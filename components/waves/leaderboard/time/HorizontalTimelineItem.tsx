@@ -1,7 +1,7 @@
 import React from "react";
-import { DecisionPoint } from "../../../../helpers/waves/time.types";
+import { DecisionPoint } from "@/helpers/waves/time.types";
 import { HorizontalTimelineDot } from "./HorizontalTimelineDot";
-import { Time } from "../../../../helpers/time";
+import { Time } from "@/helpers/time";
 
 interface HorizontalTimelineItemProps {
   readonly decision: DecisionPoint;

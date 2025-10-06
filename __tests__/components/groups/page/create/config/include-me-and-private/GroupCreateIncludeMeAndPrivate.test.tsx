@@ -4,10 +4,10 @@ import { render } from '@testing-library/react';
 let includeProps: any;
 let privateProps: any;
 
-jest.mock('../../../../../../../components/groups/page/create/config/include-me-and-private/GroupCreateIncludeMe', () => (props: any) => { includeProps = props; return <div data-testid="include" />; });
-jest.mock('../../../../../../../components/groups/page/create/config/include-me-and-private/GroupCreatePrivate', () => (props: any) => { privateProps = props; return <div data-testid="private" />; });
+jest.mock('@/components/groups/page/create/config/include-me-and-private/GroupCreateIncludeMe', () => (props: any) => { includeProps = props; return <div data-testid="include" />; });
+jest.mock('@/components/groups/page/create/config/include-me-and-private/GroupCreatePrivate', () => (props: any) => { privateProps = props; return <div data-testid="private" />; });
 
-import GroupCreateIncludeMeAndPrivate from '../../../../../../../components/groups/page/create/config/include-me-and-private/GroupCreateIncludeMeAndPrivate';
+import GroupCreateIncludeMeAndPrivate from '@/components/groups/page/create/config/include-me-and-private/GroupCreateIncludeMeAndPrivate';
 
 describe('GroupCreateIncludeMeAndPrivate', () => {
   it('passes props to child components', () => {

@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
-import { WavePodiumItemContentOutcomes } from "../../../../../components/waves/winners/podium/WavePodiumItemContentOutcomes";
-import { ApiWaveOutcomeCredit } from "../../../../../generated/models/ApiWaveOutcomeCredit";
-import { ApiWaveOutcomeType } from "../../../../../generated/models/ApiWaveOutcomeType";
+import { WavePodiumItemContentOutcomes } from "@/components/waves/winners/podium/WavePodiumItemContentOutcomes";
+import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
+import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
 
 jest.mock("react-tooltip", () => ({
   Tooltip: ({ children, id }: any) => (

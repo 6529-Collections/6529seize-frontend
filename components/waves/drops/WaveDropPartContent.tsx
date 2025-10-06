@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { ApiDropPart } from "../../../generated/models/ApiDropPart";
+import { ApiDropPart } from "@/generated/models/ApiDropPart";
 import WaveDropPartContentMedias from "./WaveDropPartContentMedias";
-import { ApiDropMentionedUser } from "../../../generated/models/ApiDropMentionedUser";
-import { ReferencedNft } from "../../../entities/IDrop";
-import { ApiWaveMin } from "../../../generated/models/ApiWaveMin";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
+import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import { ReferencedNft } from "@/entities/IDrop";
+import { ApiWaveMin } from "@/generated/models/ApiWaveMin";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import WaveDropPartContentMarkdown from "./WaveDropPartContentMarkdown";
 
 interface WaveDropPartContentProps {

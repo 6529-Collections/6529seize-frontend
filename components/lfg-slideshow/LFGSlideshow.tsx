@@ -4,9 +4,9 @@ import React, { useState, useEffect } from "react";
 import styles from "./LFGSlideshow.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExpand, faXmarkCircle } from "@fortawesome/free-solid-svg-icons";
-import { commonApiFetch } from "../../services/api/common-api";
-import { ApiNftMedia } from "../../generated/models/ApiNftMedia";
-import { enterArtFullScreen, fullScreenSupported } from "../../helpers/Helpers";
+import { commonApiFetch } from "@/services/api/common-api";
+import { ApiNftMedia } from "@/generated/models/ApiNftMedia";
+import { enterArtFullScreen, fullScreenSupported } from "@/helpers/Helpers";
 import { Button } from "react-bootstrap";
 
 const DEFAULT_TIMEOUT = 10000;

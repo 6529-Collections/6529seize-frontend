@@ -1,12 +1,12 @@
 import { getAppMetadata } from "@/components/providers/metadata";
 import { Metadata } from "next";
+import Link from "next/link";
 
 export default function About100mProjectPage() {
   return (
     <div>
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
       <meta
         name="robots"
         content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
@@ -243,9 +243,9 @@ export default function About100mProjectPage() {
         content="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2021/09/cropped-6529-logo-rev-270x270.png"
       />
       {/* Google tag (gtag.js) */}
-      <a className="skip-link screen-reader-text" href="#content">
+      <Link className="skip-link screen-reader-text" href="#content">
         Skip to content
-      </a>
+      </Link>
       <div id="boxed-wrapper">
         <div id="wrapper" className="fusion-wrapper">
           <div id="home" style={{ position: "relative", top: "-1px" }} />
@@ -280,12 +280,12 @@ export default function About100mProjectPage() {
                   </span>
                   <span className="vcard rich-snippet-hidden">
                     <span className="fn">
-                      <a
+                      <Link
                         href="/author/6529er6529-io/"
                         title="Posts by 6529er"
                         rel="author">
                         6529er
-                      </a>
+                      </Link>
                     </span>
                   </span>
                   <span className="updated rich-snippet-hidden">
@@ -303,25 +303,26 @@ export default function About100mProjectPage() {
         {/* wrapper */}
       </div>{" "}
       {/* #boxed-wrapper */}
-      <a
+      <Link
         className="fusion-one-page-text-link fusion-page-load-link"
         tabIndex={-1}
         href="#"
         aria-hidden="true">
         Page load link
-      </a>
+      </Link>
       <div className="avada-footer-scripts">
         <div
           id="sticky-social-icons-container"
           className="design-sharp alignment-right with-animation">
           <ul>
             <li className="fab-fa-twitter">
-              <a
+              <Link
                 href="https://twitter.com/punk6529"
                 target="_blank"
+                rel="noopener noreferrer"
                 className="fab-fa-twitter">
                 <i className="fab fa-twitter" />
-              </a>
+              </Link>
             </li>{" "}
           </ul>
         </div>
@@ -329,11 +330,11 @@ export default function About100mProjectPage() {
       <section
         className="to-top-container to-top-right"
         aria-labelledby="awb-to-top-label">
-        <a href="#" id="toTop" className="fusion-top-top-link">
+        <Link href="#" id="toTop" className="fusion-top-top-link">
           <span id="awb-to-top-label" className="screen-reader-text">
             Go to Top
           </span>
-        </a>
+        </Link>
       </section>
     </div>
   );

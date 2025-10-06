@@ -41,8 +41,8 @@ import NextGenAdminUpdateCollection, {
   UpdateType,
 } from "./NextGenAdminUpdateCollection";
 import NextGenAdminUploadAL from "./NextGenAdminUploadAL";
-import HeaderUserConnect from "../../header/user/HeaderUserConnect";
-import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
+import HeaderUserConnect from "@/components/header/user/HeaderUserConnect";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useSetTitle } from "@/contexts/TitleContext";
 
 enum Focus {

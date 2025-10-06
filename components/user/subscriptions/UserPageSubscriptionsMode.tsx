@@ -3,10 +3,10 @@
 import { useContext, useEffect, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import Toggle from "react-toggle";
-import { AuthContext } from "../../auth/Auth";
-import { commonApiPost } from "../../../services/api/common-api";
-import { SubscriptionDetails } from "../../../entities/ISubscription";
-import { Spinner } from "../../dotLoader/DotLoader";
+import { AuthContext } from "@/components/auth/Auth";
+import { commonApiPost } from "@/services/api/common-api";
+import { SubscriptionDetails } from "@/entities/ISubscription";
+import { Spinner } from "@/components/dotLoader/DotLoader";
 
 export default function UserPageSubscriptionsMode(
   props: Readonly<{

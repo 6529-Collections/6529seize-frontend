@@ -1,10 +1,10 @@
-import DotLoader, { Spinner } from "../../dotLoader/DotLoader";
+import DotLoader, { Spinner } from "@/components/dotLoader/DotLoader";
 import EthereumIcon from "../utils/icons/EthereumIcon";
-import { numberWithCommas } from "../../../helpers/Helpers";
-import { SubscriptionDetails } from "../../../entities/ISubscription";
+import { numberWithCommas } from "@/helpers/Helpers";
+import { SubscriptionDetails } from "@/entities/ISubscription";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Container, Row, Col } from "react-bootstrap";
-import { MEMES_MINT_PRICE } from "../../../constants";
+import { MEMES_MINT_PRICE } from "@/constants";
 import { faRefresh } from "@fortawesome/free-solid-svg-icons";
 
 export default function UserPageSubscriptionsBalance(

@@ -1,16 +1,16 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarPlus } from "@fortawesome/free-regular-svg-icons";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-import { CreateWaveDatesConfig } from "../../../../types/waves.types";
-import DateAccordion from "../../../common/DateAccordion";
+import { CreateWaveDatesConfig } from "@/types/waves.types";
+import DateAccordion from "@/components/common/DateAccordion";
 import DecisionsFirst from "./DecisionsFirst";
 import SubsequentDecisions from "./SubsequentDecisions";
 import {
   calculateDecisionTimes,
   calculateEndDateForCycles,
 } from "../services/waveDecisionService";
-import TooltipIconButton from "../../../common/TooltipIconButton";
-import CommonSwitch from "../../../utils/switch/CommonSwitch";
+import TooltipIconButton from "@/components/common/TooltipIconButton";
+import CommonSwitch from "@/components/utils/switch/CommonSwitch";
 
 interface DecisionsProps {
   readonly dates: CreateWaveDatesConfig;

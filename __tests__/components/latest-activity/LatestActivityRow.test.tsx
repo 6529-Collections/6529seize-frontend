@@ -1,16 +1,16 @@
 import React from "react";
 import { render } from "@testing-library/react";
 import { faFire, faCartPlus, faGasPump } from "@fortawesome/free-solid-svg-icons";
-import LatestActivityRow, { printRoyalties, printGas } from "../../../components/latest-activity/LatestActivityRow";
-import { MANIFOLD } from "../../../constants";
+import LatestActivityRow, { printRoyalties, printGas } from "@/components/latest-activity/LatestActivityRow";
+import { MANIFOLD } from "@/constants";
 
 jest.mock('next/image', () => ({ __esModule: true, default: (p:any) => <img {...p}/> }));
 const iconMock = jest.fn();
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: (p:any) => { iconMock(p); return <svg data-testid="icon" />; } }));
 jest.mock('react-bootstrap', () => ({ Container:(p:any)=><div data-testid="container">{p.children}</div>, Row:(p:any)=><div>{p.children}</div>, Col:(p:any)=><div>{p.children}</div> }));
-jest.mock("../../../components/address/Address", () => (p:any) => <span>{p.display}</span>);
+jest.mock("@/components/address/Address", () => (p:any) => <span>{p.display}</span>);
 
-jest.mock("../../../helpers/Helpers", () => ({
+jest.mock("@/helpers/Helpers", () => ({
   areEqualAddresses: (a:string,b:string)=>a.toLowerCase()===b.toLowerCase(),
   areEqualURLS: (a:string,b:string)=>a===b,
   displayDecimal: (n:number)=>String(n),
@@ -84,7 +84,7 @@ describe('printGas', () => {
 
 describe('extra cases', () => {
   it('renders gas tooltip', () => {
-    const { container } = render(<>{require('../../../components/latest-activity/LatestActivityRow').printGas(1,2,3)}</>);
+    const { container } = render(<>{require('@/components/latest-activity/LatestActivityRow').printGas(1,2,3)}</>);
     expect(container.querySelector('svg')).toBeInTheDocument();
   });
 

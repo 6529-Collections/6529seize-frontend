@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import HeaderUserProxyDropdownItem from '../../../../../components/header/user/proxy/HeaderUserProxyDropdownItem';
+import HeaderUserProxyDropdownItem from '@/components/header/user/proxy/HeaderUserProxyDropdownItem';
 
 const profile = {
   id: 1,

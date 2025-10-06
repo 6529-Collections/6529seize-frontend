@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react';
-import FinalizeSnapshotsTable from '../../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTable';
-import { TopHolderType } from '../../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal';
+import FinalizeSnapshotsTable from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTable';
+import { TopHolderType } from '@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal';
 
-jest.mock('../../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTableRow', () => (props: any) => (
+jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTableRow', () => (props: any) => (
   <tr><td>{props.row.snapshot?.name}</td><td>{props.row.excludeSnapshotsText}</td><td>{props.row.topHoldersFilter}</td></tr>
 ));
-jest.mock('../../../../../../../../components/allowlist-tool/common/animation/AllowlistToolAnimationWrapper', () => (props: any) => <tbody>{props.children}</tbody>);
+jest.mock('@/components/allowlist-tool/common/animation/AllowlistToolAnimationWrapper', () => (props: any) => <tbody>{props.children}</tbody>);
 
 const groupSnapshots = [
   {

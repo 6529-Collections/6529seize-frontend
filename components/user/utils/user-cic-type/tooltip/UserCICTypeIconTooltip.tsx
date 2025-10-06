@@ -11,7 +11,7 @@ import { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { CIC_META } from "../../user-cic-status/UserCICStatus";
+import { CIC_META } from "@/components/user/utils/user-cic-status/UserCICStatus";
 import UserCICTypeIconTooltipHeaders from "./UserCICTypeIconTooltipHeaders";
 import UserCICTypeIconTooltipRate from "./UserCICTypeIconTooltipRate";
 export default function UserCICTypeIconTooltip({

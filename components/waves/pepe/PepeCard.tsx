@@ -133,7 +133,7 @@ function renderFallback(href: string) {
       <a
         href={href}
         target="_blank"
-        rel="noopener noreferrer nofollow"
+        rel="nofollow noopener noreferrer"
         className="tw-flex tw-h-full tw-w-full tw-flex-col tw-justify-center tw-gap-y-1 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 tw-text-left tw-no-underline tw-transition-colors tw-duration-200 hover:tw-border-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
         aria-label="Open pepe.wtf"
       >
@@ -182,7 +182,7 @@ function renderCollection(preview: PepeCollectionPreview) {
               className="tw-text-xs tw-text-primary-300 hover:tw-underline"
               href={preview.href}
               target="_blank"
-              rel="noopener noreferrer nofollow"
+              rel="nofollow noopener noreferrer"
             >
               Browse on pepe.wtf
             </a>
@@ -217,7 +217,7 @@ function renderArtist(preview: PepeArtistPreview) {
               className="tw-text-xs tw-text-primary-300 hover:tw-underline"
               href={preview.href}
               target="_blank"
-              rel="noopener noreferrer nofollow"
+              rel="nofollow noopener noreferrer"
             >
               Browse artist on pepe.wtf
             </a>
@@ -251,7 +251,7 @@ function renderSet(preview: PepeSetPreview) {
               className="tw-text-xs tw-text-primary-300 hover:tw-underline"
               href={preview.href}
               target="_blank"
-              rel="noopener noreferrer nofollow"
+              rel="nofollow noopener noreferrer"
             >
               Open set on pepe.wtf
             </a>
@@ -260,7 +260,7 @@ function renderSet(preview: PepeSetPreview) {
                 className="tw-text-xs tw-text-primary-300 hover:tw-underline"
                 href={preview.links.wiki}
                 target="_blank"
-                rel="noopener noreferrer nofollow"
+                rel="nofollow noopener noreferrer"
               >
                 Lore
               </a>
@@ -337,7 +337,7 @@ function renderAsset(preview: PepeAssetPreview, originalHref: string) {
               className="tw-text-xs tw-text-primary-300 hover:tw-underline"
               href={preview.href}
               target="_blank"
-              rel="noopener noreferrer nofollow"
+              rel="nofollow noopener noreferrer"
             >
               Open on pepe.wtf
             </a>
@@ -346,7 +346,7 @@ function renderAsset(preview: PepeAssetPreview, originalHref: string) {
                 className="tw-text-xs tw-text-primary-300 hover:tw-underline"
                 href={preview.links.horizon}
                 target="_blank"
-                rel="noopener noreferrer nofollow"
+                rel="nofollow noopener noreferrer"
               >
                 View on Horizon
               </a>
@@ -356,7 +356,7 @@ function renderAsset(preview: PepeAssetPreview, originalHref: string) {
                 className="tw-text-xs tw-text-primary-300 hover:tw-underline"
                 href={preview.links.xchain}
                 target="_blank"
-                rel="noopener noreferrer nofollow"
+                rel="nofollow noopener noreferrer"
               >
                 View on XChain
               </a>
@@ -366,7 +366,7 @@ function renderAsset(preview: PepeAssetPreview, originalHref: string) {
                 className="tw-text-xs tw-text-primary-300 hover:tw-underline"
                 href={preview.links.wiki}
                 target="_blank"
-                rel="noopener noreferrer nofollow"
+                rel="nofollow noopener noreferrer"
               >
                 Lore
               </a>

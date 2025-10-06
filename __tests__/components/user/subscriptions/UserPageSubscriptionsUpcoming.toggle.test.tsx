@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useQuery } from '@tanstack/react-query';
-import UserPageSubscriptionsUpcoming from '../../../../components/user/subscriptions/UserPageSubscriptionsUpcoming';
-import { AuthContext } from '../../../../components/auth/Auth';
-import { createMockAuthContext } from '../../../utils/testContexts';
+import UserPageSubscriptionsUpcoming from '@/components/user/subscriptions/UserPageSubscriptionsUpcoming';
+import { AuthContext } from '@/components/auth/Auth';
+import { createMockAuthContext } from '@/__tests__/utils/testContexts';
 
 jest.mock('react-toggle', () => (props: any) => (
   <input data-testid="toggle" type="checkbox" onChange={props.onChange} />
@@ -19,19 +19,19 @@ const mockUpcomingRows = [
   },
 ];
 
-jest.mock('../../../../components/meme-calendar/meme-calendar.helpers', () => ({
+jest.mock('@/components/meme-calendar/meme-calendar.helpers', () => ({
   __esModule: true,
   formatFullDate: jest.fn(() => '2024-01-01 / Monday'),
   getUpcomingMintsForCurrentOrNextSeason: jest.fn(() => ({ rows: mockUpcomingRows })),
   isMintingToday: jest.fn(() => false),
 }));
 
-jest.mock('../../../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: jest.fn(),
   commonApiPost: jest.fn(),
 }));
 
-const { commonApiPost } = require('../../../../services/api/common-api');
+const { commonApiPost } = require('@/services/api/common-api');
 
 const sub = { token_id:1, contract:'0x123', subscribed:true } as any;
 const details = { profile:'test' } as any;

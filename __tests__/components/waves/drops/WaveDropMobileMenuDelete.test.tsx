@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import WaveDropMobileMenuDelete from '../../../../components/waves/drops/WaveDropMobileMenuDelete';
-import { AuthContext } from '../../../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../../../components/react-query-wrapper/ReactQueryWrapper';
+import WaveDropMobileMenuDelete from '@/components/waves/drops/WaveDropMobileMenuDelete';
+import { AuthContext } from '@/components/auth/Auth';
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 
 jest.mock('framer-motion', () => ({ motion: { button: (p: any) => <button {...p} />, div: (p: any) => <div {...p} /> }, AnimatePresence: (p: any) => <div>{p.children}</div> }));
 
@@ -16,7 +16,7 @@ jest.mock('@tanstack/react-query', () => ({
   },
 }));
 
-jest.mock('../../../../contexts/wave/MyStreamContext', () => ({ useMyStream: () => ({ processDropRemoved: jest.fn() }) }));
+jest.mock('@/contexts/wave/MyStreamContext', () => ({ useMyStream: () => ({ processDropRemoved: jest.fn() }) }));
 
 describe('WaveDropMobileMenuDelete', () => {
   const drop = { id: '1', wave: { id: 'w' } } as any;

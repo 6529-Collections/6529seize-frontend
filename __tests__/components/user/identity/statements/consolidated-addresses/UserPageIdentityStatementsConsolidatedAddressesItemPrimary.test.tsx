@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import Component from '../../../../../../components/user/identity/statements/consolidated-addresses/UserPageIdentityStatementsConsolidatedAddressesItemPrimary';
+import Component from '@/components/user/identity/statements/consolidated-addresses/UserPageIdentityStatementsConsolidatedAddressesItemPrimary';
 
 let loaderRendered = false;
-jest.mock('../../../../../../components/distribution-plan-tool/common/CircleLoader', () => () => {
+jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => () => {
   loaderRendered = true;
   return <div data-testid="loader" />;
 });

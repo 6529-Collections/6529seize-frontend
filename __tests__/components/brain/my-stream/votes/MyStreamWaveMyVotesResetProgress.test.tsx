@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import MyStreamWaveMyVotesResetProgress from '../../../../../components/brain/my-stream/votes/MyStreamWaveMyVotesResetProgress';
+import MyStreamWaveMyVotesResetProgress from '@/components/brain/my-stream/votes/MyStreamWaveMyVotesResetProgress';
 
 describe('MyStreamWaveMyVotesResetProgress', () => {
   it('returns null when not resetting', () => {

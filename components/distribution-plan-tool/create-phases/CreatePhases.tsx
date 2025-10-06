@@ -10,7 +10,7 @@ import DistributionPlanNextStepBtn from "../common/DistributionPlanNextStepBtn";
 import StepHeader from "../common/StepHeader";
 import CreatePhasesForm from "./form/CreatePhasesForm";
 import DistributionPlanStepWrapper from "../common/DistributionPlanStepWrapper";
-import { AllowlistOperationCode } from "../../allowlist-tool/allowlist-tool.types";
+import { AllowlistOperationCode } from "@/components/allowlist-tool/allowlist-tool.types";
 import DistributionPlanEmptyTablePlaceholder from "../common/DistributionPlanEmptyTablePlaceholder";
 export interface CreatePhasesPhase {
   readonly id: string;

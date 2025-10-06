@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import AboutCopyright from '../../../components/about/AboutCopyright';
+import AboutCopyright from '@/components/about/AboutCopyright';
 
 describe('AboutCopyright', () => {
   it('renders headings', () => {

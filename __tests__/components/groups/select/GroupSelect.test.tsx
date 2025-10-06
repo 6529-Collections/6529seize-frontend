@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import GroupSelect from '../../../../components/groups/select/GroupSelect';
-import { AuthContext } from '../../../../components/auth/Auth';
+import GroupSelect from '@/components/groups/select/GroupSelect';
+import { AuthContext } from '@/components/auth/Auth';
 
 jest.mock('@tanstack/react-query', () => ({
   useInfiniteQuery: jest.fn(),
@@ -14,17 +14,17 @@ jest.mock('react-redux', () => ({
 }));
 
 let identityProps: any = null;
-jest.mock('../../../../components/utils/input/identity/IdentitySearch', () => ({
+jest.mock('@/components/utils/input/identity/IdentitySearch', () => ({
   __esModule: true,
   IdentitySearchSize: { SM: 'SM' },
   default: (props: any) => { identityProps = props; return <div data-testid="identity" />; }
 }));
 
 let groupItemsProps: any = null;
-jest.mock('../../../../components/groups/select/GroupItems', () => (props: any) => { groupItemsProps = props; return <div data-testid="items" />; });
+jest.mock('@/components/groups/select/GroupItems', () => (props: any) => { groupItemsProps = props; return <div data-testid="items" />; });
 
 let activeGroupProps: any = null;
-jest.mock('../../../../components/groups/select/GroupsSelectActiveGroup', () => (props: any) => { activeGroupProps = props; return <div data-testid="active" />; });
+jest.mock('@/components/groups/select/GroupsSelectActiveGroup', () => (props: any) => { activeGroupProps = props; return <div data-testid="active" />; });
 
 const { useInfiniteQuery: useQueryMock } = jest.requireMock('@tanstack/react-query');
 const { useSelector: useSelectorMock } = jest.requireMock('react-redux');

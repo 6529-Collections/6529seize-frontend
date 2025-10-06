@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { WaveWinnersSmallEmpty } from '../../../../components/waves/winners/WaveWinnersSmallEmpty';
+import { WaveWinnersSmallEmpty } from '@/components/waves/winners/WaveWinnersSmallEmpty';
 
 describe('WaveWinnersSmallEmpty', () => {
   it('shows single decision message', () => {

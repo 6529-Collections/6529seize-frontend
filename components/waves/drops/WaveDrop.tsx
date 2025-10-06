@@ -2,23 +2,23 @@
 
 import { memo, useCallback, useEffect, useState, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { selectEditingDropId, setEditingDropId } from "../../../store/editSlice";
-import { useDropUpdateMutation } from "../../../hooks/drops/useDropUpdateMutation";
-import { ApiUpdateDropRequest } from "../../../generated/models/ApiUpdateDropRequest";
-import { ApiDropMentionedUser } from "../../../generated/models/ApiDropMentionedUser";
+import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
+import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
+import { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropRequest";
+import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import WaveDropActions from "./WaveDropActions";
 import WaveDropReply from "./WaveDropReply";
 import WaveDropContent from "./WaveDropContent";
 import WaveDropHeader from "./WaveDropHeader";
 import WaveDropAuthorPfp from "./WaveDropAuthorPfp";
 import WaveDropRatings from "./WaveDropRatings";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import WaveDropMetadata from "./WaveDropMetadata";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
-import useIsMobileDevice from "../../../hooks/isMobileDevice";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
 import WaveDropMobileMenu from "./WaveDropMobileMenu";
-import { ApiDropType } from "../../../generated/models/ApiDropType";
-import { ActiveDropState } from "../../../types/dropInteractionTypes";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
 import { DropInteractionParams, DropLocation } from "./Drop";
 import WaveDropReactions from "./WaveDropReactions";
 

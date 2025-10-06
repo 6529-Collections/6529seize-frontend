@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { maxOrNull, mergeDrops } from "../utils/wave-messages-utils";
-import { Drop } from "../../../helpers/waves/drop.helpers";
+import { Drop } from "@/helpers/waves/drop.helpers";
 import { WaveMessages, WaveMessagesUpdate } from "./types";
 
 type DropChange = {

@@ -1,13 +1,13 @@
 "use client"
 
 import React from "react";
-import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
+import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { ArtistActiveSubmissionContent } from "./ArtistActiveSubmissionContent";
 import { ArtistWinningArtworksContent } from "./ArtistWinningArtworksContent";
 import { ArtistPreviewModalHeader } from "./ArtistPreviewModalHeader";
 import { ArtistPreviewModalTabs } from "./ArtistPreviewModalTabs";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ModalTab } from "./ArtistPreviewModal";
 
 interface ArtistPreviewModalContentProps {

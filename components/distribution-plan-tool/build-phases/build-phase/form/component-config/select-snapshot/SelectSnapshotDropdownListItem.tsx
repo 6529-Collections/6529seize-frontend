@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DistributionPlanSnapshot } from "../../BuildPhaseFormConfigModal";
-import { assertUnreachable } from "../../../../../../../helpers/AllowlistToolHelpers";
-import { Pool } from "../../../../../../allowlist-tool/allowlist-tool.types";
+import { DistributionPlanSnapshot } from "@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { Pool } from "@/components/allowlist-tool/allowlist-tool.types";
 
 export default function SelectSnapshotDropdownListItem({
   snapshot,

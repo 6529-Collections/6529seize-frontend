@@ -1,16 +1,16 @@
 import { render, fireEvent, act } from '@testing-library/react';
 import React from 'react';
-import { SingleWaveDropChat } from '../../../../components/waves/drop/SingleWaveDropChat';
+import { SingleWaveDropChat } from '@/components/waves/drop/SingleWaveDropChat';
 
-jest.mock('../../../../hooks/useCapacitor', () => () => false);
-jest.mock('../../../../components/brain/my-stream/layout/LayoutContext', () => ({ useLayout: () => ({ spaces: { measurementsComplete: true, headerSpace: 10 } }) }));
+jest.mock('@/hooks/useCapacitor', () => () => false);
+jest.mock('@/components/brain/my-stream/layout/LayoutContext', () => ({ useLayout: () => ({ spaces: { measurementsComplete: true, headerSpace: 10 } }) }));
 
 let capturedProps: any;
-jest.mock('../../../../components/waves/drops/WaveDropsAll', () => ({ __esModule: true, default: (props: any) => { capturedProps = props; return <div data-testid="drops-all" />; } }));
+jest.mock('@/components/waves/drops/WaveDropsAll', () => ({ __esModule: true, default: (props: any) => { capturedProps = props; return <div data-testid="drops-all" />; } }));
 
-jest.mock('../../../../components/waves/CreateDropWaveWrapper', () => ({ CreateDropWaveWrapper: ({ children }: any) => <div>{children}</div>, CreateDropWaveWrapperContext: { SINGLE_DROP: 'SINGLE_DROP' } }));
+jest.mock('@/components/waves/CreateDropWaveWrapper', () => ({ CreateDropWaveWrapper: ({ children }: any) => <div>{children}</div>, CreateDropWaveWrapperContext: { SINGLE_DROP: 'SINGLE_DROP' } }));
 
-jest.mock('../../../../components/waves/PrivilegedDropCreator', () => ({ __esModule: true, default: (props: any) => <div data-testid="creator" onClick={props.onCancelReplyQuote} data-part={props.activeDrop?.partId} data-action={props.activeDrop?.action} />, DropMode: { BOTH: 'BOTH' } }));
+jest.mock('@/components/waves/PrivilegedDropCreator', () => ({ __esModule: true, default: (props: any) => <div data-testid="creator" onClick={props.onCancelReplyQuote} data-part={props.activeDrop?.partId} data-action={props.activeDrop?.action} />, DropMode: { BOTH: 'BOTH' } }));
 
 // Mock window.matchMedia for useDeviceInfo hook
 Object.defineProperty(window, 'matchMedia', {

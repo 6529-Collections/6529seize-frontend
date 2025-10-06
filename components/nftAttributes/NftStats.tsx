@@ -1,6 +1,6 @@
-import { numberWithCommas } from "../../helpers/Helpers";
+import { numberWithCommas } from "@/helpers/Helpers";
 
-import { LabNFT, NFT } from "../../entities/INFT";
+import { LabNFT, NFT } from "@/entities/INFT";
 
 export function NftPageStats(props: {
   readonly nft: NFT | LabNFT;

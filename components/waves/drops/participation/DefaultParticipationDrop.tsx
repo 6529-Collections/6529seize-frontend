@@ -1,9 +1,9 @@
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { ActiveDropState } from "../../../../types/dropInteractionTypes";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
 import { DropInteractionParams, DropLocation } from "../Drop";
-import { ApiDrop } from "../../../../generated/models/ApiDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import React from "react";
-import { useDropInteractionRules } from "../../../../hooks/drops/useDropInteractionRules";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import OngoingParticipationDrop from "./OngoingParticipationDrop";
 import EndedParticipationDrop from "./EndedParticipationDrop";
 

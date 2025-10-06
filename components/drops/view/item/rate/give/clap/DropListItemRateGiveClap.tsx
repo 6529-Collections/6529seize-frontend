@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import styles from "./Clap.module.scss";
 import mojs from "@mojs/core";
-import { formatLargeNumber } from "../../../../../../../helpers/Helpers";
-import { getRandomObjectId } from "../../../../../../../helpers/AllowlistToolHelpers";
+import { formatLargeNumber } from "@/helpers/Helpers";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { Tooltip } from "react-tooltip";
-import { DropVoteState } from "../../../../../../../hooks/drops/types";
+import { DropVoteState } from "@/hooks/drops/types";
 import { VOTE_STATE_ERRORS } from "../DropListItemRateGiveSubmit";
 
 enum RateStatus {

@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import WaveDropContent from "../../drops/WaveDropContent";
-import { ApiWaveDecisionWinner } from "../../../../generated/models/ApiWaveDecisionWinner";
+import WaveDropContent from "@/components/waves/drops/WaveDropContent";
+import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { useRouter } from "next/navigation";
-import { DropSize, ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 interface WaveWinnersDropContentProps {
   readonly winner: ApiWaveDecisionWinner;

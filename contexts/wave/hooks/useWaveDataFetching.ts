@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback } from "react";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import { useWaveLoadingState } from "./useWaveLoadingState";
 import { useWaveAbortController } from "./useWaveAbortController";
 import { WaveDataStoreUpdater } from "./types";

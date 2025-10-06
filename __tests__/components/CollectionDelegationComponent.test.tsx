@@ -16,7 +16,7 @@ jest.mock("wagmi", () => ({
   useChainId: jest.fn(() => 1),
 }));
 
-jest.mock("../../components/auth/SeizeConnectContext", () => ({
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({ address: "0x0", isConnected: true }),
 }));
 

@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import DistributionPlanToolConnected from '../../../../components/distribution-plan-tool/connect/distribution-plan-tool-connected';
-import { renderWithAuth } from '../../../utils/testContexts';
+import DistributionPlanToolConnected from '@/components/distribution-plan-tool/connect/distribution-plan-tool-connected';
+import { renderWithAuth } from '@/__tests__/utils/testContexts';
 
 jest.mock('next/navigation', () => ({ useRouter: jest.fn() }));
 

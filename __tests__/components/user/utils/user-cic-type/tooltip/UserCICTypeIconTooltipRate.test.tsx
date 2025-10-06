@@ -1,14 +1,14 @@
 import { render, screen } from '@testing-library/react';
-import { ApiIdentity } from '../../../../../../generated/models/ApiIdentity';
-import { ApiProfileClassification } from '../../../../../../generated/models/ApiProfileClassification';
-import UserCICTypeIconTooltipRate from '../../../../../../components/user/utils/user-cic-type/tooltip/UserCICTypeIconTooltipRate';
+import { ApiIdentity } from '@/generated/models/ApiIdentity';
+import { ApiProfileClassification } from '@/generated/models/ApiProfileClassification';
+import UserCICTypeIconTooltipRate from '@/components/user/utils/user-cic-type/tooltip/UserCICTypeIconTooltipRate';
 
-jest.mock('../../../../../../components/user/utils/rate/UserPageRateWrapper', () => ({
+jest.mock('@/components/user/utils/rate/UserPageRateWrapper', () => ({
   __esModule: true,
   default: ({ children }: any) => <div data-testid="wrapper">{children}</div>,
 }));
 
-jest.mock('../../../../../../components/user/identity/header/cic-rate/UserPageIdentityHeaderCICRate', () => ({
+jest.mock('@/components/user/identity/header/cic-rate/UserPageIdentityHeaderCICRate', () => ({
   __esModule: true,
   default: () => <div data-testid="rate" />,
 }));

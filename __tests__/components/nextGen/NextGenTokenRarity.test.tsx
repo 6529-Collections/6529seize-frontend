@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import NextgenTokenRarity from '../../../components/nextGen/collections/nextgenToken/NextGenTokenProperties';
+import NextgenTokenRarity from '@/components/nextGen/collections/nextgenToken/NextGenTokenProperties';
 
 jest.mock('react-bootstrap', () => {
   const React = require('react');

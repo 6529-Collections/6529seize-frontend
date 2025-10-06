@@ -1,4 +1,4 @@
-import { UnlockAppWalletModal } from '../../../components/app-wallets/AppWalletModal';
+import { UnlockAppWalletModal } from '@/components/app-wallets/AppWalletModal';
 
 describe('UnlockAppWalletModal', () => {
   it('exports component', () => {

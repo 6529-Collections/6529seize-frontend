@@ -1,19 +1,19 @@
-import { redeemRefreshTokenWithRetries } from '../../services/auth/token-refresh.utils';
-import { commonApiPost } from '../../services/api/common-api';
+import { redeemRefreshTokenWithRetries } from '@/services/auth/token-refresh.utils';
+import { commonApiPost } from '@/services/api/common-api';
 import { isAddress } from 'viem';
 import {
   TokenRefreshError,
   TokenRefreshCancelledError,
   TokenRefreshNetworkError,
   TokenRefreshServerError,
-} from '../../errors/authentication';
+} from '@/errors/authentication';
 
 // Mock dependencies
 jest.mock('viem', () => ({
   isAddress: jest.fn(),
 }));
 
-jest.mock('../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiPost: jest.fn(),
 }));
 

@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import NextGenTokenDownload, {
   NextGenTokenDownloadDropdownItem,
   Resolution,
-} from "../../../../../components/nextGen/collections/nextgenToken/NextGenTokenDownload";
+} from "@/components/nextGen/collections/nextgenToken/NextGenTokenDownload";
 
 // Mock react-bootstrap components
 jest.mock("react-bootstrap", () => {
@@ -19,7 +19,7 @@ jest.mock("react-bootstrap", () => {
 });
 
 // Mock external components
-jest.mock("../../../../../components/dotLoader/DotLoader", () => ({
+jest.mock("@/components/dotLoader/DotLoader", () => ({
   __esModule: true,
   default: () => <div data-testid="loader" />,
   Spinner: () => <div data-testid="spinner" />,

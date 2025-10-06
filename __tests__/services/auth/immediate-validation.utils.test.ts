@@ -1,16 +1,16 @@
-import { validateAuthImmediate } from '../../../services/auth/immediate-validation.utils';
-import { validateJwt } from '../../../services/auth/jwt-validation.utils';
-import { validateRoleForAuthentication } from '../../../utils/role-validation';
+import { validateAuthImmediate } from '@/services/auth/immediate-validation.utils';
+import { validateJwt } from '@/services/auth/jwt-validation.utils';
+import { validateRoleForAuthentication } from '@/utils/role-validation';
 import {
   AuthenticationRoleError,
   RoleValidationError,
   MissingActiveProfileError,
   InvalidRoleStateError
-} from '../../../errors/authentication';
+} from '@/errors/authentication';
 
 // Mock dependencies
-jest.mock('../../../services/auth/jwt-validation.utils');
-jest.mock('../../../utils/role-validation');
+jest.mock('@/services/auth/jwt-validation.utils');
+jest.mock('@/utils/role-validation');
 
 const mockValidateJwt = validateJwt as jest.MockedFunction<typeof validateJwt>;
 const mockValidateRoleForAuthentication = validateRoleForAuthentication as jest.MockedFunction<typeof validateRoleForAuthentication>;

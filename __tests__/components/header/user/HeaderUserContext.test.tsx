@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import HeaderUserContext from '../../../../components/header/user/HeaderUserContext';
+import HeaderUserContext from '@/components/header/user/HeaderUserContext';
 
 const profileMock = jest.fn();
 const proxyMock = jest.fn();
@@ -12,21 +12,21 @@ jest.mock('next/link', () => ({
   ),
 }));
 
-jest.mock('../../../../components/header/user/HeaderUserProfile', () => ({
+jest.mock('@/components/header/user/HeaderUserProfile', () => ({
   __esModule: true,
   default: (props: any) => { profileMock(props); return <div data-testid="profile" />; }
 }));
 
-jest.mock('../../../../components/header/user/proxy/HeaderUserProxy', () => ({
+jest.mock('@/components/header/user/proxy/HeaderUserProxy', () => ({
   __esModule: true,
   default: (props: any) => { proxyMock(props); return <div data-testid="proxy" />; }
 }));
 
-jest.mock('../../../../components/auth/SeizeConnectContext', () => ({
+jest.mock('@/components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: jest.fn(),
 }));
 
-const { useSeizeConnectContext } = require('../../../../components/auth/SeizeConnectContext');
+const { useSeizeConnectContext } = require('@/components/auth/SeizeConnectContext');
 
 describe('HeaderUserContext', () => {
   beforeEach(() => jest.clearAllMocks());

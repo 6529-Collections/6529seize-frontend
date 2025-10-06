@@ -7,7 +7,7 @@ import OpenGraphPreview, {
   LinkPreviewCardLayout,
   type OpenGraphPreviewData,
 } from "./OpenGraphPreview";
-import { fetchLinkPreview } from "../../services/api/link-preview-api";
+import { fetchLinkPreview } from "@/services/api/link-preview-api";
 import EnsPreviewCard from "./ens/EnsPreviewCard";
 import { isEnsPreview, type EnsPreview } from "./ens/types";
 

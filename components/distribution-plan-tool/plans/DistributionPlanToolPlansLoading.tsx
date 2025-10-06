@@ -1,6 +1,6 @@
 import AllowlistToolLoader, {
   AllowlistToolLoaderSize,
-} from "../../allowlist-tool/common/AllowlistToolLoader";
+} from "@/components/allowlist-tool/common/AllowlistToolLoader";
 
 export default function DistributionPlanToolPlansLoading() {
   return (

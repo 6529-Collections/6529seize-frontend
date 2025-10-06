@@ -1,6 +1,6 @@
-import * as exported from '../../../../../../components/waves/create-wave/voting/components';
-import TimeWeightedToggle from '../../../../../../components/waves/create-wave/voting/components/TimeWeightedToggle';
-import AveragingIntervalInput from '../../../../../../components/waves/create-wave/voting/components/AveragingIntervalInput';
+import * as exported from '@/components/waves/create-wave/voting/components';
+import TimeWeightedToggle from '@/components/waves/create-wave/voting/components/TimeWeightedToggle';
+import AveragingIntervalInput from '@/components/waves/create-wave/voting/components/AveragingIntervalInput';
 
 describe('voting components index', () => {
   it('re-exports TimeWeightedToggle', () => {

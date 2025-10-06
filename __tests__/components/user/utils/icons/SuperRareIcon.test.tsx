@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import SuperRareIcon from '../../../../../components/user/utils/icons/SuperRareIcon';
+import SuperRareIcon from '@/components/user/utils/icons/SuperRareIcon';
 
 describe('SuperRareIcon', () => {
   it('renders svg with correct attributes', () => {

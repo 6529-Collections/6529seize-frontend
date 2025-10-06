@@ -1,6 +1,14 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
+import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants";
+import { NFT } from "@/entities/INFT";
+import {
+  areEqualAddresses,
+  formatAddress,
+  isValidEthAddress,
+} from "@/helpers/Helpers";
+import { postData } from "@/services/6529api";
 import {
   faCheckCircle,
   faPlusCircle,
@@ -8,26 +16,13 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button, Col, Container, Dropdown, Form, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import { useEnsName } from "wagmi";
-import { OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
-import { NFT } from "../../entities/INFT";
-import {
-  areEqualAddresses,
-  formatAddress,
-  isValidEthAddress,
-} from "../../helpers/Helpers";
-import { postData } from "../../services/6529api";
 import { Nft, NftContract } from "./alchemy-sdk-types";
 import styles from "./Rememes.module.scss";
-
-interface AddRememe {
-  contract: string;
-  token_ids: string[];
-  references: number[];
-}
 
 export interface ProcessedRememe {
   valid: boolean;
@@ -320,11 +315,11 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                           <>
                             #{nftR.tokenId}
                             {nftR.name && ` - ${nftR.name}`}&nbsp;&nbsp;
-                            <a
+                            <Link
                               className="decoration-hover-underline"
                               href={`https://opensea.io/assets/ethereum/${contract}/${nftR.tokenId}`}
                               target="_blank"
-                              rel="noreferrer">
+                              rel="noopener noreferrer">
                               <Image
                                 unoptimized
                                 src="/opensea.png"
@@ -332,7 +327,7 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                                 width={22}
                                 height={22}
                               />
-                            </a>
+                            </Link>
                           </>
                         )}
                       </li>

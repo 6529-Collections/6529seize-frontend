@@ -3,7 +3,7 @@ import {
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
   NEXTGEN_CONTRACT,
-} from "../constants";
+} from "@/constants";
 import { numberWithCommas } from "./Helpers";
 
 export function getFileTypeFromMetadata(metadata: any) {

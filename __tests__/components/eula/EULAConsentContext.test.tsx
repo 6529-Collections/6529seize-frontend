@@ -1,22 +1,22 @@
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import { EULAConsentProvider, useEULAConsent } from '../../../components/eula/EULAConsentContext';
-import { AuthContext } from '../../../components/auth/Auth';
-import { CONSENT_EULA_COOKIE } from '../../../constants';
+import { EULAConsentProvider, useEULAConsent } from '@/components/eula/EULAConsentContext';
+import { AuthContext } from '@/components/auth/Auth';
+import { CONSENT_EULA_COOKIE } from '@/constants';
 
 jest.mock('js-cookie', () => ({
   get: jest.fn(),
   set: jest.fn(),
 }));
 
-jest.mock('../../../components/eula/EULAModal', () => () => <div data-testid="modal" />);
+jest.mock('@/components/eula/EULAModal', () => () => <div data-testid="modal" />);
 
-jest.mock('../../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: jest.fn(),
   commonApiPost: jest.fn(),
 }));
 
-jest.mock('../../../hooks/useCapacitor', () => ({
+jest.mock('@/hooks/useCapacitor', () => ({
   __esModule: true,
   default: () => ({ isIos: true, platform: 'ios' }),
 }));
@@ -26,7 +26,7 @@ jest.mock('@capacitor/device', () => ({
 }));
 
 const { get, set } = require('js-cookie');
-const { commonApiFetch, commonApiPost } = require('../../../services/api/common-api');
+const { commonApiFetch, commonApiPost } = require('@/services/api/common-api');
 const { Device } = require('@capacitor/device');
 
 const flushPromises = () => new Promise(resolve => setTimeout(resolve, 0));

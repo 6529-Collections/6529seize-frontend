@@ -14,17 +14,17 @@ import {
   migrateCookiesToLocalStorage,
   getWalletAddress,
   removeAuthJwt,
-} from "../../services/auth/auth.utils";
-import { WalletInitializationError } from "../../src/errors/wallet";
+} from "@/services/auth/auth.utils";
+import { WalletInitializationError } from "@/src/errors/wallet";
 import { useAppKit, useAppKitAccount, useAppKitState, useDisconnect } from "@reown/appkit/react";
 import { isAddress, getAddress } from "viem";
-import { SecurityEventType } from "../../src/types/security";
+import { SecurityEventType } from "@/src/types/security";
 import {
   logSecurityEvent,
   logError,
   createConnectionEventContext,
   createValidationEventContext
-} from "../../src/utils/security-logger";
+} from "@/src/utils/security-logger";
 import { WalletErrorBoundary } from "./error-boundary";
 
 // Custom error types for better error handling

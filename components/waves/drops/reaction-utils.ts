@@ -1,6 +1,6 @@
-import { ApiIdentity } from "../../../generated/models/ObjectSerializer";
-import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
-import { ApiDropReaction } from "../../../generated/models/ApiDropReaction";
+import { ApiIdentity } from "@/generated/models/ObjectSerializer";
+import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 
 export type ReactionEntry = {
   reaction: string;

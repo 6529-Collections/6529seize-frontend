@@ -4,20 +4,20 @@ import Link from "next/link";
 import {
   getScaledImageUri,
   ImageScale,
-} from "../../../../helpers/image.helpers";
-import { INotificationIdentityMentioned } from "../../../../types/feed.types";
-import { getTimeAgoShort } from "../../../../helpers/Helpers";
-import { ActiveDropState } from "../../../../types/dropInteractionTypes";
+} from "@/helpers/image.helpers";
+import { INotificationIdentityMentioned } from "@/types/feed.types";
+import { getTimeAgoShort } from "@/helpers/Helpers";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
 import Drop, {
   DropInteractionParams,
   DropLocation,
-} from "../../../waves/drops/Drop";
-import { DropSize, ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+} from "@/components/waves/drops/Drop";
+import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useRouter } from "next/navigation";
-import { ApiDrop } from "../../../../generated/models/ApiDrop";
-import { UserFollowBtnSize } from "../../../user/utils/UserFollowBtn";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
-import UserProfileTooltipWrapper from "../../../utils/tooltip/UserProfileTooltipWrapper";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 
 export default function NotificationIdentityMentioned({
   notification,

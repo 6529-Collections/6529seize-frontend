@@ -1,16 +1,17 @@
 "use client";
 
+import Link from "next/link";
 import { publicEnv } from "@/config/env";
 import { LeaderboardFocus } from "@/enums";
 import { useEffect, useState } from "react";
 import { Col, Container, Dropdown, Row } from "react-bootstrap";
-import { DBResponse } from "../../entities/IDBResponse";
-import { MemeSeason } from "../../entities/ISeason";
-import { GlobalTDHHistory, TDHCalc } from "../../entities/ITDH";
-import { ApiBlocksPage } from "../../generated/models/ApiBlocksPage";
-import { numberWithCommas } from "../../helpers/Helpers";
-import { fetchUrl } from "../../services/6529api";
-import { commonApiFetch } from "../../services/api/common-api";
+import { DBResponse } from "@/entities/IDBResponse";
+import { MemeSeason } from "@/entities/ISeason";
+import { GlobalTDHHistory, TDHCalc } from "@/entities/ITDH";
+import { ApiBlocksPage } from "@/generated/models/ApiBlocksPage";
+import { numberWithCommas } from "@/helpers/Helpers";
+import { fetchUrl } from "@/services/6529api";
+import { commonApiFetch } from "@/services/api/common-api";
 import DotLoader, { Spinner } from "../dotLoader/DotLoader";
 import {
   SearchModalDisplay,
@@ -173,9 +174,9 @@ export default function Leaderboard(
           <h1>
             Network{" "}
             {showViewAll && (
-              <a href="/network/nerd">
+              <Link href="/network/nerd">
                 <span className={styles.viewAllLink}>View All</span>
-              </a>
+              </Link>
             )}
           </h1>
         </Col>
@@ -190,7 +191,7 @@ export default function Leaderboard(
                 TDH Block&nbsp;
                 <a
                   href={`https://etherscan.io/block/${lastTDH.block}`}
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   target="_blank">
                   {lastTDH.block}
                 </a>

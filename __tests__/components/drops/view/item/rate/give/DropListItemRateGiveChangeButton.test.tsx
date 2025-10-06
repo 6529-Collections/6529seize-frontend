@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import DropListItemRateGiveChangeButton from '../../../../../../../components/drops/view/item/rate/give/DropListItemRateGiveChangeButton';
-import { AuthContext } from '../../../../../../../components/auth/Auth';
-import { ProfileConnectedStatus } from '../../../../../../../entities/IProfile';
-import { RateChangeType } from '../../../../../../../components/drops/view/item/rate/give/DropListItemRateGive';
+import DropListItemRateGiveChangeButton from '@/components/drops/view/item/rate/give/DropListItemRateGiveChangeButton';
+import { AuthContext } from '@/components/auth/Auth';
+import { ProfileConnectedStatus } from '@/entities/IProfile';
+import { RateChangeType } from '@/components/drops/view/item/rate/give/DropListItemRateGive';
 
 describe('DropListItemRateGiveChangeButton', () => {
   const renderBtn = (status: ProfileConnectedStatus, canVote = true) => {

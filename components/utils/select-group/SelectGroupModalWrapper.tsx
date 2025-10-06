@@ -1,5 +1,5 @@
 import CommonAnimationWrapper from "../animation/CommonAnimationWrapper";
-import { ApiGroupFull } from "../../../generated/models/ApiGroupFull";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import CommonAnimationOpacity from "../animation/CommonAnimationOpacity";
 import SelectGroupModal from "./SelectGroupModal";
 

@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { useWaveWebSocket } from "../../hooks/useWaveWebSocket";
+import { useWaveWebSocket } from "@/hooks/useWaveWebSocket";
 
 class MockWebSocket {
   static CONNECTING = 0;

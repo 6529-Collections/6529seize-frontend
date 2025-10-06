@@ -1,14 +1,14 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ComponentSelectRandomHolders from '../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentSelectRandomHolders';
-import { DistributionPlanToolContext } from '../../../../../components/distribution-plan-tool/DistributionPlanToolContext';
-import { RandomHoldersType } from '../../../../../components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal';
-import { ComponentRandomHoldersWeightType } from '../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/utils/ComponentRandomHoldersWeight';
+import ComponentSelectRandomHolders from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentSelectRandomHolders';
+import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
+import { RandomHoldersType } from '@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal';
+import { ComponentRandomHoldersWeightType } from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/utils/ComponentRandomHoldersWeight';
 
 // Mock nested components to isolate behaviour
 jest.mock(
-  '../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigNextBtn',
+  '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigNextBtn',
   () => ({ onNext, onSkip, showNextBtn, showSkipBtn, isDisabled, children }: any) => (
     <div>
       <button disabled={isDisabled} onClick={onNext} data-testid="next-btn">
@@ -22,22 +22,22 @@ jest.mock(
 );
 
 jest.mock(
-  '../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/BuildPhaseFormConfigModalTitle',
+  '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/BuildPhaseFormConfigModalTitle',
   () => () => <div data-testid="title" />
 );
 
 jest.mock(
-  '../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigMeta',
+  '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigMeta',
   () => ({ walletsCount }: any) => <div data-testid="meta">{String(walletsCount)}</div>
 );
 
 jest.mock(
-  '../../../../../components/distribution-plan-tool/common/DistributionPlanSecondaryText',
+  '@/components/distribution-plan-tool/common/DistributionPlanSecondaryText',
   () => ({ children }: any) => <div>{children}</div>
 );
 
 jest.mock(
-  '../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/BuildPhaseFormConfigModalSidebar',
+  '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/BuildPhaseFormConfigModalSidebar',
   () => ({ options, selectedOption, setSelectedOption }: any) => (
     <div>
       {options.map((o: any) => (
@@ -51,7 +51,7 @@ jest.mock(
 );
 
 jest.mock(
-  '../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/utils/ComponentRandomHoldersWeight',
+  '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/utils/ComponentRandomHoldersWeight',
   () => {
     const actual = jest.requireActual(
       '../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/utils/ComponentRandomHoldersWeight'

@@ -1,5 +1,5 @@
 import React from "react";
-import { CreateDropPart } from "../../entities/IDrop";
+import { CreateDropPart } from "@/entities/IDrop";
 import { AnimatePresence, motion } from "framer-motion";
 import FilePreview from "./FilePreview";
 import { UploadingFile } from "./CreateDropContent";

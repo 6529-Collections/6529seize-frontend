@@ -1,8 +1,8 @@
 import {
   CONTACT_STATEMENT_TYPE,
   CONTACT_STATEMENT_TYPES,
-} from "../../../../../../helpers/Types";
-import UserPageIdentityAddStatementsTypeButton from "../../utils/UserPageIdentityAddStatementsTypeButton";
+} from "@/helpers/Types";
+import UserPageIdentityAddStatementsTypeButton from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsTypeButton";
 
 export default function UserPageIdentityAddStatementsContactItems({
   activeType,

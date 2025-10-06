@@ -1,5 +1,5 @@
 import { renderHook, act, waitFor } from "@testing-library/react";
-import useCapacitor from "../../hooks/useCapacitor";
+import useCapacitor from "@/hooks/useCapacitor";
 
 const listeners: Record<string, Function> = {};
 

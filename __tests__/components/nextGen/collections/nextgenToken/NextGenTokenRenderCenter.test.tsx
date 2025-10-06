@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import NextGenTokenRenderCenter from '../../../../../components/nextGen/collections/nextgenToken/NextGenTokenRenderCenter';
+import NextGenTokenRenderCenter from '@/components/nextGen/collections/nextgenToken/NextGenTokenRenderCenter';
 
 jest.mock('react-bootstrap', () => {
   const React = require('react');
@@ -17,15 +17,15 @@ jest.mock('react-bootstrap', () => {
   return RB;
 });
 
-jest.mock('../../../../../components/nextGen/collections/nextgenToken/NextGenTokenDownload', () => ({
+jest.mock('@/components/nextGen/collections/nextgenToken/NextGenTokenDownload', () => ({
   __esModule: true,
   default: () => <div data-testid="download" />,
   Resolution: { '1K':'1K','2K':'2K','4K':'4K','8K':'8K','16K':'16K','0.5K':'0.5K', Thumbnail:'Thumbnail' }
 }));
 
-jest.mock('../../../../../helpers/AllowlistToolHelpers', () => ({ getRandomObjectId: () => 'id' }));
+jest.mock('@/helpers/AllowlistToolHelpers', () => ({ getRandomObjectId: () => 'id' }));
 
-jest.mock('../../../../../helpers/Helpers', () => ({ numberWithCommas: (n:number) => n.toString() }));
+jest.mock('@/helpers/Helpers', () => ({ numberWithCommas: (n:number) => n.toString() }));
 
 const token = { id: 42 } as any;
 

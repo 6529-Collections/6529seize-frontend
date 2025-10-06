@@ -1,7 +1,7 @@
 import {
   isVideoMimeType,
   processContent,
-} from "../../../../components/waves/drops/media-utils";
+} from "@/components/waves/drops/media-utils";
 
 describe("media-utils", () => {
   it("detects video mime types", () => {

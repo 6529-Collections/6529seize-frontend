@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import UserSetUpProfileCta from '../../../../../components/user/utils/set-up-profile/UserSetUpProfileCta';
-import { AuthContext } from '../../../../../components/auth/Auth';
-import { useSeizeConnectContext } from '../../../../../components/auth/SeizeConnectContext';
+import UserSetUpProfileCta from '@/components/user/utils/set-up-profile/UserSetUpProfileCta';
+import { AuthContext } from '@/components/auth/Auth';
+import { useSeizeConnectContext } from '@/components/auth/SeizeConnectContext';
 
-jest.mock('../../../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: jest.fn() }));
+jest.mock('@/components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: jest.fn() }));
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
 
 const useCtx = useSeizeConnectContext as jest.Mock;

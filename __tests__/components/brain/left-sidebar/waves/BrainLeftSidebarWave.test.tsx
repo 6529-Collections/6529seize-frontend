@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import BrainLeftSidebarWave from '../../../../../components/brain/left-sidebar/waves/BrainLeftSidebarWave';
-import { ApiWaveType } from '../../../../../generated/models/ApiWaveType';
+import BrainLeftSidebarWave from '@/components/brain/left-sidebar/waves/BrainLeftSidebarWave';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { usePrefetchWaveData } from '../../../../../hooks/usePrefetchWaveData';
+import { usePrefetchWaveData } from '@/hooks/usePrefetchWaveData';
 
 jest.mock('next/link', () => ({
   __esModule: true,
@@ -16,10 +16,10 @@ jest.mock('next/navigation', () => ({
   useSearchParams: jest.fn(),
   usePathname: jest.fn(),
 }));
-jest.mock('../../../../../hooks/usePrefetchWaveData');
-jest.mock('../../../../../components/waves/WavePicture', () => (props: any) => <img data-testid="wave-picture" alt={props.name} />);
-jest.mock('../../../../../components/brain/left-sidebar/waves/BrainLeftSidebarWaveDropTime', () => (props: any) => <span data-testid="drop-time">{props.time}</span>);
-jest.mock('../../../../../components/brain/left-sidebar/waves/BrainLeftSidebarWavePin', () => (props: any) => <div data-testid="pin">{String(props.isPinned)}</div>);
+jest.mock('@/hooks/usePrefetchWaveData');
+jest.mock('@/components/waves/WavePicture', () => (props: any) => <img data-testid="wave-picture" alt={props.name} />);
+jest.mock('@/components/brain/left-sidebar/waves/BrainLeftSidebarWaveDropTime', () => (props: any) => <span data-testid="drop-time">{props.time}</span>);
+jest.mock('@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin', () => (props: any) => <div data-testid="pin">{String(props.isPinned)}</div>);
 
 const mockedUseRouter = useRouter as jest.Mock;
 const mockedUseSearchParams = useSearchParams as jest.Mock;

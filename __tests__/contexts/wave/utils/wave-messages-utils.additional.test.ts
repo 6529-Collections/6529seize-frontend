@@ -1,7 +1,7 @@
-import { fetchWaveMessages, fetchAroundSerialNoWaveMessages, findLightDropBySerialNoWithPagination } from '../../../../contexts/wave/utils/wave-messages-utils';
-import { commonApiFetch, commonApiFetchWithRetry } from '../../../../services/api/common-api';
+import { fetchWaveMessages, fetchAroundSerialNoWaveMessages, findLightDropBySerialNoWithPagination } from '@/contexts/wave/utils/wave-messages-utils';
+import { commonApiFetch, commonApiFetchWithRetry } from '@/services/api/common-api';
 
-jest.mock('../../../../services/api/common-api');
+jest.mock('@/services/api/common-api');
 
 const drop = { id: 'd1', serial_no: 1, created_at: '2020', wave: { id: 'w' } } as any;
 

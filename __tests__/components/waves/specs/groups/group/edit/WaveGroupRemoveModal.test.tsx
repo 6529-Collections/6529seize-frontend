@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import WaveGroupRemoveModal from '../../../../../../../components/waves/specs/groups/group/edit/WaveGroupRemoveModal';
+import WaveGroupRemoveModal from '@/components/waves/specs/groups/group/edit/WaveGroupRemoveModal';
 
 jest.mock('react-dom', () => ({ ...jest.requireActual('react-dom'), createPortal: (node: any) => node }));
 jest.mock('react-use', () => ({ useClickAway: (_ref: any, fn: any) => {}, useKeyPressEvent: (_k: any, fn: any) => {} }));

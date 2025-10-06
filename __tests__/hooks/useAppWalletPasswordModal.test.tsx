@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
-import { useAppWalletPasswordModal } from '../../hooks/useAppWalletPasswordModal';
+import { useAppWalletPasswordModal } from '@/hooks/useAppWalletPasswordModal';
 
 // Mock the UnlockAppWalletModal component
 const MockUnlockAppWalletModal = jest.fn(({ show, onHide, onUnlock, address, address_hashed }) => (
@@ -21,7 +21,7 @@ const MockUnlockAppWalletModal = jest.fn(({ show, onHide, onUnlock, address, add
   ) : null
 ));
 
-jest.mock('../../components/app-wallets/AppWalletModal', () => ({
+jest.mock('@/components/app-wallets/AppWalletModal', () => ({
   UnlockAppWalletModal: MockUnlockAppWalletModal,
 }));
 

@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import AboutMemes from "../../../components/about/AboutMemes";
+import AboutMemes from "@/components/about/AboutMemes";
 
 jest.mock("next/image", () => ({
   __esModule: true,

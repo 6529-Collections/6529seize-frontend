@@ -4,16 +4,16 @@ import { useContext, useEffect, useRef, useState } from "react";
 import {
   ApiCreateOrUpdateProfileCicStatement,
   CicStatement,
-} from "../../../../entities/IProfile";
-import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { AuthContext } from "../../../auth/Auth";
+} from "@/entities/IProfile";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { AuthContext } from "@/components/auth/Auth";
 import { useMutation } from "@tanstack/react-query";
-import { commonApiPost } from "../../../../services/api/common-api";
-import { STATEMENT_GROUP, STATEMENT_TYPE } from "../../../../helpers/Types";
+import { commonApiPost } from "@/services/api/common-api";
+import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { useKeyPressEvent } from "react-use";
 import UserPageHeaderAboutEditError from "./UserPageHeaderAboutEditError";
 import { AnimatePresence } from "framer-motion";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 export default function UserPageHeaderAboutEdit({
   profile,
   statement,

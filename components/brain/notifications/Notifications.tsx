@@ -1,23 +1,23 @@
 "use client";
 
 import { useContext, useEffect, useRef, useState } from "react";
-import { useSetTitle } from "../../../contexts/TitleContext";
-import { AuthContext } from "../../auth/Auth";
-import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
-import { commonApiPostWithoutBodyAndResponse } from "../../../services/api/common-api";
+import { useSetTitle } from "@/contexts/TitleContext";
+import { AuthContext } from "@/components/auth/Auth";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import NotificationsWrapper from "./NotificationsWrapper";
 import { useMutation } from "@tanstack/react-query";
 import MyStreamNoItems from "../my-stream/layout/MyStreamNoItems";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { ActiveDropState } from "../../../types/dropInteractionTypes";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
 import { FeedScrollContainer } from "../feed/FeedScrollContainer";
-import { useNotificationsQuery } from "../../../hooks/useNotificationsQuery";
-import { useNotificationsContext } from "../../notifications/NotificationsContext";
+import { useNotificationsQuery } from "@/hooks/useNotificationsQuery";
+import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
 import { useLayout } from "../my-stream/layout/LayoutContext";
 import NotificationsCauseFilter, {
   NotificationFilter,
 } from "./NotificationsCauseFilter";
-import SpinnerLoader from "../../common/SpinnerLoader";
+import SpinnerLoader from "@/components/common/SpinnerLoader";
 
 interface NotificationsProps {
   readonly activeDrop: ActiveDropState | null;

@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveOutcomesRowRepRank from '../../../../../../../../components/waves/create-wave/outcomes/winners/rows/rep/CreateWaveOutcomesRowRepRank';
+import CreateWaveOutcomesRowRepRank from '@/components/waves/create-wave/outcomes/winners/rows/rep/CreateWaveOutcomesRowRepRank';
 
-jest.mock('../../../../../../../../helpers/Helpers', () => ({
+jest.mock('@/helpers/Helpers', () => ({
   formatLargeNumber: (n: number) => n.toString(),
 }));
 

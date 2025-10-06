@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { useProgressiveDebounce } from '../../hooks/useProgressiveDebounce';
+import { useProgressiveDebounce } from '@/hooks/useProgressiveDebounce';
 
 describe('useProgressiveDebounce', () => {
   jest.useFakeTimers();

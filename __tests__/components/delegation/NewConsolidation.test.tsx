@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import NewConsolidationComponent from '../../../components/delegation/NewConsolidation';
+import NewConsolidationComponent from '@/components/delegation/NewConsolidation';
 
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: () => <svg data-testid="icon" /> }));
 
 let submitGroupsMock: jest.Mock;
 
-jest.mock('../../../components/delegation/DelegationFormParts', () => {
+jest.mock('@/components/delegation/DelegationFormParts', () => {
   const React = require('react');
   submitGroupsMock = jest.fn(() => null);
   return {

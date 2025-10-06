@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UserPageIdentityAddStatements, { STATEMENT_ADD_VIEW } from "../../../../../../components/user/identity/statements/add/UserPageIdentityAddStatements";
-import { ApiIdentity } from '../../../../../generated/models/ApiIdentity';
+import UserPageIdentityAddStatements, { STATEMENT_ADD_VIEW } from "@/components/user/identity/statements/add/UserPageIdentityAddStatements";
+import { ApiIdentity } from '@/__tests__/generated/models/ApiIdentity';
 
 let clickAway: () => void;
 let escapeCb: () => void;
@@ -11,7 +11,7 @@ jest.mock('react-use', () => ({
   useKeyPressEvent: (key: string, cb: () => void) => { if (key === 'Escape') escapeCb = cb; }
 }));
 
-jest.mock('../../../../../../components/user/identity/statements/add/UserPageIdentityAddStatementsViews', () => ({
+jest.mock('@/components/user/identity/statements/add/UserPageIdentityAddStatementsViews', () => ({
   __esModule: true,
   default: ({ activeView, setActiveView }: any) => (
     <div data-testid="views" onClick={() => setActiveView(STATEMENT_ADD_VIEW.CONTACT)}>{activeView}</div>

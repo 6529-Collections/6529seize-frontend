@@ -4,8 +4,8 @@ import React, { useState, useCallback } from "react";
 import {
   getScaledImageUri,
   ImageScale,
-} from "../../../../../../helpers/image.helpers";
-import { useInView } from "../../../../../../hooks/useInView";
+} from "@/helpers/image.helpers";
+import { useInView } from "@/hooks/useInView";
 
 interface Props {
   readonly src: string;

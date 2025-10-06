@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import UserPageStatsActivityWalletFilter from "../../../../../../components/user/stats/activity/wallet/filter/UserPageStatsActivityWalletFilter";
-import { UserPageStatsActivityWalletFilterType } from "../../../../../../components/user/stats/activity/wallet/UserPageStatsActivityWallet";
+import UserPageStatsActivityWalletFilter from "@/components/user/stats/activity/wallet/filter/UserPageStatsActivityWalletFilter";
+import { UserPageStatsActivityWalletFilterType } from "@/components/user/stats/activity/wallet/UserPageStatsActivityWallet";
 
 jest.mock("framer-motion", () => ({
   AnimatePresence: ({ children }: any) => <>{children}</>,
@@ -15,7 +15,7 @@ jest.mock("react-use", () => ({
   useCss: jest.fn(() => ["", jest.fn()]),
 }));
 
-jest.mock("../../../../../../components/user/stats/activity/wallet/filter/UserPageStatsActivityWalletFilterItem", () => (props: any) => (
+jest.mock("@/components/user/stats/activity/wallet/filter/UserPageStatsActivityWalletFilterItem", () => (props: any) => (
   <li data-testid="filter-item" onClick={() => props.onFilter(props.filter)}>{props.title}</li>
 ));
 

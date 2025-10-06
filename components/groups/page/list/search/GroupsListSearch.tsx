@@ -1,7 +1,7 @@
-import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import IdentitySearch, {
   IdentitySearchSize,
-} from "../../../../utils/input/identity/IdentitySearch";
+} from "@/components/utils/input/identity/IdentitySearch";
 
 export default function GroupsListSearch({
   identity,

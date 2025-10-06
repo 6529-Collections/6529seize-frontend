@@ -1,5 +1,5 @@
-import { formatNumberWithCommas } from "../../../helpers/Helpers";
-import { ApiWaveCreditType } from "../../../generated/models/ApiWaveCreditType";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
 interface SingleWaveDropVoteStatsProps {
   readonly currentRating: number;

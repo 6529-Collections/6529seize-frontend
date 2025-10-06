@@ -1,7 +1,7 @@
-import { AppKitAdapterManager } from '../../../components/providers/AppKitAdapterManager'
-import { AdapterError } from '../../../src/errors/adapter'
-import { WalletValidationError } from '../../../src/errors/wallet-validation'
-import { AppWallet } from '../../../components/app-wallets/AppWalletsContext'
+import { AppKitAdapterManager } from '@/components/providers/AppKitAdapterManager'
+import { AdapterError } from '@/src/errors/adapter'
+import { WalletValidationError } from '@/src/errors/wallet-validation'
+import { AppWallet } from '@/components/app-wallets/AppWalletsContext'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 
 // Jest helper
@@ -11,10 +11,10 @@ const fail = (message?: string): never => {
 
 // Mock dependencies
 jest.mock('@reown/appkit-adapter-wagmi')
-jest.mock('../../../wagmiConfig/wagmiAppWalletConnector', () => ({
+jest.mock('@/wagmiConfig/wagmiAppWalletConnector', () => ({
   createAppWalletConnector: jest.fn(() => ({ id: 'mock-connector' }))
 }))
-jest.mock('../../../constants', () => ({
+jest.mock('@/constants', () => ({
   CW_PROJECT_ID: '12345678-1234-1234-1234-123456789abc' // Valid UUID format
 }))
 

@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useCallback, useContext, useEffect } from "react";
-import { WsMessageType, WsDropUpdateMessage } from "../../../helpers/Types";
-import { useWebSocketMessage } from "../../../services/websocket/useWebSocketMessage";
-import { AuthContext } from "../../../components/auth/Auth";
-import { ApiWave } from "../../../generated/models/ApiWave";
+import { WsMessageType, WsDropUpdateMessage } from "@/helpers/Types";
+import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
+import { AuthContext } from "@/components/auth/Auth";
+import { ApiWave } from "@/generated/models/ApiWave";
 
 /**
  * Interface for tracking new drops count for a wave

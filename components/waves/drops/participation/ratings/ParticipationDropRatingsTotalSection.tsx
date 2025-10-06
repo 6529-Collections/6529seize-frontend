@@ -1,8 +1,8 @@
 import { Tooltip } from "react-tooltip";
-import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { RatingsSectionProps, RatingsData } from "./types";
 import VoteBreakdownTooltip from "./tooltips/VoteBreakdownTooltip";
-import DropVoteProgressing from "../../../../drops/view/utils/DropVoteProgressing";
+import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
 
 interface ParticipationDropRatingsTotalSectionProps
   extends RatingsSectionProps {

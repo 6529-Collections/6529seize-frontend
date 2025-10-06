@@ -1,4 +1,4 @@
-import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 
 enum FILE_TYPES {
   IMAGE = "IMAGE",

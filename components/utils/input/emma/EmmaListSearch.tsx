@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 
 import EmmaListSearchItems from "./EmmaListSearchItems";
-import { AllowlistDescription } from "../../../allowlist-tool/allowlist-tool.types";
+import { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 
 export default function EmmaListSearch({
   selectedId,

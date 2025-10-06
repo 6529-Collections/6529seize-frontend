@@ -1,9 +1,9 @@
 import userEvent from "@testing-library/user-event";
 import { render, screen } from '@testing-library/react';
-import ProxyCreateActionSelectType from '../../../../../../../components/user/proxy/proxy/create-action/select-type/ProxyCreateActionSelectType';
-import { ApiProfileProxyActionType } from '../../../../../../../generated/models/ApiProfileProxyActionType';
+import ProxyCreateActionSelectType from '@/components/user/proxy/proxy/create-action/select-type/ProxyCreateActionSelectType';
+import { ApiProfileProxyActionType } from '@/generated/models/ApiProfileProxyActionType';
 
-jest.mock('../../../../../../../components/user/proxy/proxy/create-action/select-type/ProxyCreateActionSelectTypeItem', () => (props: any) => (
+jest.mock('@/components/user/proxy/proxy/create-action/select-type/ProxyCreateActionSelectTypeItem', () => (props: any) => (
   <div data-testid="item" onClick={() => props.setSelectedActionType(props.actionType)}>{props.actionType}</div>
 ));
 

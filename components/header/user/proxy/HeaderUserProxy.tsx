@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import HeaderUserProxyDropdown from "./HeaderUserProxyDropdown";
 
 export default function HeaderUserProxy({

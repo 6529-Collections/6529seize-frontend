@@ -1,7 +1,7 @@
 import {
   CreateDropPart,
   CreateDropRequestPart,
-} from "../../../../entities/IDrop";
+} from "@/entities/IDrop";
 import { multiPartUpload } from "./multiPartUpload";
 
 /**

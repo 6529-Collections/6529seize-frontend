@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import FinalizeSnapshotsTableRow from '../../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTableRow';
+import FinalizeSnapshotsTableRow from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTableRow';
 
-jest.mock('../../../../../../../../components/distribution-plan-tool/common/DistributionPlanTableRowWrapper', () => ({ children }: any) => (
+jest.mock('@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper', () => ({ children }: any) => (
   <tr data-testid="wrapper">{children}</tr>
 ));
 
@@ -14,9 +14,9 @@ jest.mock('react-tooltip', () => ({
   ),
 }));
 
-jest.mock('../../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTableSnapshotTooltip', () => (p: any) => <div data-testid="snapshot-tip">{p.snapshotId}</div>);
-jest.mock('../../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTableExcludedSnapshotsTooltip', () => (p: any) => <div data-testid="excluded-tip">{p.excludedSnapshots.length}</div>);
-jest.mock('../../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTableExcludedComponentsTooltip', () => (p: any) => <div data-testid="components-tip">{p.excludedComponents.length}</div>);
+jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTableSnapshotTooltip', () => (p: any) => <div data-testid="snapshot-tip">{p.snapshotId}</div>);
+jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTableExcludedSnapshotsTooltip', () => (p: any) => <div data-testid="excluded-tip">{p.excludedSnapshots.length}</div>);
+jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTableExcludedComponentsTooltip', () => (p: any) => <div data-testid="components-tip">{p.excludedComponents.length}</div>);
 
 const row: any = {
   groupSnapshotId: 'g1',

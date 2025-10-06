@@ -1,18 +1,18 @@
 import React from 'react';
 import { act, render } from '@testing-library/react';
-import DragDropPastePlugin from '../../components/drops/create/lexical/plugins/DragDropPastePlugin';
+import DragDropPastePlugin from '@/components/drops/create/lexical/plugins/DragDropPastePlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 
 const toastMock = jest.fn();
-jest.mock('../../components/auth/Auth', () => ({ useAuth: () => ({ setToast: toastMock }) }));
+jest.mock('@/components/auth/Auth', () => ({ useAuth: () => ({ setToast: toastMock }) }));
 
 const update = (fn: any) => fn();
 let commandHandler: any;
 const editor = { registerCommand: jest.fn((_cmd: any, fn: any) => { commandHandler = fn; return () => {}; }), update } as any;
 
 jest.mock('@lexical/react/LexicalComposerContext', () => ({ useLexicalComposerContext: jest.fn() }));
-jest.mock('../../components/drops/create/lexical/nodes/ImageNode', () => ({ $createImageNode: jest.fn(() => ({ getKey: () => '1' })) }));
-jest.mock('../../components/waves/create-wave/services/multiPartUpload', () => ({ multiPartUpload: jest.fn(() => Promise.resolve({ url: 'uploaded' })) }));
+jest.mock('@/components/drops/create/lexical/nodes/ImageNode', () => ({ $createImageNode: jest.fn(() => ({ getKey: () => '1' })) }));
+jest.mock('@/components/waves/create-wave/services/multiPartUpload', () => ({ multiPartUpload: jest.fn(() => Promise.resolve({ url: 'uploaded' })) }));
 
 jest.mock('lexical', () => ({
   $insertNodes: jest.fn(),
@@ -26,9 +26,9 @@ jest.mock('@lexical/utils', () => ({
 }));
 
 const { $insertNodes, $getNodeByKey } = require('lexical');
-const { multiPartUpload } = require('../../components/waves/create-wave/services/multiPartUpload');
-const { $createImageNode } = require('../../components/drops/create/lexical/nodes/ImageNode');
-const { useAuth } = require('../../components/auth/Auth');
+const { multiPartUpload } = require('@/components/waves/create-wave/services/multiPartUpload');
+const { $createImageNode } = require('@/components/drops/create/lexical/nodes/ImageNode');
+const { useAuth } = require('@/components/auth/Auth');
 
 describe('DragDropPastePlugin', () => {
   beforeEach(() => {

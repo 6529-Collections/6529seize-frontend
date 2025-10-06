@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import Modal from '../../../../../components/user/rep/modify-rep/UserPageRepModifyModal';
-import { AuthContext } from '../../../../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../../../../components/react-query-wrapper/ReactQueryWrapper';
+import Modal from '@/components/user/rep/modify-rep/UserPageRepModifyModal';
+import { AuthContext } from '@/components/auth/Auth';
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 import { useQuery, useMutation } from '@tanstack/react-query';
 
 jest.mock('@tanstack/react-query');

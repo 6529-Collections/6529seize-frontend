@@ -1,9 +1,9 @@
 import React from "react";
-import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
-import { ApiWaveDecisionWinner } from "../../../../../generated/models/ApiWaveDecisionWinner";
-import { ApiWaveOutcomeCredit } from "../../../../../generated/models/ApiWaveOutcomeCredit";
-import { ApiWaveOutcomeType } from "../../../../../generated/models/ApiWaveOutcomeType";
-import { OutcomeType } from "../../../../../hooks/drops/useDropOutcomes";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
+import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
+import { OutcomeType } from "@/hooks/drops/useDropOutcomes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAddressCard, faStar } from "@fortawesome/free-regular-svg-icons";
 import { faAward } from "@fortawesome/free-solid-svg-icons";

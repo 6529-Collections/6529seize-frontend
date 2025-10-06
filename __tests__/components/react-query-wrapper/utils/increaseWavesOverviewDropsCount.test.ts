@@ -1,7 +1,7 @@
 import { QueryClient } from '@tanstack/react-query';
-import { increaseWavesOverviewDropsCount } from '../../../../components/react-query-wrapper/utils/increaseWavesOverviewDropsCount';
-import { ApiWavesOverviewType } from '../../../../generated/models/ApiWavesOverviewType';
-import { QueryKey } from '../../../../components/react-query-wrapper/ReactQueryWrapper';
+import { increaseWavesOverviewDropsCount } from '@/components/react-query-wrapper/utils/increaseWavesOverviewDropsCount';
+import { ApiWavesOverviewType } from '@/generated/models/ApiWavesOverviewType';
+import { QueryKey } from '@/components/react-query-wrapper/ReactQueryWrapper';
 
 function createWave(id: string) {
   return { id, metrics: { drops_count: 0, your_drops_count: 0 } } as any;

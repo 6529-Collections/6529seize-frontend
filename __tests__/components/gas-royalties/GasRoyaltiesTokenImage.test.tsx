@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { GasRoyaltiesTokenImage } from '../../../components/gas-royalties/GasRoyalties';
+import { GasRoyaltiesTokenImage } from '@/components/gas-royalties/GasRoyalties';
 
 // Mock next/image to render a regular img element
 jest.mock('next/image', () => ({ __esModule: true, default: (props: any) => <img {...props} /> }));

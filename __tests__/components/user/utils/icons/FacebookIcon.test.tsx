@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import FacebookIcon from '../../../../../components/user/utils/icons/FacebookIcon';
+import FacebookIcon from '@/components/user/utils/icons/FacebookIcon';
 
 describe('FacebookIcon', () => {
   it('renders svg with viewBox', () => {

@@ -1,11 +1,11 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import DistributionPlanDeleteOperationButton from '../../../../components/distribution-plan-tool/common/DistributionPlanDeleteOperationButton';
-import { DistributionPlanToolContext } from '../../../../components/distribution-plan-tool/DistributionPlanToolContext';
-import { distributionPlanApiDelete } from '../../../../services/distribution-plan-api';
+import DistributionPlanDeleteOperationButton from '@/components/distribution-plan-tool/common/DistributionPlanDeleteOperationButton';
+import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
+import { distributionPlanApiDelete } from '@/services/distribution-plan-api';
 
-jest.mock('../../../../services/distribution-plan-api');
+jest.mock('@/services/distribution-plan-api');
 
 const mockedDelete = distributionPlanApiDelete as jest.Mock;
 

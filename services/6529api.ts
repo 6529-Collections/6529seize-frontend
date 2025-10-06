@@ -1,14 +1,17 @@
-import { DBResponse } from "../entities/IDBResponse";
+import { DBResponse } from "@/entities/IDBResponse";
 import Cookies from "js-cookie";
-import { API_AUTH_COOKIE } from "../constants";
+import { API_AUTH_COOKIE } from "@/constants";
 import { getStagingAuth } from "./auth/auth.utils";
+
+const isRelativeUrl = (value: string): boolean =>
+  !/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(value) && !value.startsWith("//");
 
 export async function fetchUrl<T = DBResponse>(
   url: string,
   init?: RequestInit
 ): Promise<T> {
   const baseHeaders = new Headers(init?.headers);
-  const apiAuth = getStagingAuth();
+  const apiAuth = isRelativeUrl(url) ? getStagingAuth() : null;
   if (apiAuth) {
     baseHeaders.set("x-6529-auth", apiAuth);
   }
@@ -41,7 +44,7 @@ export async function postData(url: string, body: any, init?: RequestInit) {
   if (!baseHeaders.has("Content-Type")) {
     baseHeaders.set("Content-Type", "application/json");
   }
-  const apiAuth = getStagingAuth();
+  const apiAuth = isRelativeUrl(url) ? getStagingAuth() : null;
   if (apiAuth) {
     baseHeaders.set("x-6529-auth", apiAuth);
   }
@@ -52,6 +55,9 @@ export async function postData(url: string, body: any, init?: RequestInit) {
     body: JSON.stringify(body),
     headers,
   });
+  if (res.status === 401) {
+    Cookies.remove(API_AUTH_COOKIE);
+  }
   const json = await res.json();
   return {
     status: res.status,
@@ -61,7 +67,7 @@ export async function postData(url: string, body: any, init?: RequestInit) {
 
 export async function postFormData(url: string, formData: FormData) {
   let headers: any = {};
-  const apiAuth = getStagingAuth();
+  const apiAuth = isRelativeUrl(url) ? getStagingAuth() : null;
   if (apiAuth) {
     headers = { "x-6529-auth": apiAuth };
   }
@@ -70,6 +76,9 @@ export async function postFormData(url: string, formData: FormData) {
     body: formData,
     headers: headers,
   });
+  if (res.status === 401) {
+    Cookies.remove(API_AUTH_COOKIE);
+  }
   const json = await res.json();
   return {
     status: res.status,

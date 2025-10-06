@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import GroupCreateHeader from '../../../../../components/groups/page/create/GroupCreateHeader';
+import GroupCreateHeader from '@/components/groups/page/create/GroupCreateHeader';
 
 describe('GroupCreateHeader', () => {
   it('renders icon and label with expected classes', () => {

@@ -1,20 +1,20 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import { WalletConsolidationState } from "../../../../../entities/IProfile";
-import EthereumIcon from "../../../utils/icons/EthereumIcon";
+import { WalletConsolidationState } from "@/entities/IProfile";
+import EthereumIcon from "@/components/user/utils/icons/EthereumIcon";
 import UserPageIdentityStatementsConsolidatedAddressesItem from "./UserPageIdentityStatementsConsolidatedAddressesItem";
-import { amIUser } from "../../../../../helpers/Helpers";
-import { commonApiFetch } from "../../../../../services/api/common-api";
+import { amIUser } from "@/helpers/Helpers";
+import { commonApiFetch } from "@/services/api/common-api";
 import { useQueries } from "@tanstack/react-query";
-import { Page } from "../../../../../helpers/Types";
+import { Page } from "@/helpers/Types";
 import Link from "next/link";
 import { AnimatePresence } from "framer-motion";
-import { AuthContext } from "../../../../auth/Auth";
-import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
-import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
-import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
-import { ApiWallet } from "../../../../../generated/models/ApiWallet";
+import { AuthContext } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { ApiWallet } from "@/generated/models/ApiWallet";
 export default function UserPageIdentityStatementsConsolidatedAddresses({
   profile,
 }: {

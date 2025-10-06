@@ -1,15 +1,15 @@
 import { render, fireEvent } from "@testing-library/react";
-import BrainLeftSidebarWaves from "../../../../../components/brain/left-sidebar/waves/BrainLeftSidebarWaves";
+import BrainLeftSidebarWaves from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWaves";
 
 let fetchNextPage = jest.fn();
 let registerWave = jest.fn();
 const useMyStream = jest.fn();
 
-jest.mock("../../../../../contexts/wave/MyStreamContext", () => ({
+jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: (...args: any) => useMyStream(...args),
 }));
 
-jest.mock("../../../../../components/brain/left-sidebar/waves/UnifiedWavesList", () => (props: any) => (
+jest.mock("@/components/brain/left-sidebar/waves/UnifiedWavesList", () => (props: any) => (
   <div data-testid="list" onClick={props.fetchNextPage} />
 ));
 

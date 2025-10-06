@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CommonBorderedRadioButton from '../../../../components/utils/radio/CommonBorderedRadioButton';
+import CommonBorderedRadioButton from '@/components/utils/radio/CommonBorderedRadioButton';
 
 
 describe('CommonBorderedRadioButton', () => {

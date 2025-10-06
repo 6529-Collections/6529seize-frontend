@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UserPageHeaderAboutEditError from '../../../../components/user/user-page-header/about/UserPageHeaderAboutEditError';
+import UserPageHeaderAboutEditError from '@/components/user/user-page-header/about/UserPageHeaderAboutEditError';
 
 describe('UserPageHeaderAboutEditError', () => {
   it('detects known error types', () => {

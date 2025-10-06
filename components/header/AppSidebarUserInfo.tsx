@@ -1,6 +1,6 @@
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { useAuth } from "../auth/Auth";
-import { useIdentity } from "../../hooks/useIdentity";
+import { useIdentity } from "@/hooks/useIdentity";
 import UserLevel from "../user/utils/level/UserLevel";
 import AppSidebarUserStats from "./AppSidebarUserStats";
 

@@ -3,11 +3,11 @@ import React from 'react';
 
 const consent = jest.fn();
 
-jest.mock('../../../components/eula/EULAConsentContext', () => ({
+jest.mock('@/components/eula/EULAConsentContext', () => ({
   useEULAConsent: () => ({ consent })
 }));
 
-const EULAModal = require('../../../components/eula/EULAModal').default;
+const EULAModal = require('@/components/eula/EULAModal').default;
 
 describe('EULAModal', () => {
   afterEach(() => {

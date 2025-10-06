@@ -9,12 +9,12 @@
  */
 
 // Mock the API functions
-jest.mock('../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiPost: jest.fn(),
 }));
 
 // Mock auth utilities
-jest.mock('../../services/auth/auth.utils', () => ({
+jest.mock('@/services/auth/auth.utils', () => ({
   getAuthJwt: jest.fn(),
   getRefreshToken: jest.fn(),
   getWalletAddress: jest.fn(),
@@ -29,20 +29,20 @@ jest.mock('jwt-decode', () => ({
 }));
 
 // Mock helpers
-jest.mock('../../helpers/Helpers', () => ({
+jest.mock('@/helpers/Helpers', () => ({
   areEqualAddresses: jest.fn(),
 }));
 
-import { commonApiPost } from '../../services/api/common-api';
+import { commonApiPost } from '@/services/api/common-api';
 import { 
   getAuthJwt, 
   getRefreshToken, 
   getWalletAddress, 
   getWalletRole,
   setAuthJwt 
-} from '../../services/auth/auth.utils';
+} from '@/services/auth/auth.utils';
 import { jwtDecode } from 'jwt-decode';
-import { areEqualAddresses } from '../../helpers/Helpers';
+import { areEqualAddresses } from '@/helpers/Helpers';
 
 // Mock implementations
 const mockCommonApiPost = commonApiPost as jest.MockedFunction<typeof commonApiPost>;

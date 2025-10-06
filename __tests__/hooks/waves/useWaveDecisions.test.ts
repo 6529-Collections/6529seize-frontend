@@ -1,11 +1,11 @@
 import { renderHook } from '@testing-library/react';
-import { useWaveDecisions } from '../../../hooks/waves/useWaveDecisions';
+import { useWaveDecisions } from '@/hooks/waves/useWaveDecisions';
 import { useQuery } from '@tanstack/react-query';
-import { commonApiFetch } from '../../../services/api/common-api';
-import { QueryKey } from '../../../components/react-query-wrapper/ReactQueryWrapper';
+import { commonApiFetch } from '@/services/api/common-api';
+import { QueryKey } from '@/components/react-query-wrapper/ReactQueryWrapper';
 
 jest.mock('@tanstack/react-query');
-jest.mock('../../../services/api/common-api');
+jest.mock('@/services/api/common-api');
 
 const useQueryMock = useQuery as jest.Mock;
 const fetchMock = commonApiFetch as jest.Mock;

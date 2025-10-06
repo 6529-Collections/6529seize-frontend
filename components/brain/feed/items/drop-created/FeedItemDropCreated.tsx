@@ -1,17 +1,17 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { IFeedItemDropCreated } from "../../../../../types/feed.types";
+import { IFeedItemDropCreated } from "@/types/feed.types";
 import Drop, {
   DropInteractionParams,
   DropLocation,
-} from "../../../../waves/drops/Drop";
-import { ApiDrop } from "../../../../../generated/models/ApiDrop";
-import { ActiveDropState } from "../../../../../types/dropInteractionTypes";
+} from "@/components/waves/drops/Drop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
 import {
   DropSize,
   ExtendedDrop,
-} from "../../../../../helpers/waves/drop.helpers";
+} from "@/helpers/waves/drop.helpers";
 
 export default function FeedItemDropCreated({
   item,

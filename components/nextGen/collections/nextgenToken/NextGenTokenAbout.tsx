@@ -9,9 +9,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
-import { ETHEREUM_ICON_TEXT } from "../../../../constants";
-import { DBResponse } from "../../../../entities/IDBResponse";
-import { NextGenCollection, NextGenToken } from "../../../../entities/INextgen";
+import { ETHEREUM_ICON_TEXT } from "@/constants";
+import { DBResponse } from "@/entities/IDBResponse";
+import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import {
   areEqualAddresses,
   cicToType,
@@ -20,21 +20,21 @@ import {
   isNullAddress,
   numberWithCommas,
   printMintDate,
-} from "../../../../helpers/Helpers";
-import useCapacitor from "../../../../hooks/useCapacitor";
-import { useIdentity } from "../../../../hooks/useIdentity";
-import { commonApiFetch } from "../../../../services/api/common-api";
-import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
-import { useCookieConsent } from "../../../cookies/CookieConsentContext";
-import EthereumIcon from "../../../user/utils/icons/EthereumIcon";
-import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
-import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
+} from "@/helpers/Helpers";
+import useCapacitor from "@/hooks/useCapacitor";
+import { useIdentity } from "@/hooks/useIdentity";
+import { commonApiFetch } from "@/services/api/common-api";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import EthereumIcon from "@/components/user/utils/icons/EthereumIcon";
+import UserCICAndLevel from "@/components/user/utils/UserCICAndLevel";
+import { NEXTGEN_CHAIN_ID } from "@/components/nextGen/nextgen_contracts";
 import {
   formatNameForUrl,
   getBlurLink,
   getMagicEdenLink,
   getOpenseaLink,
-} from "../../nextgen_helpers";
+} from "@/components/nextGen/nextgen_helpers";
 import { displayScore } from "./NextGenTokenProperties";
 
 interface Props {
@@ -174,7 +174,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                 <Link
                   href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token.id)}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="d-flex gap-2 align-items-center decoration-none"
                   data-tooltip-id={`opensea-${props.token.id}`}
                 >
@@ -242,7 +242,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                 <Link
                   href={getBlurLink(props.token.id)}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="d-flex gap-2 align-items-center decoration-none"
                   data-tooltip-id={`blur-${props.token.id}`}
                 >
@@ -292,7 +292,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                 <Link
                   href={getMagicEdenLink(props.token.id)}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="d-flex gap-2 align-items-center decoration-none"
                   data-tooltip-id={`magic-eden-${props.token.id}`}
                 >

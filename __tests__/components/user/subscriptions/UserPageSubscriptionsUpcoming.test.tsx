@@ -1,9 +1,9 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useQuery } from '@tanstack/react-query';
-import { AuthContext } from '../../../../components/auth/Auth';
-import UserPageSubscriptionsUpcoming from '../../../../components/user/subscriptions/UserPageSubscriptionsUpcoming';
-import { NFTSubscription, SubscriptionDetails } from '../../../../entities/ISubscription';
-import { createMockAuthContext } from '../../../utils/testContexts';
+import { AuthContext } from '@/components/auth/Auth';
+import UserPageSubscriptionsUpcoming from '@/components/user/subscriptions/UserPageSubscriptionsUpcoming';
+import { NFTSubscription, SubscriptionDetails } from '@/entities/ISubscription';
+import { createMockAuthContext } from '@/__tests__/utils/testContexts';
 
 jest.mock('@tanstack/react-query', () => ({
   useQuery: jest.fn(),
@@ -32,7 +32,7 @@ const mockUpcomingRows = [
   },
 ];
 
-jest.mock('../../../../components/meme-calendar/meme-calendar.helpers', () => ({
+jest.mock('@/components/meme-calendar/meme-calendar.helpers', () => ({
   __esModule: true,
   formatFullDate: jest.fn((date: Date) => {
     const iso = date.toISOString().split('T')[0];
@@ -46,7 +46,7 @@ jest.mock('../../../../components/meme-calendar/meme-calendar.helpers', () => ({
   isMintingToday: jest.fn(() => false),
 }));
 
-jest.mock('../../../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: jest.fn(),
   commonApiPost: jest.fn(),
 }));
@@ -198,7 +198,7 @@ describe('UserPageSubscriptionsUpcoming', () => {
   });
 
   it('shows minting today message when applicable', () => {
-    const { isMintingToday } = require('../../../../components/meme-calendar/meme-calendar.helpers');
+    const { isMintingToday } = require('@/components/meme-calendar/meme-calendar.helpers');
     isMintingToday.mockReturnValue(true);
     
     renderComponent();

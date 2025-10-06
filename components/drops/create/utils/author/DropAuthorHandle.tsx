@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
-import { DropPartSize } from "../../../view/part/DropPart";
-import { ProfileMinWithoutSubs } from "../../../../../helpers/ProfileTypes";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { DropPartSize } from "@/components/drops/view/part/DropPart";
+import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 
 export default function DropAuthorHandle({
   profile: { handle },

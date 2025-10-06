@@ -3,8 +3,8 @@
 import { ReactNode, useEffect, useState } from "react";
 
 import UserPageSetUpProfile from "./UserPageSetUpProfile";
-import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 export default function UserPageSetUpProfileWrapper({
   profile,

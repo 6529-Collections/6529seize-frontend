@@ -8,14 +8,14 @@ import {
   areEqualAddresses,
   cicToType,
   isValidEthAddress,
-} from "../../helpers/Helpers";
+} from "@/helpers/Helpers";
 import { AuthContext } from "../auth/Auth";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../user/utils/UserCICAndLevel";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { useCookieConsent } from "../cookies/CookieConsentContext";
-import useCapacitor from "../../hooks/useCapacitor";
+import useCapacitor from "@/hooks/useCapacitor";
 import Link from "next/link";
 
 export default function ManifoldMintingConnect(
@@ -169,7 +169,7 @@ export default function ManifoldMintingConnect(
         <Link
           href={window.location.href}
           className="text-center pt-2 pb-2"
-          target="_blank">
+          target="_blank" rel="noopener noreferrer">
           <button className="btn btn-light" style={{ width: "100%" }}>
             Mint on 6529.io
           </button>

@@ -1,6 +1,6 @@
 import { render, fireEvent } from '@testing-library/react';
-import CommonCalendarDay from '../../../../components/utils/calendar/CommonCalendarDay';
-import { CalendarDay } from '../../../../helpers/calendar/calendar.helpers';
+import CommonCalendarDay from '@/components/utils/calendar/CommonCalendarDay';
+import { CalendarDay } from '@/helpers/calendar/calendar.helpers';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 

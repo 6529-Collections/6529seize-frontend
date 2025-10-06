@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import TheLineIcon from '../../../../../components/user/utils/icons/TheLineIcon';
+import TheLineIcon from '@/components/user/utils/icons/TheLineIcon';
 
 describe('TheLineIcon', () => {
   it('renders img with expected attributes', () => {

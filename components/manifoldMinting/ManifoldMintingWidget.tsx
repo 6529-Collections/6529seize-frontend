@@ -13,13 +13,13 @@ import {
   areEqualAddresses,
   fromGWEI,
   getTransactionLink,
-} from "../../helpers/Helpers";
-import { Time } from "../../helpers/time";
+} from "@/helpers/Helpers";
+import { Time } from "@/helpers/time";
 import {
   ManifoldClaim,
   ManifoldClaimStatus,
   ManifoldPhase,
-} from "../../hooks/useManifoldClaim";
+} from "@/hooks/useManifoldClaim";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import DotLoader from "../dotLoader/DotLoader";
 import { ManifoldMerkleProof } from "./manifold-types";
@@ -247,7 +247,7 @@ export default function ManifoldMintingWidget(
       <a
         href={getTransactionLink(MANIFOLD_NETWORK.id, hash)}
         target="_blank"
-        rel="noreferrer">
+        rel="noopener noreferrer">
         view trx
       </a>
     );

@@ -1,12 +1,12 @@
 import React from "react";
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { WaveWinnersDrops } from "./drops/WaveWinnersDrops";
 import { WaveWinnersPodium } from "./podium/WaveWinnersPodium";
 import { WaveWinnersTimeline } from "./WaveWinnersTimeline";
-import { useWaveDecisions } from "../../../hooks/waves/useWaveDecisions";
-import { useLayout } from "../../../components/brain/my-stream/layout/LayoutContext";
-import { useWave } from "../../../hooks/useWave";
+import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
+import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
+import { useWave } from "@/hooks/useWave";
 
 interface WaveWinnersProps {
   readonly wave: ApiWave;

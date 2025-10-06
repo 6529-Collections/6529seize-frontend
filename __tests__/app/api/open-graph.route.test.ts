@@ -16,7 +16,7 @@ jest.mock("next/server", () => ({
   NextRequest: class {},
 }));
 
-jest.mock("../../../app/api/open-graph/utils", () => ({
+jest.mock("@/app/api/open-graph/utils", () => ({
   buildResponse: jest.fn(),
   buildGoogleWorkspaceResponse: jest.fn(),
   HTML_ACCEPT_HEADER:
@@ -40,7 +40,7 @@ jest.mock("@/lib/security/urlGuard", () => {
   };
 });
 
-jest.mock("../../../app/api/open-graph/compound/service", () => ({
+jest.mock("@/app/api/open-graph/compound/service", () => ({
   createCompoundPlan: jest.fn(() => null),
 }));
 

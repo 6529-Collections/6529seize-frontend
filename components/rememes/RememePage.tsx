@@ -7,12 +7,13 @@ import { useTitle } from "@/contexts/TitleContext";
 import { faExternalLink, faGlobe } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { useEnsName } from "wagmi";
-import { MEMES_CONTRACT, OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
-import { DBResponse } from "../../entities/IDBResponse";
-import { NFT, Rememe } from "../../entities/INFT";
+import { MEMES_CONTRACT, OPENSEA_STORE_FRONT_CONTRACT } from "@/constants";
+import { DBResponse } from "@/entities/IDBResponse";
+import { NFT, Rememe } from "@/entities/INFT";
 import {
   areEqualAddresses,
   formatAddress,
@@ -21,9 +22,9 @@ import {
   numberWithCommas,
   parseIpfsUrl,
   parseNftDescriptionToHtml,
-} from "../../helpers/Helpers";
-import useCapacitor from "../../hooks/useCapacitor";
-import { fetchAllPages, fetchUrl } from "../../services/6529api";
+} from "@/helpers/Helpers";
+import useCapacitor from "@/hooks/useCapacitor";
+import { fetchAllPages, fetchUrl } from "@/services/6529api";
 import Address from "../address/Address";
 import { useCookieConsent } from "../cookies/CookieConsentContext";
 import DotLoader from "../dotLoader/DotLoader";
@@ -258,7 +259,7 @@ export default function RememePage(props: Readonly<Props>) {
                       className={styles.userLink}
                       href={`https://etherscan.io/token/${rememe.contract}/?a=${rememe.id}`}
                       target="_blank"
-                      rel="noreferrer">
+                      rel="noopener noreferrer">
                       <Image
                         unoptimized
                         width="0"
@@ -295,7 +296,7 @@ export default function RememePage(props: Readonly<Props>) {
                         className={styles.userLink}
                         href={`https://x.com/${rememe.contract_opensea_data.twitterUsername}`}
                         target="_blank"
-                        rel="noreferrer">
+                        rel="noopener noreferrer">
                         <Image
                           unoptimized
                           width="0"
@@ -344,9 +345,9 @@ export default function RememePage(props: Readonly<Props>) {
                     .filter((rep) => rep != parseInt(rememe.id))
                     .map((rep) => (
                       <span className={styles.replica} key={`replica-rep`}>
-                        <a href={`/rememes/${rememe.contract}/${rep}`}>
+                        <Link href={`/rememes/${rememe.contract}/${rep}`}>
                           #{rep}
-                        </a>
+                        </Link>
                       </span>
                     ))}
                 </Col>
@@ -381,7 +382,7 @@ export default function RememePage(props: Readonly<Props>) {
         <a
           href={parseIpfsUrl(s)}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           className={`d-inline-flex align-items-center justify-content-start ${styles.userLink}`}>
           {s}
           <FontAwesomeIcon icon={faExternalLink} className={styles.linkIcon} />
@@ -405,7 +406,7 @@ export default function RememePage(props: Readonly<Props>) {
                       <a
                         href={rememe.token_uri}
                         target="_blank"
-                        rel="noreferrer"
+                        rel="noopener noreferrer"
                         className={`d-inline-flex align-items-center justify-content-start ${styles.userLink}`}>
                         {rememe.token_uri}
                         <FontAwesomeIcon

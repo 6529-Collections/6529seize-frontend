@@ -1,4 +1,4 @@
-import { CICType } from "../../../entities/IProfile";
+import { CICType } from "@/entities/IProfile";
 import { CIC_COLOR } from "./raters-table/ProfileRatersTableItem";
 
 export enum UserCICAndLevelSize {

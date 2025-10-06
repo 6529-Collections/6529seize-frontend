@@ -1,11 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import SelectSnapshotDropdown from "../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/select-snapshot/SelectSnapshotDropdown";
-import { Pool } from "../../../components/allowlist-tool/allowlist-tool.types";
+import SelectSnapshotDropdown from "@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/select-snapshot/SelectSnapshotDropdown";
+import { Pool } from "@/components/allowlist-tool/allowlist-tool.types";
 
-jest.mock("../../../components/allowlist-tool/common/animation/AllowlistToolAnimationWrapper", () => ({ __esModule: true, default: (p: any) => <>{p.children}</> }));
+jest.mock("@/components/allowlist-tool/common/animation/AllowlistToolAnimationWrapper", () => ({ __esModule: true, default: (p: any) => <>{p.children}</> }));
 
-jest.mock("../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/select-snapshot/SelectSnapshotDropdownList", () => (props: any) => (
+jest.mock("@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/select-snapshot/SelectSnapshotDropdownList", () => (props: any) => (
   <button data-testid="option" onClick={() => props.setSelectedSnapshot(props.snapshots[0])} />
 ));
 

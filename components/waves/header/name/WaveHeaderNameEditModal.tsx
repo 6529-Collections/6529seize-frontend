@@ -1,15 +1,15 @@
 "use client";
 
 import { useContext, useEffect, useRef, useState } from "react";
-import { ApiWave } from "../../../../generated/models/ApiWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import { AuthContext } from "../../../auth/Auth";
+import { AuthContext } from "@/components/auth/Auth";
 import WaveHeaderNameEditInput from "./WaveHeaderNameEditInput";
-import { convertWaveToUpdateWave } from "../../../../helpers/waves/waves.helpers";
+import { convertWaveToUpdateWave } from "@/helpers/waves/waves.helpers";
 import { useMutation } from "@tanstack/react-query";
-import { commonApiPost } from "../../../../services/api/common-api";
-import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { ApiUpdateWaveRequest } from "../../../../generated/models/ApiUpdateWaveRequest";
+import { commonApiPost } from "@/services/api/common-api";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
 import { createPortal } from "react-dom";
 
 export default function WaveHeaderNameEditModal({

@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { printMemeReferences } from '../../../components/rememes/RememePage';
+import { printMemeReferences } from '@/components/rememes/RememePage';
 
-jest.mock('../../../components/nft-image/NFTImage', () => () => <div data-testid="nft-image" />);
-jest.mock('../../../components/the-memes/ArtistProfileHandle', () => () => <span>Artist</span>);
+jest.mock('@/components/nft-image/NFTImage', () => () => <div data-testid="nft-image" />);
+jest.mock('@/components/the-memes/ArtistProfileHandle', () => () => <span>Artist</span>);
 
 const meme = {
   id: 1,

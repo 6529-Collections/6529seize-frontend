@@ -1,13 +1,13 @@
 "use client";
 
 import { useContext, useEffect, useState, type JSX } from "react";
-import { ApiProfileProxy } from "../../../../generated/models/ApiProfileProxy";
+import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import ProxyActions from "../proxy/list/ProxyActions";
-import { AuthContext } from "../../../auth/Auth";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
+import { AuthContext } from "@/components/auth/Auth";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import ProxyCreateAction from "../proxy/create-action/ProxyCreateAction";
-import CommonChangeAnimation from "../../../utils/animation/CommonChangeAnimation";
-import { PROFILE_PROXY_AVAILABLE_ACTIONS } from "../../../../entities/IProxy";
+import CommonChangeAnimation from "@/components/utils/animation/CommonChangeAnimation";
+import { PROFILE_PROXY_AVAILABLE_ACTIONS } from "@/entities/IProxy";
 import Link from "next/link";
 
 enum VIEW_TYPE {

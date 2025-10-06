@@ -3,20 +3,20 @@
 import { useContext, useEffect, useState } from "react";
 import AllowlistToolSelectMenuMultiple, {
   AllowlistToolSelectMenuMultipleOption,
-} from "../../../../../allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple";
+} from "@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple";
 import {
   DistributionPlanSnapshot,
   PhaseGroupSnapshotConfig,
   PhaseGroupSnapshotConfigExcludeSnapshot,
 } from "../BuildPhaseFormConfigModal";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
-import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
-import { DistributionPlanToolContext } from "../../../../DistributionPlanToolContext";
+import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
+import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import {
   AllowlistOperationCode,
   Pool,
-} from "../../../../../allowlist-tool/allowlist-tool.types";
-import { assertUnreachable } from "../../../../../../helpers/AllowlistToolHelpers";
+} from "@/components/allowlist-tool/allowlist-tool.types";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 import ComponentConfigMeta from "./ComponentConfigMeta";
 

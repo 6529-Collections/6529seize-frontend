@@ -1,16 +1,16 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import WaveGroupRemove from '../../../../../../../components/waves/specs/groups/group/edit/WaveGroupRemove';
-import { WaveGroupType } from '../../../../../../../components/waves/specs/groups/group/WaveGroup';
-import { convertWaveToUpdateWave } from '../../../../../../../helpers/waves/waves.helpers';
+import WaveGroupRemove from '@/components/waves/specs/groups/group/edit/WaveGroupRemove';
+import { WaveGroupType } from '@/components/waves/specs/groups/group/WaveGroup';
+import { convertWaveToUpdateWave } from '@/helpers/waves/waves.helpers';
 
-jest.mock('../../../../../../../components/waves/specs/groups/group/edit/WaveGroupRemoveModal', () => (props: any) => (
+jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupRemoveModal', () => (props: any) => (
   <button data-testid="remove" onClick={props.removeGroup}>remove</button>
 ));
-jest.mock('../../../../../../../components/utils/animation/CommonAnimationWrapper', () => (props: any) => <div>{props.children}</div>);
-jest.mock('../../../../../../../components/utils/animation/CommonAnimationOpacity', () => (props: any) => <div onClick={props.onClicked}>{props.children}</div>);
-jest.mock('../../../../../../../helpers/waves/waves.helpers');
+jest.mock('@/components/utils/animation/CommonAnimationWrapper', () => (props: any) => <div>{props.children}</div>);
+jest.mock('@/components/utils/animation/CommonAnimationOpacity', () => (props: any) => <div onClick={props.onClicked}>{props.children}</div>);
+jest.mock('@/helpers/waves/waves.helpers');
 
 (convertWaveToUpdateWave as jest.Mock).mockImplementation((wave: any) => ({
   visibility: { scope: { group_id: wave.visibility.scope.group.id } },

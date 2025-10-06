@@ -3,7 +3,7 @@
 import { ANY_COLLECTION } from "@/components/delegation/delegation-constants";
 import { useEffect, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
-import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { FunctionSelectors } from "../nextgen_contracts";
 import { MintingDetails } from "../nextgen_entities";
 import {

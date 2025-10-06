@@ -5,7 +5,7 @@ jest.mock("node:dns/promises", () => ({
 import {
   buildGoogleWorkspaceResponse,
   buildResponse,
-} from "../../../app/api/open-graph/utils";
+} from "@/app/api/open-graph/utils";
 import { assertPublicUrl } from "@/lib/security/urlGuard";
 
 const { lookup } = require("node:dns/promises") as {

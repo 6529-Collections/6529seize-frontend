@@ -1,13 +1,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { ApiIdentityAndSubscriptionActions } from '../../../../generated/models/ApiIdentityAndSubscriptionActions';
+import { ApiIdentityAndSubscriptionActions } from '@/generated/models/ApiIdentityAndSubscriptionActions';
 
 // Mock the Follower component
 const Follower = jest.fn(({ follower }: any) => <div data-testid="follower">{follower.identity.handle}</div>);
-jest.mock('../../../../components/utils/followers/Follower', () => ({ __esModule: true, default: Follower }));
+jest.mock('@/components/utils/followers/Follower', () => ({ __esModule: true, default: Follower }));
 
 // Mock UserCICAndLevel and its dependencies that might be causing the issue
-jest.mock('../../../../components/user/utils/UserCICAndLevel', () => ({
+jest.mock('@/components/user/utils/UserCICAndLevel', () => ({
   __esModule: true,
   default: ({ level, cicType }: any) => <div data-testid="user-cic-level">{level}</div>,
   UserCICAndLevelSize: {
@@ -19,7 +19,7 @@ jest.mock('../../../../components/user/utils/UserCICAndLevel', () => ({
 }));
 
 // Mock cicToType helper
-jest.mock('../../../../helpers/Helpers', () => ({
+jest.mock('@/helpers/Helpers', () => ({
   cicToType: jest.fn(() => 'UNKNOWN'),
 }));
 
@@ -28,7 +28,7 @@ jest.mock('next/link', () => {
   return ({ children, href }: any) => <a href={href}>{children}</a>;
 });
 
-import FollowersList from '../../../../components/utils/followers/FollowersList';
+import FollowersList from '@/components/utils/followers/FollowersList';
 
 describe('FollowersList', () => {
   it('renders follower items', () => {

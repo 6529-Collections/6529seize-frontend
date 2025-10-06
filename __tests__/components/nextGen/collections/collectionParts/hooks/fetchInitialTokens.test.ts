@@ -1,9 +1,9 @@
-import { fetchInitialTokens } from '../../../../../../components/nextGen/collections/collectionParts/hooks/fetchInitialTokens';
-import { commonApiFetch } from '../../../../../../services/api/common-api';
-import { NextGenToken } from '../../../../../../entities/INextgen';
+import { fetchInitialTokens } from '@/components/nextGen/collections/collectionParts/hooks/fetchInitialTokens';
+import { commonApiFetch } from '@/services/api/common-api';
+import { NextGenToken } from '@/entities/INextgen';
 
 // Mock the commonApiFetch service
-jest.mock('../../../../../../services/api/common-api');
+jest.mock('@/services/api/common-api');
 const mockCommonApiFetch = commonApiFetch as jest.MockedFunction<typeof commonApiFetch>;
 
 // Mock console.error to prevent noise in tests

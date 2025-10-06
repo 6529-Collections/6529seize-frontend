@@ -1,8 +1,8 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import ParticipationDropContent from '../../../../../components/waves/drops/participation/ParticipationDropContent';
+import ParticipationDropContent from '@/components/waves/drops/participation/ParticipationDropContent';
 
-jest.mock('../../../../../components/waves/drops/WaveDropContent', () => (props: any) => {
+jest.mock('@/components/waves/drops/WaveDropContent', () => (props: any) => {
   return <div data-testid="wave" data-props={JSON.stringify(props)} />;
 });
 

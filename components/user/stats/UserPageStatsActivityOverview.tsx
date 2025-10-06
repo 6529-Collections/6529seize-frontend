@@ -5,10 +5,10 @@ import { Accordion, Col, Container, Row, Table } from "react-bootstrap";
 import {
   AggregatedActivity,
   AggregatedActivityMemes,
-} from "../../../entities/IAggregatedActivity";
-import { ApiIdentity } from "../../../generated/models/ApiIdentity";
-import { numberWithCommas } from "../../../helpers/Helpers";
-import { commonApiFetch } from "../../../services/api/common-api";
+} from "@/entities/IAggregatedActivity";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { numberWithCommas } from "@/helpers/Helpers";
+import { commonApiFetch } from "@/services/api/common-api";
 import { getStatsPath } from "./UserPageStats";
 import styles from "./UserPageStats.module.scss";
 import {

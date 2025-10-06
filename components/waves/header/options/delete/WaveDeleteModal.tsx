@@ -1,14 +1,14 @@
 "use client";
 
 import { useContext, useRef, useState } from "react";
-import { ApiWave } from "../../../../../generated/models/ApiWave";
-import { AuthContext } from "../../../../auth/Auth";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { AuthContext } from "@/components/auth/Auth";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { createPortal } from "react-dom";
 import { useMutation } from "@tanstack/react-query";
-import { commonApiDelete } from "../../../../../services/api/common-api";
+import { commonApiDelete } from "@/services/api/common-api";
 import { useRouter } from "next/navigation";
-import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 export default function WaveDeleteModal({
   wave,

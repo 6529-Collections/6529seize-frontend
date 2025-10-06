@@ -1,5 +1,5 @@
-import { getCollectionBaseBreadcrums, formatNameForUrl } from '../../../components/nextGen/nextgen_helpers';
-import { NextGenCollection } from '../../../entities/INextgen';
+import { getCollectionBaseBreadcrums, formatNameForUrl } from '@/components/nextGen/nextgen_helpers';
+import { NextGenCollection } from '@/entities/INextgen';
 
 describe('nextgen_helpers additional', () => {
   it('builds breadcrumbs for collection', () => {

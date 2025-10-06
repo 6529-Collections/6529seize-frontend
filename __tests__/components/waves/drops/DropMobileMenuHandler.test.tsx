@@ -1,11 +1,11 @@
 import { render, fireEvent, act } from '@testing-library/react';
 import React from 'react';
-import DropMobileMenuHandler from '../../../../components/waves/drops/DropMobileMenuHandler';
-import { DropSize } from '../../../../helpers/waves/drop.helpers';
+import DropMobileMenuHandler from '@/components/waves/drops/DropMobileMenuHandler';
+import { DropSize } from '@/helpers/waves/drop.helpers';
 
-jest.mock('../../../../hooks/isMobileDevice', () => () => true);
+jest.mock('@/hooks/isMobileDevice', () => () => true);
 
-jest.mock('../../../../components/waves/drops/WaveDropMobileMenu', () => ({
+jest.mock('@/components/waves/drops/WaveDropMobileMenu', () => ({
   __esModule: true,
   default: (props: any) => (
     <div data-testid="menu" data-open={props.isOpen} onClick={() => props.onReply()} />

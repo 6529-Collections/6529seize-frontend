@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import StormButton from '../../../components/waves/StormButton';
+import StormButton from '@/components/waves/StormButton';
 
 
 describe('StormButton', () => {

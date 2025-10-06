@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import UserPageCollectedCardsNoCards from '../../../../../components/user/collected/cards/UserPageCollectedCardsNoCards';
-import { CollectedCollectionType, CollectionSeized } from '../../../../../entities/IProfile';
-import { MEMES_SEASON } from '../../../../../enums';
+import UserPageCollectedCardsNoCards from '@/components/user/collected/cards/UserPageCollectedCardsNoCards';
+import { CollectedCollectionType, CollectionSeized } from '@/entities/IProfile';
+import { MEMES_SEASON } from '@/enums';
 
 describe('UserPageCollectedCardsNoCards messages', () => {
   function renderComponent(filters: any) {

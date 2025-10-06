@@ -1,8 +1,8 @@
 "use client";
 
-import { ApiDropMetadata } from "../../../../generated/models/ApiDropMetadata";
+import { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import { Tooltip } from "react-tooltip";
-import useIsMobileDevice from "../../../../hooks/isMobileDevice";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
 import { useState } from "react";
 
 interface ParticipationDropMetadataProps {

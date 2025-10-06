@@ -1,7 +1,7 @@
 import Image from "next/image";
-import useIsMobileScreen from "../../hooks/isMobileScreen";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 import Link from "next/link";
-import { isGradientsContract } from "../../helpers/Helpers";
+import { isGradientsContract } from "@/helpers/Helpers";
 
 export default function NFTMarketplaceLinks({
   contract,
@@ -20,7 +20,7 @@ export default function NFTMarketplaceLinks({
         className="hover:tw-opacity-75"
         href={`https://opensea.io/assets/ethereum/${contract}/${id}`}
         target="_blank"
-        rel="noreferrer"
+        rel="noopener noreferrer"
       >
         <Image
           unoptimized
@@ -36,7 +36,7 @@ export default function NFTMarketplaceLinks({
           className="hover:tw-opacity-75"
           href={`https://blur.io/eth/asset/${contract}/${id}`}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
         >
           <Image
             unoptimized
@@ -52,7 +52,7 @@ export default function NFTMarketplaceLinks({
         className="hover:tw-opacity-75"
         href={`https://magiceden.io/item-details/ethereum/${contract}/${id}`}
         target="_blank"
-        rel="noreferrer"
+        rel="noopener noreferrer"
       >
         <Image
           unoptimized
@@ -67,7 +67,7 @@ export default function NFTMarketplaceLinks({
         className="hover:tw-opacity-75"
         href={`https://rarible.com/token/${contract}:${id}`}
         target="_blank"
-        rel="noreferrer"
+        rel="noopener noreferrer"
       >
         <Image
           unoptimized

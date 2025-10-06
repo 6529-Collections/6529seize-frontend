@@ -1,7 +1,7 @@
-import { calculateTimeLeft, calculateLastDecisionTime } from '../../../helpers/waves/time.utils';
-import { Time } from '../../../helpers/time';
+import { calculateTimeLeft, calculateLastDecisionTime } from '@/helpers/waves/time.utils';
+import { Time } from '@/helpers/time';
 
-jest.mock('../../../helpers/time', () => ({
+jest.mock('@/helpers/time', () => ({
   Time: { currentMillis: jest.fn() }
 }));
 

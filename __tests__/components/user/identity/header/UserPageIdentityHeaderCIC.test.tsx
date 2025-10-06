@@ -1,13 +1,13 @@
 import { render, screen } from '@testing-library/react';
-import UserPageIdentityHeaderCIC from '../../../../../components/user/identity/header/UserPageIdentityHeaderCIC';
-import { ApiIdentity } from '../../../../../generated/models/ApiIdentity';
+import UserPageIdentityHeaderCIC from '@/components/user/identity/header/UserPageIdentityHeaderCIC';
+import { ApiIdentity } from '@/generated/models/ApiIdentity';
 
-jest.mock('../../../../../components/user/utils/user-cic-type/UserCICTypeIconWrapper', () => ({
+jest.mock('@/components/user/utils/user-cic-type/UserCICTypeIconWrapper', () => ({
   __esModule: true,
   default: () => <div data-testid="icon" />,
 }));
 
-jest.mock('../../../../../components/user/utils/user-cic-status/UserCICStatus', () => ({
+jest.mock('@/components/user/utils/user-cic-status/UserCICStatus', () => ({
   __esModule: true,
   default: ({ cic }: { cic: number }) => <div data-testid="status">{cic}</div>,
 }));

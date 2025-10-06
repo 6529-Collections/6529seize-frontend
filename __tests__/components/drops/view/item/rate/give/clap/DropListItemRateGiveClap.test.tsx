@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import DropListItemRateGiveClap from '../../../../../../../../components/drops/view/item/rate/give/clap/DropListItemRateGiveClap';
-import { DropVoteState } from '../../../../../../../../hooks/drops/types';
+import DropListItemRateGiveClap from '@/components/drops/view/item/rate/give/clap/DropListItemRateGiveClap';
+import { DropVoteState } from '@/hooks/drops/types';
 
 const mockReplay = jest.fn();
 const mockAdd = jest.fn();
@@ -15,11 +15,11 @@ jest.mock('@mojs/core', () => ({
   },
 }));
 
-jest.mock('../../../../../../../../helpers/AllowlistToolHelpers', () => ({
+jest.mock('@/helpers/AllowlistToolHelpers', () => ({
   getRandomObjectId: () => 'id123',
 }));
 
-jest.mock('../../../../../../../../helpers/Helpers', () => ({
+jest.mock('@/helpers/Helpers', () => ({
   formatLargeNumber: jest.fn((num) => {
     const absNum = Math.abs(num);
     if (absNum < 1000) {

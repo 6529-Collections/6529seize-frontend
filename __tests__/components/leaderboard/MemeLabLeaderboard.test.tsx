@@ -1,20 +1,20 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import MemeLabLeaderboard from '../../../components/leaderboard/MemeLabLeaderboard';
-import { SortDirection } from '../../../entities/ISort';
+import MemeLabLeaderboard from '@/components/leaderboard/MemeLabLeaderboard';
+import { SortDirection } from '@/entities/ISort';
 
-jest.mock('../../../components/leaderboard/NFTLeaderboard', () => ({
+jest.mock('@/components/leaderboard/NFTLeaderboard', () => ({
   fetchNftTdhResults: jest.fn(),
   PAGE_SIZE: 25,
   setScrollPosition: jest.fn(),
 }));
 
-jest.mock('../../../components/leaderboard/LeaderboardCollector', () => ({
+jest.mock('@/components/leaderboard/LeaderboardCollector', () => ({
   LeaderboardCollector: (p: any) => <div data-testid="collector">{p.handle}</div>,
 }));
 
-jest.mock('../../../components/pagination/Pagination', () => (props: any) => (
+jest.mock('@/components/pagination/Pagination', () => (props: any) => (
   <div data-testid="pagination" onClick={() => props.setPage(props.page + 1)}>next</div>
 ));
 
@@ -28,7 +28,7 @@ jest.mock('react-bootstrap', () => {
   };
 });
 
-const { fetchNftTdhResults, setScrollPosition } = require('../../../components/leaderboard/NFTLeaderboard');
+const { fetchNftTdhResults, setScrollPosition } = require('@/components/leaderboard/NFTLeaderboard');
 
 const baseData = [
   {

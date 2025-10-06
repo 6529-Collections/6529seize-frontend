@@ -3,9 +3,9 @@
 import { useState, useContext } from "react";
 import { useSignMessage } from "wagmi";
 import { UserRejectedRequestError } from "viem";
-import { ApiCreateDropRequest } from "../../generated/models/ApiCreateDropRequest";
-import { DropHasher } from "../../utils/drop-hasher";
-import { AuthContext } from "../../components/auth/Auth";
+import { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
+import { DropHasher } from "@/utils/drop-hasher";
+import { AuthContext } from "@/components/auth/Auth";
 
 /**
  * Hook for hashing drop data and requesting user signature

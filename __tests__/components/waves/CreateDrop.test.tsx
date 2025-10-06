@@ -1,15 +1,15 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateDrop, { DropMutationBody } from '../../../components/waves/CreateDrop';
-import { AuthContext } from '../../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../../components/react-query-wrapper/ReactQueryWrapper';
+import CreateDrop, { DropMutationBody } from '@/components/waves/CreateDrop';
+import { AuthContext } from '@/components/auth/Auth';
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 
 jest.mock('@tanstack/react-query', () => ({ useMutation: (fn: any)=>({ mutateAsync: jest.fn(fn.mutationFn) }) }));
-jest.mock('../../../hooks/useProgressiveDebounce', () => ({ useProgressiveDebounce: (cb: any)=> { setTimeout(cb, 0); } }));
-jest.mock('../../../contexts/wave/MyStreamContext', () => ({ useMyStream: ()=>({ processDropRemoved: jest.fn() }) }));
-jest.mock('../../../components/waves/CreateDropStormParts', () => () => <div data-testid="storm" />);
-jest.mock('../../../components/waves/CreateDropContent', () => (props: any) => (
+jest.mock('@/hooks/useProgressiveDebounce', () => ({ useProgressiveDebounce: (cb: any)=> { setTimeout(cb, 0); } }));
+jest.mock('@/contexts/wave/MyStreamContext', () => ({ useMyStream: ()=>({ processDropRemoved: jest.fn() }) }));
+jest.mock('@/components/waves/CreateDropStormParts', () => () => <div data-testid="storm" />);
+jest.mock('@/components/waves/CreateDropContent', () => (props: any) => (
   <button onClick={() => props.submitDrop({ drop:{ wave_id:'1'}, dropId:null } as DropMutationBody)}>
     submit
   </button>

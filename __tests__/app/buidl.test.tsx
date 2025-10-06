@@ -1,10 +1,10 @@
 import { render } from '@testing-library/react';
 import Buidl from '@/app/buidl/page';
-import { AuthContext } from '../../components/auth/Auth';
+import { AuthContext } from '@/components/auth/Auth';
 
 
 // Mock TitleContext
-jest.mock('../../contexts/TitleContext', () => ({
+jest.mock('@/contexts/TitleContext', () => ({
   useTitle: () => ({
     title: 'Test Title',
     setTitle: jest.fn(),

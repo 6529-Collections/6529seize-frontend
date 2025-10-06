@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ApiWave } from "../../../../generated/models/ApiWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
 import WaveDelete from "./delete/WaveDelete";

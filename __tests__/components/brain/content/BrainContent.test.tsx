@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import BrainContent from '../../../../components/brain/content/BrainContent';
-import { ActiveDropAction } from '../../../../types/dropInteractionTypes';
+import BrainContent from '@/components/brain/content/BrainContent';
+import { ActiveDropAction } from '@/types/dropInteractionTypes';
 
 let bpValue = 'S';
 const registerRef = jest.fn();
@@ -9,16 +9,16 @@ jest.mock('react-use', () => ({
   createBreakpoint: () => () => bpValue,
 }));
 
-jest.mock('../../../../components/brain/my-stream/layout/LayoutContext', () => ({
+jest.mock('@/components/brain/my-stream/layout/LayoutContext', () => ({
   useLayout: () => ({ registerRef }),
 }));
 
-jest.mock('../../../../components/brain/content/BrainContentPinnedWaves', () => ({
+jest.mock('@/components/brain/content/BrainContentPinnedWaves', () => ({
   __esModule: true,
   default: () => <div data-testid="pinned" />,
 }));
 
-jest.mock('../../../../components/brain/content/input/BrainContentInput', () => ({
+jest.mock('@/components/brain/content/input/BrainContentInput', () => ({
   __esModule: true,
   default: ({ activeDrop, onCancelReplyQuote }: any) => (
     <div data-testid="input">

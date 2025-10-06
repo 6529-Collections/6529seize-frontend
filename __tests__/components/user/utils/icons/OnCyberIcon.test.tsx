@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import OnCyberIcon from '../../../../../components/user/utils/icons/OnCyberIcon';
+import OnCyberIcon from '@/components/user/utils/icons/OnCyberIcon';
 
 describe('OnCyberIcon', () => {
   it('renders img with expected attributes', () => {

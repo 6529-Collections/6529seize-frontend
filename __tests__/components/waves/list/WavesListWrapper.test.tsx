@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import WavesListWrapper from '../../../../components/waves/list/WavesListWrapper';
-import { AuthContext } from '../../../../components/auth/Auth';
-import { ApiWavesOverviewType } from '../../../../generated/models/ApiWavesOverviewType';
+import WavesListWrapper from '@/components/waves/list/WavesListWrapper';
+import { AuthContext } from '@/components/auth/Auth';
+import { ApiWavesOverviewType } from '@/generated/models/ApiWavesOverviewType';
 
-jest.mock('../../../../components/waves/list/WaveItem', () => (props: any) => <div data-testid="wave">{props.wave.id}</div>);
-jest.mock('../../../../components/distribution-plan-tool/common/CircleLoader', () => ({ CircleLoaderSize: { XXLARGE: 'xx' }, default: () => <div data-testid="loader" /> }));
-jest.mock('../../../../components/utils/CommonIntersectionElement', () => (props: any) => <div data-testid="intersect" onClick={() => props.onIntersection(true)} />);
+jest.mock('@/components/waves/list/WaveItem', () => (props: any) => <div data-testid="wave">{props.wave.id}</div>);
+jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => ({ CircleLoaderSize: { XXLARGE: 'xx' }, default: () => <div data-testid="loader" /> }));
+jest.mock('@/components/utils/CommonIntersectionElement', () => (props: any) => <div data-testid="intersect" onClick={() => props.onIntersection(true)} />);
 
 const defaultQuery = { data: { pages: [[{ id: 'w1' }, { id: 'w2' }, { id: 'w3' }]] }, fetchNextPage: jest.fn(), hasNextPage: false, isFetching: false, isFetchingNextPage: false, status: 'success' };
 const useInfiniteQueryMock = jest.fn().mockReturnValue(defaultQuery);

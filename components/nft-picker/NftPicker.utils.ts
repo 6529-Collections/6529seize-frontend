@@ -345,8 +345,6 @@ export function sortAndDedupIds(ids: readonly bigint[]): TokenSelection {
   return result;
 }
 
-/** @deprecated Use sortAndDedupIds instead. */
-export const mergeAndSort = sortAndDedupIds;
 
 export function toCanonicalRanges(ids: readonly bigint[]): TokenRange[] {
   const sorted = sortAndDedupIds(ids);

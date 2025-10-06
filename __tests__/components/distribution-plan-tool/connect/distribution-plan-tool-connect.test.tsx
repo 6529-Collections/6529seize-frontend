@@ -13,8 +13,8 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
 }));
 
-import { useSeizeConnectContext } from "../../../../components/auth/SeizeConnectContext";
-import * as helpers from "../../../../helpers/AllowlistToolHelpers";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import * as helpers from "@/helpers/AllowlistToolHelpers";
 
 describe("DistributionPlanToolConnect", () => {
   it("renders not connected view when address invalid", async () => {

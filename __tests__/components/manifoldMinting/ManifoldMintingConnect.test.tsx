@@ -1,11 +1,11 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ManifoldMintingConnect from '../../../components/manifoldMinting/ManifoldMintingConnect';
-import { AuthContext } from '../../../components/auth/Auth';
-import { CookieConsentProvider } from '../../../components/cookies/CookieConsentContext';
+import ManifoldMintingConnect from '@/components/manifoldMinting/ManifoldMintingConnect';
+import { AuthContext } from '@/components/auth/Auth';
+import { CookieConsentProvider } from '@/components/cookies/CookieConsentContext';
 
-jest.mock('../../../components/header/user/HeaderUserConnect', () => () => <div data-testid="header-connect" />);
+jest.mock('@/components/header/user/HeaderUserConnect', () => () => <div data-testid="header-connect" />);
 
 jest.mock('react-bootstrap', () => {
   const React = require('react');
@@ -19,7 +19,7 @@ jest.mock('react-bootstrap', () => {
   };
 });
 
-jest.mock('../../../components/user/utils/UserCICAndLevel', () => ({
+jest.mock('@/components/user/utils/UserCICAndLevel', () => ({
   __esModule: true,
   default: () => <div data-testid="user-cic" />,
   UserCICAndLevelSize: { XLARGE: 'XLARGE' },
@@ -30,11 +30,11 @@ jest.mock('wagmi', () => ({
   useEnsAddress: () => ({ data: undefined, isFetched: false }),
 }));
 
-jest.mock('../../../components/auth/SeizeConnectContext', () => ({
+jest.mock('@/components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: jest.fn(),
 }));
 
-const { useSeizeConnectContext: mockedConnect } = require('../../../components/auth/SeizeConnectContext');
+const { useSeizeConnectContext: mockedConnect } = require('@/components/auth/SeizeConnectContext');
 
 function renderConnected(onMintFor = jest.fn()) {
   const seizeCtx = { address: '0xabc000000000000000000000000000000000abcd', isConnected: true };

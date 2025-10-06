@@ -1,14 +1,14 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import NextGenAdminPayArtist from '../../../../components/nextGen/admin/NextGenAdminPayArtist';
+import NextGenAdminPayArtist from '@/components/nextGen/admin/NextGenAdminPayArtist';
 
-jest.mock('../../../../components/nextGen/admin/NextGenAdminShared', () => ({
+jest.mock('@/components/nextGen/admin/NextGenAdminShared', () => ({
   NextGenCollectionIdFormGroup: ({ onChange }: any) => <input data-testid="col" onChange={e=>onChange(e.target.value)} />,
   NextGenAdminHeadingRow: () => <div data-testid="heading" />,
   NextGenAdminTextFormGroup: ({ title, value, setValue }: any) => <input data-testid={title} value={value} onChange={e=>setValue(e.target.value)} />
 }));
 
-jest.mock('../../../../components/nextGen/nextgen_helpers', () => ({
+jest.mock('@/components/nextGen/nextgen_helpers', () => ({
   useGlobalAdmin: jest.fn(() => ({ data: true })),
   useFunctionAdmin: jest.fn(() => ({ data: true })),
   useCollectionIndex: jest.fn(() => ({ data: 1 })),
@@ -18,10 +18,10 @@ jest.mock('../../../../components/nextGen/nextgen_helpers', () => ({
   useParsedCollectionIndex: jest.fn(() => 1)
 }));
 
-jest.mock('../../../../components/nextGen/NextGenContractWriteStatus', () => () => <div data-testid="status" />);
-jest.mock('../../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: () => ({ address: '0x1' }) }));
+jest.mock('@/components/nextGen/NextGenContractWriteStatus', () => () => <div data-testid="status" />);
+jest.mock('@/components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: () => ({ address: '0x1' }) }));
 
-const helpers = require('../../../../components/nextGen/nextgen_helpers');
+const helpers = require('@/components/nextGen/nextgen_helpers');
 
 describe('NextGenAdminPayArtist', () => {
   beforeEach(() => {

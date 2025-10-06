@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { useWaveFollowers } from '../../hooks/useWaveFollowers';
+import { useWaveFollowers } from '@/hooks/useWaveFollowers';
 import { useInfiniteQuery } from '@tanstack/react-query';
 
 jest.mock('@tanstack/react-query', () => ({ useInfiniteQuery: jest.fn() }));

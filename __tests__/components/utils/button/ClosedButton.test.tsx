@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import ClosedButton from '../../../../components/utils/button/ClosedButton';
+import ClosedButton from '@/components/utils/button/ClosedButton';
 
-jest.mock('../../../../components/distribution-plan-tool/common/CircleLoader', () => ({
+jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => ({
   __esModule: true,
   default: () => <div data-testid="loader" />
 }));

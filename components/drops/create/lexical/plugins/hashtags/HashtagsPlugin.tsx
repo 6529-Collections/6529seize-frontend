@@ -19,12 +19,12 @@ import {
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import { $createHashtagNode } from "../../nodes/HashtagNode";
+import { $createHashtagNode } from "@/components/drops/create/lexical/nodes/HashtagNode";
 import HashtagsTypeaheadMenu from "./HashtagsTypeaheadMenu";
-import { isEthereumAddress } from "../../../../../../helpers/AllowlistToolHelpers";
-import { ReferencedNft } from "../../../../../../entities/IDrop";
-import { ReservoirTokensResponseTokenElement } from "../../../../../../entities/IReservoir";
-import { isInCodeContext } from "../../utils/codeContextDetection";
+import { isEthereumAddress } from "@/helpers/AllowlistToolHelpers";
+import { ReferencedNft } from "@/entities/IDrop";
+import { ReservoirTokensResponseTokenElement } from "@/entities/IReservoir";
+import { isInCodeContext } from "@/components/drops/create/lexical/utils/codeContextDetection";
 
 const PUNCTUATION =
   "\\.,\\+\\*\\?\\$\\@\\|#{}\\(\\)\\^\\-\\[\\]\\\\/!%'\"~=<>_:;";

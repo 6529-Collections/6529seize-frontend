@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UserLevel from '../../../components/user/utils/level/UserLevel';
+import UserLevel from '@/components/user/utils/level/UserLevel';
 
 describe('UserLevel', () => {
   it('applies color and size classes', () => {

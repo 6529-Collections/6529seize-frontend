@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import GroupCreateIdentitiesSearchItem from "../../../components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItem";
+import GroupCreateIdentitiesSearchItem from "@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItem";
 
 const item = { pfp: "img.png", handle: "bob", display: "Bob" } as any;
 

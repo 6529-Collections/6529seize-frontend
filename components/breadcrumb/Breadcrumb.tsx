@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import styles from "./Breadcrumb.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
-import useCapacitor from "../../hooks/useCapacitor";
+import useCapacitor from "@/hooks/useCapacitor";
 
 export interface Crumb {
   display: string;

@@ -5,8 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { v4 as uuidv4 } from "uuid";
 import { useSignMessage } from "wagmi";
-import { postFormData } from "../../../services/6529api";
-import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
+import { postFormData } from "@/services/6529api";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { FunctionSelectors } from "../nextgen_contracts";
 import {
   getCollectionIdsForAddress,

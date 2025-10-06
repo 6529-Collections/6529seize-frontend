@@ -8,6 +8,7 @@ import type {
 } from "@/components/nft-picker/NftPicker.types";
 import { getAddress } from "viem";
 import { goerli, sepolia } from "wagmi/chains";
+import { NEXTGEN_CHAIN_ID } from "@/components/nextGen/nextgen_contracts";
 
 import { fetchUrl, postData } from "./6529api";
 

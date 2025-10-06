@@ -7,8 +7,8 @@ import React, {
   ReactNode,
   useCallback,
 } from "react";
-import { DropSize } from "../../../helpers/waves/drop.helpers";
-import { useMyStream } from "../../../contexts/wave/MyStreamContext";
+import { DropSize } from "@/helpers/waves/drop.helpers";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 
 /**
  * Props for VirtualScrollWrapper

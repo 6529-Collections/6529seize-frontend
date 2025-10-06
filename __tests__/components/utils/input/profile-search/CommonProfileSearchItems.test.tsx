@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import CommonProfileSearchItems from '../../../../../components/utils/input/profile-search/CommonProfileSearchItems';
+import CommonProfileSearchItems from '@/components/utils/input/profile-search/CommonProfileSearchItems';
 
-jest.mock('../../../../../components/utils/input/profile-search/CommonProfileSearchItem', () => (props: any) => (
+jest.mock('@/components/utils/input/profile-search/CommonProfileSearchItem', () => (props: any) => (
   <li data-testid="item">{props.profile.wallet}</li>
 ));
 

@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { useNavigationHistory } from '../../hooks/useNavigationHistory';
+import { useNavigationHistory } from '@/hooks/useNavigationHistory';
 
 // Mock Next.js routers
 jest.mock('next/navigation', () => ({

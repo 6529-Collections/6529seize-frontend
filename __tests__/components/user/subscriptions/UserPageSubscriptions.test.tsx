@@ -1,13 +1,13 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UserPageSubscriptions from '../../../../components/user/subscriptions/UserPageSubscriptions';
-import { renderWithAuth } from '../../../utils/testContexts';
-import { ApiIdentity } from '../../../../generated/models/ApiIdentity';
-import * as commonApi from '../../../../services/api/common-api';
-import * as memeCalendarHelpers from '../../../../components/meme-calendar/meme-calendar.helpers';
+import UserPageSubscriptions from '@/components/user/subscriptions/UserPageSubscriptions';
+import { renderWithAuth } from '@/__tests__/utils/testContexts';
+import { ApiIdentity } from '@/generated/models/ApiIdentity';
+import * as commonApi from '@/services/api/common-api';
+import * as memeCalendarHelpers from '@/components/meme-calendar/meme-calendar.helpers';
 
 // Mock child components
-jest.mock('../../../../components/user/subscriptions/UserPageSubscriptionsBalance', () => ({
+jest.mock('@/components/user/subscriptions/UserPageSubscriptionsBalance', () => ({
   __esModule: true,
   default: ({ details, fetching, refresh, show_refresh }: any) => (
     <div data-testid="subscriptions-balance">
@@ -17,7 +17,7 @@ jest.mock('../../../../components/user/subscriptions/UserPageSubscriptionsBalanc
   ),
 }));
 
-jest.mock('../../../../components/user/subscriptions/UserPageSubscriptionsMode', () => ({
+jest.mock('@/components/user/subscriptions/UserPageSubscriptionsMode', () => ({
   __esModule: true,
   default: ({ profileKey, details, readonly, refresh }: any) => (
     <div data-testid="subscriptions-mode">
@@ -26,12 +26,12 @@ jest.mock('../../../../components/user/subscriptions/UserPageSubscriptionsMode',
   ),
 }));
 
-jest.mock('../../../../components/user/subscriptions/UserPageSubscriptionsTopUp', () => ({
+jest.mock('@/components/user/subscriptions/UserPageSubscriptionsTopUp', () => ({
   __esModule: true,
   default: () => <div data-testid="subscriptions-topup">TopUp Component</div>,
 }));
 
-jest.mock('../../../../components/user/subscriptions/UserPageSubscriptionsUpcoming', () => ({
+jest.mock('@/components/user/subscriptions/UserPageSubscriptionsUpcoming', () => ({
   __esModule: true,
   default: ({ profileKey, details, memes_subscriptions, readonly, refresh }: any) => (
     <div data-testid="subscriptions-upcoming">
@@ -40,7 +40,7 @@ jest.mock('../../../../components/user/subscriptions/UserPageSubscriptionsUpcomi
   ),
 }));
 
-jest.mock('../../../../components/user/subscriptions/UserPageSubscriptionsHistory', () => ({
+jest.mock('@/components/user/subscriptions/UserPageSubscriptionsHistory', () => ({
   __esModule: true,
   default: ({ topups, redeemed, logs, setRedeemedPage, setTopUpPage, setLogsPage }: any) => (
     <div data-testid="subscriptions-history">
@@ -52,7 +52,7 @@ jest.mock('../../../../components/user/subscriptions/UserPageSubscriptionsHistor
   ),
 }));
 
-jest.mock('../../../../components/user/subscriptions/UserPageSubscriptionsAirdropAddress', () => ({
+jest.mock('@/components/user/subscriptions/UserPageSubscriptionsAirdropAddress', () => ({
   __esModule: true,
   default: ({ show_edit, airdrop }: any) => (
     <div data-testid="subscriptions-airdrop">
@@ -62,11 +62,11 @@ jest.mock('../../../../components/user/subscriptions/UserPageSubscriptionsAirdro
 }));
 
 // Mock API
-jest.mock('../../../../services/api/common-api');
+jest.mock('@/services/api/common-api');
 const mockCommonApiFetch = commonApi.commonApiFetch as jest.MockedFunction<typeof commonApi.commonApiFetch>;
 
 // Mock meme calendar helpers
-jest.mock('../../../../components/meme-calendar/meme-calendar.helpers', () => ({
+jest.mock('@/components/meme-calendar/meme-calendar.helpers', () => ({
   __esModule: true,
   getCardsRemainingUntilEndOf: jest.fn(),
   isMintingToday: jest.fn(),

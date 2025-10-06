@@ -1,3 +1,5 @@
+import { useId, type ChangeEvent } from "react";
+
 interface TimePickerProps {
   readonly hours: number;
   readonly minutes: number;
@@ -11,12 +13,31 @@ interface TimeOption {
   minutes: number;
 }
 
+const formatTime = (timeHours: number, timeMinutes: number) => {
+  const period = timeHours >= 12 ? "PM" : "AM";
+  const hour12 = timeHours % 12 === 0 ? 12 : timeHours % 12;
+  const minuteLabel = timeMinutes.toString().padStart(2, "0");
+  return `${hour12}:${minuteLabel} ${period}`;
+};
+
 export default function TimePicker({
   hours,
   minutes,
   onTimeChange,
   minTime = null,
 }: TimePickerProps) {
+  const baseId = useId();
+  const hoursInputId = `${baseId}-hours`;
+  const minutesInputId = `${baseId}-minutes`;
+  const minTimeDescriptionId = minTime ? `${baseId}-min-time` : undefined;
+  const minTimeDescription =
+    minTime === null
+      ? undefined
+      : `Earliest selectable time is ${formatTime(
+          minTime.hours,
+          minTime.minutes
+        )}.`;
+
   const timeOptions: TimeOption[] = [
     { label: "12 AM", hours: 0, minutes: 0 },
     { label: "6 AM", hours: 6, minutes: 0 },
@@ -50,7 +71,7 @@ export default function TimePicker({
     return false;
   };
 
-  const onHoursChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onHoursChange = (e: ChangeEvent<HTMLInputElement>) => {
     const val = parseInt(e.target.value, 10);
     if (isNaN(val)) return;
     const newHours = isPm ? (val === 12 ? 12 : val + 12) : val === 12 ? 0 : val;
@@ -60,14 +81,14 @@ export default function TimePicker({
     }
   };
 
-  const onMinutesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onMinutesChange = (e: ChangeEvent<HTMLInputElement>) => {
     const val = parseInt(e.target.value, 10);
     if (isNaN(val)) return;
 
     if (!isTimeDisabled(hours, val)) {
       onTimeChange(hours, val);
     }
-  }
+  };
 
   return (
     <div className="tw-py-4 tw-relative tw-rounded-lg tw-bg-iron-800/60 tw-shadow-md tw-ring-1 tw-ring-iron-700/50">
@@ -75,36 +96,52 @@ export default function TimePicker({
         <div className="tw-flex tw-items-center tw-mb-5">
           <div className="tw-flex tw-items-center tw-space-x-2 tw-flex-1">
             <div className="tw-w-20 tw-relative">
+              <label className="tw-sr-only" htmlFor={hoursInputId}>
+                Hours
+              </label>
               <input
                 type="number"
                 min="1"
                 max="12"
                 value={displayHours}
                 onChange={onHoursChange}
+                id={hoursInputId}
+                aria-describedby={minTimeDescriptionId}
                 className="tw-w-full tw-bg-[#2A2A33] tw-border-0 tw-text-white tw-rounded-lg tw-p-2 tw-ring-1 tw-ring-iron-700/30 focus:tw-ring-primary-400 focus:tw-outline-none tw-transition-all tw-duration-300 [appearance:textfield] [&::-webkit-outer-spin-button]:tw-appearance-none [&::-webkit-inner-spin-button]:tw-appearance-none"
                 placeholder="HH"
               />
             </div>
             <span className="tw-text-iron-50 tw-font-bold">:</span>
             <div className="tw-w-20 tw-relative">
+              <label className="tw-sr-only" htmlFor={minutesInputId}>
+                Minutes
+              </label>
               <input
                 type="number"
                 min="0"
                 max="59"
                 value={minutes}
                 onChange={onMinutesChange}
+                id={minutesInputId}
+                aria-describedby={minTimeDescriptionId}
                 className="tw-w-full tw-bg-[#2A2A33] tw-border-0 tw-text-white tw-rounded-lg tw-p-2 tw-ring-1 tw-ring-iron-700/30 focus:tw-ring-primary-400 focus:tw-outline-none tw-transition-all tw-duration-300 [appearance:textfield] [&::-webkit-outer-spin-button]:tw-appearance-none [&::-webkit-inner-spin-button]:tw-appearance-none"
                 placeholder="MM"
               />
             </div>
             <button
               onClick={toggleAmPm}
-              className="tw-bg-[#2A2A33] hover:tw-bg-[#32323C] tw-text-white tw-rounded-lg tw-px-3 tw-py-2 tw-transition-all tw-duration-200 tw-border-0 tw-shadow-md hover:tw-shadow-lg hover:tw-translate-y-[-1px] tw-ml-1"
-            >
+              aria-label="Toggle AM/PM"
+              className="tw-bg-[#2A2A33] hover:tw-bg-[#32323C] tw-text-white tw-rounded-lg tw-px-3 tw-py-2 tw-transition-all tw-duration-200 tw-border-0 tw-shadow-md hover:tw-shadow-lg hover:tw-translate-y-[-1px] tw-ml-1">
               {isPm ? "PM" : "AM"}
             </button>
           </div>
         </div>
+
+        {minTimeDescription ? (
+          <p id={minTimeDescriptionId} className="tw-sr-only">
+            {minTimeDescription}
+          </p>
+        ) : null}
 
         <div className="tw-grid tw-grid-cols-3 tw-gap-1.5">
           {timeOptions.map((option) => {
@@ -122,8 +159,7 @@ export default function TimePicker({
                     : disabled
                     ? "tw-bg-[#2A2A33] tw-text-iron-600 tw-opacity-50 tw-cursor-not-allowed"
                     : "tw-bg-[#2A2A33] tw-text-iron-50 hover:tw-bg-[#32323C]"
-                }`}
-              >
+                }`}>
                 {option.label}
               </button>
             );

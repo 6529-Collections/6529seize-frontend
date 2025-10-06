@@ -1,5 +1,5 @@
 import { idStringToDisplay } from "@/helpers/Helpers";
-import { Crumb } from "../components/breadcrumb/Breadcrumb"; // Still needed by crumbBuilders
+import { Crumb } from "@/components/breadcrumb/Breadcrumb"; // Still needed by crumbBuilders
 import {
   fetchCollectionName,
   fetchGradientName,

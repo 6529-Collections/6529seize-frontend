@@ -1,23 +1,23 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ReferencedNft } from "../../../../../../entities/IDrop";
+import { ReferencedNft } from "@/entities/IDrop";
 import {
   ReservoirTokensResponse,
   ReservoirTokensResponseTokenElement,
-} from "../../../../../../entities/IReservoir";
+} from "@/entities/IReservoir";
 import { useEffect, useRef, useState } from "react";
 import DropListItemContentNftDetails from "./DropListItemContentNftDetails";
-import { areEqualAddresses } from "../../../../../../helpers/Helpers";
+import { areEqualAddresses } from "@/helpers/Helpers";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
   NEXTGEN_CONTRACT,
-} from "../../../../../../constants";
+} from "@/constants";
 import Link from "next/link";
-import { isMemesEcosystemContract } from "../../../../../../helpers/nft.helpers";
-import { QueryKey } from "../../../../../react-query-wrapper/ReactQueryWrapper";
+import { isMemesEcosystemContract } from "@/helpers/nft.helpers";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 export default function DropListItemContentNft({
   nft: { contract, token, name },

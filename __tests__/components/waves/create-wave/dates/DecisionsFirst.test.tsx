@@ -1,16 +1,16 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import DecisionsFirst from '../../../../../components/waves/create-wave/dates/DecisionsFirst';
+import DecisionsFirst from '@/components/waves/create-wave/dates/DecisionsFirst';
 
-jest.mock('../../../../../components/utils/calendar/CommonCalendar', () => (props: any) => (
+jest.mock('@/components/utils/calendar/CommonCalendar', () => (props: any) => (
   <button onClick={() => props.setSelectedTimestamp(1000)}>calendar</button>
 ));
 
-jest.mock('../../../../../components/common/TimePicker', () => (props: any) => (
+jest.mock('@/components/common/TimePicker', () => (props: any) => (
   <button onClick={() => props.onTimeChange(1, 30)}>time</button>
 ));
 
-jest.mock('../../../../../components/common/TooltipIconButton', () => () => <div />);
+jest.mock('@/components/common/TooltipIconButton', () => () => <div />);
 
 describe('DecisionsFirst', () => {
   it('updates date when calendar clicked', async () => {

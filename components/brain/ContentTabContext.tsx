@@ -8,7 +8,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import { MyStreamWaveTab } from "../../types/waves.types";
+import { MyStreamWaveTab } from "@/types/waves.types";
 
 export enum WaveVotingState {
   NOT_STARTED = "NOT_STARTED",

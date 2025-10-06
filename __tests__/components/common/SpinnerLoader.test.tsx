@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import SpinnerLoader from '../../../components/common/SpinnerLoader';
+import SpinnerLoader from '@/components/common/SpinnerLoader';
 
 describe('SpinnerLoader', () => {
   it('announces default loading status with polite live region', () => {

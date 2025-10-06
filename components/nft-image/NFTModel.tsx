@@ -1,5 +1,5 @@
 import "@google/model-viewer";
-import { BaseNFT } from "../../entities/INFT";
+import { BaseNFT } from "@/entities/INFT";
 
 export default function NFTModel(
   props: Readonly<{ nft: BaseNFT; id?: string }>

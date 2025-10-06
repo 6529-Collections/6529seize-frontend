@@ -1,19 +1,19 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import DropListItemContentMediaImage from '../../components/drops/view/item/content/media/DropListItemContentMediaImage';
+import DropListItemContentMediaImage from '@/components/drops/view/item/content/media/DropListItemContentMediaImage';
 
-jest.mock('../../helpers/image.helpers', () => ({
+jest.mock('@/helpers/image.helpers', () => ({
   getScaledImageUri: (_src: string) => _src,
   ImageScale: { AUTOx450: 'AUTOx450' },
 }));
 
-jest.mock('../../helpers/Helpers', () => ({
+jest.mock('@/helpers/Helpers', () => ({
   fullScreenSupported: () => true,
 }));
 
-jest.mock('../../hooks/useCapacitor', () => ({ __esModule: true, default: () => ({ isCapacitor: false }) }));
+jest.mock('@/hooks/useCapacitor', () => ({ __esModule: true, default: () => ({ isCapacitor: false }) }));
 
-jest.mock('../../hooks/useInView', () => ({
+jest.mock('@/hooks/useInView', () => ({
   useInView: () => [jest.fn(), true],
 }));
 

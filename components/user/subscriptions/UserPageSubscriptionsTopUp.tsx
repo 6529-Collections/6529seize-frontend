@@ -121,7 +121,7 @@ export default function UserPageSubscriptionsTopUp() {
               sendTransaction.data
             )}
             target="_blank"
-            rel="noreferrer">
+            rel="noopener noreferrer">
             view
           </a>
         </>
@@ -140,7 +140,7 @@ export default function UserPageSubscriptionsTopUp() {
         <Link
           href={window.location.href}
           className="text-center pt-2 pb-2"
-          target="_blank">
+          target="_blank" rel="noopener noreferrer">
           <button className="btn btn-light" style={{ width: "100%" }}>
             Top-up on 6529.io
           </button>

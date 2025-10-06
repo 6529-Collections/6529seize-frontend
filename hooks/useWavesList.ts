@@ -8,14 +8,14 @@ import {
   useEffect,
   useState,
 } from "react";
-import { AuthContext } from "../components/auth/Auth";
+import { AuthContext } from "@/components/auth/Auth";
 import { useWavesOverview } from "./useWavesOverview";
-import { WAVE_FOLLOWING_WAVES_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
+import { WAVE_FOLLOWING_WAVES_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 import { usePinnedWavesServer } from "./usePinnedWavesServer";
 import { useWaveData } from "./useWaveData";
-import { ApiWave } from "../generated/models/ApiWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 import { useShowFollowingWaves } from "./useShowFollowingWaves";
-import { ApiWaveType } from "../generated/models/ApiWaveType";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 // Enhanced wave interface with isPinned field and newDropsCount
 interface EnhancedWave extends ApiWave {

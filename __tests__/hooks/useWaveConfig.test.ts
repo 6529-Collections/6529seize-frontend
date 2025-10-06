@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
-import { useWaveConfig } from '../../components/waves/create-wave/hooks/useWaveConfig';
-import { CreateWaveStep } from '../../types/waves.types';
+import { useWaveConfig } from '@/components/waves/create-wave/hooks/useWaveConfig';
+import { CreateWaveStep } from '@/types/waves.types';
 
 
 describe('useWaveConfig', () => {

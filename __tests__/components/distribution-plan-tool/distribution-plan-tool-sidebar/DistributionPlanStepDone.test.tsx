@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import DistributionPlanStepDone from '../../../../components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanStepDone';
-import { DistributionPlanToolContext, DistributionPlanToolStep } from '../../../../components/distribution-plan-tool/DistributionPlanToolContext';
+import DistributionPlanStepDone from '@/components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanStepDone';
+import { DistributionPlanToolContext, DistributionPlanToolStep } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
 
 const step = { label: 'Review', description: 'desc', key: DistributionPlanToolStep.REVIEW, order: 5 } as any;
 

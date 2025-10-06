@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import CreateCustomSnapshotTable from '../../../../../components/distribution-plan-tool/create-custom-snapshots/table/CreateCustomSnapshotTable';
-import { AllowlistCustomTokenPool } from '../../../../../components/allowlist-tool/allowlist-tool.types';
+import CreateCustomSnapshotTable from '@/components/distribution-plan-tool/create-custom-snapshots/table/CreateCustomSnapshotTable';
+import { AllowlistCustomTokenPool } from '@/components/allowlist-tool/allowlist-tool.types';
 
 const snapshots: AllowlistCustomTokenPool[] = [
   { id: '1', allowlistId: 'a1', name: 'snap1', description: 'd1', walletsCount: 2, tokensCount: 5 },

@@ -1,14 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import WaveDropReply from '../../../../components/waves/drops/WaveDropReply';
+import WaveDropReply from '@/components/waves/drops/WaveDropReply';
 
-jest.mock('../../../../components/waves/drops/DropLoading', () => () => <div data-testid="loading" />);
-jest.mock('../../../../components/waves/drops/DropNotFound', () => () => <div data-testid="not-found" />);
-jest.mock('../../../../components/waves/drops/ContentDisplay', () => () => <div data-testid="content" />);
+jest.mock('@/components/waves/drops/DropLoading', () => () => <div data-testid="loading" />);
+jest.mock('@/components/waves/drops/DropNotFound', () => () => <div data-testid="not-found" />);
+jest.mock('@/components/waves/drops/ContentDisplay', () => () => <div data-testid="content" />);
 
 const hookData: any = { drop: null, content: { segments: [] }, isLoading: false };
 
-jest.mock('../../../../components/waves/drops/useDropContent', () => ({
+jest.mock('@/components/waves/drops/useDropContent', () => ({
   useDropContent: () => hookData,
 }));
 

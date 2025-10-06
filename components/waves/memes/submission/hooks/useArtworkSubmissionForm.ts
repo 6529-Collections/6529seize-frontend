@@ -3,7 +3,7 @@
 import { useReducer, useEffect, useCallback } from "react";
 import { TraitsData } from "../types/TraitsData";
 import { SubmissionStep } from "../types/Steps";
-import { useAuth } from "../../../../auth/Auth";
+import { useAuth } from "@/components/auth/Auth";
 
 /**
  * Action types for the form reducer - drastically simplified
@@ -82,7 +82,7 @@ export function useArtworkSubmissionForm() {
   const { connectedProfile } = useAuth();
 
   // Import the pre-computed initial values
-  const { initialTraits } = require("../../traits/schema");
+  const { initialTraits } = require("@/components/waves/memes/traits/schema");
 
   // Create the initial state
   const initialState: FormState = {

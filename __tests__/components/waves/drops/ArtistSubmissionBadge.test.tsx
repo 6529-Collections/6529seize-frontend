@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { ArtistSubmissionBadge } from '../../../../components/waves/drops/ArtistSubmissionBadge';
+import { ArtistSubmissionBadge } from '@/components/waves/drops/ArtistSubmissionBadge';
 
 // Mock the mobile device hook
-jest.mock('../../../../hooks/isMobileDevice', () => ({
+jest.mock('@/hooks/isMobileDevice', () => ({
   __esModule: true,
   default: jest.fn(() => false),
 }));
@@ -90,7 +90,7 @@ describe('ArtistSubmissionBadge', () => {
   });
 
   it('does not render tooltip for mobile users', () => {
-    const useIsMobileDevice = require('../../../../hooks/isMobileDevice').default;
+    const useIsMobileDevice = require('@/hooks/isMobileDevice').default;
     useIsMobileDevice.mockReturnValue(true);
     
     render(<ArtistSubmissionBadge {...defaultProps} />);
@@ -99,7 +99,7 @@ describe('ArtistSubmissionBadge', () => {
   });
 
   it('uses custom tooltipId when provided', () => {
-    const useIsMobileDevice = require('../../../../hooks/isMobileDevice').default;
+    const useIsMobileDevice = require('@/hooks/isMobileDevice').default;
     useIsMobileDevice.mockReturnValue(false); // Ensure desktop mode
     
     render(<ArtistSubmissionBadge {...defaultProps} tooltipId="custom-tooltip" />);

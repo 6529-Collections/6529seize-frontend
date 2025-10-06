@@ -1,14 +1,14 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import React from 'react';
-import MyStreamWaveMyVotesReset from '../../../../../components/brain/my-stream/votes/MyStreamWaveMyVotesReset';
-import { AuthContext } from '../../../../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../../../../components/react-query-wrapper/ReactQueryWrapper';
+import MyStreamWaveMyVotesReset from '@/components/brain/my-stream/votes/MyStreamWaveMyVotesReset';
+import { AuthContext } from '@/components/auth/Auth';
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 import { useMutation } from '@tanstack/react-query';
 
 jest.mock('@tanstack/react-query', () => ({ useMutation: jest.fn() }));
-jest.mock('../../../../../components/brain/my-stream/votes/MyStreamWaveMyVotesResetProgress', () => (p: any) => <div data-testid="progress" {...p} />);
-jest.mock('../../../../../components/utils/button/SecondaryButton', () => (p: any) => <button onClick={p.onClicked} disabled={p.disabled}>{p.children}</button>);
-jest.mock('../../../../../services/api/common-api', () => ({ commonApiPost: jest.fn(async () => ({})) }));
+jest.mock('@/components/brain/my-stream/votes/MyStreamWaveMyVotesResetProgress', () => (p: any) => <div data-testid="progress" {...p} />);
+jest.mock('@/components/utils/button/SecondaryButton', () => (p: any) => <button onClick={p.onClicked} disabled={p.disabled}>{p.children}</button>);
+jest.mock('@/services/api/common-api', () => ({ commonApiPost: jest.fn(async () => ({})) }));
 
 const useMutationMock = useMutation as jest.Mock;
 

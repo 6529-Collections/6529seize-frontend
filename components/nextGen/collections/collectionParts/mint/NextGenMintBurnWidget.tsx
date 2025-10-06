@@ -7,31 +7,31 @@ import { useEffect, useState } from "react";
 import { Button, Col, Container, Form, Row, Table } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import { useChainId, useWriteContract } from "wagmi";
-import { NextGenCollection } from "../../../../../entities/INextgen";
+import { NextGenCollection } from "@/entities/INextgen";
 import {
   areEqualAddresses,
   getNetworkName,
-} from "../../../../../helpers/Helpers";
-import { fetchUrl } from "../../../../../services/6529api";
-import { getNftsForContractAndOwner } from "../../../../../services/alchemy-api";
-import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
-import NextGenContractWriteStatus from "../../../NextGenContractWriteStatus";
+} from "@/helpers/Helpers";
+import { fetchUrl } from "@/services/6529api";
+import { getNftsForContractAndOwner } from "@/services/alchemy-api";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import NextGenContractWriteStatus from "@/components/nextGen/NextGenContractWriteStatus";
 import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
   NEXTGEN_MINTER,
-} from "../../../nextgen_contracts";
+} from "@/components/nextGen/nextgen_contracts";
 import {
   CollectionWithMerkle,
   ProofResponse,
   Status,
   TokensPerAddress,
-} from "../../../nextgen_entities";
+} from "@/components/nextGen/nextgen_entities";
 import {
   getStatusFromDates,
   useMintSharedState,
-} from "../../../nextgen_helpers";
-import styles from "../../NextGen.module.scss";
+} from "@/components/nextGen/nextgen_helpers";
+import styles from "@/components/nextGen/collections/NextGen.module.scss";
 import { Spinner } from "./NextGenMint";
 import { NextGenMintingFor } from "./NextGenMintShared";
 

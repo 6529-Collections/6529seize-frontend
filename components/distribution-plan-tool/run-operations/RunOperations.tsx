@@ -5,9 +5,9 @@ import { DistributionPlanToolContext } from "../DistributionPlanToolContext";
 import {
   AllowlistDescription,
   AllowlistRunStatus,
-} from "../../allowlist-tool/allowlist-tool.types";
+} from "@/components/allowlist-tool/allowlist-tool.types";
 import { useInterval } from "react-use";
-import { distributionPlanApiFetch } from "../../../services/distribution-plan-api";
+import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 
 const LOADING_STATES = [AllowlistRunStatus.CLAIMED, AllowlistRunStatus.PENDING];
 

@@ -2,8 +2,8 @@
 
 import { useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
-import { ApiIdentity } from "../../../generated/models/ApiIdentity";
+import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 export default function HeaderProxyNewModal({
   connectedProfile,

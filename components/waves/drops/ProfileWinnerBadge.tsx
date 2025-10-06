@@ -4,7 +4,7 @@ import React, { useId } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrophy } from "@fortawesome/free-solid-svg-icons";
 import { Tooltip } from "react-tooltip";
-import useIsMobileDevice from "../../../hooks/isMobileDevice";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
 
 // Tooltip styles - extracted to prevent re-creation on each render
 const TOOLTIP_STYLES = {

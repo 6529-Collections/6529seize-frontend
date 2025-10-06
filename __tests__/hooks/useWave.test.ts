@@ -1,8 +1,8 @@
 import { renderHook } from '@testing-library/react';
-import { useWave, SubmissionStatus } from '../../hooks/useWave';
+import { useWave, SubmissionStatus } from '@/hooks/useWave';
 
-jest.mock('../../contexts/SeizeSettingsContext', () => ({ useSeizeSettings: () => ({ isMemesWave: (id: string) => id === 'memes' }) }));
-jest.mock('../../helpers/time', () => ({ Time: { currentMillis: jest.fn(() => 2000) } }));
+jest.mock('@/contexts/SeizeSettingsContext', () => ({ useSeizeSettings: () => ({ isMemesWave: (id: string) => id === 'memes' }) }));
+jest.mock('@/helpers/time', () => ({ Time: { currentMillis: jest.fn(() => 2000) } }));
 
 describe('useWave', () => {
   const baseWave: any = {
@@ -22,7 +22,7 @@ describe('useWave', () => {
     const { result } = renderHook(() => useWave(baseWave));
     expect(result.current.participation.status).toBe(SubmissionStatus.ACTIVE);
     expect(result.current.participation.remainingSubmissions).toBe(1);
-    const time = require('../../helpers/time');
+    const time = require('@/helpers/time');
     time.Time.currentMillis.mockReturnValue(4000);
     const { result: ended } = renderHook(() => useWave(baseWave));
     expect(ended.current.participation.status).toBe(SubmissionStatus.ENDED);

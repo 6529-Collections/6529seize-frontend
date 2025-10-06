@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import BlockPickerResult from '../../../../components/block-picker/result/BlockPickerResult';
+import BlockPickerResult from '@/components/block-picker/result/BlockPickerResult';
 
-jest.mock('../../../../components/block-picker/result/BlockPickerResultHeader', () => () => <div data-testid="header"/>);
-jest.mock('../../../../components/block-picker/result/BlockPickerResultTable', () => (props: any) => <div data-testid="table" data-count={props.predictedBlocks.length}/>);
+jest.mock('@/components/block-picker/result/BlockPickerResultHeader', () => () => <div data-testid="header"/>);
+jest.mock('@/components/block-picker/result/BlockPickerResultTable', () => (props: any) => <div data-testid="table" data-count={props.predictedBlocks.length}/>);
 
 describe('BlockPickerResult', () => {
   it('shows table when blocks present', () => {

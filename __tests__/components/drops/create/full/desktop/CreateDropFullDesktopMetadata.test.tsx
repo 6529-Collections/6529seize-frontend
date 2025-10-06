@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import CreateDropFullDesktopMetadata from '../../../../../../components/drops/create/full/desktop/CreateDropFullDesktopMetadata';
-import { DropMetadata } from '../../../../../../entities/IDrop';
+import CreateDropFullDesktopMetadata from '@/components/drops/create/full/desktop/CreateDropFullDesktopMetadata';
+import { DropMetadata } from '@/entities/IDrop';
 
 describe('CreateDropFullDesktopMetadata', () => {
   const metadata: DropMetadata[] = [

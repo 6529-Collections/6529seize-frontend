@@ -1,9 +1,9 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import UserPageIdentityStatementsSocialMediaAccounts from '../../../../../../components/user/identity/statements/social-media-accounts/UserPageIdentityStatementsSocialMediaAccounts';
+import UserPageIdentityStatementsSocialMediaAccounts from '@/components/user/identity/statements/social-media-accounts/UserPageIdentityStatementsSocialMediaAccounts';
 
 let listProps: any;
-jest.mock('../../../../../../components/user/identity/statements/utils/UserPageIdentityStatementsStatementsList', () => (props: any) => { listProps = props; return <ul data-testid="list" />; });
+jest.mock('@/components/user/identity/statements/utils/UserPageIdentityStatementsStatementsList', () => (props: any) => { listProps = props; return <ul data-testid="list" />; });
 
 describe('UserPageIdentityStatementsSocialMediaAccounts', () => {
   it('passes props to list', () => {

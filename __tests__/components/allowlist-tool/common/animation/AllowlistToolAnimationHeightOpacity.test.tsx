@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import AllowlistToolAnimationHeightOpacity from '../../../../../components/allowlist-tool/common/animation/AllowlistToolAnimationHeightOpacity';
+import AllowlistToolAnimationHeightOpacity from '@/components/allowlist-tool/common/animation/AllowlistToolAnimationHeightOpacity';
 
 // Mock framer-motion
 jest.mock('framer-motion', () => ({

@@ -1,9 +1,9 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import BannerIcon from '../../../../components/profile-activity/icons/ProfileActivityLogsBannerIcon';
-import CertificateIcon from '../../../../components/profile-activity/icons/ProfileActivityLogsCertificateIcon';
-import ProfileImageIcon from '../../../../components/profile-activity/icons/ProfileActivityLogsProfileImageIcon';
-import SocialPostIcon from '../../../../components/profile-activity/icons/ProfileActivityLogsSocialMediaVerificationPostIcon';
+import BannerIcon from '@/components/profile-activity/icons/ProfileActivityLogsBannerIcon';
+import CertificateIcon from '@/components/profile-activity/icons/ProfileActivityLogsCertificateIcon';
+import ProfileImageIcon from '@/components/profile-activity/icons/ProfileActivityLogsProfileImageIcon';
+import SocialPostIcon from '@/components/profile-activity/icons/ProfileActivityLogsSocialMediaVerificationPostIcon';
 
 describe('profile activity icons', () => {
   it('render svg elements', () => {

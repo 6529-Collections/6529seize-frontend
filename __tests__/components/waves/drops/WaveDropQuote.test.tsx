@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import WaveDropQuote from '../../../../components/waves/drops/WaveDropQuote';
+import WaveDropQuote from '@/components/waves/drops/WaveDropQuote';
 
-jest.mock('../../../../components/drops/view/part/DropPartMarkdownWithPropLogger', () => (props: any) => <div data-testid="markdown">{props.partContent}</div>);
-jest.mock('../../../../components/user/utils/UserCICAndLevel', () => ({
+jest.mock('@/components/drops/view/part/DropPartMarkdownWithPropLogger', () => (props: any) => <div data-testid="markdown">{props.partContent}</div>);
+jest.mock('@/components/user/utils/UserCICAndLevel', () => ({
   __esModule: true,
   default: () => <div data-testid="cic" />,
   UserCICAndLevelSize: { SMALL: 'SMALL' }

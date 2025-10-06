@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import DropListItemContentMediaAudio from '../../../../../../../components/drops/view/item/content/media/DropListItemContentMediaAudio';
+import DropListItemContentMediaAudio from '@/components/drops/view/item/content/media/DropListItemContentMediaAudio';
 
 describe('DropListItemContentMediaAudio', () => {
   it('renders audio source', () => {

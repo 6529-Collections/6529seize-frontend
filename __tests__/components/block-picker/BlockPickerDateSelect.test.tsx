@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import BlockPickerDateSelect from '../../../components/block-picker/BlockPickerDateSelect';
+import BlockPickerDateSelect from '@/components/block-picker/BlockPickerDateSelect';
 
 describe('BlockPickerDateSelect', () => {
   const mockSetDate = jest.fn();

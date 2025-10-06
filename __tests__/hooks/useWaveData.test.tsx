@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react";
-import { useWaveData } from "../../hooks/useWaveData";
+import { useWaveData } from "@/hooks/useWaveData";
 import { useQuery } from "@tanstack/react-query";
 
 jest.mock("@tanstack/react-query", () => ({
@@ -7,7 +7,7 @@ jest.mock("@tanstack/react-query", () => ({
 }));
 
 const mockFetch = jest.fn();
-jest.mock("../../services/api/common-api", () => ({
+jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: () => mockFetch(),
 }));
 

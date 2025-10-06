@@ -6,11 +6,11 @@ jest.mock('react-dom', () => ({
   ...jest.requireActual('react-dom'),
   createPortal: (node: any) => node
 }));
-import CreateDropStormViewPartQuote from '../../../../../../components/drops/create/utils/storm/CreateDropStormViewPartQuote';
+import CreateDropStormViewPartQuote from '@/components/drops/create/utils/storm/CreateDropStormViewPartQuote';
 import { useQuery } from '@tanstack/react-query';
 
 jest.mock('@tanstack/react-query');
-jest.mock('../../../../../../components/drops/view/part/DropPart', () => ({ __esModule: true, default: (props:any) => <div data-testid="part">{props.partContent}</div>, DropPartSize: { SMALL: 'small' }}));
+jest.mock('@/components/drops/view/part/DropPart', () => ({ __esModule: true, default: (props:any) => <div data-testid="part">{props.partContent}</div>, DropPartSize: { SMALL: 'small' }}));
 
 const drop = {
   parts: [{ part_id: 1, content: 'c', media: [] }],

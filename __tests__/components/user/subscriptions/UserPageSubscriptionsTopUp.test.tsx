@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { parseEther } from 'viem';
-import UserPageSubscriptionsTopUp from '../../../../components/user/subscriptions/UserPageSubscriptionsTopUp';
-import { SUBSCRIPTIONS_CHAIN, SUBSCRIPTIONS_ADDRESS, MEMES_MINT_PRICE } from '../../../../constants';
+import UserPageSubscriptionsTopUp from '@/components/user/subscriptions/UserPageSubscriptionsTopUp';
+import { SUBSCRIPTIONS_CHAIN, SUBSCRIPTIONS_ADDRESS, MEMES_MINT_PRICE } from '@/constants';
 
 const sendTransaction = {
   data: undefined,
@@ -21,7 +21,7 @@ jest.mock('wagmi', () => ({
   useWaitForTransactionReceipt: () => waitSendTransaction,
 }));
 
-jest.mock('../../../../components/meme-calendar/meme-calendar.helpers', () => ({
+jest.mock('@/components/meme-calendar/meme-calendar.helpers', () => ({
   __esModule: true,
   displayedEonNumberFromIndex: jest.fn(() => 1),
   displayedEpochNumberFromIndex: jest.fn(() => 1),
@@ -34,12 +34,12 @@ jest.mock('../../../../components/meme-calendar/meme-calendar.helpers', () => ({
   nextMintDateOnOrAfter: jest.fn(() => new Date('2024-01-01T00:00:00Z')),
 }));
 
-jest.mock('../../../../components/auth/SeizeConnectContext', () => ({
+jest.mock('@/components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: jest.fn(() => ({ isConnected: true })),
 }));
 
-jest.mock('../../../../components/dotLoader/DotLoader', () => () => <span data-testid="loader" />);
-jest.mock('../../../../components/cookies/CookieConsentContext', () => ({ 
+jest.mock('@/components/dotLoader/DotLoader', () => () => <span data-testid="loader" />);
+jest.mock('@/components/cookies/CookieConsentContext', () => ({ 
   useCookieConsent: jest.fn(() => ({
     showCookieConsent: false,
     country: 'US',

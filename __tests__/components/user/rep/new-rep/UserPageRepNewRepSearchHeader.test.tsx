@@ -1,13 +1,13 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import UserPageRepNewRepSearchHeader from '../../../../../components/user/rep/new-rep/UserPageRepNewRepSearchHeader';
-import { AuthContext } from '../../../../../components/auth/Auth';
+import UserPageRepNewRepSearchHeader from '@/components/user/rep/new-rep/UserPageRepNewRepSearchHeader';
+import { AuthContext } from '@/components/auth/Auth';
 import { useQuery } from '@tanstack/react-query';
-import { ApiProfileProxyActionType } from '../../../../../generated/models/ApiProfileProxyActionType';
+import { ApiProfileProxyActionType } from '@/generated/models/ApiProfileProxyActionType';
 
 jest.mock('@tanstack/react-query', () => ({ useQuery: jest.fn() }));
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
-jest.mock('../../../../../components/utils/CommonInfoBox', () => (p: any) => <div data-testid="infobox">{p.message}</div>);
+jest.mock('@/components/utils/CommonInfoBox', () => (p: any) => <div data-testid="infobox">{p.message}</div>);
 
 const useQueryMock = useQuery as jest.Mock;
 

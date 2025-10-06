@@ -1,9 +1,9 @@
 import React, { createRef } from 'react';
 import { render, screen, act } from '@testing-library/react';
-import DropEditor from '../../../../components/drops/create/DropEditor';
-import { CreateDropType, CreateDropViewType } from '../../../../components/drops/create/types';
+import DropEditor from '@/components/drops/create/DropEditor';
+import { CreateDropType, CreateDropViewType } from '@/components/drops/create/types';
 
-jest.mock('../../../../components/drops/create/utils/CreateDropWrapper', () => {
+jest.mock('@/components/drops/create/utils/CreateDropWrapper', () => {
   return React.forwardRef((props: any, ref: any) => {
     React.useImperativeHandle(ref, () => ({ requestDrop: () => ({ id: 'drop' }) }));
     return <div data-testid="wrapper">{JSON.stringify({ drop: props.drop, viewType: props.viewType })}</div>;

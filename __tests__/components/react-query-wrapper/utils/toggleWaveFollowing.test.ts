@@ -1,7 +1,7 @@
 import { QueryClient } from '@tanstack/react-query';
-import { toggleWaveFollowing } from '../../../../components/react-query-wrapper/utils/toggleWaveFollowing';
-import { QueryKey } from '../../../../components/react-query-wrapper/ReactQueryWrapper';
-import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from '../../../../components/react-query-wrapper/utils/query-utils';
+import { toggleWaveFollowing } from '@/components/react-query-wrapper/utils/toggleWaveFollowing';
+import { QueryKey } from '@/components/react-query-wrapper/ReactQueryWrapper';
+import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from '@/components/react-query-wrapper/utils/query-utils';
 
 describe('toggleWaveFollowing', () => {
   it('updates subscribed actions in cache', async () => {

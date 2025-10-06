@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useMemo } from "react";
-import CommonSwitch from "../../../utils/switch/CommonSwitch";
-import { useShowFollowingWaves } from "../../../../hooks/useShowFollowingWaves";
-import { useAuth } from "../../../auth/Auth";
+import CommonSwitch from "@/components/utils/switch/CommonSwitch";
+import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
+import { useAuth } from "@/components/auth/Auth";
 
 // Pure helper function for authentication state logic (testable)
 const checkConnectedIdentity = (connectedHandle: string | null | undefined, activeProfileProxy: unknown): boolean => {

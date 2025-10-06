@@ -10,7 +10,7 @@ import {
   NextGenAdminTextFormGroup,
   NextGenAdminHeadingRow,
 } from "./NextGenAdminShared";
-import { NULL_MERKLE } from "../../../constants";
+import { NULL_MERKLE } from "@/constants";
 
 interface Props {
   close: () => void;

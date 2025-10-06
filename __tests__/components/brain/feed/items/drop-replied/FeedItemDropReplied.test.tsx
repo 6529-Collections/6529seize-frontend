@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import FeedItemDropReplied from '../../../../../../components/brain/feed/items/drop-replied/FeedItemDropReplied';
+import FeedItemDropReplied from '@/components/brain/feed/items/drop-replied/FeedItemDropReplied';
 
 const push = jest.fn();
 jest.mock('next/navigation', () => ({
@@ -9,7 +9,7 @@ jest.mock('next/navigation', () => ({
   usePathname: jest.fn(),
 }));
 
-jest.mock('../../../../../../components/waves/drops/Drop', () => ({
+jest.mock('@/components/waves/drops/Drop', () => ({
   __esModule: true,
   default: ({ onReplyClick, onQuoteClick }: any) => (
     <div>

@@ -1,15 +1,15 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import GroupItem from '../../../../../components/groups/select/item/GroupItem';
-import { getScaledImageUri } from '../../../../../helpers/image.helpers';
+import GroupItem from '@/components/groups/select/item/GroupItem';
+import { getScaledImageUri } from '@/helpers/image.helpers';
 
-jest.mock('../../../../../helpers/image.helpers', () => ({
+jest.mock('@/helpers/image.helpers', () => ({
   getScaledImageUri: jest.fn(() => 'scaled.jpg'),
   ImageScale: { W_AUTO_H_50: 'AUTOx50' },
 }));
 
-jest.mock('../../../../../helpers/Helpers', () => ({
+jest.mock('@/helpers/Helpers', () => ({
   getTimeAgo: jest.fn(() => '1 day ago'),
 }));
 

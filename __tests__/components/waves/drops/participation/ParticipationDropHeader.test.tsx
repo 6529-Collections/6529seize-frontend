@@ -1,20 +1,20 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import ParticipationDropHeader from '../../../../../components/waves/drops/participation/ParticipationDropHeader';
+import ParticipationDropHeader from '@/components/waves/drops/participation/ParticipationDropHeader';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children, onClick, className }: any) => <a href={href} onClick={onClick} className={className}>{children}</a> }));
-jest.mock('../../../../../components/user/utils/UserCICAndLevel', () => ({ __esModule: true, default: (p: any) => <div data-testid="level" {...p} />, UserCICAndLevelSize: { SMALL: 'SMALL' } }));
-jest.mock('../../../../../components/waves/drops/winner/WinnerDropBadge', () => {
+jest.mock('@/components/user/utils/UserCICAndLevel', () => ({ __esModule: true, default: (p: any) => <div data-testid="level" {...p} />, UserCICAndLevelSize: { SMALL: 'SMALL' } }));
+jest.mock('@/components/waves/drops/winner/WinnerDropBadge', () => {
   const MockWinnerDropBadge = (props: any) => <div data-testid="badge">{JSON.stringify(props)}</div>;
   MockWinnerDropBadge.displayName = 'MockWinnerDropBadge';
   return MockWinnerDropBadge;
 });
-jest.mock('../../../../../components/waves/drops/time/WaveDropTime', () => {
+jest.mock('@/components/waves/drops/time/WaveDropTime', () => {
   const MockWaveDropTime = (props: any) => <span data-testid="time">{props.timestamp}</span>;
   MockWaveDropTime.displayName = 'MockWaveDropTime';
   return MockWaveDropTime;
 });
-jest.mock('../../../../../helpers/Helpers', () => ({ cicToType: jest.fn(() => 'TYPE') }));
+jest.mock('@/helpers/Helpers', () => ({ cicToType: jest.fn(() => 'TYPE') }));
 
 describe('ParticipationDropHeader', () => {
   const baseDrop: any = {

@@ -8,7 +8,7 @@ import clsx from "clsx";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { Fragment } from "react";
-import { useIdentity } from "../../hooks/useIdentity";
+import { useIdentity } from "@/hooks/useIdentity";
 
 export type MenuItem = {
   readonly label: string;

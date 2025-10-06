@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useMemo, useRef, useState } from "react";
-import { ApiDrop, ApiWave } from "../../../generated/models/ObjectSerializer";
-import useDeviceInfo from "../../../hooks/useDeviceInfo";
+import { ApiDrop, ApiWave } from "@/generated/models/ObjectSerializer";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import WaveDropsAll from "../drops/WaveDropsAll";
 import {
   CreateDropWaveWrapper,
@@ -11,10 +11,10 @@ import {
 import {
   ActiveDropAction,
   ActiveDropState,
-} from "../../../types/dropInteractionTypes";
+} from "@/types/dropInteractionTypes";
 import PrivilegedDropCreator, { DropMode } from "../PrivilegedDropCreator";
-import { useLayout } from "../../../components/brain/my-stream/layout/LayoutContext";
-import { useAndroidKeyboard } from "../../../hooks/useAndroidKeyboard";
+import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
+import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
 
 interface SingleWaveDropChatProps {
   readonly wave: ApiWave;

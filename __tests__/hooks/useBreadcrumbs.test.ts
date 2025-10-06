@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react";
-import { useBreadcrumbs } from "../../hooks/useBreadcrumbs";
+import { useBreadcrumbs } from "@/hooks/useBreadcrumbs";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 

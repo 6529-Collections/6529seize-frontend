@@ -1,7 +1,7 @@
 import React from "react";
 import CustomTooltip from "./CustomTooltip";
-import UserProfileTooltip from "../../user/utils/profile/UserProfileTooltip";
-import useDeviceInfo from "../../../hooks/useDeviceInfo";
+import UserProfileTooltip from "@/components/user/utils/profile/UserProfileTooltip";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 interface UserProfileTooltipWrapperProps {
   readonly user: string;

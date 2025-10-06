@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useCopyToClipboard } from "react-use";
-import ProfileActivityLogItemValueWithCopy from "../../../components/profile-activity/list/items/utils/ProfileActivityLogItemValueWithCopy";
+import ProfileActivityLogItemValueWithCopy from "@/components/profile-activity/list/items/utils/ProfileActivityLogItemValueWithCopy";
 
 jest.mock("react-use", () => ({ useCopyToClipboard: jest.fn() }));
 describe("ProfileActivityLogItemValueWithCopy", () => {

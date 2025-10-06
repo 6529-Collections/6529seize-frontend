@@ -1,10 +1,10 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import BlockPickerResultTable from '../../../../components/block-picker/result/BlockPickerResultTable';
+import BlockPickerResultTable from '@/components/block-picker/result/BlockPickerResultTable';
 
 let rowProps: any[] = [];
-jest.mock('../../../../components/block-picker/result/BlockPickerResultTableRow', () => (props: any) => { rowProps.push(props); return <tr data-testid="row" />; });
-jest.mock('../../../../components/block-picker/result/BlockPickerResultTableHeader', () => () => <thead data-testid="header" />);
+jest.mock('@/components/block-picker/result/BlockPickerResultTableRow', () => (props: any) => { rowProps.push(props); return <tr data-testid="row" />; });
+jest.mock('@/components/block-picker/result/BlockPickerResultTableHeader', () => () => <thead data-testid="header" />);
 
 describe('BlockPickerResultTable', () => {
   beforeEach(() => { rowProps = []; });

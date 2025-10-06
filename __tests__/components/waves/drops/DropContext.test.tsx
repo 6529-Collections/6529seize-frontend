@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import DropContext, { useDropContext } from '../../../../components/waves/drops/DropContext';
+import DropContext, { useDropContext } from '@/components/waves/drops/DropContext';
 
 const contextValue = { drop: { id: '1' } as any, location: 'header' as any };
 const wrapper = ({ children }: any) => (

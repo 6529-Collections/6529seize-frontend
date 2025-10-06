@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import GroupCreateNumericValue from '../../../../../../../components/groups/page/create/config/common/GroupCreateNumericValue';
+import GroupCreateNumericValue from '@/components/groups/page/create/config/common/GroupCreateNumericValue';
 
 describe('GroupCreateNumericValue', () => {
   it('calls setValue with parsed number when input changes', () => {

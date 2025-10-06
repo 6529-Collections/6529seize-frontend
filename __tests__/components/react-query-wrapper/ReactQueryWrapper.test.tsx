@@ -1,11 +1,11 @@
 import React, { useContext } from 'react';
 import { render, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import ReactQueryWrapper, { ReactQueryWrapperContext, QueryKey } from '../../../components/react-query-wrapper/ReactQueryWrapper';
+import ReactQueryWrapper, { ReactQueryWrapperContext, QueryKey } from '@/components/react-query-wrapper/ReactQueryWrapper';
 
-jest.mock('../../../helpers/Helpers', () => ({ ...jest.requireActual('../../../helpers/Helpers'), wait: jest.fn(() => Promise.resolve()) }));
+jest.mock('@/helpers/Helpers', () => ({ ...jest.requireActual('../../../helpers/Helpers'), wait: jest.fn(() => Promise.resolve()) }));
 
-const wait = require('../../../helpers/Helpers').wait as jest.Mock;
+const wait = require('@/helpers/Helpers').wait as jest.Mock;
 
 type ContextType = {
   setProfile: (profile: any) => void;
@@ -138,7 +138,7 @@ it('sets initial waves overview page only once', () => {
 
 test('wave follow change toggles and invalidates', () => {
   jest.useFakeTimers();
-  const toggle = require('../../../components/react-query-wrapper/utils/toggleWaveFollowing');
+  const toggle = require('@/components/react-query-wrapper/utils/toggleWaveFollowing');
   jest.spyOn(toggle, 'toggleWaveFollowing').mockResolvedValue(undefined);
   const { client, ctx } = createTestSetup();
   act(() => ctx.onWaveFollowChange({ waveId: 'w1', following: true }));

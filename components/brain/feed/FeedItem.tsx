@@ -1,12 +1,12 @@
-import { ApiFeedItemType } from "../../../generated/models/ApiFeedItemType";
-import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
-import { TypedFeedItem } from "../../../types/feed.types";
+import { ApiFeedItemType } from "@/generated/models/ApiFeedItemType";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { TypedFeedItem } from "@/types/feed.types";
 import FeedItemDropReplied from "./items/drop-replied/FeedItemDropReplied";
 import FeedItemDropCreated from "./items/drop-created/FeedItemDropCreated";
 import FeedItemWaveCreated from "./items/wave-created/FeedItemWaveCreated";
-import { ActiveDropState } from "../../../types/dropInteractionTypes";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { DropInteractionParams } from "../../waves/drops/Drop";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { DropInteractionParams } from "@/components/waves/drops/Drop";
 
 import type { JSX } from "react";
 

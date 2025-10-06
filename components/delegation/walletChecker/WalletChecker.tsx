@@ -14,12 +14,12 @@ import {
   DELEGATION_ALL_ADDRESS,
   MEMES_CONTRACT,
   NEVER_DATE,
-} from "../../../constants";
-import { DBResponse } from "../../../entities/IDBResponse";
-import { Delegation, WalletConsolidation } from "../../../entities/IDelegation";
-import { areEqualAddresses, isValidEthAddress } from "../../../helpers/Helpers";
-import { fetchUrl } from "../../../services/6529api";
-import Address from "../../address/Address";
+} from "@/constants";
+import { DBResponse } from "@/entities/IDBResponse";
+import { Delegation, WalletConsolidation } from "@/entities/IDelegation";
+import { areEqualAddresses, isValidEthAddress } from "@/helpers/Helpers";
+import { fetchUrl } from "@/services/6529api";
+import Address from "@/components/address/Address";
 import {
   ALL_USE_CASES,
   MINTING_USE_CASE,

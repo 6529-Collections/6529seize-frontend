@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import { useDropContent } from "./useDropContent";
 import DropLoading from "./DropLoading";
 import DropNotFound from "./DropNotFound";

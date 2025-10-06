@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import CreateCustomSnapshotFormUpload from '../../../../../components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormUpload';
+import CreateCustomSnapshotFormUpload from '@/components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormUpload';
 
 function setup(csv: string) {
   const setFileName = jest.fn();

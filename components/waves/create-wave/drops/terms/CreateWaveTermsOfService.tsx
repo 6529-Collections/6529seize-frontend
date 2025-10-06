@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ApiWaveType } from "../../../../../generated/models/ApiWaveType";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 export default function CreateWaveTermsOfService({
   waveType,

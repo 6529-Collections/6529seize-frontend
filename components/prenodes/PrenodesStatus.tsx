@@ -4,7 +4,7 @@ import styles from "./Prenodes.module.scss";
 import { useEffect, useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import Pagination from "../pagination/Pagination";
-import { Time } from "../../helpers/time";
+import { Time } from "@/helpers/time";
 import {
   faCheckCircle,
   faLocationDot,
@@ -14,7 +14,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { getDateDisplay } from "../../helpers/Helpers";
+import { getDateDisplay } from "@/helpers/Helpers";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { useAuth } from "../auth/Auth";
 
@@ -124,7 +124,7 @@ export default function PrenodesStatus() {
         <a
           href={href}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           className="decoration-none">
           <Container className={`no-padding ${styles.prenode}`}>
             <Row>

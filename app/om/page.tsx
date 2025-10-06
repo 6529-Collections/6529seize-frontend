@@ -1,12 +1,11 @@
-import React from "react";
 import { getAppMetadata } from "@/components/providers/metadata";
+import Link from "next/link";
 import type { Metadata } from "next";
 
 const IndexPage = () => (
   <div>
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
     <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="robots"
       content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
@@ -312,12 +311,12 @@ CITIES 1-10"
                 <span className="entry-title rich-snippet-hidden">OM</span>
                 <span className="vcard rich-snippet-hidden">
                   <span className="fn">
-                    <a
+                    <Link
                       href="/author/6529er6529-io/"
                       title="Posts by 6529er"
                       rel="author">
                       6529er
-                    </a>
+                    </Link>
                   </span>
                 </span>
                 <span className="updated rich-snippet-hidden">
@@ -786,27 +785,27 @@ CITIES 1-10"
                             <h1
                               className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated"
                               style={{ margin: 0, lineHeight: 1 }}>
-                              <a href="/city/6529-museum-district/">
+                              <Link href="/city/6529-museum-district/">
                                 DISTRICT 1 – 6529 MUSEUM DISTRICT
-                              </a>
+                              </Link>
                             </h1>
                           </div>
                           <div className="fusion-title title fusion-title-6 fusion-sep-none fusion-title-text fusion-title-size-three">
                             <h3
                               className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated"
                               style={{ margin: 0, lineHeight: 1 }}>
-                              <a href="/city/6529-museum-district/">
+                              <Link href="/city/6529-museum-district/">
                                 PHASE 1 – ALPHA VERSION – SPRING 2022
-                              </a>
+                              </Link>
                             </h3>
                           </div>
                           <div className="fusion-text fusion-text-6">
                             <p>
                               The{" "}
                               <span style={{ textDecoration: "underline" }}>
-                                <a href="/om/6529-museum-district/">
+                                <Link href="/om/6529-museum-district/">
                                   <strong>6529 Museum District</strong>
-                                </a>
+                                </Link>
                               </span>{" "}
                               is the first district of the first city –{" "}
                               <strong>Genesis City</strong> – in what we hope
@@ -817,14 +816,14 @@ CITIES 1-10"
                             </p>
                           </div>
                           <div>
-                            <a
+                            <Link
                               className="fusion-button button-flat fusion-button-default-size button-default fusion-button-default button-1 fusion-button-default-span fusion-button-default-type"
                               target="_self"
                               href="/om/6529-museum-district/">
                               <span className="fusion-button-text">
                                 EXPLORE 6529 MUSEUM DISTRICT
                               </span>
-                            </a>
+                            </Link>
                           </div>
                         </div>
                       </div>
@@ -843,7 +842,7 @@ CITIES 1-10"
                             className="fusion-image-element "
                             style={{ textAlign: "center" }}>
                             <span className=" fusion-imageframe imageframe-none imageframe-9 hover-type-none">
-                              <a
+                              <Link
                                 className="fusion-no-lightbox"
                                 href="/om/6529-museum-district/"
                                 target="_self"
@@ -859,7 +858,7 @@ CITIES 1-10"
                                   srcSet="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Phase-0-Screenshot-200x93.jpg 200w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Phase-0-Screenshot-400x187.jpg 400w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Phase-0-Screenshot-600x280.jpg 600w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Phase-0-Screenshot-800x374.jpg 800w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Phase-0-Screenshot-1200x560.jpg 1200w, https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Phase-0-Screenshot.jpg 1300w"
                                   sizes="(max-width: 640px) 100vw, 1200px"
                                 />
-                              </a>
+                              </Link>
                             </span>
                           </div>
                         </div>
@@ -1115,9 +1114,9 @@ CITIES 1-10"
                               If you are an organization or individual who has
                               an idea about a space, a building or a district,
                               please contact us{" "}
-                              <a href="/om/partnership-request/">
+                              <Link href="/om/partnership-request/">
                                 <u>here</u>
-                              </a>
+                              </Link>
                               {"."}
                             </p>
                             <h3 style={{ color: "#000000" }}>
@@ -1334,6 +1333,7 @@ CITIES 1-10"
             <a
               href="https://twitter.com/punk6529"
               target="_blank"
+              rel="noopener noreferrer"
               className="fab-fa-twitter">
               <i className="fab fa-twitter" />
             </a>

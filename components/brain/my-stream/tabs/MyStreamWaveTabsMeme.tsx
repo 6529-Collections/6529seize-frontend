@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { ApiWave } from "../../../../generated/models/ApiWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 import MyStreamWaveDesktopTabs from "../MyStreamWaveDesktopTabs";
-import { useContentTab } from "../../ContentTabContext";
-import MemesArtSubmissionModal from "../../../waves/memes/MemesArtSubmissionModal";
+import { useContentTab } from "@/components/brain/ContentTabContext";
+import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
 import MyStreamWaveTabsMemeSubmit from "./MyStreamWaveTabsMemeSubmit";
 
 interface MyStreamWaveTabsMemeProps {

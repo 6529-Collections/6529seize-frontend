@@ -1,16 +1,16 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import ParticipationDrop from '../../../../../components/waves/drops/participation/DefaultParticipationDrop';
-import { DropLocation } from '../../../../../components/waves/drops/Drop';
+import ParticipationDrop from '@/components/waves/drops/participation/DefaultParticipationDrop';
+import { DropLocation } from '@/components/waves/drops/Drop';
 
-jest.mock('../../../../../hooks/drops/useDropInteractionRules', () => ({
+jest.mock('@/hooks/drops/useDropInteractionRules', () => ({
   useDropInteractionRules: jest.fn()
 }));
 
-jest.mock('../../../../../components/waves/drops/participation/OngoingParticipationDrop', () => () => <div data-testid="ongoing" />);
-jest.mock('../../../../../components/waves/drops/participation/EndedParticipationDrop', () => () => <div data-testid="ended" />);
+jest.mock('@/components/waves/drops/participation/OngoingParticipationDrop', () => () => <div data-testid="ongoing" />);
+jest.mock('@/components/waves/drops/participation/EndedParticipationDrop', () => () => <div data-testid="ended" />);
 
-const { useDropInteractionRules } = require('../../../../../hooks/drops/useDropInteractionRules');
+const { useDropInteractionRules } = require('@/hooks/drops/useDropInteractionRules');
 
 describe('DefaultParticipationDrop', () => {
   const baseProps = {

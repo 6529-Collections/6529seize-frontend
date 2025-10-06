@@ -1,4 +1,5 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import Link from "next/link";
 import { Metadata } from "next";
 
 export default function EmailSignaturesPage() {
@@ -6,7 +7,6 @@ export default function EmailSignaturesPage() {
     <div>
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
       <meta
         name="robots"
         content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
@@ -306,12 +306,12 @@ Notes:
                   </span>
                   <span className="vcard rich-snippet-hidden">
                     <span className="fn">
-                      <a
+                      <Link
                         href="/author/6529er6529-io/"
                         title="Posts by 6529er"
                         rel="author">
                         6529er
-                      </a>
+                      </Link>
                     </span>
                   </span>
                   <span className="updated rich-snippet-hidden">
@@ -410,7 +410,7 @@ Notes:
                                 <tbody>
                                   <tr>
                                     <td>
-                                      <a href="/">
+                                      <Link href="/">
                                         <img
                                           loading="lazy"
                                           decoding="async"
@@ -423,7 +423,7 @@ Notes:
                                           width={96}
                                           height={96}
                                         />
-                                      </a>
+                                      </Link>
                                     </td>
                                     <td
                                       style={{
@@ -434,12 +434,12 @@ Notes:
                                       <strong>6529er</strong>
                                       <br />
                                       <strong>e</strong>{" "}
-                                      <a
+                                      <Link
                                         href="/cdn-cgi/l/email-protection"
                                         className="__cf_email__"
                                         data-cfemail="774142454e1205374142454e591e18">
                                         [email&nbsp;protected]
-                                      </a>
+                                      </Link>
                                       <br />
                                       <strong>t</strong> @6529er
                                       <br />
@@ -457,12 +457,12 @@ Notes:
                                 <strong>6529er</strong>
                                 <br />
                                 <strong>e</strong>{" "}
-                                <a
+                                <Link
                                   href="/cdn-cgi/l/email-protection"
                                   className="__cf_email__"
                                   data-cfemail="e2d4d7d0db8790a2d4d7d0dbcc8b8d">
                                   [email&nbsp;protected]
-                                </a>
+                                </Link>
                                 <br />
                                 <strong>t</strong> @6529er
                                 <br />
@@ -470,7 +470,7 @@ Notes:
                                 <br />
                                 <strong>w</strong> www.6529.io
                                 <br />
-                                <a href="/">
+                                <Link href="/">
                                   <img
                                     loading="lazy"
                                     decoding="async"
@@ -483,7 +483,7 @@ Notes:
                                     width={96}
                                     height={96}
                                   />
-                                </a>
+                                </Link>
                               </p>
                             </div>
                           </div>
@@ -518,6 +518,7 @@ Notes:
               <a
                 href="https://twitter.com/punk6529"
                 target="_blank"
+                rel="noopener noreferrer"
                 className="fab-fa-twitter">
                 <i className="fab fa-twitter" />
               </a>

@@ -1,12 +1,12 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import Auth, { AuthContext, useAuth } from "../../../components/auth/Auth";
-import { ReactQueryWrapperContext } from "../../../components/react-query-wrapper/ReactQueryWrapper";
-import { mockTitleContextModule } from "../../utils/titleTestUtils";
-import { commonApiFetch, commonApiPost } from "../../../services/api/common-api";
-import { ApiNonceResponse } from "../../../generated/models/ApiNonceResponse";
-import { ApiLoginResponse } from "../../../generated/models/ApiLoginResponse";
+import Auth, { AuthContext, useAuth } from "@/components/auth/Auth";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { mockTitleContextModule } from "@/__tests__/utils/titleTestUtils";
+import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import { ApiNonceResponse } from "@/generated/models/ApiNonceResponse";
+import { ApiLoginResponse } from "@/generated/models/ApiLoginResponse";
 
 jest.mock("react-toastify", () => ({
   toast: jest.fn(),
@@ -16,12 +16,12 @@ jest.mock("react-toastify", () => ({
 
 // Using useSecureSign instead of legacy Wagmi hooks
 
-jest.mock("../../../services/api/common-api", () => ({
+jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(() => Promise.resolve({ id: "1", handle: "user", query: "user" })),
   commonApiPost: jest.fn(() => Promise.resolve({ token: 'jwt-token', refresh_token: 'refresh-token' })),
 }));
 
-jest.mock("../../../services/auth/auth.utils", () => ({
+jest.mock("@/services/auth/auth.utils", () => ({
   removeAuthJwt: jest.fn(),
   setAuthJwt: jest.fn(),
   getAuthJwt: jest.fn(() => null),
@@ -42,7 +42,7 @@ jest.mock("@reown/appkit/react", () => ({
 const mockSignMessage = jest.fn();
 const mockReset = jest.fn();
 
-jest.mock("../../../hooks/useSecureSign", () => ({
+jest.mock("@/hooks/useSecureSign", () => ({
   useSecureSign: jest.fn(() => ({
     signMessage: mockSignMessage,
     isSigningPending: false,
@@ -69,25 +69,25 @@ jest.mock('react-bootstrap', () => ({
 }));
 
 // Add mocks for new services
-jest.mock("../../../services/auth/jwt-validation.utils", () => ({
+jest.mock("@/services/auth/jwt-validation.utils", () => ({
   validateJwt: jest.fn(async () => ({ isValid: true, wasCancelled: false })),
   getRole: jest.fn(() => null),
 }));
 
-jest.mock("../../../services/auth/immediate-validation.utils", () => ({
+jest.mock("@/services/auth/immediate-validation.utils", () => ({
   validateAuthImmediate: jest.fn(async () => ({ wasCancelled: false })),
 }));
 
-jest.mock("../../../utils/error-sanitizer", () => ({
+jest.mock("@/utils/error-sanitizer", () => ({
   sanitizeErrorForUser: jest.fn((error) => 'Sanitized error message'),
   logErrorSecurely: jest.fn(),
 }));
 
-jest.mock("../../../utils/role-validation", () => ({
+jest.mock("@/utils/role-validation", () => ({
   validateRoleForAuthentication: jest.fn((proxy) => proxy?.created_by?.id || null),
 }));
 
-jest.mock("../../../hooks/useIdentity", () => ({
+jest.mock("@/hooks/useIdentity", () => ({
   useIdentity: jest.fn(() => ({ 
     profile: null, 
     isLoading: false 
@@ -102,7 +102,7 @@ let connectionState: string = 'connected';
 
 const mockSeizeDisconnectAndLogout = jest.fn();
 
-jest.mock("../../../components/auth/SeizeConnectContext", () => ({
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(() => ({
     address: walletAddress,
     isConnected: !!walletAddress,
@@ -113,9 +113,9 @@ jest.mock("../../../components/auth/SeizeConnectContext", () => ({
 }));
 
 const mockCommonApiFetch = commonApiFetch as jest.MockedFunction<typeof commonApiFetch>;
-const { commonApiPost } = require("../../../services/api/common-api");
+const { commonApiPost } = require("@/services/api/common-api");
 const mockCommonApiPost = commonApiPost as jest.MockedFunction<typeof commonApiPost>;
-const mockUseIdentity = require("../../../hooks/useIdentity").useIdentity as jest.MockedFunction<any>;
+const mockUseIdentity = require("@/hooks/useIdentity").useIdentity as jest.MockedFunction<any>;
 
 // Test helper components
 function ShowWaves() {
@@ -218,7 +218,7 @@ describe("Auth component", () => {
   });
 
   describe("Race Condition Prevention and Abort Controller", () => {
-    const mockValidateAuthImmediate = require('../../../services/auth/immediate-validation.utils').validateAuthImmediate;
+    const mockValidateAuthImmediate = require('@/services/auth/immediate-validation.utils').validateAuthImmediate;
 
     it("should prevent authentication bypass via rapid address changes", async () => {
       // Mock validateAuthImmediate to simulate cancelled operation
@@ -382,8 +382,8 @@ describe("Auth component", () => {
   });
 
   describe("Secure Authentication Flow", () => {
-    const mockValidateAuthImmediate = require('../../../services/auth/immediate-validation.utils').validateAuthImmediate;
-    const mockGetAuthJwt = require('../../../services/auth/auth.utils').getAuthJwt;
+    const mockValidateAuthImmediate = require('@/services/auth/immediate-validation.utils').validateAuthImmediate;
+    const mockGetAuthJwt = require('@/services/auth/auth.utils').getAuthJwt;
 
     it("should call validateAuthImmediate on component mount with wallet connected", async () => {
       mockGetAuthJwt.mockReturnValue('test-jwt-token');
@@ -454,7 +454,7 @@ describe("Auth component", () => {
 
   describe("Toast Notifications", () => {
     const { toast } = require("react-toastify");
-    const mockValidateAuthImmediate = require('../../../services/auth/immediate-validation.utils').validateAuthImmediate;
+    const mockValidateAuthImmediate = require('@/services/auth/immediate-validation.utils').validateAuthImmediate;
 
     it("should show toast notification using setToast function", async () => {
       mockValidateAuthImmediate.mockResolvedValue({ validationCompleted: true, wasCancelled: false, shouldShowModal: false });
@@ -487,7 +487,7 @@ describe("Auth component", () => {
   });
 
   describe("Context Values", () => {
-    const mockValidateAuthImmediate = require('../../../services/auth/immediate-validation.utils').validateAuthImmediate;
+    const mockValidateAuthImmediate = require('@/services/auth/immediate-validation.utils').validateAuthImmediate;
     
     it("should provide correct context values", async () => {
       mockValidateAuthImmediate.mockResolvedValue({ validationCompleted: true, wasCancelled: false, shouldShowModal: false });
@@ -535,7 +535,7 @@ describe("Auth component", () => {
   });
 
   describe("Profile Management", () => {
-    const mockValidateAuthImmediate = require('../../../services/auth/immediate-validation.utils').validateAuthImmediate;
+    const mockValidateAuthImmediate = require('@/services/auth/immediate-validation.utils').validateAuthImmediate;
     
     it("should fetch and set connected profile when address is provided", async () => {
       mockValidateAuthImmediate.mockResolvedValue({ validationCompleted: true, wasCancelled: false, shouldShowModal: false });
@@ -604,7 +604,7 @@ describe("Auth component", () => {
 
   describe("Modal Behavior", () => {
     it("should show modal when sign modal state is true and connected", async () => {
-      const mockValidateAuthImmediate = require('../../../services/auth/immediate-validation.utils').validateAuthImmediate;
+      const mockValidateAuthImmediate = require('@/services/auth/immediate-validation.utils').validateAuthImmediate;
       mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
         callbacks.onShowSignModal(true);
         return { validationCompleted: true, wasCancelled: false, shouldShowModal: true };
@@ -629,8 +629,8 @@ describe("Auth component", () => {
     });
 
     it("should handle modal cancel button", async () => {
-      const mockValidateAuthImmediate = require('../../../services/auth/immediate-validation.utils').validateAuthImmediate;
-      const mockSeizeDisconnectAndLogout = require('../../../components/auth/SeizeConnectContext').useSeizeConnectContext().seizeDisconnectAndLogout;
+      const mockValidateAuthImmediate = require('@/services/auth/immediate-validation.utils').validateAuthImmediate;
+      const mockSeizeDisconnectAndLogout = require('@/components/auth/SeizeConnectContext').useSeizeConnectContext().seizeDisconnectAndLogout;
       
       mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
         callbacks.onShowSignModal(true);

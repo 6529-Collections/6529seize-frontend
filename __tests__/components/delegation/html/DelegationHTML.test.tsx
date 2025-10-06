@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import DelegationHTML from '../../../../components/delegation/html/DelegationHTML';
+import DelegationHTML from '@/components/delegation/html/DelegationHTML';
 
 beforeEach(() => {
   (global as any).fetch = jest.fn();

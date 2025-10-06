@@ -1,8 +1,8 @@
-import { ApiWaveCreditType } from "../generated/models/ApiWaveCreditType";
-import { ApiWaveMetadataType } from "../generated/models/ApiWaveMetadataType";
-import { ApiWaveParticipationRequirement } from "../generated/models/ApiWaveParticipationRequirement";
-import { ApiWavesOverviewType } from "../generated/models/ApiWavesOverviewType";
-import { ApiWaveType } from "../generated/models/ApiWaveType";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
+import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
+import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 export enum MyStreamWaveTab {
   CHAT = "CHAT",

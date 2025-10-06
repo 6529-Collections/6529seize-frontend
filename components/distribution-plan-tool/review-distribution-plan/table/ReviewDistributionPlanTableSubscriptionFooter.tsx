@@ -1,15 +1,15 @@
 "use client";
 
 import { useContext, useState } from "react";
-import { commonApiPost } from "../../../../services/api/common-api";
-import CircleLoader from "../../common/CircleLoader";
-import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
+import { commonApiPost } from "@/services/api/common-api";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import {
   SubscriptionConfirm,
   download,
   isSubscriptionsAdmin,
 } from "./ReviewDistributionPlanTableSubscription";
-import { AuthContext } from "../../../auth/Auth";
+import { AuthContext } from "@/components/auth/Auth";
 
 export function ReviewDistributionPlanTableSubscriptionFooter() {
   const { distributionPlan } = useContext(DistributionPlanToolContext);

@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import GroupCreateIdentitySelectedItems from "../../components/groups/page/create/config/GroupCreateIdentitySelectedItems";
+import GroupCreateIdentitySelectedItems from "@/components/groups/page/create/config/GroupCreateIdentitySelectedItems";
 
 const identities = [
   { wallet: "1", handle: "alice", pfp: undefined },

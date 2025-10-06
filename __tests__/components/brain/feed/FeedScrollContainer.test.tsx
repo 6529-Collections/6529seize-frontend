@@ -1,7 +1,7 @@
 import { render, fireEvent } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import React, { createRef } from 'react';
-import { FeedScrollContainer } from '../../../../components/brain/feed/FeedScrollContainer';
+import { FeedScrollContainer } from '@/components/brain/feed/FeedScrollContainer';
 
 jest.useFakeTimers();
 

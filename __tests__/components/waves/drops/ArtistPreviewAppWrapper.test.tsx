@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import ArtistPreviewAppWrapper from '../../../../components/waves/drops/ArtistPreviewAppWrapper';
+import ArtistPreviewAppWrapper from '@/components/waves/drops/ArtistPreviewAppWrapper';
 
 // Mock Headless UI components
 jest.mock('@headlessui/react', () => ({

@@ -6,8 +6,8 @@ import { DistributionPlanToolContext } from "../DistributionPlanToolContext";
 import {
   AllowlistOperation,
   AllowlistOperationCode,
-} from "../../allowlist-tool/allowlist-tool.types";
-import { distributionPlanApiPost } from "../../../services/distribution-plan-api";
+} from "@/components/allowlist-tool/allowlist-tool.types";
+import { distributionPlanApiPost } from "@/services/distribution-plan-api";
 
 export default function MapDelegationsForm() {
   const { setToasts, distributionPlan, fetchOperations } = useContext(

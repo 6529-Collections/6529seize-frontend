@@ -1,12 +1,12 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import CommonCalendar from '../../../../components/utils/calendar/CommonCalendar';
+import CommonCalendar from '@/components/utils/calendar/CommonCalendar';
 
-jest.mock('../../../../helpers/calendar/calendar.helpers', () => ({
+jest.mock('@/helpers/calendar/calendar.helpers', () => ({
   __esModule: true,
   generateCalendar: jest.fn(() => [{ startTimestamp: 0, date: 1, isActiveMonth: true }])
 }));
 
-jest.mock('../../../../components/utils/calendar/CommonCalendarDay', () => ({ __esModule: true, default: () => <div data-testid="day" /> }));
+jest.mock('@/components/utils/calendar/CommonCalendarDay', () => ({ __esModule: true, default: () => <div data-testid="day" /> }));
 
 describe('CommonCalendar', () => {
   it('initializes from selected timestamp and navigates months', () => {

@@ -1,11 +1,11 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import DistributionPlanTableWrapper from "../../common/DistributionPlanTableWrapper";
+import DistributionPlanTableWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableWrapper";
 import ReviewDistributionPlanTableBody from "./ReviewDistributionPlanTableBody";
 import ReviewDistributionPlanTableHeader from "./ReviewDistributionPlanTableHeader";
-import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
-import { AllowlistResult } from "../../../allowlist-tool/allowlist-tool.types";
+import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+import { AllowlistResult } from "@/components/allowlist-tool/allowlist-tool.types";
 import { ReviewDistributionPlanTableSubscriptionFooter } from "./ReviewDistributionPlanTableSubscriptionFooter";
 export enum ReviewDistributionPlanTableItemType {
   PHASE = "PHASE",

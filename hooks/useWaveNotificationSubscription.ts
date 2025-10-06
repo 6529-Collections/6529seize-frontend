@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "../services/api/common-api";
-import { ApiWave } from "../generated/models/ApiWave";
-import { useSeizeSettings } from "../contexts/SeizeSettingsContext";
-import { GetWaveSubscription200Response } from "../generated/models/GetWaveSubscription200Response";
+import { commonApiFetch } from "@/services/api/common-api";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import { GetWaveSubscription200Response } from "@/generated/models/GetWaveSubscription200Response";
 
 export function useWaveNotificationSubscription(wave: ApiWave) {
   const { seizeSettings } = useSeizeSettings();

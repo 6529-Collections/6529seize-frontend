@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { ApiWave } from "../../../../../../generated/models/ApiWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 import { WaveGroupType } from "../WaveGroup";
 import WaveGroupRemove from "./WaveGroupRemove";
-import { ApiUpdateWaveRequest } from "../../../../../../generated/models/ApiUpdateWaveRequest";
+import { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
 
 export default function WaveGroupRemoveButton({
   wave,

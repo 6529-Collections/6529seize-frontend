@@ -8,12 +8,12 @@ import React, {
   useMemo,
   ReactNode,
 } from "react";
-import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
+import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import Cookies from "js-cookie";
-import { CONSENT_EULA_COOKIE } from "../../constants";
+import { CONSENT_EULA_COOKIE } from "@/constants";
 import { AuthContext } from "../auth/Auth";
 import EULAModal from "./EULAModal";
-import useCapacitor from "../../hooks/useCapacitor";
+import useCapacitor from "@/hooks/useCapacitor";
 import { Device } from "@capacitor/device";
 
 type EULAConsentContextType = {

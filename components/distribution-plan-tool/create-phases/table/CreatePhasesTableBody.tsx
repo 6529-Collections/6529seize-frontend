@@ -1,4 +1,4 @@
-import DistributionPlanTableBodyWrapper from "../../common/DistributionPlanTableBodyWrapper";
+import DistributionPlanTableBodyWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableBodyWrapper";
 import CreateTablePhasesRow from "./CreateTablePhasesRow";
 import { CreatePhasesPhase } from "../CreatePhases";
 

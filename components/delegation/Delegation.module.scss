@@ -426,16 +426,6 @@
   }
 }
 
-.connectWalletButton {
-  background-color: white !important;
-  color: black !important;
-  font-size: larger !important;
-  font-weight: bolder !important;
-  border: none !important;
-  padding: 6px 20px;
-  margin-left: 20px;
-}
-
 .switchNetworkButton {
   background-color: white !important;
   color: black !important;
@@ -559,8 +549,8 @@
 }
 
 .menuLeft {
-  width: 20%;
-  flex: none;
+  width: 20% !important;
+  flex: none !important;
 
   a {
     cursor: pointer;
@@ -580,11 +570,11 @@
 }
 
 .menuRight {
-  width: 80%;
+  width: 80% !important;
 }
 
 .menuLeftFull {
-  width: 100%;
+  width: 100% !important;
   display: none;
 }
 
@@ -598,7 +588,7 @@
   }
 
   .menuRight {
-    width: 100%;
+    width: 100% !important;
   }
 }
 

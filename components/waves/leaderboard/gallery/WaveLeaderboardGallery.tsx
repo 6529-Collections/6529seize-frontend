@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useContext, useMemo } from "react";
-import { ApiWave } from "../../../../generated/models/ApiWave";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { AuthContext } from "../../../auth/Auth";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { AuthContext } from "@/components/auth/Auth";
 import { WaveLeaderboardGalleryItem } from "./WaveLeaderboardGalleryItem";
 import {
   WaveDropsLeaderboardSort,
   useWaveDropsLeaderboard,
-} from "../../../../hooks/useWaveDropsLeaderboard";
+} from "@/hooks/useWaveDropsLeaderboard";
 
 interface WaveLeaderboardGalleryProps {
   readonly wave: ApiWave;

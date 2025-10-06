@@ -1,14 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import GroupCardEditActions from '../../../../../../../components/groups/page/list/card/actions/GroupCardEditActions';
-import { AuthContext } from '../../../../../../../components/auth/Auth';
+import GroupCardEditActions from '@/components/groups/page/list/card/actions/GroupCardEditActions';
+import { AuthContext } from '@/components/auth/Auth';
 
 jest.mock('framer-motion', () => ({
   AnimatePresence: ({ children }: any) => <div>{children}</div>,
   motion: { div: (props: any) => <div {...props} /> },
 }));
 
-jest.mock('../../../../../../../components/groups/page/list/card/actions/delete/GroupCardDelete', () => () => <div data-testid="delete" />);
+jest.mock('@/components/groups/page/list/card/actions/delete/GroupCardDelete', () => () => <div data-testid="delete" />);
 
 describe('GroupCardEditActions', () => {
   const group: any = { created_by: { handle: 'alice' } };

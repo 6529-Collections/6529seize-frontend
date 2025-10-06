@@ -1,18 +1,18 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import EmojiPlugin, { EMOJI_MATCH_REGEX } from '../../../../../../../components/drops/create/lexical/plugins/emoji/EmojiPlugin';
+import EmojiPlugin, { EMOJI_MATCH_REGEX } from '@/components/drops/create/lexical/plugins/emoji/EmojiPlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { useEmoji } from '../../../../../../../contexts/EmojiContext';
+import { useEmoji } from '@/contexts/EmojiContext';
 
 jest.mock('@lexical/react/LexicalComposerContext', () => ({
   useLexicalComposerContext: jest.fn(),
 }));
 
-jest.mock('../../../../../../../components/drops/create/lexical/nodes/EmojiNode', () => ({
+jest.mock('@/components/drops/create/lexical/nodes/EmojiNode', () => ({
   EmojiNode: class {},
 }));
 
-jest.mock('../../../../../../../contexts/EmojiContext', () => ({
+jest.mock('@/contexts/EmojiContext', () => ({
   useEmoji: jest.fn(),
 }));
 

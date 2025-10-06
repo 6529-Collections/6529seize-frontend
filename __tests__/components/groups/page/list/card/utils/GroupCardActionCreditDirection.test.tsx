@@ -1,6 +1,6 @@
 import { render, fireEvent } from '@testing-library/react';
-import GroupCardActionCreditDirection from '../../../../../../../components/groups/page/list/card/utils/GroupCardActionCreditDirection';
-import { CreditDirection } from '../../../../../../../components/groups/page/list/card/GroupCard';
+import GroupCardActionCreditDirection from '@/components/groups/page/list/card/utils/GroupCardActionCreditDirection';
+import { CreditDirection } from '@/components/groups/page/list/card/GroupCard';
 
 describe('GroupCardActionCreditDirection', () => {
   it('calls setCreditDirection on clicks', () => {

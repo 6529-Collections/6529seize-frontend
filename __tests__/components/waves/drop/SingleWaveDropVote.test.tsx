@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { SingleWaveDropVote, SingleWaveDropVoteSize } from '../../../../components/waves/drop/SingleWaveDropVote';
+import { SingleWaveDropVote, SingleWaveDropVoteSize } from '@/components/waves/drop/SingleWaveDropVote';
 
 let capturedProps: any;
 

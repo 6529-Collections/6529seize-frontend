@@ -1,4 +1,4 @@
-import { EMOJI_MATCH_REGEX } from '../../../components/drops/create/lexical/plugins/emoji/EmojiPlugin';
+import { EMOJI_MATCH_REGEX } from '@/components/drops/create/lexical/plugins/emoji/EmojiPlugin';
 
 describe('EmojiPlugin regex', () => {
   it('matches emoji shortcodes', () => {

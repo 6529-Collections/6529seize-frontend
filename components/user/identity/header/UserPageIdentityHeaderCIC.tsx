@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
-import { formatNumberWithCommas } from "../../../../helpers/Helpers";
-import UserCICTypeIconWrapper from "../../utils/user-cic-type/UserCICTypeIconWrapper";
-import UserCICStatus from "../../utils/user-cic-status/UserCICStatus";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import UserCICTypeIconWrapper from "@/components/user/utils/user-cic-type/UserCICTypeIconWrapper";
+import UserCICStatus from "@/components/user/utils/user-cic-status/UserCICStatus";
 
 export default function UserPageIdentityHeaderCIC({
   profile,

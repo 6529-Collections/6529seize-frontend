@@ -1,20 +1,20 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UserPageClassificationWrapper from '../../../../../../components/user/user-page-header/name/classification/UserPageClassificationWrapper';
+import UserPageClassificationWrapper from '@/components/user/user-page-header/name/classification/UserPageClassificationWrapper';
 
-jest.mock('../../../../../../components/utils/icons/PencilIcon', () => ({
+jest.mock('@/components/utils/icons/PencilIcon', () => ({
   __esModule: true,
   PencilIconSize: { SMALL: 'SMALL' },
   default: () => <span data-testid="pencil" />,
 }));
 
-jest.mock('../../../../../../components/user/user-page-header/name/classification/UserPageHeaderEditClassification', () => (props: any) => (
+jest.mock('@/components/user/user-page-header/name/classification/UserPageHeaderEditClassification', () => (props: any) => (
   <div data-testid="edit" onClick={props.onClose} />
 ));
 
-jest.mock('../../../../../../components/utils/animation/CommonAnimationWrapper', () => ({ children }: any) => <div>{children}</div>);
+jest.mock('@/components/utils/animation/CommonAnimationWrapper', () => ({ children }: any) => <div>{children}</div>);
 
-jest.mock('../../../../../../components/utils/animation/CommonAnimationOpacity', () => ({ children, onClicked }: any) => (
+jest.mock('@/components/utils/animation/CommonAnimationOpacity', () => ({ children, onClicked }: any) => (
   <div data-testid="opacity" onClick={onClicked}>{children}</div>
 ));
 

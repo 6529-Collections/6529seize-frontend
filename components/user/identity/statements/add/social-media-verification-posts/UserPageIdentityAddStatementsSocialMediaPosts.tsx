@@ -1,10 +1,10 @@
-import { ApiIdentity } from "../../../../../../generated/models/ApiIdentity";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
   STATEMENT_GROUP,
   STATEMENT_TYPE,
-} from "../../../../../../helpers/Types";
+} from "@/helpers/Types";
 import UserPageIdentityAddStatementsSocialMediaPostsHeader from "./UserPageIdentityAddStatementsSocialMediaPostsHeader";
-import UserPageIdentityAddStatementsForm from "../../utils/UserPageIdentityAddStatementsForm";
+import UserPageIdentityAddStatementsForm from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm";
 
 export default function UserPageIdentityAddStatementsSocialMediaPosts({
   profile,

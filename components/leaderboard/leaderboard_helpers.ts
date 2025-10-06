@@ -2,10 +2,10 @@
 
 import { publicEnv } from "@/config/env";
 import { useCallback, useEffect, useState } from "react";
-import { CICType } from "../../entities/IProfile";
-import { SortDirection } from "../../entities/ISort";
-import { cicToType } from "../../helpers/Helpers";
-import { commonApiFetch } from "../../services/api/common-api";
+import { CICType } from "@/entities/IProfile";
+import { SortDirection } from "@/entities/ISort";
+import { cicToType } from "@/helpers/Helpers";
+import { commonApiFetch } from "@/services/api/common-api";
 import { Collector, Content } from "./Leaderboard";
 
 export const LEADERBOARD_PAGE_SIZE = 50;

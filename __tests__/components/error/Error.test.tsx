@@ -11,6 +11,13 @@ jest.mock("@/contexts/TitleContext", () => ({
   }),
 }));
 
+jest.mock("next/navigation", () => ({
+  __esModule: true,
+  useRouter: () => ({
+    back: jest.fn(),
+  }),
+}));
+
 jest.mock("next/link", () => ({
   __esModule: true,
   default: ({ children, href, ...props }: any) => (
@@ -45,8 +52,8 @@ describe("ErrorComponent", () => {
   it("renders a styled link back to the home page", () => {
     render(<ErrorComponent />);
 
-    const homeLink = screen.getByRole("link", { name: "TAKE ME HOME" });
+    const homeLink = screen.getByRole("link", { name: "6529 HOME" });
     expect(homeLink).toHaveAttribute("href", "/");
-    expect(homeLink).toHaveClass("tw-mt-4", "tw-text-md", "tw-font-semibold");
+    expect(homeLink).toHaveClass("tw-mt-5", "tw-text-lg", "tw-font-semibold");
   });
 });

@@ -1,14 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import SubsequentDecisions from '../../../../../components/waves/create-wave/dates/SubsequentDecisions';
-import { Period } from '../../../../../helpers/Types';
+import SubsequentDecisions from '@/components/waves/create-wave/dates/SubsequentDecisions';
+import { Period } from '@/helpers/Types';
 
-jest.mock('../../../../../components/waves/create-wave/dates/DecisionPointDropdown', () => ({
+jest.mock('@/components/waves/create-wave/dates/DecisionPointDropdown', () => ({
   __esModule: true,
   default: ({ onChange }: any) => <button data-testid="dropdown" onClick={() => onChange(Period.HOURS)}>select</button>,
 }));
 
-jest.mock('../../../../../components/utils/button/PrimaryButton', () => (props: any) => (
+jest.mock('@/components/utils/button/PrimaryButton', () => (props: any) => (
   <button onClick={props.onClicked} disabled={props.disabled}>{props.children}</button>
 ));
 

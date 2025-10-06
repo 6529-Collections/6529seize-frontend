@@ -1,14 +1,12 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import Link from "next/link";
 import { Metadata } from "next";
-
-
 
 export default function Author6529er6529IoPage() {
   return (
     <div>
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
       <meta
         name="robots"
         content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
@@ -250,12 +248,12 @@ export default function Author6529er6529IoPage() {
                 <div className="fusion-page-title-wrapper">
                   <div className="fusion-page-title-captions">
                     <h1 className="entry-title">
-                      <a
+                      <Link
                         href="/cdn-cgi/l/email-protection"
                         className="__cf_email__"
                         data-cfemail="4177747378243301777473786f282e">
                         [email&nbsp;protected]
-                      </a>
+                      </Link>
                     </h1>
                     <div className="fusion-page-title-secondary"></div>
                   </div>
@@ -331,11 +329,11 @@ export default function Author6529er6529IoPage() {
                           />
                           <div className="fusion-rollover">
                             <div className="fusion-rollover-content">
-                              <a
+                              <Link
                                 className="fusion-rollover-link"
                                 href="/news/introducing-om/">
                                 INTRODUCING OM
-                              </a>
+                              </Link>
                               <div className="fusion-rollover-sep" />
                               <a
                                 className="fusion-rollover-gallery"
@@ -347,18 +345,18 @@ export default function Author6529er6529IoPage() {
                                 Gallery{" "}
                               </a>
                               <h4 className="fusion-rollover-title">
-                                <a
+                                <Link
                                   className="fusion-rollover-title-link"
                                   href="/news/introducing-om/">
                                   INTRODUCING OM{" "}
-                                </a>
+                                </Link>
                               </h4>
                               <div className="fusion-rollover-categories">
-                                <a href="/category/news/" rel="tag">
+                                <Link href="/category/news/" rel="tag">
                                   NEWS
-                                </a>
+                                </Link>
                               </div>
-                              <a
+                              <Link
                                 className="fusion-link-wrapper"
                                 href="/news/introducing-om/"
                                 aria-label="INTRODUCING OM"
@@ -369,16 +367,16 @@ export default function Author6529er6529IoPage() {
                         <div className="fusion-post-content-wrapper">
                           <div className="fusion-post-content post-content">
                             <h2 className="entry-title fusion-post-title">
-                              <a href="/news/introducing-om/">INTRODUCING OM</a>
+                              <Link href="/news/introducing-om/">INTRODUCING OM</Link>
                             </h2>
                             <span className="vcard rich-snippet-hidden">
                               <span className="fn">
-                                <a
+                                <Link
                                   href="/author/6529er6529-io/"
                                   title="Posts by 6529er"
                                   rel="author">
                                   6529er
-                                </a>
+                                </Link>
                               </span>
                             </span>
                             <span className="updated rich-snippet-hidden">
@@ -398,12 +396,12 @@ export default function Author6529er6529IoPage() {
                           </span>
                           <span className="vcard rich-snippet-hidden">
                             <span className="fn">
-                              <a
+                              <Link
                                 href="/author/6529er6529-io/"
                                 title="Posts by 6529er"
                                 rel="author">
                                 6529er
-                              </a>
+                              </Link>
                             </span>
                           </span>
                           <span className="updated rich-snippet-hidden">
@@ -424,9 +422,13 @@ export default function Author6529er6529IoPage() {
         {/* wrapper */}
       </div>{" "}
       {/* #boxed-wrapper */}
-        <button type="button" className="fusion-one-page-text-link fusion-page-load-link" tabIndex={-1} aria-hidden="true">
-          Page load link
-        </button>
+      <button
+        type="button"
+        className="fusion-one-page-text-link fusion-page-load-link"
+        tabIndex={-1}
+        aria-hidden="true">
+        Page load link
+      </button>
       <div className="avada-footer-scripts">
         <div
           id="sticky-social-icons-container"
@@ -436,6 +438,7 @@ export default function Author6529er6529IoPage() {
               <a
                 href="https://twitter.com/punk6529"
                 target="_blank"
+                rel="noopener noreferrer"
                 className="fab-fa-twitter">
                 <i className="fab fa-twitter" />
               </a>
@@ -446,16 +449,15 @@ export default function Author6529er6529IoPage() {
       <section
         className="to-top-container to-top-right"
         aria-labelledby="awb-to-top-label">
-          <button type="button" id="toTop" className="fusion-top-top-link">
-            <span id="awb-to-top-label" className="screen-reader-text">
-              Go to Top
-            </span>
-          </button>
+        <button type="button" id="toTop" className="fusion-top-top-link">
+          <span id="awb-to-top-label" className="screen-reader-text">
+            Go to Top
+          </span>
+        </button>
       </section>
     </div>
-);
+  );
 }
-
 
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({ title: "6529er, Author at 6529.io" });

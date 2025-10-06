@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { UnifiedWavesListLoader } from '../../../../../components/brain/left-sidebar/waves/UnifiedWavesListLoader';
+import { UnifiedWavesListLoader } from '@/components/brain/left-sidebar/waves/UnifiedWavesListLoader';
 
 test('returns null when not fetching', () => {
   const { container } = render(<UnifiedWavesListLoader isFetchingNextPage={false} />);

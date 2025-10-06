@@ -1,7 +1,7 @@
-import { SortDirection } from "../entities/ISort";
-import { ApiDrop } from "../generated/models/ApiDrop";
-import { ApiIdentity } from "../generated/models/ApiIdentity";
-import { ApiProfileMin } from "../generated/models/ApiProfileMin";
+import { SortDirection } from "@/entities/ISort";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 
 export interface FullPageRequest<SORT_BY_OPTIONS> {
   readonly sort_direction: SortDirection;

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { SortDirection } from "../../../entities/ISort";
+import { SortDirection } from "@/entities/ISort";
 import CommunityMembersTableHeaderSortableContent from "./CommunityMembersTableHeaderSortableContent";
-import { CommunityMembersSortOption } from "../../../enums";
+import { CommunityMembersSortOption } from "@/enums";
 
 export default function CommunityMembersTableHeader({
   activeSort,

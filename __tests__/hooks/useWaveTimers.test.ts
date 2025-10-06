@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { useWaveTimers } from '../../hooks/useWaveTimers';
+import { useWaveTimers } from '@/hooks/useWaveTimers';
 
 describe('useWaveTimers', () => {
   beforeEach(() => {

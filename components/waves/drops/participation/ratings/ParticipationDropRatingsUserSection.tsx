@@ -1,5 +1,5 @@
-import { ApiDrop } from "../../../../../generated/models/ApiDrop";
-import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { RatingsSectionProps, RatingsData, ThemeColors } from "./types";
 
 interface ParticipationDropRatingsUserSectionProps extends RatingsSectionProps {

@@ -1,8 +1,8 @@
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { AppWalletsProvider, useAppWallets } from '../../../components/app-wallets/AppWalletsContext';
+import { AppWalletsProvider, useAppWallets } from '@/components/app-wallets/AppWalletsContext';
 
-jest.mock('../../../hooks/useCapacitor', () => ({
+jest.mock('@/hooks/useCapacitor', () => ({
   __esModule: true,
   default: jest.fn().mockReturnValue({ isCapacitor: true })
 }));
@@ -20,9 +20,9 @@ jest.mock('capacitor-secure-storage-plugin', () => ({
   }
 }));
 
-jest.mock('../../../components/app-wallets/app-wallet-helpers', () => ({ encryptData: jest.fn(async (_a,_b,v) => v) }));
+jest.mock('@/components/app-wallets/app-wallet-helpers', () => ({ encryptData: jest.fn(async (_a,_b,v) => v) }));
 
-jest.mock('../../../helpers/time', () => ({ Time: { now: () => ({ toSeconds: () => 1 }) } }));
+jest.mock('@/helpers/time', () => ({ Time: { now: () => ({ toSeconds: () => 1 }) } }));
 
 describe('AppWalletsContext importAppWallet', () => {
   it('imports wallet when supported', async () => {

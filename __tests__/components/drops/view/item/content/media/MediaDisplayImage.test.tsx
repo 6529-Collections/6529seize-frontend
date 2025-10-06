@@ -1,18 +1,18 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 
-jest.mock('../../../../../../../helpers/image.helpers', () => ({
+jest.mock('@/helpers/image.helpers', () => ({
   getScaledImageUri: jest.fn(() => 'scaled-url'),
   ImageScale: { AUTOx450: 'AUTOx450' },
 }));
 
-jest.mock('../../../../../../../hooks/useInView', () => ({
+jest.mock('@/hooks/useInView', () => ({
   useInView: jest.fn(() => [React.createRef(), true] as any),
 }));
 
-import MediaDisplayImage from '../../../../../../../components/drops/view/item/content/media/MediaDisplayImage';
+import MediaDisplayImage from '@/components/drops/view/item/content/media/MediaDisplayImage';
 
-const { getScaledImageUri } = require('../../../../../../../helpers/image.helpers');
+const { getScaledImageUri } = require('@/helpers/image.helpers');
 
 describe('MediaDisplayImage', () => {
   it('displays scaled image after load', () => {

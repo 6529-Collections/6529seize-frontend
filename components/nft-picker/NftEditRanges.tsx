@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { KeyboardEvent } from "react";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCopy } from "@fortawesome/free-solid-svg-icons";
+import { faCopy, faCheck } from "@fortawesome/free-solid-svg-icons";
 
 import type { ParseError, TokenRange } from "./NftPicker.types";
 import { formatCanonical, formatBigIntWithSeparators } from "./NftPicker.utils";
@@ -111,9 +111,7 @@ export function NftEditRanges({
       textarea.select();
       try {
         textarea.setSelectionRange(0, textarea.value.length);
-      } catch (error) {
-        /* no-op, best effort for iOS/WebKit */
-      }
+      } catch {}
       const successful = document.execCommand("copy");
       textarea.remove();
       if (!successful) {
@@ -158,7 +156,10 @@ export function NftEditRanges({
                   aria-label="Copy token selection"
                 >
                   {copyStatus === "copied" ? (
-                    <span className="tw-font-semibold tw-text-emerald-300">✓ Copied!</span>
+                    <span className="tw-inline-flex tw-items-center tw-gap-2 tw-font-semibold tw-text-emerald-300">
+                      <FontAwesomeIcon icon={faCheck} />
+                      <span>Copied!</span>
+                    </span>
                   ) : (
                     <>
                       <FontAwesomeIcon icon={faCopy} />

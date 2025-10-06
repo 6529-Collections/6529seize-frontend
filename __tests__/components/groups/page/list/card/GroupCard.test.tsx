@@ -2,7 +2,7 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react";
 import GroupCard, {
   GroupCardState,
-} from "../../../../../../components/groups/page/list/card/GroupCard";
+} from "@/components/groups/page/list/card/GroupCard";
 import { AuthContext } from "@/components/auth/Auth";
 import { useRouter } from "next/navigation";
 

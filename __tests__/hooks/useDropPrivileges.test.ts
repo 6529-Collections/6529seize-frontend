@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import { useDropPrivileges, SubmissionRestriction, ChatRestriction } from '../..//hooks/useDropPriviledges';
+import { useDropPrivileges, SubmissionRestriction, ChatRestriction } from '@/hooks/useDropPriviledges';
 
 describe('useDropPrivileges', () => {
   it('returns not logged in restrictions', () => {

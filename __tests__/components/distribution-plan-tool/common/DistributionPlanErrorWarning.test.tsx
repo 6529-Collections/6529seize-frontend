@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import DistributionPlanErrorWarning from '../../../../components/distribution-plan-tool/common/DistributionPlanErrorWarning';
-import { DistributionPlanToolContext } from '../../../../components/distribution-plan-tool/DistributionPlanToolContext';
+import DistributionPlanErrorWarning from '@/components/distribution-plan-tool/common/DistributionPlanErrorWarning';
+import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
 
 describe('DistributionPlanErrorWarning', () => {
   it('displays error reason and reruns analysis when button clicked', () => {

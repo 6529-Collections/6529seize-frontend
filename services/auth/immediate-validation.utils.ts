@@ -1,12 +1,12 @@
 import { validateJwt } from "./jwt-validation.utils";
-import { validateRoleForAuthentication } from "../../utils/role-validation";
+import { validateRoleForAuthentication } from "@/utils/role-validation";
 import {
   AuthenticationRoleError,
   RoleValidationError,
   MissingActiveProfileError,
   InvalidRoleStateError
-} from "../../errors/authentication";
-import { ApiProfileProxy } from "../../generated/models/ApiProfileProxy";
+} from "@/errors/authentication";
+import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 
 interface ImmediateValidationParams {
   currentAddress: string;

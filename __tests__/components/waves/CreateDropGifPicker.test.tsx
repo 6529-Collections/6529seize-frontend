@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import CreateDropGifPicker from "../../../components/waves/CreateDropGifPicker";
+import CreateDropGifPicker from "@/components/waves/CreateDropGifPicker";
 
 jest.mock("gif-picker-react", () => ({
   __esModule: true,
@@ -11,7 +11,7 @@ jest.mock("gif-picker-react", () => ({
 
 type DialogProps = { isOpen: boolean; onClose: () => void; children: any };
 jest.mock(
-  "../../../components/mobile-wrapper-dialog/MobileWrapperDialog",
+  "@/components/mobile-wrapper-dialog/MobileWrapperDialog",
   () => (props: DialogProps) =>
     (
       <div data-testid="dialog">

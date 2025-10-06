@@ -1,10 +1,10 @@
-import { ApiGroupFull } from "../../../../../../generated/models/ApiGroupFull";
-import { ApiWave } from "../../../../../../generated/models/ApiWave";
-import SelectGroupModalWrapper from "../../../../../utils/select-group/SelectGroupModalWrapper";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { ApiWave } from "@/generated/models/ApiWave";
+import SelectGroupModalWrapper from "@/components/utils/select-group/SelectGroupModalWrapper";
 import { WaveGroupType } from "../WaveGroup";
-import { convertWaveToUpdateWave } from "../../../../../../helpers/waves/waves.helpers";
-import { assertUnreachable } from "../../../../../../helpers/AllowlistToolHelpers";
-import { ApiUpdateWaveRequest } from "../../../../../../generated/models/ApiUpdateWaveRequest";
+import { convertWaveToUpdateWave } from "@/helpers/waves/waves.helpers";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
 
 export default function WaveGroupEdit({
   wave,

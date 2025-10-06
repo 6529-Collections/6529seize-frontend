@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import AllowlistToolCommonModalWrapper, { AllowlistToolModalSize } from '../../../../../components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper';
+import AllowlistToolCommonModalWrapper, { AllowlistToolModalSize } from '@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper';
 
 jest.mock('react-use', () => ({
   useClickAway: (ref: React.RefObject<HTMLElement>, handler: () => void) => {

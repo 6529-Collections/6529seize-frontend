@@ -1,11 +1,11 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import React from 'react';
-import CommonDropdownItem from '../../../../../components/utils/select/dropdown/CommonDropdownItem';
-import { SortDirection } from '../../../../../entities/ISort';
+import CommonDropdownItem from '@/components/utils/select/dropdown/CommonDropdownItem';
+import { SortDirection } from '@/entities/ISort';
 
 jest.useFakeTimers();
 
-jest.mock('../../../../../components/user/utils/icons/CommonTableSortIcon', () => (props: any) => (
+jest.mock('@/components/user/utils/icons/CommonTableSortIcon', () => (props: any) => (
   <div data-testid="sort">{props.direction}</div>
 ));
 

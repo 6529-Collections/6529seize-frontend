@@ -1,56 +1,56 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 import React from "react";
-import { AuthContext } from "../../../../components/auth/Auth";
-import { ReactQueryWrapperContext } from "../../../../components/react-query-wrapper/ReactQueryWrapper";
-import CreateWave from "../../../../components/waves/create-wave/CreateWave";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
-import { CreateWaveStep } from "../../../../types/waves.types";
+import { AuthContext } from "@/components/auth/Auth";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import CreateWave from "@/components/waves/create-wave/CreateWave";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { CreateWaveStep } from "@/types/waves.types";
 
 // Mock all dependencies
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
 }));
 
-jest.mock("../../../../hooks/useCapacitor", () => ({
+jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
   default: jest.fn(() => ({ isIos: false, keyboardVisible: false })),
 }));
 
 jest.mock(
-  "../../../../components/waves/create-wave/hooks/useWaveConfig",
+  "@/components/waves/create-wave/hooks/useWaveConfig",
   () => ({
     useWaveConfig: jest.fn(),
   })
 );
 
 jest.mock(
-  "../../../../components/waves/create-wave/services/waveApiService",
+  "@/components/waves/create-wave/services/waveApiService",
   () => ({
     useAddWaveMutation: jest.fn(),
   })
 );
 
-jest.mock("../../../../helpers/waves/create-wave.helpers", () => ({
+jest.mock("@/helpers/waves/create-wave.helpers", () => ({
   getCreateNewWaveBody: jest.fn(),
 }));
 
 jest.mock(
-  "../../../../components/waves/create-wave/services/waveMediaService",
+  "@/components/waves/create-wave/services/waveMediaService",
   () => ({
     generateDropPart: jest.fn(),
   })
 );
 
 jest.mock(
-  "../../../../components/waves/create-wave/services/waveGroupService",
+  "@/components/waves/create-wave/services/waveGroupService",
   () => ({
     getAdminGroupId: jest.fn(),
   })
 );
 
 jest.mock(
-  "../../../../components/waves/create-wave/services/multiPartUpload",
+  "@/components/waves/create-wave/services/multiPartUpload",
   () => ({
     multiPartUpload: jest.fn(),
   })
@@ -58,7 +58,7 @@ jest.mock(
 
 // Mock step components
 jest.mock(
-  "../../../../components/waves/create-wave/overview/CreateWaveOverview",
+  "@/components/waves/create-wave/overview/CreateWaveOverview",
   () => {
     return function MockCreateWaveOverview() {
       return <div data-testid="create-wave-overview">Overview Step</div>;
@@ -67,7 +67,7 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../../components/waves/create-wave/groups/CreateWaveGroups",
+  "@/components/waves/create-wave/groups/CreateWaveGroups",
   () => {
     return function MockCreateWaveGroups() {
       return <div data-testid="create-wave-groups">Groups Step</div>;
@@ -76,7 +76,7 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../../components/waves/create-wave/utils/CreateWaveActions",
+  "@/components/waves/create-wave/utils/CreateWaveActions",
   () => {
     return function MockCreateWaveActions({
       onComplete,
@@ -93,7 +93,7 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../../components/waves/create-wave/description/CreateWaveDescription",
+  "@/components/waves/create-wave/description/CreateWaveDescription",
   () => {
     return React.forwardRef(function MockCreateWaveDescription(
       { showDropError, onHaveDropToSubmitChange }: any,
@@ -121,12 +121,12 @@ jest.mock(
   }
 );
 
-import { useWaveConfig } from "../../../../components/waves/create-wave/hooks/useWaveConfig";
-import { multiPartUpload } from "../../../../components/waves/create-wave/services/multiPartUpload";
-import { useAddWaveMutation } from "../../../../components/waves/create-wave/services/waveApiService";
-import { getAdminGroupId } from "../../../../components/waves/create-wave/services/waveGroupService";
-import { generateDropPart } from "../../../../components/waves/create-wave/services/waveMediaService";
-import { getCreateNewWaveBody } from "../../../../helpers/waves/create-wave.helpers";
+import { useWaveConfig } from "@/components/waves/create-wave/hooks/useWaveConfig";
+import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
+import { useAddWaveMutation } from "@/components/waves/create-wave/services/waveApiService";
+import { getAdminGroupId } from "@/components/waves/create-wave/services/waveGroupService";
+import { generateDropPart } from "@/components/waves/create-wave/services/waveMediaService";
+import { getCreateNewWaveBody } from "@/helpers/waves/create-wave.helpers";
 
 const mockedUseRouter = useRouter as jest.Mock;
 const mockedUseWaveConfig = useWaveConfig as jest.Mock;
@@ -552,7 +552,7 @@ describe("CreateWave", () => {
   });
 
   it("applies iOS specific styling when on iOS with keyboard not visible", () => {
-    const useCapacitor = require("../../../../hooks/useCapacitor").default;
+    const useCapacitor = require("@/hooks/useCapacitor").default;
     useCapacitor.mockReturnValue({ isIos: true, keyboardVisible: false });
 
     renderCreateWave();
@@ -563,7 +563,7 @@ describe("CreateWave", () => {
   });
 
   it("does not apply iOS styling when keyboard is visible", () => {
-    const useCapacitor = require("../../../../hooks/useCapacitor").default;
+    const useCapacitor = require("@/hooks/useCapacitor").default;
     useCapacitor.mockReturnValue({ isIos: true, keyboardVisible: true });
 
     renderCreateWave();

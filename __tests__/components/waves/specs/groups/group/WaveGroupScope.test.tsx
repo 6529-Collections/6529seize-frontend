@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
-import WaveGroupScope from '../../../../../../components/waves/specs/groups/group/WaveGroupScope';
+import WaveGroupScope from '@/components/waves/specs/groups/group/WaveGroupScope';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children, className }: any) => <a href={href} className={className}>{children}</a> }));
-jest.mock('../../../../../../helpers/image.helpers', () => ({ getScaledImageUri: (u: string) => 'scaled-' + u, ImageScale: { W_AUTO_H_50: '50' } }));
+jest.mock('@/helpers/image.helpers', () => ({ getScaledImageUri: (u: string) => 'scaled-' + u, ImageScale: { W_AUTO_H_50: '50' } }));
 
 describe('WaveGroupScope', () => {
   it('shows hidden label', () => {

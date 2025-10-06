@@ -1,29 +1,29 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import { WaveSmallLeaderboardDefaultDrop } from '../../../../components/waves/small-leaderboard/WaveSmallLeaderboardDefaultDrop';
-import { CICType } from '../../../../entities/IProfile';
+import { WaveSmallLeaderboardDefaultDrop } from '@/components/waves/small-leaderboard/WaveSmallLeaderboardDefaultDrop';
+import { CICType } from '@/entities/IProfile';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ children }: any) => <a>{children}</a> }));
 
-jest.mock('../../../../components/waves/small-leaderboard/WaveSmallLeaderboardItemContent', () => ({
+jest.mock('@/components/waves/small-leaderboard/WaveSmallLeaderboardItemContent', () => ({
   __esModule: true,
   WaveSmallLeaderboardItemContent: (props: any) => (
     <div data-testid="content" onClick={() => props.onDropClick(props.drop)} />
   )
 }));
 
-jest.mock('../../../../components/waves/small-leaderboard/WaveSmallLeaderboardItemOutcomes', () => ({
+jest.mock('@/components/waves/small-leaderboard/WaveSmallLeaderboardItemOutcomes', () => ({
   __esModule: true,
   WaveSmallLeaderboardItemOutcomes: () => <div data-testid="outcomes" />
 }));
 
-jest.mock('../../../../components/waves/drops/WaveDropActionsRate', () => ({ __esModule: true, default: () => <div data-testid="rate" /> }));
+jest.mock('@/components/waves/drops/WaveDropActionsRate', () => ({ __esModule: true, default: () => <div data-testid="rate" /> }));
 
-jest.mock('../../../../components/waves/drops/winner/WinnerDropBadge', () => ({ __esModule: true, default: () => <div data-testid="badge" /> }));
+jest.mock('@/components/waves/drops/winner/WinnerDropBadge', () => ({ __esModule: true, default: () => <div data-testid="badge" /> }));
 
-jest.mock('../../../../components/drops/view/utils/DropVoteProgressing', () => ({ __esModule: true, default: () => <div data-testid="progress" /> }));
+jest.mock('@/components/drops/view/utils/DropVoteProgressing', () => ({ __esModule: true, default: () => <div data-testid="progress" /> }));
 
-jest.mock('../../../../helpers/Helpers', () => ({
+jest.mock('@/helpers/Helpers', () => ({
   __esModule: true,
   cicToType: jest.fn(() => CICType.INACCURATE),
   formatNumberWithCommas: (n: number) => n.toString()

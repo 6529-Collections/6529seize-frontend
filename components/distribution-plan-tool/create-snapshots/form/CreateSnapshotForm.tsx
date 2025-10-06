@@ -1,23 +1,23 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
+import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import {
   getRandomObjectId,
   isEthereumAddress,
-} from "../../../../helpers/AllowlistToolHelpers";
+} from "@/helpers/AllowlistToolHelpers";
 import {
   AllowlistOperationCode,
   DistributionPlanSearchContractMetadataResult,
-} from "../../../allowlist-tool/allowlist-tool.types";
-import styles from "../../DistributionPlan.module.scss";
-import DistributionPlanAddOperationBtn from "../../common/DistributionPlanAddOperationBtn";
+} from "@/components/allowlist-tool/allowlist-tool.types";
+import styles from "@/components/distribution-plan-tool/DistributionPlan.module.scss";
+import DistributionPlanAddOperationBtn from "@/components/distribution-plan-tool/common/DistributionPlanAddOperationBtn";
 import { Tooltip } from "react-tooltip";
 import CreateSnapshotFormSearchCollection from "./CreateSnapshotFormSearchCollection";
 import {
   distributionPlanApiFetch,
   distributionPlanApiPost,
-} from "../../../../services/distribution-plan-api";
+} from "@/services/distribution-plan-api";
 interface CreateSnapshotFormValues {
   name: string;
   contract: string;

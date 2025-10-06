@@ -1,18 +1,18 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import Decisions from '../../../../../components/waves/create-wave/dates/Decisions';
+import Decisions from '@/components/waves/create-wave/dates/Decisions';
 
-jest.mock('../../../../../components/waves/create-wave/dates/DecisionsFirst', () => () => <div data-testid="first" />);
-jest.mock('../../../../../components/waves/create-wave/dates/SubsequentDecisions', () => (props: any) => (
+jest.mock('@/components/waves/create-wave/dates/DecisionsFirst', () => () => <div data-testid="first" />);
+jest.mock('@/components/waves/create-wave/dates/SubsequentDecisions', () => (props: any) => (
   <button data-testid="sub" onClick={() => props.setSubsequentDecisions([1])}>add</button>
 ));
-jest.mock('../../../../../components/waves/create-wave/services/waveDecisionService', () => ({
+jest.mock('@/components/waves/create-wave/services/waveDecisionService', () => ({
   calculateDecisionTimes: jest.fn(() => [1, 2]),
   calculateEndDateForCycles: jest.fn(() => 3),
 }));
-jest.mock('../../../../../components/common/DateAccordion', () => (props: any) => <div>{props.children}</div>);
-jest.mock('../../../../../components/common/TooltipIconButton', () => () => <div />);
-jest.mock('../../../../../components/utils/switch/CommonSwitch', () => (props: any) => (
+jest.mock('@/components/common/DateAccordion', () => (props: any) => <div>{props.children}</div>);
+jest.mock('@/components/common/TooltipIconButton', () => () => <div />);
+jest.mock('@/components/utils/switch/CommonSwitch', () => (props: any) => (
   <button role="switch" onClick={() => props.setIsOn(!props.isOn)}>{String(props.isOn)}</button>
 ));
 

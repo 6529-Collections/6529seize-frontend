@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { render, screen } from '@testing-library/react';
-import { LayoutProvider, useLayout } from '../../../../../components/brain/my-stream/layout/LayoutContext';
+import { LayoutProvider, useLayout } from '@/components/brain/my-stream/layout/LayoutContext';
 
-jest.mock('../../../../../hooks/useCapacitor', () => ({ __esModule: true, default: () => ({ isCapacitor: false, isAndroid: false, isIos: false }) }));
+jest.mock('@/hooks/useCapacitor', () => ({ __esModule: true, default: () => ({ isCapacitor: false, isAndroid: false, isIos: false }) }));
 
 beforeAll(() => {
   // run RAF callbacks immediately

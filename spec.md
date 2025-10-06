@@ -472,7 +472,11 @@ export default function Demo() {
         placeholder="Search by collection name or paste contract address…"
       />
       <pre className="tw-mt-4 tw-text-xs tw-bg-iron-900 tw-border tw-border-iron-800 tw-p-3 tw-rounded">
-        {JSON.stringify(selection, null, 2)}
+        {JSON.stringify(
+          selection,
+          (_, value) => (typeof value === "bigint" ? value.toString() : value),
+          2
+        )}
       </pre>
     </div>
   );

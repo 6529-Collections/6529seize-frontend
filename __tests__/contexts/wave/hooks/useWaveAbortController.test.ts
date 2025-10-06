@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { useWaveAbortController } from '../../../../contexts/wave/hooks/useWaveAbortController';
+import { useWaveAbortController } from '@/contexts/wave/hooks/useWaveAbortController';
 
 describe('useWaveAbortController', () => {
   it('creates, cancels and cleans up controllers', () => {

@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import UserPageIdentityAddStatementsNFTAccountHeader from '../../../../../../../components/user/identity/statements/add/nft-accounts/UserPageIdentityAddStatementsNFTAccountHeader';
+import UserPageIdentityAddStatementsNFTAccountHeader from '@/components/user/identity/statements/add/nft-accounts/UserPageIdentityAddStatementsNFTAccountHeader';
 
 describe('UserPageIdentityAddStatementsNFTAccountHeader', () => {
   it('renders title and handles close', async () => {

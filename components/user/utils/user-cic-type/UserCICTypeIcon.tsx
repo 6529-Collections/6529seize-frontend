@@ -1,5 +1,5 @@
-import { CICType } from "../../../../entities/IProfile";
-import { cicToType } from "../../../../helpers/Helpers";
+import { CICType } from "@/entities/IProfile";
+import { cicToType } from "@/helpers/Helpers";
 import UserCICAccurateIcon from "./icons/UserCICAccurateIcon";
 import UserCICUnknownIcon from "./icons/UserCICUnknownIcon";
 import UserCICInaccurateIcon from "./icons/UserCICInaccurateIcon";

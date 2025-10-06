@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import { waitFor } from '@testing-library/react';
-import InfiniteScrollTrigger from '../../../../components/utils/infinite-scroll/InfiniteScrollTrigger';
+import InfiniteScrollTrigger from '@/components/utils/infinite-scroll/InfiniteScrollTrigger';
 
 const onIntersection = jest.fn();
 const useIntersectionMock = jest.fn();

@@ -1,18 +1,18 @@
 "use client";
 
-import Toggle from "react-toggle";
-import styles from "./About.module.scss";
-import { Col, Container, Row, Table } from "react-bootstrap";
-import { useState } from "react";
-import {
-  useCookieConsent,
-  getCookieConsentByName,
-} from "../cookies/CookieConsentContext";
 import {
   CONSENT_ESSENTIAL_COOKIE,
   CONSENT_EULA_COOKIE,
   CONSENT_PERFORMANCE_COOKIE,
-} from "../../constants";
+} from "@/constants";
+import { useState } from "react";
+import { Col, Container, Row, Table } from "react-bootstrap";
+import Toggle from "react-toggle";
+import {
+  getCookieConsentByName,
+  useCookieConsent,
+} from "../cookies/CookieConsentContext";
+import styles from "./About.module.scss";
 
 export default function AboutCookiePolicy() {
   const { showCookieConsent, consent, reject } = useCookieConsent();
@@ -103,7 +103,7 @@ export default function AboutCookiePolicy() {
                         <a
                           href="https://cookiepedia.co.uk/cookies/AWSALBTGCORS"
                           target="_blank"
-                          rel="noreferrer">
+                          rel="noopener noreferrer">
                           AWSALBTGCORS
                         </a>{" "}
                         (Amazon Web Services)
@@ -117,7 +117,7 @@ export default function AboutCookiePolicy() {
                         <a
                           href="https://cookiepedia.co.uk/cookies/AWSALBTG"
                           target="_blank"
-                          rel="noreferrer">
+                          rel="noopener noreferrer">
                           AWSALBTG
                         </a>{" "}
                         (Amazon Web Services)
@@ -210,7 +210,7 @@ export default function AboutCookiePolicy() {
                         <a
                           href="https://cookiepedia.co.uk/cookies/_ga_"
                           target="_blank"
-                          rel="noreferrer">
+                          rel="noopener noreferrer">
                           _ga_71NLVV3KY3
                         </a>{" "}
                         (Google Analytics)
@@ -224,7 +224,7 @@ export default function AboutCookiePolicy() {
                         <a
                           href="https://cookiepedia.co.uk/cookies/_ga"
                           target="_blank"
-                          rel="noreferrer">
+                          rel="noopener noreferrer">
                           _ga
                         </a>{" "}
                         (Google Analytics)
@@ -238,7 +238,7 @@ export default function AboutCookiePolicy() {
                         <a
                           href="https://cookiepedia.co.uk/cookies/_gid"
                           target="_blank"
-                          rel="noreferrer">
+                          rel="noopener noreferrer">
                           _gid
                         </a>{" "}
                         (Google Analytics)

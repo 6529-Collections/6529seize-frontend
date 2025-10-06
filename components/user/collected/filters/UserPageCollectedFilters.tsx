@@ -5,16 +5,16 @@ import {
   CollectedCollectionType,
   CollectionSeized,
   CollectionSort,
-} from "../../../../entities/IProfile";
-import { MEMES_SEASON } from "../../../../enums";
+} from "@/entities/IProfile";
+import { MEMES_SEASON } from "@/enums";
 import { ProfileCollectedFilters } from "../UserPageCollected";
 import UserPageCollectedFiltersCollection from "./UserPageCollectedFiltersCollection";
 import UserPageCollectedFiltersSortBy from "./UserPageCollectedFiltersSortBy";
 import UserPageCollectedFiltersSeized from "./UserPageCollectedFiltersSeized";
 import UserPageCollectedFiltersSzn from "./UserPageCollectedFiltersSzn";
-import UserAddressesSelectDropdown from "../../utils/addresses-select/UserAddressesSelectDropdown";
+import UserAddressesSelectDropdown from "@/components/user/utils/addresses-select/UserAddressesSelectDropdown";
 import { COLLECTED_COLLECTIONS_META } from "./user-page-collected-filters.helpers";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 export default function UserPageCollectedFilters({
   profile,
   filters,

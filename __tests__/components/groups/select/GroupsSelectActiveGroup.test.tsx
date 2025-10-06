@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import GroupsSelectActiveGroup from '../../../../components/groups/select/GroupsSelectActiveGroup';
-import { QueryKey } from '../../../../components/react-query-wrapper/ReactQueryWrapper';
+import GroupsSelectActiveGroup from '@/components/groups/select/GroupsSelectActiveGroup';
+import { QueryKey } from '@/components/react-query-wrapper/ReactQueryWrapper';
 
 jest.mock('@tanstack/react-query', () => ({
   useQuery: jest.fn(),
@@ -14,7 +14,7 @@ jest.mock('react-redux', () => ({
 }));
 
 let capturedProps: any = null;
-jest.mock('../../../../components/groups/select/item/GroupItem', () => (props: any) => {
+jest.mock('@/components/groups/select/item/GroupItem', () => (props: any) => {
   capturedProps = props;
   return <div data-testid="group-item" onClick={() => props.onActiveGroupId('new-id')} />;
 });

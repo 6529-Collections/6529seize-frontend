@@ -1,14 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { MyStreamWaveTab } from '../../../../types/waves.types';
-import { ApiWaveType } from '../../../../generated/models/ApiWaveType';
-import { Time } from '../../../../helpers/time';
+import { MyStreamWaveTab } from '@/types/waves.types';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
+import { Time } from '@/helpers/time';
 
 const setActiveTab = jest.fn();
 const setActiveContentTab = jest.fn();
 const updateAvailableTabs = jest.fn();
 
-jest.mock('../../../../components/brain/ContentTabContext', () => {
+jest.mock('@/components/brain/ContentTabContext', () => {
   const actual = jest.requireActual('../../../../components/brain/ContentTabContext');
   return {
     __esModule: true,
@@ -21,7 +21,7 @@ jest.mock('../../../../components/brain/ContentTabContext', () => {
   };
 });
 
-jest.mock('../../../../hooks/useWave', () => ({
+jest.mock('@/hooks/useWave', () => ({
   useWave: () => ({
     ...mockWaveInfo,
     pauses: {
@@ -36,14 +36,14 @@ jest.mock('../../../../hooks/useWave', () => ({
   }),
 }));
 
-jest.mock('../../../../hooks/useWaveTimers', () => ({
+jest.mock('@/hooks/useWaveTimers', () => ({
   useWaveTimers: () => ({
     voting: mockVoting,
     decisions: { firstDecisionDone: false },
   }),
 }));
 
-jest.mock('../../../../hooks/waves/useDecisionPoints', () => ({
+jest.mock('@/hooks/waves/useDecisionPoints', () => ({
   useDecisionPoints: () => ({
     allDecisions: mockDecisions,
     hasMoreFuture: false,
@@ -51,14 +51,14 @@ jest.mock('../../../../hooks/waves/useDecisionPoints', () => ({
   }),
 }));
 
-jest.mock('../../../../components/waves/leaderboard/time/CompactTimeCountdown', () => ({
+jest.mock('@/components/waves/leaderboard/time/CompactTimeCountdown', () => ({
   __esModule: true,
   CompactTimeCountdown: ({ timeLeft }: any) => (
     <div data-testid="countdown">{timeLeft.seconds}</div>
   ),
 }));
 
-import MyStreamWaveDesktopTabs from '../../../../components/brain/my-stream/MyStreamWaveDesktopTabs';
+import MyStreamWaveDesktopTabs from '@/components/brain/my-stream/MyStreamWaveDesktopTabs';
 
 let mockAvailableTabs: MyStreamWaveTab[] = [];
 let mockWaveInfo: any = { isChatWave: false, isMemesWave: false, isRankWave: false };

@@ -1,13 +1,13 @@
 import React from "react";
-import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
-import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { Tooltip } from "react-tooltip";
 import Link from "next/link";
 import {
   getScaledImageUri,
   ImageScale,
-} from "../../../../../helpers/image.helpers";
-import DropVoteProgressing from "../../../../drops/view/utils/DropVoteProgressing";
+} from "@/helpers/image.helpers";
+import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
 
 interface WaveLeaderboardDropRatersProps {
   readonly drop: ExtendedDrop;

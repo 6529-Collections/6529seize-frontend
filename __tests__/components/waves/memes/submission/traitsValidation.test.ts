@@ -1,6 +1,6 @@
-import { validateTraitsData } from '../../../../../components/waves/memes/submission/validation/traitsValidation';
+import { validateTraitsData } from '@/components/waves/memes/submission/validation/traitsValidation';
 
-jest.mock('../../../../../components/waves/memes/traits/schema', () => {
+jest.mock('@/components/waves/memes/traits/schema', () => {
   const actual = jest.requireActual('../../../../../components/waves/memes/traits/schema');
   return {
     ...actual,

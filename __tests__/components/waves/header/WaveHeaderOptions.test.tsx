@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import WaveHeaderOptions from '../../../../components/waves/header/options/WaveHeaderOptions';
+import WaveHeaderOptions from '@/components/waves/header/options/WaveHeaderOptions';
 
 let clickAway: () => void; let escCb: () => void;
 
@@ -14,7 +14,7 @@ jest.mock('framer-motion', () => ({
   motion: { div: (props: any) => <div {...props} /> },
 }));
 
-jest.mock('../../../../components/waves/header/options/delete/WaveDelete', () => (props: any) => <div data-testid="delete" data-wave={props.wave.id} />);
+jest.mock('@/components/waves/header/options/delete/WaveDelete', () => (props: any) => <div data-testid="delete" data-wave={props.wave.id} />);
 
 const wave = { id: 'w1' } as any;
 

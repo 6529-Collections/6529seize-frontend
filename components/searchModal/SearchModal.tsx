@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { Button, Form, InputGroup, Modal } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
-import { formatAddress } from "../../helpers/Helpers";
+import { formatAddress } from "@/helpers/Helpers";
 import styles from "./SearchModal.module.scss";
 
 interface Props {

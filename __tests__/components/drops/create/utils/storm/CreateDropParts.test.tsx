@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import CreateDropParts from "../../../../../../components/drops/create/utils/storm/CreateDropParts";
+import CreateDropParts from "@/components/drops/create/utils/storm/CreateDropParts";
 
 describe("CreateDropParts", () => {
   it("shows part info when storm mode", () => {

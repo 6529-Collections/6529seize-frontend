@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
-import GroupCardActionWrapper from '../../../../../../components/groups/page/list/card/GroupCardActionWrapper';
-import { ApiRateMatter } from '../../../../../../generated/models/ApiRateMatter';
+import GroupCardActionWrapper from '@/components/groups/page/list/card/GroupCardActionWrapper';
+import { ApiRateMatter } from '@/generated/models/ApiRateMatter';
 
-jest.mock('../../../../../../components/groups/page/list/card/utils/GroupCardActionFooter', () => (props: any) => (
+jest.mock('@/components/groups/page/list/card/utils/GroupCardActionFooter', () => (props: any) => (
   <div data-testid="footer" data-loading={props.loading} data-disabled={props.disabled} />
 ));
 

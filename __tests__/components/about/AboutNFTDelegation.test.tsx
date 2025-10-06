@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import AboutNFTDelegation from '../../../components/about/AboutNFTDelegation';
+import AboutNFTDelegation from '@/components/about/AboutNFTDelegation';
 
 describe('AboutNFTDelegation', () => {
   it('renders heading and link', () => {

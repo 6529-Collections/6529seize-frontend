@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import WaveDropsEmptyPlaceholder from '../../../../components/waves/drops/WaveDropsEmptyPlaceholder';
+import WaveDropsEmptyPlaceholder from '@/components/waves/drops/WaveDropsEmptyPlaceholder';
 
 describe('WaveDropsEmptyPlaceholder', () => {
   it('shows subtitle when drop id present', () => {

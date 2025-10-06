@@ -1,16 +1,16 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UserPageHeaderAboutEdit from '../../../../../components/user/user-page-header/about/UserPageHeaderAboutEdit';
-import { AuthContext } from '../../../../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../../../../components/react-query-wrapper/ReactQueryWrapper';
+import UserPageHeaderAboutEdit from '@/components/user/user-page-header/about/UserPageHeaderAboutEdit';
+import { AuthContext } from '@/components/auth/Auth';
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 import { useMutation } from '@tanstack/react-query';
 
 jest.mock('react-use', () => ({ useKeyPressEvent: jest.fn() }));
 
 jest.mock('@tanstack/react-query', () => ({ useMutation: jest.fn() }));
-jest.mock('../../../../../services/api/common-api', () => ({ commonApiPost: jest.fn().mockResolvedValue({}) }));
+jest.mock('@/services/api/common-api', () => ({ commonApiPost: jest.fn().mockResolvedValue({}) }));
 jest.mock('framer-motion', () => ({ AnimatePresence: (props: any) => <div>{props.children}</div> }));
-jest.mock('../../../../../components/user/user-page-header/about/UserPageHeaderAboutEditError', () => (props: any) => <div>{props.msg}</div>);
+jest.mock('@/components/user/user-page-header/about/UserPageHeaderAboutEditError', () => (props: any) => <div>{props.msg}</div>);
 
 (useMutation as jest.Mock).mockImplementation((opts) => {
   return {

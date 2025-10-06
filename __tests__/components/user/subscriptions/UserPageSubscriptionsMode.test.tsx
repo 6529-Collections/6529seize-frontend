@@ -1,13 +1,13 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import UserPageSubscriptionsMode from '../../../../components/user/subscriptions/UserPageSubscriptionsMode';
-import { AuthContext } from '../../../../components/auth/Auth';
-import { commonApiPost } from '../../../../services/api/common-api';
+import UserPageSubscriptionsMode from '@/components/user/subscriptions/UserPageSubscriptionsMode';
+import { AuthContext } from '@/components/auth/Auth';
+import { commonApiPost } from '@/services/api/common-api';
 
-jest.mock('../../../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiPost: jest.fn(),
 }));
 
-jest.mock('../../../../components/dotLoader/DotLoader', () => ({ Spinner: () => <span data-testid="spinner" /> }));
+jest.mock('@/components/dotLoader/DotLoader', () => ({ Spinner: () => <span data-testid="spinner" /> }));
 
 describe('UserPageSubscriptionsMode', () => {
   const requestAuth = jest.fn();

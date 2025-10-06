@@ -1,4 +1,4 @@
-import { ApiProfileProxy } from "../../../../generated/models/ApiProfileProxy";
+import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 
 export default function HeaderUserProxyDropdownItem({
   profileProxy,

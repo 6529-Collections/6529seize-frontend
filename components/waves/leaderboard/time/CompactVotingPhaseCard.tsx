@@ -1,7 +1,7 @@
 import React from "react";
-import { ApiWave } from "../../../../generated/models/ApiWave";
-import { useWave } from "../../../../hooks/useWave";
-import { useWaveTimers } from "../../../../hooks/useWaveTimers";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { useWave } from "@/hooks/useWave";
+import { useWaveTimers } from "@/hooks/useWaveTimers";
 
 interface CompactVotingPhaseCardProps {
   readonly wave: ApiWave;

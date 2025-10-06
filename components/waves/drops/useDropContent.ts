@@ -2,15 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
-import { commonApiFetch } from "../../../services/api/common-api";
-import { sanitizeErrorForUser } from "../../../utils/error-sanitizer";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { commonApiFetch } from "@/services/api/common-api";
+import { sanitizeErrorForUser } from "@/utils/error-sanitizer";
 import {
   ProcessedContent,
   isVideoMimeType,
   processContent,
 } from "./media-utils";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 interface UseDropContentResult {
   drop: ApiDrop | null;
   content: ProcessedContent;

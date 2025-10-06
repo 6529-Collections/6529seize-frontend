@@ -6,9 +6,9 @@ import {
   formatCanonical,
   fromCanonicalRanges,
   isRangeTooLargeError,
-  mergeAndSort,
   parseTokenExpressionToBigints,
   parseTokenExpressionToRanges,
+  sortAndDedupIds,
   toCanonicalRanges,
   tryToNumberArray,
 } from "@/components/nft-picker/NftPicker.utils";
@@ -97,8 +97,8 @@ describe("NftPicker.utils", () => {
     });
   });
 
-  it("merges and sorts token ids", () => {
-    const result = mergeAndSort([
+  it("sorts and deduplicates token ids", () => {
+    const result = sortAndDedupIds([
       5n,
       3n,
       3n,

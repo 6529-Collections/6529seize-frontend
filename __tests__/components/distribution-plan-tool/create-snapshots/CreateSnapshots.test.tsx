@@ -1,25 +1,25 @@
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
-import CreateSnapshots from '../../../../components/distribution-plan-tool/create-snapshots/CreateSnapshots';
-import { DistributionPlanToolContext, DistributionPlanToolStep } from '../../../../components/distribution-plan-tool/DistributionPlanToolContext';
-import { AllowlistOperationCode } from '../../../../components/allowlist-tool/allowlist-tool.types';
+import CreateSnapshots from '@/components/distribution-plan-tool/create-snapshots/CreateSnapshots';
+import { DistributionPlanToolContext, DistributionPlanToolStep } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
+import { AllowlistOperationCode } from '@/components/allowlist-tool/allowlist-tool.types';
 
 // eslint-disable-next-line react/display-name
-jest.mock('../../../../components/distribution-plan-tool/create-snapshots/table/CreateSnapshotTable', () => ({ snapshots }: any) => <div data-testid="table">{snapshots.length}</div>);
+jest.mock('@/components/distribution-plan-tool/create-snapshots/table/CreateSnapshotTable', () => ({ snapshots }: any) => <div data-testid="table">{snapshots.length}</div>);
 // eslint-disable-next-line react/display-name
-jest.mock('../../../../components/distribution-plan-tool/create-snapshots/form/CreateSnapshotForm', () => () => <div data-testid="form" />);
+jest.mock('@/components/distribution-plan-tool/create-snapshots/form/CreateSnapshotForm', () => () => <div data-testid="form" />);
 // eslint-disable-next-line react/display-name
-jest.mock('../../../../components/distribution-plan-tool/common/StepHeader', () => () => <div data-testid="header" />);
+jest.mock('@/components/distribution-plan-tool/common/StepHeader', () => () => <div data-testid="header" />);
 // eslint-disable-next-line react/display-name
-jest.mock('../../../../components/distribution-plan-tool/common/DistributionPlanNextStepBtn', () => ({ showNextBtn, showRunAnalysisBtn }: any) => <div data-testid="next">{showNextBtn && 'next'}{showRunAnalysisBtn && 'run'}</div>);
+jest.mock('@/components/distribution-plan-tool/common/DistributionPlanNextStepBtn', () => ({ showNextBtn, showRunAnalysisBtn }: any) => <div data-testid="next">{showNextBtn && 'next'}{showRunAnalysisBtn && 'run'}</div>);
 // eslint-disable-next-line react/display-name
-jest.mock('../../../../components/distribution-plan-tool/common/DistributionPlanStepWrapper', () => ({ children }: any) => <div>{children}</div>);
+jest.mock('@/components/distribution-plan-tool/common/DistributionPlanStepWrapper', () => ({ children }: any) => <div>{children}</div>);
 // eslint-disable-next-line react/display-name
-jest.mock('../../../../components/distribution-plan-tool/common/DistributionPlanEmptyTablePlaceholder', () => ({ title }: any) => <div data-testid="empty">{title}</div>);
+jest.mock('@/components/distribution-plan-tool/common/DistributionPlanEmptyTablePlaceholder', () => ({ title }: any) => <div data-testid="empty">{title}</div>);
 
 jest.mock('react-use', () => ({ useInterval: jest.fn() }));
 
-jest.mock('../../../../services/distribution-plan-api', () => ({
+jest.mock('@/services/distribution-plan-api', () => ({
   distributionPlanApiFetch: jest.fn().mockResolvedValue({ success: true, data: [] }),
 }));
 

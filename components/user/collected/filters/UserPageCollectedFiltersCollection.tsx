@@ -1,7 +1,7 @@
-import { CollectedCollectionType } from "../../../../entities/IProfile";
+import { CollectedCollectionType } from "@/entities/IProfile";
 import CommonSelect, {
   CommonSelectItem,
-} from "../../../utils/select/CommonSelect";
+} from "@/components/utils/select/CommonSelect";
 import { COLLECTED_COLLECTIONS_META } from "./user-page-collected-filters.helpers";
 
 type SelectedType = CollectedCollectionType | null;

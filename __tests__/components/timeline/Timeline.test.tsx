@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
-import Timeline from "../../../components/timeline/Timeline";
-import { MediaType } from "../../../components/timeline/TimelineMedia";
+import Timeline from "@/components/timeline/Timeline";
+import { MediaType } from "@/components/timeline/TimelineMedia";
 
-jest.mock("../../../components/timeline/Timeline.module.scss", () => ({
+jest.mock("@/components/timeline/Timeline.module.scss", () => ({
   timeline: "timeline",
   timelineContainer: "container",
   content: "content",
@@ -11,7 +11,7 @@ jest.mock("../../../components/timeline/Timeline.module.scss", () => ({
 }));
 
 let mediaProps: any[] = [];
-jest.mock("../../../components/timeline/TimelineMedia", () => ({
+jest.mock("@/components/timeline/TimelineMedia", () => ({
   __esModule: true,
   MediaType: { IMAGE: 0, VIDEO: 1, HTML: 2 },
   default: (props: any) => {

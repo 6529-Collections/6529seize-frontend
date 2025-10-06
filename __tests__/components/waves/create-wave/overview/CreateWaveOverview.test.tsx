@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import CreateWaveOverview from '../../../../../components/waves/create-wave/overview/CreateWaveOverview';
-import { CREATE_WAVE_VALIDATION_ERROR } from '../../../../../helpers/waves/create-wave.validation';
-import { WaveOverviewConfig } from '../../../../../types/waves.types';
-import { ApiWaveType } from '../../../../../generated/models/ApiWaveType';
+import CreateWaveOverview from '@/components/waves/create-wave/overview/CreateWaveOverview';
+import { CREATE_WAVE_VALIDATION_ERROR } from '@/helpers/waves/create-wave.validation';
+import { WaveOverviewConfig } from '@/types/waves.types';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
 
 // Mock the child components
-jest.mock('../../../../../components/waves/create-wave/overview/CreateWaveNameInput', () => {
+jest.mock('@/components/waves/create-wave/overview/CreateWaveNameInput', () => {
   return function MockCreateWaveNameInput({ onChange, name, errors }: any) {
     return (
       <div data-testid="wave-name-input">
@@ -22,7 +22,7 @@ jest.mock('../../../../../components/waves/create-wave/overview/CreateWaveNameIn
   };
 });
 
-jest.mock('../../../../../components/waves/create-wave/overview/CreateWaveImageInput', () => {
+jest.mock('@/components/waves/create-wave/overview/CreateWaveImageInput', () => {
   return function MockCreateWaveImageInput({ imageToShow, setFile }: any) {
     return (
       <div data-testid="wave-image-input">
@@ -38,7 +38,7 @@ jest.mock('../../../../../components/waves/create-wave/overview/CreateWaveImageI
   };
 });
 
-jest.mock('../../../../../components/waves/create-wave/overview/type/CreateWaveType', () => {
+jest.mock('@/components/waves/create-wave/overview/type/CreateWaveType', () => {
   return function MockCreateWaveType({ selected, onChange }: any) {
     return (
       <div data-testid="wave-type-input">

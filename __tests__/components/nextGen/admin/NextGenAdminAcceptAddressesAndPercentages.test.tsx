@@ -1,17 +1,17 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import NextGenAdminAcceptAddressesAndPercentages from '../../../../components/nextGen/admin/NextGenAdminAcceptAddressesAndPercentages';
+import NextGenAdminAcceptAddressesAndPercentages from '@/components/nextGen/admin/NextGenAdminAcceptAddressesAndPercentages';
 
 // Mock all the hooks and dependencies
 jest.mock('wagmi', () => ({
   useReadContract: jest.fn(),
 }));
 
-jest.mock('../../../../components/auth/SeizeConnectContext', () => ({
+jest.mock('@/components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: jest.fn(),
 }));
 
-jest.mock('../../../../components/nextGen/nextgen_helpers', () => ({
+jest.mock('@/components/nextGen/nextgen_helpers', () => ({
   useGlobalAdmin: jest.fn(),
   useFunctionAdmin: jest.fn(),
   useCollectionIndex: jest.fn(),
@@ -21,13 +21,13 @@ jest.mock('../../../../components/nextGen/nextgen_helpers', () => ({
   useParsedCollectionIndex: jest.fn(),
 }));
 
-jest.mock('../../../../components/nextGen/NextGenContractWriteStatus', () => {
+jest.mock('@/components/nextGen/NextGenContractWriteStatus', () => {
   return function MockNextGenContractWriteStatus(props: any) {
     return <div data-testid="contract-write-status" {...props} />;
   };
 });
 
-jest.mock('../../../../components/nextGen/admin/NextGenAdminShared', () => ({
+jest.mock('@/components/nextGen/admin/NextGenAdminShared', () => ({
   NextGenAdminHeadingRow: ({ title, close }: any) => (
     <div data-testid="admin-heading">
       <h3>{title}</h3>
@@ -48,7 +48,7 @@ jest.mock('../../../../components/nextGen/admin/NextGenAdminShared', () => ({
 
 // Import the mocked modules
 import { useReadContract } from 'wagmi';
-import { useSeizeConnectContext } from '../../../../components/auth/SeizeConnectContext';
+import { useSeizeConnectContext } from '@/components/auth/SeizeConnectContext';
 import {
   useGlobalAdmin,
   useFunctionAdmin,
@@ -57,7 +57,7 @@ import {
   getCollectionIdsForAddress,
   useMinterContractWrite,
   useParsedCollectionIndex,
-} from '../../../../components/nextGen/nextgen_helpers';
+} from '@/components/nextGen/nextgen_helpers';
 
 const mockUseReadContract = useReadContract as jest.MockedFunction<typeof useReadContract>;
 const mockUseSeizeConnectContext = useSeizeConnectContext as jest.MockedFunction<typeof useSeizeConnectContext>;

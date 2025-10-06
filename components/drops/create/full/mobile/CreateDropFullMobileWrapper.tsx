@@ -1,5 +1,5 @@
-import { CreateDropType } from "../../types";
-import MobileWrapperDialog from "../../../../mobile-wrapper-dialog/MobileWrapperDialog";
+import { CreateDropType } from "@/components/drops/create/types";
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 
 export default function CreateDropFullMobileWrapper({
   isOpen,

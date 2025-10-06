@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import ContentSegmentComponent from '../../../../components/waves/drops/ContentSegmentComponent';
+import ContentSegmentComponent from '@/components/waves/drops/ContentSegmentComponent';
 
-jest.mock('../../../../components/waves/drops/MediaThumbnail', () => (props: any) => <div data-testid="thumb">{props.media.url}</div>);
+jest.mock('@/components/waves/drops/MediaThumbnail', () => (props: any) => <div data-testid="thumb">{props.media.url}</div>);
 
 describe('ContentSegmentComponent', () => {
   it('renders text segment', () => {

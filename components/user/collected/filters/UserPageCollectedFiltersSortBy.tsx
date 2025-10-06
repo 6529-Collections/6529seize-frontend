@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import {
   CollectedCollectionType,
   CollectionSort,
-} from "../../../../entities/IProfile";
-import { SortDirection } from "../../../../entities/ISort";
+} from "@/entities/IProfile";
+import { SortDirection } from "@/entities/ISort";
 import CommonSelect, {
   CommonSelectItem,
-} from "../../../utils/select/CommonSelect";
+} from "@/components/utils/select/CommonSelect";
 import { COLLECTED_COLLECTIONS_META } from "./user-page-collected-filters.helpers";
 
 export default function UserPageCollectedFiltersSortBy({

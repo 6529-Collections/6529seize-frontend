@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import {
   formatNumberWithCommasOrDash,
   getTimeAgo,
-} from "../../../../../helpers/Helpers";
+} from "@/helpers/Helpers";
 import {
   DistributionCollection,
   DistributionTableItem,

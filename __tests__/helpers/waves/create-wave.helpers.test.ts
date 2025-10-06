@@ -2,10 +2,10 @@ import {
   getCreateWaveNextStep,
   getCreateWavePreviousStep,
   calculateLastDecisionTime,
-} from '../../../helpers/waves/create-wave.helpers';
-import { ApiWaveType } from '../../../generated/models/ApiWaveType';
-import { ApiWaveMetadataType } from '../../../generated/models/ApiWaveMetadataType';
-import { CreateWaveStep } from '../../../types/waves.types';
+} from '@/helpers/waves/create-wave.helpers';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
+import { ApiWaveMetadataType } from '@/generated/models/ApiWaveMetadataType';
+import { CreateWaveStep } from '@/types/waves.types';
 
 describe('create-wave.helpers', () => {
   describe('getCreateWaveNextStep', () => {
@@ -57,7 +57,7 @@ describe('create-wave.helpers', () => {
 
   describe('getCreateNewWaveBody', () => {
     it('converts config into request body', () => {
-      const { getCreateNewWaveBody } = require('../../../helpers/waves/create-wave.helpers');
+      const { getCreateNewWaveBody } = require('@/helpers/waves/create-wave.helpers');
       const config = {
         overview: { type: ApiWaveType.Chat, name: 'W', image: null },
         groups: { canView:'1', canDrop:'2', canVote:'3', canChat:'4', admin:'5' },

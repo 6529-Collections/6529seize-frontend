@@ -1,14 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import CreateDropReplyingWrapper from '../../../components/waves/CreateDropReplyingWrapper';
-import { ActiveDropAction } from '../../../types/dropInteractionTypes';
+import CreateDropReplyingWrapper from '@/components/waves/CreateDropReplyingWrapper';
+import { ActiveDropAction } from '@/types/dropInteractionTypes';
 
 jest.mock('framer-motion', () => ({
   AnimatePresence: ({ children }: any) => <div>{children}</div>,
   motion: { div: ({ children, ...p }: any) => <div {...p}>{children}</div> }
 }));
 
-jest.mock('../../../components/waves/CreateDropReplying', () => ({ __esModule: true, default: (p: any) => <div data-testid="child" data-disabled={p.disabled} /> }));
+jest.mock('@/components/waves/CreateDropReplying', () => ({ __esModule: true, default: (p: any) => <div data-testid="child" data-disabled={p.disabled} /> }));
 
 describe('CreateDropReplyingWrapper', () => {
   const drop = { id: 'd1', author: { handle: 'bob' } } as any;

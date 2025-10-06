@@ -1,18 +1,18 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import CommonInput from "../../../../../../utils/input/CommonInput";
-import { ApiProfileProxy } from "../../../../../../../generated/models/ApiProfileProxy";
-import { ApiProfileProxyAction } from "../../../../../../../generated/models/ApiProfileProxyAction";
-import { AuthContext } from "../../../../../../auth/Auth";
-import { ReactQueryWrapperContext } from "../../../../../../react-query-wrapper/ReactQueryWrapper";
+import CommonInput from "@/components/utils/input/CommonInput";
+import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
+import { AuthContext } from "@/components/auth/Auth";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
-import { commonApiPut } from "../../../../../../../services/api/common-api";
+import { commonApiPut } from "@/services/api/common-api";
 
 import CircleLoader, {
   CircleLoaderSize,
-} from "../../../../../../distribution-plan-tool/common/CircleLoader";
-import { ApiUpdateProxyActionRequest } from "../../../../../../../generated/models/ApiUpdateProxyActionRequest";
+} from "@/components/distribution-plan-tool/common/CircleLoader";
+import { ApiUpdateProxyActionRequest } from "@/generated/models/ApiUpdateProxyActionRequest";
 
 export default function ProfileProxyCreditEdit({
   profileProxy,

@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import DelegationMappingToolPage from '@/app/delegation-mapping-tool/page';
-import { AuthContext } from '../../components/auth/Auth';
+import { AuthContext } from '@/components/auth/Auth';
 
 jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
 
@@ -11,7 +11,7 @@ const TestProvider: React.FC = ({ children }) => (
 
 
 // Mock TitleContext
-jest.mock('../../contexts/TitleContext', () => ({
+jest.mock('@/contexts/TitleContext', () => ({
   useTitle: () => ({
     title: 'Test Title',
     setTitle: jest.fn(),

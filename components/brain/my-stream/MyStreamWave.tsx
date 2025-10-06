@@ -1,21 +1,21 @@
 "use client";
 
 import React, { type JSX, useMemo } from "react";
-import { useSetWaveData } from "../../../contexts/TitleContext";
+import { useSetWaveData } from "@/contexts/TitleContext";
 import { useContentTab } from "../ContentTabContext";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import MyStreamWaveChat from "./MyStreamWaveChat";
-import { useWaveData } from "../../../hooks/useWaveData";
+import { useWaveData } from "@/hooks/useWaveData";
 import MyStreamWaveLeaderboard from "./MyStreamWaveLeaderboard";
 import MyStreamWaveOutcome from "./MyStreamWaveOutcome";
 import { createBreakpoint } from "react-use";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import { WaveWinners } from "../../waves/winners/WaveWinners";
-import { MyStreamWaveTab } from "../../../types/waves.types";
+import { WaveWinners } from "@/components/waves/winners/WaveWinners";
+import { MyStreamWaveTab } from "@/types/waves.types";
 import { MyStreamWaveTabs } from "./tabs/MyStreamWaveTabs";
 import MyStreamWaveMyVotes from "./votes/MyStreamWaveMyVotes";
 import MyStreamWaveFAQ from "./MyStreamWaveFAQ";
-import { useMyStream } from "../../../contexts/wave/MyStreamContext";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 
 interface MyStreamWaveProps {
   readonly waveId: string;

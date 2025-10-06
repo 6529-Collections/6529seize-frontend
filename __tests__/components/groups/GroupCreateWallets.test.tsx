@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import GroupCreateWallets, { GroupCreateWalletsType } from '../../../components/groups/page/create/config/wallets/GroupCreateWallets';
-import { AuthContext } from '../../../components/auth/Auth';
+import GroupCreateWallets, { GroupCreateWalletsType } from '@/components/groups/page/create/config/wallets/GroupCreateWallets';
+import { AuthContext } from '@/components/auth/Auth';
 
-jest.mock('../../../components/groups/page/create/config/identities/select/GroupCreateIdentitiesSelect', () => () => <div />);
-jest.mock('../../../components/groups/page/create/config/wallets/CreateGroupWalletsEmma', () => () => <div />);
-jest.mock('../../../components/groups/page/create/config/wallets/CreateGroupWalletsUpload', () => () => <div />);
+jest.mock('@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSelect', () => () => <div />);
+jest.mock('@/components/groups/page/create/config/wallets/CreateGroupWalletsEmma', () => () => <div />);
+jest.mock('@/components/groups/page/create/config/wallets/CreateGroupWalletsUpload', () => () => <div />);
 
 describe('GroupCreateWallets', () => {
   const renderComp = (props?: Partial<React.ComponentProps<typeof GroupCreateWallets>>) => {

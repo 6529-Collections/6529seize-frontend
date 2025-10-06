@@ -1,7 +1,16 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
+import { MEMES_CONTRACT } from "@/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
+import { DBResponse } from "@/entities/IDBResponse";
+import { NFTWithMemesExtendedData, VolumeType } from "@/entities/INFT";
+import { MemeSeason } from "@/entities/ISeason";
+import { SortDirection } from "@/entities/ISort";
+import { MemeLabSort, MEMES_EXTENDED_SORT, MemesSort } from "@/enums";
+import { numberWithCommas, printMintDate } from "@/helpers/Helpers";
+import { fetchUrl } from "@/services/6529api";
+import { commonApiFetch } from "@/services/api/common-api";
 import {
   faChevronCircleDown,
   faChevronCircleUp,
@@ -11,15 +20,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import { MEMES_CONTRACT } from "../../constants";
-import { DBResponse } from "../../entities/IDBResponse";
-import { NFTWithMemesExtendedData, VolumeType } from "../../entities/INFT";
-import { MemeSeason } from "../../entities/ISeason";
-import { SortDirection } from "../../entities/ISort";
-import { MemeLabSort, MEMES_EXTENDED_SORT, MemesSort } from "../../enums";
-import { numberWithCommas, printMintDate } from "../../helpers/Helpers";
-import { fetchUrl } from "../../services/6529api";
-import { commonApiFetch } from "../../services/api/common-api";
 import { AuthContext } from "../auth/Auth";
 import CollectionsDropdown from "../collections-dropdown/CollectionsDropdown";
 import DotLoader from "../dotLoader/DotLoader";
@@ -183,6 +183,9 @@ export default function TheMemesComponent() {
   const [nftsNextPage, setNftsNextPage] = useState<string>();
 
   const [nftMemes, setNftMemes] = useState<Meme[]>([]);
+  const [nftsByMeme, setNftsByMeme] = useState<
+    Map<number, NFTWithMemesExtendedData[]>
+  >(new Map());
 
   useEffect(() => {
     commonApiFetch<MemeSeason[]>({
@@ -220,32 +223,61 @@ export default function TheMemesComponent() {
   }, [sort, sortDir, selectedSeason, volumeType]);
 
   useEffect(() => {
-    const myMemesMap = new Map<number, Meme>();
-    [...nfts].map((nftm) => {
-      myMemesMap.set(nftm.meme, {
-        meme: nftm.meme,
-        meme_name: nftm.meme_name,
-      });
-    });
-    const myMemes = Array.from(myMemesMap.values());
-    if (sortDir === SortDirection.DESC) {
-      myMemes.sort((a, d) => d.meme - a.meme);
-    } else {
-      myMemes.sort((a, d) => a.meme - d.meme);
+    const memesMap = new Map<
+      number,
+      { meme: Meme; items: NFTWithMemesExtendedData[] }
+    >();
+
+    for (const nft of nfts) {
+      const existing = memesMap.get(nft.meme);
+      if (existing) {
+        existing.items.push(nft);
+      } else {
+        memesMap.set(nft.meme, {
+          meme: { meme: nft.meme, meme_name: nft.meme_name },
+          items: [nft],
+        });
+      }
     }
-    setNftMemes(myMemes);
-  }, [nfts]);
+
+    const sortedMemes = Array.from(memesMap.values()).map(
+      (value) => value.meme
+    );
+
+    if (sortDir === SortDirection.DESC) {
+      sortedMemes.sort((a, b) => b.meme - a.meme);
+    } else {
+      sortedMemes.sort((a, b) => a.meme - b.meme);
+    }
+
+    setNftMemes(sortedMemes);
+
+    const nftsByMeme = new Map<number, NFTWithMemesExtendedData[]>();
+
+    for (const [key, { items }] of Array.from(memesMap.entries())) {
+      nftsByMeme.set(
+        key,
+        items.toSorted((a, b) => a.id - b.id)
+      );
+    }
+
+    setNftsByMeme(nftsByMeme);
+  }, [nfts, sortDir]);
 
   function fetchNfts() {
     if (!nftsNextPage) {
       setFetching(false);
       return;
     }
-    fetchUrl(nftsNextPage).then((responseNfts: DBResponse) => {
-      setNfts([...nfts, ...responseNfts.data]);
-      setNftsNextPage(responseNfts.next);
-      setFetching(false);
-    });
+    fetchUrl(nftsNextPage)
+      .then((responseNfts: DBResponse) => {
+        setNfts((prev) => [...prev, ...(responseNfts.data ?? [])]);
+        setNftsNextPage(responseNfts.next);
+      })
+      .catch(() => {
+        // optionally surface a toast/log here
+      })
+      .finally(() => setFetching(false));
   }
 
   useEffect(() => {
@@ -263,21 +295,40 @@ export default function TheMemesComponent() {
   }, [fetching, routerLoaded, nftsNextPage]);
 
   useEffect(() => {
-    const checkScrollPosition = () => {
-      const distanceFromBottom =
-        document.documentElement.scrollHeight -
-        window.innerHeight -
-        window.scrollY;
+    if (!nftsNextPage) {
+      return;
+    }
 
-      if (distanceFromBottom <= 400) {
-        setFetching(true);
+    let throttleTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    const handleScroll = () => {
+      if (throttleTimeout) {
+        return;
       }
+
+      throttleTimeout = setTimeout(() => {
+        throttleTimeout = null;
+
+        const distanceFromBottom =
+          document.documentElement.scrollHeight -
+          window.innerHeight -
+          window.scrollY;
+
+        if (distanceFromBottom <= 400 && routerLoaded) {
+          setFetching(true);
+        }
+      }, 200);
     };
 
-    window.addEventListener("scroll", checkScrollPosition);
+    window.addEventListener("scroll", handleScroll);
 
-    return () => window.removeEventListener("scroll", checkScrollPosition);
-  }, []);
+    return () => {
+      if (throttleTimeout) {
+        clearTimeout(throttleTimeout);
+      }
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [routerLoaded, nftsNextPage]);
 
   function getVolume(nft: NFTWithMemesExtendedData) {
     let vol = 0;
@@ -379,9 +430,7 @@ export default function TheMemesComponent() {
   }
 
   function getNftsForMeme(meme: Meme) {
-    return [...nfts].filter((n) =>
-      nfts.find((m) => n.id === m.id && m.meme === meme.meme)
-    );
+    return nftsByMeme.get(meme.meme) ?? [];
   }
 
   function printMemes() {
@@ -396,9 +445,7 @@ export default function TheMemesComponent() {
               </h4>
             </Col>
           </Col>
-          {[...memeNfts]
-            .sort((a, b) => a.id - b.id)
-            .map((nft) => printNft(nft))}
+          {memeNfts.map((nft) => printNft(nft))}
         </Row>
       );
     });

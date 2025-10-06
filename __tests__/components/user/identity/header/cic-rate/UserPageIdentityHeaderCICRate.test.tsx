@@ -1,15 +1,15 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UserPageIdentityHeaderCICRate from '../../../../../../components/user/identity/header/cic-rate/UserPageIdentityHeaderCICRate';
-import { AuthContext } from '../../../../../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../../../../../components/react-query-wrapper/ReactQueryWrapper';
+import UserPageIdentityHeaderCICRate from '@/components/user/identity/header/cic-rate/UserPageIdentityHeaderCICRate';
+import { AuthContext } from '@/components/auth/Auth';
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-jest.mock('../../../../../../components/user/identity/header/cic-rate/UserPageIdentityHeaderCICRateStats', () => () => <div data-testid="stats" />);
-jest.mock('../../../../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: () => ({ address: '0x1' }) }));
+jest.mock('@/components/user/identity/header/cic-rate/UserPageIdentityHeaderCICRateStats', () => () => <div data-testid="stats" />);
+jest.mock('@/components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: () => ({ address: '0x1' }) }));
 jest.mock('@tanstack/react-query');
-jest.mock('../../../../../../services/api/common-api', () => ({ commonApiFetch: jest.fn(), commonApiPost: jest.fn() }));
+jest.mock('@/services/api/common-api', () => ({ commonApiFetch: jest.fn(), commonApiPost: jest.fn() }));
 jest.mock('react-use', () => ({ createBreakpoint: () => () => 'MD' }));
 
 const useQueryMock = useQuery as jest.Mock;

@@ -1,10 +1,10 @@
 import { render } from '@testing-library/react';
-import UserPageCollectedFiltersSortBy from '../../../../../components/user/collected/filters/UserPageCollectedFiltersSortBy';
-import { CollectedCollectionType, CollectionSort } from '../../../../../entities/IProfile';
-import { SortDirection } from '../../../../../entities/ISort';
+import UserPageCollectedFiltersSortBy from '@/components/user/collected/filters/UserPageCollectedFiltersSortBy';
+import { CollectedCollectionType, CollectionSort } from '@/entities/IProfile';
+import { SortDirection } from '@/entities/ISort';
 
 let capturedProps: any = null;
-jest.mock('../../../../../components/utils/select/CommonSelect', () => (props: any) => {
+jest.mock('@/components/utils/select/CommonSelect', () => (props: any) => {
   capturedProps = props;
   return <div data-testid="select" />;
 });

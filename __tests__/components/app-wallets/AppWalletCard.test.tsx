@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import AppWalletCard from '../../../components/app-wallets/AppWalletCard';
+import AppWalletCard from '@/components/app-wallets/AppWalletCard';
 
 // Mock next/link to simply render an anchor
 jest.mock('next/link', () => ({
@@ -8,7 +8,7 @@ jest.mock('next/link', () => ({
 }));
 
 // Mock AppWalletAvatar to avoid image complexities
-jest.mock('../../../components/app-wallets/AppWalletAvatar', () => ({
+jest.mock('@/components/app-wallets/AppWalletAvatar', () => ({
   __esModule: true,
   default: ({ address }: any) => <div data-testid="avatar">{address}</div>,
 }));

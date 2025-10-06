@@ -1,10 +1,10 @@
 import { renderHook } from '@testing-library/react';
-import { useWaveById } from '../../hooks/useWaveById';
+import { useWaveById } from '@/hooks/useWaveById';
 import { useQuery } from '@tanstack/react-query';
-import { QueryKey } from '../../components/react-query-wrapper/ReactQueryWrapper';
+import { QueryKey } from '@/components/react-query-wrapper/ReactQueryWrapper';
 
 jest.mock('@tanstack/react-query', () => ({ useQuery: jest.fn() }));
-jest.mock('../../services/api/common-api', () => ({ commonApiFetch: jest.fn() }));
+jest.mock('@/services/api/common-api', () => ({ commonApiFetch: jest.fn() }));
 
 const useQueryMock = useQuery as jest.Mock;
 

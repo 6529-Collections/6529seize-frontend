@@ -1,11 +1,11 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import MapDelegationsForm from '../../../../components/distribution-plan-tool/map-delegations/MapDelegationsForm';
-import { DistributionPlanToolContext } from '../../../../components/distribution-plan-tool/DistributionPlanToolContext';
-import { distributionPlanApiPost } from '../../../../services/distribution-plan-api';
-import { AllowlistOperationCode } from '../../../../components/allowlist-tool/allowlist-tool.types';
+import MapDelegationsForm from '@/components/distribution-plan-tool/map-delegations/MapDelegationsForm';
+import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
+import { distributionPlanApiPost } from '@/services/distribution-plan-api';
+import { AllowlistOperationCode } from '@/components/allowlist-tool/allowlist-tool.types';
 
-jest.mock('../../../../services/distribution-plan-api', () => ({
+jest.mock('@/services/distribution-plan-api', () => ({
   distributionPlanApiPost: jest.fn(),
 }));
 

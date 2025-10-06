@@ -1,8 +1,8 @@
 import React from "react";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { ApiWave } from "../../../../generated/models/ApiWave";
-import { ApiWaveDecisionWinner } from "../../../../generated/models/ApiWaveDecisionWinner";
-import { useWave } from "../../../../hooks/useWave";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+import { useWave } from "@/hooks/useWave";
 import { DefaultWaveWinnersDrop } from "./DefaultWaveWinnerDrop";
 import { MemesWaveWinnersDrop } from "./MemesWaveWinnerDrop";
 interface WaveWinnersDropProps {

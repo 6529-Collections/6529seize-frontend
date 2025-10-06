@@ -1,6 +1,6 @@
 import React from "react";
-import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
-import { useDropInteractionRules } from "../../hooks/drops/useDropInteractionRules";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 
 interface VotingModalButtonProps {
   readonly drop: ExtendedDrop;

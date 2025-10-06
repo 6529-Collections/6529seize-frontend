@@ -1,12 +1,12 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import CreateDropStormViewPart from '../../../../../../components/drops/create/utils/storm/CreateDropStormViewPart';
+import CreateDropStormViewPart from '@/components/drops/create/utils/storm/CreateDropStormViewPart';
 
-jest.mock('../../../../../../components/drops/view/part/DropPart', () => jest.fn(() => <div data-testid="drop-part" />));
-jest.mock('../../../../../../components/drops/create/utils/storm/CreateDropStormViewPartQuote', () => jest.fn(() => <div data-testid="quote" />));
+jest.mock('@/components/drops/view/part/DropPart', () => jest.fn(() => <div data-testid="drop-part" />));
+jest.mock('@/components/drops/create/utils/storm/CreateDropStormViewPartQuote', () => jest.fn(() => <div data-testid="quote" />));
 
-const DropPartMock = require('../../../../../../components/drops/view/part/DropPart');
-const QuoteMock = require('../../../../../../components/drops/create/utils/storm/CreateDropStormViewPartQuote');
+const DropPartMock = require('@/components/drops/view/part/DropPart');
+const QuoteMock = require('@/components/drops/create/utils/storm/CreateDropStormViewPartQuote');
 
 describe('CreateDropStormViewPart', () => {
   beforeEach(() => {

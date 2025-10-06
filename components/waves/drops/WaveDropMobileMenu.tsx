@@ -3,11 +3,11 @@
 import { publicEnv } from "@/config/env";
 import { FC, useContext, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
-import { ApiDropType } from "../../../generated/models/ApiDropType";
-import { DropSize } from "../../../helpers/waves/drop.helpers";
-import { AuthContext } from "../../auth/Auth";
-import CommonDropdownItemsMobileWrapper from "../../utils/select/dropdown/CommonDropdownItemsMobileWrapper";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { DropSize } from "@/helpers/waves/drop.helpers";
+import { AuthContext } from "@/components/auth/Auth";
+import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
 import WaveDropActionsRate from "./WaveDropActionsRate";
 import WaveDropMobileMenuDelete from "./WaveDropMobileMenuDelete";
