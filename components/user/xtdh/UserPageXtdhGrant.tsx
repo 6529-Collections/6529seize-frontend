@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import type {
   ContractOverview,
   NftPickerSelection,
@@ -9,12 +9,14 @@ import UserPageXtdhGrantSummary from "./UserPageXtdhGrantSummary";
 import UserPageXtdhGrantAmount from "./UserPageXtdhGrantAmount";
 import UserPageXtdhGrantValidity from "./UserPageXtdhGrantValidity";
 import UserPageXtdhGrantSelection from "./UserPageXtdhGrantSelection";
+import UserPageXtdhGrantSubmit from "./UserPageXtdhGrantSubmit";
 
 export default function UserPageXtdhGrant() {
   const [contract, setContract] = useState<ContractOverview | null>(null);
   const [selection, setSelection] = useState<NftPickerSelection | null>(null);
   const [amount, setAmount] = useState<number | null>(null);
   const [validUntil, setValidUntil] = useState<Date | null>(null);
+  const handleSubmit = useCallback(() => {}, []);
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-6">
@@ -32,6 +34,13 @@ export default function UserPageXtdhGrant() {
       <UserPageXtdhGrantSelection
         onSelectionChange={setSelection}
         onContractChange={setContract}
+      />
+
+      <UserPageXtdhGrantSubmit
+        contract={contract}
+        amount={amount}
+        validUntil={validUntil}
+        onSubmit={handleSubmit}
       />
     </div>
   );
