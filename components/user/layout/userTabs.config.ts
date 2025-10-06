@@ -85,8 +85,6 @@ const TABS = [
 ] as const satisfies readonly UserPageTabConfig[];
 
 export type UserPageTabKey = (typeof TABS)[number]["id"];
-export type UserPageTabType = UserPageTabKey;
-
 export const USER_PAGE_TABS = TABS;
 
 export const USER_PAGE_TAB_MAP: Record<UserPageTabKey, UserPageTabConfig> =

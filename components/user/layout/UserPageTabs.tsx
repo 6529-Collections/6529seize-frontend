@@ -34,7 +34,7 @@ const resolveTabFromPath = (pathname: string): UserPageTabKey => {
   const segments = pathname.split("/").filter(Boolean);
   const routeSegment = segments[1] ?? "";
   const match = getUserPageTabByRoute(routeSegment);
-  return (match?.id ?? DEFAULT_TAB) as UserPageTabKey;
+  return match?.id ?? DEFAULT_TAB;
 };
 
 const filterVisibleTabs = (

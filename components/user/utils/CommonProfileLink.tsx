@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { getProfileTargetRoute } from "@/helpers/Helpers";
 import { usePathname } from "next/navigation";
-import { type UserPageTabType } from "@/components/user/layout/userTabs.config";
+import { type UserPageTabKey } from "@/components/user/layout/userTabs.config";
 
 export default function CommonProfileLink({
   handleOrWallet,
@@ -12,7 +12,7 @@ export default function CommonProfileLink({
 }: {
   readonly handleOrWallet: string;
   readonly isCurrentUser: boolean;
-  readonly tabTarget: UserPageTabType;
+  readonly tabTarget: UserPageTabKey;
 }) {
   const pathname = usePathname();
   const url = getProfileTargetRoute({

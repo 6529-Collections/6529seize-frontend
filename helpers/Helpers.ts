@@ -3,7 +3,7 @@ import {
   NEXTGEN_CORE,
 } from "@/components/nextGen/nextgen_contracts";
 import {
-  type UserPageTabType,
+  type UserPageTabKey,
   getUserPageTabById,
 } from "@/components/user/layout/userTabs.config";
 import { publicEnv } from "@/config/env";
@@ -624,7 +624,7 @@ export const getProfileTargetRoute = ({
 }: {
   readonly handleOrWallet: string;
   readonly pathname: string;
-  readonly defaultPath: UserPageTabType;
+  readonly defaultPath: UserPageTabKey;
 }): string => {
   if (!handleOrWallet.length) {
     return "/404";
