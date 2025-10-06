@@ -16,6 +16,7 @@ interface NotificationsWrapperProps {
   readonly loading: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly setActiveDrop: (drop: ActiveDropState | null) => void;
+  readonly scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 export default function NotificationsWrapper({
@@ -23,6 +24,7 @@ export default function NotificationsWrapper({
   loading,
   activeDrop,
   setActiveDrop,
+  scrollContainerRef,
 }: NotificationsWrapperProps) {
   const router = useRouter();
 
@@ -87,6 +89,7 @@ export default function NotificationsWrapper({
         onReply={onReply}
         onQuote={onQuote}
         onDropContentClick={onDropContentClick}
+        scrollContainerRef={scrollContainerRef}
       />
     </div>
   );

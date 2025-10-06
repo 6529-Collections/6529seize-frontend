@@ -17,6 +17,7 @@ interface FeedScrollContainerProps {
 }
 
 const MIN_OUT_OF_VIEW_COUNT = 30;
+const TOP_SCROLL_THRESHOLD_PX = 200;
 
 export const FeedScrollContainer = forwardRef<
   HTMLDivElement,
@@ -80,31 +81,40 @@ export const FeedScrollContainer = forwardRef<
 
         const currentTarget = event.currentTarget;
         const currentScrollTop = currentTarget.scrollTop;
+        const isNearTop = currentScrollTop <= TOP_SCROLL_THRESHOLD_PX;
 
         throttleTimeoutRef.current = setTimeout(() => {
           const direction = currentScrollTop > lastScrollTop ? "down" : "up";
           setLastScrollTop(currentScrollTop);
 
-          if (direction === "up" && onScrollUpNearTop) {
-            const dropElements =
-              contentRef.current?.querySelectorAll("[id^='feed-item-']");
-            if (!dropElements) {
+          if (onScrollUpNearTop) {
+            if (isNearTop) {
+              onScrollUpNearTop();
               throttleTimeoutRef.current = null;
               return;
             }
 
-            const containerRect = currentTarget.getBoundingClientRect();
-            let outOfViewCount = 0;
-
-            dropElements.forEach((el) => {
-              const rect = el.getBoundingClientRect();
-              if (rect.bottom < containerRect.top) {
-                outOfViewCount++;
+            if (direction === "up") {
+              const dropElements =
+                contentRef.current?.querySelectorAll("[id^='feed-item-']");
+              if (!dropElements) {
+                throttleTimeoutRef.current = null;
+                return;
               }
-            });
 
-            if (outOfViewCount <= MIN_OUT_OF_VIEW_COUNT) {
-              onScrollUpNearTop();
+              const containerRect = currentTarget.getBoundingClientRect();
+              let outOfViewCount = 0;
+
+              dropElements.forEach((el) => {
+                const rect = el.getBoundingClientRect();
+                if (rect.bottom < containerRect.top) {
+                  outOfViewCount++;
+                }
+              });
+
+              if (outOfViewCount <= MIN_OUT_OF_VIEW_COUNT) {
+                onScrollUpNearTop();
+              }
             }
           }
 

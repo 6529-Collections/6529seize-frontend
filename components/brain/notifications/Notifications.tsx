@@ -138,6 +138,7 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
           loading={isFetching && items.length > 0}
           activeDrop={activeDrop}
           setActiveDrop={setActiveDrop}
+          scrollContainerRef={scrollRef}
         />
       </FeedScrollContainer>
     );
