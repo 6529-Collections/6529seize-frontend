@@ -22,17 +22,22 @@ function NotificationItemsComponent({
 }: NotificationItemsProps) {
   const keyedNotifications = useMemo(
     () =>
-      items.map((notification, index) => ({
-        notification,
-        key: `notification-${notification.id ?? index}`,
-      })),
+      items.map((notification, index) => {
+        const keySuffix = notification.id ?? index;
+
+        return {
+          notification,
+          key: `notification-${keySuffix}`,
+          domId: `feed-item-${keySuffix}`,
+        };
+      }),
     [items]
   );
 
   return (
     <div className="tw-flex tw-flex-col tw-space-y-3 tw-pb-3 lg:tw-pr-2">
-      {keyedNotifications.map(({ notification, key }) => (
-        <div key={key} id={`feed-item-${notification.id}`}>
+      {keyedNotifications.map(({ notification, key, domId }) => (
+        <div key={key} id={domId}>
           <NotificationItem
             notification={notification}
             activeDrop={activeDrop}

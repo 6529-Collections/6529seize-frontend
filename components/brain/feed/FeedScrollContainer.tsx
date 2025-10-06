@@ -221,17 +221,18 @@ export const FeedScrollContainer = forwardRef<
         if (isFetchingNextPage || throttleTimeoutRef.current) return;
 
         const currentTarget = event.currentTarget;
-        const currentScrollTop = currentTarget.scrollTop;
-        const isNearTop =
-          currentScrollTop <= NEAR_TOP_SCROLL_THRESHOLD_PX;
 
         throttleTimeoutRef.current = setTimeout(() => {
           const clearThrottle = () => {
             throttleTimeoutRef.current = null;
           };
 
-          const direction = currentScrollTop > lastScrollTop ? "down" : "up";
-          setLastScrollTop(currentScrollTop);
+          const latestScrollTop = currentTarget.scrollTop;
+          const isNearTop =
+            latestScrollTop <= NEAR_TOP_SCROLL_THRESHOLD_PX;
+
+          const direction = latestScrollTop > lastScrollTop ? "down" : "up";
+          setLastScrollTop(latestScrollTop);
 
           if (isNearTop) {
             onScrollUpNearTop();
