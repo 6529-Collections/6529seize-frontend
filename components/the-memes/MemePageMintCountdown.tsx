@@ -1,9 +1,5 @@
 "use client";
 
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Col, Container, Row } from "react-bootstrap";
-import { Tooltip } from "react-tooltip";
 import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis";
 import { MEMES_CONTRACT, MEMES_MANIFOLD_PROXY_CONTRACT } from "@/constants";
 import useCapacitor from "@/hooks/useCapacitor";
@@ -12,6 +8,10 @@ import {
   ManifoldPhase,
   useManifoldClaim,
 } from "@/hooks/useManifoldClaim";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Col, Container, Row } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
 import { useCookieConsent } from "../cookies/CookieConsentContext";
 import MintCountdownBox, {
   MemePageMintBtn,

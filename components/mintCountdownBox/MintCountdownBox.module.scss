@@ -14,17 +14,6 @@
   flex-direction: column;
   gap: 0.5rem;
   border-radius: 0.5rem;
-
-  // Fixed heights for different viewports
-  height: 150px; // Mobile
-  
-  @media (min-width: 768px) {
-    height: 150px; // Tablet/Desktop
-  }
-  
-  @media (min-width: 1200px) {
-    height: 180px; // Large Desktop
-  }
 }
 
 .mintBtn {
@@ -49,17 +38,17 @@
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 4px;
-  
+
   &.skeletonTitle {
     height: 20px;
     width: 60%;
     margin-bottom: 1rem;
   }
-  
+
   &.skeletonCountdown {
     height: 24px;
     width: 80%;
-    
+
     @media (min-width: 1200px) {
       margin-bottom: 1rem;
     }
