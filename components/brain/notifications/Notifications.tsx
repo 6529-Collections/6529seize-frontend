@@ -112,7 +112,7 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
         : pathname || "/my-stream/notifications";
       router.replace(newUrl, { scroll: false });
     }
-  }, [reload]);
+  }, [reload, refetch, markAllAsRead, searchParams, pathname, router]);
 
   const triggerFetchOlder = () => {
     if (isFetchingNextPage) {

@@ -22,8 +22,8 @@ function NotificationItemsComponent({
 }: NotificationItemsProps) {
   const keyedNotifications = useMemo(
     () =>
-      items.map((notification, index) => {
-        const keySuffix = notification.id ?? index;
+      items.map((notification) => {
+        const keySuffix = notification.id;
 
         return {
           notification,
