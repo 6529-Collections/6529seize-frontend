@@ -83,7 +83,6 @@ export function createAppWalletConnector(
     type: APP_WALLET_CONNECTOR_TYPE,
 
     async setPassword(password: string): Promise<void> {
-      // VOID RETURN - NO SILENT FAILURES
       // Input validation - fail fast
       if (!password || typeof password !== "string") {
         throw new InvalidPasswordError(
