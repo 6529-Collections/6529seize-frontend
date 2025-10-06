@@ -39,11 +39,11 @@ const contractCache = new Map<string, CacheEntry<ContractOverview | null>>();
 const tokenCache = new Map<string, CacheEntry<TokenMetadata[]>>();
 
 function gcExpired<T>(map: Map<string, CacheEntry<T>>, now = Date.now()): void {
-  for (const [key, entry] of map.entries()) {
+  map.forEach((entry, key) => {
     if (entry.expires <= now) {
       map.delete(key);
     }
-  }
+  });
 }
 
 function getSuggestionCacheKey(
