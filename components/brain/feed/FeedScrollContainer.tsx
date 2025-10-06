@@ -7,6 +7,7 @@ import React, {
   useCallback,
   useEffect,
 } from "react";
+import { NEAR_TOP_SCROLL_THRESHOLD_PX } from "../constants";
 
 interface FeedScrollContainerProps {
   readonly children: React.ReactNode;
@@ -17,7 +18,7 @@ interface FeedScrollContainerProps {
 }
 
 const MIN_OUT_OF_VIEW_COUNT = 30;
-const TOP_SCROLL_THRESHOLD_PX = 200;
+const FEED_ITEM_SELECTOR = "[id^='feed-item-']";
 
 export const FeedScrollContainer = forwardRef<
   HTMLDivElement,
@@ -37,6 +38,8 @@ export const FeedScrollContainer = forwardRef<
     const [lastScrollTop, setLastScrollTop] = useState(0);
     const throttleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const previousHeightRef = useRef<number>(0);
+    const outOfViewAboveCountRef = useRef(0);
+    const observedFeedItemsRef = useRef(new Map<Element, boolean>());
 
     // Track height changes to maintain scroll position
     useEffect(() => {
@@ -75,13 +78,152 @@ export const FeedScrollContainer = forwardRef<
       }
     }, []);
 
+    useEffect(() => {
+      if (
+        !contentRef.current ||
+        !ref ||
+        typeof ref === "function" ||
+        !("current" in ref) ||
+        !ref.current
+      ) {
+        return;
+      }
+
+      const scrollContainer = ref.current;
+      if (!scrollContainer) {
+        return;
+      }
+
+      const updateOutOfViewCount = (element: Element, isAbove: boolean) => {
+        const previous = observedFeedItemsRef.current.get(element) ?? false;
+
+        if (previous === isAbove) {
+          return;
+        }
+
+        observedFeedItemsRef.current.set(element, isAbove);
+        outOfViewAboveCountRef.current += isAbove ? 1 : -1;
+
+        if (outOfViewAboveCountRef.current < 0) {
+          outOfViewAboveCountRef.current = 0;
+        }
+      };
+
+      const intersectionObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            const rootTop = entry.rootBounds?.top ?? scrollContainer.getBoundingClientRect().top;
+            const isAbove =
+              !entry.isIntersecting && entry.boundingClientRect.bottom <= rootTop;
+
+            updateOutOfViewCount(entry.target, isAbove);
+          });
+        },
+        {
+          root: scrollContainer,
+          threshold: 0,
+        }
+      );
+
+      const observeElement = (element: Element) => {
+        if (observedFeedItemsRef.current.has(element)) {
+          return;
+        }
+
+        observedFeedItemsRef.current.set(element, false);
+        intersectionObserver.observe(element);
+      };
+
+      const unobserveElement = (element: Element) => {
+        if (!observedFeedItemsRef.current.has(element)) {
+          return;
+        }
+
+        const wasAbove = observedFeedItemsRef.current.get(element) ?? false;
+        if (wasAbove) {
+          outOfViewAboveCountRef.current = Math.max(
+            0,
+            outOfViewAboveCountRef.current - 1
+          );
+        }
+
+        observedFeedItemsRef.current.delete(element);
+        intersectionObserver.unobserve(element);
+      };
+
+      const collectFeedItems = (node: Node): Element[] => {
+        const feedItems: Element[] = [];
+
+        if (node instanceof Element) {
+          if (node.matches(FEED_ITEM_SELECTOR)) {
+            feedItems.push(node);
+          }
+
+          node.querySelectorAll(FEED_ITEM_SELECTOR).forEach((child) => {
+            feedItems.push(child);
+          });
+        } else if (node instanceof DocumentFragment) {
+          node.querySelectorAll(FEED_ITEM_SELECTOR).forEach((child) => {
+            feedItems.push(child);
+          });
+        }
+
+        return feedItems;
+      };
+
+      const initializeFeedItems = () => {
+        observedFeedItemsRef.current.clear();
+        outOfViewAboveCountRef.current = 0;
+
+        const initialElements = contentRef.current?.querySelectorAll(
+          FEED_ITEM_SELECTOR
+        );
+
+        if (!initialElements) {
+          return;
+        }
+
+        initialElements.forEach((element) => {
+          // Ensure we observe each existing feed item exactly once
+          observeElement(element);
+        });
+      };
+
+      initializeFeedItems();
+
+      const feedItemsMutationObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          mutation.addedNodes.forEach((node) => {
+            collectFeedItems(node).forEach(observeElement);
+          });
+
+          mutation.removedNodes.forEach((node) => {
+            collectFeedItems(node).forEach(unobserveElement);
+          });
+        });
+      });
+
+      feedItemsMutationObserver.observe(contentRef.current, {
+        childList: true,
+        subtree: true,
+      });
+
+      return () => {
+        feedItemsMutationObserver.disconnect();
+        intersectionObserver.disconnect();
+        observedFeedItemsRef.current.clear();
+        outOfViewAboveCountRef.current = 0;
+      };
+    }, [ref]);
+
     const handleScroll = useCallback(
       (event: React.UIEvent<HTMLDivElement>) => {
         if (isFetchingNextPage || throttleTimeoutRef.current) return;
 
         const currentTarget = event.currentTarget;
         const currentScrollTop = currentTarget.scrollTop;
-        const isNearTop = currentScrollTop <= TOP_SCROLL_THRESHOLD_PX;
+        const isNearTop =
+          currentScrollTop <= NEAR_TOP_SCROLL_THRESHOLD_PX;
 
         throttleTimeoutRef.current = setTimeout(() => {
           const clearThrottle = () => {
@@ -112,22 +254,7 @@ export const FeedScrollContainer = forwardRef<
             return;
           }
 
-          const dropElements =
-            contentRef.current?.querySelectorAll("[id^='feed-item-']");
-          if (!dropElements) {
-            clearThrottle();
-            return;
-          }
-
-          const containerRect = currentTarget.getBoundingClientRect();
-          let outOfViewCount = 0;
-
-          dropElements.forEach((el) => {
-            const rect = el.getBoundingClientRect();
-            if (rect.bottom < containerRect.top) {
-              outOfViewCount++;
-            }
-          });
+          const outOfViewCount = outOfViewAboveCountRef.current;
 
           if (outOfViewCount <= MIN_OUT_OF_VIEW_COUNT) {
             onScrollUpNearTop();

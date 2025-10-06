@@ -18,8 +18,7 @@ import NotificationsCauseFilter, {
   NotificationFilter,
 } from "./NotificationsCauseFilter";
 import SpinnerLoader from "@/components/common/SpinnerLoader";
-
-const TOP_SCROLL_THRESHOLD_PX = 160;
+import { NEAR_TOP_SCROLL_THRESHOLD_PX } from "../constants";
 
 interface NotificationsProps {
   readonly activeDrop: ActiveDropState | null;
@@ -31,6 +30,7 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
     useContext(AuthContext);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const hasInitializedScrollRef = useRef(false);
+  const hasMarkedAllAsReadRef = useRef(false);
   const isPrependingRef = useRef(false);
   const previousScrollHeightRef = useRef(0);
   const { notificationsViewStyle } = useLayout();
@@ -48,25 +48,9 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
 
   useSetTitle("Notifications | My Stream | Brain");
 
-  useEffect(() => {
-    if (reload === "true") {
-      refetch()
-        .then(() => {
-          return markAllAsReadMutation.mutateAsync();
-        })
-        .catch((error) => {
-          console.error("Error during refetch:", error);
-        });
-      const params = new URLSearchParams(searchParams?.toString() || '');
-      params.delete('reload');
-      const newUrl = params.toString() ? `${pathname}?${params.toString()}` : (pathname || '/my-stream/notifications');
-      router.replace(newUrl, { scroll: false });
-    }
-  }, [reload]);
-
   const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
 
-  const markAllAsReadMutation = useMutation({
+  const { mutateAsync: markAllAsRead } = useMutation({
     mutationFn: async () =>
       await commonApiPostWithoutBodyAndResponse({
         endpoint: `notifications/read`,
@@ -77,15 +61,21 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
+        message:
+          error instanceof Error ? error.message : String(error),
         type: "error",
       });
     },
   });
 
   useEffect(() => {
-    markAllAsReadMutation.mutateAsync();
-  }, []);
+    if (reload === "true" || hasMarkedAllAsReadRef.current) {
+      return;
+    }
+
+    hasMarkedAllAsReadRef.current = true;
+    void markAllAsRead();
+  }, [markAllAsRead, reload]);
 
   const {
     items,
@@ -103,10 +93,26 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
     cause: activeFilter?.cause,
   });
 
-  const onBottomIntersection = (state: boolean) => {
-    if (!state) {
-      return;
+  useEffect(() => {
+    if (reload === "true") {
+      refetch()
+        .then(() => {
+          hasMarkedAllAsReadRef.current = true;
+          return markAllAsRead();
+        })
+        .catch((error) => {
+          console.error("Error during refetch:", error);
+        });
+      const params = new URLSearchParams(searchParams?.toString() || "");
+      params.delete("reload");
+      const newUrl = params.toString()
+        ? `${pathname}?${params.toString()}`
+        : pathname || "/my-stream/notifications";
+      router.replace(newUrl, { scroll: false });
     }
+  }, [reload]);
+
+  const triggerFetchOlder = () => {
     if (isFetchingNextPage) {
       return;
     }
@@ -145,6 +151,10 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
     }
   }, [items.length]);
 
+  useEffect(() => {
+    hasInitializedScrollRef.current = false;
+  }, [activeFilter?.cause]);
+
   useLayoutEffect(() => {
     if (!isPrependingRef.current) {
       return;
@@ -164,10 +174,6 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
     isPrependingRef.current = false;
   }, [items]);
 
-  const handleScrollUpNearTop = () => {
-    onBottomIntersection(true);
-  };
-
   const showLoader = (!isInitialQueryDone || isFetching) && items.length === 0;
   const showNoItems = isInitialQueryDone && !isFetching && items.length === 0;
   const shouldEnableInfiniteScroll = !showLoader && !showNoItems;
@@ -178,9 +184,9 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
     }
 
     const container = event.currentTarget;
-    if (container.scrollTop <= TOP_SCROLL_THRESHOLD_PX) {
+    if (container.scrollTop <= NEAR_TOP_SCROLL_THRESHOLD_PX) {
       if (!isFetchingNextPage && hasNextPage) {
-        handleScrollUpNearTop();
+        triggerFetchOlder();
       }
     }
   };
@@ -211,7 +217,7 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
 
   return (
     <div
-      className="tw-relative tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 scroll-shadow"
+      className="tw-relative tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-x-hidden scroll-shadow"
       style={notificationsViewStyle}>
       <div className="tw-flex-1 tw-h-full tw-relative tw-flex-col tw-flex tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
         <NotificationsCauseFilter
