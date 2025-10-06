@@ -111,13 +111,13 @@ export const FeedScrollContainer = forwardRef<
 
       const intersectionObserver = new IntersectionObserver(
         (entries) => {
-          entries.forEach((entry) => {
+          for (const entry of entries) {
             const rootTop = entry.rootBounds?.top ?? scrollContainer.getBoundingClientRect().top;
             const isAbove =
               !entry.isIntersecting && entry.boundingClientRect.bottom <= rootTop;
 
             updateOutOfViewCount(entry.target, isAbove);
-          });
+          }
         },
         {
           root: scrollContainer,
@@ -159,13 +159,17 @@ export const FeedScrollContainer = forwardRef<
             feedItems.push(node);
           }
 
-          node.querySelectorAll(FEED_ITEM_SELECTOR).forEach((child) => {
+          for (const child of Array.from(
+            node.querySelectorAll(FEED_ITEM_SELECTOR)
+          )) {
             feedItems.push(child);
-          });
+          }
         } else if (node instanceof DocumentFragment) {
-          node.querySelectorAll(FEED_ITEM_SELECTOR).forEach((child) => {
+          for (const child of Array.from(
+            node.querySelectorAll(FEED_ITEM_SELECTOR)
+          )) {
             feedItems.push(child);
-          });
+          }
         }
 
         return feedItems;
@@ -183,24 +187,28 @@ export const FeedScrollContainer = forwardRef<
           return;
         }
 
-        initialElements.forEach((element) => {
+        for (const element of Array.from(initialElements)) {
           // Ensure we observe each existing feed item exactly once
           observeElement(element);
-        });
+        }
       };
 
       initializeFeedItems();
 
       const feedItemsMutationObserver = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          mutation.addedNodes.forEach((node) => {
-            collectFeedItems(node).forEach(observeElement);
-          });
+        for (const mutation of mutations) {
+          for (const node of Array.from(mutation.addedNodes)) {
+            for (const item of collectFeedItems(node)) {
+              observeElement(item);
+            }
+          }
 
-          mutation.removedNodes.forEach((node) => {
-            collectFeedItems(node).forEach(unobserveElement);
-          });
-        });
+          for (const node of Array.from(mutation.removedNodes)) {
+            for (const item of collectFeedItems(node)) {
+              unobserveElement(item);
+            }
+          }
+        }
       });
 
       feedItemsMutationObserver.observe(contentRef.current, {

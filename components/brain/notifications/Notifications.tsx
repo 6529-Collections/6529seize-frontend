@@ -74,7 +74,9 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
     }
 
     hasMarkedAllAsReadRef.current = true;
-    void markAllAsRead();
+    markAllAsRead().catch((error) => {
+      console.error("Failed to mark notifications as read:", error);
+    });
   }, [markAllAsRead, reload]);
 
   const {
