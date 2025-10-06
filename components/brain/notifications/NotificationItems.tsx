@@ -24,7 +24,7 @@ function NotificationItemsComponent({
     () =>
       items.map((notification, index) => ({
         notification,
-        key: `notification-${notification.id}-${index}`,
+        key: `notification-${notification.id ?? index}`,
       })),
     [items]
   );

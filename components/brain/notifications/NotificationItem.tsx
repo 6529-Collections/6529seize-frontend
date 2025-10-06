@@ -101,18 +101,7 @@ function NotificationItemComponent({
   );
 }
 
-const NotificationItem = memo(
-  NotificationItemComponent,
-  (prevProps, nextProps) => {
-    return (
-      prevProps.notification === nextProps.notification &&
-      prevProps.activeDrop === nextProps.activeDrop &&
-      prevProps.onReply === nextProps.onReply &&
-      prevProps.onQuote === nextProps.onQuote &&
-      prevProps.onDropContentClick === nextProps.onDropContentClick
-    );
-  }
-);
+const NotificationItem = memo(NotificationItemComponent);
 
 NotificationItem.displayName = "NotificationItem";
 
