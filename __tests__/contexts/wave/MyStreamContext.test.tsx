@@ -1,14 +1,14 @@
 import React from "react";
 import { render, screen, act } from "@testing-library/react";
-import { DropSize } from "../../../helpers/waves/drop.helpers";
+import { DropSize } from "@/helpers/waves/drop.helpers";
 import {
   MyStreamProvider,
   useMyStream,
   useMyStreamWaveMessages,
-} from "../../../contexts/wave/MyStreamContext";
+} from "@/contexts/wave/MyStreamContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-jest.mock("../../../contexts/wave/hooks/useActiveWaveManager", () => ({
+jest.mock("@/contexts/wave/hooks/useActiveWaveManager", () => ({
   useActiveWaveManager: () => ({
     activeWaveId: null,
     setActiveWave: jest.fn(),
@@ -18,7 +18,7 @@ jest.mock("../../../contexts/wave/hooks/useActiveWaveManager", () => ({
 const addPinnedWave = jest.fn();
 const removePinnedWave = jest.fn();
 
-jest.mock("../../../contexts/wave/hooks/useEnhancedWavesList", () => ({
+jest.mock("@/contexts/wave/hooks/useEnhancedWavesList", () => ({
   __esModule: true,
   default: () => ({
     waves: [],
@@ -37,7 +37,7 @@ const registerWave = jest.fn();
 const fetchNextPage = jest.fn();
 const fetchAroundSerialNo = jest.fn();
 
-jest.mock("../../../contexts/wave/hooks/useWaveDataManager", () => ({
+jest.mock("@/contexts/wave/hooks/useWaveDataManager", () => ({
   useWaveDataManager: () => ({
     registerWave,
     fetchNextPage,
@@ -50,7 +50,7 @@ const subscribe = jest.fn();
 const unsubscribe = jest.fn();
 const getData = jest.fn();
 
-jest.mock("../../../contexts/wave/hooks/useWaveMessagesStore", () => ({
+jest.mock("@/contexts/wave/hooks/useWaveMessagesStore", () => ({
   __esModule: true,
   default: () => ({
     updateData: jest.fn(),
@@ -61,21 +61,21 @@ jest.mock("../../../contexts/wave/hooks/useWaveMessagesStore", () => ({
   }),
 }));
 
-jest.mock("../../../contexts/wave/hooks/useWaveRealtimeUpdater", () => ({
+jest.mock("@/contexts/wave/hooks/useWaveRealtimeUpdater", () => ({
   useWaveRealtimeUpdater: () => ({
     processIncomingDrop: jest.fn(),
     processDropRemoved: jest.fn(),
   }),
 }));
 
-jest.mock("../../../services/websocket/useWebSocketMessage", () => ({
+jest.mock("@/services/websocket/useWebSocketMessage", () => ({
   useWebsocketStatus: () => "connected",
   useWebSocketMessage: jest.fn(),
 }));
 
-jest.mock("../../../hooks/useCapacitor", () => () => ({ isCapacitor: false }));
+jest.mock("@/hooks/useCapacitor", () => () => ({ isCapacitor: false }));
 
-jest.mock("../../../components/notifications/NotificationsContext", () => ({
+jest.mock("@/components/notifications/NotificationsContext", () => ({
   useNotificationsContext: () => ({
     removeWaveDeliveredNotifications: jest.fn().mockResolvedValue(undefined),
     removeAllDeliveredNotifications: jest.fn().mockResolvedValue(undefined),

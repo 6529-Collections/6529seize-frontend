@@ -4,22 +4,22 @@ import React, { useMemo, useState, useEffect, useRef } from "react";
 import {
   ActiveDropAction,
   ActiveDropState,
-} from "../../../types/dropInteractionTypes";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
-import WaveDropsAll from "../../waves/drops/WaveDropsAll";
-import { CreateDropWaveWrapper } from "../../waves/CreateDropWaveWrapper";
+} from "@/types/dropInteractionTypes";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import WaveDropsAll from "@/components/waves/drops/WaveDropsAll";
+import { CreateDropWaveWrapper } from "@/components/waves/CreateDropWaveWrapper";
 import PrivilegedDropCreator, {
   DropMode,
-} from "../../waves/PrivilegedDropCreator";
-import { ApiWave } from "../../../generated/models/ApiWave";
+} from "@/components/waves/PrivilegedDropCreator";
+import { ApiWave } from "@/generated/models/ApiWave";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useLayout } from "./layout/LayoutContext";
-import MobileMemesArtSubmissionBtn from "../../waves/memes/submission/MobileMemesArtSubmissionBtn";
-import { useWave } from "../../../hooks/useWave";
+import MobileMemesArtSubmissionBtn from "@/components/waves/memes/submission/MobileMemesArtSubmissionBtn";
+import { useWave } from "@/hooks/useWave";
 import { useSelector } from "react-redux";
-import { selectEditingDropId } from "../../../store/editSlice";
-import useDeviceInfo from "../../../hooks/useDeviceInfo";
-import { useAndroidKeyboard } from "../../../hooks/useAndroidKeyboard";
+import { selectEditingDropId } from "@/store/editSlice";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
 
 interface MyStreamWaveChatProps {
   readonly wave: ApiWave;

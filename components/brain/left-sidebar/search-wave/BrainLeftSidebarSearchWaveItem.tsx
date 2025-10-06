@@ -3,12 +3,12 @@
 import React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ApiWave } from "../../../../generated/models/ApiWave";
-import { usePrefetchWaveData } from "../../../../hooks/usePrefetchWaveData";
-import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
-import { useWave } from "../../../../hooks/useWave";
-import WavePicture from "../../../waves/WavePicture";
-import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { useWave } from "@/hooks/useWave";
+import WavePicture from "@/components/waves/WavePicture";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 interface BrainLeftSidebarSearchWaveItemProps {
   readonly wave: ApiWave;
   readonly onClose: () => void;

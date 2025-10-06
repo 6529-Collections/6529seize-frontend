@@ -2,8 +2,8 @@ import Link from "next/link";
 import {
   CollectedCard,
   CollectedCollectionType,
-} from "../../../../entities/IProfile";
-import { formatNumberWithCommasOrDash } from "../../../../helpers/Helpers";
+} from "@/entities/IProfile";
+import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
 import { COLLECTED_COLLECTIONS_META } from "../filters/user-page-collected-filters.helpers";
 
 export default function UserPageCollectedCard({

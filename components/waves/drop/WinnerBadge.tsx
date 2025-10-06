@@ -1,7 +1,7 @@
 import React from "react";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
-import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
-import WinnerDropBadge from "../../waves/drops/winner/WinnerDropBadge";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
+import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
 
 interface WinnerBadgeProps {
   readonly drop: ApiDrop;

@@ -1,12 +1,12 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import { WaveWinners } from '../../../../components/waves/winners/WaveWinners';
-import { useWaveDecisions } from '../../../../hooks/waves/useWaveDecisions';
-import { useWave } from '../../../../hooks/useWave';
+import { WaveWinners } from '@/components/waves/winners/WaveWinners';
+import { useWaveDecisions } from '@/hooks/waves/useWaveDecisions';
+import { useWave } from '@/hooks/useWave';
 
-jest.mock('../../../../hooks/waves/useWaveDecisions');
-jest.mock('../../../../hooks/useWave');
-jest.mock('../../../../components/brain/my-stream/layout/LayoutContext', () => ({
+jest.mock('@/hooks/waves/useWaveDecisions');
+jest.mock('@/hooks/useWave');
+jest.mock('@/components/brain/my-stream/layout/LayoutContext', () => ({
   useLayout: () => ({ winnersViewStyle: {} })
 }));
 
@@ -14,13 +14,13 @@ const Timeline = jest.fn(() => <div data-testid="timeline" />);
 const Podium = jest.fn(() => <div data-testid="podium" />);
 const Drops = jest.fn(() => <div data-testid="drops" />);
 
-jest.mock('../../../../components/waves/winners/WaveWinnersTimeline', () => ({
+jest.mock('@/components/waves/winners/WaveWinnersTimeline', () => ({
   WaveWinnersTimeline: (p: any) => Timeline(p)
 }));
-jest.mock('../../../../components/waves/winners/podium/WaveWinnersPodium', () => ({
+jest.mock('@/components/waves/winners/podium/WaveWinnersPodium', () => ({
   WaveWinnersPodium: (p: any) => Podium(p)
 }));
-jest.mock('../../../../components/waves/winners/drops/WaveWinnersDrops', () => ({
+jest.mock('@/components/waves/winners/drops/WaveWinnersDrops', () => ({
   WaveWinnersDrops: (p: any) => Drops(p)
 }));
 

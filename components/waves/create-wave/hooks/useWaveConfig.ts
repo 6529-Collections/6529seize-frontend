@@ -7,17 +7,17 @@ import {
   CreateWaveOutcomeType,
   CreateWaveStep,
   TimeWeightedVotingSettings,
-} from "../../../../types/waves.types";
-import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
-import { Time } from "../../../../helpers/time";
-import { ApiGroupFull } from "../../../../generated/models/ApiGroupFull";
-import { ApiWaveCreditType } from "../../../../generated/models/ApiWaveCreditType";
+} from "@/types/waves.types";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { Time } from "@/helpers/time";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { Period } from "../types/period";
 import {
   getCreateWaveValidationErrors,
   CREATE_WAVE_VALIDATION_ERROR,
-} from "../../../../helpers/waves/create-wave.validation";
-import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
+} from "@/helpers/waves/create-wave.validation";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 
 interface EndDateConfig {
   time: number | null;

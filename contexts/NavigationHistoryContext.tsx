@@ -11,9 +11,9 @@ import {
   useMemo,
 } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { ViewKey } from "../components/navigation/navTypes";
-import { useViewContext } from "../components/navigation/ViewContext";
-import { mainSegment, sameMainPath } from "../helpers/navigation.helpers";
+import type { ViewKey } from "@/components/navigation/navTypes";
+import { useViewContext } from "@/components/navigation/ViewContext";
+import { mainSegment, sameMainPath } from "@/helpers/navigation.helpers";
 
 interface StackRoute {
   type: "route";

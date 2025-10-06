@@ -1,15 +1,15 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import React from 'react';
-import DropListItemRateGive from '../../../../../../../components/drops/view/item/rate/give/DropListItemRateGive';
-import { AuthContext } from '../../../../../../../components/auth/Auth';
-import { ProfileConnectedStatus } from '../../../../../../../entities/IProfile';
+import DropListItemRateGive from '@/components/drops/view/item/rate/give/DropListItemRateGive';
+import { AuthContext } from '@/components/auth/Auth';
+import { ProfileConnectedStatus } from '@/entities/IProfile';
 
 
 const submitMock = jest.fn((props: any) => <div data-testid="submit" data-rate={props.rate} />);
-jest.mock('../../../../../../../components/drops/view/item/rate/give/DropListItemRateGiveSubmit', () => (props: any) => submitMock(props));
+jest.mock('@/components/drops/view/item/rate/give/DropListItemRateGiveSubmit', () => (props: any) => submitMock(props));
 
 const dropInteractionMock = { canVote: true };
-jest.mock('../../../../../../../hooks/drops/useDropInteractionRules', () => ({ useDropInteractionRules: () => dropInteractionMock }));
+jest.mock('@/hooks/drops/useDropInteractionRules', () => ({ useDropInteractionRules: () => dropInteractionMock }));
 
 const drop = {
   id: 'd1',

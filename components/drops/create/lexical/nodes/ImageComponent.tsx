@@ -3,7 +3,7 @@
 import React, { useState, type JSX } from "react";
 import CircleLoader, {
   CircleLoaderSize,
-} from "../../../../distribution-plan-tool/common/CircleLoader";
+} from "@/components/distribution-plan-tool/common/CircleLoader";
 
 interface ImageComponentProps {
   readonly src: string;

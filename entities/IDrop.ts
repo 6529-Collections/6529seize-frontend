@@ -1,6 +1,6 @@
-import { ApiCreateDropRequest } from "../generated/models/ApiCreateDropRequest";
-import { ProfileMinWithoutSubs } from "../helpers/ProfileTypes";
-import { FullPageRequest } from "../helpers/Types";
+import { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
+import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
+import { FullPageRequest } from "@/helpers/Types";
 import {
   ProfileActivityLogDropCreated,
   ProfileActivityLogDropComment,

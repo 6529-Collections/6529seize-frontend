@@ -1,7 +1,7 @@
 import styles from "./TheMemes.module.scss";
 import { Col, Container, Row, Table } from "react-bootstrap";
-import { NFT } from "../../entities/INFT";
-import { numberWithCommas, printMintDate } from "../../helpers/Helpers";
+import { NFT } from "@/entities/INFT";
+import { numberWithCommas, printMintDate } from "@/helpers/Helpers";
 import NFTLeaderboard from "../leaderboard/NFTLeaderboard";
 import { NftPageStats } from "../nftAttributes/NftStats";
 

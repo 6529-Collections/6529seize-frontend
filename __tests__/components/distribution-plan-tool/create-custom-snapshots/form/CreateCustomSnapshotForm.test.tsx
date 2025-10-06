@@ -1,20 +1,20 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateCustomSnapshotForm from '../../../../../components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotForm';
-import { DistributionPlanToolContext } from '../../../../../components/distribution-plan-tool/DistributionPlanToolContext';
-import { distributionPlanApiPost } from '../../../../../services/distribution-plan-api';
+import CreateCustomSnapshotForm from '@/components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotForm';
+import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
+import { distributionPlanApiPost } from '@/services/distribution-plan-api';
 
-jest.mock('../../../../../components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormUpload', () => () => <div data-testid="upload" />);
-jest.mock('../../../../../components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormTable', () => ({ tokens }: any) => <div data-testid="table">{tokens.length}</div>);
-jest.mock('../../../../../components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormAddWalletsModal', () => ({ addUploadedTokens, onClose, tokens }: any) => (
+jest.mock('@/components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormUpload', () => () => <div data-testid="upload" />);
+jest.mock('@/components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormTable', () => ({ tokens }: any) => <div data-testid="table">{tokens.length}</div>);
+jest.mock('@/components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormAddWalletsModal', () => ({ addUploadedTokens, onClose, tokens }: any) => (
   <div data-testid="modal">
     <span data-testid="count">{tokens.length}</span>
     <button onClick={() => { addUploadedTokens([{ owner: '0x1' }]); onClose(); }}>upload</button>
   </div>
 ));
-jest.mock('../../../../../components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper', () => ({ __esModule: true, AllowlistToolModalSize: { X_LARGE: 'X_LARGE' }, default: ({ children }: any) => <div data-testid="wrapper">{children}</div> }));
+jest.mock('@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper', () => ({ __esModule: true, AllowlistToolModalSize: { X_LARGE: 'X_LARGE' }, default: ({ children }: any) => <div data-testid="wrapper">{children}</div> }));
 
-jest.mock('../../../../../services/distribution-plan-api');
+jest.mock('@/services/distribution-plan-api');
 
 const ctx = {
   distributionPlan: { id: 'd1' },

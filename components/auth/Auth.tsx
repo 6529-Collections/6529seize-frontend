@@ -4,39 +4,39 @@ import styles from "./Auth.module.scss";
 import { createContext, useContext, useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useSecureSign, MobileSigningError, ConnectionMismatchError, SigningProviderError } from "../../hooks/useSecureSign";
-import { useIdentity } from "../../hooks/useIdentity";
+import { useSecureSign, MobileSigningError, ConnectionMismatchError, SigningProviderError } from "@/hooks/useSecureSign";
+import { useIdentity } from "@/hooks/useIdentity";
 import {
   getAuthJwt,
   removeAuthJwt,
   setAuthJwt,
-} from "../../services/auth/auth.utils";
-import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
+} from "@/services/auth/auth.utils";
+import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { isAddress } from "viem";
-import { ProfileConnectedStatus } from "../../entities/IProfile";
-import { validateJwt, getRole } from "../../services/auth/jwt-validation.utils";
+import { ProfileConnectedStatus } from "@/entities/IProfile";
+import { validateJwt, getRole } from "@/services/auth/jwt-validation.utils";
 import { useQuery } from "@tanstack/react-query";
 import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "../react-query-wrapper/ReactQueryWrapper";
-import { getProfileConnectedStatus } from "../../helpers/ProfileHelpers";
-import { ApiNonceResponse } from "../../generated/models/ApiNonceResponse";
-import { ApiLoginRequest } from "../../generated/models/ApiLoginRequest";
-import { ApiLoginResponse } from "../../generated/models/ApiLoginResponse";
-import { ApiProfileProxy } from "../../generated/models/ApiProfileProxy";
-import { groupProfileProxies } from "../../helpers/profile-proxy.helpers";
+import { getProfileConnectedStatus } from "@/helpers/ProfileHelpers";
+import { ApiNonceResponse } from "@/generated/models/ApiNonceResponse";
+import { ApiLoginRequest } from "@/generated/models/ApiLoginRequest";
+import { ApiLoginResponse } from "@/generated/models/ApiLoginResponse";
+import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { groupProfileProxies } from "@/helpers/profile-proxy.helpers";
 import { Modal, Button } from "react-bootstrap";
 import DotLoader from "../dotLoader/DotLoader";
 import { useSeizeConnectContext } from "./SeizeConnectContext";
-import { ApiIdentity } from "../../generated/models/ApiIdentity";
-import { sanitizeErrorForUser, logErrorSecurely } from "../../utils/error-sanitizer";
-import { validateRoleForAuthentication } from "../../utils/role-validation";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { sanitizeErrorForUser, logErrorSecurely } from "@/utils/error-sanitizer";
+import { validateRoleForAuthentication } from "@/utils/role-validation";
 import {
   MissingActiveProfileError,
   InvalidRoleStateError
-} from "../../errors/authentication";
-import { validateAuthImmediate } from "../../services/auth/immediate-validation.utils";
+} from "@/errors/authentication";
+import { validateAuthImmediate } from "@/services/auth/immediate-validation.utils";
 
 // Custom error classes for authentication failures
 class AuthenticationNonceError extends Error {

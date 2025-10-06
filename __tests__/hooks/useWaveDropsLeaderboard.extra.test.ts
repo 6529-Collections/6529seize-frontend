@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from '@testing-library/react';
-import { useWaveDropsLeaderboard, WaveDropsLeaderboardSort } from '../../hooks/useWaveDropsLeaderboard';
+import { useWaveDropsLeaderboard, WaveDropsLeaderboardSort } from '@/hooks/useWaveDropsLeaderboard';
 import { useInfiniteQuery, useQueryClient, useQuery } from '@tanstack/react-query';
 
 jest.mock('@tanstack/react-query', () => ({
@@ -9,9 +9,9 @@ jest.mock('@tanstack/react-query', () => ({
   keepPreviousData: {},
 }));
 jest.mock('react-use', () => ({ useDebounce: jest.fn() }));
-jest.mock('../../services/api/common-api', () => ({ commonApiFetch: jest.fn() }));
-jest.mock('../../hooks/useCapacitor', () => () => ({ isCapacitor: false }));
-jest.mock('../../helpers/waves/wave-drops.helpers', () => ({
+jest.mock('@/services/api/common-api', () => ({ commonApiFetch: jest.fn() }));
+jest.mock('@/hooks/useCapacitor', () => () => ({ isCapacitor: false }));
+jest.mock('@/helpers/waves/wave-drops.helpers', () => ({
   generateUniqueKeys: jest.fn((a:any)=>a),
   mapToExtendedDrops: jest.fn((pages:any)=> pages.flatMap((p:any)=>p.drops)),
 }));

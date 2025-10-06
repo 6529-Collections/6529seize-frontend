@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import CreateDropContentRequirementsItem from '../../../components/waves/CreateDropContentRequirementsItem';
-import { DropRequirementType } from '../../../components/waves/CreateDropContentRequirements';
+import CreateDropContentRequirementsItem from '@/components/waves/CreateDropContentRequirementsItem';
+import { DropRequirementType } from '@/components/waves/CreateDropContentRequirements';
 
 
 describe('CreateDropContentRequirementsItem', () => {

@@ -1,12 +1,12 @@
 import { renderHook, act } from '@testing-library/react';
-import { useWaveDataFetching } from '../../../../contexts/wave/hooks/useWaveDataFetching';
+import { useWaveDataFetching } from '@/contexts/wave/hooks/useWaveDataFetching';
 
 const getLoadingState = jest.fn(() => ({ state: { isLoading: false, promise: null }, shouldContinue: true }));
 const setLoadingState = jest.fn();
 const setPromise = jest.fn();
 const clearLoadingState = jest.fn();
 
-jest.mock('../../../../contexts/wave/hooks/useWaveLoadingState', () => ({
+jest.mock('@/contexts/wave/hooks/useWaveLoadingState', () => ({
   useWaveLoadingState: () => ({ getLoadingState, setLoadingState, setPromise, clearLoadingState }),
 }));
 
@@ -14,7 +14,7 @@ const cancelFetch = jest.fn();
 const createController = jest.fn(() => ({ signal: {} } as AbortController));
 const cleanupController = jest.fn();
 
-jest.mock('../../../../contexts/wave/hooks/useWaveAbortController', () => ({
+jest.mock('@/contexts/wave/hooks/useWaveAbortController', () => ({
   useWaveAbortController: () => ({ cancelFetch, createController, cleanupController }),
 }));
 
@@ -23,7 +23,7 @@ export const formatWaveMessages = jest.fn();
 export const createEmptyWaveMessages = jest.fn();
 export const fetchNewestWaveMessages = jest.fn();
 
-jest.mock('../../../../contexts/wave/utils/wave-messages-utils', () => ({
+jest.mock('@/contexts/wave/utils/wave-messages-utils', () => ({
   fetchWaveMessages: (...args: any[]) => fetchWaveMessages(...args),
   formatWaveMessages: (...args: any[]) => formatWaveMessages(...args),
   createEmptyWaveMessages: (...args: any[]) => createEmptyWaveMessages(...args),

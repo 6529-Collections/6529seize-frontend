@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { WaveWinnersSmallLoading } from '../../../../components/waves/winners/WaveWinnersSmallLoading';
+import { WaveWinnersSmallLoading } from '@/components/waves/winners/WaveWinnersSmallLoading';
 
 describe('WaveWinnersSmallLoading', () => {
   it('renders the loading skeleton structure', () => {

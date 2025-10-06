@@ -1,10 +1,10 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import UserPageIdentityStatementsNFTAccounts from '../../../../../../components/user/identity/statements/nft-accounts/UserPageIdentityStatementsNFTAccounts';
+import UserPageIdentityStatementsNFTAccounts from '@/components/user/identity/statements/nft-accounts/UserPageIdentityStatementsNFTAccounts';
 
 let listProps: any;
 
-jest.mock('../../../../../../components/user/identity/statements/utils/UserPageIdentityStatementsStatementsList', () => (props: any) => {
+jest.mock('@/components/user/identity/statements/utils/UserPageIdentityStatementsStatementsList', () => (props: any) => {
   listProps = props;
   return <ul data-testid="list" />;
 });

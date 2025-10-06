@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveApprovalThresholdTime from '../../../../../components/waves/create-wave/approval/CreateWaveApprovalThresholdTime';
-import { Period } from '../../../../../helpers/Types';
+import CreateWaveApprovalThresholdTime from '@/components/waves/create-wave/approval/CreateWaveApprovalThresholdTime';
+import { Period } from '@/helpers/Types';
 
-jest.mock('../../../../../components/waves/create-wave/dates/end-date/CreateWaveDatesEndDateSelectPeriod', () => ({
+jest.mock('@/components/waves/create-wave/dates/end-date/CreateWaveDatesEndDateSelectPeriod', () => ({
   __esModule: true,
   default: (props: any) => (
     <button onClick={() => props.onPeriodSelect(Period.HOURS)}>select-period</button>

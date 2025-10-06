@@ -23,7 +23,7 @@ import {
   NextGenAdminScriptsFormGroup,
   NextGenAdminTextFormGroup,
 } from "./NextGenAdminShared";
-import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 
 export enum UpdateType {
   UPDATE_INFO,

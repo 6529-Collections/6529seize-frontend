@@ -1,20 +1,20 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
-import UserPageHeaderEditBanner from '../../../../../components/user/user-page-header/banner/UserPageHeaderEditBanner';
-import { ApiIdentity } from '../../../../../generated/models/ApiIdentity';
-import { AuthContext } from '../../../../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../../../../components/react-query-wrapper/ReactQueryWrapper';
+import UserPageHeaderEditBanner from '@/components/user/user-page-header/banner/UserPageHeaderEditBanner';
+import { ApiIdentity } from '@/generated/models/ApiIdentity';
+import { AuthContext } from '@/components/auth/Auth';
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 
 let capturedBgProps: any;
 let capturedSaveProps: any;
 
-jest.mock('../../../../../components/user/settings/UserSettingsBackground', () => (props: any) => {
+jest.mock('@/components/user/settings/UserSettingsBackground', () => (props: any) => {
   capturedBgProps = props;
   return <div data-testid="background" />;
 });
 
-jest.mock('../../../../../components/user/settings/UserSettingsSave', () => (props: any) => {
+jest.mock('@/components/user/settings/UserSettingsSave', () => (props: any) => {
   capturedSaveProps = props;
   return (
     <button data-testid="save" type="submit" disabled={props.disabled}>

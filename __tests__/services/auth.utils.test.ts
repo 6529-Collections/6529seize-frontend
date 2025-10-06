@@ -1,6 +1,6 @@
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
-import { safeLocalStorage } from "../../helpers/safeLocalStorage";
+import { safeLocalStorage } from "@/helpers/safeLocalStorage";
 import {
   getAuthJwt,
   getStagingAuth,
@@ -8,7 +8,7 @@ import {
   migrateCookiesToLocalStorage,
   removeAuthJwt,
   setAuthJwt,
-} from "../../services/auth/auth.utils";
+} from "@/services/auth/auth.utils";
 
 jest.mock("js-cookie", () => ({
   get: jest.fn(),
@@ -16,7 +16,7 @@ jest.mock("js-cookie", () => ({
   remove: jest.fn(),
 }));
 jest.mock("jwt-decode", () => ({ jwtDecode: jest.fn() }));
-jest.mock("../../helpers/safeLocalStorage", () => ({
+jest.mock("@/helpers/safeLocalStorage", () => ({
   safeLocalStorage: {
     getItem: jest.fn(),
     setItem: jest.fn(),

@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
-import { useActivityFilters } from '../../hooks/useActivityFilters';
-import { TypeFilter, ContractFilter } from '../../hooks/useActivityData';
+import { useActivityFilters } from '@/hooks/useActivityFilters';
+import { TypeFilter, ContractFilter } from '@/hooks/useActivityData';
 
 describe('useActivityFilters', () => {
   describe('Initial State', () => {

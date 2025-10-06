@@ -9,7 +9,7 @@ import {
   type TikTokPreviewResult,
   type TikTokPreviewSuccess,
   type TikTokPreviewUnavailable,
-} from "../../services/api/tiktok-preview";
+} from "@/services/api/tiktok-preview";
 import { LinkPreviewCardLayout } from "./OpenGraphPreview";
 
 interface TikTokCardProps {

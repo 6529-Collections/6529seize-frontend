@@ -28,6 +28,7 @@ import {
   faChevronCircleUp,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
@@ -532,7 +533,10 @@ export default function MemeLabComponent() {
         sm={{ span: 4 }}
         md={{ span: 3 }}
         lg={{ span: 3 }}>
-        <a href={`/meme-lab/${nft.id}`} className="decoration-none scale-hover">
+        <Link
+          href={`/meme-lab/${nft.id}`}
+          className="decoration-none scale-hover"
+        >
           <Container fluid>
             <Row className={isConnected ? styles.nftImagePadding : ""}>
               <NFTImage
@@ -554,7 +558,7 @@ export default function MemeLabComponent() {
               </Col>
             </Row>
           </Container>
-        </a>
+        </Link>
       </Col>
     );
   }

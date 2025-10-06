@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import TimelineMedia, { MediaType } from '../../../components/timeline/TimelineMedia';
+import TimelineMedia, { MediaType } from '@/components/timeline/TimelineMedia';
 
-jest.mock('../../../components/timeline/Timeline.module.scss', () => ({ timelineMediaImage: 'media' }));
+jest.mock('@/components/timeline/Timeline.module.scss', () => ({ timelineMediaImage: 'media' }));
 
 describe('TimelineMedia', () => {
   it('renders image element by default', () => {

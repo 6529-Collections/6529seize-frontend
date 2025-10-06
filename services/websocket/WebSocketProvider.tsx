@@ -18,7 +18,7 @@ import {
   WebSocketMessage,
   WebSocketStatus,
 } from "./WebSocketTypes";
-import { WsMessageType } from "../../helpers/Types";
+import { WsMessageType } from "@/helpers/Types";
 import { getAuthJwt } from "../auth/auth.utils";
 
 // Default values for reconnection

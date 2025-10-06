@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import UserPageStatsCollected from "../../../../components/user/stats/UserPageStatsCollected";
+import UserPageStatsCollected from "@/components/user/stats/UserPageStatsCollected";
 
 const ownerBalance = {
   total_balance: 5,

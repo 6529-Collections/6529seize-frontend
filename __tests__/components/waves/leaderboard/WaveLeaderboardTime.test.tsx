@@ -1,17 +1,17 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { WaveLeaderboardTime } from '../../../../components/waves/leaderboard/WaveLeaderboardTime';
+import { WaveLeaderboardTime } from '@/components/waves/leaderboard/WaveLeaderboardTime';
 
-jest.mock('../../../../hooks/waves/useDecisionPoints', () => ({ useDecisionPoints: jest.fn() }));
-jest.mock('../../../../hooks/useWave', () => ({ useWave: jest.fn() }));
-jest.mock('../../../../components/waves/leaderboard/time/TimelineToggleHeader', () => ({ TimelineToggleHeader: () => <div data-testid="header" /> }));
-jest.mock('../../../../components/waves/leaderboard/time/ExpandedTimelineContent', () => ({ ExpandedTimelineContent: () => <div data-testid="expanded" /> }));
-jest.mock('../../../../components/waves/leaderboard/time/CompactDroppingPhaseCard', () => ({ CompactDroppingPhaseCard: () => <div data-testid="drop" /> }));
-jest.mock('../../../../components/waves/leaderboard/time/CompactVotingPhaseCard', () => ({ CompactVotingPhaseCard: () => <div data-testid="vote" /> }));
-jest.mock('../../../../helpers/time', () => ({ Time: { currentMillis: jest.fn(() => 0) } }));
+jest.mock('@/hooks/waves/useDecisionPoints', () => ({ useDecisionPoints: jest.fn() }));
+jest.mock('@/hooks/useWave', () => ({ useWave: jest.fn() }));
+jest.mock('@/components/waves/leaderboard/time/TimelineToggleHeader', () => ({ TimelineToggleHeader: () => <div data-testid="header" /> }));
+jest.mock('@/components/waves/leaderboard/time/ExpandedTimelineContent', () => ({ ExpandedTimelineContent: () => <div data-testid="expanded" /> }));
+jest.mock('@/components/waves/leaderboard/time/CompactDroppingPhaseCard', () => ({ CompactDroppingPhaseCard: () => <div data-testid="drop" /> }));
+jest.mock('@/components/waves/leaderboard/time/CompactVotingPhaseCard', () => ({ CompactVotingPhaseCard: () => <div data-testid="vote" /> }));
+jest.mock('@/helpers/time', () => ({ Time: { currentMillis: jest.fn(() => 0) } }));
 
-const useDecisionPoints = require('../../../../hooks/waves/useDecisionPoints').useDecisionPoints;
-const useWave = require('../../../../hooks/useWave').useWave;
+const useDecisionPoints = require('@/hooks/waves/useDecisionPoints').useDecisionPoints;
+const useWave = require('@/hooks/useWave').useWave;
 
 describe('WaveLeaderboardTime', () => {
   it('shows timeline when multi decision', () => {

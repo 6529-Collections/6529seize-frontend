@@ -1,7 +1,7 @@
 import { QueryClient } from "@tanstack/react-query";
 import { WAVE_FOLLOWING_WAVES_PARAMS } from "./query-utils";
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { ApiWavesOverviewType } from "../../../generated/models/ApiWavesOverviewType";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import { QueryKey } from "../ReactQueryWrapper";
 
 type WavesOverviewQueryData = {

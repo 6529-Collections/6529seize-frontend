@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import {
   Accordion,
   Col,
@@ -33,14 +34,14 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip } from "react-tooltip";
-import { DELEGATION_ABI } from "../../abis";
+import { DELEGATION_ABI } from "@/abis";
 import {
   DELEGATION_ALL_ADDRESS,
   DELEGATION_CONTRACT,
   NEVER_DATE,
   NULL_ADDRESS,
-} from "../../constants";
-import { areEqualAddresses, getTransactionLink } from "../../helpers/Helpers";
+} from "@/constants";
+import { areEqualAddresses, getTransactionLink } from "@/helpers/Helpers";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { Spinner } from "../dotLoader/DotLoader";
 import {
@@ -1756,11 +1757,10 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 </button>
               ) : (
                 <div>
-                  <span className={styles.hint}>* Note:</span> Unlock use case
-                  in{" "}
-                  <a href={`/delegation/${ANY_COLLECTION_PATH}`}>
+                  <span className={styles.hint}>* Note:</span> Unlock use case in{" "}
+                  <Link href={`/delegation/${ANY_COLLECTION_PATH}`}>
                     All Collections
-                  </a>
+                  </Link>
                 </div>
               )}
             </Col>
@@ -1778,7 +1778,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
           <Row className="pb-3">
             <Col>
               <span className={styles.hint}>* Note:</span> Unlock Wallet on{" "}
-              <a href={`/delegation/${ANY_COLLECTION_PATH}`}>All Collections</a>{" "}
+              <Link href={`/delegation/${ANY_COLLECTION_PATH}`}>
+                All Collections
+              </Link>{" "}
               to lock/unlock specific collections and use cases
             </Col>
           </Row>

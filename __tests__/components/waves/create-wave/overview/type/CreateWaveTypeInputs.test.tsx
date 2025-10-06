@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveTypeInputs from '../../../../../../components/waves/create-wave/overview/type/CreateWaveTypeInputs';
-import { ApiWaveType } from '../../../../../../generated/models/ApiWaveType';
+import CreateWaveTypeInputs from '@/components/waves/create-wave/overview/type/CreateWaveTypeInputs';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
 
-jest.mock('../../../../../../components/utils/radio/CommonBorderedRadioButton', () => (props: any) => (
+jest.mock('@/components/utils/radio/CommonBorderedRadioButton', () => (props: any) => (
   <button data-testid={props.type} disabled={props.disabled} onClick={() => props.onChange(props.type)}>{props.label}</button>
 ));
 

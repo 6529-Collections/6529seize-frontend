@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import WavesListHeader from '../../../../../components/waves/list/header/WavesListHeader';
-import { AuthContext } from '../../../../../components/auth/Auth';
+import WavesListHeader from '@/components/waves/list/header/WavesListHeader';
+import { AuthContext } from '@/components/auth/Auth';
 
-jest.mock('../../../../../components/waves/list/header/WavesListSearch', () => (props: any) => <div data-testid="search" />);
+jest.mock('@/components/waves/list/header/WavesListSearch', () => (props: any) => <div data-testid="search" />);
 
 const baseAuth = { connectedProfile: { handle: 'bob' }, activeProfileProxy: null } as any;
 

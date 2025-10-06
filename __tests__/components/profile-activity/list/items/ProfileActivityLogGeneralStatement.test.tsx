@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import ProfileActivityLogGeneralStatement from '../../../../../components/profile-activity/list/items/ProfileActivityLogGeneralStatement';
+import ProfileActivityLogGeneralStatement from '@/components/profile-activity/list/items/ProfileActivityLogGeneralStatement';
 
-jest.mock('../../../../../components/profile-activity/list/items/utils/ProfileActivityLogItemAction', () => () => <span data-testid="action" />);
+jest.mock('@/components/profile-activity/list/items/utils/ProfileActivityLogItemAction', () => () => <span data-testid="action" />);
 
 describe('ProfileActivityLogGeneralStatement', () => {
   it('displays statement text', () => {

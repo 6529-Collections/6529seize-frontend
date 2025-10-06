@@ -1,16 +1,16 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { SingleWaveDropInfoContent } from '../../../../components/waves/drop/SingleWaveDropInfoContent';
-import { ApiDropType } from '../../../../generated/models/ObjectSerializer';
-import { useSeizeSettings } from '../../../../contexts/SeizeSettingsContext';
+import { SingleWaveDropInfoContent } from '@/components/waves/drop/SingleWaveDropInfoContent';
+import { ApiDropType } from '@/generated/models/ObjectSerializer';
+import { useSeizeSettings } from '@/contexts/SeizeSettingsContext';
 
-jest.mock('../../../../contexts/SeizeSettingsContext');
+jest.mock('@/contexts/SeizeSettingsContext');
 const useSeizeSettingsMock = useSeizeSettings as jest.Mock;
 
-jest.mock('../../../../components/waves/drop/SingleWaveDropPosition', () => ({ SingleWaveDropPosition: (p: any) => <div data-testid="pos">{p.rank}</div> }));
-jest.mock('../../../../components/waves/drop/SingleWaveDropContent', () => ({ SingleWaveDropContent: () => <div data-testid="content" /> }));
-jest.mock('../../../../components/waves/drop/MemesSingleWaveDropContent', () => ({ MemesSingleWaveDropContent: () => <div data-testid="memes" /> }));
-jest.mock('../../../../components/waves/drop/WinnerBadge', () => ({ WinnerBadge: () => <div data-testid="badge" /> }));
+jest.mock('@/components/waves/drop/SingleWaveDropPosition', () => ({ SingleWaveDropPosition: (p: any) => <div data-testid="pos">{p.rank}</div> }));
+jest.mock('@/components/waves/drop/SingleWaveDropContent', () => ({ SingleWaveDropContent: () => <div data-testid="content" /> }));
+jest.mock('@/components/waves/drop/MemesSingleWaveDropContent', () => ({ MemesSingleWaveDropContent: () => <div data-testid="memes" /> }));
+jest.mock('@/components/waves/drop/WinnerBadge', () => ({ WinnerBadge: () => <div data-testid="badge" /> }));
 
 describe('SingleWaveDropInfoContent', () => {
   beforeEach(() => {

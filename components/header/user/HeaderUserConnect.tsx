@@ -1,4 +1,4 @@
-import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 
 export default function HeaderUserConnect(props: Readonly<{}>) {
   const { seizeConnect } = useSeizeConnectContext();

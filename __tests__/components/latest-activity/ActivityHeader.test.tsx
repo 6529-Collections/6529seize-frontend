@@ -1,16 +1,16 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import ActivityHeader from '../../../components/latest-activity/ActivityHeader';
+import ActivityHeader from '@/components/latest-activity/ActivityHeader';
 
 // Mock the DotLoader component
-jest.mock('../../../components/dotLoader/DotLoader', () => {
+jest.mock('@/components/dotLoader/DotLoader', () => {
   return function MockDotLoader() {
     return <div data-testid="dot-loader">Loading...</div>;
   };
 });
 
 // Mock the SCSS module
-jest.mock('../../../styles/Home.module.scss', () => ({
+jest.mock('@/styles/Home.module.scss', () => ({
   viewAllLink: 'mocked-view-all-link-class',
 }));
 

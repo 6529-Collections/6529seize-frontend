@@ -1,7 +1,7 @@
-import { getStatusFromDates, formatNameForUrl, normalizeNextgenTokenID, getOpenseaLink, getBlurLink, getMagicEdenLink, getCollectionIdsForAddress } from '../../../components/nextGen/nextgen_helpers';
-import { Status } from '../../../components/nextGen/nextgen_entities';
+import { getStatusFromDates, formatNameForUrl, normalizeNextgenTokenID, getOpenseaLink, getBlurLink, getMagicEdenLink, getCollectionIdsForAddress } from '@/components/nextGen/nextgen_helpers';
+import { Status } from '@/components/nextGen/nextgen_entities';
 
-jest.mock('../../../components/nextGen/nextgen_contracts', () => ({ NEXTGEN_CHAIN_ID: 1, NEXTGEN_CORE: { 1: '0xcore' } }));
+jest.mock('@/components/nextGen/nextgen_contracts', () => ({ NEXTGEN_CHAIN_ID: 1, NEXTGEN_CORE: { 1: '0xcore' } }));
 
 describe('nextgen_helpers', () => {
   it('determines status from dates', () => {

@@ -5,12 +5,12 @@ jest.mock("next/image", () => ({
   ),
 }));
 
-jest.mock("../../../hooks/isMobileScreen", () => ({
+jest.mock("@/hooks/isMobileScreen", () => ({
   __esModule: true,
   default: () => false,
 }));
 
-jest.mock("../../../components/user/utils/UserCICAndLevel", () => ({
+jest.mock("@/components/user/utils/UserCICAndLevel", () => ({
   __esModule: true,
   default: () => <div data-testid="cic" />,
 }));
@@ -21,7 +21,7 @@ import {
   get8KUrl,
   getNextGenIconUrl,
   getNextGenImageUrl,
-} from "../../../components/nextGen/collections/nextgenToken/NextGenTokenImage";
+} from "@/components/nextGen/collections/nextgenToken/NextGenTokenImage";
 
 const token = {
   id: 1,

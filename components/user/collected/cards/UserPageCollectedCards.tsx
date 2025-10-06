@@ -1,5 +1,5 @@
-import { CollectedCard } from "../../../../entities/IProfile";
-import CommonTablePagination from "../../../utils/table/paginator/CommonTablePagination";
+import { CollectedCard } from "@/entities/IProfile";
+import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
 import { ProfileCollectedFilters } from "../UserPageCollected";
 import UserPageCollectedCard from "./UserPageCollectedCard";
 import UserPageCollectedCardsNoCards from "./UserPageCollectedCardsNoCards";

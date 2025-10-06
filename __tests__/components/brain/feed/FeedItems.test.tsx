@@ -1,18 +1,18 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import FeedItems from '../../../../components/brain/feed/FeedItems';
-import { ApiFeedItemType } from '../../../../generated/models/ApiFeedItemType';
+import FeedItems from '@/components/brain/feed/FeedItems';
+import { ApiFeedItemType } from '@/generated/models/ApiFeedItemType';
 
-jest.mock('../../../../components/brain/feed/FeedItem', () => ({
+jest.mock('@/components/brain/feed/FeedItem', () => ({
   __esModule: true,
   default: ({ item }: any) => <div data-testid="feed-item" data-type={item.type} />
 }));
 
-jest.mock('../../../../helpers/waves/drop.helpers', () => ({
+jest.mock('@/helpers/waves/drop.helpers', () => ({
   getFeedItemKey: jest.fn(({ item, index }) => `${item.type}-${index}`),
 }));
 
-jest.mock('../../../../components/utils/animation/CommonChangeAnimation', () => ({
+jest.mock('@/components/utils/animation/CommonChangeAnimation', () => ({
   __esModule: true,
   default: ({ children }: any) => <div data-testid="anim">{children}</div>
 }));

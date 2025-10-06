@@ -1,13 +1,13 @@
 import { renderHook } from '@testing-library/react';
-import { useUnreadNotifications } from '../../hooks/useUnreadNotifications';
-import { QueryKey } from '../../components/react-query-wrapper/ReactQueryWrapper';
+import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
+import { QueryKey } from '@/components/react-query-wrapper/ReactQueryWrapper';
 
 const useQueryMock = jest.fn();
 jest.mock('@tanstack/react-query', () => ({ useQuery: (...args:any[]) => useQueryMock(...args) }));
 
-jest.mock('../../hooks/useCapacitor', () => ({ __esModule: true, default: () => ({ isCapacitor: false }) }));
+jest.mock('@/hooks/useCapacitor', () => ({ __esModule: true, default: () => ({ isCapacitor: false }) }));
 
-jest.mock('../../services/api/common-api', () => ({ commonApiFetch: jest.fn() }));
+jest.mock('@/services/api/common-api', () => ({ commonApiFetch: jest.fn() }));
 
 describe('useUnreadNotifications', () => {
   beforeEach(() => {

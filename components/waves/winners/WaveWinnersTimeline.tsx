@@ -1,7 +1,7 @@
 import React from "react";
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { ApiWaveDecision } from "../../../generated/models/ApiWaveDecision";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
 import { WaveWinnersEmpty } from "./WaveWinnersEmpty";
 import { format } from "date-fns";
 import { WaveWinnersTimelineLoading } from "./WaveWinnersTimelineLoading";

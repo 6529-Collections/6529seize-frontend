@@ -1,13 +1,13 @@
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import GroupCreateNftSearch from '../../../../../../../components/groups/page/create/config/nfts/GroupCreateNftSearch';
+import GroupCreateNftSearch from '@/components/groups/page/create/config/nfts/GroupCreateNftSearch';
 
 let capturedProps: any = null;
 let clickAwayCb: () => void = () => {};
 let keyPressCb: () => void = () => {};
 
-jest.mock('../../../../../../../components/groups/page/create/config/nfts/GroupCreateNftSearchItems', () => ({
+jest.mock('@/components/groups/page/create/config/nfts/GroupCreateNftSearchItems', () => ({
   __esModule: true,
   default: (props: any) => { capturedProps = props; return <div data-testid="items" />; }
 }));

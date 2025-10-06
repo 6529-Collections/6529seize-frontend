@@ -1,13 +1,13 @@
 import { render, screen } from '@testing-library/react';
-import CreateWaveOutcomesRowRep from '../../../../../../../../components/waves/create-wave/outcomes/winners/rows/rep/CreateWaveOutcomesRowRep';
-import { ApiWaveType } from '../../../../../../../../generated/models/ApiWaveType';
+import CreateWaveOutcomesRowRep from '@/components/waves/create-wave/outcomes/winners/rows/rep/CreateWaveOutcomesRowRep';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
 
-jest.mock('../../../../../../../../components/waves/create-wave/outcomes/winners/rows/rep/CreateWaveOutcomesRowRepApprove', () => ({
+jest.mock('@/components/waves/create-wave/outcomes/winners/rows/rep/CreateWaveOutcomesRowRepApprove', () => ({
   __esModule: true,
   default: () => <div data-testid="approve" />,
 }));
 
-jest.mock('../../../../../../../../components/waves/create-wave/outcomes/winners/rows/rep/CreateWaveOutcomesRowRepRank', () => ({
+jest.mock('@/components/waves/create-wave/outcomes/winners/rows/rep/CreateWaveOutcomesRowRepRank', () => ({
   __esModule: true,
   default: () => <div data-testid="rank" />,
 }));

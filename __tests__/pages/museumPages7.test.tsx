@@ -12,7 +12,7 @@ import IntroducingOM from "@/app/news/introducing-om/page";
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
 
 // Some of these pages rely on SeizeConnectContext, so provide a minimal mock
-jest.mock("../../components/auth/SeizeConnectContext", () => ({
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({
     address: "0x0",
     seizeConnect: jest.fn(),

@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import DistributionPlanToolSidebar, { DISTRIBUTION_PLAN_STEPS } from '../../../../components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanToolSidebar';
-import { DistributionPlanToolContext, DistributionPlanToolStep } from '../../../../components/distribution-plan-tool/DistributionPlanToolContext';
+import DistributionPlanToolSidebar, { DISTRIBUTION_PLAN_STEPS } from '@/components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanToolSidebar';
+import { DistributionPlanToolContext, DistributionPlanToolStep } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
 
-jest.mock('../../../../components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanStep', () => (p: any) => <li data-testid="step" data-order={p.activeStepOrder}>{p.step.label}</li>);
+jest.mock('@/components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanStep', () => (p: any) => <li data-testid="step" data-order={p.activeStepOrder}>{p.step.label}</li>);
 
 describe('DistributionPlanToolSidebar', () => {
   const wrapper = ({ step, children }: any) => (

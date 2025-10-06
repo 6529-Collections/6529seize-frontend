@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { Crumb } from "../components/breadcrumb/Breadcrumb";
+import { Crumb } from "@/components/breadcrumb/Breadcrumb";
 import {
   DYNAMIC_ROUTE_CONFIGS,
   DeterminedRouteInfo,

@@ -1,20 +1,20 @@
-import { ApiCreateNewWave } from "../../generated/models/ApiCreateNewWave";
-import { ApiCreateWaveDropRequest } from "../../generated/models/ApiCreateWaveDropRequest";
-import { ApiIntRange } from "../../generated/models/ApiIntRange";
-import { ApiWaveCreditScope } from "../../generated/models/ApiWaveCreditScope";
-import { ApiWaveCreditType } from "../../generated/models/ApiWaveCreditType";
-import { ApiWaveOutcome } from "../../generated/models/ApiWaveOutcome";
-import { ApiWaveOutcomeCredit } from "../../generated/models/ApiWaveOutcomeCredit";
-import { ApiWaveOutcomeSubType } from "../../generated/models/ApiWaveOutcomeSubType";
-import { ApiWaveOutcomeType } from "../../generated/models/ApiWaveOutcomeType";
-import { ApiWaveType } from "../../generated/models/ApiWaveType";
+import { ApiCreateNewWave } from "@/generated/models/ApiCreateNewWave";
+import { ApiCreateWaveDropRequest } from "@/generated/models/ApiCreateWaveDropRequest";
+import { ApiIntRange } from "@/generated/models/ApiIntRange";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
+import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
+import { ApiWaveOutcomeSubType } from "@/generated/models/ApiWaveOutcomeSubType";
+import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import {
   CreateWaveConfig,
   CreateWaveDatesConfig,
   CreateWaveOutcomeType,
   CreateWaveStep,
   TimeWeightedVotingSettings,
-} from "../../types/waves.types";
+} from "@/types/waves.types";
 import { assertUnreachable } from "../AllowlistToolHelpers";
 
 /**

@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import NotificationsWrapper from '../../../components/brain/notifications/NotificationsWrapper';
+import NotificationsWrapper from '@/components/brain/notifications/NotificationsWrapper';
 import { useRouter } from 'next/navigation';
 
 jest.mock('next/navigation', () => ({
@@ -8,7 +8,7 @@ jest.mock('next/navigation', () => ({
   useSearchParams: jest.fn(),
   usePathname: jest.fn(),
 }));
-jest.mock('../../../components/brain/notifications/NotificationItems', () => (props: any) => {
+jest.mock('@/components/brain/notifications/NotificationItems', () => (props: any) => {
   // expose callbacks
   return (
     <div data-testid="items" onClick={() => {

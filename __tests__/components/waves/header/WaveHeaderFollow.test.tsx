@@ -1,13 +1,13 @@
 import { render, screen, act, fireEvent } from '@testing-library/react';
 import React from 'react';
-import WaveHeaderFollow from '../../../../components/waves/header/WaveHeaderFollow';
-import { AuthContext } from '../../../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../../../components/react-query-wrapper/ReactQueryWrapper';
+import WaveHeaderFollow from '@/components/waves/header/WaveHeaderFollow';
+import { AuthContext } from '@/components/auth/Auth';
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 import { useMutation } from '@tanstack/react-query';
-import { commonApiPost, commonApiDeleteWithBody } from '../../../../services/api/common-api';
+import { commonApiPost, commonApiDeleteWithBody } from '@/services/api/common-api';
 
 jest.mock('@tanstack/react-query');
-jest.mock('../../../../services/api/common-api');
+jest.mock('@/services/api/common-api');
 
 (useMutation as jest.Mock).mockImplementation((opts) => ({
   mutateAsync: async () => {

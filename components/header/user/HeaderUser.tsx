@@ -2,9 +2,9 @@
 
 import HeaderUserConnected from "./HeaderUserConnected";
 import HeaderUserConnect from "./HeaderUserConnect";
-import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useEffect } from "react";
-import { useNotificationsContext } from "../../notifications/NotificationsContext";
+import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
 
 export default function HeaderUser() {
   const { address } = useSeizeConnectContext();

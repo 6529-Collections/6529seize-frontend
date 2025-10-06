@@ -1,9 +1,9 @@
-import { SortDirection } from "../../../entities/ISort";
-import { CommunityMembersSortOption } from "../../../enums";
-import CommonTableSortIcon from "../../user/utils/icons/CommonTableSortIcon";
+import { SortDirection } from "@/entities/ISort";
+import { CommunityMembersSortOption } from "@/enums";
+import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
 import CircleLoader, {
   CircleLoaderSize,
-} from "../../distribution-plan-tool/common/CircleLoader";
+} from "@/components/distribution-plan-tool/common/CircleLoader";
 
 export default function CommunityMembersMobileFilterBar({
   activeSort,

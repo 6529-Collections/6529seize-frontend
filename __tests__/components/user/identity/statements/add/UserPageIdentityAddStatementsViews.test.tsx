@@ -1,14 +1,14 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import UserPageIdentityAddStatementsViews from '../../../../../../components/user/identity/statements/add/UserPageIdentityAddStatementsViews';
-import { STATEMENT_ADD_VIEW } from '../../../../../../components/user/identity/statements/add/UserPageIdentityAddStatements';
-import { ApiIdentity } from '../../../../../../generated/models/ApiIdentity';
+import UserPageIdentityAddStatementsViews from '@/components/user/identity/statements/add/UserPageIdentityAddStatementsViews';
+import { STATEMENT_ADD_VIEW } from '@/components/user/identity/statements/add/UserPageIdentityAddStatements';
+import { ApiIdentity } from '@/generated/models/ApiIdentity';
 
-jest.mock('../../../../../../components/user/identity/statements/add/UserPageIdentityAddStatementsSelect', () => () => <div data-testid="select" />);
-jest.mock('../../../../../../components/user/identity/statements/add/contact/UserPageIdentityAddStatementsContact', () => () => <div data-testid="contact" />);
-jest.mock('../../../../../../components/user/identity/statements/add/social-media/UserPageIdentityAddStatementsSocialMediaAccount', () => () => <div data-testid="sma" />);
-jest.mock('../../../../../../components/user/identity/statements/add/social-media-verification-posts/UserPageIdentityAddStatementsSocialMediaPosts', () => () => <div data-testid="smp" />);
-jest.mock('../../../../../../components/user/identity/statements/add/nft-accounts/UserPageIdentityAddStatementsNFTAccounts', () => () => <div data-testid="nft" />);
+jest.mock('@/components/user/identity/statements/add/UserPageIdentityAddStatementsSelect', () => () => <div data-testid="select" />);
+jest.mock('@/components/user/identity/statements/add/contact/UserPageIdentityAddStatementsContact', () => () => <div data-testid="contact" />);
+jest.mock('@/components/user/identity/statements/add/social-media/UserPageIdentityAddStatementsSocialMediaAccount', () => () => <div data-testid="sma" />);
+jest.mock('@/components/user/identity/statements/add/social-media-verification-posts/UserPageIdentityAddStatementsSocialMediaPosts', () => () => <div data-testid="smp" />);
+jest.mock('@/components/user/identity/statements/add/nft-accounts/UserPageIdentityAddStatementsNFTAccounts', () => () => <div data-testid="nft" />);
 
 const profile = { id:'1' } as ApiIdentity;
 

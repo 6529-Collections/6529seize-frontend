@@ -1,5 +1,5 @@
 import CreateCustomSnapshotFormUpload from "./CreateCustomSnapshotFormUpload";
-import { CustomTokenPoolParamsToken } from "../../../allowlist-tool/allowlist-tool.types";
+import { CustomTokenPoolParamsToken } from "@/components/allowlist-tool/allowlist-tool.types";
 import CreateCustomSnapshotFormTable from "./CreateCustomSnapshotFormTable";
 
 export default function CreateCustomSnapshotFormAddWalletsModal({

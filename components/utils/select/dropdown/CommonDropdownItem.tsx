@@ -1,9 +1,9 @@
 "use client";
 
 import { cloneElement, isValidElement, useEffect, useState } from "react";
-import CommonTableSortIcon from "../../../user/utils/icons/CommonTableSortIcon";
+import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
 import { CommonSelectItemProps } from "../CommonSelect";
-import { SortDirection } from "../../../../entities/ISort";
+import { SortDirection } from "@/entities/ISort";
 
 export default function CommonDropdownItem<T, U = unknown>(
   props: Readonly<CommonSelectItemProps<T, U>>

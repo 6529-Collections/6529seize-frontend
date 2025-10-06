@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import SingleWaveDropVoteSlider from '../../../../components/waves/drop/SingleWaveDropVoteSlider';
-import { ApiWaveCreditType } from '../../../../generated/models/ApiWaveCreditType';
+import SingleWaveDropVoteSlider from '@/components/waves/drop/SingleWaveDropVoteSlider';
+import { ApiWaveCreditType } from '@/generated/models/ApiWaveCreditType';
 
 // Mock framer-motion
 jest.mock('framer-motion', () => ({
@@ -25,7 +25,7 @@ jest.mock('framer-motion', () => ({
 }));
 
 // Mock formatNumberWithCommas
-jest.mock('../../../../helpers/Helpers', () => ({
+jest.mock('@/helpers/Helpers', () => ({
   formatNumberWithCommas: (num: number) => num.toLocaleString('en-US'),
 }));
 

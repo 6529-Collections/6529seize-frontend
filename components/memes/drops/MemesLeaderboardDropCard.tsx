@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 interface MemesLeaderboardDropCardProps {
   readonly drop: ExtendedDrop;

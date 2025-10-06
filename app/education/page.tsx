@@ -1,4 +1,5 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import Link from "next/link";
 import type { Metadata } from "next";
 
 export default function EducationPage() {
@@ -299,12 +300,12 @@ Societies are made up of people – citizens, business leaders, public servants.
                   </span>
                   <span className="vcard rich-snippet-hidden">
                     <span className="fn">
-                      <a
+                      <Link
                         href="/author/6529er6529-io/"
                         title="Posts by 6529er"
                         rel="author">
                         6529er
-                      </a>
+                      </Link>
                     </span>
                   </span>
                   <span className="updated rich-snippet-hidden">
@@ -378,17 +379,17 @@ Societies are made up of people – citizens, business leaders, public servants.
                               <h3>WHAT IS THE PLAN IN EDUCATION?</h3>
                               <p>
                                 The 6529{" "}
-                                <a href="/education/tweetstorms/">
+                                <Link href="/education/tweetstorms/">
                                   <span style={{ textDecoration: "underline" }}>
                                     Tweetstorms
                                   </span>
-                                </a>{" "}
+                                </Link>{" "}
                                 and{" "}
-                                <a href="/education/podcasts/">
+                                <Link href="/education/podcasts/">
                                   <span style={{ textDecoration: "underline" }}>
                                     Podcasts
                                   </span>
-                                </a>{" "}
+                                </Link>{" "}
                                 are the start and will continue.
                               </p>
                               <p>
@@ -406,9 +407,9 @@ Societies are made up of people – citizens, business leaders, public servants.
                                 advocacy or policy in the cryptocurrency,
                                 digital rights, NFTs, Web3, metaverse, or
                                 related space, please get in touch{" "}
-                                <a href="/education/education-collaboration-form/">
+                                <Link href="/education/education-collaboration-form/">
                                   <u>here</u>
-                                </a>
+                                </Link>
                                 .
                               </p>
                               <p>

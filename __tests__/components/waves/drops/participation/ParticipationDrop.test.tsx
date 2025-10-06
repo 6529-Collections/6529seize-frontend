@@ -1,21 +1,21 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import ParticipationDrop from '../../../../../components/waves/drops/participation/ParticipationDrop';
-import { DropLocation } from '../../../../../components/waves/drops/Drop';
+import ParticipationDrop from '@/components/waves/drops/participation/ParticipationDrop';
+import { DropLocation } from '@/components/waves/drops/Drop';
 
-jest.mock('../../../../../contexts/SeizeSettingsContext', () => ({
+jest.mock('@/contexts/SeizeSettingsContext', () => ({
   useSeizeSettings: jest.fn()
 }));
 
-jest.mock('../../../../../components/memes/drops/MemeParticipationDrop', () => (props: any) => (
+jest.mock('@/components/memes/drops/MemeParticipationDrop', () => (props: any) => (
   <div data-testid="meme" {...props} />
 ));
 
-jest.mock('../../../../../components/waves/drops/participation/DefaultParticipationDrop', () => (props: any) => (
+jest.mock('@/components/waves/drops/participation/DefaultParticipationDrop', () => (props: any) => (
   <div data-testid="default" {...props} />
 ));
 
-const { useSeizeSettings } = require('../../../../../contexts/SeizeSettingsContext');
+const { useSeizeSettings } = require('@/contexts/SeizeSettingsContext');
 
 describe('ParticipationDrop', () => {
   const baseProps = {

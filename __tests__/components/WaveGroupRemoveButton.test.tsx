@@ -1,10 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import WaveGroupRemoveButton from "../../components/waves/specs/groups/group/edit/WaveGroupRemoveButton";
-import { WaveGroupType } from "../../components/waves/specs/groups/group/WaveGroup";
+import WaveGroupRemoveButton from "@/components/waves/specs/groups/group/edit/WaveGroupRemoveButton";
+import { WaveGroupType } from "@/components/waves/specs/groups/group/WaveGroup";
 import React from "react";
 
-jest.mock("../../components/waves/specs/groups/group/edit/WaveGroupRemove", () =>
+jest.mock("@/components/waves/specs/groups/group/edit/WaveGroupRemove", () =>
   function MockRemove(props: any) {
     return (
       <div data-testid="modal" onClick={() => props.onEdit({})}>

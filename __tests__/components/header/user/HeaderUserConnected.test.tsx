@@ -1,25 +1,25 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import HeaderUserConnected from "../../../../components/header/user/HeaderUserConnected";
+import HeaderUserConnected from "@/components/header/user/HeaderUserConnected";
 
 const connectingMock = jest.fn((props: any) => <div data-testid="connecting" />);
 const contextMock = jest.fn((props: any) => <div data-testid="context">{JSON.stringify(props)}</div>);
 
-jest.mock("../../../../components/header/user/HeaderUserConnecting", () => ({
+jest.mock("@/components/header/user/HeaderUserConnecting", () => ({
   __esModule: true,
   default: (props: any) => connectingMock(props),
 }));
 
-jest.mock("../../../../components/header/user/HeaderUserContext", () => ({
+jest.mock("@/components/header/user/HeaderUserContext", () => ({
   __esModule: true,
   default: (props: any) => contextMock(props),
 }));
 
-jest.mock("../../../../hooks/useIdentity", () => ({
+jest.mock("@/hooks/useIdentity", () => ({
   useIdentity: jest.fn(),
 }));
 
-const { useIdentity } = require("../../../../hooks/useIdentity");
+const { useIdentity } = require("@/hooks/useIdentity");
 
 function setup(result: { profile: any; isLoading: boolean }) {
   (useIdentity as jest.Mock).mockReturnValue(result);

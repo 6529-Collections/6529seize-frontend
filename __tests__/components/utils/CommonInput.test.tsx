@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import CommonInput from '../../../components/utils/input/CommonInput';
+import CommonInput from '@/components/utils/input/CommonInput';
 
 describe('CommonInput', () => {
   it('enforces text maxLength and focus callbacks', () => {

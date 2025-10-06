@@ -6,8 +6,8 @@ import {
   WsDropUpdateMessage,
   WsMessageType,
   WsTypingMessage,
-} from "../helpers/Types";
-import { ApiProfileMin } from "../generated/models/ApiProfileMin";
+} from "@/helpers/Types";
+import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 /* ------------------------------------------------------------------ */
 /*  Types                                                             */
 /* ------------------------------------------------------------------ */

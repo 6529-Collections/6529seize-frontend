@@ -2,18 +2,18 @@ import { renderHook, act } from "@testing-library/react";
 import {
   useWaveRealtimeUpdater,
   ProcessIncomingDropType,
-} from "../contexts/wave/hooks/useWaveRealtimeUpdater";
-import { DropSize } from "../helpers/waves/drop.helpers";
+} from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
+import { DropSize } from "@/helpers/waves/drop.helpers";
 
-jest.mock("../services/websocket/useWebSocketMessage", () => ({
+jest.mock("@/services/websocket/useWebSocketMessage", () => ({
   useWebSocketMessage: () => ({ isConnected: true }),
 }));
 
-jest.mock("../services/api/common-api", () => ({
+jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
 }));
 
-const { commonApiFetch } = require("../services/api/common-api");
+const { commonApiFetch } = require("@/services/api/common-api");
 
 const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
 

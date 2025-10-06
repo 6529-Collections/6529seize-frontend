@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import DropContentWrapper from '../../../../components/waves/drops/DropContentWrapper';
+import DropContentWrapper from '@/components/waves/drops/DropContentWrapper';
 
 declare const ResizeObserver: any;
 

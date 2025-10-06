@@ -1,7 +1,7 @@
 "use client";
 
-import useIsMobileDevice from "../../../hooks/isMobileDevice";
-import useCapacitor from "../../../hooks/useCapacitor";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useCapacitor from "@/hooks/useCapacitor";
 import { usePathname } from "next/navigation";
 
 export default function HeaderOpenMobile() {

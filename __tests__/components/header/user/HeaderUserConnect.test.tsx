@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import HeaderUserConnect from '../../../../components/header/user/HeaderUserConnect';
-import { useSeizeConnectContext } from '../../../../components/auth/SeizeConnectContext';
+import HeaderUserConnect from '@/components/header/user/HeaderUserConnect';
+import { useSeizeConnectContext } from '@/components/auth/SeizeConnectContext';
 
-jest.mock('../../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: jest.fn() }));
+jest.mock('@/components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: jest.fn() }));
 
 it('calls seizeConnect on click', async () => {
   const user = userEvent.setup();

@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import UserPageRepHeader from '../../../../../components/user/rep/header/UserPageRepHeader';
+import UserPageRepHeader from '@/components/user/rep/header/UserPageRepHeader';
 
 describe('UserPageRepHeader', () => {
   it('shows rep totals when provided', () => {

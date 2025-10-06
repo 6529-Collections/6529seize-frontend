@@ -1,7 +1,7 @@
-import { mapToExtendedDrops, generateUniqueKeys } from '../../../helpers/waves/wave-drops.helpers';
-import { getStableDropKey } from '../../../helpers/waves/drop.helpers';
+import { mapToExtendedDrops, generateUniqueKeys } from '@/helpers/waves/wave-drops.helpers';
+import { getStableDropKey } from '@/helpers/waves/drop.helpers';
 
-jest.mock('../../../helpers/waves/drop.helpers', () => ({
+jest.mock('@/helpers/waves/drop.helpers', () => ({
   getStableDropKey: jest.fn(({ id }: any) => ({ key: `k${id}`, hash: `h${id}` })),
   DropSize: { FULL: 'FULL' }
 }));

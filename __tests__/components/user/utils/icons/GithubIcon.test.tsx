@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import GithubIcon from '../../../../../components/user/utils/icons/GithubIcon';
+import GithubIcon from '@/components/user/utils/icons/GithubIcon';
 
 describe('GithubIcon', () => {
   it('renders svg element', () => {

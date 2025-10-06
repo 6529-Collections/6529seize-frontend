@@ -5,17 +5,17 @@ import {
   STATEMENT_GROUP,
   STATEMENT_META,
   STATEMENT_TYPE,
-} from "../../../../../helpers/Types";
+} from "@/helpers/Types";
 import UserPageIdentityAddStatementsInput from "./UserPageIdentityAddStatementsInput";
 import {
   ApiCreateOrUpdateProfileCicStatement,
   CicStatement,
-} from "../../../../../entities/IProfile";
+} from "@/entities/IProfile";
 import { useMutation } from "@tanstack/react-query";
-import { commonApiPost } from "../../../../../services/api/common-api";
-import { AuthContext } from "../../../../auth/Auth";
-import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
-import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
+import { commonApiPost } from "@/services/api/common-api";
+import { AuthContext } from "@/components/auth/Auth";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 export default function UserPageIdentityAddStatementsForm({
   profile,
   activeType,

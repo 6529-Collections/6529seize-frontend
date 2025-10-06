@@ -8,26 +8,26 @@ import CreateWaveOverview from "./overview/CreateWaveOverview";
 import CreateWaveGroups from "./groups/CreateWaveGroups";
 import CreateWaveDates from "./dates/CreateWaveDates";
 import CreateWaveOutcomes from "./outcomes/CreateWaveOutcomes";
-import { CreateWaveStep } from "../../../types/waves.types";
+import { CreateWaveStep } from "@/types/waves.types";
 import CreateWaveVoting from "./voting/CreateWaveVoting";
 import CreateWaveApproval from "./approval/CreateWaveApproval";
 import CreateWaveActions from "./utils/CreateWaveActions";
 import CreateWaveDescription, {
   CreateWaveDescriptionHandles,
 } from "./description/CreateWaveDescription";
-import { getCreateNewWaveBody } from "../../../helpers/waves/create-wave.helpers";
-import { AuthContext } from "../../auth/Auth";
-import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
-import { ApiCreateWaveDropRequest } from "../../../generated/models/ApiCreateWaveDropRequest";
+import { getCreateNewWaveBody } from "@/helpers/waves/create-wave.helpers";
+import { AuthContext } from "@/components/auth/Auth";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { ApiCreateWaveDropRequest } from "@/generated/models/ApiCreateWaveDropRequest";
 import { useRouter } from "next/navigation";
 import { generateDropPart } from "./services/waveMediaService";
 import { getAdminGroupId } from "./services/waveGroupService";
 import { useAddWaveMutation } from "./services/waveApiService";
 import { useWaveConfig } from "./hooks/useWaveConfig";
-import useCapacitor from "../../../hooks/useCapacitor";
+import useCapacitor from "@/hooks/useCapacitor";
 import CreateWaveFlow from "./CreateWaveFlow";
 import { multiPartUpload } from "./services/multiPartUpload";
-import { ApiIdentity } from "../../../generated/models/ApiIdentity";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 export default function CreateWave({
   profile,
   onBack,

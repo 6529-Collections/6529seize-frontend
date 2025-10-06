@@ -1,9 +1,9 @@
 import React from "react";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { SingleWaveDropLogs } from "./SingleWaveDropLogs";
 import { SingleWaveDropVoters } from "./SingleWaveDropVoters";
-import Download from "../../download/Download";
-import { getFileInfoFromUrl } from "../../../helpers/file.helpers";
+import Download from "@/components/download/Download";
+import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 
 interface SingleWaveDropInfoDetailsProps {
   readonly drop: ExtendedDrop | undefined;

@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react';
-import { useDropOutcomes, OutcomeType } from '../../../hooks/drops/useDropOutcomes';
-import { ApiWaveOutcomeCredit } from '../../../generated/models/ApiWaveOutcomeCredit';
-import { ApiWaveOutcomeType } from '../../../generated/models/ApiWaveOutcomeType';
+import { useDropOutcomes, OutcomeType } from '@/hooks/drops/useDropOutcomes';
+import { ApiWaveOutcomeCredit } from '@/generated/models/ApiWaveOutcomeCredit';
+import { ApiWaveOutcomeType } from '@/generated/models/ApiWaveOutcomeType';
 
 it('returns empty outcomes when drop has no rank', () => {
   const drop: any = { rank: null };

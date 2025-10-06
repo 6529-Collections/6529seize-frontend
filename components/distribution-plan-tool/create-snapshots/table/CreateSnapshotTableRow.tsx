@@ -1,12 +1,12 @@
 "use client";
 
 import { useCopyToClipboard } from "react-use";
-import DistributionPlanTableRowWrapper from "../../common/DistributionPlanTableRowWrapper";
-import { truncateTextMiddle } from "../../../../helpers/AllowlistToolHelpers";
+import DistributionPlanTableRowWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper";
+import { truncateTextMiddle } from "@/helpers/AllowlistToolHelpers";
 import { useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { CreateSnapshotSnapshot } from "../CreateSnapshots";
-import { DistributionPlanTokenPoolDownloadStatus } from "../../../allowlist-tool/allowlist-tool.types";
+import { DistributionPlanTokenPoolDownloadStatus } from "@/components/allowlist-tool/allowlist-tool.types";
 import CreateSnapshotTableRowDownload from "./CreateSnapshotTableRowDownload";
 
 export default function CreateSnapshotTableRow({

@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { WaveLeaderboardEmptyState } from '../../../../components/waves/leaderboard/drops/WaveLeaderboardEmptyState';
+import { WaveLeaderboardEmptyState } from '@/components/waves/leaderboard/drops/WaveLeaderboardEmptyState';
 
-jest.mock('../../../../hooks/useWave', () => ({ useWave: jest.fn(() => ({ isMemesWave: true })) }));
-jest.mock('../../../../components/utils/button/PrimaryButton', () => ({ __esModule: true, default: ({ onClicked, children }: any) => <button onClick={onClicked}>{children}</button> }));
+jest.mock('@/hooks/useWave', () => ({ useWave: jest.fn(() => ({ isMemesWave: true })) }));
+jest.mock('@/components/utils/button/PrimaryButton', () => ({ __esModule: true, default: ({ onClicked, children }: any) => <button onClick={onClicked}>{children}</button> }));
 
 describe('WaveLeaderboardEmptyState', () => {
   const wave = {} as any;
@@ -13,7 +13,7 @@ describe('WaveLeaderboardEmptyState', () => {
   });
 
   it('shows button otherwise', async () => {
-    const { useWave } = require('../../../../hooks/useWave');
+    const { useWave } = require('@/hooks/useWave');
     (useWave as jest.Mock).mockReturnValue({ isMemesWave: false });
     const onCreateDrop = jest.fn();
     const user = userEvent.setup();

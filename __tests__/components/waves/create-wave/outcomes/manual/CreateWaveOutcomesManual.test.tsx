@@ -1,17 +1,17 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveOutcomesManual from '../../../../../../components/waves/create-wave/outcomes/manual/CreateWaveOutcomesManual';
-import { ApiWaveType } from '../../../../../../generated/models/ApiWaveType';
-import { CreateWaveDatesConfig } from '../../../../../../types/waves.types';
+import CreateWaveOutcomesManual from '@/components/waves/create-wave/outcomes/manual/CreateWaveOutcomesManual';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
+import { CreateWaveDatesConfig } from '@/types/waves.types';
 
 // Mock dependencies
-jest.mock('../../../../../../components/waves/create-wave/outcomes/CreateWaveOutcomeWarning', () => {
+jest.mock('@/components/waves/create-wave/outcomes/CreateWaveOutcomeWarning', () => {
   return function MockCreateWaveOutcomeWarning() {
     return <div data-testid="outcome-warning">Outcome Warning</div>;
   };
 });
 
-jest.mock('../../../../../../components/utils/button/PrimaryButton', () => {
+jest.mock('@/components/utils/button/PrimaryButton', () => {
   return function MockPrimaryButton({ children, onClicked, disabled, loading }: any) {
     return (
       <button 

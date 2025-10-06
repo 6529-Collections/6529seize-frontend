@@ -1,11 +1,11 @@
 import { memo } from "react";
-import { Drop, ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { ActiveDropState } from "../../../../types/dropInteractionTypes";
+import { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
 import { DropInteractionParams, DropLocation } from "../Drop";
-import { ApiDrop } from "../../../../generated/models/ApiDrop";
-import MemeWinnerDrop from "../../../memes/drops/MemeWinnerDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import MemeWinnerDrop from "@/components/memes/drops/MemeWinnerDrop";
 import DefaultWinnerDrop from "./DefaultWinnerDrop";
-import { useSeizeSettings } from "../../../../contexts/SeizeSettingsContext";
+import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 
 interface WinnerDropProps {
   readonly drop: ExtendedDrop;

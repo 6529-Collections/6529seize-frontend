@@ -3,13 +3,13 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faThumbtack } from "@fortawesome/free-solid-svg-icons";
-import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { Tooltip } from "react-tooltip";
-import { useAuth } from "../../../../components/auth/Auth";
+import { useAuth } from "@/components/auth/Auth";
 import {
   usePinnedWavesServer,
   MAX_PINNED_WAVES,
-} from "../../../../hooks/usePinnedWavesServer";
+} from "@/hooks/usePinnedWavesServer";
 
 interface BrainLeftSidebarWavePinProps {
   readonly waveId: string;

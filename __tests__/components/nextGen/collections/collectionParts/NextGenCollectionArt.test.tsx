@@ -1,17 +1,17 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import NextGenCollectionArt from '../../../../../components/nextGen/collections/collectionParts/NextGenCollectionArt';
+import NextGenCollectionArt from '@/components/nextGen/collections/collectionParts/NextGenCollectionArt';
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: jest.fn(), replace: jest.fn() }),
   useSearchParams: () => new URLSearchParams(),
 }));
 
-jest.mock('../../../../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: jest.fn(() => Promise.resolve([])),
 }));
 
-jest.mock('../../../../../components/nextGen/collections/NextGenTokenList', () => (props: any) => (
+jest.mock('@/components/nextGen/collections/NextGenTokenList', () => (props: any) => (
   <div data-testid="token-list" data-limit={String(props.limit)} />
 ));
 
@@ -42,18 +42,18 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
 }));
 
 
-jest.mock('../../../../../helpers/AllowlistToolHelpers', () => ({
+jest.mock('@/helpers/AllowlistToolHelpers', () => ({
   getRandomObjectId: () => 'id',
 }));
 
-jest.mock('../../../../../components/dotLoader/DotLoader', () => () => <div data-testid="loader" />);
-jest.mock("../../../../../components/nextGen/nextgen_helpers", () => ({
+jest.mock('@/components/dotLoader/DotLoader', () => () => <div data-testid="loader" />);
+jest.mock("@/components/nextGen/nextgen_helpers", () => ({
   formatNameForUrl: (s: string) => s,
   NextGenListFilters: { ID: "ID" },
   NextGenTokenListedType: { ALL: "ALL", LISTED: "LISTED", NOT_LISTED: "NOT_LISTED" },
 }));
 
-const { commonApiFetch } = require('../../../../../services/api/common-api');
+const { commonApiFetch } = require('@/services/api/common-api');
 
 const collection = { id: 1, name: 'Cool' } as any;
 

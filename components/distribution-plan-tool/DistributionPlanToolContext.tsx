@@ -16,7 +16,7 @@ import RunOperations from "./run-operations/RunOperations";
 import {
   distributionPlanApiFetch,
   distributionPlanApiPost,
-} from "../../services/distribution-plan-api";
+} from "@/services/distribution-plan-api";
 
 export enum DistributionPlanToolStep {
   CREATE_PLAN = "CREATE_PLAN",

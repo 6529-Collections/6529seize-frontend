@@ -1,4 +1,5 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import Link from "next/link";
 import { Metadata } from "next";
 
 export default function AuthorLadysabrinaPage() {
@@ -324,13 +325,11 @@ export default function AuthorLadysabrinaPage() {
                           />
                           <div className="fusion-rollover">
                             <div className="fusion-rollover-content">
-                              <a
+                              <Link
                                 className="fusion-rollover-link"
-                                href="/blog/disney-deekay-their-secret-to-animation/"
-                                target="_blank"
-                                rel="noopener noreferrer">
+                                href="/blog/disney-deekay-their-secret-to-animation/">
                                 Disney and DeeKay: Their Secret to Animation
-                              </a>
+                              </Link>
                               <div className="fusion-rollover-sep" />
                               <a
                                 className="fusion-rollover-gallery"
@@ -342,24 +341,20 @@ export default function AuthorLadysabrinaPage() {
                                 Gallery{" "}
                               </a>
                               <h4 className="fusion-rollover-title">
-                                <a
+                                <Link
                                   className="fusion-rollover-title-link"
-                                  href="/blog/disney-deekay-their-secret-to-animation/"
-                                  target="_blank"
-                                  rel="noopener noreferrer">
+                                  href="/blog/disney-deekay-their-secret-to-animation/">
                                   Disney and DeeKay: Their Secret to Animation{" "}
-                                </a>
+                                </Link>
                               </h4>
                               <div className="fusion-rollover-categories">
-                                <a href="/category/blog/" rel="tag">
+                                <Link href="/category/blog/" rel="tag">
                                   BLOG
-                                </a>
+                                </Link>
                               </div>
-                              <a
+                              <Link
                                 className="fusion-link-wrapper"
                                 href="/blog/disney-deekay-their-secret-to-animation/"
-                                target="_blank"
-                                rel="noopener noreferrer"
                                 aria-label="Disney and DeeKay: Their Secret to Animation"
                               />
                             </div>
@@ -368,21 +363,18 @@ export default function AuthorLadysabrinaPage() {
                         <div className="fusion-post-content-wrapper">
                           <div className="fusion-post-content post-content">
                             <h2 className="entry-title fusion-post-title">
-                              <a
-                                href="/blog/disney-deekay-their-secret-to-animation/"
-                                target="_blank"
-                                rel="noopener noreferrer">
+                              <Link href="/blog/disney-deekay-their-secret-to-animation/">
                                 Disney and DeeKay: Their Secret to Animation
-                              </a>
+                              </Link>
                             </h2>
                             <span className="vcard rich-snippet-hidden">
                               <span className="fn">
-                                <a
+                                <Link
                                   href="/author/ladysabrina/"
                                   title="Posts by Sabrina Khan"
                                   rel="author">
                                   Sabrina Khan
-                                </a>
+                                </Link>
                               </span>
                             </span>
                             <span className="updated rich-snippet-hidden">
@@ -402,12 +394,12 @@ export default function AuthorLadysabrinaPage() {
                           </span>
                           <span className="vcard rich-snippet-hidden">
                             <span className="fn">
-                              <a
+                              <Link
                                 href="/author/ladysabrina/"
                                 title="Posts by Sabrina Khan"
                                 rel="author">
                                 Sabrina Khan
-                              </a>
+                              </Link>
                             </span>
                           </span>
                           <span className="updated rich-snippet-hidden">
@@ -441,13 +433,11 @@ export default function AuthorLadysabrinaPage() {
                           />
                           <div className="fusion-rollover">
                             <div className="fusion-rollover-content">
-                              <a
+                              <Link
                                 className="fusion-rollover-link"
-                                href="/blog/from-fibonacci-to-fidenza/"
-                                target="_blank"
-                                rel="noopener noreferrer">
+                                href="/blog/from-fibonacci-to-fidenza/">
                                 FROM FIBONACCI TO FIDENZA
-                              </a>
+                              </Link>
                               <div className="fusion-rollover-sep" />
                               <a
                                 className="fusion-rollover-gallery"
@@ -459,24 +449,20 @@ export default function AuthorLadysabrinaPage() {
                                 Gallery{" "}
                               </a>
                               <h4 className="fusion-rollover-title">
-                                <a
+                                <Link
                                   className="fusion-rollover-title-link"
-                                  href="/blog/from-fibonacci-to-fidenza/"
-                                  target="_blank"
-                                  rel="noopener noreferrer">
+                                  href="/blog/from-fibonacci-to-fidenza/">
                                   FROM FIBONACCI TO FIDENZA{" "}
-                                </a>
+                                </Link>
                               </h4>
                               <div className="fusion-rollover-categories">
-                                <a href="/category/blog/" rel="tag">
+                                <Link href="/category/blog/" rel="tag">
                                   BLOG
-                                </a>
+                                </Link>
                               </div>
-                              <a
+                              <Link
                                 className="fusion-link-wrapper"
                                 href="/blog/from-fibonacci-to-fidenza/"
-                                target="_blank"
-                                rel="noopener noreferrer"
                                 aria-label="FROM FIBONACCI TO FIDENZA"
                               />
                             </div>
@@ -485,21 +471,18 @@ export default function AuthorLadysabrinaPage() {
                         <div className="fusion-post-content-wrapper">
                           <div className="fusion-post-content post-content">
                             <h2 className="entry-title fusion-post-title">
-                              <a
-                                href="/blog/from-fibonacci-to-fidenza/"
-                                target="_blank"
-                                rel="noopener noreferrer">
+                              <Link href="/blog/from-fibonacci-to-fidenza/">
                                 FROM FIBONACCI TO FIDENZA
-                              </a>
+                              </Link>
                             </h2>
                             <span className="vcard rich-snippet-hidden">
                               <span className="fn">
-                                <a
+                                <Link
                                   href="/author/ladysabrina/"
                                   title="Posts by Sabrina Khan"
                                   rel="author">
                                   Sabrina Khan
-                                </a>
+                                </Link>
                               </span>
                             </span>
                             <span className="updated rich-snippet-hidden">
@@ -520,12 +503,12 @@ export default function AuthorLadysabrinaPage() {
                           </span>
                           <span className="vcard rich-snippet-hidden">
                             <span className="fn">
-                              <a
+                              <Link
                                 href="/author/ladysabrina/"
                                 title="Posts by Sabrina Khan"
                                 rel="author">
                                 Sabrina Khan
-                              </a>
+                              </Link>
                             </span>
                           </span>
                           <span className="updated rich-snippet-hidden">
@@ -559,13 +542,11 @@ export default function AuthorLadysabrinaPage() {
                           />
                           <div className="fusion-rollover">
                             <div className="fusion-rollover-content">
-                              <a
+                              <Link
                                 className="fusion-rollover-link"
-                                href="/blog/a-tale-of-two-artists/"
-                                target="_blank"
-                                rel="noopener noreferrer">
-                                A Tale of Two Artists – Van Gogh and XCOPY
-                              </a>
+                                href="/blog/a-tale-of-two-artists/">
+                                A Tale of Two Artists - Van Gogh and XCOPY
+                              </Link>
                               <div className="fusion-rollover-sep" />
                               <a
                                 className="fusion-rollover-gallery"
@@ -577,25 +558,21 @@ export default function AuthorLadysabrinaPage() {
                                 Gallery{" "}
                               </a>
                               <h4 className="fusion-rollover-title">
-                                <a
+                                <Link
                                   className="fusion-rollover-title-link"
-                                  href="/blog/a-tale-of-two-artists/"
-                                  target="_blank"
-                                  rel="noopener noreferrer">
-                                  A Tale of Two Artists – Van Gogh and XCOPY{" "}
-                                </a>
+                                  href="/blog/a-tale-of-two-artists/">
+                                  A Tale of Two Artists - Van Gogh and XCOPY{" "}
+                                </Link>
                               </h4>
                               <div className="fusion-rollover-categories">
-                                <a href="/category/blog/" rel="tag">
+                                <Link href="/category/blog/" rel="tag">
                                   BLOG
-                                </a>
+                                </Link>
                               </div>
-                              <a
+                              <Link
                                 className="fusion-link-wrapper"
                                 href="/blog/a-tale-of-two-artists/"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                aria-label="A Tale of Two Artists – Van Gogh and XCOPY"
+                                aria-label="A Tale of Two Artists - Van Gogh and XCOPY"
                               />
                             </div>
                           </div>
@@ -603,21 +580,18 @@ export default function AuthorLadysabrinaPage() {
                         <div className="fusion-post-content-wrapper">
                           <div className="fusion-post-content post-content">
                             <h2 className="entry-title fusion-post-title">
-                              <a
-                                href="/blog/a-tale-of-two-artists/"
-                                target="_blank"
-                                rel="noopener noreferrer">
-                                A Tale of Two Artists – Van Gogh and XCOPY
-                              </a>
+                              <Link href="/blog/a-tale-of-two-artists/">
+                                A Tale of Two Artists - Van Gogh and XCOPY
+                              </Link>
                             </h2>
                             <span className="vcard rich-snippet-hidden">
                               <span className="fn">
-                                <a
+                                <Link
                                   href="/author/ladysabrina/"
                                   title="Posts by Sabrina Khan"
                                   rel="author">
                                   Sabrina Khan
-                                </a>
+                                </Link>
                               </span>
                             </span>
                             <span className="updated rich-snippet-hidden">
@@ -633,16 +607,16 @@ export default function AuthorLadysabrinaPage() {
                             </div>
                           </div>
                           <span className="entry-title rich-snippet-hidden">
-                            A Tale of Two Artists – Van Gogh and XCOPY
+                            A Tale of Two Artists - Van Gogh and XCOPY
                           </span>
                           <span className="vcard rich-snippet-hidden">
                             <span className="fn">
-                              <a
+                              <Link
                                 href="/author/ladysabrina/"
                                 title="Posts by Sabrina Khan"
                                 rel="author">
                                 Sabrina Khan
-                              </a>
+                              </Link>
                             </span>
                           </span>
                           <span className="updated rich-snippet-hidden">

@@ -1,12 +1,12 @@
 import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
-import { WaveWinnersDropHeader } from '../../../../../../components/waves/winners/drops/header/WaveWinnersDropHeader';
+import { WaveWinnersDropHeader } from '@/components/waves/winners/drops/header/WaveWinnersDropHeader';
 
-jest.mock('../../../../../../components/waves/winners/drops/header/WaveWinnersDropHeaderTotalVotes', () => () => <div data-testid="votes" />);
-jest.mock('../../../../../../components/waves/winners/drops/header/WaveWinnersDropHeaderVoters', () => () => <div data-testid="voters" />);
-jest.mock('../../../../../../components/waves/winners/drops/header/WaveWinnersDropHeaderAuthorHandle', () => () => <div data-testid="author" />);
-jest.mock('../../../../../../components/waves/drops/winner/WinnerDropBadge', () => () => <div data-testid="badge" />);
-jest.mock('../../../../../../components/waves/drops/time/WaveDropTime', () => () => <div data-testid="time" />);
+jest.mock('@/components/waves/winners/drops/header/WaveWinnersDropHeaderTotalVotes', () => () => <div data-testid="votes" />);
+jest.mock('@/components/waves/winners/drops/header/WaveWinnersDropHeaderVoters', () => () => <div data-testid="voters" />);
+jest.mock('@/components/waves/winners/drops/header/WaveWinnersDropHeaderAuthorHandle', () => () => <div data-testid="author" />);
+jest.mock('@/components/waves/drops/winner/WinnerDropBadge', () => () => <div data-testid="badge" />);
+jest.mock('@/components/waves/drops/time/WaveDropTime', () => () => <div data-testid="time" />);
 
 const winner = { place: 1, drop: { created_at: 1, winning_context: {} } } as any;
 

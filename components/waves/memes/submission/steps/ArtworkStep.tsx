@@ -1,11 +1,11 @@
 "use client"
 
 import React, { useCallback, useMemo } from "react";
-import PrimaryButton from "../../../../utils/button/PrimaryButton";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import { TraitsData } from "../types/TraitsData";
-import MemesArtSubmissionFile from "../../MemesArtSubmissionFile";
+import MemesArtSubmissionFile from "@/components/waves/memes/MemesArtSubmissionFile";
 import ArtworkDetails from "../details/ArtworkDetails";
-import MemesArtSubmissionTraits from "../../MemesArtSubmissionTraits";
+import MemesArtSubmissionTraits from "@/components/waves/memes/MemesArtSubmissionTraits";
 import SubmissionProgress, { SubmissionPhase } from "../ui/SubmissionProgress";
 import { useTraitsValidation } from "../validation";
 

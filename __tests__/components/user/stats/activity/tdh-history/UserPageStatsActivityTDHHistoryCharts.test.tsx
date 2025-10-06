@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
-import UserPageStatsActivityTDHHistoryCharts from '../../../../../../components/user/stats/activity/tdh-history/UserPageStatsActivityTDHHistoryCharts';
-import { TDHHistory } from '../../../../../../entities/ITDH';
+import UserPageStatsActivityTDHHistoryCharts from '@/components/user/stats/activity/tdh-history/UserPageStatsActivityTDHHistoryCharts';
+import { TDHHistory } from '@/entities/ITDH';
 
-jest.mock('../../../../../../components/user/stats/activity/tdh-history/UserPageStatsActivityTDHHistoryChart', () => ({
+jest.mock('@/components/user/stats/activity/tdh-history/UserPageStatsActivityTDHHistoryChart', () => ({
   __esModule: true,
   default: (props: any) => <div data-testid="chart">{props.data.title}</div>,
 }));

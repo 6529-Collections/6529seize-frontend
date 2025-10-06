@@ -1,6 +1,6 @@
-import { RatingStats } from "../../../../../entities/IProfile";
+import { RatingStats } from "@/entities/IProfile";
 import UserPageRepRepsTableItem from "./UserPageRepRepsTableItem";
-import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 export default function UserPageRepRepsTableBody({
   reps,

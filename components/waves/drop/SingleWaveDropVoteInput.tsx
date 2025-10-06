@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { ApiWaveCreditType } from "../../../generated/models/ObjectSerializer";
+import { ApiWaveCreditType } from "@/generated/models/ObjectSerializer";
 import { SingleWaveDropVoteSize } from "./SingleWaveDropVote";
 
 interface SingleWaveDropVoteInputProps {

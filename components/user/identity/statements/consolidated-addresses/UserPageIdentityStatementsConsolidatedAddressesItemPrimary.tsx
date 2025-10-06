@@ -1,5 +1,5 @@
-import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
-import { ApiWallet } from "../../../../../generated/models/ApiWallet";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import { ApiWallet } from "@/generated/models/ApiWallet";
 
 export default function UserPageIdentityStatementsConsolidatedAddressesItemPrimary({
   isPrimary,

@@ -4,10 +4,10 @@ import {
   hasMetadataContent,
   hasSubmissionContent,
   ensurePartsWithFallback,
-} from '../../../components/waves/CreateDropContent';
-import type { CreateDropMetadataType } from '../../../components/waves/CreateDropContent';
-import type { CreateDropPart } from '../../../entities/IDrop';
-import { ApiWaveMetadataType } from '../../../generated/models/ApiWaveMetadataType';
+} from '@/components/waves/CreateDropContent';
+import type { CreateDropMetadataType } from '@/components/waves/CreateDropContent';
+import type { CreateDropPart } from '@/entities/IDrop';
+import { ApiWaveMetadataType } from '@/generated/models/ApiWaveMetadataType';
 
 describe('CreateDropContent utilities', () => {
   describe('convertMetadataToDropMetadata', () => {

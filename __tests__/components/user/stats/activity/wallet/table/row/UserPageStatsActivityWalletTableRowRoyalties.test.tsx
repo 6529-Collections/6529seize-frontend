@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import UserPageStatsActivityWalletTableRowRoyalties from '../../../../../../../../components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRowRoyalties';
+import UserPageStatsActivityWalletTableRowRoyalties from '@/components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRowRoyalties';
 
 jest.mock('react-tooltip', () => ({
   Tooltip: ({ children, id }: any) => (

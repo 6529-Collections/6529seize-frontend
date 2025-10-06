@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import CreateDropActionsRow from '../../../../../components/drops/create/utils/CreateDropActionsRow';
-import { AuthContext } from '../../../../../components/auth/Auth';
-import { MAX_DROP_UPLOAD_FILES } from '../../../../../helpers/Helpers';
+import CreateDropActionsRow from '@/components/drops/create/utils/CreateDropActionsRow';
+import { AuthContext } from '@/components/auth/Auth';
+import { MAX_DROP_UPLOAD_FILES } from '@/helpers/Helpers';
 
 function renderComponent(props: any, ctx?: any) {
   const value = { setToast: jest.fn(), ...(ctx || {}) } as any;

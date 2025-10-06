@@ -1,5 +1,5 @@
-import { CalendarDay } from "../../../helpers/calendar/calendar.helpers";
-import { Time } from "../../../helpers/time";
+import { CalendarDay } from "@/helpers/calendar/calendar.helpers";
+import { Time } from "@/helpers/time";
 
 enum CalendarDaySate {
   NOT_ACTIVE_MONTH = "NOT_ACTIVE_MONTH",

@@ -1,4 +1,4 @@
-import AllowlistToolAnimationWrapper from "../../allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
+import AllowlistToolAnimationWrapper from "@/components/allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
 
 export default function DistributionPlanTableBodyWrapper({
   children,

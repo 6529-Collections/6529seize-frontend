@@ -1,4 +1,4 @@
-import { SLIDER_THEMES } from '../../../../../components/waves/drop/types/slider.types';
+import { SLIDER_THEMES } from '@/components/waves/drop/types/slider.types';
 
 describe('SLIDER_THEMES', () => {
   it('contains themes for ranks 1-3 and default', () => {

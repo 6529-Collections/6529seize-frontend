@@ -1,19 +1,19 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import React from 'react';
-import DropListItemRateGiveSubmit from '../../../../../../../components/drops/view/item/rate/give/DropListItemRateGiveSubmit';
-import { AuthContext } from '../../../../../../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../../../../../../components/react-query-wrapper/ReactQueryWrapper';
+import DropListItemRateGiveSubmit from '@/components/drops/view/item/rate/give/DropListItemRateGiveSubmit';
+import { AuthContext } from '@/components/auth/Auth';
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 import { useMutation } from '@tanstack/react-query';
-import { useDropInteractionRules } from '../../../../../../../hooks/drops/useDropInteractionRules';
-import { DropVoteState } from '../../../../../../../hooks/drops/types';
-import { useMyStream } from '../../../../../../../contexts/wave/MyStreamContext';
+import { useDropInteractionRules } from '@/hooks/drops/useDropInteractionRules';
+import { DropVoteState } from '@/hooks/drops/types';
+import { useMyStream } from '@/contexts/wave/MyStreamContext';
 
 jest.useFakeTimers();
 
 jest.mock('next/dynamic', () => {
   return function dynamic(importFunc: any) {
     const Component = (props: any) => {
-      const mod = require('../../../../../../../components/drops/view/item/rate/give/clap/DropListItemRateGiveClap');
+      const mod = require('@/components/drops/view/item/rate/give/clap/DropListItemRateGiveClap');
       const Actual = mod.default || mod;
       return <Actual {...props} />;
     };
@@ -21,15 +21,15 @@ jest.mock('next/dynamic', () => {
   };
 });
 
-jest.mock('../../../../../../../components/drops/view/item/rate/give/clap/DropListItemRateGiveClap', () => (props: any) => (
+jest.mock('@/components/drops/view/item/rate/give/clap/DropListItemRateGiveClap', () => (props: any) => (
   <button data-testid="clap" onClick={props.onSubmit}>clap</button>
 ));
 
-jest.mock('../../../../../../../hooks/drops/useDropInteractionRules', () => ({ useDropInteractionRules: jest.fn() }));
+jest.mock('@/hooks/drops/useDropInteractionRules', () => ({ useDropInteractionRules: jest.fn() }));
 
 jest.mock('@tanstack/react-query', () => ({ useMutation: jest.fn() }));
 
-jest.mock('../../../../../../../contexts/wave/MyStreamContext', () => ({
+jest.mock('@/contexts/wave/MyStreamContext', () => ({
   useMyStream: jest.fn(() => ({
     applyOptimisticDropUpdate: jest.fn(() => ({ rollback: jest.fn() })),
   })),

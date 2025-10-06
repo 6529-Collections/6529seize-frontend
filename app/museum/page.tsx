@@ -1,4 +1,5 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import Link from "next/link";
 const IndexPage = () => (
   <div>
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
@@ -299,12 +300,12 @@ The museum also owns"
                 </span>
                 <span className="vcard rich-snippet-hidden">
                   <span className="fn">
-                    <a
+                    <Link
                       href="/author/6529er6529-io/"
                       title="Posts by 6529er"
                       rel="author">
                       6529er
-                    </a>
+                    </Link>
                   </span>
                 </span>
                 <span className="updated rich-snippet-hidden">
@@ -574,24 +575,24 @@ The museum also owns"
                                   style={{ color: "#000000" }}>
                                   <ul style={{ margin: 0, paddingLeft: 20 }}>
                                     <li>
-                                      <a href="/museum/imagined-worlds/">
+                                      <Link href="/museum/imagined-worlds/">
                                         <u>IMAGINED WORLDS</u>
-                                      </a>
+                                      </Link>
                                     </li>
                                     <li>
-                                      <a href="/museum/early-nft-art/">
+                                      <Link href="/museum/early-nft-art/">
                                         <u>EARLY NFT ART</u>
-                                      </a>
+                                      </Link>
                                     </li>
                                     <li>
-                                      <a href="/museum/yongoh-kim/">
+                                      <Link href="/museum/yongoh-kim/">
                                         Y<u>ONGOH KIM</u>
-                                      </a>
+                                      </Link>
                                     </li>
                                     <li>
-                                      <a href="/museum/sozet-lounge/">
+                                      <Link href="/museum/sozet-lounge/">
                                         <u>SOZET LOUNGE</u>
-                                      </a>
+                                      </Link>
                                     </li>
                                   </ul>
                                 </div>
@@ -675,9 +676,9 @@ The museum also owns"
                                   style={{ color: "#000000" }}>
                                   <ul style={{ margin: 0, paddingLeft: 20 }}>
                                     <li>
-                                      <a href="/museum/genesis/">
+                                      <Link href="/museum/genesis/">
                                         <u>GENESIS</u>
-                                      </a>
+                                      </Link>
                                     </li>
                                   </ul>
                                 </div>
@@ -763,14 +764,14 @@ The museum also owns"
                                   style={{ color: "#000000" }}>
                                   <ul style={{ margin: 0, paddingLeft: 20 }}>
                                     <li>
-                                      <a href="/museum/6529-photo-a/">
+                                      <Link href="/museum/6529-photo-a/">
                                         <u>6529 PHOTO A</u>
-                                      </a>
+                                      </Link>
                                     </li>
                                     <li>
-                                      <a href="/museum/6529-photo-b/">
+                                      <Link href="/museum/6529-photo-b/">
                                         <u>6529 PHOTO B</u>
-                                      </a>
+                                      </Link>
                                     </li>
                                   </ul>
                                 </div>
@@ -856,9 +857,9 @@ The museum also owns"
                                   style={{ color: "#000000" }}>
                                   <ul style={{ margin: 0, paddingLeft: 20 }}>
                                     <li>
-                                      <a href="/museum/general-assembly/">
+                                      <Link href="/museum/general-assembly/">
                                         <u>GENERAL ASSEMBLY</u>
-                                      </a>
+                                      </Link>
                                     </li>
                                   </ul>
                                 </div>
@@ -944,19 +945,19 @@ The museum also owns"
                                   style={{ color: "#000000" }}>
                                   <ul style={{ margin: 0, paddingLeft: 20 }}>
                                     <li>
-                                      <a href="/museum/6529-fam-2021/">
+                                      <Link href="/museum/6529-fam-2021/">
                                         <u>6529 FAM 2021</u>
-                                      </a>
+                                      </Link>
                                     </li>
                                     <li>
-                                      <a href="/museum/6529-gradient-collector-curated/">
+                                      <Link href="/museum/6529-gradient-collector-curated/">
                                         <u>6529 GRADIENT COLLECTOR CURATED</u>
-                                      </a>
+                                      </Link>
                                     </li>
                                     <li>
-                                      <a href="/museum/6529-public-domain/">
+                                      <Link href="/museum/6529-public-domain/">
                                         <u>6529 PUBLIC DOMAIN</u>
-                                      </a>
+                                      </Link>
                                     </li>
                                   </ul>
                                 </div>
@@ -1042,9 +1043,9 @@ The museum also owns"
                                   style={{ color: "#000000" }}>
                                   <ul style={{ margin: 0, paddingLeft: 20 }}>
                                     <li>
-                                      <a href="/museum/6529-fund-szn1/">
+                                      <Link href="/museum/6529-fund-szn1/">
                                         <u>6529 FUND SZN1</u>
-                                      </a>
+                                      </Link>
                                     </li>
                                   </ul>
                                 </div>
@@ -1122,9 +1123,9 @@ The museum also owns"
                                       lineHeight: 1,
                                       color: "#000000",
                                     }}>
-                                    <a href="/museum/sunshine-square/">
+                                    <Link href="/museum/sunshine-square/">
                                       <u>SUNSHINE SQUARE</u>
-                                    </a>
+                                    </Link>
                                   </h3>
                                 </div>
                               </div>
@@ -1199,9 +1200,9 @@ The museum also owns"
                                       lineHeight: 1,
                                       color: "#000000",
                                     }}>
-                                    <a href="/museum/temple-of-gm/">
+                                    <Link href="/museum/temple-of-gm/">
                                       <u>TEMPLE OF GM</u>
-                                    </a>
+                                    </Link>
                                   </h3>
                                 </div>
                               </div>
@@ -1278,9 +1279,9 @@ The museum also owns"
                                       lineHeight: 1,
                                       color: "#000000",
                                     }}>
-                                    <a href="/museum/ack-bar/">
+                                    <Link href="/museum/ack-bar/">
                                       <u>ACK BAR</u>
-                                    </a>
+                                    </Link>
                                   </h3>
                                 </div>
                               </div>
@@ -1389,19 +1390,19 @@ The museum also owns"
                                   style={{ color: "#000000" }}>
                                   <ul style={{ margin: 0, paddingLeft: 20 }}>
                                     <li>
-                                      <a href="/museum/bharat-krymo-museum-1/">
+                                      <Link href="/museum/bharat-krymo-museum-1/">
                                         <u>BHARAT KRYMO MUSEE D'ART 1</u>
-                                      </a>
+                                      </Link>
                                     </li>
                                     <li>
-                                      <a href="/museum/bharat-krymo-museum-2/">
+                                      <Link href="/museum/bharat-krymo-museum-2/">
                                         <u>BHARAT KRYMO MUSEE D'ART 2</u>
-                                      </a>
+                                      </Link>
                                     </li>
                                     <li>
-                                      <a href="/museum/bharat-krymo-museum-3/">
+                                      <Link href="/museum/bharat-krymo-museum-3/">
                                         <u>BHARAT KRYMO MUSEE D'ART 3</u>
-                                      </a>
+                                      </Link>
                                     </li>
                                   </ul>
                                 </div>
@@ -1487,14 +1488,14 @@ The museum also owns"
                                   style={{ color: "#000000" }}>
                                   <ul style={{ margin: 0, paddingLeft: 20 }}>
                                     <li>
-                                      <a href="/museum/batsoupyum-museum-1/">
+                                      <Link href="/museum/batsoupyum-museum-1/">
                                         <u>BATSOUPCAVE</u>
-                                      </a>
+                                      </Link>
                                     </li>
                                     <li>
-                                      <a href="/museum/batsoupyum-museum-2/">
+                                      <Link href="/museum/batsoupyum-museum-2/">
                                         <u>BATSOUPLOUNGE</u>
-                                      </a>
+                                      </Link>
                                     </li>
                                   </ul>
                                 </div>
@@ -1580,9 +1581,9 @@ The museum also owns"
                                   style={{ color: "#000000" }}>
                                   <ul style={{ margin: 0, paddingLeft: 20 }}>
                                     <li>
-                                      <a href="/museum/ac-museum/">
+                                      <Link href="/museum/ac-museum/">
                                         <u>AC COLLECTION</u>
-                                      </a>
+                                      </Link>
                                     </li>
                                   </ul>
                                 </div>
@@ -1668,9 +1669,9 @@ The museum also owns"
                                   style={{ color: "#000000" }}>
                                   <ul style={{ margin: 0, paddingLeft: 20 }}>
                                     <li>
-                                      <a href="/museum/bonafidehan-museum/">
+                                      <Link href="/museum/bonafidehan-museum/">
                                         <u>BONAFIDEHAN GALLERY</u>
-                                      </a>
+                                      </Link>
                                     </li>
                                   </ul>
                                 </div>

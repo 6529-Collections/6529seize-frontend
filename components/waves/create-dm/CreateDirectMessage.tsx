@@ -2,19 +2,19 @@
 
 import React, { useState } from "react";
 
-import { CommunityMemberMinimal } from "../../../entities/IProfile";
-import GroupCreateIdentitiesSelect from "../../groups/page/create/config/identities/select/GroupCreateIdentitiesSelect";
-import { areEqualAddresses } from "../../../helpers/Helpers";
-import { useAuth } from "../../auth/Auth";
+import { CommunityMemberMinimal } from "@/entities/IProfile";
+import GroupCreateIdentitiesSelect from "@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSelect";
+import { areEqualAddresses } from "@/helpers/Helpers";
+import { useAuth } from "@/components/auth/Auth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
-import { createDirectMessageWave } from "../../../helpers/waves/waves.helpers";
+import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import { useRouter } from "next/navigation";
 import CircleLoader, {
   CircleLoaderSize,
-} from "../../distribution-plan-tool/common/CircleLoader";
+} from "@/components/distribution-plan-tool/common/CircleLoader";
 import CreateWaveFlow from "../create-wave/CreateWaveFlow";
-import { ApiIdentity } from "../../../generated/models/ApiIdentity";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 export default function CreateDirectMessage({
   profile,
   onBack,

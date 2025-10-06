@@ -1,13 +1,13 @@
 import { render, screen } from "@testing-library/react";
-import ManifoldMintingWidget from "../../components/manifoldMinting/ManifoldMintingWidget";
-import { ManifoldClaimStatus, ManifoldPhase } from "../../hooks/useManifoldClaim";
+import ManifoldMintingWidget from "@/components/manifoldMinting/ManifoldMintingWidget";
+import { ManifoldClaimStatus, ManifoldPhase } from "@/hooks/useManifoldClaim";
 
-jest.mock("../../components/manifoldMinting/ManifoldMintingConnect", () => (props: any) => {
+jest.mock("@/components/manifoldMinting/ManifoldMintingConnect", () => (props: any) => {
   props.onMintFor("0x1");
   return <div />;
 });
 
-jest.mock("../../components/auth/SeizeConnectContext", () => ({
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({ address: "0x1" }),
 }));
 

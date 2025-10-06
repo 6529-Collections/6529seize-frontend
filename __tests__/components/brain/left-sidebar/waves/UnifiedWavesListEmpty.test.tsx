@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
-import UnifiedWavesListEmpty from '../../../../../components/brain/left-sidebar/waves/UnifiedWavesListEmpty';
+import UnifiedWavesListEmpty from '@/components/brain/left-sidebar/waves/UnifiedWavesListEmpty';
 import React from 'react';
-import { createMockMinimalWave } from '../../../../utils/mockFactories';
+import { createMockMinimalWave } from '@/__tests__/utils/mockFactories';
 
 describe('UnifiedWavesListEmpty', () => {
   it('returns null when waves exist', () => {

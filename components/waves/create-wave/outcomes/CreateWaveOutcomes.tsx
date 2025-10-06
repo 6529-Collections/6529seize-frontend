@@ -7,10 +7,10 @@ import {
   CreateWaveDatesConfig,
   CreateWaveOutcomeConfig,
   CreateWaveOutcomeType,
-} from "../../../../types/waves.types";
-import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeight";
-import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
-import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.validation";
+} from "@/types/waves.types";
+import CommonAnimationHeight from "@/components/utils/animation/CommonAnimationHeight";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 
 import type { JSX } from "react";
 

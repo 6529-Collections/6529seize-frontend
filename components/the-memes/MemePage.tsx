@@ -37,6 +37,7 @@ import {
   MEME_TABS,
   TabButton,
 } from "./MemeShared";
+import UpcomingMemePage from "./UpcomingMemePage";
 
 const MemePageArt = dynamic(() =>
   import("./MemePageArt").then((mod) => mod.MemePageArt)
@@ -108,19 +109,8 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     [searchParams]
   );
 
-  useEffect(() => {
-    if (focusParam === activeTab) {
-      return;
-    }
-    const params = new URLSearchParams(searchParamsString);
-    params.set("focus", activeTab);
-    const queryString = params.toString();
-    router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
-      scroll: false,
-    });
-  }, [activeTab, focusParam, pathname, router, searchParamsString]);
-
   const [nft, setNft] = useState<NFT>();
+  const [nftNotFound, setNftNotFound] = useState(false);
   const [nftMeta, setNftMeta] = useState<MemesExtendedData>();
   const [nftBalance, setNftBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -134,6 +124,29 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   useEffect(() => {
     setTitle(getMemeTabTitle(`The Memes`, nftId, nft, activeTab));
   }, [nft, nftId, activeTab, setTitle]);
+
+  useEffect(() => {
+    if (!nftNotFound && focusParam === activeTab) {
+      return;
+    }
+    let params = new URLSearchParams(searchParamsString);
+    if (nftNotFound) {
+      params.delete("focus");
+    } else {
+      params.set("focus", activeTab);
+    }
+    const queryString = params.toString();
+    router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
+      scroll: false,
+    });
+  }, [
+    activeTab,
+    focusParam,
+    pathname,
+    router,
+    searchParamsString,
+    nftNotFound,
+  ]);
 
   useEffect(() => {
     if (!nftId) {
@@ -159,9 +172,11 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
           setNftMeta(nftMetas[0]);
           const mynft = nftResponse.data?.[0];
           setNft(mynft);
+          setNftNotFound(false);
         } else {
           setNftMeta(undefined);
           setNft(undefined);
+          setNftNotFound(true);
         }
       })
       .catch(() => {
@@ -376,6 +391,13 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                 </Row>
                 {printContent()}
               </>
+            )}
+            {nftNotFound && (
+              <Row>
+                <Col>
+                  <UpcomingMemePage id={nftId} />
+                </Col>
+              </Row>
             )}
           </Container>
         </Col>

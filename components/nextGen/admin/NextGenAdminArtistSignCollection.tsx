@@ -10,13 +10,13 @@ import {
   useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
-import { areEqualAddresses } from "../../../helpers/Helpers";
+import { areEqualAddresses } from "@/helpers/Helpers";
 import { printAdminErrors } from "./NextGenAdmin";
 import {
   NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
 } from "./NextGenAdminShared";
-import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 
 interface Props {
   close: () => void;

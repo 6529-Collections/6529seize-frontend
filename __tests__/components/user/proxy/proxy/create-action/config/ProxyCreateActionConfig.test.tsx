@@ -1,34 +1,34 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import ProxyCreateActionConfig from '../../../../../../../components/user/proxy/proxy/create-action/config/ProxyCreateActionConfig';
-import { ApiProfileProxyActionType } from '../../../../../../../generated/models/ApiProfileProxyActionType';
+import ProxyCreateActionConfig from '@/components/user/proxy/proxy/create-action/config/ProxyCreateActionConfig';
+import { ApiProfileProxyActionType } from '@/generated/models/ApiProfileProxyActionType';
 
-jest.mock('../../../../../../../components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigEndTimeSwitch', () => ({
+jest.mock('@/components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigEndTimeSwitch', () => ({
   __esModule: true,
   default: (props: any) => <button data-testid="switch" onClick={() => props.setIsActive(!props.isActive)} />,
 }));
 
-jest.mock('../../../../../../../components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigCreateWave', () => ({
+jest.mock('@/components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigCreateWave', () => ({
   __esModule: true,
   default: (props: any) => <button data-testid="create-wave" onClick={() => props.onSubmit({ end_time: props.endTime, type: 'wave' })} />,
 }));
 
-jest.mock('../../../../../../../components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigAllocateRep', () => ({
+jest.mock('@/components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigAllocateRep', () => ({
   __esModule: true,
   default: (props: any) => <button data-testid="allocate-rep" onClick={() => props.onSubmit({ end_time: props.endTime, type: 'rep' })} />,
 }));
 
-jest.mock('../../../../../../../components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigAllocateCic', () => ({
+jest.mock('@/components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigAllocateCic', () => ({
   __esModule: true,
   default: () => null,
 }));
 
-jest.mock('../../../../../../../components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigReadWave', () => ({ __esModule: true, default: () => null }));
-jest.mock('../../../../../../../components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigCreateDropToWave', () => ({ __esModule: true, default: () => null }));
-jest.mock('../../../../../../../components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigRateWaveDrop', () => ({ __esModule: true, default: () => null }));
+jest.mock('@/components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigReadWave', () => ({ __esModule: true, default: () => null }));
+jest.mock('@/components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigCreateDropToWave', () => ({ __esModule: true, default: () => null }));
+jest.mock('@/components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigRateWaveDrop', () => ({ __esModule: true, default: () => null }));
 
-jest.mock('../../../../../../../components/utils/time/CommonTimeSelect', () => ({
+jest.mock('@/components/utils/time/CommonTimeSelect', () => ({
   __esModule: true,
   default: (props: any) => <button data-testid="time-select" onClick={() => props.onMillis(123)} />,
 }));

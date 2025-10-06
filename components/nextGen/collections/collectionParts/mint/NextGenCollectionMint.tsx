@@ -8,9 +8,9 @@ import {
   NEXTGEN_CORE,
   NEXTGEN_CHAIN_ID,
   NEXTGEN_MINTER,
-} from "../../../nextgen_contracts";
-import { NextGenCollection } from "../../../../../entities/INextgen";
-import NextGenNavigationHeader from "../../NextGenNavigationHeader";
+} from "@/components/nextGen/nextgen_contracts";
+import { NextGenCollection } from "@/entities/INextgen";
+import NextGenNavigationHeader from "@/components/nextGen/collections/NextGenNavigationHeader";
 
 interface Props {
   collection: NextGenCollection;

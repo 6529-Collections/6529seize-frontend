@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveNextStep from '../../../../../components/waves/create-wave/utils/CreateWaveNextStep';
-import { CreateWaveStep } from '../../../../../types/waves.types';
+import CreateWaveNextStep from '@/components/waves/create-wave/utils/CreateWaveNextStep';
+import { CreateWaveStep } from '@/types/waves.types';
 
-jest.mock('../../../../../components/utils/button/PrimaryButton', () => {
+jest.mock('@/components/utils/button/PrimaryButton', () => {
   return function PrimaryButton({ onClicked, children, disabled }: any) {
     return <button onClick={onClicked} disabled={disabled}>{children}</button>;
   };

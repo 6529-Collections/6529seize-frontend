@@ -1,14 +1,14 @@
 "use client"
 
 import { useMutation } from "@tanstack/react-query";
-import { commonApiPost } from "../../services/api/common-api";
-import { ApiUpdateDropRequest } from "../../generated/models/ApiUpdateDropRequest";
-import { ApiDrop } from "../../generated/models/ApiDrop";
-import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
+import { commonApiPost } from "@/services/api/common-api";
+import { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropRequest";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useContext } from "react";
-import { AuthContext } from "../../components/auth/Auth";
-import { useMyStream } from "../../contexts/wave/MyStreamContext";
-import { ProcessIncomingDropType } from "../../contexts/wave/hooks/useWaveRealtimeUpdater";
+import { AuthContext } from "@/components/auth/Auth";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 
 export interface DropUpdateMutationParams {
   dropId: string;

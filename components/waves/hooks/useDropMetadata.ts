@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ApiWaveMetadataType } from "../../../generated/models/ApiWaveMetadataType";
+import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 
 type CreateDropMetadataType =
   | {

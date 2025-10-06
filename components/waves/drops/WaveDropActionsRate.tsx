@@ -1,9 +1,9 @@
 import React from "react";
-import DropListItemRateGive from "../../drops/view/item/rate/give/DropListItemRateGive";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
-import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
-import { ApiDropType } from "../../../generated/models/ApiDropType";
-import { useSeizeSettings } from "../../../contexts/SeizeSettingsContext";
+import DropListItemRateGive from "@/components/drops/view/item/rate/give/DropListItemRateGive";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 
 interface WaveDropActionsRateProps {
   readonly drop: ApiDrop;

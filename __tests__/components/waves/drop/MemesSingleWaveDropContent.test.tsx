@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { MemesSingleWaveDropContent } from '../../../../components/waves/drop/MemesSingleWaveDropContent';
+import { MemesSingleWaveDropContent } from '@/components/waves/drop/MemesSingleWaveDropContent';
 
-jest.mock('../../../../components/waves/drop/SingleWaveDropContentMetadata', () => ({
+jest.mock('@/components/waves/drop/SingleWaveDropContentMetadata', () => ({
   SingleWaveDropContentMetadata: () => <div data-testid="metadata" />
 }));
 

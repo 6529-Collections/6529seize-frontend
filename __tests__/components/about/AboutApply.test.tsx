@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import AboutApply from '../../../components/about/AboutApply';
+import AboutApply from '@/components/about/AboutApply';
 
 describe('AboutApply', () => {
   it('displays eligibility requirements', () => {

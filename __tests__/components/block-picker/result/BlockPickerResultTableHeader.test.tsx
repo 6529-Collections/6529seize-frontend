@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import BlockPickerResultTableHeader from "../../../../components/block-picker/result/BlockPickerResultTableHeader";
+import BlockPickerResultTableHeader from "@/components/block-picker/result/BlockPickerResultTableHeader";
 
 describe("BlockPickerResultTableHeader", () => {
   it("renders three column headers", () => {

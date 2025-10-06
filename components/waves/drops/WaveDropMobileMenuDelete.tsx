@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useContext, useState } from "react";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMutation } from "@tanstack/react-query";
-import { commonApiDelete } from "../../../services/api/common-api";
-import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
-import { AuthContext } from "../../auth/Auth";
-import { useMyStream } from "../../../contexts/wave/MyStreamContext";
+import { commonApiDelete } from "@/services/api/common-api";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { AuthContext } from "@/components/auth/Auth";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 
 interface WaveDropMobileMenuDeleteProps {
   readonly drop: ApiDrop;

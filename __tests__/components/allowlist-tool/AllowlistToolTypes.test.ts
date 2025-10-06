@@ -3,7 +3,7 @@ import {
   AllowlistRunStatus,
   DistributionPlanTokenPoolDownloadStatus,
   Pool,
-} from '../../../components/allowlist-tool/allowlist-tool.types';
+} from '@/components/allowlist-tool/allowlist-tool.types';
 
 describe('allowlist-tool types', () => {
   it('should expose correct AllowlistOperationCode values', () => {

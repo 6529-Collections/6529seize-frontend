@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { INotificationIdentitySubscribed } from "../../../../types/feed.types";
+import { INotificationIdentitySubscribed } from "@/types/feed.types";
 import {
   getScaledImageUri,
   ImageScale,
-} from "../../../../helpers/image.helpers";
-import { getTimeAgoShort } from "../../../../helpers/Helpers";
-import { UserFollowBtnSize } from "../../../user/utils/UserFollowBtn";
+} from "@/helpers/image.helpers";
+import { getTimeAgoShort } from "@/helpers/Helpers";
+import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
-import UserProfileTooltipWrapper from "../../../utils/tooltip/UserProfileTooltipWrapper";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 
 export default function NotificationIdentitySubscribed({
   notification,

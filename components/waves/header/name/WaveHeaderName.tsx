@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { ApiWave } from "../../../../generated/models/ApiWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../../auth/Auth";
+import { AuthContext } from "@/components/auth/Auth";
 import WaveHeaderNameEdit from "./WaveHeaderNameEdit";
-import { canEditWave } from "../../../../helpers/waves/waves.helpers";
+import { canEditWave } from "@/helpers/waves/waves.helpers";
 
 export default function WaveHeaderName({ wave }: { readonly wave: ApiWave }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);

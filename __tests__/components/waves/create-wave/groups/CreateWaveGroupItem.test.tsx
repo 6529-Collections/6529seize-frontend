@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveGroupItem from '../../../../../components/waves/create-wave/groups/CreateWaveGroupItem';
-import { CreateWaveGroupStatus } from '../../../../../types/waves.types';
+import CreateWaveGroupItem from '@/components/waves/create-wave/groups/CreateWaveGroupItem';
+import { CreateWaveGroupStatus } from '@/types/waves.types';
 
 const sampleGroup = {
   id: '1',

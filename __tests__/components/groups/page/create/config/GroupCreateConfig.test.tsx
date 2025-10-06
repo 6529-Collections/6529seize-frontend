@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import GroupCreateConfig from '../../../../../../components/groups/page/create/config/GroupCreateConfig';
-import { GroupCreateWalletsType } from '../../../../../../components/groups/page/create/config/wallets/GroupCreateWallets';
+import GroupCreateConfig from '@/components/groups/page/create/config/GroupCreateConfig';
+import { GroupCreateWalletsType } from '@/components/groups/page/create/config/wallets/GroupCreateWallets';
 
 let levelProps: any = null;
 let tdhProps: any = null;
@@ -12,42 +12,42 @@ let collectionsProps: any = null;
 let includeWalletsProps: any = null;
 let excludeWalletsProps: any = null;
 
-jest.mock('../../../../../../components/groups/page/create/GroupCreateConfigHeader', () => ({
+jest.mock('@/components/groups/page/create/GroupCreateConfigHeader', () => ({
   __esModule: true,
   default: () => <div data-testid="header" />,
 }));
 
-jest.mock('../../../../../../components/groups/page/create/config/GroupCreateLevel', () => ({
+jest.mock('@/components/groups/page/create/config/GroupCreateLevel', () => ({
   __esModule: true,
   default: (props: any) => { levelProps = props; return <div data-testid="level" />; },
 }));
 
-jest.mock('../../../../../../components/groups/page/create/config/GroupCreateTDH', () => ({
+jest.mock('@/components/groups/page/create/config/GroupCreateTDH', () => ({
   __esModule: true,
   default: (props: any) => { tdhProps = props; return <div data-testid="tdh" />; },
 }));
 
-jest.mock('../../../../../../components/groups/page/create/config/GroupCreateCIC', () => ({
+jest.mock('@/components/groups/page/create/config/GroupCreateCIC', () => ({
   __esModule: true,
   default: (props: any) => { cicProps = props; return <div data-testid="cic" />; },
 }));
 
-jest.mock('../../../../../../components/groups/page/create/config/GroupCreateRep', () => ({
+jest.mock('@/components/groups/page/create/config/GroupCreateRep', () => ({
   __esModule: true,
   default: (props: any) => { repProps = props; return <div data-testid="rep" />; },
 }));
 
-jest.mock('../../../../../../components/groups/page/create/config/nfts/GroupCreateNfts', () => ({
+jest.mock('@/components/groups/page/create/config/nfts/GroupCreateNfts', () => ({
   __esModule: true,
   default: (props: any) => { nftsProps = props; return <div data-testid="nfts" />; },
 }));
 
-jest.mock('../../../../../../components/groups/page/create/config/nfts/GroupCreateCollections', () => ({
+jest.mock('@/components/groups/page/create/config/nfts/GroupCreateCollections', () => ({
   __esModule: true,
   default: (props: any) => { collectionsProps = props; return <div data-testid="collections" />; },
 }));
 
-jest.mock('../../../../../../components/groups/page/create/config/wallets/GroupCreateWallets', () => ({
+jest.mock('@/components/groups/page/create/config/wallets/GroupCreateWallets', () => ({
   __esModule: true,
   GroupCreateWalletsType: { INCLUDE: 'INCLUDE', EXCLUDE: 'EXCLUDE' },
   default: (props: any) => {

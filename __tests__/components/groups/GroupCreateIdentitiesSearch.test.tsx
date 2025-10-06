@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import GroupCreateIdentitiesSearch from '../../../components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearch';
+import GroupCreateIdentitiesSearch from '@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearch';
 
-jest.mock('../../../helpers/AllowlistToolHelpers', () => ({
+jest.mock('@/helpers/AllowlistToolHelpers', () => ({
   getRandomObjectId: () => 'id'
 }));
 
-jest.mock('../../../components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItems', () => ({
+jest.mock('@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItems', () => ({
   __esModule: true,
   default: (props: any) => (
     <div>{props.open && <button onClick={() => props.onSelect({ wallet: '0x1' })}>select</button>}</div>

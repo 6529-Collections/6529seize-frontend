@@ -1,6 +1,6 @@
 import CircleLoader, {
   CircleLoaderSize,
-} from "../../distribution-plan-tool/common/CircleLoader";
+} from "@/components/distribution-plan-tool/common/CircleLoader";
 
 export default function HeaderUserConnecting() {
   return (

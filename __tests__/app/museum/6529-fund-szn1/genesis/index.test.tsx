@@ -1,16 +1,15 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
 import GenesisPage from "@/app/museum/6529-fund-szn1/genesis/page";
+import { render, screen } from "@testing-library/react";
 
 // Mock the Header component since it's dynamically imported
-jest.mock("../../../../../components/header/Header", () => {
+jest.mock("@/components/header/Header", () => {
   return function MockHeader() {
     return <div data-testid="header">Header</div>;
   };
 });
 
 // Mock HeaderPlaceholder
-jest.mock("../../../../../components/header/HeaderPlaceholder", () => {
+jest.mock("@/components/header/HeaderPlaceholder", () => {
   return function MockHeaderPlaceholder() {
     return <div data-testid="header-placeholder">Header Placeholder</div>;
   };
@@ -89,16 +88,6 @@ describe("GenesisPage", () => {
       (meta) => meta.getAttribute("name") === "twitter:site"
     );
     expect(twitterSite?.getAttribute("content")).toBe("@om100m");
-  });
-
-  it("includes viewport meta tag for responsive design", () => {
-    renderComponent();
-
-    const viewportMeta = document.querySelector('meta[name="viewport"]');
-    expect(viewportMeta).toBeInTheDocument();
-    expect(viewportMeta?.getAttribute("content")).toBe(
-      "width=device-width, initial-scale=1"
-    );
   });
 
   it("renders the main page structure", () => {

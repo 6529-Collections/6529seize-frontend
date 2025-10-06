@@ -1,24 +1,24 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import FeedItem from '../../../../components/brain/feed/FeedItem';
-import { ApiFeedItemType } from '../../../../generated/models/ApiFeedItemType';
+import FeedItem from '@/components/brain/feed/FeedItem';
+import { ApiFeedItemType } from '@/generated/models/ApiFeedItemType';
 
-jest.mock('../../../../components/brain/feed/items/drop-created/FeedItemDropCreated', () => ({
+jest.mock('@/components/brain/feed/items/drop-created/FeedItemDropCreated', () => ({
   __esModule: true,
   default: () => <div data-testid="drop-created" />
 }));
 
-jest.mock('../../../../components/brain/feed/items/drop-replied/FeedItemDropReplied', () => ({
+jest.mock('@/components/brain/feed/items/drop-replied/FeedItemDropReplied', () => ({
   __esModule: true,
   default: () => <div data-testid="drop-replied" />
 }));
 
-jest.mock('../../../../components/brain/feed/items/wave-created/FeedItemWaveCreated', () => ({
+jest.mock('@/components/brain/feed/items/wave-created/FeedItemWaveCreated', () => ({
   __esModule: true,
   default: () => <div data-testid="wave-created" />
 }));
 
-jest.mock('../../../../helpers/AllowlistToolHelpers', () => ({
+jest.mock('@/helpers/AllowlistToolHelpers', () => ({
   assertUnreachable: jest.fn(() => { throw new Error('unreachable'); })
 }));
 
@@ -50,7 +50,7 @@ describe('FeedItem', () => {
   });
 
   it('calls assertUnreachable for unknown item', () => {
-    const { assertUnreachable } = require('../../../../helpers/AllowlistToolHelpers');
+    const { assertUnreachable } = require('@/helpers/AllowlistToolHelpers');
     const item = { type: 'OTHER' } as any;
     expect(() => render(<FeedItem {...baseProps} item={item} />)).toThrow('unreachable');
     expect(assertUnreachable).toHaveBeenCalledWith(item);

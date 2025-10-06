@@ -1,6 +1,6 @@
 import React from "react";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import WaveDropActions from "../../../waves/drops/WaveDropActions";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import WaveDropActions from "@/components/waves/drops/WaveDropActions";
 
 interface MemeDropActionsProps {
   readonly drop: ExtendedDrop;

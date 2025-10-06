@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { SingleWaveDropContentMetadata } from '../../../../components/waves/drop/SingleWaveDropContentMetadata';
+import { SingleWaveDropContentMetadata } from '@/components/waves/drop/SingleWaveDropContentMetadata';
 
-jest.mock('../../../../hooks/isMobileDevice', () => ({ __esModule: true, default: jest.fn(() => false) }));
+jest.mock('@/hooks/isMobileDevice', () => ({ __esModule: true, default: jest.fn(() => false) }));
 
 const drop = {
   metadata: [

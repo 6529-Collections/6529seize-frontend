@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 jest.mock("react-use");
-import HashtagsTypeaheadMenu from '../../../../../../../components/drops/create/lexical/plugins/hashtags/HashtagsTypeaheadMenu';
+import HashtagsTypeaheadMenu from '@/components/drops/create/lexical/plugins/hashtags/HashtagsTypeaheadMenu';
 import { useKeyPressEvent } from 'react-use';
 
 let keyCb: any;

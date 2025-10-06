@@ -6,13 +6,13 @@ import {
   faCalendarPlus,
   faTrashCan,
 } from "@fortawesome/free-regular-svg-icons";
-import { Period } from "../../../../helpers/Types";
+import { Period } from "@/helpers/Types";
 import DecisionPointDropdown from "./DecisionPointDropdown";
 import {
   calculateDecisionTimes,
   formatDate,
 } from "../services/waveDecisionService";
-import PrimaryButton from "../../../utils/button/PrimaryButton";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
 
 interface SubsequentDecisionsProps {
   readonly firstDecisionTime: number;

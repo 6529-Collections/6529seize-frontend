@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { AuthContext } from '../../../../../../components/auth/Auth';
+import { AuthContext } from '@/components/auth/Auth';
 
-const GroupCardContent = require('../../../../../../components/groups/page/list/card/GroupCardContent').default;
-const { GroupCardState } = require('../../../../../../components/groups/page/list/card/GroupCard');
+const GroupCardContent = require('@/components/groups/page/list/card/GroupCardContent').default;
+const { GroupCardState } = require('@/components/groups/page/list/card/GroupCard');
 
 const group: any = { 
   id: 'g1', 

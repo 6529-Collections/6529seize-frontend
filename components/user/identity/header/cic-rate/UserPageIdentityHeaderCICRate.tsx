@@ -1,25 +1,25 @@
 "use client";
 
 import { FormEvent, useContext, useEffect, useState } from "react";
-import { ApiProfileRaterCicState } from "../../../../../entities/IProfile";
-import { getStringAsNumberOrZero } from "../../../../../helpers/Helpers";
-import { AuthContext } from "../../../../auth/Auth";
+import { ApiProfileRaterCicState } from "@/entities/IProfile";
+import { getStringAsNumberOrZero } from "@/helpers/Helpers";
+import { AuthContext } from "@/components/auth/Auth";
 import {
   commonApiFetch,
   commonApiPost,
-} from "../../../../../services/api/common-api";
+} from "@/services/api/common-api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   QueryKey,
   ReactQueryWrapperContext,
-} from "../../../../react-query-wrapper/ReactQueryWrapper";
+} from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { createBreakpoint } from "react-use";
-import UserRateAdjustmentHelper from "../../../utils/rate/UserRateAdjustmentHelper";
-import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
-import { ApiProfileProxyActionType } from "../../../../../generated/models/ApiProfileProxyActionType";
+import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import UserPageIdentityHeaderCICRateStats from "./UserPageIdentityHeaderCICRateStats";
-import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
-import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 const useBreakpoint = createBreakpoint({ MD: 768, S: 0 });
 

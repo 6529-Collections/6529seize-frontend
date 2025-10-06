@@ -1,17 +1,17 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import FeedWrapper from '../../../../components/brain/feed/FeedWrapper';
+import FeedWrapper from '@/components/brain/feed/FeedWrapper';
 
 // Mock FeedItems to capture props
 const FeedItemsMock = jest.fn((_: any) => <div data-testid="feed-items" />);
-jest.mock('../../../../components/brain/feed/FeedItems', () => ({
+jest.mock('@/components/brain/feed/FeedItems', () => ({
   __esModule: true,
   default: (props: any) => FeedItemsMock(props),
 }));
 
 // Mock FeedScrollContainer to expose props and trigger onScrollUpNearTop
 const FeedScrollContainerMock = jest.fn();
-jest.mock('../../../../components/brain/feed/FeedScrollContainer', () => {
+jest.mock('@/components/brain/feed/FeedScrollContainer', () => {
   const React = require('react');
   return {
     FeedScrollContainer: React.forwardRef(({ children, onScrollUpNearTop, isFetchingNextPage, className }: any, ref: React.Ref<HTMLDivElement>) => {
@@ -26,7 +26,7 @@ jest.mock('../../../../components/brain/feed/FeedScrollContainer', () => {
 });
 
 // Mock layout hook to provide style
-jest.mock('../../../../components/brain/my-stream/layout/LayoutContext', () => ({
+jest.mock('@/components/brain/my-stream/layout/LayoutContext', () => ({
   useLayout: () => ({ myStreamFeedStyle: { color: 'red' } }),
 }));
 

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveDropsMetadataAddRowButton from '../../../../../../components/waves/create-wave/drops/metadata/CreateWaveDropsMetadataAddRowButton';
+import CreateWaveDropsMetadataAddRowButton from '@/components/waves/create-wave/drops/metadata/CreateWaveDropsMetadataAddRowButton';
 
 describe('CreateWaveDropsMetadataAddRowButton', () => {
   it('renders "Add" when no items and calls handler', async () => {

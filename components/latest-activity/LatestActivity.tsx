@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { Container, Row } from "react-bootstrap";
-import { NFT } from "../../entities/INFT";
-import { NextGenCollection } from "../../entities/INextgen";
-import { Transaction } from "../../entities/ITransaction";
-import useIsMobileScreen from "../../hooks/isMobileScreen";
-import { useActivityData } from "../../hooks/useActivityData";
-import { useActivityFilters } from "../../hooks/useActivityFilters";
-import { useNFTCollections } from "../../hooks/useNFTCollections";
+import { NFT } from "@/entities/INFT";
+import { NextGenCollection } from "@/entities/INextgen";
+import { Transaction } from "@/entities/ITransaction";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
+import { useActivityData } from "@/hooks/useActivityData";
+import { useActivityFilters } from "@/hooks/useActivityFilters";
+import { useNFTCollections } from "@/hooks/useNFTCollections";
 import Pagination from "../pagination/Pagination";
 import ActivityFilters from "./ActivityFilters";
 import ActivityHeader from "./ActivityHeader";

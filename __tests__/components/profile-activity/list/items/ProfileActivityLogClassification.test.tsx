@@ -1,10 +1,10 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import ProfileActivityLogClassification from '../../../../../components/profile-activity/list/items/ProfileActivityLogClassification';
-import { CLASSIFICATIONS } from '../../../../../entities/IProfile';
-import { ApiProfileClassification } from '../../../../../generated/models/ApiProfileClassification';
+import ProfileActivityLogClassification from '@/components/profile-activity/list/items/ProfileActivityLogClassification';
+import { CLASSIFICATIONS } from '@/entities/IProfile';
+import { ApiProfileClassification } from '@/generated/models/ApiProfileClassification';
 
-jest.mock('../../../../../components/profile-activity/list/items/utils/ProfileActivityLogItemAction', () => (p: any) => <span>{p.action}</span>);
+jest.mock('@/components/profile-activity/list/items/utils/ProfileActivityLogItemAction', () => (p: any) => <span>{p.action}</span>);
 
 describe('ProfileActivityLogClassification', () => {
   it('shows change when old value present', () => {

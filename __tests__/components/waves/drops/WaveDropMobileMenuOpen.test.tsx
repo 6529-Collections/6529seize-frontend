@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import WaveDropMobileMenuOpen from "../../../../components/waves/drops/WaveDropMobileMenuOpen";
-import { ApiDropType } from "../../../../generated/models/ApiDropType";
+import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
+import { ApiDropType } from "@/generated/models/ApiDropType";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 jest.mock("next/navigation", () => ({

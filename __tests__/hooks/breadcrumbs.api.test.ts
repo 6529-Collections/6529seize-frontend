@@ -1,4 +1,4 @@
-import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "../../constants";
+import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "@/constants";
 import {
   fetchCollectionName,
   fetchGradientName,
@@ -8,12 +8,12 @@ import {
   fetchProfileHandle,
   fetchRememeName,
   fetchWaveName,
-} from "../../hooks/breadcrumbs.api";
-import { commonApiFetch } from "../../services/api/common-api";
+} from "@/hooks/breadcrumbs.api";
+import { commonApiFetch } from "@/services/api/common-api";
 
 // Mock dependencies
-jest.mock("../../services/api/common-api");
-jest.mock("../../constants", () => ({
+jest.mock("@/services/api/common-api");
+jest.mock("@/constants", () => ({
   MEMELAB_CONTRACT: "test-memelab-contract",
   MEMES_CONTRACT: "test-memes-contract",
 }));

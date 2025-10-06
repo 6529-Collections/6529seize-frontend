@@ -6,11 +6,11 @@ jest.mock('@tanstack/react-query', () => ({
 }));
 
 const commonApiFetch = jest.fn();
-jest.mock('../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: (...args: any) => commonApiFetch(...args),
 }));
 
-import { useIdentityBalance } from '../../hooks/useIdentityBalance';
+import { useIdentityBalance } from '@/hooks/useIdentityBalance';
 
 describe('useIdentityBalance', () => {
   it('calls useQuery with proper params', async () => {

@@ -11,7 +11,7 @@ import {
   Tooltip,
   LogarithmicScale,
 } from "chart.js";
-import levels from "../../levels.json";
+import levels from "@/levels.json";
 import { useEffect, useState } from "react";
 
 ChartJS.register(

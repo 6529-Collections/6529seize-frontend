@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BrainLeftSidebarViewChange } from '../../../../components/brain/left-sidebar/BrainLeftSidebarViewChange';
-import { AuthContext } from '../../../../components/auth/Auth';
+import { BrainLeftSidebarViewChange } from '@/components/brain/left-sidebar/BrainLeftSidebarViewChange';
+import { AuthContext } from '@/components/auth/Auth';
 import { useRouter, usePathname } from 'next/navigation';
-import { useUnreadNotifications } from '../../../../hooks/useUnreadNotifications';
+import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
 
 jest.mock('next/link', () => ({
   __esModule: true,
@@ -17,7 +17,7 @@ jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
   usePathname: jest.fn(),
 }));
-jest.mock('../../../../hooks/useUnreadNotifications');
+jest.mock('@/hooks/useUnreadNotifications');
 
 const mockedUseRouter = useRouter as jest.Mock;
 const mockedUsePathname = usePathname as jest.Mock;

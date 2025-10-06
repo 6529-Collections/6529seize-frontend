@@ -1,8 +1,8 @@
 "use client";
 
 import { useContext } from "react";
-import { AuthContext } from "../../../auth/Auth";
-import { MAX_DROP_UPLOAD_FILES } from "../../../../helpers/Helpers";
+import { AuthContext } from "@/components/auth/Auth";
+import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
 
 export default function CreateDropActionsRow({
   canAddPart,

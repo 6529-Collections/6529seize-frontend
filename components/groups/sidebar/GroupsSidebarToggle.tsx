@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
 import { useSelector } from "react-redux";
-import { selectActiveGroupId } from "../../../store/groupSlice";
+import { selectActiveGroupId } from "@/store/groupSlice";
 
 type Props = {
   readonly open: boolean;

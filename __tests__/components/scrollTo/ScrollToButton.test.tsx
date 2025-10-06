@@ -1,6 +1,6 @@
 import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
-import ScrollToButton from '../../../components/scrollTo/ScrollToButton';
+import ScrollToButton from '@/components/scrollTo/ScrollToButton';
 
 jest.mock('react-scroll', () => ({ Link: (props: any) => <a {...props}>{props.children}</a> }));
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: () => <svg data-testid="icon" /> }));

@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { useScrollBehavior } from '../../hooks/useScrollBehavior';
+import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 
 // Mock scrollTo method
 const mockScrollTo = jest.fn();

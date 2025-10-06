@@ -1,7 +1,7 @@
 import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { TextTrait } from "../../../../../components/waves/memes/traits/TextTrait";
+import { TextTrait } from "@/components/waves/memes/traits/TextTrait";
 
 jest.mock("react-use", () => ({
   useDebounce: (fn: any, _ms: number, deps: any[]) => {

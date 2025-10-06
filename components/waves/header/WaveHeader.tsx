@@ -1,18 +1,18 @@
 "use client";
 
 import React, { useContext } from "react";
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { getTimeAgo, numberWithCommas } from "../../../helpers/Helpers";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { getTimeAgo, numberWithCommas } from "@/helpers/Helpers";
 import WaveHeaderFollow from "./WaveHeaderFollow";
-import { AuthContext } from "../../auth/Auth";
+import { AuthContext } from "@/components/auth/Auth";
 import WaveHeaderOptions from "./options/WaveHeaderOptions";
 import WaveHeaderName from "./name/WaveHeaderName";
 import WaveHeaderFollowers from "./WaveHeaderFollowers";
 import WaveHeaderDescription from "./WaveHeaderDescription";
 import WaveHeaderPinButton from "./WaveHeaderPinButton";
-import { ApiWaveType } from "../../../generated/models/ObjectSerializer";
+import { ApiWaveType } from "@/generated/models/ObjectSerializer";
 import WavePicture from "../WavePicture";
-import { Time } from "../../../helpers/time";
+import { Time } from "@/helpers/time";
 import WaveNotificationSettings from "../specs/WaveNotificationSettings";
 
 export enum WaveHeaderPinnedSide {

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveToggle from '../../../../../components/waves/create-wave/utils/CreateWaveToggle';
+import CreateWaveToggle from '@/components/waves/create-wave/utils/CreateWaveToggle';
 
 describe('CreateWaveToggle', () => {
   it('renders label when displayLabel is true', () => {

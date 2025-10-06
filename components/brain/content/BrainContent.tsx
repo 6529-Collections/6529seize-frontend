@@ -4,10 +4,9 @@ import React, { useCallback, useEffect, useRef } from "react";
 import { createBreakpoint } from "react-use";
 import BrainContentPinnedWaves from "./BrainContentPinnedWaves";
 import BrainContentInput from "./input/BrainContentInput";
-import { ActiveDropState } from "../../../types/dropInteractionTypes";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
 import { useLayout } from "../my-stream/layout/LayoutContext";
-import { useAndroidKeyboard } from "../../../hooks/useAndroidKeyboard";
-import useDeviceInfo from "../../../hooks/useDeviceInfo";
+import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
 
 // Create breakpoint hook with the same values as tailwind classes
 // lg:tw-hidden is applied at min-width 1024px

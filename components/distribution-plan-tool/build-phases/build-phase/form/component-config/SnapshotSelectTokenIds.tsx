@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
+import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
 import { PhaseConfigStep } from "../BuildPhaseFormConfigModal";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import ComponentConfigMeta from "./ComponentConfigMeta";

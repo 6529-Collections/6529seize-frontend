@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import DistributionPlanTableRowWrapper from "../../common/DistributionPlanTableRowWrapper";
+import DistributionPlanTableRowWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper";
 import {
   FetchResultsType,
   FullResultWallet,
@@ -9,13 +9,13 @@ import {
   ReviewDistributionPlanTableItemType,
   ReviewDistributionPlanTablePhase,
 } from "./ReviewDistributionPlanTable";
-import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
-import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
-import { AllowlistResult } from "../../../allowlist-tool/allowlist-tool.types";
-import RoundedJsonIconButton from "../../common/RoundedJsonIconButton";
-import RoundedCsvIconButton from "../../common/RoundedCsvIconButton";
-import RoundedManifoldIconButton from "../../common/RoundedManifoldIconButton";
-import { distributionPlanApiFetch } from "../../../../services/distribution-plan-api";
+import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { AllowlistResult } from "@/components/allowlist-tool/allowlist-tool.types";
+import RoundedJsonIconButton from "@/components/distribution-plan-tool/common/RoundedJsonIconButton";
+import RoundedCsvIconButton from "@/components/distribution-plan-tool/common/RoundedCsvIconButton";
+import RoundedManifoldIconButton from "@/components/distribution-plan-tool/common/RoundedManifoldIconButton";
+import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 import { SubscriptionLinks } from "./ReviewDistributionPlanTableSubscription";
 
 export default function ReviewDistributionPlanTableRow({

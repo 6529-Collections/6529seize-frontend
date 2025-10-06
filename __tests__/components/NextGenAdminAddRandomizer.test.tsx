@@ -1,8 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import NextGenAdminAddRandomizer from '../../components/nextGen/admin/NextGenAdminAddRandomizer';
+import NextGenAdminAddRandomizer from '@/components/nextGen/admin/NextGenAdminAddRandomizer';
 
-jest.mock('../../components/nextGen/NextGenContractWriteStatus', () => ({ __esModule: true, default: () => <div /> }));
+jest.mock('@/components/nextGen/NextGenContractWriteStatus', () => ({ __esModule: true, default: () => <div /> }));
 
 const writeContract = jest.fn();
 
@@ -10,7 +10,7 @@ beforeEach(() => {
   (global as any).ResizeObserver = class { observe(){} disconnect(){} };
 });
 
-jest.mock('../../components/nextGen/nextgen_helpers', () => ({
+jest.mock('@/components/nextGen/nextgen_helpers', () => ({
   useGlobalAdmin: () => ({ data: true }),
   useFunctionAdmin: () => ({ data: true }),
   useCollectionIndex: () => ({ data: 2 }),
@@ -28,7 +28,7 @@ jest.mock('../../components/nextGen/nextgen_helpers', () => ({
   }),
 }));
 
-jest.mock('../../components/auth/SeizeConnectContext', () => ({
+jest.mock('@/components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: () => ({ address: '0x1' }),
 }));
 

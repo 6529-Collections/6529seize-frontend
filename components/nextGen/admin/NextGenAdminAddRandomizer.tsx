@@ -21,7 +21,7 @@ import {
   NextGenAdminHeadingRow,
   NextGenAdminTextFormGroup,
 } from "./NextGenAdminShared";
-import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 
 interface Props {
   close: () => void;

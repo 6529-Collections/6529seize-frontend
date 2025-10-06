@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import UserPageStatsTags from '../../../../../components/user/stats/tags/UserPageStatsTags';
+import UserPageStatsTags from '@/components/user/stats/tags/UserPageStatsTags';
 
 const balance = {
   nextgen_balance: 2,

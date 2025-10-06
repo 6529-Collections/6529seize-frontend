@@ -1,5 +1,5 @@
-import { getStableDropKey, DropSize, convertApiDropToExtendedDrop, getFeedItemKey } from '../../../helpers/waves/drop.helpers';
-import { ApiFeedItemType } from '../../../generated/models/ApiFeedItemType';
+import { getStableDropKey, DropSize, convertApiDropToExtendedDrop, getFeedItemKey } from '@/helpers/waves/drop.helpers';
+import { ApiFeedItemType } from '@/generated/models/ApiFeedItemType';
 
 const baseDrop: any = {
   id: 'd1',

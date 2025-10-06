@@ -1,5 +1,5 @@
 import React from "react";
-import useCapacitor from "../../../hooks/useCapacitor";
+import useCapacitor from "@/hooks/useCapacitor";
 
 interface SingleWaveDropCloseProps {
   readonly onClose: () => void;

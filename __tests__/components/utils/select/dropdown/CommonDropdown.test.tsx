@@ -1,8 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import CommonDropdown from '../../../../../components/utils/select/dropdown/CommonDropdown';
-import { CommonSelectItem } from '../../../../../components/utils/select/CommonSelect';
-import { SortDirection } from '../../../../../entities/ISort';
+import CommonDropdown from '@/components/utils/select/dropdown/CommonDropdown';
+import { CommonSelectItem } from '@/components/utils/select/CommonSelect';
+import { SortDirection } from '@/entities/ISort';
 
 // Mock dependencies
 jest.mock('framer-motion', () => ({
@@ -12,13 +12,13 @@ jest.mock('framer-motion', () => ({
   ],
 }));
 
-jest.mock('../../../../../components/utils/select/dropdown/CommonDropdownItemsWrapper', () => {
+jest.mock('@/components/utils/select/dropdown/CommonDropdownItemsWrapper', () => {
   return function MockCommonDropdownItemsWrapper({ children, isOpen }: any) {
     return isOpen ? <div data-testid="dropdown-items">{children}</div> : null;
   };
 });
 
-jest.mock('../../../../../components/utils/select/dropdown/CommonDropdownItem', () => {
+jest.mock('@/components/utils/select/dropdown/CommonDropdownItem', () => {
   return function MockCommonDropdownItem({ item, setSelected, children }: any) {
     return (
       <div
@@ -32,7 +32,7 @@ jest.mock('../../../../../components/utils/select/dropdown/CommonDropdownItem', 
   };
 });
 
-jest.mock('../../../../../components/user/utils/icons/CommonTableSortIcon', () => {
+jest.mock('@/components/user/utils/icons/CommonTableSortIcon', () => {
   return function MockCommonTableSortIcon({ direction, isActive }: any) {
     return (
       <span data-testid="sort-icon">

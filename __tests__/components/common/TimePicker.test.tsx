@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import TimePicker from '../../../components/common/TimePicker';
+import TimePicker from '@/components/common/TimePicker';
 
 describe('TimePicker', () => {
   it('labels hour and minute inputs for accessibility', () => {

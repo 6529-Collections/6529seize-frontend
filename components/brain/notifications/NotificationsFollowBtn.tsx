@@ -1,23 +1,23 @@
 "use client";
 
 import { FC, useState, useContext, useEffect } from "react";
-import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
+import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import {
   FOLLOW_BTN_BUTTON_CLASSES,
   FOLLOW_BTN_LOADER_SIZES,
   FOLLOW_BTN_SVG_CLASSES,
   UserFollowBtnSize,
-} from "../../user/utils/UserFollowBtn";
+} from "@/components/user/utils/UserFollowBtn";
 import { useMutation } from "@tanstack/react-query";
-import CircleLoader from "../../distribution-plan-tool/common/CircleLoader";
-import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
-import { AuthContext } from "../../auth/Auth";
-import { ApiIdentitySubscriptionActions } from "../../../generated/models/ApiIdentitySubscriptionActions";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { AuthContext } from "@/components/auth/Auth";
+import { ApiIdentitySubscriptionActions } from "@/generated/models/ApiIdentitySubscriptionActions";
 import {
   commonApiDeleteWithBody,
   commonApiPost,
-} from "../../../services/api/common-api";
-import { ApiIdentitySubscriptionTargetAction } from "../../../generated/models/ApiIdentitySubscriptionTargetAction";
+} from "@/services/api/common-api";
+import { ApiIdentitySubscriptionTargetAction } from "@/generated/models/ApiIdentitySubscriptionTargetAction";
 
 interface NotificationsFollowBtnProps {
   readonly profile: ApiProfileMin;

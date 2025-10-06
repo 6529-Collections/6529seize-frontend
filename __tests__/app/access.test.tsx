@@ -1,14 +1,14 @@
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import AccessPage from '@/app/access/page';
-import { AuthContext } from '../../components/auth/Auth';
+import { AuthContext } from '@/components/auth/Auth';
 import { useRouter } from 'next/navigation';
 
 jest.mock('next/image', () => ({ __esModule: true, default: (p: any) => <img alt="" {...p} /> }));
 jest.mock('next/navigation', () => ({ useRouter: jest.fn() }));
 
 // Mock TitleContext
-jest.mock('../../contexts/TitleContext', () => ({
+jest.mock('@/contexts/TitleContext', () => ({
   useTitle: () => ({
     title: 'Test Title',  
     setTitle: jest.fn(),

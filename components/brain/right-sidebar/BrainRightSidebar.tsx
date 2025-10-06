@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { commonApiFetch } from "../../../services/api/common-api";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { WaveContent } from "./WaveContent";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useSidebarState } from "../../../hooks/useSidebarState";
 import { ChevronDoubleRightIcon } from "@heroicons/react/24/outline";
 

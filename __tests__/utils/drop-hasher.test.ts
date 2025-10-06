@@ -1,4 +1,4 @@
-import { DropHasher } from '../..//utils/drop-hasher';
+import { DropHasher } from '@/utils/drop-hasher';
 import { sha256 } from 'js-sha256';
 
 describe('DropHasher', () => {

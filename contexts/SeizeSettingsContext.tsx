@@ -9,8 +9,8 @@ import {
   useMemo,
   useState,
 } from "react";
-import { ApiSeizeSettings } from "../generated/models/ApiSeizeSettings";
-import { fetchUrl } from "../services/6529api";
+import { ApiSeizeSettings } from "@/generated/models/ApiSeizeSettings";
+import { fetchUrl } from "@/services/6529api";
 
 type SeizeSettingsContextType = {
   seizeSettings: ApiSeizeSettings;

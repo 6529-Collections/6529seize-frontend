@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import NextGenMintWidget from '../../../../../../components/nextGen/collections/collectionParts/mint/NextGenMintWidget';
-import { Status } from '../../../../../../components/nextGen/nextgen_entities';
+import NextGenMintWidget from '@/components/nextGen/collections/collectionParts/mint/NextGenMintWidget';
+import { Status } from '@/components/nextGen/nextgen_entities';
 
 let minting = false;
-jest.mock('../../../../../../components/nextGen/nextgen_helpers', () => ({
+jest.mock('@/components/nextGen/nextgen_helpers', () => ({
   useMintSharedState: () => ({
     proofResponse: [],
     setProofResponse: jest.fn(),
@@ -25,9 +25,9 @@ jest.mock('../../../../../../components/nextGen/nextgen_helpers', () => ({
   getStatusFromDates: () => Status.LIVE,
 }));
 
-jest.mock('../../../../../../services/6529api', () => ({ fetchUrl: jest.fn() }));
-jest.mock('../../../../../../components/nextGen/NextGenContractWriteStatus', () => () => <div />);
-jest.mock('../../../../../../components/auth/SeizeConnectContext', () => ({
+jest.mock('@/services/6529api', () => ({ fetchUrl: jest.fn() }));
+jest.mock('@/components/nextGen/NextGenContractWriteStatus', () => () => <div />);
+jest.mock('@/components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: jest.fn(),
 }));
 jest.mock('wagmi', () => ({
@@ -44,21 +44,21 @@ jest.mock('wagmi', () => ({
     error: undefined,
   }),
 }));
-jest.mock('../../../../../../components/dotLoader/DotLoader', () => () => <div />);
-jest.mock('../../../../../../components/nextGen/collections/collectionParts/mint/NextGenMintShared', () => ({
+jest.mock('@/components/dotLoader/DotLoader', () => () => <div />);
+jest.mock('@/components/nextGen/collections/collectionParts/mint/NextGenMintShared', () => ({
   NextGenMintingFor: () => <div />,
 }));
-jest.mock('../../../../../../helpers/Helpers', () => {
+jest.mock('@/helpers/Helpers', () => {
   const original = jest.requireActual('../../../../../../helpers/Helpers');
   return { ...original, getNetworkName: () => 'Ethereum' };
 });
-jest.mock('../../../../../../components/nextGen/nextgen_contracts', () => ({
+jest.mock('@/components/nextGen/nextgen_contracts', () => ({
   NEXTGEN_CHAIN_ID: 1,
   NEXTGEN_MINTER: { 1: '0x0', abi: [] },
 }));
 
 const useChainId = require('wagmi').useChainId as jest.Mock;
-const useSeizeConnectContext = require('../../../../../../components/auth/SeizeConnectContext').useSeizeConnectContext as jest.Mock;
+const useSeizeConnectContext = require('@/components/auth/SeizeConnectContext').useSeizeConnectContext as jest.Mock;
 
 const baseProps = {
   collection: {

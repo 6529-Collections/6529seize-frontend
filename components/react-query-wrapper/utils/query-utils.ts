@@ -1,5 +1,5 @@
-import { ApiWavesOverviewType } from "../../../generated/models/ApiWavesOverviewType";
-import { ApiWaveSubscriptionTargetAction } from "../../../generated/models/ApiWaveSubscriptionTargetAction";
+import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
+import { ApiWaveSubscriptionTargetAction } from "@/generated/models/ApiWaveSubscriptionTargetAction";
 
 export const WAVE_FOLLOWING_WAVES_PARAMS = {
   limit: 20,

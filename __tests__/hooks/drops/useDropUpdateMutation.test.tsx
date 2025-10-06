@@ -1,22 +1,22 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
-import { useDropUpdateMutation, DropUpdateMutationParams } from '../../../hooks/drops/useDropUpdateMutation';
-import { ApiUpdateDropRequest } from '../../../generated/models/ApiUpdateDropRequest';
-import { ApiDrop } from '../../../generated/models/ApiDrop';
-import { AuthContext } from '../../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../../components/react-query-wrapper/ReactQueryWrapper';
-import { ProcessIncomingDropType } from '../../../contexts/wave/hooks/useWaveRealtimeUpdater';
-import { commonApiPost } from '../../../services/api/common-api';
-import { useMyStream } from '../../../contexts/wave/MyStreamContext';
+import { useDropUpdateMutation, DropUpdateMutationParams } from '@/hooks/drops/useDropUpdateMutation';
+import { ApiUpdateDropRequest } from '@/generated/models/ApiUpdateDropRequest';
+import { ApiDrop } from '@/generated/models/ApiDrop';
+import { AuthContext } from '@/components/auth/Auth';
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
+import { ProcessIncomingDropType } from '@/contexts/wave/hooks/useWaveRealtimeUpdater';
+import { commonApiPost } from '@/services/api/common-api';
+import { useMyStream } from '@/contexts/wave/MyStreamContext';
 
 // Mock the API module
-jest.mock('../../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiPost: jest.fn(),
 }));
 
 // Mock the MyStreamContext
-jest.mock('../../../contexts/wave/MyStreamContext', () => ({
+jest.mock('@/contexts/wave/MyStreamContext', () => ({
   useMyStream: jest.fn(),
 }));
 

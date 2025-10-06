@@ -1,5 +1,5 @@
 import React from "react";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 
 interface WaveDropAuthorPfpProps {
   readonly drop: ApiDrop;

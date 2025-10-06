@@ -1,9 +1,9 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
-import { useWaveActivityLogs } from '../../hooks/useWaveActivityLogs';
+import { useWaveActivityLogs } from '@/hooks/useWaveActivityLogs';
 
-jest.mock('../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: jest.fn(() => Promise.resolve([{ id: '1' }, { id: '2' }])),
 }));
 

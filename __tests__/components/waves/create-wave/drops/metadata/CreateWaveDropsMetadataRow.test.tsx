@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveDropsMetadataRow from '../../../../../../components/waves/create-wave/drops/metadata/CreateWaveDropsMetadataRow';
-import { ApiWaveMetadataType } from '../../../../../../generated/models/ApiWaveMetadataType';
+import CreateWaveDropsMetadataRow from '@/components/waves/create-wave/drops/metadata/CreateWaveDropsMetadataRow';
+import { ApiWaveMetadataType } from '@/generated/models/ApiWaveMetadataType';
 
-jest.mock('../../../../../../components/waves/create-wave/drops/metadata/CreateWaveDropsMetadataRowType', () => (props: any) => (
+jest.mock('@/components/waves/create-wave/drops/metadata/CreateWaveDropsMetadataRowType', () => (props: any) => (
   <div data-testid="type" onClick={() => props.onTypeChange(ApiWaveMetadataType.Number)} />
 ));
 

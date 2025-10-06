@@ -1,15 +1,15 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { useDecisionPoints } from "../../../hooks/waves/useDecisionPoints";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
 import { AnimatePresence } from "framer-motion";
 import { TimelineToggleHeader } from "./time/TimelineToggleHeader";
 import { ExpandedTimelineContent } from "./time/ExpandedTimelineContent";
 import { CompactDroppingPhaseCard } from "./time/CompactDroppingPhaseCard";
 import { CompactVotingPhaseCard } from "./time/CompactVotingPhaseCard";
-import { useWave } from "../../../hooks/useWave";
-import { Time } from "../../../helpers/time";
+import { useWave } from "@/hooks/useWave";
+import { Time } from "@/helpers/time";
 
 interface WaveLeaderboardTimeProps {
   readonly wave: ApiWave;

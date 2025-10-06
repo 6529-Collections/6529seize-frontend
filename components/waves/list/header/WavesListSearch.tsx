@@ -1,6 +1,6 @@
 import IdentitySearch, {
   IdentitySearchSize,
-} from "../../../utils/input/identity/IdentitySearch";
+} from "@/components/utils/input/identity/IdentitySearch";
 
 export default function WavesListSearch({
   identity,

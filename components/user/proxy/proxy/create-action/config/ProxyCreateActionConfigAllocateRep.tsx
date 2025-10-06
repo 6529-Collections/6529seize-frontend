@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CreateProxyAllocateRepAction } from "../../../../../../entities/IProxy";
-import { ApiProfileProxyActionType } from "../../../../../../generated/models/ApiProfileProxyActionType";
-import CommonInput from "../../../../../utils/input/CommonInput";
+import { CreateProxyAllocateRepAction } from "@/entities/IProxy";
+import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
+import CommonInput from "@/components/utils/input/CommonInput";
 import CircleLoader, {
   CircleLoaderSize,
-} from "../../../../../distribution-plan-tool/common/CircleLoader";
+} from "@/components/distribution-plan-tool/common/CircleLoader";
 
 export default function ProxyCreateActionConfigAllocateRep({
   endTime,

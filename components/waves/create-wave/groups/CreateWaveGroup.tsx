@@ -1,20 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import CommonBorderedRadioButton from "../../../utils/radio/CommonBorderedRadioButton";
+import CommonBorderedRadioButton from "@/components/utils/radio/CommonBorderedRadioButton";
 import {
   CreateWaveGroupConfigType,
   CreateWaveGroupStatus,
   WaveGroupsConfig,
-} from "../../../../types/waves.types";
+} from "@/types/waves.types";
 import {
   CREATE_WAVE_NONE_GROUP_LABELS,
   CREATE_WAVE_SELECT_GROUP_LABELS,
-} from "../../../../helpers/waves/waves.constants";
-import { ApiGroupFull } from "../../../../generated/models/ApiGroupFull";
-import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
+} from "@/helpers/waves/waves.constants";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import CreateWaveGroupItem from "./CreateWaveGroupItem";
-import SelectGroupModalWrapper from "../../../utils/select-group/SelectGroupModalWrapper";
+import SelectGroupModalWrapper from "@/components/utils/select-group/SelectGroupModalWrapper";
 import CreateWaveToggle from "../utils/CreateWaveToggle";
 
 export default function CreateWaveGroup({

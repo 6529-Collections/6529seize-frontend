@@ -1,28 +1,28 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { DefaultSingleWaveDrop } from '../../../../components/waves/drop/DefaultSingleWaveDrop';
-import { SingleWaveDropTab } from '../../../../components/waves/drop/SingleWaveDrop';
+import { DefaultSingleWaveDrop } from '@/components/waves/drop/DefaultSingleWaveDrop';
+import { SingleWaveDropTab } from '@/components/waves/drop/SingleWaveDrop';
 
-jest.mock('../../../../components/waves/drop/SingleWaveDropHeader', () => ({
+jest.mock('@/components/waves/drop/SingleWaveDropHeader', () => ({
   __esModule: true,
   SingleWaveDropHeader: (props: any) => (
     <button data-testid="header" onClick={() => props.setActiveTab(SingleWaveDropTab.CHAT)} />
   ),
 }));
 
-jest.mock('../../../../components/waves/drop/SingleWaveDropInfoPanel', () => ({
+jest.mock('@/components/waves/drop/SingleWaveDropInfoPanel', () => ({
   __esModule: true,
   SingleWaveDropInfoPanel: (props: any) => <div data-testid="info">{props.activeTab}</div>,
 }));
 
-jest.mock('../../../../components/waves/drop/SingleWaveDropChat', () => ({
+jest.mock('@/components/waves/drop/SingleWaveDropChat', () => ({
   __esModule: true,
   SingleWaveDropChat: () => <div data-testid="chat" />,
 }));
 
-jest.mock('../../../../hooks/useDrop', () => ({ useDrop: () => ({ drop: { id: '1', wave: { id: 'w1' } } }) }));
-jest.mock('../../../../hooks/useWaveData', () => ({ useWaveData: () => ({ data: { id: 'w1' } }) }));
+jest.mock('@/hooks/useDrop', () => ({ useDrop: () => ({ drop: { id: '1', wave: { id: 'w1' } } }) }));
+jest.mock('@/hooks/useWaveData', () => ({ useWaveData: () => ({ data: { id: 'w1' } }) }));
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: jest.fn() }),
   usePathname: () => '/p',

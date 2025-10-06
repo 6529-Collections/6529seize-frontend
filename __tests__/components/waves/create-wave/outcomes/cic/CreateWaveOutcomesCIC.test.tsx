@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
-import CreateWaveOutcomesCIC from '../../../../../../components/waves/create-wave/outcomes/cic/CreateWaveOutcomesCIC';
-import { ApiWaveType } from '../../../../../../generated/models/ApiWaveType';
+import CreateWaveOutcomesCIC from '@/components/waves/create-wave/outcomes/cic/CreateWaveOutcomesCIC';
+import { ApiWaveType } from '@/generated/models/ApiWaveType';
 
-jest.mock('../../../../../../components/waves/create-wave/outcomes/cic/CreateWaveOutcomesCICRank', () => () => <div data-testid="rank" />);
-jest.mock('../../../../../../components/waves/create-wave/outcomes/cic/CreateWaveOutcomesCICApprove', () => () => <div data-testid="approve" />);
+jest.mock('@/components/waves/create-wave/outcomes/cic/CreateWaveOutcomesCICRank', () => () => <div data-testid="rank" />);
+jest.mock('@/components/waves/create-wave/outcomes/cic/CreateWaveOutcomesCICApprove', () => () => <div data-testid="approve" />);
 
 describe('CreateWaveOutcomesCIC', () => {
   it('renders rank component for rank waves', () => {

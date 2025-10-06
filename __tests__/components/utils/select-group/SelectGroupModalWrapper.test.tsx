@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import SelectGroupModalWrapper from '../../../../components/utils/select-group/SelectGroupModalWrapper';
+import SelectGroupModalWrapper from '@/components/utils/select-group/SelectGroupModalWrapper';
 
-jest.mock('../../../../components/utils/animation/CommonAnimationWrapper', () => ({ __esModule: true, default: (p:any) => <div data-testid="wrapper">{p.children}</div> }));
-jest.mock('../../../../components/utils/animation/CommonAnimationOpacity', () => ({ __esModule: true, default: (p:any) => <div data-testid="opacity" onClick={p.onClicked}>{p.children}</div> }));
-jest.mock('../../../../components/utils/select-group/SelectGroupModal', () => ({ __esModule: true, default: ({ onClose, onGroupSelect }: any) => <div data-testid="modal" onClick={() => onGroupSelect({ id:1 })} /> }));
+jest.mock('@/components/utils/animation/CommonAnimationWrapper', () => ({ __esModule: true, default: (p:any) => <div data-testid="wrapper">{p.children}</div> }));
+jest.mock('@/components/utils/animation/CommonAnimationOpacity', () => ({ __esModule: true, default: (p:any) => <div data-testid="opacity" onClick={p.onClicked}>{p.children}</div> }));
+jest.mock('@/components/utils/select-group/SelectGroupModal', () => ({ __esModule: true, default: ({ onClose, onGroupSelect }: any) => <div data-testid="modal" onClick={() => onGroupSelect({ id:1 })} /> }));
 
 describe('SelectGroupModalWrapper', () => {
   it('renders modal when open', () => {

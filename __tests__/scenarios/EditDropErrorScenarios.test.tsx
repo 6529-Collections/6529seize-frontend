@@ -1,11 +1,11 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useDropUpdateMutation } from '../../hooks/drops/useDropUpdateMutation';
-import { AuthContext } from '../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../components/react-query-wrapper/ReactQueryWrapper';
-import { commonApiPost } from '../../services/api/common-api';
-import { ApiUpdateDropRequest } from '../../generated/models/ApiUpdateDropRequest';
+import { useDropUpdateMutation } from '@/hooks/drops/useDropUpdateMutation';
+import { AuthContext } from '@/components/auth/Auth';
+import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
+import { commonApiPost } from '@/services/api/common-api';
+import { ApiUpdateDropRequest } from '@/generated/models/ApiUpdateDropRequest';
 import {
   createMockDrop,
   createMockRequest,
@@ -13,12 +13,12 @@ import {
 } from '../utils/editDropTestUtils';
 
 // Mock the API
-jest.mock('../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiPost: jest.fn(),
 }));
 
 // Mock the MyStreamContext
-jest.mock('../../contexts/wave/MyStreamContext', () => ({
+jest.mock('@/contexts/wave/MyStreamContext', () => ({
   useMyStream: jest.fn(() => ({
     processIncomingDrop: jest.fn(),
   })),

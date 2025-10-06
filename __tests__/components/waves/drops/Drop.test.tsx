@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react';
-import Drop, { DropLocation } from '../../../../components/waves/drops/Drop';
-import { ApiDropType } from '../../../../generated/models/ApiDropType';
+import Drop, { DropLocation } from '@/components/waves/drops/Drop';
+import { ApiDropType } from '@/generated/models/ApiDropType';
 import React from 'react';
 
-jest.mock('../../../../components/waves/drops/participation/ParticipationDrop', () => (props: any) => <div data-testid="participation">{props.drop.id}</div>);
-jest.mock('../../../../components/waves/drops/winner/WinnerDrop', () => (props: any) => <div data-testid="winner">{props.drop.id}</div>);
-jest.mock('../../../../components/waves/drops/WaveDrop', () => (props: any) => <div data-testid="wave">{props.drop.id}</div>);
+jest.mock('@/components/waves/drops/participation/ParticipationDrop', () => (props: any) => <div data-testid="participation">{props.drop.id}</div>);
+jest.mock('@/components/waves/drops/winner/WinnerDrop', () => (props: any) => <div data-testid="winner">{props.drop.id}</div>);
+jest.mock('@/components/waves/drops/WaveDrop', () => (props: any) => <div data-testid="wave">{props.drop.id}</div>);
 
 const base = {
   id: '1',

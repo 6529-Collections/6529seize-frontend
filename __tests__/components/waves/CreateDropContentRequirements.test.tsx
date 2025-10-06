@@ -1,9 +1,9 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import CreateDropContentRequirements from '../../../components/waves/CreateDropContentRequirements';
+import CreateDropContentRequirements from '@/components/waves/CreateDropContentRequirements';
 
 let itemProps: any[] = [];
-jest.mock('../../../components/waves/CreateDropContentRequirementsItem', () => (props: any) => {
+jest.mock('@/components/waves/CreateDropContentRequirementsItem', () => (props: any) => {
   itemProps.push(props);
   return <div data-testid="item" />;
 });

@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import BlockPickerResultTableRowModal from '../../../../components/block-picker/result/BlockPickerResultTableRowModal';
+import BlockPickerResultTableRowModal from '@/components/block-picker/result/BlockPickerResultTableRowModal';
 
-jest.mock('../../../../components/block-picker/advanced/BlockPickerAdvancedItemBlock', () => ({ block, blockParts }: any) => (
+jest.mock('@/components/block-picker/advanced/BlockPickerAdvancedItemBlock', () => ({ block, blockParts }: any) => (
   <div data-testid="block" data-block={block}>{blockParts}</div>
 ));
 

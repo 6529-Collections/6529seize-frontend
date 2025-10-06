@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import MappingToolPlaceholder from '../../../components/mapping-tools/MappingToolPlaceholder';
+import MappingToolPlaceholder from '@/components/mapping-tools/MappingToolPlaceholder';
 
 jest.mock('react-bootstrap', () => ({ Container: (p:any)=> <div>{p.children}</div> }));
 

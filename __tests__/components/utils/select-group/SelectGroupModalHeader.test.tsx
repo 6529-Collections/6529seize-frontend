@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import SelectGroupModalHeader from '../../../../components/utils/select-group/SelectGroupModalHeader';
+import SelectGroupModalHeader from '@/components/utils/select-group/SelectGroupModalHeader';
 
 describe('SelectGroupModalHeader', () => {
   it('calls onClose when close button clicked', async () => {

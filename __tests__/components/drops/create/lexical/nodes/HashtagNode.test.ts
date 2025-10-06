@@ -16,7 +16,7 @@ jest.mock('lexical', () => ({
   $applyNodeReplacement: (n: any) => n,
 }));
 
-import { $createHashtagNode, $isHashtagNode, HashtagNode } from '../../../../../../components/drops/create/lexical/nodes/HashtagNode';
+import { $createHashtagNode, $isHashtagNode, HashtagNode } from '@/components/drops/create/lexical/nodes/HashtagNode';
 
 describe('HashtagNode', () => {
   it('creates hashtag node with correct properties', () => {

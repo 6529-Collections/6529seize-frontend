@@ -21,17 +21,17 @@ jest.mock("@tanstack/react-query", () => ({
 jest.mock("react-use", () => ({ useDebounce: () => {} }));
 
 jest.mock(
-  "../../../components/community/members-table/CommunityMembersTable",
+  "@/components/community/members-table/CommunityMembersTable",
   () => (props: any) => <div data-testid="table">{props.members.length}</div>
 );
 
 jest.mock(
-  "../../../components/utils/table/paginator/CommonTablePagination",
+  "@/components/utils/table/paginator/CommonTablePagination",
   () => (props: any) => <div data-testid="pagination">{props.totalPages}</div>
 );
 
 jest.mock(
-  "../../../components/utils/animation/CommonCardSkeleton",
+  "@/components/utils/animation/CommonCardSkeleton",
   () => () => <div data-testid="skeleton" />
 );
 

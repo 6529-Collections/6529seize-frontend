@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import NextGenAbout from '../../components/nextGen/collections/NextGenAbout';
+import NextGenAbout from '@/components/nextGen/collections/NextGenAbout';
 
 describe('NextGenAbout', () => {
   it('renders heading and paragraph content', () => {

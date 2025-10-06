@@ -1,13 +1,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import CreatePhasesTableBody from '../../../components/distribution-plan-tool/create-phases/table/CreatePhasesTableBody';
+import CreatePhasesTableBody from '@/components/distribution-plan-tool/create-phases/table/CreatePhasesTableBody';
 
-jest.mock('../../../components/distribution-plan-tool/create-phases/table/CreateTablePhasesRow', () => ({ phase }: any) => (
+jest.mock('@/components/distribution-plan-tool/create-phases/table/CreateTablePhasesRow', () => ({ phase }: any) => (
   <tr data-testid="row">
     <td>{phase.name}</td>
   </tr>
 ));
-jest.mock('../../../components/distribution-plan-tool/common/DistributionPlanTableBodyWrapper', () => ({ children }: any) => <tbody data-testid="wrapper">{children}</tbody>);
+jest.mock('@/components/distribution-plan-tool/common/DistributionPlanTableBodyWrapper', () => ({ children }: any) => <tbody data-testid="wrapper">{children}</tbody>);
 
 describe('CreatePhasesTableBody', () => {
   it('renders a row for each phase', () => {

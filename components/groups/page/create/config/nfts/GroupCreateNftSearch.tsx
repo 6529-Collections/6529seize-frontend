@@ -2,9 +2,9 @@
 
 import { useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import { NFTSearchResult } from "../../../../../header/header-search/HeaderSearchModalItem";
+import { NFTSearchResult } from "@/components/header/header-search/HeaderSearchModalItem";
 import GroupCreateNftSearchItems from "./GroupCreateNftSearchItems";
-import { ApiGroupOwnsNft } from "../../../../../../generated/models/ApiGroupOwnsNft";
+import { ApiGroupOwnsNft } from "@/generated/models/ApiGroupOwnsNft";
 
 export default function GroupCreateNftSearch({
   selected,

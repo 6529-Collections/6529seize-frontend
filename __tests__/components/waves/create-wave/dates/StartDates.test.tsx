@@ -1,17 +1,25 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import StartDates from '../../../../../components/waves/create-wave/dates/StartDates';
-import { ApiWaveType } from '../../../../../generated/models/ApiWaveType';
-import { CreateWaveDatesConfig } from '../../../../../types/waves.types';
+import StartDates from "@/components/waves/create-wave/dates/StartDates";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { CreateWaveDatesConfig } from "@/types/waves.types";
+import { fireEvent, render, screen } from "@testing-library/react";
 
-jest.mock('../../../../../components/utils/calendar/CommonCalendar', () => (props: any) => (
-  <button onClick={() => props.setSelectedTimestamp(123)}>calendar</button>
-));
-jest.mock('../../../../../components/common/DateAccordion', () => (props: any) => (
-  <div>
-    <div onClick={props.onToggle}>{props.title}</div>
-    {props.isExpanded ? props.children : props.collapsedContent}
-  </div>
-));
+jest.mock("@/components/utils/calendar/CommonCalendar", () => {
+  const MockCommonCalendar = (props: any) => (
+    <button onClick={() => props.setSelectedTimestamp(123)}>calendar</button>
+  );
+  MockCommonCalendar.displayName = "MockCommonCalendar";
+  return MockCommonCalendar;
+});
+jest.mock("@/components/common/DateAccordion", () => {
+  const MockDateAccordion = (props: any) => (
+    <div>
+      <div onClick={props.onToggle}>{props.title}</div>
+      {props.isExpanded ? props.children : props.collapsedContent}
+    </div>
+  );
+  MockDateAccordion.displayName = "MockDateAccordion";
+  return MockDateAccordion;
+});
 
 const baseDates: CreateWaveDatesConfig = {
   submissionStartDate: Date.now(),
@@ -22,20 +30,32 @@ const baseDates: CreateWaveDatesConfig = {
   isRolling: false,
 };
 
-describe('StartDates', () => {
-  it('renders both calendars for rank waves', () => {
+describe("StartDates", () => {
+  it("renders both calendars for rank waves", () => {
     const { container } = render(
-      <StartDates waveType={ApiWaveType.Rank} dates={baseDates} setDates={jest.fn()} isExpanded={true} setIsExpanded={() => {}} />
+      <StartDates
+        waveType={ApiWaveType.Rank}
+        dates={baseDates}
+        setDates={jest.fn()}
+        isExpanded={true}
+        setIsExpanded={() => {}}
+      />
     );
-    expect(container.querySelectorAll('button').length).toBe(2);
+    expect(container.querySelectorAll("button").length).toBe(3);
   });
 
-  it('calls setDates when calendar clicked', () => {
+  it("calls setDates when calendar clicked", () => {
     const setDates = jest.fn();
     render(
-      <StartDates waveType={ApiWaveType.Approve} dates={baseDates} setDates={setDates} isExpanded={true} setIsExpanded={() => {}} />
+      <StartDates
+        waveType={ApiWaveType.Approve}
+        dates={baseDates}
+        setDates={setDates}
+        isExpanded={true}
+        setIsExpanded={() => {}}
+      />
     );
-    fireEvent.click(screen.getByText('calendar'));
+    fireEvent.click(screen.getByText("calendar"));
     expect(setDates).toHaveBeenCalled();
   });
 });

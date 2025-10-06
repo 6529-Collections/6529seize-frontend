@@ -1,4 +1,4 @@
-import { CreateWaveDatesConfig } from "../../../../types/waves.types";
+import { CreateWaveDatesConfig } from "@/types/waves.types";
 
 /**
  * Calculates all decision times based on firstDecisionTime and subsequentDecisions

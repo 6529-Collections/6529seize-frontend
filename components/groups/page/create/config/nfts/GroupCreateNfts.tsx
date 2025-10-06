@@ -2,15 +2,15 @@ import GroupCreateNftsSelect from "./GroupCreateNftsSelect";
 import {
   ApiGroupOwnsNft,
   ApiGroupOwnsNftNameEnum,
-} from "../../../../../../generated/models/ApiGroupOwnsNft";
-import { NFTSearchResult } from "../../../../../header/header-search/HeaderSearchModalItem";
+} from "@/generated/models/ApiGroupOwnsNft";
+import { NFTSearchResult } from "@/components/header/header-search/HeaderSearchModalItem";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
   NEXTGEN_CONTRACT,
-} from "../../../../../../constants";
-import { ApiCreateGroupDescription } from "../../../../../../generated/models/ApiCreateGroupDescription";
+} from "@/constants";
+import { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
 import GroupCreateNftsSelected from "./GroupCreateNftsSelected";
 
 export default function GroupCreateNfts({

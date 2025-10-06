@@ -1,4 +1,4 @@
-import { CicStatement } from "../../../../entities/IProfile";
+import { CicStatement } from "@/entities/IProfile";
 
 export default function UserPageHeaderAboutStatement({
   statement,

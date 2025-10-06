@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateWaveDropsTypes from '../../../../../../components/waves/create-wave/drops/types/CreateWaveDropsTypes';
-import { ApiWaveParticipationRequirement } from '../../../../../../generated/models/ApiWaveParticipationRequirement';
+import CreateWaveDropsTypes from '@/components/waves/create-wave/drops/types/CreateWaveDropsTypes';
+import { ApiWaveParticipationRequirement } from '@/generated/models/ApiWaveParticipationRequirement';
 
 describe('CreateWaveDropsTypes', () => {
   it('emits selected type on click', async () => {

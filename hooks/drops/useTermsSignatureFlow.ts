@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { ApiCreateDropRequest } from "../../generated/models/ApiCreateDropRequest";
+import { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import { useDropSignature } from "./useDropSignature";
 
 interface TermsAcknowledgment {

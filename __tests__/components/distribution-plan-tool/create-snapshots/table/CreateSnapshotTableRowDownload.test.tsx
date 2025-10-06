@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react';
-import CreateSnapshotTableRowDownload from '../../../../../components/distribution-plan-tool/create-snapshots/table/CreateSnapshotTableRowDownload';
-import { DistributionPlanToolContext } from '../../../../../components/distribution-plan-tool/DistributionPlanToolContext';
-import { distributionPlanApiFetch } from '../../../../../services/distribution-plan-api';
+import CreateSnapshotTableRowDownload from '@/components/distribution-plan-tool/create-snapshots/table/CreateSnapshotTableRowDownload';
+import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
+import { distributionPlanApiFetch } from '@/services/distribution-plan-api';
 
-jest.mock('../../../../../services/distribution-plan-api');
+jest.mock('@/services/distribution-plan-api');
 
 const distPlan = { id: '1' } as any;
 

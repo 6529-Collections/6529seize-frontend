@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import UserPageHeaderPfp from '../../../../components/user/user-page-header/pfp/UserPageHeaderPfp';
+import UserPageHeaderPfp from '@/components/user/user-page-header/pfp/UserPageHeaderPfp';
 
 jest.mock('next/image', () => ({ __esModule: true, default: (props: any) => <img {...props} /> }));
 

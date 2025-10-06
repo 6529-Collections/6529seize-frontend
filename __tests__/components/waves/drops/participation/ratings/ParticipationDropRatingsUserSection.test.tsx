@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import ParticipationDropRatingsUserSection from '../../../../../../components/waves/drops/participation/ratings/ParticipationDropRatingsUserSection';
+import ParticipationDropRatingsUserSection from '@/components/waves/drops/participation/ratings/ParticipationDropRatingsUserSection';
 
 describe('ParticipationDropRatingsUserSection', () => {
   const drop: any = { wave: { voting_credit_type: 'TDH' } };

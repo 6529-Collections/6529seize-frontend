@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import useLongPressInteraction from '../../hooks/useLongPressInteraction';
+import useLongPressInteraction from '@/hooks/useLongPressInteraction';
 
 jest.useFakeTimers();
 

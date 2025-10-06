@@ -1,12 +1,12 @@
 import { renderHook, act } from '@testing-library/react';
-import { useVirtualizedWaveDrops } from '../../hooks/useVirtualizedWaveDrops';
-import { DropSize } from '../../helpers/waves/drop.helpers';
+import { useVirtualizedWaveDrops } from '@/hooks/useVirtualizedWaveDrops';
+import { DropSize } from '@/helpers/waves/drop.helpers';
 
-jest.mock('../../hooks/useVirtualizedWaveMessages');
-jest.mock('../../contexts/wave/MyStreamContext');
+jest.mock('@/hooks/useVirtualizedWaveMessages');
+jest.mock('@/contexts/wave/MyStreamContext');
 
-import { useVirtualizedWaveMessages } from '../../hooks/useVirtualizedWaveMessages';
-import { useMyStream } from '../../contexts/wave/MyStreamContext';
+import { useVirtualizedWaveMessages } from '@/hooks/useVirtualizedWaveMessages';
+import { useMyStream } from '@/contexts/wave/MyStreamContext';
 
 const fetchNextPageForWave = jest.fn();
 const fetchNextPageForDrop = jest.fn();

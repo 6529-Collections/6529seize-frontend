@@ -1,4 +1,4 @@
-import { DecisionPoint } from "../../../helpers/waves/time.types";
+import { DecisionPoint } from "@/helpers/waves/time.types";
 
 type DecisionPointOverrides = Partial<DecisionPoint>;
 

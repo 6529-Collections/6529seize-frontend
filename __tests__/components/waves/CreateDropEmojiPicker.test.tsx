@@ -9,11 +9,11 @@ jest.mock("lexical", () => ({
 }));
 
 // 2. Mock dependencies
-jest.mock("../../../hooks/isMobileScreen", () => ({
+jest.mock("@/hooks/isMobileScreen", () => ({
   __esModule: true,
   default: jest.fn(),
 }));
-jest.mock("../../../contexts/EmojiContext", () => ({
+jest.mock("@/contexts/EmojiContext", () => ({
   __esModule: true,
   useEmoji: jest.fn(),
 }));
@@ -33,7 +33,7 @@ jest.mock("@emoji-mart/react", () => ({
 }));
 jest.mock("@emoji-mart/data", () => ({ __esModule: true, default: {} }));
 jest.mock(
-  "../../../components/mobile-wrapper-dialog/MobileWrapperDialog",
+  "@/components/mobile-wrapper-dialog/MobileWrapperDialog",
   () => ({
     __esModule: true,
     default: ({ isOpen, children }: any) =>
@@ -42,9 +42,9 @@ jest.mock(
 );
 
 // 3. Now import under test
-import CreateDropEmojiPicker from "../../../components/waves/CreateDropEmojiPicker";
-import useIsMobileScreen from "../../../hooks/isMobileScreen";
-import { useEmoji } from "../../../contexts/EmojiContext";
+import CreateDropEmojiPicker from "@/components/waves/CreateDropEmojiPicker";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
+import { useEmoji } from "@/contexts/EmojiContext";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $createTextNode, $insertNodes } from "lexical";
 

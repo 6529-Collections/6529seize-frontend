@@ -2,7 +2,7 @@
 
 import { useContext, useEffect, useState } from "react";
 import { DistributionPlanToolContext } from "../DistributionPlanToolContext";
-import { AllowlistRunStatus } from "../../allowlist-tool/allowlist-tool.types";
+import { AllowlistRunStatus } from "@/components/allowlist-tool/allowlist-tool.types";
 import DistributionPlanErrorWarning from "./DistributionPlanErrorWarning";
 
 export default function DistributionPlanWarnings() {

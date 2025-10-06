@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { ApiWaveDecisionPause } from "../../../../generated/models/ApiWaveDecisionPause";
-import { useWave } from "../../../../hooks/useWave";
-import { ApiWave } from "../../../../generated/models/ApiWave";
+import { ApiWaveDecisionPause } from "@/generated/models/ApiWaveDecisionPause";
+import { useWave } from "@/hooks/useWave";
+import { ApiWave } from "@/generated/models/ApiWave";
 
 interface TimelineToggleHeaderProps {
   readonly isOpen: boolean;

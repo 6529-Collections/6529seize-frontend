@@ -1,6 +1,6 @@
-import { CICType } from "../../entities/IProfile";
-import { formatAddress } from "../../helpers/Helpers";
-import { getScaledImageUri, ImageScale } from "../../helpers/image.helpers";
+import { CICType } from "@/entities/IProfile";
+import { formatAddress } from "@/helpers/Helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import UserCICAndLevel from "../user/utils/UserCICAndLevel";
 
 export function LeaderboardCollector(

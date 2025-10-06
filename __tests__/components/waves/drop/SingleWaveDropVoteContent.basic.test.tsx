@@ -1,19 +1,19 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { SingleWaveDropVoteContent } from '../../../../components/waves/drop/SingleWaveDropVoteContent';
-import { ApiDrop } from '../../../../generated/models/ApiDrop';
-import { ApiWaveCreditType } from '../../../../generated/models/ApiWaveCreditType';
+import { SingleWaveDropVoteContent } from '@/components/waves/drop/SingleWaveDropVoteContent';
+import { ApiDrop } from '@/generated/models/ApiDrop';
+import { ApiWaveCreditType } from '@/generated/models/ApiWaveCreditType';
 
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: () => <span /> }));
-jest.mock('../../../../components/waves/drop/SingleWaveDropVoteSubmit', () => {
+jest.mock('@/components/waves/drop/SingleWaveDropVoteSubmit', () => {
   return React.forwardRef(function MockSubmit(props: any, ref: any) {
     React.useImperativeHandle(ref, () => ({ handleClick: jest.fn() }));
     return <div data-testid="submit" />;
   });
 });
-jest.mock('../../../../components/waves/drop/SingleWaveDropVoteSlider', () => ({ __esModule: true, default: (props: any) => <div data-testid="slider" onClick={() => props.setVoteValue(5)} /> }));
-jest.mock('../../../../components/waves/drop/SingleWaveDropVoteInput', () => ({ __esModule: true, SingleWaveDropVoteInput: (props: any) => <input data-testid="input" value={props.voteValue} onChange={e=>props.setVoteValue(e.target.value)} /> }));
-jest.mock('../../../../components/waves/drop/SingleWaveDropVoteStats', () => ({ __esModule: true, SingleWaveDropVoteStats: () => <div data-testid="stats" /> }));
+jest.mock('@/components/waves/drop/SingleWaveDropVoteSlider', () => ({ __esModule: true, default: (props: any) => <div data-testid="slider" onClick={() => props.setVoteValue(5)} /> }));
+jest.mock('@/components/waves/drop/SingleWaveDropVoteInput', () => ({ __esModule: true, SingleWaveDropVoteInput: (props: any) => <input data-testid="input" value={props.voteValue} onChange={e=>props.setVoteValue(e.target.value)} /> }));
+jest.mock('@/components/waves/drop/SingleWaveDropVoteStats', () => ({ __esModule: true, SingleWaveDropVoteStats: () => <div data-testid="stats" /> }));
 
 describe('SingleWaveDropVoteContent', () => {
   const drop: ApiDrop = {

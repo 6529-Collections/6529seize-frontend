@@ -1,9 +1,9 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import DistributionPlanToolPlansLoading from '../../../../components/distribution-plan-tool/plans/DistributionPlanToolPlansLoading';
-import AllowlistToolLoader from '../../../../components/allowlist-tool/common/AllowlistToolLoader';
+import DistributionPlanToolPlansLoading from '@/components/distribution-plan-tool/plans/DistributionPlanToolPlansLoading';
+import AllowlistToolLoader from '@/components/allowlist-tool/common/AllowlistToolLoader';
 
-jest.mock('../../../../components/allowlist-tool/common/AllowlistToolLoader', () => {
+jest.mock('@/components/allowlist-tool/common/AllowlistToolLoader', () => {
   const mock = jest.fn(() => <div data-testid="loader" />);
   return {
     __esModule: true,

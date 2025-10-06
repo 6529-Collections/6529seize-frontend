@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { ApiIdentity } from "../../../generated/models/ApiIdentity";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import HeaderUserProfile from "./HeaderUserProfile";
 import HeaderUserProxy from "./proxy/HeaderUserProxy";
-import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
-import { WalletErrorBoundary } from "../../auth/error-boundary";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { WalletErrorBoundary } from "@/components/auth/error-boundary";
 
 export default function HeaderUserContext({
   profile,

@@ -11,8 +11,8 @@ import {
   TextNode,
   LexicalEditor,
 } from "lexical";
-import { EmojiNode } from "../../nodes/EmojiNode";
-import { useEmoji } from "../../../../../../contexts/EmojiContext";
+import { EmojiNode } from "@/components/drops/create/lexical/nodes/EmojiNode";
+import { useEmoji } from "@/contexts/EmojiContext";
 
 const EMOJI_TEST_REGEX = /:(\w+)/;
 export const EMOJI_MATCH_REGEX = /:(\w+):/g;

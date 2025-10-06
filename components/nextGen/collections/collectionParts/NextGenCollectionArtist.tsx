@@ -9,7 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Fragment, useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import { formatNameForUrl } from "../../nextgen_helpers";
+import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
 
 interface Props {
   collection: NextGenCollection;

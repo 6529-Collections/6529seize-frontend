@@ -1,16 +1,16 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import MobileVotingModal from '../../../components/voting/MobileVotingModal';
+import MobileVotingModal from '@/components/voting/MobileVotingModal';
 
-jest.mock('../../../components/waves/drop/SingleWaveDropVote', () => ({
+jest.mock('@/components/waves/drop/SingleWaveDropVote', () => ({
   __esModule: true,
   SingleWaveDropVote: (props: any) => (
     <button data-testid="vote" onClick={props.onVoteSuccess} />
   )
 }));
 
-jest.mock('../../../components/mobile-wrapper-dialog/MobileWrapperDialog', () => ({
+jest.mock('@/components/mobile-wrapper-dialog/MobileWrapperDialog', () => ({
   __esModule: true,
   default: (props: any) => (
     <div data-testid="dialog" onClick={props.onClose}>{props.isOpen ? 'open' : 'closed'}{props.children}</div>

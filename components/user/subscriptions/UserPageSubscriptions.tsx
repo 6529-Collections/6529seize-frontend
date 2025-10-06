@@ -18,6 +18,7 @@ import {
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
+import Link from "next/link";
 import UserPageSubscriptionsAirdropAddress, {
   AirdropAddressResult,
 } from "./UserPageSubscriptionsAirdropAddress";
@@ -267,11 +268,11 @@ export default function UserPageSubscriptions(
               <Col className="d-flex align-items-center gap-2">
                 <h4 className="mb-0">Subscribe</h4>
                 <span>
-                  <a
+                  <Link
                     href="/about/subscriptions"
                     className="font-smaller font-color-silver decoration-hover-underline">
                     Learn More
-                  </a>
+                  </Link>
                 </span>
               </Col>
             </Row>

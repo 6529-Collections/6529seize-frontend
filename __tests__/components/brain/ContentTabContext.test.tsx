@@ -1,7 +1,7 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
-import { ContentTabProvider, useContentTab, WaveVotingState } from '../../../components/brain/ContentTabContext';
-import { MyStreamWaveTab } from '../../../types/waves.types';
+import { ContentTabProvider, useContentTab, WaveVotingState } from '@/components/brain/ContentTabContext';
+import { MyStreamWaveTab } from '@/types/waves.types';
 
 function setup() {
   const wrapper: React.FC<{children: React.ReactNode}> = ({ children }) => (

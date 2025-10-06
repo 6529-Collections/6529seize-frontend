@@ -2,10 +2,10 @@
 
 import { useMemo } from "react";
 import { useQuery, useQueries } from "@tanstack/react-query";
-import { commonApiFetch } from "../services/api/common-api";
-import { ApiDrop } from "../generated/models/ApiDrop";
-import { ApiDropType } from "../generated/models/ApiDropType";
-import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "@/services/api/common-api";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 interface ArtistSubmission {
   id: string;

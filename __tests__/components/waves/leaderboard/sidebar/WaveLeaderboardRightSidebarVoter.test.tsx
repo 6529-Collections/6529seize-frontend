@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
-import { WaveLeaderboardRightSidebarVoter } from '../../../../../components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoter';
-import { ApiWaveCreditType } from '../../../../../generated/models/ApiWaveCreditType';
+import { WaveLeaderboardRightSidebarVoter } from '@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoter';
+import { ApiWaveCreditType } from '@/generated/models/ApiWaveCreditType';
 
 const baseVoter = {
   voter: { handle: 'alice', pfp: '' },

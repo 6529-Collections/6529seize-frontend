@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import { NumberTrait } from '../../components/waves/memes/traits/NumberTrait';
+import { NumberTrait } from '@/components/waves/memes/traits/NumberTrait';
 
 jest.mock('react-use', () => ({ useDebounce: (fn: any, _ms: number) => fn() }));
 

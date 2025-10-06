@@ -1,15 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
-import { useWebSocketMessage } from "../../../services/websocket/useWebSocketMessage";
-import { WsDropUpdateMessage, WsMessageType } from "../../../helpers/Types";
+import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
+import { WsDropUpdateMessage, WsMessageType } from "@/helpers/Types";
 import { WaveDataStoreUpdater } from "./types";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
-import { DropSize, ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
   commonApiFetch,
   commonApiPostWithoutBodyAndResponse,
-} from "../../../services/api/common-api";
+} from "@/services/api/common-api";
 import { useWaveEligibility } from "../WaveEligibilityContext";
 import { debounce } from "lodash";
 

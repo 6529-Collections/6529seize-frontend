@@ -6,8 +6,8 @@ import { isMimeType, mediaFileReader } from "@lexical/utils";
 import { $getNodeByKey, $insertNodes, COMMAND_PRIORITY_LOW } from "lexical";
 import { useEffect } from "react";
 import { $createImageNode } from "../nodes/ImageNode";
-import { multiPartUpload } from "../../../../waves/create-wave/services/multiPartUpload";
-import { useAuth } from "../../../../auth/Auth";
+import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
+import { useAuth } from "@/components/auth/Auth";
 
 const ACCEPTABLE_IMAGE_TYPES = [
   "image/",

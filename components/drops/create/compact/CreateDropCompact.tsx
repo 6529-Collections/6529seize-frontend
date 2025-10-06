@@ -10,16 +10,16 @@ import {
   DropMetadata,
   MentionedUser,
   ReferencedNft,
-} from "../../../../entities/IDrop";
-import PrimaryButton from "../../../utils/button/PrimaryButton";
+} from "@/entities/IDrop";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import CreateDropSelectedFileIcon from "../utils/file/CreateDropSelectedFileIcon";
 import { CreateDropType, CreateDropViewType } from "../types";
-import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import CreateDropSelectedFilePreview from "../utils/file/CreateDropSelectedFilePreview";
 import { forwardRef, useImperativeHandle, useRef } from "react";
-import { ApiWaveParticipationRequirement } from "../../../../generated/models/ApiWaveParticipationRequirement";
-import { ApiWaveRequiredMetadata } from "../../../../generated/models/ApiWaveRequiredMetadata";
-import { ProfileMinWithoutSubs } from "../../../../helpers/ProfileTypes";
+import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
+import { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
+import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 
 export interface CreateDropCompactHandles {
   clearEditorState: () => void;

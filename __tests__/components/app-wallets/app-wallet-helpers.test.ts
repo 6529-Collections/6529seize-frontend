@@ -1,4 +1,4 @@
-import { encryptData, decryptData } from '../../../components/app-wallets/app-wallet-helpers';
+import { encryptData, decryptData } from '@/components/app-wallets/app-wallet-helpers';
 
 const salt = 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4';
 const password = 'test-password';

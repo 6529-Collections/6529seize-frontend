@@ -1,8 +1,8 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import WaveDropsScrollingOverlay from '../../../../components/waves/drops/WaveDropsScrollingOverlay';
+import WaveDropsScrollingOverlay from '@/components/waves/drops/WaveDropsScrollingOverlay';
 
-jest.mock('../../../../components/distribution-plan-tool/common/CircleLoader', () => ({
+jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => ({
   __esModule: true,
   default: () => <div data-testid="loader" />,
   CircleLoaderSize: { XXLARGE: 'xxlarge' }

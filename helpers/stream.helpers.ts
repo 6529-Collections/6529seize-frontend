@@ -1,16 +1,16 @@
 import { QueryClient } from "@tanstack/react-query";
 
-import { commonApiFetch } from "../services/api/common-api";
-import { ApiWave } from "../generated/models/ApiWave";
+import { commonApiFetch } from "@/services/api/common-api";
+import { ApiWave } from "@/generated/models/ApiWave";
 import {
   WAVE_DROPS_PARAMS,
   WAVE_FOLLOWING_WAVES_PARAMS,
-} from "../components/react-query-wrapper/utils/query-utils";
+} from "@/components/react-query-wrapper/utils/query-utils";
 import { jwtDecode } from "jwt-decode";
 import { getUserProfile } from "./server.helpers";
-import { TypedFeedItem, TypedNotificationsResponse } from "../types/feed.types";
-import { ApiWaveDropsFeed } from "../generated/models/ApiWaveDropsFeed";
-import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
+import { TypedFeedItem, TypedNotificationsResponse } from "@/types/feed.types";
+import { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 const getWalletFromJwt = (headers: Record<string, string>): string | null => {
   const jwt = headers["Authorization"]?.split(" ")[1] ?? null;

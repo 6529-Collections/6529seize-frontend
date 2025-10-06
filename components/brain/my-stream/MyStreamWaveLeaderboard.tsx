@@ -1,19 +1,19 @@
 "use client";
 
 import React, { useMemo, useState, useEffect, useRef } from "react";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { AnimatePresence, motion } from "framer-motion";
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { WaveLeaderboardTime } from "../../waves/leaderboard/WaveLeaderboardTime";
-import { WaveLeaderboardHeader } from "../../waves/leaderboard/header/WaveleaderboardHeader";
-import { WaveDropCreate } from "../../waves/leaderboard/create/WaveDropCreate";
-import { WaveLeaderboardDrops } from "../../waves/leaderboard/drops/WaveLeaderboardDrops";
-import { WaveLeaderboardGallery } from "../../waves/leaderboard/gallery/WaveLeaderboardGallery";
-import { useWave } from "../../../hooks/useWave";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { WaveLeaderboardTime } from "@/components/waves/leaderboard/WaveLeaderboardTime";
+import { WaveLeaderboardHeader } from "@/components/waves/leaderboard/header/WaveleaderboardHeader";
+import { WaveDropCreate } from "@/components/waves/leaderboard/create/WaveDropCreate";
+import { WaveLeaderboardDrops } from "@/components/waves/leaderboard/drops/WaveLeaderboardDrops";
+import { WaveLeaderboardGallery } from "@/components/waves/leaderboard/gallery/WaveLeaderboardGallery";
+import { useWave } from "@/hooks/useWave";
 import { useLayout } from "./layout/LayoutContext";
-import { WaveDropsLeaderboardSort } from "../../../hooks/useWaveDropsLeaderboard";
-import useLocalPreference from "../../../hooks/useLocalPreference";
-import MemesArtSubmissionModal from "../../waves/memes/MemesArtSubmissionModal";
+import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
+import useLocalPreference from "@/hooks/useLocalPreference";
+import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
 import { createBreakpoint } from "react-use";
 
 interface MyStreamWaveLeaderboardProps {

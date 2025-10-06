@@ -7,12 +7,12 @@ const useBreadcrumbs = jest.fn(() => [{ display: "Home", href: "/" }]);
 let pathname = "/";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="header" />);
-jest.mock("../../../hooks/useBreadcrumbs", () => ({ useBreadcrumbs }));
-jest.mock("../../../contexts/HeaderContext", () => ({ useHeaderContext: () => ({ setHeaderRef }) }));
-jest.mock("../../../components/brain/my-stream/layout/LayoutContext", () => ({ useLayout: () => ({ registerRef }) }));
+jest.mock("@/hooks/useBreadcrumbs", () => ({ useBreadcrumbs }));
+jest.mock("@/contexts/HeaderContext", () => ({ useHeaderContext: () => ({ setHeaderRef }) }));
+jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({ useLayout: () => ({ registerRef }) }));
 jest.mock("next/navigation", () => ({ usePathname: () => pathname }));
 
-const SmallScreenLayout = require("../../../components/layout/SmallScreenLayout").default;
+const SmallScreenLayout = require("@/components/layout/SmallScreenLayout").default;
 
 describe("SmallScreenLayout", () => {
   beforeEach(() => {

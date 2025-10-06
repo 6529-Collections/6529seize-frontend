@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import WaveDropContent from "../../drops/WaveDropContent";
-import WaveDropMetadata from "../../drops/WaveDropMetadata";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import WaveDropContent from "@/components/waves/drops/WaveDropContent";
+import WaveDropMetadata from "@/components/waves/drops/WaveDropMetadata";
 import { useRouter } from "next/navigation";
-import WaveDropReactions from "../../drops/WaveDropReactions";
+import WaveDropReactions from "@/components/waves/drops/WaveDropReactions";
 
 interface WaveLeaderboardDropContentProps {
   readonly drop: ExtendedDrop;

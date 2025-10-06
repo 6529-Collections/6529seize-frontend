@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import useLocalPreference from '../../hooks/useLocalPreference';
+import useLocalPreference from '@/hooks/useLocalPreference';
 
 describe('useLocalPreference', () => {
   beforeEach(() => {

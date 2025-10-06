@@ -4,12 +4,12 @@ import { useContext, useEffect, useState } from "react";
 import {
   ApiProfileRepRatesState,
   RatingStats,
-} from "../../../../entities/IProfile";
+} from "@/entities/IProfile";
 import UserPageRepRepsTop from "./UserPageRepRepsTop";
 import UserPageRepRepsTable from "./table/UserPageRepRepsTable";
-import { AuthContext } from "../../../auth/Auth";
-import { ApiProfileProxyActionType } from "../../../../generated/models/ApiProfileProxyActionType";
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
+import { AuthContext } from "@/components/auth/Auth";
+import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 const TOP_REPS_COUNT = 5;
 
 export default function UserPageRepReps({

@@ -1,8 +1,8 @@
-import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import UserPageIdentityAddStatementsSelect from "./UserPageIdentityAddStatementsSelect";
 import UserPageIdentityAddStatementsContact from "./contact/UserPageIdentityAddStatementsContact";
 import UserPageIdentityAddStatementsSocialMediaAccount from "./social-media/UserPageIdentityAddStatementsSocialMediaAccount";
-import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import UserPageIdentityAddStatementsSocialMediaPosts from "./social-media-verification-posts/UserPageIdentityAddStatementsSocialMediaPosts";
 import { STATEMENT_ADD_VIEW } from "./UserPageIdentityAddStatements";
 import UserPageIdentityAddStatementsNFTAccounts from "./nft-accounts/UserPageIdentityAddStatementsNFTAccounts";

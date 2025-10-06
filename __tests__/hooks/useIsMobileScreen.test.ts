@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import useIsMobileScreen from '../../hooks/isMobileScreen';
+import useIsMobileScreen from '@/hooks/isMobileScreen';
 
 describe('useIsMobileScreen', () => {
   const originalWidth = window.innerWidth;

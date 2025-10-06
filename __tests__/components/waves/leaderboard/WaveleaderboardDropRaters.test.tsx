@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { WaveLeaderboardDropRaters } from '../../../../components/waves/leaderboard/drops/header/WaveleaderboardDropRaters';
-import { ExtendedDrop } from '../../../../helpers/waves/drop.helpers';
-import { ApiWaveCreditType } from '../../../../generated/models/ApiWaveCreditType';
+import { WaveLeaderboardDropRaters } from '@/components/waves/leaderboard/drops/header/WaveleaderboardDropRaters';
+import { ExtendedDrop } from '@/helpers/waves/drop.helpers';
+import { ApiWaveCreditType } from '@/generated/models/ApiWaveCreditType';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
-jest.mock('../../../../helpers/image.helpers', () => ({ getScaledImageUri: (u: string) => u, ImageScale: { W_AUTO_H_50: 'AUTO' } }));
-jest.mock('../../../../components/drops/view/utils/DropVoteProgressing', () => ({ __esModule: true, default: () => <span data-testid="progress" /> }));
+jest.mock('@/helpers/image.helpers', () => ({ getScaledImageUri: (u: string) => u, ImageScale: { W_AUTO_H_50: 'AUTO' } }));
+jest.mock('@/components/drops/view/utils/DropVoteProgressing', () => ({ __esModule: true, default: () => <span data-testid="progress" /> }));
 
 describe('WaveLeaderboardDropRaters', () => {
   const drop: ExtendedDrop = {

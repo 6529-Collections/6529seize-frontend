@@ -1,28 +1,28 @@
 import { render, waitFor } from "@testing-library/react";
 import React from "react";
 
-import GoogleWorkspacePreview from "../../../components/waves/GoogleWorkspacePreview";
+import GoogleWorkspacePreview from "@/components/waves/GoogleWorkspacePreview";
 
 const mockGoogleWorkspaceCard = jest.fn(({ href, data }: any) => (
   <div data-testid="google-card" data-href={href} data-type={data?.type} />
 ));
 
-jest.mock("../../../components/waves/OpenGraphPreview", () => ({
+jest.mock("@/components/waves/OpenGraphPreview", () => ({
   __esModule: true,
   default: () => <div data-testid="placeholder" />,
 }));
 
-jest.mock("../../../components/waves/GoogleWorkspaceCard", () => ({
+jest.mock("@/components/waves/GoogleWorkspaceCard", () => ({
   __esModule: true,
   default: (props: any) => mockGoogleWorkspaceCard(props),
 }));
 
-jest.mock("../../../services/api/link-preview-api", () => ({
+jest.mock("@/services/api/link-preview-api", () => ({
   fetchLinkPreview: jest.fn(),
 }));
 
 describe("GoogleWorkspacePreview", () => {
-  const { fetchLinkPreview } = require("../../../services/api/link-preview-api");
+  const { fetchLinkPreview } = require("@/services/api/link-preview-api");
 
   beforeEach(() => {
     jest.clearAllMocks();

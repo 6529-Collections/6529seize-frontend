@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react';
-import Follower from '../../../../components/utils/followers/Follower';
+import Follower from '@/components/utils/followers/Follower';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
 
-jest.mock('../../../../helpers/Helpers', () => ({ cicToType: jest.fn(() => 'UNKNOWN') }));
+jest.mock('@/helpers/Helpers', () => ({ cicToType: jest.fn(() => 'UNKNOWN') }));
 
-jest.mock('../../../../components/user/utils/UserCICAndLevel', () => ({
+jest.mock('@/components/user/utils/UserCICAndLevel', () => ({
   __esModule: true,
   default: (props: any) => <div data-testid="cic">{props.level}</div>,
   UserCICAndLevelSize: { SMALL: 'SMALL' }

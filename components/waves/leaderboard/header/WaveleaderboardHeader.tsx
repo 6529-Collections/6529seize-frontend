@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useContext } from "react";
-import { AuthContext } from "../../../auth/Auth";
-import PrimaryButton from "../../../utils/button/PrimaryButton";
-import { ApiWave } from "../../../../generated/models/ApiWave";
-import { useWave } from "../../../../hooks/useWave";
+import { AuthContext } from "@/components/auth/Auth";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { useWave } from "@/hooks/useWave";
 import { WaveleaderboardSort } from "./WaveleaderboardSort";
-import { WaveDropsLeaderboardSort } from "../../../../hooks/useWaveDropsLeaderboard";
+import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { Tooltip } from "react-tooltip";
 import { createBreakpoint } from "react-use";
 interface WaveLeaderboardHeaderProps {

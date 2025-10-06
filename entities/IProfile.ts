@@ -1,8 +1,8 @@
 import { ProfileActivityLogType, RateMatter } from "@/enums";
-import { AcceptActionRequestActionEnum } from "../generated/models/AcceptActionRequest";
-import { ApiProfileClassification } from "../generated/models/ApiProfileClassification";
-import { ApiProfileProxyActionType } from "../generated/models/ApiProfileProxyActionType";
-import { STATEMENT_GROUP, STATEMENT_TYPE } from "../helpers/Types";
+import { AcceptActionRequestActionEnum } from "@/generated/models/AcceptActionRequest";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
+import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
+import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 
 interface IProfileWallet {
   readonly address: string;

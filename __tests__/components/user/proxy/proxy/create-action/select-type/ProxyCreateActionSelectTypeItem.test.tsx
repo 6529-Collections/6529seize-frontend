@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import ProxyCreateActionSelectTypeItem from '../../../../../../../components/user/proxy/proxy/create-action/select-type/ProxyCreateActionSelectTypeItem';
-import { ApiProfileProxyActionType } from '../../../../../../../generated/models/ApiProfileProxyActionType';
-import { PROFILE_PROXY_ACTION_LABELS } from '../../../../../../../entities/IProxy';
+import ProxyCreateActionSelectTypeItem from '@/components/user/proxy/proxy/create-action/select-type/ProxyCreateActionSelectTypeItem';
+import { ApiProfileProxyActionType } from '@/generated/models/ApiProfileProxyActionType';
+import { PROFILE_PROXY_ACTION_LABELS } from '@/entities/IProxy';
 
 describe('ProxyCreateActionSelectTypeItem', () => {
   it('shows label and triggers selection', async () => {

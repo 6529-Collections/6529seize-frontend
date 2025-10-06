@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import DropVoteProgressing from '../../../../../components/drops/view/utils/DropVoteProgressing';
+import DropVoteProgressing from '@/components/drops/view/utils/DropVoteProgressing';
 import React from 'react';
 
 // Mock ResizeObserver
@@ -18,7 +18,7 @@ jest.mock('react-tooltip', () => ({
   ),
 }));
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: () => <svg data-testid="icon" /> }));
-jest.mock('../../../../../helpers/Helpers', () => ({ formatNumberWithCommas: (n: number) => String(n) }));
+jest.mock('@/helpers/Helpers', () => ({ formatNumberWithCommas: (n: number) => String(n) }));
 
 describe('DropVoteProgressing', () => {
   it('returns null when invalid values', () => {

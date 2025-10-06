@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import DistributionPlanNextStepBtn from '../../../../components/distribution-plan-tool/common/DistributionPlanNextStepBtn';
-import { DistributionPlanToolContext } from '../../../../components/distribution-plan-tool/DistributionPlanToolContext';
+import DistributionPlanNextStepBtn from '@/components/distribution-plan-tool/common/DistributionPlanNextStepBtn';
+import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
 
 function renderBtn(
   props: any,

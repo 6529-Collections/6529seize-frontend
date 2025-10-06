@@ -8,17 +8,17 @@ import {
   NextGenCollection,
   NextgenAllowlist,
   NextgenAllowlistCollection,
-} from "../../../../../entities/INextgen";
-import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
-import { areEqualAddresses } from "../../../../../helpers/Helpers";
-import { Time } from "../../../../../helpers/time";
-import { commonApiFetch } from "../../../../../services/api/common-api";
-import Pagination from "../../../../pagination/Pagination";
+} from "@/entities/INextgen";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+import { areEqualAddresses } from "@/helpers/Helpers";
+import { Time } from "@/helpers/time";
+import { commonApiFetch } from "@/services/api/common-api";
+import Pagination from "@/components/pagination/Pagination";
 import {
   SearchModalDisplay,
   SearchWalletsDisplay,
-} from "../../../../searchModal/SearchModal";
-import styles from "../../NextGen.module.scss";
+} from "@/components/searchModal/SearchModal";
+import styles from "@/components/nextGen/collections/NextGen.module.scss";
 import NextGenCollectionHeader from "../NextGenCollectionHeader";
 import { getJsonData } from "./NextGenMintWidget";
 

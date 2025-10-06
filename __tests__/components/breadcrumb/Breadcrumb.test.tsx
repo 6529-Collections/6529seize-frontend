@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
-import Breadcrumb, { Crumb } from '../../../components/breadcrumb/Breadcrumb';
+import Breadcrumb, { Crumb } from '@/components/breadcrumb/Breadcrumb';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
 
 const useCapacitorMock = jest.fn();
-jest.mock('../../../hooks/useCapacitor', () => ({ __esModule: true, default: () => useCapacitorMock() }));
+jest.mock('@/hooks/useCapacitor', () => ({ __esModule: true, default: () => useCapacitorMock() }));
 
 describe('Breadcrumb', () => {
   beforeEach(() => {

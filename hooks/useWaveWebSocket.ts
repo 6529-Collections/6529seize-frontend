@@ -2,7 +2,7 @@
 
 import { publicEnv } from "@/config/env";
 import { useEffect, useRef, useState } from "react";
-import { WsMessageType } from "../helpers/Types";
+import { WsMessageType } from "@/helpers/Types";
 
 interface UseWaveWebSocketResult {
   socket: WebSocket | null;

@@ -4,7 +4,7 @@ import {
   DelegationFormLabel,
   DelegationFormOptionsFormGroup,
   DelegationFormDelegateAddressFormGroup,
-} from '../../../components/delegation/DelegationFormParts';
+} from '@/components/delegation/DelegationFormParts';
 
 jest.mock('react-bootstrap', () => ({
   __esModule: true,

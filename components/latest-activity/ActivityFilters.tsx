@@ -2,7 +2,7 @@
 
 import { Col, Dropdown } from "react-bootstrap";
 import styles from "./LatestActivity.module.scss";
-import { TypeFilter, ContractFilter } from "../../hooks/useActivityData";
+import { TypeFilter, ContractFilter } from "@/hooks/useActivityData";
 
 interface ActivityFiltersProps {
   readonly typeFilter: TypeFilter;

@@ -1,17 +1,17 @@
 import { render, screen } from "@testing-library/react";
-import { useCookieConsent } from "../../../components/cookies/CookieConsentContext";
-import FeaturedNFTDetailsColumn from "../../../components/home/FeaturedNFTDetailsColumn";
-import { NFTWithMemesExtendedData } from "../../../entities/INFT";
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import FeaturedNFTDetailsColumn from "@/components/home/FeaturedNFTDetailsColumn";
+import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import useCapacitor, {
   CapacitorOrientationType,
-} from "../../../hooks/useCapacitor";
-import { useManifoldClaimDisplays } from "../../../hooks/useManifoldClaimDisplays";
+} from "@/hooks/useCapacitor";
+import { useManifoldClaimDisplays } from "@/hooks/useManifoldClaimDisplays";
 
 // Mock all dependencies
-jest.mock("../../../hooks/useManifoldClaim");
-jest.mock("../../../hooks/useCapacitor");
-jest.mock("../../../components/cookies/CookieConsentContext");
-jest.mock("../../../hooks/useManifoldClaimDisplays");
+jest.mock("@/hooks/useManifoldClaim");
+jest.mock("@/hooks/useCapacitor");
+jest.mock("@/components/cookies/CookieConsentContext");
+jest.mock("@/hooks/useManifoldClaimDisplays");
 
 // Mock child components
 jest.mock("next/link", () => ({
@@ -24,7 +24,7 @@ jest.mock("next/link", () => ({
 }));
 
 jest.mock(
-  "../../../components/nft-marketplace-links/NFTMarketplaceLinks",
+  "@/components/nft-marketplace-links/NFTMarketplaceLinks",
   () => ({
     __esModule: true,
     default: ({ contract, id }: { contract: string; id: number }) => (
@@ -35,7 +35,7 @@ jest.mock(
   })
 );
 
-jest.mock("../../../components/home/ManifoldClaimTable", () => ({
+jest.mock("@/components/home/ManifoldClaimTable", () => ({
   __esModule: true,
   default: ({
     statusDisplay,
@@ -54,7 +54,7 @@ jest.mock("../../../components/home/ManifoldClaimTable", () => ({
   ),
 }));
 
-jest.mock("../../../components/home/FeaturedNFTDetailsTable", () => ({
+jest.mock("@/components/home/FeaturedNFTDetailsTable", () => ({
   __esModule: true,
   default: ({
     nft,
@@ -70,7 +70,7 @@ jest.mock("../../../components/home/FeaturedNFTDetailsTable", () => ({
   ),
 }));
 
-jest.mock("../../../components/home/MintingApproachSection", () => ({
+jest.mock("@/components/home/MintingApproachSection", () => ({
   __esModule: true,
   default: ({ nftId }: { nftId: number }) => (
     <div data-testid="minting-approach-section">
@@ -79,7 +79,7 @@ jest.mock("../../../components/home/MintingApproachSection", () => ({
   ),
 }));
 
-jest.mock("../../../components/the-memes/MemePageMintCountdown", () => ({
+jest.mock("@/components/the-memes/MemePageMintCountdown", () => ({
   __esModule: true,
   default: ({
     nft_id,

@@ -2,10 +2,10 @@ import { publicEnv } from "@/config/env";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { MEMELAB_CONTRACT } from "../../constants";
-import { BaseNFT, VolumeType } from "../../entities/INFT";
-import { areEqualAddresses, idStringToDisplay } from "../../helpers/Helpers";
-import { fetchUrl } from "../../services/6529api";
+import { MEMELAB_CONTRACT } from "@/constants";
+import { BaseNFT, VolumeType } from "@/entities/INFT";
+import { areEqualAddresses, idStringToDisplay } from "@/helpers/Helpers";
+import { fetchUrl } from "@/services/6529api";
 import { getAppMetadata } from "../providers/metadata";
 
 export enum MEME_FOCUS {

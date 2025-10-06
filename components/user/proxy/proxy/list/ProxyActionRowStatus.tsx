@@ -1,8 +1,8 @@
 import {
   ProfileProxyActionStatus,
   ProfileProxySide,
-} from "../../../../../entities/IProxy";
-import { ApiProfileMin } from "../../../../../generated/models/ApiProfileMin";
+} from "@/entities/IProxy";
+import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { Tooltip } from "react-tooltip";
 
 const STATUS_CLASSES: Record<ProfileProxyActionStatus, string> = {

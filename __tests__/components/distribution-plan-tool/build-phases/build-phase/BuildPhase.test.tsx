@@ -1,14 +1,14 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import BuildPhase from '../../../../../components/distribution-plan-tool/build-phases/build-phase/BuildPhase';
-import { BuildPhasesPhase } from '../../../../../components/distribution-plan-tool/build-phases/BuildPhases';
+import BuildPhase from '@/components/distribution-plan-tool/build-phases/build-phase/BuildPhase';
+import { BuildPhasesPhase } from '@/components/distribution-plan-tool/build-phases/BuildPhases';
 
-jest.mock('../../../../../components/distribution-plan-tool/common/StepHeader', () => ({ title }: any) => <div data-testid="header">{title}</div>);
-jest.mock('../../../../../components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseForm', () => ({ selectedPhase }: any) => <div data-testid="form">{selectedPhase.name}</div>);
-jest.mock('../../../../../components/distribution-plan-tool/common/DistributionPlanStepWrapper', () => ({ children }: any) => <div data-testid="wrapper">{children}</div>);
-jest.mock('../../../../../components/distribution-plan-tool/build-phases/build-phase/table/BuildPhaseTable', () => ({ phase }: any) => <div data-testid="table">{phase.id}</div>);
-jest.mock('../../../../../components/distribution-plan-tool/common/DistributionPlanEmptyTablePlaceholder', () => ({ title }: any) => <div data-testid="placeholder">{title}</div>);
-jest.mock('../../../../../components/distribution-plan-tool/common/DistributionPlanNextStepBtn', () => ({ showRunAnalysisBtn, showNextBtn }: any) => <div data-testid="next">{showNextBtn && 'next'}{showRunAnalysisBtn && 'run'}</div>);
+jest.mock('@/components/distribution-plan-tool/common/StepHeader', () => ({ title }: any) => <div data-testid="header">{title}</div>);
+jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseForm', () => ({ selectedPhase }: any) => <div data-testid="form">{selectedPhase.name}</div>);
+jest.mock('@/components/distribution-plan-tool/common/DistributionPlanStepWrapper', () => ({ children }: any) => <div data-testid="wrapper">{children}</div>);
+jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/table/BuildPhaseTable', () => ({ phase }: any) => <div data-testid="table">{phase.id}</div>);
+jest.mock('@/components/distribution-plan-tool/common/DistributionPlanEmptyTablePlaceholder', () => ({ title }: any) => <div data-testid="placeholder">{title}</div>);
+jest.mock('@/components/distribution-plan-tool/common/DistributionPlanNextStepBtn', () => ({ showRunAnalysisBtn, showNextBtn }: any) => <div data-testid="next">{showNextBtn && 'next'}{showRunAnalysisBtn && 'run'}</div>);
 
 const phases: BuildPhasesPhase[] = [
   {

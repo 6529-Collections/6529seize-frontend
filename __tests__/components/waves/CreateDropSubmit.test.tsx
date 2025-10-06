@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { CreateDropSubmit } from '../../../components/waves/CreateDropSubmit';
+import { CreateDropSubmit } from '@/components/waves/CreateDropSubmit';
 
-jest.mock('../../../components/utils/button/PrimaryButton', () => ({
+jest.mock('@/components/utils/button/PrimaryButton', () => ({
   __esModule: true,
   default: ({ onClicked, children, disabled, loading }: any) => (
     <button onClick={onClicked} disabled={disabled} data-loading={loading}>{children}</button>

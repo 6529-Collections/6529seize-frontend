@@ -3,11 +3,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
-import { CommunityMemberMinimal } from "../../../../entities/IProfile";
-import { commonApiFetch } from "../../../../services/api/common-api";
+import { CommunityMemberMinimal } from "@/entities/IProfile";
+import { commonApiFetch } from "@/services/api/common-api";
 import CommonProfileSearchItems from "../profile-search/CommonProfileSearchItems";
-import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 export enum IdentitySearchSize {
   SM = "SM",
   MD = "MD",

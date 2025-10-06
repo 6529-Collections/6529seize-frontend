@@ -1,26 +1,26 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
-import DropsList from "../../drops/view/DropsList";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import DropsList from "@/components/drops/view/DropsList";
 import { WaveDropsScrollBottomButton } from "./WaveDropsScrollBottomButton";
 import { WaveDropsReverseContainer } from "./WaveDropsReverseContainer";
-import { useScrollBehavior } from "../../../hooks/useScrollBehavior";
+import { useScrollBehavior } from "@/hooks/useScrollBehavior";
 import CircleLoader, {
   CircleLoaderSize,
-} from "../../distribution-plan-tool/common/CircleLoader";
+} from "@/components/distribution-plan-tool/common/CircleLoader";
 import { useRouter } from "next/navigation";
-import { ActiveDropState } from "../../../types/dropInteractionTypes";
-import { DropSize, ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
+import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import WaveDropsEmptyPlaceholder from "./WaveDropsEmptyPlaceholder";
 import WaveDropsScrollingOverlay from "./WaveDropsScrollingOverlay";
-import { useNotificationsContext } from "../../notifications/NotificationsContext";
-import { commonApiPostWithoutBodyAndResponse } from "../../../services/api/common-api";
-import { useVirtualizedWaveDrops } from "../../../hooks/useVirtualizedWaveDrops";
+import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
+import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
+import { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-solid-svg-icons";
-import { useWaveIsTyping } from "../../../hooks/useWaveIsTyping";
-import { useAuth } from "../../auth/Auth";
+import { useWaveIsTyping } from "@/hooks/useWaveIsTyping";
+import { useAuth } from "@/components/auth/Auth";
 
 // Add this utility function if not already present in a shared util file
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import CreateDropMetadata from '../../../components/waves/CreateDropMetadata';
+import CreateDropMetadata from '@/components/waves/CreateDropMetadata';
 
-jest.mock('../../../components/waves/CreateDropMetadataRow', () => ({
+jest.mock('@/components/waves/CreateDropMetadataRow', () => ({
   __esModule: true,
   default: ({ index }: any) => <div data-testid="row">row-{index}</div>,
 }));

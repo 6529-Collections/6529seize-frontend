@@ -6,14 +6,14 @@ import GroupCreateActions from "./actions/GroupCreateActions";
 import GroupCreateHeader from "./GroupCreateHeader";
 import GroupCreateName from "./GroupCreateName";
 import GroupCreateWrapper from "./GroupCreateWrapper";
-import { ApiGroupFilterDirection } from "../../../../generated/models/ApiGroupFilterDirection";
-import { ApiCreateGroup } from "../../../../generated/models/ApiCreateGroup";
+import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
+import { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ApiGroupFull } from "../../../../generated/models/ApiGroupFull";
-import { commonApiFetch } from "../../../../services/api/common-api";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { commonApiFetch } from "@/services/api/common-api";
 import GroupCreateIncludeMeAndPrivate from "./config/include-me-and-private/GroupCreateIncludeMeAndPrivate";
-import { AuthContext } from "../../../auth/Auth";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import { AuthContext } from "@/components/auth/Auth";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 export default function GroupCreate({
   edit,

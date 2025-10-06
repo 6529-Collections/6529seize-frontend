@@ -1,8 +1,8 @@
+import { editSlice } from "@/store/editSlice";
+import { configureStore } from "@reduxjs/toolkit";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { Provider } from "react-redux";
-import { configureStore } from "@reduxjs/toolkit";
-import { editSlice } from "../../../store/editSlice";
 
 const useViewContext = jest.fn();
 const registerRef = jest.fn();
@@ -10,19 +10,35 @@ const setHeaderRef = jest.fn();
 const usePathname = jest.fn();
 const useSearchParams = jest.fn();
 
-jest.mock("next/dynamic", () => () => () => <div data-testid="header" />);
+jest.mock("next/dynamic", () => () => {
+  const MockDynamicComponent = () => <div data-testid="header" />;
+  MockDynamicComponent.displayName = "MockDynamicComponent";
+  return MockDynamicComponent;
+});
 jest.mock("@/components/navigation/ViewContext", () => ({
   useViewContext: () => useViewContext(),
 }));
-jest.mock("@/components/navigation/BottomNavigation", () => () => (
-  <div data-testid="bottom-nav" />
-));
-jest.mock("@/components/brain/mobile/BrainMobileWaves", () => () => (
-  <div data-testid="waves" />
-));
-jest.mock("@/components/brain/mobile/BrainMobileMessages", () => () => (
-  <div data-testid="messages" />
-));
+jest.mock(
+  "@/components/navigation/BottomNavigation",
+  () =>
+    function BottomNavigation() {
+      return <div data-testid="bottom-nav" />;
+    }
+);
+jest.mock(
+  "@/components/brain/mobile/BrainMobileWaves",
+  () =>
+    function BrainMobileWaves() {
+      return <div data-testid="waves" />;
+    }
+);
+jest.mock(
+  "@/components/brain/mobile/BrainMobileMessages",
+  () =>
+    function BrainMobileMessages() {
+      return <div data-testid="messages" />;
+    }
+);
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ registerRef }),
 }));

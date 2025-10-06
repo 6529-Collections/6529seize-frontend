@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import {
   getCreateWaveNextStep,
   getCreateWavePreviousStep,
-} from "../../../../helpers/waves/create-wave.helpers";
+} from "@/helpers/waves/create-wave.helpers";
 import {
   CreateWaveConfig,
   CreateWaveStep,
-} from "../../../../types/waves.types";
+} from "@/types/waves.types";
 import CreateWaveBackStep from "./CreateWaveBackStep";
 import CreateWaveNextStep from "./CreateWaveNextStep";
 

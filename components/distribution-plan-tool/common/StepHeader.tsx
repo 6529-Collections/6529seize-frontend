@@ -3,7 +3,7 @@
 import { useContext, useState } from "react";
 import {
   AllowlistOperationCode,
-} from "../../allowlist-tool/allowlist-tool.types";
+} from "@/components/allowlist-tool/allowlist-tool.types";
 import {
   DistributionPlanToolContext,
   DistributionPlanToolStep,

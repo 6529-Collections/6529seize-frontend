@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import CreateWaveWarning from '../../../../../components/waves/create-wave/utils/CreateWaveWarning';
+import CreateWaveWarning from '@/components/waves/create-wave/utils/CreateWaveWarning';
 
 describe('CreateWaveWarning', () => {
   it('renders provided title and description', () => {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
-import { useSecureSign, MobileSigningError, ConnectionMismatchError, SigningProviderError, ProviderValidationError } from '../../hooks/useSecureSign';
+import { useSecureSign, MobileSigningError, ConnectionMismatchError, SigningProviderError, ProviderValidationError } from '@/hooks/useSecureSign';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { useSignMessage } from 'wagmi';
 import { UserRejectedRequestError } from 'viem';

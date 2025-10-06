@@ -1,4 +1,4 @@
-import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { Tooltip } from "react-tooltip";
 import UserCICTypeIconTooltip from "./tooltip/UserCICTypeIconTooltip";
 import UserCICTypeIcon from "./UserCICTypeIcon";

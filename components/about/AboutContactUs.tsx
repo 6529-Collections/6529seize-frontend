@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
 
 export default function AboutContactUs() {
@@ -14,12 +15,12 @@ export default function AboutContactUs() {
         <Col>
           <p>
             The best way to find us at:{" "}
-            <a
+            <Link
               href="https://x.com/6529collections"
               target="_blank"
               rel="noopener noreferrer">
               https://x.com/6529collections
-            </a>
+            </Link>
           </p>
           <p>
             or email us at <a href="mailto:support@6529.io">support@6529.io</a>
@@ -29,40 +30,58 @@ export default function AboutContactUs() {
           <ul>
             <li>
               Trying to get the attention of &#64;
-              <a href="https://x.com/punk6529" target="_blank" rel="noopener noreferrer">
+              <Link
+                href="https://x.com/punk6529"
+                target="_blank"
+                rel="noopener noreferrer">
                 punk6529
-              </a>{" "}
+              </Link>{" "}
               or &#64;
-              <a href="https://x.com/6529er" target="_blank" rel="noopener noreferrer">
+              <Link
+                href="https://x.com/6529er"
+                target="_blank"
+                rel="noopener noreferrer">
                 6529er
-              </a>{" "}
+              </Link>{" "}
               or &#64;
-              <a href="https://x.com/teexels" target="_blank" rel="noopener noreferrer">
+              <Link
+                href="https://x.com/teexels"
+                target="_blank"
+                rel="noopener noreferrer">
                 teexels
-              </a>{" "}
+              </Link>{" "}
               on Twitter
             </li>
             <br />
             <li>
               Trying to get the attention of &#64;
-              <a href="https://x.com/punk6529" target="_blank" rel="noopener noreferrer">
+              <Link
+                href="https://x.com/punk6529"
+                target="_blank"
+                rel="noopener noreferrer">
                 punk6529
-              </a>
+              </Link>
               , &#64;
-              <a href="https://x.com/6529er" target="_blank" rel="noopener noreferrer">
+              <Link
+                href="https://x.com/6529er"
+                target="_blank"
+                rel="noopener noreferrer">
                 6529er
-              </a>{" "}
+              </Link>{" "}
               or &#64;
-              <a href="https://x.com/teexels" target="_blank" rel="noopener noreferrer">
+              <Link
+                href="https://x.com/teexels"
+                target="_blank"
+                rel="noopener noreferrer">
                 teexels
-              </a>{" "}
+              </Link>{" "}
               in the OM Discord (
-              <a
+              <Link
                 href="https://discord.gg/join-om"
                 target="_blank"
                 rel="noopener noreferrer">
                 https://discord.gg/join-om
-              </a>
+              </Link>
               ). We don&apos;t answer Discord DMs from people we don&apos;t
               already know.
             </li>

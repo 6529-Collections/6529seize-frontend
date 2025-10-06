@@ -16,6 +16,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { useSignMessage } from "wagmi";
@@ -203,7 +204,7 @@ export default function RememeAddPage() {
             <Row className="pt-2">
               <Col>
                 Please use this page to only add ReMemes{" "}
-                <a href="#requirements">view requirements</a>
+                <Link href="#requirements">view requirements</Link>
               </Col>
             </Row>
             <Row className="pt-4">

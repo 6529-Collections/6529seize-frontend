@@ -10,7 +10,7 @@ jest.mock('framer-motion', () => ({
 }));
 
 // Mock API fetch
-jest.mock('../../../../../../../../services/api/common-api', () => ({
+jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: jest.fn(),
 }));
 
@@ -18,21 +18,21 @@ const useQueryMock = jest.fn();
 jest.mock('@tanstack/react-query', () => ({ useQuery: (...args: any[]) => useQueryMock(...args) }));
 
 const ContentMock = jest.fn(() => <div data-testid="content" />);
-jest.mock('../../../../../../../../components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItemsContent', () => ({
+jest.mock('@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItemsContent', () => ({
   __esModule: true,
   default: ContentMock,
 }));
 
 // Mock the QueryKey module
-jest.mock('../../../../../../../../components/react-query-wrapper/ReactQueryWrapper', () => ({
+jest.mock('@/components/react-query-wrapper/ReactQueryWrapper', () => ({
   QueryKey: {
     PROFILE_SEARCH: 'PROFILE_SEARCH',
   },
 }));
 
 // Import after mocks
-import GroupCreateIdentitiesSearchItems from '../../../../../../../../components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItems';
-import { QueryKey } from '../../../../../../../../components/react-query-wrapper/ReactQueryWrapper';
+import GroupCreateIdentitiesSearchItems from '@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItems';
+import { QueryKey } from '@/components/react-query-wrapper/ReactQueryWrapper';
 
 const communityData = [{ wallet: '0x1', handle: 'alice', display: 'Alice' }];
 

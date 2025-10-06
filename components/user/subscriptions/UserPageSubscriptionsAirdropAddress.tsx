@@ -1,8 +1,8 @@
 import { AIRDROPS_USE_CASE } from "@/components/delegation/delegation-constants";
 import { Col, Container, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
-import { MEMES_CONTRACT } from "../../../constants";
-import { formatAddress } from "../../../helpers/Helpers";
+import { MEMES_CONTRACT } from "@/constants";
+import { formatAddress } from "@/helpers/Helpers";
 
 interface AirdropAddress {
   address: string;

@@ -1,8 +1,8 @@
-import { CommunityMemberMinimal } from "../../../../../../../entities/IProfile";
+import { CommunityMemberMinimal } from "@/entities/IProfile";
 import {
   getScaledImageUri,
   ImageScale,
-} from "../../../../../../../helpers/image.helpers";
+} from "@/helpers/image.helpers";
 
 export default function GroupCreateIdentitiesSearchItem({
   item,

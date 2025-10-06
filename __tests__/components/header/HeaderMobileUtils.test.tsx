@@ -4,7 +4,7 @@ import {
   printMobileHr,
   printMobileSubheader,
   printMobileRow
-} from '../../../components/header/HeaderMobileUtils';
+} from '@/components/header/HeaderMobileUtils';
 
 // Mock Next.js Link component
 jest.mock('next/link', () => ({ 
@@ -33,7 +33,7 @@ jest.mock('react-bootstrap', () => ({
 }));
 
 // Mock SCSS modules
-jest.mock('../../../components/header/Header.module.scss', () => ({
+jest.mock('@/components/header/Header.module.scss', () => ({
   burgerMenuSubheader: 'mocked-burger-menu-subheader'
 }));
 

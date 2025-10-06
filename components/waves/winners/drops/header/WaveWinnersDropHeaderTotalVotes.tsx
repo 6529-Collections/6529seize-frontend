@@ -1,5 +1,5 @@
-import { ApiWaveDecisionWinner } from "../../../../../generated/models/ApiWaveDecisionWinner";
-import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
+import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 
 interface WaveWinnersDropHeaderTotalVotesProps {
   readonly winner: ApiWaveDecisionWinner;

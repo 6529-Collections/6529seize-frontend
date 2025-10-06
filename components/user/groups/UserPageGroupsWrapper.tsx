@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { useIdentity } from "../../../hooks/useIdentity";
+import { useIdentity } from "@/hooks/useIdentity";
 import UserPageSetUpProfileWrapper from "../utils/set-up-profile/UserPageSetUpProfileWrapper";
 import UserPageGroups from "./UserPageGroups";
 export default function UserPageGroupsWrapper({

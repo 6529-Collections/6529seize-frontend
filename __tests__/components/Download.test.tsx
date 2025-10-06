@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import Download from '../../components/download/Download';
+import Download from '@/components/download/Download';
 
 const mockDownload = jest.fn();
 const mockCancel = jest.fn();

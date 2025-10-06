@@ -1,19 +1,19 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import DropItemChat from '../../../../components/waves/drops/DropItemChat';
-import { ApiDropType } from '../../../../generated/models/ApiDropType';
+import DropItemChat from '@/components/waves/drops/DropItemChat';
+import { ApiDropType } from '@/generated/models/ApiDropType';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
 
-jest.mock('../../../../hooks/useDrop', () => ({ useDrop: jest.fn() }));
-jest.mock('../../../../helpers/Helpers', () => ({ removeBaseEndpoint: jest.fn((l: string) => l.replace('https://base.com', '')) }));
-jest.mock('../../../../components/drops/view/item/content/media/DropListItemContentMedia', () => (props: any) => <div data-testid="media" {...props} />);
-jest.mock('../../../../components/waves/drop/SingleWaveDropPosition', () => ({ SingleWaveDropPosition: (p: any) => <div data-testid="position">{p.rank}</div> }));
-jest.mock('../../../../components/waves/drop/SingleWaveDropVotes', () => ({ SingleWaveDropVotes: () => <div data-testid="votes" /> }));
-jest.mock('../../../../components/waves/ChatItemHrefButtons', () => (p: any) => <div data-testid="href-buttons">{p.relativeHref}</div>);
+jest.mock('@/hooks/useDrop', () => ({ useDrop: jest.fn() }));
+jest.mock('@/helpers/Helpers', () => ({ removeBaseEndpoint: jest.fn((l: string) => l.replace('https://base.com', '')) }));
+jest.mock('@/components/drops/view/item/content/media/DropListItemContentMedia', () => (props: any) => <div data-testid="media" {...props} />);
+jest.mock('@/components/waves/drop/SingleWaveDropPosition', () => ({ SingleWaveDropPosition: (p: any) => <div data-testid="position">{p.rank}</div> }));
+jest.mock('@/components/waves/drop/SingleWaveDropVotes', () => ({ SingleWaveDropVotes: () => <div data-testid="votes" /> }));
+jest.mock('@/components/waves/ChatItemHrefButtons', () => (p: any) => <div data-testid="href-buttons">{p.relativeHref}</div>);
 
-const { useDrop } = require('../../../../hooks/useDrop');
-const { removeBaseEndpoint } = require('../../../../helpers/Helpers');
+const { useDrop } = require('@/hooks/useDrop');
+const { removeBaseEndpoint } = require('@/helpers/Helpers');
 
 describe('DropItemChat', () => {
   it('renders fallback link when drop not loaded', () => {

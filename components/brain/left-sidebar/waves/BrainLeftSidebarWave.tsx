@@ -3,11 +3,11 @@
 import React, { useMemo } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { usePrefetchWaveData } from "../../../../hooks/usePrefetchWaveData";
-import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
-import WavePicture from "../../../waves/WavePicture";
+import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import WavePicture from "@/components/waves/WavePicture";
 import BrainLeftSidebarWaveDropTime from "./BrainLeftSidebarWaveDropTime";
-import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
+import { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesList";
 import BrainLeftSidebarWavePin from "./BrainLeftSidebarWavePin";
 import { formatAddress, isValidEthAddress } from "../../../../helpers/Helpers";
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";

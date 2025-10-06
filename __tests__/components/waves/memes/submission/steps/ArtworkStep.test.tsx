@@ -1,18 +1,18 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import ArtworkStep from '../../../../../../components/waves/memes/submission/steps/ArtworkStep';
-import { TraitsData } from '../../../../../../components/waves/memes/submission/types/TraitsData';
+import ArtworkStep from '@/components/waves/memes/submission/steps/ArtworkStep';
+import { TraitsData } from '@/components/waves/memes/submission/types/TraitsData';
 
-jest.mock('../../../../../../components/waves/memes/MemesArtSubmissionFile', () => () => <div data-testid="file" />);
-jest.mock('../../../../../../components/waves/memes/submission/details/ArtworkDetails', () => (props: any) => (
+jest.mock('@/components/waves/memes/MemesArtSubmissionFile', () => () => <div data-testid="file" />);
+jest.mock('@/components/waves/memes/submission/details/ArtworkDetails', () => (props: any) => (
   <div data-testid="details" onClick={() => props.onTitleChange('t')} />
 ));
-jest.mock('../../../../../../components/waves/memes/MemesArtSubmissionTraits', () => () => <div data-testid="traits" />);
-jest.mock('../../../../../../components/waves/memes/submission/ui/SubmissionProgress', () => () => <div data-testid="progress" />);
-jest.mock('../../../../../../components/utils/button/PrimaryButton', () => (props: any) => (
+jest.mock('@/components/waves/memes/MemesArtSubmissionTraits', () => () => <div data-testid="traits" />);
+jest.mock('@/components/waves/memes/submission/ui/SubmissionProgress', () => () => <div data-testid="progress" />);
+jest.mock('@/components/utils/button/PrimaryButton', () => (props: any) => (
   <button data-testid="submit" disabled={props.disabled} title={props.title} onClick={props.onClicked}>{props.children}</button>
 ));
-jest.mock('../../../../../../components/waves/memes/submission/validation', () => ({
+jest.mock('@/components/waves/memes/submission/validation', () => ({
   useTraitsValidation: () => ({
     errors: {},
     validateAll: () => ({ isValid: true }),

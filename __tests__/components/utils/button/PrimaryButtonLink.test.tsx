@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import PrimaryButtonLink from '../../../../components/utils/button/PrimaryButtonLink';
+import PrimaryButtonLink from '@/components/utils/button/PrimaryButtonLink';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children, ...rest }: any) => <a href={href} {...rest}>{children}</a> }));
 

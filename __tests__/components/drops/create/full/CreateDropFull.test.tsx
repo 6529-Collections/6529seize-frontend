@@ -1,8 +1,8 @@
 import React, { createRef } from 'react';
 import { render, screen } from '@testing-library/react';
-import CreateDropFull, { CreateDropFullHandles } from '../../../../../components/drops/create/full/CreateDropFull';
-import { CreateDropScreenType } from '../../../../../components/drops/create/utils/CreateDropWrapper';
-import { CreateDropType } from '../../../../../components/drops/create/types';
+import CreateDropFull, { CreateDropFullHandles } from '@/components/drops/create/full/CreateDropFull';
+import { CreateDropScreenType } from '@/components/drops/create/utils/CreateDropWrapper';
+import { CreateDropType } from '@/components/drops/create/types';
 
 jest.mock('react-use', () => ({
   createBreakpoint: () => () => 'LG',
@@ -11,14 +11,14 @@ jest.mock('react-use', () => ({
 const desktopClearMock = jest.fn();
 const mobileClearMock = jest.fn();
 
-jest.mock('../../../../../components/drops/create/full/desktop/CreateDropFullDesktop', () => {
+jest.mock('@/components/drops/create/full/desktop/CreateDropFullDesktop', () => {
   return React.forwardRef((props: any, ref) => {
     React.useImperativeHandle(ref, () => ({ clearEditorState: desktopClearMock }));
     return <div data-testid="desktop">{props.children}</div>;
   });
 });
 
-jest.mock('../../../../../components/drops/create/full/mobile/CreateDropFullMobile', () => {
+jest.mock('@/components/drops/create/full/mobile/CreateDropFullMobile', () => {
   return React.forwardRef((props: any, ref) => {
     React.useImperativeHandle(ref, () => ({ clearEditorState: mobileClearMock }));
     return <div data-testid="mobile">{props.children}</div>;

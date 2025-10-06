@@ -1,15 +1,15 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import NextGenCollectionArtist from '../../../../../components/nextGen/collections/collectionParts/NextGenCollectionArtist';
-import { formatNameForUrl } from '../../../../../components/nextGen/nextgen_helpers';
-import { STATEMENT_TYPE } from '../../../../../helpers/Types';
+import NextGenCollectionArtist from '@/components/nextGen/collections/collectionParts/NextGenCollectionArtist';
+import { formatNameForUrl } from '@/components/nextGen/nextgen_helpers';
+import { STATEMENT_TYPE } from '@/helpers/Types';
 
 jest.mock('next/image', () => ({ __esModule: true, default: (p: any) => <img {...p} /> }));
-jest.mock('../../../../../hooks/useIdentity', () => ({ useIdentity: jest.fn() }));
-jest.mock('../../../../../services/api/common-api', () => ({ commonApiFetch: jest.fn() }));
+jest.mock('@/hooks/useIdentity', () => ({ useIdentity: jest.fn() }));
+jest.mock('@/services/api/common-api', () => ({ commonApiFetch: jest.fn() }));
 
-const { useIdentity } = require('../../../../../hooks/useIdentity');
-const { commonApiFetch } = require('../../../../../services/api/common-api');
+const { useIdentity } = require('@/hooks/useIdentity');
+const { commonApiFetch } = require('@/services/api/common-api');
 
 const collection = {
   id: 1,

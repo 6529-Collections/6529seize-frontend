@@ -5,7 +5,7 @@ import { Modal, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { decryptData } from "./app-wallet-helpers";
-import { areEqualAddresses } from "../../helpers/Helpers";
+import { areEqualAddresses } from "@/helpers/Helpers";
 import { useAuth } from "../auth/Auth";
 import { useAppWallets } from "./AppWalletsContext";
 

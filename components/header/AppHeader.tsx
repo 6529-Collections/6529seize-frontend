@@ -6,14 +6,14 @@ import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { useAuth } from "../auth/Auth";
-import { useIdentity } from "../../hooks/useIdentity";
+import { useIdentity } from "@/hooks/useIdentity";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useViewContext } from "../navigation/ViewContext";
-import { useWaveById } from "../../hooks/useWaveById";
+import { useWaveById } from "@/hooks/useWaveById";
 import BackButton from "../navigation/BackButton";
 import Spinner from "../utils/Spinner";
-import { useNavigationHistoryContext } from "../../contexts/NavigationHistoryContext";
-import { capitalizeEveryWord, formatAddress } from "../../helpers/Helpers";
+import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
+import { capitalizeEveryWord, formatAddress } from "@/helpers/Helpers";
 import HeaderActionButtons from "./HeaderActionButtons";
 
 interface Props {

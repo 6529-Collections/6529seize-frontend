@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import MemesArtSubmissionFile from '../../../../components/waves/memes/MemesArtSubmissionFile';
-import { AuthContext } from '../../../../components/auth/Auth';
+import MemesArtSubmissionFile from '@/components/waves/memes/MemesArtSubmissionFile';
+import { AuthContext } from '@/components/auth/Auth';
 
 // Mock framer-motion to avoid AbortSignal compatibility issues
 jest.mock('framer-motion', () => {
@@ -54,7 +54,7 @@ beforeAll(() => {
 });
 
 // Mock child components with relaxed validation for testing
-jest.mock('../../../../components/waves/memes/file-upload/components/FilePreview', () => {
+jest.mock('@/components/waves/memes/file-upload/components/FilePreview', () => {
   const FilePreviewMock = React.forwardRef<HTMLDivElement, any>((props, ref) => (
     <div ref={ref} data-testid="preview">
       {props.url || 'no-url'}
@@ -65,7 +65,7 @@ jest.mock('../../../../components/waves/memes/file-upload/components/FilePreview
   return FilePreviewMock;
 });
 
-jest.mock('../../../../components/waves/memes/file-upload/components/UploadArea', () => {
+jest.mock('@/components/waves/memes/file-upload/components/UploadArea', () => {
   const UploadAreaMock = React.forwardRef<HTMLDivElement, any>((props, ref) => (
     <div ref={ref} data-testid="upload" data-visual-state={props.visualState}>
       {props.error && <div data-testid="upload-error">{props.error}</div>}
@@ -76,7 +76,7 @@ jest.mock('../../../../components/waves/memes/file-upload/components/UploadArea'
   return UploadAreaMock;
 });
 
-jest.mock('../../../../components/waves/memes/file-upload/components/BrowserWarning', () => {
+jest.mock('@/components/waves/memes/file-upload/components/BrowserWarning', () => {
   const BrowserWarningMock = React.forwardRef<HTMLDivElement, any>(({ reason }, ref) => {
     if (!reason) {
       throw new Error('BrowserWarning requires reason prop');
@@ -93,7 +93,7 @@ const mockProcessFile = jest.fn();
 const mockHandleRetry = jest.fn();
 const mockHandleRemoveFile = jest.fn();
 
-jest.mock('../../../../components/waves/memes/file-upload/hooks/useFileUploader', () => () => ({
+jest.mock('@/components/waves/memes/file-upload/hooks/useFileUploader', () => () => ({
   state: {
     visualState: 'idle',
     error: null,
@@ -120,7 +120,7 @@ const mockHandleDragLeave = jest.fn();
 const mockHandleDrop = jest.fn();
 const mockHandleKeyDown = jest.fn();
 
-jest.mock('../../../../components/waves/memes/file-upload/hooks/useDragAndDrop', () => () => ({
+jest.mock('@/components/waves/memes/file-upload/hooks/useDragAndDrop', () => () => ({
   dropAreaRef: mockDropAreaRef,
   handleDragEnter: mockHandleDragEnter,
   handleDragOver: mockHandleDragOver,
@@ -128,22 +128,22 @@ jest.mock('../../../../components/waves/memes/file-upload/hooks/useDragAndDrop',
   handleDrop: mockHandleDrop,
 }));
 
-jest.mock('../../../../components/waves/memes/file-upload/hooks/useAccessibility', () => () => ({
+jest.mock('@/components/waves/memes/file-upload/hooks/useAccessibility', () => () => ({
   handleKeyDown: mockHandleKeyDown,
 }));
 
 // Mock browser detection at the module level with fresh functions
-jest.mock('../../../../components/waves/memes/file-upload/utils/browserDetection', () => ({
+jest.mock('@/components/waves/memes/file-upload/utils/browserDetection', () => ({
   isBrowserSupported: jest.fn(() => ({ supported: false, reason: 'Browser compatibility issue detected' })),
   detectBrowser: jest.fn(() => 'Chrome'),
   __esModule: true
 }));
 
 // Access the mocked functions
-const mockBrowserDetection = jest.mocked(require('../../../../components/waves/memes/file-upload/utils/browserDetection'));
+const mockBrowserDetection = jest.mocked(require('@/components/waves/memes/file-upload/utils/browserDetection'));
 
 // Mock constants
-jest.mock('../../../../components/waves/memes/file-upload/utils/constants', () => ({
+jest.mock('@/components/waves/memes/file-upload/utils/constants', () => ({
   FILE_INPUT_ACCEPT: 'image/*,video/*',
   __esModule: true
 }));

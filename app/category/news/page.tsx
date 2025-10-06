@@ -1,4 +1,5 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import Link from "next/link";
 import type { Metadata } from "next";
 
 export default function CategoryNewsPage() {
@@ -300,11 +301,11 @@ export default function CategoryNewsPage() {
                           />
                           <div className="fusion-rollover">
                             <div className="fusion-rollover-content">
-                              <a
+                              <Link
                                 className="fusion-rollover-link"
                                 href="/news/introducing-om/">
                                 INTRODUCING OM
-                              </a>
+                              </Link>
                               <div className="fusion-rollover-sep" />
                               <a
                                 className="fusion-rollover-gallery"
@@ -316,18 +317,18 @@ export default function CategoryNewsPage() {
                                 Gallery{" "}
                               </a>
                               <h4 className="fusion-rollover-title">
-                                <a
+                                <Link
                                   className="fusion-rollover-title-link"
                                   href="/news/introducing-om/">
                                   INTRODUCING OM{" "}
-                                </a>
+                                </Link>
                               </h4>
                               <div className="fusion-rollover-categories">
-                                <a href="/category/news/" rel="tag">
+                                <Link href="/category/news/" rel="tag">
                                   NEWS
-                                </a>
+                                </Link>
                               </div>
-                              <a
+                              <Link
                                 className="fusion-link-wrapper"
                                 href="/news/introducing-om/"
                                 aria-label="INTRODUCING OM"
@@ -338,16 +339,16 @@ export default function CategoryNewsPage() {
                         <div className="fusion-post-content-wrapper">
                           <div className="fusion-post-content post-content">
                             <h2 className="entry-title fusion-post-title">
-                              <a href="/news/introducing-om/">INTRODUCING OM</a>
+                              <Link href="/news/introducing-om/">INTRODUCING OM</Link>
                             </h2>
                             <span className="vcard rich-snippet-hidden">
                               <span className="fn">
-                                <a
+                                <Link
                                   href="/author/6529er6529-io/"
                                   title="Posts by 6529er"
                                   rel="author">
                                   6529er
-                                </a>
+                                </Link>
                               </span>
                             </span>
                             <span className="updated rich-snippet-hidden">
@@ -367,12 +368,12 @@ export default function CategoryNewsPage() {
                           </span>
                           <span className="vcard rich-snippet-hidden">
                             <span className="fn">
-                              <a
+                              <Link
                                 href="/author/6529er6529-io/"
                                 title="Posts by 6529er"
                                 rel="author">
                                 6529er
-                              </a>
+                              </Link>
                             </span>
                           </span>
                           <span className="updated rich-snippet-hidden">

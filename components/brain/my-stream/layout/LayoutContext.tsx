@@ -10,7 +10,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import useCapacitor from "../../../../hooks/useCapacitor";
+import useCapacitor from "@/hooks/useCapacitor";
 
 // Define the different spaces that need to be measured
 interface LayoutSpaces {

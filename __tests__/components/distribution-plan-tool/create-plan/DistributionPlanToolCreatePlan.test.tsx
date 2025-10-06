@@ -1,13 +1,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import DistributionPlanToolCreatePlan from '../../../../components/distribution-plan-tool/create-plan/DistributionPlanToolCreatePlan';
+import DistributionPlanToolCreatePlan from '@/components/distribution-plan-tool/create-plan/DistributionPlanToolCreatePlan';
 import { useRouter } from 'next/navigation';
 
 jest.mock('next/navigation', () => ({ useRouter: jest.fn() }));
 
 jest.mock(
-  '../../../../components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper',
+  '@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper',
   () => ({
     __esModule: true,
     AllowlistToolModalSize: { X_LARGE: 'X_LARGE' },
@@ -23,7 +23,7 @@ jest.mock(
 
 const createPlanMock = jest.fn();
 jest.mock(
-  '../../../../components/distribution-plan-tool/create-plan/CreateDistributionPlan',
+  '@/components/distribution-plan-tool/create-plan/CreateDistributionPlan',
   () => ({
     __esModule: true,
     default: ({ onSuccess }: any) => (

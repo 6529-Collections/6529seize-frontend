@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import useIsMobileDevice from '../../hooks/isMobileDevice';
+import useIsMobileDevice from '@/hooks/isMobileDevice';
 
 describe('useIsMobileDevice', () => {
   const originalUserAgent = navigator.userAgent;

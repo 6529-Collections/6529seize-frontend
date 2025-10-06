@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
-import NewAssignPrimaryAddress from '../../../components/delegation/NewAssignPrimaryAddress';
-import { AuthContext } from '../../../components/auth/Auth';
+import NewAssignPrimaryAddress from '@/components/delegation/NewAssignPrimaryAddress';
+import { AuthContext } from '@/components/auth/Auth';
 import { useQuery } from '@tanstack/react-query';
 
 jest.mock('@tanstack/react-query');
-jest.mock('../../../components/delegation/DelegationFormParts', () => ({
+jest.mock('@/components/delegation/DelegationFormParts', () => ({
   DelegationCloseButton: (p: any) => <button onClick={p.onHide}>x</button>,
   DelegationFormOriginalDelegatorFormGroup: () => <div />,
   DelegationFormLabel: () => <div />,
@@ -12,7 +12,7 @@ jest.mock('../../../components/delegation/DelegationFormParts', () => ({
   DelegationSubmitGroups: () => <div />,
   DelegationFormOptionsFormGroup: () => <div />,
 }));
-jest.mock('../../../components/dotLoader/DotLoader', () => () => <div data-testid="loader" />);
+jest.mock('@/components/dotLoader/DotLoader', () => () => <div data-testid="loader" />);
 
 const useQueryMock = useQuery as jest.Mock;
 

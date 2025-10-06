@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { DBResponse } from "../entities/IDBResponse";
-import { NftOwner } from "../entities/IOwner";
-import { commonApiFetch } from "../services/api/common-api";
+import { DBResponse } from "@/entities/IDBResponse";
+import { NftOwner } from "@/entities/IOwner";
+import { commonApiFetch } from "@/services/api/common-api";
 
 interface UseNftBalanceProps {
   consolidationKey: string | null;

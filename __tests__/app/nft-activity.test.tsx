@@ -1,10 +1,10 @@
 import NFTActivityPage, { generateMetadata } from "@/app/nft-activity/page";
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import { AuthContext } from "../../components/auth/Auth";
+import { AuthContext } from "@/components/auth/Auth";
 
 // Mock TitleContext
-jest.mock("../../contexts/TitleContext", () => ({
+jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({
     title: "Test Title",
     setTitle: jest.fn(),
@@ -21,7 +21,7 @@ jest.mock("../../contexts/TitleContext", () => ({
 }));
 
 // Mock the LatestActivity component since it's dynamically imported and may have complex dependencies
-jest.mock("../../components/latest-activity/LatestActivity", () => {
+jest.mock("@/components/latest-activity/LatestActivity", () => {
   return function MockLatestActivity({ page, pageSize, showMore }: any) {
     return (
       <div data-testid="latest-activity">
@@ -47,13 +47,13 @@ jest.mock("react-bootstrap", () => ({
 }));
 
 // Mock styles
-jest.mock("../../styles/Modules.module.scss", () => ({
+jest.mock("@/styles/Modules.module.scss", () => ({
   main: "main-class",
   leaderboardContainer: "leaderboard-container-class",
 }));
 
 // Mock MyStreamContext if needed
-jest.mock("../../contexts/wave/MyStreamContext", () => ({
+jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: () => ({}),
   MyStreamProvider: ({ children }: any) => children,
 }));

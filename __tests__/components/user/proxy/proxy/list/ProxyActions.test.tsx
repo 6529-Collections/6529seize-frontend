@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
-import ProxyActions from '../../../../../../components/user/proxy/proxy/list/ProxyActions';
-import { Time } from '../../../../../../helpers/time';
+import ProxyActions from '@/components/user/proxy/proxy/list/ProxyActions';
+import { Time } from '@/helpers/time';
 
-jest.mock('../../../../../../components/user/proxy/proxy/list/ProxyActionRow', () => (props: any) => (
+jest.mock('@/components/user/proxy/proxy/list/ProxyActionRow', () => (props: any) => (
   <div data-testid="row">{props.action.id}</div>
 ));
 

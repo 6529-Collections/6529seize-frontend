@@ -1,11 +1,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UserPageRepRepsTable, { RepsTableSort } from '../../../../../../components/user/rep/reps/table/UserPageRepRepsTable';
+import UserPageRepRepsTable, { RepsTableSort } from '@/components/user/rep/reps/table/UserPageRepRepsTable';
 
 let latestReps: any[] = [];
-jest.mock('../../../../../../components/user/rep/reps/table/UserPageRepRepsTableBody', () => (props: any) => { latestReps = props.reps; return <tbody data-testid="body" />; });
-jest.mock('../../../../../../components/user/rep/reps/table/UserPageRepRepsTableHeader', () => (props: any) => (
+jest.mock('@/components/user/rep/reps/table/UserPageRepRepsTableBody', () => (props: any) => { latestReps = props.reps; return <tbody data-testid="body" />; });
+jest.mock('@/components/user/rep/reps/table/UserPageRepRepsTableHeader', () => (props: any) => (
   <thead>
     <tr>
       <th><button onClick={() => props.onSortTypeClick(RepsTableSort.REP)}>rep</button></th>

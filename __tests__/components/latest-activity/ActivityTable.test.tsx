@@ -1,12 +1,12 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import ActivityTable from "../../../components/latest-activity/ActivityTable";
-import { Transaction } from "../../../entities/ITransaction";
-import { NFT } from "../../../entities/INFT";
-import { NextGenCollection } from "../../../entities/INextgen";
+import ActivityTable from "@/components/latest-activity/ActivityTable";
+import { Transaction } from "@/entities/ITransaction";
+import { NFT } from "@/entities/INFT";
+import { NextGenCollection } from "@/entities/INextgen";
 
 // Mock the child component to isolate ActivityTable testing
-jest.mock("../../../components/latest-activity/LatestActivityRow", () => {
+jest.mock("@/components/latest-activity/LatestActivityRow", () => {
   return function MockLatestActivityRow(props: any) {
     return (
       <tr data-testid="activity-row">
@@ -39,12 +39,12 @@ jest.mock("react-bootstrap", () => ({
 }));
 
 // Mock helpers
-jest.mock("../../../helpers/Helpers", () => ({
+jest.mock("@/helpers/Helpers", () => ({
   areEqualAddresses: jest.fn((a: string, b: string) => a.toLowerCase() === b.toLowerCase()),
   isNextgenContract: jest.fn((contract: string) => contract.includes("nextgen")),
 }));
 
-jest.mock("../../../components/nextGen/nextgen_helpers", () => ({
+jest.mock("@/components/nextGen/nextgen_helpers", () => ({
   normalizeNextgenTokenID: jest.fn((tokenId: number) => ({
     collection_id: Math.floor(tokenId / 1000),
     token_id: tokenId % 1000,
@@ -179,8 +179,8 @@ describe("ActivityTable", () => {
   });
 
   it("handles NextGen contracts correctly", () => {
-    const { areEqualAddresses, isNextgenContract } = require("../../../helpers/Helpers");
-    const { normalizeNextgenTokenID } = require("../../../components/nextGen/nextgen_helpers");
+    const { areEqualAddresses, isNextgenContract } = require("@/helpers/Helpers");
+    const { normalizeNextgenTokenID } = require("@/components/nextGen/nextgen_helpers");
     
     // Mock NextGen contract detection
     isNextgenContract.mockImplementation((contract: string) => contract === "0xnextgen");
@@ -227,7 +227,7 @@ describe("ActivityTable", () => {
   });
 
   it("handles missing NextGen collection data gracefully", () => {
-    const { isNextgenContract } = require("../../../helpers/Helpers");
+    const { isNextgenContract } = require("@/helpers/Helpers");
     isNextgenContract.mockReturnValue(true);
 
     render(
@@ -242,7 +242,7 @@ describe("ActivityTable", () => {
   });
 
   it("generates correct keys for activity rows", () => {
-    const ActivityTableComponent = require("../../../components/latest-activity/ActivityTable").default;
+    const ActivityTableComponent = require("@/components/latest-activity/ActivityTable").default;
     
     render(
       <ActivityTableComponent

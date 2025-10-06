@@ -1,7 +1,7 @@
-import { distributionPlanApiFetch, distributionPlanApiPost, distributionPlanApiDelete } from "../../services/distribution-plan-api";
+import { distributionPlanApiFetch, distributionPlanApiPost, distributionPlanApiDelete } from "@/services/distribution-plan-api";
 
-jest.mock("../../services/distribution-plan.utils", () => ({ makeErrorToast: jest.fn() }));
-jest.mock("../../services/auth/auth.utils", () => ({ getAuthJwt: jest.fn(), removeAuthJwt: jest.fn() }));
+jest.mock("@/services/distribution-plan.utils", () => ({ makeErrorToast: jest.fn() }));
+jest.mock("@/services/auth/auth.utils", () => ({ getAuthJwt: jest.fn(), removeAuthJwt: jest.fn() }));
 
 const { makeErrorToast } = jest.requireMock("../../services/distribution-plan.utils");
 const { getAuthJwt, removeAuthJwt } = jest.requireMock("../../services/auth/auth.utils");

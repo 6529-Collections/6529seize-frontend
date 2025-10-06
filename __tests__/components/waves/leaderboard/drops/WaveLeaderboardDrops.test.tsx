@@ -1,26 +1,26 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { WaveLeaderboardDrops } from '../../../../../components/waves/leaderboard/drops/WaveLeaderboardDrops';
-import { AuthContext } from '../../../../../components/auth/Auth';
-import { ApiWave } from '../../../../../generated/models/ApiWave';
-import { WaveDropsLeaderboardSort } from '../../../../../hooks/useWaveDropsLeaderboard';
+import { WaveLeaderboardDrops } from '@/components/waves/leaderboard/drops/WaveLeaderboardDrops';
+import { AuthContext } from '@/components/auth/Auth';
+import { ApiWave } from '@/generated/models/ApiWave';
+import { WaveDropsLeaderboardSort } from '@/hooks/useWaveDropsLeaderboard';
 
 const hook = jest.fn();
 let intersectionCb: any;
 
-jest.mock('../../../../../hooks/useWaveDropsLeaderboard', () => {
+jest.mock('@/hooks/useWaveDropsLeaderboard', () => {
   const actual = jest.requireActual('../../../../../hooks/useWaveDropsLeaderboard');
   return { __esModule: true, ...actual, useWaveDropsLeaderboard: (...args: any[]) => hook(...args) };
 });
 
-jest.mock('../../../../../hooks/useIntersectionObserver', () => ({
+jest.mock('@/hooks/useIntersectionObserver', () => ({
   useIntersectionObserver: (cb: any) => { intersectionCb = cb; return { current: null }; }
 }));
 
-jest.mock('../../../../../components/waves/leaderboard/drops/WaveLeaderboardDrop', () => ({ WaveLeaderboardDrop: (props: any) => <div data-testid="drop">{props.drop.id}</div> }));
-jest.mock('../../../../../components/waves/leaderboard/drops/WaveLeaderboardEmptyState', () => ({ WaveLeaderboardEmptyState: (props: any) => <div data-testid="empty" onClick={props.onCreateDrop} /> }));
-jest.mock('../../../../../components/waves/leaderboard/drops/WaveLeaderboardLoading', () => ({ WaveLeaderboardLoading: () => <div data-testid="loading" /> }));
-jest.mock('../../../../../components/waves/leaderboard/drops/WaveLeaderboardLoadingBar', () => ({ WaveLeaderboardLoadingBar: () => <div data-testid="bar" /> }));
+jest.mock('@/components/waves/leaderboard/drops/WaveLeaderboardDrop', () => ({ WaveLeaderboardDrop: (props: any) => <div data-testid="drop">{props.drop.id}</div> }));
+jest.mock('@/components/waves/leaderboard/drops/WaveLeaderboardEmptyState', () => ({ WaveLeaderboardEmptyState: (props: any) => <div data-testid="empty" onClick={props.onCreateDrop} /> }));
+jest.mock('@/components/waves/leaderboard/drops/WaveLeaderboardLoading', () => ({ WaveLeaderboardLoading: () => <div data-testid="loading" /> }));
+jest.mock('@/components/waves/leaderboard/drops/WaveLeaderboardLoadingBar', () => ({ WaveLeaderboardLoadingBar: () => <div data-testid="bar" /> }));
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: jest.fn() }),
   usePathname: () => '/p',

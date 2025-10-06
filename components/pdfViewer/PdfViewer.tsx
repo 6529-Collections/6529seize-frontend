@@ -1,5 +1,5 @@
 import { Col, Container, Row } from "react-bootstrap";
-import useIsMobileScreen from "../../hooks/isMobileScreen";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 import Link from "next/link";
 
 interface Props {

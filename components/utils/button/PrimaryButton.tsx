@@ -1,4 +1,4 @@
-import CircleLoader from "../../distribution-plan-tool/common/CircleLoader";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 
 export default function PrimaryButton({
   loading,

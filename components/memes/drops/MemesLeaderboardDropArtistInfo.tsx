@@ -2,17 +2,17 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { cicToType } from "../../../helpers/Helpers";
+import { cicToType } from "@/helpers/Helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
-} from "../../user/utils/UserCICAndLevel";
-import WaveDropAuthorPfp from "../../waves/drops/WaveDropAuthorPfp";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import WinnerDropBadge from "../../waves/drops/winner/WinnerDropBadge";
-import WaveDropTime from "../../waves/drops/time/WaveDropTime";
-import UserProfileTooltipWrapper from "../../utils/tooltip/UserProfileTooltipWrapper";
-import { ArtistSubmissionBadge } from "../../waves/drops/ArtistSubmissionBadge";
-import { ArtistPreviewModal } from "../../waves/drops/ArtistPreviewModal";
+} from "@/components/user/utils/UserCICAndLevel";
+import WaveDropAuthorPfp from "@/components/waves/drops/WaveDropAuthorPfp";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
+import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import { ArtistSubmissionBadge } from "@/components/waves/drops/ArtistSubmissionBadge";
+import { ArtistPreviewModal } from "@/components/waves/drops/ArtistPreviewModal";
 
 interface MemesLeaderboardDropArtistInfoProps {
   readonly drop: ExtendedDrop;

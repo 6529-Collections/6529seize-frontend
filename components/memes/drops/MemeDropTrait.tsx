@@ -1,8 +1,8 @@
 import React from "react";
-import { formatNumberWithCommas } from "../../../helpers/Helpers";
-import { FIELD_TO_LABEL_MAP } from "../../waves/memes/traits/schema";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { FIELD_TO_LABEL_MAP } from "@/components/waves/memes/traits/schema";
 import { Tooltip } from "react-tooltip";
-import useIsMobileDevice from "../../../hooks/isMobileDevice";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
 
 interface MemeDropTraitProps {
   readonly label: string;

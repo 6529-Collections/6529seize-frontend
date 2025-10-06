@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ProxyListItem from '../../../../../components/user/proxy/list/ProxyListItem';
-import { AuthContext } from '../../../../../components/auth/Auth';
+import ProxyListItem from '@/components/user/proxy/list/ProxyListItem';
+import { AuthContext } from '@/components/auth/Auth';
 
-jest.mock('../../../../../components/user/proxy/proxy/list/ProxyActions', () => () => <div data-testid="actions" />);
-jest.mock('../../../../../components/user/proxy/proxy/create-action/ProxyCreateAction', () => (props: any) => <div data-testid="create" onClick={props.onCancel} />);
-jest.mock('../../../../../components/utils/animation/CommonChangeAnimation', () => ({ __esModule: true, default: ({ children }: any) => <div>{children}</div> }));
+jest.mock('@/components/user/proxy/proxy/list/ProxyActions', () => () => <div data-testid="actions" />);
+jest.mock('@/components/user/proxy/proxy/create-action/ProxyCreateAction', () => (props: any) => <div data-testid="create" onClick={props.onCancel} />);
+jest.mock('@/components/utils/animation/CommonChangeAnimation', () => ({ __esModule: true, default: ({ children }: any) => <div>{children}</div> }));
 
 describe('ProxyListItem', () => {
   const proxy: any = {

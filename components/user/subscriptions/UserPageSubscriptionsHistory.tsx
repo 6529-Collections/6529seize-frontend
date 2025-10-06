@@ -4,7 +4,7 @@ import {
   RedeemedSubscription,
   SubscriptionLog,
   SubscriptionTopUp,
-} from "../../../entities/ISubscription";
+} from "@/entities/ISubscription";
 import EthereumIcon from "../utils/icons/EthereumIcon";
 import EtherscanIcon from "../utils/icons/EtherscanIcon";
 import {
@@ -12,11 +12,11 @@ import {
   formatAddress,
   getDateDisplay,
   getTransactionLink,
-} from "../../../helpers/Helpers";
+} from "@/helpers/Helpers";
 import { mainnet } from "wagmi/chains";
-import { MEMES_CONTRACT } from "../../../constants";
-import { Page } from "../../../helpers/Types";
-import Pagination from "../../pagination/Pagination";
+import { MEMES_CONTRACT } from "@/constants";
+import { Page } from "@/helpers/Types";
+import Pagination from "@/components/pagination/Pagination";
 
 export default function UserPageSubscriptionsHistory(
   props: Readonly<{

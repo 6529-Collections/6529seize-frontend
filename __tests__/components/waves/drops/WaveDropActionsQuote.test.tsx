@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import WaveDropActionsQuote from '../../../../components/waves/drops/WaveDropActionsQuote';
-import { AuthContext } from '../../../../components/auth/Auth';
-import { WaveEligibilityProvider } from '../../../../contexts/wave/WaveEligibilityContext';
+import WaveDropActionsQuote from '@/components/waves/drops/WaveDropActionsQuote';
+import { AuthContext } from '@/components/auth/Auth';
+import { WaveEligibilityProvider } from '@/contexts/wave/WaveEligibilityContext';
 
 jest.mock('react-tooltip', () => ({
   Tooltip: ({ children }: any) => <div>{children}</div>

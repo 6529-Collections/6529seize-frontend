@@ -1,10 +1,10 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { MemePageTimeline } from '../../../components/the-memes/MemePageTimeline';
-import { fetchAllPages } from '../../../services/6529api';
+import { MemePageTimeline } from '@/components/the-memes/MemePageTimeline';
+import { fetchAllPages } from '@/services/6529api';
 
-jest.mock('../../../services/6529api');
-jest.mock('../../../components/timeline/Timeline', () => ({ __esModule: true, default: ({ steps }: any) => (<div data-testid="timeline" data-count={steps.length} />) }));
+jest.mock('@/services/6529api');
+jest.mock('@/components/timeline/Timeline', () => ({ __esModule: true, default: ({ steps }: any) => (<div data-testid="timeline" data-count={steps.length} />) }));
 
 describe('MemePageTimeline', () => {
   beforeEach(() => {

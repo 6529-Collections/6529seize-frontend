@@ -1,6 +1,6 @@
-import { ApiWaveType } from "../../../../../../generated/models/ApiWaveType";
-import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../../../helpers/waves/create-wave.validation";
-import { CreateWaveOutcomeConfig } from "../../../../../../types/waves.types";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import { CreateWaveOutcomeConfig } from "@/types/waves.types";
 import CreateWaveOutcomesRow from "./CreateWaveOutcomesRow";
 
 export default function CreateWaveOutcomesRows({

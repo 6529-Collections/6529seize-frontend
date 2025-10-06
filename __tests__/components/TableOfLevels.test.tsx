@@ -1,6 +1,6 @@
 import { render, screen, within } from '@testing-library/react';
-import TableOfLevels from '../../components/levels/TableOfLevels';
-import levels from '../../levels.json';
+import TableOfLevels from '@/components/levels/TableOfLevels';
+import levels from '@/levels.json';
 
 describe('TableOfLevels', () => {
   // Mock toLocaleString to ensure consistent behavior across different locales

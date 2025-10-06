@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
 
 export default function AboutDataDecentral() {
@@ -17,11 +18,11 @@ export default function AboutDataDecentral() {
             a decentralized manner.
           </p>
           <p>
-            Effectively all information on 6529.io comes from on-chain or
-            public sources or is derived in transparent ways from on-chain or
-            public sources. This means anyone can replicate the data available
-            on this site for a website or application of their own, without
-            seeking permission from us and without any dependency on us.
+            Effectively all information on 6529.io comes from on-chain or public
+            sources or is derived in transparent ways from on-chain or public
+            sources. This means anyone can replicate the data available on this
+            site for a website or application of their own, without seeking
+            permission from us and without any dependency on us.
           </p>
           <p>This page shares the source of all data displayed on 6529.io.</p>
           <p>On-Chain (Ethereum)</p>
@@ -50,12 +51,12 @@ export default function AboutDataDecentral() {
           <ul>
             <li>
               6529 Team addresses. A record of these can be found on Arweave{" "}
-              <a
+              <Link
                 href={`https://arweave.net/fy83ffOGqR9cR2zooI7u9JxsG0oEWVJxH3B-bNxXKJg`}
                 target="_blank"
                 rel="noopener noreferrer">
                 here
-              </a>
+              </Link>
               . We will move this list 100% on-chain in the coming weeks.
             </li>
           </ul>
@@ -81,9 +82,9 @@ export default function AboutDataDecentral() {
               Every day, we post our complete set of on-chain and calculated
               values shown on the site to Arweave as a CSV. The specific links
               can be found{" "}
-              <a href={`/open-data`} target="_blank" rel="noopener noreferrer">
+              <Link href="/open-data" target="_blank" rel="noopener noreferrer">
                 here
-              </a>
+              </Link>
               .
             </li>
           </ul>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import DistributionPlanStepUpcoming from '../../../components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanStepUpcoming';
-import { DISTRIBUTION_PLAN_STEPS } from '../../../components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanToolSidebar';
+import DistributionPlanStepUpcoming from '@/components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanStepUpcoming';
+import { DISTRIBUTION_PLAN_STEPS } from '@/components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanToolSidebar';
 
 describe('DistributionPlanStepUpcoming', () => {
   it('shows connector when not last step', () => {

@@ -3,17 +3,17 @@
 import { useRouter } from "next/navigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
-import { IFeedItemDropReplied } from "../../../../../types/feed.types";
-import { ApiDrop } from "../../../../../generated/models/ApiDrop";
-import { ActiveDropState } from "../../../../../types/dropInteractionTypes";
+import { IFeedItemDropReplied } from "@/types/feed.types";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
 import {
   DropSize,
   ExtendedDrop,
-} from "../../../../../helpers/waves/drop.helpers";
+} from "@/helpers/waves/drop.helpers";
 import Drop, {
   DropInteractionParams,
   DropLocation,
-} from "../../../../waves/drops/Drop";
+} from "@/components/waves/drops/Drop";
 
 export default function FeedItemDropReplied({
   item,

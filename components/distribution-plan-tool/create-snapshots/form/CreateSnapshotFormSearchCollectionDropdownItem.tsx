@@ -1,15 +1,15 @@
 "use client";
 
-import { DistributionPlanSearchContractMetadataResult } from "../../../allowlist-tool/allowlist-tool.types";
+import { DistributionPlanSearchContractMetadataResult } from "@/components/allowlist-tool/allowlist-tool.types";
 import Image from "next/image";
-import DistributionPlanVerifiedIcon from "../../common/DistributionPlanVerifiedIcon";
+import DistributionPlanVerifiedIcon from "@/components/distribution-plan-tool/common/DistributionPlanVerifiedIcon";
 import {
   formatNumber,
   truncateTextMiddle,
-} from "../../../../helpers/AllowlistToolHelpers";
+} from "@/helpers/AllowlistToolHelpers";
 import { useContext, useState } from "react";
-import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
-import { distributionPlanApiFetch } from "../../../../services/distribution-plan-api";
+import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 
 interface CollectionMeta {
   readonly imgUrl: string;

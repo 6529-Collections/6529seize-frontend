@@ -1,8 +1,8 @@
 "use client";
 
 import { useContext } from "react";
-import { AuthContext } from "../../../../auth/Auth";
-import { ApiGroupFull } from "../../../../../generated/models/ApiGroupFull";
+import { AuthContext } from "@/components/auth/Auth";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { GroupCardState } from "./GroupCard";
 import GroupCardConfigs from "./GroupCardConfigs";
 

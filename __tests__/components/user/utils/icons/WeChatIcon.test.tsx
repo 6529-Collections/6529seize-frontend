@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import WeChatIcon from '../../../../../components/user/utils/icons/WeChatIcon';
+import WeChatIcon from '@/components/user/utils/icons/WeChatIcon';
 
 describe('WeChatIcon', () => {
   it('renders svg with green fill', () => {

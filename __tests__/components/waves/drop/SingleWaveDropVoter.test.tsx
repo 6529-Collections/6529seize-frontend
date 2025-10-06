@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { SingleWaveDropVoter } from '../../../../components/waves/drop/SingleWaveDropVoter';
-import { ApiWaveCreditType } from '../../../../generated/models/ApiWaveCreditType';
+import { SingleWaveDropVoter } from '@/components/waves/drop/SingleWaveDropVoter';
+import { ApiWaveCreditType } from '@/generated/models/ApiWaveCreditType';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
 

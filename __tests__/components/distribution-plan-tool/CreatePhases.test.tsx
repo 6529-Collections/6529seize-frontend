@@ -1,17 +1,17 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import CreatePhases from '../../../components/distribution-plan-tool/create-phases/CreatePhases';
-import { DistributionPlanToolContext, DistributionPlanToolStep } from '../../../components/distribution-plan-tool/DistributionPlanToolContext';
-import { AllowlistOperationCode } from '../../../components/allowlist-tool/allowlist-tool.types';
+import CreatePhases from '@/components/distribution-plan-tool/create-phases/CreatePhases';
+import { DistributionPlanToolContext, DistributionPlanToolStep } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
+import { AllowlistOperationCode } from '@/components/allowlist-tool/allowlist-tool.types';
 
-jest.mock('../../../components/distribution-plan-tool/common/StepHeader', () => () => <div data-testid="header" />);
-jest.mock('../../../components/distribution-plan-tool/common/DistributionPlanStepWrapper', () => ({ children }: any) => <div>{children}</div>);
-jest.mock('../../../components/distribution-plan-tool/create-phases/form/CreatePhasesForm', () => () => <div data-testid="form" />);
-jest.mock('../../../components/distribution-plan-tool/create-phases/table/CreatePhasesTable', () => ({ phases }: any) => <div data-testid="table">{phases.length}</div>);
-jest.mock('../../../components/distribution-plan-tool/common/DistributionPlanNextStepBtn', () => ({ onNextStep, showNextBtn }: any) => (
+jest.mock('@/components/distribution-plan-tool/common/StepHeader', () => () => <div data-testid="header" />);
+jest.mock('@/components/distribution-plan-tool/common/DistributionPlanStepWrapper', () => ({ children }: any) => <div>{children}</div>);
+jest.mock('@/components/distribution-plan-tool/create-phases/form/CreatePhasesForm', () => () => <div data-testid="form" />);
+jest.mock('@/components/distribution-plan-tool/create-phases/table/CreatePhasesTable', () => ({ phases }: any) => <div data-testid="table">{phases.length}</div>);
+jest.mock('@/components/distribution-plan-tool/common/DistributionPlanNextStepBtn', () => ({ onNextStep, showNextBtn }: any) => (
   <button data-testid="next" onClick={onNextStep}>{showNextBtn && 'next'}</button>
 ));
-jest.mock('../../../components/distribution-plan-tool/common/DistributionPlanEmptyTablePlaceholder', () => ({ title }: any) => <div data-testid="empty">{title}</div>);
+jest.mock('@/components/distribution-plan-tool/common/DistributionPlanEmptyTablePlaceholder', () => ({ title }: any) => <div data-testid="empty">{title}</div>);
 
 describe('CreatePhases', () => {
   function renderWithOps(operations: any[], setStep = jest.fn()) {

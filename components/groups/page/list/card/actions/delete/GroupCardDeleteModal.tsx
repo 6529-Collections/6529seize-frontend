@@ -1,17 +1,17 @@
 "use client";
 
 import { useContext, useRef, useState } from "react";
-import { ApiGroupFull } from "../../../../../../../generated/models/ApiGroupFull";
-import { AuthContext } from "../../../../../../auth/Auth";
-import { ReactQueryWrapperContext } from "../../../../../../react-query-wrapper/ReactQueryWrapper";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { AuthContext } from "@/components/auth/Auth";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   selectActiveGroupId,
   setActiveGroupId,
-} from "../../../../../../../store/groupSlice";
+} from "@/store/groupSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useClickAway, useKeyPressEvent } from "react-use";
 
-import { commonApiPost } from "../../../../../../../services/api/common-api";
+import { commonApiPost } from "@/services/api/common-api";
 import { createPortal } from "react-dom";
 import { useMutation } from "@tanstack/react-query";
 

@@ -1,15 +1,15 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import CommonTimeSelect from '../../../../components/utils/time/CommonTimeSelect';
+import CommonTimeSelect from '@/components/utils/time/CommonTimeSelect';
 
-jest.mock('../../../../components/utils/input/CommonInput', () => ({
+jest.mock('@/components/utils/input/CommonInput', () => ({
   __esModule: true,
   default: ({ value, onChange }: any) => (
     <input data-testid="input" value={value} onChange={e => onChange(e.target.value)} />
   )
 }));
 
-jest.mock('../../../../components/utils/select/dropdown/CommonDropdown', () => ({
+jest.mock('@/components/utils/select/dropdown/CommonDropdown', () => ({
   __esModule: true,
   default: ({ items, activeItem, setSelected }: any) => (
     <select data-testid="dropdown" value={activeItem} onChange={e => setSelected(e.target.value)}>

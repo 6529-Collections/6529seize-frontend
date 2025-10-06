@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { distributionPlanApiFetch } from "../../../services/distribution-plan-api";
-import { AllowlistDescription } from "../../allowlist-tool/allowlist-tool.types";
+import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
+import { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import DistributionPlanToolPlansLoading from "./DistributionPlanToolPlansLoading";
 import DistributionPlanToolPlansNoPlans from "./DistributionPlanToolPlansNoPlans";
 import DistributionPlanToolPlansTable from "./DistributionPlanToolPlansTable";
-import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 
 enum State {
   LOADING = "LOADING",

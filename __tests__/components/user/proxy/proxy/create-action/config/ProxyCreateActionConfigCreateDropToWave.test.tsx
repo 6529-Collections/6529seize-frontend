@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ProxyCreateActionConfigCreateDropToWave from '../../../../../../../components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigCreateDropToWave';
-import { ApiProfileProxyActionType } from '../../../../../../../generated/models/ApiProfileProxyActionType';
+import ProxyCreateActionConfigCreateDropToWave from '@/components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigCreateDropToWave';
+import { ApiProfileProxyActionType } from '@/generated/models/ApiProfileProxyActionType';
 
 describe('ProxyCreateActionConfigCreateDropToWave', () => {
   it('calls callbacks on buttons', async () => {
