@@ -10,30 +10,18 @@ import {
 import { useWebSocket } from "@/services/websocket/useWebSocket";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
-/* ------------------------------------------------------------------ */
-/*  Types                                                             */
-/* ------------------------------------------------------------------ */
 
 interface TypingEntry {
   profile: ApiProfileMin;
-  lastTypingAt: number; // our local receive time (ms)
+  lastTypingAt: number;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Constants                                                         */
-/* ------------------------------------------------------------------ */
-
-const TYPING_WINDOW_MS = 5_000; // still typing if ≤ 5 s old
-const CLEANUP_INTERVAL_MS = 1_000; // prune/check once per second
-
-/* ------------------------------------------------------------------ */
-/*  Helper to convert active typers → human string                    */
-/* ------------------------------------------------------------------ */
+const TYPING_WINDOW_MS = 5_000;
+const CLEANUP_INTERVAL_MS = 1_000;
 
 function buildTypingString(entries: TypingEntry[]): string {
   if (entries.length === 0) return "";
 
-  // Highest‑level first (undefined → 0)
   const sorted = entries.sort(
     (a, b) => (b.profile.level ?? 0) - (a.profile.level ?? 0)
   );
@@ -46,34 +34,19 @@ function buildTypingString(entries: TypingEntry[]): string {
   if (names.length === 2) {
     return `${names[0]}, ${names[1]} are typing`;
   }
-  return `${names[0]}, ${names[1]} and ${
-    names.length - 2
-  } more people are typing`;
+  return `${names[0]}, ${names[1]} and ${names.length - 2} more people are typing`;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Hook                                                              */
-/* ------------------------------------------------------------------ */
-
-/**
- * React hook that returns a live “is‑typing” label for a wave.
- *
- * @param waveId    Wave/channel ID being viewed.
- * @param myHandle  Handle of current user (events from this handle are ignored).
- */
 export function useWaveIsTyping(
   waveId: string,
   myHandle: string | null
 ): string {
   const { send, status } = useWebSocket();
 
-  /** Only the final string lives in state; everything else is in a ref. */
   const [typingMessage, setTypingMessage] = useState("");
 
-  /** Mutable store of active typers — doesn’t cause re‑renders. */
   const typersRef = useRef<Map<string, TypingEntry>>(new Map());
 
-  /* ----- 1. Reset when wave changes -------------------------------- */
   const updateTypingString = useCallback(() => {
     const entries = Array.from(typersRef.current.values());
     const newMessage = buildTypingString(entries);
@@ -81,13 +54,11 @@ export function useWaveIsTyping(
     setTypingMessage((prev) => (prev === newMessage ? prev : newMessage));
   }, []);
 
-  /* ----- 1. Reset when wave changes -------------------------------- */
   useEffect(() => {
     typersRef.current.clear();
     updateTypingString();
   }, [waveId, updateTypingString]);
 
-  /* ----- 2. Subscribe to wave events ------------------------------- */
   useEffect(() => {
     if (status !== WebSocketStatus.CONNECTED) {
       return;
@@ -106,7 +77,6 @@ export function useWaveIsTyping(
     };
   }, [send, status, waveId]);
 
-  /* ----- 3. Handle incoming USER_IS_TYPING packets ----------------- */
   useWebSocketMessage<WsTypingMessage["data"]>(
     WsMessageType.USER_IS_TYPING,
     useCallback(
@@ -127,7 +97,6 @@ export function useWaveIsTyping(
     )
   );
 
-  /* ----- 4. Clear typers when they post drops ---------------------- */
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_UPDATE,
     useCallback(
@@ -144,7 +113,6 @@ export function useWaveIsTyping(
     )
   );
 
-  /* ----- 5. Clear stale state when connection drops ---------------- */
   useEffect(() => {
     if (status !== WebSocketStatus.CONNECTED) {
       typersRef.current.clear();
@@ -152,11 +120,9 @@ export function useWaveIsTyping(
     }
   }, [status, updateTypingString]);
 
-  /* ----- 6. Periodic cleanup + state update ------------------------ */
   useEffect(() => {
     const intervalId = setInterval(() => {
       const now = Date.now();
-      // Prune stale typers
       typersRef.current.forEach((entry, handle) => {
         if (now - entry.lastTypingAt > TYPING_WINDOW_MS) {
           typersRef.current.delete(handle);
