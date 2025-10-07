@@ -75,15 +75,30 @@ beforeEach(() => {
     switch (queryKey[0]) {
       case QueryKey.PROFILE_SEARCH:
       case QueryKey.NFTS_SEARCH:
-        return { isFetching: false, data: [] };
+        return {
+          isFetching: false,
+          data: [],
+          error: undefined,
+          refetch: jest.fn(),
+        };
       default:
-        return { isFetching: false, data: [] };
+        return {
+          isFetching: false,
+          data: [],
+          error: undefined,
+          refetch: jest.fn(),
+        };
     }
   });
   useRouterMock.mockReturnValue({ push: jest.fn() });
   usePathnameMock.mockReturnValue("/");
   useSearchParamsMock.mockReturnValue(new URLSearchParams());
-  useWavesMock.mockReturnValue({ waves: [], isFetching: false });
+  useWavesMock.mockReturnValue({
+    waves: [],
+    isFetching: false,
+    error: null,
+    refetch: jest.fn(),
+  });
   useLocalPreferenceMock.mockReturnValue(["PROFILES", jest.fn()]);
   useDeviceInfoMock.mockReturnValue({ isApp: false } as any);
 });
