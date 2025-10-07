@@ -94,7 +94,7 @@ export default function UserPageXtdhStatsHeader({
           Your xTDH Allocation
         </p>
         <div className="tw-space-y-2">
-          <div className="tw-h-2.5 tw-w-full tw-rounded-full tw-bg-iron-850">
+          <div className="tw-h-2.5 tw-w-full tw-rounded-full tw-border tw-border-iron-700 tw-bg-iron-900">
             <div
               className="tw-h-full tw-rounded-full tw-bg-primary-500 tw-transition-all tw-duration-300"
               style={{ width: `${clampedPercentage}%` }}
@@ -186,7 +186,7 @@ function UserPageXtdhStatsHeaderSkeleton() {
       </div>
       <div className="tw-mt-4 tw-space-y-2 tw-animate-pulse">
         <div className="tw-h-3 tw-w-32 tw-rounded tw-bg-iron-700" />
-        <div className="tw-h-2.5 tw-w-full tw-rounded-full tw-bg-iron-850" />
+        <div className="tw-h-2.5 tw-w-full tw-rounded-full tw-border tw-border-iron-700 tw-bg-iron-900" />
         <div className="tw-h-4 tw-w-40 tw-rounded tw-bg-iron-700" />
       </div>
       <div className="tw-mt-4 tw-space-y-2 tw-animate-pulse">
