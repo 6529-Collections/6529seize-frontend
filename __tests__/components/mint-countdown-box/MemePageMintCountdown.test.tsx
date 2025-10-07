@@ -16,12 +16,6 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
   useCookieConsent: jest.fn(),
 }));
 
-/**
- * Mock MintCountdownBox to:
- *  - Surface the props we care about via data-* attributes
- *  - Render a Mint button only when (!small && !hideMintBtn && mintInfo && linkInfo)
- *  - Render a disabled skeleton button when mintInfo is missing
- */
 jest.mock("@/components/mint-countdown-box/MintCountdownBox", () => {
   return function MockMintCountdownBox(props: any) {
     const canShowMint =
@@ -131,7 +125,7 @@ describe("MemePageMintCountdown", () => {
       const box = getByTestId("mint-countdown-box");
       expect(box).toHaveAttribute("data-is-ended", "true");
       // Title is still computed even if ended — current code uses "... Ends In"
-      expect(box.getAttribute("data-mint-title") ?? "").toMatch(/Ends In$/);
+      expect(box.dataset.mintTitle).toMatch(/Ends In$/);
       expect(box).toHaveAttribute("data-mint-date", "200");
     });
 

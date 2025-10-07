@@ -74,15 +74,7 @@ export default function MintCountdownBox(props: Readonly<Props>) {
             icon={faInfoCircle}
             data-tooltip-id="allowlist-info"
             data-tooltip-content="The timer displays the current time remaining for a specific phase of the drop. Please refer to the distribution plan to check if you are in the allowlist."
-            style={{
-              position: "absolute",
-              top: "10px",
-              right: "10px",
-              fontSize: "18px",
-              cursor: "help",
-              color: "#6c757d",
-              zIndex: 10,
-            }}
+            className={styles.allowlistInfo}
           />
           <Tooltip
             id="allowlist-info"
