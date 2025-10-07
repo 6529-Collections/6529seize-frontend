@@ -5,6 +5,7 @@ import "@/styles/Home.module.scss";
 import "@/styles/seize-bootstrap.scss";
 import "@/styles/swiper.scss";
 //keep this last so that we can override the styles of the above css files
+import "@/styles/animations.scss";
 import "@/styles/globals.scss";
 
 import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";

@@ -1,13 +1,13 @@
 "use client";
 
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { NftPageStats } from "@/components/nft-attributes/NftStats";
+import RememeImage from "@/components/nft-image/RememeImage";
+import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
+import Pagination from "@/components/pagination/Pagination";
+import { printMemeReferences } from "@/components/rememes/RememePage";
+import { RememeSort } from "@/components/rememes/Rememes";
 import { publicEnv } from "@/config/env";
-import { faFire, faRefresh } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { Col, Container, Dropdown, Row, Table } from "react-bootstrap";
-import { Tooltip } from "react-tooltip";
 import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants";
 import { DBResponse } from "@/entities/IDBResponse";
 import { MemesExtendedData, NFT, Rememe } from "@/entities/INFT";
@@ -19,13 +19,13 @@ import {
 } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { fetchUrl } from "@/services/6529api";
-import { useCookieConsent } from "../cookies/CookieConsentContext";
-import RememeImage from "../nft-image/RememeImage";
-import NFTMarketplaceLinks from "../nft-marketplace-links/NFTMarketplaceLinks";
-import { NftPageStats } from "../nftAttributes/NftStats";
-import Pagination from "../pagination/Pagination";
-import { printMemeReferences } from "../rememes/RememePage";
-import { RememeSort } from "../rememes/Rememes";
+import { faFire, faRefresh } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import { Col, Container, Dropdown, Row, Table } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
 import ArtistProfileHandle from "./ArtistProfileHandle";
 import MemeCalendarPeriods from "./MemeCalendarPeriods";
 import styles from "./TheMemes.module.scss";
@@ -225,9 +225,7 @@ export function MemePageLiveRightMenu(props: {
               <Col>
                 <Link
                   href={distributionPlanLink}
-                  target={
-                    props.nft.has_distribution ? "_self" : "_blank"
-                  }
+                  target={props.nft.has_distribution ? "_self" : "_blank"}
                   rel={
                     props.nft.has_distribution
                       ? undefined

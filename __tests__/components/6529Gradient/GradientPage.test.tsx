@@ -18,19 +18,23 @@ jest.mock("@/services/6529api", () => ({
   fetchUrl: jest.fn(),
 }));
 
-jest.mock("@/components/nft-image/NFTImage", () => (props: any) => (
-  <div data-testid="image" />
-));
-jest.mock("@/components/address/Address", () => (props: any) => (
-  <div data-testid="address">{props.display}</div>
-));
-jest.mock("@/components/the-memes/ArtistProfileHandle", () => () => (
-  <div data-testid="artist" />
-));
-jest.mock("@/components/you-own-nft-badge/YouOwnNftBadge", () => () => (
-  <div data-testid="owner-badge" />
-));
-jest.mock("@/components/nftAttributes/NftStats", () => ({
+jest.mock("@/components/nft-image/NFTImage", () => ({
+  __esModule: true,
+  default: (props: any) => <div data-testid="image" />,
+}));
+jest.mock("@/components/address/Address", () => ({
+  __esModule: true,
+  default: (props: any) => <div data-testid="address">{props.display}</div>,
+}));
+jest.mock("@/components/the-memes/ArtistProfileHandle", () => ({
+  __esModule: true,
+  default: () => <div data-testid="artist" />,
+}));
+jest.mock("@/components/you-own-nft-badge/YouOwnNftBadge", () => ({
+  __esModule: true,
+  default: () => <div data-testid="owner-badge" />,
+}));
+jest.mock("@/components/nft-attributes/NftStats", () => ({
   NftPageStats: () => (
     <>
       <tr data-testid="stats-row">
@@ -40,16 +44,18 @@ jest.mock("@/components/nftAttributes/NftStats", () => ({
     </>
   ),
 }));
-jest.mock("@/components/nft-navigation/NftNavigation", () => () => (
-  <div data-testid="nav" />
-));
-jest.mock(
-  "@/components/nft-marketplace-links/NFTMarketplaceLinks",
-  () => () => <div data-testid="links" />
-);
-jest.mock("@/components/latest-activity/LatestActivityRow", () => () => (
-  <tr data-testid="activity-row" />
-));
+jest.mock("@/components/nft-navigation/NftNavigation", () => ({
+  __esModule: true,
+  default: () => <div data-testid="nav" />,
+}));
+jest.mock("@/components/nft-marketplace-links/NFTMarketplaceLinks", () => ({
+  __esModule: true,
+  default: () => <div data-testid="links" />,
+}));
+jest.mock("@/components/latest-activity/LatestActivityRow", () => ({
+  __esModule: true,
+  default: () => <tr data-testid="activity-row" />,
+}));
 jest.mock("@/hooks/useCapacitor", () => () => ({ isIos: false }));
 
 const routerReplace = jest.fn();

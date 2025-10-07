@@ -1,1 +1,16 @@
 @use "../../styles/variables.scss";
+
+.skeletonText {
+  background: linear-gradient(90deg, #444 25%, #555 50%, #444 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+
+  &.skeletonTitle {
+    width: 50%;
+  }
+
+  &.skeletonCountdown {
+    width: 80%;
+  }
+}
