@@ -17,7 +17,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
 }));
 
 // Mock MintCountdownBox to isolate MemePageMintCountdown behavior
-jest.mock("@/components/mintCountdownBox/MintCountdownBox", () => {
+jest.mock("@/components/mint-countdown-box/MintCountdownBox", () => {
   return function MockMintCountdownBox(props: any) {
     return (
       <div data-testid="mint-countdown-box">
@@ -90,10 +90,10 @@ describe("MemePageMintCountdown", () => {
       );
 
       expect(
-        container.querySelector("[class*='loadingState']")
+        container.querySelector("[class*='skeletonText']")
       ).toBeInTheDocument();
       expect(
-        container.querySelector("[class*='skeletonText']")
+        container.querySelector("[class*='skeletonButton']")
       ).toBeInTheDocument();
       expect(
         screen.queryByTestId("mint-countdown-box")
