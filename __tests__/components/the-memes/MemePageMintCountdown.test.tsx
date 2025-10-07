@@ -1,5 +1,5 @@
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import MemePageMintCountdown from "@/components/the-memes/MemePageMintCountdown";
+import MemePageMintCountdown from "@/components/mint-countdown-box/MemePageMintCountdown";
 import { Time } from "@/helpers/time";
 import useCapacitor from "@/hooks/useCapacitor";
 import {

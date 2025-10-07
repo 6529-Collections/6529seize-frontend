@@ -2,13 +2,13 @@
 
 import Address from "@/components/address/Address";
 import DotLoader from "@/components/dotLoader/DotLoader";
+import MemePageMintCountdown from "@/components/mint-countdown-box/MemePageMintCountdown";
 import Pagination from "@/components/pagination/Pagination";
 import ScrollToButton from "@/components/scrollTo/ScrollToButton";
 import {
   SearchModalDisplay,
   SearchWalletsDisplay,
 } from "@/components/searchModal/SearchModal";
-import MemePageMintCountdown from "@/components/the-memes/MemePageMintCountdown";
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants";
 import { DBResponse } from "@/entities/IDBResponse";
