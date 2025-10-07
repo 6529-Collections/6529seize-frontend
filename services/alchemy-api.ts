@@ -206,7 +206,7 @@ function pickImage(source?: {
 }
 
 function pickThumbnail(source?: {
-  image?: { thumbnailUrl?: string | null } | null;
+  image?: { thumbnailUrl?: string | null; cachedUrl?: string | null } | null;
   media?: { thumbnailUrl?: string | null }[] | null;
 }): string | null {
   if (!source) {
@@ -214,6 +214,9 @@ function pickThumbnail(source?: {
   }
   if (source.image?.thumbnailUrl) {
     return source.image.thumbnailUrl;
+  }
+  if (source.image?.cachedUrl) {
+    return source.image.cachedUrl;
   }
   if (source.media && source.media.length > 0) {
     const mediaItem = source.media.find((item) => item?.thumbnailUrl) ??

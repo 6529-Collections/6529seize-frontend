@@ -3,6 +3,15 @@ import Cookies from "js-cookie";
 import { API_AUTH_COOKIE } from "@/constants";
 import { getStagingAuth } from "./auth/auth.utils";
 
+function headersToObject(headers: Headers): Record<string, string> {
+  const result: Record<string, string> = {};
+  headers.forEach((value, key) => {
+    const normalized = key.toLowerCase() === "content-type" ? "Content-Type" : key;
+    result[normalized] = value;
+  });
+  return result;
+}
+
 export async function fetchUrl<T = DBResponse>(
   url: string,
   init?: RequestInit
@@ -12,7 +21,7 @@ export async function fetchUrl<T = DBResponse>(
   if (apiAuth) {
     baseHeaders.set("x-6529-auth", apiAuth);
   }
-  const headers = Object.fromEntries(baseHeaders.entries());
+  const headers = headersToObject(baseHeaders);
   const res = await fetch(url, {
     ...init,
     headers,
@@ -45,7 +54,7 @@ export async function postData(url: string, body: any, init?: RequestInit) {
   if (apiAuth) {
     baseHeaders.set("x-6529-auth", apiAuth);
   }
-  const headers = Object.fromEntries(baseHeaders.entries());
+  const headers = headersToObject(baseHeaders);
   const res = await fetch(url, {
     ...init,
     method: "POST",

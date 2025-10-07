@@ -124,7 +124,7 @@ export default function UserPageXtdh({
           isSelf={canGrant}
         />
       ) : (
-        <UserPageXtdhReceived />
+        <UserPageXtdhReceived profileId={statsProfileId} />
       )}
     </div>
   );
