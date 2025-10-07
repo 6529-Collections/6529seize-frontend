@@ -9,6 +9,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { AuthContext } from "@/components/auth/Auth";
 import UserPageXtdhGranted from "./UserPageXtdhGranted";
 import UserPageXtdhReceived from "./UserPageXtdhReceived";
+import UserPageXtdhStatsHeader from "./UserPageXtdhStatsHeader";
 
 type XtdhViewFilter = "granted" | "received";
 
@@ -42,6 +43,13 @@ export default function UserPageXtdh({
   const router = useRouter();
   const pathname = usePathname();
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const statsProfileId = useMemo(() =>
+    profile.query ??
+    profile.handle ??
+    profile.primary_wallet ??
+    profile.consolidation_key ??
+    null,
+  [profile.consolidation_key, profile.handle, profile.primary_wallet, profile.query]);
 
   const activeFilter = useMemo(
     () => parseFilter(searchParams?.get("tab") ?? null),
@@ -93,6 +101,8 @@ export default function UserPageXtdh({
 
   return (
     <div className="tailwind-scope tw-flex tw-flex-col tw-gap-6">
+      <UserPageXtdhStatsHeader profileId={statsProfileId} />
+
       <div className="tw-w-full tw-overflow-x-auto horizontal-menu-hide-scrollbar">
         <CommonSelect
           items={XTDH_FILTER_ITEMS}
