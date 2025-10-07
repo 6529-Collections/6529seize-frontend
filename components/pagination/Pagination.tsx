@@ -3,7 +3,7 @@
 import { faCaretLeft, faCaretRight } from "@fortawesome/free-solid-svg-icons";
 import styles from "./Pagination.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useState } from "react";
+import { type ChangeEvent, type KeyboardEvent, useEffect, useState } from "react";
 
 interface Props {
   page: number;
@@ -53,7 +53,7 @@ export default function Pagination(props: Readonly<Props>) {
     return props.page >= getLastPage();
   }
 
-  function enterValue(event: any) {
+  function enterValue(event: KeyboardEvent<HTMLInputElement>) {
     if (event.key === "Enter") {
       const newValue = parseInt(inputPage);
       if (!isNaN(newValue) && newValue >= 1 && newValue <= getLastPage()) {
@@ -64,27 +64,26 @@ export default function Pagination(props: Readonly<Props>) {
     }
   }
 
-  function setValue(event: any) {
+  function setValue(event: ChangeEvent<HTMLInputElement>) {
     const newValue = event.target.value;
     setInputPage(newValue);
   }
+  
 
   return (
     <>
       {props.totalResults > props.pageSize && (
         <span>
-          <FontAwesomeIcon
-            icon={faCaretLeft}
+          <button
+            type="button"
             onClick={pagePrevious}
-            className={
-              props.page > 1
-                ? `${styles.iconEnabled}`
-                : `${styles.iconDisabled}`
-            }
-            role="button"
+            className={`${styles.iconButton} ${
+              props.page > 1 ? styles.iconEnabled : styles.iconDisabled
+            }`}
             aria-label="Previous page"
-            tabIndex={0}
-          />{" "}
+            disabled={props.page <= 1}>
+            <FontAwesomeIcon icon={faCaretLeft} />
+          </button>{" "}
           <input
             id="page-number"
             type="text"
@@ -95,24 +94,24 @@ export default function Pagination(props: Readonly<Props>) {
             aria-label="Page number"
           />
           {" of "}
-          <span
+          <button
+            type="button"
             onClick={goToLast}
-            className={isLastPage() ? styles.goToLast : ""}
-            role="button"
+            className={styles.goToLast}
             aria-label="Go to last page"
-            tabIndex={0}>
+            disabled={isLastPage()}>
             {Math.ceil(props.totalResults / props.pageSize).toLocaleString()}
-          </span>{" "}
-          <FontAwesomeIcon
-            icon={faCaretRight}
+          </button>{" "}
+          <button
+            type="button"
             onClick={pageNext}
-            className={
-              isLastPage() ? `${styles.iconDisabled}` : `${styles.iconEnabled}`
-            }
-            role="button"
+            className={`${styles.iconButton} ${
+              isLastPage() ? styles.iconDisabled : styles.iconEnabled
+            }`}
             aria-label="Next page"
-            tabIndex={0}
-          />
+            disabled={isLastPage()}>
+            <FontAwesomeIcon icon={faCaretRight} />
+          </button>
         </span>
       )}
     </>
