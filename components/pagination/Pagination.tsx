@@ -68,6 +68,7 @@ export default function Pagination(props: Readonly<Props>) {
     const newValue = event.target.value;
     setInputPage(newValue);
   }
+  
 
   return (
     <>
