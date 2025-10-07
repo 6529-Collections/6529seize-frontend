@@ -79,7 +79,7 @@ export default function UserPageXtdhStatsHeader({
 
       <div
         role="group"
-        aria-label="Your xTDH Allocation"
+        aria-label="xTDH Allocation"
         className="tw-mt-5"
       >
         <p
@@ -87,7 +87,7 @@ export default function UserPageXtdhStatsHeader({
           title="Overview of how much of your daily xTDH rate is currently granted"
           tabIndex={0}
         >
-          Your xTDH Allocation
+          xTDH Allocation
         </p>
         <div className="tw-space-y-2">
           <div className="tw-h-2.5 tw-w-full tw-rounded-full tw-border tw-border-iron-700 tw-bg-iron-900">

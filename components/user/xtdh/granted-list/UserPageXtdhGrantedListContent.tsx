@@ -45,8 +45,8 @@ export function UserPageXtdhGrantedListContent({
     return (
       <GrantedListMessage>
         {isSelf
-          ? "You haven't granted any xTDH yet."
-          : "This identity hasn't granted any xTDH yet."}
+          ? "You haven't granted any xTDH yet. Start supporting collections you believe in by allocating your xTDH capacity."
+          : "This identity hasn't granted any xTDH yet. When users grant their xTDH to NFT collections, they support those collections by sharing their TDH generation capacity. This allows collectors of those NFTs to accrue TDH over time."}
       </GrantedListMessage>
     );
   }
