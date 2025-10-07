@@ -52,7 +52,7 @@ export function useWaves({
 
   const [debouncedParams, setDebouncedParams] =
     useState<SearchWavesParams>(params);
-  useDebounce(() => setDebouncedParams(params), 200, [params]);
+  useDebounce(() => setDebouncedParams(params), 200, [params]); 
 
   const authQuery = useInfiniteQuery({
     queryKey: [QueryKey.WAVES, debouncedParams],

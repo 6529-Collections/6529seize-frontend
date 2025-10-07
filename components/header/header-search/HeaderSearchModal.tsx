@@ -149,6 +149,7 @@ export default function HeaderSearchModal({
   };
 
   const [selectedItemIndex, setSelectedItemIndex] = useState<number>(0);
+  const [state, setState] = useState<STATE>(STATE.INITIAL);
 
   const getCurrentItems = (): HeaderSearchModalItemType[] => {
     if (selectedCategory === CATEGORY.NFTS) {
@@ -172,6 +173,7 @@ export default function HeaderSearchModal({
   );
 
   useKeyPressEvent("Enter", () => {
+    if (state !== STATE.SUCCESS) return;
     const items = getCurrentItems();
     if (!items || items.length === 0) return;
     const item = items[selectedItemIndex];
@@ -195,8 +197,6 @@ export default function HeaderSearchModal({
       onClose();
     }
   });
-
-  const [state, setState] = useState<STATE>(STATE.INITIAL);
 
   useEffect(() => {
     setSelectedItemIndex(0);
@@ -253,6 +253,7 @@ export default function HeaderSearchModal({
   ]);
 
   const handleRetry = () => {
+    setState(STATE.LOADING);
     const refetchByCategory: Record<CATEGORY, () => Promise<unknown>> = {
       [CATEGORY.NFTS]: refetchNfts,
       [CATEGORY.PROFILES]: refetchProfiles,
@@ -403,12 +404,29 @@ export default function HeaderSearchModal({
                   role="tabpanel"
                   className="tw-h-72 tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-px-4 tw-text-center"
                 >
-                  <p className="tw-text-iron-300 tw-font-normal tw-text-sm">
+                  <p
+                    className="tw-text-iron-300 tw-font-normal tw-text-sm"
+                    aria-live="polite"
+                  >
                     Something went wrong while searching. Please try again.
                   </p>
                   <button
                     type="button"
                     onClick={handleRetry}
+                    disabled={
+                      (selectedCategory === CATEGORY.NFTS && isFetchingNfts) ||
+                      (selectedCategory === CATEGORY.PROFILES &&
+                        isFetchingProfiles) ||
+                      (selectedCategory === CATEGORY.WAVES && isFetchingWaves)
+                    }
+                    aria-busy={
+                      (selectedCategory === CATEGORY.NFTS && isFetchingNfts) ||
+                      (selectedCategory === CATEGORY.PROFILES &&
+                        isFetchingProfiles) ||
+                      (selectedCategory === CATEGORY.WAVES && isFetchingWaves)
+                        ? true
+                        : undefined
+                    }
                     className="tw-rounded-lg tw-bg-primary-500 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-950 hover:tw-bg-primary-400 tw-transition tw-duration-200"
                   >
                     Try again
