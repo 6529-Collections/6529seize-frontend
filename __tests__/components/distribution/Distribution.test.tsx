@@ -30,19 +30,8 @@ jest.mock("next/image", () => ({
 // Mock child components
 jest.mock("@/components/mint-countdown-box/MemePageMintCountdown", () => ({
   __esModule: true,
-  default: ({
-    nft_id,
-    hide_mint_btn,
-    is_full_width,
-    show_only_if_active,
-  }: any) => (
-    <div
-      data-testid="mint-countdown"
-      data-nft-id={nft_id}
-      data-hide-mint-btn={hide_mint_btn}
-      data-is-full-width={is_full_width}
-      data-show-only-if-active={show_only_if_active}
-    />
+  default: ({ nft_id }: any) => (
+    <div data-testid="mint-countdown" data-nft-id={nft_id} data- />
   ),
 }));
 
