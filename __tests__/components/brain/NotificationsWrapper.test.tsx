@@ -26,15 +26,25 @@ describe('NotificationsWrapper', () => {
   it('shows loading spinner and handles actions', () => {
     const setActive = jest.fn();
     render(
-      <NotificationsWrapper items={[]} loading={true} activeDrop={null} setActiveDrop={setActive} />
+      <NotificationsWrapper
+        items={[]}
+        loadingOlder={true}
+        activeDrop={null}
+        setActiveDrop={setActive}
+      />
     );
-    expect(screen.getByText(/Loading notifications/, { selector: 'div' })).toBeInTheDocument();
+    expect(screen.getByText(/Loading older notifications/i)).toBeInTheDocument();
   });
 
   it('delegates callbacks to router and state setter', () => {
     const setActive = jest.fn();
     render(
-      <NotificationsWrapper items={[]} loading={false} activeDrop={null} setActiveDrop={setActive} />
+      <NotificationsWrapper
+        items={[]}
+        loadingOlder={false}
+        activeDrop={null}
+        setActiveDrop={setActive}
+      />
     );
     screen.getByTestId('items').click();
     expect(setActive).toHaveBeenCalledTimes(2);

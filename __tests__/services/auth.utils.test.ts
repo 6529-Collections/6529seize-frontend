@@ -8,6 +8,7 @@ import {
   migrateCookiesToLocalStorage,
   removeAuthJwt,
   setAuthJwt,
+  syncWalletRoleWithServer,
 } from "@/services/auth/auth.utils";
 
 jest.mock("js-cookie", () => ({
@@ -49,6 +50,44 @@ describe("auth.utils", () => {
     expect(safeLocalStorage.setItem).toHaveBeenCalledWith(
       "6529-wallet-role",
       "role"
+    );
+    expect(safeLocalStorage.setItem).toHaveBeenCalledWith(
+      "auth-role-addr",
+      "role"
+    );
+  });
+
+  it("setAuthJwt clears role storage when role is missing", () => {
+    (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
+    jest.spyOn(Date, "now").mockReturnValue(0);
+    setAuthJwt("Addr", "jwt", "refresh");
+    expect(safeLocalStorage.removeItem).toHaveBeenCalledWith(
+      "6529-wallet-role"
+    );
+    expect(safeLocalStorage.removeItem).toHaveBeenCalledWith(
+      "auth-role-addr"
+    );
+  });
+
+  it("syncWalletRoleWithServer stores server role", () => {
+    syncWalletRoleWithServer("Admin", "0xABC");
+    expect(safeLocalStorage.setItem).toHaveBeenCalledWith(
+      "6529-wallet-role",
+      "Admin"
+    );
+    expect(safeLocalStorage.setItem).toHaveBeenCalledWith(
+      "auth-role-0xabc",
+      "Admin"
+    );
+  });
+
+  it("syncWalletRoleWithServer clears role when server role is missing", () => {
+    syncWalletRoleWithServer(null, "0xAbC");
+    expect(safeLocalStorage.removeItem).toHaveBeenCalledWith(
+      "6529-wallet-role"
+    );
+    expect(safeLocalStorage.removeItem).toHaveBeenCalledWith(
+      "auth-role-0xabc"
     );
   });
 
@@ -105,6 +144,7 @@ describe("auth.utils", () => {
   });
 
   it("removeAuthJwt clears storage and cookie", () => {
+    (safeLocalStorage.getItem as jest.Mock).mockReturnValue("Addr");
     removeAuthJwt();
     expect(Cookies.remove).toHaveBeenCalledWith("wallet-auth", {
       secure: true,
@@ -118,6 +158,9 @@ describe("auth.utils", () => {
     );
     expect(safeLocalStorage.removeItem).toHaveBeenCalledWith(
       "6529-wallet-role"
+    );
+    expect(safeLocalStorage.removeItem).toHaveBeenCalledWith(
+      "auth-role-addr"
     );
   });
 });
