@@ -15,7 +15,12 @@ jest.mock('@/components/brain/left-sidebar/search-wave/BrainLeftSidebarSearchWav
 
 describe('BrainLeftSidebarSearchWaveDropdown', () => {
   it('does not render when closed', () => {
-    useWaves.mockReturnValue({ waves: [], isFetching: false });
+    useWaves.mockReturnValue({
+      waves: [],
+      isFetching: false,
+      error: null,
+      refetch: jest.fn(),
+    });
     const { container } = render(
       <BrainLeftSidebarSearchWaveDropdown open={false} searchCriteria={null} onClose={jest.fn()} listType="waves" />
     );
@@ -23,7 +28,12 @@ describe('BrainLeftSidebarSearchWaveDropdown', () => {
   });
 
   it('shows waves when open', () => {
-    useWaves.mockReturnValue({ waves: [{ id: '1', name: 'Wave1' }], isFetching: false });
+    useWaves.mockReturnValue({
+      waves: [{ id: '1', name: 'Wave1' }],
+      isFetching: false,
+      error: null,
+      refetch: jest.fn(),
+    });
     render(
       <BrainLeftSidebarSearchWaveDropdown open searchCriteria="wave" onClose={jest.fn()} listType="waves" />
     );
