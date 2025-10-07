@@ -49,10 +49,13 @@ jest.mock(
     (...args: any[]) =>
       useLocalPreference(...args)
 );
-jest.mock(
-  "@/components/header/header-search/HeaderSearchModalItem",
-  () => (props: any) => <div data-testid="item">{JSON.stringify(props)}</div>
-);
+jest.mock("@/components/header/header-search/HeaderSearchModalItem", () => {
+  const MockHeaderSearchModalItem = (props: any) => (
+    <div data-testid="item">{JSON.stringify(props)}</div>
+  );
+  MockHeaderSearchModalItem.displayName = "MockHeaderSearchModalItem";
+  return MockHeaderSearchModalItem;
+});
 
 const profile = { handle: "alice", wallet: "0x1", display: "Alice", level: 1 };
 
@@ -137,6 +140,15 @@ describe("HeaderSearchModal", () => {
     jest.clearAllMocks();
   });
 
+  it("associates the search input with an accessible label", () => {
+    setup();
+    expect(
+      screen.getByRole("textbox", {
+        name: "Search",
+      })
+    ).toBeInTheDocument();
+  });
+
   it("calls onClose when escape is pressed", () => {
     const { onClose } = setup();
     escapeCb();
@@ -145,7 +157,7 @@ describe("HeaderSearchModal", () => {
 
   it("renders search results when query returns items", () => {
     setup();
-    const input = screen.getByRole("textbox");
+    const input = screen.getByRole("textbox", { name: "Search" });
     fireEvent.change(input, { target: { value: "abc" } });
     expect(screen.getByTestId("item")).toBeInTheDocument();
   });
@@ -197,7 +209,9 @@ describe("HeaderSearchModal", () => {
       )
     ).toBeInTheDocument();
 
-    const retryButton = await screen.findByRole("button", { name: /try again/i });
+    const retryButton = await screen.findByRole("button", {
+      name: /try again/i,
+    });
     fireEvent.click(retryButton);
 
     expect(profilesRefetch).toHaveBeenCalled();
