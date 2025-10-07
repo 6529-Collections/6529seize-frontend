@@ -16,6 +16,7 @@ import MyStreamWaveMyVotes from "./votes/MyStreamWaveMyVotes";
 import MyStreamWaveFAQ from "./MyStreamWaveFAQ";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { createBreakpoint } from "react-use";
+import { getHomeFeedRoute } from "@/helpers/navigation.helpers";
 
 interface MyStreamWaveProps {
   readonly waveId: string;
@@ -36,7 +37,9 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     onWaveNotFound: () => {
       const params = new URLSearchParams(searchParams?.toString() || '');
       params.delete('wave');
-      const newUrl = params.toString() ? `${pathname}?${params.toString()}` : (pathname || '/my-stream');
+      const newUrl = params.toString()
+        ? `${pathname}?${params.toString()}`
+        : (pathname || getHomeFeedRoute());
       router.push(newUrl, { scroll: false });
     },
   });
@@ -62,7 +65,6 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const { activeContentTab } = useContentTab();
 
   const breakpoint = useBreakpoint();
-  const isSmallScreen = breakpoint === "S";
 
   // For handling clicks on drops
   const onDropClick = (drop: ExtendedDrop) => {
@@ -96,8 +98,8 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     <div
       className="tailwind-scope tw-relative tw-flex tw-flex-col tw-h-full"
       key={stableWaveKey}>
-      {/* Always render tab container - shows title area on all screen sizes */}
-      {!isSmallScreen && <MyStreamWaveTabs wave={wave} />}
+      {/* Always render tab container (hidden on app inside MyStreamWaveTabs) */}
+      <MyStreamWaveTabs wave={wave} />
 
       <div
         className="tw-flex-grow tw-overflow-hidden tw-relative"

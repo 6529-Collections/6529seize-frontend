@@ -24,6 +24,7 @@ import BrainMobileWaves from "./mobile/BrainMobileWaves";
 import BrainMobileMessages from "./mobile/BrainMobileMessages";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import BrainNotifications from "./notifications/NotificationsContainer";
+import { getHomeFeedRoute } from "@/helpers/navigation.helpers";
 
 export enum BrainView {
   DEFAULT = "DEFAULT",
@@ -73,7 +74,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       params.delete('wave');
       const newUrl = params.toString()
         ? `${pathname}?${params.toString()}`
-        : pathname || '/my-stream';
+        : pathname || getHomeFeedRoute();
       router.push(newUrl, { scroll: false });
     },
   });
@@ -96,7 +97,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     params.delete('drop');
     const newUrl = params.toString()
       ? `${pathname}?${params.toString()}`
-      : pathname || '/my-stream';
+      : pathname || getHomeFeedRoute();
     router.push(newUrl, { scroll: false });
   };
 
@@ -109,16 +110,27 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   const hasWave = Boolean(waveId);
 
   useEffect(() => {
-    if (pathname === "/my-stream/notifications") {
+    const tabParam = searchParams?.get('tab');
+
+    if (pathname === "/notifications" && !waveId) {
       setActiveView(BrainView.NOTIFICATIONS);
-    } else if (pathname === "/my-stream" && !waveId) {
-      setActiveView(BrainView.DEFAULT);
-    } else if (pathname === "/waves" && !waveId) {
-      setActiveView(BrainView.WAVES);
-    } else if (pathname === "/messages" && !waveId) {
-      setActiveView(BrainView.MESSAGES);
+      return;
     }
-  }, [pathname, waveId]);
+
+    if (pathname === "/messages" && !waveId) {
+      setActiveView(BrainView.MESSAGES);
+      return;
+    }
+
+    if (pathname === "/waves" && !waveId) {
+      setActiveView(BrainView.WAVES);
+      return;
+    }
+
+    if (pathname === "/" && (!tabParam || tabParam === "feed") && !waveId) {
+      setActiveView(BrainView.DEFAULT);
+    }
+  }, [pathname, searchParams, waveId]);
 
   // Handle tab visibility and reset on wave changes
   useEffect(() => {

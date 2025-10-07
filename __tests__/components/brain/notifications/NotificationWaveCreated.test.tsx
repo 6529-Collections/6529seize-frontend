@@ -31,7 +31,7 @@ it('renders wave data and links', () => {
   });
   render(<NotificationWaveCreated notification={notification} />);
   expect(screen.getByRole('link', { name: 'alice' })).toHaveAttribute('href', '/alice');
-  expect(screen.getByRole('link', { name: 'Wave 1' })).toHaveAttribute('href', '/my-stream?wave=1');
+  expect(screen.getByRole('link', { name: 'Wave 1' })).toHaveAttribute('href', '/waves?wave=1');
   expect(screen.getByTestId('wave-follow')).toBeInTheDocument();
   expect(screen.getByTestId('follow-btn')).toBeInTheDocument();
   const img = screen.getByRole('img');

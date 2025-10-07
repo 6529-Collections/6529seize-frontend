@@ -41,7 +41,7 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
   const pathname = usePathname();
   const reload = searchParams?.get('reload') ?? undefined;
 
-  useSetTitle("Notifications | My Stream | Brain");
+  useSetTitle("Notifications | Brain");
 
   useEffect(() => {
     if (reload === "true") {
@@ -54,7 +54,7 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
         });
       const params = new URLSearchParams(searchParams?.toString() || '');
       params.delete('reload');
-      const newUrl = params.toString() ? `${pathname}?${params.toString()}` : (pathname || '/my-stream/notifications');
+      const newUrl = params.toString() ? `${pathname}?${params.toString()}` : (pathname || '/notifications');
       router.replace(newUrl, { scroll: false });
     }
   }, [reload]);

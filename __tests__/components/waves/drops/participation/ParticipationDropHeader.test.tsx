@@ -32,7 +32,7 @@ describe('ParticipationDropHeader', () => {
     expect(screen.getByTestId('time')).toHaveTextContent('123');
     expect(screen.getByTestId('badge').textContent).toContain('"rank":2');
     expect(screen.getByTestId('badge').textContent).toContain('"decisionTime":999');
-    expect(screen.getByText('WaveName').closest('a')).toHaveAttribute('href', '/my-stream?wave=w1');
+    expect(screen.getByText('WaveName').closest('a')).toHaveAttribute('href', '/waves?wave=w1');
   });
 
   it('omits wave link when showWaveInfo is false', () => {

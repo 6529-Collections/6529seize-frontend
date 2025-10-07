@@ -81,6 +81,15 @@ export default function HomeFeed() {
     }
   };
 
+  useEffect(() => {
+    if (!hasTouchScreen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [hasTouchScreen]);
+
   const content = (
     <BrainContent
       activeDrop={activeDrop}
@@ -105,9 +114,9 @@ export default function HomeFeed() {
     return content;
   }
 
-  return (
-    <div style={hasTouchScreen ? smallScreenFeedStyle : homepageFeedStyle}>
-      {content}
-    </div>
-  );
+  const containerStyle = hasTouchScreen
+    ? { ...smallScreenFeedStyle, overflow: "hidden" as const }
+    : homepageFeedStyle;
+
+  return <div style={containerStyle}>{content}</div>;
 }

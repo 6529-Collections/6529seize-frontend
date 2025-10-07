@@ -1,42 +1,24 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import CreateWaveFlow from "@/components/waves/create-wave/CreateWaveFlow";
 
-jest.mock("@/hooks/isMobileScreen", () => ({
-  __esModule: true,
-  default: jest.fn(),
-}));
-
-import useIsMobileScreen from "@/hooks/isMobileScreen";
-const mockedUseIsMobileScreen = useIsMobileScreen as jest.Mock;
-
 describe("CreateWaveFlow", () => {
-  it("renders title size based on screen width", () => {
-    mockedUseIsMobileScreen.mockReturnValueOnce(true);
-    const { rerender } = render(
+  it("renders provided children", () => {
+    render(
       <CreateWaveFlow title="Test" onBack={() => {}}>
-        <div data-testid="child" />
+        <div data-testid="child">content</div>
       </CreateWaveFlow>
     );
-    expect(screen.getByText("Test")).toHaveClass("tw-text-3xl");
 
-    mockedUseIsMobileScreen.mockReturnValueOnce(false);
-    rerender(
-      <CreateWaveFlow title="Test" onBack={() => {}}>
-        <div data-testid="child" />
-      </CreateWaveFlow>
-    );
-    expect(screen.getByText("Test")).toHaveClass("tw-text-5xl");
+    expect(screen.getByTestId("child")).toHaveTextContent("content");
   });
 
-  it("invokes onBack when button clicked", () => {
-    mockedUseIsMobileScreen.mockReturnValue(false);
-    const onBack = jest.fn();
+  it("does not render legacy back button", () => {
     render(
-      <CreateWaveFlow title="BackTest" onBack={onBack}>
-        <span />
+      <CreateWaveFlow title="Test" onBack={() => {}}>
+        <span>child</span>
       </CreateWaveFlow>
     );
-    fireEvent.click(screen.getByRole("button", { name: "All Waves" }));
-    expect(onBack).toHaveBeenCalled();
+
+    expect(screen.queryByRole('button', { name: 'All Waves' })).toBeNull();
   });
 });

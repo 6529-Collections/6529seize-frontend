@@ -31,7 +31,7 @@ describe("useActiveWaveManager", () => {
     act(() => {
       result.current.setActiveWave("def");
     });
-    expect(push).toHaveBeenLastCalledWith("/my-stream?wave=def");
+    expect(push).toHaveBeenLastCalledWith('/waves?wave=def');
 
     // Simulate router query change to trigger state update
     (useSearchParams as jest.Mock).mockReturnValue(
@@ -43,6 +43,6 @@ describe("useActiveWaveManager", () => {
     act(() => {
       result.current.setActiveWave(null);
     });
-    expect(push).toHaveBeenLastCalledWith("/my-stream");
+    expect(push).toHaveBeenLastCalledWith('/waves');
   });
 });

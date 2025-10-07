@@ -72,7 +72,7 @@ export default function AboutApply() {
               <p className="mb-4">
                 Visit the{" "}
                 <a
-                  href="https://6529.io/my-stream?wave=0ecb95d0-d8f2-48e8-8137-bfa71ee8593c"
+                  href="https://6529.io/waves?wave=0ecb95d0-d8f2-48e8-8137-bfa71ee8593c"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="link-info">
@@ -291,7 +291,7 @@ export default function AboutApply() {
                   <div style={{ color: "rgb(154, 154, 154)" }}>
                     Visit{" "}
                     <a
-                      href="https://6529.io/my-stream?wave=e2dae377-d27d-4a69-8b77-38d88fad4d01"
+                      href="https://6529.io/waves?wave=e2dae377-d27d-4a69-8b77-38d88fad4d01"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="link-info">

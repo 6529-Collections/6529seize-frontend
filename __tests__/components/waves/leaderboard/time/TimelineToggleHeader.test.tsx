@@ -7,9 +7,6 @@ jest.mock("@/helpers/waves/time.utils", () => ({
   calculateTimeLeft: jest.fn(() => ({ days: 0, hours: 1, minutes: 2, seconds: 3 })),
 }));
 
-jest.mock("@/components/waves/leaderboard/time/TimeCountdown", () => ({
-  TimeCountdown: ({ timeLeft }: any) => <div data-testid="countdown">{timeLeft.seconds}</div>,
-}));
 
 jest.mock("@/hooks/useWave", () => ({
   useWave: jest.fn(() => null),

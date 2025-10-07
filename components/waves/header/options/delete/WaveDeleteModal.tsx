@@ -36,7 +36,7 @@ export default function WaveDeleteModal({
         type: "warning",
       });
       invalidateDrops();
-      router.push("/my-stream");
+      router.push("/waves");
     },
     onError: (error) => {
       setToast({

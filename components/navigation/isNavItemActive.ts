@@ -40,19 +40,20 @@ export const isNavItemActive = (
 
   const waveParam = searchParams?.get("wave");
   const hasWaveParam = typeof waveParam === "string";
-  const isMyStreamPath = pathname === "/my-stream";
   const isWavesPath = pathname === "/waves";
   const isMessagesPath = pathname === "/messages";
-  const isWaveSubRoute =
-    hasWaveParam && (isMyStreamPath || isWavesPath || isMessagesPath);
-  const viewParam = searchParams?.get("view");
-  const isWavesView = isMyStreamPath && viewParam === "waves";
-  const isMessagesView = isMyStreamPath && viewParam === "messages";
+  const tabParam = searchParams?.get("tab");
   const isFeedTab = homeActiveTab === "feed";
+  const isHomeFeedPath = pathname === "/" && (tabParam === "feed" || isFeedTab);
+  const isWaveSubRoute =
+    hasWaveParam && (isHomeFeedPath || isWavesPath || isMessagesPath);
+  const viewParam = searchParams?.get("view");
+  const isWavesView = pathname === "/waves" || viewParam === "waves";
+  const isMessagesView = pathname === "/messages" || viewParam === "messages";
 
   if (item.kind === "route") {
     if (item.name === "Stream") {
-      return pathname === "/" && activeView === null && isFeedTab;
+      return isHomeFeedPath && activeView === null;
     }
     if (item.name === "Home") {
       return (

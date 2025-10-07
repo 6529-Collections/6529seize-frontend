@@ -37,6 +37,6 @@ describe('BrainLeftSidebarWaveClose', () => {
     render(<BrainLeftSidebarWaveClose waveId="1" />);
     const button = screen.getByRole('button');
     await userEvent.click(button);
-    expect(push).toHaveBeenCalledWith('/my-stream');
+    expect(push).toHaveBeenCalledWith('/waves');
   });
 });

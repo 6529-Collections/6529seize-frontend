@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { publicEnv } from "./config/env";
 import { API_AUTH_COOKIE } from "./constants";
+import {
+  getHomeFeedRoute,
+  getMessagesBaseRoute,
+  getNotificationsRoute,
+  getWaveRoute,
+  getWavesBaseRoute,
+} from "@/helpers/navigation.helpers";
 
 const redirectMappings = [
   { url: "/6529-dubai/", target: "/" },
@@ -126,31 +133,58 @@ export async function middleware(req: NextRequest) {
           isLinuxDesktop);
 
       if (isDesktopOS) {
-        const url = req.nextUrl.clone();
+        const redirectTo = (target: string) => {
+          const clone = req.nextUrl.clone();
+          const [pathnamePart, searchPart] = target.split("?");
+          clone.pathname = pathnamePart || "/";
+          clone.search = searchPart ? `?${searchPart}` : "";
+          return NextResponse.redirect(clone, 301);
+        };
 
         if (normalizedPathname === "/my-stream/notifications") {
-          url.pathname = "/notifications";
-          url.search = "";
-          return NextResponse.redirect(url, 301);
+          return redirectTo(getNotificationsRoute(false));
         }
 
         if (normalizedPathname === "/my-stream") {
-          const view = req.nextUrl.searchParams.get("view");
+          const params = new URLSearchParams(req.nextUrl.searchParams);
+          const view = params.get("view") ?? undefined;
+          const wave = params.get("wave") ?? undefined;
+          const drop = params.get("drop") ?? undefined;
+          const serial = params.get("serialNo") ?? undefined;
+
+          const serialNo = serial ? serial.replace(/\/$/, "") : undefined;
+
+          const buildWaveHref = (isDirectMessage: boolean) => {
+            if (!wave) {
+              return isDirectMessage
+                ? getMessagesBaseRoute(false)
+                : getWavesBaseRoute(false);
+            }
+
+            const extraParams = drop ? { drop } : undefined;
+
+            return getWaveRoute({
+              waveId: wave,
+              serialNo,
+              extraParams,
+              isDirectMessage,
+              isApp: false,
+            });
+          };
 
           if (view === "messages") {
-            const wave = req.nextUrl.searchParams.get("wave");
-            url.pathname = "/messages";
-            url.search = wave ? `?wave=${wave}` : "";
-            return NextResponse.redirect(url, 301);
+            return redirectTo(buildWaveHref(true));
           }
 
-          url.pathname = "/waves";
-          const params = new URLSearchParams(req.nextUrl.searchParams);
-          if (params.has("view")) {
-            params.delete("view");
+          if (view === "waves") {
+            return redirectTo(buildWaveHref(false));
           }
-          url.search = params.toString() ? `?${params.toString()}` : "";
-          return NextResponse.redirect(url, 301);
+
+          if (wave) {
+            return redirectTo(buildWaveHref(false));
+          }
+
+          return redirectTo(getHomeFeedRoute());
         }
       }
     }

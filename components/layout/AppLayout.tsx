@@ -32,7 +32,16 @@ export default function AppLayout({ children }: Props) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isSingleDropOpen = searchParams?.get("drop") !== null;
-  const isStreamRoute = pathname?.startsWith("/my-stream");
+  const waveParam = searchParams?.get("wave");
+  const viewParam = searchParams?.get("view");
+  const hasWaveParam = Boolean(waveParam);
+  const isViewingWavesOrMessages =
+    viewParam === "waves" || viewParam === "messages";
+  const isStreamRoute =
+    pathname === "/waves" ||
+    pathname === "/messages" ||
+    pathname === "/notifications" ||
+    (pathname === "/" && (hasWaveParam || isViewingWavesOrMessages));
   const isHomeFeedView = pathname === "/" && homeActiveTab === "feed";
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();

@@ -75,7 +75,7 @@ export default function HomeWeb({
 
       <div className="tw-h-full">
         {activeTab === "feed" ? (
-          <div className="tw-min-h-full tw-bg-black tw-overflow-hidden tailwind-scope tw-px-2 lg:tw-px-6 xl:tw-px-8">
+          <div className="tw-h-full tw-bg-black tw-overflow-hidden tailwind-scope tw-px-2 lg:tw-px-6 xl:tw-px-8">
             {isAuthenticated ? <HomeFeed /> : <ConnectWallet />}
           </div>
         ) : (

@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import { useRouter } from "next/navigation";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
@@ -74,7 +75,12 @@ export default function CreateDirectMessage({
           .filter((i) => i !== null),
       });
       onSuccess?.();
-      router.push(`/my-stream?view=messages&wave=${wave.id}`);
+      const href = getWaveRoute({
+        waveId: wave.id,
+        isDirectMessage: true,
+        isApp: false,
+      });
+      router.push(href);
     } catch (error) {
       console.error(error);
       setToast({

@@ -29,15 +29,13 @@ export default function SmallScreenHeader({
             height={40}
           />
         </Link>
-        {!isMenuOpen && (
-          <button
-            onClick={onMenuToggle}
-            className="tw-h-10 tw-w-10 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid"
-            aria-label="Open menu"
-          >
-            <Bars3Icon className="tw-h-5 tw-w-5 tw-text-iron-300 tw-flex-shrink-0" />
-          </button>
-        )}
+        <button
+          onClick={onMenuToggle}
+          className="tw-h-10 tw-w-10 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid"
+          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+        >
+          <Bars3Icon className="tw-h-5 tw-w-5 tw-text-iron-300 tw-flex-shrink-0" />
+        </button>
       </div>
     </header>
   );

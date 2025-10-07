@@ -9,10 +9,7 @@ import MyStreamWaveTabsMemeSubmit from "./MyStreamWaveTabsMemeSubmit";
 import { useWave } from "../../../../hooks/useWave";
 import { useDecisionPoints } from "../../../../hooks/waves/useDecisionPoints";
 import { Time } from "../../../../helpers/time";
-import {
-  calculateTimeLeft,
-  TimeLeft,
-} from "../../../../helpers/waves/time.utils";
+import { calculateTimeLeft, TimeLeft } from "../../../../helpers/waves/time.utils";
 import { CompactTimeCountdown } from "../../../waves/leaderboard/time/CompactTimeCountdown";
 import { useSidebarState } from "../../../../hooks/useSidebarState";
 import { ChevronDoubleLeftIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
@@ -54,18 +51,10 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
 
   // Filter out decisions that occur during pause periods using the helper from useWave
   const filteredDecisions = React.useMemo(() => {
-    // Convert DecisionPoint[] to ApiWaveDecision[] format for the filter function
     const decisionsAsApiFormat = allDecisions.map(
-      (decision) =>
-        ({
-          decision_time: decision.timestamp,
-        } as any)
+      (decision) => ({ decision_time: decision.timestamp } as any)
     );
-
-    // Apply the filter
     const filtered = filterDecisionsDuringPauses(decisionsAsApiFormat);
-
-    // Convert back to DecisionPoint[] format
     return allDecisions.filter((decision) =>
       filtered.some((f) => f.decision_time === decision.timestamp)
     );
@@ -86,18 +75,11 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
   });
 
   useEffect(() => {
-    // Initial calculation
     if (nextDecisionTime) {
       setTimeLeft(calculateTimeLeft(nextDecisionTime));
-    }
-
-    // Only set up interval if there's a next decision
-    if (nextDecisionTime) {
       const intervalId = setInterval(() => {
         const newTimeLeft = calculateTimeLeft(nextDecisionTime);
         setTimeLeft(newTimeLeft);
-
-        // Clear interval when countdown reaches zero
         if (
           newTimeLeft.days === 0 &&
           newTimeLeft.hours === 0 &&
@@ -107,8 +89,6 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
           clearInterval(intervalId);
         }
       }, 1000);
-
-      // Clean up interval on unmount
       return () => clearInterval(intervalId);
     }
   }, [nextDecisionTime]);
@@ -188,7 +168,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
             wave={wave}
             setActiveTab={setActiveContentTab}
           />
-          {/* Next winner announcement for memes and rank waves, only if there's an upcoming decision */}
+          {/* Next winner announcement for memes and rank waves, visible on all tabs when there's an upcoming decision */}
           {(isMemesWave || isRankWave) && nextDecisionTime && (
             <div className="tw-flex-shrink-0 tw-px-2 sm:tw-px-4 md:tw-px-6">
               <CompactTimeCountdown timeLeft={timeLeft} />

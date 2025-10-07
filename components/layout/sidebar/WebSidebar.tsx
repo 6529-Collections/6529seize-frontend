@@ -92,7 +92,7 @@ function WebSidebar({
 
   const sidebarContent = (
     <div
-      className="tw-relative tw-z-50 tw-h-full tw-bg-black tw-border-r tw-border-y-0 tw-border-l-0 tw-border-iron-800 tw-border-solid tw-transition-[width] tw-duration-300 tw-ease-in-out focus:tw-outline-none"
+      className="tw-relative tw-z-50 tw-h-full tw-bg-black tw-border-r tw-border-solid tw-border-y-0 tw-border-l-0 tw-border-iron-800 tw-border-0 tw-transition-[width] tw-duration-300 tw-ease-in-out focus:tw-outline-none"
       style={{ width: sidebarWidth }}
       aria-label="Primary sidebar"
       ref={scrollContainerRef}
@@ -116,28 +116,32 @@ function WebSidebar({
     </div>
   );
 
-  return (
-    <>
-      {isDialog && (
+  // Mobile behavior: render nothing when closed; use overlay + dialog when open
+  if (isMobile) {
+    if (!isOffcanvasOpen) {
+      return null;
+    }
+    return (
+      <>
         <button
           type="button"
-          className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-[70] focus:tw-outline-none"
+          className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-[70] tw-border-0 focus:tw-outline-none"
           onClick={onCloseOffcanvas}
           aria-label="Close menu overlay"
         />
-      )}
-      {isDialog ? (
-        <dialog
-          open
-          className="tw-fixed tw-inset-y-0 tw-left-0 tw-bg-transparent tw-border-none tw-p-0 tw-m-0 focus:tw-outline-none tw-z-[80]"
-        >
-          {sidebarContent}
-        </dialog>
-      ) : (
-        <div className="tw-fixed tw-inset-y-0 tw-left-0 focus:tw-outline-none tw-z-40">
+        <div className="tw-fixed tw-inset-y-0 tw-left-0 tw-z-[80] focus:tw-outline-none">
           {sidebarContent}
         </div>
-      )}
+      </>
+    );
+  }
+
+  // Desktop behavior: fixed sidebar
+  return (
+    <>
+      <div className="tw-fixed tw-inset-y-0 tw-left-0 focus:tw-outline-none tw-z-40">
+        {sidebarContent}
+      </div>
       {!isTouchScreen && (
         <ReactTooltip
           id="sidebar-tooltip"

@@ -93,11 +93,13 @@ export const NavigationHistoryProvider: React.FC<{
     prevPathRef.current = url;
 
     const isProfile = pathname?.startsWith("/[user]");
+    const [pathOnly, searchOnly = ""] = url.split("?");
+    const hasWaveParam = searchOnly.includes("wave=");
     const isWaveRoute =
-      (url.startsWith("/my-stream") ||
-        url.startsWith("/waves") ||
-        url.startsWith("/messages")) &&
-      url.includes("wave=");
+      hasWaveParam &&
+      (pathOnly === "/" ||
+        pathOnly.startsWith("/waves") ||
+        pathOnly.startsWith("/messages"));
 
     let pathKey: string;
     if (isProfile) {

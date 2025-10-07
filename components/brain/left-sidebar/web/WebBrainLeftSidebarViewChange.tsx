@@ -26,7 +26,10 @@ export const WebBrainLeftSidebarViewChange: React.FC<
 
   const isLinkActive = (path: string) => {
     if (path === "/waves") {
-      return pathname === "/waves" || (!pathname?.startsWith("/messages") && pathname !== "/my-stream/notifications" && pathname !== "/notifications");
+      return (
+        pathname === "/waves" ||
+        (!pathname?.startsWith("/messages") && pathname !== "/notifications")
+      );
     }
     return activeTab?.startsWith(path);
   };

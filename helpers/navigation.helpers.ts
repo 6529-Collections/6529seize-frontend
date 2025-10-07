@@ -8,18 +8,15 @@ export const sameMainPath = (a: string, b: string): boolean => mainSegment(a) ==
 
 export const getHomeLatestRoute = (): string => "/";
 
-export const getHomeFeedRoute = (): string => "/";
+export const getHomeFeedRoute = (): string => "/?tab=feed";
 
-export const getHomeRoute = (isApp: boolean): string => (isApp ? "/" : "/my-stream");
+export const getHomeRoute = (_isApp: boolean): string => "/";
 
-export const getWavesBaseRoute = (isApp: boolean): string =>
-  isApp ? "/waves" : "/my-stream?view=waves";
+export const getWavesBaseRoute = (_isApp: boolean): string => "/waves";
 
-export const getMessagesBaseRoute = (isApp: boolean): string =>
-  isApp ? "/messages" : "/my-stream?view=messages";
+export const getMessagesBaseRoute = (_isApp: boolean): string => "/messages";
 
-export const getNotificationsRoute = (isApp: boolean): string =>
-  isApp ? "/notifications" : "/my-stream/notifications";
+export const getNotificationsRoute = (_isApp: boolean): string => "/notifications";
 
 export const getWaveRoute = ({
   waveId,
@@ -52,12 +49,7 @@ export const getWaveRoute = ({
     queryEntries.push(["serialNo", normalizedSerial]);
   }
 
-  const base = (() => {
-    if (isApp) {
-      return isDirectMessage ? "/messages" : "/waves";
-    }
-    return "/my-stream";
-  })();
+  const base = isDirectMessage ? "/messages" : "/waves";
 
   if (queryEntries.length === 0) {
     return base;
@@ -83,8 +75,5 @@ export const getWaveHomeRoute = ({
   isDirectMessage: boolean;
   isApp: boolean;
 }): string => {
-  if (isApp) {
-    return isDirectMessage ? "/messages" : "/waves";
-  }
-  return "/my-stream";
+  return isDirectMessage ? "/messages" : "/waves";
 };

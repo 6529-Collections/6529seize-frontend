@@ -481,7 +481,7 @@ describe("CreateWave", () => {
 
       await waitFor(() => {
         expect(mockRouter.push).toHaveBeenCalledWith(
-          "/my-stream?wave=new-wave-id"
+          "/waves?wave=new-wave-id"
         );
         expect(mockQueryContext.waitAndInvalidateDrops).toHaveBeenCalled();
         expect(mockQueryContext.onWaveCreated).toHaveBeenCalled();

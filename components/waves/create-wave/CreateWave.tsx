@@ -85,7 +85,7 @@ export default function CreateWave({
       waitAndInvalidateDrops();
       onWaveCreated();
       onSuccess?.();
-      router.push(`/my-stream?wave=${response.id}`);
+      router.push(`/waves?wave=${response.id}`);
     },
     onError: (error) => {
       setToast({

@@ -11,6 +11,7 @@ jest.mock('@/components/brain/right-sidebar/WaveContent', () => ({
 }));
 
 import BrainRightSidebar, { Mode, SidebarTab } from '@/components/brain/right-sidebar/BrainRightSidebar';
+import { SidebarProvider } from '@/hooks/useSidebarState';
 import { useQuery } from '@tanstack/react-query';
 
 const mockUseQuery = useQuery as jest.Mock;
@@ -26,8 +27,10 @@ describe('BrainRightSidebar', () => {
     mockUseQuery.mockReturnValue({ data: wave });
   });
 
+  const renderSidebar = (ui: React.ReactNode) => render(<SidebarProvider>{ui}</SidebarProvider>);
+
   it('renders WaveContent with fetched wave data', () => {
-    render(
+    renderSidebar(
       <BrainRightSidebar
         isCollapsed={false}
         setIsCollapsed={setIsCollapsed}
@@ -51,7 +54,7 @@ describe('BrainRightSidebar', () => {
 
   it('toggles collapsed state when button clicked', async () => {
     const user = userEvent.setup();
-    render(
+    renderSidebar(
       <BrainRightSidebar
         isCollapsed={false}
         setIsCollapsed={setIsCollapsed}
@@ -61,13 +64,13 @@ describe('BrainRightSidebar', () => {
         setActiveTab={setActiveTab}
       />
     );
-    await user.click(screen.getByRole('button', { name: /toggle sidebar/i }));
+    await user.click(screen.getByRole('button', { name: /close sidebar/i }));
     expect(setIsCollapsed).toHaveBeenCalledWith(true);
   });
 
   it('does not render WaveContent when no wave data', () => {
     mockUseQuery.mockReturnValue({ data: undefined });
-    const { container } = render(
+    const { container } = renderSidebar(
       <BrainRightSidebar
         isCollapsed={false}
         setIsCollapsed={setIsCollapsed}

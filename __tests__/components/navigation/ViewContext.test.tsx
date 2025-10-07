@@ -43,7 +43,7 @@ const TestNavComponent: React.FC<{
 
 beforeEach(() => {
   jest.clearAllMocks();
-  usePathname.mockReturnValue("/my-stream");
+  usePathname.mockReturnValue('/');
   useRouter.mockReturnValue({
     push,
   });
@@ -105,7 +105,7 @@ describe("ViewContext", () => {
         />
       </ViewProvider>
     );
-    expect(push).toHaveBeenCalledWith("/my-stream?view=waves");
-    expect(push).toHaveBeenLastCalledWith("/my-stream?view=waves");
+    expect(push).toHaveBeenCalledWith("/waves");
+    expect(push).toHaveBeenLastCalledWith("/waves");
   });
 });

@@ -41,7 +41,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
   const isDropWave = wave && wave.wave.type !== ApiWaveType.Chat;
   const getHref = (waveId: string) => {
     const currentWaveId = searchParams?.get('wave') ?? undefined;
-    const isDirectMessage = wave?.chat.scope.group?.is_direct_message ?? false;
+    const isDirectMessage = wave?.chat?.scope?.group?.is_direct_message ?? false;
 
     if (currentWaveId === waveId) {
       return getWaveHomeRoute({ isDirectMessage, isApp });

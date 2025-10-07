@@ -20,7 +20,7 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
     const uuid = "123e4567-e89b-12d3-a456-426614174000";
 
     it("parses valid link", () => {
-      const res = parseSeizeQuoteLink(`/my-stream?wave=${uuid}&serialNo=10`);
+      const res = parseSeizeQuoteLink(`/waves?wave=${uuid}&serialNo=10`);
       expect(res).toEqual({ waveId: uuid, serialNo: "10", dropId: undefined });
     });
 

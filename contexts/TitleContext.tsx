@@ -31,9 +31,8 @@ const getDefaultTitleForRoute = (pathname: string | null): string => {
   if (!pathname) return DEFAULT_TITLE;
   if (pathname === "/") return "6529.io";
   if (pathname.startsWith("/waves")) return "Waves | Brain";
-  if (pathname.startsWith("/my-stream/notifications"))
-    return "Notifications | My Stream | Brain";
-  if (pathname.startsWith("/my-stream")) return "My Stream | Brain";
+  if (pathname.startsWith("/notifications")) return "Notifications | Brain";
+  if (pathname.startsWith("/messages")) return "Messages | Brain";
   if (pathname.startsWith("/the-memes")) return "The Memes | Collections";
   if (pathname.startsWith("/meme-lab")) return "Meme Lab | Collections";
   if (pathname.startsWith("/network")) return "Network";
@@ -49,7 +48,6 @@ const getDefaultTitleForRoute = (pathname: string | null): string => {
     // Check if it's not one of the known routes
     const knownRoutes = [
       "waves",
-      "my-stream",
       "the-memes",
       "meme-lab",
       "network",
@@ -83,6 +81,9 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   const [streamHasNewItems, setStreamHasNewItems] = useState(false);
   const routeRef = useRef(pathname);
   const queryRef = useRef(searchParams);
+  const tabParam = searchParams?.get("tab");
+  const waveParam = searchParams?.get("wave");
+  const isHomeFeedTab = pathname === "/" && tabParam === "feed";
 
   useEffect(() => {
     if (routeRef.current === pathname) {
@@ -97,26 +98,26 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const pathChanged = routeRef.current !== pathname;
     const queryChanged =
-      JSON.stringify(queryRef.current) !== JSON.stringify(searchParams);
+      queryRef.current?.toString() !== searchParams?.toString();
 
     if (pathChanged) {
       routeRef.current = pathname;
       queryRef.current = searchParams;
       const defaultTitle = getDefaultTitleForRoute(pathname);
       setTitle(defaultTitle);
-      // Reset wave data when leaving my-stream
-      if (pathname !== "/my-stream") {
+      // Reset wave data when leaving the home feed tab
+      if (!isHomeFeedTab) {
         setWaveData(null);
         setStreamHasNewItems(false);
       }
-    } else if (queryChanged && pathname === "/my-stream") {
+    } else if (queryChanged && isHomeFeedTab) {
       queryRef.current = searchParams;
       // Reset wave data when navigating between waves or back to stream
-      if (!searchParams?.get("wave")) {
+      if (!waveParam) {
         setWaveData(null);
       }
     }
-  }, [pathname, searchParams]);
+  }, [pathname, searchParams, isHomeFeedTab, waveParam]);
 
   const updateTitle = (newTitle: string) => {
     if (routeRef.current === pathname) {
@@ -126,31 +127,28 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Compute the title based on current state
   const computedTitle = useMemo(() => {
-    if (pathname === "/my-stream") {
-      if (searchParams?.get("wave") && waveData) {
-        // Wave title
+    if (isHomeFeedTab) {
+      if (waveParam && waveData) {
         let newItemsText = "";
-        // Only show new items if there are no notifications
         if (waveData.newItemsCount > 0 && notificationCount === 0) {
           const messageText =
             waveData.newItemsCount === 1 ? "message" : "messages";
           newItemsText = `(${waveData.newItemsCount} new ${messageText}) `;
         }
         return `${newItemsText}${waveData.name} | Brain`;
-      } else {
-        // Main stream title
-        // Only show new items if there are no notifications
-        const prefix =
-          streamHasNewItems && notificationCount === 0
-            ? "(New messages) My Stream"
-            : "My Stream";
-        return `${prefix} | Brain`;
       }
+
+      const prefix =
+        streamHasNewItems && notificationCount === 0
+          ? "(New messages) My Feed"
+          : "My Feed";
+      return `${prefix} | Brain`;
     }
+
     return title;
   }, [
-    pathname,
-    searchParams?.get("wave"),
+    isHomeFeedTab,
+    waveParam,
     waveData,
     streamHasNewItems,
     title,

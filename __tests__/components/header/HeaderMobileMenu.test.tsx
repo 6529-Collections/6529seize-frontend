@@ -255,7 +255,7 @@ describe('HeaderMobileMenu', () => {
 
       const mobileRows = screen.getAllByTestId('mobile-row');
       const brainRows = mobileRows.filter(row => 
-        row.getAttribute('data-path') === '/my-stream' || 
+        row.getAttribute('data-path') === '/?tab=feed' || 
         row.getAttribute('data-path') === '/waves'
       );
       

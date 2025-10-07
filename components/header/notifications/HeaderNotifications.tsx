@@ -37,8 +37,7 @@ export default function HeaderNotifications() {
   ]);
 
   useEffect(() => {
-    const isNotificationsRoute =
-      pathname === "/my-stream/notifications" || pathname === "/notifications";
+    const isNotificationsRoute = pathname === "/notifications";
 
     if (isNotificationsRoute) {
       setLinkHref(`${pathname}?reload=true`);

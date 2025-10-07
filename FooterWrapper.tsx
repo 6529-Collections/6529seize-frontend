@@ -17,18 +17,21 @@ export default function FooterWrapper() {
       return;
     }
 
-    const loadStoredTab = () => {
+    const determineInitialTab = () => {
       try {
+        const params = new URLSearchParams(win.location?.search ?? "");
+        const tabFromQuery = params.get("tab");
         const savedTab = win.localStorage.getItem("home.activeTab");
-        if (savedTab) {
-          setHomeActiveTab(savedTab);
+        const resolvedTab = tabFromQuery ?? savedTab;
+        if (resolvedTab) {
+          setHomeActiveTab(resolvedTab);
         }
       } catch (error) {
-        console.warn("Failed to read home.activeTab from storage", error);
+        console.warn("Failed to determine active home tab", error);
       }
     };
 
-    loadStoredTab();
+    determineInitialTab();
 
     const handleTabChange = (event: CustomEvent<{ tab?: string }>) => {
       if (event.detail?.tab) {
@@ -43,23 +46,24 @@ export default function FooterWrapper() {
     };
   }, []);
 
-  // Paths where footer should be hidden
+  const homeFeedTabActive = pathname === "/" && homeActiveTab === "feed";
+  const myFeedRoutes = ["/my-feed", "/feed"];
+
   const hideFooter =
     isApp ||
+    homeFeedTabActive ||
+    myFeedRoutes.some((path) => pathname?.startsWith(path)) ||
     ["/waves", "/messages", "/notifications", "/open-mobile"].some((path) =>
       pathname?.startsWith(path)
-    ) ||
-    (pathname === "/" && homeActiveTab === "feed");
+    );
 
   if (hideFooter) return null;
 
-  // App mode: no sidebar to respect
-  if (isApp) return <Footer />;
+  // App mode or small-screen web: no left-rail spacing
+  if (isApp || isMobile) return <Footer />;
 
-  // WebLayout mode: match main content's sidebar spacing
-  const footerStyle = isMobile && isOffcanvasOpen
-    ? { transform: `translateX(${sidebarWidth})` }
-    : { paddingLeft: sidebarWidth };
+  // Desktop WebLayout: match main content's sidebar spacing
+  const footerStyle = { paddingLeft: sidebarWidth };
 
   return (
     <div style={footerStyle}>

@@ -20,6 +20,7 @@ import { useSelector } from "react-redux";
 import { selectEditingDropId } from "@/store/editSlice";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
+import { getHomeFeedRoute } from "@/helpers/navigation.helpers";
 
 interface MyStreamWaveChatProps {
   readonly wave: ApiWave;
@@ -45,7 +46,9 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
       setInitialDrop(parseInt(dropParam));
       const params = new URLSearchParams(searchParams?.toString() || '');
       params.delete("serialNo");
-      const href = params.toString() ? `${pathname}?${params.toString()}` : (pathname || '/my-stream');
+      const href = params.toString()
+        ? `${pathname}?${params.toString()}`
+        : (pathname || getHomeFeedRoute());
       router.replace(href, { scroll: false });
     } else {
       setInitialDrop(null);

@@ -63,7 +63,7 @@ export const items: NavItemData[] = [
   {
     kind: "route",
     name: "Notifications",
-    href: "/my-stream/notifications",
+    href: "/notifications",
     icon: "notifications",
     iconComponent: BellIcon,
   },
@@ -78,7 +78,6 @@ const BottomNavigation: React.FC = () => {
 
   const setMobileNavRef = useCallback(
     (node: HTMLDivElement | null) => {
-      console.log("BottomNavigation", node);
       mobileNavRef.current = node;
       registerRef("mobileNav", node);
     },

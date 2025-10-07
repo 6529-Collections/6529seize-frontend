@@ -59,6 +59,6 @@ describe('BrainContentPinnedWaves', () => {
     expect(wave2).toBeInTheDocument();
     await user.click(wave1);
     expect(removeId).toHaveBeenCalledWith('1');
-    expect(replace).toHaveBeenCalledWith('/my-stream');
+    expect(replace).toHaveBeenCalledWith('/waves');
   });
 });

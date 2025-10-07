@@ -89,8 +89,8 @@ describe("isNavItemActive", () => {
     expect(
       isNavItemActive(
         item,
-        "/my-stream",
-        new URLSearchParams({ wave: "x1" }),
+        '/waves',
+        new URLSearchParams({ wave: 'x1' }),
         null,
         false,
         "latest"
@@ -108,8 +108,8 @@ describe("isNavItemActive", () => {
     expect(
       isNavItemActive(
         item,
-        "/my-stream",
-        new URLSearchParams({ wave: "dm1" }),
+        '/messages',
+        new URLSearchParams({ wave: 'dm1' }),
         null,
         true,
         "latest"

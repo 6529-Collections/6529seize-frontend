@@ -55,7 +55,7 @@ describe('NotificationDropReplied', () => {
     );
     expect(screen.getByText('user')).toBeInTheDocument();
     await user.click(screen.getByTestId('drop'));
-    expect(push).toHaveBeenCalledWith('/my-stream?wave=w2&serialNo=5/');
-    expect(push).toHaveBeenCalledWith('/my-stream?wave=w2&serialNo=7/');
+    expect(push).toHaveBeenCalledWith('/waves?wave=w2&serialNo=5/');
+    expect(push).toHaveBeenCalledWith('/waves?wave=w2&serialNo=7/');
   });
 });

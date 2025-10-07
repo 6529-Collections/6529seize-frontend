@@ -1,7 +1,7 @@
 "use client";
 
 import React, { type ReactNode } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import MobileLayout from "./MobileLayout";
 import WebLayout from "./WebLayout";
 import ClientOnly from "@/components/client-only/ClientOnly";
@@ -31,6 +31,7 @@ const shouldBypassLayout = (pathname: string | null | undefined): boolean => {
 
 export default function MainLayout({ metadata: _metadata, children }: MainLayoutProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { isApp, isMobileDevice } = useDeviceInfo();
 
   if (shouldBypassLayout(pathname)) {
@@ -39,10 +40,25 @@ export default function MainLayout({ metadata: _metadata, children }: MainLayout
 
   const renderMobileLayout = isApp || isMobileDevice;
 
+  const waveParam = searchParams?.get("wave");
+  const viewParam = searchParams?.get("view");
+  const tabParam = searchParams?.get("tab");
+
+  const hasWaveParam = Boolean(waveParam);
+  const isViewingWavesOrMessages =
+    viewParam === "waves" || viewParam === "messages";
+  const isHomeFeedView =
+    pathname === "/" && (tabParam === "feed" || hasWaveParam);
+  const isStreamRoute =
+    pathname === "/waves" ||
+    pathname === "/messages" ||
+    pathname === "/notifications" ||
+    (pathname === "/" && (hasWaveParam || isViewingWavesOrMessages));
+
   const content = renderMobileLayout ? (
     <MobileLayout>{children}</MobileLayout>
   ) : (
-    <WebLayout isSmall={pathname?.startsWith("/my-stream") ?? false}>
+    <WebLayout isSmall={isHomeFeedView || isStreamRoute}>
       {children}
     </WebLayout>
   );

@@ -2,10 +2,12 @@ import { render, screen } from "@testing-library/react";
 
 const usePathname = jest.fn();
 const useDeviceInfo = jest.fn();
+const useSearchParams = jest.fn();
 const useAuth = jest.fn();
 
 jest.mock("next/navigation", () => ({
   usePathname: () => usePathname(),
+  useSearchParams: () => useSearchParams(),
 }));
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
@@ -73,6 +75,7 @@ const metadata = {
 
 beforeEach(() => {
   useAuth.mockReturnValue({});
+  useSearchParams.mockReturnValue(new URLSearchParams());
 });
 
 afterEach(() => {
@@ -105,8 +108,8 @@ describe("MainLayout", () => {
     expect(screen.queryByTestId("desktop")).not.toBeInTheDocument();
   });
 
-  it("passes isSmall=true for /my-stream routes", () => {
-    usePathname.mockReturnValue("/my-stream");
+  it("passes isSmall=true for wave-centric routes", () => {
+    usePathname.mockReturnValue("/waves");
     useDeviceInfo.mockReturnValue({
       isMobileDevice: false,
       hasTouchScreen: false,
