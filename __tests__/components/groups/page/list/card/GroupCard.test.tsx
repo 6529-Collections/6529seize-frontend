@@ -1,5 +1,6 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import GroupCard, {
   GroupCardState,
 } from "@/components/groups/page/list/card/GroupCard";
@@ -70,15 +71,25 @@ describe("GroupCard", () => {
     expect(push).toHaveBeenCalledWith(`/network?page=1&group=${group.id}`);
   });
 
-  it("navigates to community view when pressing Enter", () => {
+  it("navigates to community view when pressing Enter", async () => {
+    const user = userEvent.setup();
     const { getByRole } = renderComp();
-    fireEvent.keyDown(getByRole("button"), { key: "Enter" });
+    const button = getByRole("button");
+
+    button.focus();
+    await user.keyboard("{Enter}");
+
     expect(push).toHaveBeenCalledWith(`/network?page=1&group=${group.id}`);
   });
 
-  it("navigates to community view when pressing Space", () => {
+  it("navigates to community view when pressing Space", async () => {
+    const user = userEvent.setup();
     const { getByRole } = renderComp();
-    fireEvent.keyDown(getByRole("button"), { key: " " });
+    const button = getByRole("button");
+
+    button.focus();
+    await user.keyboard(" ");
+
     expect(push).toHaveBeenCalledWith(`/network?page=1&group=${group.id}`);
   });
 
