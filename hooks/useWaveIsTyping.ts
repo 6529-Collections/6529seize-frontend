@@ -16,8 +16,8 @@ interface TypingEntry {
   lastTypingAt: number;
 }
 
-const TYPING_WINDOW_MS = 5_000;
-const CLEANUP_INTERVAL_MS = 1_000;
+const TYPING_WINDOW_MS = 5000;
+const CLEANUP_INTERVAL_MS = 1000;
 
 function buildTypingString(entries: TypingEntry[]): string {
   if (entries.length === 0) return "";
