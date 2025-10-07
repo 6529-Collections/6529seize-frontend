@@ -170,7 +170,7 @@ describe("HeaderSearchModal", () => {
 
   it("navigates on enter key", () => {
     const { push } = setup();
-    const input = screen.getByRole("textbox");
+    const input = screen.getByRole("textbox", { name: "Search" });
     fireEvent.change(input, { target: { value: "alice" } });
     enterCb();
     expect(push).toHaveBeenCalled();
@@ -200,7 +200,7 @@ describe("HeaderSearchModal", () => {
       },
     });
 
-    const input = screen.getByRole("textbox");
+    const input = screen.getByRole("textbox", { name: "Search" });
     fireEvent.change(input, { target: { value: "alice" } });
 
     expect(
