@@ -1,8 +1,5 @@
-import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import ManifoldMinting from "@/components/manifoldMinting/ManifoldMinting";
-import { Time } from "@/helpers/time";
+import { render, screen, waitFor } from "@testing-library/react";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -18,18 +15,22 @@ jest.mock("react-bootstrap", () => {
   };
 });
 
-jest.mock("@/components/nft-image/NFTImage", () => () => (
-  <div data-testid="image" />
-));
-jest.mock("@/components/nftAttributes/NFTAttributes", () => () => (
-  <div data-testid="attrs" />
-));
-jest.mock("@/components/manifoldMinting/ManifoldMintingWidget", () => () => (
-  <div data-testid="widget" />
-));
-jest.mock("@/components/the-memes/MemePageMintCountdown", () => () => (
-  <div data-testid="countdown" />
-));
+jest.mock("@/components/nft-image/NFTImage", () => ({
+  __esModule: true,
+  default: () => <div data-testid="image" />,
+}));
+jest.mock("@/components/nft-attributes/NFTAttributes", () => ({
+  __esModule: true,
+  default: () => <div data-testid="nft-attributes" />,
+}));
+jest.mock("@/components/manifoldMinting/ManifoldMintingWidget", () => ({
+  __esModule: true,
+  default: () => <div data-testid="widget" />,
+}));
+jest.mock("@/components/mint-countdown-box/MemePageMintCountdown", () => ({
+  __esModule: true,
+  default: () => <div data-testid="countdown" />,
+}));
 
 // Mock the Time class used in the component
 jest.mock("@/helpers/time", () => ({
@@ -39,10 +40,10 @@ jest.mock("@/helpers/time", () => ({
       toSeconds: jest.fn(() => Date.now() / 1000),
       toDate: jest.fn(() => new Date()),
       toLocaleDateTimeString: jest.fn(() => "2023-01-01 12:00"),
-      toIsoDateString: jest.fn(() => "2023-01-01"), 
+      toIsoDateString: jest.fn(() => "2023-01-01"),
       toIsoTimeString: jest.fn(() => "12:00:00 UTC"),
       lt: jest.fn(() => false),
-      gt: jest.fn(() => true)
+      gt: jest.fn(() => true),
     })),
     seconds: jest.fn((s) => ({
       toMillis: jest.fn(() => s * 1000),
@@ -52,9 +53,9 @@ jest.mock("@/helpers/time", () => ({
       toIsoDateString: jest.fn(() => "2023-01-01"),
       toIsoTimeString: jest.fn(() => "12:00:00 UTC"),
       lt: jest.fn(() => false),
-      gt: jest.fn(() => true)
-    }))
-  }
+      gt: jest.fn(() => true),
+    })),
+  },
 }));
 
 // Mock all the helper functions to avoid implementation complexity
@@ -70,7 +71,7 @@ jest.mock("@/helpers/Helpers", () => ({
 
 jest.mock("@/hooks/useManifoldClaim", () => {
   // Create mock Time objects that include all necessary methods
-  const createMockTime = (ms = Date.now()) => ({
+  const createMockTime = (ms = Date.now()): any => ({
     lt: jest.fn(() => false),
     gt: jest.fn(() => true),
     gte: jest.fn(() => true),
@@ -83,20 +84,20 @@ jest.mock("@/hooks/useManifoldClaim", () => {
     toSeconds: jest.fn(() => ms / 1000),
     toLocaleDateTimeString: jest.fn(() => "2023-01-01 12:00"),
     toIsoDateString: jest.fn(() => "2023-01-01"),
-    toIsoTimeString: jest.fn(() => "12:00:00 UTC")
+    toIsoTimeString: jest.fn(() => "12:00:00 UTC"),
   });
 
   return {
     __esModule: true,
     useManifoldClaim: jest.fn(),
-    ManifoldClaimStatus: { 
+    ManifoldClaimStatus: {
       ACTIVE: "active",
-      UPCOMING: "upcoming", 
-      ENDED: "ended" 
+      UPCOMING: "upcoming",
+      ENDED: "ended",
     },
     ManifoldPhase: {
       ALLOWLIST: "Allowlist",
-      PUBLIC: "Public Phase"
+      PUBLIC: "Public Phase",
     },
     buildMemesPhases: jest.fn(() => [
       {
@@ -107,7 +108,7 @@ jest.mock("@/hooks/useManifoldClaim", () => {
         end: createMockTime(Date.now() + 3600000), // 1 hour from now
       },
       {
-        id: "public", 
+        id: "public",
         name: "Public Phase",
         type: "Public Phase",
         start: createMockTime(Date.now() + 3600000), // 1 hour from now
@@ -133,9 +134,9 @@ global.fetch = mockFetch;
 const createMockManifoldInstance = (overrides = {}) => ({
   id: 1,
   publicData: {
-    asset: { 
-      name: "Test NFT", 
-      description: "Test description", 
+    asset: {
+      name: "Test NFT",
+      description: "Test description",
       attributes: [],
       image_url: "test.jpg",
       animation_url: "",
@@ -173,7 +174,7 @@ const defaultProps = {
     toDate: jest.fn(() => new Date()),
     toLocaleDateTimeString: jest.fn(() => "2023-01-01 12:00"),
     toIsoDateString: jest.fn(() => "2023-01-01"),
-    toIsoTimeString: jest.fn(() => "12:00:00 UTC")
+    toIsoTimeString: jest.fn(() => "12:00:00 UTC"),
   } as any, // Mock Time object
 };
 
@@ -191,7 +192,7 @@ describe("Basic Functionality", () => {
       }
       return undefined;
     });
-    
+
     render(<ManifoldMinting {...defaultProps} />);
     await screen.findByText("Error fetching mint information");
   });
@@ -199,7 +200,7 @@ describe("Basic Functionality", () => {
   test("shows loading state initially", () => {
     useManifoldClaim.mockReturnValue(undefined);
     mockFetch.mockImplementation(() => new Promise(() => {})); // Never resolves
-    
+
     render(<ManifoldMinting {...defaultProps} />);
     expect(screen.getByText("Retrieving Mint information")).toBeInTheDocument();
   });
@@ -210,17 +211,20 @@ describe("Basic Functionality", () => {
       ok: true,
       json: () => Promise.resolve(createMockManifoldInstance()),
     });
-    
+
     render(<ManifoldMinting {...defaultProps} />);
-    
+
     // Should render title and basic info - component renders "Mint" span and title text
     expect(screen.getByText("Mint")).toBeInTheDocument();
     expect(screen.getByText("Test Meme")).toBeInTheDocument();
-    
+
     // Wait for the NFT info to load and display
-    await waitFor(() => {
-      expect(screen.getByText("Test NFT")).toBeInTheDocument();
-    }, { timeout: 3000 });
+    await waitFor(
+      () => {
+        expect(screen.getByText("Test NFT")).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
   });
 });
 
@@ -231,41 +235,49 @@ describe("Component Structure", () => {
       ok: true,
       json: () => Promise.resolve(createMockManifoldInstance()),
     });
-    
+
     render(<ManifoldMinting {...defaultProps} />);
-    
+
     // Wait for data to load
-    await waitFor(() => {
-      expect(screen.getByText("Test NFT")).toBeInTheDocument();
-    }, { timeout: 3000 });
-    
+    await waitFor(
+      () => {
+        expect(screen.getByText("Test NFT")).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
+
     // Check that child components are rendered
     expect(screen.getByTestId("image")).toBeInTheDocument();
-    expect(screen.getByTestId("attrs")).toBeInTheDocument();
+    expect(screen.getByTestId("nft-attributes")).toBeInTheDocument();
     expect(screen.getByTestId("widget")).toBeInTheDocument();
   });
 
   test("displays edition size and pricing information", async () => {
-    useManifoldClaim.mockReturnValue(createMockClaim({
-      total: 100,
-      totalMax: 1000,
-      remaining: 900,
-      cost: 50000000000000000 // 0.05 ETH in wei
-    }));
-    
+    useManifoldClaim.mockReturnValue(
+      createMockClaim({
+        total: 100,
+        totalMax: 1000,
+        remaining: 900,
+        cost: 50000000000000000, // 0.05 ETH in wei
+      })
+    );
+
     mockFetch.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve(createMockManifoldInstance()),
     });
-    
+
     render(<ManifoldMinting {...defaultProps} />);
-    
-    await waitFor(() => {
-      expect(screen.getByText("Test NFT")).toBeInTheDocument();
-      // Check that the mock functions were called for rendering data
-      const helpers = require("@/helpers/Helpers");
-      expect(helpers.numberWithCommas).toHaveBeenCalled();
-      expect(helpers.fromGWEI).toHaveBeenCalled();
-    }, { timeout: 3000 });
+
+    await waitFor(
+      () => {
+        expect(screen.getByText("Test NFT")).toBeInTheDocument();
+        // Check that the mock functions were called for rendering data
+        const helpers = require("@/helpers/Helpers");
+        expect(helpers.numberWithCommas).toHaveBeenCalled();
+        expect(helpers.fromGWEI).toHaveBeenCalled();
+      },
+      { timeout: 3000 }
+    );
   });
 });

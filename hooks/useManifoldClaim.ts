@@ -1,6 +1,12 @@
 "use client";
 
-import { MANIFOLD_NETWORK, MEMES_CONTRACT, NULL_MERKLE } from "@/constants";
+import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis";
+import {
+  MANIFOLD_NETWORK,
+  MEMES_CONTRACT,
+  MEMES_MANIFOLD_PROXY_CONTRACT,
+  NULL_MERKLE,
+} from "@/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
 import { DateTime } from "luxon";
@@ -194,4 +200,14 @@ export function useManifoldClaim(
   }, [readContract.isFetching]);
 
   return claim;
+}
+
+export function useMemesManifoldClaim(tokenId: number, onError?: () => void) {
+  return useManifoldClaim(
+    MEMES_CONTRACT,
+    MEMES_MANIFOLD_PROXY_CONTRACT,
+    MEMES_MANIFOLD_PROXY_ABI,
+    tokenId,
+    onError
+  );
 }
