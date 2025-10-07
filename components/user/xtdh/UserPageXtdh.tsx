@@ -68,10 +68,10 @@ export default function UserPageXtdh({
   }, [activeProfileProxy, connectedProfile, profile.consolidation_key, profile.handle]);
 
   useEffect(() => {
-    if (!searchParams || !pathname) return;
-    if (searchParams.has("tab")) return;
+    if (!pathname) return;
+    if (searchParams?.has("tab")) return;
 
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams();
     params.set("tab", DEFAULT_FILTER);
     const queryString = params.toString();
 
@@ -82,13 +82,13 @@ export default function UserPageXtdh({
 
   const handleFilterChange = useCallback(
     (filter: XtdhViewFilter) => {
-      if (!searchParams || !pathname) return;
+      if (!pathname) return;
 
       if (activeFilter === filter) {
         return;
       }
 
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams();
       params.set("tab", filter);
 
       const queryString = params.toString();
@@ -96,7 +96,7 @@ export default function UserPageXtdh({
         scroll: false,
       });
     },
-    [activeFilter, pathname, router, searchParams]
+    [activeFilter, pathname, router]
   );
 
   return (
