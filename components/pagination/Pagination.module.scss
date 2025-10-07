@@ -12,6 +12,11 @@
   justify-content: center;
   font: inherit;
 
+  &:focus-visible {
+    outline: 2px solid variables.$focus-outline;
+    outline-offset: 2px;
+  }
+
   &:disabled {
     cursor: default;
   }
@@ -33,6 +38,11 @@
   padding: 0;
   cursor: pointer;
   font: inherit;
+
+  &:focus-visible {
+    outline: 2px solid variables.$focus-outline;
+    outline-offset: 2px;
+  }
 
   &:hover {
     text-decoration: underline;
