@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  useContext,
-  useEffect,
-  useState,
-  type JSX,
-  type KeyboardEvent,
-} from "react";
+import { useContext, useEffect, useState, type JSX } from "react";
 import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { getRandomColorWithSeed } from "@/helpers/Helpers";
 import GroupCardView from "./GroupCardView";
@@ -111,40 +105,33 @@ export default function GroupCard({
     ),
   };
 
-  const goToCommunityView = () => {
-    if (state !== GroupCardState.IDLE) return;
-    router.push(`/network?page=1&group=${group?.id}`);
-  };
-
-  const onCardKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      goToCommunityView();
-    }
-  };
-
   const isIdle = state === GroupCardState.IDLE;
+  const cardLabel =
+    group?.name ?? titlePlaceholder ?? "View community group details";
 
   return (
-    <div
-      role="button"
-      tabIndex={isIdle ? 0 : -1}
-      aria-disabled={!isIdle}
-      className={`${isIdle && "tw-group tw-cursor-pointer"} tw-col-span-1`}
-      onClick={goToCommunityView}
-      onKeyDown={onCardKeyDown}>
-      <div
-        className="tw-relative tw-w-full tw-h-9 tw-rounded-t-2xl"
-        style={{
-          background: `linear-gradient(45deg, ${banner1} 0%, ${banner2} 100%)`,
-        }}>
-        <div className="tw-absolute tw-inset-0 tw-rounded-t-2xl tw-ring-[1.5px] tw-ring-white/20 group-hover:tw-ring-white/40 tw-ring-inset tw-pointer-events-none tw-transition tw-duration-500 tw-ease-out"></div>
-      </div>
-      <div
-        className={` ${
-          connectedProfile?.handle ? "tw-min-h-[134px]" : "tw-h-[123.5px]"
-        } -tw-mt-1 tw-bg-iron-900 tw-flex tw-flex-col tw-rounded-b-2xl tw-relative tw-border-[1.5px] tw-border-solid tw-border-t-0 tw-border-iron-700 group-hover:tw-border-iron-600 tw-transition tw-duration-500 tw-ease-out`}>
-        {components[state]}
+    <div className="tw-col-span-1 tw-relative">
+      {isIdle && (
+        <button
+          type="button"
+          onClick={() => router.push(`/network?page=1&group=${group?.id}`)}
+          className="tw-absolute tw-inset-0 tw-z-10 tw-rounded-2xl tw-border-0 tw-bg-transparent tw-p-0 tw-cursor-pointer focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500"
+          aria-label={`Open ${cardLabel}`}></button>
+      )}
+      <div className={isIdle ? "tw-group" : ""}>
+        <div
+          className="tw-relative tw-w-full tw-h-9 tw-rounded-t-2xl"
+          style={{
+            background: `linear-gradient(45deg, ${banner1} 0%, ${banner2} 100%)`,
+          }}>
+          <div className="tw-absolute tw-inset-0 tw-rounded-t-2xl tw-ring-[1.5px] tw-ring-white/20 group-hover:tw-ring-white/40 tw-ring-inset tw-pointer-events-none tw-transition tw-duration-500 tw-ease-out"></div>
+        </div>
+        <div
+          className={`${
+            connectedProfile?.handle ? "tw-min-h-[134px]" : "tw-h-[123.5px]"
+          } -tw-mt-1 tw-bg-iron-900 tw-flex tw-flex-col tw-rounded-b-2xl tw-relative tw-border-[1.5px] tw-border-solid tw-border-t-0 tw-border-iron-700 group-hover:tw-border-iron-600 tw-transition tw-duration-500 tw-ease-out`}>
+          {components[state]}
+        </div>
       </div>
     </div>
   );
