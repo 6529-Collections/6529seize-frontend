@@ -29,7 +29,7 @@ jest.mock("@/helpers/nft.helpers", () => ({
   getFileTypeFromMetadata: () => "png",
   getDimensionsFromMetadata: () => "100x100",
 }));
-jest.mock("@/components/nftAttributes/NFTAttributes", () => ({
+jest.mock("@/components/nft-attributes/NFTAttributes", () => ({
   __esModule: true,
   default: () => <div data-testid="attrs" />,
 }));

@@ -1,9 +1,9 @@
-import styles from "./TheMemes.module.scss";
-import { Col, Container, Row, Table } from "react-bootstrap";
+import NFTLeaderboard from "@/components/leaderboard/NFTLeaderboard";
+import { NftPageStats } from "@/components/nft-attributes/NftStats";
 import { NFT } from "@/entities/INFT";
 import { numberWithCommas, printMintDate } from "@/helpers/Helpers";
-import NFTLeaderboard from "../leaderboard/NFTLeaderboard";
-import { NftPageStats } from "../nftAttributes/NftStats";
+import { Col, Container, Row, Table } from "react-bootstrap";
+import styles from "./TheMemes.module.scss";
 
 export function MemePageCollectorsRightMenu(props: {
   show: boolean;

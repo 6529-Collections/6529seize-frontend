@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Col, Container, Row, Table } from "react-bootstrap";
+import { Spinner } from "@/components/dotLoader/DotLoader";
+import MemePageMintCountdown from "@/components/mint-countdown-box/MemePageMintCountdown";
+import NFTAttributes from "@/components/nft-attributes/NFTAttributes";
+import NFTImage from "@/components/nft-image/NFTImage";
 import { ETHEREUM_ICON_TEXT, MEMES_CONTRACT } from "@/constants";
 import { Distribution } from "@/entities/IDistribution";
 import {
@@ -22,10 +23,9 @@ import {
   MemePhase,
   useManifoldClaim,
 } from "@/hooks/useManifoldClaim";
-import { Spinner } from "../dotLoader/DotLoader";
-import NFTImage from "../nft-image/NFTImage";
-import NFTAttributes from "../nftAttributes/NFTAttributes";
-import MemePageMintCountdown from "../the-memes/MemePageMintCountdown";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Col, Container, Row, Table } from "react-bootstrap";
 import { getTraitValue, ManifoldInstance } from "./manifold-types";
 import styles from "./ManifoldMinting.module.scss";
 import ManifoldMintingWidget from "./ManifoldMintingWidget";
@@ -246,8 +246,6 @@ export default function ManifoldMinting(props: Readonly<Props>) {
               <MemePageMintCountdown
                 nft_id={props.token_id}
                 hide_mint_btn={true}
-                is_full_width={true}
-                show_only_if_active={true}
               />
             </Col>
           </Row>

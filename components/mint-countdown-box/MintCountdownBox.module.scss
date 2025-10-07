@@ -2,18 +2,31 @@
 
 .countdownContainer {
   background-color: variables.$very-dark-grey;
-  padding: 15px 20px;
-  width: 100%;
+  padding: 15px 20px !important;
   color: white;
+  width: 100%;
+  position: relative;
   box-shadow: 0.5px 0.5px 3px 0px rgba(255, 255, 255, 0.02),
     1px 3px 6px 0px rgba(0, 0, 0, 0.15),
     -0.5px -1px 3px 0px rgba(255, 255, 255, 0.02),
     -3px -3px 5px 0px rgba(255, 255, 255, 0.02) inset,
     6px 3px 6px 0px rgba(0, 0, 0, 0.4) inset;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  border-radius: 0.5rem;
+  justify-content: center;
+  align-items: center;
+
+  height: 155px; // Mobile & small screens
+
+  @media (min-width: 768px) {
+    height: 180px; // Tablet & larger
+  }
+
+  &.countdownContainerShort {
+    height: 120px;
+  }
 }
 
 .mintBtn {
@@ -21,6 +34,7 @@
   border: 2px solid white !important;
   font-size: larger !important;
   font-weight: bold;
+  border-radius: 4px;
 
   &:hover {
     background-color: white;
@@ -28,43 +42,19 @@
   }
 }
 
-// Skeleton loading styles
-.loadingState {
-  opacity: 0.7;
-}
-
-.skeletonText {
+.skeletonBtn {
   background: linear-gradient(90deg, #444 25%, #555 50%, #444 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
-  border-radius: 4px;
-
-  &.skeletonTitle {
-    height: 20px;
-    width: 60%;
-  }
-
-  &.skeletonCountdown {
-    height: 30px;
-    width: 80%;
-  }
+  border: 2px solid #666 !important;
 }
 
-.skeletonButton {
-  background: linear-gradient(90deg, #444 25%, #555 50%, #444 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: 4px;
-  height: 40px;
-  width: 100%;
-  border: 2px solid #666;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+.allowlistInfo {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 18px;
+  cursor: help;
+  color: #6c757d;
+  z-index: 10;
 }

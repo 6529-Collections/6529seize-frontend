@@ -1,10 +1,8 @@
 "use client";
 
-import { faExpandAlt } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Carousel, Col, Container, Row, Table } from "react-bootstrap";
+import Download from "@/components/download/Download";
+import NFTAttributes from "@/components/nft-attributes/NFTAttributes";
+import NFTImage from "@/components/nft-image/NFTImage";
 import { MemesExtendedData, NFT } from "@/entities/INFT";
 import {
   enterArtFullScreen,
@@ -17,9 +15,11 @@ import {
   getDimensionsFromMetadata,
   getFileTypeFromMetadata,
 } from "@/helpers/nft.helpers";
-import Download from "../download/Download";
-import NFTImage from "../nft-image/NFTImage";
-import NFTAttributes from "../nftAttributes/NFTAttributes";
+import { faExpandAlt } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Carousel, Col, Container, Row, Table } from "react-bootstrap";
 import ArtistProfileHandle from "./ArtistProfileHandle";
 import styles from "./TheMemes.module.scss";
 
@@ -270,9 +270,7 @@ export function MemePageArt(props: {
                     <Col>
                       <Link
                         href={distributionPlanLink}
-                        target={
-                          props.nft.has_distribution ? "_self" : "_blank"
-                        }
+                        target={props.nft.has_distribution ? "_self" : "_blank"}
                         rel={
                           props.nft.has_distribution
                             ? undefined

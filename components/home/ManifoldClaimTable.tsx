@@ -1,6 +1,6 @@
+import { NftPageStats } from "@/components/nft-attributes/NftStats";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { Table } from "react-bootstrap";
-import { NftPageStats } from "@/components/nftAttributes/NftStats";
 
 interface ManifoldClaimTableProps {
   readonly statusDisplay: React.ReactNode;
@@ -28,11 +28,7 @@ export default function ManifoldClaimTable({
             <b>{costDisplay}</b>
           </td>
         </tr>
-        <NftPageStats
-          nft={nft}
-          hide_mint_price={true}
-          hide_hodl_rate={true}
-        />
+        <NftPageStats nft={nft} hide_mint_price={true} hide_hodl_rate={true} />
       </tbody>
     </Table>
   );

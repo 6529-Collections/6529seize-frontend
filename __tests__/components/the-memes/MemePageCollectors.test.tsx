@@ -1,9 +1,8 @@
-import { render, screen } from "@testing-library/react";
-import React from "react";
 import {
   MemePageCollectorsRightMenu,
   MemePageCollectorsSubMenu,
 } from "@/components/the-memes/MemePageCollectors";
+import { render, screen } from "@testing-library/react";
 
 jest.mock("@/helpers/Helpers", () => ({
   numberWithCommas: jest.fn((n) => n.toString()),
@@ -16,7 +15,7 @@ jest.mock("@/components/leaderboard/NFTLeaderboard", () => (props: any) => {
   return <div data-testid="leaderboard" />;
 });
 
-jest.mock("@/components/nftAttributes/NftStats", () => ({
+jest.mock("@/components/nft-attributes/NftStats", () => ({
   NftPageStats: () => <tr data-testid="stats" />,
 }));
 
@@ -29,7 +28,6 @@ const nft = {
   tdh_rank: 7,
 } as any;
 
-
 describe("MemePageCollectorsRightMenu", () => {
   it("renders NFT details when shown", () => {
     render(<MemePageCollectorsRightMenu show nft={nft} />);
@@ -39,7 +37,9 @@ describe("MemePageCollectorsRightMenu", () => {
   });
 
   it("returns null when not shown", () => {
-    const { container } = render(<MemePageCollectorsRightMenu show={false} nft={nft} />);
+    const { container } = render(
+      <MemePageCollectorsRightMenu show={false} nft={nft} />
+    );
     expect(container).toBeEmptyDOMElement();
   });
 });
@@ -53,8 +53,9 @@ describe("MemePageCollectorsSubMenu", () => {
   });
 
   it("returns null when nft missing", () => {
-    const { container } = render(<MemePageCollectorsSubMenu show nft={undefined} />);
+    const { container } = render(
+      <MemePageCollectorsSubMenu show nft={undefined} />
+    );
     expect(container).toBeEmptyDOMElement();
   });
 });
-
