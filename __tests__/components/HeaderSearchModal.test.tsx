@@ -7,7 +7,12 @@ jest.mock(
 );
 
 jest.mock("@/hooks/useWaves", () => ({
-  useWaves: () => ({ waves: [], isFetching: false }),
+  useWaves: () => ({
+    waves: [],
+    isFetching: false,
+    error: null,
+    refetch: jest.fn(),
+  }),
 }));
 
 jest.mock("@/hooks/useLocalPreference", () =>
@@ -21,6 +26,8 @@ jest.mock("@tanstack/react-query", () => {
     useQuery: jest.fn(() => ({
       data: [{ handle: "bob", wallet: "0x1" }],
       isFetching: false,
+      error: undefined,
+      refetch: jest.fn(),
     })),
   };
 });

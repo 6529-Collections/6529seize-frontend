@@ -25,6 +25,7 @@ import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
 enum STATE {
   INITIAL = "INITIAL",
   LOADING = "LOADING",
+  ERROR = "ERROR",
   NO_RESULTS = "NO_RESULTS",
   SUCCESS = "SUCCESS",
 }
@@ -79,9 +80,12 @@ export default function HeaderSearchModal({
     }
   }, []);
 
-  const { isFetching: isFetchingProfiles, data: profiles } = useQuery<
-    CommunityMemberMinimal[]
-  >({
+  const {
+    isFetching: isFetchingProfiles,
+    data: profiles,
+    error: profilesError,
+    refetch: refetchProfiles,
+  } = useQuery<CommunityMemberMinimal[], Error>({
     queryKey: [QueryKey.PROFILE_SEARCH, debouncedValue],
     queryFn: async () =>
       await commonApiFetch<CommunityMemberMinimal[]>({
@@ -95,7 +99,12 @@ export default function HeaderSearchModal({
       debouncedValue.length >= MIN_SEARCH_LENGTH,
   });
 
-  const { isFetching: isFetchingNfts, data: nfts } = useQuery({
+  const {
+    isFetching: isFetchingNfts,
+    data: nfts,
+    error: nftsError,
+    refetch: refetchNfts,
+  } = useQuery<NFTSearchResult[], Error>({
     queryKey: [QueryKey.NFTS_SEARCH, debouncedValue],
     queryFn: async () => {
       return await commonApiFetch<NFTSearchResult[]>({
@@ -111,7 +120,12 @@ export default function HeaderSearchModal({
         (debouncedValue.length > 0 && !isNaN(Number(debouncedValue)))),
   });
 
-  const { waves, isFetching: isFetchingWaves } = useWaves({
+  const {
+    waves,
+    isFetching: isFetchingWaves,
+    error: wavesError,
+    refetch: refetchWaves,
+  } = useWaves({
     identity: null,
     waveName:
       debouncedValue.length >= MIN_SEARCH_LENGTH ? debouncedValue : null,
@@ -135,6 +149,7 @@ export default function HeaderSearchModal({
   };
 
   const [selectedItemIndex, setSelectedItemIndex] = useState<number>(0);
+  const [state, setState] = useState<STATE>(STATE.INITIAL);
 
   const getCurrentItems = (): HeaderSearchModalItemType[] => {
     if (selectedCategory === CATEGORY.NFTS) {
@@ -158,6 +173,7 @@ export default function HeaderSearchModal({
   );
 
   useKeyPressEvent("Enter", () => {
+    if (state !== STATE.SUCCESS) return;
     const items = getCurrentItems();
     if (!items || items.length === 0) return;
     const item = items[selectedItemIndex];
@@ -182,21 +198,23 @@ export default function HeaderSearchModal({
     }
   });
 
-  const [state, setState] = useState<STATE>(STATE.INITIAL);
-
   useEffect(() => {
     setSelectedItemIndex(0);
     let fetching = false;
     let items: HeaderSearchModalItemType[] = [];
+    let hasError = false;
     if (selectedCategory === CATEGORY.NFTS) {
       fetching = isFetchingNfts;
       items = nfts ?? [];
+      hasError = Boolean(nftsError);
     } else if (selectedCategory === CATEGORY.PROFILES) {
       fetching = isFetchingProfiles;
       items = profiles ?? [];
+      hasError = Boolean(profilesError);
     } else {
       fetching = isFetchingWaves;
       items = waves ?? [];
+      hasError = Boolean(wavesError);
     }
 
     if (fetching) {
@@ -206,6 +224,11 @@ export default function HeaderSearchModal({
 
     if (debouncedValue.length === 0) {
       setState(STATE.INITIAL);
+      return;
+    }
+
+    if (hasError) {
+      setState(STATE.ERROR);
       return;
     }
 
@@ -224,7 +247,23 @@ export default function HeaderSearchModal({
     nfts,
     waves,
     debouncedValue,
+    profilesError,
+    nftsError,
+    wavesError,
   ]);
+
+  const handleRetry = () => {
+    setState(STATE.LOADING);
+    const refetchByCategory: Record<CATEGORY, () => Promise<unknown>> = {
+      [CATEGORY.NFTS]: refetchNfts,
+      [CATEGORY.PROFILES]: refetchProfiles,
+      [CATEGORY.WAVES]: refetchWaves,
+    };
+
+    refetchByCategory[selectedCategory]().catch(() => {
+      setState(STATE.ERROR);
+    });
+  };
 
   const activeElementRef = useRef<HTMLDivElement>(null);
 
@@ -357,6 +396,41 @@ export default function HeaderSearchModal({
                   className="tw-h-72 tw-flex tw-items-center tw-justify-center"
                 >
                   <p className="tw-text-iron-300 tw-text-sm">No results found</p>
+                </div>
+              )}
+              {state === STATE.ERROR && (
+                <div
+                  id={HEADER_SEARCH_RESULTS_PANEL_ID}
+                  role="tabpanel"
+                  className="tw-h-72 tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-px-4 tw-text-center"
+                >
+                  <p
+                    className="tw-text-iron-300 tw-font-normal tw-text-sm"
+                    aria-live="polite"
+                  >
+                    Something went wrong while searching. Please try again.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleRetry}
+                    disabled={
+                      (selectedCategory === CATEGORY.NFTS && isFetchingNfts) ||
+                      (selectedCategory === CATEGORY.PROFILES &&
+                        isFetchingProfiles) ||
+                      (selectedCategory === CATEGORY.WAVES && isFetchingWaves)
+                    }
+                    aria-busy={
+                      (selectedCategory === CATEGORY.NFTS && isFetchingNfts) ||
+                      (selectedCategory === CATEGORY.PROFILES &&
+                        isFetchingProfiles) ||
+                      (selectedCategory === CATEGORY.WAVES && isFetchingWaves)
+                        ? true
+                        : undefined
+                    }
+                    className="tw-rounded-lg tw-bg-primary-500 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-950 hover:tw-bg-primary-400 tw-transition tw-duration-200"
+                  >
+                    Try again
+                  </button>
                 </div>
               )}
               {state === STATE.INITIAL && (
