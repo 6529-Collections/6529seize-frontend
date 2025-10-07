@@ -27,6 +27,10 @@ const getJwtExpiration = (jwt: string): number => {
   return decodedJwt.exp;
 };
 
+const getAddressRoleStorageKey = (address: string): string => {
+  return `auth-role-${address.toLowerCase()}`;
+};
+
 // TODO: remove these cookies once migration is complete
 export const migrateCookiesToLocalStorage = () => {
   const walletAddress = Cookies.get(WALLET_ADDRESS_COOKIE);
@@ -69,8 +73,7 @@ export const setAuthJwt = (
 
   safeLocalStorage.setItem(WALLET_ADDRESS_STORAGE_KEY, address);
   safeLocalStorage.setItem(WALLET_REFRESH_TOKEN_STORAGE_KEY, refreshToken);
-  const normalizedAddress = address.toLowerCase();
-  const addressRoleStorageKey = `auth-role-${normalizedAddress}`;
+  const addressRoleStorageKey = getAddressRoleStorageKey(address);
   if (role) {
     safeLocalStorage.setItem(WALLET_ROLE_STORAGE_KEY, role);
     safeLocalStorage.setItem(addressRoleStorageKey, role);
@@ -108,13 +111,12 @@ export const getWalletRole = () => {
 
 export const removeAuthJwt = () => {
   const storedAddress = safeLocalStorage.getItem(WALLET_ADDRESS_STORAGE_KEY);
-  const normalizedAddress = storedAddress?.toLowerCase();
   Cookies.remove(WALLET_AUTH_COOKIE, COOKIE_OPTIONS);
   safeLocalStorage.removeItem(WALLET_ADDRESS_STORAGE_KEY);
   safeLocalStorage.removeItem(WALLET_REFRESH_TOKEN_STORAGE_KEY);
   safeLocalStorage.removeItem(WALLET_ROLE_STORAGE_KEY);
-  if (normalizedAddress) {
-    safeLocalStorage.removeItem(`auth-role-${normalizedAddress}`);
+  if (storedAddress) {
+    safeLocalStorage.removeItem(getAddressRoleStorageKey(storedAddress));
   }
 };
 
@@ -125,8 +127,7 @@ export const syncWalletRoleWithServer = (
   serverRole: string | null,
   address: string
 ): void => {
-  const normalizedAddress = address.toLowerCase();
-  const addressRoleStorageKey = `auth-role-${normalizedAddress}`;
+  const addressRoleStorageKey = getAddressRoleStorageKey(address);
 
   if (serverRole) {
     safeLocalStorage.setItem(WALLET_ROLE_STORAGE_KEY, serverRole);
