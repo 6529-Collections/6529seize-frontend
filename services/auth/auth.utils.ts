@@ -1,8 +1,8 @@
 import { publicEnv } from "@/config/env";
-import Cookies from "js-cookie";
-import { jwtDecode } from "jwt-decode";
 import { API_AUTH_COOKIE } from "@/constants";
 import { safeLocalStorage } from "@/helpers/safeLocalStorage";
+import Cookies from "js-cookie";
+import { jwtDecode } from "jwt-decode";
 
 export const WALLET_AUTH_COOKIE = "wallet-auth";
 
@@ -29,29 +29,6 @@ const getJwtExpiration = (jwt: string): number => {
 
 const getAddressRoleStorageKey = (address: string): string => {
   return `auth-role-${address.toLowerCase()}`;
-};
-
-// TODO: remove these cookies once migration is complete
-export const migrateCookiesToLocalStorage = () => {
-  const walletAddress = Cookies.get(WALLET_ADDRESS_COOKIE);
-  const walletRefreshToken = Cookies.get(WALLET_REFRESH_TOKEN_COOKIE);
-  const walletRole = Cookies.get(WALLET_ROLE_COOKIE);
-
-  if (walletAddress) {
-    safeLocalStorage.setItem(WALLET_ADDRESS_STORAGE_KEY, walletAddress);
-    Cookies.remove(WALLET_ADDRESS_COOKIE);
-  }
-  if (walletRefreshToken) {
-    safeLocalStorage.setItem(
-      WALLET_REFRESH_TOKEN_STORAGE_KEY,
-      walletRefreshToken
-    );
-    Cookies.remove(WALLET_REFRESH_TOKEN_COOKIE);
-  }
-  if (walletRole) {
-    safeLocalStorage.setItem(WALLET_ROLE_STORAGE_KEY, walletRole);
-    Cookies.remove(WALLET_ROLE_COOKIE);
-  }
 };
 
 export const setAuthJwt = (
