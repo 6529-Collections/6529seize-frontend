@@ -155,10 +155,7 @@ interface AddressValidationResult {
 }
 
 const isCapacitorPlatform = (): boolean => {
-  return (
-    typeof globalThis.window !== "undefined" &&
-    Boolean(globalThis.window.Capacitor?.isNativePlatform?.())
-  );
+  return !!globalThis.window?.Capacitor?.isNativePlatform?.();
 };
 
 const validateStoredAddress = (

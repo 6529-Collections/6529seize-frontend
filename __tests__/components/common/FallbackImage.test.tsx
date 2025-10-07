@@ -8,7 +8,7 @@ describe("FallbackImage", () => {
   });
 
   it("falls back without logging to the console", async () => {
-    const logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
     const onPrimaryError = jest.fn();
 
     render(
@@ -21,16 +21,16 @@ describe("FallbackImage", () => {
     );
 
     const image = screen.getByRole("img", { name: "fallback example" });
-    expect(image.getAttribute("src")).toBe("primary.gif");
+    expect(image).toHaveAttribute("src", "primary.gif");
 
     fireEvent.error(image);
 
     await waitFor(() => {
-      expect(image.getAttribute("src")).toBe("fallback.gif");
+      expect(image).toHaveAttribute("src", "fallback.gif");
     });
 
     expect(onPrimaryError).toHaveBeenCalledTimes(1);
-    expect(logSpy).not.toHaveBeenCalled();
+    expect(errorSpy).not.toHaveBeenCalled();
   });
 
   it("calls onError when both primary and fallback fail", async () => {
@@ -51,7 +51,7 @@ describe("FallbackImage", () => {
 
     fireEvent.error(image);
     await waitFor(() => {
-      expect(image.getAttribute("src")).toBe("fallback.gif");
+      expect(image).toHaveAttribute("src", "fallback.gif");
     });
 
     fireEvent.error(image);
