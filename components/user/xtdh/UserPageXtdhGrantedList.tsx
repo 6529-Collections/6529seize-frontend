@@ -39,8 +39,8 @@ export default function UserPageXtdhGrantedList({
         endpoint: "tdh-grants",
         params: {
           grantor,
-          page,
-          page_size: pageSize,
+          page: page.toString(),
+          page_size: pageSize.toString(),
         },
       }),
     enabled,
