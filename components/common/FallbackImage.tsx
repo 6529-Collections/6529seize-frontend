@@ -3,9 +3,9 @@
 import React from "react";
 
 type FallbackImageProps = React.ImgHTMLAttributes<HTMLImageElement> & {
-  primarySrc: string; // try first (your downscaled gif)
-  fallbackSrc: string; // use if primary fails (your original gif)
-  onPrimaryError?: (
+  readonly primarySrc: string;
+  readonly fallbackSrc: string;
+  readonly onPrimaryError?: (
     event: React.SyntheticEvent<HTMLImageElement, Event>
   ) => void;
 };
