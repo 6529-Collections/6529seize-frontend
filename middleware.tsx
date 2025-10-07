@@ -119,10 +119,7 @@ export async function middleware(req: NextRequest) {
         userAgent.includes("macintosh") ||
         (userAgent.includes("mac os x") && !userAgent.includes("mobile"));
       const isLinuxDesktop =
-        userAgent.includes("linux") &&
-        !isAndroid &&
-        !userAgent.includes("mobile");
-
+        userAgent.includes("linux") && !isAndroid && !userAgent.includes("mobile");
       const isDesktopOS =
         !isAndroid &&
         !isIOS &&
@@ -131,7 +128,6 @@ export async function middleware(req: NextRequest) {
           userAgent.includes("cros") ||
           isMacDesktop ||
           isLinuxDesktop);
-
       if (isDesktopOS) {
         const redirectTo = (target: string) => {
           const clone = req.nextUrl.clone();
@@ -140,29 +136,23 @@ export async function middleware(req: NextRequest) {
           clone.search = searchPart ? `?${searchPart}` : "";
           return NextResponse.redirect(clone, 301);
         };
-
         if (normalizedPathname === "/my-stream/notifications") {
           return redirectTo(getNotificationsRoute(false));
         }
-
         if (normalizedPathname === "/my-stream") {
           const params = new URLSearchParams(req.nextUrl.searchParams);
           const view = params.get("view") ?? undefined;
           const wave = params.get("wave") ?? undefined;
           const drop = params.get("drop") ?? undefined;
           const serial = params.get("serialNo") ?? undefined;
-
           const serialNo = serial ? serial.replace(/\/$/, "") : undefined;
-
           const buildWaveHref = (isDirectMessage: boolean) => {
             if (!wave) {
               return isDirectMessage
                 ? getMessagesBaseRoute(false)
                 : getWavesBaseRoute(false);
             }
-
             const extraParams = drop ? { drop } : undefined;
-
             return getWaveRoute({
               waveId: wave,
               serialNo,
@@ -171,19 +161,9 @@ export async function middleware(req: NextRequest) {
               isApp: false,
             });
           };
-
-          if (view === "messages") {
-            return redirectTo(buildWaveHref(true));
-          }
-
-          if (view === "waves") {
-            return redirectTo(buildWaveHref(false));
-          }
-
-          if (wave) {
-            return redirectTo(buildWaveHref(false));
-          }
-
+          if (view === "messages") return redirectTo(buildWaveHref(true));
+          if (view === "waves") return redirectTo(buildWaveHref(false));
+          if (wave) return redirectTo(buildWaveHref(false));
           return redirectTo(getHomeFeedRoute());
         }
       }

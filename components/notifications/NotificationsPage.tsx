@@ -8,10 +8,18 @@ import Notifications from "../brain/notifications/Notifications";
 import { ActiveDropState } from "../../types/dropInteractionTypes";
 import BrainContent from "../brain/content/BrainContent";
 import { SidebarProvider } from "../../hooks/useSidebarState";
+import { useDropModal } from "@/hooks/useDropModal";
+import BrainDesktopDrop from "@/components/brain/BrainDesktopDrop";
+import { DropSize } from "@/helpers/waves/drop.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 
 export default function NotificationsPage() {
   const { isAuthenticated } = useSeizeConnectContext();
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
+  const { drop, isDropOpen, onDropClose } = useDropModal();
+  const { isApp, hasTouchScreen } = useDeviceInfo();
+  const { spaces } = useLayout();
 
   const onCancelReplyQuote = () => {
     setActiveDrop(null);
@@ -45,11 +53,48 @@ export default function NotificationsPage() {
 
   return (
     <SidebarProvider>
-      <div className="tw-h-full tw-bg-black tailwind-scope">
+      <div className="tw-h-full tw-bg-black tailwind-scope tw-relative">
+        {isDropOpen && drop && (
+          isApp ? (
+            <div
+              className="tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-[1000]"
+              style={{ top: spaces.headerSpace }}
+            >
+              <BrainDesktopDrop
+                drop={{
+                  type: DropSize.FULL,
+                  ...drop,
+                  stableKey: drop.id,
+                  stableHash: drop.id,
+                }}
+                onClose={onDropClose}
+              />
+            </div>
+          ) : (
+            <div
+              className="tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-[49] tw-bg-black"
+              style={{
+                left: hasTouchScreen ? 0 : "var(--left-rail)",
+                top: spaces.headerSpace,
+              }}
+            >
+              <BrainDesktopDrop
+                drop={{
+                  type: DropSize.FULL,
+                  ...drop,
+                  stableKey: drop.id,
+                  stableHash: drop.id,
+                }}
+                onClose={onDropClose}
+              />
+            </div>
+          )
+        )}
         <div className="tw-h-full tw-px-2 lg:tw-px-8">
           <BrainContent
             activeDrop={activeDrop}
             onCancelReplyQuote={onCancelReplyQuote}
+            showPinnedWaves={false}
           >
             <Notifications
               activeDrop={activeDrop}

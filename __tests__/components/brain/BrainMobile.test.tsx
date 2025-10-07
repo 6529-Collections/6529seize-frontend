@@ -78,7 +78,7 @@ describe('BrainMobile', () => {
   });
 
   it('shows notifications view when path matches', async () => {
-    mockPathname = '/my-stream/notifications';
+    mockPathname = '/notifications';
     render(<BrainMobile>child</BrainMobile>);
     await waitFor(() => {
       expect(screen.getByTestId('notifications')).toBeInTheDocument();
@@ -96,4 +96,3 @@ describe('BrainMobile', () => {
     rerender(<div />);
   });
 });
-

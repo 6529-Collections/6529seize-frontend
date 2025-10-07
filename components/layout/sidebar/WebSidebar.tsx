@@ -14,6 +14,8 @@ interface WebSidebarProps {
   readonly isCollapsed: boolean;
   readonly onToggle: () => void;
   readonly isMobile: boolean;
+  readonly isNarrow?: boolean;
+  readonly isBelowMd?: boolean;
   readonly isOffcanvasOpen: boolean;
   readonly onCloseOffcanvas: () => void;
   readonly sidebarWidth: string;
@@ -23,6 +25,8 @@ function WebSidebar({
   isCollapsed,
   onToggle,
   isMobile,
+  isNarrow = false,
+  isBelowMd = false,
   isOffcanvasOpen,
   onCloseOffcanvas,
   sidebarWidth,
@@ -49,18 +53,20 @@ function WebSidebar({
 
   // Close sidebar on route change when on mobile
   const prevPathnameRef = useRef(pathname);
+  const isOverlayActive = isNarrow && isBelowMd && isOffcanvasOpen;
+
   useEffect(() => {
     if (prevPathnameRef.current !== pathname) {
       prevPathnameRef.current = pathname;
-      if (isMobile && isOffcanvasOpen) {
+      if ((isMobile || isOverlayActive) && isOffcanvasOpen) {
         onCloseOffcanvas();
       }
     }
-  }, [pathname, isMobile, isOffcanvasOpen, onCloseOffcanvas]);
+  }, [pathname, isMobile, isOverlayActive, isOffcanvasOpen, onCloseOffcanvas]);
 
   // ESC key closes off-canvas overlay
   useEffect(() => {
-    if (!isMobile || !isOffcanvasOpen) return;
+    if ((!isMobile && !isOverlayActive) || !isOffcanvasOpen) return;
 
     const { window: browserWindow } = globalThis as typeof globalThis & {
       window?: Window;
@@ -79,8 +85,9 @@ function WebSidebar({
     return () => browserWindow.removeEventListener("keydown", handleEscapeKey);
   }, [isMobile, isOffcanvasOpen, onCloseOffcanvas]);
 
-  // Sidebar is expanded on mobile when offcanvas is open
-  const shouldShowCollapsed = isMobile && isOffcanvasOpen ? false : isCollapsed;
+  // Sidebar is expanded when offcanvas is open (mobile or narrow desktop)
+  const shouldShowCollapsed =
+    ((isMobile || (isNarrow && isBelowMd)) && isOffcanvasOpen) ? false : isCollapsed;
   const isDialog = isMobile && isOffcanvasOpen;
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -142,6 +149,15 @@ function WebSidebar({
       <div className="tw-fixed tw-inset-y-0 tw-left-0 focus:tw-outline-none tw-z-40">
         {sidebarContent}
       </div>
+      {/* Narrow desktop: add dim overlay while pushing content */}
+      {isOverlayActive && (
+        <button
+          type="button"
+          className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-30 tw-border-0 focus:tw-outline-none"
+          onClick={onCloseOffcanvas}
+          aria-label="Close menu overlay"
+        />
+      )}
       {!isTouchScreen && (
         <ReactTooltip
           id="sidebar-tooltip"

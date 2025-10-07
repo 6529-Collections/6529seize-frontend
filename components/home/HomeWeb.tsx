@@ -35,6 +35,7 @@ export default function HomeWeb({
   const { isAuthenticated } = useSeizeConnectContext();
   const { registerRef } = useLayout();
   const { drop, isDropOpen, onDropClose } = useDropModal();
+  const { spaces } = useLayout();
   const { activeTab, handleTabChange } = useHomeTabs();
 
   // Callback ref for registration with LayoutContext
@@ -49,9 +50,10 @@ export default function HomeWeb({
     <div className="tw-h-full">
       {isDropOpen && drop && (
         <div
-          className="tw-fixed tw-inset-0 tw-z-[49] tw-bg-black"
+          className="tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-[49] tw-bg-black"
           style={{
-            left: hasTouchScreen ? 0 : "var(--left-rail)", // 0 for mobile, sidebar offset for desktop
+            left: hasTouchScreen ? 0 : "var(--left-rail)",
+            top: spaces.headerSpace,
             transition: "none",
           }}
         >

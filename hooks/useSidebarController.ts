@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { SIDEBAR_WIDTHS, SIDEBAR_BREAKPOINT } from "../constants/sidebar";
 import { safeSessionStorage } from "../helpers/safeSessionStorage";
 
@@ -28,7 +28,7 @@ const getBrowserWindow = () => {
  *   by the sidebar component, not this hook.
  */
 export function useSidebarController() {
-  // Media query for desktop vs mobile breakpoint
+  // Media query for breakpoint (narrow screen)
   const mql = useMemo(() => {
     const browserWindow = getBrowserWindow();
     if (browserWindow === undefined || typeof browserWindow.matchMedia !== "function") {
@@ -37,9 +37,48 @@ export function useSidebarController() {
     return browserWindow.matchMedia(`(max-width: ${SIDEBAR_BREAKPOINT - 0.02}px)`);
   }, []);
 
-  const [isMobile, setIsMobile] = useState(() => {
+  const [isNarrow, setIsNarrow] = useState(() => {
     const browserWindow = getBrowserWindow();
     return browserWindow ? browserWindow.innerWidth < SIDEBAR_BREAKPOINT : false;
+  });
+
+  // Detect coarse pointer devices (touch screens)
+  const coarseMql = useMemo(() => {
+    const browserWindow = getBrowserWindow();
+    if (browserWindow === undefined || typeof browserWindow.matchMedia !== "function") {
+      return null;
+    }
+    return browserWindow.matchMedia("(pointer: coarse)");
+  }, []);
+  const [isTouchScreen, setIsTouchScreen] = useState(() => {
+    const browserWindow = getBrowserWindow();
+    return browserWindow ? browserWindow.matchMedia?.("(pointer: coarse)").matches ?? false : false;
+  });
+
+  // Detect mobile-width (< 1024px)
+  const mobileWidthMql = useMemo(() => {
+    const browserWindow = getBrowserWindow();
+    if (browserWindow === undefined || typeof browserWindow.matchMedia !== "function") {
+      return null;
+    }
+    return browserWindow.matchMedia("(max-width: 1023.98px)");
+  }, []);
+  const [isMobileWidth, setIsMobileWidth] = useState(() => {
+    const browserWindow = getBrowserWindow();
+    return browserWindow ? browserWindow.innerWidth < 1024 : false;
+  });
+
+  // Detect Tailwind md breakpoint (< 768px)
+  const belowMdMql = useMemo(() => {
+    const browserWindow = getBrowserWindow();
+    if (browserWindow === undefined || typeof browserWindow.matchMedia !== "function") {
+      return null;
+    }
+    return browserWindow.matchMedia("(max-width: 767.98px)");
+  }, []);
+  const [isBelowMd, setIsBelowMd] = useState(() => {
+    const browserWindow = getBrowserWindow();
+    return browserWindow ? browserWindow.innerWidth < 768 : true;
   });
 
   // Desktop state - default to expanded (false) on big screens with session persistence
@@ -69,22 +108,69 @@ export function useSidebarController() {
   // Off-canvas overlay state (mobile expanded view)
   const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
 
+  // Determine mobile mode only for mobile width + touch devices (phones/tablets)
+  const isMobile = useMemo(
+    () => isMobileWidth && isTouchScreen,
+    [isMobileWidth, isTouchScreen]
+  );
+
+  const isOffcanvasMode = useMemo(
+    () => isMobile || isNarrow,
+    [isMobile, isNarrow]
+  );
+
   // Derived collapsed state (pure function of inputs)
   const isCollapsed = useMemo(() => {
-    if (isMobile) return true; // Mobile always collapsed when not off-canvas
-    return isDesktopCollapsed; // Desktop: use current state (default false = expanded)
-  }, [isMobile, isDesktopCollapsed]);
+    if (isOffcanvasMode) {
+      // Overlay open => expanded; closed => collapsed
+      return !isOffcanvasOpen;
+    }
+    // Wide desktop: honor user preference
+    return isDesktopCollapsed;
+  }, [isOffcanvasMode, isOffcanvasOpen, isDesktopCollapsed]);
 
   // React to breakpoint changes
   useEffect(() => {
     if (mql === null) {
       return;
     }
-    const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    setIsMobile(mql.matches);
+    const onChange = (e: MediaQueryListEvent) => setIsNarrow(e.matches);
+    setIsNarrow(mql.matches);
     mql.addEventListener("change", onChange);
     return () => mql.removeEventListener("change", onChange);
   }, [mql]);
+
+  // React to touch capability changes
+  useEffect(() => {
+    if (coarseMql === null) {
+      return;
+    }
+    const onChange = (e: MediaQueryListEvent) => setIsTouchScreen(e.matches);
+    setIsTouchScreen(coarseMql.matches);
+    coarseMql.addEventListener("change", onChange);
+    return () => coarseMql.removeEventListener("change", onChange);
+  }, [coarseMql]);
+
+  // React to width changes for mobile detection
+  useEffect(() => {
+    if (mobileWidthMql === null) {
+      return;
+    }
+    const onChange = (e: MediaQueryListEvent) => setIsMobileWidth(e.matches);
+    setIsMobileWidth(mobileWidthMql.matches);
+    mobileWidthMql.addEventListener("change", onChange);
+    return () => mobileWidthMql.removeEventListener("change", onChange);
+  }, [mobileWidthMql]);
+
+  useEffect(() => {
+    if (belowMdMql === null) {
+      return;
+    }
+    const onChange = (e: MediaQueryListEvent) => setIsBelowMd(e.matches);
+    setIsBelowMd(belowMdMql.matches);
+    belowMdMql.addEventListener("change", onChange);
+    return () => belowMdMql.removeEventListener("change", onChange);
+  }, [belowMdMql]);
 
   // Close off-canvas when switching from desktop to mobile
   useEffect(() => {
@@ -93,15 +179,37 @@ export function useSidebarController() {
     }
   }, [isMobile]);
 
+  // Keep behavior consistent across narrow desktop transitions
+  // - Entering narrow: do not auto-open; ensure overlay is closed
+  // - Leaving narrow: map current overlay state to desktop preference (expanded if was open)
+  const prevIsNarrowRef = useRef(isNarrow);
+  useEffect(() => {
+    if (prevIsNarrowRef.current === isNarrow) return;
+
+    if (isNarrow) {
+      // Entering narrow: never auto-open
+      setIsOffcanvasOpen(false);
+    } else {
+      // Leaving narrow: if overlay was open, expand persistent rail on desktop
+      if (isOffcanvasOpen) {
+        setIsDesktopCollapsedState(false);
+        setIsOffcanvasOpen(false);
+      }
+      // If overlay was closed, keep desktop preference as-is
+    }
+
+    prevIsNarrowRef.current = isNarrow;
+  }, [isNarrow, isOffcanvasOpen]);
+
   const toggleCollapsed = useCallback(() => {
-    if (isMobile) {
+    if (isOffcanvasMode) {
       // Mobile: toggle off-canvas overlay
       setIsOffcanvasOpen(prev => !prev);
     } else {
       // Desktop: toggle state (with session persistence)
       setIsDesktopCollapsed(prev => !prev);
     }
-  }, [isMobile, setIsDesktopCollapsed]);
+  }, [isOffcanvasMode, setIsDesktopCollapsed]);
 
   const closeOffcanvas = useCallback(() => {
     setIsOffcanvasOpen(false);
@@ -109,15 +217,19 @@ export function useSidebarController() {
 
   // Calculate CSS values based on derived state  
   const sidebarWidth = useMemo(() => {
-    // When off-canvas is open, use expanded width; otherwise use derived collapsed state
-    if (isMobile && isOffcanvasOpen) return SIDEBAR_WIDTHS.EXPANDED;
+    if (isOffcanvasMode && isOffcanvasOpen) {
+      return SIDEBAR_WIDTHS.EXPANDED;
+    }
     return isCollapsed ? SIDEBAR_WIDTHS.COLLAPSED : SIDEBAR_WIDTHS.EXPANDED;
-  }, [isMobile, isOffcanvasOpen, isCollapsed]);
+  }, [isOffcanvasMode, isOffcanvasOpen, isCollapsed]);
 
   return {
     // State
     isMobile,
+    isNarrow,
     isCollapsed,
+    isBelowMd,
+    isOffcanvasMode,
     isOffcanvasOpen,
     
     // Actions (memoized to prevent unnecessary re-renders)

@@ -24,6 +24,11 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
       expect(res).toEqual({ waveId: uuid, serialNo: "10", dropId: undefined });
     });
 
+    it("parses legacy my-stream quote link", () => {
+      const res = parseSeizeQuoteLink(`/my-stream?wave=${uuid}&serialNo=10`);
+      expect(res).toEqual({ waveId: uuid, serialNo: "10", dropId: undefined });
+    });
+
     it("returns null for invalid link", () => {
       expect(parseSeizeQuoteLink("/wrong")).toBeNull();
     });
@@ -44,6 +49,15 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
         "foo",
       ]);
       expect(res).toBeNull();
+    });
+
+    it("accepts path aliases", () => {
+      const res = parseSeizeQueryLink(
+        "https://site.com/alias?foo=1",
+        ["/path", "/alias"],
+        ["foo"]
+      );
+      expect(res).toEqual({ foo: "1" });
     });
 
     it("returns null when host does not match mocked BASE_ENDPOINT", () => {

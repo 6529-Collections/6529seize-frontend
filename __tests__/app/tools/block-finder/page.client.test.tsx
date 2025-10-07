@@ -4,6 +4,9 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 const mockSetToast = jest.fn();
 const mockSetTitle = jest.fn();
 
+const DEFAULT_DATE = "2025-09-26";
+const DEFAULT_TIME = "12:00";
+
 jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({ setTitle: mockSetTitle }),
 }));
@@ -112,11 +115,20 @@ jest.mock("@/components/block-picker/result/BlockPickerResult", () => ({
 /** Utilities */
 function setDateAndTime() {
   fireEvent.change(screen.getByTestId("date-input"), {
-    target: { value: "2025-09-26" },
+    target: { value: DEFAULT_DATE },
   });
   fireEvent.change(screen.getByTestId("time-input"), {
-    target: { value: "12:00" },
+    target: { value: DEFAULT_TIME },
   });
+}
+
+// Mirrors the component's timestamp calculation so expectations stay timezone agnostic.
+function getTimestamp(date: string, time: string) {
+  const dateObj = new Date(date);
+  const [hours, minutes] = time.split(":");
+  const startDate = new Date(dateObj);
+  startDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+  return startDate.getTime();
 }
 
 describe("tools/block-finder/page.client.tsx (client)", () => {
@@ -202,9 +214,10 @@ describe("tools/block-finder/page.client.tsx (client)", () => {
     expect(init.method).toBe("POST");
 
     const body = JSON.parse(init.body as string);
+    const expectedTimestamp = getTimestamp(DEFAULT_DATE, DEFAULT_TIME);
+
     expect(body).toEqual({
-      // timestamp equals 2025-09-26 date with time 12:00 local -> client code uses Date(date)+time
-      timestamp: new Date("2025-09-26T12:00:00.000+03:00").getTime(),
+      timestamp: expectedTimestamp,
     });
 
     // Result rendered with returned block number
@@ -252,7 +265,7 @@ describe("tools/block-finder/page.client.tsx (client)", () => {
     expect(init.method).toBe("POST");
 
     const parsed = JSON.parse(init.body as string);
-    const min = new Date("2025-09-26T12:00:00.000+03:00").getTime();
+    const min = getTimestamp(DEFAULT_DATE, DEFAULT_TIME);
     const max = min + 60_000; // ONE_MINUTE
 
     expect(parsed.minTimestamp).toBe(min);

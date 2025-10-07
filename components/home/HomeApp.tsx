@@ -10,6 +10,9 @@ import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import ConnectWallet from "../common/ConnectWallet";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import { useHomeTabs } from "./useHomeTabs";
+import { useDropModal } from "@/hooks/useDropModal";
+import BrainDesktopDrop from "../brain/BrainDesktopDrop";
+import { DropSize } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 interface HomeAppProps {
@@ -28,9 +31,10 @@ export default function HomeApp({
   isMemeMintingActive,
 }: HomeAppProps) {
   const { isAuthenticated } = useSeizeConnectContext();
-  const { registerRef } = useLayout();
+  const { registerRef, spaces } = useLayout();
   const { activeTab } = useHomeTabs();
   const { isApp } = useDeviceInfo();
+  const { drop, isDropOpen, onDropClose } = useDropModal();
 
   useEffect(() => {
     registerRef("tabs", null);
@@ -39,16 +43,16 @@ export default function HomeApp({
   useEffect(() => {
     if (!isApp) return;
 
-    const previousOverflow = document.body.style.overflow;
-
     if (activeTab === "feed") {
       document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = previousOverflow || "";
+      // Ensure normal page scrolling when not on the feed tab
+      document.body.style.overflow = "";
     }
 
     return () => {
-      document.body.style.overflow = previousOverflow || "";
+      // Always restore default scrolling on cleanup
+      document.body.style.overflow = "";
     };
   }, [activeTab, isApp]);
 
@@ -75,7 +79,23 @@ export default function HomeApp({
   }
 
   return (
-    <div>
+    <div className="tw-relative">
+      {isDropOpen && drop && (
+        <div
+          className="tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-[1000]"
+          style={{ top: spaces.headerSpace }}
+        >
+          <BrainDesktopDrop
+            drop={{
+              type: DropSize.FULL,
+              ...drop,
+              stableKey: drop.id,
+              stableHash: drop.id,
+            }}
+            onClose={onDropClose}
+          />
+        </div>
+      )}
       <div>{content}</div>
     </div>
   );

@@ -59,7 +59,9 @@ export const MemesSingleWaveDrop: React.FC<MemesSingleWaveDropProps> = ({
           className={`${
             activeTab === SingleWaveDropTab.CHAT ? "tw-flex" : "tw-hidden"
           } lg:tw-flex lg:tw-flex-1 `}>
-          {wave && drop && <SingleWaveDropChat wave={wave} drop={drop} />}
+          {wave && drop && (
+            <SingleWaveDropChat key={drop.id} wave={wave} drop={drop} />
+          )}
         </div>
       </div>
     </div>

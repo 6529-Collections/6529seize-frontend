@@ -1,9 +1,7 @@
 import { render } from '@testing-library/react';
 const NotificationItem = jest.fn(() => <div data-testid="item" />);
-const CommonChangeAnimation = jest.fn(({ children }) => <div data-testid="anim">{children}</div>);
 
 jest.mock('@/components/brain/notifications/NotificationItem', () => ({ __esModule: true, default: NotificationItem }));
-jest.mock('@/components/utils/animation/CommonChangeAnimation', () => ({ __esModule: true, default: CommonChangeAnimation }));
 
 import NotificationItems from '@/components/brain/notifications/NotificationItems';
 import React from 'react';
@@ -26,7 +24,6 @@ describe('NotificationItems', () => {
       />
     );
 
-    expect(CommonChangeAnimation).toHaveBeenCalledTimes(2);
     expect(NotificationItem).toHaveBeenCalledTimes(2);
     expect(NotificationItem.mock.calls[0][0]).toEqual(
       expect.objectContaining({
