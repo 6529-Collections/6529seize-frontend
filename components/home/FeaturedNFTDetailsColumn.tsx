@@ -1,13 +1,12 @@
 "use client";
-import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis";
+
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import MemePageMintCountdown from "@/components/mint-countdown-box/MemePageMintCountdown";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import MemeCalendarPeriods from "@/components/the-memes/MemeCalendarPeriods";
-import MemePageMintCountdown from "@/components/the-memes/MemePageMintCountdown";
-import { MEMES_CONTRACT, MEMES_MANIFOLD_PROXY_CONTRACT } from "@/constants";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import useCapacitor from "@/hooks/useCapacitor";
-import { useManifoldClaim } from "@/hooks/useManifoldClaim";
+import { useMemesManifoldClaim } from "@/hooks/useManifoldClaim";
 import { useManifoldClaimDisplays } from "@/hooks/useManifoldClaimDisplays";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
@@ -27,12 +26,7 @@ export default function FeaturedNFTDetailsColumn({
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
 
-  const manifoldClaim = useManifoldClaim(
-    MEMES_CONTRACT,
-    MEMES_MANIFOLD_PROXY_CONTRACT,
-    MEMES_MANIFOLD_PROXY_ABI,
-    featuredNft.id
-  );
+  const manifoldClaim = useMemesManifoldClaim(featuredNft.id);
 
   const {
     editionSizeDisplay: manifoldClaimEditionSizeDisplay,
@@ -75,12 +69,7 @@ export default function FeaturedNFTDetailsColumn({
         {isMemeMintingActive && (
           <Row>
             <Col>
-              <MemePageMintCountdown
-                nft_id={featuredNft.id}
-                is_full_width={true}
-                hide_mint_btn={false}
-                show_only_if_active={false}
-              />
+              <MemePageMintCountdown nft_id={featuredNft.id} />
             </Col>
           </Row>
         )}

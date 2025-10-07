@@ -30,7 +30,7 @@ jest.mock("@/components/nft-image/RememeImage", () => ({
   __esModule: true,
   default: () => <div data-testid="rememe-image" />,
 }));
-jest.mock("@/components/nftAttributes/NftStats", () => ({
+jest.mock("@/components/nft-attributes/NftStats", () => ({
   __esModule: true,
   NftPageStats: () => <tr data-testid="nft-stats" />,
 }));
