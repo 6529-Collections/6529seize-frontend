@@ -7,24 +7,34 @@ jest.mock("@/contexts/TitleContext", () => ({
   useSetTitle: jest.fn(),
 }));
 jest.mock("@/hooks/useCapacitor", () => () => ({ isIos: false }));
-jest.mock("@/components/nft-image/NFTImage", () => () => (
-  <div data-testid="nft-image" />
-));
-jest.mock("@/components/address/Address", () => () => (
-  <div data-testid="address" />
-));
-jest.mock(
-  "@/components/nft-marketplace-links/NFTMarketplaceLinks",
-  () => () => <div data-testid="marketplace-links" />
-);
-jest.mock("@/components/the-memes/ArtistProfileHandle", () => () => (
-  <div data-testid="artist-handle" />
-));
-jest.mock("@/components/latest-activity/LatestActivityRow", () => () => (
-  <tr data-testid="activity-row" />
-));
-jest.mock("@/components/nftAttributes/NftStats", () => () => <></>);
-jest.mock("@/components/nft-navigation/NftNavigation", () => () => <></>);
+jest.mock("@/components/nft-image/NFTImage", () => ({
+  __esModule: true,
+  default: () => <div data-testid="nft-image" />,
+}));
+jest.mock("@/components/address/Address", () => ({
+  __esModule: true,
+  default: () => <div data-testid="address" />,
+}));
+jest.mock("@/components/nft-marketplace-links/NFTMarketplaceLinks", () => ({
+  __esModule: true,
+  default: () => <div data-testid="marketplace-links" />,
+}));
+jest.mock("@/components/the-memes/ArtistProfileHandle", () => ({
+  __esModule: true,
+  default: () => <div data-testid="artist-handle" />,
+}));
+jest.mock("@/components/latest-activity/LatestActivityRow", () => ({
+  __esModule: true,
+  default: () => <tr data-testid="activity-row" />,
+}));
+jest.mock("@/components/nft-attributes/NftStats", () => ({
+  __esModule: true,
+  default: () => <></>,
+}));
+jest.mock("@/components/nft-navigation/NftNavigation", () => ({
+  __esModule: true,
+  default: () => <></>,
+}));
 
 // === generateMetadata Function Test ===
 describe("generateMetadata", () => {
