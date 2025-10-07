@@ -1,4 +1,13 @@
+import {
+  AuthenticationError,
+  SeizeConnectProvider,
+  useSeizeConnectContext,
+  WalletConnectionError,
+  WalletDisconnectionError,
+} from "@/components/auth/SeizeConnectContext";
 import { publicEnv } from "@/config/env";
+import * as authUtils from "@/services/auth/auth.utils";
+import { WalletInitializationError } from "@/src/errors/wallet";
 import {
   fireEvent,
   render,
@@ -9,15 +18,6 @@ import {
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { act } from "react-dom/test-utils";
-import {
-  AuthenticationError,
-  SeizeConnectProvider,
-  useSeizeConnectContext,
-  WalletConnectionError,
-  WalletDisconnectionError,
-} from "@/components/auth/SeizeConnectContext";
-import * as authUtils from "@/services/auth/auth.utils";
-import { WalletInitializationError } from "@/src/errors/wallet";
 
 // Mock the Reown AppKit hooks
 jest.mock("@reown/appkit/react", () => ({
@@ -48,7 +48,6 @@ jest.mock("viem", () => ({
 
 // Mock auth utils
 jest.mock("@/services/auth/auth.utils", () => ({
-  migrateCookiesToLocalStorage: jest.fn(),
   getWalletAddress: jest.fn(() => null),
   removeAuthJwt: jest.fn(),
 }));

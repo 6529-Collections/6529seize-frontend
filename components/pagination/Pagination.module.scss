@@ -1,21 +1,58 @@
 @use 'sass:color';
 @use "../../styles/variables.scss";
 
-.iconEnabled {
+.iconButton {
+  border: none;
+  background: transparent;
+  color: inherit;
+  padding: 0;
   width: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: inherit;
+
+  &:focus-visible {
+    outline: 2px solid variables.$focus-outline;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.iconEnabled {
   cursor: pointer;
 }
 
 .iconDisabled {
-  width: 14px;
   opacity: 0.6;
+  cursor: default;
 }
 
 .goToLast {
+  border: none;
+  background: transparent;
+  color: inherit;
+  padding: 0;
   cursor: pointer;
+  font: inherit;
+
+  &:focus-visible {
+    outline: 2px solid variables.$focus-outline;
+    outline-offset: 2px;
+  }
+
   &:hover {
     text-decoration: underline;
     color: color.scale(variables.$font-color, $lightness: -(variables.$darken-percentage));
+  }
+
+  &:disabled {
+    cursor: default;
+    text-decoration: none;
+    color: inherit;
   }
 }
 

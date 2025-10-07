@@ -6,25 +6,26 @@ import React, {
   useContext,
   useEffect,
   useMemo,
-  useState,
   useRef,
+  useState,
 } from "react";
 
-import {
-  migrateCookiesToLocalStorage,
-  getWalletAddress,
-  removeAuthJwt,
-} from "@/services/auth/auth.utils";
+import { getWalletAddress, removeAuthJwt } from "@/services/auth/auth.utils";
 import { WalletInitializationError } from "@/src/errors/wallet";
-import { useAppKit, useAppKitAccount, useAppKitState, useDisconnect } from "@reown/appkit/react";
-import { isAddress, getAddress } from "viem";
 import { SecurityEventType } from "@/src/types/security";
 import {
-  logSecurityEvent,
-  logError,
   createConnectionEventContext,
-  createValidationEventContext
+  createValidationEventContext,
+  logError,
+  logSecurityEvent,
 } from "@/src/utils/security-logger";
+import {
+  useAppKit,
+  useAppKitAccount,
+  useAppKitState,
+  useDisconnect,
+} from "@reown/appkit/react";
+import { getAddress, isAddress } from "viem";
 import { WalletErrorBoundary } from "./error-boundary";
 
 // Custom error types for better error handling
@@ -35,7 +36,7 @@ export class WalletConnectionError extends Error {
     public readonly code?: string
   ) {
     super(message);
-    this.name = 'WalletConnectionError';
+    this.name = "WalletConnectionError";
   }
 }
 
@@ -46,17 +47,14 @@ export class WalletDisconnectionError extends Error {
     public readonly code?: string
   ) {
     super(message);
-    this.name = 'WalletDisconnectionError';
+    this.name = "WalletDisconnectionError";
   }
 }
 
 export class AuthenticationError extends Error {
-  constructor(
-    message: string,
-    public readonly cause?: unknown
-  ) {
+  constructor(message: string, public readonly cause?: unknown) {
     super(message);
-    this.name = 'AuthenticationError';
+    this.name = "AuthenticationError";
   }
 }
 
@@ -76,13 +74,13 @@ interface SeizeConnectContextType {
   /** Opens the wallet connection modal */
   seizeConnect: () => void;
 
-  /** 
+  /**
    * Disconnects the current wallet connection
    * @throws {WalletDisconnectionError} When disconnection fails
    */
   seizeDisconnect: () => Promise<void>;
 
-  /** 
+  /**
    * Disconnects wallet and clears authentication state
    * @param reconnect - Whether to automatically reopen connection modal after logout
    * @throws {WalletDisconnectionError} When disconnection fails
@@ -90,7 +88,7 @@ interface SeizeConnectContextType {
    */
   seizeDisconnectAndLogout: (reconnect?: boolean) => Promise<void>;
 
-  /** 
+  /**
    * Manually set the connected address (for internal use)
    * @param address - The wallet address to set as connected
    */
@@ -106,7 +104,12 @@ interface SeizeConnectContextType {
   isAuthenticated: boolean;
 
   /** Current connection state for better timing control */
-  connectionState: 'initializing' | 'disconnected' | 'connecting' | 'connected' | 'error';
+  connectionState:
+    | "initializing"
+    | "disconnected"
+    | "connecting"
+    | "connected"
+    | "error";
 
   /** Unified wallet state machine for advanced consumers */
   walletState: WalletState;
@@ -128,9 +131,10 @@ const createWalletError = (
   operation: string,
   originalError: unknown
 ): WalletConnectionError | WalletDisconnectionError => {
-  const message = originalError instanceof Error
-    ? originalError.message
-    : `Unknown error during ${operation}`;
+  const message =
+    originalError instanceof Error
+      ? originalError.message
+      : `Unknown error during ${operation}`;
 
   return new ErrorClass(
     `Failed to ${operation}: ${message}`,
@@ -145,22 +149,24 @@ interface AddressValidationResult {
   normalizedAddress?: string;
   errorContext?: {
     length: number;
-    format: 'hex_prefixed' | 'other';
+    format: "hex_prefixed" | "other";
     debugAddress: string;
   };
 }
 
 const isCapacitorPlatform = (): boolean => {
-  return typeof window !== 'undefined' && Boolean(window.Capacitor?.isNativePlatform?.());
+  return !!globalThis.window?.Capacitor?.isNativePlatform?.();
 };
 
-const validateStoredAddress = (storedAddress: string): AddressValidationResult => {
+const validateStoredAddress = (
+  storedAddress: string
+): AddressValidationResult => {
   // Capacitor-specific validation (more lenient)
   if (isCapacitorPlatform()) {
-    if (storedAddress.startsWith('0x') && storedAddress.length === 42) {
+    if (storedAddress.startsWith("0x") && storedAddress.length === 42) {
       return {
         isValid: true,
-        normalizedAddress: storedAddress.toLowerCase()
+        normalizedAddress: storedAddress.toLowerCase(),
       };
     }
   }
@@ -169,47 +175,49 @@ const validateStoredAddress = (storedAddress: string): AddressValidationResult =
   if (isAddress(storedAddress)) {
     return {
       isValid: true,
-      normalizedAddress: getAddress(storedAddress) // checksummed format
+      normalizedAddress: getAddress(storedAddress), // checksummed format
     };
   }
 
   // Invalid address - prepare error context
   const addressLength = storedAddress.length;
-  const addressFormat = storedAddress.startsWith('0x') ? 'hex_prefixed' : 'other';
-  const debugAddress = storedAddress.length >= 10
-    ? storedAddress.slice(0, 10) + '...'
-    : storedAddress;
+  const addressFormat = storedAddress.startsWith("0x")
+    ? "hex_prefixed"
+    : "other";
+  const debugAddress =
+    storedAddress.length >= 10
+      ? storedAddress.slice(0, 10) + "..."
+      : storedAddress;
 
   return {
     isValid: false,
     errorContext: {
       length: addressLength,
       format: addressFormat,
-      debugAddress
-    }
+      debugAddress,
+    },
   };
 };
 
 // Unified Wallet State Machine - eliminates multiple state variables and inconsistencies
 type WalletState =
-  | { status: 'initializing' }
-  | { status: 'error'; error: Error }
-  | { status: 'disconnected' }
-  | { status: 'connecting' }
-  | { status: 'connected'; address: string };
-
+  | { status: "initializing" }
+  | { status: "error"; error: Error }
+  | { status: "disconnected" }
+  | { status: "connecting" }
+  | { status: "connected"; address: string };
 
 // Initialization error handling utility
 const handleInitializationError = (
   error: unknown,
-  errorContext?: AddressValidationResult['errorContext']
+  errorContext?: AddressValidationResult["errorContext"]
 ): WalletInitializationError => {
   if (errorContext) {
     // Invalid address error
     logSecurityEvent(
       SecurityEventType.INVALID_ADDRESS_DETECTED,
       createValidationEventContext(
-        'wallet_initialization',
+        "wallet_initialization",
         false,
         errorContext.length,
         errorContext.format
@@ -220,30 +228,35 @@ const handleInitializationError = (
     try {
       removeAuthJwt();
     } catch (cleanupError) {
-      logError('auth_cleanup_during_init', new Error(`Failed to clear invalid auth state: ${cleanupError}`));
+      logError(
+        "auth_cleanup_during_init",
+        new Error(`Failed to clear invalid auth state: ${cleanupError}`)
+      );
     }
 
     const initError = new WalletInitializationError(
-      'Invalid wallet address found in storage during initialization. This indicates potential data corruption or security breach.',
+      "Invalid wallet address found in storage during initialization. This indicates potential data corruption or security breach.",
       undefined,
       errorContext.debugAddress
     );
-    logError('wallet_initialization', initError);
+    logError("wallet_initialization", initError);
     return initError;
   }
 
   // Unexpected error
   const initError = new WalletInitializationError(
-    'Unexpected error during wallet initialization',
+    "Unexpected error during wallet initialization",
     error
   );
-  logError('wallet_initialization', initError);
+  logError("wallet_initialization", initError);
   return initError;
 };
 
 // Consolidated wallet state management hook with unified state machine
 const useConsolidatedWalletState = () => {
-  const [walletState, setWalletState] = useState<WalletState>({ status: 'initializing' });
+  const [walletState, setWalletState] = useState<WalletState>({
+    status: "initializing",
+  });
 
   useEffect(() => {
     const initializeWallet = async () => {
@@ -253,7 +266,7 @@ const useConsolidatedWalletState = () => {
 
         // Step 2: Handle no stored address (legitimate case)
         if (!storedAddress) {
-          setWalletState({ status: 'disconnected' });
+          setWalletState({ status: "disconnected" });
           return;
         }
 
@@ -263,19 +276,21 @@ const useConsolidatedWalletState = () => {
         if (validationResult.isValid && validationResult.normalizedAddress) {
           // Step 4: Success - set connected state with valid address
           setWalletState({
-            status: 'connected',
-            address: validationResult.normalizedAddress
+            status: "connected",
+            address: validationResult.normalizedAddress,
           });
         } else {
           // Step 4: Error - handle invalid address
-          const error = handleInitializationError(undefined, validationResult.errorContext);
-          setWalletState({ status: 'error', error });
+          const error = handleInitializationError(
+            undefined,
+            validationResult.errorContext
+          );
+          setWalletState({ status: "error", error });
         }
-
       } catch (error) {
         // Step 4: Error - handle unexpected errors
         const initError = handleInitializationError(error);
-        setWalletState({ status: 'error', error: initError });
+        setWalletState({ status: "error", error: initError });
       }
     };
 
@@ -284,26 +299,28 @@ const useConsolidatedWalletState = () => {
 
   // State transition methods
   const setConnecting = useCallback(() => {
-    setWalletState({ status: 'connecting' });
+    setWalletState({ status: "connecting" });
   }, []);
 
   const setConnected = useCallback((address: string) => {
-    setWalletState({ status: 'connected', address });
+    setWalletState({ status: "connected", address });
   }, []);
 
   const setDisconnected = useCallback(() => {
-    setWalletState({ status: 'disconnected' });
+    setWalletState({ status: "disconnected" });
   }, []);
 
   const setError = useCallback((error: Error) => {
-    setWalletState({ status: 'error', error });
+    setWalletState({ status: "error", error });
   }, []);
 
   // Computed properties for backward compatibility
-  const connectedAddress = walletState.status === 'connected' ? walletState.address : undefined;
-  const hasInitializationError = walletState.status === 'error';
-  const initializationError = walletState.status === 'error' ? walletState.error : undefined;
-  const isInitialized = walletState.status !== 'initializing';
+  const connectedAddress =
+    walletState.status === "connected" ? walletState.address : undefined;
+  const hasInitializationError = walletState.status === "error";
+  const initializationError =
+    walletState.status === "error" ? walletState.error : undefined;
+  const isInitialized = walletState.status !== "initializing";
 
   return {
     walletState,
@@ -315,10 +332,9 @@ const useConsolidatedWalletState = () => {
     // Backward compatibility properties
     hasInitializationError,
     initializationError,
-    isInitialized
+    isInitialized,
   };
 };
-
 
 export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -327,7 +343,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const { disconnect } = useDisconnect();
   const { open } = useAppKit();
   const state = useAppKitState();
-
 
   // Use consolidated wallet state management
   const {
@@ -338,13 +353,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     setDisconnected,
     hasInitializationError,
     initializationError,
-    isInitialized
+    isInitialized,
   } = useConsolidatedWalletState();
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    migrateCookiesToLocalStorage();
-  }, []);
 
   useEffect(() => {
     // Wait for initialization to complete before processing account changes
@@ -365,7 +376,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
           const checksummedAddress = getAddress(account.address);
 
           // Only update if not already connected with same address
-          const isAlreadyConnected = walletState.status === 'connected' && walletState.address === checksummedAddress;
+          const isAlreadyConnected =
+            walletState.status === "connected" &&
+            walletState.address === checksummedAddress;
           if (!isAlreadyConnected) {
             setConnected(checksummedAddress);
           }
@@ -375,10 +388,10 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
           logSecurityEvent(
             SecurityEventType.INVALID_ADDRESS_DETECTED,
             createValidationEventContext(
-              'wallet_provider',
+              "wallet_provider",
               false,
               addressStr?.length || 0,
-              addressStr?.startsWith('0x') ? 'hex_prefixed' : 'other'
+              addressStr?.startsWith("0x") ? "hex_prefixed" : "other"
             )
           );
 
@@ -388,18 +401,20 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         const storedAddress = getWalletAddress();
         if (storedAddress && isAddress(storedAddress)) {
           const checksummedAddress = getAddress(storedAddress);
-          const isAlreadyConnected = walletState.status === 'connected' && walletState.address === checksummedAddress;
+          const isAlreadyConnected =
+            walletState.status === "connected" &&
+            walletState.address === checksummedAddress;
           if (!isAlreadyConnected) {
             setConnected(checksummedAddress);
           }
-        } else if (walletState.status !== 'disconnected') {
+        } else if (walletState.status !== "disconnected") {
           setDisconnected();
         }
-      } else if (account.status === 'connecting') {
-        if (walletState.status !== 'connecting') {
+      } else if (account.status === "connecting") {
+        if (walletState.status !== "connecting") {
           setConnecting();
         }
-      } else if (walletState.status !== 'disconnected') {
+      } else if (walletState.status !== "disconnected") {
         setDisconnected();
       }
     }, 50); // Small delay to debounce rapid changes
@@ -410,14 +425,23 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         clearTimeout(debounceTimeoutRef.current);
       }
     };
-  }, [account.address, account.isConnected, account.status, isInitialized, walletState, setConnected, setDisconnected, setConnecting]);
+  }, [
+    account.address,
+    account.isConnected,
+    account.status,
+    isInitialized,
+    walletState,
+    setConnected,
+    setDisconnected,
+    setConnecting,
+  ]);
 
   const seizeConnect = useCallback((): void => {
     try {
       // Log connection attempt for security monitoring
       logSecurityEvent(
         SecurityEventType.WALLET_CONNECTION_ATTEMPT,
-        createConnectionEventContext('seizeConnect')
+        createConnectionEventContext("seizeConnect")
       );
 
       open({ view: "Connect" });
@@ -425,14 +449,14 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       // Log successful modal opening
       logSecurityEvent(
         SecurityEventType.WALLET_MODAL_OPENED,
-        createConnectionEventContext('seizeConnect')
+        createConnectionEventContext("seizeConnect")
       );
     } catch (error) {
       const connectionError = new WalletConnectionError(
-        'Failed to open wallet connection modal',
+        "Failed to open wallet connection modal",
         error
       );
-      logError('seizeConnect', connectionError);
+      logError("seizeConnect", connectionError);
       throw connectionError;
     }
   }, [open]);
@@ -443,10 +467,10 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     } catch (error: unknown) {
       const walletError = createWalletError(
         WalletDisconnectionError,
-        'disconnect wallet',
+        "disconnect wallet",
         error
       );
-      logError('seizeDisconnect', walletError);
+      logError("seizeDisconnect", walletError);
       throw walletError;
     }
   }, [disconnect]);
@@ -459,14 +483,14 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       } catch (error: unknown) {
         const walletError = createWalletError(
           WalletDisconnectionError,
-          'disconnect wallet during logout',
+          "disconnect wallet during logout",
           error
         );
-        logError('seizeDisconnectAndLogout', walletError);
+        logError("seizeDisconnectAndLogout", walletError);
 
         // SECURITY: Throw AuthenticationError to prevent auth bypass
         throw new AuthenticationError(
-          'Cannot complete logout: wallet disconnection failed. User may still have active wallet connection.',
+          "Cannot complete logout: wallet disconnection failed. User may still have active wallet connection.",
           walletError
         );
       }
@@ -483,94 +507,104 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
             try {
               logSecurityEvent(
                 SecurityEventType.WALLET_CONNECTION_ATTEMPT,
-                createConnectionEventContext('seizeDisconnectAndLogout_reconnect')
+                createConnectionEventContext(
+                  "seizeDisconnectAndLogout_reconnect"
+                )
               );
               open({ view: "Connect" });
             } catch (openError) {
-              console.error('Failed to reopen wallet connection after logout:', openError);
+              logError(
+                "seizeDisconnectAndLogout_reconnect",
+                openError instanceof Error
+                  ? openError
+                  : new Error(
+                      `Failed to reopen wallet connection: ${openError}`
+                    )
+              );
             }
           }, 100);
         }
       } catch (error: unknown) {
         const authError = new AuthenticationError(
-          'Failed to clear authentication state after successful wallet disconnect',
+          "Failed to clear authentication state after successful wallet disconnect",
           error
         );
-        logError('seizeDisconnectAndLogout', authError);
+        logError("seizeDisconnectAndLogout", authError);
         throw authError;
       }
     },
     [disconnect, open, setDisconnected] // FIXED: Use unified state transition
   );
 
-  const seizeAcceptConnection = useCallback((address: string): void => {
-    // Extract diagnostic data before validation check
-    const addressLength = address.length;
-    const addressFormat = address.startsWith('0x') ? 'hex_prefixed' : 'other';
+  const seizeAcceptConnection = useCallback(
+    (address: string): void => {
+      // Extract diagnostic data before validation check
+      const addressLength = address.length;
+      const addressFormat = address.startsWith("0x") ? "hex_prefixed" : "other";
 
-    if (!isAddress(address)) {
-      // Log security event with NO address data
+      if (!isAddress(address)) {
+        // Log security event with NO address data
+        logSecurityEvent(
+          SecurityEventType.INVALID_ADDRESS_DETECTED,
+          createValidationEventContext(
+            "seizeAcceptConnection",
+            false,
+            addressLength,
+            addressFormat
+          )
+        );
+
+        const error = new AuthenticationError(
+          "Invalid Ethereum address format. Address must be a valid EIP-55 checksummed format."
+        );
+        logError("seizeAcceptConnection", error);
+        throw error;
+      }
+
+      // Log successful address validation with NO address data
       logSecurityEvent(
-        SecurityEventType.INVALID_ADDRESS_DETECTED,
-        createValidationEventContext(
-          'seizeAcceptConnection',
-          false,
-          addressLength,
-          addressFormat
-        )
+        SecurityEventType.ADDRESS_VALIDATION_SUCCESS,
+        createValidationEventContext("seizeAcceptConnection", true)
       );
 
-      const error = new AuthenticationError(
-        'Invalid Ethereum address format. Address must be a valid EIP-55 checksummed format.'
-      );
-      logError('seizeAcceptConnection', error);
-      throw error;
-    }
+      // Normalize address to checksummed format for consistency
+      const checksummedAddress = getAddress(address);
+      setConnected(checksummedAddress);
+    },
+    [setConnected]
+  );
 
-    // Log successful address validation with NO address data
-    logSecurityEvent(
-      SecurityEventType.ADDRESS_VALIDATION_SUCCESS,
-      createValidationEventContext(
-        'seizeAcceptConnection',
-        true
-      )
-    );
-
-    // Normalize address to checksummed format for consistency
-    const checksummedAddress = getAddress(address);
-    setConnected(checksummedAddress);
-  }, [setConnected]);
-
-  const contextValue = useMemo((): SeizeConnectContextType => ({
-    address: connectedAddress,
-    walletName: undefined,
-    walletIcon: undefined,
-    isSafeWallet: false,
-    seizeConnect,
-    seizeDisconnect,
-    seizeDisconnectAndLogout,
-    seizeAcceptConnection,
-    seizeConnectOpen: state.open,
-    isConnected: account.isConnected,
-    isAuthenticated: !!connectedAddress,
-    connectionState: walletState.status, // Unified state machine
-    walletState, // Expose unified state for advanced consumers
-    hasInitializationError,
-    initializationError,
-  }), [
-    connectedAddress,
-    seizeConnect,
-    seizeDisconnect,
-    seizeDisconnectAndLogout,
-    seizeAcceptConnection,
-    state.open,
-    account.isConnected,
-    walletState,
-    hasInitializationError,
-    initializationError,
-  ]);
-
-
+  const contextValue = useMemo(
+    (): SeizeConnectContextType => ({
+      address: connectedAddress,
+      walletName: undefined,
+      walletIcon: undefined,
+      isSafeWallet: false,
+      seizeConnect,
+      seizeDisconnect,
+      seizeDisconnectAndLogout,
+      seizeAcceptConnection,
+      seizeConnectOpen: state.open,
+      isConnected: account.isConnected,
+      isAuthenticated: !!connectedAddress,
+      connectionState: walletState.status, // Unified state machine
+      walletState, // Expose unified state for advanced consumers
+      hasInitializationError,
+      initializationError,
+    }),
+    [
+      connectedAddress,
+      seizeConnect,
+      seizeDisconnect,
+      seizeDisconnectAndLogout,
+      seizeAcceptConnection,
+      state.open,
+      account.isConnected,
+      walletState,
+      hasInitializationError,
+      initializationError,
+    ]
+  );
 
   return (
     <WalletErrorBoundary>

@@ -1,14 +1,23 @@
-"use client"
+"use client";
 
 import React from "react";
 
 type FallbackImageProps = React.ImgHTMLAttributes<HTMLImageElement> & {
-  primarySrc: string;   // try first (your downscaled gif)
-  fallbackSrc: string;  // use if primary fails (your original gif)
+  readonly primarySrc: string;
+  readonly fallbackSrc: string;
+  readonly onPrimaryError?: (
+    event: React.SyntheticEvent<HTMLImageElement, Event>
+  ) => void;
 };
 
-export const FallbackImage = React.forwardRef<HTMLImageElement, FallbackImageProps>(
-  ({ primarySrc, fallbackSrc, alt = "", onError, ...rest }, ref) => {
+export const FallbackImage = React.forwardRef<
+  HTMLImageElement,
+  FallbackImageProps
+>(
+  (
+    { primarySrc, fallbackSrc, alt = "", onError, onPrimaryError, ...rest },
+    ref
+  ) => {
     const [src, setSrc] = React.useState(primarySrc);
     const [usedFallback, setUsedFallback] = React.useState(false);
 
@@ -20,7 +29,7 @@ export const FallbackImage = React.forwardRef<HTMLImageElement, FallbackImagePro
 
     const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
       if (!usedFallback) {
-        console.log(`[FallbackImage] Primary failed: ${primarySrc}, falling back to: ${fallbackSrc}`);
+        onPrimaryError?.(e);
         setSrc(fallbackSrc);
         setUsedFallback(true);
       } else {
