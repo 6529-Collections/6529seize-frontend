@@ -1,5 +1,6 @@
 "use client";
 
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { useXtdhStats } from "@/hooks/useXtdhStats";
 
 interface UserPageXtdhStatsHeaderProps {
@@ -37,18 +38,13 @@ export default function UserPageXtdhStatsHeader({
   const grantingPercentage = xtdhRate > 0 ? (xtdhRateGranted / xtdhRate) * 100 : 0;
   const clampedPercentage = Math.min(Math.max(grantingPercentage, 0), 100);
 
-  const baseRateDisplay = formatNumber(data.baseTdhRate, {
-    maximumFractionDigits: 0,
-  });
-  const multiplierDisplay = formatNumber(data.multiplier, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-  const xtdhRateDisplay = formatNumber(xtdhRate);
-  const grantedDisplay = formatNumber(xtdhRateGranted);
-  const availableDisplay = formatNumber(xtdhRateAvailable);
-  const receivedRateDisplay = formatNumber(data.xtdhRateReceived);
-  const totalReceivedDisplay = formatNumber(data.totalXtdhReceived);
+  const baseRateDisplay = formatDisplay(data.baseTdhRate);
+  const multiplierDisplay = formatDisplay(data.multiplier, 2);
+  const xtdhRateDisplay = formatDisplay(xtdhRate);
+  const grantedDisplay = formatDisplay(xtdhRateGranted);
+  const availableDisplay = formatDisplay(xtdhRateAvailable);
+  const receivedRateDisplay = formatDisplay(data.xtdhRateReceived);
+  const totalReceivedDisplay = formatDisplay(data.totalXtdhReceived);
 
   return (
     <section
@@ -64,7 +60,7 @@ export default function UserPageXtdhStatsHeader({
         <StatCard
           label="Base TDH Rate"
           tooltip="Daily TDH generation from Memes cards and Gradients"
-          value={`${baseRateDisplay}`}
+          value={baseRateDisplay}
           suffix="/day"
         />
         <StatCard
@@ -101,7 +97,7 @@ export default function UserPageXtdhStatsHeader({
               role="progressbar"
               aria-valuemin={0}
               aria-valuemax={100}
-              aria-valuenow={Math.round(clampedPercentage)}
+              aria-valuenow={Math.floor(clampedPercentage)}
               aria-valuetext={`${grantedDisplay} out of ${xtdhRateDisplay} xTDH rate granted, ${availableDisplay} available`}
             />
           </div>
@@ -139,8 +135,14 @@ export default function UserPageXtdhStatsHeader({
   );
 }
 
-function formatNumber(value: number, options?: Intl.NumberFormatOptions) {
-  return value.toLocaleString(undefined, options);
+function formatDisplay(value: number, decimals = 0) {
+  if (Number.isNaN(value)) {
+    return "-";
+  }
+
+  const factor = Math.pow(10, decimals);
+  const flooredValue = Math.floor(value * factor) / factor;
+  return formatNumberWithCommas(flooredValue);
 }
 
 interface StatCardProps {

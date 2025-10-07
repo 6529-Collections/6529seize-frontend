@@ -48,13 +48,35 @@ export async function GET(
     return NextResponse.json(error, { status: 500 });
   }
 
-  const mockData: XtdhStatsResponse = {
-    baseTdhRate: 1000,
-    multiplier: 0.1,
-    xtdhRateGranted: 80,
-    xtdhRateReceived: 45,
-    totalXtdhReceived: 12_450,
-  };
+  const normalizedProfile = profile.toLowerCase();
+
+  let mockData: XtdhStatsResponse;
+
+  if (normalizedProfile === "simo") {
+    mockData = {
+      baseTdhRate: 12_212,
+      multiplier: 0.1,
+      xtdhRateGranted: 0,
+      xtdhRateReceived: 3_389,
+      totalXtdhReceived: 3_389,
+    };
+  } else if (normalizedProfile === "test1234") {
+    mockData = {
+      baseTdhRate: 1_000,
+      multiplier: 0.1,
+      xtdhRateGranted: 80,
+      xtdhRateReceived: 45,
+      totalXtdhReceived: 12_450,
+    };
+  } else {
+    mockData = {
+      baseTdhRate: 0,
+      multiplier: 0.1,
+      xtdhRateGranted: 0,
+      xtdhRateReceived: 0,
+      totalXtdhReceived: 0,
+    };
+  }
 
   await new Promise((resolve) => {
     setTimeout(resolve, NETWORK_DELAY_MS);
