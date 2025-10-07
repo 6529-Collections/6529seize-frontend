@@ -78,3 +78,88 @@ export interface XtdhReceivedNftsResponse {
   readonly pageSize: number;
   readonly availableCollections: XtdhReceivedCollectionOption[];
 }
+
+export type XtdhAllocationNetwork = "ethereum" | "polygon" | "optimism" | string;
+
+export interface XtdhAllocationHolderSummary {
+  readonly profileId: string;
+  readonly displayName: string;
+  readonly profileImage: string;
+  readonly tokenCount: number;
+  readonly xtdhEarned: number;
+  readonly lastEarnedAt: string;
+}
+
+export interface XtdhEcosystemToken {
+  readonly collectionId: string;
+  readonly collectionName: string;
+  readonly collectionImage: string;
+  readonly collectionSlug: string;
+  readonly blockchain: XtdhAllocationNetwork;
+  readonly contractAddress: string;
+  readonly tokenStandard: "ERC721" | "ERC1155";
+  readonly tokenId: string;
+  readonly tokenName: string;
+  readonly tokenImage: string;
+  readonly xtdhRate: number;
+  readonly totalXtdhAllocated: number;
+  readonly grantorCount: number;
+  readonly topGrantors: XtdhGranter[];
+  readonly granters: XtdhGranter[];
+  readonly holderSummaries: XtdhAllocationHolderSummary[];
+  readonly lastAllocatedAt: string;
+}
+
+export interface XtdhEcosystemCollection {
+  readonly collectionId: string;
+  readonly collectionName: string;
+  readonly collectionImage: string;
+  readonly collectionSlug: string;
+  readonly description: string;
+  readonly blockchain: XtdhAllocationNetwork;
+  readonly contractAddress: string;
+  readonly tokenStandard: "ERC721" | "ERC1155";
+  readonly tokenCount: number;
+  readonly receivingTokenCount: number;
+  readonly totalXtdhRate: number;
+  readonly totalXtdhAllocated: number;
+  readonly grantorCount: number;
+  readonly grantCount: number;
+  readonly topGrantors: XtdhGranter[];
+  readonly granters: XtdhGranter[];
+  readonly holderSummaries: XtdhAllocationHolderSummary[];
+  readonly tokens: XtdhEcosystemToken[];
+  readonly lastAllocatedAt: string;
+  readonly lastUpdatedAt: string;
+}
+
+export interface XtdhEcosystemCollectionsResponse {
+  readonly collections: XtdhEcosystemCollection[];
+  readonly totalCount: number;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly availableFilters: {
+    readonly networks: XtdhAllocationNetwork[];
+    readonly grantors: XtdhGranterPreview[];
+  };
+}
+
+export interface XtdhEcosystemTokensResponse {
+  readonly tokens: XtdhEcosystemToken[];
+  readonly totalCount: number;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly availableFilters: {
+    readonly networks: XtdhAllocationNetwork[];
+    readonly grantors: XtdhGranterPreview[];
+  };
+}
+
+export interface XtdhOverviewStats {
+  readonly totalCollections: number;
+  readonly totalGrantors: number;
+  readonly totalTokens: number;
+  readonly totalXtdhAllocated: number;
+  readonly totalXtdhRate: number;
+  readonly lastUpdatedAt: string;
+}

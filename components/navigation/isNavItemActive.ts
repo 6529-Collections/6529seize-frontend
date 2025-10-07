@@ -32,6 +32,7 @@ export const isNavItemActive = (
       "/nextgen",
       "/meme-lab",
       "/rememes",
+      "/xtdh",
     ];
     return relatedHrefs.some((href) => pathname.startsWith(href));
   }

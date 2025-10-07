@@ -1,4 +1,4 @@
-import { useQuery, type UseQueryResult } from "@tanstack/react-query";
+import { keepPreviousData, useQuery, type UseQueryResult } from "@tanstack/react-query";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type {
@@ -171,7 +171,7 @@ export function useReceivedCollections(
       Math.min(1_000 * 2 ** attemptIndex, 30_000),
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -202,6 +202,6 @@ export function useReceivedNfts(
       Math.min(1_000 * 2 ** attemptIndex, 30_000),
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
   });
 }

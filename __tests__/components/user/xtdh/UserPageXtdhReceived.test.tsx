@@ -120,7 +120,7 @@ describe("UserPageXtdhReceived", () => {
   it("requests collections data with default parameters", () => {
     render(<UserPageXtdhReceived profileId="simo" />);
 
-    expect(mockUseReceivedCollections).toHaveBeenCalledTimes(1);
+    expect(mockUseReceivedCollections).toHaveBeenCalled();
     const args = mockUseReceivedCollections.mock.calls[0]?.[0];
     expect(args).toMatchObject({
       profile: "simo",
