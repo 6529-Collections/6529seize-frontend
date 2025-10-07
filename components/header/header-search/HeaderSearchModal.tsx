@@ -253,17 +253,15 @@ export default function HeaderSearchModal({
   ]);
 
   const handleRetry = () => {
-    if (selectedCategory === CATEGORY.NFTS) {
-      void refetchNfts();
-      return;
-    }
+    const refetchByCategory: Record<CATEGORY, () => Promise<unknown>> = {
+      [CATEGORY.NFTS]: refetchNfts,
+      [CATEGORY.PROFILES]: refetchProfiles,
+      [CATEGORY.WAVES]: refetchWaves,
+    };
 
-    if (selectedCategory === CATEGORY.PROFILES) {
-      void refetchProfiles();
-      return;
-    }
-
-    void refetchWaves();
+    refetchByCategory[selectedCategory]().catch(() => {
+      setState(STATE.ERROR);
+    });
   };
 
   const activeElementRef = useRef<HTMLDivElement>(null);
