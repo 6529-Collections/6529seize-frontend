@@ -4,7 +4,13 @@ import styles from "./CollectionsDropdown.module.scss";
 import { Dropdown } from "react-bootstrap";
 import { useRouter } from "next/navigation";
 
-type CollectionType = "memes" | "gradient" | "nextgen" | "memelab" | "rememes";
+type CollectionType =
+  | "memes"
+  | "gradient"
+  | "nextgen"
+  | "memelab"
+  | "rememes"
+  | "xtdh";
 
 interface CollectionItem {
   id: CollectionType;
@@ -18,6 +24,7 @@ const COLLECTIONS: CollectionItem[] = [
   { id: "nextgen", name: "NextGen", path: "/nextgen" },
   { id: "memelab", name: "Meme Lab", path: "/meme-lab" },
   { id: "rememes", name: "ReMemes", path: "/rememes" },
+  { id: "xtdh", name: "xTDH", path: "/xtdh" },
 ];
 
 interface Props {

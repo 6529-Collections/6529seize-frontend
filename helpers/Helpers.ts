@@ -3,9 +3,9 @@ import {
   NEXTGEN_CORE,
 } from "@/components/nextGen/nextgen_contracts";
 import {
-  USER_PAGE_TAB_META,
-  UserPageTabType,
-} from "@/components/user/layout/UserPageTabs";
+  type UserPageTabKey,
+  getUserPageTabById,
+} from "@/components/user/layout/userTabs.config";
 import { publicEnv } from "@/config/env";
 import {
   GRADIENT_CONTRACT,
@@ -624,7 +624,7 @@ export const getProfileTargetRoute = ({
 }: {
   readonly handleOrWallet: string;
   readonly pathname: string;
-  readonly defaultPath: UserPageTabType;
+  readonly defaultPath: UserPageTabKey;
 }): string => {
   if (!handleOrWallet.length) {
     return "/404";
@@ -632,7 +632,8 @@ export const getProfileTargetRoute = ({
   if (pathname.includes("[user]")) {
     return pathname.replace("[user]", handleOrWallet);
   }
-  return `/${handleOrWallet}/${USER_PAGE_TAB_META[defaultPath].route}`;
+  const tab = getUserPageTabById(defaultPath);
+  return `/${handleOrWallet}/${tab?.route ?? ""}`;
 };
 
 export function isNullAddress(address: string) {
