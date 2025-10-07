@@ -16,12 +16,6 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
   useCookieConsent: jest.fn(),
 }));
 
-/**
- * Mock MintCountdownBox to:
- *  - Surface the props we care about via data-* attributes
- *  - Render a Mint button only when (!small && !hideMintBtn && mintInfo && linkInfo)
- *  - Render a disabled skeleton button when mintInfo is missing
- */
 jest.mock("@/components/mint-countdown-box/MintCountdownBox", () => {
   return function MockMintCountdownBox(props: any) {
     const canShowMint =
