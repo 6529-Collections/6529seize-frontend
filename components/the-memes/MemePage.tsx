@@ -372,14 +372,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               </Col>
               {isLastCard && (
                 <Col sm={12} md={6} className="d-flex align-items-center">
-                  {nft && (
-                    <MemePageMintCountdown
-                      nft_id={nft.id}
-                      hide_mint_btn={false}
-                      is_full_width={false}
-                      show_only_if_active={true}
-                    />
-                  )}
+                  {nft && <MemePageMintCountdown nft_id={nft.id} />}
                 </Col>
               )}
             </Row>

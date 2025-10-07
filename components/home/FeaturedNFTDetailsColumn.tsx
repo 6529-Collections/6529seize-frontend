@@ -69,12 +69,7 @@ export default function FeaturedNFTDetailsColumn({
         {isMemeMintingActive && (
           <Row>
             <Col>
-              <MemePageMintCountdown
-                nft_id={featuredNft.id}
-                is_full_width={true}
-                hide_mint_btn={false}
-                show_only_if_active={false}
-              />
+              <MemePageMintCountdown nft_id={featuredNft.id} />
             </Col>
           </Row>
         )}

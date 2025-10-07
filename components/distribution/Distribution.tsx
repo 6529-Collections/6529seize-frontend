@@ -238,14 +238,7 @@ export default function DistributionPage(props: Readonly<Props>) {
       !isNaN(nftIdNumber) &&
       areEqualAddresses(props.contract, MEMES_CONTRACT)
     ) {
-      return (
-        <MemePageMintCountdown
-          nft_id={nftIdNumber}
-          hide_mint_btn={false}
-          is_full_width={false}
-          show_only_if_active={true}
-        />
-      );
+      return <MemePageMintCountdown nft_id={nftIdNumber} />;
     }
 
     return <></>;

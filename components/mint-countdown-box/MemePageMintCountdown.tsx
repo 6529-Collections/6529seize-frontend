@@ -12,9 +12,7 @@ import MintCountdownBox from "./MintCountdownBox";
 export default function MemePageMintCountdown(
   props: Readonly<{
     nft_id: number;
-    hide_mint_btn: boolean;
-    is_full_width: boolean;
-    show_only_if_active: boolean;
+    hide_mint_btn?: boolean;
   }>
 ) {
   const manifoldClaim = useMemesManifoldClaim(props.nft_id);

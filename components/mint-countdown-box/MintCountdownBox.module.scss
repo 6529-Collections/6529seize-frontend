@@ -40,11 +40,11 @@
     background-color: white;
     color: black;
   }
+}
 
-  &.skeleton {
-    background: linear-gradient(90deg, #444 25%, #555 50%, #444 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-    border: 2px solid #666 !important;
-  }
+.skeletonBtn {
+  background: linear-gradient(90deg, #444 25%, #555 50%, #444 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border: 2px solid #666 !important;
 }

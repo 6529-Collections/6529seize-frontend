@@ -31,9 +31,10 @@ export default function MintCountdownBox(props: Readonly<Props>) {
   const showSkeletonButton = !hasMintInfo;
 
   // Safe date conversion (only when present)
-  const countdownDate = mintInfo?.date
-    ? new Date(mintInfo.date * 1000)
-    : undefined;
+  const countdownDate =
+    mintInfo?.date === null || mintInfo?.date === undefined
+      ? undefined
+      : new Date(mintInfo.date * 1000);
 
   const showAllowlistInfo = mintInfo?.showAllowlistInfo;
 
@@ -112,7 +113,7 @@ export default function MintCountdownBox(props: Readonly<Props>) {
         <div className="pt-2 pb-2 tw-w-full">
           <button
             disabled
-            className={`pt-2 pb-2 btn-block no-wrap ${styles.mintBtn} ${styles.skeleton}`}>
+            className={`pt-2 pb-2 btn-block no-wrap ${styles.mintBtn} ${styles.skeletonBtn}`}>
             &nbsp;
           </button>
         </div>
