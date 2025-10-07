@@ -31,7 +31,7 @@ jest.mock("next/image", () => ({
 jest.mock("@/components/mint-countdown-box/MemePageMintCountdown", () => ({
   __esModule: true,
   default: ({ nft_id }: any) => (
-    <div data-testid="mint-countdown" data-nft-id={nft_id} data- />
+    <div data-testid="mint-countdown" data-nft-id={nft_id} />
   ),
 }));
 
