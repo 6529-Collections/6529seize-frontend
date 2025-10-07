@@ -59,24 +59,24 @@ const profile = { handle: "alice", wallet: "0x1", display: "Alice", level: 1 };
 interface SetupOptions {
   queryImpl?: (params: {
     queryKey: [QueryKey, string];
-    profilesRefetch: jest.Mock;
-    nftsRefetch: jest.Mock;
+    profilesRefetch: jest.Mock<Promise<unknown>, []>;
+    nftsRefetch: jest.Mock<Promise<unknown>, []>;
   }) => {
     isFetching: boolean;
     data: unknown;
     error?: Error;
-    refetch: jest.Mock;
+    refetch: jest.Mock<Promise<unknown>, []>;
   };
   selectedCategory?: "PROFILES" | "NFTS" | "WAVES";
   wavesReturn?: {
     waves: unknown[];
     isFetching: boolean;
     error: Error | null;
-    refetch: jest.Mock;
+    refetch: jest.Mock<Promise<unknown>, []>;
   };
-  profilesRefetch?: jest.Mock;
-  nftsRefetch?: jest.Mock;
-  wavesRefetch?: jest.Mock;
+  profilesRefetch?: jest.Mock<Promise<unknown>, []>;
+  nftsRefetch?: jest.Mock<Promise<unknown>, []>;
+  wavesRefetch?: jest.Mock<Promise<unknown>, []>;
 }
 
 function setup(options: SetupOptions = {}) {
@@ -84,9 +84,9 @@ function setup(options: SetupOptions = {}) {
     queryImpl,
     selectedCategory = "PROFILES",
     wavesReturn,
-    profilesRefetch = jest.fn(),
-    nftsRefetch = jest.fn(),
-    wavesRefetch = jest.fn(),
+    profilesRefetch = jest.fn(() => Promise.resolve()),
+    nftsRefetch = jest.fn(() => Promise.resolve()),
+    wavesRefetch = jest.fn(() => Promise.resolve()),
   } = options;
   const push = jest.fn();
   const onClose = jest.fn();
@@ -165,7 +165,7 @@ describe("HeaderSearchModal", () => {
   });
 
   it("shows an error message and allows retry when a search fails", async () => {
-    const profilesRefetch = jest.fn();
+    const profilesRefetch = jest.fn(() => Promise.resolve());
     setup({
       profilesRefetch,
       queryImpl: ({ queryKey, profilesRefetch, nftsRefetch }) => {
