@@ -1,6 +1,12 @@
 "use client";
 
-import { useContext, useEffect, useState, type JSX } from "react";
+import {
+  useContext,
+  useEffect,
+  useState,
+  type JSX,
+  type KeyboardEvent,
+} from "react";
 import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { getRandomColorWithSeed } from "@/helpers/Helpers";
 import GroupCardView from "./GroupCardView";
@@ -110,12 +116,23 @@ export default function GroupCard({
     router.push(`/network?page=1&group=${group?.id}`);
   };
 
+  const onCardKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      goToCommunityView();
+    }
+  };
+
+  const isIdle = state === GroupCardState.IDLE;
+
   return (
     <div
-      className={`${
-        state === GroupCardState.IDLE && "tw-group tw-cursor-pointer"
-      } tw-col-span-1`}
-      onClick={goToCommunityView}>
+      role="button"
+      tabIndex={isIdle ? 0 : -1}
+      aria-disabled={!isIdle}
+      className={`${isIdle && "tw-group tw-cursor-pointer"} tw-col-span-1`}
+      onClick={goToCommunityView}
+      onKeyDown={onCardKeyDown}>
       <div
         className="tw-relative tw-w-full tw-h-9 tw-rounded-t-2xl"
         style={{

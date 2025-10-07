@@ -30,6 +30,10 @@ jest.mock(
 const push = jest.fn();
 (useRouter as jest.Mock).mockReturnValue({ push });
 
+beforeEach(() => {
+  push.mockClear();
+});
+
 describe("GroupCard", () => {
   const group: any = {
     id: "g1",
@@ -61,8 +65,20 @@ describe("GroupCard", () => {
   }
 
   it("navigates to community view when idle", () => {
-    renderComp();
-    fireEvent.click(document.querySelector("div.tw-col-span-1")!);
+    const { getByRole } = renderComp();
+    fireEvent.click(getByRole("button"));
+    expect(push).toHaveBeenCalledWith(`/network?page=1&group=${group.id}`);
+  });
+
+  it("navigates to community view when pressing Enter", () => {
+    const { getByRole } = renderComp();
+    fireEvent.keyDown(getByRole("button"), { key: "Enter" });
+    expect(push).toHaveBeenCalledWith(`/network?page=1&group=${group.id}`);
+  });
+
+  it("navigates to community view when pressing Space", () => {
+    const { getByRole } = renderComp();
+    fireEvent.keyDown(getByRole("button"), { key: " " });
     expect(push).toHaveBeenCalledWith(`/network?page=1&group=${group.id}`);
   });
 
