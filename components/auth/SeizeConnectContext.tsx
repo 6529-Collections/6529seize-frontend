@@ -156,8 +156,8 @@ interface AddressValidationResult {
 
 const isCapacitorPlatform = (): boolean => {
   return (
-    typeof window !== "undefined" &&
-    Boolean(window.Capacitor?.isNativePlatform?.())
+    typeof globalThis.window !== "undefined" &&
+    Boolean(globalThis.window.Capacitor?.isNativePlatform?.())
   );
 };
 
