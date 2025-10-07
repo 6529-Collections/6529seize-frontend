@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
+import type { GrantedFilterStatus } from "../UserPageXtdhGrantedList";
 import { UserPageXtdhGrantList } from "./UserPageXtdhGrantList";
 
 export interface UserPageXtdhGrantedListContentProps {
@@ -10,6 +11,7 @@ export interface UserPageXtdhGrantedListContentProps {
   readonly grants: ApiTdhGrantsPage["data"];
   readonly isSelf: boolean;
   readonly onRetry: () => void;
+  readonly status: GrantedFilterStatus;
 }
 
 export function UserPageXtdhGrantedListContent({
@@ -20,6 +22,7 @@ export function UserPageXtdhGrantedListContent({
   grants,
   isSelf,
   onRetry,
+  status,
 }: Readonly<UserPageXtdhGrantedListContentProps>) {
   if (!enabled) {
     return (
@@ -42,6 +45,14 @@ export function UserPageXtdhGrantedListContent({
   }
 
   if (!grants.length) {
+    if (status !== "ALL") {
+      const statusLabel = status.toLowerCase();
+      return (
+        <GrantedListMessage>
+          No {statusLabel} grants found. Try a different filter.
+        </GrantedListMessage>
+      );
+    }
     return (
       <GrantedListMessage>
         {isSelf
