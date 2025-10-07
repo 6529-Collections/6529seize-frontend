@@ -2,16 +2,18 @@
 
 import styles from "./Rememes.module.scss";
 
+import Address from "@/components/address/Address";
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import DotLoader from "@/components/dotLoader/DotLoader";
+import NFTAttributes from "@/components/nft-attributes/NFTAttributes";
+import NFTImage from "@/components/nft-image/NFTImage";
+import RememeImage from "@/components/nft-image/RememeImage";
+import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
+import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
+import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
 import { publicEnv } from "@/config/env";
-import { useTitle } from "@/contexts/TitleContext";
-import { faExternalLink, faGlobe } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Col, Container, Row, Table } from "react-bootstrap";
-import { useEnsName } from "wagmi";
 import { MEMES_CONTRACT, OPENSEA_STORE_FRONT_CONTRACT } from "@/constants";
+import { useTitle } from "@/contexts/TitleContext";
 import { DBResponse } from "@/entities/IDBResponse";
 import { NFT, Rememe } from "@/entities/INFT";
 import {
@@ -25,15 +27,13 @@ import {
 } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
-import Address from "../address/Address";
-import { useCookieConsent } from "../cookies/CookieConsentContext";
-import DotLoader from "../dotLoader/DotLoader";
-import NFTImage from "../nft-image/NFTImage";
-import RememeImage from "../nft-image/RememeImage";
-import NFTMarketplaceLinks from "../nft-marketplace-links/NFTMarketplaceLinks";
-import NFTAttributes from "../nftAttributes/NFTAttributes";
-import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
-import ArtistProfileHandle from "../the-memes/ArtistProfileHandle";
+import { faExternalLink, faGlobe } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Col, Container, Row, Table } from "react-bootstrap";
+import { useEnsName } from "wagmi";
 
 interface Props {
   contract: string;

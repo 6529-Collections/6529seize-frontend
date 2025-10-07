@@ -24,9 +24,9 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
       expect(res).toEqual({ waveId: uuid, serialNo: "10", dropId: undefined });
     });
 
-    it("parses legacy my-stream quote link", () => {
+    it("returns null for legacy my-stream link", () => {
       const res = parseSeizeQuoteLink(`/my-stream?wave=${uuid}&serialNo=10`);
-      expect(res).toEqual({ waveId: uuid, serialNo: "10", dropId: undefined });
+      expect(res).toBeNull();
     });
 
     it("returns null for invalid link", () => {
@@ -51,18 +51,18 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
       expect(res).toBeNull();
     });
 
-    it("accepts path aliases", () => {
-      const res = parseSeizeQueryLink(
-        "https://site.com/alias?foo=1",
-        ["/path", "/alias"],
-        ["foo"]
-      );
-      expect(res).toEqual({ foo: "1" });
-    });
-
     it("returns null when host does not match mocked BASE_ENDPOINT", () => {
       const res = parseSeizeQueryLink(
         "https://example.com/path?foo=1",
+        "/path",
+        ["foo"]
+      );
+      expect(res).toBeNull();
+    });
+
+    it("requires exact path match", () => {
+      const res = parseSeizeQueryLink(
+        "https://site.com/alias?foo=1",
         "/path",
         ["foo"]
       );

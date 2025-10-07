@@ -6,10 +6,10 @@ import Address from "@/components/address/Address";
 import { AuthContext } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
+import { NftPageStats } from "@/components/nft-attributes/NftStats";
 import NFTImage from "@/components/nft-image/NFTImage";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import NftNavigation from "@/components/nft-navigation/NftNavigation";
-import { NftPageStats } from "@/components/nftAttributes/NftStats";
 import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
 import { publicEnv } from "@/config/env";
 import { GRADIENT_CONTRACT } from "@/constants";
@@ -27,7 +27,6 @@ import { fetchUrl } from "@/services/6529api";
 import { useContext, useEffect, useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import YouOwnNftBadge from "../you-own-nft-badge/YouOwnNftBadge";
-
 interface NftWithOwner extends NFT {
   owner: string;
   owner_display: string;

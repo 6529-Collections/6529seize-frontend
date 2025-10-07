@@ -1,11 +1,15 @@
-import { createConnector } from "wagmi";
-import { privateKeyToAccount } from "viem/accounts";
-import { createWalletClient, fallback, http, WalletClient } from "viem";
-import type { Address, Hex, Chain } from "viem";
 import type { AppWallet } from "@/components/app-wallets/AppWalletsContext";
 import { decryptData } from "@/components/app-wallets/app-wallet-helpers";
 import { areEqualAddresses } from "@/helpers/Helpers";
-import { WalletAuthenticationError, InvalidPasswordError, PrivateKeyDecryptionError } from "@/src/errors/wallet-auth";
+import {
+  InvalidPasswordError,
+  PrivateKeyDecryptionError,
+  WalletAuthenticationError,
+} from "@/src/errors/wallet-auth";
+import type { Address, Chain, Hex } from "viem";
+import { createWalletClient, fallback, http, WalletClient } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { createConnector } from "wagmi";
 
 export const APP_WALLET_CONNECTOR_TYPE = "app-wallet";
 
@@ -58,7 +62,10 @@ export function createAppWalletConnector(
       return options.appWallet.address;
     },
     get name() {
-      const shortAddress = options.appWallet.address.slice(0, 6) + '...' + options.appWallet.address.slice(-4);
+      const shortAddress =
+        options.appWallet.address.slice(0, 6) +
+        "..." +
+        options.appWallet.address.slice(-4);
       return `${options.appWallet.name} (${shortAddress})`;
     },
     get supportsSimulation() {
@@ -75,17 +82,19 @@ export function createAppWalletConnector(
     },
     type: APP_WALLET_CONNECTOR_TYPE,
 
-    async setPassword(password: string): Promise<void> { // VOID RETURN - NO SILENT FAILURES
+    async setPassword(password: string): Promise<void> {
       // Input validation - fail fast
-      if (!password || typeof password !== 'string') {
-        throw new InvalidPasswordError('Password is required and must be a string');
+      if (!password || typeof password !== "string") {
+        throw new InvalidPasswordError(
+          "Password is required and must be a string"
+        );
       }
 
       try {
         // Check if we're in Capacitor for more lenient validation
-        const isCapacitor = typeof window !== 'undefined' && 
-                           window.Capacitor?.isNativePlatform?.();
-        
+        const isCapacitor =
+          !!globalThis?.window?.Capacitor?.isNativePlatform?.();
+
         // Validate password by decrypting address hash
         const decryptedAddress = await decryptData(
           options.appWallet.address,
@@ -94,18 +103,25 @@ export function createAppWalletConnector(
         );
 
         if (!decryptedAddress) {
-          throw new InvalidPasswordError('Password decryption resulted in empty data');
+          throw new InvalidPasswordError(
+            "Password decryption resulted in empty data"
+          );
         }
 
         // For Capacitor, be more lenient with address comparison
         if (isCapacitor) {
-          const match = decryptedAddress.toLowerCase() === 
-                       options.appWallet.address.toLowerCase();
+          const match =
+            decryptedAddress.toLowerCase() ===
+            options.appWallet.address.toLowerCase();
           if (!match) {
-            throw new InvalidPasswordError('Password does not match wallet');
+            throw new InvalidPasswordError("Password does not match wallet");
           }
-        } else if (!areEqualAddresses(decryptedAddress, options.appWallet.address)) {
-          throw new InvalidPasswordError('Password does not match wallet - address verification failed');
+        } else if (
+          !areEqualAddresses(decryptedAddress, options.appWallet.address)
+        ) {
+          throw new InvalidPasswordError(
+            "Password does not match wallet - address verification failed"
+          );
         }
 
         // Decrypt the private key
@@ -116,24 +132,25 @@ export function createAppWalletConnector(
         );
 
         if (!privateKey) {
-          throw new PrivateKeyDecryptionError('Private key decryption returned empty result');
+          throw new PrivateKeyDecryptionError(
+            "Private key decryption returned empty result"
+          );
         }
 
         // Only set after all validations pass
         decryptedPrivateKey = privateKey;
-        
       } catch (error) {
         // Clear any potentially set private key on error
         decryptedPrivateKey = null;
-        
+
         // Re-throw our custom errors unchanged
         if (error instanceof WalletAuthenticationError) {
           throw error;
         }
-        
+
         // Wrap unexpected errors
         throw new PrivateKeyDecryptionError(
-          'Unexpected error during password validation',
+          "Unexpected error during password validation",
           error
         );
       }
@@ -143,34 +160,47 @@ export function createAppWalletConnector(
       // Optional initialization logic
     },
 
-    async connect({
-      chainId: maybeChainId,
-      isReconnecting,
-    }: {
+    async connect<withCapabilities extends boolean = false>(opts?: {
       chainId?: number;
       isReconnecting?: boolean;
-    } = {}) {
+      withCapabilities?: boolean | withCapabilities;
+    }): Promise<{
+      accounts: withCapabilities extends true
+        ? readonly {
+            address: `0x${string}`;
+            capabilities: Record<string, unknown>;
+          }[]
+        : readonly `0x${string}`[];
+      chainId: number;
+    }> {
+      const maybeChainId = opts?.chainId;
       const chainId = maybeChainId ?? chains[0].id;
 
       // Validate chainId
       const validChain = chains.find((c) => c.id === chainId);
       if (!validChain) {
-        throw new Error(`Chain ID ${chainId} is not supported. Supported chains: ${chains.map(c => c.id).join(', ')}`);
+        throw new Error(
+          `Chain ID ${chainId} is not supported. Supported chains: ${chains
+            .map((c) => c.id)
+            .join(", ")}`
+        );
       }
 
       if (!decryptedPrivateKey) {
         const password = await requestPasswordModal();
         if (!password) {
-          throw new InvalidPasswordError('Password is required for wallet connection');
+          throw new InvalidPasswordError(
+            "Password is required for wallet connection"
+          );
         }
-        
-        // This will throw on failure - no silent failures
+        // Throws on failure
         await this.setPassword(password);
       }
 
-      // Verify we have the decrypted key after password validation
       if (!decryptedPrivateKey) {
-        throw new PrivateKeyDecryptionError('Private key not available after password validation');
+        throw new PrivateKeyDecryptionError(
+          "Private key not available after password validation"
+        );
       }
 
       const client = await getOrCreateClient(chainId);
@@ -179,19 +209,44 @@ export function createAppWalletConnector(
       }
 
       // Verify the account address matches the expected wallet address
-      if (!areEqualAddresses(client.account.address, options.appWallet.address)) {
-        throw new WalletAuthenticationError('Account address mismatch - potential security breach');
+      if (
+        !areEqualAddresses(client.account.address, options.appWallet.address)
+      ) {
+        throw new WalletAuthenticationError(
+          "Account address mismatch - potential security breach"
+        );
       }
 
+      // Keep internal state up to date
+      currentChainId = chainId;
+
+      // Emit connect event (addresses only)
       emitter.emit("connect", {
         accounts: [client.account.address],
-        chainId: chainId,
+        chainId,
       });
 
+      if (opts?.withCapabilities) {
+        const accountsWithCaps = (
+          [client.account.address] as readonly `0x${string}`[]
+        ).map((address) => ({
+          address,
+          capabilities: {} as Record<string, unknown>,
+        })) as unknown as readonly {
+          address: `0x${string}`;
+          capabilities: Record<string, unknown>;
+        }[];
+
+        return {
+          accounts: accountsWithCaps as any,
+          chainId,
+        } as any;
+      }
+
       return {
-        accounts: [client.account.address],
-        chainId: chainId,
-      };
+        accounts: [client.account.address] as readonly `0x${string}`[],
+        chainId,
+      } as any;
     },
 
     async disconnect() {

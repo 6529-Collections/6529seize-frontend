@@ -1,11 +1,9 @@
-import { render, screen } from "@testing-library/react";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import FeaturedNFTDetailsColumn from "@/components/home/FeaturedNFTDetailsColumn";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
-import useCapacitor, {
-  CapacitorOrientationType,
-} from "@/hooks/useCapacitor";
+import useCapacitor, { CapacitorOrientationType } from "@/hooks/useCapacitor";
 import { useManifoldClaimDisplays } from "@/hooks/useManifoldClaimDisplays";
+import { render, screen } from "@testing-library/react";
 
 // Mock all dependencies
 jest.mock("@/hooks/useManifoldClaim");
@@ -23,17 +21,14 @@ jest.mock("next/link", () => ({
   ),
 }));
 
-jest.mock(
-  "@/components/nft-marketplace-links/NFTMarketplaceLinks",
-  () => ({
-    __esModule: true,
-    default: ({ contract, id }: { contract: string; id: number }) => (
-      <div data-testid="nft-marketplace-links">
-        Marketplace Links - Contract: {contract}, ID: {id}
-      </div>
-    ),
-  })
-);
+jest.mock("@/components/nft-marketplace-links/NFTMarketplaceLinks", () => ({
+  __esModule: true,
+  default: ({ contract, id }: { contract: string; id: number }) => (
+    <div data-testid="nft-marketplace-links">
+      Marketplace Links - Contract: {contract}, ID: {id}
+    </div>
+  ),
+}));
 
 jest.mock("@/components/home/ManifoldClaimTable", () => ({
   __esModule: true,
@@ -79,12 +74,11 @@ jest.mock("@/components/home/MintingApproachSection", () => ({
   ),
 }));
 
-jest.mock("@/components/the-memes/MemePageMintCountdown", () => ({
+jest.mock("@/components/mint-countdown-box/MemePageMintCountdown", () => ({
   __esModule: true,
   default: ({
     nft_id,
     setClaim,
-    is_full_width,
   }: {
     nft_id: number;
     setClaim: (claim: any) => void;
@@ -92,7 +86,6 @@ jest.mock("@/components/the-memes/MemePageMintCountdown", () => ({
   }) => (
     <div data-testid="meme-page-mint-countdown">
       <div>NFT ID: {nft_id}</div>
-      <div>Full Width: {is_full_width.toString()}</div>
       <button onClick={() => setClaim({ id: 1, status: "active" })}>
         Set Claim
       </button>

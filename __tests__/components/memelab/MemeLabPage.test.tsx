@@ -85,12 +85,12 @@ jest.mock("@/components/timeline/Timeline", () => ({
   default: () => <div data-testid="timeline" />,
 }));
 
-jest.mock("@/components/nftAttributes/NFTAttributes", () => ({
+jest.mock("@/components/nft-attributes/NFTAttributes", () => ({
   __esModule: true,
   default: () => <div data-testid="nft-attributes" />,
 }));
 
-jest.mock("@/components/nftAttributes/NftStats", () => ({
+jest.mock("@/components/nft-attributes/NftStats", () => ({
   NftPageStats: () => <tr data-testid="nft-stats" />,
 }));
 
