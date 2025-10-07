@@ -171,6 +171,7 @@ export function useReceivedCollections(
       Math.min(1_000 * 2 ** attemptIndex, 30_000),
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
+    keepPreviousData: true,
   });
 }
 
@@ -201,5 +202,6 @@ export function useReceivedNfts(
       Math.min(1_000 * 2 ** attemptIndex, 30_000),
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
+    keepPreviousData: true,
   });
 }

@@ -20,6 +20,9 @@ import {
   useReceivedNfts,
   type UseReceivedCollectionsFilters,
 } from "@/hooks/useXtdhReceived";
+import TooltipIconButton from "@/components/common/TooltipIconButton";
+import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import { faList, faTableCellsLarge } from "@fortawesome/free-solid-svg-icons";
 import type {
   XtdhGranter,
   XtdhGranterPreview,
@@ -40,6 +43,13 @@ const VIEW_LABELS: Record<ReceivedView, string> = {
   collections: "Collections",
   nfts: "NFTs",
 };
+
+const VIEW_ICONS: Record<ReceivedView, IconDefinition> = {
+  collections: faTableCellsLarge,
+  nfts: faList,
+};
+
+const VIEW_ORDER: ReceivedView[] = ["collections", "nfts"];
 
 type ReceivedView = "collections" | "nfts";
 type CollectionsSortField =
@@ -198,22 +208,20 @@ export default function UserPageXtdhReceived({
         View NFTs you hold that are currently receiving xTDH grants. Use the
         filters to explore by collection or individual token.
       </p>
-
-      <div className="tw-flex tw-flex-col md:tw-flex-row md:tw-items-center md:tw-justify-between tw-gap-2">
-        <ViewToggle view={view} onViewChange={handleViewChange} />
-        <span
-          aria-live="polite"
-          aria-atomic="true"
-          className="tw-text-xs tw-text-iron-400"
-        >
-          {announcement}
-        </span>
-      </div>
-
       {view === "collections" ? (
-        <CollectionsView profileId={profileId} />
+        <CollectionsView
+          profileId={profileId}
+          view={view}
+          onViewChange={handleViewChange}
+          announcement={announcement}
+        />
       ) : (
-        <NftsView profileId={profileId} />
+        <NftsView
+          profileId={profileId}
+          view={view}
+          onViewChange={handleViewChange}
+          announcement={announcement}
+        />
       )}
     </section>
   );
@@ -222,44 +230,66 @@ export default function UserPageXtdhReceived({
 function ViewToggle({
   view,
   onViewChange,
+  announcement,
 }: {
   readonly view: ReceivedView;
   readonly onViewChange: (view: ReceivedView) => void;
+  readonly announcement: string;
 }) {
   return (
-    <div
-      className="tw-inline-flex tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700"
-      role="group"
-      aria-label="View options"
-    >
-      {(Object.keys(VIEW_LABELS) as ReceivedView[]).map((option) => {
-        const isActive = view === option;
-        return (
-          <button
-            key={option}
-            type="button"
-            onClick={() => onViewChange(option)}
-            aria-pressed={isActive}
-            aria-label={`${VIEW_LABELS[option]} view`}
-            className={classNames(
-              "tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-transition tw-duration-300 tw-ease-out",
-              isActive
-                ? "tw-bg-primary-500 tw-text-black"
-                : "tw-bg-iron-900 tw-text-iron-200 hover:tw-bg-iron-800"
-            )}
-          >
-            {VIEW_LABELS[option]}
-          </button>
-        );
-      })}
+    <div className="tw-inline-flex tw-flex-col tw-items-end">
+      <div
+        className="tw-inline-flex tw-overflow-hidden tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900"
+        role="group"
+        aria-label="View options"
+      >
+        {VIEW_ORDER.map((option) => {
+          const isActive = view === option;
+          return (
+            <TooltipIconButton
+              key={option}
+              onClick={() => onViewChange(option)}
+              aria-pressed={isActive}
+              aria-label={`${VIEW_LABELS[option]} view`}
+              tooltipText={`${VIEW_LABELS[option]} view`}
+              className={classNames(
+                "tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-border-solid tw-transition tw-duration-200 tw-ease-out focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-0",
+                option === VIEW_ORDER[0] ? "tw-rounded-l-lg" : "tw-rounded-r-lg",
+                isActive
+                  ? "tw-bg-primary-500"
+                  : "tw-bg-transparent hover:tw-bg-iron-800",
+                option !== VIEW_ORDER[0] ? "tw-border-l tw-border-iron-700" : ""
+              )}
+              icon={VIEW_ICONS[option]}
+              iconClassName={classNames(
+                "tw-text-base",
+                isActive ? "tw-text-iron-50" : "tw-text-iron-300"
+              )}
+            />
+          );
+        })}
+      </div>
+      <span
+        aria-live="polite"
+        aria-atomic="true"
+        className="tw-sr-only"
+      >
+        {announcement}
+      </span>
     </div>
   );
 }
 
 function CollectionsView({
   profileId,
+  view,
+  onViewChange,
+  announcement,
 }: {
   readonly profileId: string | null;
+  readonly view: ReceivedView;
+  readonly onViewChange: (view: ReceivedView) => void;
+  readonly announcement: string;
 }) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -327,9 +357,19 @@ function CollectionsView({
 
   const collections = data?.collections ?? [];
   const totalCount = data?.totalCount ?? 0;
+  const [availableCollectionOptions, setAvailableCollectionOptions] = useState<
+    XtdhReceivedCollectionOption[]
+  >([]);
+
+  useEffect(() => {
+    if (data?.availableCollections !== undefined) {
+      setAvailableCollectionOptions(data.availableCollections);
+    }
+  }, [data?.availableCollections]);
+
   const availableCollections = useMemo(
-    () => mergeCollectionOptions(data?.availableCollections ?? [], selectedCollections),
-    [data?.availableCollections, selectedCollections]
+    () => mergeCollectionOptions(availableCollectionOptions, selectedCollections),
+    [availableCollectionOptions, selectedCollections]
   );
 
   const totalPages = useMemo(() => {
@@ -476,7 +516,7 @@ function CollectionsView({
   return (
     <div className="tw-flex tw-flex-col tw-gap-4">
       <div
-        className="tw-flex tw-flex-col tw-gap-3 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between"
+        className="tw-flex tw-flex-col tw-gap-3"
         role="region"
         aria-label="Filter and sort controls"
       >
@@ -509,14 +549,23 @@ function CollectionsView({
             </button>
           )}
         </div>
-        <span
-          role="status"
-          aria-live="polite"
-          aria-atomic="true"
-          className="tw-text-sm tw-text-iron-300"
-        >
-          {resultSummary}
-        </span>
+        <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+          <span
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            className="tw-text-sm tw-text-iron-300"
+          >
+            {resultSummary}
+          </span>
+          <div className="tw-flex tw-justify-end sm:tw-justify-end">
+            <ViewToggle
+              view={view}
+              onViewChange={onViewChange}
+              announcement={announcement}
+            />
+          </div>
+        </div>
       </div>
 
       {isLoading ? (
@@ -562,8 +611,14 @@ function CollectionsView({
 
 function NftsView({
   profileId,
+  view,
+  onViewChange,
+  announcement,
 }: {
   readonly profileId: string | null;
+  readonly view: ReceivedView;
+  readonly onViewChange: (view: ReceivedView) => void;
+  readonly announcement: string;
 }) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -631,9 +686,19 @@ function NftsView({
 
   const nfts = data?.nfts ?? [];
   const totalCount = data?.totalCount ?? 0;
+  const [availableCollectionOptions, setAvailableCollectionOptions] = useState<
+    XtdhReceivedCollectionOption[]
+  >([]);
+
+  useEffect(() => {
+    if (data?.availableCollections !== undefined) {
+      setAvailableCollectionOptions(data.availableCollections);
+    }
+  }, [data?.availableCollections]);
+
   const availableCollections = useMemo(
-    () => mergeCollectionOptions(data?.availableCollections ?? [], selectedCollections),
-    [data?.availableCollections, selectedCollections]
+    () => mergeCollectionOptions(availableCollectionOptions, selectedCollections),
+    [availableCollectionOptions, selectedCollections]
   );
 
   const totalPages = useMemo(() => {
@@ -766,7 +831,7 @@ function NftsView({
   return (
     <div className="tw-flex tw-flex-col tw-gap-4">
       <div
-        className="tw-flex tw-flex-col tw-gap-3 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between"
+        className="tw-flex tw-flex-col tw-gap-3"
         role="region"
         aria-label="Filter and sort controls"
       >
@@ -799,14 +864,23 @@ function NftsView({
             </button>
           )}
         </div>
-        <span
-          role="status"
-          aria-live="polite"
-          aria-atomic="true"
-          className="tw-text-sm tw-text-iron-300"
-        >
-          {resultSummary}
-        </span>
+        <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+          <span
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            className="tw-text-sm tw-text-iron-300"
+          >
+            {resultSummary}
+          </span>
+          <div className="tw-flex tw-justify-end sm:tw-justify-end">
+            <ViewToggle
+              view={view}
+              onViewChange={onViewChange}
+              announcement={announcement}
+            />
+          </div>
+        </div>
       </div>
 
       {isLoading ? (
