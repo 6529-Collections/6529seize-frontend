@@ -202,9 +202,6 @@ describe("DistributionPage", () => {
         const mintCountdown = screen.getByTestId("mint-countdown");
         expect(mintCountdown).toBeInTheDocument();
         expect(mintCountdown.dataset.nftId).toBe("456");
-        expect(mintCountdown.dataset.hideMintBtn).toBe("false");
-        expect(mintCountdown.dataset.isFullWidth).toBe("false");
-        expect(mintCountdown.dataset.showOnlyIfActive).toBe("true");
       });
     });
 

@@ -79,7 +79,6 @@ jest.mock("@/components/mint-countdown-box/MemePageMintCountdown", () => ({
   default: ({
     nft_id,
     setClaim,
-    is_full_width,
   }: {
     nft_id: number;
     setClaim: (claim: any) => void;
@@ -87,7 +86,6 @@ jest.mock("@/components/mint-countdown-box/MemePageMintCountdown", () => ({
   }) => (
     <div data-testid="meme-page-mint-countdown">
       <div>NFT ID: {nft_id}</div>
-      <div>Full Width: {is_full_width.toString()}</div>
       <button onClick={() => setClaim({ id: 1, status: "active" })}>
         Set Claim
       </button>
