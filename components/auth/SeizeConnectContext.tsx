@@ -513,9 +513,13 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
               );
               open({ view: "Connect" });
             } catch (openError) {
-              console.error(
-                "Failed to reopen wallet connection after logout:",
-                openError
+              logError(
+                "seizeDisconnectAndLogout_reconnect",
+                openError instanceof Error
+                  ? openError
+                  : new Error(
+                      `Failed to reopen wallet connection: ${openError}`
+                    )
               );
             }
           }, 100);
