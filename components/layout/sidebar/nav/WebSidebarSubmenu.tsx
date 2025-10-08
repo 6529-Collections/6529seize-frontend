@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useCallback, useRef } from "react";
+import { useEffect, useMemo, useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { SidebarSection } from "@/components/navigation/navTypes";
 import { SIDEBAR_DIMENSIONS } from "@/constants/sidebar";
@@ -27,6 +27,7 @@ function WebSidebarSubmenu({
   };
   const browserWindow = globalScope.window;
   const browserDocument = globalScope.document;
+  const [isMounted, setIsMounted] = useState(false);
 
   // Position submenu at fixed position - right after collapsed sidebar
   const submenuPosition = {
@@ -65,11 +66,14 @@ function WebSidebarSubmenu({
       return;
     }
 
+    setIsMounted(true);
+
     browserWindow.addEventListener("keydown", handleKeyDown);
     browserDocument.addEventListener("mousedown", handleClickOutside);
     browserDocument.addEventListener("touchstart", handleClickOutside);
 
     return () => {
+      setIsMounted(false);
       browserWindow.removeEventListener("keydown", handleKeyDown);
       browserDocument.removeEventListener("mousedown", handleClickOutside);
       browserDocument.removeEventListener("touchstart", handleClickOutside);
@@ -91,10 +95,14 @@ function WebSidebarSubmenu({
     return null;
   }
 
+  const transitionClasses = isMounted
+    ? "tw-opacity-100"
+    : "tw-opacity-0";
+
   return createPortal(
     <div
       ref={popoverRef}
-      className="tw-fixed tw-z-[95] tw-bg-iron-950"
+      className={`tw-fixed tw-z-[95] tw-bg-iron-950 tw-transition-opacity tw-duration-150 tw-ease-out tw-will-change-opacity ${transitionClasses}`}
       style={{ top: submenuPosition.top, left: submenuPosition.left }}
     >
       <div

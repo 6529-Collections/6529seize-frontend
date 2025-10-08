@@ -113,7 +113,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
       {" "}
       <div className="tw-w-full tw-flex tw-flex-col tw-bg-iron-950">
         {/* Title, toggle button and submit button */}
-        <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-px-2 sm:tw-px-4 md:tw-px-6 tw-py-3">
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-px-2 sm:tw-px-4 md:tw-px-6 tw-py-3 tw-overflow-x-auto">
           <div className="tw-flex tw-items-center tw-gap-x-1.5">
             {/* Mobile back button */}
             {isMobile && (

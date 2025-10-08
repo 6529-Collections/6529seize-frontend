@@ -12,7 +12,6 @@ jest.mock('@/components/brain/right-sidebar/WaveContent', () => ({
 
 const closeRightSidebar = jest.fn();
 jest.mock('@/hooks/useSidebarState', () => {
-  const React = require('react');
   return {
     __esModule: true,
     SidebarProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,

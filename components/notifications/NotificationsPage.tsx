@@ -2,8 +2,6 @@
 
 import React, { useState } from "react";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import HeaderUserConnect from "../header/user/HeaderUserConnect";
-import Image from "next/image";
 import Notifications from "../brain/notifications/Notifications";
 import { ActiveDropState } from "../../types/dropInteractionTypes";
 import BrainContent from "../brain/content/BrainContent";
@@ -13,6 +11,7 @@ import BrainDesktopDrop from "@/components/brain/BrainDesktopDrop";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
+import ConnectWallet from "@/components/common/ConnectWallet";
 
 export default function NotificationsPage() {
   const { isAuthenticated } = useSeizeConnectContext();
@@ -26,29 +25,7 @@ export default function NotificationsPage() {
   };
 
   if (!isAuthenticated) {
-    return (
-      <div className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-px-6 tw-min-h-screen">
-        <Image
-          unoptimized
-          priority
-          loading="eager"
-          src="https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/279.WEBP"
-          alt="Brain"
-          width={304}
-          height={450}
-          className="tw-rounded-md tw-shadow-lg tw-max-w-[30vw] md:tw-max-w-[200px] tw-h-auto"
-        />
-        <div className="tw-flex tw-flex-col tw-items-center md:tw-items-start tw-text-center md:tw-text-left tw-gap-4">
-          <h1 className="tw-text-xl tw-font-bold">
-            This content is only available to connected wallets.
-          </h1>
-          <p className="tw-text-base tw-text-gray-400">
-            Connect your wallet to continue.
-          </p>
-          <HeaderUserConnect />
-        </div>
-      </div>
-    );
+    return <ConnectWallet />;
   }
 
   return (

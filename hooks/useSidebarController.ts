@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
-import { SIDEBAR_WIDTHS, SIDEBAR_BREAKPOINT } from "../constants/sidebar";
+import {
+  SIDEBAR_WIDTHS,
+  SIDEBAR_BREAKPOINT,
+  SIDEBAR_MOBILE_BREAKPOINT,
+} from "../constants/sidebar";
 import { safeSessionStorage } from "../helpers/safeSessionStorage";
 
 const getBrowserWindow = () => {
@@ -61,28 +65,15 @@ export function useSidebarController() {
     if (browserWindow === undefined || typeof browserWindow.matchMedia !== "function") {
       return null;
     }
-    return browserWindow.matchMedia("(max-width: 1023.98px)");
+    return browserWindow.matchMedia(`(max-width: ${SIDEBAR_MOBILE_BREAKPOINT - 0.02}px)`);
   }, []);
   const [isMobileWidth, setIsMobileWidth] = useState(() => {
     const browserWindow = getBrowserWindow();
-    return browserWindow ? browserWindow.innerWidth < 1024 : false;
-  });
-
-  // Detect Tailwind md breakpoint (< 768px)
-  const belowMdMql = useMemo(() => {
-    const browserWindow = getBrowserWindow();
-    if (browserWindow === undefined || typeof browserWindow.matchMedia !== "function") {
-      return null;
-    }
-    return browserWindow.matchMedia("(max-width: 767.98px)");
-  }, []);
-  const [isBelowMd, setIsBelowMd] = useState(() => {
-    const browserWindow = getBrowserWindow();
-    return browserWindow ? browserWindow.innerWidth < 768 : true;
+    return browserWindow ? browserWindow.innerWidth < SIDEBAR_MOBILE_BREAKPOINT : false;
   });
 
   // Desktop state - default to expanded (false) on big screens with session persistence
-  const [isDesktopCollapsed, setIsDesktopCollapsedState] = useState(() => {
+  const [isDesktopCollapsed, setDesktopCollapsed] = useState(() => {
     try {
       const stored = safeSessionStorage.getItem("sidebarCollapsed");
       return stored !== null ? JSON.parse(stored) : false;
@@ -92,8 +83,8 @@ export function useSidebarController() {
   });
 
   // Wrapper to persist state changes to sessionStorage
-  const setIsDesktopCollapsed = useCallback((value: boolean | ((prev: boolean) => boolean)) => {
-    setIsDesktopCollapsedState((prev: boolean) => {
+  const persistDesktopCollapsed = useCallback((value: boolean | ((prev: boolean) => boolean)) => {
+    setDesktopCollapsed((prev: boolean) => {
       const newValue = typeof value === "function" ? value(prev) : value;
       // Save to sessionStorage
       try {
@@ -121,12 +112,12 @@ export function useSidebarController() {
 
   // Derived collapsed state (pure function of inputs)
   const isCollapsed = useMemo(() => {
-    if (isOffcanvasMode) {
-      // Overlay open => expanded; closed => collapsed
-      return !isOffcanvasOpen;
+    if (!isOffcanvasMode) {
+      // Wide desktop: honor user preference
+      return isDesktopCollapsed;
     }
-    // Wide desktop: honor user preference
-    return isDesktopCollapsed;
+    // Overlay open => expanded; closed => collapsed
+    return isOffcanvasOpen ? false : true;
   }, [isOffcanvasMode, isOffcanvasOpen, isDesktopCollapsed]);
 
   // React to breakpoint changes
@@ -162,16 +153,6 @@ export function useSidebarController() {
     return () => mobileWidthMql.removeEventListener("change", onChange);
   }, [mobileWidthMql]);
 
-  useEffect(() => {
-    if (belowMdMql === null) {
-      return;
-    }
-    const onChange = (e: MediaQueryListEvent) => setIsBelowMd(e.matches);
-    setIsBelowMd(belowMdMql.matches);
-    belowMdMql.addEventListener("change", onChange);
-    return () => belowMdMql.removeEventListener("change", onChange);
-  }, [belowMdMql]);
-
   // Close off-canvas when switching from desktop to mobile
   useEffect(() => {
     if (isMobile) {
@@ -191,7 +172,7 @@ export function useSidebarController() {
       setIsOffcanvasOpen(false);
     } else if (isOffcanvasOpen) {
       // Leaving narrow: if overlay was open, expand persistent rail on desktop
-      setIsDesktopCollapsedState(false);
+      setDesktopCollapsed(false);
       setIsOffcanvasOpen(false);
     }
 
@@ -204,9 +185,9 @@ export function useSidebarController() {
       setIsOffcanvasOpen(prev => !prev);
     } else {
       // Desktop: toggle state (with session persistence)
-      setIsDesktopCollapsed(prev => !prev);
+      persistDesktopCollapsed(prev => !prev);
     }
-  }, [isOffcanvasMode, setIsDesktopCollapsed]);
+  }, [isOffcanvasMode, persistDesktopCollapsed]);
 
   const closeOffcanvas = useCallback(() => {
     setIsOffcanvasOpen(false);
@@ -225,7 +206,6 @@ export function useSidebarController() {
     isMobile,
     isNarrow,
     isCollapsed,
-    isBelowMd,
     isOffcanvasMode,
     isOffcanvasOpen,
     

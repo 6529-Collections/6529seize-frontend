@@ -19,7 +19,6 @@ const WebLayout = ({ children, isSmall = false }: WebLayoutProps) => {
     isMobile,
     isNarrow,
     isCollapsed,
-    isBelowMd,
     isOffcanvasMode,
     isOffcanvasOpen,
     toggleCollapsed,
@@ -29,11 +28,10 @@ const WebLayout = ({ children, isSmall = false }: WebLayoutProps) => {
 
   const rootStyle = useMemo<LayoutCssVars>(() => {
     // Keep left rail constant for collapsed rail; mobile has none
-    const leftRail = isMobile
-      ? "0"
-      : isNarrow
-        ? SIDEBAR_WIDTHS.COLLAPSED
-        : sidebarWidth;
+    let leftRail = "0";
+    if (!isMobile) {
+      leftRail = isNarrow ? SIDEBAR_WIDTHS.COLLAPSED : sidebarWidth;
+    }
     return {
       "--left-rail": leftRail,
       minHeight: "100dvh",
@@ -49,16 +47,8 @@ const WebLayout = ({ children, isSmall = false }: WebLayoutProps) => {
     if (isNarrow) {
       const collapsed = SIDEBAR_WIDTHS.COLLAPSED;
       const expanded = SIDEBAR_WIDTHS.EXPANDED;
-      const pushDelta = `calc(${expanded} - ${collapsed})`;
 
       if (isOffcanvasMode) {
-        if (isBelowMd && isOffcanvasOpen) {
-          return {
-            paddingLeft: collapsed,
-            transform: `translateX(${pushDelta})`,
-          };
-        }
-
         return {
           paddingLeft: isOffcanvasOpen ? expanded : collapsed,
         };
@@ -84,7 +74,6 @@ const WebLayout = ({ children, isSmall = false }: WebLayoutProps) => {
           onToggle={toggleCollapsed}
           isMobile={isMobile}
           isNarrow={isNarrow}
-          isBelowMd={isBelowMd}
           isOffcanvasOpen={isOffcanvasOpen}
           onCloseOffcanvas={closeOffcanvas}
           sidebarWidth={sidebarWidth}

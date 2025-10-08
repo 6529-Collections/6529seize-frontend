@@ -8,7 +8,6 @@ import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { CreateWaveStep } from "@/types/waves.types";
 
 jest.mock("@/components/waves/create-wave/CreateWaveFlow", () => {
-  const React = require("react");
   return {
     __esModule: true,
     default: ({ title, onBack, children }: any) => (

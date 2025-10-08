@@ -11,6 +11,7 @@ export const SIDEBAR_DIMENSIONS = {
 } as const;
 
 export const SIDEBAR_BREAKPOINT = 1280; // xl breakpoint
+export const SIDEBAR_MOBILE_BREAKPOINT = 1024; // lg breakpoint
 
 export const COLLECTIONS_ROUTES = [
   "/the-memes",

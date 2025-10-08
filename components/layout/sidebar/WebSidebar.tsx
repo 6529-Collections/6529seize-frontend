@@ -15,7 +15,6 @@ interface WebSidebarProps {
   readonly onToggle: () => void;
   readonly isMobile: boolean;
   readonly isNarrow?: boolean;
-  readonly isBelowMd?: boolean;
   readonly isOffcanvasOpen: boolean;
   readonly onCloseOffcanvas: () => void;
   readonly sidebarWidth: string;
@@ -26,7 +25,6 @@ function WebSidebar({
   onToggle,
   isMobile,
   isNarrow = false,
-  isBelowMd = false,
   isOffcanvasOpen,
   onCloseOffcanvas,
   sidebarWidth,
@@ -53,7 +51,7 @@ function WebSidebar({
 
   // Close sidebar on route change when on mobile
   const prevPathnameRef = useRef(pathname);
-  const isOverlayActive = isNarrow && isBelowMd && isOffcanvasOpen;
+  const isOverlayActive = isNarrow && isMobile && isOffcanvasOpen;
 
   useEffect(() => {
     if (prevPathnameRef.current !== pathname) {
@@ -86,8 +84,7 @@ function WebSidebar({
   }, [isMobile, isOffcanvasOpen, onCloseOffcanvas]);
 
   // Sidebar is expanded when offcanvas is open (mobile or narrow desktop)
-  const shouldShowCollapsed =
-    ((isMobile || (isNarrow && isBelowMd)) && isOffcanvasOpen) ? false : isCollapsed;
+  const shouldShowCollapsed = isMobile && isOffcanvasOpen ? false : isCollapsed;
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const handleToggle = () => {
@@ -148,7 +145,6 @@ function WebSidebar({
       <div className="tw-fixed tw-inset-y-0 tw-left-0 focus:tw-outline-none tw-z-40">
         {sidebarContent}
       </div>
-      {/* Narrow desktop: add dim overlay while pushing content */}
       {isOverlayActive && (
         <button
           type="button"

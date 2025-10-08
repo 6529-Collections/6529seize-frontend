@@ -424,8 +424,18 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   // Small screen layout feed style (properly accounts for header)
   const smallScreenFeedStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
-    // For small screen: includes actual header space and tabs
-    return calculateHeightStyle("myStreamFeed", spaces, 0);
+    const totalOffset =
+      spaces.headerSpace +
+      spaces.pinnedSpace +
+      spaces.tabsSpace +
+      spaces.spacerSpace +
+      spaces.mobileTabsSpace +
+      spaces.mobileNavSpace;
+    const heightCalc = `calc(100vh - ${totalOffset}px)`;
+    return {
+      height: heightCalc,
+      maxHeight: heightCalc,
+    };
   }, [spaces]);
 
   const mobileWavesViewStyle = useMemo<React.CSSProperties>(() => {

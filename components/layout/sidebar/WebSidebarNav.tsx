@@ -348,23 +348,31 @@ const WebSidebarNav = React.forwardRef<
           {/* Overlay for main content */}
           <button
             type="button"
-            className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-[70] focus:tw-outline-none"
+            className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-[70] focus:tw-outline-none tw-border-0"
             style={{ left: "18rem" }} // 4rem sidebar + 14rem submenu
             onClick={closeSubmenu}
             onKeyDown={(e) => {
-              if (e.key === 'Escape') {
+              if (e.key === "Escape") {
                 e.preventDefault();
                 closeSubmenu();
               }
             }}
             aria-label="Close submenu"
           />
-          <WebSidebarSubmenu
-            section={activeSection}
-            anchor={submenuAnchor}
-            pathname={pathname}
-            onClose={closeSubmenu}
-          />
+          <CommonAnimationWrapper mode="sync" initial={false}>
+            <CommonAnimationOpacity
+              key={`sidebar-submenu-${activeSection.key}`}
+              elementClasses="tw-contents"
+              elementRole="presentation"
+            >
+              <WebSidebarSubmenu
+                section={activeSection}
+                anchor={submenuAnchor}
+                pathname={pathname}
+                onClose={closeSubmenu}
+              />
+            </CommonAnimationOpacity>
+          </CommonAnimationWrapper>
         </>
       )}
     </>

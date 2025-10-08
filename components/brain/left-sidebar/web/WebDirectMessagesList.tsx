@@ -155,7 +155,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
 
   return (
     <div className="tw-h-full tw-flex tw-flex-col">
-      <div className="tw-flex-1 tw-bg-black tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-4 tw-flex tw-flex-col">
+      <div className="tw-flex-1 tw-bg-black tw-py-4 tw-flex tw-flex-col">
         {/* Messages header with create button */}
         <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-mb-4">
           <span className="tw-text-xl tw-font-semibold tw-text-iron-50">

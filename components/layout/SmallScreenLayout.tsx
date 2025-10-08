@@ -6,7 +6,6 @@ import WebSidebar from "./sidebar/WebSidebar";
 import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import { useSearchParams } from "next/navigation";
-import LayoutDebugOverlay from "@/components/debug/LayoutDebugOverlay";
 
 interface Props {
   readonly children: ReactNode;
@@ -83,10 +82,6 @@ export default function SmallScreenLayout({ children }: Props) {
         {children}
       </main>
 
-      {/* Optional layout debug overlay, enabled with ?debug=layout */}
-      {searchParams?.get("debug") === "layout" && (
-        <LayoutDebugOverlay containerRef={containerRef} headerRef={headerRef} />
-      )}
     </div>
   );
 }

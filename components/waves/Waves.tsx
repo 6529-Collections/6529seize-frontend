@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
-import HeaderUserConnect from "@/components/header/user/HeaderUserConnect";
 import UserSetUpProfileCta from "@/components/user/utils/set-up-profile/UserSetUpProfileCta";
 import { useSetTitle } from "@/contexts/TitleContext";
 import Image from "next/image";
@@ -10,6 +9,7 @@ import { useMemo, type JSX } from "react";
 import CreateDirectMessage from "./create-dm/CreateDirectMessage";
 import CreateWave from "./create-wave/CreateWave";
 import WavesList from "./list/WavesList";
+import ConnectWallet from "@/components/common/ConnectWallet";
 
 enum WavesViewMode {
   CREATE = "CREATE",
@@ -98,17 +98,7 @@ export default function Waves() {
       </h1>
     );
   } else if (!connectedProfile) {
-    return returnPlaceholder(
-      <>
-        <h1 className="tw-text-xl tw-font-bold">
-          This content is only available to connected wallets.
-        </h1>
-        <p className="tw-text-base tw-text-gray-400">
-          Connect your wallet to continue.
-        </p>
-        <HeaderUserConnect />
-      </>
-    );
+    return <ConnectWallet />;
   } else if (!connectedProfile?.handle) {
     return returnPlaceholder(
       <>

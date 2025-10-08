@@ -33,16 +33,10 @@ export default function NotificationsWrapper({
 
   const onDropContentClick = useCallback(
     (drop: ExtendedDrop) => {
-      // In notifications route, open drop in-place as a modal
-      if (pathname === "/notifications") {
-        const params = new URLSearchParams(searchParams?.toString() || "");
-        params.set("drop", drop.id);
-        const newUrl = `${pathname}?${params.toString()}`;
-        router.push(newUrl, { scroll: false });
+      if (!drop?.wave?.id) {
         return;
       }
 
-      // Otherwise, navigate to the appropriate wave route
       const waveInfo = drop.wave as any;
       const isDirectMessage =
         waveInfo?.chat?.scope?.group?.is_direct_message ?? false;
@@ -56,7 +50,7 @@ export default function NotificationsWrapper({
 
       router.push(href);
     },
-    [router, isApp, pathname, searchParams]
+    [router, isApp]
   );
 
   const onReply = useCallback(

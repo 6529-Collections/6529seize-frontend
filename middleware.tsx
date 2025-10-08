@@ -74,6 +74,16 @@ const redirectMappings = [
   { url: "/om/bug/report/", target: "/about/contact-us" },
 ];
 
+const STATIC_PATH_PREFIXES = ["/api", "/_next", "/sitemap", "/robots.txt", "/error"] as const;
+const STATIC_PATH_SUFFIXES = [
+  "favicon.ico",
+  ".jpeg",
+  ".png",
+  ".gif",
+  ".svg",
+  ".webp",
+] as const;
+
 function handleRedirects(req: NextRequest): NextResponse | undefined {
   let { pathname } = req.nextUrl;
 
@@ -108,6 +118,8 @@ export async function middleware(req: NextRequest) {
         ? pathname.slice(0, -1)
         : pathname;
 
+    let redirectTarget: string | undefined;
+
     if (normalizedPathname.startsWith("/my-stream")) {
       const userAgent = (req.headers.get("user-agent") || "").toLowerCase();
       const isAndroid = userAgent.includes("android");
@@ -120,32 +132,22 @@ export async function middleware(req: NextRequest) {
         (userAgent.includes("mac os x") && !userAgent.includes("mobile"));
       const isLinuxDesktop =
         userAgent.includes("linux") && !isAndroid && !userAgent.includes("mobile");
-      const isDesktopOS =
-        !isAndroid &&
-        !isIOS &&
-        (userAgent.includes("windows") ||
-          userAgent.includes("x11") ||
-          userAgent.includes("cros") ||
-          isMacDesktop ||
-          isLinuxDesktop);
+      const hasDesktopSignal =
+        userAgent.includes("windows") || userAgent.includes("x11") || userAgent.includes("cros");
+      const isDesktopOS = !isAndroid && !isIOS && (hasDesktopSignal || isMacDesktop || isLinuxDesktop);
+
       if (isDesktopOS) {
-        const redirectTo = (target: string) => {
-          const clone = req.nextUrl.clone();
-          const [pathnamePart, searchPart] = target.split("?");
-          clone.pathname = pathnamePart || "/";
-          clone.search = searchPart ? `?${searchPart}` : "";
-          return NextResponse.redirect(clone, 301);
-        };
         if (normalizedPathname === "/my-stream/notifications") {
-          return redirectTo(getNotificationsRoute(false));
-        }
-        if (normalizedPathname === "/my-stream") {
+          redirectTarget = getNotificationsRoute(false);
+        } else if (normalizedPathname === "/my-stream") {
           const params = new URLSearchParams(req.nextUrl.searchParams);
           const view = params.get("view") ?? undefined;
           const wave = params.get("wave") ?? undefined;
-          const drop = params.get("drop") ?? undefined;
+          const rawDrop = params.get("drop") ?? undefined;
+          const drop = rawDrop ? rawDrop.replace(/\/+$/, "") : undefined;
           const serial = params.get("serialNo") ?? undefined;
           const serialNo = serial ? serial.replace(/\/$/, "") : undefined;
+
           const buildWaveHref = (isDirectMessage: boolean) => {
             if (!wave) {
               return isDirectMessage
@@ -161,27 +163,38 @@ export async function middleware(req: NextRequest) {
               isApp: false,
             });
           };
-          if (view === "messages") return redirectTo(buildWaveHref(true));
-          if (view === "waves") return redirectTo(buildWaveHref(false));
-          if (wave) return redirectTo(buildWaveHref(false));
-          return redirectTo(getHomeFeedRoute());
+
+          if (view === "messages") {
+            redirectTarget = buildWaveHref(true);
+          } else if (view === "waves" || wave) {
+            redirectTarget = buildWaveHref(false);
+          } else if (drop) {
+            const params = new URLSearchParams();
+            params.set("drop", drop);
+            redirectTarget = `${getWavesBaseRoute(false)}?${params.toString()}`;
+          } else {
+            redirectTarget = getHomeFeedRoute();
+          }
         }
       }
     }
 
-    if (
-      normalizedPathname.startsWith("/api") ||
-      normalizedPathname.startsWith("/_next") ||
-      normalizedPathname.endsWith("favicon.ico") ||
-      normalizedPathname.endsWith(".jpeg") ||
-      normalizedPathname.endsWith(".png") ||
-      normalizedPathname.endsWith(".gif") ||
-      normalizedPathname.endsWith(".svg") ||
-      normalizedPathname.endsWith(".webp") ||
-      normalizedPathname.startsWith("/sitemap") ||
-      normalizedPathname.startsWith("/robots.txt") ||
-      normalizedPathname.startsWith("/error")
-    ) {
+    if (redirectTarget) {
+      const clone = req.nextUrl.clone();
+      const [pathnamePart, searchPart] = redirectTarget.split("?");
+      clone.pathname = pathnamePart || "/";
+      clone.search = searchPart ? `?${searchPart}` : "";
+      return NextResponse.redirect(clone, 301);
+    }
+
+    const matchesStaticPrefix = STATIC_PATH_PREFIXES.some(prefix =>
+      normalizedPathname.startsWith(prefix)
+    );
+    const matchesStaticSuffix = STATIC_PATH_SUFFIXES.some(suffix =>
+      normalizedPathname.endsWith(suffix)
+    );
+
+    if (matchesStaticPrefix || matchesStaticSuffix) {
       return NextResponse.next();
     }
 
@@ -197,14 +210,18 @@ export async function middleware(req: NextRequest) {
         req.nextUrl.pathname = "/access";
         req.nextUrl.search = "";
         return NextResponse.redirect(req.nextUrl);
-      } else if (r.status === 403) {
+      }
+
+      if (r.status === 403) {
         req.nextUrl.pathname = "/restricted";
         req.nextUrl.search = "";
         return NextResponse.redirect(req.nextUrl);
-      } else {
-        return NextResponse.next();
       }
+
+      return NextResponse.next();
     }
+
+    return NextResponse.next();
   } catch (error) {
     return NextResponse.redirect(new URL("/error", req.url));
   }

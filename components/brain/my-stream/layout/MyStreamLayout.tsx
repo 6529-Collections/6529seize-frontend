@@ -5,11 +5,11 @@ import Head from "next/head";
 import Brain from "@/components/brain/Brain";
 import { AuthContext } from "@/components/auth/Auth";
 import { useLayout } from "./LayoutContext";
-import HeaderUserConnect from "@/components/header/user/HeaderUserConnect";
-import Image from "next/image";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import ClientOnly from "@/components/client-only/ClientOnly";
 import UserSetUpProfileCta from "@/components/user/utils/set-up-profile/UserSetUpProfileCta";
+import ConnectWallet from "@/components/common/ConnectWallet";
+import Image from "next/image";
 
 // Main layout content that uses the Layout context
 function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
@@ -27,20 +27,6 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
   );
 
   const connectPrompt = useMemo(() => {
-    if (!isAuthenticated) {
-      return (
-        <>
-          <h1 className="tw-text-xl tw-font-bold">
-            This content is only available to connected wallets.
-          </h1>
-          <p className="tw-text-base tw-text-gray-400">
-            Connect your wallet to continue.
-          </p>
-          <HeaderUserConnect />
-        </>
-      );
-    }
-
     if (!connectedProfile?.handle && !fetchingProfile) {
       return (
         <>
@@ -55,7 +41,7 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
     return (
       <h1 className="tw-text-xl tw-font-bold tw-animate-pulse">Loading...</h1>
     );
-  }, [isAuthenticated, connectedProfile, fetchingProfile]);
+  }, [connectedProfile, fetchingProfile]);
 
   const content = shouldShowContent ? (
     <div className="tw-flex-1" id="my-stream-content">
@@ -63,6 +49,8 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
         <div className={containerClassName}>{children}</div>
       </Brain>
     </div>
+  ) : !isAuthenticated ? (
+    <ConnectWallet />
   ) : (
     <div
       id="my-stream-connect"

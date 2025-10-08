@@ -25,7 +25,14 @@ jest.mock('@/components/brain/content/BrainContentPinnedWave', () => ({
   ),
 }));
 
+jest.mock('@/contexts/wave/MyStreamContext', () => ({
+  useMyStream: jest.fn(),
+}));
+
 import BrainContentPinnedWaves from '@/components/brain/content/BrainContentPinnedWaves';
+import { useMyStream } from '@/contexts/wave/MyStreamContext';
+
+const mockUseMyStream = useMyStream as jest.Mock;
 
 beforeAll(() => {
   (window as any).matchMedia = (window as any).matchMedia || (() => ({ matches: false, addListener: jest.fn(), removeListener: jest.fn() }));
@@ -40,6 +47,7 @@ describe('BrainContentPinnedWaves', () => {
     replace.mockClear();
     mockPinnedIds = [];
     searchParams.delete('wave');
+    mockUseMyStream.mockReturnValue({ directMessages: { list: [] } });
   });
 
   it('returns null when no pinned waves', () => {

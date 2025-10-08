@@ -11,7 +11,6 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 jest.mock("@/hooks/useIdentity", () => ({
   useIdentity: () => ({ profile: null }),
 }));
-jest.mock("@/components/debug/LayoutDebugOverlay", () => () => null);
 jest.mock("next/navigation", () => ({
   usePathname: () => pathname,
   useSearchParams: () => new URLSearchParams(),
@@ -29,6 +28,7 @@ describe("SmallScreenLayout", () => {
     render(<SmallScreenLayout>child</SmallScreenLayout>);
     expect(registerRef).toHaveBeenCalledWith("header", expect.any(HTMLElement));
     expect(screen.getByAltText("6529Seize")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Search" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Open menu" })).toBeInTheDocument();
   });
 
