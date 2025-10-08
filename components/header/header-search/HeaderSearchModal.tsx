@@ -1,26 +1,26 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import FocusTrap from "focus-trap-react";
-import { useEffect, useRef, useState } from "react";
-import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
+import { TabToggle } from "@/components/common/TabToggle";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { UserPageTabType } from "@/components/user/layout/UserPageTabs";
 import { CommunityMemberMinimal } from "@/entities/IProfile";
-import { commonApiFetch } from "@/services/api/common-api";
-import HeaderSearchModalItem, {
-  NFTSearchResult,
-  HeaderSearchModalItemType,
-} from "./HeaderSearchModalItem";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { getProfileTargetRoute } from "@/helpers/Helpers";
-import { UserPageTabType } from "@/components/user/layout/UserPageTabs";
-import { createPortal } from "react-dom";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { useWaves } from "@/hooks/useWaves";
 import useLocalPreference from "@/hooks/useLocalPreference";
-import { TabToggle } from "@/components/common/TabToggle";
+import { useWaves } from "@/hooks/useWaves";
+import { commonApiFetch } from "@/services/api/common-api";
 import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { useQuery } from "@tanstack/react-query";
+import FocusTrap from "focus-trap-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
+import HeaderSearchModalItem, {
+  HeaderSearchModalItemType,
+  NFTSearchResult,
+} from "./HeaderSearchModalItem";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
 import {
   getWaveHomeRoute,
@@ -351,7 +351,11 @@ export default function HeaderSearchModal({
                       clipRule="evenodd"
                     />
                   </svg>
+                  <label className="tw-sr-only" htmlFor="header-search-input">
+                    Search
+                  </label>
                   <input
+                    id="header-search-input"
                     ref={inputRef}
                     type="text"
                     required
@@ -387,8 +391,7 @@ export default function HeaderSearchModal({
                 <div
                   id={HEADER_SEARCH_RESULTS_PANEL_ID}
                   role="tabpanel"
-                  className="tw-h-72 tw-scroll-py-2 tw-px-4 tw-py-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-text-sm tw-text-iron-200"
-                >
+                  className="tw-h-72 tw-scroll-py-2 tw-px-4 tw-py-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-text-sm tw-text-iron-200">
                   {renderItems(getCurrentItems())}
                 </div>
               )}
@@ -396,8 +399,7 @@ export default function HeaderSearchModal({
                 <div
                   id={HEADER_SEARCH_RESULTS_PANEL_ID}
                   role="tabpanel"
-                  className="tw-h-72 tw-flex tw-items-center tw-justify-center"
-                >
+                  className="tw-h-72 tw-flex tw-items-center tw-justify-center">
                   <p className="tw-text-iron-300 tw-font-normal tw-text-sm">
                     Loading...
                   </p>
@@ -407,21 +409,20 @@ export default function HeaderSearchModal({
                 <div
                   id={HEADER_SEARCH_RESULTS_PANEL_ID}
                   role="tabpanel"
-                  className="tw-h-72 tw-flex tw-items-center tw-justify-center"
-                >
-                  <p className="tw-text-iron-300 tw-text-sm">No results found</p>
+                  className="tw-h-72 tw-flex tw-items-center tw-justify-center">
+                  <p className="tw-text-iron-300 tw-text-sm">
+                    No results found
+                  </p>
                 </div>
               )}
               {state === STATE.ERROR && (
                 <div
                   id={HEADER_SEARCH_RESULTS_PANEL_ID}
                   role="tabpanel"
-                  className="tw-h-72 tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-px-4 tw-text-center"
-                >
+                  className="tw-h-72 tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-px-4 tw-text-center">
                   <p
                     className="tw-text-iron-300 tw-font-normal tw-text-sm"
-                    aria-live="polite"
-                  >
+                    aria-live="polite">
                     Something went wrong while searching. Please try again.
                   </p>
                   <button
@@ -441,8 +442,7 @@ export default function HeaderSearchModal({
                         ? true
                         : undefined
                     }
-                    className="tw-rounded-lg tw-bg-primary-500 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-950 hover:tw-bg-primary-400 tw-transition tw-duration-200"
-                  >
+                    className="tw-rounded-lg tw-bg-primary-500 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-950 hover:tw-bg-primary-400 tw-transition tw-duration-200">
                     Try again
                   </button>
                 </div>
@@ -451,8 +451,7 @@ export default function HeaderSearchModal({
                 <div
                   id={HEADER_SEARCH_RESULTS_PANEL_ID}
                   role="tabpanel"
-                  className="tw-h-72 tw-flex tw-items-center tw-justify-center"
-                >
+                  className="tw-h-72 tw-flex tw-items-center tw-justify-center">
                   <p className="tw-text-iron-300 tw-font-normal tw-text-sm tw-text-center">
                     Search for NFTs (by ID or name), Profiles and Waves
                   </p>

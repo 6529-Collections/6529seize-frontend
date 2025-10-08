@@ -253,33 +253,37 @@ export default function ManifoldMintingWidget(
     );
   };
 
+  const waitMintWritePending = waitMintWrite.isPending;
+  const waitMintWriteSuccess = waitMintWrite.isSuccess;
+
   useEffect(() => {
-    let mintWriteStatus = <></>;
-    if (mintWrite.data) {
-      if (waitMintWrite.isPending) {
-        mintWriteStatus = (
-          <>
-            <span className="font-larger font-bolder">
-              Transaction Submitted - SEIZING <DotLoader />
-            </span>
-            <br />
-            <span className="pt-2">{getViewLink(mintWrite.data)}</span>
-          </>
-        );
-      } else if (waitMintWrite.isSuccess) {
-        mintWriteStatus = (
-          <>
-            <span className="text-success font-larger font-bolder">
-              SEIZED!
-            </span>
-            <br />
-            <span className="pt-2">{getViewLink(mintWrite.data)}</span>
-          </>
-        );
-      }
-      setMintStatus(mintWriteStatus);
+    if (!mintWrite.data) {
+      return;
     }
-  }, [mintWrite.data, waitMintWrite]);
+
+    if (waitMintWritePending) {
+      setMintStatus(
+        <>
+          <span className="font-larger font-bolder">
+            Transaction Submitted - SEIZING <DotLoader />
+          </span>
+          <br />
+          <span className="pt-2">{getViewLink(mintWrite.data)}</span>
+        </>
+      );
+      return;
+    }
+
+    if (waitMintWriteSuccess) {
+      setMintStatus(
+        <>
+          <span className="text-success font-larger font-bolder">SEIZED!</span>
+          <br />
+          <span className="pt-2">{getViewLink(mintWrite.data)}</span>
+        </>
+      );
+    }
+  }, [mintWrite.data, waitMintWritePending, waitMintWriteSuccess]);
 
   function getButtonText() {
     if (props.claim.status === ManifoldClaimStatus.ACTIVE) {
