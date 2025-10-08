@@ -1,5 +1,6 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import GroupCard, {
   GroupCardState,
 } from "@/components/groups/page/list/card/GroupCard";
@@ -29,6 +30,10 @@ jest.mock(
 
 const push = jest.fn();
 (useRouter as jest.Mock).mockReturnValue({ push });
+
+beforeEach(() => {
+  push.mockClear();
+});
 
 describe("GroupCard", () => {
   const group: any = {
@@ -61,8 +66,30 @@ describe("GroupCard", () => {
   }
 
   it("navigates to community view when idle", () => {
-    renderComp();
-    fireEvent.click(document.querySelector("div.tw-col-span-1")!);
+    const { getByRole } = renderComp();
+    fireEvent.click(getByRole("button"));
+    expect(push).toHaveBeenCalledWith(`/network?page=1&group=${group.id}`);
+  });
+
+  it("navigates to community view when pressing Enter", async () => {
+    const user = userEvent.setup();
+    const { getByRole } = renderComp();
+    const button = getByRole("button");
+
+    button.focus();
+    await user.keyboard("{Enter}");
+
+    expect(push).toHaveBeenCalledWith(`/network?page=1&group=${group.id}`);
+  });
+
+  it("navigates to community view when pressing Space", async () => {
+    const user = userEvent.setup();
+    const { getByRole } = renderComp();
+    const button = getByRole("button");
+
+    button.focus();
+    await user.keyboard(" ");
+
     expect(push).toHaveBeenCalledWith(`/network?page=1&group=${group.id}`);
   });
 
