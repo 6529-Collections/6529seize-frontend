@@ -66,6 +66,9 @@ const MULTIPLIER_MILESTONES = [
   "100% multiplier in 120 months",
 ];
 
+const SECTION_HEADER_CLASS =
+  "tw-flex tw-min-h-[84px] tw-flex-col tw-justify-start tw-gap-1";
+
 const DEFAULT_USER_STATE: UserSectionState = {
   kind: "ready",
   baseTdhRate: 1_500,
@@ -136,7 +139,7 @@ export default function XtdhStatsOverview({
           </span>
         </div>
       ) : null}
-      <div className="tw-mt-6 tw-grid tw-gap-6 xl:tw-grid-cols-[1.2fr_1fr]">
+      <div className="tw-mt-6 tw-grid tw-items-start tw-gap-6 xl:tw-grid-cols-2">
         <NetworkStatsSection stats={networkStats} />
         <UserXtdhStatusSection state={DEFAULT_USER_STATE} onRetry={handleRetry} />
       </div>
@@ -172,18 +175,17 @@ function NetworkStatsSection({ stats }: { readonly stats: NetworkStats }) {
 
   return (
     <section
-      className="tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-5 tw-text-iron-50"
+      className="tw-flex tw-h-full tw-flex-col tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-5 tw-text-iron-50"
       role="region"
       aria-label="Network Stats"
     >
-      <div>
-        <h2 className="tw-m-0 tw-text-lg tw-font-semibold">Network Stats</h2>
-        <p className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-300">
-          Ecosystem-wide view of Fluid xTDH capacity and allocations.
-        </p>
-      </div>
-      <div className="tw-mt-5 tw-space-y-6">
-        <MultiplierHighlight multiplier={stats.multiplier} />
+      <div className="tw-space-y-6">
+        <div className={SECTION_HEADER_CLASS}>
+          <h2 className="tw-m-0 tw-text-lg tw-font-semibold">Network Stats</h2>
+          <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+            Fluid xTDH capacity and allocations across the network.
+          </p>
+        </div>
         <CapacityProgressCard
           title="Total Daily xTDH Capacity"
           total={stats.totalCapacity}
@@ -194,6 +196,7 @@ function NetworkStatsSection({ stats }: { readonly stats: NetworkStats }) {
           percentLabel={formatPercentLabel(stats.percentAllocated, "Allocated")}
           variant="network"
         />
+        <MultiplierHighlight multiplier={stats.multiplier} />
         <NetworkMetricsGrid metrics={metrics} />
       </div>
     </section>
@@ -475,11 +478,10 @@ function UserXtdhStatusSection({
   return (
     <section className={baseClass} role="region" aria-label="Your xTDH status">
       <div className="tw-space-y-6">
-        <div>
+        <div className={SECTION_HEADER_CLASS}>
           {title}
           <p className="tw-mt-1 tw-text-sm tw-text-iron-300">
-            This is your daily Fluid xTDH budget based on your Base TDH and the
-            current multiplier.
+            Daily Fluid xTDH budget from your Base TDH and multiplier.
           </p>
         </div>
         <CapacityProgressCard
