@@ -105,7 +105,6 @@ const mockAuthUtils = {
   getRefreshToken: jest.fn<string | null, []>(() => null),
   getWalletAddress: jest.fn<string | null, []>(() => null),
   getWalletRole: jest.fn<string | null, []>(() => null),
-  migrateCookiesToLocalStorage: jest.fn(),
   removeAuthJwt: jest.fn(),
 };
 
@@ -115,8 +114,6 @@ require("@/services/auth/auth.utils").getWalletAddress =
   mockAuthUtils.getWalletAddress;
 require("@/services/auth/auth.utils").getWalletRole =
   mockAuthUtils.getWalletRole;
-require("@/services/auth/auth.utils").migrateCookiesToLocalStorage =
-  mockAuthUtils.migrateCookiesToLocalStorage;
 require("@/services/auth/auth.utils").removeAuthJwt =
   mockAuthUtils.removeAuthJwt;
 
