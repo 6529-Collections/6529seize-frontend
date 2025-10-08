@@ -14,8 +14,13 @@ const findTweetId = (segments: readonly string[]): string | null => {
     }
 
     const candidate = segments[index + 1];
-    if (candidate && /^\d+$/.test(candidate)) {
-      return candidate;
+    if (!candidate) {
+      continue;
+    }
+
+    const sanitized = candidate.split(/[?#]/, 1)[0];
+    if (sanitized && /^\d+$/.test(sanitized)) {
+      return sanitized;
     }
   }
 

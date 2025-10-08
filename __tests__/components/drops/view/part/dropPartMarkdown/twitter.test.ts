@@ -23,6 +23,11 @@ describe("parseTwitterLink", () => {
       "9988776655",
     ],
     [
+      "hashbang status link with query params",
+      "https://twitter.com/#!/user/status/9988776655?s=20",
+      "9988776655",
+    ],
+    [
       "x.com status link",
       "https://x.com/someone/status/4433221100",
       "4433221100",
