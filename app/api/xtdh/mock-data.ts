@@ -858,6 +858,8 @@ export function getOverviewStats(): XtdhOverviewStats {
   );
 
   const currentMultiplier = 0.1;
+  const totalBaseTdhRate =
+    currentMultiplier > 0 ? totalXtdhRate / currentMultiplier : 0;
 
   const lastUpdatedAt = ECOSYSTEM_TOKENS.reduce((latest, token) => {
     const current = new Date(token.lastAllocatedAt).getTime();
@@ -872,6 +874,7 @@ export function getOverviewStats(): XtdhOverviewStats {
     totalXtdhRate,
     totalActiveAllocations,
     currentMultiplier,
+    totalBaseTdhRate,
     lastUpdatedAt: new Date(lastUpdatedAt).toISOString(),
   };
 }

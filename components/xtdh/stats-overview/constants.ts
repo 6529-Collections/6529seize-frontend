@@ -22,3 +22,6 @@ export const INFO_TOOLTIP_STYLE: CSSProperties = {
 
 export const SECTION_HEADER_CLASS =
   "tw-flex tw-min-h-[84px] tw-flex-col tw-justify-start tw-gap-1";
+
+export const OVERVIEW_CARD_CLASS =
+  "tw-flex tw-h-full tw-flex-col tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-5 tw-text-iron-50";

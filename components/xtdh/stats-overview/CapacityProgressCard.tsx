@@ -51,7 +51,7 @@ export function CapacityProgressCard({
         <span>
           {allocatedLabel}: {formatRateValue(allocated)}/day
         </span>
-        <span className="tw-text-iron-600">•</span>
+        <span className="tw-text-iron-600">|</span>
         <span>
           {reservedLabel}: {formatRateValue(reserved)}/day
         </span>

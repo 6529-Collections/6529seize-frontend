@@ -5,6 +5,9 @@ export interface XtdhStatsResponse {
   readonly xtdhRateReceived: number;
   readonly totalXtdhReceived: number;
   readonly allocationsCount: number;
+  readonly collectionsAllocatedCount: number;
+  readonly tokensAllocatedCount: number;
+  readonly receivingCollectionsCount: number;
 }
 
 export interface XtdhStatsError {
@@ -164,5 +167,6 @@ export interface XtdhOverviewStats {
   readonly totalXtdhRate: number;
   readonly totalActiveAllocations: number;
   readonly currentMultiplier: number;
+  readonly totalBaseTdhRate: number;
   readonly lastUpdatedAt: string;
 }

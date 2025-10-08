@@ -71,6 +71,9 @@ export async function GET(
       xtdhRateReceived: 3_389,
       totalXtdhReceived: 3_389,
       allocationsCount: 0,
+      collectionsAllocatedCount: 0,
+      tokensAllocatedCount: 0,
+      receivingCollectionsCount: 4,
     };
   } else if (normalizedProfile === "test1234") {
     mockData = {
@@ -80,6 +83,9 @@ export async function GET(
       xtdhRateReceived: 45,
       totalXtdhReceived: 12_450,
       allocationsCount: 2,
+      collectionsAllocatedCount: 2,
+      tokensAllocatedCount: 5,
+      receivingCollectionsCount: 1,
     };
   } else {
     mockData = {
@@ -89,6 +95,9 @@ export async function GET(
       xtdhRateReceived: 0,
       totalXtdhReceived: 0,
       allocationsCount: 0,
+      collectionsAllocatedCount: 0,
+      tokensAllocatedCount: 0,
+      receivingCollectionsCount: 0,
     };
   }
 

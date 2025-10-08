@@ -65,6 +65,7 @@ describe("xTDH API routes", () => {
         totalXtdhRate: expect.any(Number),
         totalActiveAllocations: expect.any(Number),
         currentMultiplier: expect.any(Number),
+        totalBaseTdhRate: expect.any(Number),
       })
     );
   });

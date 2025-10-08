@@ -12,6 +12,7 @@ import { XtdhStatsOverviewSkeleton } from "./stats-overview/Skeletons";
 import { XtdhStatsOverviewError } from "./stats-overview/ErrorState";
 import { NetworkStatsSection } from "./stats-overview/NetworkStatsSection";
 import { UserXtdhStatusSection } from "./stats-overview/UserXtdhStatusSection";
+import { CurrentMultiplierCard } from "./stats-overview/CurrentMultiplierCard";
 import type { NetworkStats, UserSectionState } from "./stats-overview/types";
 import { calculatePercentage, clampToRange } from "./stats-overview/utils";
 
@@ -111,6 +112,9 @@ export default function XtdhStatsOverview({
         <NetworkStatsSection stats={networkStats} />
         <UserXtdhStatusSection state={userState} onRetry={handleRetry} />
       </div>
+      <div className="tw-mt-6">
+        <CurrentMultiplierCard multiplier={networkStats.multiplier} />
+      </div>
     </section>
   );
 }
@@ -122,6 +126,7 @@ function buildNetworkStats(data: XtdhOverviewStats): NetworkStats | null {
   if (!isNonNegativeNumber(data.totalGrantors)) return null;
   if (!isNonNegativeNumber(data.totalTokens)) return null;
   if (!isNonNegativeNumber(data.totalActiveAllocations)) return null;
+  if (!isNonNegativeNumber(data.totalBaseTdhRate)) return null;
   if (!isFiniteNumber(data.currentMultiplier)) return null;
 
   const totalCapacity = data.totalXtdhRate;
@@ -135,6 +140,7 @@ function buildNetworkStats(data: XtdhOverviewStats): NetworkStats | null {
 
   return {
     multiplier: data.currentMultiplier,
+    baseTdhRate: data.totalBaseTdhRate,
     totalCapacity,
     allocatedCapacity,
     availableCapacity,
@@ -190,6 +196,27 @@ function buildUserSectionState({
     return { kind: "error", message: "Invalid xTDH user data" };
   }
 
+  if (
+    !isNonNegativeNumber(data.collectionsAllocatedCount) ||
+    !Number.isInteger(data.collectionsAllocatedCount)
+  ) {
+    return { kind: "error", message: "Invalid xTDH user data" };
+  }
+
+  if (
+    !isNonNegativeNumber(data.tokensAllocatedCount) ||
+    !Number.isInteger(data.tokensAllocatedCount)
+  ) {
+    return { kind: "error", message: "Invalid xTDH user data" };
+  }
+
+  if (
+    !isNonNegativeNumber(data.receivingCollectionsCount) ||
+    !Number.isInteger(data.receivingCollectionsCount)
+  ) {
+    return { kind: "error", message: "Invalid xTDH user data" };
+  }
+
   if (data.baseTdhRate <= 0) {
     return { kind: "no_base_tdh" };
   }
@@ -200,6 +227,9 @@ function buildUserSectionState({
     multiplier: data.multiplier,
     allocatedRate: data.xtdhRateGranted,
     allocationsCount: data.allocationsCount,
+    collectionsAllocatedCount: data.collectionsAllocatedCount,
+    tokensAllocatedCount: data.tokensAllocatedCount,
+    receivingCollectionsCount: data.receivingCollectionsCount,
   };
 }
 

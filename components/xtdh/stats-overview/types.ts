@@ -11,10 +11,14 @@ export type UserSectionState =
       multiplier: number;
       allocatedRate: number;
       allocationsCount: number;
+      collectionsAllocatedCount: number;
+      tokensAllocatedCount: number;
+      receivingCollectionsCount: number;
     };
 
 export interface NetworkStats {
   readonly multiplier: number;
+  readonly baseTdhRate: number;
   readonly totalCapacity: number;
   readonly allocatedCapacity: number;
   readonly availableCapacity: number;
@@ -25,10 +29,11 @@ export interface NetworkStats {
   readonly tokens: number;
 }
 
-export interface NetworkMetric {
+export interface StatsMetric {
   readonly label: string;
-  readonly value: string;
   readonly tooltip: ReactNode;
+  readonly value: string;
+  readonly valueSuffix?: string;
 }
 
 export type CapacityProgressVariant = "network" | "user";

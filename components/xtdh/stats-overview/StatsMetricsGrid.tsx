@@ -1,13 +1,13 @@
 import { InfoTooltip } from "./InfoTooltip";
-import type { NetworkMetric } from "./types";
+import type { StatsMetric } from "./types";
 
-interface NetworkMetricsGridProps {
-  readonly metrics: ReadonlyArray<NetworkMetric>;
+interface StatsMetricsGridProps {
+  readonly metrics: ReadonlyArray<StatsMetric>;
 }
 
-export function NetworkMetricsGrid({
+export function StatsMetricsGrid({
   metrics,
-}: Readonly<NetworkMetricsGridProps>) {
+}: Readonly<StatsMetricsGridProps>) {
   return (
     <div className="tw-grid tw-gap-3 sm:tw-grid-cols-2">
       {metrics.map((metric) => (
@@ -17,7 +17,7 @@ export function NetworkMetricsGrid({
   );
 }
 
-function MetricTile({ metric }: { readonly metric: NetworkMetric }) {
+function MetricTile({ metric }: { readonly metric: StatsMetric }) {
   return (
     <div className="tw-space-y-1 tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-4">
       <div className="tw-flex tw-items-center tw-gap-2">
@@ -31,6 +31,12 @@ function MetricTile({ metric }: { readonly metric: NetworkMetric }) {
       </div>
       <p className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50">
         {metric.value}
+        {metric.valueSuffix ? (
+          <span className="tw-text-sm tw-font-medium tw-text-iron-300">
+            {" "}
+            {metric.valueSuffix}
+          </span>
+        ) : null}
       </p>
     </div>
   );

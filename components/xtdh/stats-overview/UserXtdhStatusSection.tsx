@@ -3,13 +3,18 @@ import Link from "next/link";
 import { Tooltip } from "react-tooltip";
 
 import { CapacityProgressCard } from "./CapacityProgressCard";
-import { SECTION_HEADER_CLASS, INFO_TOOLTIP_STYLE } from "./constants";
-import { InfoTooltip } from "./InfoTooltip";
+import {
+  INFO_TOOLTIP_STYLE,
+  OVERVIEW_CARD_CLASS,
+  SECTION_HEADER_CLASS,
+} from "./constants";
+import { StatsMetricsGrid } from "./StatsMetricsGrid";
 import type { UserSectionState } from "./types";
 import {
   calculatePercentage,
   clampToRange,
   formatPercentLabel,
+  formatPlainNumber,
   formatRateValue,
 } from "./utils";
 import { UserStatusSkeleton } from "./Skeletons";
@@ -27,8 +32,7 @@ export function UserXtdhStatusSection({
     return <UserStatusSkeleton />;
   }
 
-  const baseClass =
-    "tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-5 tw-text-iron-50 tw-flex tw-h-full tw-flex-col";
+  const baseClass = OVERVIEW_CARD_CLASS;
   const title = (
     <h2 className="tw-m-0 tw-text-lg tw-font-semibold">Your xTDH Status</h2>
   );
@@ -99,73 +103,65 @@ export function UserXtdhStatusSection({
   const allocated = clampToRange(state.allocatedRate, 0, capacity);
   const autoAccruing = Math.max(capacity - allocated, 0);
   const percentAllocated = calculatePercentage(allocated, capacity);
+  const metrics = [
+    {
+      label: "Base TDH Rate",
+      value: formatRateValue(state.baseTdhRate),
+      valueSuffix: "/day",
+      tooltip:
+        "Your daily Base TDH generation rate (from Memes + Gradients). Fluid xTDH is calculated from this.",
+    },
+    {
+      label: "Your Allocations",
+      value: formatPlainNumber(state.allocationsCount),
+      tooltip: "Number of allocations you have actively granted.",
+    },
+    {
+      label: "Collections",
+      value: formatPlainNumber(state.collectionsAllocatedCount),
+      tooltip: "Collections you have allocated xTDH to.",
+    },
+    {
+      label: "Tokens",
+      value: formatPlainNumber(state.tokensAllocatedCount),
+      tooltip: "Individual tokens you have allocated xTDH to.",
+    },
+    {
+      label: "Receiving Collections",
+      value: formatPlainNumber(state.receivingCollectionsCount),
+      tooltip:
+        "Collections allocating xTDH to NFTs you hold. This shows where you benefit from others' allocations.",
+    },
+  ] as const;
 
   return (
     <section className={baseClass} role="region" aria-label="Your xTDH status">
-      <div className="tw-space-y-6">
-        <div className={SECTION_HEADER_CLASS}>
-          {title}
-          <p className="tw-mt-1 tw-text-sm tw-text-iron-300">
-            Daily Fluid xTDH budget from your Base TDH and multiplier.
-          </p>
+      <div className="tw-flex tw-h-full tw-flex-col">
+        <div className="tw-flex-1 tw-space-y-6">
+          <div className={SECTION_HEADER_CLASS}>
+            {title}
+            <p className="tw-mt-1 tw-text-sm tw-text-iron-300">
+              Daily Fluid xTDH budget from your Base TDH and multiplier.
+            </p>
+          </div>
+          <CapacityProgressCard
+            title="Your Daily xTDH Capacity"
+            total={capacity}
+            allocated={allocated}
+            reserved={autoAccruing}
+            allocatedLabel="Allocated"
+            reservedLabel="Auto-accruing"
+            percentLabel={formatPercentLabel(percentAllocated, "Allocated")}
+            variant="user"
+          />
+          <StatsMetricsGrid metrics={metrics} />
         </div>
-        <CapacityProgressCard
-          title="Your Daily xTDH Capacity"
-          total={capacity}
-          allocated={allocated}
-          reserved={autoAccruing}
-          allocatedLabel="Allocated"
-          reservedLabel="Auto-accruing"
-          percentLabel={formatPercentLabel(percentAllocated, "Allocated")}
-          variant="user"
+        <AllocateButton
+          disabled={autoAccruing <= 0}
+          tooltip="You have no available xTDH to allocate"
         />
-        <div className="tw-grid tw-gap-3 sm:tw-grid-cols-2">
-          <UserDetailCard
-            label="Base TDH Rate"
-            value={`${formatRateValue(state.baseTdhRate)}/day`}
-            tooltip="Your daily Base TDH generation rate (from Memes + Gradients). Fluid xTDH is calculated from this."
-          />
-          <UserDetailCard
-            label="Your Allocations"
-            value={`${state.allocationsCount} ${
-              state.allocationsCount === 1 ? "collection" : "collections"
-            }`}
-            tooltip="Number of collections you're currently allocating xTDH to."
-          />
-        </div>
       </div>
-      <AllocateButton
-        disabled={autoAccruing <= 0}
-        tooltip="You have no available xTDH to allocate"
-      />
     </section>
-  );
-}
-
-function UserDetailCard({
-  label,
-  value,
-  tooltip,
-}: {
-  readonly label: string;
-  readonly value: string;
-  readonly tooltip: string;
-}) {
-  return (
-    <div className="tw-flex tw-items-center tw-justify-between tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-3">
-      <div className="tw-flex tw-items-center tw-gap-2">
-        <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-300">
-          {label}
-        </p>
-        <InfoTooltip
-          ariaLabel={`Explain ${label}`}
-          tooltip={<span className="tw-text-xs">{tooltip}</span>}
-        />
-      </div>
-      <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-50">
-        {value}
-      </p>
-    </div>
   );
 }
 
