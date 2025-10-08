@@ -18,13 +18,8 @@ const BrainLeftSidebarWaveClose: React.FC<BrainLeftSidebarWaveCloseProps> = ({
 }) => {
   const router = useRouter();
   const { isApp } = useDeviceInfo();
-  let isDirectMessage = false;
-  try {
-    const { data: wave } = useWaveData({ waveId });
-    isDirectMessage = wave?.chat.scope.group?.is_direct_message ?? false;
-  } catch (error) {
-    isDirectMessage = false;
-  }
+  const { data: wave } = useWaveData({ waveId });
+  const isDirectMessage = wave?.chat.scope.group?.is_direct_message ?? false;
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();

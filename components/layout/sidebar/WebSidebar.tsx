@@ -88,7 +88,6 @@ function WebSidebar({
   // Sidebar is expanded when offcanvas is open (mobile or narrow desktop)
   const shouldShowCollapsed =
     ((isMobile || (isNarrow && isBelowMd)) && isOffcanvasOpen) ? false : isCollapsed;
-  const isDialog = isMobile && isOffcanvasOpen;
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const handleToggle = () => {

@@ -15,12 +15,15 @@ export default function LayoutDebugOverlay({
   const { spaces } = useLayout();
 
   const docHeights = useMemo(() => {
-    const d = (globalThis as typeof globalThis & { document?: Document }).document;
-    const w = (globalThis as typeof globalThis & { window?: Window }).window;
+    const { window: browserWindow, document: browserDocument } =
+      globalThis as typeof globalThis & {
+        window?: Window;
+        document?: Document;
+      };
     return {
-      innerHeight: w?.innerHeight ?? 0,
-      clientHeight: d?.documentElement?.clientHeight ?? 0,
-      scrollHeight: d?.documentElement?.scrollHeight ?? 0,
+      innerHeight: browserWindow?.innerHeight ?? 0,
+      clientHeight: browserDocument?.documentElement?.clientHeight ?? 0,
+      scrollHeight: browserDocument?.documentElement?.scrollHeight ?? 0,
     };
   }, [spaces]);
 
@@ -28,6 +31,14 @@ export default function LayoutDebugOverlay({
     // Log to console on changes
     const c = containerRef?.current as HTMLElement | null;
     const h = headerRef?.current as HTMLElement | null;
+    const { window: browserWindow, document: browserDocument } =
+      globalThis as typeof globalThis & {
+        window?: Window;
+        document?: Document;
+      };
+    const windowInnerHeight = browserWindow?.innerHeight ?? 0;
+    const documentClientHeight = browserDocument?.documentElement?.clientHeight ?? 0;
+    const documentScrollHeight = browserDocument?.documentElement?.scrollHeight ?? 0;
 
     // Use collapsed group for readability
     // eslint-disable-next-line no-console
@@ -35,11 +46,11 @@ export default function LayoutDebugOverlay({
     // eslint-disable-next-line no-console
     console.log("spaces", spaces);
     // eslint-disable-next-line no-console
-    console.log("window.innerHeight", typeof window !== "undefined" ? window.innerHeight : 0);
+    console.log("window.innerHeight", windowInnerHeight);
     // eslint-disable-next-line no-console
-    console.log("documentElement.clientHeight", document?.documentElement?.clientHeight ?? 0);
+    console.log("documentElement.clientHeight", documentClientHeight);
     // eslint-disable-next-line no-console
-    console.log("documentElement.scrollHeight", document?.documentElement?.scrollHeight ?? 0);
+    console.log("documentElement.scrollHeight", documentScrollHeight);
     if (c) {
       // eslint-disable-next-line no-console
       console.log("container: clientHeight / offsetHeight / scrollHeight", c.clientHeight, c.offsetHeight, c.scrollHeight);
@@ -70,4 +81,3 @@ export default function LayoutDebugOverlay({
     </div>
   );
 }
-

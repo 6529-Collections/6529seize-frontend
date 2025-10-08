@@ -14,7 +14,7 @@ interface WebLayoutProps {
   readonly isSmall?: boolean;
 }
 
-const WebLayout = ({ children }: WebLayoutProps) => {
+const WebLayout = ({ children, isSmall = false }: WebLayoutProps) => {
   const {
     isMobile,
     isNarrow,
@@ -73,7 +73,11 @@ const WebLayout = ({ children }: WebLayoutProps) => {
   })();
 
   return (
-    <div className="tw-flex tw-relative tw-overflow-x-hidden" style={rootStyle}>
+    <div
+      className="tw-flex tw-relative tw-overflow-x-hidden"
+      style={rootStyle}
+      data-small={isSmall ? "true" : "false"}
+    >
       <div className="tailwind-scope">
         <WebSidebar
           isCollapsed={isCollapsed}

@@ -189,13 +189,10 @@ export function useSidebarController() {
     if (isNarrow) {
       // Entering narrow: never auto-open
       setIsOffcanvasOpen(false);
-    } else {
+    } else if (isOffcanvasOpen) {
       // Leaving narrow: if overlay was open, expand persistent rail on desktop
-      if (isOffcanvasOpen) {
-        setIsDesktopCollapsedState(false);
-        setIsOffcanvasOpen(false);
-      }
-      // If overlay was closed, keep desktop preference as-is
+      setIsDesktopCollapsedState(false);
+      setIsOffcanvasOpen(false);
     }
 
     prevIsNarrowRef.current = isNarrow;

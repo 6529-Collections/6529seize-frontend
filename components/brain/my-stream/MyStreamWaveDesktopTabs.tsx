@@ -10,7 +10,6 @@ import { useWaveTimers } from "@/hooks/useWaveTimers";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
 import { Time } from "@/helpers/time";
-import { calculateTimeLeft, TimeLeft } from "@/helpers/waves/time.utils";
 
 interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;
@@ -41,7 +40,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const {
     isChatWave,
     isMemesWave,
-    isRankWave,
     pauses: { filterDecisionsDuringPauses },
   } = useWave(wave);
   const {
@@ -122,41 +120,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   ]);
 
   // Calculate time left for next decision
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  });
-
-  useEffect(() => {
-    // Initial calculation
-    if (nextDecisionTime) {
-      setTimeLeft(calculateTimeLeft(nextDecisionTime));
-    }
-
-    // Only set up interval if there's a next decision
-    if (nextDecisionTime) {
-      const intervalId = setInterval(() => {
-        const newTimeLeft = calculateTimeLeft(nextDecisionTime);
-        setTimeLeft(newTimeLeft);
-
-        // Clear interval when countdown reaches zero
-        if (
-          newTimeLeft.days === 0 &&
-          newTimeLeft.hours === 0 &&
-          newTimeLeft.minutes === 0 &&
-          newTimeLeft.seconds === 0
-        ) {
-          clearInterval(intervalId);
-        }
-      }, 1000);
-
-      // Clean up interval on unmount
-      return () => clearInterval(intervalId);
-    }
-  }, [nextDecisionTime]);
-
   // Update available tabs when wave changes
   useEffect(() => {
     const votingState = isUpcoming

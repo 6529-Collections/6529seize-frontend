@@ -10,7 +10,7 @@ export default function FooterWrapper() {
   const { isApp } = useDeviceInfo();
   const pathname = usePathname();
   const [homeActiveTab, setHomeActiveTab] = useState<string>("latest");
-  const { sidebarWidth, isMobile, isOffcanvasOpen } = useSidebarController();
+  const { sidebarWidth, isMobile } = useSidebarController();
   useEffect(() => {
     const win = (globalThis as typeof globalThis & { window?: Window }).window;
     if (win === undefined) {

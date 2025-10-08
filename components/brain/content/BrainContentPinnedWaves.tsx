@@ -13,13 +13,8 @@ const BrainContentPinnedWaves: React.FC = () => {
   const searchParams = useSearchParams();
   const { pinnedIds, addId, removeId } = usePinnedWaves();
   const { isApp } = useDeviceInfo();
-  let directMessagesList: ReadonlyArray<{ id: string }> = [];
-  try {
-    const stream = useMyStream();
-    directMessagesList = stream.directMessages.list;
-  } catch (error) {
-    directMessagesList = [];
-  }
+  const { directMessages } = useMyStream();
+  const directMessagesList = directMessages?.list ?? [];
   const [onHoverWaveId, setOnHoverWaveId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const leftArrowRef = useRef<HTMLButtonElement>(null);

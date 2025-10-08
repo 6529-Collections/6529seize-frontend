@@ -19,31 +19,18 @@ export default function SmallScreenLayout({ children }: Props) {
   const headerRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  let searchParams: ReturnType<typeof useSearchParams> | null = null;
-  try {
-    searchParams = useSearchParams();
-  } catch (error) {
-    searchParams = null;
-  }
+  const searchParams = useSearchParams();
 
   // Get tab from URL
   const activeTab = searchParams?.get("tab") || "latest";
 
   useEffect(() => {
-    try {
-      if (headerRef.current) {
-        registerRef("header", headerRef.current);
-      }
-    } catch (error) {
-      console.error('Failed to register header ref:', error);
+    if (headerRef.current) {
+      registerRef("header", headerRef.current);
     }
 
     return () => {
-      try {
-        registerRef("header", null);
-      } catch (error) {
-        console.error('Failed to unregister header ref:', error);
-      }
+      registerRef("header", null);
     };
   }, [registerRef]);
 
@@ -58,24 +45,18 @@ export default function SmallScreenLayout({ children }: Props) {
     }
   }, [activeTab]);
 
-  const renderSidebar = () => {
-    try {
-      return (
-        <div className="tailwind-scope">
-          <WebSidebar
-            isCollapsed={false}
-            onToggle={() => setIsMenuOpen(!isMenuOpen)}
-            isMobile={true}
-            isOffcanvasOpen={isMenuOpen}
-            onCloseOffcanvas={() => setIsMenuOpen(false)}
-            sidebarWidth={SIDEBAR_WIDTHS.EXPANDED}
-          />
-        </div>
-      );
-    } catch (error) {
-      return null;
-    }
-  };
+  const renderSidebar = () => (
+    <div className="tailwind-scope">
+      <WebSidebar
+        isCollapsed={false}
+        onToggle={() => setIsMenuOpen(!isMenuOpen)}
+        isMobile={true}
+        isOffcanvasOpen={isMenuOpen}
+        onCloseOffcanvas={() => setIsMenuOpen(false)}
+        sidebarWidth={SIDEBAR_WIDTHS.EXPANDED}
+      />
+    </div>
+  );
 
   // Focus and ESC handling are managed inside WebSidebar on mobile
 

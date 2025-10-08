@@ -59,7 +59,7 @@ export const getWaveRoute = ({
     .map(([key, value]) => {
       const encodedKey = encodeURIComponent(key);
       const encodedValue = key === "serialNo"
-        ? encodeURIComponent(value).replace(/%2F/g, "/")
+        ? encodeURIComponent(value).replaceAll("%2F", "/")
         : encodeURIComponent(value);
       return `${encodedKey}=${encodedValue}`;
     })

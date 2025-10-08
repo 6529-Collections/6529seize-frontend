@@ -88,7 +88,7 @@ describe("ViewContext", () => {
         />
       </ViewProvider>
     );
-    expect(push).toHaveBeenCalledWith("/");
+    expect(push).toHaveBeenCalledWith("/?tab=feed");
   });
 
   it("navigates to waves view when no last visited wave", () => {

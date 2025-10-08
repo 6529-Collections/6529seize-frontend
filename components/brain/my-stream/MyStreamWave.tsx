@@ -64,7 +64,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   // Get the active tab and utilities from global context
   const { activeContentTab } = useContentTab();
 
-  const breakpoint = useBreakpoint();
+  useBreakpoint();
 
   // For handling clicks on drops
   const onDropClick = (drop: ExtendedDrop) => {

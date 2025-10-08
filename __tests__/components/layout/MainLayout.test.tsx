@@ -118,7 +118,7 @@ describe("MainLayout", () => {
     render(<MainLayout metadata={metadata}>child</MainLayout>);
     const desktop = screen.getByTestId("desktop");
     expect(desktop).toBeInTheDocument();
-    expect(desktop.getAttribute("data-small")).toBe("true");
+    expect(desktop.dataset.small).toBe("true");
   });
 
   it("passes isSmall=false on other routes", () => {
@@ -130,6 +130,6 @@ describe("MainLayout", () => {
     });
     render(<MainLayout metadata={metadata}>child</MainLayout>);
     const desktop = screen.getByTestId("desktop");
-    expect(desktop.getAttribute("data-small")).toBe("false");
+    expect(desktop.dataset.small).toBe("false");
   });
 });

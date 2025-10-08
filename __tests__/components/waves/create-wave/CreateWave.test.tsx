@@ -7,6 +7,22 @@ import CreateWave from "@/components/waves/create-wave/CreateWave";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { CreateWaveStep } from "@/types/waves.types";
 
+jest.mock("@/components/waves/create-wave/CreateWaveFlow", () => {
+  const React = require("react");
+  return {
+    __esModule: true,
+    default: ({ title, onBack, children }: any) => (
+      <div data-testid="create-wave-flow">
+        <div data-testid="create-wave-flow-title">{title}</div>
+        <button type="button" onClick={onBack}>
+          All Waves
+        </button>
+        {children}
+      </div>
+    ),
+  };
+});
+
 // Mock all dependencies
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -269,7 +285,9 @@ describe("CreateWave", () => {
   it("renders the create wave form with main steps and current step content", () => {
     renderCreateWave();
 
-    expect(screen.getByText('Create Wave "Test Wave"')).toBeInTheDocument();
+    expect(screen.getByTestId("create-wave-flow-title")).toHaveTextContent(
+      'Create Wave "Test Wave"'
+    );
     expect(screen.getByTestId("create-wave-overview")).toBeInTheDocument();
   });
 
