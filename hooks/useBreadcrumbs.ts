@@ -1,9 +1,9 @@
 "use client";
 
+import { Crumb } from "@/components/breadcrumb/Breadcrumb";
 import { useQuery } from "@tanstack/react-query";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { Crumb } from "@/components/breadcrumb/Breadcrumb";
 import {
   DYNAMIC_ROUTE_CONFIGS,
   DeterminedRouteInfo,
@@ -140,6 +140,8 @@ export const useBreadcrumbs = (): Crumb[] => {
 
       // 1) Special caps
       if (disp === "api") c = { ...c, display: "API" };
+      if (disp === "tdh") c = { ...c, display: "TDH" };
+      if (disp === "tdh history") c = { ...c, display: "TDH History" };
 
       // 2) Force non-link for "Tools"
       if (disp === "tools") {
