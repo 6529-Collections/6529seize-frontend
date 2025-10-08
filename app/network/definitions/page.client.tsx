@@ -7,7 +7,6 @@ import { Col, Container, Row } from "react-bootstrap";
 const NAV_LINKS = [
   { href: "/network/tdh", label: "TDH" },
   { href: "/network/tdh/historic-boosts", label: "TDH Historic Boosts" },
-  { href: "/network/definitions", label: "Definitions" },
   { href: "/network/stats", label: "Network Stats" },
   { href: "/network/levels", label: "Levels" },
 ] as const;
@@ -91,7 +90,9 @@ export default function DefinitionsClient() {
                 <u>TDH:</u>
               </b>{" "}
               TDH (unboosted) &times; boosters. For the current rules, see{" "}
-              <Link href="/network/tdh" className={BUTTON_LINK_CLASSES}>
+              <Link
+                href="/network/tdh"
+                className="tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-border-solid tw-border-[#555] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-1 tw-py-0.5 tw-no-underline">
                 TDH
               </Link>
               .

@@ -64,6 +64,7 @@ class MockWebSocket {
 describe('WebSocketProvider', () => {
   let originalWs: any;
   let mockGetAuthJwt: jest.MockedFunction<typeof authUtils.getAuthJwt>;
+  let mathRandomSpy: jest.SpyInstance<number, []>;
   
   beforeEach(() => {
     originalWs = global.WebSocket;
@@ -76,11 +77,13 @@ describe('WebSocketProvider', () => {
     mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<typeof authUtils.getAuthJwt>;
     mockGetAuthJwt.mockReturnValue('fresh-token');
     
+    mathRandomSpy = jest.spyOn(Math, 'random').mockReturnValue(0.5);
     jest.clearAllMocks();
   });
   
   afterEach(() => {
     (global as any).WebSocket = originalWs;
+    mathRandomSpy.mockRestore();
     jest.useRealTimers();
   });
 

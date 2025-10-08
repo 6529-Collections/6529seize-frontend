@@ -25,18 +25,29 @@ import { getAuthJwt } from "../auth/auth.utils";
 const DEFAULT_RECONNECT_DELAY = 2000; // Start with 2 seconds
 const MAX_RECONNECT_DELAY = 30000; // Max 30 seconds
 const DEFAULT_MAX_RECONNECT_ATTEMPTS = 20; // Try up to 20 times before giving up
+const DEFAULT_RECONNECT_JITTER_FACTOR = 0.2; // +/-20% randomisation window
 
 /**
  * Calculate delay for exponential backoff
  */
-function calculateReconnectDelay(
+export function calculateReconnectDelay(
   attempt: number,
   initialDelay: number,
-  maxDelay: number
+  maxDelay: number,
+  jitterFactor: number = DEFAULT_RECONNECT_JITTER_FACTOR
 ): number {
   // Exponential backoff formula: initialDelay * 2^attempt (capped at maxDelay)
-  const delay = initialDelay * Math.pow(1.5, attempt);
-  return Math.min(delay, maxDelay);
+  const baseDelay = Math.min(initialDelay * Math.pow(1.5, attempt), maxDelay);
+
+  if (jitterFactor <= 0) {
+    return baseDelay;
+  }
+
+  const clampedJitter = Math.min(Math.max(jitterFactor, 0), 1);
+  const jitterOffset = (Math.random() * 2 - 1) * clampedJitter; // Range [-clampedJitter, clampedJitter]
+  const jitteredDelay = baseDelay * (1 + jitterOffset);
+
+  return Math.min(maxDelay, Math.max(0, Math.round(jitteredDelay)));
 }
 
 /**
@@ -120,10 +131,13 @@ export function WebSocketProvider({
 
     // Calculate delay based on attempts
     const baseDelay = config.reconnectDelay ?? DEFAULT_RECONNECT_DELAY;
+    const jitterFactor =
+      config.reconnectJitter ?? DEFAULT_RECONNECT_JITTER_FACTOR;
     const delay = calculateReconnectDelay(
       reconnectAttemptsRef.current,
       baseDelay,
-      MAX_RECONNECT_DELAY
+      MAX_RECONNECT_DELAY,
+      jitterFactor
     );
 
     // Schedule reconnection
@@ -132,7 +146,11 @@ export function WebSocketProvider({
       // Attempt reconnection with the stored token
       connect(reconnectTokenRef.current);
     }, delay);
-  }, [config.maxReconnectAttempts, config.reconnectDelay]);
+  }, [
+    config.maxReconnectAttempts,
+    config.reconnectDelay,
+    config.reconnectJitter,
+  ]);
 
   /**
    * Connect to WebSocket server
