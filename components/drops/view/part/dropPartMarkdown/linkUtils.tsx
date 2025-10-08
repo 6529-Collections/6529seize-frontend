@@ -6,6 +6,7 @@ import { isLikelyEnsTarget } from "@/lib/ens/detect";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 
 import { isPepeHost } from "./pepe";
+import { TWITTER_DOMAINS } from "./twitter";
 
 const parseUrl = (href: string): URL | null => {
   try {
@@ -16,7 +17,6 @@ const parseUrl = (href: string): URL | null => {
 };
 
 const YOUTUBE_DOMAINS = ["youtube.com", "youtube-nocookie.com"] as const;
-const TWITTER_DOMAINS = ["twitter.com", "x.com"] as const;
 const ART_BLOCKS_DOMAINS = [
   "artblocks.io",
   "live.artblocks.io",
