@@ -132,7 +132,7 @@ export default function TDHHistoricBoostsPage() {
     <Container className="tw-pt-12 tw-pb-12">
       <Row>
         <Col>
-          <h1>TDH - Historic Boosts</h1>
+          <h1>TDH — Historic Boosts</h1>
           <p className="tw-mt-4 tw-mb-8">
             Previous TDH versions are archived here for reference.
           </p>
