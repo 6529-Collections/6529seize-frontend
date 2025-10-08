@@ -40,7 +40,7 @@ export default function GroupCardEditActions({
   useEffect(() => setEditTitle(getEditTitle()), [isMyFilter]);
 
   return (
-    <div className="tw-relative" ref={listRef}>
+    <div className="tw-relative tw-z-20" ref={listRef}>
       <button
         type="button"
         className="tw-bg-transparent tw-h-full tw-border-0 tw-block tw-text-iron-500 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"

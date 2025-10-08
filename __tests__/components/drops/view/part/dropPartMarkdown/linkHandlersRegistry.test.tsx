@@ -182,9 +182,14 @@ describe("createLinkRenderer", () => {
     expect(screen.getByTestId("drop-card")).toHaveAttribute("data-drop", "def");
   });
 
-  it("renders Twitter embeds", () => {
+  it.each([
+    ["standard status link", "https://twitter.com/user/status/987654321"],
+    ["mobile twitter link", "https://mobile.twitter.com/user/status/987654321"],
+    ["i/web link", "https://twitter.com/i/web/status/987654321"],
+    ["x.com link", "https://x.com/user/status/987654321"],
+    ["hashbang link", "https://twitter.com/#!/user/status/987654321"],
+  ])("renders Twitter embeds for %s", (_, tweetHref) => {
     const { renderAnchor } = baseRenderer();
-    const tweetHref = "https://twitter.com/user/status/987654321";
     const element = renderAnchor({ href: tweetHref } as any);
     render(<>{element}</>);
     expect(screen.getByTestId("tweet")).toHaveAttribute("data-href", tweetHref);
