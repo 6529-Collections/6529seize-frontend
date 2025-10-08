@@ -12,6 +12,7 @@ import XtdhTokensView, {
   TOKENS_PAGE_SIZE,
   type XtdhTokensViewState,
 } from "./tokens/XtdhTokensView";
+import { deriveProfileIdentifier } from "./profile-utils";
 import { useXtdhCollections, useXtdhTokens } from "@/hooks/useXtdhOverview";
 import { classNames } from "@/helpers/Helpers";
 import UserPageXtdhGrant from "@/components/user/xtdh/UserPageXtdhGrant";
@@ -78,17 +79,6 @@ function parseTokenSort(value: string | null): XtdhTokensViewState["sort"] {
     : DEFAULT_TOKEN_SORT;
 }
 
-function deriveProfileKey(profile: any | null): string | null {
-  if (!profile) return null;
-  return (
-    profile.query ??
-    profile.handle ??
-    profile.primary_wallet ??
-    profile.consolidation_key ??
-    null
-  );
-}
-
 export default function XtdhPage(): JSX.Element {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -97,7 +87,7 @@ export default function XtdhPage(): JSX.Element {
   const [showGrantForm, setShowGrantForm] = useState(false);
 
   const connectedProfileId = useMemo(
-    () => deriveProfileKey(connectedProfile),
+    () => deriveProfileIdentifier(connectedProfile),
     [connectedProfile]
   );
 

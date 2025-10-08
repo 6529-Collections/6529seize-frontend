@@ -7,6 +7,7 @@ import { useXtdhOverviewStats } from "@/hooks/useXtdhOverview";
 import { useXtdhStats } from "@/hooks/useXtdhStats";
 import type { XtdhOverviewStats, XtdhStatsResponse } from "@/types/xtdh";
 
+import { deriveProfileIdentifier } from "./profile-utils";
 import { XtdhStatsOverviewSkeleton } from "./stats-overview/Skeletons";
 import { XtdhStatsOverviewError } from "./stats-overview/ErrorState";
 import { NetworkStatsSection } from "./stats-overview/NetworkStatsSection";
@@ -23,7 +24,7 @@ export default function XtdhStatsOverview({
 }: Readonly<XtdhStatsOverviewProps>) {
   const { connectedProfile } = useContext(AuthContext);
   const profileKey = useMemo(
-    () => deriveProfileKey(connectedProfile),
+    () => deriveProfileIdentifier(connectedProfile),
     [connectedProfile]
   );
 
@@ -200,17 +201,6 @@ function buildUserSectionState({
     allocatedRate: data.xtdhRateGranted,
     allocationsCount: data.allocationsCount,
   };
-}
-
-function deriveProfileKey(profile: any | null): string | null {
-  if (!profile) return null;
-  return (
-    profile.query ??
-    profile.handle ??
-    profile.primary_wallet ??
-    profile.consolidation_key ??
-    null
-  );
 }
 
 function isNonNegativeNumber(value: unknown): value is number {

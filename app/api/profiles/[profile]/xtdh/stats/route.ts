@@ -7,6 +7,17 @@ const RATE_LIMIT_PROBABILITY = 0.05;
 const SERVER_ERROR_PROBABILITY = 0.05;
 const NETWORK_DELAY_MS = 300;
 
+function normalizeProfileIdentifier(value: string | null | undefined): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+  return trimmed.replace(/^@/, "").toLowerCase();
+}
+
 export async function GET(
   _request: NextRequest,
   context: { params: Promise<{ profile: string }> }
@@ -48,7 +59,7 @@ export async function GET(
     return NextResponse.json(error, { status: 500 });
   }
 
-  const normalizedProfile = profile.toLowerCase();
+  const normalizedProfile = normalizeProfileIdentifier(profile);
 
   let mockData: XtdhStatsResponse;
 
