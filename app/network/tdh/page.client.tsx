@@ -4,6 +4,9 @@ import { useSetTitle } from "@/contexts/TitleContext";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
 
+const BUTTON_LINK_CLASSES =
+  "tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-font-medium tw-border-solid tw-border-[#555] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-4 tw-py-2 tw-no-underline";
+
 export default function TDHMainPage() {
   useSetTitle("TDH | Network");
 
@@ -203,12 +206,10 @@ export default function TDHMainPage() {
             <div className="tw-mt-8 tw-flex tw-flex-wrap tw-gap-3">
               <Link
                 href="/network/tdh/historic-boosts"
-                className="tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-font-medium tw-border-solid tw-border-[#555] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-4 tw-py-2 tw-no-underline">
+                className={BUTTON_LINK_CLASSES}>
                 View Historic Boosts
               </Link>
-              <Link
-                href="/network/definitions"
-                className="tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-font-medium tw-border-solid tw-border-[#555] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-4 tw-py-2 tw-no-underline">
+              <Link href="/network/definitions" className={BUTTON_LINK_CLASSES}>
                 Definitions
               </Link>
             </div>
@@ -222,9 +223,7 @@ export default function TDHMainPage() {
                 Aggregate community activity, holdings, trading, and time-based
                 metrics across the network.
               </p>
-              <Link
-                href="/network/stats"
-                className="tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-font-medium tw-border-solid tw-border-[#555] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-4 tw-py-2 tw-no-underline">
+              <Link href="/network/stats" className={BUTTON_LINK_CLASSES}>
                 View Network Stats
               </Link>
             </div>
@@ -234,9 +233,7 @@ export default function TDHMainPage() {
                 Our integrated progression that combines <b>TDH</b> with{" "}
                 <b>Rep</b> (peer-given reputation points).
               </p>
-              <Link
-                href="/network/levels"
-                className="tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-font-medium tw-border-solid tw-border-[#555] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-4 tw-py-2 tw-no-underline">
+              <Link href="/network/levels" className={BUTTON_LINK_CLASSES}>
                 View Levels
               </Link>
             </div>
