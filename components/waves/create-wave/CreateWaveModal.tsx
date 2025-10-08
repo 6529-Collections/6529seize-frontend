@@ -1,10 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import CreateWave from "./CreateWave";
 import { ApiIdentity } from "../../../generated/models/ApiIdentity";
+import { createPortal } from "react-dom";
 
 interface CreateWaveModalProps {
   readonly isOpen: boolean;
@@ -17,14 +18,23 @@ export default function CreateWaveModal({
   onClose,
   profile,
 }: CreateWaveModalProps) {
-  return (
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  if (!mounted) return null;
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-backdrop-blur-[1px] tw-flex tw-items-start lg:tw-items-center tw-justify-center tw-z-[9999] tw-p-4"
+          className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-backdrop-blur-[1px] tw-flex tw-items-start lg:tw-items-center tw-justify-center tw-z-[9999] tw-px-4 tw-pb-4 tw-pt-[calc(env(safe-area-inset-top,0px)+1rem)]"
           onClick={onClose}
         >
           <motion.div
@@ -57,6 +67,7 @@ export default function CreateWaveModal({
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
