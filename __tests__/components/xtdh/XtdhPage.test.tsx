@@ -20,6 +20,7 @@ import {
   useXtdhCollections,
   useXtdhTokens,
 } from "@/hooks/useXtdhOverview";
+import { useXtdhStats } from "@/hooks/useXtdhStats";
 
 const mockUseSearchParams = jest.fn();
 const mockReplace = jest.fn();
@@ -36,9 +37,14 @@ jest.mock("@/hooks/useXtdhOverview", () => ({
   useXtdhTokens: jest.fn(),
 }));
 
+jest.mock("@/hooks/useXtdhStats", () => ({
+  useXtdhStats: jest.fn(),
+}));
+
 const mockedOverviewStats = useXtdhOverviewStats as jest.Mock;
 const mockedCollections = useXtdhCollections as jest.Mock;
 const mockedTokens = useXtdhTokens as jest.Mock;
+const mockedUserStats = useXtdhStats as jest.Mock;
 
 const baseDate = new Date().toISOString();
 
@@ -182,6 +188,8 @@ describe("XtdhPage", () => {
         totalTokens: 6,
         totalXtdhAllocated: 1400,
         totalXtdhRate: 1600,
+        totalActiveAllocations: 3200,
+        currentMultiplier: 0.1,
         lastUpdatedAt: baseDate,
       },
       isLoading: false,
@@ -225,6 +233,35 @@ describe("XtdhPage", () => {
       error: null,
       refetch: jest.fn(),
       isFetching: false,
+    });
+
+    mockedUserStats.mockImplementation(({ profile }) => {
+      if (!profile) {
+        return {
+          data: undefined,
+          isLoading: false,
+          isError: false,
+          error: null,
+          refetch: jest.fn(),
+          isFetching: false,
+        };
+      }
+
+      return {
+        data: {
+          baseTdhRate: 1_500,
+          multiplier: 0.1,
+          xtdhRateGranted: 50,
+          xtdhRateReceived: 15,
+          totalXtdhReceived: 1_200,
+          allocationsCount: 2,
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: jest.fn(),
+        isFetching: false,
+      };
     });
   });
 

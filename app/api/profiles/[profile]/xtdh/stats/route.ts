@@ -59,6 +59,7 @@ export async function GET(
       xtdhRateGranted: 0,
       xtdhRateReceived: 3_389,
       totalXtdhReceived: 3_389,
+      allocationsCount: 0,
     };
   } else if (normalizedProfile === "test1234") {
     mockData = {
@@ -67,6 +68,7 @@ export async function GET(
       xtdhRateGranted: 80,
       xtdhRateReceived: 45,
       totalXtdhReceived: 12_450,
+      allocationsCount: 2,
     };
   } else {
     mockData = {
@@ -75,6 +77,7 @@ export async function GET(
       xtdhRateGranted: 0,
       xtdhRateReceived: 0,
       totalXtdhReceived: 0,
+      allocationsCount: 0,
     };
   }
 
