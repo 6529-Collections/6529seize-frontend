@@ -52,7 +52,7 @@ export function UserStatusSkeleton() {
       </div>
       <div className="tw-h-20 tw-rounded-xl tw-bg-iron-800" />
       <div className="tw-grid tw-gap-3 sm:tw-grid-cols-2">
-        {Array.from({ length: 5 }).map((_, index) => (
+        {Array.from({ length: 4 }).map((_, index) => (
           <div key={index} className="tw-h-16 tw-rounded-lg tw-bg-iron-800" />
         ))}
       </div>
@@ -61,7 +61,6 @@ export function UserStatusSkeleton() {
           <div key={index} className="tw-h-16 tw-rounded-lg tw-bg-iron-800" />
         ))}
       </div>
-      <div className="tw-ml-auto tw-h-10 tw-w-32 tw-rounded-lg tw-bg-iron-800" />
     </div>
   );
 }

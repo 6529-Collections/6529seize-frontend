@@ -1,3 +1,4 @@
+import { classNames } from "@/helpers/Helpers";
 import type { CapacityProgressVariant } from "./types";
 import { calculatePercentage, formatRateValue } from "./utils";
 
@@ -8,8 +9,10 @@ interface CapacityProgressCardProps {
   readonly reserved: number;
   readonly allocatedLabel: string;
   readonly reservedLabel: string;
-  readonly percentLabel: string;
+  readonly percentLabel?: string;
   readonly variant: CapacityProgressVariant;
+  readonly footnote?: string;
+  readonly isEmpty?: boolean;
 }
 
 export function CapacityProgressCard({
@@ -21,11 +24,14 @@ export function CapacityProgressCard({
   reservedLabel,
   percentLabel,
   variant,
+  footnote,
+  isEmpty = false,
 }: Readonly<CapacityProgressCardProps>) {
   const ariaLabel =
     variant === "network"
       ? "Total network xTDH capacity allocated"
       : "Your xTDH capacity allocated";
+  const percentDisplay = percentLabel ?? "\u2014";
 
   return (
     <div className="tw-space-y-4 tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-950/60 tw-p-4">
@@ -43,19 +49,29 @@ export function CapacityProgressCard({
           </p>
         </div>
         <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-200">
-          {percentLabel}
+          {percentDisplay}
         </p>
       </div>
-      <CapacityProgressBar value={allocated} total={total} variant={variant} ariaLabel={ariaLabel} />
-      <p className="tw-m-0 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-sm tw-text-iron-200">
-        <span>
-          {allocatedLabel}: {formatRateValue(allocated)}/day
-        </span>
-        <span className="tw-text-iron-600">|</span>
-        <span>
-          {reservedLabel}: {formatRateValue(reserved)}/day
-        </span>
-      </p>
+      <CapacityProgressBar
+        value={allocated}
+        total={total}
+        variant={variant}
+        ariaLabel={ariaLabel}
+        isEmpty={isEmpty}
+      />
+      {footnote ? (
+        <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-400">{footnote}</p>
+      ) : (
+        <p className="tw-m-0 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-sm tw-text-iron-200">
+          <span>
+            {allocatedLabel}: {formatRateValue(allocated)}/day
+          </span>
+          <span className="tw-text-iron-600">|</span>
+          <span>
+            {reservedLabel}: {formatRateValue(reserved)}/day
+          </span>
+        </p>
+      )}
     </div>
   );
 }
@@ -65,16 +81,21 @@ function CapacityProgressBar({
   total,
   variant,
   ariaLabel,
+  isEmpty,
 }: {
   readonly value: number;
   readonly total: number;
   readonly variant: CapacityProgressVariant;
   readonly ariaLabel: string;
+  readonly isEmpty: boolean;
 }) {
   const percent = calculatePercentage(value, total);
   const containerClasses =
     variant === "user"
-      ? "tw-relative tw-h-3 tw-w-full tw-overflow-hidden tw-rounded-full tw-bg-emerald-500/20 tw-ring-1 tw-ring-emerald-400/30"
+      ? classNames(
+          "tw-relative tw-h-3 tw-w-full tw-overflow-hidden tw-rounded-full tw-ring-1 tw-ring-emerald-400/30",
+          isEmpty ? "tw-bg-emerald-500/10 tw-opacity-70" : "tw-bg-emerald-500/20"
+        )
       : "tw-relative tw-h-3 tw-w-full tw-overflow-hidden tw-rounded-full tw-bg-iron-800";
   const progressClasses =
     variant === "user"

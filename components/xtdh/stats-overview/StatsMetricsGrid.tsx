@@ -1,6 +1,6 @@
 import { classNames } from "@/helpers/Helpers";
-import { InfoTooltip } from "./InfoTooltip";
 import type { StatsMetric } from "./types";
+import { InfoTooltip } from "./InfoTooltip";
 
 interface StatsMetricsGridProps {
   readonly metrics: ReadonlyArray<StatsMetric>;
@@ -25,6 +25,10 @@ export function StatsMetricsGrid({
 }
 
 function MetricTile({ metric }: { readonly metric: StatsMetric }) {
+  const baseValueClasses = "tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50";
+  const valueClasses =
+    metric.tone === "muted" ? `${baseValueClasses} tw-opacity-70` : baseValueClasses;
+
   return (
     <div className="tw-space-y-1 tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-4">
       <div className="tw-flex tw-items-center tw-gap-2">
@@ -36,7 +40,7 @@ function MetricTile({ metric }: { readonly metric: StatsMetric }) {
           tooltip={<span className="tw-text-xs">{metric.tooltip}</span>}
         />
       </div>
-      <p className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50">
+      <p className={valueClasses}>
         {metric.value}
         {metric.valueSuffix ? (
           <span className="tw-text-sm tw-font-medium tw-text-iron-300">
@@ -45,6 +49,11 @@ function MetricTile({ metric }: { readonly metric: StatsMetric }) {
           </span>
         ) : null}
       </p>
+      {metric.helperText ? (
+        <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-400">
+          {metric.helperText}
+        </p>
+      ) : null}
     </div>
   );
 }

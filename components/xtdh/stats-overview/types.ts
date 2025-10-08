@@ -1,24 +1,25 @@
 import type { ReactNode } from "react";
 import type { XtdhMultiplierMilestone } from "@/types/xtdh";
 
+export interface UserStatsData {
+  readonly baseTdhRate: number;
+  readonly multiplier: number;
+  readonly dailyCapacity: number;
+  readonly allocatedDaily: number;
+  readonly autoAccruingDaily: number;
+  readonly allocationsCount: number;
+  readonly collectionsAllocatedCount: number;
+  readonly tokensAllocatedCount: number;
+  readonly totalXtdhReceived: number;
+  readonly totalXtdhGranted: number;
+}
+
 export type UserSectionState =
   | { kind: "loading" }
   | { kind: "error"; message?: string }
   | { kind: "unauthenticated" }
-  | { kind: "no_base_tdh" }
-  | {
-      kind: "ready";
-      baseTdhRate: number;
-      multiplier: number;
-      dailyCapacity: number;
-      allocatedDaily: number;
-      autoAccruingDaily: number;
-      allocationsCount: number;
-      collectionsAllocatedCount: number;
-      tokensAllocatedCount: number;
-      totalXtdhReceived: number;
-      totalXtdhGranted: number;
-    };
+  | ({ kind: "no_base_tdh" } & UserStatsData)
+  | ({ kind: "ready" } & UserStatsData);
 
 export interface NetworkStats {
   readonly multiplier: {
@@ -44,6 +45,8 @@ export interface StatsMetric {
   readonly tooltip: ReactNode;
   readonly value: string;
   readonly valueSuffix?: string;
+  readonly helperText?: string;
+  readonly tone?: "default" | "muted";
 }
 
 export type CapacityProgressVariant = "network" | "user";

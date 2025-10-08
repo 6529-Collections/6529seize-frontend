@@ -250,10 +250,6 @@ function buildUserSectionState({
     return { kind: "error", message: "Invalid xTDH user data" };
   }
 
-  if (data.baseTdhRate <= 0) {
-    return { kind: "no_base_tdh" };
-  }
-
   const dailyCapacity = clampToRange(data.dailyCapacity, 0, Number.MAX_SAFE_INTEGER);
   const allocatedDaily = clampToRange(data.xtdhRateGranted, 0, dailyCapacity);
   const autoAccruingDaily = clampToRange(
@@ -261,6 +257,22 @@ function buildUserSectionState({
     0,
     dailyCapacity
   );
+
+  if (data.baseTdhRate <= 0) {
+    return {
+      kind: "no_base_tdh",
+      baseTdhRate: data.baseTdhRate,
+      multiplier: data.multiplier,
+      dailyCapacity,
+      allocatedDaily,
+      autoAccruingDaily,
+      allocationsCount: data.allocationsCount,
+      collectionsAllocatedCount: data.collectionsAllocatedCount,
+      tokensAllocatedCount: data.tokensAllocatedCount,
+      totalXtdhReceived: data.totalXtdhReceived,
+      totalXtdhGranted: data.totalXtdhGranted,
+    };
+  }
 
   return {
     kind: "ready",
