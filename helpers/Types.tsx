@@ -326,6 +326,8 @@ export enum WsMessageType {
   DROP_REACTION_UPDATE = "DROP_REACTION_UPDATE",
   USER_IS_TYPING = "USER_IS_TYPING",
   SUBSCRIBE_TO_WAVE = "SUBSCRIBE_TO_WAVE",
+  PING = "PING",
+  PONG = "PONG",
 }
 
 export interface WsTypingMessage {

@@ -25,6 +25,10 @@ import { getAuthJwt } from "../auth/auth.utils";
 const DEFAULT_RECONNECT_DELAY = 2000; // Start with 2 seconds
 const MAX_RECONNECT_DELAY = 30000; // Max 30 seconds
 const DEFAULT_MAX_RECONNECT_ATTEMPTS = 20; // Try up to 20 times before giving up
+const DEFAULT_HEARTBEAT_INTERVAL = 15000;
+const DEFAULT_HEARTBEAT_TIMEOUT = 45000;
+const HEARTBEAT_MONITOR_INTERVAL = 1000;
+const HEARTBEAT_CLOSE_CODE = 4000;
 
 /**
  * Calculate delay for exponential backoff
@@ -64,30 +68,78 @@ export function WebSocketProvider({
   const reconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isManualDisconnectRef = useRef(false);
   const reconnectTokenRef = useRef<string | undefined>(undefined);
+  const heartbeatCheckTimerRef = useRef<ReturnType<typeof setInterval> | null>(
+    null
+  );
+  const lastActivityRef = useRef<number>(Date.now());
+  const awaitingHeartbeatRef = useRef(false);
+  const lastPingAtRef = useRef<number | null>(null);
 
   /**
    * Parse and route incoming WebSocket messages
    */
   const handleMessage = useCallback((event: MessageEvent) => {
+    const now = Date.now();
+    const wasAwaitingHeartbeat = awaitingHeartbeatRef.current;
+    const lastPingAt = lastPingAtRef.current;
+
+    lastActivityRef.current = now;
+    awaitingHeartbeatRef.current = false;
+    lastPingAtRef.current = null;
+
+    if (wasAwaitingHeartbeat) {
+      const latency =
+        typeof lastPingAt === "number" ? now - lastPingAt : undefined;
+      console.log(
+        latency !== undefined
+          ? `[WebSocket] Heartbeat acknowledged after ${latency}ms`
+          : "[WebSocket] Heartbeat acknowledged"
+      );
+    }
+
+    let message: WebSocketMessage<{ data?: any }> | null = null;
+
     try {
-      // Parse the message
-      const message: WebSocketMessage<{ data: any }> = JSON.parse(event.data);
-
-      // Get subscribers for this message type
-      const subscribers = subscribersRef.current.get(message.type);
-
-      // If there are subscribers, notify them with the message data
-      if (subscribers) {
-        subscribers.forEach((callback) => {
-          try {
-            callback(message.data);
-          } catch (error) {
-            console.error("Error in subscriber callback:", error);
-          }
-        });
-      }
+      message = JSON.parse(event.data);
     } catch (error) {
       console.error("Failed to parse WebSocket message:", error);
+      return;
+    }
+
+    if (!message || typeof message.type !== "string") {
+      console.warn("Received WebSocket message without a valid type:", message);
+      return;
+    }
+
+    if (message.type === WsMessageType.PING) {
+      console.log("[WebSocket] Received heartbeat ping from server");
+      const ws = wsRef.current;
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        try {
+          ws.send(JSON.stringify({ type: WsMessageType.PONG }));
+          console.log("[WebSocket] Responded with heartbeat pong");
+        } catch (error) {
+          console.error("Failed to send heartbeat pong:", error);
+        }
+      }
+      return;
+    }
+
+    if (message.type === WsMessageType.PONG) {
+      console.log("[WebSocket] Received heartbeat pong from server");
+      return;
+    }
+
+    const subscribers = subscribersRef.current.get(message.type);
+
+    if (subscribers) {
+      subscribers.forEach((callback) => {
+        try {
+          callback(message.data);
+        } catch (error) {
+          console.error("Error in subscriber callback:", error);
+        }
+      });
     }
   }, []);
 
@@ -134,6 +186,69 @@ export function WebSocketProvider({
     }, delay);
   }, [config.maxReconnectAttempts, config.reconnectDelay]);
 
+  const stopHeartbeat = useCallback(() => {
+    if (heartbeatCheckTimerRef.current) {
+      clearInterval(heartbeatCheckTimerRef.current);
+      heartbeatCheckTimerRef.current = null;
+      console.log("[WebSocket] Stopped heartbeat monitor");
+    }
+    awaitingHeartbeatRef.current = false;
+    lastPingAtRef.current = null;
+  }, []);
+
+  const startHeartbeat = useCallback(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    stopHeartbeat();
+    lastActivityRef.current = Date.now();
+    awaitingHeartbeatRef.current = false;
+    lastPingAtRef.current = null;
+
+    const pingInterval =
+      config.heartbeatInterval ?? DEFAULT_HEARTBEAT_INTERVAL;
+    const timeout = config.heartbeatTimeout ?? DEFAULT_HEARTBEAT_TIMEOUT;
+
+    heartbeatCheckTimerRef.current = setInterval(() => {
+      const ws = wsRef.current;
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        return;
+      }
+
+      const now = Date.now();
+      const elapsed = now - lastActivityRef.current;
+
+      if (!awaitingHeartbeatRef.current && elapsed >= pingInterval) {
+        try {
+          ws.send(JSON.stringify({ type: WsMessageType.PING }));
+          awaitingHeartbeatRef.current = true;
+          lastPingAtRef.current = now;
+          console.log(
+            `[WebSocket] Sent heartbeat ping after ${elapsed}ms of inactivity`
+          );
+        } catch (error) {
+          console.error("[WebSocket] Failed to send heartbeat ping:", error);
+        }
+      }
+
+      if (awaitingHeartbeatRef.current && elapsed >= timeout) {
+        console.warn(
+          `[WebSocket] Heartbeat timeout (${elapsed}ms) — closing socket`
+        );
+        awaitingHeartbeatRef.current = false;
+        lastPingAtRef.current = null;
+        ws.close(HEARTBEAT_CLOSE_CODE, "Heartbeat timeout");
+      }
+    }, HEARTBEAT_MONITOR_INTERVAL);
+
+    console.log("[WebSocket] Started heartbeat monitor");
+  }, [
+    config.heartbeatInterval,
+    config.heartbeatTimeout,
+    stopHeartbeat,
+  ]);
+
   /**
    * Connect to WebSocket server
    */
@@ -144,6 +259,8 @@ export function WebSocketProvider({
 
       // Reset manual disconnect flag
       isManualDisconnectRef.current = false;
+
+      stopHeartbeat();
 
       // Close existing connection if any
       if (wsRef.current) {
@@ -173,11 +290,13 @@ export function WebSocketProvider({
 
           // Reset reconnect attempts on successful connection
           reconnectAttemptsRef.current = 0;
+          startHeartbeat();
         };
 
         ws.onmessage = handleMessage;
 
         ws.onclose = (event) => {
+          stopHeartbeat();
           // Clean up WebSocket
           wsRef.current = null;
           setStatus(WebSocketStatus.DISCONNECTED);
@@ -212,7 +331,14 @@ export function WebSocketProvider({
         attemptReconnect();
       }
     },
-    [config.url, handleMessage, clearReconnectTimer, attemptReconnect]
+    [
+      config.url,
+      handleMessage,
+      clearReconnectTimer,
+      attemptReconnect,
+      startHeartbeat,
+      stopHeartbeat,
+    ]
   );
 
   /**
@@ -224,6 +350,7 @@ export function WebSocketProvider({
 
     // Clear any pending reconnect
     clearReconnectTimer();
+    stopHeartbeat();
 
     // Reset reconnect attempts
     reconnectAttemptsRef.current = 0;
@@ -234,7 +361,7 @@ export function WebSocketProvider({
       wsRef.current = null;
       setStatus(WebSocketStatus.DISCONNECTED);
     }
-  }, [clearReconnectTimer]);
+  }, [clearReconnectTimer, stopHeartbeat]);
 
   /**
    * Subscribe to a specific message type
@@ -282,6 +409,7 @@ export function WebSocketProvider({
     return () => {
       // Clear any pending reconnect
       clearReconnectTimer();
+      stopHeartbeat();
 
       // Close the connection
       if (wsRef.current) {
@@ -289,7 +417,7 @@ export function WebSocketProvider({
         wsRef.current = null;
       }
     };
-  }, [clearReconnectTimer]);
+  }, [clearReconnectTimer, stopHeartbeat]);
 
   // Create context value
   const contextValue: WebSocketContextValue = useMemo(

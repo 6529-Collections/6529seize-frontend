@@ -33,4 +33,6 @@ export interface WebSocketConfig {
   url: string;
   reconnectDelay?: number;
   maxReconnectAttempts?: number;
+  heartbeatInterval?: number;
+  heartbeatTimeout?: number;
 }

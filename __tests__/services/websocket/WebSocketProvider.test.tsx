@@ -305,6 +305,170 @@ describe('WebSocketProvider', () => {
     });
   });
 
+  describe('Heartbeat Monitoring', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('sends heartbeat ping after inactivity', () => {
+      const wrapper = createWrapper({
+        url: 'ws://test',
+        heartbeatInterval: 5000,
+        heartbeatTimeout: 15000,
+      });
+      const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
+        wrapper,
+      });
+
+      act(() => {
+        result.current.connect('token');
+      });
+
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>).mock
+        .results[0].value as MockWebSocket;
+
+      act(() => {
+        ws.triggerOpen();
+      });
+
+      expect(ws.send).not.toHaveBeenCalled();
+
+      act(() => {
+        jest.advanceTimersByTime(5000);
+      });
+
+      expect(ws.send).toHaveBeenCalledWith(
+        JSON.stringify({ type: WsMessageType.PING })
+      );
+    });
+
+    it('closes the socket when heartbeat timeout is exceeded', () => {
+      const wrapper = createWrapper({
+        url: 'ws://test',
+        heartbeatInterval: 5000,
+        heartbeatTimeout: 10000,
+      });
+      const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
+        wrapper,
+      });
+
+      act(() => {
+        result.current.connect('token');
+      });
+
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>).mock
+        .results[0].value as MockWebSocket;
+
+      act(() => {
+        ws.triggerOpen();
+      });
+
+      act(() => {
+        jest.advanceTimersByTime(5000);
+      });
+
+      expect(ws.send).toHaveBeenCalledWith(
+        JSON.stringify({ type: WsMessageType.PING })
+      );
+
+      act(() => {
+        jest.advanceTimersByTime(5000);
+      });
+
+      expect(ws.close).toHaveBeenCalledWith(4000, 'Heartbeat timeout');
+    });
+
+    it('resets inactivity timer when messages arrive', () => {
+      const wrapper = createWrapper({
+        url: 'ws://test',
+        heartbeatInterval: 4000,
+        heartbeatTimeout: 12000,
+      });
+      const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
+        wrapper,
+      });
+
+      act(() => {
+        result.current.connect('token');
+      });
+
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>).mock
+        .results[0].value as MockWebSocket;
+
+      act(() => {
+        ws.triggerOpen();
+      });
+
+      const callback = jest.fn();
+
+      act(() => {
+        result.current.subscribe(WsMessageType.DROP_UPDATE, callback);
+      });
+
+      act(() => {
+        jest.advanceTimersByTime(4000);
+      });
+
+      expect(ws.send).toHaveBeenCalledWith(
+        JSON.stringify({ type: WsMessageType.PING })
+      );
+      ws.send.mockClear();
+
+      act(() => {
+        ws.triggerMessage({ type: WsMessageType.DROP_UPDATE, data: { id: 42 } });
+      });
+
+      expect(callback).toHaveBeenCalledWith({ id: 42 });
+
+      act(() => {
+        jest.advanceTimersByTime(3000);
+      });
+
+      expect(ws.send).not.toHaveBeenCalled();
+
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+
+      expect(ws.send).toHaveBeenCalledWith(
+        JSON.stringify({ type: WsMessageType.PING })
+      );
+      expect(ws.close).not.toHaveBeenCalled();
+    });
+
+    it('responds to server heartbeat pings with pong', () => {
+      const wrapper = createWrapper({ url: 'ws://test' });
+      const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
+        wrapper,
+      });
+
+      act(() => {
+        result.current.connect('token');
+      });
+
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>).mock
+        .results[0].value as MockWebSocket;
+
+      act(() => {
+        ws.triggerOpen();
+      });
+
+      ws.send.mockClear();
+
+      act(() => {
+        ws.triggerMessage({ type: WsMessageType.PING });
+      });
+
+      expect(ws.send).toHaveBeenCalledWith(
+        JSON.stringify({ type: WsMessageType.PONG })
+      );
+    });
+  });
+
   describe('Reconnection Logic - Fail Fast Patterns', () => {
     beforeEach(() => {
       jest.useFakeTimers();
