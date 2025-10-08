@@ -32,7 +32,7 @@ export function CurrentMultiplierCard({
                     Understanding the multiplier
                   </p>
                   <p className="tw-m-0 tw-text-xs tw-text-iron-200">
-                    Fluid xTDH equals your Base TDH rate multiplied by the current
+                    xTDH equals your Base TDH rate multiplied by the current
                     network multiplier.
                   </p>
                   <ul className="tw-m-0 tw-list-disc tw-space-y-1 tw-pl-4 tw-text-xs tw-text-iron-200">
@@ -47,7 +47,7 @@ export function CurrentMultiplierCard({
                     <li>{MULTIPLIER_MILESTONES[1]}</li>
                   </ul>
                   <p className="tw-m-0 tw-text-xs tw-text-iron-200">
-                    Fluid xTDH auto-accrues unless you allocate it elsewhere.
+                    xTDH auto-accrues unless you allocate it elsewhere.
                   </p>
                 </div>
               }
@@ -62,8 +62,8 @@ export function CurrentMultiplierCard({
         </div>
         <div className="tw-max-w-xl tw-space-y-2 tw-text-sm tw-text-primary-100">
           <p className="tw-m-0">
-            This multiplier determines how much Fluid xTDH capacity you have available
-            to allocate. Your Fluid xTDH capacity = Base TDH × Current Multiplier.
+            This multiplier determines how much xTDH capacity you have available
+            to allocate. Your xTDH capacity = Base TDH × Current Multiplier.
           </p>
           <p className="tw-m-0">
             Next increase: {NEXT_MULTIPLIER_EVENT.label} to{" "}

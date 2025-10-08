@@ -109,7 +109,7 @@ export function UserXtdhStatusSection({
       value: formatRateValue(state.baseTdhRate),
       valueSuffix: "/day",
       tooltip:
-        "Your daily Base TDH generation rate (from Memes + Gradients). Fluid xTDH is calculated from this.",
+        "Your daily Base TDH generation rate (from Memes + Gradients). xTDH is calculated from this.",
     },
     {
       label: "Your Allocations",
@@ -141,7 +141,7 @@ export function UserXtdhStatusSection({
           <div className={SECTION_HEADER_CLASS}>
             {title}
             <p className="tw-mt-1 tw-text-sm tw-text-iron-300">
-              Daily Fluid xTDH budget from your Base TDH and multiplier.
+              Daily xTDH budget from your Base TDH and multiplier.
             </p>
           </div>
           <CapacityProgressCard

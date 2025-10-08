@@ -42,7 +42,7 @@ export function NetworkStatsSection({
     {
       label: "Grantors",
       value: formatPlainNumber(stats.grantors),
-      tooltip: "Unique identities allocating their Fluid xTDH to collections.",
+      tooltip: "Unique identities allocating their xTDH to collections.",
     },
   ] as const;
 
@@ -53,7 +53,7 @@ export function NetworkStatsSection({
           <div className={SECTION_HEADER_CLASS}>
             <h2 className="tw-m-0 tw-text-lg tw-font-semibold">Network Stats</h2>
             <p className="tw-m-0 tw-text-sm tw-text-iron-300">
-              Fluid xTDH capacity and allocations across the network.
+              xTDH capacity and allocations across the network.
             </p>
           </div>
           <CapacityProgressCard
