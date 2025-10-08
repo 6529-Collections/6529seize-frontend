@@ -36,7 +36,6 @@ export default function TDHMainPage() {
                   <li>Nakamoto Freedom (Edition Size 300) = 13.136</li>
                   <li>Gradients (Edition Size 101) = 39.020</li>
                 </ul>
-                (Edition Size 300) = 13.136; Gradients (101) = 39.020.
               </li>
               <li>
                 <span className="tw-font-medium">Boosts:</span> we multiply by
