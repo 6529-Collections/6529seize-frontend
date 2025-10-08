@@ -24,6 +24,7 @@ export const DEFAULT_WEBSOCKET_CONFIG = {
     "wss://default-fallback-url",
   reconnectDelay: 2000,
   maxReconnectAttempts: 20,
+  reconnectJitter: 0.2,
 };
 
 /**
