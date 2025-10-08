@@ -38,6 +38,10 @@ const WebLayout = ({ children, isSmall = false }: WebLayoutProps) => {
     } as LayoutCssVars;
   }, [isMobile, isNarrow, sidebarWidth]);
 
+  const collapsedWidth = SIDEBAR_WIDTHS.COLLAPSED;
+  const expandedWidth = SIDEBAR_WIDTHS.EXPANDED;
+  const narrowTranslateX = `translateX(calc(${expandedWidth} - ${collapsedWidth}))`;
+
   const mainStyle: CSSProperties = (() => {
     if (isMobile) {
       // On mobile, shift content only when off-canvas is open
@@ -45,22 +49,17 @@ const WebLayout = ({ children, isSmall = false }: WebLayoutProps) => {
       return {};
     }
     if (isNarrow) {
-      const collapsed = SIDEBAR_WIDTHS.COLLAPSED;
-      const expanded = SIDEBAR_WIDTHS.EXPANDED;
-
-      if (isOffcanvasMode) {
-        return {
-          paddingLeft: isOffcanvasOpen ? expanded : collapsed,
-        };
-      }
-
       return {
-        paddingLeft: isCollapsed ? collapsed : expanded,
+        paddingLeft: collapsedWidth,
+        transform: isOffcanvasOpen ? narrowTranslateX : "translateX(0)",
       };
     }
     // Wide desktop: honor user preference (expanded/collapsed)
     return { paddingLeft: sidebarWidth };
   })();
+
+  const shouldDimContent =
+    isOffcanvasOpen && (isMobile || (!isMobile && isNarrow));
 
   return (
     <div
@@ -81,7 +80,7 @@ const WebLayout = ({ children, isSmall = false }: WebLayoutProps) => {
       </div>
       <main
         className={`tw-flex-1 tw-min-w-0 tw-transition-all tw-duration-300 tw-ease-out ${
-          isMobile && isOffcanvasOpen
+          shouldDimContent
             ? "tw-opacity-40 tw-pointer-events-none"
             : ""
         }`}

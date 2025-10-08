@@ -12,9 +12,11 @@ export const getHomeFeedRoute = (): string => "/?tab=feed";
 
 export const getHomeRoute = (_isApp: boolean): string => "/";
 
-export const getWavesBaseRoute = (_isApp: boolean): string => "/waves";
+export const getWavesBaseRoute = (isApp: boolean): string =>
+  isApp ? "/?view=waves" : "/waves";
 
-export const getMessagesBaseRoute = (_isApp: boolean): string => "/messages";
+export const getMessagesBaseRoute = (isApp: boolean): string =>
+  isApp ? "/?view=messages" : "/messages";
 
 export const getNotificationsRoute = (_isApp: boolean): string => "/notifications";
 
@@ -75,5 +77,7 @@ export const getWaveHomeRoute = ({
   isDirectMessage: boolean;
   isApp: boolean;
 }): string => {
-  return isDirectMessage ? "/messages" : "/waves";
+  return isDirectMessage
+    ? getMessagesBaseRoute(isApp)
+    : getWavesBaseRoute(isApp);
 };

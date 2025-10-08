@@ -51,7 +51,7 @@ function WebSidebar({
 
   // Close sidebar on route change when on mobile
   const prevPathnameRef = useRef(pathname);
-  const isOverlayActive = isNarrow && isMobile && isOffcanvasOpen;
+  const isOverlayActive = isOffcanvasOpen && (isMobile || isNarrow);
 
   useEffect(() => {
     if (prevPathnameRef.current !== pathname) {
@@ -145,7 +145,7 @@ function WebSidebar({
       <div className="tw-fixed tw-inset-y-0 tw-left-0 focus:tw-outline-none tw-z-40">
         {sidebarContent}
       </div>
-      {isOverlayActive && (
+      {!isMobile && isOverlayActive && (
         <button
           type="button"
           className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-30 tw-border-0 focus:tw-outline-none"

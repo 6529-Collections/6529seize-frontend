@@ -10,6 +10,8 @@ import CreateDirectMessage from "./create-dm/CreateDirectMessage";
 import CreateWave from "./create-wave/CreateWave";
 import WavesList from "./list/WavesList";
 import ConnectWallet from "@/components/common/ConnectWallet";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getWavesBaseRoute } from "@/helpers/navigation.helpers";
 
 enum WavesViewMode {
   CREATE = "CREATE",
@@ -28,6 +30,7 @@ export const CREATE_DIRECT_MESSAGE_SEARCH_PATH = `${WAVES_PATH}?${CREATE_SEARCH_
 export default function Waves() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { isApp } = useDeviceInfo();
 
   useSetTitle("Waves | Brain");
 
@@ -57,11 +60,13 @@ export default function Waves() {
   const onViewModeChange = (mode: WavesViewMode) => {
     if (mode === WavesViewMode.CREATE) {
       router.push(CREATE_WAVE_SEARCH_PATH);
-    } else if (mode === WavesViewMode.CREATE_DM) {
-      router.push(CREATE_DIRECT_MESSAGE_SEARCH_PATH);
-    } else {
-      router.push(WAVES_PATH);
+      return;
     }
+    if (mode === WavesViewMode.CREATE_DM) {
+      router.push(CREATE_DIRECT_MESSAGE_SEARCH_PATH);
+      return;
+    }
+    router.push(getWavesBaseRoute(isApp));
   };
 
   const returnPlaceholder = (content: JSX.Element) => {
