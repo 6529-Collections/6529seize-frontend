@@ -861,20 +861,46 @@ export function getOverviewStats(): XtdhOverviewStats {
   const totalBaseTdhRate =
     currentMultiplier > 0 ? totalXtdhRate / currentMultiplier : 0;
 
+  const totalAvailableCapacity = Math.max(totalXtdhRate - totalXtdhAllocated, 0);
+
+  const totalNetworkXtdh = ECOSYSTEM_TOKENS.reduce((sum, token) => {
+    const tokenTotal = token.holderSummaries.reduce(
+      (holderSum, holder) => holderSum + holder.xtdhEarned,
+      0
+    );
+    return sum + tokenTotal;
+  }, 0);
+
+  const multiplierNextValue = 0.12;
+  const multiplierNextIncreaseDate = "in 30 days";
+  const multiplierMilestones = [
+    { percentage: 30, timeframe: "36 months" },
+    { percentage: 100, timeframe: "120 months" },
+  ] as const;
+
   const lastUpdatedAt = ECOSYSTEM_TOKENS.reduce((latest, token) => {
     const current = new Date(token.lastAllocatedAt).getTime();
     return current > latest ? current : latest;
   }, 0);
 
   return {
-    totalCollections,
-    totalGrantors,
-    totalTokens,
-    totalXtdhAllocated,
-    totalXtdhRate,
-    totalActiveAllocations,
-    currentMultiplier,
-    totalBaseTdhRate,
+    network: {
+      totalDailyCapacity: totalXtdhRate,
+      totalAllocated: totalXtdhAllocated,
+      totalAvailable: totalAvailableCapacity,
+      baseTdhRate: totalBaseTdhRate,
+      activeAllocations: totalActiveAllocations,
+      grantors: totalGrantors,
+      collections: totalCollections,
+      tokens: totalTokens,
+      totalXtdh: totalNetworkXtdh,
+    },
+    multiplier: {
+      current: currentMultiplier,
+      nextValue: multiplierNextValue,
+      nextIncreaseDate: multiplierNextIncreaseDate,
+      milestones: multiplierMilestones,
+    },
     lastUpdatedAt: new Date(lastUpdatedAt).toISOString(),
   };
 }

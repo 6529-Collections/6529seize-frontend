@@ -32,9 +32,9 @@ export default function UserPageXtdhStatsHeader({
     );
   }
 
-  const xtdhRate = data.baseTdhRate * data.multiplier;
+  const xtdhRate = data.dailyCapacity;
   const xtdhRateGranted = data.xtdhRateGranted;
-  const xtdhRateAvailable = Math.max(xtdhRate - xtdhRateGranted, 0);
+  const xtdhRateAvailable = Math.max(data.xtdhRateAutoAccruing, 0);
   const grantingPercentage = xtdhRate > 0 ? (xtdhRateGranted / xtdhRate) * 100 : 0;
   const clampedPercentage = Math.min(Math.max(grantingPercentage, 0), 100);
 

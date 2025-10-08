@@ -58,14 +58,23 @@ describe("xTDH API routes", () => {
     await getStats();
     expect(jsonMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        totalCollections: expect.any(Number),
-        totalGrantors: expect.any(Number),
-        totalTokens: expect.any(Number),
-        totalXtdhAllocated: expect.any(Number),
-        totalXtdhRate: expect.any(Number),
-        totalActiveAllocations: expect.any(Number),
-        currentMultiplier: expect.any(Number),
-        totalBaseTdhRate: expect.any(Number),
+        network: expect.objectContaining({
+          totalDailyCapacity: expect.any(Number),
+          totalAllocated: expect.any(Number),
+          totalAvailable: expect.any(Number),
+          baseTdhRate: expect.any(Number),
+          activeAllocations: expect.any(Number),
+          grantors: expect.any(Number),
+          collections: expect.any(Number),
+          tokens: expect.any(Number),
+          totalXtdh: expect.any(Number),
+        }),
+        multiplier: expect.objectContaining({
+          current: expect.any(Number),
+          nextValue: expect.any(Number),
+          nextIncreaseDate: expect.any(String),
+          milestones: expect.any(Array),
+        }),
       })
     );
   });

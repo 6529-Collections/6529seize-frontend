@@ -1,15 +1,22 @@
+import { classNames } from "@/helpers/Helpers";
 import { InfoTooltip } from "./InfoTooltip";
 import type { StatsMetric } from "./types";
 
 interface StatsMetricsGridProps {
   readonly metrics: ReadonlyArray<StatsMetric>;
+  readonly className?: string;
 }
 
 export function StatsMetricsGrid({
   metrics,
+  className,
 }: Readonly<StatsMetricsGridProps>) {
+  const gridClassName = className
+    ? classNames("tw-grid tw-gap-3 sm:tw-grid-cols-2", className)
+    : "tw-grid tw-gap-3 sm:tw-grid-cols-2";
+
   return (
-    <div className="tw-grid tw-gap-3 sm:tw-grid-cols-2">
+    <div className={gridClassName}>
       {metrics.map((metric) => (
         <MetricTile key={metric.label} metric={metric} />
       ))}

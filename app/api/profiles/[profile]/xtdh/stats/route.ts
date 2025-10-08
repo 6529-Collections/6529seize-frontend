@@ -67,37 +67,43 @@ export async function GET(
     mockData = {
       baseTdhRate: 12_212,
       multiplier: 0.1,
+      dailyCapacity: 1_221,
       xtdhRateGranted: 0,
+      xtdhRateAutoAccruing: 1_221,
       xtdhRateReceived: 3_389,
       totalXtdhReceived: 3_389,
+      totalXtdhGranted: 18_540,
       allocationsCount: 0,
       collectionsAllocatedCount: 0,
       tokensAllocatedCount: 0,
-      receivingCollectionsCount: 4,
     };
   } else if (normalizedProfile === "test1234") {
     mockData = {
       baseTdhRate: 1_000,
       multiplier: 0.1,
+      dailyCapacity: 100,
       xtdhRateGranted: 80,
+      xtdhRateAutoAccruing: 20,
       xtdhRateReceived: 45,
       totalXtdhReceived: 12_450,
+      totalXtdhGranted: 9_875,
       allocationsCount: 2,
       collectionsAllocatedCount: 2,
       tokensAllocatedCount: 5,
-      receivingCollectionsCount: 1,
     };
   } else {
     mockData = {
       baseTdhRate: 0,
       multiplier: 0.1,
+      dailyCapacity: 0,
       xtdhRateGranted: 0,
+      xtdhRateAutoAccruing: 0,
       xtdhRateReceived: 0,
       totalXtdhReceived: 0,
+      totalXtdhGranted: 0,
       allocationsCount: 0,
       collectionsAllocatedCount: 0,
       tokensAllocatedCount: 0,
-      receivingCollectionsCount: 0,
     };
   }
 

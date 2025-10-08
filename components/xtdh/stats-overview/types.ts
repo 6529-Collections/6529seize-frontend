@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { XtdhMultiplierMilestone } from "@/types/xtdh";
 
 export type UserSectionState =
   | { kind: "loading" }
@@ -9,15 +10,23 @@ export type UserSectionState =
       kind: "ready";
       baseTdhRate: number;
       multiplier: number;
-      allocatedRate: number;
+      dailyCapacity: number;
+      allocatedDaily: number;
+      autoAccruingDaily: number;
       allocationsCount: number;
       collectionsAllocatedCount: number;
       tokensAllocatedCount: number;
-      receivingCollectionsCount: number;
+      totalXtdhReceived: number;
+      totalXtdhGranted: number;
     };
 
 export interface NetworkStats {
-  readonly multiplier: number;
+  readonly multiplier: {
+    readonly current: number;
+    readonly nextValue: number;
+    readonly nextIncreaseDate: string;
+    readonly milestones: readonly XtdhMultiplierMilestone[];
+  };
   readonly baseTdhRate: number;
   readonly totalCapacity: number;
   readonly allocatedCapacity: number;
@@ -27,6 +36,7 @@ export interface NetworkStats {
   readonly grantors: number;
   readonly collections: number;
   readonly tokens: number;
+  readonly totalXtdh: number;
 }
 
 export interface StatsMetric {

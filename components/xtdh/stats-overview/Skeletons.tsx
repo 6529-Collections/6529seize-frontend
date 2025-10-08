@@ -29,7 +29,7 @@ export function NetworkStatsSkeleton() {
         <div className="tw-h-6 tw-w-full tw-rounded tw-bg-iron-800" />
       </div>
       <div className="tw-grid tw-gap-3 sm:tw-grid-cols-2">
-        {Array.from({ length: 5 }).map((_, index) => (
+        {Array.from({ length: 6 }).map((_, index) => (
           <div
             key={index}
             className="tw-space-y-2 tw-rounded-lg tw-bg-iron-950 tw-p-4"
@@ -53,6 +53,11 @@ export function UserStatusSkeleton() {
       <div className="tw-h-20 tw-rounded-xl tw-bg-iron-800" />
       <div className="tw-grid tw-gap-3 sm:tw-grid-cols-2">
         {Array.from({ length: 5 }).map((_, index) => (
+          <div key={index} className="tw-h-16 tw-rounded-lg tw-bg-iron-800" />
+        ))}
+      </div>
+      <div className="tw-grid tw-gap-3 sm:tw-grid-cols-2">
+        {Array.from({ length: 2 }).map((_, index) => (
           <div key={index} className="tw-h-16 tw-rounded-lg tw-bg-iron-800" />
         ))}
       </div>

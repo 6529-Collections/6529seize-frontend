@@ -27,7 +27,7 @@ export function NetworkStatsSection({
       label: "Active Allocations",
       value: formatPlainNumber(stats.activeAllocations),
       tooltip:
-        "Total number of individual xTDH allocations active in the ecosystem.",
+        "Total number of active allocation grants across the network.",
     },
     {
       label: "Collections",
@@ -37,12 +37,12 @@ export function NetworkStatsSection({
     {
       label: "Tokens",
       value: formatPlainNumber(stats.tokens),
-      tooltip: "Individual tokens/NFTs receiving xTDH.",
+      tooltip: "Individual tokens receiving xTDH allocations.",
     },
     {
       label: "Grantors",
       value: formatPlainNumber(stats.grantors),
-      tooltip: "Unique identities allocating their xTDH to collections.",
+      tooltip: "Unique identities actively granting xTDH to collections or tokens.",
     },
   ] as const;
 
@@ -52,12 +52,12 @@ export function NetworkStatsSection({
         <div className="tw-flex-1 tw-space-y-6">
           <div className={SECTION_HEADER_CLASS}>
             <h2 className="tw-m-0 tw-text-lg tw-font-semibold">Network Stats</h2>
-            <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+            <p className="tw-mt-1 tw-text-sm tw-text-iron-300">
               xTDH capacity and allocations across the network.
             </p>
           </div>
           <CapacityProgressCard
-            title="Total Daily xTDH Capacity"
+            title="TOTAL DAILY XTDH CAPACITY"
             total={stats.totalCapacity}
             allocated={stats.allocatedCapacity}
             reserved={stats.availableCapacity}
@@ -66,7 +66,15 @@ export function NetworkStatsSection({
             percentLabel={formatPercentLabel(stats.percentAllocated, "Allocated")}
             variant="network"
           />
-          <StatsMetricsGrid metrics={metrics} />
+          <StatsMetricsGrid metrics={[
+            ...metrics,
+            {
+              label: "Total xTDH",
+              value: formatPlainNumber(stats.totalXtdh),
+              tooltip:
+                "Total xTDH that has been generated across the entire network (zero-sum: total accrued equals total granted).",
+            },
+          ]} />
         </div>
       </div>
     </section>

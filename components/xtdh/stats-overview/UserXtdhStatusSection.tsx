@@ -1,10 +1,7 @@
-import { useId } from "react";
 import Link from "next/link";
-import { Tooltip } from "react-tooltip";
 
 import { CapacityProgressCard } from "./CapacityProgressCard";
 import {
-  INFO_TOOLTIP_STYLE,
   OVERVIEW_CARD_CLASS,
   SECTION_HEADER_CLASS,
 } from "./constants";
@@ -99,11 +96,12 @@ export function UserXtdhStatusSection({
     return <UserStatusSkeleton />;
   }
 
-  const capacity = Math.max(state.baseTdhRate * state.multiplier, 0);
-  const allocated = clampToRange(state.allocatedRate, 0, capacity);
-  const autoAccruing = Math.max(capacity - allocated, 0);
+  const capacity = Math.max(state.dailyCapacity, 0);
+  const allocated = clampToRange(state.allocatedDaily, 0, capacity);
+  const autoAccruing = clampToRange(state.autoAccruingDaily, 0, capacity);
   const percentAllocated = calculatePercentage(allocated, capacity);
-  const metrics = [
+
+  const primaryMetrics = [
     {
       label: "Base TDH Rate",
       value: formatRateValue(state.baseTdhRate),
@@ -126,11 +124,18 @@ export function UserXtdhStatusSection({
       value: formatPlainNumber(state.tokensAllocatedCount),
       tooltip: "Individual tokens you have allocated xTDH to.",
     },
+  ] as const;
+  const secondaryMetrics = [
     {
-      label: "Receiving Collections",
-      value: formatPlainNumber(state.receivingCollectionsCount),
+      label: "Your xTDH Accrued",
+      value: formatPlainNumber(state.totalXtdhReceived),
       tooltip:
-        "Collections allocating xTDH to NFTs you hold. This shows where you benefit from others' allocations.",
+        "Total xTDH you've earned through auto-accrual and from collections allocating to your NFTs.",
+    },
+    {
+      label: "Your xTDH Granted",
+      value: formatPlainNumber(state.totalXtdhGranted),
+      tooltip: "Total xTDH you've given out through your allocations.",
     },
   ] as const;
 
@@ -145,7 +150,7 @@ export function UserXtdhStatusSection({
             </p>
           </div>
           <CapacityProgressCard
-            title="Your Daily xTDH Capacity"
+            title="YOUR DAILY XTDH CAPACITY"
             total={capacity}
             allocated={allocated}
             reserved={autoAccruing}
@@ -154,41 +159,10 @@ export function UserXtdhStatusSection({
             percentLabel={formatPercentLabel(percentAllocated, "Allocated")}
             variant="user"
           />
-          <StatsMetricsGrid metrics={metrics} />
+          <StatsMetricsGrid metrics={primaryMetrics} />
+          <StatsMetricsGrid metrics={secondaryMetrics} className="tw-mt-2" />
         </div>
-        <AllocateButton
-          disabled={autoAccruing <= 0}
-          tooltip="You have no available xTDH to allocate"
-        />
       </div>
     </section>
-  );
-}
-
-function AllocateButton({
-  disabled,
-  tooltip,
-}: {
-  readonly disabled: boolean;
-  readonly tooltip?: string;
-}) {
-  const tooltipId = useId().replace(/:/g, "");
-  return (
-    <div className="tw-mt-6 tw-flex tw-justify-end">
-      <button
-        type="button"
-        className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-primary-500 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-50 tw-transition hover:tw-bg-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-0 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
-        disabled={disabled}
-        data-tooltip-id={disabled && tooltip ? tooltipId : undefined}
-        data-tooltip-place="top"
-      >
-        Allocate xTDH
-      </button>
-      {disabled && tooltip ? (
-        <Tooltip id={tooltipId} style={INFO_TOOLTIP_STYLE}>
-          {tooltip}
-        </Tooltip>
-      ) : null}
-    </div>
   );
 }

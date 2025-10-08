@@ -1,16 +1,21 @@
 import { InfoTooltip } from "./InfoTooltip";
-import { MULTIPLIER_MILESTONES, NEXT_MULTIPLIER_EVENT } from "./constants";
+import type { NetworkStats } from "./types";
 import { formatMultiplierDisplay } from "./utils";
 
 interface CurrentMultiplierCardProps {
-  readonly multiplier: number;
+  readonly multiplier: NetworkStats["multiplier"];
 }
 
 export function CurrentMultiplierCard({
   multiplier,
 }: Readonly<CurrentMultiplierCardProps>) {
-  const multiplierDisplay = formatMultiplierDisplay(multiplier);
-  const percentDisplay = `${Math.round(multiplier * 100)}% of Base TDH`;
+  const multiplierDisplay = formatMultiplierDisplay(multiplier.current);
+  const percentDisplay = `${Math.round(multiplier.current * 100)}% of Base TDH`;
+  const nextMultiplierDisplay = formatMultiplierDisplay(multiplier.nextValue);
+
+  const milestoneSummary = multiplier.milestones
+    .map((milestone) => `${milestone.percentage}% multiplier in ${milestone.timeframe}`)
+    .join(" • ");
 
   return (
     <section
@@ -40,11 +45,13 @@ export function CurrentMultiplierCard({
                       Current: {multiplierDisplay} ({percentDisplay})
                     </li>
                     <li>
-                      {NEXT_MULTIPLIER_EVENT.label}:{" "}
-                      {formatMultiplierDisplay(NEXT_MULTIPLIER_EVENT.value)}
+                      Next increase: {multiplier.nextIncreaseDate} to {nextMultiplierDisplay}
                     </li>
-                    <li>{MULTIPLIER_MILESTONES[0]}</li>
-                    <li>{MULTIPLIER_MILESTONES[1]}</li>
+                    {multiplier.milestones.map((milestone) => (
+                      <li key={`${milestone.percentage}-${milestone.timeframe}`}>
+                        {milestone.percentage}% multiplier in {milestone.timeframe}
+                      </li>
+                    ))}
                   </ul>
                   <p className="tw-m-0 tw-text-xs tw-text-iron-200">
                     xTDH auto-accrues unless you allocate it elsewhere.
@@ -66,12 +73,13 @@ export function CurrentMultiplierCard({
             to allocate. Your xTDH capacity = Base TDH × Current Multiplier.
           </p>
           <p className="tw-m-0">
-            Next increase: {NEXT_MULTIPLIER_EVENT.label} to{" "}
-            {formatMultiplierDisplay(NEXT_MULTIPLIER_EVENT.value)}.
+            Next increase: {multiplier.nextIncreaseDate} to {nextMultiplierDisplay}.
           </p>
-          <p className="tw-m-0 tw-text-primary-200">
-            Long-term milestones: {MULTIPLIER_MILESTONES[0]} • {MULTIPLIER_MILESTONES[1]}
-          </p>
+          {milestoneSummary ? (
+            <p className="tw-m-0 tw-text-primary-200">
+              Long-term milestones: {milestoneSummary}
+            </p>
+          ) : null}
         </div>
       </div>
     </section>

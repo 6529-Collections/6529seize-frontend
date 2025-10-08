@@ -1,13 +1,15 @@
 export interface XtdhStatsResponse {
   readonly baseTdhRate: number;
   readonly multiplier: number;
+  readonly dailyCapacity: number;
   readonly xtdhRateGranted: number;
+  readonly xtdhRateAutoAccruing: number;
   readonly xtdhRateReceived: number;
   readonly totalXtdhReceived: number;
+  readonly totalXtdhGranted: number;
   readonly allocationsCount: number;
   readonly collectionsAllocatedCount: number;
   readonly tokensAllocatedCount: number;
-  readonly receivingCollectionsCount: number;
 }
 
 export interface XtdhStatsError {
@@ -160,13 +162,27 @@ export interface XtdhEcosystemTokensResponse {
 }
 
 export interface XtdhOverviewStats {
-  readonly totalCollections: number;
-  readonly totalGrantors: number;
-  readonly totalTokens: number;
-  readonly totalXtdhAllocated: number;
-  readonly totalXtdhRate: number;
-  readonly totalActiveAllocations: number;
-  readonly currentMultiplier: number;
-  readonly totalBaseTdhRate: number;
+  readonly network: {
+    readonly totalDailyCapacity: number;
+    readonly totalAllocated: number;
+    readonly totalAvailable: number;
+    readonly baseTdhRate: number;
+    readonly activeAllocations: number;
+    readonly grantors: number;
+    readonly collections: number;
+    readonly tokens: number;
+    readonly totalXtdh: number;
+  };
+  readonly multiplier: {
+    readonly current: number;
+    readonly nextValue: number;
+    readonly nextIncreaseDate: string;
+    readonly milestones: readonly XtdhMultiplierMilestone[];
+  };
   readonly lastUpdatedAt: string;
+}
+
+export interface XtdhMultiplierMilestone {
+  readonly percentage: number;
+  readonly timeframe: string;
 }

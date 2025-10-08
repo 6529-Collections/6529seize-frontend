@@ -1,15 +1,5 @@
 import type { CSSProperties } from "react";
 
-export const NEXT_MULTIPLIER_EVENT = {
-  label: "Next increase in 30 days",
-  value: 0.12,
-};
-
-export const MULTIPLIER_MILESTONES = [
-  "30% multiplier in 36 months",
-  "100% multiplier in 120 months",
-] as const;
-
 export const INFO_TOOLTIP_STYLE: CSSProperties = {
   backgroundColor: "#111827",
   color: "#F9FAFB",
