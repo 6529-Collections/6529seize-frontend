@@ -7,7 +7,6 @@ import { Col, Container, Row } from "react-bootstrap";
 const NAV_LINKS = [
   { href: "/network/tdh", label: "TDH" },
   { href: "/network/tdh/historic-boosts", label: "TDH Historic Boosts" },
-  { href: "/network/definitions", label: "Definitions" },
   { href: "/network/stats", label: "Network Stats" },
   { href: "/network/levels", label: "Levels" },
 ] as const;
