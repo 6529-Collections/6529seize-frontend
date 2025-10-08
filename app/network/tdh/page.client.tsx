@@ -111,7 +111,7 @@ export default function TDHMainPage() {
                 </ul>
               </div>
               <p className="tw-mt-3">
-                Maximum theoretical Category A boost (infinite sets):
+                Maximum theoretical Category A boost (infinite sets):{" "}
                 <span className="tw-font-mono">
                   {"0.60 + 0.05 / (1 - 0.6529) = 0.744051"}
                 </span>
