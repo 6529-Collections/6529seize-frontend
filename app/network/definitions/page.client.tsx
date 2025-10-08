@@ -4,6 +4,14 @@ import { useSetTitle } from "@/contexts/TitleContext";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
 
+const NAV_LINKS = [
+  { href: "/network/tdh", label: "TDH" },
+  { href: "/network/tdh/historic-boosts", label: "TDH Historic Boosts" },
+  { href: "/network/definitions", label: "Definitions" },
+  { href: "/network/stats", label: "Network Stats" },
+  { href: "/network/levels", label: "Levels" },
+] as const;
+
 export default function DefinitionsClient() {
   useSetTitle("Definitions | Network");
 
@@ -90,26 +98,14 @@ export default function DefinitionsClient() {
           </div>
 
           <div className="tw-mt-10 tw-flex tw-flex-wrap tw-gap-3">
-            <Link
-              href="/network/tdh"
-              className="tw-flex-1 tw-min-w-[150px] tw-text-center tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-font-medium tw-border tw-border-[#555] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-4 tw-py-2 tw-no-underline">
-              TDH
-            </Link>
-            <Link
-              href="/network/tdh/history"
-              className="tw-flex-1 tw-min-w-[150px] tw-text-center tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-font-medium tw-border tw-border-[#555] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-4 tw-py-2 tw-no-underline">
-              TDH History
-            </Link>
-            <Link
-              href="/network/stats"
-              className="tw-flex-1 tw-min-w-[150px] tw-text-center tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-font-medium tw-border tw-border-[#555] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-4 tw-py-2 tw-no-underline">
-              Network Stats
-            </Link>
-            <Link
-              href="/network/levels"
-              className="tw-flex-1 tw-min-w-[150px] tw-text-center tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-font-medium tw-border tw-border-[#555] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-4 tw-py-2 tw-no-underline">
-              Levels
-            </Link>
+            {NAV_LINKS.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                className="tw-flex-1 tw-min-w-[150px] tw-text-center tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-font-medium tw-border tw-border-[#555] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-4 tw-py-2 tw-no-underline">
+                {label}
+              </Link>
+            ))}
           </div>
         </Col>
       </Row>
