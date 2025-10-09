@@ -12,7 +12,7 @@ const NAV_LINKS = [
 ] as const;
 
 const BUTTON_LINK_CLASSES =
-  "tw-flex-1 tw-min-w-[150px] tw-text-center tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-font-medium hover:tw-bg-[#ddd] hover:tw-text-black tw-border-solid tw-border-[#222] tw-px-4 tw-py-2 tw-no-underline";
+  "tw-flex-1 tw-min-w-[150px] tw-text-center tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-font-medium hover:tw-bg-[#ddd] hover:tw-text-black tw-border-solid tw-border-[#222] tw-px-4 tw-py-2 tw-no-underline tw-w-full sm:tw-w-auto sm:tw-whitespace-nowrap";
 
 export default function DefinitionsClient() {
   useSetTitle("Definitions | Network");
@@ -23,7 +23,7 @@ export default function DefinitionsClient() {
         <Col>
           <h1>Definitions</h1>
 
-          <div className="tw-mt-6 tw-space-y-3 tw-text-lg">
+          <div className="tw-mt-6 tw-space-y-3 tw-text-base lg:tw-text-lg">
             <p>
               <b>
                 <u>Cards Collected:</u>
@@ -99,7 +99,7 @@ export default function DefinitionsClient() {
             </p>
           </div>
 
-          <div className="tw-mt-10 tw-flex tw-flex-wrap tw-gap-3">
+          <div className="tw-mt-10 tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-flex-wrap sm:tw-gap-3">
             {NAV_LINKS.map(({ href, label }) => (
               <Link key={href} href={href} className={BUTTON_LINK_CLASSES}>
                 {label}
