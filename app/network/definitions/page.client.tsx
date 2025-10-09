@@ -92,7 +92,7 @@ export default function DefinitionsClient() {
               TDH (unboosted) &times; boosters. For the current rules, see{" "}
               <Link
                 href="/network/tdh"
-                className="tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-border-solid tw-border-[#555] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-1 tw-py-0.5 tw-no-underline">
+                className="tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-border-solid tw-border-[#555] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-1 tw-py-0.5 tw-no-underline tw-text-md tw-font-medium">
                 TDH
               </Link>
               .
