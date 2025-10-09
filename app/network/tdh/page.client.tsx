@@ -53,7 +53,7 @@ export default function TDHMainPage() {
           <div
             id="tdh-1-4"
             className="tw-mt-10 tw-rounded-lg tw-bg-[#0c0c0d] tw-border-1 tw-border-solid tw-border-[#222] tw-p-6">
-            <h3>TDH 1.4 (October 8, 2025 — present)</h3>
+            <h3>TDH 1.4 (October 10, 2025 — present)</h3>
             <p className="tw-mt-4">
               Higher of <b>Category A</b> and <b>Category B</b> boosters, plus{" "}
               <b>Category C</b> boosters.
