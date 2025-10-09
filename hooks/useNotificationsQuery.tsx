@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { commonApiFetch } from "@/services/api/common-api";
 import {
@@ -79,7 +79,7 @@ export function useNotificationsQuery({
   limit = "30",
   cause = null,
 }: UseNotificationsQueryProps) {
-  const queryClient = useQueryClient();
+  const prefetch = usePrefetchNotifications();
 
   /**
    * OPTIONAL: Prefetch the first few pages of notifications.
@@ -90,16 +90,8 @@ export function useNotificationsQuery({
       return;
     }
 
-    queryClient.prefetchInfiniteQuery({
-      queryKey: getIdentityNotificationsQueryKey(identity, limit, cause),
-      queryFn: ({ pageParam }: { pageParam?: number | null }) =>
-        fetchNotifications({ limit, cause, pageParam }),
-      initialPageParam: null,
-      getNextPageParam: (lastPage) => lastPage.notifications.at(-1)?.id ?? null,
-      pages: 3,
-      staleTime: 60000,
-    });
-  }, [queryClient, identity, activeProfileProxy, limit, cause]);
+    prefetch({ identity, limit, cause });
+  }, [prefetch, identity, activeProfileProxy, limit, cause]);
 
   /**
    * Now the actual Infinite Query for notifications
@@ -116,7 +108,7 @@ export function useNotificationsQuery({
 
   const items = useMemo(() => {
     if (!query.data) {
-      return [] as TypedNotification[];
+      return [];
     }
 
     const data = (
@@ -139,26 +131,30 @@ export function useNotificationsQuery({
 export function usePrefetchNotifications() {
   const queryClient = useQueryClient();
 
-  return ({
-    identity,
-    cause = null,
-    limit = "30",
-  }: {
-    identity: string | null;
-    cause?: ApiNotificationCause[] | null;
-    limit?: string;
-  }) => {
-    if (!identity) {
-      return;
-    }
-    queryClient.prefetchInfiniteQuery({
-      queryKey: getIdentityNotificationsQueryKey(identity, limit, cause),
-      queryFn: ({ pageParam }: { pageParam?: number | null }) =>
-        fetchNotifications({ limit, cause, pageParam }),
-      initialPageParam: null,
-      getNextPageParam: (lastPage) => lastPage.notifications.at(-1)?.id ?? null,
-      pages: 3,
-      staleTime: 60000,
-    });
-  };
+  return useCallback(
+    ({
+      identity,
+      cause = null,
+      limit = "30",
+    }: {
+      identity: string | null;
+      cause?: ApiNotificationCause[] | null;
+      limit?: string;
+    }) => {
+      if (!identity) {
+        return;
+      }
+      queryClient.prefetchInfiniteQuery({
+        queryKey: getIdentityNotificationsQueryKey(identity, limit, cause),
+        queryFn: ({ pageParam }: { pageParam?: number | null }) =>
+          fetchNotifications({ limit, cause, pageParam }),
+        initialPageParam: null,
+        getNextPageParam: (lastPage) =>
+          lastPage.notifications.at(-1)?.id ?? null,
+        pages: 3,
+        staleTime: 60000,
+      });
+    },
+    [queryClient]
+  );
 }
