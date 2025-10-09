@@ -1,13 +1,8 @@
 import { getAppMetadata } from "@/components/providers/metadata";
-import styles from "@/styles/Home.module.scss";
 import TDHHistoricBoostsPage from "./page.client";
 
 export default function TDHHistory() {
-  return (
-    <main className={styles.main}>
-      <TDHHistoricBoostsPage />
-    </main>
-  );
+  return <TDHHistoricBoostsPage />;
 }
 
 export const generateMetadata = async () => {

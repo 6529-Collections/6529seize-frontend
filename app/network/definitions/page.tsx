@@ -1,13 +1,8 @@
 import { getAppMetadata } from "@/components/providers/metadata";
-import styles from "@/styles/Home.module.scss";
 import DefinitionsClient from "./page.client";
 
 export default function Definitions() {
-  return (
-    <main className={styles.main}>
-      <DefinitionsClient />
-    </main>
-  );
+  return <DefinitionsClient />;
 }
 
 export const generateMetadata = async () => {
