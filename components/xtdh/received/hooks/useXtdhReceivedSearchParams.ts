@@ -2,20 +2,20 @@
 
 import { useCallback } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { UpdateParamsHandler } from "./useUserPageXtdhReceivedFilters";
+import type { UpdateXtdhReceivedParamsHandler } from "./useXtdhReceivedFilters";
 
 /**
  * Centralises reading & writing URL search params while preventing scroll jumps.
  */
-export function useUserPageXtdhReceivedSearchParams(): {
+export function useXtdhReceivedSearchParams(): {
   readonly searchParams: ReturnType<typeof useSearchParams>;
-  readonly handleUpdateParams: UpdateParamsHandler;
+  readonly handleUpdateParams: UpdateXtdhReceivedParamsHandler;
 } {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
-  const handleUpdateParams = useCallback<UpdateParamsHandler>(
+  const handleUpdateParams = useCallback<UpdateXtdhReceivedParamsHandler>(
     (updater) => {
       if (!pathname) return;
       const params = new URLSearchParams(searchParams?.toString() ?? "");

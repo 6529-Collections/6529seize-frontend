@@ -10,44 +10,49 @@ export const COLLECTION_QUERY_PARAM = "collection";
 export const MIN_RATE_QUERY_PARAM = "min_rate";
 export const MIN_GRANTORS_QUERY_PARAM = "min_grantors";
 
-export type ReceivedView = "collections" | "nfts";
+export type XtdhReceivedView = "collections" | "nfts";
 
-export const VIEW_ORDER: ReceivedView[] = ["collections", "nfts"];
+export const XTDH_RECEIVED_VIEW_ORDER: XtdhReceivedView[] = ["collections", "nfts"];
 
-export const VIEW_LABELS: Record<ReceivedView, string> = {
+export const XTDH_RECEIVED_VIEW_LABELS: Record<XtdhReceivedView, string> = {
   collections: "Collections",
   nfts: "NFTs",
 };
 
-export const VIEW_ICONS: Record<ReceivedView, IconDefinition> = {
+export const XTDH_RECEIVED_VIEW_ICONS: Record<XtdhReceivedView, IconDefinition> = {
   collections: faTableCellsLarge,
   nfts: faList,
 };
 
-export type CollectionsSortField =
+export type XtdhCollectionsSortField =
   | "total_rate"
   | "total_received"
   | "token_count"
   | "collection_name";
 
-export type NftSortField =
+export type XtdhNftSortField =
   | "xtdh_rate"
   | "total_received"
   | "token_id"
   | "collection_name";
 
-export const DEFAULT_COLLECTION_SORT: CollectionsSortField = "total_rate";
-export const DEFAULT_NFT_SORT: NftSortField = "xtdh_rate";
+export const DEFAULT_COLLECTION_SORT: XtdhCollectionsSortField = "total_rate";
+export const DEFAULT_NFT_SORT: XtdhNftSortField = "xtdh_rate";
 export const DEFAULT_DIRECTION = SortDirection.DESC;
 
-export const COLLECTION_SORT_ITEMS: CommonSelectItem<CollectionsSortField>[] = [
-  { key: "total_rate", label: "Total xTDH Rate", value: "total_rate" },
-  { key: "total_received", label: "Total xTDH Received", value: "total_received" },
-  { key: "token_count", label: "Token Count", value: "token_count" },
-  { key: "collection_name", label: "Collection Name", value: "collection_name" },
-];
+export const XTDH_COLLECTION_SORT_ITEMS: CommonSelectItem<XtdhCollectionsSortField>[] =
+  [
+    { key: "total_rate", label: "Total xTDH Rate", value: "total_rate" },
+    { key: "total_received", label: "Total xTDH Received", value: "total_received" },
+    { key: "token_count", label: "Token Count", value: "token_count" },
+    {
+      key: "collection_name",
+      label: "Collection Name",
+      value: "collection_name",
+    },
+  ];
 
-export const NFT_SORT_ITEMS: CommonSelectItem<NftSortField>[] = [
+export const XTDH_NFT_SORT_ITEMS: CommonSelectItem<XtdhNftSortField>[] = [
   { key: "xtdh_rate", label: "xTDH Rate", value: "xtdh_rate" },
   { key: "total_received", label: "Total xTDH Received", value: "total_received" },
   { key: "token_id", label: "Token ID", value: "token_id" },

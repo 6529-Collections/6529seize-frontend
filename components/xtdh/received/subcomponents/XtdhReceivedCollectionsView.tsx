@@ -4,30 +4,32 @@ import CollectionsAutocomplete from "@/components/utils/input/collections/Collec
 import CommonSelect from "@/components/utils/select/CommonSelect";
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
 import {
-  COLLECTION_SORT_ITEMS,
-  type CollectionsSortField,
-  type ReceivedView,
-} from "../constants";
-import { useUserPageXtdhReceivedCollectionsState } from "../hooks";
-import { UserPageXtdhReceivedCollectionCard } from "./CollectionCard";
-import { UserPageXtdhReceivedEmptyState } from "./EmptyState";
-import { UserPageXtdhReceivedErrorState } from "./ErrorState";
-import { UserPageXtdhReceivedCollectionsSkeleton } from "./CollectionsSkeleton";
-import { UserPageXtdhReceivedViewToggle } from "./ViewToggle";
+  XTDH_COLLECTION_SORT_ITEMS,
+  type XtdhCollectionsSortField,
+  type XtdhReceivedView,
+} from "../utils/constants";
+import { useXtdhReceivedCollectionsState } from "../hooks";
+import { XtdhReceivedCollectionCard } from "./XtdhReceivedCollectionCard";
+import { XtdhReceivedEmptyState } from "./XtdhReceivedEmptyState";
+import { XtdhReceivedErrorState } from "./XtdhReceivedErrorState";
+import { XtdhReceivedCollectionsSkeleton } from "./XtdhReceivedCollectionsSkeleton";
+import { XtdhReceivedViewToggle } from "./XtdhReceivedViewToggle";
 
-export interface UserPageXtdhReceivedCollectionsViewProps {
+export interface XtdhReceivedCollectionsViewProps {
   readonly profileId: string | null;
-  readonly view: ReceivedView;
-  readonly onViewChange: (view: ReceivedView) => void;
+  readonly view: XtdhReceivedView;
+  readonly onViewChange: (view: XtdhReceivedView) => void;
   readonly announcement: string;
+  readonly granterHrefBuilder?: (profileId: string) => string;
 }
 
-export function UserPageXtdhReceivedCollectionsView({
+export function XtdhReceivedCollectionsView({
   profileId,
   view,
   onViewChange,
   announcement,
-}: UserPageXtdhReceivedCollectionsViewProps) {
+  granterHrefBuilder,
+}: XtdhReceivedCollectionsViewProps) {
   const {
     collections,
     isLoading,
@@ -52,18 +54,18 @@ export function UserPageXtdhReceivedCollectionsView({
     toggleCollection,
     expandedTokens,
     toggleToken,
-  } = useUserPageXtdhReceivedCollectionsState(profileId);
+  } = useXtdhReceivedCollectionsState(profileId);
 
   if (!profileId) {
     return (
-      <UserPageXtdhReceivedEmptyState message="Unable to determine which profile to load." />
+      <XtdhReceivedEmptyState message="Unable to determine which profile to load." />
     );
   }
 
   if (isError) {
     const errorMessage = error instanceof Error ? error.message : "";
     return (
-      <UserPageXtdhReceivedErrorState message={errorMessage} onRetry={handleRetry} />
+      <XtdhReceivedErrorState message={errorMessage} onRetry={handleRetry} />
     );
   }
 
@@ -84,8 +86,8 @@ export function UserPageXtdhReceivedCollectionsView({
             />
           </div>
           <div className="tw-w-full lg:tw-w-auto">
-            <CommonSelect<CollectionsSortField>
-              items={COLLECTION_SORT_ITEMS}
+            <CommonSelect<XtdhCollectionsSortField>
+              items={XTDH_COLLECTION_SORT_ITEMS}
               activeItem={activeSort}
               filterLabel="Sort collections"
               setSelected={handleSortChange}
@@ -113,7 +115,7 @@ export function UserPageXtdhReceivedCollectionsView({
             {resultSummary}
           </span>
           <div className="tw-flex tw-justify-end sm:tw-justify-end">
-            <UserPageXtdhReceivedViewToggle
+            <XtdhReceivedViewToggle
               view={view}
               onViewChange={onViewChange}
               announcement={announcement}
@@ -123,27 +125,28 @@ export function UserPageXtdhReceivedCollectionsView({
       </div>
 
       {isLoading ? (
-        <UserPageXtdhReceivedCollectionsSkeleton />
+        <XtdhReceivedCollectionsSkeleton />
       ) : collections.length === 0 ? (
         filtersAreActive ? (
-          <UserPageXtdhReceivedEmptyState
+          <XtdhReceivedEmptyState
             message="No collections match your filters."
             actionLabel="Clear filters"
             onAction={handleClearFilters}
           />
         ) : (
-          <UserPageXtdhReceivedEmptyState message="You haven't received any xTDH grants for your collections yet. Once granters allocate xTDH to collections you hold, they will appear here." />
+          <XtdhReceivedEmptyState message="You haven't received any xTDH grants for your collections yet. Once granters allocate xTDH to collections you hold, they will appear here." />
         )
       ) : (
         <div className="tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-3" role="list" aria-label="Collections receiving xTDH">
           {collections.map((collection) => (
-            <UserPageXtdhReceivedCollectionCard
+            <XtdhReceivedCollectionCard
               key={collection.collectionId}
               collection={collection}
               expanded={expandedCollectionId === collection.collectionId}
               onToggle={() => toggleCollection(collection.collectionId)}
               expandedTokens={expandedTokens}
               onToggleToken={toggleToken}
+              granterHrefBuilder={granterHrefBuilder}
             />
           ))}
         </div>

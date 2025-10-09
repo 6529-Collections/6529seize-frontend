@@ -2,17 +2,17 @@
 
 import type { XtdhGranterPreview } from "@/types/xtdh";
 
-export interface UserPageXtdhReceivedGranterAvatarGroupProps {
+export interface XtdhReceivedGranterAvatarGroupProps {
   readonly granters: XtdhGranterPreview[];
   readonly granterCount: number;
   readonly additional: number;
 }
 
-export function UserPageXtdhReceivedGranterAvatarGroup({
+export function XtdhReceivedGranterAvatarGroup({
   granters,
   granterCount,
   additional,
-}: UserPageXtdhReceivedGranterAvatarGroupProps) {
+}: XtdhReceivedGranterAvatarGroupProps) {
   return (
     <div className="tw-flex tw-items-center tw-gap-2">
       <div className="tw-flex -tw-space-x-2">

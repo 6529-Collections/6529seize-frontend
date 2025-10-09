@@ -3,42 +3,42 @@ import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { UseReceivedCollectionsFilters } from "@/hooks/useXtdhReceived";
 import type { XtdhReceivedCollectionOption } from "@/types/xtdh";
 import {
-  COLLECTION_SORT_ITEMS,
   DEFAULT_COLLECTION_SORT,
   DEFAULT_DIRECTION,
   DEFAULT_NFT_SORT,
-  NFT_SORT_ITEMS,
+  XTDH_COLLECTION_SORT_ITEMS,
+  XTDH_NFT_SORT_ITEMS,
 } from "./constants";
 
-export function parseCollectionsSort(value: string | null) {
+export function parseXtdhCollectionsSort(value: string | null) {
   if (!value) return DEFAULT_COLLECTION_SORT;
   const normalized = value.toLowerCase();
   return (
-    COLLECTION_SORT_ITEMS.find((item) => item.value === normalized)?.value ??
+    XTDH_COLLECTION_SORT_ITEMS.find((item) => item.value === normalized)?.value ??
     DEFAULT_COLLECTION_SORT
   );
 }
 
-export function parseNftSort(value: string | null) {
+export function parseXtdhNftSort(value: string | null) {
   if (!value) return DEFAULT_NFT_SORT;
   const normalized = value.toLowerCase();
   return (
-    NFT_SORT_ITEMS.find((item) => item.value === normalized)?.value ??
+    XTDH_NFT_SORT_ITEMS.find((item) => item.value === normalized)?.value ??
     DEFAULT_NFT_SORT
   );
 }
 
-export function parseSortDirection(value: string | null): SortDirection {
+export function parseXtdhSortDirection(value: string | null): SortDirection {
   if (!value) return DEFAULT_DIRECTION;
   const normalized = value.trim().toUpperCase();
   return normalized === SortDirection.ASC ? SortDirection.ASC : SortDirection.DESC;
 }
 
-export function toApiDirection(direction: SortDirection): "asc" | "desc" {
+export function xtdhToApiDirection(direction: SortDirection): "asc" | "desc" {
   return direction === SortDirection.ASC ? "asc" : "desc";
 }
 
-export function parsePage(value: string | null) {
+export function parseXtdhPage(value: string | null) {
   const parsed = Number.parseInt(value ?? "", 10);
   if (Number.isNaN(parsed) || parsed < 1) {
     return 1;
@@ -46,7 +46,7 @@ export function parsePage(value: string | null) {
   return parsed;
 }
 
-export function parseCollectionsFilterParam(value: string | null) {
+export function parseXtdhCollectionsFilterParam(value: string | null) {
   if (!value) return [];
   return value
     .split(",")
@@ -54,13 +54,13 @@ export function parseCollectionsFilterParam(value: string | null) {
     .filter(Boolean);
 }
 
-export function parseNumberParam(value: string | null) {
+export function parseXtdhNumberParam(value: string | null) {
   if (!value) return undefined;
   const parsed = Number.parseFloat(value);
   return Number.isNaN(parsed) ? undefined : parsed;
 }
 
-export function hasActiveFilters(filters: UseReceivedCollectionsFilters) {
+export function xtdhHasActiveFilters(filters: UseReceivedCollectionsFilters) {
   return Boolean(
     (filters.collections && filters.collections.length > 0) ||
       typeof filters.minRate === "number" ||
@@ -68,7 +68,7 @@ export function hasActiveFilters(filters: UseReceivedCollectionsFilters) {
   );
 }
 
-export function mergeCollectionOptions(
+export function mergeXtdhCollectionOptions(
   options: XtdhReceivedCollectionOption[],
   selected: string[]
 ) {
@@ -96,15 +96,15 @@ export function mergeCollectionOptions(
   );
 }
 
-export function formatValue(value: number) {
+export function formatXtdhValue(value: number) {
   if (Number.isNaN(value)) return "-";
   return formatNumberWithCommas(value);
 }
 
-export function formatRate(value: number) {
-  return `${formatValue(value)} /day`;
+export function formatXtdhRate(value: number) {
+  return `${formatXtdhValue(value)} /day`;
 }
 
-export function formatTotal(value: number) {
-  return formatValue(value);
+export function formatXtdhTotal(value: number) {
+  return formatXtdhValue(value);
 }

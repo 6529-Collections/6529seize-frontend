@@ -7,16 +7,18 @@ import {
   COLLECTION_QUERY_PARAM,
   MIN_GRANTORS_QUERY_PARAM,
   MIN_RATE_QUERY_PARAM,
-} from "../constants";
+} from "../utils/constants";
 import {
-  hasActiveFilters,
-  parseCollectionsFilterParam,
-  parseNumberParam,
+  parseXtdhCollectionsFilterParam,
+  parseXtdhNumberParam,
+  xtdhHasActiveFilters,
 } from "../utils";
 
-export type UpdateParamsHandler = (updater: (params: URLSearchParams) => void) => void;
+export type UpdateXtdhReceivedParamsHandler = (
+  updater: (params: URLSearchParams) => void
+) => void;
 
-export interface UserPageXtdhReceivedFiltersState {
+export interface UseXtdhReceivedFiltersState {
   readonly selectedCollections: string[];
   readonly minRate: number | undefined;
   readonly minGrantors: number | undefined;
@@ -30,22 +32,26 @@ export interface UserPageXtdhReceivedFiltersState {
  * Provides shared filter state derived from URL search params along with
  * handlers for mutating the query string in a consistent way across views.
  */
-export function useUserPageXtdhReceivedFilters(
+export function useXtdhReceivedFilters(
   searchParams: ReadonlyURLSearchParams | null,
-  handleUpdateParams: UpdateParamsHandler
-): UserPageXtdhReceivedFiltersState {
+  handleUpdateParams: UpdateXtdhReceivedParamsHandler
+): UseXtdhReceivedFiltersState {
   const selectedCollections = useMemo(
-    () => parseCollectionsFilterParam(searchParams?.get(COLLECTION_QUERY_PARAM) ?? null),
+    () =>
+      parseXtdhCollectionsFilterParam(
+        searchParams?.get(COLLECTION_QUERY_PARAM) ?? null
+      ),
     [searchParams]
   );
 
   const minRate = useMemo(
-    () => parseNumberParam(searchParams?.get(MIN_RATE_QUERY_PARAM) ?? null),
+    () => parseXtdhNumberParam(searchParams?.get(MIN_RATE_QUERY_PARAM) ?? null),
     [searchParams]
   );
 
   const minGrantors = useMemo(
-    () => parseNumberParam(searchParams?.get(MIN_GRANTORS_QUERY_PARAM) ?? null),
+    () =>
+      parseXtdhNumberParam(searchParams?.get(MIN_GRANTORS_QUERY_PARAM) ?? null),
     [searchParams]
   );
 
@@ -58,7 +64,7 @@ export function useUserPageXtdhReceivedFilters(
     [minGrantors, minRate, selectedCollections]
   );
 
-  const filtersAreActive = hasActiveFilters(filters);
+  const filtersAreActive = xtdhHasActiveFilters(filters);
 
   const handleCollectionsFilterChange = useCallback(
     (nextSelected: string[]) => {

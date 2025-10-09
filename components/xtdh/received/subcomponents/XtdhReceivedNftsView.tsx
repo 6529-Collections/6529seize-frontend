@@ -4,30 +4,32 @@ import CollectionsAutocomplete from "@/components/utils/input/collections/Collec
 import CommonSelect from "@/components/utils/select/CommonSelect";
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
 import {
-  NFT_SORT_ITEMS,
-  type NftSortField,
-  type ReceivedView,
-} from "../constants";
-import { useUserPageXtdhReceivedNftsState } from "../hooks";
-import { UserPageXtdhReceivedEmptyState } from "./EmptyState";
-import { UserPageXtdhReceivedErrorState } from "./ErrorState";
-import { UserPageXtdhReceivedNftSkeleton } from "./NftSkeleton";
-import { UserPageXtdhReceivedNftCard } from "./NftCard";
-import { UserPageXtdhReceivedViewToggle } from "./ViewToggle";
+  XTDH_NFT_SORT_ITEMS,
+  type XtdhNftSortField,
+  type XtdhReceivedView,
+} from "../utils/constants";
+import { useXtdhReceivedNftsState } from "../hooks";
+import { XtdhReceivedEmptyState } from "./XtdhReceivedEmptyState";
+import { XtdhReceivedErrorState } from "./XtdhReceivedErrorState";
+import { XtdhReceivedNftSkeleton } from "./XtdhReceivedNftSkeleton";
+import { XtdhReceivedNftCard } from "./XtdhReceivedNftCard";
+import { XtdhReceivedViewToggle } from "./XtdhReceivedViewToggle";
 
-export interface UserPageXtdhReceivedNftsViewProps {
+export interface XtdhReceivedNftsViewProps {
   readonly profileId: string | null;
-  readonly view: ReceivedView;
-  readonly onViewChange: (view: ReceivedView) => void;
+  readonly view: XtdhReceivedView;
+  readonly onViewChange: (view: XtdhReceivedView) => void;
   readonly announcement: string;
+  readonly granterHrefBuilder?: (profileId: string) => string;
 }
 
-export function UserPageXtdhReceivedNftsView({
+export function XtdhReceivedNftsView({
   profileId,
   view,
   onViewChange,
   announcement,
-}: UserPageXtdhReceivedNftsViewProps) {
+  granterHrefBuilder,
+}: XtdhReceivedNftsViewProps) {
   const {
     nfts,
     isLoading,
@@ -50,18 +52,18 @@ export function UserPageXtdhReceivedNftsView({
     handleRetry,
     expandedTokens,
     toggleToken,
-  } = useUserPageXtdhReceivedNftsState(profileId);
+  } = useXtdhReceivedNftsState(profileId);
 
   if (!profileId) {
     return (
-      <UserPageXtdhReceivedEmptyState message="Unable to determine which profile to load." />
+      <XtdhReceivedEmptyState message="Unable to determine which profile to load." />
     );
   }
 
   if (isError) {
     const errorMessage = error instanceof Error ? error.message : "";
     return (
-      <UserPageXtdhReceivedErrorState message={errorMessage} onRetry={handleRetry} />
+      <XtdhReceivedErrorState message={errorMessage} onRetry={handleRetry} />
     );
   }
 
@@ -82,8 +84,8 @@ export function UserPageXtdhReceivedNftsView({
             />
           </div>
           <div className="tw-w-full lg:tw-w-auto">
-            <CommonSelect<NftSortField>
-              items={NFT_SORT_ITEMS}
+            <CommonSelect<XtdhNftSortField>
+              items={XTDH_NFT_SORT_ITEMS}
               activeItem={activeSort}
               filterLabel="Sort NFTs"
               setSelected={handleSortChange}
@@ -111,7 +113,7 @@ export function UserPageXtdhReceivedNftsView({
             {resultSummary}
           </span>
           <div className="tw-flex tw-justify-end sm:tw-justify-end">
-            <UserPageXtdhReceivedViewToggle
+            <XtdhReceivedViewToggle
               view={view}
               onViewChange={onViewChange}
               announcement={announcement}
@@ -121,25 +123,26 @@ export function UserPageXtdhReceivedNftsView({
       </div>
 
       {isLoading ? (
-        <UserPageXtdhReceivedNftSkeleton />
+        <XtdhReceivedNftSkeleton />
       ) : nfts.length === 0 ? (
         filtersAreActive ? (
-          <UserPageXtdhReceivedEmptyState
+          <XtdhReceivedEmptyState
             message="No NFTs match your filters."
             actionLabel="Clear filters"
             onAction={handleClearFilters}
           />
         ) : (
-          <UserPageXtdhReceivedEmptyState message="You don't hold any NFTs currently receiving xTDH grants. When others grant xTDH to collections you hold, they will appear here." />
+          <XtdhReceivedEmptyState message="You don't hold any NFTs currently receiving xTDH grants. When others grant xTDH to collections you hold, they will appear here." />
         )
       ) : (
         <div className="tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-3" role="list" aria-label="NFTs receiving xTDH">
           {nfts.map((nft) => (
-            <UserPageXtdhReceivedNftCard
+            <XtdhReceivedNftCard
               key={nft.tokenId}
               nft={nft}
               expanded={!!expandedTokens[nft.tokenId]}
               onToggle={() => toggleToken(nft.tokenId)}
+              granterHrefBuilder={granterHrefBuilder}
             />
           ))}
         </div>

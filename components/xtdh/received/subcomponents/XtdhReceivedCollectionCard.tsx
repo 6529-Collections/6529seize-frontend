@@ -1,27 +1,29 @@
 'use client';
 
 import { useMemo } from "react";
-import type { XtdhReceivedCollectionSummary } from "@/types/xtdh";
-import { formatRate, formatTotal } from "../utils";
-import { UserPageXtdhReceivedGranterAvatarGroup } from "./GranterAvatarGroup";
-import { UserPageXtdhReceivedTokenRow } from "./TokenRow";
-import { UserPageXtdhReceivedEmptyState } from "./EmptyState";
+import type { XtdhReceivedCollectionSummary, XtdhReceivedNft } from "@/types/xtdh";
+import { formatXtdhRate, formatXtdhTotal } from "../utils";
+import { XtdhReceivedGranterAvatarGroup } from "./XtdhReceivedGranterAvatarGroup";
+import { XtdhReceivedNftCard } from "./XtdhReceivedNftCard";
+import { XtdhReceivedEmptyState } from "./XtdhReceivedEmptyState";
 
-export interface UserPageXtdhReceivedCollectionCardProps {
+export interface XtdhReceivedCollectionCardProps {
   readonly collection: XtdhReceivedCollectionSummary;
   readonly expanded: boolean;
   readonly onToggle: () => void;
   readonly expandedTokens: Record<string, boolean>;
   readonly onToggleToken: (tokenId: string) => void;
+  readonly granterHrefBuilder?: (profileId: string) => string;
 }
 
-export function UserPageXtdhReceivedCollectionCard({
+export function XtdhReceivedCollectionCard({
   collection,
   expanded,
   onToggle,
   expandedTokens,
   onToggleToken,
-}: UserPageXtdhReceivedCollectionCardProps) {
+  granterHrefBuilder,
+}: XtdhReceivedCollectionCardProps) {
   const additionalGranters = useMemo(
     () => Math.max(collection.granterCount - collection.granterPreviews.length, 0),
     [collection]
@@ -62,7 +64,7 @@ export function UserPageXtdhReceivedCollectionCard({
                 Total xTDH Rate
               </span>
               <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
-                {formatRate(collection.totalXtdhRate)}
+                {formatXtdhRate(collection.totalXtdhRate)}
               </span>
             </div>
             <div className="tw-flex tw-flex-col tw-gap-1">
@@ -70,10 +72,10 @@ export function UserPageXtdhReceivedCollectionCard({
                 Total Received
               </span>
               <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
-                {formatTotal(collection.totalXtdhReceived)}
+                {formatXtdhTotal(collection.totalXtdhReceived)}
               </span>
             </div>
-            <UserPageXtdhReceivedGranterAvatarGroup
+            <XtdhReceivedGranterAvatarGroup
               granters={collection.granterPreviews}
               granterCount={collection.granterCount}
               additional={additionalGranters}
@@ -90,16 +92,27 @@ export function UserPageXtdhReceivedCollectionCard({
       {expanded && (
         <div className="tw-mt-4 tw-space-y-3">
           {collection.tokens.length === 0 ? (
-            <UserPageXtdhReceivedEmptyState message="No tokens found in this collection." />
+            <XtdhReceivedEmptyState message="No tokens found in this collection." />
           ) : (
-            collection.tokens.map((token) => (
-              <UserPageXtdhReceivedTokenRow
-                key={token.tokenId}
-                token={token}
-                expanded={!!expandedTokens[token.tokenId]}
-                onToggle={() => onToggleToken(token.tokenId)}
-              />
-            ))
+            collection.tokens.map((token) => {
+              const nftForCard: XtdhReceivedNft = {
+                ...token,
+                collectionId: collection.collectionId,
+                collectionName: collection.collectionName,
+                collectionImage: collection.collectionImage,
+              };
+
+              return (
+                <XtdhReceivedNftCard
+                  key={token.tokenId}
+                  nft={nftForCard}
+                  expanded={!!expandedTokens[token.tokenId]}
+                  onToggle={() => onToggleToken(token.tokenId)}
+                  granterHrefBuilder={granterHrefBuilder}
+                  showCollectionName={false}
+                />
+              );
+            })
           )}
         </div>
       )}

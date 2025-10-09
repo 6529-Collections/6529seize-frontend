@@ -11,26 +11,26 @@ import {
   DEFAULT_DIRECTION,
   DEFAULT_NFT_SORT,
   NFTS_PAGE_SIZE,
-  type NftSortField,
-} from "../constants";
+  type XtdhNftSortField,
+} from "../utils/constants";
 import {
-  mergeCollectionOptions,
-  parseNftSort,
-  parsePage,
-  parseSortDirection,
-  toApiDirection,
+  mergeXtdhCollectionOptions,
+  parseXtdhNftSort,
+  parseXtdhPage,
+  parseXtdhSortDirection,
+  xtdhToApiDirection,
 } from "../utils";
-import { useUserPageXtdhReceivedFilters } from "./useUserPageXtdhReceivedFilters";
-import { useUserPageXtdhReceivedSearchParams } from "./useUserPageXtdhReceivedSearchParams";
+import { useXtdhReceivedFilters } from "./useXtdhReceivedFilters";
+import { useXtdhReceivedSearchParams } from "./useXtdhReceivedSearchParams";
 
-export interface UserPageXtdhReceivedNftsState {
+export interface UseXtdhReceivedNftsState {
   readonly profileId: string | null;
   readonly nfts: XtdhReceivedNft[];
   readonly isLoading: boolean;
   readonly isFetching: boolean;
   readonly isError: boolean;
   readonly error: unknown;
-  readonly activeSort: NftSortField;
+  readonly activeSort: XtdhNftSortField;
   readonly activeDirection: SortDirection;
   readonly collectionFilterOptions: {
     readonly id: string;
@@ -43,7 +43,7 @@ export interface UserPageXtdhReceivedNftsState {
   readonly page: number;
   readonly totalPages: number;
   readonly haveNextPage: boolean;
-  readonly handleSortChange: (nextSort: NftSortField) => void;
+  readonly handleSortChange: (nextSort: XtdhNftSortField) => void;
   readonly handleCollectionsFilterChange: (nextSelected: string[]) => void;
   readonly handleClearFilters: () => void;
   readonly handlePageChange: (page: number) => void;
@@ -55,10 +55,10 @@ export interface UserPageXtdhReceivedNftsState {
 /**
  * Encapsulates NFTs view state, mirroring collection behaviour for parity.
  */
-export function useUserPageXtdhReceivedNftsState(
+export function useXtdhReceivedNftsState(
   profileId: string | null
-): UserPageXtdhReceivedNftsState {
-  const { searchParams, handleUpdateParams } = useUserPageXtdhReceivedSearchParams();
+): UseXtdhReceivedNftsState {
+  const { searchParams, handleUpdateParams } = useXtdhReceivedSearchParams();
 
   const {
     selectedCollections,
@@ -66,25 +66,25 @@ export function useUserPageXtdhReceivedNftsState(
     filtersAreActive,
     handleCollectionsFilterChange,
     handleClearFilters,
-  } = useUserPageXtdhReceivedFilters(searchParams, handleUpdateParams);
+  } = useXtdhReceivedFilters(searchParams, handleUpdateParams);
 
   const activeSort = useMemo(
-    () => parseNftSort(searchParams?.get("sort") ?? null),
+    () => parseXtdhNftSort(searchParams?.get("sort") ?? null),
     [searchParams]
   );
 
   const activeDirection = useMemo(
-    () => parseSortDirection(searchParams?.get("dir") ?? null),
+    () => parseXtdhSortDirection(searchParams?.get("dir") ?? null),
     [searchParams]
   );
 
   const apiDirection = useMemo(
-    () => toApiDirection(activeDirection),
+    () => xtdhToApiDirection(activeDirection),
     [activeDirection]
   );
 
   const page = useMemo(
-    () => parsePage(searchParams?.get("page") ?? null),
+    () => parseXtdhPage(searchParams?.get("page") ?? null),
     [searchParams]
   );
 
@@ -119,7 +119,8 @@ export function useUserPageXtdhReceivedNftsState(
   }, [data?.availableCollections]);
 
   const availableCollections = useMemo(
-    () => mergeCollectionOptions(availableCollectionOptions, selectedCollections),
+    () =>
+      mergeXtdhCollectionOptions(availableCollectionOptions, selectedCollections),
     [availableCollectionOptions, selectedCollections]
   );
 
@@ -144,10 +145,10 @@ export function useUserPageXtdhReceivedNftsState(
   );
 
   const handleSortChange = useCallback(
-    (nextSort: NftSortField) => {
+    (nextSort: XtdhNftSortField) => {
       handleUpdateParams((params) => {
-        const currentSort = parseNftSort(params.get("sort"));
-        const currentDirection = parseSortDirection(params.get("dir"));
+        const currentSort = parseXtdhNftSort(params.get("sort"));
+        const currentDirection = parseXtdhSortDirection(params.get("dir"));
 
         const nextDirection =
           nextSort === currentSort

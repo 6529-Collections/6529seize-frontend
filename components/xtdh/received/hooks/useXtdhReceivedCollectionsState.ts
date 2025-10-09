@@ -12,26 +12,26 @@ import {
   COLLECTIONS_PAGE_SIZE,
   DEFAULT_COLLECTION_SORT,
   DEFAULT_DIRECTION,
-  type CollectionsSortField,
-} from "../constants";
+  type XtdhCollectionsSortField,
+} from "../utils/constants";
 import {
-  mergeCollectionOptions,
-  parseCollectionsSort,
-  parsePage,
-  parseSortDirection,
-  toApiDirection,
+  mergeXtdhCollectionOptions,
+  parseXtdhCollectionsSort,
+  parseXtdhPage,
+  parseXtdhSortDirection,
+  xtdhToApiDirection,
 } from "../utils";
-import { useUserPageXtdhReceivedFilters } from "./useUserPageXtdhReceivedFilters";
-import { useUserPageXtdhReceivedSearchParams } from "./useUserPageXtdhReceivedSearchParams";
+import { useXtdhReceivedFilters } from "./useXtdhReceivedFilters";
+import { useXtdhReceivedSearchParams } from "./useXtdhReceivedSearchParams";
 
-export interface UserPageXtdhReceivedCollectionsState {
+export interface UseXtdhReceivedCollectionsState {
   readonly profileId: string | null;
   readonly collections: XtdhReceivedCollectionSummary[];
   readonly isLoading: boolean;
   readonly isFetching: boolean;
   readonly isError: boolean;
   readonly error: unknown;
-  readonly activeSort: CollectionsSortField;
+  readonly activeSort: XtdhCollectionsSortField;
   readonly activeDirection: SortDirection;
   readonly collectionFilterOptions: {
     readonly id: string;
@@ -44,7 +44,7 @@ export interface UserPageXtdhReceivedCollectionsState {
   readonly page: number;
   readonly totalPages: number;
   readonly haveNextPage: boolean;
-  readonly handleSortChange: (nextSort: CollectionsSortField) => void;
+  readonly handleSortChange: (nextSort: XtdhCollectionsSortField) => void;
   readonly handleCollectionsFilterChange: (nextSelected: string[]) => void;
   readonly handleClearFilters: () => void;
   readonly handlePageChange: (page: number) => void;
@@ -59,10 +59,10 @@ export interface UserPageXtdhReceivedCollectionsState {
  * Encapsulates the collections view behaviour, spanning query params, data
  * fetching and interactive expansion state.
  */
-export function useUserPageXtdhReceivedCollectionsState(
+export function useXtdhReceivedCollectionsState(
   profileId: string | null
-): UserPageXtdhReceivedCollectionsState {
-  const { searchParams, handleUpdateParams } = useUserPageXtdhReceivedSearchParams();
+): UseXtdhReceivedCollectionsState {
+  const { searchParams, handleUpdateParams } = useXtdhReceivedSearchParams();
 
   const {
     selectedCollections,
@@ -70,25 +70,25 @@ export function useUserPageXtdhReceivedCollectionsState(
     filtersAreActive,
     handleCollectionsFilterChange,
     handleClearFilters,
-  } = useUserPageXtdhReceivedFilters(searchParams, handleUpdateParams);
+  } = useXtdhReceivedFilters(searchParams, handleUpdateParams);
 
   const activeSort = useMemo(
-    () => parseCollectionsSort(searchParams?.get("sort") ?? null),
+    () => parseXtdhCollectionsSort(searchParams?.get("sort") ?? null),
     [searchParams]
   );
 
   const activeDirection = useMemo(
-    () => parseSortDirection(searchParams?.get("dir") ?? null),
+    () => parseXtdhSortDirection(searchParams?.get("dir") ?? null),
     [searchParams]
   );
 
   const apiDirection = useMemo(
-    () => toApiDirection(activeDirection),
+    () => xtdhToApiDirection(activeDirection),
     [activeDirection]
   );
 
   const page = useMemo(
-    () => parsePage(searchParams?.get("page") ?? null),
+    () => parseXtdhPage(searchParams?.get("page") ?? null),
     [searchParams]
   );
 
@@ -123,7 +123,8 @@ export function useUserPageXtdhReceivedCollectionsState(
   }, [data?.availableCollections]);
 
   const availableCollections = useMemo(
-    () => mergeCollectionOptions(availableCollectionOptions, selectedCollections),
+    () =>
+      mergeXtdhCollectionOptions(availableCollectionOptions, selectedCollections),
     [availableCollectionOptions, selectedCollections]
   );
 
@@ -148,10 +149,10 @@ export function useUserPageXtdhReceivedCollectionsState(
   );
 
   const handleSortChange = useCallback(
-    (nextSort: CollectionsSortField) => {
+    (nextSort: XtdhCollectionsSortField) => {
       handleUpdateParams((params) => {
-        const currentSort = parseCollectionsSort(params.get("sort"));
-        const currentDirection = parseSortDirection(params.get("dir"));
+        const currentSort = parseXtdhCollectionsSort(params.get("sort"));
+        const currentDirection = parseXtdhSortDirection(params.get("dir"));
 
         const nextDirection =
           nextSort === currentSort
@@ -255,5 +256,5 @@ export function useUserPageXtdhReceivedCollectionsState(
   };
 }
 
-export type CollectionSummary = XtdhReceivedCollectionSummary;
-export type CollectionToken = XtdhReceivedToken;
+export type XtdhCollectionSummary = XtdhReceivedCollectionSummary;
+export type XtdhCollectionToken = XtdhReceivedToken;
