@@ -82,7 +82,7 @@ describe('DirectMessagesList', () => {
   });
 
   it('shows connect wallet placeholder when not authenticated', () => {
-    const { container } = renderWithAuth(null);
+    renderWithAuth(null);
     expect(screen.getByTestId('connect')).toBeInTheDocument();
     expect(screen.getByTestId('connect')).toBeInTheDocument();
   });

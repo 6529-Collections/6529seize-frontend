@@ -9,7 +9,7 @@ import {
 } from "@/types/dropInteractionTypes";
 import { DropInteractionParams } from "@/components/waves/drops/Drop";
 import NotificationItems from "./NotificationItems";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 
@@ -28,8 +28,6 @@ export default function NotificationsWrapper({
 }: NotificationsWrapperProps) {
   const router = useRouter();
   const { isApp } = useDeviceInfo();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   const onDropContentClick = useCallback(
     (drop: ExtendedDrop) => {

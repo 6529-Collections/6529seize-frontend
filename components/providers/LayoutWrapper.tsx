@@ -18,10 +18,10 @@ export default function LayoutWrapper({
   const { isApp, hasTouchScreen } = useDeviceInfo();
   const isSmallScreen = useIsMobileScreen();
   const [isTouchTabletViewport, setIsTouchTabletViewport] = useState(() => {
-    if (typeof window === "undefined") {
+    if (typeof globalThis.window === "undefined") {
       return false;
     }
-    return window.innerWidth < SIDEBAR_MOBILE_BREAKPOINT;
+    return globalThis.window.innerWidth < SIDEBAR_MOBILE_BREAKPOINT;
   });
   const pathname = usePathname();
 
@@ -31,7 +31,13 @@ export default function LayoutWrapper({
       return;
     }
 
-    const mediaQuery = window.matchMedia(
+    const browserWindow = globalThis.window;
+    if (browserWindow === undefined) {
+      setIsTouchTabletViewport(false);
+      return;
+    }
+
+    const mediaQuery = browserWindow.matchMedia(
       `(max-width: ${SIDEBAR_MOBILE_BREAKPOINT - 0.02}px)`
     );
 
@@ -42,11 +48,18 @@ export default function LayoutWrapper({
 
     if (typeof mediaQuery.addEventListener === "function") {
       mediaQuery.addEventListener("change", listener);
-      return () => mediaQuery.removeEventListener("change", listener);
+      return () => {
+        mediaQuery.removeEventListener?.("change", listener);
+      };
     }
 
-    mediaQuery.addListener(listener);
-    return () => mediaQuery.removeListener(listener);
+    const previousOnChange = mediaQuery.onchange;
+    mediaQuery.onchange = listener;
+    return () => {
+      if (mediaQuery.onchange === listener) {
+        mediaQuery.onchange = previousOnChange ?? null;
+      }
+    };
   }, [hasTouchScreen]);
 
   const isAccessOrRestricted =

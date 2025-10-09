@@ -73,7 +73,7 @@ export function useSidebarController() {
   });
 
   // Desktop state - default to expanded (false) on big screens with session persistence
-  const [isDesktopCollapsed, setDesktopCollapsed] = useState(() => {
+  const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(() => {
     try {
       const stored = safeSessionStorage.getItem("sidebarCollapsed");
       return stored !== null ? JSON.parse(stored) : false;
@@ -84,7 +84,7 @@ export function useSidebarController() {
 
   // Wrapper to persist state changes to sessionStorage
   const persistDesktopCollapsed = useCallback((value: boolean | ((prev: boolean) => boolean)) => {
-    setDesktopCollapsed((prev: boolean) => {
+    setIsDesktopCollapsed((prev: boolean) => {
       const newValue = typeof value === "function" ? value(prev) : value;
       // Save to sessionStorage
       try {
@@ -112,12 +112,12 @@ export function useSidebarController() {
 
   // Derived collapsed state (pure function of inputs)
   const isCollapsed = useMemo(() => {
-    if (!isOffcanvasMode) {
-      // Wide desktop: honor user preference
-      return isDesktopCollapsed;
+    if (isOffcanvasMode) {
+      // Overlay open => expanded; closed => collapsed
+      return !isOffcanvasOpen;
     }
-    // Overlay open => expanded; closed => collapsed
-    return isOffcanvasOpen ? false : true;
+    // Wide desktop: honor user preference
+    return isDesktopCollapsed;
   }, [isOffcanvasMode, isOffcanvasOpen, isDesktopCollapsed]);
 
   // React to breakpoint changes
@@ -172,7 +172,7 @@ export function useSidebarController() {
       setIsOffcanvasOpen(false);
     } else if (isOffcanvasOpen) {
       // Leaving narrow: if overlay was open, expand persistent rail on desktop
-      setDesktopCollapsed(false);
+      setIsDesktopCollapsed(false);
       setIsOffcanvasOpen(false);
     }
 

@@ -43,34 +43,39 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
     );
   }, [connectedProfile, fetchingProfile]);
 
-  const content = shouldShowContent ? (
-    <div className="tw-flex-1" id="my-stream-content">
-      <Brain>
-        <div className={containerClassName}>{children}</div>
-      </Brain>
-    </div>
-  ) : !isAuthenticated ? (
-    <ConnectWallet />
-  ) : (
-    <div
-      id="my-stream-connect"
-      className="tw-flex-1 tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-min-h-[80dvh] tw-p-6"
-    >
-      <Image
-        unoptimized
-        priority
-        loading="eager"
-        src="https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/279.WEBP"
-        alt="Brain"
-        width={304}
-        height={450}
-        className="tw-rounded-md tw-shadow-lg tw-max-w-[30vw] md:tw-max-w-[200px] tw-h-auto"
-      />
-      <div className="tw-flex tw-flex-col tw-items-center md:tw-items-start tw-text-center md:tw-text-left tw-gap-4">
-        {connectPrompt}
+  let content: ReactNode;
+  if (shouldShowContent) {
+    content = (
+      <div className="tw-flex-1" id="my-stream-content">
+        <Brain>
+          <div className={containerClassName}>{children}</div>
+        </Brain>
       </div>
-    </div>
-  );
+    );
+  } else if (isAuthenticated) {
+    content = (
+      <div
+        id="my-stream-connect"
+        className="tw-flex-1 tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-min-h-[80dvh] tw-p-6"
+      >
+        <Image
+          unoptimized
+          priority
+          loading="eager"
+          src="https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/279.WEBP"
+          alt="Brain"
+          width={304}
+          height={450}
+          className="tw-rounded-md tw-shadow-lg tw-max-w-[30vw] md:tw-max-w-[200px] tw-h-auto"
+        />
+        <div className="tw-flex tw-flex-col tw-items-center md:tw-items-start tw-text-center md:tw-text-left tw-gap-4">
+          {connectPrompt}
+        </div>
+      </div>
+    );
+  } else {
+    content = <ConnectWallet />;
+  }
 
   return (
     <>
