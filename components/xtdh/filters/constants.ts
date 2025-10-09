@@ -19,21 +19,17 @@ export interface ActivityLabels {
 export const COLLECTION_SORT_OPTIONS: ReadonlyArray<
   CommonSelectItem<XtdhCollectionsSort>
 > = [
-  { key: "total_rate", label: "Total xTDH Rate", value: "total_rate" },
-  { key: "total_allocated", label: "Total xTDH Allocated", value: "total_allocated" },
-  { key: "recent", label: "Recently Updated", value: "recent" },
-  { key: "grantors", label: "Number of Grantors", value: "grantors" },
-  { key: "name", label: "Collection Name", value: "name" },
+  { key: "total_rate", label: "xTDH Rate", value: "total_rate" },
+  { key: "total_allocated", label: "Total xTDH", value: "total_allocated" },
+  { key: "grantors", label: "Grantors", value: "grantors" },
 ];
 
 export const TOKEN_SORT_OPTIONS: ReadonlyArray<
   CommonSelectItem<XtdhTokensSort>
 > = [
   { key: "rate", label: "xTDH Rate", value: "rate" },
-  { key: "recent", label: "Recently Granted", value: "recent" },
+  { key: "total_allocated", label: "Total xTDH", value: "total_allocated" },
   { key: "grantors", label: "Grantors", value: "grantors" },
-  { key: "collection", label: "Collection Name", value: "collection" },
-  { key: "name", label: "Token Name", value: "name" },
 ];
 
 export const SORT_OPTIONS: Record<

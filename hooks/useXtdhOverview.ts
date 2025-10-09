@@ -8,7 +8,7 @@ import type {
 } from "@/types/xtdh";
 
 export interface UseXtdhCollectionsParams {
-  readonly sort: "total_rate" | "recent" | "grantors" | "name" | "total_allocated";
+  readonly sort: "total_rate" | "total_allocated" | "grantors";
   readonly dir: "asc" | "desc";
   readonly page: number;
   readonly pageSize?: number;
@@ -21,7 +21,7 @@ export interface UseXtdhCollectionsParams {
 }
 
 export interface UseXtdhTokensParams {
-  readonly sort: "rate" | "recent" | "grantors" | "name" | "collection";
+  readonly sort: "rate" | "total_allocated" | "grantors";
   readonly dir: "asc" | "desc";
   readonly page: number;
   readonly pageSize?: number;

@@ -53,9 +53,7 @@ function parseCollectionSort(value: string | null): XtdhCollectionsSort {
   if (!value) return DEFAULT_COLLECTION_SORT;
   const normalized = value.toLowerCase() as XtdhCollectionsSort;
 
-  return (["total_rate", "total_allocated", "recent", "grantors", "name"] as const).includes(
-    normalized
-  )
+  return (["total_rate", "total_allocated", "grantors"] as const).includes(normalized)
     ? normalized
     : DEFAULT_COLLECTION_SORT;
 }
@@ -64,7 +62,7 @@ function parseTokenSort(value: string | null): XtdhTokensSort {
   if (!value) return DEFAULT_TOKEN_SORT;
   const normalized = value.toLowerCase() as XtdhTokensSort;
 
-  return (["rate", "recent", "grantors", "collection", "name"] as const).includes(normalized)
+  return (["rate", "total_allocated", "grantors"] as const).includes(normalized)
     ? normalized
     : DEFAULT_TOKEN_SORT;
 }

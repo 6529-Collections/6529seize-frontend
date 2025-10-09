@@ -3,16 +3,12 @@ export type XtdhView = "collections" | "tokens";
 export type XtdhCollectionsSort =
   | "total_rate"
   | "total_allocated"
-  | "recent"
-  | "grantors"
-  | "name";
+  | "grantors";
 
 export type XtdhTokensSort =
   | "rate"
-  | "recent"
   | "grantors"
-  | "collection"
-  | "name";
+  | "total_allocated";
 
 export type XtdhSortDirection = "asc" | "desc";
 

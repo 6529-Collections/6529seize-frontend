@@ -589,7 +589,7 @@ const AVAILABLE_NETWORKS = (() => {
 export interface CollectionQueryOptions {
   readonly page: number;
   readonly pageSize: number;
-  readonly sort: "total_rate" | "recent" | "grantors" | "name" | "total_allocated";
+  readonly sort: "total_rate" | "total_allocated" | "grantors";
   readonly dir: "asc" | "desc";
   readonly networks: string[];
   readonly minRate?: number;
@@ -601,7 +601,7 @@ export interface CollectionQueryOptions {
 export interface TokenQueryOptions {
   readonly page: number;
   readonly pageSize: number;
-  readonly sort: "rate" | "recent" | "grantors" | "name" | "collection";
+  readonly sort: "rate" | "total_allocated" | "grantors";
   readonly dir: "asc" | "desc";
   readonly networks: string[];
   readonly minRate?: number;
@@ -665,13 +665,6 @@ function filterCollections(
       const direction = options.dir === "asc" ? 1 : -1;
 
       switch (options.sort) {
-        case "name":
-          return (
-            a.collectionName.localeCompare(b.collectionName) * direction ||
-            (new Date(a.lastAllocatedAt).getTime() -
-              new Date(b.lastAllocatedAt).getTime()) *
-              -direction
-          );
         case "grantors":
           if (a.grantorCount === b.grantorCount) {
             return (
@@ -680,12 +673,6 @@ function filterCollections(
             );
           }
           return (a.grantorCount - b.grantorCount) * direction;
-        case "recent":
-          return (
-            (new Date(a.lastAllocatedAt).getTime() -
-              new Date(b.lastAllocatedAt).getTime()) *
-            direction
-          );
         case "total_allocated":
           if (a.totalXtdhAllocated === b.totalXtdhAllocated) {
             return (
@@ -761,16 +748,6 @@ function filterTokens(
       const direction = options.dir === "asc" ? 1 : -1;
 
       switch (options.sort) {
-        case "name":
-          return (
-            a.tokenName.localeCompare(b.tokenName) * direction ||
-            a.collectionName.localeCompare(b.collectionName) * direction
-          );
-        case "collection":
-          if (a.collectionName === b.collectionName) {
-            return a.tokenName.localeCompare(b.tokenName) * direction;
-          }
-          return a.collectionName.localeCompare(b.collectionName) * direction;
         case "grantors":
           if (a.grantorCount === b.grantorCount) {
             return (
@@ -779,12 +756,14 @@ function filterTokens(
             );
           }
           return (a.grantorCount - b.grantorCount) * direction;
-        case "recent":
-          return (
-            (new Date(a.lastAllocatedAt).getTime() -
-              new Date(b.lastAllocatedAt).getTime()) *
-            direction
-          );
+        case "total_allocated":
+          if (a.totalXtdhAllocated === b.totalXtdhAllocated) {
+            return (
+              (a.xtdhRate - b.xtdhRate) * direction ||
+              a.tokenName.localeCompare(b.tokenName) * direction
+            );
+          }
+          return (a.totalXtdhAllocated - b.totalXtdhAllocated) * direction;
         case "rate":
         default:
           if (a.xtdhRate === b.xtdhRate) {

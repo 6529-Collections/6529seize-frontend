@@ -82,20 +82,22 @@ export default function DesktopFilterPanel<SortValue extends XtdhSortValue>({
           disabled={disableInteractions}
         />
 
-        <XtdhFilterCheckboxField
-          id={`${view}-my-grants`}
-          label={activityLabels.allocated}
-          checked={state.showMyGrants && Boolean(connectedProfileId)}
-          onChange={onToggleMyGrants}
-          disabled={personalFiltersDisabled}
-        />
-        <XtdhFilterCheckboxField
-          id={`${view}-receiving`}
-          label={activityLabels.receiving}
-          checked={state.showMyReceiving && Boolean(connectedProfileId)}
-          onChange={onToggleReceiving}
-          disabled={personalFiltersDisabled}
-        />
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-4">
+          <XtdhFilterCheckboxField
+            id={`${view}-my-grants`}
+            label={activityLabels.allocated}
+            checked={state.showMyGrants && Boolean(connectedProfileId)}
+            onChange={onToggleMyGrants}
+            disabled={personalFiltersDisabled}
+          />
+          <XtdhFilterCheckboxField
+            id={`${view}-receiving`}
+            label={activityLabels.receiving}
+            checked={state.showMyReceiving && Boolean(connectedProfileId)}
+            onChange={onToggleReceiving}
+            disabled={personalFiltersDisabled}
+          />
+        </div>
         {!connectedProfileId ? (
           <span className="tw-text-xs tw-text-amber-300">
             Connect to a profile to enable personal filters.
