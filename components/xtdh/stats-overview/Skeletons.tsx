@@ -2,15 +2,15 @@ export function XtdhStatsOverviewSkeleton() {
   return (
     <section className="tw-rounded-2xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-6 tw-shadow-md tw-shadow-black/30 tw-text-iron-50">
       <div className="tw-h-7 tw-w-40 tw-rounded tw-bg-iron-800 tw-animate-pulse" />
-      <div className="tw-mt-6 tw-grid tw-gap-6 xl:tw-grid-cols-2">
-        <NetworkStatsSkeleton />
-        <UserStatusSkeleton />
-      </div>
       <div className="tw-mt-6 tw-rounded-2xl tw-border tw-border-primary-500/20 tw-bg-primary-500/10 tw-p-6 tw-animate-pulse">
         <div className="tw-h-4 tw-w-36 tw-rounded tw-bg-primary-500/30" />
         <div className="tw-mt-4 tw-h-8 tw-w-48 tw-rounded tw-bg-primary-500/30" />
         <div className="tw-mt-2 tw-h-4 tw-w-52 tw-rounded tw-bg-primary-500/20" />
         <div className="tw-mt-4 tw-h-12 tw-w-full tw-rounded tw-bg-primary-500/20" />
+      </div>
+      <div className="tw-mt-6 tw-grid tw-gap-6 xl:tw-grid-cols-2">
+        <NetworkStatsSkeleton />
+        <UserStatusSkeleton />
       </div>
     </section>
   );
