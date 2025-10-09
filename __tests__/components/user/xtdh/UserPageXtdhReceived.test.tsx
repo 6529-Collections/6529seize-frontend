@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import UserPageXtdhReceived from "@/components/user/xtdh/UserPageXtdhReceived";
+import UserPageXtdhReceived from "@/components/xtdh/user/received";
 
 const mockUseReceivedCollections = jest.fn();
 const mockUseReceivedNfts = jest.fn();

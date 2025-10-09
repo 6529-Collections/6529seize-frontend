@@ -51,8 +51,6 @@ export interface UseXtdhReceivedCollectionsState {
   readonly handleRetry: () => void;
   readonly expandedCollectionId: string | null;
   readonly toggleCollection: (collectionId: string) => void;
-  readonly expandedTokens: Record<string, boolean>;
-  readonly toggleToken: (tokenId: string) => void;
 }
 
 /**
@@ -195,24 +193,10 @@ export function useXtdhReceivedCollectionsState(
   const [expandedCollectionId, setExpandedCollectionId] = useState<string | null>(
     null
   );
-  const [expandedTokens, setExpandedTokens] = useState<Record<string, boolean>>({});
 
   const toggleCollection = useCallback((collectionId: string) => {
     setExpandedCollectionId((prev) => (prev === collectionId ? null : collectionId));
   }, []);
-
-  const toggleToken = useCallback((tokenId: string) => {
-    setExpandedTokens((prev) => ({
-      ...prev,
-      [tokenId]: !prev[tokenId],
-    }));
-  }, []);
-
-  useEffect(() => {
-    setExpandedTokens((prev) =>
-      Object.keys(prev).length > 0 ? {} : prev
-    );
-  }, [expandedCollectionId]);
 
   const resultSummary = useMemo(() => {
     if (!profileId) {
@@ -251,8 +235,6 @@ export function useXtdhReceivedCollectionsState(
     handleRetry,
     expandedCollectionId,
     toggleCollection,
-    expandedTokens,
-    toggleToken,
   };
 }
 

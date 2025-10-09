@@ -8,8 +8,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { AuthContext } from "@/components/auth/Auth";
 import UserPageXtdhGranted from "./UserPageXtdhGranted";
-import UserPageXtdhReceived from "./UserPageXtdhReceived";
 import UserPageXtdhStatsHeader from "./UserPageXtdhStatsHeader";
+import UserPageXtdhReceived from "@/components/xtdh/user/received";
 
 type XtdhViewFilter = "granted" | "received";
 

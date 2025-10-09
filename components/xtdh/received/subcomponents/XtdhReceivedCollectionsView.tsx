@@ -52,8 +52,6 @@ export function XtdhReceivedCollectionsView({
     handleRetry,
     expandedCollectionId,
     toggleCollection,
-    expandedTokens,
-    toggleToken,
   } = useXtdhReceivedCollectionsState(profileId);
 
   if (!profileId) {
@@ -144,8 +142,6 @@ export function XtdhReceivedCollectionsView({
               collection={collection}
               expanded={expandedCollectionId === collection.collectionId}
               onToggle={() => toggleCollection(collection.collectionId)}
-              expandedTokens={expandedTokens}
-              onToggleToken={toggleToken}
               granterHrefBuilder={granterHrefBuilder}
             />
           ))}

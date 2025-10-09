@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import clsx from "clsx";
 import type { XtdhReceivedNft } from "@/types/xtdh";
 import { formatXtdhRate, formatXtdhTotal } from "../utils";
@@ -9,8 +9,6 @@ import { XtdhReceivedGranterRow } from "./XtdhReceivedGranterRow";
 
 export interface XtdhReceivedNftCardProps {
   readonly nft: XtdhReceivedNft;
-  readonly expanded: boolean;
-  readonly onToggle: () => void;
   readonly granterHrefBuilder?: (profileId: string) => string;
   readonly showCollectionName?: boolean;
   readonly className?: string;
@@ -18,12 +16,11 @@ export interface XtdhReceivedNftCardProps {
 
 export function XtdhReceivedNftCard({
   nft,
-  expanded,
-  onToggle,
   granterHrefBuilder,
   showCollectionName = true,
   className,
 }: XtdhReceivedNftCardProps) {
+  const [expanded, setExpanded] = useState(false);
   const additionalGranters = useMemo(
     () => Math.max(nft.granterCount - nft.granterPreviews.length, 0),
     [nft]
@@ -85,7 +82,9 @@ export function XtdhReceivedNftCard({
           />
           <button
             type="button"
-            onClick={onToggle}
+            onClick={() => {
+              setExpanded((prev) => !prev);
+            }}
             aria-expanded={expanded}
             aria-controls={granterPanelId}
             className="md:tw-ml-auto tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-850 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-200 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"

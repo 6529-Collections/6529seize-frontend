@@ -16,7 +16,7 @@ jest.mock("@/components/user/xtdh/UserPageXtdhGranted", () => () => (
   <div data-testid="granted-view" />
 ));
 
-jest.mock("@/components/user/xtdh/UserPageXtdhReceived", () => () => (
+jest.mock("@/components/xtdh/user/received", () => () => (
   <div data-testid="received-view" />
 ));
 

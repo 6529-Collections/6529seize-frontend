@@ -48,8 +48,6 @@ export interface UseXtdhReceivedNftsState {
   readonly handleClearFilters: () => void;
   readonly handlePageChange: (page: number) => void;
   readonly handleRetry: () => void;
-  readonly expandedTokens: Record<string, boolean>;
-  readonly toggleToken: (tokenId: string) => void;
 }
 
 /**
@@ -188,15 +186,6 @@ export function useXtdhReceivedNftsState(
     void refetch();
   }, [refetch]);
 
-  const [expandedTokens, setExpandedTokens] = useState<Record<string, boolean>>({});
-
-  const toggleToken = useCallback((tokenId: string) => {
-    setExpandedTokens((prev) => ({
-      ...prev,
-      [tokenId]: !prev[tokenId],
-    }));
-  }, []);
-
   const resultSummary = useMemo(() => {
     if (!profileId) {
       return "Connect or select a profile to view received xTDH.";
@@ -232,7 +221,5 @@ export function useXtdhReceivedNftsState(
     handleClearFilters,
     handlePageChange,
     handleRetry,
-    expandedTokens,
-    toggleToken,
   };
 }

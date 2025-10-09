@@ -50,8 +50,6 @@ export function XtdhReceivedNftsView({
     handleClearFilters,
     handlePageChange,
     handleRetry,
-    expandedTokens,
-    toggleToken,
   } = useXtdhReceivedNftsState(profileId);
 
   if (!profileId) {
@@ -140,8 +138,6 @@ export function XtdhReceivedNftsView({
             <XtdhReceivedNftCard
               key={nft.tokenId}
               nft={nft}
-              expanded={!!expandedTokens[nft.tokenId]}
-              onToggle={() => toggleToken(nft.tokenId)}
               granterHrefBuilder={granterHrefBuilder}
             />
           ))}

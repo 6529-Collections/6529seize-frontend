@@ -11,8 +11,6 @@ export interface XtdhReceivedCollectionCardProps {
   readonly collection: XtdhReceivedCollectionSummary;
   readonly expanded: boolean;
   readonly onToggle: () => void;
-  readonly expandedTokens: Record<string, boolean>;
-  readonly onToggleToken: (tokenId: string) => void;
   readonly granterHrefBuilder?: (profileId: string) => string;
 }
 
@@ -20,8 +18,6 @@ export function XtdhReceivedCollectionCard({
   collection,
   expanded,
   onToggle,
-  expandedTokens,
-  onToggleToken,
   granterHrefBuilder,
 }: XtdhReceivedCollectionCardProps) {
   const additionalGranters = useMemo(
@@ -106,8 +102,6 @@ export function XtdhReceivedCollectionCard({
                 <XtdhReceivedNftCard
                   key={token.tokenId}
                   nft={nftForCard}
-                  expanded={!!expandedTokens[token.tokenId]}
-                  onToggle={() => onToggleToken(token.tokenId)}
                   granterHrefBuilder={granterHrefBuilder}
                   showCollectionName={false}
                 />
