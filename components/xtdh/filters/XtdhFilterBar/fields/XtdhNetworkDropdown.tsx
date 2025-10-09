@@ -48,6 +48,9 @@ export default function XtdhNetworkDropdown({
     if (!hasNetworks) {
       return "No networks";
     }
+    if (normalizedNetworks.length === 1) {
+      return normalizedNetworks[0];
+    }
     if (allSelected) {
       return "All networks";
     }
@@ -55,7 +58,13 @@ export default function XtdhNetworkDropdown({
       return normalizedSelected[0];
     }
     return `${selectedCount.toLocaleString()} networks`;
-  }, [allSelected, hasNetworks, normalizedSelected, selectedCount]);
+  }, [
+    allSelected,
+    hasNetworks,
+    normalizedNetworks,
+    normalizedSelected,
+    selectedCount,
+  ]);
 
   const items = useMemo<CommonSelectItem<string>[]>(() => {
     if (!hasNetworks) {

@@ -40,7 +40,7 @@ describe("xTDH API routes", () => {
 
   it("returns filtered tokens", async () => {
     const request = {
-      url: "http://localhost/api/xtdh/tokens?network=polygon&min_rate=150",
+      url: "http://localhost/api/xtdh/tokens?network=ethereum&min_rate=150",
     } as Request;
 
     await getTokens(request);
@@ -49,7 +49,7 @@ describe("xTDH API routes", () => {
     expect(Array.isArray(payload.tokens)).toBe(true);
     expect(payload.tokens.length).toBeGreaterThan(0);
     for (const token of payload.tokens) {
-      expect(token.blockchain).toBe("polygon");
+      expect(token.blockchain).toBe("ethereum");
       expect(token.xtdhRate).toBeGreaterThanOrEqual(150);
     }
   });
@@ -110,7 +110,7 @@ describe("xTDH mock data helpers", () => {
       pageSize: 10,
       sort: "rate",
       dir: "desc",
-      networks: ["polygon"],
+      networks: ["ethereum"],
       grantorProfileId: null,
       holderProfileId: null,
       minGrantors: undefined,
@@ -119,7 +119,7 @@ describe("xTDH mock data helpers", () => {
 
     expect(result.tokens.length).toBeGreaterThan(0);
     result.tokens.forEach((token) => {
-      expect(token.blockchain).toBe("polygon");
+      expect(token.blockchain).toBe("ethereum");
       expect(token.xtdhRate).toBeGreaterThanOrEqual(150);
     });
   });

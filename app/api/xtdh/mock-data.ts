@@ -573,9 +573,18 @@ function buildGrantorPreviews(): XtdhGranterPreview[] {
 }
 
 const AVAILABLE_GRANTORS = buildGrantorPreviews();
-const AVAILABLE_NETWORKS = Array.from(
-  new Set(ECOSYSTEM_COLLECTIONS.map((collection) => collection.blockchain))
-).sort();
+const NETWORK_ALLOWLIST = new Set(["ethereum"]);
+const AVAILABLE_NETWORKS = (() => {
+  const derived = Array.from(
+    new Set(ECOSYSTEM_COLLECTIONS.map((collection) => collection.blockchain))
+  ).filter((network) => NETWORK_ALLOWLIST.has(network.toLowerCase()));
+
+  if (derived.length > 0) {
+    return derived.sort();
+  }
+
+  return Array.from(NETWORK_ALLOWLIST);
+})();
 
 export interface CollectionQueryOptions {
   readonly page: number;
