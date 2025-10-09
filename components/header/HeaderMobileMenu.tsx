@@ -215,9 +215,10 @@ export default function HeaderMobileMenu({
               {printMobileRow("Groups", "/network/groups")}
               {printMobileRow("NFT Activity", "/nft-activity")}
               {printMobileRow("Memes Calendar", "/meme-calendar")}
+              {printMobileRow("TDH", "/network/tdh")}
               {printMobileHr()}
               {printMobileSubheader("Metrics")}
-              {printMobileRow("Definitions", "/network/metrics")}
+              {printMobileRow("Definitions", "/network/definitions")}
               {printMobileRow("Network Stats", "/network/stats")}
               {printMobileRow("Levels", "/network/levels")}
               {printMobileHr()}

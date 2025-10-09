@@ -49,7 +49,7 @@ export default function GroupCardHeader({
               ? `/${group?.created_by.handle ?? userPlaceholder}`
               : userPlaceholder ?? ""
           }
-          className="tw-no-underline hover:tw-underline tw-transition tw-duration-300 tw-ease-out  tw-text-iron-50 hover:tw-text-iron-400">
+          className="tw-relative tw-z-20 tw-no-underline hover:tw-underline tw-transition tw-duration-300 tw-ease-out  tw-text-iron-50 hover:tw-text-iron-400">
           <span className="tw-text-sm tw-font-semibold">
             {group?.created_by.handle ?? userPlaceholder}
           </span>

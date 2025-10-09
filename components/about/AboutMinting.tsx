@@ -537,12 +537,12 @@ export default function AboutMinting() {
             </li>
             <br />
             <li>
-              For our full analysis of our Network Metrics, go here:{" "}
+              For our full analysis of our Network Definitions, go here:{" "}
               <Link
-                href="/network/metrics"
+                href="/network/definitions"
                 target="_blank"
                 rel="noopener noreferrer">
-                6529.io/network/metrics
+                6529.io/network/definitions
               </Link>
             </li>
           </ul>
