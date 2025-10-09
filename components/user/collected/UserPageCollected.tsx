@@ -26,8 +26,10 @@ import {
   convertAddressToLowerCase,
 } from "./filters/user-page-collected-filters.helpers";
 import UserPageCollectedFilters from "./filters/UserPageCollectedFilters";
+import TransferPanel from "./transfer/TransferPanel";
+import { TransferProvider } from "./transfer/TransferState";
+import TransferToggle from "./transfer/TransferToggle";
 import UserPageCollectedFirstLoading from "./UserPageCollectedFirstLoading";
-
 export interface ProfileCollectedFilters {
   readonly handleOrWallet: string;
   readonly accountForConsolidations: boolean;
@@ -450,7 +452,7 @@ export default function UserPageCollected({
       {isInitialLoading ? (
         <UserPageCollectedFirstLoading />
       ) : (
-        <>
+        <TransferProvider>
           <div
             className="tw-overflow-x-auto horizontal-menu-hide-scrollbar horizontal-menu-scrollable-x"
             ref={scrollContainer}>
@@ -465,17 +467,28 @@ export default function UserPageCollected({
               scrollHorizontally={scrollHorizontally}
             />
           </div>
-          <div className="tw-mt-6">
-            <UserPageCollectedCards
-              cards={data?.data ?? []}
-              totalPages={totalPages}
-              page={filters.page}
-              showDataRow={showDataRow}
-              filters={filters}
-              setPage={setPage}
-            />
+
+          {/* small control bar with Transfer toggle */}
+          <div className="tw-mt-3 tw-flex tw-justify-end">
+            <TransferToggle />
           </div>
-        </>
+
+          <div className="tw-mt-6 tw-flex tw-gap-6">
+            <div className="tw-flex-1">
+              <UserPageCollectedCards
+                cards={data?.data ?? []}
+                totalPages={totalPages}
+                page={filters.page}
+                showDataRow={showDataRow}
+                filters={filters}
+                setPage={setPage}
+              />
+            </div>
+
+            {/* appears only when transfer is enabled */}
+            <TransferPanel />
+          </div>
+        </TransferProvider>
       )}
     </div>
   );

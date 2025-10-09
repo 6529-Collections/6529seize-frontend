@@ -6,11 +6,6 @@ import { jwtDecode } from "jwt-decode";
 
 export const WALLET_AUTH_COOKIE = "wallet-auth";
 
-// TODO: remove these cookies once migration is complete
-const WALLET_ADDRESS_COOKIE = "wallet-address";
-const WALLET_REFRESH_TOKEN_COOKIE = "wallet-refresh-token";
-const WALLET_ROLE_COOKIE = "wallet-role";
-
 const WALLET_ADDRESS_STORAGE_KEY = "6529-wallet-address";
 const WALLET_REFRESH_TOKEN_STORAGE_KEY = "6529-wallet-refresh-token";
 const WALLET_ROLE_STORAGE_KEY = "6529-wallet-role";
