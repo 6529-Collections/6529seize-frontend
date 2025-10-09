@@ -99,13 +99,13 @@ export default function TDHMainPage() {
                   <li>
                     5th additional set:{" "}
                     <span className="tw-font-mono tw-font-medium">
-                      0.05 &times; 0.6529<sup>4</sup> = 0.009120
+                      0.05 &times; 0.6529<sup>4</sup> = 0.009086
                     </span>
                   </li>
                   <li>
                     10th additional set:{" "}
                     <span className="tw-font-mono tw-font-medium">
-                      0.05 &times; 0.6529<sup>9</sup> = 0.001469
+                      0.05 &times; 0.6529<sup>9</sup> = 0.001078
                     </span>
                   </li>
                 </ul>
