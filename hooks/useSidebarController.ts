@@ -76,7 +76,11 @@ export function useSidebarController() {
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(() => {
     try {
       const stored = safeSessionStorage.getItem("sidebarCollapsed");
-      return stored !== null ? JSON.parse(stored) : false;
+      if (stored === null) {
+        return false;
+      }
+      const parsed = JSON.parse(stored);
+      return typeof parsed === "boolean" ? parsed : false;
     } catch {
       return false; // Default to expanded on error
     }

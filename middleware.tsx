@@ -234,6 +234,36 @@ function handleRedirects(req: NextRequest): NextResponse | undefined {
   return undefined;
 }
 
+async function enforceAccessControl(
+  req: NextRequest,
+  normalizedPathname: string
+): Promise<NextResponse> {
+  if (normalizedPathname === "/access" || normalizedPathname === "/restricted") {
+    return NextResponse.next();
+  }
+
+  const apiAuth = req.cookies.get(API_AUTH_COOKIE) ?? {
+    value: publicEnv.STAGING_API_KEY ?? "",
+  };
+  const response = await fetch(`${publicEnv.API_ENDPOINT}/api/`, {
+    headers: apiAuth ? { "x-6529-auth": apiAuth.value } : {},
+  });
+
+  if (response.status === 401) {
+    req.nextUrl.pathname = "/access";
+    req.nextUrl.search = "";
+    return NextResponse.redirect(req.nextUrl);
+  }
+
+  if (response.status === 403) {
+    req.nextUrl.pathname = "/restricted";
+    req.nextUrl.search = "";
+    return NextResponse.redirect(req.nextUrl);
+  }
+
+  return NextResponse.next();
+}
+
 export async function middleware(req: NextRequest) {
   try {
     const redirectResponse = handleRedirects(req);
@@ -247,11 +277,9 @@ export async function middleware(req: NextRequest) {
         ? pathname.slice(0, -1)
         : pathname;
 
-    let redirectTarget: string | undefined;
-
-    if (normalizedPathname.startsWith("/my-stream")) {
-      redirectTarget = resolveMyStreamRedirect(req, normalizedPathname);
-    }
+    const redirectTarget = normalizedPathname.startsWith("/my-stream")
+      ? resolveMyStreamRedirect(req, normalizedPathname)
+      : undefined;
 
     if (redirectTarget) {
       const clone = req.nextUrl.clone();
@@ -261,41 +289,14 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(clone, 301);
     }
 
-    const matchesStaticPrefix = STATIC_PATH_PREFIXES.some(prefix =>
-      normalizedPathname.startsWith(prefix)
-    );
-    const matchesStaticSuffix = STATIC_PATH_SUFFIXES.some(suffix =>
-      normalizedPathname.endsWith(suffix)
-    );
-
-    if (matchesStaticPrefix || matchesStaticSuffix) {
+    if (
+      STATIC_PATH_PREFIXES.some(prefix => normalizedPathname.startsWith(prefix)) ||
+      STATIC_PATH_SUFFIXES.some(suffix => normalizedPathname.endsWith(suffix))
+    ) {
       return NextResponse.next();
     }
 
-    if (normalizedPathname !== "/access" && normalizedPathname !== "/restricted") {
-      const apiAuth = req.cookies.get(API_AUTH_COOKIE) ?? {
-        value: publicEnv.STAGING_API_KEY ?? "",
-      };
-      const r = await fetch(`${publicEnv.API_ENDPOINT}/api/`, {
-        headers: apiAuth ? { "x-6529-auth": apiAuth.value } : {},
-      });
-
-      if (r.status === 401) {
-        req.nextUrl.pathname = "/access";
-        req.nextUrl.search = "";
-        return NextResponse.redirect(req.nextUrl);
-      }
-
-      if (r.status === 403) {
-        req.nextUrl.pathname = "/restricted";
-        req.nextUrl.search = "";
-        return NextResponse.redirect(req.nextUrl);
-      }
-
-      return NextResponse.next();
-    }
-
-    return NextResponse.next();
+    return enforceAccessControl(req, normalizedPathname);
   } catch (error) {
     return NextResponse.redirect(new URL("/error", req.url));
   }
