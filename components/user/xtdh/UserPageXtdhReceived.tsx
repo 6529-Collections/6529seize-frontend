@@ -532,7 +532,6 @@ function CollectionsView({
               value={selectedCollections}
               onChange={handleCollectionsFilterChange}
               disabled={isLoading || isFetching}
-              label="Collections"
             />
           </div>
           <div className="tw-w-full lg:tw-w-auto">
@@ -858,7 +857,6 @@ function NftsView({
               value={selectedCollections}
               onChange={handleCollectionsFilterChange}
               disabled={isLoading || isFetching}
-              label="Collections"
             />
           </div>
           <div className="tw-w-full lg:tw-w-auto">

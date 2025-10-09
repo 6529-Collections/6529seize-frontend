@@ -24,7 +24,6 @@ export interface CollectionsAutocompleteProps {
   readonly value: ReadonlyArray<string>;
   readonly onChange: (next: string[]) => void;
   readonly disabled?: boolean;
-  readonly label?: string;
   readonly placeholder?: string;
   readonly noResultsText?: string;
 }
@@ -34,7 +33,6 @@ export default function CollectionsAutocomplete({
   value,
   onChange,
   disabled = false,
-  label,
   placeholder = "Search collections…",
   noResultsText = "No collections found.",
 }: Readonly<CollectionsAutocompleteProps>) {
@@ -224,107 +222,98 @@ export default function CollectionsAutocomplete({
 
   return (
     <div ref={containerRef} className="tw-flex tw-flex-col tw-gap-1.5">
-      {label ? (
-        <label
-          htmlFor={inputId}
-          className={classNames(
-            "tw-text-xs tw-font-semibold",
-            disabled ? "tw-text-iron-500" : "tw-text-iron-200"
-          )}
-        >
-          {label}
-        </label>
-      ) : null}
-      <div
-        className={classNames(
-          "tw-flex tw-min-h-[46px] tw-w-full tw-cursor-text tw-flex-wrap tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-transition tw-duration-300 tw-ease-out",
-          disabled
-            ? "tw-border-iron-800 tw-bg-iron-900/60 tw-text-iron-400 tw-opacity-80"
-            : "tw-border-iron-700 tw-bg-iron-900 hover:tw-border-iron-600"
-        )}
-        onClick={focusInput}
-        role="presentation"
-      >
-        {selectedOptions.map((option) => (
-          <span
-            key={option.id}
-            className="tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-850 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-text-iron-100"
-          >
-            <span>{option.name}</span>
-            <button
-              type="button"
-              className="tw-inline-flex tw-h-4 tw-w-4 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-transparent tw-bg-transparent tw-text-iron-400 hover:tw-text-error tw-transition tw-duration-200 tw-ease-out"
-              onClick={() => handleRemove(option.id)}
-              aria-label={`Remove ${option.name}`}
-            >
-              ×
-            </button>
-          </span>
-        ))}
-        <input
-          ref={inputRef}
-          id={inputId}
-          value={query}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          onFocus={handleInputFocus}
-          disabled={disabled}
-          placeholder={selectedOptions.length ? "Add another collection…" : placeholder}
-          aria-autocomplete="list"
-          aria-expanded={open}
-          aria-controls={listboxId}
-          aria-haspopup="listbox"
-          className={classNames(
-            "tw-flex-1 tw-min-w-[140px] tw-border-none tw-bg-transparent tw-text-sm tw-font-medium tw-text-iron-50 focus:tw-outline-none",
-            disabled ? "tw-cursor-not-allowed tw-text-iron-400" : "tw-cursor-text"
-          )}
-        />
-      </div>
-      {open && (
+      <div className="tw-relative">
         <div
-          ref={listboxRef}
-          id={listboxId}
-          role="listbox"
-          className="tw-z-20 tw-mt-1 tw-max-h-64 tw-w-full tw-overflow-y-auto tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-shadow-xl"
-        >
-          {hasNoResults ? (
-            <div className="tw-px-3.5 tw-py-3 tw-text-sm tw-text-iron-300">
-              {noResultsText}
-            </div>
-          ) : (
-            filteredOptions.map((option, index) => {
-              const isHighlighted = index === highlightedIndex;
-              return (
-                <button
-                  key={option.id}
-                  type="button"
-                  role="option"
-                  aria-selected={isHighlighted}
-                  onMouseEnter={() => handleOptionMouseEnter(index)}
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => handleSelect(option)}
-                  className={classNames(
-                    "tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-3.5 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-transition tw-duration-200 tw-ease-out",
-                    isHighlighted
-                      ? "tw-bg-primary-500/20 tw-text-primary-200"
-                      : "hover:tw-bg-iron-900 tw-text-iron-100"
-                  )}
-                >
-                  <span className="tw-flex tw-flex-col">
-                    <span>{option.name}</span>
-                    <span className="tw-text-xs tw-text-iron-400">{option.id}</span>
-                  </span>
-                  {typeof option.tokenCount === "number" ? (
-                    <span className="tw-text-xs tw-text-iron-400">
-                      {option.tokenCount.toLocaleString()} tokens
-                    </span>
-                  ) : null}
-                </button>
-              );
-            })
+          className={classNames(
+            "tw-flex tw-min-h-[46px] tw-w-full tw-cursor-text tw-flex-wrap tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-transition tw-duration-300 tw-ease-out",
+            disabled
+              ? "tw-border-iron-800 tw-bg-iron-900/60 tw-text-iron-400 tw-opacity-80"
+              : "tw-border-iron-700 tw-bg-iron-900 hover:tw-border-iron-600"
           )}
+          onClick={focusInput}
+          role="presentation"
+        >
+          {selectedOptions.map((option) => (
+            <span
+              key={option.id}
+              className="tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-850 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-text-iron-100"
+            >
+              <span>{option.name}</span>
+              <button
+                type="button"
+                className="tw-inline-flex tw-h-4 tw-w-4 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-transparent tw-bg-transparent tw-text-iron-400 hover:tw-text-error tw-transition tw-duration-200 tw-ease-out"
+                onClick={() => handleRemove(option.id)}
+                aria-label={`Remove ${option.name}`}
+              >
+                ×
+              </button>
+            </span>
+          ))}
+          <input
+            ref={inputRef}
+            id={inputId}
+            value={query}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            onFocus={handleInputFocus}
+            disabled={disabled}
+            placeholder={selectedOptions.length ? "Add another collection…" : placeholder}
+            aria-autocomplete="list"
+            aria-expanded={open}
+            aria-controls={listboxId}
+            aria-haspopup="listbox"
+            className={classNames(
+              "tw-flex-1 tw-min-w-[140px] tw-border-none tw-bg-transparent tw-text-sm tw-font-medium tw-text-iron-50 focus:tw-outline-none",
+              disabled ? "tw-cursor-not-allowed tw-text-iron-400" : "tw-cursor-text"
+            )}
+          />
         </div>
-      )}
+        {open && (
+          <div
+            ref={listboxRef}
+            id={listboxId}
+            role="listbox"
+            className="tw-absolute tw-left-0 tw-right-0 tw-top-full tw-z-20 tw-mt-1 tw-max-h-64 tw-overflow-y-auto tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-shadow-xl"
+          >
+            {hasNoResults ? (
+              <div className="tw-px-3.5 tw-py-3 tw-text-sm tw-text-iron-300">
+                {noResultsText}
+              </div>
+            ) : (
+              filteredOptions.map((option, index) => {
+                const isHighlighted = index === highlightedIndex;
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    role="option"
+                    aria-selected={isHighlighted}
+                    onMouseEnter={() => handleOptionMouseEnter(index)}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => handleSelect(option)}
+                    className={classNames(
+                      "tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-3.5 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-transition tw-duration-200 tw-ease-out",
+                      isHighlighted
+                        ? "tw-bg-primary-500/20 tw-text-primary-200"
+                        : "hover:tw-bg-iron-900 tw-text-iron-100"
+                    )}
+                  >
+                    <span className="tw-flex tw-flex-col">
+                      <span>{option.name}</span>
+                      <span className="tw-text-xs tw-text-iron-400">{option.id}</span>
+                    </span>
+                    {typeof option.tokenCount === "number" ? (
+                      <span className="tw-text-xs tw-text-iron-400">
+                        {option.tokenCount.toLocaleString()} tokens
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
