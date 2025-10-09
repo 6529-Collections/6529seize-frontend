@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { commonApiFetch } from "@/services/api/common-api";
 import {
-  TypedNotification,
   TypedNotificationsResponse,
 } from "@/types/feed.types";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
@@ -79,24 +78,19 @@ export function useNotificationsQuery({
   limit = "30",
   cause = null,
 }: UseNotificationsQueryProps) {
-  const queryClient = useQueryClient();
-
-  const [items, setItems] = useState<TypedNotification[]>([]);
-  const [isInitialQueryDone, setIsInitialQueryDone] = useState(false);
+  const prefetch = usePrefetchNotifications();
 
   /**
    * OPTIONAL: Prefetch the first few pages of notifications.
    * This is similar to how `useMyStreamQuery` sets up prefetching.
    */
-  queryClient.prefetchInfiniteQuery({
-    queryKey: getIdentityNotificationsQueryKey(identity, limit, cause),
-    queryFn: ({ pageParam }: { pageParam?: number | null }) =>
-      fetchNotifications({ limit, cause, pageParam }),
-    initialPageParam: null,
-    getNextPageParam: (lastPage) => lastPage.notifications.at(-1)?.id ?? null,
-    pages: 3,
-    staleTime: 60000,
-  });
+  useEffect(() => {
+    if (!identity || activeProfileProxy) {
+      return;
+    }
+
+    prefetch({ identity, limit, cause });
+  }, [prefetch, identity, activeProfileProxy, limit, cause]);
 
   /**
    * Now the actual Infinite Query for notifications
@@ -111,30 +105,19 @@ export function useNotificationsQuery({
     staleTime: 60000,
   });
 
-  useEffect(() => {
-    setItems([]);
-    setIsInitialQueryDone(false);
-  }, [identity, cause]);
-
-  /**
-   * Flatten all pages and (optionally) reverse them. Store in local state.
-   */
-  useEffect(() => {
+  const items = useMemo(() => {
     if (!query.data) {
-      return;
+      return [];
     }
 
-    let data: TypedNotification[] = (
+    const data = (
       query.data.pages as TypedNotificationsResponse[]
     ).flatMap((page) => page.notifications);
 
-    if (reverse) {
-      data = data.reverse();
-    }
-
-    setItems(data);
-    setIsInitialQueryDone(true);
+    return reverse ? [...data].reverse() : data;
   }, [query.data, reverse]);
+
+  const isInitialQueryDone = query.isSuccess || query.isError;
 
   // Return everything the query provides, plus our flattened items & readiness indicator.
   return {
@@ -147,26 +130,30 @@ export function useNotificationsQuery({
 export function usePrefetchNotifications() {
   const queryClient = useQueryClient();
 
-  return ({
-    identity,
-    cause = null,
-    limit = "30",
-  }: {
-    identity: string | null;
-    cause?: ApiNotificationCause[] | null;
-    limit?: string;
-  }) => {
-    if (!identity) {
-      return;
-    }
-    queryClient.prefetchInfiniteQuery({
-      queryKey: getIdentityNotificationsQueryKey(identity, limit, cause),
-      queryFn: ({ pageParam }: { pageParam?: number | null }) =>
-        fetchNotifications({ limit, cause, pageParam }),
-      initialPageParam: null,
-      getNextPageParam: (lastPage) => lastPage.notifications.at(-1)?.id ?? null,
-      pages: 3,
-      staleTime: 60000,
-    });
-  };
+  return useCallback(
+    ({
+      identity,
+      cause = null,
+      limit = "30",
+    }: {
+      identity: string | null;
+      cause?: ApiNotificationCause[] | null;
+      limit?: string;
+    }) => {
+      if (!identity) {
+        return;
+      }
+      queryClient.prefetchInfiniteQuery({
+        queryKey: getIdentityNotificationsQueryKey(identity, limit, cause),
+        queryFn: ({ pageParam }: { pageParam?: number | null }) =>
+          fetchNotifications({ limit, cause, pageParam }),
+        initialPageParam: null,
+        getNextPageParam: (lastPage) =>
+          lastPage.notifications.at(-1)?.id ?? null,
+        pages: 3,
+        staleTime: 60000,
+      });
+    },
+    [queryClient]
+  );
 }
