@@ -17,7 +17,7 @@ const BLANK_RUN_REGEX = new RegExp(
   "g"
 );
 const BLANK_PARAGRAPH_TOKEN_REGEX = new RegExp(
-  `${BLANK_PARAGRAPH_MARKER}\\n?`,
+  `${BLANK_PARAGRAPH_MARKER}(\\n?)`,
   "g"
 );
 
@@ -69,7 +69,10 @@ const collapseBlankParagraphMarkers = (markdown: string): string => {
     return "\n".repeat(markerCount);
   });
 
-  return collapsedRuns.replace(BLANK_PARAGRAPH_TOKEN_REGEX, "");
+  return collapsedRuns.replace(
+    BLANK_PARAGRAPH_TOKEN_REGEX,
+    (_match, trailingNewline: string) => `\n${trailingNewline}`
+  );
 };
 
 export const exportDropMarkdown = (

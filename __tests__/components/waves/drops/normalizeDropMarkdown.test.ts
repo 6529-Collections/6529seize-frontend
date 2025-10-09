@@ -47,6 +47,18 @@ describe("exportDropMarkdown", () => {
     expect(exportDropMarkdown(editorState, [])).toBe("First\n\n\n\nSecond");
   });
 
+  it("preserves trailing blank paragraphs", () => {
+    convertToMarkdownStringMock.mockReturnValue("First\n\n__BLANK_PARAGRAPH__");
+    expect(exportDropMarkdown(editorState, [])).toBe("First\n\n\n");
+  });
+
+  it("preserves multiple trailing blank paragraphs", () => {
+    convertToMarkdownStringMock.mockReturnValue(
+      "First\n\n__BLANK_PARAGRAPH__\n\n__BLANK_PARAGRAPH__"
+    );
+    expect(exportDropMarkdown(editorState, [])).toBe("First\n\n\n\n");
+  });
+
 });
 
 describe("normalizeDropMarkdown", () => {
