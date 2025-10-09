@@ -138,30 +138,23 @@ export function useXtdhFilters(connectedProfileId: string | null) {
       const currentDefault =
         view === "collections" ? DEFAULT_COLLECTION_SORT : DEFAULT_TOKEN_SORT;
 
-      const currentSort = view === "collections" ? collectionSort : tokenSort;
-      const isSame = currentSort === nextSort;
-      const nextDirection = isSame
-        ? direction === "asc"
-          ? "desc"
-          : "asc"
-        : DEFAULT_DIRECTION;
-
       updateQueryParams({
         sort: nextSort === currentDefault ? null : nextSort,
+        page: "1",
+      });
+    },
+    [updateQueryParams, view]
+  );
+
+  const setSortDirection = useCallback(
+    (nextDirection: "asc" | "desc") => {
+      updateQueryParams({
         dir: nextDirection === DEFAULT_DIRECTION ? null : nextDirection,
         page: "1",
       });
     },
-    [collectionSort, direction, tokenSort, updateQueryParams, view]
+    [updateQueryParams]
   );
-
-  const toggleDirection = useCallback(() => {
-    const nextDirection = direction === "asc" ? "desc" : "asc";
-    updateQueryParams({
-      dir: nextDirection === DEFAULT_DIRECTION ? null : nextDirection,
-      page: "1",
-    });
-  }, [direction, updateQueryParams]);
 
   const setNetworks = useCallback(
     (nextNetworks: string[]) => {
@@ -240,6 +233,19 @@ export function useXtdhFilters(connectedProfileId: string | null) {
     [updateQueryParams]
   );
 
+  const resetFilters = useCallback(() => {
+    updateQueryParams({
+      sort: null,
+      dir: null,
+      network: null,
+      min_rate: null,
+      min_grantors: null,
+      my_grants: null,
+      receiving: null,
+      page: "1",
+    });
+  }, [updateQueryParams]);
+
   return {
     view,
     collectionSort,
@@ -253,12 +259,13 @@ export function useXtdhFilters(connectedProfileId: string | null) {
     showMyReceiving,
     setView,
     setSort,
-    toggleDirection,
+    setSortDirection,
     setNetworks,
     setMinRate,
     setMinGrantors,
     toggleMyGrants,
     toggleMyReceiving,
     setPage,
+    resetFilters,
   };
 }

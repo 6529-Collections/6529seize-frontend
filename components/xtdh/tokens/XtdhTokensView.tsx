@@ -7,7 +7,7 @@ import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { XtdhEcosystemToken, XtdhEcosystemTokensResponse } from "@/types/xtdh";
 import XtdhFilterBar from "../filters/XtdhFilterBar";
 import { TOKEN_SORT_OPTIONS } from "../filters/constants";
-import type { XtdhTokensViewState } from "../filters/types";
+import type { XtdhTokensViewState, XtdhSortDirection } from "../filters/types";
 export type { XtdhTokensViewState } from "../filters/types";
 
 export const TOKENS_PAGE_SIZE = 25;
@@ -16,13 +16,14 @@ interface XtdhTokensViewProps {
   readonly state: XtdhTokensViewState;
   readonly connectedProfileId: string | null;
   readonly onSortChange: (sort: XtdhTokensViewState["sort"]) => void;
-  readonly onDirectionToggle: () => void;
+  readonly onDirectionChange: (direction: XtdhSortDirection) => void;
   readonly onNetworksChange: (networks: string[]) => void;
   readonly onMinRateChange: (value: number | undefined) => void;
   readonly onMinGrantorsChange: (value: number | undefined) => void;
   readonly onToggleMyGrants: (enabled: boolean) => void;
   readonly onToggleReceiving: (enabled: boolean) => void;
   readonly onPageChange: (page: number) => void;
+  readonly onClearAll: () => void;
   readonly query: UseQueryResult<XtdhEcosystemTokensResponse, Error>;
 }
 
@@ -30,13 +31,14 @@ export default function XtdhTokensView({
   state,
   connectedProfileId,
   onSortChange,
-  onDirectionToggle,
+  onDirectionChange,
   onNetworksChange,
   onMinRateChange,
   onMinGrantorsChange,
   onToggleMyGrants,
   onToggleReceiving,
   onPageChange,
+  onClearAll,
   query,
 }: Readonly<XtdhTokensViewProps>) {
   const { data, isLoading, isError, error, isFetching, refetch } = query;
@@ -121,12 +123,13 @@ export default function XtdhTokensView({
         availableNetworks={availableNetworks}
         disableInteractions={disableInteractions}
         onSortChange={onSortChange}
-        onDirectionToggle={onDirectionToggle}
+        onDirectionChange={onDirectionChange}
         onNetworksChange={onNetworksChange}
         onMinRateChange={onMinRateChange}
         onMinGrantorsChange={onMinGrantorsChange}
         onToggleMyGrants={onToggleMyGrants}
         onToggleReceiving={onToggleReceiving}
+        onClearAll={onClearAll}
       />
 
       <div className="tw-flex tw-flex-col tw-gap-4">

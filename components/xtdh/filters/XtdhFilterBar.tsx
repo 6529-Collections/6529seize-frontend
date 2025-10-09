@@ -1,20 +1,23 @@
 "use client";
 
-import { useCallback } from "react";
-import CommonSelect, {
-  type CommonSelectItem,
-} from "@/components/utils/select/CommonSelect";
-import CommonSwitch from "@/components/utils/switch/CommonSwitch";
-import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
+import { useCallback, useMemo, useState } from "react";
+import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import { classNames } from "@/helpers/Helpers";
-import { SortDirection } from "@/entities/ISort";
+import {
+  ACTIVITY_LABELS,
+  DEFAULT_COLLECTION_SORT,
+  DEFAULT_DIRECTION,
+  DEFAULT_TOKEN_SORT,
+} from "./constants";
+import SortDropdown from "./SortDropdown";
+import MobileFilterDrawer from "./MobileFilterDrawer";
 import type { ActivityLabels } from "./constants";
-import { ACTIVITY_LABELS } from "./constants";
 import type {
   XtdhFilterState,
   XtdhCollectionsSort,
   XtdhTokensSort,
   XtdhView,
+  XtdhSortDirection,
 } from "./types";
 
 type XtdhSortValue = XtdhCollectionsSort | XtdhTokensSort;
@@ -27,12 +30,13 @@ interface XtdhFilterBarProps<SortValue extends XtdhSortValue> {
   readonly availableNetworks: string[];
   readonly disableInteractions: boolean;
   readonly onSortChange: (sort: SortValue) => void;
-  readonly onDirectionToggle: () => void;
+  readonly onDirectionChange: (direction: XtdhSortDirection) => void;
   readonly onNetworksChange: (networks: string[]) => void;
   readonly onMinRateChange: (value: number | undefined) => void;
   readonly onMinGrantorsChange: (value: number | undefined) => void;
   readonly onToggleMyGrants: (enabled: boolean) => void;
   readonly onToggleReceiving: (enabled: boolean) => void;
+  readonly onClearAll: () => void;
   readonly activityLabels?: ActivityLabels;
 }
 
@@ -44,26 +48,46 @@ export default function XtdhFilterBar<SortValue extends XtdhSortValue>({
   availableNetworks,
   disableInteractions,
   onSortChange,
-  onDirectionToggle,
+  onDirectionChange,
   onNetworksChange,
   onMinRateChange,
   onMinGrantorsChange,
   onToggleMyGrants,
   onToggleReceiving,
+  onClearAll,
   activityLabels = ACTIVITY_LABELS[view],
 }: Readonly<XtdhFilterBarProps<SortValue>>) {
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+  const defaultSort =
+    view === "collections" ? DEFAULT_COLLECTION_SORT : DEFAULT_TOKEN_SORT;
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    count += state.networks.length;
+    if (typeof state.minRate === "number") count += 1;
+    if (typeof state.minGrantors === "number") count += 1;
+    if (state.showMyGrants) count += 1;
+    if (state.showMyReceiving) count += 1;
+    if (state.sort !== defaultSort) count += 1;
+    if (state.direction !== DEFAULT_DIRECTION) count += 1;
+    return count;
+  }, [state, defaultSort]);
+
   const handleNetworkToggle = useCallback(
     (network: string) => {
+      if (disableInteractions) return;
       const nextNetworks = state.networks.includes(network)
         ? state.networks.filter((item) => item !== network)
         : [...state.networks, network];
       onNetworksChange(nextNetworks);
     },
-    [onNetworksChange, state.networks]
+    [disableInteractions, onNetworksChange, state.networks]
   );
 
   const handleMinRateInput = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
+      if (disableInteractions) return;
       const { value } = event.target;
       if (value === "") {
         onMinRateChange(undefined);
@@ -73,11 +97,12 @@ export default function XtdhFilterBar<SortValue extends XtdhSortValue>({
       const parsed = Number.parseFloat(value);
       onMinRateChange(Number.isFinite(parsed) ? parsed : undefined);
     },
-    [onMinRateChange]
+    [disableInteractions, onMinRateChange]
   );
 
   const handleMinGrantorsInput = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
+      if (disableInteractions) return;
       const { value } = event.target;
       if (value === "") {
         onMinGrantorsChange(undefined);
@@ -87,138 +112,293 @@ export default function XtdhFilterBar<SortValue extends XtdhSortValue>({
       const parsed = Number.parseInt(value, 10);
       onMinGrantorsChange(Number.isFinite(parsed) ? parsed : undefined);
     },
-    [onMinGrantorsChange]
+    [disableInteractions, onMinGrantorsChange]
   );
 
-  const minRateId = view === "collections" ? "xtdh-collections-min-rate" : "xtdh-tokens-min-rate";
-  const minGrantorsId =
-    view === "collections" ? "xtdh-collections-min-grantors" : "xtdh-tokens-min-grantors";
+  const handleSortSelect = useCallback(
+    (value: SortValue) => {
+      if (disableInteractions) return;
+      const isChanging = state.sort !== value;
+      onSortChange(value);
+      if (isChanging && state.direction !== DEFAULT_DIRECTION) {
+        onDirectionChange(DEFAULT_DIRECTION);
+      }
+    },
+    [disableInteractions, onSortChange, state.direction, onDirectionChange, state.sort]
+  );
 
-  const personalFiltersDisabled = !connectedProfileId;
-  const sortDirection =
-    state.direction === "asc" ? SortDirection.ASC : SortDirection.DESC;
+  const handleSortWithDirection = useCallback(
+    (value: SortValue, direction: XtdhSortDirection) => {
+      if (disableInteractions) return;
+      if (state.sort !== value) {
+        onSortChange(value);
+      }
+      onDirectionChange(direction);
+    },
+    [disableInteractions, onDirectionChange, onSortChange, state.sort]
+  );
+
+  const handleToggleMyGrants = useCallback(
+    (enabled: boolean) => {
+      if (disableInteractions) return;
+      onToggleMyGrants(enabled);
+    },
+    [disableInteractions, onToggleMyGrants]
+  );
+
+  const handleToggleReceiving = useCallback(
+    (enabled: boolean) => {
+      if (disableInteractions) return;
+      onToggleReceiving(enabled);
+    },
+    [disableInteractions, onToggleReceiving]
+  );
+
+  const minRateId =
+    view === "collections"
+      ? "xtdh-collections-min-rate"
+      : "xtdh-tokens-min-rate";
+  const minGrantorsId =
+    view === "collections"
+      ? "xtdh-collections-min-grantors"
+      : "xtdh-tokens-min-grantors";
+
+  const personalFiltersDisabled =
+    !connectedProfileId || disableInteractions;
 
   return (
-    <div
-      className="tw-grid tw-gap-4 lg:tw-grid-cols-2 xl:tw-grid-cols-[1.5fr_1fr]"
-      role="region"
-      aria-label="Filters"
-    >
-      <div className="tw-space-y-3">
-        <label className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
-          Sort By
-        </label>
-          <div className="tw-flex tw-items-center tw-gap-3">
-            <div className="tw-flex-1">
-              <CommonSelect
-                items={[...sortOptions]}
-                activeItem={state.sort}
-                filterLabel={`Sort ${view}`}
-                setSelected={onSortChange}
-                sortDirection={sortDirection}
-                disabled={disableInteractions}
-              />
+    <>
+      <div className="tw-hidden md:tw-flex md:tw-flex-col md:tw-space-y-4 md:tw-border-b md:tw-border-iron-800 md:tw-pb-4">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+            <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
+              Network
+            </span>
+            <div className="tw-flex tw-flex-wrap tw-gap-3">
+              {availableNetworks.length === 0 ? (
+                <span className="tw-text-sm tw-text-iron-400">
+                  {disableInteractions
+                    ? "Loading networks…"
+                    : "No network filters available."}
+                </span>
+              ) : (
+                availableNetworks.map((network) => (
+                  <button
+                    key={network}
+                    type="button"
+                    onClick={() => handleNetworkToggle(network)}
+                    disabled={disableInteractions}
+                    className={classNames(
+                      "tw-h-10 tw-rounded-full tw-border tw-border-iron-800 tw-px-4 tw-text-sm tw-font-semibold tw-transition focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-0",
+                      disableInteractions
+                        ? "tw-bg-iron-900 tw-text-iron-500 tw-cursor-not-allowed"
+                        : state.networks.includes(network)
+                        ? "tw-bg-primary-500 tw-text-iron-950"
+                        : "tw-bg-iron-900 tw-text-iron-200 hover:tw-bg-iron-800"
+                    )}
+                  >
+                    {network}
+                  </button>
+                ))
+              )}
             </div>
-          <button
-            type="button"
-            onClick={onDirectionToggle}
+          </div>
+          <SortDropdown
+            options={sortOptions}
+            value={state.sort}
+            direction={state.direction}
+            onSelect={handleSortSelect}
+            onSelectWithDirection={handleSortWithDirection}
             disabled={disableInteractions}
-            className={classNames(
-              "tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-0 tw-transition tw-duration-200",
-              disableInteractions ? "tw-opacity-50 tw-cursor-not-allowed" : "hover:tw-bg-iron-800"
-            )}
-            aria-label={`Sort direction: ${state.direction === "desc" ? "descending" : "ascending"}`}
-          >
-            <CommonTableSortIcon direction={sortDirection} isActive={true} />
-          </button>
+          />
+        </div>
+
+        <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-3">
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+            <NumberField
+              id={minRateId}
+              label="Minimum xTDH Rate"
+              value={state.minRate}
+              placeholder="Any"
+              onChange={handleMinRateInput}
+              disabled={disableInteractions}
+            />
+            <NumberField
+              id={minGrantorsId}
+              label="Minimum Grantors"
+              value={state.minGrantors}
+              placeholder="Any"
+              onChange={handleMinGrantorsInput}
+              disabled={disableInteractions}
+            />
+          </div>
+          <div className="tw-flex tw-flex-col tw-items-end tw-gap-2">
+            <CheckboxField
+              id={`${view}-my-grants`}
+              label={activityLabels.allocated}
+              checked={state.showMyGrants && Boolean(connectedProfileId)}
+              onChange={handleToggleMyGrants}
+              disabled={personalFiltersDisabled}
+            />
+            <CheckboxField
+              id={`${view}-receiving`}
+              label={activityLabels.receiving}
+              checked={state.showMyReceiving && Boolean(connectedProfileId)}
+              onChange={handleToggleReceiving}
+              disabled={personalFiltersDisabled}
+            />
+            {!connectedProfileId ? (
+              <span className="tw-text-xs tw-text-amber-300">
+                Connect to a profile to enable personal filters.
+              </span>
+            ) : null}
+          </div>
         </div>
       </div>
 
-      <div className="tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4">
-        <div className="tw-space-y-2">
-          <p className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400 tw-m-0">
-            Network
-          </p>
-          <div className="tw-flex tw-flex-wrap tw-gap-2">
-            {availableNetworks.length === 0 ? (
-              <span className="tw-text-sm tw-text-iron-400">
-                {disableInteractions ? "Loading networks…" : "No network filters available."}
-              </span>
-            ) : (
-              availableNetworks.map((network) => (
-                <button
-                  key={network}
-                  type="button"
-                  onClick={() => handleNetworkToggle(network)}
-                  className={classNames(
-                    "tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-iron-700 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-transition focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-0",
-                    state.networks.includes(network)
-                      ? "tw-bg-primary-500 tw-text-iron-50"
-                      : "tw-bg-iron-800 tw-text-iron-200 hover:tw-bg-iron-700"
-                  )}
-                >
-                  {network}
-                </button>
-              ))
-            )}
-          </div>
-        </div>
-        <div className="tw-grid tw-grid-cols-2 tw-gap-3">
-          <div>
-            <label
-              htmlFor={minRateId}
-              className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400 tw-block tw-mb-1"
-            >
-              Minimum xTDH Rate
-            </label>
-            <input
-              id={minRateId}
-              name={`${view}-min-rate`}
-              type="number"
-              min={0}
-              value={state.minRate ?? ""}
-              onChange={handleMinRateInput}
-              placeholder="Any"
-              className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-50 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400"
-            />
-          </div>
-          <div>
-            <label
-              htmlFor={minGrantorsId}
-              className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400 tw-block tw-mb-1"
-            >
-              Minimum Grantors
-            </label>
-            <input
-              id={minGrantorsId}
-              name={`${view}-min-grantors`}
-              type="number"
-              min={0}
-              value={state.minGrantors ?? ""}
-              onChange={handleMinGrantorsInput}
-              placeholder="Any"
-              className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-50 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400"
-            />
-          </div>
-        </div>
-        <div className="tw-flex tw-flex-col tw-gap-2">
-          <CommonSwitch
-            label={activityLabels.allocated}
-            isOn={state.showMyGrants && Boolean(connectedProfileId)}
-            setIsOn={onToggleMyGrants}
-          />
-          <CommonSwitch
-            label={activityLabels.receiving}
-            isOn={state.showMyReceiving && Boolean(connectedProfileId)}
-            setIsOn={onToggleReceiving}
-          />
-          {personalFiltersDisabled && (
-            <p className="tw-text-xs tw-text-amber-300 tw-m-0">
-              Connect to a profile to enable personal filters.
-            </p>
-          )}
-        </div>
+      <div className="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-iron-800 tw-pb-4 md:tw-hidden">
+        <button
+          type="button"
+          onClick={() => setIsMobileOpen(true)}
+          className="tw-inline-flex tw-h-10 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-50 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-0"
+        >
+          <span aria-hidden="true">☰</span>
+          <span>Filters &amp; Sort</span>
+          {activeFilterCount > 0 ? (
+            <span className="tw-inline-flex tw-h-6 tw-min-w-[1.5rem] tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500 tw-px-2 tw-text-xs tw-font-bold tw-text-iron-950">
+              {activeFilterCount}
+            </span>
+          ) : null}
+        </button>
+        <SortSummary
+          sortOptions={sortOptions}
+          sort={state.sort}
+          direction={state.direction}
+        />
       </div>
+
+      <MobileFilterDrawer
+        isOpen={isMobileOpen}
+        onClose={() => setIsMobileOpen(false)}
+        sortOptions={sortOptions}
+        sort={state.sort}
+        direction={state.direction}
+        onSelectSort={handleSortSelect}
+        onSelectSortWithDirection={handleSortWithDirection}
+        availableNetworks={availableNetworks}
+        selectedNetworks={state.networks}
+        onToggleNetwork={handleNetworkToggle}
+        minRate={state.minRate}
+        minGrantors={state.minGrantors}
+        onMinRateChange={onMinRateChange}
+        onMinGrantorsChange={onMinGrantorsChange}
+        showMyGrants={state.showMyGrants}
+        showMyReceiving={state.showMyReceiving}
+        onToggleMyGrants={handleToggleMyGrants}
+        onToggleReceiving={handleToggleReceiving}
+        connectedProfileId={connectedProfileId}
+        onClearAll={() => {
+          onClearAll();
+          setIsMobileOpen(false);
+        }}
+        disabled={disableInteractions}
+      />
+    </>
+  );
+}
+
+function NumberField({
+  id,
+  label,
+  value,
+  placeholder,
+  onChange,
+  disabled,
+}: {
+  readonly id: string;
+  readonly label: string;
+  readonly value?: number;
+  readonly placeholder?: string;
+  readonly onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  readonly disabled?: boolean;
+}) {
+  return (
+    <label className="tw-flex tw-flex-col tw-gap-1">
+      <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
+        {label}
+      </span>
+      <input
+        id={id}
+        type="number"
+        min={0}
+        value={value ?? ""}
+        onChange={onChange}
+        placeholder={placeholder}
+        disabled={disabled}
+        className={classNames(
+          "tw-h-10 tw-w-44 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-iron-50 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400",
+          disabled ? "tw-opacity-50 tw-cursor-not-allowed" : ""
+        )}
+      />
+    </label>
+  );
+}
+
+function CheckboxField({
+  id,
+  label,
+  checked,
+  onChange,
+  disabled,
+}: {
+  readonly id: string;
+  readonly label: string;
+  readonly checked: boolean;
+  readonly onChange: (value: boolean) => void;
+  readonly disabled?: boolean;
+}) {
+  return (
+    <label
+      htmlFor={id}
+      className={classNames(
+        "tw-flex tw-items-center tw-gap-2 tw-text-sm tw-font-medium",
+        disabled ? "tw-text-iron-500" : "tw-text-iron-200"
+      )}
+    >
+      <input
+        id={id}
+        type="checkbox"
+        checked={checked}
+        onChange={(event) => onChange(event.target.checked)}
+        disabled={disabled}
+        className="tw-h-5 tw-w-5 tw-rounded tw-border tw-border-iron-800 tw-bg-iron-950 focus:tw-ring-primary-400"
+      />
+      <span>{label}</span>
+    </label>
+  );
+}
+
+function SortSummary<SortValue extends string>({
+  sortOptions,
+  sort,
+  direction,
+}: {
+  readonly sortOptions: ReadonlyArray<CommonSelectItem<SortValue>>;
+  readonly sort: SortValue;
+  readonly direction: XtdhSortDirection;
+}) {
+  const activeOption = useMemo(
+    () => sortOptions.find((option) => option.value === sort),
+    [sortOptions, sort]
+  );
+
+  if (!activeOption) {
+    return null;
+  }
+
+  return (
+    <div className="tw-text-xs tw-font-medium tw-text-iron-300">
+      {activeOption.label} {direction === "asc" ? "↑" : "↓"}
     </div>
   );
 }

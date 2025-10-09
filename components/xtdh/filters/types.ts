@@ -14,9 +14,11 @@ export type XtdhTokensSort =
   | "collection"
   | "name";
 
+export type XtdhSortDirection = "asc" | "desc";
+
 export interface XtdhFilterState<SortValue extends string> {
   readonly sort: SortValue;
-  readonly direction: "asc" | "desc";
+  readonly direction: XtdhSortDirection;
   readonly networks: string[];
   readonly minRate?: number;
   readonly minGrantors?: number;

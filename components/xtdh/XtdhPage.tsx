@@ -32,13 +32,14 @@ export default function XtdhPage() {
     showMyReceiving,
     setView,
     setSort,
-    toggleDirection,
+    setSortDirection,
     setNetworks,
     setMinRate,
     setMinGrantors,
     toggleMyGrants,
     toggleMyReceiving,
     setPage,
+    resetFilters,
   } = useXtdhFilters(connectedProfileId);
 
   const sharedState = {
@@ -54,13 +55,14 @@ export default function XtdhPage() {
   const sharedViewProps = {
     connectedProfileId,
     onSortChange: setSort,
-    onDirectionToggle: toggleDirection,
+    onDirectionChange: setSortDirection,
     onNetworksChange: setNetworks,
     onMinRateChange: setMinRate,
     onMinGrantorsChange: setMinGrantors,
     onToggleMyGrants: toggleMyGrants,
     onToggleReceiving: toggleMyReceiving,
     onPageChange: setPage,
+    onClearAll: resetFilters,
   };
 
   const collectionsQuery = useXtdhCollections({

@@ -3,9 +3,10 @@ import type {
   XtdhCollectionsSort,
   XtdhTokensSort,
   XtdhView,
+  XtdhSortDirection,
 } from "./types";
 
-export const DEFAULT_DIRECTION: "asc" | "desc" = "desc";
+export const DEFAULT_DIRECTION: XtdhSortDirection = "desc";
 export const DEFAULT_COLLECTION_SORT: XtdhCollectionsSort = "total_rate";
 export const DEFAULT_TOKEN_SORT: XtdhTokensSort = "rate";
 

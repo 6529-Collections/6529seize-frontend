@@ -8,7 +8,7 @@ import type { XtdhEcosystemCollection } from "@/types/xtdh";
 import type { XtdhEcosystemCollectionsResponse } from "@/types/xtdh";
 import XtdhFilterBar from "../filters/XtdhFilterBar";
 import { COLLECTION_SORT_OPTIONS } from "../filters/constants";
-import type { XtdhCollectionsViewState } from "../filters/types";
+import type { XtdhCollectionsViewState, XtdhSortDirection } from "../filters/types";
 export type { XtdhCollectionsViewState } from "../filters/types";
 
 export const COLLECTIONS_PAGE_SIZE = 20;
@@ -17,13 +17,14 @@ interface XtdhCollectionsViewProps {
   readonly state: XtdhCollectionsViewState;
   readonly connectedProfileId: string | null;
   readonly onSortChange: (sort: XtdhCollectionsViewState["sort"]) => void;
-  readonly onDirectionToggle: () => void;
+  readonly onDirectionChange: (direction: XtdhSortDirection) => void;
   readonly onNetworksChange: (networks: string[]) => void;
   readonly onMinRateChange: (value: number | undefined) => void;
   readonly onMinGrantorsChange: (value: number | undefined) => void;
   readonly onToggleMyGrants: (enabled: boolean) => void;
   readonly onToggleReceiving: (enabled: boolean) => void;
   readonly onPageChange: (page: number) => void;
+  readonly onClearAll: () => void;
   readonly query: UseQueryResult<XtdhEcosystemCollectionsResponse, Error>;
 }
 
@@ -31,13 +32,14 @@ export default function XtdhCollectionsView({
   state,
   connectedProfileId,
   onSortChange,
-  onDirectionToggle,
+  onDirectionChange,
   onNetworksChange,
   onMinRateChange,
   onMinGrantorsChange,
   onToggleMyGrants,
   onToggleReceiving,
   onPageChange,
+  onClearAll,
   query,
 }: Readonly<XtdhCollectionsViewProps>) {
   const { data, isLoading, isError, error, isFetching, refetch } = query;
@@ -122,12 +124,13 @@ export default function XtdhCollectionsView({
         availableNetworks={availableNetworks}
         disableInteractions={disableInteractions}
         onSortChange={onSortChange}
-        onDirectionToggle={onDirectionToggle}
+        onDirectionChange={onDirectionChange}
         onNetworksChange={onNetworksChange}
         onMinRateChange={onMinRateChange}
         onMinGrantorsChange={onMinGrantorsChange}
         onToggleMyGrants={onToggleMyGrants}
         onToggleReceiving={onToggleReceiving}
+        onClearAll={onClearAll}
       />
 
       <div className="tw-flex tw-flex-col tw-gap-4">
