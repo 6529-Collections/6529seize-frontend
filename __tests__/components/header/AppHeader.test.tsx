@@ -118,8 +118,8 @@ describe("AppHeader", () => {
     expect(screen.getByText("The Memes #123")).toBeInTheDocument();
   });
 
-  it("shows My Feed title on home feed tab", () => {
+  it("shows My Stream title on home feed tab", () => {
     setup({ asPath: "/", homeActiveTab: "feed" });
-    expect(screen.getByText("My Feed")).toBeInTheDocument();
+    expect(screen.getByText("My Stream")).toBeInTheDocument();
   });
 });

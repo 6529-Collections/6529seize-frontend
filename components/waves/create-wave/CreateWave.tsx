@@ -28,6 +28,8 @@ import useCapacitor from "@/hooks/useCapacitor";
 import CreateWaveFlow from "./CreateWaveFlow";
 import { multiPartUpload } from "./services/multiPartUpload";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 export default function CreateWave({
   profile,
   onBack,
@@ -75,6 +77,7 @@ export default function CreateWave({
     // Chat
     onChatEnabledChange,
   } = useWaveConfig();
+  const { isApp } = useDeviceInfo();
 
   const createWaveDescriptionRef = useRef<CreateWaveDescriptionHandles | null>(
     null
@@ -85,7 +88,17 @@ export default function CreateWave({
       waitAndInvalidateDrops();
       onWaveCreated();
       onSuccess?.();
-      router.push(`/waves?wave=${response.id}`);
+      if (isApp) {
+        router.replace(
+          getWaveRoute({
+            waveId: response.id,
+            isDirectMessage: false,
+            isApp: true,
+          })
+        );
+      } else {
+        router.push(`/waves?wave=${response.id}`);
+      }
     },
     onError: (error) => {
       setToast({

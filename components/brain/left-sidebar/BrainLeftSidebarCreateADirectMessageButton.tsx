@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import React, { useMemo } from "react";
 import { useAuth } from "@/components/auth/Auth";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 interface BrainLeftSidebarCreateADirectMessageButtonProps {}
 
@@ -13,6 +14,7 @@ const BrainLeftSidebarCreateADirectMessageButton: React.FC<
   BrainLeftSidebarCreateADirectMessageButtonProps
 > = () => {
   const { connectedProfile, activeProfileProxy } = useAuth();
+  const { isApp } = useDeviceInfo();
 
   const isConnectedIdentity = useMemo(() => {
     return !!connectedProfile?.handle && !activeProfileProxy;
@@ -27,7 +29,7 @@ const BrainLeftSidebarCreateADirectMessageButton: React.FC<
 
   return (
     <Link
-      href={CREATE_DIRECT_MESSAGE_SEARCH_PATH}
+      href={isApp ? "/messages/create" : CREATE_DIRECT_MESSAGE_SEARCH_PATH}
       className="tw-no-underline tw-ring-1 tw-ring-inset tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-700 tw-text-iron-300 tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-py-2 tw-px-4 tw-text-xs tw-bg-iron-800 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-transition-all tw-duration-300">
       <FontAwesomeIcon
         icon={faPaperPlane}

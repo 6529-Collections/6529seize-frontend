@@ -1,6 +1,6 @@
 "use client";
 
-import React, { forwardRef } from "react";
+import { forwardRef } from "react";
 
 type TabType = "feed" | "latest";
 
@@ -31,7 +31,7 @@ const HomePageTabs = forwardRef<HTMLDivElement, HomePageTabsProps>(
                     : "tw-text-iron-500 group-hover:desktop-hover:hover:tw-text-iron-300 tw-whitespace-nowrap tw-px-1 tw-border-transparent tw-transition tw-duration-300 tw-ease-out"
                 }`}
               >
-                My Feed
+                My Stream
               </span>
             </button>
             <button

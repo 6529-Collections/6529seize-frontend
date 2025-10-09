@@ -149,7 +149,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
         <>
           <button
             type="button"
-            className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-[49] tw-border-0"
+            className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-[70] tw-border-0"
             onClick={closeRightSidebar}
             onKeyDown={(event) => {
               if (event.key === "Escape") {

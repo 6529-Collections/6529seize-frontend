@@ -1,13 +1,13 @@
 "use client"
 
-import FeedWrapper from "../feed/FeedWrapper";
-import { TypedFeedItem } from "@/types/feed.types";
-import { ActiveDropState } from "@/types/dropInteractionTypes";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropInteractionParams } from "@/components/waves/drops/Drop";
 import { useSetStreamHasNewItems } from "@/contexts/TitleContext";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
+import { TypedFeedItem } from "@/types/feed.types";
 import { useMemo } from "react";
 import SpinnerLoader from "../../common/SpinnerLoader";
+import FeedWrapper from "../feed/FeedWrapper";
 import { useLayout } from "./layout/LayoutContext";
 
 interface MyStreamProps {
@@ -53,7 +53,7 @@ export default function MyStream({
           className="tw-relative tw-flex tw-flex-col tw-rounded-t-xl"
           style={myStreamFeedStyle}
         >
-          <SpinnerLoader text="Loading My Feed..." />
+          <SpinnerLoader text="Loading My Stream..." />
         </div>
       ) : (
         <FeedWrapper

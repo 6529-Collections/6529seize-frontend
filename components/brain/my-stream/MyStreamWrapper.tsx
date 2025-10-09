@@ -15,7 +15,6 @@ import {
 } from "@/types/dropInteractionTypes";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropInteractionParams } from "@/components/waves/drops/Drop";
-import { SidebarProvider } from "../../../hooks/useSidebarState";
 
 const MyStreamWrapper: React.FC = () => {
   const searchParams = useSearchParams();
@@ -104,13 +103,11 @@ const MyStreamWrapper: React.FC = () => {
   );
 
   return (
-    <SidebarProvider>
-      <BrainContent
-        activeDrop={activeDrop}
-        onCancelReplyQuote={onCancelReplyQuote}>
-        {component}
-      </BrainContent>
-    </SidebarProvider>
+    <BrainContent
+      activeDrop={activeDrop}
+      onCancelReplyQuote={onCancelReplyQuote}>
+      {component}
+    </BrainContent>
   );
 };
 

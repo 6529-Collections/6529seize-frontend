@@ -12,6 +12,11 @@ jest.mock("next/navigation", () => ({
   usePathname: () => "/waves",
 }));
 
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: jest.fn(() => ({ isApp: false })),
+}));
+
 jest.mock("@/components/waves/create-wave/CreateWave", () => {
   return () => <div data-testid="create-wave">CreateWave</div>;
 });
@@ -32,6 +37,7 @@ jest.mock("@/components/waves/list/WavesList", () => {
 });
 
 const { useSearchParams } = jest.requireMock("next/navigation");
+const { default: useDeviceInfo } = require("@/hooks/useDeviceInfo");
 
 const baseAuth = {
   connectedProfile: { handle: "alice" },
@@ -85,4 +91,22 @@ it("navigates on button clicks", async () => {
 
   await user.click(screen.getByText("open-create-dm"));
   expect(push).toHaveBeenCalledWith("/waves?create=dm");
+});
+
+it("navigates to app create routes when running in app", async () => {
+  const push = jest.fn();
+  const deviceInfoMock = useDeviceInfo as jest.Mock;
+  deviceInfoMock.mockReturnValue({ isApp: true });
+  (useRouter as jest.Mock).mockReturnValue({ push });
+
+  const user = userEvent.setup();
+  renderWaves(new Map());
+
+  await user.click(screen.getByText("open-create-wave"));
+  expect(push).toHaveBeenCalledWith("/waves/create");
+
+  await user.click(screen.getByText("open-create-dm"));
+  expect(push).toHaveBeenCalledWith("/messages/create");
+
+  deviceInfoMock.mockReturnValue({ isApp: false });
 });

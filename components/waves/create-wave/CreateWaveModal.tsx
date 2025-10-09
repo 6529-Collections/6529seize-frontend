@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import CreateWave from "./CreateWave";
-import { ApiIdentity } from "../../../generated/models/ApiIdentity";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { ApiIdentity } from "../../../generated/models/ApiIdentity";
+import CreateWave from "./CreateWave";
 
 interface CreateWaveModalProps {
   readonly isOpen: boolean;

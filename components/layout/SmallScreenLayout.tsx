@@ -6,6 +6,7 @@ import WebSidebar from "./sidebar/WebSidebar";
 import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import { useSearchParams } from "next/navigation";
+import { SidebarProvider } from "../../hooks/useSidebarState";
 
 interface Props {
   readonly children: ReactNode;
@@ -60,12 +61,13 @@ export default function SmallScreenLayout({ children }: Props) {
   // Focus and ESC handling are managed inside WebSidebar on mobile
 
   return (
-    <div
-      ref={containerRef}
-      className={`tw-bg-black ${
-        activeTab === "feed" ? "tw-overflow-hidden" : "tw-overflow-auto"
-      }`}
-    >
+    <SidebarProvider>
+      <div
+        ref={containerRef}
+        className={`tw-bg-black ${
+          activeTab === "feed" ? "tw-overflow-hidden" : "tw-overflow-auto"
+        }`}
+      >
       {/* Header bar with hamburger */}
       <div ref={headerRef} className="tw-sticky tw-top-0 tw-z-30">
         <SmallScreenHeader
@@ -78,10 +80,11 @@ export default function SmallScreenLayout({ children }: Props) {
       {renderSidebar()}
 
       {/* Main content area */}
-      <main className="tw-transition-opacity tw-duration-300">
-        {children}
-      </main>
+        <main className="tw-transition-opacity tw-duration-300">
+          {children}
+        </main>
 
-    </div>
+      </div>
+    </SidebarProvider>
   );
 }

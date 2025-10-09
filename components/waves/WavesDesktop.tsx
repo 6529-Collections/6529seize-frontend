@@ -2,7 +2,6 @@
 
 import React, { ReactNode } from "react";
 import { ContentTabProvider } from "../brain/ContentTabContext";
-import { SidebarProvider } from "../../hooks/useSidebarState";
 import WavesMessagesWrapper from "../shared/WavesMessagesWrapper";
 
 interface Props {
@@ -18,11 +17,9 @@ const WavesDesktop: React.FC<Props> = ({ children }) => {
 };
 
 const WavesDesktopWithProvider: React.FC<Props> = (props) => (
-  <SidebarProvider>
-    <ContentTabProvider>
-      <WavesDesktop {...props} />
-    </ContentTabProvider>
-  </SidebarProvider>
+  <ContentTabProvider>
+    <WavesDesktop {...props} />
+  </ContentTabProvider>
 );
 
 export default WavesDesktopWithProvider;

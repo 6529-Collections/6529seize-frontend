@@ -5,7 +5,6 @@ import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import Notifications from "../brain/notifications/Notifications";
 import { ActiveDropState } from "../../types/dropInteractionTypes";
 import BrainContent from "../brain/content/BrainContent";
-import { SidebarProvider } from "../../hooks/useSidebarState";
 import { useDropModal } from "@/hooks/useDropModal";
 import BrainDesktopDrop from "@/components/brain/BrainDesktopDrop";
 import { DropSize } from "@/helpers/waves/drop.helpers";
@@ -29,8 +28,7 @@ export default function NotificationsPage() {
   }
 
   return (
-    <SidebarProvider>
-      <div className="tw-h-full tw-bg-black tailwind-scope tw-relative">
+    <div className="tw-h-full tw-bg-black tailwind-scope tw-relative">
         {isDropOpen && drop && (
           isApp ? (
             <div
@@ -80,6 +78,5 @@ export default function NotificationsPage() {
           </BrainContent>
         </div>
       </div>
-    </SidebarProvider>
   );
 }

@@ -16,6 +16,7 @@ import CircleLoader, {
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import CreateWaveFlow from "../create-wave/CreateWaveFlow";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 export default function CreateDirectMessage({
   profile,
   onBack,
@@ -27,6 +28,7 @@ export default function CreateDirectMessage({
 }) {
   const [isCreating, setIsCreating] = useState(false);
   const router = useRouter();
+  const { isApp } = useDeviceInfo();
 
   const { setToast } = useAuth();
 
@@ -78,9 +80,13 @@ export default function CreateDirectMessage({
       const href = getWaveRoute({
         waveId: wave.id,
         isDirectMessage: true,
-        isApp: false,
+        isApp,
       });
-      router.push(href);
+      if (isApp) {
+        router.replace(href);
+      } else {
+        router.push(href);
+      }
     } catch (error) {
       console.error(error);
       setToast({

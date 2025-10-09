@@ -140,8 +140,8 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const prefix =
         streamHasNewItems && notificationCount === 0
-          ? "(New messages) My Feed"
-          : "My Feed";
+          ? "(New messages) My Stream"
+          : "My Stream";
       return `${prefix} | Brain`;
     }
 

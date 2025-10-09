@@ -9,11 +9,7 @@ export default function CreateWaveFlow({
 }) {
   return (
     <div className="tailwind-scope tw-bg-iron-950">
-      <div className="tw-h-full tw-w-full">
-       
-          {children}
-      
-      </div>
+      <div className="tw-h-full tw-w-full">{children}</div>
     </div>
   );
 }

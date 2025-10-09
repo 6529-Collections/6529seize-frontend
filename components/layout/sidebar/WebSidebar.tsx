@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import { Tooltip as ReactTooltip } from "react-tooltip";
 import { usePathname } from "next/navigation";
-import WebSidebarNav from "./WebSidebarNav";
-import WebSidebarUser from "./WebSidebarUser";
-import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
+import { useEffect, useRef, useState } from "react";
+import { Tooltip as ReactTooltip } from "react-tooltip";
 import { useIdentity } from "../../../hooks/useIdentity";
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import HeaderShare from "../../header/share/HeaderShare";
 import WebSidebarHeader from "./WebSidebarHeader";
+import WebSidebarNav from "./WebSidebarNav";
+import WebSidebarUser from "./WebSidebarUser";
 
 interface WebSidebarProps {
   readonly isCollapsed: boolean;

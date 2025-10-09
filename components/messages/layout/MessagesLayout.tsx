@@ -81,7 +81,7 @@ function MessagesLayoutContent({ children }: { readonly children: ReactNode }) {
       <Head>
         <style>{`body { overflow: hidden !important; }`}</style>
       </Head>
-      <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black tw-overflow-hidden">
+      <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black">
         <ClientOnly>{content}</ClientOnly>
       </div>
     </>

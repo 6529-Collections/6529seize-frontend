@@ -9,7 +9,11 @@ import { useWaveData } from "@/hooks/useWaveData";
 import { useWave } from "@/hooks/useWave";
 import { useViewContext } from "./ViewContext";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
+import {
+  getMessagesBaseRoute,
+  getWaveHomeRoute,
+  getWavesBaseRoute,
+} from "@/helpers/navigation.helpers";
 
 export default function BackButton() {
   const { canGoBack, goBack } = useNavigationHistoryContext();
@@ -54,6 +58,16 @@ export default function BackButton() {
 
   const handleClick = () => {
     if (loading) return;
+
+    if (pathname === "/waves/create") {
+      router.replace(getWavesBaseRoute(true));
+      return;
+    }
+
+    if (pathname === "/messages/create") {
+      router.replace(getMessagesBaseRoute(true));
+      return;
+    }
 
     if (dropId) {
       setLoading(true);

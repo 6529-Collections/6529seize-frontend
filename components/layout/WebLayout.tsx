@@ -4,6 +4,7 @@ import React, { type CSSProperties, type ReactNode, useMemo } from "react";
 import WebSidebar from "./sidebar/WebSidebar";
 import { useSidebarController } from "../../hooks/useSidebarController";
 import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
+import { SidebarProvider, useSidebarState } from "../../hooks/useSidebarState";
 
 type LayoutCssVars = CSSProperties & {
   "--left-rail": string;
@@ -14,17 +15,17 @@ interface WebLayoutProps {
   readonly isSmall?: boolean;
 }
 
-const WebLayout = ({ children, isSmall = false }: WebLayoutProps) => {
+const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
   const {
     isMobile,
     isNarrow,
     isCollapsed,
-    isOffcanvasMode,
     isOffcanvasOpen,
     toggleCollapsed,
     closeOffcanvas,
     sidebarWidth,
   } = useSidebarController();
+  const { isRightSidebarOpen } = useSidebarState();
 
   const rootStyle = useMemo<LayoutCssVars>(() => {
     // Keep left rail constant for collapsed rail; mobile has none
@@ -43,20 +44,32 @@ const WebLayout = ({ children, isSmall = false }: WebLayoutProps) => {
   const narrowTranslateX = `translateX(calc(${expandedWidth} - ${collapsedWidth}))`;
 
   const mainStyle: CSSProperties = (() => {
+    const base: CSSProperties = {};
+
     if (isMobile) {
-      // On mobile, shift content only when off-canvas is open
-      if (isOffcanvasOpen) return { transform: `translateX(${sidebarWidth})` };
-      return {};
+      if (isOffcanvasOpen) {
+        base.transform = `translateX(${sidebarWidth})`;
+      }
+      return base;
     }
+
     if (isNarrow) {
-      return {
-        paddingLeft: collapsedWidth,
-        transform: isOffcanvasOpen ? narrowTranslateX : "translateX(0)",
-      };
+      base.paddingLeft = collapsedWidth;
+      if (isOffcanvasOpen) {
+        base.transform = narrowTranslateX;
+      } else {
+        base.transform = "translateX(0)";
+      }
+      return base;
     }
-    // Wide desktop: honor user preference (expanded/collapsed)
-    return { paddingLeft: sidebarWidth };
+
+    base.paddingLeft = sidebarWidth;
+    return base;
   })();
+
+  if (isRightSidebarOpen) {
+    delete mainStyle.transform;
+  }
 
   const shouldDimContent =
     isOffcanvasOpen && (isMobile || (!isMobile && isNarrow));
@@ -80,7 +93,7 @@ const WebLayout = ({ children, isSmall = false }: WebLayoutProps) => {
       </div>
       <main
         className={`tw-flex-1 tw-min-w-0 tw-transition-all tw-duration-300 tw-ease-out ${
-          shouldDimContent
+        shouldDimContent
             ? "tw-opacity-40 tw-pointer-events-none"
             : ""
         }`}
@@ -91,5 +104,11 @@ const WebLayout = ({ children, isSmall = false }: WebLayoutProps) => {
     </div>
   );
 };
+
+const WebLayout = ({ children, isSmall = false }: WebLayoutProps) => (
+  <SidebarProvider>
+    <WebLayoutContent isSmall={isSmall}>{children}</WebLayoutContent>
+  </SidebarProvider>
+);
 
 export default WebLayout;

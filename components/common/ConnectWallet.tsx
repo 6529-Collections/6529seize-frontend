@@ -1,12 +1,12 @@
 "use client";
 
-import React from "react";
 import Image from "next/image";
+import React from "react";
 import HeaderUserConnect from "../header/user/HeaderUserConnect";
 
 const ConnectWallet: React.FC = () => {
   return (
-    <div className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-px-6 tw-h-[100dvh]">
+    <div className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-px-6 tw-py-16 md:tw-h-[100dvh]">
       <Image
         unoptimized
         priority

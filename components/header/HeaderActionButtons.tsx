@@ -9,12 +9,14 @@ import {
   CREATE_DIRECT_MESSAGE_SEARCH_PATH,
   CREATE_WAVE_SEARCH_PATH,
 } from "../waves/Waves";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 export default function HeaderViewActionButtons() {
   const { activeView } = useViewContext();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { isApp } = useDeviceInfo();
 
   const baseButtonClasses =
     "tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-h-10 tw-w-10 tw-border-0 tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 tw-transition tw-duration-300 tw-ease-out tw-bg-black active:tw-bg-iron-800";
@@ -31,7 +33,8 @@ export default function HeaderViewActionButtons() {
   const showMessagesButton = isOnMessagesRoute || isMessagesContext;
 
   if (showWaveButton) {
-    const onCreateWave = () => router.push(CREATE_WAVE_SEARCH_PATH);
+    const onCreateWave = () =>
+      router.push(isApp ? "/waves/create" : CREATE_WAVE_SEARCH_PATH);
 
     return (
       <button
@@ -46,7 +49,8 @@ export default function HeaderViewActionButtons() {
   }
 
   if (showMessagesButton) {
-    const onCreateDm = () => router.push(CREATE_DIRECT_MESSAGE_SEARCH_PATH);
+    const onCreateDm = () =>
+      router.push(isApp ? "/messages/create" : CREATE_DIRECT_MESSAGE_SEARCH_PATH);
 
     return (
       <button

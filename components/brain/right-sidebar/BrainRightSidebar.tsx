@@ -54,7 +54,7 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
 
   return (
     <div
-      className="tw-fixed tw-inset-y-0 tw-right-0 tw-z-[50] tw-bg-iron-950 tw-flex tw-flex-col
+      className="tw-fixed tw-inset-y-0 tw-right-0 tw-z-[80] tw-bg-iron-950 tw-flex tw-flex-col
         tw-w-[20.5rem] tw-shadow-2xl
         lg:tw-bg-opacity-95 min-[1300px]:tw-bg-opacity-100
         lg:tw-backdrop-blur min-[1300px]:tw-backdrop-blur-none tw-border-l tw-border-solid tw-border-iron-800 tw-border-y-0 tw-border-r-0"

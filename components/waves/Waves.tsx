@@ -59,10 +59,18 @@ export default function Waves() {
 
   const onViewModeChange = (mode: WavesViewMode) => {
     if (mode === WavesViewMode.CREATE) {
+      if (isApp) {
+        router.push("/waves/create");
+        return;
+      }
       router.push(CREATE_WAVE_SEARCH_PATH);
       return;
     }
     if (mode === WavesViewMode.CREATE_DM) {
+      if (isApp) {
+        router.push("/messages/create");
+        return;
+      }
       router.push(CREATE_DIRECT_MESSAGE_SEARCH_PATH);
       return;
     }
