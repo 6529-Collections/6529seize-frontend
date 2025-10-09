@@ -255,14 +255,14 @@ export default function MobileFilterDrawer<SortValue extends string>({
             <div className="tw-space-y-3">
               <CheckboxField
                 id="mobile-my-grants"
-                label="Collections I've allocated to"
+                label="I've allocated to"
                 checked={showMyGrants && Boolean(connectedProfileId)}
                 onChange={onToggleMyGrants}
                 disabled={!connectedProfileId || disabled}
               />
               <CheckboxField
                 id="mobile-receiving"
-                label="Collections where I'm receiving"
+                label="I'm receiving"
                 checked={showMyReceiving && Boolean(connectedProfileId)}
                 onChange={onToggleReceiving}
                 disabled={!connectedProfileId || disabled}

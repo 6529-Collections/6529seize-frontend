@@ -63,7 +63,7 @@ export default function XtdhFilterCheckboxField({
           />
         </span>
       </span>
-      <span className="tw-text-sm tw-font-semibold">{label}</span>
+      <span className="tw-text-sm tw-font-semibold tw-whitespace-nowrap">{label}</span>
     </label>
   );
 }

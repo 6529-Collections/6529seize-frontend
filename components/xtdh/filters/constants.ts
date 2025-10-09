@@ -44,13 +44,12 @@ export const SORT_OPTIONS: Record<
   tokens: TOKEN_SORT_OPTIONS,
 };
 
+const SHARED_ACTIVITY_LABELS: ActivityLabels = {
+  allocated: "I've allocated to",
+  receiving: "I'm receiving",
+};
+
 export const ACTIVITY_LABELS: Record<XtdhView, ActivityLabels> = {
-  collections: {
-    allocated: "Collections I've allocated to",
-    receiving: "Collections where I'm receiving",
-  },
-  tokens: {
-    allocated: "Tokens I've allocated to",
-    receiving: "Tokens where I'm receiving",
-  },
+  collections: SHARED_ACTIVITY_LABELS,
+  tokens: SHARED_ACTIVITY_LABELS,
 };
