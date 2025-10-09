@@ -7,11 +7,8 @@ import XtdhStatsOverview from "./XtdhStatsOverview";
 import XtdhViewSwitcher from "./XtdhViewSwitcher";
 import XtdhCollectionsView, { COLLECTIONS_PAGE_SIZE } from "./collections/XtdhCollectionsView";
 import XtdhTokensView, { TOKENS_PAGE_SIZE } from "./tokens/XtdhTokensView";
-import {
-  DEFAULT_COLLECTION_SORT,
-  DEFAULT_TOKEN_SORT,
-  useXtdhQueryState,
-} from "./hooks/useXtdhQueryState";
+import { DEFAULT_COLLECTION_SORT, DEFAULT_TOKEN_SORT } from "./filters/constants";
+import { useXtdhFilters } from "./filters/useXtdhFilters";
 import { useXtdhCollections, useXtdhTokens } from "@/hooks/useXtdhOverview";
 
 export default function XtdhPage() {
@@ -42,7 +39,7 @@ export default function XtdhPage() {
     toggleMyGrants,
     toggleMyReceiving,
     setPage,
-  } = useXtdhQueryState(connectedProfileId);
+  } = useXtdhFilters(connectedProfileId);
 
   const sharedState = {
     direction,

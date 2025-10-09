@@ -1,7 +1,7 @@
 "use client";
 
 import { classNames } from "@/helpers/Helpers";
-import type { XtdhView } from "./hooks/useXtdhQueryState";
+import type { XtdhView } from "./filters/types";
 
 interface XtdhViewSwitcherProps {
   readonly view: XtdhView;

@@ -2,14 +2,18 @@
 
 import { useCallback, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { XtdhCollectionsViewState } from "../collections/XtdhCollectionsView";
-import type { XtdhTokensViewState } from "../tokens/XtdhTokensView";
-
-export type XtdhView = "collections" | "tokens";
-
-export const DEFAULT_COLLECTION_SORT: XtdhCollectionsViewState["sort"] = "total_rate";
-export const DEFAULT_TOKEN_SORT: XtdhTokensViewState["sort"] = "rate";
-export const DEFAULT_DIRECTION: "asc" | "desc" = "desc";
+import {
+  DEFAULT_COLLECTION_SORT,
+  DEFAULT_DIRECTION,
+  DEFAULT_TOKEN_SORT,
+} from "./constants";
+import type {
+  XtdhCollectionsSort,
+  XtdhCollectionsViewState,
+  XtdhTokensSort,
+  XtdhTokensViewState,
+  XtdhView,
+} from "./types";
 
 function parseView(value: string | null): XtdhView {
   if (!value) return "collections";
@@ -45,29 +49,27 @@ function parseDirection(value: string | null): "asc" | "desc" {
   return value?.toLowerCase() === "asc" ? "asc" : "desc";
 }
 
-function parseCollectionSort(
-  value: string | null
-): XtdhCollectionsViewState["sort"] {
+function parseCollectionSort(value: string | null): XtdhCollectionsSort {
   if (!value) return DEFAULT_COLLECTION_SORT;
-  const normalized = value.toLowerCase();
-  return (["total_rate", "recent", "grantors", "name", "total_allocated"] as const).includes(
-    normalized as XtdhCollectionsViewState["sort"]
+  const normalized = value.toLowerCase() as XtdhCollectionsSort;
+
+  return (["total_rate", "total_allocated", "recent", "grantors", "name"] as const).includes(
+    normalized
   )
-    ? (normalized as XtdhCollectionsViewState["sort"])
+    ? normalized
     : DEFAULT_COLLECTION_SORT;
 }
 
-function parseTokenSort(value: string | null): XtdhTokensViewState["sort"] {
+function parseTokenSort(value: string | null): XtdhTokensSort {
   if (!value) return DEFAULT_TOKEN_SORT;
-  const normalized = value.toLowerCase();
-  return (["rate", "recent", "grantors", "name", "collection"] as const).includes(
-    normalized as XtdhTokensViewState["sort"]
-  )
-    ? (normalized as XtdhTokensViewState["sort"])
+  const normalized = value.toLowerCase() as XtdhTokensSort;
+
+  return (["rate", "recent", "grantors", "collection", "name"] as const).includes(normalized)
+    ? normalized
     : DEFAULT_TOKEN_SORT;
 }
 
-export function useXtdhQueryState(connectedProfileId: string | null) {
+export function useXtdhFilters(connectedProfileId: string | null) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -84,6 +86,7 @@ export function useXtdhQueryState(connectedProfileId: string | null) {
     () => parseTokenSort(searchParams?.get("sort") ?? null),
     [searchParams]
   );
+
   const direction = parseDirection(searchParams?.get("dir") ?? null);
   const page = parsePage(searchParams?.get("page") ?? null);
   const networks = parseList(searchParams?.get("network") ?? null);
@@ -91,10 +94,6 @@ export function useXtdhQueryState(connectedProfileId: string | null) {
   const minGrantors = parseNumber(searchParams?.get("min_grantors") ?? null);
   const showMyGrants = parseBoolean(searchParams?.get("my_grants") ?? null);
   const showMyReceiving = parseBoolean(searchParams?.get("receiving") ?? null);
-
-  const defaultSort =
-    view === "collections" ? DEFAULT_COLLECTION_SORT : DEFAULT_TOKEN_SORT;
-  const activeSort = view === "collections" ? collectionSort : tokenSort;
 
   const updateQueryParams = useCallback(
     (updates: Record<string, string | null | undefined>) => {
@@ -134,14 +133,13 @@ export function useXtdhQueryState(connectedProfileId: string | null) {
 
   const setSort = useCallback(
     (
-      nextSort:
-        | XtdhCollectionsViewState["sort"]
-        | XtdhTokensViewState["sort"]
+      nextSort: XtdhCollectionsViewState["sort"] | XtdhTokensViewState["sort"]
     ) => {
       const currentDefault =
         view === "collections" ? DEFAULT_COLLECTION_SORT : DEFAULT_TOKEN_SORT;
 
-      const isSame = activeSort === nextSort;
+      const currentSort = view === "collections" ? collectionSort : tokenSort;
+      const isSame = currentSort === nextSort;
       const nextDirection = isSame
         ? direction === "asc"
           ? "desc"
@@ -154,7 +152,7 @@ export function useXtdhQueryState(connectedProfileId: string | null) {
         page: "1",
       });
     },
-    [activeSort, direction, updateQueryParams, view]
+    [collectionSort, direction, tokenSort, updateQueryParams, view]
   );
 
   const toggleDirection = useCallback(() => {
@@ -253,8 +251,6 @@ export function useXtdhQueryState(connectedProfileId: string | null) {
     minGrantors,
     showMyGrants,
     showMyReceiving,
-    defaultSort,
-    activeSort,
     setView,
     setSort,
     toggleDirection,
