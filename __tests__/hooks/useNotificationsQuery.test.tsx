@@ -25,7 +25,9 @@ describe('useNotificationsQuery', () => {
       fetchNextPage: jest.fn(),
       hasNextPage: true,
       isLoading: false,
-      isLoadingNextPage: false
+      isLoadingNextPage: false,
+      isSuccess: true,
+      isError: false
     });
     const { result } = renderHook(() => useNotificationsQuery({ identity: 'id', reverse: true }));
     expect(result.current.items.map(i => i.id)).toEqual([3,2,1]);
@@ -34,7 +36,11 @@ describe('useNotificationsQuery', () => {
   });
 
   it('returns empty when no data', () => {
-    useInfiniteQueryMock.mockReturnValue({ data: undefined });
+    useInfiniteQueryMock.mockReturnValue({
+      data: undefined,
+      isSuccess: false,
+      isError: false
+    });
     const { result } = renderHook(() => useNotificationsQuery({ identity: 'id' }));
     expect(result.current.items).toEqual([]);
     expect(result.current.isInitialQueryDone).toBe(false);
@@ -42,7 +48,9 @@ describe('useNotificationsQuery', () => {
 
   it('resets when identity changes', async () => {
     useInfiniteQueryMock.mockReturnValue({
-      data: { pages: [{ notifications: [{ id: 1 }] }] }
+      data: { pages: [{ notifications: [{ id: 1 }] }] },
+      isSuccess: true,
+      isError: false
     });
     const { result, rerender } = renderHook(
       ({ identity }) => useNotificationsQuery({ identity }),
@@ -50,7 +58,11 @@ describe('useNotificationsQuery', () => {
     );
     expect(result.current.items).toHaveLength(1);
 
-    useInfiniteQueryMock.mockReturnValue({ data: undefined });
+    useInfiniteQueryMock.mockReturnValue({
+      data: undefined,
+      isSuccess: false,
+      isError: false
+    });
     rerender({ identity: 'b' });
 
     expect(result.current.items).toEqual([]);

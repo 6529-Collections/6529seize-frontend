@@ -21,7 +21,7 @@ export default async function NotificationsPage() {
   )?.value;
 
   if (
-    notificationsFetched &&
+    !notificationsFetched ||
     +notificationsFetched < Time.now().toMillis() - 60000
   ) {
     await prefetchAuthenticatedNotifications({

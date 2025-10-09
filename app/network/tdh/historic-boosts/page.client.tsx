@@ -139,7 +139,7 @@ export default function TDHHistoricBoostsPage() {
 
           <div className="tw-space-y-6">
             {/* 1.3 */}
-            <DetailsCard title="TDH 1.3 (March 29, 2024 — October 8, 2025)">
+            <DetailsCard title="TDH 1.3 (March 29, 2024 — October 9, 2025)">
               <IntroLine>
                 Higher of <b>Category A</b> and <b>Category B</b> Boosters, plus{" "}
                 <b>Category C</b> Boosters
