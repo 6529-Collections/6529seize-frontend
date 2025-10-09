@@ -3,14 +3,16 @@
 import { useCallback, useMemo, useState } from "react";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import { classNames } from "@/helpers/Helpers";
+import { SortDirection } from "@/entities/ISort";
 import {
   ACTIVITY_LABELS,
   DEFAULT_COLLECTION_SORT,
   DEFAULT_DIRECTION,
   DEFAULT_TOKEN_SORT,
 } from "./constants";
-import SortDropdown from "./SortDropdown";
 import MobileFilterDrawer from "./MobileFilterDrawer";
+import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
+import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
 import type { ActivityLabels } from "./constants";
 import type {
   XtdhFilterState,
@@ -138,6 +140,12 @@ export default function XtdhFilterBar<SortValue extends XtdhSortValue>({
     [disableInteractions, onDirectionChange, onSortChange, state.sort]
   );
 
+  const handleToggleDirection = useCallback(() => {
+    if (disableInteractions) return;
+    const nextDirection = state.direction === "asc" ? "desc" : "asc";
+    onDirectionChange(nextDirection);
+  }, [disableInteractions, onDirectionChange, state.direction]);
+
   const handleToggleMyGrants = useCallback(
     (enabled: boolean) => {
       if (disableInteractions) return;
@@ -166,10 +174,40 @@ export default function XtdhFilterBar<SortValue extends XtdhSortValue>({
   const personalFiltersDisabled =
     !connectedProfileId || disableInteractions;
 
+  const tabSortDirection =
+    state.direction === "asc" ? SortDirection.ASC : SortDirection.DESC;
+
   return (
     <>
       <div className="tw-hidden md:tw-flex md:tw-flex-col md:tw-space-y-4 md:tw-border-b md:tw-border-iron-800 md:tw-pb-4">
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-4">
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+            <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
+              Sort By
+            </span>
+            <CommonTabs
+              items={[...sortOptions] as CommonSelectItem<SortValue>[]}
+              activeItem={state.sort}
+              setSelected={handleSortSelect}
+              sortDirection={tabSortDirection}
+              filterLabel={`Sort ${view}`}
+              disabled={disableInteractions}
+            />
+            <button
+              type="button"
+              onClick={handleToggleDirection}
+              disabled={disableInteractions}
+              className={classNames(
+                "tw-inline-flex tw-items-center tw-justify-center tw-h-10 tw-w-10 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-900 tw-text-sm tw-font-semibold tw-text-iron-200 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-0 tw-transition",
+                disableInteractions
+                  ? "tw-opacity-50 tw-cursor-not-allowed"
+                  : "hover:tw-bg-iron-800"
+              )}
+              aria-label={`Sort direction: ${state.direction === "desc" ? "descending" : "ascending"}`}
+            >
+              <CommonTableSortIcon direction={tabSortDirection} isActive={true} />
+            </button>
+          </div>
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
             <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
               Network
@@ -203,14 +241,6 @@ export default function XtdhFilterBar<SortValue extends XtdhSortValue>({
               )}
             </div>
           </div>
-          <SortDropdown
-            options={sortOptions}
-            value={state.sort}
-            direction={state.direction}
-            onSelect={handleSortSelect}
-            onSelectWithDirection={handleSortWithDirection}
-            disabled={disableInteractions}
-          />
         </div>
 
         <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-3">
