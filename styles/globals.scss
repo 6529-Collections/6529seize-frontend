@@ -20,7 +20,6 @@
   }
 }
 
-// add the code bellow
 @layer utilities {
   /* Hide scrollbar for Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
@@ -142,9 +141,23 @@
   display: none;
 }
 
+:root {
+  color-scheme: dark;
+  @include variables.inject-theme(dark);
+}
+
+body.theme-dark {
+  color-scheme: dark;
+}
+
+body.theme-light {
+  color-scheme: light;
+  @include variables.inject-theme(light);
+}
+
 body {
-  background-color: #161617 !important;
-  color: variables.$font-color !important;
+  background-color: var(--background-primary) !important;
+  color: var(--text-primary) !important;
   font-size: variables.$font-size !important;
   font-family: variables.$main-font !important;
   overflow: auto;
@@ -154,11 +167,21 @@ body {
   }
 }
 
+.theme-surface-elevated {
+  background-color: var(--surface-elevated) !important;
+  color: var(--text-primary);
+}
+
+.theme-surface-secondary {
+  background-color: var(--background-secondary) !important;
+  color: var(--text-primary);
+}
+
 textarea,
 select,
 input,
 button {
-  color: variables.$font-color;
+  color: var(--text-primary);
 }
 
 textarea:not(.tailwind-scope textarea),
@@ -179,14 +202,11 @@ code {
 a {
   outline: 0 !important;
   text-decoration: underline;
-  color: variables.$font-color;
+  color: var(--link-color);
 }
 
 a:hover {
-  color: color.scale(
-    variables.$font-color,
-    $lightness: -(variables.$darken-percentage)
-  );
+  color: var(--link-hover-color);
 }
 
 @media only screen and (max-width: 1200px) {
@@ -310,7 +330,8 @@ h5:not(.tailwind-scope h5) {
 
 #footer {
   font-size: variables.$font-smaller;
-  background-color: variables.$bg-color-1;
+  background-color: var(--background-secondary);
+  color: var(--text-muted);
   padding: 2rem;
   line-height: 18px;
 
@@ -331,10 +352,11 @@ h5:not(.tailwind-scope h5) {
     padding-bottom: 8px;
     text-decoration: none;
     white-space: nowrap;
+    color: var(--text-primary);
   }
 
   a:hover {
-    opacity: 0.75;
+    color: var(--link-hover-color);
   }
 }
 
@@ -352,11 +374,11 @@ h5:not(.tailwind-scope h5) {
 }
 
 .font-color {
-  color: variables.$font-color;
+  color: var(--text-primary);
 }
 
 .font-color-h {
-  color: variables.$font-color-h;
+  color: var(--text-muted);
 }
 
 .font-color-silver {
@@ -377,7 +399,7 @@ h5:not(.tailwind-scope h5) {
 
 .font-color-hover {
   &:hover {
-    color: variables.$font-color;
+    color: var(--text-primary);
   }
 }
 
@@ -471,10 +493,10 @@ h5:not(.tailwind-scope h5) {
   background-color: transparent !important;
   border: transparent !important;
   text-decoration: underline;
-  color: variables.$font-color !important;
+  color: var(--link-color) !important;
 
   &:hover {
-    color: variables.$font-color-h !important;
+    color: var(--link-hover-color) !important;
   }
 }
 
@@ -730,4 +752,40 @@ pre code {
 
 .drop-content-container.should-truncate .drop-expand-button {
   display: flex;
+}
+
+@layer utilities {
+  :root:not(.dark) .tw-text-white {
+    color: black !important;
+  }
+  :root:not(.dark) .tw-bg-black {
+    background-color: white !important;
+  }
+
+  /* Greys: pick sensible light-mode counterparts */
+  :root:not(.dark) .tw-text-gray-400 {
+    color: rgb(55, 65, 81) !important;
+  } /* ~gray-700 */
+  :root:not(.dark) .tw-text-gray-300 {
+    color: rgb(75, 85, 99) !important;
+  } /* ~gray-600 */
+  :root:not(.dark) .tw-text-gray-200 {
+    color: rgb(107, 114, 128) !important;
+  } /* ~gray-500 */
+
+  /* Borders */
+  :root:not(.dark) .tw-border-gray-700 {
+    border-color: rgb(229, 231, 235) !important;
+  } /* gray-200 */
+
+  /* Backgrounds commonly used in dark UIs */
+  :root:not(.dark) .tw-bg-gray-900 {
+    background-color: rgb(255, 255, 255) !important;
+  }
+  :root:not(.dark) .tw-bg-gray-800 {
+    background-color: rgb(249, 250, 251) !important;
+  } /* gray-50 */
+  :root:not(.dark) .tw-bg-gray-700 {
+    background-color: rgb(243, 244, 246) !important;
+  } /* gray-100 */
 }

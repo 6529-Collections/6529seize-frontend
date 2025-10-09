@@ -1,5 +1,3 @@
-@use "variables.scss" as variables;
-
 // Define Bootstrap variable overrides FIRST
 $pink: #da2089;
 $green: #208359;
@@ -7,6 +5,8 @@ $blue: #267c93;
 $orange: #ffa500;
 $yellow: #ffff00;
 // Add any other Bootstrap variables you want to set globally BEFORE the import.
+
+@use "variables.scss";
 
 // Import Bootstrap's full SCSS using @use and configure its variables.
 @use "bootstrap/scss/bootstrap" with (
@@ -90,8 +90,8 @@ $yellow: #ffff00;
 .navbar-expand .navbar-nav .dropdown-menu,
 .dropdown .dropdown-menu,
 .dropdown-center .dropdown-menu {
-  background-color: variables.$bg-color-1;
-  border-top: 3px solid white;
+  background-color: var(--surface-elevated);
+  border-top: 3px solid var(--surface-border);
   border-top-right-radius: 0;
   border-top-left-radius: 0;
 }
@@ -116,7 +116,7 @@ $yellow: #ffff00;
   padding-bottom: 8px;
   width: 98%;
   margin-left: 1%;
-  color: variables.$font-color !important;
+  color: var(--text-primary) !important;
 }
 
 .dropdown-toggle::after {
@@ -127,8 +127,8 @@ $yellow: #ffff00;
 .dropdown-item.active,
 .dropdown-item:active,
 .dropdown-item:hover {
-  background-color: variables.$very-dark-grey !important;
-  color: variables.$font-color !important;
+  background-color: var(--surface-hover) !important;
+  color: var(--text-primary) !important;
 }
 
 .dropdown-item:focus {
@@ -136,7 +136,7 @@ $yellow: #ffff00;
 }
 
 .nav-link {
-  color: variables.$font-color;
+  color: var(--text-primary);
   padding: 0 !important;
   font-weight: 600;
   font-size: 16px;
@@ -145,7 +145,7 @@ $yellow: #ffff00;
 .navbar-nav .show > .nav-link,
 .navbar-nav .nav-link.active {
   pointer-events: none !important;
-  color: variables.$lightest-grey;
+  color: var(--text-muted);
 }
 
 table:not(.tailwind-scope table),
@@ -155,7 +155,7 @@ tfoot:not(.tailwind-scope tfoot),
 tr:not(.tailwind-scope tr),
 td:not(.tailwind-scope td),
 th:not(.tailwind-scope th) {
-  color: variables.$font-color !important;
+  color: var(--text-primary) !important;
   border: none;
 }
 
@@ -166,11 +166,11 @@ th:not(.tailwind-scope th) {
 
 .nav-link:hover,
 .nav-link:focus {
-  color: variables.$lightest-grey;
+  color: var(--text-muted);
 }
 
 .dropdown-divider {
-  border-color: variables.$very-dark-grey !important;
+  border-color: var(--surface-border) !important;
 }
 
 .modal-content {
@@ -205,7 +205,8 @@ th:not(.tailwind-scope th) {
 }
 
 .accordion-button {
-  color: variables.$font-color !important;
+  color: var(--text-primary) !important;
+  background-color: var(--surface-elevated) !important;
 }
 
 .accordion-button::after {
@@ -221,10 +222,6 @@ th:not(.tailwind-scope th) {
   border: none;
 }
 
-.accordion-button {
-  background-color: rgb(30, 30, 30) !important;
-}
-
 .accordion-button::after {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
 }
@@ -233,13 +230,18 @@ th:not(.tailwind-scope th) {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
 }
 
+body.theme-light .accordion-button::after,
+body.theme-light .accordion-button:not(.collapsed)::after {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23111827'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+
 .form-select:focus {
-  border-color: variables.$dark-grey;
+  border-color: var(--surface-border-strong);
 }
 
 .toast-header {
-  color: black !important;
-  background-color: variables.$off-white !important;
+  color: var(--text-primary) !important;
+  background-color: var(--surface-elevated) !important;
   border-radius: 0 !important;
   font-size: larger;
   font-weight: bolder !important;
@@ -247,8 +249,8 @@ th:not(.tailwind-scope th) {
 }
 
 .toast-body {
-  color: black !important;
-  background-color: white !important;
+  color: var(--text-primary) !important;
+  background-color: var(--background-primary) !important;
   font-size: larger;
   padding: 20px;
 }

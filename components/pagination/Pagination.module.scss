@@ -1,4 +1,3 @@
-@use 'sass:color';
 @use "../../styles/variables.scss";
 
 .iconButton {
@@ -46,7 +45,7 @@
 
   &:hover {
     text-decoration: underline;
-    color: color.scale(variables.$font-color, $lightness: -(variables.$darken-percentage));
+    color: var(--link-hover-color);
   }
 
   &:disabled {
@@ -61,5 +60,5 @@
   text-align: center;
   background-color: transparent;
   border: none;
-  border-bottom: 1px solid variables.$font-color;
+  border-bottom: 1px solid var(--text-primary);
 }

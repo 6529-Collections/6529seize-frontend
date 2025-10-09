@@ -42,6 +42,7 @@ export const CONSENT_ESSENTIAL_COOKIE = "essential-cookies-consent";
 export const CONSENT_PERFORMANCE_COOKIE = "performance-cookies-consent";
 export const CONSENT_EULA_COOKIE = "eula-consent";
 export const PROFILE_PROXY_ACCEPTANCE_COOKIE = "profile-proxy-acceptance";
+export const THEME_PREFERENCE_COOKIE = "6529-theme";
 export const NEVER_DATE = 64060588800;
 
 export const OPENSEA_STORE_FRONT_CONTRACT =

@@ -2,6 +2,7 @@
 
 import React, { ReactNode, useCallback } from "react";
 import dynamic from "next/dynamic";
+import clsx from "clsx";
 import HeaderPlaceholder from "../header/HeaderPlaceholder";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import Breadcrumb from "../breadcrumb/Breadcrumb";
@@ -40,9 +41,9 @@ const DesktopLayout = ({ children, isSmall }: DesktopLayoutProps) => {
     <>
       <div
         ref={headerWrapperRef}
-        className={`${
-          isStreamView ? "tw-sticky tw-top-0 tw-z-50 tw-bg-black" : ""
-        }`}>
+        className={clsx("theme-surface-secondary", {
+          "tw-sticky tw-top-0 tw-z-50": isStreamView,
+        })}>
         <Header isSmall={isSmall} />
         {!isHomePage && <Breadcrumb breadcrumbs={breadcrumbs} />}
       </div>

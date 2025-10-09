@@ -10,24 +10,109 @@ $font-size: 16px;
 $font-smaller: 14px;
 $font-smallest: 12px;
 
+@use "sass:map";
+
 // CUSTOM COLORS
 $white: #ffffff;
 $off-white: rgb(215, 215, 215);
 $lightest-grey: rgb(154, 154, 154);
 $lighter-grey-2: rgb(100, 100, 100);
-$lighter-grey: rgb(68, 68, 68);
 $almost-very-dark-grey: rgb(30, 30, 30);
 $very-dark-grey: rgb(34, 34, 34);
 $dark-grey: rgb(51, 51, 51);
 $nextgen-grey: rgb(40, 40, 40);
 
-$font-color: white;
-$font-color-h: $lightest-grey;
-$font-color-dark: black;
-$bg-color-1: black;
-$bg-color-2: $very-dark-grey;
+// Theme tokens that are applied as CSS custom properties.
+// Keeping the palette defined here allows dark and light modes to
+// share the same semantic tokens across the codebase.
+$theme-colors: (
+  dark: (
+    font-color: #f9fafb,
+    font-color-h: $lightest-grey,
+    font-color-dark: #000000,
+    bg-color-1: #000000,
+    bg-color-2: $very-dark-grey,
+    background-primary: #161617,
+    background-secondary: #1f1f23,
+    lighter-grey: rgb(68, 68, 68),
+    surface-elevated: #1f1f23,
+    surface-hover: #26262b,
+    surface-border: #2e2e34,
+    surface-border-strong: #3a3a44,
+    text-primary: #f9fafb,
+    text-muted: $lightest-grey,
+    link-color: #f9fafb,
+    link-hover-color: #d1d5db,
+    button-background: rgba(255, 255, 255, 0.08),
+    button-background-hover: rgba(255, 255, 255, 0.16),
+    focus-outline: #528bff,
+  ),
+  light: (
+    font-color: #111827,
+    font-color-h: #4b5563,
+    font-color-dark: #000000,
+    bg-color-1: #f5f6f8,
+    bg-color-2: #e5e7eb,
+    background-primary: #f5f6f8,
+    background-secondary: #e5e7eb,
+    lighter-grey: rgb(136, 136, 136),
+    surface-elevated: #ffffff,
+    surface-hover: #eef1f5,
+    surface-border: #d1d5db,
+    surface-border-strong: #9ca3af,
+    text-primary: #111827,
+    text-muted: #4b5563,
+    link-color: #000,
+    link-hover-color: #3e3939,
+    button-background: rgba(15, 23, 42, 0.08),
+    button-background-hover: rgba(15, 23, 42, 0.16),
+    focus-outline: #3b82f6,
+  ),
+);
+
+@function theme-color($theme, $token) {
+  $theme-map: map.get($theme-colors, $theme);
+
+  @if $theme-map == null {
+    @error "Unknown theme `#{$theme}`. Available themes: #{map.keys($theme-colors)}";
+  }
+
+  @if not map.has-key($theme-map, $token) {
+    @error "Unknown token `#{$token}` for theme `#{$theme}`.";
+  }
+
+  @return map.get($theme-map, $token);
+}
+
+@mixin inject-theme($theme) {
+  --font-color: #{theme-color($theme, font-color)};
+  --font-color-h: #{theme-color($theme, font-color-h)};
+  --font-color-dark: #{theme-color($theme, font-color-dark)};
+  --bg-color-1: #{theme-color($theme, bg-color-1)};
+  --bg-color-2: #{theme-color($theme, bg-color-2)};
+  --background-primary: #{theme-color($theme, background-primary)};
+  --background-secondary: #{theme-color($theme, background-secondary)};
+  --lighter-grey: #{theme-color($theme, lighter-grey)};
+  --surface-elevated: #{theme-color($theme, surface-elevated)};
+  --surface-hover: #{theme-color($theme, surface-hover)};
+  --surface-border: #{theme-color($theme, surface-border)};
+  --surface-border-strong: #{theme-color($theme, surface-border-strong)};
+  --text-primary: #{theme-color($theme, text-primary)};
+  --text-muted: #{theme-color($theme, text-muted)};
+  --link-color: #{theme-color($theme, link-color)};
+  --link-hover-color: #{theme-color($theme, link-hover-color)};
+  --button-background: #{theme-color($theme, button-background)};
+  --button-background-hover: #{theme-color($theme, button-background-hover)};
+  --focus-outline: #{theme-color($theme, focus-outline)};
+}
 
 $darken-percentage: 30%;
+$font-color: var(--font-color);
+$font-color-h: var(--font-color-h);
+$font-color-dark: var(--font-color-dark);
+$bg-color-1: var(--bg-color-1);
+$bg-color-2: var(--bg-color-2);
+$lighter-grey: var(--lighter-grey);
 
 // Project-specific named colors (if you need aliases for the bootstrap theme colors for your own components)
 // These are NOT overriding Bootstrap directly anymore.
@@ -36,7 +121,7 @@ $project-green: #208359;
 $project-blue: #267c93;
 $project-orange: #ffa500;
 $project-yellow: #ffff00;
-$focus-outline: #528bff;
+$focus-outline: var(--focus-outline);
 
 $salmon: #1861ff;
 $raspberry: #c51d34;

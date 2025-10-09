@@ -22,6 +22,7 @@ import { ViewProvider } from "../navigation/ViewContext";
 import { MyStreamProvider } from "@/contexts/wave/MyStreamContext";
 import { TitleProvider } from "@/contexts/TitleContext";
 import { WaveEligibilityProvider } from "@/contexts/wave/WaveEligibilityContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 export default function Providers({
   children,
@@ -30,12 +31,13 @@ export default function Providers({
 }) {
   return (
     <QueryClientSetup>
-      <AppWalletsProvider>
-        <WagmiSetup>
-          <CapacitorSetup />
-          <IpfsImageSetup />
-          <ReactQueryWrapper>
-            <SeizeSettingsProvider>
+      <ThemeProvider>
+        <AppWalletsProvider>
+          <WagmiSetup>
+            <CapacitorSetup />
+            <IpfsImageSetup />
+            <ReactQueryWrapper>
+              <SeizeSettingsProvider>
               <EmojiProvider>
                 <IpfsProvider>
                   <SeizeConnectProvider>
@@ -74,6 +76,7 @@ export default function Providers({
           </ReactQueryWrapper>
         </WagmiSetup>
       </AppWalletsProvider>
+      </ThemeProvider>
     </QueryClientSetup>
   );
 }

@@ -15,9 +15,11 @@ import Providers from "@/components/providers/Providers";
 import StoreSetup from "@/components/providers/StoreSetup";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
+import { THEME_PREFERENCE_COOKIE } from "@/constants";
 import { Viewport } from "next";
 import { ErrorBoundary } from "react-error-boundary";
 import ErrorPage from "./error-page";
+import { cookies } from "next/headers";
 
 export const metadata = getAppMetadata();
 export const viewport: Viewport = {
@@ -28,15 +30,20 @@ export const viewport: Viewport = {
   maximumScale: 10,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   readonly children: React.ReactNode;
 }) {
   const isUsingStaticAssets = publicEnv.ASSETS_FROM_S3 === "true";
+  const cookieStore = await cookies();
+  const cookieTheme = cookieStore.get(THEME_PREFERENCE_COOKIE)?.value;
+  const initialTheme = cookieTheme === "light" ? "light" : "dark";
+  const htmlClassName = initialTheme === "dark" ? "dark" : "";
+  const bodyClassName = initialTheme === "dark" ? "theme-dark" : "theme-light";
 
   return (
-    <html lang="en">
+    <html lang="en" className={htmlClassName || undefined}>
       <head>
         <link rel="preconnect" href={publicEnv.API_ENDPOINT} crossOrigin="" />
         <link rel="preconnect" href="https://d3lqz0a4bldqgf.cloudfront.net" />
@@ -46,7 +53,7 @@ export default function RootLayout({
           <link rel="preconnect" href="https://dnclu2fna0b2b.cloudfront.net" />
         )}
       </head>
-      <body>
+      <body className={bodyClassName} data-theme={initialTheme}>
         <AwsRumProvider>
           <StoreSetup>
             <Providers>

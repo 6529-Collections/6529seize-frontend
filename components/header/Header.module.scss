@@ -6,13 +6,13 @@
   z-index: 600;
   position: relative;
   min-height: variables.$header-height;
-  background-color: variables.$bg-color-1;
+  background-color: var(--surface-elevated, variables.$bg-color-1);
 }
 
 .capacitorMainContainer {
   height: calc(variables.$header-height-capacitor + env(safe-area-inset-top));
   z-index: 600;
-  background-color: #000000;
+  background-color: var(--surface-elevated, #000000);
   position: fixed;
   top: 0;
   padding-top: env(safe-area-inset-top);
@@ -77,18 +77,19 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: variables.$bg-color-1;
+  background-color: var(--background-primary, variables.$bg-color-1);
   z-index: 1001;
   padding-top: 20px;
   padding-bottom: 20px;
   overflow-y: auto;
+  color: var(--text-primary);
 
   a {
     text-decoration: none;
     h3,
     h4 {
       float: none;
-      color: white !important;
+      color: var(--text-primary) !important;
     }
   }
 
@@ -121,7 +122,7 @@
 
 .burgerMenuHeader {
   float: none;
-  color: white !important;
+  color: var(--text-primary) !important;
 }
 
 .burgerMenuOpen {
@@ -181,14 +182,14 @@
   z-index: 10;
   position: relative;
   min-height: variables.$header-height;
-  background-color: variables.$bg-color-1;
+  background-color: var(--surface-elevated, variables.$bg-color-1);
 }
 
 .headerPlaceholderCapacitor {
   z-index: 10;
   position: relative;
   min-height: variables.$header-height-capacitor;
-  background-color: variables.$bg-color-1;
+  background-color: var(--surface-elevated, variables.$bg-color-1);
 }
 
 .userDropdown {
@@ -329,7 +330,7 @@
   z-index: 600;
   position: relative;
   min-height: 70px;
-  background-color: variables.$bg-color-1;
+  background-color: var(--surface-elevated, variables.$bg-color-1);
 }
 
 .headerRowSmall {
@@ -357,24 +358,25 @@
   padding-left: 16px;
   padding-right: 16px;
   font-weight: normal;
-  color: variables.$font-color;
+  color: var(--text-primary, variables.$font-color);
   cursor: pointer;
 
   &:hover {
-    background-color: #222 !important;
+    background-color: var(--surface-hover, #222222) !important;
   }
 }
 
 .nestedMenu {
   position: absolute;
-  border-top: 3px solid variables.$font-color;
+  border-top: 3px solid var(--surface-border-strong, variables.$font-color);
   left: 100%;
   top: 0;
   display: none;
-  background-color: black;
+  background-color: var(--surface-elevated, black);
   padding: 0.5rem;
   z-index: 1050;
   min-width: 160px;
+  color: var(--text-primary);
 }
 
 .submenuContainer:hover .nestedMenu {
@@ -382,5 +384,27 @@
 }
 
 .burgerMenuSubheader {
-  color: variables.$font-color-h !important;
+  color: var(--text-muted, variables.$font-color-h) !important;
+}
+
+.themeToggleButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background-color: var(--button-background);
+  color: var(--text-primary);
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    background-color: var(--button-background-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--focus-outline);
+    outline-offset: 2px;
+  }
 }

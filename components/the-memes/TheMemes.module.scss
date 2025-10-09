@@ -71,10 +71,8 @@
 }
 
 .memePageTab {
-  color: color.scale(
-    variables.$font-color,
-    $lightness: -(variables.$darken-percentage)
-  );
+  color: var(--font-color);
+  filter: brightness(0.9);
   margin-right: 15px;
   cursor: pointer;
   &:hover {

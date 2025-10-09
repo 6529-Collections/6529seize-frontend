@@ -23,6 +23,8 @@ import HeaderNotifications from "./notifications/HeaderNotifications";
 import HeaderOpenMobile from "./open-mobile/HeaderOpenMobile";
 import HeaderShare from "./share/HeaderShare";
 import HeaderUser from "./user/HeaderUser";
+import HeaderThemeToggle from "./HeaderThemeToggle";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {
   onLoad?: () => void;
@@ -42,6 +44,7 @@ export default function Header(props: Readonly<Props>) {
   const { country } = useCookieConsent();
   const { appWalletsSupported } = useAppWallets();
   const { address, seizeConnectOpen } = useSeizeConnectContext();
+  const { theme } = useTheme();
 
   const isMobile = useIsMobileScreen();
 
@@ -183,12 +186,13 @@ export default function Header(props: Readonly<Props>) {
                   xxl={{ span: 9 }}
                   className={`d-flex align-items-center justify-content-end ${styles.headerRight}`}>
                   <Container className="no-padding">
-                    <Navbar expand="lg" variant="dark">
+                    <Navbar expand="lg" variant={theme === "dark" ? "dark" : "light"}>
                       <Container
                         className={`d-flex align-items-center justify-content-end no-padding`}>
                         <div className={styles.dMdNone}>
                           <div className="d-flex align-items-center">
                             <div className="tw-inline-flex tw-space-x-3 tw-mr-3">
+                              <HeaderThemeToggle />
                               <HeaderOpenMobile />
                               {showWaves && <HeaderNotifications />}
                               <HeaderSearchButton />
@@ -215,6 +219,9 @@ export default function Header(props: Readonly<Props>) {
                               pathname={pathname ?? undefined}
                             />
                             <HeaderUser />
+                            <div className="tailwind-scope tw-relative min-[1200px]:tw-mr-3 tw-self-center">
+                              <HeaderThemeToggle />
+                            </div>
                             {showWaves && <HeaderNotifications />}
                             <HeaderShare />
                             <HeaderSearchButton />
