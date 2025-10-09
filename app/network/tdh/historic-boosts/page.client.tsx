@@ -183,7 +183,7 @@ export default function TDHHistoricBoostsPage() {
               <Link
                 key={href}
                 href={href}
-                className="tw-flex-1 tw-min-w-[150px] tw-text-center tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-font-medium tw-border tw-border-[#222] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-4 tw-py-2 tw-no-underline">
+                className="tw-flex-1 tw-min-w-[150px] tw-text-center tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-font-medium tw-border-solid tw-border-[#222] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-4 tw-py-2 tw-no-underline">
                 {label}
               </Link>
             ))}
