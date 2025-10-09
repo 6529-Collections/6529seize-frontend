@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { commonApiFetch } from "@/services/api/common-api";
 import {
@@ -81,9 +81,6 @@ export function useNotificationsQuery({
 }: UseNotificationsQueryProps) {
   const queryClient = useQueryClient();
 
-  const [items, setItems] = useState<TypedNotification[]>([]);
-  const [isInitialQueryDone, setIsInitialQueryDone] = useState(false);
-
   /**
    * OPTIONAL: Prefetch the first few pages of notifications.
    * This is similar to how `useMyStreamQuery` sets up prefetching.
@@ -111,30 +108,19 @@ export function useNotificationsQuery({
     staleTime: 60000,
   });
 
-  useEffect(() => {
-    setItems([]);
-    setIsInitialQueryDone(false);
-  }, [identity, cause]);
-
-  /**
-   * Flatten all pages and (optionally) reverse them. Store in local state.
-   */
-  useEffect(() => {
+  const items = useMemo(() => {
     if (!query.data) {
-      return;
+      return [] as TypedNotification[];
     }
 
-    let data: TypedNotification[] = (
+    const data = (
       query.data.pages as TypedNotificationsResponse[]
     ).flatMap((page) => page.notifications);
 
-    if (reverse) {
-      data = data.reverse();
-    }
-
-    setItems(data);
-    setIsInitialQueryDone(true);
+    return reverse ? [...data].reverse() : data;
   }, [query.data, reverse]);
+
+  const isInitialQueryDone = query.isSuccess || query.isError;
 
   // Return everything the query provides, plus our flattened items & readiness indicator.
   return {
