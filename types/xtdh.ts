@@ -85,7 +85,7 @@ export interface XtdhReceivedNftsResponse {
   readonly availableCollections: XtdhReceivedCollectionOption[];
 }
 
-export type XtdhAllocationNetwork = "ethereum" | "polygon" | "optimism" | string;
+export type XtdhAllocationNetwork = "ethereum" | string;
 
 export interface XtdhAllocationHolderSummary {
   readonly profileId: string;

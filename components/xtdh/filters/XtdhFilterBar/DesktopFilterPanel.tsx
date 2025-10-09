@@ -1,6 +1,7 @@
-import type { ChangeEvent } from "react";
-import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
+import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
+import type { SortDirection } from "@/entities/ISort";
+import type { ChangeEvent } from "react";
 import type { ActivityLabels } from "../constants";
 import type {
   XtdhCollectionsSort,
@@ -8,10 +9,9 @@ import type {
   XtdhTokensSort,
   XtdhView,
 } from "../types";
-import XtdhNetworkDropdown from "./fields/XtdhNetworkDropdown";
-import XtdhFilterNumberField from "./fields/XtdhFilterNumberField";
 import XtdhFilterCheckboxField from "./fields/XtdhFilterCheckboxField";
-import type { SortDirection } from "@/entities/ISort";
+import XtdhFilterNumberField from "./fields/XtdhFilterNumberField";
+import XtdhNetworkDropdown from "./fields/XtdhNetworkDropdown";
 
 type XtdhSortValue = XtdhCollectionsSort | XtdhTokensSort;
 

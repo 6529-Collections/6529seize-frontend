@@ -45,7 +45,7 @@ interface RawCollectionMeta {
   readonly collectionName: string;
   readonly collectionSlug: string;
   readonly description: string;
-  readonly blockchain: "ethereum" | "polygon";
+  readonly blockchain: "ethereum";
   readonly contractAddress: string;
   readonly tokenStandard: "ERC721" | "ERC1155";
   readonly tokenCount: number;
@@ -312,7 +312,7 @@ const RAW_COLLECTIONS: RawCollectionRecord[] = [
     collectionSlug: "glitch-dreams",
     description:
       "Early adopter curated set featuring cross-chain experimental glitch art collaborations.",
-    blockchain: "polygon",
+    blockchain: "ethereum",
     contractAddress: "0x934bd3af10bd8c75a785dcf4e0d4fd720c3d1ae1",
     tokenStandard: "ERC1155",
     tokenCount: 1024,
