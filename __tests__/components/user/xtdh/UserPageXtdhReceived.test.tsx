@@ -147,7 +147,10 @@ describe("UserPageXtdhReceived", () => {
 
     render(<UserPageXtdhReceived profileId="simo" />);
 
-    expect(screen.getByText("1 collection selected")).toBeInTheDocument();
+    expect(screen.getByLabelText("Collections")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Remove The Memes of Production/i })
+    ).toBeInTheDocument();
     const clearButton = screen.getByRole("button", { name: /Clear filters/i });
     expect(clearButton).toBeInTheDocument();
 

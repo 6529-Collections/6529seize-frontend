@@ -1,17 +1,12 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type FormEvent,
-} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import CommonSelect, {
   type CommonSelectItem,
 } from "@/components/utils/select/CommonSelect";
+import CollectionsAutocomplete from "@/components/utils/input/collections/CollectionsAutocomplete";
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
 import { SortDirection } from "@/entities/ISort";
 import { classNames, formatNumberWithCommas } from "@/helpers/Helpers";
@@ -372,6 +367,16 @@ function CollectionsView({
     [availableCollectionOptions, selectedCollections]
   );
 
+  const collectionFilterOptions = useMemo(
+    () =>
+      availableCollections.map((option) => ({
+        id: option.collectionId,
+        name: option.collectionName,
+        tokenCount: option.tokenCount,
+      })),
+    [availableCollections]
+  );
+
   const totalPages = useMemo(() => {
     if (!totalCount) return 1;
     return Math.max(1, Math.ceil(totalCount / COLLECTIONS_PAGE_SIZE));
@@ -522,11 +527,12 @@ function CollectionsView({
       >
         <div className="tw-flex tw-flex-col tw-gap-3 lg:tw-flex-row lg:tw-items-center lg:tw-gap-4">
           <div className="tw-w-full lg:tw-w-64">
-            <CollectionMultiSelect
-              options={availableCollections}
+            <CollectionsAutocomplete
+              options={collectionFilterOptions}
               value={selectedCollections}
               onChange={handleCollectionsFilterChange}
               disabled={isLoading || isFetching}
+              label="Collections"
             />
           </div>
           <div className="tw-w-full lg:tw-w-auto">
@@ -701,6 +707,16 @@ function NftsView({
     [availableCollectionOptions, selectedCollections]
   );
 
+  const collectionFilterOptions = useMemo(
+    () =>
+      availableCollections.map((option) => ({
+        id: option.collectionId,
+        name: option.collectionName,
+        tokenCount: option.tokenCount,
+      })),
+    [availableCollections]
+  );
+
   const totalPages = useMemo(() => {
     if (!totalCount) return 1;
     return Math.max(1, Math.ceil(totalCount / NFTS_PAGE_SIZE));
@@ -837,11 +853,12 @@ function NftsView({
       >
         <div className="tw-flex tw-flex-col tw-gap-3 lg:tw-flex-row lg:tw-items-center lg:tw-gap-4">
           <div className="tw-w-full lg:tw-w-64">
-            <CollectionMultiSelect
-              options={availableCollections}
+            <CollectionsAutocomplete
+              options={collectionFilterOptions}
               value={selectedCollections}
               onChange={handleCollectionsFilterChange}
               disabled={isLoading || isFetching}
+              label="Collections"
             />
           </div>
           <div className="tw-w-full lg:tw-w-auto">
@@ -1230,132 +1247,6 @@ function GranterAvatarGroup({
         <span className="tw-text-xs tw-font-semibold tw-text-iron-200">
           +{additional} more
         </span>
-      )}
-    </div>
-  );
-}
-
-function CollectionMultiSelect({
-  options,
-  value,
-  onChange,
-  disabled,
-}: {
-  readonly options: XtdhReceivedCollectionOption[];
-  readonly value: string[];
-  readonly onChange: (next: string[]) => void;
-  readonly disabled?: boolean;
-}) {
-  const [open, setOpen] = useState(false);
-  const selectedSet = useMemo(() => new Set(value), [value]);
-
-  const handleToggle = useCallback(() => {
-    if (disabled) return;
-    setOpen((prev) => !prev);
-  }, [disabled]);
-
-  useEffect(() => {
-    function handleOutside(event: MouseEvent) {
-      const target = event.target as HTMLElement | null;
-      if (!target?.closest('[data-collections-filter="true"]')) {
-        setOpen(false);
-      }
-    }
-    if (open) {
-      document.addEventListener("mousedown", handleOutside);
-      return () => document.removeEventListener("mousedown", handleOutside);
-    }
-    return undefined;
-  }, [open]);
-
-  const handleCheckboxChange = useCallback(
-    (collectionId: string) => {
-      const next = new Set(selectedSet);
-      if (next.has(collectionId)) {
-        next.delete(collectionId);
-      } else {
-        next.add(collectionId);
-      }
-      onChange(Array.from(next));
-    },
-    [onChange, selectedSet]
-  );
-
-  const handleClear = useCallback(
-    (event: FormEvent<HTMLButtonElement>) => {
-      event.preventDefault();
-      onChange([]);
-    },
-    [onChange]
-  );
-
-  const activeLabel = value.length
-    ? `${value.length.toLocaleString()} collection${value.length === 1 ? "" : "s"} selected`
-    : "All collections";
-
-  return (
-    <div
-      className="tw-relative"
-      data-collections-filter="true"
-    >
-      <button
-        type="button"
-        onClick={handleToggle}
-        disabled={disabled}
-        aria-expanded={open}
-        aria-haspopup="listbox"
-        className={classNames(
-          "tw-flex tw-w-full tw-items-center tw-justify-between tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-transition tw-duration-300 tw-ease-out",
-          disabled
-            ? "tw-opacity-60 tw-text-iron-400"
-            : "hover:tw-border-iron-600 tw-text-iron-200"
-        )}
-      >
-        <span>{activeLabel}</span>
-        <span aria-hidden>{open ? "▲" : "▼"}</span>
-      </button>
-      {open && (
-        <div
-          className="tw-absolute tw-z-20 tw-mt-2 tw-w-full tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-shadow-xl"
-          role="listbox"
-          aria-multiselectable="true"
-        >
-          <div className="tw-max-h-64 tw-overflow-y-auto tw-py-2">
-            {options.map((option) => {
-              const checked = selectedSet.has(option.collectionId);
-              return (
-                <label
-                  key={option.collectionId}
-                  className="tw-flex tw-cursor-pointer tw-items-center tw-justify-between tw-gap-2 tw-px-3.5 tw-py-2 hover:tw-bg-iron-900"
-                >
-                  <div className="tw-flex tw-items-center tw-gap-2">
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => handleCheckboxChange(option.collectionId)}
-                      className="tw-h-4 tw-w-4 tw-rounded tw-border-iron-600 tw-bg-iron-900 tw-text-primary-500 focus:tw-ring-primary-400"
-                    />
-                    <span className="tw-text-sm tw-text-iron-100">
-                      {option.collectionName}
-                    </span>
-                  </div>
-                  <span className="tw-text-xs tw-text-iron-400">
-                    {option.tokenCount.toLocaleString()} tokens
-                  </span>
-                </label>
-              );
-            })}
-          </div>
-          <div className="tw-border-t tw-border-iron-800 tw-px-3.5 tw-py-2">
-            <button
-              type="button"
-              onClick={handleClear}
-              className="tw-text-xs tw-font-semibold tw-text-primary-400 hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
-            >
-              Clear selection
-            </button>
-          </div>
-        </div>
       )}
     </div>
   );
