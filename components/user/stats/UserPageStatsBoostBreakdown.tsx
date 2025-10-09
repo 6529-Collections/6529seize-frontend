@@ -45,42 +45,48 @@ export default function UserPageStatsBoostBreakdown({
   }
 
   function getMemesRows() {
-    let rows = [];
-    rows.push(
+    const headerRow = (
       <tr key={getRandomObjectId()}>
         <td className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-pt-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-white-400">
           Memes
         </td>
       </tr>
     );
-    if (tdh?.boost_breakdown) {
-      rows.push(
-        getMemeRow("Full Collection Set", tdh.boost_breakdown?.memes_card_sets)
-      );
-      if (tdh.boost_breakdown?.memes_card_sets?.acquired === 0) {
-        rows.push(getMemeRow("SZN1", tdh.boost_breakdown?.memes_szn1));
-        if (!tdh.boost_breakdown?.memes_szn1?.acquired) {
-          rows.push(
-            getMemeRow("Genesis Set", tdh.boost_breakdown?.memes_genesis)
-          );
-          rows.push(
-            getMemeRow("Nakamoto", tdh.boost_breakdown?.memes_nakamoto)
-          );
-        }
-        rows.push(getMemeRow("SZN2", tdh.boost_breakdown?.memes_szn2));
-        rows.push(getMemeRow("SZN3", tdh.boost_breakdown?.memes_szn3));
-        rows.push(getMemeRow("SZN4", tdh.boost_breakdown?.memes_szn4));
-        rows.push(getMemeRow("SZN5", tdh.boost_breakdown?.memes_szn5));
-        rows.push(getMemeRow("SZN6", tdh.boost_breakdown?.memes_szn6));
-        rows.push(getMemeRow("SZN7", tdh.boost_breakdown?.memes_szn7));
-        rows.push(getMemeRow("SZN8", tdh.boost_breakdown?.memes_szn8));
-        rows.push(getMemeRow("SZN9", tdh.boost_breakdown?.memes_szn9));
-        rows.push(getMemeRow("SZN10", tdh.boost_breakdown?.memes_szn10));
-        rows.push(getMemeRow("SZN11", tdh.boost_breakdown?.memes_szn11));
-      }
+
+    const bb = tdh?.boost_breakdown;
+    if (!bb) return [headerRow];
+
+    const baseRows = [
+      headerRow,
+      getMemeRow("Full Collection Set", bb.memes_card_sets),
+    ];
+
+    if (bb.memes_card_sets?.acquired !== 0) {
+      return baseRows;
     }
 
-    return rows;
+    const extraRows = [
+      getMemeRow("SZN1", bb.memes_szn1),
+      ...(bb.memes_szn1?.acquired
+        ? []
+        : [
+            getMemeRow("Genesis Set", bb.memes_genesis),
+            getMemeRow("Nakamoto", bb.memes_nakamoto),
+          ]),
+      getMemeRow("SZN2", bb.memes_szn2),
+      getMemeRow("SZN3", bb.memes_szn3),
+      getMemeRow("SZN4", bb.memes_szn4),
+      getMemeRow("SZN5", bb.memes_szn5),
+      getMemeRow("SZN6", bb.memes_szn6),
+      getMemeRow("SZN7", bb.memes_szn7),
+      getMemeRow("SZN8", bb.memes_szn8),
+      getMemeRow("SZN9", bb.memes_szn9),
+      getMemeRow("SZN10", bb.memes_szn10),
+      getMemeRow("SZN11", bb.memes_szn11),
+      getMemeRow("SZN12", bb.memes_szn12),
+    ];
+
+    return [...baseRows, ...extraRows];
   }
 
   function getBaseBoostRow(name: string, breakdown?: TDHBoostBreakdown) {
@@ -125,9 +131,9 @@ export default function UserPageStatsBoostBreakdown({
         </h3>
         <span>
           <Link
-            href="/network/metrics#tdh-1.3"
+            href="/network/tdh#tdh-1-4"
             className="decoration-hover-underline tw-text-sm">
-            TDH Version: 1.3
+            TDH Version: 1.4
           </Link>
         </span>
       </div>
