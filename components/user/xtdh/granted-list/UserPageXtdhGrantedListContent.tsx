@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
-import type { GrantedFilterStatus } from "../UserPageXtdhGrantedList";
+import type { GrantedFilterStatus } from "@/components/user/xtdh/user-page-xtdh-granted-list/types";
 import { UserPageXtdhGrantList } from "./UserPageXtdhGrantList";
 
 export interface UserPageXtdhGrantedListContentProps {
