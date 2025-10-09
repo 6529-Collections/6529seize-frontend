@@ -18,7 +18,7 @@ export default function LayoutWrapper({
   const { isApp, hasTouchScreen } = useDeviceInfo();
   const isSmallScreen = useIsMobileScreen();
   const [isTouchTabletViewport, setIsTouchTabletViewport] = useState(() => {
-    if (typeof globalThis.window === "undefined") {
+    if (globalThis.window === undefined) {
       return false;
     }
     return globalThis.window.innerWidth < SIDEBAR_MOBILE_BREAKPOINT;

@@ -113,8 +113,10 @@ export function useSidebarController() {
   // Derived collapsed state (pure function of inputs)
   const isCollapsed = useMemo(() => {
     if (isOffcanvasMode) {
-      // Overlay open => expanded; closed => collapsed
-      return !isOffcanvasOpen;
+      if (isOffcanvasOpen) {
+        return false;
+      }
+      return true;
     }
     // Wide desktop: honor user preference
     return isDesktopCollapsed;

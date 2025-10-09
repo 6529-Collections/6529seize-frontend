@@ -84,6 +84,135 @@ const STATIC_PATH_SUFFIXES = [
   ".webp",
 ] as const;
 
+function isDesktopOSFromUserAgent(userAgent: string): boolean {
+  const isAndroid = userAgent.includes("android");
+  const isIOS =
+    userAgent.includes("iphone") ||
+    userAgent.includes("ipad") ||
+    userAgent.includes("ipod");
+  const isMacDesktop =
+    userAgent.includes("macintosh") ||
+    (userAgent.includes("mac os x") && !userAgent.includes("mobile"));
+  const isLinuxDesktop =
+    userAgent.includes("linux") && !isAndroid && !userAgent.includes("mobile");
+  const hasDesktopSignal =
+    userAgent.includes("windows") ||
+    userAgent.includes("x11") ||
+    userAgent.includes("cros");
+
+  return !isAndroid && !isIOS && (hasDesktopSignal || isMacDesktop || isLinuxDesktop);
+}
+
+function normalizeDropParam(value: string | null): string | undefined {
+  if (!value) {
+    return undefined;
+  }
+  return value.replace(/\/+$/, "");
+}
+
+function normalizeSerialParam(value: string | null): string | undefined {
+  if (!value) {
+    return undefined;
+  }
+  return value.replace(/\/$/, "");
+}
+
+function buildWaveHref({
+  wave,
+  drop,
+  serialNo,
+  isDirectMessage,
+}: {
+  wave?: string;
+  drop?: string;
+  serialNo?: string;
+  isDirectMessage: boolean;
+}): string {
+  if (!wave) {
+    return isDirectMessage
+      ? getMessagesBaseRoute(false)
+      : getWavesBaseRoute(false);
+  }
+
+  const extraParams = drop ? { drop } : undefined;
+  return getWaveRoute({
+    waveId: wave,
+    serialNo,
+    extraParams,
+    isDirectMessage,
+    isApp: false,
+  });
+}
+
+function resolveMyStreamHomeRedirect({
+  view,
+  wave,
+  drop,
+  serialNo,
+}: {
+  view?: string;
+  wave?: string;
+  drop?: string;
+  serialNo?: string;
+}): string {
+  if (view === "messages") {
+    return buildWaveHref({
+      wave,
+      drop,
+      serialNo,
+      isDirectMessage: true,
+    });
+  }
+
+  if (view === "waves" || wave) {
+    return buildWaveHref({
+      wave,
+      drop,
+      serialNo,
+      isDirectMessage: false,
+    });
+  }
+
+  if (drop) {
+    const params = new URLSearchParams();
+    params.set("drop", drop);
+    return `${getWavesBaseRoute(false)}?${params.toString()}`;
+  }
+
+  return getHomeFeedRoute();
+}
+
+function resolveMyStreamRedirect(
+  req: NextRequest,
+  normalizedPathname: string
+): string | undefined {
+  const userAgent = (req.headers.get("user-agent") || "").toLowerCase();
+  if (!isDesktopOSFromUserAgent(userAgent)) {
+    return undefined;
+  }
+
+  if (normalizedPathname === "/my-stream/notifications") {
+    return getNotificationsRoute(false);
+  }
+
+  if (normalizedPathname !== "/my-stream") {
+    return undefined;
+  }
+
+  const params = new URLSearchParams(req.nextUrl.searchParams);
+  const view = params.get("view") ?? undefined;
+  const wave = params.get("wave") ?? undefined;
+  const drop = normalizeDropParam(params.get("drop"));
+  const serialNo = normalizeSerialParam(params.get("serialNo"));
+
+  return resolveMyStreamHomeRedirect({
+    view,
+    wave,
+    drop,
+    serialNo,
+  });
+}
+
 function handleRedirects(req: NextRequest): NextResponse | undefined {
   let { pathname } = req.nextUrl;
 
@@ -121,62 +250,7 @@ export async function middleware(req: NextRequest) {
     let redirectTarget: string | undefined;
 
     if (normalizedPathname.startsWith("/my-stream")) {
-      const userAgent = (req.headers.get("user-agent") || "").toLowerCase();
-      const isAndroid = userAgent.includes("android");
-      const isIOS =
-        userAgent.includes("iphone") ||
-        userAgent.includes("ipad") ||
-        userAgent.includes("ipod");
-      const isMacDesktop =
-        userAgent.includes("macintosh") ||
-        (userAgent.includes("mac os x") && !userAgent.includes("mobile"));
-      const isLinuxDesktop =
-        userAgent.includes("linux") && !isAndroid && !userAgent.includes("mobile");
-      const hasDesktopSignal =
-        userAgent.includes("windows") || userAgent.includes("x11") || userAgent.includes("cros");
-      const isDesktopOS = !isAndroid && !isIOS && (hasDesktopSignal || isMacDesktop || isLinuxDesktop);
-
-      if (isDesktopOS) {
-        if (normalizedPathname === "/my-stream/notifications") {
-          redirectTarget = getNotificationsRoute(false);
-        } else if (normalizedPathname === "/my-stream") {
-          const params = new URLSearchParams(req.nextUrl.searchParams);
-          const view = params.get("view") ?? undefined;
-          const wave = params.get("wave") ?? undefined;
-          const rawDrop = params.get("drop") ?? undefined;
-          const drop = rawDrop ? rawDrop.replace(/\/+$/, "") : undefined;
-          const serial = params.get("serialNo") ?? undefined;
-          const serialNo = serial ? serial.replace(/\/$/, "") : undefined;
-
-          const buildWaveHref = (isDirectMessage: boolean) => {
-            if (!wave) {
-              return isDirectMessage
-                ? getMessagesBaseRoute(false)
-                : getWavesBaseRoute(false);
-            }
-            const extraParams = drop ? { drop } : undefined;
-            return getWaveRoute({
-              waveId: wave,
-              serialNo,
-              extraParams,
-              isDirectMessage,
-              isApp: false,
-            });
-          };
-
-          if (view === "messages") {
-            redirectTarget = buildWaveHref(true);
-          } else if (view === "waves" || wave) {
-            redirectTarget = buildWaveHref(false);
-          } else if (drop) {
-            const params = new URLSearchParams();
-            params.set("drop", drop);
-            redirectTarget = `${getWavesBaseRoute(false)}?${params.toString()}`;
-          } else {
-            redirectTarget = getHomeFeedRoute();
-          }
-        }
-      }
+      redirectTarget = resolveMyStreamRedirect(req, normalizedPathname);
     }
 
     if (redirectTarget) {
