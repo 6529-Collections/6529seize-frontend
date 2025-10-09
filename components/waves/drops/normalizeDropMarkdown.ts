@@ -12,12 +12,14 @@ import {
 
 const ZERO_WIDTH_SPACE_REGEX = /\u200B/g;
 const BLANK_PARAGRAPH_MARKER = "__BLANK_PARAGRAPH__";
+const SENTINEL_BOUNDARY = "\u2063";
+const BLANK_PARAGRAPH_SENTINEL = `${SENTINEL_BOUNDARY}${BLANK_PARAGRAPH_MARKER}${SENTINEL_BOUNDARY}`;
 const BLANK_RUN_REGEX = new RegExp(
-  `(?:${BLANK_PARAGRAPH_MARKER}\\n\\n)+`,
+  `(?:${BLANK_PARAGRAPH_SENTINEL}\\n\\n)+`,
   "g"
 );
 const BLANK_PARAGRAPH_TOKEN_REGEX = new RegExp(
-  `${BLANK_PARAGRAPH_MARKER}(\\n?)`,
+  `${BLANK_PARAGRAPH_SENTINEL}(\\n?)`,
   "g"
 );
 
@@ -51,7 +53,7 @@ const isBlankParagraph = (node: LexicalNode): boolean => {
 const blankParagraphTransformer: Transformer = {
   type: "element",
   dependencies: [],
-  export: (node) => (isBlankParagraph(node) ? BLANK_PARAGRAPH_MARKER : null),
+  export: (node) => (isBlankParagraph(node) ? BLANK_PARAGRAPH_SENTINEL : null),
   regExp: /(?:)/,
   replace: () => {},
 };
@@ -65,7 +67,7 @@ const collapseBlankParagraphMarkers = (markdown: string): string => {
   }
 
   const collapsedRuns = markdown.replace(BLANK_RUN_REGEX, (match) => {
-    const markerCount = match.split(BLANK_PARAGRAPH_MARKER).length - 1;
+    const markerCount = match.split(BLANK_PARAGRAPH_SENTINEL).length - 1;
     return "\n".repeat(markerCount);
   });
 
