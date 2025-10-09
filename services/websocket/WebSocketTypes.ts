@@ -33,9 +33,4 @@ export interface WebSocketConfig {
   url: string;
   reconnectDelay?: number;
   maxReconnectAttempts?: number;
-  /**
-   * Optional jitter factor (0-1) applied to each reconnect delay to avoid herd behaviour.
-   * Represents the maximum percentage variance applied around the base delay.
-   */
-  reconnectJitter?: number;
 }
