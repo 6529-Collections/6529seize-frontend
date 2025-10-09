@@ -12,7 +12,7 @@ const NAV_LINKS = [
 ] as const;
 
 const BUTTON_LINK_CLASSES =
-  "tw-flex-1 tw-min-w-[150px] tw-text-center tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-font-medium tw-border tw-border-[#555] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-4 tw-py-2 tw-no-underline";
+  "tw-flex-1 tw-min-w-[150px] tw-text-center tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-font-medium tw-border tw-border-[#555] hover:tw-bg-[#ddd] hover:tw-text-black tw-border-solid tw-border-[#222] tw-px-4 tw-py-2 tw-no-underline";
 
 export default function DefinitionsClient() {
   useSetTitle("Definitions | Network");
@@ -92,7 +92,7 @@ export default function DefinitionsClient() {
               TDH (unboosted) &times; boosters. For the current rules, see{" "}
               <Link
                 href="/network/tdh"
-                className="tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-border-solid tw-border-[#555] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-1 tw-py-0.5 tw-no-underline tw-text-md tw-font-medium">
+                className="tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-border-solid tw-border-[#222] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-1 tw-py-0.5 tw-no-underline tw-text-md tw-font-medium">
                 TDH
               </Link>
               .
