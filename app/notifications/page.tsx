@@ -12,7 +12,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { Time } from "@/helpers/time";
 import type { Metadata } from "next";
 
-export default async function NotificationsPage(): Promise<JSX.Element> {
+export default async function NotificationsPage() {
   const queryClient = new QueryClient();
   const headers = await getAppCommonHeaders();
   const cookieStore = await cookies();
