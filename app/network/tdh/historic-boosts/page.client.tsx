@@ -7,7 +7,7 @@ import { Col, Container, Row } from "react-bootstrap";
 
 function DetailsCard(props: Readonly<{ title: string; children: ReactNode }>) {
   return (
-    <details className="tw-rounded-lg tw-bg-[#333] tw-border-1 tw-border-solid tw-border-[#555]">
+    <details className="tw-rounded-lg tw-bg-[#0c0c0d] tw-border-1 tw-border-solid tw-border-[#222]">
       <summary className="tw-cursor-pointer tw-select-none tw-list-none tw-px-5 tw-py-3 tw-font-medium">
         <h5 className="tw-m-0">{props.title}</h5>
       </summary>
@@ -129,7 +129,7 @@ export default function TDHHistoricBoostsPage() {
   useSetTitle("TDH Historic Boosts | Network");
 
   return (
-    <Container className="tw-pt-12 tw-pb-12">
+    <Container className="tw-min-h-screen tw-pt-12 tw-pb-12">
       <Row>
         <Col>
           <h1>TDH — Historic Boosts</h1>
@@ -183,7 +183,7 @@ export default function TDHHistoricBoostsPage() {
               <Link
                 key={href}
                 href={href}
-                className="tw-flex-1 tw-min-w-[150px] tw-text-center tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-font-medium tw-border tw-border-[#555] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-4 tw-py-2 tw-no-underline">
+                className="tw-flex-1 tw-min-w-[150px] tw-text-center tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-font-medium tw-border tw-border-[#222] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-4 tw-py-2 tw-no-underline">
                 {label}
               </Link>
             ))}

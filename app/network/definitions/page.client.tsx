@@ -18,7 +18,7 @@ export default function DefinitionsClient() {
   useSetTitle("Definitions | Network");
 
   return (
-    <Container className="tw-pt-12 tw-pb-12">
+    <Container className="tw-min-h-screen tw-pt-12 tw-pb-12">
       <Row>
         <Col>
           <h1>Definitions</h1>
