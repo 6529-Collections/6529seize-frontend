@@ -1,6 +1,5 @@
 'use client';
 
-import { useMemo } from "react";
 import type { XtdhReceivedCollectionSummary, XtdhReceivedNft } from "@/types/xtdh";
 import { formatXtdhRate, formatXtdhTotal } from "../utils";
 import { XtdhReceivedGranterAvatarGroup } from "./XtdhReceivedGranterAvatarGroup";
@@ -18,11 +17,6 @@ export function XtdhReceivedCollectionCard({
   expanded,
   onToggle,
 }: XtdhReceivedCollectionCardProps) {
-  const additionalGranters = useMemo(
-    () => Math.max(collection.granterCount - collection.granterPreviews.length, 0),
-    [collection]
-  );
-
   return (
     <div
       className="tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-4"
@@ -70,9 +64,7 @@ export function XtdhReceivedCollectionCard({
               </span>
             </div>
             <XtdhReceivedGranterAvatarGroup
-              granters={collection.granterPreviews}
-              granterCount={collection.granterCount}
-              additional={additionalGranters}
+              granters={collection.granters}
             />
             <span
               className="tw-ml-auto tw-inline-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-iron-700 tw-bg-iron-850 tw-text-sm tw-text-iron-200"

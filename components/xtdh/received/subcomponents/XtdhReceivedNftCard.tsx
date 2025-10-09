@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import clsx from "clsx";
 import type { XtdhReceivedNft } from "@/types/xtdh";
 import { formatXtdhRate, formatXtdhTotal } from "../utils";
@@ -17,10 +17,6 @@ export function XtdhReceivedNftCard({
   showCollectionName = true,
 }: XtdhReceivedNftCardProps) {
   const [expanded, setExpanded] = useState(false);
-  const additionalGranters = useMemo(
-    () => Math.max(nft.granterCount - nft.granterPreviews.length, 0),
-    [nft]
-  );
   const granterPanelId = `nft-granters-${nft.tokenId}`;
   const containerClass = clsx(
     "tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-4 tw-flex tw-flex-col tw-gap-4",
@@ -71,9 +67,7 @@ export function XtdhReceivedNftCard({
             </span>
           </div>
           <XtdhReceivedGranterAvatarGroup
-            granters={nft.granterPreviews}
-            granterCount={nft.granterCount}
-            additional={additionalGranters}
+            granters={nft.granters}
           />
           <button
             type="button"

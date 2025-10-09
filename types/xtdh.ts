@@ -24,13 +24,10 @@ export interface XtdhReceivedError {
   readonly statusCode: number;
 }
 
-export interface XtdhGranterPreview {
+export interface XtdhGranter {
   readonly profileId: string;
   readonly displayName: string;
   readonly profileImage: string;
-}
-
-export interface XtdhGranter extends XtdhGranterPreview {
   readonly xtdhRateGranted: number;
 }
 
@@ -40,8 +37,6 @@ export interface XtdhReceivedToken {
   readonly tokenImage: string;
   readonly xtdhRate: number;
   readonly totalXtdhReceived: number;
-  readonly granterCount: number;
-  readonly granterPreviews: XtdhGranterPreview[];
   readonly granters: XtdhGranter[];
 }
 
@@ -52,8 +47,7 @@ export interface XtdhReceivedCollectionSummary {
   readonly tokenCount: number;
   readonly totalXtdhRate: number;
   readonly totalXtdhReceived: number;
-  readonly granterCount: number;
-  readonly granterPreviews: XtdhGranterPreview[];
+  readonly granters: XtdhGranter[];
   readonly tokens: XtdhReceivedToken[];
 }
 
@@ -146,7 +140,7 @@ export interface XtdhEcosystemCollectionsResponse {
   readonly pageSize: number;
   readonly availableFilters: {
     readonly networks: XtdhAllocationNetwork[];
-    readonly grantors: XtdhGranterPreview[];
+    readonly grantors: XtdhGranter[];
   };
 }
 
@@ -157,7 +151,7 @@ export interface XtdhEcosystemTokensResponse {
   readonly pageSize: number;
   readonly availableFilters: {
     readonly networks: XtdhAllocationNetwork[];
-    readonly grantors: XtdhGranterPreview[];
+    readonly grantors: XtdhGranter[];
   };
 }
 

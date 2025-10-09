@@ -5,7 +5,6 @@ import {
   type XtdhEcosystemToken,
   type XtdhEcosystemTokensResponse,
   type XtdhGranter,
-  type XtdhGranterPreview,
   type XtdhOverviewStats,
 } from "@/types/xtdh";
 
@@ -552,17 +551,19 @@ function aggregateCollections(
 
 const ECOSYSTEM_COLLECTIONS = aggregateCollections(ECOSYSTEM_TOKENS);
 
-function buildGrantorPreviews(): XtdhGranterPreview[] {
-  const map = new Map<string, XtdhGranterPreview>();
+function buildGrantorDirectory(): XtdhGranter[] {
+  const map = new Map<string, XtdhGranter>();
 
   for (const collection of ECOSYSTEM_COLLECTIONS) {
     for (const granter of collection.granters) {
-      if (!map.has(granter.profileId)) {
+      const existing = map.get(granter.profileId);
+      if (existing) {
         map.set(granter.profileId, {
-          profileId: granter.profileId,
-          displayName: granter.displayName,
-          profileImage: granter.profileImage,
+          ...existing,
+          xtdhRateGranted: existing.xtdhRateGranted + granter.xtdhRateGranted,
         });
+      } else {
+        map.set(granter.profileId, granter);
       }
     }
   }
@@ -572,7 +573,7 @@ function buildGrantorPreviews(): XtdhGranterPreview[] {
   );
 }
 
-const AVAILABLE_GRANTORS = buildGrantorPreviews();
+const AVAILABLE_GRANTORS = buildGrantorDirectory();
 const NETWORK_ALLOWLIST = new Set(["ethereum"]);
 const AVAILABLE_NETWORKS = (() => {
   const derived = Array.from(

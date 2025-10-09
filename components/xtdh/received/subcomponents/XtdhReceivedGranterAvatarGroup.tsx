@@ -1,22 +1,23 @@
 'use client';
 
-import type { XtdhGranterPreview } from "@/types/xtdh";
+import { useMemo } from "react";
+import type { XtdhGranter } from "@/types/xtdh";
 
 export interface XtdhReceivedGranterAvatarGroupProps {
-  readonly granters: XtdhGranterPreview[];
-  readonly granterCount: number;
-  readonly additional: number;
+  readonly granters: XtdhGranter[];
 }
 
 export function XtdhReceivedGranterAvatarGroup({
   granters,
-  granterCount,
-  additional,
 }: XtdhReceivedGranterAvatarGroupProps) {
+  const previewGranters = useMemo(() => granters.slice(0, 5), [granters]);
+  const granterCount = granters.length;
+  const additional = Math.max(granterCount - previewGranters.length, 0);
+
   return (
     <div className="tw-flex tw-items-center tw-gap-2">
       <div className="tw-flex -tw-space-x-2">
-        {granters.map((granter) => (
+        {previewGranters.map((granter) => (
           <img
             key={granter.profileId}
             src={granter.profileImage}

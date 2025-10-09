@@ -1,6 +1,5 @@
 import {
   type XtdhGranter,
-  type XtdhGranterPreview,
   type XtdhReceivedCollectionOption,
   type XtdhReceivedCollectionSummary,
   type XtdhReceivedNft,
@@ -522,7 +521,7 @@ interface CollectionAccumulator {
   totalXtdhRate: number;
   totalXtdhReceived: number;
   tokens: XtdhReceivedToken[];
-  granters: Map<string, XtdhGranterPreview>;
+  granters: Map<string, XtdhGranter>;
 }
 
 export function buildCollections(
@@ -540,7 +539,7 @@ export function buildCollections(
         totalXtdhRate: 0,
         totalXtdhReceived: 0,
         tokens: [],
-        granters: new Map<string, XtdhGranterPreview>(),
+        granters: new Map<string, XtdhGranter>(),
       });
     }
 
@@ -552,18 +551,16 @@ export function buildCollections(
     entry.totalXtdhReceived += token.totalXtdhReceived;
 
     for (const granter of token.granters) {
-      entry.granters.set(granter.profileId, {
-        profileId: granter.profileId,
-        displayName: granter.displayName,
-        profileImage: granter.profileImage,
-      });
+      const existing = entry.granters.get(granter.profileId);
+      if (existing) {
+        entry.granters.set(granter.profileId, {
+          ...existing,
+          xtdhRateGranted: existing.xtdhRateGranted + granter.xtdhRateGranted,
+        });
+      } else {
+        entry.granters.set(granter.profileId, granter);
+      }
     }
-
-    const tokenGranterPreviews = token.granters.slice(0, 5).map((granter) => ({
-      profileId: granter.profileId,
-      displayName: granter.displayName,
-      profileImage: granter.profileImage,
-    }));
 
     entry.tokens.push({
       tokenId: token.tokenId,
@@ -571,8 +568,6 @@ export function buildCollections(
       tokenImage: token.tokenImage,
       xtdhRate: token.xtdhRate,
       totalXtdhReceived: token.totalXtdhReceived,
-      granterCount: token.granters.length,
-      granterPreviews: tokenGranterPreviews,
       granters: token.granters,
     });
   }
@@ -584,8 +579,7 @@ export function buildCollections(
     tokenCount: entry.tokenCount,
     totalXtdhRate: entry.totalXtdhRate,
     totalXtdhReceived: entry.totalXtdhReceived,
-    granterCount: entry.granters.size,
-    granterPreviews: Array.from(entry.granters.values()).slice(0, 5),
+    granters: Array.from(entry.granters.values()),
     tokens: entry.tokens,
   }));
 }
@@ -626,12 +620,6 @@ export function buildNfts(tokens: BaseTokenData[]): XtdhReceivedNft[] {
     tokenImage: token.tokenImage,
     xtdhRate: token.xtdhRate,
     totalXtdhReceived: token.totalXtdhReceived,
-    granterCount: token.granters.length,
-    granterPreviews: token.granters.slice(0, 5).map((granter) => ({
-      profileId: granter.profileId,
-      displayName: granter.displayName,
-      profileImage: granter.profileImage,
-    })),
     granters: token.granters,
   }));
 }

@@ -28,14 +28,6 @@ describe("UserPageXtdhReceived", () => {
       tokenImage: "https://example.com/token-1.png",
       xtdhRate: 50,
       totalXtdhReceived: 1000,
-      granterCount: 1,
-      granterPreviews: [
-        {
-          profileId: "alice",
-          displayName: "Alice",
-          profileImage: "https://example.com/alice.png",
-        },
-      ],
       granters: [
         {
           profileId: "alice",
@@ -56,14 +48,7 @@ describe("UserPageXtdhReceived", () => {
             tokenCount: 1,
             totalXtdhRate: 50,
             totalXtdhReceived: 1000,
-            granterCount: 1,
-            granterPreviews: [
-              {
-                profileId: "alice",
-                displayName: "Alice",
-                profileImage: "https://example.com/alice.png",
-              },
-            ],
+            granters: baseToken.granters,
             tokens: [baseToken],
           },
         ],
