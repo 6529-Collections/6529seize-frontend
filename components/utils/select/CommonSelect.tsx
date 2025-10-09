@@ -30,6 +30,7 @@ interface CommonSelectDefaultProps<T, U> {
   readonly renderItemChildren?: (
     item: CommonSelectItem<T, U>
   ) => React.ReactElement<ChildComponentProps>;
+  readonly closeOnSelect?: boolean;
 }
 
 interface CommonSelectsWithSortProps<T, U>

@@ -9,6 +9,7 @@ import type {
 export const DEFAULT_DIRECTION: XtdhSortDirection = "desc";
 export const DEFAULT_COLLECTION_SORT: XtdhCollectionsSort = "total_rate";
 export const DEFAULT_TOKEN_SORT: XtdhTokensSort = "rate";
+export const ALL_NETWORKS_OPTION = "__xtdh_network_all__";
 
 export interface ActivityLabels {
   readonly allocated: string;

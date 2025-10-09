@@ -5,9 +5,7 @@ import type { UseQueryResult } from "@tanstack/react-query";
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { XtdhEcosystemToken, XtdhEcosystemTokensResponse } from "@/types/xtdh";
-import XtdhFilterBar from "../filters/XtdhFilterBar";
-import { TOKEN_SORT_OPTIONS } from "../filters/constants";
-import type { XtdhTokensViewState, XtdhSortDirection } from "../filters/types";
+import type { XtdhTokensViewState } from "../filters/types";
 export type { XtdhTokensViewState } from "../filters/types";
 
 export const TOKENS_PAGE_SIZE = 25;
@@ -15,30 +13,14 @@ export const TOKENS_PAGE_SIZE = 25;
 interface XtdhTokensViewProps {
   readonly state: XtdhTokensViewState;
   readonly connectedProfileId: string | null;
-  readonly onSortChange: (sort: XtdhTokensViewState["sort"]) => void;
-  readonly onDirectionChange: (direction: XtdhSortDirection) => void;
-  readonly onNetworksChange: (networks: string[]) => void;
-  readonly onMinRateChange: (value: number | undefined) => void;
-  readonly onMinGrantorsChange: (value: number | undefined) => void;
-  readonly onToggleMyGrants: (enabled: boolean) => void;
-  readonly onToggleReceiving: (enabled: boolean) => void;
   readonly onPageChange: (page: number) => void;
-  readonly onClearAll: () => void;
   readonly query: UseQueryResult<XtdhEcosystemTokensResponse, Error>;
 }
 
 export default function XtdhTokensView({
   state,
   connectedProfileId,
-  onSortChange,
-  onDirectionChange,
-  onNetworksChange,
-  onMinRateChange,
-  onMinGrantorsChange,
-  onToggleMyGrants,
-  onToggleReceiving,
   onPageChange,
-  onClearAll,
   query,
 }: Readonly<XtdhTokensViewProps>) {
   const { data, isLoading, isError, error, isFetching, refetch } = query;
@@ -53,9 +35,6 @@ export default function XtdhTokensView({
     () => state.page * TOKENS_PAGE_SIZE < totalCount,
     [state.page, totalCount]
   );
-
-  const availableNetworks = data?.availableFilters.networks ?? [];
-  const disableInteractions = isLoading || isFetching;
 
   const resultSummary = useMemo(() => {
     if (isError) {
@@ -114,23 +93,6 @@ export default function XtdhTokensView({
           {resultSummary}
         </div>
       </header>
-
-      <XtdhFilterBar
-        view="tokens"
-        state={state}
-        sortOptions={TOKEN_SORT_OPTIONS}
-        connectedProfileId={connectedProfileId}
-        availableNetworks={availableNetworks}
-        disableInteractions={disableInteractions}
-        onSortChange={onSortChange}
-        onDirectionChange={onDirectionChange}
-        onNetworksChange={onNetworksChange}
-        onMinRateChange={onMinRateChange}
-        onMinGrantorsChange={onMinGrantorsChange}
-        onToggleMyGrants={onToggleMyGrants}
-        onToggleReceiving={onToggleReceiving}
-        onClearAll={onClearAll}
-      />
 
       <div className="tw-flex tw-flex-col tw-gap-4">
         {isLoading && (

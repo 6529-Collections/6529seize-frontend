@@ -6,9 +6,7 @@ import CommonTablePagination from "@/components/utils/table/paginator/CommonTabl
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { XtdhEcosystemCollection } from "@/types/xtdh";
 import type { XtdhEcosystemCollectionsResponse } from "@/types/xtdh";
-import XtdhFilterBar from "../filters/XtdhFilterBar";
-import { COLLECTION_SORT_OPTIONS } from "../filters/constants";
-import type { XtdhCollectionsViewState, XtdhSortDirection } from "../filters/types";
+import type { XtdhCollectionsViewState } from "../filters/types";
 export type { XtdhCollectionsViewState } from "../filters/types";
 
 export const COLLECTIONS_PAGE_SIZE = 20;
@@ -16,30 +14,14 @@ export const COLLECTIONS_PAGE_SIZE = 20;
 interface XtdhCollectionsViewProps {
   readonly state: XtdhCollectionsViewState;
   readonly connectedProfileId: string | null;
-  readonly onSortChange: (sort: XtdhCollectionsViewState["sort"]) => void;
-  readonly onDirectionChange: (direction: XtdhSortDirection) => void;
-  readonly onNetworksChange: (networks: string[]) => void;
-  readonly onMinRateChange: (value: number | undefined) => void;
-  readonly onMinGrantorsChange: (value: number | undefined) => void;
-  readonly onToggleMyGrants: (enabled: boolean) => void;
-  readonly onToggleReceiving: (enabled: boolean) => void;
   readonly onPageChange: (page: number) => void;
-  readonly onClearAll: () => void;
   readonly query: UseQueryResult<XtdhEcosystemCollectionsResponse, Error>;
 }
 
 export default function XtdhCollectionsView({
   state,
   connectedProfileId,
-  onSortChange,
-  onDirectionChange,
-  onNetworksChange,
-  onMinRateChange,
-  onMinGrantorsChange,
-  onToggleMyGrants,
-  onToggleReceiving,
   onPageChange,
-  onClearAll,
   query,
 }: Readonly<XtdhCollectionsViewProps>) {
   const { data, isLoading, isError, error, isFetching, refetch } = query;
@@ -54,9 +36,6 @@ export default function XtdhCollectionsView({
     () => state.page * COLLECTIONS_PAGE_SIZE < totalCount,
     [state.page, totalCount]
   );
-
-  const availableNetworks = data?.availableFilters.networks ?? [];
-  const disableInteractions = isLoading || isFetching;
 
   const resultSummary = useMemo(() => {
     if (isError) {
@@ -115,23 +94,6 @@ export default function XtdhCollectionsView({
           {resultSummary}
         </div>
       </header>
-
-      <XtdhFilterBar
-        view="collections"
-        state={state}
-        sortOptions={COLLECTION_SORT_OPTIONS}
-        connectedProfileId={connectedProfileId}
-        availableNetworks={availableNetworks}
-        disableInteractions={disableInteractions}
-        onSortChange={onSortChange}
-        onDirectionChange={onDirectionChange}
-        onNetworksChange={onNetworksChange}
-        onMinRateChange={onMinRateChange}
-        onMinGrantorsChange={onMinGrantorsChange}
-        onToggleMyGrants={onToggleMyGrants}
-        onToggleReceiving={onToggleReceiving}
-        onClearAll={onClearAll}
-      />
 
       <div className="tw-flex tw-flex-col tw-gap-4">
         {isLoading && (
