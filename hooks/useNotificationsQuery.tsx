@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { commonApiFetch } from "@/services/api/common-api";
 import {
@@ -85,15 +85,21 @@ export function useNotificationsQuery({
    * OPTIONAL: Prefetch the first few pages of notifications.
    * This is similar to how `useMyStreamQuery` sets up prefetching.
    */
-  queryClient.prefetchInfiniteQuery({
-    queryKey: getIdentityNotificationsQueryKey(identity, limit, cause),
-    queryFn: ({ pageParam }: { pageParam?: number | null }) =>
-      fetchNotifications({ limit, cause, pageParam }),
-    initialPageParam: null,
-    getNextPageParam: (lastPage) => lastPage.notifications.at(-1)?.id ?? null,
-    pages: 3,
-    staleTime: 60000,
-  });
+  useEffect(() => {
+    if (!identity || activeProfileProxy) {
+      return;
+    }
+
+    queryClient.prefetchInfiniteQuery({
+      queryKey: getIdentityNotificationsQueryKey(identity, limit, cause),
+      queryFn: ({ pageParam }: { pageParam?: number | null }) =>
+        fetchNotifications({ limit, cause, pageParam }),
+      initialPageParam: null,
+      getNextPageParam: (lastPage) => lastPage.notifications.at(-1)?.id ?? null,
+      pages: 3,
+      staleTime: 60000,
+    });
+  }, [queryClient, identity, activeProfileProxy, limit, cause]);
 
   /**
    * Now the actual Infinite Query for notifications
