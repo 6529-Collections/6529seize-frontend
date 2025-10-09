@@ -578,7 +578,7 @@ function CollectionsView({
       ) : collections.length === 0 ? (
         filtersAreActive ? (
           <EmptyState
-            message="No NFTs match your filters."
+            message="No collections match your filters."
             actionLabel="Clear filters"
             onAction={handleClearFilters}
           />
