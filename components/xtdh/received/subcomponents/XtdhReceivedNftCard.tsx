@@ -10,13 +10,11 @@ import { XtdhReceivedGranterRow } from "./XtdhReceivedGranterRow";
 export interface XtdhReceivedNftCardProps {
   readonly nft: XtdhReceivedNft;
   readonly showCollectionName?: boolean;
-  readonly className?: string;
 }
 
 export function XtdhReceivedNftCard({
   nft,
   showCollectionName = true,
-  className,
 }: XtdhReceivedNftCardProps) {
   const [expanded, setExpanded] = useState(false);
   const additionalGranters = useMemo(
@@ -26,8 +24,7 @@ export function XtdhReceivedNftCard({
   const granterPanelId = `nft-granters-${nft.tokenId}`;
   const containerClass = clsx(
     "tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-4 tw-flex tw-flex-col tw-gap-4",
-    showCollectionName ? "tw-rounded-2xl" : "tw-rounded-xl tw-bg-iron-900",
-    className
+    showCollectionName ? "tw-rounded-2xl" : "tw-rounded-xl tw-bg-iron-900"
   );
   const imageClass = clsx(
     "tw-object-cover tw-border tw-border-iron-700",
