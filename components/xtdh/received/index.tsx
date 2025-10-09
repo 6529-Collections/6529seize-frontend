@@ -12,12 +12,10 @@ import {
 
 export interface XtdhReceivedSectionProps {
   readonly profileId: string | null;
-  readonly granterHrefBuilder?: (profileId: string) => string;
 }
 
 export function XtdhReceivedSection({
   profileId,
-  granterHrefBuilder,
 }: XtdhReceivedSectionProps) {
   const [view, setView] = useState<XtdhReceivedView>("collections");
   const [announcement, setAnnouncement] = useState<string>(
@@ -48,7 +46,6 @@ export function XtdhReceivedSection({
           view={view}
           onViewChange={handleViewChange}
           announcement={announcement}
-          granterHrefBuilder={granterHrefBuilder}
         />
       ) : (
         <XtdhReceivedNftsView
@@ -56,7 +53,6 @@ export function XtdhReceivedSection({
           view={view}
           onViewChange={handleViewChange}
           announcement={announcement}
-          granterHrefBuilder={granterHrefBuilder}
         />
       )}
     </section>

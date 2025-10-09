@@ -20,7 +20,6 @@ export interface XtdhReceivedCollectionsViewProps {
   readonly view: XtdhReceivedView;
   readonly onViewChange: (view: XtdhReceivedView) => void;
   readonly announcement: string;
-  readonly granterHrefBuilder?: (profileId: string) => string;
 }
 
 export function XtdhReceivedCollectionsView({
@@ -28,7 +27,6 @@ export function XtdhReceivedCollectionsView({
   view,
   onViewChange,
   announcement,
-  granterHrefBuilder,
 }: XtdhReceivedCollectionsViewProps) {
   const {
     collections,
@@ -142,7 +140,6 @@ export function XtdhReceivedCollectionsView({
               collection={collection}
               expanded={expandedCollectionId === collection.collectionId}
               onToggle={() => toggleCollection(collection.collectionId)}
-              granterHrefBuilder={granterHrefBuilder}
             />
           ))}
         </div>

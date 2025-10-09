@@ -20,7 +20,6 @@ export interface XtdhReceivedNftsViewProps {
   readonly view: XtdhReceivedView;
   readonly onViewChange: (view: XtdhReceivedView) => void;
   readonly announcement: string;
-  readonly granterHrefBuilder?: (profileId: string) => string;
 }
 
 export function XtdhReceivedNftsView({
@@ -28,7 +27,6 @@ export function XtdhReceivedNftsView({
   view,
   onViewChange,
   announcement,
-  granterHrefBuilder,
 }: XtdhReceivedNftsViewProps) {
   const {
     nfts,
@@ -138,7 +136,6 @@ export function XtdhReceivedNftsView({
             <XtdhReceivedNftCard
               key={nft.tokenId}
               nft={nft}
-              granterHrefBuilder={granterHrefBuilder}
             />
           ))}
         </div>

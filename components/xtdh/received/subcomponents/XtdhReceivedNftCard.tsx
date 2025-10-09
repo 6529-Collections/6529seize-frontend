@@ -9,14 +9,12 @@ import { XtdhReceivedGranterRow } from "./XtdhReceivedGranterRow";
 
 export interface XtdhReceivedNftCardProps {
   readonly nft: XtdhReceivedNft;
-  readonly granterHrefBuilder?: (profileId: string) => string;
   readonly showCollectionName?: boolean;
   readonly className?: string;
 }
 
 export function XtdhReceivedNftCard({
   nft,
-  granterHrefBuilder,
   showCollectionName = true,
   className,
 }: XtdhReceivedNftCardProps) {
@@ -104,7 +102,6 @@ export function XtdhReceivedNftCard({
             <XtdhReceivedGranterRow
               key={`${nft.tokenId}-${granter.profileId}`}
               granter={granter}
-              hrefBuilder={granterHrefBuilder}
             />
           ))}
         </div>

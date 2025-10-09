@@ -11,14 +11,12 @@ export interface XtdhReceivedCollectionCardProps {
   readonly collection: XtdhReceivedCollectionSummary;
   readonly expanded: boolean;
   readonly onToggle: () => void;
-  readonly granterHrefBuilder?: (profileId: string) => string;
 }
 
 export function XtdhReceivedCollectionCard({
   collection,
   expanded,
   onToggle,
-  granterHrefBuilder,
 }: XtdhReceivedCollectionCardProps) {
   const additionalGranters = useMemo(
     () => Math.max(collection.granterCount - collection.granterPreviews.length, 0),
@@ -102,7 +100,6 @@ export function XtdhReceivedCollectionCard({
                 <XtdhReceivedNftCard
                   key={token.tokenId}
                   nft={nftForCard}
-                  granterHrefBuilder={granterHrefBuilder}
                   showCollectionName={false}
                 />
               );

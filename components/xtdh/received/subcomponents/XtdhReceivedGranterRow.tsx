@@ -6,17 +6,16 @@ import { formatXtdhRate } from "../utils";
 
 export interface XtdhReceivedGranterRowProps {
   readonly granter: XtdhGranter;
-  readonly hrefBuilder?: (profileId: string) => string;
 }
 
 /**
  * Renders a single granter entry complete with profile link and xTDH rate.
- * `hrefBuilder` allows scoping the profile URL for different page contexts.
  */
 export function XtdhReceivedGranterRow({
   granter,
-  hrefBuilder = (profileId) => `/${encodeURIComponent(profileId)}/xtdh`,
 }: XtdhReceivedGranterRowProps) {
+  const href = `/${encodeURIComponent(granter.profileId)}/xtdh`;
+
   return (
     <div className="tw-flex tw-items-center tw-justify-between tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-3">
       <div className="tw-flex tw-items-center tw-gap-3">
@@ -28,7 +27,7 @@ export function XtdhReceivedGranterRow({
         />
         <div className="tw-flex tw-flex-col tw-gap-0.5">
           <Link
-            href={hrefBuilder(granter.profileId)}
+            href={href}
             className="tw-text-sm tw-font-semibold tw-text-primary-400 hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
           >
             {granter.displayName}
