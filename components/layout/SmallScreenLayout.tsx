@@ -1,45 +1,98 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import React, { ReactNode, useCallback } from "react";
-import { usePathname } from "next/navigation";
+import React, { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import SmallScreenHeader from "./SmallScreenHeader";
+import WebSidebar from "./sidebar/WebSidebar";
+import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
-import HeaderPlaceholder from "../header/HeaderPlaceholder";
-import Breadcrumb from "../breadcrumb/Breadcrumb";
-import { useBreadcrumbs } from "@/hooks/useBreadcrumbs";
-import { useHeaderContext } from "@/contexts/HeaderContext";
-
-const Header = dynamic(() => import("../header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
+import { useSearchParams } from "next/navigation";
+import { SidebarProvider } from "../../hooks/useSidebarState";
 
 interface Props {
   readonly children: ReactNode;
 }
 
 export default function SmallScreenLayout({ children }: Props) {
+  // Simple menu state
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { registerRef } = useLayout();
-  const { setHeaderRef } = useHeaderContext();
-  const breadcrumbs = useBreadcrumbs();
-  const pathname = usePathname();
-  const isHomePage = pathname === "/";
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const headerWrapperRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      registerRef("header", node);
-      setHeaderRef(node);
-    },
-    [registerRef, setHeaderRef]
+  const searchParams = useSearchParams();
+
+  // Get tab from URL
+  const activeTab = searchParams?.get("tab") || "latest";
+
+  useEffect(() => {
+    if (headerRef.current) {
+      registerRef("header", headerRef.current);
+    }
+
+    return () => {
+      registerRef("header", null);
+    };
+  }, [registerRef]);
+
+  // Reset scroll position when switching tabs
+  useEffect(() => {
+    const container = containerRef.current;
+    if (container && activeTab) {
+      // Use requestAnimationFrame for smoother scrolling
+      requestAnimationFrame(() => {
+        container.scrollTop = 0;
+      });
+    }
+  }, [activeTab]);
+
+  const toggleMenu = useCallback(() => {
+    setIsMenuOpen(prev => !prev);
+  }, []);
+
+  const closeMenu = useCallback(() => {
+    setIsMenuOpen(false);
+  }, []);
+
+  const renderSidebar = () => (
+    <div className="tailwind-scope">
+      <WebSidebar
+        isCollapsed={false}
+        onToggle={toggleMenu}
+        isMobile={true}
+        isOffcanvasOpen={isMenuOpen}
+        onCloseOffcanvas={closeMenu}
+        sidebarWidth={SIDEBAR_WIDTHS.EXPANDED}
+      />
+    </div>
   );
 
+  // Focus and ESC handling are managed inside WebSidebar on mobile
+
   return (
-    <div>
-      <div ref={headerWrapperRef}>
-        <Header />
-        {!isHomePage && <Breadcrumb breadcrumbs={breadcrumbs} />}
+    <SidebarProvider>
+      <div
+        ref={containerRef}
+        className={`tw-bg-black ${
+          activeTab === "feed" ? "tw-overflow-hidden" : "tw-overflow-auto"
+        }`}
+      >
+      {/* Header bar with hamburger */}
+      <div ref={headerRef} className="tw-sticky tw-top-0 tw-z-30">
+        <SmallScreenHeader
+          onMenuToggle={toggleMenu}
+          isMenuOpen={isMenuOpen}
+        />
       </div>
-      <main>{children}</main>
-    </div>
+
+      {/* Sidebar and overlay are handled by WebSidebar in mobile mode */}
+      {renderSidebar()}
+
+      {/* Main content area */}
+        <main className="tw-transition-opacity tw-duration-300">
+          {children}
+        </main>
+
+      </div>
+    </SidebarProvider>
   );
 }

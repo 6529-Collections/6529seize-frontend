@@ -269,11 +269,11 @@ const setupEditTest = (user: any) => {
       await user.type(editTextarea, additionalContent);
     },
     async save() {
-      const saveButton = screen.getByTestId("save-button");
+      const saveButton = screen.getByRole('button', { name: /save/i });
       await user.click(saveButton);
     },
     async cancel() {
-      const cancelButton = screen.getByTestId("cancel-button");
+      const cancelButton = screen.getByRole('button', { name: /cancel/i });
       await user.click(cancelButton);
     },
   };

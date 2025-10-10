@@ -26,7 +26,7 @@ describe("WaveLeaderboardDropContent", () => {
     const drop = { wave: { id: "w" }, serial_no: 5, metadata: ["m"] } as any;
     render(<WaveLeaderboardDropContent drop={drop} />);
     fireEvent.click(screen.getByTestId("content"));
-    expect(push).toHaveBeenCalledWith("/my-stream?wave=w&serialNo=5/");
+    expect(push).toHaveBeenCalledWith("/waves?wave=w&serialNo=5/");
     expect(screen.getByTestId("meta")).toHaveTextContent("1");
   });
 });

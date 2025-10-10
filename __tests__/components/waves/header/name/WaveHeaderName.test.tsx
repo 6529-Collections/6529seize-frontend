@@ -17,7 +17,7 @@ describe('WaveHeaderName', () => {
     (canEditWave as jest.Mock).mockReturnValue(true);
     render(<WaveHeaderName wave={wave} />);
     expect(screen.getByTestId('edit')).toBeInTheDocument();
-    expect(screen.getByText('Wave').closest('a')).toHaveAttribute('href', '/my-stream?wave=w1');
+    expect(screen.getByText('Wave').closest('a')).toHaveAttribute('href', '/waves?wave=w1');
   });
 
   it('hides edit button when cannot edit', () => {

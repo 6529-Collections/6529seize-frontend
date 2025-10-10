@@ -77,7 +77,7 @@ const DropPart = memo(
 
     const onQuoteClick = (drop: ApiDrop) => {
       router.push(
-        `/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}`,
+        `/waves?wave=${drop.wave.id}&serialNo=${drop.serial_no}`,
         { scroll: false }
       );
     };
@@ -105,7 +105,7 @@ const DropPart = memo(
                   {wave?.id && (
                     <Link
                       onClick={(e) => e.stopPropagation()}
-                      href={`/my-stream?wave=${wave.id}`}
+                      href={`/waves?wave=${wave.id}`}
                       className="tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out">
                       <span>{wave.name}</span>
                     </Link>

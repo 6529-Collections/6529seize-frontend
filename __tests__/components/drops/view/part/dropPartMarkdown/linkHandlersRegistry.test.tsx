@@ -162,7 +162,7 @@ describe("createLinkRenderer", () => {
   it("renders seize quote previews when matching internal links", () => {
     const { renderAnchor } = baseRenderer();
     const element = renderAnchor({
-      href: "https://6529.io/my-stream?wave=123e4567-e89b-12d3-a456-426614174000&serialNo=5",
+      href: "https://6529.io/waves?wave=123e4567-e89b-12d3-a456-426614174000&serialNo=5",
     } as any);
     render(<>{element}</>);
     expect(screen.getByTestId("seize-quote")).toBeInTheDocument();
@@ -177,7 +177,7 @@ describe("createLinkRenderer", () => {
 
   it("renders seize drop previews", () => {
     const { renderAnchor } = baseRenderer();
-    const element = renderAnchor({ href: "https://6529.io/my-stream?wave=abc&drop=def" } as any);
+    const element = renderAnchor({ href: "https://6529.io/waves?wave=abc&drop=def" } as any);
     render(<>{element}</>);
     expect(screen.getByTestId("drop-card")).toHaveAttribute("data-drop", "def");
   });

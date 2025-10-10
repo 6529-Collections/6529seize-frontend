@@ -11,6 +11,7 @@ import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { useAuth } from "@/components/auth/Auth";
+import { getWaveHomeRoute } from "../../../helpers/navigation.helpers";
 
 interface BrainMobileTabsProps {
   readonly activeView: BrainView;
@@ -163,7 +164,9 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
           <>
             <button
               onClick={() => {
-                router.push("/my-stream");
+                router.push(
+                  getWaveHomeRoute({ isDirectMessage: false, isApp: !!isApp })
+                );
                 onViewChange(BrainView.DEFAULT);
               }}
               className={backButtonClasses}>

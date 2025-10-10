@@ -54,7 +54,7 @@ describe("HeaderNavConfig", () => {
       expect(brainSection).toBeDefined();
       expect(brainSection?.condition?.(mockContext)).toBe(true);
       expect(brainSection?.items).toEqual([
-        { name: "My Stream", path: "/my-stream" },
+        { name: "My Stream", path: "/?tab=feed" },
         { name: "Waves", path: "/waves" },
       ]);
     });

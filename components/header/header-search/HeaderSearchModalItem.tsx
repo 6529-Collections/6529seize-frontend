@@ -24,6 +24,11 @@ import {
 } from "@/components/nextGen/nextgen_contracts";
 import HeaderSearchModalItemMedia from "./HeaderSearchModalItemMedia";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import useDeviceInfo from "../../../hooks/useDeviceInfo";
+import {
+  getWaveHomeRoute,
+  getWaveRoute,
+} from "../../../helpers/navigation.helpers";
 
 export interface NFTSearchResult {
   id: number;
@@ -56,6 +61,7 @@ export default function HeaderSearchModalItem({
   const searchParams = useSearchParams();
   const ref = useRef<HTMLDivElement>(null);
   const isHovering = useHoverDirty(ref as React.RefObject<HTMLDivElement>);
+  const { isApp } = useDeviceInfo();
 
   const supportsHover =
     typeof window !== "undefined" &&
@@ -130,10 +136,22 @@ export default function HeaderSearchModalItem({
       return `${collectionMap[nft.contract].path}/${nft.id}`;
     } else {
       const wave = getWave();
-      const currentWaveId = searchParams?.get("wave") as string | undefined;
-      return currentWaveId === wave.id
-        ? "/my-stream"
-        : `/my-stream?wave=${wave.id}`;
+      const currentWaveId = searchParams?.get("wave") ?? undefined;
+      const isDirectMessage =
+        wave.chat?.scope?.group?.is_direct_message ?? false;
+
+      if (currentWaveId === wave.id) {
+        return getWaveHomeRoute({
+          isDirectMessage,
+          isApp,
+        });
+      }
+
+      return getWaveRoute({
+        waveId: wave.id,
+        isDirectMessage,
+        isApp,
+      });
     }
   };
 

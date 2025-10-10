@@ -28,6 +28,12 @@ jest.mock('@/components/drops/create/utils/storm/CreateDropParts', () => () => <
 jest.mock('@/components/drops/create/utils/CreateDropActionsRow', () => () => <div data-testid="actions" />);
 jest.mock('@/components/drops/create/utils/storm/CreateDropContentMissingMediaWarning', () => () => <div />);
 jest.mock('@/components/drops/create/utils/storm/CreateDropContentMissingMetadataWarning', () => () => <div />);
+jest.mock('@/components/waves/drops/normalizeDropMarkdown', () => ({
+  __esModule: true,
+  default: (value: string) => value,
+  normalizeDropMarkdown: (value: string) => value,
+  exportDropMarkdown: () => '',
+}));
 
 let linkProps: any = null;
 let mockClear: any;

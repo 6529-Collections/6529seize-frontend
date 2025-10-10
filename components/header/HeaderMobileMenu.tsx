@@ -134,7 +134,7 @@ export default function HeaderMobileMenu({
             {showBurgerMenuBrain && (
               <Container>
                 {printMobileHr()}
-                {printMobileRow("My Stream", "/my-stream")}
+                {printMobileRow("My Stream", "/?tab=feed")}
                 {printMobileRow("Waves", "/waves")}
                 {printMobileHr()}
               </Container>

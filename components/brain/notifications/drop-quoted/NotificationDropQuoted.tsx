@@ -9,6 +9,8 @@ import Drop, {
 } from "@/components/waves/drops/Drop";
 import { useRouter } from "next/navigation";
 import { ApiDrop } from "@/generated/models/ApiDrop";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 
 export default function NotificationDropQuoted({
   notification,
@@ -24,17 +26,30 @@ export default function NotificationDropQuoted({
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }) {
   const router = useRouter();
+  const { isApp } = useDeviceInfo();
 
-  const navigateToWave = (waveId: string, serialNo: number) => {
-    router.push(`/my-stream?wave=${waveId}&serialNo=${serialNo}/`);
+  const navigateToWave = (
+    waveId: string,
+    serialNo: number,
+    isDirectMessage: boolean
+  ) => {
+    router.push(
+      getWaveRoute({ waveId, serialNo, isDirectMessage, isApp })
+    );
   };
 
   const onReplyClick = (serialNo: number) => {
-    navigateToWave(notification.related_drops[0].wave.id, serialNo);
+    const baseWave = notification.related_drops[0].wave as any;
+    const isDirectMessage =
+      baseWave?.chat?.scope?.group?.is_direct_message ?? false;
+    navigateToWave(notification.related_drops[0].wave.id, serialNo, isDirectMessage);
   };
 
   const onQuoteClick = (quote: ApiDrop) => {
-    navigateToWave(quote.wave.id, quote.serial_no);
+    const quoteWave = quote.wave as any;
+    const isDirectMessage =
+      quoteWave?.chat?.scope?.group?.is_direct_message ?? false;
+    navigateToWave(quote.wave.id, quote.serial_no, isDirectMessage);
   };
 
   return (

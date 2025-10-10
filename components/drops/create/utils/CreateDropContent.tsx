@@ -27,7 +27,6 @@ import {
 import { MaxLengthPlugin } from "../lexical/plugins/MaxLengthPlugin";
 import ToggleViewButtonPlugin from "../lexical/plugins/ToggleViewButtonPlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
-import { $convertToMarkdownString } from "@lexical/markdown";
 
 import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin";
 import { ListNode, ListItemNode } from "@lexical/list";
@@ -70,6 +69,9 @@ import { EmojiNode } from "../lexical/nodes/EmojiNode";
 import CreateDropEmojiPicker from "@/components/waves/CreateDropEmojiPicker";
 import EmojiPlugin from "../lexical/plugins/emoji/EmojiPlugin";
 import PlainTextPastePlugin from "../lexical/plugins/PlainTextPastePlugin";
+import {
+  exportDropMarkdown,
+} from "@/components/waves/drops/normalizeDropMarkdown";
 
 export interface CreateDropContentHandles {
   clearEditorState: () => void;
@@ -193,16 +195,17 @@ const CreateDropContent = forwardRef<
     const currentPartCount = (drop?.parts.length ?? 0) + 1;
     const [charsCount, setCharsCount] = useState(0);
     useEffect(() => {
-      editorState?.read(() =>
-        setCharsCount(
-          $convertToMarkdownString([
-            ...SAFE_MARKDOWN_TRANSFORMERS,
-            MENTION_TRANSFORMER,
-            HASHTAG_TRANSFORMER,
-            IMAGE_TRANSFORMER,
-          ])?.length ?? 0
-        )
-      );
+      if (!editorState) {
+        setCharsCount(0);
+        return;
+      }
+      const markdown = exportDropMarkdown(editorState, [
+        ...SAFE_MARKDOWN_TRANSFORMERS,
+        MENTION_TRANSFORMER,
+        HASHTAG_TRANSFORMER,
+        IMAGE_TRANSFORMER,
+      ]);
+      setCharsCount(markdown.length);
     }, [editorState]);
 
     const [isStormMode, setIsStormMode] = useState(false);

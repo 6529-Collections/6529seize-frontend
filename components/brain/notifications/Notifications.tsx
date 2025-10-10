@@ -56,7 +56,7 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
   const pathname = usePathname();
   const reload = searchParams?.get('reload') ?? undefined;
 
-  useSetTitle("Notifications | My Stream | Brain");
+  useSetTitle("Notifications | Brain");
 
   const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
 
@@ -119,7 +119,7 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
       params.delete("reload");
       const newUrl = params.toString()
         ? `${pathname}?${params.toString()}`
-        : pathname || "/my-stream/notifications";
+        : pathname || "/notifications";
       router.replace(newUrl, { scroll: false });
     }
   }, [reload, refetch, markAllAsRead, searchParams, pathname, router]);

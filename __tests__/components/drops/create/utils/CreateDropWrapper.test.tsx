@@ -16,10 +16,12 @@ jest.mock('react-use', () => ({
   createBreakpoint: () => () => 'LG'
 }));
 
-// Mock lexical
-jest.mock('@lexical/markdown', () => ({
-  $convertToMarkdownString: () => '',
-  TRANSFORMERS: []
+// Mock markdown utilities
+jest.mock('@/components/waves/drops/normalizeDropMarkdown', () => ({
+  __esModule: true,
+  default: (value: string) => value,
+  normalizeDropMarkdown: (value: string) => value,
+  exportDropMarkdown: () => '',
 }));
 
 // Mock transformers
