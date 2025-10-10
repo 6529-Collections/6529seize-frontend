@@ -9,6 +9,8 @@ import {
 } from "@/components/waves/drops/normalizeDropMarkdown";
 import type { EditorState } from "lexical";
 
+const BLANK_PARAGRAPH_SENTINEL = "\u2063__BLANK_PARAGRAPH__\u2063";
+
 const {
   $convertToMarkdownString: convertToMarkdownStringMock,
 } = jest.requireMock("@lexical/markdown") as {
@@ -35,26 +37,28 @@ describe("exportDropMarkdown", () => {
 
   it("collapses a single blank paragraph marker into one additional newline", () => {
     convertToMarkdownStringMock.mockReturnValue(
-      "First\n\n__BLANK_PARAGRAPH__\n\nSecond"
+      `First\n\n${BLANK_PARAGRAPH_SENTINEL}\n\nSecond`
     );
     expect(exportDropMarkdown(editorState, [])).toBe("First\n\n\nSecond");
   });
 
   it("collapses multiple blank markers into the correct newline count", () => {
     convertToMarkdownStringMock.mockReturnValue(
-      "First\n\n__BLANK_PARAGRAPH__\n\n__BLANK_PARAGRAPH__\n\nSecond"
+      `First\n\n${BLANK_PARAGRAPH_SENTINEL}\n\n${BLANK_PARAGRAPH_SENTINEL}\n\nSecond`
     );
     expect(exportDropMarkdown(editorState, [])).toBe("First\n\n\n\nSecond");
   });
 
   it("preserves trailing blank paragraphs", () => {
-    convertToMarkdownStringMock.mockReturnValue("First\n\n__BLANK_PARAGRAPH__");
+    convertToMarkdownStringMock.mockReturnValue(
+      `First\n\n${BLANK_PARAGRAPH_SENTINEL}`
+    );
     expect(exportDropMarkdown(editorState, [])).toBe("First\n\n\n");
   });
 
   it("preserves multiple trailing blank paragraphs", () => {
     convertToMarkdownStringMock.mockReturnValue(
-      "First\n\n__BLANK_PARAGRAPH__\n\n__BLANK_PARAGRAPH__"
+      `First\n\n${BLANK_PARAGRAPH_SENTINEL}\n\n${BLANK_PARAGRAPH_SENTINEL}`
     );
     expect(exportDropMarkdown(editorState, [])).toBe("First\n\n\n\n");
   });
