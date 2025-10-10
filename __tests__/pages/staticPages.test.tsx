@@ -11,9 +11,6 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { redirect } from "next/navigation";
 
-jest.mock("next/font/google", () => ({
-  Poppins: () => ({ className: "poppins" }),
-}));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({
     address: "0x0",

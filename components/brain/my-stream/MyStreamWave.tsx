@@ -8,7 +8,6 @@ import MyStreamWaveChat from "./MyStreamWaveChat";
 import { useWaveData } from "@/hooks/useWaveData";
 import MyStreamWaveLeaderboard from "./MyStreamWaveLeaderboard";
 import MyStreamWaveOutcome from "./MyStreamWaveOutcome";
-import { createBreakpoint } from "react-use";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { WaveWinners } from "@/components/waves/winners/WaveWinners";
 import { MyStreamWaveTab } from "@/types/waves.types";
@@ -16,18 +15,19 @@ import { MyStreamWaveTabs } from "./tabs/MyStreamWaveTabs";
 import MyStreamWaveMyVotes from "./votes/MyStreamWaveMyVotes";
 import MyStreamWaveFAQ from "./MyStreamWaveFAQ";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { createBreakpoint } from "react-use";
+import { getHomeFeedRoute } from "@/helpers/navigation.helpers";
 
 interface MyStreamWaveProps {
   readonly waveId: string;
 }
 
-const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
-
 const getContentTabPanelId = (tab: MyStreamWaveTab): string =>
   `my-stream-wave-tabpanel-${tab.toLowerCase()}`;
 
+const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
+
 const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
-  const breakpoint = useBreakpoint();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -37,7 +37,9 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     onWaveNotFound: () => {
       const params = new URLSearchParams(searchParams?.toString() || '');
       params.delete('wave');
-      const newUrl = params.toString() ? `${pathname}?${params.toString()}` : (pathname || '/my-stream');
+      const newUrl = params.toString()
+        ? `${pathname}?${params.toString()}`
+        : (pathname || getHomeFeedRoute());
       router.push(newUrl, { scroll: false });
     },
   });
@@ -61,6 +63,8 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
 
   // Get the active tab and utilities from global context
   const { activeContentTab } = useContentTab();
+
+  useBreakpoint();
 
   // For handling clicks on drops
   const onDropClick = (drop: ExtendedDrop) => {
@@ -94,11 +98,11 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     <div
       className="tailwind-scope tw-relative tw-flex tw-flex-col tw-h-full"
       key={stableWaveKey}>
-      {/* Don't render tab container for simple waves */}
-      {breakpoint !== "S" && <MyStreamWaveTabs wave={wave} />}
+      {/* Always render tab container (hidden on app inside MyStreamWaveTabs) */}
+      <MyStreamWaveTabs wave={wave} />
 
       <div
-        className="tw-flex-grow tw-overflow-hidden"
+        className="tw-flex-grow tw-overflow-hidden tw-relative"
         role="tabpanel"
         id={getContentTabPanelId(activeContentTab)}
       >

@@ -10,6 +10,8 @@ import useIsMobileDevice from "@/hooks/isMobileDevice";
 import { ApiWaveType } from "@/generated/models/ObjectSerializer";
 import WavePicture from "@/components/waves/WavePicture";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getWaveHomeRoute, getWaveRoute } from "@/helpers/navigation.helpers";
 
 interface BrainContentPinnedWaveProps {
   readonly waveId: string;
@@ -30,6 +32,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
   const searchParams = useSearchParams();
   const prefetchWaveData = usePrefetchWaveData();
   const { registerWave } = useMyStream();
+  const { isApp } = useDeviceInfo();
   const { data: wave } = useWaveData({
     waveId,
     onWaveNotFound: () => onRemove(waveId),
@@ -38,10 +41,17 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
   const isDropWave = wave && wave.wave.type !== ApiWaveType.Chat;
   const getHref = (waveId: string) => {
     const currentWaveId = searchParams?.get('wave') ?? undefined;
+    const isDirectMessage = wave?.chat?.scope?.group?.is_direct_message ?? false;
+
     if (currentWaveId === waveId) {
-      return "/my-stream";
+      return getWaveHomeRoute({ isDirectMessage, isApp });
     }
-    return `/my-stream?wave=${waveId}`;
+
+    return getWaveRoute({
+      waveId,
+      isDirectMessage,
+      isApp,
+    });
   };
 
   const onLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {

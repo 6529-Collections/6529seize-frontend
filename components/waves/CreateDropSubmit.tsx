@@ -19,7 +19,7 @@ export const CreateDropSubmit: React.FC<CreateDropSubmitProps> = ({
       onClicked={onDrop}
       loading={submitting}
       disabled={!canSubmit}
-      padding="tw-px-2.5 lg:tw-px-3.5 tw-py-2.5 tw-max-w-[3.875rem]"
+      padding="tw-px-2.5 lg:tw-px-3.5 tw-py-3 tw-max-w-[3.875rem]"
     >
       <span className="tw-hidden lg:tw-inline">{isDropMode ? "Drop" : "Post"}</span>
       <svg

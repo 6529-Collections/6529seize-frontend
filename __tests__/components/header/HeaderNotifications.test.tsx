@@ -24,6 +24,15 @@ jest.mock("@/components/notifications/NotificationsContext", () => ({
   useNotificationsContext: jest.fn(),
 }));
 
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    isApp: false,
+    isMobileDevice: false,
+    hasTouchScreen: false,
+  })),
+}));
+
 const { usePathname } = require("next/navigation");
 const { useAuth } = require("@/components/auth/Auth");
 const { useTitle } = require("@/contexts/TitleContext");
@@ -62,7 +71,7 @@ describe("HeaderNotifications", () => {
 
     expect(screen.getByRole("link")).toHaveAttribute(
       "href",
-      "/my-stream/notifications"
+      "/notifications"
     );
     expect(screen.getByRole("link").querySelector("div")).toBeInTheDocument();
     expect(removeAll).not.toHaveBeenCalled();
@@ -82,7 +91,7 @@ describe("HeaderNotifications", () => {
       setWaveData: jest.fn(),
       setStreamHasNewItems: jest.fn(),
     });
-    (usePathname as jest.Mock).mockReturnValue("/my-stream/notifications");
+    (usePathname as jest.Mock).mockReturnValue("/notifications");
     const removeAll = jest.fn();
     (useNotificationsContext as jest.Mock).mockReturnValue({
       removeAllDeliveredNotifications: removeAll,
@@ -96,7 +105,7 @@ describe("HeaderNotifications", () => {
 
     expect(screen.getByRole("link")).toHaveAttribute(
       "href",
-      "/my-stream/notifications?reload=true"
+      "/notifications?reload=true"
     );
     expect(screen.getByRole("link").querySelector("div")).toBeNull();
     expect(removeAll).toHaveBeenCalled();

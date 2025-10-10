@@ -36,6 +36,6 @@ describe("WaveWinnersDropContent", () => {
     expect(callArgs.drop.wave.id).toBe("w1");
 
     await user.click(screen.getByTestId("content"));
-    expect(push).toHaveBeenCalledWith("/my-stream?wave=w1&serialNo=2/");
+    expect(push).toHaveBeenCalledWith("/waves?wave=w1&serialNo=2//");
   });
 });

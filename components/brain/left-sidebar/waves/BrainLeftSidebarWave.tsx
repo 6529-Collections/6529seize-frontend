@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
@@ -9,48 +9,74 @@ import WavePicture from "@/components/waves/WavePicture";
 import BrainLeftSidebarWaveDropTime from "./BrainLeftSidebarWaveDropTime";
 import { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesList";
 import BrainLeftSidebarWavePin from "./BrainLeftSidebarWavePin";
+import { formatAddress, isValidEthAddress } from "../../../../helpers/Helpers";
+import useDeviceInfo from "../../../../hooks/useDeviceInfo";
+import {
+  getWaveHomeRoute,
+  getWaveRoute,
+} from "../../../../helpers/navigation.helpers";
 
 interface BrainLeftSidebarWaveProps {
   readonly wave: MinimalWave;
   readonly onHover: (waveId: string) => void;
   readonly showPin?: boolean;
+  readonly isDirectMessage?: boolean;
 }
 
 const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   wave,
   onHover,
   showPin = true,
+  isDirectMessage = false,
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const prefetchWaveData = usePrefetchWaveData();
+  const { isApp } = useDeviceInfo();
   const isDropWave = wave.type !== ApiWaveType.Chat;
 
-  const getHref = (waveId: string) => {
-    const currentWaveId = searchParams?.get('wave') ?? undefined;
-    if (currentWaveId === waveId) {
-      return "/my-stream";
+  const formattedWaveName = useMemo(() => {
+    if (wave.type === ApiWaveType.Chat) {
+      const marker = "id-";
+      const addressPrefix = `${marker}0x`;
+      const markerIndex = wave.name.indexOf(addressPrefix);
+
+      if (markerIndex !== -1) {
+        const prefix = wave.name.slice(0, markerIndex + marker.length);
+        const addressStart = markerIndex + marker.length;
+        const candidateAddress = wave.name.slice(addressStart, addressStart + 42);
+
+        if (isValidEthAddress(candidateAddress)) {
+          const suffix = wave.name.slice(addressStart + candidateAddress.length);
+          return `${prefix}${formatAddress(candidateAddress)}${suffix}`;
+        }
+      }
     }
-    const params = new URLSearchParams();
-    params.set('wave', waveId);
-    return `/my-stream?${params.toString()}`;
+    return wave.name;
+  }, [wave.name, wave.type]);
+
+  const getHref = (waveId: string) => {
+    const currentWaveId = searchParams?.get("wave") ?? undefined;
+    if (currentWaveId === waveId) {
+      return getWaveHomeRoute({ isDirectMessage, isApp });
+    }
+    return getWaveRoute({ waveId, isDirectMessage, isApp });
   };
 
   const haveNewDrops = wave.newDropsCount.count > 0;
 
   const onWaveHover = (waveId: string) => {
-    const currentWaveId = searchParams?.get('wave') ?? undefined;
+    const currentWaveId = searchParams?.get("wave") ?? undefined;
     if (waveId !== currentWaveId) {
       onHover(waveId);
       prefetchWaveData(waveId);
     }
   };
 
-  const isActive = wave.id === (searchParams?.get('wave') ?? undefined);
+  const isActive = wave.id === (searchParams?.get("wave") ?? undefined);
 
   const onLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    // Navigate to the new wave
     router.push(getHref(wave.id));
   };
 
@@ -107,7 +133,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           </div>
         </div>
         <div className="tw-flex-1">
-          <div className="tw-text-sm tw-font-medium">{wave.name}</div>
+          <div className="tw-text-sm tw-font-medium">{formattedWaveName}</div>
           {!!wave.newDropsCount.latestDropTimestamp && (
             <div className="tw-mt-0.5 tw-text-xs tw-text-iron-500">
               <span className="tw-pr-1">Last drop:</span>

@@ -60,6 +60,7 @@ function setup(opts: any) {
   (useIdentity as jest.Mock).mockReturnValue({ profile: opts.profile });
   (useViewContext as jest.Mock).mockReturnValue({
     activeView: opts.activeView ?? null,
+    homeActiveTab: opts.homeActiveTab ?? "latest",
   });
   (useNavigationHistoryContext as jest.Mock).mockReturnValue({
     canGoBack: opts.canGoBack ?? false,
@@ -115,5 +116,10 @@ describe("AppHeader", () => {
   it("formats meme titles from path", () => {
     setup({ address: "0x1", asPath: "/the-memes/123" });
     expect(screen.getByText("The Memes #123")).toBeInTheDocument();
+  });
+
+  it("shows My Stream title on home feed tab", () => {
+    setup({ asPath: "/", homeActiveTab: "feed" });
+    expect(screen.getByText("My Stream")).toBeInTheDocument();
   });
 });

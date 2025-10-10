@@ -8,6 +8,12 @@ import Spinner from "../utils/Spinner";
 import { useWaveData } from "@/hooks/useWaveData";
 import { useWave } from "@/hooks/useWave";
 import { useViewContext } from "./ViewContext";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import {
+  getMessagesBaseRoute,
+  getWaveHomeRoute,
+  getWavesBaseRoute,
+} from "@/helpers/navigation.helpers";
 
 export default function BackButton() {
   const { canGoBack, goBack } = useNavigationHistoryContext();
@@ -16,9 +22,13 @@ export default function BackButton() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
+  const { isApp } = useDeviceInfo();
 
   const waveId = searchParams?.get("wave") ?? null;
   const dropId = searchParams?.get("drop") ?? null;
+
+  const isInMessagesContext =
+    pathname === "/messages" || searchParams?.get("view") === "messages";
 
   // Fetch wave to determine if it is DM
   const { data: wave } = useWaveData({
@@ -26,7 +36,15 @@ export default function BackButton() {
     onWaveNotFound: () => {
       const params = new URLSearchParams(searchParams?.toString() || "");
       params.delete("wave");
-      const newUrl = params.toString() ? `${pathname}?${params.toString()}` : (pathname || '/my-stream');
+      const basePath =
+        pathname ??
+        getWaveHomeRoute({
+          isDirectMessage: isInMessagesContext,
+          isApp,
+        });
+      const newUrl = params.toString()
+        ? `${basePath}?${params.toString()}`
+        : basePath;
       router.replace(newUrl, { scroll: false });
     },
   });
@@ -41,11 +59,29 @@ export default function BackButton() {
   const handleClick = () => {
     if (loading) return;
 
+    if (pathname === "/waves/create") {
+      router.replace(getWavesBaseRoute(true));
+      return;
+    }
+
+    if (pathname === "/messages/create") {
+      router.replace(getMessagesBaseRoute(true));
+      return;
+    }
+
     if (dropId) {
       setLoading(true);
       const params = new URLSearchParams(searchParams?.toString() || "");
       params.delete("drop");
-      const newUrl = params.toString() ? `${pathname}?${params.toString()}` : (pathname || '/my-stream');
+      const basePath =
+        pathname ??
+        getWaveHomeRoute({
+          isDirectMessage: isInMessagesContext || isDm,
+          isApp,
+        });
+      const newUrl = params.toString()
+        ? `${basePath}?${params.toString()}`
+        : basePath;
       router.replace(newUrl, { scroll: false });
       return;
     }

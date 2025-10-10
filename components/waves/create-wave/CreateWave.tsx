@@ -28,12 +28,16 @@ import useCapacitor from "@/hooks/useCapacitor";
 import CreateWaveFlow from "./CreateWaveFlow";
 import { multiPartUpload } from "./services/multiPartUpload";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 export default function CreateWave({
   profile,
   onBack,
+  onSuccess,
 }: {
   readonly profile: ApiIdentity;
   readonly onBack: () => void;
+  readonly onSuccess?: () => void;
 }) {
   const router = useRouter();
   const { isIos, keyboardVisible } = useCapacitor();
@@ -73,6 +77,7 @@ export default function CreateWave({
     // Chat
     onChatEnabledChange,
   } = useWaveConfig();
+  const { isApp } = useDeviceInfo();
 
   const createWaveDescriptionRef = useRef<CreateWaveDescriptionHandles | null>(
     null
@@ -82,7 +87,18 @@ export default function CreateWave({
     onSuccess: (response) => {
       waitAndInvalidateDrops();
       onWaveCreated();
-      router.push(`/my-stream?wave=${response.id}`);
+      onSuccess?.();
+      if (isApp) {
+        router.replace(
+          getWaveRoute({
+            waveId: response.id,
+            isDirectMessage: false,
+            isApp: true,
+          })
+        );
+      } else {
+        router.push(`/waves?wave=${response.id}`);
+      }
     },
     onError: (error) => {
       setToast({
@@ -269,11 +285,12 @@ export default function CreateWave({
 
   return (
     <CreateWaveFlow
-      onBack={onBack}
       title={`Create Wave ${
         config.overview.name ? `"${config.overview.name}"` : ""
-      }`}>
-      <div className="tw-mt-4 md:tw-mt-8 xl:tw-max-w-[60rem] tw-mx-auto lg:tw-flex tw-gap-x-16 tw-justify-between tw-h-full tw-w-full">
+      }`}
+      onBack={onBack}
+    >
+      <div className="tw-mt-4 xl:tw-max-w-[60rem] tw-mx-auto lg:tw-flex tw-gap-x-16 tw-justify-between tw-h-full tw-w-full">
         <div className="tw-1/4">
           <CreateWavesMainSteps
             activeStep={step}
@@ -282,9 +299,8 @@ export default function CreateWave({
           />
         </div>
         <div
-          className={`tw-flex-1 ${
-            isIos && !keyboardVisible ? "tw-mb-10" : ""
-          }`}>
+          className={`tw-flex-1 ${isIos && !keyboardVisible ? "tw-mb-10" : ""}`}
+        >
           <div className="tw-relative tw-w-full tw-bg-iron-900 tw-p-4 lg:tw-p-8 tw-rounded-xl">
             <div className="tw-relative tw-h-full">
               <div className="tw-flex tw-flex-col tw-h-full">

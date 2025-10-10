@@ -9,11 +9,11 @@ import UnifiedWavesListEmpty from "../left-sidebar/waves/UnifiedWavesListEmpty";
 import BrainLeftSidebarCreateADirectMessageButton from "../left-sidebar/BrainLeftSidebarCreateADirectMessageButton";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { AuthContext } from "@/components/auth/Auth";
-import HeaderUserConnect from "@/components/header/user/HeaderUserConnect";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import Image from "next/image";
 import UserSetUpProfileCta from "@/components/user/utils/set-up-profile/UserSetUpProfileCta";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import ConnectWallet from "@/components/common/ConnectWallet";
+import Image from "next/image";
 
 interface DirectMessagesListProps {
   readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
@@ -75,17 +75,11 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
   const shouldShowPlaceholder = !isAuthenticated || !connectedProfile?.handle;
 
   if (shouldShowPlaceholder) {
-    const placeholderContent = !isAuthenticated ? (
-      <>
-        <h1 className="tw-text-xl tw-font-bold">
-          This content is only available to connected wallets.
-        </h1>
-        <p className="tw-text-base tw-text-gray-400">
-          Connect your wallet to continue.
-        </p>
-        <HeaderUserConnect />
-      </>
-    ) : (
+    if (!isAuthenticated) {
+      return <ConnectWallet />;
+    }
+
+    const placeholderContent = (
       <>
         <h1 className="tw-text-xl tw-font-bold">
           You need to set up a profile to continue.
