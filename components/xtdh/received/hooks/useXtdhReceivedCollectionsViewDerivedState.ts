@@ -3,11 +3,11 @@ import { useMemo } from "react";
 import {
   DEFAULT_CLEAR_FILTERS_LABEL,
   DEFAULT_EMPTY_STATE_COPY,
-} from "../XtdhReceivedCollectionsView.constants";
+} from "../subcomponents/XtdhReceivedCollectionsView.constants";
 import type {
   XtdhReceivedCollectionsViewEmptyCopy,
   XtdhReceivedCollectionsViewState,
-} from "../XtdhReceivedCollectionsView.types";
+} from "../subcomponents/XtdhReceivedCollectionsView.types";
 
 export interface XtdhReceivedCollectionsViewDerivedState {
   readonly emptyStateCopy: XtdhReceivedCollectionsViewEmptyCopy;
@@ -22,12 +22,7 @@ export interface XtdhReceivedCollectionsViewDerivedState {
 export function useXtdhReceivedCollectionsViewDerivedState(
   state: XtdhReceivedCollectionsViewState,
 ): XtdhReceivedCollectionsViewDerivedState {
-  const {
-    emptyStateCopy,
-    clearFiltersLabel,
-    collections,
-    totalPages,
-  } = state;
+  const { emptyStateCopy, clearFiltersLabel, collections, totalPages } = state;
 
   return useMemo(() => {
     const resolvedEmptyStateCopy =
@@ -42,10 +37,6 @@ export function useXtdhReceivedCollectionsViewDerivedState(
       clearFiltersLabel: resolvedClearFiltersLabel,
       shouldShowPagination,
     };
-  }, [
-    clearFiltersLabel,
-    collections,
-    emptyStateCopy,
-    totalPages,
-  ]);
+  }, [clearFiltersLabel, collections, emptyStateCopy, totalPages]);
 }
+

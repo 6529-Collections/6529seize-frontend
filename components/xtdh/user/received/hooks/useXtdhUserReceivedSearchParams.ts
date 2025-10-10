@@ -2,12 +2,13 @@
 
 import { useCallback } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { UpdateXtdhReceivedParamsHandler } from "./useXtdhReceivedFilters";
+
+import type { UpdateXtdhReceivedParamsHandler } from "./useXtdhUserReceivedFilters";
 
 /**
  * Centralises reading & writing URL search params while preventing scroll jumps.
  */
-export function useXtdhReceivedSearchParams(): {
+export function useXtdhUserReceivedSearchParams(): {
   readonly searchParams: ReturnType<typeof useSearchParams>;
   readonly handleUpdateParams: UpdateXtdhReceivedParamsHandler;
 } {
@@ -25,8 +26,9 @@ export function useXtdhReceivedSearchParams(): {
         scroll: false,
       });
     },
-    [pathname, router, searchParams]
+    [pathname, router, searchParams],
   );
 
   return { searchParams, handleUpdateParams };
 }
+

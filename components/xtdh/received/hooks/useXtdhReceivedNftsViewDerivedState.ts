@@ -3,11 +3,11 @@ import { useMemo } from "react";
 import {
   DEFAULT_CLEAR_FILTERS_LABEL,
   DEFAULT_EMPTY_STATE_COPY,
-} from "../XtdhReceivedNftsView.constants";
+} from "../subcomponents/XtdhReceivedNftsView.constants";
 import type {
   XtdhReceivedNftsViewEmptyCopy,
   XtdhReceivedNftsViewState,
-} from "../XtdhReceivedNftsView.types";
+} from "../subcomponents/XtdhReceivedNftsView.types";
 
 export interface XtdhReceivedNftsViewDerivedState {
   readonly clearFiltersLabel: string;
@@ -22,12 +22,7 @@ export interface XtdhReceivedNftsViewDerivedState {
 export function useXtdhReceivedNftsViewDerivedState(
   state: XtdhReceivedNftsViewState,
 ): XtdhReceivedNftsViewDerivedState {
-  const {
-    clearFiltersLabel,
-    emptyStateCopy,
-    nfts,
-    totalPages,
-  } = state;
+  const { clearFiltersLabel, emptyStateCopy, nfts, totalPages } = state;
 
   return useMemo(() => {
     const resolvedClearFiltersLabel =
@@ -42,10 +37,6 @@ export function useXtdhReceivedNftsViewDerivedState(
       emptyStateCopy: resolvedEmptyStateCopy,
       shouldShowPagination,
     };
-  }, [
-    clearFiltersLabel,
-    emptyStateCopy,
-    nfts,
-    totalPages,
-  ]);
+  }, [clearFiltersLabel, emptyStateCopy, nfts, totalPages]);
 }
+

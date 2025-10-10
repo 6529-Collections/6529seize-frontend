@@ -5,7 +5,7 @@ import { XtdhReceivedNftsViewContent } from "./XtdhReceivedNftsViewContent";
 import { XtdhReceivedNftsViewFallback } from "./XtdhReceivedNftsViewFallback";
 import {
   useXtdhReceivedNftsViewDerivedState,
-} from "./hooks/useXtdhReceivedNftsViewDerivedState";
+} from "../hooks/useXtdhReceivedNftsViewDerivedState";
 import type { XtdhReceivedNftsViewState } from "./XtdhReceivedNftsView.types";
 
 export interface XtdhReceivedNftsViewProps {

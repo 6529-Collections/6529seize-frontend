@@ -1,36 +1,43 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { SortDirection } from "@/entities/ISort";
-import { useReceivedNfts } from "@/hooks/useXtdhReceived";
-import type {
-  XtdhReceivedCollectionOption,
-  XtdhReceivedNft,
-} from "@/types/xtdh";
+
 import {
+  COLLECTIONS_PAGE_SIZE,
+  DEFAULT_COLLECTION_SORT,
   DEFAULT_DIRECTION,
-  DEFAULT_NFT_SORT,
-  NFTS_PAGE_SIZE,
-  type XtdhNftSortField,
-} from "../utils/constants";
+  type XtdhCollectionsSortField,
+} from "@/components/xtdh/received/utils/constants";
 import {
   mergeXtdhCollectionOptions,
-  parseXtdhNftSort,
+  parseXtdhCollectionsSort,
   parseXtdhPage,
   parseXtdhSortDirection,
   xtdhToApiDirection,
-} from "../utils";
-import { useXtdhReceivedFilters } from "./useXtdhReceivedFilters";
-import { useXtdhReceivedSearchParams } from "./useXtdhReceivedSearchParams";
+} from "@/components/xtdh/received/utils";
+import { SortDirection } from "@/entities/ISort";
+import { useReceivedCollections } from "@/hooks/useXtdhReceived";
+import type {
+  XtdhReceivedCollectionOption,
+  XtdhReceivedCollectionSummary,
+  XtdhReceivedToken,
+} from "@/types/xtdh";
 
-export interface UseXtdhReceivedNftsState {
+import { useXtdhUserReceivedFilters } from "./useXtdhUserReceivedFilters";
+import { useXtdhUserReceivedSearchParams } from "./useXtdhUserReceivedSearchParams";
+
+export interface UseXtdhUserReceivedCollectionsStateOptions {
+  readonly enabled?: boolean;
+}
+
+export interface UseXtdhUserReceivedCollectionsState {
   readonly profileId: string | null;
-  readonly nfts: XtdhReceivedNft[];
+  readonly collections: XtdhReceivedCollectionSummary[];
   readonly isLoading: boolean;
   readonly isFetching: boolean;
   readonly isError: boolean;
   readonly error: unknown;
-  readonly activeSort: XtdhNftSortField;
+  readonly activeSort: XtdhCollectionsSortField;
   readonly activeDirection: SortDirection;
   readonly collectionFilterOptions: {
     readonly id: string;
@@ -43,20 +50,24 @@ export interface UseXtdhReceivedNftsState {
   readonly page: number;
   readonly totalPages: number;
   readonly haveNextPage: boolean;
-  readonly handleSortChange: (nextSort: XtdhNftSortField) => void;
+  readonly handleSortChange: (nextSort: XtdhCollectionsSortField) => void;
   readonly handleCollectionsFilterChange: (nextSelected: string[]) => void;
   readonly handleClearFilters: () => void;
   readonly handlePageChange: (page: number) => void;
   readonly handleRetry: () => void;
+  readonly expandedCollectionId: string | null;
+  readonly toggleCollection: (collectionId: string) => void;
 }
 
 /**
- * Encapsulates NFTs view state, mirroring collection behaviour for parity.
+ * Encapsulates the collections view behaviour, spanning query params, data
+ * fetching and interactive expansion state.
  */
-export function useXtdhReceivedNftsState(
-  profileId: string | null
-): UseXtdhReceivedNftsState {
-  const { searchParams, handleUpdateParams } = useXtdhReceivedSearchParams();
+export function useXtdhUserReceivedCollectionsState(
+  profileId: string | null,
+  options?: UseXtdhUserReceivedCollectionsStateOptions,
+): UseXtdhUserReceivedCollectionsState {
+  const { searchParams, handleUpdateParams } = useXtdhUserReceivedSearchParams();
 
   const {
     selectedCollections,
@@ -64,26 +75,28 @@ export function useXtdhReceivedNftsState(
     filtersAreActive,
     handleCollectionsFilterChange,
     handleClearFilters,
-  } = useXtdhReceivedFilters(searchParams, handleUpdateParams);
+  } = useXtdhUserReceivedFilters(searchParams, handleUpdateParams);
+
+  const isEnabled = Boolean(profileId) && (options?.enabled ?? true);
 
   const activeSort = useMemo(
-    () => parseXtdhNftSort(searchParams?.get("sort") ?? null),
-    [searchParams]
+    () => parseXtdhCollectionsSort(searchParams?.get("sort") ?? null),
+    [searchParams],
   );
 
   const activeDirection = useMemo(
     () => parseXtdhSortDirection(searchParams?.get("dir") ?? null),
-    [searchParams]
+    [searchParams],
   );
 
   const apiDirection = useMemo(
     () => xtdhToApiDirection(activeDirection),
-    [activeDirection]
+    [activeDirection],
   );
 
   const page = useMemo(
     () => parseXtdhPage(searchParams?.get("page") ?? null),
-    [searchParams]
+    [searchParams],
   );
 
   const {
@@ -93,17 +106,17 @@ export function useXtdhReceivedNftsState(
     isError,
     error,
     refetch,
-  } = useReceivedNfts({
+  } = useReceivedCollections({
     profile: profileId,
     sort: activeSort,
     dir: apiDirection,
     page,
-    pageSize: NFTS_PAGE_SIZE,
+    pageSize: COLLECTIONS_PAGE_SIZE,
     filters,
-    enabled: Boolean(profileId),
+    enabled: isEnabled,
   });
 
-  const nfts = data?.nfts ?? [];
+  const collections = data?.collections ?? [];
   const totalCount = data?.totalCount ?? 0;
 
   const [availableCollectionOptions, setAvailableCollectionOptions] = useState<
@@ -119,7 +132,7 @@ export function useXtdhReceivedNftsState(
   const availableCollections = useMemo(
     () =>
       mergeXtdhCollectionOptions(availableCollectionOptions, selectedCollections),
-    [availableCollectionOptions, selectedCollections]
+    [availableCollectionOptions, selectedCollections],
   );
 
   const collectionFilterOptions = useMemo(
@@ -129,23 +142,23 @@ export function useXtdhReceivedNftsState(
         name: option.collectionName,
         tokenCount: option.tokenCount,
       })),
-    [availableCollections]
+    [availableCollections],
   );
 
   const totalPages = useMemo(() => {
     if (!totalCount) return 1;
-    return Math.max(1, Math.ceil(totalCount / NFTS_PAGE_SIZE));
+    return Math.max(1, Math.ceil(totalCount / COLLECTIONS_PAGE_SIZE));
   }, [totalCount]);
 
   const haveNextPage = useMemo(
-    () => page * NFTS_PAGE_SIZE < totalCount,
-    [page, totalCount]
+    () => page * COLLECTIONS_PAGE_SIZE < totalCount,
+    [page, totalCount],
   );
 
   const handleSortChange = useCallback(
-    (nextSort: XtdhNftSortField) => {
+    (nextSort: XtdhCollectionsSortField) => {
       handleUpdateParams((params) => {
-        const currentSort = parseXtdhNftSort(params.get("sort"));
+        const currentSort = parseXtdhCollectionsSort(params.get("sort"));
         const currentDirection = parseXtdhSortDirection(params.get("dir"));
 
         const nextDirection =
@@ -155,7 +168,7 @@ export function useXtdhReceivedNftsState(
               : SortDirection.ASC
             : DEFAULT_DIRECTION;
 
-        if (nextSort === DEFAULT_NFT_SORT) {
+        if (nextSort === DEFAULT_COLLECTION_SORT) {
           params.delete("sort");
         } else {
           params.set("sort", nextSort);
@@ -170,7 +183,7 @@ export function useXtdhReceivedNftsState(
         params.set("page", "1");
       });
     },
-    [handleUpdateParams]
+    [handleUpdateParams],
   );
 
   const handlePageChange = useCallback(
@@ -179,30 +192,38 @@ export function useXtdhReceivedNftsState(
         params.set("page", nextPage.toString());
       });
     },
-    [handleUpdateParams]
+    [handleUpdateParams],
   );
 
   const handleRetry = useCallback(() => {
     void refetch();
   }, [refetch]);
 
+  const [expandedCollectionId, setExpandedCollectionId] = useState<string | null>(
+    null,
+  );
+
+  const toggleCollection = useCallback((collectionId: string) => {
+    setExpandedCollectionId((prev) => (prev === collectionId ? null : collectionId));
+  }, []);
+
   const resultSummary = useMemo(() => {
     if (!profileId) {
       return "Connect or select a profile to view received xTDH.";
     }
     if (isLoading) {
-      return "Loading NFTs…";
+      return "Loading collections…";
     }
     if (isFetching) {
-      return "Updating NFTs…";
+      return "Updating collections…";
     }
-    const label = totalCount === 1 ? "NFT" : "NFTs";
+    const label = totalCount === 1 ? "collection" : "collections";
     return `Showing ${totalCount.toLocaleString()} ${label}`;
   }, [isFetching, isLoading, profileId, totalCount]);
 
   return {
     profileId,
-    nfts,
+    collections,
     isLoading,
     isFetching,
     isError,
@@ -221,5 +242,10 @@ export function useXtdhReceivedNftsState(
     handleClearFilters,
     handlePageChange,
     handleRetry,
+    expandedCollectionId,
+    toggleCollection,
   };
 }
+
+export type XtdhCollectionSummary = XtdhReceivedCollectionSummary;
+export type XtdhCollectionToken = XtdhReceivedToken;

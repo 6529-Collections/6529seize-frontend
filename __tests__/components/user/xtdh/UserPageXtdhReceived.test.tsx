@@ -116,15 +116,26 @@ describe("UserPageXtdhReceived", () => {
     expect(args.filters).toEqual({ collections: [], minRate: undefined, minGrantors: undefined });
   });
 
-  it("switches to the NFTs query when the view toggle is used", async () => {
+  it("enables the NFTs query only after switching the view", async () => {
     const user = userEvent.setup();
     render(<UserPageXtdhReceived profileId="simo" />);
 
-    expect(mockUseReceivedNfts).not.toHaveBeenCalled();
+    const initialCalls = mockUseReceivedNfts.mock.calls.length;
+    expect(initialCalls).toBeGreaterThan(0);
+    for (let index = 0; index < initialCalls; index += 1) {
+      expect(mockUseReceivedNfts.mock.calls[index]?.[0]).toMatchObject({
+        enabled: false,
+      });
+    }
 
     await user.click(screen.getByRole("button", { name: /NFTs view/i }));
 
-    expect(mockUseReceivedNfts).toHaveBeenCalled();
+    expect(mockUseReceivedNfts.mock.calls.length).toBeGreaterThan(initialCalls);
+    const latestCall =
+      mockUseReceivedNfts.mock.calls[mockUseReceivedNfts.mock.calls.length - 1];
+    expect(latestCall?.[0]).toMatchObject({
+      enabled: true,
+    });
   });
 
   it("shows the clear filters control when a collection filter is active", () => {

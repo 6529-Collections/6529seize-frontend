@@ -5,7 +5,7 @@ import { XtdhReceivedCollectionsViewContent } from "./XtdhReceivedCollectionsVie
 import { XtdhReceivedCollectionsViewFallback } from "./XtdhReceivedCollectionsViewFallback";
 import {
   useXtdhReceivedCollectionsViewDerivedState,
-} from "./hooks/useXtdhReceivedCollectionsViewDerivedState";
+} from "../hooks/useXtdhReceivedCollectionsViewDerivedState";
 import type { XtdhReceivedCollectionsViewState } from "./XtdhReceivedCollectionsView.types";
 
 export interface XtdhReceivedCollectionsViewProps {

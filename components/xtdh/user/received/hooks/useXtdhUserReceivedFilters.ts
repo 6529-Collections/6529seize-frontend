@@ -2,23 +2,24 @@
 
 import { useCallback, useMemo } from "react";
 import type { ReadonlyURLSearchParams } from "next/navigation";
+
 import type { UseReceivedCollectionsFilters } from "@/hooks/useXtdhReceived";
 import {
   COLLECTION_QUERY_PARAM,
   MIN_GRANTORS_QUERY_PARAM,
   MIN_RATE_QUERY_PARAM,
-} from "../utils/constants";
+} from "@/components/xtdh/received/utils/constants";
 import {
   parseXtdhCollectionsFilterParam,
   parseXtdhNumberParam,
   xtdhHasActiveFilters,
-} from "../utils";
+} from "@/components/xtdh/received/utils";
 
 export type UpdateXtdhReceivedParamsHandler = (
-  updater: (params: URLSearchParams) => void
+  updater: (params: URLSearchParams) => void,
 ) => void;
 
-export interface UseXtdhReceivedFiltersState {
+export interface UseXtdhUserReceivedFiltersState {
   readonly selectedCollections: string[];
   readonly minRate: number | undefined;
   readonly minGrantors: number | undefined;
@@ -32,27 +33,27 @@ export interface UseXtdhReceivedFiltersState {
  * Provides shared filter state derived from URL search params along with
  * handlers for mutating the query string in a consistent way across views.
  */
-export function useXtdhReceivedFilters(
+export function useXtdhUserReceivedFilters(
   searchParams: ReadonlyURLSearchParams | null,
-  handleUpdateParams: UpdateXtdhReceivedParamsHandler
-): UseXtdhReceivedFiltersState {
+  handleUpdateParams: UpdateXtdhReceivedParamsHandler,
+): UseXtdhUserReceivedFiltersState {
   const selectedCollections = useMemo(
     () =>
       parseXtdhCollectionsFilterParam(
-        searchParams?.get(COLLECTION_QUERY_PARAM) ?? null
+        searchParams?.get(COLLECTION_QUERY_PARAM) ?? null,
       ),
-    [searchParams]
+    [searchParams],
   );
 
   const minRate = useMemo(
     () => parseXtdhNumberParam(searchParams?.get(MIN_RATE_QUERY_PARAM) ?? null),
-    [searchParams]
+    [searchParams],
   );
 
   const minGrantors = useMemo(
     () =>
       parseXtdhNumberParam(searchParams?.get(MIN_GRANTORS_QUERY_PARAM) ?? null),
-    [searchParams]
+    [searchParams],
   );
 
   const filters = useMemo<UseReceivedCollectionsFilters>(
@@ -61,7 +62,7 @@ export function useXtdhReceivedFilters(
       minRate,
       minGrantors,
     }),
-    [minGrantors, minRate, selectedCollections]
+    [minGrantors, minRate, selectedCollections],
   );
 
   const filtersAreActive = xtdhHasActiveFilters(filters);
@@ -77,7 +78,7 @@ export function useXtdhReceivedFilters(
         params.set("page", "1");
       });
     },
-    [handleUpdateParams]
+    [handleUpdateParams],
   );
 
   const handleClearFilters = useCallback(() => {
@@ -99,3 +100,4 @@ export function useXtdhReceivedFilters(
     handleClearFilters,
   };
 }
+

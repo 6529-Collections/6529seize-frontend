@@ -3,9 +3,9 @@
 import type { XtdhReceivedCollectionSummary } from "@/types/xtdh";
 
 import { XTDH_RECEIVED_COLLECTION_EMPTY_MESSAGE } from "./XtdhReceivedCollectionCard.constants";
-import { useXtdhReceivedCollectionTokens } from "./useXtdhReceivedCollectionTokens";
 import { XtdhReceivedEmptyState } from "./XtdhReceivedEmptyState";
 import { XtdhReceivedNftCard } from "./XtdhReceivedNftCard";
+import { useXtdhReceivedCollectionTokens } from "../hooks/useXtdhReceivedCollectionTokens";
 
 export interface XtdhReceivedCollectionCardContentProps {
   readonly collection: XtdhReceivedCollectionSummary;

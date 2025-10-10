@@ -26,3 +26,4 @@ export function useXtdhReceivedCollectionTokens(
     [collectionId, collectionImage, collectionName, tokens],
   );
 }
+
