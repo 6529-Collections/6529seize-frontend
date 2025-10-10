@@ -1,5 +1,6 @@
 export * from "./XtdhReceivedCollectionsSkeleton";
 export * from "./XtdhReceivedCollectionsView";
+export * from "./XtdhReceivedCollectionsUserView";
 export * from "./XtdhReceivedCollectionsControls";
 export * from "./XtdhReceivedCollectionsList";
 export * from "./XtdhReceivedCollectionsView.types";
