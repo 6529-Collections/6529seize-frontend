@@ -2,6 +2,21 @@ import CreateCustomSnapshotFormUpload from "./CreateCustomSnapshotFormUpload";
 import { CustomTokenPoolParamsToken } from "@/components/allowlist-tool/allowlist-tool.types";
 import CreateCustomSnapshotFormTable from "./CreateCustomSnapshotFormTable";
 
+interface CreateCustomSnapshotFormAddWalletsModalProps {
+  readonly fileName: string | null;
+  readonly setFileName: (fileName: string | null) => void;
+  readonly tokens: CustomTokenPoolParamsToken[];
+  readonly addUploadedTokens: (
+    tokens: CustomTokenPoolParamsToken[],
+  ) => boolean;
+  readonly chunkSize: number;
+  readonly maxRows: number;
+  readonly setManualWallet: (manualWallet: string | null) => void;
+  readonly addManualWallet: () => void;
+  readonly onRemoveToken: (index: number) => void;
+  readonly onClose: () => void;
+}
+
 export default function CreateCustomSnapshotFormAddWalletsModal({
   fileName,
   setFileName,
@@ -14,21 +29,12 @@ export default function CreateCustomSnapshotFormAddWalletsModal({
   addManualWallet,
   onRemoveToken,
   onClose,
-}: {
-  readonly fileName: string | null;
-  readonly setFileName: (fileName: string | null) => void;
-  readonly tokens: CustomTokenPoolParamsToken[];
-  readonly addUploadedTokens: (tokens: CustomTokenPoolParamsToken[]) => boolean;
-  readonly chunkSize: number;
-  readonly maxRows: number;
-  readonly setManualWallet: (manualWallet: string | null) => void;
-  readonly addManualWallet: () => void;
-  readonly onRemoveToken: (index: number) => void;
-  readonly onClose: () => void;
-}) {
+}: CreateCustomSnapshotFormAddWalletsModalProps) {
   const totalWallets = tokens.length;
   const chunkCount =
-    totalWallets > 0 ? Math.ceil(totalWallets / chunkSize) : 0;
+    totalWallets > 0 && chunkSize > 0
+      ? Math.ceil(totalWallets / chunkSize)
+      : 0;
   const walletLabel = totalWallets === 1 ? "wallet" : "wallets";
   const snapshotLabel = chunkCount === 1 ? "custom snapshot" : "custom snapshots";
 
@@ -47,9 +53,16 @@ export default function CreateCustomSnapshotFormAddWalletsModal({
               You can add up to {maxRows.toLocaleString()} wallets in one batch.
             </p>
             {totalWallets > 0 && (
-              <p className="tw-text-xs tw-text-neutral-100">
-                Currently added {totalWallets.toLocaleString()} {walletLabel}. This will create {chunkCount.toLocaleString()} {snapshotLabel}.
-              </p>
+              <>
+                <p className="tw-text-xs tw-text-neutral-100">
+                  Currently added {totalWallets.toLocaleString()} {walletLabel}. This will create {chunkCount.toLocaleString()} {snapshotLabel}.
+                </p>
+                {totalWallets > maxRows && (
+                  <p className="tw-text-xs tw-text-yellow-400">
+                    Warning: Exceeds batch limit of {maxRows.toLocaleString()} wallets.
+                  </p>
+                )}
+              </>
             )}
           </div>
           <div className="tw-mt-6 tw-flex tw-gap-x-4">

@@ -3,6 +3,7 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { useMutation } from "@tanstack/react-query";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import {
   AllowlistOperation,
@@ -58,7 +59,6 @@ export default function CreateCustomSnapshotForm() {
   };
 
   const [fileName, setFileName] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [uploadState, setUploadState] = useState<{
     processed: number;
     total: number;
@@ -79,79 +79,83 @@ export default function CreateCustomSnapshotForm() {
     return `We will split ${tokenCount.toLocaleString()} ${walletLabel} into ${chunkCount.toLocaleString()} ${snapshotLabel} (up to ${CUSTOM_SNAPSHOT_CHUNK_SIZE.toLocaleString()} wallets each).`;
   }, [tokenCount, chunkCount]);
 
-  const resolveEns = async (ens: string[]): Promise<ResolvedEns[]> => {
-    if (!ens.length) return [];
-    const endpoint = `/other/resolve-ens-to-address`;
-    const { success, data } = await distributionPlanApiPost<ResolvedEns[]>({
-      endpoint,
-      body: ens,
-    });
-    if (!success || !data) {
-      return [];
-    }
-    return data;
-  };
-
-  const addCustomTokenPool = async (): Promise<string | null> => {
-    if (!distributionPlan) return null;
-    if (!tokens.length) {
-      setToasts({ messages: ["No tokens provided"], type: "error" });
-      return null;
-    }
-    if (tokens.length > MAX_CUSTOM_SNAPSHOT_ROWS) {
+  const resolveEnsMutation = useMutation<ResolvedEns[], Error, string[]>({
+    mutationFn: async (ensList) => {
+      if (!ensList.length) {
+        return [];
+      }
+      const endpoint = `/other/resolve-ens-to-address`;
+      const { success, data } = await distributionPlanApiPost<ResolvedEns[]>({
+        endpoint,
+        body: ensList,
+      });
+      if (!success || !data) {
+        throw new Error("Failed to resolve ENS addresses");
+      }
+      return data;
+    },
+    onError: () => {
       setToasts({
-        messages: [
-          `You can upload up to ${MAX_CUSTOM_SNAPSHOT_ROWS.toLocaleString()} wallets per batch`,
-        ],
+        messages: ["Some ENS addresses could not be resolved"],
         type: "error",
       });
-      return null;
-    }
-    const trimmedName = formValues.name.trim();
-    if (!trimmedName) {
-      setToasts({ messages: ["Name is required"], type: "error" });
-      return null;
-    }
+    },
+  });
 
-    const ens = tokens.filter((token) => token.owner.endsWith(".eth"));
-    setIsLoading(true);
-    try {
-      const resolvedEns = await resolveEns(ens.map((token) => token.owner));
-      if (ens.length !== resolvedEns.length) {
-        setToasts({
-          messages: ["Some ENS addresses could not be resolved"],
-          type: "error",
-        });
-        return null;
-      }
-      if (resolvedEns.some((resolved) => !resolved.address)) {
-        setToasts({
-          messages: ["Some ENS addresses could not be resolved"],
-          type: "error",
-        });
-        return null;
-      }
-
-      const resolvedMap = new Map<string, string>();
-      resolvedEns.forEach((resolved) => {
-        if (resolved.address) {
-          resolvedMap.set(resolved.ens, resolved.address.toLowerCase());
+  const createCustomSnapshotsMutation = useMutation<
+    { snapshotId: string | null; chunkCount: number },
+    Error,
+    {
+      tokens: CustomTokenPoolParamsToken[];
+      trimmedName: string;
+      distributionPlanId: string;
+    }
+  >({
+    mutationFn: async ({ tokens: originalTokens, trimmedName, distributionPlanId }) => {
+      const ensTokens = originalTokens.filter((token) =>
+        token.owner.endsWith(".eth")
+      );
+      let tokensWithResolvedEns = originalTokens;
+      if (ensTokens.length) {
+        const resolvedEns = await resolveEnsMutation.mutateAsync(
+          ensTokens.map((token) => token.owner)
+        );
+        if (ensTokens.length !== resolvedEns.length) {
+          setToasts({
+            messages: ["Some ENS addresses could not be resolved"],
+            type: "error",
+          });
+          throw new Error("ENS resolution count mismatch");
         }
-      });
+        if (resolvedEns.some((resolved) => !resolved.address)) {
+          setToasts({
+            messages: ["Some ENS addresses could not be resolved"],
+            type: "error",
+          });
+          throw new Error("ENS resolution missing addresses");
+        }
 
-      const tokensWithResolvedEns = tokens.map((token) => {
-        if (token.owner.endsWith(".eth")) {
-          const resolvedAddress = resolvedMap.get(token.owner);
-          if (!resolvedAddress) {
-            return token;
+        const resolvedMap = new Map<string, string>();
+        for (const resolved of resolvedEns) {
+          if (resolved.address) {
+            resolvedMap.set(resolved.ens, resolved.address.toLowerCase());
           }
-          return {
-            ...token,
-            owner: resolvedAddress,
-          };
         }
-        return token;
-      });
+
+        tokensWithResolvedEns = originalTokens.map((token) => {
+          if (token.owner.endsWith(".eth")) {
+            const resolvedAddress = resolvedMap.get(token.owner);
+            if (!resolvedAddress) {
+              return token;
+            }
+            return {
+              ...token,
+              owner: resolvedAddress,
+            };
+          }
+          return token;
+        });
+      }
 
       const tokenChunks = chunkTokens(tokensWithResolvedEns);
       if (!tokenChunks.length) {
@@ -159,15 +163,17 @@ export default function CreateCustomSnapshotForm() {
           messages: ["No valid wallets found after resolving ENS"],
           type: "error",
         });
-        return null;
+        throw new Error("No valid wallets after resolving ENS");
       }
+
       setUploadState({ processed: 0, total: tokenChunks.length });
+
       const createdSnapshotIds: string[] = [];
       for (let index = 0; index < tokenChunks.length; index += 1) {
         const chunk = tokenChunks[index];
         const snapshotName = `${trimmedName}-${index + 1}`;
         const customTokenPoolId = getRandomObjectId();
-        const endpoint = `/allowlists/${distributionPlan.id}/operations`;
+        const endpoint = `/allowlists/${distributionPlanId}/operations`;
         const { success } = await distributionPlanApiPost<AllowlistOperation>({
           endpoint,
           body: {
@@ -188,8 +194,9 @@ export default function CreateCustomSnapshotForm() {
             ],
             type: "error",
           });
-          return null;
+          throw new Error(`Failed to create snapshot "${snapshotName}"`);
         }
+
         createdSnapshotIds.push(customTokenPoolId);
         setUploadState({
           processed: index + 1,
@@ -197,7 +204,13 @@ export default function CreateCustomSnapshotForm() {
         });
       }
 
-      fetchOperations(distributionPlan.id);
+      return {
+        snapshotId: createdSnapshotIds.at(0) ?? null,
+        chunkCount: tokenChunks.length,
+      };
+    },
+    onSuccess: ({ chunkCount }, variables) => {
+      fetchOperations(variables.distributionPlanId);
       setFormValues({
         name: "",
       });
@@ -205,18 +218,55 @@ export default function CreateCustomSnapshotForm() {
       setFileName(null);
       setToasts({
         messages: [
-          `Created ${tokenChunks.length} custom snapshot${
-            tokenChunks.length > 1 ? "s" : ""
+          `Created ${chunkCount} custom snapshot${
+            chunkCount > 1 ? "s" : ""
           }.`,
         ],
         type: "success",
       });
-      return createdSnapshotIds.at(0) ?? null;
-    } finally {
+    },
+    onSettled: () => {
       setUploadState(null);
-      setIsLoading(false);
+    },
+  });
+
+  const addCustomTokenPool = async (): Promise<string | null> => {
+    if (!distributionPlan) return null;
+    if (createCustomSnapshotsMutation.isPending) {
+      return null;
+    }
+    if (!tokens.length) {
+      setToasts({ messages: ["No tokens provided"], type: "error" });
+      return null;
+    }
+    if (tokens.length > MAX_CUSTOM_SNAPSHOT_ROWS) {
+      setToasts({
+        messages: [
+          `You can upload up to ${MAX_CUSTOM_SNAPSHOT_ROWS.toLocaleString()} wallets per batch`,
+        ],
+        type: "error",
+      });
+      return null;
+    }
+    const trimmedName = formValues.name.trim();
+    if (!trimmedName) {
+      setToasts({ messages: ["Name is required"], type: "error" });
+      return null;
+    }
+
+    try {
+      const result = await createCustomSnapshotsMutation.mutateAsync({
+        tokens,
+        trimmedName,
+        distributionPlanId: distributionPlan.id,
+      });
+      return result.snapshotId;
+    } catch {
+      return null;
     }
   };
+
+  const isLoading = createCustomSnapshotsMutation.isPending;
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
