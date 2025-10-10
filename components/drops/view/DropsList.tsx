@@ -67,6 +67,11 @@ const DropsList = memo(function DropsList({
     [onReplyClick]
   );
 
+  const chronologicalDrops = useMemo(
+    () => [...drops].reverse(),
+    [drops]
+  );
+
   // Memoize the props passed to each MemoizedDrop to prevent unnecessary renders
   const getItemData = useMemo(() => {
     return {
@@ -104,9 +109,9 @@ const DropsList = memo(function DropsList({
 
   const memoizedDrops = useMemo(
     () =>
-      drops.map((drop, i) => {
-        const previousDrop = drops[i + 1] ?? null;
-        const nextDrop = drops[i - 1] ?? null;
+      chronologicalDrops.map((drop, i) => {
+        const previousDrop = chronologicalDrops[i - 1] ?? null;
+        const nextDrop = chronologicalDrops[i + 1] ?? null;
 
         return (
           <div
@@ -151,7 +156,7 @@ const DropsList = memo(function DropsList({
           </div>
         );
       }),
-    [drops, getItemData] // Only depends on drops array and the memoized item data
+    [chronologicalDrops, getItemData] // Only depends on drops array and the memoized item data
   );
 
   return memoizedDrops;
