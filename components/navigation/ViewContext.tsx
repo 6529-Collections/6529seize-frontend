@@ -108,7 +108,9 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
     if (waveParam) {
       setActiveView(null);
       if (waveParam !== lastFetchedWaveId) {
-        void fetchWaveDetails(waveParam);
+        fetchWaveDetails(waveParam).catch(error =>
+          console.warn("Failed to fetch wave metadata", error)
+        );
       }
     } else {
       if (lastFetchedWaveId !== null) {
