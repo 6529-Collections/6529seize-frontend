@@ -53,10 +53,10 @@ const DEFAULT_TOKENS: BaseTokenData[] = [
     xtdhRate: 420,
     totalXtdhReceived: 12890,
     granters: [
-      createGranter("gm6529", "GM 6529", 120),
-      createGranter("punk3167", "punk3167", 80),
+      createGranter("punk6529", "punk6529", 120),
+      createGranter("simo", "simo", 80),
       createGranter("artguy", "Art Blocksmith", 45),
-      createGranter("gradientqueen", "Gradient Queen", 60),
+      createGranter("test1234", "test1234", 60),
       createGranter("metaverse_monk", "Metaverse Monk", 30),
       createGranter("cryptofox", "Crypto Fox", 25),
       createGranter("zenwhale", "Zen Whale", 28),
@@ -77,8 +77,8 @@ const DEFAULT_TOKENS: BaseTokenData[] = [
     xtdhRate: 280,
     totalXtdhReceived: 9870,
     granters: [
-      createGranter("gm6529", "GM 6529", 75),
-      createGranter("punk3167", "punk3167", 55),
+      createGranter("punk6529", "punk6529", 75),
+      createGranter("simo", "simo", 55),
       createGranter("pixelpioneer", "Pixel Pioneer", 30),
       createGranter("colorwave", "Colorwave", 32),
       createGranter("chainmage", "Chain Mage", 26),
@@ -97,7 +97,7 @@ const DEFAULT_TOKENS: BaseTokenData[] = [
     xtdhRate: 150,
     totalXtdhReceived: 6275,
     granters: [
-      createGranter("gradientqueen", "Gradient Queen", 42),
+      createGranter("test1234", "test1234", 42),
       createGranter("colorwave", "Colorwave", 30),
       createGranter("data_degen", "Data Degen", 38),
       createGranter("memex", "Meme X", 40),
@@ -129,10 +129,10 @@ const DEFAULT_TOKENS: BaseTokenData[] = [
     xtdhRate: 510,
     totalXtdhReceived: 15430,
     granters: [
-      createGranter("gm6529", "GM 6529", 110),
-      createGranter("punk3167", "punk3167", 80),
+      createGranter("punk6529", "punk6529", 110),
+      createGranter("simo", "simo", 80),
       createGranter("artguy", "Art Blocksmith", 50),
-      createGranter("gradientqueen", "Gradient Queen", 70),
+      createGranter("test1234", "test1234", 70),
       createGranter("metaverse_monk", "Metaverse Monk", 36),
       createGranter("cryptofox", "Crypto Fox", 34),
       createGranter("zenwhale", "Zen Whale", 44),
@@ -170,7 +170,7 @@ const DEFAULT_TOKENS: BaseTokenData[] = [
     xtdhRate: 600,
     totalXtdhReceived: 18250,
     granters: [
-      createGranter("gradientqueen", "Gradient Queen", 140),
+      createGranter("test1234", "test1234", 140),
       createGranter("colorwave", "Colorwave", 120),
       createGranter("pixelpioneer", "Pixel Pioneer", 95),
       createGranter("moonmath", "Moon Math", 88),
@@ -192,7 +192,7 @@ const DEFAULT_TOKENS: BaseTokenData[] = [
     xtdhRate: 310,
     totalXtdhReceived: 8650,
     granters: [
-      createGranter("gradientqueen", "Gradient Queen", 90),
+      createGranter("test1234", "test1234", 90),
       createGranter("colorwave", "Colorwave", 72),
       createGranter("pixelpioneer", "Pixel Pioneer", 44),
       createGranter("moonmath", "Moon Math", 50),
@@ -210,7 +210,7 @@ const DEFAULT_TOKENS: BaseTokenData[] = [
     xtdhRate: 270,
     totalXtdhReceived: 7430,
     granters: [
-      createGranter("gradientqueen", "Gradient Queen", 78),
+      createGranter("test1234", "test1234", 78),
       createGranter("pixelpioneer", "Pixel Pioneer", 54),
       createGranter("moonmath", "Moon Math", 38),
       createGranter("synth_slinger", "Synth Slinger", 36),
@@ -228,7 +228,7 @@ const DEFAULT_TOKENS: BaseTokenData[] = [
     xtdhRate: 190,
     totalXtdhReceived: 5640,
     granters: [
-      createGranter("gradientqueen", "Gradient Queen", 62),
+      createGranter("test1234", "test1234", 62),
       createGranter("colorwave", "Colorwave", 41),
       createGranter("pixelpioneer", "Pixel Pioneer", 38),
       createGranter("futurefunk", "Future Funk", 30),
@@ -245,7 +245,7 @@ const DEFAULT_TOKENS: BaseTokenData[] = [
     xtdhRate: 120,
     totalXtdhReceived: 2980,
     granters: [
-      createGranter("gradientqueen", "Gradient Queen", 34),
+      createGranter("test1234", "test1234", 34),
       createGranter("colorwave", "Colorwave", 29),
       createGranter("futurefunk", "Future Funk", 22),
       createGranter("lumenloop", "Lumen Loop", 18),
