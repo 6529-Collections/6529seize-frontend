@@ -23,7 +23,6 @@ import {
   MentionedUser,
   ReferencedNft,
 } from "@/entities/IDrop";
-import { $convertToMarkdownString } from "@lexical/markdown";
 import { MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/MentionTransformer";
 import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/HastagTransformer";
 import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
@@ -59,6 +58,7 @@ import {
   getMissingRequirements,
   MissingRequirements,
 } from "./utils/getMissingRequirements";
+import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
 import { EMOJI_TRANSFORMER } from "../drops/create/lexical/transformers/EmojiTransformer";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { useWave } from "@/hooks/useWave";
@@ -488,15 +488,15 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const getMarkdown = useMemo(
     () =>
-      editorState?.read(() =>
-        $convertToMarkdownString([
-          ...SAFE_MARKDOWN_TRANSFORMERS,
-          MENTION_TRANSFORMER,
-          HASHTAG_TRANSFORMER,
-          IMAGE_TRANSFORMER,
-          EMOJI_TRANSFORMER,
-        ])
-      ) ?? null,
+      editorState
+        ? exportDropMarkdown(editorState, [
+            ...SAFE_MARKDOWN_TRANSFORMERS,
+            MENTION_TRANSFORMER,
+            HASHTAG_TRANSFORMER,
+            IMAGE_TRANSFORMER,
+            EMOJI_TRANSFORMER,
+          ])
+        : null,
     [editorState]
   );
 

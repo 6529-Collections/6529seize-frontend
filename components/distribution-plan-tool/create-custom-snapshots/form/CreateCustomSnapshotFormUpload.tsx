@@ -15,7 +15,7 @@ export default function CreateCustomSnapshotFormUpload({
 }: {
   fileName: string | null;
   setFileName: (fileName: string | null) => void;
-  setTokens: (tokens: CustomTokenPoolParamsToken[]) => void;
+  setTokens: (tokens: CustomTokenPoolParamsToken[]) => boolean;
 }) {
   const onFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -46,8 +46,8 @@ export default function CreateCustomSnapshotFormUpload({
         .filter((token) => {
           return isEthereumAddress(token.owner);
         });
-      setTokens(results);
-      setFileName(file.name);
+      const added = setTokens(results);
+      setFileName(added ? file.name : null);
     };
     reader.readAsText(file);
   };

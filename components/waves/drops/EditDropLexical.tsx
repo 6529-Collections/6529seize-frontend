@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   InitialConfigType,
   LexicalComposer,
@@ -11,7 +11,7 @@ import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
-import { $convertFromMarkdownString, $convertToMarkdownString } from "@lexical/markdown";
+import { $convertFromMarkdownString } from "@lexical/markdown";
 import {
   $getRoot,
   EditorState,
@@ -54,6 +54,11 @@ import EmojiPlugin from "@/components/drops/create/lexical/plugins/emoji/EmojiPl
 import { EmojiNode } from "@/components/drops/create/lexical/nodes/EmojiNode";
 import { SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
+import normalizeDropMarkdown, { exportDropMarkdown } from "./normalizeDropMarkdown";
+import {
+  addBlankLinePlaceholders,
+  removeBlankLinePlaceholders,
+} from "./blankLinePlaceholders";
 
 interface EditDropLexicalProps {
   readonly initialContent: string;
@@ -181,7 +186,11 @@ function InitialContentPlugin({ initialContent }: { initialContent: string }) {
 
   useEffect(() => {
     editor.update(() => {
-      $convertFromMarkdownString(initialContent, EDIT_MARKDOWN_TRANSFORMERS);
+      const normalizedContent = normalizeDropMarkdown(initialContent);
+      $convertFromMarkdownString(
+        normalizedContent,
+        EDIT_MARKDOWN_TRANSFORMERS
+      );
 
       const root = $getRoot();
       convertCodeNodesToFences(root);
@@ -266,6 +275,8 @@ function KeyboardPlugin({
   mentionsRef: React.RefObject<NewMentionsPluginHandles | null>;
 }) {
   const [editor] = useLexicalComposerContext();
+  const sanitizedInitialContent =
+    removeBlankLinePlaceholders(initialContent);
 
   useEffect(() => {
     const removeEscapeListener = editor.registerCommand(
@@ -289,15 +300,20 @@ function KeyboardPlugin({
         }
 
         if (!isSaving) {
-          editor.getEditorState().read(() => {
-            const currentMarkdown =
-              $convertToMarkdownString(EDIT_MARKDOWN_TRANSFORMERS);
-            if (currentMarkdown.trim() === initialContent.trim()) {
-              onCancel();
-            } else {
-              onSave();
-            }
-          });
+          const currentMarkdown = exportDropMarkdown(
+            editor.getEditorState(),
+            EDIT_MARKDOWN_TRANSFORMERS
+          );
+          const sanitizedCurrentMarkdown =
+            removeBlankLinePlaceholders(currentMarkdown);
+          if (
+            sanitizedCurrentMarkdown.trim() ===
+            sanitizedInitialContent.trim()
+          ) {
+            onCancel();
+          } else {
+            onSave();
+          }
         }
         return true;
       },
@@ -308,7 +324,15 @@ function KeyboardPlugin({
       removeEscapeListener();
       removeEnterListener();
     };
-  }, [editor, onSave, onCancel, isSaving, initialContent, mentionsRef]);
+  }, [
+    editor,
+    onSave,
+    onCancel,
+    isSaving,
+    initialContent,
+    mentionsRef,
+    sanitizedInitialContent,
+  ]);
 
   return null;
 }
@@ -327,6 +351,14 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
   const editorRef = useRef<HTMLDivElement>(null);
   const mentionsRef = useRef<NewMentionsPluginHandles>(null);
   const { isApp } = useDeviceInfo();
+  const normalizedInitialContent = useMemo(
+    () => normalizeDropMarkdown(initialContent),
+    [initialContent]
+  );
+  const editorInitialContent = useMemo(
+    () => addBlankLinePlaceholders(normalizedInitialContent),
+    [normalizedInitialContent]
+  );
 
   const initialConfig: InitialConfigType = {
     namespace: "EditDropLexical",
@@ -378,17 +410,27 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
   const handleSave = useCallback(() => {
     if (!editorState) return;
 
-    editorState.read(() => {
-      const markdown = $convertToMarkdownString(EDIT_MARKDOWN_TRANSFORMERS);
+    const markdown = exportDropMarkdown(
+      editorState,
+      EDIT_MARKDOWN_TRANSFORMERS
+    );
 
-      if (markdown.trim() === initialContent.trim()) {
-        onCancel();
-        return;
-      }
+    const sanitizedMarkdown =
+      removeBlankLinePlaceholders(markdown);
 
-      onSave(markdown, mentionedUsers);
-    });
-  }, [editorState, mentionedUsers, onSave, initialContent, onCancel]);
+    if (sanitizedMarkdown.trim() === normalizedInitialContent.trim()) {
+      onCancel();
+      return;
+    }
+
+    onSave(sanitizedMarkdown, mentionedUsers);
+  }, [
+    editorState,
+    mentionedUsers,
+    onSave,
+    normalizedInitialContent,
+    onCancel,
+  ]);
 
   return (
     <div className="tw-w-full" data-editor-mode="true">
@@ -428,13 +470,13 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
             onSelect={handleMentionSelect}
           />
           <EmojiPlugin />
-          <InitialContentPlugin initialContent={initialContent} />
+          <InitialContentPlugin initialContent={editorInitialContent} />
           <FocusPlugin isApp={isApp} />
           <KeyboardPlugin
             onSave={handleSave}
             onCancel={onCancel}
             isSaving={isSaving}
-            initialContent={initialContent}
+            initialContent={normalizedInitialContent}
             mentionsRef={mentionsRef}
           />
         </div>
