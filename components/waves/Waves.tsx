@@ -4,14 +4,16 @@ import { useAuth } from "@/components/auth/Auth";
 import UserSetUpProfileCta from "@/components/user/utils/set-up-profile/UserSetUpProfileCta";
 import { useSetTitle } from "@/contexts/TitleContext";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, type JSX } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState, type JSX } from "react";
 import CreateDirectMessage from "./create-dm/CreateDirectMessage";
 import CreateWave from "./create-wave/CreateWave";
 import WavesList from "./list/WavesList";
 import ConnectWallet from "@/components/common/ConnectWallet";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getWavesBaseRoute } from "@/helpers/navigation.helpers";
+import CreateWaveModal from "./create-wave/CreateWaveModal";
+import CreateDirectMessageModal from "./create-dm/CreateDirectMessageModal";
 
 enum WavesViewMode {
   CREATE = "CREATE",
@@ -30,7 +32,10 @@ export const CREATE_DIRECT_MESSAGE_SEARCH_PATH = `${WAVES_PATH}?${CREATE_SEARCH_
 export default function Waves() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const { isApp } = useDeviceInfo();
+  const [isCreateWaveModalOpen, setIsCreateWaveModalOpen] = useState(false);
+  const [isCreateDmModalOpen, setIsCreateDmModalOpen] = useState(false);
 
   useSetTitle("Waves | Brain");
 
@@ -41,6 +46,22 @@ export default function Waves() {
     searchParams?.get(CREATE_SEARCH_PARAM) === NEW_WAVE_SEARCH_VALUE;
   const isCreateNewDirectMessage =
     searchParams?.get(CREATE_SEARCH_PARAM) === NEW_DIRECT_MESSAGE_SEARCH_VALUE;
+
+  useEffect(() => {
+    if (isApp) {
+      return;
+    }
+    if (isCreateNewWave) {
+      setIsCreateWaveModalOpen(true);
+      setIsCreateDmModalOpen(false);
+    } else if (isCreateNewDirectMessage) {
+      setIsCreateDmModalOpen(true);
+      setIsCreateWaveModalOpen(false);
+    } else {
+      setIsCreateWaveModalOpen(false);
+      setIsCreateDmModalOpen(false);
+    }
+  }, [isApp, isCreateNewWave, isCreateNewDirectMessage]);
 
   const viewMode = useMemo(() => {
     if (isCreateNewWave) {
@@ -57,13 +78,44 @@ export default function Waves() {
     [connectedProfile, activeProfileProxy]
   );
 
+  const updateCreateQuery = useCallback(
+    (value: "wave" | "dm" | null) => {
+      if (isApp) {
+        return;
+      }
+      const params = new URLSearchParams(searchParams?.toString() || "");
+      if (value) {
+        params.set(CREATE_SEARCH_PARAM, value);
+      } else {
+        params.delete(CREATE_SEARCH_PARAM);
+      }
+      const basePath = "/discover";
+      const query = params.toString();
+      const destination = query ? `${basePath}?${query}` : basePath;
+      router.replace(destination, { scroll: false });
+    },
+    [isApp, router, searchParams]
+  );
+
+  const closeCreateWaveModal = useCallback(() => {
+    setIsCreateWaveModalOpen(false);
+    updateCreateQuery(null);
+  }, [updateCreateQuery]);
+
+  const closeCreateDmModal = useCallback(() => {
+    setIsCreateDmModalOpen(false);
+    updateCreateQuery(null);
+  }, [updateCreateQuery]);
+
   const onViewModeChange = (mode: WavesViewMode) => {
     if (mode === WavesViewMode.CREATE) {
       if (isApp) {
         router.push("/waves/create");
         return;
       }
-      router.push(CREATE_WAVE_SEARCH_PATH);
+      setIsCreateWaveModalOpen(true);
+      setIsCreateDmModalOpen(false);
+      updateCreateQuery("wave");
       return;
     }
     if (mode === WavesViewMode.CREATE_DM) {
@@ -71,10 +123,44 @@ export default function Waves() {
         router.push("/messages/create");
         return;
       }
-      router.push(CREATE_DIRECT_MESSAGE_SEARCH_PATH);
+      setIsCreateDmModalOpen(true);
+      setIsCreateWaveModalOpen(false);
+      updateCreateQuery("dm");
       return;
     }
-    router.push(getWavesBaseRoute(isApp));
+    if (isApp) {
+      router.push(getWavesBaseRoute(true));
+    } else {
+      closeCreateWaveModal();
+      closeCreateDmModal();
+    }
+  };
+
+  useEffect(() => {
+    if (
+      isApp ||
+      (!isCreateNewWave && !isCreateNewDirectMessage) ||
+      pathname === "/discover"
+    ) {
+      return;
+    }
+    updateCreateQuery(isCreateNewWave ? "wave" : "dm");
+  }, [
+    isApp,
+    isCreateNewWave,
+    isCreateNewDirectMessage,
+    pathname,
+    updateCreateQuery,
+  ]);
+
+  const handleViewReset = () => {
+    if (isApp) {
+      router.push(getWavesBaseRoute(true));
+      return;
+    }
+    setIsCreateWaveModalOpen(false);
+    setIsCreateDmModalOpen(false);
+    updateCreateQuery(null);
   };
 
   const returnPlaceholder = (content: JSX.Element) => {
@@ -140,18 +226,36 @@ export default function Waves() {
       />
     ),
     [WavesViewMode.CREATE]: (
-      <CreateWave
-        onBack={() => onViewModeChange(WavesViewMode.VIEW)}
-        profile={connectedProfile}
-      />
+      <CreateWave onBack={handleViewReset} profile={connectedProfile} />
     ),
     [WavesViewMode.CREATE_DM]: (
       <CreateDirectMessage
-        onBack={() => onViewModeChange(WavesViewMode.VIEW)}
+        onBack={handleViewReset}
         profile={connectedProfile}
       />
     ),
   };
 
-  return <div className="tailwind-scope">{components[viewMode]}</div>;
+  const activeView = isApp ? viewMode : WavesViewMode.VIEW;
+
+  return (
+    <div className="tailwind-scope">
+      {components[activeView]}
+
+      {!isApp && connectedProfile && (
+        <>
+          <CreateWaveModal
+            isOpen={isCreateWaveModalOpen}
+            onClose={handleViewReset}
+            profile={connectedProfile}
+          />
+          <CreateDirectMessageModal
+            isOpen={isCreateDmModalOpen}
+            onClose={handleViewReset}
+            profile={connectedProfile}
+          />
+        </>
+      )}
+    </div>
+  );
 }

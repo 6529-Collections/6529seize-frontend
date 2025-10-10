@@ -285,10 +285,10 @@ export default function CreateWave({
 
   return (
     <CreateWaveFlow
-      onBack={onBack}
       title={`Create Wave ${
         config.overview.name ? `"${config.overview.name}"` : ""
       }`}
+      onBack={onBack}
     >
       <div className="tw-mt-4 xl:tw-max-w-[60rem] tw-mx-auto lg:tw-flex tw-gap-x-16 tw-justify-between tw-h-full tw-w-full">
         <div className="tw-1/4">

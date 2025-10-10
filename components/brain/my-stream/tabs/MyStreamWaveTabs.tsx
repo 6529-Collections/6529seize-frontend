@@ -45,7 +45,6 @@ export const MyStreamWaveTabs: React.FC<MyStreamWaveTabsProps> = ({ wave }) => {
   return (
     <div className="tw-flex-shrink-0" ref={setTabsRef} id="tabs-container">
       <div className="tw-w-full tw-bg-iron-950">
-        {/* Combined row with tabs, title, and action button */}
         <div className="tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-x-3">
           {isMemesWave ? (
             <MyStreamWaveTabsMeme wave={wave} />

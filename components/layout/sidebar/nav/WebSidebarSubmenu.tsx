@@ -29,13 +29,11 @@ function WebSidebarSubmenu({
   const browserDocument = globalScope.document;
   const [isMounted, setIsMounted] = useState(false);
 
-  // Position submenu at fixed position - right after collapsed sidebar
   const submenuPosition = {
     top: 0,
     left: `${SIDEBAR_DIMENSIONS.COLLAPSED_WIDTH_REM}rem`,
   };
 
-  // Memoize event handlers
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -73,7 +71,6 @@ function WebSidebarSubmenu({
     browserDocument.addEventListener("touchstart", handleClickOutside);
 
     return () => {
-      setIsMounted(false);
       browserWindow.removeEventListener("keydown", handleKeyDown);
       browserDocument.removeEventListener("mousedown", handleClickOutside);
       browserDocument.removeEventListener("touchstart", handleClickOutside);
@@ -82,15 +79,10 @@ function WebSidebarSubmenu({
 
   const isActive = (href: string) => pathname === href;
 
-  // Combine all items from section and subsections
   const combinedItems = useMemo(() => {
-    return [
-      ...section.items,
-      ...(section.subsections?.flatMap(sub => sub.items) ?? [])
-    ];
+    return [...section.items, ...(section.subsections?.flatMap((sub) => sub.items) ?? [])];
   }, [section.items, section.subsections]);
 
-  // SSR check - early return for server-side rendering
   if (browserDocument === undefined) {
     return null;
   }
@@ -110,7 +102,6 @@ function WebSidebarSubmenu({
         role="menu"
         aria-label={`${section.name} sub-navigation`}
       >
-        {/* Header with section name */}
         <div className="tw-px-6 tw-py-4 tw-border-b tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-t-0">
           <h3 className="tw-text-base tw-font-semibold tw-text-iron-50">
             {section.name}

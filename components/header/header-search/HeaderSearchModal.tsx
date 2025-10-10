@@ -323,7 +323,7 @@ export default function HeaderSearchModal({
           document.body,
       }}>
       <div className="tailwind-scope tw-cursor-default tw-relative tw-z-1000">
-        <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-backdrop-blur-[1px]"></div>
+        <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-70 tw-backdrop-blur-[1px]"></div>
         <div className="tw-fixed tw-inset-0 tw-z-1000 tw-overflow-y-auto">
           <div className="tw-flex tw-min-h-full tw-items-start tw-justify-center tw-p-2 tw-text-center lg:tw-items-center sm:tw-p-0">
             <div

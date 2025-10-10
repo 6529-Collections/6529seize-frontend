@@ -17,7 +17,6 @@ import WavePicture from "../../../waves/WavePicture";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { createBreakpoint } from "react-use";
 
-// Breakpoint for mobile responsiveness (lg = 1024px)
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
 interface MyStreamWaveTabsMemeProps {
@@ -27,32 +26,27 @@ interface MyStreamWaveTabsMemeProps {
 const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
   wave,
 }) => {
-  // Get the active tab and utilities from global context
   const { activeContentTab, setActiveContentTab } = useContentTab();
   const { toggleRightSidebar, isRightSidebarOpen } = useSidebarState();
   const [isMemesModalOpen, setIsMemesModalOpen] = useState(false);
 
-  // Navigation hooks for mobile back button
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "S";
 
-  // Wave hooks for countdown functionality
   const {
     isMemesWave,
     isRankWave,
     pauses: { filterDecisionsDuringPauses },
   } = useWave(wave);
 
-  // For next decision countdown
   const { allDecisions } = useDecisionPoints(wave);
 
-  // Filter out decisions that occur during pause periods using the helper from useWave
   const filteredDecisions = React.useMemo(() => {
-    const decisionsAsApiFormat = allDecisions.map(
-      (decision) => ({ decision_time: decision.timestamp } as any)
+    const decisionsAsApiFormat: { decision_time: number }[] = allDecisions.map(
+      (decision) => ({ decision_time: decision.timestamp })
     );
     const filtered = filterDecisionsDuringPauses(decisionsAsApiFormat);
     return allDecisions.filter((decision) =>
@@ -60,13 +54,11 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
     );
   }, [allDecisions, filterDecisionsDuringPauses]);
 
-  // Get the next valid decision time (excluding paused decisions)
   const nextDecisionTime =
     filteredDecisions.find(
       (decision) => decision.timestamp > Time.currentMillis()
     )?.timestamp ?? null;
 
-  // Calculate time left for next decision
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({
     days: 0,
     hours: 0,
@@ -93,12 +85,10 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
     }
   }, [nextDecisionTime]);
 
-  // Update your "Submit to Memes" button handler
   const handleMemesSubmit = () => {
     setIsMemesModalOpen(true);
   };
 
-  // Mobile back button handler - removes wave param to go back to list
   const handleMobileBack = () => {
     const params = new URLSearchParams(searchParams?.toString() || "");
     params.delete("wave");
@@ -112,10 +102,8 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
     <>
       {" "}
       <div className="tw-w-full tw-flex tw-flex-col tw-bg-iron-950">
-        {/* Title, toggle button and submit button */}
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-px-2 sm:tw-px-4 md:tw-px-6 tw-py-3 tw-overflow-x-auto">
           <div className="tw-flex tw-items-center tw-gap-x-1.5">
-            {/* Mobile back button */}
             {isMobile && (
               <button
                 onClick={handleMobileBack}
@@ -145,7 +133,6 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
                 wave={wave}
               />
             </div>
-            {/* Right sidebar toggle button */}
             <button
               type="button"
               onClick={toggleRightSidebar}
@@ -168,7 +155,6 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
             wave={wave}
             setActiveTab={setActiveContentTab}
           />
-          {/* Next winner announcement for memes and rank waves, visible on all tabs when there's an upcoming decision */}
           {(isMemesWave || isRankWave) && nextDecisionTime && (
             <div className="tw-flex-shrink-0 tw-px-2 sm:tw-px-4 md:tw-px-6">
               <CompactTimeCountdown timeLeft={timeLeft} />

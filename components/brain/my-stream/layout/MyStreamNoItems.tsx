@@ -5,7 +5,7 @@ import { getWavesBaseRoute } from "@/helpers/navigation.helpers";
 
 export default function MyStreamNoItems() {
   const { isApp } = useDeviceInfo();
-  const exploreHref = isApp ? getWavesBaseRoute(true) : "/waves";
+  const exploreHref = getWavesBaseRoute(isApp);
   const createHref = isApp ? "/waves/create" : CREATE_WAVE_SEARCH_PATH;
 
   return (

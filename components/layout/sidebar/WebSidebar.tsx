@@ -81,7 +81,7 @@ function WebSidebar({
 
     browserWindow.addEventListener("keydown", handleEscapeKey);
     return () => browserWindow.removeEventListener("keydown", handleEscapeKey);
-  }, [isMobile, isOffcanvasOpen, onCloseOffcanvas]);
+  }, [isMobile, isOffcanvasOpen, isOverlayActive, onCloseOffcanvas]);
 
   // Sidebar is expanded when offcanvas is open (mobile or narrow desktop)
   const shouldShowCollapsed = isMobile && isOffcanvasOpen ? false : isCollapsed;
@@ -119,7 +119,6 @@ function WebSidebar({
     </div>
   );
 
-  // Mobile behavior: render nothing when closed; use overlay + dialog when open
   if (isMobile) {
     if (!isOffcanvasOpen) {
       return null;
@@ -128,7 +127,7 @@ function WebSidebar({
       <>
         <button
           type="button"
-          className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-[70] tw-border-0 focus:tw-outline-none"
+          className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-70 tw-z-[70] tw-border-0 focus:tw-outline-none"
           onClick={onCloseOffcanvas}
           aria-label="Close menu overlay"
         />
@@ -139,7 +138,6 @@ function WebSidebar({
     );
   }
 
-  // Desktop behavior: fixed sidebar
   return (
     <>
       <div className="tw-fixed tw-inset-y-0 tw-left-0 focus:tw-outline-none tw-z-40">
@@ -148,7 +146,7 @@ function WebSidebar({
       {!isMobile && isOverlayActive && (
         <button
           type="button"
-          className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-30 tw-border-0 focus:tw-outline-none"
+          className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-70 tw-z-30 tw-border-0 focus:tw-outline-none"
           onClick={onCloseOffcanvas}
           aria-label="Close menu overlay"
         />

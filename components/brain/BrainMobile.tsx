@@ -155,7 +155,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     ) {
       setActiveView(BrainView.DEFAULT);
     }
-  }, [pathname, searchParams, waveId]);
+  }, [pathname, searchParams, waveId, isApp]);
 
   // Handle tab visibility and reset on wave changes
   useEffect(() => {

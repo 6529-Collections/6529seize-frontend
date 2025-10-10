@@ -16,6 +16,7 @@ import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
+import DiscoverIcon from "@/components/common/icons/DiscoverIcon";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import BellIcon from "@/components/common/icons/BellIcon";
 import { MagnifyingGlassIcon, UserIcon } from "@heroicons/react/24/outline";
@@ -217,6 +218,17 @@ const WebSidebarNav = React.forwardRef<
             />
           </li>
 
+          {/* Discover */}
+          <li>
+            <WebSidebarNavItem
+              href="/discover"
+              icon={DiscoverIcon}
+              active={pathname?.startsWith("/discover") || false}
+              collapsed={isCollapsed}
+              label="Discover"
+            />
+          </li>
+
           {/* Messages */}
           <li>
             <WebSidebarNavItem
@@ -348,7 +360,7 @@ const WebSidebarNav = React.forwardRef<
           {/* Overlay for main content */}
           <button
             type="button"
-            className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50 tw-z-[70] focus:tw-outline-none tw-border-0"
+            className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-70 tw-z-[70] focus:tw-outline-none tw-border-0"
             style={{ left: "18rem" }} // 4rem sidebar + 14rem submenu
             onClick={closeSubmenu}
             onKeyDown={(e) => {

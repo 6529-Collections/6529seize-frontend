@@ -8,11 +8,7 @@ import React, { useMemo } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 
-interface BrainLeftSidebarCreateADirectMessageButtonProps {}
-
-const BrainLeftSidebarCreateADirectMessageButton: React.FC<
-  BrainLeftSidebarCreateADirectMessageButtonProps
-> = () => {
+const BrainLeftSidebarCreateADirectMessageButton: React.FC = () => {
   const { connectedProfile, activeProfileProxy } = useAuth();
   const { isApp } = useDeviceInfo();
 

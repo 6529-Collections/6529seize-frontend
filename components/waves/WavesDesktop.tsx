@@ -10,7 +10,7 @@ interface Props {
 
 const WavesDesktop: React.FC<Props> = ({ children }) => {
   return (
-    <WavesMessagesWrapper defaultPath="/waves" showLeftSidebar={true}>
+    <WavesMessagesWrapper defaultPath="/discover" showLeftSidebar={true}>
       {children}
     </WavesMessagesWrapper>
   );
