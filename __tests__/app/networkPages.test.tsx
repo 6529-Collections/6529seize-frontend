@@ -1,9 +1,12 @@
+import DefinitionsPage, {
+  generateMetadata as generateDefinitionsMetadata,
+} from "@/app/network/definitions/page";
 import GroupsPage, {
   generateMetadata as generateGroupsMetadata,
 } from "@/app/network/groups/page";
-import CommunityMetricsPage, {
-  generateMetadata as generateMetricsMetadata,
-} from "@/app/network/metrics/page";
+import TDHPage, {
+  generateMetadata as generateTDHMetadata,
+} from "@/app/network/tdh/page";
 import { AuthContext } from "@/components/auth/Auth";
 import { render, screen } from "@testing-library/react";
 import React from "react";
@@ -64,17 +67,26 @@ describe("network pages render", () => {
     expect(screen.getByTestId("groups-component")).toBeInTheDocument();
   });
 
-  it("renders Community Metrics page", () => {
-    renderWithAuth(<CommunityMetricsPage />);
-    expect(screen.getByText("Network")).toBeInTheDocument();
-    expect(screen.getByText("Metrics")).toBeInTheDocument();
-    expect(screen.getByText(/Background/i)).toBeInTheDocument();
-    expect(screen.getByText(/Metrics Definitions/i)).toBeInTheDocument();
+  it("renders TDH page", () => {
+    renderWithAuth(<TDHPage />);
+    expect(
+      screen.getByRole("heading", { level: 1, name: /^TDH$/ })
+    ).toBeInTheDocument();
+    expect(screen.getByText(/How TDH is computed/i)).toBeInTheDocument();
+    expect(screen.getByText(/TDH 1.4/i)).toBeInTheDocument();
   });
 
-  it("displays TDH calculation details in metrics page", () => {
-    renderWithAuth(<CommunityMetricsPage />);
+  it("displays TDH calculation details", () => {
+    renderWithAuth(<TDHPage />);
     expect(screen.getByText(/Total Days Held/i)).toBeInTheDocument();
+    expect(screen.getByText(/Additional Set Boost/i)).toBeInTheDocument();
+  });
+
+  it("renders Definitions page", () => {
+    renderWithAuth(<DefinitionsPage />);
+    expect(
+      screen.getByRole("heading", { level: 1, name: /^Definitions$/ })
+    ).toBeInTheDocument();
     expect(screen.getByText(/Cards Collected/i)).toBeInTheDocument();
     expect(screen.getByText(/Unique Memes/i)).toBeInTheDocument();
   });
@@ -85,9 +97,15 @@ describe("network pages render", () => {
     expect(metadata.description).toEqual("Network | 6529.io");
   });
 
-  it("generates metadata for Metrics page", async () => {
-    const metadata = await generateMetricsMetadata();
-    expect(metadata.title).toEqual("Metrics");
+  it("generates metadata for TDH page", async () => {
+    const metadata = await generateTDHMetadata();
+    expect(metadata.title).toEqual("TDH");
+    expect(metadata.description).toEqual("Network | 6529.io");
+  });
+
+  it("generates metadata for Definitions page", async () => {
+    const metadata = await generateDefinitionsMetadata();
+    expect(metadata.title).toEqual("Definitions");
     expect(metadata.description).toEqual("Network | 6529.io");
   });
 });
