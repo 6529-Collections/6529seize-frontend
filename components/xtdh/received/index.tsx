@@ -7,7 +7,7 @@ import {
 } from "./utils/constants";
 import {
   XtdhReceivedCollectionsUserView,
-  XtdhReceivedNftsView,
+  XtdhReceivedNftsUserView,
 } from "./subcomponents";
 
 export interface XtdhReceivedSectionProps {
@@ -48,7 +48,7 @@ export function XtdhReceivedSection({
           announcement={announcement}
         />
       ) : (
-        <XtdhReceivedNftsView
+        <XtdhReceivedNftsUserView
           profileId={profileId}
           view={view}
           onViewChange={handleViewChange}

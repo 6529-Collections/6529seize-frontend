@@ -1,156 +1,49 @@
 'use client';
 
-import CollectionsAutocomplete from "@/components/utils/input/collections/CollectionsAutocomplete";
-import CommonSelect from "@/components/utils/select/CommonSelect";
-import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
+import type { XtdhReceivedView } from "../utils/constants";
+import { XtdhReceivedNftsViewContent } from "./XtdhReceivedNftsViewContent";
+import { XtdhReceivedNftsViewFallback } from "./XtdhReceivedNftsViewFallback";
 import {
-  XTDH_NFT_SORT_ITEMS,
-  type XtdhNftSortField,
-  type XtdhReceivedView,
-} from "../utils/constants";
-import { useXtdhReceivedNftsState } from "../hooks";
-import { XtdhReceivedEmptyState } from "./XtdhReceivedEmptyState";
-import { XtdhReceivedErrorState } from "./XtdhReceivedErrorState";
-import { XtdhReceivedNftSkeleton } from "./XtdhReceivedNftSkeleton";
-import { XtdhReceivedNftCard } from "./XtdhReceivedNftCard";
-import { XtdhReceivedViewToggle } from "./XtdhReceivedViewToggle";
+  useXtdhReceivedNftsViewDerivedState,
+} from "./hooks/useXtdhReceivedNftsViewDerivedState";
+import type { XtdhReceivedNftsViewState } from "./XtdhReceivedNftsView.types";
 
 export interface XtdhReceivedNftsViewProps {
-  readonly profileId: string | null;
   readonly view: XtdhReceivedView;
   readonly onViewChange: (view: XtdhReceivedView) => void;
   readonly announcement: string;
+  readonly state: XtdhReceivedNftsViewState;
 }
 
 export function XtdhReceivedNftsView({
-  profileId,
   view,
   onViewChange,
   announcement,
+  state,
 }: XtdhReceivedNftsViewProps) {
-  const {
-    nfts,
-    isLoading,
-    isFetching,
-    isError,
-    error,
-    activeSort,
-    activeDirection,
-    collectionFilterOptions,
-    filtersAreActive,
-    selectedCollections,
-    resultSummary,
-    page,
-    totalPages,
-    haveNextPage,
-    handleSortChange,
-    handleCollectionsFilterChange,
-    handleClearFilters,
-    handlePageChange,
-    handleRetry,
-  } = useXtdhReceivedNftsState(profileId);
+  const derivedState = useXtdhReceivedNftsViewDerivedState(state);
+  const { clearFiltersLabel, emptyStateCopy, shouldShowPagination } = derivedState;
 
-  if (!profileId) {
+  if (state.missingScopeMessage || state.isError) {
     return (
-      <XtdhReceivedEmptyState message="Unable to determine which profile to load." />
-    );
-  }
-
-  if (isError) {
-    const errorMessage = error instanceof Error ? error.message : "";
-    return (
-      <XtdhReceivedErrorState message={errorMessage} onRetry={handleRetry} />
+      <XtdhReceivedNftsViewFallback
+        missingScopeMessage={state.missingScopeMessage}
+        isError={state.isError}
+        errorMessage={state.errorMessage}
+        onRetry={state.handleRetry}
+      />
     );
   }
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-4">
-      <div
-        className="tw-flex tw-flex-col tw-gap-3"
-        role="region"
-        aria-label="Filter and sort controls"
-      >
-        <div className="tw-flex tw-flex-col tw-gap-3 lg:tw-flex-row lg:tw-items-center lg:tw-gap-4">
-          <div className="tw-w-full lg:tw-w-64">
-            <CollectionsAutocomplete
-              options={collectionFilterOptions}
-              value={selectedCollections}
-              onChange={handleCollectionsFilterChange}
-              disabled={isLoading || isFetching}
-            />
-          </div>
-          <div className="tw-w-full lg:tw-w-auto">
-            <CommonSelect<XtdhNftSortField>
-              items={XTDH_NFT_SORT_ITEMS}
-              activeItem={activeSort}
-              filterLabel="Sort NFTs"
-              setSelected={handleSortChange}
-              sortDirection={activeDirection}
-              disabled={isLoading}
-            />
-          </div>
-          {filtersAreActive && (
-            <button
-              type="button"
-              onClick={handleClearFilters}
-              className="tw-self-start tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-200 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
-            >
-              Clear filters
-            </button>
-          )}
-        </div>
-        <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
-          <span
-            role="status"
-            aria-live="polite"
-            aria-atomic="true"
-            className="tw-text-sm tw-text-iron-300"
-          >
-            {resultSummary}
-          </span>
-          <div className="tw-flex tw-justify-end sm:tw-justify-end">
-            <XtdhReceivedViewToggle
-              view={view}
-              onViewChange={onViewChange}
-              announcement={announcement}
-            />
-          </div>
-        </div>
-      </div>
-
-      {isLoading ? (
-        <XtdhReceivedNftSkeleton />
-      ) : nfts.length === 0 ? (
-        filtersAreActive ? (
-          <XtdhReceivedEmptyState
-            message="No NFTs match your filters."
-            actionLabel="Clear filters"
-            onAction={handleClearFilters}
-          />
-        ) : (
-          <XtdhReceivedEmptyState message="You don't hold any NFTs currently receiving xTDH grants. When others grant xTDH to collections you hold, they will appear here." />
-        )
-      ) : (
-        <div className="tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-3" role="list" aria-label="NFTs receiving xTDH">
-          {nfts.map((nft) => (
-            <XtdhReceivedNftCard
-              key={nft.tokenId}
-              nft={nft}
-            />
-          ))}
-        </div>
-      )}
-
-      {nfts.length > 0 && totalPages > 1 && (
-        <CommonTablePagination
-          small={true}
-          currentPage={page}
-          setCurrentPage={handlePageChange}
-          totalPages={totalPages}
-          haveNextPage={haveNextPage}
-          loading={isFetching}
-        />
-      )}
-    </div>
+    <XtdhReceivedNftsViewContent
+      view={view}
+      onViewChange={onViewChange}
+      announcement={announcement}
+      state={state}
+      clearFiltersLabel={clearFiltersLabel}
+      emptyStateCopy={emptyStateCopy}
+      shouldShowPagination={shouldShowPagination}
+    />
   );
 }

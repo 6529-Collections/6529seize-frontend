@@ -12,4 +12,6 @@ export * from "./XtdhReceivedGranterRow";
 export * from "./XtdhReceivedNftCard";
 export * from "./XtdhReceivedNftSkeleton";
 export * from "./XtdhReceivedNftsView";
+export * from "./XtdhReceivedNftsUserView";
+export * from "./XtdhReceivedNftsView.types";
 export * from "./XtdhReceivedViewToggle";
