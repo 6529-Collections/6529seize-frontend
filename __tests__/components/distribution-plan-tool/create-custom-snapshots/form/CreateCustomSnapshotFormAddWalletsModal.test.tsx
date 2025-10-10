@@ -24,6 +24,8 @@ describe('CreateCustomSnapshotFormAddWalletsModal', () => {
     setFileName: jest.fn(),
     tokens: [],
     addUploadedTokens: jest.fn(),
+    chunkSize: 500,
+    maxRows: 100000,
     setManualWallet: jest.fn(),
     addManualWallet: jest.fn(),
     onRemoveToken: jest.fn(),

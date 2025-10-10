@@ -245,10 +245,12 @@ export const createMarkdownContentRenderers = ({
       return content;
     }
 
-    return content.replace(/\n{4,}/g, (match: string) => {
-      const numParagraphs = Math.floor(match.length / 2) - 1;
-      const emptyParagraphs = Array(numParagraphs).fill("\n\n&nbsp;").join("");
-      return "\n\n" + emptyParagraphs + "\n\n";
+    return content.replace(/\n{3,}/g, (match: string) => {
+      const extraBlankLines = match.length - 2;
+      const fillerParagraphs = Array(extraBlankLines)
+        .fill("&nbsp;")
+        .join("\n\n");
+      return `\n\n${fillerParagraphs}\n\n`;
     });
   };
 
