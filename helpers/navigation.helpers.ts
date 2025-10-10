@@ -51,10 +51,7 @@ export const getWaveRoute = ({
     queryEntries.push(["serialNo", normalizedSerial]);
   }
 
-  const base = isDirectMessage
-    ? getMessagesBaseRoute(isApp)
-    : getWavesBaseRoute(isApp);
-  const hasBaseQuery = base.includes("?");
+  const base = isDirectMessage ? "/messages" : "/waves";
 
   if (queryEntries.length === 0) {
     return base;
@@ -70,8 +67,7 @@ export const getWaveRoute = ({
     })
     .join("&");
 
-  const separator = hasBaseQuery ? "&" : "?";
-  return `${base}${separator}${query}`;
+  return `${base}?${query}`;
 };
 
 export const getWaveHomeRoute = ({
