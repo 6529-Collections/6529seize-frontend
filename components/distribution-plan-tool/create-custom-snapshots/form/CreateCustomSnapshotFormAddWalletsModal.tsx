@@ -15,16 +15,16 @@ export default function CreateCustomSnapshotFormAddWalletsModal({
   onRemoveToken,
   onClose,
 }: {
-  fileName: string | null;
-  setFileName: (fileName: string | null) => void;
-  tokens: CustomTokenPoolParamsToken[];
-  addUploadedTokens: (tokens: CustomTokenPoolParamsToken[]) => boolean;
-  chunkSize: number;
-  maxRows: number;
-  setManualWallet: (manualWallet: string | null) => void;
-  addManualWallet: () => void;
-  onRemoveToken: (index: number) => void;
-  onClose: () => void;
+  readonly fileName: string | null;
+  readonly setFileName: (fileName: string | null) => void;
+  readonly tokens: CustomTokenPoolParamsToken[];
+  readonly addUploadedTokens: (tokens: CustomTokenPoolParamsToken[]) => boolean;
+  readonly chunkSize: number;
+  readonly maxRows: number;
+  readonly setManualWallet: (manualWallet: string | null) => void;
+  readonly addManualWallet: () => void;
+  readonly onRemoveToken: (index: number) => void;
+  readonly onClose: () => void;
 }) {
   const totalWallets = tokens.length;
   const chunkCount =
@@ -66,7 +66,9 @@ export default function CreateCustomSnapshotFormAddWalletsModal({
                       type="text"
                       name="owner"
                       autoComplete="off"
-                      onChange={(e) => setManualWallet(e.target.value ?? "")}
+                      onChange={(e) =>
+                        setManualWallet((e.target.value ?? "").trim())
+                      }
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault();

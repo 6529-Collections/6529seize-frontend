@@ -1,6 +1,8 @@
 "use client";
 
 import { useContext, useEffect, useMemo, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import {
   AllowlistOperation,
@@ -244,7 +246,7 @@ export default function CreateCustomSnapshotForm() {
       });
       return;
     }
-    const normalizedWallet = manualWallet.toLowerCase();
+    const normalizedWallet = manualWallet.trim().toLowerCase();
     setTokens((prev) => {
       if (prev.length >= MAX_CUSTOM_SNAPSHOT_ROWS) {
         setToasts({
@@ -321,19 +323,10 @@ export default function CreateCustomSnapshotForm() {
                 onClick={() => setIsAddWalletsOpen(true)}
                 type="button"
                 className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent tw-px-4 tw-py-3 tw-underline hover:tw-bg-[#232323] tw-rounded-lg tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border-transparent tw-border-solid tw-border-neutral-700 tw-border-2 hover:tw-border-[#232323] tw-transition tw-duration-300 tw-ease-out">
-                <svg
+                <FontAwesomeIcon
+                  icon={faPlus}
                   className="tw-h-5 tw-w-5 tw-mr-2 -tw-ml-1"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M12 5V19M5 12H19"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                />
                 <span>Add wallets</span>
               </button>
             </div>
