@@ -76,6 +76,18 @@ const BrainDesktop: React.FC<Props> = ({ children }) => {
     return drop.id?.toLowerCase() === dropId.toLowerCase();
   }, [drop, dropId]);
 
+  const enhancedDrop = useMemo(() => {
+    if (!drop || typeof drop.id !== "string") {
+      return null;
+    }
+    return {
+      type: DropSize.FULL,
+      ...drop,
+      stableKey: drop.id,
+      stableHash: drop.id,
+    } as ExtendedDrop;
+  }, [drop]);
+
   const contentClasses =
     "tw-relative tw-flex tw-flex-grow tw-w-full tw-px-3 min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto";
 
@@ -95,18 +107,13 @@ const BrainDesktop: React.FC<Props> = ({ children }) => {
             <BrainLeftSidebar activeWaveId={waveId} />
             <div className="tw-flex-grow tw-flex tw-flex-col tw-h-full">
               {children}
-              {isDropOpen && (
+              {isDropOpen && enhancedDrop && (
                 <div
                   className="tw-absolute tw-inset-0 tw-z-[49]"
                   style={{ transition: "none" }}
                 >
                   <BrainDesktopDrop
-                    drop={{
-                      type: DropSize.FULL,
-                      ...drop,
-                      stableKey: drop.id,
-                      stableHash: drop.id,
-                    }}
+                    drop={enhancedDrop}
                     onClose={onDropClose}
                   />
                 </div>

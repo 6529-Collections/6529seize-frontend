@@ -2,7 +2,6 @@
 
 import { ReactNode, useMemo } from "react";
 import Head from "next/head";
-import ClientOnly from "../../client-only/ClientOnly";
 import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
 import MessagesDesktop from "../MessagesDesktop";
 import MessagesMobile from "../MessagesMobile";
@@ -82,7 +81,7 @@ function MessagesLayoutContent({ children }: { readonly children: ReactNode }) {
         <style>{`body { overflow: hidden !important; }`}</style>
       </Head>
       <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black">
-        <ClientOnly>{content}</ClientOnly>
+        {content}
       </div>
     </>
   );
