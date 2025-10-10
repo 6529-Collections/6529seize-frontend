@@ -1,4 +1,4 @@
-import { useCallback, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 
 export default function CreateWaveFlow({
   title,
@@ -9,22 +9,27 @@ export default function CreateWaveFlow({
   readonly onBack: () => void;
   readonly children: ReactNode;
 }) {
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         onBack();
       }
-    },
-    [onBack]
-  );
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onBack]);
 
   return (
     <div
       className="tailwind-scope tw-bg-iron-950"
-      data-flow-title={title}
-      onKeyDown={handleKeyDown}
-      tabIndex={-1}
-    >
+      data-flow-title={title}>
       <div className="tw-h-full tw-w-full">{children}</div>
     </div>
   );

@@ -127,7 +127,7 @@ function WebSidebar({
       <>
         <button
           type="button"
-          className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-70 tw-z-[70] tw-border-0 focus:tw-outline-none"
+          className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-z-[70] tw-border-0 focus:tw-outline-none"
           onClick={onCloseOffcanvas}
           aria-label="Close menu overlay"
         />
@@ -146,7 +146,7 @@ function WebSidebar({
       {!isMobile && isOverlayActive && (
         <button
           type="button"
-          className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-70 tw-z-30 tw-border-0 focus:tw-outline-none"
+          className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-z-30 tw-border-0 focus:tw-outline-none"
           onClick={onCloseOffcanvas}
           aria-label="Close menu overlay"
         />

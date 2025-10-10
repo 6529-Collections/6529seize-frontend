@@ -63,11 +63,11 @@ const baseAuth = {
 
 function renderWaves(params: Map<string, string | null>) {
   const searchParamsInstance = new URLSearchParams();
-  params.forEach((value, key) => {
+  for (const [key, value] of params) {
     if (value !== null && value !== undefined) {
       searchParamsInstance.set(key, value);
     }
-  });
+  }
   (useSearchParams as jest.Mock).mockReturnValue({
     get: (key: string) => params.get(key) ?? null,
     toString: () => searchParamsInstance.toString(),

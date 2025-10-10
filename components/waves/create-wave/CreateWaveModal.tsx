@@ -34,7 +34,7 @@ export default function CreateWaveModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-70 tw-backdrop-blur-[1px] tw-flex tw-items-start lg:tw-items-center tw-justify-center tw-z-[9999] tw-px-4 tw-pb-4 tw-pt-[calc(env(safe-area-inset-top,0px)+1rem)]"
+          className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px] tw-flex tw-items-start lg:tw-items-center tw-justify-center tw-z-[9999] tw-px-4 tw-pb-4 tw-pt-[calc(env(safe-area-inset-top,0px)+1rem)]"
           onClick={onClose}
         >
           <motion.div
