@@ -46,9 +46,9 @@ describe("xTDH API routes", () => {
     await getTokens(request);
 
     const payload = jsonMock.mock.calls.at(-1)[0];
-    expect(Array.isArray(payload.tokens)).toBe(true);
-    expect(payload.tokens.length).toBeGreaterThan(0);
-    for (const token of payload.tokens) {
+    expect(Array.isArray(payload.nfts)).toBe(true);
+    expect(payload.nfts.length).toBeGreaterThan(0);
+    for (const token of payload.nfts) {
       expect(token.blockchain).toBe("ethereum");
       expect(token.xtdhRate).toBeGreaterThanOrEqual(150);
     }
@@ -87,11 +87,10 @@ describe("xTDH mock data helpers", () => {
       pageSize: 10,
       sort: "total_rate",
       dir: "desc",
-      networks: [],
-      grantorProfileId: "gm6529",
-      holderProfileId: null,
-      minGrantors: undefined,
-      minRate: undefined,
+      filters: {
+        networks: [],
+        grantorProfileId: "gm6529",
+      },
     });
 
     expect(result.collections.length).toBeGreaterThan(0);
@@ -108,17 +107,16 @@ describe("xTDH mock data helpers", () => {
     const result = getTokensResponse({
       page: 1,
       pageSize: 10,
-      sort: "rate",
+      sort: "xtdh_rate",
       dir: "desc",
-      networks: ["ethereum"],
-      grantorProfileId: null,
-      holderProfileId: null,
-      minGrantors: undefined,
-      minRate: 150,
+      filters: {
+        networks: ["ethereum"],
+        minRate: 150,
+      },
     });
 
-    expect(result.tokens.length).toBeGreaterThan(0);
-    result.tokens.forEach((token) => {
+    expect(result.nfts.length).toBeGreaterThan(0);
+    result.nfts.forEach((token) => {
       expect(token.blockchain).toBe("ethereum");
       expect(token.xtdhRate).toBeGreaterThanOrEqual(150);
     });

@@ -38,15 +38,36 @@ export interface XtdhReceivedToken {
   readonly xtdhRate: number;
   readonly totalXtdhReceived: number;
   readonly granters: XtdhGranter[];
+  readonly collectionSlug?: string;
+  readonly blockchain?: string;
+  readonly contractAddress?: string;
+  readonly tokenStandard?: "ERC721" | "ERC1155";
+  readonly totalXtdhAllocated?: number;
+  readonly grantorCount?: number;
+  readonly holderSummaries?: XtdhAllocationHolderSummary[];
+  readonly lastAllocatedAt?: string;
 }
 
 export interface XtdhReceivedCollectionSummary {
   readonly collectionId: string;
   readonly collectionName: string;
   readonly collectionImage: string;
+  readonly collectionSlug?: string;
+  readonly description?: string;
+  readonly blockchain?: string;
+  readonly contractAddress?: string;
+  readonly tokenStandard?: "ERC721" | "ERC1155";
   readonly tokenCount: number;
+  readonly receivingTokenCount?: number;
   readonly totalXtdhRate: number;
   readonly totalXtdhReceived: number;
+  readonly totalXtdhAllocated?: number;
+  readonly grantorCount?: number;
+  readonly grantCount?: number;
+  readonly topGrantors?: XtdhGranter[];
+  readonly holderSummaries?: XtdhAllocationHolderSummary[];
+  readonly lastAllocatedAt?: string;
+  readonly lastUpdatedAt?: string;
   readonly granters: XtdhGranter[];
   readonly tokens: XtdhReceivedToken[];
 }
@@ -79,8 +100,6 @@ export interface XtdhReceivedNftsResponse {
   readonly availableCollections: XtdhReceivedCollectionOption[];
 }
 
-export type XtdhAllocationNetwork = "ethereum" | string;
-
 export interface XtdhAllocationHolderSummary {
   readonly profileId: string;
   readonly displayName: string;
@@ -88,71 +107,6 @@ export interface XtdhAllocationHolderSummary {
   readonly tokenCount: number;
   readonly xtdhEarned: number;
   readonly lastEarnedAt: string;
-}
-
-export interface XtdhEcosystemToken {
-  readonly collectionId: string;
-  readonly collectionName: string;
-  readonly collectionImage: string;
-  readonly collectionSlug: string;
-  readonly blockchain: XtdhAllocationNetwork;
-  readonly contractAddress: string;
-  readonly tokenStandard: "ERC721" | "ERC1155";
-  readonly tokenId: string;
-  readonly tokenName: string;
-  readonly tokenImage: string;
-  readonly xtdhRate: number;
-  readonly totalXtdhAllocated: number;
-  readonly grantorCount: number;
-  readonly topGrantors: XtdhGranter[];
-  readonly granters: XtdhGranter[];
-  readonly holderSummaries: XtdhAllocationHolderSummary[];
-  readonly lastAllocatedAt: string;
-}
-
-export interface XtdhEcosystemCollection {
-  readonly collectionId: string;
-  readonly collectionName: string;
-  readonly collectionImage: string;
-  readonly collectionSlug: string;
-  readonly description: string;
-  readonly blockchain: XtdhAllocationNetwork;
-  readonly contractAddress: string;
-  readonly tokenStandard: "ERC721" | "ERC1155";
-  readonly tokenCount: number;
-  readonly receivingTokenCount: number;
-  readonly totalXtdhRate: number;
-  readonly totalXtdhAllocated: number;
-  readonly grantorCount: number;
-  readonly grantCount: number;
-  readonly topGrantors: XtdhGranter[];
-  readonly granters: XtdhGranter[];
-  readonly holderSummaries: XtdhAllocationHolderSummary[];
-  readonly tokens: XtdhEcosystemToken[];
-  readonly lastAllocatedAt: string;
-  readonly lastUpdatedAt: string;
-}
-
-export interface XtdhEcosystemCollectionsResponse {
-  readonly collections: XtdhEcosystemCollection[];
-  readonly totalCount: number;
-  readonly page: number;
-  readonly pageSize: number;
-  readonly availableFilters: {
-    readonly networks: XtdhAllocationNetwork[];
-    readonly grantors: XtdhGranter[];
-  };
-}
-
-export interface XtdhEcosystemTokensResponse {
-  readonly tokens: XtdhEcosystemToken[];
-  readonly totalCount: number;
-  readonly page: number;
-  readonly pageSize: number;
-  readonly availableFilters: {
-    readonly networks: XtdhAllocationNetwork[];
-    readonly grantors: XtdhGranter[];
-  };
 }
 
 export interface XtdhOverviewStats {

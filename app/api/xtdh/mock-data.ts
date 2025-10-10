@@ -1,11 +1,12 @@
 import {
   type XtdhAllocationHolderSummary,
-  type XtdhEcosystemCollection,
-  type XtdhEcosystemCollectionsResponse,
-  type XtdhEcosystemToken,
-  type XtdhEcosystemTokensResponse,
   type XtdhGranter,
   type XtdhOverviewStats,
+  type XtdhReceivedCollectionOption,
+  type XtdhReceivedCollectionSummary,
+  type XtdhReceivedCollectionsResponse,
+  type XtdhReceivedNft,
+  type XtdhReceivedNftsResponse,
 } from "@/types/xtdh";
 
 const AVATAR_BASE_URL = "https://i.pravatar.cc/120";
@@ -37,6 +38,61 @@ interface RawHolder {
   readonly tokenCount: number;
   readonly xtdhEarned: number;
   readonly lastEarnedDaysAgo: number;
+}
+
+interface EcosystemTokenRecord {
+  readonly collectionId: string;
+  readonly collectionName: string;
+  readonly collectionImage: string;
+  readonly collectionSlug: string;
+  readonly description: string;
+  readonly blockchain: string;
+  readonly contractAddress: string;
+  readonly tokenStandard: "ERC721" | "ERC1155";
+  readonly tokenId: string;
+  readonly tokenName: string;
+  readonly tokenImage: string;
+  readonly xtdhRate: number;
+  readonly totalXtdhAllocated: number;
+  readonly totalXtdhReceived: number;
+  readonly grantorCount: number;
+  readonly topGrantors: XtdhGranter[];
+  readonly granters: XtdhGranter[];
+  readonly holderSummaries: XtdhAllocationHolderSummary[];
+  readonly lastAllocatedAt: string;
+}
+
+interface EcosystemCollectionRecord {
+  readonly collectionId: string;
+  readonly collectionName: string;
+  readonly collectionImage: string;
+  readonly collectionSlug: string;
+  readonly description: string;
+  readonly blockchain: string;
+  readonly contractAddress: string;
+  readonly tokenStandard: "ERC721" | "ERC1155";
+  readonly tokenCount: number;
+  readonly receivingTokenCount: number;
+  readonly totalXtdhRate: number;
+  readonly totalXtdhAllocated: number;
+  readonly totalXtdhReceived: number;
+  readonly grantorCount: number;
+  readonly grantCount: number;
+  readonly topGrantors: XtdhGranter[];
+  readonly granters: XtdhGranter[];
+  readonly holderSummaries: XtdhAllocationHolderSummary[];
+  readonly tokens: EcosystemTokenRecord[];
+  readonly lastAllocatedAt: string;
+  readonly lastUpdatedAt: string;
+}
+
+export interface TokenFilters {
+  readonly collections?: string[];
+  readonly networks?: string[];
+  readonly minRate?: number;
+  readonly minGrantors?: number;
+  readonly grantorProfileId?: string | null;
+  readonly holderProfileId?: string | null;
 }
 
 interface RawCollectionMeta {
@@ -399,12 +455,17 @@ function toHolder(raw: RawHolder): XtdhAllocationHolderSummary {
   };
 }
 
-const ECOSYSTEM_TOKENS: XtdhEcosystemToken[] = RAW_COLLECTIONS.flatMap(
+const ECOSYSTEM_TOKENS: EcosystemTokenRecord[] = RAW_COLLECTIONS.flatMap(
   (collection) =>
     collection.receivingTokens.map((token) => {
       const granters = token.granters.map(toGranter);
       const topGrantors = [...granters].sort(
         (a, b) => b.xtdhRateGranted - a.xtdhRateGranted
+      );
+      const holderSummaries = token.holders.map(toHolder);
+      const totalReceived = holderSummaries.reduce(
+        (sum, holder) => sum + holder.xtdhEarned,
+        0
       );
 
       return {
@@ -412,6 +473,7 @@ const ECOSYSTEM_TOKENS: XtdhEcosystemToken[] = RAW_COLLECTIONS.flatMap(
         collectionName: collection.collectionName,
         collectionImage: imageUrl(collection.imageSeed),
         collectionSlug: collection.collectionSlug,
+        description: collection.description,
         blockchain: collection.blockchain,
         contractAddress: collection.contractAddress,
         tokenStandard: collection.tokenStandard,
@@ -420,12 +482,13 @@ const ECOSYSTEM_TOKENS: XtdhEcosystemToken[] = RAW_COLLECTIONS.flatMap(
         tokenImage: imageUrl(token.tokenImageSeed, 240, 240),
         xtdhRate: token.xtdhRate,
         totalXtdhAllocated: token.totalAllocated,
+        totalXtdhReceived: totalReceived > 0 ? totalReceived : token.totalAllocated,
         grantorCount: granters.length,
         topGrantors: topGrantors.slice(0, 3),
         granters,
-        holderSummaries: token.holders.map(toHolder),
+        holderSummaries,
         lastAllocatedAt: daysAgoToIso(token.lastAllocatedDaysAgo),
-      } satisfies XtdhEcosystemToken;
+      } satisfies EcosystemTokenRecord;
     })
 );
 
@@ -458,9 +521,9 @@ function mergeHolders(
 }
 
 function aggregateCollections(
-  tokens: XtdhEcosystemToken[]
-): XtdhEcosystemCollection[] {
-  const grouped = new Map<string, XtdhEcosystemToken[]>();
+  tokens: EcosystemTokenRecord[]
+): EcosystemCollectionRecord[] {
+  const grouped = new Map<string, EcosystemTokenRecord[]>();
 
   for (const token of tokens) {
     const existing = grouped.get(token.collectionId);
@@ -479,6 +542,7 @@ function aggregateCollections(
 
     let totalRate = 0;
     let totalAllocated = 0;
+    let totalReceived = 0;
     let grantCount = 0;
     let latestAllocation = collectionTokens[0]?.lastAllocatedAt ?? daysAgoToIso(365);
 
@@ -488,6 +552,7 @@ function aggregateCollections(
     for (const token of collectionTokens) {
       totalRate += token.xtdhRate;
       totalAllocated += token.totalXtdhAllocated;
+      totalReceived += token.totalXtdhReceived;
       grantCount += token.granters.length;
 
       if (
@@ -531,10 +596,11 @@ function aggregateCollections(
       blockchain: meta.blockchain,
       contractAddress: meta.contractAddress,
       tokenStandard: meta.tokenStandard,
-      tokenCount: meta.tokenCount,
+      tokenCount: receivingTokenCount,
       receivingTokenCount,
       totalXtdhRate: totalRate,
       totalXtdhAllocated: totalAllocated,
+      totalXtdhReceived: totalReceived,
       grantorCount: granters.length,
       grantCount,
       topGrantors: granters.slice(0, 5),
@@ -545,239 +611,264 @@ function aggregateCollections(
       ),
       lastAllocatedAt: latestAllocation,
       lastUpdatedAt: latestAllocation,
-    } satisfies XtdhEcosystemCollection;
+    } satisfies EcosystemCollectionRecord;
   });
 }
 
 const ECOSYSTEM_COLLECTIONS = aggregateCollections(ECOSYSTEM_TOKENS);
 
-function buildGrantorDirectory(): XtdhGranter[] {
-  const map = new Map<string, XtdhGranter>();
+const AVAILABLE_COLLECTION_OPTIONS =
+  buildCollectionOptionsFromTokens(ECOSYSTEM_TOKENS);
 
-  for (const collection of ECOSYSTEM_COLLECTIONS) {
-    for (const granter of collection.granters) {
-      const existing = map.get(granter.profileId);
-      if (existing) {
-        map.set(granter.profileId, {
-          ...existing,
-          xtdhRateGranted: existing.xtdhRateGranted + granter.xtdhRateGranted,
-        });
-      } else {
-        map.set(granter.profileId, granter);
-      }
-    }
-  }
-
-  return Array.from(map.values()).sort((a, b) =>
-    a.displayName.localeCompare(b.displayName)
-  );
-}
-
-const AVAILABLE_GRANTORS = buildGrantorDirectory();
-const NETWORK_ALLOWLIST = new Set(["ethereum"]);
-const AVAILABLE_NETWORKS = (() => {
-  const derived = Array.from(
-    new Set(ECOSYSTEM_COLLECTIONS.map((collection) => collection.blockchain))
-  ).filter((network) => NETWORK_ALLOWLIST.has(network.toLowerCase()));
-
-  if (derived.length > 0) {
-    return derived.sort();
-  }
-
-  return Array.from(NETWORK_ALLOWLIST);
-})();
 
 export interface CollectionQueryOptions {
   readonly page: number;
   readonly pageSize: number;
-  readonly sort: "total_rate" | "total_allocated" | "grantors";
+  readonly sort: "total_rate" | "total_received" | "token_count" | "collection_name";
   readonly dir: "asc" | "desc";
-  readonly networks: string[];
-  readonly minRate?: number;
-  readonly minGrantors?: number;
-  readonly grantorProfileId?: string | null;
-  readonly holderProfileId?: string | null;
+  readonly filters: TokenFilters;
 }
 
 export interface TokenQueryOptions {
   readonly page: number;
   readonly pageSize: number;
-  readonly sort: "rate" | "total_allocated" | "grantors";
+  readonly sort: "xtdh_rate" | "total_received" | "token_id" | "collection_name";
   readonly dir: "asc" | "desc";
-  readonly networks: string[];
-  readonly minRate?: number;
-  readonly minGrantors?: number;
-  readonly grantorProfileId?: string | null;
-  readonly holderProfileId?: string | null;
+  readonly filters: TokenFilters;
 }
 
-function filterCollections(
-  items: XtdhEcosystemCollection[],
-  options: CollectionQueryOptions
-): XtdhEcosystemCollection[] {
-  return items
-    .filter((collection) => {
-      if (
-        options.networks.length > 0 &&
-        !options.networks.includes(collection.blockchain)
-      ) {
-        return false;
-      }
+function applyTokenFilters(
+  tokens: EcosystemTokenRecord[],
+  filters: TokenFilters
+): EcosystemTokenRecord[] {
+  const {
+    collections,
+    networks,
+    minRate,
+    minGrantors,
+    grantorProfileId,
+    holderProfileId,
+  } = filters;
 
-      if (
-        typeof options.minRate === "number" &&
-        collection.totalXtdhRate < options.minRate
-      ) {
-        return false;
-      }
+  return tokens.filter((token) => {
+    if (collections && collections.length > 0 && !collections.includes(token.collectionId)) {
+      return false;
+    }
 
-      if (
-        typeof options.minGrantors === "number" &&
-        collection.grantorCount < options.minGrantors
-      ) {
-        return false;
-      }
+    if (networks && networks.length > 0 && !networks.includes(token.blockchain)) {
+      return false;
+    }
 
-      if (
-        options.grantorProfileId &&
-        !collection.granters.some(
-          (granter) =>
-            granter.profileId.toLowerCase() ===
-            options.grantorProfileId?.toLowerCase()
-        )
-      ) {
-        return false;
-      }
+    if (typeof minRate === "number" && token.xtdhRate < minRate) {
+      return false;
+    }
 
-      if (
-        options.holderProfileId &&
-        !collection.holderSummaries.some(
-          (holder) =>
-            holder.profileId.toLowerCase() ===
-            options.holderProfileId?.toLowerCase()
-        )
-      ) {
-        return false;
-      }
+    if (typeof minGrantors === "number" && token.granters.length < minGrantors) {
+      return false;
+    }
 
-      return true;
-    })
-    .sort((a, b) => {
-      const direction = options.dir === "asc" ? 1 : -1;
+    if (
+      grantorProfileId &&
+      !token.granters.some(
+        (granter) =>
+          granter.profileId.toLowerCase() === grantorProfileId.toLowerCase()
+      )
+    ) {
+      return false;
+    }
 
-      switch (options.sort) {
-        case "grantors":
-          if (a.grantorCount === b.grantorCount) {
-            return (
-              (a.totalXtdhRate - b.totalXtdhRate) * direction ||
-              a.collectionName.localeCompare(b.collectionName) * direction
-            );
-          }
-          return (a.grantorCount - b.grantorCount) * direction;
-        case "total_allocated":
-          if (a.totalXtdhAllocated === b.totalXtdhAllocated) {
-            return (
-              (a.totalXtdhRate - b.totalXtdhRate) * direction ||
-              a.collectionName.localeCompare(b.collectionName) * direction
-            );
-          }
-          return (a.totalXtdhAllocated - b.totalXtdhAllocated) * direction;
-        case "total_rate":
-        default:
-          if (a.totalXtdhRate === b.totalXtdhRate) {
-            return (
-              (new Date(a.lastAllocatedAt).getTime() -
-                new Date(b.lastAllocatedAt).getTime()) *
-                direction ||
-              a.collectionName.localeCompare(b.collectionName) * direction
-            );
-          }
-          return (a.totalXtdhRate - b.totalXtdhRate) * direction;
-      }
-    });
+    if (
+      holderProfileId &&
+      !token.holderSummaries.some(
+        (holder) =>
+          holder.profileId.toLowerCase() === holderProfileId.toLowerCase()
+      )
+    ) {
+      return false;
+    }
+
+    return true;
+  });
 }
 
-function filterTokens(
-  items: XtdhEcosystemToken[],
-  options: TokenQueryOptions
-): XtdhEcosystemToken[] {
-  return items
-    .filter((token) => {
-      if (options.networks.length > 0 && !options.networks.includes(token.blockchain)) {
-        return false;
-      }
+function sortCollections(
+  collections: EcosystemCollectionRecord[],
+  sort: CollectionQueryOptions["sort"],
+  dir: "asc" | "desc"
+): EcosystemCollectionRecord[] {
+  const direction = dir === "asc" ? 1 : -1;
 
-      if (
-        typeof options.minRate === "number" &&
-        token.xtdhRate < options.minRate
-      ) {
-        return false;
-      }
+  return [...collections].sort((a, b) => {
+    switch (sort) {
+      case "collection_name":
+        return (
+          a.collectionName.localeCompare(b.collectionName) * direction ||
+          (a.totalXtdhRate - b.totalXtdhRate) * direction
+        );
+      case "token_count":
+        if (a.tokenCount === b.tokenCount) {
+          return (
+            (a.totalXtdhRate - b.totalXtdhRate) * direction ||
+            a.collectionName.localeCompare(b.collectionName) * direction
+          );
+        }
+        return (a.tokenCount - b.tokenCount) * direction;
+      case "total_received":
+        if (a.totalXtdhReceived === b.totalXtdhReceived) {
+          return (
+            (a.totalXtdhRate - b.totalXtdhRate) * direction ||
+            a.collectionName.localeCompare(b.collectionName) * direction
+          );
+        }
+        return (a.totalXtdhReceived - b.totalXtdhReceived) * direction;
+      case "total_rate":
+      default:
+        if (a.totalXtdhRate === b.totalXtdhRate) {
+          return (
+            (new Date(a.lastAllocatedAt).getTime() -
+              new Date(b.lastAllocatedAt).getTime()) *
+              direction ||
+            a.collectionName.localeCompare(b.collectionName) * direction
+          );
+        }
+        return (a.totalXtdhRate - b.totalXtdhRate) * direction;
+    }
+  });
+}
 
-      if (
-        typeof options.minGrantors === "number" &&
-        token.grantorCount < options.minGrantors
-      ) {
-        return false;
-      }
+function sortTokens(
+  tokens: EcosystemTokenRecord[],
+  sort: TokenQueryOptions["sort"],
+  dir: "asc" | "desc"
+): EcosystemTokenRecord[] {
+  const direction = dir === "asc" ? 1 : -1;
 
-      if (
-        options.grantorProfileId &&
-        !token.granters.some(
-          (granter) =>
-            granter.profileId.toLowerCase() ===
-            options.grantorProfileId?.toLowerCase()
-        )
-      ) {
-        return false;
-      }
+  return [...tokens].sort((a, b) => {
+    switch (sort) {
+      case "collection_name":
+        return (
+          a.collectionName.localeCompare(b.collectionName) * direction ||
+          a.tokenName.localeCompare(b.tokenName) * direction
+        );
+      case "token_id":
+        return (
+          a.tokenId.localeCompare(b.tokenId) * direction ||
+          a.tokenName.localeCompare(b.tokenName) * direction
+        );
+      case "total_received":
+        if (a.totalXtdhReceived === b.totalXtdhReceived) {
+          return (
+            (a.xtdhRate - b.xtdhRate) * direction ||
+            a.tokenName.localeCompare(b.tokenName) * direction
+          );
+        }
+        return (a.totalXtdhReceived - b.totalXtdhReceived) * direction;
+      case "xtdh_rate":
+      default:
+        if (a.xtdhRate === b.xtdhRate) {
+          return (
+            (new Date(a.lastAllocatedAt).getTime() -
+              new Date(b.lastAllocatedAt).getTime()) *
+              direction ||
+            a.tokenName.localeCompare(b.tokenName) * direction
+          );
+        }
+        return (a.xtdhRate - b.xtdhRate) * direction;
+    }
+  });
+}
 
-      if (
-        options.holderProfileId &&
-        !token.holderSummaries.some(
-          (holder) =>
-            holder.profileId.toLowerCase() ===
-            options.holderProfileId?.toLowerCase()
-        )
-      ) {
-        return false;
-      }
+function buildCollectionOptionsFromTokens(
+  tokens: EcosystemTokenRecord[]
+): XtdhReceivedCollectionOption[] {
+  const map = new Map<
+    string,
+    { collectionName: string; tokenCount: number }
+  >();
 
-      return true;
-    })
-    .sort((a, b) => {
-      const direction = options.dir === "asc" ? 1 : -1;
+  for (const token of tokens) {
+    const existing = map.get(token.collectionId);
+    if (existing) {
+      existing.tokenCount += 1;
+    } else {
+      map.set(token.collectionId, {
+        collectionName: token.collectionName,
+        tokenCount: 1,
+      });
+    }
+  }
 
-      switch (options.sort) {
-        case "grantors":
-          if (a.grantorCount === b.grantorCount) {
-            return (
-              (a.xtdhRate - b.xtdhRate) * direction ||
-              a.tokenName.localeCompare(b.tokenName) * direction
-            );
-          }
-          return (a.grantorCount - b.grantorCount) * direction;
-        case "total_allocated":
-          if (a.totalXtdhAllocated === b.totalXtdhAllocated) {
-            return (
-              (a.xtdhRate - b.xtdhRate) * direction ||
-              a.tokenName.localeCompare(b.tokenName) * direction
-            );
-          }
-          return (a.totalXtdhAllocated - b.totalXtdhAllocated) * direction;
-        case "rate":
-        default:
-          if (a.xtdhRate === b.xtdhRate) {
-            return (
-              (new Date(a.lastAllocatedAt).getTime() -
-                new Date(b.lastAllocatedAt).getTime()) *
-                direction ||
-              a.tokenName.localeCompare(b.tokenName) * direction
-            );
-          }
-          return (a.xtdhRate - b.xtdhRate) * direction;
-      }
-    });
+  return Array.from(map.entries())
+    .map(([collectionId, value]) => ({
+      collectionId,
+      collectionName: value.collectionName,
+      tokenCount: value.tokenCount,
+    }))
+    .sort((a, b) => a.collectionName.localeCompare(b.collectionName));
+}
+
+function mapTokenToReceived(token: EcosystemTokenRecord): XtdhReceivedNft {
+  return {
+    tokenId: token.tokenId,
+    tokenName: token.tokenName,
+    tokenImage: token.tokenImage,
+    xtdhRate: token.xtdhRate,
+    totalXtdhReceived: token.totalXtdhReceived,
+    granters: token.granters,
+    collectionId: token.collectionId,
+    collectionName: token.collectionName,
+    collectionImage: token.collectionImage,
+    collectionSlug: token.collectionSlug,
+    blockchain: token.blockchain,
+    contractAddress: token.contractAddress,
+    tokenStandard: token.tokenStandard,
+    totalXtdhAllocated: token.totalXtdhAllocated,
+    grantorCount: token.grantorCount,
+    holderSummaries: token.holderSummaries,
+    lastAllocatedAt: token.lastAllocatedAt,
+  };
+}
+
+function mapCollectionToReceived(
+  collection: EcosystemCollectionRecord
+): XtdhReceivedCollectionSummary {
+  return {
+    collectionId: collection.collectionId,
+    collectionName: collection.collectionName,
+    collectionImage: collection.collectionImage,
+    collectionSlug: collection.collectionSlug,
+    description: collection.description,
+    blockchain: collection.blockchain,
+    contractAddress: collection.contractAddress,
+    tokenStandard: collection.tokenStandard,
+    tokenCount: collection.tokenCount,
+    receivingTokenCount: collection.receivingTokenCount,
+    totalXtdhRate: collection.totalXtdhRate,
+    totalXtdhReceived: collection.totalXtdhReceived,
+    totalXtdhAllocated: collection.totalXtdhAllocated,
+    grantorCount: collection.grantorCount,
+    grantCount: collection.grantCount,
+    topGrantors: collection.topGrantors,
+    granters: collection.granters,
+    holderSummaries: collection.holderSummaries,
+    lastAllocatedAt: collection.lastAllocatedAt,
+    lastUpdatedAt: collection.lastUpdatedAt,
+    tokens: collection.tokens.map((token) => {
+      const summary = mapTokenToReceived(token);
+      return {
+        tokenId: summary.tokenId,
+        tokenName: summary.tokenName,
+        tokenImage: summary.tokenImage,
+        xtdhRate: summary.xtdhRate,
+        totalXtdhReceived: summary.totalXtdhReceived,
+        granters: summary.granters,
+        totalXtdhAllocated: summary.totalXtdhAllocated,
+        grantorCount: summary.grantorCount,
+        holderSummaries: summary.holderSummaries,
+        lastAllocatedAt: summary.lastAllocatedAt,
+      };
+    }),
+  };
 }
 
 function paginate<T>(items: T[], page: number, pageSize: number): T[] {
@@ -787,37 +878,42 @@ function paginate<T>(items: T[], page: number, pageSize: number): T[] {
 
 export function getCollectionsResponse(
   options: CollectionQueryOptions
-): XtdhEcosystemCollectionsResponse {
-  const filtered = filterCollections(ECOSYSTEM_COLLECTIONS, options);
-  const paged = paginate(filtered, options.page, options.pageSize);
+): XtdhReceivedCollectionsResponse {
+  const filteredTokens = applyTokenFilters(ECOSYSTEM_TOKENS, options.filters);
+  const aggregatedCollections = aggregateCollections(filteredTokens);
+  const sortedCollections = sortCollections(
+    aggregatedCollections,
+    options.sort,
+    options.dir
+  );
+  const pagedCollections = paginate(
+    sortedCollections,
+    options.page,
+    options.pageSize
+  );
 
   return {
-    collections: paged,
-    totalCount: filtered.length,
+    collections: pagedCollections.map(mapCollectionToReceived),
+    totalCount: sortedCollections.length,
     page: options.page,
     pageSize: options.pageSize,
-    availableFilters: {
-      networks: AVAILABLE_NETWORKS,
-      grantors: AVAILABLE_GRANTORS,
-    },
+    availableCollections: AVAILABLE_COLLECTION_OPTIONS,
   };
 }
 
 export function getTokensResponse(
   options: TokenQueryOptions
-): XtdhEcosystemTokensResponse {
-  const filtered = filterTokens(ECOSYSTEM_TOKENS, options);
-  const paged = paginate(filtered, options.page, options.pageSize);
+): XtdhReceivedNftsResponse {
+  const filteredTokens = applyTokenFilters(ECOSYSTEM_TOKENS, options.filters);
+  const sortedTokens = sortTokens(filteredTokens, options.sort, options.dir);
+  const pagedTokens = paginate(sortedTokens, options.page, options.pageSize);
 
   return {
-    tokens: paged,
-    totalCount: filtered.length,
+    nfts: pagedTokens.map(mapTokenToReceived),
+    totalCount: sortedTokens.length,
     page: options.page,
     pageSize: options.pageSize,
-    availableFilters: {
-      networks: AVAILABLE_NETWORKS,
-      grantors: AVAILABLE_GRANTORS,
-    },
+    availableCollections: AVAILABLE_COLLECTION_OPTIONS,
   };
 }
 

@@ -42,6 +42,9 @@ export async function GET(request: Request) {
       searchParams.get("dir")?.toLowerCase() === "asc" ? "asc" : "desc";
 
     const networks = parseList(searchParams.get("network"));
+    const collectionsParam =
+      searchParams.get("collections") ?? searchParams.get("collection");
+    const collections = parseList(collectionsParam);
     const minRate = parseFloat(searchParams.get("min_rate"));
     const minGrantors = parseFloat(searchParams.get("min_grantors"));
     const grantorProfileId = searchParams.get("grantor") ?? undefined;
@@ -52,11 +55,14 @@ export async function GET(request: Request) {
       pageSize,
       sort: sortParam,
       dir: directionParam,
-      networks,
-      minRate,
-      minGrantors,
-      grantorProfileId: grantorProfileId ?? null,
-      holderProfileId: holderProfileId ?? null,
+      filters: {
+        collections: collections.length ? collections : undefined,
+        networks: networks.length ? networks : undefined,
+        minRate,
+        minGrantors,
+        grantorProfileId: grantorProfileId ?? null,
+        holderProfileId: holderProfileId ?? null,
+      },
     });
 
     return NextResponse.json(response);

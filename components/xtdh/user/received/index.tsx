@@ -115,6 +115,7 @@ export default function UserPageXtdhReceived({
     }),
     [nftsStateData, profileId],
   );
+  
 
   return (
     <XtdhReceivedSection

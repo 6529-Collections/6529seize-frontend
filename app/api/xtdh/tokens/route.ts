@@ -30,11 +30,15 @@ export async function GET(request: Request) {
 
     const page = parseNumber(params.get("page"), 1);
     const pageSize = parseNumber(params.get("page_size"), DEFAULT_PAGE_SIZE);
-    const sortParam = (params.get("sort") ?? "rate") as TokenQueryOptions["sort"];
+    const sortParam = (params.get("sort") ??
+      "xtdh_rate") as TokenQueryOptions["sort"];
     const directionParam =
       params.get("dir")?.toLowerCase() === "asc" ? "asc" : "desc";
 
     const networks = parseList(params.get("network"));
+    const collectionsParam =
+      params.get("collections") ?? params.get("collection");
+    const collections = parseList(collectionsParam);
     const minRate = parseFloat(params.get("min_rate"));
     const minGrantors = parseFloat(params.get("min_grantors"));
     const grantorProfileId = params.get("grantor") ?? undefined;
@@ -45,11 +49,14 @@ export async function GET(request: Request) {
       pageSize,
       sort: sortParam,
       dir: directionParam,
-      networks,
-      minRate,
-      minGrantors,
-      grantorProfileId: grantorProfileId ?? null,
-      holderProfileId: holderProfileId ?? null,
+      filters: {
+        collections: collections.length ? collections : undefined,
+        networks: networks.length ? networks : undefined,
+        minRate,
+        minGrantors,
+        grantorProfileId: grantorProfileId ?? null,
+        holderProfileId: holderProfileId ?? null,
+      },
     });
 
     return NextResponse.json(response);
