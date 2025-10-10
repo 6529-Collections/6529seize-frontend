@@ -41,7 +41,7 @@ const isBlankParagraph = (node: LexicalNode): boolean => {
     if ($isTextNode(child)) {
       const text = child
         .getTextContent()
-        .replace(ZERO_WIDTH_SPACE_REGEX, "")
+        .replaceAll(ZERO_WIDTH_SPACE_REGEX, "")
         .trim();
       return text.length === 0;
     }
@@ -59,19 +59,19 @@ const blankParagraphTransformer: Transformer = {
 };
 
 const normalizeLineEndings = (markdown: string): string =>
-  markdown.replace(/\r\n/g, "\n");
+  markdown.replaceAll(/\r\n/g, "\n");
 
 const collapseBlankParagraphMarkers = (markdown: string): string => {
   if (!markdown) {
     return markdown;
   }
 
-  const collapsedRuns = markdown.replace(BLANK_RUN_REGEX, (match) => {
+  const collapsedRuns = markdown.replaceAll(BLANK_RUN_REGEX, (match) => {
     const markerCount = match.split(BLANK_PARAGRAPH_SENTINEL).length - 1;
     return "\n".repeat(markerCount);
   });
 
-  return collapsedRuns.replace(
+  return collapsedRuns.replaceAll(
     BLANK_PARAGRAPH_TOKEN_REGEX,
     (_match, trailingNewline: string) => `\n${trailingNewline}`
   );

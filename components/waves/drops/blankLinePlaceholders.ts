@@ -6,7 +6,7 @@ export const addBlankLinePlaceholders = (markdown: string): string => {
     return markdown;
   }
 
-  return markdown.replace(/\n{3,}/g, (match) => {
+  return markdown.replaceAll(/\n{3,}/g, (match) => {
     const extraNewLines = match.length - 2;
     const placeholderSegment = (`${BLANK_LINE_PLACEHOLDER}\n`).repeat(
       extraNewLines
