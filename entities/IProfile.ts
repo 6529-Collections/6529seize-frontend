@@ -1,4 +1,10 @@
-import { ProfileActivityLogType, RateMatter } from "@/enums";
+import {
+  GRADIENT_CONTRACT,
+  MEMELAB_CONTRACT,
+  MEMES_CONTRACT,
+  NEXTGEN_CONTRACT,
+} from "@/constants";
+import { ContractType, ProfileActivityLogType, RateMatter } from "@/enums";
 import { AcceptActionRequestActionEnum } from "@/generated/models/AcceptActionRequest";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
@@ -367,6 +373,26 @@ export enum CollectedCollectionType {
   GRADIENTS = "GRADIENTS",
   MEMELAB = "MEMELAB",
 }
+
+export const COLLECTED_COLLECTION_TYPE_TO_CONTRACT: Record<
+  CollectedCollectionType,
+  string
+> = {
+  [CollectedCollectionType.MEMES]: MEMES_CONTRACT,
+  [CollectedCollectionType.NEXTGEN]: NEXTGEN_CONTRACT,
+  [CollectedCollectionType.GRADIENTS]: GRADIENT_CONTRACT,
+  [CollectedCollectionType.MEMELAB]: MEMELAB_CONTRACT,
+};
+
+export const COLLECTED_COLLECTION_TYPE_TO_CONTRACT_TYPE: Record<
+  CollectedCollectionType,
+  string
+> = {
+  [CollectedCollectionType.MEMES]: ContractType.ERC1155,
+  [CollectedCollectionType.NEXTGEN]: ContractType.ERC721,
+  [CollectedCollectionType.GRADIENTS]: ContractType.ERC721,
+  [CollectedCollectionType.MEMELAB]: ContractType.ERC1155,
+};
 
 export enum CollectionSeized {
   SEIZED = "SEIZED",
