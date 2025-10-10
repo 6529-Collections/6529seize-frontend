@@ -81,12 +81,11 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
     };
   }, []);
 
-  const fetchWaveDetails = useCallback(
-    async (targetWaveId: string) => {
-      try {
-        const res = await commonApiFetch<ApiWave>({
-          endpoint: `/waves/${targetWaveId}`,
-        });
+  const fetchWaveDetails = useCallback((targetWaveId: string) => {
+    commonApiFetch<ApiWave>({
+      endpoint: `/waves/${targetWaveId}`,
+    })
+      .then((res) => {
         if (!res) {
           return;
         }
@@ -95,20 +94,20 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
         } else {
           setLastVisitedWave(res.id);
         }
-      } catch (error) {
+      })
+      .catch((error) => {
         console.warn("Failed to fetch wave metadata", error);
-      } finally {
+      })
+      .finally(() => {
         setLastFetchedWaveId(targetWaveId);
-      }
-    },
-    []
-  );
+      });
+  }, []);
 
   useEffect(() => {
     if (waveParam) {
       setActiveView(null);
       if (waveParam !== lastFetchedWaveId) {
-        void fetchWaveDetails(waveParam);
+        fetchWaveDetails(waveParam);
       }
     } else {
       if (lastFetchedWaveId !== null) {
