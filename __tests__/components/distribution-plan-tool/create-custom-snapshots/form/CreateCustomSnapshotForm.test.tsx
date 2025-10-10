@@ -45,10 +45,15 @@ describe('CreateCustomSnapshotForm', () => {
     expect(screen.queryByTestId('modal')).not.toBeInTheDocument();
     // table should now show 1 token
     expect(screen.getByTestId('table')).toHaveTextContent('1');
+    expect(
+      screen.getByText(/will split .* into 1 custom snapshot/i)
+    ).toBeInTheDocument();
 
     const input = screen.getByRole('textbox');
     await userEvent.type(input, 'Snap');
-    await userEvent.click(screen.getByRole('button', { name: /add custom snapshot/i }));
+    await userEvent.click(
+      screen.getByRole('button', { name: /add .*custom snapshots?/i })
+    );
 
     expect(distributionPlanApiPost).toHaveBeenCalledTimes(1);
     const call = (distributionPlanApiPost as jest.Mock).mock.calls[0][0];
@@ -73,10 +78,18 @@ describe('CreateCustomSnapshotForm', () => {
     );
     await userEvent.click(screen.getByRole('button', { name: /add wallets/i }));
     await userEvent.click(screen.getByRole('button', { name: 'upload' }));
+    expect(
+      screen.getByText(/will split .* into 3 custom snapshots/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /add 3 custom snapshots/i })
+    ).toBeInTheDocument();
 
     const input = screen.getByRole('textbox');
     await userEvent.type(input, 'BulkSnap');
-    await userEvent.click(screen.getByRole('button', { name: /add custom snapshot/i }));
+    await userEvent.click(
+      screen.getByRole('button', { name: /add .*custom snapshots?/i })
+    );
 
     expect(distributionPlanApiPost).toHaveBeenCalledTimes(3);
     const calls = (distributionPlanApiPost as jest.Mock).mock.calls;

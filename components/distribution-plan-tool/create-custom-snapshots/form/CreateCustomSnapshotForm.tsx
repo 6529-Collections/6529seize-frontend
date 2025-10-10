@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import {
   AllowlistOperation,
@@ -20,8 +20,8 @@ import AllowlistToolCommonModalWrapper, {
 } from "@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
 import CreateCustomSnapshotFormAddWalletsModal from "./CreateCustomSnapshotFormAddWalletsModal";
 
-const MAX_CUSTOM_SNAPSHOT_ROWS = 100000;
-const CUSTOM_SNAPSHOT_CHUNK_SIZE = 500;
+export const MAX_CUSTOM_SNAPSHOT_ROWS = 100000;
+export const CUSTOM_SNAPSHOT_CHUNK_SIZE = 500;
 
 export default function CreateCustomSnapshotForm() {
   const { distributionPlan, setToasts, fetchOperations } = useContext(
@@ -57,6 +57,25 @@ export default function CreateCustomSnapshotForm() {
 
   const [fileName, setFileName] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [uploadState, setUploadState] = useState<{
+    processed: number;
+    total: number;
+  } | null>(null);
+
+  const tokenCount = tokens.length;
+  const chunkCount =
+    tokenCount > 0
+      ? Math.ceil(tokenCount / CUSTOM_SNAPSHOT_CHUNK_SIZE)
+      : 0;
+
+  const snapshotSummary = useMemo(() => {
+    if (!tokenCount) {
+      return null;
+    }
+    const walletLabel = tokenCount === 1 ? "wallet" : "wallets";
+    const snapshotLabel = chunkCount === 1 ? "custom snapshot" : "custom snapshots";
+    return `We will split ${tokenCount.toLocaleString()} ${walletLabel} into ${chunkCount.toLocaleString()} ${snapshotLabel} (up to ${CUSTOM_SNAPSHOT_CHUNK_SIZE.toLocaleString()} wallets each).`;
+  }, [tokenCount, chunkCount]);
 
   const resolveEns = async (ens: string[]): Promise<ResolvedEns[]> => {
     if (!ens.length) return [];
@@ -133,6 +152,14 @@ export default function CreateCustomSnapshotForm() {
       });
 
       const tokenChunks = chunkTokens(tokensWithResolvedEns);
+      if (!tokenChunks.length) {
+        setToasts({
+          messages: ["No valid wallets found after resolving ENS"],
+          type: "error",
+        });
+        return null;
+      }
+      setUploadState({ processed: 0, total: tokenChunks.length });
       const createdSnapshotIds: string[] = [];
       for (let index = 0; index < tokenChunks.length; index += 1) {
         const chunk = tokenChunks[index];
@@ -162,6 +189,10 @@ export default function CreateCustomSnapshotForm() {
           return null;
         }
         createdSnapshotIds.push(customTokenPoolId);
+        setUploadState({
+          processed: index + 1,
+          total: tokenChunks.length,
+        });
       }
 
       fetchOperations(distributionPlan.id);
@@ -180,6 +211,7 @@ export default function CreateCustomSnapshotForm() {
       });
       return createdSnapshotIds.at(0) ?? null;
     } finally {
+      setUploadState(null);
       setIsLoading(false);
     }
   };
@@ -308,8 +340,43 @@ export default function CreateCustomSnapshotForm() {
           </div>
           <div>
             <DistributionPlanAddOperationBtn loading={isLoading}>
-              Add custom snapshot
+              {chunkCount > 1
+                ? `Add ${chunkCount.toLocaleString()} custom snapshots`
+                : "Add custom snapshot"}
             </DistributionPlanAddOperationBtn>
+            <div className="tw-mt-3 tw-space-y-2">
+              <p className="tw-text-xs tw-text-neutral-300">
+                Snapshots are limited to {CUSTOM_SNAPSHOT_CHUNK_SIZE.toLocaleString()} wallets. We'll split larger uploads automatically.
+              </p>
+              {snapshotSummary && (
+                <p className="tw-text-xs tw-text-neutral-100">{snapshotSummary}</p>
+              )}
+              {uploadState && uploadState.total > 0 && (
+                <div>
+                  <div className="tw-h-2 tw-w-60 tw-overflow-hidden tw-rounded-full tw-bg-neutral-700">
+                    <div
+                      className="tw-h-2 tw-rounded-full tw-bg-primary-500 tw-transition-all tw-duration-300"
+                      style={{
+                        width: `${Math.min(
+                          100,
+                          Math.round(
+                            (uploadState.processed / uploadState.total) * 100
+                          )
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                  <p className="tw-mt-2 tw-text-xs tw-text-neutral-200">
+                    {uploadState.processed < uploadState.total
+                      ? `Creating snapshot ${Math.min(
+                          uploadState.processed + 1,
+                          uploadState.total
+                        )} of ${uploadState.total.toLocaleString()}...`
+                      : "Finalizing snapshots..."}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </form>
@@ -325,6 +392,8 @@ export default function CreateCustomSnapshotForm() {
             setFileName={setFileName}
             tokens={tokens}
             addUploadedTokens={addUploadedTokens}
+            chunkSize={CUSTOM_SNAPSHOT_CHUNK_SIZE}
+            maxRows={MAX_CUSTOM_SNAPSHOT_ROWS}
             setManualWallet={setManualWallet}
             addManualWallet={addManualWallet}
             onRemoveToken={onRemoveToken}
