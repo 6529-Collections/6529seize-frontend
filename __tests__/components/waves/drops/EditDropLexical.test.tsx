@@ -155,14 +155,25 @@ jest.mock('@lexical/react/LexicalComposerContext', () => ({
 jest.mock('@lexical/markdown', () => ({
   __esModule: true,
   $convertFromMarkdownString: jest.fn(),
-  $convertToMarkdownString: jest.fn(() => 'mock markdown'),
 }));
 const {
   $convertFromMarkdownString: convertFromMarkdownStringMock,
-  $convertToMarkdownString: convertToMarkdownStringMock,
 } = jest.requireMock('@lexical/markdown') as {
   $convertFromMarkdownString: jest.Mock;
-  $convertToMarkdownString: jest.Mock;
+};
+
+jest.mock('@/components/waves/drops/normalizeDropMarkdown', () => ({
+  __esModule: true,
+  default: jest.fn((value: string) => value),
+  normalizeDropMarkdown: jest.fn((value: string) => value),
+  exportDropMarkdown: jest.fn(() => 'mock markdown'),
+}));
+const {
+  normalizeDropMarkdown: normalizeDropMarkdownMock,
+  exportDropMarkdown: exportDropMarkdownMock,
+} = jest.requireMock('@/components/waves/drops/normalizeDropMarkdown') as {
+  normalizeDropMarkdown: jest.Mock;
+  exportDropMarkdown: jest.Mock;
 };
 jest.mock('lexical', () => ({
   $getRoot: getRootMock,
@@ -197,7 +208,8 @@ describe('EditDropLexical', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    convertToMarkdownStringMock.mockReturnValue('mock markdown');
+    exportDropMarkdownMock.mockReturnValue('mock markdown');
+    normalizeDropMarkdownMock.mockImplementation((value: string) => value);
     convertFromMarkdownStringMock.mockReset();
     rootMock.getChildren.mockReturnValue([]);
     rootMock.getAllTextNodes.mockReturnValue([]);
@@ -214,7 +226,7 @@ describe('EditDropLexical', () => {
     const user = userEvent.setup();
     const onSave = jest.fn();
     const onCancel = jest.fn();
-    convertToMarkdownStringMock.mockReturnValue('updated markdown');
+    exportDropMarkdownMock.mockReturnValue('updated markdown');
 
     render(<EditDropLexical {...defaultProps} onSave={onSave} onCancel={onCancel} />);
 
@@ -239,7 +251,7 @@ describe('EditDropLexical', () => {
     const user = userEvent.setup();
     const onSave = jest.fn();
     const onCancel = jest.fn();
-    convertToMarkdownStringMock.mockReturnValue('Initial content here');
+    exportDropMarkdownMock.mockReturnValue('Initial content here');
 
     render(<EditDropLexical {...defaultProps} onSave={onSave} onCancel={onCancel} />);
 
@@ -253,7 +265,7 @@ describe('EditDropLexical', () => {
   it('invokes keyboard command handlers', async () => {
     const onSave = jest.fn();
     const onCancel = jest.fn();
-    convertToMarkdownStringMock.mockReturnValue('changed content');
+    exportDropMarkdownMock.mockReturnValue('changed content');
 
     render(<EditDropLexical {...defaultProps} onSave={onSave} onCancel={onCancel} />);
 
@@ -282,7 +294,7 @@ describe('EditDropLexical', () => {
       handled = enterHandler?.({ shiftKey: false }) ?? false;
     });
     expect(handled).toBe(true);
-    expect(convertToMarkdownStringMock).toHaveBeenCalled();
+    expect(exportDropMarkdownMock).toHaveBeenCalled();
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 });

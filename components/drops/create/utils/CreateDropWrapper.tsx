@@ -21,7 +21,6 @@ import {
   ReferencedNft,
 } from "@/entities/IDrop";
 import { createBreakpoint } from "react-use";
-import { $convertToMarkdownString } from "@lexical/markdown";
 import { CreateDropType, CreateDropViewType } from "../types";
 import { MENTION_TRANSFORMER } from "../lexical/transformers/MentionTransformer";
 import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
@@ -38,6 +37,9 @@ import { SAFE_MARKDOWN_TRANSFORMERS } from "../lexical/transformers/markdownTran
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { WalletValidationError } from "@/src/errors/wallet";
+import {
+  exportDropMarkdown,
+} from "@/components/waves/drops/normalizeDropMarkdown";
 
 export enum CreateDropScreenType {
   DESKTOP = "DESKTOP",
@@ -194,14 +196,14 @@ const CreateDropWrapper = forwardRef<
       ]);
     };
     const getMarkdown = () =>
-      editorState?.read(() =>
-        $convertToMarkdownString([
-          ...SAFE_MARKDOWN_TRANSFORMERS,
-          MENTION_TRANSFORMER,
-          HASHTAG_TRANSFORMER,
-          IMAGE_TRANSFORMER,
-        ])
-      ) ?? null;
+      editorState
+        ? exportDropMarkdown(editorState, [
+            ...SAFE_MARKDOWN_TRANSFORMERS,
+            MENTION_TRANSFORMER,
+            HASHTAG_TRANSFORMER,
+            IMAGE_TRANSFORMER,
+          ])
+        : null;
 
     const getMissingRequiredMetadata = (): ApiWaveRequiredMetadata[] => {
       if (!waveProps?.id) {

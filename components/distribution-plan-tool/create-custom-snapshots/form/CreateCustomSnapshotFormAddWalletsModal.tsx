@@ -2,26 +2,42 @@ import CreateCustomSnapshotFormUpload from "./CreateCustomSnapshotFormUpload";
 import { CustomTokenPoolParamsToken } from "@/components/allowlist-tool/allowlist-tool.types";
 import CreateCustomSnapshotFormTable from "./CreateCustomSnapshotFormTable";
 
+interface CreateCustomSnapshotFormAddWalletsModalProps {
+  readonly fileName: string | null;
+  readonly setFileName: (fileName: string | null) => void;
+  readonly tokens: CustomTokenPoolParamsToken[];
+  readonly addUploadedTokens: (
+    tokens: CustomTokenPoolParamsToken[],
+  ) => boolean;
+  readonly chunkSize: number;
+  readonly maxRows: number;
+  readonly setManualWallet: (manualWallet: string | null) => void;
+  readonly addManualWallet: () => void;
+  readonly onRemoveToken: (index: number) => void;
+  readonly onClose: () => void;
+}
+
 export default function CreateCustomSnapshotFormAddWalletsModal({
   fileName,
   setFileName,
   tokens,
   addUploadedTokens,
 
+  chunkSize,
+  maxRows,
   setManualWallet,
   addManualWallet,
   onRemoveToken,
   onClose,
-}: {
-  fileName: string | null;
-  setFileName: (fileName: string | null) => void;
-  tokens: CustomTokenPoolParamsToken[];
-  addUploadedTokens: (tokens: CustomTokenPoolParamsToken[]) => void;
-  setManualWallet: (manualWallet: string | null) => void;
-  addManualWallet: () => void;
-  onRemoveToken: (index: number) => void;
-  onClose: () => void;
-}) {
+}: CreateCustomSnapshotFormAddWalletsModalProps) {
+  const totalWallets = tokens.length;
+  const chunkCount =
+    totalWallets > 0 && chunkSize > 0
+      ? Math.ceil(totalWallets / chunkSize)
+      : 0;
+  const walletLabel = totalWallets === 1 ? "wallet" : "wallets";
+  const snapshotLabel = chunkCount === 1 ? "custom snapshot" : "custom snapshots";
+
   return (
     <div className="tw-rounded-lg tw-overflow-hidden">
       <div className="tw-max-h-[calc(100vh_+_-100px)] tw-overflow-y-auto tw-overflow-x-hidden">
@@ -29,6 +45,26 @@ export default function CreateCustomSnapshotFormAddWalletsModal({
           <p className="tw-max-w-sm tw-text-lg tw-text-white tw-font-medium tw-mb-0">
             Add wallets
           </p>
+          <div className="tw-mt-2 tw-space-y-1">
+            <p className="tw-text-xs tw-text-neutral-300">
+              Each custom snapshot supports up to {chunkSize.toLocaleString()} wallets. Larger lists are split automatically.
+            </p>
+            <p className="tw-text-xs tw-text-neutral-300">
+              You can add up to {maxRows.toLocaleString()} wallets in one batch.
+            </p>
+            {totalWallets > 0 && (
+              <>
+                <p className="tw-text-xs tw-text-neutral-100">
+                  Currently added {totalWallets.toLocaleString()} {walletLabel}. This will create {chunkCount.toLocaleString()} {snapshotLabel}.
+                </p>
+                {totalWallets > maxRows && (
+                  <p className="tw-text-xs tw-text-yellow-400">
+                    Warning: Exceeds batch limit of {maxRows.toLocaleString()} wallets.
+                  </p>
+                )}
+              </>
+            )}
+          </div>
           <div className="tw-mt-6 tw-flex tw-gap-x-4">
             <div className="tw-flex tw-justify-between tw-w-full tw-gap-x-4">
               <div className="tw-flex tw-gap-x-4">
@@ -43,7 +79,9 @@ export default function CreateCustomSnapshotFormAddWalletsModal({
                       type="text"
                       name="owner"
                       autoComplete="off"
-                      onChange={(e) => setManualWallet(e.target.value ?? "")}
+                      onChange={(e) =>
+                        setManualWallet((e.target.value ?? "").trim())
+                      }
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault();
