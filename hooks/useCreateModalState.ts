@@ -12,18 +12,18 @@ export const CREATE_QUERY_KEY = "create";
 export const CREATE_WAVE_VALUE = "wave";
 export const CREATE_DIRECT_MESSAGE_VALUE = "dm";
 
-export type CreateOverlayMode =
+export type CreateModalMode =
   | typeof CREATE_WAVE_VALUE
   | typeof CREATE_DIRECT_MESSAGE_VALUE
   | null;
 
-export default function useCreateWaveDmNavigation() {
+export default function useCreateModalState() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
 
-  const mode = useMemo<CreateOverlayMode>(() => {
+  const mode = useMemo<CreateModalMode>(() => {
     const value = searchParams?.get(CREATE_QUERY_KEY);
     if (value === CREATE_WAVE_VALUE || value === CREATE_DIRECT_MESSAGE_VALUE) {
       return value;
@@ -32,7 +32,7 @@ export default function useCreateWaveDmNavigation() {
   }, [searchParams]);
 
   const buildDestination = useCallback(
-    (value: CreateOverlayMode) => {
+    (value: CreateModalMode) => {
       const params = new URLSearchParams(searchParams?.toString() ?? "");
 
       if (value) {
@@ -50,7 +50,7 @@ export default function useCreateWaveDmNavigation() {
   );
 
   const updateMode = useCallback(
-    (value: CreateOverlayMode) => {
+    (value: CreateModalMode) => {
       if (isApp) {
         if (value === CREATE_WAVE_VALUE) {
           router.push("/waves/create");
@@ -66,7 +66,10 @@ export default function useCreateWaveDmNavigation() {
     [buildDestination, isApp, router]
   );
 
-  const openWave = useCallback(() => updateMode(CREATE_WAVE_VALUE), [updateMode]);
+  const openWave = useCallback(
+    () => updateMode(CREATE_WAVE_VALUE),
+    [updateMode]
+  );
   const openDirectMessage = useCallback(
     () => updateMode(CREATE_DIRECT_MESSAGE_VALUE),
     [updateMode]
@@ -74,7 +77,7 @@ export default function useCreateWaveDmNavigation() {
   const close = useCallback(() => updateMode(null), [updateMode]);
 
   const getHrefForMode = useCallback(
-    (value: CreateOverlayMode) => {
+    (value: CreateModalMode) => {
       if (isApp) {
         if (value === CREATE_WAVE_VALUE) {
           return "/waves/create";

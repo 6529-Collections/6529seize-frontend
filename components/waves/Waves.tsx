@@ -13,11 +13,11 @@ import ConnectWallet from "@/components/common/ConnectWallet";
 import { getWavesBaseRoute } from "@/helpers/navigation.helpers";
 import CreateWaveModal from "./create-wave/CreateWaveModal";
 import CreateDirectMessageModal from "./create-dm/CreateDirectMessageModal";
-import useCreateWaveDmNavigation, {
+import useCreateModalState, {
   CREATE_DIRECT_MESSAGE_VALUE,
   CREATE_QUERY_KEY,
   CREATE_WAVE_VALUE,
-} from "@/hooks/useCreateWaveDmNavigation";
+} from "@/hooks/useCreateModalState";
 
 enum WavesViewMode {
   CREATE = "CREATE",
@@ -39,7 +39,7 @@ export default function Waves() {
     openDirectMessage,
     close,
     isApp,
-  } = useCreateWaveDmNavigation();
+  } = useCreateModalState();
 
   useSetTitle("Waves | Brain");
 

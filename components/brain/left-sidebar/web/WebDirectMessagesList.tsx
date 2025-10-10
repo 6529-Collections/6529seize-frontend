@@ -18,7 +18,7 @@ import Image from "next/image";
 import UserSetUpProfileCta from "../../../user/utils/set-up-profile/UserSetUpProfileCta";
 import { useInfiniteScroll } from "../../../../hooks/useInfiniteScroll";
 import CreateDirectMessageModal from "../../../waves/create-dm/CreateDirectMessageModal";
-import useCreateWaveDmNavigation from "@/hooks/useCreateWaveDmNavigation";
+import useCreateModalState from "@/hooks/useCreateModalState";
 
 interface WebDirectMessagesListProps {
   readonly scrollContainerRef: React.RefObject<HTMLElement | null>;
@@ -30,7 +30,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
   const { isAuthenticated } = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
   const { isDirectMessageModalOpen, openDirectMessage, close, isApp } =
-    useCreateWaveDmNavigation();
+    useCreateModalState();
 
   // Check if device is touch-enabled for tooltip display
   const globalScope = globalThis as typeof globalThis & {

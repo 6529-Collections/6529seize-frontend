@@ -5,13 +5,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useViewContext } from "../navigation/ViewContext";
-import useCreateWaveDmNavigation from "@/hooks/useCreateWaveDmNavigation";
+import useCreateModalState from "@/hooks/useCreateModalState";
 
 export default function HeaderViewActionButtons() {
   const { activeView } = useViewContext();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { openWave, openDirectMessage } = useCreateWaveDmNavigation();
+  const { openWave, openDirectMessage } = useCreateModalState();
 
   const baseButtonClasses =
     "tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-h-10 tw-w-10 tw-border-0 tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 tw-transition tw-duration-300 tw-ease-out tw-bg-black active:tw-bg-iron-800";

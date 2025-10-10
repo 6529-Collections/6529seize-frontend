@@ -20,7 +20,7 @@ import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import CreateWaveModal from "../../../waves/create-wave/CreateWaveModal";
 import { useAuth } from "../../../auth/Auth";
 import { Tooltip as ReactTooltip } from "react-tooltip";
-import useCreateWaveDmNavigation from "@/hooks/useCreateWaveDmNavigation";
+import useCreateModalState from "@/hooks/useCreateModalState";
 
 // Lightweight type guard that checks essential properties only
 function isValidWave(wave: unknown): wave is MinimalWave {
@@ -78,7 +78,7 @@ const WebUnifiedWavesListWaves = forwardRef<
     const sentinelRef = useRef<HTMLDivElement>(null);
     const { connectedProfile } = useAuth();
     const { isWaveModalOpen, openWave, close, isApp } =
-      useCreateWaveDmNavigation();
+      useCreateModalState();
 
     // Check if device is touch-enabled for tooltip display
     const globalScope = globalThis as typeof globalThis & {

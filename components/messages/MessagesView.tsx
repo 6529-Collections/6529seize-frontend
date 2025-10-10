@@ -10,14 +10,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import CreateDirectMessageModal from "../waves/create-dm/CreateDirectMessageModal";
 import { useAuth } from "../auth/Auth";
 import useDeviceInfo from "../../hooks/useDeviceInfo";
-import useCreateWaveDmNavigation from "@/hooks/useCreateWaveDmNavigation";
+import useCreateModalState from "@/hooks/useCreateModalState";
 
 const MessagesView: React.FC = () => {
   const searchParams = useSearchParams();
   const { connectedProfile } = useAuth();
   const { isApp } = useDeviceInfo();
   const { isDirectMessageModalOpen, openDirectMessage, close } =
-    useCreateWaveDmNavigation();
+    useCreateModalState();
 
   const serialisedWaveId = searchParams?.get("wave") || null;
 

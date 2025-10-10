@@ -5,13 +5,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import React, { useMemo } from "react";
 import { useAuth } from "@/components/auth/Auth";
-import useCreateWaveDmNavigation, {
+import useCreateModalState, {
   CREATE_DIRECT_MESSAGE_VALUE,
-} from "@/hooks/useCreateWaveDmNavigation";
+} from "@/hooks/useCreateModalState";
 
 const BrainLeftSidebarCreateADirectMessageButton: React.FC = () => {
   const { connectedProfile, activeProfileProxy } = useAuth();
-  const { getHrefForMode } = useCreateWaveDmNavigation();
+  const { getHrefForMode } = useCreateModalState();
 
   const isConnectedIdentity = useMemo(() => {
     return !!connectedProfile?.handle && !activeProfileProxy;

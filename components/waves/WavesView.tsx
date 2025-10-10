@@ -9,13 +9,13 @@ import CreateWaveModal from "./create-wave/CreateWaveModal";
 import { useAuth } from "../auth/Auth";
 import useDeviceInfo from "../../hooks/useDeviceInfo";
 import PrimaryButton from "../utils/button/PrimaryButton";
-import useCreateWaveDmNavigation from "@/hooks/useCreateWaveDmNavigation";
+import useCreateModalState from "@/hooks/useCreateModalState";
 
 const WavesView: React.FC = () => {
   const searchParams = useSearchParams();
   const { connectedProfile } = useAuth();
   const { isApp } = useDeviceInfo();
-  const { isWaveModalOpen, openWave, close } = useCreateWaveDmNavigation();
+  const { isWaveModalOpen, openWave, close } = useCreateModalState();
 
   const serialisedWaveId = searchParams?.get('wave') || null;
 
