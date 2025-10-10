@@ -1,4 +1,5 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import { TransferProvider } from "@/components/user/collected/transfer/TransferState";
 import UserPageLayout from "@/components/user/layout/UserPageLayout";
 import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import { getMetadataForUserPage } from "@/helpers/Helpers";
@@ -16,9 +17,15 @@ type FactoryArgs = {
   subroute: string;
   metaLabel: string;
   Tab: (props: TabProps) => React.JSX.Element;
+  enableTransfer?: boolean;
 };
 
-export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
+export function createUserTabPage({
+  subroute,
+  metaLabel,
+  Tab,
+  enableTransfer,
+}: FactoryArgs) {
   async function Page({
     params,
     searchParams,
@@ -50,11 +57,15 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
       redirect(needsRedirect.redirect.destination);
     }
 
-    return (
-      <UserPageLayout profile={profile}>
+    const TabComponent = enableTransfer ? (
+      <TransferProvider>
         <Tab profile={profile} />
-      </UserPageLayout>
+      </TransferProvider>
+    ) : (
+      <Tab profile={profile} />
     );
+
+    return <UserPageLayout profile={profile}>{TabComponent}</UserPageLayout>;
   }
 
   async function generateMetadata({

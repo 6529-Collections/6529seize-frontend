@@ -1,16 +1,17 @@
 "use client";
 
+import { ContractType } from "@/enums";
 import React, { createContext, useContext, useMemo, useState } from "react";
 
 export type TransferItem = {
   key: string;
+  contract: string;
+  contractType: ContractType;
+  tokenId: number;
   title?: string;
   thumbUrl?: string;
-
-  /** Max copies available to transfer for this item */
-  max?: number; // default 1
-  /** Selected quantity (1..max) */
-  qty?: number; // default 1 when selected
+  max?: number;
+  qty?: number;
 };
 
 type TransferContextShape = {

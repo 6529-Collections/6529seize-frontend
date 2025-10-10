@@ -1,5 +1,6 @@
 "use client";
 
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   CollectedCard,
@@ -10,7 +11,9 @@ import {
 import { SortDirection } from "@/entities/ISort";
 import { MEMES_SEASON } from "@/enums";
 import { ApiIdentity } from "@/generated/models/ObjectSerializer";
+import { areEqualAddresses } from "@/helpers/Helpers";
 import { Page } from "@/helpers/Types";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
@@ -19,7 +22,7 @@ import {
   useRouter,
   useSearchParams,
 } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import UserPageCollectedCards from "./cards/UserPageCollectedCards";
 import {
   COLLECTED_COLLECTIONS_META,
@@ -27,7 +30,7 @@ import {
 } from "./filters/user-page-collected-filters.helpers";
 import UserPageCollectedFilters from "./filters/UserPageCollectedFilters";
 import TransferPanel from "./transfer/TransferPanel";
-import { TransferProvider } from "./transfer/TransferState";
+import { useTransfer } from "./transfer/TransferState";
 import TransferToggle from "./transfer/TransferToggle";
 import UserPageCollectedFirstLoading from "./UserPageCollectedFirstLoading";
 export interface ProfileCollectedFilters {
@@ -78,6 +81,8 @@ export default function UserPageCollected({
 }: {
   readonly profile: ApiIdentity;
 }) {
+  const { isMobileDevice } = useDeviceInfo();
+  const { address: connectedAddress } = useSeizeConnectContext();
   const defaultSortBy = CollectionSort.TOKEN_ID;
   const defaultSortDirection = SortDirection.DESC;
   const defaultSeized = CollectionSeized.SEIZED;
@@ -88,6 +93,11 @@ export default function UserPageCollected({
   const params = useParams();
   const router = useRouter();
   const user = params?.user?.toString().toLowerCase() ?? "";
+
+  const showTransfer =
+    profile.wallets?.some((w) =>
+      areEqualAddresses(w.wallet, connectedAddress)
+    ) && !isMobileDevice;
 
   const convertSeized = ({
     seized,
@@ -164,7 +174,7 @@ export default function UserPageCollected({
     );
   };
 
-  const getFilters = (): ProfileCollectedFilters => {
+  const getFilters = useCallback((): ProfileCollectedFilters => {
     const address = searchParams?.get(SEARCH_PARAMS_FIELDS.address);
     const collection = searchParams?.get(SEARCH_PARAMS_FIELDS.collection);
     const seized = searchParams?.get(SEARCH_PARAMS_FIELDS.seized);
@@ -192,34 +202,79 @@ export default function UserPageCollected({
       }),
       sortDirection: convertSortDirection(sortDirection ?? null),
     };
-  };
+  }, [searchParams, profile.handle, user]);
 
-  const createQueryString = (updateItems: QueryUpdateInput[]): string => {
-    const params = new URLSearchParams(searchParams?.toString() ?? "");
-    for (const { name, value } of updateItems) {
-      const key = SEARCH_PARAMS_FIELDS[name];
-      if (!value) {
-        params.delete(key);
-      } else {
-        params.set(key, value.toLowerCase());
+  const createQueryString = useCallback(
+    (updateItems: QueryUpdateInput[]): string => {
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
+      for (const { name, value } of updateItems) {
+        const key = SEARCH_PARAMS_FIELDS[name];
+        if (!value) {
+          params.delete(key);
+        } else {
+          params.set(key, value.toLowerCase());
+        }
       }
-    }
-    return params.toString();
-  };
+      return params.toString();
+    },
+    [searchParams]
+  );
 
-  const updateFields = async (
-    updateItems: QueryUpdateInput[]
-  ): Promise<void> => {
-    const queryString = createQueryString(updateItems);
-    const path = queryString ? pathname + "?" + queryString : pathname;
-    if (path) {
-      router.replace(path, {
-        scroll: false,
-      });
-    }
-  };
+  const updateFields = useCallback(
+    async (updateItems: QueryUpdateInput[]): Promise<void> => {
+      const queryString = createQueryString(updateItems);
+      const path = queryString ? pathname + "?" + queryString : pathname;
+      if (path) {
+        router.replace(path, {
+          scroll: false,
+        });
+      }
+    },
+    [pathname, router, createQueryString]
+  );
 
   const [filters, setFilters] = useState<ProfileCollectedFilters>(getFilters());
+
+  const { enabled: transferEnabled } = useTransfer();
+  const previousAddressRef = useRef<string | null>(null);
+  const hadForcedRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    // Only enforce if transfer is available on this profile (owns wallet & not mobile)
+    if (!showTransfer) return;
+
+    const currentParamAddress =
+      searchParams?.get(SEARCH_PARAMS_FIELDS.address) ?? null;
+    const connected = connectedAddress?.toLowerCase() ?? null;
+
+    if (transferEnabled) {
+      if (!hadForcedRef.current) {
+        previousAddressRef.current = currentParamAddress;
+      }
+      hadForcedRef.current = true;
+
+      // Force to connected wallet
+      updateFields([
+        { name: "address", value: connected },
+        { name: "page", value: "1" },
+      ]);
+    } else if (hadForcedRef.current) {
+      const restore = previousAddressRef.current;
+      previousAddressRef.current = null;
+      hadForcedRef.current = false;
+
+      updateFields([
+        { name: "address", value: restore },
+        { name: "page", value: "1" },
+      ]);
+    }
+  }, [
+    transferEnabled,
+    connectedAddress,
+    showTransfer,
+    updateFields,
+    searchParams,
+  ]);
 
   const setCollection = async (
     collection: CollectedCollectionType | null
@@ -341,7 +396,10 @@ export default function UserPageCollected({
     await updateFields(items);
   };
 
-  useEffect(() => setFilters(getFilters()), [searchParams]);
+  useEffect(
+    () => setFilters(getFilters()),
+    [searchParams, profile, user, connectedAddress, getFilters]
+  );
 
   const {
     isFetching,
@@ -452,7 +510,7 @@ export default function UserPageCollected({
       {isInitialLoading ? (
         <UserPageCollectedFirstLoading />
       ) : (
-        <TransferProvider>
+        <>
           <div
             className="tw-overflow-x-auto horizontal-menu-hide-scrollbar horizontal-menu-scrollable-x"
             ref={scrollContainer}>
@@ -469,9 +527,11 @@ export default function UserPageCollected({
           </div>
 
           {/* small control bar with Transfer toggle */}
-          <div className="tw-mt-3 tw-flex tw-justify-end">
-            <TransferToggle />
-          </div>
+          {showTransfer && (
+            <div className="tw-mt-3 tw-flex tw-justify-end">
+              <TransferToggle />
+            </div>
+          )}
 
           <div className="tw-mt-6 tw-flex tw-gap-6">
             <div className="tw-flex-1">
@@ -486,9 +546,9 @@ export default function UserPageCollected({
             </div>
 
             {/* appears only when transfer is enabled */}
-            <TransferPanel />
+            {showTransfer && transferEnabled && <TransferPanel />}
           </div>
-        </TransferProvider>
+        </>
       )}
     </div>
   );

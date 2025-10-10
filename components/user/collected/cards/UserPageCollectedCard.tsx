@@ -1,19 +1,21 @@
 import { CollectedCard, CollectedCollectionType } from "@/entities/IProfile";
+import { ContractType } from "@/enums";
 import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
 import Link from "next/link";
 import { COLLECTED_COLLECTIONS_META } from "../filters/user-page-collected-filters.helpers";
 
 export default function UserPageCollectedCard({
   card,
+  contractType,
   showDataRow,
   interactiveMode = "link",
   selected = false,
   onToggle,
-  // NEW
   copiesMax = 1,
   qtySelected = 0,
 }: {
   readonly card: CollectedCard;
+  readonly contractType: ContractType;
   readonly showDataRow: boolean;
   readonly interactiveMode?: "link" | "select";
   readonly selected?: boolean;
@@ -111,13 +113,19 @@ export default function UserPageCollectedCard({
                 onSelect={onToggle}
                 onChange={onToggle}
               />
-              <span className="tw-text-sm tw-font-medium">
-                {selected
-                  ? `Selected ${qtySelected} / ${copiesMax}`
-                  : copiesMax > 1
-                  ? `Select (up to ${copiesMax})`
-                  : "Select"}
-              </span>
+              {contractType === ContractType.ERC1155 ? (
+                <span className="tw-text-sm tw-font-medium">
+                  {selected
+                    ? `Selected ${qtySelected} / ${copiesMax}`
+                    : copiesMax > 1
+                    ? `Select (up to ${copiesMax})`
+                    : "Select"}
+                </span>
+              ) : (
+                <span className="tw-text-sm tw-font-medium">
+                  {selected ? "Selected" : "Select"}
+                </span>
+              )}
             </div>
           )}
         </div>
@@ -125,7 +133,6 @@ export default function UserPageCollectedCard({
     </div>
   );
 
-  // In transfer mode: disable Link, click anywhere toggles selection
   if (interactiveMode === "select") {
     return (
       <div
@@ -145,7 +152,6 @@ export default function UserPageCollectedCard({
     );
   }
 
-  // Normal (navigable) card
   return (
     <Link href={path} className="tw-no-underline">
       {CardBody}

@@ -1,9 +1,14 @@
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
-import { CollectedCard } from "@/entities/IProfile";
+import {
+  COLLECTED_COLLECTION_TYPE_TO_CONTRACT,
+  COLLECTED_COLLECTION_TYPE_TO_CONTRACT_TYPE,
+  CollectedCard,
+} from "@/entities/IProfile";
 import { ProfileCollectedFilters } from "../UserPageCollected";
 import UserPageCollectedCard from "./UserPageCollectedCard";
 import UserPageCollectedCardsNoCards from "./UserPageCollectedCardsNoCards";
 
+import { ContractType } from "@/enums";
 import { buildTransferKey, useTransfer } from "../transfer/TransferState";
 
 export default function UserPageCollectedCards({
@@ -47,6 +52,11 @@ export default function UserPageCollectedCards({
                 <UserPageCollectedCard
                   key={`${card.collection}-${card.token_id}`}
                   card={card}
+                  contractType={
+                    COLLECTED_COLLECTION_TYPE_TO_CONTRACT_TYPE[
+                      card.collection
+                    ] as ContractType
+                  }
                   showDataRow={showDataRow}
                   interactiveMode={t.enabled ? "select" : "link"}
                   selected={selected}
@@ -55,9 +65,15 @@ export default function UserPageCollectedCards({
                   onToggle={() =>
                     t.toggleSelect({
                       key: selKey,
+                      contract:
+                        COLLECTED_COLLECTION_TYPE_TO_CONTRACT[card.collection],
+                      contractType: COLLECTED_COLLECTION_TYPE_TO_CONTRACT_TYPE[
+                        card.collection
+                      ] as ContractType,
+                      tokenId: card.token_id,
                       title: card.token_name,
                       thumbUrl: card.img,
-                      max, // <- important
+                      max,
                     })
                   }
                 />
