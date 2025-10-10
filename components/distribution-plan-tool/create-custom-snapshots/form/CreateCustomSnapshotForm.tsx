@@ -20,6 +20,9 @@ import AllowlistToolCommonModalWrapper, {
 } from "@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
 import CreateCustomSnapshotFormAddWalletsModal from "./CreateCustomSnapshotFormAddWalletsModal";
 
+const MAX_CUSTOM_SNAPSHOT_ROWS = 100000;
+const CUSTOM_SNAPSHOT_CHUNK_SIZE = 500;
+
 export default function CreateCustomSnapshotForm() {
   const { distributionPlan, setToasts, fetchOperations } = useContext(
     DistributionPlanToolContext
@@ -30,6 +33,16 @@ export default function CreateCustomSnapshotForm() {
     name: "",
   });
   const [tokens, setTokens] = useState<CustomTokenPoolParamsToken[]>([]);
+
+  const chunkTokens = (
+    list: CustomTokenPoolParamsToken[]
+  ): CustomTokenPoolParamsToken[][] => {
+    const chunks: CustomTokenPoolParamsToken[][] = [];
+    for (let i = 0; i < list.length; i += CUSTOM_SNAPSHOT_CHUNK_SIZE) {
+      chunks.push(list.slice(i, i + CUSTOM_SNAPSHOT_CHUNK_SIZE));
+    }
+    return chunks;
+  };
 
   const onRemoveToken = (index: number) => {
     setTokens((prev) => prev.filter((_, i) => i !== index));
@@ -47,81 +60,128 @@ export default function CreateCustomSnapshotForm() {
 
   const resolveEns = async (ens: string[]): Promise<ResolvedEns[]> => {
     if (!ens.length) return [];
-    setIsLoading(true);
     const endpoint = `/other/resolve-ens-to-address`;
-    const { data } = await distributionPlanApiPost<ResolvedEns[]>({
+    const { success, data } = await distributionPlanApiPost<ResolvedEns[]>({
       endpoint,
       body: ens,
     });
-    setIsLoading(false);
-    return data ?? [];
+    if (!success || !data) {
+      return [];
+    }
+    return data;
   };
 
   const addCustomTokenPool = async (): Promise<string | null> => {
-    const ens = tokens.filter((token) => token.owner.endsWith(".eth"));
-    const resolvedEns = await resolveEns(ens.map((token) => token.owner));
-    if (ens.length !== resolvedEns.length) {
-      setToasts({
-        messages: ["Some ENS addresses could not be resolved"],
-        type: "error",
-      });
-      return null;
-    }
-    if (resolvedEns.some((ens) => !ens.address)) {
-      setToasts({
-        messages: ["Some ENS addresses could not be resolved"],
-        type: "error",
-      });
-      return null;
-    }
-
-    const tokensWithResolvedEns = tokens.map((token) => {
-      if (token.owner.endsWith(".eth")) {
-        const resolved = resolvedEns.find(
-          (resolved) => resolved.ens === token.owner
-        );
-        if (resolved) {
-          return {
-            ...token,
-            owner: resolved.address,
-          };
-        }
-      }
-      return token;
-    });
     if (!distributionPlan) return null;
-    setIsLoading(true);
-    if (tokens.length === 0) {
+    if (!tokens.length) {
       setToasts({ messages: ["No tokens provided"], type: "error" });
       return null;
     }
-    setIsLoading(true);
-    const endpoint = `/allowlists/${distributionPlan.id}/operations`;
-    const customTokenPoolId = getRandomObjectId();
-    const { success } = await distributionPlanApiPost<AllowlistOperation>({
-      endpoint,
-      body: {
-        code: AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL,
-        params: {
-          id: customTokenPoolId,
-          name: formValues.name,
-          description: formValues.name,
-          tokens: tokensWithResolvedEns,
-        },
-      },
-    });
-    setIsLoading(false);
-    if (!success) {
+    if (tokens.length > MAX_CUSTOM_SNAPSHOT_ROWS) {
+      setToasts({
+        messages: [
+          `You can upload up to ${MAX_CUSTOM_SNAPSHOT_ROWS.toLocaleString()} wallets per batch`,
+        ],
+        type: "error",
+      });
+      return null;
+    }
+    const trimmedName = formValues.name.trim();
+    if (!trimmedName) {
+      setToasts({ messages: ["Name is required"], type: "error" });
       return null;
     }
 
-    fetchOperations(distributionPlan.id);
-    setFormValues({
-      name: "",
-    });
-    setTokens([]);
-    setFileName(null);
-    return customTokenPoolId;
+    const ens = tokens.filter((token) => token.owner.endsWith(".eth"));
+    setIsLoading(true);
+    try {
+      const resolvedEns = await resolveEns(ens.map((token) => token.owner));
+      if (ens.length !== resolvedEns.length) {
+        setToasts({
+          messages: ["Some ENS addresses could not be resolved"],
+          type: "error",
+        });
+        return null;
+      }
+      if (resolvedEns.some((resolved) => !resolved.address)) {
+        setToasts({
+          messages: ["Some ENS addresses could not be resolved"],
+          type: "error",
+        });
+        return null;
+      }
+
+      const resolvedMap = new Map<string, string>();
+      resolvedEns.forEach((resolved) => {
+        if (resolved.address) {
+          resolvedMap.set(resolved.ens, resolved.address.toLowerCase());
+        }
+      });
+
+      const tokensWithResolvedEns = tokens.map((token) => {
+        if (token.owner.endsWith(".eth")) {
+          const resolvedAddress = resolvedMap.get(token.owner);
+          if (!resolvedAddress) {
+            return token;
+          }
+          return {
+            ...token,
+            owner: resolvedAddress,
+          };
+        }
+        return token;
+      });
+
+      const tokenChunks = chunkTokens(tokensWithResolvedEns);
+      const createdSnapshotIds: string[] = [];
+      for (let index = 0; index < tokenChunks.length; index += 1) {
+        const chunk = tokenChunks[index];
+        const snapshotName = `${trimmedName}-${index + 1}`;
+        const customTokenPoolId = getRandomObjectId();
+        const endpoint = `/allowlists/${distributionPlan.id}/operations`;
+        const { success } = await distributionPlanApiPost<AllowlistOperation>({
+          endpoint,
+          body: {
+            code: AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL,
+            params: {
+              id: customTokenPoolId,
+              name: snapshotName,
+              description: snapshotName,
+              tokens: chunk,
+            },
+          },
+        });
+
+        if (!success) {
+          setToasts({
+            messages: [
+              `Failed to create snapshot "${snapshotName}". Please try again.`,
+            ],
+            type: "error",
+          });
+          return null;
+        }
+        createdSnapshotIds.push(customTokenPoolId);
+      }
+
+      fetchOperations(distributionPlan.id);
+      setFormValues({
+        name: "",
+      });
+      setTokens([]);
+      setFileName(null);
+      setToasts({
+        messages: [
+          `Created ${tokenChunks.length} custom snapshot${
+            tokenChunks.length > 1 ? "s" : ""
+          }.`,
+        ],
+        type: "success",
+      });
+      return createdSnapshotIds.at(0) ?? null;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -152,18 +212,53 @@ export default function CreateCustomSnapshotForm() {
       });
       return;
     }
-    setTokens((prev) => [
-      {
-        owner: manualWallet.toLowerCase(),
-      },
-      ...prev,
-    ]);
+    const normalizedWallet = manualWallet.toLowerCase();
+    setTokens((prev) => {
+      if (prev.length >= MAX_CUSTOM_SNAPSHOT_ROWS) {
+        setToasts({
+          messages: [
+            `You can upload up to ${MAX_CUSTOM_SNAPSHOT_ROWS.toLocaleString()} wallets per batch`,
+          ],
+          type: "error",
+        });
+        return prev;
+      }
+      return [
+        {
+          owner: normalizedWallet,
+        },
+        ...prev,
+      ];
+    });
 
     setManualWallet(null);
   };
 
-  const addUploadedTokens = (tokens: CustomTokenPoolParamsToken[]) => {
-    setTokens((prev) => [...tokens, ...prev]);
+  const addUploadedTokens = (
+    uploadedTokens: CustomTokenPoolParamsToken[]
+  ): boolean => {
+    if (!uploadedTokens.length) {
+      setToasts({
+        messages: ["No wallets found in the uploaded file"],
+        type: "error",
+      });
+      return false;
+    }
+    let tokensWereAdded = false;
+    setTokens((prev) => {
+      if (prev.length + uploadedTokens.length > MAX_CUSTOM_SNAPSHOT_ROWS) {
+        setToasts({
+          messages: [
+            `You can upload up to ${MAX_CUSTOM_SNAPSHOT_ROWS.toLocaleString()} wallets per batch`,
+          ],
+          type: "error",
+        });
+        return prev;
+      }
+      tokensWereAdded = true;
+      return [...uploadedTokens, ...prev];
+    });
+    return tokensWereAdded;
   };
 
   const [isAddWalletsOpen, setIsAddWalletsOpen] = useState<boolean>(false);

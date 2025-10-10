@@ -3,13 +3,16 @@ import userEvent from '@testing-library/user-event';
 import CreateCustomSnapshotForm from '@/components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotForm';
 import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
 import { distributionPlanApiPost } from '@/services/distribution-plan-api';
+import type { CustomTokenPoolParamsToken } from '@/components/allowlist-tool/allowlist-tool.types';
+
+let mockUploadedTokens: CustomTokenPoolParamsToken[] = [];
 
 jest.mock('@/components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormUpload', () => () => <div data-testid="upload" />);
 jest.mock('@/components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormTable', () => ({ tokens }: any) => <div data-testid="table">{tokens.length}</div>);
 jest.mock('@/components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormAddWalletsModal', () => ({ addUploadedTokens, onClose, tokens }: any) => (
   <div data-testid="modal">
     <span data-testid="count">{tokens.length}</span>
-    <button onClick={() => { addUploadedTokens([{ owner: '0x1' }]); onClose(); }}>upload</button>
+    <button onClick={() => { addUploadedTokens(mockUploadedTokens); onClose(); }}>upload</button>
   </div>
 ));
 jest.mock('@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper', () => ({ __esModule: true, AllowlistToolModalSize: { X_LARGE: 'X_LARGE' }, default: ({ children }: any) => <div data-testid="wrapper">{children}</div> }));
@@ -24,7 +27,11 @@ const ctx = {
 
 describe('CreateCustomSnapshotForm', () => {
   beforeEach(() => {
+    mockUploadedTokens = [{ owner: '0x0000000000000000000000000000000000000001' }];
     (distributionPlanApiPost as jest.Mock).mockResolvedValue({ success: true, data: null });
+    (distributionPlanApiPost as jest.Mock).mockClear();
+    (ctx.setToasts as jest.Mock).mockClear();
+    (ctx.fetchOperations as jest.Mock).mockClear();
   });
 
   it('adds uploaded tokens and submits form', async () => {
@@ -43,7 +50,45 @@ describe('CreateCustomSnapshotForm', () => {
     await userEvent.type(input, 'Snap');
     await userEvent.click(screen.getByRole('button', { name: /add custom snapshot/i }));
 
-    expect(distributionPlanApiPost).toHaveBeenCalled();
+    expect(distributionPlanApiPost).toHaveBeenCalledTimes(1);
+    const call = (distributionPlanApiPost as jest.Mock).mock.calls[0][0];
+    expect(call.body.params.name).toBe('Snap-1');
+    expect(call.body.params.tokens).toHaveLength(1);
     expect(ctx.fetchOperations).toHaveBeenCalledWith('d1');
+    expect(ctx.setToasts).toHaveBeenCalledWith({
+      messages: ['Created 1 custom snapshot.'],
+      type: 'success',
+    });
+  });
+
+  it('splits uploads into 500 row chunks', async () => {
+    mockUploadedTokens = Array.from({ length: 1100 }, (_, index) => ({
+      owner: `0x${(index + 1).toString(16).padStart(40, '0')}`,
+    }));
+
+    render(
+      <DistributionPlanToolContext.Provider value={ctx as any}>
+        <CreateCustomSnapshotForm />
+      </DistributionPlanToolContext.Provider>
+    );
+    await userEvent.click(screen.getByRole('button', { name: /add wallets/i }));
+    await userEvent.click(screen.getByRole('button', { name: 'upload' }));
+
+    const input = screen.getByRole('textbox');
+    await userEvent.type(input, 'BulkSnap');
+    await userEvent.click(screen.getByRole('button', { name: /add custom snapshot/i }));
+
+    expect(distributionPlanApiPost).toHaveBeenCalledTimes(3);
+    const calls = (distributionPlanApiPost as jest.Mock).mock.calls;
+    expect(calls[0][0].body.params.name).toBe('BulkSnap-1');
+    expect(calls[0][0].body.params.tokens).toHaveLength(500);
+    expect(calls[1][0].body.params.name).toBe('BulkSnap-2');
+    expect(calls[1][0].body.params.tokens).toHaveLength(500);
+    expect(calls[2][0].body.params.name).toBe('BulkSnap-3');
+    expect(calls[2][0].body.params.tokens).toHaveLength(100);
+    expect(ctx.setToasts).toHaveBeenCalledWith({
+      messages: ['Created 3 custom snapshots.'],
+      type: 'success',
+    });
   });
 });

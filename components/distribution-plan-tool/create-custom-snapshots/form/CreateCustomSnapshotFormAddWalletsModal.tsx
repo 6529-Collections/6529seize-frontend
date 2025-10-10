@@ -16,7 +16,7 @@ export default function CreateCustomSnapshotFormAddWalletsModal({
   fileName: string | null;
   setFileName: (fileName: string | null) => void;
   tokens: CustomTokenPoolParamsToken[];
-  addUploadedTokens: (tokens: CustomTokenPoolParamsToken[]) => void;
+  addUploadedTokens: (tokens: CustomTokenPoolParamsToken[]) => boolean;
   setManualWallet: (manualWallet: string | null) => void;
   addManualWallet: () => void;
   onRemoveToken: (index: number) => void;

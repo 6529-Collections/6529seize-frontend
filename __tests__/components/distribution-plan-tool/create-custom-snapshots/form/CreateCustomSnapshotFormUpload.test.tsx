@@ -2,9 +2,9 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import CreateCustomSnapshotFormUpload from '@/components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormUpload';
 
-function setup(csv: string) {
+function setup(csv: string, tokensReturn = true) {
   const setFileName = jest.fn();
-  const setTokens = jest.fn();
+  const setTokens = jest.fn().mockReturnValue(tokensReturn);
   const file = new File([csv], 'wallets.csv', { type: 'text/csv' });
   class MockFileReader {
     result: string | ArrayBuffer | null = null;
@@ -44,6 +44,14 @@ describe('CreateCustomSnapshotFormUpload', () => {
       expect(setTokens).toHaveBeenCalledWith([
         { owner: '0xcccccccccccccccccccccccccccccccccccccccc' },
       ]);
+    });
+  });
+
+  it('clears filename when upload is rejected', async () => {
+    const csv = 'owner\n0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    const { setFileName } = setup(csv, false);
+    await waitFor(() => {
+      expect(setFileName).toHaveBeenCalledWith(null);
     });
   });
 });
