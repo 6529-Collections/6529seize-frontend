@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useContext, useState } from "react";
+import React, { useRef, useContext } from "react";
 import WebUnifiedWavesListWaves, {
   WebUnifiedWavesListWavesHandle,
 } from "./WebUnifiedWavesListWaves";
@@ -16,9 +16,9 @@ import HeaderUserConnect from "../../../header/user/HeaderUserConnect";
 import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
 import Image from "next/image";
 import UserSetUpProfileCta from "../../../user/utils/set-up-profile/UserSetUpProfileCta";
-import useDeviceInfo from "../../../../hooks/useDeviceInfo";
 import { useInfiniteScroll } from "../../../../hooks/useInfiniteScroll";
 import CreateDirectMessageModal from "../../../waves/create-dm/CreateDirectMessageModal";
+import useCreateWaveDmNavigation from "@/hooks/useCreateWaveDmNavigation";
 
 interface WebDirectMessagesListProps {
   readonly scrollContainerRef: React.RefObject<HTMLElement | null>;
@@ -29,8 +29,8 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
 }) => {
   const { isAuthenticated } = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
-  const { isApp } = useDeviceInfo();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const { isDirectMessageModalOpen, openDirectMessage, close, isApp } =
+    useCreateWaveDmNavigation();
 
   // Check if device is touch-enabled for tooltip display
   const globalScope = globalThis as typeof globalThis & {
@@ -167,7 +167,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
               data-tooltip-content="New direct message"
             >
               <PrimaryButton
-                onClicked={() => setIsCreateModalOpen(true)}
+                onClicked={openDirectMessage}
                 loading={false}
                 disabled={false}
                 padding="tw-px-2 tw-py-2"
@@ -216,8 +216,8 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
       {/* Create Direct Message Modal */}
       {connectedProfile && (
         <CreateDirectMessageModal
-          isOpen={isCreateModalOpen}
-          onClose={() => setIsCreateModalOpen(false)}
+          isOpen={isDirectMessageModalOpen}
+          onClose={close}
           profile={connectedProfile}
         />
       )}

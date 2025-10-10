@@ -5,7 +5,6 @@ import React, {
   forwardRef,
   useImperativeHandle,
   useRef,
-  useState,
 } from "react";
 import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
 import WebBrainLeftSidebarWave from "./WebBrainLeftSidebarWave";
@@ -20,8 +19,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import CreateWaveModal from "../../../waves/create-wave/CreateWaveModal";
 import { useAuth } from "../../../auth/Auth";
-import useDeviceInfo from "../../../../hooks/useDeviceInfo";
 import { Tooltip as ReactTooltip } from "react-tooltip";
+import useCreateWaveDmNavigation from "@/hooks/useCreateWaveDmNavigation";
 
 // Lightweight type guard that checks essential properties only
 function isValidWave(wave: unknown): wave is MinimalWave {
@@ -78,8 +77,8 @@ const WebUnifiedWavesListWaves = forwardRef<
     const listContainerRef = useRef<HTMLDivElement>(null);
     const sentinelRef = useRef<HTMLDivElement>(null);
     const { connectedProfile } = useAuth();
-    const { isApp } = useDeviceInfo();
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const { isWaveModalOpen, openWave, close, isApp } =
+      useCreateWaveDmNavigation();
 
     // Check if device is touch-enabled for tooltip display
     const globalScope = globalThis as typeof globalThis & {
@@ -139,7 +138,7 @@ const WebUnifiedWavesListWaves = forwardRef<
                     data-tooltip-content="Create wave"
                   >
                     <PrimaryButton
-                      onClicked={() => setIsCreateModalOpen(true)}
+                      onClicked={openWave}
                       loading={false}
                       disabled={false}
                       padding="tw-px-2 tw-py-2"
@@ -257,8 +256,8 @@ const WebUnifiedWavesListWaves = forwardRef<
         {/* Create Wave Modal */}
         {connectedProfile && (
           <CreateWaveModal
-            isOpen={isCreateModalOpen}
-            onClose={() => setIsCreateModalOpen(false)}
+            isOpen={isWaveModalOpen}
+            onClose={close}
             profile={connectedProfile}
           />
         )}

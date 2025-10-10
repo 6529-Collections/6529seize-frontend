@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useSearchParams } from "next/navigation";
 import MyStreamWave from "../brain/my-stream/MyStreamWave";
 import BrainContent from "../brain/content/BrainContent";
@@ -10,12 +10,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import CreateDirectMessageModal from "../waves/create-dm/CreateDirectMessageModal";
 import { useAuth } from "../auth/Auth";
 import useDeviceInfo from "../../hooks/useDeviceInfo";
+import useCreateWaveDmNavigation from "@/hooks/useCreateWaveDmNavigation";
 
 const MessagesView: React.FC = () => {
   const searchParams = useSearchParams();
   const { connectedProfile } = useAuth();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const { isApp } = useDeviceInfo();
+  const { isDirectMessageModalOpen, openDirectMessage, close } =
+    useCreateWaveDmNavigation();
 
   const serialisedWaveId = searchParams?.get("wave") || null;
 
@@ -41,7 +43,7 @@ const MessagesView: React.FC = () => {
           messages and continue the discussion.
         </p>
         <PrimaryButton
-          onClicked={() => setIsCreateModalOpen(true)}
+          onClicked={openDirectMessage}
           loading={false}
           disabled={false}
           padding="tw-px-4 tw-py-2"
@@ -65,8 +67,8 @@ const MessagesView: React.FC = () => {
       {/* Create Direct Message Modal */}
       {connectedProfile && (
         <CreateDirectMessageModal
-          isOpen={isCreateModalOpen}
-          onClose={() => setIsCreateModalOpen(false)}
+          isOpen={isDirectMessageModalOpen}
+          onClose={close}
           profile={connectedProfile}
         />
       )}

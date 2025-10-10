@@ -96,7 +96,7 @@ it("navigates on button clicks", async () => {
   const { unmount } = renderWaves(new Map());
 
   await user.click(screen.getByText("open-create-wave"));
-  expect(mockRouter.replace).toHaveBeenCalledWith("/discover?create=wave", {
+  expect(mockRouter.replace).toHaveBeenCalledWith("/waves?create=wave", {
     scroll: false,
   });
 
@@ -104,7 +104,7 @@ it("navigates on button clicks", async () => {
   renderWaves(new Map());
 
   await user.click(screen.getByText("open-create-dm"));
-  expect(mockRouter.replace).toHaveBeenCalledWith("/discover?create=dm", {
+  expect(mockRouter.replace).toHaveBeenCalledWith("/waves?create=dm", {
     scroll: false,
   });
 });
@@ -118,9 +118,12 @@ it("navigates to app create routes when running in app", async () => {
 
   await user.click(screen.getByText("open-create-wave"));
   expect(mockRouter.push).toHaveBeenCalledWith("/waves/create");
+  expect(mockRouter.replace).not.toHaveBeenCalled();
+  mockRouter.replace.mockReset();
 
   await user.click(screen.getByText("open-create-dm"));
   expect(mockRouter.push).toHaveBeenCalledWith("/messages/create");
+  expect(mockRouter.replace).not.toHaveBeenCalled();
 
   deviceInfoMock.mockReturnValue({ isApp: false });
 });

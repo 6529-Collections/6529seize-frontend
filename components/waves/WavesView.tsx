@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useSearchParams } from "next/navigation";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import MyStreamWave from "../brain/my-stream/MyStreamWave";
@@ -9,12 +9,13 @@ import CreateWaveModal from "./create-wave/CreateWaveModal";
 import { useAuth } from "../auth/Auth";
 import useDeviceInfo from "../../hooks/useDeviceInfo";
 import PrimaryButton from "../utils/button/PrimaryButton";
+import useCreateWaveDmNavigation from "@/hooks/useCreateWaveDmNavigation";
 
 const WavesView: React.FC = () => {
   const searchParams = useSearchParams();
   const { connectedProfile } = useAuth();
   const { isApp } = useDeviceInfo();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const { isWaveModalOpen, openWave, close } = useCreateWaveDmNavigation();
 
   const serialisedWaveId = searchParams?.get('wave') || null;
 
@@ -38,7 +39,7 @@ const WavesView: React.FC = () => {
 
         {connectedProfile && (
           <PrimaryButton
-            onClicked={() => setIsCreateModalOpen(true)}
+            onClicked={openWave}
             disabled={false}
             loading={false}
           >
@@ -64,8 +65,8 @@ const WavesView: React.FC = () => {
       {/* Create Wave Modal */}
       {connectedProfile && (
         <CreateWaveModal
-          isOpen={isCreateModalOpen}
-          onClose={() => setIsCreateModalOpen(false)}
+          isOpen={isWaveModalOpen}
+          onClose={close}
           profile={connectedProfile}
         />
       )}

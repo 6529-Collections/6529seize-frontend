@@ -4,16 +4,20 @@ import { useAuth } from "@/components/auth/Auth";
 import UserSetUpProfileCta from "@/components/user/utils/set-up-profile/UserSetUpProfileCta";
 import { useSetTitle } from "@/contexts/TitleContext";
 import Image from "next/image";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState, type JSX } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo, type JSX } from "react";
 import CreateDirectMessage from "./create-dm/CreateDirectMessage";
 import CreateWave from "./create-wave/CreateWave";
 import WavesList from "./list/WavesList";
 import ConnectWallet from "@/components/common/ConnectWallet";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getWavesBaseRoute } from "@/helpers/navigation.helpers";
 import CreateWaveModal from "./create-wave/CreateWaveModal";
 import CreateDirectMessageModal from "./create-dm/CreateDirectMessageModal";
+import useCreateWaveDmNavigation, {
+  CREATE_DIRECT_MESSAGE_VALUE,
+  CREATE_QUERY_KEY,
+  CREATE_WAVE_VALUE,
+} from "@/hooks/useCreateWaveDmNavigation";
 
 enum WavesViewMode {
   CREATE = "CREATE",
@@ -21,146 +25,67 @@ enum WavesViewMode {
   VIEW = "VIEW",
 }
 
-const CREATE_SEARCH_PARAM = "create";
-const NEW_WAVE_SEARCH_VALUE = "wave";
-const NEW_DIRECT_MESSAGE_SEARCH_VALUE = "dm";
-
 const WAVES_PATH = "/waves";
-export const CREATE_WAVE_SEARCH_PATH = `${WAVES_PATH}?${CREATE_SEARCH_PARAM}=${NEW_WAVE_SEARCH_VALUE}`;
-export const CREATE_DIRECT_MESSAGE_SEARCH_PATH = `${WAVES_PATH}?${CREATE_SEARCH_PARAM}=${NEW_DIRECT_MESSAGE_SEARCH_VALUE}`;
+export const CREATE_WAVE_SEARCH_PATH = `${WAVES_PATH}?${CREATE_QUERY_KEY}=${CREATE_WAVE_VALUE}`;
+export const CREATE_DIRECT_MESSAGE_SEARCH_PATH = `${WAVES_PATH}?${CREATE_QUERY_KEY}=${CREATE_DIRECT_MESSAGE_VALUE}`;
 
 export default function Waves() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const { isApp } = useDeviceInfo();
-  const [isCreateWaveModalOpen, setIsCreateWaveModalOpen] = useState(false);
-  const [isCreateDmModalOpen, setIsCreateDmModalOpen] = useState(false);
+  const {
+    mode,
+    isWaveModalOpen,
+    isDirectMessageModalOpen,
+    openWave,
+    openDirectMessage,
+    close,
+    isApp,
+  } = useCreateWaveDmNavigation();
 
   useSetTitle("Waves | Brain");
 
   const { connectedProfile, activeProfileProxy, showWaves, fetchingProfile } =
     useAuth();
 
-  const isCreateNewWave =
-    searchParams?.get(CREATE_SEARCH_PARAM) === NEW_WAVE_SEARCH_VALUE;
-  const isCreateNewDirectMessage =
-    searchParams?.get(CREATE_SEARCH_PARAM) === NEW_DIRECT_MESSAGE_SEARCH_VALUE;
-
-  useEffect(() => {
-    if (isApp) {
-      return;
-    }
-    if (isCreateNewWave) {
-      setIsCreateWaveModalOpen(true);
-      setIsCreateDmModalOpen(false);
-    } else if (isCreateNewDirectMessage) {
-      setIsCreateDmModalOpen(true);
-      setIsCreateWaveModalOpen(false);
-    } else {
-      setIsCreateWaveModalOpen(false);
-      setIsCreateDmModalOpen(false);
-    }
-  }, [isApp, isCreateNewWave, isCreateNewDirectMessage]);
-
   const viewMode = useMemo(() => {
-    if (isCreateNewWave) {
+    if (mode === CREATE_WAVE_VALUE) {
       return WavesViewMode.CREATE;
     }
-    if (isCreateNewDirectMessage) {
+    if (mode === CREATE_DIRECT_MESSAGE_VALUE) {
       return WavesViewMode.CREATE_DM;
     }
     return WavesViewMode.VIEW;
-  }, [isCreateNewWave, isCreateNewDirectMessage]);
+  }, [mode]);
 
   const showCreateNewButton = useMemo(
     () => !!connectedProfile?.handle && !activeProfileProxy,
     [connectedProfile, activeProfileProxy]
   );
 
-  const updateCreateQuery = useCallback(
-    (value: "wave" | "dm" | null) => {
-      if (isApp) {
+  const onViewModeChange = useCallback(
+    (nextMode: WavesViewMode) => {
+      if (nextMode === WavesViewMode.CREATE) {
+        openWave();
         return;
       }
-      const params = new URLSearchParams(searchParams?.toString() || "");
-      if (value) {
-        params.set(CREATE_SEARCH_PARAM, value);
-      } else {
-        params.delete(CREATE_SEARCH_PARAM);
+      if (nextMode === WavesViewMode.CREATE_DM) {
+        openDirectMessage();
+        return;
       }
-      const basePath = "/discover";
-      const query = params.toString();
-      const destination = query ? `${basePath}?${query}` : basePath;
-      router.replace(destination, { scroll: false });
+      if (isApp) {
+        router.push(getWavesBaseRoute(true));
+        return;
+      }
+      close();
     },
-    [isApp, router, searchParams]
+    [close, isApp, openDirectMessage, openWave, router]
   );
-
-  const closeCreateWaveModal = useCallback(() => {
-    setIsCreateWaveModalOpen(false);
-    updateCreateQuery(null);
-  }, [updateCreateQuery]);
-
-  const closeCreateDmModal = useCallback(() => {
-    setIsCreateDmModalOpen(false);
-    updateCreateQuery(null);
-  }, [updateCreateQuery]);
-
-  const onViewModeChange = (mode: WavesViewMode) => {
-    if (mode === WavesViewMode.CREATE) {
-      if (isApp) {
-        router.push("/waves/create");
-        return;
-      }
-      setIsCreateWaveModalOpen(true);
-      setIsCreateDmModalOpen(false);
-      updateCreateQuery("wave");
-      return;
-    }
-    if (mode === WavesViewMode.CREATE_DM) {
-      if (isApp) {
-        router.push("/messages/create");
-        return;
-      }
-      setIsCreateDmModalOpen(true);
-      setIsCreateWaveModalOpen(false);
-      updateCreateQuery("dm");
-      return;
-    }
-    if (isApp) {
-      router.push(getWavesBaseRoute(true));
-    } else {
-      closeCreateWaveModal();
-      closeCreateDmModal();
-    }
-  };
-
-  useEffect(() => {
-    if (
-      isApp ||
-      (!isCreateNewWave && !isCreateNewDirectMessage) ||
-      pathname === "/discover"
-    ) {
-      return;
-    }
-    updateCreateQuery(isCreateNewWave ? "wave" : "dm");
-  }, [
-    isApp,
-    isCreateNewWave,
-    isCreateNewDirectMessage,
-    pathname,
-    updateCreateQuery,
-  ]);
 
   const handleViewReset = () => {
     if (isApp) {
       router.push(getWavesBaseRoute(true));
       return;
     }
-    setIsCreateWaveModalOpen(false);
-    setIsCreateDmModalOpen(false);
-    updateCreateQuery(null);
+    close();
   };
 
   const returnPlaceholder = (content: JSX.Element) => {
@@ -226,11 +151,16 @@ export default function Waves() {
       />
     ),
     [WavesViewMode.CREATE]: (
-      <CreateWave onBack={handleViewReset} profile={connectedProfile} />
+      <CreateWave
+        onBack={handleViewReset}
+        onSuccess={handleViewReset}
+        profile={connectedProfile}
+      />
     ),
     [WavesViewMode.CREATE_DM]: (
       <CreateDirectMessage
         onBack={handleViewReset}
+        onSuccess={handleViewReset}
         profile={connectedProfile}
       />
     ),
@@ -245,12 +175,12 @@ export default function Waves() {
       {!isApp && connectedProfile && (
         <>
           <CreateWaveModal
-            isOpen={isCreateWaveModalOpen}
+            isOpen={isWaveModalOpen}
             onClose={handleViewReset}
             profile={connectedProfile}
           />
           <CreateDirectMessageModal
-            isOpen={isCreateDmModalOpen}
+            isOpen={isDirectMessageModalOpen}
             onClose={handleViewReset}
             profile={connectedProfile}
           />
