@@ -84,6 +84,18 @@ const STATIC_PATH_SUFFIXES = [
   ".webp",
 ] as const;
 
+function stripTrailingSlashes(value: string): string {
+  let end = value.length;
+  while (end > 0 && value[end - 1] === "/") {
+    end--;
+  }
+  return end === value.length ? value : value.slice(0, end);
+}
+
+function removeSingleTrailingSlash(value: string): string {
+  return value.endsWith("/") ? value.slice(0, -1) : value;
+}
+
 function isDesktopOSFromUserAgent(userAgent: string): boolean {
   const isAndroid = userAgent.includes("android");
   const isIOS =
@@ -107,14 +119,14 @@ function normalizeDropParam(value: string | null): string | undefined {
   if (!value) {
     return undefined;
   }
-  return value.replace(/\/+$/, "");
+  return stripTrailingSlashes(value);
 }
 
 function normalizeSerialParam(value: string | null): string | undefined {
   if (!value) {
     return undefined;
   }
-  return value.replace(/\/$/, "");
+  return removeSingleTrailingSlash(value);
 }
 
 function buildWaveHref({

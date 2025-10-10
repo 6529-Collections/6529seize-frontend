@@ -4,7 +4,6 @@ import React, { type ReactNode } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import MobileLayout from "./MobileLayout";
 import WebLayout from "./WebLayout";
-import ClientOnly from "@/components/client-only/ClientOnly";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { ViewProvider } from "@/components/navigation/ViewContext";
 import { NavigationHistoryProvider } from "@/contexts/NavigationHistoryContext";
@@ -64,16 +63,14 @@ export default function MainLayout({ metadata: _metadata, children }: MainLayout
   );
 
   return (
-    <ClientOnly>
-      <NavigationHistoryProvider>
-        <ViewProvider>
-          <MyStreamProvider>
-            <LayoutProvider>
-              <ScrollPositionProvider>{content}</ScrollPositionProvider>
-            </LayoutProvider>
-          </MyStreamProvider>
-        </ViewProvider>
-      </NavigationHistoryProvider>
-    </ClientOnly>
+    <NavigationHistoryProvider>
+      <ViewProvider>
+        <MyStreamProvider>
+          <LayoutProvider>
+            <ScrollPositionProvider>{content}</ScrollPositionProvider>
+          </LayoutProvider>
+        </MyStreamProvider>
+      </ViewProvider>
+    </NavigationHistoryProvider>
   );
 }

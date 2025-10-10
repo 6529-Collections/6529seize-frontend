@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import BrainLeftSidebar from "./left-sidebar/BrainLeftSidebar";
 import BrainRightSidebar, {
@@ -15,32 +15,25 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useLayout } from "./my-stream/layout/LayoutContext";
 import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
-import Cookies from "js-cookie";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
+import { useSidebarState } from "@/hooks/useSidebarState";
 
 interface Props {
   readonly children: ReactNode;
 }
 
-const SIDEBAR_COLLAPSED_COOKIE = "brain-right-sidebar-collapsed";
-
 const BrainDesktop: React.FC<Props> = ({ children }) => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
-  
-  const [isCollapsed] = useState(() => {
-    const cookie = Cookies.get(SIDEBAR_COLLAPSED_COOKIE);
-    return cookie ? JSON.parse(cookie) : false;
-  });
-  const [showRightSidebar, setShowRightSidebar] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>(SidebarTab.ABOUT);
 
   // Access layout context for pre-calculated styles
   const { contentContainerStyle } = useLayout();
+  const { isRightSidebarOpen, closeRightSidebar } = useSidebarState();
 
-  const dropId = searchParams?.get('drop') ?? undefined;
-  const waveId = searchParams?.get('wave') ?? undefined;
+  const dropId = searchParams?.get("drop") ?? undefined;
+  const waveId = searchParams?.get("wave") ?? undefined;
 
   const { data: drop } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: dropId }],
@@ -53,37 +46,38 @@ const BrainDesktop: React.FC<Props> = ({ children }) => {
   });
 
   useEffect(() => {
-    if (waveId) {
-      setShowRightSidebar(true);
-    } else {
-      setShowRightSidebar(false);
+    if (!waveId && isRightSidebarOpen) {
+      closeRightSidebar();
     }
-  }, [waveId]);
+  }, [waveId, isRightSidebarOpen, closeRightSidebar]);
 
   const onDropClose = () => {
-    const params = new URLSearchParams(searchParams?.toString() || '');
-    params.delete('drop');
-    const basePath = pathname ?? getWaveHomeRoute({ isDirectMessage: false, isApp: false });
-    const newUrl = params.toString() ? `${basePath}?${params.toString()}` : basePath;
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    params.delete("drop");
+    const basePath =
+      pathname ??
+      getWaveHomeRoute({ isDirectMessage: false, isApp: false });
+    const newUrl = params.toString()
+      ? `${basePath}?${params.toString()}`
+      : basePath;
     router.push(newUrl, { scroll: false });
   };
 
   const onDropClick = (drop: ExtendedDrop) => {
-    const params = new URLSearchParams(searchParams?.toString() || '');
-    params.set('drop', drop.id);
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    params.set("drop", drop.id);
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
-  const isDropOpen =
-    drop &&
-    drop?.id?.toLowerCase() === dropId?.toLowerCase();
+  const isDropOpen = useMemo(() => {
+    if (!drop || !dropId) {
+      return false;
+    }
+    return drop.id?.toLowerCase() === dropId.toLowerCase();
+  }, [drop, dropId]);
 
-  const contentClasses = `tw-relative tw-flex tw-flex-grow tw-w-full tw-px-3 min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto
-    ${
-      showRightSidebar && !isCollapsed && !isDropOpen
-        ? "min-[1300px]:tw-mr-[21rem] min-[1300px]:tw-ml-3 min-[1600px]:tw-max-w-full min-[1920px]:tw-mx-auto min-[1920px]:tw-max-w-[1280px]"
-        : ""
-    }`;
+  const contentClasses =
+    "tw-relative tw-flex tw-flex-grow tw-w-full tw-px-3 min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto";
 
   return (
     <div className="tw-relative tw-flex tw-flex-col">
@@ -92,17 +86,20 @@ const BrainDesktop: React.FC<Props> = ({ children }) => {
           layout={!isDropOpen}
           className={isDropOpen ? "tw-w-full xl:tw-pl-6" : contentClasses}
           transition={{ duration: 0.3 }}
-          style={{ transition: "none" }}>
+          style={{ transition: "none" }}
+        >
           <div
             className="tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-gap-x-6 tw-gap-y-4 tw-w-full tw-overflow-hidden"
-            style={contentContainerStyle}>
+            style={contentContainerStyle}
+          >
             <BrainLeftSidebar activeWaveId={waveId} />
             <div className="tw-flex-grow tw-flex tw-flex-col tw-h-full">
               {children}
               {isDropOpen && (
                 <div
                   className="tw-absolute tw-inset-0 tw-z-[49]"
-                  style={{ transition: "none" }}>
+                  style={{ transition: "none" }}
+                >
                   <BrainDesktopDrop
                     drop={{
                       type: DropSize.FULL,
@@ -119,7 +116,7 @@ const BrainDesktop: React.FC<Props> = ({ children }) => {
         </motion.div>
       </div>
 
-      {showRightSidebar && !isDropOpen && waveId && (
+      {isRightSidebarOpen && !isDropOpen && waveId && (
         <BrainRightSidebar
           key="right-sidebar"
           waveId={waveId}

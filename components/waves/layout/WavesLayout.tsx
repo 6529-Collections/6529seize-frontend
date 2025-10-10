@@ -4,7 +4,6 @@ import Head from "next/head";
 import { ReactNode, useMemo } from "react";
 import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
-import ClientOnly from "../../client-only/ClientOnly";
 import ConnectWallet from "../../common/ConnectWallet";
 import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
 import WavesDesktop from "../WavesDesktop";
@@ -82,7 +81,7 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
         <style>{`body { overflow: hidden !important; }`}</style>
       </Head>
       <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black tw-overflow-hidden">
-        <ClientOnly>{content}</ClientOnly>
+        {content}
       </div>
     </>
   );

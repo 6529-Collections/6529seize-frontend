@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ReactNode, useEffect, useRef, useState } from "react";
+import React, { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import SmallScreenHeader from "./SmallScreenHeader";
 import WebSidebar from "./sidebar/WebSidebar";
 import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
@@ -45,14 +45,22 @@ export default function SmallScreenLayout({ children }: Props) {
     }
   }, [activeTab]);
 
+  const toggleMenu = useCallback(() => {
+    setIsMenuOpen(prev => !prev);
+  }, []);
+
+  const closeMenu = useCallback(() => {
+    setIsMenuOpen(false);
+  }, []);
+
   const renderSidebar = () => (
     <div className="tailwind-scope">
       <WebSidebar
         isCollapsed={false}
-        onToggle={() => setIsMenuOpen(!isMenuOpen)}
+        onToggle={toggleMenu}
         isMobile={true}
         isOffcanvasOpen={isMenuOpen}
-        onCloseOffcanvas={() => setIsMenuOpen(false)}
+        onCloseOffcanvas={closeMenu}
         sidebarWidth={SIDEBAR_WIDTHS.EXPANDED}
       />
     </div>
@@ -71,7 +79,7 @@ export default function SmallScreenLayout({ children }: Props) {
       {/* Header bar with hamburger */}
       <div ref={headerRef} className="tw-sticky tw-top-0 tw-z-30">
         <SmallScreenHeader
-          onMenuToggle={() => setIsMenuOpen(!isMenuOpen)}
+          onMenuToggle={toggleMenu}
           isMenuOpen={isMenuOpen}
         />
       </div>

@@ -49,6 +49,9 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
   const [homeActiveTab, setHomeActiveTab] = useState<HomeTab>(() =>
     getStoredHomeTab()
   );
+  const waveParam = searchParams?.get("wave");
+  const viewParam = searchParams?.get("view");
+  const [lastFetchedWaveId, setLastFetchedWaveId] = useState<string | null>(null);
 
   useEffect(() => {
     const { window: browserWindow } = globalThis as typeof globalThis & {
@@ -78,33 +81,46 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
     };
   }, []);
 
+  const fetchWaveDetails = useCallback(
+    async (targetWaveId: string) => {
+      try {
+        const res = await commonApiFetch<ApiWave>({
+          endpoint: `/waves/${targetWaveId}`,
+        });
+        if (!res) {
+          return;
+        }
+        if (res.chat.scope.group?.is_direct_message) {
+          setLastVisitedDm(res.id);
+        } else {
+          setLastVisitedWave(res.id);
+        }
+      } catch (error) {
+        console.warn("Failed to fetch wave metadata", error);
+      } finally {
+        setLastFetchedWaveId(targetWaveId);
+      }
+    },
+    []
+  );
+
   useEffect(() => {
-    const wave = searchParams?.get("wave");
-    const view = searchParams?.get("view");
-
-    const getWave = async () => {
-      const res = await commonApiFetch<ApiWave>({
-        endpoint: `/waves/${wave}`,
-      });
-      if (!res) {
-        return;
-      }
-      if (res.chat.scope.group?.is_direct_message) {
-        setLastVisitedDm(res.id);
-      } else {
-        setLastVisitedWave(res.id);
-      }
-    };
-
-    if (wave) {
+    if (waveParam) {
       setActiveView(null);
-      getWave();
-    } else if (view) {
-      setActiveView(view as ViewKey);
+      if (waveParam !== lastFetchedWaveId) {
+        void fetchWaveDetails(waveParam);
+      }
     } else {
-      setActiveView(null);
+      if (lastFetchedWaveId !== null) {
+        setLastFetchedWaveId(null);
+      }
+      if (viewParam) {
+        setActiveView(viewParam as ViewKey);
+      } else {
+        setActiveView(null);
+      }
     }
-  }, [searchParams]);
+  }, [waveParam, viewParam, fetchWaveDetails, lastFetchedWaveId]);
 
   const handleNavClick = useCallback(
     async (item: NavItem) => {
