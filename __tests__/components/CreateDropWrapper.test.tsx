@@ -19,7 +19,12 @@ jest.mock('@/components/drops/create/full/CreateDropFull', () =>
   ))
 );
 
-jest.mock('@lexical/markdown', () => ({ $convertToMarkdownString: () => 'text', TRANSFORMERS: [] }));
+jest.mock('@/components/waves/drops/normalizeDropMarkdown', () => ({
+  __esModule: true,
+  default: (value: string) => value,
+  normalizeDropMarkdown: (value: string) => value,
+  exportDropMarkdown: () => 'text',
+}));
 jest.mock('@/components/drops/create/lexical/transformers/MentionTransformer', () => ({}));
 jest.mock('@/components/drops/create/lexical/transformers/HastagTransformer', () => ({}));
 jest.mock('@/components/drops/create/lexical/transformers/ImageTransformer', () => ({}));
