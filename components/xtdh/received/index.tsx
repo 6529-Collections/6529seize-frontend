@@ -6,7 +6,7 @@ import {
   type XtdhReceivedView,
 } from "./utils/constants";
 import {
-  XtdhReceivedCollectionsView,
+  XtdhReceivedCollectionsUserView,
   XtdhReceivedNftsView,
 } from "./subcomponents";
 
@@ -41,7 +41,7 @@ export function XtdhReceivedSection({
         to explore by collection or individual token.
       </p>
       {view === "collections" ? (
-        <XtdhReceivedCollectionsView
+        <XtdhReceivedCollectionsUserView
           profileId={profileId}
           view={view}
           onViewChange={handleViewChange}
