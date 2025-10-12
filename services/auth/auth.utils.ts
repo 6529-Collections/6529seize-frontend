@@ -1,8 +1,8 @@
 import { publicEnv } from "@/config/env";
-import Cookies from "js-cookie";
-import { jwtDecode } from "jwt-decode";
 import { API_AUTH_COOKIE } from "@/constants";
 import { safeLocalStorage } from "@/helpers/safeLocalStorage";
+import Cookies from "js-cookie";
+import { jwtDecode } from "jwt-decode";
 
 export const WALLET_AUTH_COOKIE = "wallet-auth";
 
@@ -27,27 +27,8 @@ const getJwtExpiration = (jwt: string): number => {
   return decodedJwt.exp;
 };
 
-// TODO: remove these cookies once migration is complete
-export const migrateCookiesToLocalStorage = () => {
-  const walletAddress = Cookies.get(WALLET_ADDRESS_COOKIE);
-  const walletRefreshToken = Cookies.get(WALLET_REFRESH_TOKEN_COOKIE);
-  const walletRole = Cookies.get(WALLET_ROLE_COOKIE);
-
-  if (walletAddress) {
-    safeLocalStorage.setItem(WALLET_ADDRESS_STORAGE_KEY, walletAddress);
-    Cookies.remove(WALLET_ADDRESS_COOKIE);
-  }
-  if (walletRefreshToken) {
-    safeLocalStorage.setItem(
-      WALLET_REFRESH_TOKEN_STORAGE_KEY,
-      walletRefreshToken
-    );
-    Cookies.remove(WALLET_REFRESH_TOKEN_COOKIE);
-  }
-  if (walletRole) {
-    safeLocalStorage.setItem(WALLET_ROLE_STORAGE_KEY, walletRole);
-    Cookies.remove(WALLET_ROLE_COOKIE);
-  }
+const getAddressRoleStorageKey = (address: string): string => {
+  return `auth-role-${address.toLowerCase()}`;
 };
 
 export const setAuthJwt = (
@@ -69,8 +50,13 @@ export const setAuthJwt = (
 
   safeLocalStorage.setItem(WALLET_ADDRESS_STORAGE_KEY, address);
   safeLocalStorage.setItem(WALLET_REFRESH_TOKEN_STORAGE_KEY, refreshToken);
+  const addressRoleStorageKey = getAddressRoleStorageKey(address);
   if (role) {
     safeLocalStorage.setItem(WALLET_ROLE_STORAGE_KEY, role);
+    safeLocalStorage.setItem(addressRoleStorageKey, role);
+  } else {
+    safeLocalStorage.removeItem(WALLET_ROLE_STORAGE_KEY);
+    safeLocalStorage.removeItem(addressRoleStorageKey);
   }
 };
 
@@ -101,36 +87,31 @@ export const getWalletRole = () => {
 };
 
 export const removeAuthJwt = () => {
+  const storedAddress = safeLocalStorage.getItem(WALLET_ADDRESS_STORAGE_KEY);
   Cookies.remove(WALLET_AUTH_COOKIE, COOKIE_OPTIONS);
   safeLocalStorage.removeItem(WALLET_ADDRESS_STORAGE_KEY);
   safeLocalStorage.removeItem(WALLET_REFRESH_TOKEN_STORAGE_KEY);
   safeLocalStorage.removeItem(WALLET_ROLE_STORAGE_KEY);
+  if (storedAddress) {
+    safeLocalStorage.removeItem(getAddressRoleStorageKey(storedAddress));
+  }
 };
 
 /**
- * Validates JWT role against wallet role with fail-fast security checks
- *
- * @param freshJwt - The fresh JWT token from server response
- * @param walletRole - The role associated with the current wallet
- * @param requestedRole - The role that was requested (optional)
- * @returns The validated role from the fresh JWT
- * @throws Error if validation fails
+ * Synchronizes wallet role storage with the authoritative value from the server.
  */
 export const syncWalletRoleWithServer = (
   serverRole: string | null,
   address: string
 ): void => {
-  const currentRole = getWalletRole();
-  if (currentRole !== serverRole) {
-    // Update local storage to match server
-    if (serverRole) {
-      safeLocalStorage.setItem(
-        `auth-role-${address.toLowerCase()}`,
-        serverRole
-      );
-    } else {
-      safeLocalStorage.removeItem(`auth-role-${address.toLowerCase()}`);
-    }
+  const addressRoleStorageKey = getAddressRoleStorageKey(address);
+
+  if (serverRole) {
+    safeLocalStorage.setItem(WALLET_ROLE_STORAGE_KEY, serverRole);
+    safeLocalStorage.setItem(addressRoleStorageKey, serverRole);
+  } else {
+    safeLocalStorage.removeItem(WALLET_ROLE_STORAGE_KEY);
+    safeLocalStorage.removeItem(addressRoleStorageKey);
   }
 };
 

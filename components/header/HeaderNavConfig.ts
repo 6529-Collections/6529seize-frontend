@@ -58,12 +58,13 @@ export function getDesktopNavigation(_context: NavContext): NavDropdown[] {
         { name: "Groups", path: "/network/groups" },
         { name: "NFT Activity", path: "/nft-activity" },
         { name: "Memes Calendar", path: "/meme-calendar" },
+        { name: "TDH", path: "/network/tdh" },
       ],
       sections: [
         {
           name: "Metrics",
           items: [
-            { name: "Definitions", path: "/network/metrics" },
+            { name: "Definitions", path: "/network/definitions" },
             { name: "Network Stats", path: "/network/stats" },
             { name: "Levels", path: "/network/levels" },
           ],

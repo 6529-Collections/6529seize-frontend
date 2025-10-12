@@ -1,0 +1,60 @@
+@use "../../styles/variables.scss";
+
+.countdownContainer {
+  background-color: variables.$very-dark-grey;
+  padding: 15px 20px !important;
+  color: white;
+  width: 100%;
+  position: relative;
+  box-shadow: 0.5px 0.5px 3px 0px rgba(255, 255, 255, 0.02),
+    1px 3px 6px 0px rgba(0, 0, 0, 0.15),
+    -0.5px -1px 3px 0px rgba(255, 255, 255, 0.02),
+    -3px -3px 5px 0px rgba(255, 255, 255, 0.02) inset,
+    6px 3px 6px 0px rgba(0, 0, 0, 0.4) inset;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  height: 155px; // Mobile & small screens
+
+  @media (min-width: 768px) {
+    height: 180px; // Tablet & larger
+  }
+
+  &.countdownContainerShort {
+    height: 120px;
+  }
+}
+
+.mintBtn {
+  background-color: transparent;
+  border: 2px solid white !important;
+  font-size: larger !important;
+  font-weight: bold;
+  border-radius: 4px;
+
+  &:hover {
+    background-color: white;
+    color: black;
+  }
+}
+
+.skeletonBtn {
+  background: linear-gradient(90deg, #444 25%, #555 50%, #444 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border: 2px solid #666 !important;
+}
+
+.allowlistInfo {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 18px;
+  cursor: help;
+  color: #6c757d;
+  z-index: 10;
+}

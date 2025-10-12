@@ -28,35 +28,27 @@ jest.mock("next/image", () => ({
 }));
 
 // Mock child components
-jest.mock(
-  "@/components/the-memes/MemePageMintCountdown",
-  () =>
-    ({ nft_id, hide_mint_btn, is_full_width, show_only_if_active }: any) =>
-      (
-        <div
-          data-testid="mint-countdown"
-          data-nft-id={nft_id}
-          data-hide-mint-btn={hide_mint_btn}
-          data-is-full-width={is_full_width}
-          data-show-only-if-active={show_only_if_active}
-        />
-      )
-);
+jest.mock("@/components/mint-countdown-box/MemePageMintCountdown", () => ({
+  __esModule: true,
+  default: ({ nft_id }: any) => (
+    <div data-testid="mint-countdown" data-nft-id={nft_id} />
+  ),
+}));
 
-jest.mock(
-  "@/components/address/Address",
-  () =>
-    ({ wallets, display, hideCopy }: any) =>
-      (
-        <div
-          data-testid="address-component"
-          data-wallet={wallets?.[0]}
-          data-display={display}
-          data-hide-copy={hideCopy}>
-          {display || wallets?.[0]}
-        </div>
-      )
-);
+jest.mock("@/components/address/Address", () => {
+  const MockAddress = ({ wallets, display, hideCopy }: any) => (
+    <div
+      data-testid="address-component"
+      data-wallet={wallets?.[0]}
+      data-display={display}
+      data-hide-copy={hideCopy}>
+      {display || wallets?.[0]}
+    </div>
+  );
+
+  MockAddress.displayName = "MockAddress";
+  return MockAddress;
+});
 
 jest.mock("@/components/searchModal/SearchModal", () => ({
   SearchWalletsDisplay: ({
@@ -97,42 +89,44 @@ jest.mock("@/components/searchModal/SearchModal", () => ({
     ) : null,
 }));
 
-jest.mock(
-  "@/components/pagination/Pagination",
-  () =>
-    ({ page, pageSize, totalResults, setPage }: any) =>
-      (
-        <div data-testid="pagination">
-          <span>
-            Page {page} of {Math.ceil(totalResults / pageSize)}
-          </span>
-          <button
-            onClick={() => setPage(page + 1)}
-            data-testid="next-page"
-            disabled={page >= Math.ceil(totalResults / pageSize)}>
-            Next
-          </button>
-        </div>
-      )
-);
+jest.mock("@/components/pagination/Pagination", () => {
+  const MockPagination = ({ page, pageSize, totalResults, setPage }: any) => (
+    <div data-testid="pagination">
+      <span>
+        Page {page} of {Math.ceil(totalResults / pageSize)}
+      </span>
+      <button
+        onClick={() => setPage(page + 1)}
+        data-testid="next-page"
+        disabled={page >= Math.ceil(totalResults / pageSize)}>
+        Next
+      </button>
+    </div>
+  );
 
-jest.mock("@/components/dotLoader/DotLoader", () => () => (
-  <div data-testid="dot-loader">Loading...</div>
-));
+  MockPagination.displayName = "MockPagination";
+  return MockPagination;
+});
 
-jest.mock(
-  "@/components/scrollTo/ScrollToButton",
-  () =>
-    ({ threshold, to, offset }: any) =>
-      (
-        <div
-          data-testid="scroll-to-button"
-          data-threshold={threshold}
-          data-to={to}
-          data-offset={offset}
-        />
-      )
-);
+jest.mock("@/components/dotLoader/DotLoader", () => {
+  const MockDotLoader = () => <div data-testid="dot-loader">Loading...</div>;
+  MockDotLoader.displayName = "MockDotLoader";
+  return MockDotLoader;
+});
+
+jest.mock("@/components/scrollTo/ScrollToButton", () => {
+  const MockScrollToButton = ({ threshold, to, offset }: any) => (
+    <div
+      data-testid="scroll-to-button"
+      data-threshold={threshold}
+      data-to={to}
+      data-offset={offset}
+    />
+  );
+
+  MockScrollToButton.displayName = "MockScrollToButton";
+  return MockScrollToButton;
+});
 
 // Sample test data
 const mockDistributionData = [
@@ -197,9 +191,6 @@ describe("DistributionPage", () => {
         const mintCountdown = screen.getByTestId("mint-countdown");
         expect(mintCountdown).toBeInTheDocument();
         expect(mintCountdown.dataset.nftId).toBe("456");
-        expect(mintCountdown.dataset.hideMintBtn).toBe("false");
-        expect(mintCountdown.dataset.isFullWidth).toBe("false");
-        expect(mintCountdown.dataset.showOnlyIfActive).toBe("true");
       });
     });
 

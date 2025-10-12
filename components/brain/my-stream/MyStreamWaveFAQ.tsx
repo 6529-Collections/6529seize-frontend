@@ -437,7 +437,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
               />
             </Link>
             <Link
-              href="https://6529.io/network/metrics"
+              href="https://6529.io/network/tdh"
               target="_blank"
               rel="noopener noreferrer"
               className="tw-group tw-text-base tw-flex tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors">

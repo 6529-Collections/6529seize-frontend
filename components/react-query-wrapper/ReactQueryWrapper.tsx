@@ -1202,7 +1202,7 @@ export default function ReactQueryWrapper({
     Cookies.set([QueryKey.FEED_ITEMS].toString(), `${Time.now().toMillis()}`);
   });
 
-  useQueryKeyListener([QueryKey.FEED_ITEMS], () => {
+  useQueryKeyListener([QueryKey.IDENTITY_NOTIFICATIONS], () => {
     Cookies.set(
       [QueryKey.IDENTITY_NOTIFICATIONS].toString(),
       `${Time.now().toMillis()}`

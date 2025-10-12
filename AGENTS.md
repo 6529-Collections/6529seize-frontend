@@ -51,6 +51,7 @@ If `npm run test` fails due to low coverage on a modified file, write meaningful
 
 - Use TypeScript and React functional components with hooks.
 - Follow existing code style and naming conventions.
+- Adhere to clean code standards as measured by SonarQube.
 - Place tests in `__tests__` directories or alongside components as `ComponentName.test.tsx`.
 - Mock external dependencies and APIs in tests.
 

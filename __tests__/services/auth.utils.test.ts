@@ -1,14 +1,14 @@
-import Cookies from "js-cookie";
-import { jwtDecode } from "jwt-decode";
 import { safeLocalStorage } from "@/helpers/safeLocalStorage";
 import {
   getAuthJwt,
   getStagingAuth,
   getWalletAddress,
-  migrateCookiesToLocalStorage,
   removeAuthJwt,
   setAuthJwt,
+  syncWalletRoleWithServer,
 } from "@/services/auth/auth.utils";
+import Cookies from "js-cookie";
+import { jwtDecode } from "jwt-decode";
 
 jest.mock("js-cookie", () => ({
   get: jest.fn(),
@@ -50,6 +50,40 @@ describe("auth.utils", () => {
       "6529-wallet-role",
       "role"
     );
+    expect(safeLocalStorage.setItem).toHaveBeenCalledWith(
+      "auth-role-addr",
+      "role"
+    );
+  });
+
+  it("setAuthJwt clears role storage when role is missing", () => {
+    (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
+    jest.spyOn(Date, "now").mockReturnValue(0);
+    setAuthJwt("Addr", "jwt", "refresh");
+    expect(safeLocalStorage.removeItem).toHaveBeenCalledWith(
+      "6529-wallet-role"
+    );
+    expect(safeLocalStorage.removeItem).toHaveBeenCalledWith("auth-role-addr");
+  });
+
+  it("syncWalletRoleWithServer stores server role", () => {
+    syncWalletRoleWithServer("Admin", "0xABC");
+    expect(safeLocalStorage.setItem).toHaveBeenCalledWith(
+      "6529-wallet-role",
+      "Admin"
+    );
+    expect(safeLocalStorage.setItem).toHaveBeenCalledWith(
+      "auth-role-0xabc",
+      "Admin"
+    );
+  });
+
+  it("syncWalletRoleWithServer clears role when server role is missing", () => {
+    syncWalletRoleWithServer(null, "0xAbC");
+    expect(safeLocalStorage.removeItem).toHaveBeenCalledWith(
+      "6529-wallet-role"
+    );
+    expect(safeLocalStorage.removeItem).toHaveBeenCalledWith("auth-role-0xabc");
   });
 
   it("getAuthJwt prefers dev mode", () => {
@@ -71,29 +105,6 @@ describe("auth.utils", () => {
     expect(getStagingAuth()).toBe("e");
   });
 
-  it("migrateCookiesToLocalStorage moves and removes cookies", () => {
-    (Cookies.get as jest.Mock)
-      .mockReturnValueOnce("addr")
-      .mockReturnValueOnce("refresh")
-      .mockReturnValueOnce("role");
-    migrateCookiesToLocalStorage();
-    expect(safeLocalStorage.setItem).toHaveBeenCalledWith(
-      "6529-wallet-address",
-      "addr"
-    );
-    expect(Cookies.remove).toHaveBeenCalledWith("wallet-address");
-    expect(safeLocalStorage.setItem).toHaveBeenCalledWith(
-      "6529-wallet-refresh-token",
-      "refresh"
-    );
-    expect(Cookies.remove).toHaveBeenCalledWith("wallet-refresh-token");
-    expect(safeLocalStorage.setItem).toHaveBeenCalledWith(
-      "6529-wallet-role",
-      "role"
-    );
-    expect(Cookies.remove).toHaveBeenCalledWith("wallet-role");
-  });
-
   it("getWalletAddress respects dev mode and storage", () => {
     const { publicEnv } = require("@/config/env");
     publicEnv.USE_DEV_AUTH = "true";
@@ -105,6 +116,7 @@ describe("auth.utils", () => {
   });
 
   it("removeAuthJwt clears storage and cookie", () => {
+    (safeLocalStorage.getItem as jest.Mock).mockReturnValue("Addr");
     removeAuthJwt();
     expect(Cookies.remove).toHaveBeenCalledWith("wallet-auth", {
       secure: true,
@@ -119,5 +131,6 @@ describe("auth.utils", () => {
     expect(safeLocalStorage.removeItem).toHaveBeenCalledWith(
       "6529-wallet-role"
     );
+    expect(safeLocalStorage.removeItem).toHaveBeenCalledWith("auth-role-addr");
   });
 });

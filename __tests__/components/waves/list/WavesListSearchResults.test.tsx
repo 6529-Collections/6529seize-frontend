@@ -93,6 +93,20 @@ const mockWaves: ApiWave[] = [
 
 const mockUseWaves = useWaves as jest.MockedFunction<typeof useWaves>;
 
+const createUseWavesReturn = (
+  overrides: Partial<ReturnType<typeof useWaves>> = {}
+) => ({
+  waves: [],
+  isFetching: false,
+  isFetchingNextPage: false,
+  hasNextPage: false,
+  fetchNextPage: jest.fn(),
+  status: "success",
+  error: null,
+  refetch: jest.fn(),
+  ...overrides,
+});
+
 describe('WavesListSearchResults', () => {
   const defaultProps = {
     identity: null,
@@ -104,14 +118,7 @@ describe('WavesListSearchResults', () => {
   });
 
   it('renders search title', () => {
-    mockUseWaves.mockReturnValue({
-      waves: [],
-      isFetching: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: jest.fn(),
-      status: 'success',
-    });
+    mockUseWaves.mockReturnValue(createUseWavesReturn());
 
     render(<WavesListSearchResults {...defaultProps} />);
     
@@ -119,14 +126,9 @@ describe('WavesListSearchResults', () => {
   });
 
   it('renders wave items when waves are available', () => {
-    mockUseWaves.mockReturnValue({
+    mockUseWaves.mockReturnValue(createUseWavesReturn({
       waves: mockWaves,
-      isFetching: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: jest.fn(),
-      status: 'success',
-    });
+    }));
 
     render(<WavesListSearchResults {...defaultProps} />);
     
@@ -137,14 +139,7 @@ describe('WavesListSearchResults', () => {
   });
 
   it('shows no results message when no waves found and not fetching', () => {
-    mockUseWaves.mockReturnValue({
-      waves: [],
-      isFetching: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: jest.fn(),
-      status: 'success',
-    });
+    mockUseWaves.mockReturnValue(createUseWavesReturn());
 
     render(<WavesListSearchResults {...defaultProps} />);
     
@@ -154,14 +149,10 @@ describe('WavesListSearchResults', () => {
   });
 
   it('does not show no results message when fetching', () => {
-    mockUseWaves.mockReturnValue({
-      waves: [],
+    mockUseWaves.mockReturnValue(createUseWavesReturn({
       isFetching: true,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: jest.fn(),
       status: 'pending',
-    });
+    }));
 
     render(<WavesListSearchResults {...defaultProps} />);
     
@@ -171,14 +162,10 @@ describe('WavesListSearchResults', () => {
   });
 
   it('shows loading indicator when fetching', () => {
-    mockUseWaves.mockReturnValue({
-      waves: [],
+    mockUseWaves.mockReturnValue(createUseWavesReturn({
       isFetching: true,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: jest.fn(),
       status: 'pending',
-    });
+    }));
 
     render(<WavesListSearchResults {...defaultProps} />);
     
@@ -187,14 +174,11 @@ describe('WavesListSearchResults', () => {
 
   it('calls fetchNextPage on intersection when conditions are met', async () => {
     const mockFetchNextPage = jest.fn();
-    mockUseWaves.mockReturnValue({
+    mockUseWaves.mockReturnValue(createUseWavesReturn({
       waves: mockWaves,
-      isFetching: false,
-      isFetchingNextPage: false,
       hasNextPage: true,
       fetchNextPage: mockFetchNextPage,
-      status: 'success',
-    });
+    }));
 
     render(<WavesListSearchResults {...defaultProps} />);
     
@@ -205,14 +189,13 @@ describe('WavesListSearchResults', () => {
 
   it('does not call fetchNextPage when already fetching', async () => {
     const mockFetchNextPage = jest.fn();
-    mockUseWaves.mockReturnValue({
+    mockUseWaves.mockReturnValue(createUseWavesReturn({
       waves: mockWaves,
       isFetching: true,
-      isFetchingNextPage: false,
       hasNextPage: true,
       fetchNextPage: mockFetchNextPage,
       status: 'pending',
-    });
+    }));
 
     render(<WavesListSearchResults {...defaultProps} />);
     
@@ -222,14 +205,11 @@ describe('WavesListSearchResults', () => {
 
   it('does not call fetchNextPage when no more pages', async () => {
     const mockFetchNextPage = jest.fn();
-    mockUseWaves.mockReturnValue({
+    mockUseWaves.mockReturnValue(createUseWavesReturn({
       waves: mockWaves,
-      isFetching: false,
-      isFetchingNextPage: false,
       hasNextPage: false,
       fetchNextPage: mockFetchNextPage,
-      status: 'success',
-    });
+    }));
 
     render(<WavesListSearchResults {...defaultProps} />);
     
@@ -239,14 +219,12 @@ describe('WavesListSearchResults', () => {
 
   it('does not call fetchNextPage when fetching next page', async () => {
     const mockFetchNextPage = jest.fn();
-    mockUseWaves.mockReturnValue({
+    mockUseWaves.mockReturnValue(createUseWavesReturn({
       waves: mockWaves,
-      isFetching: false,
       isFetchingNextPage: true,
       hasNextPage: true,
       fetchNextPage: mockFetchNextPage,
-      status: 'success',
-    });
+    }));
 
     render(<WavesListSearchResults {...defaultProps} />);
     
@@ -255,14 +233,7 @@ describe('WavesListSearchResults', () => {
   });
 
   it('passes correct parameters to useWaves hook', () => {
-    mockUseWaves.mockReturnValue({
-      waves: [],
-      isFetching: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: jest.fn(),
-      status: 'success',
-    });
+    mockUseWaves.mockReturnValue(createUseWavesReturn());
 
     render(<WavesListSearchResults identity="test-identity" waveName="test-wave" />);
     
@@ -273,14 +244,7 @@ describe('WavesListSearchResults', () => {
   });
 
   it('handles null identity and wave name', () => {
-    mockUseWaves.mockReturnValue({
-      waves: [],
-      isFetching: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: jest.fn(),
-      status: 'success',
-    });
+    mockUseWaves.mockReturnValue(createUseWavesReturn());
 
     render(<WavesListSearchResults identity={null} waveName={null} />);
     
@@ -291,14 +255,10 @@ describe('WavesListSearchResults', () => {
   });
 
   it('renders intersection element for infinite scroll', () => {
-    mockUseWaves.mockReturnValue({
+    mockUseWaves.mockReturnValue(createUseWavesReturn({
       waves: mockWaves,
-      isFetching: false,
-      isFetchingNextPage: false,
       hasNextPage: true,
-      fetchNextPage: jest.fn(),
-      status: 'success',
-    });
+    }));
 
     render(<WavesListSearchResults {...defaultProps} />);
     

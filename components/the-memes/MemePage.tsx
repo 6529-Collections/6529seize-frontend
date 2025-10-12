@@ -9,8 +9,8 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 
 import { AuthContext } from "@/components/auth/Auth";
+import MemePageMintCountdown from "@/components/mint-countdown-box/MemePageMintCountdown";
 import NFTImage from "@/components/nft-image/NFTImage";
-import NftNavigation from "@/components/nft-navigation/NftNavigation";
 import { publicEnv } from "@/config/env";
 import { useTitle } from "@/contexts/TitleContext";
 import { MemesExtendedData, NFT, NftRank, NftTDH } from "@/entities/INFT";
@@ -21,12 +21,12 @@ import { fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import NftNavigation from "../nft-navigation/NftNavigation";
 import {
   MemePageCollectorsRightMenu,
   MemePageCollectorsSubMenu,
 } from "./MemePageCollectors";
 import { MemePageLiveRightMenu, MemePageLiveSubMenu } from "./MemePageLive";
-import MemePageMintCountdown from "./MemePageMintCountdown";
 import {
   MemePageYourCardsRightMenu,
   MemePageYourCardsSubMenu,
@@ -241,22 +241,6 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     return (
       <>
         <Container className="p-0">
-          {nft && (
-            <Row>
-              <Col
-                xs={{ span: 12 }}
-                sm={{ span: 12 }}
-                md={{ span: 12 }}
-                lg={{ span: 6 }}>
-                <MemePageMintCountdown
-                  nft_id={nft.id}
-                  hide_mint_btn={false}
-                  is_full_width={false}
-                  show_only_if_active={true}
-                />
-              </Col>
-            </Row>
-          )}
           <Row>
             {[
               MEME_FOCUS.LIVE,
@@ -339,44 +323,61 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     );
   }
 
+  const isLastCard = nftMeta?.collection_size === nft?.id;
+
   return (
     <Container fluid className={styles.mainContainer}>
       <Row>
         <Col>
           <Container className="pt-4 pb-4">
             <Row>
-              <Col>
-                <h1>
-                  <span className="font-lightest">The</span> Memes
-                </h1>
+              <Col sm={12} md={isLastCard ? 6 : 12}>
+                <Container className="no-padding">
+                  <Row>
+                    <Col>
+                      <h1>
+                        <span className="font-lightest">The</span> Memes
+                      </h1>
+                    </Col>
+                  </Row>
+                  {nftMeta && nft && (
+                    <>
+                      <Row className="pt-3 pb-3">
+                        <Col className="d-flex">
+                          <NftNavigation
+                            nftId={nft.id}
+                            path="/the-memes"
+                            startIndex={1}
+                            endIndex={nftMeta.collection_size}
+                          />
+                        </Col>
+                      </Row>
+                      <Row className="pt-2">
+                        <Col>
+                          <h2 className="float-left">
+                            <Link
+                              href={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}>
+                              SZN{nftMeta.season}
+                            </Link>
+                          </h2>
+                          <h2 className="float-left">
+                            &nbsp;| Card {nft.id} -&nbsp;
+                          </h2>
+                          <h2 className="float-left">{nft.name}</h2>
+                        </Col>
+                      </Row>
+                    </>
+                  )}
+                </Container>
               </Col>
+              {isLastCard && (
+                <Col sm={12} md={6} className="d-flex align-items-center">
+                  {nft && <MemePageMintCountdown nft_id={nft.id} />}
+                </Col>
+              )}
             </Row>
             {nftMeta && nft && (
               <>
-                <Row className="pt-3 pb-3">
-                  <Col className="d-flex">
-                    <NftNavigation
-                      nftId={nft.id}
-                      path="/the-memes"
-                      startIndex={1}
-                      endIndex={nftMeta.collection_size}
-                    />
-                  </Col>
-                </Row>
-                <Row className="pt-2">
-                  <Col>
-                    <h2 className="float-left">
-                      <Link
-                        href={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}>
-                        SZN{nftMeta.season}
-                      </Link>
-                    </h2>
-                    <h2 className="float-left">
-                      &nbsp;| Card {nft.id} -&nbsp;
-                    </h2>
-                    <h2 className="float-left">{nft.name}</h2>
-                  </Col>
-                </Row>
                 <Row className="pt-3 pb-3">
                   <Col className="tw-flex tw-gap-3 tw-items-center tw-flex-wrap">
                     {MEME_TABS.map((tab) => (
