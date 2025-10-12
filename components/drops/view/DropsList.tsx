@@ -157,7 +157,7 @@ const DropsList = memo(function DropsList({
           </div>
         );
       }),
-    [orderedDrops, getItemData] // Only depends on drops array and the memoized item data
+    [orderedDrops, getItemData] // Only depends on orderedDrops array and the memoized item data
   );
 
   return memoizedDrops;
