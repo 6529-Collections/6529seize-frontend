@@ -67,15 +67,17 @@ const DropsList = memo(function DropsList({
     [onReplyClick]
   );
 
-  const chronologicalDrops = useMemo(
-    () => [...drops].reverse(),
-    [drops]
-  );
+  const orderedDrops = useMemo(() => {
+    if (location === DropLocation.WAVE) {
+      return [...drops].reverse();
+    }
+
+    return drops;
+  }, [drops, location]);
 
   // Memoize the props passed to each MemoizedDrop to prevent unnecessary renders
   const getItemData = useMemo(() => {
     return {
-      drops,
       showWaveInfo,
       activeDrop,
       handleReply,
@@ -91,7 +93,6 @@ const DropsList = memo(function DropsList({
       scrollContainerRef,
     };
   }, [
-    drops,
     showWaveInfo,
     activeDrop,
     handleReply,
@@ -109,9 +110,9 @@ const DropsList = memo(function DropsList({
 
   const memoizedDrops = useMemo(
     () =>
-      chronologicalDrops.map((drop, i) => {
-        const previousDrop = chronologicalDrops[i - 1] ?? null;
-        const nextDrop = chronologicalDrops[i + 1] ?? null;
+      orderedDrops.map((drop, i) => {
+        const previousDrop = orderedDrops[i - 1] ?? null;
+        const nextDrop = orderedDrops[i + 1] ?? null;
 
         return (
           <div
@@ -156,7 +157,7 @@ const DropsList = memo(function DropsList({
           </div>
         );
       }),
-    [chronologicalDrops, getItemData] // Only depends on drops array and the memoized item data
+    [orderedDrops, getItemData] // Only depends on drops array and the memoized item data
   );
 
   return memoizedDrops;
