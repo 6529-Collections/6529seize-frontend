@@ -4,7 +4,7 @@ import { useId } from "react";
 
 import { FilterTargetType } from "./filterTargetTypes";
 
-export { FilterTargetType };
+export { FilterTargetType } from "./filterTargetTypes";
 
 const TARGETS = [
   { id: FilterTargetType.ALL, name: "All" },
