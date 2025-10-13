@@ -1,15 +1,18 @@
-import type {
-  XtdhMultiplierMilestone,
-  XtdhOverviewStats,
-  XtdhStatsResponse,
-} from "@/types/xtdh";
+import type { XtdhOverviewStats, XtdhStatsResponse } from "@/types/xtdh";
 
-import type { GrowthPathMetric, NetworkStats, UserSectionState } from "./types";
+import type {
+  MultiplierCycleProgress,
+  NetworkStats,
+  UserSectionState,
+} from "./types";
 import {
   calculatePercentage,
   clampToRange,
-  parseTimeframeToMonths,
+  parseCountdownToDays,
 } from "./utils";
+
+const MIN_CYCLE_DAYS = 30;
+const DEFAULT_ELAPSED_BUFFER_DAYS = 20;
 
 export function buildNetworkStats(
   data: XtdhOverviewStats
@@ -49,6 +52,9 @@ export function buildNetworkStats(
   const allocatedCapacity = clampToRange(network.totalAllocated, 0, totalCapacity);
   const availableCapacity = clampToRange(network.totalAvailable, 0, totalCapacity);
   const percentAllocated = calculatePercentage(allocatedCapacity, totalCapacity);
+  const cycleProgress = buildMultiplierCycleProgress(
+    multiplier.nextIncreaseDate
+  );
   const sanitizedLastUpdatedAt =
     typeof lastUpdatedAt === "string" && isParsableDate(lastUpdatedAt)
       ? lastUpdatedAt
@@ -60,6 +66,7 @@ export function buildNetworkStats(
       nextValue: multiplier.nextValue,
       nextIncreaseDate: multiplier.nextIncreaseDate,
       milestones: multiplier.milestones,
+      cycleProgress,
     },
     lastUpdatedAt: sanitizedLastUpdatedAt,
     baseTdhRate: network.baseTdhRate,
@@ -75,70 +82,33 @@ export function buildNetworkStats(
   };
 }
 
-export function buildLongTermScheduleMetrics(
-  milestones: ReadonlyArray<XtdhMultiplierMilestone>
-): GrowthPathMetric[] {
-  if (!Array.isArray(milestones) || milestones.length === 0) {
-    return [];
+export function buildMultiplierCycleProgress(
+  nextIncreaseDate: string
+): MultiplierCycleProgress | null {
+  if (typeof nextIncreaseDate !== "string") {
+    return null;
   }
 
-  const baseMetrics = milestones.map((milestone, index) => {
-    const percent = Number.isFinite(milestone.percentage)
-      ? `${milestone.percentage}%`
-      : "-";
-    const timeframe = milestone.timeframe || "TBD";
-    const value =
-      percent !== "-" && !percent.startsWith("-") ? `+${percent}` : percent;
+  const countdownDays = parseCountdownToDays(nextIncreaseDate);
+  if (countdownDays === null) {
+    return null;
+  }
 
-    return {
-      label: `Milestone ${index + 1}`,
-      value,
-      helperText: `≈ ${timeframe}`,
-      tooltip: `Projected network multiplier reaching ${percent} in roughly ${timeframe}.`,
-      monthsEstimate: parseTimeframeToMonths(timeframe),
-      positionPercent: 0,
-    };
-  });
+  const totalDays = Math.max(
+    Math.round(countdownDays + DEFAULT_ELAPSED_BUFFER_DAYS),
+    MIN_CYCLE_DAYS
+  );
+  const remainingDays = clampToRange(countdownDays, 0, totalDays);
+  const elapsedDays = clampToRange(totalDays - remainingDays, 0, totalDays);
+  const percentComplete =
+    totalDays > 0 ? (elapsedDays / totalDays) * 100 : 0;
 
-  const validMonths = baseMetrics
-    .map((metric) => metric.monthsEstimate)
-    .filter(
-      (months): months is number =>
-        Number.isFinite(months) && (months as number) >= 0
-    );
-
-  const maxMonths = validMonths.length > 0 ? Math.max(...validMonths) : 0;
-  const minPosition = 5;
-  const count = baseMetrics.length;
-
-  const fallbackPosition = (index: number): number => {
-    if (count <= 1) {
-      return 100;
-    }
-    const ratio = index / (count - 1);
-    return clampToRange(ratio * 100, minPosition, 100);
+  return {
+    totalDays,
+    elapsedDays,
+    remainingDays,
+    percentComplete,
   };
-
-  return baseMetrics.map((metric, index) => {
-    const months = metric.monthsEstimate;
-    if (!Number.isFinite(months) || months < 0 || maxMonths <= 0) {
-      return {
-        ...metric,
-        positionPercent: fallbackPosition(index),
-      };
-    }
-
-    const raw = (months / maxMonths) * 100;
-    const isMax = Math.abs(months - maxMonths) < 0.0001;
-    const position = isMax
-      ? 100
-      : clampToRange(raw, minPosition, 100);
-
-    return {
-      ...metric,
-      positionPercent: position,
-    };
-  });
 }
 
 export function buildUserSectionState({

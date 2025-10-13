@@ -78,6 +78,64 @@ export function extractCountdownLabel(input: string): string | null {
   return `${value} ${normalizedUnit}`;
 }
 
+const COUNTDOWN_UNIT_TO_DAYS: Record<string, number> = {
+  day: 1,
+  days: 1,
+  d: 1,
+  hour: 1 / 24,
+  hours: 1 / 24,
+  hr: 1 / 24,
+  hrs: 1 / 24,
+  week: 7,
+  weeks: 7,
+  wk: 7,
+  wks: 7,
+  month: 30,
+  months: 30,
+  mo: 30,
+  mos: 30,
+  year: 365,
+  years: 365,
+  yr: 365,
+  yrs: 365,
+};
+
+export function parseCountdownToDays(input: string): number | null {
+  if (typeof input !== "string") {
+    return null;
+  }
+
+  const trimmed = input.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const match = trimmed.match(
+    /\b(?:in|within)\s+(\d+(?:\.\d+)?)\s+([a-zA-Z]+)\b/i
+  );
+  if (!match) {
+    return null;
+  }
+
+  const value = Number.parseFloat(match[1]);
+  if (!Number.isFinite(value) || value < 0) {
+    return null;
+  }
+
+  const unit = match[2].toLowerCase();
+  const multiplier = COUNTDOWN_UNIT_TO_DAYS[unit];
+  if (!Number.isFinite(multiplier)) {
+    return null;
+  }
+
+  const days = value * multiplier;
+  if (!Number.isFinite(days)) {
+    return null;
+  }
+
+  return Math.max(0, days);
+}
+
 const TIMEFRAME_UNIT_TO_MONTHS: Record<string, number> = {
   day: 1 / 30,
   days: 1 / 30,

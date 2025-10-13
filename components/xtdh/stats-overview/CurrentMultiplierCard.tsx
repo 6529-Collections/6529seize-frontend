@@ -45,10 +45,21 @@ export function CurrentMultiplierCard({
     >
       <div className="tw-flex tw-h-full tw-flex-col tw-gap-3">
         <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
-          <div className="tw-flex tw-flex-col tw-gap-1">
-            <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-200">
-              Current → Next Multiplier
-            </p>
+          <div className="tw-flex tw-flex-col tw-gap-2">
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 sm:tw-gap-3">
+              <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-200">
+                Current Multiplier
+              </p>
+              <span
+                aria-hidden="true"
+                className="tw-inline-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-primary-500/35 tw-bg-primary-500/10 tw-text-sm tw-font-semibold tw-text-primary-300 sm:tw-h-7 sm:tw-w-7"
+              >
+                →
+              </span>
+              <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
+                Next Multiplier
+              </p>
+            </div>
             {updateLabel ? (
               <p className="tw-m-0 tw-text-[11px] tw-font-medium tw-text-iron-300">
                 {updateLabel}
@@ -75,7 +86,7 @@ export function CurrentMultiplierCard({
           />
         </div>
 
-        <div className="tw-flex tw-flex-col tw-gap-3 md:tw-flex-row md:tw-items-center md:tw-gap-5">
+        <div className="tw-flex tw-flex-col tw-gap-3 md:tw-flex-row md:tw-items-center md:tw-gap-6">
           <div className="tw-flex tw-min-w-[140px] tw-flex-col tw-gap-1">
             <p className="tw-m-0 tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-200">
               Now
@@ -86,10 +97,15 @@ export function CurrentMultiplierCard({
             <p className="tw-m-0 tw-text-xs tw-text-primary-100">{currentPercent}</p>
           </div>
 
-          <div className="tw-flex tw-items-center tw-gap-2 md:tw-gap-3" aria-hidden="true">
-            <span className="tw-inline-flex tw-h-px tw-w-10 tw-bg-primary-700/40" />
-            <span className="tw-text-base tw-font-semibold tw-text-primary-200">→</span>
-            <span className="tw-inline-flex tw-h-px tw-w-10 tw-bg-primary-700/40" />
+          <div
+            className="tw-flex tw-items-center tw-gap-3 md:tw-gap-5"
+            aria-hidden="true"
+          >
+            <span className="tw-inline-flex tw-h-px tw-w-10 tw-rounded-full tw-bg-primary-500/30 md:tw-w-11" />
+            <span className="tw-inline-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-primary-500/40 tw-bg-primary-500/15 tw-text-lg tw-font-semibold tw-text-primary-200 md:tw-h-7 md:tw-w-7">
+              →
+            </span>
+            <span className="tw-inline-flex tw-h-px tw-w-10 tw-rounded-full tw-bg-primary-500/30 md:tw-w-11" />
           </div>
 
           <div className="tw-flex tw-flex-col tw-gap-2">
@@ -112,16 +128,15 @@ export function CurrentMultiplierCard({
           </div>
         </div>
 
-        <GrowthPathTrack milestones={multiplier.milestones} />
+        <GrowthPathTrack progress={multiplier.cycleProgress} />
 
-        <div className="tw-mt-auto tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-[11px] tw-font-medium tw-text-primary-100">
-          <span>Next increase: {multiplier.nextIncreaseDate}</span>
-          {deltaLabel ? (
+        {deltaLabel ? (
+          <div className="tw-mt-auto tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-[11px] tw-font-medium tw-text-primary-100">
             <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-primary-500/40 tw-bg-primary-500/10 tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-semibold tw-text-primary-200">
               {deltaLabel}
             </span>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </div>
     </section>
   );

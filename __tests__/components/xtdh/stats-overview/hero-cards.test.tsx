@@ -1,4 +1,6 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+
+import { buildMultiplierCycleProgress } from "@/components/xtdh/stats-overview/data-builders";
 
 import { CurrentMultiplierCard } from "@/components/xtdh/stats-overview/CurrentMultiplierCard";
 import { SummaryActionsCard } from "@/components/xtdh/stats-overview/SummaryActionsCard";
@@ -12,6 +14,7 @@ const baseMultiplier: NetworkStats["multiplier"] = {
     { percentage: 30, timeframe: "36 months" },
     { percentage: 100, timeframe: "120 months" },
   ],
+  cycleProgress: buildMultiplierCycleProgress("in 30 days"),
 };
 
 describe("CurrentMultiplierCard", () => {
@@ -24,7 +27,7 @@ describe("CurrentMultiplierCard", () => {
     jest.useRealTimers();
   });
 
-  it("renders combined multiplier trajectory details", () => {
+  it("renders multiplier trajectory details with clear headings", () => {
     render(
       <CurrentMultiplierCard
         multiplier={baseMultiplier}
@@ -35,6 +38,8 @@ describe("CurrentMultiplierCard", () => {
     expect(
       screen.getByRole("region", { name: "Multiplier trajectory" })
     ).toBeInTheDocument();
+    expect(screen.getByText("Current Multiplier")).toBeInTheDocument();
+    expect(screen.getByText("Next Multiplier")).toBeInTheDocument();
     expect(screen.getByText("0.10× Base TDH")).toBeInTheDocument();
     expect(screen.getByText("10% of Base TDH")).toBeInTheDocument();
     expect(screen.getByText("0.12× Base TDH")).toBeInTheDocument();
@@ -42,50 +47,47 @@ describe("CurrentMultiplierCard", () => {
     expect(screen.getByText("30 days")).toBeInTheDocument();
     expect(screen.getByText("+0.02×")).toBeInTheDocument();
     expect(screen.getByText("Updated 30 min ago")).toBeInTheDocument();
-    expect(screen.getByText("Growth Path")).toBeInTheDocument();
+    expect(
+      screen.getByText("Current Progress to Next Multiplier")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("40% complete to next increase")
+    ).toBeInTheDocument();
+    const progressbar = screen.getByRole("progressbar");
+    expect(progressbar).toHaveAttribute("aria-valuenow", "40");
   });
 
   it("falls back when countdown cannot be parsed", () => {
     render(
       <CurrentMultiplierCard
-        multiplier={{ ...baseMultiplier, nextIncreaseDate: "July 20, 2025" }}
+        multiplier={{
+          ...baseMultiplier,
+          nextIncreaseDate: "July 20, 2025",
+          cycleProgress: null,
+        }}
       />
     );
 
-    expect(screen.getByText("Next increase: July 20, 2025")).toBeInTheDocument();
+    expect(
+      screen.getByText("Progress data will publish soon.")
+    ).toBeInTheDocument();
     expect(screen.queryByText("30 days")).not.toBeInTheDocument();
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
   });
 
-  it("renders growth milestones inline", () => {
-    render(<CurrentMultiplierCard multiplier={baseMultiplier} />);
-
-    const trajectory = screen.getByRole("region", {
-      name: "Multiplier trajectory",
-    });
-
-    expect(
-      within(trajectory).getAllByText("+30%").length
-    ).toBeGreaterThanOrEqual(1);
-    expect(
-      within(trajectory).getAllByText("≈ 36 months").length
-    ).toBeGreaterThanOrEqual(1);
-    expect(
-      within(trajectory).getAllByText("+100%").length
-    ).toBeGreaterThanOrEqual(1);
-    expect(
-      within(trajectory).getAllByText("≈ 120 months").length
-    ).toBeGreaterThanOrEqual(1);
-  });
-
-  it("renders fallback copy when milestones are not provided", () => {
+  it("shows unlocked state when cycle progress reaches completion", () => {
     render(
       <CurrentMultiplierCard
-        multiplier={{ ...baseMultiplier, milestones: [] }}
+        multiplier={{
+          ...baseMultiplier,
+          nextIncreaseDate: "in 0 days",
+          cycleProgress: buildMultiplierCycleProgress("in 0 days"),
+        }}
       />
     );
 
     expect(
-      screen.getByText("Long-term milestones will publish soon.")
+      screen.getByText("Next multiplier unlocked")
     ).toBeInTheDocument();
   });
 });

@@ -1,7 +1,8 @@
-import { buildLongTermScheduleMetrics } from "@/components/xtdh/stats-overview/data-builders";
+import { buildMultiplierCycleProgress } from "@/components/xtdh/stats-overview/data-builders";
 import {
   extractCountdownLabel,
   formatLastUpdatedLabel,
+  parseCountdownToDays,
   parseTimeframeToMonths,
 } from "@/components/xtdh/stats-overview/utils";
 
@@ -16,6 +17,21 @@ describe("extractCountdownLabel", () => {
     expect(extractCountdownLabel("soon")).toBeNull();
     expect(extractCountdownLabel("")).toBeNull();
     expect(extractCountdownLabel("on July 20")).toBeNull();
+  });
+});
+
+describe("parseCountdownToDays", () => {
+  it("converts supported units to day counts", () => {
+    expect(parseCountdownToDays("in 12 days")).toBe(12);
+    expect(parseCountdownToDays("within 2 weeks")).toBe(14);
+    expect(parseCountdownToDays("In 1 month")).toBe(30);
+    expect(parseCountdownToDays("within 0 days")).toBe(0);
+  });
+
+  it("returns null when countdown cannot be parsed", () => {
+    expect(parseCountdownToDays("soon")).toBeNull();
+    expect(parseCountdownToDays("July 20")).toBeNull();
+    expect(parseCountdownToDays("")).toBeNull();
   });
 });
 
@@ -65,42 +81,29 @@ describe("formatLastUpdatedLabel", () => {
   });
 });
 
-describe("buildLongTermScheduleMetrics", () => {
-  it("maps milestones to stats metrics with percentage and timeframe", () => {
-    const milestones = [
-      { percentage: 30, timeframe: "36 months" },
-      { percentage: 100, timeframe: "120 months" },
-    ] as const;
+describe("buildMultiplierCycleProgress", () => {
+  it("returns a simulated progress snapshot from the countdown string", () => {
+    const progress = buildMultiplierCycleProgress("in 30 days");
 
-    const metrics = buildLongTermScheduleMetrics(milestones);
-
-    expect(metrics).toHaveLength(2);
-    expect(metrics[0]).toMatchObject({
-      label: "Milestone 1",
-      value: "+30%",
-      helperText: "≈ 36 months",
+    expect(progress).not.toBeNull();
+    expect(progress).toMatchObject({
+      totalDays: 50,
+      elapsedDays: 20,
+      remainingDays: 30,
     });
-    expect(metrics[1]).toMatchObject({
-      label: "Milestone 2",
-      value: "+100%",
-      helperText: "≈ 120 months",
-    });
-    expect(metrics[0].positionPercent).toBeCloseTo(30);
-    expect(metrics[1].positionPercent).toBe(100);
+    expect(progress?.percentComplete).toBeCloseTo(40, 5);
   });
 
-  it("falls back to even spacing when timeframe cannot be parsed", () => {
-    const metrics = buildLongTermScheduleMetrics([
-      { percentage: 10, timeframe: "soon" },
-      { percentage: 20, timeframe: "TBD" },
-      { percentage: 30, timeframe: "later" },
-    ]);
+  it("returns 100 percent when no days remain", () => {
+    const progress = buildMultiplierCycleProgress("in 0 days");
 
-    expect(metrics).toHaveLength(3);
-    expect(metrics.map((metric) => metric.positionPercent)).toEqual([5, 50, 100]);
+    expect(progress).not.toBeNull();
+    expect(progress?.percentComplete).toBe(100);
+    expect(progress?.elapsedDays).toBe(progress?.totalDays);
   });
 
-  it("returns an empty list when no milestones are provided", () => {
-    expect(buildLongTermScheduleMetrics([])).toEqual([]);
+  it("returns null when countdown cannot be interpreted", () => {
+    expect(buildMultiplierCycleProgress("July 20, 2025")).toBeNull();
+    expect(buildMultiplierCycleProgress("")).toBeNull();
   });
 });
