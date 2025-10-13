@@ -160,6 +160,34 @@ interface NotificationsProps {
   readonly setActiveDrop: (activeDrop: ActiveDropState | null) => void;
 }
 
+const getErrorDetails = (error: unknown) => {
+  const status =
+    (error as any)?.status ??
+    (error as any)?.response?.status ??
+    (error as any)?.cause?.status;
+
+  if (error instanceof Error) {
+    const message = error.message?.trim() || DEFAULT_ERROR_MESSAGE;
+    return {
+      message,
+      isUnauthorized: status === 401 || /unauthorized/i.test(message),
+    };
+  }
+
+  if (typeof error === "string") {
+    const message = error.trim() || DEFAULT_ERROR_MESSAGE;
+    return {
+      message,
+      isUnauthorized: status === 401 || /unauthorized/i.test(message),
+    };
+  }
+
+  return {
+    message: DEFAULT_ERROR_MESSAGE,
+    isUnauthorized: status === 401,
+  };
+};
+
 export default function Notifications({ activeDrop, setActiveDrop }: NotificationsProps) {
   const {
     connectedProfile,
@@ -257,34 +285,6 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
     reverse: true,
     cause: activeFilter?.cause,
   });
-
-  const getErrorDetails = (error: unknown) => {
-    const status =
-      (error as any)?.status ??
-      (error as any)?.response?.status ??
-      (error as any)?.cause?.status;
-
-    if (error instanceof Error) {
-      const message = error.message?.trim() || DEFAULT_ERROR_MESSAGE;
-      return {
-        message,
-        isUnauthorized: status === 401 || /unauthorized/i.test(message),
-      };
-    }
-
-    if (typeof error === "string") {
-      const message = error.trim() || DEFAULT_ERROR_MESSAGE;
-      return {
-        message,
-        isUnauthorized: status === 401 || /unauthorized/i.test(message),
-      };
-    }
-
-    return {
-      message: DEFAULT_ERROR_MESSAGE,
-      isUnauthorized: status === 401,
-    };
-  };
 
   useEffect(() => {
     if (reload !== "true") {
