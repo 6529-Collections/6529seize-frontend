@@ -1,5 +1,13 @@
 # AGENTS.md – Codex Configuration for Next.js Frontend
 
+## Codex Workflow
+
+- Review `/codex/STATE.md` before starting new work to confirm ticket ownership and status.
+- Track every piece of work with a ticket in `/codex/tickets/`, keeping the front matter and board entry in sync as progress is made.
+- Log meaningful events and decisions inside the ticket with timestamped notes; avoid editing tickets marked **Done**.
+- Consult `/codex/plans/` for active planning documents and update them when sprint scope changes.
+- See `codex/agents.md` for the full Codex agent contract and operational details.
+
 ## Setup
 
 ```bash
@@ -57,9 +65,8 @@ If `npm run test` fails due to low coverage on a modified file, write meaningful
 
 ## Next.js Directory Structure
 
-The project supports both the classic `pages/` folder and Next.js `app/` router.
-Legacy routes remain under `pages/`, while all **new** pages must be created
-inside the `app/` directory.
+This project now ships exclusively on the Next.js `app/` router. All routes live
+inside the `app/` directory—do not introduce a legacy `pages/` tree.
 
 Routes in `app/` should export a `generateMetadata` function using the helper
 `getAppMetadata`:
