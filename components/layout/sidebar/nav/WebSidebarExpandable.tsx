@@ -24,32 +24,24 @@ function WebSidebarExpandable({
   pathname,
   'data-section': dataSection,
 }: WebSidebarExpandableProps) {
-  // Helper to check active routes
   const isActive = (href: string) => pathname === href;
 
-  // Compute which subsection has the active item
   const activeSubsection = section.subsections?.find(sub =>
     sub.items.some(item => isActive(item.href))
   )?.name || null;
 
-  // Track which subsection is expanded (only one at a time)
   const [expandedSubsection, setExpandedSubsection] = useState<string | null>(null);
 
-  // Sync expanded subsection with active route
   useEffect(() => {
     setExpandedSubsection(activeSubsection);
   }, [activeSubsection]);
 
-  // Handle subsection toggle - closes others when opening one
   const handleSubsectionToggle = useCallback((subsectionName: string, isExpanded: boolean) => {
     setExpandedSubsection(isExpanded ? subsectionName : null);
   }, []);
 
-  // Check if section has any active item - memoized since section changes rarely
   const hasActiveItem = useMemo(() => {
-    // Check direct items
     if (section.items.some((item) => pathname === item.href)) return true;
-    // Check subsection items
     if (
       section.subsections?.some((sub) =>
         sub.items.some((item) => pathname === item.href)

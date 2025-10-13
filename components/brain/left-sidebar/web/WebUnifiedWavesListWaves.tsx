@@ -22,14 +22,12 @@ import { useAuth } from "../../../auth/Auth";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import useCreateModalState from "@/hooks/useCreateModalState";
 
-// Lightweight type guard that checks essential properties only
 function isValidWave(wave: unknown): wave is MinimalWave {
   if (wave === null || wave === undefined || typeof wave !== "object") {
     return false;
   }
 
   const w = wave as MinimalWave;
-  // Check only essential properties for performance
   return (
     typeof w.id === "string" &&
     w.id.length > 0 &&
@@ -38,11 +36,9 @@ function isValidWave(wave: unknown): wave is MinimalWave {
   );
 }
 
-// Height for empty waves placeholder to maintain consistent layout
 const EMPTY_WAVES_PLACEHOLDER_HEIGHT = "48px" as const;
 
-// Virtualization constants
-const WAVE_ROW_HEIGHT = 62 as const; // Height of each wave row in pixels
+const WAVE_ROW_HEIGHT = 62 as const;
 
 export interface WebUnifiedWavesListWavesHandle {
   sentinelRef: React.RefObject<HTMLElement | null>;
@@ -77,10 +73,8 @@ const WebUnifiedWavesListWaves = forwardRef<
     const listContainerRef = useRef<HTMLDivElement>(null);
     const sentinelRef = useRef<HTMLDivElement>(null);
     const { connectedProfile } = useAuth();
-    const { isWaveModalOpen, openWave, close, isApp } =
-      useCreateModalState();
+    const { isWaveModalOpen, openWave, close, isApp } = useCreateModalState();
 
-    // Check if device is touch-enabled for tooltip display
     const globalScope = globalThis as typeof globalThis & {
       window?: Window;
       navigator?: Navigator;
@@ -98,7 +92,6 @@ const WebUnifiedWavesListWaves = forwardRef<
       sentinelRef,
     }));
 
-    // Split waves into pinned and regular
     const { pinnedWaves, regularWaves } = useMemo(() => {
       const pinned: MinimalWave[] = [];
       const regular: MinimalWave[] = [];
@@ -114,20 +107,18 @@ const WebUnifiedWavesListWaves = forwardRef<
       return { pinnedWaves: pinned, regularWaves: regular };
     }, [waves]);
 
-    // Use virtualization hook for regular waves
     const virtual = useVirtualizedWaves<MinimalWave>(
       regularWaves,
       "web-unified-waves-regular",
       scrollContainerRef || listContainerRef,
       listContainerRef,
       WAVE_ROW_HEIGHT,
-      5 // overscan
+      5
     );
 
     return (
       <>
         <div className="tw-flex tw-flex-col">
-          {/* Waves header with create button */}
           {!hideHeaders && (
             <SectionHeader
               label="Waves"
@@ -154,7 +145,6 @@ const WebUnifiedWavesListWaves = forwardRef<
             />
           )}
 
-          {/* Waves filter toggle on its own row */}
           {!hideHeaders && !hideToggle && (
             <div className="tw-pb-3 tw-mt-4 tw-flex tw-px-4">
               <WavesFilterToggle />
@@ -162,7 +152,6 @@ const WebUnifiedWavesListWaves = forwardRef<
           )}
 
           <div>
-            {/* Conditionally show pinned section */}
             {!hideHeaders && pinnedWaves.length > 0 && (
               <section
                 className="tw-flex tw-flex-col"
@@ -188,13 +177,11 @@ const WebUnifiedWavesListWaves = forwardRef<
                   ))}
               </section>
             )}
-            {/* Add divider between pinned and regular waves */}
             {!hideHeaders &&
               pinnedWaves.length > 0 &&
               regularWaves.length > 0 && (
                 <div className="tw-border-t tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-b-0 tw-my-3" />
               )}
-            {/* Conditionally show regular waves or maintain structure */}
             {regularWaves.length > 0 ? (
               <section
                 ref={listContainerRef}
@@ -253,7 +240,6 @@ const WebUnifiedWavesListWaves = forwardRef<
           </div>
         </div>
 
-        {/* Create Wave Modal */}
         {connectedProfile && (
           <CreateWaveModal
             isOpen={isWaveModalOpen}
@@ -262,7 +248,6 @@ const WebUnifiedWavesListWaves = forwardRef<
           />
         )}
 
-        {/* Tooltip */}
         {!isTouchDevice && (
           <ReactTooltip
             id="create-wave-tooltip"
@@ -271,7 +256,7 @@ const WebUnifiedWavesListWaves = forwardRef<
             opacity={1}
             style={{
               padding: "6px 10px",
-              background: "#37373E", // iron-700
+              background: "#37373E",
               color: "white",
               fontSize: "12px",
               fontWeight: 500,
@@ -279,7 +264,7 @@ const WebUnifiedWavesListWaves = forwardRef<
               boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
               zIndex: 10000,
             }}
-            border="1px solid #4C4C55" // iron-650
+            border="1px solid #4C4C55"
           />
         )}
       </>

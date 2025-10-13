@@ -75,7 +75,7 @@ export function useSidebarSections(
           {
             name: "The Memes Tools",
             items: [
-              ...(!isIos || country === "US"
+              ...(!isIos || country?.toUpperCase() === "US"
                 ? [
                     {
                       name: "Memes Subscriptions",
@@ -111,7 +111,7 @@ export function useSidebarSections(
             name: "NFTs",
             items: [
               { name: "The Memes", href: `/about/${AboutSection.MEMES}` },
-              ...(!isIos || country === "US"
+              ...(!isIos || country?.toUpperCase() === "US"
                 ? [
                     {
                       name: "Subscriptions",
@@ -179,7 +179,6 @@ export function useSidebarSections(
   );
 }
 
-// Create a section map for quick lookups
 export function useSectionMap(sections: SidebarSection[]) {
   return useMemo(
     () => new Map(sections.map(section => [section.key, section])),

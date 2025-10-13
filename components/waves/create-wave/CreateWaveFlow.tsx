@@ -10,7 +10,8 @@ export default function CreateWaveFlow({
   readonly children: ReactNode;
 }) {
   useEffect(() => {
-    if (typeof window === "undefined") {
+    const browserWindow = globalThis.window;
+    if (!browserWindow) {
       return;
     }
 
@@ -20,9 +21,9 @@ export default function CreateWaveFlow({
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    browserWindow.addEventListener("keydown", handleKeyDown);
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      browserWindow.removeEventListener("keydown", handleKeyDown);
     };
   }, [onBack]);
 
