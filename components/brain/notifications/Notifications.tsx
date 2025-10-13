@@ -8,12 +8,13 @@ import {
   useRef,
   useState,
 } from "react";
-import type { UIEventHandler } from "react";
+import type { ReactNode, UIEventHandler } from "react";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import NotificationsWrapper from "./NotificationsWrapper";
+import type { TypedNotification } from "@/types/feed.types";
 import { useMutation } from "@tanstack/react-query";
 import MyStreamNoItems from "../my-stream/layout/MyStreamNoItems";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
@@ -32,6 +33,127 @@ const LOAD_TIMEOUT_MS = 15000;
 const DEFAULT_ERROR_MESSAGE = "Failed to load notifications. Please try again.";
 const LOAD_TIMEOUT_MESSAGE =
   "Loading notifications is taking longer than expected. Please try again.";
+
+interface StateAction {
+  readonly label: string;
+  readonly handler: () => void;
+}
+
+function renderStateMessage(
+  message: string,
+  action?: StateAction
+): ReactNode {
+  return (
+    <div className="tw-flex tw-flex-1 tw-flex-col tw-items-center tw-justify-center tw-gap-4 tw-text-center tw-min-h-full tw-px-4 tw-py-8">
+      <p className="tw-text-iron-300 tw-text-sm md:tw-text-base">{message}</p>
+      {action ? (
+        <button
+          type="button"
+          onClick={action.handler}
+          className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-iron-500 tw-bg-transparent tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100 desktop-hover:hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-iron-300">
+          {action.label}
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+interface NotificationsContentParams {
+  readonly isLoadingProfile: boolean;
+  readonly hasConnectedProfile: boolean;
+  readonly hasProfileHandle: boolean;
+  readonly showProxyDisabledState: boolean;
+  readonly showErrorState: boolean;
+  readonly resolvedErrorMessage: string;
+  readonly handleRetry: () => void;
+  readonly handleAuthRetry: () => void;
+  readonly handleProxyDisable: () => void;
+  readonly showLoader: boolean;
+  readonly showNoItems: boolean;
+  readonly items: TypedNotification[];
+  readonly loadingOlder: boolean;
+  readonly activeDrop: ActiveDropState | null;
+  readonly setActiveDrop: (activeDrop: ActiveDropState | null) => void;
+}
+
+function resolveNotificationsContent({
+  isLoadingProfile,
+  hasConnectedProfile,
+  hasProfileHandle,
+  showProxyDisabledState,
+  showErrorState,
+  resolvedErrorMessage,
+  handleRetry,
+  handleAuthRetry,
+  handleProxyDisable,
+  showLoader,
+  showNoItems,
+  items,
+  loadingOlder,
+  activeDrop,
+  setActiveDrop,
+}: NotificationsContentParams): ReactNode {
+  if (isLoadingProfile) {
+    return (
+      <div className="tw-flex tw-flex-1 tw-flex-col tw-items-center tw-justify-center tw-min-h-full tw-py-8">
+        <SpinnerLoader text="Loading profile..." />
+      </div>
+    );
+  }
+
+  if (!hasConnectedProfile) {
+    return renderStateMessage("Connect your wallet to view notifications.", {
+      label: "Reconnect wallet",
+      handler: handleAuthRetry,
+    });
+  }
+
+  if (!hasProfileHandle) {
+    return renderStateMessage(
+      "We couldn't determine your profile handle. Please reconnect to continue.",
+      { label: "Reconnect wallet", handler: handleAuthRetry }
+    );
+  }
+
+  if (showProxyDisabledState) {
+    return renderStateMessage(
+      "Notifications are not available while you are using a profile proxy.",
+      { label: "Switch to primary profile", handler: handleProxyDisable }
+    );
+  }
+
+  if (showErrorState) {
+    return renderStateMessage(resolvedErrorMessage, {
+      label: "Try again",
+      handler: handleRetry,
+    });
+  }
+
+  if (showLoader) {
+    return (
+      <div className="tw-flex tw-flex-1 tw-flex-col tw-items-center tw-justify-center tw-min-h-full tw-py-8">
+        <SpinnerLoader text="Loading notifications..." />
+      </div>
+    );
+  }
+
+  if (showNoItems) {
+    return (
+      <div className="tw-flex tw-flex-1 tw-flex-col tw-items-center tw-justify-start tw-min-h-full">
+        <MyStreamNoItems />
+      </div>
+    );
+  }
+
+  return (
+    <NotificationsWrapper
+      items={items}
+      loadingOlder={loadingOlder}
+      activeDrop={activeDrop}
+      setActiveDrop={setActiveDrop}
+    />
+  );
+}
 
 interface NotificationsProps {
   readonly activeDrop: ActiveDropState | null;
@@ -294,12 +416,12 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
       return;
     }
 
-    const timerId = window.setTimeout(() => {
+    const timerId = globalThis.setTimeout(() => {
       setHasTimedOut(true);
     }, LOAD_TIMEOUT_MS);
 
     return () => {
-      window.clearTimeout(timerId);
+      globalThis.clearTimeout(timerId);
     };
   }, [
     isSuccess,
@@ -397,23 +519,6 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
   const resolvedErrorMessage = hasTimedOut
     ? LOAD_TIMEOUT_MESSAGE
     : errorMessage ?? DEFAULT_ERROR_MESSAGE;
-
-  const renderStateMessage = (
-    message: string,
-    action?: { label: string; handler: () => void }
-  ) => (
-    <div className="tw-flex tw-flex-1 tw-flex-col tw-items-center tw-justify-center tw-gap-4 tw-text-center tw-min-h-full tw-px-4 tw-py-8">
-      <p className="tw-text-iron-300 tw-text-sm md:tw-text-base">{message}</p>
-      {action ? (
-        <button
-          type="button"
-          onClick={action.handler}
-          className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-iron-500 tw-bg-transparent tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100 desktop-hover:hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-iron-300">
-          {action.label}
-        </button>
-      ) : null}
-    </div>
-  );
 
   useLayoutEffect(() => {
     const scrollElement = scrollContainerRef.current;
@@ -520,55 +625,23 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
     ]
   );
 
-  let notificationsContent = null;
-  if (isLoadingProfile) {
-    notificationsContent = (
-      <div className="tw-flex tw-flex-1 tw-flex-col tw-items-center tw-justify-center tw-min-h-full tw-py-8">
-        <SpinnerLoader text="Loading profile..." />
-      </div>
-    );
-  } else if (!hasConnectedProfile) {
-    notificationsContent = renderStateMessage(
-      "Connect your wallet to view notifications.",
-      { label: "Reconnect wallet", handler: handleAuthRetry }
-    );
-  } else if (!hasProfileHandle) {
-    notificationsContent = renderStateMessage(
-      "We couldn't determine your profile handle. Please reconnect to continue.",
-      { label: "Reconnect wallet", handler: handleAuthRetry }
-    );
-  } else if (showProxyDisabledState) {
-    notificationsContent = renderStateMessage(
-      "Notifications are not available while you are using a profile proxy.",
-      { label: "Switch to primary profile", handler: handleProxyDisable }
-    );
-  } else if (showErrorState) {
-    notificationsContent = renderStateMessage(resolvedErrorMessage, {
-      label: "Try again",
-      handler: handleRetry,
-    });
-  } else if (showLoader) {
-    notificationsContent = (
-      <div className="tw-flex tw-flex-1 tw-flex-col tw-items-center tw-justify-center tw-min-h-full tw-py-8">
-        <SpinnerLoader text="Loading notifications..." />
-      </div>
-    );
-  } else if (showNoItems) {
-    notificationsContent = (
-      <div className="tw-flex tw-flex-1 tw-flex-col tw-items-center tw-justify-start tw-min-h-full">
-        <MyStreamNoItems />
-      </div>
-    );
-  } else {
-    notificationsContent = (
-      <NotificationsWrapper
-        items={items}
-        loadingOlder={isFetchingNextPage}
-        activeDrop={activeDrop}
-        setActiveDrop={setActiveDrop}
-      />
-    );
-  }
+  const notificationsContent = resolveNotificationsContent({
+    isLoadingProfile,
+    hasConnectedProfile,
+    hasProfileHandle,
+    showProxyDisabledState,
+    showErrorState,
+    resolvedErrorMessage,
+    handleRetry,
+    handleAuthRetry,
+    handleProxyDisable,
+    showLoader,
+    showNoItems,
+    items,
+    loadingOlder: isFetchingNextPage,
+    activeDrop,
+    setActiveDrop,
+  });
 
   return (
     <div
