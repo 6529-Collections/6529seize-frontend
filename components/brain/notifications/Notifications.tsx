@@ -521,7 +521,7 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
     isInitialQueryDone &&
     !isFetching &&
     items.length === 0;
-  const showErrorState = (errorMessage || hasTimedOut) && items.length === 0;
+  const showErrorState = (!!errorMessage || hasTimedOut) && items.length === 0;
   const shouldEnableInfiniteScroll =
     isAuthenticated && !showLoader && !showNoItems && !showErrorState;
 
