@@ -7,6 +7,7 @@ import {
   InvalidRoleStateError
 } from "@/errors/authentication";
 import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { publicEnv } from "@/config/env";
 
 interface ImmediateValidationParams {
   currentAddress: string;
@@ -141,6 +142,11 @@ export const validateAuthImmediate = async ({
   params: ImmediateValidationParams;
   callbacks: ImmediateValidationCallbacks;
 }): Promise<ImmediateValidationResult> => {
+  if (publicEnv.USE_DEV_AUTH === "true") {
+    // Dev auth relies on static env values, so skip live validation to avoid disconnect loops.
+    return createValidationResult(true, false, false);
+  }
+
   const {
     currentAddress,
     connectionAddress,
