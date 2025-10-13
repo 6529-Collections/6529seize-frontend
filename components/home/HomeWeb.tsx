@@ -50,6 +50,14 @@ export default function HomeWeb({
     [registerRef]
   );
 
+  const feedContent = isWalletInitializing ? (
+    <SpinnerLoader text="Loading feed..." />
+  ) : isAuthenticated ? (
+    <HomeFeed />
+  ) : (
+    <ConnectWallet />
+  );
+
   return (
     <div className="tw-h-full">
       {isDropOpen && drop && (
@@ -82,13 +90,7 @@ export default function HomeWeb({
       <div className="tw-h-full">
         {activeTab === "feed" ? (
           <div className="tw-h-full tw-bg-black tw-overflow-hidden tailwind-scope tw-px-2 lg:tw-px-6 xl:tw-px-8">
-            {isWalletInitializing ? (
-              <SpinnerLoader text="Loading feed..." />
-            ) : isAuthenticated ? (
-              <HomeFeed />
-            ) : (
-              <ConnectWallet />
-            )}
+            {feedContent}
           </div>
         ) : (
           <Home
