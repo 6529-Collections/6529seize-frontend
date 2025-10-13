@@ -32,6 +32,7 @@ type Props = {
   readonly defaultBanner2: string;
   readonly initialStatements: CicStatement[];
   readonly profileEnabledAt: string | null;
+  readonly followersCount: number | null;
 };
 
 export default function UserPageHeaderClient({
@@ -42,6 +43,7 @@ export default function UserPageHeaderClient({
   defaultBanner2,
   initialStatements,
   profileEnabledAt,
+  followersCount,
 }: Readonly<Props>) {
   const params = useParams();
   const router = useRouter();
@@ -223,7 +225,11 @@ export default function UserPageHeaderClient({
                 canEdit={canEdit}
               />
             )}
-            <UserPageHeaderStats profile={profile} />
+            <UserPageHeaderStats
+              profile={profile}
+              handleOrWallet={normalizedHandleOrWallet}
+              followersCount={followersCount}
+            />
             <UserPageHeaderProfileEnabledAt
               profileEnabledAt={profileEnabledAt}
             />
