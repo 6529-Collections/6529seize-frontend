@@ -34,16 +34,12 @@ export function XtdhReceivedCollectionsViewContent({
 }: XtdhReceivedCollectionsViewContentProps) {
   const {
     resultSummary,
-    selectedCollections,
-    collectionFilterOptions,
     filtersAreActive,
     isLoading,
     isFetching,
     activeSort,
     activeDirection,
-    handleCollectionsFilterChange,
     handleSortChange,
-    handleClearFilters,
     collections,
     expandedCollectionId,
     toggleCollection,
@@ -51,22 +47,41 @@ export function XtdhReceivedCollectionsViewContent({
     totalPages,
     haveNextPage,
     handlePageChange,
+    searchQuery,
+    handleSearchChange,
+    ownershipFilter,
+    handleOwnershipFilterChange,
+    isMyAllocationsActive,
+    handleToggleMyAllocations,
+    isTrendingActive,
+    handleToggleTrending,
+    isNewlyAllocatedActive,
+    handleToggleNewlyAllocated,
+    activeFilters,
+    handleResetFilters,
   } = state;
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-4">
       <XtdhReceivedCollectionsControls
         resultSummary={resultSummary}
-        selectedCollections={selectedCollections}
-        collectionFilterOptions={collectionFilterOptions}
+        searchQuery={searchQuery}
+        onSearchChange={handleSearchChange}
+        ownershipFilter={ownershipFilter}
+        onOwnershipFilterChange={handleOwnershipFilterChange}
+        isMyAllocationsActive={isMyAllocationsActive}
+        onToggleMyAllocations={handleToggleMyAllocations}
+        isTrendingActive={isTrendingActive}
+        onToggleTrending={handleToggleTrending}
+        isNewlyAllocatedActive={isNewlyAllocatedActive}
+        onToggleNewlyAllocated={handleToggleNewlyAllocated}
+        activeFilters={activeFilters}
         filtersAreActive={filtersAreActive}
         isLoading={isLoading}
-        isFetching={isFetching}
         activeSort={activeSort}
         activeDirection={activeDirection}
-        onCollectionsFilterChange={handleCollectionsFilterChange}
         onSortChange={handleSortChange}
-        onClearFilters={handleClearFilters}
+        onResetFilters={handleResetFilters}
         view={view}
         onViewChange={onViewChange}
         announcement={announcement}
@@ -78,7 +93,7 @@ export function XtdhReceivedCollectionsViewContent({
         collections={collections}
         filtersAreActive={filtersAreActive}
         emptyStateCopy={emptyStateCopy}
-        onClearFilters={handleClearFilters}
+        onClearFilters={handleResetFilters}
         expandedCollectionId={expandedCollectionId}
         onToggleCollection={toggleCollection}
         clearFiltersLabel={clearFiltersLabel}

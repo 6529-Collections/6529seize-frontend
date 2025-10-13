@@ -24,6 +24,11 @@ export function XtdhReceivedCollectionCardSummary({
         <span className="tw-text-base tw-font-semibold tw-text-iron-50">
           {collection.collectionName}
         </span>
+        {collection.creatorName && (
+          <span className="tw-text-xs tw-text-iron-400">
+            By {collection.creatorName}
+          </span>
+        )}
         <span className="tw-text-xs tw-text-iron-300">
           {collection.tokenCount.toLocaleString()} tokens receiving xTDH
         </span>

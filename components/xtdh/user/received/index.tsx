@@ -65,23 +65,52 @@ export default function UserPageXtdhReceived({
       collections: collectionsStateData.collections,
       activeSort: collectionsStateData.activeSort,
       activeDirection: collectionsStateData.activeDirection,
-      collectionFilterOptions: collectionsStateData.collectionFilterOptions,
       filtersAreActive: collectionsStateData.filtersAreActive,
-      selectedCollections: collectionsStateData.selectedCollections,
       resultSummary: collectionsStateData.resultSummary,
       page: collectionsStateData.page,
       totalPages: collectionsStateData.totalPages,
       haveNextPage: collectionsStateData.haveNextPage,
       handleSortChange: collectionsStateData.handleSortChange,
-      handleCollectionsFilterChange:
-        collectionsStateData.handleCollectionsFilterChange,
-      handleClearFilters: collectionsStateData.handleClearFilters,
       handlePageChange: collectionsStateData.handlePageChange,
       handleRetry: collectionsStateData.handleRetry,
       expandedCollectionId: collectionsStateData.expandedCollectionId,
       toggleCollection: collectionsStateData.toggleCollection,
       emptyStateCopy: COLLECTIONS_EMPTY_STATE_COPY,
       clearFiltersLabel: COLLECTIONS_CLEAR_FILTERS_LABEL,
+      searchQuery: "",
+      handleSearchChange: () => {
+        /* no-op */
+      },
+      ownershipFilter: "all",
+      handleOwnershipFilterChange: () => {
+        /* no-op */
+      },
+      isMyAllocationsActive: false,
+      handleToggleMyAllocations: () => {
+        collectionsStateData.handleClearFilters();
+      },
+      isTrendingActive: false,
+      handleToggleTrending: () => {
+        /* no-op */
+      },
+      isNewlyAllocatedActive: false,
+      handleToggleNewlyAllocated: () => {
+        /* no-op */
+      },
+      activeFilters:
+        collectionsStateData.filtersAreActive &&
+        collectionsStateData.selectedCollections.length > 0
+          ? [
+              `Collections: ${collectionsStateData.selectedCollections
+                .map((id) =>
+                  collectionsStateData.collectionFilterOptions.find(
+                    (option) => option.id === id,
+                  )?.name ?? id,
+                )
+                .join(", ")}`,
+            ]
+          : [],
+      handleResetFilters: collectionsStateData.handleClearFilters,
     }),
     [collectionsStateData, profileId],
   );

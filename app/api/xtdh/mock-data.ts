@@ -32,6 +32,12 @@ interface RawGranter {
   readonly rate: number;
 }
 
+interface RawCreator {
+  readonly profileId: string;
+  readonly displayName: string;
+  readonly avatarSeed: string;
+}
+
 interface RawHolder {
   readonly profileId: string;
   readonly displayName: string;
@@ -67,6 +73,11 @@ interface EcosystemCollectionRecord {
   readonly collectionName: string;
   readonly collectionImage: string;
   readonly collectionSlug: string;
+  readonly creator: {
+    readonly profileId: string;
+    readonly displayName: string;
+    readonly avatar: string;
+  };
   readonly description: string;
   readonly blockchain: string;
   readonly contractAddress: string;
@@ -78,6 +89,11 @@ interface EcosystemCollectionRecord {
   readonly totalXtdhReceived: number;
   readonly grantorCount: number;
   readonly grantCount: number;
+  readonly rateChange7d: number;
+  readonly firstAllocatedAt: string;
+  readonly firstAllocationDaysAgo: number;
+  readonly isGrantedByUser: boolean;
+  readonly isReceivedByUser: boolean;
   readonly topGrantors: XtdhGranter[];
   readonly granters: XtdhGranter[];
   readonly holderSummaries: XtdhAllocationHolderSummary[];
@@ -100,11 +116,16 @@ interface RawCollectionMeta {
   readonly collectionName: string;
   readonly collectionSlug: string;
   readonly description: string;
+  readonly creator: RawCreator;
   readonly blockchain: "ethereum";
   readonly contractAddress: string;
   readonly tokenStandard: "ERC721" | "ERC1155";
   readonly tokenCount: number;
   readonly imageSeed: string;
+  readonly firstAllocationDaysAgo: number;
+  readonly rateChange7d: number;
+  readonly isGrantedByUser: boolean;
+  readonly isReceivedByUser: boolean;
 }
 
 interface RawTokenRecord {
@@ -129,11 +150,20 @@ const RAW_COLLECTIONS: RawCollectionRecord[] = [
     collectionSlug: "the-memes",
     description:
       "Community-curated cultural artifacts where holders experiment with decentralized coordination.",
+    creator: {
+      profileId: "punk6529",
+      displayName: "punk6529",
+      avatarSeed: "punk6529",
+    },
     blockchain: "ethereum",
     contractAddress: "0x6529c5f88a2f5f0d8d1a2f2c0ab574b9d51a90ef",
     tokenStandard: "ERC721",
     tokenCount: 6529,
     imageSeed: "xtdh-memes",
+    firstAllocationDaysAgo: 540,
+    rateChange7d: 0.18,
+    isGrantedByUser: true,
+    isReceivedByUser: false,
     receivingTokens: [
       {
         tokenId: "1",
@@ -229,11 +259,20 @@ const RAW_COLLECTIONS: RawCollectionRecord[] = [
     collectionSlug: "6529-gradient",
     description:
       "A study in long-form gradients exploring color theory and collector collaboration.",
+    creator: {
+      profileId: "gradientqueen",
+      displayName: "Gradient Queen",
+      avatarSeed: "gradientqueen",
+    },
     blockchain: "ethereum",
     contractAddress: "0x6529b4ab815af9b55de5d65de7f39744f0bf1043",
     tokenStandard: "ERC721",
     tokenCount: 4000,
     imageSeed: "xtdh-gradient",
+    firstAllocationDaysAgo: 14,
+    rateChange7d: 0.32,
+    isGrantedByUser: true,
+    isReceivedByUser: true,
     receivingTokens: [
       {
         tokenId: "144",
@@ -295,11 +334,20 @@ const RAW_COLLECTIONS: RawCollectionRecord[] = [
     collectionSlug: "meme-lab",
     description:
       "Experimental editions from emerging artists testing the edges of meme culture.",
+    creator: {
+      profileId: "remixer",
+      displayName: "Remixer",
+      avatarSeed: "remixer",
+    },
     blockchain: "ethereum",
     contractAddress: "0x1ab476c23c95cb7563d5a6c54ce93cf96427f1f3",
     tokenStandard: "ERC1155",
     tokenCount: 420,
     imageSeed: "xtdh-memelab",
+    firstAllocationDaysAgo: 6,
+    rateChange7d: 0.07,
+    isGrantedByUser: false,
+    isReceivedByUser: true,
     receivingTokens: [
       {
         tokenId: "12",
@@ -367,11 +415,20 @@ const RAW_COLLECTIONS: RawCollectionRecord[] = [
     collectionSlug: "glitch-dreams",
     description:
       "Early adopter curated set featuring cross-chain experimental glitch art collaborations.",
+    creator: {
+      profileId: "pixelpioneer",
+      displayName: "Pixel Pioneer",
+      avatarSeed: "pixelpioneer",
+    },
     blockchain: "ethereum",
     contractAddress: "0x934bd3af10bd8c75a785dcf4e0d4fd720c3d1ae1",
     tokenStandard: "ERC1155",
     tokenCount: 1024,
     imageSeed: "xtdh-glitch-dreams",
+    firstAllocationDaysAgo: 2,
+    rateChange7d: -0.04,
+    isGrantedByUser: false,
+    isReceivedByUser: false,
     receivingTokens: [
       {
         tokenId: "88",
@@ -587,11 +644,18 @@ function aggregateCollections(
 
     const receivingTokenCount = collectionTokens.length;
 
+    const firstAllocatedAt = daysAgoToIso(meta.firstAllocationDaysAgo);
+
     return {
       collectionId: meta.collectionId,
       collectionName: meta.collectionName,
       collectionImage: imageUrl(meta.imageSeed),
       collectionSlug: meta.collectionSlug,
+      creator: {
+        profileId: meta.creator.profileId,
+        displayName: meta.creator.displayName,
+        avatar: avatarUrl(meta.creator.avatarSeed),
+      },
       description: meta.description,
       blockchain: meta.blockchain,
       contractAddress: meta.contractAddress,
@@ -603,6 +667,11 @@ function aggregateCollections(
       totalXtdhReceived: totalReceived,
       grantorCount: granters.length,
       grantCount,
+      rateChange7d: meta.rateChange7d,
+      firstAllocatedAt,
+      firstAllocationDaysAgo: meta.firstAllocationDaysAgo,
+      isGrantedByUser: meta.isGrantedByUser,
+      isReceivedByUser: meta.isReceivedByUser,
       topGrantors: granters.slice(0, 5),
       granters,
       holderSummaries: holders,
@@ -624,7 +693,14 @@ const AVAILABLE_COLLECTION_OPTIONS =
 export interface CollectionQueryOptions {
   readonly page: number;
   readonly pageSize: number;
-  readonly sort: "total_rate" | "total_received" | "token_count" | "collection_name";
+  readonly sort:
+    | "total_rate"
+    | "total_received"
+    | "grantor_count"
+    | "token_count"
+    | "rate_change_7d"
+    | "last_allocation_at"
+    | "collection_name";
   readonly dir: "asc" | "desc";
   readonly filters: TokenFilters;
 }
@@ -705,6 +781,14 @@ function sortCollections(
           a.collectionName.localeCompare(b.collectionName) * direction ||
           (a.totalXtdhRate - b.totalXtdhRate) * direction
         );
+      case "grantor_count":
+        if (a.grantorCount === b.grantorCount) {
+          return (
+            (a.totalXtdhRate - b.totalXtdhRate) * direction ||
+            a.collectionName.localeCompare(b.collectionName) * direction
+          );
+        }
+        return (a.grantorCount - b.grantorCount) * direction;
       case "token_count":
         if (a.tokenCount === b.tokenCount) {
           return (
@@ -721,6 +805,28 @@ function sortCollections(
           );
         }
         return (a.totalXtdhReceived - b.totalXtdhReceived) * direction;
+      case "rate_change_7d": {
+        const aRate = a.rateChange7d ?? 0;
+        const bRate = b.rateChange7d ?? 0;
+        if (aRate === bRate) {
+          return (
+            (a.totalXtdhRate - b.totalXtdhRate) * direction ||
+            a.collectionName.localeCompare(b.collectionName) * direction
+          );
+        }
+        return (aRate - bRate) * direction;
+      }
+      case "last_allocation_at": {
+        const aTime = new Date(a.lastAllocatedAt).getTime();
+        const bTime = new Date(b.lastAllocatedAt).getTime();
+        if (aTime === bTime) {
+          return (
+            (a.totalXtdhRate - b.totalXtdhRate) * direction ||
+            a.collectionName.localeCompare(b.collectionName) * direction
+          );
+        }
+        return (aTime - bTime) * direction;
+      }
       case "total_rate":
       default:
         if (a.totalXtdhRate === b.totalXtdhRate) {
@@ -837,6 +943,9 @@ function mapCollectionToReceived(
     collectionName: collection.collectionName,
     collectionImage: collection.collectionImage,
     collectionSlug: collection.collectionSlug,
+    creatorProfileId: collection.creator.profileId,
+    creatorName: collection.creator.displayName,
+    creatorAvatar: collection.creator.avatar,
     description: collection.description,
     blockchain: collection.blockchain,
     contractAddress: collection.contractAddress,
@@ -853,6 +962,11 @@ function mapCollectionToReceived(
     holderSummaries: collection.holderSummaries,
     lastAllocatedAt: collection.lastAllocatedAt,
     lastUpdatedAt: collection.lastUpdatedAt,
+    firstAllocatedAt: collection.firstAllocatedAt,
+    firstAllocationDaysAgo: collection.firstAllocationDaysAgo,
+    rateChange7d: collection.rateChange7d,
+    isGrantedByUser: collection.isGrantedByUser,
+    isReceivedByUser: collection.isReceivedByUser,
     tokens: collection.tokens.map((token) => {
       const summary = mapTokenToReceived(token);
       return {

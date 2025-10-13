@@ -1,12 +1,13 @@
-'use client';
+"use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { SortDirection } from "@/entities/ISort";
 import type {
   XtdhReceivedCollectionOption,
+  XtdhReceivedCollectionSummary,
   XtdhReceivedCollectionsResponse,
   XtdhReceivedNftsResponse,
 } from "@/types/xtdh";
@@ -17,11 +18,15 @@ import {
   DEFAULT_DIRECTION,
   DEFAULT_NFT_SORT,
   NFTS_PAGE_SIZE,
+  type XtdhCollectionOwnershipFilter,
   type XtdhCollectionsSortField,
   type XtdhNftSortField,
   type XtdhReceivedView,
 } from "../utils/constants";
-import { mergeXtdhCollectionOptions, xtdhHasActiveFilters } from "../utils";
+import {
+  mergeXtdhCollectionOptions,
+  xtdhIsCollectionNewlyAllocated,
+} from "../utils";
 import type {
   XtdhReceivedCollectionsViewState,
   XtdhReceivedNftsViewState,
@@ -46,6 +51,8 @@ interface UseXtdhReceivedExplorerResult {
   readonly nftsState: XtdhReceivedNftsViewState;
 }
 
+const COLLECTIONS_FETCH_PAGE_SIZE = 200;
+
 interface CollectionFilters {
   readonly selectedCollections: string[];
   readonly setSelectedCollections: (nextSelected: string[]) => void;
@@ -64,35 +71,16 @@ function useCollectionFilters(): CollectionFilters {
   };
 }
 
-interface CollectionsStateParams {
-  readonly sort: XtdhCollectionsSortField;
-  readonly direction: SortDirection;
-  readonly page: number;
-  readonly selectedCollections: string[];
-}
-
-function useCollectionsQuery({
-  sort,
-  direction,
-  page,
-  selectedCollections,
-}: CollectionsStateParams) {
+function useCollectionsQuery() {
   return useQuery<XtdhReceivedCollectionsResponse, Error>({
-    queryKey: [
-      QueryKey.XTDH_RECEIVED_COLLECTIONS,
-      "ecosystem",
-      sort,
-      direction,
-      page,
-      selectedCollections.join(","),
-    ],
+    queryKey: [QueryKey.XTDH_RECEIVED_COLLECTIONS, "ecosystem", "exploration"],
     queryFn: async () =>
       await fetchXtdhReceivedCollections({
-        sort,
-        direction,
-        page,
-        pageSize: COLLECTIONS_PAGE_SIZE,
-        collections: selectedCollections,
+        sort: DEFAULT_COLLECTION_SORT,
+        direction: DEFAULT_DIRECTION,
+        page: 1,
+        pageSize: COLLECTIONS_FETCH_PAGE_SIZE,
+        collections: [],
       }),
     placeholderData: keepPreviousData,
     staleTime: 60_000,
@@ -152,22 +140,71 @@ function useCollectionsControls() {
   const [expandedCollectionId, setExpandedCollectionId] = useState<
     string | null
   >(null);
+  const [trendingActive, setTrendingActive] = useState<boolean>(false);
+
+  const lastManualSortRef = useRef<XtdhCollectionsSortField>(DEFAULT_COLLECTION_SORT);
+  const lastManualDirectionRef = useRef<SortDirection>(DEFAULT_DIRECTION);
 
   const handleCollectionsSortChange = useCallback(
     (nextSort: XtdhCollectionsSortField) => {
-      setCollectionsDirection((prevDirection) => {
-        if (nextSort === collectionsSort) {
-          return prevDirection === SortDirection.ASC
-            ? SortDirection.DESC
-            : SortDirection.ASC;
+      if (nextSort === "rate_change_7d") {
+        if (!trendingActive && collectionsSort !== "rate_change_7d") {
+          lastManualSortRef.current = collectionsSort;
+          lastManualDirectionRef.current = collectionsDirection;
         }
-        return DEFAULT_DIRECTION;
-      });
+        setTrendingActive(true);
+        setCollectionsSort("rate_change_7d");
+        setCollectionsDirection(SortDirection.DESC);
+        setCollectionsPage(1);
+        return;
+      }
+
+      const newDirection =
+        nextSort === collectionsSort
+          ? collectionsDirection === SortDirection.ASC
+            ? SortDirection.DESC
+            : SortDirection.ASC
+          : DEFAULT_DIRECTION;
+
+      lastManualSortRef.current = nextSort;
+      lastManualDirectionRef.current = newDirection;
+
+      setTrendingActive(false);
       setCollectionsSort(nextSort);
+      setCollectionsDirection(newDirection);
       setCollectionsPage(1);
     },
-    [collectionsSort],
+    [collectionsDirection, collectionsSort, trendingActive],
   );
+
+  const handleToggleTrending = useCallback(() => {
+    setCollectionsPage(1);
+    setTrendingActive((prev) => {
+      if (prev) {
+        setCollectionsSort(lastManualSortRef.current);
+        setCollectionsDirection(lastManualDirectionRef.current);
+        return false;
+      }
+
+      if (collectionsSort !== "rate_change_7d") {
+        lastManualSortRef.current = collectionsSort;
+        lastManualDirectionRef.current = collectionsDirection;
+      }
+
+      setCollectionsSort("rate_change_7d");
+      setCollectionsDirection(SortDirection.DESC);
+      return true;
+    });
+  }, [collectionsDirection, collectionsSort]);
+
+  const resetCollectionsSort = useCallback(() => {
+    lastManualSortRef.current = DEFAULT_COLLECTION_SORT;
+    lastManualDirectionRef.current = DEFAULT_DIRECTION;
+    setTrendingActive(false);
+    setCollectionsSort(DEFAULT_COLLECTION_SORT);
+    setCollectionsDirection(DEFAULT_DIRECTION);
+    setCollectionsPage(1);
+  }, []);
 
   const toggleCollection = useCallback((collectionId: string) => {
     setExpandedCollectionId((prev) =>
@@ -177,12 +214,15 @@ function useCollectionsControls() {
 
   return {
     collectionsSort,
-    handleCollectionsSortChange,
     collectionsDirection,
     collectionsPage,
     setCollectionsPage,
     expandedCollectionId,
     toggleCollection,
+    trendingActive,
+    handleCollectionsSortChange,
+    handleToggleTrending,
+    resetCollectionsSort,
   };
 }
 
@@ -291,6 +331,82 @@ function useCollectionOptions(
   return collectionFilterOptions;
 }
 
+function sortCollectionsClient(
+  collections: XtdhReceivedCollectionSummary[],
+  sort: XtdhCollectionsSortField,
+  direction: SortDirection,
+): XtdhReceivedCollectionSummary[] {
+  const multiplier = direction === SortDirection.ASC ? 1 : -1;
+
+  return [...collections].sort((a, b) => {
+    const fallback =
+      (a.totalXtdhRate - b.totalXtdhRate) * multiplier ||
+      a.collectionName.localeCompare(b.collectionName) * multiplier;
+
+    switch (sort) {
+      case "collection_name":
+        return (
+          a.collectionName.localeCompare(b.collectionName) * multiplier ||
+          (a.totalXtdhRate - b.totalXtdhRate) * multiplier
+        );
+      case "grantor_count": {
+        const aCount = a.grantorCount ?? 0;
+        const bCount = b.grantorCount ?? 0;
+        if (aCount === bCount) {
+          return fallback;
+        }
+        return (aCount - bCount) * multiplier;
+      }
+      case "token_count": {
+        const aCount = a.tokenCount ?? 0;
+        const bCount = b.tokenCount ?? 0;
+        if (aCount === bCount) {
+          return fallback;
+        }
+        return (aCount - bCount) * multiplier;
+      }
+      case "total_received":
+        if (a.totalXtdhReceived === b.totalXtdhReceived) {
+          return fallback;
+        }
+        return (a.totalXtdhReceived - b.totalXtdhReceived) * multiplier;
+      case "rate_change_7d": {
+        const aRate = a.rateChange7d ?? 0;
+        const bRate = b.rateChange7d ?? 0;
+        if (aRate === bRate) {
+          return fallback;
+        }
+        return (aRate - bRate) * multiplier;
+      }
+      case "last_allocation_at": {
+        const aTime = a.lastAllocatedAt
+          ? new Date(a.lastAllocatedAt).getTime()
+          : 0;
+        const bTime = b.lastAllocatedAt
+          ? new Date(b.lastAllocatedAt).getTime()
+          : 0;
+        if (aTime === bTime) {
+          return fallback;
+        }
+        return (aTime - bTime) * multiplier;
+      }
+      case "total_rate":
+      default:
+        if (a.totalXtdhRate === b.totalXtdhRate) {
+          return (
+            (a.lastAllocatedAt && b.lastAllocatedAt
+              ? (new Date(a.lastAllocatedAt).getTime() -
+                  new Date(b.lastAllocatedAt).getTime()) *
+                multiplier
+              : 0) ||
+            a.collectionName.localeCompare(b.collectionName) * multiplier
+          );
+        }
+        return (a.totalXtdhRate - b.totalXtdhRate) * multiplier;
+    }
+  });
+}
+
 export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
   const [view, setView] = useState<XtdhReceivedView>("collections");
   const [hasViewedNfts, setHasViewedNfts] = useState<boolean>(false);
@@ -299,12 +415,15 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
 
   const {
     collectionsSort,
-    handleCollectionsSortChange,
     collectionsDirection,
     collectionsPage,
     setCollectionsPage,
     expandedCollectionId,
     toggleCollection,
+    trendingActive,
+    handleCollectionsSortChange,
+    handleToggleTrending,
+    resetCollectionsSort,
   } = useCollectionsControls();
 
   const {
@@ -315,20 +434,23 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
     setNftsPage,
   } = useTokensControls();
 
-  const { handleCollectionsFilterChange, handleClearFilters } =
-    useCollectionFiltersState(
-      selectedCollections,
-      setSelectedCollections,
-      setCollectionsPage,
-      setNftsPage,
-    );
-
-  const collectionsQuery = useCollectionsQuery({
-    sort: collectionsSort,
-    direction: collectionsDirection,
-    page: collectionsPage,
+  const {
+    handleCollectionsFilterChange,
+    handleClearFilters: handleClearCollectionFilters,
+  } = useCollectionFiltersState(
     selectedCollections,
-  });
+    setSelectedCollections,
+    setCollectionsPage,
+    setNftsPage,
+  );
+
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [ownershipFilter, setOwnershipFilter] =
+    useState<XtdhCollectionOwnershipFilter>("all");
+  const [newlyAllocatedOnly, setNewlyAllocatedOnly] =
+    useState<boolean>(false);
+
+  const collectionsQuery = useCollectionsQuery();
 
   const shouldEnableTokensQuery = hasViewedNfts || view === "nfts";
 
@@ -340,34 +462,110 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
     isEnabled: shouldEnableTokensQuery,
   });
 
-  const filtersAreActive = useMemo(
-    () =>
-      xtdhHasActiveFilters({
-        collections: selectedCollections,
-      }),
-    [selectedCollections],
-  );
-
   const collectionFilterOptions = useCollectionOptions(
     collectionsQuery,
     tokensQuery,
     selectedCollections,
   );
 
-  const collectionsTotalCount = collectionsQuery.data?.totalCount ?? 0;
-  const nftsTotalCount = tokensQuery.data?.totalCount ?? 0;
+  const collectionNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const collection of collectionsQuery.data?.collections ?? []) {
+      map.set(collection.collectionId, collection.collectionName);
+    }
+    return map;
+  }, [collectionsQuery.data?.collections]);
 
-  const collectionsTotalPages = useMemo(
-    () => Math.max(1, Math.ceil(collectionsTotalCount / COLLECTIONS_PAGE_SIZE)),
-    [collectionsTotalCount],
+  const derivedCollections = useMemo(() => {
+    const base = collectionsQuery.data?.collections ?? [];
+    const selectionSet =
+      selectedCollections.length > 0 ? new Set(selectedCollections) : null;
+    const trimmedSearchRaw = searchQuery.trim();
+    const normalizedSearch = trimmedSearchRaw.toLowerCase();
+
+    let filtered = selectionSet
+      ? base.filter((collection) => selectionSet.has(collection.collectionId))
+      : base;
+
+    if (normalizedSearch) {
+      filtered = filtered.filter((collection) => {
+        const nameMatch = collection.collectionName
+          .toLowerCase()
+          .includes(normalizedSearch);
+        const creatorMatch = (collection.creatorName ?? "")
+          .toLowerCase()
+          .includes(normalizedSearch);
+        return nameMatch || creatorMatch;
+      });
+    }
+
+    if (ownershipFilter === "granted") {
+      filtered = filtered.filter((collection) => collection.isGrantedByUser);
+    } else if (ownershipFilter === "received") {
+      filtered = filtered.filter((collection) => collection.isReceivedByUser);
+    }
+
+    if (newlyAllocatedOnly) {
+      filtered = filtered.filter((collection) =>
+        xtdhIsCollectionNewlyAllocated(collection),
+      );
+    }
+
+    const activeSort = trendingActive ? "rate_change_7d" : collectionsSort;
+    const activeDirection = trendingActive
+      ? SortDirection.DESC
+      : collectionsDirection;
+
+    const sorted = sortCollectionsClient(filtered, activeSort, activeDirection);
+
+    return {
+      trimmedSearch: trimmedSearchRaw,
+      activeSort,
+      activeDirection,
+      sorted,
+    };
+  }, [
+    collectionsQuery.data?.collections,
+    selectedCollections,
+    searchQuery,
+    ownershipFilter,
+    newlyAllocatedOnly,
+    trendingActive,
+    collectionsSort,
+    collectionsDirection,
+  ]);
+
+  const {
+    trimmedSearch,
+    activeSort: resolvedCollectionSort,
+    activeDirection: resolvedCollectionDirection,
+    sorted: sortedCollections,
+  } = derivedCollections;
+
+  const collectionsTotalCount = sortedCollections.length;
+  const collectionsTotalPages = Math.max(
+    1,
+    Math.ceil(collectionsTotalCount / COLLECTIONS_PAGE_SIZE),
   );
 
+  useEffect(() => {
+    if (collectionsPage > collectionsTotalPages) {
+      setCollectionsPage(collectionsTotalPages);
+    }
+  }, [collectionsPage, collectionsTotalPages, setCollectionsPage]);
+
+  const paginatedCollections = useMemo(() => {
+    const start = (collectionsPage - 1) * COLLECTIONS_PAGE_SIZE;
+    return sortedCollections.slice(start, start + COLLECTIONS_PAGE_SIZE);
+  }, [sortedCollections, collectionsPage]);
+
+  const collectionsHaveNextPage = collectionsPage < collectionsTotalPages;
+
+  const nftsTotalCount = tokensQuery.data?.totalCount ?? 0;
   const nftsTotalPages = useMemo(
     () => Math.max(1, Math.ceil(nftsTotalCount / NFTS_PAGE_SIZE)),
     [nftsTotalCount],
   );
-
-  const collectionsHaveNextPage = collectionsPage < collectionsTotalPages;
   const nftsHaveNextPage = nftsPage < nftsTotalPages;
 
   const collectionsResultSummary = useMemo(() => {
@@ -430,31 +628,134 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
     }
   }, []);
 
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchQuery(value);
+      setCollectionsPage(1);
+    },
+    [setCollectionsPage],
+  );
+
+  const handleOwnershipFilterChange = useCallback(
+    (nextFilter: XtdhCollectionOwnershipFilter) => {
+      setOwnershipFilter((prev) => (prev === nextFilter ? "all" : nextFilter));
+      setCollectionsPage(1);
+    },
+    [setCollectionsPage],
+  );
+
+  const handleToggleMyAllocations = useCallback(() => {
+    setOwnershipFilter((prev) => (prev === "granted" ? "all" : "granted"));
+    setCollectionsPage(1);
+  }, [setCollectionsPage]);
+
+  const handleToggleNewlyAllocated = useCallback(() => {
+    setNewlyAllocatedOnly((prev) => !prev);
+    setCollectionsPage(1);
+  }, [setCollectionsPage]);
+
+  const handleResetFilters = useCallback(() => {
+    setSearchQuery("");
+    setOwnershipFilter("all");
+    setNewlyAllocatedOnly(false);
+    resetCollectionsSort();
+    handleClearCollectionFilters();
+  }, [handleClearCollectionFilters, resetCollectionsSort]);
+
+  const filtersAreActive = useMemo(
+    () =>
+      Boolean(
+        trimmedSearch ||
+          ownershipFilter !== "all" ||
+          newlyAllocatedOnly ||
+          trendingActive ||
+          selectedCollections.length > 0,
+      ),
+    [
+      trimmedSearch,
+      ownershipFilter,
+      newlyAllocatedOnly,
+      trendingActive,
+      selectedCollections.length,
+    ],
+  );
+
+  const activeFilters = useMemo(() => {
+    const labels: string[] = [];
+
+    if (trimmedSearch) {
+      labels.push(`Search: “${trimmedSearch}”`);
+    }
+
+    if (selectedCollections.length > 0) {
+      const names = selectedCollections
+        .map((id) => collectionNameMap.get(id) ?? id)
+        .filter(Boolean);
+      if (names.length > 0) {
+        labels.push(`Collections: ${names.join(", ")}`);
+      }
+    }
+
+    if (ownershipFilter === "granted") {
+      labels.push("My Allocations");
+    } else if (ownershipFilter === "received") {
+      labels.push("I Have Received");
+    }
+
+    if (newlyAllocatedOnly) {
+      labels.push("Newly Allocated");
+    }
+
+    if (trendingActive) {
+      labels.push("Trending (7d)");
+    }
+
+    return labels;
+  }, [
+    trimmedSearch,
+    selectedCollections,
+    collectionNameMap,
+    ownershipFilter,
+    newlyAllocatedOnly,
+    trendingActive,
+  ]);
+
+  const isMyAllocationsActive = ownershipFilter === "granted";
+  const nftFiltersAreActive = selectedCollections.length > 0;
+
   const collectionsState: XtdhReceivedCollectionsViewState = {
     missingScopeMessage: undefined,
     isLoading: collectionsQuery.isLoading,
     isFetching: collectionsQuery.isFetching,
     isError: collectionsQuery.isError,
     errorMessage: collectionsErrorMessage,
-    collections: collectionsQuery.data?.collections ?? [],
-    activeSort: collectionsSort,
-    activeDirection: collectionsDirection,
-    collectionFilterOptions,
+    collections: paginatedCollections,
+    activeSort: resolvedCollectionSort,
+    activeDirection: resolvedCollectionDirection,
     filtersAreActive,
-    selectedCollections,
     resultSummary: collectionsResultSummary,
     page: collectionsPage,
     totalPages: collectionsTotalPages,
     haveNextPage: collectionsHaveNextPage,
     handleSortChange: handleCollectionsSortChange,
-    handleCollectionsFilterChange,
-    handleClearFilters,
     handlePageChange: handleCollectionsPageChange,
     handleRetry: handleCollectionsRetry,
     expandedCollectionId,
     toggleCollection,
-    emptyStateCopy: COLLECTIONS_EMPTY_STATE_COPY,
     clearFiltersLabel: COLLECTIONS_CLEAR_FILTERS_LABEL,
+    emptyStateCopy: COLLECTIONS_EMPTY_STATE_COPY,
+    searchQuery,
+    handleSearchChange,
+    ownershipFilter,
+    handleOwnershipFilterChange,
+    isMyAllocationsActive,
+    handleToggleMyAllocations,
+    isTrendingActive: trendingActive,
+    handleToggleTrending,
+    isNewlyAllocatedActive: newlyAllocatedOnly,
+    handleToggleNewlyAllocated,
+    activeFilters,
+    handleResetFilters,
   };
 
   const nftsState: XtdhReceivedNftsViewState = {
@@ -467,7 +768,7 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
     activeSort: nftsSort,
     activeDirection: nftsDirection,
     collectionFilterOptions,
-    filtersAreActive,
+    filtersAreActive: nftFiltersAreActive,
     selectedCollections,
     resultSummary: nftsResultSummary,
     page: nftsPage,
@@ -475,7 +776,7 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
     haveNextPage: nftsHaveNextPage,
     handleSortChange: handleNftsSortChange,
     handleCollectionsFilterChange,
-    handleClearFilters,
+    handleClearFilters: handleClearCollectionFilters,
     handlePageChange: handleNftsPageChange,
     handleRetry: handleNftsRetry,
     clearFiltersLabel: NFTS_CLEAR_FILTERS_LABEL,

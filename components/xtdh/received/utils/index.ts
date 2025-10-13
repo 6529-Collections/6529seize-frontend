@@ -1,11 +1,13 @@
 import { SortDirection } from "@/entities/ISort";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { UseReceivedCollectionsFilters } from "@/hooks/useXtdhReceived";
-import type { XtdhReceivedCollectionOption } from "@/types/xtdh";
+import type { XtdhReceivedCollectionOption, XtdhReceivedCollectionSummary } from "@/types/xtdh";
 import {
   DEFAULT_COLLECTION_SORT,
   DEFAULT_DIRECTION,
   DEFAULT_NFT_SORT,
+  NEWLY_ALLOCATED_WINDOW_DAYS,
+  TRENDING_RATE_CHANGE_THRESHOLD,
   XTDH_COLLECTION_SORT_ITEMS,
   XTDH_NFT_SORT_ITEMS,
 } from "./constants";
@@ -107,4 +109,34 @@ export function formatXtdhRate(value: number) {
 
 export function formatXtdhTotal(value: number) {
   return formatXtdhValue(value);
+}
+
+export function xtdhIsCollectionNewlyAllocated(
+  collection: XtdhReceivedCollectionSummary,
+  windowDays = NEWLY_ALLOCATED_WINDOW_DAYS,
+  reference = Date.now(),
+): boolean {
+  if (typeof collection.firstAllocationDaysAgo === "number") {
+    return collection.firstAllocationDaysAgo <= windowDays;
+  }
+
+  if (!collection.firstAllocatedAt) {
+    return false;
+  }
+
+  const firstAllocationTime = new Date(collection.firstAllocatedAt).getTime();
+  if (!Number.isFinite(firstAllocationTime)) {
+    return false;
+  }
+
+  const diffMs = reference - firstAllocationTime;
+  const diffDays = diffMs / 86_400_000;
+  return diffDays <= windowDays;
+}
+
+export function xtdhIsCollectionTrending(
+  collection: XtdhReceivedCollectionSummary,
+  threshold = TRENDING_RATE_CHANGE_THRESHOLD,
+): boolean {
+  return (collection.rateChange7d ?? 0) >= threshold;
 }

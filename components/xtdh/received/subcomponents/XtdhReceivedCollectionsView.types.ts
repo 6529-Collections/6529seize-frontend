@@ -1,6 +1,9 @@
 import type { SortDirection } from "@/entities/ISort";
 import type { XtdhReceivedCollectionSummary } from "@/types/xtdh";
-import type { XtdhCollectionsSortField } from "../utils/constants";
+import type {
+  XtdhCollectionOwnershipFilter,
+  XtdhCollectionsSortField,
+} from "../utils/constants";
 
 export interface XtdhReceivedCollectionsViewEmptyCopy {
   readonly defaultMessage: string;
@@ -17,24 +20,30 @@ export interface XtdhReceivedCollectionsViewState {
   readonly collections: XtdhReceivedCollectionSummary[];
   readonly activeSort: XtdhCollectionsSortField;
   readonly activeDirection: SortDirection;
-  readonly collectionFilterOptions: ReadonlyArray<{
-    readonly id: string;
-    readonly name: string;
-    readonly tokenCount: number;
-  }>;
   readonly filtersAreActive: boolean;
-  readonly selectedCollections: string[];
   readonly resultSummary: string;
   readonly page: number;
   readonly totalPages: number;
   readonly haveNextPage: boolean;
   readonly handleSortChange: (nextSort: XtdhCollectionsSortField) => void;
-  readonly handleCollectionsFilterChange: (nextSelected: string[]) => void;
-  readonly handleClearFilters: () => void;
   readonly handlePageChange: (page: number) => void;
   readonly handleRetry: () => void;
   readonly expandedCollectionId: string | null;
   readonly toggleCollection: (collectionId: string) => void;
   readonly emptyStateCopy?: XtdhReceivedCollectionsViewEmptyCopy;
   readonly clearFiltersLabel?: string;
+  readonly searchQuery: string;
+  readonly handleSearchChange: (value: string) => void;
+  readonly ownershipFilter: XtdhCollectionOwnershipFilter;
+  readonly handleOwnershipFilterChange: (
+    next: XtdhCollectionOwnershipFilter,
+  ) => void;
+  readonly isMyAllocationsActive: boolean;
+  readonly handleToggleMyAllocations: () => void;
+  readonly isTrendingActive: boolean;
+  readonly handleToggleTrending: () => void;
+  readonly isNewlyAllocatedActive: boolean;
+  readonly handleToggleNewlyAllocated: () => void;
+  readonly activeFilters: string[];
+  readonly handleResetFilters: () => void;
 }

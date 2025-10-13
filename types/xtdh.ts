@@ -54,6 +54,9 @@ export interface XtdhReceivedCollectionSummary {
   readonly collectionImage: string;
   readonly collectionSlug?: string;
   readonly description?: string;
+  readonly creatorProfileId?: string;
+  readonly creatorName?: string;
+  readonly creatorAvatar?: string;
   readonly blockchain?: string;
   readonly contractAddress?: string;
   readonly tokenStandard?: "ERC721" | "ERC1155";
@@ -68,6 +71,11 @@ export interface XtdhReceivedCollectionSummary {
   readonly holderSummaries?: XtdhAllocationHolderSummary[];
   readonly lastAllocatedAt?: string;
   readonly lastUpdatedAt?: string;
+  readonly firstAllocatedAt?: string;
+  readonly firstAllocationDaysAgo?: number;
+  readonly rateChange7d?: number;
+  readonly isGrantedByUser?: boolean;
+  readonly isReceivedByUser?: boolean;
   readonly granters: XtdhGranter[];
   readonly tokens: XtdhReceivedToken[];
 }
