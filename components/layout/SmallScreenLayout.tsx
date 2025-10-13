@@ -7,6 +7,7 @@ import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import { useSearchParams } from "next/navigation";
 import { SidebarProvider } from "../../hooks/useSidebarState";
+import ClientOnly from "../client-only/ClientOnly";
 
 interface Props {
   readonly children: ReactNode;
@@ -70,29 +71,30 @@ export default function SmallScreenLayout({ children }: Props) {
 
   return (
     <SidebarProvider>
-      <div
-        ref={containerRef}
-        className={`tw-bg-black ${
-          activeTab === "feed" ? "tw-overflow-hidden" : "tw-overflow-auto"
-        }`}
-      >
-      {/* Header bar with hamburger */}
-      <div ref={headerRef} className="tw-sticky tw-top-0 tw-z-30">
-        <SmallScreenHeader
-          onMenuToggle={toggleMenu}
-          isMenuOpen={isMenuOpen}
-        />
-      </div>
+      <ClientOnly>
+        <div
+          ref={containerRef}
+          className={`tw-bg-black ${
+            activeTab === "feed" ? "tw-overflow-hidden" : "tw-overflow-auto"
+          }`}
+        >
+          {/* Header bar with hamburger */}
+          <div ref={headerRef} className="tw-sticky tw-top-0 tw-z-30">
+            <SmallScreenHeader
+              onMenuToggle={toggleMenu}
+              isMenuOpen={isMenuOpen}
+            />
+          </div>
 
-      {/* Sidebar and overlay are handled by WebSidebar in mobile mode */}
-      {renderSidebar()}
+          {/* Sidebar and overlay are handled by WebSidebar in mobile mode */}
+          {renderSidebar()}
 
-      {/* Main content area */}
-        <main className="tw-transition-opacity tw-duration-300">
-          {children}
-        </main>
-
-      </div>
+          {/* Main content area */}
+          <main className="tw-transition-opacity tw-duration-300">
+            {children}
+          </main>
+        </div>
+      </ClientOnly>
     </SidebarProvider>
   );
 }

@@ -5,6 +5,7 @@ import WebSidebar from "./sidebar/WebSidebar";
 import { useSidebarController } from "../../hooks/useSidebarController";
 import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
 import { SidebarProvider, useSidebarState } from "../../hooks/useSidebarState";
+import ClientOnly from "../client-only/ClientOnly";
 
 type LayoutCssVars = CSSProperties & {
   "--left-rail": string;
@@ -93,9 +94,7 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
       </div>
       <main
         className={`tw-flex-1 tw-min-w-0 tw-transition-all tw-duration-300 tw-ease-out ${
-        shouldDimContent
-            ? "tw-opacity-40 tw-pointer-events-none"
-            : ""
+          shouldDimContent ? "tw-opacity-40 tw-pointer-events-none" : ""
         }`}
         style={mainStyle}
       >
@@ -107,7 +106,9 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
 
 const WebLayout = ({ children, isSmall = false }: WebLayoutProps) => (
   <SidebarProvider>
-    <WebLayoutContent isSmall={isSmall}>{children}</WebLayoutContent>
+    <ClientOnly>
+      <WebLayoutContent isSmall={isSmall}>{children}</WebLayoutContent>
+    </ClientOnly>
   </SidebarProvider>
 );
 

@@ -15,6 +15,7 @@ import { useDropModal } from "@/hooks/useDropModal";
 import BrainDesktopDrop from "../brain/BrainDesktopDrop";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useHomeTabs } from "./useHomeTabs";
+import SpinnerLoader from "../common/SpinnerLoader";
 
 interface HomeWebProps {
   readonly featuredNft: NFTWithMemesExtendedData;
@@ -32,11 +33,14 @@ export default function HomeWeb({
   isMemeMintingActive,
 }: HomeWebProps) {
   const { hasTouchScreen } = useDeviceInfo();
-  const { isAuthenticated } = useSeizeConnectContext();
+  const { isAuthenticated, connectionState } = useSeizeConnectContext();
   const { registerRef } = useLayout();
   const { drop, isDropOpen, onDropClose } = useDropModal();
   const { spaces } = useLayout();
   const { activeTab, handleTabChange } = useHomeTabs();
+
+  const isWalletInitializing =
+    connectionState === "initializing" || connectionState === "connecting";
 
   // Callback ref for registration with LayoutContext
   const setTabsRef = useMemo(
@@ -78,7 +82,13 @@ export default function HomeWeb({
       <div className="tw-h-full">
         {activeTab === "feed" ? (
           <div className="tw-h-full tw-bg-black tw-overflow-hidden tailwind-scope tw-px-2 lg:tw-px-6 xl:tw-px-8">
-            {isAuthenticated ? <HomeFeed /> : <ConnectWallet />}
+            {isWalletInitializing ? (
+              <SpinnerLoader text="Loading feed..." />
+            ) : isAuthenticated ? (
+              <HomeFeed />
+            ) : (
+              <ConnectWallet />
+            )}
           </div>
         ) : (
           <Home
