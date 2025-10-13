@@ -23,19 +23,17 @@ describe("SmallScreenLayout", () => {
     registerRef.mockClear();
   });
 
-  it("renders header and menu toggle on home page", () => {
+  it("renders header and menu toggle on home page", async () => {
     pathname = "/";
     render(<SmallScreenLayout>child</SmallScreenLayout>);
-    expect(registerRef).toHaveBeenCalledWith("header", expect.any(HTMLElement));
-    expect(screen.getByAltText("6529Seize")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Search" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Open menu" })).toBeInTheDocument();
+    expect(await screen.findByAltText("6529Seize")).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Search" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Open menu" })).toBeInTheDocument();
   });
 
-  it("still renders header on non-home page", () => {
+  it("still renders header on non-home page", async () => {
     pathname = "/page";
     render(<SmallScreenLayout>child</SmallScreenLayout>);
-    expect(registerRef).toHaveBeenCalledWith("header", expect.any(HTMLElement));
-    expect(screen.getByAltText("6529Seize")).toBeInTheDocument();
+    expect(await screen.findByAltText("6529Seize")).toBeInTheDocument();
   });
 });

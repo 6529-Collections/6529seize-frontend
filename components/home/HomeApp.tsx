@@ -14,7 +14,6 @@ import { useDropModal } from "@/hooks/useDropModal";
 import BrainDesktopDrop from "../brain/BrainDesktopDrop";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import SpinnerLoader from "../common/SpinnerLoader";
 
 interface HomeAppProps {
   readonly featuredNft: NFTWithMemesExtendedData;
