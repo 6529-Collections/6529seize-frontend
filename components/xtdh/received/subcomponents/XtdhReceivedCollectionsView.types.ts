@@ -5,6 +5,11 @@ import type {
   XtdhCollectionsSortField,
 } from "../utils/constants";
 
+export interface XtdhActiveFilterChip {
+  readonly label: string;
+  readonly onRemove?: () => void;
+}
+
 export interface XtdhReceivedCollectionsViewEmptyCopy {
   readonly defaultMessage: string;
   readonly filtersMessage: string;
@@ -44,6 +49,6 @@ export interface XtdhReceivedCollectionsViewState {
   readonly handleToggleTrending: () => void;
   readonly isNewlyAllocatedActive: boolean;
   readonly handleToggleNewlyAllocated: () => void;
-  readonly activeFilters: string[];
+  readonly activeFilters: XtdhActiveFilterChip[];
   readonly handleResetFilters: () => void;
 }

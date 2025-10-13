@@ -128,7 +128,8 @@ describe("UserPageXtdhReceived", () => {
       });
     }
 
-    await user.click(screen.getByRole("button", { name: /NFTs view/i }));
+    const nftToggles = screen.getAllByRole("button", { name: /NFTs view/i });
+    await user.click(nftToggles[0]);
 
     expect(mockUseReceivedNfts.mock.calls.length).toBeGreaterThan(initialCalls);
     const latestCall =
@@ -144,7 +145,7 @@ describe("UserPageXtdhReceived", () => {
     render(<UserPageXtdhReceived profileId="simo" />);
 
     expect(
-      screen.getByRole("button", { name: /Remove The Memes of Production/i })
+      screen.getByText(/Collections: The Memes of Production/i)
     ).toBeInTheDocument();
     const clearButton = screen.getByRole("button", { name: /Clear filters/i });
     expect(clearButton).toBeInTheDocument();

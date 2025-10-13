@@ -1,6 +1,12 @@
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
-import { faList, faTableCellsLarge } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowTrendUp,
+  faClockRotateLeft,
+  faList,
+  faTableCellsLarge,
+  faUserCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import { SortDirection } from "@/entities/ISort";
 
 export const COLLECTIONS_PAGE_SIZE = 20;
@@ -45,25 +51,60 @@ export const DEFAULT_COLLECTION_SORT: XtdhCollectionsSortField = "total_rate";
 export const DEFAULT_NFT_SORT: XtdhNftSortField = "xtdh_rate";
 export const DEFAULT_DIRECTION = SortDirection.DESC;
 
-export const XTDH_COLLECTION_SORT_ITEMS: CommonSelectItem<XtdhCollectionsSortField>[] =
+export type XtdhCollectionSortItem =
+  CommonSelectItem<XtdhCollectionsSortField> & {
+    readonly tooltip: string;
+  };
+
+export const XTDH_COLLECTION_SORT_ITEMS: ReadonlyArray<XtdhCollectionSortItem> =
   [
-    { key: "total_rate", label: "Total xTDH Rate", value: "total_rate" },
-    { key: "total_received", label: "Total xTDH Received", value: "total_received" },
-    { key: "grantor_count", label: "Grantor Count", value: "grantor_count" },
-    { key: "token_count", label: "Token Count", value: "token_count" },
+    {
+      key: "total_rate",
+      label: "Rate",
+      mobileLabel: "Total xTDH Rate",
+      tooltip: "Total xTDH Rate",
+      value: "total_rate",
+    },
+    {
+      key: "total_received",
+      label: "Total",
+      mobileLabel: "Total xTDH Received",
+      tooltip: "Total xTDH Received",
+      value: "total_received",
+    },
+    {
+      key: "grantor_count",
+      label: "Grantors",
+      mobileLabel: "Grantor Count",
+      tooltip: "Grantor Count",
+      value: "grantor_count",
+    },
+    {
+      key: "token_count",
+      label: "Tokens",
+      mobileLabel: "Token Count",
+      tooltip: "Token Count",
+      value: "token_count",
+    },
     {
       key: "rate_change_7d",
-      label: "xTDH Rate Change (7d)",
+      label: "Δ7d",
+      mobileLabel: "xTDH Rate Change (7 days)",
+      tooltip: "xTDH Rate Change (7 days)",
       value: "rate_change_7d",
     },
     {
       key: "last_allocation_at",
-      label: "Last Allocation Date",
+      label: "Last",
+      mobileLabel: "Last Allocation",
+      tooltip: "Last Allocation",
       value: "last_allocation_at",
     },
     {
       key: "collection_name",
-      label: "Collection Name",
+      label: "Name",
+      mobileLabel: "Collection Name",
+      tooltip: "Collection Name",
       value: "collection_name",
     },
   ];
@@ -79,13 +120,25 @@ export type XtdhCollectionOwnershipFilter = "all" | "granted" | "received";
 
 export const XTDH_COLLECTION_OWNERSHIP_LABELS: Record<XtdhCollectionOwnershipFilter, string> = {
   all: "All",
-  granted: "I Have Granted",
-  received: "I Have Received",
+  granted: "Granted",
+  received: "Received",
 };
 
 export type XtdhCollectionDiscoveryToggle = "trending" | "newly_allocated";
 
-export const XTDH_COLLECTION_DISCOVERY_LABELS: Record<XtdhCollectionDiscoveryToggle, string> = {
-  trending: "🔥 Trending (7d)",
-  newly_allocated: "🆕 Newly Allocated",
+export const XTDH_COLLECTION_DISCOVERY_CONFIG: Record<
+  XtdhCollectionDiscoveryToggle,
+  { readonly label: string; readonly icon: IconDefinition }
+> = {
+  trending: {
+    label: "Trending",
+    icon: faArrowTrendUp,
+  },
+  newly_allocated: {
+    label: "New",
+    icon: faClockRotateLeft,
+  },
 };
+
+export const XTDH_MY_ALLOCATIONS_LABEL = "Mine";
+export const XTDH_MY_ALLOCATIONS_ICON = faUserCircle;

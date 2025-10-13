@@ -18,6 +18,9 @@ import {
   DEFAULT_DIRECTION,
   DEFAULT_NFT_SORT,
   NFTS_PAGE_SIZE,
+  XTDH_COLLECTION_DISCOVERY_CONFIG,
+  XTDH_COLLECTION_OWNERSHIP_LABELS,
+  XTDH_MY_ALLOCATIONS_LABEL,
   type XtdhCollectionOwnershipFilter,
   type XtdhCollectionsSortField,
   type XtdhNftSortField,
@@ -31,6 +34,7 @@ import type {
   XtdhReceivedCollectionsViewState,
   XtdhReceivedNftsViewState,
 } from "../subcomponents";
+import type { XtdhActiveFilterChip } from "../subcomponents/XtdhReceivedCollectionsView.types";
 import {
   DEFAULT_CLEAR_FILTERS_LABEL as COLLECTIONS_CLEAR_FILTERS_LABEL,
   DEFAULT_EMPTY_STATE_COPY as COLLECTIONS_EMPTY_STATE_COPY,
@@ -159,12 +163,15 @@ function useCollectionsControls() {
         return;
       }
 
-      const newDirection =
-        nextSort === collectionsSort
-          ? collectionsDirection === SortDirection.ASC
-            ? SortDirection.DESC
-            : SortDirection.ASC
-          : DEFAULT_DIRECTION;
+      const isSameSort = nextSort === collectionsSort;
+      const defaultDirection =
+        nextSort === "collection_name" ? SortDirection.ASC : DEFAULT_DIRECTION;
+
+      const newDirection = isSameSort
+        ? collectionsDirection === SortDirection.ASC
+          ? SortDirection.DESC
+          : SortDirection.ASC
+        : defaultDirection;
 
       lastManualSortRef.current = nextSort;
       lastManualDirectionRef.current = newDirection;
@@ -197,14 +204,9 @@ function useCollectionsControls() {
     });
   }, [collectionsDirection, collectionsSort]);
 
-  const resetCollectionsSort = useCallback(() => {
-    lastManualSortRef.current = DEFAULT_COLLECTION_SORT;
-    lastManualDirectionRef.current = DEFAULT_DIRECTION;
+  const clearTrending = useCallback(() => {
     setTrendingActive(false);
-    setCollectionsSort(DEFAULT_COLLECTION_SORT);
-    setCollectionsDirection(DEFAULT_DIRECTION);
-    setCollectionsPage(1);
-  }, []);
+  }, [setTrendingActive]);
 
   const toggleCollection = useCallback((collectionId: string) => {
     setExpandedCollectionId((prev) =>
@@ -222,7 +224,7 @@ function useCollectionsControls() {
     trendingActive,
     handleCollectionsSortChange,
     handleToggleTrending,
-    resetCollectionsSort,
+    clearTrending,
   };
 }
 
@@ -423,7 +425,7 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
     trendingActive,
     handleCollectionsSortChange,
     handleToggleTrending,
-    resetCollectionsSort,
+    clearTrending,
   } = useCollectionsControls();
 
   const {
@@ -658,9 +660,9 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
     setSearchQuery("");
     setOwnershipFilter("all");
     setNewlyAllocatedOnly(false);
-    resetCollectionsSort();
+    clearTrending();
     handleClearCollectionFilters();
-  }, [handleClearCollectionFilters, resetCollectionsSort]);
+  }, [clearTrending, handleClearCollectionFilters]);
 
   const filtersAreActive = useMemo(
     () =>
@@ -680,11 +682,34 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
     ],
   );
 
-  const activeFilters = useMemo(() => {
-    const labels: string[] = [];
+  const clearSearch = useCallback(() => {
+    setSearchQuery("");
+  }, [setSearchQuery]);
+
+  const clearSelectedCollectionsChip = useCallback(() => {
+    handleClearCollectionFilters();
+  }, [handleClearCollectionFilters]);
+
+  const clearOwnershipFilter = useCallback(() => {
+    setOwnershipFilter("all");
+  }, [setOwnershipFilter]);
+
+  const clearNewlyAllocatedChip = useCallback(() => {
+    setNewlyAllocatedOnly(false);
+  }, [setNewlyAllocatedOnly]);
+
+  const clearTrendingChip = useCallback(() => {
+    clearTrending();
+  }, [clearTrending]);
+
+  const activeFilters = useMemo<XtdhActiveFilterChip[]>(() => {
+    const chips: XtdhActiveFilterChip[] = [];
 
     if (trimmedSearch) {
-      labels.push(`Search: “${trimmedSearch}”`);
+      chips.push({
+        label: `Search: "${trimmedSearch}"`,
+        onRemove: clearSearch,
+      });
     }
 
     if (selectedCollections.length > 0) {
@@ -692,32 +717,52 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
         .map((id) => collectionNameMap.get(id) ?? id)
         .filter(Boolean);
       if (names.length > 0) {
-        labels.push(`Collections: ${names.join(", ")}`);
+        chips.push({
+          label: `Collections: ${names.join(", ")}`,
+          onRemove: clearSelectedCollectionsChip,
+        });
       }
     }
 
     if (ownershipFilter === "granted") {
-      labels.push("My Allocations");
+      chips.push({
+        label: XTDH_MY_ALLOCATIONS_LABEL,
+        onRemove: clearOwnershipFilter,
+      });
     } else if (ownershipFilter === "received") {
-      labels.push("I Have Received");
+      chips.push({
+        label: XTDH_COLLECTION_OWNERSHIP_LABELS.received,
+        onRemove: clearOwnershipFilter,
+      });
     }
 
     if (newlyAllocatedOnly) {
-      labels.push("Newly Allocated");
+      chips.push({
+        label: XTDH_COLLECTION_DISCOVERY_CONFIG.newly_allocated.label,
+        onRemove: clearNewlyAllocatedChip,
+      });
     }
 
     if (trendingActive) {
-      labels.push("Trending (7d)");
+      chips.push({
+        label: XTDH_COLLECTION_DISCOVERY_CONFIG.trending.label,
+        onRemove: clearTrendingChip,
+      });
     }
 
-    return labels;
+    return chips;
   }, [
     trimmedSearch,
+    clearSearch,
     selectedCollections,
     collectionNameMap,
+    clearSelectedCollectionsChip,
     ownershipFilter,
+    clearOwnershipFilter,
     newlyAllocatedOnly,
+    clearNewlyAllocatedChip,
     trendingActive,
+    clearTrendingChip,
   ]);
 
   const isMyAllocationsActive = ownershipFilter === "granted";

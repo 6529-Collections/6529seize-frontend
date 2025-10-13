@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 
 import XtdhReceivedSection from "../../received";
 import type {
+  XtdhActiveFilterChip,
   XtdhReceivedCollectionsViewState,
   XtdhReceivedNftsViewState,
 } from "@/components/xtdh/received/subcomponents";
@@ -100,15 +101,18 @@ export default function UserPageXtdhReceived({
       activeFilters:
         collectionsStateData.filtersAreActive &&
         collectionsStateData.selectedCollections.length > 0
-          ? [
-              `Collections: ${collectionsStateData.selectedCollections
-                .map((id) =>
-                  collectionsStateData.collectionFilterOptions.find(
-                    (option) => option.id === id,
-                  )?.name ?? id,
-                )
-                .join(", ")}`,
-            ]
+          ? ([
+              {
+                label: `Collections: ${collectionsStateData.selectedCollections
+                  .map((id) =>
+                    collectionsStateData.collectionFilterOptions.find(
+                      (option) => option.id === id,
+                    )?.name ?? id,
+                  )
+                  .join(", ")}`,
+                onRemove: collectionsStateData.handleClearFilters,
+              },
+            ] satisfies XtdhActiveFilterChip[])
           : [],
       handleResetFilters: collectionsStateData.handleClearFilters,
     }),

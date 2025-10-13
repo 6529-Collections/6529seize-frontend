@@ -1,8 +1,10 @@
 'use client';
 
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
+import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 
-import type { XtdhReceivedView } from "../utils/constants";
+import type { XtdhReceivedView, XtdhCollectionsSortField } from "../utils/constants";
+import { XTDH_COLLECTION_SORT_ITEMS } from "../utils/constants";
 import { XtdhReceivedCollectionsControls } from "./XtdhReceivedCollectionsControls";
 import { XtdhReceivedCollectionsList } from "./XtdhReceivedCollectionsList";
 import type {
@@ -87,6 +89,17 @@ export function XtdhReceivedCollectionsViewContent({
         announcement={announcement}
         clearFiltersLabel={clearFiltersLabel}
       />
+
+      <div className="hidden md:block">
+        <CommonTabs<XtdhCollectionsSortField>
+          items={XTDH_COLLECTION_SORT_ITEMS}
+          activeItem={activeSort}
+          filterLabel="Sort collections"
+          setSelected={handleSortChange}
+          sortDirection={activeDirection}
+          disabled={isLoading}
+        />
+      </div>
 
       <XtdhReceivedCollectionsList
         isLoading={isLoading}
