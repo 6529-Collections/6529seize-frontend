@@ -5,6 +5,7 @@ import { XtdhStatsOverviewError } from "./stats-overview/ErrorState";
 import { NetworkStatsSection } from "./stats-overview/NetworkStatsSection";
 import { UserXtdhStatusSection } from "./stats-overview/UserXtdhStatusSection";
 import { CurrentMultiplierCard } from "./stats-overview/CurrentMultiplierCard";
+import { SummaryActionsCard } from "./stats-overview/SummaryActionsCard";
 import { useXtdhStatsOverviewData } from "./stats-overview/useXtdhStatsOverviewData";
 
 interface XtdhStatsOverviewProps {
@@ -38,12 +39,12 @@ export default function XtdhStatsOverview({
 
   return (
     <section
-      className="tw-rounded-2xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-6 tw-text-iron-50 tw-shadow-md tw-shadow-black/30"
+      className="tw-rounded-2xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-5 md:tw-p-6 tw-text-iron-50 tw-shadow-md tw-shadow-black/30"
       role="region"
       aria-label="xTDH Overview"
     >
       {showRefreshing ? (
-        <div className="tw-mb-2 tw-flex tw-justify-end">
+        <div className="tw-mb-1 tw-flex tw-justify-end">
           <span
             className="tw-flex tw-items-center tw-gap-2 tw-text-xs tw-text-iron-300"
             aria-live="polite"
@@ -53,8 +54,14 @@ export default function XtdhStatsOverview({
           </span>
         </div>
       ) : null}
-      <div className="tw-mt-6 tw-flex tw-flex-col tw-gap-6">
-        <CurrentMultiplierCard multiplier={networkStats.multiplier} />
+      <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-4 md:tw-gap-5">
+        <div className="tw-grid tw-gap-4 md:tw-grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <CurrentMultiplierCard
+            multiplier={networkStats.multiplier}
+            lastUpdatedAt={networkStats.lastUpdatedAt}
+          />
+          <SummaryActionsCard />
+        </div>
         <div className="tw-grid tw-items-start tw-gap-6 xl:tw-grid-cols-2">
           <NetworkStatsSection stats={networkStats} />
           <UserXtdhStatusSection state={userState} onRetry={handleRetry} />

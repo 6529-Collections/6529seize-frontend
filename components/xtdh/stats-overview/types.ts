@@ -28,6 +28,7 @@ export interface NetworkStats {
     readonly nextIncreaseDate: string;
     readonly milestones: readonly XtdhMultiplierMilestone[];
   };
+  readonly lastUpdatedAt: string | null;
   readonly baseTdhRate: number;
   readonly totalCapacity: number;
   readonly allocatedCapacity: number;
@@ -47,6 +48,11 @@ export interface StatsMetric {
   readonly valueSuffix?: string;
   readonly helperText?: string;
   readonly tone?: "default" | "muted";
+}
+
+export interface GrowthPathMetric extends StatsMetric {
+  readonly monthsEstimate: number | null;
+  readonly positionPercent: number;
 }
 
 export type CapacityProgressVariant = "network" | "user";

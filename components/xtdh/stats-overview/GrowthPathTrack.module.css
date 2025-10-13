@@ -1,0 +1,71 @@
+.trackLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%);
+}
+
+.trackLine::before,
+.trackLine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+}
+
+.trackLine::before {
+  background: rgba(82, 139, 255, 0.2);
+}
+
+.trackLine::after {
+  background: linear-gradient(
+    90deg,
+    rgba(82, 139, 255, 0.05) 0%,
+    rgba(82, 139, 255, 0.25) 35%,
+    rgba(82, 139, 255, 0.4) 55%,
+    rgba(82, 139, 255, 0.18) 75%,
+    rgba(82, 139, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: growth-path-flow 26s linear infinite;
+}
+
+.marker {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.markerDot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background-color: #528bff;
+  box-shadow: 0 0 6px rgba(82, 139, 255, 0.45);
+}
+
+@keyframes growth-path-flow {
+  from {
+    background-position: 0% 0%;
+  }
+  to {
+    background-position: 200% 0%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trackLine::after {
+    animation: none;
+    background-position: 100% 0;
+  }
+}

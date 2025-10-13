@@ -1,12 +1,20 @@
-import type { XtdhOverviewStats, XtdhStatsResponse } from "@/types/xtdh";
+import type {
+  XtdhMultiplierMilestone,
+  XtdhOverviewStats,
+  XtdhStatsResponse,
+} from "@/types/xtdh";
 
-import type { NetworkStats, UserSectionState } from "./types";
-import { calculatePercentage, clampToRange } from "./utils";
+import type { GrowthPathMetric, NetworkStats, UserSectionState } from "./types";
+import {
+  calculatePercentage,
+  clampToRange,
+  parseTimeframeToMonths,
+} from "./utils";
 
 export function buildNetworkStats(
   data: XtdhOverviewStats
 ): NetworkStats | null {
-  const { network, multiplier } = data;
+  const { network, multiplier, lastUpdatedAt } = data;
 
   if (!network) return null;
   if (!isNonNegativeNumber(network.totalDailyCapacity)) return null;
@@ -41,6 +49,10 @@ export function buildNetworkStats(
   const allocatedCapacity = clampToRange(network.totalAllocated, 0, totalCapacity);
   const availableCapacity = clampToRange(network.totalAvailable, 0, totalCapacity);
   const percentAllocated = calculatePercentage(allocatedCapacity, totalCapacity);
+  const sanitizedLastUpdatedAt =
+    typeof lastUpdatedAt === "string" && isParsableDate(lastUpdatedAt)
+      ? lastUpdatedAt
+      : null;
 
   return {
     multiplier: {
@@ -49,6 +61,7 @@ export function buildNetworkStats(
       nextIncreaseDate: multiplier.nextIncreaseDate,
       milestones: multiplier.milestones,
     },
+    lastUpdatedAt: sanitizedLastUpdatedAt,
     baseTdhRate: network.baseTdhRate,
     totalCapacity,
     allocatedCapacity,
@@ -60,6 +73,72 @@ export function buildNetworkStats(
     tokens: network.tokens,
     totalXtdh: network.totalXtdh,
   };
+}
+
+export function buildLongTermScheduleMetrics(
+  milestones: ReadonlyArray<XtdhMultiplierMilestone>
+): GrowthPathMetric[] {
+  if (!Array.isArray(milestones) || milestones.length === 0) {
+    return [];
+  }
+
+  const baseMetrics = milestones.map((milestone, index) => {
+    const percent = Number.isFinite(milestone.percentage)
+      ? `${milestone.percentage}%`
+      : "-";
+    const timeframe = milestone.timeframe || "TBD";
+    const value =
+      percent !== "-" && !percent.startsWith("-") ? `+${percent}` : percent;
+
+    return {
+      label: `Milestone ${index + 1}`,
+      value,
+      helperText: `≈ ${timeframe}`,
+      tooltip: `Projected network multiplier reaching ${percent} in roughly ${timeframe}.`,
+      monthsEstimate: parseTimeframeToMonths(timeframe),
+      positionPercent: 0,
+    };
+  });
+
+  const validMonths = baseMetrics
+    .map((metric) => metric.monthsEstimate)
+    .filter(
+      (months): months is number =>
+        Number.isFinite(months) && (months as number) >= 0
+    );
+
+  const maxMonths = validMonths.length > 0 ? Math.max(...validMonths) : 0;
+  const minPosition = 5;
+  const count = baseMetrics.length;
+
+  const fallbackPosition = (index: number): number => {
+    if (count <= 1) {
+      return 100;
+    }
+    const ratio = index / (count - 1);
+    return clampToRange(ratio * 100, minPosition, 100);
+  };
+
+  return baseMetrics.map((metric, index) => {
+    const months = metric.monthsEstimate;
+    if (!Number.isFinite(months) || months < 0 || maxMonths <= 0) {
+      return {
+        ...metric,
+        positionPercent: fallbackPosition(index),
+      };
+    }
+
+    const raw = (months / maxMonths) * 100;
+    const isMax = Math.abs(months - maxMonths) < 0.0001;
+    const position = isMax
+      ? 100
+      : clampToRange(raw, minPosition, 100);
+
+    return {
+      ...metric,
+      positionPercent: position,
+    };
+  });
 }
 
 export function buildUserSectionState({
@@ -181,4 +260,9 @@ function isNonNegativeNumber(value: unknown): value is number {
 
 function isFiniteNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
+}
+
+function isParsableDate(value: string): boolean {
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed);
 }
