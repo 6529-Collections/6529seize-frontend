@@ -2,11 +2,11 @@
 
 ## Codex Workflow
 
-- Review `/codex/STATE.md` before starting new work to confirm ticket ownership and status.
-- Track every piece of work with a ticket in `/codex/tickets/`, keeping the front matter and board entry in sync as progress is made.
+- Review [codex/STATE.md](codex/STATE.md) before starting new work to confirm ticket ownership and status.
+- Track every piece of work with a ticket in [codex/tickets](codex/tickets), keeping the front matter and board entry in sync as progress is made.
 - Log meaningful events and decisions inside the ticket with timestamped notes; avoid editing tickets marked **Done**.
-- Consult `/codex/plans/` for active planning documents and update them when sprint scope changes.
-- See `codex/agents.md` for the full Codex agent contract and operational details.
+- Consult [codex/plans](codex/plans) for active planning documents and update them when sprint scope changes.
+- See [codex/agents.md](codex/agents.md) for the full Codex agent contract and operational details.
 
 ## Setup
 
