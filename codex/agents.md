@@ -15,7 +15,7 @@ The `/codex` directory centralises planning artefacts so work can be tracked and
 - `/codex/STATE.md`: Master board of tickets, tracked as a Markdown table. Every ticket ID listed here must have a matching file in `codex/tickets/`.
 - `/codex/tickets/`: Canonical ticket records with context, plan, acceptance checks, PR links, and chronological log entries.
 - `/codex/plans/`: Time-boxed planning documents (for example, sprint briefs) that roll tickets into broader initiatives and demos.
-- `/codex/docs/`: Evergreen documentation (audits, incident reviews, architecture narratives) that must remain accessible after the related tickets close.
+- `/codex/docs/`: Evergreen documentation (audits, incident reviews, architecture narratives) that must remain accessible after the related tickets close. See `codex/docs/README.md` for naming, metadata, and security conventions.
 
 > Tip: Avoid editing tickets marked **Done**—append follow-up work as a new ticket to keep historical artefacts immutable.
 
@@ -61,7 +61,14 @@ Use `codex/docs/` for artefacts that need to persist beyond the lifecycle of a s
 - Record incident and postmortem summaries, including follow-up owners and due dates.
 - Share durable runbooks, operational checklists, or process guides that should stay versioned alongside the board.
 
-Name documents with a chronological prefix (for example, `2025-03-18-platform-audit.md`) and link them from related tickets, plans, or READMEs so reviewers can trace the supporting context quickly.
+Follow the `codex/docs/README.md` guidance when drafting or updating documentation:
+
+- Add the required YAML front matter (title, date, owner, review cadence, status, related links, and optional audience or superseded references).
+- Scrub secrets, credentials, and personal data; if redaction is impossible, store the sensitive source in the approved secure location and link to it with access notes.
+- Capture retention or access constraints up front (for example, `internal-only`, `retain 12 months`).
+- Close each document with a **Backlinks** section that lists the tickets, plans, and PRs that reference the artefact.
+
+Name documents with a chronological prefix (for example, `2025-03-18-platform-audit.md`) and link them from related tickets, plans, or READMEs so reviewers can trace the supporting context quickly. Maintain an index in `codex/docs/INDEX.md` when the archive expands to help contributors discover key references.
 
 ## Codex Agent Contract
 
