@@ -136,23 +136,30 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
   });
 
   const getErrorDetails = (error: unknown) => {
+    const status =
+      (error as any)?.status ??
+      (error as any)?.response?.status ??
+      (error as any)?.cause?.status;
+
     if (error instanceof Error) {
       const message = error.message?.trim() || DEFAULT_ERROR_MESSAGE;
       return {
         message,
-        isUnauthorized: /unauthorized/i.test(message),
+        isUnauthorized: status === 401 || /unauthorized/i.test(message),
       };
     }
+
     if (typeof error === "string") {
       const message = error.trim() || DEFAULT_ERROR_MESSAGE;
       return {
         message,
-        isUnauthorized: /unauthorized/i.test(message),
+        isUnauthorized: status === 401 || /unauthorized/i.test(message),
       };
     }
+
     return {
       message: DEFAULT_ERROR_MESSAGE,
-      isUnauthorized: false,
+      isUnauthorized: status === 401,
     };
   };
 
