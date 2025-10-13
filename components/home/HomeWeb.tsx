@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, type ReactNode } from "react";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import Home from "./Home";
@@ -50,13 +50,14 @@ export default function HomeWeb({
     [registerRef]
   );
 
-  const feedContent = isWalletInitializing ? (
-    <SpinnerLoader text="Loading feed..." />
-  ) : isAuthenticated ? (
-    <HomeFeed />
-  ) : (
-    <ConnectWallet />
-  );
+  let feedContent: ReactNode;
+  if (isWalletInitializing) {
+    feedContent = <SpinnerLoader text="Loading feed..." />;
+  } else if (isAuthenticated) {
+    feedContent = <HomeFeed />;
+  } else {
+    feedContent = <ConnectWallet />;
+  }
 
   const sidebarLeftOffset = hasTouchScreen ? 0 : "var(--left-rail)";
 
