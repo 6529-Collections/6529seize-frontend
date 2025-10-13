@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import UserPageHeader from '@/components/user/user-page-header/UserPageHeader';
+import UserPageHeaderClient from '@/components/user/user-page-header/UserPageHeaderClient';
 import { AuthContext } from '@/components/auth/Auth';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useRouter } from 'next/navigation';
@@ -46,10 +46,19 @@ describe('UserPageHeader', () => {
   it('renders follow button and about section', () => {
     render(
       <AuthContext.Provider value={auth}>
-        <UserPageHeader
+        <UserPageHeaderClient
           profile={profile}
-          fallbackHandleOrWallet="bob"
+          handleOrWallet="bob"
           fallbackMainAddress="0x1"
+          defaultBanner1="#000000"
+          defaultBanner2="#111111"
+          initialStatements={[
+            {
+              statement_type: 'BIO',
+              statement_group: 'GENERAL',
+            } as any,
+          ]}
+          profileEnabledAt="2024-01-01T00:00:00Z"
         />
       </AuthContext.Provider>
     );
