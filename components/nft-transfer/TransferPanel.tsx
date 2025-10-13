@@ -1,7 +1,12 @@
 "use client";
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { faAnglesDown, faAnglesUp } from "@fortawesome/free-solid-svg-icons";
+import {
+  faAnglesDown,
+  faAnglesUp,
+  faMinusCircle,
+  faPlusCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
@@ -142,28 +147,25 @@ export default function TransferPanel() {
                       {label}
                     </div>
                   </div>
-
                   {max > 1 && (
                     <div className="tw-flex tw-items-center tw-gap-1">
-                      <button
-                        type="button"
-                        className="tw-inline-flex tw-items-center tw-justify-center tw-h-6 tw-w-6 tw-rounded-full tw-bg-white tw-text-black tw-font-medium hover:tw-bg-[#ddd] tw-text-lg tw-p-0 tw-border-0 disabled:tw-opacity-50 disabled:tw-cursor-not-allowed"
+                      <FontAwesomeIcon
+                        icon={faMinusCircle}
                         onClick={() => t.decQty(it.key)}
-                        disabled={qty <= 1}
-                        aria-label="Decrease">
-                        -
-                      </button>
-                      <div className="tw-min-w-[2ch] tw-text-center tw-text-xs tw-tabular-nums">
+                        className="tw-size-6 tw-cursor-pointer"
+                        color={qty <= 1 ? "#60606C" : "#fff"}
+                        aria-disabled={qty <= 1}
+                      />
+                      <div className="tw-min-w-[2ch] tw-text-center tw-text-xs tw-tabular-nums tw-select-none">
                         {qty}
                       </div>
-                      <button
-                        type="button"
-                        className="tw-inline-flex tw-items-center tw-justify-center tw-h-6 tw-w-6 tw-rounded-full tw-bg-white tw-text-black tw-font-medium hover:tw-bg-[#ddd] tw-text-lg tw-p-0 tw-border-0 disabled:tw-opacity-50 disabled:tw-cursor-not-allowed"
+                      <FontAwesomeIcon
+                        icon={faPlusCircle}
                         onClick={() => t.incQty(it.key)}
-                        disabled={qty >= max}
-                        aria-label="Increase">
-                        +
-                      </button>
+                        className="tw-size-6 tw-cursor-pointer"
+                        color={qty >= max ? "#60606C" : "#fff"}
+                        aria-disabled={qty >= max}
+                      />
                     </div>
                   )}
 

@@ -1,6 +1,8 @@
 import { CollectedCard, CollectedCollectionType } from "@/entities/IProfile";
 import { ContractType } from "@/enums";
 import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
+import { faMinusCircle, faPlusCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { COLLECTED_COLLECTIONS_META } from "../filters/user-page-collected-filters.helpers";
 
@@ -114,6 +116,7 @@ export default function UserPageCollectedCard({
                 id={`${card.collection}-${card.token_id}`}
                 type="checkbox"
                 className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                readOnly
               />
               {contractType === ContractType.ERC1155 ? (
                 <>
@@ -128,33 +131,31 @@ export default function UserPageCollectedCard({
                   </span>
                   {copiesMax > 1 && qtySelected > 0 && (
                     <div className="tw-flex tw-items-center tw-gap-1">
-                      <button
-                        type="button"
-                        className="tw-inline-flex tw-items-center tw-justify-center tw-h-5 tw-w-5 tw-rounded-full tw-bg-white tw-text-black tw-font-medium hover:tw-bg-[#ddd] tw-text-lg tw-p-0 tw-border-0 disabled:tw-opacity-50 disabled:tw-cursor-not-allowed"
+                      <FontAwesomeIcon
+                        icon={faMinusCircle}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           onDecQty?.();
                         }}
-                        disabled={qtySelected <= 1}
-                        aria-label="Decrease">
-                        -
-                      </button>
-                      <div className="tw-min-w-[2ch] tw-text-center tw-text-xs tw-tabular-nums">
+                        className="tw-size-5 tw-cursor-pointer"
+                        color={qtySelected <= 1 ? "#60606C" : "#fff"}
+                        aria-disabled={qtySelected <= 1}
+                      />
+                      <div className="tw-min-w-[2ch] tw-text-center tw-text-xs tw-tabular-nums tw-select-none">
                         {qtySelected}
                       </div>
-                      <button
-                        type="button"
-                        className="tw-inline-flex tw-items-center tw-justify-center tw-h-5 tw-w-5 tw-rounded-full tw-bg-white tw-text-black tw-font-medium hover:tw-bg-[#ddd] tw-text-lg tw-p-0 tw-border-0 disabled:tw-opacity-50 disabled:tw-cursor-not-allowed"
+                      <FontAwesomeIcon
+                        icon={faPlusCircle}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           onIncQty?.();
                         }}
-                        disabled={qtySelected >= copiesMax}
-                        aria-label="Increase">
-                        +
-                      </button>
+                        className="tw-size-5 tw-cursor-pointer"
+                        color={qtySelected >= copiesMax ? "#60606C" : "#fff"}
+                        aria-disabled={qtySelected >= copiesMax}
+                      />
                     </div>
                   )}
                 </>

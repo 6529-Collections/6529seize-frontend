@@ -15,12 +15,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import TransferModalPfp from "./TransferModalPfp";
 
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import { publicEnv } from "@/config/env";
 import { Address } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
 // DEMO: set to true to simulate transfers locally without opening wallet or sending txs
 const MOCK_TRANSFERS = false;
-const MOCK_TRANSFER_END_FLOW = "success";
+const MOCK_TRANSFER_END_FLOW: "success" | "error" = "success";
 
 const ERC721_ABI = [
   {
@@ -59,6 +60,7 @@ export default function TransferModal({
   open: boolean;
   onClose: (opts?: { completed?: boolean }) => void;
 }) {
+  const enableMockTransfers = publicEnv.NODE_ENV !== "production";
   const t = useTransfer();
   const [query, setQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
@@ -89,6 +91,12 @@ export default function TransferModal({
   const [walletsAtEnd, setWalletsAtEnd] = useState(false);
 
   const [isClosing, setIsClosing] = useState(false);
+
+  // UI-driven mock controls (default to constants above)
+  const [mockTransfers, setMockTransfers] = useState<boolean>(MOCK_TRANSFERS);
+  const [mockEndFlow, setMockEndFlow] = useState<"success" | "error">(
+    MOCK_TRANSFER_END_FLOW
+  );
 
   type FlowState = "review" | "wallet" | "submitted" | "success" | "error";
   const [flow, setFlow] = useState<FlowState>("review");
@@ -321,7 +329,7 @@ export default function TransferModal({
       }
 
       // If mocking, synthesize hashes and progress the flow without sending txs
-      if (MOCK_TRANSFERS) {
+      if (mockTransfers) {
         const hashes: {
           hash: string;
           label: string;
@@ -364,7 +372,7 @@ export default function TransferModal({
           await new Promise((r) => setTimeout(r, 3000));
         }
 
-        setFlow(MOCK_TRANSFER_END_FLOW as FlowState);
+        setFlow(mockEndFlow as FlowState);
         return;
       }
 
@@ -461,6 +469,8 @@ export default function TransferModal({
     selectedWallet,
     walletClient,
     txHashes.length,
+    mockTransfers,
+    mockEndFlow,
   ]);
 
   if (!open) return null;
@@ -470,7 +480,7 @@ export default function TransferModal({
       return <span>Review transfer and select recipient</span>;
     if (flow === "success")
       return (
-        <span className="tw-flex tw-items-center tw-gap-1">
+        <span className="tw-flex tw-items-center tw-gap-1.5">
           <span className="tw-text-green">Success!</span>
           <img
             src="/emojis/sgt_saluting_face.webp"
@@ -481,7 +491,7 @@ export default function TransferModal({
       );
     if (flow === "error")
       return (
-        <span className="tw-flex tw-items-center tw-gap-1">
+        <span className="tw-flex tw-items-center tw-gap-1.5">
           <span className="tw-text-red">Transfer failed</span>
           <img
             src="/emojis/sgt_sob.webp"
@@ -492,14 +502,14 @@ export default function TransferModal({
       );
     if (flow === "wallet")
       return (
-        <span className="tw-flex tw-items-center tw-gap-1">
+        <span className="tw-flex tw-items-center tw-gap-1.5">
           <span>Confirm in your wallet</span>
           <CircleLoader />
         </span>
       );
     if (flow === "submitted")
       return (
-        <span className="tw-flex tw-items-center tw-gap-1">
+        <span className="tw-flex tw-items-center tw-gap-1.5">
           <span>Transfer submitted</span>
           <CircleLoader />
         </span>
@@ -530,14 +540,38 @@ export default function TransferModal({
         {/* header */}
         <div className="tw-flex tw-items-center tw-justify-between tw-border-0 tw-border-b-[3px] tw-border-solid tw-border-white/30 tw-p-4">
           <div className="tw-text-lg tw-font-semibold">{getFlowTitle()}</div>
-          {(flow === "review" || flow === "success" || flow === "error") && (
-            <FontAwesomeIcon
-              icon={faXmarkCircle}
-              type="button"
-              onClick={handleClose}
-              size="xl"
-            />
-          )}
+          <div className="tw-flex tw-items-center tw-gap-3">
+            {flow === "review" && enableMockTransfers && (
+              <div className="tw-flex tw-items-center tw-gap-2 tw-text-[12px] tw-opacity-80">
+                <label className="tw-flex tw-items-center tw-gap-1">
+                  <input
+                    type="checkbox"
+                    checked={mockTransfers}
+                    onChange={(e) => setMockTransfers(e.target.checked)}
+                  />
+                  <span>Mock</span>
+                </label>
+                <select
+                  value={mockEndFlow}
+                  onChange={(e) =>
+                    setMockEndFlow(e.target.value as "success" | "error")
+                  }
+                  disabled={!mockTransfers}
+                  className="tw-bg-white/10 tw-rounded tw-border tw-border-white/20 tw-px-2 tw-py-1 tw-text-[12px] focus:tw-outline-none">
+                  <option value="success">success</option>
+                  <option value="error">error</option>
+                </select>
+              </div>
+            )}
+            {(flow === "review" || flow === "success" || flow === "error") && (
+              <FontAwesomeIcon
+                icon={faXmarkCircle}
+                type="button"
+                onClick={handleClose}
+                size="xl"
+              />
+            )}
+          </div>
         </div>
 
         {/* body */}
@@ -599,12 +633,7 @@ export default function TransferModal({
             </div>
 
             {/* right: search + select target */}
-            <div
-              className={
-                !selectedProfile
-                  ? "tw-flex tw-flex-col tw-space-y-2 tw-min-h-0"
-                  : undefined
-              }>
+            <div className="tw-flex tw-flex-col tw-space-y-2 tw-min-h-0">
               <div
                 className={`tw-font-semibold ${
                   selectedProfile ? "tw-mb-2" : "tw-mb-0"
@@ -818,7 +847,7 @@ export default function TransferModal({
             )}
             {flow === "error" && (
               <div className="tw-space-y-2">
-                <div className="tw-text-sm tw-text-red-400">{errorMsg}</div>
+                <div>{errorMsg}</div>
                 {txHashes.length > 0 && (
                   <ul className="tw-space-y-1">
                     {txHashes.map((h) => (

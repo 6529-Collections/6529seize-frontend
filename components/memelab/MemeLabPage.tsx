@@ -28,7 +28,9 @@ import { MEMELAB_CONTRACT, MEMES_CONTRACT, NULL_ADDRESS } from "@/constants";
 import { useTitle } from "@/contexts/TitleContext";
 import { DBResponse } from "@/entities/IDBResponse";
 import { LabExtendedData, LabNFT, NFT, NFTHistory } from "@/entities/INFT";
+import { CollectedCollectionType } from "@/entities/IProfile";
 import { Transaction } from "@/entities/ITransaction";
+import { ContractType } from "@/enums";
 import {
   addProtocol,
   areEqualAddresses,
@@ -58,6 +60,8 @@ import {
   Row,
   Table,
 } from "react-bootstrap";
+import TransferSingle from "../nft-transfer/TransferSingle";
+import { TransferProvider } from "../nft-transfer/TransferState";
 
 const ACTIVITY_PAGE_SIZE = 25;
 
@@ -675,6 +679,23 @@ export default function MemeLabPageComponent({
                     <Col>
                       {getTokenCount(transferredOut)} card
                       {getTokenCount(transferredOut) > 1 && "s"} transferred out
+                    </Col>
+                  </Row>
+                )}
+                {nftBalance > 0 && nft?.id && (
+                  <Row className="pt-5">
+                    <Col>
+                      <TransferProvider>
+                        <TransferSingle
+                          collectionType={CollectedCollectionType.MEMES}
+                          contractType={ContractType.ERC1155}
+                          contract={MEMES_CONTRACT}
+                          tokenId={nft?.id}
+                          max={nftBalance}
+                          title={nft?.name ?? `The Memes #${nft?.id}`}
+                          thumbUrl={nft?.thumbnail}
+                        />
+                      </TransferProvider>
                     </Col>
                   </Row>
                 )}
