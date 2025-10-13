@@ -140,7 +140,10 @@ function WebSidebar({
 
   return (
     <>
-      <div className="tw-fixed tw-inset-y-0 tw-left-0 focus:tw-outline-none tw-z-40">
+      <div
+        className="tw-fixed tw-inset-y-0 tw-left-0 focus:tw-outline-none tw-z-40"
+        style={{ left: "var(--layout-margin, 0px)" }}
+      >
         {sidebarContent}
       </div>
       {!isMobile && isOverlayActive && (

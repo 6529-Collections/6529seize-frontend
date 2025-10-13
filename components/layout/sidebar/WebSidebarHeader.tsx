@@ -14,11 +14,7 @@ function WebSidebarHeader({ collapsed, onToggle }: WebSidebarHeaderProps) {
     <div className="tw-relative tw-shrink-0 tw-h-12 tw-flex tw-items-center tw-justify-between tw-px-2">
       <Link
         href="/"
-        className={`tw-relative tw-z-10 tw-flex tw-items-center tw-ml-1.5 tw-transition-all tw-duration-100 tw-ease-in-out ${
-          collapsed
-            ? "tw-opacity-0 tw-scale-75 tw-pointer-events-none"
-            : "tw-opacity-100 tw-scale-100"
-        }`}
+        className="tw-relative tw-z-10 tw-flex tw-items-center tw-ml-1.5 tw-ease-in-out"
       >
         <Image
           unoptimized
@@ -37,7 +33,7 @@ function WebSidebarHeader({ collapsed, onToggle }: WebSidebarHeaderProps) {
         onClick={onToggle}
         onMouseDown={(event) => event.preventDefault()}
         className={`tw-group tw-size-8 tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-700 tw-border tw-border-iron-700 tw-border-solid tw-backdrop-blur-sm tw-shadow-[0_10px_24px_rgba(0,0,0,0.45)] desktop-hover:hover:tw-bg-iron-650 desktop-hover:hover:tw-border-iron-650 desktop-hover:hover:tw-shadow-[0_12px_30px_rgba(0,0,0,0.55)] tw-absolute tw-transition-all tw-duration-300 tw-ease-in-out ${
-          collapsed ? "tw-left-4" : "tw-right-4"
+          collapsed ? "tw-right-12" : "tw-right-4"
         }`}
         aria-label={collapsed ? "Expand" : "Collapse"}
         aria-expanded={!collapsed}

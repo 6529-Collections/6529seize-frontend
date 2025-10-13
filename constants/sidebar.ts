@@ -1,5 +1,5 @@
 export const SIDEBAR_WIDTHS = {
-  EXPANDED: "18rem",
+  EXPANDED: "17.1875rem",
   COLLAPSED: "4rem",
   SUBMENU: "14rem",
 } as const;

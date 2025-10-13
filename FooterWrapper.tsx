@@ -5,12 +5,13 @@ import { useState, useEffect } from "react";
 import useDeviceInfo from "./hooks/useDeviceInfo";
 import Footer from "@/components/footer/Footer";
 import { useSidebarController } from "./hooks/useSidebarController";
+import { SIDEBAR_WIDTHS } from "@/constants/sidebar";
 
 export default function FooterWrapper() {
   const { isApp } = useDeviceInfo();
   const pathname = usePathname();
   const [homeActiveTab, setHomeActiveTab] = useState<string>("latest");
-  const { sidebarWidth, isMobile } = useSidebarController();
+  const { sidebarWidth, isMobile, isNarrow } = useSidebarController();
   useEffect(() => {
     const win = (globalThis as typeof globalThis & { window?: Window }).window;
     if (win === undefined) {
@@ -63,10 +64,13 @@ export default function FooterWrapper() {
   if (isApp || isMobile) return <Footer />;
 
   // Desktop WebLayout: match main content's sidebar spacing
-  const footerStyle = { paddingLeft: sidebarWidth };
+  const sidebarSpacing = isNarrow ? SIDEBAR_WIDTHS.COLLAPSED : sidebarWidth;
 
   return (
-    <div style={footerStyle}>
+    <div
+      className="tw-w-full tw-max-w-[1300px] tw-mx-auto"
+      style={{ paddingLeft: sidebarSpacing }}
+    >
       <Footer />
     </div>
   );

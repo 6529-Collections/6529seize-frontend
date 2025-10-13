@@ -8,8 +8,11 @@ import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
 import { SidebarProvider, useSidebarState } from "../../hooks/useSidebarState";
 import ClientOnly from "../client-only/ClientOnly";
 
+const DESKTOP_MAX_WIDTH = 1300;
+
 type LayoutCssVars = CSSProperties & {
-  "--left-rail": string;
+  "--layout-margin"?: string;
+  "--left-rail"?: string;
 };
 
 interface WebLayoutProps {
@@ -30,15 +33,19 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
   const { isRightSidebarOpen } = useSidebarState();
 
   const rootStyle = useMemo<LayoutCssVars>(() => {
-    // Keep left rail constant for collapsed rail; mobile has none
-    let leftRail = "0";
-    if (!isMobile) {
-      leftRail = isNarrow ? SIDEBAR_WIDTHS.COLLAPSED : sidebarWidth;
+    const base: LayoutCssVars = { minHeight: "100dvh" };
+
+    if (isMobile) {
+      base["--layout-margin"] = "0px";
+      base["--left-rail"] = "0px";
+      return base;
     }
-    return {
-      "--left-rail": leftRail,
-      minHeight: "100dvh",
-    } as LayoutCssVars;
+
+    const layoutMargin = `max((100vw - ${DESKTOP_MAX_WIDTH}px) / 2, 0px)`;
+    const leftRailWidth = isNarrow ? SIDEBAR_WIDTHS.COLLAPSED : sidebarWidth;
+    base["--layout-margin"] = layoutMargin;
+    base["--left-rail"] = `calc(${layoutMargin} + ${leftRailWidth})`;
+    return base;
   }, [isMobile, isNarrow, sidebarWidth]);
 
   const collapsedWidth = SIDEBAR_WIDTHS.COLLAPSED;
@@ -46,7 +53,7 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
   const narrowTranslateX = `translateX(calc(${expandedWidth} - ${collapsedWidth}))`;
 
   const mainStyle: CSSProperties = (() => {
-    const base: CSSProperties = {};
+    const base: CSSProperties = { width: "100%" };
 
     if (isMobile) {
       if (isOffcanvasOpen) {
@@ -78,7 +85,9 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
 
   return (
     <div
-      className="tw-flex tw-relative tw-overflow-x-hidden"
+      className={`tw-flex tw-relative tw-overflow-x-hidden tw-w-full${
+        isMobile ? "" : " tw-max-w-[1300px] tw-mx-auto"
+      }`}
       style={rootStyle}
       data-small={isSmall ? "true" : "false"}
     >
