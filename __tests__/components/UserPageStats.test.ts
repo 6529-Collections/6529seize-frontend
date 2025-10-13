@@ -1,4 +1,4 @@
-import { getStatsPath } from '@/components/user/stats/UserPageStats';
+import { getStatsPath } from '@/components/user/stats/userPageStats.helpers';
 import { ApiIdentity } from '@/generated/models/ApiIdentity';
 
 describe('getStatsPath', () => {

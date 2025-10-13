@@ -5,7 +5,7 @@ import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import UserPageHeaderName from "./name/UserPageHeaderName";
 import UserLevel from "../utils/level/UserLevel";
 import UserPageHeaderStats from "./stats/UserPageHeaderStats";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { amIUser, getRandomColor } from "@/helpers/Helpers";
 import UserPageHeaderPfpWrapper from "./pfp/UserPageHeaderPfpWrapper";
 import UserPageHeaderAbout from "./about/UserPageHeaderAbout";
@@ -20,6 +20,7 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import UserPageHeaderProfileEnabledAt from "./UserPageHeaderProfileEnabledAt";
+import { useIdentity } from "@/hooks/useIdentity";
 
 const DEFAULT_BANNER_1 = getRandomColor();
 const DEFAULT_BANNER_2 = getRandomColor();
@@ -36,18 +37,41 @@ const UserPageHeaderPfp = dynamic(() => import("./pfp/UserPageHeaderPfp"), {
 });
 
 export default function UserPageHeader({
-  profile,
-  mainAddress,
+  profile: initialProfile,
+  fallbackHandleOrWallet,
+  fallbackMainAddress,
 }: {
   readonly profile: ApiIdentity;
-  readonly mainAddress: string;
+  readonly fallbackHandleOrWallet: string;
+  readonly fallbackMainAddress: string;
 }) {
   const params = useParams();
   const router = useRouter();
-  const user = params?.user?.toString().toLowerCase();
+  const routeHandleOrWallet = params?.user?.toString().toLowerCase() ?? null;
+  const normalizedFallbackHandle = fallbackHandleOrWallet.toLowerCase();
+  const normalizedHandleOrWallet =
+    routeHandleOrWallet ?? normalizedFallbackHandle;
   const { address } = useSeizeConnectContext();
   const { connectedProfile, activeProfileProxy, setToast } =
     useContext(AuthContext);
+
+  const { profile: hydratedProfile } = useIdentity({
+    handleOrWallet: normalizedHandleOrWallet,
+    initialProfile,
+  });
+
+  const profile = useMemo(
+    () => hydratedProfile ?? initialProfile,
+    [hydratedProfile, initialProfile]
+  );
+
+  const mainAddress = useMemo(() => {
+    const primaryWallet = profile?.primary_wallet;
+    if (primaryWallet) {
+      return primaryWallet.toLowerCase();
+    }
+    return fallbackMainAddress.toLowerCase();
+  }, [profile?.primary_wallet, fallbackMainAddress]);
 
   const [directMessageLoading, setDirectMessageLoading] =
     useState<boolean>(false);
@@ -81,12 +105,12 @@ export default function UserPageHeader({
   }, [profile, isMyProfile, activeProfileProxy]);
 
   const { isFetched, data: statements } = useQuery<CicStatement[]>({
-    queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, user?.toLowerCase()],
+    queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, normalizedHandleOrWallet],
     queryFn: async () =>
       await commonApiFetch<CicStatement[]>({
-        endpoint: `profiles/${user}/cic/statements`,
+        endpoint: `profiles/${normalizedHandleOrWallet}/cic/statements`,
       }),
-    enabled: !!user,
+    enabled: !!normalizedHandleOrWallet,
   });
 
   const [aboutStatement, setAboutStatement] = useState<CicStatement | null>(
@@ -193,7 +217,9 @@ export default function UserPageHeader({
               />
             )}
             <UserPageHeaderStats profile={profile} />
-            <UserPageHeaderProfileEnabledAt handleOrWallet={profile.handle} />
+            <UserPageHeaderProfileEnabledAt
+              handleOrWallet={profile.handle ?? normalizedHandleOrWallet}
+            />
           </div>
         </div>
       </section>

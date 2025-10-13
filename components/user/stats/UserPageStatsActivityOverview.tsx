@@ -9,7 +9,7 @@ import {
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
-import { getStatsPath } from "./UserPageStats";
+import { getStatsPath } from "./userPageStats.helpers";
 import styles from "./UserPageStats.module.scss";
 import {
   UserPageStatsTableHead,

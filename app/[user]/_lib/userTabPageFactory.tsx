@@ -27,10 +27,11 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
     readonly searchParams: Promise<Record<string, string>>;
   }) {
     const { user } = await params;
+    const normalizedUser = user.toLowerCase();
     const query = await searchParams;
     const headers = await getAppCommonHeaders();
     const profile: ApiIdentity = await getUserProfile({
-      user: user.toLowerCase(),
+      user: normalizedUser,
       headers,
     }).catch(() => {
       notFound();
@@ -51,7 +52,7 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
     }
 
     return (
-      <UserPageLayout profile={profile}>
+      <UserPageLayout profile={profile} handleOrWallet={normalizedUser}>
         <Tab profile={profile} />
       </UserPageLayout>
     );
@@ -63,9 +64,10 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
     readonly params: Promise<{ user: string }>;
   }): Promise<Metadata> {
     const { user } = await params;
+    const normalizedUser = user.toLowerCase();
     const headers = await getAppCommonHeaders();
     const profile: ApiIdentity = await getUserProfile({
-      user: user.toLowerCase(),
+      user: normalizedUser,
       headers,
     });
     return getAppMetadata(getMetadataForUserPage(profile, metaLabel));

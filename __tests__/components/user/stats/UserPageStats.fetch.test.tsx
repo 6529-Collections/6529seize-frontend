@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UserPageStats from '@/components/user/stats/UserPageStats';
+import UserPageStatsClient from '@/components/user/stats/UserPageStatsClient';
 import { commonApiFetch } from '@/services/api/common-api';
 
 jest.mock('@/components/user/stats/UserPageStatsCollected', () => () => <div data-testid="collected" />);
@@ -17,24 +17,47 @@ jest.mock('@/components/user/utils/addresses-select/UserAddressesSelectDropdown'
 jest.mock('@/services/api/common-api');
 const apiMock = commonApiFetch as jest.Mock;
 
-describe('UserPageStats data fetching', () => {
+describe('UserPageStatsClient data fetching', () => {
   beforeEach(() => {
+    apiMock.mockClear();
     apiMock.mockResolvedValue({});
   });
 
-  it('calls APIs with initial and updated address', async () => {
+  it('fetches data when address changes', async () => {
     const profile: any = { wallets: [{ wallet: '0x1' }], consolidation_key: 'k' };
-    render(<UserPageStats profile={profile} />);
+    render(
+      <UserPageStatsClient
+        profile={profile}
+        initialSeasons={[{} as any]}
+        initialTdh={{} as any}
+        initialOwnerBalance={{} as any}
+        initialBalanceMemes={[]}
+      />
+    );
 
-    await waitFor(() => expect(apiMock).toHaveBeenCalledTimes(4));
-    expect(apiMock.mock.calls[0][0]).toMatchObject({ endpoint: 'new_memes_seasons' });
-    expect(apiMock.mock.calls[1][0]).toMatchObject({ endpoint: 'tdh/consolidation/k' });
-    expect(apiMock.mock.calls[2][0]).toMatchObject({ endpoint: 'owners-balances/consolidation/k' });
-    expect(apiMock.mock.calls[3][0]).toMatchObject({ endpoint: 'owners-balances/consolidation/k/memes' });
-
-    apiMock.mockClear();
+    expect(apiMock).not.toHaveBeenCalled();
     userEvent.click(screen.getByTestId('dropdown'));
-    await waitFor(() => expect(apiMock).toHaveBeenCalled());
+    await waitFor(() => expect(apiMock).toHaveBeenCalledTimes(3));
     expect(apiMock.mock.calls[0][0]).toMatchObject({ endpoint: 'tdh/wallet/0xabc' });
+    expect(apiMock.mock.calls[1][0]).toMatchObject({ endpoint: 'owners-balances/wallet/0xabc' });
+    expect(apiMock.mock.calls[2][0]).toMatchObject({
+      endpoint: 'owners-balances/wallet/0xabc/memes',
+    });
+  });
+
+  it('fetches seasons on mount when initial data missing', async () => {
+    const profile: any = { wallets: [{ wallet: '0x1' }] };
+    render(
+      <UserPageStatsClient
+        profile={profile}
+        initialSeasons={[]}
+        initialTdh={undefined}
+        initialOwnerBalance={undefined}
+        initialBalanceMemes={[]}
+      />
+    );
+
+    await waitFor(() => expect(apiMock).toHaveBeenCalled());
+    expect(apiMock.mock.calls[0][0]).toMatchObject({ endpoint: 'new_memes_seasons' });
   });
 });
