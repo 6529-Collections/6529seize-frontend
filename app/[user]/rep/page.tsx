@@ -1,9 +1,8 @@
 import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import UserPageRepWrapper from "@/components/user/rep/UserPageRepWrapper";
-import { FilterTargetType } from "@/components/utils/CommonFilterTargetSelect";
 import { ApiProfileRepRatesState } from "@/entities/IProfile";
-import { RateMatter } from "@/enums";
+import { ProfileActivityFilterTargetType, RateMatter } from "@/enums";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getProfileLogTypes } from "@/helpers/profile-logs.helpers";
 import { getInitialRatersParams } from "@/helpers/server.helpers";
@@ -24,7 +23,7 @@ const getInitialActivityLogParams = (
     logTypes: [],
   }),
   matter: RateMatter.REP,
-  targetType: FilterTargetType.ALL,
+  targetType: ProfileActivityFilterTargetType.ALL,
   handleOrWallet,
   groupId: null,
 });

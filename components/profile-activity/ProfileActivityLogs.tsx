@@ -5,13 +5,15 @@ import { CountlessPage } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import CommonFilterTargetSelect, {
-  FilterTargetType,
-} from "../utils/CommonFilterTargetSelect";
+import CommonFilterTargetSelect from "../utils/CommonFilterTargetSelect";
 import ProfileActivityLogsFilter from "./filter/ProfileActivityLogsFilter";
 import ProfileActivityLogsList from "./list/ProfileActivityLogsList";
 
-import { ProfileActivityLogType, RateMatter } from "@/enums";
+import {
+  ProfileActivityFilterTargetType,
+  ProfileActivityLogType,
+  RateMatter,
+} from "@/enums";
 import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 import { selectActiveGroupId } from "@/store/groupSlice";
 import { useSelector } from "react-redux";
@@ -24,7 +26,7 @@ export interface ActivityLogParams {
   readonly pageSize: number;
   readonly logTypes: ProfileActivityLogType[];
   readonly matter: RateMatter | null;
-  readonly targetType: FilterTargetType;
+  readonly targetType: ProfileActivityFilterTargetType;
   readonly handleOrWallet: string | null;
   readonly groupId: string | null;
 }
@@ -55,7 +57,9 @@ export default function ProfileActivityLogs({
   const [selectedFilters, setSelectedFilters] = useState<
     ProfileActivityLogType[]
   >(initialParams.logTypes);
-  const [targetType, setTargetType] = useState<FilterTargetType>(
+  const [targetType, setTargetType] = useState<
+    ProfileActivityFilterTargetType
+  >(
     initialParams.targetType
   );
   const [currentPage, setCurrentPage] = useState<number>(initialParams.page);
@@ -75,7 +79,7 @@ export default function ProfileActivityLogs({
     setCurrentPage(1);
   };
 
-  const onTargetType = (target: FilterTargetType) => {
+  const onTargetType = (target: ProfileActivityFilterTargetType) => {
     setTargetType(target);
     setCurrentPage(1);
   };
