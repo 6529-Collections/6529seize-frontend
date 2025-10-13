@@ -15,6 +15,7 @@ The `/codex` directory centralises planning artefacts so work can be tracked and
 - `/codex/STATE.md`: Master board of tickets, tracked as a Markdown table. Every ticket ID listed here must have a matching file in `codex/tickets/`.
 - `/codex/tickets/`: Canonical ticket records with context, plan, acceptance checks, PR links, and chronological log entries.
 - `/codex/plans/`: Time-boxed planning documents (for example, sprint briefs) that roll tickets into broader initiatives and demos.
+- `/codex/docs/`: Evergreen documentation (audits, incident reviews, architecture narratives) that must remain accessible after the related tickets close.
 
 > Tip: Avoid editing tickets marked **Done**—append follow-up work as a new ticket to keep historical artefacts immutable.
 
@@ -50,6 +51,17 @@ Planning files in `codex/plans/` should:
 - Follow the naming convention `YYYYWW-name.md` (calendar week) or `YYYY-QN-name.md` for quarterly plans.
 - Document the planning window, goals, committed tickets, stretch objectives, demo notes, and retro actions.
 - Link back to ticket IDs and keep status snapshots so stakeholders can see progression across the time box.
+
+## Documentation Archive
+
+Use `codex/docs/` for artefacts that need to persist beyond the lifecycle of a single ticket:
+
+- Preserve code audits, compliance reviews, or security assessments requiring long-term traceability.
+- Log architecture or design decisions that inform multiple tickets or future initiatives.
+- Record incident and postmortem summaries, including follow-up owners and due dates.
+- Share durable runbooks, operational checklists, or process guides that should stay versioned alongside the board.
+
+Name documents with a chronological prefix (for example, `2025-03-18-platform-audit.md`) and link them from related tickets, plans, or READMEs so reviewers can trace the supporting context quickly.
 
 ## Codex Agent Contract
 
