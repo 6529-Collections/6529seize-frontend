@@ -42,6 +42,7 @@ type NotificationsQueryParams = {
   limit: string;
   cause: ApiNotificationCause[] | null;
   pageParam?: number | null;
+  signal?: AbortSignal;
 };
 
 const getIdentityNotificationsQueryKey = (
@@ -54,6 +55,7 @@ const fetchNotifications = async ({
   limit,
   cause,
   pageParam,
+  signal,
 }: NotificationsQueryParams) => {
   const params: Record<string, string> = { limit };
 
@@ -68,6 +70,7 @@ const fetchNotifications = async ({
   return await commonApiFetch<TypedNotificationsResponse>({
     endpoint: "notifications",
     params,
+    signal,
   });
 };
 
@@ -97,12 +100,29 @@ export function useNotificationsQuery({
    */
   const query = useInfiniteQuery({
     queryKey: getIdentityNotificationsQueryKey(identity, limit, cause),
-    queryFn: ({ pageParam }: { pageParam: number | null }) =>
-      fetchNotifications({ limit, cause, pageParam }),
+    queryFn: ({
+      pageParam,
+      signal,
+    }: {
+      pageParam: number | null;
+      signal: AbortSignal | undefined;
+    }) => fetchNotifications({ limit, cause, pageParam, signal }),
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.notifications.at(-1)?.id ?? null,
     enabled: !!identity && !activeProfileProxy,
     staleTime: 60000,
+    retry: (failureCount, error: unknown) => {
+      if (typeof error === "string") {
+        if (error.toLowerCase().includes("unauthorized")) {
+          return false;
+        }
+      } else if (error instanceof Error) {
+        if (/unauthorized/i.test(error.message)) {
+          return false;
+        }
+      }
+      return failureCount < 3;
+    },
   });
 
   const items = useMemo(() => {
