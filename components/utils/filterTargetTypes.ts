@@ -1,5 +1,3 @@
-export enum FilterTargetType {
-  ALL = "ALL",
-  INCOMING = "INCOMING",
-  OUTGOING = "OUTGOING",
-}
+export {
+  ProfileActivityFilterTargetType as FilterTargetType,
+} from "@/enums";
