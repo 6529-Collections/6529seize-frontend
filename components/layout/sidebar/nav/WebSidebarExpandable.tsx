@@ -96,7 +96,7 @@ function WebSidebarExpandable({
             >
               {/* Vertical connector line */}
               <div
-                className={`tw-absolute tw-left-6 tw-top-0 tw-bottom-0 tw-w-px tw-bg-iron-800 tw-transition-opacity tw-duration-300 ${
+                className={`tw-absolute tw-left-7 tw-top-0 tw-bottom-0 tw-w-px tw-bg-iron-800 tw-transition-opacity tw-duration-300 ${
                   expanded ? "tw-opacity-100" : "tw-opacity-0"
                 }`}
                 aria-hidden="true"

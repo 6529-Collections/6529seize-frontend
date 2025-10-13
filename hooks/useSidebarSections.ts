@@ -21,12 +21,13 @@ export function useSidebarSections(
           { name: "Groups", href: "/network/groups" },
           { name: "NFT Activity", href: "/nft-activity" },
           { name: "Memes Calendar", href: "/meme-calendar" },
+          { name: "TDH", href: "/network/tdh" },
         ],
         subsections: [
           {
             name: "Metrics",
             items: [
-              { name: "Definitions", href: "/network/metrics" },
+              { name: "Definitions", href: "/network/definitions" },
               { name: "Network Stats", href: "/network/stats" },
               { name: "Levels", href: "/network/levels" },
             ],
@@ -94,7 +95,7 @@ export function useSidebarSections(
                 : []),
               { name: "API", href: "/tools/api" },
               { name: "EMMA", href: "/emma" },
-              { name: "Block Finder", href: "/meme-blocks" },
+              { name: "Block Finder", href: "/tools/block-finder" },
               { name: "Open Data", href: "/open-data" },
             ],
           },
