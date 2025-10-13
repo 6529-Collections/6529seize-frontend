@@ -53,12 +53,8 @@ export function XtdhReceivedCollectionsViewContent({
     handleSearchChange,
     ownershipFilter,
     handleOwnershipFilterChange,
-    isMyAllocationsActive,
-    handleToggleMyAllocations,
-    isTrendingActive,
-    handleToggleTrending,
-    isNewlyAllocatedActive,
-    handleToggleNewlyAllocated,
+    discoveryFilter,
+    handleDiscoveryFilterChange,
     activeFilters,
     handleResetFilters,
   } = state;
@@ -71,12 +67,8 @@ export function XtdhReceivedCollectionsViewContent({
         onSearchChange={handleSearchChange}
         ownershipFilter={ownershipFilter}
         onOwnershipFilterChange={handleOwnershipFilterChange}
-        isMyAllocationsActive={isMyAllocationsActive}
-        onToggleMyAllocations={handleToggleMyAllocations}
-        isTrendingActive={isTrendingActive}
-        onToggleTrending={handleToggleTrending}
-        isNewlyAllocatedActive={isNewlyAllocatedActive}
-        onToggleNewlyAllocated={handleToggleNewlyAllocated}
+        discoveryFilter={discoveryFilter}
+        onDiscoveryFilterChange={handleDiscoveryFilterChange}
         activeFilters={activeFilters}
         filtersAreActive={filtersAreActive}
         isLoading={isLoading}

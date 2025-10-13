@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useCallback, useMemo, useState } from "react";
+import { Fragment, useCallback, useState } from "react";
 import {
   Dialog,
   DialogPanel,
@@ -8,7 +8,6 @@ import {
   TransitionChild,
 } from "@headlessui/react";
 import clsx from "clsx";
-import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMagnifyingGlass,
@@ -19,14 +18,14 @@ import {
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import CommonInput from "@/components/utils/input/CommonInput";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
+import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import type { SortDirection } from "@/entities/ISort";
 import {
-  XTDH_COLLECTION_DISCOVERY_CONFIG,
-  XTDH_COLLECTION_OWNERSHIP_LABELS,
+  XTDH_COLLECTION_DISCOVERY_TABS,
+  XTDH_COLLECTION_OWNERSHIP_TABS,
   XTDH_COLLECTION_SORT_ITEMS,
-  XTDH_MY_ALLOCATIONS_ICON,
-  XTDH_MY_ALLOCATIONS_LABEL,
   type XtdhCollectionOwnershipFilter,
+  type XtdhCollectionsDiscoveryFilter,
   type XtdhCollectionsSortField,
   type XtdhReceivedView,
 } from "../utils/constants";
@@ -39,12 +38,10 @@ export interface XtdhReceivedCollectionsControlsProps {
   readonly onSearchChange: (value: string) => void;
   readonly ownershipFilter: XtdhCollectionOwnershipFilter;
   readonly onOwnershipFilterChange: (filter: XtdhCollectionOwnershipFilter) => void;
-  readonly isMyAllocationsActive: boolean;
-  readonly onToggleMyAllocations: () => void;
-  readonly isTrendingActive: boolean;
-  readonly onToggleTrending: () => void;
-  readonly isNewlyAllocatedActive: boolean;
-  readonly onToggleNewlyAllocated: () => void;
+  readonly discoveryFilter: XtdhCollectionsDiscoveryFilter;
+  readonly onDiscoveryFilterChange: (
+    filter: XtdhCollectionsDiscoveryFilter,
+  ) => void;
   readonly activeFilters: readonly XtdhActiveFilterChip[];
   readonly filtersAreActive: boolean;
   readonly isLoading: boolean;
@@ -56,96 +53,6 @@ export interface XtdhReceivedCollectionsControlsProps {
   readonly onViewChange: (view: XtdhReceivedView) => void;
   readonly announcement: string;
   readonly clearFiltersLabel: string;
-}
-
-const OWNERSHIP_SEGMENT_OPTIONS: ReadonlyArray<{
-  readonly value: Extract<XtdhCollectionOwnershipFilter, "granted" | "received">;
-  readonly label: string;
-}> = [
-  { value: "granted", label: XTDH_COLLECTION_OWNERSHIP_LABELS.granted },
-  { value: "received", label: XTDH_COLLECTION_OWNERSHIP_LABELS.received },
-];
-
-interface DiscoveryToggleButtonProps {
-  readonly label: string;
-  readonly icon: IconDefinition;
-  readonly active: boolean;
-  readonly disabled: boolean;
-  readonly onClick: () => void;
-}
-
-function DiscoveryToggleButton({
-  label,
-  icon,
-  active,
-  disabled,
-  onClick,
-}: DiscoveryToggleButtonProps) {
-  return (
-    <button
-      type="button"
-      className={clsx(
-        "tw-relative tw-inline-flex tw-items-center tw-gap-2 tw-rounded-full tw-border tw-px-3.5 tw-py-2 tw-text-sm tw-font-semibold tw-transition-colors tw-duration-200 tw-min-h-[44px] focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400",
-        active
-          ? "tw-border-primary-500 tw-bg-primary-500/20 tw-text-primary-200"
-          : "tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 hover:tw-border-iron-500",
-        disabled && "tw-cursor-not-allowed tw-opacity-60",
-      )}
-      aria-pressed={active}
-      disabled={disabled}
-      onClick={onClick}
-    >
-      <FontAwesomeIcon icon={icon} className="tw-h-4 tw-w-4" />
-      <span>{label}</span>
-    </button>
-  );
-}
-
-interface OwnershipSegmentedControlProps {
-  readonly value: XtdhCollectionOwnershipFilter;
-  readonly onChange: (next: XtdhCollectionOwnershipFilter) => void;
-  readonly disabled: boolean;
-}
-
-function OwnershipSegmentedControl({
-  value,
-  onChange,
-  disabled,
-}: OwnershipSegmentedControlProps) {
-  return (
-    <div
-      className="tw-inline-flex tw-items-center tw-gap-1 tw-rounded-full tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-1"
-      role="group"
-      aria-label="Relationship filter"
-    >
-      {OWNERSHIP_SEGMENT_OPTIONS.map((option) => {
-        const isActive = value === option.value;
-        return (
-          <button
-            key={option.value}
-            type="button"
-            className={clsx(
-              "tw-flex-1 tw-rounded-full tw-border tw-border-transparent tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-min-w-[96px] tw-min-h-[44px] tw-whitespace-nowrap tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400",
-              isActive
-                ? "tw-border-primary-500 tw-bg-primary-500/20 tw-text-primary-200"
-                : "tw-text-iron-200 hover:tw-bg-iron-800",
-              disabled && "tw-cursor-not-allowed tw-opacity-60",
-            )}
-            aria-pressed={isActive}
-            disabled={disabled}
-            onClick={() => {
-              if (disabled) {
-                return;
-              }
-              onChange(isActive ? "all" : option.value);
-            }}
-          >
-            {option.label}
-          </button>
-        );
-      })}
-    </div>
-  );
 }
 
 interface ActiveFiltersChipsProps {
@@ -275,12 +182,8 @@ export function XtdhReceivedCollectionsControls({
   onSearchChange,
   ownershipFilter,
   onOwnershipFilterChange,
-  isMyAllocationsActive,
-  onToggleMyAllocations,
-  isTrendingActive,
-  onToggleTrending,
-  isNewlyAllocatedActive,
-  onToggleNewlyAllocated,
+  discoveryFilter,
+  onDiscoveryFilterChange,
   activeFilters,
   filtersAreActive,
   isLoading,
@@ -301,40 +204,6 @@ export function XtdhReceivedCollectionsControls({
       onSearchChange(value ?? "");
     },
     [onSearchChange],
-  );
-
-  const discoveryToggles = useMemo(
-    () => [
-      {
-        key: "trending" as const,
-        label: XTDH_COLLECTION_DISCOVERY_CONFIG.trending.label,
-        icon: XTDH_COLLECTION_DISCOVERY_CONFIG.trending.icon,
-        active: isTrendingActive,
-        onClick: onToggleTrending,
-      },
-      {
-        key: "newly_allocated" as const,
-        label: XTDH_COLLECTION_DISCOVERY_CONFIG.newly_allocated.label,
-        icon: XTDH_COLLECTION_DISCOVERY_CONFIG.newly_allocated.icon,
-        active: isNewlyAllocatedActive,
-        onClick: onToggleNewlyAllocated,
-      },
-      {
-        key: "mine" as const,
-        label: XTDH_MY_ALLOCATIONS_LABEL,
-        icon: XTDH_MY_ALLOCATIONS_ICON,
-        active: isMyAllocationsActive,
-        onClick: onToggleMyAllocations,
-      },
-    ],
-    [
-      isTrendingActive,
-      onToggleTrending,
-      isNewlyAllocatedActive,
-      onToggleNewlyAllocated,
-      isMyAllocationsActive,
-      onToggleMyAllocations,
-    ],
   );
 
   return (
@@ -391,9 +260,9 @@ export function XtdhReceivedCollectionsControls({
           </div>
         </div>
 
-        <div className="hidden md:flex md:flex-col md:gap-5">
+        <div className="hidden md:flex md:flex-col md:gap-4">
           <div className="tw-flex tw-flex-wrap md:tw:flex-nowrap tw-items-center tw-gap-3 xl:tw-gap-4">
-            <div className="tw-min-w-[220px] tw-max-w-[420px] tw-flex-shrink-0">
+            <div className="tw-min-w-[220px] tw-max-w-[360px] tw-flex-shrink-0">
               <CommonInput
                 value={searchQuery}
                 onChange={handleSearchInput}
@@ -402,8 +271,27 @@ export function XtdhReceivedCollectionsControls({
                 disabled={isLoading}
               />
             </div>
-            <div className="tw-flex-1" />
-            <div className="tw-flex-shrink-0">
+            <div className="tw-flex-1 tw-flex tw-items-center tw-gap-3">
+              <div className="tw-flex-1">
+                <CommonTabs<XtdhCollectionOwnershipFilter>
+                  items={XTDH_COLLECTION_OWNERSHIP_TABS}
+                  activeItem={ownershipFilter}
+                  filterLabel="Relationship filter"
+                  setSelected={onOwnershipFilterChange}
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="tw-flex-1">
+                <CommonTabs<XtdhCollectionsDiscoveryFilter>
+                  items={XTDH_COLLECTION_DISCOVERY_TABS}
+                  activeItem={discoveryFilter}
+                  filterLabel="Discovery filter"
+                  setSelected={onDiscoveryFilterChange}
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+            <div className="tw-flex-shrink-0 tw-ml-auto">
               <XtdhReceivedViewToggle
                 view={view}
                 onViewChange={onViewChange}
@@ -411,35 +299,17 @@ export function XtdhReceivedCollectionsControls({
               />
             </div>
           </div>
-
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-gap-y-3 xl:tw-gap-x-3">
-            <OwnershipSegmentedControl
-              value={ownershipFilter}
-              onChange={onOwnershipFilterChange}
-              disabled={isLoading}
-            />
-            <div className="tw-flex tw-flex-1 tw-flex-wrap tw-items-center tw-gap-2">
-              {discoveryToggles.map((toggle) => (
-                <DiscoveryToggleButton
-                  key={toggle.key}
-                  label={toggle.label}
-                  icon={toggle.icon}
-                  active={toggle.active}
-                  disabled={isLoading}
-                  onClick={toggle.onClick}
-                />
-              ))}
-            </div>
-            {filtersAreActive && (
+          {filtersAreActive && (
+            <div className="tw-flex tw-justify-end">
               <button
                 type="button"
                 onClick={onResetFilters}
-                className="tw-inline-flex tw-min-h-[44px] tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-iron-700 tw-bg-transparent tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-200 tw-transition tw-duration-200 hover:tw-border-iron-500 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 tw-ml-auto"
+                className="tw-inline-flex tw-min-h-[44px] tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-iron-700 tw-bg-transparent tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-200 tw-transition tw-duration-200 hover:tw-border-iron-500 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
               >
                 {clearFiltersLabel}
               </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         <ActiveFiltersChips filters={activeFilters} />
@@ -474,9 +344,11 @@ export function XtdhReceivedCollectionsControls({
             <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
               Relationship
             </span>
-            <OwnershipSegmentedControl
-              value={ownershipFilter}
-              onChange={onOwnershipFilterChange}
+            <CommonTabs<XtdhCollectionOwnershipFilter>
+              items={XTDH_COLLECTION_OWNERSHIP_TABS}
+              activeItem={ownershipFilter}
+              filterLabel="Relationship filter"
+              setSelected={onOwnershipFilterChange}
               disabled={isLoading}
             />
           </section>
@@ -485,18 +357,13 @@ export function XtdhReceivedCollectionsControls({
             <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
               Discovery
             </span>
-            <div className="tw-flex tw-flex-wrap tw-gap-2">
-              {discoveryToggles.map((toggle) => (
-                <DiscoveryToggleButton
-                  key={toggle.key}
-                  label={toggle.label}
-                  icon={toggle.icon}
-                  active={toggle.active}
-                  disabled={isLoading}
-                  onClick={toggle.onClick}
-                />
-              ))}
-            </div>
+            <CommonTabs<XtdhCollectionsDiscoveryFilter>
+              items={XTDH_COLLECTION_DISCOVERY_TABS}
+              activeItem={discoveryFilter}
+              filterLabel="Discovery filter"
+              setSelected={onDiscoveryFilterChange}
+              disabled={isLoading}
+            />
           </section>
 
           <ActiveFiltersChips filters={activeFilters} />

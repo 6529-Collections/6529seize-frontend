@@ -40,12 +40,8 @@ const baseProps = {
   onSearchChange: jest.fn(),
   ownershipFilter: "all" as const,
   onOwnershipFilterChange: jest.fn(),
-  isMyAllocationsActive: false,
-  onToggleMyAllocations: jest.fn(),
-  isTrendingActive: false,
-  onToggleTrending: jest.fn(),
-  isNewlyAllocatedActive: false,
-  onToggleNewlyAllocated: jest.fn(),
+  discoveryFilter: "none" as const,
+  onDiscoveryFilterChange: jest.fn(),
   activeFilters: [] as XtdhActiveFilterChip[],
   filtersAreActive: false,
   isLoading: false,
@@ -71,7 +67,7 @@ describe("XtdhReceivedCollectionsControls", () => {
         {...baseProps}
         activeFilters={[
           { label: "Trending", onRemove: removeTrending },
-          { label: "Mine" },
+          { label: "Granted" },
         ]}
         filtersAreActive={true}
       />,
@@ -80,7 +76,7 @@ describe("XtdhReceivedCollectionsControls", () => {
     expect(screen.getAllByTestId("sort-dropdown").length).toBeGreaterThan(0);
     expect(screen.getByText("Active Filters")).toBeInTheDocument();
     expect(screen.getAllByText("Trending").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Mine").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Granted").length).toBeGreaterThan(0);
     const viewToggles = screen.getAllByTestId("view-toggle");
     expect(viewToggles.length).toBeGreaterThan(0);
     expect(viewToggles[0]).toHaveTextContent("toggle");
@@ -91,18 +87,18 @@ describe("XtdhReceivedCollectionsControls", () => {
     expect(removeTrending).toHaveBeenCalledTimes(1);
   });
 
-  it("invokes ownership toggles and discovery handlers", () => {
+  it("invokes ownership and discovery handlers via tabs", () => {
     const onOwnershipFilterChange = jest.fn();
-    const onToggleTrending = jest.fn();
+    const onDiscoveryFilterChange = jest.fn();
     const { rerender } = render(
       <XtdhReceivedCollectionsControls
         {...baseProps}
         onOwnershipFilterChange={onOwnershipFilterChange}
-        onToggleTrending={onToggleTrending}
+        onDiscoveryFilterChange={onDiscoveryFilterChange}
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Granted" }));
+    fireEvent.click(screen.getByRole("tab", { name: "Granted" }));
     expect(onOwnershipFilterChange).toHaveBeenCalledWith("granted");
 
     rerender(
@@ -110,15 +106,15 @@ describe("XtdhReceivedCollectionsControls", () => {
         {...baseProps}
         ownershipFilter="granted"
         onOwnershipFilterChange={onOwnershipFilterChange}
-        onToggleTrending={onToggleTrending}
+        onDiscoveryFilterChange={onDiscoveryFilterChange}
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Granted" }));
+    fireEvent.click(screen.getByRole("tab", { name: "All" }));
     expect(onOwnershipFilterChange).toHaveBeenLastCalledWith("all");
 
-    fireEvent.click(screen.getAllByRole("button", { name: "Trending" })[0]);
-    expect(onToggleTrending).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("tab", { name: "Trending" }));
+    expect(onDiscoveryFilterChange).toHaveBeenCalledWith("trending");
   });
 
   it("opens mobile filters dialog and wires reset + apply actions", () => {
@@ -126,7 +122,7 @@ describe("XtdhReceivedCollectionsControls", () => {
       <XtdhReceivedCollectionsControls
         {...baseProps}
         filtersAreActive={true}
-        activeFilters={[{ label: "Mine" }]}
+        activeFilters={[{ label: "Granted" }]}
       />,
     );
 

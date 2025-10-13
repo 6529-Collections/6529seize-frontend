@@ -233,7 +233,7 @@ describe("useXtdhReceivedExplorer", () => {
     );
 
     act(() => {
-      latest?.collectionsState.handleOwnershipFilterChange("granted");
+      latest?.collectionsState.handleOwnershipFilterChange("all");
     });
 
     await waitFor(() =>
@@ -241,7 +241,7 @@ describe("useXtdhReceivedExplorer", () => {
     );
 
     act(() => {
-      latest?.collectionsState.handleToggleNewlyAllocated();
+      latest?.collectionsState.handleDiscoveryFilterChange("new");
     });
 
     await waitFor(() =>
@@ -249,7 +249,7 @@ describe("useXtdhReceivedExplorer", () => {
     );
 
     act(() => {
-      latest?.collectionsState.handleToggleNewlyAllocated();
+      latest?.collectionsState.handleDiscoveryFilterChange("none");
     });
 
     await waitFor(() =>
@@ -276,7 +276,7 @@ describe("useXtdhReceivedExplorer", () => {
     expect(latest?.collectionsState.activeDirection).toBe(SortDirection.DESC);
 
     act(() => {
-      latest?.collectionsState.handleToggleTrending();
+      latest?.collectionsState.handleDiscoveryFilterChange("trending");
     });
 
     await waitFor(() =>
@@ -286,7 +286,7 @@ describe("useXtdhReceivedExplorer", () => {
     expect(latest?.collectionsState.collections[0].collectionId).toBe("alpha");
 
     act(() => {
-      latest?.collectionsState.handleToggleTrending();
+      latest?.collectionsState.handleDiscoveryFilterChange("none");
     });
 
     await waitFor(() =>
@@ -311,7 +311,6 @@ describe("useXtdhReceivedExplorer", () => {
     );
     expect(latest?.collectionsState.searchQuery).toBe("");
     expect(latest?.collectionsState.ownershipFilter).toBe("all");
-    expect(latest?.collectionsState.isNewlyAllocatedActive).toBe(false);
-    expect(latest?.collectionsState.isTrendingActive).toBe(false);
+    expect(latest?.collectionsState.discoveryFilter).toBe("none");
   });
 });

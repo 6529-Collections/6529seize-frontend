@@ -5,7 +5,6 @@ import {
   faClockRotateLeft,
   faList,
   faTableCellsLarge,
-  faUserCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { SortDirection } from "@/entities/ISort";
 
@@ -124,6 +123,22 @@ export const XTDH_COLLECTION_OWNERSHIP_LABELS: Record<XtdhCollectionOwnershipFil
   received: "Received",
 };
 
+export const XTDH_COLLECTION_OWNERSHIP_TABS: ReadonlyArray<
+  CommonSelectItem<XtdhCollectionOwnershipFilter>
+> = [
+  { key: "all", label: XTDH_COLLECTION_OWNERSHIP_LABELS.all, value: "all" },
+  {
+    key: "granted",
+    label: XTDH_COLLECTION_OWNERSHIP_LABELS.granted,
+    value: "granted",
+  },
+  {
+    key: "received",
+    label: XTDH_COLLECTION_OWNERSHIP_LABELS.received,
+    value: "received",
+  },
+];
+
 export type XtdhCollectionDiscoveryToggle = "trending" | "newly_allocated";
 
 export const XTDH_COLLECTION_DISCOVERY_CONFIG: Record<
@@ -140,5 +155,16 @@ export const XTDH_COLLECTION_DISCOVERY_CONFIG: Record<
   },
 };
 
-export const XTDH_MY_ALLOCATIONS_LABEL = "Mine";
-export const XTDH_MY_ALLOCATIONS_ICON = faUserCircle;
+export type XtdhCollectionsDiscoveryFilter = "none" | "trending" | "new";
+
+export const XTDH_COLLECTION_DISCOVERY_TABS: ReadonlyArray<
+  CommonSelectItem<XtdhCollectionsDiscoveryFilter>
+> = [
+  { key: "none", label: "All activity", value: "none" },
+  { key: "trending", label: XTDH_COLLECTION_DISCOVERY_CONFIG.trending.label, value: "trending" },
+  {
+    key: "new",
+    label: XTDH_COLLECTION_DISCOVERY_CONFIG.newly_allocated.label,
+    value: "new",
+  },
+];

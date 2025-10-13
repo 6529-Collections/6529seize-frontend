@@ -86,16 +86,8 @@ export default function UserPageXtdhReceived({
       handleOwnershipFilterChange: () => {
         /* no-op */
       },
-      isMyAllocationsActive: false,
-      handleToggleMyAllocations: () => {
-        collectionsStateData.handleClearFilters();
-      },
-      isTrendingActive: false,
-      handleToggleTrending: () => {
-        /* no-op */
-      },
-      isNewlyAllocatedActive: false,
-      handleToggleNewlyAllocated: () => {
+      discoveryFilter: "none",
+      handleDiscoveryFilterChange: () => {
         /* no-op */
       },
       activeFilters:

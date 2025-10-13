@@ -3,6 +3,7 @@ import type { XtdhReceivedCollectionSummary } from "@/types/xtdh";
 import type {
   XtdhCollectionOwnershipFilter,
   XtdhCollectionsSortField,
+  XtdhCollectionsDiscoveryFilter,
 } from "../utils/constants";
 
 export interface XtdhActiveFilterChip {
@@ -43,12 +44,10 @@ export interface XtdhReceivedCollectionsViewState {
   readonly handleOwnershipFilterChange: (
     next: XtdhCollectionOwnershipFilter,
   ) => void;
-  readonly isMyAllocationsActive: boolean;
-  readonly handleToggleMyAllocations: () => void;
-  readonly isTrendingActive: boolean;
-  readonly handleToggleTrending: () => void;
-  readonly isNewlyAllocatedActive: boolean;
-  readonly handleToggleNewlyAllocated: () => void;
+  readonly discoveryFilter: XtdhCollectionsDiscoveryFilter;
+  readonly handleDiscoveryFilterChange: (
+    next: XtdhCollectionsDiscoveryFilter,
+  ) => void;
   readonly activeFilters: XtdhActiveFilterChip[];
   readonly handleResetFilters: () => void;
 }
