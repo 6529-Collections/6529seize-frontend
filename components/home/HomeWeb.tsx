@@ -58,13 +58,15 @@ export default function HomeWeb({
     <ConnectWallet />
   );
 
+  const sidebarLeftOffset = hasTouchScreen ? 0 : "var(--left-rail)";
+
   return (
     <div className="tw-h-full">
       {isDropOpen && drop && (
         <div
           className="tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-[49] tw-bg-black"
           style={{
-            left: hasTouchScreen ? 0 : "var(--left-rail)",
+            left: sidebarLeftOffset,
             top: spaces.headerSpace,
             transition: "none",
           }}
