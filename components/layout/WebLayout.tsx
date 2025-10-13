@@ -1,6 +1,7 @@
 "use client";
 
 import React, { type CSSProperties, type ReactNode, useMemo } from "react";
+import Image from "next/image";
 import WebSidebar from "./sidebar/WebSidebar";
 import { useSidebarController } from "../../hooks/useSidebarController";
 import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
@@ -106,7 +107,24 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
 
 const WebLayout = ({ children, isSmall = false }: WebLayoutProps) => (
   <SidebarProvider>
-    <ClientOnly>
+    <ClientOnly
+      fallback={
+        <div className="tailwind-scope tw-min-h-[100dvh] tw-bg-black tw-flex tw-items-center tw-justify-center tw-px-6">
+          <div className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-gap-8 tw-text-center md:tw-text-left">
+            <Image
+              unoptimized
+              priority
+              loading="eager"
+              src="https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/279.WEBP"
+              alt="Brain"
+              width={220}
+              height={326}
+              className="tw-rounded-md tw-shadow-lg tw-max-w-[40vw] md:tw-max-w-[180px] tw-h-auto"
+            />
+            <h1 className="tw-text-xl tw-font-bold tw-text-white">Loading...</h1>
+          </div>
+        </div>
+      }>
       <WebLayoutContent isSmall={isSmall}>{children}</WebLayoutContent>
     </ClientOnly>
   </SidebarProvider>
