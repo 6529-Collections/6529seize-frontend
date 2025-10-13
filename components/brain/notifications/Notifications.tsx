@@ -199,16 +199,12 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
       return;
     }
 
-    if (typeof ResizeObserver === "undefined") {
-      return;
-    }
-
     const observationTarget =
       (scrollElement.firstElementChild as HTMLElement | null) ?? scrollElement;
 
     let rafId: number | null = null;
 
-    const observer = new ResizeObserver(() => {
+    const scheduleStickToBottom = () => {
       if (!hasInitializedScrollRef.current || !isPinnedToBottomRef.current) {
         return;
       }
@@ -226,15 +222,47 @@ export default function Notifications({ activeDrop, setActiveDrop }: Notificatio
         container.scrollTop = container.scrollHeight;
         rafId = null;
       });
-    });
+    };
 
-    observer.observe(observationTarget);
+    if (typeof ResizeObserver !== "undefined") {
+      const resizeObserver = new ResizeObserver(() => {
+        scheduleStickToBottom();
+      });
+
+      resizeObserver.observe(observationTarget);
+
+      return () => {
+        if (rafId !== null) {
+          cancelAnimationFrame(rafId);
+        }
+        resizeObserver.disconnect();
+      };
+    }
+
+    if (typeof MutationObserver !== "undefined") {
+      const mutationObserver = new MutationObserver(() => {
+        scheduleStickToBottom();
+      });
+
+      mutationObserver.observe(observationTarget, {
+        attributes: true,
+        childList: true,
+        subtree: true,
+        characterData: true,
+      });
+
+      return () => {
+        if (rafId !== null) {
+          cancelAnimationFrame(rafId);
+        }
+        mutationObserver.disconnect();
+      };
+    }
 
     return () => {
       if (rafId !== null) {
         cancelAnimationFrame(rafId);
       }
-      observer.disconnect();
     };
   }, [items, showLoader, showNoItems]);
 
