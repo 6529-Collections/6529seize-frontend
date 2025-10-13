@@ -16,12 +16,14 @@ import TransferModalPfp from "./TransferModalPfp";
 
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { publicEnv } from "@/config/env";
-import { Address } from "viem";
+import { commonApiFetch } from "@/services/api/common-api";
+import { Address, isAddress } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
 // DEMO: set to true to simulate transfers locally without opening wallet or sending txs
 const MOCK_TRANSFERS = false;
 const MOCK_TRANSFER_END_FLOW: "success" | "error" = "success";
+const MIN_SEARCH_LENGTH = 3;
 
 const ERC721_ABI = [
   {
@@ -112,6 +114,13 @@ export default function TransferModal({
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
   const { address } = useAccount();
+  const trimmedQuery = query.trim();
+  const needsMoreSearchCharacters =
+    trimmedQuery.length > 0 && trimmedQuery.length < MIN_SEARCH_LENGTH;
+  const remainingSearchCharacters = Math.max(
+    MIN_SEARCH_LENGTH - trimmedQuery.length,
+    0
+  );
 
   useEffect(() => {
     if (!open) {
@@ -142,24 +151,24 @@ export default function TransferModal({
     setSelectedProfile(null);
     setSelectedWallet(null);
 
-    const q = query.trim();
-    if (q.length === 0) {
+    if (trimmedQuery.length < MIN_SEARCH_LENGTH) {
       setResults([]);
       setIsSearching(false);
       return;
     }
 
     let cancelled = false;
+    const abortController = new AbortController();
     setIsSearching(true);
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(
-          `https://api.6529.io/api/community-members?param=${encodeURIComponent(
-            q
-          )}`
-        );
-        if (!res.ok) throw new Error(`Search failed with ${res.status}`);
-        const arr: CommunityMemberMinimal[] = await res.json();
+        const arr = await commonApiFetch<CommunityMemberMinimal[]>({
+          endpoint: "community-members",
+          params: {
+            param: trimmedQuery,
+          },
+          signal: abortController.signal,
+        });
         if (!cancelled) setResults(arr || []);
       } catch (e) {
         if (!cancelled) setResults([]);
@@ -170,9 +179,10 @@ export default function TransferModal({
 
     return () => {
       cancelled = true;
+      abortController.abort();
       clearTimeout(timer);
     };
-  }, [open, query]);
+  }, [open, trimmedQuery]);
 
   const items = useMemo(
     () =>
@@ -293,6 +303,7 @@ export default function TransferModal({
       return;
     }
 
+    let wroteTransaction = false;
     try {
       setErrorMsg(null);
       setTxHashes([]);
@@ -317,15 +328,17 @@ export default function TransferModal({
         { is1155: boolean; items: typeof selItems; label: string }
       >();
       for (const it of selItems) {
-        if (!byContract.has(it.contract)) {
-          const is1155 = it.contractType === "ERC1155";
-          byContract.set(it.contract, {
-            is1155,
-            items: [] as any,
-            label: it.label,
-          });
+        const existing = byContract.get(it.contract);
+        if (existing) {
+          existing.items.push(it);
+          continue;
         }
-        byContract.get(it.contract)!.items.push(it);
+
+        byContract.set(it.contract, {
+          is1155: it.contractType === "ERC1155",
+          items: [it],
+          label: it.label,
+        });
       }
 
       // If mocking, synthesize hashes and progress the flow without sending txs
@@ -381,14 +394,23 @@ export default function TransferModal({
         label: string;
       }[] = [];
 
-      const { data: walletClientLocal } = { data: walletClient } as any;
-
-      if (!walletClientLocal) {
+      if (!walletClient) {
         setErrorMsg("Wallet not ready. Please reconnect.");
         setFlow("error");
         setRetryable(true);
         return;
       }
+
+      if (!selectedWallet || !isAddress(selectedWallet)) {
+        setErrorMsg(
+          "Invalid destination wallet. Please choose another wallet."
+        );
+        setFlow("error");
+        setRetryable(true);
+        return;
+      }
+
+      const destinationWallet = selectedWallet as Address;
 
       for (const [contract, { is1155, items: citems }] of Array.from(
         byContract.entries()
@@ -401,16 +423,11 @@ export default function TransferModal({
             address: contract as Address,
             abi: ERC1155_ABI,
             functionName: "safeBatchTransferFrom",
-            args: [
-              address as Address,
-              selectedWallet as string as Address,
-              ids,
-              amts,
-              "0x",
-            ],
+            args: [address as Address, destinationWallet, ids, amts, "0x"],
           });
           const label = citems.map((x) => x.label).join(", ");
-          const hash = await walletClientLocal.writeContract(request);
+          const hash = await walletClient.writeContract(request);
+          wroteTransaction = true;
           hashes.push({
             hash,
             label,
@@ -422,13 +439,10 @@ export default function TransferModal({
               address: contract as Address,
               abi: ERC721_ABI,
               functionName: "safeTransferFrom",
-              args: [
-                address as Address,
-                selectedWallet as string as Address,
-                x.tokenId,
-              ],
+              args: [address as Address, destinationWallet, x.tokenId],
             });
-            const hash = await walletClientLocal.writeContract(request);
+            const hash = await walletClient.writeContract(request);
+            wroteTransaction = true;
             hashes.push({
               hash,
               label: x.label,
@@ -459,7 +473,7 @@ export default function TransferModal({
         name.includes("UserRejected") ||
         sm.includes("rejected") ||
         m.includes("rejected");
-      setRetryable(looksRejected && txHashes.length === 0);
+      setRetryable(looksRejected && !wroteTransaction);
       setFlow("error");
     }
   }, [
@@ -468,7 +482,6 @@ export default function TransferModal({
     t.selected,
     selectedWallet,
     walletClient,
-    txHashes.length,
     mockTransfers,
     mockEndFlow,
   ]);
@@ -654,11 +667,15 @@ export default function TransferModal({
                   <div className="tw-text-[12px] tw-opacity-60">
                     {isSearching
                       ? "Searching…"
+                      : needsMoreSearchCharacters
+                      ? `Keep typing ${remainingSearchCharacters} more character${
+                          remainingSearchCharacters === 1 ? "" : "s"
+                        }`
                       : results.length > 0
                       ? `Found ${results.length} result${
                           results.length === 1 ? "" : "s"
                         }`
-                      : query
+                      : trimmedQuery
                       ? "No results."
                       : "Type to search."}
                   </div>

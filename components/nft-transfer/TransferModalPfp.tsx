@@ -26,17 +26,40 @@ export default function TransferModalPfp({
   const levelColor = getLevelBgColor(level);
 
   useEffect(() => {
+    let isMounted = true;
+
+    if (!src) {
+      setResolved(null);
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    setResolved(null);
+
     (async () => {
-      if (!src) return;
-      const newSrc = await resolveIpfsUrl(src);
-      setResolved(newSrc);
+      try {
+        const newSrc = await resolveIpfsUrl(src);
+        if (isMounted) {
+          setResolved(newSrc ?? null);
+        }
+      } catch {
+        if (isMounted) {
+          setResolved(null);
+        }
+      }
     })();
+
+    return () => {
+      isMounted = false;
+    };
   }, [src]);
 
   if (!resolved) {
     return (
       <div
-        className={`tw-h-10 tw-w-10 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-text-sm tw-font-semibold ${levelColor}`}>
+        style={{ width: size, height: size }}
+        className={`tw-rounded-full tw-flex tw-items-center tw-justify-center tw-text-sm tw-font-semibold ${levelColor}`}>
         {level}
       </div>
     );
