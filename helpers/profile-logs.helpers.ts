@@ -2,8 +2,10 @@ import {
   ActivityLogParams,
   ActivityLogParamsConverted,
 } from "@/components/profile-activity/ProfileActivityLogs";
-import { FilterTargetType } from "@/components/utils/CommonFilterTargetSelect";
-import { ProfileActivityLogType } from "@/enums";
+import {
+  ProfileActivityFilterTargetType,
+  ProfileActivityLogType,
+} from "@/enums";
 
 const DISABLED_LOG_TYPES = [
   ProfileActivityLogType.DROP_COMMENT,
@@ -34,7 +36,7 @@ export const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
     logTypes: [],
   }),
   matter: null,
-  targetType: FilterTargetType.ALL,
+  targetType: ProfileActivityFilterTargetType.ALL,
   handleOrWallet: null,
   groupId: null,
 };
@@ -65,18 +67,18 @@ export const convertActivityLogParams = ({
     return converted;
   }
 
-  if (params.targetType === FilterTargetType.ALL) {
+  if (params.targetType === ProfileActivityFilterTargetType.ALL) {
     converted.include_incoming = "true";
     converted.profile = params.handleOrWallet;
     return converted;
   }
 
-  if (params.targetType === FilterTargetType.INCOMING) {
+  if (params.targetType === ProfileActivityFilterTargetType.INCOMING) {
     converted.target = params.handleOrWallet;
     return converted;
   }
 
-  if (params.targetType === FilterTargetType.OUTGOING) {
+  if (params.targetType === ProfileActivityFilterTargetType.OUTGOING) {
     converted.profile = params.handleOrWallet;
     return converted;
   }
