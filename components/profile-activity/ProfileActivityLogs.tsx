@@ -51,6 +51,11 @@ export default function ProfileActivityLogs({
   readonly disableActiveGroup?: boolean;
   readonly children?: React.ReactNode;
 }) {
+
+  console.log('===============================================');
+  console.log('initialParams');
+  console.log(initialParams);
+  console.log('===============================================');
   const activeGroupId = useSelector(selectActiveGroupId);
   const [selectedFilters, setSelectedFilters] = useState<
     ProfileActivityLogType[]
@@ -94,6 +99,14 @@ export default function ProfileActivityLogs({
       disableActiveGroup: !!disableActiveGroup,
     })
   );
+
+useEffect(() => {
+
+  console.log('===============================================');
+  console.log('params', params);
+  console.log('===============================================');
+}, [params]);
+
 
   useEffect(() => {
     setParams(

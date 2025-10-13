@@ -2,11 +2,9 @@
 
 import { useId } from "react";
 
-export enum FilterTargetType {
-  ALL = "ALL",
-  INCOMING = "INCOMING",
-  OUTGOING = "OUTGOING",
-}
+import { FilterTargetType } from "./filterTargetTypes";
+
+export { FilterTargetType };
 
 const TARGETS = [
   { id: FilterTargetType.ALL, name: "All" },

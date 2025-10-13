@@ -1,4 +1,4 @@
-import { FilterTargetType } from "@/components/utils/CommonFilterTargetSelect";
+import { FilterTargetType } from "@/components/utils/filterTargetTypes";
 import { ProfileActivityLogType } from "@/enums";
 import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 

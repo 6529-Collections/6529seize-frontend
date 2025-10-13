@@ -1,7 +1,7 @@
 import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import UserPageIdentityWrapper from "@/components/user/identity/UserPageIdentityWrapper";
-import { FilterTargetType } from "@/components/utils/CommonFilterTargetSelect";
+import { FilterTargetType } from "@/components/utils/filterTargetTypes";
 import { RateMatter } from "@/enums";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getProfileLogTypes } from "@/helpers/profile-logs.helpers";
