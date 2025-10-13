@@ -1,8 +1,10 @@
 "use client";
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { faAnglesDown, faAnglesUp } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import TransferModal from "./TransferModal";
 import { useTransfer } from "./TransferState";
 
@@ -11,6 +13,9 @@ export default function TransferPanel() {
   const { isConnected } = useSeizeConnectContext();
 
   const [showModal, setShowModal] = useState(false);
+  const listRef = useRef<HTMLUListElement | null>(null);
+  const [listHasOverflow, setListHasOverflow] = useState(false);
+  const [listAtEnd, setListAtEnd] = useState(false);
 
   useEffect(() => {
     if (!isConnected && t.enabled) {
@@ -19,13 +24,63 @@ export default function TransferPanel() {
     }
   }, [isConnected, t]);
 
-  if (!t.enabled) return null;
-
   const items = Array.from(t.selected.values());
+
+  // Scroll to top when items increase (new selection added)
+  const prevItemsLenRef = useRef(items.length);
+  useEffect(() => {
+    if (items.length > prevItemsLenRef.current && listRef.current) {
+      // Scroll the selection list to the top when a new item is added
+      listRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    prevItemsLenRef.current = items.length;
+  }, [items.length]);
+
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) {
+      setListHasOverflow(false);
+      setListAtEnd(false);
+      return;
+    }
+
+    const hasOverflow = (node: HTMLElement | null) =>
+      !!node && node.scrollHeight > node.clientHeight;
+
+    const nearBottom = (node: HTMLElement | null) => {
+      if (!node) return false;
+      const threshold = 4; // px tolerance
+      return (
+        node.scrollTop + node.clientHeight >= node.scrollHeight - threshold
+      );
+    };
+
+    const check = () => {
+      setListHasOverflow(hasOverflow(el));
+      setListAtEnd(nearBottom(el));
+    };
+
+    // Initial check
+    check();
+
+    // Re-check on resize
+    window.addEventListener("resize", check);
+
+    // Listen for scroll on the list to flip the arrow
+    const onScroll = () => setListAtEnd(nearBottom(el));
+    el.addEventListener("scroll", onScroll);
+
+    return () => {
+      window.removeEventListener("resize", check);
+      el.removeEventListener("scroll", onScroll);
+    };
+  }, [items.length]);
+
+  if (!t.enabled) return null;
 
   return (
     <>
-      <aside className="tw-sticky tw-top-2 tw-h-fit tw-w-80 tw-shrink-0 tw-rounded-2xl tw-border tw-border-white/10 tw-bg-black/70 tw-backdrop-blur tw-p-4">
+      <aside className="tw-sticky tw-top-2 tw-ring-[3px] tw-ring-white/30 tw-w-80 tw-shrink-0 tw-rounded-2xl tw-border tw-border-white/10 tw-bg-black/70 tw-backdrop-blur tw-p-4 tw-flex tw-flex-col tw-max-h-[calc(100vh-1rem)] tw-overflow-hidden tw-self-start">
         <div className="tw-text-xs tw-leading-tight tw-opacity-70">
           * You can only transfer NFTs from the address you are currently
           connected to.
@@ -48,7 +103,11 @@ export default function TransferPanel() {
         {items.length === 0 ? (
           <p className="tw-text-xs tw-opacity-70">Choose cards to transfer.</p>
         ) : (
-          <ul className="tw-max-h-[75vh] tw-overflow-auto tw-space-y-2 tw-px-0">
+          <ul
+            ref={listRef}
+            className={`tw-overflow-auto tw-space-y-2 tw-px-0 tw-mb-1 tw-pr-3 tw-[scrollbar-gutter:stable] tw-scrollbar-thin tw-scrollbar-thumb-white/30 tw-scrollbar-track-transparent hover:tw-scrollbar-thumb-white/50 ${
+              listHasOverflow ? "tw-flex-1 tw-min-h-0" : ""
+            }`}>
             {items.map((it) => {
               const max = Math.max(1, it.max ?? 1);
               const qty = Math.min(Math.max(1, it.qty ?? 1), max);
@@ -59,15 +118,18 @@ export default function TransferPanel() {
               return (
                 <li
                   key={it.key}
-                  className="tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/5 tw-p-2">
+                  className="tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/10 tw-p-2">
                   {it.thumbUrl ? (
-                    <Image
-                      alt={it.title ?? it.key}
-                      src={it.thumbUrl}
-                      width={30}
-                      height={30}
-                      className="tw-rounded-lg tw-object-cover"
-                    />
+                    <div className="tw-relative tw-h-10 tw-w-10 tw-rounded-md tw-overflow-hidden tw-bg-white/10">
+                      <Image
+                        alt={it.title ?? it.key}
+                        src={it.thumbUrl}
+                        fill
+                        sizes="40px"
+                        className="tw-object-contain"
+                        quality={90}
+                      />
+                    </div>
                   ) : (
                     <div className="tw-h-10 tw-w-10 tw-rounded-lg tw-bg-white/10" />
                   )}
@@ -118,6 +180,12 @@ export default function TransferPanel() {
           </ul>
         )}
 
+        {listHasOverflow && (
+          <div className="tw-text-xs tw-opacity-75 tw-text-center">
+            <FontAwesomeIcon icon={listAtEnd ? faAnglesUp : faAnglesDown} />{" "}
+            Scroll for more
+          </div>
+        )}
         <div className="tw-mt-3 tw-flex tw-gap-3">
           <button
             type="button"

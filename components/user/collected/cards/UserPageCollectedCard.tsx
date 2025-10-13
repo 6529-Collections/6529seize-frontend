@@ -11,6 +11,8 @@ export default function UserPageCollectedCard({
   interactiveMode = "link",
   selected = false,
   onToggle,
+  onIncQty,
+  onDecQty,
   copiesMax = 1,
   qtySelected = 0,
 }: {
@@ -20,6 +22,8 @@ export default function UserPageCollectedCard({
   readonly interactiveMode?: "link" | "select";
   readonly selected?: boolean;
   readonly onToggle?: () => void;
+  readonly onIncQty?: () => void;
+  readonly onDecQty?: () => void;
   readonly copiesMax?: number;
   readonly qtySelected?: number;
 }) {
@@ -110,17 +114,50 @@ export default function UserPageCollectedCard({
                 id={`${card.collection}-${card.token_id}`}
                 type="checkbox"
                 className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                onSelect={onToggle}
-                onChange={onToggle}
               />
               {contractType === ContractType.ERC1155 ? (
-                <span className="tw-text-sm tw-font-medium">
-                  {selected
-                    ? `Selected ${qtySelected} / ${copiesMax}`
-                    : copiesMax > 1
-                    ? `Select (up to ${copiesMax})`
-                    : "Select"}
-                </span>
+                <>
+                  <span className="tw-text-sm tw-font-medium">
+                    {selected
+                      ? `Selected ${
+                          copiesMax === 1 ? `${qtySelected} / ${copiesMax}` : ""
+                        }`
+                      : copiesMax > 1
+                      ? `Select (up to ${copiesMax})`
+                      : "Select"}
+                  </span>
+                  {copiesMax > 1 && qtySelected > 0 && (
+                    <div className="tw-flex tw-items-center tw-gap-1">
+                      <button
+                        type="button"
+                        className="tw-inline-flex tw-items-center tw-justify-center tw-h-5 tw-w-5 tw-rounded-full tw-bg-white tw-text-black tw-font-medium hover:tw-bg-[#ddd] tw-text-lg tw-p-0 tw-border-0 disabled:tw-opacity-50 disabled:tw-cursor-not-allowed"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onDecQty?.();
+                        }}
+                        disabled={qtySelected <= 1}
+                        aria-label="Decrease">
+                        -
+                      </button>
+                      <div className="tw-min-w-[2ch] tw-text-center tw-text-xs tw-tabular-nums">
+                        {qtySelected}
+                      </div>
+                      <button
+                        type="button"
+                        className="tw-inline-flex tw-items-center tw-justify-center tw-h-5 tw-w-5 tw-rounded-full tw-bg-white tw-text-black tw-font-medium hover:tw-bg-[#ddd] tw-text-lg tw-p-0 tw-border-0 disabled:tw-opacity-50 disabled:tw-cursor-not-allowed"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onIncQty?.();
+                        }}
+                        disabled={qtySelected >= copiesMax}
+                        aria-label="Increase">
+                        +
+                      </button>
+                    </div>
+                  )}
+                </>
               ) : (
                 <span className="tw-text-sm tw-font-medium">
                   {selected ? "Selected" : "Select"}
