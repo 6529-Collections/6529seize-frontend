@@ -50,6 +50,7 @@ function renderStateMessage(
         <button
           type="button"
           onClick={action.handler}
+          aria-label={`${message} ${action.label}`}
           className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-iron-500 tw-bg-transparent tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100 desktop-hover:hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-iron-300">
           {action.label}
         </button>
