@@ -1,6 +1,8 @@
 "use client";
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { faRightLeft } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef } from "react";
 import { useTransfer } from "./TransferState";
 
@@ -9,17 +11,14 @@ export default function TransferToggle() {
   const { isConnected, seizeConnect, seizeConnectOpen } =
     useSeizeConnectContext();
 
-  // Track if THIS button initiated a connect, so we enable transfer on success.
   const wantTransferAfterConnect = useRef(false);
 
   useEffect(() => {
-    // If the user connected after we asked them to, enable transfer mode.
     if (isConnected && wantTransferAfterConnect.current) {
       t.setEnabled(true);
       wantTransferAfterConnect.current = false;
     }
 
-    // If the modal closed without connecting, clear the intent.
     if (!isConnected && !seizeConnectOpen && wantTransferAfterConnect.current) {
       wantTransferAfterConnect.current = false;
     }
@@ -30,13 +29,11 @@ export default function TransferToggle() {
       type="button"
       onClick={() => {
         if (!isConnected) {
-          // Remember intent and open connect modal
           wantTransferAfterConnect.current = true;
           seizeConnect();
           return;
         }
 
-        // Already connected: normal toggle behavior
         if (t.enabled) {
           t.setEnabled(false);
           t.clear();
@@ -44,9 +41,9 @@ export default function TransferToggle() {
           t.setEnabled(true);
         }
       }}
-      className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/5 hover:tw-bg-white/10 tw-px-3 tw-py-2 tw-text-sm">
-      <span aria-hidden>⇄</span>
+      className="tw-inline-flex tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-iron-900 hover:tw-ring-iron-600 hover:tw-bg-iron-800 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-px-5 tw-py-3 tw-font-semibold tw-text-sm">
       {t.enabled ? "Exit transfer" : "Transfer"}
+      <FontAwesomeIcon icon={faRightLeft} />
     </button>
   );
 }

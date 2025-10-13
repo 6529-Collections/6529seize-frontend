@@ -1,6 +1,9 @@
 "use client";
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import TransferPanel from "@/components/nft-transfer/TransferPanel";
+import { useTransfer } from "@/components/nft-transfer/TransferState";
+import TransferToggle from "@/components/nft-transfer/TransferToggle";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   CollectedCard,
@@ -29,9 +32,6 @@ import {
   convertAddressToLowerCase,
 } from "./filters/user-page-collected-filters.helpers";
 import UserPageCollectedFilters from "./filters/UserPageCollectedFilters";
-import TransferPanel from "./transfer/TransferPanel";
-import { useTransfer } from "./transfer/TransferState";
-import TransferToggle from "./transfer/TransferToggle";
 import UserPageCollectedFirstLoading from "./UserPageCollectedFirstLoading";
 export interface ProfileCollectedFilters {
   readonly handleOrWallet: string;
@@ -526,9 +526,8 @@ export default function UserPageCollected({
             />
           </div>
 
-          {/* small control bar with Transfer toggle */}
           {showTransfer && (
-            <div className="tw-mt-3 tw-flex tw-justify-end">
+            <div className="tw-mt-6 tw-flex tw-justify-end">
               <TransferToggle />
             </div>
           )}

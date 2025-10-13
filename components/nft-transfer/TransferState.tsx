@@ -79,11 +79,17 @@ export function TransferProvider({ children }: { children: React.ReactNode }) {
           next.delete(item.key);
         } else {
           const max = Math.max(1, item.max ?? 1);
-          next.set(item.key, {
+          const newItem = {
             ...item,
             max,
             qty: 1,
-          });
+          };
+          const newMap = new Map();
+          newMap.set(item.key, newItem);
+          for (const [key, value] of Array.from(next.entries())) {
+            newMap.set(key, value);
+          }
+          return newMap;
         }
         return next;
       });
@@ -161,7 +167,6 @@ export function useTransfer() {
   return ctx;
 }
 
-// helper to build a stable key for a card
 export function buildTransferKey(args: {
   collection?: string | null;
   tokenId?: string | number | null;

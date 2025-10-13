@@ -1,0 +1,193 @@
+// __tests__/components/nft-transfer/TransferSingle.test.tsx
+import "@testing-library/jest-dom";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+
+jest.mock("@/styles/Home.module.scss", () => ({ shadowBox: "shadowBox" }));
+
+jest.mock("@/enums", () => ({
+  ContractType: { ERC721: "ERC721", ERC1155: "ERC1155" },
+}));
+
+jest.mock("@/entities/IProfile", () => ({
+  COLLECTED_COLLECTION_TYPE_TO_CONTRACT: {
+    MEMES: "0xCONTRACT_MEMES",
+    NEXTGEN: "0xCONTRACT_NEXTGEN",
+  },
+  COLLECTED_COLLECTION_TYPE_TO_CONTRACT_TYPE: {
+    MEMES: "ERC721",
+    NEXTGEN: "ERC1155",
+  },
+  CollectedCollectionType: {} as any,
+}));
+
+// ---- mock useTransfer() and buildTransferKey() ----
+let mockSelected = new Map<string, { qty?: number; max?: number }>();
+const mockFns = {
+  select: jest.fn(),
+  unselect: jest.fn(),
+  incQty: jest.fn(),
+  decQty: jest.fn(),
+  setQty: jest.fn(),
+  toggleSelect: jest.fn(),
+  clear: jest.fn(),
+  setEnabled: jest.fn(),
+};
+
+jest.mock("@/components/nft-transfer/TransferState", () => {
+  const buildTransferKey = ({ collection, tokenId }: any) =>
+    `${collection}:${tokenId}`;
+  const useTransfer = () => ({
+    enabled: true,
+    setEnabled: mockFns.setEnabled,
+    toggle: jest.fn(),
+    selected: mockSelected as unknown as Map<string, any>,
+    isSelected: (key: string) => mockSelected.has(key),
+    select: mockFns.select,
+    unselect: mockFns.unselect,
+    toggleSelect: mockFns.toggleSelect,
+    setQty: mockFns.setQty,
+    incQty: mockFns.incQty,
+    decQty: mockFns.decQty,
+    clear: mockFns.clear,
+    count: mockSelected.size,
+    totalQty: Array.from(mockSelected.values()).reduce(
+      (s, it) => s + (it.qty ?? 1),
+      0
+    ),
+  });
+  return { useTransfer, buildTransferKey };
+});
+
+jest.mock("@/components/nft-transfer/TransferModal", () => ({
+  __esModule: true,
+  default: ({ open, onClose }: { open: boolean; onClose: () => void }) => (
+    <div data-testid="transfer-modal" data-open={open} onClick={onClose}>
+      {open ? "OPEN" : "CLOSED"}
+    </div>
+  ),
+}));
+
+import TransferSingle from "@/components/nft-transfer/TransferSingle";
+import { ContractType } from "@/enums";
+
+const resetAll = () => {
+  mockFns.select.mockReset();
+  mockFns.unselect.mockReset();
+  mockFns.incQty.mockReset();
+  mockFns.decQty.mockReset();
+  mockFns.setQty.mockReset();
+  mockFns.toggleSelect.mockReset();
+  mockFns.clear.mockReset();
+  mockFns.setEnabled.mockReset();
+  mockSelected = new Map();
+};
+
+const baseProps = {
+  collectionType: "MEMES" as any,
+  contractType: ContractType.ERC721,
+  contract: "0xCONTRACT_MEMES",
+  tokenId: 1,
+  title: "The Memes #1",
+  max: 1,
+  thumbUrl: "https://example.com/img.jpg",
+};
+
+describe("TransferSingle", () => {
+  beforeEach(resetAll);
+  afterEach(cleanup);
+
+  test("renders basic structure", () => {
+    render(<TransferSingle {...baseProps} />);
+    expect(screen.getByTestId("transfer-single")).toBeInTheDocument();
+    expect(screen.getByText("Transfer")).toBeInTheDocument();
+    expect(screen.getByTestId("transfer-single-submit")).toHaveTextContent(
+      "Transfer 1 copy"
+    );
+  });
+
+  test("calls select on mount and unselect on unmount", () => {
+    const { unmount } = render(<TransferSingle {...baseProps} />);
+    const expectedKey = `${baseProps.contract}:${baseProps.tokenId}`;
+    expect(mockFns.select).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: expectedKey,
+        contract: "0xCONTRACT_MEMES",
+        contractType: "ERC721",
+      })
+    );
+    unmount();
+    expect(mockFns.unselect).toHaveBeenCalledWith(expectedKey);
+  });
+
+  test("hides +/- when max = 1", () => {
+    render(<TransferSingle {...baseProps} />);
+    expect(screen.queryByTestId("faMinusCircle")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("faPlusCircle")).not.toBeInTheDocument();
+  });
+
+  test("renders +/- controls when max > 1 and handles bounds", () => {
+    const props = { ...baseProps, max: 5, contractType: ContractType.ERC1155 };
+    const key = `${props.contract}:${props.tokenId}`;
+    mockSelected = new Map([[key, { qty: 1, max: 5 }]]);
+    render(<TransferSingle {...props} />);
+    const minus = screen.getByTestId("transfer-single-minus");
+    const plus = screen.getByTestId("transfer-single-plus");
+    expect(minus).toHaveAttribute("aria-disabled", "true");
+    expect(plus).toHaveAttribute("aria-disabled", "false");
+    cleanup();
+    resetAll();
+    mockSelected = new Map([[key, { qty: 5, max: 5 }]]);
+    render(<TransferSingle {...props} />);
+    const minus2 = screen.getByTestId("transfer-single-minus");
+    const plus2 = screen.getByTestId("transfer-single-plus");
+    expect(minus2).toHaveAttribute("aria-disabled", "false");
+    expect(plus2).toHaveAttribute("aria-disabled", "true");
+  });
+
+  test("clicking + and - triggers incQty and decQty", () => {
+    const props = { ...baseProps, max: 3, contractType: ContractType.ERC1155 };
+    const key = `${props.contract}:${props.tokenId}`;
+    mockSelected = new Map([[key, { qty: 2, max: 3 }]]);
+    render(<TransferSingle {...props} />);
+
+    const minus = screen.getByTestId("transfer-single-minus");
+    const plus = screen.getByTestId("transfer-single-plus");
+    fireEvent.click(minus);
+    fireEvent.click(plus);
+    expect(mockFns.decQty).toHaveBeenCalledWith(key);
+    expect(mockFns.incQty).toHaveBeenCalledWith(key);
+  });
+
+  test("button label changes with selected qty", () => {
+    const props = { ...baseProps, max: 10, contractType: ContractType.ERC1155 };
+    const key = `${props.contract}:${props.tokenId}`;
+    mockSelected = new Map([[key, { qty: 3, max: 10 }]]);
+    render(<TransferSingle {...props} />);
+    expect(screen.getByTestId("transfer-single-submit")).toHaveTextContent(
+      "Transfer 3 copies"
+    );
+  });
+
+  test("opens modal on button click", () => {
+    render(<TransferSingle {...baseProps} />);
+    const modal = screen.getByTestId("transfer-modal");
+    expect(modal).toHaveAttribute("data-open", "false");
+    fireEvent.click(screen.getByTestId("transfer-single-submit"));
+    expect(screen.getByTestId("transfer-modal")).toHaveAttribute(
+      "data-open",
+      "true"
+    );
+  });
+
+  test("rerender with new tokenId updates select key", () => {
+    const { rerender } = render(<TransferSingle {...baseProps} />);
+    const firstKey = `${baseProps.contract}:${baseProps.tokenId}`;
+    expect(mockFns.select).toHaveBeenCalledWith(
+      expect.objectContaining({ key: firstKey })
+    );
+    rerender(<TransferSingle {...baseProps} tokenId={99} />);
+    expect(mockFns.select).toHaveBeenLastCalledWith(
+      expect.objectContaining({ key: `${baseProps.contract}:99` })
+    );
+  });
+});

@@ -1,15 +1,19 @@
-import styles from "./TheMemes.module.scss";
-import { Col, Container, Row, Table } from "react-bootstrap";
-import { NULL_ADDRESS } from "@/constants";
+import TransferSingle from "@/components/nft-transfer/TransferSingle";
+import { MEMES_CONTRACT, NULL_ADDRESS } from "@/constants";
 import { NFT, NftRank, NftTDH } from "@/entities/INFT";
+import { CollectedCollectionType } from "@/entities/IProfile";
+import { ConsolidatedTDH } from "@/entities/ITDH";
+import { Transaction } from "@/entities/ITransaction";
+import { ContractType } from "@/enums";
 import {
   areEqualAddresses,
   numberWithCommas,
   printMintDate,
 } from "@/helpers/Helpers";
-import { Transaction } from "@/entities/ITransaction";
-import { ConsolidatedTDH } from "@/entities/ITDH";
+import { Col, Container, Row, Table } from "react-bootstrap";
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
+import { TransferProvider } from "../nft-transfer/TransferState";
+import styles from "./TheMemes.module.scss";
 
 export function MemePageYourCardsRightMenu(props: {
   show: boolean;
@@ -127,14 +131,6 @@ export function MemePageYourCardsRightMenu(props: {
                               <td>Cards</td>
                               <td className="text-right">{`x${props.nftBalance}`}</td>
                             </tr>
-                            {/* <tr className={`pt-1 ${styles.overviewColumn}`}>
-                              <td>Rank</td>
-                              <td className="text-right">
-                                {`#${numberWithCommas(
-                                  myOwner.dense_rank_balance
-                                )}`}
-                              </td>
-                            </tr> */}
                           </tbody>
                         </Table>
                       </Col>
@@ -224,6 +220,25 @@ export function MemePageYourCardsRightMenu(props: {
                     <Col>
                       {getTokenCount(transferredOut)} card
                       {getTokenCount(transferredOut) > 1 && "s"} transferred out
+                    </Col>
+                  </Row>
+                )}
+                {props.nftBalance > 0 && props.myOwner && props.nft?.id && (
+                  <Row className="pt-5">
+                    <Col>
+                      <TransferProvider>
+                        <TransferSingle
+                          collectionType={CollectedCollectionType.MEMES}
+                          contractType={ContractType.ERC1155}
+                          contract={MEMES_CONTRACT}
+                          tokenId={props.nft?.id}
+                          max={props.nftBalance}
+                          title={
+                            props.nft?.name ?? `The Memes #${props.nft?.id}`
+                          }
+                          thumbUrl={props.nft?.thumbnail}
+                        />
+                      </TransferProvider>
                     </Col>
                   </Row>
                 )}

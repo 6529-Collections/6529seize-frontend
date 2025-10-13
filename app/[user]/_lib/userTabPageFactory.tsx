@@ -1,5 +1,5 @@
+import { TransferProvider } from "@/components/nft-transfer/TransferState";
 import { getAppMetadata } from "@/components/providers/metadata";
-import { TransferProvider } from "@/components/user/collected/transfer/TransferState";
 import UserPageLayout from "@/components/user/layout/UserPageLayout";
 import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import { getMetadataForUserPage } from "@/helpers/Helpers";

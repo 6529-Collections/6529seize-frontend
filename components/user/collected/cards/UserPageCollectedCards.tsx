@@ -8,8 +8,11 @@ import { ProfileCollectedFilters } from "../UserPageCollected";
 import UserPageCollectedCard from "./UserPageCollectedCard";
 import UserPageCollectedCardsNoCards from "./UserPageCollectedCardsNoCards";
 
+import {
+  buildTransferKey,
+  useTransfer,
+} from "@/components/nft-transfer/TransferState";
 import { ContractType } from "@/enums";
-import { buildTransferKey, useTransfer } from "../transfer/TransferState";
 
 export default function UserPageCollectedCards({
   cards,
@@ -76,6 +79,8 @@ export default function UserPageCollectedCards({
                       max,
                     })
                   }
+                  onIncQty={() => t.incQty(selKey)}
+                  onDecQty={() => t.decQty(selKey)}
                 />
               );
             })}

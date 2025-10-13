@@ -1,6 +1,8 @@
 import { CollectedCard, CollectedCollectionType } from "@/entities/IProfile";
 import { ContractType } from "@/enums";
 import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
+import { faMinusCircle, faPlusCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { COLLECTED_COLLECTIONS_META } from "../filters/user-page-collected-filters.helpers";
 
@@ -11,6 +13,8 @@ export default function UserPageCollectedCard({
   interactiveMode = "link",
   selected = false,
   onToggle,
+  onIncQty,
+  onDecQty,
   copiesMax = 1,
   qtySelected = 0,
 }: {
@@ -20,6 +24,8 @@ export default function UserPageCollectedCard({
   readonly interactiveMode?: "link" | "select";
   readonly selected?: boolean;
   readonly onToggle?: () => void;
+  readonly onIncQty?: () => void;
+  readonly onDecQty?: () => void;
   readonly copiesMax?: number;
   readonly qtySelected?: number;
 }) {
@@ -110,17 +116,49 @@ export default function UserPageCollectedCard({
                 id={`${card.collection}-${card.token_id}`}
                 type="checkbox"
                 className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                onSelect={onToggle}
-                onChange={onToggle}
+                readOnly
               />
               {contractType === ContractType.ERC1155 ? (
-                <span className="tw-text-sm tw-font-medium">
-                  {selected
-                    ? `Selected ${qtySelected} / ${copiesMax}`
-                    : copiesMax > 1
-                    ? `Select (up to ${copiesMax})`
-                    : "Select"}
-                </span>
+                <>
+                  <span className="tw-text-sm tw-font-medium">
+                    {selected
+                      ? `Selected ${
+                          copiesMax === 1 ? `${qtySelected} / ${copiesMax}` : ""
+                        }`
+                      : copiesMax > 1
+                      ? `Select (up to ${copiesMax})`
+                      : "Select"}
+                  </span>
+                  {copiesMax > 1 && qtySelected > 0 && (
+                    <div className="tw-flex tw-items-center tw-gap-1">
+                      <FontAwesomeIcon
+                        icon={faMinusCircle}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onDecQty?.();
+                        }}
+                        className="tw-size-5 tw-cursor-pointer"
+                        color={qtySelected <= 1 ? "#60606C" : "#fff"}
+                        aria-disabled={qtySelected <= 1}
+                      />
+                      <div className="tw-min-w-[2ch] tw-text-center tw-text-xs tw-tabular-nums tw-select-none">
+                        {qtySelected}
+                      </div>
+                      <FontAwesomeIcon
+                        icon={faPlusCircle}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onIncQty?.();
+                        }}
+                        className="tw-size-5 tw-cursor-pointer"
+                        color={qtySelected >= copiesMax ? "#60606C" : "#fff"}
+                        aria-disabled={qtySelected >= copiesMax}
+                      />
+                    </div>
+                  )}
+                </>
               ) : (
                 <span className="tw-text-sm tw-font-medium">
                   {selected ? "Selected" : "Select"}
