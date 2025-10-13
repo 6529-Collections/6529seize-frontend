@@ -1,31 +1,53 @@
-import { useEffect, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, type ReactNode } from "react";
 
 export default function CreateWaveFlow({
   title,
   onBack,
   children,
+  isActive = true,
 }: {
   readonly title: string;
   readonly onBack: () => void;
   readonly children: ReactNode;
+  readonly isActive?: boolean;
 }) {
+  const onBackRef = useRef(onBack);
+
+  useEffect(() => {
+    onBackRef.current = onBack;
+  }, [onBack]);
+
+  const handleBack = useCallback(() => {
+    onBackRef.current?.();
+  }, []);
+
   useEffect(() => {
     const browserWindow = globalThis.window;
-    if (!browserWindow) {
+    if (!browserWindow || !isActive) {
       return;
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onBack();
+      if (event.key !== "Escape") {
+        return;
       }
+
+      const target = event.target as HTMLElement | null;
+      const tagName = target?.tagName.toLowerCase();
+      if (tagName === "input" || tagName === "textarea" || tagName === "select") {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      handleBack();
     };
 
     browserWindow.addEventListener("keydown", handleKeyDown);
     return () => {
       browserWindow.removeEventListener("keydown", handleKeyDown);
     };
-  }, [onBack]);
+  }, [handleBack, isActive]);
 
   return (
     <div
