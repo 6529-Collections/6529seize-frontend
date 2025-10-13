@@ -56,9 +56,7 @@ describe("TransferPanel", () => {
 
     render(<TransferPanel />);
 
-    expect(
-      screen.getByText(/choose cards to transfer/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/choose cards to transfer/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /continue/i })).toBeDisabled();
 
     fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
@@ -104,8 +102,13 @@ describe("TransferPanel", () => {
     fireEvent.click(screen.getByRole("button", { name: /clear/i }));
     expect(clear).toHaveBeenCalled();
 
-    fireEvent.click(screen.getByRole("button", { name: /increase/i }));
+    const increaseButton = screen.getByTestId("transfer-panel-plus");
+    fireEvent.click(increaseButton);
     expect(incQty).toHaveBeenCalledWith("MEMES:1");
+
+    const decreaseButton = screen.getByTestId("transfer-panel-minus");
+    fireEvent.click(decreaseButton);
+    expect(decQty).toHaveBeenCalledWith("MEMES:1");
 
     fireEvent.click(screen.getByRole("button", { name: /remove/i }));
     expect(unselect).toHaveBeenCalledWith("MEMES:1");

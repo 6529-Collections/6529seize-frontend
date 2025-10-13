@@ -78,8 +78,16 @@ describe("TransferModal", () => {
   const identityResult = {
     profile: {
       wallets: [
-        { wallet: "0xrecipient", display: "Recipient", tdh: 1 },
-        { wallet: "0xalt", display: "Alt", tdh: 2 },
+        {
+          wallet: "0x1111111111111111111111111111111111111111",
+          display: "Recipient",
+          tdh: 1,
+        },
+        {
+          wallet: "0x2222222222222222222222222222222222222222",
+          display: "Alt",
+          tdh: 2,
+        },
       ],
     },
     isLoading: false,
@@ -99,7 +107,9 @@ describe("TransferModal", () => {
         return identityResult;
       }
     );
-    mockUseAccount.mockReturnValue({ address: "0xsender" });
+    mockUseAccount.mockReturnValue({
+      address: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    });
     mockUsePublicClient.mockReturnValue({
       simulateContract: jest.fn(),
       waitForTransactionReceipt: jest.fn(),
@@ -134,7 +144,7 @@ describe("TransferModal", () => {
           profile_id: "1",
           handle: "recipient",
           display: "Recipient",
-          wallet: "0xrecipient",
+          wallet: "0x1111111111111111111111111111111111111111",
           level: 10,
           tdh: 100,
           pfp: null,
@@ -156,7 +166,9 @@ describe("TransferModal", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /recipient/i }));
     fireEvent.click(
-      screen.getByRole("button", { name: /recipient\s+0xrecipient/i })
+      screen.getByRole("button", {
+        name: /recipient\s+0x1111111111111111111111111111111111111111/i,
+      })
     );
   }
 

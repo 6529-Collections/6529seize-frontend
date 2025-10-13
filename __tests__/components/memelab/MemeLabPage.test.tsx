@@ -3,6 +3,8 @@ import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
+import { createConfig, http, WagmiProvider } from "wagmi";
+import { mainnet } from "wagmi/chains";
 
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
@@ -360,8 +362,19 @@ describe("MemeLabPageComponent", () => {
 
     setupMockApiCalls(1);
 
+    const mockWagmiConfig = createConfig({
+      chains: [mainnet],
+      transports: {
+        [mainnet.id]: http(),
+      },
+    });
+
     await act(async () => {
-      renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
+      renderWithQueryClient(
+        <WagmiProvider config={mockWagmiConfig}>
+          <MemeLabPageComponent nftId="1" />
+        </WagmiProvider>
+      );
     });
 
     await waitFor(

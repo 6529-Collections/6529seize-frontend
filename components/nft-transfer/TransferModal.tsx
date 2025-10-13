@@ -109,7 +109,6 @@ export default function TransferModal({
     }[]
   >([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [retryable, setRetryable] = useState(false);
 
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
@@ -299,7 +298,6 @@ export default function TransferModal({
     if (!publicClient || !address) {
       setErrorMsg("Client not ready. Please reconnect.");
       setFlow("error");
-      setRetryable(true);
       return;
     }
 
@@ -307,7 +305,6 @@ export default function TransferModal({
     try {
       setErrorMsg(null);
       setTxHashes([]);
-      setRetryable(false);
       setFlow("wallet");
 
       // Prepare items expanded with contract & tokenId/qty & contractType
@@ -397,7 +394,6 @@ export default function TransferModal({
       if (!walletClient) {
         setErrorMsg("Wallet not ready. Please reconnect.");
         setFlow("error");
-        setRetryable(true);
         return;
       }
 
@@ -406,7 +402,6 @@ export default function TransferModal({
           "Invalid destination wallet. Please choose another wallet."
         );
         setFlow("error");
-        setRetryable(true);
         return;
       }
 
@@ -464,16 +459,6 @@ export default function TransferModal({
     } catch (err: any) {
       const msg = err?.shortMessage || err?.message || "Transaction failed";
       setErrorMsg(msg);
-      const code = err?.code;
-      const name = err?.name || "";
-      const sm = String(err?.shortMessage || "").toLowerCase();
-      const m = String(err?.message || "").toLowerCase();
-      const looksRejected =
-        code === 4001 ||
-        name.includes("UserRejected") ||
-        sm.includes("rejected") ||
-        m.includes("rejected");
-      setRetryable(looksRejected && !wroteTransaction);
       setFlow("error");
     }
   }, [
