@@ -59,8 +59,8 @@ export default function TransferModal({
   open,
   onClose,
 }: {
-  open: boolean;
-  onClose: (opts?: { completed?: boolean }) => void;
+  readonly open: boolean;
+  readonly onClose: (opts?: { completed?: boolean }) => void;
 }) {
   const enableMockTransfers = publicEnv.NODE_ENV !== "production";
   const t = useTransfer();
@@ -301,7 +301,6 @@ export default function TransferModal({
       return;
     }
 
-    let wroteTransaction = false;
     try {
       setErrorMsg(null);
       setTxHashes([]);
@@ -422,7 +421,6 @@ export default function TransferModal({
           });
           const label = citems.map((x) => x.label).join(", ");
           const hash = await walletClient.writeContract(request);
-          wroteTransaction = true;
           hashes.push({
             hash,
             label,
@@ -437,7 +435,6 @@ export default function TransferModal({
               args: [address as Address, destinationWallet, x.tokenId],
             });
             const hash = await walletClient.writeContract(request);
-            wroteTransaction = true;
             hashes.push({
               hash,
               label: x.label,
@@ -514,8 +511,22 @@ export default function TransferModal({
       );
   };
 
+  // Derive search helper text without nested ternaries (Sonar fix)
+  let searchStatusText = "Type to search.";
+  if (isSearching) {
+    searchStatusText = "Searching…";
+  } else if (needsMoreSearchCharacters) {
+    const plural = remainingSearchCharacters === 1 ? "" : "s";
+    searchStatusText = `Keep typing ${remainingSearchCharacters} more character${plural}`;
+  } else if (results.length > 0) {
+    const plural = results.length === 1 ? "" : "s";
+    searchStatusText = `Found ${results.length} result${plural}`;
+  } else if (trimmedQuery) {
+    searchStatusText = "No results.";
+  }
+
   return (
-    <div
+    <dialog
       className={[
         "tw-fixed tw-inset-0 tw-z-[100] tw-bg-white/10 tw-backdrop-blur-sm tw-flex tw-items-start tw-justify-center tw-p-4 md:tw-p-8",
         isClosing
@@ -526,7 +537,6 @@ export default function TransferModal({
         if (flow === "wallet" || flow === "submitted") return;
         if (e.target === e.currentTarget) handleClose();
       }}
-      role="dialog"
       aria-modal="true">
       <div
         className={[
@@ -638,70 +648,7 @@ export default function TransferModal({
                 }`}>
                 Recipient
               </div>
-              {!selectedProfile ? (
-                <>
-                  <input
-                    autoFocus
-                    type="text"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search by handle, ens or wallet"
-                    className="tw-h-14 tw-w-full tw-rounded-lg tw-border-none tw-bg-white/10 tw-px-3 tw-py-2 focus:tw-outline-none focus:tw-bg-white/20"
-                    ref={searchInputRef}
-                  />
-                  <div className="tw-text-[12px] tw-opacity-60">
-                    {isSearching
-                      ? "Searching…"
-                      : needsMoreSearchCharacters
-                      ? `Keep typing ${remainingSearchCharacters} more character${
-                          remainingSearchCharacters === 1 ? "" : "s"
-                        }`
-                      : results.length > 0
-                      ? `Found ${results.length} result${
-                          results.length === 1 ? "" : "s"
-                        }`
-                      : trimmedQuery
-                      ? "No results."
-                      : "Type to search."}
-                  </div>
-                  <div
-                    ref={resultsListRef}
-                    className="tw-space-y-2 tw-flex-1 tw-min-h-0 tw-overflow-auto tw-pr-3 tw-[scrollbar-gutter:stable] tw-scrollbar-thin tw-scrollbar-thumb-white/30 tw-scrollbar-track-transparent hover:tw-scrollbar-thumb-white/50">
-                    {results.map((r: CommunityMemberMinimal) => (
-                      <button
-                        key={r.profile_id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedProfile(r);
-                          setSelectedWallet(null);
-                        }}
-                        className="tw-w-full tw-text-left tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/10 hover:tw-bg-white/15 tw-p-2 tw-flex tw-items-center tw-gap-3">
-                        <TransferModalPfp
-                          src={r.pfp}
-                          alt={r.display || r.handle || r.wallet}
-                          level={r.level}
-                        />
-                        <div className="tw-min-w-0 tw-flex-1">
-                          <div className="tw-truncate tw-text-sm tw-font-medium">
-                            {r.display || r.handle}
-                          </div>
-                          <div className="tw-truncate tw-text-[11px] tw-opacity-60">
-                            TDH: {r.tdh.toLocaleString()} - Level: {r.level}
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                  {resultsHasOverflow && (
-                    <div className="tw-text-xs tw-opacity-75 tw-text-center">
-                      <FontAwesomeIcon
-                        icon={resultsAtEnd ? faAnglesUp : faAnglesDown}
-                      />{" "}
-                      Scroll for more
-                    </div>
-                  )}
-                </>
-              ) : (
+              {selectedProfile ? (
                 <>
                   <div className="tw-flex tw-items-center tw-justify-between tw-rounded-lg tw-bg-white/10 tw-px-3 tw-py-2">
                     <div className="tw-flex tw-items-center tw-gap-3 tw-min-w-0">
@@ -794,6 +741,57 @@ export default function TransferModal({
                       </div>
                     )}
                   </div>
+                </>
+              ) : (
+                <>
+                  <input
+                    autoFocus
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search by handle, ens or wallet"
+                    className="tw-h-14 tw-w-full tw-rounded-lg tw-border-none tw-bg-white/10 tw-px-3 tw-py-2 focus:tw-outline-none focus:tw-bg-white/20"
+                    ref={searchInputRef}
+                  />
+                  <div className="tw-text-[12px] tw-opacity-60">
+                    {searchStatusText}
+                  </div>
+                  <div
+                    ref={resultsListRef}
+                    className="tw-space-y-2 tw-flex-1 tw-min-h-0 tw-overflow-auto tw-pr-3 tw-[scrollbar-gutter:stable] tw-scrollbar-thin tw-scrollbar-thumb-white/30 tw-scrollbar-track-transparent hover:tw-scrollbar-thumb-white/50">
+                    {results.map((r: CommunityMemberMinimal) => (
+                      <button
+                        key={r.profile_id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedProfile(r);
+                          setSelectedWallet(null);
+                        }}
+                        className="tw-w-full tw-text-left tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/10 hover:tw-bg-white/15 tw-p-2 tw-flex tw-items-center tw-gap-3">
+                        <TransferModalPfp
+                          src={r.pfp}
+                          alt={r.display || r.handle || r.wallet}
+                          level={r.level}
+                        />
+                        <div className="tw-min-w-0 tw-flex-1">
+                          <div className="tw-truncate tw-text-sm tw-font-medium">
+                            {r.display || r.handle}
+                          </div>
+                          <div className="tw-truncate tw-text-[11px] tw-opacity-60">
+                            TDH: {r.tdh.toLocaleString()} - Level: {r.level}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                  {resultsHasOverflow && (
+                    <div className="tw-text-xs tw-opacity-75 tw-text-center">
+                      <FontAwesomeIcon
+                        icon={resultsAtEnd ? faAnglesUp : faAnglesDown}
+                      />{" "}
+                      Scroll for more
+                    </div>
+                  )}
                 </>
               )}
             </div>
@@ -921,6 +919,6 @@ export default function TransferModal({
           )}
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }

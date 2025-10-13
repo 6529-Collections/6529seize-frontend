@@ -118,7 +118,7 @@ describe("TransferModal", () => {
       },
     });
     mockUseWalletClient.mockReturnValue({ data: { writeContract: jest.fn() } });
-    global.fetch = jest.fn();
+    globalThis.fetch = jest.fn();
   });
 
   afterEach(() => {
@@ -137,7 +137,7 @@ describe("TransferModal", () => {
   async function selectRecipientFlow() {
     jest.useFakeTimers();
 
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       json: jest.fn().mockResolvedValue([
         {
@@ -161,7 +161,7 @@ describe("TransferModal", () => {
       jest.advanceTimersByTime(400);
     });
 
-    await waitFor(() => expect(global.fetch).toHaveBeenCalled());
+    await waitFor(() => expect(globalThis.fetch).toHaveBeenCalled());
     jest.useRealTimers();
 
     fireEvent.click(screen.getByRole("button", { name: /recipient/i }));

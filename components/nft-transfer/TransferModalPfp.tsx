@@ -16,10 +16,10 @@ export default function TransferModalPfp({
   level,
   size = 40,
 }: {
-  src?: string | null;
-  alt?: string;
-  level: number;
-  size?: number;
+  readonly src?: string | null;
+  readonly alt?: string;
+  readonly level: number;
+  readonly size?: number;
 }) {
   const [resolved, setResolved] = useState<string | null>(null);
 

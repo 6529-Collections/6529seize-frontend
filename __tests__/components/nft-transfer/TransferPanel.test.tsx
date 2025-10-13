@@ -28,7 +28,7 @@ const mockTransferModal = require("@/components/nft-transfer/TransferModal")
 describe("TransferPanel", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (window.HTMLElement.prototype as any).scrollTo = jest.fn();
+    (globalThis.HTMLElement.prototype as any).scrollTo = jest.fn();
   });
 
   it("renders nothing when transfer is disabled", () => {

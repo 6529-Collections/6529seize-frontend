@@ -43,7 +43,11 @@ function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
 
-export function TransferProvider({ children }: { children: React.ReactNode }) {
+export function TransferProvider({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}) {
   const [enabled, setEnabled] = useState(false);
   const [selected, setSelected] = useState<Map<string, TransferItem>>(
     () => new Map()
