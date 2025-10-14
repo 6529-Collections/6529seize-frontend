@@ -75,11 +75,9 @@ export function XtdhReceivedCollectionsViewContent({
         activeSort={activeSort}
         activeDirection={activeDirection}
         onSortChange={handleSortChange}
-        onResetFilters={handleResetFilters}
         view={view}
         onViewChange={onViewChange}
         announcement={announcement}
-        clearFiltersLabel={clearFiltersLabel}
       />
 
       <div className="hidden md:block">

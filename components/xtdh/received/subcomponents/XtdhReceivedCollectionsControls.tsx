@@ -48,11 +48,9 @@ export interface XtdhReceivedCollectionsControlsProps {
   readonly activeSort: XtdhCollectionsSortField;
   readonly activeDirection: SortDirection;
   readonly onSortChange: (nextSort: XtdhCollectionsSortField) => void;
-  readonly onResetFilters: () => void;
   readonly view: XtdhReceivedView;
   readonly onViewChange: (view: XtdhReceivedView) => void;
   readonly announcement: string;
-  readonly clearFiltersLabel: string;
 }
 
 interface ActiveFiltersChipsProps {
@@ -190,11 +188,9 @@ export function XtdhReceivedCollectionsControls({
   activeSort,
   activeDirection,
   onSortChange,
-  onResetFilters,
   view,
   onViewChange,
   announcement,
-  clearFiltersLabel,
 }: XtdhReceivedCollectionsControlsProps) {
   const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false);
   const [isFiltersDialogOpen, setIsFiltersDialogOpen] = useState(false);
@@ -299,17 +295,6 @@ export function XtdhReceivedCollectionsControls({
               />
             </div>
           </div>
-          {filtersAreActive && (
-            <div className="tw-flex tw-justify-end">
-              <button
-                type="button"
-                onClick={onResetFilters}
-                className="tw-inline-flex tw-min-h-[44px] tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-iron-700 tw-bg-transparent tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-200 tw-transition tw-duration-200 hover:tw-border-iron-500 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-              >
-                {clearFiltersLabel}
-              </button>
-            </div>
-          )}
         </div>
 
         <ActiveFiltersChips filters={activeFilters} />
@@ -368,14 +353,7 @@ export function XtdhReceivedCollectionsControls({
 
           <ActiveFiltersChips filters={activeFilters} />
 
-          <div className="tw-flex tw-justify-between tw-gap-3">
-            <button
-              type="button"
-              onClick={onResetFilters}
-              className="tw-inline-flex tw-flex-1 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-iron-700 tw-bg-transparent tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-200 hover:tw-border-iron-500 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 tw-transition tw-duration-200"
-            >
-              {clearFiltersLabel}
-            </button>
+          <div className="tw-flex tw-justify-end tw-gap-3">
             <button
               type="button"
               onClick={() => setIsFiltersDialogOpen(false)}

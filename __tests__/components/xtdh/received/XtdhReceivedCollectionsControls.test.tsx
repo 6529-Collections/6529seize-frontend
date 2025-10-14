@@ -48,11 +48,9 @@ const baseProps = {
   activeSort: "total_rate" as const,
   activeDirection: SortDirection.DESC,
   onSortChange: jest.fn(),
-  onResetFilters: jest.fn(),
   view: "collections" as const,
   onViewChange: jest.fn(),
   announcement: "toggle",
-  clearFiltersLabel: "Reset filters",
 };
 
 describe("XtdhReceivedCollectionsControls", () => {
@@ -117,7 +115,7 @@ describe("XtdhReceivedCollectionsControls", () => {
     expect(onDiscoveryFilterChange).toHaveBeenCalledWith("trending");
   });
 
-  it("opens mobile filters dialog and wires reset + apply actions", () => {
+  it("opens mobile filters dialog and allows applying changes", () => {
     render(
       <XtdhReceivedCollectionsControls
         {...baseProps}
@@ -129,11 +127,6 @@ describe("XtdhReceivedCollectionsControls", () => {
     fireEvent.click(screen.getByRole("button", { name: /Filters/ }));
     const dialog = screen.getByTestId("mobile-dialog");
     expect(dialog).toBeInTheDocument();
-
-    fireEvent.click(
-      within(dialog).getByRole("button", { name: "Reset filters" })
-    );
-    expect(baseProps.onResetFilters).toHaveBeenCalledTimes(1);
 
     fireEvent.click(within(dialog).getByRole("button", { name: "Apply" }));
     expect(screen.queryByTestId("mobile-dialog")).not.toBeInTheDocument();

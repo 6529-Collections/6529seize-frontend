@@ -82,15 +82,6 @@ export function XtdhReceivedNftsViewContent({
               disabled={isLoading}
             />
           </div>
-          {filtersAreActive && (
-            <button
-              type="button"
-              onClick={handleClearFilters}
-              className="tw-self-start tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-200 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
-            >
-              {clearFiltersLabel}
-            </button>
-          )}
         </div>
         <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
           <span
