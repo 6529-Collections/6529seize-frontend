@@ -20,7 +20,7 @@ export function XtdhReceivedCollectionCardContent({
   const tokens = useXtdhReceivedCollectionTokens(collection);
 
   return (
-    <div className="tw-mt-4 tw-space-y-3">
+    <div className="tw-border-t tw-border-iron-850 tw-px-4 tw-py-4 tw-space-y-3">
       {tokens.length === 0 ? (
         <XtdhReceivedEmptyState message={XTDH_RECEIVED_COLLECTION_EMPTY_MESSAGE} />
       ) : (

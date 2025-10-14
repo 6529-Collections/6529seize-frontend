@@ -1,37 +1,98 @@
 'use client';
 
+import clsx from "clsx";
+
+import { FallbackImage } from "@/components/common/FallbackImage";
 import type { XtdhReceivedCollectionSummary } from "@/types/xtdh";
+
+import {
+  xtdhIsCollectionNewlyAllocated,
+  xtdhIsCollectionTrending,
+} from "../utils";
+
+type BadgeVariant = "trending" | "new" | "mine";
+
+interface StatusBadge {
+  readonly label: string;
+  readonly variant: BadgeVariant;
+}
 
 export interface XtdhReceivedCollectionCardSummaryProps {
   readonly collection: XtdhReceivedCollectionSummary;
+  readonly className?: string;
+}
+
+function getBadgeStyles(variant: BadgeVariant) {
+  switch (variant) {
+    case "trending":
+      return "tw-border-primary-400/40 tw-bg-primary-500/15 tw-text-primary-200";
+    case "new":
+      return "tw-border-iron-700 tw-bg-iron-850 tw-text-iron-200";
+    case "mine":
+      return "tw-border-success/40 tw-bg-success/10 tw-text-success";
+    default:
+      return "";
+  }
+}
+
+function getStatusBadges(
+  collection: XtdhReceivedCollectionSummary,
+): StatusBadge[] {
+  const badges: StatusBadge[] = [];
+
+  if (xtdhIsCollectionTrending(collection)) {
+    badges.push({ label: "Trending", variant: "trending" });
+  }
+
+  if (xtdhIsCollectionNewlyAllocated(collection)) {
+    badges.push({ label: "New", variant: "new" });
+  }
+
+  if (collection.isGrantedByUser) {
+    badges.push({ label: "Mine", variant: "mine" });
+  }
+
+  return badges;
 }
 
 /**
- * Renders the collection preview details inside the card header.
+ * Renders the collection preview image, title, and status badges.
  */
 export function XtdhReceivedCollectionCardSummary({
   collection,
+  className,
 }: XtdhReceivedCollectionCardSummaryProps) {
+  const badges = getStatusBadges(collection);
+
   return (
-    <div className="tw-flex tw-items-center tw-gap-3">
-      <img
-        src={collection.collectionImage}
-        alt={`${collection.collectionName} artwork`}
-        className="tw-h-14 tw-w-14 tw-rounded-xl tw-object-cover tw-border tw-border-iron-700"
-        loading="lazy"
+    <div className={clsx("tw-flex tw-items-start tw-gap-3 tw-min-w-0", className)}>
+      <FallbackImage
+        primarySrc={collection.collectionImage}
+        fallbackSrc="/pebbles-loading.jpeg"
+        alt={`${collection.collectionName} cover`}
+        className="tw-h-16 tw-w-16 tw-flex-shrink-0 tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-900 tw-object-cover"
       />
-      <div className="tw-flex tw-flex-col tw-gap-1">
-        <span className="tw-text-base tw-font-semibold tw-text-iron-50">
-          {collection.collectionName}
-        </span>
-        {collection.creatorName && (
-          <span className="tw-text-xs tw-text-iron-400">
-            By {collection.creatorName}
+      <div className="tw-min-w-0 tw-flex-1">
+        <div className="tw-flex tw-flex-wrap tw-items-start tw-gap-2">
+          <span className="tw-min-w-0 tw-flex-1 tw-text-base tw-font-semibold tw-leading-snug tw-text-iron-50 tw-line-clamp-2">
+            {collection.collectionName}
           </span>
-        )}
-        <span className="tw-text-xs tw-text-iron-300">
-          {collection.tokenCount.toLocaleString()} tokens receiving xTDH
-        </span>
+          {badges.length > 0 && (
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-1.5">
+              {badges.map((badge) => (
+                <span
+                  key={badge.label}
+                  className={clsx(
+                    "tw-inline-flex tw-items-center tw-rounded-full tw-border tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-semibold tw-leading-tight",
+                    getBadgeStyles(badge.variant),
+                  )}
+                >
+                  {badge.label}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -17,8 +17,8 @@ export function XtdhReceivedCollectionCard({
   onToggle,
 }: XtdhReceivedCollectionCardProps) {
   return (
-    <div
-      className="tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-4"
+    <article
+      className="tw-flex tw-h-full tw-flex-col tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-shadow-sm"
       role="listitem"
     >
       <XtdhReceivedCollectionCardHeader
@@ -29,6 +29,6 @@ export function XtdhReceivedCollectionCard({
       {expanded && (
         <XtdhReceivedCollectionCardContent collection={collection} />
       )}
-    </div>
+    </article>
   );
 }

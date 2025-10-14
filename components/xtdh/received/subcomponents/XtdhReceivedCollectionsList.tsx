@@ -47,7 +47,7 @@ export function XtdhReceivedCollectionsList({
 
   return (
     <div
-      className="tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-3"
+      className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 xl:tw-grid-cols-3 tw-gap-3"
       role="list"
       aria-label="Collections receiving xTDH"
     >

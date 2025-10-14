@@ -111,6 +111,124 @@ export function formatXtdhTotal(value: number) {
   return formatXtdhValue(value);
 }
 
+export function getCollectionTokensReceiving(
+  collection: XtdhReceivedCollectionSummary,
+) {
+  return collection.receivingTokenCount ?? collection.tokenCount;
+}
+
+export function getCollectionGrantorCount(
+  collection: XtdhReceivedCollectionSummary,
+) {
+  if (typeof collection.grantorCount === "number") {
+    return collection.grantorCount;
+  }
+
+  if (Array.isArray(collection.granters)) {
+    return collection.granters.length;
+  }
+
+  if (Array.isArray(collection.topGrantors)) {
+    return collection.topGrantors.length;
+  }
+
+  return 0;
+}
+
+export function formatTokensReceivingLabel(count: number) {
+  const formatted = formatNumberWithCommas(count);
+  const suffix = count === 1 ? "token" : "tokens";
+  return `${formatted} ${suffix} receiving xTDH`;
+}
+
+export type RateChangeDelta =
+  | {
+      readonly trend: "positive" | "negative" | "neutral";
+      readonly percentageLabel: string;
+    }
+  | undefined;
+
+export function getRateChangeDelta(rateChange?: number | null): RateChangeDelta {
+  if (typeof rateChange !== "number" || Number.isNaN(rateChange)) {
+    return undefined;
+  }
+
+  const percentage = rateChange * 100;
+  const absoluteValue = Math.abs(percentage);
+
+  const formatter = new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: absoluteValue < 1 ? 1 : 0,
+    maximumFractionDigits: absoluteValue < 10 ? 1 : 0,
+  });
+
+  const percentageLabel = `${formatter.format(absoluteValue)}%`;
+
+  if (percentage > 0) {
+    return {
+      trend: "positive",
+      percentageLabel,
+    };
+  }
+
+  if (percentage < 0) {
+    return {
+      trend: "negative",
+      percentageLabel,
+    };
+  }
+
+  return {
+    trend: "neutral",
+    percentageLabel,
+  };
+}
+
+export function formatUpdatedRelativeLabel(
+  date?: string | null,
+  reference = Date.now(),
+) {
+  if (!date) {
+    return undefined;
+  }
+
+  const timestamp = new Date(date).getTime();
+  if (!Number.isFinite(timestamp)) {
+    return undefined;
+  }
+
+  const diffMs = Math.max(reference - timestamp, 0);
+  const diffSeconds = Math.floor(diffMs / 1000);
+
+  if (diffSeconds < 60) {
+    return "Updated just now";
+  }
+
+  const diffMinutes = Math.floor(diffSeconds / 60);
+  if (diffMinutes < 60) {
+    return `Updated ${diffMinutes}m ago`;
+  }
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) {
+    return `Updated ${diffHours}h ago`;
+  }
+
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) {
+    return `Updated ${diffDays}d ago`;
+  }
+
+  const diffWeeks = Math.floor(diffDays / 7);
+  if (diffWeeks < 5) {
+    return `Updated ${diffWeeks}w ago`;
+  }
+
+  return `Updated ${new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+  }).format(timestamp)}`;
+}
+
 export function xtdhIsCollectionNewlyAllocated(
   collection: XtdhReceivedCollectionSummary,
   windowDays = NEWLY_ALLOCATED_WINDOW_DAYS,

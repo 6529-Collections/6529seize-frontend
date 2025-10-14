@@ -68,6 +68,7 @@ export function XtdhReceivedNftCard({
           </div>
           <XtdhReceivedGranterAvatarGroup
             granters={nft.granters}
+            showCountLabel={true}
           />
           <button
             type="button"

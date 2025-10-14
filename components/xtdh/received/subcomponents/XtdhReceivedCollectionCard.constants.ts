@@ -8,4 +8,4 @@ export const XTDH_RECEIVED_COLLECTION_EMPTY_MESSAGE =
  * Generates the accessible toggle label for the collection card expander.
  */
 export const getXtdhReceivedCollectionToggleLabel = (collectionName: string) =>
-  `Toggle ${collectionName} collection`;
+  `View ${collectionName} details`;
