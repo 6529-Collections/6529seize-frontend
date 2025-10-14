@@ -1,11 +1,13 @@
 "use client";
 
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import {
   COLLECTED_COLLECTION_TYPE_TO_CONTRACT,
   COLLECTED_COLLECTION_TYPE_TO_CONTRACT_TYPE,
   CollectedCollectionType,
 } from "@/entities/IProfile";
 import { ContractType } from "@/enums";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import styles from "@/styles/Home.module.scss";
 import {
   faMinusCircle,
@@ -13,7 +15,7 @@ import {
   faRightLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import TransferModal from "./TransferModal";
 import { buildTransferKey, useTransfer } from "./TransferState";
 
@@ -34,7 +36,13 @@ export default function TransferSingle({
   readonly max: number;
   readonly thumbUrl?: string;
 }) {
+  const { isMobileDevice } = useDeviceInfo();
+
   const t = useTransfer();
+
+  const { isConnected, seizeConnect, seizeConnectOpen } =
+    useSeizeConnectContext();
+  const wantModalAfterConnect = useRef(false);
 
   const key = useMemo(
     () =>
@@ -64,11 +72,36 @@ export default function TransferSingle({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, collectionType, tokenId, max, thumbUrl, title]);
 
+  useEffect(() => {
+    if (isConnected && wantModalAfterConnect.current) {
+      setShowModal(true);
+      wantModalAfterConnect.current = false;
+    }
+
+    if (!isConnected && !seizeConnectOpen && wantModalAfterConnect.current) {
+      wantModalAfterConnect.current = false;
+    }
+  }, [isConnected, seizeConnectOpen]);
+
   const selectedQty = t.selected.get(key)?.qty ?? 0;
 
   const displayQty = selectedQty > 0 ? selectedQty : 1;
 
   const [showModal, setShowModal] = useState(false);
+
+  const transferButtonText = useMemo(() => {
+    if (contractType === ContractType.ERC721) {
+      return "Transfer";
+    }
+    if (displayQty > 1) {
+      return `Transfer ${displayQty} copies`;
+    }
+    return "Transfer 1 copy";
+  }, [displayQty, contractType]);
+
+  if (isMobileDevice) {
+    return null;
+  }
 
   return (
     <div className={styles.shadowBox} data-testid="transfer-single">
@@ -103,10 +136,17 @@ export default function TransferSingle({
       <div className="tw-mt-4">
         <button
           type="button"
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            if (!isConnected) {
+              wantModalAfterConnect.current = true;
+              seizeConnect();
+              return;
+            }
+            setShowModal(true);
+          }}
           className="tw-w-full tw-py-2 tw-rounded-lg tw-bg-white tw-text-black tw-py-1 disabled:tw-opacity-75 disabled:tw-cursor-not-allowed tw-border-1 tw-border-solid tw-border-[#444] tw-text-lg tw-font-semibold"
           data-testid="transfer-single-submit">
-          Transfer {displayQty > 1 ? `${displayQty} copies` : "1 copy"}
+          {transferButtonText}
         </button>
       </div>
       <TransferModal open={showModal} onClose={() => setShowModal(false)} />

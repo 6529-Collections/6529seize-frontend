@@ -16,7 +16,6 @@ import { MEMES_SEASON } from "@/enums";
 import { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { Page } from "@/helpers/Types";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
@@ -81,7 +80,6 @@ export default function UserPageCollected({
 }: {
   readonly profile: ApiIdentity;
 }) {
-  const { isMobileDevice } = useDeviceInfo();
   const { address: connectedAddress } = useSeizeConnectContext();
   const defaultSortBy = CollectionSort.TOKEN_ID;
   const defaultSortDirection = SortDirection.DESC;
@@ -94,10 +92,9 @@ export default function UserPageCollected({
   const router = useRouter();
   const user = params?.user?.toString().toLowerCase() ?? "";
 
-  const showTransfer =
-    profile.wallets?.some((w) =>
-      areEqualAddresses(w.wallet, connectedAddress)
-    ) && !isMobileDevice;
+  const showTransfer = profile.wallets?.some((w) =>
+    areEqualAddresses(w.wallet, connectedAddress)
+  );
 
   const convertSeized = ({
     seized,

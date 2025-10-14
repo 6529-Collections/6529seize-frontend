@@ -514,7 +514,7 @@ export default function TransferModal({
       aria-modal="true"
       tabIndex={-1}
       className={[
-        "tw-fixed tw-inset-0 tw-z-[100] tw-bg-white/10 tw-backdrop-blur-sm tw-flex tw-items-start tw-justify-center tw-p-4 md:tw-p-8",
+        "tw-fixed tw-w-full tw-h-full tw-inset-0 tw-z-[100] tw-bg-white/10 tw-backdrop-blur-sm tw-flex tw-items-start tw-justify-center tw-p-4 md:tw-p-8",
         isClosing
           ? "tw-opacity-0 tw-transition-opacity tw-duration-150"
           : "tw-opacity-100 tw-transition-opacity tw-duration-150",

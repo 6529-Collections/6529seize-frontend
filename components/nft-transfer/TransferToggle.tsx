@@ -1,12 +1,14 @@
 "use client";
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { faRightLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef } from "react";
 import { useTransfer } from "./TransferState";
 
 export default function TransferToggle() {
+  const { isMobileDevice } = useDeviceInfo();
   const t = useTransfer();
   const { isConnected, seizeConnect, seizeConnectOpen } =
     useSeizeConnectContext();
@@ -23,6 +25,10 @@ export default function TransferToggle() {
       wantTransferAfterConnect.current = false;
     }
   }, [isConnected, seizeConnectOpen, t]);
+
+  if (isMobileDevice) {
+    return null;
+  }
 
   return (
     <button
