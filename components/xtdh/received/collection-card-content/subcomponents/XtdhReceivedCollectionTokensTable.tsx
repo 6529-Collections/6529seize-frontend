@@ -51,12 +51,16 @@ export function XtdhReceivedCollectionTokensTable({
   const containerPadding =
     tone === "overlay" ? "tw-px-2 tw-pt-3 tw-pb-4" : "tw-pl-5 tw-pr-4 tw-py-4";
   const collapseLabel = "Collapse tokens";
+  const focusRingOffsetClass =
+    tone === "overlay"
+      ? "focus-visible:tw-ring-offset-iron-950"
+      : "focus-visible:tw-ring-offset-iron-975";
 
   const headerButtonClass =
-    "tw-flex tw-items-center tw-gap-1 tw-text-xxs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400";
+    "tw-inline-flex tw-items-center tw-gap-1 tw-rounded-sm tw-border-none tw-bg-transparent tw-px-0 tw-py-0 tw-text-xxs tw-font-semibold tw-uppercase tw-tracking-[0.18em] tw-text-iron-400 tw-leading-none";
   const headerButtonInteractiveClass =
-    "tw-rounded-sm tw-px-1 tw-py-0.5 tw-text-iron-300 tw-transition tw-duration-150 tw-ease-out hover:tw-text-iron-50 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-1 focus-visible:tw-ring-offset-transparent";
-  const activeSortClass = "tw-text-primary-200";
+    "tw-transition tw-duration-150 tw-ease-out hover:tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400/70 focus-visible:tw-ring-offset-2";
+  const activeSortClass = "tw-text-iron-100";
 
   const getSortState = (key: XtdhReceivedTokenSortKey) =>
     sortKey === key ? sortDirection : "none";
@@ -70,7 +74,7 @@ export function XtdhReceivedCollectionTokensTable({
     return (
       <FontAwesomeIcon
         icon={icon}
-        className="tw-h-3 tw-w-3 tw-text-primary-300"
+        className="tw-h-3 tw-w-3 tw-text-iron-300"
       />
     );
   };
@@ -100,10 +104,9 @@ export function XtdhReceivedCollectionTokensTable({
                 <button
                   type="button"
                   onClick={onCollapse}
-                  className="tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-iron-800 tw-bg-iron-900/40 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-200 tw-transition tw-duration-150 tw-ease-out hover:tw-border-iron-700 hover:tw-bg-iron-900/60 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-transparent"
+                  className="tw-inline-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-bg-transparent tw-text-iron-400 tw-transition tw-duration-150 tw-ease-out hover:tw-bg-iron-900/50 hover:tw-text-iron-50 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-975"
                   aria-label={collapseLabel}
                 >
-                  <span>Collapse</span>
                   <FontAwesomeIcon icon={faChevronUp} className="tw-h-3 tw-w-3" />
                 </button>
               )}
@@ -135,6 +138,7 @@ export function XtdhReceivedCollectionTokensTable({
                   className={clsx(
                     headerButtonClass,
                     headerButtonInteractiveClass,
+                    focusRingOffsetClass,
                     sortKey === "rate" && activeSortClass,
                   )}
                 >
@@ -159,6 +163,7 @@ export function XtdhReceivedCollectionTokensTable({
                   className={clsx(
                     headerButtonClass,
                     headerButtonInteractiveClass,
+                    focusRingOffsetClass,
                     sortKey === "received" && activeSortClass,
                   )}
                 >
@@ -183,6 +188,7 @@ export function XtdhReceivedCollectionTokensTable({
                   className={clsx(
                     headerButtonClass,
                     headerButtonInteractiveClass,
+                    focusRingOffsetClass,
                     sortKey === "grantors" && activeSortClass,
                   )}
                 >
