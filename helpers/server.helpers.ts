@@ -26,7 +26,7 @@ export const userPageNeedsRedirect = ({
   subroute,
 }: {
   profile: ApiIdentity | null;
-  req: any;
+  req: { query: Record<string, string | string[] | undefined> };
   subroute: string | null;
 }): {
   redirect: {
@@ -35,9 +35,13 @@ export const userPageNeedsRedirect = ({
   };
   props: {};
 } | null => {
+  const userParam = req.query.user;
+  const userValue = Array.isArray(userParam) ? userParam[0] : userParam;
+
   if (
     profile?.handle &&
-    profile.handle.toLowerCase() !== req.query.user.toLowerCase()
+    typeof userValue === "string" &&
+    profile.handle.toLowerCase() !== userValue.toLowerCase()
   ) {
     const currentQuery = { ...req.query };
     delete currentQuery.user;
@@ -48,34 +52,37 @@ export const userPageNeedsRedirect = ({
       if (typeof input === "string") {
         return input;
       }
-      if (
-        typeof input === "number" ||
-        typeof input === "boolean" ||
-        typeof input === "bigint"
-      ) {
+      if (typeof input === "number") {
+        return Number.isFinite(input) ? String(input) : null;
+      }
+      if (typeof input === "boolean" || typeof input === "bigint") {
         return String(input);
       }
       return null;
     };
-    const queryEntries: Array<[string, string]> = Object.entries(
-      currentQuery
-    ).flatMap(([key, value]): Array<[string, string]> => {
-      if (Array.isArray(value)) {
-        return value
-          .map(toQueryStringValue)
-          .filter((entry): entry is string => entry !== null)
-          .map((entry): [string, string] => [key, entry]);
+    const queryEntries: Array<[string, string]> = Object.entries(currentQuery).flatMap(
+      ([key, value]): Array<[string, string]> => {
+        if (Array.isArray(value)) {
+          const normalizedEntries = value
+            .map(toQueryStringValue)
+            .filter((entry): entry is string => entry !== null);
+          if (normalizedEntries.length === 0) {
+            return [];
+          }
+          // Preserve legacy comma-separated encoding so downstream consumers receive strings.
+          return [[key, normalizedEntries.join(",")]];
+        }
+        const normalizedValue = toQueryStringValue(value);
+        if (normalizedValue === null) {
+          return [];
+        }
+        return [[key, normalizedValue]];
       }
-      const normalizedValue = toQueryStringValue(value);
-      if (normalizedValue === null) {
-        return [];
-      }
-      return [[key, normalizedValue]];
-    });
+    );
     const queryParamsString = new URLSearchParams(queryEntries).toString();
-    const destination = subroute
-      ? `/${profile.handle}/${subroute}?${queryParamsString}`
-      : `/${profile.handle}?${queryParamsString}`;
+    const encodedHandle = encodeURIComponent(profile.handle);
+    const basePath = subroute ? `/${encodedHandle}/${subroute}` : `/${encodedHandle}`;
+    const destination = queryParamsString ? `${basePath}?${queryParamsString}` : basePath;
     return {
       redirect: {
         permanent: false,
