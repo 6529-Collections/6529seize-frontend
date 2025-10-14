@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-export default function Page(): JSX.Element {
+export default function Page() {
   return (
     <main className="tw-mx-auto tw-w-full tw-max-w-6xl tw-px-4 tw-py-8 lg:tw-px-0">
       <XtdhPage />

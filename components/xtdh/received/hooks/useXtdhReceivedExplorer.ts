@@ -18,8 +18,6 @@ import {
   DEFAULT_DIRECTION,
   DEFAULT_NFT_SORT,
   NFTS_PAGE_SIZE,
-  XTDH_COLLECTION_DISCOVERY_CONFIG,
-  XTDH_COLLECTION_OWNERSHIP_LABELS,
   type XtdhCollectionOwnershipFilter,
   type XtdhCollectionsDiscoveryFilter,
   type XtdhCollectionsSortField,
@@ -34,7 +32,6 @@ import type {
   XtdhReceivedCollectionsViewState,
   XtdhReceivedNftsViewState,
 } from "../subcomponents";
-import type { XtdhActiveFilterChip } from "../subcomponents/XtdhReceivedCollectionsView.types";
 import {
   DEFAULT_CLEAR_FILTERS_LABEL as COLLECTIONS_CLEAR_FILTERS_LABEL,
   DEFAULT_EMPTY_STATE_COPY as COLLECTIONS_EMPTY_STATE_COPY,
@@ -469,14 +466,6 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
     selectedCollections,
   );
 
-  const collectionNameMap = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const collection of collectionsQuery.data?.collections ?? []) {
-      map.set(collection.collectionId, collection.collectionName);
-    }
-    return map;
-  }, [collectionsQuery.data?.collections]);
-
   const derivedCollections = useMemo(() => {
     const base = collectionsQuery.data?.collections ?? [];
     const selectionSet =
@@ -714,89 +703,6 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
     ],
   );
 
-  const clearSearch = useCallback(() => {
-    setSearchQuery("");
-  }, [setSearchQuery]);
-
-  const clearSelectedCollectionsChip = useCallback(() => {
-    handleClearCollectionFilters();
-  }, [handleClearCollectionFilters]);
-
-  const clearOwnershipFilter = useCallback(() => {
-    setOwnershipFilter("all");
-  }, [setOwnershipFilter]);
-
-  const clearNewlyAllocatedChip = useCallback(() => {
-    setNewlyAllocatedOnly(false);
-  }, [setNewlyAllocatedOnly]);
-
-  const clearTrendingChip = useCallback(() => {
-    setTrendingFilterActive(false);
-  }, [setTrendingFilterActive]);
-
-  const activeFilters = useMemo<XtdhActiveFilterChip[]>(() => {
-    const chips: XtdhActiveFilterChip[] = [];
-
-    if (trimmedSearch) {
-      chips.push({
-        label: `Search: "${trimmedSearch}"`,
-        onRemove: clearSearch,
-      });
-    }
-
-    if (selectedCollections.length > 0) {
-      const names = selectedCollections
-        .map((id) => collectionNameMap.get(id) ?? id)
-        .filter(Boolean);
-      if (names.length > 0) {
-        chips.push({
-          label: `Collections: ${names.join(", ")}`,
-          onRemove: clearSelectedCollectionsChip,
-        });
-      }
-    }
-
-    if (ownershipFilter === "granted") {
-      chips.push({
-        label: XTDH_COLLECTION_OWNERSHIP_LABELS.granted,
-        onRemove: clearOwnershipFilter,
-      });
-    } else if (ownershipFilter === "received") {
-      chips.push({
-        label: XTDH_COLLECTION_OWNERSHIP_LABELS.received,
-        onRemove: clearOwnershipFilter,
-      });
-    }
-
-    if (newlyAllocatedOnly) {
-      chips.push({
-        label: XTDH_COLLECTION_DISCOVERY_CONFIG.newly_allocated.label,
-        onRemove: clearNewlyAllocatedChip,
-      });
-    }
-
-    if (trendingActive) {
-      chips.push({
-        label: XTDH_COLLECTION_DISCOVERY_CONFIG.trending.label,
-        onRemove: clearTrendingChip,
-      });
-    }
-
-    return chips;
-  }, [
-    trimmedSearch,
-    clearSearch,
-    selectedCollections,
-    collectionNameMap,
-    clearSelectedCollectionsChip,
-    ownershipFilter,
-    clearOwnershipFilter,
-    newlyAllocatedOnly,
-    clearNewlyAllocatedChip,
-    trendingActive,
-    clearTrendingChip,
-  ]);
-
   const nftFiltersAreActive = selectedCollections.length > 0;
 
   const collectionsState: XtdhReceivedCollectionsViewState = {
@@ -826,7 +732,6 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
     handleOwnershipFilterChange,
     discoveryFilter,
     handleDiscoveryFilterChange,
-    activeFilters,
     handleResetFilters,
   };
 

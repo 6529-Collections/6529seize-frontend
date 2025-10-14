@@ -3,7 +3,6 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { SortDirection } from "@/entities/ISort";
 import { XtdhReceivedCollectionsViewContent } from "@/components/xtdh/received/subcomponents/XtdhReceivedCollectionsViewContent";
 import type {
-  XtdhActiveFilterChip,
   XtdhReceivedCollectionsViewEmptyCopy,
   XtdhReceivedCollectionsViewState,
 } from "@/components/xtdh/received/subcomponents/XtdhReceivedCollectionsView.types";
@@ -54,7 +53,6 @@ const baseState: XtdhReceivedCollectionsViewState = {
   handleOwnershipFilterChange: jest.fn(),
   discoveryFilter: "none",
   handleDiscoveryFilterChange: jest.fn(),
-  activeFilters: [] as XtdhActiveFilterChip[],
   handleResetFilters: jest.fn(),
 };
 

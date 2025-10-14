@@ -7,7 +7,6 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import clsx from "clsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMagnifyingGlass,
@@ -30,7 +29,6 @@ import {
   type XtdhReceivedView,
 } from "../utils/constants";
 import { XtdhReceivedViewToggle } from "./XtdhReceivedViewToggle";
-import type { XtdhActiveFilterChip } from "./XtdhReceivedCollectionsView.types";
 
 export interface XtdhReceivedCollectionsControlsProps {
   readonly resultSummary: string;
@@ -42,7 +40,6 @@ export interface XtdhReceivedCollectionsControlsProps {
   readonly onDiscoveryFilterChange: (
     filter: XtdhCollectionsDiscoveryFilter,
   ) => void;
-  readonly activeFilters: readonly XtdhActiveFilterChip[];
   readonly filtersAreActive: boolean;
   readonly isLoading: boolean;
   readonly activeSort: XtdhCollectionsSortField;
@@ -51,56 +48,6 @@ export interface XtdhReceivedCollectionsControlsProps {
   readonly view: XtdhReceivedView;
   readonly onViewChange: (view: XtdhReceivedView) => void;
   readonly announcement: string;
-}
-
-interface ActiveFiltersChipsProps {
-  readonly filters: readonly XtdhActiveFilterChip[];
-  readonly className?: string;
-}
-
-function ActiveFiltersChips({ filters, className }: ActiveFiltersChipsProps) {
-  if (!filters.length) {
-    return null;
-  }
-
-  return (
-    <div
-      className={clsx(
-        "tw-flex tw-flex-wrap tw-items-center tw-gap-2",
-        className,
-      )}
-    >
-      <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-400">
-        Active Filters
-      </span>
-      {filters.map(({ label, onRemove }, index) => {
-        const key = `${label}-${index}`;
-        if (onRemove) {
-          return (
-            <button
-              key={key}
-              type="button"
-              className="tw-inline-flex tw-min-h-[44px] tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-100 tw-transition-colors tw-duration-200 hover:tw-border-iron-500 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-              onClick={onRemove}
-            >
-              <span>{label}</span>
-              <FontAwesomeIcon icon={faXmark} className="tw-h-3 tw-w-3" />
-              <span className="tw-sr-only">Remove {label}</span>
-            </button>
-          );
-        }
-
-        return (
-          <span
-            key={key}
-            className="tw-inline-flex tw-min-h-[44px] tw-items-center tw-rounded-full tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-100"
-          >
-            {label}
-          </span>
-        );
-      })}
-    </div>
-  );
 }
 
 interface MobileSearchDialogProps {
@@ -182,7 +129,6 @@ export function XtdhReceivedCollectionsControls({
   onOwnershipFilterChange,
   discoveryFilter,
   onDiscoveryFilterChange,
-  activeFilters,
   filtersAreActive,
   isLoading,
   activeSort,
@@ -297,8 +243,6 @@ export function XtdhReceivedCollectionsControls({
           </div>
         </div>
 
-        <ActiveFiltersChips filters={activeFilters} />
-
         <div className="tw-flex tw-flex-col tw-gap-2 md:tw-flex-row md:tw-items-center md:tw-justify-between">
           <span
             role="status"
@@ -350,8 +294,6 @@ export function XtdhReceivedCollectionsControls({
               disabled={isLoading}
             />
           </section>
-
-          <ActiveFiltersChips filters={activeFilters} />
 
           <div className="tw-flex tw-justify-end tw-gap-3">
             <button

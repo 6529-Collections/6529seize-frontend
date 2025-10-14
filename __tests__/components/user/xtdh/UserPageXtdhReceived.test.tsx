@@ -139,25 +139,16 @@ describe("UserPageXtdhReceived", () => {
     });
   });
 
-  it("shows an active filter chip with a removal control when a collection filter is active", async () => {
+  it("indicates active filters in the controls when a collection filter is active", () => {
     mockUseSearchParams.mockReturnValue(new URLSearchParams("collection=memes"));
 
-    const user = userEvent.setup();
     render(<UserPageXtdhReceived profileId="simo" />);
 
-    expect(
-      screen.getAllByText(/Collections: The Memes of Production/i).length
-    ).toBeGreaterThan(0);
+    const filtersButton = screen.getByRole("button", { name: /Filters/i });
+    expect(filtersButton.querySelector('[aria-hidden="true"]')).not.toBeNull();
 
     expect(
-      screen.queryByRole("button", { name: /Clear filters/i })
+      screen.queryByText(/Collections: The Memes of Production/i)
     ).not.toBeInTheDocument();
-
-    const removeCollectionsFilter = screen.getByRole("button", {
-      name: /Remove Collections: The Memes of Production/i,
-    });
-
-    await user.click(removeCollectionsFilter);
-    expect(mockPush).toHaveBeenCalled();
   });
 });

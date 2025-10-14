@@ -55,7 +55,6 @@ export function XtdhReceivedCollectionsViewContent({
     handleOwnershipFilterChange,
     discoveryFilter,
     handleDiscoveryFilterChange,
-    activeFilters,
     handleResetFilters,
   } = state;
 
@@ -69,7 +68,6 @@ export function XtdhReceivedCollectionsViewContent({
         onOwnershipFilterChange={handleOwnershipFilterChange}
         discoveryFilter={discoveryFilter}
         onDiscoveryFilterChange={handleDiscoveryFilterChange}
-        activeFilters={activeFilters}
         filtersAreActive={filtersAreActive}
         isLoading={isLoading}
         activeSort={activeSort}

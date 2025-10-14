@@ -6,11 +6,6 @@ import type {
   XtdhCollectionsDiscoveryFilter,
 } from "../utils/constants";
 
-export interface XtdhActiveFilterChip {
-  readonly label: string;
-  readonly onRemove?: () => void;
-}
-
 export interface XtdhReceivedCollectionsViewEmptyCopy {
   readonly defaultMessage: string;
   readonly filtersMessage: string;
@@ -48,6 +43,5 @@ export interface XtdhReceivedCollectionsViewState {
   readonly handleDiscoveryFilterChange: (
     next: XtdhCollectionsDiscoveryFilter,
   ) => void;
-  readonly activeFilters: XtdhActiveFilterChip[];
   readonly handleResetFilters: () => void;
 }

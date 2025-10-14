@@ -299,7 +299,7 @@ describe("useXtdhReceivedExplorer", () => {
     });
 
     await waitFor(() =>
-      expect(latest?.collectionsState.activeFilters.length).toBeGreaterThan(0),
+      expect(latest?.collectionsState.filtersAreActive).toBe(true),
     );
 
     act(() => {
@@ -307,7 +307,7 @@ describe("useXtdhReceivedExplorer", () => {
     });
 
     await waitFor(() =>
-      expect(latest?.collectionsState.activeFilters).toHaveLength(0),
+      expect(latest?.collectionsState.filtersAreActive).toBe(false),
     );
     expect(latest?.collectionsState.searchQuery).toBe("");
     expect(latest?.collectionsState.ownershipFilter).toBe("all");

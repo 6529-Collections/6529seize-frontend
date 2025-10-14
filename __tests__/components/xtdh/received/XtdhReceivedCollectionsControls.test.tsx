@@ -1,10 +1,7 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 
 import { SortDirection } from "@/entities/ISort";
-import {
-  XtdhReceivedCollectionsControls,
-  type XtdhActiveFilterChip,
-} from "@/components/xtdh/received/subcomponents";
+import { XtdhReceivedCollectionsControls } from "@/components/xtdh/received/subcomponents";
 
 jest.mock("@/components/utils/select/dropdown/CommonDropdown", () => ({
   __esModule: true,
@@ -42,7 +39,6 @@ const baseProps = {
   onOwnershipFilterChange: jest.fn(),
   discoveryFilter: "none" as const,
   onDiscoveryFilterChange: jest.fn(),
-  activeFilters: [] as XtdhActiveFilterChip[],
   filtersAreActive: false,
   isLoading: false,
   activeSort: "total_rate" as const,
@@ -58,31 +54,24 @@ describe("XtdhReceivedCollectionsControls", () => {
     jest.clearAllMocks();
   });
 
-  it("renders primary controls and active filters summary", () => {
-    const removeTrending = jest.fn();
+  it("renders primary controls layout", () => {
     render(
       <XtdhReceivedCollectionsControls
         {...baseProps}
-        activeFilters={[
-          { label: "Trending", onRemove: removeTrending },
-          { label: "Granted" },
-        ]}
         filtersAreActive={true}
       />,
     );
 
     expect(screen.getAllByTestId("sort-dropdown").length).toBeGreaterThan(0);
-    expect(screen.getByText("Active Filters")).toBeInTheDocument();
-    expect(screen.getAllByText("Trending").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Granted").length).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("button", { name: /Filters/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Showing 3 of 10 collections"),
+    ).toBeInTheDocument();
     const viewToggles = screen.getAllByTestId("view-toggle");
     expect(viewToggles.length).toBeGreaterThan(0);
     expect(viewToggles[0]).toHaveTextContent("toggle");
-
-    fireEvent.click(
-      screen.getByRole("button", { name: /Remove Trending/i })
-    );
-    expect(removeTrending).toHaveBeenCalledTimes(1);
   });
 
   it("invokes ownership and discovery handlers via tabs", () => {
@@ -120,7 +109,6 @@ describe("XtdhReceivedCollectionsControls", () => {
       <XtdhReceivedCollectionsControls
         {...baseProps}
         filtersAreActive={true}
-        activeFilters={[{ label: "Granted" }]}
       />,
     );
 
