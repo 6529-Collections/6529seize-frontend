@@ -63,7 +63,7 @@ const config = {
   collectCoverage: true,
   collectCoverageFrom: [
     // Target actual source directories like app, components, contexts, etc.
-    "{app,components,contexts,entities,helpers,hooks,lib,pages,services,store,utils,wagmiConfig}/**/*.{ts,tsx}",
+    "{app,components,contexts,entities,helpers,hooks,lib,services,store,utils,wagmiConfig}/**/*.{ts,tsx}",
     // Exclude all TypeScript definition files from coverage
     "!**/*.d.ts",
     // Exclude node_modules
