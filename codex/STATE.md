@@ -4,9 +4,6 @@ This table is the single source of truth for active and historical tickets. Keep
 
 | Ticket ID | Title | Status | Priority | Owner | PRs | Last Updated |
 |-----------|-------|--------|----------|-------|-----|--------------|
-<<<<<<< HEAD
-| TKT-0001 | Align UserPageStats fetch tests with implementation | Review | P1 | openai-assistant | [#1539](https://github.com/6529-Collections/6529seize-frontend/pull/1539) | 2025-10-14 |
-=======
 | TKT-0001 | Audit client-side processing for server migration | Done | P1 | evocoder | — | 2025-10-14 |
 | TKT-0002 | Server-side hydrate brain and wave pipelines | Backlog | P0 | evocoder | — | 2025-10-14 |
 | TKT-0003 | Server aggregate collection analytics surfaces | Backlog | P1 | evocoder | — | 2025-10-14 |
@@ -14,7 +11,7 @@ This table is the single source of truth for active and historical tickets. Keep
 | TKT-0005 | Replace notification polling with server-driven delivery | Backlog | P1 | evocoder | — | 2025-10-14 |
 | TKT-0006 | Centralise media and IPFS upload orchestration | Backlog | P1 | evocoder | — | 2025-10-14 |
 | TKT-0007 | Stabilize group name search input | In-Progress | P0 | simo6529 | [#1540](https://github.com/6529-Collections/6529seize-frontend/pull/1540) | 2025-10-14 |
->>>>>>> main
+| TKT-0008 | Reconcile Codex board merge conflicts | In-Progress | P1 | openai-assistant | — | 2025-10-14 |
 
 ## Usage Guidelines
 
