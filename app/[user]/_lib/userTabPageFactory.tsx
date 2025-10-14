@@ -37,12 +37,13 @@ const isNotFoundError = (error: unknown): boolean => {
     return true;
   }
 
-  const message =
-    typeof error === "string"
-      ? error
-      : error instanceof Error
-      ? error.message
-      : undefined;
+  let message: string | undefined;
+
+  if (typeof error === "string") {
+    message = error;
+  } else if (error instanceof Error) {
+    message = error.message;
+  }
 
   return !!message && message.toLowerCase().includes("not found");
 };
