@@ -54,8 +54,8 @@ export function XtdhReceivedCollectionCardMetrics({
         <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-400">
           xTDH Rate
         </span>
-        <div className="tw-flex tw-items-center tw-justify-end tw-gap-2">
-          <span className="tw-text-sm tw-font-semibold tw-text-iron-50 tw-text-right">
+        <div className="tw-flex tw-items-center tw-gap-2">
+          <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
             {formatXtdhRate(collection.totalXtdhRate)}
           </span>
           {delta && (
@@ -86,7 +86,7 @@ export function XtdhReceivedCollectionCardMetrics({
         <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-400">
           Received
         </span>
-        <span className="tw-text-sm tw-font-semibold tw-text-iron-50 tw-text-right">
+        <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
           {formatXtdhTotal(collection.totalXtdhReceived)}
         </span>
       </div>

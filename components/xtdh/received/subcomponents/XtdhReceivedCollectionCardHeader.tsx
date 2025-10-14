@@ -47,7 +47,7 @@ export function XtdhReceivedCollectionCardHeader({
   );
 
   const chevronClass = clsx(
-    "tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-text-iron-400 tw-transition tw-duration-200 tw-ease-out group-hover:tw-text-iron-200 group-focus-visible:tw-text-iron-100",
+    "tw-flex tw-h-7 tw-w-7 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-text-iron-400 tw-transition tw-duration-200 tw-ease-out group-hover:tw-text-iron-200 group-focus-visible:tw-text-iron-100",
   );
 
   return (
@@ -58,21 +58,10 @@ export function XtdhReceivedCollectionCardHeader({
       aria-label={getXtdhReceivedCollectionToggleLabel(collection.collectionName)}
       className="tw-group tw-flex tw-w-full tw-flex-col tw-gap-3 tw-rounded-2xl tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-left tw-transition tw-duration-200 tw-ease-out hover:tw-bg-iron-900/60 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
     >
-      <div className="tw-flex tw-items-start tw-gap-3 tw-order-1">
-        <XtdhReceivedCollectionCardSummary
-          collection={collection}
-          className="tw-flex-1"
-        />
-        <span className={chevronClass} aria-hidden="true">
-          <FontAwesomeIcon
-            icon={faChevronRight}
-            className={clsx(
-              "tw-h-3 tw-w-3 tw-transition-transform tw-duration-200",
-              expanded ? "tw-rotate-90" : "tw-rotate-0",
-            )}
-          />
-        </span>
-      </div>
+      <XtdhReceivedCollectionCardSummary
+        collection={collection}
+        className="tw-order-1"
+      />
       <XtdhReceivedCollectionCardMetrics
         collection={collection}
         className="tw-order-2 md:tw-order-3"
@@ -83,6 +72,15 @@ export function XtdhReceivedCollectionCardHeader({
         </p>
       )}
       <div className="tw-order-4 tw-flex tw-flex-wrap tw-items-center tw-gap-3 md:tw-gap-4">
+        <span className={chevronClass} aria-hidden="true">
+          <FontAwesomeIcon
+            icon={faChevronRight}
+            className={clsx(
+              "tw-h-3 tw-w-3 tw-transition-transform tw-duration-200",
+              expanded ? "tw-rotate-90" : "tw-rotate-0",
+            )}
+          />
+        </span>
         <XtdhReceivedGranterAvatarGroup
           granters={collection.granters}
           totalCount={getCollectionGrantorCount(collection)}
