@@ -168,6 +168,7 @@ export default function UserPageHeaderClient({
         message: `Failed to create direct message: ${error}`,
         type: "error",
       });
+    } finally {
       setDirectMessageLoading(false);
     }
   };

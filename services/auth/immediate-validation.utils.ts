@@ -142,8 +142,10 @@ export const validateAuthImmediate = async ({
   params: ImmediateValidationParams;
   callbacks: ImmediateValidationCallbacks;
 }): Promise<ImmediateValidationResult> => {
-  if (publicEnv.USE_DEV_AUTH === "true") {
-    // Dev auth relies on static env values, so skip live validation to avoid disconnect loops.
+  if (
+    publicEnv.USE_DEV_AUTH === "true" &&
+    (publicEnv.NODE_ENV ?? process.env.NODE_ENV) !== "production"
+  ) {
     return createValidationResult(true, false, false);
   }
 

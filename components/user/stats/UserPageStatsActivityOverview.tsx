@@ -36,28 +36,36 @@ export default function UserPageStatsActivityOverview({
   );
 
   useEffect(() => {
+    const controller = new AbortController();
     const url = `aggregated-activity/${getStatsPath(profile, activeAddress)}`;
     commonApiFetch<AggregatedActivity>({
       endpoint: url,
+      signal: controller.signal,
     })
-      .then((response) => {
-        setActivity(response);
-      })
-      .catch((error) => {
+      .then(setActivity)
+      .catch(() => {
         setActivity(undefined);
       });
+    return () => controller.abort();
   }, [activeAddress, profile]);
 
   useEffect(() => {
+    const controller = new AbortController();
     const url = `aggregated-activity/${getStatsPath(
       profile,
       activeAddress
     )}/memes`;
     commonApiFetch<AggregatedActivityMemes[]>({
       endpoint: url,
-    }).then((response) => {
-      setActivityMemes(response);
-    });
+      signal: controller.signal,
+    })
+      .then((response) => {
+        setActivityMemes(response);
+      })
+      .catch(() => {
+        setActivityMemes([]);
+      });
+    return () => controller.abort();
   }, [activeAddress, profile]);
 
   return (

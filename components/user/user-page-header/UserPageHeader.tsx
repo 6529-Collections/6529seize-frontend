@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { CicStatement, ProfileActivityLog } from "@/entities/IProfile";
+import { SortDirection } from "@/entities/ISort";
 import { CountlessPage } from "@/helpers/Types";
 import { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
@@ -31,6 +32,9 @@ async function fetchProfileEnabledLog(
     params: {
       profile: handleOrWallet,
       log_type: "PROFILE_CREATED",
+      page_size: "1",
+      sort: "created_at",
+      sort_direction: SortDirection.ASC,
     },
     headers,
   });

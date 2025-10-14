@@ -10,9 +10,10 @@ import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { MemeSeason } from "@/entities/ISeason";
 import { ConsolidatedTDH, TDH } from "@/entities/ITDH";
 import { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { commonApiFetch } from "@/services/api/common-api";
 import { getStatsPath } from "./userPageStats.helpers";
+import { isAddress } from "viem";
 
 type Props = {
   readonly profile: ApiIdentity;
@@ -41,6 +42,19 @@ export default function UserPageStatsClient({
   const [balanceMemes, setBalanceMemes] = useState<OwnerBalanceMemes[]>(
     initialBalanceMemes
   );
+  const activeAddressForStats = useMemo(() => {
+    if (!activeAddress) {
+      return null;
+    }
+
+    const trimmed = activeAddress.trim();
+
+    if (!isAddress(trimmed)) {
+      return null;
+    }
+
+    return trimmed.toLowerCase();
+  }, [activeAddress]);
 
   useEffect(() => setSeasons(initialSeasons), [initialSeasons]);
   useEffect(() => setTdh(initialTdh), [initialTdh]);
@@ -63,12 +77,20 @@ export default function UserPageStatsClient({
   useEffect(() => {
     const controller = new AbortController();
 
-    if (activeAddress === null) {
+    if (activeAddressForStats === null && initialTdh != null) {
       setTdh(initialTdh);
       return () => controller.abort();
     }
 
-    const url = `tdh/${getStatsPath(profile, activeAddress)}`;
+    let statsPath: string;
+    try {
+      statsPath = getStatsPath(profile, activeAddressForStats);
+    } catch {
+      setTdh(initialTdh);
+      return () => controller.abort();
+    }
+
+    const url = `tdh/${statsPath}`;
     commonApiFetch<ConsolidatedTDH | TDH>({
       endpoint: url,
       signal: controller.signal,
@@ -79,17 +101,25 @@ export default function UserPageStatsClient({
       });
 
     return () => controller.abort();
-  }, [activeAddress, profile, initialTdh]);
+  }, [activeAddressForStats, profile, initialTdh]);
 
   useEffect(() => {
     const controller = new AbortController();
 
-    if (activeAddress === null) {
+    if (activeAddressForStats === null && initialOwnerBalance != null) {
       setOwnerBalance(initialOwnerBalance);
       return () => controller.abort();
     }
 
-    const url = `owners-balances/${getStatsPath(profile, activeAddress)}`;
+    let statsPath: string;
+    try {
+      statsPath = getStatsPath(profile, activeAddressForStats);
+    } catch {
+      setOwnerBalance(initialOwnerBalance);
+      return () => controller.abort();
+    }
+
+    const url = `owners-balances/${statsPath}`;
     commonApiFetch<OwnerBalance>({
       endpoint: url,
       signal: controller.signal,
@@ -100,20 +130,25 @@ export default function UserPageStatsClient({
       });
 
     return () => controller.abort();
-  }, [activeAddress, profile, initialOwnerBalance]);
+  }, [activeAddressForStats, profile, initialOwnerBalance]);
 
   useEffect(() => {
     const controller = new AbortController();
 
-    if (activeAddress === null) {
+    if (activeAddressForStats === null && initialBalanceMemes.length > 0) {
       setBalanceMemes(initialBalanceMemes);
       return () => controller.abort();
     }
 
-    const url = `owners-balances/${getStatsPath(
-      profile,
-      activeAddress
-    )}/memes`;
+    let statsPath: string;
+    try {
+      statsPath = getStatsPath(profile, activeAddressForStats);
+    } catch {
+      setBalanceMemes(initialBalanceMemes);
+      return () => controller.abort();
+    }
+
+    const url = `owners-balances/${statsPath}/memes`;
     commonApiFetch<OwnerBalanceMemes[]>({
       endpoint: url,
       signal: controller.signal,
@@ -124,7 +159,7 @@ export default function UserPageStatsClient({
       });
 
     return () => controller.abort();
-  }, [activeAddress, profile, initialBalanceMemes]);
+  }, [activeAddressForStats, profile, initialBalanceMemes]);
 
   return (
     <div className="tailwind-scope">
@@ -150,10 +185,13 @@ export default function UserPageStatsClient({
 
       <UserPageStatsActivityOverview
         profile={profile}
-        activeAddress={activeAddress}
+        activeAddress={activeAddressForStats}
       />
 
-      <UserPageActivityWrapper profile={profile} activeAddress={activeAddress} />
+      <UserPageActivityWrapper
+        profile={profile}
+        activeAddress={activeAddressForStats}
+      />
 
       <UserPageStatsBoostBreakdown tdh={tdh} />
     </div>

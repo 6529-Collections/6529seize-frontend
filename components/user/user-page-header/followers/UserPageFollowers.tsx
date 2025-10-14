@@ -8,12 +8,18 @@ export default function UserPageFollowers({
   readonly handleOrWallet: string;
   readonly followersCount: number | null;
 }) {
+  const trimmedHandleOrWallet = handleOrWallet.trim();
+  if (!trimmedHandleOrWallet) {
+    return null;
+  }
+
+  const safeHandleOrWallet = encodeURIComponent(trimmedHandleOrWallet);
   const count = followersCount ?? 0;
   const label = count === 1 ? "Follower" : "Followers";
 
   return (
     <Link
-      href={`/${handleOrWallet}/followers`}
+      href={`/${safeHandleOrWallet}/followers`}
       className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
     >
       <span className="tw-text-base tw-font-medium tw-text-iron-50">

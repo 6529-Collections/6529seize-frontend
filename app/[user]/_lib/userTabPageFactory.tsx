@@ -18,17 +18,21 @@ type FactoryArgs = {
   Tab: (props: TabProps) => React.JSX.Element;
 };
 
+type Awaitable<T> = T | Promise<T>;
+type UserRouteParams = { user: string };
+type UserSearchParams = Record<string, string | string[] | undefined>;
+
 export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
   async function Page({
     params,
     searchParams,
   }: {
-    readonly params: Promise<{ user: string }>;
-    readonly searchParams: Promise<Record<string, string>>;
+    readonly params: Awaitable<UserRouteParams>;
+    readonly searchParams?: Awaitable<UserSearchParams>;
   }) {
-    const { user } = await params;
+    const { user } = await Promise.resolve(params);
     const normalizedUser = user.toLowerCase();
-    const query = await searchParams;
+    const query = await Promise.resolve(searchParams ?? {});
     const headers = await getAppCommonHeaders();
     const profile: ApiIdentity = await getUserProfile({
       user: normalizedUser,
@@ -61,9 +65,9 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
   async function generateMetadata({
     params,
   }: {
-    readonly params: Promise<{ user: string }>;
+    readonly params: Awaitable<UserRouteParams>;
   }): Promise<Metadata> {
-    const { user } = await params;
+    const { user } = await Promise.resolve(params);
     const normalizedUser = user.toLowerCase();
     const headers = await getAppCommonHeaders();
     const profile: ApiIdentity = await getUserProfile({

@@ -6,6 +6,15 @@ import { formatNumberWithCommas } from "@/helpers/Helpers";
 import UserPageFollowers from "../followers/UserPageFollowers";
 import { Tooltip } from "react-tooltip";
 
+const SAFE_ROUTE_SEGMENT_PATTERN = /^[a-zA-Z0-9_-]+$/;
+
+function sanitizeRouteSegment(value: string): string | null {
+  if (!value) {
+    return null;
+  }
+  return SAFE_ROUTE_SEGMENT_PATTERN.test(value) ? value : null;
+}
+
 export default function UserPageHeaderStats({
   profile,
   handleOrWallet,
@@ -15,7 +24,11 @@ export default function UserPageHeaderStats({
   readonly handleOrWallet: string;
   readonly followersCount: number | null;
 }) {
-  const routeHandle = handleOrWallet;
+  const routeHandle = sanitizeRouteSegment(handleOrWallet);
+
+  if (!routeHandle) {
+    return null;
+  }
 
   return (
     <div className="tw-mt-3">

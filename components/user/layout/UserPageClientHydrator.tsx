@@ -24,7 +24,6 @@ export default function UserPageClientHydrator({
   const { setProfile } = useContext(ReactQueryWrapperContext);
 
   useEffect(() => {
-    // Prime react-query cache for direct handle lookups.
     queryClient.setQueryData<ApiIdentity>(
       [QueryKey.PROFILE, normalizedHandleOrWallet],
       profile
