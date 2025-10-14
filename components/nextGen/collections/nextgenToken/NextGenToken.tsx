@@ -1,12 +1,16 @@
 "use client";
 
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import TransferSingle from "@/components/nft-transfer/TransferSingle";
+import { NEXTGEN_CONTRACT } from "@/constants";
 import {
   NextGenCollection,
   NextGenToken,
   NextGenTrait,
 } from "@/entities/INextgen";
-import { NextgenCollectionView } from "@/enums";
-import { isNullAddress } from "@/helpers/Helpers";
+import { CollectedCollectionType } from "@/entities/IProfile";
+import { ContractType, NextgenCollectionView } from "@/enums";
+import { areEqualAddresses, isNullAddress } from "@/helpers/Helpers";
 import {
   faChevronCircleLeft,
   faChevronCircleRight,
@@ -14,6 +18,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import { printViewButton } from "../collectionParts/NextGenCollection";
@@ -38,6 +43,35 @@ interface Props {
 
 export default function NextGenTokenPage(props: Readonly<Props>) {
   const router = useRouter();
+  const { address: connectedAddress } = useSeizeConnectContext();
+
+  const isConnectedAddressOwner = useMemo(() => {
+    return areEqualAddresses(connectedAddress, props.token.owner);
+  }, [props.token.owner, connectedAddress]);
+
+  const transferSingle = useMemo(() => {
+    if (!isConnectedAddressOwner) {
+      return null;
+    }
+    return (
+      <div className="mb-4">
+        <TransferSingle
+          collectionType={CollectedCollectionType.NEXTGEN}
+          contractType={ContractType.ERC721}
+          contract={NEXTGEN_CONTRACT}
+          tokenId={props.token.id}
+          max={1}
+          title={props.token.name ?? `6529 NextGen #${props.token.id}`}
+          thumbUrl={props.token.thumbnail_url}
+        />
+      </div>
+    );
+  }, [
+    props.token.id,
+    props.token.name,
+    props.token.thumbnail_url,
+    isConnectedAddressOwner,
+  ]);
 
   function printDetails() {
     return (
@@ -66,16 +100,20 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
             )}
           </Col>
         </Row>
-        <Row>
+        <Row className="pt-4 pb-4">
           {props.view === NextgenCollectionView.ABOUT && (
             <>
-              <Col sm={12} md={6} className="pt-4 pb-4">
+              <Col xs={12} className="d-md-none">
+                {transferSingle}
+              </Col>
+              <Col sm={12} md={6}>
                 <NextGenTokenAbout
                   collection={props.collection}
                   token={props.token}
                 />
               </Col>
-              <Col sm={12} md={6} className="pt-4 pb-4">
+              <Col sm={12} md={6}>
+                <div className="d-none d-md-block">{transferSingle}</div>
                 <NextgenTokenTraits
                   collection={props.collection}
                   token={props.token}
@@ -119,7 +157,6 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
     const hasPreviousToken = props.token.normalised_id > 0;
     const prev = (
       <FontAwesomeIcon
-        title="Previous Token"
         icon={faChevronCircleLeft}
         data-tooltip-id={
           hasPreviousToken ? `prev-token-${props.token.id}` : undefined
@@ -148,9 +185,8 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
         {hasPreviousToken && (
           <Tooltip
             id={`prev-token-${props.token.id}`}
+            variant="light"
             style={{
-              backgroundColor: "#1F2937",
-              color: "white",
               padding: "4px 8px",
             }}>
             Previous Token
@@ -192,9 +228,9 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
         {hasNextToken && (
           <Tooltip
             id={`next-token-${props.token.id}`}
+            delayShow={250}
+            variant="light"
             style={{
-              backgroundColor: "#1F2937",
-              color: "white",
               padding: "4px 8px",
             }}>
             Next Token

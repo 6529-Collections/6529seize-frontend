@@ -4,13 +4,16 @@ import styles from "./6529Gradient.module.scss";
 
 import Address from "@/components/address/Address";
 import { AuthContext } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
 import { NftPageStats } from "@/components/nft-attributes/NftStats";
 import NFTImage from "@/components/nft-image/NFTImage";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import NftNavigation from "@/components/nft-navigation/NftNavigation";
+import TransferSingle from "@/components/nft-transfer/TransferSingle";
 import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
+import YouOwnNftBadge from "@/components/you-own-nft-badge/YouOwnNftBadge";
 import { publicEnv } from "@/config/env";
 import { GRADIENT_CONTRACT } from "@/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
@@ -28,10 +31,7 @@ import useCapacitor from "@/hooks/useCapacitor";
 import { fetchUrl } from "@/services/6529api";
 import { useContext, useEffect, useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
-import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import TransferSingle from "../nft-transfer/TransferSingle";
-import { TransferProvider } from "../nft-transfer/TransferState";
-import YouOwnNftBadge from "../you-own-nft-badge/YouOwnNftBadge";
+
 interface NftWithOwner extends NFT {
   owner: string;
   owner_display: string;
@@ -155,17 +155,15 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
                   </Col>
                   {isConnectedAddressOwner && (
                     <Col xs={5}>
-                      <TransferProvider>
-                        <TransferSingle
-                          collectionType={CollectedCollectionType.GRADIENTS}
-                          contractType={ContractType.ERC721}
-                          contract={GRADIENT_CONTRACT}
-                          tokenId={nft.id}
-                          max={1}
-                          title={nft.name ?? `6529 Gradient #${nft.id}`}
-                          thumbUrl={nft.thumbnail}
-                        />
-                      </TransferProvider>
+                      <TransferSingle
+                        collectionType={CollectedCollectionType.GRADIENTS}
+                        contractType={ContractType.ERC721}
+                        contract={GRADIENT_CONTRACT}
+                        tokenId={nft.id}
+                        max={1}
+                        title={nft.name ?? `6529 Gradient #${nft.id}`}
+                        thumbUrl={nft.thumbnail}
+                      />
                     </Col>
                   )}
                 </Row>

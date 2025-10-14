@@ -2,7 +2,7 @@
 
 import styles from "../NextGen.module.scss";
 
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { useAuth } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { NEXTGEN_CHAIN_ID } from "@/components/nextGen/nextgen_contracts";
 import {
@@ -33,7 +33,7 @@ import { faFire } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import { displayScore } from "./NextGenTokenProperties";
@@ -46,7 +46,7 @@ interface Props {
 export default function NextgenTokenAbout(props: Readonly<Props>) {
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
-  const account = useSeizeConnectContext();
+  const { connectedProfile } = useAuth();
   const [tdh, setTdh] = useState<number>(0);
   const { profile } = useIdentity({
     handleOrWallet: props.token.owner,
@@ -61,7 +61,13 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
         setTdh(result.data[0].boosted_tdh);
       }
     });
-  }, [props.token.owner]);
+  }, [props.token.owner, props.token.id]);
+
+  const isOwner = useMemo(() => {
+    return connectedProfile?.wallets?.some((w) =>
+      areEqualAddresses(w.wallet, props.token.owner)
+    );
+  }, [props.token.owner, connectedProfile?.wallets]);
 
   return (
     <Container className="no-padding">
@@ -150,9 +156,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                 </span>
               </Link>
             )}
-            {areEqualAddresses(props.token.owner, account.address) && (
-              <YouOwnNftBadge />
-            )}
+            {isOwner && <YouOwnNftBadge />}
           </span>
         </Col>
       </Row>

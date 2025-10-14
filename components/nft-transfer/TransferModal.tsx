@@ -14,9 +14,12 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import TransferModalPfp from "./TransferModalPfp";
 
-import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
 import { publicEnv } from "@/config/env";
 import { commonApiFetch } from "@/services/api/common-api";
+import Link from "next/link";
 import { Address, isAddress } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
@@ -121,6 +124,60 @@ export default function TransferModal({
     0
   );
 
+  // --- helpers to reduce complexity (kept types light on purpose) ---
+  const groupByContract = useCallback((items: any[]) => {
+    const by = new Map<
+      string,
+      { is1155: boolean; items: any[]; label: string }
+    >();
+    for (const it of items) {
+      const existing = by.get(it.contract);
+      if (existing) {
+        existing.items.push(it);
+      } else {
+        by.set(it.contract, {
+          is1155: it.contractType === "ERC1155",
+          items: [it],
+          label: it.label,
+        });
+      }
+    }
+    return by;
+  }, []);
+
+  const makeMockHashes = useCallback(
+    (
+      byContract: Map<string, { is1155: boolean; items: any[]; label: string }>
+    ) => {
+      const hashes: { hash: string; label: string }[] = [];
+      for (const [, { is1155, items: citems }] of Array.from(
+        byContract.entries()
+      )) {
+        if (is1155) {
+          const rand = Array.from(
+            { length: 64 },
+            () => "0123456789abcdef"[Math.floor(Math.random() * 16)]
+          ).join("");
+          hashes.push({
+            hash: `0x${rand}`,
+            label: citems.map((x) => x.label).join(", "),
+          });
+        } else {
+          for (const x of citems) {
+            const rand = Array.from(
+              { length: 64 },
+              () => "0123456789abcdef"[Math.floor(Math.random() * 16)]
+            ).join("");
+            hashes.push({ hash: `0x${rand}`, label: x.label });
+          }
+        }
+      }
+      return hashes;
+    },
+    []
+  );
+
+  // --- lifecycle & effects ---
   useEffect(() => {
     if (!open) {
       setQuery("");
@@ -128,6 +185,18 @@ export default function TransferModal({
       setResults([]);
       setSelectedProfile(null);
       setSelectedWallet(null);
+      setFlow("review");
+      setTxHashes([]);
+      setErrorMsg(null);
+      setMockTransfers(MOCK_TRANSFERS);
+      setMockEndFlow(MOCK_TRANSFER_END_FLOW);
+      setLeftHasOverflow(false);
+      setResultsHasOverflow(false);
+      setWalletsHasOverflow(false);
+      setLeftAtEnd(false);
+      setResultsAtEnd(false);
+      setWalletsAtEnd(false);
+      setIsClosing(false);
     }
   }, [open]);
 
@@ -135,6 +204,7 @@ export default function TransferModal({
     if (open) setIsClosing(false);
   }, [open]);
 
+  // lock body scroll while open
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -143,6 +213,21 @@ export default function TransferModal({
       document.body.style.overflow = prev;
     };
   }, [open]);
+
+  // ESC to close (no keyboard listener on <dialog>/<div>)
+  useEffect(() => {
+    if (!open) return;
+    if (flow === "wallet" || flow === "submitted") return;
+    const onKey = (ev: KeyboardEvent) => {
+      if (ev.key === "Escape" || ev.key === "Esc") {
+        ev.preventDefault();
+        handleClose();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, flow, isClosing]);
 
   useEffect(() => {
     if (!open) return;
@@ -169,7 +254,8 @@ export default function TransferModal({
           signal: abortController.signal,
         });
         if (!cancelled) setResults(arr || []);
-      } catch (e) {
+      } catch (err) {
+        console.warn("Search failed", err);
         if (!cancelled) setResults([]);
       } finally {
         if (!cancelled) setIsSearching(false);
@@ -214,13 +300,9 @@ export default function TransferModal({
       setWalletsAtEnd(nearBottom(walletsListRef.current));
     };
 
-    // Initial check
     check();
-
-    // Re-check on window resize
     globalThis.addEventListener("resize", check);
 
-    // Attach scroll listeners to each scrollable container
     const leftEl = leftListRef.current;
     const resultsEl = resultsListRef.current;
     const walletsEl = walletsListRef.current;
@@ -263,7 +345,6 @@ export default function TransferModal({
   }, [open, items, results, profile?.wallets, isIdentityLoading]);
 
   const totalUnits = t.totalQty;
-
   const canConfirm = open && selectedWallet && totalUnits > 0;
 
   const handleClose = useCallback(() => {
@@ -289,11 +370,10 @@ export default function TransferModal({
       setTxHashes([]);
       setFlow("wallet");
 
-      // Prepare items expanded with contract & tokenId/qty & contractType
       const selItems = Array.from(t.selected.values()).map((it) => ({
         contract: it.contract as Address,
         tokenId: BigInt(it.tokenId),
-        label: it.key.replace(":", " #"),
+        label: (it.key as string).replace(":", " #"),
         qty: BigInt(
           Math.min(Math.max(1, it.qty ?? 1), Math.max(1, it.max ?? 1))
         ),
@@ -301,77 +381,19 @@ export default function TransferModal({
         contractType: it.contractType,
       }));
 
-      // Group by contract
-      const byContract = new Map<
-        string,
-        { is1155: boolean; items: typeof selItems; label: string }
-      >();
-      for (const it of selItems) {
-        const existing = byContract.get(it.contract);
-        if (existing) {
-          existing.items.push(it);
-          continue;
-        }
+      const byContract = groupByContract(selItems);
 
-        byContract.set(it.contract, {
-          is1155: it.contractType === "ERC1155",
-          items: [it],
-          label: it.label,
-        });
-      }
-
-      // If mocking, synthesize hashes and progress the flow without sending txs
       if (mockTransfers) {
-        const hashes: {
-          hash: string;
-          label: string;
-        }[] = [];
-        // for ERC1155 one hash per contract, for ERC721 one per token
-        for (const [_, { is1155, items: citems }] of Array.from(
-          byContract.entries()
-        )) {
-          if (is1155) {
-            // one hash
-            const rand = Array.from(
-              { length: 66 },
-              () => "0123456789abcdef"[Math.floor(Math.random() * 16)]
-            ).join("");
-            const label = citems.map((x) => x.label).join(", ");
-            hashes.push({
-              hash: "0x" + rand.slice(0, 64),
-              label,
-            });
-          } else {
-            for (const x of citems) {
-              const rand = Array.from(
-                { length: 66 },
-                () => "0123456789abcdef"[Math.floor(Math.random() * 16)]
-              ).join("");
-              const label = x.label;
-              hashes.push({
-                hash: "0x" + rand.slice(0, 64),
-                label,
-              });
-            }
-          }
-        }
-
+        const hashes = makeMockHashes(byContract);
         await new Promise((r) => setTimeout(r, 2000));
         setTxHashes(hashes);
         setFlow("submitted");
-
-        for (const _h of hashes) {
+        for (let i = 0; i < hashes.length; i++) {
           await new Promise((r) => setTimeout(r, 3000));
         }
-
         setFlow(mockEndFlow as FlowState);
         return;
       }
-
-      const hashes: {
-        hash: string;
-        label: string;
-      }[] = [];
 
       if (!walletClient) {
         setErrorMsg("Wallet not ready. Please reconnect.");
@@ -389,6 +411,15 @@ export default function TransferModal({
 
       const destinationWallet = selectedWallet as Address;
 
+      // avoid TS complaining about writeContract on {}
+      const write = (
+        walletClient as unknown as {
+          writeContract: (req: any) => Promise<`0x${string}`>;
+        }
+      ).writeContract;
+
+      const hashes: { hash: string; label: string }[] = [];
+
       for (const [contract, { is1155, items: citems }] of Array.from(
         byContract.entries()
       )) {
@@ -403,11 +434,8 @@ export default function TransferModal({
             args: [address as Address, destinationWallet, ids, amts, "0x"],
           });
           const label = citems.map((x) => x.label).join(", ");
-          const hash = await walletClient.writeContract(request);
-          hashes.push({
-            hash,
-            label,
-          });
+          const hash = await write(request);
+          hashes.push({ hash, label });
         } else {
           for (const x of citems) {
             const { request } = await publicClient.simulateContract({
@@ -417,11 +445,8 @@ export default function TransferModal({
               functionName: "safeTransferFrom",
               args: [address as Address, destinationWallet, x.tokenId],
             });
-            const hash = await walletClient.writeContract(request);
-            hashes.push({
-              hash,
-              label: x.label,
-            });
+            const hash = await write(request);
+            hashes.push({ hash, label: x.label });
           }
         }
       }
@@ -449,6 +474,8 @@ export default function TransferModal({
     walletClient,
     mockTransfers,
     mockEndFlow,
+    groupByContract,
+    makeMockHashes,
   ]);
 
   if (!open) return null;
@@ -459,7 +486,7 @@ export default function TransferModal({
     if (flow === "success")
       return (
         <span className="tw-flex tw-items-center tw-gap-1.5">
-          <span className="tw-text-green">Success!</span>
+          <span className="tw-text-green">Transfer Successful!</span>
           <img
             src="/emojis/sgt_saluting_face.webp"
             alt="sgt_saluting_face"
@@ -470,7 +497,7 @@ export default function TransferModal({
     if (flow === "error")
       return (
         <span className="tw-flex tw-items-center tw-gap-1.5">
-          <span className="tw-text-red">Transfer failed</span>
+          <span className="tw-text-red">Transfer Failed</span>
           <img
             src="/emojis/sgt_sob.webp"
             alt="sgt_sob"
@@ -482,14 +509,14 @@ export default function TransferModal({
       return (
         <span className="tw-flex tw-items-center tw-gap-1.5">
           <span>Confirm in your wallet</span>
-          <CircleLoader />
+          <CircleLoader size={CircleLoaderSize.MEDIUM} />
         </span>
       );
     if (flow === "submitted")
       return (
         <span className="tw-flex tw-items-center tw-gap-1.5">
           <span>Transfer submitted</span>
-          <CircleLoader />
+          <CircleLoader size={CircleLoaderSize.MEDIUM} />
         </span>
       );
   };
@@ -508,38 +535,29 @@ export default function TransferModal({
     searchStatusText = "No results.";
   }
 
+  // Backdrop + modal content; no role on non-interactive with key/mouse listeners on it
   return (
-    <dialog
-      role="dialog"
-      aria-modal="true"
-      tabIndex={-1}
+    <div
       className={[
-        "tw-fixed tw-w-full tw-h-full tw-inset-0 tw-z-[100] tw-bg-white/10 tw-backdrop-blur-sm tw-flex tw-items-start tw-justify-center tw-p-4 md:tw-p-8",
+        "tw-fixed tw-inset-0 tw-z-[100] tw-bg-white/10 tw-backdrop-blur-sm tw-flex tw-items-start tw-justify-center tw-p-4 md:tw-p-8",
         isClosing
           ? "tw-opacity-0 tw-transition-opacity tw-duration-150"
           : "tw-opacity-100 tw-transition-opacity tw-duration-150",
       ].join(" ")}
-      onClick={(e) => {
+      onMouseDown={(e) => {
         if (flow === "wallet" || flow === "submitted") return;
         if (e.target === e.currentTarget) handleClose();
       }}
-      onKeyDown={(e) => {
-        if (e.key === "Escape" || e.key === "Esc") {
-          e.preventDefault();
-          handleClose();
-        }
-        // Optional: make backdrop “clickable” via keyboard too
-        if (e.key === "Enter" || e.key === " ") {
-          if (flow !== "wallet" && flow !== "submitted") handleClose();
-        }
-      }}>
+      aria-modal="true"
+      aria-label="Transfer dialog">
       <div
         className={[
-          "tw-w-[70vw] tw-max-w-[1100px] tw-h-[85vh] tw-max-h-[900px] tw-rounded-2xl tw-bg-[#0c0c0d] tw-ring-[3px] tw-ring-white/30 tw-text-white tw-shadow-xl tw-overflow-hidden tw-flex tw-flex-col",
+          "tw-w-[70vw] tw-max-w-[1100px] tw-h-[75vh] tw-max-h-[900px] tw-rounded-2xl tw-bg-[#0c0c0d] tw-ring-[3px] tw-ring-white/30 tw-text-white tw-shadow-xl tw-overflow-hidden tw-flex tw-flex-col",
           isClosing
             ? "tw-scale-95 tw-opacity-0 tw-transition-all tw-duration-150"
             : "tw-scale-100 tw-opacity-100 tw-transition-all tw-duration-150",
-        ].join(" ")}>
+        ].join(" ")}
+        onMouseDown={(e) => e.stopPropagation()}>
         {/* header */}
         <div className="tw-flex tw-items-center tw-justify-between tw-border-0 tw-border-b-[3px] tw-border-solid tw-border-white/30 tw-p-4">
           <div className="tw-text-lg tw-font-semibold">{getFlowTitle()}</div>
@@ -567,12 +585,13 @@ export default function TransferModal({
               </div>
             )}
             {(flow === "review" || flow === "success" || flow === "error") && (
-              <FontAwesomeIcon
-                icon={faXmarkCircle}
+              <button
                 type="button"
                 onClick={handleClose}
-                size="xl"
-              />
+                aria-label="Close"
+                className="tw-bg-transparent tw-border-none tw-p-0 tw-flex tw-items-center tw-justify-center">
+                <FontAwesomeIcon icon={faXmarkCircle} className="tw-size-6" />
+              </button>
             )}
           </div>
         </div>
@@ -668,7 +687,7 @@ export default function TransferModal({
                     </div>
                     <button
                       type="button"
-                      className="tw-text-xs tw-rounded-md tw-bg-white/10 hover:tw-bg-white/15 tw-px-2 tw-py-1 tw-border-1 tw-border-solid tw-border-[#444]"
+                      className="!tw-text-xs tw-rounded-md tw-bg-white/10 hover:tw-bg-white/15 tw-px-2 tw-py-1 tw-border-1 tw-border-solid tw-border-[#444] tw-font-medium"
                       onClick={() => {
                         setSelectedProfile(null);
                         setSelectedWallet(null);
@@ -723,7 +742,7 @@ export default function TransferModal({
                                 className={[
                                   "tw-w-full tw-text-left tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/10 hover:tw-bg-white/15 tw-p-2",
                                   isSel
-                                    ? "tw-ring-inset tw-ring-2 tw-ring-emerald-400/60"
+                                    ? "tw-border-2 tw-border-solid tw-border-emerald-400"
                                     : "",
                                 ].join(" ")}>
                                 <div className="tw-text-sm tw-font-medium">
@@ -814,15 +833,19 @@ export default function TransferModal({
                 <div>Waiting for confirmation…</div>
                 <ul className="tw-space-y-1">
                   {txHashes.map((h) => (
-                    <li key={h.hash} className="tw-text-sm">
-                      {h.label} {" - "}
-                      <a
+                    <li key={h.hash}>
+                      {h.label}
+                      <Link
                         href={`${publicClient?.chain?.blockExplorers?.default.url}/tx/${h.hash}`}
                         target="_blank"
                         rel="noreferrer"
                         className="tw-underline">
-                        View Tx
-                      </a>
+                        <button
+                          type="button"
+                          className="tw-ml-2 tw-text-md tw-rounded-lg tw-bg-white hover:tw-bg-white/95 tw-text-black tw-font-medium tw-text-sm tw-px-2 tw-py-1">
+                          View Tx
+                        </button>
+                      </Link>
                     </li>
                   ))}
                 </ul>
@@ -830,22 +853,26 @@ export default function TransferModal({
             )}
             {flow === "success" && (
               <div className="tw-space-y-2">
-                <div>
+                <div className="tw-font-semibold tw-text-lg">
                   {txHashes.length > 1
                     ? "All transfers confirmed"
                     : "Transfer confirmed"}
                 </div>
                 <ul className="tw-space-y-1">
                   {txHashes.map((h) => (
-                    <li key={h.hash} className="tw-text-sm">
-                      {h.label} {" - "}
-                      <a
+                    <li key={h.hash}>
+                      {h.label}
+                      <Link
                         href={`${publicClient?.chain?.blockExplorers?.default.url}/tx/${h.hash}`}
                         target="_blank"
                         rel="noreferrer"
                         className="tw-underline">
-                        View Tx
-                      </a>
+                        <button
+                          type="button"
+                          className="tw-ml-2 tw-text-md tw-rounded-lg tw-bg-white hover:tw-bg-white/95 tw-text-black tw-font-medium tw-text-sm tw-px-2 tw-py-1">
+                          View Tx
+                        </button>
+                      </Link>
                     </li>
                   ))}
                 </ul>
@@ -857,15 +884,19 @@ export default function TransferModal({
                 {txHashes.length > 0 && (
                   <ul className="tw-space-y-1">
                     {txHashes.map((h) => (
-                      <li key={h.hash} className="tw-text-sm">
-                        {h.label} {" - "}
-                        <a
+                      <li key={h.hash}>
+                        {h.label}
+                        <Link
                           href={`${publicClient?.chain?.blockExplorers?.default.url}/tx/${h.hash}`}
                           target="_blank"
                           rel="noreferrer"
                           className="tw-underline">
-                          View Tx
-                        </a>
+                          <button
+                            type="button"
+                            className="tw-ml-2 tw-text-md tw-rounded-lg tw-bg-white hover:tw-bg-white/95 tw-text-black tw-font-medium tw-text-sm tw-px-2 tw-py-1">
+                            View Tx
+                          </button>
+                        </Link>
                       </li>
                     ))}
                   </ul>
@@ -884,14 +915,14 @@ export default function TransferModal({
                   <button
                     type="button"
                     onClick={handleClose}
-                    className="tw-rounded-lg tw-bg-white/10 hover:tw-bg-white/15 tw-px-4 tw-py-2 tw-border-1 tw-border-solid tw-border-[#444]">
+                    className="tw-rounded-lg tw-bg-white/10 hover:tw-bg-white/15 tw-px-4 tw-py-2 tw-border-1 tw-border-solid tw-border-[#444] tw-font-medium">
                     Cancel
                   </button>
                   <button
                     type="button"
                     disabled={!canConfirm}
                     onClick={handleConfirm}
-                    className="tw-rounded-lg tw-bg-white tw-text-black tw-px-4 tw-py-2 tw-border-1 tw-border-solid tw-border-[#444] disabled:tw-opacity-60 disabled:tw-cursor-not-allowed">
+                    className="tw-rounded-lg tw-bg-white tw-text-black tw-px-4 tw-py-2 tw-border-1 tw-border-solid tw-border-[#444] disabled:tw-opacity-60 disabled:tw-cursor-not-allowed tw-font-medium">
                     Transfer
                   </button>
                 </>
@@ -903,7 +934,7 @@ export default function TransferModal({
                 <button
                   type="button"
                   disabled
-                  className="tw-rounded-lg tw-bg-white/10 tw-px-4 tw-py-2 tw-opacity-60">
+                  className="tw-rounded-lg tw-bg-white/10 tw-px-4 tw-py-2 tw-opacity-60 tw-font-medium">
                   Processing…
                 </button>
               );
@@ -915,13 +946,13 @@ export default function TransferModal({
                   <button
                     type="button"
                     onClick={() => setFlow("review")}
-                    className="tw-rounded-lg tw-bg-white/10 hover:tw-bg-white/15 tw-px-4 tw-py-2 tw-border-1 tw-border-solid tw-border-[#444]">
+                    className="tw-rounded-lg tw-bg-white/10 hover:tw-bg-white/15 tw-px-4 tw-py-2 tw-border-1 tw-border-solid tw-border-[#444] tw-font-medium">
                     Back
                   </button>
                   <button
                     type="button"
                     onClick={handleClose}
-                    className="tw-rounded-lg tw-bg-white tw-text-black tw-px-4 tw-py-2">
+                    className="tw-rounded-lg tw-bg-white hover:tw-bg-white/95 tw-text-black tw-px-4 tw-py-2 tw-font-medium">
                     Close
                   </button>
                 </>
@@ -939,6 +970,6 @@ export default function TransferModal({
           })()}
         </div>
       </div>
-    </dialog>
+    </div>
   );
 }

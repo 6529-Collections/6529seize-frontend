@@ -12,7 +12,6 @@ import {
 } from "@/helpers/Helpers";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
-import { TransferProvider } from "../nft-transfer/TransferState";
 import styles from "./TheMemes.module.scss";
 
 export function MemePageYourCardsRightMenu(props: {
@@ -135,6 +134,23 @@ export function MemePageYourCardsRightMenu(props: {
                         </Table>
                       </Col>
                     </Row>
+                    {props.nftBalance > 0 && props.myOwner && props.nft?.id && (
+                      <Row className="mb-2">
+                        <Col>
+                          <TransferSingle
+                            collectionType={CollectedCollectionType.MEMES}
+                            contractType={ContractType.ERC1155}
+                            contract={MEMES_CONTRACT}
+                            tokenId={props.nft?.id}
+                            max={props.nftBalance}
+                            title={
+                              props.nft?.name ?? `The Memes #${props.nft?.id}`
+                            }
+                            thumbUrl={props.nft?.thumbnail}
+                          />
+                        </Col>
+                      </Row>
+                    )}
                     {props.myRank && props.nft && props.myTDH ? (
                       <Row className="pt-2">
                         <Col
@@ -220,25 +236,6 @@ export function MemePageYourCardsRightMenu(props: {
                     <Col>
                       {getTokenCount(transferredOut)} card
                       {getTokenCount(transferredOut) > 1 && "s"} transferred out
-                    </Col>
-                  </Row>
-                )}
-                {props.nftBalance > 0 && props.myOwner && props.nft?.id && (
-                  <Row className="pt-5">
-                    <Col>
-                      <TransferProvider>
-                        <TransferSingle
-                          collectionType={CollectedCollectionType.MEMES}
-                          contractType={ContractType.ERC1155}
-                          contract={MEMES_CONTRACT}
-                          tokenId={props.nft?.id}
-                          max={props.nftBalance}
-                          title={
-                            props.nft?.name ?? `The Memes #${props.nft?.id}`
-                          }
-                          thumbUrl={props.nft?.thumbnail}
-                        />
-                      </TransferProvider>
                     </Col>
                   </Row>
                 )}

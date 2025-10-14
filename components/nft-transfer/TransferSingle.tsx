@@ -17,17 +17,13 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useMemo, useRef, useState } from "react";
 import TransferModal from "./TransferModal";
-import { buildTransferKey, useTransfer } from "./TransferState";
+import {
+  buildTransferKey,
+  TransferProvider,
+  useTransfer,
+} from "./TransferState";
 
-export default function TransferSingle({
-  collectionType,
-  contractType,
-  contract,
-  tokenId,
-  max,
-  thumbUrl,
-  title,
-}: {
+interface TransferSingleProps {
   readonly collectionType: CollectedCollectionType;
   readonly contractType: ContractType;
   readonly contract: string;
@@ -35,7 +31,26 @@ export default function TransferSingle({
   readonly title: string;
   readonly max: number;
   readonly thumbUrl?: string;
-}) {
+}
+
+export default function TransferSingle(props: TransferSingleProps) {
+  return (
+    <TransferProvider>
+      <TransferSingleImpl {...props} />
+    </TransferProvider>
+  );
+}
+
+function TransferSingleImpl(props: TransferSingleProps) {
+  const {
+    collectionType,
+    contractType,
+    contract,
+    tokenId,
+    title,
+    max,
+    thumbUrl,
+  } = props;
   const { isMobileDevice } = useDeviceInfo();
 
   const t = useTransfer();
@@ -47,7 +62,7 @@ export default function TransferSingle({
   const key = useMemo(
     () =>
       buildTransferKey({
-        collection: contract,
+        collection: collectionType,
         tokenId,
       }),
     [contract, tokenId]
@@ -105,33 +120,35 @@ export default function TransferSingle({
 
   return (
     <div className={styles.shadowBox} data-testid="transfer-single">
-      <div className="tw-flex tw-items-center tw-gap-2">
-        <span className="tw-text-lg tw-font-medium">Transfer</span>
-        <FontAwesomeIcon icon={faRightLeft} />
-      </div>
-      {max > 1 && (
-        <div className="tw-mt-4 tw-flex tw-items-center tw-gap-1">
-          <FontAwesomeIcon
-            icon={faMinusCircle}
-            onClick={() => t.decQty(key)}
-            className="tw-size-6 tw-cursor-pointer"
-            color={selectedQty <= 1 ? "#60606C" : "#fff"}
-            aria-disabled={selectedQty <= 1}
-            data-testid="transfer-single-minus"
-          />
-          <div className="tw-min-w-[2ch] tw-text-center tw-text-xs tw-tabular-nums tw-select-none">
-            {selectedQty}
-          </div>
-          <FontAwesomeIcon
-            icon={faPlusCircle}
-            onClick={() => t.incQty(key)}
-            className="tw-size-6 tw-cursor-pointer"
-            color={selectedQty >= max ? "#60606C" : "#fff"}
-            aria-disabled={selectedQty >= max}
-            data-testid="transfer-single-plus"
-          />
+      <div className="tw-flex tw-items-center tw-gap-5">
+        <div className="tw-flex tw-items-center tw-gap-2">
+          <span className="tw-text-lg tw-font-medium">Transfer</span>
+          <FontAwesomeIcon icon={faRightLeft} />
         </div>
-      )}
+        {max > 1 && (
+          <div className="tw-flex tw-items-center tw-gap-1">
+            <FontAwesomeIcon
+              icon={faMinusCircle}
+              onClick={() => t.decQty(key)}
+              className="tw-size-6 tw-cursor-pointer"
+              color={selectedQty <= 1 ? "#60606C" : "#fff"}
+              aria-disabled={selectedQty <= 1}
+              data-testid="transfer-single-minus"
+            />
+            <div className="tw-min-w-[2ch] tw-text-center tw-text-xs tw-tabular-nums tw-select-none">
+              {selectedQty}
+            </div>
+            <FontAwesomeIcon
+              icon={faPlusCircle}
+              onClick={() => t.incQty(key)}
+              className="tw-size-6 tw-cursor-pointer"
+              color={selectedQty >= max ? "#60606C" : "#fff"}
+              aria-disabled={selectedQty >= max}
+              data-testid="transfer-single-plus"
+            />
+          </div>
+        )}
+      </div>
 
       <div className="tw-mt-4">
         <button
