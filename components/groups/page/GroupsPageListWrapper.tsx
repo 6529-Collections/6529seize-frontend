@@ -1,6 +1,14 @@
 "use client";
 
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  startTransition,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import GroupsList from "./list/GroupsList";
 import { AuthContext } from "@/components/auth/Auth";
 import { useRouter } from "next/navigation";
@@ -43,6 +51,7 @@ export default function GroupsPageListWrapper({
   const group = searchParams?.get(GROUP_NAME_SEARCH_PARAM);
 
   const [groupDraft, setGroupDraft] = useState<string | null>(group ?? null);
+  const lastSyncedGroupRef = useRef<string | null>(group ?? null);
   const filters = useMemo<GroupsRequestParams>(
     () => ({
       group_name: groupDraft,
@@ -51,7 +60,11 @@ export default function GroupsPageListWrapper({
     [groupDraft, identity]
   );
 
-  useEffect(() => setGroupDraft(group ?? null), [group]);
+  useEffect(() => {
+    const nextGroup = group ?? null;
+    lastSyncedGroupRef.current = nextGroup;
+    setGroupDraft(nextGroup);
+  }, [group]);
 
   const createQueryString = useCallback(
     (config: {
@@ -79,24 +92,32 @@ export default function GroupsPageListWrapper({
           value,
         },
       ]);
-      router.replace(query ? `${pathname}?${query}` : pathname);
+      startTransition(() => {
+        router.replace(query ? `${pathname}?${query}` : pathname);
+      });
     },
     [createQueryString, pathname, router]
   );
 
   useDebounce(
     () => {
-      if ((group ?? null) === groupDraft) {
+      if (groupDraft === lastSyncedGroupRef.current) {
         return;
       }
+      lastSyncedGroupRef.current = groupDraft;
       updateGroupNameParam(groupDraft);
     },
     200,
-    [groupDraft, group, updateGroupNameParam]
+    [groupDraft, updateGroupNameParam]
   );
 
   const setGroupName = (value: string | null) => {
     setGroupDraft(value);
+    if (lastSyncedGroupRef.current === value) {
+      return;
+    }
+    lastSyncedGroupRef.current = value;
+    updateGroupNameParam(value);
   };
 
   const setAuthorIdentity = (value: string | null) => {
