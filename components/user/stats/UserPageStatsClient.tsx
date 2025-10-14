@@ -152,8 +152,7 @@ export default function UserPageStatsClient({
 
     if (
       activeAddressForStats === null &&
-      initialBalanceMemes != null &&
-      initialBalanceMemes.length > 0
+      initialBalanceMemes != null
     ) {
       setBalanceMemes(initialBalanceMemes);
       return () => controller.abort();

@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
@@ -76,23 +76,15 @@ export default function UserPageHeaderClient({
   const [directMessageLoading, setDirectMessageLoading] =
     useState<boolean>(false);
 
-  const initialIsMyProfile = amIUser({
-    profile,
-    address,
-    connectedHandle: connectedProfile?.handle ?? undefined,
-  });
-
-  const [isMyProfile, setIsMyProfile] = useState<boolean>(initialIsMyProfile);
-
-  useEffect(() => {
-    setIsMyProfile(
+  const isMyProfile = useMemo(
+    () =>
       amIUser({
         profile,
         address,
         connectedHandle: connectedProfile?.handle ?? undefined,
-      })
-    );
-  }, [profile, address, connectedProfile?.handle]);
+      }),
+    [profile, address, connectedProfile?.handle]
+  );
 
   const canEdit = useMemo(
     () => !!(profile.handle && isMyProfile && !activeProfileProxy),
@@ -119,13 +111,10 @@ export default function UserPageHeaderClient({
         statement.statement_group === STATEMENT_GROUP.GENERAL
     ) ?? null;
 
-  const [aboutStatement, setAboutStatement] = useState<CicStatement | null>(
-    () => findAboutStatement(initialStatements)
+  const aboutStatement = useMemo(
+    () => findAboutStatement(statements),
+    [statements]
   );
-
-  useEffect(() => {
-    setAboutStatement(findAboutStatement(statements));
-  }, [statements]);
 
   const showAbout = useMemo(() => {
     if (!isFetched) {
@@ -150,8 +139,12 @@ export default function UserPageHeaderClient({
       router.push(`/waves/${wave.id}`);
     } catch (error) {
       console.error(error);
+      const errorMessage =
+        error instanceof Error
+          ? `Failed to create direct message: ${error.message}`
+          : "Failed to create direct message. Please try again.";
       setToast({
-        message: `Failed to create direct message: ${error}`,
+        message: errorMessage,
         type: "error",
       });
     } finally {

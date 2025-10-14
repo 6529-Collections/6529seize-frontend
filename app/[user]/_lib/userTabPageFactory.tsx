@@ -21,6 +21,38 @@ type FactoryArgs = {
 type UserRouteParams = { user: string };
 type UserSearchParams = Record<string, string | string[] | undefined>;
 
+const normalizeSearchParams = (
+  params?: UserSearchParams | URLSearchParams
+): UserSearchParams => {
+  if (!params) {
+    return {};
+  }
+
+  if (params instanceof URLSearchParams) {
+    return Array.from(params.entries()).reduce(
+      (acc, [key, value]) => {
+        const existing = acc[key];
+        if (existing === undefined) {
+          acc[key] = value;
+        } else if (Array.isArray(existing)) {
+          acc[key] = [...existing, value];
+        } else {
+          acc[key] = [existing, value];
+        }
+        return acc;
+      },
+      {} as UserSearchParams
+    );
+  }
+
+  return Object.entries(params).reduce((acc, [key, value]) => {
+    if (value !== undefined) {
+      acc[key] = value;
+    }
+    return acc;
+  }, {} as UserSearchParams);
+};
+
 const isNotFoundError = (error: unknown): boolean => {
   if (!error || (typeof error !== "object" && typeof error !== "string")) {
     return false;
@@ -63,9 +95,11 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
 
     const user = resolvedParams.user;
     const normalizedUser = user.toLowerCase();
-    const query: UserSearchParams = searchParams
+    const resolvedSearchParams = searchParams
       ? await searchParams
-      : {};
+      : undefined;
+    const query: UserSearchParams =
+      normalizeSearchParams(resolvedSearchParams);
     const headers = await getAppCommonHeaders();
     const profile: ApiIdentity = await getUserProfile({
       user: normalizedUser,
