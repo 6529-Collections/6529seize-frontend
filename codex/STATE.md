@@ -10,6 +10,7 @@ This table is the single source of truth for active and historical tickets. Keep
 | TKT-0004 | Offload CSV mapping tools to server pipelines | Backlog | P1 | evocoder | — | 2025-10-14 |
 | TKT-0005 | Replace notification polling with server-driven delivery | Backlog | P1 | evocoder | — | 2025-10-14 |
 | TKT-0006 | Centralise media and IPFS upload orchestration | Backlog | P1 | evocoder | — | 2025-10-14 |
+| TKT-0007 | Stabilize group name search input | In-Progress | P0 | simo6529 | [#1540](https://github.com/6529-Collections/6529seize-frontend/pull/1540) | 2025-10-14 |
 
 ## Usage Guidelines
 

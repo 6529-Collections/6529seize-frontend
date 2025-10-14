@@ -15,6 +15,8 @@ title: Upgrade authentication flow
 ---
 ```
 
+Set `owner` to the assignee's GitHub handle. When the handle is not available yet, use `owner: unknown` and correct it before logging work.
+
 - Use ISO 8601 dates for `created`.
 - Keep keys in alphabetical order.
 - `status` must match the values used in `codex/STATE.md`.
