@@ -58,7 +58,7 @@ describe('UserPageStatsClient data fetching', () => {
         initialSeasons={[]}
         initialTdh={undefined}
         initialOwnerBalance={undefined}
-        initialBalanceMemes={[]}
+        initialBalanceMemes={undefined as any}
       />
     );
 
