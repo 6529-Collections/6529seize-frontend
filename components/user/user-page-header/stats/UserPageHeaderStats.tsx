@@ -12,7 +12,14 @@ function sanitizeRouteSegment(value: string): string | null {
   if (!value) {
     return null;
   }
-  return SAFE_ROUTE_SEGMENT_PATTERN.test(value) ? value : null;
+  const trimmedValue = value.trim();
+  if (!trimmedValue) {
+    return null;
+  }
+  const normalizedValue = trimmedValue.toLowerCase();
+  return SAFE_ROUTE_SEGMENT_PATTERN.test(normalizedValue)
+    ? normalizedValue
+    : null;
 }
 
 export default function UserPageHeaderStats({

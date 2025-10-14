@@ -11,7 +11,10 @@ jest.mock('@/components/user/stats/UserPageStatsBoostBreakdown', () => () => <di
 jest.mock('@/components/user/stats/tags/UserPageStatsTags', () => () => <div data-testid="tags" />);
 
 jest.mock('@/components/user/utils/addresses-select/UserAddressesSelectDropdown', () => ({ onActiveAddress }: any) => (
-  <button onClick={() => onActiveAddress('0xabc')} data-testid="dropdown" />
+  <button
+    onClick={() => onActiveAddress('0x0000000000000000000000000000000000000001')}
+    data-testid="dropdown"
+  />
 ));
 
 jest.mock('@/services/api/common-api');
@@ -31,18 +34,20 @@ describe('UserPageStatsClient data fetching', () => {
         initialSeasons={[{} as any]}
         initialTdh={{} as any}
         initialOwnerBalance={{} as any}
-        initialBalanceMemes={[]}
+        initialBalanceMemes={[{} as any]}
       />
     );
 
     expect(apiMock).not.toHaveBeenCalled();
-    userEvent.click(screen.getByTestId('dropdown'));
+    await userEvent.click(screen.getByTestId('dropdown'));
     await waitFor(() => expect(apiMock).toHaveBeenCalledTimes(3));
-    expect(apiMock.mock.calls[0][0]).toMatchObject({ endpoint: 'tdh/wallet/0xabc' });
-    expect(apiMock.mock.calls[1][0]).toMatchObject({ endpoint: 'owners-balances/wallet/0xabc' });
-    expect(apiMock.mock.calls[2][0]).toMatchObject({
-      endpoint: 'owners-balances/wallet/0xabc/memes',
-    });
+
+    const endpoints = apiMock.mock.calls.map((call) => call[0].endpoint);
+    expect(endpoints).toEqual([
+      'tdh/wallet/0x0000000000000000000000000000000000000001',
+      'owners-balances/wallet/0x0000000000000000000000000000000000000001',
+      'owners-balances/wallet/0x0000000000000000000000000000000000000001/memes',
+    ]);
   });
 
   it('fetches seasons on mount when initial data missing', async () => {
@@ -57,7 +62,14 @@ describe('UserPageStatsClient data fetching', () => {
       />
     );
 
-    await waitFor(() => expect(apiMock).toHaveBeenCalled());
-    expect(apiMock.mock.calls[0][0]).toMatchObject({ endpoint: 'new_memes_seasons' });
+    await waitFor(() => expect(apiMock).toHaveBeenCalledTimes(4));
+
+    const endpoints = apiMock.mock.calls.map((call) => call[0].endpoint);
+    expect(endpoints).toEqual([
+      'new_memes_seasons',
+      'tdh/wallet/0x1',
+      'owners-balances/wallet/0x1',
+      'owners-balances/wallet/0x1/memes',
+    ]);
   });
 });

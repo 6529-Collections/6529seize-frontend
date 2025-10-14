@@ -56,22 +56,34 @@ export default function UserPageStatsClient({
     return trimmed.toLowerCase();
   }, [activeAddress]);
 
+  const statsPath = useMemo(() => {
+    try {
+      return getStatsPath(profile, activeAddressForStats);
+    } catch {
+      return null;
+    }
+  }, [profile, activeAddressForStats]);
+
   useEffect(() => setSeasons(initialSeasons), [initialSeasons]);
   useEffect(() => setTdh(initialTdh), [initialTdh]);
   useEffect(() => setOwnerBalance(initialOwnerBalance), [initialOwnerBalance]);
   useEffect(() => setBalanceMemes(initialBalanceMemes), [initialBalanceMemes]);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     if (initialSeasons.length > 0) {
-      return;
+      return () => controller.abort();
     }
     commonApiFetch<MemeSeason[]>({
       endpoint: "new_memes_seasons",
+      signal: controller.signal,
     })
       .then(setSeasons)
       .catch(() => {
         setSeasons([]);
       });
+    return () => controller.abort();
   }, [initialSeasons.length]);
 
   useEffect(() => {
@@ -82,10 +94,7 @@ export default function UserPageStatsClient({
       return () => controller.abort();
     }
 
-    let statsPath: string;
-    try {
-      statsPath = getStatsPath(profile, activeAddressForStats);
-    } catch {
+    if (statsPath === null) {
       setTdh(initialTdh);
       return () => controller.abort();
     }
@@ -101,7 +110,7 @@ export default function UserPageStatsClient({
       });
 
     return () => controller.abort();
-  }, [activeAddressForStats, profile, initialTdh]);
+  }, [activeAddressForStats, initialTdh, statsPath]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -111,10 +120,7 @@ export default function UserPageStatsClient({
       return () => controller.abort();
     }
 
-    let statsPath: string;
-    try {
-      statsPath = getStatsPath(profile, activeAddressForStats);
-    } catch {
+    if (statsPath === null) {
       setOwnerBalance(initialOwnerBalance);
       return () => controller.abort();
     }
@@ -130,20 +136,17 @@ export default function UserPageStatsClient({
       });
 
     return () => controller.abort();
-  }, [activeAddressForStats, profile, initialOwnerBalance]);
+  }, [activeAddressForStats, initialOwnerBalance, statsPath]);
 
   useEffect(() => {
     const controller = new AbortController();
 
-    if (activeAddressForStats === null && initialBalanceMemes.length > 0) {
+    if (activeAddressForStats === null && initialBalanceMemes != null) {
       setBalanceMemes(initialBalanceMemes);
       return () => controller.abort();
     }
 
-    let statsPath: string;
-    try {
-      statsPath = getStatsPath(profile, activeAddressForStats);
-    } catch {
+    if (statsPath === null) {
       setBalanceMemes(initialBalanceMemes);
       return () => controller.abort();
     }
@@ -159,7 +162,7 @@ export default function UserPageStatsClient({
       });
 
     return () => controller.abort();
-  }, [activeAddressForStats, profile, initialBalanceMemes]);
+  }, [activeAddressForStats, initialBalanceMemes, statsPath]);
 
   return (
     <div className="tailwind-scope">

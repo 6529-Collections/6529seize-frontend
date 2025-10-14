@@ -21,6 +21,32 @@ type FactoryArgs = {
 type UserRouteParams = { user: string };
 type UserSearchParams = Record<string, string | string[] | undefined>;
 
+const isNotFoundError = (error: unknown): boolean => {
+  if (!error || (typeof error !== "object" && typeof error !== "string")) {
+    return false;
+  }
+
+  const status =
+    typeof error === "object" && error !== null
+      ? (error as { status?: number }).status ??
+        (error as { statusCode?: number }).statusCode ??
+        (error as { response?: { status?: number } }).response?.status
+      : undefined;
+
+  if (status === 404) {
+    return true;
+  }
+
+  const message =
+    typeof error === "string"
+      ? error
+      : error instanceof Error
+      ? error.message
+      : undefined;
+
+  return !!message && message.toLowerCase().includes("not found");
+};
+
 export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
   async function Page({
     params,
@@ -43,8 +69,11 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
     const profile: ApiIdentity = await getUserProfile({
       user: normalizedUser,
       headers,
-    }).catch(() => {
-      notFound();
+    }).catch((error: unknown) => {
+      if (isNotFoundError(error)) {
+        notFound();
+      }
+      throw error;
     });
 
     const needsRedirect = userPageNeedsRedirect({
@@ -79,8 +108,11 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
     const profile: ApiIdentity = await getUserProfile({
       user: normalizedUser,
       headers,
-    }).catch(() => {
-      notFound();
+    }).catch((error: unknown) => {
+      if (isNotFoundError(error)) {
+        notFound();
+      }
+      throw error;
     });
     return getAppMetadata(getMetadataForUserPage(profile, metaLabel));
   }

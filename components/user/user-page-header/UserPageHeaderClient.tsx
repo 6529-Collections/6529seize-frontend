@@ -93,15 +93,10 @@ export default function UserPageHeaderClient({
     );
   }, [profile, address, connectedProfile?.handle]);
 
-  const getCanEdit = (): boolean => {
-    return !!(profile.handle && isMyProfile && !activeProfileProxy);
-  };
-
-  const [canEdit, setCanEdit] = useState<boolean>(getCanEdit());
-
-  useEffect(() => {
-    setCanEdit(getCanEdit());
-  }, [profile, isMyProfile, activeProfileProxy]);
+  const canEdit = useMemo(
+    () => !!(profile.handle && isMyProfile && !activeProfileProxy),
+    [profile.handle, isMyProfile, activeProfileProxy]
+  );
 
   const { isFetched, data: statements } = useQuery<CicStatement[]>({
     queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, normalizedHandleOrWallet],
@@ -132,20 +127,11 @@ export default function UserPageHeaderClient({
     setAboutStatement(about ?? null);
   }, [statements]);
 
-  const [showAbout, setShowAbout] = useState<boolean>(() => {
-    return !!aboutStatement || getCanEdit();
-  });
-
-  useEffect(() => {
+  const showAbout = useMemo(() => {
     if (!isFetched) {
-      setShowAbout(false);
-      return;
+      return false;
     }
-    if (aboutStatement || canEdit) {
-      setShowAbout(true);
-      return;
-    }
-    setShowAbout(false);
+    return !!(aboutStatement || canEdit);
   }, [aboutStatement, canEdit, isFetched]);
 
   const handleCreateDirectMessage = async (
