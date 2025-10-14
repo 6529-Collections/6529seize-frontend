@@ -4,7 +4,7 @@ Use this catalogue to keep long-lived documentation easy to discover. Group entr
 
 ## 2025
 
-- _No archived documents yet. Add entries in the format `YYYY-MM-DD – Title (owner)` pointing to the corresponding file._
+- [2025-10-14 – Client Processing Audit (@evocoder)](2025-10-14-client-processing-audit.md)
 
 ---
 
