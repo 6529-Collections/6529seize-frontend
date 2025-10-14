@@ -18,6 +18,7 @@ import { useDebounce } from "react-use";
 
 const IDENTITY_SEARCH_PARAM = "identity";
 const GROUP_NAME_SEARCH_PARAM = "group";
+const CREATED_AT_LESS_THAN_SEARCH_PARAM = "created_at_less_than";
 
 export default function GroupsPageListWrapper({
   onCreateNewGroup,
@@ -67,14 +68,16 @@ export default function GroupsPageListWrapper({
   }, [group]);
 
   const createQueryString = useCallback(
-    (config: {
-      name: string;
-      value: string | null;
-    }[]): string => {
-      const params = new URLSearchParams(searchParams?.toString());
+    (
+      config: {
+        name: string;
+        value: string | null;
+      }[]
+    ): string => {
+      const params = new URLSearchParams(searchParams.toString());
       for (const { name, value } of config) {
-        if (!value) {
-          params?.delete(name);
+        if (value == null || value === "") {
+          params.delete(name);
         } else {
           params.set(name, value);
         }
@@ -90,6 +93,10 @@ export default function GroupsPageListWrapper({
         {
           name: GROUP_NAME_SEARCH_PARAM,
           value,
+        },
+        {
+          name: CREATED_AT_LESS_THAN_SEARCH_PARAM,
+          value: null,
         },
       ]);
       startTransition(() => {
@@ -111,35 +118,51 @@ export default function GroupsPageListWrapper({
     [groupDraft, updateGroupNameParam]
   );
 
-  const setGroupName = (value: string | null) => {
-    setGroupDraft(value);
-    if (lastSyncedGroupRef.current === value) {
-      return;
-    }
-    lastSyncedGroupRef.current = value;
-    updateGroupNameParam(value);
-  };
+  const setGroupName = useCallback(
+    (value: string | null) => {
+      setGroupDraft(value);
+      if (lastSyncedGroupRef.current === value) {
+        return;
+      }
+      lastSyncedGroupRef.current = value;
+      updateGroupNameParam(value);
+    },
+    [updateGroupNameParam]
+  );
 
-  const setAuthorIdentity = (value: string | null) => {
-    const query = createQueryString([
-      {
-        name: IDENTITY_SEARCH_PARAM,
-        value,
-      },
-    ]);
-    router.replace(query ? `${pathname}?${query}` : pathname);
-  };
+  const setAuthorIdentity = useCallback(
+    (value: string | null) => {
+      const query = createQueryString([
+        {
+          name: IDENTITY_SEARCH_PARAM,
+          value,
+        },
+        {
+          name: CREATED_AT_LESS_THAN_SEARCH_PARAM,
+          value: null,
+        },
+      ]);
+      startTransition(() => {
+        router.replace(query ? `${pathname}?${query}` : pathname);
+      });
+    },
+    [createQueryString, pathname, router]
+  );
 
-  const onMyGroups = () => {
+  const onMyGroups = useCallback(() => {
     if (!connectedProfile?.handle) {
       return;
     }
-    if (activeProfileProxy?.created_by.handle) {
+    if (activeProfileProxy?.created_by?.handle) {
       setAuthorIdentity(activeProfileProxy.created_by.handle);
       return;
     }
     setAuthorIdentity(connectedProfile.handle);
-  };
+  }, [
+    activeProfileProxy?.created_by?.handle,
+    connectedProfile?.handle,
+    setAuthorIdentity,
+  ]);
 
   return (
     <GroupsList

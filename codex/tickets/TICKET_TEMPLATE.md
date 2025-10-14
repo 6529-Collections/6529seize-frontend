@@ -7,6 +7,8 @@ status: Backlog
 title: Concise, action-oriented title
 ---
 
+Always replace `owner` with the ticket's GitHub handle. If the handle is not yet confirmed, set `owner: unknown` and update it before recording any progress.
+
 ## Context
 
 > Summarise the problem space, business justification, and any relevant background links.
