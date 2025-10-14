@@ -349,6 +349,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                             path="/the-memes"
                             startIndex={1}
                             endIndex={nftMeta.collection_size}
+                            params={searchParams}
                           />
                         </Col>
                       </Row>

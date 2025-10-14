@@ -1188,6 +1188,7 @@ export default function MemeLabPageComponent({
                       path="/meme-lab"
                       startIndex={1}
                       endIndex={nftMeta.collection_size}
+                      params={searchParams}
                     />
                   </Col>
                 </Row>

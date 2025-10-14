@@ -165,7 +165,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
           if (!hasPreviousToken) {
             return;
           }
-          const url = new URL(window.location.href);
+          const url = new URL(globalThis.location.href);
           url.pathname = url.pathname.replace(
             /\/(\d+)(\/?)$/,
             `/${props.token.id - 1}$2`
@@ -209,7 +209,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
           if (!hasNextToken) {
             return;
           }
-          const url = new URL(window.location.href);
+          const url = new URL(globalThis.location.href);
           url.pathname = url.pathname.replace(
             /\/(\d+)(\/?)$/,
             `/${props.token.id + 1}$2`

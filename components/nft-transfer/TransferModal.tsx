@@ -17,16 +17,13 @@ import TransferModalPfp from "./TransferModalPfp";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import { publicEnv } from "@/config/env";
 import { ContractType } from "@/enums";
+import { getUserProfile } from "@/helpers/server.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import Link from "next/link";
-import { Address, isAddress } from "viem";
+import { Address, isAddress, PublicClient } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
-// DEMO: set to true to simulate transfers locally without opening wallet or sending txs
-const MOCK_TRANSFERS = false;
-const MOCK_TRANSFER_END_FLOW: "success" | "error" = "success";
 const MIN_SEARCH_LENGTH = 3;
 
 const ERC721_ABI = [
@@ -46,6 +43,19 @@ const ERC721_ABI = [
 const ERC1155_ABI = [
   {
     type: "function",
+    name: "safeTransferFrom",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "from", type: "address" },
+      { name: "to", type: "address" },
+      { name: "id", type: "uint256" },
+      { name: "amount", type: "uint256" },
+      { name: "data", type: "bytes" },
+    ],
+    outputs: [],
+  },
+  {
+    type: "function",
     name: "safeBatchTransferFrom",
     stateMutability: "nonpayable",
     inputs: [
@@ -59,83 +69,68 @@ const ERC1155_ABI = [
   },
 ] as const;
 
-type FlowState = "review" | "wallet" | "submitted" | "success" | "error";
+const MANIFOLD_CORE_ABI = [
+  {
+    type: "function",
+    name: "tokenExtension",
+    stateMutability: "view",
+    inputs: [{ name: "tokenId", type: "uint256" }],
+    outputs: [{ type: "address" }],
+  },
+] as const;
 
-function FlowTitle({ flow }: { flow: FlowState }) {
+type FlowState = "review" | "submission";
+type TxState =
+  | "pending"
+  | "awaiting_approval"
+  | "submitted"
+  | "success"
+  | "error";
+
+type TxEntry = {
+  id: string; // stable per action, e.g. `${key}-batch` or `${contract}-${tokenId}`
+  originKey: string;
+  label: string; // e.g. "MEMES #145, #146" or single token label
+  state: TxState;
+  hash?: `0x${string}`;
+  error?: string;
+};
+
+function FlowTitle({
+  flow,
+  txs,
+}: {
+  readonly flow: FlowState;
+  readonly txs: TxEntry[];
+}) {
   if (flow === "review")
     return <span>Review transfer and select recipient</span>;
-  if (flow === "success")
+
+  const anyPending = anyTxsPending(txs);
+  if (anyPending) {
     return (
       <span className="tw-flex tw-items-center tw-gap-1.5">
-        <span className="tw-text-green">Transfer Successful!</span>
-        <img
-          src="/emojis/sgt_saluting_face.webp"
-          alt="sgt_saluting_face"
-          className="tw-w-6 tw-h-6"
-        />
-      </span>
-    );
-  if (flow === "error")
-    return (
-      <span className="tw-flex tw-items-center tw-gap-1.5">
-        <span className="tw-text-red">Transfer Failed</span>
-        <img
-          src="/emojis/sgt_sob.webp"
-          alt="sgt_sob"
-          className="tw-w-6 tw-h-6"
-        />
-      </span>
-    );
-  if (flow === "wallet")
-    return (
-      <span className="tw-flex tw-items-center tw-gap-1.5">
-        <span>Confirm in your wallet</span>
+        <span>Executing Transactions</span>
         <CircleLoader size={CircleLoaderSize.MEDIUM} />
       </span>
     );
+  }
+
+  const total = txs.length;
+  const successCount = txs.filter((t) => t.state === "success").length;
+  const errorCount = txs.filter((t) => t.state === "error").length;
+
+  let icon = "/emojis/sgt_saluting_face.webp"; // all success
+  if (successCount === 0 && errorCount === total)
+    icon = "/emojis/sgt_sob.webp"; // all error
+  else if (errorCount > 0 && successCount > 0)
+    icon = "/emojis/sgt_grimacing.webp"; // partial
+
   return (
     <span className="tw-flex tw-items-center tw-gap-1.5">
-      <span>Transfer submitted</span>
-      <CircleLoader size={CircleLoaderSize.MEDIUM} />
+      <span>Transfer Complete</span>
+      <img src={icon} alt="status" className="tw-w-6 tw-h-6" />
     </span>
-  );
-}
-
-function MockControls({
-  enabled,
-  flow,
-  mockTransfers,
-  setMockTransfers,
-  mockEndFlow,
-  setMockEndFlow,
-}: {
-  enabled: boolean;
-  flow: FlowState;
-  mockTransfers: boolean;
-  setMockTransfers: (b: boolean) => void;
-  mockEndFlow: "success" | "error";
-  setMockEndFlow: (v: "success" | "error") => void;
-}) {
-  if (!enabled || flow !== "review") return null;
-  return (
-    <div className="tw-flex tw-items-center tw-gap-2 tw-text-[12px] tw-opacity-80">
-      <label className="tw-flex tw-items-center tw-gap-1">
-        <input
-          type="checkbox"
-          checked={mockTransfers}
-          onChange={(e) => setMockTransfers(e.target.checked)}
-        />
-        <span>Mock</span>
-      </label>
-      <select
-        value={mockEndFlow}
-        onChange={(e) => setMockEndFlow(e.target.value as "success" | "error")}
-        disabled={!mockTransfers}
-        className="tw-bg-white/10 tw-rounded tw-border tw-border-white/20 tw-px-2 tw-py-1 tw-text-[12px] focus:tw-outline-none">
-        <option value="success">success</option>
-        <option value="error">error</option>
-      </select>
-    </div>
   );
 }
 
@@ -145,10 +140,15 @@ function SelectedSummaryList({
   leftHasOverflow,
   leftAtEnd,
 }: {
-  items: { key: string; qty: number; title?: string; thumbUrl?: string }[];
-  leftListRef: React.RefObject<HTMLUListElement | null>;
-  leftHasOverflow: boolean;
-  leftAtEnd: boolean;
+  readonly items: {
+    key: string;
+    qty: number;
+    title?: string;
+    thumbUrl?: string;
+  }[];
+  readonly leftListRef: React.RefObject<HTMLUListElement | null>;
+  readonly leftHasOverflow: boolean;
+  readonly leftAtEnd: boolean;
 }) {
   return (
     <div className="tw-flex tw-flex-col tw-space-y-2 tw-min-h-0">
@@ -222,18 +222,18 @@ function RecipientSelected({
   walletsAtEnd,
   selectedWallet,
 }: {
-  selectedProfile: CommunityMemberMinimal;
-  profile: any;
-  isIdentityLoading: boolean;
-  setSelectedProfile: (v: CommunityMemberMinimal | null) => void;
-  setSelectedWallet: (v: string | null) => void;
-  setResults: (v: CommunityMemberMinimal[]) => void;
-  setQuery: (v: string) => void;
-  searchInputRef: React.RefObject<HTMLInputElement | null>;
-  walletsListRef: React.RefObject<HTMLDivElement | null>;
-  walletsHasOverflow: boolean;
-  walletsAtEnd: boolean;
-  selectedWallet: string | null;
+  readonly selectedProfile: CommunityMemberMinimal;
+  readonly profile: any;
+  readonly isIdentityLoading: boolean;
+  readonly setSelectedProfile: (v: CommunityMemberMinimal | null) => void;
+  readonly setSelectedWallet: (v: string | null) => void;
+  readonly setResults: (v: CommunityMemberMinimal[]) => void;
+  readonly setQuery: (v: string) => void;
+  readonly searchInputRef: React.RefObject<HTMLInputElement | null>;
+  readonly walletsListRef: React.RefObject<HTMLDivElement | null>;
+  readonly walletsHasOverflow: boolean;
+  readonly walletsAtEnd: boolean;
+  readonly selectedWallet: string | null;
 }) {
   const wallets = profile?.wallets ?? [];
   return (
@@ -296,7 +296,7 @@ function RecipientSelected({
                     type="button"
                     onClick={() => setSelectedWallet(w.wallet)}
                     className={[
-                      "tw-w-full tw-text-left tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/10 hover:tw-bg-white/15 tw-p-2",
+                      "tw-w-full tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/10 hover:tw-bg-white/15 tw-p-2 tw-flex tw-flex-col tw-items-start tw-justify-between",
                       isSel
                         ? "tw-border-2 tw-border-solid !tw-border-emerald-400"
                         : "",
@@ -335,14 +335,14 @@ function RecipientSearch({
   resultsAtEnd,
   searchInputRef,
 }: {
-  query: string;
-  setQuery: (v: string) => void;
-  searchStatusText: string;
-  results: CommunityMemberMinimal[];
-  onPick: (r: CommunityMemberMinimal) => void;
-  resultsListRef: React.RefObject<HTMLDivElement | null>;
-  resultsHasOverflow: boolean;
-  resultsAtEnd: boolean;
+  readonly query: string;
+  readonly setQuery: (v: string) => void;
+  readonly searchStatusText: string;
+  readonly results: CommunityMemberMinimal[];
+  readonly onPick: (r: CommunityMemberMinimal) => void;
+  readonly resultsListRef: React.RefObject<HTMLDivElement | null>;
+  readonly resultsHasOverflow: boolean;
+  readonly resultsAtEnd: boolean;
   searchInputRef: React.RefObject<HTMLInputElement | null>;
 }) {
   return (
@@ -392,28 +392,331 @@ function RecipientSearch({
   );
 }
 
-function TxList({
-  txHashes,
+function TxStatusList({
+  txs,
   publicClient,
 }: {
-  txHashes: { hash: string; label: string }[];
-  publicClient: any;
+  readonly txs: TxEntry[];
+  readonly publicClient: any;
+}) {
+  const explorer = publicClient?.chain?.blockExplorers?.default.url;
+
+  const getBgColor = (state: TxState) => {
+    switch (state) {
+      case "awaiting_approval":
+        return "#406AFE";
+      case "error":
+        return "#ffcccc";
+      case "success":
+        return "#ccffcc";
+      default:
+        return "rgba(255, 255, 255, 0.1)";
+    }
+  };
+  const getTextColor = (state: TxState) => {
+    switch (state) {
+      case "pending":
+      case "awaiting_approval":
+        return "#fff";
+      default:
+        return "#000";
+    }
+  };
+
+  return (
+    <>
+      {txs.map((t, index) => (
+        <div
+          key={t.id}
+          className="tw-rounded-lg tw-p-4"
+          style={{
+            backgroundColor: getBgColor(t.state),
+            color: getTextColor(t.state),
+          }}>
+          <div className="tw-font-medium">
+            {index + 1}/ {t.label}
+          </div>
+          <div className="tw-text-xs tw-opacity-60">
+            Originator: {t.originKey}
+          </div>
+          <div className="tw-text-sm tw-mt-2">
+            {t.state === "pending" && <span>Pending</span>}
+            {t.state === "awaiting_approval" && (
+              <span>Approve in your wallet</span>
+            )}
+            {t.state === "error" && (
+              <span>Error: {t.error || "Transaction failed"}</span>
+            )}
+            {t.state === "submitted" && (
+              <span>
+                Submitted — waiting for confirmation
+                {t.hash && explorer && (
+                  <Link
+                    href={`${explorer}/tx/${t.hash}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="tw-no-underline tw-ml-2 tw-text-md tw-rounded-md tw-bg-white hover:tw-bg-white/80 tw-text-black hover:tw-text-black tw-font-medium tw-text-sm tw-px-2 tw-py-1">
+                    View Tx
+                  </Link>
+                )}
+              </span>
+            )}
+            {t.state === "success" && (
+              <span>
+                Successful
+                {t.hash && explorer && (
+                  <Link
+                    href={`${explorer}/tx/${t.hash}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="tw-no-underline tw-ml-2 tw-text-md tw-rounded-md tw-bg-white hover:tw-bg-white/80 tw-text-black hover:tw-text-black tw-font-medium tw-text-sm tw-px-2 tw-py-1">
+                    View Tx
+                  </Link>
+                )}
+              </span>
+            )}
+          </div>
+        </div>
+      ))}
+    </>
+  );
+}
+
+// --- Helper functions/components to offload branching logic ---
+function getSearchStatusText(
+  isSearching: boolean,
+  needsMoreSearchCharacters: boolean,
+  remainingSearchCharacters: number,
+  resultsLen: number,
+  trimmedQuery: string
+): string {
+  if (isSearching) return "Searching…";
+  if (needsMoreSearchCharacters) {
+    const plural = remainingSearchCharacters === 1 ? "" : "s";
+    return `Keep typing ${remainingSearchCharacters} more character${plural}`;
+  }
+  if (resultsLen > 0) {
+    const plural = resultsLen === 1 ? "" : "s";
+    return `Found ${resultsLen} result${plural}`;
+  }
+  if (trimmedQuery) return "No results.";
+  return "Type to search.";
+}
+
+function HeaderRight({
+  flow,
+  trxPending,
+  onClose,
+}: {
+  readonly flow: FlowState;
+  readonly trxPending: boolean;
+  readonly onClose: () => void;
 }) {
   return (
-    <ul className="tw-space-y-1">
-      {txHashes.map((h) => (
-        <li key={h.hash}>
-          {h.label}
-          <Link
-            href={`${publicClient?.chain?.blockExplorers?.default.url}/tx/${h.hash}`}
-            target="_blank"
-            rel="noreferrer"
-            className="tw-ml-2 tw-text-md tw-rounded-lg tw-bg-white hover:tw-bg-white/95 tw-text-black tw-font-medium tw-text-sm tw-px-2 tw-py-1">
-            View Tx
-          </Link>
-        </li>
-      ))}
-    </ul>
+    <div className="tw-flex tw-items-center tw-gap-3">
+      {(flow === "review" || !trxPending) && (
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          className="tw-bg-transparent tw-border-none tw-p-0 tw-flex tw-items-center tw-justify-center">
+          <FontAwesomeIcon icon={faXmarkCircle} className="tw-size-6" />
+        </button>
+      )}
+    </div>
+  );
+}
+
+function FooterActions({
+  flow,
+  canConfirm,
+  onCancel,
+  onConfirm,
+  onClose,
+  txs,
+}: {
+  readonly flow: FlowState;
+  readonly canConfirm: boolean;
+  readonly onCancel: () => void;
+  readonly onConfirm: () => void;
+  readonly onClose: () => void;
+  readonly txs: TxEntry[];
+}) {
+  if (flow === "review") {
+    return (
+      <>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="tw-rounded-lg tw-bg-white/10 hover:tw-bg-white/15 tw-px-4 tw-py-2 tw-border-2 tw-border-solid tw-border-[#444] tw-font-medium">
+          Cancel
+        </button>
+        <button
+          type="button"
+          disabled={!canConfirm}
+          onClick={onConfirm}
+          className="tw-rounded-lg tw-bg-white tw-text-black tw-px-4 tw-py-2 tw-border-2 tw-border-solid tw-border-[#444] disabled:tw-opacity-60 disabled:tw-cursor-not-allowed tw-font-medium">
+          Transfer
+        </button>
+      </>
+    );
+  }
+
+  const anyPending = anyTxsPending(txs);
+  if (anyPending) {
+    return (
+      <button
+        type="button"
+        disabled
+        className="tw-rounded-lg tw-bg-white/10 tw-px-4 tw-py-2 tw-opacity-60 tw-font-medium">
+        Processing…
+      </button>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onClose}
+      className="tw-rounded-lg tw-bg-white hover:tw-bg-white/80 tw-text-black hover:tw-text-black tw-px-4 tw-py-2">
+      Close
+    </button>
+  );
+}
+
+function BodyByFlow({
+  flow,
+  items,
+  leftListRef,
+  leftHasOverflow,
+  leftAtEnd,
+  selectedProfile,
+  profile,
+  isIdentityLoading,
+  setSelectedProfile,
+  setSelectedWallet,
+  setResults,
+  setQuery,
+  searchInputRef,
+  walletsListRef,
+  walletsHasOverflow,
+  walletsAtEnd,
+  selectedWallet,
+  query,
+  setQueryExternal,
+  searchStatusText,
+  results,
+  onPick,
+  resultsListRef,
+  resultsHasOverflow,
+  resultsAtEnd,
+  publicClient,
+  txs,
+}: {
+  readonly flow: FlowState;
+  readonly items: {
+    key: string;
+    qty: number;
+    title?: string;
+    thumbUrl?: string;
+  }[];
+  readonly leftListRef: React.RefObject<HTMLUListElement | null>;
+  readonly leftHasOverflow: boolean;
+  readonly leftAtEnd: boolean;
+  readonly selectedProfile: CommunityMemberMinimal | null;
+  readonly profile: any;
+  readonly isIdentityLoading: boolean;
+  readonly setSelectedProfile: (v: CommunityMemberMinimal | null) => void;
+  readonly setSelectedWallet: (v: string | null) => void;
+  readonly setResults: (v: CommunityMemberMinimal[]) => void;
+  readonly setQuery: (v: string) => void;
+  readonly searchInputRef: React.RefObject<HTMLInputElement | null>;
+  readonly walletsListRef: React.RefObject<HTMLDivElement | null>;
+  readonly walletsHasOverflow: boolean;
+  readonly walletsAtEnd: boolean;
+  readonly selectedWallet: string | null;
+  readonly query: string;
+  readonly setQueryExternal: (v: string) => void;
+  readonly searchStatusText: string;
+  readonly results: CommunityMemberMinimal[];
+  readonly onPick: (r: CommunityMemberMinimal) => void;
+  readonly resultsListRef: React.RefObject<HTMLDivElement | null>;
+  readonly resultsHasOverflow: boolean;
+  readonly resultsAtEnd: boolean;
+  readonly publicClient: any;
+  readonly txs: TxEntry[];
+}) {
+  if (flow === "submission") {
+    const anyPending = anyTxsPending(txs);
+
+    return (
+      <div className="tw-flex-1 tw-overflow-auto tw-p-6 tw-space-y-4">
+        {anyPending && (
+          <div className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-opacity-80">
+            <span>
+              Follow the prompts in your wallet and keep this tab open.
+            </span>
+          </div>
+        )}
+        <TxStatusList txs={txs} publicClient={publicClient} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="tw-flex-1 tw-overflow-hidden tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-6 tw-px-4 tw-py-2">
+      <SelectedSummaryList
+        items={items}
+        leftListRef={leftListRef}
+        leftHasOverflow={leftHasOverflow}
+        leftAtEnd={leftAtEnd}
+      />
+      <div className="tw-flex tw-flex-col tw-space-y-2 tw-min-h-0">
+        <div
+          className={`tw-font-semibold ${
+            selectedProfile ? "tw-mb-2" : "tw-mb-0"
+          }`}>
+          Recipient
+        </div>
+        {selectedProfile ? (
+          <RecipientSelected
+            selectedProfile={selectedProfile}
+            profile={profile}
+            isIdentityLoading={isIdentityLoading}
+            setSelectedProfile={setSelectedProfile}
+            setSelectedWallet={setSelectedWallet}
+            setResults={setResults}
+            setQuery={setQuery}
+            searchInputRef={searchInputRef}
+            walletsListRef={walletsListRef}
+            walletsHasOverflow={walletsHasOverflow}
+            walletsAtEnd={walletsAtEnd}
+            selectedWallet={selectedWallet}
+          />
+        ) : (
+          <RecipientSearch
+            query={query}
+            setQuery={setQueryExternal}
+            searchStatusText={searchStatusText}
+            results={results}
+            onPick={onPick}
+            resultsListRef={resultsListRef}
+            resultsHasOverflow={resultsHasOverflow}
+            resultsAtEnd={resultsAtEnd}
+            searchInputRef={searchInputRef}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function anyTxsPending(txs: TxEntry[]) {
+  return txs.some(
+    (t) =>
+      t.state === "pending" ||
+      t.state === "awaiting_approval" ||
+      t.state === "submitted"
   );
 }
 
@@ -424,7 +727,6 @@ export default function TransferModal({
   readonly open: boolean;
   readonly onClose: (opts?: { completed?: boolean }) => void;
 }) {
-  const enableMockTransfers = publicEnv.NODE_ENV !== "production";
   const t = useTransfer();
   const [query, setQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
@@ -456,20 +758,10 @@ export default function TransferModal({
 
   const [isClosing, setIsClosing] = useState(false);
 
-  // UI-driven mock controls (default to constants above)
-  const [mockTransfers, setMockTransfers] = useState<boolean>(MOCK_TRANSFERS);
-  const [mockEndFlow, setMockEndFlow] = useState<"success" | "error">(
-    MOCK_TRANSFER_END_FLOW
-  );
-
   const [flow, setFlow] = useState<FlowState>("review");
-  const [txHashes, setTxHashes] = useState<
-    {
-      hash: string;
-      label: string;
-    }[]
-  >([]);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [txs, setTxs] = useState<TxEntry[]>([]);
+
+  const trxPending = useMemo(() => anyTxsPending(txs), [txs]);
 
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
@@ -482,55 +774,71 @@ export default function TransferModal({
     0
   );
 
-  // --- helpers to reduce complexity (kept types light on purpose) ---
-  const groupByContract = useCallback((items: any[]) => {
-    const by = new Map<
-      string,
-      { is1155: boolean; items: any[]; label: string }
-    >();
-    for (const it of items) {
-      const existing = by.get(it.contract);
-      if (existing) {
-        existing.items.push(it);
-      } else {
-        by.set(it.contract, {
-          is1155: it.contractType === ContractType.ERC1155,
-          items: [it],
-          label: it.label,
-        });
-      }
-    }
-    return by;
-  }, []);
+  const groupByContractAndOriginator = useCallback(
+    async (publicClient: PublicClient, items: any[]) => {
+      const by = new Map<
+        string,
+        {
+          contract: string;
+          originKey: string;
+          is1155: boolean;
+          items: any[];
+          label: string;
+        }
+      >();
 
-  const makeMockHashes = useCallback(
-    (
-      byContract: Map<string, { is1155: boolean; items: any[]; label: string }>
-    ) => {
-      const hashes: { hash: string; label: string }[] = [];
-      for (const [, { is1155, items: citems }] of Array.from(
-        byContract.entries()
-      )) {
+      // minimal Manifold reads
+      const MANIFOLD_CORE_ABI = [
+        {
+          type: "function",
+          name: "tokenExtension",
+          stateMutability: "view",
+          inputs: [{ name: "tokenId", type: "uint256" }],
+          outputs: [{ type: "address" }],
+        },
+      ] as const;
+
+      const getOriginKey = async (contract: Address, tokenId: bigint) => {
+        try {
+          const ext = (await publicClient.readContract({
+            address: contract,
+            abi: MANIFOLD_CORE_ABI,
+            functionName: "tokenExtension",
+            args: [tokenId],
+          })) as Address;
+          return `ext:${ext.toLowerCase()}`;
+        } catch {
+          // core-minted (no extension for token)
+          return `core:${contract.toLowerCase()}`;
+        }
+      };
+
+      for (const it of items) {
+        const contract = (it.contract as string).toLowerCase();
+        const is1155 = it.contractType === ContractType.ERC1155;
+
+        let originKey = "erc721";
         if (is1155) {
-          const rand = Array.from(
-            { length: 64 },
-            () => "0123456789abcdef"[Math.floor(Math.random() * 16)]
-          ).join("");
-          hashes.push({
-            hash: `0x${rand}`,
-            label: citems.map((x) => x.label).join(", "),
-          });
+          const id = BigInt(it.tokenId);
+          originKey = await getOriginKey(contract as Address, id);
+        }
+
+        const key = `${contract}::${originKey}`;
+        const existing = by.get(key);
+        if (existing) {
+          existing.items.push(it);
         } else {
-          for (const x of citems) {
-            const rand = Array.from(
-              { length: 64 },
-              () => "0123456789abcdef"[Math.floor(Math.random() * 16)]
-            ).join("");
-            hashes.push({ hash: `0x${rand}`, label: x.label });
-          }
+          by.set(key, {
+            contract,
+            originKey,
+            is1155,
+            items: [it],
+            label: it.label,
+          });
         }
       }
-      return hashes;
+
+      return by;
     },
     []
   );
@@ -544,10 +852,6 @@ export default function TransferModal({
       setSelectedProfile(null);
       setSelectedWallet(null);
       setFlow("review");
-      setTxHashes([]);
-      setErrorMsg(null);
-      setMockTransfers(MOCK_TRANSFERS);
-      setMockEndFlow(MOCK_TRANSFER_END_FLOW);
       setLeftHasOverflow(false);
       setResultsHasOverflow(false);
       setWalletsHasOverflow(false);
@@ -571,21 +875,6 @@ export default function TransferModal({
       document.body.style.overflow = prev;
     };
   }, [open]);
-
-  // ESC to close (no keyboard listener on <dialog>/<div>)
-  useEffect(() => {
-    if (!open) return;
-    if (flow === "wallet" || flow === "submitted") return;
-    const onKey = (ev: KeyboardEvent) => {
-      if (ev.key === "Escape" || ev.key === "Esc") {
-        ev.preventDefault();
-        handleClose();
-      }
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, flow, isClosing]);
 
   useEffect(() => {
     if (!open) return;
@@ -611,10 +900,45 @@ export default function TransferModal({
           },
           signal: abortController.signal,
         });
+        if (arr.length === 0) {
+          throw new Error("No results for Community Member found");
+        }
         if (!cancelled) setResults(arr || []);
       } catch (err) {
         console.warn("Search failed", err);
-        if (!cancelled) setResults([]);
+        if (cancelled) return;
+
+        const isErrorNotFound =
+          err instanceof Error &&
+          err.message === "No results for Community Member found";
+        if (!isErrorNotFound) {
+          setResults([]);
+          return;
+        }
+
+        try {
+          const identity = await getUserProfile({
+            user: trimmedQuery,
+            headers: {},
+          });
+          const communityMember: CommunityMemberMinimal = {
+            profile_id: identity.id,
+            handle: identity.handle,
+            wallet: identity.primary_wallet,
+            pfp: identity.pfp,
+            display: identity.handle ?? null,
+            normalised_handle: identity.normalised_handle,
+            primary_wallet: identity.primary_wallet,
+            tdh: identity.tdh,
+            level: identity.level,
+            cic_rating: identity.cic,
+          };
+          setResults([communityMember]);
+        } catch (err) {
+          console.warn("Search failed", err);
+          if (cancelled) return;
+          setResults([]);
+        }
       } finally {
         if (!cancelled) setIsSearching(false);
       }
@@ -706,84 +1030,117 @@ export default function TransferModal({
   const canConfirm = open && selectedWallet && totalUnits > 0;
 
   const handleClose = useCallback(() => {
-    if (flow === "wallet" || flow === "submitted") return;
+    if (trxPending) return;
     if (isClosing) return;
     setIsClosing(true);
     setTimeout(() => {
-      onClose(
-        flow === "success" || flow === "error" ? { completed: true } : undefined
-      );
+      onClose({ completed: txs.every((t) => t.state === "success") });
     }, 150);
-  }, [flow, isClosing, onClose]);
+  }, [isClosing, onClose, txs, trxPending]);
 
   const handleConfirm = useCallback(async () => {
     if (!publicClient || !address) {
-      setErrorMsg("Client not ready. Please reconnect.");
-      setFlow("error");
+      setTxs([
+        {
+          id: "init",
+          originKey: "init",
+          label: "Client not ready",
+          state: "error",
+          error: "Client not ready. Please reconnect.",
+        },
+      ]);
+      setFlow("submission");
       return;
     }
 
-    try {
-      setErrorMsg(null);
-      setTxHashes([]);
-      setFlow("wallet");
+    const selItems = Array.from(t.selected.values()).map((it) => ({
+      contract: it.contract as Address,
+      tokenId: BigInt(it.tokenId),
+      label: (it.key as string).replace(":", " #"),
+      qty: BigInt(Math.min(Math.max(1, it.qty ?? 1), Math.max(1, it.max ?? 1))),
+      key: it.key,
+      contractType: it.contractType,
+    }));
 
-      const selItems = Array.from(t.selected.values()).map((it) => ({
-        contract: it.contract as Address,
-        tokenId: BigInt(it.tokenId),
-        label: (it.key as string).replace(":", " #"),
-        qty: BigInt(
-          Math.min(Math.max(1, it.qty ?? 1), Math.max(1, it.max ?? 1))
-        ),
-        key: it.key,
-        contractType: it.contractType,
-      }));
+    const byContract = await groupByContractAndOriginator(
+      publicClient,
+      selItems
+    );
+    byContract.forEach((value) => {
+      value.items.sort((a, b) =>
+        a.tokenId.toString().localeCompare(b.tokenId.toString())
+      );
+    });
+    console.log("byContractAndOriginator", byContract);
 
-      const byContract = groupByContract(selItems);
-
-      if (mockTransfers) {
-        const hashes = makeMockHashes(byContract);
-        await new Promise((r) => setTimeout(r, 2000));
-        setTxHashes(hashes);
-        setFlow("submitted");
-        for (const _ of hashes) {
-          await new Promise((r) => setTimeout(r, 3000));
+    // Seed entries: 1 per 1155 batch (contract) or 1 per 721 token
+    const initial: TxEntry[] = [];
+    for (const [
+      key,
+      { originKey, contract, is1155, items: citems },
+    ] of Array.from(byContract.entries())) {
+      if (is1155) {
+        initial.push({
+          id: `${key}-batch`,
+          originKey,
+          label: citems.map((x: any) => x.label).join(", "),
+          state: "pending",
+        });
+      } else {
+        for (const x of citems) {
+          initial.push({
+            id: `${contract}-${x.tokenId.toString()}`,
+            originKey,
+            label: x.label,
+            state: "pending",
+          });
         }
-        setFlow(mockEndFlow as FlowState);
-        return;
       }
+    }
+    setTxs(initial);
+    setFlow("submission");
 
-      if (!walletClient) {
-        setErrorMsg("Wallet not ready. Please reconnect.");
-        setFlow("error");
-        return;
+    if (!walletClient) {
+      setTxs([
+        {
+          id: "init",
+          originKey: "init",
+          label: "Wallet not ready",
+          state: "error",
+          error: "Wallet not ready. Please reconnect.",
+        },
+      ]);
+      return;
+    }
+
+    if (!selectedWallet || !isAddress(selectedWallet)) {
+      setTxs([
+        {
+          id: "init",
+          originKey: "init",
+          label: "Invalid destination wallet",
+          state: "error",
+          error: "Invalid destination wallet. Please choose another wallet.",
+        },
+      ]);
+      return;
+    }
+
+    const destinationWallet = selectedWallet as Address;
+    const write = (
+      walletClient as unknown as {
+        writeContract: (req: any) => Promise<`0x${string}`>;
       }
+    ).writeContract;
 
-      if (!selectedWallet || !isAddress(selectedWallet)) {
-        setErrorMsg(
-          "Invalid destination wallet. Please choose another wallet."
-        );
-        setFlow("error");
-        return;
-      }
-
-      const destinationWallet = selectedWallet as Address;
-
-      // avoid TS complaining about writeContract on {}
-      const write = (
-        walletClient as unknown as {
-          writeContract: (req: any) => Promise<`0x${string}`>;
-        }
-      ).writeContract;
-
-      const hashes: { hash: string; label: string }[] = [];
-
-      for (const [contract, { is1155, items: citems }] of Array.from(
-        byContract.entries()
-      )) {
-        if (is1155) {
-          const ids = citems.map((x) => x.tokenId);
-          const amts = citems.map((x) => x.qty);
+    for (const [key, { contract, is1155, items: citems }] of Array.from(
+      byContract.entries()
+    )) {
+      if (is1155) {
+        // Try batch
+        try {
+          const ids = citems.map((x: any) => x.tokenId);
+          const amts = citems.map((x: any) => x.qty);
           const { request } = await publicClient.simulateContract({
             account: address,
             address: contract as Address,
@@ -791,11 +1148,51 @@ export default function TransferModal({
             functionName: "safeBatchTransferFrom",
             args: [address as Address, destinationWallet, ids, amts, "0x"],
           });
-          const label = citems.map((x) => x.label).join(", ");
+
+          setTxs((prev) =>
+            prev.map((e) =>
+              e.id === `${key}-batch` ? { ...e, state: "awaiting_approval" } : e
+            )
+          );
+
           const hash = await write(request);
-          hashes.push({ hash, label });
-        } else {
-          for (const x of citems) {
+          setTxs((prev) =>
+            prev.map((e) =>
+              e.id === `${key}-batch` ? { ...e, state: "submitted", hash } : e
+            )
+          );
+          const receipt = await publicClient.waitForTransactionReceipt({
+            hash,
+          });
+          setTxs((prev) =>
+            prev.map((e) =>
+              e.id === `${key}-batch`
+                ? {
+                    ...e,
+                    state: receipt.status === "success" ? "success" : "error",
+                  }
+                : e
+            )
+          );
+        } catch (e: any) {
+          console.error("Error in batch 1155 transfer", e);
+          setTxs((prev) =>
+            prev.map((te) =>
+              te.id === `${key}-batch`
+                ? {
+                    ...te,
+                    state: "error",
+                    error: String(e?.shortMessage || e?.message || e),
+                  }
+                : te
+            )
+          );
+        }
+      } else {
+        // ERC721 one by one
+        for (const x of citems) {
+          const tid = `${contract}-${x.tokenId.toString()}`;
+          try {
             const { request } = await publicClient.simulateContract({
               account: address,
               address: contract as Address,
@@ -803,26 +1200,57 @@ export default function TransferModal({
               functionName: "safeTransferFrom",
               args: [address as Address, destinationWallet, x.tokenId],
             });
-            const hash = await write(request);
-            hashes.push({ hash, label: x.label });
+            try {
+              const hash = await write(request);
+              setTxs((prev) =>
+                prev.map((te) =>
+                  te.id === tid ? { ...te, state: "submitted", hash } : te
+                )
+              );
+              const receipt = await publicClient.waitForTransactionReceipt({
+                hash,
+              });
+              setTxs((prev) =>
+                prev.map((te) =>
+                  te.id === tid
+                    ? {
+                        ...te,
+                        state:
+                          receipt.status === "success" ? "success" : "error",
+                      }
+                    : te
+                )
+              );
+            } catch (e: any) {
+              setTxs((prev) =>
+                prev.map((te) =>
+                  te.id === tid
+                    ? {
+                        ...te,
+                        state: "error",
+                        error: String(e?.shortMessage || e?.message || e),
+                      }
+                    : te
+                )
+              );
+            }
+          } catch (simErr: any) {
+            setTxs((prev) =>
+              prev.map((te) =>
+                te.id === tid
+                  ? {
+                      ...te,
+                      state: "error",
+                      error: String(
+                        simErr?.shortMessage || simErr?.message || simErr
+                      ),
+                    }
+                  : te
+              )
+            );
           }
         }
       }
-
-      setTxHashes(hashes);
-      setFlow("submitted");
-
-      for (const h of hashes) {
-        await publicClient.waitForTransactionReceipt({
-          hash: h.hash as `0x${string}`,
-        });
-      }
-
-      setFlow("success");
-    } catch (err: any) {
-      const msg = err?.shortMessage || err?.message || "Transaction failed";
-      setErrorMsg(msg);
-      setFlow("error");
     }
   }, [
     publicClient,
@@ -830,43 +1258,42 @@ export default function TransferModal({
     t.selected,
     selectedWallet,
     walletClient,
-    mockTransfers,
-    mockEndFlow,
-    groupByContract,
-    makeMockHashes,
+    groupByContractAndOriginator,
   ]);
 
   if (!open) return null;
 
-  // Derive search helper text without nested ternaries (Sonar fix)
-  let searchStatusText = "Type to search.";
-  if (isSearching) {
-    searchStatusText = "Searching…";
-  } else if (needsMoreSearchCharacters) {
-    const plural = remainingSearchCharacters === 1 ? "" : "s";
-    searchStatusText = `Keep typing ${remainingSearchCharacters} more character${plural}`;
-  } else if (results.length > 0) {
-    const plural = results.length === 1 ? "" : "s";
-    searchStatusText = `Found ${results.length} result${plural}`;
-  } else if (trimmedQuery) {
-    searchStatusText = "No results.";
-  }
+  // Derive search helper text using helper
+  const searchStatusText = getSearchStatusText(
+    isSearching,
+    needsMoreSearchCharacters,
+    remainingSearchCharacters,
+    results.length,
+    trimmedQuery
+  );
 
   // Backdrop + modal content; no role on non-interactive with key/mouse listeners on it
   return (
-    <div
+    <dialog
+      role="dialog"
+      aria-modal="true"
+      tabIndex={-1}
       className={[
-        "tw-fixed tw-inset-0 tw-z-[100] tw-bg-white/10 tw-backdrop-blur-sm tw-flex tw-items-start tw-justify-center tw-p-4 md:tw-p-8",
+        "tw-w-full tw-h-full tw-fixed tw-inset-0 tw-z-[100] tw-bg-white/10 tw-backdrop-blur-sm tw-flex tw-items-center tw-justify-center tw-p-4 md:tw-p-8",
         isClosing
           ? "tw-opacity-0 tw-transition-opacity tw-duration-150"
           : "tw-opacity-100 tw-transition-opacity tw-duration-150",
       ].join(" ")}
       onMouseDown={(e) => {
-        if (flow === "wallet" || flow === "submitted") return;
+        if (trxPending) return;
         if (e.target === e.currentTarget) handleClose();
       }}
-      aria-modal="true"
-      role="dialog"
+      onKeyDown={(e) => {
+        if (e.key === "Escape" || e.key === "Esc") {
+          e.preventDefault();
+          handleClose();
+        }
+      }}
       aria-label="Transfer dialog">
       <div
         className={[
@@ -874,183 +1301,69 @@ export default function TransferModal({
           isClosing
             ? "tw-scale-95 tw-opacity-0 tw-transition-all tw-duration-150"
             : "tw-scale-100 tw-opacity-100 tw-transition-all tw-duration-150",
+          flow === "submission" || isClosing
+            ? "tw-h-fit tw-max-h-[90vh]"
+            : "tw-h-[75vh]",
         ].join(" ")}
         onMouseDown={(e) => e.stopPropagation()}>
         {/* header */}
         <div className="tw-flex tw-items-center tw-justify-between tw-border-0 tw-border-b-[3px] tw-border-solid tw-border-white/30 tw-p-4">
           <div className="tw-text-lg tw-font-semibold">
-            <FlowTitle flow={flow} />
+            <FlowTitle flow={flow} txs={txs} />
           </div>
-          <div className="tw-flex tw-items-center tw-gap-3">
-            <MockControls
-              enabled={enableMockTransfers}
-              flow={flow}
-              mockTransfers={mockTransfers}
-              setMockTransfers={setMockTransfers}
-              mockEndFlow={mockEndFlow}
-              setMockEndFlow={setMockEndFlow}
-            />
-            {(flow === "review" || flow === "success" || flow === "error") && (
-              <button
-                type="button"
-                onClick={handleClose}
-                aria-label="Close"
-                className="tw-bg-transparent tw-border-none tw-p-0 tw-flex tw-items-center tw-justify-center">
-                <FontAwesomeIcon icon={faXmarkCircle} className="tw-size-6" />
-              </button>
-            )}
-          </div>
+          <HeaderRight
+            flow={flow}
+            trxPending={trxPending}
+            onClose={handleClose}
+          />
         </div>
 
         {/* body */}
-        {flow === "review" ? (
-          <div className="tw-flex-1 tw-overflow-hidden tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-6 tw-px-4 tw-py-2">
-            {/* left: recap selected NFTs */}
-            <SelectedSummaryList
-              items={items}
-              leftListRef={leftListRef}
-              leftHasOverflow={leftHasOverflow}
-              leftAtEnd={leftAtEnd}
-            />
-            {/* right: search + select target */}
-            <div className="tw-flex tw-flex-col tw-space-y-2 tw-min-h-0">
-              <div
-                className={`tw-font-semibold ${
-                  selectedProfile ? "tw-mb-2" : "tw-mb-0"
-                }`}>
-                Recipient
-              </div>
-              {selectedProfile ? (
-                <RecipientSelected
-                  selectedProfile={selectedProfile}
-                  profile={profile}
-                  isIdentityLoading={isIdentityLoading}
-                  setSelectedProfile={setSelectedProfile}
-                  setSelectedWallet={setSelectedWallet}
-                  setResults={setResults}
-                  setQuery={setQuery}
-                  searchInputRef={searchInputRef}
-                  walletsListRef={walletsListRef}
-                  walletsHasOverflow={walletsHasOverflow}
-                  walletsAtEnd={walletsAtEnd}
-                  selectedWallet={selectedWallet}
-                />
-              ) : (
-                <RecipientSearch
-                  query={query}
-                  setQuery={setQuery}
-                  searchStatusText={searchStatusText}
-                  results={results}
-                  onPick={(r) => {
-                    setSelectedProfile(r);
-                    setSelectedWallet(null);
-                  }}
-                  resultsListRef={resultsListRef}
-                  resultsHasOverflow={resultsHasOverflow}
-                  resultsAtEnd={resultsAtEnd}
-                  searchInputRef={searchInputRef}
-                />
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="tw-flex-1 tw-overflow-auto tw-p-6 tw-space-y-4">
-            {flow === "wallet" && (
-              <div className="tw-text-center">
-                <div>Approve the transaction to continue.</div>
-              </div>
-            )}
-            {flow === "submitted" && (
-              <div className="tw-space-y-2">
-                <div>Waiting for confirmation…</div>
-                <TxList txHashes={txHashes} publicClient={publicClient} />
-              </div>
-            )}
-            {flow === "success" && (
-              <div className="tw-space-y-2">
-                <div className="tw-font-semibold tw-text-lg">
-                  {txHashes.length > 1
-                    ? "All transfers confirmed"
-                    : "Transfer confirmed"}
-                </div>
-                <TxList txHashes={txHashes} publicClient={publicClient} />
-              </div>
-            )}
-            {flow === "error" && (
-              <div className="tw-space-y-2">
-                <div>{errorMsg}</div>
-                {txHashes.length > 0 && (
-                  <TxList txHashes={txHashes} publicClient={publicClient} />
-                )}
-              </div>
-            )}
-          </div>
-        )}
+        <BodyByFlow
+          flow={flow}
+          items={items}
+          leftListRef={leftListRef}
+          leftHasOverflow={leftHasOverflow}
+          leftAtEnd={leftAtEnd}
+          selectedProfile={selectedProfile}
+          profile={profile}
+          isIdentityLoading={isIdentityLoading}
+          setSelectedProfile={setSelectedProfile}
+          setSelectedWallet={setSelectedWallet}
+          setResults={setResults}
+          setQuery={setQuery}
+          searchInputRef={searchInputRef}
+          walletsListRef={walletsListRef}
+          walletsHasOverflow={walletsHasOverflow}
+          walletsAtEnd={walletsAtEnd}
+          selectedWallet={selectedWallet}
+          query={query}
+          setQueryExternal={setQuery}
+          searchStatusText={searchStatusText}
+          results={results}
+          onPick={(r) => {
+            setSelectedProfile(r);
+            setSelectedWallet(null);
+          }}
+          resultsListRef={resultsListRef}
+          resultsHasOverflow={resultsHasOverflow}
+          resultsAtEnd={resultsAtEnd}
+          publicClient={publicClient}
+          txs={txs}
+        />
 
         {/* footer */}
         <div className="tw-flex tw-justify-end tw-gap-3 tw-border-0 tw-border-t-[3px] tw-border-solid tw-border-white/30 tw-p-4">
-          {(() => {
-            if (flow === "review") {
-              return (
-                <>
-                  <button
-                    type="button"
-                    onClick={handleClose}
-                    className="tw-rounded-lg tw-bg-white/10 hover:tw-bg-white/15 tw-px-4 tw-py-2 tw-border-2 tw-border-solid tw-border-[#444] tw-font-medium">
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    disabled={!canConfirm}
-                    onClick={handleConfirm}
-                    className="tw-rounded-lg tw-bg-white tw-text-black tw-px-4 tw-py-2 tw-border-2 tw-border-solid tw-border-[#444] disabled:tw-opacity-60 disabled:tw-cursor-not-allowed tw-font-medium">
-                    Transfer
-                  </button>
-                </>
-              );
-            }
-
-            if (flow === "wallet" || flow === "submitted") {
-              return (
-                <button
-                  type="button"
-                  disabled
-                  className="tw-rounded-lg tw-bg-white/10 tw-px-4 tw-py-2 tw-opacity-60 tw-font-medium">
-                  Processing…
-                </button>
-              );
-            }
-
-            if (flow === "error") {
-              return (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => setFlow("review")}
-                    className="tw-rounded-lg tw-bg-white/10 hover:tw-bg-white/15 tw-px-4 tw-py-2 tw-border-2 tw-border-solid tw-border-[#444] tw-font-medium">
-                    Back
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleClose}
-                    className="tw-rounded-lg tw-bg-white hover:tw-bg-white/95 tw-text-black tw-px-4 tw-py-2 tw-font-medium">
-                    Close
-                  </button>
-                </>
-              );
-            }
-
-            return (
-              <button
-                type="button"
-                onClick={handleClose}
-                className="tw-rounded-lg tw-bg-white tw-text-black tw-px-4 tw-py-2">
-                Close
-              </button>
-            );
-          })()}
+          <FooterActions
+            flow={flow}
+            canConfirm={!!canConfirm}
+            onCancel={handleClose}
+            onConfirm={handleConfirm}
+            onClose={handleClose}
+            txs={txs}
+          />
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }

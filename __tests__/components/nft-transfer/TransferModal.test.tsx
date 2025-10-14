@@ -21,7 +21,6 @@ jest.mock("@/components/nft-transfer/TransferModalPfp", () => {
   return MockTransferModalPfp;
 });
 jest.mock("@/components/distribution-plan-tool/common/CircleLoader", () => {
-  const React = require("react");
   const MockCircleLoader = () => <div data-testid="loader" />;
   MockCircleLoader.displayName = "MockCircleLoader";
 
@@ -33,6 +32,12 @@ jest.mock("@/components/distribution-plan-tool/common/CircleLoader", () => {
     },
   };
 });
+jest.mock("@/services/api/common-api", () => ({
+  commonApiFetch: jest.fn(),
+}));
+jest.mock("@/helpers/server.helpers", () => ({
+  getUserProfile: jest.fn(),
+}));
 jest.mock("wagmi", () => ({
   useAccount: jest.fn(),
   usePublicClient: jest.fn(),
@@ -49,11 +54,15 @@ jest.mock("next/image", () => ({
 const mockUseTransfer = require("@/components/nft-transfer/TransferState")
   .useTransfer as jest.Mock;
 const mockUseIdentity = require("@/hooks/useIdentity").useIdentity as jest.Mock;
+const mockCommonApiFetch = require("@/services/api/common-api")
+  .commonApiFetch as jest.Mock;
+const mockGetUserProfile = require("@/helpers/server.helpers")
+  .getUserProfile as jest.Mock;
 const mockUseAccount = require("wagmi").useAccount as jest.Mock;
 const mockUsePublicClient = require("wagmi").usePublicClient as jest.Mock;
 const mockUseWalletClient = require("wagmi").useWalletClient as jest.Mock;
 
-describe("TransferModal", () => {
+describe("TransferModal (reworked)", () => {
   const selectedItems = new Map([
     [
       "MEMES:10",
@@ -66,6 +75,7 @@ describe("TransferModal", () => {
         max: 5,
         title: "Memes 10",
         thumbUrl: "https://example.com/thumb-10.png",
+        label: "MEMES #10",
       },
     ],
     [
@@ -79,6 +89,7 @@ describe("TransferModal", () => {
         max: 1,
         title: "Poster 7",
         thumbUrl: "https://example.com/thumb-7.png",
+        label: "POSTER #7",
       },
     ],
   ]);
@@ -103,10 +114,12 @@ describe("TransferModal", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
     mockUseTransfer.mockReturnValue({
       selected: selectedItems,
       totalQty: 3,
     });
+
     mockUseIdentity.mockImplementation(
       ({ handleOrWallet }: { handleOrWallet: string }) => {
         if (!handleOrWallet) {
@@ -115,18 +128,45 @@ describe("TransferModal", () => {
         return identityResult;
       }
     );
+
+    mockCommonApiFetch.mockResolvedValue([
+      {
+        profile_id: "1",
+        handle: "recipient",
+        display: "Recipient",
+        wallet: "0x1111111111111111111111111111111111111111",
+        level: 10,
+        tdh: 100,
+        pfp: null,
+      },
+    ]);
+    mockGetUserProfile.mockResolvedValue({
+      id: "1",
+      handle: "recipient",
+      normalised_handle: "recipient",
+      primary_wallet: "0x1111111111111111111111111111111111111111",
+      pfp: null,
+      tdh: 100,
+      level: 10,
+      cic: 0,
+    });
+
     mockUseAccount.mockReturnValue({
       address: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     });
+
     mockUsePublicClient.mockReturnValue({
       simulateContract: jest.fn(),
       waitForTransactionReceipt: jest.fn(),
+      readContract: jest.fn(),
       chain: {
         blockExplorers: { default: { url: "https://explorer" } },
       },
     });
-    mockUseWalletClient.mockReturnValue({ data: { writeContract: jest.fn() } });
-    globalThis.fetch = jest.fn();
+
+    mockUseWalletClient.mockReturnValue({
+      data: { writeContract: jest.fn() },
+    });
   });
 
   afterEach(() => {
@@ -136,51 +176,41 @@ describe("TransferModal", () => {
   const openModal = (onClose = jest.fn()) =>
     render(<TransferModal open onClose={onClose} />);
 
-  it("disables transfer confirmation until a wallet is selected", () => {
-    openModal();
-    const transferButton = screen.getByRole("button", { name: /^transfer$/i });
-    expect(transferButton).toBeDisabled();
-  });
-
-  async function selectRecipientFlow() {
+  const selectRecipientFlow = async () => {
     jest.useFakeTimers();
-
-    (globalThis.fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      json: jest.fn().mockResolvedValue([
-        {
-          profile_id: "1",
-          handle: "recipient",
-          display: "Recipient",
-          wallet: "0x1111111111111111111111111111111111111111",
-          level: 10,
-          tdh: 100,
-          pfp: null,
-        },
-      ]),
-    });
 
     openModal();
 
     const input = screen.getByPlaceholderText(/search by handle/i);
     fireEvent.change(input, { target: { value: "rec" } });
 
+    // debounce is 350ms
     await act(async () => {
       jest.advanceTimersByTime(400);
     });
 
-    await waitFor(() => expect(globalThis.fetch).toHaveBeenCalled());
-    jest.useRealTimers();
+    await waitFor(() => expect(mockCommonApiFetch).toHaveBeenCalled());
 
+    // pick the search result (Recipient)
     fireEvent.click(screen.getByRole("button", { name: /recipient/i }));
+
+    // then pick the specific wallet
     fireEvent.click(
       screen.getByRole("button", {
-        name: /recipient\s+0x1111111111111111111111111111111111111111/i,
+        name: /0x1111111111111111111111111111111111111111/i,
       })
     );
-  }
 
-  it("submits ERC1155 and ERC721 transfers successfully", async () => {
+    jest.useRealTimers();
+  };
+
+  it("disables transfer confirmation until a wallet is selected", () => {
+    openModal();
+    const transferButton = screen.getByRole("button", { name: /^transfer$/i });
+    expect(transferButton).toBeDisabled();
+  });
+
+  it("submits ERC1155 (batch) and ERC721 transfers successfully and shows completion UI", async () => {
     await selectRecipientFlow();
 
     const publicClient = mockUsePublicClient.mock.results.at(-1)?.value;
@@ -190,20 +220,27 @@ describe("TransferModal", () => {
       throw new Error("Expected wagmi clients to be initialised");
     }
 
-    const walletClient = walletWrapper.data;
-
     const simulateContract = publicClient.simulateContract as jest.Mock;
-    simulateContract
-      .mockResolvedValueOnce({ request: { type: "1155" } })
-      .mockResolvedValueOnce({ request: { type: "721" } });
+    const readContract = publicClient.readContract as jest.Mock;
+    const writeContract = walletWrapper.data.writeContract as jest.Mock;
+    const waitForReceipt = publicClient.waitForTransactionReceipt as jest.Mock;
 
-    const writeContract = walletClient.writeContract as jest.Mock;
+    // groupByContractAndOriginator will call readContract for 1155 origin key
+    readContract.mockResolvedValue(
+      "0x0000000000000000000000000000000000000abc"
+    );
+
+    simulateContract
+      .mockResolvedValueOnce({ request: { type: "1155" } }) // 1155 batch
+      .mockResolvedValueOnce({ request: { type: "721" } }); // 721 single
+
     writeContract
       .mockResolvedValueOnce("0xhash1155")
       .mockResolvedValueOnce("0xhash721");
 
-    const waitForReceipt = publicClient.waitForTransactionReceipt as jest.Mock;
-    waitForReceipt.mockResolvedValue({});
+    waitForReceipt
+      .mockResolvedValueOnce({ status: "success" })
+      .mockResolvedValueOnce({ status: "success" });
 
     fireEvent.click(screen.getByRole("button", { name: /^transfer$/i }));
 
@@ -211,9 +248,12 @@ describe("TransferModal", () => {
     expect(writeContract).toHaveBeenCalledTimes(2);
     expect(waitForReceipt).toHaveBeenCalledTimes(2);
 
-    expect(
-      await screen.findByText(/all transfers confirmed/i)
-    ).toBeInTheDocument();
+    // Title should switch to "Transfer Complete"
+    expect(await screen.findByText(/transfer complete/i)).toBeInTheDocument();
+
+    // Each tx card should show "Successful"
+    const successBadges = await screen.findAllByText(/successful/i);
+    expect(successBadges.length).toBe(2);
   });
 
   it("shows an error when the wallet client is unavailable", async () => {
@@ -226,6 +266,10 @@ describe("TransferModal", () => {
     expect(
       await screen.findByText(/wallet not ready\. please reconnect\./i)
     ).toBeInTheDocument();
-    expect(screen.getByText(/transfer failed/i)).toBeInTheDocument();
+
+    const anyErrorMatches = screen.queryAllByText(
+      /invalid destination wallet|wallet not ready|client not ready|error/i
+    );
+    expect(anyErrorMatches.length).toBeGreaterThan(0);
   });
 });

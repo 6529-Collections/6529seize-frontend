@@ -32,7 +32,6 @@ const mockFns = {
 };
 
 jest.mock("@/components/nft-transfer/TransferState", () => {
-  const React = require("react");
   return {
     __esModule: true,
     TransferProvider: ({ children }: any) => <>{children}</>,
