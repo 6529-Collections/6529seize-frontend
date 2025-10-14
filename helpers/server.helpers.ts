@@ -45,10 +45,13 @@ export const userPageNeedsRedirect = ({
       ([key, value]) => {
         if (Array.isArray(value)) {
           return value
-            .filter((entry) => entry != null)
+            .filter((entry) => entry !== undefined && entry !== null)
             .map((entry) => [key, String(entry)]);
         }
-        return value != null ? [[key, String(value)]] : [];
+        if (value === undefined || value === null) {
+          return [];
+        }
+        return [[key, String(value)]];
       }
     );
     const queryParamsString = new URLSearchParams(queryEntries).toString();
