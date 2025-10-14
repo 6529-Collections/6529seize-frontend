@@ -4,7 +4,7 @@ import { useCallback, useLayoutEffect, useRef } from "react";
 import clsx from "clsx";
 import type { XtdhReceivedCollectionSummary } from "@/types/xtdh";
 
-import { XtdhReceivedCollectionCardContent } from "./XtdhReceivedCollectionCardContent";
+import { XtdhReceivedCollectionCardContent } from "../collection-card-content";
 import { XtdhReceivedCollectionCardHeader } from "./XtdhReceivedCollectionCardHeader";
 
 export interface XtdhReceivedCollectionCardProps {
