@@ -1,3 +1,4 @@
+import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
 import {
   MemePageYourCardsRightMenu,
   MemePageYourCardsSubMenu,
@@ -7,6 +8,20 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { createConfig, http, WagmiProvider } from "wagmi";
 import { mainnet } from "wagmi/chains";
+
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: jest.fn(() => ({
+    isAuthenticated: false,
+    seizeConnect: jest.fn(),
+    seizeAcceptConnection: jest.fn(),
+    address: undefined,
+    hasInitializationError: false,
+    initializationError: null,
+  })),
+  SeizeConnectProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}));
 
 const mockNFT = {
   id: 123,
@@ -48,7 +63,9 @@ const renderWithProviders = (component: React.ReactNode) => {
   });
   return render(
     <QueryClientProvider client={queryClient}>
-      <WagmiProvider config={mockWagmiConfig}>{component}</WagmiProvider>
+      <WagmiProvider config={mockWagmiConfig}>
+        <SeizeConnectProvider>{component}</SeizeConnectProvider>
+      </WagmiProvider>
     </QueryClientProvider>
   );
 };

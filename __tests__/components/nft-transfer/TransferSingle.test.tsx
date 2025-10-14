@@ -32,28 +32,26 @@ const mockFns = {
 };
 
 jest.mock("@/components/nft-transfer/TransferState", () => {
-  const buildTransferKey = ({ collection, tokenId }: any) =>
-    `${collection}:${tokenId}`;
-  const useTransfer = () => ({
-    enabled: true,
-    setEnabled: mockFns.setEnabled,
-    toggle: jest.fn(),
-    selected: mockSelected as unknown as Map<string, any>,
-    isSelected: (key: string) => mockSelected.has(key),
-    select: mockFns.select,
-    unselect: mockFns.unselect,
-    toggleSelect: mockFns.toggleSelect,
-    setQty: mockFns.setQty,
-    incQty: mockFns.incQty,
-    decQty: mockFns.decQty,
-    clear: mockFns.clear,
-    count: mockSelected.size,
-    totalQty: Array.from(mockSelected.values()).reduce(
-      (s, it) => s + (it.qty ?? 1),
-      0
-    ),
-  });
-  return { useTransfer, buildTransferKey };
+  const React = require("react");
+  return {
+    __esModule: true,
+    TransferProvider: ({ children }: any) => <>{children}</>,
+    useTransfer: () => ({
+      selected: mockSelected,
+      select: mockFns.select,
+      unselect: mockFns.unselect,
+      incQty: mockFns.incQty,
+      decQty: mockFns.decQty,
+      setQty: mockFns.setQty,
+      toggleSelect: mockFns.toggleSelect,
+      clear: mockFns.clear,
+      setEnabled: mockFns.setEnabled,
+      totalQty: 1,
+      count: 1,
+    }),
+    buildTransferKey: ({ collection, tokenId }: any) =>
+      `${collection}:${tokenId}`,
+  };
 });
 
 jest.mock("@/components/nft-transfer/TransferModal", () => ({
@@ -147,7 +145,7 @@ describe("TransferSingle", () => {
 
   test("calls select on mount and unselect on unmount", () => {
     const { unmount } = render(<TransferSingle {...baseProps} />);
-    const expectedKey = `${baseProps.contract}:${baseProps.tokenId}`;
+    const expectedKey = `${baseProps.collectionType}:${baseProps.tokenId}`;
     expect(mockFns.select).toHaveBeenCalledWith(
       expect.objectContaining({
         key: expectedKey,
@@ -171,7 +169,7 @@ describe("TransferSingle", () => {
 
   test("renders +/- controls when max > 1 and handles bounds", () => {
     const props = { ...baseProps, max: 5, contractType: ContractType.ERC1155 };
-    const key = `${props.contract}:${props.tokenId}`;
+    const key = `${props.collectionType}:${props.tokenId}`;
     mockSelected = new Map([[key, { qty: 1, max: 5 }]]);
     render(<TransferSingle {...props} />);
     const minus = screen.getByTestId("transfer-single-minus");
@@ -190,7 +188,7 @@ describe("TransferSingle", () => {
 
   test("clicking + and - triggers incQty and decQty", () => {
     const props = { ...baseProps, max: 3, contractType: ContractType.ERC1155 };
-    const key = `${props.contract}:${props.tokenId}`;
+    const key = `${props.collectionType}:${props.tokenId}`;
     mockSelected = new Map([[key, { qty: 2, max: 3 }]]);
     render(<TransferSingle {...props} />);
     const minus = screen.getByTestId("transfer-single-minus");
@@ -203,7 +201,7 @@ describe("TransferSingle", () => {
 
   test("button label for ERC1155 reflects selected qty (copies)", () => {
     const props = { ...baseProps, max: 10, contractType: ContractType.ERC1155 };
-    const key = `${props.contract}:${props.tokenId}`;
+    const key = `${props.collectionType}:${props.tokenId}`;
     mockSelected = new Map([[key, { qty: 3, max: 10 }]]);
     render(<TransferSingle {...props} />);
     expect(screen.getByTestId("transfer-single-submit")).toHaveTextContent(
@@ -248,13 +246,13 @@ describe("TransferSingle", () => {
 
   test("rerender with new tokenId updates select key", () => {
     const { rerender } = render(<TransferSingle {...baseProps} />);
-    const firstKey = `${baseProps.contract}:${baseProps.tokenId}`;
+    const firstKey = `${baseProps.collectionType}:${baseProps.tokenId}`;
     expect(mockFns.select).toHaveBeenCalledWith(
       expect.objectContaining({ key: firstKey })
     );
     rerender(<TransferSingle {...baseProps} tokenId={99} />);
     expect(mockFns.select).toHaveBeenLastCalledWith(
-      expect.objectContaining({ key: `${baseProps.contract}:99` })
+      expect.objectContaining({ key: `${baseProps.collectionType}:99` })
     );
   });
 });

@@ -165,12 +165,12 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
           if (!hasPreviousToken) {
             return;
           }
-          const currentHref = window.location.href;
-          const prevHref = currentHref.replace(
-            props.token.id.toString(),
-            (props.token.id - 1).toString()
+          const url = new URL(window.location.href);
+          url.pathname = url.pathname.replace(
+            /\/(\d+)(\/?)$/,
+            `/${props.token.id - 1}$2`
           );
-          router.push(prevHref, { scroll: false });
+          router.push(url.toString(), { scroll: false });
         }}
         style={{
           height: "35px",
@@ -185,6 +185,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
         {hasPreviousToken && (
           <Tooltip
             id={`prev-token-${props.token.id}`}
+            delayShow={250}
             variant="light"
             style={{
               padding: "4px 8px",
@@ -208,12 +209,12 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
           if (!hasNextToken) {
             return;
           }
-          const currentHref = window.location.href;
-          const nextHref = currentHref.replace(
-            props.token.id.toString(),
-            (props.token.id + 1).toString()
+          const url = new URL(window.location.href);
+          url.pathname = url.pathname.replace(
+            /\/(\d+)(\/?)$/,
+            `/${props.token.id + 1}$2`
           );
-          router.push(nextHref, { scroll: false });
+          router.push(url.toString(), { scroll: false });
         }}
         style={{
           height: "35px",

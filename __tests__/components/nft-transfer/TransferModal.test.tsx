@@ -21,9 +21,17 @@ jest.mock("@/components/nft-transfer/TransferModalPfp", () => {
   return MockTransferModalPfp;
 });
 jest.mock("@/components/distribution-plan-tool/common/CircleLoader", () => {
+  const React = require("react");
   const MockCircleLoader = () => <div data-testid="loader" />;
   MockCircleLoader.displayName = "MockCircleLoader";
-  return MockCircleLoader;
+
+  return {
+    __esModule: true,
+    default: MockCircleLoader,
+    CircleLoaderSize: {
+      MEDIUM: "MEDIUM",
+    },
+  };
 });
 jest.mock("wagmi", () => ({
   useAccount: jest.fn(),

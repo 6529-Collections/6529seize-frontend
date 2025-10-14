@@ -1,11 +1,7 @@
 "use client";
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import {
-  COLLECTED_COLLECTION_TYPE_TO_CONTRACT,
-  COLLECTED_COLLECTION_TYPE_TO_CONTRACT_TYPE,
-  CollectedCollectionType,
-} from "@/entities/IProfile";
+import { CollectedCollectionType } from "@/entities/IProfile";
 import { ContractType } from "@/enums";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import styles from "@/styles/Home.module.scss";
@@ -65,16 +61,14 @@ function TransferSingleImpl(props: TransferSingleProps) {
         collection: collectionType,
         tokenId,
       }),
-    [contract, tokenId]
+    [collectionType, tokenId]
   );
 
   useEffect(() => {
     t.select({
       key,
-      contract: COLLECTED_COLLECTION_TYPE_TO_CONTRACT[collectionType],
-      contractType: COLLECTED_COLLECTION_TYPE_TO_CONTRACT_TYPE[
-        collectionType
-      ] as ContractType,
+      contract,
+      contractType,
       tokenId,
       max,
       thumbUrl,
@@ -85,7 +79,16 @@ function TransferSingleImpl(props: TransferSingleProps) {
       t.unselect(key);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, collectionType, tokenId, max, thumbUrl, title]);
+  }, [
+    key,
+    collectionType,
+    tokenId,
+    max,
+    thumbUrl,
+    title,
+    contract,
+    contractType,
+  ]);
 
   useEffect(() => {
     if (isConnected && wantModalAfterConnect.current) {
@@ -100,19 +103,17 @@ function TransferSingleImpl(props: TransferSingleProps) {
 
   const selectedQty = t.selected.get(key)?.qty ?? 0;
 
-  const displayQty = selectedQty > 0 ? selectedQty : 1;
-
   const [showModal, setShowModal] = useState(false);
 
   const transferButtonText = useMemo(() => {
     if (contractType === ContractType.ERC721) {
       return "Transfer";
     }
-    if (displayQty > 1) {
-      return `Transfer ${displayQty} copies`;
+    if (selectedQty > 1) {
+      return `Transfer ${selectedQty} copies`;
     }
     return "Transfer 1 copy";
-  }, [displayQty, contractType]);
+  }, [selectedQty, contractType]);
 
   if (isMobileDevice) {
     return null;
@@ -161,7 +162,7 @@ function TransferSingleImpl(props: TransferSingleProps) {
             }
             setShowModal(true);
           }}
-          className="tw-w-full tw-py-2 tw-rounded-lg tw-bg-white tw-text-black tw-py-1 disabled:tw-opacity-75 disabled:tw-cursor-not-allowed tw-border-1 tw-border-solid tw-border-[#444] tw-text-lg tw-font-semibold"
+          className="tw-w-full tw-py-2 tw-rounded-lg tw-bg-white tw-text-black disabled:tw-opacity-75 disabled:tw-cursor-not-allowed tw-border-2 tw-border-solid tw-border-[#444] tw-text-lg tw-font-semibold"
           data-testid="transfer-single-submit">
           {transferButtonText}
         </button>

@@ -99,7 +99,7 @@ export default function TransferPanel() {
             <button
               type="button"
               onClick={t.clear}
-              className="tw-text-sm tw-rounded-lg tw-bg-white tw-text-black tw-py-1 tw-border-1 tw-border-solid tw-border-[#444]">
+              className="tw-text-sm tw-rounded-lg tw-bg-white tw-text-black tw-py-1 tw-border-2 tw-border-solid tw-border-[#444]">
               Clear
             </button>
           )}
@@ -197,14 +197,14 @@ export default function TransferPanel() {
               t.setEnabled(false);
               t.clear();
             }}
-            className="tw-flex-1 tw-rounded-lg tw-bg-white/10 hover:tw-bg-white/20 tw-text-white tw-py-1 tw-border-1 tw-border-solid tw-border-[#444]">
+            className="tw-flex-1 tw-rounded-lg tw-bg-white/10 hover:tw-bg-white/20 tw-text-white tw-py-1 tw-border-2 tw-border-solid tw-border-[#444]">
             Cancel
           </button>
           <button
             type="button"
             disabled={t.totalQty === 0}
             onClick={() => setShowModal(true)}
-            className="tw-flex-1 tw-rounded-lg tw-bg-white tw-text-black tw-py-1 disabled:tw-opacity-75 disabled:tw-cursor-not-allowed tw-border-1 tw-border-solid tw-border-[#444]">
+            className="tw-flex-1 tw-rounded-lg tw-bg-white tw-text-black tw-py-1 disabled:tw-opacity-75 disabled:tw-cursor-not-allowed tw-border-2 tw-border-solid tw-border-[#444]">
             Continue
           </button>
         </div>

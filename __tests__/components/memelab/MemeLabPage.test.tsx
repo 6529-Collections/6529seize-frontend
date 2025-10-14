@@ -1,3 +1,4 @@
+import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
 import MemeLabPageComponent from "@/components/memelab/MemeLabPage";
 import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -113,6 +114,20 @@ jest.mock("@/components/latest-activity/LatestActivityRow", () => ({
 jest.mock("@/components/pagination/Pagination", () => ({
   __esModule: true,
   default: () => <div data-testid="pagination" />,
+}));
+
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: jest.fn(() => ({
+    isAuthenticated: false,
+    seizeConnect: jest.fn(),
+    seizeAcceptConnection: jest.fn(),
+    address: undefined,
+    hasInitializationError: false,
+    initializationError: null,
+  })),
+  SeizeConnectProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
 }));
 
 // Import mocks
@@ -372,7 +387,9 @@ describe("MemeLabPageComponent", () => {
     await act(async () => {
       renderWithQueryClient(
         <WagmiProvider config={mockWagmiConfig}>
-          <MemeLabPageComponent nftId="1" />
+          <SeizeConnectProvider>
+            <MemeLabPageComponent nftId="1" />
+          </SeizeConnectProvider>
         </WagmiProvider>
       );
     });

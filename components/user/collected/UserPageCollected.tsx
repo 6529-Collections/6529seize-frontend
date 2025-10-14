@@ -251,19 +251,23 @@ export default function UserPageCollected({
       hadForcedRef.current = true;
 
       // Force to connected wallet
-      updateFields([
-        { name: "address", value: connected },
-        { name: "page", value: "1" },
-      ]);
+      if (currentParamAddress !== connected) {
+        updateFields([
+          { name: "address", value: connected },
+          { name: "page", value: "1" },
+        ]);
+      }
     } else if (hadForcedRef.current) {
       const restore = previousAddressRef.current;
       previousAddressRef.current = null;
       hadForcedRef.current = false;
 
-      updateFields([
-        { name: "address", value: restore },
-        { name: "page", value: "1" },
-      ]);
+      if (restore !== currentParamAddress) {
+        updateFields([
+          { name: "address", value: restore },
+          { name: "page", value: "1" },
+        ]);
+      }
     }
   }, [
     transferEnabled,
