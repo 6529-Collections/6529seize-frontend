@@ -18,6 +18,7 @@ interface WebUnifiedWavesListProps {
   readonly isFetchingNextPage: boolean;
   readonly onHover: (waveId: string) => void;
   readonly scrollContainerRef: React.RefObject<HTMLElement | null>;
+  readonly isCondensed?: boolean;
 }
 
 const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = ({
@@ -29,6 +30,7 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = ({
   isFetchingNextPage,
   onHover,
   scrollContainerRef,
+  isCondensed = false,
 }) => {
   // Refs to the scroll container and sentinel
   const listRef = useRef<WebUnifiedWavesListWavesHandle>(null);
@@ -44,7 +46,11 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = ({
   );
 
   return (
-    <div className="tw-h-full tw-bg-black tw-py-4">
+    <div
+      className={`tw-h-full tw-py-4 ${
+        isCondensed ? "tw-bg-transparent tw-py-3" : "tw-bg-black"
+      }`}
+    >
       <div className="tw-w-full">
         {/* Unified Waves List */}
         <WebUnifiedWavesListWaves
@@ -52,6 +58,7 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = ({
           waves={waves}
           onHover={onHover}
           scrollContainerRef={scrollContainerRef}
+          isCondensed={isCondensed}
         />
 
         {/* Loading indicator and intersection trigger */}

@@ -22,10 +22,12 @@ import useCreateModalState from "@/hooks/useCreateModalState";
 
 interface WebDirectMessagesListProps {
   readonly scrollContainerRef: React.RefObject<HTMLElement | null>;
+  readonly isCondensed?: boolean;
 }
 
 const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
   scrollContainerRef,
+  isCondensed = false,
 }) => {
   const { isAuthenticated } = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
@@ -149,38 +151,43 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
         hideHeaders={true}
         hidePin={true}
         basePath="/messages"
+        isCondensed={isCondensed}
       />
     );
   }
 
   return (
     <div className="tw-h-full tw-flex tw-flex-col">
-      <div className="tw-flex-1 tw-bg-black tw-py-4 tw-flex tw-flex-col">
-        {/* Messages header with create button */}
-        <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-mb-4">
-          <span className="tw-text-xl tw-font-semibold tw-text-iron-50">
-            Messages
-          </span>
-          {!isApp && (
-            <div 
-              data-tooltip-id="create-dm-tooltip"
-              data-tooltip-content="New direct message"
-            >
-              <PrimaryButton
-                onClicked={openDirectMessage}
-                loading={false}
-                disabled={false}
-                padding="tw-px-2 tw-py-2"
+      <div
+        className={`tw-flex-1 tw-flex tw-flex-col ${
+          isCondensed ? "tw-bg-transparent tw-py-3" : "tw-bg-black tw-py-4"
+        }`}
+      >
+        {!isCondensed && (
+          <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-mb-4">
+            <span className="tw-text-xl tw-font-semibold tw-text-iron-50">
+              Messages
+            </span>
+            {!isApp && (
+              <div
+                data-tooltip-id="create-dm-tooltip"
+                data-tooltip-content="New direct message"
               >
-                <FontAwesomeIcon
-                
-                  icon={faPaperPlane}
-                  className="tw-size-4 tw-flex-shrink-0"
-                />
-              </PrimaryButton>
-            </div>
-          )}
-        </div>
+                <PrimaryButton
+                  onClicked={openDirectMessage}
+                  loading={false}
+                  disabled={false}
+                  padding="tw-px-2 tw-py-2"
+                >
+                  <FontAwesomeIcon
+                    icon={faPaperPlane}
+                    className="tw-size-4 tw-flex-shrink-0"
+                  />
+                </PrimaryButton>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="tw-flex-1 tw-w-full tw-flex tw-flex-col">
           {listContent}
@@ -193,7 +200,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
       </div>
 
       {/* Tooltip */}
-      {!isTouchDevice && (
+      {!isTouchDevice && !isCondensed && (
         <ReactTooltip
           id="create-dm-tooltip"
           place="bottom"

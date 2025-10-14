@@ -15,7 +15,13 @@ import { usePathname } from "next/navigation";
  * - Uses an internal scroll container to enable inertia scrolling and custom
  *   scrollbars without managing explicit heights; relies on parent layout flex.
  */
-const WebLeftSidebar: React.FC = () => {
+interface WebLeftSidebarProps {
+  readonly isCondensed?: boolean;
+}
+
+const WebLeftSidebar: React.FC<WebLeftSidebarProps> = ({
+  isCondensed = false,
+}) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
@@ -23,17 +29,29 @@ const WebLeftSidebar: React.FC = () => {
   const isMessagesView = pathname?.startsWith("/messages");
 
   return (
-    <div className="tw-relative tw-w-full lg:tw-w-80 tw-h-full">
+    <div
+      className={`tw-relative tw-w-full tw-h-full ${
+        isCondensed ? "lg:tw-w-16" : "lg:tw-w-80"
+      }`}
+    >
       <div
         ref={scrollContainerRef}
-        className="tw-flex tw-flex-col tw-border-b-0 tw-border-iron-800 tw-border-solid tw-border-l-0 tw-border-t-0 tw-border-r-0 lg:tw-border-r tw-overflow-y-auto tw-w-full lg:tw-w-80 tw-h-full tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-transition-colors tw-duration-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-z-40"
+        className={`tw-flex tw-flex-col tw-border-b-0 tw-border-iron-800 tw-border-solid tw-border-l-0 tw-border-t-0 tw-border-r tw-overflow-y-auto tw-w-full tw-h-full tw-scrollbar-thin no-scrollbar tw-scrollbar-thumb-iron-500 tw-transition-colors tw-duration-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-z-40 ${
+          isCondensed ? "lg:tw-w-16" : "lg:tw-w-80"
+        }`}
         style={{ minHeight: "100%" }}
       >
         {!isMessagesView && (
-          <WebBrainLeftSidebarWaves scrollContainerRef={scrollContainerRef} />
+          <WebBrainLeftSidebarWaves
+            scrollContainerRef={scrollContainerRef}
+            isCondensed={isCondensed}
+          />
         )}
         {isMessagesView && (
-          <WebDirectMessagesList scrollContainerRef={scrollContainerRef} />
+          <WebDirectMessagesList
+            scrollContainerRef={scrollContainerRef}
+            isCondensed={isCondensed}
+          />
         )}
       </div>
     </div>

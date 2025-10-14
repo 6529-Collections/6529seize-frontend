@@ -2,6 +2,7 @@
 
 import React, { ReactNode, useEffect, useState, useCallback, useMemo } from "react";
 import BrainRightSidebar, {
+  BrainRightSidebarInline,
   SidebarTab,
 } from "../brain/right-sidebar/BrainRightSidebar";
 import WebBrainLeftSidebar from "../brain/left-sidebar/web/WebLeftSidebar";
@@ -99,7 +100,10 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   const shouldShowLeftSidebar = showLeftSidebar && (!isMobile || !waveId);
   const shouldShowMainContent = !isMobile || waveId;
   const shouldShowDropOverlay = isDropOpen && drop && shouldShowMainContent;
-  const shouldShowRightSidebar = isRightSidebarOpen && !isDropOpen && waveId;
+  const shouldShowRightSidebar = Boolean(
+    isRightSidebarOpen && !isDropOpen && waveId
+  );
+  const shouldInlineRightSidebar = shouldShowRightSidebar && !isMobile;
 
   // Handle error state for drop loading
   if (dropError && dropId) {
@@ -115,14 +119,14 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
             className={isDropOpen ? "tw-w-full xl:tw-pl-6" : contentClasses}
           >
             <div
-              className="tw-flex tw-flex-row tw-justify-between tw-w-full tw-overflow-hidden"
+              className="tw-flex tw-w-full tw-overflow-hidden"
               style={contentContainerStyle}
             >
               {shouldShowLeftSidebar && (
-                <WebBrainLeftSidebar />
+                <WebBrainLeftSidebar isCondensed={shouldInlineRightSidebar} />
               )}
               {shouldShowMainContent && (
-                <div className="tw-flex-grow tw-flex tw-flex-col tw-h-full tw-min-w-0">
+                <div className="tw-flex-grow tw-flex tw-flex-col tw-h-full tw-min-w-0 tw-relative">
                   {children}
                   {shouldShowDropOverlay && (
                     <div className="tw-absolute tw-inset-0 tw-z-[49]">
@@ -139,13 +143,24 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
                   )}
                 </div>
               )}
+              {shouldInlineRightSidebar && (
+                <div className="tw-hidden xl:tw-flex tw-flex-shrink-0">
+                  <BrainRightSidebarInline
+                    key="right-sidebar-inline"
+                    waveId={waveId}
+                    onDropClick={onDropClick}
+                    activeTab={sidebarTab}
+                    setActiveTab={setSidebarTab}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
 
       {/* Overlay backdrop when right sidebar is open - moved outside motion container */}
-      {shouldShowRightSidebar && (
+      {shouldShowRightSidebar && isMobile && (
         <>
           <button
             type="button"

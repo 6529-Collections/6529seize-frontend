@@ -38,7 +38,8 @@ function isValidWave(wave: unknown): wave is MinimalWave {
 
 const EMPTY_WAVES_PLACEHOLDER_HEIGHT = "48px" as const;
 
-const WAVE_ROW_HEIGHT = 62 as const;
+const WAVE_ROW_HEIGHT_DEFAULT = 62 as const;
+const WAVE_ROW_HEIGHT_CONDENSED = 52 as const;
 
 export interface WebUnifiedWavesListWavesHandle {
   sentinelRef: React.RefObject<HTMLElement | null>;
@@ -52,6 +53,7 @@ interface WebUnifiedWavesListWavesProps {
   readonly hidePin?: boolean;
   readonly scrollContainerRef?: React.RefObject<HTMLElement | null>;
   readonly basePath?: string;
+  readonly isCondensed?: boolean;
 }
 
 const WebUnifiedWavesListWaves = forwardRef<
@@ -67,6 +69,7 @@ const WebUnifiedWavesListWaves = forwardRef<
       hidePin = false,
       scrollContainerRef,
       basePath = "/waves",
+      isCondensed = false,
     },
     ref
   ) => {
@@ -107,19 +110,23 @@ const WebUnifiedWavesListWaves = forwardRef<
       return { pinnedWaves: pinned, regularWaves: regular };
     }, [waves]);
 
+    const rowHeight = isCondensed
+      ? WAVE_ROW_HEIGHT_CONDENSED
+      : WAVE_ROW_HEIGHT_DEFAULT;
+
     const virtual = useVirtualizedWaves<MinimalWave>(
       regularWaves,
       "web-unified-waves-regular",
       scrollContainerRef || listContainerRef,
       listContainerRef,
-      WAVE_ROW_HEIGHT,
+      rowHeight,
       5
     );
 
     return (
       <>
         <div className="tw-flex tw-flex-col">
-          {!hideHeaders && (
+          {!hideHeaders && !isCondensed && (
             <SectionHeader
               label="Waves"
               rightContent={
@@ -145,43 +152,46 @@ const WebUnifiedWavesListWaves = forwardRef<
             />
           )}
 
-          {!hideHeaders && !hideToggle && (
+          {!hideHeaders && !hideToggle && !isCondensed && (
             <div className="tw-pb-3 tw-mt-4 tw-flex tw-px-4">
               <WavesFilterToggle />
             </div>
           )}
 
           <div>
-            {!hideHeaders && pinnedWaves.length > 0 && (
-              <section
-                className="tw-flex tw-flex-col"
-                aria-label="Pinned waves"
-              >
-                {pinnedWaves
-                  .filter((wave): wave is MinimalWave => {
-                    if (!isValidWave(wave)) {
-                      console.warn("Invalid pinned wave object", wave);
-                      return false;
-                    }
-                    return true;
-                  })
-                  .map((wave) => (
-                    <div key={wave.id}>
-                      <WebBrainLeftSidebarWave
-                        wave={wave}
-                        onHover={onHover}
-                        showPin={!hidePin}
-                        basePath={basePath}
-                      />
-                    </div>
-                  ))}
-              </section>
+          {!hideHeaders && pinnedWaves.length > 0 && (
+            <section
+              className={`tw-flex tw-flex-col ${
+                isCondensed ? "tw-gap-y-2 tw-items-center" : ""
+              }`}
+              aria-label="Pinned waves"
+            >
+              {pinnedWaves
+                .filter((wave): wave is MinimalWave => {
+                  if (!isValidWave(wave)) {
+                    console.warn("Invalid pinned wave object", wave);
+                    return false;
+                  }
+                  return true;
+                })
+                .map((wave) => (
+                  <div key={wave.id} className="tw-w-full">
+                    <WebBrainLeftSidebarWave
+                      wave={wave}
+                      onHover={onHover}
+                      showPin={!hidePin && !isCondensed}
+                      basePath={basePath}
+                      condensed={isCondensed}
+                    />
+                  </div>
+                ))}
+            </section>
+          )}
+          {!hideHeaders &&
+            pinnedWaves.length > 0 &&
+            regularWaves.length > 0 && (
+              <div className="tw-border-t tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-b-0 tw-my-3" />
             )}
-            {!hideHeaders &&
-              pinnedWaves.length > 0 &&
-              regularWaves.length > 0 && (
-                <div className="tw-border-t tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-b-0 tw-my-3" />
-              )}
             {regularWaves.length > 0 ? (
               <section
                 ref={listContainerRef}
@@ -226,6 +236,7 @@ const WebUnifiedWavesListWaves = forwardRef<
                         onHover={onHover}
                         showPin={!hidePin}
                         basePath={basePath}
+                        condensed={isCondensed}
                       />
                     </div>
                   );

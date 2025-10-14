@@ -4,10 +4,12 @@ import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
 
 interface WebBrainLeftSidebarWavesProps {
   readonly scrollContainerRef: React.RefObject<HTMLElement | null>;
+  readonly isCondensed?: boolean;
 }
 
 const WebBrainLeftSidebarWaves: React.FC<WebBrainLeftSidebarWavesProps> = ({
   scrollContainerRef,
+  isCondensed = false,
 }) => {
 
   
@@ -29,6 +31,7 @@ const WebBrainLeftSidebarWaves: React.FC<WebBrainLeftSidebarWavesProps> = ({
       isFetchingNextPage={waves.isFetchingNextPage}
       onHover={registerWave}
       scrollContainerRef={scrollContainerRef}
+      isCondensed={isCondensed}
     />
   );
 };
