@@ -4,7 +4,7 @@ This table is the single source of truth for active and historical tickets. Keep
 
 | Ticket ID | Title | Status | Priority | Owner | PRs | Last Updated |
 |-----------|-------|--------|----------|-------|-----|--------------|
-| — | — | — | — | — | — | — |
+| TKT-0001 | Stabilize group name search input | In-Progress | P0 | simoluts | — | 2025-10-14 |
 
 ## Usage Guidelines
 

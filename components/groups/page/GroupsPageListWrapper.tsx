@@ -1,11 +1,12 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import GroupsList from "./list/GroupsList";
 import { AuthContext } from "@/components/auth/Auth";
 import { useRouter } from "next/navigation";
 import { usePathname, useSearchParams } from "next/navigation";
 import { GroupsRequestParams } from "@/entities/IGroup";
+import { useDebounce } from "react-use";
 
 const IDENTITY_SEARCH_PARAM = "identity";
 const GROUP_NAME_SEARCH_PARAM = "group";
@@ -41,59 +42,71 @@ export default function GroupsPageListWrapper({
   const identity = searchParams?.get(IDENTITY_SEARCH_PARAM);
   const group = searchParams?.get(GROUP_NAME_SEARCH_PARAM);
 
-  const [filters, setFilters] = useState<GroupsRequestParams>({
-    group_name: group ?? null,
-    author_identity: identity ?? null,
-  });
-
-  useEffect(() => {
-    setFilters({
-      group_name: group ?? null,
+  const [groupDraft, setGroupDraft] = useState<string | null>(group ?? null);
+  const filters = useMemo<GroupsRequestParams>(
+    () => ({
+      group_name: groupDraft,
       author_identity: identity ?? null,
-    });
-  }, [group, identity]);
+    }),
+    [groupDraft, identity]
+  );
 
-  const createQueryString = (
-    config: {
+  useEffect(() => setGroupDraft(group ?? null), [group]);
+
+  const createQueryString = useCallback(
+    (config: {
       name: string;
       value: string | null;
-    }[]
-  ): string => {
-    const params = new URLSearchParams(searchParams?.toString());
-    for (const { name, value } of config) {
-      if (!value) {
-        params?.delete(name);
-      } else {
-        params.set(name, value);
+    }[]): string => {
+      const params = new URLSearchParams(searchParams?.toString());
+      for (const { name, value } of config) {
+        if (!value) {
+          params?.delete(name);
+        } else {
+          params.set(name, value);
+        }
       }
-    }
-    return params.toString();
-  };
+      return params.toString();
+    },
+    [searchParams]
+  );
+
+  const updateGroupNameParam = useCallback(
+    (value: string | null) => {
+      const query = createQueryString([
+        {
+          name: GROUP_NAME_SEARCH_PARAM,
+          value,
+        },
+      ]);
+      router.replace(query ? `${pathname}?${query}` : pathname);
+    },
+    [createQueryString, pathname, router]
+  );
+
+  useDebounce(
+    () => {
+      if ((group ?? null) === groupDraft) {
+        return;
+      }
+      updateGroupNameParam(groupDraft);
+    },
+    200,
+    [groupDraft, group, updateGroupNameParam]
+  );
 
   const setGroupName = (value: string | null) => {
-    router.replace(
-      pathname +
-        "?" +
-        createQueryString([
-          {
-            name: GROUP_NAME_SEARCH_PARAM,
-            value,
-          },
-        ])
-    );
+    setGroupDraft(value);
   };
 
   const setAuthorIdentity = (value: string | null) => {
-    router.replace(
-      pathname +
-        "?" +
-        createQueryString([
-          {
-            name: IDENTITY_SEARCH_PARAM,
-            value,
-          },
-        ])
-    );
+    const query = createQueryString([
+      {
+        name: IDENTITY_SEARCH_PARAM,
+        value,
+      },
+    ]);
+    router.replace(query ? `${pathname}?${query}` : pathname);
   };
 
   const onMyGroups = () => {
