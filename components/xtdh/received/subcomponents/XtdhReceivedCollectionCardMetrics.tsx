@@ -50,11 +50,11 @@ export function XtdhReceivedCollectionCardMetrics({
         className,
       )}
     >
-      <div className="tw-flex tw-min-w-[150px] tw-flex-col tw-items-end tw-gap-1">
-        <span className="tw-self-start tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-500">
+      <div className="tw-flex tw-min-w-[150px] tw-flex-col tw-items-start tw-gap-1">
+        <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-500">
           xTDH Rate
         </span>
-        <div className="tw-flex tw-w-full tw-items-center tw-justify-end tw-gap-2">
+        <div className="tw-flex tw-items-center tw-gap-2">
           <span className="tw-text-sm tw-font-semibold tw-text-iron-50 tw-tabular-nums">
             {formatXtdhRate(collection.totalXtdhRate)}
           </span>
@@ -82,8 +82,8 @@ export function XtdhReceivedCollectionCardMetrics({
           </span>
         )}
       </div>
-      <div className="tw-flex tw-min-w-[150px] tw-flex-col tw-items-end tw-gap-1">
-        <span className="tw-self-start tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-500">
+      <div className="tw-flex tw-min-w-[150px] tw-flex-col tw-items-start tw-gap-1">
+        <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-500">
           Received
         </span>
         <span className="tw-text-sm tw-font-semibold tw-text-iron-50 tw-tabular-nums">
