@@ -21,7 +21,6 @@ interface StatusBadge {
 export interface XtdhReceivedCollectionCardSummaryProps {
   readonly collection: XtdhReceivedCollectionSummary;
   readonly className?: string;
-  readonly updatedLabel?: string;
 }
 
 function getBadgeStyles(variant: BadgeVariant) {
@@ -62,7 +61,6 @@ function getStatusBadges(
  */
 export function XtdhReceivedCollectionCardSummary({
   collection,
-  updatedLabel,
   className,
 }: XtdhReceivedCollectionCardSummaryProps) {
   const badges = getStatusBadges(collection);
@@ -102,11 +100,6 @@ export function XtdhReceivedCollectionCardSummary({
               </span>
             ))}
           </div>
-        )}
-        {updatedLabel && (
-          <span className="tw-block tw-text-xs tw-leading-snug tw-text-iron-500">
-            {updatedLabel}
-          </span>
         )}
       </div>
     </div>

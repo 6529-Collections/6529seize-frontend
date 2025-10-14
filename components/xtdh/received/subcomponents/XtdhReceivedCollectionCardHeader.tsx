@@ -60,7 +60,6 @@ export function XtdhReceivedCollectionCardHeader({
     >
       <XtdhReceivedCollectionCardSummary
         collection={collection}
-        updatedLabel={updatedLabel}
         className="tw-order-1"
       />
       <XtdhReceivedCollectionCardMetrics
@@ -77,15 +76,22 @@ export function XtdhReceivedCollectionCardHeader({
           granters={collection.granters}
           totalCount={getCollectionGrantorCount(collection)}
         />
-        <span className={clsx(chevronClass, "tw-ml-auto")} aria-hidden="true">
-          <FontAwesomeIcon
-            icon={faChevronRight}
-            className={clsx(
-              "tw-h-3 tw-w-3 tw-transition-transform tw-duration-200",
-              expanded ? "tw-rotate-90" : "tw-rotate-0",
-            )}
-          />
-        </span>
+        <div className="tw-ml-auto tw-flex tw-items-center tw-gap-3 md:tw-gap-4">
+          {updatedLabel && (
+            <span className="tw-text-xs tw-leading-snug tw-text-iron-500">
+              {updatedLabel}
+            </span>
+          )}
+          <span className={chevronClass} aria-hidden="true">
+            <FontAwesomeIcon
+              icon={faChevronRight}
+              className={clsx(
+                "tw-h-3 tw-w-3 tw-transition-transform tw-duration-200",
+                expanded ? "tw-rotate-90" : "tw-rotate-0",
+              )}
+            />
+          </span>
+        </div>
       </div>
     </button>
   );
