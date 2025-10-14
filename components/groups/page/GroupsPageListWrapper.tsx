@@ -97,6 +97,7 @@ export default function GroupsPageListWrapper({
 
   const setGroupName = (value: string | null) => {
     setGroupDraft(value);
+    updateGroupNameParam(value);
   };
 
   const setAuthorIdentity = (value: string | null) => {
