@@ -3,16 +3,24 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 
-import type { XtdhReceivedNft } from "@/types/xtdh";
+import type {
+  XtdhReceivedCollectionSummary,
+  XtdhReceivedNft,
+} from "@/types/xtdh";
 
 import { useXtdhReceivedBodyScrollLock } from "../hooks/useXtdhReceivedBodyScrollLock";
 import { XTDH_RECEIVED_COLLECTION_EMPTY_MESSAGE } from "../../subcomponents/XtdhReceivedCollectionCard.constants";
 import { XtdhReceivedEmptyState } from "../../subcomponents/XtdhReceivedEmptyState";
 import { XtdhReceivedCollectionTokenDetails } from "./XtdhReceivedCollectionTokenDetails";
 import { XtdhReceivedCollectionTokensTable } from "./XtdhReceivedCollectionTokensTable";
+import type {
+  XtdhReceivedTokenSortDirection,
+  XtdhReceivedTokenSortKey,
+} from "../hooks/useXtdhReceivedTokenSorting";
 
 export interface XtdhReceivedCollectionOverlayContentProps {
   readonly collectionName: string;
+  readonly collection: XtdhReceivedCollectionSummary;
   readonly tokens: readonly XtdhReceivedNft[];
   readonly activeToken: XtdhReceivedNft | null;
   readonly activeTokenId: string | null;
@@ -20,10 +28,14 @@ export interface XtdhReceivedCollectionOverlayContentProps {
   readonly onSelectToken: (tokenId: string) => void;
   readonly onClose: () => void;
   readonly onCloseDetails: () => void;
+  readonly sortKey: XtdhReceivedTokenSortKey;
+  readonly sortDirection: XtdhReceivedTokenSortDirection;
+  readonly onRequestSort: (key: XtdhReceivedTokenSortKey) => void;
 }
 
 export function XtdhReceivedCollectionOverlayContent({
   collectionName,
+  collection,
   tokens,
   activeToken,
   activeTokenId,
@@ -31,14 +43,24 @@ export function XtdhReceivedCollectionOverlayContent({
   onSelectToken,
   onClose,
   onCloseDetails,
+  sortKey,
+  sortDirection,
+  onRequestSort,
 }: XtdhReceivedCollectionOverlayContentProps) {
   useXtdhReceivedBodyScrollLock(true);
 
   const emptyState = (
-    <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-px-6">
+    <div className="tw-flex tw-h-40 tw-w-full tw-items-center tw-justify-center tw-px-6">
       <XtdhReceivedEmptyState message={XTDH_RECEIVED_COLLECTION_EMPTY_MESSAGE} />
     </div>
   );
+
+  const activeCount = tokens.length;
+  const totalTokens = collection.tokenCount;
+  const headerCaption =
+    typeof totalTokens === "number" && totalTokens > 0
+      ? `${activeCount.toLocaleString()}/${totalTokens.toLocaleString()} active`
+      : undefined;
 
   return (
     <div className="tw-fixed tw-inset-0 tw-z-50 tw-flex tw-flex-col tw-bg-iron-1000/90 tw-backdrop-blur-sm">
@@ -61,25 +83,28 @@ export function XtdhReceivedCollectionOverlayContent({
         </button>
       </div>
       <div className="tw-flex-1 tw-overflow-y-auto tw-px-4 tw-py-5 tw-scrollbar-thin tw-scrollbar-thumb-iron-800">
-        {tokens.length === 0 ? (
-          emptyState
-        ) : (
-          <div className="tw-flex tw-flex-col tw-gap-5">
-            <XtdhReceivedCollectionTokensTable
-              tokens={tokens}
-              activeTokenId={activeTokenId}
-              onSelectToken={onSelectToken}
+        <div className="tw-flex tw-flex-col tw-gap-5">
+          <XtdhReceivedCollectionTokensTable
+            tone="overlay"
+            headerLabel={`TOKENS (${activeCount.toLocaleString()} active)`}
+            headerCaption={headerCaption}
+            tokens={tokens}
+            activeTokenId={activeTokenId}
+            onSelectToken={onSelectToken}
+            detailsRegionId={detailsRegionId}
+            emptyState={emptyState}
+            sortKey={sortKey}
+            sortDirection={sortDirection}
+            onRequestSort={onRequestSort}
+          />
+          {activeToken && (
+            <XtdhReceivedCollectionTokenDetails
+              token={activeToken}
               detailsRegionId={detailsRegionId}
+              onClose={onCloseDetails}
             />
-            {activeToken && (
-              <XtdhReceivedCollectionTokenDetails
-                token={activeToken}
-                detailsRegionId={detailsRegionId}
-                onClose={onCloseDetails}
-              />
-            )}
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

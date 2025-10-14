@@ -1,13 +1,15 @@
 'use client';
 
 import { useCallback } from "react";
+import type { KeyboardEvent } from "react";
 import clsx from "clsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 
 import type { XtdhReceivedNft } from "@/types/xtdh";
 
-import { formatXtdhRate, formatXtdhTotal } from "../../utils";
+import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
+import { formatXtdhTotal, formatXtdhValue } from "../../utils";
 import { XtdhReceivedGranterAvatarGroup } from "../../subcomponents/XtdhReceivedGranterAvatarGroup";
 import { XTDH_RECEIVED_TOKEN_TABLE_COLUMNS } from "../constants";
 import { getXtdhReceivedTokenGrantorCount } from "../utils/tokenGrantors";
@@ -29,61 +31,124 @@ export function XtdhReceivedCollectionTokenRow({
     onSelect(nft.tokenId);
   }, [nft.tokenId, onSelect]);
 
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        handleSelect();
+      }
+    },
+    [handleSelect],
+  );
+
   const grantorCount = getXtdhReceivedTokenGrantorCount(nft);
+  const rateValue = formatXtdhValue(nft.xtdhRate);
+  const totalReceived = formatXtdhTotal(nft.totalXtdhReceived);
+  const grantorAriaLabel = `${grantorCount.toLocaleString()} grantor${grantorCount === 1 ? "" : "s"}`;
 
   return (
     <div
       role="row"
+      tabIndex={0}
+      onClick={handleSelect}
+      onKeyDown={handleKeyDown}
+      aria-label={`View details for ${nft.tokenName}`}
       className={clsx(
-        "tw-grid tw-w-full tw-items-center tw-gap-3 tw-border-b tw-border-iron-900/60 tw-px-4 tw-py-3 tw-text-sm tw-leading-tight tw-transition tw-duration-150 tw-ease-out last:tw-border-none",
+        "tw-grid tw-w-full tw-cursor-pointer tw-items-center tw-gap-3 tw-border-b tw-border-iron-900/60 tw-px-4 tw-py-2.5 tw-text-sm tw-leading-tight tw-transition-colors tw-duration-150 tw-ease-out last:tw-border-none",
+        "focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950",
         XTDH_RECEIVED_TOKEN_TABLE_COLUMNS,
         isActive
           ? "tw-bg-primary-500/10 tw-ring-1 tw-ring-inset tw-ring-primary-500/60"
-          : "hover:tw-bg-iron-900/60",
+          : "hover:tw-bg-iron-900/55",
       )}
     >
-      <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
-        <img
-          src={nft.tokenImage}
-          alt={`${nft.tokenName} artwork`}
-          className="tw-h-12 tw-w-12 tw-flex-shrink-0 tw-rounded-lg tw-border tw-border-iron-800 tw-object-cover"
-          loading="lazy"
-        />
-        <div className="tw-flex tw-min-w-0 tw-flex-col">
-          <span className="tw-truncate tw-text-sm tw-font-semibold tw-text-iron-50">
-            {nft.tokenName}
-          </span>
-          <span className="tw-text-xxs tw-uppercase tw-text-iron-400">
-            Token #{nft.tokenId}
-          </span>
+      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3">
+        <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
+          <img
+            src={nft.tokenImage}
+            alt={`${nft.tokenName} artwork`}
+            className="tw-h-12 tw-w-12 tw-flex-shrink-0 tw-rounded-lg tw-border tw-border-iron-800 tw-object-cover"
+            loading="lazy"
+          />
+          <div className="tw-flex tw-min-w-0 tw-flex-col">
+            <span className="tw-truncate tw-text-sm tw-font-semibold tw-text-iron-50">
+              {nft.tokenName}
+            </span>
+            <span className="tw-text-xxs tw-uppercase tw-tracking-wide tw-text-iron-500">
+              Token #{nft.tokenId}
+            </span>
+          </div>
+        </div>
+        <div className="tw-flex tw-flex-col tw-gap-2 md:tw-hidden">
+          <div className="tw-flex tw-items-center tw-justify-between">
+            <span className="tw-text-xxs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+              Rate (/day)
+            </span>
+            <span className="tw-text-sm tw-font-semibold tw-text-iron-100 tw-tabular-nums">
+              {rateValue}
+              <span className="tw-ml-1 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
+                /day
+              </span>
+            </span>
+          </div>
+          <div className="tw-flex tw-items-center tw-justify-between">
+            <span className="tw-text-xxs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+              Total Received
+            </span>
+            <span className="tw-text-sm tw-font-semibold tw-text-iron-100 tw-tabular-nums">
+              {totalReceived}
+            </span>
+          </div>
+          <div className="tw-flex tw-items-center tw-justify-between">
+            <span className="tw-text-xxs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+              Grantors
+            </span>
+            <CustomTooltip content="View grantors" placement="top">
+              <span>
+                <XtdhReceivedGranterAvatarGroup
+                  granters={nft.granters}
+                  totalCount={grantorCount}
+                  onClick={handleSelect}
+                  ariaLabel={grantorAriaLabel}
+                />
+              </span>
+            </CustomTooltip>
+          </div>
         </div>
       </div>
       <div className="tw-hidden md:tw-flex md:tw-justify-end">
-        <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
-          {formatXtdhRate(nft.xtdhRate)}
+        <span className="tw-text-sm tw-font-semibold tw-text-iron-100 tw-tabular-nums">
+          {rateValue}
+          <span className="tw-ml-1 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
+            /day
+          </span>
         </span>
       </div>
       <div className="tw-hidden md:tw-flex md:tw-justify-end">
-        <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
-          {formatXtdhTotal(nft.totalXtdhReceived)}
+        <span className="tw-text-sm tw-font-semibold tw-text-iron-100 tw-tabular-nums">
+          {totalReceived}
         </span>
       </div>
-      <div className="tw-hidden md:tw-flex md:tw-justify-start">
-        <XtdhReceivedGranterAvatarGroup
-          granters={nft.granters}
-          totalCount={grantorCount}
-          onClick={handleSelect}
-          ariaLabel={`View grantors for ${nft.tokenName}`}
-        />
+      <div className="tw-hidden md:tw-flex md:tw-items-center md:tw-justify-start">
+        <CustomTooltip content="View grantors" placement="top">
+          <span>
+            <XtdhReceivedGranterAvatarGroup
+              granters={nft.granters}
+              totalCount={grantorCount}
+              onClick={handleSelect}
+              ariaLabel={grantorAriaLabel}
+            />
+          </span>
+        </CustomTooltip>
       </div>
-      <div className="tw-flex tw-justify-end md:tw-justify-end">
+      <div className="tw-flex tw-justify-end">
         <button
           type="button"
           onClick={handleSelect}
           aria-expanded={isActive}
           aria-controls={detailsRegionId}
           className={clsx(
-            "tw-inline-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-transparent tw-bg-transparent tw-px-2 tw-py-1.5 tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-300 tw-transition tw-duration-150 tw-ease-out",
+            "tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-transparent tw-bg-transparent tw-px-2 tw-py-1.5 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-primary-300 tw-transition tw-duration-150 tw-ease-out",
             "hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950",
           )}
         >

@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useLayoutEffect, useRef } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import clsx from "clsx";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { XtdhReceivedCollectionSummary } from "@/types/xtdh";
 
 import { XtdhReceivedCollectionCardContent } from "../collection-card-content";
@@ -26,6 +27,7 @@ export function XtdhReceivedCollectionCard({
     documentHeight: number;
     wasAtBottom: boolean;
   } | null>(null);
+  const shouldReduceMotion = useReducedMotion();
 
   const handleToggle = useCallback(() => {
     const node = cardRef.current;
@@ -51,6 +53,41 @@ export function XtdhReceivedCollectionCard({
 
     onToggle();
   }, [onToggle]);
+
+  useEffect(() => {
+    if (!expanded || typeof window === "undefined") {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        handleToggle();
+      }
+    };
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const node = cardRef.current;
+      if (!node) {
+        return;
+      }
+
+      const path = event.composedPath();
+      if (path.includes(node)) {
+        return;
+      }
+
+      handleToggle();
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("pointerdown", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [expanded, handleToggle]);
 
   useLayoutEffect(() => {
     const node = cardRef.current;
@@ -119,12 +156,34 @@ export function XtdhReceivedCollectionCard({
         expanded={expanded}
         onToggle={handleToggle}
       />
-      {expanded && (
-        <XtdhReceivedCollectionCardContent
-          collection={collection}
-          onClose={handleToggle}
-        />
-      )}
+      <AnimatePresence initial={false}>
+        {expanded && (
+          <motion.div
+            key="xtdh-received-collection-content"
+            initial={
+              shouldReduceMotion
+                ? false
+                : { opacity: 0, height: 0 }
+            }
+            animate={{ opacity: 1, height: "auto" }}
+            exit={
+              shouldReduceMotion
+                ? { opacity: 0 }
+                : { opacity: 0, height: 0 }
+            }
+            transition={{
+              duration: shouldReduceMotion ? 0 : 0.24,
+              ease: [0.22, 0.61, 0.36, 1],
+            }}
+            style={{ overflow: "hidden" }}
+          >
+            <XtdhReceivedCollectionCardContent
+              collection={collection}
+              onClose={handleToggle}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </article>
   );
 }

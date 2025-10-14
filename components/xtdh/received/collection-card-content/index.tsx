@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import type { XtdhReceivedCollectionSummary } from "@/types/xtdh";
 
 import { useXtdhReceivedCollectionTokens } from "../hooks/useXtdhReceivedCollectionTokens";
+import { useXtdhReceivedTokenSorting } from "./hooks/useXtdhReceivedTokenSorting";
 import { XtdhReceivedCollectionInlineContent } from "./subcomponents/XtdhReceivedCollectionInlineContent";
 import { XtdhReceivedCollectionOverlayContent } from "./subcomponents/XtdhReceivedCollectionOverlayContent";
 import { useXtdhReceivedActiveToken } from "./hooks/useXtdhReceivedActiveToken";
@@ -21,8 +22,10 @@ export function XtdhReceivedCollectionCardContent({
   onClose,
 }: XtdhReceivedCollectionCardContentProps) {
   const tokens = useXtdhReceivedCollectionTokens(collection);
+  const { sortedTokens, sortKey, sortDirection, requestSort } =
+    useXtdhReceivedTokenSorting(tokens);
   const { activeToken, activeTokenId, selectToken, clearSelection } =
-    useXtdhReceivedActiveToken(tokens);
+    useXtdhReceivedActiveToken(sortedTokens);
   const isMobile = useXtdhReceivedIsMobile();
   const clientReady = useXtdhReceivedClientReady();
 
@@ -36,13 +39,17 @@ export function XtdhReceivedCollectionCardContent({
     return createPortal(
       <XtdhReceivedCollectionOverlayContent
         collectionName={collection.collectionName}
-        tokens={tokens}
+        collection={collection}
+        tokens={sortedTokens}
         activeToken={activeToken}
         activeTokenId={activeTokenId}
         onSelectToken={selectToken}
         detailsRegionId={detailsRegionId}
         onClose={onClose}
         onCloseDetails={clearSelection}
+        sortKey={sortKey}
+        sortDirection={sortDirection}
+        onRequestSort={requestSort}
       />,
       document.body,
     );
@@ -50,12 +57,17 @@ export function XtdhReceivedCollectionCardContent({
 
   return (
     <XtdhReceivedCollectionInlineContent
-      tokens={tokens}
+      collection={collection}
+      tokens={sortedTokens}
       activeToken={activeToken}
       activeTokenId={activeTokenId}
       onSelectToken={selectToken}
       detailsRegionId={detailsRegionId}
       onCloseDetails={clearSelection}
+      sortKey={sortKey}
+      sortDirection={sortDirection}
+      onRequestSort={requestSort}
+      onCollapse={onClose}
     />
   );
 }

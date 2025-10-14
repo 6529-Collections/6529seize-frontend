@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 
 import type { XtdhReceivedCollectionSummary } from "@/types/xtdh";
 
@@ -52,8 +52,8 @@ export function XtdhReceivedCollectionCardHeader({
     .join(" ")
     .trim();
 
-  const actionLabel = expanded ? "Collapse" : "Expand";
-  const actionIcon = expanded ? faChevronUp : faChevronDown;
+  const actionLabel = "Expand";
+  const actionIcon = faChevronDown;
   const actionPillClass = clsx(
     "tw-inline-flex tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-iron-800/80 tw-bg-iron-900/40 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out",
     expanded
@@ -157,13 +157,15 @@ export function XtdhReceivedCollectionCardHeader({
             )}
           </div>
         )}
-        <span className={clsx(actionPillClass, "tw-ml-auto")}>
-          <span>{actionLabel}</span>
-          <FontAwesomeIcon
-            icon={actionIcon}
-            className="tw-h-3 tw-w-3 tw-transition-transform tw-duration-200"
-          />
-        </span>
+        {!expanded && (
+          <span className={clsx(actionPillClass, "tw-ml-auto")}>
+            <span>{actionLabel}</span>
+            <FontAwesomeIcon
+              icon={actionIcon}
+              className="tw-h-3 tw-w-3 tw-transition-transform tw-duration-200"
+            />
+          </span>
+        )}
       </div>
     </button>
   );
