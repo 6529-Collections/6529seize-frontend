@@ -41,17 +41,35 @@ export const userPageNeedsRedirect = ({
   ) {
     const currentQuery = { ...req.query };
     delete currentQuery.user;
+    const toQueryStringValue = (input: unknown): string | null => {
+      if (input === undefined || input === null) {
+        return null;
+      }
+      if (typeof input === "string") {
+        return input;
+      }
+      if (
+        typeof input === "number" ||
+        typeof input === "boolean" ||
+        typeof input === "bigint"
+      ) {
+        return String(input);
+      }
+      return null;
+    };
     const queryEntries = Object.entries(currentQuery).flatMap(
       ([key, value]) => {
         if (Array.isArray(value)) {
           return value
-            .filter((entry) => entry !== undefined && entry !== null)
-            .map((entry) => [key, String(entry)]);
+            .map(toQueryStringValue)
+            .filter((entry): entry is string => entry !== null)
+            .map((entry) => [key, entry]);
         }
-        if (value === undefined || value === null) {
+        const normalizedValue = toQueryStringValue(value);
+        if (normalizedValue === null) {
           return [];
         }
-        return [[key, String(value)]];
+        return [[key, normalizedValue]];
       }
     );
     const queryParamsString = new URLSearchParams(queryEntries).toString();
