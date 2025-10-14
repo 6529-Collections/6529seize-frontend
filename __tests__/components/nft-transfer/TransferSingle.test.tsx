@@ -61,9 +61,14 @@ jest.mock("@/components/nft-transfer/TransferState", () => {
 jest.mock("@/components/nft-transfer/TransferModal", () => ({
   __esModule: true,
   default: ({ open, onClose }: { open: boolean; onClose: () => void }) => (
-    <div data-testid="transfer-modal" data-open={open} onClick={onClose}>
+    <button
+      type="button"
+      data-testid="transfer-modal"
+      data-open={open}
+      aria-expanded={open}
+      onClick={onClose}>
       {open ? "OPEN" : "CLOSED"}
-    </div>
+    </button>
   ),
 }));
 

@@ -121,13 +121,20 @@ export default function UserPageCollectedCard({
               {contractType === ContractType.ERC1155 ? (
                 <>
                   <span className="tw-text-sm tw-font-medium">
-                    {selected
-                      ? `Selected ${
-                          copiesMax === 1 ? `${qtySelected} / ${copiesMax}` : ""
-                        }`
-                      : copiesMax > 1
-                      ? `Select (up to ${copiesMax})`
-                      : "Select"}
+                    {(() => {
+                      if (selected) {
+                        if (copiesMax === 1) {
+                          return `Selected ${qtySelected} / ${copiesMax}`;
+                        }
+                        return "Selected";
+                      }
+
+                      if (copiesMax > 1) {
+                        return `Select (up to ${copiesMax})`;
+                      }
+
+                      return "Select";
+                    })()}
                   </span>
                   {copiesMax > 1 && qtySelected > 0 && (
                     <div className="tw-flex tw-items-center tw-gap-1">
@@ -173,20 +180,13 @@ export default function UserPageCollectedCard({
 
   if (interactiveMode === "select") {
     return (
-      <div
-        className="tw-no-underline"
-        role="button"
-        tabIndex={0}
+      <button
+        type="button"
         onClick={onToggle}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            onToggle?.();
-          }
-        }}
-        aria-pressed={selected}>
+        aria-pressed={selected}
+        className="tw-no-underline tw-w-full tw-text-left tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none">
         {CardBody}
-      </div>
+      </button>
     );
   }
 

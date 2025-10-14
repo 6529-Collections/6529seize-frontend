@@ -218,7 +218,7 @@ export default function TransferModal({
     check();
 
     // Re-check on window resize
-    window.addEventListener("resize", check);
+    globalThis.addEventListener("resize", check);
 
     // Attach scroll listeners to each scrollable container
     const leftEl = leftListRef.current;
@@ -255,7 +255,7 @@ export default function TransferModal({
     walletsEl?.addEventListener("scroll", onScrollWallets);
 
     return () => {
-      window.removeEventListener("resize", check);
+      globalThis.removeEventListener("resize", check);
       leftEl?.removeEventListener("scroll", onScrollLeft);
       resultsEl?.removeEventListener("scroll", onScrollResults);
       walletsEl?.removeEventListener("scroll", onScrollWallets);
@@ -276,23 +276,6 @@ export default function TransferModal({
       );
     }, 150);
   }, [flow, isClosing, onClose]);
-
-  useEffect(() => {
-    if (!open) return;
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      // Support both modern and legacy key values
-      if (e.key === "Escape" || e.key === "Esc") {
-        e.preventDefault();
-        handleClose();
-      }
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open, handleClose]);
 
   const handleConfirm = useCallback(async () => {
     if (!publicClient || !address) {
@@ -527,6 +510,9 @@ export default function TransferModal({
 
   return (
     <dialog
+      role="dialog"
+      aria-modal="true"
+      tabIndex={-1}
       className={[
         "tw-fixed tw-inset-0 tw-z-[100] tw-bg-white/10 tw-backdrop-blur-sm tw-flex tw-items-start tw-justify-center tw-p-4 md:tw-p-8",
         isClosing
@@ -537,7 +523,16 @@ export default function TransferModal({
         if (flow === "wallet" || flow === "submitted") return;
         if (e.target === e.currentTarget) handleClose();
       }}
-      aria-modal="true">
+      onKeyDown={(e) => {
+        if (e.key === "Escape" || e.key === "Esc") {
+          e.preventDefault();
+          handleClose();
+        }
+        // Optional: make backdrop “clickable” via keyboard too
+        if (e.key === "Enter" || e.key === " ") {
+          if (flow !== "wallet" && flow !== "submitted") handleClose();
+        }
+      }}>
       <div
         className={[
           "tw-w-[70vw] tw-max-w-[1100px] tw-h-[85vh] tw-max-h-[900px] tw-rounded-2xl tw-bg-[#0c0c0d] tw-ring-[3px] tw-ring-white/30 tw-text-white tw-shadow-xl tw-overflow-hidden tw-flex tw-flex-col",
@@ -690,17 +685,28 @@ export default function TransferModal({
                     <div
                       ref={walletsListRef}
                       className="tw-space-y-2 tw-flex-1 tw-min-h-0 tw-overflow-auto tw-pr-3 tw-[scrollbar-gutter:stable] tw-scrollbar-thin tw-scrollbar-thumb-white/30 tw-scrollbar-track-transparent hover:tw-scrollbar-thumb-white/50">
-                      {isIdentityLoading ? (
-                        <div className="tw-text-xs tw-opacity-60">
-                          Loading wallets…
-                        </div>
-                      ) : (profile?.wallets ?? []).length === 0 ? (
-                        <div className="tw-text-xs tw-opacity-60">
-                          No wallets found for{" "}
-                          {selectedProfile.display || selectedProfile.handle}.
-                        </div>
-                      ) : (
-                        profile!.wallets!.map(
+                      {(() => {
+                        if (isIdentityLoading) {
+                          return (
+                            <div className="tw-text-xs tw-opacity-60">
+                              Loading wallets…
+                            </div>
+                          );
+                        }
+
+                        const wallets = profile?.wallets ?? [];
+                        if (wallets.length === 0) {
+                          return (
+                            <div className="tw-text-xs tw-opacity-60">
+                              No wallets found for{" "}
+                              {selectedProfile.display ||
+                                selectedProfile.handle}
+                              .
+                            </div>
+                          );
+                        }
+
+                        return wallets.map(
                           (w: {
                             wallet: string;
                             display: string;
@@ -729,8 +735,8 @@ export default function TransferModal({
                               </button>
                             );
                           }
-                        )
-                      )}
+                        );
+                      })()}
                     </div>
                     {walletsHasOverflow && (
                       <div className="tw-text-xs tw-opacity-75 tw-text-center">
@@ -871,52 +877,66 @@ export default function TransferModal({
 
         {/* footer */}
         <div className="tw-flex tw-justify-end tw-gap-3 tw-border-0 tw-border-t-[3px] tw-border-solid tw-border-white/30 tw-p-4">
-          {flow === "review" ? (
-            <>
-              <button
-                type="button"
-                onClick={handleClose}
-                className="tw-rounded-lg tw-bg-white/10 hover:tw-bg-white/15 tw-px-4 tw-py-2 tw-border-1 tw-border-solid tw-border-[#444]">
-                Cancel
-              </button>
-              <button
-                type="button"
-                disabled={!canConfirm}
-                onClick={handleConfirm}
-                className="tw-rounded-lg tw-bg-white tw-text-black tw-px-4 tw-py-2 tw-border-1 tw-border-solid tw-border-[#444] disabled:tw-opacity-60 disabled:tw-cursor-not-allowed">
-                Transfer
-              </button>
-            </>
-          ) : flow === "wallet" || flow === "submitted" ? (
-            <button
-              type="button"
-              disabled
-              className="tw-rounded-lg tw-bg-white/10 tw-px-4 tw-py-2 tw-opacity-60">
-              Processing…
-            </button>
-          ) : flow === "error" ? (
-            <>
-              <button
-                type="button"
-                onClick={() => setFlow("review")}
-                className="tw-rounded-lg tw-bg-white/10 hover:tw-bg-white/15 tw-px-4 tw-py-2 tw-border-1 tw-border-solid tw-border-[#444]">
-                Back
-              </button>
+          {(() => {
+            if (flow === "review") {
+              return (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleClose}
+                    className="tw-rounded-lg tw-bg-white/10 hover:tw-bg-white/15 tw-px-4 tw-py-2 tw-border-1 tw-border-solid tw-border-[#444]">
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!canConfirm}
+                    onClick={handleConfirm}
+                    className="tw-rounded-lg tw-bg-white tw-text-black tw-px-4 tw-py-2 tw-border-1 tw-border-solid tw-border-[#444] disabled:tw-opacity-60 disabled:tw-cursor-not-allowed">
+                    Transfer
+                  </button>
+                </>
+              );
+            }
+
+            if (flow === "wallet" || flow === "submitted") {
+              return (
+                <button
+                  type="button"
+                  disabled
+                  className="tw-rounded-lg tw-bg-white/10 tw-px-4 tw-py-2 tw-opacity-60">
+                  Processing…
+                </button>
+              );
+            }
+
+            if (flow === "error") {
+              return (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setFlow("review")}
+                    className="tw-rounded-lg tw-bg-white/10 hover:tw-bg-white/15 tw-px-4 tw-py-2 tw-border-1 tw-border-solid tw-border-[#444]">
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleClose}
+                    className="tw-rounded-lg tw-bg-white tw-text-black tw-px-4 tw-py-2">
+                    Close
+                  </button>
+                </>
+              );
+            }
+
+            return (
               <button
                 type="button"
                 onClick={handleClose}
                 className="tw-rounded-lg tw-bg-white tw-text-black tw-px-4 tw-py-2">
                 Close
               </button>
-            </>
-          ) : (
-            <button
-              type="button"
-              onClick={handleClose}
-              className="tw-rounded-lg tw-bg-white tw-text-black tw-px-4 tw-py-2">
-              Close
-            </button>
-          )}
+            );
+          })()}
         </div>
       </div>
     </dialog>
