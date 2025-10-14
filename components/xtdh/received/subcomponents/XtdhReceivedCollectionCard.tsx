@@ -20,7 +20,7 @@ export function XtdhReceivedCollectionCard({
   return (
     <article
       className={clsx(
-        "tw-flex tw-h-full tw-min-h-[220px] tw-flex-col tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-shadow-sm tw-transition tw-duration-200 tw-ease-out",
+        "tw-flex tw-h-full tw-flex-col tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-shadow-sm tw-transition tw-duration-200 tw-ease-out",
         expanded && "tw-border-primary-400/70 tw-shadow-lg tw-shadow-primary-900/40",
       )}
       role="listitem"

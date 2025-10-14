@@ -82,9 +82,9 @@ export function XtdhReceivedCollectionCardHeader({
       onClick={onToggle}
       aria-expanded={expanded}
       aria-label={getXtdhReceivedCollectionToggleLabel(collection.collectionName)}
-      className="tw-group tw-flex tw-w-full tw-flex-col tw-gap-4 tw-rounded-2xl tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-left tw-transition tw-duration-200 tw-ease-out hover:tw-bg-iron-900/60 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
+      className="tw-group tw-flex tw-w-full tw-flex-col tw-gap-3 tw-rounded-2xl tw-bg-transparent tw-px-4 tw-py-3 tw-text-left tw-transition tw-duration-200 tw-ease-out hover:tw-bg-iron-900/60 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
     >
-      <div className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-4 md:tw-grid-cols-[minmax(0,2.3fr)_minmax(0,1.1fr)_minmax(0,1.1fr)_minmax(0,1.2fr)]">
+      <div className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-3 md:tw-grid-cols-[minmax(0,2.3fr)_minmax(0,1.1fr)_minmax(0,1.1fr)_minmax(0,1.2fr)]">
         <XtdhReceivedCollectionCardSummary
           collection={collection}
           className="tw-order-1 tw-min-w-0"
@@ -126,7 +126,7 @@ export function XtdhReceivedCollectionCardHeader({
           />
         </div>
       </div>
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 md:tw-gap-4">
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 md:tw-gap-3">
         {(activitySnapshot.desktop || updatedMetadata) && (
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 tw-text-xs tw-leading-snug tw-text-iron-400">
             <span className="tw-min-w-0 tw-truncate tw-whitespace-nowrap">
