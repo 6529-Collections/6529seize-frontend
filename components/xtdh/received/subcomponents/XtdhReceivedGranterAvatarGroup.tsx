@@ -14,6 +14,8 @@ export interface XtdhReceivedGranterAvatarGroupProps {
   readonly totalCount?: number;
   readonly className?: string;
   readonly showCountLabel?: boolean;
+  readonly onClick?: () => void;
+  readonly ariaLabel?: string;
 }
 
 function formatGrantorCount(count: number) {
@@ -26,6 +28,8 @@ export function XtdhReceivedGranterAvatarGroup({
   totalCount,
   className,
   showCountLabel = false,
+  onClick,
+  ariaLabel,
 }: XtdhReceivedGranterAvatarGroupProps) {
   const displayable = granters.filter(
     (granter) => Boolean(granter.profileImage) && Boolean(granter.displayName),
@@ -40,10 +44,30 @@ export function XtdhReceivedGranterAvatarGroup({
       ? formatGrantorCount(overallCount)
       : "No grantors yet";
 
+  const interactive = typeof onClick === "function";
+  const RootComponent = (interactive ? "button" : "div") as
+    | "button"
+    | "div";
+  const rootClassName = clsx(
+    "tw-inline-flex tw-items-center tw-gap-2",
+    interactive
+      ? "tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-900/40 tw-px-2.5 tw-py-1.5 tw-text-left tw-transition tw-duration-200 tw-ease-out hover:tw-border-iron-700 hover:tw-bg-iron-900/60 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
+      : undefined,
+    className,
+  );
+
+  const commonProps = interactive
+    ? {
+        type: "button" as const,
+        onClick,
+        "aria-label": ariaLabel ?? srLabel,
+      }
+    : {};
+
   if (preview.length > 0) {
     return (
-      <div className={clsx("tw-flex tw-items-center tw-gap-2", className)}>
-        <div className="tw-flex -tw-space-x-2" aria-hidden="true">
+      <RootComponent className={rootClassName} {...commonProps}>
+        <span className="tw-inline-flex -tw-space-x-2" aria-hidden="true">
           {preview.map((granter) => (
             <CustomTooltip
               key={granter.profileId}
@@ -68,31 +92,34 @@ export function XtdhReceivedGranterAvatarGroup({
               </span>
             </CustomTooltip>
           )}
-        </div>
+        </span>
         {showCountLabel && (
           <span className="tw-text-xs tw-text-iron-300">
             {formatGrantorCount(overallCount)}
           </span>
         )}
         <span className="tw-sr-only">{srLabel}</span>
-      </div>
+      </RootComponent>
     );
   }
 
   if (overallCount <= 0) {
     return (
-      <div className={clsx("tw-text-xs tw-text-iron-400", className)}>
+      <RootComponent
+        className={clsx(rootClassName, "tw-text-xs tw-text-iron-400")}
+        {...commonProps}
+      >
         No grantors yet
-      </div>
+      </RootComponent>
     );
   }
 
   return (
-    <div className={clsx("tw-inline-flex tw-items-center tw-gap-2", className)}>
+    <RootComponent className={rootClassName} {...commonProps}>
       <span className="tw-inline-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-iron-950 tw-bg-iron-900">
         <FontAwesomeIcon icon={faUserGroup} className="tw-h-3 tw-w-3 tw-text-iron-300" />
       </span>
       <span className="tw-text-xs tw-text-iron-300">{formatGrantorCount(overallCount)}</span>
-    </div>
+    </RootComponent>
   );
 }

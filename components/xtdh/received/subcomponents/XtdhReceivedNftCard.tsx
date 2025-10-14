@@ -17,7 +17,7 @@ export function XtdhReceivedNftCard({
   showCollectionName = true,
 }: XtdhReceivedNftCardProps) {
   const [expanded, setExpanded] = useState(false);
-  const granterPanelId = `nft-granters-${nft.tokenId}`;
+  const grantorPanelId = `nft-grantors-${nft.tokenId}`;
   const containerClass = clsx(
     "tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-4 tw-flex tw-flex-col tw-gap-4",
     showCollectionName ? "tw-rounded-2xl" : "tw-rounded-xl tw-bg-iron-900"
@@ -76,19 +76,19 @@ export function XtdhReceivedNftCard({
               setExpanded((prev) => !prev);
             }}
             aria-expanded={expanded}
-            aria-controls={granterPanelId}
+            aria-controls={grantorPanelId}
             className="md:tw-ml-auto tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-850 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-200 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
           >
-            {expanded ? "Hide granters" : "View granters"}
+            {expanded ? "Hide grantors" : "View grantors"}
           </button>
         </div>
       </div>
       {expanded && (
         <div
-          id={granterPanelId}
+          id={grantorPanelId}
           className={expandedContentClass}
           role="region"
-          aria-label={`Granters for ${nft.tokenName}`}
+          aria-label={`Grantors for ${nft.tokenName}`}
         >
           {nft.granters.map((granter) => (
             <XtdhReceivedGranterRow

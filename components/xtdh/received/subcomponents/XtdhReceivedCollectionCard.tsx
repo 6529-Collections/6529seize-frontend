@@ -1,5 +1,6 @@
 'use client';
 
+import clsx from "clsx";
 import type { XtdhReceivedCollectionSummary } from "@/types/xtdh";
 
 import { XtdhReceivedCollectionCardContent } from "./XtdhReceivedCollectionCardContent";
@@ -18,7 +19,10 @@ export function XtdhReceivedCollectionCard({
 }: XtdhReceivedCollectionCardProps) {
   return (
     <article
-      className="tw-flex tw-h-full tw-min-h-[220px] tw-flex-col tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-shadow-sm"
+      className={clsx(
+        "tw-flex tw-h-full tw-min-h-[220px] tw-flex-col tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-shadow-sm tw-transition tw-duration-200 tw-ease-out",
+        expanded && "tw-border-primary-400/70 tw-shadow-lg tw-shadow-primary-900/40",
+      )}
       role="listitem"
     >
       <XtdhReceivedCollectionCardHeader
@@ -27,7 +31,10 @@ export function XtdhReceivedCollectionCard({
         onToggle={onToggle}
       />
       {expanded && (
-        <XtdhReceivedCollectionCardContent collection={collection} />
+        <XtdhReceivedCollectionCardContent
+          collection={collection}
+          onClose={onToggle}
+        />
       )}
     </article>
   );
