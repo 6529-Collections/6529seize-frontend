@@ -6,6 +6,7 @@ The `/codex` directory centralises planning artefacts so work can be tracked and
 
 - **Open a ticket**: Create a new Markdown file under `codex/tickets/` using the ticket template. Assign a unique ID that matches the filename (`ticket-ID.md`) and choose an initial priority (P0–P3).
 - **Register the ticket**: Add a row to `codex/STATE.md` capturing the ticket metadata. The table is the authoritative board and must mirror the ticket front matter.
+- **Set the owner handle**: Record the ticket owner's GitHub handle in both the front matter and `codex/STATE.md`. If the handle is not yet known, write `unknown` and replace it before any work begins.
 - **Deliver incremental work**: Keep updates small, land pull requests frequently, and cross-reference the ticket in PR descriptions.
 - **Maintain the board**: Whenever the status, owner, linked PRs, or priority changes, update both the ticket front matter and the `STATE.md` row.
 - **Close the loop**: Before marking a ticket **Done**, verify the acceptance criteria, ensure linked PRs are merged, and capture the final log entry.
