@@ -60,6 +60,7 @@ export function XtdhReceivedCollectionCardHeader({
     >
       <XtdhReceivedCollectionCardSummary
         collection={collection}
+        updatedLabel={updatedLabel}
         className="tw-order-1"
       />
       <XtdhReceivedCollectionCardMetrics
@@ -72,7 +73,11 @@ export function XtdhReceivedCollectionCardHeader({
         </p>
       )}
       <div className="tw-order-4 tw-flex tw-flex-wrap tw-items-center tw-gap-3 md:tw-gap-4">
-        <span className={chevronClass} aria-hidden="true">
+        <XtdhReceivedGranterAvatarGroup
+          granters={collection.granters}
+          totalCount={getCollectionGrantorCount(collection)}
+        />
+        <span className={clsx(chevronClass, "tw-ml-auto")} aria-hidden="true">
           <FontAwesomeIcon
             icon={faChevronRight}
             className={clsx(
@@ -81,15 +86,6 @@ export function XtdhReceivedCollectionCardHeader({
             )}
           />
         </span>
-        <XtdhReceivedGranterAvatarGroup
-          granters={collection.granters}
-          totalCount={getCollectionGrantorCount(collection)}
-        />
-        {updatedLabel && (
-          <span className="tw-ml-auto tw-text-xs tw-text-iron-500">
-            {updatedLabel}
-          </span>
-        )}
       </div>
     </button>
   );
