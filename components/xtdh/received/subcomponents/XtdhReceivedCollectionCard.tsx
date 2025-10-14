@@ -18,7 +18,7 @@ export function XtdhReceivedCollectionCard({
 }: XtdhReceivedCollectionCardProps) {
   return (
     <article
-      className="tw-flex tw-h-full tw-flex-col tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-shadow-sm"
+      className="tw-flex tw-h-full tw-min-h-[220px] tw-flex-col tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-shadow-sm"
       role="listitem"
     >
       <XtdhReceivedCollectionCardHeader

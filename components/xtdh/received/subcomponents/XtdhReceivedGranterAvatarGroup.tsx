@@ -53,15 +53,20 @@ export function XtdhReceivedGranterAvatarGroup({
               <img
                 src={granter.profileImage}
                 alt=""
-                className="tw-h-7 tw-w-7 tw-rounded-full tw-border tw-border-iron-800 tw-bg-iron-900 tw-object-cover"
+                className="tw-h-7 tw-w-7 tw-rounded-full tw-border tw-border-iron-950 tw-bg-iron-900 tw-object-cover"
                 loading="lazy"
               />
             </CustomTooltip>
           ))}
           {additional > 0 && (
-            <span className="tw-inline-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-iron-800 tw-bg-iron-900 tw-text-xxs tw-font-semibold tw-text-iron-200">
-              +{additional.toLocaleString()}
-            </span>
+            <CustomTooltip
+              content={`and ${additional.toLocaleString()} more grantor${additional === 1 ? "" : "s"}`}
+              placement="top"
+            >
+              <span className="tw-inline-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-iron-950 tw-bg-iron-900 tw-text-xxs tw-font-semibold tw-leading-none tw-text-iron-200">
+                +{additional.toLocaleString()}
+              </span>
+            </CustomTooltip>
           )}
         </div>
         {showCountLabel && (
@@ -84,7 +89,7 @@ export function XtdhReceivedGranterAvatarGroup({
 
   return (
     <div className={clsx("tw-inline-flex tw-items-center tw-gap-2", className)}>
-      <span className="tw-inline-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-iron-800 tw-bg-iron-900">
+      <span className="tw-inline-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-iron-950 tw-bg-iron-900">
         <FontAwesomeIcon icon={faUserGroup} className="tw-h-3 tw-w-3 tw-text-iron-300" />
       </span>
       <span className="tw-text-xs tw-text-iron-300">{formatGrantorCount(overallCount)}</span>

@@ -71,7 +71,7 @@ export function XtdhReceivedCollectionCardSummary({
         primarySrc={collection.collectionImage}
         fallbackSrc="/pebbles-loading.jpeg"
         alt={`${collection.collectionName} cover`}
-        className="tw-h-16 tw-w-16 tw-flex-shrink-0 tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-900 tw-object-cover"
+        className="tw-h-16 tw-w-16 tw-flex-shrink-0 tw-rounded-2xl tw-border tw-border-iron-700 tw-bg-iron-900 tw-object-cover"
       />
       <div className="tw-min-w-0 tw-flex-1 tw-space-y-1">
         <CustomTooltip
@@ -87,12 +87,12 @@ export function XtdhReceivedCollectionCardSummary({
           </span>
         </CustomTooltip>
         {badges.length > 0 && (
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-1.5">
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
             {badges.map((badge) => (
               <span
                 key={badge.label}
                 className={clsx(
-                  "tw-inline-flex tw-items-center tw-rounded-full tw-border tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-semibold tw-leading-tight",
+                  "tw-inline-flex tw-items-center tw-rounded-md tw-border tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-semibold tw-leading-tight",
                   getBadgeStyles(badge.variant),
                 )}
               >

@@ -47,7 +47,7 @@ export function XtdhReceivedCollectionCardHeader({
   );
 
   const chevronClass = clsx(
-    "tw-flex tw-h-7 tw-w-7 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-text-iron-400 tw-transition tw-duration-200 tw-ease-out group-hover:tw-text-iron-200 group-focus-visible:tw-text-iron-100",
+    "tw-flex tw-h-7 tw-w-7 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900/70 tw-text-iron-300 tw-transition tw-duration-200 tw-ease-out group-hover:tw-text-iron-200 group-focus-visible:tw-text-iron-100",
   );
 
   return (
@@ -67,7 +67,7 @@ export function XtdhReceivedCollectionCardHeader({
         className="tw-order-2 md:tw-order-3"
       />
       {subline && (
-        <p className="tw-order-3 tw-text-xs tw-text-iron-400 tw-leading-snug md:tw-order-2">
+        <p className="tw-order-3 tw-text-xs tw-text-iron-500 tw-leading-snug md:tw-order-2">
           {subline}
         </p>
       )}
@@ -76,7 +76,7 @@ export function XtdhReceivedCollectionCardHeader({
           granters={collection.granters}
           totalCount={getCollectionGrantorCount(collection)}
         />
-        <div className="tw-ml-auto tw-flex tw-items-center tw-gap-3 md:tw-gap-4">
+        <div className="tw-ml-auto tw-flex tw-items-center tw-gap-3 md:tw-gap-4 tw-rounded-full tw-bg-iron-900/0 tw-px-2 tw-py-1 tw-transition tw-duration-200 tw-ease-out group-hover:tw-bg-iron-900/40 group-focus-visible:tw-bg-iron-900/40">
           {updatedLabel && (
             <span className="tw-text-xs tw-leading-snug tw-text-iron-500">
               {updatedLabel}

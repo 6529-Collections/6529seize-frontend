@@ -18,11 +18,11 @@ export interface XtdhReceivedCollectionCardMetricsProps {
 
 function getDeltaChipClasses(trend: "positive" | "negative" | "neutral") {
   if (trend === "positive") {
-    return "tw-border-success/40 tw-bg-success/10 tw-text-success";
+    return "tw-border-success/30 tw-bg-success/5 tw-text-success";
   }
 
   if (trend === "negative") {
-    return "tw-border-error/40 tw-bg-error/10 tw-text-error";
+    return "tw-border-error/30 tw-bg-error/5 tw-text-error";
   }
 
   return "tw-border-iron-700 tw-bg-iron-850 tw-text-iron-200";
@@ -46,16 +46,16 @@ export function XtdhReceivedCollectionCardMetrics({
   return (
     <div
       className={clsx(
-        "tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-3 sm:tw-gap-x-8",
+        "tw-grid tw-grid-cols-[minmax(150px,1fr)_minmax(150px,1fr)] tw-gap-x-6 tw-gap-y-3 sm:tw-gap-x-8",
         className,
       )}
     >
-      <div className="tw-flex tw-min-w-[150px] tw-flex-col tw-gap-1">
-        <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-400">
+      <div className="tw-flex tw-min-w-[150px] tw-flex-col tw-items-end tw-gap-1">
+        <span className="tw-self-start tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-500">
           xTDH Rate
         </span>
-        <div className="tw-flex tw-items-center tw-gap-2">
-          <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
+        <div className="tw-flex tw-w-full tw-items-center tw-justify-end tw-gap-2">
+          <span className="tw-text-sm tw-font-semibold tw-text-iron-50 tw-tabular-nums">
             {formatXtdhRate(collection.totalXtdhRate)}
           </span>
           {delta && (
@@ -82,11 +82,11 @@ export function XtdhReceivedCollectionCardMetrics({
           </span>
         )}
       </div>
-      <div className="tw-flex tw-min-w-[150px] tw-flex-col tw-gap-1">
-        <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-400">
+      <div className="tw-flex tw-min-w-[150px] tw-flex-col tw-items-end tw-gap-1">
+        <span className="tw-self-start tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-500">
           Received
         </span>
-        <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
+        <span className="tw-text-sm tw-font-semibold tw-text-iron-50 tw-tabular-nums">
           {formatXtdhTotal(collection.totalXtdhReceived)}
         </span>
       </div>
