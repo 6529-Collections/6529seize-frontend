@@ -4,7 +4,7 @@ import type { XtdhReceivedNft } from "@/types/xtdh";
 
 import { XTDH_RECEIVED_COLLECTION_EMPTY_MESSAGE } from "../../subcomponents/XtdhReceivedCollectionCard.constants";
 import { XtdhReceivedEmptyState } from "../../subcomponents/XtdhReceivedEmptyState";
-import { XtdhReceivedCollectionTokenDetails } from "./XtdhReceivedCollectionTokenDetails";
+import { XtdhReceivedCollectionTokenDetailsDrawer } from "./XtdhReceivedCollectionTokenDetailsDrawer";
 import { XtdhReceivedCollectionTokensTable } from "./XtdhReceivedCollectionTokensTable";
 
 export interface XtdhReceivedCollectionInlineContentProps {
@@ -33,37 +33,22 @@ export function XtdhReceivedCollectionInlineContent({
   }
 
   return (
-    <div className="tw-grid tw-gap-6 tw-border-t tw-border-iron-850 tw-bg-iron-975/20 tw-px-4 tw-pb-5 tw-pt-4 xl:tw-grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
-      <XtdhReceivedCollectionTokensTable
-        tokens={tokens}
-        activeTokenId={activeTokenId}
-        onSelectToken={onSelectToken}
-        detailsRegionId={detailsRegionId}
-      />
-      <div className="tw-hidden xl:tw-block">
-        {activeToken ? (
-          <XtdhReceivedCollectionTokenDetails
-            token={activeToken}
-            detailsRegionId={detailsRegionId}
-            onClose={onCloseDetails}
-          />
-        ) : (
-          <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-dashed tw-border-iron-850/70 tw-bg-iron-950/40 tw-p-6">
-            <span className="tw-text-sm tw-text-iron-300">
-              Select a token to review grantors.
-            </span>
-          </div>
-        )}
+    <>
+      <div className="tw-flex tw-flex-col tw-gap-6 tw-border-t tw-border-iron-850 tw-bg-iron-975/20 tw-px-4 tw-pb-5 tw-pt-4">
+        <XtdhReceivedCollectionTokensTable
+          tokens={tokens}
+          activeTokenId={activeTokenId}
+          onSelectToken={onSelectToken}
+          detailsRegionId={detailsRegionId}
+        />
       </div>
-      <div className="tw-block xl:tw-hidden">
-        {activeToken && (
-          <XtdhReceivedCollectionTokenDetails
-            token={activeToken}
-            detailsRegionId={detailsRegionId}
-            onClose={onCloseDetails}
-          />
-        )}
-      </div>
-    </div>
+      {activeToken && (
+        <XtdhReceivedCollectionTokenDetailsDrawer
+          token={activeToken}
+          detailsRegionId={detailsRegionId}
+          onClose={onCloseDetails}
+        />
+      )}
+    </>
   );
 }

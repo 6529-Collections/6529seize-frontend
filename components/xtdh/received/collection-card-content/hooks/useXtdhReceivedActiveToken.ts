@@ -27,7 +27,7 @@ export function useXtdhReceivedActiveToken(
         return previous;
       }
 
-      return tokens[0]?.tokenId ?? null;
+      return null;
     });
   }, [tokens]);
 

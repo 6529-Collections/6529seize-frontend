@@ -21,17 +21,17 @@ export function XtdhReceivedCollectionTokensTable({
   onSelectToken,
 }: XtdhReceivedCollectionTokensTableProps) {
   return (
-    <div className="tw-flex tw-flex-col tw-gap-3">
+    <div className="tw-flex tw-w-full tw-flex-col tw-gap-3">
       <div className="tw-flex tw-items-center tw-justify-between tw-text-xs tw-uppercase tw-text-iron-400">
         <span className="tw-font-semibold">Tokens</span>
         <span className="tw-hidden md:tw-inline">Sort: Rate / Received / Grantors</span>
       </div>
-      <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-850 tw-bg-iron-975/40">
-        <div className="tw-max-h-[420px] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700">
+      <div className="tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-850 tw-bg-iron-975/40">
+        <div className="tw-max-h-[420px] tw-w-full tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700">
           <div
             role="row"
             className={clsx(
-              "tw-sticky tw-top-0 tw-z-10 tw-grid tw-items-center tw-gap-3 tw-bg-iron-950 tw-px-4 tw-py-3",
+              "tw-sticky tw-top-0 tw-z-10 tw-grid tw-w-full tw-items-center tw-gap-3 tw-bg-iron-950 tw-px-4 tw-py-3",
               XTDH_RECEIVED_TOKEN_TABLE_COLUMNS,
             )}
           >

@@ -1,5 +1,6 @@
 'use client';
 
+import clsx from "clsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 
@@ -12,19 +13,24 @@ export interface XtdhReceivedCollectionTokenDetailsProps {
   readonly token: XtdhReceivedNft;
   readonly detailsRegionId: string;
   readonly onClose: () => void;
+  readonly className?: string;
 }
 
 export function XtdhReceivedCollectionTokenDetails({
   token,
   detailsRegionId,
   onClose,
+  className,
 }: XtdhReceivedCollectionTokenDetailsProps) {
   return (
     <aside
       id={detailsRegionId}
       role="region"
       aria-label={`Grantors for ${token.tokenName}`}
-      className="tw-flex tw-h-full tw-flex-col tw-rounded-xl tw-border tw-border-iron-850 tw-bg-iron-950/80 tw-shadow-inner"
+      className={clsx(
+        "tw-flex tw-h-full tw-flex-col tw-rounded-xl tw-border tw-border-iron-850 tw-bg-iron-950/80 tw-shadow-inner",
+        className,
+      )}
     >
       <div className="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-iron-900/60 tw-px-4 tw-py-3">
         <div className="tw-flex tw-items-center tw-gap-3">
@@ -35,7 +41,10 @@ export function XtdhReceivedCollectionTokenDetails({
             loading="lazy"
           />
           <div className="tw-flex tw-flex-col">
-            <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
+            <span
+              id={`${detailsRegionId}-title`}
+              className="tw-text-sm tw-font-semibold tw-text-iron-50"
+            >
               {token.tokenName}
             </span>
             <span className="tw-text-xxs tw-uppercase tw-text-iron-400">

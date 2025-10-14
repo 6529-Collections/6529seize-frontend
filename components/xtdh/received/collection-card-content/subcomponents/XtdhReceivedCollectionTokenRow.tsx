@@ -35,7 +35,7 @@ export function XtdhReceivedCollectionTokenRow({
     <div
       role="row"
       className={clsx(
-        "tw-grid tw-items-center tw-gap-3 tw-border-b tw-border-iron-900/60 tw-px-4 tw-py-3 tw-text-sm tw-leading-tight tw-transition tw-duration-150 tw-ease-out last:tw-border-none",
+        "tw-grid tw-w-full tw-items-center tw-gap-3 tw-border-b tw-border-iron-900/60 tw-px-4 tw-py-3 tw-text-sm tw-leading-tight tw-transition tw-duration-150 tw-ease-out last:tw-border-none",
         XTDH_RECEIVED_TOKEN_TABLE_COLUMNS,
         isActive
           ? "tw-bg-primary-500/10 tw-ring-1 tw-ring-inset tw-ring-primary-500/60"
