@@ -18,7 +18,6 @@ type FactoryArgs = {
   Tab: (props: TabProps) => React.JSX.Element;
 };
 
-type Awaitable<T> = T | Promise<T>;
 type UserRouteParams = { user: string };
 type UserSearchParams = Record<string, string | string[] | undefined>;
 
@@ -27,12 +26,17 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
     params,
     searchParams,
   }: {
-    readonly params: Awaitable<UserRouteParams>;
-    readonly searchParams?: Awaitable<UserSearchParams>;
+    readonly params?: Promise<UserRouteParams>;
+    readonly searchParams?: Promise<UserSearchParams>;
   }) {
-    const { user } = await Promise.resolve(params);
+    const resolvedParams = params ? await params : undefined;
+    if (!resolvedParams?.user) {
+      notFound();
+    }
+
+    const user = resolvedParams.user;
     const normalizedUser = user.toLowerCase();
-    const query = await Promise.resolve(searchParams ?? {});
+    const query = (searchParams ? await searchParams : {}) as UserSearchParams;
     const headers = await getAppCommonHeaders();
     const profile: ApiIdentity = await getUserProfile({
       user: normalizedUser,
@@ -65,10 +69,14 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
   async function generateMetadata({
     params,
   }: {
-    readonly params: Awaitable<UserRouteParams>;
+    readonly params?: Promise<UserRouteParams>;
   }): Promise<Metadata> {
-    const { user } = await Promise.resolve(params);
-    const normalizedUser = user.toLowerCase();
+    const resolvedParams = params ? await params : undefined;
+    if (!resolvedParams?.user) {
+      notFound();
+    }
+
+    const normalizedUser = resolvedParams.user.toLowerCase();
     const headers = await getAppCommonHeaders();
     const profile: ApiIdentity = await getUserProfile({
       user: normalizedUser,
