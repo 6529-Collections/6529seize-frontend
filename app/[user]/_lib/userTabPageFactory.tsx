@@ -10,12 +10,12 @@ import {
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
-type TabProps = { profile: ApiIdentity };
+type TabProps = { readonly profile: ApiIdentity };
 
 type FactoryArgs = {
   subroute: string;
   metaLabel: string;
-  Tab: (props: TabProps) => React.JSX.Element;
+  Tab: (props: Readonly<TabProps>) => React.JSX.Element;
 };
 
 type UserRouteParams = { user: string };
@@ -26,17 +26,21 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
     params,
     searchParams,
   }: {
-    readonly params?: Promise<UserRouteParams>;
-    readonly searchParams?: Promise<UserSearchParams>;
+    readonly params?: UserRouteParams;
+    readonly searchParams?:
+      | Promise<UserSearchParams>
+      | UserSearchParams;
   }) {
-    const resolvedParams = params ? await params : undefined;
+    const resolvedParams = params;
     if (!resolvedParams?.user) {
       notFound();
     }
 
     const user = resolvedParams.user;
     const normalizedUser = user.toLowerCase();
-    const query = (searchParams ? await searchParams : {}) as UserSearchParams;
+    const query: UserSearchParams = searchParams
+      ? await searchParams
+      : {};
     const headers = await getAppCommonHeaders();
     const profile: ApiIdentity = await getUserProfile({
       user: normalizedUser,
@@ -45,13 +49,9 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
       notFound();
     });
 
-    if (!profile) {
-      notFound();
-    }
-
     const needsRedirect = userPageNeedsRedirect({
       profile,
-      req: { query: { user, ...query } },
+      req: { query: { ...query, user } },
       subroute,
     });
 
@@ -69,9 +69,9 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
   async function generateMetadata({
     params,
   }: {
-    readonly params?: Promise<UserRouteParams>;
+    readonly params?: UserRouteParams;
   }): Promise<Metadata> {
-    const resolvedParams = params ? await params : undefined;
+    const resolvedParams = params;
     if (!resolvedParams?.user) {
       notFound();
     }
@@ -81,6 +81,8 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
     const profile: ApiIdentity = await getUserProfile({
       user: normalizedUser,
       headers,
+    }).catch(() => {
+      notFound();
     });
     return getAppMetadata(getMetadataForUserPage(profile, metaLabel));
   }

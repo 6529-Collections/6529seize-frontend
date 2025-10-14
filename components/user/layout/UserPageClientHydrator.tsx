@@ -6,7 +6,7 @@ import {
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useSetTitle } from "@/contexts/TitleContext";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { containsEmojis, formatAddress } from "@/helpers/Helpers";
 import { useQueryClient } from "@tanstack/react-query";
 

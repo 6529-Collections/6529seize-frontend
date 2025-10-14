@@ -6,7 +6,7 @@ import UserAddressesSelectDropdown from "../utils/addresses-select/UserAddresses
 import UserPageStatsTags from "./tags/UserPageStatsTags";
 import UserPageStatsActivityOverview from "./UserPageStatsActivityOverview";
 import UserPageStatsBoostBreakdown from "./UserPageStatsBoostBreakdown";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { MemeSeason } from "@/entities/ISeason";
 import { ConsolidatedTDH, TDH } from "@/entities/ITDH";
 import { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";

@@ -13,7 +13,8 @@ export default function UserPageFollowers({
     return null;
   }
 
-  const safeHandleOrWallet = encodeURIComponent(trimmedHandleOrWallet);
+  const normalizedHandleOrWallet = trimmedHandleOrWallet.toLowerCase();
+  const safeHandleOrWallet = encodeURIComponent(normalizedHandleOrWallet);
   const count = followersCount ?? 0;
   const label = count === 1 ? "Follower" : "Followers";
 
