@@ -47,6 +47,16 @@ Note: When changing files like readme.md, agents.md or other documentation or in
 
 If `npm run test` fails due to low coverage on a modified file, write meaningful tests that verify the file's functionality and bring its coverage to at least 80%. If a Jest test fails, debug and fix the underlying code or the test itself, ensuring the code behaves as expected and tests accurately reflect its intended functionality. Repeat this process until `npm run test` passes.
 
+## Codex Workspace
+
+Use the `/codex/` directory as the shared source of truth for planning and ticket execution.
+
+- Start every workstream by reviewing `codex/STATE.md` and keeping its ticket rows in sync with the matching files under `codex/tickets/`.
+- Author new tickets with the provided template, maintain alphabetical YAML front matter, and log timestamped updates as work progresses.
+- Capture broader planning artefacts in `codex/plans/` and evergreen documentation in `codex/docs/`, following the conventions spelled out in `codex/agents.md` and `codex/docs/README.md`.
+- Link pull requests back to their tickets and mirror merged PR references in both the ticket log and `STATE.md` so the board stays auditable.
+- Never edit tickets marked **Done**; open a fresh ticket if new scope emerges.
+
 ## Coding Conventions
 
 - Use TypeScript and React functional components with hooks.
@@ -57,9 +67,9 @@ If `npm run test` fails due to low coverage on a modified file, write meaningful
 
 ## Next.js Directory Structure
 
-The project supports both the classic `pages/` folder and Next.js `app/` router.
-Legacy routes remain under `pages/`, while all **new** pages must be created
-inside the `app/` directory.
+All production routes now live under the Next.js `app/` router.
+The legacy `pages/` directory has been fully migrated, so add any new routes
+under `app/`.
 
 Routes in `app/` should export a `generateMetadata` function using the helper
 `getAppMetadata`:
