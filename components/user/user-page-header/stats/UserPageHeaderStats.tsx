@@ -6,7 +6,7 @@ import { formatNumberWithCommas } from "@/helpers/Helpers";
 import UserPageFollowers from "../followers/UserPageFollowers";
 import { Tooltip } from "react-tooltip";
 
-const SAFE_ROUTE_SEGMENT_PATTERN = /^[a-zA-Z0-9_-]+$/;
+const SAFE_ROUTE_SEGMENT_PATTERN = /^[a-zA-Z0-9._-]+$/;
 
 function sanitizeRouteSegment(value: string): string | null {
   if (!value) {
