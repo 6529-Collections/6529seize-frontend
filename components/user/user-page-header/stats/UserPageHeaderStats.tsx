@@ -17,9 +17,10 @@ function sanitizeRouteSegment(value: string): string | null {
     return null;
   }
   const normalizedValue = trimmedValue.toLowerCase();
-  return SAFE_ROUTE_SEGMENT_PATTERN.test(normalizedValue)
-    ? normalizedValue
-    : null;
+  if (!SAFE_ROUTE_SEGMENT_PATTERN.test(normalizedValue)) {
+    return null;
+  }
+  return encodeURIComponent(normalizedValue);
 }
 
 export default function UserPageHeaderStats({

@@ -41,7 +41,19 @@ export const userPageNeedsRedirect = ({
   ) {
     const currentQuery = { ...req.query };
     delete currentQuery.user;
-    const queryParamsString = new URLSearchParams(currentQuery).toString();
+    const queryParams = new URLSearchParams();
+    Object.entries(currentQuery).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach((entry) => {
+          if (entry != null) {
+            queryParams.append(key, entry);
+          }
+        });
+      } else if (value != null) {
+        queryParams.append(key, value);
+      }
+    });
+    const queryParamsString = queryParams.toString();
     const destination = subroute
       ? `/${profile.handle}/${subroute}?${queryParamsString}`
       : `/${profile.handle}?${queryParamsString}`;

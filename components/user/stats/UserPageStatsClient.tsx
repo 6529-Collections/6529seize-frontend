@@ -7,9 +7,9 @@ import UserPageStatsTags from "./tags/UserPageStatsTags";
 import UserPageStatsActivityOverview from "./UserPageStatsActivityOverview";
 import UserPageStatsBoostBreakdown from "./UserPageStatsBoostBreakdown";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { MemeSeason } from "@/entities/ISeason";
-import { ConsolidatedTDH, TDH } from "@/entities/ITDH";
-import { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
+import type { MemeSeason } from "@/entities/ISeason";
+import type { ConsolidatedTDH, TDH } from "@/entities/ITDH";
+import type { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
 import { useEffect, useMemo, useState } from "react";
 import { commonApiFetch } from "@/services/api/common-api";
 import { getStatsPath } from "./userPageStats.helpers";
@@ -80,7 +80,10 @@ export default function UserPageStatsClient({
       signal: controller.signal,
     })
       .then(setSeasons)
-      .catch(() => {
+      .catch((error) => {
+        if ((error as { name?: string })?.name === "AbortError") {
+          return;
+        }
         setSeasons([]);
       });
     return () => controller.abort();
@@ -105,7 +108,10 @@ export default function UserPageStatsClient({
       signal: controller.signal,
     })
       .then(setTdh)
-      .catch(() => {
+      .catch((error) => {
+        if ((error as { name?: string })?.name === "AbortError") {
+          return;
+        }
         setTdh(undefined);
       });
 
@@ -131,7 +137,10 @@ export default function UserPageStatsClient({
       signal: controller.signal,
     })
       .then(setOwnerBalance)
-      .catch(() => {
+      .catch((error) => {
+        if ((error as { name?: string })?.name === "AbortError") {
+          return;
+        }
         setOwnerBalance(undefined);
       });
 
@@ -141,7 +150,11 @@ export default function UserPageStatsClient({
   useEffect(() => {
     const controller = new AbortController();
 
-    if (activeAddressForStats === null && initialBalanceMemes != null) {
+    if (
+      activeAddressForStats === null &&
+      initialBalanceMemes != null &&
+      initialBalanceMemes.length > 0
+    ) {
       setBalanceMemes(initialBalanceMemes);
       return () => controller.abort();
     }
@@ -157,7 +170,10 @@ export default function UserPageStatsClient({
       signal: controller.signal,
     })
       .then(setBalanceMemes)
-      .catch(() => {
+      .catch((error) => {
+        if ((error as { name?: string })?.name === "AbortError") {
+          return;
+        }
         setBalanceMemes([]);
       });
 

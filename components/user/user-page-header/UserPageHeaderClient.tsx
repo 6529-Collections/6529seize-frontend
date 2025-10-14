@@ -76,10 +76,11 @@ export default function UserPageHeaderClient({
   const [directMessageLoading, setDirectMessageLoading] =
     useState<boolean>(false);
 
-  const initialIsMyProfile =
-    connectedProfile?.handle && profile.handle
-      ? connectedProfile.handle.toLowerCase() === profile.handle.toLowerCase()
-      : false;
+  const initialIsMyProfile = amIUser({
+    profile,
+    address,
+    connectedHandle: connectedProfile?.handle ?? undefined,
+  });
 
   const [isMyProfile, setIsMyProfile] = useState<boolean>(initialIsMyProfile);
 
@@ -109,22 +110,21 @@ export default function UserPageHeaderClient({
     staleTime: 60_000,
   });
 
-  const [aboutStatement, setAboutStatement] = useState<CicStatement | null>(
-    () =>
-      initialStatements.find(
-        (statement) =>
-          statement.statement_type === STATEMENT_TYPE.BIO &&
-          statement.statement_group === STATEMENT_GROUP.GENERAL
-      ) ?? null
-  );
-
-  useEffect(() => {
-    const about = statements?.find(
+  const findAboutStatement = (
+    statementsList: CicStatement[] | null | undefined
+  ): CicStatement | null =>
+    statementsList?.find(
       (statement) =>
         statement.statement_type === STATEMENT_TYPE.BIO &&
         statement.statement_group === STATEMENT_GROUP.GENERAL
-    );
-    setAboutStatement(about ?? null);
+    ) ?? null;
+
+  const [aboutStatement, setAboutStatement] = useState<CicStatement | null>(
+    () => findAboutStatement(initialStatements)
+  );
+
+  useEffect(() => {
+    setAboutStatement(findAboutStatement(statements));
   }, [statements]);
 
   const showAbout = useMemo(() => {

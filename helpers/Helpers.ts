@@ -25,6 +25,9 @@ import { PageSSRMetadata, Period } from "./Types";
 
 export const MAX_DROP_UPLOAD_FILES = 8;
 
+const unicodeEmojiRegex = emojiRegex();
+const codePointRegex = /U\+([\dA-Fa-f]{1,6})/g;
+
 export function formatAddress(address: string) {
   if (
     !address ||
@@ -279,12 +282,12 @@ export function containsEmojis(s: string) {
     return false;
   }
 
-  const unicodeEmojiRegex = emojiRegex();
+  unicodeEmojiRegex.lastIndex = 0;
   if (unicodeEmojiRegex.test(s)) {
     return true;
   }
 
-  const codePointRegex = /U\+([\dA-Fa-f]{1,6})/g;
+  codePointRegex.lastIndex = 0;
   return codePointRegex.test(s);
 }
 
