@@ -6,10 +6,7 @@ import { FallbackImage } from "@/components/common/FallbackImage";
 import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import type { XtdhReceivedCollectionSummary } from "@/types/xtdh";
 
-import {
-  xtdhIsCollectionNewlyAllocated,
-  xtdhIsCollectionTrending,
-} from "../utils";
+import { xtdhIsCollectionNewlyAllocated, xtdhIsCollectionTrending } from "../utils";
 
 type BadgeVariant = "trending" | "new" | "mine";
 

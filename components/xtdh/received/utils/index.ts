@@ -183,50 +183,111 @@ export function getRateChangeDelta(rateChange?: number | null): RateChangeDelta 
   };
 }
 
-export function formatUpdatedRelativeLabel(
+export interface UpdatedRelativeMetadata {
+  readonly label: string;
+  readonly timeAgo: string;
+  readonly datetime: string;
+  readonly tooltip: string;
+}
+
+export function getUpdatedRelativeMetadata(
   date?: string | null,
   reference = Date.now(),
-) {
+): UpdatedRelativeMetadata | undefined {
   if (!date) {
     return undefined;
   }
 
-  const timestamp = new Date(date).getTime();
+  const parsedDate = new Date(date);
+  const timestamp = parsedDate.getTime();
   if (!Number.isFinite(timestamp)) {
     return undefined;
   }
+
+  const isoString = parsedDate.toISOString();
+  const tooltip = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+  }).format(parsedDate);
 
   const diffMs = Math.max(reference - timestamp, 0);
   const diffSeconds = Math.floor(diffMs / 1000);
 
   if (diffSeconds < 60) {
-    return "Updated just now";
+    return {
+      label: "Updated just now",
+      timeAgo: "just now",
+      datetime: isoString,
+      tooltip,
+    };
   }
 
   const diffMinutes = Math.floor(diffSeconds / 60);
   if (diffMinutes < 60) {
-    return `Updated ${diffMinutes}m ago`;
+    const timeAgo = `${diffMinutes}m ago`;
+    return {
+      label: `Updated ${timeAgo}`,
+      timeAgo,
+      datetime: isoString,
+      tooltip,
+    };
   }
 
   const diffHours = Math.floor(diffMinutes / 60);
   if (diffHours < 24) {
-    return `Updated ${diffHours}h ago`;
+    const timeAgo = `${diffHours}h ago`;
+    return {
+      label: `Updated ${timeAgo}`,
+      timeAgo,
+      datetime: isoString,
+      tooltip,
+    };
   }
 
   const diffDays = Math.floor(diffHours / 24);
   if (diffDays < 7) {
-    return `Updated ${diffDays}d ago`;
+    const timeAgo = `${diffDays}d ago`;
+    return {
+      label: `Updated ${timeAgo}`,
+      timeAgo,
+      datetime: isoString,
+      tooltip,
+    };
   }
 
   const diffWeeks = Math.floor(diffDays / 7);
   if (diffWeeks < 5) {
-    return `Updated ${diffWeeks}w ago`;
+    const timeAgo = `${diffWeeks}w ago`;
+    return {
+      label: `Updated ${timeAgo}`,
+      timeAgo,
+      datetime: isoString,
+      tooltip,
+    };
   }
 
-  return `Updated ${new Intl.DateTimeFormat("en-US", {
+  const longDate = new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
-  }).format(timestamp)}`;
+  }).format(timestamp);
+
+  return {
+    label: `Updated ${longDate}`,
+    timeAgo: longDate,
+    datetime: isoString,
+    tooltip,
+  };
+}
+
+export function formatUpdatedRelativeLabel(
+  date?: string | null,
+  reference = Date.now(),
+) {
+  return getUpdatedRelativeMetadata(date, reference)?.label;
 }
 
 export function xtdhIsCollectionNewlyAllocated(
@@ -257,4 +318,55 @@ export function xtdhIsCollectionTrending(
   threshold = TRENDING_RATE_CHANGE_THRESHOLD,
 ): boolean {
   return (collection.rateChange7d ?? 0) >= threshold;
+}
+
+export interface CollectionActivitySnapshot {
+  readonly desktop: string;
+  readonly tablet: string;
+  readonly mobile: string;
+  readonly screenReader: string;
+  readonly activeReceiving: number;
+  readonly totalSupply?: number;
+}
+
+export function getCollectionActivitySnapshot(
+  collection: XtdhReceivedCollectionSummary,
+): CollectionActivitySnapshot {
+  const activeReceivingRaw = getCollectionTokensReceiving(collection);
+  const activeReceiving = Number.isFinite(activeReceivingRaw)
+    ? Math.max(activeReceivingRaw, 0)
+    : 0;
+
+  const totalSupplyRaw = collection.tokenCount;
+  const hasTotalSupply = Number.isFinite(totalSupplyRaw);
+  const totalSupply = hasTotalSupply ? Math.max(totalSupplyRaw, 0) : undefined;
+
+  const formattedActive = formatNumberWithCommas(activeReceiving);
+  const formattedTotal =
+    typeof totalSupply === "number" ? formatNumberWithCommas(totalSupply) : undefined;
+
+  const activeTokenLabel = activeReceiving === 1 ? "token" : "tokens";
+  const totalTokenLabel =
+    typeof totalSupply === "number" && totalSupply === 1 ? "token" : "tokens";
+  const activeVerb = activeReceiving === 1 ? "is" : "are";
+
+  if (typeof totalSupply === "number" && typeof formattedTotal === "string") {
+    return {
+      desktop: `${formattedActive} / ${formattedTotal} ${activeTokenLabel} receiving xTDH`,
+      tablet: `${formattedActive}/${formattedTotal} ${activeTokenLabel} w/ xTDH`,
+      mobile: `${formattedActive}/${formattedTotal} active`,
+      screenReader: `${formattedActive} out of ${formattedTotal} ${totalTokenLabel} ${activeVerb} currently receiving xTDH.`,
+      activeReceiving,
+      totalSupply,
+    };
+  }
+
+  return {
+    desktop: `${formattedActive} ${activeTokenLabel} receiving xTDH`,
+    tablet: `${formattedActive} ${activeTokenLabel} w/ xTDH`,
+    mobile: `${formattedActive} active`,
+    screenReader: `${formattedActive} ${activeTokenLabel} ${activeVerb} currently receiving xTDH.`,
+    activeReceiving,
+    totalSupply: undefined,
+  };
 }
