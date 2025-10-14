@@ -57,21 +57,21 @@ export const userPageNeedsRedirect = ({
       }
       return null;
     };
-    const queryEntries = Object.entries(currentQuery).flatMap(
-      ([key, value]) => {
-        if (Array.isArray(value)) {
-          return value
-            .map(toQueryStringValue)
-            .filter((entry): entry is string => entry !== null)
-            .map((entry) => [key, entry]);
-        }
-        const normalizedValue = toQueryStringValue(value);
-        if (normalizedValue === null) {
-          return [];
-        }
-        return [[key, normalizedValue]];
+    const queryEntries: Array<[string, string]> = Object.entries(
+      currentQuery
+    ).flatMap(([key, value]): Array<[string, string]> => {
+      if (Array.isArray(value)) {
+        return value
+          .map(toQueryStringValue)
+          .filter((entry): entry is string => entry !== null)
+          .map((entry): [string, string] => [key, entry]);
       }
-    );
+      const normalizedValue = toQueryStringValue(value);
+      if (normalizedValue === null) {
+        return [];
+      }
+      return [[key, normalizedValue]];
+    });
     const queryParamsString = new URLSearchParams(queryEntries).toString();
     const destination = subroute
       ? `/${profile.handle}/${subroute}?${queryParamsString}`
