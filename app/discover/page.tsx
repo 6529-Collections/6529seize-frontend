@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 
 export default function DiscoverPage() {
   return (
-    <div className="tailwind-scope lg:tw-min-h-screen tw-bg-iron-950 tw-overflow-x-hidden">
+    <div className="tailwind-scope lg:tw-min-h-screen tw-bg-black tw-overflow-x-hidden">
       <div className="tw-overflow-hidden tw-h-full tw-w-full">
         <Waves />
       </div>

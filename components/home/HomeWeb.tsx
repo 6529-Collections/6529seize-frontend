@@ -92,7 +92,7 @@ export default function HomeWeb({
 
       <div className="tw-h-full">
         {activeTab === "feed" ? (
-          <div className="tw-h-full tw-bg-black tw-overflow-hidden tailwind-scope tw-px-2 lg:tw-px-6 xl:tw-px-8">
+          <div className="tw-h-full tw-bg-black tw-overflow-hidden tailwind-scope tw-px-2 lg:tw-px-6 xl:tw-px-8 tw-border-solid tw-border-r tw-border-iron-800 tw-border-y-0 tw-border-l-0">
             {feedContent}
           </div>
         ) : (

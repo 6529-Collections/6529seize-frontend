@@ -68,7 +68,7 @@ export default function FooterWrapper() {
 
   return (
     <div
-      className="tw-w-full tw-max-w-[1300px] tw-mx-auto"
+      className="tw-w-full tw-max-w-[1324px] tw-mx-auto"
       style={{ paddingLeft: sidebarSpacing }}
     >
       <Footer />

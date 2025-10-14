@@ -95,7 +95,7 @@ function WebSidebar({
 
   const sidebarContent = (
     <div
-      className="tw-relative tw-z-50 tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-bg-black tw-border-r tw-border-solid tw-border-y-0 tw-border-l-0 tw-border-iron-800 tw-border-0 tw-transition-[width] tw-duration-300 tw-ease-in-out focus:tw-outline-none"
+      className="tw-relative tw-z-50 tw-h-full tw-bg-black tw-border-r tw-border-solid tw-border-y-0 tw-border-l-0 tw-border-iron-700/95 tw-border-0 tw-transition-[width] tw-duration-300 tw-ease-in-out focus:tw-outline-none"
       style={{ width: sidebarWidth }}
       aria-label="Primary sidebar"
       ref={scrollContainerRef}
@@ -106,7 +106,7 @@ function WebSidebar({
           onToggle={handleToggle}
         />
 
-        <div className="tw-flex tw-flex-col tw-h-full">
+        <div className="tw-flex tw-flex-col tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin no-scrollbar tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
           <div className="tw-flex-1">
             <WebSidebarNav ref={navRef} isCollapsed={shouldShowCollapsed} />
           </div>

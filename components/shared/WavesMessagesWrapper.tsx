@@ -2,7 +2,6 @@
 
 import React, { ReactNode, useEffect, useState, useCallback, useMemo } from "react";
 import BrainRightSidebar, {
-  BrainRightSidebarInline,
   SidebarTab,
 } from "../brain/right-sidebar/BrainRightSidebar";
 import WebBrainLeftSidebar from "../brain/left-sidebar/web/WebLeftSidebar";
@@ -18,7 +17,7 @@ import { useSidebarState } from "../../hooks/useSidebarState";
 import { createBreakpoint } from "react-use";
 
 // Breakpoint for mobile responsiveness (lg = 1024px)
-const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
+const useBreakpoint = createBreakpoint({ XL: 1400, LG: 1024, S: 0 });
 
 interface WavesMessagesWrapperProps {
   readonly children: ReactNode;
@@ -52,6 +51,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
 
   // Check if we're on mobile (below LG breakpoint)
   const isMobile = breakpoint === "S";
+  const isLargeDesktop = breakpoint === "XL";
 
   // Auto-close right sidebar when no wave is selected
   useEffect(() => {
@@ -93,9 +93,6 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
     [dropId, drop?.id]
   );
 
-  const contentClasses =
-    "tw-relative tw-flex tw-flex-grow tw-w-full tw-max-w-full tw-mx-auto";
-
   // Clear logic for when to show each part
   const shouldShowLeftSidebar = showLeftSidebar && (!isMobile || !waveId);
   const shouldShowMainContent = !isMobile || waveId;
@@ -103,7 +100,10 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   const shouldShowRightSidebar = Boolean(
     isRightSidebarOpen && !isDropOpen && waveId
   );
-  const shouldInlineRightSidebar = shouldShowRightSidebar && !isMobile;
+  const shouldInlineRightSidebar =
+    shouldShowRightSidebar && (!isMobile && (isLargeDesktop || breakpoint === "LG"));
+  const shouldOverlayRightSidebar =
+    shouldShowRightSidebar && (!shouldInlineRightSidebar);
 
   // Handle error state for drop loading
   if (dropError && dropId) {
@@ -116,7 +116,11 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
       <div className="tw-relative tw-flex tw-flex-col">
         <div className="tw-relative tw-flex tw-flex-grow">
           <div
-            className={isDropOpen ? "tw-w-full xl:tw-pl-6" : contentClasses}
+            className={
+              isDropOpen
+                ? "tw-w-full xl:tw-pl-6"
+                : "tw-relative tw-flex tw-flex-grow tw-w-full tw-max-w-full tw-mx-auto"
+            }
           >
             <div
               className="tw-flex tw-w-full tw-overflow-hidden"
@@ -126,7 +130,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
                 <WebBrainLeftSidebar isCondensed={shouldInlineRightSidebar} />
               )}
               {shouldShowMainContent && (
-                <div className="tw-flex-grow tw-flex tw-flex-col tw-h-full tw-min-w-0 tw-relative">
+                <div className="tw-flex-grow tw-flex tw-flex-col tw-h-full tw-min-w-0 tw-border-solid tw-border-r tw-border-iron-800 tw-border-y-0 tw-border-l-0">
                   {children}
                   {shouldShowDropOverlay && (
                     <div className="tw-absolute tw-inset-0 tw-z-[49]">
@@ -144,9 +148,10 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
                 </div>
               )}
               {shouldInlineRightSidebar && (
-                <div className="tw-hidden xl:tw-flex tw-flex-shrink-0">
-                  <BrainRightSidebarInline
+                <div className="tw-hidden lg:tw-block tw-flex-shrink-0 tw-pl-6 tw-pt-2">
+                  <BrainRightSidebar
                     key="right-sidebar-inline"
+                    variant="inline"
                     waveId={waveId}
                     onDropClick={onDropClick}
                     activeTab={sidebarTab}
@@ -160,11 +165,11 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
       </div>
 
       {/* Overlay backdrop when right sidebar is open - moved outside motion container */}
-      {shouldShowRightSidebar && isMobile && (
+      {shouldOverlayRightSidebar && (
         <>
           <button
             type="button"
-            className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-70 tw-z-[70] tw-border-0"
+            className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-z-[70] tw-border-0"
             onClick={closeRightSidebar}
             onKeyDown={(event) => {
               if (event.key === "Escape") {
@@ -176,6 +181,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
           />
           <BrainRightSidebar
             key="right-sidebar"
+            variant="overlay"
             waveId={waveId}
             onDropClick={onDropClick}
             activeTab={sidebarTab}

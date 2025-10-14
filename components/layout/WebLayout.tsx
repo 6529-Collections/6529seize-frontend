@@ -8,7 +8,7 @@ import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
 import { SidebarProvider, useSidebarState } from "../../hooks/useSidebarState";
 import ClientOnly from "../client-only/ClientOnly";
 
-const DESKTOP_MAX_WIDTH = 1300;
+const DESKTOP_MAX_WIDTH = 1324;
 
 type LayoutCssVars = CSSProperties & {
   "--layout-margin"?: string;
@@ -86,7 +86,7 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
   return (
     <div
       className={`tw-flex tw-relative tw-overflow-x-hidden tw-w-full${
-        isMobile ? "" : " tw-max-w-[1300px] tw-mx-auto"
+        isMobile ? "" : " tw-max-w-[1324px] tw-mx-auto"
       }`}
       style={rootStyle}
       data-small={isSmall ? "true" : "false"}

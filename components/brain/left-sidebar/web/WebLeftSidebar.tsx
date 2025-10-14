@@ -36,7 +36,7 @@ const WebLeftSidebar: React.FC<WebLeftSidebarProps> = ({
     >
       <div
         ref={scrollContainerRef}
-        className={`tw-flex tw-flex-col tw-border-b-0 tw-border-iron-800 tw-border-solid tw-border-l-0 tw-border-t-0 tw-border-r tw-overflow-y-auto tw-w-full tw-h-full tw-scrollbar-thin no-scrollbar tw-scrollbar-thumb-iron-500 tw-transition-colors tw-duration-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-z-40 ${
+        className={`tw-flex tw-flex-col tw-border-b-0 tw-border-iron-700/95 tw-border-solid tw-border-l-0 tw-border-t-0 tw-border-r tw-overflow-y-auto tw-w-full tw-h-full tw-scrollbar-thin no-scrollbar tw-scrollbar-thumb-iron-500 tw-transition-colors tw-duration-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-z-40 ${
           isCondensed ? "lg:tw-w-16" : "lg:tw-w-80"
         }`}
         style={{ minHeight: "100%" }}

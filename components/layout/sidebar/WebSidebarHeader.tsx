@@ -27,21 +27,19 @@ function WebSidebarHeader({ collapsed, onToggle }: WebSidebarHeaderProps) {
           height={40}
         />
       </Link>
-
       <button
         type="button"
         onClick={onToggle}
         onMouseDown={(event) => event.preventDefault()}
-        className={`tw-group tw-size-8 tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-700 tw-border tw-border-iron-700 tw-border-solid tw-backdrop-blur-sm tw-shadow-[0_10px_24px_rgba(0,0,0,0.45)] desktop-hover:hover:tw-bg-iron-650 desktop-hover:hover:tw-border-iron-650 desktop-hover:hover:tw-shadow-[0_12px_30px_rgba(0,0,0,0.55)] tw-absolute tw-transition-all tw-duration-300 tw-ease-in-out ${
-          collapsed ? "tw-right-12" : "tw-right-4"
+        className={`tw-group tw-absolute tw-top-1/2 -tw-translate-y-1/2 tw-right-0 tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 w-backdrop-blur-sm tw-shadow-[0_12px_28px_rgba(0,0,0,0.35)] tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-iron-500/80 desktop-hover:hover:tw-bg-iron-700/85 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.4)] ${
+          collapsed ? "-tw-right-6 tw-rotate-180" : " tw-right-4"
         }`}
-        aria-label={collapsed ? "Expand" : "Collapse"}
-        aria-expanded={!collapsed}
+        aria-label="Toggle right sidebar"
       >
         <ChevronDoubleLeftIcon
           strokeWidth={2}
-          className={`tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-200 group-hover:desktop-hover:hover:tw-text-white tw-transition-all tw-duration-300 tw-ease-in-out ${
-            collapsed ? "tw-rotate-180" : ""
+          className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-200 group-hover:desktop-hover:hover:tw-text-white tw-transition-all tw-duration-300 tw-ease-in-out ${
+            collapsed ? "" : ""
           }`}
         />
       </button>

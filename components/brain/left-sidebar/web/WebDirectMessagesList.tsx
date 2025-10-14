@@ -48,6 +48,27 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
       (browserNavigator?.maxTouchPoints ?? 0) > 0 ||
       browserWindow.matchMedia?.("(pointer: coarse)")?.matches);
 
+  const shouldRenderCreateDirectMessage = !isApp;
+  const renderCreateDirectMessageButton = () =>
+    shouldRenderCreateDirectMessage ? (
+      <div
+        data-tooltip-id="create-dm-tooltip"
+        data-tooltip-content="New direct message"
+      >
+        <PrimaryButton
+          onClicked={openDirectMessage}
+          loading={false}
+          disabled={false}
+          padding="tw-px-2 tw-py-2"
+        >
+          <FontAwesomeIcon
+            icon={faPaperPlane}
+            className="tw-size-4 tw-flex-shrink-0"
+          />
+        </PrimaryButton>
+      </div>
+    ) : null;
+
   // Moved all hooks to the top level, before any conditional logic
   const listRef = useRef<WebUnifiedWavesListWavesHandle>(null);
   const { directMessages, registerWave } = useMyStream();
@@ -159,34 +180,21 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
   return (
     <div className="tw-h-full tw-flex tw-flex-col">
       <div
-        className={`tw-flex-1 tw-flex tw-flex-col ${
-          isCondensed ? "tw-bg-transparent tw-py-3" : "tw-bg-black tw-py-4"
-        }`}
+        className="tw-flex-1 tw-flex tw-flex-col tw-py-4 tw-bg-black"
       >
-        {!isCondensed && (
+        {!isCondensed ? (
           <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-mb-4">
             <span className="tw-text-xl tw-font-semibold tw-text-iron-50">
               Messages
             </span>
-            {!isApp && (
-              <div
-                data-tooltip-id="create-dm-tooltip"
-                data-tooltip-content="New direct message"
-              >
-                <PrimaryButton
-                  onClicked={openDirectMessage}
-                  loading={false}
-                  disabled={false}
-                  padding="tw-px-2 tw-py-2"
-                >
-                  <FontAwesomeIcon
-                    icon={faPaperPlane}
-                    className="tw-size-4 tw-flex-shrink-0"
-                  />
-                </PrimaryButton>
-              </div>
-            )}
+            {renderCreateDirectMessageButton()}
           </div>
+        ) : (
+          shouldRenderCreateDirectMessage && (
+            <div className="tw-flex tw-justify-center tw-px-2 tw-mb-3">
+              {renderCreateDirectMessageButton()}
+            </div>
+          )
         )}
 
         <div className="tw-flex-1 tw-w-full tw-flex tw-flex-col">
@@ -200,7 +208,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
       </div>
 
       {/* Tooltip */}
-      {!isTouchDevice && !isCondensed && (
+      {!isTouchDevice && shouldRenderCreateDirectMessage && (
         <ReactTooltip
           id="create-dm-tooltip"
           place="bottom"

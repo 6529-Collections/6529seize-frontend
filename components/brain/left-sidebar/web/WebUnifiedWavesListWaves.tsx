@@ -95,6 +95,27 @@ const WebUnifiedWavesListWaves = forwardRef<
       sentinelRef,
     }));
 
+    const shouldRenderCreateWaveButton = !isApp && !!connectedProfile;
+    const renderCreateWaveButton = () =>
+      shouldRenderCreateWaveButton ? (
+        <div
+          data-tooltip-id="create-wave-tooltip"
+          data-tooltip-content="Create wave"
+        >
+          <PrimaryButton
+            onClicked={openWave}
+            loading={false}
+            disabled={false}
+            padding="tw-px-2 tw-py-2"
+          >
+            <FontAwesomeIcon
+              icon={faPlus}
+              className="tw-size-4 tw-flex-shrink-0"
+            />
+          </PrimaryButton>
+        </div>
+      ) : null;
+
     const { pinnedWaves, regularWaves } = useMemo(() => {
       const pinned: MinimalWave[] = [];
       const regular: MinimalWave[] = [];
@@ -129,28 +150,16 @@ const WebUnifiedWavesListWaves = forwardRef<
           {!hideHeaders && !isCondensed && (
             <SectionHeader
               label="Waves"
-              rightContent={
-                !isApp && connectedProfile ? (
-                  <div
-                    data-tooltip-id="create-wave-tooltip"
-                    data-tooltip-content="Create wave"
-                  >
-                    <PrimaryButton
-                      onClicked={openWave}
-                      loading={false}
-                      disabled={false}
-                      padding="tw-px-2 tw-py-2"
-                    >
-                      <FontAwesomeIcon
-                        icon={faPlus}
-                        className="tw-size-4 tw-flex-shrink-0"
-                      />
-                    </PrimaryButton>
-                  </div>
-                ) : undefined
-              }
+              rightContent={renderCreateWaveButton()}
             />
           )}
+          {!hideHeaders &&
+            isCondensed &&
+            shouldRenderCreateWaveButton && (
+              <div className="tw-flex tw-justify-center tw-px-2 tw-mb-3">
+                {renderCreateWaveButton()}
+              </div>
+            )}
 
           {!hideHeaders && !hideToggle && !isCondensed && (
             <div className="tw-pb-3 tw-mt-4 tw-flex tw-px-4">

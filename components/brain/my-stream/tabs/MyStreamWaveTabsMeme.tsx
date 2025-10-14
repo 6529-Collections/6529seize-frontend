@@ -9,10 +9,16 @@ import MyStreamWaveTabsMemeSubmit from "./MyStreamWaveTabsMemeSubmit";
 import { useWave } from "../../../../hooks/useWave";
 import { useDecisionPoints } from "../../../../hooks/waves/useDecisionPoints";
 import { Time } from "../../../../helpers/time";
-import { calculateTimeLeft, TimeLeft } from "../../../../helpers/waves/time.utils";
+import {
+  calculateTimeLeft,
+  TimeLeft,
+} from "../../../../helpers/waves/time.utils";
 import { CompactTimeCountdown } from "../../../waves/leaderboard/time/CompactTimeCountdown";
 import { useSidebarState } from "../../../../hooks/useSidebarState";
-import { ChevronDoubleLeftIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
+import {
+  ChevronDoubleLeftIcon,
+  ArrowLeftIcon,
+} from "@heroicons/react/24/outline";
 import WavePicture from "../../../waves/WavePicture";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { createBreakpoint } from "react-use";
@@ -102,7 +108,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
     <>
       {" "}
       <div className="tw-w-full tw-flex tw-flex-col tw-bg-iron-950">
-        <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-px-2 sm:tw-px-4 md:tw-px-6 tw-py-3 tw-overflow-x-auto">
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-px-2 sm:tw-px-4 tw-py-3 tw-overflow-x-hidden">
           <div className="tw-flex tw-items-center tw-gap-x-1.5">
             {isMobile && (
               <button
@@ -126,7 +132,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
               {wave.name}
             </h1>
           </div>
-          <div className="tw-flex tw-items-center tw-gap-x-2">
+          <div className="tw-flex tw-items-center tw-gap-x-2 tw-relative tw-pr-10">
             <div className="tw-hidden lg:tw-block">
               <MyStreamWaveTabsMemeSubmit
                 handleMemesSubmit={handleMemesSubmit}
@@ -136,13 +142,15 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
             <button
               type="button"
               onClick={toggleRightSidebar}
-              className="tw-group tw-size-8 tw-rounded-full tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-bg-iron-700 tw-border tw-border-iron-700 tw-border-solid tw-backdrop-blur-sm tw-transition-all tw-duration-200 tw-shadow-[0_10px_24px_rgba(0,0,0,0.45)] desktop-hover:hover:tw-bg-iron-650 desktop-hover:hover:tw-border-iron-650 desktop-hover:hover:tw-shadow-[0_12px_30px_rgba(0,0,0,0.55)]"
+              className="tw-group tw-absolute tw-top-1/2 -tw-translate-y-1/2 tw-right-0 tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-700 w-backdrop-blur-sm tw-shadow-[0_12px_28px_rgba(0,0,0,0.35)] tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-iron-500/80 desktop-hover:hover:tw-bg-iron-700/85 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.4)]"
               aria-label="Toggle right sidebar"
             >
               <ChevronDoubleLeftIcon
                 strokeWidth={2}
-                className={`tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-200 group-hover:hover:tw-text-white tw-transition-all tw-duration-200  ${
-                  isRightSidebarOpen ? "tw-rotate-180" : "tw-rotate-0"
+                className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-200 tw-transition tw-duration-300 ${
+                  isRightSidebarOpen
+                    ? "tw-rotate-180 desktop-hover:group-hover:tw-translate-x-0.5"
+                    : "tw-rotate-0 desktop-hover:group-hover:-tw-translate-x-0.5"
                 }`}
               />
             </button>
@@ -156,7 +164,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
             setActiveTab={setActiveContentTab}
           />
           {(isMemesWave || isRankWave) && nextDecisionTime && (
-            <div className="tw-flex-shrink-0 tw-px-2 sm:tw-px-4 md:tw-px-6">
+            <div className="tw-flex-shrink-0 tw-px-2 sm:tw-px-4">
               <CompactTimeCountdown timeLeft={timeLeft} />
             </div>
           )}
