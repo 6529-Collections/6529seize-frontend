@@ -26,12 +26,12 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
     params,
     searchParams,
   }: {
-    readonly params?: UserRouteParams;
+    readonly params?: Promise<UserRouteParams> | UserRouteParams;
     readonly searchParams?:
       | Promise<UserSearchParams>
       | UserSearchParams;
   }) {
-    const resolvedParams = params;
+    const resolvedParams = params ? await params : undefined;
     if (!resolvedParams?.user) {
       notFound();
     }
@@ -69,9 +69,9 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
   async function generateMetadata({
     params,
   }: {
-    readonly params?: UserRouteParams;
+    readonly params?: Promise<UserRouteParams> | UserRouteParams;
   }): Promise<Metadata> {
-    const resolvedParams = params;
+    const resolvedParams = params ? await params : undefined;
     if (!resolvedParams?.user) {
       notFound();
     }
