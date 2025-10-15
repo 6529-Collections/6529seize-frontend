@@ -11,6 +11,7 @@ import {
 import { CollectedCollectionType } from "@/entities/IProfile";
 import { ContractType, NextgenCollectionView } from "@/enums";
 import { areEqualAddresses, isNullAddress } from "@/helpers/Helpers";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import {
   faChevronCircleLeft,
   faChevronCircleRight,
@@ -18,7 +19,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import { printViewButton } from "../collectionParts/NextGenCollection";
@@ -39,18 +40,6 @@ interface Props {
   tokenCount: number;
   view: NextgenCollectionView;
   setView: (view: NextgenCollectionView) => void;
-}
-
-function useMediaQuery(query: string) {
-  const [matches, setMatches] = useState(false);
-  useEffect(() => {
-    const m = globalThis.matchMedia(query);
-    setMatches(m.matches);
-    const handler = (e: MediaQueryListEvent) => setMatches(e.matches);
-    m.addEventListener("change", handler);
-    return () => m.removeEventListener("change", handler);
-  }, [query]);
-  return matches;
 }
 
 export default function NextGenTokenPage(props: Readonly<Props>) {

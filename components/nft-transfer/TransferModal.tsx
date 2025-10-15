@@ -886,7 +886,6 @@ export default function TransferModal({
   const debouncedQuery = useDebouncedValue(trimmedQuery, 350);
   const enabled = open && debouncedQuery.length >= MIN_SEARCH_LENGTH;
 
-  // Main query (community-members → fallback to identity profile)
   const { data, isFetching } = useQuery({
     queryKey: ["memberSearch", debouncedQuery],
     enabled,
@@ -963,7 +962,7 @@ export default function TransferModal({
 
       const nearBottom = (el: HTMLElement | null) => {
         if (!el) return false;
-        const threshold = 4; // px tolerance
+        const threshold = 4;
         return el.scrollTop + el.clientHeight >= el.scrollHeight - threshold;
       };
 
@@ -1063,7 +1062,6 @@ export default function TransferModal({
     }
     console.log("byContractAndOriginator", byContract);
 
-    // Seed entries: 1 per 1155 batch (contract) or 1 per 721 token
     const initial: TxEntry[] = [];
     for (const [
       key,
@@ -1251,6 +1249,18 @@ export default function TransferModal({
     groupByContractAndOriginator,
   ]);
 
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.key === "Escape" || e.key === "Esc") && !trxPending) {
+        e.preventDefault();
+        handleClose();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open, trxPending, handleClose]);
+
   if (!open) return null;
 
   // Derive search helper text using helper
@@ -1266,35 +1276,44 @@ export default function TransferModal({
     <dialog
       open
       aria-modal="true"
+      aria-label="Transfer dialog"
       tabIndex={-1}
       className={[
-        "tw-w-full tw-h-full tw-fixed tw-inset-0 tw-z-[100] tw-bg-white/10 tw-backdrop-blur-sm tw-flex tw-items-center tw-justify-center tw-p-4 md:tw-p-8",
+        // make the dialog the fixed container; no event handlers here
+        "tw-w-full tw-h-full tw-fixed tw-inset-0 tw-z-[100] tw-flex tw-items-center tw-justify-center tw-p-4 md:tw-p-8",
         isClosing
           ? "tw-opacity-0 tw-transition-opacity tw-duration-150"
           : "tw-opacity-100 tw-transition-opacity tw-duration-150",
-      ].join(" ")}
-      onMouseDown={(e) => {
-        if (trxPending) return;
-        if (e.target === e.currentTarget) handleClose();
-      }}
-      onKeyDown={(e) => {
-        if (e.key === "Escape" || e.key === "Esc") {
-          e.preventDefault();
-          handleClose();
-        }
-      }}
-      aria-label="Transfer dialog">
-      <div
-        role="presentation"
-        onMouseDown={(e) => e.stopPropagation()}
+        "tw-relative", // needed for the absolute overlay button below
+      ].join(" ")}>
+      {/* Backdrop as an actual interactive element */}
+      <button
+        type="button"
+        aria-label="Close"
+        disabled={trxPending}
+        onClick={() => {
+          if (!trxPending) handleClose();
+        }}
         className={[
-          "tw-w-[70vw] tw-max-w-[1100px] tw-h-[75vh] tw-max-h-[900px] tw-rounded-2xl tw-bg-[#0c0c0d] tw-ring-[3px] tw-ring-white/30 tw-text-white tw-shadow-xl tw-overflow-hidden tw-flex tw-flex-col",
+          "tw-absolute tw-inset-0 tw-z-0",
+          "tw-bg-white/10 tw-backdrop-blur-sm", // your old backdrop styles
+          "tw-cursor-pointer",
+          "disabled:tw-cursor-default",
+        ].join(" ")}
+      />
+
+      {/* Modal content (no role='presentation', no mouse handlers) */}
+      <div
+        className={[
+          "tw-relative tw-z-10",
+          "tw-w-[70vw] tw-max-w-[1100px]",
+          flow === "submission" || isClosing
+            ? "tw-h-fit tw-max-h-[90vh]"
+            : "tw-h-[75vh] tw-max-h-[900px]",
+          "tw-rounded-2xl tw-bg-[#0c0c0d] tw-ring-[3px] tw-ring-white/30 tw-text-white tw-shadow-xl tw-overflow-hidden tw-flex tw-flex-col",
           isClosing
             ? "tw-scale-95 tw-opacity-0 tw-transition-all tw-duration-150"
             : "tw-scale-100 tw-opacity-100 tw-transition-all tw-duration-150",
-          flow === "submission" || isClosing
-            ? "tw-h-fit tw-max-h-[90vh]"
-            : "tw-h-[75vh]",
         ].join(" ")}>
         {/* header */}
         <div className="tw-flex tw-items-center tw-justify-between tw-border-0 tw-border-b-[3px] tw-border-solid tw-border-white/30 tw-p-4">
