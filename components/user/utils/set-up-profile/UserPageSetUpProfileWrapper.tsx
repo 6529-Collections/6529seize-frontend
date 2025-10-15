@@ -1,25 +1,41 @@
 "use client";
 
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 
 import UserPageSetUpProfile from "./UserPageSetUpProfile";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { useIdentity } from "@/hooks/useIdentity";
 
 export default function UserPageSetUpProfileWrapper({
   profile,
   children,
+  handleOrWallet,
 }: {
   readonly profile: ApiIdentity;
   readonly children: ReactNode;
+  readonly handleOrWallet?: string;
 }) {
   const { address } = useSeizeConnectContext();
 
+  const normalizedHandleOrWallet = useMemo(() => {
+    if (handleOrWallet) return handleOrWallet.toLowerCase();
+    if (profile?.handle) return profile.handle.toLowerCase();
+    return profile?.wallets?.[0]?.wallet?.toLowerCase() ?? null;
+  }, [handleOrWallet, profile]);
+
+  const { profile: hydratedProfile } = useIdentity({
+    handleOrWallet: normalizedHandleOrWallet,
+    initialProfile: profile,
+  });
+
+  const resolvedProfile = hydratedProfile ?? profile;
+
   const getShowSetUpProfile = () => {
     if (!address) return false;
-    if (!profile) return false;
-    if (profile.handle) return false;
-    return !!profile.wallets?.find((w) =>
+    if (!resolvedProfile) return false;
+    if (resolvedProfile.handle) return false;
+    return !!resolvedProfile.wallets?.find((w) =>
       [w.wallet.toLowerCase(), w.display?.toLowerCase()].includes(
         address.toLowerCase()
       )
@@ -32,11 +48,11 @@ export default function UserPageSetUpProfileWrapper({
 
   useEffect(
     () => setShowSetUpProfile(getShowSetUpProfile()),
-    [profile, address]
+    [resolvedProfile, address]
   );
 
   if (showSetUpProfile) {
-    return <UserPageSetUpProfile profile={profile} />;
+    return <UserPageSetUpProfile profile={resolvedProfile} />;
   }
   return <>{children}</>;
 }

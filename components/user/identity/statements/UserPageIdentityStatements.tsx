@@ -6,8 +6,7 @@ import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { STATEMENT_GROUP } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { Tooltip } from "react-tooltip";
 import UserPageIdentityStatementsConsolidatedAddresses from "./consolidated-addresses/UserPageIdentityStatementsConsolidatedAddresses";
 import UserPageIdentityStatementsContacts from "./contacts/UserPageIdentityStatementsContacts";
@@ -17,64 +16,63 @@ import UserPageIdentityStatementsSocialMediaAccounts from "./social-media-accoun
 import UserPageIdentityStatementsSocialMediaVerificationPosts from "./social-media-verification-posts/UserPageIdentityStatementsSocialMediaVerificationPosts";
 export default function UserPageIdentityStatements({
   profile,
+  handleOrWallet,
+  initialStatements,
 }: {
   readonly profile: ApiIdentity;
+  readonly handleOrWallet: string;
+  readonly initialStatements: CicStatement[];
 }) {
-  const params = useParams();
-  const user = (params?.user as string)?.toLowerCase();
-  const [socialMediaAccounts, setSocialMediaAccounts] = useState<
-    CicStatement[]
-  >([]);
+  const normalizedHandle = handleOrWallet.toLowerCase();
 
-  const [contacts, setContacts] = useState<CicStatement[]>([]);
-  const [nftAccounts, setNftAccounts] = useState<CicStatement[]>([]);
-  const [socialMediaVerificationPosts, setSocialMediaVerificationPosts] =
-    useState<CicStatement[]>([]);
-
-  const { isLoading, data: statements } = useQuery<CicStatement[]>({
-    queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, user.toLowerCase()],
+  const { isLoading, data: statements = [] } = useQuery<CicStatement[]>({
+    queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, normalizedHandle],
     queryFn: async () =>
       await commonApiFetch<CicStatement[]>({
-        endpoint: `profiles/${user}/cic/statements`,
+        endpoint: `profiles/${normalizedHandle}/cic/statements`,
       }),
-    enabled: !!user,
+    enabled: !!normalizedHandle,
+    initialData: initialStatements,
   });
 
-  useEffect(() => {
-    if (!statements) {
-      setNftAccounts([]);
-      setSocialMediaAccounts([]);
-      setContacts([]);
-      setSocialMediaVerificationPosts([]);
-      return;
-    }
-    const sortedStatements = [...statements].sort((a, d) => {
+  const sortedStatements = useMemo(() => {
+    return [...statements].sort((a, d) => {
       return new Date(d.crated_at).getTime() - new Date(a.crated_at).getTime();
     });
-    setSocialMediaAccounts(
+  }, [statements]);
+
+  const socialMediaAccounts = useMemo(
+    () =>
       sortedStatements.filter(
         (s) => s.statement_group === STATEMENT_GROUP.SOCIAL_MEDIA_ACCOUNT
-      )
-    );
-    setContacts(
+      ),
+    [sortedStatements]
+  );
+
+  const contacts = useMemo(
+    () =>
       sortedStatements.filter(
         (s) => s.statement_group === STATEMENT_GROUP.CONTACT
-      )
-    );
+      ),
+    [sortedStatements]
+  );
 
-    setNftAccounts(
+  const nftAccounts = useMemo(
+    () =>
       sortedStatements.filter(
         (s) => s.statement_group === STATEMENT_GROUP.NFT_ACCOUNTS
-      )
-    );
+      ),
+    [sortedStatements]
+  );
 
-    setSocialMediaVerificationPosts(
+  const socialMediaVerificationPosts = useMemo(
+    () =>
       sortedStatements.filter(
         (s) =>
           s.statement_group === STATEMENT_GROUP.SOCIAL_MEDIA_VERIFICATION_POST
-      )
-    );
-  }, [statements]);
+      ),
+    [sortedStatements]
+  );
 
   return (
     <div className="tw-mt-6 lg:tw-mt-8">

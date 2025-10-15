@@ -1,6 +1,5 @@
-import ProfileName, {
-  ProfileNameType,
-} from "@/components/profile-activity/ProfileName";
+import ProfileName from "@/components/profile-activity/ProfileName";
+import { ProfileNameType } from "@/components/profile-activity/profileName.types";
 import { ProfileRatersTableType } from "@/enums";
 import UserTableHeaderWrapper from "@/components/user/utils/UserTableHeaderWrapper";
 

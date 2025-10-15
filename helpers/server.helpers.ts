@@ -1,11 +1,15 @@
 import { ActivityLogParamsConverted } from "@/components/profile-activity/ProfileActivityLogs";
-import { ProfileRatersParams } from "@/components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
-import { ProfileActivityLog } from "@/entities/IProfile";
+import {
+  CicStatement,
+  ProfileActivityLog,
+  RatingWithProfileInfoAndLevel,
+} from "@/entities/IProfile";
 import { SortDirection } from "@/entities/ISort";
 import { ProfileRatersParamsOrderBy, RateMatter } from "@/enums";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
 import { Page } from "./Types";
+import { ProfileRatersParams } from "@/components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
 
 export const getUserProfile = async ({
   user,
@@ -134,3 +138,45 @@ export const getInitialRatersParams = ({
   orderBy: ProfileRatersParamsOrderBy.RATING,
   handleOrWallet,
 });
+
+export const getProfileCicStatements = async ({
+  handleOrWallet,
+  headers,
+}: {
+  handleOrWallet: string;
+  headers: Record<string, string>;
+}): Promise<CicStatement[]> => {
+  return await commonApiFetch<CicStatement[]>({
+    endpoint: `profiles/${handleOrWallet}/cic/statements`,
+    headers,
+  });
+};
+
+export const getProfileCicRatings = async ({
+  handleOrWallet,
+  headers,
+  params,
+}: {
+  handleOrWallet: string;
+  headers: Record<string, string>;
+  params: {
+    page: number;
+    pageSize: number;
+    given: boolean;
+    order: SortDirection;
+    orderBy: ProfileRatersParamsOrderBy;
+  };
+}): Promise<Page<RatingWithProfileInfoAndLevel>> => {
+  const { page, pageSize, given, order, orderBy } = params;
+  return await commonApiFetch<Page<RatingWithProfileInfoAndLevel>>({
+    endpoint: `profiles/${handleOrWallet}/cic/ratings/by-rater`,
+    params: {
+      page: `${page}`,
+      page_size: `${pageSize}`,
+      order: order.toLowerCase(),
+      order_by: orderBy.toLowerCase(),
+      given: given ? "true" : "false",
+    },
+    headers,
+  });
+};

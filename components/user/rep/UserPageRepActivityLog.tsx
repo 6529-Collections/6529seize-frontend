@@ -1,9 +1,8 @@
 import ProfileActivityLogs, {
   ActivityLogParams,
 } from "@/components/profile-activity/ProfileActivityLogs";
-import ProfileName, {
-  ProfileNameType,
-} from "@/components/profile-activity/ProfileName";
+import ProfileName from "@/components/profile-activity/ProfileName";
+import { ProfileNameType } from "@/components/profile-activity/profileName.types";
 import UserTableHeaderWrapper from "../utils/UserTableHeaderWrapper";
 
 export default function UserPageRepActivityLog({

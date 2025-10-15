@@ -8,20 +8,11 @@ import { SortDirection } from "@/entities/ISort";
 import { CountlessPage } from "@/helpers/Types";
 import { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
+import { getProfileCicStatements } from "@/helpers/server.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 
 import UserPageHeaderClient from "./UserPageHeaderClient";
 import { getRandomColor } from "@/helpers/Helpers";
-
-async function fetchStatements(
-  handleOrWallet: string,
-  headers: Record<string, string>
-) {
-  return await commonApiFetch<CicStatement[]>({
-    endpoint: `profiles/${handleOrWallet}/cic/statements`,
-    headers,
-  });
-}
 
 async function fetchProfileEnabledLog(
   handleOrWallet: string,
@@ -76,12 +67,14 @@ type Props = {
   readonly profile: ApiIdentity;
   readonly handleOrWallet: string;
   readonly fallbackMainAddress: string;
+  readonly initialStatements?: CicStatement[];
 };
 
 export default async function UserPageHeader({
   profile,
   handleOrWallet,
   fallbackMainAddress,
+  initialStatements,
 }: Readonly<Props>) {
   if (!handleOrWallet) {
     notFound();
@@ -90,15 +83,24 @@ export default async function UserPageHeader({
   const headers = await getAppCommonHeaders();
   const normalizedHandle = handleOrWallet.toLowerCase();
 
+  const statementsPromise = initialStatements
+    ? Promise.resolve(initialStatements)
+    : getProfileCicStatements({
+        handleOrWallet: normalizedHandle,
+        headers,
+      });
+
   const [statementsResult, profileLogResult, followersResult] =
     await Promise.allSettled([
-      fetchStatements(normalizedHandle, headers),
+      statementsPromise,
       fetchProfileEnabledLog(normalizedHandle, headers),
       fetchFollowersCount(profile.id, headers),
     ]);
 
   const statements: CicStatement[] =
-    statementsResult.status === "fulfilled" ? statementsResult.value : [];
+    statementsResult.status === "fulfilled"
+      ? statementsResult.value
+      : initialStatements ?? [];
 
   const profileLog: CountlessPage<ProfileActivityLog> | null =
     profileLogResult.status === "fulfilled" ? profileLogResult.value : null;

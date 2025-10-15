@@ -7,7 +7,6 @@ jest.mock('@/components/profile-activity/ProfileActivityLogs', () => (props: any
 
 jest.mock('@/components/profile-activity/ProfileName', () => ({
   __esModule: true,
-  ProfileNameType: { POSSESSION: 'POSSESSION', DEFAULT: 'DEFAULT' },
   default: (props: any) => <span data-testid="name">{props.type}</span>,
 }));
 
@@ -18,11 +17,18 @@ jest.mock('@/components/user/utils/UserTableHeaderWrapper', () => (props: any) =
 describe('UserPageIdentityActivityLog', () => {
   it('passes initial params to activity logs', () => {
     const params = { limit: 5 } as any;
-    render(<UserPageIdentityActivityLog initialActivityLogParams={params} />);
+    const data = { data: [], page: 1, next: false } as any;
+    render(
+      <UserPageIdentityActivityLog
+        initialActivityLogParams={params}
+        initialActivityLogData={data}
+      />
+    );
     const activity = screen.getByTestId('activity');
     const props = JSON.parse(activity.getAttribute('data-props') || '{}');
     expect(props.initialParams).toEqual(params);
     expect(props.withFilters).toBe(true);
+    expect(props.initialData).toEqual(data);
     expect(screen.getByText('NIC Activity Log')).toBeInTheDocument();
   });
 });

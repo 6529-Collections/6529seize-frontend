@@ -6,10 +6,7 @@ import { createPossessionStr } from "@/helpers/Helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-export enum ProfileNameType {
-  POSSESSION = "POSSESSION",
-  DEFAULT = "DEFAULT",
-}
+import { ProfileNameType } from "./profileName.types";
 
 export default function ProfileName({
   type,

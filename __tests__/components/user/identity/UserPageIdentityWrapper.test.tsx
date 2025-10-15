@@ -1,21 +1,15 @@
 import UserPageIdentityWrapper from "@/components/user/identity/UserPageIdentityWrapper";
-import { useIdentity } from "@/hooks/useIdentity";
 import { render } from "@testing-library/react";
-import { useParams, useRouter } from "next/navigation";
-
-jest.mock("next/navigation", () => ({
-  useRouter: jest.fn(),
-  useParams: jest.fn(),
-}));
-jest.mock("@/hooks/useIdentity", () => ({ useIdentity: jest.fn() }));
 
 let wrapperProfile: any;
 let identityProps: any;
+let wrapperHandle: any;
 
 jest.mock(
   "@/components/user/utils/set-up-profile/UserPageSetUpProfileWrapper",
   () => (props: any) => {
     wrapperProfile = props.profile;
+    wrapperHandle = props.handleOrWallet;
     return <div data-testid="wrapper">{props.children}</div>;
   }
 );
@@ -25,47 +19,46 @@ jest.mock("@/components/user/identity/UserPageIdentity", () => (props: any) => {
 });
 
 describe("UserPageIdentityWrapper", () => {
-  const routerMock = useRouter as jest.Mock;
-  const useIdentityMock = useIdentity as jest.Mock;
-  const useParamsMock = useParams as jest.Mock;
   beforeEach(() => {
     wrapperProfile = null;
     identityProps = null;
+    wrapperHandle = null;
   });
 
-  it("uses profile from hook when available", () => {
-    useParamsMock.mockReturnValue({ user: "alice" });
+  it("passes initial data to child components", () => {
     const profile: any = { handle: "alice" };
-    useIdentityMock.mockReturnValue({ profile });
-    render(
-      <UserPageIdentityWrapper
-        profile={profile}
-        initialCICReceivedParams={{} as any}
-        initialCICGivenParams={{} as any}
-        initialActivityLogParams={{} as any}
-      />
-    );
-    expect(useIdentityMock).toHaveBeenCalledWith({
-      handleOrWallet: "alice",
-      initialProfile: profile,
-    });
-    expect(wrapperProfile).toBe(profile);
-    expect(identityProps.profile).toBe(profile);
-  });
+    const receivedParams: any = { foo: "bar" };
+    const givenParams: any = { baz: "qux" };
+    const activityParams: any = { page: 1 };
+    const statements: any[] = [];
+    const cicGivenData: any = { data: [] };
+    const cicReceivedData: any = { data: [] };
+    const activityData: any = { data: [] };
 
-  it("falls back to initial profile when hook returns null", () => {
-    routerMock.mockReturnValue({ query: { user: "bob" } });
-    const profile: any = { handle: "bob" };
-    useIdentityMock.mockReturnValue({ profile: null });
     render(
       <UserPageIdentityWrapper
         profile={profile}
-        initialCICReceivedParams={{} as any}
-        initialCICGivenParams={{} as any}
-        initialActivityLogParams={{} as any}
+        initialCICReceivedParams={receivedParams}
+        initialCICGivenParams={givenParams}
+        initialActivityLogParams={activityParams}
+        handleOrWallet="alice"
+        initialStatements={statements}
+        initialCicGivenData={cicGivenData}
+        initialCicReceivedData={cicReceivedData}
+        initialActivityLogData={activityData}
       />
     );
+
     expect(wrapperProfile).toBe(profile);
+    expect(wrapperHandle).toBe("alice");
     expect(identityProps.profile).toBe(profile);
+    expect(identityProps.initialCICReceivedParams).toBe(receivedParams);
+    expect(identityProps.initialCICGivenParams).toBe(givenParams);
+    expect(identityProps.initialActivityLogParams).toBe(activityParams);
+    expect(identityProps.handleOrWallet).toBe("alice");
+    expect(identityProps.initialStatements).toBe(statements);
+    expect(identityProps.initialCicGivenData).toBe(cicGivenData);
+    expect(identityProps.initialCicReceivedData).toBe(cicReceivedData);
+    expect(identityProps.initialActivityLogData).toBe(activityData);
   });
 });

@@ -12,6 +12,10 @@ jest.mock('@/components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: jest.fn(),
 }));
 
+jest.mock('@/hooks/useIdentity', () => ({
+  useIdentity: jest.fn().mockReturnValue({ profile: null }),
+}));
+
 const { useSeizeConnectContext } = require('@/components/auth/SeizeConnectContext');
 
 describe('UserPageSetUpProfileWrapper', () => {

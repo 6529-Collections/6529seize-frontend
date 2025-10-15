@@ -1,15 +1,18 @@
 import ProfileActivityLogs, {
   ActivityLogParams,
 } from "@/components/profile-activity/ProfileActivityLogs";
-import ProfileName, {
-  ProfileNameType,
-} from "@/components/profile-activity/ProfileName";
+import ProfileName from "@/components/profile-activity/ProfileName";
+import { ProfileNameType } from "@/components/profile-activity/profileName.types";
 import UserTableHeaderWrapper from "@/components/user/utils/UserTableHeaderWrapper";
+import { CountlessPage } from "@/helpers/Types";
+import { ProfileActivityLog } from "@/entities/IProfile";
 
 export default function UserPageIdentityActivityLog({
   initialActivityLogParams,
+  initialActivityLogData,
 }: {
   readonly initialActivityLogParams: ActivityLogParams;
+  readonly initialActivityLogData: CountlessPage<ProfileActivityLog>;
 }) {
   return (
     <div>
@@ -23,6 +26,7 @@ export default function UserPageIdentityActivityLog({
         <ProfileActivityLogs
           initialParams={initialActivityLogParams}
           withFilters={true}
+          initialData={initialActivityLogData}
         />
       </div>
     </div>

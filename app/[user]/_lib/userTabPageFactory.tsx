@@ -1,5 +1,7 @@
 import { getAppMetadata } from "@/components/providers/metadata";
-import UserPageLayout from "@/components/user/layout/UserPageLayout";
+import UserPageLayout, {
+  type UserPageLayoutProps,
+} from "@/components/user/layout/UserPageLayout";
 import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import { getMetadataForUserPage } from "@/helpers/Helpers";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
@@ -12,10 +14,27 @@ import { notFound, redirect } from "next/navigation";
 
 type TabProps = { readonly profile: ApiIdentity };
 
-type FactoryArgs = {
+type PrepareArgs = {
+  profile: ApiIdentity;
+  headers: Record<string, string>;
+  user: string;
+  query: UserSearchParams;
+};
+
+type PrepareResult<TTabExtraProps extends Record<string, unknown>> = {
+  tabProps?: TTabExtraProps;
+  layoutProps?: Partial<UserPageLayoutProps>;
+};
+
+type FactoryArgs<
+  TTabExtraProps extends Record<string, unknown> = Record<string, never>
+> = {
   subroute: string;
   metaLabel: string;
-  Tab: (props: Readonly<TabProps>) => React.JSX.Element;
+  Tab: (props: Readonly<TabProps & TTabExtraProps>) => React.JSX.Element;
+  prepare?: (
+    args: PrepareArgs
+  ) => Promise<PrepareResult<TTabExtraProps>>;
 };
 
 type UserRouteParams = { user: string };
@@ -80,7 +99,9 @@ const isNotFoundError = (error: unknown): boolean => {
   return !!message && message.toLowerCase().includes("not found");
 };
 
-export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
+export function createUserTabPage<
+  TTabExtraProps extends Record<string, unknown> = Record<string, never>
+>({ subroute, metaLabel, Tab, prepare }: FactoryArgs<TTabExtraProps>) {
   async function Page({
     params,
     searchParams,
@@ -111,6 +132,15 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
       throw error;
     });
 
+    const prepared = prepare
+      ? await prepare({
+          profile,
+          headers,
+          user: normalizedUser,
+          query,
+        })
+      : undefined;
+
     const needsRedirect = userPageNeedsRedirect({
       profile,
       req: { query: { ...query, user } },
@@ -122,8 +152,15 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
     }
 
     return (
-      <UserPageLayout profile={profile} handleOrWallet={normalizedUser}>
-        <Tab profile={profile} />
+      <UserPageLayout
+        profile={profile}
+        handleOrWallet={normalizedUser}
+        {...(prepared?.layoutProps ?? {})}
+      >
+        <Tab
+          profile={profile}
+          {...((prepared?.tabProps ?? {}) as TTabExtraProps)}
+        />
       </UserPageLayout>
     );
   }

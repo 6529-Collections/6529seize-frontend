@@ -47,11 +47,13 @@ export default function ProfileActivityLogs({
   withFilters,
   disableActiveGroup = false,
   children,
+  initialData,
 }: {
   readonly initialParams: ActivityLogParams;
   readonly withFilters: boolean;
   readonly disableActiveGroup?: boolean;
   readonly children?: React.ReactNode;
+  readonly initialData?: CountlessPage<ProfileActivityLog>;
 }) {
   const activeGroupId = useSelector(selectActiveGroupId);
   const [selectedFilters, setSelectedFilters] = useState<
@@ -138,6 +140,7 @@ export default function ProfileActivityLogs({
           endpoint: `profile-logs`,
           params: params,
         }),
+      initialData,
       placeholderData: keepPreviousData,
     }
   );
