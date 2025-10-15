@@ -11,6 +11,8 @@ import {
 
 const AVATAR_BASE_URL = "https://i.pravatar.cc/120";
 const IMAGE_BASE_URL = "https://picsum.photos/seed";
+const TOKEN_TRENDING_RATE_THRESHOLD = 0.1;
+const TOKEN_NEW_WINDOW_DAYS = 7;
 
 function avatarUrl(seed: string): string {
   return `${AVATAR_BASE_URL}?u=${encodeURIComponent(seed)}`;
@@ -66,6 +68,10 @@ interface EcosystemTokenRecord {
   readonly granters: XtdhGranter[];
   readonly holderSummaries: XtdhAllocationHolderSummary[];
   readonly lastAllocatedAt: string;
+  readonly isGrantedByUser: boolean;
+  readonly isReceivedByUser: boolean;
+  readonly rateChange7d: number;
+  readonly firstAllocationDaysAgo: number;
 }
 
 interface EcosystemCollectionRecord {
@@ -109,6 +115,9 @@ export interface TokenFilters {
   readonly minGrantors?: number;
   readonly grantorProfileId?: string | null;
   readonly holderProfileId?: string | null;
+  readonly search?: string;
+  readonly ownership?: "all" | "granted" | "received";
+  readonly discovery?: "none" | "trending" | "new";
 }
 
 interface RawCollectionMeta {
@@ -545,6 +554,10 @@ const ECOSYSTEM_TOKENS: EcosystemTokenRecord[] = RAW_COLLECTIONS.flatMap(
         granters,
         holderSummaries,
         lastAllocatedAt: daysAgoToIso(token.lastAllocatedDaysAgo),
+        isGrantedByUser: collection.isGrantedByUser,
+        isReceivedByUser: collection.isReceivedByUser,
+        rateChange7d: collection.rateChange7d,
+        firstAllocationDaysAgo: collection.firstAllocationDaysAgo,
       } satisfies EcosystemTokenRecord;
     })
 );
@@ -708,7 +721,13 @@ export interface CollectionQueryOptions {
 export interface TokenQueryOptions {
   readonly page: number;
   readonly pageSize: number;
-  readonly sort: "xtdh_rate" | "total_received" | "token_id" | "collection_name";
+  readonly sort:
+    | "xtdh_rate"
+    | "total_received"
+    | "grantor_count"
+    | "rate_change_7d"
+    | "last_allocation_at"
+    | "token_name";
   readonly dir: "asc" | "desc";
   readonly filters: TokenFilters;
 }
@@ -724,7 +743,14 @@ function applyTokenFilters(
     minGrantors,
     grantorProfileId,
     holderProfileId,
+    search,
+    ownership,
+    discovery,
   } = filters;
+  const normalizedSearch =
+    typeof search === "string" && search.trim().length > 0
+      ? search.trim().toLowerCase()
+      : "";
 
   return tokens.filter((token) => {
     if (collections && collections.length > 0 && !collections.includes(token.collectionId)) {
@@ -761,6 +787,34 @@ function applyTokenFilters(
       )
     ) {
       return false;
+    }
+
+    if (normalizedSearch) {
+      const matchesSearch =
+        token.tokenName.toLowerCase().includes(normalizedSearch) ||
+        token.tokenId.toLowerCase().includes(normalizedSearch) ||
+        token.collectionName.toLowerCase().includes(normalizedSearch);
+      if (!matchesSearch) {
+        return false;
+      }
+    }
+
+    if (ownership === "granted" && !token.isGrantedByUser) {
+      return false;
+    }
+
+    if (ownership === "received" && !token.isReceivedByUser) {
+      return false;
+    }
+
+    if (discovery === "trending") {
+      if ((token.rateChange7d ?? 0) < TOKEN_TRENDING_RATE_THRESHOLD) {
+        return false;
+      }
+    } else if (discovery === "new") {
+      if (token.firstAllocationDaysAgo > TOKEN_NEW_WINDOW_DAYS) {
+        return false;
+      }
     }
 
     return true;
@@ -851,15 +905,10 @@ function sortTokens(
 
   return [...tokens].sort((a, b) => {
     switch (sort) {
-      case "collection_name":
+      case "token_name":
         return (
-          a.collectionName.localeCompare(b.collectionName) * direction ||
-          a.tokenName.localeCompare(b.tokenName) * direction
-        );
-      case "token_id":
-        return (
-          a.tokenId.localeCompare(b.tokenId) * direction ||
-          a.tokenName.localeCompare(b.tokenName) * direction
+          a.tokenName.localeCompare(b.tokenName) * direction ||
+          a.collectionName.localeCompare(b.collectionName) * direction
         );
       case "total_received":
         if (a.totalXtdhReceived === b.totalXtdhReceived) {
@@ -869,6 +918,36 @@ function sortTokens(
           );
         }
         return (a.totalXtdhReceived - b.totalXtdhReceived) * direction;
+      case "grantor_count":
+        if (a.grantorCount === b.grantorCount) {
+          return (
+            (a.xtdhRate - b.xtdhRate) * direction ||
+            a.tokenName.localeCompare(b.tokenName) * direction
+          );
+        }
+        return (a.grantorCount - b.grantorCount) * direction;
+      case "rate_change_7d": {
+        const aRate = a.rateChange7d ?? 0;
+        const bRate = b.rateChange7d ?? 0;
+        if (aRate === bRate) {
+          return (
+            (a.xtdhRate - b.xtdhRate) * direction ||
+            a.tokenName.localeCompare(b.tokenName) * direction
+          );
+        }
+        return (aRate - bRate) * direction;
+      }
+      case "last_allocation_at": {
+        const aTime = new Date(a.lastAllocatedAt).getTime();
+        const bTime = new Date(b.lastAllocatedAt).getTime();
+        if (aTime === bTime) {
+          return (
+            (a.xtdhRate - b.xtdhRate) * direction ||
+            a.tokenName.localeCompare(b.tokenName) * direction
+          );
+        }
+        return (aTime - bTime) * direction;
+      }
       case "xtdh_rate":
       default:
         if (a.xtdhRate === b.xtdhRate) {

@@ -43,6 +43,21 @@ export async function GET(request: Request) {
     const minGrantors = parseFloat(params.get("min_grantors"));
     const grantorProfileId = params.get("grantor") ?? undefined;
     const holderProfileId = params.get("holder") ?? undefined;
+    const search = params.get("search") ?? undefined;
+    const ownershipParam = params.get("ownership");
+    const ownership =
+      ownershipParam === "granted" || ownershipParam === "received"
+        ? ownershipParam
+        : ownershipParam === "all"
+          ? "all"
+          : undefined;
+    const discoveryParam = params.get("discovery");
+    const discovery =
+      discoveryParam === "trending" || discoveryParam === "new"
+        ? discoveryParam
+        : discoveryParam === "none"
+          ? "none"
+          : undefined;
 
     const response = getTokensResponse({
       page,
@@ -56,6 +71,9 @@ export async function GET(request: Request) {
         minGrantors,
         grantorProfileId: grantorProfileId ?? null,
         holderProfileId: holderProfileId ?? null,
+        search: search ?? undefined,
+        ownership,
+        discovery,
       },
     });
 

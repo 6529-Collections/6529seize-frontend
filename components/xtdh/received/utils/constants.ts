@@ -43,8 +43,10 @@ export type XtdhCollectionsSortField =
 export type XtdhNftSortField =
   | "xtdh_rate"
   | "total_received"
-  | "token_id"
-  | "collection_name";
+  | "grantor_count"
+  | "rate_change_7d"
+  | "last_allocation_at"
+  | "token_name";
 
 export const DEFAULT_COLLECTION_SORT: XtdhCollectionsSortField = "total_rate";
 export const DEFAULT_NFT_SORT: XtdhNftSortField = "xtdh_rate";
@@ -108,11 +110,40 @@ export const XTDH_COLLECTION_SORT_ITEMS: ReadonlyArray<XtdhCollectionSortItem> =
     },
   ];
 
-export const XTDH_NFT_SORT_ITEMS: CommonSelectItem<XtdhNftSortField>[] = [
-  { key: "xtdh_rate", label: "xTDH Rate", value: "xtdh_rate" },
-  { key: "total_received", label: "Total xTDH Received", value: "total_received" },
-  { key: "token_id", label: "Token ID", value: "token_id" },
-  { key: "collection_name", label: "Collection Name", value: "collection_name" },
+export const XTDH_NFT_SORT_ITEMS: ReadonlyArray<
+  CommonSelectItem<XtdhNftSortField>
+> = [
+  { key: "xtdh_rate", label: "Rate", mobileLabel: "Rate (/day)", value: "xtdh_rate" },
+  {
+    key: "total_received",
+    label: "Total",
+    mobileLabel: "Total xTDH Received",
+    value: "total_received",
+  },
+  {
+    key: "grantor_count",
+    label: "Grantors",
+    mobileLabel: "Grantor Count",
+    value: "grantor_count",
+  },
+  {
+    key: "rate_change_7d",
+    label: "Δ7d",
+    mobileLabel: "xTDH Rate Change (7 days)",
+    value: "rate_change_7d",
+  },
+  {
+    key: "last_allocation_at",
+    label: "Last",
+    mobileLabel: "Last Allocation",
+    value: "last_allocation_at",
+  },
+  {
+    key: "token_name",
+    label: "Name",
+    mobileLabel: "Token Name",
+    value: "token_name",
+  },
 ];
 
 export type XtdhCollectionOwnershipFilter = "all" | "granted" | "received";

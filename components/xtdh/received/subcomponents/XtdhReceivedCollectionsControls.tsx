@@ -16,6 +16,7 @@ import {
 
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import CommonInput from "@/components/utils/input/CommonInput";
+import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import type { SortDirection } from "@/entities/ISort";
@@ -30,7 +31,13 @@ import {
 } from "../utils/constants";
 import { XtdhReceivedViewToggle } from "./XtdhReceivedViewToggle";
 
-export interface XtdhReceivedCollectionsControlsProps {
+const DEFAULT_SEARCH_LABEL = "Search collections";
+const DEFAULT_SEARCH_PLACEHOLDER = "Search collections...";
+const DEFAULT_SORT_LABEL = "Sort collections";
+
+export interface XtdhReceivedCollectionsControlsProps<
+  TSort extends string = XtdhCollectionsSortField,
+> {
   readonly resultSummary: string;
   readonly searchQuery: string;
   readonly onSearchChange: (value: string) => void;
@@ -42,12 +49,16 @@ export interface XtdhReceivedCollectionsControlsProps {
   ) => void;
   readonly filtersAreActive: boolean;
   readonly isLoading: boolean;
-  readonly activeSort: XtdhCollectionsSortField;
+  readonly activeSort: TSort;
   readonly activeDirection: SortDirection;
-  readonly onSortChange: (nextSort: XtdhCollectionsSortField) => void;
+  readonly onSortChange: (nextSort: TSort) => void;
   readonly view: XtdhReceivedView;
   readonly onViewChange: (view: XtdhReceivedView) => void;
   readonly announcement: string;
+  readonly sortItems?: ReadonlyArray<CommonSelectItem<TSort>>;
+  readonly sortLabel?: string;
+  readonly searchLabel?: string;
+  readonly searchPlaceholder?: string;
 }
 
 interface MobileSearchDialogProps {
@@ -56,6 +67,8 @@ interface MobileSearchDialogProps {
   readonly value: string;
   readonly onChange: (value: string | null) => void;
   readonly isLoading: boolean;
+  readonly label: string;
+  readonly placeholder: string;
 }
 
 function MobileSearchDialog({
@@ -64,6 +77,8 @@ function MobileSearchDialog({
   value,
   onChange,
   isLoading,
+  label,
+  placeholder,
 }: MobileSearchDialogProps) {
   return (
     <Transition appear={true} show={isOpen} as={Fragment}>
@@ -93,7 +108,7 @@ function MobileSearchDialog({
             <DialogPanel className="tw-w-full tw-max-w-lg tw-rounded-2xl tw-bg-iron-950 tw-p-4 tw-shadow-xl tw-ring-1 tw-ring-iron-800">
               <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
                 <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
-                  Search collections
+                  {label}
                 </span>
                 <button
                   type="button"
@@ -108,7 +123,7 @@ function MobileSearchDialog({
                 <CommonInput
                   value={value}
                   onChange={onChange}
-                  placeholder="Search collections..."
+                  placeholder={placeholder}
                   showSearchIcon={true}
                   disabled={isLoading}
                 />
@@ -121,7 +136,9 @@ function MobileSearchDialog({
   );
 }
 
-export function XtdhReceivedCollectionsControls({
+export function XtdhReceivedCollectionsControls<
+  TSort extends string = XtdhCollectionsSortField,
+>({
   resultSummary,
   searchQuery,
   onSearchChange,
@@ -137,9 +154,19 @@ export function XtdhReceivedCollectionsControls({
   view,
   onViewChange,
   announcement,
-}: XtdhReceivedCollectionsControlsProps) {
+  sortItems,
+  sortLabel,
+  searchLabel,
+  searchPlaceholder,
+}: XtdhReceivedCollectionsControlsProps<TSort>) {
   const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false);
   const [isFiltersDialogOpen, setIsFiltersDialogOpen] = useState(false);
+  const resolvedSortItems =
+    (sortItems ??
+      XTDH_COLLECTION_SORT_ITEMS) as ReadonlyArray<CommonSelectItem<TSort>>;
+  const resolvedSortLabel = sortLabel ?? DEFAULT_SORT_LABEL;
+  const resolvedSearchLabel = searchLabel ?? DEFAULT_SEARCH_LABEL;
+  const resolvedSearchPlaceholder = searchPlaceholder ?? DEFAULT_SEARCH_PLACEHOLDER;
 
   const handleSearchInput = useCallback(
     (value: string | null) => {
@@ -160,16 +187,16 @@ export function XtdhReceivedCollectionsControls({
             type="button"
             onClick={() => setIsSearchDialogOpen(true)}
             className="tw-inline-flex tw-h-11 tw-w-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 hover:tw-border-iron-500 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 md:tw-hidden"
-            aria-label="Search collections"
+            aria-label={resolvedSearchLabel}
           >
             <FontAwesomeIcon icon={faMagnifyingGlass} className="tw-h-4 tw-w-4" />
           </button>
 
           <div className="tw-flex-1 tw-min-w-0">
-            <CommonDropdown<XtdhCollectionsSortField>
-              items={XTDH_COLLECTION_SORT_ITEMS}
+            <CommonDropdown<TSort>
+              items={resolvedSortItems}
               activeItem={activeSort}
-              filterLabel="Sort collections"
+              filterLabel={resolvedSortLabel}
               setSelected={onSortChange}
               sortDirection={activeDirection}
               disabled={isLoading}
@@ -208,7 +235,7 @@ export function XtdhReceivedCollectionsControls({
               <CommonInput
                 value={searchQuery}
                 onChange={handleSearchInput}
-                placeholder="Search collections..."
+                placeholder={resolvedSearchPlaceholder}
                 showSearchIcon={true}
                 disabled={isLoading}
               />
@@ -261,6 +288,8 @@ export function XtdhReceivedCollectionsControls({
         value={searchQuery}
         onChange={handleSearchInput}
         isLoading={isLoading}
+        label={resolvedSearchLabel}
+        placeholder={resolvedSearchPlaceholder}
       />
 
       <MobileWrapperDialog

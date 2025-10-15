@@ -97,6 +97,9 @@ interface TokensStateParams {
   readonly page: number;
   readonly selectedCollections: string[];
   readonly isEnabled: boolean;
+  readonly search?: string;
+  readonly ownership?: XtdhCollectionOwnershipFilter;
+  readonly discovery?: XtdhCollectionsDiscoveryFilter;
 }
 
 function useTokensQuery({
@@ -105,6 +108,9 @@ function useTokensQuery({
   page,
   selectedCollections,
   isEnabled,
+  search,
+  ownership,
+  discovery,
 }: TokensStateParams) {
   return useQuery<XtdhReceivedNftsResponse, Error>({
     queryKey: [
@@ -114,6 +120,9 @@ function useTokensQuery({
       direction,
       page,
       selectedCollections.join(","),
+      search ?? "",
+      ownership ?? "all",
+      discovery ?? "none",
     ],
     queryFn: async () =>
       await fetchXtdhReceivedTokens({
@@ -122,6 +131,9 @@ function useTokensQuery({
         page,
         pageSize: NFTS_PAGE_SIZE,
         collections: selectedCollections,
+        search,
+        ownership,
+        discovery,
       }),
     enabled: isEnabled,
     placeholderData: keepPreviousData,
@@ -225,26 +237,89 @@ function useCollectionsControls() {
   };
 }
 
-function useTokensControls() {
+function useTokensControls(
+  setCollectionsTrendingFilterActive: (active: boolean) => void,
+) {
   const [nftsSort, setNftsSort] = useState<XtdhNftSortField>(DEFAULT_NFT_SORT);
   const [nftsDirection, setNftsDirection] =
     useState<SortDirection>(DEFAULT_DIRECTION);
   const [nftsPage, setNftsPage] = useState<number>(1);
+  const trendingActiveRef = useRef<boolean>(false);
+  const lastManualSortRef = useRef<XtdhNftSortField>(DEFAULT_NFT_SORT);
+  const lastManualDirectionRef = useRef<SortDirection>(DEFAULT_DIRECTION);
+
+  const setTokensTrendingFilterActive = useCallback(
+    (nextActive: boolean) => {
+      if (nextActive) {
+        if (!trendingActiveRef.current && nftsSort !== "rate_change_7d") {
+          lastManualSortRef.current = nftsSort;
+          lastManualDirectionRef.current = nftsDirection;
+        }
+        trendingActiveRef.current = true;
+        setCollectionsTrendingFilterActive(true);
+        setNftsSort("rate_change_7d");
+        setNftsDirection(SortDirection.DESC);
+        setNftsPage(1);
+        return;
+      }
+
+      if (trendingActiveRef.current) {
+        trendingActiveRef.current = false;
+        setCollectionsTrendingFilterActive(false);
+        setNftsSort(lastManualSortRef.current);
+        setNftsDirection(lastManualDirectionRef.current);
+        setNftsPage(1);
+      }
+    },
+    [
+      nftsDirection,
+      nftsSort,
+      setCollectionsTrendingFilterActive,
+      setNftsPage,
+    ],
+  );
 
   const handleNftsSortChange = useCallback(
     (nextSort: XtdhNftSortField) => {
-      setNftsDirection((prevDirection) => {
-        if (nextSort === nftsSort) {
-          return prevDirection === SortDirection.ASC
-            ? SortDirection.DESC
-            : SortDirection.ASC;
-        }
-        return DEFAULT_DIRECTION;
-      });
+      if (nextSort === "rate_change_7d") {
+        setTokensTrendingFilterActive(true);
+        return;
+      }
+
+      const currentSort = trendingActiveRef.current
+        ? lastManualSortRef.current
+        : nftsSort;
+      const currentDirection = trendingActiveRef.current
+        ? lastManualDirectionRef.current
+        : nftsDirection;
+      const isSameSort = nextSort === currentSort;
+      const defaultDirection =
+        nextSort === "token_name" ? SortDirection.ASC : DEFAULT_DIRECTION;
+      const newDirection = isSameSort
+        ? currentDirection === SortDirection.ASC
+          ? SortDirection.DESC
+          : SortDirection.ASC
+        : defaultDirection;
+
+      lastManualSortRef.current = nextSort;
+      lastManualDirectionRef.current = newDirection;
+
+      if (trendingActiveRef.current) {
+        setTokensTrendingFilterActive(false);
+        return;
+      }
+
       setNftsSort(nextSort);
+      setNftsDirection(newDirection);
       setNftsPage(1);
     },
-    [nftsSort],
+    [
+      nftsDirection,
+      nftsSort,
+      setNftsPage,
+      setTokensTrendingFilterActive,
+      trendingActiveRef,
+    ],
   );
 
   return {
@@ -253,6 +328,7 @@ function useTokensControls() {
     nftsDirection,
     nftsPage,
     setNftsPage,
+    setTokensTrendingFilterActive,
   };
 }
 
@@ -430,7 +506,8 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
     nftsDirection,
     nftsPage,
     setNftsPage,
-  } = useTokensControls();
+    setTokensTrendingFilterActive,
+  } = useTokensControls(setTrendingFilterActive);
 
   const {
     handleCollectionsFilterChange,
@@ -449,6 +526,7 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
     useState<boolean>(false);
 
   const collectionsQuery = useCollectionsQuery();
+  const trimmedSearchQuery = searchQuery.trim();
 
   const shouldEnableTokensQuery = hasViewedNfts || view === "nfts";
 
@@ -458,6 +536,9 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
     page: nftsPage,
     selectedCollections,
     isEnabled: shouldEnableTokensQuery,
+    search: trimmedSearchQuery ? trimmedSearchQuery : undefined,
+    ownership: ownershipFilter,
+    discovery: newlyAllocatedOnly ? "new" : trendingActive ? "trending" : "none",
   });
 
   const collectionFilterOptions = useCollectionOptions(
@@ -470,8 +551,7 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
     const base = collectionsQuery.data?.collections ?? [];
     const selectionSet =
       selectedCollections.length > 0 ? new Set(selectedCollections) : null;
-    const trimmedSearchRaw = searchQuery.trim();
-    const normalizedSearch = trimmedSearchRaw.toLowerCase();
+    const normalizedSearch = trimmedSearchQuery.toLowerCase();
 
     let filtered = selectionSet
       ? base.filter((collection) => selectionSet.has(collection.collectionId))
@@ -509,7 +589,7 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
     const sorted = sortCollectionsClient(filtered, activeSort, activeDirection);
 
     return {
-      trimmedSearch: trimmedSearchRaw,
+      trimmedSearch: trimmedSearchQuery,
       activeSort,
       activeDirection,
       sorted,
@@ -517,7 +597,7 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
   }, [
     collectionsQuery.data?.collections,
     selectedCollections,
-    searchQuery,
+    trimmedSearchQuery,
     ownershipFilter,
     newlyAllocatedOnly,
     trendingActive,
@@ -622,16 +702,18 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
     (value: string) => {
       setSearchQuery(value);
       setCollectionsPage(1);
+      setNftsPage(1);
     },
-    [setCollectionsPage],
+    [setCollectionsPage, setNftsPage],
   );
 
   const handleOwnershipFilterChange = useCallback(
     (nextFilter: XtdhCollectionOwnershipFilter) => {
       setOwnershipFilter(nextFilter);
       setCollectionsPage(1);
+      setNftsPage(1);
     },
-    [setCollectionsPage],
+    [setCollectionsPage, setNftsPage],
   );
 
   const discoveryFilter: XtdhCollectionsDiscoveryFilter = trendingActive
@@ -643,11 +725,12 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
   const handleDiscoveryFilterChange = useCallback(
     (next: XtdhCollectionsDiscoveryFilter) => {
       setCollectionsPage(1);
+      setNftsPage(1);
       if (next === "trending") {
         if (newlyAllocatedOnly) {
           setNewlyAllocatedOnly(false);
         }
-        setTrendingFilterActive(true);
+        setTokensTrendingFilterActive(true);
         return;
       }
 
@@ -656,7 +739,7 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
           setNewlyAllocatedOnly(true);
         }
         if (trendingActive) {
-          setTrendingFilterActive(false);
+          setTokensTrendingFilterActive(false);
         }
         return;
       }
@@ -665,14 +748,15 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
         setNewlyAllocatedOnly(false);
       }
       if (trendingActive) {
-        setTrendingFilterActive(false);
+        setTokensTrendingFilterActive(false);
       }
     },
     [
       newlyAllocatedOnly,
       setCollectionsPage,
+      setNftsPage,
       setNewlyAllocatedOnly,
-      setTrendingFilterActive,
+      setTokensTrendingFilterActive,
       trendingActive,
     ],
   );
@@ -681,11 +765,12 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
     setSearchQuery("");
     setOwnershipFilter("all");
     setNewlyAllocatedOnly(false);
-    setTrendingFilterActive(false);
+    setTokensTrendingFilterActive(false);
     handleClearCollectionFilters();
-  }, [handleClearCollectionFilters, setTrendingFilterActive]);
+    setNftsPage(1);
+  }, [handleClearCollectionFilters, setNftsPage, setTokensTrendingFilterActive]);
 
-  const filtersAreActive = useMemo(
+  const sharedFiltersAreActive = useMemo(
     () =>
       Boolean(
         trimmedSearch ||
@@ -703,7 +788,7 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
     ],
   );
 
-  const nftFiltersAreActive = selectedCollections.length > 0;
+  const nftFiltersAreActive = sharedFiltersAreActive;
 
   const collectionsState: XtdhReceivedCollectionsViewState = {
     missingScopeMessage: undefined,
@@ -714,7 +799,7 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
     collections: paginatedCollections,
     activeSort: resolvedCollectionSort,
     activeDirection: resolvedCollectionDirection,
-    filtersAreActive,
+    filtersAreActive: sharedFiltersAreActive,
     resultSummary: collectionsResultSummary,
     page: collectionsPage,
     totalPages: collectionsTotalPages,
@@ -753,11 +838,17 @@ export function useXtdhReceivedExplorer(): UseXtdhReceivedExplorerResult {
     haveNextPage: nftsHaveNextPage,
     handleSortChange: handleNftsSortChange,
     handleCollectionsFilterChange,
-    handleClearFilters: handleClearCollectionFilters,
+    handleClearFilters: handleResetFilters,
     handlePageChange: handleNftsPageChange,
     handleRetry: handleNftsRetry,
     clearFiltersLabel: NFTS_CLEAR_FILTERS_LABEL,
     emptyStateCopy: NFTS_EMPTY_STATE_COPY,
+    searchQuery,
+    handleSearchChange,
+    ownershipFilter,
+    handleOwnershipFilterChange,
+    discoveryFilter,
+    handleDiscoveryFilterChange,
   };
 
   return {

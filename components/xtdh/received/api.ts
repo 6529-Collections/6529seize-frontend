@@ -8,6 +8,8 @@ import type {
   XtdhReceivedNftsResponse,
 } from "@/types/xtdh";
 import type {
+  XtdhCollectionOwnershipFilter,
+  XtdhCollectionsDiscoveryFilter,
   XtdhCollectionsSortField,
   XtdhNftSortField,
 } from "./utils/constants";
@@ -28,6 +30,9 @@ export interface XtdhReceivedTokensQueryParams {
   readonly page: number;
   readonly pageSize: number;
   readonly collections: readonly string[];
+  readonly search?: string;
+  readonly ownership?: XtdhCollectionOwnershipFilter;
+  readonly discovery?: XtdhCollectionsDiscoveryFilter;
 }
 
 function toApiDirection(direction: SortDirection): ApiSortDirection {
@@ -97,6 +102,15 @@ export async function fetchXtdhReceivedTokens(
 
   if (params.collections.length > 0) {
     searchParams.set("collections", params.collections.join(","));
+  }
+  if (params.search && params.search.trim().length > 0) {
+    searchParams.set("search", params.search.trim());
+  }
+  if (params.ownership && params.ownership !== "all") {
+    searchParams.set("ownership", params.ownership);
+  }
+  if (params.discovery && params.discovery !== "none") {
+    searchParams.set("discovery", params.discovery);
   }
 
   const queryString = searchParams.toString();

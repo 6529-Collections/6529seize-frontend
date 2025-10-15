@@ -1,6 +1,10 @@
 import type { SortDirection } from "@/entities/ISort";
 import type { XtdhReceivedNft } from "@/types/xtdh";
-import type { XtdhNftSortField } from "../utils/constants";
+import type {
+  XtdhCollectionOwnershipFilter,
+  XtdhCollectionsDiscoveryFilter,
+  XtdhNftSortField,
+} from "../utils/constants";
 
 export interface XtdhReceivedNftsViewEmptyCopy {
   readonly defaultMessage: string;
@@ -35,4 +39,14 @@ export interface XtdhReceivedNftsViewState {
   readonly handleRetry: () => void;
   readonly clearFiltersLabel?: string;
   readonly emptyStateCopy?: XtdhReceivedNftsViewEmptyCopy;
+  readonly searchQuery: string;
+  readonly handleSearchChange: (value: string) => void;
+  readonly ownershipFilter: XtdhCollectionOwnershipFilter;
+  readonly handleOwnershipFilterChange: (
+    filter: XtdhCollectionOwnershipFilter,
+  ) => void;
+  readonly discoveryFilter: XtdhCollectionsDiscoveryFilter;
+  readonly handleDiscoveryFilterChange: (
+    filter: XtdhCollectionsDiscoveryFilter,
+  ) => void;
 }

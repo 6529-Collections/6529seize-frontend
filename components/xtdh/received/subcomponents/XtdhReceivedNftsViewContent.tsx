@@ -3,19 +3,17 @@
 import { useCallback, useMemo, useState } from "react";
 
 import CollectionsAutocomplete from "@/components/utils/input/collections/CollectionsAutocomplete";
-import CommonSelect from "@/components/utils/select/CommonSelect";
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
 
 import {
   XTDH_NFT_SORT_ITEMS,
-  type XtdhNftSortField,
   type XtdhReceivedView,
 } from "../utils/constants";
 import { XtdhReceivedEmptyState } from "./XtdhReceivedEmptyState";
 import { XtdhReceivedNftSkeleton } from "./XtdhReceivedNftSkeleton";
-import { XtdhReceivedViewToggle } from "./XtdhReceivedViewToggle";
 import { XtdhReceivedTokenRow } from "./XtdhReceivedTokenRow";
 import { XtdhReceivedCollectionTokenDetailsDrawer } from "../collection-card-content/subcomponents/XtdhReceivedCollectionTokenDetailsDrawer";
+import { XtdhReceivedCollectionsControls } from "./XtdhReceivedCollectionsControls";
 import type {
   XtdhReceivedNftsViewEmptyCopy,
   XtdhReceivedNftsViewState,
@@ -57,6 +55,12 @@ export function XtdhReceivedNftsViewContent({
     haveNextPage,
     totalPages,
     handlePageChange,
+    searchQuery,
+    handleSearchChange,
+    ownershipFilter,
+    handleOwnershipFilterChange,
+    discoveryFilter,
+    handleDiscoveryFilterChange,
   } = state;
 
   const [activeTokenId, setActiveTokenId] = useState<string | null>(null);
@@ -77,47 +81,36 @@ export function XtdhReceivedNftsViewContent({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-4">
-      <div
-        className="tw-flex tw-flex-col tw-gap-3"
-        role="region"
-        aria-label="Filter and sort controls"
-      >
-        <div className="tw-flex tw-flex-col tw-gap-3 lg:tw-flex-row lg:tw-items-center lg:tw-gap-4">
-          <div className="tw-w-full lg:tw-w-64">
-            <CollectionsAutocomplete
-              options={collectionFilterOptions}
-              value={selectedCollections}
-              onChange={handleCollectionsFilterChange}
-              disabled={isLoading || isFetching}
-            />
-          </div>
-          <div className="tw-w-full lg:tw-w-auto">
-            <CommonSelect<XtdhNftSortField>
-              items={XTDH_NFT_SORT_ITEMS}
-              activeItem={activeSort}
-              filterLabel="Sort NFTs"
-              setSelected={handleSortChange}
-              sortDirection={activeDirection}
-              disabled={isLoading}
-            />
-          </div>
-        </div>
-        <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
-          <span
-            role="status"
-            aria-live="polite"
-            aria-atomic="true"
-            className="tw-text-sm tw-text-iron-300"
-          >
-            {resultSummary}
-          </span>
-          <div className="tw-flex tw-justify-end sm:tw-justify-end">
-            <XtdhReceivedViewToggle
-              view={view}
-              onViewChange={onViewChange}
-              announcement={announcement}
-            />
-          </div>
+      <XtdhReceivedCollectionsControls
+        resultSummary={resultSummary}
+        searchQuery={searchQuery}
+        onSearchChange={handleSearchChange}
+        ownershipFilter={ownershipFilter}
+        onOwnershipFilterChange={handleOwnershipFilterChange}
+        discoveryFilter={discoveryFilter}
+        onDiscoveryFilterChange={handleDiscoveryFilterChange}
+        filtersAreActive={filtersAreActive}
+        isLoading={isLoading}
+        activeSort={activeSort}
+        activeDirection={activeDirection}
+        onSortChange={handleSortChange}
+        view={view}
+        onViewChange={onViewChange}
+        announcement={announcement}
+        sortItems={XTDH_NFT_SORT_ITEMS}
+        sortLabel="Sort tokens"
+        searchLabel="Search tokens"
+        searchPlaceholder="Search tokens..."
+      />
+
+      <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-gap-4">
+        <div className="tw-w-full sm:tw-w-64">
+          <CollectionsAutocomplete
+            options={collectionFilterOptions}
+            value={selectedCollections}
+            onChange={handleCollectionsFilterChange}
+            disabled={isLoading || isFetching}
+          />
         </div>
       </div>
 
