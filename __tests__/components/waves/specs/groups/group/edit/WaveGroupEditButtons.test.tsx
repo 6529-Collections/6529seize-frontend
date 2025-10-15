@@ -10,12 +10,18 @@ jest.mock('@tanstack/react-query', () => ({ useMutation: jest.fn() }));
 
 jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupEditButton', () => ({
   __esModule: true,
-  default: ({ onEdit }: any) => <button onClick={() => onEdit({})}>edit</button>,
+  default: ({ onEdit, renderTrigger }: any) => {
+    const handleOpen = () => onEdit({});
+    return renderTrigger ? <>{renderTrigger({ open: handleOpen })}</> : <button onClick={handleOpen}>edit</button>;
+  },
 }));
 
 jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupRemoveButton', () => ({
   __esModule: true,
-  default: ({ onEdit }: any) => <button onClick={() => onEdit({})}>remove</button>,
+  default: ({ onEdit, renderTrigger }: any) => {
+    const handleOpen = () => onEdit({});
+    return renderTrigger ? <>{renderTrigger({ open: handleOpen })}</> : <button onClick={handleOpen}>remove</button>;
+  },
 }));
 
 jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => ({
@@ -46,9 +52,10 @@ describe('WaveGroupEditButtons', () => {
     jest.clearAllMocks();
   });
 
-  it('calls mutate on edit', async () => {
+  it('opens menu and calls mutate on edit', async () => {
     render(<WaveGroupEditButtons haveGroup wave={wave} type={WaveGroupType.VIEW} />, { wrapper });
-    fireEvent.click(screen.getByText('edit'));
+    fireEvent.click(screen.getByRole('button', { name: /Group options/i }));
+    fireEvent.click(screen.getByText('Change group'));
     await waitFor(() => expect(auth.requestAuth).toHaveBeenCalled());
     expect(mutateAsync).toHaveBeenCalled();
   });
@@ -56,12 +63,24 @@ describe('WaveGroupEditButtons', () => {
   it('shows error toast when auth fails', async () => {
     auth.requestAuth.mockResolvedValueOnce({ success: false });
     render(<WaveGroupEditButtons haveGroup wave={wave} type={WaveGroupType.VIEW} />, { wrapper });
-    fireEvent.click(screen.getByText('edit'));
+    fireEvent.click(screen.getByRole('button', { name: /Group options/i }));
+    fireEvent.click(screen.getByText('Change group'));
     await waitFor(() => expect(auth.setToast).toHaveBeenCalled());
   });
 
-  it('hides remove button for admin type', () => {
-    const { queryByText } = render(<WaveGroupEditButtons haveGroup wave={wave} type={WaveGroupType.ADMIN} />, { wrapper });
-    expect(queryByText('remove')).toBeNull();
+  it('hides remove option for admin type', async () => {
+    render(<WaveGroupEditButtons haveGroup wave={wave} type={WaveGroupType.ADMIN} />, { wrapper });
+    fireEvent.click(screen.getByRole('button', { name: /Group options/i }));
+    expect(screen.getByText('Change group')).toBeInTheDocument();
+    expect(screen.queryByText('Remove group')).toBeNull();
   });
 });
+jest.mock('@headlessui/react', () => ({
+  Menu: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  MenuButton: React.forwardRef<HTMLButtonElement, any>(({ children, ...props }, ref) => (
+    <button ref={ref} {...props}>{children}</button>
+  )),
+  MenuItems: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  MenuItem: ({ children }: any) => children({ close: jest.fn(), active: false }),
+  Transition: ({ children }: any) => <>{children}</>,
+}));

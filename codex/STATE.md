@@ -10,6 +10,7 @@ This table is the single source of truth for active and historical tickets. Keep
 | TKT-0004 | Offload CSV mapping tools to server pipelines | Backlog | P1 | evocoder | — | 2025-10-14 |
 | TKT-0005 | Replace notification polling with server-driven delivery | Backlog | P1 | evocoder | — | 2025-10-14 |
 | TKT-0006 | Centralise media and IPFS upload orchestration | Backlog | P1 | evocoder | — | 2025-10-14 |
+| TKT-0007 | Fix wave group menu overflow clipping | In-Progress | P1 | simo6529 | — | 2025-10-15 |
 
 ## Usage Guidelines
 
