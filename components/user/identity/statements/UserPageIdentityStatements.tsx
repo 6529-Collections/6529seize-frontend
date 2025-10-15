@@ -8,6 +8,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { Tooltip } from "react-tooltip";
+import { useParams } from "next/navigation";
 import UserPageIdentityStatementsConsolidatedAddresses from "./consolidated-addresses/UserPageIdentityStatementsConsolidatedAddresses";
 import UserPageIdentityStatementsContacts from "./contacts/UserPageIdentityStatementsContacts";
 import UserPageIdentityAddStatementsHeader from "./header/UserPageIdentityAddStatementsHeader";
@@ -20,10 +21,20 @@ export default function UserPageIdentityStatements({
   initialStatements,
 }: {
   readonly profile: ApiIdentity;
-  readonly handleOrWallet: string;
+  readonly handleOrWallet?: string;
   readonly initialStatements: CicStatement[];
 }) {
-  const normalizedHandle = handleOrWallet.toLowerCase();
+  const params = useParams<{ user?: string | string[] }>();
+  const paramHandle = Array.isArray(params?.user)
+    ? params?.user?.[0]
+    : params?.user;
+  const fallbackHandle =
+    handleOrWallet ??
+    profile.handle ??
+    profile.wallets?.[0]?.wallet ??
+    paramHandle ??
+    "";
+  const normalizedHandle = fallbackHandle.toLowerCase();
 
   const { isLoading, data: statements = [] } = useQuery<CicStatement[]>({
     queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, normalizedHandle],

@@ -1,5 +1,4 @@
 import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
-import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import UserPageIdentityHydrator from "@/components/user/identity/UserPageIdentityHydrator";
 import UserPageIdentityWrapper from "@/components/user/identity/UserPageIdentityWrapper";
 import {
@@ -7,35 +6,12 @@ import {
   ProfileActivityLog,
   RatingWithProfileInfoAndLevel,
 } from "@/entities/IProfile";
-import { ProfileActivityFilterTargetType, RateMatter } from "@/enums";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import type {
-  CountlessPage,
-  Page as PageWithCount,
-} from "@/helpers/Types";
-import { convertActivityLogParams, getProfileLogTypes } from "@/helpers/profile-logs.helpers";
+import type { CountlessPage, Page as PageWithCount } from "@/helpers/Types";
 import {
-  getInitialRatersParams,
-  getProfileCicRatings,
-  getProfileCicStatements,
-  getUserProfileActivityLogs,
-} from "@/helpers/server.helpers";
-
-const MATTER_TYPE = RateMatter.NIC;
-
-const getInitialActivityLogParams = (
-  handleOrWallet: string
-): ActivityLogParams => ({
-  page: 1,
-  pageSize: 10,
-  logTypes: getProfileLogTypes({
-    logTypes: [],
-  }),
-  matter: null,
-  targetType: ProfileActivityFilterTargetType.ALL,
-  handleOrWallet,
-  groupId: null,
-});
+  fetchIdentityTabData,
+  type IdentityTabParams,
+} from "@/app/[user]/identity/_lib/identityTabQueries";
 
 type IdentityTabExtraProps = {
   readonly handleOrWallet: string;
@@ -43,6 +19,7 @@ type IdentityTabExtraProps = {
   readonly initialCicGivenData: PageWithCount<RatingWithProfileInfoAndLevel>;
   readonly initialCicReceivedData: PageWithCount<RatingWithProfileInfoAndLevel>;
   readonly initialActivityLogData: CountlessPage<ProfileActivityLog>;
+  readonly initialParams: IdentityTabParams;
 };
 
 function IdentityTab({
@@ -52,25 +29,16 @@ function IdentityTab({
   initialCicGivenData,
   initialCicReceivedData,
   initialActivityLogData,
+  initialParams,
 }: {
   readonly profile: ApiIdentity;
 } & IdentityTabExtraProps) {
   const normalizedHandleOrWallet = handleOrWallet.toLowerCase();
-
-  const initialCICGivenParams = getInitialRatersParams({
-    handleOrWallet: normalizedHandleOrWallet,
-    matter: MATTER_TYPE,
-    given: false,
-  });
-
-  const initialCICReceivedParams = getInitialRatersParams({
-    handleOrWallet: normalizedHandleOrWallet,
-    matter: MATTER_TYPE,
-    given: true,
-  });
-
-  const initialActivityLogParams =
-    getInitialActivityLogParams(normalizedHandleOrWallet);
+  const {
+    activityLogParams: initialActivityLogParams,
+    cicGivenParams: initialCICGivenParams,
+    cicReceivedParams: initialCICReceivedParams,
+  } = initialParams;
 
   return (
     <div className="tailwind-scope">
@@ -107,87 +75,21 @@ const { Page, generateMetadata } = createUserTabPage<IdentityTabExtraProps>({
   prepare: async ({ profile, headers, user }) => {
     const fallbackHandleOrWallet =
       profile.handle ?? profile.wallets?.[0]?.wallet ?? user;
-    const normalizedHandleOrWallet = fallbackHandleOrWallet.toLowerCase();
-
-    const initialCICGivenParams = getInitialRatersParams({
-      handleOrWallet: normalizedHandleOrWallet,
-      matter: MATTER_TYPE,
-      given: false,
+    const identityTabResult = await fetchIdentityTabData({
+      handleOrWallet: fallbackHandleOrWallet,
+      headers,
     });
 
-    const initialCICReceivedParams = getInitialRatersParams({
+    const {
       handleOrWallet: normalizedHandleOrWallet,
-      matter: MATTER_TYPE,
-      given: true,
-    });
-
-    const initialActivityLogParams =
-      getInitialActivityLogParams(normalizedHandleOrWallet);
-
-    const [
-      statementsResult,
-      activityLogsResult,
-      cicGivenResult,
-      cicReceivedResult,
-    ] = await Promise.allSettled([
-      getProfileCicStatements({
-        handleOrWallet: normalizedHandleOrWallet,
-        headers,
-      }),
-      getUserProfileActivityLogs<ProfileActivityLog>({
-        headers,
-        params: convertActivityLogParams({
-          params: initialActivityLogParams,
-          disableActiveGroup: true,
-        }),
-      }),
-      getProfileCicRatings({
-        handleOrWallet: normalizedHandleOrWallet,
-        headers,
-        params: initialCICGivenParams,
-      }),
-      getProfileCicRatings({
-        handleOrWallet: normalizedHandleOrWallet,
-        headers,
-        params: initialCICReceivedParams,
-      }),
-    ]);
-
-    const initialStatements: CicStatement[] =
-      statementsResult.status === "fulfilled" ? statementsResult.value : [];
-
-    const initialActivityLogData: CountlessPage<ProfileActivityLog> =
-      activityLogsResult.status === "fulfilled"
-        ? {
-            data: activityLogsResult.value.data,
-            page: activityLogsResult.value.page,
-            next: activityLogsResult.value.next,
-          }
-        : {
-            data: [],
-            page: 1,
-            next: false,
-          };
-
-    const initialCicGivenData: PageWithCount<RatingWithProfileInfoAndLevel> =
-      cicGivenResult.status === "fulfilled"
-        ? cicGivenResult.value
-        : {
-            count: 0,
-            data: [],
-            page: 1,
-            next: false,
-          };
-
-    const initialCicReceivedData: PageWithCount<RatingWithProfileInfoAndLevel> =
-      cicReceivedResult.status === "fulfilled"
-        ? cicReceivedResult.value
-        : {
-            count: 0,
-            data: [],
-            page: 1,
-            next: false,
-          };
+      data: {
+        statements: initialStatements,
+        activityLog: initialActivityLogData,
+        cicGiven: initialCicGivenData,
+        cicReceived: initialCicReceivedData,
+      },
+      params: initialParams,
+    } = identityTabResult;
 
     return {
       tabProps: {
@@ -196,6 +98,7 @@ const { Page, generateMetadata } = createUserTabPage<IdentityTabExtraProps>({
         initialCicGivenData,
         initialCicReceivedData,
         initialActivityLogData,
+        initialParams,
       },
       layoutProps: {
         initialStatements,

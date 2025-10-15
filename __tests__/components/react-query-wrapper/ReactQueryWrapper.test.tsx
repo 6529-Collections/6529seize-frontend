@@ -2,6 +2,9 @@ import React, { useContext } from 'react';
 import { render, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ReactQueryWrapper, { ReactQueryWrapperContext, QueryKey } from '@/components/react-query-wrapper/ReactQueryWrapper';
+import { RateMatter, ProfileRatersParamsOrderBy, ProfileActivityFilterTargetType } from '@/enums';
+import { SortDirection } from '@/entities/ISort';
+import { convertActivityLogParams } from '@/helpers/profile-logs.helpers';
 
 jest.mock('@/helpers/Helpers', () => ({ ...jest.requireActual('../../../helpers/Helpers'), wait: jest.fn(() => Promise.resolve()) }));
 
@@ -23,6 +26,7 @@ type ContextType = {
   onGroupChanged: (params: { groupId: string }) => void;
   onIdentityBulkRate: () => void;
   invalidateNotifications: () => void;
+  initProfileIdentityPage: (params: any) => void;
 };
 
 const createTestSetup = () => {
@@ -49,6 +53,116 @@ describe('ReactQueryWrapper context', () => {
     act(() => ctx.setProfile(profile));
     expect(client.getQueryData([QueryKey.PROFILE, 'alice'])).toEqual(profile);
     expect(client.getQueryData([QueryKey.PROFILE, '0x1'])).toEqual(profile);
+  });
+
+  it('initProfileIdentityPage primes logs, raters, and statements caches', () => {
+    const { client, ctx } = createTestSetup();
+    const profile = { handle: 'Alice', wallets: [{ wallet: '0xABC' }] } as any;
+    const activityLogParams = {
+      page: 1,
+      pageSize: 10,
+      logTypes: [],
+      matter: null,
+      targetType: ProfileActivityFilterTargetType.ALL,
+      handleOrWallet: 'alice',
+      groupId: null,
+    };
+    const activityLogData = {
+      data: [{ id: 'log-1' }],
+      page: 1,
+      next: false,
+    };
+    const cicGivenParams = {
+      page: 1,
+      pageSize: 7,
+      given: false,
+      order: SortDirection.DESC,
+      orderBy: ProfileRatersParamsOrderBy.RATING,
+      handleOrWallet: 'alice',
+      matter: RateMatter.NIC,
+    };
+    const cicReceivedParams = {
+      ...cicGivenParams,
+      given: true,
+    };
+    const cicGivenData = {
+      count: 1,
+      data: [{ id: 'given-1' }],
+      page: 1,
+      next: false,
+    };
+    const cicReceivedData = {
+      count: 2,
+      data: [{ id: 'received-1' }],
+      page: 1,
+      next: false,
+    };
+    const statements = [{ id: 'statement-1' }] as any[];
+
+    act(() =>
+      ctx.initProfileIdentityPage({
+        profile,
+        activityLogs: {
+          params: activityLogParams,
+          data: activityLogData,
+        },
+        cicGivenToUsers: {
+          params: cicGivenParams,
+          data: cicGivenData,
+        },
+        cicReceivedFromUsers: {
+          params: cicReceivedParams,
+          data: cicReceivedData,
+        },
+        statements: {
+          handleOrWallet: 'alice',
+          data: statements,
+        },
+      })
+    );
+
+    const expectedActivityKey = [
+      QueryKey.PROFILE_LOGS,
+      convertActivityLogParams({
+        params: activityLogParams,
+        disableActiveGroup: true,
+      }),
+    ];
+
+    expect(client.getQueryData([QueryKey.PROFILE, 'alice'])).toEqual(profile);
+    expect(client.getQueryData([QueryKey.PROFILE, '0xabc'])).toEqual(profile);
+    expect(client.getQueryData(expectedActivityKey)).toEqual(activityLogData);
+    expect(
+      client.getQueryData([
+        QueryKey.PROFILE_RATERS,
+        {
+          handleOrWallet: 'alice',
+          matter: RateMatter.NIC,
+          page: '1',
+          pageSize: '7',
+          order: SortDirection.DESC,
+          orderBy: ProfileRatersParamsOrderBy.RATING,
+          given: false,
+        },
+      ])
+    ).toEqual(cicGivenData);
+    expect(
+      client.getQueryData([
+        QueryKey.PROFILE_RATERS,
+        {
+          handleOrWallet: 'alice',
+          matter: RateMatter.NIC,
+          page: '1',
+          pageSize: '7',
+          order: SortDirection.DESC,
+          orderBy: ProfileRatersParamsOrderBy.RATING,
+          given: true,
+        },
+      ])
+    ).toEqual(cicReceivedData);
+    expect(
+      client.getQueryData([QueryKey.PROFILE_CIC_STATEMENTS, 'alice'])
+    ).toEqual(statements);
   });
 
   it('waits then invalidates drops', async () => {

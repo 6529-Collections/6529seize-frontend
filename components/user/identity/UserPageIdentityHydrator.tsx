@@ -1,12 +1,8 @@
 "use client";
 
 import { useEffect, useContext } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 
-import {
-  QueryKey,
-  ReactQueryWrapperContext,
-} from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type {
@@ -41,7 +37,6 @@ export default function UserPageIdentityHydrator({
   initialCicReceivedData,
 }: Readonly<Props>) {
   const normalizedHandle = handleOrWallet.toLowerCase();
-  const queryClient = useQueryClient();
   const { initProfileIdentityPage } = useContext(ReactQueryWrapperContext);
 
   useEffect(() => {
@@ -59,6 +54,10 @@ export default function UserPageIdentityHydrator({
         params: initialCICReceivedParams,
         data: initialCicReceivedData,
       },
+      statements: {
+        handleOrWallet: normalizedHandle,
+        data: initialStatements,
+      },
     });
   }, [
     initProfileIdentityPage,
@@ -69,14 +68,9 @@ export default function UserPageIdentityHydrator({
     initialCicGivenData,
     initialCICReceivedParams,
     initialCicReceivedData,
+    initialStatements,
+    normalizedHandle,
   ]);
-
-  useEffect(() => {
-    queryClient.setQueryData<CicStatement[]>(
-      [QueryKey.PROFILE_CIC_STATEMENTS, normalizedHandle],
-      initialStatements
-    );
-  }, [queryClient, normalizedHandle, initialStatements]);
 
   return null;
 }
