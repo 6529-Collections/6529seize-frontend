@@ -101,28 +101,15 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
     const query: UserSearchParams =
       normalizeSearchParams(resolvedSearchParams);
     const headers = await getAppCommonHeaders();
-    const shouldLogProfileFetch = process.env.NODE_ENV !== "production";
-    const profileFetchStart = shouldLogProfileFetch ? Date.now() : 0;
-    let profileFetchStatus: "success" | "error" = "success";
-
     const profile: ApiIdentity = await getCachedUserProfile({
       user: normalizedUser,
       headers,
     })
       .catch((error: unknown) => {
-        profileFetchStatus = "error";
         if (isNotFoundError(error)) {
           notFound();
         }
         throw error;
-      })
-      .finally(() => {
-        if (shouldLogProfileFetch) {
-          const duration = Date.now() - profileFetchStart;
-          console.log(
-            `[SSR][userTabPageFactory] getUserProfile(page:${normalizedUser}) ${profileFetchStatus} in ${duration}ms`
-          );
-        }
       });
 
     const needsRedirect = userPageNeedsRedirect({
@@ -154,28 +141,15 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
 
     const normalizedUser = resolvedParams.user.toLowerCase();
     const headers = await getAppCommonHeaders();
-    const shouldLogProfileFetch = process.env.NODE_ENV !== "production";
-    const profileFetchStart = shouldLogProfileFetch ? Date.now() : 0;
-    let profileFetchStatus: "success" | "error" = "success";
-
     const profile: ApiIdentity = await getCachedUserProfile({
       user: normalizedUser,
       headers,
     })
       .catch((error: unknown) => {
-        profileFetchStatus = "error";
         if (isNotFoundError(error)) {
           notFound();
         }
         throw error;
-      })
-      .finally(() => {
-        if (shouldLogProfileFetch) {
-          const duration = Date.now() - profileFetchStart;
-          console.log(
-            `[SSR][userTabPageFactory] getUserProfile(metadata:${normalizedUser}) ${profileFetchStatus} in ${duration}ms`
-          );
-        }
       });
     return getAppMetadata(getMetadataForUserPage(profile, metaLabel));
   }

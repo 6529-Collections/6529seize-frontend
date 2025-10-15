@@ -32,17 +32,11 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
     url += `?${queryParams.toString()}`;
   }
 
-  const shouldLogTiming =
-    process.env.NODE_ENV !== "production" && typeof window === "undefined";
-  const timingStart = shouldLogTiming ? Date.now() : 0;
-  let responseStatus: number | string = "no-response";
-
   try {
     const res = await fetch(url, {
       headers: getHeaders(param.headers),
       signal: param.signal,
     });
-    responseStatus = res.status;
     const body: unknown = await res.json();
     if (!res.ok) {
       const errorMessage =
@@ -54,13 +48,6 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
     return body as T;
   } catch (error) {
     throw error;
-  } finally {
-    if (shouldLogTiming) {
-      const duration = Date.now() - timingStart;
-      console.log(
-        `[SSR][commonApiFetch] ${param.endpoint} -> ${responseStatus} in ${duration}ms`
-      );
-    }
   }
 };
 

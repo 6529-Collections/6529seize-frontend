@@ -58,20 +58,10 @@ export default async function UserPageHeader({
   const headers = await getAppCommonHeaders();
   const normalizedHandle = handleOrWallet.toLowerCase();
 
-  const shouldLogHeaderFetch = process.env.NODE_ENV !== "production";
-  const headerFetchStart = shouldLogHeaderFetch ? Date.now() : 0;
-
   const [statementsResult, followersResult] = await Promise.allSettled([
     fetchStatements(normalizedHandle, headers),
     fetchFollowersCount(profile.id, headers),
   ]);
-
-  if (shouldLogHeaderFetch) {
-    const duration = Date.now() - headerFetchStart;
-    console.log(
-      `[SSR][UserPageHeader] data fetch ${normalizedHandle} (statements:${statementsResult.status}, followers:${followersResult.status}) in ${duration}ms`
-    );
-  }
 
   const statements: CicStatement[] =
     statementsResult.status === "fulfilled" ? statementsResult.value : [];
