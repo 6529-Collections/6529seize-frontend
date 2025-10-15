@@ -52,7 +52,7 @@ export default function WaveGroupRemoveModal({
               </div>
               <div className="tw-absolute tw-right-4 tw-top-4 tw-flex tw-justify-between tw-items-center">
                 <button
-                  onClick={removeGroup}
+                  onClick={closeModal}
                   type="button"
                   className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out">
                   <span className="tw-sr-only tw-text-sm">Close</span>
