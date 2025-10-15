@@ -1066,10 +1066,12 @@ export default function TransferModal({
     setIsClosing(true);
     setTimeout(() => {
       onClose({
-        completed: txs.length > 0 && txs.every((t) => t.state === "success"),
+        completed:
+          flow !== "review" ||
+          (txs.length > 0 && txs.every((t) => t.state === "error")),
       });
     }, 150);
-  }, [isClosing, onClose, txs, trxPending]);
+  }, [isClosing, onClose, flow, trxPending, txs]);
 
   const handleConfirm = useCallback(async () => {
     if (!publicClient || !address) {
