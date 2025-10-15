@@ -27,7 +27,8 @@ export default function NftNavigation(
   const disabledClass = "tw-pointer-events-none tw-text-gray-400";
 
   const query = useMemo(() => {
-    return `?${props.params?.toString() ?? ""}`;
+    const paramsStr = props.params?.toString();
+    return paramsStr ? `?${paramsStr}` : "";
   }, [props.params]);
 
   function printFullScreen() {

@@ -236,6 +236,41 @@ function RecipientSelected({
   readonly selectedWallet: string | null;
 }) {
   const wallets = profile?.wallets ?? [];
+  let walletsContent;
+  if (isIdentityLoading) {
+    walletsContent = (
+      <div className="tw-text-xs tw-opacity-60">Loading wallets…</div>
+    );
+  } else if (wallets.length === 0) {
+    walletsContent = (
+      <div className="tw-text-xs tw-opacity-60">
+        No wallets found for {selectedProfile.display || selectedProfile.handle}
+        .
+      </div>
+    );
+  } else {
+    walletsContent = wallets.map(
+      (w: { wallet: string; display: string; tdh: number }) => {
+        const isSel = selectedWallet?.toLowerCase() === w.wallet.toLowerCase();
+        return (
+          <button
+            key={w.wallet}
+            type="button"
+            onClick={() => setSelectedWallet(w.wallet)}
+            className={[
+              "tw-w-full tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/10 hover:tw-bg-white/15 tw-p-2 tw-flex tw-flex-col tw-items-start tw-justify-between",
+              isSel ? "tw-border-2 tw-border-solid !tw-border-emerald-400" : "",
+            ].join(" ")}>
+            <div className="tw-text-sm tw-font-medium">
+              {w.display || w.wallet}
+            </div>
+            <div className="tw-text-[11px] tw-opacity-60">{w.wallet}</div>
+          </button>
+        );
+      }
+    );
+  }
+
   return (
     <>
       <div className="tw-flex tw-items-center tw-justify-between tw-rounded-lg tw-bg-white/10 tw-px-3 tw-py-2">
@@ -278,40 +313,7 @@ function RecipientSelected({
         <div
           ref={walletsListRef}
           className="tw-space-y-2 tw-flex-1 tw-min-h-0 tw-overflow-auto tw-pr-3 tw-[scrollbar-gutter:stable] tw-scrollbar-thin tw-scrollbar-thumb-white/30 tw-scrollbar-track-transparent hover:tw-scrollbar-thumb-white/50">
-          {isIdentityLoading ? (
-            <div className="tw-text-xs tw-opacity-60">Loading wallets…</div>
-          ) : wallets.length === 0 ? (
-            <div className="tw-text-xs tw-opacity-60">
-              No wallets found for{" "}
-              {selectedProfile.display || selectedProfile.handle}.
-            </div>
-          ) : (
-            wallets.map(
-              (w: { wallet: string; display: string; tdh: number }) => {
-                const isSel =
-                  selectedWallet?.toLowerCase() === w.wallet.toLowerCase();
-                return (
-                  <button
-                    key={w.wallet}
-                    type="button"
-                    onClick={() => setSelectedWallet(w.wallet)}
-                    className={[
-                      "tw-w-full tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/10 hover:tw-bg-white/15 tw-p-2 tw-flex tw-flex-col tw-items-start tw-justify-between",
-                      isSel
-                        ? "tw-border-2 tw-border-solid !tw-border-emerald-400"
-                        : "",
-                    ].join(" ")}>
-                    <div className="tw-text-sm tw-font-medium">
-                      {w.display || w.wallet}
-                    </div>
-                    <div className="tw-text-[11px] tw-opacity-60">
-                      {w.wallet}
-                    </div>
-                  </button>
-                );
-              }
-            )
-          )}
+          {walletsContent}
         </div>
         {walletsHasOverflow && (
           <div className="tw-text-xs tw-opacity-75 tw-text-center">
@@ -343,7 +345,7 @@ function RecipientSearch({
   readonly resultsListRef: React.RefObject<HTMLDivElement | null>;
   readonly resultsHasOverflow: boolean;
   readonly resultsAtEnd: boolean;
-  searchInputRef: React.RefObject<HTMLInputElement | null>;
+  readonly searchInputRef: React.RefObject<HTMLInputElement | null>;
 }) {
   return (
     <>
@@ -1066,11 +1068,11 @@ export default function TransferModal({
       publicClient,
       selItems
     );
-    byContract.forEach((value) => {
+    for (const value of Array.from(byContract.values())) {
       value.items.sort((a, b) =>
         a.tokenId.toString().localeCompare(b.tokenId.toString())
       );
-    });
+    }
     console.log("byContractAndOriginator", byContract);
 
     // Seed entries: 1 per 1155 batch (contract) or 1 per 721 token
@@ -1234,7 +1236,7 @@ export default function TransferModal({
                 )
               );
             }
-          } catch (simErr: any) {
+          } catch (error: any) {
             setTxs((prev) =>
               prev.map((te) =>
                 te.id === tid
@@ -1242,7 +1244,7 @@ export default function TransferModal({
                       ...te,
                       state: "error",
                       error: String(
-                        simErr?.shortMessage || simErr?.message || simErr
+                        error?.shortMessage || error?.message || error
                       ),
                     }
                   : te
@@ -1272,10 +1274,9 @@ export default function TransferModal({
     trimmedQuery
   );
 
-  // Backdrop + modal content; no role on non-interactive with key/mouse listeners on it
   return (
     <dialog
-      role="dialog"
+      open
       aria-modal="true"
       tabIndex={-1}
       className={[
@@ -1296,6 +1297,8 @@ export default function TransferModal({
       }}
       aria-label="Transfer dialog">
       <div
+        role="presentation"
+        onMouseDown={(e) => e.stopPropagation()}
         className={[
           "tw-w-[70vw] tw-max-w-[1100px] tw-h-[75vh] tw-max-h-[900px] tw-rounded-2xl tw-bg-[#0c0c0d] tw-ring-[3px] tw-ring-white/30 tw-text-white tw-shadow-xl tw-overflow-hidden tw-flex tw-flex-col",
           isClosing
@@ -1304,8 +1307,7 @@ export default function TransferModal({
           flow === "submission" || isClosing
             ? "tw-h-fit tw-max-h-[90vh]"
             : "tw-h-[75vh]",
-        ].join(" ")}
-        onMouseDown={(e) => e.stopPropagation()}>
+        ].join(" ")}>
         {/* header */}
         <div className="tw-flex tw-items-center tw-justify-between tw-border-0 tw-border-b-[3px] tw-border-solid tw-border-white/30 tw-p-4">
           <div className="tw-text-lg tw-font-semibold">

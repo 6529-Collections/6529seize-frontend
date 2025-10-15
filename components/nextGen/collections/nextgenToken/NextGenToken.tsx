@@ -18,7 +18,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import { printViewButton } from "../collectionParts/NextGenCollection";
@@ -49,10 +49,25 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
     return areEqualAddresses(connectedAddress, props.token.owner);
   }, [props.token.owner, connectedAddress]);
 
+  function useMediaQuery(query: string) {
+    const [matches, setMatches] = useState(false);
+    useEffect(() => {
+      const m = window.matchMedia(query);
+      setMatches(m.matches);
+      const handler = (e: MediaQueryListEvent) => setMatches(e.matches);
+      m.addEventListener("change", handler);
+      return () => m.removeEventListener("change", handler);
+    }, [query]);
+    return matches;
+  }
+
+  const isMdUp = useMediaQuery("(min-width: 768px)");
+
   const transferSingle = useMemo(() => {
     if (!isConnectedAddressOwner) {
       return null;
     }
+
     return (
       <div className="mb-4">
         <TransferSingle
@@ -103,9 +118,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
         <Row className="pt-4 pb-4">
           {props.view === NextgenCollectionView.ABOUT && (
             <>
-              <Col xs={12} className="d-md-none">
-                {transferSingle}
-              </Col>
+              <Col xs={12}>{!isMdUp ? transferSingle : null}</Col>
               <Col sm={12} md={6}>
                 <NextGenTokenAbout
                   collection={props.collection}
@@ -113,7 +126,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
                 />
               </Col>
               <Col sm={12} md={6}>
-                <div className="d-none d-md-block">{transferSingle}</div>
+                {isMdUp ? transferSingle : null}
                 <NextgenTokenTraits
                   collection={props.collection}
                   token={props.token}

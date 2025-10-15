@@ -62,7 +62,7 @@ const mockUseAccount = require("wagmi").useAccount as jest.Mock;
 const mockUsePublicClient = require("wagmi").usePublicClient as jest.Mock;
 const mockUseWalletClient = require("wagmi").useWalletClient as jest.Mock;
 
-describe("TransferModal (reworked)", () => {
+describe("TransferModal", () => {
   const selectedItems = new Map([
     [
       "MEMES:10",

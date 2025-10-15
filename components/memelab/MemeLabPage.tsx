@@ -61,7 +61,6 @@ import {
   Table,
 } from "react-bootstrap";
 import TransferSingle from "../nft-transfer/TransferSingle";
-import { TransferProvider } from "../nft-transfer/TransferState";
 
 const ACTIVITY_PAGE_SIZE = 25;
 
@@ -685,17 +684,15 @@ export default function MemeLabPageComponent({
                 {nftBalance > 0 && nft?.id && (
                   <Row className="pt-5">
                     <Col>
-                      <TransferProvider>
-                        <TransferSingle
-                          collectionType={CollectedCollectionType.MEMES}
-                          contractType={ContractType.ERC1155}
-                          contract={MEMES_CONTRACT}
-                          tokenId={nft?.id}
-                          max={nftBalance}
-                          title={nft?.name ?? `The Memes #${nft?.id}`}
-                          thumbUrl={nft?.thumbnail}
-                        />
-                      </TransferProvider>
+                      <TransferSingle
+                        collectionType={CollectedCollectionType.MEMELAB}
+                        contractType={ContractType.ERC1155}
+                        contract={MEMELAB_CONTRACT}
+                        tokenId={nft?.id}
+                        max={nftBalance}
+                        title={nft?.name ?? `Meme Lab #${nft?.id}`}
+                        thumbUrl={nft?.thumbnail}
+                      />
                     </Col>
                   </Row>
                 )}
