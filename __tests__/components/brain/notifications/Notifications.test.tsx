@@ -94,7 +94,7 @@ jest.mock('@/contexts/TitleContext', () => ({
   TitleProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-import Notifications from '@/components/brain/notifications/Notifications';
+import Notifications from '@/components/brain/notifications';
 
 describe('Notifications component', () => {
   beforeEach(() => {

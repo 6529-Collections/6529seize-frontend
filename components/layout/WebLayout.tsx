@@ -1,6 +1,6 @@
 "use client";
 
-import React, { type CSSProperties, type ReactNode, useMemo } from "react";
+import React, { type ReactNode } from "react";
 import Image from "next/image";
 import WebSidebar from "./sidebar/WebSidebar";
 import { useSidebarController } from "../../hooks/useSidebarController";
@@ -9,11 +9,6 @@ import { SidebarProvider, useSidebarState } from "../../hooks/useSidebarState";
 import ClientOnly from "../client-only/ClientOnly";
 
 const DESKTOP_MAX_WIDTH = 1324;
-
-type LayoutCssVars = CSSProperties & {
-  "--layout-margin"?: string;
-  "--left-rail"?: string;
-};
 
 interface WebLayoutProps {
   readonly children: ReactNode;
@@ -32,68 +27,21 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
   } = useSidebarController();
   const { isRightSidebarOpen } = useSidebarState();
 
-  const rootStyle = useMemo<LayoutCssVars>(() => {
-    if (isMobile) {
-      return {
-        minHeight: "100dvh",
-        "--layout-margin": "0px",
-        "--left-rail": "0px",
-      };
-    }
-
-    const layoutMargin = `max((100vw - ${DESKTOP_MAX_WIDTH}px) / 2, 0px)`;
-    const leftRailWidth = isNarrow ? SIDEBAR_WIDTHS.COLLAPSED : sidebarWidth;
-
-    return {
-      minHeight: "100dvh",
-      "--layout-margin": layoutMargin,
-      "--left-rail": `calc(${layoutMargin} + ${leftRailWidth})`,
-    };
-  }, [isMobile, isNarrow, sidebarWidth]);
-
-  const collapsedWidth = SIDEBAR_WIDTHS.COLLAPSED;
-  const expandedWidth = SIDEBAR_WIDTHS.EXPANDED;
-  const narrowTranslateX = `translateX(calc(${expandedWidth} - ${collapsedWidth}))`;
-
-  const mainStyle = useMemo<CSSProperties>(() => {
-    const style: CSSProperties = { width: "100%" };
-    let transform: string | undefined;
-
-    if (isMobile) {
-      if (isOffcanvasOpen) {
-        transform = `translateX(${sidebarWidth})`;
-      }
-    } else if (isNarrow) {
-      style.paddingLeft = collapsedWidth;
-      transform = isOffcanvasOpen ? narrowTranslateX : "translateX(0)";
-    } else {
-      style.paddingLeft = sidebarWidth;
-    }
-
-    if (!isRightSidebarOpen && transform) {
-      style.transform = transform;
-    }
-
-    return style;
-  }, [
-    collapsedWidth,
-    isMobile,
-    isNarrow,
-    isOffcanvasOpen,
-    isRightSidebarOpen,
-    narrowTranslateX,
-    sidebarWidth,
-  ]);
-
-  const shouldDimContent =
-    isOffcanvasOpen && (isMobile || (!isMobile && isNarrow));
+  const cssVars: React.CSSProperties = {
+    ["--sidebar-width" as any]: sidebarWidth,
+    ["--collapsed-width" as any]: SIDEBAR_WIDTHS.COLLAPSED,
+    ["--expanded-width" as any]: SIDEBAR_WIDTHS.EXPANDED,
+    ["--layout-max" as any]: `${DESKTOP_MAX_WIDTH}px`,
+  };
 
   return (
     <div
-      className={`tw-flex tw-relative tw-overflow-x-hidden tw-w-full${
-        isMobile ? "" : " tw-max-w-[1324px] tw-mx-auto"
-      }`}
-      style={rootStyle}
+      className="layout-root tw-flex tw-relative tw-overflow-x-hidden tw-w-full"
+      style={cssVars}
+      data-mobile={isMobile}
+      data-narrow={isNarrow}
+      data-offcanvas={isOffcanvasOpen}
+      data-right-open={isRightSidebarOpen}
       data-small={isSmall ? "true" : "false"}
     >
       <div className="tailwind-scope">
@@ -108,10 +56,11 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
         />
       </div>
       <main
-        className={`tw-flex-1 tw-min-w-0 tw-transition-all tw-duration-300 tw-ease-out ${
-          shouldDimContent ? "tw-opacity-40 tw-pointer-events-none" : ""
-        }`}
-        style={mainStyle}
+        className="layout-main tw-flex-1 tw-min-w-0"
+        data-mobile={isMobile}
+        data-narrow={isNarrow}
+        data-offcanvas={isOffcanvasOpen}
+        data-right-open={isRightSidebarOpen}
       >
         {children}
       </main>
@@ -138,7 +87,8 @@ const WebLayout = ({ children, isSmall = false }: WebLayoutProps) => (
             <h1 className="tw-text-xl tw-font-bold tw-text-white">Loading...</h1>
           </div>
         </div>
-      }>
+      }
+    >
       <WebLayoutContent isSmall={isSmall}>{children}</WebLayoutContent>
     </ClientOnly>
   </SidebarProvider>

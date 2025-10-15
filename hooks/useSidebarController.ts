@@ -32,47 +32,30 @@ const getBrowserWindow = () => {
  *   by the sidebar component, not this hook.
  */
 export function useSidebarController() {
-  // Media query for breakpoint (narrow screen)
-  const mql = useMemo(() => {
+  const createMediaQuery = useCallback((query: string): MediaQueryList | null => {
     const browserWindow = getBrowserWindow();
     if (browserWindow === undefined || typeof browserWindow.matchMedia !== "function") {
       return null;
     }
-    return browserWindow.matchMedia(`(max-width: ${SIDEBAR_BREAKPOINT - 0.02}px)`);
+    return browserWindow.matchMedia(query);
   }, []);
 
-  const [isNarrow, setIsNarrow] = useState(() => {
-    const browserWindow = getBrowserWindow();
-    return browserWindow ? browserWindow.innerWidth < SIDEBAR_BREAKPOINT : false;
-  });
+  const narrowMql = useMemo(
+    () => createMediaQuery(`(max-width: ${SIDEBAR_BREAKPOINT - 0.02}px)`),
+    [createMediaQuery]
+  );
+  const coarseMql = useMemo(() => createMediaQuery("(pointer: coarse)"), [createMediaQuery]);
+  const mobileWidthMql = useMemo(
+    () => createMediaQuery(`(max-width: ${SIDEBAR_MOBILE_BREAKPOINT - 0.02}px)`),
+    [createMediaQuery]
+  );
 
-  // Detect coarse pointer devices (touch screens)
-  const coarseMql = useMemo(() => {
-    const browserWindow = getBrowserWindow();
-    if (browserWindow === undefined || typeof browserWindow.matchMedia !== "function") {
-      return null;
-    }
-    return browserWindow.matchMedia("(pointer: coarse)");
-  }, []);
-  const [isTouchScreen, setIsTouchScreen] = useState(() => {
-    const browserWindow = getBrowserWindow();
-    return browserWindow ? browserWindow.matchMedia?.("(pointer: coarse)").matches ?? false : false;
-  });
+  const [isNarrow, setIsNarrow] = useState(() => narrowMql?.matches ?? false);
+  const [isTouchScreen, setIsTouchScreen] = useState(() => coarseMql?.matches ?? false);
+  const [isMobileWidth, setIsMobileWidth] = useState(() => mobileWidthMql?.matches ?? false);
 
-  // Detect mobile-width (< 1024px)
-  const mobileWidthMql = useMemo(() => {
-    const browserWindow = getBrowserWindow();
-    if (browserWindow === undefined || typeof browserWindow.matchMedia !== "function") {
-      return null;
-    }
-    return browserWindow.matchMedia(`(max-width: ${SIDEBAR_MOBILE_BREAKPOINT - 0.02}px)`);
-  }, []);
-  const [isMobileWidth, setIsMobileWidth] = useState(() => {
-    const browserWindow = getBrowserWindow();
-    return browserWindow ? browserWindow.innerWidth < SIDEBAR_MOBILE_BREAKPOINT : false;
-  });
+  const lastIsNarrowRef = useRef(isNarrow);
 
-  // Desktop state - default to collapsed (true) on big screens with session persistence
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(() => {
     try {
       const stored = safeSessionStorage.getItem("sidebarCollapsed");
@@ -82,15 +65,13 @@ export function useSidebarController() {
       const parsed = JSON.parse(stored);
       return typeof parsed === "boolean" ? parsed : true;
     } catch {
-      return true; // Default to collapsed on error
+      return true;
     }
   });
 
-  // Wrapper to persist state changes to sessionStorage
   const persistDesktopCollapsed = useCallback((value: boolean | ((prev: boolean) => boolean)) => {
     setIsDesktopCollapsed((prev: boolean) => {
       const newValue = typeof value === "function" ? value(prev) : value;
-      // Save to sessionStorage
       try {
         safeSessionStorage.setItem("sidebarCollapsed", JSON.stringify(newValue));
       } catch (e) {
@@ -100,10 +81,8 @@ export function useSidebarController() {
     });
   }, []);
 
-  // Off-canvas overlay state (mobile expanded view)
   const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
 
-  // Determine mobile mode only for mobile width + touch devices (phones/tablets)
   const isMobile = useMemo(
     () => isMobileWidth && isTouchScreen,
     [isMobileWidth, isTouchScreen]
@@ -114,7 +93,6 @@ export function useSidebarController() {
     [isMobile, isNarrow]
   );
 
-  // Derived collapsed state (pure function of inputs)
   const isCollapsed = useMemo(() => {
     if (isOffcanvasMode) {
       if (isOffcanvasOpen) {
@@ -122,75 +100,64 @@ export function useSidebarController() {
       }
       return true;
     }
-    // Wide desktop: honor user preference
     return isDesktopCollapsed;
   }, [isOffcanvasMode, isOffcanvasOpen, isDesktopCollapsed]);
 
-  // React to breakpoint changes
   useEffect(() => {
-    if (mql === null) {
+    if (!narrowMql) {
       return;
     }
-    const onChange = (e: MediaQueryListEvent) => setIsNarrow(e.matches);
-    setIsNarrow(mql.matches);
-    mql.addEventListener("change", onChange);
-    return () => mql.removeEventListener("change", onChange);
-  }, [mql]);
+    const handleChange = (event: MediaQueryListEvent) => setIsNarrow(event.matches);
+    setIsNarrow(narrowMql.matches);
+    narrowMql.addEventListener("change", handleChange);
+    return () => narrowMql.removeEventListener("change", handleChange);
+  }, [narrowMql]);
 
-  // React to touch capability changes
   useEffect(() => {
-    if (coarseMql === null) {
+    if (!coarseMql) {
       return;
     }
-    const onChange = (e: MediaQueryListEvent) => setIsTouchScreen(e.matches);
+    const handleChange = (event: MediaQueryListEvent) => setIsTouchScreen(event.matches);
     setIsTouchScreen(coarseMql.matches);
-    coarseMql.addEventListener("change", onChange);
-    return () => coarseMql.removeEventListener("change", onChange);
+    coarseMql.addEventListener("change", handleChange);
+    return () => coarseMql.removeEventListener("change", handleChange);
   }, [coarseMql]);
 
-  // React to width changes for mobile detection
   useEffect(() => {
-    if (mobileWidthMql === null) {
+    if (!mobileWidthMql) {
       return;
     }
-    const onChange = (e: MediaQueryListEvent) => setIsMobileWidth(e.matches);
+    const handleChange = (event: MediaQueryListEvent) => setIsMobileWidth(event.matches);
     setIsMobileWidth(mobileWidthMql.matches);
-    mobileWidthMql.addEventListener("change", onChange);
-    return () => mobileWidthMql.removeEventListener("change", onChange);
+    mobileWidthMql.addEventListener("change", handleChange);
+    return () => mobileWidthMql.removeEventListener("change", handleChange);
   }, [mobileWidthMql]);
 
-  // Close off-canvas when switching from desktop to mobile
   useEffect(() => {
     if (isMobile) {
       setIsOffcanvasOpen(false);
     }
   }, [isMobile]);
 
-  // Keep behavior consistent across narrow desktop transitions
-  // - Entering narrow: do not auto-open; ensure overlay is closed
-  // - Leaving narrow: map current overlay state to desktop preference (expanded if was open)
-  const prevIsNarrowRef = useRef(isNarrow);
   useEffect(() => {
-    if (prevIsNarrowRef.current === isNarrow) return;
+    if (lastIsNarrowRef.current === isNarrow) {
+      return;
+    }
 
     if (isNarrow) {
-      // Entering narrow: never auto-open
       setIsOffcanvasOpen(false);
     } else if (isOffcanvasOpen) {
-      // Leaving narrow: if overlay was open, expand persistent rail on desktop
       setIsDesktopCollapsed(false);
       setIsOffcanvasOpen(false);
     }
 
-    prevIsNarrowRef.current = isNarrow;
-  }, [isNarrow, isOffcanvasOpen]);
+    lastIsNarrowRef.current = isNarrow;
+  }, [isNarrow, isOffcanvasOpen, setIsDesktopCollapsed, setIsOffcanvasOpen]);
 
   const toggleCollapsed = useCallback(() => {
     if (isOffcanvasMode) {
-      // Mobile: toggle off-canvas overlay
       setIsOffcanvasOpen(prev => !prev);
     } else {
-      // Desktop: toggle state (with session persistence)
       persistDesktopCollapsed(prev => !prev);
     }
   }, [isOffcanvasMode, persistDesktopCollapsed]);
@@ -199,7 +166,6 @@ export function useSidebarController() {
     setIsOffcanvasOpen(false);
   }, []);
 
-  // Calculate CSS values based on derived state  
   const sidebarWidth = useMemo(() => {
     if (isOffcanvasMode && isOffcanvasOpen) {
       return SIDEBAR_WIDTHS.EXPANDED;
@@ -208,18 +174,13 @@ export function useSidebarController() {
   }, [isOffcanvasMode, isOffcanvasOpen, isCollapsed]);
 
   return {
-    // State
     isMobile,
     isNarrow,
     isCollapsed,
     isOffcanvasMode,
     isOffcanvasOpen,
-    
-    // Actions (memoized to prevent unnecessary re-renders)
     toggleCollapsed,
     closeOffcanvas,
-    
-    // Computed values for layout
     sidebarWidth,
   };
 }

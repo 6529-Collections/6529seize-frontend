@@ -64,10 +64,11 @@ function WebSidebar({
     }
 
     if ("addListener" in coarsePointerQuery) {
-      // Older Safari fallback; deprecated but still in use
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const legacyQuery = coarsePointerQuery as any;
-      legacyQuery.addListener(handlePointerChange);
+      const legacyQuery = coarsePointerQuery as MediaQueryList & {
+        addListener?: (listener: (event: MediaQueryListEvent) => void) => void;
+        removeListener?: (listener: (event: MediaQueryListEvent) => void) => void;
+      };
+      legacyQuery.addListener?.(handlePointerChange);
       return () => legacyQuery.removeListener?.(handlePointerChange);
     }
   }, []);

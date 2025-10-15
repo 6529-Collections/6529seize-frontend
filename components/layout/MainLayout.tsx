@@ -54,12 +54,12 @@ export default function MainLayout({ metadata: _metadata, children }: MainLayout
     pathname === "/notifications" ||
     (pathname === "/" && (hasWaveParam || isViewingWavesOrMessages));
 
+  const isSmallDesktopLayout = isHomeFeedView || isStreamRoute;
+
   const content = renderMobileLayout ? (
     <MobileLayout>{children}</MobileLayout>
   ) : (
-    <WebLayout isSmall={isHomeFeedView || isStreamRoute}>
-      {children}
-    </WebLayout>
+    <WebLayout isSmall={isSmallDesktopLayout}>{children}</WebLayout>
   );
 
   return (
