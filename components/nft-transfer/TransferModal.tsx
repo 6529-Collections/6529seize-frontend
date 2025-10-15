@@ -1101,7 +1101,6 @@ export default function TransferModal({
         a.tokenId.toString().localeCompare(b.tokenId.toString())
       );
     }
-    console.log("byContractAndOriginator", byContract);
 
     const initial: TxEntry[] = [];
     for (const [
