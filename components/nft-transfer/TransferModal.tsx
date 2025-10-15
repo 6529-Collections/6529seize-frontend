@@ -111,7 +111,9 @@ function FlowTitle({
   if (anyPending) {
     return (
       <span className="tw-flex tw-items-center tw-gap-1.5">
-        <span>Executing Transactions</span>
+        <span>
+          Executing {txs.length} Transaction{txs.length > 1 ? "s" : ""}
+        </span>
         <CircleLoader size={CircleLoaderSize.MEDIUM} />
       </span>
     );
@@ -121,15 +123,38 @@ function FlowTitle({
   const successCount = txs.filter((t) => t.state === "success").length;
   const errorCount = txs.filter((t) => t.state === "error").length;
 
-  let icon = "/emojis/sgt_saluting_face.webp"; // all success
-  if (successCount === 0 && errorCount === total)
-    icon = "/emojis/sgt_sob.webp"; // all error
-  else if (errorCount > 0 && successCount > 0)
-    icon = "/emojis/sgt_grimacing.webp"; // partial
+  const allSuccess = total > 0 && successCount === total;
+  const allFail = total > 0 && errorCount === total;
+
+  let label = "";
+  let icon = "";
+  if (total === 1) {
+    if (allSuccess) {
+      label = "Transfer Successful";
+      icon = "/emojis/sgt_saluting_face.webp";
+    } else if (allFail) {
+      label = "Transfer Failed";
+      icon = "/emojis/sgt_sob.webp";
+    } else {
+      label = "Transfer Complete";
+      icon = "/emojis/sgt_grimacing.webp";
+    }
+  } else {
+    if (allSuccess) {
+      label = `All ${total} Transactions Successful`;
+      icon = "/emojis/sgt_saluting_face.webp";
+    } else if (allFail) {
+      label = `All ${total} Transactions Failed`;
+      icon = "/emojis/sgt_sob.webp";
+    } else {
+      label = `Transfer Complete: ${successCount} successful, ${errorCount} failed`;
+      icon = "/emojis/sgt_grimacing.webp";
+    }
+  }
 
   return (
     <span className="tw-flex tw-items-center tw-gap-1.5">
-      <span>Transfer Complete</span>
+      <span>{label}</span>
       <img src={icon} alt="status" className="tw-w-6 tw-h-6" />
     </span>
   );
@@ -496,7 +521,7 @@ function getSearchStatusText(
   if (isSearching) return "Searching…";
   if (needsMoreSearchCharacters) {
     const plural = remainingSearchCharacters === 1 ? "" : "s";
-    return `Keep typing ${remainingSearchCharacters} more character${plural}`;
+    return `Type ${remainingSearchCharacters} more character${plural}`;
   }
   if (resultsLen > 0) {
     const plural = resultsLen === 1 ? "" : "s";
@@ -750,6 +775,7 @@ export default function TransferModal({
   const resultsListRef = useRef<HTMLDivElement | null>(null);
   const walletsListRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const dialogRef = useRef<HTMLDialogElement | null>(null);
 
   const [leftHasOverflow, setLeftHasOverflow] = useState(false);
   const [resultsHasOverflow, setResultsHasOverflow] = useState(false);
@@ -929,8 +955,12 @@ export default function TransferModal({
   });
 
   useEffect(() => {
-    setIsSearching(enabled && isFetching);
-  }, [enabled, isFetching, setIsSearching]);
+    const preDebounce =
+      open &&
+      trimmedQuery.length >= MIN_SEARCH_LENGTH &&
+      debouncedQuery !== trimmedQuery;
+    setIsSearching(preDebounce || (enabled && isFetching));
+  }, [open, trimmedQuery, debouncedQuery, enabled, isFetching]);
 
   useEffect(() => {
     if (!enabled) {
@@ -1188,6 +1218,13 @@ export default function TransferModal({
               functionName: "safeTransferFrom",
               args: [address as Address, destinationWallet, x.tokenId],
             });
+
+            setTxs((prev) =>
+              prev.map((te) =>
+                te.id === tid ? { ...te, state: "awaiting_approval" } : te
+              )
+            );
+
             try {
               const hash = await write(request);
               setTxs((prev) =>
@@ -1274,58 +1311,51 @@ export default function TransferModal({
 
   return (
     <dialog
+      ref={dialogRef}
       open
       aria-modal="true"
-      aria-label="Transfer dialog"
+      aria-labelledby="transfer-title"
+      aria-describedby="transfer-desc"
       tabIndex={-1}
       className={[
-        // make the dialog the fixed container; no event handlers here
-        "tw-w-full tw-h-full tw-fixed tw-inset-0 tw-z-[100] tw-flex tw-items-center tw-justify-center tw-p-4 md:tw-p-8",
+        "tw-w-full tw-h-full tw-fixed tw-inset-0 tw-z-[100] tw-bg-white/10 tw-backdrop-blur-sm tw-flex tw-items-center tw-justify-center tw-p-4 md:tw-p-8",
         isClosing
           ? "tw-opacity-0 tw-transition-opacity tw-duration-150"
           : "tw-opacity-100 tw-transition-opacity tw-duration-150",
-        "tw-relative", // needed for the absolute overlay button below
-      ].join(" ")}>
-      {/* Backdrop as an actual interactive element */}
-      <button
-        type="button"
-        aria-label="Close"
-        disabled={trxPending}
-        onClick={() => {
-          if (!trxPending) handleClose();
-        }}
-        className={[
-          "tw-absolute tw-inset-0 tw-z-0",
-          "tw-bg-white/10 tw-backdrop-blur-sm", // your old backdrop styles
-          "tw-cursor-pointer",
-          "disabled:tw-cursor-default",
-        ].join(" ")}
-      />
-
-      {/* Modal content (no role='presentation', no mouse handlers) */}
+      ].join(" ")}
+      onClick={(e) => {
+        if (trxPending) return;
+        if (dialogRef.current && e.target === dialogRef.current) {
+          handleClose();
+        }
+      }}>
       <div
+        role="document"
         className={[
-          "tw-relative tw-z-10",
-          "tw-w-[70vw] tw-max-w-[1100px]",
-          flow === "submission" || isClosing
-            ? "tw-h-fit tw-max-h-[90vh]"
-            : "tw-h-[75vh] tw-max-h-[900px]",
-          "tw-rounded-2xl tw-bg-[#0c0c0d] tw-ring-[3px] tw-ring-white/30 tw-text-white tw-shadow-xl tw-overflow-hidden tw-flex tw-flex-col",
+          "tw-w-[70vw] tw-max-w-[1100px] tw-h-[75vh] tw-max-h-[900px] tw-rounded-2xl tw-bg-[#0c0c0d] tw-ring-[3px] tw-ring-white/30 tw-text-white tw-shadow-xl tw-overflow-hidden tw-flex tw-flex-col",
           isClosing
             ? "tw-scale-95 tw-opacity-0 tw-transition-all tw-duration-150"
             : "tw-scale-100 tw-opacity-100 tw-transition-all tw-duration-150",
+          flow === "submission" || isClosing
+            ? "tw-h-fit tw-max-h-[90vh]"
+            : "tw-h-[75vh]",
         ].join(" ")}>
         {/* header */}
         <div className="tw-flex tw-items-center tw-justify-between tw-border-0 tw-border-b-[3px] tw-border-solid tw-border-white/30 tw-p-4">
-          <div className="tw-text-lg tw-font-semibold">
+          <h2 id="transfer-title" className="tw-text-lg tw-font-semibold">
             <FlowTitle flow={flow} txs={txs} />
-          </div>
+          </h2>
           <HeaderRight
             flow={flow}
             trxPending={trxPending}
             onClose={handleClose}
           />
         </div>
+        <p id="transfer-desc" className="tw-sr-only">
+          {flow === "review"
+            ? "Review selected NFTs and choose the destination recipient and wallet."
+            : "Follow wallet prompts. Each transaction will indicate its current status."}
+        </p>
 
         {/* body */}
         <BodyByFlow

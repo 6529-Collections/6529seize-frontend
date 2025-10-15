@@ -241,11 +241,164 @@ describe("TransferModal", () => {
     expect(writeContract.mock.calls.length).toBeGreaterThanOrEqual(2);
     expect(waitForReceipt.mock.calls.length).toBeGreaterThanOrEqual(2);
 
-    await screen.findByText(/transfer complete/i);
+    await screen.findByText(/all 2 transactions successful/i);
 
-    // Each tx card should show "Successful"
-    const successBadges = await screen.findAllByText(/successful/i);
+    // Each tx card should show "Successful" (exact match; exclude header text)
+    const successBadges = await screen.findAllByText(/^Successful$/i);
     expect(successBadges.length).toBe(2);
+  });
+
+  it("handles a single ERC721 success and shows 'Transfer Successful'", async () => {
+    // Override selected to a single ERC721
+    const singleSelected = new Map([
+      [
+        "POSTER:7",
+        {
+          key: "POSTER:7",
+          contract: "0x721",
+          contractType: ContractType.ERC721,
+          tokenId: 7,
+          qty: 1,
+          max: 1,
+          title: "Poster 7",
+          thumbUrl: "https://example.com/thumb-7.png",
+          label: "POSTER #7",
+        },
+      ],
+    ]);
+    // Ensure the mocked selection stays consistent across all renders
+    mockUseTransfer.mockReset();
+    mockUseTransfer.mockReturnValue({
+      selected: singleSelected,
+      totalQty: 1,
+    });
+
+    await selectRecipientFlow();
+
+    const publicClient = mockUsePublicClient.mock.results.at(-1)?.value;
+    const walletWrapper = mockUseWalletClient.mock.results.at(-1)?.value;
+
+    const simulateContract = publicClient.simulateContract as jest.Mock;
+    const readContract = publicClient.readContract as jest.Mock;
+    const writeContract = walletWrapper.data.writeContract as jest.Mock;
+    const waitForReceipt = publicClient.waitForTransactionReceipt as jest.Mock;
+
+    // 721 path does not require origin read, but keep it safe
+    readContract.mockResolvedValue(
+      "0x0000000000000000000000000000000000000abc"
+    );
+    simulateContract.mockResolvedValueOnce({ request: { type: "721" } });
+    writeContract.mockResolvedValueOnce("0xhash721");
+    waitForReceipt.mockResolvedValueOnce({ status: "success" });
+
+    fireEvent.click(screen.getByRole("button", { name: /^transfer$/i }));
+
+    await screen.findByText(/transfer successful/i);
+    const successBadges = await screen.findAllByText(/^successful$/i);
+    expect(successBadges.length).toBe(1);
+  });
+
+  it("handles a single ERC721 failure and shows 'Transfer Failed'", async () => {
+    // Override selected to a single ERC721
+    const singleSelected = new Map([
+      [
+        "POSTER:8",
+        {
+          key: "POSTER:8",
+          contract: "0x721",
+          contractType: ContractType.ERC721,
+          tokenId: 8,
+          qty: 1,
+          max: 1,
+          title: "Poster 8",
+          thumbUrl: "https://example.com/thumb-8.png",
+          label: "POSTER #8",
+        },
+      ],
+    ]);
+    // Ensure the mocked selection stays consistent across all renders
+    mockUseTransfer.mockReset();
+    mockUseTransfer.mockReturnValue({
+      selected: singleSelected,
+      totalQty: 1,
+    });
+
+    await selectRecipientFlow();
+
+    const publicClient = mockUsePublicClient.mock.results.at(-1)?.value;
+    const walletWrapper = mockUseWalletClient.mock.results.at(-1)?.value;
+
+    const simulateContract = publicClient.simulateContract as jest.Mock;
+    const readContract = publicClient.readContract as jest.Mock;
+    const writeContract = walletWrapper.data.writeContract as jest.Mock;
+    const waitForReceipt = publicClient.waitForTransactionReceipt as jest.Mock;
+
+    readContract.mockResolvedValue(
+      "0x0000000000000000000000000000000000000abc"
+    );
+    simulateContract.mockResolvedValueOnce({ request: { type: "721" } });
+    writeContract.mockResolvedValueOnce("0xhash721");
+    // Force failure on receipt
+    waitForReceipt.mockResolvedValueOnce({ status: "error" });
+
+    fireEvent.click(screen.getByRole("button", { name: /^transfer$/i }));
+
+    await screen.findByText(/transfer failed/i);
+    const errorBadges = await screen.findAllByText(/error/i);
+    expect(errorBadges.length).toBeGreaterThan(0);
+  });
+
+  it("shows mixed results summary when one succeeds and one fails", async () => {
+    // Use default selected (1155 + 721)
+    await selectRecipientFlow();
+
+    const publicClient = mockUsePublicClient.mock.results.at(-1)?.value;
+    const walletWrapper = mockUseWalletClient.mock.results.at(-1)?.value;
+
+    const simulateContract = publicClient.simulateContract as jest.Mock;
+    const readContract = publicClient.readContract as jest.Mock;
+    const writeContract = walletWrapper.data.writeContract as jest.Mock;
+    const waitForReceipt = publicClient.waitForTransactionReceipt as jest.Mock;
+
+    readContract.mockResolvedValue(
+      "0x0000000000000000000000000000000000000abc"
+    );
+
+    simulateContract
+      .mockResolvedValueOnce({ request: { type: "1155" } }) // 1155 batch
+      .mockResolvedValueOnce({ request: { type: "721" } }); // 721 single
+
+    writeContract
+      .mockResolvedValueOnce("0xhash1155")
+      .mockResolvedValueOnce("0xhash721");
+
+    // Make first succeed, second fail
+    waitForReceipt
+      .mockResolvedValueOnce({ status: "success" })
+      .mockResolvedValueOnce({ status: "error" });
+
+    fireEvent.click(screen.getByRole("button", { name: /^transfer$/i }));
+
+    await screen.findByText(/transfer complete: 1 successful, 1 failed/i);
+
+    const successBadges = await screen.findAllByText(/^successful$/i);
+    expect(successBadges.length).toBe(1);
+    const errorBadges = await screen.findAllByText(/error/i);
+    expect(errorBadges.length).toBeGreaterThan(0);
+  });
+
+  it("shows a client not ready error when no public client is available", async () => {
+    // Make public client undefined for this test
+    mockUsePublicClient.mockReset();
+    mockUsePublicClient.mockReturnValue(undefined);
+
+    await selectRecipientFlow();
+
+    fireEvent.click(screen.getByRole("button", { name: /^transfer$/i }));
+
+    expect(
+      await screen.findByText(/client not ready\. please reconnect\./i)
+    ).toBeInTheDocument();
   });
 
   it("shows an error when the wallet client is unavailable", async () => {
