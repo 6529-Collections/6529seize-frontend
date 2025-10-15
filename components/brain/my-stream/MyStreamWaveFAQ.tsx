@@ -36,7 +36,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
 
   return (
     <div className={containerClassName} style={faqViewStyle}>
-      <div className="tw-space-y-4 md:tw-space-y-6 tw-mb-4 tw-px-2 sm:tw-px-4 md:tw-px-6">
+      <div className="tw-space-y-4 md:tw-space-y-6 tw-mb-4 tw-px-2 sm:tw-px-4">
         <section className="tw-bg-iron-900 tw-rounded-lg tw-px-4 tw-py-5 sm:tw-p-6 tw-border tw-border-iron-800 tw-border-solid tw-shadow-sm">
           <p className="tw-text-iron-50 tw-font-semibold tw-text-xl sm:tw-text-2xl tw-mb-0">
             The Memes - Main Stage FAQ

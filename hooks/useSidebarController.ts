@@ -20,12 +20,12 @@ const getBrowserWindow = () => {
  *
  * Controls the main (left) sidebar responsive behavior and visual state.
  * - Determines mobile vs desktop using a `matchMedia` query at `SIDEBAR_BREAKPOINT`.
- * - Manages desktop collapsed state (default: expanded) with session persistence.
+ * - Manages desktop collapsed state (default: collapsed) with session persistence.
  * - Manages mobile off‑canvas open state (overlay panel on small screens).
  * - Exposes memoized actions and a computed `sidebarWidth` used by layouts.
  *
  * Notes
- * - Desktop sidebar defaults to expanded on big screens (≥1024px).
+ * - Desktop sidebar defaults to collapsed on big screens (≥1024px).
  * - User preference is stored in sessionStorage (cleared when tab closes).
  * - Cleans up media query listeners on unmount.
  * - ESC key handling and focus management for the off‑canvas panel are handled
@@ -72,17 +72,17 @@ export function useSidebarController() {
     return browserWindow ? browserWindow.innerWidth < SIDEBAR_MOBILE_BREAKPOINT : false;
   });
 
-  // Desktop state - default to expanded (false) on big screens with session persistence
+  // Desktop state - default to collapsed (true) on big screens with session persistence
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(() => {
     try {
       const stored = safeSessionStorage.getItem("sidebarCollapsed");
       if (stored === null) {
-        return false;
+        return true;
       }
       const parsed = JSON.parse(stored);
-      return typeof parsed === "boolean" ? parsed : false;
+      return typeof parsed === "boolean" ? parsed : true;
     } catch {
-      return false; // Default to expanded on error
+      return true; // Default to collapsed on error
     }
   });
 

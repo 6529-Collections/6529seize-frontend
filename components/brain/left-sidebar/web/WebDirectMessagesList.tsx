@@ -183,7 +183,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
         className="tw-flex-1 tw-flex tw-flex-col tw-py-4 tw-bg-black"
       >
         {!isCondensed ? (
-          <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-mb-4">
+          <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-mb-3">
             <span className="tw-text-xl tw-font-semibold tw-text-iron-50">
               Messages
             </span>

@@ -94,7 +94,7 @@ export default function SmallScreenLayout({ children }: Props) {
           }`}
         >
           {/* Header bar with hamburger */}
-          <div ref={headerRef} className="tw-sticky tw-top-0 tw-z-30">
+          <div ref={headerRef}>
             <SmallScreenHeader
               onMenuToggle={toggleMenu}
               isMenuOpen={isMenuOpen}

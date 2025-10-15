@@ -20,7 +20,7 @@ const MyStreamWaveOutcome: React.FC<MyStreamWaveOutcomeProps> = ({ wave }) => {
   }, []);
   return (
     <div className={containerClassName} style={outcomeViewStyle}>
-      <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 tw-space-y-4">
+      <div className="tw-px-2 sm:tw-px-4 tw-space-y-4">
         {wave.outcomes.map((outcome, index) => (
           <WaveOutcome
             key={`${outcome.credit}-${outcome.type}-${index}`}

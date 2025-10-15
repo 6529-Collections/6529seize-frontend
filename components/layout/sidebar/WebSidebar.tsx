@@ -100,7 +100,7 @@ function WebSidebar({
       aria-label="Primary sidebar"
       ref={scrollContainerRef}
     >
-      <div className="tw-flex tw-flex-col tw-h-full tw-pt-3">
+      <div className="tw-flex tw-flex-col tw-h-full tw-pt-2">
         <WebSidebarHeader
           collapsed={shouldShowCollapsed}
           onToggle={handleToggle}

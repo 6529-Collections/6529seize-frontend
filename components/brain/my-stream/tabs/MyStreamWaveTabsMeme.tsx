@@ -109,11 +109,11 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
       {" "}
       <div className="tw-w-full tw-flex tw-flex-col tw-bg-iron-950">
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-px-2 sm:tw-px-4 tw-py-3 tw-overflow-x-hidden">
-          <div className="tw-flex tw-items-center tw-gap-x-1.5">
+          <div className="tw-flex tw-items-center">
             {isMobile && (
               <button
                 onClick={handleMobileBack}
-                className="tw-flex tw-items-center tw-h-full tw-px-2.5 -tw-ml-2.5 tw-bg-transparent tw-border-0 tw-text-iron-300 hover:tw-text-iron-50 tw-transition-colors tw-p-0"
+                className="tw-flex tw-items-center tw-h-full tw-px-2.5 -tw-ml-2.5 tw-mr-1.5 tw-bg-transparent tw-border-0 tw-text-iron-300 hover:tw-text-iron-50 tw-transition-colors tw-p-0"
                 aria-label="Go back"
               >
                 <ArrowLeftIcon className="tw-w-6 tw-h-6 tw-flex-shrink-0" />
@@ -128,7 +128,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
                 }))}
               />
             </div>
-            <h1 className="tw-text-sm lg:tw-text-xl tw-font-semibold tw-text-white/95 tw-tracking-tight tw-mb-0 tw-truncate">
+            <h1 className="tw-ml-3 tw-text-sm lg:tw-text-xl tw-font-semibold tw-text-white/95 tw-tracking-tight tw-mb-0 tw-truncate">
               {wave.name}
             </h1>
           </div>

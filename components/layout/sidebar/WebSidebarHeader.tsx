@@ -14,7 +14,7 @@ function WebSidebarHeader({ collapsed, onToggle }: WebSidebarHeaderProps) {
     <div className="tw-relative tw-shrink-0 tw-h-12 tw-flex tw-items-center tw-justify-between tw-px-2">
       <Link
         href="/"
-        className="tw-relative tw-z-10 tw-flex tw-items-center tw-ml-1.5 tw-ease-in-out"
+        className="tw-relative tw-z-10 tw-flex tw-items-center tw-ml-3 tw-ease-in-out"
       >
         <Image
           unoptimized
@@ -31,16 +31,16 @@ function WebSidebarHeader({ collapsed, onToggle }: WebSidebarHeaderProps) {
         type="button"
         onClick={onToggle}
         onMouseDown={(event) => event.preventDefault()}
-        className={`tw-group tw-absolute tw-top-1/2 -tw-translate-y-1/2 tw-right-0 tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 w-backdrop-blur-sm tw-shadow-[0_12px_28px_rgba(0,0,0,0.35)] tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-iron-500/80 desktop-hover:hover:tw-bg-iron-700/85 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.4)] ${
-          collapsed ? "-tw-right-6 tw-rotate-180" : " tw-right-4"
+        className={`tw-group desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.4)] tw-border-iron-700 tw-bg-iron-800 tw-shadow-[0_12px_28px_rgba(0,0,0,0.35)] tw-absolute tw-top-1/2 -tw-translate-y-1/2 tw-flex tw-items-center tw-justify-center tw-border tw-border-solid   ${
+          collapsed
+            ? "tw-rotate-180 tw-h-6 tw-w-6 tw-rounded-lg -tw-right-3"
+            : " tw-h-8 tw-w-8 tw-right-4  tw-rounded-xl"
         }`}
         aria-label="Toggle right sidebar"
       >
         <ChevronDoubleLeftIcon
           strokeWidth={2}
-          className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-200 group-hover:desktop-hover:hover:tw-text-white tw-transition-all tw-duration-300 tw-ease-in-out ${
-            collapsed ? "" : ""
-          }`}
+          className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-200 group-hover:desktop-hover:hover:tw-text-white tw-transition-all tw-duration-300 tw-ease-in-out"
         />
       </button>
     </div>

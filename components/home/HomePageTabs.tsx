@@ -14,7 +14,7 @@ const HomePageTabs = forwardRef<HTMLDivElement, HomePageTabsProps>(
     return (
       <div
         ref={ref}
-        className="tailwind-scope md:tw-px-8 tw-sticky tw-top-0 tw-z-20 tw-overflow-hidden tw-bg-black/80 tw-backdrop-blur tw-border-b tw-border-solid tw-border-iron-800 tw-border-l-0 tw-border-r tw-border-t-0"
+        className="tailwind-scope md:tw-px-8 tw-sticky tw-top-0 tw-z-20 tw-overflow-hidden tw-bg-black/80 tw-backdrop-blur tw-border-b tw-border-solid tw-border-iron-700/95 tw-border-l-0 tw-border-r-0 lg:tw-border-r tw-border-t-0"
       >
         <div className="tw-flex tw-overflow-x-auto horizontal-menu-hide-scrollbar tw-w-full">
           <div className="tw-flex  tw-justify-center tw-w-full md:tw-w-auto tw-gap-x-4 md:tw-gap-x-6">

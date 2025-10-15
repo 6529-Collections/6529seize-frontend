@@ -1,11 +1,11 @@
 export const SIDEBAR_WIDTHS = {
   EXPANDED: "17.1875rem",
-  COLLAPSED: "4rem",
+  COLLAPSED: "5rem",
   SUBMENU: "14rem",
 } as const;
 
 export const SIDEBAR_DIMENSIONS = {
-  COLLAPSED_WIDTH_REM: 4,
+  COLLAPSED_WIDTH_REM: 5,
   SUBMENU_WIDTH_REM: 14,
   SUBMENU_HEADER_HEIGHT_REM: 3.5,
 } as const;

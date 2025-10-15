@@ -1,10 +1,7 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
-import {
-  faCopy,
-  faExternalLink,
-} from "@fortawesome/free-solid-svg-icons";
+import { faCopy, faExternalLink } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ShareIcon } from "@heroicons/react/24/outline";
 import yaml from "js-yaml";
@@ -49,7 +46,11 @@ const squareStyle = {
   justifyContent: "center",
 };
 
-export default function HeaderShare({ isCollapsed = false }: { readonly isCollapsed?: boolean }) {
+export default function HeaderShare({
+  isCollapsed = false,
+}: {
+  readonly isCollapsed?: boolean;
+}) {
   const capacitor = useCapacitor();
   const isMobileDevice = useIsMobileDevice();
   const [showQRModal, setShowQRModal] = useState<boolean>(false);
@@ -59,26 +60,34 @@ export default function HeaderShare({ isCollapsed = false }: { readonly isCollap
   }
 
   return (
-    <div className="tailwind-scope tw-relative tw-mt-1 tw-pl-1 tw-pr-2">
+    <div className="tailwind-scope tw-relative tw-pl-3 tw-pr-2">
       <button
         type="button"
         aria-label="QR Code"
         title="QR Code"
         onClick={() => setShowQRModal(true)}
-        className={`tw-w-full tw-block tw-text-left tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 tw-h-12 tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 tw-font-medium tw-text-base tw-px-2 tw-text-iron-400 tw-bg-transparent ${
-          isCollapsed ? "desktop-hover:hover:tw-text-white" : "desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
+        className={`tw-w-full tw-block tw-text-left tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 tw-h-[2.875rem] tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 tw-font-medium tw-text-base tw-px-2 tw-text-iron-400 tw-bg-transparent ${
+          isCollapsed
+            ? "desktop-hover:hover:tw-text-white"
+            : "desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
         } active:tw-bg-transparent`}
         data-tooltip-id="sidebar-tooltip"
         data-tooltip-content="Share"
         data-tooltip-hidden={!isCollapsed}
       >
-        <div className={`tw-flex tw-items-center tw-w-full tw-h-full ${isCollapsed ? "" : "tw-gap-x-2"}`}>
+        <div
+          className={`tw-flex tw-items-center tw-w-full tw-h-full ${
+            isCollapsed ? "" : "tw-gap-x-2"
+          }`}
+        >
           <div className="tw-w-10 tw-flex tw-items-center tw-justify-center tw-flex-shrink-0">
             <ShareIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
           </div>
-          <span className={`tw-block tw-overflow-hidden tw-whitespace-nowrap tw-transition-all tw-duration-300 ${
-            isCollapsed ? "tw-opacity-0 tw-w-0" : "tw-opacity-100 tw-flex-1"
-          }`}>
+          <span
+            className={`tw-block tw-overflow-hidden tw-whitespace-nowrap tw-transition-all tw-duration-300 ${
+              isCollapsed ? "tw-opacity-0 tw-w-0" : "tw-opacity-100 tw-flex-1"
+            }`}
+          >
             Share
           </span>
         </div>
@@ -232,7 +241,8 @@ function HeaderQRModal({
         <div className="tw-flex tw-items-center tw-gap-2" style={squareStyle}>
           <a
             href={url}
-            className="decoration-none tw-flex tw-flex-col tw-items-center tw-gap-8">
+            className="decoration-none tw-flex tw-flex-col tw-items-center tw-gap-8"
+          >
             <Image
               unoptimized
               priority
@@ -245,7 +255,8 @@ function HeaderQRModal({
             />
             <Button
               variant="primary"
-              className="tw-flex tw-items-center tw-gap-2 tw-w-full">
+              className="tw-flex tw-items-center tw-gap-2 tw-w-full"
+            >
               <FontAwesomeIcon icon={faExternalLink} />
               <div className="no-wrap">Open in 6529 Core</div>
             </Button>
@@ -303,7 +314,8 @@ function HeaderQRModal({
           content = (
             <div
               className="tw-p-10 tw-flex tw-flex-col tw-gap-12 tw-items-center tw-justify-center"
-              style={squareStyle}>
+              style={squareStyle}
+            >
               <ShareMobileApp platform="ios" />
               <ShareMobileApp platform="android" />
             </div>
@@ -355,7 +367,8 @@ function HeaderQRModal({
       onHide={onClose}
       keyboard
       centered
-      data-testid="header-share-modal">
+      data-testid="header-share-modal"
+    >
       <Modal.Body className={styles.modalBody}>
         <ModalMenu
           isShareConnection={!!getRefreshToken()}
@@ -392,20 +405,23 @@ function ModalMenu({
           <Button
             className={activeTab === Mode.SHARE ? styles.disabledMenuBtn : ""}
             variant={activeTab === Mode.SHARE ? "light" : "outline-light"}
-            onClick={() => onTabChange(Mode.SHARE, SubMode.APP)}>
+            onClick={() => onTabChange(Mode.SHARE, SubMode.APP)}
+          >
             Share Connection
           </Button>
         )}
         <Button
           className={activeTab === Mode.NAVIGATE ? styles.disabledMenuBtn : ""}
           variant={activeTab === Mode.NAVIGATE ? "light" : "outline-light"}
-          onClick={() => onTabChange(Mode.NAVIGATE, SubMode.APP)}>
+          onClick={() => onTabChange(Mode.NAVIGATE, SubMode.APP)}
+        >
           Current URL
         </Button>
         <Button
           className={activeTab === Mode.APPS ? styles.disabledMenuBtn : ""}
           variant={activeTab === Mode.APPS ? "light" : "outline-light"}
-          onClick={() => onTabChange(Mode.APPS, SubMode.APP)}>
+          onClick={() => onTabChange(Mode.APPS, SubMode.APP)}
+        >
           6529 Apps
         </Button>
       </div>
@@ -413,7 +429,8 @@ function ModalMenu({
       <div className="mt-3 d-flex gap-2">
         <Button
           variant={activeSubTab === SubMode.APP ? "light" : "outline-light"}
-          onClick={() => onTabChange(activeTab, SubMode.APP)}>
+          onClick={() => onTabChange(activeTab, SubMode.APP)}
+        >
           <span className="font-smaller">6529 Mobile</span>
         </Button>
         {activeTab === Mode.NAVIGATE && (
@@ -421,14 +438,16 @@ function ModalMenu({
             variant={
               activeSubTab === SubMode.BROWSER ? "light" : "outline-light"
             }
-            onClick={() => onTabChange(activeTab, SubMode.BROWSER)}>
+            onClick={() => onTabChange(activeTab, SubMode.BROWSER)}
+          >
             <span className="font-smaller">Browser</span>
           </Button>
         )}
         {!isElectron && (
           <Button
             variant={activeSubTab === SubMode.CORE ? "light" : "outline-light"}
-            onClick={() => onTabChange(activeTab, SubMode.CORE)}>
+            onClick={() => onTabChange(activeTab, SubMode.CORE)}
+          >
             <span className="font-smaller">6529 Core</span>
           </Button>
         )}
@@ -561,7 +580,8 @@ function CoreAppDownload({
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="tw-w-full tw-bg-black tw-px-5 tw-py-3 tw-border tw-border-solid tw-border-white tw-rounded-lg decoration-none tw-flex tw-items-center tw-gap-4 hover:tw-scale-[1.03] tw-transition-all tw-duration-300 tw-ease-out">
+      className="tw-w-full tw-bg-black tw-px-5 tw-py-3 tw-border tw-border-solid tw-border-white tw-rounded-lg decoration-none tw-flex tw-items-center tw-gap-4 hover:tw-scale-[1.03] tw-transition-all tw-duration-300 tw-ease-out"
+    >
       <div className="tw-bg-white tw-rounded-full tw-p-4">
         <Image
           unoptimized

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, type ReactNode } from "react";
+import React, { useCallback, type ReactNode } from "react";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import Home from "./Home";
@@ -34,17 +34,16 @@ export default function HomeWeb({
 }: HomeWebProps) {
   const { hasTouchScreen } = useDeviceInfo();
   const { isAuthenticated, connectionState } = useSeizeConnectContext();
-  const { registerRef } = useLayout();
+  const { registerRef, spaces } = useLayout();
   const { drop, isDropOpen, onDropClose } = useDropModal();
-  const { spaces } = useLayout();
   const { activeTab, handleTabChange } = useHomeTabs();
 
   const isWalletInitializing =
     connectionState === "initializing" || connectionState === "connecting";
 
-  // Callback ref for registration with LayoutContext
-  const setTabsRef = useMemo(
-    () => (element: HTMLDivElement | null) => {
+  // Memoized callback ref for LayoutContext registration
+  const setTabsRef = useCallback(
+    (element: HTMLDivElement | null) => {
       registerRef("tabs", element);
     },
     [registerRef]
@@ -68,6 +67,7 @@ export default function HomeWeb({
           className="tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-[49] tw-bg-black"
           style={{
             left: sidebarLeftOffset,
+            right: "var(--layout-margin, 0px)",
             top: spaces.headerSpace,
             transition: "none",
           }}
@@ -92,7 +92,7 @@ export default function HomeWeb({
 
       <div className="tw-h-full">
         {activeTab === "feed" ? (
-          <div className="tw-h-full tw-bg-black tw-overflow-hidden tailwind-scope tw-px-2 lg:tw-px-6 xl:tw-px-8 tw-border-solid tw-border-r tw-border-iron-800 tw-border-y-0 tw-border-l-0">
+          <div className="tw-h-full tw-bg-black tw-overflow-hidden tailwind-scope tw-px-2 lg:tw-px-6 xl:tw-px-8 tw-border-solid tw-border-r tw-border-iron-700/95 tw-border-y-0 tw-border-l-0">
             {feedContent}
           </div>
         ) : (
