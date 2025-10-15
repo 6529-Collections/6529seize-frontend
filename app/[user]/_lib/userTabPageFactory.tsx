@@ -4,7 +4,7 @@ import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import { getMetadataForUserPage } from "@/helpers/Helpers";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import {
-  getUserProfile,
+  getCachedUserProfile,
   userPageNeedsRedirect,
 } from "@/helpers/server.helpers";
 import type { Metadata } from "next";
@@ -105,7 +105,7 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
     const profileFetchStart = shouldLogProfileFetch ? Date.now() : 0;
     let profileFetchStatus: "success" | "error" = "success";
 
-    const profile: ApiIdentity = await getUserProfile({
+    const profile: ApiIdentity = await getCachedUserProfile({
       user: normalizedUser,
       headers,
     })
@@ -158,7 +158,7 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
     const profileFetchStart = shouldLogProfileFetch ? Date.now() : 0;
     let profileFetchStatus: "success" | "error" = "success";
 
-    const profile: ApiIdentity = await getUserProfile({
+    const profile: ApiIdentity = await getCachedUserProfile({
       user: normalizedUser,
       headers,
     })

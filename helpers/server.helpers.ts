@@ -6,6 +6,7 @@ import { ProfileRatersParamsOrderBy, RateMatter } from "@/enums";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
 import { Page } from "./Types";
+import { createHash } from "crypto";
 
 export const getUserProfile = async ({
   user,
@@ -18,6 +19,53 @@ export const getUserProfile = async ({
     endpoint: `identities/${user}`,
     headers: headers,
   });
+};
+
+const inflightUserProfileRequests = new Map<string, Promise<ApiIdentity>>();
+
+const createHeadersSignature = (
+  headers: Record<string, string>
+): string => {
+  if (!headers || Object.keys(headers).length === 0) {
+    return "no-auth";
+  }
+  const normalizedEntries = Object.entries(headers).sort(([a], [b]) =>
+    a.localeCompare(b)
+  );
+  const serialized = normalizedEntries
+    .map(([key, value]) => `${key}:${value}`)
+    .join("|");
+  return createHash("sha256").update(serialized).digest("hex");
+};
+
+export const getCachedUserProfile = async ({
+  user,
+  headers,
+}: {
+  user: string;
+  headers: Record<string, string>;
+}): Promise<ApiIdentity> => {
+  const normalizedUser = user.toLowerCase();
+  const signature = createHeadersSignature(headers);
+  const cacheKey = `${normalizedUser}:${signature}`;
+
+  const inflight = inflightUserProfileRequests.get(cacheKey);
+  if (inflight) {
+    return await inflight;
+  }
+
+  const fetchPromise = getUserProfile({
+    user: normalizedUser,
+    headers,
+  });
+
+  inflightUserProfileRequests.set(cacheKey, fetchPromise);
+
+  try {
+    return await fetchPromise;
+  } finally {
+    inflightUserProfileRequests.delete(cacheKey);
+  }
 };
 
 export const userPageNeedsRedirect = ({
