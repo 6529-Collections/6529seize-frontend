@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useMemo, useState } from "react";
+import clsx from "clsx";
 
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
@@ -128,21 +129,32 @@ export function XtdhReceivedNftsViewContent({
         )
       ) : (
         <>
-          <div
-            className="tw-overflow-hidden tw-rounded-2xl tw-border tw-border-iron-900/70 tw-bg-iron-975/25"
-            role="table"
-            aria-label="NFTs receiving xTDH"
-          >
-            <div role="rowgroup">
-              {nfts.map((nft) => (
-                <XtdhReceivedTokenRow
-                  key={nft.tokenId}
-                  nft={nft}
-                  isActive={nft.tokenId === activeTokenId}
-                  detailsRegionId={detailsRegionId}
-                  onSelect={handleTokenSelect}
-                />
-              ))}
+          <div role="table" aria-label="NFTs receiving xTDH">
+            <div
+              role="rowgroup"
+              className="tw-flex tw-flex-col tw-gap-3"
+            >
+              {nfts.map((nft) => {
+                const isTokenActive = nft.tokenId === activeTokenId;
+                return (
+                  <div
+                    key={nft.tokenId}
+                    role="presentation"
+                    className={clsx(
+                      "tw-overflow-hidden tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-shadow-sm tw-transition tw-duration-200 tw-ease-out",
+                      isTokenActive &&
+                        "tw-border-primary-400/70 tw-shadow-lg tw-shadow-primary-900/40",
+                    )}
+                  >
+                    <XtdhReceivedTokenRow
+                      nft={nft}
+                      isActive={isTokenActive}
+                      detailsRegionId={detailsRegionId}
+                      onSelect={handleTokenSelect}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
           {activeToken && (
