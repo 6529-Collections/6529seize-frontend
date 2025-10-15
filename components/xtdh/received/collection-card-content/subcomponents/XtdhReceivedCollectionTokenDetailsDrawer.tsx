@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import clsx from "clsx";
 
@@ -24,6 +25,23 @@ export function XtdhReceivedCollectionTokenDetailsDrawer({
 }: XtdhReceivedCollectionTokenDetailsDrawerProps) {
   const isClientReady = useXtdhReceivedClientReady();
   useXtdhReceivedBodyScrollLock(true);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      event.stopPropagation();
+      onClose();
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose]);
 
   if (!isClientReady || typeof document === "undefined") {
     return null;

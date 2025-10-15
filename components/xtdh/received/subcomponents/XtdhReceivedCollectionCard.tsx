@@ -59,11 +59,31 @@ export function XtdhReceivedCollectionCard({
       return;
     }
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.stopPropagation();
-        handleToggle();
+    const hasActiveModal = () =>
+      typeof document !== "undefined" &&
+      document.querySelector('[role="dialog"][aria-modal="true"]') !== null;
+
+    const isModalEventTarget = (target: EventTarget): boolean => {
+      if (!(target instanceof Element)) {
+        return false;
       }
+
+      const role = target.getAttribute("role");
+      const ariaModal = target.getAttribute("aria-modal");
+      return role === "dialog" && ariaModal === "true";
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      if (hasActiveModal()) {
+        return;
+      }
+
+      event.stopPropagation();
+      handleToggle();
     };
 
     const handlePointerDown = (event: PointerEvent) => {
@@ -72,8 +92,15 @@ export function XtdhReceivedCollectionCard({
         return;
       }
 
-      const path = event.composedPath();
-      if (path.includes(node)) {
+      const path =
+        typeof event.composedPath === "function"
+          ? event.composedPath()
+          : [];
+
+      if (
+        path.includes(node) ||
+        path.some((target) => isModalEventTarget(target))
+      ) {
         return;
       }
 
