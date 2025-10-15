@@ -19,6 +19,7 @@ import CircleLoader, {
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { ContractType } from "@/enums";
 import { getUserProfile } from "@/helpers/server.helpers";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
@@ -893,15 +894,6 @@ export default function TransferModal({
       document.body.style.overflow = prev;
     };
   }, [open]);
-
-  function useDebouncedValue<T>(value: T, delay: number) {
-    const [debounced, setDebounced] = useState(value);
-    useEffect(() => {
-      const t = setTimeout(() => setDebounced(value), delay);
-      return () => clearTimeout(t);
-    }, [value, delay]);
-    return debounced;
-  }
 
   useEffect(() => {
     if (!open) return;
