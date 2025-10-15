@@ -44,7 +44,6 @@ export function XtdhReceivedCollectionTokenRow({
   const grantorCount = getXtdhReceivedTokenGrantorCount(nft);
   const rateValue = formatXtdhValue(nft.xtdhRate);
   const totalReceived = formatXtdhTotal(nft.totalXtdhReceived);
-  const grantorAriaLabel = `${grantorCount.toLocaleString()} grantor${grantorCount === 1 ? "" : "s"}`;
 
   return (
     <div
@@ -108,8 +107,6 @@ export function XtdhReceivedCollectionTokenRow({
                 <XtdhReceivedGranterAvatarGroup
                   granters={nft.granters}
                   totalCount={grantorCount}
-                  onClick={handleSelect}
-                  ariaLabel={grantorAriaLabel}
                 />
               </span>
             </CustomTooltip>
@@ -135,8 +132,6 @@ export function XtdhReceivedCollectionTokenRow({
             <XtdhReceivedGranterAvatarGroup
               granters={nft.granters}
               totalCount={grantorCount}
-              onClick={handleSelect}
-              ariaLabel={grantorAriaLabel}
             />
           </span>
         </CustomTooltip>
