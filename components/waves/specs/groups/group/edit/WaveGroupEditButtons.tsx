@@ -125,7 +125,7 @@ export default function WaveGroupEditButtons({
                     close();
                     openEditRef.current?.();
                   }}
-                  className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-rounded-md tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-font-semibold tw-text-iron-200 hover:tw-bg-iron-800 tw-transition tw-duration-200 tw-ease-out">
+                  className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-rounded-md tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-font-semibold tw-text-iron-200 hover:tw-bg-iron-800 tw-transition tw-duration-200 tw-ease-out">
                   Change group
                 </button>
               )}
@@ -139,7 +139,7 @@ export default function WaveGroupEditButtons({
                       close();
                       openRemoveRef.current?.();
                     }}
-                    className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-rounded-md tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-font-semibold tw-text-red hover:tw-bg-iron-800 tw-transition tw-duration-200 tw-ease-out">
+                    className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-rounded-md tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-font-semibold tw-text-red hover:tw-bg-iron-800 tw-transition tw-duration-200 tw-ease-out">
                     Remove group
                   </button>
                 )}
