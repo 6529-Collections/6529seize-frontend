@@ -40,19 +40,17 @@ export default function CommonDropdownItem<T, U = unknown>(
       <button
         type="button"
         className={`${
-          isMobile
-            ? "tw-py-3 hover:tw-bg-iron-800"
-            : "hover:tw-bg-iron-700 tw-py-2"
-        } tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-inline-flex tw-justify-between  tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out`}
+          isMobile ? "tw-px-4 tw-py-3" : "tw-px-3 tw-py-2"
+        } tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-text-left tw-text-sm tw-font-medium tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${
+          isActive ? "tw-bg-iron-800 tw-text-iron-100" : ""
+        }`}
         onClick={onSelected}
         onMouseEnter={() => setShouldRotate(true)}
         onMouseLeave={() => setShouldRotate(false)}>
-        <div className="tw-w-44 tw-truncate tw-flex tw-items-center">
-          <span className="tw-text-sm tw-font-medium tw-text-white">
-            {label}
-          </span>
+        <div className="tw-flex tw-flex-1 tw-items-center tw-gap-x-2 tw-min-w-0">
+          <span className="tw-truncate tw-text-sm tw-font-medium">{label}</span>
           {sortDirection && (
-            <span className="-tw-mt-0.5 tw-ml-2">
+            <span className="-tw-mt-0.5">
               <CommonTableSortIcon
                 direction={isActive ? sortDirection : SortDirection.DESC}
                 isActive={isActive}
@@ -62,7 +60,7 @@ export default function CommonDropdownItem<T, U = unknown>(
           )}
           {item.value === activeItem && (
             <svg
-              className="tw-h-5 tw-w-5 tw-ml-2 tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-primary-300 tw-transition tw-duration-200 tw-ease-out"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"
