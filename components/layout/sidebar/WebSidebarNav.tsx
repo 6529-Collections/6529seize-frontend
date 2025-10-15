@@ -22,6 +22,7 @@ import React, {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useState,
 } from "react";
 import { useKey } from "react-use";
@@ -43,7 +44,6 @@ const WebSidebarNav = React.forwardRef<
   const { address } = useSeizeConnectContext();
   const { connectedProfile } = useAuth();
   const { appWalletsSupported } = useAppWallets();
-  // Notification indicators
   const { haveUnreadNotifications } = useUnreadNotifications(
     connectedProfile?.handle ?? null
   );
@@ -52,142 +52,91 @@ const WebSidebarNav = React.forwardRef<
     handle: connectedProfile?.handle ?? null,
   });
 
-  // Local state for expandable sections
-  const [expandedSections, setExpandedSections] = useState<string[]>([]);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+  const [openSubmenuKey, setOpenSubmenuKey] = useState<string | null>(null);
+  const [submenuLeft, setSubmenuLeft] = useState<number | null>(null);
 
-  // State for search modal
-  const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
-
-  // Keyboard shortcut for search
   useKey(
     (event) => event.metaKey && event.key === "k",
     () => setIsSearchOpen(true),
     { event: "keydown" }
   );
 
-  // Profile path computation
-  let profilePath: string | null = null;
-  if (connectedProfile?.handle) {
-    profilePath = `/${connectedProfile.handle}`;
-  } else if (address) {
-    profilePath = `/${address}`;
-  }
+  const profilePath = useMemo(() => {
+    if (connectedProfile?.handle) return `/${connectedProfile.handle}`;
+    if (address) return `/${address}`;
+    return null;
+  }, [connectedProfile?.handle, address]);
 
-  // Use custom hook for sections
   const sections = useSidebarSections(
     appWalletsSupported,
     capacitor.isIos,
     country
   );
-
-  // Create section map for efficient lookups
   const sectionMap = useSectionMap(sections);
-
-  // Get specific sections from map
   const networkSection = sectionMap.get("network");
   const collectionsSection = sectionMap.get("collections");
 
-  // Click-based submenu state for collapsed sidebar
-  const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
-  const [submenuAnchor, setSubmenuAnchor] = useState<HTMLElement | null>(null);
-
-  // Handle click on collapsed sidebar section
-  const handleCollapsedClick = useCallback(
-    (sectionKey: string, event: React.MouseEvent) => {
-      const target = event.currentTarget as HTMLElement;
-
-      // Toggle submenu
-      if (activeSubmenu === sectionKey) {
-        setActiveSubmenu(null);
-        setSubmenuAnchor(null);
-      } else {
-        setActiveSubmenu(sectionKey);
-        setSubmenuAnchor(target);
-      }
-    },
-    [activeSubmenu]
-  );
-
   const closeSubmenu = useCallback(() => {
-    setActiveSubmenu(null);
-    setSubmenuAnchor(null);
+    setOpenSubmenuKey(null);
+    setSubmenuLeft(null);
   }, []);
 
-  // Expose closeSubmenu to parent
-  useImperativeHandle(
-    ref,
-    () => ({
-      closeSubmenu,
-    }),
-    [closeSubmenu]
-  );
+  useImperativeHandle(ref, () => ({ closeSubmenu }), [closeSubmenu]);
 
-  // Toggle section expansion
-  const toggleSection = useCallback((key: string) => {
-    setExpandedSections((prev) =>
-      prev.includes(key)
-        ? prev.filter((section) => section !== key)
-        : [...prev, key]
-    );
-  }, []);
-
-  const collapsedSectionToggle = useCallback(
-    (sectionKey: string) =>
-      (event?: React.MouseEvent) => {
-        if (event) {
-          handleCollapsedClick(sectionKey, event);
-        }
-      },
-    [handleCollapsedClick]
-  );
-
-  const expandedSectionToggle = useCallback(
-    (sectionKey: string) => () => {
-      toggleSection(sectionKey);
-    },
-    [toggleSection]
-  );
-
-  // Auto-manage expanded sections based on current route
-  useEffect(() => {
-    if (!pathname) return;
-
-    // Find which section contains the current route
-    let activeSection: string | null = null;
+  const activeSectionKey = useMemo(() => {
+    if (!pathname) return null;
     for (const section of sections) {
-      const hasActiveItem =
-        section.items.some((item) => pathname === item.href) ||
+      const inItems = section.items.some((item) => pathname === item.href);
+      const inSubsections =
         section.subsections?.some((sub) =>
           sub.items.some((item) => pathname === item.href)
-        );
-
-      if (hasActiveItem) {
-        activeSection = section.key;
-        break;
-      }
+        ) ?? false;
+      if (inItems || inSubsections) return section.key;
     }
+    return null;
+  }, [pathname, sections]);
 
-    // Set expanded sections based on active route
-    if (activeSection) {
-      setExpandedSections([activeSection]);
-    } else {
-      setExpandedSections([]);
-    }
-  }, [pathname, sections]); // Run when pathname changes
-
-  // Get the section for the active submenu
-  const activeSection = sections.find((s) => s.key === activeSubmenu);
-
-  // Close submenu immediately when sidebar expands or pathname changes
   useEffect(() => {
-    if (!isCollapsed && activeSubmenu) {
+    if (activeSectionKey) {
+      setExpandedKeys([activeSectionKey]);
+    } else {
+      setExpandedKeys([]);
+    }
+    closeSubmenu();
+  }, [activeSectionKey, closeSubmenu]);
+
+  useEffect(() => {
+    if (!isCollapsed) {
       closeSubmenu();
     }
-  }, [isCollapsed, activeSubmenu, closeSubmenu]);
+  }, [isCollapsed, closeSubmenu]);
 
-  useEffect(() => {
-    closeSubmenu();
-  }, [pathname, closeSubmenu]);
+  const handleSectionToggle = useCallback(
+    (sectionKey: string) =>
+      (event?: React.MouseEvent) => {
+        event?.stopPropagation();
+        if (isCollapsed) {
+          const target = event?.currentTarget as HTMLElement | undefined;
+          const nextKey = openSubmenuKey === sectionKey ? null : sectionKey;
+          if (nextKey && target) {
+            const rect = target.getBoundingClientRect();
+            setSubmenuLeft(rect.right);
+          } else {
+            setSubmenuLeft(null);
+          }
+          setOpenSubmenuKey(nextKey);
+        } else {
+          setExpandedKeys((prev) =>
+            prev.includes(sectionKey)
+              ? prev.filter((key) => key !== sectionKey)
+              : [...prev, sectionKey]
+          );
+        }
+      },
+    [isCollapsed, openSubmenuKey]
+  );
 
   return (
     <>
@@ -196,7 +145,6 @@ const WebSidebarNav = React.forwardRef<
         aria-label="Desktop navigation"
       >
         <ul className="tw-list-none tw-m-0 tw-p-0">
-          {/* Home */}
           <li>
             <WebSidebarNavItem
               href="/"
@@ -207,7 +155,6 @@ const WebSidebarNav = React.forwardRef<
             />
           </li>
 
-          {/* Waves */}
           <li>
             <WebSidebarNavItem
               href="/waves"
@@ -218,7 +165,6 @@ const WebSidebarNav = React.forwardRef<
             />
           </li>
 
-          {/* Discover */}
           <li>
             <WebSidebarNavItem
               href="/discover"
@@ -229,7 +175,6 @@ const WebSidebarNav = React.forwardRef<
             />
           </li>
 
-          {/* Messages */}
           <li>
             <WebSidebarNavItem
               href="/messages"
@@ -241,17 +186,12 @@ const WebSidebarNav = React.forwardRef<
             />
           </li>
 
-          {/* Network */}
           {networkSection && (
             <li>
               <WebSidebarExpandable
                 section={networkSection}
-                expanded={expandedSections.includes("network")}
-                onToggle={
-                  isCollapsed
-                    ? collapsedSectionToggle("network")
-                    : expandedSectionToggle("network")
-                }
+                expanded={expandedKeys.includes("network")}
+                onToggle={handleSectionToggle("network")}
                 collapsed={isCollapsed}
                 pathname={pathname}
                 data-section="network"
@@ -259,17 +199,12 @@ const WebSidebarNav = React.forwardRef<
             </li>
           )}
 
-          {/* Collections */}
           {collectionsSection && (
             <li>
               <WebSidebarExpandable
                 section={collectionsSection}
-                expanded={expandedSections.includes("collections")}
-                onToggle={
-                  isCollapsed
-                    ? collapsedSectionToggle("collections")
-                    : expandedSectionToggle("collections")
-                }
+                expanded={expandedKeys.includes("collections")}
+                onToggle={handleSectionToggle("collections")}
                 collapsed={isCollapsed}
                 pathname={pathname}
                 data-section="collections"
@@ -277,7 +212,6 @@ const WebSidebarNav = React.forwardRef<
             </li>
           )}
 
-          {/* Notifications */}
           <li>
             <WebSidebarNavItem
               href="/notifications"
@@ -289,7 +223,6 @@ const WebSidebarNav = React.forwardRef<
             />
           </li>
 
-          {/* Profile */}
           {profilePath && (
             <li>
               <WebSidebarNavItem
@@ -303,11 +236,10 @@ const WebSidebarNav = React.forwardRef<
             </li>
           )}
 
-          {/* Search */}
           <li>
             <WebSidebarNavItem
-              onClick={(e?: React.MouseEvent) => {
-                e?.stopPropagation();
+              onClick={(event?: React.MouseEvent) => {
+                event?.stopPropagation();
                 setIsSearchOpen(true);
               }}
               icon={MagnifyingGlassIcon}
@@ -317,7 +249,6 @@ const WebSidebarNav = React.forwardRef<
             />
           </li>
 
-          {/* Tools and About - Expandable */}
           {sections
             .filter(
               (section) =>
@@ -327,12 +258,8 @@ const WebSidebarNav = React.forwardRef<
               <li key={section.key}>
                 <WebSidebarExpandable
                   section={section}
-                  expanded={expandedSections.includes(section.key)}
-                  onToggle={
-                    isCollapsed
-                      ? collapsedSectionToggle(section.key)
-                      : expandedSectionToggle(section.key)
-                  }
+                  expanded={expandedKeys.includes(section.key)}
+                  onToggle={handleSectionToggle(section.key)}
                   collapsed={isCollapsed}
                   pathname={pathname}
                   data-section={section.key}
@@ -342,50 +269,39 @@ const WebSidebarNav = React.forwardRef<
         </ul>
       </nav>
 
-      {/* Search Modal */}
-      <CommonAnimationWrapper mode="sync" initial={true}>
+      <CommonAnimationWrapper mode="sync" initial>
         {isSearchOpen && (
           <CommonAnimationOpacity
             key="search-modal"
             elementClasses="tw-fixed tw-inset-0 tw-z-50"
             elementRole="dialog"
-            onClicked={(e) => e.stopPropagation()}
+            onClicked={(event) => event.stopPropagation()}
           >
             <HeaderSearchModal onClose={() => setIsSearchOpen(false)} />
           </CommonAnimationOpacity>
         )}
       </CommonAnimationWrapper>
-      {activeSubmenu && activeSection && submenuAnchor && (
-        <>
-          {/* Overlay for main content */}
-          <button
-            type="button"
-            className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-z-[70] focus:tw-outline-none tw-border-0"
-            style={{ left: "18rem" }} // 4rem sidebar + 14rem submenu
-            onClick={closeSubmenu}
-            onKeyDown={(e) => {
-              if (e.key === "Escape") {
-                e.preventDefault();
-                closeSubmenu();
-              }
-            }}
-            aria-label="Close submenu"
-          />
-          <CommonAnimationWrapper mode="sync" initial={false}>
-            <CommonAnimationOpacity
-              key={`sidebar-submenu-${activeSection.key}`}
-              elementClasses="tw-contents"
-              elementRole="presentation"
-            >
-              <WebSidebarSubmenu
-                section={activeSection}
-                anchor={submenuAnchor}
-                pathname={pathname}
-                onClose={closeSubmenu}
-              />
-            </CommonAnimationOpacity>
-          </CommonAnimationWrapper>
-        </>
+
+      {isCollapsed && openSubmenuKey && (
+        <CommonAnimationWrapper mode="sync" initial={false}>
+          <CommonAnimationOpacity
+            key={`sidebar-submenu-${openSubmenuKey}`}
+            elementClasses="tw-contents"
+            elementRole="presentation"
+          >
+            {(() => {
+              const openSection = sections.find((section) => section.key === openSubmenuKey);
+              return openSection ? (
+                <WebSidebarSubmenu
+                  section={openSection}
+                  pathname={pathname}
+                  onClose={closeSubmenu}
+                  leftOffset={submenuLeft ?? undefined}
+                />
+              ) : null;
+            })()}
+          </CommonAnimationOpacity>
+        </CommonAnimationWrapper>
       )}
     </>
   );

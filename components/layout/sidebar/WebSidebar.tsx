@@ -42,11 +42,34 @@ function WebSidebar({
     const { window: browserWindow } = globalThis as typeof globalThis & {
       window?: Window;
     };
-    if (browserWindow === undefined) {
+    if (
+      browserWindow === undefined ||
+      typeof browserWindow.matchMedia !== "function"
+    ) {
+      setIsTouchScreen(false);
       return;
     }
 
-    setIsTouchScreen(browserWindow.matchMedia("(pointer: coarse)").matches);
+    const coarsePointerQuery = browserWindow.matchMedia("(pointer: coarse)");
+    const handlePointerChange = (event: MediaQueryListEvent) => {
+      setIsTouchScreen(event.matches);
+    };
+
+    setIsTouchScreen(coarsePointerQuery.matches);
+
+    if (typeof coarsePointerQuery.addEventListener === "function") {
+      coarsePointerQuery.addEventListener("change", handlePointerChange);
+      return () =>
+        coarsePointerQuery.removeEventListener("change", handlePointerChange);
+    }
+
+    if ("addListener" in coarsePointerQuery) {
+      // Older Safari fallback; deprecated but still in use
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const legacyQuery = coarsePointerQuery as any;
+      legacyQuery.addListener(handlePointerChange);
+      return () => legacyQuery.removeListener?.(handlePointerChange);
+    }
   }, []);
 
   // Close sidebar on route change when on mobile
@@ -95,7 +118,7 @@ function WebSidebar({
 
   const sidebarContent = (
     <div
-      className="tw-relative tw-z-50 tw-h-full tw-bg-black tw-border-r tw-border-solid tw-border-y-0 tw-border-l-0 tw-border-iron-700/95 tw-border-0 tw-transition-[width] tw-duration-300 tw-ease-in-out focus:tw-outline-none"
+      className="tw-group tw-relative tw-z-50 tw-h-full tw-bg-black tw-border-r tw-border-solid tw-border-y-0 tw-border-l-0 tw-border-iron-700/95 tw-border-0 tw-transition-[width] tw-duration-300 tw-ease-in-out focus:tw-outline-none"
       style={{ width: sidebarWidth }}
       aria-label="Primary sidebar"
       ref={scrollContainerRef}
@@ -106,7 +129,10 @@ function WebSidebar({
           onToggle={handleToggle}
         />
 
-        <div className="tw-flex tw-flex-col tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin no-scrollbar tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
+        <div
+          className="tw-flex tw-flex-col tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin no-scrollbar tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+          data-sidebar-scroll="true"
+        >
           <div className="tw-flex-1">
             <WebSidebarNav ref={navRef} isCollapsed={shouldShowCollapsed} />
           </div>

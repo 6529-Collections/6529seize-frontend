@@ -65,7 +65,7 @@ export default function NotificationsPage() {
             </div>
           )
         )}
-        <div className="tw-h-full tw-px-2 lg:tw-px-8">
+        <div className="tw-h-full tw-px-2 lg:tw-px-6 xl:tw-px-8">
           <BrainContent
             activeDrop={activeDrop}
             onCancelReplyQuote={onCancelReplyQuote}

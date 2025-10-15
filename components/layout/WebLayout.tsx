@@ -33,52 +33,57 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
   const { isRightSidebarOpen } = useSidebarState();
 
   const rootStyle = useMemo<LayoutCssVars>(() => {
-    const base: LayoutCssVars = { minHeight: "100dvh" };
-
     if (isMobile) {
-      base["--layout-margin"] = "0px";
-      base["--left-rail"] = "0px";
-      return base;
+      return {
+        minHeight: "100dvh",
+        "--layout-margin": "0px",
+        "--left-rail": "0px",
+      };
     }
 
     const layoutMargin = `max((100vw - ${DESKTOP_MAX_WIDTH}px) / 2, 0px)`;
     const leftRailWidth = isNarrow ? SIDEBAR_WIDTHS.COLLAPSED : sidebarWidth;
-    base["--layout-margin"] = layoutMargin;
-    base["--left-rail"] = `calc(${layoutMargin} + ${leftRailWidth})`;
-    return base;
+
+    return {
+      minHeight: "100dvh",
+      "--layout-margin": layoutMargin,
+      "--left-rail": `calc(${layoutMargin} + ${leftRailWidth})`,
+    };
   }, [isMobile, isNarrow, sidebarWidth]);
 
   const collapsedWidth = SIDEBAR_WIDTHS.COLLAPSED;
   const expandedWidth = SIDEBAR_WIDTHS.EXPANDED;
   const narrowTranslateX = `translateX(calc(${expandedWidth} - ${collapsedWidth}))`;
 
-  const mainStyle: CSSProperties = (() => {
-    const base: CSSProperties = { width: "100%" };
+  const mainStyle = useMemo<CSSProperties>(() => {
+    const style: CSSProperties = { width: "100%" };
+    let transform: string | undefined;
 
     if (isMobile) {
       if (isOffcanvasOpen) {
-        base.transform = `translateX(${sidebarWidth})`;
+        transform = `translateX(${sidebarWidth})`;
       }
-      return base;
+    } else if (isNarrow) {
+      style.paddingLeft = collapsedWidth;
+      transform = isOffcanvasOpen ? narrowTranslateX : "translateX(0)";
+    } else {
+      style.paddingLeft = sidebarWidth;
     }
 
-    if (isNarrow) {
-      base.paddingLeft = collapsedWidth;
-      if (isOffcanvasOpen) {
-        base.transform = narrowTranslateX;
-      } else {
-        base.transform = "translateX(0)";
-      }
-      return base;
+    if (!isRightSidebarOpen && transform) {
+      style.transform = transform;
     }
 
-    base.paddingLeft = sidebarWidth;
-    return base;
-  })();
-
-  if (isRightSidebarOpen) {
-    delete mainStyle.transform;
-  }
+    return style;
+  }, [
+    collapsedWidth,
+    isMobile,
+    isNarrow,
+    isOffcanvasOpen,
+    isRightSidebarOpen,
+    narrowTranslateX,
+    sidebarWidth,
+  ]);
 
   const shouldDimContent =
     isOffcanvasOpen && (isMobile || (!isMobile && isNarrow));

@@ -31,10 +31,10 @@ function WebSidebarHeader({ collapsed, onToggle }: WebSidebarHeaderProps) {
         type="button"
         onClick={onToggle}
         onMouseDown={(event) => event.preventDefault()}
-        className={`tw-group desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.4)] tw-border-iron-700 tw-bg-iron-800 tw-shadow-[0_12px_28px_rgba(0,0,0,0.35)] tw-absolute tw-top-1/2 -tw-translate-y-1/2 tw-flex tw-items-center tw-justify-center tw-border tw-border-solid   ${
+        className={`desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.4)] tw-border-iron-700  tw-bg-iron-800 tw-shadow-[0_12px_28px_rgba(0,0,0,0.35)] tw-absolute tw-top-1/2 -tw-translate-y-1/2 tw-flex tw-items-center tw-justify-center tw-border tw-border-solid   ${
           collapsed
             ? "tw-rotate-180 tw-h-6 tw-w-6 tw-rounded-lg -tw-right-3"
-            : " tw-h-8 tw-w-8 tw-right-4  tw-rounded-xl"
+            : " tw-h-8 tw-w-8 tw-right-4 tw-rounded-xl"
         }`}
         aria-label="Toggle right sidebar"
       >
