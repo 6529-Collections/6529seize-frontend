@@ -31,9 +31,7 @@ type TransferContextShape = {
   decQty: (key: string) => void;
 
   clear: () => void;
-  /** number of distinct items selected */
   count: number;
-  /** total units selected (sum of qty across items) */
   totalQty: number;
 };
 

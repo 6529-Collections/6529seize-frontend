@@ -1,8 +1,7 @@
 "use client";
 
-import { resolveIpfsUrl } from "@/components/ipfs/IPFSContext";
+import { useResolvedIpfsUrl } from "@/hooks/useResolvedIpfsUrl";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 
 function getLevelBgColor(level: number) {
   if (level >= 80) return "tw-bg-[#55B075] tw-text-black";
@@ -21,39 +20,9 @@ export default function TransferModalPfp({
   readonly level: number;
   readonly size?: number;
 }) {
-  const [resolved, setResolved] = useState<string | null>(null);
+  const { data: resolved } = useResolvedIpfsUrl(src);
 
   const levelColor = getLevelBgColor(level);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    if (!src) {
-      setResolved(null);
-      return () => {
-        isMounted = false;
-      };
-    }
-
-    setResolved(null);
-
-    (async () => {
-      try {
-        const newSrc = await resolveIpfsUrl(src);
-        if (isMounted) {
-          setResolved(newSrc ?? null);
-        }
-      } catch {
-        if (isMounted) {
-          setResolved(null);
-        }
-      }
-    })();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [src]);
 
   if (!resolved) {
     return (

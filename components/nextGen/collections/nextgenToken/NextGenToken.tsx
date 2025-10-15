@@ -17,7 +17,7 @@ import {
   faFire,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
@@ -41,25 +41,28 @@ interface Props {
   setView: (view: NextgenCollectionView) => void;
 }
 
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(false);
+  useEffect(() => {
+    const m = globalThis.matchMedia(query);
+    setMatches(m.matches);
+    const handler = (e: MediaQueryListEvent) => setMatches(e.matches);
+    m.addEventListener("change", handler);
+    return () => m.removeEventListener("change", handler);
+  }, [query]);
+  return matches;
+}
+
 export default function NextGenTokenPage(props: Readonly<Props>) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const { address: connectedAddress } = useSeizeConnectContext();
 
   const isConnectedAddressOwner = useMemo(() => {
     return areEqualAddresses(connectedAddress, props.token.owner);
   }, [props.token.owner, connectedAddress]);
-
-  function useMediaQuery(query: string) {
-    const [matches, setMatches] = useState(false);
-    useEffect(() => {
-      const m = window.matchMedia(query);
-      setMatches(m.matches);
-      const handler = (e: MediaQueryListEvent) => setMatches(e.matches);
-      m.addEventListener("change", handler);
-      return () => m.removeEventListener("change", handler);
-    }, [query]);
-    return matches;
-  }
 
   const isMdUp = useMediaQuery("(min-width: 768px)");
 
@@ -118,7 +121,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
         <Row className="pt-4 pb-4">
           {props.view === NextgenCollectionView.ABOUT && (
             <>
-              <Col xs={12}>{!isMdUp ? transferSingle : null}</Col>
+              <Col xs={12}>{isMdUp ? null : transferSingle}</Col>
               <Col sm={12} md={6}>
                 <NextGenTokenAbout
                   collection={props.collection}
@@ -178,12 +181,14 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
           if (!hasPreviousToken) {
             return;
           }
-          const url = new URL(globalThis.location.href);
-          url.pathname = url.pathname.replace(
+          const newPathname = pathname.replace(
             /\/(\d+)(\/?)$/,
             `/${props.token.id - 1}$2`
           );
-          router.push(url.toString(), { scroll: false });
+          const query = searchParams.toString();
+          router.push(query ? `${newPathname}?${query}` : newPathname, {
+            scroll: false,
+          });
         }}
         style={{
           height: "35px",
@@ -222,12 +227,14 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
           if (!hasNextToken) {
             return;
           }
-          const url = new URL(globalThis.location.href);
-          url.pathname = url.pathname.replace(
+          const newPathname = pathname.replace(
             /\/(\d+)(\/?)$/,
             `/${props.token.id + 1}$2`
           );
-          router.push(url.toString(), { scroll: false });
+          const query = searchParams.toString();
+          router.push(query ? `${newPathname}?${query}` : newPathname, {
+            scroll: false,
+          });
         }}
         style={{
           height: "35px",

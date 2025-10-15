@@ -53,7 +53,7 @@ const mockTransactions = [
   },
 ] as any[];
 
-const renderWithProviders = (component: React.ReactNode) => {
+const renderMemePageYourCardsWithProviders = (component: React.ReactNode) => {
   const queryClient = new QueryClient();
   const mockWagmiConfig = createConfig({
     chains: [mainnet],
@@ -132,7 +132,7 @@ describe("MemePageYourCardsRightMenu", () => {
 
     describe("when user owns cards", () => {
       it("should display cards count and overview", () => {
-        renderWithProviders(
+        renderMemePageYourCardsWithProviders(
           <MemePageYourCardsRightMenu
             show={true}
             transactions={mockTransactions}
@@ -152,7 +152,7 @@ describe("MemePageYourCardsRightMenu", () => {
       });
 
       it("should display first acquisition date", () => {
-        renderWithProviders(
+        renderMemePageYourCardsWithProviders(
           <MemePageYourCardsRightMenu
             show={true}
             transactions={mockTransactions}
@@ -169,7 +169,7 @@ describe("MemePageYourCardsRightMenu", () => {
       });
 
       it("should display no TDH message when no TDH data", () => {
-        renderWithProviders(
+        renderMemePageYourCardsWithProviders(
           <MemePageYourCardsRightMenu
             show={true}
             transactions={mockTransactions}
@@ -186,7 +186,7 @@ describe("MemePageYourCardsRightMenu", () => {
       });
 
       it("should categorize airdropped cards", () => {
-        renderWithProviders(
+        renderMemePageYourCardsWithProviders(
           <MemePageYourCardsRightMenu
             show={true}
             transactions={mockTransactions}
@@ -203,7 +203,7 @@ describe("MemePageYourCardsRightMenu", () => {
       });
 
       it("should categorize bought cards", () => {
-        renderWithProviders(
+        renderMemePageYourCardsWithProviders(
           <MemePageYourCardsRightMenu
             show={true}
             transactions={mockTransactions}

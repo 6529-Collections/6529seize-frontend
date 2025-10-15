@@ -88,7 +88,7 @@ export default function UserPageCollectedCard({
             </span>
             {showSeizedCount && (
               <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium tw-text-iron-400">
-                {formatNumberWithCommasOrDash(card.seized_count)}x
+                {formatNumberWithCommasOrDash(card.seized_count ?? 0)}x
               </span>
             )}
           </div>
@@ -148,6 +148,8 @@ export default function UserPageCollectedCard({
                         className="tw-size-5 tw-cursor-pointer"
                         color={qtySelected <= 1 ? "#60606C" : "#fff"}
                         aria-disabled={qtySelected <= 1}
+                        role="button"
+                        aria-label="Decrease quantity"
                       />
                       <div className="tw-min-w-[2ch] tw-text-center tw-text-xs tw-tabular-nums tw-select-none">
                         {qtySelected}
@@ -162,6 +164,8 @@ export default function UserPageCollectedCard({
                         className="tw-size-5 tw-cursor-pointer"
                         color={qtySelected >= copiesMax ? "#60606C" : "#fff"}
                         aria-disabled={qtySelected >= copiesMax}
+                        role="button"
+                        aria-label="Increase quantity"
                       />
                     </div>
                   )}

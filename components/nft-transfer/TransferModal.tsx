@@ -20,6 +20,7 @@ import CircleLoader, {
 import { ContractType } from "@/enums";
 import { getUserProfile } from "@/helpers/server.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { Address, isAddress, PublicClient } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
@@ -867,80 +868,78 @@ export default function TransferModal({
     };
   }, [open]);
 
+  function useDebouncedValue<T>(value: T, delay: number) {
+    const [debounced, setDebounced] = useState(value);
+    useEffect(() => {
+      const t = setTimeout(() => setDebounced(value), delay);
+      return () => clearTimeout(t);
+    }, [value, delay]);
+    return debounced;
+  }
+
   useEffect(() => {
     if (!open) return;
-
     setSelectedProfile(null);
     setSelectedWallet(null);
+  }, [open]);
 
-    if (trimmedQuery.length < MIN_SEARCH_LENGTH) {
-      setResults([]);
-      setIsSearching(false);
-      return;
-    }
+  const debouncedQuery = useDebouncedValue(trimmedQuery, 350);
+  const enabled = open && debouncedQuery.length >= MIN_SEARCH_LENGTH;
 
-    let cancelled = false;
-    const abortController = new AbortController();
-    setIsSearching(true);
-    const timer = setTimeout(async () => {
+  // Main query (community-members → fallback to identity profile)
+  const { data, isFetching } = useQuery({
+    queryKey: ["memberSearch", debouncedQuery],
+    enabled,
+    refetchOnWindowFocus: false,
+    retry: 1,
+    staleTime: 30_000,
+    gcTime: 300_000,
+    queryFn: async ({ signal }: { signal: AbortSignal }) => {
       try {
         const arr = await commonApiFetch<CommunityMemberMinimal[]>({
           endpoint: "community-members",
-          params: {
-            param: trimmedQuery,
-          },
-          signal: abortController.signal,
+          params: { param: debouncedQuery },
+          signal,
         });
-        if (arr.length === 0) {
-          throw new Error("No results for Community Member found");
-        }
-        if (!cancelled) setResults(arr || []);
-      } catch (err) {
-        console.warn("Search failed", err);
-        if (cancelled) return;
 
-        const isErrorNotFound =
-          err instanceof Error &&
-          err.message === "No results for Community Member found";
-        if (!isErrorNotFound) {
-          setResults([]);
-          return;
-        }
+        if (arr && arr.length > 0) return arr;
 
-        try {
-          const identity = await getUserProfile({
-            user: trimmedQuery,
-            headers: {},
-          });
-          const communityMember: CommunityMemberMinimal = {
-            profile_id: identity.id,
-            handle: identity.handle,
-            wallet: identity.primary_wallet,
-            pfp: identity.pfp,
-            display: identity.handle ?? null,
-            normalised_handle: identity.normalised_handle,
-            primary_wallet: identity.primary_wallet,
-            tdh: identity.tdh,
-            level: identity.level,
-            cic_rating: identity.cic,
-          };
-          setResults([communityMember]);
-        } catch (err) {
-          console.warn("Search failed", err);
-          if (cancelled) return;
-          setResults([]);
-        }
-      } finally {
-        if (!cancelled) setIsSearching(false);
+        const identity = await getUserProfile({
+          user: debouncedQuery,
+          headers: {},
+        });
+
+        const communityMember: CommunityMemberMinimal = {
+          profile_id: identity.id,
+          handle: identity.handle,
+          wallet: identity.primary_wallet,
+          pfp: identity.pfp,
+          display: identity.handle ?? null,
+          normalised_handle: identity.normalised_handle,
+          primary_wallet: identity.primary_wallet,
+          tdh: identity.tdh,
+          level: identity.level,
+          cic_rating: identity.cic,
+        };
+
+        return [communityMember];
+      } catch {
+        return [];
       }
-    }, 350);
+    },
+  });
 
-    return () => {
-      cancelled = true;
-      abortController.abort();
-      clearTimeout(timer);
-    };
-  }, [open, trimmedQuery]);
+  useEffect(() => {
+    setIsSearching(enabled && isFetching);
+  }, [enabled, isFetching, setIsSearching]);
+
+  useEffect(() => {
+    if (!enabled) {
+      setResults([]);
+      return;
+    }
+    setResults(data ?? []);
+  }, [enabled, data, setResults]);
 
   const items = useMemo(
     () =>
