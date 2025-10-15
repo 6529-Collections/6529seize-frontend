@@ -72,6 +72,7 @@
     "cross-env": "^7.0.3",
     "csv-parser": "^3.0.0",
     "emoji-mart": "^5.6.0",
+    "emoji-regex": "^10.6.0",
     "ethereum-cryptography": "^2.2.0",
     "ethers": "^6.13.5",
     "focus-trap-react": "^11.0.3",
