@@ -163,7 +163,7 @@ beforeEach(() => {
 
   mockUseAuth.mockReturnValue({
     connectedProfile: {
-      wallets: ["0xabc"],
+      wallets: [{ wallet: "0xabc" }],
     },
   });
 

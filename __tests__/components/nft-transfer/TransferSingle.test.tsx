@@ -173,16 +173,16 @@ describe("TransferSingle", () => {
     render(<TransferSingle {...props} />);
     const minus = screen.getByTestId("transfer-single-minus");
     const plus = screen.getByTestId("transfer-single-plus");
-    expect(minus).toHaveAttribute("aria-disabled", "true");
-    expect(plus).toHaveAttribute("aria-disabled", "false");
+    expect(minus).toBeDisabled();
+    expect(plus).toBeEnabled();
     cleanup();
     resetAll();
     mockSelected = new Map([[key, { qty: 5, max: 5 }]]);
     render(<TransferSingle {...props} />);
     const minus2 = screen.getByTestId("transfer-single-minus");
     const plus2 = screen.getByTestId("transfer-single-plus");
-    expect(minus2).toHaveAttribute("aria-disabled", "false");
-    expect(plus2).toHaveAttribute("aria-disabled", "true");
+    expect(minus2).toBeEnabled();
+    expect(plus2).toBeDisabled();
   });
 
   test("clicking + and - triggers incQty and decQty", () => {

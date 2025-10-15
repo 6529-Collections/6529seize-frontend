@@ -78,8 +78,8 @@ describe("TransferPanel", () => {
           key: "MEMES:1",
           title: "Card 1",
           thumbUrl: "https://example.com/thumb.png",
-          qty: 1,
-          max: 2,
+          qty: 2,
+          max: 3,
         },
       ],
     ]);
