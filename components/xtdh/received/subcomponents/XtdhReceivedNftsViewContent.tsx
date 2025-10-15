@@ -2,11 +2,12 @@
 
 import { useCallback, useMemo, useState } from "react";
 
-import CollectionsAutocomplete from "@/components/utils/input/collections/CollectionsAutocomplete";
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
+import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 
 import {
   XTDH_NFT_SORT_ITEMS,
+  type XtdhNftSortField,
   type XtdhReceivedView,
 } from "../utils/constants";
 import { XtdhReceivedEmptyState } from "./XtdhReceivedEmptyState";
@@ -42,9 +43,6 @@ export function XtdhReceivedNftsViewContent({
     nfts,
     isLoading,
     isFetching,
-    collectionFilterOptions,
-    selectedCollections,
-    handleCollectionsFilterChange,
     activeSort,
     activeDirection,
     handleSortChange,
@@ -103,15 +101,15 @@ export function XtdhReceivedNftsViewContent({
         searchPlaceholder="Search tokens..."
       />
 
-      <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-gap-4">
-        <div className="tw-w-full sm:tw-w-64">
-          <CollectionsAutocomplete
-            options={collectionFilterOptions}
-            value={selectedCollections}
-            onChange={handleCollectionsFilterChange}
-            disabled={isLoading || isFetching}
-          />
-        </div>
+      <div className="hidden md:block">
+        <CommonTabs<XtdhNftSortField>
+          items={XTDH_NFT_SORT_ITEMS}
+          activeItem={activeSort}
+          filterLabel="Sort tokens"
+          setSelected={handleSortChange}
+          sortDirection={activeDirection}
+          disabled={isLoading}
+        />
       </div>
 
       {isLoading ? (
