@@ -216,16 +216,6 @@ export function XtdhReceivedCollectionTokensTable({
                   {renderSortIcon("grantors")}
                 </button>
               </div>
-              <span
-                role="columnheader"
-                aria-sort="none"
-                className={clsx(
-                  "tw-flex tw-justify-end tw-text-right",
-                  headerTextClass,
-                )}
-              >
-                Action
-              </span>
             </div>
           </div>
 

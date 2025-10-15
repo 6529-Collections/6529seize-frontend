@@ -3,9 +3,6 @@
 import { useCallback } from "react";
 import type { KeyboardEvent } from "react";
 import clsx from "clsx";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
-
 import type { XtdhReceivedNft } from "@/types/xtdh";
 
 import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
@@ -52,6 +49,8 @@ export function XtdhReceivedCollectionTokenRow({
       onClick={handleSelect}
       onKeyDown={handleKeyDown}
       aria-label={`View details for ${nft.tokenName}`}
+      aria-expanded={isActive}
+      aria-controls={detailsRegionId}
       className={clsx(
         "tw-grid tw-w-full tw-cursor-pointer tw-items-center tw-gap-3 tw-border-b tw-border-iron-900/60 tw-px-4 tw-py-2.5 tw-text-sm tw-leading-tight tw-transition-colors tw-duration-150 tw-ease-out last:tw-border-none",
         "focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950",
@@ -135,21 +134,6 @@ export function XtdhReceivedCollectionTokenRow({
             />
           </span>
         </CustomTooltip>
-      </div>
-      <div className="tw-flex tw-justify-end">
-        <button
-          type="button"
-          onClick={handleSelect}
-          aria-expanded={isActive}
-          aria-controls={detailsRegionId}
-          className={clsx(
-            "tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-transparent tw-bg-transparent tw-px-2 tw-py-1.5 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-primary-300 tw-transition tw-duration-150 tw-ease-out",
-            "hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950",
-          )}
-        >
-          <span>Details</span>
-          <FontAwesomeIcon icon={faChevronRight} className="tw-h-3 tw-w-3" />
-        </button>
       </div>
     </div>
   );
