@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useContext, useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { WaveGroupType } from "../WaveGroup";
 import { useMutation } from "@tanstack/react-query";
@@ -12,13 +12,7 @@ import WaveGroupRemoveButton from "./WaveGroupRemoveButton";
 import { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
-import {
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuItems,
-  Transition,
-} from "@headlessui/react";
+import { CompactMenu } from "@/components/common/CompactMenu";
 
 export default function WaveGroupEditButtons({
   haveGroup,
@@ -78,7 +72,7 @@ export default function WaveGroupEditButtons({
   }
 
   return (
-    <Menu as="div" className="tw-relative">
+    <div className="tw-relative">
       <div className="tw-hidden">
         <WaveGroupEditButton
           wave={wave}
@@ -101,53 +95,44 @@ export default function WaveGroupEditButtons({
           />
         )}
       </div>
-      <MenuButton className="tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-size-7 tw-border-0 tw-bg-transparent tw-text-iron-300 hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out">
-        <span className="tw-sr-only">Group options</span>
-        <Cog6ToothIcon className="tw-size-5 tw-flex-shrink-0" />
-      </MenuButton>
-      <Transition
-        as={Fragment}
-        enter="tw-transition tw-duration-150 tw-ease-out"
-        enterFrom="tw-opacity-0 tw-translate-y-1"
-        enterTo="tw-opacity-100 tw-translate-y-0"
-        leave="tw-transition tw-duration-100 tw-ease-in"
-        leaveFrom="tw-opacity-100 tw-translate-y-0"
-        leaveTo="tw-opacity-0 tw-translate-y-1">
-        <MenuItems
-          anchor="bottom end"
-          className="tw-z-50 tw-w-40 tw-rounded-lg tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 tw-ring-white/10 focus:tw-outline-none">
-          <div className="tw-flex tw-flex-col">
-            <MenuItem>
-              {({ close }) => (
-                <button
-                  type="button"
-                  onClick={() => {
-                    close();
-                    openEditRef.current?.();
-                  }}
-                  className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-rounded-md tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-font-semibold tw-text-iron-200 hover:tw-bg-iron-800 tw-transition tw-duration-200 tw-ease-out">
-                  Change group
-                </button>
-              )}
-            </MenuItem>
-            {haveGroup && type !== WaveGroupType.ADMIN && (
-              <MenuItem>
-                {({ close }) => (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      close();
-                      openRemoveRef.current?.();
-                    }}
-                    className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-rounded-md tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-font-semibold tw-text-red hover:tw-bg-iron-800 tw-transition tw-duration-200 tw-ease-out">
-                    Remove group
-                  </button>
-                )}
-              </MenuItem>
-            )}
-          </div>
-        </MenuItems>
-      </Transition>
-    </Menu>
+      <CompactMenu
+        triggerClassName="tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-text-iron-200 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
+        trigger={() => (
+          <>
+            <span className="tw-sr-only">Group options</span>
+            <Cog6ToothIcon className="tw-size-5 tw-flex-shrink-0" />
+          </>
+        )}
+        aria-label="Group options"
+        itemsWrapperClassName="tw-flex tw-flex-col"
+        unstyledItems
+        itemClassName="tw-flex tw-items-center tw-gap-x-2 tw-rounded-md tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-font-semibold tw-transition tw-duration-200 tw-ease-out"
+        focusItemClassName="tw-bg-iron-800 tw-text-iron-50"
+        items={[
+          {
+            id: "change",
+            label: "Change group",
+            onSelect: () => {
+              openEditRef.current?.();
+            },
+            className:
+              "tw-text-iron-200 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50",
+          },
+          ...(haveGroup && type !== WaveGroupType.ADMIN
+            ? [
+                {
+                  id: "remove",
+                  label: "Remove group",
+                  onSelect: () => {
+                    openRemoveRef.current?.();
+                  },
+                  className:
+                    "tw-text-red desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-red",
+                } as const,
+              ]
+            : []),
+        ]}
+      />
+    </div>
   );
 }

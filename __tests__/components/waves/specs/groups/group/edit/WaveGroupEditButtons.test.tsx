@@ -75,12 +75,21 @@ describe('WaveGroupEditButtons', () => {
     expect(screen.queryByText('Remove group')).toBeNull();
   });
 });
-jest.mock('@headlessui/react', () => ({
-  Menu: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  MenuButton: React.forwardRef<HTMLButtonElement, any>(({ children, ...props }, ref) => (
-    <button ref={ref} {...props}>{children}</button>
-  )),
-  MenuItems: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  MenuItem: ({ children }: any) => children({ close: jest.fn(), active: false }),
-  Transition: ({ children }: any) => <>{children}</>,
-}));
+jest.mock('@headlessui/react', () => {
+  const close = jest.fn();
+  return {
+    Menu: ({ children, ...props }: any) => (
+      <div {...props}>
+        {typeof children === 'function'
+          ? children({ open: false, close })
+          : children}
+      </div>
+    ),
+    MenuButton: React.forwardRef<HTMLButtonElement, any>(({ children, ...props }, ref) => (
+      <button ref={ref} {...props}>{children}</button>
+    )),
+    MenuItems: ({ children, anchor: _anchor, ...props }: any) => <div {...props}>{children}</div>,
+    MenuItem: ({ children }: any) => children({ close, active: false }),
+    Transition: ({ children }: any) => <>{typeof children === 'function' ? children() : children}</>,
+  };
+});
