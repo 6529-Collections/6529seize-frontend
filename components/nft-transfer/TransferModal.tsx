@@ -18,6 +18,7 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { ContractType } from "@/enums";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getUserProfile } from "@/helpers/server.helpers";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -105,6 +106,14 @@ type TxItem = {
   contractType: ContractType;
   contract: Address;
 };
+
+type WalletClientWithWrite = {
+  writeContract: (req: any) => Promise<`0x${string}`>;
+};
+
+function hasWriteContract(client: any): client is WalletClientWithWrite {
+  return client && typeof client.writeContract === "function";
+}
 
 function computeFlowTitle(
   total: number,
@@ -270,7 +279,7 @@ function RecipientSelected({
   selectedWallet,
 }: {
   readonly selectedProfile: CommunityMemberMinimal;
-  readonly profile: any;
+  readonly profile: ApiIdentity | null;
   readonly isIdentityLoading: boolean;
   readonly setSelectedProfile: (v: CommunityMemberMinimal | null) => void;
   readonly setSelectedWallet: (v: string | null) => void;
@@ -1067,8 +1076,9 @@ export default function TransferModal({
     setTimeout(() => {
       onClose({
         completed:
-          flow !== "review" ||
-          (txs.length > 0 && !txs.every((t) => t.state === "error")),
+          flow !== "review" &&
+          txs.length > 0 &&
+          !txs.every((t) => t.state === "error"),
       });
     }, 150);
   }, [isClosing, onClose, flow, trxPending, txs]);
@@ -1165,12 +1175,21 @@ export default function TransferModal({
       return;
     }
 
+    if (!hasWriteContract(walletClient)) {
+      setTxs([
+        {
+          id: "init",
+          originKey: "init",
+          label: "Wallet not ready",
+          state: "error",
+          error: "Wallet does not support writeContract.",
+        },
+      ]);
+      return;
+    }
+
     const destinationWallet = selectedWallet as Address;
-    const write = (
-      walletClient as unknown as {
-        writeContract: (req: any) => Promise<`0x${string}`>;
-      }
-    ).writeContract;
+    const write = walletClient.writeContract;
 
     for (const [key, { contract, is1155, items: citems }] of Array.from(
       byContract.entries()
