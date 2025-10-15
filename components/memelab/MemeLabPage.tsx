@@ -12,6 +12,7 @@ import { NftPageStats } from "@/components/nft-attributes/NftStats";
 import NFTImage from "@/components/nft-image/NFTImage";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import NftNavigation from "@/components/nft-navigation/NftNavigation";
+import TransferSingle from "@/components/nft-transfer/TransferSingle";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import Pagination from "@/components/pagination/Pagination";
 import { printMemeReferences } from "@/components/rememes/RememePage";
@@ -60,7 +61,6 @@ import {
   Row,
   Table,
 } from "react-bootstrap";
-import TransferSingle from "../nft-transfer/TransferSingle";
 
 const ACTIVITY_PAGE_SIZE = 25;
 

@@ -789,17 +789,6 @@ export default function TransferModal({
         }
       >();
 
-      // minimal Manifold reads
-      const MANIFOLD_CORE_ABI = [
-        {
-          type: "function",
-          name: "tokenExtension",
-          stateMutability: "view",
-          inputs: [{ name: "tokenId", type: "uint256" }],
-          outputs: [{ type: "address" }],
-        },
-      ] as const;
-
       const getOriginKey = async (contract: Address, tokenId: bigint) => {
         try {
           const ext = (await publicClient.readContract({
