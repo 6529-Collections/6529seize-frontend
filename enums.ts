@@ -145,6 +145,12 @@ export enum DelegationCenterSection {
   HTML = "html",
 }
 
+export enum ProfileActivityFilterTargetType {
+  ALL = "ALL",
+  INCOMING = "INCOMING",
+  OUTGOING = "OUTGOING",
+}
+
 export enum ProfileActivityLogType {
   RATING_EDIT = "RATING_EDIT",
   HANDLE_EDIT = "HANDLE_EDIT",

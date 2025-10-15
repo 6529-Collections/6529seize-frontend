@@ -12,6 +12,7 @@ import { NftPageStats } from "@/components/nft-attributes/NftStats";
 import NFTImage from "@/components/nft-image/NFTImage";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import NftNavigation from "@/components/nft-navigation/NftNavigation";
+import TransferSingle from "@/components/nft-transfer/TransferSingle";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import Pagination from "@/components/pagination/Pagination";
 import { printMemeReferences } from "@/components/rememes/RememePage";
@@ -60,8 +61,6 @@ import {
   Row,
   Table,
 } from "react-bootstrap";
-import TransferSingle from "../nft-transfer/TransferSingle";
-import { TransferProvider } from "../nft-transfer/TransferState";
 
 const ACTIVITY_PAGE_SIZE = 25;
 
@@ -169,7 +168,8 @@ export default function MemeLabPageComponent({
   }, [nftId]);
 
   useEffect(() => {
-    const wallets = connectedProfile?.wallets ?? [];
+    const walletObjects = connectedProfile?.wallets ?? [];
+    const wallets = walletObjects.map((w) => w.wallet);
     if (wallets.length > 0 && nftId) {
       fetchUrl(
         `${
@@ -558,7 +558,8 @@ export default function MemeLabPageComponent({
       (t) => t.value === 0 && areEqualAddresses(t.from_address, NULL_ADDRESS)
     );
 
-    const wallets = connectedProfile?.wallets ?? [];
+    const walletObjects = connectedProfile?.wallets ?? [];
+    const wallets = walletObjects.map((w) => w.wallet);
     const transferredIn =
       wallets.length === 0
         ? []
@@ -628,79 +629,95 @@ export default function MemeLabPageComponent({
                 </Col>
               </Row>
             )}
-            {transactions.length > 0 && wallets && (
-              <>
-                <Row className="pt-2 pb-2">
-                  <Col>
-                    <h3>Overview</h3>
-                  </Col>
-                </Row>
-                <Row className={`pb-2 ${styles.overviewColumn}`}>
-                  <Col>
-                    First acquired{" "}
-                    {printMintDate(new Date(firstAcquired.transaction_date))}
-                  </Col>
-                </Row>
-                {airdropped.length > 0 && (
-                  <Row className={`pt-1 ${styles.overviewColumn}`}>
-                    <Col>
-                      {getTokenCount(airdropped)} card
-                      {getTokenCount(airdropped) > 1 && "s"} airdropped
+            {transactions.length > 0 &&
+              wallets.length > 0 &&
+              nftBalance > 0 &&
+              nft && (
+                <>
+                  <Row className="pt-2">
+                    <Col
+                      xs={{ span: 12 }}
+                      sm={{ span: 12 }}
+                      md={{ span: 12 }}
+                      lg={{ span: 8 }}>
+                      <Table bordered={false}>
+                        <tbody>
+                          <tr className={`${styles.overviewColumn}`}>
+                            <td>Cards</td>
+                            <td className="text-right">{`x${nftBalance}`}</td>
+                          </tr>
+                        </tbody>
+                      </Table>
                     </Col>
                   </Row>
-                )}
-                {bought.length > 0 && (
-                  <Row className={`pt-1 ${styles.overviewColumn}`}>
+                  <Row className="mb-2">
                     <Col>
-                      {getTokenCount(bought)} card
-                      {getTokenCount(bought) > 1 && "s"} bought for {boughtSum}{" "}
-                      ETH
+                      <TransferSingle
+                        collectionType={CollectedCollectionType.MEMELAB}
+                        contractType={ContractType.ERC1155}
+                        contract={MEMELAB_CONTRACT}
+                        tokenId={nft.id}
+                        max={nftBalance}
+                        title={nft?.name ?? `Meme Lab #${nft?.id}`}
+                        thumbUrl={nft?.thumbnail}
+                      />
                     </Col>
                   </Row>
-                )}
-                {transferredIn.length > 0 && (
-                  <Row className={`pt-1 ${styles.overviewColumn}`}>
+                  <Row className="pt-2 pb-2">
                     <Col>
-                      {getTokenCount(transferredIn)} card
-                      {getTokenCount(transferredIn) > 1 && "s"} transferred in
+                      <h3>Overview</h3>
                     </Col>
                   </Row>
-                )}
-                {sold.length > 0 && (
-                  <Row className={`pt-1 ${styles.overviewColumn}`}>
+                  <Row className={`pb-2 ${styles.overviewColumn}`}>
                     <Col>
-                      {getTokenCount(sold)} card
-                      {getTokenCount(sold) > 1 && "s"} sold for {soldSum} eth
+                      First acquired{" "}
+                      {printMintDate(new Date(firstAcquired.transaction_date))}
                     </Col>
                   </Row>
-                )}
-                {transferredOut.length > 0 && (
-                  <Row className={`pt-1 ${styles.overviewColumn}`}>
-                    <Col>
-                      {getTokenCount(transferredOut)} card
-                      {getTokenCount(transferredOut) > 1 && "s"} transferred out
-                    </Col>
-                  </Row>
-                )}
-                {nftBalance > 0 && nft?.id && (
-                  <Row className="pt-5">
-                    <Col>
-                      <TransferProvider>
-                        <TransferSingle
-                          collectionType={CollectedCollectionType.MEMES}
-                          contractType={ContractType.ERC1155}
-                          contract={MEMES_CONTRACT}
-                          tokenId={nft?.id}
-                          max={nftBalance}
-                          title={nft?.name ?? `The Memes #${nft?.id}`}
-                          thumbUrl={nft?.thumbnail}
-                        />
-                      </TransferProvider>
-                    </Col>
-                  </Row>
-                )}
-              </>
-            )}
+                  {airdropped.length > 0 && (
+                    <Row className={`pt-1 ${styles.overviewColumn}`}>
+                      <Col>
+                        {getTokenCount(airdropped)} card
+                        {getTokenCount(airdropped) > 1 && "s"} airdropped
+                      </Col>
+                    </Row>
+                  )}
+                  {bought.length > 0 && (
+                    <Row className={`pt-1 ${styles.overviewColumn}`}>
+                      <Col>
+                        {getTokenCount(bought)} card
+                        {getTokenCount(bought) > 1 && "s"} bought for{" "}
+                        {boughtSum} ETH
+                      </Col>
+                    </Row>
+                  )}
+                  {transferredIn.length > 0 && (
+                    <Row className={`pt-1 ${styles.overviewColumn}`}>
+                      <Col>
+                        {getTokenCount(transferredIn)} card
+                        {getTokenCount(transferredIn) > 1 && "s"} transferred in
+                      </Col>
+                    </Row>
+                  )}
+                  {sold.length > 0 && (
+                    <Row className={`pt-1 ${styles.overviewColumn}`}>
+                      <Col>
+                        {getTokenCount(sold)} card
+                        {getTokenCount(sold) > 1 && "s"} sold for {soldSum} ETH
+                      </Col>
+                    </Row>
+                  )}
+                  {transferredOut.length > 0 && (
+                    <Row className={`pt-1 ${styles.overviewColumn}`}>
+                      <Col>
+                        {getTokenCount(transferredOut)} card
+                        {getTokenCount(transferredOut) > 1 && "s"} transferred
+                        out
+                      </Col>
+                    </Row>
+                  )}
+                </>
+              )}
           </Row>
         </Container>
       </Col>
@@ -1188,6 +1205,7 @@ export default function MemeLabPageComponent({
                       path="/meme-lab"
                       startIndex={1}
                       endIndex={nftMeta.collection_size}
+                      params={searchParams}
                     />
                   </Col>
                 </Row>

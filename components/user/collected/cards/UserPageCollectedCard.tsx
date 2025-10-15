@@ -23,9 +23,9 @@ export default function UserPageCollectedCard({
   readonly showDataRow: boolean;
   readonly interactiveMode?: "link" | "select";
   readonly selected?: boolean;
-  readonly onToggle?: () => void;
-  readonly onIncQty?: () => void;
-  readonly onDecQty?: () => void;
+  readonly onToggle: () => void;
+  readonly onIncQty: () => void;
+  readonly onDecQty: () => void;
   readonly copiesMax?: number;
   readonly qtySelected?: number;
 }) {
@@ -52,7 +52,6 @@ export default function UserPageCollectedCard({
     }
   };
 
-  // shared card body
   const CardBody = (
     <div
       className={[
@@ -88,7 +87,7 @@ export default function UserPageCollectedCard({
             </span>
             {showSeizedCount && (
               <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium tw-text-iron-400">
-                {formatNumberWithCommasOrDash(card.seized_count)}x
+                {formatNumberWithCommasOrDash(card.seized_count ?? 0)}x
               </span>
             )}
           </div>
@@ -115,47 +114,69 @@ export default function UserPageCollectedCard({
                 checked={selected}
                 id={`${card.collection}-${card.token_id}`}
                 type="checkbox"
-                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                readOnly
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  onToggle();
+                }}
               />
               {contractType === ContractType.ERC1155 ? (
                 <>
                   <span className="tw-text-sm tw-font-medium">
-                    {selected
-                      ? `Selected ${
-                          copiesMax === 1 ? `${qtySelected} / ${copiesMax}` : ""
-                        }`
-                      : copiesMax > 1
-                      ? `Select (up to ${copiesMax})`
-                      : "Select"}
+                    {(() => {
+                      if (selected) {
+                        if (copiesMax === 1) {
+                          return `Selected ${qtySelected} / ${copiesMax}`;
+                        }
+                        return "Selected";
+                      }
+
+                      if (copiesMax > 1) {
+                        return `Select (up to ${copiesMax})`;
+                      }
+
+                      return "Select";
+                    })()}
                   </span>
                   {copiesMax > 1 && qtySelected > 0 && (
                     <div className="tw-flex tw-items-center tw-gap-1">
-                      <FontAwesomeIcon
-                        icon={faMinusCircle}
+                      <button
+                        type="button"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          onDecQty?.();
+                          onDecQty();
                         }}
-                        className="tw-size-5 tw-cursor-pointer"
-                        color={qtySelected <= 1 ? "#60606C" : "#fff"}
-                        aria-disabled={qtySelected <= 1}
-                      />
+                        disabled={qtySelected <= 1}
+                        aria-label="Decrease quantity"
+                        className="tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none tw-flex tw-items-center tw-justify-center">
+                        <FontAwesomeIcon
+                          icon={faMinusCircle}
+                          className="tw-size-5 tw-cursor-pointer"
+                          color={qtySelected <= 1 ? "#60606C" : "#fff"}
+                        />
+                      </button>
                       <div className="tw-min-w-[2ch] tw-text-center tw-text-xs tw-tabular-nums tw-select-none">
                         {qtySelected}
                       </div>
-                      <FontAwesomeIcon
-                        icon={faPlusCircle}
+                      <button
+                        type="button"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          onIncQty?.();
+                          onIncQty();
                         }}
-                        className="tw-size-5 tw-cursor-pointer"
-                        color={qtySelected >= copiesMax ? "#60606C" : "#fff"}
-                        aria-disabled={qtySelected >= copiesMax}
-                      />
+                        disabled={qtySelected >= copiesMax}
+                        aria-label="Increase quantity"
+                        className="tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none tw-flex tw-items-center tw-justify-center">
+                        <FontAwesomeIcon
+                          icon={faPlusCircle}
+                          className="tw-size-5 tw-cursor-pointer"
+                          color={qtySelected >= copiesMax ? "#60606C" : "#fff"}
+                        />
+                      </button>
                     </div>
                   )}
                 </>
@@ -173,20 +194,13 @@ export default function UserPageCollectedCard({
 
   if (interactiveMode === "select") {
     return (
-      <div
-        className="tw-no-underline"
-        role="button"
-        tabIndex={0}
+      <button
+        type="button"
         onClick={onToggle}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            onToggle?.();
-          }
-        }}
-        aria-pressed={selected}>
+        aria-pressed={selected}
+        className="tw-no-underline tw-w-full tw-text-left tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none">
         {CardBody}
-      </div>
+      </button>
     );
   }
 

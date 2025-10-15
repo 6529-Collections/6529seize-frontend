@@ -1,17 +1,17 @@
-import { renderHook, act } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 
 import {
+  buildTransferKey,
   TransferProvider,
   useTransfer,
-  buildTransferKey,
 } from "@/components/nft-transfer/TransferState";
 import { ContractType } from "@/enums";
 
-describe("TransferState", () => {
-  function renderTransfer() {
-    return renderHook(() => useTransfer(), { wrapper: TransferProvider });
-  }
+function renderTransfer() {
+  return renderHook(() => useTransfer(), { wrapper: TransferProvider });
+}
 
+describe("TransferState", () => {
   it("initialises with transfer disabled and no selections", () => {
     const { result } = renderTransfer();
 

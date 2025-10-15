@@ -61,9 +61,9 @@ pm2 start npm --name=6529seize -- run start
 
 ## Directory Structure
 
-This project uses both the legacy `pages/` directory and the new `app/` router
-from Next.js. Existing pages remain under `pages/`, while **all new pages should
-be created in `app/`**.
+All application routes now live under Next.js’s `app/` router.
+The legacy `pages/` directory has been fully migrated, so create any new routes
+inside `app/`.
 
 Pages inside `app/` must define a `generateMetadata` function that returns the
 result of `getAppMetadata`:

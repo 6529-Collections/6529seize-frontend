@@ -99,7 +99,7 @@ export default function TransferPanel() {
             <button
               type="button"
               onClick={t.clear}
-              className="tw-text-sm tw-rounded-lg tw-bg-white tw-text-black tw-py-1 tw-border-1 tw-border-solid tw-border-[#444]">
+              className="tw-text-sm tw-rounded-lg tw-bg-white tw-text-black tw-py-1 tw-border-2 tw-border-solid tw-border-[#444]">
               Clear
             </button>
           )}
@@ -149,25 +149,35 @@ export default function TransferPanel() {
                   </div>
                   {max > 1 && (
                     <div className="tw-flex tw-items-center tw-gap-1">
-                      <FontAwesomeIcon
-                        icon={faMinusCircle}
+                      <button
+                        type="button"
                         onClick={() => t.decQty(it.key)}
-                        className="tw-size-6 tw-cursor-pointer"
-                        color={qty <= 1 ? "#60606C" : "#fff"}
-                        aria-disabled={qty <= 1}
-                        data-testid="transfer-panel-minus"
-                      />
+                        disabled={qty <= 1}
+                        aria-label="Decrease quantity"
+                        className="tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none tw-flex tw-items-center tw-justify-center"
+                        data-testid="transfer-panel-minus">
+                        <FontAwesomeIcon
+                          icon={faMinusCircle}
+                          className="tw-size-6 tw-cursor-pointer"
+                          color={qty <= 1 ? "#60606C" : "#fff"}
+                        />
+                      </button>
                       <div className="tw-min-w-[2ch] tw-text-center tw-text-xs tw-tabular-nums tw-select-none">
                         {qty}
                       </div>
-                      <FontAwesomeIcon
-                        icon={faPlusCircle}
+                      <button
+                        type="button"
                         onClick={() => t.incQty(it.key)}
-                        className="tw-size-6 tw-cursor-pointer"
-                        color={qty >= max ? "#60606C" : "#fff"}
-                        aria-disabled={qty >= max}
-                        data-testid="transfer-panel-plus"
-                      />
+                        disabled={qty >= max}
+                        aria-label="Increase quantity"
+                        className="tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none tw-flex tw-items-center tw-justify-center"
+                        data-testid="transfer-panel-plus">
+                        <FontAwesomeIcon
+                          icon={faPlusCircle}
+                          className="tw-size-6 tw-cursor-pointer"
+                          color={qty >= max ? "#60606C" : "#fff"}
+                        />
+                      </button>
                     </div>
                   )}
 
@@ -197,14 +207,14 @@ export default function TransferPanel() {
               t.setEnabled(false);
               t.clear();
             }}
-            className="tw-flex-1 tw-rounded-lg tw-bg-white/10 hover:tw-bg-white/20 tw-text-white tw-py-1 tw-border-1 tw-border-solid tw-border-[#444]">
+            className="tw-flex-1 tw-rounded-lg tw-bg-white/10 hover:tw-bg-white/20 tw-text-white tw-py-1 tw-border-2 tw-border-solid tw-border-[#444]">
             Cancel
           </button>
           <button
             type="button"
             disabled={t.totalQty === 0}
             onClick={() => setShowModal(true)}
-            className="tw-flex-1 tw-rounded-lg tw-bg-white tw-text-black tw-py-1 disabled:tw-opacity-75 disabled:tw-cursor-not-allowed tw-border-1 tw-border-solid tw-border-[#444]">
+            className="tw-flex-1 tw-rounded-lg tw-bg-white tw-text-black tw-py-1 disabled:tw-opacity-75 disabled:tw-cursor-not-allowed tw-border-2 tw-border-solid tw-border-[#444]">
             Continue
           </button>
         </div>

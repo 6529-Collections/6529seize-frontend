@@ -13,35 +13,36 @@ interface UseNotificationsQueryProps {
   /**
    * If true, reverse the notifications order (e.g. for a "descending" / "newest first" display).
    */
-  reverse?: boolean;
+  readonly reverse?: boolean;
 
   /**
    * Only fetch notifications if we have a valid identity.
    * Used in "enabled" to avoid sending queries prematurely.
    */
-  identity?: string | null;
+  readonly identity?: string | null;
 
   /**
    * Example usage where you only fetch if no active profile proxy is set.
    * Adjust or remove according to your own logic.
    */
-  activeProfileProxy?: boolean;
+  readonly activeProfileProxy?: boolean;
 
   /**
    * How many notifications to fetch per page.
    */
-  limit?: string;
+  readonly limit?: string;
 
   /**
    * The cause of the notifications to fetch.
    */
-  cause?: ApiNotificationCause[] | null;
+  readonly cause?: ApiNotificationCause[] | null;
 }
 
 type NotificationsQueryParams = {
   limit: string;
   cause: ApiNotificationCause[] | null;
   pageParam?: number | null;
+  signal?: AbortSignal;
 };
 
 const getIdentityNotificationsQueryKey = (
@@ -54,10 +55,11 @@ const fetchNotifications = async ({
   limit,
   cause,
   pageParam,
+  signal,
 }: NotificationsQueryParams) => {
   const params: Record<string, string> = { limit };
 
-  if (pageParam) {
+  if (pageParam != null) {
     params.id_less_than = String(pageParam);
   }
 
@@ -68,6 +70,7 @@ const fetchNotifications = async ({
   return await commonApiFetch<TypedNotificationsResponse>({
     endpoint: "notifications",
     params,
+    signal,
   });
 };
 
@@ -97,12 +100,29 @@ export function useNotificationsQuery({
    */
   const query = useInfiniteQuery({
     queryKey: getIdentityNotificationsQueryKey(identity, limit, cause),
-    queryFn: ({ pageParam }: { pageParam: number | null }) =>
-      fetchNotifications({ limit, cause, pageParam }),
+    queryFn: ({
+      pageParam,
+      signal,
+    }: {
+      pageParam: number | null;
+      signal: AbortSignal | undefined;
+    }) => fetchNotifications({ limit, cause, pageParam, signal }),
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.notifications.at(-1)?.id ?? null,
     enabled: !!identity && !activeProfileProxy,
     staleTime: 60000,
+    retry: (failureCount, error: unknown) => {
+      const status =
+        (error as any)?.status ??
+        (error as any)?.response?.status ??
+        (error as any)?.cause?.status;
+      if (status === 401) return false;
+      if (typeof error === "string" && /unauthorized/i.test(error)) return false;
+      if (error instanceof Error && /unauthorized/i.test(error.message)) {
+        return false;
+      }
+      return failureCount < 3;
+    },
   });
 
   const items = useMemo(() => {
@@ -145,8 +165,13 @@ export function usePrefetchNotifications() {
       }
       queryClient.prefetchInfiniteQuery({
         queryKey: getIdentityNotificationsQueryKey(identity, limit, cause),
-        queryFn: ({ pageParam }: { pageParam?: number | null }) =>
-          fetchNotifications({ limit, cause, pageParam }),
+        queryFn: ({
+          pageParam,
+          signal,
+        }: {
+          pageParam?: number | null;
+          signal?: AbortSignal;
+        }) => fetchNotifications({ limit, cause, pageParam, signal }),
         initialPageParam: null,
         getNextPageParam: (lastPage) =>
           lastPage.notifications.at(-1)?.id ?? null,

@@ -2,24 +2,25 @@
 
 import { useId } from "react";
 
-export enum FilterTargetType {
-  ALL = "ALL",
-  INCOMING = "INCOMING",
-  OUTGOING = "OUTGOING",
-}
+import { ProfileActivityFilterTargetType } from "@/enums";
+
+export { ProfileActivityFilterTargetType } from "@/enums";
+export {
+  ProfileActivityFilterTargetType as FilterTargetType,
+} from "@/enums";
 
 const TARGETS = [
-  { id: FilterTargetType.ALL, name: "All" },
-  { id: FilterTargetType.OUTGOING, name: "Outgoing" },
-  { id: FilterTargetType.INCOMING, name: "Incoming" },
+  { id: ProfileActivityFilterTargetType.ALL, name: "All" },
+  { id: ProfileActivityFilterTargetType.OUTGOING, name: "Outgoing" },
+  { id: ProfileActivityFilterTargetType.INCOMING, name: "Incoming" },
 ];
 
 export default function CommonFilterTargetSelect({
   selected,
   onChange,
 }: {
-  readonly selected: FilterTargetType;
-  readonly onChange: (filter: FilterTargetType) => void;
+  readonly selected: ProfileActivityFilterTargetType;
+  readonly onChange: (filter: ProfileActivityFilterTargetType) => void;
 }) {
   const baseId = useId().replaceAll(":", "");
   const groupName = `filter-target-${baseId}`;

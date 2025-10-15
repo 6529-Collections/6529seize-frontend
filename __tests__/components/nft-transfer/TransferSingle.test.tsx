@@ -1,4 +1,3 @@
-// __tests__/components/nft-transfer/TransferSingle.test.tsx
 import "@testing-library/jest-dom";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 
@@ -20,7 +19,6 @@ jest.mock("@/entities/IProfile", () => ({
   CollectedCollectionType: {} as any,
 }));
 
-// ---- mock useTransfer() and buildTransferKey() ----
 let mockSelected = new Map<string, { qty?: number; max?: number }>();
 const mockFns = {
   select: jest.fn(),
@@ -34,41 +32,70 @@ const mockFns = {
 };
 
 jest.mock("@/components/nft-transfer/TransferState", () => {
-  const buildTransferKey = ({ collection, tokenId }: any) =>
-    `${collection}:${tokenId}`;
-  const useTransfer = () => ({
-    enabled: true,
-    setEnabled: mockFns.setEnabled,
-    toggle: jest.fn(),
-    selected: mockSelected as unknown as Map<string, any>,
-    isSelected: (key: string) => mockSelected.has(key),
-    select: mockFns.select,
-    unselect: mockFns.unselect,
-    toggleSelect: mockFns.toggleSelect,
-    setQty: mockFns.setQty,
-    incQty: mockFns.incQty,
-    decQty: mockFns.decQty,
-    clear: mockFns.clear,
-    count: mockSelected.size,
-    totalQty: Array.from(mockSelected.values()).reduce(
-      (s, it) => s + (it.qty ?? 1),
-      0
-    ),
-  });
-  return { useTransfer, buildTransferKey };
+  return {
+    __esModule: true,
+    TransferProvider: ({ children }: any) => <>{children}</>,
+    useTransfer: () => ({
+      selected: mockSelected,
+      select: mockFns.select,
+      unselect: mockFns.unselect,
+      incQty: mockFns.incQty,
+      decQty: mockFns.decQty,
+      setQty: mockFns.setQty,
+      toggleSelect: mockFns.toggleSelect,
+      clear: mockFns.clear,
+      setEnabled: mockFns.setEnabled,
+      totalQty: 1,
+      count: 1,
+    }),
+    buildTransferKey: ({ collection, tokenId }: any) =>
+      `${collection}:${tokenId}`,
+  };
 });
 
 jest.mock("@/components/nft-transfer/TransferModal", () => ({
   __esModule: true,
   default: ({ open, onClose }: { open: boolean; onClose: () => void }) => (
-    <div data-testid="transfer-modal" data-open={open} onClick={onClose}>
+    <button
+      type="button"
+      data-testid="transfer-modal"
+      data-open={open}
+      aria-expanded={open}
+      onClick={onClose}>
       {open ? "OPEN" : "CLOSED"}
-    </div>
+    </button>
   ),
+}));
+
+jest.mock("@/components/auth/SeizeConnectContext", () => {
+  const state = { isConnected: true, seizeConnectOpen: false };
+  const seizeConnect = jest.fn(() => {
+    state.seizeConnectOpen = true;
+  });
+  return {
+    __esModule: true,
+    useSeizeConnectContext: () => ({
+      isConnected: state.isConnected,
+      seizeConnect,
+      seizeConnectOpen: state.seizeConnectOpen,
+    }),
+    __state: state,
+    __seizeConnect: seizeConnect,
+  };
+});
+
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: jest.fn(() => ({ isMobileDevice: false })),
 }));
 
 import TransferSingle from "@/components/nft-transfer/TransferSingle";
 import { ContractType } from "@/enums";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+
+const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
+  typeof useDeviceInfo
+>;
 
 const resetAll = () => {
   mockFns.select.mockReset();
@@ -80,6 +107,11 @@ const resetAll = () => {
   mockFns.clear.mockReset();
   mockFns.setEnabled.mockReset();
   mockSelected = new Map();
+  const connectMod = require("@/components/auth/SeizeConnectContext");
+  connectMod.__state.isConnected = true;
+  connectMod.__state.seizeConnectOpen = false;
+  connectMod.__seizeConnect.mockReset();
+  useDeviceInfoMock.mockReturnValue({ isMobileDevice: false } as any);
 };
 
 const baseProps = {
@@ -96,18 +128,23 @@ describe("TransferSingle", () => {
   beforeEach(resetAll);
   afterEach(cleanup);
 
-  test("renders basic structure", () => {
+  test("renders basic structure (ERC721) and button reads 'Transfer'", () => {
     render(<TransferSingle {...baseProps} />);
     expect(screen.getByTestId("transfer-single")).toBeInTheDocument();
-    expect(screen.getByText("Transfer")).toBeInTheDocument();
     expect(screen.getByTestId("transfer-single-submit")).toHaveTextContent(
-      "Transfer 1 copy"
+      "Transfer"
     );
+  });
+
+  test("returns null when rendered on mobile device", () => {
+    useDeviceInfoMock.mockReturnValue({ isMobileDevice: true } as any);
+    const { container } = render(<TransferSingle {...baseProps} />);
+    expect(container.firstChild).toBeNull();
   });
 
   test("calls select on mount and unselect on unmount", () => {
     const { unmount } = render(<TransferSingle {...baseProps} />);
-    const expectedKey = `${baseProps.contract}:${baseProps.tokenId}`;
+    const expectedKey = `${baseProps.collectionType}:${baseProps.tokenId}`;
     expect(mockFns.select).toHaveBeenCalledWith(
       expect.objectContaining({
         key: expectedKey,
@@ -119,37 +156,40 @@ describe("TransferSingle", () => {
     expect(mockFns.unselect).toHaveBeenCalledWith(expectedKey);
   });
 
-  test("hides +/- when max = 1", () => {
+  test("hides +/- controls when max = 1", () => {
     render(<TransferSingle {...baseProps} />);
-    expect(screen.queryByTestId("faMinusCircle")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("faPlusCircle")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("transfer-single-minus")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("transfer-single-plus")
+    ).not.toBeInTheDocument();
   });
 
   test("renders +/- controls when max > 1 and handles bounds", () => {
     const props = { ...baseProps, max: 5, contractType: ContractType.ERC1155 };
-    const key = `${props.contract}:${props.tokenId}`;
+    const key = `${props.collectionType}:${props.tokenId}`;
     mockSelected = new Map([[key, { qty: 1, max: 5 }]]);
     render(<TransferSingle {...props} />);
     const minus = screen.getByTestId("transfer-single-minus");
     const plus = screen.getByTestId("transfer-single-plus");
-    expect(minus).toHaveAttribute("aria-disabled", "true");
-    expect(plus).toHaveAttribute("aria-disabled", "false");
+    expect(minus).toBeDisabled();
+    expect(plus).toBeEnabled();
     cleanup();
     resetAll();
     mockSelected = new Map([[key, { qty: 5, max: 5 }]]);
     render(<TransferSingle {...props} />);
     const minus2 = screen.getByTestId("transfer-single-minus");
     const plus2 = screen.getByTestId("transfer-single-plus");
-    expect(minus2).toHaveAttribute("aria-disabled", "false");
-    expect(plus2).toHaveAttribute("aria-disabled", "true");
+    expect(minus2).toBeEnabled();
+    expect(plus2).toBeDisabled();
   });
 
   test("clicking + and - triggers incQty and decQty", () => {
     const props = { ...baseProps, max: 3, contractType: ContractType.ERC1155 };
-    const key = `${props.contract}:${props.tokenId}`;
+    const key = `${props.collectionType}:${props.tokenId}`;
     mockSelected = new Map([[key, { qty: 2, max: 3 }]]);
     render(<TransferSingle {...props} />);
-
     const minus = screen.getByTestId("transfer-single-minus");
     const plus = screen.getByTestId("transfer-single-plus");
     fireEvent.click(minus);
@@ -158,9 +198,9 @@ describe("TransferSingle", () => {
     expect(mockFns.incQty).toHaveBeenCalledWith(key);
   });
 
-  test("button label changes with selected qty", () => {
+  test("button label for ERC1155 reflects selected qty (copies)", () => {
     const props = { ...baseProps, max: 10, contractType: ContractType.ERC1155 };
-    const key = `${props.contract}:${props.tokenId}`;
+    const key = `${props.collectionType}:${props.tokenId}`;
     mockSelected = new Map([[key, { qty: 3, max: 10 }]]);
     render(<TransferSingle {...props} />);
     expect(screen.getByTestId("transfer-single-submit")).toHaveTextContent(
@@ -168,7 +208,9 @@ describe("TransferSingle", () => {
     );
   });
 
-  test("opens modal on button click", () => {
+  test("opens modal immediately when already connected", () => {
+    const connectMod = require("@/components/auth/SeizeConnectContext");
+    connectMod.__state.isConnected = true;
     render(<TransferSingle {...baseProps} />);
     const modal = screen.getByTestId("transfer-modal");
     expect(modal).toHaveAttribute("data-open", "false");
@@ -179,15 +221,37 @@ describe("TransferSingle", () => {
     );
   });
 
+  test("connect-first flow: click triggers seizeConnect, modal opens after connection", () => {
+    const connectMod = require("@/components/auth/SeizeConnectContext");
+    connectMod.__state.isConnected = false;
+    connectMod.__state.seizeConnectOpen = false;
+    const { rerender } = render(<TransferSingle {...baseProps} />);
+    const modal = screen.getByTestId("transfer-modal");
+    expect(modal).toHaveAttribute("data-open", "false");
+    fireEvent.click(screen.getByTestId("transfer-single-submit"));
+    expect(connectMod.__seizeConnect).toHaveBeenCalled();
+    expect(screen.getByTestId("transfer-modal")).toHaveAttribute(
+      "data-open",
+      "false"
+    );
+    connectMod.__state.isConnected = true;
+    connectMod.__state.seizeConnectOpen = false;
+    rerender(<TransferSingle {...baseProps} />);
+    expect(screen.getByTestId("transfer-modal")).toHaveAttribute(
+      "data-open",
+      "true"
+    );
+  });
+
   test("rerender with new tokenId updates select key", () => {
     const { rerender } = render(<TransferSingle {...baseProps} />);
-    const firstKey = `${baseProps.contract}:${baseProps.tokenId}`;
+    const firstKey = `${baseProps.collectionType}:${baseProps.tokenId}`;
     expect(mockFns.select).toHaveBeenCalledWith(
       expect.objectContaining({ key: firstKey })
     );
     rerender(<TransferSingle {...baseProps} tokenId={99} />);
     expect(mockFns.select).toHaveBeenLastCalledWith(
-      expect.objectContaining({ key: `${baseProps.contract}:99` })
+      expect.objectContaining({ key: `${baseProps.collectionType}:99` })
     );
   });
 });

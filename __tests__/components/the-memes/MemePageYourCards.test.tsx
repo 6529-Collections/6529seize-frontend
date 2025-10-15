@@ -1,3 +1,4 @@
+import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
 import {
   MemePageYourCardsRightMenu,
   MemePageYourCardsSubMenu,
@@ -7,6 +8,20 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { createConfig, http, WagmiProvider } from "wagmi";
 import { mainnet } from "wagmi/chains";
+
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: jest.fn(() => ({
+    isAuthenticated: false,
+    seizeConnect: jest.fn(),
+    seizeAcceptConnection: jest.fn(),
+    address: undefined,
+    hasInitializationError: false,
+    initializationError: null,
+  })),
+  SeizeConnectProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}));
 
 const mockNFT = {
   id: 123,
@@ -38,7 +53,7 @@ const mockTransactions = [
   },
 ] as any[];
 
-const renderWithProviders = (component: React.ReactNode) => {
+const renderMemePageYourCardsWithProviders = (component: React.ReactNode) => {
   const queryClient = new QueryClient();
   const mockWagmiConfig = createConfig({
     chains: [mainnet],
@@ -48,7 +63,9 @@ const renderWithProviders = (component: React.ReactNode) => {
   });
   return render(
     <QueryClientProvider client={queryClient}>
-      <WagmiProvider config={mockWagmiConfig}>{component}</WagmiProvider>
+      <WagmiProvider config={mockWagmiConfig}>
+        <SeizeConnectProvider>{component}</SeizeConnectProvider>
+      </WagmiProvider>
     </QueryClientProvider>
   );
 };
@@ -115,7 +132,7 @@ describe("MemePageYourCardsRightMenu", () => {
 
     describe("when user owns cards", () => {
       it("should display cards count and overview", () => {
-        renderWithProviders(
+        renderMemePageYourCardsWithProviders(
           <MemePageYourCardsRightMenu
             show={true}
             transactions={mockTransactions}
@@ -135,7 +152,7 @@ describe("MemePageYourCardsRightMenu", () => {
       });
 
       it("should display first acquisition date", () => {
-        renderWithProviders(
+        renderMemePageYourCardsWithProviders(
           <MemePageYourCardsRightMenu
             show={true}
             transactions={mockTransactions}
@@ -152,7 +169,7 @@ describe("MemePageYourCardsRightMenu", () => {
       });
 
       it("should display no TDH message when no TDH data", () => {
-        renderWithProviders(
+        renderMemePageYourCardsWithProviders(
           <MemePageYourCardsRightMenu
             show={true}
             transactions={mockTransactions}
@@ -169,7 +186,7 @@ describe("MemePageYourCardsRightMenu", () => {
       });
 
       it("should categorize airdropped cards", () => {
-        renderWithProviders(
+        renderMemePageYourCardsWithProviders(
           <MemePageYourCardsRightMenu
             show={true}
             transactions={mockTransactions}
@@ -186,7 +203,7 @@ describe("MemePageYourCardsRightMenu", () => {
       });
 
       it("should categorize bought cards", () => {
-        renderWithProviders(
+        renderMemePageYourCardsWithProviders(
           <MemePageYourCardsRightMenu
             show={true}
             transactions={mockTransactions}

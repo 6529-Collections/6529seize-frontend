@@ -1,41 +1,21 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import UserPageFollowers from '@/components/user/user-page-header/followers/UserPageFollowers';
-import { useQuery } from '@tanstack/react-query';
 
-jest.mock('@tanstack/react-query', () => ({ useQuery: jest.fn() }));
-
-jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
-
-jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => ({
+jest.mock('next/link', () => ({
   __esModule: true,
-  default: () => <div data-testid="loader" />,
-  CircleLoaderSize: { SMALL: 'SMALL' }
+  default: ({ href, children }: any) => <a href={href}>{children}</a>,
 }));
 
 jest.mock('@/helpers/Helpers', () => ({
-  formatNumberWithCommas: (n: number) => `fmt-${n}`
+  formatNumberWithCommas: (n: number) => `fmt-${n}`,
 }));
 
-const useQueryMock = useQuery as jest.Mock;
-
-const profile = { id: '1', handle: 'alice' } as any;
-
-function renderComponent(data: any, fetching = false) {
-  useQueryMock.mockReturnValue({ data, isFetching: fetching });
-  return render(<UserPageFollowers profile={profile} />);
-}
-
 describe('UserPageFollowers header component', () => {
-  afterEach(() => jest.clearAllMocks());
-
-  it('shows loader when fetching', () => {
-    renderComponent({ count: 2 }, true);
-    expect(screen.getByTestId('loader')).toBeInTheDocument();
-  });
-
   it('renders follower count and link', () => {
-    renderComponent({ count: 1 }, false);
+    render(
+      <UserPageFollowers handleOrWallet="alice" followersCount={1} />
+    );
     const link = screen.getByRole('link');
     expect(link).toHaveAttribute('href', '/alice/followers');
     expect(screen.getByText('fmt-1')).toBeInTheDocument();
@@ -43,7 +23,16 @@ describe('UserPageFollowers header component', () => {
   });
 
   it('pluralizes followers correctly', () => {
-    renderComponent({ count: 5 }, false);
+    render(
+      <UserPageFollowers handleOrWallet="alice" followersCount={5} />
+    );
     expect(screen.getByText('Followers')).toBeInTheDocument();
+  });
+
+  it('defaults to zero when count missing', () => {
+    render(
+      <UserPageFollowers handleOrWallet="alice" followersCount={null} />
+    );
+    expect(screen.getByText('fmt-0')).toBeInTheDocument();
   });
 });

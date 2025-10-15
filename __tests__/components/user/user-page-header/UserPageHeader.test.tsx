@@ -1,10 +1,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import UserPageHeader from '@/components/user/user-page-header/UserPageHeader';
+import UserPageHeaderClient from '@/components/user/user-page-header/UserPageHeaderClient';
 import { AuthContext } from '@/components/auth/Auth';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useRouter } from 'next/navigation';
 import { useSeizeConnectContext } from '@/components/auth/SeizeConnectContext';
+import { useIdentity } from '@/hooks/useIdentity';
 
 jest.mock('next/dynamic', () => () => () => <div />);
 jest.mock('@/components/user/user-page-header/banner/UserPageHeaderBanner', () => () => <div data-testid="banner" />);
@@ -18,6 +19,7 @@ jest.mock('@/components/user/utils/UserFollowBtn', () => ({ __esModule: true, de
 jest.mock('@/components/user/utils/level/UserLevel', () => () => <div data-testid="level" />);
 jest.mock('@/components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: jest.fn() }));
 jest.mock('@tanstack/react-query', () => ({ useQuery: jest.fn() }));
+jest.mock('@/hooks/useIdentity', () => ({ useIdentity: jest.fn() }));
 jest.mock('next/navigation', () => ({
   useParams: jest.fn(),
   useRouter: jest.fn(),
@@ -29,6 +31,7 @@ const useRouterMock = useRouter as jest.Mock;
 (useSeizeConnectContext as jest.Mock).mockReturnValue({ address: '0x1' });
 useParamsMock.mockReturnValue({ user: 'bob' });
 useRouterMock.mockReturnValue({ push: jest.fn() });
+(useIdentity as jest.Mock).mockReturnValue({ profile });
 
 const auth = { connectedProfile: { handle: 'alice' }, activeProfileProxy: null, setToast: jest.fn() } as any;
 
@@ -43,7 +46,21 @@ describe('UserPageHeader', () => {
   it('renders follow button and about section', () => {
     render(
       <AuthContext.Provider value={auth}>
-        <UserPageHeader profile={profile} mainAddress="0x1" />
+        <UserPageHeaderClient
+          profile={profile}
+          handleOrWallet="bob"
+          fallbackMainAddress="0x1"
+          defaultBanner1="#000000"
+          defaultBanner2="#111111"
+          initialStatements={[
+            {
+              statement_type: 'BIO',
+              statement_group: 'GENERAL',
+            } as any,
+          ]}
+          profileEnabledAt="2024-01-01T00:00:00Z"
+          followersCount={5}
+        />
       </AuthContext.Provider>
     );
     expect(screen.getByTestId('follow')).toBeInTheDocument();

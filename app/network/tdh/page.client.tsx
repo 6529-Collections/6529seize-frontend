@@ -52,7 +52,7 @@ export default function TDHMainPage() {
           {/* TDH 1.4 */}
           <div
             id="tdh-1-4"
-            className="tw-mt-10 tw-rounded-lg tw-bg-[#0c0c0d] tw-border-1 tw-border-solid tw-border-[#222] tw-p-6">
+            className="tw-mt-10 tw-rounded-lg tw-bg-[#0c0c0d] tw-border-2 tw-border-solid tw-border-[#222] tw-p-6">
             <h3>TDH 1.4 (October 10, 2025 — present)</h3>
             <p className="tw-mt-4">
               Higher of <b>Category A</b> and <b>Category B</b> boosters, plus{" "}
@@ -216,7 +216,7 @@ export default function TDHMainPage() {
 
           {/* Cross-links */}
           <div className="tw-mt-10 tw-grid md:tw-grid-cols-2 tw-gap-6">
-            <div className="tw-rounded-lg tw-bg-[#0c0c0d] tw-border-1 tw-border-solid tw-border-[#222] tw-p-6">
+            <div className="tw-rounded-lg tw-bg-[#0c0c0d] tw-border-2 tw-border-solid tw-border-[#222] tw-p-6">
               <h3>Network Stats</h3>
               <p className="tw-mt-1">
                 Aggregate community activity, holdings, trading, and time-based
@@ -226,7 +226,7 @@ export default function TDHMainPage() {
                 View Network Stats
               </Link>
             </div>
-            <div className="tw-rounded-lg tw-bg-[#0c0c0d] tw-border-1 tw-border-solid tw-border-[#222] tw-p-6">
+            <div className="tw-rounded-lg tw-bg-[#0c0c0d] tw-border-2 tw-border-solid tw-border-[#222] tw-p-6">
               <h3>Levels</h3>
               <p className="tw-mt-1">
                 Our integrated progression that combines <b>TDH</b> with{" "}

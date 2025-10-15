@@ -1,34 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
-import { FC } from "react";
-import { CountlessPage } from "@/helpers/Types";
-import { ProfileActivityLog } from "@/entities/IProfile";
-import { commonApiFetch } from "@/services/api/common-api";
 import { formatTimestampToMonthYear } from "@/helpers/Helpers";
 
-interface UserPageHeaderProfileEnabledAtProps {
-  readonly handleOrWallet: string | null;
-}
-
-const UserPageHeaderProfileEnabledAt: FC<
-  UserPageHeaderProfileEnabledAtProps
-> = ({ handleOrWallet }) => {
-  const { data } = useQuery<CountlessPage<ProfileActivityLog>>({
-    queryKey: ["profile-created-at", handleOrWallet],
-    queryFn: () => {
-      return commonApiFetch<CountlessPage<ProfileActivityLog>>({
-        endpoint: `profile-logs`,
-        params: {
-          profile: handleOrWallet ?? "",
-          log_type: "PROFILE_CREATED",
-        },
-      });
-    },
-    enabled: !!handleOrWallet,
-  });
-
-  const createdAt = data?.data[0].created_at;
-
-  if (!createdAt) {
+export default function UserPageHeaderProfileEnabledAt({
+  profileEnabledAt,
+}: {
+  readonly profileEnabledAt: string | null;
+}) {
+  if (!profileEnabledAt) {
     return null;
   }
 
@@ -39,10 +16,10 @@ const UserPageHeaderProfileEnabledAt: FC<
         suppressHydrationWarning
       >
         Profile Enabled:{" "}
-        {formatTimestampToMonthYear(new Date(createdAt).getTime())}
+        {formatTimestampToMonthYear(
+          new Date(profileEnabledAt).getTime()
+        )}
       </p>
     </div>
   );
-};
-
-export default UserPageHeaderProfileEnabledAt;
+}

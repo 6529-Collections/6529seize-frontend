@@ -1,5 +1,7 @@
-import { FilterTargetType } from "@/components/utils/CommonFilterTargetSelect";
-import { ProfileActivityLogType } from "@/enums";
+import {
+  ProfileActivityFilterTargetType,
+  ProfileActivityLogType,
+} from "@/enums";
 import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 
 describe("convertActivityLogParams", () => {
@@ -8,7 +10,7 @@ describe("convertActivityLogParams", () => {
     pageSize: 10,
     logTypes: [ProfileActivityLogType.DROP_CREATED],
     matter: null,
-    targetType: FilterTargetType.ALL,
+    targetType: ProfileActivityFilterTargetType.ALL,
     handleOrWallet: null,
     groupId: "g1",
   };
@@ -43,7 +45,7 @@ describe("convertActivityLogParams", () => {
       params: {
         ...base,
         handleOrWallet: "u",
-        targetType: FilterTargetType.INCOMING,
+        targetType: ProfileActivityFilterTargetType.INCOMING,
       },
       disableActiveGroup: false,
     });
@@ -52,7 +54,7 @@ describe("convertActivityLogParams", () => {
       params: {
         ...base,
         handleOrWallet: "u",
-        targetType: FilterTargetType.OUTGOING,
+        targetType: ProfileActivityFilterTargetType.OUTGOING,
       },
       disableActiveGroup: false,
     });

@@ -1,116 +1,71 @@
-"use client";
-
+import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { useEffect, useState } from "react";
-import { commonApiFetch } from "@/services/api/common-api";
-
-import UserPageStatsCollected from "./UserPageStatsCollected";
-import UserPageActivityWrapper from "./activity/UserPageActivityWrapper";
-import UserAddressesSelectDropdown from "../utils/addresses-select/UserAddressesSelectDropdown";
 import { MemeSeason } from "@/entities/ISeason";
-import { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
-import UserPageStatsTags from "./tags/UserPageStatsTags";
-import UserPageStatsActivityOverview from "./UserPageStatsActivityOverview";
-import UserPageStatsBoostBreakdown from "./UserPageStatsBoostBreakdown";
 import { ConsolidatedTDH, TDH } from "@/entities/ITDH";
+import { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
+import { getStatsPath } from "./userPageStats.helpers";
+import { commonApiFetch } from "@/services/api/common-api";
+import UserPageStatsClient from "./UserPageStatsClient";
 
-export function getStatsPath(
-  profile: ApiIdentity,
-  activeAddress: string | null
-) {
-  if (activeAddress) {
-    return `wallet/${activeAddress}`;
-  }
-  if (profile.consolidation_key) {
-    return `consolidation/${profile.consolidation_key}`;
-  }
-  return `wallet/${profile.wallets?.[0].wallet}`;
+async function fetchSeasons(headers: Record<string, string>) {
+  return await commonApiFetch<MemeSeason[]>({
+    endpoint: "new_memes_seasons",
+    headers,
+  });
 }
 
-export default function UserPageStats({
+async function fetchTdh(
+  headers: Record<string, string>,
+  statsPath: string
+) {
+  return await commonApiFetch<ConsolidatedTDH | TDH>({
+    endpoint: `tdh/${statsPath}`,
+    headers,
+  });
+}
+
+async function fetchOwnerBalance(
+  headers: Record<string, string>,
+  statsPath: string
+) {
+  return await commonApiFetch<OwnerBalance>({
+    endpoint: `owners-balances/${statsPath}`,
+    headers,
+  });
+}
+
+async function fetchOwnerBalanceMemes(
+  headers: Record<string, string>,
+  statsPath: string
+) {
+  return await commonApiFetch<OwnerBalanceMemes[]>({
+    endpoint: `owners-balances/${statsPath}/memes`,
+    headers,
+  });
+}
+
+export default async function UserPageStats({
   profile,
 }: {
   readonly profile: ApiIdentity;
 }) {
-  const [activeAddress, setActiveAddress] = useState<string | null>(null);
+  const headers = await getAppCommonHeaders();
+  const statsPath = getStatsPath(profile, null);
 
-  const [seasons, setSeasons] = useState<MemeSeason[]>([]);
-  const [tdh, setTdh] = useState<ConsolidatedTDH | TDH>();
-  const [ownerBalance, setOwnerBalance] = useState<OwnerBalance>();
-  const [balanceMemes, setBalanceMemes] = useState<OwnerBalanceMemes[]>([]);
-
-  useEffect(() => {
-    commonApiFetch<MemeSeason[]>({
-      endpoint: "new_memes_seasons",
-    }).then((response) => {
-      setSeasons(response);
-    });
-  }, []);
-
-  useEffect(() => {
-    const url = `tdh/${getStatsPath(profile, activeAddress)}`;
-    commonApiFetch<ConsolidatedTDH | TDH>({
-      endpoint: url,
-    }).then((response) => {
-      setTdh(response);
-    });
-  }, [activeAddress, profile]);
-
-  useEffect(() => {
-    const url = `owners-balances/${getStatsPath(profile, activeAddress)}`;
-    commonApiFetch<OwnerBalance>({
-      endpoint: url,
-    })
-      .then((response) => {
-        setOwnerBalance(response);
-      })
-      .catch((error) => {
-        setOwnerBalance(undefined);
-      });
-  }, [activeAddress, profile]);
-
-  useEffect(() => {
-    const url = `owners-balances/${getStatsPath(profile, activeAddress)}/memes`;
-    commonApiFetch<OwnerBalanceMemes[]>({
-      endpoint: url,
-    }).then((response) => {
-      setBalanceMemes(response);
-    });
-  }, [activeAddress, profile]);
+  const [seasons, tdh, ownerBalance, balanceMemes] = await Promise.all([
+    fetchSeasons(headers).catch(() => []),
+    fetchTdh(headers, statsPath).catch(() => undefined),
+    fetchOwnerBalance(headers, statsPath).catch(() => undefined),
+    fetchOwnerBalanceMemes(headers, statsPath).catch(() => []),
+  ]);
 
   return (
-    <div className="tailwind-scope">
-      <div className="tw-flex-col-reverse tw-flex lg:tw-flex-row tw-justify-between tw-gap-6 lg:tw-space-y-0 tw-w-full tw-mt-6 lg:tw-mt-8">
-        <UserPageStatsTags
-          ownerBalance={ownerBalance}
-          balanceMemes={balanceMemes}
-          seasons={seasons}
-        />
-        <div>
-          <UserAddressesSelectDropdown
-            wallets={profile.wallets ?? []}
-            onActiveAddress={setActiveAddress}
-          />
-        </div>
-      </div>
-
-      <UserPageStatsCollected
-        ownerBalance={ownerBalance}
-        balanceMemes={balanceMemes}
-        seasons={seasons}
-      />
-
-      <UserPageStatsActivityOverview
-        profile={profile}
-        activeAddress={activeAddress}
-      />
-
-      <UserPageActivityWrapper
-        profile={profile}
-        activeAddress={activeAddress}
-      />
-
-      <UserPageStatsBoostBreakdown tdh={tdh} />
-    </div>
+    <UserPageStatsClient
+      profile={profile}
+      initialSeasons={seasons}
+      initialTdh={tdh}
+      initialOwnerBalance={ownerBalance}
+      initialBalanceMemes={balanceMemes}
+    />
   );
 }

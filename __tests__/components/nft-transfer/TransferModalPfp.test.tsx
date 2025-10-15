@@ -1,11 +1,21 @@
 import { render, screen, waitFor } from "@testing-library/react";
 
 import TransferModalPfp from "@/components/nft-transfer/TransferModalPfp";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-const mockResolveIpfsUrl = jest.fn();
-jest.mock("@/components/ipfs/IPFSContext", () => ({
-  resolveIpfsUrl: (...args: unknown[]) => mockResolveIpfsUrl(...args),
+const mockUseResolvedIpfsUrl = jest.fn();
+jest.mock("@/hooks/useResolvedIpfsUrl", () => ({
+  useResolvedIpfsUrl: (...args: unknown[]) => mockUseResolvedIpfsUrl(...args),
 }));
+
+const renderTransferModalPfp = (level: number, src: string | null) => {
+  const queryClient = new QueryClient();
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <TransferModalPfp level={level} src={src} alt="Profile" />
+    </QueryClientProvider>
+  );
+};
 
 describe("TransferModalPfp", () => {
   beforeEach(() => {
@@ -13,20 +23,22 @@ describe("TransferModalPfp", () => {
   });
 
   it("renders a level badge while the image is loading", () => {
-    mockResolveIpfsUrl.mockResolvedValue(null);
+    mockUseResolvedIpfsUrl.mockReturnValue({ data: null });
 
-    render(<TransferModalPfp level={82} src={null} />);
+    renderTransferModalPfp(82, null);
 
     expect(screen.getByText("82")).toBeInTheDocument();
   });
 
   it("loads and displays the resolved image", async () => {
-    mockResolveIpfsUrl.mockResolvedValue("https://cdn.test/pfp.png");
+    mockUseResolvedIpfsUrl.mockReturnValue({
+      data: "https://cdn.test/pfp.png",
+    });
 
-    render(<TransferModalPfp level={45} src="ipfs://hash" alt="Profile" />);
+    renderTransferModalPfp(45, "ipfs://hash");
 
     await waitFor(() =>
-      expect(screen.getByRole("img", { name: "Profile" })).toBeInTheDocument()
+      expect(screen.getByAltText("Profile")).toBeInTheDocument()
     );
   });
 });

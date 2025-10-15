@@ -28,8 +28,6 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "pages/_document.tsx",
-    "pages/**/*.jsx",
     ".next/types/**/*.ts"
   ],
   "exclude": ["node_modules", "tests", "e2e"]
