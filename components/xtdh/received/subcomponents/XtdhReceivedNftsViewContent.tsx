@@ -1,5 +1,7 @@
 'use client';
 
+import { useCallback, useMemo, useState } from "react";
+
 import CollectionsAutocomplete from "@/components/utils/input/collections/CollectionsAutocomplete";
 import CommonSelect from "@/components/utils/select/CommonSelect";
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
@@ -10,9 +12,10 @@ import {
   type XtdhReceivedView,
 } from "../utils/constants";
 import { XtdhReceivedEmptyState } from "./XtdhReceivedEmptyState";
-import { XtdhReceivedNftCard } from "./XtdhReceivedNftCard";
 import { XtdhReceivedNftSkeleton } from "./XtdhReceivedNftSkeleton";
 import { XtdhReceivedViewToggle } from "./XtdhReceivedViewToggle";
+import { XtdhReceivedTokenRow } from "./XtdhReceivedTokenRow";
+import { XtdhReceivedCollectionTokenDetailsDrawer } from "../collection-card-content/subcomponents/XtdhReceivedCollectionTokenDetailsDrawer";
 import type {
   XtdhReceivedNftsViewEmptyCopy,
   XtdhReceivedNftsViewState,
@@ -55,6 +58,22 @@ export function XtdhReceivedNftsViewContent({
     totalPages,
     handlePageChange,
   } = state;
+
+  const [activeTokenId, setActiveTokenId] = useState<string | null>(null);
+  const activeToken = useMemo(
+    () => nfts.find((nft) => nft.tokenId === activeTokenId) ?? null,
+    [nfts, activeTokenId],
+  );
+
+  const handleTokenSelect = useCallback((tokenId: string) => {
+    setActiveTokenId((previous) => (previous === tokenId ? null : tokenId));
+  }, []);
+
+  const handleCloseDetails = useCallback(() => {
+    setActiveTokenId(null);
+  }, []);
+
+  const detailsRegionId = "xtdh-received-nfts-details";
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-4">
@@ -117,18 +136,32 @@ export function XtdhReceivedNftsViewContent({
           />
         )
       ) : (
-        <div
-          className="tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-3"
-          role="list"
-          aria-label="NFTs receiving xTDH"
-        >
-          {nfts.map((nft) => (
-            <XtdhReceivedNftCard
-              key={nft.tokenId}
-              nft={nft}
+        <>
+          <div
+            className="tw-overflow-hidden tw-rounded-2xl tw-border tw-border-iron-900/70 tw-bg-iron-975/25"
+            role="table"
+            aria-label="NFTs receiving xTDH"
+          >
+            <div role="rowgroup">
+              {nfts.map((nft) => (
+                <XtdhReceivedTokenRow
+                  key={nft.tokenId}
+                  nft={nft}
+                  isActive={nft.tokenId === activeTokenId}
+                  detailsRegionId={detailsRegionId}
+                  onSelect={handleTokenSelect}
+                />
+              ))}
+            </div>
+          </div>
+          {activeToken && (
+            <XtdhReceivedCollectionTokenDetailsDrawer
+              token={activeToken}
+              detailsRegionId={detailsRegionId}
+              onClose={handleCloseDetails}
             />
-          ))}
-        </div>
+          )}
+        </>
       )}
 
       {shouldShowPagination && (

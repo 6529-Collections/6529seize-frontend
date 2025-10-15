@@ -6,24 +6,24 @@ import clsx from "clsx";
 import type { XtdhReceivedNft } from "@/types/xtdh";
 
 import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
-import { formatXtdhTotal, formatXtdhValue } from "../../utils";
-import { XtdhReceivedGranterAvatarGroup } from "../../subcomponents/XtdhReceivedGranterAvatarGroup";
-import { XTDH_RECEIVED_TOKEN_TABLE_COLUMNS } from "../constants";
-import { getXtdhReceivedTokenGrantorCount } from "../utils/tokenGrantors";
+import { formatXtdhTotal, formatXtdhValue } from "../utils";
+import { XtdhReceivedGranterAvatarGroup } from "./XtdhReceivedGranterAvatarGroup";
+import { XTDH_RECEIVED_TOKEN_TABLE_COLUMNS } from "../collection-card-content/constants";
+import { getXtdhReceivedTokenGrantorCount } from "../collection-card-content/utils/tokenGrantors";
 
-export interface XtdhReceivedCollectionTokenRowProps {
+export interface XtdhReceivedTokenRowProps {
   readonly nft: XtdhReceivedNft;
   readonly isActive: boolean;
   readonly detailsRegionId: string;
   readonly onSelect: (tokenId: string) => void;
 }
 
-export function XtdhReceivedCollectionTokenRow({
+export function XtdhReceivedTokenRow({
   nft,
   isActive,
   detailsRegionId,
   onSelect,
-}: XtdhReceivedCollectionTokenRowProps) {
+}: XtdhReceivedTokenRowProps) {
   const handleSelect = useCallback(() => {
     onSelect(nft.tokenId);
   }, [nft.tokenId, onSelect]);

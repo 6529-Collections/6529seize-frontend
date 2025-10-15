@@ -11,7 +11,7 @@ import {
 import type { XtdhReceivedNft } from "@/types/xtdh";
 
 import { XTDH_RECEIVED_TOKEN_TABLE_COLUMNS } from "../constants";
-import { XtdhReceivedCollectionTokenRow } from "./XtdhReceivedCollectionTokenRow";
+import { XtdhReceivedTokenRow } from "../../subcomponents/XtdhReceivedTokenRow";
 import type {
   XtdhReceivedTokenSortDirection,
   XtdhReceivedTokenSortKey,
@@ -222,7 +222,7 @@ export function XtdhReceivedCollectionTokensTable({
           <div role="rowgroup">
             {tokens.length > 0 ? (
               tokens.map((token) => (
-                <XtdhReceivedCollectionTokenRow
+                <XtdhReceivedTokenRow
                   key={token.tokenId}
                   nft={token}
                   isActive={token.tokenId === activeTokenId}
