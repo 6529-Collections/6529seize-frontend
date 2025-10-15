@@ -5,7 +5,7 @@ import {
   ActiveDropState,
 } from "@/types/dropInteractionTypes";
 import BrainContent from "../content/BrainContent";
-import Notifications from "./Notifications";
+import Notifications from "./index";
 
 const NotificationsContainer: React.FC = () => {
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
