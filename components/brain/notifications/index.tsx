@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import NotificationsCauseFilter from "./NotificationsCauseFilter";
 import { useNotificationsController } from "./hooks/useNotificationsController";
@@ -11,6 +12,24 @@ interface NotificationsProps {
   readonly activeDrop: ActiveDropState | null;
   readonly setActiveDrop: (activeDrop: ActiveDropState | null) => void;
 }
+
+const NOTIFICATION_CAUSE_PRIORITY: Record<ApiNotificationCause, number> = {
+  [ApiNotificationCause.IdentitySubscribed]: 0,
+  [ApiNotificationCause.IdentityMentioned]: 1,
+  [ApiNotificationCause.DropQuoted]: 2,
+  [ApiNotificationCause.DropReplied]: 3,
+  [ApiNotificationCause.DropVoted]: 4,
+  [ApiNotificationCause.DropReacted]: 5,
+  [ApiNotificationCause.WaveCreated]: 6,
+  [ApiNotificationCause.AllDrops]: 7,
+};
+
+const compareNotificationCause = (
+  firstCause: ApiNotificationCause,
+  secondCause: ApiNotificationCause,
+): number =>
+  NOTIFICATION_CAUSE_PRIORITY[firstCause] -
+  NOTIFICATION_CAUSE_PRIORITY[secondCause];
 
 export default function Notifications({
   activeDrop,
@@ -31,7 +50,7 @@ export default function Notifications({
   const activeFilterKey = useMemo(
     () =>
       activeFilter?.cause
-        ? [...activeFilter.cause].sort().join("|")
+        ? [...activeFilter.cause].sort(compareNotificationCause).join("|")
         : "notifications-filter-all",
     [activeFilter],
   );
