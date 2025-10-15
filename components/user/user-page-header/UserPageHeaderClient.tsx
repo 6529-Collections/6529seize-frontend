@@ -4,7 +4,7 @@ import { useContext, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
-import { CicStatement } from "@/entities/IProfile";
+import { CicStatement, ProfileActivityLog } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { AuthContext } from "@/components/auth/Auth";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
@@ -23,6 +23,8 @@ import UserPageHeaderProfileEnabledAt from "./UserPageHeaderProfileEnabledAt";
 import UserLevel from "../utils/level/UserLevel";
 import UserFollowBtn from "../utils/UserFollowBtn";
 import { useIdentity } from "@/hooks/useIdentity";
+import { SortDirection } from "@/entities/ISort";
+import { CountlessPage } from "@/helpers/Types";
 
 type Props = {
   readonly profile: ApiIdentity;
@@ -31,7 +33,7 @@ type Props = {
   readonly defaultBanner1: string;
   readonly defaultBanner2: string;
   readonly initialStatements: CicStatement[];
-  readonly profileEnabledAt: string | null;
+  readonly initialProfileEnabledAt: string | null;
   readonly followersCount: number | null;
 };
 
@@ -42,7 +44,7 @@ export default function UserPageHeaderClient({
   defaultBanner1,
   defaultBanner2,
   initialStatements,
-  profileEnabledAt,
+  initialProfileEnabledAt,
   followersCount,
 }: Readonly<Props>) {
   const params = useParams();
@@ -122,6 +124,39 @@ export default function UserPageHeaderClient({
     }
     return !!(aboutStatement || canEdit);
   }, [aboutStatement, canEdit, isFetched]);
+
+  const { data: profileEnabledLog } = useQuery<
+    CountlessPage<ProfileActivityLog>
+  >({
+    queryKey: [
+      QueryKey.PROFILE_LOGS,
+      normalizedHandleOrWallet,
+      "PROFILE_CREATED",
+    ],
+    queryFn: async () =>
+      await commonApiFetch<CountlessPage<ProfileActivityLog>>({
+        endpoint: "profile-logs",
+        params: {
+          profile: normalizedHandleOrWallet,
+          log_type: "PROFILE_CREATED",
+          page_size: "1",
+          sort: "created_at",
+          sort_direction: SortDirection.ASC,
+        },
+      }),
+    enabled: !!normalizedHandleOrWallet,
+    staleTime: 60_000,
+  });
+
+  const resolvedProfileEnabledAt = useMemo(() => {
+    const createdAt =
+      profileEnabledLog?.data?.[0]?.created_at ?? initialProfileEnabledAt;
+    if (!createdAt) {
+      return null;
+    }
+    const parsed = new Date(createdAt);
+    return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+  }, [profileEnabledLog, initialProfileEnabledAt]);
 
   const handleCreateDirectMessage = async (
     primaryWallet: string | undefined
@@ -211,7 +246,7 @@ export default function UserPageHeaderClient({
               followersCount={followersCount}
             />
             <UserPageHeaderProfileEnabledAt
-              profileEnabledAt={profileEnabledAt}
+              profileEnabledAt={resolvedProfileEnabledAt}
             />
           </div>
         </div>

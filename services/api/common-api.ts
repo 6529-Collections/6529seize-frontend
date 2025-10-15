@@ -31,17 +31,37 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
     });
     url += `?${queryParams.toString()}`;
   }
-  const res = await fetch(url, {
-    headers: getHeaders(param.headers),
-    signal: param.signal,
-  });
-  if (!res.ok) {
-    const body: any = await res.json();
-    return new Promise((_, rej) =>
-      rej(body?.error ?? res.statusText ?? "Something went wrong")
-    );
+
+  const shouldLogTiming =
+    process.env.NODE_ENV !== "production" && typeof window === "undefined";
+  const timingStart = shouldLogTiming ? Date.now() : 0;
+  let responseStatus: number | string = "no-response";
+
+  try {
+    const res = await fetch(url, {
+      headers: getHeaders(param.headers),
+      signal: param.signal,
+    });
+    responseStatus = res.status;
+    const body: unknown = await res.json();
+    if (!res.ok) {
+      const errorMessage =
+        typeof body === "object" && body !== null && "error" in body
+          ? (body as { error?: unknown }).error
+          : undefined;
+      throw errorMessage ?? res.statusText ?? "Something went wrong";
+    }
+    return body as T;
+  } catch (error) {
+    throw error;
+  } finally {
+    if (shouldLogTiming) {
+      const duration = Date.now() - timingStart;
+      console.log(
+        `[SSR][commonApiFetch] ${param.endpoint} -> ${responseStatus} in ${duration}ms`
+      );
+    }
   }
-  return res.json();
 };
 
 export interface RetryOptions {

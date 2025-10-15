@@ -3,9 +3,7 @@
 import { notFound } from "next/navigation";
 
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { CicStatement, ProfileActivityLog } from "@/entities/IProfile";
-import { SortDirection } from "@/entities/ISort";
-import { CountlessPage } from "@/helpers/Types";
+import { CicStatement } from "@/entities/IProfile";
 import { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -19,23 +17,6 @@ async function fetchStatements(
 ) {
   return await commonApiFetch<CicStatement[]>({
     endpoint: `profiles/${handleOrWallet}/cic/statements`,
-    headers,
-  });
-}
-
-async function fetchProfileEnabledLog(
-  handleOrWallet: string,
-  headers: Record<string, string>
-) {
-  return await commonApiFetch<CountlessPage<ProfileActivityLog>>({
-    endpoint: "profile-logs",
-    params: {
-      profile: handleOrWallet,
-      log_type: "PROFILE_CREATED",
-      page_size: "1",
-      sort: "created_at",
-      sort_direction: SortDirection.ASC,
-    },
     headers,
   });
 }
@@ -59,19 +40,6 @@ async function fetchFollowersCount(
   return response.count ?? null;
 }
 
-function extractProfileEnabledAt(
-  logPage: CountlessPage<ProfileActivityLog> | null
-): string | null {
-  if (!logPage?.data?.length) {
-    return null;
-  }
-  const createdAt = logPage.data[0]?.created_at;
-  if (!createdAt) {
-    return null;
-  }
-  return new Date(createdAt).toISOString();
-}
-
 type Props = {
   readonly profile: ApiIdentity;
   readonly handleOrWallet: string;
@@ -90,18 +58,23 @@ export default async function UserPageHeader({
   const headers = await getAppCommonHeaders();
   const normalizedHandle = handleOrWallet.toLowerCase();
 
-  const [statementsResult, profileLogResult, followersResult] =
-    await Promise.allSettled([
-      fetchStatements(normalizedHandle, headers),
-      fetchProfileEnabledLog(normalizedHandle, headers),
-      fetchFollowersCount(profile.id, headers),
-    ]);
+  const shouldLogHeaderFetch = process.env.NODE_ENV !== "production";
+  const headerFetchStart = shouldLogHeaderFetch ? Date.now() : 0;
+
+  const [statementsResult, followersResult] = await Promise.allSettled([
+    fetchStatements(normalizedHandle, headers),
+    fetchFollowersCount(profile.id, headers),
+  ]);
+
+  if (shouldLogHeaderFetch) {
+    const duration = Date.now() - headerFetchStart;
+    console.log(
+      `[SSR][UserPageHeader] data fetch ${normalizedHandle} (statements:${statementsResult.status}, followers:${followersResult.status}) in ${duration}ms`
+    );
+  }
 
   const statements: CicStatement[] =
     statementsResult.status === "fulfilled" ? statementsResult.value : [];
-
-  const profileLog: CountlessPage<ProfileActivityLog> | null =
-    profileLogResult.status === "fulfilled" ? profileLogResult.value : null;
 
   const defaultBanner1 = getRandomColor();
   const defaultBanner2 = getRandomColor();
@@ -114,7 +87,7 @@ export default async function UserPageHeader({
       defaultBanner1={defaultBanner1}
       defaultBanner2={defaultBanner2}
       initialStatements={statements}
-      profileEnabledAt={extractProfileEnabledAt(profileLog)}
+      initialProfileEnabledAt={null}
       followersCount={
         followersResult.status === "fulfilled" ? followersResult.value : null
       }

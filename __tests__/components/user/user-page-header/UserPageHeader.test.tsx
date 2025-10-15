@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useParams, useRouter } from 'next/navigation';
 import { useSeizeConnectContext } from '@/components/auth/SeizeConnectContext';
 import { useIdentity } from '@/hooks/useIdentity';
+import { QueryKey } from '@/components/react-query-wrapper/ReactQueryWrapper';
 
 jest.mock('next/dynamic', () => () => () => <div />);
 jest.mock('@/components/user/user-page-header/banner/UserPageHeaderBanner', () => () => <div data-testid="banner" />);
@@ -37,9 +38,20 @@ const auth = { connectedProfile: { handle: 'alice' }, activeProfileProxy: null, 
 
 describe('UserPageHeader', () => {
   beforeEach(() => {
-    (useQuery as jest.Mock).mockReturnValue({
-      isFetched: true,
-      data: [{ statement_type: 'BIO', statement_group: 'GENERAL' }],
+    (useQuery as jest.Mock).mockImplementation(({ queryKey }: any) => {
+      const rootKey = Array.isArray(queryKey) ? queryKey[0] : undefined;
+      if (rootKey === QueryKey.PROFILE_CIC_STATEMENTS) {
+        return {
+          isFetched: true,
+          data: [{ statement_type: 'BIO', statement_group: 'GENERAL' }],
+        };
+      }
+      if (rootKey === QueryKey.PROFILE_LOGS) {
+        return {
+          data: { data: [{ created_at: '2024-01-01T00:00:00Z' }] },
+        };
+      }
+      return {};
     });
   });
 
@@ -58,7 +70,7 @@ describe('UserPageHeader', () => {
               statement_group: 'GENERAL',
             } as any,
           ]}
-          profileEnabledAt="2024-01-01T00:00:00Z"
+          initialProfileEnabledAt={null}
           followersCount={5}
         />
       </AuthContext.Provider>
