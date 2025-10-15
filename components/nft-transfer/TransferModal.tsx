@@ -1065,7 +1065,9 @@ export default function TransferModal({
     if (isClosing) return;
     setIsClosing(true);
     setTimeout(() => {
-      onClose({ completed: txs.every((t) => t.state === "success") });
+      onClose({
+        completed: txs.length > 0 && txs.every((t) => t.state === "success"),
+      });
     }, 150);
   }, [isClosing, onClose, txs, trxPending]);
 
