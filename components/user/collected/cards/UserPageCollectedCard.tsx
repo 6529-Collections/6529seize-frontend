@@ -23,9 +23,9 @@ export default function UserPageCollectedCard({
   readonly showDataRow: boolean;
   readonly interactiveMode?: "link" | "select";
   readonly selected?: boolean;
-  readonly onToggle?: () => void;
-  readonly onIncQty?: () => void;
-  readonly onDecQty?: () => void;
+  readonly onToggle: () => void;
+  readonly onIncQty: () => void;
+  readonly onDecQty: () => void;
   readonly copiesMax?: number;
   readonly qtySelected?: number;
 }) {
@@ -52,7 +52,6 @@ export default function UserPageCollectedCard({
     }
   };
 
-  // shared card body
   const CardBody = (
     <div
       className={[
@@ -117,7 +116,10 @@ export default function UserPageCollectedCard({
                 type="checkbox"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onToggle?.();
+                }}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  onToggle();
                 }}
               />
               {contractType === ContractType.ERC1155 ? (
@@ -145,7 +147,7 @@ export default function UserPageCollectedCard({
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          onDecQty?.();
+                          onDecQty();
                         }}
                         disabled={qtySelected <= 1}
                         aria-label="Decrease quantity"
@@ -164,7 +166,7 @@ export default function UserPageCollectedCard({
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          onIncQty?.();
+                          onIncQty();
                         }}
                         disabled={qtySelected >= copiesMax}
                         aria-label="Increase quantity"
