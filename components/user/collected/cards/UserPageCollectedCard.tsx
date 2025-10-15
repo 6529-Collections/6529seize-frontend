@@ -122,10 +122,7 @@ export default function UserPageCollectedCard({
               />
               {contractType === ContractType.ERC1155 ? (
                 <>
-                  <label
-                    htmlFor={`${card.collection}-${card.token_id}`}
-                    className="tw-text-sm tw-font-medium tw-cursor-pointer"
-                    onClick={(e) => e.stopPropagation()}>
+                  <span className="tw-text-sm tw-font-medium">
                     {(() => {
                       if (selected) {
                         if (copiesMax === 1) {
@@ -140,7 +137,7 @@ export default function UserPageCollectedCard({
 
                       return "Select";
                     })()}
-                  </label>
+                  </span>
                   {copiesMax > 1 && qtySelected > 0 && (
                     <div className="tw-flex tw-items-center tw-gap-1">
                       <button
@@ -182,12 +179,9 @@ export default function UserPageCollectedCard({
                   )}
                 </>
               ) : (
-                <label
-                  htmlFor={`${card.collection}-${card.token_id}`}
-                  className="tw-text-sm tw-font-medium tw-cursor-pointer"
-                  onClick={(e) => e.stopPropagation()}>
+                <span className="tw-text-sm tw-font-medium">
                   {selected ? "Selected" : "Select"}
-                </label>
+                </span>
               )}
             </div>
           )}
