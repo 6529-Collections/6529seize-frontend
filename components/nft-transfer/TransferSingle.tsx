@@ -128,25 +128,35 @@ function TransferSingleImpl(props: TransferSingleProps) {
         </div>
         {max > 1 && (
           <div className="tw-flex tw-items-center tw-gap-1">
-            <FontAwesomeIcon
-              icon={faMinusCircle}
+            <button
+              type="button"
               onClick={() => t.decQty(key)}
-              className="tw-size-6 tw-cursor-pointer"
-              color={selectedQty <= 1 ? "#60606C" : "#fff"}
-              aria-disabled={selectedQty <= 1}
-              data-testid="transfer-single-minus"
-            />
+              disabled={selectedQty <= 1}
+              aria-label="Decrease quantity"
+              className="tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none tw-flex tw-items-center tw-justify-center"
+              data-testid="transfer-single-minus">
+              <FontAwesomeIcon
+                icon={faMinusCircle}
+                className="tw-size-6 tw-cursor-pointer"
+                color={selectedQty <= 1 ? "#60606C" : "#fff"}
+              />
+            </button>
             <div className="tw-min-w-[2ch] tw-text-center tw-text-xs tw-tabular-nums tw-select-none">
               {selectedQty}
             </div>
-            <FontAwesomeIcon
-              icon={faPlusCircle}
+            <button
+              type="button"
               onClick={() => t.incQty(key)}
-              className="tw-size-6 tw-cursor-pointer"
-              color={selectedQty >= max ? "#60606C" : "#fff"}
-              aria-disabled={selectedQty >= max}
-              data-testid="transfer-single-plus"
-            />
+              disabled={selectedQty >= max}
+              aria-label="Increase quantity"
+              className="tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none tw-flex tw-items-center tw-justify-center"
+              data-testid="transfer-single-plus">
+              <FontAwesomeIcon
+                icon={faPlusCircle}
+                className="tw-size-6 tw-cursor-pointer"
+                color={selectedQty >= max ? "#60606C" : "#fff"}
+              />
+            </button>
           </div>
         )}
       </div>

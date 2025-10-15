@@ -138,35 +138,41 @@ export default function UserPageCollectedCard({
                   </span>
                   {copiesMax > 1 && qtySelected > 0 && (
                     <div className="tw-flex tw-items-center tw-gap-1">
-                      <FontAwesomeIcon
-                        icon={faMinusCircle}
+                      <button
+                        type="button"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           onDecQty?.();
                         }}
-                        className="tw-size-5 tw-cursor-pointer"
-                        color={qtySelected <= 1 ? "#60606C" : "#fff"}
-                        aria-disabled={qtySelected <= 1}
-                        role="button"
+                        disabled={qtySelected <= 1}
                         aria-label="Decrease quantity"
-                      />
+                        className="tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none tw-flex tw-items-center tw-justify-center">
+                        <FontAwesomeIcon
+                          icon={faMinusCircle}
+                          className="tw-size-5 tw-cursor-pointer"
+                          color={qtySelected <= 1 ? "#60606C" : "#fff"}
+                        />
+                      </button>
                       <div className="tw-min-w-[2ch] tw-text-center tw-text-xs tw-tabular-nums tw-select-none">
                         {qtySelected}
                       </div>
-                      <FontAwesomeIcon
-                        icon={faPlusCircle}
+                      <button
+                        type="button"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           onIncQty?.();
                         }}
-                        className="tw-size-5 tw-cursor-pointer"
-                        color={qtySelected >= copiesMax ? "#60606C" : "#fff"}
-                        aria-disabled={qtySelected >= copiesMax}
-                        role="button"
+                        disabled={qtySelected >= copiesMax}
                         aria-label="Increase quantity"
-                      />
+                        className="tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none tw-flex tw-items-center tw-justify-center">
+                        <FontAwesomeIcon
+                          icon={faPlusCircle}
+                          className="tw-size-5 tw-cursor-pointer"
+                          color={qtySelected >= copiesMax ? "#60606C" : "#fff"}
+                        />
+                      </button>
                     </div>
                   )}
                 </>

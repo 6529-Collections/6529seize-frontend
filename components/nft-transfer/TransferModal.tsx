@@ -90,13 +90,59 @@ type TxState =
   | "error";
 
 type TxEntry = {
-  id: string; // stable per action, e.g. `${key}-batch` or `${contract}-${tokenId}`
+  id: string;
   originKey: string;
-  label: string; // e.g. "MEMES #145, #146" or single token label
+  label: string;
   state: TxState;
   hash?: `0x${string}`;
   error?: string;
 };
+
+type TxItem = {
+  key: string;
+  tokenId: bigint;
+  qty: bigint;
+  contractType: ContractType;
+  contract: Address;
+};
+
+function computeFlowTitle(
+  total: number,
+  successCount: number,
+  errorCount: number
+): { label: string; icon: string } {
+  const allSuccess = total > 0 && successCount === total;
+  const allFail = total > 0 && errorCount === total;
+
+  if (total === 1 && allSuccess) {
+    return {
+      label: "Transfer Successful",
+      icon: "/emojis/sgt_saluting_face.webp",
+    };
+  }
+  if (total === 1 && allFail) {
+    return { label: "Transfer Failed", icon: "/emojis/sgt_sob.webp" };
+  }
+  if (total === 1) {
+    return { label: "Transfer Complete", icon: "/emojis/sgt_grimacing.webp" };
+  }
+  if (allSuccess) {
+    return {
+      label: `All ${total} Transactions Successful`,
+      icon: "/emojis/sgt_saluting_face.webp",
+    };
+  }
+  if (allFail) {
+    return {
+      label: `All ${total} Transactions Failed`,
+      icon: "/emojis/sgt_sob.webp",
+    };
+  }
+  return {
+    label: `Transfer Complete: ${successCount} successful, ${errorCount} failed`,
+    icon: "/emojis/sgt_grimacing.webp",
+  };
+}
 
 function FlowTitle({
   flow,
@@ -105,8 +151,9 @@ function FlowTitle({
   readonly flow: FlowState;
   readonly txs: TxEntry[];
 }) {
-  if (flow === "review")
+  if (flow === "review") {
     return <span>Review transfer and select recipient</span>;
+  }
 
   const anyPending = anyTxsPending(txs);
   if (anyPending) {
@@ -124,34 +171,7 @@ function FlowTitle({
   const successCount = txs.filter((t) => t.state === "success").length;
   const errorCount = txs.filter((t) => t.state === "error").length;
 
-  const allSuccess = total > 0 && successCount === total;
-  const allFail = total > 0 && errorCount === total;
-
-  let label = "";
-  let icon = "";
-  if (total === 1) {
-    if (allSuccess) {
-      label = "Transfer Successful";
-      icon = "/emojis/sgt_saluting_face.webp";
-    } else if (allFail) {
-      label = "Transfer Failed";
-      icon = "/emojis/sgt_sob.webp";
-    } else {
-      label = "Transfer Complete";
-      icon = "/emojis/sgt_grimacing.webp";
-    }
-  } else {
-    if (allSuccess) {
-      label = `All ${total} Transactions Successful`;
-      icon = "/emojis/sgt_saluting_face.webp";
-    } else if (allFail) {
-      label = `All ${total} Transactions Failed`;
-      icon = "/emojis/sgt_sob.webp";
-    } else {
-      label = `Transfer Complete: ${successCount} successful, ${errorCount} failed`;
-      icon = "/emojis/sgt_grimacing.webp";
-    }
-  }
+  const { label, icon } = computeFlowTitle(total, successCount, errorCount);
 
   return (
     <span className="tw-flex tw-items-center tw-gap-1.5">
@@ -805,15 +825,15 @@ export default function TransferModal({
   );
 
   const groupByContractAndOriginator = useCallback(
-    async (publicClient: PublicClient, items: any[]) => {
+    async (publicClient: PublicClient, items: TxItem[]) => {
       const by = new Map<
         string,
         {
           contract: string;
+          collection: string;
           originKey: string;
           is1155: boolean;
-          items: any[];
-          label: string;
+          items: TxItem[];
         }
       >();
 
@@ -849,10 +869,10 @@ export default function TransferModal({
         } else {
           by.set(key, {
             contract,
+            collection: it.key.split(":")[0],
             originKey,
             is1155,
             items: [it],
-            label: it.label,
           });
         }
       }
@@ -1064,10 +1084,9 @@ export default function TransferModal({
       return;
     }
 
-    const selItems = Array.from(t.selected.values()).map((it) => ({
+    const selItems: TxItem[] = Array.from(t.selected.values()).map((it) => ({
       contract: it.contract as Address,
       tokenId: BigInt(it.tokenId),
-      label: (it.key as string).replace(":", " #"),
       qty: BigInt(Math.min(Math.max(1, it.qty ?? 1), Math.max(1, it.max ?? 1))),
       key: it.key,
       contractType: it.contractType,
@@ -1087,13 +1106,20 @@ export default function TransferModal({
     const initial: TxEntry[] = [];
     for (const [
       key,
-      { originKey, contract, is1155, items: citems },
+      { collection, originKey, contract, is1155, items: citems },
     ] of Array.from(byContract.entries())) {
       if (is1155) {
+        const itemsLabel = citems
+          .map((x: TxItem) => {
+            const tokenId = x.tokenId.toString();
+            const count = x.qty;
+            return `#${tokenId}(x${count})`;
+          })
+          .join(" - ");
         initial.push({
           id: `${key}-batch`,
           originKey,
-          label: citems.map((x: any) => x.label).join(", "),
+          label: `${collection} ${itemsLabel}`,
           state: "pending",
         });
       } else {
@@ -1101,7 +1127,7 @@ export default function TransferModal({
           initial.push({
             id: `${contract}-${x.tokenId.toString()}`,
             originKey,
-            label: x.label,
+            label: `${collection} #${x.tokenId.toString()}`,
             state: "pending",
           });
         }
@@ -1286,8 +1312,8 @@ export default function TransferModal({
         handleClose();
       }
     };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    globalThis.addEventListener("keydown", onKeyDown);
+    return () => globalThis.removeEventListener("keydown", onKeyDown);
   }, [open, trxPending, handleClose]);
 
   if (!open) return null;
@@ -1308,21 +1334,17 @@ export default function TransferModal({
       aria-modal="true"
       aria-labelledby="transfer-title"
       aria-describedby="transfer-desc"
-      tabIndex={-1}
+      onCancel={(e) => {
+        e.preventDefault();
+        if (!trxPending) handleClose();
+      }}
       className={[
-        "tw-w-full tw-h-full tw-fixed tw-inset-0 tw-z-[100] tw-bg-white/10 tw-backdrop-blur-sm tw-flex tw-items-center tw-justify-center tw-p-4 md:tw-p-8",
+        "tw-w-full tw-h-full tw-fixed tw-inset-0 tw-z-[1000] tw-bg-white/10 tw-backdrop-blur-sm tw-flex tw-items-center tw-justify-center tw-p-4 md:tw-p-8",
         isClosing
           ? "tw-opacity-0 tw-transition-opacity tw-duration-150"
           : "tw-opacity-100 tw-transition-opacity tw-duration-150",
-      ].join(" ")}
-      onClick={(e) => {
-        if (trxPending) return;
-        if (dialogRef.current && e.target === dialogRef.current) {
-          handleClose();
-        }
-      }}>
+      ].join(" ")}>
       <div
-        role="document"
         className={[
           "tw-w-[70vw] tw-max-w-[1100px] tw-h-[75vh] tw-max-h-[900px] tw-rounded-2xl tw-bg-[#0c0c0d] tw-ring-[3px] tw-ring-white/30 tw-text-white tw-shadow-xl tw-overflow-hidden tw-flex tw-flex-col",
           isClosing
@@ -1334,9 +1356,9 @@ export default function TransferModal({
         ].join(" ")}>
         {/* header */}
         <div className="tw-flex tw-items-center tw-justify-between tw-border-0 tw-border-b-[3px] tw-border-solid tw-border-white/30 tw-p-4">
-          <h2 id="transfer-title" className="tw-text-lg tw-font-semibold">
+          <div className="tw-text-lg tw-font-semibold">
             <FlowTitle flow={flow} txs={txs} />
-          </h2>
+          </div>
           <HeaderRight
             flow={flow}
             trxPending={trxPending}

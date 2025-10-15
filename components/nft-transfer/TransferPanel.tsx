@@ -149,25 +149,35 @@ export default function TransferPanel() {
                   </div>
                   {max > 1 && (
                     <div className="tw-flex tw-items-center tw-gap-1">
-                      <FontAwesomeIcon
-                        icon={faMinusCircle}
+                      <button
+                        type="button"
                         onClick={() => t.decQty(it.key)}
-                        className="tw-size-6 tw-cursor-pointer"
-                        color={qty <= 1 ? "#60606C" : "#fff"}
-                        aria-disabled={qty <= 1}
-                        data-testid="transfer-panel-minus"
-                      />
+                        disabled={qty <= 1}
+                        aria-label="Decrease quantity"
+                        className="tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none tw-flex tw-items-center tw-justify-center"
+                        data-testid="transfer-panel-minus">
+                        <FontAwesomeIcon
+                          icon={faMinusCircle}
+                          className="tw-size-6 tw-cursor-pointer"
+                          color={qty <= 1 ? "#60606C" : "#fff"}
+                        />
+                      </button>
                       <div className="tw-min-w-[2ch] tw-text-center tw-text-xs tw-tabular-nums tw-select-none">
                         {qty}
                       </div>
-                      <FontAwesomeIcon
-                        icon={faPlusCircle}
+                      <button
+                        type="button"
                         onClick={() => t.incQty(it.key)}
-                        className="tw-size-6 tw-cursor-pointer"
-                        color={qty >= max ? "#60606C" : "#fff"}
-                        aria-disabled={qty >= max}
-                        data-testid="transfer-panel-plus"
-                      />
+                        disabled={qty >= max}
+                        aria-label="Increase quantity"
+                        className="tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none tw-flex tw-items-center tw-justify-center"
+                        data-testid="transfer-panel-plus">
+                        <FontAwesomeIcon
+                          icon={faPlusCircle}
+                          className="tw-size-6 tw-cursor-pointer"
+                          color={qty >= max ? "#60606C" : "#fff"}
+                        />
+                      </button>
                     </div>
                   )}
 

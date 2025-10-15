@@ -419,4 +419,209 @@ describe("TransferModal", () => {
       expect(anyErrorMatches.length).toBeGreaterThan(0);
     });
   });
+
+  it("groups ERC1155 by extension origin and sorts tokenIds in the batch label", async () => {
+    const singleContract = "0x1155";
+
+    const selected = new Map([
+      [
+        "MEMES:5",
+        {
+          key: "MEMES:5",
+          contract: singleContract,
+          contractType: ContractType.ERC1155,
+          tokenId: 5,
+          qty: 0, // will clamp to 1
+          max: 1,
+          title: "Memes 5",
+          thumbUrl: "https://example.com/thumb-5.png",
+          label: "MEMES #5",
+        },
+      ],
+      [
+        "MEMES:3",
+        {
+          key: "MEMES:3",
+          contract: singleContract,
+          contractType: ContractType.ERC1155,
+          tokenId: 3,
+          qty: 10, // will clamp to 2 via max
+          max: 2,
+          title: "Memes 3",
+          thumbUrl: "https://example.com/thumb-3.png",
+          label: "MEMES #3",
+        },
+      ],
+    ]);
+
+    mockUseTransfer.mockReset();
+    mockUseTransfer.mockReturnValue({ selected, totalQty: 2 });
+
+    await selectRecipientFlow();
+
+    const publicClient = mockUsePublicClient.mock.results.at(-1)?.value;
+    const walletWrapper = mockUseWalletClient.mock.results.at(-1)?.value;
+
+    const readContract = publicClient.readContract as jest.Mock;
+    const simulateContract = publicClient.simulateContract as jest.Mock;
+    const writeContract = walletWrapper.data.writeContract as jest.Mock;
+    const waitForReceipt = publicClient.waitForTransactionReceipt as jest.Mock;
+
+    // Same extension for both tokens -> 1 batch group. The address is lowercased in code
+    readContract.mockResolvedValue(
+      "0x0000000000000000000000000000000000000AbC"
+    );
+
+    simulateContract.mockResolvedValueOnce({ request: { type: "1155" } });
+    writeContract.mockResolvedValueOnce("0xhash1155batch");
+    waitForReceipt.mockResolvedValueOnce({ status: "success" });
+
+    fireEvent.click(screen.getByRole("button", { name: /^transfer$/i }));
+
+    // Batch label should be sorted ascending by tokenId and clamped quantities: #3(x2) then #5(x1)
+    await screen.findByText(/MEMES #3\(x2\) - #5\(x1\)/i);
+
+    // Origin key should reflect the extension address (lowercased)
+    await screen.findByText(
+      /Originator: ext:0x0000000000000000000000000000000000000abc/i
+    );
+  });
+
+  it("creates separate ERC1155 batches when origin extensions differ", async () => {
+    const singleContract = "0x1155";
+
+    const selected = new Map([
+      [
+        "MEMES:1",
+        {
+          key: "MEMES:1",
+          contract: singleContract,
+          contractType: ContractType.ERC1155,
+          tokenId: 1,
+          qty: 1,
+          max: 5,
+          title: "Memes 1",
+          thumbUrl: "https://example.com/thumb-1.png",
+          label: "MEMES #1",
+        },
+      ],
+      [
+        "MEMES:2",
+        {
+          key: "MEMES:2",
+          contract: singleContract,
+          contractType: ContractType.ERC1155,
+          tokenId: 2,
+          qty: 1,
+          max: 5,
+          title: "Memes 2",
+          thumbUrl: "https://example.com/thumb-2.png",
+          label: "MEMES #2",
+        },
+      ],
+    ]);
+
+    mockUseTransfer.mockReset();
+    mockUseTransfer.mockReturnValue({ selected, totalQty: 2 });
+
+    await selectRecipientFlow();
+
+    const publicClient = mockUsePublicClient.mock.results.at(-1)?.value;
+    const walletWrapper = mockUseWalletClient.mock.results.at(-1)?.value;
+
+    const readContract = publicClient.readContract as jest.Mock;
+    const simulateContract = publicClient.simulateContract as jest.Mock;
+    const writeContract = walletWrapper.data.writeContract as jest.Mock;
+    const waitForReceipt = publicClient.waitForTransactionReceipt as jest.Mock;
+
+    // Different extensions -> two separate groups/batches
+    readContract
+      .mockResolvedValueOnce("0x0000000000000000000000000000000000000abc")
+      .mockResolvedValueOnce("0x0000000000000000000000000000000000000def");
+
+    simulateContract
+      .mockResolvedValueOnce({ request: { type: "1155" } })
+      .mockResolvedValueOnce({ request: { type: "1155" } });
+
+    writeContract
+      .mockResolvedValueOnce("0xhash1155a")
+      .mockResolvedValueOnce("0xhash1155b");
+
+    waitForReceipt
+      .mockResolvedValueOnce({ status: "success" })
+      .mockResolvedValueOnce({ status: "success" });
+
+    fireEvent.click(screen.getByRole("button", { name: /^transfer$/i }));
+
+    // Two cards rendered — one per origin group
+    const cards = await screen.findAllByText(/Originator: ext:/i);
+    expect(cards.length).toBe(2);
+  });
+
+  it("creates individual entries for ERC721 and uses 'erc721' origin key", async () => {
+    const selected = new Map([
+      [
+        "POSTER:9",
+        {
+          key: "POSTER:9",
+          contract: "0x721",
+          contractType: ContractType.ERC721,
+          tokenId: 9,
+          qty: 1,
+          max: 1,
+          title: "Poster 9",
+          thumbUrl: "https://example.com/thumb-9.png",
+          label: "POSTER #9",
+        },
+      ],
+      [
+        "POSTER:7",
+        {
+          key: "POSTER:7",
+          contract: "0x721",
+          contractType: ContractType.ERC721,
+          tokenId: 7,
+          qty: 1,
+          max: 1,
+          title: "Poster 7",
+          thumbUrl: "https://example.com/thumb-7.png",
+          label: "POSTER #7",
+        },
+      ],
+    ]);
+
+    mockUseTransfer.mockReset();
+    mockUseTransfer.mockReturnValue({ selected, totalQty: 2 });
+
+    await selectRecipientFlow();
+
+    const publicClient = mockUsePublicClient.mock.results.at(-1)?.value;
+    const walletWrapper = mockUseWalletClient.mock.results.at(-1)?.value;
+
+    const simulateContract = publicClient.simulateContract as jest.Mock;
+    const writeContract = walletWrapper.data.writeContract as jest.Mock;
+    const waitForReceipt = publicClient.waitForTransactionReceipt as jest.Mock;
+
+    simulateContract
+      .mockResolvedValueOnce({ request: { type: "721" } })
+      .mockResolvedValueOnce({ request: { type: "721" } });
+
+    writeContract
+      .mockResolvedValueOnce("0xhash721a")
+      .mockResolvedValueOnce("0xhash721b");
+
+    waitForReceipt
+      .mockResolvedValueOnce({ status: "success" })
+      .mockResolvedValueOnce({ status: "success" });
+
+    fireEvent.click(screen.getByRole("button", { name: /^transfer$/i }));
+
+    // Two separate entries should render with labels for each token
+    await screen.findByText(/POSTER #7/i);
+    await screen.findByText(/POSTER #9/i);
+
+    // And origin should be erc721
+    const erc721Origins = await screen.findAllByText(/Originator: erc721/i);
+    expect(erc721Origins.length).toBe(2);
+  });
 });
