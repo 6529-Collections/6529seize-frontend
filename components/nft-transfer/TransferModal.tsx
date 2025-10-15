@@ -446,7 +446,7 @@ function TxStatusList({
   publicClient,
 }: {
   readonly txs: TxEntry[];
-  readonly publicClient: any;
+  readonly publicClient: PublicClient | undefined;
 }) {
   const explorer = publicClient?.chain?.blockExplorers?.default.url;
 
@@ -692,7 +692,7 @@ function BodyByFlow({
   readonly resultsListRef: React.RefObject<HTMLDivElement | null>;
   readonly resultsHasOverflow: boolean;
   readonly resultsAtEnd: boolean;
-  readonly publicClient: any;
+  readonly publicClient: PublicClient | undefined;
   readonly txs: TxEntry[];
 }) {
   if (flow === "submission") {
@@ -924,7 +924,7 @@ export default function TransferModal({
   const debouncedQuery = useDebouncedValue(trimmedQuery, 350);
   const enabled = open && debouncedQuery.length >= MIN_SEARCH_LENGTH;
 
-  const { data, isFetching } = useQuery({
+  const { data, isFetching } = useQuery<CommunityMemberMinimal[]>({
     queryKey: ["memberSearch", debouncedQuery],
     enabled,
     refetchOnWindowFocus: false,

@@ -703,7 +703,7 @@ export default function MemeLabPageComponent({
                     <Row className={`pt-1 ${styles.overviewColumn}`}>
                       <Col>
                         {getTokenCount(sold)} card
-                        {getTokenCount(sold) > 1 && "s"} sold for {soldSum} eth
+                        {getTokenCount(sold) > 1 && "s"} sold for {soldSum} ETH
                       </Col>
                     </Row>
                   )}
