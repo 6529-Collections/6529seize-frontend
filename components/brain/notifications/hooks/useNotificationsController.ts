@@ -103,8 +103,12 @@ export const useNotificationsController =
           endpoint: `notifications/read`,
         }),
       onSuccess: async () => {
-        invalidateNotifications();
-        await removeAllDeliveredNotifications();
+        try {
+          invalidateNotifications();
+          await removeAllDeliveredNotifications();
+        } catch (error) {
+          console.error("Failed to clear delivered notifications:", error);
+        }
       },
       onError: (error) => {
         setToast({

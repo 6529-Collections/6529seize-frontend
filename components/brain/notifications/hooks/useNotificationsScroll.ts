@@ -97,6 +97,7 @@ export const useNotificationsScroll = ({
 
   useEffect(() => {
     hasInitializedScrollRef.current = false;
+    isPrependingRef.current = false;
     isPinnedToBottomRef.current = true;
   }, [activeFilterKey]);
 

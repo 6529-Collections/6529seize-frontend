@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import NotificationsCauseFilter from "./NotificationsCauseFilter";
 import { useNotificationsController } from "./hooks/useNotificationsController";
@@ -27,8 +28,13 @@ export default function Notifications({
     handlers,
   } = useNotificationsController();
 
-  const activeFilterKey =
-    activeFilter?.cause?.join("|") ?? "notifications-filter-all";
+  const activeFilterKey = useMemo(
+    () =>
+      activeFilter?.cause
+        ? [...activeFilter.cause].sort().join("|")
+        : "notifications-filter-all",
+    [activeFilter],
+  );
 
   const { scrollContainerRef, handleScroll } = useNotificationsScroll({
     items,
