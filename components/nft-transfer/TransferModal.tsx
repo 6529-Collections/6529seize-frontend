@@ -1068,7 +1068,7 @@ export default function TransferModal({
       onClose({
         completed:
           flow !== "review" ||
-          (txs.length > 0 && txs.every((t) => t.state === "error")),
+          (txs.length > 0 && !txs.every((t) => t.state === "error")),
       });
     }, 150);
   }, [isClosing, onClose, flow, trxPending, txs]);
