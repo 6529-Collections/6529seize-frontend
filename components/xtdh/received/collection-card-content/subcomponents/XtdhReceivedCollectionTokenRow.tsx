@@ -129,7 +129,7 @@ export function XtdhReceivedCollectionTokenRow({
           {totalReceived}
         </span>
       </div>
-      <div className="tw-hidden md:tw-flex md:tw-items-center md:tw-justify-start">
+      <div className="tw-hidden md:tw-flex md:tw-w-full md:tw-items-center md:tw-justify-end">
         <CustomTooltip content="View grantors" placement="top">
           <span>
             <XtdhReceivedGranterAvatarGroup

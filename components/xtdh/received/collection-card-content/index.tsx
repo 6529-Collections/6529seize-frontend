@@ -67,7 +67,6 @@ export function XtdhReceivedCollectionCardContent({
       sortKey={sortKey}
       sortDirection={sortDirection}
       onRequestSort={requestSort}
-      onCollapse={onClose}
     />
   );
 }

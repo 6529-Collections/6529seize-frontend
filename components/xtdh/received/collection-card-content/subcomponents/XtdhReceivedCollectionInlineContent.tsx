@@ -24,7 +24,6 @@ export interface XtdhReceivedCollectionInlineContentProps {
   readonly sortKey: XtdhReceivedTokenSortKey;
   readonly sortDirection: XtdhReceivedTokenSortDirection;
   readonly onRequestSort: (key: XtdhReceivedTokenSortKey) => void;
-  readonly onCollapse: () => void;
 }
 
 export function XtdhReceivedCollectionInlineContent({
@@ -38,7 +37,6 @@ export function XtdhReceivedCollectionInlineContent({
   sortKey,
   sortDirection,
   onRequestSort,
-  onCollapse,
 }: XtdhReceivedCollectionInlineContentProps) {
   const activeCount = tokens.length;
   const totalTokens = collection.tokenCount;
@@ -77,7 +75,6 @@ export function XtdhReceivedCollectionInlineContent({
           sortKey={sortKey}
           sortDirection={sortDirection}
           onRequestSort={onRequestSort}
-          onCollapse={onCollapse}
         />
       </div>
       {activeToken && (
