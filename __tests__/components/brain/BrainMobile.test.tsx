@@ -46,7 +46,7 @@ jest.mock('@/components/brain/mobile/BrainMobileWaves', () => ({ __esModule: tru
 
 jest.mock('@/components/brain/mobile/BrainMobileMessages', () => ({ __esModule: true, default: () => <div data-testid='messages' /> }));
 
-jest.mock('@/components/brain/notifications/Notifications', () => ({ __esModule: true, default: () => <div data-testid='notifications' /> }));
+jest.mock('@/components/brain/notifications', () => ({ __esModule: true, default: () => <div data-testid='notifications' /> }));
 
 jest.mock('@/components/brain/my-stream/MyStreamWaveLeaderboard', () => ({ __esModule: true, default: () => <div data-testid="leaderboard" /> }));
 
@@ -96,4 +96,3 @@ describe('BrainMobile', () => {
     rerender(<div />);
   });
 });
-

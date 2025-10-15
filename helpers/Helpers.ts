@@ -19,10 +19,14 @@ import { BaseNFT, VolumeType } from "@/entities/INFT";
 import { CICType } from "@/entities/IProfile";
 import { DateIntervalsSelection } from "@/enums";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import emojiRegex from "emoji-regex";
 import { goerli, mainnet, sepolia } from "wagmi/chains";
 import { PageSSRMetadata, Period } from "./Types";
 
 export const MAX_DROP_UPLOAD_FILES = 8;
+
+const unicodeEmojiRegex = emojiRegex();
+const codePointRegex = /U\+([\dA-Fa-f]{1,6})/g;
 
 export function formatAddress(address: string) {
   if (
@@ -274,8 +278,17 @@ export function isIPFS(s: string) {
 }
 
 export function containsEmojis(s: string) {
-  const regex = /U\+([\dA-Fa-f]{1,6})/g;
-  return regex.test(s);
+  if (!s) {
+    return false;
+  }
+
+  unicodeEmojiRegex.lastIndex = 0;
+  if (unicodeEmojiRegex.test(s)) {
+    return true;
+  }
+
+  codePointRegex.lastIndex = 0;
+  return codePointRegex.test(s);
 }
 
 export function parseEmojis(s: string) {

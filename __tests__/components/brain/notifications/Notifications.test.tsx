@@ -2,6 +2,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 const mutateAsyncMock = jest.fn();
+const requestAuthMock = jest.fn().mockResolvedValue({ success: true });
+const setActiveProfileProxyMock = jest.fn().mockResolvedValue(undefined);
+const setToastMock = jest.fn();
 
 jest.mock('@tanstack/react-query', () => ({
   useMutation: () => ({ mutateAsync: mutateAsyncMock }),
@@ -19,11 +22,19 @@ jest.mock('@/components/auth/Auth', () => {
   const React = require('react');
   return {
     AuthContext: React.createContext({
-      connectedProfile: { handle: 'bob' },
-      activeProfileProxy: false,
-      setToast: jest.fn(),
+      connectedProfile: { handle: 'bob', id: '1' },
+      activeProfileProxy: null,
+      fetchingProfile: false,
+      requestAuth: requestAuthMock,
+      setToast: setToastMock,
+      setActiveProfileProxy: setActiveProfileProxyMock,
     }),
-    useAuth: () => ({ setTitle: setTitleMock }),
+    useAuth: () => ({
+      setTitle: setTitleMock,
+      requestAuth: requestAuthMock,
+      setToast: setToastMock,
+      setActiveProfileProxy: setActiveProfileProxyMock,
+    }),
   };
 });
 
@@ -83,7 +94,7 @@ jest.mock('@/contexts/TitleContext', () => ({
   TitleProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-import Notifications from '@/components/brain/notifications/Notifications';
+import Notifications from '@/components/brain/notifications';
 
 describe('Notifications component', () => {
   beforeEach(() => {
@@ -91,6 +102,11 @@ describe('Notifications component', () => {
     mutateAsyncMock.mockResolvedValue(undefined);
     useNotificationsQueryMock.mockReset();
     setTitleMock.mockClear();
+    requestAuthMock.mockClear();
+    requestAuthMock.mockResolvedValue({ success: true });
+    setActiveProfileProxyMock.mockClear();
+    setActiveProfileProxyMock.mockResolvedValue(undefined);
+    setToastMock.mockClear();
   });
 
   it('shows loader when fetching and no items', async () => {
@@ -99,9 +115,11 @@ describe('Notifications component', () => {
       isFetching: true,
       isFetchingNextPage: false,
       hasNextPage: false,
-      fetchNextPage: jest.fn(),
-      refetch: jest.fn(),
+      fetchNextPage: jest.fn().mockResolvedValue(undefined),
+      refetch: jest.fn().mockResolvedValue(undefined),
       isInitialQueryDone: false,
+      isSuccess: false,
+      error: null,
     });
 
     render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
@@ -119,9 +137,11 @@ describe('Notifications component', () => {
       isFetching: false,
       isFetchingNextPage: false,
       hasNextPage: false,
-      fetchNextPage: jest.fn(),
-      refetch: jest.fn(),
+      fetchNextPage: jest.fn().mockResolvedValue(undefined),
+      refetch: jest.fn().mockResolvedValue(undefined),
       isInitialQueryDone: true,
+      isSuccess: true,
+      error: null,
     });
 
     render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
@@ -138,9 +158,11 @@ describe('Notifications component', () => {
       isFetching: false,
       isFetchingNextPage: false,
       hasNextPage: false,
-      fetchNextPage: jest.fn(),
-      refetch: jest.fn(),
+      fetchNextPage: jest.fn().mockResolvedValue(undefined),
+      refetch: jest.fn().mockResolvedValue(undefined),
       isInitialQueryDone: true,
+      isSuccess: true,
+      error: null,
     });
 
     render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
