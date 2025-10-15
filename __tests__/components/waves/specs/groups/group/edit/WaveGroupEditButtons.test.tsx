@@ -24,6 +24,19 @@ jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupRemoveButton', ()
   },
 }));
 
+jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupManageIdentitiesModal', () => ({
+  __esModule: true,
+  WaveGroupManageIdentitiesMode: {
+    INCLUDE: 'INCLUDE',
+    EXCLUDE: 'EXCLUDE',
+  },
+  default: ({ mode, onClose }: any) => (
+    <div data-testid={`${mode.toLowerCase()}-modal`}>
+      <button onClick={onClose}>close</button>
+    </div>
+  ),
+}));
+
 jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => ({
   __esModule: true,
   default: () => <div data-testid="loader" />,
@@ -35,6 +48,7 @@ const mutateAsync = jest.fn();
 const auth = {
   setToast: jest.fn(),
   requestAuth: jest.fn().mockResolvedValue({ success: true }),
+  connectedProfile: { id: "profile-1", handle: "alice" },
 } as any;
 
 const wrapper = ({ children }: any) => (
@@ -45,7 +59,35 @@ const wrapper = ({ children }: any) => (
   </AuthContext.Provider>
 );
 
-const wave: any = { id: 'w1' };
+const baseGroup = {
+  id: "group-1",
+  name: "Group 1",
+  author: { id: "profile-1", handle: "alice" },
+  created_at: Date.now(),
+  is_hidden: false,
+  is_direct_message: false,
+};
+
+const wave: any = {
+  id: "w1",
+  visibility: { scope: { group: baseGroup } },
+  participation: {
+    scope: { group: baseGroup },
+    authenticated_user_eligible: true,
+  },
+  voting: {
+    scope: { group: baseGroup },
+    authenticated_user_eligible: true,
+  },
+  chat: {
+    scope: { group: baseGroup },
+    authenticated_user_eligible: true,
+  },
+  wave: {
+    admin_group: { group: baseGroup },
+    authenticated_user_eligible_for_admin: true,
+  },
+};
 
 describe('WaveGroupEditButtons', () => {
   beforeEach(() => {
