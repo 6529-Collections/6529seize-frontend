@@ -17,7 +17,7 @@ export default function UserPageLayout({
   handleOrWallet,
   children,
   initialStatements,
-}: UserPageLayoutProps) {
+}: Readonly<UserPageLayoutProps>) {
   const normalizedHandleOrWallet = handleOrWallet.toLowerCase();
   const mainAddress =
     initialProfile?.primary_wallet ?? normalizedHandleOrWallet;

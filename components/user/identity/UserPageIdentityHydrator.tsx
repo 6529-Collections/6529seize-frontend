@@ -69,7 +69,6 @@ export default function UserPageIdentityHydrator({
   }, [
     initProfileIdentityPage,
     profile,
-    initialActivityLogParams,
     activityLogsPayload,
     initialCICGivenParams,
     initialCicGivenData,

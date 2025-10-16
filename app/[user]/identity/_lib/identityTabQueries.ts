@@ -72,13 +72,13 @@ export const createIdentityTabParams = (
   const cicGivenParams = getInitialRatersParams({
     handleOrWallet: normalizedHandle,
     matter: MATTER_TYPE,
-    given: false,
+    given: true,
   });
 
   const cicReceivedParams = getInitialRatersParams({
     handleOrWallet: normalizedHandle,
     matter: MATTER_TYPE,
-    given: true,
+    given: false,
   });
 
   const activityLogParams: ActivityLogParams = {

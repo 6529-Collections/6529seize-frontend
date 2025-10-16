@@ -74,7 +74,10 @@ const { Page, generateMetadata } = createUserTabPage<IdentityTabExtraProps>({
   Tab: IdentityTab,
   prepare: async ({ profile, headers, user }) => {
     const fallbackHandleOrWallet =
-      profile.handle ?? profile.wallets?.[0]?.wallet ?? user;
+      profile.handle ??
+      profile.primary_wallet ??
+      profile.wallets?.[0]?.wallet ??
+      user;
     const identityTabResult = await fetchIdentityTabData({
       handleOrWallet: fallbackHandleOrWallet,
       headers,

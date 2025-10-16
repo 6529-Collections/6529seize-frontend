@@ -173,7 +173,7 @@ export const getProfileCicRatings = async ({
     params: {
       page: `${page}`,
       page_size: `${pageSize}`,
-      order: order.toLowerCase(),
+      order,
       order_by: orderBy.toLowerCase(),
       given: given ? "true" : "false",
     },

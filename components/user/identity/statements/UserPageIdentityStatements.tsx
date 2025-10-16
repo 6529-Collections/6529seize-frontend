@@ -5,6 +5,8 @@ import { CicStatement } from "@/entities/IProfile";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { STATEMENT_GROUP } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
+import { faCircleQuestion } from "@fortawesome/free-regular-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { Tooltip } from "react-tooltip";
@@ -135,20 +137,11 @@ export default function UserPageIdentityStatements({
                       aria-label="Statements help"
                       className="tw-rounded-full tw-h-10 tw-w-10 tw-inline-flex tw-items-center tw-justify-center focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
                       data-tooltip-id="statements-help">
-                      <svg
+                      <FontAwesomeIcon
+                        icon={faCircleQuestion}
                         className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-400"
-                        viewBox="0 0 24 24"
-                        fill="none"
                         aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path
-                          d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
+                      />
                     </div>
                     <Tooltip
                       id="statements-help"

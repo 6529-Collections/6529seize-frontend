@@ -1,7 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
-
 import { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { CountlessPage, Page } from "@/helpers/Types";
@@ -36,10 +34,7 @@ export default function UserPageIdentityWrapper({
   readonly initialCicReceivedData: Page<RatingWithProfileInfoAndLevel>;
   readonly initialActivityLogData?: CountlessPage<ProfileActivityLog>;
 }) {
-  const normalizedHandle = useMemo(
-    () => handleOrWallet.toLowerCase(),
-    [handleOrWallet]
-  );
+  const normalizedHandle = handleOrWallet.toLowerCase();
 
   const { profile: hydratedProfile } = useIdentity({
     handleOrWallet: normalizedHandle,
@@ -51,14 +46,14 @@ export default function UserPageIdentityWrapper({
   return (
     <UserPageSetUpProfileWrapper
       profile={resolvedProfile}
-      handleOrWallet={handleOrWallet}
+      handleOrWallet={normalizedHandle}
     >
       <UserPageIdentity
         profile={resolvedProfile}
         initialCICReceivedParams={initialCICReceivedParams}
         initialCICGivenParams={initialCICGivenParams}
         initialActivityLogParams={initialActivityLogParams}
-        handleOrWallet={handleOrWallet}
+        handleOrWallet={normalizedHandle}
         initialStatements={initialStatements}
         initialCicGivenData={initialCicGivenData}
         initialCicReceivedData={initialCicReceivedData}
