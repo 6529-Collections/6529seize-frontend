@@ -5,7 +5,7 @@ import type {
   RatingWithProfileInfoAndLevel,
 } from "@/entities/IProfile";
 import { ProfileActivityFilterTargetType, RateMatter } from "@/enums";
-import { convertActivityLogParams, getProfileLogTypes } from "@/helpers/profile-logs.helpers";
+import { getProfileLogTypes } from "@/helpers/profile-logs.helpers";
 import type { CountlessPage, Page } from "@/helpers/Types";
 import {
   getInitialRatersParams,
@@ -13,7 +13,6 @@ import {
   getProfileCicStatements,
 } from "@/helpers/server.helpers";
 import type { ProfileRatersParams } from "@/components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
-import { publicEnv } from "@/config/env";
 
 type IdentityRatersPage = Page<RatingWithProfileInfoAndLevel>;
 
@@ -143,67 +142,6 @@ const createIdentityCacheHints = (
   revalidateSeconds: IDENTITY_CACHE_REVALIDATE_SECONDS,
 });
 
-const logIdentityFetch = async <T>({
-  handle,
-  key,
-  fetcher,
-  describeRequest,
-}: {
-  handle: string;
-  key: IdentityTabDatasetKey;
-  fetcher: () => Promise<T>;
-  describeRequest?: () => string;
-}): Promise<T> => {
-  if (describeRequest) {
-    console.info(
-      `[identity][fetch] ${key} for ${handle} request -> ${describeRequest()}`
-    );
-  }
-  const startedAt = Date.now();
-  try {
-    const result = await fetcher();
-    console.info(
-      `[identity][fetch] ${key} for ${handle} succeeded in ${
-        Date.now() - startedAt
-      }ms`
-    );
-    return result;
-  } catch (error) {
-    console.error(
-      `[identity][fetch] ${key} for ${handle} failed in ${
-        Date.now() - startedAt
-      }ms`,
-      error
-    );
-    throw error;
-  }
-};
-
-const createApiRequestUrl = ({
-  endpoint,
-  params,
-}: {
-  endpoint: string;
-  params?: Record<string, string | undefined>;
-}): string => {
-  const baseUrl = `${publicEnv.API_ENDPOINT}/api/${endpoint}`;
-  if (!params) {
-    return baseUrl;
-  }
-
-  const queryParams = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
-    if (value === undefined || value === null) {
-      return;
-    }
-    const normalizedValue = value === "nic" ? "cic" : value;
-    queryParams.set(key, normalizedValue);
-  });
-
-  const queryString = queryParams.toString();
-  return queryString ? `${baseUrl}?${queryString}` : baseUrl;
-};
-
 export const fetchIdentityTabData = async ({
   handleOrWallet,
   headers,
@@ -214,51 +152,22 @@ export const fetchIdentityTabData = async ({
   const normalizedHandle = handleOrWallet.toLowerCase();
   const params = createIdentityTabParams(normalizedHandle);
 
-  const activityLogRequestParams = convertActivityLogParams({
-    params: params.activityLogParams,
-    disableActiveGroup: true,
-  });
-
-  const activityLogRequestUrl = createApiRequestUrl({
-    endpoint: "profile-logs",
-    params: activityLogRequestParams,
-  });
-
-  console.info(
-    `[identity][fetch] activityLog for ${normalizedHandle} skipped (client fetch) -> ${activityLogRequestUrl}`
-  );
-
   const [statementsResult, cicGivenResult, cicReceivedResult] =
     await Promise.allSettled([
-      logIdentityFetch({
-        handle: normalizedHandle,
-        key: "statements",
-        fetcher: () =>
-          getProfileCicStatements({
-            handleOrWallet: normalizedHandle,
-            headers,
-          }),
-    }),
-    logIdentityFetch({
-      handle: normalizedHandle,
-      key: "cicGiven",
-      fetcher: () =>
-        getProfileCicRatings({
-          handleOrWallet: normalizedHandle,
-          headers,
-          params: params.cicGivenParams,
-        }),
-    }),
-    logIdentityFetch({
-      handle: normalizedHandle,
-      key: "cicReceived",
-      fetcher: () =>
-        getProfileCicRatings({
-          handleOrWallet: normalizedHandle,
-          headers,
-          params: params.cicReceivedParams,
-        }),
-    }),
+      getProfileCicStatements({
+        handleOrWallet: normalizedHandle,
+        headers,
+      }),
+      getProfileCicRatings({
+        handleOrWallet: normalizedHandle,
+        headers,
+        params: params.cicGivenParams,
+      }),
+      getProfileCicRatings({
+        handleOrWallet: normalizedHandle,
+        headers,
+        params: params.cicReceivedParams,
+      }),
   ]);
 
   const statementsOutcome = resolveSettledResult({

@@ -26,23 +26,8 @@ jest.mock("@/helpers/server.helpers", () => {
 });
 
 describe("identityTabQueries", () => {
-  let infoSpy: jest.SpyInstance;
-  let errorSpy: jest.SpyInstance;
-
-  beforeAll(() => {
-    infoSpy = jest.spyOn(console, "info").mockImplementation(() => {});
-    errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
-  });
-
-  afterAll(() => {
-    infoSpy.mockRestore();
-    errorSpy.mockRestore();
-  });
-
   beforeEach(() => {
     jest.clearAllMocks();
-    infoSpy.mockClear();
-    errorSpy.mockClear();
   });
 
   it("creates initial params with normalized handle and default log types", () => {
