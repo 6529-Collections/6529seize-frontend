@@ -139,4 +139,23 @@ describe('OpenGraphPreview', () => {
     );
   });
 
+  it('wraps long unbroken segments to keep layout consistent', () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue('/article');
+
+    const longUrl = `https://example.com/${'a'.repeat(48)}`;
+
+    render(
+      <OpenGraphPreview
+        href="https://example.com/article"
+        preview={{
+          description: `Visit ${longUrl} for additional context`,
+        }}
+      />
+    );
+
+    const wrappedSegment = screen.getByText(longUrl);
+    expect(wrappedSegment.tagName).toBe('SPAN');
+    expect(wrappedSegment).toHaveClass('tw-break-all');
+  });
+
 });

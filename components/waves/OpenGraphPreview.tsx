@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -51,6 +51,7 @@ const IMAGE_KEYS = [
   "secureUrl",
 ];
 const IMAGE_COLLECTION_KEYS = ["images", "ogImages", "og_images", "thumbnails"];
+const LONG_UNBROKEN_SEGMENT_THRESHOLD = 32;
 
 function readFirstString(
   data: OpenGraphPreviewData | null | undefined,
@@ -133,6 +134,45 @@ function extractImageUrl(
   }
 
   return undefined;
+}
+
+function wrapLongUnbrokenSegments(value: string | undefined): ReactNode {
+  if (!value) {
+    return value ?? "";
+  }
+
+  const tokens = value.split(/(\s+)/u);
+  let mutated = false;
+
+  const nodes = tokens
+    .map((token, index) => {
+      if (!token) {
+        return null;
+      }
+
+      const trimmed = token.trim();
+      if (trimmed.length >= LONG_UNBROKEN_SEGMENT_THRESHOLD) {
+        mutated = true;
+        return (
+          <span key={`og-wrap-${index}`} className="tw-break-all">
+            {token}
+          </span>
+        );
+      }
+
+      return (
+        <Fragment key={`og-wrap-${index}`}>
+          {token}
+        </Fragment>
+      );
+    })
+    .filter((token): token is ReactNode => token !== null);
+
+  if (!mutated) {
+    return value;
+  }
+
+  return nodes;
 }
 
 function extractDomainFromUrl(url: string | undefined): string | undefined {
@@ -268,8 +308,8 @@ export default function OpenGraphPreview({
               href={effectiveHref}
               target={linkTarget}
               rel={linkRel}
-              className="tw-break-words tw-break-all tw-[overflow-wrap:anywhere] tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white">
-              {domain ?? href}
+              className="tw-break-words tw-[overflow-wrap:anywhere] tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white">
+              {wrapLongUnbrokenSegments(domain ?? href)}
             </Link>
           </div>
         </div>
@@ -313,12 +353,12 @@ export default function OpenGraphPreview({
               href={effectiveHref}
               target={linkTarget}
               rel={linkRel}
-              className="tw-break-words tw-break-all tw-[overflow-wrap:anywhere] tw-text-lg tw-font-semibold tw-leading-snug tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white">
-              {title ?? domain ?? href}
+              className="tw-break-words tw-[overflow-wrap:anywhere] tw-text-lg tw-font-semibold tw-leading-snug tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white">
+              {wrapLongUnbrokenSegments(title ?? domain ?? href)}
             </Link>
             {description && (
-              <p className="tw-m-0 tw-text-sm tw-text-iron-300 tw-line-clamp-3 tw-break-words tw-break-all tw-[overflow-wrap:anywhere] tw-whitespace-pre-line">
-                {description}
+              <p className="tw-m-0 tw-text-sm tw-text-iron-300 tw-line-clamp-3 tw-break-words tw-[overflow-wrap:anywhere] tw-whitespace-pre-line">
+                {wrapLongUnbrokenSegments(description)}
               </p>
             )}
           </div>
