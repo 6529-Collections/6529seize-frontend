@@ -65,7 +65,7 @@ export default function NFTMarketplaceLinks({
       <Link
         title="Rarible"
         className="hover:tw-opacity-75"
-        href={`https://rarible.com/token/${contract}:${id}`}
+        href={`https://rarible.com/ethereum/items/${contract}:${id}`}
         target="_blank"
         rel="noopener noreferrer"
       >
