@@ -16,8 +16,8 @@ export default function LinkHandlerFrame({
   relativeHref,
 }: LinkHandlerFrameProps) {
   return (
-    <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-      <div className="tw-flex-1 tw-min-w-0">{children}</div>
+    <div className="tw-flex tw-items-stretch tw-w-full tw-min-w-0 tw-max-w-full tw-gap-x-1">
+      <div className="tw-flex-1 tw-min-w-0 tw-max-w-full">{children}</div>
       <ChatItemHrefButtons
         href={href}
         hideLink={hideLink}

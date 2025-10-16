@@ -197,8 +197,8 @@ export function LinkPreviewCardLayout({
   const relativeHref = getRelativeHref(href);
 
   return (
-    <div className="tw-flex tw-w-full tw-items-stretch tw-gap-x-1">
-      <div className="tw-flex-1 tw-min-w-0">{children}</div>
+    <div className="tw-flex tw-w-full tw-min-w-0 tw-max-w-full tw-items-stretch tw-gap-x-1">
+      <div className="tw-flex-1 tw-min-w-0 tw-max-w-full">{children}</div>
       <ChatItemHrefButtons href={href} relativeHref={relativeHref} />
     </div>
   );
@@ -232,7 +232,7 @@ export default function OpenGraphPreview({
     return (
       <LinkPreviewCardLayout href={href}>
         <div
-          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
+          className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
           <div
             className="tw-animate-pulse tw-flex tw-flex-col tw-gap-y-3"
             data-testid="og-preview-skeleton">
@@ -256,7 +256,7 @@ export default function OpenGraphPreview({
     return (
       <LinkPreviewCardLayout href={href}>
         <div
-          className="tw-flex tw-h-full tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-6"
+          className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-6"
           data-testid="og-preview-unavailable">
           <div className="tw-text-center tw-space-y-2">
             <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-400">
@@ -266,7 +266,7 @@ export default function OpenGraphPreview({
               href={effectiveHref}
               target={linkTarget}
               rel={linkRel}
-              className="tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white">
+              className="tw-break-words tw-[overflow-wrap:anywhere] tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white">
               {domain ?? href}
             </Link>
           </div>
@@ -278,7 +278,7 @@ export default function OpenGraphPreview({
   return (
     <LinkPreviewCardLayout href={href}>
       <div
-        className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4"
+        className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4"
         data-testid="og-preview-card">
         <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row">
           {imageUrl && (
@@ -311,11 +311,11 @@ export default function OpenGraphPreview({
               href={effectiveHref}
               target={linkTarget}
               rel={linkRel}
-              className="tw-text-lg tw-font-semibold tw-leading-snug tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white">
+              className="tw-break-words tw-[overflow-wrap:anywhere] tw-text-lg tw-font-semibold tw-leading-snug tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white">
               {title ?? domain ?? href}
             </Link>
             {description && (
-              <p className="tw-m-0 tw-text-sm tw-text-iron-300 tw-line-clamp-3 tw-break-words tw-whitespace-pre-line">
+              <p className="tw-m-0 tw-text-sm tw-text-iron-300 tw-line-clamp-3 tw-break-words tw-[overflow-wrap:anywhere] tw-whitespace-pre-line">
                 {description}
               </p>
             )}
