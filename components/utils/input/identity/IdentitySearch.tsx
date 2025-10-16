@@ -20,12 +20,14 @@ export default function IdentitySearch({
   size = IdentitySearchSize.MD,
   label = "Identity",
   error = false,
+  autoFocus = false,
   setIdentity,
 }: {
   readonly identity: string | null;
   readonly size?: IdentitySearchSize;
   readonly error?: boolean;
   readonly label?: string;
+  readonly autoFocus?: boolean;
 
   readonly setIdentity: (identity: string | null) => void;
 }) {
@@ -100,6 +102,13 @@ export default function IdentitySearch({
   const wrapperRef = useRef<HTMLDivElement>(null);
   useClickAway(wrapperRef, () => setIsOpen(false));
   useKeyPressEvent("Escape", () => setIsOpen(false));
+
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (autoFocus) {
+      inputRef.current?.focus();
+    }
+  }, [autoFocus]);
 
   const handleArrowNavigation = (event: KeyboardEvent<HTMLInputElement>) => {
     if (!data?.length) {
@@ -178,7 +187,9 @@ export default function IdentitySearch({
   return (
     <div className="tw-group tw-w-full tw-relative" ref={wrapperRef}>
       <input
+        ref={inputRef}
         type="text"
+        autoFocus={autoFocus}
         value={searchCriteria ?? ""}
         onChange={(e) => onSearchCriteriaChange(e.target.value)}
         onFocus={() => onFocusChange(true)}

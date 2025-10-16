@@ -74,6 +74,7 @@ export default function WaveGroupManageIdentitiesModal({
                 size={IdentitySearchSize.MD}
                 identity={identity}
                 setIdentity={setIdentity}
+                autoFocus
                 label="Identity handle or address"
               />
             </div>
