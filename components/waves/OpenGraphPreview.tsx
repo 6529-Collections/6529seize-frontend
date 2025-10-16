@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { Fragment, type ReactElement, type ReactNode } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -51,6 +51,7 @@ const IMAGE_KEYS = [
   "secureUrl",
 ];
 const IMAGE_COLLECTION_KEYS = ["images", "ogImages", "og_images", "thumbnails"];
+const LONG_UNBROKEN_SEGMENT_THRESHOLD = 32;
 
 function readFirstString(
   data: OpenGraphPreviewData | null | undefined,
@@ -135,6 +136,45 @@ function extractImageUrl(
   return undefined;
 }
 
+function wrapLongUnbrokenSegments(value: string | undefined): ReactNode {
+  if (!value) {
+    return value ?? "";
+  }
+
+  const tokens = value.split(/(\s+)/);
+  let mutated = false;
+  let offset = 0;
+
+  const nodes = tokens
+    .map((token) => {
+      if (!token) {
+        return null;
+      }
+
+      const key = `og-wrap-${offset}`;
+      offset += token.length;
+
+      const trimmed = token.trim();
+      if (trimmed.length >= LONG_UNBROKEN_SEGMENT_THRESHOLD) {
+        mutated = true;
+        return (
+          <span key={key} className="tw-break-all">
+            {token}
+          </span>
+        );
+      }
+
+      return <Fragment key={key}>{token}</Fragment>;
+    })
+    .filter((token): token is ReactElement => token !== null);
+
+  if (!mutated) {
+    return value;
+  }
+
+  return nodes;
+}
+
 function extractDomainFromUrl(url: string | undefined): string | undefined {
   if (!url) {
     return undefined;
@@ -197,8 +237,10 @@ export function LinkPreviewCardLayout({
   const relativeHref = getRelativeHref(href);
 
   return (
-    <div className="tw-flex tw-w-full tw-items-stretch tw-gap-x-1">
-      <div className="tw-flex-1 tw-min-w-0">{children}</div>
+    <div className="tw-flex tw-w-full tw-min-w-0 tw-max-w-full tw-items-stretch tw-gap-x-1">
+      <div className="tw-flex-1 tw-min-w-0 tw-max-w-full tw-overflow-hidden focus-within:tw-overflow-visible">
+        {children}
+      </div>
       <ChatItemHrefButtons href={href} relativeHref={relativeHref} />
     </div>
   );
@@ -232,7 +274,7 @@ export default function OpenGraphPreview({
     return (
       <LinkPreviewCardLayout href={href}>
         <div
-          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
+          className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
           <div
             className="tw-animate-pulse tw-flex tw-flex-col tw-gap-y-3"
             data-testid="og-preview-skeleton">
@@ -256,7 +298,7 @@ export default function OpenGraphPreview({
     return (
       <LinkPreviewCardLayout href={href}>
         <div
-          className="tw-flex tw-h-full tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-6"
+          className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-6"
           data-testid="og-preview-unavailable">
           <div className="tw-text-center tw-space-y-2">
             <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-400">
@@ -266,8 +308,8 @@ export default function OpenGraphPreview({
               href={effectiveHref}
               target={linkTarget}
               rel={linkRel}
-              className="tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white">
-              {domain ?? href}
+              className="tw-break-words tw-[overflow-wrap:anywhere] tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white">
+              {wrapLongUnbrokenSegments(domain ?? href)}
             </Link>
           </div>
         </div>
@@ -278,7 +320,7 @@ export default function OpenGraphPreview({
   return (
     <LinkPreviewCardLayout href={href}>
       <div
-        className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4"
+        className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4"
         data-testid="og-preview-card">
         <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row">
           {imageUrl && (
@@ -304,19 +346,19 @@ export default function OpenGraphPreview({
           <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-y-2">
             {domain && (
               <span className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
-                {domain}
+            {wrapLongUnbrokenSegments(domain)}
               </span>
             )}
             <Link
               href={effectiveHref}
               target={linkTarget}
               rel={linkRel}
-              className="tw-text-lg tw-font-semibold tw-leading-snug tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white">
-              {title ?? domain ?? href}
+              className="tw-break-words tw-[overflow-wrap:anywhere] tw-text-lg tw-font-semibold tw-leading-snug tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white">
+              {wrapLongUnbrokenSegments(title ?? domain ?? href)}
             </Link>
             {description && (
-              <p className="tw-m-0 tw-text-sm tw-text-iron-300 tw-line-clamp-3 tw-break-words tw-whitespace-pre-line">
-                {description}
+              <p className="tw-m-0 tw-text-sm tw-text-iron-300 tw-line-clamp-3 tw-break-words tw-[overflow-wrap:anywhere] tw-whitespace-pre-line">
+                {wrapLongUnbrokenSegments(description)}
               </p>
             )}
           </div>
