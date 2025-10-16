@@ -21,7 +21,7 @@ export default function LinkHandlerFrame({
     relativeHref ??
     (() => {
       const relative = removeBaseEndpoint(href);
-      return relative && relative.startsWith("/") ? relative : undefined;
+      return relative?.startsWith("/") ? relative : undefined;
     })();
 
   return (

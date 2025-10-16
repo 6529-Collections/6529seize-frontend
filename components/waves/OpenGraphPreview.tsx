@@ -143,28 +143,28 @@ function wrapLongUnbrokenSegments(value: string | undefined): ReactNode {
 
   const tokens = value.split(/(\s+)/);
   let mutated = false;
+  let offset = 0;
 
   const nodes = tokens
-    .map((token, index) => {
+    .map((token) => {
       if (!token) {
         return null;
       }
+
+      const key = `og-wrap-${offset}`;
+      offset += token.length;
 
       const trimmed = token.trim();
       if (trimmed.length >= LONG_UNBROKEN_SEGMENT_THRESHOLD) {
         mutated = true;
         return (
-          <span key={`og-wrap-${index}`} className="tw-break-all">
+          <span key={key} className="tw-break-all">
             {token}
           </span>
         );
       }
 
-      return (
-        <Fragment key={`og-wrap-${index}`}>
-          {token}
-        </Fragment>
-      );
+      return <Fragment key={key}>{token}</Fragment>;
     })
     .filter((token): token is ReactElement => token !== null);
 
@@ -346,7 +346,7 @@ export default function OpenGraphPreview({
           <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-y-2">
             {domain && (
               <span className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
-                {domain}
+            {wrapLongUnbrokenSegments(domain)}
               </span>
             )}
             <Link
