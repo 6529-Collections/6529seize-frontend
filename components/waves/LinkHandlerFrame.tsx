@@ -17,7 +17,7 @@ export default function LinkHandlerFrame({
 }: LinkHandlerFrameProps) {
   return (
     <div className="tw-flex tw-items-stretch tw-w-full tw-min-w-0 tw-max-w-full tw-gap-x-1">
-      <div className="tw-flex-1 tw-min-w-0 tw-max-w-full tw-overflow-hidden">
+      <div className="tw-flex-1 tw-min-w-0 tw-max-w-full tw-overflow-hidden focus-within:tw-overflow-visible">
         {children}
       </div>
       <ChatItemHrefButtons
