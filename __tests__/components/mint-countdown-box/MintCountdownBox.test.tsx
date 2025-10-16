@@ -149,7 +149,7 @@ describe("MintCountdownBox (new API)", () => {
     it("shows ended state (sold out) message", () => {
       render(
         <MintCountdownBox
-          mintInfo={{ title: "X", date: 1640995200, isEnded: true }}
+          mintInfo={{ title: "X", date: 1640995200, isSoldOut: true }}
         />
       );
       expect(
