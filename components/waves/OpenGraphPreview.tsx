@@ -1,4 +1,4 @@
-import { Fragment, type ReactNode } from "react";
+import { Fragment, type ReactElement, type ReactNode } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -141,7 +141,7 @@ function wrapLongUnbrokenSegments(value: string | undefined): ReactNode {
     return value ?? "";
   }
 
-  const tokens = value.split(/(\s+)/u);
+  const tokens = value.split(/(\s+)/);
   let mutated = false;
 
   const nodes = tokens
@@ -166,7 +166,7 @@ function wrapLongUnbrokenSegments(value: string | undefined): ReactNode {
         </Fragment>
       );
     })
-    .filter((token): token is ReactNode => token !== null);
+    .filter((token): token is ReactElement => token !== null);
 
   if (!mutated) {
     return value;
