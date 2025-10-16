@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import IdentitySearch, {
@@ -31,6 +31,14 @@ export default function WaveGroupManageIdentitiesModal({
   const [identity, setIdentity] = useState<string | null>(null);
   const actionLabel =
     mode === WaveGroupManageIdentitiesMode.INCLUDE ? "Include" : "Exclude";
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (identity) {
+      onClose();
+    }
+  };
 
   return createPortal(
     <div className="tw-cursor-default tw-relative tw-z-50">
@@ -69,38 +77,35 @@ export default function WaveGroupManageIdentitiesModal({
                 </svg>
               </button>
             </div>
-            <div className="tw-mt-6">
-              <IdentitySearch
-                size={IdentitySearchSize.MD}
-                identity={identity}
-                setIdentity={setIdentity}
-                autoFocus
-                label="Identity handle or address"
-              />
-            </div>
-            <div className="tw-mt-6 tw-flex tw-justify-end">
-              <button
-                onClick={() => {
-                  if (identity) {
-                    onClose();
-                  }
-                }}
-                type="button"
-                disabled={!identity}
-                className={`tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-rounded-lg tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out ${
-                  identity
-                    ? "tw-bg-primary-500 tw-border-primary-500 tw-text-white hover:tw-bg-primary-600 hover:tw-border-primary-600"
-                    : "tw-bg-iron-800 tw-border-iron-700 tw-text-iron-400 tw-opacity-60"
-                }`}>
-                {actionLabel}
-              </button>
-              <button
-                onClick={onClose}
-                type="button"
-                className="tw-ml-3 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 hover:tw-border-iron-600">
-                Cancel
-              </button>
-            </div>
+            <form onSubmit={handleSubmit}>
+              <div className="tw-mt-6">
+                <IdentitySearch
+                  size={IdentitySearchSize.MD}
+                  identity={identity}
+                  setIdentity={setIdentity}
+                  autoFocus
+                  label="Identity handle or address"
+                />
+              </div>
+              <div className="tw-mt-6 tw-flex tw-justify-end">
+                <button
+                  type="submit"
+                  disabled={!identity}
+                  className={`tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-rounded-lg tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out ${
+                    identity
+                      ? "tw-bg-primary-500 tw-border-primary-500 tw-text-white hover:tw-bg-primary-600 hover:tw-border-primary-600"
+                      : "tw-bg-iron-800 tw-border-iron-700 tw-text-iron-400 tw-opacity-60"
+                  }`}>
+                  {actionLabel}
+                </button>
+                <button
+                  onClick={onClose}
+                  type="button"
+                  className="tw-ml-3 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 hover:tw-border-iron-600">
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
