@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, KeyboardEvent } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { CommunityMemberMinimal } from "@/entities/IProfile";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -73,16 +73,20 @@ export default function IdentitySearch({
   });
 
   const [isOpen, setIsOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
   const onValueChange = (newValue: string | null) => {
     setIdentity(newValue);
     setSearchCriteria(newValue);
     setIsOpen(false);
+    setHighlightedIndex(null);
   };
 
   const onFocusChange = (newV: boolean) => {
     if (newV) {
       setIsOpen(true);
+      return;
     }
+    setHighlightedIndex(null);
   };
 
   const onSearchCriteriaChange = (newV: string | null) => {
@@ -90,11 +94,87 @@ export default function IdentitySearch({
     if (!newV) {
       setIdentity(null);
     }
+    setHighlightedIndex(null);
   };
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   useClickAway(wrapperRef, () => setIsOpen(false));
   useKeyPressEvent("Escape", () => setIsOpen(false));
+
+  const handleArrowNavigation = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (!data?.length) {
+      return;
+    }
+
+    const maxIndex = data.length - 1;
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setIsOpen(true);
+      setHighlightedIndex((current) => {
+        if (current === null || current >= maxIndex) {
+          return 0;
+        }
+        return current + 1;
+      });
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setIsOpen(true);
+      setHighlightedIndex((current) => {
+        if (current === null || current <= 0) {
+          return maxIndex;
+        }
+        return current - 1;
+      });
+      return;
+    }
+
+    if (event.key === "Enter" && highlightedIndex !== null) {
+      event.preventDefault();
+      const profile = data[highlightedIndex];
+      if (profile) {
+        onValueChange(profile.handle ?? profile.wallet ?? null);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (!isOpen) {
+      setHighlightedIndex(null);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!data?.length) {
+      setHighlightedIndex(null);
+      return;
+    }
+
+    if (identity) {
+      const nextIndex = data.findIndex((profile) => {
+        const value = profile.handle ?? profile.wallet;
+        return value?.toLowerCase() === identity.toLowerCase();
+      });
+
+      if (nextIndex >= 0) {
+        setHighlightedIndex(nextIndex);
+        return;
+      }
+    }
+
+    setHighlightedIndex((current) => {
+      if (current === null) {
+        return null;
+      }
+
+      const maxIndex = data.length - 1;
+      return current > maxIndex ? maxIndex : current;
+    });
+  }, [data, identity]);
+
   return (
     <div className="tw-group tw-w-full tw-relative" ref={wrapperRef}>
       <input
@@ -103,6 +183,7 @@ export default function IdentitySearch({
         onChange={(e) => onSearchCriteriaChange(e.target.value)}
         onFocus={() => onFocusChange(true)}
         onBlur={() => onFocusChange(false)}
+        onKeyDown={(event) => handleArrowNavigation(event)}
         id={randomId}
         autoComplete="off"
         className={`${INPUT_CLASSES[size]} ${
@@ -158,6 +239,7 @@ export default function IdentitySearch({
         selected={identity}
         searchCriteria={searchCriteria}
         profiles={data ?? []}
+        highlightedIndex={highlightedIndex}
         onProfileSelect={(profile) =>
           onValueChange(profile?.handle ?? profile?.wallet ?? null)
         }
