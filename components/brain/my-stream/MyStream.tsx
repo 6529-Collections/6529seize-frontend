@@ -44,7 +44,7 @@ export default function MyStream({
   
   // Update stream new items status in title context
   useSetStreamHasNewItems(hasNewItems);
-  const showLoader = !isInitialQueryDone && items.length === 0;
+  const showLoader = (!isInitialQueryDone || isFetching) && items.length === 0;
 
   return (
     <div className="tw-h-full">

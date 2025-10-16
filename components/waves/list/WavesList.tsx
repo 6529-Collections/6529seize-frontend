@@ -9,10 +9,12 @@ import WavesListHeader from "./header/WavesListHeader";
 import WavesListSearchResults from "./WavesListSearchResults";
 
 export default function WavesList({
+  heading = "Waves",
   showCreateNewButton,
   onCreateNewWave,
   onCreateNewDirectMessage,
 }: {
+  readonly heading?: string;
   readonly showCreateNewButton?: boolean;
   readonly onCreateNewWave: () => void;
   readonly onCreateNewDirectMessage: () => void;
@@ -77,6 +79,7 @@ export default function WavesList({
     <div className="tailwind-scope">
       <div className="tw-pb-14 lg:tw-pb-24 tw-px-2 lg:tw-px-6 xl:tw-px-8 tw-mx-auto">
         <WavesListHeader
+          title={heading}
           identity={identity}
           waveName={waveName}
           showCreateNewButton={showCreateNewButton}

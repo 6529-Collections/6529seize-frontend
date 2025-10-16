@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 
 export default function WavesListHeader({
+  title = "Waves",
   identity,
   waveName,
   showCreateNewButton,
@@ -16,6 +17,7 @@ export default function WavesListHeader({
   setIdentity,
   setWaveName,
 }: {
+  readonly title?: string;
   readonly identity: string | null;
   readonly waveName: string | null;
   readonly showCreateNewButton?: boolean;
@@ -36,7 +38,7 @@ export default function WavesListHeader({
   );
   return (
     <div className="tw-mt-4 md:tw-mt-8">
-      <h1 className="tw-text-3xl md:tw-text-5xl tw-mb-0">Waves</h1>
+      <h1 className="tw-text-3xl md:tw-text-5xl tw-mb-0">{title}</h1>
       <div className="tw-mt-4 md:tw-mt-6 tw-flex tw-flex-col md:tw-flex-row tw-w-full md:tw-items-center tw-justify-between tw-gap-4">
         <WavesListSearch
           identity={identity}

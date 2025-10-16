@@ -57,7 +57,7 @@ const calculateHeightStyle = (
   capacitorSpace: number // Accept specific space value
 ): React.CSSProperties => {
   // Use dynamic viewport height to avoid extra space on mobile browsers
-  const heightCalc = `calc(100dvh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${spaces.mobileNavSpace}px - ${capacitorSpace}px)`;
+  const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${spaces.mobileNavSpace}px - ${capacitorSpace}px)`;
   return {
     height: heightCalc,
     maxHeight: heightCalc,
@@ -431,7 +431,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       spaces.spacerSpace +
       spaces.mobileTabsSpace +
       spaces.mobileNavSpace;
-    const heightCalc = `calc(100vh - ${totalOffset}px)`;
+    const heightCalc = `calc(100dvh - ${totalOffset}px)`;
     return {
       height: heightCalc,
       maxHeight: heightCalc,

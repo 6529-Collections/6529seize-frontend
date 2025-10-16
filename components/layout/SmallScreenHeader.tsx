@@ -16,7 +16,7 @@ export default function SmallScreenHeader({
   isMenuOpen,
 }: SmallScreenHeaderProps) {
   return (
-    <header className="tailwind-scope tw-flex-shrink-0 tw-bg-black tw-border-b tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-t-0">
+    <header className="tailwind-scope tw-sticky tw-top-0 tw-z-50 tw-flex-shrink-0 tw-bg-black tw-border-b tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-t-0">
       <div className="tw-flex tw-items-center tw-justify-between tw-h-16 tw-px-5">
         <Link href="/" className="tw-flex tw-items-center">
           <Image

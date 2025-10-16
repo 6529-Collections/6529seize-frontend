@@ -55,7 +55,12 @@ const WebSidebarNav = React.forwardRef<
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [openSubmenuKey, setOpenSubmenuKey] = useState<string | null>(null);
-  const [submenuLeft, setSubmenuLeft] = useState<number | null>(null);
+  const [submenuAnchor, setSubmenuAnchor] = useState<{
+    left: number;
+    top: number;
+    height: number;
+  } | null>(null);
+  const [submenuTrigger, setSubmenuTrigger] = useState<HTMLElement | null>(null);
 
   useKey(
     (event) => event.metaKey && event.key === "k",
@@ -80,7 +85,8 @@ const WebSidebarNav = React.forwardRef<
 
   const closeSubmenu = useCallback(() => {
     setOpenSubmenuKey(null);
-    setSubmenuLeft(null);
+    setSubmenuAnchor(null);
+    setSubmenuTrigger(null);
   }, []);
 
   useImperativeHandle(ref, () => ({ closeSubmenu }), [closeSubmenu]);
@@ -120,13 +126,19 @@ const WebSidebarNav = React.forwardRef<
         if (isCollapsed) {
           const target = event?.currentTarget as HTMLElement | undefined;
           const nextKey = openSubmenuKey === sectionKey ? null : sectionKey;
+          setOpenSubmenuKey(nextKey);
           if (nextKey && target) {
             const rect = target.getBoundingClientRect();
-            setSubmenuLeft(rect.right);
+            setSubmenuAnchor({
+              left: rect.right + 12,
+              top: rect.top,
+              height: rect.height,
+            });
+            setSubmenuTrigger(target);
           } else {
-            setSubmenuLeft(null);
+            setSubmenuAnchor(null);
+            setSubmenuTrigger(null);
           }
-          setOpenSubmenuKey(nextKey);
         } else {
           setExpandedKeys((prev) =>
             prev.includes(sectionKey)
@@ -136,6 +148,77 @@ const WebSidebarNav = React.forwardRef<
         }
       },
     [isCollapsed, openSubmenuKey]
+  );
+
+  useEffect(() => {
+    if (!isCollapsed || !submenuTrigger) {
+      return;
+    }
+
+    const updateAnchor = () => {
+      if (!submenuTrigger) return;
+      const rect = submenuTrigger.getBoundingClientRect();
+      setSubmenuAnchor({
+        left: rect.right + 12,
+        top: rect.top,
+        height: rect.height,
+      });
+    };
+
+    const browserWindow =
+      typeof window !== "undefined" ? window : undefined;
+    const scrollContainer = submenuTrigger.closest(
+      "[data-sidebar-scroll='true']"
+    ) as HTMLElement | null;
+    const resizeObserver =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(updateAnchor)
+        : null;
+
+    updateAnchor();
+    browserWindow?.addEventListener("resize", updateAnchor);
+    scrollContainer?.addEventListener("scroll", updateAnchor, {
+      passive: true,
+    });
+    resizeObserver?.observe(submenuTrigger);
+
+    return () => {
+      browserWindow?.removeEventListener("resize", updateAnchor);
+      scrollContainer?.removeEventListener("scroll", updateAnchor);
+      resizeObserver?.disconnect();
+    };
+  }, [isCollapsed, submenuTrigger]);
+
+  const renderCollapsedSubmenu = useCallback(
+    (sectionKey: string) => {
+      if (
+        !isCollapsed ||
+        openSubmenuKey !== sectionKey ||
+        !submenuAnchor
+      ) {
+        return null;
+      }
+
+      const openSection = sections.find(
+        (section) => section.key === sectionKey
+      );
+      if (!openSection) {
+        return null;
+      }
+
+      return (
+        <WebSidebarSubmenu
+          key={`sidebar-submenu-${sectionKey}`}
+          section={openSection}
+          pathname={pathname}
+          onClose={closeSubmenu}
+          leftOffset={submenuAnchor.left}
+          anchorTop={submenuAnchor.top}
+          anchorHeight={submenuAnchor.height}
+        />
+      );
+    },
+    [isCollapsed, openSubmenuKey, sections, pathname, closeSubmenu, submenuAnchor]
   );
 
   return (
@@ -167,16 +250,6 @@ const WebSidebarNav = React.forwardRef<
 
           <li>
             <WebSidebarNavItem
-              href="/discover"
-              icon={DiscoverIcon}
-              active={pathname?.startsWith("/discover") || false}
-              collapsed={isCollapsed}
-              label="Discover"
-            />
-          </li>
-
-          <li>
-            <WebSidebarNavItem
               href="/messages"
               icon={ChatBubbleIcon}
               active={pathname?.startsWith("/messages") || false}
@@ -186,8 +259,18 @@ const WebSidebarNav = React.forwardRef<
             />
           </li>
 
+          <li>
+            <WebSidebarNavItem
+              href="/discover"
+              icon={DiscoverIcon}
+              active={pathname?.startsWith("/discover") || false}
+              collapsed={isCollapsed}
+              label="Discover"
+            />
+          </li>
+
           {networkSection && (
-            <li>
+            <li className={isCollapsed ? "tw-relative" : undefined}>
               <WebSidebarExpandable
                 section={networkSection}
                 expanded={expandedKeys.includes("network")}
@@ -196,11 +279,12 @@ const WebSidebarNav = React.forwardRef<
                 pathname={pathname}
                 data-section="network"
               />
+              {renderCollapsedSubmenu("network")}
             </li>
           )}
 
           {collectionsSection && (
-            <li>
+            <li className={isCollapsed ? "tw-relative" : undefined}>
               <WebSidebarExpandable
                 section={collectionsSection}
                 expanded={expandedKeys.includes("collections")}
@@ -209,6 +293,7 @@ const WebSidebarNav = React.forwardRef<
                 pathname={pathname}
                 data-section="collections"
               />
+              {renderCollapsedSubmenu("collections")}
             </li>
           )}
 
@@ -255,7 +340,10 @@ const WebSidebarNav = React.forwardRef<
                 section.key !== "network" && section.key !== "collections"
             )
             .map((section) => (
-              <li key={section.key}>
+              <li
+                key={section.key}
+                className={isCollapsed ? "tw-relative" : undefined}
+              >
                 <WebSidebarExpandable
                   section={section}
                   expanded={expandedKeys.includes(section.key)}
@@ -264,6 +352,7 @@ const WebSidebarNav = React.forwardRef<
                   pathname={pathname}
                   data-section={section.key}
                 />
+                {renderCollapsedSubmenu(section.key)}
               </li>
             ))}
         </ul>
@@ -282,27 +371,6 @@ const WebSidebarNav = React.forwardRef<
         )}
       </CommonAnimationWrapper>
 
-      {isCollapsed && openSubmenuKey && (
-        <CommonAnimationWrapper mode="sync" initial={false}>
-          <CommonAnimationOpacity
-            key={`sidebar-submenu-${openSubmenuKey}`}
-            elementClasses="tw-contents"
-            elementRole="presentation"
-          >
-            {(() => {
-              const openSection = sections.find((section) => section.key === openSubmenuKey);
-              return openSection ? (
-                <WebSidebarSubmenu
-                  section={openSection}
-                  pathname={pathname}
-                  onClose={closeSubmenu}
-                  leftOffset={submenuLeft ?? undefined}
-                />
-              ) : null;
-            })()}
-          </CommonAnimationOpacity>
-        </CommonAnimationWrapper>
-      )}
     </>
   );
 });

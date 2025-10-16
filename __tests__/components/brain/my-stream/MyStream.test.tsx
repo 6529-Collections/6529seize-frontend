@@ -78,13 +78,30 @@ describe('MyStream', () => {
         onReply={jest.fn()}
         onQuote={jest.fn()}
         activeDrop={null}
-        items={[]}
-        isFetching={true}
+        items={[{ id: '1' }] as any}
+        isFetching={false}
         onBottomIntersection={jest.fn()}
         onDropContentClick={onDropContentClick}
       />
     );
     const props = FeedWrapperMock.mock.calls[0][0];
     expect(props).toEqual(expect.objectContaining({ onDropContentClick }));
+  });
+
+  it('shows loader when feed still fetching with no items', () => {
+    render(
+      <MyStream
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        activeDrop={null}
+        items={[]}
+        isFetching={true}
+        onBottomIntersection={jest.fn()}
+      />
+    );
+    expect(
+      screen.getByRole('status', { name: 'Loading My Stream...' })
+    ).toBeInTheDocument();
+    expect(FeedWrapperMock).not.toHaveBeenCalled();
   });
 });

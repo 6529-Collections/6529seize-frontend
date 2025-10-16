@@ -19,6 +19,11 @@ import useCreateModalState, {
   CREATE_WAVE_VALUE,
 } from "@/hooks/useCreateModalState";
 
+interface WavesProps {
+  readonly heading?: string;
+  readonly documentTitle?: string;
+}
+
 enum WavesViewMode {
   CREATE = "CREATE",
   CREATE_DM = "CREATE_DM",
@@ -29,7 +34,10 @@ const WAVES_PATH = "/waves";
 export const CREATE_WAVE_SEARCH_PATH = `${WAVES_PATH}?${CREATE_QUERY_KEY}=${CREATE_WAVE_VALUE}`;
 export const CREATE_DIRECT_MESSAGE_SEARCH_PATH = `${WAVES_PATH}?${CREATE_QUERY_KEY}=${CREATE_DIRECT_MESSAGE_VALUE}`;
 
-export default function Waves() {
+export default function Waves({
+  heading = "Waves",
+  documentTitle = "Waves | Brain",
+}: WavesProps = {}) {
   const router = useRouter();
   const {
     mode,
@@ -41,7 +49,7 @@ export default function Waves() {
     isApp,
   } = useCreateModalState();
 
-  useSetTitle("Waves | Brain");
+  useSetTitle(documentTitle);
 
   const { connectedProfile, activeProfileProxy, showWaves, fetchingProfile } =
     useAuth();
@@ -143,6 +151,7 @@ export default function Waves() {
   const components: Record<WavesViewMode, JSX.Element> = {
     [WavesViewMode.VIEW]: (
       <WavesList
+        heading={heading}
         onCreateNewWave={() => onViewModeChange(WavesViewMode.CREATE)}
         onCreateNewDirectMessage={() =>
           onViewModeChange(WavesViewMode.CREATE_DM)
