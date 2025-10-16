@@ -14,7 +14,7 @@ This table is the single source of truth for active and historical tickets. Keep
 | TKT-0008 | Reconcile Codex board merge conflicts | In-Progress | P1 | openai-assistant | [#1539](https://github.com/6529-Collections/6529seize-frontend/pull/1539) | 2025-10-14 |
 | TKT-0009 | Refactor Brain notifications shell for modular clarity | In-Progress | P1 | simo6529 | [#1545](https://github.com/6529-Collections/6529seize-frontend/pull/1545) | 2025-10-15 |
 | TKT-0010 | Phase roadmap for identity tab SSR migration | In-Progress | P1 | openai-assistant | — | 2025-10-15 |
-| TKT-0011 | Harden identity SSR data contract | In-Progress | P1 | openai-assistant | [#1550](https://github.com/6529-Collections/6529seize-frontend/pull/1550) | 2025-10-16 |
+| TKT-0011 | Harden identity SSR data contract | Review | P1 | openai-assistant | [#1550](https://github.com/6529-Collections/6529seize-frontend/pull/1550) | 2025-10-16 |
 | TKT-0012 | Build server-first identity shells | Backlog | P1 | openai-assistant | — | 2025-10-15 |
 | TKT-0013 | Implement identity SSR streaming and mutations | Backlog | P1 | openai-assistant | — | 2025-10-15 |
 

@@ -95,7 +95,7 @@ const { Page, generateMetadata } = createUserTabPage<IdentityTabExtraProps>({
     } = identityTabResult;
 
     const initialActivityLogData =
-      activityLog ?? undefined;
+      activityLog === null ? undefined : activityLog;
 
     return {
       tabProps: {
