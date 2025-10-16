@@ -18,7 +18,7 @@ type IdentityTabExtraProps = {
   readonly initialStatements: CicStatement[];
   readonly initialCicGivenData: PageWithCount<RatingWithProfileInfoAndLevel>;
   readonly initialCicReceivedData: PageWithCount<RatingWithProfileInfoAndLevel>;
-  readonly initialActivityLogData: CountlessPage<ProfileActivityLog>;
+  readonly initialActivityLogData?: CountlessPage<ProfileActivityLog>;
   readonly initialParams: IdentityTabParams;
 };
 
@@ -84,12 +84,15 @@ const { Page, generateMetadata } = createUserTabPage<IdentityTabExtraProps>({
       handleOrWallet: normalizedHandleOrWallet,
       data: {
         statements: initialStatements,
-        activityLog: initialActivityLogData,
+        activityLog,
         cicGiven: initialCicGivenData,
         cicReceived: initialCicReceivedData,
       },
       params: initialParams,
     } = identityTabResult;
+
+    const initialActivityLogData =
+      activityLog ?? undefined;
 
     return {
       tabProps: {

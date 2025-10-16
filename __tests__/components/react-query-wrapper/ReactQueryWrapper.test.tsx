@@ -165,6 +165,57 @@ describe('ReactQueryWrapper context', () => {
     ).toEqual(statements);
   });
 
+  it('initProfileIdentityPage skips log priming when no initial data provided', () => {
+    const { client, ctx } = createTestSetup();
+    const profile = { handle: 'alice', wallets: [] } as any;
+    const cicParams = {
+      page: 1,
+      pageSize: 7,
+      given: false,
+      order: SortDirection.DESC,
+      orderBy: ProfileRatersParamsOrderBy.RATING,
+      handleOrWallet: 'alice',
+      matter: RateMatter.NIC,
+    };
+
+    act(() =>
+      ctx.initProfileIdentityPage({
+        profile,
+        activityLogs: undefined,
+        cicGivenToUsers: {
+          params: cicParams,
+          data: { count: 0, data: [], page: 1, next: false },
+        },
+        cicReceivedFromUsers: {
+          params: { ...cicParams, given: true },
+          data: { count: 0, data: [], page: 1, next: false },
+        },
+        statements: {
+          handleOrWallet: 'alice',
+          data: [],
+        },
+      })
+    );
+
+    const logsKey = [
+      QueryKey.PROFILE_LOGS,
+      convertActivityLogParams({
+        params: {
+          page: 1,
+          pageSize: 10,
+          logTypes: [],
+          matter: null,
+          targetType: ProfileActivityFilterTargetType.ALL,
+          handleOrWallet: 'alice',
+          groupId: null,
+        },
+        disableActiveGroup: true,
+      }),
+    ];
+
+    expect(client.getQueryData(logsKey)).toBeUndefined();
+  });
+
   it('waits then invalidates drops', async () => {
     const { client, ctx } = createTestSetup();
     await act(async () => {

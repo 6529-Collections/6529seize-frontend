@@ -26,8 +26,23 @@ jest.mock("@/helpers/server.helpers", () => {
 });
 
 describe("identityTabQueries", () => {
+  let infoSpy: jest.SpyInstance;
+  let errorSpy: jest.SpyInstance;
+
+  beforeAll(() => {
+    infoSpy = jest.spyOn(console, "info").mockImplementation(() => {});
+    errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterAll(() => {
+    infoSpy.mockRestore();
+    errorSpy.mockRestore();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
+    infoSpy.mockClear();
+    errorSpy.mockClear();
   });
 
   it("creates initial params with normalized handle and default log types", () => {
@@ -63,12 +78,6 @@ describe("identityTabQueries", () => {
 
   it("fetches identity tab data and normalizes responses", async () => {
     const statements = [{ id: "statement" }];
-    const activityLogs = {
-      count: 1,
-      data: [{ id: "log" }],
-      page: 1,
-      next: false,
-    };
     const ratingsGiven = {
       count: 2,
       data: [{ id: "given" }],
@@ -83,9 +92,6 @@ describe("identityTabQueries", () => {
     };
 
     (getProfileCicStatements as jest.Mock).mockResolvedValue(statements);
-    (getUserProfileActivityLogs as jest.Mock).mockResolvedValue(
-      activityLogs
-    );
     (getProfileCicRatings as jest.Mock).mockImplementation(
       async ({ params }: { params: { given: boolean } }) =>
         params.given ? ratingsReceived : ratingsGiven
@@ -100,16 +106,12 @@ describe("identityTabQueries", () => {
       handleOrWallet: "alice",
       headers: { authorization: "token" },
     });
-    expect(getUserProfileActivityLogs).toHaveBeenCalledTimes(1);
+    expect(getUserProfileActivityLogs).not.toHaveBeenCalled();
     expect(getProfileCicRatings).toHaveBeenCalledTimes(2);
     expect(result.handleOrWallet).toBe("alice");
     expect(result.params.activityLogParams.handleOrWallet).toBe("alice");
     expect(result.data.statements).toEqual(statements);
-    expect(result.data.activityLog).toEqual({
-      data: activityLogs.data,
-      page: activityLogs.page,
-      next: activityLogs.next,
-    });
+    expect(result.data.activityLog).toBeNull();
     expect(result.data.cicGiven).toEqual(ratingsGiven);
     expect(result.data.cicReceived).toEqual(ratingsReceived);
     expect(result.errors).toEqual([]);
@@ -118,7 +120,6 @@ describe("identityTabQueries", () => {
       tags: [
         "identity:alice",
         "identity:alice:statements",
-        "identity:alice:activity",
         "identity:alice:raters:given",
         "identity:alice:raters:received",
       ],
@@ -127,9 +128,6 @@ describe("identityTabQueries", () => {
 
   it("returns safe defaults when upstream requests fail", async () => {
     (getProfileCicStatements as jest.Mock).mockRejectedValue(
-      new Error("fail")
-    );
-    (getUserProfileActivityLogs as jest.Mock).mockRejectedValue(
       new Error("fail")
     );
     (getProfileCicRatings as jest.Mock).mockRejectedValue(
@@ -142,11 +140,7 @@ describe("identityTabQueries", () => {
     });
 
     expect(result.data.statements).toEqual([]);
-    expect(result.data.activityLog).toEqual({
-      data: [],
-      page: 1,
-      next: false,
-    });
+    expect(result.data.activityLog).toBeNull();
     expect(result.data.cicGiven).toEqual({
       count: 0,
       data: [],
@@ -159,9 +153,9 @@ describe("identityTabQueries", () => {
       page: 1,
       next: false,
     });
+    expect(getUserProfileActivityLogs).not.toHaveBeenCalled();
     expect(result.cache.tags).toContain("identity:alice");
     expect(result.errors.map((error) => error.key).sort()).toEqual([
-      "activityLog",
       "cicGiven",
       "cicReceived",
       "statements",

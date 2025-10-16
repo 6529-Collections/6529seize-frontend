@@ -12,7 +12,7 @@ export default function UserPageIdentityActivityLog({
   initialActivityLogData,
 }: {
   readonly initialActivityLogParams: ActivityLogParams;
-  readonly initialActivityLogData: CountlessPage<ProfileActivityLog>;
+  readonly initialActivityLogData?: CountlessPage<ProfileActivityLog>;
 }) {
   return (
     <div>

@@ -1,15 +1,17 @@
 # Identity Tab Server Data Flow
 
 This directory renders the profile **Identity** tab. The route now relies on
-Next.js server preparation to gather all identity data before handing off to
-client widgets.
+Next.js server preparation for the fast-to-resolve datasets while delegating
+slow activity log calls to the client.
 
 ## Server Preparation
 
-- `app/[user]/identity/_lib/identityTabQueries.ts` derives the initial NIC
-  activity log, raters tables, and CIC statements using a single `fetchIdentityTabData`
+- `app/[user]/identity/_lib/identityTabQueries.ts` derives the initial
+  raters tables and CIC statements using a single `fetchIdentityTabData`
   call. The helper normalises the handle, applies default filters, and returns
-  safe empty structures whenever an upstream request fails.
+  safe empty structures whenever an upstream request fails. The activity log
+  request is intentionally skipped so the slow `profile-logs` endpoint loads on
+  the client instead of blocking SSR.
 - The same helper surfaces `cache` hints (identity-specific `revalidateSeconds`
   and cache tags) plus a typed `errors` collection so callers can plug into
   `revalidateTag` strategies or add logging without duplicating fallback logic.
@@ -20,16 +22,16 @@ client widgets.
 ## Hydration
 
 - `UserPageIdentityHydrator` calls `initProfileIdentityPage` once to seed the
-  React Query cache with activity logs, raters, and statements. The React Query
-  wrapper now records statements alongside the other caches, removing the extra
-  `useEffect` that previously wrote statements separately.
+  React Query cache with raters and statements. The activity log cache seeding
+  runs only when server data is provided (e.g. in tests or future optimisations),
+  keeping the client fetch path the single source of truth for logs.
 
 ## Client Components
 
 - `UserPageIdentity`, `ProfileActivityLogs`, and `ProfileRatersTableWrapper`
-  receive server-populated `initialData` and query params through props. As a
-  result, the first paint is fully server rendered and client hooks only take
-  over once the user interacts (pagination, filters, mutations).
+  receive server-populated `initialData` where available alongside query params.
+  Statements and raters still hydrate immediately, while `ProfileActivityLogs`
+  now shows its loading skeleton until the client query resolves.
 
 ## Testing Notes
 

@@ -102,4 +102,23 @@ describe("UserPageIdentityWrapper", () => {
       initialProfile: profile,
     });
   });
+
+  it("omits activity log data when undefined", () => {
+    useIdentityMock.mockReturnValue({ profile: null });
+
+    render(
+      <UserPageIdentityWrapper
+        profile={{ handle: "alice" } as any}
+        initialCICReceivedParams={{} as any}
+        initialCICGivenParams={{} as any}
+        initialActivityLogParams={{} as any}
+        handleOrWallet="alice"
+        initialStatements={[]}
+        initialCicGivenData={{} as any}
+        initialCicReceivedData={{} as any}
+      />
+    );
+
+    expect(identityProps.initialActivityLogData).toBeUndefined();
+  });
 });

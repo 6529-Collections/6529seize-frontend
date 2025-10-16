@@ -111,7 +111,7 @@ interface InitProfileRepPageParams {
 
 interface InitProfileIdentityPageParams {
   readonly profile: ApiIdentity;
-  readonly activityLogs: InitProfileActivityLogsParams;
+  readonly activityLogs?: InitProfileActivityLogsParams | null;
   readonly cicGivenToUsers: InitProfileRatersParamsAndData;
   readonly cicReceivedFromUsers: InitProfileRatersParamsAndData;
   readonly statements: {
@@ -778,11 +778,13 @@ export default function ReactQueryWrapper({
     statements,
   }: InitProfileIdentityPageParams) => {
     setProfile(profile);
-    initProfileActivityLogs({
-      params: activityLogs.params,
-      data: activityLogs.data,
-      disableActiveGroup: true,
-    });
+    if (activityLogs) {
+      initProfileActivityLogs({
+        params: activityLogs.params,
+        data: activityLogs.data,
+        disableActiveGroup: true,
+      });
+    }
     setProfileRaters(cicGivenToUsers);
     setProfileRaters(cicReceivedFromUsers);
     if (statements.handleOrWallet) {

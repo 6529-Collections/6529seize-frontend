@@ -1,5 +1,9 @@
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
-import type { CicStatement, ProfileActivityLog, RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
+import type {
+  CicStatement,
+  ProfileActivityLog,
+  RatingWithProfileInfoAndLevel,
+} from "@/entities/IProfile";
 import { ProfileActivityFilterTargetType, RateMatter } from "@/enums";
 import { convertActivityLogParams, getProfileLogTypes } from "@/helpers/profile-logs.helpers";
 import type { CountlessPage, Page } from "@/helpers/Types";
@@ -7,9 +11,9 @@ import {
   getInitialRatersParams,
   getProfileCicRatings,
   getProfileCicStatements,
-  getUserProfileActivityLogs,
 } from "@/helpers/server.helpers";
 import type { ProfileRatersParams } from "@/components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import { publicEnv } from "@/config/env";
 
 type IdentityRatersPage = Page<RatingWithProfileInfoAndLevel>;
 
@@ -27,7 +31,7 @@ type IdentityTabDatasetKey =
 
 export type IdentityTabServerData = {
   readonly statements: CicStatement[];
-  readonly activityLog: CountlessPage<ProfileActivityLog>;
+  readonly activityLog: CountlessPage<ProfileActivityLog> | null;
   readonly cicGiven: IdentityRatersPage;
   readonly cicReceived: IdentityRatersPage;
 };
@@ -53,13 +57,6 @@ export type IdentityTabCacheHints = {
 };
 
 const IDENTITY_CACHE_REVALIDATE_SECONDS = 60;
-
-const createEmptyActivityLogPage = (): Page<ProfileActivityLog> => ({
-  count: 0,
-  data: [],
-  page: 1,
-  next: false,
-});
 
 const createEmptyRatersPage = (): IdentityRatersPage => ({
   count: 0,
@@ -104,14 +101,6 @@ export const createIdentityTabParams = (
   };
 };
 
-const toCountlessPage = (
-  page: Page<ProfileActivityLog>
-): CountlessPage<ProfileActivityLog> => ({
-  data: page.data,
-  page: page.page,
-  next: page.next,
-});
-
 const resolveSettledResult = <T>({
   result,
   key,
@@ -148,12 +137,72 @@ const createIdentityCacheHints = (
   tags: [
     `identity:${normalizedHandle}`,
     `identity:${normalizedHandle}:statements`,
-    `identity:${normalizedHandle}:activity`,
     `identity:${normalizedHandle}:raters:given`,
     `identity:${normalizedHandle}:raters:received`,
   ],
   revalidateSeconds: IDENTITY_CACHE_REVALIDATE_SECONDS,
 });
+
+const logIdentityFetch = async <T>({
+  handle,
+  key,
+  fetcher,
+  describeRequest,
+}: {
+  handle: string;
+  key: IdentityTabDatasetKey;
+  fetcher: () => Promise<T>;
+  describeRequest?: () => string;
+}): Promise<T> => {
+  if (describeRequest) {
+    console.info(
+      `[identity][fetch] ${key} for ${handle} request -> ${describeRequest()}`
+    );
+  }
+  const startedAt = Date.now();
+  try {
+    const result = await fetcher();
+    console.info(
+      `[identity][fetch] ${key} for ${handle} succeeded in ${
+        Date.now() - startedAt
+      }ms`
+    );
+    return result;
+  } catch (error) {
+    console.error(
+      `[identity][fetch] ${key} for ${handle} failed in ${
+        Date.now() - startedAt
+      }ms`,
+      error
+    );
+    throw error;
+  }
+};
+
+const createApiRequestUrl = ({
+  endpoint,
+  params,
+}: {
+  endpoint: string;
+  params?: Record<string, string | undefined>;
+}): string => {
+  const baseUrl = `${publicEnv.API_ENDPOINT}/api/${endpoint}`;
+  if (!params) {
+    return baseUrl;
+  }
+
+  const queryParams = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null) {
+      return;
+    }
+    const normalizedValue = value === "nic" ? "cic" : value;
+    queryParams.set(key, normalizedValue);
+  });
+
+  const queryString = queryParams.toString();
+  return queryString ? `${baseUrl}?${queryString}` : baseUrl;
+};
 
 export const fetchIdentityTabData = async ({
   handleOrWallet,
@@ -170,29 +219,45 @@ export const fetchIdentityTabData = async ({
     disableActiveGroup: true,
   });
 
-  const [
-    statementsResult,
-    activityLogsResult,
-    cicGivenResult,
-    cicReceivedResult,
-  ] = await Promise.allSettled([
-    getProfileCicStatements({
-      handleOrWallet: normalizedHandle,
-      headers,
+  const activityLogRequestUrl = createApiRequestUrl({
+    endpoint: "profile-logs",
+    params: activityLogRequestParams,
+  });
+
+  console.info(
+    `[identity][fetch] activityLog for ${normalizedHandle} skipped (client fetch) -> ${activityLogRequestUrl}`
+  );
+
+  const [statementsResult, cicGivenResult, cicReceivedResult] =
+    await Promise.allSettled([
+      logIdentityFetch({
+        handle: normalizedHandle,
+        key: "statements",
+        fetcher: () =>
+          getProfileCicStatements({
+            handleOrWallet: normalizedHandle,
+            headers,
+          }),
     }),
-    getUserProfileActivityLogs<ProfileActivityLog>({
-      headers,
-      params: activityLogRequestParams,
+    logIdentityFetch({
+      handle: normalizedHandle,
+      key: "cicGiven",
+      fetcher: () =>
+        getProfileCicRatings({
+          handleOrWallet: normalizedHandle,
+          headers,
+          params: params.cicGivenParams,
+        }),
     }),
-    getProfileCicRatings({
-      handleOrWallet: normalizedHandle,
-      headers,
-      params: params.cicGivenParams,
-    }),
-    getProfileCicRatings({
-      handleOrWallet: normalizedHandle,
-      headers,
-      params: params.cicReceivedParams,
+    logIdentityFetch({
+      handle: normalizedHandle,
+      key: "cicReceived",
+      fetcher: () =>
+        getProfileCicRatings({
+          handleOrWallet: normalizedHandle,
+          headers,
+          params: params.cicReceivedParams,
+        }),
     }),
   ]);
 
@@ -200,12 +265,6 @@ export const fetchIdentityTabData = async ({
     result: statementsResult,
     key: "statements",
     fallback: () => [],
-  });
-
-  const activityLogOutcome = resolveSettledResult({
-    result: activityLogsResult,
-    key: "activityLog",
-    fallback: createEmptyActivityLogPage,
   });
 
   const cicGivenOutcome = resolveSettledResult({
@@ -222,7 +281,6 @@ export const fetchIdentityTabData = async ({
 
   const errors = [
     statementsOutcome.error,
-    activityLogOutcome.error,
     cicGivenOutcome.error,
     cicReceivedOutcome.error,
   ].filter((error): error is IdentityTabQueryError => error !== null);
@@ -232,7 +290,7 @@ export const fetchIdentityTabData = async ({
     params,
     data: {
       statements: statementsOutcome.data,
-      activityLog: toCountlessPage(activityLogOutcome.data),
+      activityLog: null,
       cicGiven: cicGivenOutcome.data,
       cicReceived: cicReceivedOutcome.data,
     },

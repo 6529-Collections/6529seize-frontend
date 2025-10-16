@@ -32,7 +32,7 @@ export default function UserPageIdentity({
   readonly initialStatements: CicStatement[];
   readonly initialCicGivenData: Page<RatingWithProfileInfoAndLevel>;
   readonly initialCicReceivedData: Page<RatingWithProfileInfoAndLevel>;
-  readonly initialActivityLogData: CountlessPage<ProfileActivityLog>;
+  readonly initialActivityLogData?: CountlessPage<ProfileActivityLog>;
 }) {
   return (
     <div className="tailwind-scope">

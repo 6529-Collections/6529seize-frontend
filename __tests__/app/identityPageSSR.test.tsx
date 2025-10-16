@@ -1,11 +1,7 @@
 import { render, screen } from "@testing-library/react";
-import type {
-  CountlessPage,
-  Page as PageWithCount,
-} from "@/helpers/Types";
+import type { Page as PageWithCount } from "@/helpers/Types";
 import type {
   CicStatement,
-  ProfileActivityLog,
   RatingWithProfileInfoAndLevel,
 } from "@/entities/IProfile";
 import type { IdentityTabParams } from "@/app/[user]/identity/_lib/identityTabQueries";
@@ -96,11 +92,6 @@ describe("identity page SSR prepare hook", () => {
       wallets: [],
     } as any;
     const statements = [{ id: "statement-1" }] as CicStatement[];
-    const activityLog: CountlessPage<ProfileActivityLog> = {
-      data: [{ id: "log-1" } as ProfileActivityLog],
-      page: 1,
-      next: false,
-    };
     const cicGiven: PageWithCount<RatingWithProfileInfoAndLevel> = {
       count: 1,
       data: [{ id: "given-1" } as RatingWithProfileInfoAndLevel],
@@ -151,7 +142,7 @@ describe("identity page SSR prepare hook", () => {
       params,
       data: {
         statements,
-        activityLog,
+        activityLog: null,
         cicGiven,
         cicReceived,
       },
@@ -160,7 +151,6 @@ describe("identity page SSR prepare hook", () => {
         tags: [
           "identity:alice",
           "identity:alice:statements",
-          "identity:alice:activity",
           "identity:alice:raters:given",
           "identity:alice:raters:received",
         ],
@@ -203,7 +193,7 @@ describe("identity page SSR prepare hook", () => {
         handleOrWallet: "alice",
         initialStatements: statements,
         initialActivityLogParams: params.activityLogParams,
-        initialActivityLogData: activityLog,
+        initialActivityLogData: undefined,
         initialCICGivenParams: params.cicGivenParams,
         initialCicGivenData: cicGiven,
         initialCICReceivedParams: params.cicReceivedParams,
@@ -221,7 +211,7 @@ describe("identity page SSR prepare hook", () => {
         initialActivityLogParams: params.activityLogParams,
         initialCicGivenData: cicGiven,
         initialCicReceivedData: cicReceived,
-        initialActivityLogData: activityLog,
+        initialActivityLogData: undefined,
       })
     );
 

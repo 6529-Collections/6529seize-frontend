@@ -31,4 +31,17 @@ describe('UserPageIdentityActivityLog', () => {
     expect(props.initialData).toEqual(data);
     expect(screen.getByText('NIC Activity Log')).toBeInTheDocument();
   });
+
+  it('omits initial data when none is provided', () => {
+    const params = { page: 1 } as any;
+    render(
+      <UserPageIdentityActivityLog
+        initialActivityLogParams={params}
+      />
+    );
+    const activity = screen.getByTestId('activity');
+    const props = JSON.parse(activity.getAttribute('data-props') || '{}');
+    expect(props.initialParams).toEqual(params);
+    expect(props.initialData).toBeUndefined();
+  });
 });
