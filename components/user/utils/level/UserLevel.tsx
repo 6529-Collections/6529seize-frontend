@@ -35,8 +35,7 @@ export default function UserLevel({
   return (
     <button
       onClick={openLevelsPage}
-      className={`tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-ring-inset ${classes}`}
-    >
+      className={`tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-ring-inset ${classes}`}>
       Level {level}
     </button>
   );

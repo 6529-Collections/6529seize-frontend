@@ -1,6 +1,7 @@
 import { mockGradientCollection } from "@/__tests__/fixtures/gradientFixtures";
 import GradientPageComponent from "@/components/6529Gradient/GradientPage";
 import { AuthContext } from "@/components/auth/Auth";
+import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
 import { GRADIENT_CONTRACT } from "@/constants";
 import { TitleProvider } from "@/contexts/TitleContext";
@@ -58,6 +59,20 @@ jest.mock("@/components/latest-activity/LatestActivityRow", () => ({
 }));
 jest.mock("@/hooks/useCapacitor", () => () => ({ isIos: false }));
 
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: jest.fn(() => ({
+    isAuthenticated: false,
+    seizeConnect: jest.fn(),
+    seizeAcceptConnection: jest.fn(),
+    address: undefined,
+    hasInitializationError: false,
+    initializationError: null,
+  })),
+  SeizeConnectProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}));
+
 const routerReplace = jest.fn();
 (useRouter as jest.Mock).mockReturnValue({
   replace: routerReplace,
@@ -89,7 +104,9 @@ function renderPage(wallet: string = "0x1") {
       <AuthContext.Provider
         value={{ connectedProfile: { wallets: [{ wallet }] } } as any}>
         <CookieConsentProvider>
-          <GradientPageComponent id="1" />
+          <SeizeConnectProvider>
+            <GradientPageComponent id="1" />
+          </SeizeConnectProvider>
         </CookieConsentProvider>
       </AuthContext.Provider>
     </TitleProvider>

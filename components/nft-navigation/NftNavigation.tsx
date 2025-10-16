@@ -1,3 +1,4 @@
+import { enterArtFullScreen, fullScreenSupported } from "@/helpers/Helpers";
 import {
   faChevronCircleLeft,
   faChevronCircleRight,
@@ -5,7 +6,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import { enterArtFullScreen, fullScreenSupported } from "@/helpers/Helpers";
+import { ReadonlyURLSearchParams } from "next/navigation";
+import { useMemo } from "react";
 
 export default function NftNavigation(
   props: Readonly<{
@@ -14,6 +16,7 @@ export default function NftNavigation(
     startIndex: number;
     endIndex: number;
     fullscreenElementId?: string;
+    params?: ReadonlyURLSearchParams;
   }>
 ) {
   const isFirst = props.nftId === props.startIndex;
@@ -22,6 +25,11 @@ export default function NftNavigation(
   const baseClass = "tw-w-[25px] tw-h-[25px] md:tw-w-[35px] md:tw-h-[35px]";
 
   const disabledClass = "tw-pointer-events-none tw-text-gray-400";
+
+  const query = useMemo(() => {
+    const paramsStr = props.params?.toString();
+    return paramsStr ? `?${paramsStr}` : "";
+  }, [props.params]);
 
   function printFullScreen() {
     if (!props.fullscreenElementId) {
@@ -43,12 +51,12 @@ export default function NftNavigation(
     <>
       <span className="tw-flex tw-gap-2 tw-items-center tw-justify-center">
         <Link
-          href={`${props.path}/${props.nftId - 1}`}
+          href={`${props.path}/${props.nftId - 1}${query}`}
           className={`${baseClass} ${isFirst ? disabledClass : ""}`}>
           <FontAwesomeIcon icon={faChevronCircleLeft} className={baseClass} />
         </Link>
         <Link
-          href={`${props.path}/${props.nftId + 1}`}
+          href={`${props.path}/${props.nftId + 1}${query}`}
           className={`${baseClass} ${isLast ? disabledClass : ""}`}>
           <FontAwesomeIcon icon={faChevronCircleRight} className={baseClass} />
         </Link>

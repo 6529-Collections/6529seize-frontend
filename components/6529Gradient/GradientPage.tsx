@@ -4,19 +4,24 @@ import styles from "./6529Gradient.module.scss";
 
 import Address from "@/components/address/Address";
 import { AuthContext } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
 import { NftPageStats } from "@/components/nft-attributes/NftStats";
 import NFTImage from "@/components/nft-image/NFTImage";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import NftNavigation from "@/components/nft-navigation/NftNavigation";
+import TransferSingle from "@/components/nft-transfer/TransferSingle";
 import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
+import YouOwnNftBadge from "@/components/you-own-nft-badge/YouOwnNftBadge";
 import { publicEnv } from "@/config/env";
 import { GRADIENT_CONTRACT } from "@/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { DBResponse } from "@/entities/IDBResponse";
 import { NFT } from "@/entities/INFT";
+import { CollectedCollectionType } from "@/entities/IProfile";
 import { Transaction } from "@/entities/ITransaction";
+import { ContractType } from "@/enums";
 import {
   areEqualAddresses,
   numberWithCommas,
@@ -26,7 +31,7 @@ import useCapacitor from "@/hooks/useCapacitor";
 import { fetchUrl } from "@/services/6529api";
 import { useContext, useEffect, useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
-import YouOwnNftBadge from "../you-own-nft-badge/YouOwnNftBadge";
+
 interface NftWithOwner extends NFT {
   owner: string;
   owner_display: string;
@@ -35,6 +40,7 @@ interface NftWithOwner extends NFT {
 export default function GradientPageComponent({ id }: { readonly id: string }) {
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
+  const { address: connectedAddress } = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
   const fullscreenElementId = "the-art-fullscreen-img";
 
@@ -42,6 +48,7 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
 
   const [nft, setNft] = useState<NftWithOwner>();
   const [isOwner, setIsOwner] = useState(false);
+  const [isConnectedAddressOwner, setIsConnectedAddressOwner] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   const [allNfts, setAllNfts] = useState<NftWithOwner[]>([]);
@@ -55,6 +62,10 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
       ) ?? false
     );
   }, [nft, connectedProfile]);
+
+  useEffect(() => {
+    setIsConnectedAddressOwner(areEqualAddresses(connectedAddress, nft?.owner));
+  }, [nft, connectedAddress]);
 
   useEffect(() => {
     async function fetchNfts(url: string, mynfts: NftWithOwner[]) {
@@ -117,28 +128,44 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
             )}
           </Col>
           {nft && (
-            <Col
-              xs={{ span: 12 }}
-              sm={{ span: 12 }}
-              md={{ span: 6 }}
-              lg={{ span: 6 }}
-              className="pt-2">
+            <Col xs={12} sm={12} md={6} lg={6} className="pt-2">
               <Container>
                 <Row>
-                  <Col>
-                    <h3>Owner</h3>
+                  <Col
+                    xs={isConnectedAddressOwner ? 7 : 12}
+                    className="tw-flex tw-items-center tw-gap-2">
+                    <Container className="no-padding">
+                      <Row>
+                        <Col>
+                          <h3>Owner</h3>
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col className="d-flex align-items-center gap-1">
+                          <h4 className="tw-mb-0">
+                            <Address
+                              wallets={[nft.owner as `0x${string}`]}
+                              display={nft.owner_display}
+                            />
+                          </h4>
+                          {isOwner && <YouOwnNftBadge />}
+                        </Col>
+                      </Row>
+                    </Container>
                   </Col>
-                </Row>
-                <Row>
-                  <Col className="d-flex align-items-center gap-1">
-                    <h4 className="tw-mb-0">
-                      <Address
-                        wallets={[nft.owner as `0x${string}`]}
-                        display={nft.owner_display}
+                  {isConnectedAddressOwner && (
+                    <Col xs={5}>
+                      <TransferSingle
+                        collectionType={CollectedCollectionType.GRADIENTS}
+                        contractType={ContractType.ERC721}
+                        contract={GRADIENT_CONTRACT}
+                        tokenId={nft.id}
+                        max={1}
+                        title={nft.name ?? `6529 Gradient #${nft.id}`}
+                        thumbUrl={nft.thumbnail}
                       />
-                    </h4>
-                    {isOwner && <YouOwnNftBadge />}
-                  </Col>
+                    </Col>
+                  )}
                 </Row>
                 <Row className="pt-4">
                   <Col>

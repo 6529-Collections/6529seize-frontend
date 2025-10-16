@@ -1,3 +1,4 @@
+import { TransferProvider } from "@/components/nft-transfer/TransferState";
 import { getAppMetadata } from "@/components/providers/metadata";
 import UserPageLayout from "@/components/user/layout/UserPageLayout";
 import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
@@ -16,6 +17,7 @@ type FactoryArgs = {
   subroute: string;
   metaLabel: string;
   Tab: (props: Readonly<TabProps>) => React.JSX.Element;
+  enableTransfer?: boolean;
 };
 
 type UserRouteParams = { user: string };
@@ -29,20 +31,17 @@ const normalizeSearchParams = (
   }
 
   if (params instanceof URLSearchParams) {
-    return Array.from(params.entries()).reduce(
-      (acc, [key, value]) => {
-        const existing = acc[key];
-        if (existing === undefined) {
-          acc[key] = value;
-        } else if (Array.isArray(existing)) {
-          acc[key] = [...existing, value];
-        } else {
-          acc[key] = [existing, value];
-        }
-        return acc;
-      },
-      {} as UserSearchParams
-    );
+    return Array.from(params.entries()).reduce((acc, [key, value]) => {
+      const existing = acc[key];
+      if (existing === undefined) {
+        acc[key] = value;
+      } else if (Array.isArray(existing)) {
+        acc[key] = [...existing, value];
+      } else {
+        acc[key] = [existing, value];
+      }
+      return acc;
+    }, {} as UserSearchParams);
   }
 
   return Object.entries(params).reduce((acc, [key, value]) => {
@@ -80,7 +79,12 @@ const isNotFoundError = (error: unknown): boolean => {
   return !!message && message.toLowerCase().includes("not found");
 };
 
-export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
+export function createUserTabPage({
+  subroute,
+  metaLabel,
+  Tab,
+  enableTransfer,
+}: FactoryArgs) {
   async function Page({
     params,
     searchParams,
@@ -95,11 +99,8 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
 
     const user = resolvedParams.user;
     const normalizedUser = user.toLowerCase();
-    const resolvedSearchParams = searchParams
-      ? await searchParams
-      : undefined;
-    const query: UserSearchParams =
-      normalizeSearchParams(resolvedSearchParams);
+    const resolvedSearchParams = searchParams ? await searchParams : undefined;
+    const query: UserSearchParams = normalizeSearchParams(resolvedSearchParams);
     const headers = await getAppCommonHeaders();
     const profile: ApiIdentity = await getUserProfile({
       user: normalizedUser,
@@ -121,11 +122,17 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
       redirect(needsRedirect.redirect.destination);
     }
 
-    return (
+    const TabComponent = (
       <UserPageLayout profile={profile} handleOrWallet={normalizedUser}>
         <Tab profile={profile} />
       </UserPageLayout>
     );
+
+    if (enableTransfer) {
+      return <TransferProvider>{TabComponent}</TransferProvider>;
+    }
+
+    return TabComponent;
   }
 
   async function generateMetadata({

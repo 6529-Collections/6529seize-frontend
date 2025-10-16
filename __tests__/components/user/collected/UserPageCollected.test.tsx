@@ -1,3 +1,4 @@
+import { TransferProvider } from "@/components/nft-transfer/TransferState";
 import UserPageCollected from "@/components/user/collected/UserPageCollected";
 import { CollectedCollectionType } from "@/entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
@@ -53,6 +54,14 @@ jest.mock(
       return <div data-testid="loading" />;
     }
 );
+
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: jest.fn(() => ({ address: "0x123" })),
+}));
+
+const renderWithTransferProvider = (component: React.ReactNode) => {
+  return render(<TransferProvider>{component}</TransferProvider>);
+};
 
 describe("UserPageCollected", () => {
   const useRouterMock = useRouter as jest.Mock;
@@ -113,7 +122,7 @@ describe("UserPageCollected", () => {
       data: undefined,
     });
 
-    render(<UserPageCollected profile={mockProfile} />);
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
     expect(screen.getByTestId("loading")).toBeInTheDocument();
   });
 
@@ -133,7 +142,7 @@ describe("UserPageCollected", () => {
       data: mockData,
     });
 
-    render(<UserPageCollected profile={mockProfile} />);
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
 
     expect(screen.getByTestId("filters")).toBeInTheDocument();
     expect(screen.getByTestId("cards")).toBeInTheDocument();
@@ -149,7 +158,7 @@ describe("UserPageCollected", () => {
       return null;
     });
 
-    render(<UserPageCollected profile={mockProfile} />);
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
 
     expect(screen.getByTestId("filters")).toHaveAttribute(
       "data-collection",
@@ -163,7 +172,7 @@ describe("UserPageCollected", () => {
       return null;
     });
 
-    render(<UserPageCollected profile={mockProfile} />);
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
     expect(screen.getByTestId("filters")).toBeInTheDocument();
   });
 
@@ -174,7 +183,7 @@ describe("UserPageCollected", () => {
       return null;
     });
 
-    render(<UserPageCollected profile={mockProfile} />);
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
     expect(screen.getByTestId("filters")).toBeInTheDocument();
   });
 
@@ -185,7 +194,7 @@ describe("UserPageCollected", () => {
       return null;
     });
 
-    render(<UserPageCollected profile={mockProfile} />);
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
     expect(screen.getByTestId("filters")).toBeInTheDocument();
   });
 
@@ -207,12 +216,12 @@ describe("UserPageCollected", () => {
       data: mockData,
     });
 
-    render(<UserPageCollected profile={mockProfile} />);
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
     expect(screen.getByTestId("cards")).toHaveAttribute("data-page", "2");
   });
 
   it("shows data row for collections that support it", () => {
-    render(<UserPageCollected profile={mockProfile} />);
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
     expect(screen.getByTestId("cards")).toHaveAttribute(
       "data-show-data-row",
       "true"
@@ -223,7 +232,7 @@ describe("UserPageCollected", () => {
     mockSearchParams.get.mockImplementation((k: string) =>
       k === "collection" ? "memelab" : null
     );
-    render(<UserPageCollected profile={mockProfile} />);
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
     expect(screen.getByTestId("cards")).toHaveAttribute(
       "data-show-data-row",
       "false"
@@ -243,7 +252,7 @@ describe("UserPageCollected", () => {
       data: mockData,
     });
 
-    render(<UserPageCollected profile={mockProfile} />);
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
 
     await waitFor(() => {
       expect(screen.getByTestId("cards")).toHaveAttribute(
@@ -254,7 +263,7 @@ describe("UserPageCollected", () => {
   });
 
   it("uses profile handle when no address filter provided", () => {
-    render(<UserPageCollected profile={mockProfile} />);
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
 
     expect(useQueryMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -276,7 +285,7 @@ describe("UserPageCollected", () => {
       return null;
     });
 
-    render(<UserPageCollected profile={mockProfile} />);
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
 
     expect(useQueryMock).toHaveBeenCalledWith(
       expect.objectContaining({
