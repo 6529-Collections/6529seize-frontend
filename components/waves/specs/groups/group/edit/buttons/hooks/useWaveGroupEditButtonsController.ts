@@ -28,21 +28,19 @@ interface UseWaveGroupEditButtonsControllerProps {
   readonly onWaveCreated: () => void;
 }
 
+export enum WaveGroupIdentitiesModal {
+  INCLUDE = "include",
+  EXCLUDE = "exclude",
+}
+
 export interface WaveGroupEditButtonsController {
   readonly mutating: boolean;
-  readonly showIncludeModal: boolean;
-  readonly showExcludeModal: boolean;
-  readonly openIncludeModal: () => void;
-  readonly closeIncludeModal: () => void;
-  readonly openExcludeModal: () => void;
-  readonly closeExcludeModal: () => void;
   readonly canIncludeIdentity: boolean;
   readonly canExcludeIdentity: boolean;
-  readonly shouldAllowRemove: boolean;
-  readonly registerEditTrigger: (open: () => void) => void;
-  readonly triggerEdit: () => void;
-  readonly registerRemoveTrigger: (open: () => void) => void;
-  readonly triggerRemove: () => void;
+  readonly canRemoveGroup: boolean;
+  readonly activeIdentitiesModal: WaveGroupIdentitiesModal | null;
+  readonly openIdentitiesModal: (modal: WaveGroupIdentitiesModal) => void;
+  readonly closeIdentitiesModal: () => void;
   readonly onEdit: (body: ApiUpdateWaveRequest) => Promise<void>;
 }
 
@@ -56,11 +54,8 @@ export const useWaveGroupEditButtonsController = ({
   onWaveCreated,
 }: UseWaveGroupEditButtonsControllerProps): WaveGroupEditButtonsController => {
   const [mutating, setMutating] = useState(false);
-  const [showIncludeModal, setShowIncludeModal] = useState(false);
-  const [showExcludeModal, setShowExcludeModal] = useState(false);
-  const openEditRef = useRef<(() => void) | null>(null);
-  const openRemoveRef = useRef<(() => void) | null>(null);
-
+  const [activeIdentitiesModal, setActiveIdentitiesModal] =
+    useState<WaveGroupIdentitiesModal | null>(null);
   const scopedGroup = useMemo(
     () => getScopedGroup(wave, type),
     [wave, type],
@@ -78,7 +73,7 @@ export const useWaveGroupEditButtonsController = ({
   const canIncludeIdentity = hasGroup && (isWaveAdmin || isAuthor);
   const canExcludeIdentity =
     isWaveAdmin || isAuthor || !hasGroup;
-  const shouldAllowRemove =
+  const canRemoveGroup =
     haveGroup && type !== WaveGroupType.ADMIN;
 
   const editWaveMutation = useMutation({
@@ -119,58 +114,35 @@ export const useWaveGroupEditButtonsController = ({
   );
 
   useEffect(() => {
-    if (!haveGroup || type === WaveGroupType.ADMIN) {
-      openRemoveRef.current = null;
+    if (
+      (activeIdentitiesModal === WaveGroupIdentitiesModal.INCLUDE &&
+        !canIncludeIdentity) ||
+      (activeIdentitiesModal === WaveGroupIdentitiesModal.EXCLUDE &&
+        !canExcludeIdentity)
+    ) {
+      setActiveIdentitiesModal(null);
     }
-  }, [haveGroup, type]);
+  }, [activeIdentitiesModal, canIncludeIdentity, canExcludeIdentity]);
 
-  const registerEditTrigger = useCallback((open: () => void) => {
-    openEditRef.current = open;
-  }, []);
+  const openIdentitiesModal = useCallback(
+    (modal: WaveGroupIdentitiesModal) => {
+      setActiveIdentitiesModal(modal);
+    },
+    [],
+  );
 
-  const triggerEdit = useCallback(() => {
-    openEditRef.current?.();
-  }, []);
-
-  const registerRemoveTrigger = useCallback((open: () => void) => {
-    openRemoveRef.current = open;
-  }, []);
-
-  const triggerRemove = useCallback(() => {
-    openRemoveRef.current?.();
-  }, []);
-
-  const openIncludeModal = useCallback(() => {
-    setShowIncludeModal(true);
-  }, []);
-
-  const closeIncludeModal = useCallback(() => {
-    setShowIncludeModal(false);
-  }, []);
-
-  const openExcludeModal = useCallback(() => {
-    setShowExcludeModal(true);
-  }, []);
-
-  const closeExcludeModal = useCallback(() => {
-    setShowExcludeModal(false);
+  const closeIdentitiesModal = useCallback(() => {
+    setActiveIdentitiesModal(null);
   }, []);
 
   return {
     mutating,
-    showIncludeModal,
-    showExcludeModal,
-    openIncludeModal,
-    closeIncludeModal,
-    openExcludeModal,
-    closeExcludeModal,
     canIncludeIdentity,
     canExcludeIdentity,
-    shouldAllowRemove,
-    registerEditTrigger,
-    triggerEdit,
-    registerRemoveTrigger,
-    triggerRemove,
+    canRemoveGroup,
+    activeIdentitiesModal,
+    openIdentitiesModal,
+    closeIdentitiesModal,
     onEdit,
   };
 };

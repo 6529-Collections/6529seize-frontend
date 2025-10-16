@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import { CompactMenu, type CompactMenuItem } from "@/components/common/CompactMenu";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -15,13 +15,11 @@ interface WaveGroupEditMenuProps {
   readonly onEdit: (body: ApiUpdateWaveRequest) => Promise<void>;
   readonly canIncludeIdentity: boolean;
   readonly canExcludeIdentity: boolean;
-  readonly shouldAllowRemove: boolean;
+  readonly canRemoveGroup: boolean;
   readonly onIncludeIdentity: () => void;
   readonly onExcludeIdentity: () => void;
-  readonly onChangeGroup: () => void;
-  readonly onRemoveGroup: () => void;
-  readonly registerEditTrigger: (open: () => void) => void;
-  readonly registerRemoveTrigger: (open: () => void) => void;
+  readonly onChangeGroup?: () => void;
+  readonly onRemoveGroup?: () => void;
 }
 
 const MENU_ITEM_CLASS =
@@ -33,14 +31,15 @@ export default function WaveGroupEditMenu({
   onEdit,
   canIncludeIdentity,
   canExcludeIdentity,
-  shouldAllowRemove,
+  canRemoveGroup,
   onIncludeIdentity,
   onExcludeIdentity,
   onChangeGroup,
   onRemoveGroup,
-  registerEditTrigger,
-  registerRemoveTrigger,
 }: WaveGroupEditMenuProps) {
+  const editTriggerRef = useRef<(() => void) | null>(null);
+  const removeTriggerRef = useRef<(() => void) | null>(null);
+
   const menuItems = useMemo<CompactMenuItem[]>(() => {
     const items: CompactMenuItem[] = [];
 
@@ -67,16 +66,28 @@ export default function WaveGroupEditMenu({
     items.push({
       id: "change",
       label: "Change group",
-      onSelect: onChangeGroup,
+      onSelect: () => {
+        if (onChangeGroup) {
+          onChangeGroup();
+        } else {
+          editTriggerRef.current?.();
+        }
+      },
       className:
         "tw-text-iron-200 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50",
     });
 
-    if (shouldAllowRemove) {
+    if (canRemoveGroup) {
       items.push({
         id: "remove",
         label: "Remove group",
-        onSelect: onRemoveGroup,
+        onSelect: () => {
+          if (onRemoveGroup) {
+            onRemoveGroup();
+          } else {
+            removeTriggerRef.current?.();
+          }
+        },
         className:
           "tw-text-red desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-red",
       });
@@ -90,7 +101,7 @@ export default function WaveGroupEditMenu({
     onExcludeIdentity,
     onChangeGroup,
     onRemoveGroup,
-    shouldAllowRemove,
+    canRemoveGroup,
   ]);
 
   return (
@@ -101,17 +112,17 @@ export default function WaveGroupEditMenu({
           type={type}
           onEdit={onEdit}
           renderTrigger={({ open }) => {
-            registerEditTrigger(open);
+            editTriggerRef.current = open;
             return null;
           }}
         />
-        {shouldAllowRemove ? (
+        {canRemoveGroup ? (
           <WaveGroupRemoveButton
             wave={wave}
             type={type}
             onEdit={onEdit}
             renderTrigger={({ open }) => {
-              registerRemoveTrigger(open);
+              removeTriggerRef.current = open;
               return null;
             }}
           />

@@ -3,32 +3,29 @@
 import WaveGroupManageIdentitiesModal, {
   WaveGroupManageIdentitiesMode,
 } from "../../WaveGroupManageIdentitiesModal";
+import { WaveGroupIdentitiesModal } from "../hooks/useWaveGroupEditButtonsController";
 
 interface WaveGroupManageIdentitiesModalsProps {
-  readonly showIncludeModal: boolean;
-  readonly showExcludeModal: boolean;
-  readonly onCloseInclude: () => void;
-  readonly onCloseExclude: () => void;
+  readonly activeModal: WaveGroupIdentitiesModal | null;
+  readonly onClose: () => void;
 }
 
 export default function WaveGroupManageIdentitiesModals({
-  showIncludeModal,
-  showExcludeModal,
-  onCloseInclude,
-  onCloseExclude,
+  activeModal,
+  onClose,
 }: WaveGroupManageIdentitiesModalsProps) {
   return (
     <>
-      {showIncludeModal ? (
+      {activeModal === WaveGroupIdentitiesModal.INCLUDE ? (
         <WaveGroupManageIdentitiesModal
           mode={WaveGroupManageIdentitiesMode.INCLUDE}
-          onClose={onCloseInclude}
+          onClose={onClose}
         />
       ) : null}
-      {showExcludeModal ? (
+      {activeModal === WaveGroupIdentitiesModal.EXCLUDE ? (
         <WaveGroupManageIdentitiesModal
           mode={WaveGroupManageIdentitiesMode.EXCLUDE}
-          onClose={onCloseExclude}
+          onClose={onClose}
         />
       ) : null}
     </>

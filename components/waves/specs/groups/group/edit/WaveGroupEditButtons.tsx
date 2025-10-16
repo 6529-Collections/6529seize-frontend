@@ -6,7 +6,10 @@ import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { WaveGroupType } from "../WaveGroup";
-import { useWaveGroupEditButtonsController } from "./buttons/hooks/useWaveGroupEditButtonsController";
+import {
+  useWaveGroupEditButtonsController,
+  WaveGroupIdentitiesModal,
+} from "./buttons/hooks/useWaveGroupEditButtonsController";
 import WaveGroupEditMenu from "./buttons/subcomponents/WaveGroupEditMenu";
 import WaveGroupManageIdentitiesModals from "./buttons/subcomponents/WaveGroupManageIdentitiesModals";
 
@@ -30,17 +33,10 @@ export default function WaveGroupEditButtons({
     onEdit,
     canIncludeIdentity,
     canExcludeIdentity,
-    shouldAllowRemove,
-    showIncludeModal,
-    showExcludeModal,
-    openIncludeModal,
-    openExcludeModal,
-    closeIncludeModal,
-    closeExcludeModal,
-    registerEditTrigger,
-    registerRemoveTrigger,
-    triggerEdit,
-    triggerRemove,
+    canRemoveGroup,
+    activeIdentitiesModal,
+    openIdentitiesModal,
+    closeIdentitiesModal,
   } = useWaveGroupEditButtonsController({
     haveGroup,
     wave,
@@ -63,19 +59,17 @@ export default function WaveGroupEditButtons({
         onEdit={onEdit}
         canIncludeIdentity={canIncludeIdentity}
         canExcludeIdentity={canExcludeIdentity}
-        shouldAllowRemove={shouldAllowRemove}
-        onIncludeIdentity={openIncludeModal}
-        onExcludeIdentity={openExcludeModal}
-        onChangeGroup={triggerEdit}
-        onRemoveGroup={triggerRemove}
-        registerEditTrigger={registerEditTrigger}
-        registerRemoveTrigger={registerRemoveTrigger}
+        canRemoveGroup={canRemoveGroup}
+        onIncludeIdentity={() =>
+          openIdentitiesModal(WaveGroupIdentitiesModal.INCLUDE)
+        }
+        onExcludeIdentity={() =>
+          openIdentitiesModal(WaveGroupIdentitiesModal.EXCLUDE)
+        }
       />
       <WaveGroupManageIdentitiesModals
-        showIncludeModal={showIncludeModal}
-        showExcludeModal={showExcludeModal}
-        onCloseInclude={closeIncludeModal}
-        onCloseExclude={closeExcludeModal}
+        activeModal={activeIdentitiesModal}
+        onClose={closeIdentitiesModal}
       />
     </>
   );
