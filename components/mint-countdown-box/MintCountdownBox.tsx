@@ -12,6 +12,7 @@ interface Props {
     showAllowlistInfo?: boolean;
     isFinalized?: boolean;
     isEnded?: boolean;
+    isSoldOut?: boolean;
   };
   linkInfo?: {
     href: string;
@@ -43,23 +44,23 @@ export default function MintCountdownBox(props: Readonly<Props>) {
     small ? styles.countdownContainerShort : "",
   ].join(" ");
 
-  if (mintInfo?.isFinalized) {
-    return (
-      <div className={containerClasses}>
-        <h4 className="mb-3">⌛️ Mint Phase Complete</h4>
-        <p className="mb-1 tw-font-medium">This mint phase has ended.</p>
-        <p className="mb-0 tw-text-md">Thank you for participating!</p>
-      </div>
-    );
-  }
-
-  if (mintInfo?.isEnded) {
+  if (mintInfo?.isSoldOut) {
     return (
       <div className={containerClasses}>
         <h4 className="mb-3">✅ Mint Complete - Sold Out!</h4>
         <p className="mb-1 tw-font-medium">
           All NFTs have been successfully minted.
         </p>
+        <p className="mb-0 tw-text-md">Thank you for participating!</p>
+      </div>
+    );
+  }
+
+  if (mintInfo?.isFinalized) {
+    return (
+      <div className={containerClasses}>
+        <h4 className="mb-3">⌛️ Mint Phase Complete</h4>
+        <p className="mb-1 tw-font-medium">This mint phase has ended.</p>
         <p className="mb-0 tw-text-md">Thank you for participating!</p>
       </div>
     );

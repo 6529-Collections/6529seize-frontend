@@ -96,6 +96,7 @@ export interface ManifoldClaim {
   memePhase?: MemePhase;
   isFetching: boolean;
   isFinalized: boolean;
+  isSoldOut: boolean;
 }
 
 export function useManifoldClaim(
@@ -176,6 +177,7 @@ export function useManifoldClaim(
         memePhase: memePhase,
         isFetching: false,
         isFinalized: remaining === 0 || status === ManifoldClaimStatus.ENDED,
+        isSoldOut: remaining <= 0,
       };
       setClaim(newClaim);
       setRefetchInterval(status === ManifoldClaimStatus.ACTIVE ? 5000 : 10000);
