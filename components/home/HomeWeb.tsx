@@ -6,7 +6,6 @@ import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import Home from "./Home";
 import HomeFeed from "./HomeFeed";
 import HomePageTabs from "./HomePageTabs";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import ConnectWallet from "../common/ConnectWallet";
@@ -32,9 +31,8 @@ export default function HomeWeb({
   initialTokens,
   isMemeMintingActive,
 }: HomeWebProps) {
-  const { hasTouchScreen } = useDeviceInfo();
   const { isAuthenticated, connectionState } = useSeizeConnectContext();
-  const { registerRef, spaces } = useLayout();
+  const { registerRef } = useLayout();
   const { drop, isDropOpen, onDropClose } = useDropModal();
   const { activeTab, handleTabChange } = useHomeTabs();
 
@@ -58,20 +56,10 @@ export default function HomeWeb({
     feedContent = <ConnectWallet />;
   }
 
-  const sidebarLeftOffset = hasTouchScreen ? 0 : "var(--left-rail)";
-
   return (
-    <div className="tw-h-full">
+    <div className="tw-h-full tw-flex tw-flex-col tw-relative">
       {isDropOpen && drop && (
-        <div
-          className="tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-[49] tw-bg-black"
-          style={{
-            left: sidebarLeftOffset,
-            right: "var(--layout-margin, 0px)",
-            top: spaces.headerSpace,
-            transition: "none",
-          }}
-        >
+        <div className="tw-absolute tw-inset-0 tw-z-[49]">
           <BrainDesktopDrop
             drop={{
               type: DropSize.FULL,
@@ -90,20 +78,22 @@ export default function HomeWeb({
         onTabChange={handleTabChange}
       />
 
-      <div className="tw-h-full">
-        {activeTab === "feed" ? (
-          <div className="tw-h-full tw-bg-black tw-overflow-hidden tailwind-scope tw-px-2 lg:tw-px-6 xl:tw-px-8 tw-border-solid tw-border-r tw-border-iron-700/95 tw-border-y-0 tw-border-l-0">
-            {feedContent}
-          </div>
-        ) : (
-          <Home
-            featuredNft={featuredNft}
-            isMemeMintingActive={isMemeMintingActive}
-            featuredNextgen={featuredNextgen}
-            initialActivityData={initialActivityData}
-            initialTokens={initialTokens}
-          />
-        )}
+      <div className="tw-flex-1 tw-min-h-0">
+        <div className="tw-h-full">
+          {activeTab === "feed" ? (
+            <div className="tw-h-full tw-bg-black tw-overflow-hidden tailwind-scope tw-px-2 lg:tw-px-6 xl:tw-px-8 tw-border-solid tw-border-r tw-border-iron-700/95 tw-border-y-0 tw-border-l-0">
+              {feedContent}
+            </div>
+          ) : (
+            <Home
+              featuredNft={featuredNft}
+              isMemeMintingActive={isMemeMintingActive}
+              featuredNextgen={featuredNextgen}
+              initialActivityData={initialActivityData}
+              initialTokens={initialTokens}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
