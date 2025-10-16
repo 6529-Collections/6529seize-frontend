@@ -198,7 +198,9 @@ export function LinkPreviewCardLayout({
 
   return (
     <div className="tw-flex tw-w-full tw-min-w-0 tw-max-w-full tw-items-stretch tw-gap-x-1">
-      <div className="tw-flex-1 tw-min-w-0 tw-max-w-full">{children}</div>
+      <div className="tw-flex-1 tw-min-w-0 tw-max-w-full tw-overflow-hidden">
+        {children}
+      </div>
       <ChatItemHrefButtons href={href} relativeHref={relativeHref} />
     </div>
   );
@@ -266,7 +268,7 @@ export default function OpenGraphPreview({
               href={effectiveHref}
               target={linkTarget}
               rel={linkRel}
-              className="tw-break-words tw-[overflow-wrap:anywhere] tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white">
+              className="tw-break-words tw-break-all tw-[overflow-wrap:anywhere] tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white">
               {domain ?? href}
             </Link>
           </div>
@@ -311,11 +313,11 @@ export default function OpenGraphPreview({
               href={effectiveHref}
               target={linkTarget}
               rel={linkRel}
-              className="tw-break-words tw-[overflow-wrap:anywhere] tw-text-lg tw-font-semibold tw-leading-snug tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white">
+              className="tw-break-words tw-break-all tw-[overflow-wrap:anywhere] tw-text-lg tw-font-semibold tw-leading-snug tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white">
               {title ?? domain ?? href}
             </Link>
             {description && (
-              <p className="tw-m-0 tw-text-sm tw-text-iron-300 tw-line-clamp-3 tw-break-words tw-[overflow-wrap:anywhere] tw-whitespace-pre-line">
+              <p className="tw-m-0 tw-text-sm tw-text-iron-300 tw-line-clamp-3 tw-break-words tw-break-all tw-[overflow-wrap:anywhere] tw-whitespace-pre-line">
                 {description}
               </p>
             )}
