@@ -112,6 +112,17 @@ describe("identityTabQueries", () => {
     });
     expect(result.data.cicGiven).toEqual(ratingsGiven);
     expect(result.data.cicReceived).toEqual(ratingsReceived);
+    expect(result.errors).toEqual([]);
+    expect(result.cache).toEqual({
+      revalidateSeconds: 60,
+      tags: [
+        "identity:alice",
+        "identity:alice:statements",
+        "identity:alice:activity",
+        "identity:alice:raters:given",
+        "identity:alice:raters:received",
+      ],
+    });
   });
 
   it("returns safe defaults when upstream requests fail", async () => {
@@ -148,5 +159,12 @@ describe("identityTabQueries", () => {
       page: 1,
       next: false,
     });
+    expect(result.cache.tags).toContain("identity:alice");
+    expect(result.errors.map((error) => error.key).sort()).toEqual([
+      "activityLog",
+      "cicGiven",
+      "cicReceived",
+      "statements",
+    ]);
   });
 });

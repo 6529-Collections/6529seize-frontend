@@ -1,3 +1,7 @@
+"use client";
+
+import { useMemo } from "react";
+
 import { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { CountlessPage, Page } from "@/helpers/Types";
@@ -6,6 +10,7 @@ import {
   ProfileActivityLog,
   RatingWithProfileInfoAndLevel,
 } from "@/entities/IProfile";
+import { useIdentity } from "@/hooks/useIdentity";
 import { ProfileRatersParams } from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import UserPageSetUpProfileWrapper from "../utils/set-up-profile/UserPageSetUpProfileWrapper";
 import UserPageIdentity from "./UserPageIdentity";
@@ -31,13 +36,25 @@ export default function UserPageIdentityWrapper({
   readonly initialCicReceivedData: Page<RatingWithProfileInfoAndLevel>;
   readonly initialActivityLogData: CountlessPage<ProfileActivityLog>;
 }) {
+  const normalizedHandle = useMemo(
+    () => handleOrWallet.toLowerCase(),
+    [handleOrWallet]
+  );
+
+  const { profile: hydratedProfile } = useIdentity({
+    handleOrWallet: normalizedHandle,
+    initialProfile,
+  });
+
+  const resolvedProfile = hydratedProfile ?? initialProfile;
+
   return (
     <UserPageSetUpProfileWrapper
-      profile={initialProfile}
+      profile={resolvedProfile}
       handleOrWallet={handleOrWallet}
     >
       <UserPageIdentity
-        profile={initialProfile}
+        profile={resolvedProfile}
         initialCICReceivedParams={initialCICReceivedParams}
         initialCICGivenParams={initialCICGivenParams}
         initialActivityLogParams={initialActivityLogParams}

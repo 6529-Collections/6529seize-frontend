@@ -155,6 +155,17 @@ describe("identity page SSR prepare hook", () => {
         cicGiven,
         cicReceived,
       },
+      cache: {
+        revalidateSeconds: 60,
+        tags: [
+          "identity:alice",
+          "identity:alice:statements",
+          "identity:alice:activity",
+          "identity:alice:raters:given",
+          "identity:alice:raters:received",
+        ],
+      },
+      errors: [],
     });
 
     const element = await Page({

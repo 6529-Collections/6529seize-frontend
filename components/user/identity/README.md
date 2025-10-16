@@ -10,6 +10,9 @@ client widgets.
   activity log, raters tables, and CIC statements using a single `fetchIdentityTabData`
   call. The helper normalises the handle, applies default filters, and returns
   safe empty structures whenever an upstream request fails.
+- The same helper surfaces `cache` hints (identity-specific `revalidateSeconds`
+  and cache tags) plus a typed `errors` collection so callers can plug into
+  `revalidateTag` strategies or add logging without duplicating fallback logic.
 - The `prepare` hook inside `app/[user]/identity/page.tsx` injects this payload
   into the tab props so that the layout, hydrator, and client components can
   render immediately without issuing duplicate requests.

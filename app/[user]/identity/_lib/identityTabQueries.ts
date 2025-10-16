@@ -19,6 +19,12 @@ export type IdentityTabParams = {
   readonly cicReceivedParams: ProfileRatersParams;
 };
 
+type IdentityTabDatasetKey =
+  | "statements"
+  | "activityLog"
+  | "cicGiven"
+  | "cicReceived";
+
 export type IdentityTabServerData = {
   readonly statements: CicStatement[];
   readonly activityLog: CountlessPage<ProfileActivityLog>;
@@ -30,11 +36,26 @@ export type IdentityTabQueryResult = {
   readonly handleOrWallet: string;
   readonly params: IdentityTabParams;
   readonly data: IdentityTabServerData;
+  readonly cache: IdentityTabCacheHints;
+  readonly errors: IdentityTabQueryError[];
 };
 
 const MATTER_TYPE = RateMatter.NIC;
 
-const createEmptyActivityLog = (): CountlessPage<ProfileActivityLog> => ({
+export type IdentityTabQueryError = {
+  readonly key: IdentityTabDatasetKey;
+  readonly error: unknown;
+};
+
+export type IdentityTabCacheHints = {
+  readonly tags: string[];
+  readonly revalidateSeconds: number;
+};
+
+const IDENTITY_CACHE_REVALIDATE_SECONDS = 60;
+
+const createEmptyActivityLogPage = (): Page<ProfileActivityLog> => ({
+  count: 0,
   data: [],
   page: 1,
   next: false,
@@ -91,6 +112,49 @@ const toCountlessPage = (
   next: page.next,
 });
 
+const resolveSettledResult = <T>({
+  result,
+  key,
+  fallback,
+}: {
+  result: PromiseSettledResult<T>;
+  key: IdentityTabDatasetKey;
+  fallback: () => T;
+}): {
+  data: T;
+  error: IdentityTabQueryError | null;
+} => {
+  if (result.status === "fulfilled") {
+    return {
+      data: result.value,
+      error: null,
+    };
+  }
+
+  return {
+    data: fallback(),
+    error: {
+      key,
+      error:
+        (result.reason as unknown) ??
+        new Error(`identity tab ${key} request rejected`),
+    },
+  };
+};
+
+const createIdentityCacheHints = (
+  normalizedHandle: string
+): IdentityTabCacheHints => ({
+  tags: [
+    `identity:${normalizedHandle}`,
+    `identity:${normalizedHandle}:statements`,
+    `identity:${normalizedHandle}:activity`,
+    `identity:${normalizedHandle}:raters:given`,
+    `identity:${normalizedHandle}:raters:received`,
+  ],
+  revalidateSeconds: IDENTITY_CACHE_REVALIDATE_SECONDS,
+});
+
 export const fetchIdentityTabData = async ({
   handleOrWallet,
   headers,
@@ -132,34 +196,47 @@ export const fetchIdentityTabData = async ({
     }),
   ]);
 
-  const statements: CicStatement[] =
-    statementsResult.status === "fulfilled"
-      ? statementsResult.value
-      : [];
+  const statementsOutcome = resolveSettledResult({
+    result: statementsResult,
+    key: "statements",
+    fallback: () => [],
+  });
 
-  const activityLogPage: CountlessPage<ProfileActivityLog> =
-    activityLogsResult.status === "fulfilled"
-      ? toCountlessPage(activityLogsResult.value)
-      : createEmptyActivityLog();
+  const activityLogOutcome = resolveSettledResult({
+    result: activityLogsResult,
+    key: "activityLog",
+    fallback: createEmptyActivityLogPage,
+  });
 
-  const cicGiven: IdentityRatersPage =
-    cicGivenResult.status === "fulfilled"
-      ? cicGivenResult.value
-      : createEmptyRatersPage();
+  const cicGivenOutcome = resolveSettledResult({
+    result: cicGivenResult,
+    key: "cicGiven",
+    fallback: createEmptyRatersPage,
+  });
 
-  const cicReceived: IdentityRatersPage =
-    cicReceivedResult.status === "fulfilled"
-      ? cicReceivedResult.value
-      : createEmptyRatersPage();
+  const cicReceivedOutcome = resolveSettledResult({
+    result: cicReceivedResult,
+    key: "cicReceived",
+    fallback: createEmptyRatersPage,
+  });
+
+  const errors = [
+    statementsOutcome.error,
+    activityLogOutcome.error,
+    cicGivenOutcome.error,
+    cicReceivedOutcome.error,
+  ].filter((error): error is IdentityTabQueryError => error !== null);
 
   return {
     handleOrWallet: normalizedHandle,
     params,
     data: {
-      statements,
-      activityLog: activityLogPage,
-      cicGiven,
-      cicReceived,
+      statements: statementsOutcome.data,
+      activityLog: toCountlessPage(activityLogOutcome.data),
+      cicGiven: cicGivenOutcome.data,
+      cicReceived: cicReceivedOutcome.data,
     },
+    cache: createIdentityCacheHints(normalizedHandle),
+    errors,
   };
 };
