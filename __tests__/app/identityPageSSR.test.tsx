@@ -4,7 +4,7 @@ import type {
   CicStatement,
   RatingWithProfileInfoAndLevel,
 } from "@/entities/IProfile";
-import type { IdentityTabParams } from "@/app/[user]/identity/page";
+import type { IdentityTabParams } from "@/app/[user]/identity/_lib/identityShared";
 import {
   ProfileActivityFilterTargetType,
   ProfileRatersParamsOrderBy,

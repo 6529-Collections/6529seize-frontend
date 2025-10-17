@@ -1,34 +1,24 @@
-import { Suspense, cache, use } from "react";
+import { Suspense, cache } from "react";
 import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
-import UserPageIdentityHydrator from "@/components/user/identity/UserPageIdentityHydrator";
-import UserPageIdentityHeader from "@/components/user/identity/header/UserPageIdentityHeader";
-import UserPageIdentityStatements from "@/components/user/identity/statements/UserPageIdentityStatements";
-import ProfileRatersTableWrapper, {
-  type ProfileRatersParams,
-} from "@/components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
-import UserPageIdentityActivityLog from "@/components/user/identity/activity/UserPageIdentityActivityLog";
-import UserPageSetUpProfileWrapper from "@/components/user/utils/set-up-profile/UserPageSetUpProfileWrapper";
-import CommonSkeletonLoader from "@/components/utils/animation/CommonSkeletonLoader";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import type { CountlessPage, Page as PageWithCount } from "@/helpers/Types";
-import type {
-  CicStatement,
-  ProfileActivityLog,
-  RatingWithProfileInfoAndLevel,
-} from "@/entities/IProfile";
-import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
+import type { CountlessPage } from "@/helpers/Types";
+import type { CicStatement, ProfileActivityLog } from "@/entities/IProfile";
+import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 import {
-  convertActivityLogParams,
-  getProfileLogTypes,
-} from "@/helpers/profile-logs.helpers";
-import {
-  getInitialRatersParams,
   getProfileCicRatings,
   getUserProfileActivityLogs,
 } from "@/helpers/server.helpers";
 import { fetchHeaderStatements } from "@/components/user/user-page-header/userPageHeaderPrefetch";
-import { ProfileActivityFilterTargetType, RateMatter } from "@/enums";
 import { withServerTiming } from "@/helpers/performance.helpers";
+import {
+  createIdentityTabParams,
+  type IdentityTabParams,
+  type IdentityRatersPage,
+  type IdentityHydrationPayload,
+} from "@/app/[user]/identity/_lib/identityShared";
+import { IdentityTabFallback } from "@/app/[user]/identity/_components/IdentitySkeletons";
+import { IdentityHydratorSection } from "@/app/[user]/identity/_components/IdentityHydratorSection";
+import { IdentityContentShell } from "@/app/[user]/identity/_components/IdentityContentShell";
 
 type IdentityTabExtraProps = {
   readonly identityHandle: string;
@@ -43,65 +33,12 @@ type IdentityResources = {
   readonly hydrationPromise: Promise<IdentityHydrationPayload>;
 };
 
-type IdentityHydrationPayload = {
-  readonly statements: CicStatement[];
-  readonly cicGiven: IdentityRatersPage;
-  readonly cicReceived: IdentityRatersPage;
-  readonly activityLog: CountlessPage<ProfileActivityLog> | null;
-};
-
-export type IdentityRatersPage = PageWithCount<RatingWithProfileInfoAndLevel>;
-
-export type IdentityTabParams = {
-  readonly activityLogParams: ActivityLogParams;
-  readonly cicGivenParams: ProfileRatersParams;
-  readonly cicReceivedParams: ProfileRatersParams;
-};
-
 const createEmptyRatersPage = (): IdentityRatersPage => ({
   count: 0,
   data: [],
   page: 1,
   next: false,
 });
-
-const MATTER_TYPE = RateMatter.NIC;
-
-const createIdentityTabParams = (
-  handleOrWallet: string
-): IdentityTabParams => {
-  const normalizedHandle = handleOrWallet.toLowerCase();
-
-  const cicGivenParams = getInitialRatersParams({
-    handleOrWallet: normalizedHandle,
-    matter: MATTER_TYPE,
-    given: true,
-  });
-
-  const cicReceivedParams = getInitialRatersParams({
-    handleOrWallet: normalizedHandle,
-    matter: MATTER_TYPE,
-    given: false,
-  });
-
-  const activityLogParams: ActivityLogParams = {
-    page: 1,
-    pageSize: 10,
-    logTypes: getProfileLogTypes({
-      logTypes: [],
-    }),
-    matter: null,
-    targetType: ProfileActivityFilterTargetType.ALL,
-    handleOrWallet: normalizedHandle,
-    groupId: null,
-  };
-
-  return {
-    activityLogParams,
-    cicGivenParams,
-    cicReceivedParams,
-  };
-};
 
 const fetchCicRatings = cache(
   async (
@@ -214,33 +151,6 @@ const createIdentityResources = ({
   };
 };
 
-function IdentityTabFallback(): React.JSX.Element {
-  return (
-    <div
-      className="tailwind-scope tw-space-y-8"
-      data-testid="identity-tab-fallback"
-    >
-      <div className="tw-space-y-4">
-        <div className="tw-h-6 tw-w-48 tw-rounded tw-bg-iron-900 tw-animate-pulse" />
-        <div className="tw-bg-iron-900 tw-border tw-border-iron-800 tw-rounded-xl tw-p-6">
-          <CommonSkeletonLoader />
-        </div>
-      </div>
-      <div className="tw-grid tw-grid-cols-1 tw-gap-6 xl:tw-grid-cols-2">
-        <div className="tw-bg-iron-900 tw-border tw-border-iron-800 tw-rounded-xl tw-p-6">
-          <CommonSkeletonLoader />
-        </div>
-        <div className="tw-bg-iron-900 tw-border tw-border-iron-800 tw-rounded-xl tw-p-6">
-          <CommonSkeletonLoader />
-        </div>
-      </div>
-      <div className="tw-bg-iron-900 tw-border tw-border-iron-800 tw-rounded-xl tw-p-6">
-        <CommonSkeletonLoader />
-      </div>
-    </div>
-  );
-}
-
 async function IdentityTabContent({
   profile,
   handleOrWallet,
@@ -279,242 +189,6 @@ async function IdentityTabContent({
         activityLogPromise={resources.activityLogPromise}
       />
     </>
-  );
-}
-
-function IdentityHydratorSection({
-  profile,
-  handleOrWallet,
-  params,
-  hydrationPromise,
-}: {
-  readonly profile: ApiIdentity;
-  readonly handleOrWallet: string;
-  readonly params: IdentityTabParams;
-  readonly hydrationPromise: Promise<IdentityHydrationPayload>;
-}): React.JSX.Element {
-  const { statements, cicGiven, cicReceived, activityLog } =
-    use(hydrationPromise);
-
-  return (
-    <UserPageIdentityHydrator
-      profile={profile}
-      handleOrWallet={handleOrWallet}
-      initialStatements={statements}
-      initialActivityLogParams={params.activityLogParams}
-      initialActivityLogData={activityLog ?? undefined}
-      initialCICGivenParams={params.cicGivenParams}
-      initialCicGivenData={cicGiven}
-      initialCICReceivedParams={params.cicReceivedParams}
-      initialCicReceivedData={cicReceived}
-    />
-  );
-}
-
-function IdentityContentShell({
-  profile,
-  handleOrWallet,
-  params,
-  statementsPromise,
-  cicGivenPromise,
-  cicReceivedPromise,
-  activityLogPromise,
-}: {
-  readonly profile: ApiIdentity;
-  readonly handleOrWallet: string;
-  readonly params: IdentityTabParams;
-  readonly statementsPromise: Promise<CicStatement[]>;
-  readonly cicGivenPromise: Promise<IdentityRatersPage>;
-  readonly cicReceivedPromise: Promise<IdentityRatersPage>;
-  readonly activityLogPromise: Promise<CountlessPage<ProfileActivityLog> | null>;
-}): React.JSX.Element {
-  return (
-    <UserPageSetUpProfileWrapper
-      profile={profile}
-      handleOrWallet={handleOrWallet}
-    >
-      <div className="tailwind-scope">
-        <UserPageIdentityHeader profile={profile} />
-        <Suspense fallback={<StatementsSkeleton />}>
-          <IdentityStatementsSection
-            profile={profile}
-            handleOrWallet={handleOrWallet}
-            resource={statementsPromise}
-          />
-        </Suspense>
-        <div className="tw-mt-6 lg:tw-mt-10 xl:tw-flex xl:tw-items-stretch tw-space-y-8 lg:tw-space-y-10 xl:tw-space-y-0 tw-gap-x-8">
-          <Suspense fallback={<RatersSkeleton type="given" />}>
-            <IdentityRatersSection
-              resource={cicGivenPromise}
-              initialParams={params.cicGivenParams}
-              handleOrWallet={handleOrWallet}
-            />
-          </Suspense>
-          <Suspense fallback={<RatersSkeleton type="received" />}>
-            <IdentityRatersSection
-              resource={cicReceivedPromise}
-              initialParams={params.cicReceivedParams}
-              handleOrWallet={handleOrWallet}
-            />
-          </Suspense>
-        </div>
-        <Suspense fallback={<ActivitySkeleton />}>
-          <IdentityActivitySection
-            resource={activityLogPromise}
-            initialParams={params.activityLogParams}
-          />
-        </Suspense>
-      </div>
-    </UserPageSetUpProfileWrapper>
-  );
-}
-
-function IdentityStatementsSection({
-  profile,
-  handleOrWallet,
-  resource,
-}: {
-  readonly profile: ApiIdentity;
-  readonly handleOrWallet: string;
-  readonly resource: Promise<CicStatement[]>;
-}): React.JSX.Element {
-  const statements = use(resource);
-  return (
-    <UserPageIdentityStatements
-      profile={profile}
-      handleOrWallet={handleOrWallet}
-      initialStatements={statements}
-    />
-  );
-}
-
-function IdentityRatersSection({
-  resource,
-  initialParams,
-  handleOrWallet,
-}: {
-  readonly resource: Promise<IdentityRatersPage>;
-  readonly initialParams: IdentityTabParams["cicGivenParams"];
-  readonly handleOrWallet: string;
-}): React.JSX.Element {
-  const ratings = use(resource);
-  return (
-    <ProfileRatersTableWrapper
-      initialParams={initialParams}
-      handleOrWallet={handleOrWallet}
-      initialData={ratings as PageWithCount<RatingWithProfileInfoAndLevel>}
-    />
-  );
-}
-
-function IdentityActivitySection({
-  resource,
-  initialParams,
-}: {
-  readonly resource: Promise<CountlessPage<ProfileActivityLog> | null>;
-  readonly initialParams: IdentityTabParams["activityLogParams"];
-}): React.JSX.Element {
-  const activityLog = use(resource);
-  return (
-    <UserPageIdentityActivityLog
-      initialActivityLogParams={initialParams}
-      initialActivityLogData={activityLog ?? undefined}
-    />
-  );
-}
-
-function StatementsSkeleton(): React.JSX.Element {
-  return (
-    <div className="tw-mt-6 lg:tw-mt-8">
-      <div className="tw-flex tw-flex-col lg:tw-flex-row lg:tw-items-center lg:tw-justify-between">
-        <div className="tw-space-y-2">
-          <div className="tw-h-6 tw-w-48 tw-rounded tw-bg-iron-900 tw-animate-pulse" />
-          <div className="tw-h-4 tw-w-72 tw-max-w-full tw-rounded tw-bg-iron-900 tw-animate-pulse" />
-        </div>
-        <div className="tw-mt-4 lg:tw-mt-0 tw-flex tw-items-center tw-gap-3">
-          <div className="tw-h-9 tw-w-32 tw-rounded-full tw-bg-iron-900 tw-animate-pulse" />
-          <div className="tw-h-9 tw-w-9 tw-rounded-full tw-bg-iron-900 tw-animate-pulse" />
-        </div>
-      </div>
-      <div className="tw-mt-2 lg:tw-mt-4 tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl">
-        <div className="tw-relative tw-px-4 tw-py-6 lg:tw-p-8 tw-grid tw-grid-cols-1 xl:tw-grid-cols-9 tw-gap-8">
-          {[0, 1, 2, 3, 4].map((index) => (
-            <div
-              key={`statements-skeleton-${index}`}
-              className={`tw-col-span-3 tw-space-y-4 ${
-                index === 0 ? "tw-col-span-3" : ""
-              }`}
-            >
-              <div className="tw-h-5 tw-w-40 tw-rounded tw-bg-iron-900 tw-animate-pulse" />
-              <div className="tw-space-y-3">
-                <CommonSkeletonLoader />
-              </div>
-            </div>
-          ))}
-          <div className="tw-absolute tw-right-2 lg:tw-right-4 tw-top-2 xl:tw-top-4">
-            <div className="tw-h-10 tw-w-10 tw-rounded-full tw-bg-iron-900 tw-animate-pulse" />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function RatersSkeleton({
-  type,
-}: {
-  readonly type: "given" | "received";
-}): React.JSX.Element {
-  return (
-    <div
-      className="tw-flex-1 tw-min-h-full tw-flex tw-flex-col"
-      data-testid={`identity-raters-skeleton-${type}`}
-    >
-      <div className="tw-h-6 tw-w-40 tw-rounded tw-bg-iron-900 tw-animate-pulse" />
-      <div className="tw-flex-1 tw-mt-2 lg:tw-mt-4 tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl tw-overflow-hidden">
-        <div className="tw-border-b tw-border-iron-800 tw-px-4 sm:tw-px-6 tw-py-3">
-          <div className="tw-h-4 tw-w-28 tw-rounded tw-bg-iron-800 tw-animate-pulse" />
-        </div>
-        <div className="tw-space-y-3 tw-p-4 sm:tw-px-6">
-          {[0, 1, 2, 3].map((row) => (
-            <div
-              key={`raters-skeleton-row-${type}-${row}`}
-              className="tw-flex tw-items-center tw-justify-between"
-            >
-              <div className="tw-h-4 tw-w-40 tw-rounded tw-bg-iron-800 tw-animate-pulse" />
-              <div className="tw-flex tw-items-center tw-gap-4">
-                <div className="tw-h-4 tw-w-16 tw-rounded tw-bg-iron-800 tw-animate-pulse" />
-                <div className="tw-h-4 tw-w-20 tw-rounded tw-bg-iron-800 tw-animate-pulse" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ActivitySkeleton(): React.JSX.Element {
-  return (
-    <div className="tw-mt-8 tw-space-y-4">
-      <div className="tw-flex tw-items-center tw-justify-between">
-        <div className="tw-h-6 tw-w-52 tw-rounded tw-bg-iron-900 tw-animate-pulse" />
-        <div className="tw-h-6 tw-w-16 tw-rounded tw-bg-iron-900 tw-animate-pulse" />
-      </div>
-      <div className="tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl">
-        <div className="tw-space-y-3 tw-p-6">
-          {[0, 1, 2].map((row) => (
-            <div
-              key={`activity-skeleton-row-${row}`}
-              className="tw-space-y-2 tw-border-b tw-border-iron-800 tw-pb-3 last:tw-border-b-0 last:tw-pb-0"
-            >
-              <div className="tw-h-4 tw-w-60 tw-max-w-full tw-rounded tw-bg-iron-800 tw-animate-pulse" />
-              <div className="tw-h-4 tw-w-40 tw-rounded tw-bg-iron-900 tw-animate-pulse" />
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
   );
 }
 

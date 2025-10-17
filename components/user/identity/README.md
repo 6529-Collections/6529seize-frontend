@@ -11,6 +11,9 @@ its server-side data fetching directly inside
   statements, raters, and the activity log. Each fetch uses a `createResource`
   guard so failures log a warning and fall back to safe defaults instead of
   breaking the stream.
+- Server wrappers under `app/[user]/identity/_components` (`IdentityHydratorSection`,
+  `IdentityContentShell`, etc.) render the initial HTML for statements, raters,
+  and activity logs while deferring interactive pieces to client components.
 - Suspense boundaries wrap every section, allowing the header to render
   immediately while tables and logs hydrate as their promises settle.
 
@@ -28,6 +31,8 @@ its server-side data fetching directly inside
 - `UserPageIdentityActivityLog` still defers to `ProfileActivityLogs`, which
   hydrates from the optional server payload and continues fetching on the
   client when the user filters or paginates.
+- Unknown activity log types now fall back to a resilient
+  `ProfileActivityLogUnknown` renderer instead of triggering an assertion.
 
 ## Testing Notes
 

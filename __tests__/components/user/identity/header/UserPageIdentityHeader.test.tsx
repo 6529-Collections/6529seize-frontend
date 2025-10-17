@@ -3,8 +3,11 @@ import UserPageIdentityHeader from '@/components/user/identity/header/UserPageId
 import { ApiIdentity } from '@/generated/models/ApiIdentity';
 
 jest.mock('@/components/user/identity/header/UserPageIdentityHeaderCIC', () => () => <div data-testid="cic" />);
-jest.mock('@/components/user/utils/rate/UserPageRateWrapper', () => (props: any) => <div data-testid="rate-wrapper">{props.children}</div>);
-jest.mock('@/components/user/identity/header/cic-rate/UserPageIdentityHeaderCICRate', () => () => <div data-testid="cic-rate" />);
+jest.mock('@/components/user/identity/header/UserPageIdentityHeaderActionsClient', () => () => (
+  <div data-testid="rate-wrapper">
+    <div data-testid="cic-rate" />
+  </div>
+));
 
 const profile = { cic: 1 } as ApiIdentity;
 
