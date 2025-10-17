@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import type { Page as PageWithCount } from "@/helpers/Types";
 import type {
   CicStatement,
@@ -127,6 +127,21 @@ jest.mock(
   }
 );
 
+jest.mock(
+  "@/components/user/user-page-header/userPageHeaderData",
+  () => {
+    const actual = jest.requireActual(
+      "@/components/user/user-page-header/userPageHeaderData"
+    );
+    return {
+      __esModule: true,
+      ...actual,
+      fetchProfileEnabledLog: jest.fn(),
+      fetchFollowersCount: jest.fn(),
+    };
+  }
+);
+
 import Page, {
   IdentityTabContent,
 } from "@/app/[user]/identity/page";
@@ -138,6 +153,10 @@ import {
   getUserProfileActivityLogs,
   userPageNeedsRedirect,
 } from "@/helpers/server.helpers";
+import {
+  fetchFollowersCount,
+  fetchProfileEnabledLog,
+} from "@/components/user/user-page-header/userPageHeaderData";
 
 const buildIdentityData = () => {
   const statements = [{ id: "statement-1" }] as CicStatement[];
@@ -199,6 +218,12 @@ describe("identity page SSR streaming", () => {
   it("prepares layout props while deferring identity data fetches", async () => {
     const headers = { "x-test": "identity" };
     const profile = { handle: null, wallets: [], id: 99 } as any;
+    const profileLog = {
+      page: 1,
+      next: false,
+      data: [{ created_at: "2024-01-01T00:00:00Z" }],
+    };
+    const followersCount = 3;
 
     (getAppCommonHeaders as jest.Mock).mockResolvedValue(headers);
     (getUserProfile as jest.Mock).mockResolvedValue(profile);
@@ -215,6 +240,8 @@ describe("identity page SSR streaming", () => {
       next: false,
       data: [],
     });
+    (fetchProfileEnabledLog as jest.Mock).mockResolvedValue(profileLog);
+    (fetchFollowersCount as jest.Mock).mockResolvedValue(followersCount);
 
     const element = await Page({
       params: Promise.resolve({ user: "Alice" }),
@@ -232,10 +259,21 @@ describe("identity page SSR streaming", () => {
       req: { query: { user: "Alice", q: "test" } },
       subroute: "identity",
     });
+    expect(fetchProfileEnabledLog).toHaveBeenCalledWith({
+      handleOrWallet: "alice",
+      headers,
+    });
+    expect(fetchFollowersCount).toHaveBeenCalledWith({
+      profileId: profile.id,
+      headers,
+    });
     expect(layoutPropsSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         profile,
         handleOrWallet: "alice",
+        initialStatements: [],
+        profileEnabledAt: "2024-01-01T00:00:00.000Z",
+        followersCount,
       })
     );
     expect(screen.getByTestId("identity-tab-fallback")).toBeInTheDocument();

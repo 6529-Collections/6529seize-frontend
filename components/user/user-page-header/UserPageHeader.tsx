@@ -37,31 +37,41 @@ export default async function UserPageHeader({
     notFound();
   }
 
-  const headers = await getAppCommonHeaders();
   const normalizedHandle = handleOrWallet.toLowerCase();
 
-  const statementsPromise = initialStatements
-    ? Promise.resolve(initialStatements)
-    : getProfileCicStatements({
-        handleOrWallet: normalizedHandle,
-        headers,
-      });
+  let cachedHeaders: Record<string, string> | null = null;
+  const ensureHeaders = async () => {
+    if (cachedHeaders === null) {
+      cachedHeaders = await getAppCommonHeaders();
+    }
+    return cachedHeaders;
+  };
+
+  const statementsPromise: Promise<CicStatement[]> =
+    initialStatements === undefined
+      ? getProfileCicStatements({
+          handleOrWallet: normalizedHandle,
+          headers: await ensureHeaders(),
+        })
+      : Promise.resolve(initialStatements ?? []);
 
   const profileLogPromise: Promise<CountlessPage<ProfileActivityLog> | null> =
     profileEnabledAt === undefined
       ? fetchProfileEnabledLog({
           handleOrWallet: normalizedHandle,
-          headers,
+          headers: await ensureHeaders(),
         })
       : Promise.resolve(null);
 
   const followersPromise: Promise<number | null> =
     followersCount === undefined
-      ? fetchFollowersCount({
-          profileId: profile.id,
-          headers,
-        })
-      : Promise.resolve(followersCount);
+      ? profile.id
+        ? fetchFollowersCount({
+            profileId: profile.id,
+            headers: await ensureHeaders(),
+          })
+        : Promise.resolve(null)
+      : Promise.resolve(followersCount ?? null);
 
   const [statementsResult, profileLogResult, resolvedFollowersResult] =
     await Promise.allSettled([

@@ -25,6 +25,11 @@ import {
   getProfileCicStatements,
   getUserProfileActivityLogs,
 } from "@/helpers/server.helpers";
+import {
+  extractProfileEnabledAt,
+  fetchFollowersCount,
+  fetchProfileEnabledLog,
+} from "@/components/user/user-page-header/userPageHeaderData";
 import { withServerTiming } from "@/helpers/performance.helpers";
 
 type IdentityTabExtraProps = {
@@ -448,11 +453,41 @@ const { Page, generateMetadata } = createUserTabPage<IdentityTabExtraProps>({
       profile.wallets?.[0]?.wallet ??
       user;
     const normalizedHandleOrWallet = fallbackHandleOrWallet.toLowerCase();
+    const headerPrefetchResults = await Promise.allSettled([
+      fetchStatements(normalizedHandleOrWallet, headers),
+      fetchProfileEnabledLog({
+        handleOrWallet: normalizedHandleOrWallet,
+        headers,
+      }),
+      fetchFollowersCount({
+        profileId: profile.id,
+        headers,
+      }),
+    ]);
+
+    const [statementsResult, profileLogResult, followersResult] =
+      headerPrefetchResults;
+
+    const resolvedStatements =
+      statementsResult.status === "fulfilled" ? statementsResult.value : [];
+
+    const resolvedProfileEnabledAt =
+      profileLogResult.status === "fulfilled"
+        ? extractProfileEnabledAt(profileLogResult.value)
+        : null;
+
+    const resolvedFollowersCount =
+      followersResult.status === "fulfilled" ? followersResult.value : null;
 
     return {
       tabProps: {
         identityHandle: normalizedHandleOrWallet,
         requestHeaders: headers,
+      },
+      layoutProps: {
+        initialStatements: resolvedStatements,
+        profileEnabledAt: resolvedProfileEnabledAt,
+        followersCount: resolvedFollowersCount,
       },
     };
   },
