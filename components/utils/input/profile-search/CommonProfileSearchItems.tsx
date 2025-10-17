@@ -8,12 +8,14 @@ export default function CommonProfileSearchItems({
   selected,
   searchCriteria,
   onProfileSelect,
+  highlightedIndex = null,
 }: {
   readonly open: boolean;
   readonly profiles: CommunityMemberMinimal[];
   readonly selected: string | null;
   readonly searchCriteria: string | null;
   readonly onProfileSelect: (newV: CommunityMemberMinimal | null) => void;
+  readonly highlightedIndex?: number | null;
 }) {
   const noResultsText =
     !searchCriteria || searchCriteria.length < 3
@@ -33,11 +35,12 @@ export default function CommonProfileSearchItems({
             <div className="tw-py-1 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto">
               <ul className="tw-flex tw-flex-col tw-gap-y-1 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
                 {profiles.length ? (
-                  profiles.map((profile) => (
+                  profiles.map((profile, index) => (
                     <CommonProfileSearchItem
                       key={profile.wallet}
                       profile={profile}
                       selected={selected}
+                      isHighlighted={highlightedIndex === index}
                       onProfileSelect={onProfileSelect}
                     />
                   ))

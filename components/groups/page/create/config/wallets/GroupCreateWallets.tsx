@@ -8,6 +8,29 @@ import CreateGroupWalletsEmma from "./CreateGroupWalletsEmma";
 import CreateGroupWalletsUpload from "./CreateGroupWalletsUpload";
 import { useContext, useEffect, useState } from "react";
 
+const normaliseWalletList = (list: readonly string[]): string[] =>
+  list.map((wallet) => wallet.toLowerCase()).sort();
+
+const walletListsMatch = (
+  lhs: readonly string[] | null,
+  rhs: readonly string[] | null
+): boolean => {
+  if (lhs === rhs) {
+    return true;
+  }
+  if (!lhs || !rhs) {
+    return lhs === rhs;
+  }
+  if (lhs.length !== rhs.length) {
+    return false;
+  }
+  const normalisedLhs = normaliseWalletList(lhs);
+  const normalisedRhs = normaliseWalletList(rhs);
+  return normalisedLhs.every(
+    (wallet, index) => wallet === normalisedRhs[index]
+  );
+};
+
 export enum GroupCreateWalletsType {
   INCLUDE = "INCLUDE",
   EXCLUDE = "EXCLUDE",
@@ -46,6 +69,17 @@ export default function GroupCreateWallets({
   const [selectedWallets, setSelectedWallets] = useState<string[]>(
     getSelectedWallets()
   );
+
+  useEffect(() => {
+    if (walletListsMatch(wallets, uploadedWallets)) {
+      return;
+    }
+    if (!wallets || !wallets.length) {
+      setUploadedWallets(null);
+      return;
+    }
+    setUploadedWallets(Array.from(new Set(wallets)));
+  }, [wallets, uploadedWallets]);
 
   useEffect(
     () => setSelectedWallets(getSelectedWallets()),

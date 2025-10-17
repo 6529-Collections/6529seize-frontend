@@ -11,13 +11,13 @@ export default function WaveGroupEdit({
   type,
   isEditOpen,
   setIsEditOpen,
-  onEdit,
+  onWaveUpdate,
 }: {
   readonly wave: ApiWave;
   readonly type: WaveGroupType;
   readonly isEditOpen: boolean;
   readonly setIsEditOpen: (isOpen: boolean) => void;
-  readonly onEdit: (body: ApiUpdateWaveRequest) => Promise<void>;
+  readonly onWaveUpdate: (body: ApiUpdateWaveRequest) => Promise<void>;
 }) {
   const getBody = ({
     group,
@@ -89,7 +89,7 @@ export default function WaveGroupEdit({
 
   const onGroupSelect = async (group: ApiGroupFull): Promise<void> => {
     const body = getBody({ group });
-    await onEdit(body);
+    await onWaveUpdate(body);
   };
 
   return (

@@ -15,52 +15,52 @@ export default function WaveGroups({ wave, useRing = true }: WaveGroupsProps) {
 
   return (
     <div className="tw-w-full tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0">
-      <div
-        className={`tw-h-full tw-bg-iron-950 tw-relative tw-overflow-auto ${ringClasses}`}
-      >
-        <div className="tw-pb-4">
-          <div className="tw-px-4 tw-pt-4 tw-flex tw-justify-between tw-items-start tw-gap-x-6">
-            <p className="tw-mb-0 tw-text-base tw-text-iron-200 tw-font-semibold tw-tracking-tight">
-              Eligible
-            </p>
-          </div>
-          <div className="tw-px-4 tw-flex tw-flex-col tw-gap-y-2 tw-mt-2">
-            <WaveGroup
-              scope={wave.visibility.scope}
-              type={WaveGroupType.VIEW}
-              isEligible={true}
-              wave={wave}
-            />
-            {wave.wave.type !== ApiWaveType.Chat && (
-              <>
-                <WaveGroup
-                  scope={wave.participation.scope}
-                  type={WaveGroupType.DROP}
-                  isEligible={wave.participation.authenticated_user_eligible}
-                  wave={wave}
-                />
-                <WaveGroup
-                  scope={wave.voting.scope}
-                  type={WaveGroupType.VOTE}
-                  isEligible={wave.voting.authenticated_user_eligible}
-                  wave={wave}
-                />
-              </>
-            )}
+      <div className={`tw-h-full tw-bg-iron-950 tw-relative ${ringClasses}`}>
+        <div className="tw-h-full tw-overflow-y-auto tw-overflow-x-hidden no-scrollbar">
+          <div className="tw-pb-4">
+            <div className="tw-px-4 tw-pt-4 tw-flex tw-justify-between tw-items-start tw-gap-x-6">
+              <p className="tw-mb-0 tw-text-base tw-text-iron-200 tw-font-semibold tw-tracking-tight">
+                Eligible
+              </p>
+            </div>
+            <div className="tw-px-4 tw-flex tw-flex-col tw-gap-y-2 tw-mt-2">
+              <WaveGroup
+                scope={wave.visibility.scope}
+                type={WaveGroupType.VIEW}
+                isEligible={true}
+                wave={wave}
+              />
+              {wave.wave.type !== ApiWaveType.Chat && (
+                <>
+                  <WaveGroup
+                    scope={wave.participation.scope}
+                    type={WaveGroupType.DROP}
+                    isEligible={wave.participation.authenticated_user_eligible}
+                    wave={wave}
+                  />
+                  <WaveGroup
+                    scope={wave.voting.scope}
+                    type={WaveGroupType.VOTE}
+                    isEligible={wave.voting.authenticated_user_eligible}
+                    wave={wave}
+                  />
+                </>
+              )}
 
-            <WaveGroup
-              scope={wave.chat.scope}
-              type={WaveGroupType.CHAT}
-              isEligible={wave.chat.authenticated_user_eligible}
-              wave={wave}
-            />
+              <WaveGroup
+                scope={wave.chat.scope}
+                type={WaveGroupType.CHAT}
+                isEligible={wave.chat.authenticated_user_eligible}
+                wave={wave}
+              />
 
-            <WaveGroup
-              scope={wave.wave.admin_group}
-              type={WaveGroupType.ADMIN}
-              isEligible={wave.wave.authenticated_user_eligible_for_admin}
-              wave={wave}
-            />
+              <WaveGroup
+                scope={wave.wave.admin_group}
+                type={WaveGroupType.ADMIN}
+                isEligible={wave.wave.authenticated_user_eligible_for_admin}
+                wave={wave}
+              />
+            </div>
           </div>
         </div>
       </div>

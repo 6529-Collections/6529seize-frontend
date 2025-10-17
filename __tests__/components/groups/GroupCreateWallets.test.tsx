@@ -34,6 +34,6 @@ describe('GroupCreateWallets', () => {
     const user = userEvent.setup();
     const { setWallets } = renderComp({ walletsLimit:5 });
     await user.click(screen.getByLabelText('Remove wallets'));
-    expect(setWallets).toHaveBeenLastCalledWith(null);
+    expect(setWallets).toHaveBeenCalledWith(null);
   });
 });

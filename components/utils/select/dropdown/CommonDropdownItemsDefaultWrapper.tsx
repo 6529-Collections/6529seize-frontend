@@ -40,23 +40,20 @@ export default function CommonDropdownItemsDefaultWrapper<T>({
   }, [buttonPosition, dropdownRef, dynamicPosition]);
 
   return (
-    <div className="tw-absolute" ref={dropdownRef}>
+    <div className="tw-absolute tw-z-50" ref={dropdownRef}>
       <AnimatePresence mode="wait" initial={false}>
         {isOpen && (
           <motion.div
-            className="tw-z-10 tw-mt-1 tw-min-w-[18rem] tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
+            ref={listRef}
+            className="tw-mt-2 tw-w-72 tw-min-w-[12rem] tw-rounded-lg tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 tw-ring-white/10 focus:tw-outline-none"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}>
-            <div
-              className="tw-absolute tw-z-10 tw-mt-1 tw-overflow-hidden tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10"
-              ref={listRef}>
-              <div className="tw-py-1 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto">
-                <ul className="tw-flex tw-flex-col tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
-                  {children}
-                </ul>
-              </div>
+            <div className="tw-max-h-80 tw-overflow-y-auto tw-overflow-x-hidden">
+              <ul className="tw-flex tw-flex-col tw-gap-0.5 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
+                {children}
+              </ul>
             </div>
           </motion.div>
         )}

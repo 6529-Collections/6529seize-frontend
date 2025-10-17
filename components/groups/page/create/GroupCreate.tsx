@@ -53,12 +53,41 @@ export default function GroupCreate({
     enabled: !!originalGroup?.id && !!originalGroup?.group.identity_group_id,
   });
 
+  const {
+    data: originalGroupExcludedWallets,
+    isFetching: loadingOriginalGroupExcludedWallets,
+  } = useQuery<string[]>({
+    queryKey: [
+      QueryKey.GROUP_WALLET_GROUP_WALLETS,
+      {
+        group_id: originalGroup?.id,
+        wallet_group_id: originalGroup?.group.excluded_identity_group_id,
+      },
+    ],
+    queryFn: async () =>
+      await commonApiFetch<string[]>({
+        endpoint: `groups/${originalGroup?.id}/identity_groups/${originalGroup?.group.excluded_identity_group_id}`,
+      }),
+    enabled:
+      !!originalGroup?.id && !!originalGroup?.group.excluded_identity_group_id,
+  });
+
   const [isFetching, setIsFetching] = useState(
-    loadingOriginalGroup || loadingOriginalGroupWallets
+    loadingOriginalGroup ||
+      loadingOriginalGroupWallets ||
+      loadingOriginalGroupExcludedWallets
   );
   useEffect(() => {
-    setIsFetching(loadingOriginalGroup || loadingOriginalGroupWallets);
-  }, [loadingOriginalGroup, loadingOriginalGroupWallets]);
+    setIsFetching(
+      loadingOriginalGroup ||
+        loadingOriginalGroupWallets ||
+        loadingOriginalGroupExcludedWallets
+    );
+  }, [
+    loadingOriginalGroup,
+    loadingOriginalGroupWallets,
+    loadingOriginalGroupExcludedWallets,
+  ]);
 
   const [groupConfig, setGroupConfig] = useState<ApiCreateGroup>({
     name: "",
@@ -117,11 +146,11 @@ export default function GroupCreate({
         },
         owns_nfts: originalGroup.group.owns_nfts,
         identity_addresses: originalGroupWallets ?? [],
-        excluded_identity_addresses: [],
+        excluded_identity_addresses: originalGroupExcludedWallets ?? [],
       },
       is_private: originalGroup.is_private ?? false,
     });
-  }, [originalGroup, originalGroupWallets]);
+  }, [originalGroup, originalGroupWallets, originalGroupExcludedWallets]);
 
   const getMyAddresses = () => {
     if (!connectedProfile) {

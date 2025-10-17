@@ -8,10 +8,12 @@ export default function CommonProfileSearchItem({
   profile,
   selected,
   onProfileSelect,
+  isHighlighted = false,
 }: {
   readonly profile: CommunityMemberMinimal;
   readonly selected: string | null;
   readonly onProfileSelect: (newV: CommunityMemberMinimal | null) => void;
+  readonly isHighlighted?: boolean;
 }) {
   const handleOrWallet = profile.handle ?? profile.wallet;
   const isSelected = selected?.toLowerCase() === handleOrWallet.toLowerCase();
@@ -23,7 +25,9 @@ export default function CommonProfileSearchItem({
     <li className="tw-h-full">
       <button
         type="button"
-        className="hover:tw-bg-iron-700 tw-py-2 tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
+        className={`hover:tw-bg-iron-700 tw-py-2 tw-w-full tw-h-full tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out ${
+          isHighlighted ? "tw-bg-iron-700" : "tw-bg-transparent"
+        }`}
         onClick={onProfileClick}
       >
         <div className="tw-w-full tw-flex tw-justify-between tw-items-center">
