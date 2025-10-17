@@ -10,16 +10,16 @@ jest.mock('@tanstack/react-query', () => ({ useMutation: jest.fn() }));
 
 jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupEditButton', () => ({
   __esModule: true,
-  default: ({ onEdit, renderTrigger }: any) => {
-    const handleOpen = () => onEdit({});
+  default: ({ onWaveUpdate, renderTrigger }: any) => {
+    const handleOpen = () => onWaveUpdate({});
     return renderTrigger ? <>{renderTrigger({ open: handleOpen })}</> : <button onClick={handleOpen}>edit</button>;
   },
 }));
 
 jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupRemoveButton', () => ({
   __esModule: true,
-  default: ({ onEdit, renderTrigger }: any) => {
-    const handleOpen = () => onEdit({});
+  default: ({ onWaveUpdate, renderTrigger }: any) => {
+    const handleOpen = () => onWaveUpdate({});
     return renderTrigger ? <>{renderTrigger({ open: handleOpen })}</> : <button onClick={handleOpen}>remove</button>;
   },
 }));

@@ -12,12 +12,19 @@ export enum WaveGroupManageIdentitiesMode {
   EXCLUDE = "EXCLUDE",
 }
 
+export interface WaveGroupManageIdentitiesConfirmEvent {
+  readonly identity: string;
+  readonly mode: WaveGroupManageIdentitiesMode;
+}
+
 export default function WaveGroupManageIdentitiesModal({
   mode,
   onClose,
+  onConfirm,
 }: {
   readonly mode: WaveGroupManageIdentitiesMode;
   readonly onClose: () => void;
+  readonly onConfirm: (event: WaveGroupManageIdentitiesConfirmEvent) => void;
 }) {
   const modalRef = useRef<HTMLDivElement>(null);
   useClickAway(modalRef, onClose);
@@ -28,6 +35,11 @@ export default function WaveGroupManageIdentitiesModal({
       ? "Include identity"
       : "Exclude identity";
 
+  const description =
+    mode === WaveGroupManageIdentitiesMode.INCLUDE
+      ? "Add an identity to this group's allow list."
+      : "Move an identity to this group's exclude list.";
+
   const [identity, setIdentity] = useState<string | null>(null);
   const actionLabel =
     mode === WaveGroupManageIdentitiesMode.INCLUDE ? "Include" : "Exclude";
@@ -36,6 +48,10 @@ export default function WaveGroupManageIdentitiesModal({
     event.preventDefault();
 
     if (identity) {
+      onConfirm({
+        identity,
+        mode,
+      });
       onClose();
     }
   };
@@ -54,7 +70,7 @@ export default function WaveGroupManageIdentitiesModal({
                   {title}
                 </p>
                 <p className="tw-text-sm tw-text-iron-400 tw-mb-0">
-                  We will wire this flow in a follow-up update.
+                  {description}
                 </p>
               </div>
               <button

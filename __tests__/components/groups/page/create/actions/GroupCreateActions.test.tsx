@@ -8,29 +8,19 @@ import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/React
 jest.mock('@/components/groups/page/create/actions/GroupCreateTest', () => () => <div data-testid="test" />);
 jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => () => <div data-testid="loader" />);
 
-const commonApiPost = jest.fn();
-jest.mock('@/services/api/common-api', () => ({
-  commonApiPost: (...args: any[]) => commonApiPost(...args),
+const mockSubmit = jest.fn();
+const mockValidate = jest.fn();
+jest.mock('@/hooks/groups/useGroupMutations', () => ({
+  useGroupMutations: () => ({
+    validate: mockValidate,
+    submit: mockSubmit,
+    runTest: jest.fn(),
+    isSubmitting: false,
+    isTesting: false,
+    updateVisibility: jest.fn(),
+    isUpdatingVisibility: false,
+  }),
 }));
-
-// simple useMutation mock that executes mutationFn and callbacks
-const useMutationMock = jest.fn((options: any) => {
-  const mutateAsync = jest.fn(async (param?: any) => {
-    try {
-      const result = await options.mutationFn(param);
-      if (options.onSuccess) options.onSuccess(result, param, undefined);
-      if (options.onSettled) options.onSettled(result, undefined, param, undefined);
-      return result;
-    } catch (err) {
-      if (options.onError) options.onError(err, param, undefined);
-      if (options.onSettled) options.onSettled(undefined, err, param, undefined);
-      throw err;
-    }
-  });
-  return { mutateAsync };
-});
-
-jest.mock('@tanstack/react-query', () => ({ useMutation: (options: any) => useMutationMock(options) }));
 
 const defaultGroup = {
   name: '',
@@ -68,7 +58,14 @@ function renderActions(props?: Partial<React.ComponentProps<typeof GroupCreateAc
   return { auth, queryCtx, onCompleted };
 }
 
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockSubmit.mockReset();
+  mockValidate.mockReset();
+});
+
 it('disables create button when no filters selected', () => {
+  mockValidate.mockReturnValue({ valid: false, issues: [] });
   renderActions();
   expect(screen.getByRole('button', { name: 'Create' })).toBeDisabled();
 });
@@ -80,20 +77,19 @@ it('creates group and marks visible on save', async () => {
     group: { ...defaultGroup.group, identity_addresses: ['0x1'] },
   };
   const originalGroup = { id: 'old', created_by: { handle: 'Alice' } } as any;
-  commonApiPost.mockResolvedValueOnce({ id: '123' }).mockResolvedValueOnce({});
+  mockValidate.mockReturnValue({ valid: true, issues: [] });
+  mockSubmit.mockResolvedValueOnce({ ok: true, group: { id: '123' }, published: true });
 
   const { auth, queryCtx, onCompleted } = renderActions({ groupConfig, originalGroup });
 
   await userEvent.click(screen.getByRole('button', { name: 'Create' }));
 
-  await waitFor(() => expect(commonApiPost).toHaveBeenCalledTimes(2));
-  expect(auth.requestAuth).toHaveBeenCalled();
-  expect(commonApiPost).toHaveBeenNthCalledWith(1, { endpoint: 'groups', body: groupConfig });
-  expect(commonApiPost).toHaveBeenNthCalledWith(2, {
-    endpoint: 'groups/123/visible',
-    body: { visible: true, old_version_id: 'old' },
+  await waitFor(() => expect(mockSubmit).toHaveBeenCalledTimes(1));
+  expect(mockSubmit).toHaveBeenCalledWith({
+    payload: groupConfig,
+    previousGroup: originalGroup,
+    currentHandle: 'alice',
   });
   expect(auth.setToast).toHaveBeenCalledWith({ message: 'Group created.', type: 'success' });
-  expect(queryCtx.onGroupCreate).toHaveBeenCalled();
   expect(onCompleted).toHaveBeenCalled();
 });

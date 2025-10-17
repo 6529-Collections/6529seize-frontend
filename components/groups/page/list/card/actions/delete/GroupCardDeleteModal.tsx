@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useRef, useState } from "react";
+import { useContext, useRef } from "react";
 import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -11,9 +11,8 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { useClickAway, useKeyPressEvent } from "react-use";
 
-import { commonApiPost } from "@/services/api/common-api";
 import { createPortal } from "react-dom";
-import { useMutation } from "@tanstack/react-query";
+import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 
 export default function GroupCardDeleteModal({
   group,
@@ -30,49 +29,38 @@ export default function GroupCardDeleteModal({
   useClickAway(modalRef, onClose);
   useKeyPressEvent("Escape", onClose);
 
-  const [mutating, setMutating] = useState<boolean>(false);
-
-  const makeFilterNotVisibleMutation = useMutation({
-    mutationFn: async (param: { id: string; body: { visible: false } }) =>
-      await commonApiPost<{ visible: false }, ApiGroupFull>({
-        endpoint: `groups/${param.id}/visible`,
-        body: param.body,
-      }),
-    onSuccess: () => {
-      setToast({
-        message: "Group deleted.",
-        type: "warning",
-      });
-      onGroupRemoved({ groupId: group.id });
-      if (activeGroupId === group.id) {
-        dispatch(setActiveGroupId(null));
-      }
-    },
-    onError: (error) => {
-      setToast({
-        message: error as unknown as string,
-        type: "error",
-      });
-    },
-    onSettled: () => {
-      setMutating(false);
-    },
+  const { updateVisibility, isUpdatingVisibility } = useGroupMutations({
+    requestAuth,
   });
 
   const onDelete = async () => {
-    if (mutating) {
+    if (isUpdatingVisibility) {
       return;
     }
-    setMutating(true);
-    const { success } = await requestAuth();
-    if (!success) {
-      setMutating(false);
-      return;
-    }
-    await makeFilterNotVisibleMutation.mutateAsync({
-      id: group.id,
-      body: { visible: false },
+    const result = await updateVisibility({
+      groupId: group.id,
+      visible: false,
     });
+
+    if (!result.ok) {
+      if (result.reason === "auth") {
+        return;
+      }
+      setToast({
+        message: result.error,
+        type: "error",
+      });
+      return;
+    }
+
+    setToast({
+      message: "Group deleted.",
+      type: "warning",
+    });
+    onGroupRemoved({ groupId: group.id });
+    if (activeGroupId === group.id) {
+      dispatch(setActiveGroupId(null));
+    }
   };
 
   return createPortal(
@@ -137,19 +125,19 @@ export default function GroupCardDeleteModal({
               <div className="tw-mt-8">
                 <div className="sm:tw-flex sm:tw-flex-row-reverse tw-gap-x-3">
                   <button
-                    disabled={mutating}
+                    disabled={isUpdatingVisibility}
                     onClick={onDelete}
                     type="button"
                     className={`tw-w-full sm:tw-w-auto tw-flex tw-items-center tw-justify-center tw-relative  tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out ${
-                      mutating
+                      isUpdatingVisibility
                         ? "tw-cursor-not-allowed tw-bg-iron-400 tw-border-iron-400"
                         : "tw-cursor-pointer tw-bg-[#F04438] tw-border-[#F04438] hover:tw-bg-[#D92D20] hover:tw-border-[#D92D20]"
                     }`}>
                     <div
-                      style={{ visibility: mutating ? "hidden" : "visible" }}>
+                      style={{ visibility: isUpdatingVisibility ? "hidden" : "visible" }}>
                       Delete
                     </div>
-                    {mutating && (
+                    {isUpdatingVisibility && (
                       <svg
                         aria-hidden="true"
                         role="output"
@@ -168,11 +156,11 @@ export default function GroupCardDeleteModal({
                     )}
                   </button>
                   <button
-                    disabled={mutating}
+                    disabled={isUpdatingVisibility}
                     onClick={onClose}
                     type="button"
                     className={`tw-mt-3 sm:tw-mt-0 tw-w-full sm:tw-w-auto tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out ${
-                      mutating
+                      isUpdatingVisibility
                         ? "tw-cursor-not-allowed"
                         : "hover:tw-bg-iron-800 hover:tw-border-iron-700"
                     }`}>

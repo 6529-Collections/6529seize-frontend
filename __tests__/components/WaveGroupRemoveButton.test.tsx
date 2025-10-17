@@ -7,7 +7,7 @@ import React from "react";
 jest.mock("@/components/waves/specs/groups/group/edit/WaveGroupRemove", () =>
   function MockRemove(props: any) {
     return (
-      <div data-testid="modal" onClick={() => props.onEdit({})}>
+      <div data-testid="modal" onClick={() => props.onWaveUpdate({})}>
         remove
       </div>
     );
@@ -17,13 +17,13 @@ jest.mock("@/components/waves/specs/groups/group/edit/WaveGroupRemove", () =>
 describe("WaveGroupRemoveButton", () => {
   it("opens modal and triggers edit", async () => {
     const user = userEvent.setup();
-    const onEdit = jest.fn().mockResolvedValue(undefined);
+    const onWaveUpdate = jest.fn().mockResolvedValue(undefined);
     render(
-      <WaveGroupRemoveButton wave={{} as any} type={WaveGroupType.VIEW} onEdit={onEdit} />
+      <WaveGroupRemoveButton wave={{} as any} type={WaveGroupType.VIEW} onWaveUpdate={onWaveUpdate} />
     );
     await user.click(screen.getByTitle("Remove"));
     expect(screen.getByTestId("modal")).toBeInTheDocument();
     await user.click(screen.getByTestId("modal"));
-    expect(onEdit).toHaveBeenCalled();
+    expect(onWaveUpdate).toHaveBeenCalled();
   });
 });

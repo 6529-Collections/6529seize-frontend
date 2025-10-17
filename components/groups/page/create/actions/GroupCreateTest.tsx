@@ -4,15 +4,15 @@ import { useContext, useEffect, useState } from "react";
 import { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { AuthContext } from "@/components/auth/Auth";
-import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
-import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { commonApiFetch } from "@/services/api/common-api";
 import { CommunityMembersQuery } from "@/app/network/page";
 import { SortDirection } from "@/entities/ISort";
 import { Page } from "@/helpers/Types";
 import { CommunityMemberOverview } from "@/entities/IProfile";
 import { CommunityMembersSortOption } from "@/enums";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 
 export default function GroupCreateTest({
   groupConfig,
@@ -22,23 +22,8 @@ export default function GroupCreateTest({
   readonly disabled: boolean;
 }) {
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
-
-  const [mutating, setMutating] = useState<boolean>(false);
-  const createNewFilterMutation = useMutation({
-    mutationFn: async (body: ApiCreateGroup) =>
-      await commonApiPost<ApiCreateGroup, ApiGroupFull>({
-        endpoint: `groups`,
-        body,
-      }),
-    onError: (error) => {
-      setToast({
-        message: error as unknown as string,
-        type: "error",
-      });
-    },
-    onSettled: () => {
-      setMutating(false);
-    },
+  const { runTest, isTesting } = useGroupMutations({
+    requestAuth,
   });
 
   const [params, setParams] = useState<CommunityMembersQuery>({
@@ -75,13 +60,7 @@ export default function GroupCreateTest({
   );
 
   const onTest = async (): Promise<void> => {
-    if (mutating) {
-      return;
-    }
-    setMutating(true);
-    const { success } = await requestAuth();
-    if (!success) {
-      setMutating(false);
+    if (isTesting || disabled) {
       return;
     }
     setParams((prev: CommunityMembersQuery) => ({
@@ -89,27 +68,34 @@ export default function GroupCreateTest({
       group_id: undefined,
     }));
 
-    const response = await createNewFilterMutation.mutateAsync({
-      name: groupConfig.name.length
-        ? groupConfig.name
-        : `${connectedProfile?.handle} Test Run`,
-      group: groupConfig.group,
+    const result = await runTest({
+      payload: groupConfig,
+      nameFallback: `${connectedProfile?.handle ?? "Group"} Test Run`,
     });
-    if (response) {
-      setParams((prev: CommunityMembersQuery) => ({
-        ...prev,
-        group_id: response.id,
-      }));
+
+    if (!result.ok) {
+      if (result.reason !== "auth") {
+        setToast({
+          message: result.error,
+          type: "error",
+        });
+      }
+      return;
     }
+
+    setParams((prev: CommunityMembersQuery) => ({
+      ...prev,
+      group_id: result.group.id,
+    }));
   };
 
   const [loading, setLoading] = useState<boolean>(false);
-  useEffect(() => setLoading(isFetching || mutating), [isFetching, mutating]);
+  useEffect(() => setLoading(isFetching || isTesting), [isFetching, isTesting]);
   return (
     <div className="tw-flex tw-items-center tw-space-x-4">
       <button
         type="button"
-        disabled={disabled}
+        disabled={disabled || isTesting}
         onClick={onTest}
         className={`${
           disabled

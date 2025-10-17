@@ -12,13 +12,13 @@ export default function WaveGroupRemove({
   type,
   isEditOpen,
   setIsEditOpen,
-  onEdit,
+  onWaveUpdate,
 }: {
   readonly wave: ApiWave;
   readonly type: WaveGroupType;
   readonly isEditOpen: boolean;
   readonly setIsEditOpen: (isOpen: boolean) => void;
-  readonly onEdit: (body: ApiUpdateWaveRequest) => Promise<void>;
+  readonly onWaveUpdate: (body: ApiUpdateWaveRequest) => Promise<void>;
 }) {
   const getBody = (): ApiUpdateWaveRequest => {
     const originalBody = convertWaveToUpdateWave(wave);
@@ -86,7 +86,7 @@ export default function WaveGroupRemove({
 
   const onRemove = async (): Promise<void> => {
     const body = getBody();
-    await onEdit(body);
+    await onWaveUpdate(body);
   };
 
   return (

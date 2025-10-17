@@ -12,6 +12,7 @@ import {
 } from "./buttons/hooks/useWaveGroupEditButtonsController";
 import WaveGroupEditMenu from "./buttons/subcomponents/WaveGroupEditMenu";
 import WaveGroupManageIdentitiesModals from "./buttons/subcomponents/WaveGroupManageIdentitiesModals";
+import { WaveGroupManageIdentitiesMode } from "./WaveGroupManageIdentitiesModal";
 
 export interface WaveGroupEditButtonsProps {
   readonly haveGroup: boolean;
@@ -30,13 +31,14 @@ export default function WaveGroupEditButtons({
 
   const {
     mutating,
-    onEdit,
+    updateWave,
     canIncludeIdentity,
     canExcludeIdentity,
     canRemoveGroup,
     activeIdentitiesModal,
     openIdentitiesModal,
     closeIdentitiesModal,
+    onIdentityConfirm,
   } = useWaveGroupEditButtonsController({
     haveGroup,
     wave,
@@ -56,7 +58,7 @@ export default function WaveGroupEditButtons({
       <WaveGroupEditMenu
         wave={wave}
         type={type}
-        onEdit={onEdit}
+        onWaveUpdate={updateWave}
         canIncludeIdentity={canIncludeIdentity}
         canExcludeIdentity={canExcludeIdentity}
         canRemoveGroup={canRemoveGroup}
@@ -70,6 +72,13 @@ export default function WaveGroupEditButtons({
       <WaveGroupManageIdentitiesModals
         activeModal={activeIdentitiesModal}
         onClose={closeIdentitiesModal}
+        onConfirm={({ identity, mode }) => {
+          const action =
+            mode === WaveGroupManageIdentitiesMode.INCLUDE
+              ? WaveGroupIdentitiesModal.INCLUDE
+              : WaveGroupIdentitiesModal.EXCLUDE;
+          onIdentityConfirm({ identity, mode: action });
+        }}
       />
     </>
   );

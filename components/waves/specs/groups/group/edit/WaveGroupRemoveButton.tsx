@@ -9,12 +9,12 @@ import { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
 export default function WaveGroupRemoveButton({
   wave,
   type,
-  onEdit,
+  onWaveUpdate,
   renderTrigger,
 }: {
   readonly wave: ApiWave;
   readonly type: WaveGroupType;
-  readonly onEdit: (body: ApiUpdateWaveRequest) => Promise<void>;
+  readonly onWaveUpdate: (body: ApiUpdateWaveRequest) => Promise<void>;
   readonly renderTrigger?: (options: { open: () => void }) => ReactNode;
 }) {
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -48,9 +48,9 @@ export default function WaveGroupRemoveButton({
         isEditOpen={isEditOpen}
         type={type}
         setIsEditOpen={setIsEditOpen}
-        onEdit={async (body) => {
+        onWaveUpdate={async (body) => {
           setIsEditOpen(false);
-          await onEdit(body);
+          await onWaveUpdate(body);
         }}
       />
     </>

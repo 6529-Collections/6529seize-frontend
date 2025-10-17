@@ -12,7 +12,7 @@ import WaveGroupRemoveButton from "../../WaveGroupRemoveButton";
 interface WaveGroupEditMenuProps {
   readonly wave: ApiWave;
   readonly type: WaveGroupType;
-  readonly onEdit: (body: ApiUpdateWaveRequest) => Promise<void>;
+  readonly onWaveUpdate: (body: ApiUpdateWaveRequest) => Promise<void>;
   readonly canIncludeIdentity: boolean;
   readonly canExcludeIdentity: boolean;
   readonly canRemoveGroup: boolean;
@@ -28,7 +28,7 @@ const MENU_ITEM_CLASS =
 export default function WaveGroupEditMenu({
   wave,
   type,
-  onEdit,
+  onWaveUpdate,
   canIncludeIdentity,
   canExcludeIdentity,
   canRemoveGroup,
@@ -110,7 +110,7 @@ export default function WaveGroupEditMenu({
         <WaveGroupEditButton
           wave={wave}
           type={type}
-          onEdit={onEdit}
+          onWaveUpdate={onWaveUpdate}
           renderTrigger={({ open }) => {
             editTriggerRef.current = open;
             return null;
@@ -120,7 +120,7 @@ export default function WaveGroupEditMenu({
           <WaveGroupRemoveButton
             wave={wave}
             type={type}
-            onEdit={onEdit}
+            onWaveUpdate={onWaveUpdate}
             renderTrigger={({ open }) => {
               removeTriggerRef.current = open;
               return null;
