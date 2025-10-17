@@ -90,7 +90,6 @@ function WebSidebarExpandable({
           <div className="tw-overflow-hidden">
             <div
               id={panelId}
-              role="group"
               aria-label={`${section.name} items`}
               className="tw-relative tw-p-0 tw-m-0"
             >
@@ -101,7 +100,7 @@ function WebSidebarExpandable({
                 aria-hidden="true"
               />
 
-              <ul role="list" className="tw-list-none tw-p-0 tw-m-0">
+              <ul className="tw-list-none tw-p-0 tw-m-0">
                 {section.items.map((item) => {
                   const active = isActive(item.href);
                   return (

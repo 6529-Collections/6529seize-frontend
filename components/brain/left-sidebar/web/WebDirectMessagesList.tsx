@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useContext } from "react";
+import React, { useRef, useContext, type ReactNode } from "react";
 import WebUnifiedWavesListWaves, {
   WebUnifiedWavesListWavesHandle,
 } from "./WebUnifiedWavesListWaves";
@@ -67,6 +67,39 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
   const haveDirectMessages = directMessages.list.length > 0;
   const isEmpty = !directMessages.isFetching && !haveDirectMessages;
   const isInitialLoad = directMessages.isFetching && !haveDirectMessages;
+
+  let listContent: ReactNode;
+  if (isInitialLoad) {
+    listContent = (
+      <UnifiedWavesListLoader
+        isFetching={true}
+        isFetchingNextPage={false}
+      />
+    );
+  } else if (isEmpty) {
+    listContent = (
+      <UnifiedWavesListEmpty
+        sortedWaves={directMessages.list}
+        isFetching={directMessages.isFetching}
+        isFetchingNextPage={directMessages.isFetchingNextPage}
+        emptyMessage="No direct messages yet"
+      />
+    );
+  } else {
+    listContent = (
+      <WebUnifiedWavesListWaves
+        ref={listRef}
+        waves={directMessages.list}
+        onHover={registerWave}
+        scrollContainerRef={scrollContainerRef}
+        hideToggle={true}
+        hideHeaders={true}
+        hidePin={true}
+        basePath="/messages"
+        isCondensed={isCondensed}
+      />
+    );
+  }
 
   // Not authenticated
   if (!isAuthenticated) {
@@ -164,31 +197,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
         )}
 
         <div className="tw-flex-1 tw-w-full tw-flex tw-flex-col">
-          {isInitialLoad ? (
-            <UnifiedWavesListLoader
-              isFetching={true}
-              isFetchingNextPage={false}
-            />
-          ) : isEmpty ? (
-            <UnifiedWavesListEmpty
-              sortedWaves={directMessages.list}
-              isFetching={directMessages.isFetching}
-              isFetchingNextPage={directMessages.isFetchingNextPage}
-              emptyMessage="No direct messages yet"
-            />
-          ) : (
-            <WebUnifiedWavesListWaves
-              ref={listRef}
-              waves={directMessages.list}
-              onHover={registerWave}
-              scrollContainerRef={scrollContainerRef}
-              hideToggle={true}
-              hideHeaders={true}
-              hidePin={true}
-              basePath="/messages"
-              isCondensed={isCondensed}
-            />
-          )}
+          {listContent}
 
           <UnifiedWavesListLoader
             isFetching={false}

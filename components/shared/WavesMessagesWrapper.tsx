@@ -99,11 +99,10 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   const shouldShowDropOverlay = isDropOpen && drop && shouldShowMainContent;
   const shouldShowRightSidebar = Boolean(isRightSidebarOpen && waveId && !isDropOpen);
   const canInlineRight = !isMobile && (isLargeDesktop || breakpoint === "LG");
-  const rightVariant: "inline" | "overlay" | null = shouldShowRightSidebar
-    ? canInlineRight
-      ? "inline"
-      : "overlay"
-    : null;
+  let rightVariant: "inline" | "overlay" | null = null;
+  if (shouldShowRightSidebar) {
+    rightVariant = canInlineRight ? "inline" : "overlay";
+  }
 
   // Handle error state for drop loading
   if (dropError && dropId) {

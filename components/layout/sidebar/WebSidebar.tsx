@@ -63,15 +63,14 @@ function WebSidebar({
         coarsePointerQuery.removeEventListener("change", handlePointerChange);
     }
 
-    if ("addListener" in coarsePointerQuery) {
-      const legacyQuery = coarsePointerQuery as MediaQueryList & {
-        addListener?: (listener: (event: MediaQueryListEvent) => void) => void;
-        removeListener?: (
-          listener: (event: MediaQueryListEvent) => void
-        ) => void;
+    if ("onchange" in coarsePointerQuery) {
+      const originalHandler = coarsePointerQuery.onchange;
+      coarsePointerQuery.onchange = handlePointerChange;
+      return () => {
+        if (coarsePointerQuery.onchange === handlePointerChange) {
+          coarsePointerQuery.onchange = originalHandler ?? null;
+        }
       };
-      legacyQuery.addListener?.(handlePointerChange);
-      return () => legacyQuery.removeListener?.(handlePointerChange);
     }
   }, []);
 

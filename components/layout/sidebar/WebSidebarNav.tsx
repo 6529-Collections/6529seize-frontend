@@ -120,73 +120,75 @@ const WebSidebarNav = React.forwardRef<
   }, [isCollapsed, closeSubmenu]);
 
   const handleSectionToggle = useCallback(
-    (sectionKey: string) =>
-      (event?: React.MouseEvent) => {
-        event?.stopPropagation();
-        if (isCollapsed) {
-          const target = event?.currentTarget as HTMLElement | undefined;
-          const nextKey = openSubmenuKey === sectionKey ? null : sectionKey;
-          setOpenSubmenuKey(nextKey);
-          if (nextKey && target) {
-            const rect = target.getBoundingClientRect();
-            setSubmenuAnchor({
-              left: rect.right + 12,
-              top: rect.top,
-              height: rect.height,
-            });
-            setSubmenuTrigger(target);
-          } else {
-            setSubmenuAnchor(null);
-            setSubmenuTrigger(null);
-          }
+    (sectionKey: string, event?: React.MouseEvent) => {
+      event?.stopPropagation();
+
+      if (isCollapsed) {
+        const target = event?.currentTarget as HTMLElement | undefined;
+        const nextKey = openSubmenuKey === sectionKey ? null : sectionKey;
+        setOpenSubmenuKey(nextKey);
+
+        if (nextKey && target) {
+          const rect = target.getBoundingClientRect();
+          setSubmenuAnchor({
+            left: rect.right + 12,
+            top: rect.top,
+            height: rect.height,
+          });
+          setSubmenuTrigger(target);
         } else {
-          setExpandedKeys((prev) =>
-            prev.includes(sectionKey)
-              ? prev.filter((key) => key !== sectionKey)
-              : [...prev, sectionKey]
-          );
+          setSubmenuAnchor(null);
+          setSubmenuTrigger(null);
         }
-      },
+
+        return;
+      }
+
+      setExpandedKeys((prev) =>
+        prev.includes(sectionKey)
+          ? prev.filter((key) => key !== sectionKey)
+          : [...prev, sectionKey]
+      );
+    },
     [isCollapsed, openSubmenuKey]
   );
 
   useEffect(() => {
-    if (!isCollapsed || !submenuTrigger) {
-      return;
+    if (isCollapsed && submenuTrigger) {
+      const updateAnchor = () => {
+        const rect = submenuTrigger.getBoundingClientRect();
+        setSubmenuAnchor({
+          left: rect.right + 12,
+          top: rect.top,
+          height: rect.height,
+        });
+      };
+
+      const browserWindow =
+        typeof globalThis !== "undefined" ? globalThis.window : undefined;
+      const scrollContainer = submenuTrigger.closest(
+        "[data-sidebar-scroll='true']"
+      ) as HTMLElement | null;
+      const resizeObserver =
+        typeof ResizeObserver !== "undefined"
+          ? new ResizeObserver(updateAnchor)
+          : null;
+
+      updateAnchor();
+      browserWindow?.addEventListener("resize", updateAnchor);
+      scrollContainer?.addEventListener("scroll", updateAnchor, {
+        passive: true,
+      });
+      resizeObserver?.observe(submenuTrigger);
+
+      return () => {
+        browserWindow?.removeEventListener("resize", updateAnchor);
+        scrollContainer?.removeEventListener("scroll", updateAnchor);
+        resizeObserver?.disconnect();
+      };
     }
 
-    const updateAnchor = () => {
-      if (!submenuTrigger) return;
-      const rect = submenuTrigger.getBoundingClientRect();
-      setSubmenuAnchor({
-        left: rect.right + 12,
-        top: rect.top,
-        height: rect.height,
-      });
-    };
-
-    const browserWindow =
-      typeof window !== "undefined" ? window : undefined;
-    const scrollContainer = submenuTrigger.closest(
-      "[data-sidebar-scroll='true']"
-    ) as HTMLElement | null;
-    const resizeObserver =
-      typeof ResizeObserver !== "undefined"
-        ? new ResizeObserver(updateAnchor)
-        : null;
-
-    updateAnchor();
-    browserWindow?.addEventListener("resize", updateAnchor);
-    scrollContainer?.addEventListener("scroll", updateAnchor, {
-      passive: true,
-    });
-    resizeObserver?.observe(submenuTrigger);
-
-    return () => {
-      browserWindow?.removeEventListener("resize", updateAnchor);
-      scrollContainer?.removeEventListener("scroll", updateAnchor);
-      resizeObserver?.disconnect();
-    };
+    return undefined;
   }, [isCollapsed, submenuTrigger]);
 
   const renderCollapsedSubmenu = useCallback(
@@ -274,7 +276,7 @@ const WebSidebarNav = React.forwardRef<
               <WebSidebarExpandable
                 section={networkSection}
                 expanded={expandedKeys.includes("network")}
-                onToggle={handleSectionToggle("network")}
+                onToggle={(event) => handleSectionToggle("network", event)}
                 collapsed={isCollapsed}
                 pathname={pathname}
                 data-section="network"
@@ -288,7 +290,9 @@ const WebSidebarNav = React.forwardRef<
               <WebSidebarExpandable
                 section={collectionsSection}
                 expanded={expandedKeys.includes("collections")}
-                onToggle={handleSectionToggle("collections")}
+                onToggle={(event) =>
+                  handleSectionToggle("collections", event)
+                }
                 collapsed={isCollapsed}
                 pathname={pathname}
                 data-section="collections"
@@ -347,7 +351,9 @@ const WebSidebarNav = React.forwardRef<
                 <WebSidebarExpandable
                   section={section}
                   expanded={expandedKeys.includes(section.key)}
-                  onToggle={handleSectionToggle(section.key)}
+                  onToggle={(event) =>
+                    handleSectionToggle(section.key, event)
+                  }
                   collapsed={isCollapsed}
                   pathname={pathname}
                   data-section={section.key}

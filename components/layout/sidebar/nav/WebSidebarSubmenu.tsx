@@ -80,21 +80,24 @@ function WebSidebarSubmenu({
   }, [browserWindow, browserDocument, handleKeyDown, handleClickOutside]);
 
   useLayoutEffect(() => {
-    if (!browserWindow || !containerRef.current) return;
+    if (browserWindow && containerRef.current) {
+      const menuRect = containerRef.current.getBoundingClientRect();
+      const viewportHeight = browserWindow.innerHeight || 0;
+      const padding = 16;
 
-    const menuRect = containerRef.current.getBoundingClientRect();
-    const viewportHeight = browserWindow.innerHeight || 0;
-    const padding = 16;
+      const anchorCenter =
+        anchorTop !== undefined && anchorHeight !== undefined
+          ? anchorTop + anchorHeight / 2
+          : (anchorTop ?? padding) + menuRect.height / 2;
 
-    const anchorCenter =
-      anchorTop !== undefined && anchorHeight !== undefined
-        ? anchorTop + anchorHeight / 2
-        : (anchorTop ?? padding) + menuRect.height / 2;
+      let top = anchorCenter - menuRect.height / 2;
+      top = Math.max(
+        padding,
+        Math.min(top, viewportHeight - menuRect.height - padding)
+      );
 
-    let top = anchorCenter - menuRect.height / 2;
-    top = Math.max(padding, Math.min(top, viewportHeight - menuRect.height - padding));
-
-    setComputedTop(top);
+      setComputedTop(top);
+    }
   }, [browserWindow, anchorTop, anchorHeight, section.key, combinedItems.length]);
 
   const isActive = useCallback(
