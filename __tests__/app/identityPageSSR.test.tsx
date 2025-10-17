@@ -4,7 +4,7 @@ import type {
   CicStatement,
   RatingWithProfileInfoAndLevel,
 } from "@/entities/IProfile";
-import type { IdentityTabParams } from "@/app/[user]/identity/_lib/identityTabQueries";
+import type { IdentityTabParams } from "@/app/[user]/identity/page";
 import {
   ProfileActivityFilterTargetType,
   ProfileRatersParamsOrderBy,
@@ -162,13 +162,17 @@ const buildIdentityData = () => {
   const statements = [{ id: "statement-1" }] as CicStatement[];
   const cicGiven: PageWithCount<RatingWithProfileInfoAndLevel> = {
     count: 1,
-    data: [{ id: "given-1" } as RatingWithProfileInfoAndLevel],
+    data: [
+      { id: "given-1" } as unknown as RatingWithProfileInfoAndLevel,
+    ],
     page: 1,
     next: false,
   };
   const cicReceived: PageWithCount<RatingWithProfileInfoAndLevel> = {
     count: 2,
-    data: [{ id: "received-1" } as RatingWithProfileInfoAndLevel],
+    data: [
+      { id: "received-1" } as unknown as RatingWithProfileInfoAndLevel,
+    ],
     page: 1,
     next: false,
   };
@@ -341,7 +345,11 @@ describe("identity page SSR streaming", () => {
     expect(
       screen.getByTestId("identity-raters-skeleton-received")
     ).toBeInTheDocument();
-    expect(screen.getAllByText((content, node) => node?.className?.includes?.("tw-animate-pulse")).length).toBeGreaterThan(
+    expect(
+      screen.getAllByText((_, node) =>
+        Boolean(node?.className?.includes?.("tw-animate-pulse"))
+      ).length
+    ).toBeGreaterThan(
       0
     );
   });

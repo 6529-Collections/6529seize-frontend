@@ -3,7 +3,9 @@ import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
 import UserPageIdentityHydrator from "@/components/user/identity/UserPageIdentityHydrator";
 import UserPageIdentityHeader from "@/components/user/identity/header/UserPageIdentityHeader";
 import UserPageIdentityStatements from "@/components/user/identity/statements/UserPageIdentityStatements";
-import ProfileRatersTableWrapper from "@/components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import ProfileRatersTableWrapper, {
+  type ProfileRatersParams,
+} from "@/components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import UserPageIdentityActivityLog from "@/components/user/identity/activity/UserPageIdentityActivityLog";
 import UserPageSetUpProfileWrapper from "@/components/user/utils/set-up-profile/UserPageSetUpProfileWrapper";
 import CommonSkeletonLoader from "@/components/utils/animation/CommonSkeletonLoader";
@@ -14,17 +16,18 @@ import type {
   ProfileActivityLog,
   RatingWithProfileInfoAndLevel,
 } from "@/entities/IProfile";
+import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import {
-  createIdentityTabParams,
-  type IdentityTabParams,
-  type IdentityRatersPage,
-} from "@/app/[user]/identity/_lib/identityTabQueries";
-import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
+  convertActivityLogParams,
+  getProfileLogTypes,
+} from "@/helpers/profile-logs.helpers";
 import {
+  getInitialRatersParams,
   getProfileCicRatings,
   getUserProfileActivityLogs,
 } from "@/helpers/server.helpers";
 import { fetchHeaderStatements } from "@/components/user/user-page-header/userPageHeaderPrefetch";
+import { ProfileActivityFilterTargetType, RateMatter } from "@/enums";
 import { withServerTiming } from "@/helpers/performance.helpers";
 
 type IdentityTabExtraProps = {
@@ -47,12 +50,58 @@ type IdentityHydrationPayload = {
   readonly activityLog: CountlessPage<ProfileActivityLog> | null;
 };
 
+export type IdentityRatersPage = PageWithCount<RatingWithProfileInfoAndLevel>;
+
+export type IdentityTabParams = {
+  readonly activityLogParams: ActivityLogParams;
+  readonly cicGivenParams: ProfileRatersParams;
+  readonly cicReceivedParams: ProfileRatersParams;
+};
+
 const createEmptyRatersPage = (): IdentityRatersPage => ({
   count: 0,
   data: [],
   page: 1,
   next: false,
 });
+
+const MATTER_TYPE = RateMatter.NIC;
+
+const createIdentityTabParams = (
+  handleOrWallet: string
+): IdentityTabParams => {
+  const normalizedHandle = handleOrWallet.toLowerCase();
+
+  const cicGivenParams = getInitialRatersParams({
+    handleOrWallet: normalizedHandle,
+    matter: MATTER_TYPE,
+    given: true,
+  });
+
+  const cicReceivedParams = getInitialRatersParams({
+    handleOrWallet: normalizedHandle,
+    matter: MATTER_TYPE,
+    given: false,
+  });
+
+  const activityLogParams: ActivityLogParams = {
+    page: 1,
+    pageSize: 10,
+    logTypes: getProfileLogTypes({
+      logTypes: [],
+    }),
+    matter: null,
+    targetType: ProfileActivityFilterTargetType.ALL,
+    handleOrWallet: normalizedHandle,
+    groupId: null,
+  };
+
+  return {
+    activityLogParams,
+    cicGivenParams,
+    cicReceivedParams,
+  };
+};
 
 const fetchCicRatings = cache(
   async (
