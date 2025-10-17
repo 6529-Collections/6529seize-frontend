@@ -69,6 +69,8 @@ export default function ProfileRatersTableWrapper({
 
   const type = getType();
 
+  const hasInitialData = !!initialData;
+
   const {
     isLoading,
     isFetching,
@@ -102,6 +104,10 @@ export default function ProfileRatersTableWrapper({
     enabled: !!normalizedHandle,
     initialData,
     placeholderData: keepPreviousData,
+    staleTime: hasInitialData ? 30_000 : 0,
+    refetchOnMount: hasInitialData ? false : undefined,
+    refetchOnWindowFocus: hasInitialData ? false : undefined,
+    refetchOnReconnect: hasInitialData ? false : undefined,
   });
 
   const [totalPages, setTotalPages] = useState<number>(1);

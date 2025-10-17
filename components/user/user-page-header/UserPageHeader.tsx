@@ -6,15 +6,17 @@ import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { CicStatement, ProfileActivityLog } from "@/entities/IProfile";
 import { CountlessPage } from "@/helpers/Types";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
-import { getProfileCicStatements } from "@/helpers/server.helpers";
 
 import UserPageHeaderClient from "./UserPageHeaderClient";
 import { getRandomColor } from "@/helpers/Helpers";
 import {
   extractProfileEnabledAt,
-  fetchFollowersCount,
-  fetchProfileEnabledLog,
 } from "./userPageHeaderData";
+import {
+  fetchHeaderFollowersCount,
+  fetchHeaderProfileLog,
+  fetchHeaderStatements,
+} from "./userPageHeaderPrefetch";
 
 type Props = {
   readonly profile: ApiIdentity;
@@ -49,28 +51,17 @@ export default async function UserPageHeader({
 
   const statementsPromise: Promise<CicStatement[]> =
     initialStatements === undefined
-      ? getProfileCicStatements({
-          handleOrWallet: normalizedHandle,
-          headers: await ensureHeaders(),
-        })
+      ? fetchHeaderStatements(normalizedHandle, await ensureHeaders())
       : Promise.resolve(initialStatements ?? []);
 
   const profileLogPromise: Promise<CountlessPage<ProfileActivityLog> | null> =
     profileEnabledAt === undefined
-      ? fetchProfileEnabledLog({
-          handleOrWallet: normalizedHandle,
-          headers: await ensureHeaders(),
-        })
+      ? fetchHeaderProfileLog(normalizedHandle, await ensureHeaders())
       : Promise.resolve(null);
 
   const followersPromise: Promise<number | null> =
     followersCount === undefined
-      ? profile.id
-        ? fetchFollowersCount({
-            profileId: profile.id,
-            headers: await ensureHeaders(),
-          })
-        : Promise.resolve(null)
+      ? fetchHeaderFollowersCount(profile.id, await ensureHeaders())
       : Promise.resolve(followersCount ?? null);
 
   const [statementsResult, profileLogResult, resolvedFollowersResult] =

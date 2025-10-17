@@ -22,14 +22,9 @@ import {
 import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 import {
   getProfileCicRatings,
-  getProfileCicStatements,
   getUserProfileActivityLogs,
 } from "@/helpers/server.helpers";
-import {
-  extractProfileEnabledAt,
-  fetchFollowersCount,
-  fetchProfileEnabledLog,
-} from "@/components/user/user-page-header/userPageHeaderData";
+import { fetchHeaderStatements } from "@/components/user/user-page-header/userPageHeaderPrefetch";
 import { withServerTiming } from "@/helpers/performance.helpers";
 
 type IdentityTabExtraProps = {
@@ -58,18 +53,6 @@ const createEmptyRatersPage = (): IdentityRatersPage => ({
   page: 1,
   next: false,
 });
-
-const fetchStatements = cache(
-  async (normalizedHandle: string, headers: Record<string, string>) =>
-    await withServerTiming(
-      `identity-statements:${normalizedHandle}`,
-      async () =>
-        await getProfileCicStatements({
-          handleOrWallet: normalizedHandle,
-          headers,
-        })
-    )
-);
 
 const fetchCicRatings = cache(
   async (
@@ -134,7 +117,7 @@ const createIdentityResources = ({
 }): IdentityResources => {
   const statementsPromise = createResource(
     "statements",
-    () => fetchStatements(normalizedHandle, headers),
+    () => fetchHeaderStatements(normalizedHandle, headers),
     () => []
   );
 
@@ -393,8 +376,37 @@ function IdentityActivitySection({
 
 function StatementsSkeleton(): React.JSX.Element {
   return (
-    <div className="tw-bg-iron-900 tw-border tw-border-iron-800 tw-rounded-xl tw-p-6">
-      <CommonSkeletonLoader />
+    <div className="tw-mt-6 lg:tw-mt-8">
+      <div className="tw-flex tw-flex-col lg:tw-flex-row lg:tw-items-center lg:tw-justify-between">
+        <div className="tw-space-y-2">
+          <div className="tw-h-6 tw-w-48 tw-rounded tw-bg-iron-900 tw-animate-pulse" />
+          <div className="tw-h-4 tw-w-72 tw-max-w-full tw-rounded tw-bg-iron-900 tw-animate-pulse" />
+        </div>
+        <div className="tw-mt-4 lg:tw-mt-0 tw-flex tw-items-center tw-gap-3">
+          <div className="tw-h-9 tw-w-32 tw-rounded-full tw-bg-iron-900 tw-animate-pulse" />
+          <div className="tw-h-9 tw-w-9 tw-rounded-full tw-bg-iron-900 tw-animate-pulse" />
+        </div>
+      </div>
+      <div className="tw-mt-2 lg:tw-mt-4 tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl">
+        <div className="tw-relative tw-px-4 tw-py-6 lg:tw-p-8 tw-grid tw-grid-cols-1 xl:tw-grid-cols-9 tw-gap-8">
+          {[0, 1, 2, 3, 4].map((index) => (
+            <div
+              key={`statements-skeleton-${index}`}
+              className={`tw-col-span-3 tw-space-y-4 ${
+                index === 0 ? "tw-col-span-3" : ""
+              }`}
+            >
+              <div className="tw-h-5 tw-w-40 tw-rounded tw-bg-iron-900 tw-animate-pulse" />
+              <div className="tw-space-y-3">
+                <CommonSkeletonLoader />
+              </div>
+            </div>
+          ))}
+          <div className="tw-absolute tw-right-2 lg:tw-right-4 tw-top-2 xl:tw-top-4">
+            <div className="tw-h-10 tw-w-10 tw-rounded-full tw-bg-iron-900 tw-animate-pulse" />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -406,18 +418,53 @@ function RatersSkeleton({
 }): React.JSX.Element {
   return (
     <div
-      className="tw-bg-iron-900 tw-border tw-border-iron-800 tw-rounded-xl tw-flex-1 tw-p-6"
+      className="tw-flex-1 tw-min-h-full tw-flex tw-flex-col"
       data-testid={`identity-raters-skeleton-${type}`}
     >
-      <CommonSkeletonLoader />
+      <div className="tw-h-6 tw-w-40 tw-rounded tw-bg-iron-900 tw-animate-pulse" />
+      <div className="tw-flex-1 tw-mt-2 lg:tw-mt-4 tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl tw-overflow-hidden">
+        <div className="tw-border-b tw-border-iron-800 tw-px-4 sm:tw-px-6 tw-py-3">
+          <div className="tw-h-4 tw-w-28 tw-rounded tw-bg-iron-800 tw-animate-pulse" />
+        </div>
+        <div className="tw-space-y-3 tw-p-4 sm:tw-px-6">
+          {[0, 1, 2, 3].map((row) => (
+            <div
+              key={`raters-skeleton-row-${type}-${row}`}
+              className="tw-flex tw-items-center tw-justify-between"
+            >
+              <div className="tw-h-4 tw-w-40 tw-rounded tw-bg-iron-800 tw-animate-pulse" />
+              <div className="tw-flex tw-items-center tw-gap-4">
+                <div className="tw-h-4 tw-w-16 tw-rounded tw-bg-iron-800 tw-animate-pulse" />
+                <div className="tw-h-4 tw-w-20 tw-rounded tw-bg-iron-800 tw-animate-pulse" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
 
 function ActivitySkeleton(): React.JSX.Element {
   return (
-    <div className="tw-bg-iron-900 tw-border tw-border-iron-800 tw-rounded-xl tw-p-6">
-      <CommonSkeletonLoader />
+    <div className="tw-mt-8 tw-space-y-4">
+      <div className="tw-flex tw-items-center tw-justify-between">
+        <div className="tw-h-6 tw-w-52 tw-rounded tw-bg-iron-900 tw-animate-pulse" />
+        <div className="tw-h-6 tw-w-16 tw-rounded tw-bg-iron-900 tw-animate-pulse" />
+      </div>
+      <div className="tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl">
+        <div className="tw-space-y-3 tw-p-6">
+          {[0, 1, 2].map((row) => (
+            <div
+              key={`activity-skeleton-row-${row}`}
+              className="tw-space-y-2 tw-border-b tw-border-iron-800 tw-pb-3 last:tw-border-b-0 last:tw-pb-0"
+            >
+              <div className="tw-h-4 tw-w-60 tw-max-w-full tw-rounded tw-bg-iron-800 tw-animate-pulse" />
+              <div className="tw-h-4 tw-w-40 tw-rounded tw-bg-iron-900 tw-animate-pulse" />
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -453,41 +500,10 @@ const { Page, generateMetadata } = createUserTabPage<IdentityTabExtraProps>({
       profile.wallets?.[0]?.wallet ??
       user;
     const normalizedHandleOrWallet = fallbackHandleOrWallet.toLowerCase();
-    const headerPrefetchResults = await Promise.allSettled([
-      fetchStatements(normalizedHandleOrWallet, headers),
-      fetchProfileEnabledLog({
-        handleOrWallet: normalizedHandleOrWallet,
-        headers,
-      }),
-      fetchFollowersCount({
-        profileId: profile.id,
-        headers,
-      }),
-    ]);
-
-    const [statementsResult, profileLogResult, followersResult] =
-      headerPrefetchResults;
-
-    const resolvedStatements =
-      statementsResult.status === "fulfilled" ? statementsResult.value : [];
-
-    const resolvedProfileEnabledAt =
-      profileLogResult.status === "fulfilled"
-        ? extractProfileEnabledAt(profileLogResult.value)
-        : null;
-
-    const resolvedFollowersCount =
-      followersResult.status === "fulfilled" ? followersResult.value : null;
-
     return {
       tabProps: {
         identityHandle: normalizedHandleOrWallet,
         requestHeaders: headers,
-      },
-      layoutProps: {
-        initialStatements: resolvedStatements,
-        profileEnabledAt: resolvedProfileEnabledAt,
-        followersCount: resolvedFollowersCount,
       },
     };
   },

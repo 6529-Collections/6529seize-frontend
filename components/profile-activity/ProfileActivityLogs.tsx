@@ -4,7 +4,7 @@ import { ProfileActivityLog } from "@/entities/IProfile";
 import { CountlessPage } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CommonFilterTargetSelect from "../utils/CommonFilterTargetSelect";
 import ProfileActivityLogsFilter from "./filter/ProfileActivityLogsFilter";
 import ProfileActivityLogsList from "./list/ProfileActivityLogsList";
@@ -86,23 +86,8 @@ export default function ProfileActivityLogs({
     setCurrentPage(1);
   };
 
-  const [params, setParams] = useState<ActivityLogParamsConverted>(
-    convertActivityLogParams({
-      params: {
-        page: currentPage,
-        pageSize: initialParams.pageSize,
-        logTypes: selectedFilters,
-        matter: initialParams.matter,
-        targetType,
-        handleOrWallet: initialParams.handleOrWallet,
-        groupId: activeGroupId,
-      },
-      disableActiveGroup: !!disableActiveGroup,
-    })
-  );
-
-  useEffect(() => {
-    setParams(
+  const params = useMemo(
+    () =>
       convertActivityLogParams({
         params: {
           page: currentPage,
@@ -114,15 +99,20 @@ export default function ProfileActivityLogs({
           groupId: activeGroupId,
         },
         disableActiveGroup: !!disableActiveGroup,
-      })
-    );
-  }, [
-    currentPage,
-    selectedFilters,
-    initialParams.handleOrWallet,
-    targetType,
-    activeGroupId,
-  ]);
+      }),
+    [
+      currentPage,
+      selectedFilters,
+      initialParams.pageSize,
+      initialParams.matter,
+      initialParams.handleOrWallet,
+      targetType,
+      activeGroupId,
+      disableActiveGroup,
+    ]
+  );
+
+  const hasInitialData = !!initialData;
 
   const { isLoading, data: logs } = useQuery<CountlessPage<ProfileActivityLog>>(
     {
@@ -142,6 +132,10 @@ export default function ProfileActivityLogs({
         }),
       initialData,
       placeholderData: keepPreviousData,
+      staleTime: hasInitialData ? 30_000 : 0,
+      refetchOnMount: hasInitialData ? false : undefined,
+      refetchOnWindowFocus: hasInitialData ? false : undefined,
+      refetchOnReconnect: hasInitialData ? false : undefined,
     }
   );
 

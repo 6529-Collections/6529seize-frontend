@@ -3,6 +3,7 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import UserPageLayout, {
   type UserPageLayoutProps,
 } from "@/components/user/layout/UserPageLayout";
+import { prefetchUserPageHeaderData } from "@/components/user/user-page-header/userPageHeaderPrefetch";
 import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import { getMetadataForUserPage } from "@/helpers/Helpers";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
@@ -189,11 +190,35 @@ export function createUserTabPage<
       redirect(needsRedirect.redirect.destination);
     }
 
+    const headerPrefetch = await prefetchUserPageHeaderData({
+      profile,
+      headers,
+      handleOrWallet: normalizedUser,
+    });
+
+    const layoutPropsFromPrepare = prepared?.layoutProps ?? {};
+
+    const layoutProps: Partial<UserPageLayoutProps> = {
+      ...layoutPropsFromPrepare,
+      initialStatements:
+        layoutPropsFromPrepare.initialStatements !== undefined
+          ? layoutPropsFromPrepare.initialStatements
+          : headerPrefetch.statements,
+      profileEnabledAt:
+        layoutPropsFromPrepare.profileEnabledAt !== undefined
+          ? layoutPropsFromPrepare.profileEnabledAt
+          : headerPrefetch.profileEnabledAt,
+      followersCount:
+        layoutPropsFromPrepare.followersCount !== undefined
+          ? layoutPropsFromPrepare.followersCount
+          : headerPrefetch.followersCount,
+    };
+
     return (
       <UserPageLayout
         profile={profile}
         handleOrWallet={normalizedUser}
-        {...(prepared?.layoutProps ?? {})}
+        {...layoutProps}
       >
         <Tab
           profile={profile}
