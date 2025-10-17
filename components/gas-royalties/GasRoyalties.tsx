@@ -87,7 +87,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
   useEffect(() => {
     const path =
       props.focus === GasRoyaltiesCollectionFocus.MEMES ? "memes" : "memelab";
-    fetchUrl(`${publicEnv.API_ENDPOINT}/api/${path}/artists_names`).then(
+    fetchUrl<ApiArtistNameItem[]>(`${publicEnv.API_ENDPOINT}/api/${path}/artists_names`).then(
       (res: ApiArtistNameItem[]) => {
         setArtists(res);
       }

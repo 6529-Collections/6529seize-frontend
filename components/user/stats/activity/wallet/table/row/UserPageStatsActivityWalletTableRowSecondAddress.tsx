@@ -9,7 +9,7 @@ import {
 } from "@/helpers/Helpers";
 import { TransactionType } from "./UserPageStatsActivityWalletTableRow";
 import { usePathname } from "next/navigation";
-import { UserPageTabType } from "@/components/user/layout/UserPageTabs";
+import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 
 export default function UserPageStatsActivityWalletTableRowSecondAddress({
   transaction,
@@ -75,7 +75,7 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
   const path = getProfileTargetRoute({
     handleOrWallet: address,
     pathname: pathname ?? "",
-    defaultPath: UserPageTabType.STATS,
+    defaultPath: USER_PAGE_TAB_IDS.STATS,
   });
 
   return (

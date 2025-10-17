@@ -147,7 +147,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
         setFetchingProofs(true);
         const merkleRoot = props.collection.merkle_root;
         const url = `${publicEnv.API_ENDPOINT}/api/nextgen/proofs/${merkleRoot}/${mintForAddress}`;
-        fetchUrl(url).then((response: ProofResponse[]) => {
+        fetchUrl<ProofResponse[]>(url).then((response: ProofResponse[]) => {
           const proofResponses: ProofResponse[] = [];
           if (response.length > 0) {
             proofResponses.push({

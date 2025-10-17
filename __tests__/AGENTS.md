@@ -1,66 +1,134 @@
-# Test Guidelines for Codex
+# Codex Testing Guidelines
 
-## Purpose and Structure
+## Purpose & Structure
 
-The `__tests__` directory contains Jest test suites for this Next.js project. Tests mirror the source folders such as `components`, `contexts`, `hooks` and `utils` to keep structure familiar. Integration tests for API routes live under `app/api`. Fixtures and helpers used across tests reside in their respective subfolders.
+* All tests live in `__tests__`, mirroring source folders (`components`, `contexts`, `hooks`, `utils`).
+* API integration tests: `app/api`.
+* Shared fixtures & helpers: relevant subfolders.
+* Jest automatically picks up mocks from `__mocks__`.
 
-## Testing Frameworks and Tools
+## Tools
 
-- **Jest** with the `ts-jest` preset for TypeScript support.
-- **@testing-library/react** and **@testing-library/user-event** for React component tests.
-- Additional mocks live in `__mocks__` and are automatically picked up by Jest.
+* **Jest** + `ts-jest` (TypeScript).
+* **@testing-library/react** + **user-event** (React tests).
+* Coverage reports in `coverage/`.
 
-## Test Writing Guidelines
+## Writing Tests
 
-- Prioritise meaningful coverage that validates business requirements over achieving raw coverage numbers.
-- Use the **Arrange – Act – Assert** pattern and keep assertions focused on behaviour, not implementation details.
-- Give each test a clear, descriptive name that conveys the scenario and expected outcome.
-- Tests should remain independent, deterministic and fast.
+* Focus on business value, not raw coverage.
+* Follow **Arrange – Act – Assert**.
+* One behaviour per test; clear, descriptive names.
+* Keep tests independent, deterministic, and fast.
+* Use realistic data.
 
-## Test Categorisation and Prioritisation
+### Test Types
 
-Consider the following categories when writing tests:
+* **Happy Path** – expected workflows.
+* **Errors** – invalid input, unexpected scenarios.
+* **Edge Cases** – boundaries, rare conditions.
+* **Integration** – components & API interactions.
+* **Performance/Security** – when relevant.
 
-- **Happy Path Tests** – standard workflows with valid inputs.
-- **Error Handling Tests** – behaviour with invalid inputs or unexpected scenarios.
-- **Edge Case Tests** – boundary conditions and uncommon situations.
-- **Integration Tests** – interactions between components or with API routes.
-- **Performance & Security Tests** – only when relevant.
+Prioritise high-risk areas first when time-boxed.
 
-When time‑boxed, focus on high‑risk areas first, then fill coverage gaps and polish.
+## Time-Boxed Cycle (20 min)
 
-## Time‑Boxed Testing Approach
+1. **5–7 min**: core flows.
+2. **5–7 min**: edge cases & branches.
+3. **5–6 min**: clean up & refine.
 
-A suggested 20‑minute cycle:
+## Quality Checklist
 
-1. **Initial Phase (5‑7 min)** – target high‑impact paths and core functionality.
-2. **Middle Phase (5‑7 min)** – add tests for edge cases or missing branches.
-3. **Final Phase (5‑6 min)** – clean up, improve readability and verify results.
+* [ ] Clear, descriptive names
+* [ ] Arrange – Act – Assert used
+* [ ] Independent & fast
+* [ ] One behaviour per test
+* [ ] Production-like data
 
-## Test Quality Checklist
-
-- [ ] Clear, descriptive test names
-- [ ] Proper Arrange – Act – Assert structure
-- [ ] Independent and deterministic
-- [ ] Execute quickly and focus on one behaviour
-- [ ] Use realistic, production‑like data
-
-## Execution Instructions
-
-Run tests with:
+## Running Tests
 
 ```bash
-npm run test:cov:changed
-```
-
-This command runs Jest only on files changed since `main`. Use `npm run test` if
-you need to execute the entire suite.
-
-This command also checks coverage for modified files. Linting and type‑checking should pass as well:
-
-```bash
+npm run test:cov:changed   # changed files only
+npm run test               # full suite
 npm run lint
 npm run type-check
 ```
 
-Coverage reports are generated in the `coverage` directory. A summary is printed in the terminal after tests complete.
+---
+
+# Coding Standards
+
+### Complexity
+
+* Functions ≤ 15 cognitive complexity.
+* Extract deep ternaries (>3 levels).
+* Break down complex logic.
+
+### Modern Patterns
+
+**Iteration**
+
+```ts
+// ❌ Avoid
+items.forEach(item => processItem(item));
+
+// ✅ Prefer
+for (const item of items) {
+  processItem(item);
+}
+```
+
+* Allows `break/continue`.
+* Works with async/await.
+
+**Array Access**
+
+```ts
+// ✅ Prefer
+const last = array.at(-1);
+const secondLast = array.at(-2);
+```
+
+**Strings**
+
+```ts
+// ✅ Prefer
+str.replaceAll('old', 'new');
+```
+
+**Globals**
+
+```ts
+// ✅ Prefer
+globalThis.fetch(url);
+```
+
+**Imports**
+
+* One import per module.
+* Order: external → internal → types.
+* No duplicates.
+
+**Accessibility**
+
+* Use semantic HTML (`<label>`, `<output>`) over ARIA when possible.
+* Every form control must have a label.
+* Test with keyboard + screen reader.
+
+**Modern DOM**
+
+```ts
+element.remove(); // instead of parent.removeChild(element)
+```
+
+**Error Handling**
+
+* Catch only when meaningful.
+* No empty `catch`.
+* Log with context.
+
+**Clarity**
+
+* Avoid double negatives.
+* Prefer explicit, remove redundant annotations.
+* Use optional chaining (`?.`).

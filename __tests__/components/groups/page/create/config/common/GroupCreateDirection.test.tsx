@@ -13,8 +13,8 @@ describe('GroupCreateDirection', () => {
         setDirection={setDirection}
       />
     );
-    expect(screen.getByRole('button', { name: 'Identity to' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Identity from' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Identity to' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Identity from' })).toBeInTheDocument();
   });
 
   it('calls setDirection when selecting a tab', async () => {
@@ -27,7 +27,7 @@ describe('GroupCreateDirection', () => {
         setDirection={setDirection}
       />
     );
-    await user.click(screen.getByRole('button', { name: 'Identity from' }));
+    await user.click(screen.getByRole('tab', { name: 'Identity from' }));
     expect(setDirection).toHaveBeenCalledWith(ApiGroupFilterDirection.Received);
   });
 });
