@@ -116,7 +116,7 @@ function WebSidebarSubmenu({
   return createPortal(
     <div
       ref={containerRef}
-      className="tailwind-scope tw-fixed tw-z-[95] tw-w-56 tw-max-h-[65vh] tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg tw-shadow-[0_20px_45px_rgba(7,7,11,0.7)] tw-overflow-hidden tw-flex tw-flex-col"
+      className="tailwind-scope tw-fixed tw-z-[95] tw-ml-2 tw-w-64 tw-max-h-[65vh] tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg tw-shadow-[0_20px_45px_rgba(7,7,11,0.7)] tw-overflow-hidden tw-flex tw-flex-col"
       style={{
         left: leftStyle,
         top: topStyle,
@@ -124,7 +124,7 @@ function WebSidebarSubmenu({
       role="menu"
       aria-label={`${section.name} sub-navigation`}
     >
-      <div className="tw-px-6 tw-py-4 tw-border-b tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-t-0">
+      <div className="tw-px-6 tw-pt-4 tw-pb-2 tw-border-b tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-t-0">
         <h3 className="tw-text-base tw-font-semibold tw-text-iron-50">
           {section.name}
         </h3>

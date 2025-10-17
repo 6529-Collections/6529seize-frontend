@@ -49,25 +49,6 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
       browserWindow.matchMedia?.("(pointer: coarse)")?.matches);
 
   const shouldRenderCreateDirectMessage = !isApp;
-  const renderCreateDirectMessageButton = () =>
-    shouldRenderCreateDirectMessage ? (
-      <div
-        data-tooltip-id="create-dm-tooltip"
-        data-tooltip-content="New direct message"
-      >
-        <PrimaryButton
-          onClicked={openDirectMessage}
-          loading={false}
-          disabled={false}
-          padding="tw-px-2 tw-py-2"
-        >
-          <FontAwesomeIcon
-            icon={faPaperPlane}
-            className="tw-size-4 tw-flex-shrink-0"
-          />
-        </PrimaryButton>
-      </div>
-    ) : null;
 
   // Moved all hooks to the top level, before any conditional logic
   const listRef = useRef<WebUnifiedWavesListWavesHandle>(null);
@@ -143,62 +124,71 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
     );
   }
 
-  let listContent: React.ReactNode;
-
-  if (isInitialLoad) {
-    listContent = (
-      <UnifiedWavesListLoader
-        isFetching={true}
-        isFetchingNextPage={false}
-      />
-    );
-  } else if (isEmpty) {
-    listContent = (
-      <UnifiedWavesListEmpty
-        sortedWaves={directMessages.list}
-        isFetching={directMessages.isFetching}
-        isFetchingNextPage={directMessages.isFetchingNextPage}
-        emptyMessage="No direct messages yet"
-      />
-    );
-  } else {
-    listContent = (
-      <WebUnifiedWavesListWaves
-        ref={listRef}
-        waves={directMessages.list}
-        onHover={registerWave}
-        scrollContainerRef={scrollContainerRef}
-        hideToggle={true}
-        hideHeaders={true}
-        hidePin={true}
-        basePath="/messages"
-        isCondensed={isCondensed}
-      />
-    );
-  }
-
   return (
     <div className="tw-h-full tw-flex tw-flex-col">
       <div
         className="tw-flex-1 tw-flex tw-flex-col tw-py-4 tw-bg-black"
       >
-        {!isCondensed ? (
-          <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-mb-3">
-            <span className="tw-text-xl tw-font-semibold tw-text-iron-50">
-              Messages
-            </span>
-            {renderCreateDirectMessageButton()}
+        {(shouldRenderCreateDirectMessage || !isCondensed) && (
+          <div
+            className={`tw-flex tw-mb-3 ${
+              isCondensed
+                ? "tw-justify-center tw-px-2"
+                : "tw-items-center tw-justify-between tw-px-4"
+            }`}
+          >
+            {!isCondensed && (
+              <span className="tw-text-xl tw-font-semibold tw-text-iron-50">
+                Messages
+              </span>
+            )}
+            {shouldRenderCreateDirectMessage && (
+              <div
+                data-tooltip-id="create-dm-tooltip"
+                data-tooltip-content="New direct message"
+              >
+                <PrimaryButton
+                  onClicked={openDirectMessage}
+                  loading={false}
+                  disabled={false}
+                  padding="tw-px-2 tw-py-2"
+                >
+                  <FontAwesomeIcon
+                    icon={faPaperPlane}
+                    className="tw-size-4 tw-flex-shrink-0"
+                  />
+                </PrimaryButton>
+              </div>
+            )}
           </div>
-        ) : (
-          shouldRenderCreateDirectMessage && (
-            <div className="tw-flex tw-justify-center tw-px-2 tw-mb-3">
-              {renderCreateDirectMessageButton()}
-            </div>
-          )
         )}
 
         <div className="tw-flex-1 tw-w-full tw-flex tw-flex-col">
-          {listContent}
+          {isInitialLoad ? (
+            <UnifiedWavesListLoader
+              isFetching={true}
+              isFetchingNextPage={false}
+            />
+          ) : isEmpty ? (
+            <UnifiedWavesListEmpty
+              sortedWaves={directMessages.list}
+              isFetching={directMessages.isFetching}
+              isFetchingNextPage={directMessages.isFetchingNextPage}
+              emptyMessage="No direct messages yet"
+            />
+          ) : (
+            <WebUnifiedWavesListWaves
+              ref={listRef}
+              waves={directMessages.list}
+              onHover={registerWave}
+              scrollContainerRef={scrollContainerRef}
+              hideToggle={true}
+              hideHeaders={true}
+              hidePin={true}
+              basePath="/messages"
+              isCondensed={isCondensed}
+            />
+          )}
 
           <UnifiedWavesListLoader
             isFetching={false}

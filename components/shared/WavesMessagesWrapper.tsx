@@ -97,13 +97,13 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   const shouldShowLeftSidebar = showLeftSidebar && (!isMobile || !waveId);
   const shouldShowMainContent = !isMobile || waveId;
   const shouldShowDropOverlay = isDropOpen && drop && shouldShowMainContent;
-  const shouldShowRightSidebar = Boolean(
-    isRightSidebarOpen && !isDropOpen && waveId
-  );
-  const shouldInlineRightSidebar =
-    shouldShowRightSidebar && (!isMobile && (isLargeDesktop || breakpoint === "LG"));
-  const shouldOverlayRightSidebar =
-    shouldShowRightSidebar && (!shouldInlineRightSidebar);
+  const shouldShowRightSidebar = Boolean(isRightSidebarOpen && waveId && !isDropOpen);
+  const canInlineRight = !isMobile && (isLargeDesktop || breakpoint === "LG");
+  const rightVariant: "inline" | "overlay" | null = shouldShowRightSidebar
+    ? canInlineRight
+      ? "inline"
+      : "overlay"
+    : null;
 
   // Handle error state for drop loading
   if (dropError && dropId) {
@@ -127,7 +127,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
               style={contentContainerStyle}
             >
               {shouldShowLeftSidebar && (
-                <WebBrainLeftSidebar isCondensed={shouldInlineRightSidebar} />
+                <WebBrainLeftSidebar isCondensed={rightVariant === "inline"} />
               )}
               {shouldShowMainContent && (
                 <div className="tw-flex-grow tw-flex tw-flex-col tw-h-full tw-min-w-0 tw-border-solid tw-border-r tw-border-iron-800 tw-border-y-0 tw-border-l-0">
@@ -147,10 +147,9 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
                   )}
                 </div>
               )}
-              {shouldInlineRightSidebar && (
+              {rightVariant === "inline" && (
                 <div className="tw-hidden lg:tw-block tw-flex-shrink-0 tw-pl-6 tw-pt-2">
                   <BrainRightSidebar
-                    key="right-sidebar-inline"
                     variant="inline"
                     waveId={waveId}
                     onDropClick={onDropClick}
@@ -165,29 +164,14 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
       </div>
 
       {/* Overlay backdrop when right sidebar is open - moved outside motion container */}
-      {shouldOverlayRightSidebar && (
-        <>
-          <button
-            type="button"
-            className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-z-[70] tw-border-0"
-            onClick={closeRightSidebar}
-            onKeyDown={(event) => {
-              if (event.key === "Escape") {
-                event.preventDefault();
-                closeRightSidebar();
-              }
-            }}
-            aria-label="Close sidebar overlay"
-          />
-          <BrainRightSidebar
-            key="right-sidebar"
-            variant="overlay"
-            waveId={waveId}
-            onDropClick={onDropClick}
-            activeTab={sidebarTab}
-            setActiveTab={setSidebarTab}
-          />
-        </>
+      {rightVariant === "overlay" && (
+        <BrainRightSidebar
+          variant="overlay"
+          waveId={waveId}
+          onDropClick={onDropClick}
+          activeTab={sidebarTab}
+          setActiveTab={setSidebarTab}
+        />
       )}
     </>
   );

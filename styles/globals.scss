@@ -13,12 +13,12 @@
   .layout-root {
     min-height: 100dvh;
 
-    --layout-max: 1324px;
+    --layout-max: 82.75rem;
     --sidebar-width: 0px;
     --collapsed-width: 0px;
     --expanded-width: 0px;
 
-    --layout-margin: max((100vw - var(--layout-max)) / 2, 0px);
+    --layout-margin: max((100vw - var(--layout-max)) / 2.25, 0px);
     --left-rail: calc(var(--layout-margin) + var(--sidebar-width));
   }
 

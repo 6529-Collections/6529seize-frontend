@@ -60,7 +60,7 @@ export default function HeaderShare({
   }
 
   return (
-    <div className="tailwind-scope tw-relative tw-pl-3 tw-pr-2">
+    <div className="tailwind-scope tw-relative tw-px-3">
       <button
         type="button"
         aria-label="QR Code"

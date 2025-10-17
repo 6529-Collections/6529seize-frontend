@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -103,20 +104,17 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
 }) => {
   const { wave, mode, setMode, close } = useBrainRightSidebarState(waveId);
   const isOverlay = variant === "overlay";
-  const containerClasses = isOverlay
-    ? `tw-fixed tw-inset-y-0 tw-right-0 tw-z-[80] tw-bg-iron-950 tw-flex tw-flex-col
-        tw-w-[20.5rem] tw-shadow-2xl
-        lg:tw-bg-opacity-95 min-[1300px]:tw-bg-opacity-100
-        lg:tw-backdrop-blur min-[1300px]:tw-backdrop-blur-none tw-border-l tw-border-solid tw-border-iron-800 tw-border-y-0 tw-border-r-0`
-    : "tw-flex tw-flex-col tw-w-[20.5rem] tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg overflow-hidden";
-  const contentClasses = [
-    "tw-text-iron-500 tw-text-sm tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-h-full",
-  ];
 
-  return (
-    <div className={containerClasses}>
+  const panel = (
+    <div
+      className={`tw-flex tw-flex-col tw-w-[20.5rem] tw-bg-iron-950 ${
+        isOverlay
+          ? `tw-fixed tw-inset-y-0 tw-right-0 tw-z-[100] tw-shadow-2xl lg:tw-bg-opacity-95 min-[1300px]:tw-bg-opacity-100 lg:tw-backdrop-blur min-[1300px]:tw-backdrop-blur-none tw-border-l tw-border-solid tw-border-iron-800 tw-border-y-0 tw-border-r-0`
+          : "tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg overflow-hidden tw-max-h-[calc(100dvh-16px)]"
+      }`}
+    >
       {isOverlay && (
-        <div className="tw-absolute tw-top-2 -tw-left-5 tw-z-[85]">
+        <div className="tw-absolute tw-top-2 -tw-left-5 tw-z-[110]">
           <button
             type="button"
             onClick={close}
@@ -131,7 +129,7 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
         </div>
       )}
 
-      <div className={contentClasses.join(" ")}>
+      <div className="tw-text-iron-500 tw-text-sm tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-h-full">
         <SidebarContent
           wave={wave}
           mode={mode}
@@ -143,6 +141,29 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
       </div>
     </div>
   );
+
+  if (isOverlay && typeof document !== "undefined" && document.body) {
+    return createPortal(
+      <>
+        <button
+          type="button"
+          onClick={close}
+          aria-label="Close right overlay"
+          className="tw-fixed tw-inset-0 tw-bg-black/50 tw-z-[90] tw-border-0 focus:tw-outline-none"
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              event.preventDefault();
+              close();
+            }
+          }}
+        />
+        {panel}
+      </>,
+      document.body
+    );
+  }
+
+  return panel;
 };
 
 export default BrainRightSidebar;

@@ -126,22 +126,21 @@ export default function SidebarLayout({
           setOpen={setOpen}
         />
       </div>
-      <div className="tailwind-scope tw-bg-black tw-min-h-dvh tw-mt-6 lg:tw-mt-8 tw-pb-6 lg:tw-pb-8 tw-px-2 lg:tw-px-4 xl:tw-px-8 tw-mx-auto">
+      <div className="tailwind-scope tw-bg-black tw-min-h-dvh tw-mt-6 lg:tw-mt-8 tw-pb-6 tw-mx-auto">
         <div className="tw-flex">
           <div
             className={`tw-fixed tw-z-30 tw-inset-y-0 tw-h-full tw-overflow-x-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500  tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-transform tw-transition tw-duration-300 tw-ease-out ${
               !open ? "-tw-translate-x-full" : ""
             }`}
-            ref={sidebarRef}
-            style={{ left: open ? "var(--left-rail, 0)" : 0 }}>
+            ref={sidebarRef}>
             <div className="tw-bg-iron-950 tw-w-80 tw-border-r tw-border-solid tw-border-t-0 tw-border-l-0 tw-border-b-0 tw-border-iron-700">
               <GroupsSidebar />
             </div>
           </div>
           <div className="tw-w-full">
             <div
-              className={` tw-transform tw-transition-all tw-duration-300 tw-ease-out ${
-                animateContentMarginLeft ? "tw-ml-[320px]" : " tw-ml-0"
+              className={` tw-transform tw-transition-all tw-duration-300 tw-ease-out tw-mt-4 tw-px-2 lg:tw-px-6 xl:tw-px-8 ${
+                animateContentMarginLeft ? "tw-ml-[320px]" : "tw-ml-0"
               }`}>
               {init && children}
             </div>

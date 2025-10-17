@@ -96,25 +96,6 @@ const WebUnifiedWavesListWaves = forwardRef<
     }));
 
     const shouldRenderCreateWaveButton = !isApp && !!connectedProfile;
-    const renderCreateWaveButton = () =>
-      shouldRenderCreateWaveButton ? (
-        <div
-          data-tooltip-id="create-wave-tooltip"
-          data-tooltip-content="Create wave"
-        >
-          <PrimaryButton
-            onClicked={openWave}
-            loading={false}
-            disabled={false}
-            padding="tw-px-2 tw-py-2"
-          >
-            <FontAwesomeIcon
-              icon={faPlus}
-              className="tw-size-4 tw-flex-shrink-0"
-            />
-          </PrimaryButton>
-        </div>
-      ) : null;
 
     const { pinnedWaves, regularWaves } = useMemo(() => {
       const pinned: MinimalWave[] = [];
@@ -147,19 +128,53 @@ const WebUnifiedWavesListWaves = forwardRef<
     return (
       <>
         <div className="tw-flex tw-flex-col">
-          {!hideHeaders && !isCondensed && (
-            <SectionHeader
-              label="Waves"
-              rightContent={renderCreateWaveButton()}
-            />
-          )}
           {!hideHeaders &&
-            isCondensed &&
-            shouldRenderCreateWaveButton && (
-              <div className="tw-flex tw-justify-center tw-px-2 tw-mb-3">
-                {renderCreateWaveButton()}
-              </div>
-            )}
+            (isCondensed ? (
+              shouldRenderCreateWaveButton && (
+                <div className="tw-flex tw-justify-center tw-px-2 tw-mb-3.5">
+                  <div
+                    data-tooltip-id="create-wave-tooltip"
+                    data-tooltip-content="Create wave"
+                  >
+                    <PrimaryButton
+                      onClicked={openWave}
+                      loading={false}
+                      disabled={false}
+                      padding="tw-px-2 tw-py-2"
+                    >
+                      <FontAwesomeIcon
+                        icon={faPlus}
+                        className="tw-size-4 tw-flex-shrink-0"
+                      />
+                    </PrimaryButton>
+                  </div>
+                </div>
+              )
+            ) : (
+              <SectionHeader
+                label="Waves"
+                rightContent={
+                  shouldRenderCreateWaveButton ? (
+                    <div
+                      data-tooltip-id="create-wave-tooltip"
+                      data-tooltip-content="Create wave"
+                    >
+                      <PrimaryButton
+                        onClicked={openWave}
+                        loading={false}
+                        disabled={false}
+                        padding="tw-px-2 tw-py-2"
+                      >
+                        <FontAwesomeIcon
+                          icon={faPlus}
+                          className="tw-size-4 tw-flex-shrink-0"
+                        />
+                      </PrimaryButton>
+                    </div>
+                  ) : undefined
+                }
+              />
+            ))}
 
           {!hideHeaders && !hideToggle && !isCondensed && (
             <div className="tw-pb-3 tw-mt-4 tw-flex tw-px-4">

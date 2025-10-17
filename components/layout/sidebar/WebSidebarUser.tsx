@@ -50,7 +50,7 @@ function WebSidebarUser({
 
   const profile = parentProfile || localProfile;
 
-  const containerClasses = "tw-mt-auto tw-relative tw-w-full tw-group tw-pb-2 tw-pl-3 tw-pr-2";
+  const containerClasses = "tw-mt-auto tw-relative tw-w-full tw-group tw-pb-2 tw-px-3";
 
   if (!address) {
     return (

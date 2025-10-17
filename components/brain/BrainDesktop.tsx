@@ -88,15 +88,16 @@ const BrainDesktop: React.FC<Props> = ({ children }) => {
     } as ExtendedDrop;
   }, [drop]);
 
-  const contentClasses =
-    "tw-relative tw-flex tw-flex-grow tw-w-full tw-px-3 min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto";
-
   return (
     <div className="tw-relative tw-flex tw-flex-col">
       <div className="tw-relative tw-flex tw-flex-grow">
         <motion.div
           layout={!isDropOpen}
-          className={isDropOpen ? "tw-w-full xl:tw-pl-6" : contentClasses}
+          className={
+            isDropOpen
+              ? "tw-w-full xl:tw-pl-6"
+              : "tw-relative tw-flex tw-flex-grow tw-w-full tw-px-3 min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto"
+          }
           transition={{ duration: 0.3 }}
           style={{ transition: "none" }}
         >

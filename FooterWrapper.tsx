@@ -1,11 +1,11 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
-import useDeviceInfo from "./hooks/useDeviceInfo";
 import Footer from "@/components/footer/Footer";
-import { useSidebarController } from "./hooks/useSidebarController";
 import { SIDEBAR_WIDTHS } from "@/constants/sidebar";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import useDeviceInfo from "./hooks/useDeviceInfo";
+import { useSidebarController } from "./hooks/useSidebarController";
 
 export default function FooterWrapper() {
   const { isApp } = useDeviceInfo();
@@ -68,7 +68,7 @@ export default function FooterWrapper() {
 
   return (
     <div
-      className="tw-w-full tw-max-w-[1324px] tw-mx-auto"
+      className="tw-w-full tw-max-w-[82.75rem] tw-mx-auto"
       style={{ paddingLeft: sidebarSpacing }}
     >
       <Footer />

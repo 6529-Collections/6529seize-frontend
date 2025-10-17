@@ -224,7 +224,7 @@ const WebSidebarNav = React.forwardRef<
   return (
     <>
       <nav
-        className="tw-flex tw-flex-col tw-mt-4 tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-pr-2 tw-pl-3"
+        className="tw-flex tw-flex-col tw-mt-4 tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-px-3"
         aria-label="Desktop navigation"
       >
         <ul className="tw-list-none tw-m-0 tw-p-0">

@@ -66,7 +66,9 @@ function WebSidebar({
     if ("addListener" in coarsePointerQuery) {
       const legacyQuery = coarsePointerQuery as MediaQueryList & {
         addListener?: (listener: (event: MediaQueryListEvent) => void) => void;
-        removeListener?: (listener: (event: MediaQueryListEvent) => void) => void;
+        removeListener?: (
+          listener: (event: MediaQueryListEvent) => void
+        ) => void;
       };
       legacyQuery.addListener?.(handlePointerChange);
       return () => legacyQuery.removeListener?.(handlePointerChange);
@@ -117,70 +119,63 @@ function WebSidebar({
     onToggle();
   };
 
-  const sidebarContent = (
-    <div
-      className="tw-group tw-relative tw-z-50 tw-h-full tw-bg-black tw-border-r tw-border-solid tw-border-y-0 tw-border-l-0 tw-border-iron-700/95 tw-border-0 tw-transition-[width] tw-duration-300 tw-ease-in-out focus:tw-outline-none"
-      style={{ width: sidebarWidth }}
-      aria-label="Primary sidebar"
-      ref={scrollContainerRef}
-    >
-      <div className="tw-flex tw-flex-col tw-h-full tw-pt-2">
-        <WebSidebarHeader
-          collapsed={shouldShowCollapsed}
-          onToggle={handleToggle}
-        />
-
-        <div
-          className="tw-flex tw-flex-col tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin no-scrollbar tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
-          data-sidebar-scroll="true"
-        >
-          <div className="tw-flex-1">
-            <WebSidebarNav ref={navRef} isCollapsed={shouldShowCollapsed} />
-          </div>
-
-          <HeaderShare isCollapsed={shouldShowCollapsed} />
-
-          <WebSidebarUser isCollapsed={shouldShowCollapsed} profile={profile} />
-        </div>
-      </div>
-    </div>
-  );
-
-  if (isMobile) {
-    if (!isOffcanvasOpen) {
-      return null;
-    }
-    return (
-      <>
-        <button
-          type="button"
-          className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-z-[70] tw-border-0 focus:tw-outline-none"
-          onClick={onCloseOffcanvas}
-          aria-label="Close menu overlay"
-        />
-        <div className="tw-fixed tw-inset-y-0 tw-left-0 tw-z-[80] focus:tw-outline-none">
-          {sidebarContent}
-        </div>
-      </>
-    );
+  const shouldRenderSidebar = !isMobile || isOffcanvasOpen;
+  if (!shouldRenderSidebar) {
+    return null;
   }
 
   return (
     <>
-      <div
-        className="tw-fixed tw-inset-y-0 tw-left-0 focus:tw-outline-none tw-z-40"
-        style={{ left: "var(--layout-margin, 0px)" }}
-      >
-        {sidebarContent}
-      </div>
-      {!isMobile && isOverlayActive && (
+      {isOverlayActive && (
         <button
           type="button"
-          className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-z-30 tw-border-0 focus:tw-outline-none"
+          className={
+            isMobile
+              ? "tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-z-[70] tw-border-0 focus:tw-outline-none"
+              : "tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-z-30 tw-border-0 focus:tw-outline-none"
+          }
           onClick={onCloseOffcanvas}
           aria-label="Close menu overlay"
         />
       )}
+      <div
+        className={
+          isMobile
+            ? "tw-fixed tw-inset-y-0 tw-left-0 tw-z-[80] focus:tw-outline-none"
+            : "tw-fixed tw-inset-y-0 tw-left-0 focus:tw-outline-none tw-z-40"
+        }
+        style={isMobile ? undefined : { left: "var(--layout-margin, 0px)" }}
+      >
+        <div
+          className="tw-group tw-relative tw-z-50 tw-h-full tw-bg-black tw-border-r tw-border-solid tw-border-y-0 tw-border-l-0 tw-border-iron-700/95 tw-border-0 tw-transition-[width] tw-duration-300 tw-ease-in-out focus:tw-outline-none"
+          style={{ width: sidebarWidth }}
+          aria-label="Primary sidebar"
+          ref={scrollContainerRef}
+        >
+          <div className="tw-flex tw-flex-col tw-h-full tw-pt-2">
+            <WebSidebarHeader
+              collapsed={shouldShowCollapsed}
+              onToggle={handleToggle}
+            />
+
+            <div
+              className="tw-flex tw-flex-col tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin no-scrollbar tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+              data-sidebar-scroll="true"
+            >
+              <div className="tw-flex-1">
+                <WebSidebarNav ref={navRef} isCollapsed={shouldShowCollapsed} />
+              </div>
+
+              <HeaderShare isCollapsed={shouldShowCollapsed} />
+
+              <WebSidebarUser
+                isCollapsed={shouldShowCollapsed}
+                profile={profile}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
       {!isTouchScreen && (
         <ReactTooltip
           id="sidebar-tooltip"
