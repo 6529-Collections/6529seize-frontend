@@ -86,8 +86,8 @@ export default function LinkPreviewCard({
 
     return (
       <LinkPreviewCardLayout href={href}>
-        <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
-          <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-start">
+        <div className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
+          <div className="tw-flex tw-h-full tw-w-full tw-max-w-full tw-items-center tw-justify-start tw-overflow-hidden tw-break-words tw-[overflow-wrap:anywhere]">
             {fallbackContent}
           </div>
         </div>
@@ -102,7 +102,7 @@ export default function LinkPreviewCard({
   if (state.type === "ens") {
     return (
       <LinkPreviewCardLayout href={href}>
-        <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
+        <div className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
           <EnsPreviewCard preview={state.data} />
         </div>
       </LinkPreviewCardLayout>
