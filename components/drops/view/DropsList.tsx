@@ -123,6 +123,12 @@ const DropsList = memo(function DropsList({
         return (
           <HighlightDropWrapper
             key={drop.stableKey}
+            id={`drop-${drop.serial_no}`}
+            ref={
+              getItemData.serialNo === drop.serial_no
+                ? getItemData.targetDropRef
+                : null
+            }
             active={getItemData.serialNo === drop.serial_no}
             scrollContainer={getItemData.scrollContainerRef?.current ?? null}
             className={
