@@ -21,6 +21,14 @@ jest.mock('@/services/api/common-api', () => ({
   commonApiPost: (...args: any[]) => mockCommonApiPost(...args),
 }));
 
+jest.mock('@/helpers/Helpers', () => {
+  const actual = jest.requireActual('@/helpers/Helpers');
+  return {
+    ...actual,
+    wait: jest.fn().mockResolvedValue(undefined),
+  };
+});
+
 jest.mock('@/services/groups/groupMutations', () => {
   const actual = jest.requireActual('@/services/groups/groupMutations');
   return {

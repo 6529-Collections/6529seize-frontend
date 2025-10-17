@@ -21,6 +21,7 @@ import { convertWaveToUpdateWave } from "@/helpers/waves/waves.helpers";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { WaveGroupType } from "../../../WaveGroup";
 import { getScopedGroup, isGroupAuthor } from "../utils/waveGroupEdit";
+import { wait } from "@/helpers/Helpers";
 
 const WAVE_GROUP_LABELS: Record<string, string> = {
   VIEW: "View",
@@ -458,6 +459,9 @@ export const useWaveGroupEditButtonsController = ({
           oldVersionId: previousGroupId,
         });
 
+        // Temporary guard while the API propagates the newly published group.
+        await wait(2000);
+
         const updateBody = buildWaveUpdateBody(wave, type, createdGroup.id);
         waveMutationTriggered = true;
         await editWaveMutation.mutateAsync(updateBody);
@@ -472,10 +476,12 @@ export const useWaveGroupEditButtonsController = ({
           type: "success",
         });
       } catch (error) {
-        setToast({
-          message: toErrorMessage(error),
-          type: "error",
-        });
+        if (!waveMutationTriggered) {
+          setToast({
+            message: toErrorMessage(error),
+            type: "error",
+          });
+        }
       } finally {
         if (!waveMutationTriggered) {
           setMutating(false);
