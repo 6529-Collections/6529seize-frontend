@@ -82,9 +82,18 @@ describe("ProfileActivityLogsItem", () => {
     ).toBeInTheDocument();
   });
 
-  it("throws for unknown type", () => {
-    expect(() =>
-      render(<ProfileActivityLogsItem log={{ type: "x" } as any} user={null} />)
-    ).toThrow();
+  it("renders fallback for unknown type", () => {
+    render(
+      <ProfileActivityLogsItem
+        log={{ id: "unknown", type: "x", created_at: "2024-01-01T00:00:00Z" } as any}
+        user={null}
+      />
+    );
+    expect(
+      document.querySelector('[data-testid="RATE"]')
+    ).not.toBeInTheDocument();
+    expect(
+      document.querySelector('[data-testid="unknown-identity-activity"]')
+    ).toBeInTheDocument();
   });
 });

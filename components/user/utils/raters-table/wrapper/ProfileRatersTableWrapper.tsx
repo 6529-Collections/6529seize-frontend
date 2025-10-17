@@ -14,7 +14,6 @@ import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import ProfileRatersTable from "../ProfileRatersTable";
 import ProfileRatersTableWrapperHeader from "./ProfileRatersTableWrapperHeader";
@@ -31,11 +30,16 @@ export interface ProfileRatersParams {
 
 export default function ProfileRatersTableWrapper({
   initialParams,
+  handleOrWallet,
+  initialData,
 }: {
   readonly initialParams: ProfileRatersParams;
+  readonly handleOrWallet?: string;
+  readonly initialData?: Page<RatingWithProfileInfoAndLevel>;
 }) {
-  const params = useParams();
-  const handleOrWallet = (params?.user as string)?.toLowerCase();
+  const normalizedHandle = (
+    handleOrWallet ?? initialParams.handleOrWallet
+  ).toLowerCase();
   const pageSize = initialParams.pageSize;
   const given = initialParams.given;
   const matter = initialParams.matter;
@@ -65,6 +69,8 @@ export default function ProfileRatersTableWrapper({
 
   const type = getType();
 
+  const hasInitialData = !!initialData;
+
   const {
     isLoading,
     isFetching,
@@ -73,7 +79,7 @@ export default function ProfileRatersTableWrapper({
     queryKey: [
       QueryKey.PROFILE_RATERS,
       {
-        handleOrWallet,
+        handleOrWallet: normalizedHandle,
         matter,
         page: `${currentPage}`,
         pageSize: `${pageSize}`,
@@ -84,7 +90,7 @@ export default function ProfileRatersTableWrapper({
     ],
     queryFn: async () =>
       await commonApiFetch<Page<RatingWithProfileInfoAndLevel>>({
-        endpoint: `profiles/${handleOrWallet}/${
+        endpoint: `profiles/${normalizedHandle}/${
           matter === RateMatter.NIC ? "cic" : matter.toLowerCase()
         }/ratings/by-rater`,
         params: {
@@ -95,8 +101,13 @@ export default function ProfileRatersTableWrapper({
           given: given ? "true" : "false",
         },
       }),
-    enabled: !!handleOrWallet,
+    enabled: !!normalizedHandle,
+    initialData,
     placeholderData: keepPreviousData,
+    staleTime: hasInitialData ? 30_000 : 0,
+    refetchOnMount: hasInitialData ? false : undefined,
+    refetchOnWindowFocus: hasInitialData ? false : undefined,
+    refetchOnReconnect: hasInitialData ? false : undefined,
   });
 
   const [totalPages, setTotalPages] = useState<number>(1);

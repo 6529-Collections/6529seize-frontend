@@ -1,6 +1,5 @@
-import ProfileName, {
-  ProfileNameType,
-} from "@/components/profile-activity/ProfileName";
+import ProfileName from "@/components/profile-activity/ProfileName";
+import { ProfileNameType } from "@/components/profile-activity/profileName.types";
 import { useIdentity } from "@/hooks/useIdentity";
 import { render, screen } from "@testing-library/react";
 import { useParams } from "next/navigation";

@@ -1,6 +1,5 @@
 import { ProfileActivityLog } from "@/entities/IProfile";
 import { ProfileActivityLogType } from "@/enums";
-import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import ProfileActivityLogBanner from "./items/ProfileActivityLogBanner";
 import ProfileActivityLogClassification from "./items/ProfileActivityLogClassification";
 import ProfileActivityLogContact from "./items/ProfileActivityLogContact";
@@ -16,6 +15,7 @@ import ProfileActivityLogProxyActionState from "./items/ProfileActivityLogProxyA
 import ProfileActivityLogRate from "./items/ProfileActivityLogRate";
 import ProfileActivityLogSocialMedia from "./items/ProfileActivityLogSocialMedia";
 import ProfileActivityLogSocialMediaVerificationPost from "./items/ProfileActivityLogSocialMediaVerificationPost";
+import ProfileActivityLogUnknown from "./items/ProfileActivityLogUnknown";
 
 export default function UserPageIdentityActivityLogItem({
   log,
@@ -64,6 +64,6 @@ export default function UserPageIdentityActivityLogItem({
     case ProfileActivityLogType.PROXY_DROP_RATING_EDIT:
       return <></>;
     default:
-      assertUnreachable(logType);
+      return <ProfileActivityLogUnknown log={log} />;
   }
 }

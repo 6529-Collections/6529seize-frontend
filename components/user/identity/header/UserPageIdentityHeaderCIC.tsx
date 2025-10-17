@@ -1,6 +1,5 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import UserCICTypeIconWrapper from "@/components/user/utils/user-cic-type/UserCICTypeIconWrapper";
@@ -11,11 +10,7 @@ export default function UserPageIdentityHeaderCIC({
 }: {
   readonly profile: ApiIdentity;
 }) {
-  const [cicRating, setCicRating] = useState<number>(profile.cic);
-
-  useEffect(() => {
-    setCicRating(profile.cic);
-  }, [profile]);
+  const cicRating = profile.cic;
 
   return (
     <div className="tw-mb-6 tw-mt-4 tw-flex tw-flex-col sm:tw-flex-row sm:tw-flex-wrap sm:tw-space-x-6 tw-gap-y-1">

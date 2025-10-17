@@ -1,8 +1,6 @@
-import UserPageRateWrapper from "@/components/user/utils/rate/UserPageRateWrapper";
-import { RateMatter } from "@/enums";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import UserPageIdentityHeaderCICRate from "./cic-rate/UserPageIdentityHeaderCICRate";
 import UserPageIdentityHeaderCIC from "./UserPageIdentityHeaderCIC";
+import UserPageIdentityHeaderActionsClient from "./UserPageIdentityHeaderActionsClient";
 
 export default function UserPageIdentityHeader({
   profile,
@@ -23,12 +21,7 @@ export default function UserPageIdentityHeader({
             </p>
           </div>
           <UserPageIdentityHeaderCIC profile={profile} />
-          <UserPageRateWrapper profile={profile} type={RateMatter.NIC}>
-            <UserPageIdentityHeaderCICRate
-              profile={profile}
-              isTooltip={false}
-            />
-          </UserPageRateWrapper>
+          <UserPageIdentityHeaderActionsClient profile={profile} />
         </div>
       </div>
     </div>

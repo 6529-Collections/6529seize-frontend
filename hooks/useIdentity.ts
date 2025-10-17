@@ -19,6 +19,8 @@ export function useIdentity({
   handleOrWallet,
   initialProfile,
 }: Readonly<UseIdentityProps>) {
+  const hasInitialProfile =
+    initialProfile !== null && initialProfile !== undefined;
   const { data: profile, isLoading } = useQuery<ApiIdentity>({
     queryKey: [QueryKey.PROFILE, handleOrWallet?.toLowerCase()],
     queryFn: async () =>
@@ -28,6 +30,10 @@ export function useIdentity({
     enabled: !!handleOrWallet,
     initialData: initialProfile ?? undefined,
     retry: 3,
+    staleTime: hasInitialProfile ? 300_000 : 0,
+    refetchOnMount: hasInitialProfile ? false : undefined,
+    refetchOnWindowFocus: hasInitialProfile ? false : undefined,
+    refetchOnReconnect: hasInitialProfile ? false : undefined,
   });
 
   return { profile: profile ?? null, isLoading };

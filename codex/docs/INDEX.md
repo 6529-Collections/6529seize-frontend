@@ -5,6 +5,7 @@ Use this catalogue to keep long-lived documentation easy to discover. Group entr
 ## 2025
 
 - [2025-10-14 – Client Processing Audit (@evocoder)](2025-10-14-client-processing-audit.md)
+- [2025-10-15 – Identity SSR Phase 1 Snapshot (@openai-assistant)](2025-10-15-identity-ssr-phase1.md)
 
 ---
 

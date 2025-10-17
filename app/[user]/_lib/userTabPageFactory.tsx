@@ -1,5 +1,9 @@
+import { cache } from "react";
 import { getAppMetadata } from "@/components/providers/metadata";
-import UserPageLayout from "@/components/user/layout/UserPageLayout";
+import UserPageLayout, {
+  type UserPageLayoutProps,
+} from "@/components/user/layout/UserPageLayout";
+import { prefetchUserPageHeaderData } from "@/components/user/user-page-header/userPageHeaderPrefetch";
 import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import { getMetadataForUserPage } from "@/helpers/Helpers";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
@@ -7,16 +11,34 @@ import {
   getUserProfile,
   userPageNeedsRedirect,
 } from "@/helpers/server.helpers";
+import { withServerTiming } from "@/helpers/performance.helpers";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
 type TabProps = { readonly profile: ApiIdentity };
 
-type FactoryArgs = {
+type PrepareArgs = Readonly<{
+  profile: ApiIdentity;
+  headers: Record<string, string>;
+  user: string;
+  query: UserSearchParams;
+}>;
+
+type PrepareResult<TTabExtraProps extends Record<string, unknown>> = Readonly<{
+  tabProps?: TTabExtraProps;
+  layoutProps?: Partial<UserPageLayoutProps>;
+}>;
+
+type FactoryArgs<
+  TTabExtraProps extends Record<string, unknown> = Record<string, never>
+> = Readonly<{
   subroute: string;
   metaLabel: string;
-  Tab: (props: Readonly<TabProps>) => React.JSX.Element;
-};
+  Tab: (props: Readonly<TabProps & TTabExtraProps>) => React.JSX.Element;
+  prepare?: (
+    args: PrepareArgs
+  ) => Promise<PrepareResult<TTabExtraProps>>;
+}>;
 
 type UserRouteParams = { user: string };
 type UserSearchParams = Record<string, string | string[] | undefined>;
@@ -80,14 +102,61 @@ const isNotFoundError = (error: unknown): boolean => {
   return !!message && message.toLowerCase().includes("not found");
 };
 
-export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
+type ResolvedProfile = Readonly<{
+  profile: ApiIdentity;
+  headers: Record<string, string>;
+}>;
+
+const resolveUserProfile = cache(
+  async (normalizedUser: string): Promise<ResolvedProfile> => {
+    const headers = await getAppCommonHeaders();
+    try {
+      const profile = await withServerTiming(
+        `identity-profile:${normalizedUser}`,
+        async () =>
+          await getUserProfile({
+            user: normalizedUser,
+            headers,
+          })
+      );
+      return { profile, headers };
+    } catch (error) {
+      if (isNotFoundError(error)) {
+        notFound();
+      }
+      throw error;
+    }
+  }
+);
+
+export function createUserTabPage<
+  TTabExtraProps extends Record<string, unknown> = Record<string, never>
+>({ subroute, metaLabel, Tab, prepare }: FactoryArgs<TTabExtraProps>) {
+  async function Page({
+    params,
+    searchParams,
+  }: {
+    readonly params?: UserRouteParams;
+    readonly searchParams?: UserSearchParams;
+  }): Promise<React.JSX.Element>;
   async function Page({
     params,
     searchParams,
   }: {
     readonly params?: Promise<UserRouteParams>;
     readonly searchParams?: Promise<UserSearchParams>;
-  }) {
+  }): Promise<React.JSX.Element>;
+  async function Page({
+    params,
+    searchParams,
+  }: {
+    readonly params?:
+      | UserRouteParams
+      | Promise<UserRouteParams>;
+    readonly searchParams?:
+      | UserSearchParams
+      | Promise<UserSearchParams>;
+  }): Promise<React.JSX.Element> {
     const resolvedParams = params ? await params : undefined;
     if (!resolvedParams?.user) {
       notFound();
@@ -100,16 +169,16 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
       : undefined;
     const query: UserSearchParams =
       normalizeSearchParams(resolvedSearchParams);
-    const headers = await getAppCommonHeaders();
-    const profile: ApiIdentity = await getUserProfile({
-      user: normalizedUser,
-      headers,
-    }).catch((error: unknown) => {
-      if (isNotFoundError(error)) {
-        notFound();
-      }
-      throw error;
-    });
+    const { profile, headers } = await resolveUserProfile(normalizedUser);
+
+    const prepared = prepare
+      ? await prepare({
+          profile,
+          headers,
+          user: normalizedUser,
+          query,
+        })
+      : undefined;
 
     const needsRedirect = userPageNeedsRedirect({
       profile,
@@ -121,9 +190,40 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
       redirect(needsRedirect.redirect.destination);
     }
 
+    const headerPrefetch = await prefetchUserPageHeaderData({
+      profile,
+      headers,
+      handleOrWallet: normalizedUser,
+    });
+
+    const layoutPropsFromPrepare = prepared?.layoutProps ?? {};
+
+    const layoutProps: Partial<UserPageLayoutProps> = {
+      ...layoutPropsFromPrepare,
+      initialStatements:
+        layoutPropsFromPrepare.initialStatements !== undefined
+          ? layoutPropsFromPrepare.initialStatements
+          : headerPrefetch.statements,
+      profileEnabledAt:
+        layoutPropsFromPrepare.profileEnabledAt !== undefined
+          ? layoutPropsFromPrepare.profileEnabledAt
+          : headerPrefetch.profileEnabledAt,
+      followersCount:
+        layoutPropsFromPrepare.followersCount !== undefined
+          ? layoutPropsFromPrepare.followersCount
+          : headerPrefetch.followersCount,
+    };
+
     return (
-      <UserPageLayout profile={profile} handleOrWallet={normalizedUser}>
-        <Tab profile={profile} />
+      <UserPageLayout
+        profile={profile}
+        handleOrWallet={normalizedUser}
+        {...layoutProps}
+      >
+        <Tab
+          profile={profile}
+          {...((prepared?.tabProps ?? {}) as TTabExtraProps)}
+        />
       </UserPageLayout>
     );
   }
@@ -131,7 +231,17 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
   async function generateMetadata({
     params,
   }: {
+    readonly params?: UserRouteParams;
+  }): Promise<Metadata>;
+  async function generateMetadata({
+    params,
+  }: {
     readonly params?: Promise<UserRouteParams>;
+  }): Promise<Metadata>;
+  async function generateMetadata({
+    params,
+  }: {
+    readonly params?: UserRouteParams | Promise<UserRouteParams>;
   }): Promise<Metadata> {
     const resolvedParams = params ? await params : undefined;
     if (!resolvedParams?.user) {
@@ -139,16 +249,7 @@ export function createUserTabPage({ subroute, metaLabel, Tab }: FactoryArgs) {
     }
 
     const normalizedUser = resolvedParams.user.toLowerCase();
-    const headers = await getAppCommonHeaders();
-    const profile: ApiIdentity = await getUserProfile({
-      user: normalizedUser,
-      headers,
-    }).catch((error: unknown) => {
-      if (isNotFoundError(error)) {
-        notFound();
-      }
-      throw error;
-    });
+    const { profile } = await resolveUserProfile(normalizedUser);
     return getAppMetadata(getMetadataForUserPage(profile, metaLabel));
   }
 

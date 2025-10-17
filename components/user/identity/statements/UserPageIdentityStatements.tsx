@@ -5,10 +5,12 @@ import { CicStatement } from "@/entities/IProfile";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { STATEMENT_GROUP } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
+import { faCircleQuestion } from "@fortawesome/free-regular-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { Tooltip } from "react-tooltip";
+import { useParams } from "next/navigation";
 import UserPageIdentityStatementsConsolidatedAddresses from "./consolidated-addresses/UserPageIdentityStatementsConsolidatedAddresses";
 import UserPageIdentityStatementsContacts from "./contacts/UserPageIdentityStatementsContacts";
 import UserPageIdentityAddStatementsHeader from "./header/UserPageIdentityAddStatementsHeader";
@@ -17,64 +19,73 @@ import UserPageIdentityStatementsSocialMediaAccounts from "./social-media-accoun
 import UserPageIdentityStatementsSocialMediaVerificationPosts from "./social-media-verification-posts/UserPageIdentityStatementsSocialMediaVerificationPosts";
 export default function UserPageIdentityStatements({
   profile,
+  handleOrWallet,
+  initialStatements,
 }: {
   readonly profile: ApiIdentity;
+  readonly handleOrWallet?: string;
+  readonly initialStatements: CicStatement[];
 }) {
-  const params = useParams();
-  const user = (params?.user as string)?.toLowerCase();
-  const [socialMediaAccounts, setSocialMediaAccounts] = useState<
-    CicStatement[]
-  >([]);
+  const params = useParams<{ user?: string | string[] }>();
+  const paramHandle = Array.isArray(params?.user)
+    ? params?.user?.[0]
+    : params?.user;
+  const fallbackHandle =
+    handleOrWallet ??
+    profile.handle ??
+    profile.wallets?.[0]?.wallet ??
+    paramHandle ??
+    "";
+  const normalizedHandle = fallbackHandle.toLowerCase();
 
-  const [contacts, setContacts] = useState<CicStatement[]>([]);
-  const [nftAccounts, setNftAccounts] = useState<CicStatement[]>([]);
-  const [socialMediaVerificationPosts, setSocialMediaVerificationPosts] =
-    useState<CicStatement[]>([]);
-
-  const { isLoading, data: statements } = useQuery<CicStatement[]>({
-    queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, user.toLowerCase()],
+  const { isLoading, data: statements = [] } = useQuery<CicStatement[]>({
+    queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, normalizedHandle],
     queryFn: async () =>
       await commonApiFetch<CicStatement[]>({
-        endpoint: `profiles/${user}/cic/statements`,
+        endpoint: `profiles/${normalizedHandle}/cic/statements`,
       }),
-    enabled: !!user,
+    enabled: !!normalizedHandle,
+    initialData: initialStatements,
   });
 
-  useEffect(() => {
-    if (!statements) {
-      setNftAccounts([]);
-      setSocialMediaAccounts([]);
-      setContacts([]);
-      setSocialMediaVerificationPosts([]);
-      return;
-    }
-    const sortedStatements = [...statements].sort((a, d) => {
+  const sortedStatements = useMemo(() => {
+    return [...statements].sort((a, d) => {
       return new Date(d.crated_at).getTime() - new Date(a.crated_at).getTime();
     });
-    setSocialMediaAccounts(
+  }, [statements]);
+
+  const socialMediaAccounts = useMemo(
+    () =>
       sortedStatements.filter(
         (s) => s.statement_group === STATEMENT_GROUP.SOCIAL_MEDIA_ACCOUNT
-      )
-    );
-    setContacts(
+      ),
+    [sortedStatements]
+  );
+
+  const contacts = useMemo(
+    () =>
       sortedStatements.filter(
         (s) => s.statement_group === STATEMENT_GROUP.CONTACT
-      )
-    );
+      ),
+    [sortedStatements]
+  );
 
-    setNftAccounts(
+  const nftAccounts = useMemo(
+    () =>
       sortedStatements.filter(
         (s) => s.statement_group === STATEMENT_GROUP.NFT_ACCOUNTS
-      )
-    );
+      ),
+    [sortedStatements]
+  );
 
-    setSocialMediaVerificationPosts(
+  const socialMediaVerificationPosts = useMemo(
+    () =>
       sortedStatements.filter(
         (s) =>
           s.statement_group === STATEMENT_GROUP.SOCIAL_MEDIA_VERIFICATION_POST
-      )
-    );
-  }, [statements]);
+      ),
+    [sortedStatements]
+  );
 
   return (
     <div className="tw-mt-6 lg:tw-mt-8">
@@ -126,20 +137,11 @@ export default function UserPageIdentityStatements({
                       aria-label="Statements help"
                       className="tw-rounded-full tw-h-10 tw-w-10 tw-inline-flex tw-items-center tw-justify-center focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
                       data-tooltip-id="statements-help">
-                      <svg
+                      <FontAwesomeIcon
+                        icon={faCircleQuestion}
                         className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-400"
-                        viewBox="0 0 24 24"
-                        fill="none"
                         aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path
-                          d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
+                      />
                     </div>
                     <Tooltip
                       id="statements-help"

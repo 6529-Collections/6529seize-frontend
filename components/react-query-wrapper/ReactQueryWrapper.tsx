@@ -5,6 +5,7 @@ import {
   ApiProfileRepRatesState,
   ProfileActivityLog,
   RatingWithProfileInfoAndLevel,
+  CicStatement,
 } from "@/entities/IProfile";
 import { RateMatter } from "@/enums";
 import { ApiDrop } from "@/generated/models/ApiDrop";
@@ -110,9 +111,13 @@ interface InitProfileRepPageParams {
 
 interface InitProfileIdentityPageParams {
   readonly profile: ApiIdentity;
-  readonly activityLogs: InitProfileActivityLogsParams;
+  readonly activityLogs?: InitProfileActivityLogsParams | null;
   readonly cicGivenToUsers: InitProfileRatersParamsAndData;
   readonly cicReceivedFromUsers: InitProfileRatersParamsAndData;
+  readonly statements: {
+    readonly handleOrWallet: string;
+    readonly data: CicStatement[];
+  };
 }
 
 type ReactQueryWrapperContextType = {
@@ -770,15 +775,27 @@ export default function ReactQueryWrapper({
     activityLogs,
     cicGivenToUsers,
     cicReceivedFromUsers,
+    statements,
   }: InitProfileIdentityPageParams) => {
     setProfile(profile);
-    initProfileActivityLogs({
-      params: activityLogs.params,
-      data: activityLogs.data,
-      disableActiveGroup: true,
-    });
+    if (activityLogs) {
+      initProfileActivityLogs({
+        params: activityLogs.params,
+        data: activityLogs.data,
+        disableActiveGroup: true,
+      });
+    }
     setProfileRaters(cicGivenToUsers);
     setProfileRaters(cicReceivedFromUsers);
+    if (statements.handleOrWallet) {
+      queryClient.setQueryData<CicStatement[]>(
+        [
+          QueryKey.PROFILE_CIC_STATEMENTS,
+          statements.handleOrWallet.toLowerCase(),
+        ],
+        statements.data
+      );
+    }
   };
 
   const initCommunityActivityPage = ({
