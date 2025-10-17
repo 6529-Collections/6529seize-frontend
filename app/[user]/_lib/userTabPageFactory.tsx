@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { getAppMetadata } from "@/components/providers/metadata";
 import UserPageLayout, {
   type UserPageLayoutProps,
@@ -9,6 +10,7 @@ import {
   getUserProfile,
   userPageNeedsRedirect,
 } from "@/helpers/server.helpers";
+import { withServerTiming } from "@/helpers/performance.helpers";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
@@ -99,6 +101,33 @@ const isNotFoundError = (error: unknown): boolean => {
   return !!message && message.toLowerCase().includes("not found");
 };
 
+type ResolvedProfile = Readonly<{
+  profile: ApiIdentity;
+  headers: Record<string, string>;
+}>;
+
+const resolveUserProfile = cache(
+  async (normalizedUser: string): Promise<ResolvedProfile> => {
+    const headers = await getAppCommonHeaders();
+    try {
+      const profile = await withServerTiming(
+        `identity-profile:${normalizedUser}`,
+        async () =>
+          await getUserProfile({
+            user: normalizedUser,
+            headers,
+          })
+      );
+      return { profile, headers };
+    } catch (error) {
+      if (isNotFoundError(error)) {
+        notFound();
+      }
+      throw error;
+    }
+  }
+);
+
 export function createUserTabPage<
   TTabExtraProps extends Record<string, unknown> = Record<string, never>
 >({ subroute, metaLabel, Tab, prepare }: FactoryArgs<TTabExtraProps>) {
@@ -139,16 +168,7 @@ export function createUserTabPage<
       : undefined;
     const query: UserSearchParams =
       normalizeSearchParams(resolvedSearchParams);
-    const headers = await getAppCommonHeaders();
-    const profile: ApiIdentity = await getUserProfile({
-      user: normalizedUser,
-      headers,
-    }).catch((error: unknown) => {
-      if (isNotFoundError(error)) {
-        notFound();
-      }
-      throw error;
-    });
+    const { profile, headers } = await resolveUserProfile(normalizedUser);
 
     const prepared = prepare
       ? await prepare({
@@ -204,16 +224,7 @@ export function createUserTabPage<
     }
 
     const normalizedUser = resolvedParams.user.toLowerCase();
-    const headers = await getAppCommonHeaders();
-    const profile: ApiIdentity = await getUserProfile({
-      user: normalizedUser,
-      headers,
-    }).catch((error: unknown) => {
-      if (isNotFoundError(error)) {
-        notFound();
-      }
-      throw error;
-    });
+    const { profile } = await resolveUserProfile(normalizedUser);
     return getAppMetadata(getMetadataForUserPage(profile, metaLabel));
   }
 

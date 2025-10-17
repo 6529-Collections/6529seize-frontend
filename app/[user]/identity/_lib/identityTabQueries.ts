@@ -13,8 +13,9 @@ import {
   getProfileCicStatements,
 } from "@/helpers/server.helpers";
 import type { ProfileRatersParams } from "@/components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import { withServerTiming } from "@/helpers/performance.helpers";
 
-type IdentityRatersPage = Page<RatingWithProfileInfoAndLevel>;
+export type IdentityRatersPage = Page<RatingWithProfileInfoAndLevel>;
 
 export type IdentityTabParams = {
   readonly activityLogParams: ActivityLogParams;
@@ -152,23 +153,41 @@ export const fetchIdentityTabData = async ({
   const normalizedHandle = handleOrWallet.toLowerCase();
   const params = createIdentityTabParams(normalizedHandle);
 
-  const [statementsResult, cicGivenResult, cicReceivedResult] =
-    await Promise.allSettled([
-      getProfileCicStatements({
+  const statementsPromise = withServerTiming(
+    `identity-statements:${normalizedHandle}`,
+    async () =>
+      await getProfileCicStatements({
         handleOrWallet: normalizedHandle,
         headers,
-      }),
-      getProfileCicRatings({
+      })
+  );
+
+  const cicGivenPromise = withServerTiming(
+    `identity-cic:${normalizedHandle}:given`,
+    async () =>
+      await getProfileCicRatings({
         handleOrWallet: normalizedHandle,
         headers,
         params: params.cicGivenParams,
-      }),
-      getProfileCicRatings({
+      })
+  );
+
+  const cicReceivedPromise = withServerTiming(
+    `identity-cic:${normalizedHandle}:received`,
+    async () =>
+      await getProfileCicRatings({
         handleOrWallet: normalizedHandle,
         headers,
         params: params.cicReceivedParams,
-      }),
-  ]);
+      })
+  );
+
+  const [statementsResult, cicGivenResult, cicReceivedResult] =
+    await Promise.allSettled([
+      statementsPromise,
+      cicGivenPromise,
+      cicReceivedPromise,
+    ]);
 
   const statementsOutcome = resolveSettledResult({
     result: statementsResult,

@@ -44,7 +44,7 @@ describe("identityTabQueries", () => {
     expect(params.cicGivenParams).toEqual({
       page: 1,
       pageSize: 7,
-      given: false,
+      given: true,
       order: SortDirection.DESC,
       orderBy: ProfileRatersParamsOrderBy.RATING,
       handleOrWallet: "alice",
@@ -53,7 +53,7 @@ describe("identityTabQueries", () => {
     expect(params.cicReceivedParams).toEqual({
       page: 1,
       pageSize: 7,
-      given: true,
+      given: false,
       order: SortDirection.DESC,
       orderBy: ProfileRatersParamsOrderBy.RATING,
       handleOrWallet: "alice",
@@ -79,7 +79,7 @@ describe("identityTabQueries", () => {
     (getProfileCicStatements as jest.Mock).mockResolvedValue(statements);
     (getProfileCicRatings as jest.Mock).mockImplementation(
       async ({ params }: { params: { given: boolean } }) =>
-        params.given ? ratingsReceived : ratingsGiven
+        params.given ? ratingsGiven : ratingsReceived
     );
 
     const result = await fetchIdentityTabData({
