@@ -1,4 +1,4 @@
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, act } from '@testing-library/react';
 import React from 'react';
 import { useHlsPlayer } from '@/hooks/useHlsPlayer';
 
@@ -48,6 +48,9 @@ describe('useHlsPlayer', () => {
     );
     const video = getByTestId('vid') as HTMLVideoElement;
     expect(video.getAttribute('data-loading')).toBe('true');
+    await act(async () => {
+      await Promise.resolve();
+    });
     await waitFor(() => {
       expect(video.getAttribute('data-loading')).toBe('false');
     });

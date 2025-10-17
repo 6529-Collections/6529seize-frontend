@@ -9,6 +9,8 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useWave } from "@/hooks/useWave";
 import WavePicture from "@/components/waves/WavePicture";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getWaveHomeRoute, getWaveRoute } from "@/helpers/navigation.helpers";
 interface BrainLeftSidebarSearchWaveItemProps {
   readonly wave: ApiWave;
   readonly onClose: () => void;
@@ -21,20 +23,23 @@ const BrainLeftSidebarSearchWaveItem: React.FC<
   const searchParams = useSearchParams();
   const prefetchWaveData = usePrefetchWaveData();
   const { registerWave } = useMyStream();
+  const { isApp } = useDeviceInfo();
   const isDropWave = wave.wave.type !== ApiWaveType.Chat;
   const { isDm } = useWave(wave);
 
   const getHref = (waveId: string) => {
     const currentWaveId = searchParams?.get('wave') ?? undefined;
+    const isDirectMessage = isDm;
+
     if (currentWaveId === waveId) {
-      return "/my-stream";
+      return getWaveHomeRoute({ isDirectMessage, isApp });
     }
-    const params = new URLSearchParams();
-    if (isDm) {
-      params.set('view', 'messages');
-    }
-    params.set('wave', waveId);
-    return `/my-stream?${params.toString()}`;
+
+    return getWaveRoute({
+      waveId,
+      isDirectMessage,
+      isApp,
+    });
   };
   const isActive = wave.id === (searchParams?.get('wave') ?? undefined);
 

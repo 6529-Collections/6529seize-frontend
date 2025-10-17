@@ -18,6 +18,8 @@ import { ApiDrop } from "@/generated/models/ApiDrop";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 
 export default function NotificationDropReplied({
   notification,
@@ -33,15 +35,34 @@ export default function NotificationDropReplied({
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }) {
   const router = useRouter();
+  const { isApp } = useDeviceInfo();
+  const baseWave = notification.related_drops[1].wave as any;
+  const isDirectMessage =
+    baseWave?.chat?.scope?.group?.is_direct_message ?? false;
+
   const onReplyClick = (serialNo: number) => {
     router.push(
-      `/my-stream?wave=${notification.related_drops[1].wave.id}&serialNo=${serialNo}/`
+      getWaveRoute({
+        waveId: notification.related_drops[1].wave.id,
+        serialNo,
+        isDirectMessage,
+        isApp,
+      })
     );
   };
 
   const onQuoteClick = (quote: ApiDrop) => {
+    const quoteWave = quote.wave as any;
+    const quoteIsDm =
+      quoteWave?.chat?.scope?.group?.is_direct_message ?? isDirectMessage;
+
     router.push(
-      `/my-stream?wave=${quote.wave.id}&serialNo=${quote.serial_no}/`
+      getWaveRoute({
+        waveId: quote.wave.id,
+        serialNo: quote.serial_no,
+        isDirectMessage: quoteIsDm,
+        isApp,
+      })
     );
   };
   return (

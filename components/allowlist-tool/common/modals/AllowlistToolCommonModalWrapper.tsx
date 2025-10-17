@@ -2,8 +2,8 @@
 
 import React, { useRef } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import AllowlistToolAnimationWrapper from "../animation/AllowlistToolAnimationWrapper";
 import AllowlistToolAnimationOpacity from "../animation/AllowlistToolAnimationOpacity";
+import AllowlistToolAnimationWrapper from "../animation/AllowlistToolAnimationWrapper";
 
 export enum AllowlistToolModalSize {
   SMALL = "SMALL",
@@ -49,7 +49,7 @@ export default function AllowlistToolCommonModalWrapper({
           elementRole="dialog"
           onClicked={(e) => e.stopPropagation()}>
           <div className="tw-relative tw-z-10">
-            <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
+            <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50"></div>
             <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
               <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
                 <div

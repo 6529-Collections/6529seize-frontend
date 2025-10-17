@@ -23,7 +23,7 @@ describe('BrainLeftSidebarSearchWaveItem', () => {
     const onClose = jest.fn();
     render(<BrainLeftSidebarSearchWaveItem wave={wave} onClose={onClose} />);
     fireEvent.click(screen.getByRole('link'));
-    expect(push).toHaveBeenCalledWith('/my-stream?wave=w1');
+    expect(push).toHaveBeenCalledWith('/waves?wave=w1');
     expect(onClose).toHaveBeenCalled();
   });
 

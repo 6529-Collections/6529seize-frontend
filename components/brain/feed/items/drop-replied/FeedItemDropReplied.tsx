@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { IFeedItemDropReplied } from "@/types/feed.types";
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import { ActiveDropState } from "@/types/dropInteractionTypes";
@@ -29,15 +31,34 @@ export default function FeedItemDropReplied({
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }) {
   const router = useRouter();
+  const { isApp } = useDeviceInfo();
+  const baseWave = item.item.reply.wave as any;
+  const isDirectMessage =
+    baseWave?.chat?.scope?.group?.is_direct_message ?? false;
+
   const onReplyClick = (serialNo: number) => {
     router.push(
-      `/my-stream?wave=${item.item.reply.wave.id}&serialNo=${serialNo}/`
+      getWaveRoute({
+        waveId: item.item.reply.wave.id,
+        serialNo,
+        isDirectMessage,
+        isApp,
+      })
     );
   };
 
   const onQuoteClick = (quote: ApiDrop) => {
+    const quoteWave = quote.wave as any;
+    const isQuoteDm =
+      quoteWave?.chat?.scope?.group?.is_direct_message ?? isDirectMessage;
+
     router.push(
-      `/my-stream?wave=${quote.wave.id}&serialNo=${quote.serial_no}/`
+      getWaveRoute({
+        waveId: quote.wave.id,
+        serialNo: quote.serial_no,
+        isDirectMessage: isQuoteDm,
+        isApp,
+      })
     );
   };
 

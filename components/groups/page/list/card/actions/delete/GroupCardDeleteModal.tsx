@@ -1,19 +1,19 @@
 "use client";
 
-import { useContext, useRef, useState } from "react";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import {
-  selectActiveGroupId,
-  setActiveGroupId,
+    selectActiveGroupId,
+    setActiveGroupId,
 } from "@/store/groupSlice";
+import { useContext, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useClickAway, useKeyPressEvent } from "react-use";
 
 import { commonApiPost } from "@/services/api/common-api";
-import { createPortal } from "react-dom";
 import { useMutation } from "@tanstack/react-query";
+import { createPortal } from "react-dom";
 
 export default function GroupCardDeleteModal({
   group,
@@ -77,7 +77,7 @@ export default function GroupCardDeleteModal({
 
   return createPortal(
     <div className="tw-cursor-default tw-relative tw-z-50">
-      <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
+      <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50"></div>
       <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
           <div

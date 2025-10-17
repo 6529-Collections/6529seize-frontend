@@ -5,6 +5,7 @@ import WaveDropContent from "@/components/waves/drops/WaveDropContent";
 import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { useRouter } from "next/navigation";
 import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 
 interface WaveWinnersDropContentProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -19,7 +20,16 @@ export const WaveWinnersDropContent: React.FC<WaveWinnersDropContentProps> = ({
   const [activePartIndex, setActivePartIndex] = useState(0);
 
   const onDropContentClick = (drop: ExtendedDrop) => {
-    router.push(`/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}/`);
+    const waveMeta = (drop.wave as unknown as {
+      chat?: { scope?: { group?: { is_direct_message?: boolean } } };
+    })?.chat;
+    const href = getWaveRoute({
+      waveId: drop.wave.id,
+      serialNo: drop.serial_no,
+      isDirectMessage: waveMeta?.scope?.group?.is_direct_message ?? false,
+      isApp: false,
+    });
+    router.push(`${href}/`);
   };
 
   return (

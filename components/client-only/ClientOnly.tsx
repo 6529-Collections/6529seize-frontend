@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 
 export default function ClientOnly({
   children,
+  fallback = null,
 }: {
   readonly children: React.ReactNode;
+  readonly fallback?: React.ReactNode;
 }) {
   const [hasMounted, setHasMounted] = useState(false);
 
@@ -13,7 +15,7 @@ export default function ClientOnly({
     setHasMounted(true);
   }, []);
 
-  if (!hasMounted) return null;
+  if (!hasMounted) return <>{fallback}</>;
 
   return <>{children}</>;
 }

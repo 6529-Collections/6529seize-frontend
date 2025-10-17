@@ -48,6 +48,6 @@ describe('WaveDeleteModal', () => {
     expect(mutateAsync).toHaveBeenCalled();
     expect(auth.setToast).toHaveBeenCalledWith({ message: 'Wave deleted.', type: 'warning' });
     expect(rq.invalidateDrops).toHaveBeenCalled();
-    expect(push).toHaveBeenCalledWith('/my-stream');
+    expect(push).toHaveBeenCalledWith('/waves');
   });
 });

@@ -27,7 +27,6 @@ import HeaderUser from "./user/HeaderUser";
 interface Props {
   onLoad?: () => void;
   onSetWallets?(wallets: string[]): any;
-  readonly isSmall?: boolean;
   readonly extraClass?: string;
 }
 
@@ -62,7 +61,7 @@ export default function Header(props: Readonly<Props>) {
   if (capacitor.isCapacitor) {
     containerClassName = styles.capacitorMainContainer;
     rowClassName = styles.capacitorHeaderRow;
-  } else if (props.isSmall || isMobile) {
+  } else if (isMobile) {
     containerClassName = styles.mainContainerSmall;
     rowClassName = styles.headerRowSmall;
   }
@@ -146,7 +145,6 @@ export default function Header(props: Readonly<Props>) {
         setShowBurgerMenuTools={setShowBurgerMenuTools}
         showBurgerMenuBrain={showBurgerMenuBrain}
         setShowBurgerMenuBrain={setShowBurgerMenuBrain}
-        isSmall={props.isSmall}
         isCapacitor={capacitor.isCapacitor}
         isMobile={isMobile}
         showWaves={showWaves}
@@ -168,7 +166,6 @@ export default function Header(props: Readonly<Props>) {
                   xxl={{ span: 3 }}
                   className={`d-flex align-items-center justify-content-start`}>
                   <HeaderLogo
-                    isSmall={props.isSmall}
                     isCapacitor={capacitor.isCapacitor}
                     isMobile={isMobile}
                   />

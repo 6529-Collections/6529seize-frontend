@@ -1,16 +1,16 @@
 "use client";
 
-import { useContext, useEffect, useRef, useState } from "react";
-import { ApiWave } from "@/generated/models/ApiWave";
-import { useClickAway, useKeyPressEvent } from "react-use";
 import { AuthContext } from "@/components/auth/Auth";
-import WaveHeaderNameEditInput from "./WaveHeaderNameEditInput";
-import { convertWaveToUpdateWave } from "@/helpers/waves/waves.helpers";
-import { useMutation } from "@tanstack/react-query";
-import { commonApiPost } from "@/services/api/common-api";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { convertWaveToUpdateWave } from "@/helpers/waves/waves.helpers";
+import { commonApiPost } from "@/services/api/common-api";
+import { useMutation } from "@tanstack/react-query";
+import { useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useClickAway, useKeyPressEvent } from "react-use";
+import WaveHeaderNameEditInput from "./WaveHeaderNameEditInput";
 
 export default function WaveHeaderNameEditModal({
   wave,
@@ -74,7 +74,7 @@ export default function WaveHeaderNameEditModal({
   };
   return createPortal(
     <div className="tw-relative tw-z-50">
-      <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
+      <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50"></div>
       <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-text-center sm:tw-items-center tw-p-2 lg:tw-p-0">
           <div

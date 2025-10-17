@@ -10,7 +10,11 @@ jest.mock('next/link', () => ({
 jest.mock('@/components/header/HeaderLogo', () => ({
   __esModule: true,
   default: (props: any) => (
-    <div data-testid="header-logo" data-small={props.isSmall} data-capacitor={props.isCapacitor} data-mobile={props.isMobile}>
+    <div
+      data-testid="header-logo"
+      data-capacitor={String(props.isCapacitor)}
+      data-mobile={String(props.isMobile)}
+    >
       Logo
     </div>
   )
@@ -51,7 +55,6 @@ interface HeaderMobileMenuProps {
   setShowBurgerMenuTools: (show: boolean) => void;
   showBurgerMenuBrain: boolean;
   setShowBurgerMenuBrain: (show: boolean) => void;
-  isSmall?: boolean;
   isCapacitor: boolean;
   isMobile: boolean;
   showWaves: boolean;
@@ -73,7 +76,6 @@ const defaultProps: HeaderMobileMenuProps = {
   setShowBurgerMenuTools: jest.fn(),
   showBurgerMenuBrain: false,
   setShowBurgerMenuBrain: jest.fn(),
-  isSmall: false,
   isCapacitor: false,
   isMobile: false,
   showWaves: true,
@@ -113,14 +115,12 @@ describe('HeaderMobileMenu', () => {
     });
 
     it('passes correct props to HeaderLogo', () => {
-      renderHeaderMobileMenu({ 
-        isSmall: true, 
-        isCapacitor: true, 
-        isMobile: true 
+      renderHeaderMobileMenu({
+        isCapacitor: true,
+        isMobile: true
       });
       
       const logo = screen.getByTestId('header-logo');
-      expect(logo).toHaveAttribute('data-small', 'true');
       expect(logo).toHaveAttribute('data-capacitor', 'true');
       expect(logo).toHaveAttribute('data-mobile', 'true');
     });
@@ -255,7 +255,7 @@ describe('HeaderMobileMenu', () => {
 
       const mobileRows = screen.getAllByTestId('mobile-row');
       const brainRows = mobileRows.filter(row => 
-        row.getAttribute('data-path') === '/my-stream' || 
+        row.getAttribute('data-path') === '/?tab=feed' || 
         row.getAttribute('data-path') === '/waves'
       );
       

@@ -91,7 +91,7 @@ export default function Groups() {
         )}
       </div>
 
-      <h1 className="tw-float-none">Groups</h1>
+      <h1 className="tw-text-xl tw-font-semibold tw-text-iron-50 tw-mb-0">Groups</h1>
 
       {components[viewMode]}
     </div>

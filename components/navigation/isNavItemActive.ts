@@ -1,3 +1,4 @@
+import type { HomeTab } from "@/components/home/useHomeTabs";
 import type { NavItem as NavItemData, ViewKey } from "./navTypes";
 
 export const isNavItemActive = (
@@ -5,7 +6,8 @@ export const isNavItemActive = (
   pathname: string,
   searchParams: URLSearchParams,
   activeView: ViewKey | null,
-  isCurrentWaveDm: boolean
+  isCurrentWaveDm: boolean,
+  homeActiveTab: HomeTab
 ): boolean => {
   // User profile pages and Network routes are active only when no in-app view is selected
   if (item.name === "Network" && activeView === null) {
@@ -36,31 +38,51 @@ export const isNavItemActive = (
     return relatedHrefs.some((href) => pathname.startsWith(href));
   }
 
+  const waveParam = searchParams?.get("wave");
+  const hasWaveParam = typeof waveParam === "string";
+  const isWavesPath = pathname === "/waves";
+  const isMessagesPath = pathname === "/messages";
+  const tabParam = searchParams?.get("tab");
+  const isFeedTab = homeActiveTab === "feed";
+  const isHomeFeedPath = pathname === "/" && (tabParam === "feed" || isFeedTab);
   const isWaveSubRoute =
-    pathname === "/my-stream" && typeof searchParams?.get("wave") === "string";
+    hasWaveParam && (isHomeFeedPath || isWavesPath || isMessagesPath);
+  const viewParam = searchParams?.get("view");
+  const isWavesView = pathname === "/waves" || viewParam === "waves";
+  const isMessagesView = pathname === "/messages" || viewParam === "messages";
 
   if (item.kind === "route") {
     if (item.name === "Stream") {
+      return isHomeFeedPath && activeView === null;
+    }
+    if (item.name === "Home") {
       return (
-        pathname === item.href &&
+        pathname === "/" &&
         activeView === null &&
-        typeof searchParams?.get("wave") !== "string"
+        !isFeedTab &&
+        !hasWaveParam &&
+        !isWavesView &&
+        !isMessagesView
       );
     }
     return pathname === item.href && activeView === null;
   }
 
-  if (item.viewKey === "waves") {
+  if (item.kind === "view" && item.viewKey === "waves") {
     if (activeView === "waves") return true;
     if (activeView === "messages") return false;
-    return isWaveSubRoute && !isCurrentWaveDm;
+    if (isWaveSubRoute) return !isCurrentWaveDm;
+    if (!hasWaveParam && (isWavesPath || isWavesView)) return true;
+    return false;
   }
 
-  if (item.viewKey === "messages") {
+  if (item.kind === "view" && item.viewKey === "messages") {
     if (activeView === "messages") return true;
     if (activeView === "waves") return false;
-    return isWaveSubRoute && isCurrentWaveDm;
+    if (isWaveSubRoute) return isCurrentWaveDm;
+    if (!hasWaveParam && (isMessagesPath || isMessagesView)) return true;
+    return false;
   }
 
-  return activeView === item.viewKey;
+  return item.kind === "view" && activeView === item.viewKey;
 };

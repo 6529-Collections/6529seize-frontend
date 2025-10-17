@@ -6,5 +6,5 @@ export default async function WaveRedirect({
   readonly params: Promise<{ wave: string }>;
 }) {
   const { wave } = await params;
-  redirect(`/my-stream?wave=${wave}`);
+  redirect(`/waves?wave=${wave}`);
 }

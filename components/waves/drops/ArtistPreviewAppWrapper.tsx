@@ -1,14 +1,14 @@
 "use client"
 
-import { Fragment, ReactNode, useRef } from "react";
 import {
-  Dialog,
-  DialogPanel,
-  Transition,
-  TransitionChild,
+    Dialog,
+    DialogPanel,
+    Transition,
+    TransitionChild,
 } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { motion, PanInfo, useDragControls } from "framer-motion";
+import { Fragment, ReactNode, useRef } from "react";
 
 export default function ArtistPreviewAppWrapper({
   isOpen,
@@ -44,7 +44,7 @@ export default function ArtistPreviewAppWrapper({
           leaveFrom="tw-opacity-100"
           leaveTo="tw-opacity-0"
         >
-          <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75 tw-backdrop-blur-[1px] tw-transition-opacity" />
+          <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px] tw-transition-opacity" />
         </TransitionChild>
 
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}

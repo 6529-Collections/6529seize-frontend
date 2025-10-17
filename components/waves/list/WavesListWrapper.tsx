@@ -178,7 +178,7 @@ export default function WavesListWrapper({
   return (
     <div>
       <div className="tw-inline-flex tw-w-full tw-items-center tw-justify-between">
-        <span className="tw-tracking-tight tw-text-xl tw-font-semibold tw-text-iron-50">
+        <span className="tw-text-xl tw-font-semibold tw-text-iron-50">
           {LABELS[overviewType]}
         </span>
         {waves.length >= NORMAL_REQUEST_SIZE && (

@@ -43,8 +43,8 @@ describe('FeedItemWaveCreated', () => {
     );
     expect(screen.getByText(/user/)).toBeInTheDocument();
     fireEvent.click(screen.getByText('reply'));
-    expect(push).toHaveBeenCalledWith('/my-stream?wave=w&serialNo=42/', { scroll: false });
+    expect(push).toHaveBeenCalledWith('/waves?wave=w&serialNo=42/', { scroll: false });
     fireEvent.click(screen.getByText('quote'));
-    expect(push).toHaveBeenCalledWith('/my-stream?wave=w&serialNo=7/', { scroll: false });
+    expect(push).toHaveBeenCalledWith('/waves?wave=w&serialNo=7/', { scroll: false });
   });
 });
