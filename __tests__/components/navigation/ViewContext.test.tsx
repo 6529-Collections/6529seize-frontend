@@ -6,6 +6,15 @@ import {
 } from "@/components/navigation/ViewContext";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: () => ({
+    isApp: false,
+    isMobileDevice: false,
+    hasTouchScreen: false,
+  }),
+}));
+
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
   usePathname: jest.fn(),
@@ -14,9 +23,27 @@ jest.mock("next/navigation", () => ({
 
 const push = jest.fn();
 
+type ViewContextValue = ReturnType<typeof useViewContext>;
+
+const TestNavComponent: React.FC<{
+  readonly item: NavItem;
+  readonly afterNav?: (context: ViewContextValue) => void;
+}> = ({ item, afterNav }) => {
+  const context = useViewContext();
+
+  React.useEffect(() => {
+    context.handleNavClick(item);
+    if (afterNav) {
+      afterNav(context);
+    }
+  }, [context, item, afterNav]);
+
+  return null;
+};
+
 beforeEach(() => {
   jest.clearAllMocks();
-  usePathname.mockReturnValue("/my-stream");
+  usePathname.mockReturnValue('/');
   useRouter.mockReturnValue({
     push,
   });
@@ -33,46 +60,52 @@ describe("ViewContext", () => {
   });
 
   it("handles route navigation", () => {
-    function Test() {
-      const { handleNavClick } = useViewContext();
-      React.useEffect(() => {
-        handleNavClick({
-          kind: "route",
-          name: "Home",
-          href: "/home",
-          icon: "h",
-        });
-      }, []);
-      return null;
-    }
     render(
       <ViewProvider>
-        <Test />
+        <TestNavComponent
+          item={{
+            kind: "route",
+            name: "Home",
+            href: "/home",
+            icon: "h",
+          } as NavItem}
+        />
       </ViewProvider>
     );
-    expect(push).toHaveBeenCalledWith("/home");
+    expect(push).toHaveBeenCalledWith("/");
+  });
+
+  it("navigates to feed tab when Stream is clicked", () => {
+    render(
+      <ViewProvider>
+        <TestNavComponent
+          item={{
+            kind: "route",
+            name: "Stream",
+            href: "/",
+            icon: "s",
+          } as NavItem}
+        />
+      </ViewProvider>
+    );
+    expect(push).toHaveBeenCalledWith("/?tab=feed");
   });
 
   it("navigates to waves view when no last visited wave", () => {
-    function Test() {
-      const { handleNavClick, hardBack } = useViewContext();
-      React.useEffect(() => {
-        handleNavClick({
-          kind: "view",
-          name: "Waves",
-          viewKey: "waves",
-          icon: "w",
-        });
-        hardBack("waves");
-      }, []);
-      return null;
-    }
     render(
       <ViewProvider>
-        <Test />
+        <TestNavComponent
+          item={{
+            kind: "view",
+            name: "Waves",
+            viewKey: "waves",
+            icon: "w",
+          } as NavItem}
+          afterNav={({ hardBack }) => hardBack("waves")}
+        />
       </ViewProvider>
     );
-    expect(push).toHaveBeenCalledWith("/my-stream?view=waves");
-    expect(push).toHaveBeenLastCalledWith("/my-stream?view=waves");
+    expect(push).toHaveBeenCalledWith("/waves");
+    expect(push).toHaveBeenLastCalledWith("/waves");
   });
 });

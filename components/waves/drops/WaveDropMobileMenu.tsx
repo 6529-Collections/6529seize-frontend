@@ -1,6 +1,7 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { FC, useContext, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { ApiDrop } from "@/generated/models/ApiDrop";
@@ -53,7 +54,18 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
     if (longPressTriggered) return;
     if (isTemporaryDrop) return;
 
-    const dropLink = `${publicEnv.BASE_ENDPOINT}/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}`;
+    const waveDetails =
+      (drop.wave as unknown as {
+        chat?: { scope?: { group?: { is_direct_message?: boolean } } };
+      }) ?? undefined;
+    const isDirectMessage =
+      waveDetails?.chat?.scope?.group?.is_direct_message ?? false;
+    const dropLink = `${publicEnv.BASE_ENDPOINT}${getWaveRoute({
+      waveId: drop.wave.id,
+      serialNo: drop.serial_no,
+      isDirectMessage,
+      isApp: false,
+    })}`;
 
     if (navigator?.clipboard?.writeText) {
       navigator.clipboard.writeText(dropLink).then(() => {

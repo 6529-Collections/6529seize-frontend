@@ -185,6 +185,7 @@ const buildDefaultGroupName = (
   wave: ApiWave,
   type: WaveGroupType,
   mode: WaveGroupIdentitiesModal,
+  
 ): string => {
   const typeLabel = WAVE_GROUP_LABELS[type] ?? "Group";
   const actionLabel =

@@ -20,7 +20,7 @@ describe('MemeWinnerArtistInfo', () => {
     expect(screen.getByTestId('pfp')).toBeInTheDocument();
     expect(screen.getByTestId('badge')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /artist/i })).toHaveAttribute('href', '/artist');
-    expect(screen.getByRole('link', { name: /Wave/i })).toHaveAttribute('href', '/my-stream?wave=w1');
+    expect(screen.getByRole('link', { name: /Wave/i })).toHaveAttribute('href', '/waves?wave=w1');
   });
 
   it('hides wave info when disabled', () => {

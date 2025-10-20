@@ -236,7 +236,7 @@ export default function CommunityMembers() {
   return (
     <div>
       <div className="tw-flex tw-items-center tw-justify-between">
-        <h1 className="tw-hidden lg:tw-block tw-float-none tw-text-3xl md:tw-text-5xl">
+        <h1 className="tw-text-xl tw-font-semibold tw-text-iron-50 tw-mb-0">
           Network
         </h1>
         <div className="tw-inline-flex tw-space-x-3 tw-items-center tw-ml-auto">

@@ -12,6 +12,7 @@ import CircleLoader, {
 import { useRouter } from "next/navigation";
 import { ActiveDropState } from "@/types/dropInteractionTypes";
 import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import WaveDropsEmptyPlaceholder from "./WaveDropsEmptyPlaceholder";
 import WaveDropsScrollingOverlay from "./WaveDropsScrollingOverlay";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
@@ -365,14 +366,24 @@ export default function WaveDropsAll({
   const onQuoteClick = useCallback(
     (drop: ApiDrop) => {
       if (drop.wave.id !== waveId) {
-        router.push(
-          `/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}`
-        );
+        const waveDetails =
+          (drop.wave as unknown as {
+            chat?: { scope?: { group?: { is_direct_message?: boolean } } };
+          }) ?? undefined;
+        const isDirectMessage =
+          waveDetails?.chat?.scope?.group?.is_direct_message ?? false;
+        const href = getWaveRoute({
+          waveId: drop.wave.id,
+          serialNo: drop.serial_no,
+          isDirectMessage,
+          isApp: false,
+        });
+        router.push(href);
       } else {
         setSerialNo(drop.serial_no);
       }
     },
-    [router, waveId] // removed setSerialNo from deps as it's a setState function that never changes
+    [router, waveId]
   );
 
   const renderContent = () => {
@@ -462,7 +473,7 @@ export default function WaveDropsAll({
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-h-full tw-justify-end tw-relative tw-overflow-y-auto tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-border-x tw-border-t tw-border-b-0">
+    <div className="tw-flex tw-flex-col tw-h-full tw-justify-end tw-relative tw-overflow-y-auto tw-bg-iron-950">
       {renderContent()}
       <WaveDropsScrollingOverlay isVisible={isScrolling} />
     </div>

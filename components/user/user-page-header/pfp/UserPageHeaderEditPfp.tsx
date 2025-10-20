@@ -3,12 +3,12 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { useIpfsService } from "@/components/ipfs/IPFSContext";
 import {
-  QueryKey,
-  ReactQueryWrapperContext,
+    QueryKey,
+    ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import UserSettingsImgSelectFile from "@/components/user/settings/UserSettingsImgSelectFile";
 import UserSettingsImgSelectMeme, {
-  MemeLite,
+    MemeLite,
 } from "@/components/user/settings/UserSettingsImgSelectMeme";
 import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
@@ -16,9 +16,9 @@ import { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import {
-  commonApiFetch,
-  commonApiPost,
-  commonApiPostForm,
+    commonApiFetch,
+    commonApiPost,
+    commonApiPostForm,
 } from "@/services/api/common-api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { FormEvent, useContext, useEffect, useRef, useState } from "react";
@@ -188,7 +188,7 @@ export default function UserPageHeaderEditPfp({
 
   return (
     <div className="tw-relative tw-z-50">
-      <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
+      <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50"></div>
       <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-text-center sm:tw-items-center tw-p-2 lg:tw-p-0">
           <div

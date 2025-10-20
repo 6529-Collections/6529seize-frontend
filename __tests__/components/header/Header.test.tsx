@@ -122,7 +122,6 @@ function setup(options: any = {}) {
   const onSetWallets = jest.fn();
   const utils = render(
     <Header
-      isSmall={options.isSmall}
       onLoad={onLoad}
       onSetWallets={onSetWallets}
       extraClass={options.extraClass}
@@ -135,7 +134,7 @@ afterEach(() => jest.clearAllMocks());
 
 describe("Header", () => {
   it("calls onLoad and applies small container class", async () => {
-    const { onLoad, container } = setup({ isSmall: true });
+    const { onLoad, container } = setup({ mobile: true });
     await waitFor(() => expect(onLoad).toHaveBeenCalled());
     expect(
       container.querySelector("." + styles.mainContainerSmall)

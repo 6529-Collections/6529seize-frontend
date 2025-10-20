@@ -18,6 +18,7 @@ interface DeviceInfo {
  * - hasTouchScreen: Whether the device has a touch screen
  * - isApp: Whether the device is an app
  */
+
 export default function useDeviceInfo(): DeviceInfo {
   const { isCapacitor } = useCapacitor();
 

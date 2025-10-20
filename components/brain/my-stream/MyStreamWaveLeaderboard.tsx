@@ -40,7 +40,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   }, []);
 
   const containerClassName = useMemo(() => {
-    return `tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-flex-grow lg:tw-pr-2`;
+    return `tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-flex-grow tw-px-2 sm:tw-px-4`;
   }, []);
 
   const [isCreatingDrop, setIsCreatingDrop] = useState(false);
@@ -81,19 +81,18 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   return (
     <div className={containerClassName} style={leaderboardViewStyle}>
       {/* Main content container */}
-      <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 lg:tw-pt-2">
-        {/* Time section */}
+      <div className="tw-pt-4">
         <WaveLeaderboardTime wave={wave} />
       </div>
 
       {/* Sticky tabs/filters section */}
-      <div className="tw-sticky tw-top-0 tw-z-10 tw-bg-iron-950 tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
+      <div className="tw-sticky tw-top-0 tw-z-10 tw-bg-black">
         <WaveLeaderboardHeader
           wave={wave}
           viewMode={effectiveViewMode}
           sort={sort}
           onViewModeChange={(mode) => setViewMode(mode)}
-          onCreateDrop={() => {
+          onCreateDrop={() => { 
             if (mountedRef.current) {
               setIsCreatingDrop(true);
             }
@@ -103,14 +102,15 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       </div>
 
       {/* Content section */}
-      <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 tw-mt-2">
+      <div className="tw-mt-2">
         <AnimatePresence>
           {isCreatingDrop && !isMemesWave && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}>
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+            >
               <WaveDropCreate
                 wave={wave}
                 onCancel={() => {

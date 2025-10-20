@@ -60,7 +60,7 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
     );
 
   return (
-    <div className="tw-pt-2 lg:tw-pt-6 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
+    <div className="tw-pt-4 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
       <div className="tw-relative">
         <div className="tw-absolute tw-left-2 lg:tw-left-[19px] tw-top-0 tw-bottom-0 tw-w-px tw-bg-iron-700/80"></div>
 

@@ -100,7 +100,7 @@ describe("Drops", () => {
     expect(fetchNext).toHaveBeenCalled();
 
     await userEvent.click(screen.getByText("quote"));
-    expect(push).toHaveBeenCalledWith("/my-stream?wave=w0&serialNo=0");
+    expect(push).toHaveBeenCalledWith('/waves?wave=w0&serialNo=0');
     expect(dropsListSpy).toHaveBeenCalledWith(
       expect.objectContaining({ drops: expect.any(Array) })
     );

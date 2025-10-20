@@ -42,6 +42,7 @@ export default function MemePageMintCountdown(
 
     const showAllowlistInfo = manifoldClaim.phase === ManifoldPhase.ALLOWLIST;
     const isFinalized = manifoldClaim.isFinalized;
+    const isSoldOut = manifoldClaim.isSoldOut;
     const isEnded = manifoldClaim.status === ManifoldClaimStatus.ENDED;
 
     return {
@@ -50,6 +51,7 @@ export default function MemePageMintCountdown(
       showAllowlistInfo,
       isFinalized,
       isEnded,
+      isSoldOut,
     };
   };
 

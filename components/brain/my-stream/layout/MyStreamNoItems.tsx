@@ -1,7 +1,13 @@
 import { CREATE_WAVE_SEARCH_PATH } from "@/components/waves/Waves";
 import Link from "next/link";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getWavesBaseRoute } from "@/helpers/navigation.helpers";
 
 export default function MyStreamNoItems() {
+  const { isApp } = useDeviceInfo();
+  const exploreHref = getWavesBaseRoute(isApp);
+  const createHref = isApp ? "/waves/create" : CREATE_WAVE_SEARCH_PATH;
+
   return (
     <div className="tw-mt-8 md:tw-mt-16 tw-pb-8 md:tw-max-w-xl tw-mx-auto tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
       <div className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-p-4">
@@ -80,7 +86,7 @@ export default function MyStreamNoItems() {
 
       <div className="tw-mt-8 tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center tw-gap-4">
         <Link
-          href="/waves"
+          href={exploreHref}
           className="tw-no-underline tw-group tw-text-sm tw-flex tw-items-center tw-font-medium tw-justify-center tw-px-4 tw-py-2.5 tw-rounded-lg tw-bg-iron-900 tw-text-primary-400 tw-border tw-border-primary-400 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-950  hover:tw-border-primary-400 tw-border-solid hover:tw-text-primary-400">
           <span>Explore Waves</span>
           <svg
@@ -103,7 +109,7 @@ export default function MyStreamNoItems() {
         </span>
 
         <Link
-          href={CREATE_WAVE_SEARCH_PATH}
+          href={createHref}
           className="tw-no-underline tw-text-sm tw-group tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-font-medium tw-px-4 tw-py-2.5 tw-rounded-lg tw-bg-primary-500 tw-text-white hover:tw-text-white hover:tw-bg-primary-600 tw-border tw-border-primary-500 hover:tw-border-primary-600 tw-border-solid tw-transition tw-duration-300 tw-ease-out">
           <svg
             className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0"

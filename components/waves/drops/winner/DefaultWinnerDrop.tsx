@@ -14,6 +14,7 @@ import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
 import WaveDropRatings from "../WaveDropRatings";
 import WaveDropMetadata from "../WaveDropMetadata";
 import WaveDropMobileMenu from "../WaveDropMobileMenu";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import WinnerDropBadge from "./WinnerDropBadge";
 import WaveDropReactions from "../WaveDropReactions";
@@ -185,14 +186,27 @@ const DefaultWinnerDrop = ({
                   />
                 }
               />
-              {showWaveInfo && (
-                <Link
-                  href={`/my-stream?wave=${drop.wave.id}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="tw-text-xs tw-leading-none tw-mt-0.5 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline">
-                  {drop.wave.name}
-                </Link>
-              )}
+              {showWaveInfo && (() => {
+                const waveDetails =
+                  (drop.wave as unknown as {
+                    chat?: { scope?: { group?: { is_direct_message?: boolean } } };
+                  }) ?? undefined;
+                const isDirectMessage =
+                  waveDetails?.chat?.scope?.group?.is_direct_message ?? false;
+                const waveHref = getWaveRoute({
+                  waveId: drop.wave.id,
+                  isDirectMessage,
+                  isApp: false,
+                });
+                return (
+                  <Link
+                    href={waveHref}
+                    onClick={(e) => e.stopPropagation()}
+                    className="tw-text-xs tw-leading-none tw-mt-0.5 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline">
+                    {drop.wave.name}
+                  </Link>
+                );
+              })()}
             </div>
             <div>
               <WaveDropContent

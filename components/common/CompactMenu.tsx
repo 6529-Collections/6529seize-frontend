@@ -7,6 +7,7 @@ import {
   MenuItem,
   MenuItems,
   Transition,
+  type MenuItemsProps,
 } from "@headlessui/react";
 import clsx from "clsx";
 
@@ -40,7 +41,7 @@ export interface CompactMenuProps {
   readonly activeItemClassName?: string;
   readonly inactiveItemClassName?: string;
   readonly focusItemClassName?: string;
-  readonly anchor?: string;
+  readonly anchor?: MenuItemsProps["anchor"];
   readonly menuWidthClassName?: string;
   readonly disabled?: boolean;
   readonly activeItemId?: string;
@@ -65,6 +66,8 @@ const DEFAULT_INACTIVE_ITEM_CLASSES =
 
 const DEFAULT_FOCUS_ITEM_CLASSES = "tw-bg-iron-800 tw-text-iron-50";
 
+const DEFAULT_ANCHOR: MenuItemsProps["anchor"] = "bottom end";
+
 export function CompactMenu({
   trigger,
   items,
@@ -79,7 +82,7 @@ export function CompactMenu({
   activeItemClassName,
   inactiveItemClassName,
   focusItemClassName,
-  anchor = "bottom end",
+  anchor = DEFAULT_ANCHOR,
   menuWidthClassName = "tw-w-40",
   disabled = false,
   activeItemId,

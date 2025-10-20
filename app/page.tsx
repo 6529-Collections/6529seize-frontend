@@ -1,4 +1,4 @@
-import Home from "@/components/home/Home";
+import HomePage from "@/components/home/HomePage";
 import { fetchInitialActivityData } from "@/components/latest-activity/fetchInitialActivityData";
 import { isMintingActive } from "@/components/meme-calendar/meme-calendar.helpers";
 import { fetchInitialTokens } from "@/components/nextGen/collections/collectionParts/hooks/fetchInitialTokens";
@@ -11,9 +11,8 @@ import { commonApiFetch } from "@/services/api/common-api";
 import styles from "@/styles/Home.module.scss";
 import { Metadata } from "next";
 
-export default async function HomePage() {
+export default async function Page() {
   const headers = await getAppCommonHeaders();
-
   // First, fetch featured data and activity data in parallel
   const [featuredNft, featuredNextgen, initialActivityData] = await Promise.all(
     [
@@ -36,7 +35,7 @@ export default async function HomePage() {
 
   return (
     <main className={styles.main}>
-      <Home
+      <HomePage
         featuredNft={featuredNft}
         isMemeMintingActive={isMintingActive()}
         featuredNextgen={featuredNextgen}
