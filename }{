@@ -1,3 +1,0 @@
-components/brain/notifications/NotificationsContainer.tsx:10:const NotificationsContainer: React.FC = () => {
-components/brain/notifications/NotificationsContainer.tsx:30:export default NotificationsContainer; 
-components/brain/BrainMobile.tsx:26:import BrainNotifications from "./notifications/NotificationsContainer";
