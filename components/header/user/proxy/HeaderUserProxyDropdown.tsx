@@ -66,12 +66,12 @@ export default function HeaderUserProxyDropdown({
       <AnimatePresence mode="wait" initial={false}>
         {isOpen && (
           <motion.div
-            className="tw-absolute tw-left-0 tw-z-10 tw-mt-1 tw-w-72 tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
-            initial={{ opacity: 0, y: -20 }}
+            className="tw-fixed tw-left-6 tw-z-[9999] tw-bottom-16 tw-mb-2 tw-mt-1 tw-w-72 tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.2 }}>
-            <div className="tw-absolute tw-z-10 tw-mt-1 tw-overflow-hidden tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
+            <div className="tw-mt-1 tw-overflow-hidden tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl">
               <div className="tw-py-2 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto">
                 <div
                   role="list"
@@ -90,7 +90,7 @@ export default function HeaderUserProxyDropdown({
                           <img
                             src={profile.pfp}
                             alt="Profile Picture"
-                            className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
+                            className="tw-flex-shrink-0 tw-object-cover tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
                           />
                         ) : (
                           <div

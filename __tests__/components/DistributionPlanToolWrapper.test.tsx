@@ -3,9 +3,6 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import DistributionPlanToolWrapper from "@/components/distribution-plan-tool/wrapper/DistributionPlanToolWrapper";
 import { render } from "@testing-library/react";
 
-jest.mock("next/font/google", () => ({
-  Poppins: () => ({ className: "poppins" }),
-}));
 jest.mock("@/components/auth/SeizeConnectContext");
 
 // Mock TitleContext

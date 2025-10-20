@@ -1,9 +1,9 @@
 "use client";
 
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import UserPageIdentityAddStatementsViews from "./UserPageIdentityAddStatementsViews";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 export enum STATEMENT_ADD_VIEW {
   SELECT = "SELECT",
@@ -38,7 +38,7 @@ export default function UserPageIdentityAddStatements({
 
   return (
     <div className="tw-relative tw-z-10">
-      <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
+      <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50"></div>
       <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-text-center sm:tw-items-center tw-p-2 lg:tw-p-0">
           <div

@@ -10,6 +10,23 @@ import {
 import { DropInteractionParams } from "@/components/waves/drops/Drop";
 import NotificationItems from "./NotificationItems";
 import { useRouter } from "next/navigation";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
+
+type WaveWithChatScope = ExtendedDrop["wave"] & {
+  chat?: {
+    scope?: {
+      group?: {
+        is_direct_message?: boolean;
+      };
+    };
+  };
+};
+
+const hasChatScope = (
+  wave: ExtendedDrop["wave"]
+): wave is WaveWithChatScope =>
+  typeof wave === "object" && wave !== null && "chat" in wave;
 
 interface NotificationsWrapperProps {
   readonly items: TypedNotification[];
@@ -25,14 +42,28 @@ export default function NotificationsWrapper({
   setActiveDrop,
 }: NotificationsWrapperProps) {
   const router = useRouter();
+  const { isApp } = useDeviceInfo();
 
   const onDropContentClick = useCallback(
     (drop: ExtendedDrop) => {
-      router.push(
-        `/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}/`
-      );
+      if (!drop?.wave?.id) {
+        return;
+      }
+
+      const isDirectMessage = hasChatScope(drop.wave)
+        ? drop.wave.chat?.scope?.group?.is_direct_message ?? false
+        : false;
+
+      const href = getWaveRoute({
+        waveId: drop.wave.id,
+        serialNo: drop.serial_no,
+        isDirectMessage,
+        isApp,
+      });
+
+      router.push(href);
     },
-    [router]
+    [router, isApp]
   );
 
   const onReply = useCallback(

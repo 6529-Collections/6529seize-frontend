@@ -48,6 +48,6 @@ describe('NotificationsWrapper', () => {
     );
     screen.getByTestId('items').click();
     expect(setActive).toHaveBeenCalledTimes(2);
-    expect(push).toHaveBeenCalledWith('/my-stream?wave=w&serialNo=1/');
+    expect(push).toHaveBeenCalledWith('/waves?wave=w&serialNo=1/');
   });
 });

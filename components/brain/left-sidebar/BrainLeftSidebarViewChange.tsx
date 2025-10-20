@@ -1,10 +1,15 @@
 "use client";
 
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { AuthContext } from "@/components/auth/Auth";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
+import useDeviceInfo from "../../../hooks/useDeviceInfo";
+import {
+  getHomeRoute,
+  getNotificationsRoute,
+} from "@/helpers/navigation.helpers";
 
 interface BrainLeftSidebarViewChangeProps {}
 
@@ -14,6 +19,12 @@ export const BrainLeftSidebarViewChange: React.FC<
   const { connectedProfile } = useContext(AuthContext);
   const router = useRouter();
   const pathname = usePathname();
+  const { isApp } = useDeviceInfo();
+  const streamHref = useMemo(() => getHomeRoute(isApp), [isApp]);
+  const notificationsHref = useMemo(
+    () => getNotificationsRoute(isApp),
+    [isApp]
+  );
   const [activeTab, setActiveTab] = useState(pathname);
 
   const { haveUnreadNotifications } = useUnreadNotifications(
@@ -35,7 +46,7 @@ export const BrainLeftSidebarViewChange: React.FC<
 
   const onNotificationsClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    router.push("/my-stream/notifications", { scroll: false });
+    router.push(notificationsHref, { scroll: false });
   };
 
   return (
@@ -44,16 +55,18 @@ export const BrainLeftSidebarViewChange: React.FC<
         className="tw-absolute tw-h-8 tw-bg-iron-800 tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-in-out"
         style={{
           width: "calc(50% - 4px)",
-          left: isLinkActive("/my-stream") ? "2px" : "calc(50% + 2px)",
+          left: isLinkActive(streamHref)
+            ? "2px"
+            : "calc(50% + 2px)",
         }}
       />
-      <Link href="/my-stream" className={getLinkClasses("/my-stream")}>
+      <Link href={streamHref} className={getLinkClasses(streamHref)}>
         <span className="tw-font-semibold tw-text-sm">My Stream</span>
       </Link>
       <Link
-        href="/my-stream/notifications"
+        href={notificationsHref}
         onClick={onNotificationsClick}
-        className={getLinkClasses("/my-stream/notifications")}>
+        className={getLinkClasses(notificationsHref)}>
         <span className="tw-font-semibold tw-text-sm">Notifications</span>
         {haveUnreadNotifications && (
           <span className="tw-size-2 -tw-mt-3 -tw-ml-0.5 tw-bg-red tw-rounded-full"></span>

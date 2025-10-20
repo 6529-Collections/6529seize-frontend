@@ -1,19 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import AppSidebar from "./AppSidebar";
-import HeaderSearchButton from "./header-search/HeaderSearchButton";
-import { Bars3Icon } from "@heroicons/react/24/outline";
-import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import { useAuth } from "../auth/Auth";
-import { useIdentity } from "@/hooks/useIdentity";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useViewContext } from "../navigation/ViewContext";
-import { useWaveById } from "@/hooks/useWaveById";
-import BackButton from "../navigation/BackButton";
-import Spinner from "../utils/Spinner";
 import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
 import { capitalizeEveryWord, formatAddress } from "@/helpers/Helpers";
+import { useIdentity } from "@/hooks/useIdentity";
+import { useWaveById } from "@/hooks/useWaveById";
+import { Bars3Icon } from "@heroicons/react/24/outline";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useAuth } from "../auth/Auth";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import BackButton from "../navigation/BackButton";
+import { useViewContext } from "../navigation/ViewContext";
+import Spinner from "../utils/Spinner";
+import AppSidebar from "./AppSidebar";
+import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import HeaderActionButtons from "./HeaderActionButtons";
 
 interface Props {
@@ -30,7 +30,7 @@ export default function AppHeader(props: Readonly<Props>) {
     handleOrWallet: address ?? null,
     initialProfile: null,
   });
-  const { activeView } = useViewContext();
+  const { activeView, homeActiveTab } = useViewContext();
   const { canGoBack } = useNavigationHistoryContext();
 
   const pfp = (() => {
@@ -52,13 +52,19 @@ export default function AppHeader(props: Readonly<Props>) {
       : null;
   const { wave, isLoading, isFetching } = useWaveById(waveId);
   const isProfileRoute = pathname?.startsWith("/[user]");
+  const isCreateRoute =
+    pathname === "/waves/create" || pathname === "/messages/create";
 
   const showBackButton =
-    (!!waveId && activeView === null) || (isProfileRoute && canGoBack);
+    isCreateRoute ||
+    (!!waveId && activeView === null) ||
+    (isProfileRoute && canGoBack);
 
   const finalTitle: React.ReactNode = (() => {
-    if (activeView === "waves") return "Waves";
-    if (activeView === "messages") return "Messages";
+    if (activeView === "waves" || pathname === "/waves/create") return "Waves";
+    if (activeView === "messages" || pathname === "/messages/create")
+      return "Messages";
+    if (pathname === "/" && homeActiveTab === "feed") return "My Stream";
     if (waveId) {
       if (isLoading || isFetching || wave?.id !== waveId) return <Spinner />;
       return wave?.name ?? "Wave";

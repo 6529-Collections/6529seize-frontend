@@ -10,8 +10,6 @@ import { useWaveTimers } from "@/hooks/useWaveTimers";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
 import { Time } from "@/helpers/time";
-import { calculateTimeLeft, TimeLeft } from "@/helpers/waves/time.utils";
-import { CompactTimeCountdown } from "@/components/waves/leaderboard/time/CompactTimeCountdown";
 
 interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;
@@ -42,7 +40,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const {
     isChatWave,
     isMemesWave,
-    isRankWave,
     pauses: { filterDecisionsDuringPauses },
   } = useWave(wave);
   const {
@@ -84,8 +81,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       (decision) => decision.timestamp > Time.currentMillis()
     )?.timestamp ?? null;
 
-  const [autoExpandFutureAttempts, setAutoExpandFutureAttempts] =
-    useState(0);
+  const [autoExpandFutureAttempts, setAutoExpandFutureAttempts] = useState(0);
 
   useEffect(() => {
     const hasUpcoming = !!nextDecisionTime;
@@ -124,41 +120,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   ]);
 
   // Calculate time left for next decision
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  });
-
-  useEffect(() => {
-    // Initial calculation
-    if (nextDecisionTime) {
-      setTimeLeft(calculateTimeLeft(nextDecisionTime));
-    }
-
-    // Only set up interval if there's a next decision
-    if (nextDecisionTime) {
-      const intervalId = setInterval(() => {
-        const newTimeLeft = calculateTimeLeft(nextDecisionTime);
-        setTimeLeft(newTimeLeft);
-
-        // Clear interval when countdown reaches zero
-        if (
-          newTimeLeft.days === 0 &&
-          newTimeLeft.hours === 0 &&
-          newTimeLeft.minutes === 0 &&
-          newTimeLeft.seconds === 0
-        ) {
-          clearInterval(intervalId);
-        }
-      }, 1000);
-
-      // Clean up interval on unmount
-      return () => clearInterval(intervalId);
-    }
-  }, [nextDecisionTime]);
-
   // Update available tabs when wave changes
   useEffect(() => {
     const votingState = isUpcoming
@@ -230,19 +191,12 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   }
 
   return (
-    <div className="tw-@container/tabs tw-flex tw-items-start tw-gap-4 tw-justify-between tw-w-full tw-mb-2 tw-overflow-x-auto tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-scrollbar-thin">
+    <div className="tw-@container/tabs tw-px-2 sm:tw-px-4 tw-flex tw-items-start tw-gap-4 tw-justify-between tw-w-full tw-overflow-x-auto tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-scrollbar-thin">
       <TabToggle
         options={options}
         activeKey={activeTab}
         onSelect={(key) => setActiveTab(key as MyStreamWaveTab)}
       />
-
-      {/* Next winner announcement for memes and rank waves, only in chat view and only if there's an upcoming decision */}
-      {(isMemesWave || isRankWave) &&
-        nextDecisionTime &&
-        activeTab === MyStreamWaveTab.CHAT && (
-          <CompactTimeCountdown timeLeft={timeLeft} />
-        )}
     </div>
   );
 };

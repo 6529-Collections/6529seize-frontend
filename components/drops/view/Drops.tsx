@@ -10,12 +10,15 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import DropsList from "./DropsList";
 
 const REQUEST_SIZE = 10;
 
 export default function Drops() {
   const router = useRouter();
+  const { isApp } = useDeviceInfo();
   const params = useParams();
   const handleOrWallet = (params?.user as string)?.toLowerCase();
   const { connectedProfile } = useContext(AuthContext);
@@ -132,12 +135,26 @@ export default function Drops() {
     };
   }, [drops]);
 
+  const navigateToDropWave = (drop: Pick<ApiDrop, "wave" | "serial_no">) => {
+    const waveInfo = drop.wave as any;
+    const isDirectMessage =
+      waveInfo?.chat?.scope?.group?.is_direct_message ?? false;
+    router.push(
+      getWaveRoute({
+        waveId: drop.wave.id,
+        serialNo: drop.serial_no,
+        isDirectMessage,
+        isApp,
+      })
+    );
+  };
+
   const onQuoteClick = (drop: ApiDrop) => {
-    router.push(`/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}`);
+    navigateToDropWave(drop);
   };
 
   const onDropContentClick = (drop: ExtendedDrop) => {
-    router.push(`/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}`);
+    navigateToDropWave(drop);
   };
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);

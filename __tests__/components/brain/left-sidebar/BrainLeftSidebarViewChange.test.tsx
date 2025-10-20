@@ -45,15 +45,15 @@ describe('BrainLeftSidebarViewChange', () => {
     jest.clearAllMocks();
   });
 
-  it('highlights "My Stream" link when on /my-stream', () => {
-    renderSidebar('/my-stream');
+  it('highlights "My Stream" link when on /', () => {
+    renderSidebar('/');
     const links = screen.getAllByRole('link');
     expect(links[0].className).toContain('tw-text-iron-300');
     expect(links[1].className).toContain('tw-text-iron-400');
   });
 
   it('highlights "Notifications" link and shows unread dot', () => {
-    renderSidebar('/my-stream/notifications', true);
+    renderSidebar('/notifications', true);
     const links = screen.getAllByRole('link');
     expect(links[1].className).toContain('tw-text-iron-300');
     expect(links[0].className).toContain('tw-text-iron-400');
@@ -62,8 +62,8 @@ describe('BrainLeftSidebarViewChange', () => {
 
   it('navigates to notifications with shallow routing on click', async () => {
     const user = userEvent.setup();
-    const { push } = renderSidebar('/my-stream');
+    const { push } = renderSidebar('/');
     await user.click(screen.getByRole('link', { name: /notifications/i }));
-    expect(push).toHaveBeenCalledWith('/my-stream/notifications', { scroll: false });
+    expect(push).toHaveBeenCalledWith('/notifications', { scroll: false });
   });
 });

@@ -10,27 +10,71 @@ describe("isNavItemActive", () => {
       icon: "",
     } as any;
     expect(
-      isNavItemActive(item, "/network", new URLSearchParams(), null, false)
+      isNavItemActive(
+        item,
+        "/network",
+        new URLSearchParams(),
+        null,
+        false,
+        "latest"
+      )
     ).toBe(true);
   });
 
-  it("handles Stream route based on wave query", () => {
+  it("handles Stream route based on tab query", () => {
     const item: NavItem = {
       kind: "route",
       name: "Stream",
-      href: "/my-stream",
+      href: "/",
       icon: "",
     } as any;
     expect(
-      isNavItemActive(item, "/my-stream", new URLSearchParams(), null, false)
+      isNavItemActive(
+        item,
+        "/",
+        new URLSearchParams(),
+        null,
+        false,
+        "feed"
+      )
     ).toBe(true);
     expect(
       isNavItemActive(
         item,
-        "/my-stream",
-        new URLSearchParams({ wave: "w1" }),
+        "/",
+        new URLSearchParams(),
         null,
-        false
+        false,
+        "latest"
+      )
+    ).toBe(false);
+  });
+
+  it("marks Home active for latest tab", () => {
+    const item: NavItem = {
+      kind: "route",
+      name: "Home",
+      href: "/",
+      icon: "",
+    } as any;
+    expect(
+      isNavItemActive(
+        item,
+        "/",
+        new URLSearchParams(),
+        null,
+        false,
+        "latest"
+      )
+    ).toBe(true);
+    expect(
+      isNavItemActive(
+        item,
+        "/",
+        new URLSearchParams(),
+        null,
+        false,
+        "feed"
       )
     ).toBe(false);
   });
@@ -45,10 +89,11 @@ describe("isNavItemActive", () => {
     expect(
       isNavItemActive(
         item,
-        "/my-stream",
-        new URLSearchParams({ wave: "x1" }),
+        '/waves',
+        new URLSearchParams({ wave: 'x1' }),
         null,
-        false
+        false,
+        "latest"
       )
     ).toBe(true);
   });
@@ -63,10 +108,11 @@ describe("isNavItemActive", () => {
     expect(
       isNavItemActive(
         item,
-        "/my-stream",
-        new URLSearchParams({ wave: "dm1" }),
+        '/messages',
+        new URLSearchParams({ wave: 'dm1' }),
         null,
-        true
+        true,
+        "latest"
       )
     ).toBe(true);
   });

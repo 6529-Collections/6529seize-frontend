@@ -126,11 +126,11 @@ describe('MyStreamWave', () => {
     expect(mockRouterPush).toHaveBeenCalledWith('/path?wave=1&drop=d1', { scroll: false });
   });
 
-  it('hides tabs when breakpoint is small', () => {
+  it('still renders tabs when breakpoint is small', () => {
     mockBreakpoint = 'S';
     useWaveData.mockReturnValue({ data: wave });
     useContentTab.mockReturnValue({ activeContentTab: MyStreamWaveTab.CHAT });
     render(<MyStreamWave waveId="1" />);
-    expect(screen.queryByTestId('tabs')).toBeNull();
+    expect(screen.getByTestId('tabs')).toHaveTextContent('1');
   });
 });
