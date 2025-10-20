@@ -160,7 +160,7 @@ export default function AppSidebar({
           leave="tw-ease-in tw-duration-200"
           leaveFrom="tw-opacity-100"
           leaveTo="tw-opacity-0">
-          <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-50" />
+          <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50" />
         </TransitionChild>
 
         <div className="tw-fixed tw-inset-0 tw-flex">

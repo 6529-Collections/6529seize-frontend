@@ -71,7 +71,7 @@ describe("AppLayout", () => {
   };
 
   it("renders main content when no active view", () => {
-    useViewContext.mockReturnValue({ activeView: null });
+    useViewContext.mockReturnValue({ activeView: null, homeActiveTab: 'latest' });
     renderWithProvider(<AppLayout>child</AppLayout>);
     expect(screen.getByTestId("header")).toBeInTheDocument();
     expect(screen.getByText("child")).toBeInTheDocument();
@@ -79,11 +79,11 @@ describe("AppLayout", () => {
   });
 
   it("renders waves or messages view based on activeView", () => {
-    useViewContext.mockReturnValue({ activeView: "waves" });
+    useViewContext.mockReturnValue({ activeView: "waves", homeActiveTab: 'latest' });
     const { rerender } = renderWithProvider(<AppLayout>child</AppLayout>);
     expect(screen.getByTestId("waves")).toBeInTheDocument();
 
-    useViewContext.mockReturnValue({ activeView: "messages" });
+    useViewContext.mockReturnValue({ activeView: "messages", homeActiveTab: 'latest' });
     rerender(
       <Provider store={store}>
         <AppLayout>child</AppLayout>

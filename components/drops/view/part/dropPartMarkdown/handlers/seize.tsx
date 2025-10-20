@@ -75,7 +75,7 @@ const createSeizeGroupHandler = (): LinkHandler =>
   );
 
 const getWaveId = (href: string): string | null => {
-  const result = parseSeizeQueryLink(href, "/my-stream", ["wave"], true);
+  const result = parseSeizeQueryLink(href, "/waves", ["wave"], true);
   if (!result || typeof result.wave !== "string") {
     return null;
   }
@@ -91,7 +91,7 @@ const createSeizeWaveHandler = (): LinkHandler =>
   );
 
 const getDropId = (href: string): string | null => {
-  const result = parseSeizeQueryLink(href, "/my-stream", ["wave", "drop"], true);
+  const result = parseSeizeQueryLink(href, "/waves", ["wave", "drop"], true);
   if (!result || typeof result.drop !== "string") {
     return null;
   }

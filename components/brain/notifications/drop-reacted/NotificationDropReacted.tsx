@@ -22,6 +22,8 @@ import type {
   INotificationDropReacted,
 } from "@/types/feed.types";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 
 export const getNotificationVoteColor = (vote: number) => {
   if (vote > 0) return "tw-text-green";
@@ -48,6 +50,7 @@ export default function NotificationDropReacted({
 }: Props) {
   const router = useRouter();
   const { emojiMap, findNativeEmoji } = useEmoji();
+  const { isApp } = useDeviceInfo();
 
   // Determine if this notification is a "vote" or a "reaction"
   const isVoted =
@@ -150,14 +153,31 @@ export default function NotificationDropReacted({
     return null;
   }
 
+  const baseWave = notification.related_drops[0].wave as any;
+  const baseIsDm = baseWave?.chat?.scope?.group?.is_direct_message ?? false;
+
   const onReplyClick = (serialNo: number) => {
     router.push(
-      `/my-stream?wave=${notification.related_drops[0].wave.id}&serialNo=${serialNo}/`
+      getWaveRoute({
+        waveId: baseWave.id,
+        serialNo,
+        isDirectMessage: baseIsDm,
+        isApp,
+      })
     );
   };
   const onQuoteClick = (quote: ApiDrop) => {
+    const quoteWave = quote.wave as any;
+    const isDirectMessage =
+      quoteWave?.chat?.scope?.group?.is_direct_message ?? baseIsDm;
+
     router.push(
-      `/my-stream?wave=${quote.wave.id}&serialNo=${quote.serial_no}/`
+      getWaveRoute({
+        waveId: quote.wave.id,
+        serialNo: quote.serial_no,
+        isDirectMessage,
+        isApp,
+      })
     );
   };
 

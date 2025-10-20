@@ -35,7 +35,7 @@ describe('NotificationDropQuoted', () => {
       <NotificationDropQuoted notification={notification} activeDrop={null} onReply={jest.fn()} onQuote={jest.fn()} />
     );
     await user.click(screen.getByText('reply'));
-    expect(push).toHaveBeenCalledWith('/my-stream?wave=w&serialNo=11/');
+    expect(push).toHaveBeenCalledWith('/waves?wave=w&serialNo=11/');
   });
 
   it('navigates on quote click', async () => {
@@ -44,6 +44,6 @@ describe('NotificationDropQuoted', () => {
       <NotificationDropQuoted notification={notification} activeDrop={null} onReply={jest.fn()} onQuote={jest.fn()} />
     );
     await user.click(screen.getByText('quote'));
-    expect(push).toHaveBeenCalledWith('/my-stream?wave=q&serialNo=22/');
+    expect(push).toHaveBeenCalledWith('/waves?wave=q&serialNo=22/');
   });
 });

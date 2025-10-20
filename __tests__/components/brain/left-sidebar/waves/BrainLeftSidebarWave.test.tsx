@@ -67,17 +67,17 @@ describe('BrainLeftSidebarWave', () => {
 
   it('computes href based on current wave', () => {
     const { rerender } = render(<BrainLeftSidebarWave wave={baseWave} onHover={onHover} />);
-    expect(screen.getByRole('link')).toHaveAttribute('href', '/my-stream?wave=1');
+    expect(screen.getByRole('link')).toHaveAttribute('href', '/waves?wave=1');
     searchParams.set('wave', '1');
     rerender(<BrainLeftSidebarWave wave={baseWave} onHover={onHover} />);
-    expect(screen.getByRole('link')).toHaveAttribute('href', '/my-stream');
+    expect(screen.getByRole('link')).toHaveAttribute('href', '/waves');
   });
 
   it('pushes shallow route on click', async () => {
     render(<BrainLeftSidebarWave wave={baseWave} onHover={onHover} />);
     const link = screen.getByRole('link');
     await userEvent.click(link);
-    expect(router.push).toHaveBeenCalledWith('/my-stream?wave=1');
+    expect(router.push).toHaveBeenCalledWith('/waves?wave=1');
   });
 
   it('shows drop indicators for non-chat waves', () => {

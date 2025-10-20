@@ -10,20 +10,25 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import { useRouter } from "next/navigation";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import CreateWaveFlow from "../create-wave/CreateWaveFlow";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 export default function CreateDirectMessage({
   profile,
   onBack,
+  onSuccess,
 }: {
   readonly profile: ApiIdentity;
   readonly onBack: () => void;
+  readonly onSuccess?: () => void;
 }) {
   const [isCreating, setIsCreating] = useState(false);
   const router = useRouter();
+  const { isApp } = useDeviceInfo();
 
   const { setToast } = useAuth();
 
@@ -71,7 +76,17 @@ export default function CreateDirectMessage({
           .map((i) => i.primary_wallet ?? i.wallet)
           .filter((i) => i !== null),
       });
-      router.push(`/my-stream?view=messages&wave=${wave.id}`);
+      onSuccess?.();
+      const href = getWaveRoute({
+        waveId: wave.id,
+        isDirectMessage: true,
+        isApp,
+      });
+      if (isApp) {
+        router.replace(href);
+      } else {
+        router.push(href);
+      }
     } catch (error) {
       console.error(error);
       setToast({

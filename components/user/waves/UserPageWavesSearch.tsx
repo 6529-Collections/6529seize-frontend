@@ -8,6 +8,7 @@ import {
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 export default function UserPageWavesSearch({
   waveName,
@@ -19,6 +20,7 @@ export default function UserPageWavesSearch({
   readonly setWaveName: (value: string | null) => void;
 }) {
   const router = useRouter();
+  const { isApp } = useDeviceInfo();
   const onWaveNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setWaveName(event.target.value);
   };
@@ -75,7 +77,9 @@ export default function UserPageWavesSearch({
       {showCreateNewWaveButton && (
         <div className="tw-flex tw-gap-2">
           <PrimaryButton
-            onClicked={() => router.push(CREATE_WAVE_SEARCH_PATH)}
+            onClicked={() =>
+              router.push(isApp ? "/waves/create" : CREATE_WAVE_SEARCH_PATH)
+            }
             loading={false}
             disabled={false}>
             <svg
@@ -95,7 +99,11 @@ export default function UserPageWavesSearch({
             <span>Create Wave</span>
           </PrimaryButton>
           <PrimaryButton
-            onClicked={() => router.push(CREATE_DIRECT_MESSAGE_SEARCH_PATH)}
+            onClicked={() =>
+              router.push(
+                isApp ? "/messages/create" : CREATE_DIRECT_MESSAGE_SEARCH_PATH
+              )
+            }
             loading={false}
             disabled={false}>
             <FontAwesomeIcon

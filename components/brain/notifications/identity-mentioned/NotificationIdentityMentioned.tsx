@@ -18,6 +18,8 @@ import { ApiDrop } from "@/generated/models/ApiDrop";
 import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 
 export default function NotificationIdentityMentioned({
   notification,
@@ -33,16 +35,34 @@ export default function NotificationIdentityMentioned({
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }) {
   const router = useRouter();
-  const navigateToDropInWave = (waveId: string, serialNo: number) => {
-    router.push(`/my-stream?wave=${waveId}&serialNo=${serialNo}/`);
+  const { isApp } = useDeviceInfo();
+  const baseWave = notification.related_drops[0].wave as any;
+  const baseIsDm = baseWave.chat?.scope?.group?.is_direct_message ?? false;
+
+  const navigateToDropInWave = (
+    waveId: string,
+    serialNo: number,
+    isDirectMessage: boolean
+  ) => {
+    router.push(
+      getWaveRoute({
+        waveId,
+        serialNo,
+        isDirectMessage,
+        isApp,
+      })
+    );
   };
 
   const onReplyClick = (serialNo: number) => {
-    navigateToDropInWave(notification.related_drops[0].wave.id, serialNo);
+    navigateToDropInWave(baseWave.id, serialNo, baseIsDm);
   };
 
   const onQuoteClick = (quote: ApiDrop) => {
-    navigateToDropInWave(quote.wave.id, quote.serial_no);
+    const quoteWave = quote.wave as any;
+    const quoteIsDm =
+      quoteWave?.chat?.scope?.group?.is_direct_message ?? baseIsDm;
+    navigateToDropInWave(quote.wave.id, quote.serial_no, quoteIsDm);
   };
 
   return (

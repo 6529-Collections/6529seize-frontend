@@ -3,13 +3,11 @@ import Link from "next/link";
 import styles from "./Header.module.scss";
 
 interface HeaderLogoProps {
-  readonly isSmall?: boolean;
   readonly isCapacitor: boolean;
   readonly isMobile: boolean;
 }
 
 export default function HeaderLogo({
-  isSmall,
   isCapacitor,
   isMobile,
 }: HeaderLogoProps) {
@@ -22,7 +20,7 @@ export default function HeaderLogo({
     logoHeight = 40;
   }
 
-  const logoClassName = isSmall || isCapacitor || isMobile
+  const logoClassName = isCapacitor || isMobile
     ? styles.logoIconSmall
     : styles.logoIcon;
 
