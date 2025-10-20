@@ -1,28 +1,28 @@
 "use client";
 
-import { useContext, useEffect, useRef, useState } from "react";
-import { useClickAway, useKeyPressEvent } from "react-use";
-import {
-  ApiProfileRepRatesState,
-  RatingStats,
-} from "@/entities/IProfile";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import { AuthContext } from "@/components/auth/Auth";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import {
-  commonApiFetch,
-  commonApiPost,
-} from "@/services/api/common-api";
-import { getStringAsNumberOrZero } from "@/helpers/Helpers";
-import UserPageRepModifyModalHeader from "./UserPageRepModifyModalHeader";
-import UserPageRepModifyModalRaterStats from "./UserPageRepModifyModalRaterStats";
+    QueryKey,
+    ReactQueryWrapperContext,
+} from "@/components/react-query-wrapper/ReactQueryWrapper";
 import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
 import {
-  QueryKey,
-  ReactQueryWrapperContext,
-} from "@/components/react-query-wrapper/ReactQueryWrapper";
-import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
-import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
+    ApiProfileRepRatesState,
+    RatingStats,
+} from "@/entities/IProfile";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
+import { getStringAsNumberOrZero } from "@/helpers/Helpers";
+import {
+    commonApiFetch,
+    commonApiPost,
+} from "@/services/api/common-api";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useContext, useEffect, useRef, useState } from "react";
+import { useClickAway, useKeyPressEvent } from "react-use";
+import UserPageRepModifyModalHeader from "./UserPageRepModifyModalHeader";
+import UserPageRepModifyModalRaterStats from "./UserPageRepModifyModalRaterStats";
 interface ApiAddRepRatingToProfileRequest {
   readonly amount: number;
   readonly category: string;
@@ -374,7 +374,7 @@ export default function UserPageRepModifyModal({
 
   return (
     <div className="tw-relative tw-z-10">
-      <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
+      <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50"></div>
       <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-text-center sm:tw-items-center tw-p-2 lg:tw-p-0">
           <div

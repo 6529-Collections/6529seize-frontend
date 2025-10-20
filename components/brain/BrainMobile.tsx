@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import BrainMobileTabs from "./mobile/BrainMobileTabs";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
@@ -24,6 +24,10 @@ import BrainMobileWaves from "./mobile/BrainMobileWaves";
 import BrainMobileMessages from "./mobile/BrainMobileMessages";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import BrainNotifications from "./notifications/NotificationsContainer";
+import { getHomeFeedRoute } from "@/helpers/navigation.helpers";
+import CreateWaveModal from "@/components/waves/create-wave/CreateWaveModal";
+import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectMessageModal";
+import { useAuth } from "@/components/auth/Auth";
 
 export enum BrainView {
   DEFAULT = "DEFAULT",
@@ -47,6 +51,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
+  const { connectedProfile } = useAuth();
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -71,7 +76,9 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     onWaveNotFound: () => {
       const params = new URLSearchParams(searchParams?.toString() || '');
       params.delete('wave');
-      const newUrl = params.toString() ? `${pathname}?${params.toString()}` : (pathname || '/my-stream');
+      const newUrl = params.toString()
+        ? `${pathname}?${params.toString()}`
+        : pathname || getHomeFeedRoute();
       router.push(newUrl, { scroll: false });
     },
   });
@@ -92,7 +99,9 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   const onDropClose = () => {
     const params = new URLSearchParams(searchParams?.toString() || '');
     params.delete('drop');
-    const newUrl = params.toString() ? `${pathname}?${params.toString()}` : (pathname || '/my-stream');
+    const newUrl = params.toString()
+      ? `${pathname}?${params.toString()}`
+      : pathname || getHomeFeedRoute();
     router.push(newUrl, { scroll: false });
   };
 
@@ -105,12 +114,48 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   const hasWave = Boolean(waveId);
 
   useEffect(() => {
-    if (pathname === "/my-stream/notifications") {
+    const tabParam = searchParams?.get("tab");
+    const viewParam = searchParams?.get("view");
+    const createParam = searchParams?.get("create");
+
+    if (createParam && isApp) {
+      setActiveView(BrainView.DEFAULT);
+      return;
+    }
+
+    if (
+      (!waveId && pathname === "/notifications") ||
+      (!waveId && viewParam === "notifications")
+    ) {
       setActiveView(BrainView.NOTIFICATIONS);
-    } else if (pathname === "/my-stream" && !waveId) {
+      return;
+    }
+
+    if (
+      (!waveId && pathname === "/messages") ||
+      (!waveId && viewParam === "messages")
+    ) {
+      setActiveView(BrainView.MESSAGES);
+      return;
+    }
+
+    if (
+      (!waveId && pathname === "/waves") ||
+      (!waveId && viewParam === "waves")
+    ) {
+      setActiveView(BrainView.WAVES);
+      return;
+    }
+
+    if (
+      pathname === "/" &&
+      (!tabParam || tabParam === "feed") &&
+      !waveId &&
+      !viewParam
+    ) {
       setActiveView(BrainView.DEFAULT);
     }
-  }, [pathname, waveId]);
+  }, [pathname, searchParams, waveId, isApp]);
 
   // Handle tab visibility and reset on wave changes
   useEffect(() => {
@@ -156,6 +201,43 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     }
   }, [hasWave, wave, isCompleted, firstDecisionDone, activeView, isMemesWave, waveId]);
 
+  const closeCreateOverlay = useCallback(() => {
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    params.delete("create");
+    const base = pathname ?? "/";
+    const next = params.toString() ? `${base}?${params.toString()}` : base;
+    router.replace(next, { scroll: false });
+  }, [router, pathname, searchParams]);
+
+  const createOverlay = useMemo(() => {
+    if (!isApp) return null;
+    const createParam = searchParams?.get("create");
+    if (!createParam) return null;
+    if (!connectedProfile) return null;
+
+    if (createParam === "dm") {
+      return (
+        <CreateDirectMessageModal
+          isOpen={true}
+          onClose={closeCreateOverlay}
+          profile={connectedProfile}
+        />
+      );
+    }
+
+    if (createParam === "wave") {
+      return (
+        <CreateWaveModal
+          isOpen={true}
+          onClose={closeCreateOverlay}
+          profile={connectedProfile}
+        />
+      );
+    }
+
+    return null;
+  }, [isApp, searchParams, connectedProfile, closeCreateOverlay]);
+
   const viewComponents: Record<BrainView, ReactNode> = {
     [BrainView.ABOUT]: (
       <BrainMobileAbout activeWaveId={waveId} />
@@ -188,6 +270,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
 
   return (
     <div className="tw-relative tw-flex tw-flex-col tw-h-full">
+      {createOverlay}
       {isDropOpen && (
         <div className="tw-absolute tw-inset-0 tw-z-1000">
           <BrainDesktopDrop

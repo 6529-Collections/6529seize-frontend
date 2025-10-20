@@ -19,7 +19,7 @@ describe('AboutApply', () => {
     });
     expect(link).toHaveAttribute(
       'href',
-      'https://6529.io/my-stream?wave=0ecb95d0-d8f2-48e8-8137-bfa71ee8593c'
+      'https://6529.io/waves?wave=0ecb95d0-d8f2-48e8-8137-bfa71ee8593c'
     );
     expect(link).toHaveAttribute('target', '_blank');
   });

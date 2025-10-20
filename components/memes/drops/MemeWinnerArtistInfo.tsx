@@ -68,7 +68,7 @@ export default function MemeWinnerArtistInfo({
         {showWaveInfo && drop.wave && (
           <Link
             onClick={(e) => e.stopPropagation()}
-            href={`/my-stream?wave=${drop.wave.id}`}
+            href={`/waves?wave=${drop.wave.id}`}
             className="tw-mb-0 tw-text-[11px] tw-leading-0 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
           >
             {drop.wave.name}

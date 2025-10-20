@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
@@ -10,6 +10,7 @@ import { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropPart } from "@/generated/models/ApiDropPart";
 import DropPartMarkdownWithPropLogger from "@/components/drops/view/part/DropPartMarkdownWithPropLogger";
 import WaveDropTime from "./time/WaveDropTime";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 
 interface WaveDropQuoteProps {
   readonly drop: ApiDrop | null;
@@ -64,6 +65,23 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
     }
   };
 
+  const waveHref = useMemo(() => {
+    if (!drop) return "";
+
+    const waveDetails = (drop.wave as unknown as {
+      chat?: { scope?: { group?: { is_direct_message?: boolean } } };
+    }) ?? undefined;
+
+    const isDirectMessage =
+      waveDetails?.chat?.scope?.group?.is_direct_message ?? false;
+
+    return getWaveRoute({
+      waveId: drop.wave.id,
+      isDirectMessage,
+      isApp: false,
+    });
+  }, [drop]);
+
   return (
     <div
       className="tw-mt-1 tw-bg-iron-950 tw-rounded-xl tw-px-3 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-cursor-pointer"
@@ -115,11 +133,13 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
               )}
             </div>
             <div>
-              <Link
-                href={`/my-stream?wave=${drop?.wave.id}`}
-                className="tw-text-[11px] tw-leading-0 -tw-mt-1 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline">
-                {drop?.wave.name}
-              </Link>
+              {drop && waveHref && (
+                <Link
+                  href={waveHref}
+                  className="tw-text-[11px] tw-leading-0 -tw-mt-1 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw_DURATION-300 tw-ease-out tw-no-underline">
+                  {drop.wave.name}
+                </Link>
+              )}
             </div>
             <div className="tw-mt-0.5">
               <DropPartMarkdownWithPropLogger

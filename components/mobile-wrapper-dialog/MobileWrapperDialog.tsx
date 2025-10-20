@@ -1,11 +1,11 @@
-import { Fragment } from "react";
 import {
-  Dialog,
-  DialogPanel,
-  DialogTitle,
-  Transition,
-  TransitionChild,
+    Dialog,
+    DialogPanel,
+    DialogTitle,
+    Transition,
+    TransitionChild,
 } from "@headlessui/react";
+import { Fragment } from "react";
 
 export default function MobileWrapperDialog({
   title,
@@ -40,7 +40,7 @@ export default function MobileWrapperDialog({
           leaveTo="tw-opacity-0"
           beforeLeave={onBeforeLeave}
           afterLeave={onAfterLeave}>
-          <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75 tw-backdrop-blur-[1px]" />
+          <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px]" />
         </TransitionChild>
 
         <div 

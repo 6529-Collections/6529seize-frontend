@@ -383,7 +383,7 @@ describe('WaveDropsAll', () => {
         dropsProps.onQuoteClick(mockDrop);
       });
       
-      expect(mockPush).toHaveBeenCalledWith('/my-stream?wave=other-wave&serialNo=42');
+      expect(mockPush).toHaveBeenCalledWith('/waves?wave=other-wave&serialNo=42/');
     });
 
     it('sets serial number for same wave quote navigation', () => {

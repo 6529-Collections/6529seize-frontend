@@ -24,6 +24,14 @@ jest.mock("@/components/utils/Spinner", () => ({
   __esModule: true,
   default: () => <div data-testid="spinner" />,
 }));
+jest.mock("../../../hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: () => ({
+    isApp: false,
+    isMobileDevice: false,
+    hasTouchScreen: false,
+  }),
+}));
 
 const {
   useNavigationHistoryContext,
@@ -45,7 +53,10 @@ function setup(query: any = {}, opts: any = {}) {
     canGoBack: opts.canGoBack ?? false,
     goBack: jest.fn(),
   });
-  (useViewContext as jest.Mock).mockReturnValue({ hardBack: jest.fn() });
+  (useViewContext as jest.Mock).mockReturnValue({
+    hardBack: jest.fn(),
+    homeActiveTab: 'latest',
+  });
   (useWaveData as jest.Mock).mockReturnValue({ data: opts.wave });
   (useWave as jest.Mock).mockReturnValue({ isDm: opts.isDm ?? false });
   const utils = render(<BackButton />);
@@ -86,4 +97,3 @@ describe("BackButton", () => {
     expect(goBack).toHaveBeenCalled();
   });
 });
-

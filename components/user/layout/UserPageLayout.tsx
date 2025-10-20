@@ -18,7 +18,7 @@ export type UserPageLayoutProps = {
 function UserPageHeaderFallback() {
   return (
     <div className="tw-bg-iron-900 tw-border-b tw-border-iron-800 tw-py-8">
-      <div className="tw-px-6 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
+      <div className="tw-px-2 lg:tw-px-6 xl:tw-px-8 tw-mx-auto">
         <CommonSkeletonLoader />
       </div>
     </div>
@@ -54,7 +54,7 @@ export default function UserPageLayout({
             followersCount={followersCount}
           />
         </Suspense>
-        <div className="tw-px-4 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
+        <div className="tw-px-2 lg:tw-px-6 xl:tw-px-8 tw-mx-auto">
           <UserPageTabs />
           <div className="tw-mt-6 lg:tw-mt-8">{children}</div>
         </div>

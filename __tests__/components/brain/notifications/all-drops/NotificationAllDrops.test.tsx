@@ -39,7 +39,7 @@ describe('NotificationAllDrops', () => {
     props.onReplyClick(5);
     props.onQuoteClick({ wave:{ id:'w' }, serial_no:6 } as any);
     const router = (useRouter as jest.Mock).mock.results[0].value;
-    expect(router.push).toHaveBeenCalledWith('/my-stream?wave=w&serialNo=5/');
-    expect(router.push).toHaveBeenCalledWith('/my-stream?wave=w&serialNo=6/');
+    expect(router.push).toHaveBeenCalledWith('/waves?wave=w&serialNo=5/');
+    expect(router.push).toHaveBeenCalledWith('/waves?wave=w&serialNo=6/');
   });
 });

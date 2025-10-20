@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPalette } from "@fortawesome/free-solid-svg-icons";
 import { Tooltip } from "react-tooltip";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 // Tooltip styles - extracted to prevent re-creation on each render
 const TOOLTIP_STYLES = {
@@ -28,6 +29,7 @@ export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
   tooltipId = "submission-badge",
 }) => {
   const isMobile = useIsMobileDevice();
+  const { hasTouchScreen } = useDeviceInfo();
   const id = useId();
   const uniqueTooltipId = `${tooltipId}-${id}`;
   const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
@@ -60,7 +62,7 @@ export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
         }`}
         aria-expanded="false"
         aria-haspopup="dialog"
-        data-tooltip-id={!isMobile ? uniqueTooltipId : undefined}
+        data-tooltip-id={!isMobile && !hasTouchScreen ? uniqueTooltipId : undefined}
       >
         <FontAwesomeIcon
           icon={faPalette}
@@ -69,7 +71,7 @@ export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
       </button>
 
       {/* Tooltip - only on non-touch devices */}
-      {!isMobile && (
+      {!isMobile && !hasTouchScreen && (
         <Tooltip
           id={uniqueTooltipId}
           place="top"
