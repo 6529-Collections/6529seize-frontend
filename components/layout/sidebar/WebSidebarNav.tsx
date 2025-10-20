@@ -164,8 +164,7 @@ const WebSidebarNav = React.forwardRef<
         });
       };
 
-      const browserWindow =
-        globalThis.window === undefined ? undefined : globalThis.window;
+      const browserWindow = globalThis.window ?? undefined;
       const scrollContainer = submenuTrigger.closest(
         "[data-sidebar-scroll='true']"
       ) as HTMLElement | null;
