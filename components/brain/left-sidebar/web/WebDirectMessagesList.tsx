@@ -34,7 +34,6 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
   const { isDirectMessageModalOpen, openDirectMessage, close, isApp } =
     useCreateModalState();
 
-  // Check if device is touch-enabled for tooltip display
   const globalScope = globalThis as typeof globalThis & {
     window?: Window;
     navigator?: Navigator;
@@ -50,11 +49,9 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
 
   const shouldRenderCreateDirectMessage = !isApp;
 
-  // Moved all hooks to the top level, before any conditional logic
   const listRef = useRef<WebUnifiedWavesListWavesHandle>(null);
   const { directMessages, registerWave } = useMyStream();
 
-  // Use the custom hook for infinite scroll
   useInfiniteScroll(
     directMessages.hasNextPage,
     directMessages.isFetchingNextPage,
@@ -101,7 +98,6 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
     );
   }
 
-  // Not authenticated
   if (!isAuthenticated) {
     return (
       <div className="tw-flex tw-flex-col tw-gap-y-4 tw-h-full">
@@ -129,7 +125,6 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
     );
   }
 
-  // Authenticated but no profile
   if (!connectedProfile) {
     return (
       <div className="tw-flex tw-flex-col tw-gap-y-4 tw-h-full">
@@ -206,7 +201,6 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
         </div>
       </div>
 
-      {/* Tooltip */}
       {!isTouchDevice && shouldRenderCreateDirectMessage && (
         <ReactTooltip
           id="create-dm-tooltip"
@@ -215,7 +209,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
           opacity={1}
           style={{
             padding: "6px 10px",
-            background: "#37373E", // iron-700
+            background: "#37373E",
             color: "white",
             fontSize: "12px",
             fontWeight: 500,
@@ -223,11 +217,10 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
             boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
             zIndex: 10000,
           }}
-          border="1px solid #4C4C55" // iron-650
+          border="1px solid #4C4C55"
         />
       )}
-      
-      {/* Create Direct Message Modal */}
+
       {connectedProfile && (
         <CreateDirectMessageModal
           isOpen={isDirectMessageModalOpen}

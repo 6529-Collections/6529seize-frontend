@@ -11,7 +11,6 @@ import WavePicture from "../../../waves/WavePicture";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { createBreakpoint } from "react-use";
 
-// Breakpoint for mobile responsiveness (lg = 1024px)
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 interface MyStreamWaveTabsDefaultProps {
   readonly wave: ApiWave;
@@ -20,18 +19,15 @@ interface MyStreamWaveTabsDefaultProps {
 const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   wave,
 }) => {
-  // Get the active tab and utilities from global context
   const { activeContentTab, setActiveContentTab } = useContentTab();
   const { toggleRightSidebar, isRightSidebarOpen } = useSidebarState();
 
-  // Navigation hooks for mobile back button
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "S";
 
-  // Mobile back button handler - removes wave param to go back to list
   const handleMobileBack = () => {
     const params = new URLSearchParams(searchParams?.toString() || "");
     params.delete("wave");
@@ -43,10 +39,8 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
 
   return (
     <div className="tw-w-full tw-flex tw-flex-col tw-bg-iron-950">
-      {/* Wave name header with toggle button */}
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-px-2 sm:tw-px-4 tw-py-3 tw-border-b tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-t-0">
         <div className="tw-flex tw-items-center">
-          {/* Mobile back button */}
           {isMobile && (
             <button
               onClick={handleMobileBack}
@@ -69,12 +63,11 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
             {wave.name}
           </h1>
         </div>
-        {/* Right sidebar toggle button */}
         <div className="tw-relative tw-flex tw-items-center tw-self-stretch">
           <button
             type="button"
             onClick={toggleRightSidebar}
-            className="tw-group tw-absolute tw-top-1/2 -tw-translate-y-1/2 tw-right-0 tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 w-backdrop-blur-sm tw-shadow-[0_12px_28px_rgba(0,0,0,0.35)] tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-iron-500/80 desktop-hover:hover:tw-bg-iron-700/85 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.4)]"
+            className="tw-group tw-absolute tw-top-1/2 -tw-translate-y-1/2 tw-right-0 tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-backdrop-blur-sm tw-shadow-[0_12px_28px_rgba(0,0,0,0.35)] tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-iron-500/80 desktop-hover:hover:tw-bg-iron-700/85 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.4)]"
             aria-label="Toggle right sidebar"
           >
             <ChevronDoubleLeftIcon
