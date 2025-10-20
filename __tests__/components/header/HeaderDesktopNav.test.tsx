@@ -82,33 +82,33 @@ describe('HeaderDesktopNav', () => {
   it('renders links based on conditions', () => {
     render(<HeaderDesktopNav showWaves={true} appWalletsSupported={true} capacitorIsIos={false} country="US" pathname="/" />);
     
-    expect(screen.getByTestId('link-my-stream')).toBeInTheDocument();
-    expect(screen.getByTestId('link-waves')).toBeInTheDocument();
-    expect(screen.getByTestId('link-app-wallets')).toBeInTheDocument();
+    expect(screen.getByText('My Stream')).toBeInTheDocument();
+    expect(screen.getByText('Waves')).toBeInTheDocument();
+    expect(screen.getByText('App Wallets')).toBeInTheDocument();
   });
 
   it('hides app wallets when not supported', () => {
     render(<HeaderDesktopNav showWaves={true} appWalletsSupported={false} capacitorIsIos={false} country="US" pathname="/" />);
     
-    expect(screen.queryByTestId('link-app-wallets')).not.toBeInTheDocument();
+    expect(screen.queryByText('App Wallets')).not.toBeInTheDocument();
   });
 
   it('hides Memes Subscriptions on iOS for non-US countries', () => {
     render(<HeaderDesktopNav showWaves={true} appWalletsSupported={true} capacitorIsIos={true} country="CA" pathname="/" />);
     
-    expect(screen.queryByTestId('link-memes-subscriptions')).not.toBeInTheDocument();
+    expect(screen.queryByText('Memes Subscriptions')).not.toBeInTheDocument();
   });
 
   it('shows Memes Subscriptions on iOS for US country', () => {
     render(<HeaderDesktopNav showWaves={true} appWalletsSupported={true} capacitorIsIos={true} country="US" pathname="/" />);
     
-    expect(screen.getByTestId('link-memes-subscriptions')).toBeInTheDocument();
+    expect(screen.getByText('Memes Subscriptions')).toBeInTheDocument();
   });
 
   it('shows Memes Subscriptions on non-iOS devices regardless of country', () => {
     render(<HeaderDesktopNav showWaves={true} appWalletsSupported={true} capacitorIsIos={false} country="CA" pathname="/" />);
     
-    expect(screen.getByTestId('link-memes-subscriptions')).toBeInTheDocument();
+    expect(screen.getByText('Memes Subscriptions')).toBeInTheDocument();
   });
 
   it('applies active class to About dropdown when pathname contains /about', () => {

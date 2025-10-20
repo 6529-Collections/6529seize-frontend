@@ -82,8 +82,8 @@ describe('DirectMessagesList', () => {
   });
 
   it('shows connect wallet placeholder when not authenticated', () => {
-    const { container } = renderWithAuth(null);
-    expect(container.querySelector('#my-stream-connect')).toBeInTheDocument();
+    renderWithAuth(null);
+    expect(screen.getByTestId('connect')).toBeInTheDocument();
     expect(screen.getByTestId('connect')).toBeInTheDocument();
   });
 

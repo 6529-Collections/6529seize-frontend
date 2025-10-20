@@ -103,13 +103,13 @@ describe('MyStreamWaveDesktopTabs', () => {
     expect(screen.queryByText('My Votes')).toBeNull();
   });
 
-  it('shows countdown for upcoming decision', () => {
+  it('does not render countdown; parent header handles it', () => {
     const spy = jest.spyOn(Time, 'currentMillis').mockReturnValue(0);
     mockWaveInfo = { isChatWave: false, isMemesWave: true, isRankWave: false };
     mockAvailableTabs = [MyStreamWaveTab.CHAT];
     mockDecisions = [{ timestamp: 10000 }];
-    const { getByTestId } = renderComponent(MyStreamWaveTab.CHAT);
-    expect(getByTestId('countdown')).toHaveTextContent('10');
+    renderComponent(MyStreamWaveTab.CHAT);
+    expect(screen.queryByTestId('countdown')).toBeNull();
     spy.mockRestore();
   });
 });

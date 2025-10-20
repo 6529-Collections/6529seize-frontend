@@ -9,6 +9,11 @@ jest.mock('react-use', () => ({
   createBreakpoint: () => () => bpValue,
 }));
 
+jest.mock('@/hooks/useDeviceInfo', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({ isApp: true })),
+}));
+
 jest.mock('@/components/brain/my-stream/layout/LayoutContext', () => ({
   useLayout: () => ({ registerRef }),
 }));

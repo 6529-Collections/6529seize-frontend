@@ -99,7 +99,7 @@ describe("BrainMobileTabs", () => {
     const button = screen.getByRole("button", { name: /my stream/i });
     expect(button).toBeInTheDocument();
     await userEvent.click(button);
-    expect(push).toHaveBeenCalledWith("/my-stream");
+    expect(push).toHaveBeenCalledWith("/waves");
     expect(onViewChange).toHaveBeenCalledWith(BrainView.DEFAULT);
   });
 

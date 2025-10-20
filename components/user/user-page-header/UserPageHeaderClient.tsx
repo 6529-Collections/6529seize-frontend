@@ -161,7 +161,7 @@ export default function UserPageHeaderClient({
           defaultBanner2={defaultBanner2}
           canEdit={canEdit}
         />
-        <div className="tw-relative tw-px-6 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
+        <div className="tw-relative tw-px-2 lg:tw-px-6 xl:tw-px-8 tw-mx-auto">
           <div className="tw-flex tw-flex-col">
             <div className="tw-flex tw-justify-between">
               <div className="-tw-mt-16 sm:-tw-mt-24 tw-w-min">

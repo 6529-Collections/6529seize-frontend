@@ -2,10 +2,6 @@ import { BlockPickerTimeWindow } from "@/app/tools/block-finder/page.client";
 import BlockPickerTimeWindowSelectList from "@/components/block-picker/BlockPickerTimeWindowSelectList";
 import { fireEvent, render, screen } from "@testing-library/react";
 
-jest.mock("next/font/google", () => ({
-  Poppins: () => ({ className: "poppins" }),
-}));
-
 describe("BlockPickerTimeWindowSelectList", () => {
   const options = [
     { title: "One", value: BlockPickerTimeWindow.ONE_MINUTE },

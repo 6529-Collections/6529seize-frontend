@@ -19,7 +19,6 @@ jest.mock('@/components/header/Header.module.scss', () => ({
 
 describe('HeaderLogo', () => {
   const defaultProps = {
-    isSmall: false,
     isCapacitor: false,
     isMobile: false
   };
@@ -80,14 +79,6 @@ describe('HeaderLogo', () => {
     expect(logoImage).not.toHaveClass('logoIconSmall');
   });
 
-  it('applies logoIconSmall class when isSmall is true', () => {
-    render(<HeaderLogo {...defaultProps} isSmall={true} />);
-    
-    const logoImage = screen.getByRole('img');
-    expect(logoImage).toHaveClass('logoIconSmall');
-    expect(logoImage).not.toHaveClass('logoIcon');
-  });
-
   it('applies logoIconSmall class when isCapacitor is true', () => {
     render(<HeaderLogo {...defaultProps} isCapacitor={true} />);
     
@@ -105,7 +96,7 @@ describe('HeaderLogo', () => {
   });
 
   it('applies logoIconSmall class when multiple small conditions are true', () => {
-    render(<HeaderLogo {...defaultProps} isSmall={true} isCapacitor={true} isMobile={true} />);
+    render(<HeaderLogo {...defaultProps} isCapacitor={true} isMobile={true} />);
     
     const logoImage = screen.getByRole('img');
     expect(logoImage).toHaveClass('logoIconSmall');
@@ -126,49 +117,25 @@ describe('HeaderLogo', () => {
     const testCases = [
       {
         name: 'default desktop',
-        props: { isSmall: false, isCapacitor: false, isMobile: false },
+        props: { isCapacitor: false, isMobile: false },
         expectedClass: 'logoIcon',
         expectedSize: { width: '50', height: '50' }
       },
       {
-        name: 'small desktop',
-        props: { isSmall: true, isCapacitor: false, isMobile: false },
-        expectedClass: 'logoIconSmall',
-        expectedSize: { width: '50', height: '50' }
-      },
-      {
         name: 'capacitor app',
-        props: { isSmall: false, isCapacitor: true, isMobile: false },
+        props: { isCapacitor: true, isMobile: false },
         expectedClass: 'logoIconSmall',
         expectedSize: { width: '40', height: '40' }
       },
       {
         name: 'mobile view',
-        props: { isSmall: false, isCapacitor: false, isMobile: true },
-        expectedClass: 'logoIconSmall',
-        expectedSize: { width: '40', height: '40' }
-      },
-      {
-        name: 'small mobile',
-        props: { isSmall: true, isCapacitor: false, isMobile: true },
-        expectedClass: 'logoIconSmall',
-        expectedSize: { width: '40', height: '40' }
-      },
-      {
-        name: 'small capacitor',
-        props: { isSmall: true, isCapacitor: true, isMobile: false },
+        props: { isCapacitor: false, isMobile: true },
         expectedClass: 'logoIconSmall',
         expectedSize: { width: '40', height: '40' }
       },
       {
         name: 'capacitor mobile',
-        props: { isSmall: false, isCapacitor: true, isMobile: true },
-        expectedClass: 'logoIconSmall',
-        expectedSize: { width: '40', height: '40' }
-      },
-      {
-        name: 'all small flags',
-        props: { isSmall: true, isCapacitor: true, isMobile: true },
+        props: { isCapacitor: true, isMobile: true },
         expectedClass: 'logoIconSmall',
         expectedSize: { width: '40', height: '40' }
       }

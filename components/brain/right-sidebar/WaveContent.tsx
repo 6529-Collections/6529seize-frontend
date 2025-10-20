@@ -151,7 +151,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
 
   return (
     <>
-      <div className="tw-mt-4 tw-pl-2.5 tw-pb-[1px]">
+      <div className="tw-pl-2.5 tw-pb-[1px]">
         <TabToggleWithOverflow
           options={options}
           activeKey={activeTab}
