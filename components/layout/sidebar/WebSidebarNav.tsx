@@ -165,14 +165,14 @@ const WebSidebarNav = React.forwardRef<
       };
 
       const browserWindow =
-        typeof globalThis !== "undefined" ? globalThis.window : undefined;
+        typeof window === "undefined" ? undefined : window;
       const scrollContainer = submenuTrigger.closest(
         "[data-sidebar-scroll='true']"
       ) as HTMLElement | null;
-      const resizeObserver =
-        typeof ResizeObserver !== "undefined"
-          ? new ResizeObserver(updateAnchor)
-          : null;
+      const canObserve = typeof ResizeObserver === "function";
+      const resizeObserver = canObserve
+        ? new ResizeObserver(updateAnchor)
+        : null;
 
       updateAnchor();
       browserWindow?.addEventListener("resize", updateAnchor);
@@ -193,32 +193,28 @@ const WebSidebarNav = React.forwardRef<
 
   const renderCollapsedSubmenu = useCallback(
     (sectionKey: string) => {
-      if (
-        !isCollapsed ||
-        openSubmenuKey !== sectionKey ||
-        !submenuAnchor
-      ) {
-        return null;
+      if (isCollapsed && openSubmenuKey === sectionKey && submenuAnchor) {
+        const openSection = sections.find(
+          (section) => section.key === sectionKey
+        );
+        if (!openSection) {
+          return null;
+        }
+
+        return (
+          <WebSidebarSubmenu
+            key={`sidebar-submenu-${sectionKey}`}
+            section={openSection}
+            pathname={pathname}
+            onClose={closeSubmenu}
+            leftOffset={submenuAnchor.left}
+            anchorTop={submenuAnchor.top}
+            anchorHeight={submenuAnchor.height}
+          />
+        );
       }
 
-      const openSection = sections.find(
-        (section) => section.key === sectionKey
-      );
-      if (!openSection) {
-        return null;
-      }
-
-      return (
-        <WebSidebarSubmenu
-          key={`sidebar-submenu-${sectionKey}`}
-          section={openSection}
-          pathname={pathname}
-          onClose={closeSubmenu}
-          leftOffset={submenuAnchor.left}
-          anchorTop={submenuAnchor.top}
-          anchorHeight={submenuAnchor.height}
-        />
-      );
+      return null;
     },
     [isCollapsed, openSubmenuKey, sections, pathname, closeSubmenu, submenuAnchor]
   );
