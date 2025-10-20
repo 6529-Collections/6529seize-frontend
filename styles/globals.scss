@@ -18,7 +18,7 @@
     --collapsed-width: 0px;
     --expanded-width: 0px;
 
-    --layout-margin: max((100vw - var(--layout-max)) / 2.25, 0px);
+    --layout-margin: max((100vw - var(--layout-max)) / 2, 0px);
     --left-rail: calc(var(--layout-margin) + var(--sidebar-width));
   }
 

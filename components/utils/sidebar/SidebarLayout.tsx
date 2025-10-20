@@ -118,7 +118,7 @@ export default function SidebarLayout({
     <main className="tailwind-scope tw-bg-black tw-overflow-x-hidden">
       <div
         className={`tw-transition-all tw-duration-300 tw-ease-out ${
-          !open ? "tw-ml-0" : "tw-ml-[320px]"
+          !open ? "tw-ml-2" : "tw-ml-[320px]"
         }`}>
         <GroupsSidebarToggle
           ref={openButtonRef}
@@ -130,7 +130,9 @@ export default function SidebarLayout({
         <div className="tw-flex">
           <div
             className={`tw-fixed tw-z-30 tw-inset-y-0 tw-h-full tw-overflow-x-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500  tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-transform tw-transition tw-duration-300 tw-ease-out ${
-              !open ? "-tw-translate-x-full" : ""
+              open
+                ? "tw-translate-x-0 tw-opacity-100"
+                : "-tw-translate-x-full tw-opacity-0"
             }`}
             ref={sidebarRef}>
             <div className="tw-bg-iron-950 tw-w-80 tw-border-r tw-border-solid tw-border-t-0 tw-border-l-0 tw-border-b-0 tw-border-iron-700">
