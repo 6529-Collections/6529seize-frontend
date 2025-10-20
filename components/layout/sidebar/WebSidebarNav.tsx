@@ -165,7 +165,7 @@ const WebSidebarNav = React.forwardRef<
       };
 
       const browserWindow =
-        typeof window === "undefined" ? undefined : window;
+        typeof globalThis.window === "undefined" ? undefined : globalThis.window;
       const scrollContainer = submenuTrigger.closest(
         "[data-sidebar-scroll='true']"
       ) as HTMLElement | null;

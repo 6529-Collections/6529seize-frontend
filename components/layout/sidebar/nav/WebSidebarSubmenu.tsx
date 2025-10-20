@@ -107,9 +107,9 @@ function WebSidebarSubmenu({
 
   if (browserDocument) {
     const leftStyle =
-      leftOffset !== undefined
-        ? `${leftOffset}px`
-        : "calc(var(--layout-margin, 0px) + 80px)";
+      leftOffset === undefined
+        ? "calc(var(--layout-margin, 0px) + 80px)"
+        : `${leftOffset}px`;
 
     const topStyle = Number.isFinite(computedTop)
       ? `${computedTop}px`
