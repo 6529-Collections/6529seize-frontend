@@ -1,5 +1,36 @@
 import { publicEnv } from "@/config/env";
 
+let cachedBaseEndpoint: string | undefined;
+let cachedBaseUrl: URL | null | undefined;
+
+const getBaseUrl = (): URL | null => {
+  const current = publicEnv.BASE_ENDPOINT;
+
+  if (!current) {
+    cachedBaseEndpoint = undefined;
+    cachedBaseUrl = null;
+    return null;
+  }
+
+  if (cachedBaseEndpoint === current && cachedBaseUrl !== undefined) {
+    return cachedBaseUrl;
+  }
+
+  cachedBaseEndpoint = current;
+  try {
+    cachedBaseUrl = new URL(current);
+  } catch {
+    cachedBaseUrl = null;
+  }
+
+  return cachedBaseUrl;
+};
+
+export const getSeizeBaseOrigin = (): string | null => {
+  const baseUrl = getBaseUrl();
+  return baseUrl ? baseUrl.origin : null;
+};
+
 export interface SeizeQuoteLinkInfo {
   waveId: string;
   serialNo?: string;
@@ -24,10 +55,19 @@ export function parseSeizeQueryLink(
   exact: boolean = false
 ): Record<string, string> | null {
   try {
-    const url = new URL(href);
+    const baseUrl = getBaseUrl();
+    if (!baseUrl) {
+      return null;
+    }
 
-    const allowedOrigins = new Set([new URL(publicEnv.BASE_ENDPOINT).origin]);
-    if (!allowedOrigins.has(url.origin)) return null;
+    let url: URL;
+    try {
+      url = new URL(href);
+    } catch {
+      url = new URL(href, baseUrl.origin);
+    }
+
+    if (url.origin !== baseUrl.origin) return null;
     if (url.pathname !== path) return null;
 
     if (exact) {
@@ -56,3 +96,65 @@ export function parseSeizeQueryLink(
     return null;
   }
 }
+
+export const ensureStableSeizeLink = (
+  href: string,
+  currentHref?: string
+): string => {
+  try {
+    const baseUrl = getBaseUrl();
+    if (!baseUrl) {
+      return href;
+    }
+
+    let targetUrl: URL;
+    try {
+      targetUrl = new URL(href);
+    } catch {
+      targetUrl = new URL(href, baseUrl.origin);
+    }
+
+    if (targetUrl.origin !== baseUrl.origin) {
+      return href;
+    }
+
+    const dropId = targetUrl.searchParams.get("drop");
+    if (!dropId) {
+      return href;
+    }
+
+    let globalWindow: Window | undefined;
+    if (typeof globalThis === "object" && "window" in globalThis) {
+      globalWindow = (globalThis as typeof globalThis & { window?: Window }).window;
+    }
+
+    const resolvedCurrentHref = currentHref ?? globalWindow?.location?.href;
+    if (resolvedCurrentHref === undefined || resolvedCurrentHref === "") {
+      return href;
+    }
+
+    let currentUrl: URL;
+    try {
+      currentUrl = new URL(resolvedCurrentHref);
+    } catch {
+      return href;
+    }
+
+    if (currentUrl.origin !== baseUrl.origin) {
+      return href;
+    }
+
+    const params = new URLSearchParams(currentUrl.search);
+    params.set("drop", dropId);
+    const query = params.toString();
+    const hash = currentUrl.hash ?? "";
+
+    const path = currentUrl.pathname || "/";
+
+    const querySuffix = query ? `?${query}` : "";
+
+    return `${baseUrl.origin}${path}${querySuffix}${hash}`;
+  } catch {
+    return href;
+  }
+};

@@ -1,6 +1,7 @@
 describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
   let parseSeizeQuoteLink: any;
   let parseSeizeQueryLink: any;
+  let ensureStableSeizeLink: any;
 
   beforeAll(() => {
     jest.resetModules();
@@ -13,6 +14,7 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
     ({
       parseSeizeQuoteLink,
       parseSeizeQueryLink,
+      ensureStableSeizeLink,
     } = require("@/helpers/SeizeLinkParser"));
   });
 
@@ -77,6 +79,75 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
         true
       );
       expect(res).toBeNull();
+    });
+  });
+
+  describe("ensureStableSeizeLink", () => {
+    it("returns original href for non-base URLs", () => {
+      const incoming = "https://othersite.com/?drop=drop-id";
+      const current = "https://site.com/messages?wave=abc";
+      expect(ensureStableSeizeLink(incoming, current)).toBe(incoming);
+    });
+
+    it("returns original href when drop param missing", () => {
+      const incoming = "https://site.com/";
+      const current = "https://site.com/messages?wave=abc";
+      expect(ensureStableSeizeLink(incoming, current)).toBe(incoming);
+    });
+
+    it("rewrites root drop link to current path with drop param", () => {
+      const incoming = "https://site.com/?drop=drop-id";
+      const current = "https://site.com/messages?wave=abc";
+      expect(ensureStableSeizeLink(incoming, current)).toBe(
+        "https://site.com/messages?wave=abc&drop=drop-id"
+      );
+    });
+
+    it("handles relative drop links", () => {
+      const incoming = "?drop=drop-id";
+      const current = "https://site.com/messages";
+      expect(ensureStableSeizeLink(incoming, current)).toBe(
+        "https://site.com/messages?drop=drop-id"
+      );
+    });
+
+    it("preserves existing query params and replaces drop", () => {
+      const incoming = "https://site.com/?drop=new-drop";
+      const current = "https://site.com/messages?wave=abc&drop=old-drop";
+      expect(ensureStableSeizeLink(incoming, current)).toBe(
+        "https://site.com/messages?wave=abc&drop=new-drop"
+      );
+    });
+
+    it("rebases drop links from other paths onto current location", () => {
+      const incoming = "https://site.com/waves?wave=abc&drop=def";
+      const current = "https://site.com/messages?wave=xyz";
+      expect(ensureStableSeizeLink(incoming, current)).toBe(
+        "https://site.com/messages?wave=xyz&drop=def"
+      );
+    });
+
+    it("refreshes cached origin when BASE_ENDPOINT changes", () => {
+      const { publicEnv } = require("@/config/env");
+
+      expect(
+        ensureStableSeizeLink(
+          "https://site.com/?drop=drop-1",
+          "https://site.com/messages"
+        )
+      ).toBe("https://site.com/messages?drop=drop-1");
+
+      publicEnv.BASE_ENDPOINT = "https://other.com";
+      try {
+        expect(
+          ensureStableSeizeLink(
+            "https://other.com/?drop=drop-2",
+            "https://other.com/messages"
+          )
+        ).toBe("https://other.com/messages?drop=drop-2");
+      } finally {
+        publicEnv.BASE_ENDPOINT = "https://site.com";
+      }
     });
   });
 });

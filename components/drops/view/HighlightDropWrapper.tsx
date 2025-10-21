@@ -1,6 +1,16 @@
 "use client";
 
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { classNames } from "@/helpers/Helpers";
+import { useIntersectionObserver } from "@/hooks/scroll/useIntersectionObserver";
+import {
+  forwardRef,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 interface HighlightDropWrapperProps {
   readonly active: boolean;
@@ -10,100 +20,233 @@ interface HighlightDropWrapperProps {
   readonly highlightMs?: number;
   readonly fadeMs?: number;
   readonly visibilityThreshold?: number;
+  readonly id?: string;
 }
 
-export default function HighlightDropWrapper({
-  active,
-  scrollContainer,
-  children,
-  className = "",
-  highlightMs = 3500,
-  fadeMs = 500,
-  visibilityThreshold = 0.6,
-}: HighlightDropWrapperProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [highlightUntil, setHighlightUntil] = useState(0);
-  const [isFading, setIsFading] = useState(false);
-  const rafRef = useRef<number | null>(null);
-  const fadeTimeoutRef = useRef<number | null>(null);
-  const lastExtendedRef = useRef(false);
+const MAX_VISIBILITY_WAIT_MS = 4000;
 
-  useEffect(() => {
-    if (!active) return;
+const HighlightDropWrapper = forwardRef<
+  HTMLDivElement,
+  HighlightDropWrapperProps
+>(
+  (
+    {
+      active,
+      scrollContainer,
+      children,
+      className = "",
+      highlightMs = 3500,
+      fadeMs = 500,
+      visibilityThreshold = 0.6,
+      id,
+    },
+    forwardedRef
+  ) => {
+    const innerRef = useRef<HTMLDivElement>(null);
+    const [phase, setPhase] = useState<"idle" | "highlight" | "fading">("idle");
+    const phaseRef = useRef(phase);
+    const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+      null
+    );
+    const fadeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const rafRef = useRef<number | null>(null);
+    const visibilityStartTimeRef = useRef<number | null>(null);
 
-    setIsFading(false);
-    lastExtendedRef.current = false;
-    setHighlightUntil(Date.now() + highlightMs);
+    const lastExtendedRef = useRef(false);
+    const prevActiveRef = useRef(false);
 
-    const checkVisibility = () => {
-      const el = ref.current;
-      if (el) {
-        const er = el.getBoundingClientRect();
-        const cr = scrollContainer
-          ? scrollContainer.getBoundingClientRect()
-          : new DOMRect(0, 0, window.innerWidth, window.innerHeight);
+    const setNode = (node: HTMLDivElement | null) => {
+      innerRef.current = node;
+      if (typeof forwardedRef === "function") {
+        forwardedRef(node);
+      } else if (forwardedRef) {
+        forwardedRef.current = node;
+      }
+    };
 
-        const interLeft = Math.max(er.left, cr.left);
-        const interTop = Math.max(er.top, cr.top);
-        const interRight = Math.min(er.right, cr.right);
-        const interBottom = Math.min(er.bottom, cr.bottom);
+    useEffect(() => {
+      phaseRef.current = phase;
+    }, [phase]);
 
-        const interW = Math.max(0, interRight - interLeft);
-        const interH = Math.max(0, interBottom - interTop);
-        const interArea = interW * interH;
-        const ratio = interArea / Math.max(1, er.width * er.height);
+    const stopRAF = useCallback(() => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+      rafRef.current = null;
+      visibilityStartTimeRef.current = null;
+    }, []);
 
-        if (ratio >= visibilityThreshold && !lastExtendedRef.current) {
-          setHighlightUntil(Date.now() + highlightMs);
-          lastExtendedRef.current = true;
+    const clearTimers = useCallback(() => {
+      if (highlightTimeoutRef.current) {
+        clearTimeout(highlightTimeoutRef.current);
+        highlightTimeoutRef.current = null;
+      }
+      if (fadeTimeoutRef.current) {
+        clearTimeout(fadeTimeoutRef.current);
+        fadeTimeoutRef.current = null;
+      }
+    }, []);
+
+    const runHighlightWindow = useCallback(() => {
+      clearTimers();
+      setPhase("highlight");
+
+      highlightTimeoutRef.current = setTimeout(() => {
+        setPhase("fading");
+
+        fadeTimeoutRef.current = setTimeout(() => {
+          setPhase("idle");
+        }, fadeMs);
+      }, highlightMs);
+    }, [clearTimers, fadeMs, highlightMs]);
+
+    const trackVisibilityOnce = useCallback(() => {
+      stopRAF();
+
+      const getNow =
+        typeof performance !== "undefined" &&
+        typeof performance.now === "function"
+          ? () => performance.now()
+          : () => Date.now();
+
+      const startTimestamp = getNow();
+      visibilityStartTimeRef.current = startTimestamp;
+
+      const checkVisibility = () => {
+        const currentTimestamp = getNow();
+        const startTime = visibilityStartTimeRef.current ?? startTimestamp;
+        const elapsed = currentTimestamp - startTime;
+        if (elapsed >= MAX_VISIBILITY_WAIT_MS) {
+          stopRAF();
           return;
         }
+
+        const el = innerRef.current;
+        if (el) {
+          const elRect = el.getBoundingClientRect();
+          const containerRect = scrollContainer
+            ? scrollContainer.getBoundingClientRect()
+            : ({
+                left: 0,
+                top: 0,
+                right: globalThis.innerWidth,
+                bottom: globalThis.innerHeight,
+                width: globalThis.innerWidth,
+                height: globalThis.innerHeight,
+              } as DOMRect);
+
+          const interLeft = Math.max(elRect.left, containerRect.left);
+          const interTop = Math.max(elRect.top, containerRect.top);
+          const interRight = Math.min(elRect.right, containerRect.right);
+          const interBottom = Math.min(elRect.bottom, containerRect.bottom);
+
+          const interWidth = Math.max(0, interRight - interLeft);
+          const interHeight = Math.max(0, interBottom - interTop);
+          const interArea = interWidth * interHeight;
+          const ratio = interArea / Math.max(1, elRect.width * elRect.height);
+
+          if (ratio >= visibilityThreshold && !lastExtendedRef.current) {
+            lastExtendedRef.current = true;
+            if (phaseRef.current !== "highlight") {
+              runHighlightWindow();
+            }
+            stopRAF();
+            return;
+          }
+        }
+
+        rafRef.current = globalThis.requestAnimationFrame(checkVisibility);
+      };
+
+      rafRef.current = globalThis.requestAnimationFrame(checkVisibility);
+    }, [runHighlightWindow, scrollContainer, stopRAF, visibilityThreshold]);
+
+    const handleIntersection = useCallback(
+      (entry: IntersectionObserverEntry) => {
+        if (!active) {
+          return;
+        }
+
+        if (
+          entry.intersectionRatio >= visibilityThreshold &&
+          !lastExtendedRef.current
+        ) {
+          lastExtendedRef.current = true;
+          if (phaseRef.current !== "highlight") {
+            runHighlightWindow();
+          }
+          stopRAF();
+        }
+      },
+      [active, runHighlightWindow, stopRAF, visibilityThreshold]
+    );
+
+    useIntersectionObserver(
+      innerRef,
+      {
+        root: scrollContainer ?? undefined,
+        threshold: visibilityThreshold,
+        freezeOnceVisible: true,
+      },
+      handleIntersection,
+      active
+    );
+
+    useEffect(() => {
+      return () => {
+        stopRAF();
+        clearTimers();
+      };
+    }, [clearTimers, stopRAF]);
+
+    useEffect(() => {
+      if (phase === "idle") {
+        stopRAF();
       }
-      rafRef.current = requestAnimationFrame(checkVisibility);
-    };
+    }, [phase, stopRAF]);
 
-    rafRef.current = requestAnimationFrame(checkVisibility);
-
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-  }, [active, highlightMs, scrollContainer, visibilityThreshold]);
-
-  useEffect(() => {
-    if (!active) return;
-    const interval = window.setInterval(() => {
-      if (Date.now() >= highlightUntil && highlightUntil !== 0) {
-        setHighlightUntil(0);
-        setIsFading(true);
-        if (fadeTimeoutRef.current) clearTimeout(fadeTimeoutRef.current);
-        fadeTimeoutRef.current = window.setTimeout(() => {
-          setIsFading(false);
-        }, fadeMs);
-        clearInterval(interval);
+    useEffect(() => {
+      if (!active) {
+        stopRAF();
       }
-    }, 150);
+    }, [active, stopRAF]);
 
-    return () => {
-      clearInterval(interval);
-      if (fadeTimeoutRef.current) clearTimeout(fadeTimeoutRef.current);
-    };
-  }, [active, highlightUntil, fadeMs]);
+    useEffect(() => {
+      const wasActive = prevActiveRef.current;
+      prevActiveRef.current = active;
 
-  const isHighlighted = Date.now() < highlightUntil;
+      if (active && !wasActive) {
+        lastExtendedRef.current = false;
+        runHighlightWindow();
+        trackVisibilityOnce();
+      }
+    }, [active, runHighlightWindow, trackVisibilityOnce]);
 
-  const classes = [
-    className,
-    isHighlighted ? "tw-bg-[#25263f] tw-transition-colors tw-duration-500" : "",
-    !isHighlighted && isFading
-      ? "tw-bg-transparent tw-transition-colors tw-duration-500"
-      : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
+    const isHighlighted = phase === "highlight";
+    const isFading = phase === "fading";
 
-  return (
-    <div ref={ref} className={classes}>
-      {children}
-    </div>
-  );
-}
+    const transitionClasses =
+      isHighlighted || isFading ? "tw-transition-colors" : "";
+    const transitionStyle = useMemo(() => {
+      if (isHighlighted || isFading) {
+        return { transitionDuration: `${fadeMs}ms` };
+      }
+      return undefined;
+    }, [fadeMs, isHighlighted, isFading]);
+    const classes = classNames(
+      className,
+      transitionClasses,
+      isHighlighted ? "tw-bg-[#25263f]" : "",
+      !isHighlighted && isFading ? "tw-bg-transparent" : ""
+    );
+
+    return (
+      <div ref={setNode} id={id} className={classes} style={transitionStyle}>
+        {children}
+      </div>
+    );
+  }
+);
+
+HighlightDropWrapper.displayName = "HighlightDropWrapper";
+export default HighlightDropWrapper;

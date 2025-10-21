@@ -19,6 +19,10 @@ export function useIntersectionObserver(
       return;
     }
 
+    if (typeof IntersectionObserver === "undefined") {
+      return;
+    }
+
     const observer = new IntersectionObserver((entries) => {
       if (entries[0]) {
         callback(entries[0]);
