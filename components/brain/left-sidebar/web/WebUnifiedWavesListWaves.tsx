@@ -19,7 +19,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import CreateWaveModal from "../../../waves/create-wave/CreateWaveModal";
 import { useAuth } from "../../../auth/Auth";
-import { Tooltip } from "react-tooltip";
+import { Tooltip as ReactTooltip } from "react-tooltip";
 import useCreateModalState from "@/hooks/useCreateModalState";
 
 function isValidWave(wave: unknown): wave is MinimalWave {
@@ -96,11 +96,6 @@ const WebUnifiedWavesListWaves = forwardRef<
     }));
 
     const shouldRenderCreateWaveButton = !isApp && !!connectedProfile;
-    const showCreateTooltip = !isTouchDevice && isCondensed;
-    const createWaveTooltipId = "create-wave-tooltip";
-    const createWaveTooltipProps = showCreateTooltip
-      ? { "data-tooltip-id": createWaveTooltipId }
-      : {};
 
     const { pinnedWaves, regularWaves } = useMemo(() => {
       const pinned: MinimalWave[] = [];
@@ -137,37 +132,21 @@ const WebUnifiedWavesListWaves = forwardRef<
             (isCondensed ? (
               shouldRenderCreateWaveButton && (
                 <div className="tw-flex tw-justify-center tw-px-2 tw-mb-3.5">
-                  <div>
+                  <div
+                    data-tooltip-id="create-wave-tooltip"
+                    data-tooltip-content="Create wave"
+                  >
                     <PrimaryButton
                       onClicked={openWave}
                       loading={false}
                       disabled={false}
                       padding="tw-px-2 tw-py-2"
-                      {...createWaveTooltipProps}
                     >
                       <FontAwesomeIcon
                         icon={faPlus}
                         className="tw-size-4 tw-flex-shrink-0"
                       />
                     </PrimaryButton>
-                    {showCreateTooltip && (
-                      <Tooltip
-                        id={createWaveTooltipId}
-                        place="right"
-                        style={{
-                          background: "#37373E",
-                          color: "white",
-                          padding: "6px 10px",
-                          fontSize: "12px",
-                          fontWeight: 500,
-                          borderRadius: "6px",
-                          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                          zIndex: 10000,
-                        }}
-                      >
-                        <span className="tw-text-xs">Create wave</span>
-                      </Tooltip>
-                    )}
                   </div>
                 </div>
               )
@@ -176,7 +155,10 @@ const WebUnifiedWavesListWaves = forwardRef<
                 label="Waves"
                 rightContent={
                   shouldRenderCreateWaveButton ? (
-                    <div>
+                    <div
+                      data-tooltip-id="create-wave-tooltip"
+                      data-tooltip-content="Create wave"
+                    >
                       <PrimaryButton
                         onClicked={openWave}
                         loading={false}
@@ -298,6 +280,26 @@ const WebUnifiedWavesListWaves = forwardRef<
             isOpen={isWaveModalOpen}
             onClose={close}
             profile={connectedProfile}
+          />
+        )}
+
+        {!isTouchDevice && (
+          <ReactTooltip
+            id="create-wave-tooltip"
+            place="bottom"
+            offset={8}
+            opacity={1}
+            style={{
+              padding: "6px 10px",
+              background: "#37373E",
+              color: "white",
+              fontSize: "12px",
+              fontWeight: 500,
+              borderRadius: "6px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+              zIndex: 10000,
+            }}
+            border="1px solid #4C4C55"
           />
         )}
       </>
