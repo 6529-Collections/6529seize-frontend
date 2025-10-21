@@ -11,6 +11,7 @@ import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesLis
 import BrainLeftSidebarWavePin from "../waves/BrainLeftSidebarWavePin";
 import { formatAddress, isValidEthAddress } from "../../../../helpers/Helpers";
 import { Tooltip } from "react-tooltip";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 interface WebBrainLeftSidebarWaveProps {
   readonly wave: MinimalWave;
@@ -30,19 +31,7 @@ const WebBrainLeftSidebarWave: React.FC<WebBrainLeftSidebarWaveProps> = ({
   const searchParams = useSearchParams();
   const prefetchWaveData = usePrefetchWaveData();
   const isDropWave = wave.type !== ApiWaveType.Chat;
-
-  const globalScope = globalThis as typeof globalThis & {
-    window?: Window;
-    navigator?: Navigator;
-  };
-  const browserWindow = globalScope.window;
-  const browserNavigator = globalScope.navigator;
-
-  const isTouchDevice =
-    !!browserWindow &&
-    ("ontouchstart" in browserWindow ||
-      (browserNavigator?.maxTouchPoints ?? 0) > 0 ||
-      browserWindow.matchMedia?.("(pointer: coarse)")?.matches);
+  const { hasTouchScreen } = useDeviceInfo();
 
   const getHref = (waveId: string) => {
     const currentWaveId = searchParams?.get("wave") ?? undefined;
@@ -91,7 +80,7 @@ const WebBrainLeftSidebarWave: React.FC<WebBrainLeftSidebarWaveProps> = ({
 
   const isActive = wave.id === (searchParams?.get("wave") ?? undefined);
   const tooltipId = `wave-condensed-${wave.id}`;
-  const showTooltip = condensed && !isTouchDevice;
+  const showTooltip = condensed && !hasTouchScreen;
 
   if (condensed) {
     return (
