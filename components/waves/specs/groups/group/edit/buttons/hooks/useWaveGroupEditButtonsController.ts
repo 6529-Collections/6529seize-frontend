@@ -21,7 +21,6 @@ import { convertWaveToUpdateWave } from "@/helpers/waves/waves.helpers";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { WaveGroupType } from "../../../WaveGroup";
 import { getScopedGroup, isGroupAuthor } from "../utils/waveGroupEdit";
-import { wait } from "@/helpers/Helpers";
 
 const WAVE_GROUP_LABELS: Record<string, string> = {
   VIEW: "View",
@@ -113,10 +112,31 @@ const createEmptyGroupPayload = (name: string): ApiCreateGroup => ({
   is_private: false,
 });
 
+const getGroupIdFromUpdateBody = (
+  body: ApiUpdateWaveRequest,
+  type: WaveGroupType,
+): string | null => {
+  switch (type) {
+    case WaveGroupType.VIEW:
+      return body.visibility.scope.group_id ?? null;
+    case WaveGroupType.DROP:
+      return body.participation.scope.group_id ?? null;
+    case WaveGroupType.VOTE:
+      return body.voting.scope.group_id ?? null;
+    case WaveGroupType.CHAT:
+      return body.chat.scope.group_id ?? null;
+    case WaveGroupType.ADMIN:
+      return body.wave.admin_group.group_id ?? null;
+    default:
+      assertUnreachable(type);
+      return null;
+  }
+};
+
 const buildWaveUpdateBody = (
   wave: ApiWave,
   type: WaveGroupType,
-  groupId: string,
+  groupId: string | null,
 ): ApiUpdateWaveRequest => {
   const originalBody = convertWaveToUpdateWave(wave);
   switch (type) {
@@ -185,7 +205,6 @@ const buildDefaultGroupName = (
   wave: ApiWave,
   type: WaveGroupType,
   mode: WaveGroupIdentitiesModal,
-  
 ): string => {
   const typeLabel = WAVE_GROUP_LABELS[type] ?? "Group";
   const actionLabel =
@@ -326,7 +345,17 @@ export const useWaveGroupEditButtonsController = ({
     onSuccess: () => {
       onWaveCreated();
     },
-    onError: (error) => {
+    onError: (error, body) => {
+      const groupId = body ? getGroupIdFromUpdateBody(body, type) : null;
+      console.error(
+        "[WaveGroupEditButtons] Wave update failed",
+        {
+          waveId: wave.id,
+          waveGroupType: type,
+          groupId,
+          error,
+        },
+      );
       setToast({
         message: error as unknown as string,
         type: "error",
@@ -390,6 +419,7 @@ export const useWaveGroupEditButtonsController = ({
       }
 
       setMutating(true);
+      const needsWaveUpdate = !scopedGroup?.id;
       let waveMutationTriggered = false;
       try {
         const { success } = await requestAuth();
@@ -460,12 +490,20 @@ export const useWaveGroupEditButtonsController = ({
           oldVersionId: previousGroupId,
         });
 
-        // Temporary guard while the API propagates the newly published group.
-        await wait(2000);
+        console.info("[WaveGroupEditButtons] Published updated group", {
+          waveId: wave.id,
+          waveGroupType: type,
+          previousGroupId,
+          newGroupId: createdGroup.id,
+        });
 
-        const updateBody = buildWaveUpdateBody(wave, type, createdGroup.id);
-        waveMutationTriggered = true;
-        await editWaveMutation.mutateAsync(updateBody);
+        if (needsWaveUpdate) {
+          const updateBody = buildWaveUpdateBody(wave, type, createdGroup.id);
+          waveMutationTriggered = true;
+          await editWaveMutation.mutateAsync(updateBody);
+        } else {
+          onWaveCreated();
+        }
 
         const successMessage =
           mode === WaveGroupIdentitiesModal.INCLUDE
@@ -484,18 +522,16 @@ export const useWaveGroupEditButtonsController = ({
           });
         }
       } finally {
-        if (!waveMutationTriggered) {
-          setMutating(false);
-        }
+        setMutating(false);
       }
     },
     [
-      editWaveMutation,
       requestAuth,
       scopedGroup,
       setToast,
       type,
       wave,
+      onWaveCreated,
     ],
   );
 
