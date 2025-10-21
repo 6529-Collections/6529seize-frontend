@@ -6,6 +6,10 @@ import { createLinkRenderer } from "@/components/drops/view/part/dropPartMarkdow
 import { ensureStableSeizeLink } from "@/helpers/SeizeLinkParser";
 import { publicEnv } from "@/config/env";
 
+type EnsureStableSeizeLinkWithSetter = typeof ensureStableSeizeLink & {
+  __setCurrentHref?: (href?: string) => void;
+};
+
 jest.mock("@/components/drops/view/part/dropPartMarkdown/youtubePreview", () => ({
   __esModule: true,
   default: ({ href }: { href: string }) => (
@@ -117,7 +121,8 @@ jest.mock("@/helpers/SeizeLinkParser", () => {
   const ensureStableSeizeLink = (href: string) =>
     actual.ensureStableSeizeLink(href, currentHrefOverride);
 
-  (ensureStableSeizeLink as any).__setCurrentHref = (href?: string) => {
+  const ensureWithSetter = ensureStableSeizeLink as EnsureStableSeizeLinkWithSetter;
+  ensureWithSetter.__setCurrentHref = (href?: string) => {
     currentHrefOverride = href;
   };
 
@@ -131,11 +136,13 @@ const onQuoteClick = jest.fn();
 
 const baseRenderer = () => createLinkRenderer({ onQuoteClick });
 
+type EnsureStableSeizeLinkWithSetter = typeof ensureStableSeizeLink & {
+  __setCurrentHref?: (href?: string) => void;
+};
+
 const setEnsureCurrentHref = (href?: string) => {
-  const setter = (ensureStableSeizeLink as any).__setCurrentHref;
-  if (typeof setter === "function") {
-    setter(href);
-  }
+  const ensureWithSetter = ensureStableSeizeLink as EnsureStableSeizeLinkWithSetter;
+  ensureWithSetter.__setCurrentHref?.(href);
 };
 
 describe("createLinkRenderer", () => {
@@ -227,7 +234,6 @@ describe("createLinkRenderer", () => {
       "data-href",
       "https://6529.io/messages?wave=current-wave&drop=drop-123"
     );
-    setEnsureCurrentHref();
   });
 
   it("normalizes drop links shared from other paths", () => {
@@ -244,7 +250,6 @@ describe("createLinkRenderer", () => {
       "data-href",
       "https://6529.io/messages?wave=current-wave&drop=drop-456"
     );
-    setEnsureCurrentHref();
   });
 
   it.each([
