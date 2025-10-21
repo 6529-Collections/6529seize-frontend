@@ -90,8 +90,9 @@ describe('AllowlistToolCommonModalWrapper', () => {
         <div>content</div>
       </AllowlistToolCommonModalWrapper>
     );
-    const overlay = document.querySelector('.tw-bg-opacity-75') as HTMLElement;
-    fireEvent.mouseDown(overlay);
+    const overlay = document.querySelector('.tw-bg-opacity-50');
+    expect(overlay).not.toBeNull();
+    fireEvent.mouseDown(overlay as Element);
     expect(handleClose).toHaveBeenCalledTimes(1);
   });
 

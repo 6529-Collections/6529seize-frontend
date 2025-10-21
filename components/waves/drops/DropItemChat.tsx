@@ -45,7 +45,7 @@ export default function DropItemChat({
               <span className="tw-mb-0 tw-text-[11px] tw-leading-0 -tw-mt-1 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out tw-no-underline">
                 <Link
                   className="tw-no-underline"
-                  href={`/my-stream/wave/${drop.wave.id}`}>
+                  href={relativeLink}>
                   {drop.wave.name}
                 </Link>
               </span>

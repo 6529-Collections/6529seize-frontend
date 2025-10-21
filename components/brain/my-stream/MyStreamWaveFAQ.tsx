@@ -31,12 +31,12 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
   }, [setActiveContentTab]);
 
   const containerClassName = useMemo(() => {
-    return "tw-w-full tw-flex tw-flex-col lg:tw-pt-2 lg:tw-pr-2 tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-desktop-hover:hover:desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-h-full";
+    return "tw-w-full tw-flex tw-flex-col tw-pt-4 lg:tw-pr-2 tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-desktop-hover:hover:desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-h-full";
   }, []);
 
   return (
     <div className={containerClassName} style={faqViewStyle}>
-      <div className="tw-space-y-4 md:tw-space-y-6 tw-mb-4 tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
+      <div className="tw-space-y-4 md:tw-space-y-6 tw-mb-4 tw-px-2 sm:tw-px-4">
         <section className="tw-bg-iron-900 tw-rounded-lg tw-px-4 tw-py-5 sm:tw-p-6 tw-border tw-border-iron-800 tw-border-solid tw-shadow-sm">
           <p className="tw-text-iron-50 tw-font-semibold tw-text-xl sm:tw-text-2xl tw-mb-0">
             The Memes - Main Stage FAQ
@@ -352,7 +352,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
             existing work and story and someone may nominate you:
           </p>
           <Link
-            href="https://6529.io/my-stream?wave=0ecb95d0-d8f2-48e8-8137-bfa71ee8593c"
+            href="https://6529.io/waves?wave=0ecb95d0-d8f2-48e8-8137-bfa71ee8593c"
             target="_blank"
             rel="noopener noreferrer"
             className="tw-group tw-flex tw-text-base tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors tw-mb-4">
@@ -395,7 +395,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
             (after you have read the artist brief)
           </p>
           <Link
-            href="https://6529.io/my-stream?wave=e2dae377-d27d-4a69-8b77-38d88fad4d01"
+            href="https://6529.io/waves?wave=e2dae377-d27d-4a69-8b77-38d88fad4d01"
             target="_blank"
             rel="noopener noreferrer"
             className="tw-group tw-flex tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors">

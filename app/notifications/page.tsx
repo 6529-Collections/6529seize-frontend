@@ -3,13 +3,14 @@ import {
   dehydrate,
   HydrationBoundary,
 } from "@tanstack/react-query";
-import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
-import { prefetchAuthenticatedNotifications } from "@/helpers/stream.helpers";
 import { getAppMetadata } from "@/components/providers/metadata";
 import NotificationsPageClient from "./page.client";
 import { cookies } from "next/headers";
+import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
+import { prefetchAuthenticatedNotifications } from "@/helpers/stream.helpers";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { Time } from "@/helpers/time";
+import type { Metadata } from "next";
 
 export default async function NotificationsPage() {
   const queryClient = new QueryClient();
@@ -37,7 +38,7 @@ export default async function NotificationsPage() {
   );
 }
 
-export async function generateMetadata() {
+export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({
     title: "Notifications | My Stream",
     description: "Brain",

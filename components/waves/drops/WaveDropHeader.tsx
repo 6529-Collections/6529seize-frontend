@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cicToType } from "@/helpers/Helpers";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
@@ -120,16 +121,26 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
         </div>
       </div>
       <div>
-        {showWaveInfo && (
-          <Link
-            onClick={(e) =>
-              handleNavigation(e, `/my-stream?wave=${drop.wave.id}`)
-            }
-            href={`/my-stream?wave=${drop.wave.id}`}
-            className="tw-mb-0 tw-text-[11px] tw-leading-0 -tw-mt-1 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
-          >
-            {drop.wave.name}
-          </Link>
+        {showWaveInfo && drop.wave && (
+          (() => {
+            const waveMeta = (drop.wave as unknown as {
+              chat?: { scope?: { group?: { is_direct_message?: boolean } } };
+            })?.chat;
+            const waveHref = getWaveRoute({
+              waveId: drop.wave.id,
+              isDirectMessage: waveMeta?.scope?.group?.is_direct_message ?? false,
+              isApp: false,
+            });
+            return (
+              <Link
+                onClick={(e) => handleNavigation(e, waveHref)}
+                href={waveHref}
+                className="tw-mb-0 tw-text-[11px] tw-leading-0 -tw-mt-1 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
+              >
+                {drop.wave.name}
+              </Link>
+            );
+          })()
         )}
       </div>
 

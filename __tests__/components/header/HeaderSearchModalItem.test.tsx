@@ -9,6 +9,15 @@ jest.mock("react-use", () => ({
   useHoverDirty: (...args: any[]) => useHoverDirty(...args),
 }));
 
+jest.mock("../../../hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    isApp: false,
+    isMobileDevice: false,
+    hasTouchScreen: false,
+  })),
+}));
+
 jest.mock("next/link", () => ({
   __esModule: true,
   default: ({ href, children, onClick }: any) => (
@@ -138,7 +147,7 @@ it("renders wave item and uses query to build path", () => {
     />
   );
   const link = screen.getByTestId("link");
-  expect(link).toHaveAttribute("href", "/my-stream?wave=wave1");
+  expect(link).toHaveAttribute("href", "/waves?wave=wave1");
   expect(link.textContent).toContain("Wave 1");
   expect(link.textContent).toContain("Wave #2");
   expect(screen.getByTestId("media").textContent).toContain("pic.png");
