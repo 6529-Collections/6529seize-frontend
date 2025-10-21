@@ -123,10 +123,13 @@ export const ensureStableSeizeLink = (
       return href;
     }
 
+    const globalWindow =
+      typeof globalThis !== "undefined"
+        ? (globalThis as typeof globalThis & { window?: Window }).window
+        : undefined;
     const resolvedCurrentHref =
-      currentHref ??
-      (typeof window !== "undefined" ? window.location.href : undefined);
-    if (!resolvedCurrentHref) {
+      currentHref ?? globalWindow?.location?.href ?? undefined;
+    if (resolvedCurrentHref === undefined || resolvedCurrentHref === "") {
       return href;
     }
 
@@ -148,7 +151,9 @@ export const ensureStableSeizeLink = (
 
     const path = currentUrl.pathname || "/";
 
-    return `${baseUrl.origin}${path}${query ? `?${query}` : ""}${hash}`;
+    const querySuffix = query ? `?${query}` : "";
+
+    return `${baseUrl.origin}${path}${querySuffix}${hash}`;
   } catch {
     return href;
   }

@@ -11,19 +11,13 @@ jest.mock("@/components/drops/view/part/dropPartMarkdown/youtubePreview", () => 
   default: ({ href }: { href: string }) => (
     <div data-testid="youtube-preview" data-href={href} />
   ),
-j jest.mock("@/components/waves/drops/DropItemChat", () => ({
-  __esModule: true,
-- default: ({ dropId }: { dropId: string }) => <div data-testid="drop-card" data-drop={dropId} />,
-+ default: ({ dropId, href }: { dropId: string; href: string }) => (
-+   <div data-testid="drop-card" data-drop={dropId} data-href={href}>
-+     <div data-testid="chat-buttons" data-href={href} />
-+   </div>
-+ ),
 }));
 
 jest.mock("@/components/drops/view/part/DropPartMarkdownImage", () => ({
   __esModule: true,
-  default: ({ src }: { src: string }) => <img data-testid="markdown-image" src={src} alt="" />,
+  default: ({ src }: { src: string }) => (
+    <img data-testid="markdown-image" src={src} alt="" />
+  ),
 }));
 
 jest.mock("@/components/drops/view/part/dropPartMarkdown/renderers", () => ({
