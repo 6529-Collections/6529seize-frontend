@@ -21,7 +21,8 @@ export default function CommonDropdownItemsDefaultWrapper<T>({
 }) {
   const listRef = useRef<HTMLDivElement>(null);
   useClickAway(listRef, (e) => {
-    if (e.target !== buttonRef.current) {
+    const target = e.target as Node | null;
+    if (!buttonRef.current?.contains(target)) {
       setOpen(false);
     }
   });
@@ -33,9 +34,9 @@ export default function CommonDropdownItemsDefaultWrapper<T>({
     if (!dynamicPosition) return;
     if (buttonPosition?.right && dropdownRef.current) {
       const { right } = buttonPosition;
-      dropdownRef.current.style.left = `${
-        right - dropdownRef.current.offsetWidth
-      }px`;
+      const el = dropdownRef.current;
+      const left = Math.max(0, right - el.offsetWidth);
+      el.style.left = `${left}px`;
     }
   }, [buttonPosition, dropdownRef, dynamicPosition]);
 

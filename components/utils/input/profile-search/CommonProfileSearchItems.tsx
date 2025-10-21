@@ -33,7 +33,10 @@ export default function CommonProfileSearchItems({
         >
           <div className="tw-absolute tw-overflow-hidden tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
             <div className="tw-py-1 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto">
-              <ul className="tw-flex tw-flex-col tw-gap-y-1 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
+              <ul
+                className="tw-flex tw-flex-col tw-gap-y-1 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none"
+                role="listbox"
+              >
                 {profiles.length ? (
                   profiles.map((profile, index) => (
                     <CommonProfileSearchItem
@@ -45,7 +48,10 @@ export default function CommonProfileSearchItems({
                     />
                   ))
                 ) : (
-                  <li className="tw-py-2 tw-w-full tw-h-full tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-medium tw-text-white tw-rounded-lg tw-relative tw-select-none tw-px-2">
+                  <li
+                    className="tw-py-2 tw-w-full tw-h-full tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-medium tw-text-white tw-rounded-lg tw-relative tw-select-none tw-px-2"
+                    role="presentation"
+                  >
                     {noResultsText}
                   </li>
                 )}

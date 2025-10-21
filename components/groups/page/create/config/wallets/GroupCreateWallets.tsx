@@ -31,6 +31,18 @@ const walletListsMatch = (
   );
 };
 
+const dedupeWallets = (wallets: readonly string[]): string[] => {
+  const seen = new Set<string>();
+  return wallets.filter((wallet) => {
+    const normalised = wallet.toLowerCase();
+    if (seen.has(normalised)) {
+      return false;
+    }
+    seen.add(normalised);
+    return true;
+  });
+};
+
 export enum GroupCreateWalletsType {
   INCLUDE = "INCLUDE",
   EXCLUDE = "EXCLUDE",
@@ -71,14 +83,15 @@ export default function GroupCreateWallets({
   );
 
   useEffect(() => {
-    if (walletListsMatch(wallets, uploadedWallets)) {
-      return;
-    }
     if (!wallets || !wallets.length) {
       setUploadedWallets(null);
       return;
     }
-    setUploadedWallets(Array.from(new Set(wallets)));
+    const dedupedWallets = dedupeWallets(wallets);
+    if (walletListsMatch(dedupedWallets, uploadedWallets)) {
+      return;
+    }
+    setUploadedWallets(dedupedWallets);
   }, [wallets, uploadedWallets]);
 
   useEffect(
@@ -107,25 +120,37 @@ export default function GroupCreateWallets({
   };
 
   const onUploadedWalletsChange = (newV: string[] | null) =>
-    setUploadedWallets(newV ? Array.from(new Set(newV)) : null);
+    setUploadedWallets(newV ? dedupeWallets(newV) : null);
 
   const onEmmaWalletsChange = (newV: string[] | null) =>
-    setEmmaWallets(newV ? Array.from(new Set(newV)) : null);
+    setEmmaWallets(newV ? dedupeWallets(newV) : null);
 
   useEffect(() => {
     const uploaded = uploadedWallets ?? [];
     const emma = emmaWallets ?? [];
     const selected = selectedWallets ?? [];
-    const all = Array.from(new Set([...uploaded, ...emma, ...selected]));
+    const combined = [...uploaded, ...emma, ...selected];
     if (
       iAmIncluded &&
       connectedProfile?.primary_wallet &&
       type === GroupCreateWalletsType.INCLUDE
     ) {
-      all.push(connectedProfile.primary_wallet);
+      combined.push(connectedProfile.primary_wallet);
     }
-    setWallets(all.length ? Array.from(new Set(all)) : null);
-  }, [uploadedWallets, emmaWallets, selectedWallets]);
+    const dedupedAll = combined.length ? dedupeWallets(combined) : [];
+    const next = dedupedAll.length ? dedupedAll : null;
+    if (!walletListsMatch(next, wallets)) {
+      setWallets(next);
+    }
+  }, [
+    uploadedWallets,
+    emmaWallets,
+    selectedWallets,
+    iAmIncluded,
+    connectedProfile?.primary_wallet,
+    type,
+    wallets,
+  ]);
 
   const removeWallets = () => {
     setUploadedWallets(null);
@@ -137,7 +162,7 @@ export default function GroupCreateWallets({
     setSelectedIdentities((prev) => prev.filter((i) => i.wallet !== wallet));
   };
 
-  const isOverLimit = wallets?.length && wallets.length > walletsLimit;
+  const isOverLimit = (wallets?.length ?? 0) > walletsLimit;
 
   return (
     <div className="tw-col-span-full">

@@ -34,7 +34,9 @@ export default function WaveGroup({
 
   const canEditGroup = () => getShowEdit() && !scope.group?.is_direct_message;
   const [showEdit, setShowEdit] = useState(canEditGroup());
-  useEffect(() => setShowEdit(canEditGroup()), [connectedProfile, wave]);
+  useEffect(() => {
+    setShowEdit(canEditGroup());
+  }, [connectedProfile, activeProfileProxy, wave, scope]);
 
   return (
     <div className="tw-relative tw-group tw-text-sm tw-flex tw-items-center tw-justify-between tw-w-full tw-h-6">

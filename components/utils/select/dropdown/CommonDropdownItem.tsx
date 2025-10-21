@@ -1,6 +1,8 @@
 "use client";
 
 import { cloneElement, isValidElement, useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
 import { CommonSelectItemProps } from "../CommonSelect";
 import { SortDirection } from "@/entities/ISort";
@@ -59,20 +61,11 @@ export default function CommonDropdownItem<T, U = unknown>(
             </span>
           )}
           {item.value === activeItem && (
-            <svg
+            <FontAwesomeIcon
+              icon={faCheck}
               className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-primary-300 tw-transition tw-duration-200 tw-ease-out"
-              viewBox="0 0 24 24"
-              fill="none"
               aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M20 6L9 17L4 12"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            />
           )}
         </div>
         {isValidElement(children) &&

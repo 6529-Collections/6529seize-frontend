@@ -2,9 +2,11 @@ import { useMemo } from "react";
 import { useWaveData } from "@/hooks/useWaveData";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import { useAuth } from "@/components/auth/Auth";
+import { isGroupAuthor as computeIsGroupAuthor } from "@/components/waves/specs/groups/group/edit/buttons/utils/waveGroupEdit";
 import { ApiWaveScope } from "@/generated/models/ApiWaveScope";
 import { ApiGroup } from "@/generated/models/ApiGroup";
 import { ApiWave } from "@/generated/models/ApiWave";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 interface WaveScopeSummary {
   readonly hasGroup: boolean;
@@ -31,23 +33,11 @@ interface UseWaveScopePermissionsResult {
 
 const buildScopeSummary = (
   scope: ApiWaveScope,
-  currentProfileId: string | number | null,
-  currentProfileHandle: string | null
+  connectedProfile: ApiIdentity | null
 ): WaveScopeSummary => {
   const group = scope.group ?? null;
   const hasGroup = group !== null;
-  const matchesId =
-    hasGroup &&
-    group.author?.id !== undefined &&
-    group.author?.id !== null &&
-    currentProfileId !== null &&
-    String(group.author.id) === String(currentProfileId);
-  const matchesHandle =
-    hasGroup &&
-    !!currentProfileHandle &&
-    !!group.author?.handle &&
-    group.author.handle === currentProfileHandle;
-  const isGroupAuthor = hasGroup ? matchesId || matchesHandle : false;
+  const isGroupAuthor = computeIsGroupAuthor(group, connectedProfile);
 
   return {
     hasGroup,
@@ -70,8 +60,6 @@ export function useWaveScopePermissions(
   const eligibility = normalizedWaveId
     ? getEligibility(normalizedWaveId)
     : null;
-  const currentProfileId = connectedProfile?.id ?? null;
-  const currentProfileHandle = connectedProfile?.handle ?? null;
 
   const scopes = useMemo(() => {
     if (!wave) {
@@ -81,26 +69,22 @@ export function useWaveScopePermissions(
     return {
       view: buildScopeSummary(
         wave.visibility.scope,
-        currentProfileId,
-        currentProfileHandle
+        connectedProfile
       ),
       drop: buildScopeSummary(
         wave.participation.scope,
-        currentProfileId,
-        currentProfileHandle
+        connectedProfile
       ),
       vote: buildScopeSummary(
         wave.voting.scope,
-        currentProfileId,
-        currentProfileHandle
+        connectedProfile
       ),
       chat: buildScopeSummary(
         wave.chat.scope,
-        currentProfileId,
-        currentProfileHandle
+        connectedProfile
       ),
     };
-  }, [wave, currentProfileId, currentProfileHandle]);
+  }, [wave, connectedProfile, connectedProfile?.id, connectedProfile?.handle]);
 
   const isWaveAdmin = eligibility?.authenticated_user_admin ?? false;
 

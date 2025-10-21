@@ -13,9 +13,9 @@ This table is the single source of truth for active and historical tickets. Keep
 | TKT-0007 | Stabilize group name search input | In-Progress | P0 | simo6529 | [#1540](https://github.com/6529-Collections/6529seize-frontend/pull/1540) | 2025-10-14 |
 | TKT-0008 | Reconcile Codex board merge conflicts | In-Progress | P1 | openai-assistant | [#1539](https://github.com/6529-Collections/6529seize-frontend/pull/1539) | 2025-10-14 |
 | TKT-0009 | Refactor Brain notifications shell for modular clarity | In-Progress | P1 | simo6529 | [#1545](https://github.com/6529-Collections/6529seize-frontend/pull/1545) | 2025-10-15 |
-| TKT-0010 | Fix wave group menu overflow clipping | In-Progress | P1 | simo6529 | — | 2025-10-15 |
-| TKT-0011 | Restore identity search keyboard navigation | In-Progress | P1 | openai-assistant | — | 2025-10-16 |
-| TKT-0012 | Refactor wave group edit buttons for modular clarity | In-Progress | P1 | openai-assistant | — | 2025-10-21 |
+| TKT-0010 | Fix wave group menu overflow clipping | In-Progress | P1 | simo6529 | [#1544](https://github.com/6529-Collections/6529seize-frontend/pull/1544) | 2025-10-17 |
+| TKT-0011 | Restore identity search keyboard navigation | In-Progress | P1 | openai-assistant | [#1544](https://github.com/6529-Collections/6529seize-frontend/pull/1544) | 2025-10-17 |
+| TKT-0012 | Refactor wave group edit buttons for modular clarity | In-Progress | P1 | openai-assistant | [#1544](https://github.com/6529-Collections/6529seize-frontend/pull/1544) | 2025-10-17 |
 
 ## Usage Guidelines
 

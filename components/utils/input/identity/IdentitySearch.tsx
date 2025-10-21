@@ -231,7 +231,6 @@ export default function IdentitySearch({
       <input
         ref={inputRef}
         type="text"
-        autoFocus={autoFocus}
         value={searchCriteria ?? ""}
         onChange={(e) => onSearchCriteriaChange(e.target.value)}
         onFocus={() => onFocusChange(true)}
