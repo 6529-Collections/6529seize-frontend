@@ -77,10 +77,10 @@ const HighlightDropWrapper = forwardRef<
       clearTimers();
       setPhase("highlight");
 
-      highlightTimeoutRef.current = window.setTimeout(() => {
+      highlightTimeoutRef.current = globalThis.setTimeout(() => {
         setPhase("fading");
 
-        fadeTimeoutRef.current = window.setTimeout(() => {
+        fadeTimeoutRef.current = globalThis.setTimeout(() => {
           setPhase("idle");
         }, fadeMs) as unknown as number;
       }, highlightMs) as unknown as number;
@@ -98,10 +98,10 @@ const HighlightDropWrapper = forwardRef<
             : ({
                 left: 0,
                 top: 0,
-                right: window.innerWidth,
-                bottom: window.innerHeight,
-                width: window.innerWidth,
-                height: window.innerHeight,
+                right: globalThis.innerWidth,
+                bottom: globalThis.innerHeight,
+                width: globalThis.innerWidth,
+                height: globalThis.innerHeight,
               } as DOMRect);
 
           const interLeft = Math.max(elRect.left, containerRect.left);
