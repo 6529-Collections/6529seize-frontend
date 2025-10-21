@@ -162,7 +162,6 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
         </div>
       </div>
 
-      {/* Overlay backdrop when right sidebar is open - moved outside motion container */}
       {rightVariant === "overlay" && (
         <BrainRightSidebar
           variant="overlay"
