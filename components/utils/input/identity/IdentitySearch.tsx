@@ -85,14 +85,16 @@ export default function IdentitySearch({
 
   const onFocusChange = (newV: boolean) => {
     if (newV) {
-      setIsOpen(true);
+      setIsOpen(!!searchCriteria?.length);
       return;
     }
+    setIsOpen(false);
     setHighlightedIndex(null);
   };
 
   const onSearchCriteriaChange = (newV: string | null) => {
     setSearchCriteria(newV);
+    setIsOpen(!!newV?.length);
     if (!newV) {
       setIdentity(null);
     }
