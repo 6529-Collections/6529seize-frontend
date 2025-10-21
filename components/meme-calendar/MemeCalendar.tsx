@@ -1,5 +1,6 @@
 "use client";
 
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 import {
   faCaretLeft,
   faCaretRight,
@@ -204,9 +205,8 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
           const cellDateUtcDay = new Date(Date.UTC(year, month, day));
           const col = idx % 7;
           const row = Math.floor(idx / 7);
-          let tooltipPlace: "top" | "bottom" | "left" | "right";
+          let tooltipPlace: "top" | "bottom" | "right";
           if (col <= 1) tooltipPlace = "right";
-          else if (col >= 4) tooltipPlace = "left";
           else if (row <= 1) tooltipPlace = "bottom";
           else tooltipPlace = "top";
 
@@ -292,7 +292,7 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
                 : formatFullDate(mintInstantUtc, displayTz);
             const oneLineDivWithNote = noteTooltipContent
               ? `<div style="margin-bottom:12px">${oneLine}<br />
-                <span style="font-size:12px; color: #666;">*${noteTooltipContent}</span></div>`
+                <span style="font-size:11px; color: #666;">*${noteTooltipContent}</span></div>`
               : `<div style="margin-bottom:12px">${oneLine}</div>`;
             const invites =
               mintInstantUtc.getTime() > now.getTime()
@@ -844,6 +844,7 @@ interface MemeCalendarProps {
 }
 
 export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
+  const isMobile = useIsMobileScreen();
   const [seasonIndex, setSeasonIndex] = useState<number>(() => {
     try {
       return getSeasonIndexForDate(new Date());
@@ -1255,7 +1256,9 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
         id="meme-tooltip"
         clickable
         openOnClick
-        className="tw-max-w-[22rem] !tw-opacity-[0.975] !tw-text-black !tw-rounded-md !tw-border !tw-border-solid !tw-border-[#222222] !tw-z-[1000] !tw-whitespace-normal"
+        className={`!tw-opacity-[0.975] !tw-text-black !tw-rounded-md !tw-border !tw-border-solid !tw-border-[#222222] !tw-z-[1000] !tw-whitespace-normal ${
+          isMobile ? "tw-max-w-[15rem]" : "tw-max-w-[22rem] "
+        }`}
       />
     </div>
   );
