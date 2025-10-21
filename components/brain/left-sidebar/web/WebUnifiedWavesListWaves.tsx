@@ -98,6 +98,9 @@ const WebUnifiedWavesListWaves = forwardRef<
     const shouldRenderCreateWaveButton = !isApp && !!connectedProfile;
     const showCreateTooltip = !isTouchDevice && isCondensed;
     const createWaveTooltipId = "create-wave-tooltip";
+    const createWaveTooltipProps = showCreateTooltip
+      ? { "data-tooltip-id": createWaveTooltipId }
+      : {};
 
     const { pinnedWaves, regularWaves } = useMemo(() => {
       const pinned: MinimalWave[] = [];
@@ -140,9 +143,7 @@ const WebUnifiedWavesListWaves = forwardRef<
                       loading={false}
                       disabled={false}
                       padding="tw-px-2 tw-py-2"
-                      {...(showCreateTooltip
-                        ? { "data-tooltip-id": createWaveTooltipId }
-                        : {})}
+                      {...createWaveTooltipProps}
                     >
                       <FontAwesomeIcon
                         icon={faPlus}
