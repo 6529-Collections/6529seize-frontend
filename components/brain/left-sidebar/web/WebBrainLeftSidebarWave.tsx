@@ -10,6 +10,7 @@ import BrainLeftSidebarWaveDropTime from "../waves/BrainLeftSidebarWaveDropTime"
 import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
 import BrainLeftSidebarWavePin from "../waves/BrainLeftSidebarWavePin";
 import { formatAddress, isValidEthAddress } from "../../../../helpers/Helpers";
+import { Tooltip } from "react-tooltip";
 
 interface WebBrainLeftSidebarWaveProps {
   readonly wave: MinimalWave;
@@ -29,6 +30,19 @@ const WebBrainLeftSidebarWave: React.FC<WebBrainLeftSidebarWaveProps> = ({
   const searchParams = useSearchParams();
   const prefetchWaveData = usePrefetchWaveData();
   const isDropWave = wave.type !== ApiWaveType.Chat;
+
+  const globalScope = globalThis as typeof globalThis & {
+    window?: Window;
+    navigator?: Navigator;
+  };
+  const browserWindow = globalScope.window;
+  const browserNavigator = globalScope.navigator;
+
+  const isTouchDevice =
+    !!browserWindow &&
+    ("ontouchstart" in browserWindow ||
+      (browserNavigator?.maxTouchPoints ?? 0) > 0 ||
+      browserWindow.matchMedia?.("(pointer: coarse)")?.matches);
 
   const getHref = (waveId: string) => {
     const currentWaveId = searchParams?.get("wave") ?? undefined;
@@ -76,6 +90,8 @@ const WebBrainLeftSidebarWave: React.FC<WebBrainLeftSidebarWaveProps> = ({
   };
 
   const isActive = wave.id === (searchParams?.get("wave") ?? undefined);
+  const tooltipId = `wave-condensed-${wave.id}`;
+  const showTooltip = condensed && !isTouchDevice;
 
   if (condensed) {
     return (
@@ -90,6 +106,7 @@ const WebBrainLeftSidebarWave: React.FC<WebBrainLeftSidebarWaveProps> = ({
           href={getHref(wave.id)}
           onMouseEnter={() => onWaveHover(wave.id)}
           className="tw-flex tw-items-center tw-justify-center tw-no-underline"
+          {...(showTooltip ? { "data-tooltip-id": tooltipId } : {})}
         >
           <div className="tw-relative">
             <div
@@ -127,6 +144,27 @@ const WebBrainLeftSidebarWave: React.FC<WebBrainLeftSidebarWaveProps> = ({
             </div>
           </div>
         </Link>
+        {showTooltip && (
+          <Tooltip
+            id={tooltipId}
+            place="right"
+            positionStrategy="fixed"
+            style={{
+              background: "#37373E",
+              color: "white",
+              padding: "6px 10px",
+              fontSize: "12px",
+              fontWeight: 500,
+              borderRadius: "6px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+              zIndex: 10000,
+            }}
+          >
+            <span className="tw-text-xs">
+              {formattedWaveName}
+            </span>
+          </Tooltip>
+        )}
       </div>
     );
   }
