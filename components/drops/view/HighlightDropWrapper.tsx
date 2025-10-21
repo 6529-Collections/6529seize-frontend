@@ -8,6 +8,8 @@ import {
   useRef,
   useState,
 } from "react";
+import { useIntersectionObserver } from "@/hooks/scroll/useIntersectionObserver";
+import { classNames } from "@/helpers/Helpers";
 
 interface HighlightDropWrapperProps {
   readonly active: boolean;
@@ -41,25 +43,30 @@ const HighlightDropWrapper = forwardRef<
     const [phase, setPhase] = useState<"idle" | "highlight" | "fading">(
       "idle"
     );
-    const rafRef = useRef<number | null>(null);
     const highlightTimeoutRef = useRef<number | null>(null);
     const fadeTimeoutRef = useRef<number | null>(null);
+    const rafRef = useRef<number | null>(null);
+    const visibilityStartTimeRef = useRef<number | null>(null);
 
     const lastExtendedRef = useRef(false);
     const prevActiveRef = useRef(false);
+    const maxVisibilityWaitMs = 4000;
 
     const setNode = (node: HTMLDivElement | null) => {
       innerRef.current = node;
-      if (typeof forwardedRef === "function") forwardedRef(node);
-      else if (forwardedRef)
-        (
-          forwardedRef as React.MutableRefObject<HTMLDivElement | null>
-        ).current = node;
+      if (typeof forwardedRef === "function") {
+        forwardedRef(node);
+      } else if (forwardedRef) {
+        forwardedRef.current = node;
+      }
     };
 
     const stopRAF = useCallback(() => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
       rafRef.current = null;
+      visibilityStartTimeRef.current = null;
     }, []);
 
     const clearTimers = useCallback(() => {
@@ -89,7 +96,23 @@ const HighlightDropWrapper = forwardRef<
     const trackVisibilityOnce = useCallback(() => {
       stopRAF();
 
+      const getNow =
+        typeof performance !== "undefined" && typeof performance.now === "function"
+          ? () => performance.now()
+          : () => Date.now();
+
+      const startTimestamp = getNow();
+      visibilityStartTimeRef.current = startTimestamp;
+
       const checkVisibility = () => {
+        const currentTimestamp = getNow();
+        const startTime = visibilityStartTimeRef.current ?? startTimestamp;
+        const elapsed = currentTimestamp - startTime;
+        if (elapsed >= maxVisibilityWaitMs) {
+          stopRAF();
+          return;
+        }
+
         const el = innerRef.current;
         if (el) {
           const elRect = el.getBoundingClientRect();
@@ -123,11 +146,46 @@ const HighlightDropWrapper = forwardRef<
           }
         }
 
-        rafRef.current = requestAnimationFrame(checkVisibility);
+        rafRef.current = globalThis.requestAnimationFrame(checkVisibility);
       };
 
-      rafRef.current = requestAnimationFrame(checkVisibility);
-    }, [runHighlightWindow, scrollContainer, stopRAF, visibilityThreshold]);
+      rafRef.current = globalThis.requestAnimationFrame(checkVisibility);
+    }, [
+      maxVisibilityWaitMs,
+      runHighlightWindow,
+      scrollContainer,
+      stopRAF,
+      visibilityThreshold,
+    ]);
+
+    const handleIntersection = useCallback(
+      (entry: IntersectionObserverEntry) => {
+        if (!active) {
+          return;
+        }
+
+        if (
+          entry.intersectionRatio >= visibilityThreshold &&
+          !lastExtendedRef.current
+        ) {
+          lastExtendedRef.current = true;
+          runHighlightWindow();
+          stopRAF();
+        }
+      },
+      [active, runHighlightWindow, scrollContainer, stopRAF, visibilityThreshold]
+    );
+
+    useIntersectionObserver(
+      innerRef,
+      {
+        root: scrollContainer ?? undefined,
+        threshold: visibilityThreshold,
+        freezeOnceVisible: true,
+      },
+      handleIntersection,
+      active
+    );
 
     useEffect(() => {
       return () => {
@@ -143,6 +201,12 @@ const HighlightDropWrapper = forwardRef<
     }, [phase, stopRAF]);
 
     useEffect(() => {
+      if (!active) {
+        stopRAF();
+      }
+    }, [active, stopRAF]);
+
+    useEffect(() => {
       const wasActive = prevActiveRef.current;
       prevActiveRef.current = active;
 
@@ -156,17 +220,14 @@ const HighlightDropWrapper = forwardRef<
     const isHighlighted = phase === "highlight";
     const isFading = phase === "fading";
 
-    const classes = [
+    const transitionClasses =
+      isHighlighted || isFading ? "tw-transition-colors tw-duration-500" : "";
+    const classes = classNames(
       className,
-      isHighlighted
-        ? "tw-bg-[#25263f] tw-transition-colors tw-duration-500"
-        : "",
-      !isHighlighted && isFading
-        ? "tw-bg-transparent tw-transition-colors tw-duration-500"
-        : "",
-    ]
-      .filter(Boolean)
-      .join(" ");
+      transitionClasses,
+      isHighlighted ? "tw-bg-[#25263f]" : "",
+      !isHighlighted && isFading ? "tw-bg-transparent" : ""
+    );
 
     return (
       <div ref={setNode} id={id} className={classes}>
