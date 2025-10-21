@@ -15,8 +15,11 @@ export default function CommonProfileSearchItem({
   readonly onProfileSelect: (newV: CommunityMemberMinimal | null) => void;
   readonly isHighlighted?: boolean;
 }) {
-  const handleOrWallet = profile.handle ?? profile.wallet;
-  const isSelected = selected?.toLowerCase() === handleOrWallet.toLowerCase();
+  const selectableValue =
+    profile.primary_wallet ?? profile.wallet ?? profile.handle ?? null;
+  const isSelected =
+    typeof selectableValue === "string" &&
+    selected?.toLowerCase() === selectableValue.toLowerCase();
   const title = profile.handle ?? profile.display;
 
   const onProfileClick = () => onProfileSelect(profile);

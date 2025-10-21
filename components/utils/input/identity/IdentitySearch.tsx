@@ -15,6 +15,20 @@ export enum IdentitySearchSize {
 
 const MIN_SEARCH_LENGTH = 3;
 
+const getSelectableIdentity = (
+  profile: CommunityMemberMinimal | null | undefined
+): string | null => {
+  if (!profile) {
+    return null;
+  }
+  return (
+    profile.primary_wallet ??
+    profile.wallet ??
+    profile.handle ??
+    null
+  );
+};
+
 export default function IdentitySearch({
   identity,
   size = IdentitySearchSize.MD,
@@ -48,8 +62,6 @@ export default function IdentitySearch({
 
   const randomId = getRandomObjectId();
 
-  useEffect(() => setSearchCriteria(identity), [identity]);
-
   const [searchCriteria, setSearchCriteria] = useState<string | null>(identity);
   const [debouncedValue, setDebouncedValue] = useState<string | null>(
     searchCriteria
@@ -74,11 +86,25 @@ export default function IdentitySearch({
     enabled: !!debouncedValue && debouncedValue.length >= MIN_SEARCH_LENGTH,
   });
 
+  const selectionUpdateRef = useRef(false);
+
+  useEffect(() => {
+    if (selectionUpdateRef.current) {
+      selectionUpdateRef.current = false;
+      return;
+    }
+    setSearchCriteria(identity);
+  }, [identity]);
+
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
-  const onValueChange = (newValue: string | null) => {
+  const onValueChange = (
+    newValue: string | null,
+    displayValue?: string | null
+  ) => {
+    selectionUpdateRef.current = true;
     setIdentity(newValue);
-    setSearchCriteria(newValue);
+    setSearchCriteria(displayValue ?? newValue);
     setIsOpen(false);
     setHighlightedIndex(null);
   };
@@ -147,7 +173,21 @@ export default function IdentitySearch({
       event.preventDefault();
       const profile = data[highlightedIndex];
       if (profile) {
-        onValueChange(profile.handle ?? profile.wallet ?? null);
+        const nextIdentity = getSelectableIdentity(profile);
+        if (!nextIdentity) {
+          return;
+        }
+
+        const displayValue =
+          profile.handle ?? profile.display ?? nextIdentity;
+        onValueChange(nextIdentity, displayValue);
+
+        const formElement = inputRef.current?.form ?? null;
+        if (formElement) {
+          setTimeout(() => {
+            formElement.requestSubmit();
+          }, 0);
+        }
       }
     }
   };
@@ -166,7 +206,7 @@ export default function IdentitySearch({
 
     if (identity) {
       const nextIndex = data.findIndex((profile) => {
-        const value = profile.handle ?? profile.wallet;
+        const value = getSelectableIdentity(profile);
         return value?.toLowerCase() === identity.toLowerCase();
       });
 
@@ -253,9 +293,15 @@ export default function IdentitySearch({
         searchCriteria={searchCriteria}
         profiles={data ?? []}
         highlightedIndex={highlightedIndex}
-        onProfileSelect={(profile) =>
-          onValueChange(profile?.handle ?? profile?.wallet ?? null)
-        }
+        onProfileSelect={(profile) => {
+          const nextIdentity = getSelectableIdentity(profile);
+          if (!nextIdentity) {
+            return;
+          }
+          const displayValue =
+            profile.handle ?? profile.display ?? nextIdentity;
+          onValueChange(nextIdentity, displayValue);
+        }}
       />
       {error && (
         <div className="tw-pt-1.5 tw-relative tw-flex tw-items-center tw-gap-x-2">
