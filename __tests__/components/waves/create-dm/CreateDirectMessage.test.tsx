@@ -41,6 +41,6 @@ describe("CreateDirectMessage", () => {
     setup();
     await user.click(screen.getByText("add"));
     await user.click(screen.getByRole("button", { name: /create/i }));
-    expect(push).toHaveBeenCalledWith("/my-stream?view=messages&wave=1");
+    expect(push).toHaveBeenCalledWith("/messages?wave=1");
   });
 });

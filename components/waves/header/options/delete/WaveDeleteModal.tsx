@@ -1,14 +1,14 @@
 "use client";
 
-import { useContext, useRef, useState } from "react";
-import { ApiWave } from "@/generated/models/ApiWave";
 import { AuthContext } from "@/components/auth/Auth";
-import { useClickAway, useKeyPressEvent } from "react-use";
-import { createPortal } from "react-dom";
-import { useMutation } from "@tanstack/react-query";
-import { commonApiDelete } from "@/services/api/common-api";
-import { useRouter } from "next/navigation";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { commonApiDelete } from "@/services/api/common-api";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useContext, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { useClickAway, useKeyPressEvent } from "react-use";
 
 export default function WaveDeleteModal({
   wave,
@@ -36,7 +36,7 @@ export default function WaveDeleteModal({
         type: "warning",
       });
       invalidateDrops();
-      router.push("/my-stream");
+      router.push("/waves");
     },
     onError: (error) => {
       setToast({
@@ -63,8 +63,8 @@ export default function WaveDeleteModal({
   };
 
   return createPortal(
-    <div className="tw-cursor-default tw-relative tw-z-50">
-      <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
+    <div className="tw-cursor-default tw-relative tw-z-[80]">
+      <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50"></div>
       <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
           <div

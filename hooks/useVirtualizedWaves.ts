@@ -14,7 +14,7 @@ export const SENTINEL_HEIGHT = 40;
 export function useVirtualizedWaves<T>(
   items: readonly T[],
   key: string,
-  scrollContainerRef: React.RefObject<HTMLDivElement | null>,
+  scrollContainerRef: React.RefObject<HTMLElement | null>,
   listContainerRef: React.RefObject<HTMLDivElement | null>,
   rowHeight = 72,
   overscan = 5

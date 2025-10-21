@@ -24,7 +24,7 @@ export default function Home({
   readonly initialTokens: NextGenToken[];
 }) {
   return (
-    <>
+    <div className="tw-px-2 lg:tw-px-6 xl:tw-px-8">
       <LatestDropSection
         featuredNft={featuredNft}
         isMemeMintingActive={isMemeMintingActive}
@@ -77,6 +77,6 @@ export default function Home({
           </Col>
         </Row>
       </Container>
-    </>
+    </div>
   );
 }

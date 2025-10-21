@@ -8,7 +8,7 @@ export interface SeizeQuoteLinkInfo {
 
 export function parseSeizeQuoteLink(href: string): SeizeQuoteLinkInfo | null {
   const regex =
-    /\/my-stream\?wave=([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})&serialNo=(\d+)$/;
+    /\/waves\?wave=([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})&serialNo=(\d+)$/;
 
   const match = href.match(regex);
   if (!match) return null;

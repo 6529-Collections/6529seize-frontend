@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { cicToType } from "@/helpers/Helpers";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
@@ -51,15 +52,26 @@ export default function ParticipationDropHeader({
           />
         )}
       </div>
-      {showWaveInfo && (
-        <Link
-          onClick={(e) => e.stopPropagation()}
-          href={`/my-stream?wave=${drop.wave.id}`}
-          className="tw-mb-0 tw-text-[11px] tw-leading-0 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
-        >
-          {drop.wave.name}
-        </Link>
-      )}
+      {showWaveInfo && drop.wave && (() => {
+        const waveMeta = (drop.wave as unknown as {
+          chat?: { scope?: { group?: { is_direct_message?: boolean } } };
+        })?.chat;
+        const isDirectMessage = waveMeta?.scope?.group?.is_direct_message ?? false;
+        const waveHref = getWaveRoute({
+          waveId: drop.wave.id,
+          isDirectMessage,
+          isApp: false,
+        });
+        return (
+          <Link
+            onClick={(e) => e.stopPropagation()}
+            href={waveHref}
+            className="tw-mb-0 tw-text-[11px] tw-leading-0 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
+          >
+            {drop.wave.name}
+          </Link>
+        );
+      })()}
     </>
   );
 }

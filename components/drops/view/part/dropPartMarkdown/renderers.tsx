@@ -87,7 +87,7 @@ const renderSeizeQuote = (
     return (
       <LinkHandlerFrame
         href={href}
-        relativeHref={`/my-stream?wave=${waveId}&drop=${dropId}`}>
+        relativeHref={`/waves?wave=${waveId}&drop=${dropId}`}>
         <WaveDropQuoteWithDropId
           dropId={dropId}
           partId={1}

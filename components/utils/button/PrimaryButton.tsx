@@ -16,27 +16,17 @@ export default function PrimaryButton({
   readonly title?: string;
 }) {
   return (
-    <div
-      className={`${
-        disabled || loading
-          ? "tw-from-primary-400/50 tw-to-primary-500/50"
-          : " tw-from-primary-400 tw-to-primary-500"
-      } tw-p-[1px] tw-w-full sm:tw-w-auto tw-flex tw-rounded-lg tw-bg-gradient-to-b`}
+    <button
+      onClick={onClicked}
+      disabled={disabled || loading}
+      type="button"
+      title={title}
+      className={`tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-flex tw-items-center tw-rounded-lg tw-bg-iron-200 ${padding} tw-text-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-border-0 tw-ring-1 tw-ring-inset tw-ring-white hover:tw-bg-iron-300 hover:tw-ring-iron-300 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out tw-justify-center tw-gap-x-1.5 ${
+        disabled || loading ? "tw-cursor-not-allowed tw-opacity-50" : ""
+      }`}
     >
-      <button
-        onClick={onClicked}
-        disabled={disabled || loading}
-        type="button"
-        title={title}
-        className={`${
-          disabled || loading
-            ? "tw-opacity-30 tw-text-iron-300"
-            : "tw-text-white desktop-hover:hover:tw-bg-primary-600 desktop-hover:hover:tw-border-primary-600"
-        } tw-flex tw-w-full tw-gap-x-1.5 tw-items-center tw-justify-center tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-bg-primary-500 ${padding} tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out`}
-      >
-        {loading && <CircleLoader />}
-       {children}
-      </button>
-    </div>
+      {loading && <CircleLoader />}
+      {children}
+    </button>
   );
 }

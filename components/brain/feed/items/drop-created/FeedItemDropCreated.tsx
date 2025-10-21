@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { IFeedItemDropCreated } from "@/types/feed.types";
 import Drop, {
   DropInteractionParams,
@@ -29,14 +31,34 @@ export default function FeedItemDropCreated({
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }) {
   const router = useRouter();
+  const { isApp } = useDeviceInfo();
+
+  const getRoute = (
+    waveId: string,
+    serialNo: string | number,
+    isDirectMessage: boolean
+  ) =>
+    getWaveRoute({
+      waveId,
+      serialNo,
+      isDirectMessage,
+      isApp,
+    });
+
   const onReplyClick = (serialNo: number) => {
-    router.push(`/my-stream?wave=${item.item.wave.id}&serialNo=${serialNo}/`);
+    const waveInfo = item.item.wave as any;
+    const isDirectMessage =
+      waveInfo?.chat?.scope?.group?.is_direct_message ?? false;
+
+    router.push(getRoute(item.item.wave.id, serialNo, isDirectMessage));
   };
 
   const onQuoteClick = (quote: ApiDrop) => {
-    router.push(
-      `/my-stream?wave=${quote.wave.id}&serialNo=${quote.serial_no}/`
-    );
+    const waveInfo = quote.wave as any;
+    const isDirectMessage =
+      waveInfo?.chat?.scope?.group?.is_direct_message ?? false;
+
+    router.push(getRoute(quote.wave.id, quote.serial_no, isDirectMessage));
   };
   return (
     <Drop

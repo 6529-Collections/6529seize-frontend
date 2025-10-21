@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 
 export default function WavesListHeader({
+  title = "Waves",
   identity,
   waveName,
   showCreateNewButton,
@@ -16,6 +17,7 @@ export default function WavesListHeader({
   setIdentity,
   setWaveName,
 }: {
+  readonly title?: string;
   readonly identity: string | null;
   readonly waveName: string | null;
   readonly showCreateNewButton?: boolean;
@@ -36,15 +38,15 @@ export default function WavesListHeader({
   );
   return (
     <div className="tw-mt-4 md:tw-mt-8">
-      <h1 className="tw-text-3xl md:tw-text-5xl tw-mb-0">Waves</h1>
-      <div className="tw-mt-4 md:tw-mt-6 tw-flex tw-flex-col md:tw-flex-row tw-w-full md:tw-items-center tw-justify-between tw-gap-4">
+      <h1 className="tw-text-xl tw-font-semibold tw-text-iron-50 tw-mb-0">{title}</h1>
+      <div className="tw-mt-4 md:tw-mt-6 tw-flex tw-flex-col lg:tw-flex-row tw-w-full lg:tw-items-center tw-justify-between tw-gap-4">
         <WavesListSearch
           identity={identity}
           waveName={waveName}
           setWaveName={setWaveName}
           setIdentity={setIdentity}
         />
-        <div className="tw-flex tw-flex-wrap tw-gap-3">
+        <div className="tw-flex tw-gap-3 tw-items-center">
           {showMyWavesButton && (
             <button
               onClick={() =>
@@ -62,7 +64,7 @@ export default function WavesListHeader({
                 <button
                   onClick={onCreateNewWave}
                   type="button"
-                  className="tw-flex tw-items-center tw-whitespace-nowrap tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-shadow-sm hover:tw-bg-primary-600 hover:tw-border-primary-600 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out">
+                  className="tw-flex tw-items-center tw-whitespace-nowrap tw-border-0 tw-rounded-lg tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-shadow-sm hover:tw-bg-primary-600 hover:tw-border-primary-600 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out">
                   <svg
                     className="tw-size-5 tw-mr-1.5 -tw-ml-1.5 tw-flex-shrink-0"
                     viewBox="0 0 24 24"
@@ -84,7 +86,7 @@ export default function WavesListHeader({
                 <button
                   onClick={onCreateNewDirectMessage}
                   type="button"
-                  className="tw-flex tw-items-center tw-whitespace-nowrap tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-shadow-sm hover:tw-bg-primary-600 hover:tw-border-primary-600 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out">
+                  className="tw-flex tw-items-center tw-whitespace-nowrap tw-border-0 tw-rounded-lg tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-shadow-sm hover:tw-bg-primary-600 hover:tw-border-primary-600 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out">
                   <FontAwesomeIcon
                     icon={faPaperPlane}
                     className="tw-size-4 tw-mr-1.5 -tw-ml-1.5 tw-flex-shrink-0"

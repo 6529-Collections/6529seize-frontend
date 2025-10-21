@@ -17,6 +17,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
+import {
+  getWaveHomeRoute,
+  getWaveRoute,
+} from "../../../helpers/navigation.helpers";
+import useDeviceInfo from "../../../hooks/useDeviceInfo";
 import HeaderSearchModalItem, {
   HeaderSearchModalItemType,
   NFTSearchResult,
@@ -47,6 +52,7 @@ export default function HeaderSearchModal({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { isApp } = useDeviceInfo();
   const modalRef = useRef<HTMLDivElement>(null);
   useClickAway(modalRef, onClose);
   useKeyPressEvent("Escape", onClose);
@@ -190,9 +196,17 @@ export default function HeaderSearchModal({
     }
     if (selectedCategory === CATEGORY.WAVES) {
       const wave = item as ApiWave;
-      const currentWaveId = searchParams?.get("wave") as string | undefined;
+      const currentWaveId = searchParams?.get("wave") ?? undefined;
+      const isDirectMessage =
+        wave.chat?.scope?.group?.is_direct_message ?? false;
       const target =
-        currentWaveId === wave.id ? "/my-stream" : `/my-stream?wave=${wave.id}`;
+        currentWaveId === wave.id
+          ? getWaveHomeRoute({ isDirectMessage, isApp })
+          : getWaveRoute({
+              waveId: wave.id,
+              isDirectMessage,
+              isApp,
+            });
       router.push(target);
       onClose();
     }
@@ -309,9 +323,9 @@ export default function HeaderSearchModal({
           document.body,
       }}>
       <div className="tailwind-scope tw-cursor-default tw-relative tw-z-1000">
-        <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
+        <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px]"></div>
         <div className="tw-fixed tw-inset-0 tw-z-1000 tw-overflow-y-auto">
-          <div className="tw-flex tw-min-h-full tw-items-start tw-justify-center tw-p-2 tw-text-center sm:tw-items-center sm:tw-p-0">
+          <div className="tw-flex tw-min-h-full tw-items-start tw-justify-center tw-p-2 tw-text-center lg:tw-items-center sm:tw-p-0">
             <div
               ref={modalRef}
               className="sm:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-overflow-hidden inset-safe-area">

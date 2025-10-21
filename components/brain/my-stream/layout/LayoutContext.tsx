@@ -56,7 +56,8 @@ const calculateHeightStyle = (
   spaces: LayoutSpaces,
   capacitorSpace: number // Accept specific space value
 ): React.CSSProperties => {
-  const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${spaces.mobileNavSpace}px - ${capacitorSpace}px)`;
+  // Use dynamic viewport height to avoid extra space on mobile browsers
+  const heightCalc = `calc(100dvh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${spaces.mobileNavSpace}px - ${capacitorSpace}px)`;
   return {
     height: heightCalc,
     maxHeight: heightCalc,
@@ -107,6 +108,12 @@ interface LayoutContextType {
   // Style for feed view
   myStreamFeedStyle: React.CSSProperties;
 
+  // Style for homepage feed view (excludes header/breadcrumbs, includes tabs)
+  homepageFeedStyle: React.CSSProperties;
+
+  // Style for small screen layout feed (includes header and tabs)
+  smallScreenFeedStyle: React.CSSProperties;
+
   // Style for mobile waves view
   mobileWavesViewStyle: React.CSSProperties;
 
@@ -139,6 +146,8 @@ const LayoutContext = createContext<LayoutContextType>({
   faqViewStyle: {}, // Empty style object as default for FAQ
   notificationsViewStyle: {}, // Empty style object as default
   myStreamFeedStyle: {}, // Empty style object as default
+  homepageFeedStyle: {}, // Empty style object as default
+  smallScreenFeedStyle: {}, // Empty style object as default
   mobileWavesViewStyle: {}, // Empty style object as default
   mobileAboutViewStyle: {}, // Empty style object as default
 });
@@ -346,7 +355,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     }
 
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.spacerSpace}px`,
+      height: `calc(100dvh - ${spaces.headerSpace}px - ${spaces.spacerSpace}px)`,
       display: "flex",
     };
   }, [spaces.measurementsComplete, spaces.headerSpace, spaces.spacerSpace]);
@@ -400,6 +409,35 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     return calculateHeightStyle("myStreamFeed", spaces, 0);
   }, [spaces]);
 
+  // Homepage-specific feed style that excludes header/breadcrumb space
+  const homepageFeedStyle = useMemo<React.CSSProperties>(() => {
+    if (!spaces.measurementsComplete) return {};
+    // For homepage: exclude header and breadcrumb spacer, but include tabs height
+    const homepageSpaces = {
+      ...spaces,
+      headerSpace: 0, // No header in new homepage layout
+      spacerSpace: 0, // No breadcrumb spacer in new homepage layout
+    };
+    return calculateHeightStyle("myStreamFeed", homepageSpaces, 0);
+  }, [spaces]);
+
+  // Small screen layout feed style (properly accounts for header)
+  const smallScreenFeedStyle = useMemo<React.CSSProperties>(() => {
+    if (!spaces.measurementsComplete) return {};
+    const totalOffset =
+      spaces.headerSpace +
+      spaces.pinnedSpace +
+      spaces.tabsSpace +
+      spaces.spacerSpace +
+      spaces.mobileTabsSpace +
+      spaces.mobileNavSpace;
+    const heightCalc = `calc(100dvh - ${totalOffset}px)`;
+    return {
+      height: heightCalc,
+      maxHeight: heightCalc,
+    };
+  }, [spaces]);
+
   const mobileWavesViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
     return calculateHeightStyle("mobileWaves", spaces, 0);
@@ -424,6 +462,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       faqViewStyle,
       notificationsViewStyle,
       myStreamFeedStyle,
+      homepageFeedStyle,
+      smallScreenFeedStyle,
       mobileWavesViewStyle,
       mobileAboutViewStyle,
     }),
@@ -439,6 +479,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       faqViewStyle,
       notificationsViewStyle,
       myStreamFeedStyle,
+      homepageFeedStyle,
+      smallScreenFeedStyle,
       mobileWavesViewStyle,
       mobileAboutViewStyle,
     ]

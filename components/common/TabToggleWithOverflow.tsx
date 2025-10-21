@@ -111,11 +111,11 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
             role="tab"
             aria-selected={activeKey === option.key}
             onClick={() => handleSelect(option.key)}
-            className={`tw-flex-1 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-border-b-2 tw-border-t-0 tw-border-x-0 tw-border-solid tw-bg-transparent tw-transition-all tw-duration-200 ${
+            className={`tw-flex-1 tw-py-3 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-border-b-2 tw-border-t-0 tw-border-x-0 tw-border-solid tw-bg-transparent tw-transition-all tw-duration-200 ${
               fullWidth ? "tw-text-center tw-justify-center tw-flex" : ""
             } ${
               activeKey === option.key
-                ? "tw-text-primary-300 tw-border-primary-400"
+                ? "tw-text-white tw-border-primary-300"
                 : "tw-text-iron-400 hover:tw-text-iron-200 tw-border-transparent"
             }`}>
             {option.label}
@@ -131,9 +131,9 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
             aria-expanded={isOverflowOpen}
             onClick={toggleOverflowMenu}
             onKeyDown={handleOverflowKeyDown}
-            className={`tw-whitespace-nowrap tw-flex tw-items-center tw-gap-0.5 tw-text-sm tw-font-medium tw-border-0 tw-bg-transparent tw-transition-all tw-duration-200 ${
+            className={`tw-whitespace-nowrap tw-py-3 tw-flex tw-items-center tw-gap-0.5 tw-text-sm tw-font-medium tw-border-0 tw-bg-transparent tw-transition-all tw-duration-200 ${
               isActiveInOverflow
-                ? "tw-text-primary-300 tw-border-b-2 tw-border-primary-400"
+                ? "tw-text-white tw-border-b-2 tw-border-primary-300"
                 : "tw-text-iron-400 hover:tw-text-iron-200"
             }`}>
             {isActiveInOverflow

@@ -35,7 +35,7 @@ export function getDesktopNavigation(_context: NavContext): NavDropdown[] {
       title: "Brain",
       condition: (ctx) => ctx.showWaves,
       items: [
-        { name: "My Stream", path: "/my-stream" },
+        { name: "My Stream", path: "/?tab=feed" },
         { name: "Waves", path: "/waves" },
       ],
     },

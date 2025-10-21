@@ -1,11 +1,6 @@
 "use client";
 
 import React from "react";
-import {
-  calculateTimeLeft,
-  TimeLeft,
-} from "@/helpers/waves/time.utils";
-import { TimeCountdown } from "./TimeCountdown";
 import { ApiWaveDecisionPause } from "@/generated/models/ApiWaveDecisionPause";
 import { useWave } from "@/hooks/useWave";
 import { ApiWave } from "@/generated/models/ApiWave";
@@ -32,19 +27,6 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
 }) => {
   const waveData = useWave(wave);
   const hasNextDecision = !!nextDecisionTime;
-  const getTimeLeft = () => {
-    if (hasNextDecision) {
-      return calculateTimeLeft(nextDecisionTime);
-    }
-    return {
-      days: 0,
-      hours: 0,
-      minutes: 0,
-      seconds: 0,
-    };
-  };
-
-  const [timeLeft, setTimeLeft] = React.useState<TimeLeft>(getTimeLeft());
 
   // Extract the status display logic
   const getStatusDisplay = () => {
@@ -96,69 +78,26 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
     );
   };
 
-  React.useEffect(() => {
-    // Initial calculation
-    setTimeLeft(getTimeLeft());
-
-    // Only set up interval if there's a next decision and time remaining
-    if (hasNextDecision) {
-      const intervalId = setInterval(() => {
-        const newTimeLeft = getTimeLeft();
-        setTimeLeft(newTimeLeft);
-
-        // Clear interval when countdown reaches zero
-        if (
-          newTimeLeft.days === 0 &&
-          newTimeLeft.hours === 0 &&
-          newTimeLeft.minutes === 0 &&
-          newTimeLeft.seconds === 0
-        ) {
-          clearInterval(intervalId);
-        }
-      }, 1000);
-
-      // Clean up interval on unmount
-      return () => clearInterval(intervalId);
-    }
-  }, [nextDecisionTime, hasNextDecision]);
-
   return (
     <div
-      className="tw-@container tw-px-4 tw-py-2 tw-bg-iron-800/95 tw-rounded-t-lg tw-border tw-border-solid tw-border-iron-700/50 tw-cursor-pointer desktop-hover:hover:tw-bg-iron-700/80 tw-transition-all tw-duration-300 tw-ease-out tw-group tw-shadow-sm"
+      className="tw-@container tw-px-3 tw-py-1.5 tw-bg-iron-800/95 tw-rounded-t-lg tw-border tw-border-solid tw-border-iron-700/50 tw-cursor-pointer desktop-hover:hover:tw-bg-iron-700/80 tw-transition-all tw-duration-300 tw-ease-out tw-group tw-shadow-sm"
       onClick={() => setIsOpen(!isOpen)}>
-      {/* Mobile: Show pause info at the top (only when paused) */}
-      {isPaused && currentPause && (
-        <div className="tw-block @[700px]:tw-hidden tw-text-sm tw-font-medium tw-mb-2">
-          {getStatusDisplay()}
-        </div>
-      )}
+      <div className="tw-flex tw-items-center tw-gap-2 tw-w-full">
+        {/* Title */}
+        <span
+          className={`tw-text-xs tw-font-semibold tw-whitespace-nowrap tw-flex-shrink-0 ${
+            hasNextDecision ? "tw-text-iron-100" : "tw-text-iron-400"
+          }`}>
+          {hasNextDecision ? "Decision Timeline" : "Announcement history"}
+        </span>
 
-      <div className="tw-flex tw-items-center tw-gap-2">
-        <div className="tw-flex tw-items-center tw-justify-between tw-flex-1">
-          <div className="tw-flex tw-items-baseline tw-gap-x-2 tw-flex-1">
-            <span
-              className={`tw-text-sm tw-font-semibold tw-whitespace-nowrap tw-tracking-tight ${
-                hasNextDecision ? "tw-text-iron-100" : "tw-text-iron-400"
-              }`}>
-              {hasNextDecision ? "Next winner:" : "Announcement history"}
-            </span>
-
-            {hasNextDecision && (
-              <div>
-                <TimeCountdown timeLeft={timeLeft} />
-              </div>
-            )}
-          </div>
-
-        </div>
-
-        {/* Desktop: Show all statuses */}
-        <div className="tw-text-sm tw-font-medium tw-hidden @[700px]:tw-block">
+        {/* Status display - takes remaining space */}
+        <div className="tw-flex-1 tw-text-xs tw-font-medium tw-flex tw-justify-end tw-items-center">
           {getStatusDisplay()}
         </div>
 
         <button
-          className="tw-w-7 tw-h-7 tw-flex tw-items-center tw-justify-center tw-bg-iron-700/50 tw-rounded-md tw-border tw-border-solid tw-border-iron-600/40 desktop-hover:hover:tw-bg-iron-600/60 desktop-hover:hover:tw-border-iron-500/50 tw-transition-all tw-duration-300 tw-ease-out tw-flex-shrink-0"
+          className="tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center tw-bg-iron-700/50 tw-rounded-md tw-border tw-border-solid tw-border-iron-600/40 desktop-hover:hover:tw-bg-iron-600/60 desktop-hover:hover:tw-border-iron-500/50 tw-transition-all tw-duration-300 tw-ease-out tw-flex-shrink-0"
           aria-label={isOpen ? "Collapse" : "Expand"}>
           <svg
             className={`tw-w-4 tw-h-4 tw-text-iron-200 desktop-hover:group-hover:tw-text-iron-100 tw-flex-shrink-0 ${

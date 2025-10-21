@@ -1,12 +1,12 @@
 "use client"
 
-import React, { useEffect, useRef, useState, Fragment } from "react";
-import { createPortal } from "react-dom";
-import { Dialog, Transition } from "@headlessui/react";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
-import { ArtistPreviewModalContent } from "./ArtistPreviewModalContent";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { Dialog, Transition } from "@headlessui/react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import ArtistPreviewAppWrapper from "./ArtistPreviewAppWrapper";
+import { ArtistPreviewModalContent } from "./ArtistPreviewModalContent";
 
 export type ModalTab = "active" | "winners";
 
@@ -92,7 +92,7 @@ export const ArtistPreviewModal: React.FC<
           leaveTo="tw-opacity-0"
         >
           {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-          <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75 tw-backdrop-blur-[1px]" onClick={onClose} />
+          <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px]" onClick={onClose} />
         </Transition.Child>
 
         {/* Desktop modal */}

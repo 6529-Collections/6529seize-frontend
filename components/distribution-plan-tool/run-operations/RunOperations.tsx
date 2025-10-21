@@ -1,13 +1,13 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
-import { DistributionPlanToolContext } from "../DistributionPlanToolContext";
 import {
-  AllowlistDescription,
-  AllowlistRunStatus,
+    AllowlistDescription,
+    AllowlistRunStatus,
 } from "@/components/allowlist-tool/allowlist-tool.types";
-import { useInterval } from "react-use";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
+import { useContext, useEffect, useState } from "react";
+import { useInterval } from "react-use";
+import { DistributionPlanToolContext } from "../DistributionPlanToolContext";
 
 const LOADING_STATES = [AllowlistRunStatus.CLAIMED, AllowlistRunStatus.PENDING];
 
@@ -59,7 +59,7 @@ export default function RunOperations() {
     <>
       {showLoader && (
         <div className="tw-relative tw-z-10" role="dialog">
-          <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75">
+          <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50">
             <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
               <div className="tw-flex tw-min-h-full tw-justify-center tw-p-4 tw-text-center tw-items-center sm:tw-p-0">
                 <svg

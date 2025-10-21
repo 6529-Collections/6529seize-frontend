@@ -37,8 +37,8 @@ describe('FeedItemDropReplied', () => {
       />
     );
     fireEvent.click(screen.getByText('reply'));
-    expect(push).toHaveBeenCalledWith('/my-stream?wave=w1&serialNo=1/');
+    expect(push).toHaveBeenCalledWith('/waves?wave=w1&serialNo=1/');
     fireEvent.click(screen.getByText('quote'));
-    expect(push).toHaveBeenCalledWith('/my-stream?wave=w2&serialNo=8/');
+    expect(push).toHaveBeenCalledWith('/waves?wave=w2&serialNo=8/');
   });
 });

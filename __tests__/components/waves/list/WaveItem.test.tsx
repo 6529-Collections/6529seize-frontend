@@ -17,6 +17,7 @@ const wave = {
     banner1_color: '#000',
     banner2_color: '#111',
   },
+  chat: { scope: { group: { is_direct_message: false } } },
 } as any;
 
 describe('WaveItem', () => {

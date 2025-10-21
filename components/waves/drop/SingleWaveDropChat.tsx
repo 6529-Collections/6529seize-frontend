@@ -80,7 +80,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
     <div className="tw-flex-1">
       <div
         ref={contentWrapperRef}
-        className="tw-h-full tw-overflow-hidden tw-bg-iron-950 tw-relative">
+        className="tw-h-full tw-overflow-hidden tw-bg-iron-950 tw-relative lg:tw-border lg:tw-border-l-0 lg:tw-border-r lg:tw-border-solid tw-border-iron-900 tw-border-y-0">
         <div className="tw-relative tw-h-full">
           <div className="tw-h-full tw-w-full tw-flex tw-items-stretch">
             <div className={containerClassName} style={containerStyle}>

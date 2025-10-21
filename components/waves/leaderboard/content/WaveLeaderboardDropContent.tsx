@@ -19,7 +19,7 @@ export const WaveLeaderboardDropContent: React.FC<
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
 
   const onDropContentClick = (drop: ExtendedDrop) => {
-    router.push(`/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}/`);
+    router.push(`/waves?wave=${drop.wave.id}&serialNo=${drop.serial_no}/`);
   };
 
   return (
