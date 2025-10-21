@@ -1,7 +1,13 @@
-// HighlightDropWrapper.tsx (minimal patch)
 "use client";
 
-import { forwardRef, ReactNode, useEffect, useRef, useState } from "react";
+import {
+  forwardRef,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 interface HighlightDropWrapperProps {
   readonly active: boolean;
@@ -32,15 +38,15 @@ const HighlightDropWrapper = forwardRef<
     forwardedRef
   ) => {
     const innerRef = useRef<HTMLDivElement>(null);
-    const [highlightUntil, setHighlightUntil] = useState(0);
-    const [isFading, setIsFading] = useState(false);
+    const [phase, setPhase] = useState<"idle" | "highlight" | "fading">(
+      "idle"
+    );
     const rafRef = useRef<number | null>(null);
+    const highlightTimeoutRef = useRef<number | null>(null);
     const fadeTimeoutRef = useRef<number | null>(null);
 
-    // NEW: end-time timeout (replaces polling interval)
-    const endTimeoutRef = useRef<number | null>(null);
-
     const lastExtendedRef = useRef(false);
+    const prevActiveRef = useRef(false);
 
     const setNode = (node: HTMLDivElement | null) => {
       innerRef.current = node;
@@ -51,23 +57,43 @@ const HighlightDropWrapper = forwardRef<
         ).current = node;
     };
 
-    const stopRAF = () => {
+    const stopRAF = useCallback(() => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
-    };
+    }, []);
 
-    useEffect(() => {
-      if (!active) return;
+    const clearTimers = useCallback(() => {
+      if (highlightTimeoutRef.current) {
+        clearTimeout(highlightTimeoutRef.current);
+        highlightTimeoutRef.current = null;
+      }
+      if (fadeTimeoutRef.current) {
+        clearTimeout(fadeTimeoutRef.current);
+        fadeTimeoutRef.current = null;
+      }
+    }, []);
 
-      setIsFading(false);
-      lastExtendedRef.current = false;
-      setHighlightUntil(Date.now() + highlightMs);
+    const runHighlightWindow = useCallback(() => {
+      clearTimers();
+      setPhase("highlight");
+
+      highlightTimeoutRef.current = window.setTimeout(() => {
+        setPhase("fading");
+
+        fadeTimeoutRef.current = window.setTimeout(() => {
+          setPhase("idle");
+        }, fadeMs) as unknown as number;
+      }, highlightMs) as unknown as number;
+    }, [clearTimers, fadeMs, highlightMs]);
+
+    const trackVisibilityOnce = useCallback(() => {
+      stopRAF();
 
       const checkVisibility = () => {
         const el = innerRef.current;
         if (el) {
-          const er = el.getBoundingClientRect();
-          const cr = scrollContainer
+          const elRect = el.getBoundingClientRect();
+          const containerRect = scrollContainer
             ? scrollContainer.getBoundingClientRect()
             : ({
                 left: 0,
@@ -78,77 +104,57 @@ const HighlightDropWrapper = forwardRef<
                 height: window.innerHeight,
               } as DOMRect);
 
-          const interLeft = Math.max(er.left, cr.left);
-          const interTop = Math.max(er.top, cr.top);
-          const interRight = Math.min(er.right, cr.right);
-          const interBottom = Math.min(er.bottom, cr.bottom);
+          const interLeft = Math.max(elRect.left, containerRect.left);
+          const interTop = Math.max(elRect.top, containerRect.top);
+          const interRight = Math.min(elRect.right, containerRect.right);
+          const interBottom = Math.min(elRect.bottom, containerRect.bottom);
 
-          const interW = Math.max(0, interRight - interLeft);
-          const interH = Math.max(0, interBottom - interTop);
-          const interArea = interW * interH;
-          const ratio = interArea / Math.max(1, er.width * er.height);
+          const interWidth = Math.max(0, interRight - interLeft);
+          const interHeight = Math.max(0, interBottom - interTop);
+          const interArea = interWidth * interHeight;
+          const ratio =
+            interArea / Math.max(1, elRect.width * elRect.height);
 
           if (ratio >= visibilityThreshold && !lastExtendedRef.current) {
-            setHighlightUntil(Date.now() + highlightMs);
             lastExtendedRef.current = true;
-
-            // NEW: we’re done extending once; stop the rAF loop
+            runHighlightWindow();
             stopRAF();
             return;
           }
         }
+
         rafRef.current = requestAnimationFrame(checkVisibility);
       };
 
       rafRef.current = requestAnimationFrame(checkVisibility);
+    }, [runHighlightWindow, scrollContainer, stopRAF, visibilityThreshold]);
 
+    useEffect(() => {
       return () => {
         stopRAF();
+        clearTimers();
       };
-    }, [active, highlightMs, scrollContainer, visibilityThreshold]);
+    }, [clearTimers, stopRAF]);
 
-    // REPLACEMENT: remove the polling interval; use one precise timeout
     useEffect(() => {
-      if (!active) return;
-
-      // clear any pending end/fade timers
-      if (endTimeoutRef.current) {
-        clearTimeout(endTimeoutRef.current);
-        endTimeoutRef.current = null;
+      if (phase !== "highlight") {
+        stopRAF();
       }
-      if (fadeTimeoutRef.current) {
-        clearTimeout(fadeTimeoutRef.current);
-        fadeTimeoutRef.current = null;
+    }, [phase, stopRAF]);
+
+    useEffect(() => {
+      const wasActive = prevActiveRef.current;
+      prevActiveRef.current = active;
+
+      if (active && !wasActive) {
+        lastExtendedRef.current = false;
+        runHighlightWindow();
+        trackVisibilityOnce();
       }
+    }, [active, runHighlightWindow, trackVisibilityOnce]);
 
-      if (highlightUntil === 0) return;
-
-      const remaining = Math.max(0, highlightUntil - Date.now());
-
-      endTimeoutRef.current = window.setTimeout(() => {
-        // end highlight, start fade
-        setHighlightUntil(0);
-        setIsFading(true);
-
-        // finish fade
-        fadeTimeoutRef.current = window.setTimeout(() => {
-          setIsFading(false);
-        }, fadeMs) as unknown as number;
-      }, remaining) as unknown as number;
-
-      return () => {
-        if (endTimeoutRef.current) {
-          clearTimeout(endTimeoutRef.current);
-          endTimeoutRef.current = null;
-        }
-        if (fadeTimeoutRef.current) {
-          clearTimeout(fadeTimeoutRef.current);
-          fadeTimeoutRef.current = null;
-        }
-      };
-    }, [active, highlightUntil, fadeMs]);
-
-    const isHighlighted = Date.now() < highlightUntil;
+    const isHighlighted = phase === "highlight";
+    const isFading = phase === "fading";
 
     const classes = [
       className,
