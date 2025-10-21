@@ -13,6 +13,7 @@ interface WaveGroupEditMenuProps {
   readonly wave: ApiWave;
   readonly type: WaveGroupType;
   readonly onWaveUpdate: (body: ApiUpdateWaveRequest) => Promise<void>;
+  readonly hasGroup: boolean;
   readonly canIncludeIdentity: boolean;
   readonly canExcludeIdentity: boolean;
   readonly canRemoveGroup: boolean;
@@ -29,6 +30,7 @@ export default function WaveGroupEditMenu({
   wave,
   type,
   onWaveUpdate,
+  hasGroup,
   canIncludeIdentity,
   canExcludeIdentity,
   canRemoveGroup,
@@ -42,6 +44,7 @@ export default function WaveGroupEditMenu({
 
   const menuItems = useMemo<CompactMenuItem[]>(() => {
     const items: CompactMenuItem[] = [];
+    const changeGroupLabel = hasGroup ? "Change group" : "Add group";
 
     if (canIncludeIdentity) {
       items.push({
@@ -65,7 +68,7 @@ export default function WaveGroupEditMenu({
 
     items.push({
       id: "change",
-      label: "Change group",
+      label: changeGroupLabel,
       onSelect: () => {
         if (onChangeGroup) {
           onChangeGroup();
@@ -102,6 +105,7 @@ export default function WaveGroupEditMenu({
     onChangeGroup,
     onRemoveGroup,
     canRemoveGroup,
+    hasGroup,
   ]);
 
   return (

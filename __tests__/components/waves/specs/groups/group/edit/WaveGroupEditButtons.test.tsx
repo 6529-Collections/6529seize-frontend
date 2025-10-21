@@ -116,6 +116,26 @@ describe('WaveGroupEditButtons', () => {
     expect(screen.getByText('Change group')).toBeInTheDocument();
     expect(screen.queryByText('Remove group')).toBeNull();
   });
+
+  it('shows add label when no group is linked', async () => {
+    const waveWithoutGroup = {
+      ...wave,
+      visibility: {
+        ...wave.visibility,
+        scope: { group: null },
+      },
+    };
+
+    render(
+      <WaveGroupEditButtons haveGroup={false} wave={waveWithoutGroup} type={WaveGroupType.VIEW} />,
+      { wrapper },
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /Group options/i }));
+
+    expect(screen.getByText('Add group')).toBeInTheDocument();
+    expect(screen.queryByText('Change group')).toBeNull();
+  });
 });
 jest.mock('@headlessui/react', () => {
   const close = jest.fn();

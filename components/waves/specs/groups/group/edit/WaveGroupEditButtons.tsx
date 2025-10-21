@@ -59,6 +59,7 @@ export default function WaveGroupEditButtons({
         wave={wave}
         type={type}
         onWaveUpdate={updateWave}
+        hasGroup={haveGroup}
         canIncludeIdentity={canIncludeIdentity}
         canExcludeIdentity={canExcludeIdentity}
         canRemoveGroup={canRemoveGroup}
