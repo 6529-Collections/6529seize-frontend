@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { render, screen } from "@testing-library/react";
 
 import { createLinkRenderer } from "@/components/drops/view/part/dropPartMarkdown/linkHandlers";
+import { ensureStableSeizeLink } from "@/helpers/SeizeLinkParser";
 import { publicEnv } from "@/config/env";
 
 jest.mock("@/components/drops/view/part/dropPartMarkdown/youtubePreview", () => ({
@@ -10,6 +11,14 @@ jest.mock("@/components/drops/view/part/dropPartMarkdown/youtubePreview", () => 
   default: ({ href }: { href: string }) => (
     <div data-testid="youtube-preview" data-href={href} />
   ),
+j jest.mock("@/components/waves/drops/DropItemChat", () => ({
+  __esModule: true,
+- default: ({ dropId }: { dropId: string }) => <div data-testid="drop-card" data-drop={dropId} />,
++ default: ({ dropId, href }: { dropId: string; href: string }) => (
++   <div data-testid="drop-card" data-drop={dropId} data-href={href}>
++     <div data-testid="chat-buttons" data-href={href} />
++   </div>
++ ),
 }));
 
 jest.mock("@/components/drops/view/part/DropPartMarkdownImage", () => ({
@@ -100,12 +109,40 @@ jest.mock("@/components/waves/list/WaveItemChat", () => ({
 
 jest.mock("@/components/waves/drops/DropItemChat", () => ({
   __esModule: true,
-  default: ({ dropId }: { dropId: string }) => <div data-testid="drop-card" data-drop={dropId} />,
+  default: ({ dropId, href }: { dropId: string; href: string }) => (
+    <div data-testid="drop-card" data-drop={dropId} data-href={href}>
+      <div data-testid="chat-buttons" data-href={href} />
+    </div>
+  ),
 }));
+
+jest.mock("@/helpers/SeizeLinkParser", () => {
+  const actual = jest.requireActual("@/helpers/SeizeLinkParser");
+  let currentHrefOverride: string | undefined;
+
+  const ensureStableSeizeLink = (href: string) =>
+    actual.ensureStableSeizeLink(href, currentHrefOverride);
+
+  (ensureStableSeizeLink as any).__setCurrentHref = (href?: string) => {
+    currentHrefOverride = href;
+  };
+
+  return {
+    ...actual,
+    ensureStableSeizeLink,
+  };
+});
 
 const onQuoteClick = jest.fn();
 
 const baseRenderer = () => createLinkRenderer({ onQuoteClick });
+
+const setEnsureCurrentHref = (href?: string) => {
+  const setter = (ensureStableSeizeLink as any).__setCurrentHref;
+  if (typeof setter === "function") {
+    setter(href);
+  }
+};
 
 describe("createLinkRenderer", () => {
   const FALLBACK_BASE_ENDPOINT = "https://6529.io";
@@ -116,6 +153,7 @@ describe("createLinkRenderer", () => {
     jest.clearAllMocks();
     publicEnv.BASE_ENDPOINT = FALLBACK_BASE_ENDPOINT;
     process.env.BASE_ENDPOINT = FALLBACK_BASE_ENDPOINT;
+    setEnsureCurrentHref(undefined);
   });
 
   afterEach(() => {
@@ -125,6 +163,7 @@ describe("createLinkRenderer", () => {
     } else {
       process.env.BASE_ENDPOINT = originalProcessBaseEndpoint;
     }
+    setEnsureCurrentHref(undefined);
   });
 
   it("renders DropPartMarkdownImage for img elements", () => {
@@ -180,6 +219,38 @@ describe("createLinkRenderer", () => {
     const element = renderAnchor({ href: "https://6529.io/waves?wave=abc&drop=def" } as any);
     render(<>{element}</>);
     expect(screen.getByTestId("drop-card")).toHaveAttribute("data-drop", "def");
+  });
+
+  it("normalizes root drop links using current location context", () => {
+    setEnsureCurrentHref("https://6529.io/messages?wave=current-wave");
+
+    const { renderAnchor } = baseRenderer();
+    const element = renderAnchor({ href: "https://6529.io/?drop=drop-123" } as any);
+    render(<>{element}</>);
+
+    expect(screen.getByTestId("drop-card")).toHaveAttribute("data-drop", "drop-123");
+    expect(screen.getByTestId("chat-buttons")).toHaveAttribute(
+      "data-href",
+      "https://6529.io/messages?wave=current-wave&drop=drop-123"
+    );
+    setEnsureCurrentHref(undefined);
+  });
+
+  it("normalizes drop links shared from other paths", () => {
+    setEnsureCurrentHref("https://6529.io/messages?wave=current-wave");
+
+    const { renderAnchor } = baseRenderer();
+    const element = renderAnchor({
+      href: "https://6529.io/waves?wave=other-wave&drop=drop-456",
+    } as any);
+    render(<>{element}</>);
+
+    expect(screen.getByTestId("drop-card")).toHaveAttribute("data-drop", "drop-456");
+    expect(screen.getByTestId("chat-buttons")).toHaveAttribute(
+      "data-href",
+      "https://6529.io/messages?wave=current-wave&drop=drop-456"
+    );
+    setEnsureCurrentHref(undefined);
   });
 
   it.each([
