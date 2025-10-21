@@ -73,23 +73,29 @@ describe("HighlightDropWrapper", () => {
       </HighlightDropWrapper>
     );
 
-    expect(container.firstChild).toHaveClass("tw-bg-[#25263f]");
+    const wrapper = container.firstChild as HTMLElement;
+
+    expect(wrapper).toHaveClass("tw-bg-[#25263f]");
+    expect(wrapper).toHaveClass("tw-transition-colors");
+    expect(wrapper.style.transitionDuration).not.toBe("");
 
     act(() => {
       jest.advanceTimersByTime(1200);
     });
-    expect(container.firstChild).not.toHaveClass("tw-bg-[#25263f]");
-    expect(container.firstChild).toHaveClass(
-      "tw-bg-transparent tw-transition-colors tw-duration-500"
-    );
+
+    expect(wrapper).not.toHaveClass("tw-bg-[#25263f]");
+    expect(wrapper).toHaveClass("tw-transition-colors");
+    expect(wrapper).toHaveClass("tw-bg-transparent");
+    expect(wrapper.style.transitionDuration).not.toBe("");
 
     act(() => {
       jest.advanceTimersByTime(500);
     });
-    expect(container.firstChild).not.toHaveClass("tw-bg-[#25263f]");
-    expect(container.firstChild).not.toHaveClass(
-      "tw-bg-transparent tw-transition-colors tw-duration-500"
-    );
+
+    expect(wrapper).not.toHaveClass("tw-bg-[#25263f]");
+    expect(wrapper).not.toHaveClass("tw-transition-colors");
+    expect(wrapper).not.toHaveClass("tw-bg-transparent");
+    expect(wrapper.style.transitionDuration).toBe("");
   });
 
   it("restarts highlight when reactivated", () => {
@@ -125,6 +131,7 @@ describe("HighlightDropWrapper", () => {
     });
 
     expect(container.firstChild).toHaveClass("tw-bg-[#25263f]");
+    expect(container.firstChild).toHaveClass("tw-transition-colors");
   });
 
   it("keeps highlight duration even if active resets immediately", () => {
@@ -140,24 +147,28 @@ describe("HighlightDropWrapper", () => {
       </HighlightDropWrapper>
     );
 
-    expect(container.firstChild).toHaveClass("tw-bg-[#25263f]");
+    const wrapper = container.firstChild as HTMLElement;
+
+    expect(wrapper).toHaveClass("tw-bg-[#25263f]");
+    expect(wrapper).toHaveClass("tw-transition-colors");
+    expect(wrapper.style.transitionDuration).not.toBe("");
 
     act(() => {
       jest.advanceTimersByTime(1200);
     });
 
-    expect(container.firstChild).not.toHaveClass("tw-bg-[#25263f]");
-    expect(container.firstChild).toHaveClass(
-      "tw-bg-transparent tw-transition-colors tw-duration-500"
-    );
+    expect(wrapper).not.toHaveClass("tw-bg-[#25263f]");
+    expect(wrapper).toHaveClass("tw-transition-colors");
+    expect(wrapper).toHaveClass("tw-bg-transparent");
+    expect(wrapper.style.transitionDuration).not.toBe("");
 
     act(() => {
       jest.advanceTimersByTime(500);
     });
 
-    expect(container.firstChild).not.toHaveClass("tw-bg-[#25263f]");
-    expect(container.firstChild).not.toHaveClass(
-      "tw-bg-transparent tw-transition-colors tw-duration-500"
-    );
+    expect(wrapper).not.toHaveClass("tw-bg-[#25263f]");
+    expect(wrapper).not.toHaveClass("tw-transition-colors");
+    expect(wrapper).not.toHaveClass("tw-bg-transparent");
+    expect(wrapper.style.transitionDuration).toBe("");
   });
 });
