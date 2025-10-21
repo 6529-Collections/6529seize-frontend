@@ -5,6 +5,7 @@ import {
   ReactNode,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -218,10 +219,12 @@ const HighlightDropWrapper = forwardRef<
 
     const transitionClasses =
       isHighlighted || isFading ? "tw-transition-colors" : "";
-    const transitionStyle =
-      isHighlighted || isFading
-        ? { transitionDuration: `${fadeMs}ms` }
-        : undefined;
+    const transitionStyle = useMemo(() => {
+      if (isHighlighted || isFading) {
+        return { transitionDuration: `${fadeMs}ms` };
+      }
+      return undefined;
+    }, [fadeMs, isHighlighted, isFading]);
     const classes = classNames(
       className,
       transitionClasses,
