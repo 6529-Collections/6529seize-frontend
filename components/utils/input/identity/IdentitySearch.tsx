@@ -294,6 +294,9 @@ export default function IdentitySearch({
         profiles={data ?? []}
         highlightedIndex={highlightedIndex}
         onProfileSelect={(profile) => {
+          if (!profile) {
+            return;
+          }
           const nextIdentity = getSelectableIdentity(profile);
           if (!nextIdentity) {
             return;
