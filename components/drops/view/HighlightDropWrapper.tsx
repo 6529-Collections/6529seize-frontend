@@ -137,7 +137,7 @@ const HighlightDropWrapper = forwardRef<
     }, [clearTimers, stopRAF]);
 
     useEffect(() => {
-      if (phase !== "highlight") {
+      if (phase === "idle") {
         stopRAF();
       }
     }, [phase, stopRAF]);
