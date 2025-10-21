@@ -123,12 +123,12 @@ export const ensureStableSeizeLink = (
       return href;
     }
 
-    const globalWindow =
-      typeof globalThis !== "undefined"
-        ? (globalThis as typeof globalThis & { window?: Window }).window
-        : undefined;
-    const resolvedCurrentHref =
-      currentHref ?? globalWindow?.location?.href ?? undefined;
+    let globalWindow: Window | undefined;
+    if (typeof globalThis === "object" && "window" in globalThis) {
+      globalWindow = (globalThis as typeof globalThis & { window?: Window }).window;
+    }
+
+    const resolvedCurrentHref = currentHref ?? globalWindow?.location?.href;
     if (resolvedCurrentHref === undefined || resolvedCurrentHref === "") {
       return href;
     }

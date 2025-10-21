@@ -147,7 +147,7 @@ describe("createLinkRenderer", () => {
     jest.clearAllMocks();
     publicEnv.BASE_ENDPOINT = FALLBACK_BASE_ENDPOINT;
     process.env.BASE_ENDPOINT = FALLBACK_BASE_ENDPOINT;
-    setEnsureCurrentHref(undefined);
+    setEnsureCurrentHref();
   });
 
   afterEach(() => {
@@ -157,7 +157,7 @@ describe("createLinkRenderer", () => {
     } else {
       process.env.BASE_ENDPOINT = originalProcessBaseEndpoint;
     }
-    setEnsureCurrentHref(undefined);
+    setEnsureCurrentHref();
   });
 
   it("renders DropPartMarkdownImage for img elements", () => {
@@ -227,7 +227,7 @@ describe("createLinkRenderer", () => {
       "data-href",
       "https://6529.io/messages?wave=current-wave&drop=drop-123"
     );
-    setEnsureCurrentHref(undefined);
+    setEnsureCurrentHref();
   });
 
   it("normalizes drop links shared from other paths", () => {
@@ -244,7 +244,7 @@ describe("createLinkRenderer", () => {
       "data-href",
       "https://6529.io/messages?wave=current-wave&drop=drop-456"
     );
-    setEnsureCurrentHref(undefined);
+    setEnsureCurrentHref();
   });
 
   it.each([
