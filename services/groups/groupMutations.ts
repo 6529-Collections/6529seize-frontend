@@ -46,6 +46,7 @@ export const validateGroupPayload = (
   }
 
   const hasIncludeWallets = includeCount > 0;
+  const hasExcludeWallets = excludeCount > 0;
   const hasLevel =
     payload.group.level.min !== null || payload.group.level.max !== null;
   const hasTdh =
@@ -61,7 +62,17 @@ export const validateGroupPayload = (
     payload.group.cic.user_identity !== null;
   const hasNfts = payload.group.owns_nfts.length > 0;
 
-  if (!(hasIncludeWallets || hasLevel || hasTdh || hasRep || hasCic || hasNfts)) {
+  if (
+    !(
+      hasIncludeWallets ||
+      hasExcludeWallets ||
+      hasLevel ||
+      hasTdh ||
+      hasRep ||
+      hasCic ||
+      hasNfts
+    )
+  ) {
     issues.push("NO_FILTERS");
   }
 
@@ -112,4 +123,3 @@ export const hideGroup = async ({
     body: { visible: false },
   });
 };
-

@@ -49,6 +49,19 @@ describe('validateGroupPayload', () => {
     expectIssue(result.issues, 'NO_FILTERS');
   });
 
+  it('marks payload valid when only exclude wallets present', () => {
+    const result = validateGroupPayload(
+      createPayload({
+        group: {
+          excluded_identity_addresses: ['0xdead'],
+        },
+      })
+    );
+
+    expect(result.valid).toBe(true);
+    expect(result.issues).toHaveLength(0);
+  });
+
   it('flags include list above limit', () => {
     const include = Array.from({ length: GROUP_INCLUDE_LIMIT + 1 }, (_, idx) => `0x${idx}`);
     const result = validateGroupPayload(
@@ -76,4 +89,3 @@ describe('validateGroupPayload', () => {
     expectIssue(result.issues, 'EXCLUDE_LIMIT');
   });
 });
-
