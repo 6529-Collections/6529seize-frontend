@@ -1,5 +1,6 @@
 "use client";
 
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 import {
   faCaretLeft,
   faCaretRight,
@@ -42,6 +43,7 @@ import {
   ymd,
   ZoomLevel,
 } from "./meme-calendar.helpers";
+import { getMintOverrideNoteForUtcDay } from "./meme-calendar.overrides";
 import { getHistoricalMintsOnUtcDay } from "./meme-calendar.szn1";
 
 /*
@@ -59,6 +61,15 @@ function formatMonthYearShort(d: Date): string {
   return `${d.toLocaleString("default", {
     month: "short",
   })} ${d.getUTCFullYear()}`;
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 function getZoomTitle(zoom: ZoomLevel, seasonIndex: number): string {
@@ -192,12 +203,23 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
           }
 
           const cellDateUtcDay = new Date(Date.UTC(year, month, day));
+          const col = idx % 7;
+          const row = Math.floor(idx / 7);
+          let tooltipPlace: "top" | "bottom" | "right";
+          if (col <= 1) tooltipPlace = "right";
+          else if (row <= 1) tooltipPlace = "bottom";
+          else tooltipPlace = "top";
+
           const historical = getHistoricalMintsOnUtcDay(cellDateUtcDay);
           const isHistoricalMintDay = historical.length > 0;
 
           const isScheduledMintDay = isMintEligibleUtcDay(cellDateUtcDay);
 
           const isMintDay = isHistoricalMintDay || isScheduledMintDay;
+          const overrideNote = getMintOverrideNoteForUtcDay(cellDateUtcDay);
+          const noteTooltipContent = overrideNote
+            ? escapeHtml(overrideNote).replaceAll("\n", "<br />")
+            : "";
 
           // For label: if multiple historical mints, show a range (#1-#3). Otherwise single #.
           let mintLabel: string | undefined;
@@ -268,6 +290,10 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
               mintInstantUtc.getTime() > now.getTime()
                 ? formatFullDateTime(mintInstantUtc, displayTz)
                 : formatFullDate(mintInstantUtc, displayTz);
+            const oneLineDivWithNote = noteTooltipContent
+              ? `<div style="margin-bottom:12px">${oneLine}<br />
+                <span style="font-size:11px; color: #666;">*${noteTooltipContent}</span></div>`
+              : `<div style="margin-bottom:12px">${oneLine}</div>`;
             const invites =
               mintInstantUtc.getTime() > now.getTime()
                 ? printCalendarInvites(mintInstantUtc, mintNumber!, "#000")
@@ -275,7 +301,7 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
             tooltipHtml = `
               <div style="min-width:220px">
                 <div style="font-weight:600; margin-bottom:3px; font-size:larger">Meme ${mintLabel}</div>
-                <div style="margin-bottom:12px">${oneLine}</div>
+                ${oneLineDivWithNote}
                 ${invites}
               </div>`;
             if (mintInstantUtc?.getTime() > now.getTime()) {
@@ -296,6 +322,7 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
               data-tooltip-id="meme-tooltip"
               data-tooltip-html={tooltipHtml}
               data-tooltip-class-name={tooltipClassName}
+              data-tooltip-place={tooltipPlace}
               onClick={() => onSelectDay?.(cellDateUtcDay)}>
               <span
                 className={`tw-text-xs tw-rounded-full tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center ${
@@ -817,6 +844,7 @@ interface MemeCalendarProps {
 }
 
 export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
+  const isMobile = useIsMobileScreen();
   const [seasonIndex, setSeasonIndex] = useState<number>(() => {
     try {
       return getSeasonIndexForDate(new Date());
@@ -1191,7 +1219,7 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
                   name="meme-calendar-mint-input"
                   placeholder="123"
                   onChange={(event) => {
-                    const v = event.target.value.replace(/\D/g, "");
+                    const v = event.target.value.replaceAll(/\D/g, "");
                     setJumpMint(v);
                   }}
                   className="tw-text-black placeholder:tw-text-gray-500 focus:tw-outline-none tw-border-none tw-h-9 tw-w-full sm:tw-w-[8ch] tw-min-w-0 tw-px-2 tw-rounded-r-md"
@@ -1228,7 +1256,9 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
         id="meme-tooltip"
         clickable
         openOnClick
-        className="tw-max-w-sm !tw-opacity-[0.975] !tw-text-black !tw-rounded-md !tw-border !tw-border-solid !tw-border-[#222222]"
+        className={`!tw-opacity-[0.975] !tw-text-black !tw-rounded-md !tw-border !tw-border-solid !tw-border-[#222222] !tw-z-[1000] !tw-whitespace-normal ${
+          isMobile ? "tw-max-w-[15rem]" : "tw-max-w-[22rem] "
+        }`}
       />
     </div>
   );
