@@ -210,7 +210,7 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
           const isMintDay = isHistoricalMintDay || isScheduledMintDay;
           const overrideNote = getMintOverrideNoteForUtcDay(cellDateUtcDay);
           const noteTooltipContent = overrideNote
-            ? escapeHtml(overrideNote).replaceAll(/\n/g, "<br />")
+            ? escapeHtml(overrideNote).replaceAll("\n", "<br />")
             : "";
 
           // For label: if multiple historical mints, show a range (#1-#3). Otherwise single #.
