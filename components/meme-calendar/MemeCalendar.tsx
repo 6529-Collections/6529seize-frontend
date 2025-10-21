@@ -202,6 +202,15 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
           }
 
           const cellDateUtcDay = new Date(Date.UTC(year, month, day));
+          const col = idx % 7;
+          const row = Math.floor(idx / 7);
+          let tooltipPlace: "top" | "bottom" | "left" | "right" = "top";
+          if (col <= 1) tooltipPlace = "right";
+          else if (col >= 4) tooltipPlace = "left";
+          else if (row <= 1) tooltipPlace = "bottom";
+          else if (row >= 4) tooltipPlace = "top";
+          else tooltipPlace = "top";
+
           const historical = getHistoricalMintsOnUtcDay(cellDateUtcDay);
           const isHistoricalMintDay = historical.length > 0;
 
@@ -314,6 +323,7 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
               data-tooltip-id="meme-tooltip"
               data-tooltip-html={tooltipHtml}
               data-tooltip-class-name={tooltipClassName}
+              data-tooltip-place={tooltipPlace}
               onClick={() => onSelectDay?.(cellDateUtcDay)}>
               <span
                 className={`tw-text-xs tw-rounded-full tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center ${
@@ -1246,7 +1256,7 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
         id="meme-tooltip"
         clickable
         openOnClick
-        className="tw-max-w-sm !tw-opacity-[0.975] !tw-text-black !tw-rounded-md !tw-border !tw-border-solid !tw-border-[#222222]"
+        className="tw-max-w-[22rem] !tw-opacity-[0.975] !tw-text-black !tw-rounded-md !tw-border !tw-border-solid !tw-border-[#222222] !tw-z-[1000] !tw-whitespace-normal"
       />
     </div>
   );
