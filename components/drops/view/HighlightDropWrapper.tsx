@@ -43,8 +43,9 @@ const HighlightDropWrapper = forwardRef<
     const [phase, setPhase] = useState<"idle" | "highlight" | "fading">(
       "idle"
     );
-    const highlightTimeoutRef = useRef<number | null>(null);
-    const fadeTimeoutRef = useRef<number | null>(null);
+    const highlightTimeoutRef =
+      useRef<ReturnType<typeof setTimeout> | null>(null);
+    const fadeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const rafRef = useRef<number | null>(null);
     const visibilityStartTimeRef = useRef<number | null>(null);
 
@@ -84,13 +85,13 @@ const HighlightDropWrapper = forwardRef<
       clearTimers();
       setPhase("highlight");
 
-      highlightTimeoutRef.current = globalThis.setTimeout(() => {
+      highlightTimeoutRef.current = setTimeout(() => {
         setPhase("fading");
 
-        fadeTimeoutRef.current = globalThis.setTimeout(() => {
+        fadeTimeoutRef.current = setTimeout(() => {
           setPhase("idle");
-        }, fadeMs) as unknown as number;
-      }, highlightMs) as unknown as number;
+        }, fadeMs);
+      }, highlightMs);
     }, [clearTimers, fadeMs, highlightMs]);
 
     const trackVisibilityOnce = useCallback(() => {
@@ -173,7 +174,7 @@ const HighlightDropWrapper = forwardRef<
           stopRAF();
         }
       },
-      [active, runHighlightWindow, scrollContainer, stopRAF, visibilityThreshold]
+      [active, runHighlightWindow, stopRAF, visibilityThreshold]
     );
 
     useIntersectionObserver(
