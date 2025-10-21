@@ -22,6 +22,8 @@ interface HighlightDropWrapperProps {
   readonly id?: string;
 }
 
+const MAX_VISIBILITY_WAIT_MS = 4000;
+
 const HighlightDropWrapper = forwardRef<
   HTMLDivElement,
   HighlightDropWrapperProps
@@ -51,7 +53,6 @@ const HighlightDropWrapper = forwardRef<
 
     const lastExtendedRef = useRef(false);
     const prevActiveRef = useRef(false);
-    const maxVisibilityWaitMs = 4000;
 
     const setNode = (node: HTMLDivElement | null) => {
       innerRef.current = node;
@@ -109,7 +110,7 @@ const HighlightDropWrapper = forwardRef<
         const currentTimestamp = getNow();
         const startTime = visibilityStartTimeRef.current ?? startTimestamp;
         const elapsed = currentTimestamp - startTime;
-        if (elapsed >= maxVisibilityWaitMs) {
+        if (elapsed >= MAX_VISIBILITY_WAIT_MS) {
           stopRAF();
           return;
         }
@@ -151,13 +152,7 @@ const HighlightDropWrapper = forwardRef<
       };
 
       rafRef.current = globalThis.requestAnimationFrame(checkVisibility);
-    }, [
-      maxVisibilityWaitMs,
-      runHighlightWindow,
-      scrollContainer,
-      stopRAF,
-      visibilityThreshold,
-    ]);
+    }, [runHighlightWindow, scrollContainer, stopRAF, visibilityThreshold]);
 
     const handleIntersection = useCallback(
       (entry: IntersectionObserverEntry) => {
@@ -222,7 +217,11 @@ const HighlightDropWrapper = forwardRef<
     const isFading = phase === "fading";
 
     const transitionClasses =
-      isHighlighted || isFading ? "tw-transition-colors tw-duration-500" : "";
+      isHighlighted || isFading ? "tw-transition-colors" : "";
+    const transitionStyle =
+      isHighlighted || isFading
+        ? { transitionDuration: `${fadeMs}ms` }
+        : undefined;
     const classes = classNames(
       className,
       transitionClasses,
@@ -231,7 +230,7 @@ const HighlightDropWrapper = forwardRef<
     );
 
     return (
-      <div ref={setNode} id={id} className={classes}>
+      <div ref={setNode} id={id} className={classes} style={transitionStyle}>
         {children}
       </div>
     );
