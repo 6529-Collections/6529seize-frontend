@@ -1,8 +1,8 @@
-import { HISTORICAL_MINTS } from "./meme-calendar.szn1";
 import {
   EXTRA_MINT_UTC_DAYS,
   SKIPPED_MINT_UTC_DAYS,
 } from "./meme-calendar.overrides";
+import { HISTORICAL_MINTS } from "./meme-calendar.szn1";
 
 // Constants for division sizes
 export const SEASONS_PER_YEAR = 4;
@@ -1005,4 +1005,16 @@ export function getUpcomingMintsForCurrentOrNextSeason(
     ...next,
     seasonIndex: nextIdx,
   };
+}
+
+export function getCanonicalNextMintNumber(now: Date = new Date()): number {
+  const upcomingInstant = getNextMintStart(now);
+  const upcomingUtcDay = new Date(
+    Date.UTC(
+      upcomingInstant.getUTCFullYear(),
+      upcomingInstant.getUTCMonth(),
+      upcomingInstant.getUTCDate()
+    )
+  );
+  return getMintNumberForMintDate(upcomingUtcDay);
 }

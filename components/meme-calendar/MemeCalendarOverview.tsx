@@ -20,6 +20,7 @@ import {
   formatFullDate,
   formatFullDateTime,
   formatToFullDivision,
+  getCanonicalNextMintNumber,
   getMintNumberForMintDate,
   getMintTimelineDetails,
   getNextMintStart,
@@ -167,17 +168,10 @@ export function MemeCalendarOverviewNextMint({
   const cardRef = useRef<HTMLDivElement>(null);
   const mintInputRef = useRef<HTMLInputElement>(null);
 
-  const canonicalNextMintNumber = useMemo(() => {
-    const upcomingInstant = getNextMintStart(now);
-    const upcomingUtcDay = new Date(
-      Date.UTC(
-        upcomingInstant.getUTCFullYear(),
-        upcomingInstant.getUTCMonth(),
-        upcomingInstant.getUTCDate()
-      )
-    );
-    return getMintNumberForMintDate(upcomingUtcDay);
-  }, [now]);
+  const canonicalNextMintNumber = useMemo(
+    () => getCanonicalNextMintNumber(now),
+    [now]
+  );
 
   const handleMintSelection = useCallback(
     (mintNumber: number) => {
@@ -426,17 +420,10 @@ export function MemeCalendarOverviewUpcomingMints({
       [now]
     );
 
-  const canonicalNextMintNumber = useMemo(() => {
-    const upcomingInstant = getNextMintStart(now);
-    const upcomingUtcDay = new Date(
-      Date.UTC(
-        upcomingInstant.getUTCFullYear(),
-        upcomingInstant.getUTCMonth(),
-        upcomingInstant.getUTCDate()
-      )
-    );
-    return getMintNumberForMintDate(upcomingUtcDay);
-  }, [now]);
+  const canonicalNextMintNumber = useMemo(
+    () => getCanonicalNextMintNumber(now),
+    [now]
+  );
 
   const { filteredRows, hasCanonicalNext } = useMemo(() => {
     const containsCanonical = rows.some(
@@ -486,7 +473,7 @@ export function MemeCalendarOverviewUpcomingMints({
                     {formatFullDateTime(instantUtc, displayTz)}
                   </td>
                   <td
-                    className="tw-py-2 tw-flex align-items-center justify-content-end tw-pr-6"
+                    className="tw-py-2 tw-flex tw-items-center tw-justify-end tw-pr-6"
                     dangerouslySetInnerHTML={{
                       __html: printCalendarInvites(
                         instantUtc,
