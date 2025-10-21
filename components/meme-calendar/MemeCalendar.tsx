@@ -204,12 +204,14 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
           const cellDateUtcDay = new Date(Date.UTC(year, month, day));
           const col = idx % 7;
           const row = Math.floor(idx / 7);
-          let tooltipPlace: "top" | "bottom" | "left" | "right" = "top";
-          if (col <= 1) tooltipPlace = "right";
-          else if (col >= 4) tooltipPlace = "left";
-          else if (row <= 1) tooltipPlace = "bottom";
-          else if (row >= 4) tooltipPlace = "top";
-          else tooltipPlace = "top";
+          const tooltipPlace: "top" | "bottom" | "left" | "right" =
+            col <= 1
+              ? "right"
+              : col >= 4
+              ? "left"
+              : row <= 1
+              ? "bottom"
+              : "top";
 
           const historical = getHistoricalMintsOnUtcDay(cellDateUtcDay);
           const isHistoricalMintDay = historical.length > 0;
