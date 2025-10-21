@@ -25,7 +25,8 @@ const BASE_EXTRA_MINT_DAYS: readonly MintDayOverride[] = [
 ];
 
 function isoToUtcDayNumber(isoDate: string): number {
-  const match = isoDate.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const regex = /^(\d{4})-(\d{2})-(\d{2})$/;
+  const match = regex.exec(isoDate);
   if (!match) {
     throw new Error(`Invalid ISO date string for mint override: ${isoDate}`);
   }

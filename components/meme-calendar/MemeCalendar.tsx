@@ -64,11 +64,11 @@ function formatMonthYearShort(d: Date): string {
 
 function escapeHtml(value: string): string {
   return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+    .replaceAll(/&/g, "&amp;")
+    .replaceAll(/</g, "&lt;")
+    .replaceAll(/>/g, "&gt;")
+    .replaceAll(/"/g, "&quot;")
+    .replaceAll(/'/g, "&#39;");
 }
 
 function getZoomTitle(zoom: ZoomLevel, seasonIndex: number): string {
@@ -210,7 +210,7 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
           const isMintDay = isHistoricalMintDay || isScheduledMintDay;
           const overrideNote = getMintOverrideNoteForUtcDay(cellDateUtcDay);
           const noteTooltipContent = overrideNote
-            ? escapeHtml(overrideNote).replace(/\n/g, "<br />")
+            ? escapeHtml(overrideNote).replaceAll(/\n/g, "<br />")
             : "";
 
           // For label: if multiple historical mints, show a range (#1-#3). Otherwise single #.
@@ -1209,7 +1209,7 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
                   name="meme-calendar-mint-input"
                   placeholder="123"
                   onChange={(event) => {
-                    const v = event.target.value.replace(/\D/g, "");
+                    const v = event.target.value.replaceAll(/\D/g, "");
                     setJumpMint(v);
                   }}
                   className="tw-text-black placeholder:tw-text-gray-500 focus:tw-outline-none tw-border-none tw-h-9 tw-w-full sm:tw-w-[8ch] tw-min-w-0 tw-px-2 tw-rounded-r-md"

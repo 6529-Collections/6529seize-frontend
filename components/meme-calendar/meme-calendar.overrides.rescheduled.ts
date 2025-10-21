@@ -1,6 +1,6 @@
-import { MintRescheduleOverride } from "./meme-calendar.overrides";
+import type { MintRescheduleOverride } from "./meme-calendar.overrides";
 
-export const CUSTOM_RESCHEDULED_MINTS: MintRescheduleOverride[] = [
+export const CUSTOM_RESCHEDULED_MINTS: readonly MintRescheduleOverride[] = [
   {
     mintNumber: 415,
     from: "2025-10-20",
