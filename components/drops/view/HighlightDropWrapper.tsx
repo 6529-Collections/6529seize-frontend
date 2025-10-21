@@ -46,6 +46,7 @@ const HighlightDropWrapper = forwardRef<
     const [phase, setPhase] = useState<"idle" | "highlight" | "fading">(
       "idle"
     );
+    const phaseRef = useRef(phase);
     const highlightTimeoutRef =
       useRef<ReturnType<typeof setTimeout> | null>(null);
     const fadeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -63,6 +64,10 @@ const HighlightDropWrapper = forwardRef<
         forwardedRef.current = node;
       }
     };
+
+    useEffect(() => {
+      phaseRef.current = phase;
+    }, [phase]);
 
     const stopRAF = useCallback(() => {
       if (rafRef.current) {
@@ -143,7 +148,9 @@ const HighlightDropWrapper = forwardRef<
 
           if (ratio >= visibilityThreshold && !lastExtendedRef.current) {
             lastExtendedRef.current = true;
-            runHighlightWindow();
+            if (phaseRef.current !== "highlight") {
+              runHighlightWindow();
+            }
             stopRAF();
             return;
           }
@@ -166,7 +173,9 @@ const HighlightDropWrapper = forwardRef<
           !lastExtendedRef.current
         ) {
           lastExtendedRef.current = true;
-          runHighlightWindow();
+          if (phaseRef.current !== "highlight") {
+            runHighlightWindow();
+          }
           stopRAF();
         }
       },
