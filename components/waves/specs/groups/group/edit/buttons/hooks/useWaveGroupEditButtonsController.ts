@@ -331,7 +331,7 @@ export const useWaveGroupEditButtonsController = ({
     [scopedGroup, connectedProfile],
   );
 
-  const canIncludeIdentity = isWaveAdmin || isAuthor;
+  const canIncludeIdentity = hasGroup && (isWaveAdmin || isAuthor);
   const canExcludeIdentity = isWaveAdmin || isAuthor;
   const canRemoveGroup =
     haveGroup && type !== WaveGroupType.ADMIN;
@@ -415,6 +415,18 @@ export const useWaveGroupEditButtonsController = ({
     }) => {
       const normalisedIdentity = normaliseIdentity(identity);
       if (!normalisedIdentity) {
+        return;
+      }
+
+      if (
+        mode === WaveGroupIdentitiesModal.INCLUDE &&
+        !scopedGroup?.id
+      ) {
+        setToast({
+          type: "error",
+          message:
+            "You need to define group filters before including specific identities.",
+        });
         return;
       }
 

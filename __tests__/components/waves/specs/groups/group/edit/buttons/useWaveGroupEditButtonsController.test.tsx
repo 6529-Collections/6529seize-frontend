@@ -180,7 +180,7 @@ describe('useWaveGroupEditButtonsController - identity management', () => {
     });
   });
 
-  it('creates a brand new group when none exists', async () => {
+  it('blocks including identities when no group exists', async () => {
     mockCommonApiFetch.mockReset();
 
     const { result } = renderHook(() =>
@@ -195,6 +195,8 @@ describe('useWaveGroupEditButtonsController - identity management', () => {
       }),
     );
 
+    expect(result.current.canIncludeIdentity).toBe(false);
+
     await act(async () => {
       await result.current.onIdentityConfirm({
         identity: '0xFACE',
@@ -202,33 +204,15 @@ describe('useWaveGroupEditButtonsController - identity management', () => {
       });
     });
 
-    expect(mockCommonApiFetch).not.toHaveBeenCalled();
-    const payloadArg = mockCreateGroup.mock.calls[0][0].payload;
-    expect(payloadArg.name).toBe('Wave Alpha View Include');
-    expect(payloadArg.group.identity_addresses).toEqual(['0xface']);
-    expect(mockPublishGroup).toHaveBeenCalledWith({
-      id: 'new-group-id',
-      oldVersionId: null,
-    });
-    expect(mockCommonApiPost).toHaveBeenCalledWith({
-      endpoint: `waves/wave-1`,
-      body: expect.objectContaining({
-        visibility: expect.objectContaining({
-          scope: expect.objectContaining({ group_id: 'new-group-id' }),
-        }),
-      }),
-    });
-    expect(mutateAsyncSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        visibility: expect.objectContaining({
-          scope: expect.objectContaining({ group_id: 'new-group-id' }),
-        }),
-      }),
-    );
-    expect(onWaveCreated).toHaveBeenCalledTimes(1);
+    expect(requestAuth).not.toHaveBeenCalled();
+    expect(mockCreateGroup).not.toHaveBeenCalled();
+    expect(mockPublishGroup).not.toHaveBeenCalled();
+    expect(mockCommonApiPost).not.toHaveBeenCalled();
+    expect(mutateAsyncSpy).not.toHaveBeenCalled();
+    expect(onWaveCreated).not.toHaveBeenCalled();
     expect(setToast).toHaveBeenCalledWith({
-      message: 'Identity successfully included in the group.',
-      type: 'success',
+      message: 'You need to define group filters before including specific identities.',
+      type: 'error',
     });
   });
 
