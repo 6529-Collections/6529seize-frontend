@@ -20,6 +20,7 @@ import {
   formatFullDate,
   formatFullDateTime,
   formatToFullDivision,
+  getCanonicalNextMintNumber,
   getMintNumberForMintDate,
   getMintTimelineDetails,
   getNextMintStart,
@@ -167,17 +168,10 @@ export function MemeCalendarOverviewNextMint({
   const cardRef = useRef<HTMLDivElement>(null);
   const mintInputRef = useRef<HTMLInputElement>(null);
 
-  const canonicalNextMintNumber = useMemo(() => {
-    const upcomingInstant = getNextMintStart(now);
-    const upcomingUtcDay = new Date(
-      Date.UTC(
-        upcomingInstant.getUTCFullYear(),
-        upcomingInstant.getUTCMonth(),
-        upcomingInstant.getUTCDate()
-      )
-    );
-    return getMintNumberForMintDate(upcomingUtcDay);
-  }, [now]);
+  const canonicalNextMintNumber = useMemo(
+    () => getCanonicalNextMintNumber(now),
+    [now]
+  );
 
   const handleMintSelection = useCallback(
     (mintNumber: number) => {
@@ -426,6 +420,27 @@ export function MemeCalendarOverviewUpcomingMints({
       [now]
     );
 
+  const canonicalNextMintNumber = useMemo(
+    () => getCanonicalNextMintNumber(now),
+    [now]
+  );
+
+  const { filteredRows, hasCanonicalNext } = useMemo(() => {
+    const containsCanonical = rows.some(
+      (row) => row.meme === canonicalNextMintNumber
+    );
+    return {
+      filteredRows: containsCanonical
+        ? rows.filter((row) => row.meme !== canonicalNextMintNumber)
+        : rows,
+      hasCanonicalNext: containsCanonical,
+    } as const;
+  }, [rows, canonicalNextMintNumber]);
+
+  const emptyStateCopy = hasCanonicalNext
+    ? "No additional mints scheduled in this season."
+    : "No upcoming mints in this season.";
+
   return (
     <div className="tw-h-full tw-p-4 tw-flex tw-flex-col tw-bg-[#0c0c0d] tw-rounded-md tw-border tw-border-solid tw-border-[#222222]">
       <div className="tw-flex tw-items-center tw-justify-between tw-mb-3">
@@ -442,14 +457,14 @@ export function MemeCalendarOverviewUpcomingMints({
         <table className="tw-w-full tw-text-sm">
           <thead></thead>
           <tbody>
-            {rows.length === 0 ? (
+            {filteredRows.length === 0 ? (
               <tr>
                 <td className="tw-py-3 tw-text-gray-500" colSpan={3}>
-                  No upcoming mints in this season.
+                  {emptyStateCopy}
                 </td>
               </tr>
             ) : (
-              rows.map(({ utcDay, instantUtc, meme }) => (
+              filteredRows.map(({ utcDay, instantUtc, meme }) => (
                 <tr key={ymd(utcDay)}>
                   <td className="tw-py-2 tw-font-semibold">
                     #{meme.toLocaleString()}
@@ -458,7 +473,7 @@ export function MemeCalendarOverviewUpcomingMints({
                     {formatFullDateTime(instantUtc, displayTz)}
                   </td>
                   <td
-                    className="tw-py-2 tw-flex align-items-center justify-content-end tw-pr-6"
+                    className="tw-py-2 tw-flex tw-items-center tw-justify-end tw-pr-6"
                     dangerouslySetInnerHTML={{
                       __html: printCalendarInvites(
                         instantUtc,
