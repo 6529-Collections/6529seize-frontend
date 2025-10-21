@@ -14,6 +14,8 @@ import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 
 export default function NotificationWaveCreated({
   notification,
@@ -29,6 +31,14 @@ export default function NotificationWaveCreated({
       await commonApiFetch<ApiWave>({
         endpoint: `waves/${notification.additional_context.wave_id}`,
       }),
+  });
+
+  const { isApp } = useDeviceInfo();
+  const invitationHref = getWaveRoute({
+    waveId: notification.additional_context.wave_id,
+    isDirectMessage:
+      wave?.chat.scope.group?.is_direct_message ?? false,
+    isApp,
   });
 
   return (
@@ -56,7 +66,7 @@ export default function NotificationWaveCreated({
           </Link>{" "}
           <span className="tw-text-iron-400"> invited you to a wave:</span>{" "}
           <Link
-            href={`/my-stream?wave=${notification.additional_context.wave_id}`}
+            href={invitationHref}
             className="tw-text-md tw-font-medium tw-no-underline tw-text-primary-400 hover:tw-text-primary-300">
             {wave?.name}
           </Link>{" "}

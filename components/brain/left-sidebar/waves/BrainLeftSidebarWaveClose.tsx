@@ -5,6 +5,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
 import { Tooltip } from "react-tooltip";
+import { useWaveData } from "../../../../hooks/useWaveData";
+import useDeviceInfo from "../../../../hooks/useDeviceInfo";
+import { getWaveHomeRoute } from "../../../../helpers/navigation.helpers";
 
 interface BrainLeftSidebarWaveCloseProps {
   readonly waveId: string;
@@ -14,13 +17,14 @@ const BrainLeftSidebarWaveClose: React.FC<BrainLeftSidebarWaveCloseProps> = ({
   waveId,
 }) => {
   const router = useRouter();
+  const { isApp } = useDeviceInfo();
+  const { data: wave } = useWaveData({ waveId });
+  const isDirectMessage = wave?.chat.scope.group?.is_direct_message ?? false;
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-
-    // Navigate to the base my-stream URL without the wave parameter
-    router.push("/my-stream");
+    router.push(getWaveHomeRoute({ isDirectMessage, isApp }));
   };
 
   const tooltipId = `wave-close-${waveId}`;

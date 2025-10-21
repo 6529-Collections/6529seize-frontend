@@ -14,10 +14,10 @@ export const TimeUnitDisplay: React.FC<TimeUnitDisplayProps> = ({
 }) => {
   return (
     <div className="tw-flex tw-items-center tw-gap-x-0.5">
-      <span className="tw-text-sm tw-text-iron-50 tw-tabular-nums tw-font-mono tw-font-bold">
+      <span className="tw-text-xxs tw-text-iron-50 tw-tabular-nums tw-font-medium">
         {value}
       </span>
-      <span className="tw-text-sm tw-text-iron-400">{label}</span>
+      <span className="tw-text-xxs tw-text-iron-400 tw-font-normal">{label}</span>
     </div>
   );
 };

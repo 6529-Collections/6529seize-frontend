@@ -9,9 +9,11 @@ const LEVEL_CLASSES: { minLevel: number; classes: string }[] = [
 export default function UserLevel({
   level,
   size = "base",
+  asSpan = false,
 }: {
   readonly level: number;
-  readonly size?: "xs" | "sm" | "base";
+  readonly size?: "xxs" | "xs" | "sm" | "base";
+  readonly asSpan?: boolean;
 }) {
   const getColorClasses = () =>
     LEVEL_CLASSES.find((levelClass) => levelClass.minLevel <= level)?.classes ??
@@ -24,6 +26,9 @@ export default function UserLevel({
     if (size === "xs") {
       return "tw-text-[0.6875rem] tw-ring-1 tw-font-semibold tw-py-[0.1875rem]";
     }
+    if (size === "xxs") {
+      return "tw-text-[0.6875rem] tw-ring-1 tw-font-semibold tw-py-0";
+    }
     return "tw-text-base tw-font-semibold tw-ring-2 tw-py-1";
   };
 
@@ -32,11 +37,18 @@ export default function UserLevel({
     window.open("/network/levels", "_blank");
   };
 
+  const content = `Level ${level}`;
+  const sharedClasses = `tw-inline-flex tw-items-center tw-rounded-xl tw-px-2 tw-ring-inset ${classes}`;
+
+  if (asSpan) {
+    return <span className={sharedClasses}>{content}</span>;
+  }
+
   return (
     <button
       onClick={openLevelsPage}
-      className={`tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-ring-inset ${classes}`}>
-      Level {level}
+      className={`tw-border-none tw-bg-transparent ${sharedClasses}`}>
+      {content}
     </button>
   );
 }

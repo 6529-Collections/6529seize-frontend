@@ -2,17 +2,17 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import SelectGroupModalSearch from "./SelectGroupModalSearch";
 import SelectGroupModalHeader from "./SelectGroupModalHeader";
+import SelectGroupModalSearch from "./SelectGroupModalSearch";
 
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { GroupsRequestParams } from "@/entities/IGroup";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { Mutable, NonNullableNotRequired } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
-import SelectGroupModalItems from "./SelectGroupModalItems";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import { GroupsRequestParams } from "@/entities/IGroup";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { createPortal } from "react-dom";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import SelectGroupModalItems from "./SelectGroupModalItems";
 export default function SelectGroupModal({
   onClose,
   onGroupSelect,
@@ -76,7 +76,7 @@ export default function SelectGroupModal({
 
   return createPortal(
     <div className="tw-relative tw-z-1000 tailwind-scope">
-      <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
+      <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50"></div>
       <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-text-center sm:tw-items-center tw-p-2 lg:tw-p-0">
           <div

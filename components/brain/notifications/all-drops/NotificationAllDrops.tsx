@@ -16,6 +16,8 @@ import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useRouter } from "next/navigation";
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import { getNotificationVoteColor } from "../drop-reacted/NotificationDropReacted";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 
 export default function NotificationAllDrops({
   notification,
@@ -31,15 +33,34 @@ export default function NotificationAllDrops({
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }) {
   const router = useRouter();
+  const { isApp } = useDeviceInfo();
+  const baseWave = notification.related_drops[0].wave as any;
+  const isDirectMessage =
+    baseWave?.chat?.scope?.group?.is_direct_message ?? false;
+
   const onReplyClick = (serialNo: number) => {
     router.push(
-      `/my-stream?wave=${notification.related_drops[0].wave.id}&serialNo=${serialNo}/`
+      getWaveRoute({
+        waveId: notification.related_drops[0].wave.id,
+        serialNo,
+        isDirectMessage,
+        isApp,
+      })
     );
   };
 
   const onQuoteClick = (quote: ApiDrop) => {
+    const quoteWave = quote.wave as any;
+    const quoteIsDm =
+      quoteWave?.chat?.scope?.group?.is_direct_message ?? isDirectMessage;
+
     router.push(
-      `/my-stream?wave=${quote.wave.id}&serialNo=${quote.serial_no}/`
+      getWaveRoute({
+        waveId: quote.wave.id,
+        serialNo: quote.serial_no,
+        isDirectMessage: quoteIsDm,
+        isApp,
+      })
     );
   };
 

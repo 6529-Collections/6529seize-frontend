@@ -1,6 +1,7 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import React, { useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { ApiDrop } from "@/generated/models/ApiDrop";
@@ -21,7 +22,18 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
   const copyToClipboard = () => {
     if (isTemporaryDrop(drop)) return;
 
-    const dropLink = `${publicEnv.BASE_ENDPOINT}/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}`;
+    const waveDetails =
+      (drop.wave as unknown as {
+        chat?: { scope?: { group?: { is_direct_message?: boolean } } };
+      }) ?? undefined;
+    const isDirectMessage =
+      waveDetails?.chat?.scope?.group?.is_direct_message ?? false;
+    const dropLink = `${publicEnv.BASE_ENDPOINT}${getWaveRoute({
+      waveId: drop.wave.id,
+      serialNo: drop.serial_no,
+      isDirectMessage,
+      isApp: false,
+    })}`;
     navigator.clipboard.writeText(dropLink).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);

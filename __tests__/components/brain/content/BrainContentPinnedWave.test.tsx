@@ -24,6 +24,11 @@ jest.mock('@/hooks/usePrefetchWaveData', () => ({
   usePrefetchWaveData: () => prefetch,
 }));
 
+jest.mock('@/hooks/useDeviceInfo', () => ({
+  __esModule: true,
+  default: () => ({ isApp: false }),
+}));
+
 const registerWave = jest.fn();
 jest.mock('@/contexts/wave/MyStreamContext', () => ({
   useMyStream: () => ({ registerWave }),
@@ -82,7 +87,7 @@ describe('BrainContentPinnedWave', () => {
     const { container } = renderComponent();
 
     expect(screen.getAllByText('Wave 1').length).toBeGreaterThan(0);
-    expect(screen.getByRole('link')).toHaveAttribute('href', '/my-stream?wave=1');
+    expect(screen.getByRole('link')).toHaveAttribute('href', '/waves?wave=1');
 
     await user.hover(container.firstChild as HTMLElement);
     expect(onMouseEnter).toHaveBeenCalledWith('1');
@@ -94,15 +99,15 @@ describe('BrainContentPinnedWave', () => {
 
     await user.click(screen.getByRole('link'));
     expect(onMouseLeave).toHaveBeenCalled();
-    expect(push).toHaveBeenCalledWith('/my-stream?wave=1');
+    expect(push).toHaveBeenCalledWith('/waves?wave=1');
   });
 
-  it('uses /my-stream when viewing active wave and skips prefetch', async () => {
+  it('uses waves route when viewing active wave and skips prefetch', async () => {
     searchParams.set('wave', '1');
     const user = userEvent.setup();
     const { container } = renderComponent();
 
-    expect(screen.getByRole('link')).toHaveAttribute('href', '/my-stream');
+    expect(screen.getByRole('link')).toHaveAttribute('href', '/waves');
 
     await user.hover(container.firstChild as HTMLElement);
     expect(onMouseEnter).toHaveBeenCalledWith('1');

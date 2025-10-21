@@ -2,6 +2,15 @@ import { renderHook, act } from "@testing-library/react";
 import { useActiveWaveManager } from "@/contexts/wave/hooks/useActiveWaveManager";
 import { useRouter, useSearchParams } from "next/navigation";
 
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: () => ({
+    isApp: false,
+    isMobileDevice: false,
+    hasTouchScreen: false,
+  }),
+}));
+
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
   useSearchParams: jest.fn(),
@@ -22,7 +31,7 @@ describe("useActiveWaveManager", () => {
     act(() => {
       result.current.setActiveWave("def");
     });
-    expect(push).toHaveBeenLastCalledWith("/my-stream?wave=def");
+    expect(push).toHaveBeenLastCalledWith('/waves?wave=def');
 
     // Simulate router query change to trigger state update
     (useSearchParams as jest.Mock).mockReturnValue(
@@ -34,6 +43,6 @@ describe("useActiveWaveManager", () => {
     act(() => {
       result.current.setActiveWave(null);
     });
-    expect(push).toHaveBeenLastCalledWith("/my-stream");
+    expect(push).toHaveBeenLastCalledWith('/waves');
   });
 });

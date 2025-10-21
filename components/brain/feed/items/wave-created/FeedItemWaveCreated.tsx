@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { IFeedItemWaveCreated } from "@/types/feed.types";
 
 import { ApiDrop } from "@/generated/models/ApiDrop";
@@ -13,6 +12,9 @@ import Drop, {
   DropInteractionParams,
   DropLocation,
 } from "@/components/waves/drops/Drop";
+import { useRouter } from "next/navigation";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 
 export default function FeedItemWaveCreated({
   item,
@@ -30,13 +32,36 @@ export default function FeedItemWaveCreated({
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }) {
   const router = useRouter();
+  const { isApp } = useDeviceInfo();
+
+  const waveInfo = item.item.wave as any;
+  const isDirectMessage =
+    waveInfo?.chat?.scope?.group?.is_direct_message ?? false;
+
   const onReplyClick = (serialNo: number) => {
-    router.push(`/my-stream?wave=${item.item.id}&serialNo=${serialNo}/`, { scroll: false });
+    router.push(
+      getWaveRoute({
+        waveId: item.item.id,
+        serialNo,
+        isDirectMessage,
+        isApp,
+      }),
+      { scroll: false }
+    );
   };
 
   const onQuoteClick = (quote: ApiDrop) => {
+    const quoteWave = quote.wave as any;
+    const quoteIsDm =
+      quoteWave?.chat?.scope?.group?.is_direct_message ?? isDirectMessage;
+
     router.push(
-      `/my-stream?wave=${quote.wave.id}&serialNo=${quote.serial_no}/`,
+      getWaveRoute({
+        waveId: quote.wave.id,
+        serialNo: quote.serial_no,
+        isDirectMessage: quoteIsDm,
+        isApp,
+      }),
       { scroll: false }
     );
   };
