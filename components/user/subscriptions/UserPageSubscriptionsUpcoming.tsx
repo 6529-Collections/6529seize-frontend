@@ -47,7 +47,11 @@ export default function UserPageSubscriptionsUpcoming(
     }
   }, [props.memes_subscriptions, expanded]);
 
-  const [now] = useState(new Date());
+  const [now] = useState(() => {
+    const d = new Date();
+    d.setUTCHours(0, 0, 0, 0);
+    return d;
+  });
   const { rows } = useMemo<SeasonMintScanResult>(
     () => getUpcomingMintsForCurrentOrNextSeason(now),
     [now]

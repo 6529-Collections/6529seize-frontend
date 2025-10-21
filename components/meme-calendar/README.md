@@ -2,6 +2,27 @@
 
 This module centralizes all date math, numbering, and calendar link logic that powers the Meme Calendar UI. The table below summarizes the primary exported helpers and the responsibilities they cover.
 
+## Mint schedule overrides
+
+The default mint cadence (Monday/Wednesday/Friday, plus a handful of historic exceptions) is declared in [`meme-calendar.overrides.ts`](./meme-calendar.overrides.ts). Add future skips, bonus mint days, or one-off reschedules there without touching the helpers themselves.
+
+- Append ISO dates (e.g. `"2025-10-21"`) to `CUSTOM_SKIPPED_MINT_DAYS` to cancel a scheduled mint.
+- Append ISO dates to `CUSTOM_EXTRA_MINT_DAYS` to force an additional mint even if it falls on a non-standard weekday.
+- Use `CUSTOM_RESCHEDULED_MINTS` when a numbered mint simply moves to a different date. Each entry automatically skips the original day and whitelists the new day:
+
+  ```ts
+  export const CUSTOM_RESCHEDULED_MINTS: MintRescheduleOverride[] = [
+    {
+      mintNumber: 415,
+      from: "2025-10-20", // original Monday slot
+      to: "2025-10-21",   // new Tuesday slot
+      note: "Delayed one day for artist schedule",
+    },
+  ];
+  ```
+
+These overrides feed into the eligibility logic used by all calendar utilities, so views, countdowns, and mint-number lookups stay in sync automatically.
+
 ## Mint Day & Window Calculations
 
 | Helper                                        | Summary                                                                                                                                 |

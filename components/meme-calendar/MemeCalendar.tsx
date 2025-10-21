@@ -42,6 +42,7 @@ import {
   ymd,
   ZoomLevel,
 } from "./meme-calendar.helpers";
+import { getMintOverrideNoteForUtcDay } from "./meme-calendar.overrides";
 import { getHistoricalMintsOnUtcDay } from "./meme-calendar.szn1";
 
 /*
@@ -59,6 +60,15 @@ function formatMonthYearShort(d: Date): string {
   return `${d.toLocaleString("default", {
     month: "short",
   })} ${d.getUTCFullYear()}`;
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function getZoomTitle(zoom: ZoomLevel, seasonIndex: number): string {
@@ -198,6 +208,10 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
           const isScheduledMintDay = isMintEligibleUtcDay(cellDateUtcDay);
 
           const isMintDay = isHistoricalMintDay || isScheduledMintDay;
+          const overrideNote = getMintOverrideNoteForUtcDay(cellDateUtcDay);
+          const noteTooltipContent = overrideNote
+            ? escapeHtml(overrideNote).replace(/\n/g, "<br />")
+            : "";
 
           // For label: if multiple historical mints, show a range (#1-#3). Otherwise single #.
           let mintLabel: string | undefined;
@@ -268,6 +282,10 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
               mintInstantUtc.getTime() > now.getTime()
                 ? formatFullDateTime(mintInstantUtc, displayTz)
                 : formatFullDate(mintInstantUtc, displayTz);
+            const oneLineDivWithNote = noteTooltipContent
+              ? `<div style="margin-bottom:12px">${oneLine}<br />
+                <span style="font-size:12px; color: #666;">*${noteTooltipContent}</span></div>`
+              : `<div style="margin-bottom:12px">${oneLine}</div>`;
             const invites =
               mintInstantUtc.getTime() > now.getTime()
                 ? printCalendarInvites(mintInstantUtc, mintNumber!, "#000")
@@ -275,7 +293,7 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
             tooltipHtml = `
               <div style="min-width:220px">
                 <div style="font-weight:600; margin-bottom:3px; font-size:larger">Meme ${mintLabel}</div>
-                <div style="margin-bottom:12px">${oneLine}</div>
+                ${oneLineDivWithNote}
                 ${invites}
               </div>`;
             if (mintInstantUtc?.getTime() > now.getTime()) {
