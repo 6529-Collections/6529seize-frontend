@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { ActiveDropState } from "@/types/dropInteractionTypes";
 import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
 import WaveDropsEmptyPlaceholder from "./WaveDropsEmptyPlaceholder";
 import WaveDropsScrollingOverlay from "./WaveDropsScrollingOverlay";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
@@ -378,8 +379,10 @@ export default function WaveDropsAll({
           (drop.wave as unknown as {
             chat?: { scope?: { group?: { is_direct_message?: boolean } } };
           }) ?? undefined;
-        const isDirectMessage =
-          waveDetails?.chat?.scope?.group?.is_direct_message ?? false;
+        const isDirectMessage = isWaveDirectMessage(
+          drop.wave.id,
+          waveDetails
+        );
         const href = getWaveRoute({
           waveId: drop.wave.id,
           serialNo: drop.serial_no,
