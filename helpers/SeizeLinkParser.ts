@@ -83,27 +83,16 @@ export function parseSeizeQuoteLink(href: string): SeizeQuoteLinkInfo | null {
   }
 
   const serialNo = sanitizeQueryValue(url.searchParams.get("serialNo"));
-  const dropId = sanitizeQueryValue(url.searchParams.get("drop"));
 
-  if (!serialNo && !dropId) {
-    return null;
-  }
 
-  
-
-  if (serialNo && !/^\d+$/.test(serialNo)) {
+  if (!serialNo || !/^\d+$/.test(serialNo)) {
     return null;
   }
   
-
   const result: SeizeQuoteLinkInfo = { waveId };
 
   if (serialNo) {
     result.serialNo = serialNo;
-  }
-
-  if (dropId) {
-    result.dropId = dropId;
   }
 
   return result;

@@ -43,18 +43,16 @@ export default function HomeApp({
   useEffect(() => {
     if (!isApp) return;
 
-    if (activeTab === "feed") {
+    if (activeTab === "feed" || isDropOpen) {
       document.body.style.overflow = "hidden";
     } else {
-      // Ensure normal page scrolling when not on the feed tab
       document.body.style.overflow = "";
     }
 
     return () => {
-      // Always restore default scrolling on cleanup
       document.body.style.overflow = "";
     };
-  }, [activeTab, isApp]);
+  }, [activeTab, isApp, isDropOpen]);
 
   let content: React.ReactNode;
 
