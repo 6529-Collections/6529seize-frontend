@@ -73,7 +73,8 @@ export const createLinkRenderer = ({
       return null;
     }
 
-    const stableHref = ensureStableSeizeLink(href);
+    // TODO: temporary
+    const stableHref = ensureStableSeizeLink(href.replace('https://', ''));
     if (!isValidLink(stableHref)) {
       return null;
     }

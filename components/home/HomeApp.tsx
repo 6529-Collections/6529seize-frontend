@@ -1,19 +1,18 @@
 "use client";
 
-import React, { useEffect } from "react";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
-import Home from "./Home";
-import { InitialActivityData } from "../latest-activity/fetchInitialActivityData";
-import HomeFeed from "./HomeFeed";
-import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import ConnectWallet from "../common/ConnectWallet";
-import { useLayout } from "../brain/my-stream/layout/LayoutContext";
-import { useHomeTabs } from "./useHomeTabs";
-import { useDropModal } from "@/hooks/useDropModal";
-import BrainDesktopDrop from "../brain/BrainDesktopDrop";
-import { DropSize } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useDropModal } from "@/hooks/useDropModal";
+import React, { useEffect } from "react";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import { useLayout } from "../brain/my-stream/layout/LayoutContext";
+import ConnectWallet from "../common/ConnectWallet";
+import { InitialActivityData } from "../latest-activity/fetchInitialActivityData";
+import Home from "./Home";
+import HomeFeed from "./HomeFeed";
+import { useHomeTabs } from "./useHomeTabs";
+import BrainDesktopDrop from "../brain/BrainDesktopDrop";
 
 interface HomeAppProps {
   readonly featuredNft: NFTWithMemesExtendedData;

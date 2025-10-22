@@ -22,7 +22,7 @@ if (typeof window !== 'undefined') {
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import WaveDropsAll from '@/components/waves/drops/WaveDropsAll';
+import WaveDropsAll from '@/components/waves/drops/wave-drops-all';
 import { useVirtualizedWaveDrops } from '@/hooks/useVirtualizedWaveDrops';
 import { ApiDrop } from '@/generated/models/ApiDrop';
 import { ActiveDropState } from '@/types/dropInteractionTypes';
