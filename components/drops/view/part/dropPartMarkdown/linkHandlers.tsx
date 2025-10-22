@@ -8,6 +8,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { ExtraProps } from "react-markdown";
 
 import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ensureStableSeizeLink } from "@/helpers/SeizeLinkParser";
 
 import LinkPreviewCard from "@/components/waves/LinkPreviewCard";
 import DropPartMarkdownImage from "../DropPartMarkdownImage";
@@ -68,21 +69,28 @@ export const createLinkRenderer = ({
 
   const renderAnchor: LinkRenderer["renderAnchor"] = (props) => {
     const { href } = props;
-    if (!href || !isValidLink(href)) {
+    if (!href) {
       return null;
     }
 
-    const parsedUrl = parseUrl(href);
-    const renderFallbackAnchor = () => renderExternalOrInternalLink(href, props);
-    const matchSeize = findMatch(seizeHandlers, href);
+    const stableHref = ensureStableSeizeLink(href);
+    if (!isValidLink(stableHref)) {
+      return null;
+    }
+
+    const parsedUrl = parseUrl(stableHref);
+    const anchorProps = { ...props, href: stableHref };
+    const renderFallbackAnchor = () =>
+      renderExternalOrInternalLink(stableHref, anchorProps);
+    const matchSeize = findMatch(seizeHandlers, stableHref);
     const renderOpenGraph = () => {
-      if (!shouldUseOpenGraphPreview(href, parsedUrl)) {
+      if (!shouldUseOpenGraphPreview(stableHref, parsedUrl)) {
         return renderFallbackAnchor();
       }
 
       return (
         <LinkPreviewCard
-          href={href}
+          href={stableHref}
           renderFallback={() => renderFallbackAnchor()}
         />
       );
@@ -117,7 +125,7 @@ export const createLinkRenderer = ({
 
     const renderFromHandler = (handler: LinkHandler): ReactElement | null => {
       try {
-        const rendered = handler.render(href);
+        const rendered = handler.render(stableHref);
         if (rendered === null || rendered === undefined) {
           throw new Error("Link handler returned no content");
         }
@@ -138,7 +146,7 @@ export const createLinkRenderer = ({
       }
     }
 
-    const matchExternal = findMatch(handlers, href);
+    const matchExternal = findMatch(handlers, stableHref);
 
     if (matchExternal) {
       const rendered = renderFromHandler(matchExternal);
@@ -156,22 +164,27 @@ export const createLinkRenderer = ({
   };
 
   const isSmartLink = (href: string): boolean => {
-    if (!href || !isValidLink(href)) {
+    if (!href) {
       return false;
     }
 
-    const parsedUrl = parseUrl(href);
-    const seizeMatch = findMatch(seizeHandlers, href);
+    const stableHref = ensureStableSeizeLink(href);
+    if (!isValidLink(stableHref)) {
+      return false;
+    }
+
+    const parsedUrl = parseUrl(stableHref);
+    const seizeMatch = findMatch(seizeHandlers, stableHref);
     if (seizeMatch) {
       return seizeMatch.display === "block";
     }
 
-    const match = findMatch(handlers, href);
+    const match = findMatch(handlers, stableHref);
     if (match) {
       return match.display === "block";
     }
 
-    return shouldUseOpenGraphPreview(href, parsedUrl);
+    return shouldUseOpenGraphPreview(stableHref, parsedUrl);
   };
 
   return {
