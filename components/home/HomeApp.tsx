@@ -13,6 +13,7 @@ import Home from "./Home";
 import HomeFeed from "./HomeFeed";
 import { useHomeTabs } from "./useHomeTabs";
 import BrainDesktopDrop from "../brain/BrainDesktopDrop";
+import { DropSize } from "@/helpers/waves/drop.helpers";
 
 interface HomeAppProps {
   readonly featuredNft: NFTWithMemesExtendedData;
