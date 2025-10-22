@@ -158,8 +158,30 @@ export function CompactMenu({
               >
                 <div className={clsx("tw-flex tw-flex-col", itemsWrapperClassName)}>
                   {items.map((item) => (
-                    <MenuItem key={item.id} disabled={item.disabled}>
-                      {({ active }) => {
+                    <MenuItem
+                      key={item.id}
+                      as="button"
+                      type="button"
+                      disabled={item.disabled}
+                      role={item.role}
+                      aria-selected={item.ariaSelected}
+                      aria-label={item.ariaLabel}
+                      data-compact-menu-item="true"
+                      data-menu-item-id={item.id}
+                      data-active={(item.active ?? activeItemId === item.id) ? "true" : "false"}
+                      data-disabled={item.disabled ? "true" : "false"}
+                      data-testid={item["data-testid"]}
+                      onClick={() => {
+                        if (item.disabled) {
+                          return;
+                        }
+                        if (closeOnSelect) {
+                          close();
+                        }
+                        item.onSelect?.();
+                        onItemSelect?.(item.id);
+                      }}
+                      className={({ active }) => {
                         const isActive = item.active ?? activeItemId === item.id;
                         const stateClasses = isActive
                           ? clsx(
@@ -179,48 +201,22 @@ export function CompactMenu({
                               )
                             : undefined;
 
-                        const content = (
-                          <button
-                            type="button"
-                            data-compact-menu-item="true"
-                            data-menu-item-id={item.id}
-                            data-active={isActive ? "true" : "false"}
-                            data-disabled={item.disabled ? "true" : "false"}
-                            role={item.role}
-                            aria-selected={item.ariaSelected}
-                            aria-label={item.ariaLabel}
-                            data-testid={item["data-testid"]}
-                            onClick={() => {
-                              if (item.disabled) {
-                                return;
-                              }
-                              if (closeOnSelect) {
-                                close();
-                              }
-                              item.onSelect?.();
-                              onItemSelect?.(item.id);
-                            }}
-                            className={clsx(
-                              DEFAULT_ITEM_CLASSES,
-                              stateClasses,
-                              focusClasses,
-                              itemClassName,
-                              item.className,
-                              item.disabled &&
-                                "tw-cursor-not-allowed tw-opacity-60 tw-text-iron-500",
-                            )}
-                          >
-                            {item.icon && (
-                              <span className="tw-flex tw-shrink-0 tw-items-center tw-justify-center">
-                                {item.icon}
-                              </span>
-                            )}
-                            <span className="tw-flex-1 tw-text-left">{item.label}</span>
-                          </button>
+                        return clsx(
+                          DEFAULT_ITEM_CLASSES,
+                          stateClasses,
+                          focusClasses,
+                          itemClassName,
+                          item.className,
+                          item.disabled && "tw-cursor-not-allowed tw-opacity-60 tw-text-iron-500",
                         );
-
-                        return content;
                       }}
+                    >
+                      {item.icon && (
+                        <span className="tw-flex tw-shrink-0 tw-items-center tw-justify-center">
+                          {item.icon}
+                        </span>
+                      )}
+                      <span className="tw-flex-1 tw-text-left">{item.label}</span>
                     </MenuItem>
                   ))}
                 </div>

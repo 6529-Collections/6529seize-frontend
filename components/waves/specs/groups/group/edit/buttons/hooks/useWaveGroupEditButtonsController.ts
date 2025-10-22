@@ -10,6 +10,7 @@ import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveReque
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
+import { wait } from "@/helpers/Helpers";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import {
   createGroup,
@@ -22,7 +23,7 @@ import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { WaveGroupType } from "../../../WaveGroup";
 import { getScopedGroup, isGroupAuthor } from "../utils/waveGroupEdit";
 
-const WAVE_GROUP_LABELS: Record<string, string> = {
+const WAVE_GROUP_LABELS: Record<WaveGroupType, string> = {
   VIEW: "View",
   DROP: "Drop",
   VOTE: "Vote",
@@ -501,6 +502,21 @@ export const useWaveGroupEditButtonsController = ({
           id: createdGroup.id,
           oldVersionId: previousGroupId,
         });
+
+        // Poll publish status (max ~2s)
+        for (let i = 0; i < 10; i++) {
+          try {
+            const refreshed = await commonApiFetch<ApiGroupFull>({
+              endpoint: `groups/${createdGroup.id}`,
+            });
+            if (refreshed.visible) {
+              break;
+            }
+          } catch {
+            // Ignore fetch errors while propagation completes
+          }
+          await wait(200);
+        }
 
         console.info("[WaveGroupEditButtons] Published updated group", {
           waveId: wave.id,

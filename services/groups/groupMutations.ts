@@ -21,11 +21,15 @@ export const sanitiseGroupPayload = (
   group: {
     ...payload.group,
     owns_nfts: [...payload.group.owns_nfts],
-    identity_addresses: payload.group.identity_addresses
-      ? [...payload.group.identity_addresses]
+    identity_addresses:
+      payload.group.identity_addresses &&
+      payload.group.identity_addresses.length > 0
+        ? [...payload.group.identity_addresses]
       : null,
-    excluded_identity_addresses: payload.group.excluded_identity_addresses
-      ? [...payload.group.excluded_identity_addresses]
+    excluded_identity_addresses:
+      payload.group.excluded_identity_addresses &&
+      payload.group.excluded_identity_addresses.length > 0
+        ? [...payload.group.excluded_identity_addresses]
       : null,
   },
 });
@@ -101,9 +105,11 @@ export const createGroup = async ({
 export const publishGroup = async ({
   id,
   oldVersionId,
+  signal,
 }: {
   readonly id: string;
   readonly oldVersionId: string | null;
+  readonly signal?: AbortSignal;
 }): Promise<ApiGroupFull> =>
   await commonApiPost<
     { visible: true; old_version_id: string | null },
@@ -111,15 +117,19 @@ export const publishGroup = async ({
   >({
     endpoint: `groups/${id}/visible`,
     body: { visible: true, old_version_id: oldVersionId },
+    signal,
   });
 
 export const hideGroup = async ({
   id,
+  signal,
 }: {
   readonly id: string;
+  readonly signal?: AbortSignal;
 }): Promise<void> => {
   await commonApiPost<{ visible: false }, ApiGroupFull>({
     endpoint: `groups/${id}/visible`,
     body: { visible: false },
+    signal,
   });
 };
