@@ -31,14 +31,14 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
       expect(res).toEqual({ waveId: uuid, serialNo: "10" });
     });
 
-    it("parses drop-based quote link", () => {
+    it("returns null for drop-based quote link", () => {
       const res = parseSeizeQuoteLink(`/waves?wave=${uuid}&drop=drop-123`);
-      expect(res).toEqual({ waveId: uuid, dropId: "drop-123" });
+      expect(res).toBeNull();
     });
 
-    it("parses drop-based quote link with trailing slash", () => {
+    it("returns null for drop-based quote link with trailing slash", () => {
       const res = parseSeizeQuoteLink(`/waves?wave=${uuid}&drop=drop-123/`);
-      expect(res).toEqual({ waveId: uuid, dropId: "drop-123" });
+      expect(res).toBeNull();
     });
 
     it("returns null for legacy my-stream link", () => {

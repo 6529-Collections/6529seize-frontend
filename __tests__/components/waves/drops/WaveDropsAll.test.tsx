@@ -573,7 +573,7 @@ describe('WaveDropsAll', () => {
       expect(containerProps.hasNextPage).toBe(true);
     });
 
-    it('passes simplified onUserScroll callback to reverse container', async () => {
+    it('does not expose deprecated onUserScroll callback on reverse container', async () => {
       setupMocks({
         waveMessages: { drops: [createMockDrop()] }
       });
@@ -585,13 +585,10 @@ describe('WaveDropsAll', () => {
         expect(screen.getByTestId('reverse-container')).toBeInTheDocument();
       });
       
-      // The onUserScroll callback should be present and callable
-      expect(typeof containerProps.onUserScroll).toBe('function');
-      
-      // Should not throw when called (callback is now a no-op placeholder)
-      expect(() => {
-        containerProps.onUserScroll();
-      }).not.toThrow();
+      // Legacy onUserScroll callback is no longer provided
+      expect(containerProps.onUserScroll).toBeUndefined();
+      // onTopIntersection should still be a callable handler
+      expect(typeof containerProps.onTopIntersection).toBe('function');
     });
 
     it('disables hasNextPage when drops count is below threshold', async () => {
