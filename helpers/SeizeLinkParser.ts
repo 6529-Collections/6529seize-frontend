@@ -45,8 +45,13 @@ const sanitizeQueryValue = (value: string | null): string | null => {
     return null;
   }
 
-  const trimmed = value.trim().replace(/\/+$/, "");
-  return trimmed.length > 0 ? trimmed : null;
+  const trimmed = value.trim();
+  let end = trimmed.length;
+  while (end > 0 && trimmed[end - 1] === "/") {
+    end -= 1;
+  }
+  const sanitized = end === trimmed.length ? trimmed : trimmed.slice(0, end);
+  return sanitized.length > 0 ? sanitized : null;
 };
 
 export function parseSeizeQuoteLink(href: string): SeizeQuoteLinkInfo | null {
@@ -81,14 +86,16 @@ export function parseSeizeQuoteLink(href: string): SeizeQuoteLinkInfo | null {
 
   const serialNo = sanitizeQueryValue(url.searchParams.get("serialNo"));
 
-  if (!serialNo || !DIGITS_REGEX.test(serialNo)) {
-    return null;
-  }
-
   const result: SeizeQuoteLinkInfo = { waveId };
 
   if (serialNo) {
+    if (!DIGITS_REGEX.test(serialNo)) {
+      return null;
+    }
+
     result.serialNo = serialNo;
+  } else {
+    return null
   }
 
   return result;

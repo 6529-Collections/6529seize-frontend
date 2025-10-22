@@ -270,10 +270,10 @@ export const useWaveDropsSerialScroll = ({
         if (success) {
           setSerialTarget(null);
         } else {
-          void fetchAndScrollToDrop();
+          fetchAndScrollToDrop();
         }
       } else {
-        void fetchAndScrollToDrop();
+        fetchAndScrollToDrop();
       }
     }
   }, [init, serialTarget, fetchAndScrollToDrop, scrollToSerialNo, isScrolling]);

@@ -13,8 +13,8 @@ export const useWaveDropsNotificationRead = ({
   removeWaveDeliveredNotifications,
 }: UseWaveDropsNotificationReadParams) => {
   useEffect(() => {
-    void removeWaveDeliveredNotifications(waveId);
-    void commonApiPostWithoutBodyAndResponse({
+    removeWaveDeliveredNotifications(waveId);
+    commonApiPostWithoutBodyAndResponse({
       endpoint: `notifications/wave/${waveId}/read`,
     }).catch((error) =>
       console.error("Failed to mark feed as read:", error)
