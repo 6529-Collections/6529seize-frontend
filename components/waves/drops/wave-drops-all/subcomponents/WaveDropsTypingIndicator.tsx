@@ -9,7 +9,7 @@ interface WaveDropsTypingIndicatorProps {
 export const WaveDropsTypingIndicator: React.FC<
   WaveDropsTypingIndicatorProps
 > = ({ typingMessage }) => {
-  const visibilityClass = typingMessage
+  const visibilityClass = typingMessage !== null
     ? "tw-opacity-100 tw-visible"
     : "tw-opacity-0 tw-invisible";
 
