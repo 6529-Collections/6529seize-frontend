@@ -2,6 +2,7 @@
 
 import React, {
   type ReactNode,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -34,9 +35,25 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
   const { isRightSidebarOpen } = useSidebarState();
 
   const layoutRootRef = useRef<HTMLDivElement | null>(null);
+
+  const getLayoutMargin = useCallback(() => {
+    const doc = document.documentElement;
+    const clientWidth = doc.clientWidth;
+    const layoutWidth =
+      layoutRootRef.current?.offsetWidth ??
+      Math.min(clientWidth, DESKTOP_MAX_WIDTH);
+    const margin = Math.max((clientWidth - layoutWidth) / 2, 0);
+    return `${margin}px`;
+  }, []);
+
   const [resolvedLayoutMargin, setResolvedLayoutMargin] = useState<
     string | null
-  >(null);
+  >(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+    return getLayoutMargin();
+  });
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -49,13 +66,7 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
     }
 
     const updateMargin = () => {
-      const root = layoutRootRef.current;
-      if (!root) {
-        return;
-      }
-
-      const { left } = root.getBoundingClientRect();
-      const next = `${Math.max(left, 0)}px`;
+      const next = getLayoutMargin();
       setResolvedLayoutMargin((prev) => (prev === next ? prev : next));
     };
 
@@ -78,7 +89,7 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
         window.cancelAnimationFrame(rafId);
       }
     };
-  }, [isMobile, isRightSidebarOpen]);
+  }, [getLayoutMargin, isMobile, isRightSidebarOpen]);
 
   const cssVars = useMemo(
     () =>
