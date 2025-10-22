@@ -118,7 +118,7 @@ export default function SidebarLayout({
     <main className="tailwind-scope tw-bg-black tw-overflow-x-hidden">
       <div
         className={`tw-transition-all tw-duration-300 tw-ease-out ${
-          !open ? "tw-ml-2" : "tw-ml-[320px]"
+          !open ? "" : "tw-ml-[320px]"
         }`}>
         <GroupsSidebarToggle
           ref={openButtonRef}

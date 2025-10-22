@@ -1,6 +1,12 @@
 "use client";
 
-import React, { type ReactNode } from "react";
+import React, {
+  type ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Image from "next/image";
 import WebSidebar from "./sidebar/WebSidebar";
 import { useSidebarController } from "../../hooks/useSidebarController";
@@ -27,15 +33,70 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
   } = useSidebarController();
   const { isRightSidebarOpen } = useSidebarState();
 
-  const cssVars: React.CSSProperties = {
-    ["--sidebar-width" as any]: sidebarWidth,
-    ["--collapsed-width" as any]: SIDEBAR_WIDTHS.COLLAPSED,
-    ["--expanded-width" as any]: SIDEBAR_WIDTHS.EXPANDED,
-    ["--layout-max" as any]: `${DESKTOP_MAX_WIDTH}px`,
-  };
+  const layoutRootRef = useRef<HTMLDivElement | null>(null);
+  const [resolvedLayoutMargin, setResolvedLayoutMargin] = useState<
+    string | null
+  >(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (isMobile) {
+      setResolvedLayoutMargin("0px");
+      return;
+    }
+
+    const updateMargin = () => {
+      const root = layoutRootRef.current;
+      if (!root) {
+        return;
+      }
+
+      const { left } = root.getBoundingClientRect();
+      const next = `${Math.max(left, 0)}px`;
+      setResolvedLayoutMargin((prev) => (prev === next ? prev : next));
+    };
+
+    updateMargin();
+
+    let rafId: number | null = null;
+    const throttledUpdate = () => {
+      if (rafId === null) {
+        rafId = window.requestAnimationFrame(() => {
+          updateMargin();
+          rafId = null;
+        });
+      }
+    };
+
+    window.addEventListener("resize", throttledUpdate);
+    return () => {
+      window.removeEventListener("resize", throttledUpdate);
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
+      }
+    };
+  }, [isMobile, isRightSidebarOpen]);
+
+  const cssVars = useMemo(
+    () =>
+      ({
+        "--sidebar-width": sidebarWidth,
+        "--collapsed-width": SIDEBAR_WIDTHS.COLLAPSED,
+        "--expanded-width": SIDEBAR_WIDTHS.EXPANDED,
+        "--layout-max": `${DESKTOP_MAX_WIDTH}px`,
+        ...(resolvedLayoutMargin !== null
+          ? { "--layout-margin": resolvedLayoutMargin }
+          : {}),
+      }) as React.CSSProperties,
+    [resolvedLayoutMargin, sidebarWidth]
+  );
 
   return (
     <div
+      ref={layoutRootRef}
       className="layout-root tw-flex tw-relative tw-overflow-x-hidden tw-w-full"
       style={cssVars}
       data-mobile={isMobile}
