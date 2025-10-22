@@ -45,6 +45,8 @@ export default function WaveGroupEditMenu({
 }: WaveGroupEditMenuProps) {
   const editButtonRef = useRef<WaveGroupEditButtonHandle | null>(null);
   const removeButtonRef = useRef<WaveGroupRemoveButtonHandle | null>(null);
+  const renderEditTriggerRef = useRef<(() => void) | null>(null);
+  const renderRemoveTriggerRef = useRef<(() => void) | null>(null);
 
   const menuItems = useMemo<CompactMenuItem[]>(() => {
     const items: CompactMenuItem[] = [];
@@ -76,9 +78,13 @@ export default function WaveGroupEditMenu({
       onSelect: () => {
         if (onChangeGroup) {
           onChangeGroup();
-        } else {
-          editButtonRef.current?.open();
+          return;
         }
+        if (editButtonRef.current) {
+          editButtonRef.current.open();
+          return;
+        }
+        renderEditTriggerRef.current?.();
       },
       className:
         "tw-text-iron-200 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50",
@@ -91,9 +97,13 @@ export default function WaveGroupEditMenu({
         onSelect: () => {
           if (onRemoveGroup) {
             onRemoveGroup();
-          } else {
-            removeButtonRef.current?.open();
+            return;
           }
+          if (removeButtonRef.current) {
+            removeButtonRef.current.open();
+            return;
+          }
+          renderRemoveTriggerRef.current?.();
         },
         className:
           "tw-text-red desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-red",
@@ -134,7 +144,10 @@ export default function WaveGroupEditMenu({
         wave={wave}
         type={type}
         onWaveUpdate={onWaveUpdate}
-        renderTrigger={() => null}
+        renderTrigger={({ open }) => {
+          renderEditTriggerRef.current = open;
+          return null;
+        }}
       />
       {canRemoveGroup ? (
         <WaveGroupRemoveButton
@@ -142,7 +155,10 @@ export default function WaveGroupEditMenu({
           wave={wave}
           type={type}
           onWaveUpdate={onWaveUpdate}
-          renderTrigger={() => null}
+          renderTrigger={({ open }) => {
+            renderRemoveTriggerRef.current = open;
+            return null;
+          }}
         />
       ) : null}
     </div>

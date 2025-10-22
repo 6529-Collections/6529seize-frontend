@@ -127,7 +127,7 @@ const getGroupIdFromUpdateBody = (
     case WaveGroupType.CHAT:
       return body.chat.scope.group_id ?? null;
     case WaveGroupType.ADMIN:
-      return body.wave.admin_group.group_id ?? null;
+      return body.wave.admin_group?.group_id ?? null;
     default:
       assertUnreachable(type);
       return null;
