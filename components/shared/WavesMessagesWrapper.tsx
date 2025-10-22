@@ -115,11 +115,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
       <div className="tw-relative tw-flex tw-flex-col">
         <div className="tw-relative tw-flex tw-flex-grow">
           <div
-            className={
-              isDropOpen
-                ? "tw-w-full xl:tw-pl-6"
-                : "tw-relative tw-flex tw-flex-grow tw-w-full tw-max-w-full tw-mx-auto"
-            }
+            className="tw-relative tw-flex tw-flex-grow tw-w-full tw-max-w-full tw-mx-auto"
           >
             <div
               className="tw-flex tw-w-full tw-overflow-hidden"
