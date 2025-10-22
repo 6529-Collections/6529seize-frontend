@@ -38,14 +38,75 @@ export interface SeizeQuoteLinkInfo {
 }
 
 export function parseSeizeQuoteLink(href: string): SeizeQuoteLinkInfo | null {
-  const regex =
-    /\/waves\?wave=([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})&serialNo=(\d+)$/;
+  const configuredBaseOrigin = getSeizeBaseOrigin();
+  if (!configuredBaseOrigin) {
+    return null;
+  }
 
-  const match = href.match(regex);
-  if (!match) return null;
+  let url: URL;
+  try {
+    url = new URL(href, configuredBaseOrigin);
+  } catch {
+    return null;
+  }
 
-  const [, waveId, serialNo, dropId] = match;
-  return { waveId, serialNo, dropId };
+  if (url.origin !== configuredBaseOrigin) {
+    return null;
+  }
+
+  
+
+  if (url.pathname !== "/waves") {
+    return null;
+  }
+
+
+  
+  const sanitizeQueryValue = (value: string | null): string | null => {
+    if (value === null) {
+      return null;
+    }
+
+    const trimmed = value.trim().replace(/\/+$/, "");
+    return trimmed.length > 0 ? trimmed : null;
+  };
+
+  const waveId = sanitizeQueryValue(url.searchParams.get("wave"));
+
+  if (
+    !waveId ||
+    !/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(
+      waveId
+    )
+  ) {
+    return null;
+  }
+
+  const serialNo = sanitizeQueryValue(url.searchParams.get("serialNo"));
+  const dropId = sanitizeQueryValue(url.searchParams.get("drop"));
+
+  if (!serialNo && !dropId) {
+    return null;
+  }
+
+  
+
+  if (serialNo && !/^\d+$/.test(serialNo)) {
+    return null;
+  }
+  
+
+  const result: SeizeQuoteLinkInfo = { waveId };
+
+  if (serialNo) {
+    result.serialNo = serialNo;
+  }
+
+  if (dropId) {
+    result.dropId = dropId;
+  }
+
+  return result;
 }
 
 export function parseSeizeQueryLink(

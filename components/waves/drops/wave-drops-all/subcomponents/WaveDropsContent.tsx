@@ -61,12 +61,15 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   typingMessage,
   onDropContentClick,
 }) => {
+  const dropsCount = waveMessages?.drops?.length ?? 0;
   const isInitialLoading =
     !!waveMessages?.isLoading &&
     !waveMessages?.isLoadingNextPage &&
-    !(waveMessages?.drops.length ?? 0);
+    dropsCount === 0;
+  const isHydrating = !waveMessages;
 
-  if (isInitialLoading) {
+  if (isHydrating || isInitialLoading) {
+    // When the hook is still hydrating, keep showing the loader instead of the empty state.
     return (
       <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-py-10">
         <CircleLoader size={CircleLoaderSize.XXLARGE} />
@@ -74,7 +77,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
     );
   }
 
-  if ((waveMessages?.drops.length ?? 0) === 0) {
+  if (dropsCount === 0) {
     return <WaveDropsEmptyPlaceholder dropId={dropId} />;
   }
 

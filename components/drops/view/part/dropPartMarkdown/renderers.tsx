@@ -70,7 +70,6 @@ const renderSeizeQuote = (
   href: string
 ): ReactElement | null => {
   const { waveId, serialNo, dropId } = quoteLinkInfo;
-
   if (serialNo) {
     return (
       <LinkHandlerFrame href={href} hideLink>

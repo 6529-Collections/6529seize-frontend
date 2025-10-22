@@ -74,7 +74,7 @@ export const createLinkRenderer = ({
     }
 
     // TODO: temporary
-    const stableHref = ensureStableSeizeLink(href.replace('https://', ''));
+    const stableHref = ensureStableSeizeLink(href.replace('https://6529.io/', 'http://localhost:3001/'));
     if (!isValidLink(stableHref)) {
       return null;
     }

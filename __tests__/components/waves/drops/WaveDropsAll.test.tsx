@@ -136,13 +136,15 @@ const createMockDrop = (overrides: Partial<ApiDrop> = {}): ApiDrop => ({
   ...overrides
 } as ApiDrop);
 
+type WaveMessagesMock = {
+  isLoading?: boolean;
+  isLoadingNextPage?: boolean;
+  hasNextPage?: boolean;
+  drops?: ApiDrop[];
+};
+
 interface MockSetupOptions {
-  waveMessages?: {
-    isLoading?: boolean;
-    isLoadingNextPage?: boolean;
-    hasNextPage?: boolean;
-    drops?: ApiDrop[];
-  };
+  waveMessages?: WaveMessagesMock;
   scrollBehavior?: {
     isAtBottom?: boolean;
     shouldPinToBottom?: boolean;
@@ -162,14 +164,28 @@ function setupMocks(options: MockSetupOptions = {}) {
   scrollButtonProps = undefined;
   
   // Setup useVirtualizedWaveDrops mock
+  const defaultWaveMessages: WaveMessagesMock = {
+    isLoading: false,
+    isLoadingNextPage: false,
+    hasNextPage: false,
+    drops: [] as any
+  };
+
+  const hasWaveMessagesOverride = Object.prototype.hasOwnProperty.call(
+    options,
+    'waveMessages'
+  );
+
+  const waveMessagesMock =
+    hasWaveMessagesOverride && options.waveMessages === undefined
+      ? undefined
+      : {
+          ...defaultWaveMessages,
+          ...(options.waveMessages ?? {})
+        };
+
   useVirtualizedWaveDropsMock.mockReturnValue({
-    waveMessages: {
-      isLoading: false,
-      isLoadingNextPage: false, 
-      hasNextPage: false,
-      drops: [] as any,
-      ...options.waveMessages
-    },
+    waveMessages: waveMessagesMock as any,
     fetchNextPage: mockFetchNextPage,
     waitAndRevealDrop: mockWaitAndRevealDrop
   });
@@ -251,6 +267,17 @@ describe('WaveDropsAll', () => {
   });
 
   describe('Loading States', () => {
+    it('does not render the empty placeholder while data is hydrating', () => {
+      setupMocks({
+        waveMessages: undefined
+      });
+
+      renderComponent();
+
+      expect(screen.getByTestId('circle-loader')).toBeInTheDocument();
+      expect(screen.queryByTestId('empty-placeholder')).not.toBeInTheDocument();
+    });
+
     it('shows loader when loading initial data with empty drops', () => {
       setupMocks({
         waveMessages: {
@@ -672,9 +699,10 @@ describe('WaveDropsAll', () => {
       
       renderComponent();
       
-      // With null waveMessages, the component should not crash
-      // Looking at the component logic, it still renders the drops list even with null
-      expect(screen.getByTestId('drops-list')).toBeInTheDocument();
+      // Should show the loader instead of the empty placeholder while hydrating
+      expect(screen.getByTestId('circle-loader')).toBeInTheDocument();
+      expect(screen.queryByTestId('drops-list')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('empty-placeholder')).not.toBeInTheDocument();
     });
 
     it('handles scroll operation timeout gracefully', () => {
