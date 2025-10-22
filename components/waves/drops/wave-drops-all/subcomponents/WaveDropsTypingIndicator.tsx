@@ -11,7 +11,7 @@ export const WaveDropsTypingIndicator: React.FC<
 > = ({ typingMessage }) => {
   const visibilityClass = typingMessage
     ? "tw-opacity-100 tw-visible"
-    : "tw-opacity-0 tw-invisible tw-hidden";
+    : "tw-opacity-0 tw-hidden";
 
   return (
     <div

@@ -39,6 +39,8 @@ interface WaveDropsMessageListSectionProps {
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }
 
+const MIN_DROPS_FOR_PAGINATION = 25;
+
 export const WaveDropsMessageListSection: React.FC<
   WaveDropsMessageListSectionProps
 > = ({
@@ -59,7 +61,8 @@ export const WaveDropsMessageListSection: React.FC<
   onDropContentClick,
 }) => {
   const hasNextPage =
-    !!waveMessages?.hasNextPage && (waveMessages?.drops?.length ?? 0) >= 25;
+    !!waveMessages?.hasNextPage &&
+    (waveMessages?.drops?.length ?? 0) >= MIN_DROPS_FOR_PAGINATION;
 
   return (
     <>
