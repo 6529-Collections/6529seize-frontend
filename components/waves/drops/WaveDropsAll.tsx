@@ -66,6 +66,14 @@ export default function WaveDropsAll({
 
   const [serialNo, setSerialNo] = useState<number | null>(initialDrop);
 
+  useEffect(() => {
+    if (initialDrop !== null) {
+      setSerialNo((current) =>
+        current === initialDrop ? current : initialDrop
+      );
+    }
+  }, [initialDrop]);
+
   const {
     scrollContainerRef,
     bottomAnchorRef,

@@ -5,15 +5,26 @@ import { getWaveRoute } from "@/helpers/navigation.helpers";
 import React, { useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { ApiDrop } from "@/generated/models/ApiDrop";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 
 interface WaveDropActionsCopyLinkProps {
   readonly drop: ApiDrop;
 }
 
+const useOptionalMyStream = (): ReturnType<typeof useMyStream> | null => {
+  try {
+    return useMyStream();
+  } catch {
+    return null;
+  }
+};
+
 const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
   drop,
 }) => {
   const [copied, setCopied] = useState(false);
+  const myStream = useOptionalMyStream();
+  const directMessageWaves = myStream?.directMessages.list ?? [];
 
   const isTemporaryDrop = (drop: ApiDrop): boolean => {
     return drop.id.startsWith("temp-");
@@ -27,7 +38,8 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
         chat?: { scope?: { group?: { is_direct_message?: boolean } } };
       }) ?? undefined;
     const isDirectMessage =
-      waveDetails?.chat?.scope?.group?.is_direct_message ?? false;
+      directMessageWaves.some((wave) => wave.id === drop.wave.id) ||
+      (waveDetails?.chat?.scope?.group?.is_direct_message ?? false);
     const dropLink = `${publicEnv.BASE_ENDPOINT}${getWaveRoute({
       waveId: drop.wave.id,
       serialNo: drop.serial_no,
