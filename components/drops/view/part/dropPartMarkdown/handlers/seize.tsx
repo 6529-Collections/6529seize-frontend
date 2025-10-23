@@ -2,8 +2,9 @@ import type { ReactElement } from "react";
 
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import {
-  parseSeizeQuoteLink,
+  getSeizeBaseOrigin,
   parseSeizeQueryLink,
+  parseSeizeQuoteLink,
   type SeizeQuoteLinkInfo,
 } from "@/helpers/SeizeLinkParser";
 
@@ -91,12 +92,21 @@ const createSeizeWaveHandler = (): LinkHandler =>
   );
 
 const getDropId = (href: string): string | null => {
-  const result = parseSeizeQueryLink(href, "/waves", ["wave", "drop"], true);
-  if (!result || typeof result.drop !== "string") {
+  const baseOrigin = getSeizeBaseOrigin();
+  if (!baseOrigin) {
     return null;
   }
 
-  return result.drop;
+  try {
+    const url = new URL(href, baseOrigin);
+    if (url.origin !== baseOrigin) {
+      return null;
+    }
+    const dropId = url.searchParams.get("drop");
+    return dropId ?? null;
+  } catch {
+    return null;
+  }
 };
 
 const createSeizeDropHandler = (): LinkHandler =>

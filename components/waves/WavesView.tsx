@@ -22,6 +22,7 @@ const WavesView: React.FC = () => {
   const showPlaceholder = !serialisedWaveId && !isApp;
 
   let content: React.ReactNode = null;
+  
 
   if (serialisedWaveId) {
     content = (

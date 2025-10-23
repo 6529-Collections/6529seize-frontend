@@ -1,12 +1,18 @@
-"use client"
+"use client";
 
-import { useMemo, RefObject, useCallback, memo } from "react";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import { DropSize, ExtendedDrop, Drop as DropType } from "@/helpers/waves/drop.helpers";
-import { ActiveDropState } from "@/types/dropInteractionTypes";
 import Drop, { DropLocation } from "@/components/waves/drops/Drop";
-import VirtualScrollWrapper from "@/components/waves/drops/VirtualScrollWrapper";
 import LightDrop from "@/components/waves/drops/LightDrop";
+import VirtualScrollWrapper from "@/components/waves/drops/VirtualScrollWrapper";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import {
+  DropSize,
+  Drop as DropType,
+  ExtendedDrop,
+} from "@/helpers/waves/drop.helpers";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
+import { memo, RefObject, useCallback, useMemo } from "react";
+import HighlightDropWrapper from "./HighlightDropWrapper";
+
 type DropActionHandler = ({
   drop,
   partId,
@@ -115,7 +121,7 @@ const DropsList = memo(function DropsList({
         const nextDrop = orderedDrops[i + 1] ?? null;
 
         return (
-          <div
+          <HighlightDropWrapper
             key={drop.stableKey}
             id={`drop-${drop.serial_no}`}
             ref={
@@ -123,16 +129,16 @@ const DropsList = memo(function DropsList({
                 ? getItemData.targetDropRef
                 : null
             }
+            active={getItemData.serialNo === drop.serial_no}
+            scrollContainer={getItemData.scrollContainerRef?.current ?? null}
             className={
               getItemData.serialNo === drop.serial_no ? "tw-scroll-mt-20" : ""
-            }
-          >
+            }>
             <VirtualScrollWrapper
               scrollContainerRef={getItemData.scrollContainerRef}
               dropSerialNo={drop.serial_no}
               waveId={drop.type === DropSize.FULL ? drop.wave.id : drop.waveId}
-              type={drop.type}
-            >
+              type={drop.type}>
               {drop.type === DropSize.FULL ? (
                 <MemoizedDrop
                   dropViewDropId={getItemData.dropViewDropId}
@@ -154,7 +160,7 @@ const DropsList = memo(function DropsList({
                 <MemoizedLightDrop drop={drop} />
               )}
             </VirtualScrollWrapper>
-          </div>
+          </HighlightDropWrapper>
         );
       }),
     [orderedDrops, getItemData] // Only depends on orderedDrops array and the memoized item data
