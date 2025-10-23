@@ -1,3 +1,4 @@
+import { escapeRegExp } from "@/lib/text/regex";
 import type {
   GoogleDocsLinkPreview,
   GoogleSheetsLinkPreview,
@@ -176,10 +177,6 @@ function validateGooglePreviewUrl(rawUrl: string): URL | null {
   }
 
   return parsed;
-}
-
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function decodeHtmlEntities(value: string): string {
