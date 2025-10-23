@@ -19,6 +19,7 @@ interface WebSidebarSubmenuProps {
   readonly leftOffset?: number;
   readonly anchorTop?: number;
   readonly anchorHeight?: number;
+  readonly triggerElement?: HTMLElement | null;
 }
 
 function WebSidebarSubmenu({
@@ -28,6 +29,7 @@ function WebSidebarSubmenu({
   leftOffset,
   anchorTop,
   anchorHeight,
+  triggerElement,
 }: WebSidebarSubmenuProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -58,23 +60,23 @@ function WebSidebarSubmenu({
 
   const handleClickOutside = useCallback(
     (event: MouseEvent | TouchEvent) => {
-      const target = event.target as Node | null;
-      if (target === null) {
+      const target = event.target;
+      if (!(target instanceof Node)) {
         return;
       }
 
       const container = containerRef.current;
-      if (container === null) {
+      if (container?.contains(target)) {
         return;
       }
 
-      if (container.contains(target)) {
+      if (triggerElement?.contains(target)) {
         return;
       }
 
       onClose();
     },
-    [onClose]
+    [onClose, triggerElement]
   );
 
   useEffect(() => {
@@ -85,6 +87,7 @@ function WebSidebarSubmenu({
     browserWindow.addEventListener("keydown", handleKeyDown);
     browserDocument.addEventListener("mousedown", handleClickOutside);
     browserDocument.addEventListener("touchstart", handleClickOutside);
+
     return () => {
       browserWindow.removeEventListener("keydown", handleKeyDown);
       browserDocument.removeEventListener("mousedown", handleClickOutside);
@@ -109,7 +112,7 @@ function WebSidebarSubmenu({
         Math.min(top, viewportHeight - menuRect.height - padding)
       );
 
-      setComputedTop(top);
+      setComputedTop((previous) => (previous === top ? previous : top));
     }
   }, [browserWindow, anchorTop, anchorHeight, section.key, combinedItems.length]);
 
@@ -119,6 +122,11 @@ function WebSidebarSubmenu({
   );
 
   if (browserDocument === undefined) {
+    return null;
+  }
+
+  const portalTarget = browserDocument.body;
+  if (!portalTarget) {
     return null;
   }
 
@@ -168,7 +176,7 @@ function WebSidebarSubmenu({
         })}
       </div>
     </div>,
-    browserDocument.body
+    portalTarget
   );
 }
 
