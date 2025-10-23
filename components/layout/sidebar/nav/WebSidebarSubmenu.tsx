@@ -31,14 +31,13 @@ function WebSidebarSubmenu({
 }: WebSidebarSubmenuProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const browserWindow =
-    typeof window !== "undefined"
-      ? (window as Window | undefined)
-      : undefined;
-  const browserDocument =
-    typeof document !== "undefined"
-      ? (document as Document | undefined)
-      : undefined;
+  const hasGlobalContext = typeof globalThis !== "undefined";
+  const browserWindow = hasGlobalContext
+    ? (globalThis.window as Window | undefined)
+    : undefined;
+  const browserDocument = hasGlobalContext
+    ? (globalThis.document as Document | undefined)
+    : undefined;
 
   const [computedTop, setComputedTop] = useState<number>(() => anchorTop ?? 16);
 
@@ -60,16 +59,28 @@ function WebSidebarSubmenu({
   const handleClickOutside = useCallback(
     (event: MouseEvent | TouchEvent) => {
       const target = event.target as Node | null;
-      if (!target) return;
-      if (containerRef.current && !containerRef.current.contains(target)) {
-        onClose();
+      if (target === null) {
+        return;
       }
+
+      const container = containerRef.current;
+      if (container === null) {
+        return;
+      }
+
+      if (container.contains(target)) {
+        return;
+      }
+
+      onClose();
     },
     [onClose]
   );
 
   useEffect(() => {
-    if (!browserWindow || !browserDocument) return;
+    if (browserWindow === undefined || browserDocument === undefined) {
+      return;
+    }
 
     browserWindow.addEventListener("keydown", handleKeyDown);
     browserDocument.addEventListener("mousedown", handleClickOutside);
@@ -107,7 +118,7 @@ function WebSidebarSubmenu({
     [pathname]
   );
 
-  if (!browserDocument) {
+  if (browserDocument === undefined) {
     return null;
   }
 
