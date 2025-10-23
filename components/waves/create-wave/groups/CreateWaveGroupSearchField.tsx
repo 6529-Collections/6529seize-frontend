@@ -11,6 +11,7 @@ import {
 import { useDebounce, useClickAway, useKeyPressEvent } from "react-use";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
+import { escapeRegExp } from "@/lib/text/regex";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { GroupsRequestParams } from "@/entities/IGroup";
@@ -22,10 +23,6 @@ import CircleLoader, {
 
 const MAX_RESULTS = 7;
 const DEBOUNCE_MS = 200;
-
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
 
 function HighlightedText({
   text,
@@ -306,8 +303,6 @@ export default function CreateWaveGroupSearchField({
         <AnimatePresence mode="wait" initial={false}>
           {isOpen && !disabled && (
             <motion.div
-              role="listbox"
-              id={listboxId}
               className="tw-absolute tw-z-50 tw-mt-1.5 tw-w-full tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -316,27 +311,30 @@ export default function CreateWaveGroupSearchField({
             >
               <div className="tw-absolute tw-overflow-hidden tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
                 <div className="tw-py-1 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto tw-max-h-64">
-                  {isFetching ? (
-                    <div className="tw-flex tw-items-center tw-justify-center tw-py-4">
-                      <CircleLoader size={CircleLoaderSize.SMALL} />
-                    </div>
-                  ) : suggestions.length > 0 ? (
-                    <ul className="tw-flex tw-flex-col tw-gap-y-1 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
-                      {suggestions.map((group, index) => {
+                  <ul
+                    id={listboxId}
+                    role="listbox"
+                    className="tw-flex tw-flex-col tw-gap-y-1 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none"
+                  >
+                    {isFetching ? (
+                      <li className="tw-flex tw-items-center tw-justify-center tw-py-4">
+                        <CircleLoader size={CircleLoaderSize.SMALL} />
+                      </li>
+                    ) : suggestions.length > 0 ? (
+                      suggestions.map((group, index) => {
                         const isActive = index === activeIndex;
-                        const isSelected =
-                          selectedGroup && selectedGroup.id === group.id;
+                        const isSelected = selectedGroup?.id === group.id;
+                        const optionStateClasses =
+                          isActive || isSelected
+                            ? "tw-bg-iron-800 tw-text-white"
+                            : "tw-text-white hover:tw-bg-iron-800";
                         return (
                           <li
                             key={group.id}
                             id={`${listboxId}-option-${index}`}
                             role="option"
                             aria-selected={isSelected}
-                            className={`tw-py-2 tw-w-full tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-medium tw-rounded-lg tw-relative tw-select-none tw-px-2 ${
-                              isActive || isSelected
-                                ? "tw-bg-iron-800 tw-text-white"
-                                : "tw-text-white hover:tw-bg-iron-800"
-                            }`}
+                            className={`tw-py-2 tw-w-full tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-medium tw-rounded-lg tw-relative tw-select-none tw-px-2 ${optionStateClasses}`}
                             onMouseEnter={() => setActiveIndex(index)}
                             onMouseDown={(event) => event.preventDefault()}
                             onClick={() => onOptionSelect(group)}
@@ -357,13 +355,13 @@ export default function CreateWaveGroupSearchField({
                             </div>
                           </li>
                         );
-                      })}
-                    </ul>
-                  ) : (
-                    <div className="tw-py-2 tw-w-full tw-text-sm tw-font-medium tw-text-white tw-rounded-lg tw-relative tw-select-none tw-px-4">
-                      {showNoResults ? "No groups found" : helperText}
-                    </div>
-                  )}
+                      })
+                    ) : (
+                      <li className="tw-py-2 tw-w-full tw-text-sm tw-font-medium tw-text-white tw-rounded-lg tw-relative tw-select-none tw-px-4">
+                        {showNoResults ? "No groups found" : helperText}
+                      </li>
+                    )}
+                  </ul>
                 </div>
               </div>
             </motion.div>

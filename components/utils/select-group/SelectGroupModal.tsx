@@ -16,12 +16,12 @@ export default function SelectGroupModal({
   const skipInitialOutsideClick = useRef(true);
 
   useEffect(() => {
-    const timeout = window.setTimeout(() => {
+    const timeout = globalThis.setTimeout(() => {
       skipInitialOutsideClick.current = false;
     }, 0);
 
     return () => {
-      window.clearTimeout(timeout);
+      globalThis.clearTimeout(timeout);
     };
   }, []);
 
