@@ -21,7 +21,7 @@ const WavesView: React.FC = () => {
   const showPlaceholder = !serialisedWaveId && !isApp;
 
   let content: React.ReactNode = null;
-  
+
 
   if (serialisedWaveId) {
     content = (
@@ -55,14 +55,12 @@ const WavesView: React.FC = () => {
   // internally via MyStreamWaveChat. We pass null to BrainContent because
   // the wave's internal state controls the reply/quote input box.
   return (
-    <>
-      <BrainContent
-        activeDrop={null}
-        onCancelReplyQuote={() => {}}>
-        {content}
-      </BrainContent>
+    <BrainContent
+      activeDrop={null}
+      onCancelReplyQuote={() => { }}>
+      {content}
+    </BrainContent>
 
-    </>
   );
 };
 
