@@ -283,12 +283,12 @@ export default function CreateWaveGroupSearchField({
           {showClearButton && (
             <button
               type="button"
-              className="tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-iron-400 hover:tw-text-error tw-transition tw-duration-150"
+              className="tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-iron-400 hover:tw-text-error tw-transition tw-duration-150 tw-bg-transparent tw-border-0 tw-p-0"
               onClick={clearSelection}
               aria-label="Clear selected group"
-          >
-            <svg
-              className="tw-h-4 tw-w-4"
+            >
+              <svg
+                className="tw-h-4 tw-w-4"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
