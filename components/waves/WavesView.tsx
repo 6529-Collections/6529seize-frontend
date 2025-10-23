@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import MyStreamWave from "../brain/my-stream/MyStreamWave";
 import BrainContent from "../brain/content/BrainContent";
-import CreateWaveModal from "./create-wave/CreateWaveModal";
 import { useAuth } from "../auth/Auth";
 import useDeviceInfo from "../../hooks/useDeviceInfo";
 import PrimaryButton from "../utils/button/PrimaryButton";
@@ -15,7 +14,7 @@ const WavesView: React.FC = () => {
   const searchParams = useSearchParams();
   const { connectedProfile } = useAuth();
   const { isApp } = useDeviceInfo();
-  const { isWaveModalOpen, openWave, close } = useCreateModalState();
+  const { openWave } = useCreateModalState();
 
   const serialisedWaveId = searchParams?.get('wave') || null;
 
@@ -63,14 +62,6 @@ const WavesView: React.FC = () => {
         {content}
       </BrainContent>
 
-      {/* Create Wave Modal */}
-      {connectedProfile && (
-        <CreateWaveModal
-          isOpen={isWaveModalOpen}
-          onClose={close}
-          profile={connectedProfile}
-        />
-      )}
     </>
   );
 };
