@@ -11,7 +11,6 @@ import CreateWave from "./create-wave/CreateWave";
 import WavesList from "./list/WavesList";
 import ConnectWallet from "@/components/common/ConnectWallet";
 import { getWavesBaseRoute } from "@/helpers/navigation.helpers";
-import CreateWaveModal from "./create-wave/CreateWaveModal";
 import CreateDirectMessageModal from "./create-dm/CreateDirectMessageModal";
 import useCreateModalState, {
   CREATE_DIRECT_MESSAGE_VALUE,
@@ -41,7 +40,6 @@ export default function Waves({
   const router = useRouter();
   const {
     mode,
-    isWaveModalOpen,
     isDirectMessageModalOpen,
     openWave,
     openDirectMessage,
@@ -182,18 +180,11 @@ export default function Waves({
       {components[activeView]}
 
       {!isApp && connectedProfile && (
-        <>
-          <CreateWaveModal
-            isOpen={isWaveModalOpen}
-            onClose={handleViewReset}
-            profile={connectedProfile}
-          />
-          <CreateDirectMessageModal
-            isOpen={isDirectMessageModalOpen}
-            onClose={handleViewReset}
-            profile={connectedProfile}
-          />
-        </>
+        <CreateDirectMessageModal
+          isOpen={isDirectMessageModalOpen}
+          onClose={handleViewReset}
+          profile={connectedProfile}
+        />
       )}
     </div>
   );

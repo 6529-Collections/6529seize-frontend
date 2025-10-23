@@ -17,7 +17,6 @@ import {
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
-import CreateWaveModal from "../../../waves/create-wave/CreateWaveModal";
 import { useAuth } from "../../../auth/Auth";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import useCreateModalState from "@/hooks/useCreateModalState";
@@ -76,7 +75,7 @@ const WebUnifiedWavesListWaves = forwardRef<
     const listContainerRef = useRef<HTMLDivElement>(null);
     const sentinelRef = useRef<HTMLDivElement>(null);
     const { connectedProfile } = useAuth();
-    const { isWaveModalOpen, openWave, close, isApp } = useCreateModalState();
+    const { openWave, isApp } = useCreateModalState();
 
     const globalScope = globalThis as typeof globalThis & {
       window?: Window;
@@ -274,14 +273,6 @@ const WebUnifiedWavesListWaves = forwardRef<
             )}
           </div>
         </div>
-
-        {connectedProfile && (
-          <CreateWaveModal
-            isOpen={isWaveModalOpen}
-            onClose={close}
-            profile={connectedProfile}
-          />
-        )}
 
         {!isTouchDevice && (
           <ReactTooltip
