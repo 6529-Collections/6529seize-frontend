@@ -37,15 +37,68 @@ export interface SeizeQuoteLinkInfo {
   dropId?: string;
 }
 
+const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+const DIGITS_REGEX = /^\d+$/;
+
+const sanitizeQueryValue = (value: string | null): string | null => {
+  if (value === null) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  let end = trimmed.length;
+  while (end > 0 && trimmed[end - 1] === "/") {
+    end -= 1;
+  }
+  const sanitized = end === trimmed.length ? trimmed : trimmed.slice(0, end);
+  return sanitized.length > 0 ? sanitized : null;
+};
+
 export function parseSeizeQuoteLink(href: string): SeizeQuoteLinkInfo | null {
-  const regex =
-    /\/waves\?wave=([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})&serialNo=(\d+)$/;
+  const configuredBaseOrigin = getSeizeBaseOrigin();
+  if (!configuredBaseOrigin) {
+    return null;
+  }
 
-  const match = href.match(regex);
-  if (!match) return null;
+  let url: URL;
+  try {
+    url = new URL(href, configuredBaseOrigin);
+  } catch {
+    return null;
+  }
 
-  const [, waveId, serialNo, dropId] = match;
-  return { waveId, serialNo, dropId };
+  if (url.origin !== configuredBaseOrigin) {
+    return null;
+  }
+
+  if (url.pathname !== "/waves") {
+    return null;
+  }
+
+  const waveId = sanitizeQueryValue(url.searchParams.get("wave"));
+
+  if (
+    !waveId ||
+    !UUID_REGEX.test(waveId)
+  ) {
+    return null;
+  }
+
+  const serialNo = sanitizeQueryValue(url.searchParams.get("serialNo"));
+
+  const result: SeizeQuoteLinkInfo = { waveId };
+
+  if (serialNo) {
+    if (!DIGITS_REGEX.test(serialNo)) {
+      return null;
+    }
+
+    result.serialNo = serialNo;
+  } else {
+    return null
+  }
+
+  return result;
 }
 
 export function parseSeizeQueryLink(

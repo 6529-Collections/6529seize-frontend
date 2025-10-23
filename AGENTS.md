@@ -64,6 +64,7 @@ Use the `/codex/` directory as the shared source of truth for planning and ticke
 - Adhere to clean code standards as measured by SonarQube.
 - Place tests in `__tests__` directories or alongside components as `ComponentName.test.tsx`.
 - Mock external dependencies and APIs in tests.
+- When parsing Seize URLs or similar app-specific links, do not fall back to placeholder origins (e.g., `https://example.com`); fail fast if the configured base origin is unavailable.
 
 ## Next.js Directory Structure
 
