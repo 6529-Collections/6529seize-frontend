@@ -67,12 +67,12 @@ export default function LayoutWrapper({
 
   let LayoutComponent: ComponentType<{ readonly children: ReactNode }> = WebLayout;
 
-  const shouldUseSmallScreenLayout =
+  const useSmallLayout =
     hasTouchScreen && (isSmallScreen || isTouchTabletViewport);
 
   if (isApp) {
     LayoutComponent = MobileLayout;
-  } else if (shouldUseSmallScreenLayout) {
+  } else if (useSmallLayout) {
     LayoutComponent = SmallScreenLayout;
   }
 
