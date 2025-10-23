@@ -2,7 +2,13 @@
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { createBreakpoint } from "react-use";
 import { ApiDrop } from "../../generated/models/ApiDrop";
 import { DropSize, ExtendedDrop } from "../../helpers/waves/drop.helpers";
@@ -15,6 +21,9 @@ import BrainRightSidebar, {
   SidebarTab,
 } from "../brain/right-sidebar/BrainRightSidebar";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
+import { useAuth } from "../auth/Auth";
+import useCreateModalState from "@/hooks/useCreateModalState";
+import CreateWaveModal from "../waves/create-wave/CreateWaveModal";
 
 // Breakpoint for mobile responsiveness (lg = 1024px)
 const useBreakpoint = createBreakpoint({ XL: 1400, LG: 1024, S: 0 });
@@ -40,6 +49,8 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
 
   // Get global sidebar state
   const { isRightSidebarOpen, closeRightSidebar } = useSidebarState();
+  const { connectedProfile } = useAuth();
+  const { isWaveModalOpen, close } = useCreateModalState();
 
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>(SidebarTab.ABOUT);
 
@@ -165,6 +176,14 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
           onDropClick={onDropClick}
           activeTab={sidebarTab}
           setActiveTab={setSidebarTab}
+        />
+      )}
+
+      {connectedProfile && (
+        <CreateWaveModal
+          isOpen={isWaveModalOpen}
+          onClose={close}
+          profile={connectedProfile}
         />
       )}
     </>
