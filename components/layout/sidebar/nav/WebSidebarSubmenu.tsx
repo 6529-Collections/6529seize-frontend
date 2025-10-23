@@ -118,7 +118,7 @@ function WebSidebarSubmenu({
     return createPortal(
       <div
         ref={containerRef}
-        className="tailwind-scope tw-fixed tw-z-[95] tw-ml-2 tw-w-64 tw-max-h-[65vh] tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg tw-shadow-[0_20px_45px_rgba(7,7,11,0.7)] tw-overflow-hidden tw-flex tw-flex-col"
+        className="tailwind-scope tw-fixed tw-z-[95] tw-w-64 tw-max-h-[65vh] tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg tw-shadow-[0_20px_45px_rgba(7,7,11,0.7)] tw-overflow-hidden tw-flex tw-flex-col"
         style={{
           left: leftStyle,
           top: topStyle,
