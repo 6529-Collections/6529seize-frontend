@@ -28,9 +28,10 @@ export default function CommunityActivityPageClient({
     <SidebarLayout>
       <ProfileActivityLogs
         initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
-        withFilters={true}>
+        withFilters={true}
+      >
         <h1 className="tw-block tw-float-none tw-whitespace-nowrap">
-          <span className="font-lightest">Network</span> Activity
+          Network Activity
         </h1>
       </ProfileActivityLogs>
     </SidebarLayout>

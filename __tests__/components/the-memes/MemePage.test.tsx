@@ -495,7 +495,9 @@ describe("MemePage loading states", () => {
     renderPage();
 
     // Should render title and basic structure even while loading
-    expect(screen.getByText("Memes")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "The Memes" })
+    ).toBeInTheDocument();
   });
 
   it("shows content only after metadata and NFT load", async () => {
@@ -532,7 +534,9 @@ describe("MemePage navigation integration", () => {
       () => {
         expect(screen.getByText(/SZN1/)).toBeInTheDocument();
         expect(screen.getByText(/Card 1/)).toBeInTheDocument();
-        expect(screen.getByText("Meme")).toBeInTheDocument();
+        expect(
+          screen.getByRole("heading", { name: "The Memes" })
+        ).toBeInTheDocument();
       },
       { timeout: 5000 }
     );

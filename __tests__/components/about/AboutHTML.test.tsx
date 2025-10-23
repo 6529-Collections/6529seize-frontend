@@ -11,11 +11,10 @@ jest.mock("@/components/about/about.helpers", () => ({
 describe("AboutHTML", () => {
   it("splits title when containing spaces", async () => {
     render(<AboutHTML title="Test Title" path="test.html" />);
-    const light = await screen.findByText("Test");
-    expect(light).toHaveClass("font-lightest");
-    expect(
-      screen.getByRole("heading", { name: /Test Title/ })
-    ).toBeInTheDocument();
+    const heading = await screen.findByRole("heading", {
+      name: /Test Title/,
+    });
+    expect(heading).toHaveTextContent("Test Title");
   });
 
   it("renders title without split", async () => {

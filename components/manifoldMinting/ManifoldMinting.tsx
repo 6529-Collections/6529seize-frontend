@@ -146,7 +146,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
       <Row className="pb-2">
         <Col className="d-flex align-items-center gap-2 ">
           <h2 className="mb-0">
-            <span className="font-lightest">Mint</span> {props.title}
+            Mint {props.title}
           </h2>
         </Col>
       </Row>

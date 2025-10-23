@@ -35,7 +35,7 @@ export function DownloadsLayout({
             <Row>
               <Col>
                 <h1>
-                  <span className="font-lightest">{title}</span> Downloads
+                  {title} Downloads
                 </h1>
               </Col>
             </Row>

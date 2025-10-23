@@ -20,7 +20,7 @@ export default function CommunityDownloads() {
             <Row>
               <Col>
                 <h1>
-                  <span className="font-lightest">Open</span> Data
+                  Open Data
                 </h1>
               </Col>
             </Row>

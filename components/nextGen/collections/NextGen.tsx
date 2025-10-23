@@ -130,8 +130,7 @@ export default function NextGen(props: Readonly<Props>) {
         <Row>
           <Col>
             <h1>
-              <span className="font-lightest">Explore</span>{" "}
-              {props.collection.name}{" "}
+              Explore {props.collection.name}
             </h1>
           </Col>
         </Row>
@@ -145,7 +144,7 @@ export default function NextGen(props: Readonly<Props>) {
         <Row>
           <Col>
             <h1>
-              <span className="font-lightest">Featured</span> Artist
+              Featured Artist
             </h1>
           </Col>
         </Row>

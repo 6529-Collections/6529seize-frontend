@@ -247,7 +247,7 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
             <Row>
               <Col>
                 <h1>
-                  <span className="font-lightest">6529</span> Gradient
+                  6529 Gradient
                 </h1>
               </Col>
             </Row>

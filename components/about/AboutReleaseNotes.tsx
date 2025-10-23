@@ -16,7 +16,7 @@ export default function AboutReleaseNotes() {
       <Row>
         <Col>
           <h1>
-            <span className="font-lightest">Release</span> Notes
+            Release Notes
           </h1>
         </Col>
       </Row>
