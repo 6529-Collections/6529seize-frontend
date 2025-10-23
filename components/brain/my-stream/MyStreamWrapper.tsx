@@ -1,10 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import MyStream from "./MyStream";
-import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import MyStreamWave from "./MyStreamWave";
-import BrainContent from "../content/BrainContent";
+import { DropInteractionParams } from "@/components/waves/drops/Drop";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
   useMyStreamQuery,
   usePollingQuery,
@@ -13,8 +10,11 @@ import {
   ActiveDropAction,
   ActiveDropState,
 } from "@/types/dropInteractionTypes";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { DropInteractionParams } from "@/components/waves/drops/Drop";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import BrainContent from "../content/BrainContent";
+import MyStream from "./MyStream";
+import MyStreamWave from "./MyStreamWave";
 
 const MyStreamWrapper: React.FC = () => {
   const searchParams = useSearchParams();
