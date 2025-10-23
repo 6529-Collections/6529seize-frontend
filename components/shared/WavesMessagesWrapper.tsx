@@ -1,20 +1,20 @@
 "use client";
 
-import React, { ReactNode, useEffect, useState, useCallback, useMemo } from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { createBreakpoint } from "react-use";
+import { ApiDrop } from "../../generated/models/ApiDrop";
+import { DropSize, ExtendedDrop } from "../../helpers/waves/drop.helpers";
+import { useSidebarState } from "../../hooks/useSidebarState";
+import { commonApiFetch } from "../../services/api/common-api";
+import BrainDesktopDrop from "../brain/BrainDesktopDrop";
+import WebBrainLeftSidebar from "../brain/left-sidebar/web/WebLeftSidebar";
+import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import BrainRightSidebar, {
   SidebarTab,
 } from "../brain/right-sidebar/BrainRightSidebar";
-import WebBrainLeftSidebar from "../brain/left-sidebar/web/WebLeftSidebar";
-import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import BrainDesktopDrop from "../brain/BrainDesktopDrop";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ApiDrop } from "../../generated/models/ApiDrop";
-import { commonApiFetch } from "../../services/api/common-api";
-import { DropSize, ExtendedDrop } from "../../helpers/waves/drop.helpers";
-import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
-import { useSidebarState } from "../../hooks/useSidebarState";
-import { createBreakpoint } from "react-use";
 
 // Breakpoint for mobile responsiveness (lg = 1024px)
 const useBreakpoint = createBreakpoint({ XL: 1400, LG: 1024, S: 0 });
@@ -115,11 +115,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
       <div className="tw-relative tw-flex tw-flex-col">
         <div className="tw-relative tw-flex tw-flex-grow">
           <div
-            className={
-              isDropOpen
-                ? "tw-w-full xl:tw-pl-6"
-                : "tw-relative tw-flex tw-flex-grow tw-w-full tw-max-w-full tw-mx-auto"
-            }
+            className="tw-relative tw-flex tw-flex-grow tw-w-full tw-max-w-full tw-mx-auto"
           >
             <div
               className="tw-flex tw-w-full tw-overflow-hidden"

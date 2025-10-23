@@ -23,12 +23,35 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
 
     it("parses valid link", () => {
       const res = parseSeizeQuoteLink(`/waves?wave=${uuid}&serialNo=10`);
-      expect(res).toEqual({ waveId: uuid, serialNo: "10", dropId: undefined });
+      expect(res).toEqual({ waveId: uuid, serialNo: "10" });
+    });
+
+    it("parses serial link with trailing slash", () => {
+      const res = parseSeizeQuoteLink(`/waves?wave=${uuid}&serialNo=10/`);
+      expect(res).toEqual({ waveId: uuid, serialNo: "10" });
+    });
+
+    it("returns null for drop-based quote link", () => {
+      const res = parseSeizeQuoteLink(`/waves?wave=${uuid}&drop=drop-123`);
+      expect(res).toBeNull();
+    });
+
+    it("returns null for drop-based quote link with trailing slash", () => {
+      const res = parseSeizeQuoteLink(`/waves?wave=${uuid}&drop=drop-123/`);
+      expect(res).toBeNull();
     });
 
     it("returns null for legacy my-stream link", () => {
       const res = parseSeizeQuoteLink(`/my-stream?wave=${uuid}&serialNo=10`);
       expect(res).toBeNull();
+    });
+
+    it("returns null for invalid wave id", () => {
+      expect(parseSeizeQuoteLink("/waves?wave=not-a-uuid&serialNo=10")).toBeNull();
+    });
+
+    it("returns null when neither serial nor drop provided", () => {
+      expect(parseSeizeQuoteLink(`/waves?wave=${uuid}`)).toBeNull();
     });
 
     it("returns null for invalid link", () => {

@@ -1,26 +1,26 @@
 "use client";
 
-import React, { useMemo, useState, useEffect, useRef } from "react";
+import { CreateDropWaveWrapper } from "@/components/waves/CreateDropWaveWrapper";
+import WaveDropsAll from "@/components/waves/drops/wave-drops-all";
+import MobileMemesArtSubmissionBtn from "@/components/waves/memes/submission/MobileMemesArtSubmissionBtn";
+import PrivilegedDropCreator, {
+  DropMode,
+} from "@/components/waves/PrivilegedDropCreator";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { getHomeFeedRoute } from "@/helpers/navigation.helpers";
+import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useWave } from "@/hooks/useWave";
+import { selectEditingDropId } from "@/store/editSlice";
 import {
   ActiveDropAction,
   ActiveDropState,
 } from "@/types/dropInteractionTypes";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import WaveDropsAll from "@/components/waves/drops/WaveDropsAll";
-import { CreateDropWaveWrapper } from "@/components/waves/CreateDropWaveWrapper";
-import PrivilegedDropCreator, {
-  DropMode,
-} from "@/components/waves/PrivilegedDropCreator";
-import { ApiWave } from "@/generated/models/ApiWave";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useLayout } from "./layout/LayoutContext";
-import MobileMemesArtSubmissionBtn from "@/components/waves/memes/submission/MobileMemesArtSubmissionBtn";
-import { useWave } from "@/hooks/useWave";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { selectEditingDropId } from "@/store/editSlice";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
-import { getHomeFeedRoute } from "@/helpers/navigation.helpers";
+import { useLayout } from "./layout/LayoutContext";
 
 interface MyStreamWaveChatProps {
   readonly wave: ApiWave;
