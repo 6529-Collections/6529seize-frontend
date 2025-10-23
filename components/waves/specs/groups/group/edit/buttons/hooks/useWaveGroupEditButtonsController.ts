@@ -333,7 +333,7 @@ export const useWaveGroupEditButtonsController = ({
   );
 
   const canIncludeIdentity = hasGroup && (isWaveAdmin || isAuthor);
-  const canExcludeIdentity = isWaveAdmin || isAuthor;
+  const canExcludeIdentity = hasGroup && (isWaveAdmin || isAuthor);
   const canRemoveGroup =
     haveGroup && type !== WaveGroupType.ADMIN;
 
