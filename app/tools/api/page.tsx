@@ -244,7 +244,7 @@ run().catch((err) => {
         <Row>
           <Col>
             <h1>
-              <span className="font-lightest">6529.io</span> API
+              6529.io API
             </h1>
           </Col>
         </Row>

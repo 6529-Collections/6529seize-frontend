@@ -115,7 +115,7 @@ export default function StepHeader({
       } tw-flex tw-flex-col tw-w-full`}>
       <div className="tw-flex tw-items-center tw-justify-between tw-w-full">
         <h1 className="tw-text-white">
-          <span className="font-lightest">{STEP_META[step].title}</span> {title}
+          {STEP_META[step].title} {title}
         </h1>
         <div>
           {step !== DistributionPlanToolStep.CREATE_PLAN && (

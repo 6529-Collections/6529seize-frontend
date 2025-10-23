@@ -656,7 +656,7 @@ export default function MemeLabComponent() {
                 <Col className="d-flex align-items-center justify-content-between mb-3">
                   <span className="d-flex align-items-center gap-3 flex-wrap">
                     <h1 className="mb-0">
-                      <span className="font-lightest">Meme</span> Lab
+                      Meme Lab
                     </h1>
                     <LFGButton contract={MEMELAB_CONTRACT} />
                   </span>

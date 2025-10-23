@@ -304,8 +304,9 @@ describe("MemeLabPageComponent", () => {
       renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
     });
 
-    expect(screen.getByText("Meme")).toBeInTheDocument();
-    expect(screen.getByText("Lab")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Meme Lab" })
+    ).toBeInTheDocument();
   });
 
   it("fetches lab extended data on mount", async () => {
@@ -438,8 +439,9 @@ describe("MemeLabPageComponent", () => {
     });
 
     // Should handle no metadata gracefully
-    expect(screen.getByText("Meme")).toBeInTheDocument();
-    expect(screen.getByText("Lab")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Meme Lab" })
+    ).toBeInTheDocument();
   });
 
   it("calculates user balance correctly", async () => {
@@ -552,8 +554,9 @@ describe("MemeLabPageComponent", () => {
         renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
       });
 
-      expect(screen.getByText("Meme")).toBeInTheDocument();
-      expect(screen.getByText("Lab")).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "Meme Lab" })
+      ).toBeInTheDocument();
     });
 
     it("does not render NFT content when no metadata is available", async () => {
@@ -567,8 +570,9 @@ describe("MemeLabPageComponent", () => {
         renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
       });
 
-      expect(screen.getByText("Meme")).toBeInTheDocument();
-      expect(screen.getByText("Lab")).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "Meme Lab" })
+      ).toBeInTheDocument();
       // Should not render NFT-specific content without metadata
       expect(screen.queryByTestId("nft-image")).not.toBeInTheDocument();
       expect(screen.queryByTestId("nft-navigation")).not.toBeInTheDocument();

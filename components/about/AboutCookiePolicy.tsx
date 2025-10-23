@@ -34,7 +34,7 @@ export default function AboutCookiePolicy() {
       <Row>
         <Col>
           <h1>
-            <span className="font-lightest">Cookie</span> Policy
+            Cookie Policy
           </h1>
         </Col>
       </Row>

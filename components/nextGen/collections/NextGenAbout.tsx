@@ -7,7 +7,7 @@ export default function NextGenAbout() {
       <Row className="pb-3">
         <Col>
           <h1>
-            <span className="font-lightest">About</span> NextGen
+            About NextGen
           </h1>
         </Col>
       </Row>
