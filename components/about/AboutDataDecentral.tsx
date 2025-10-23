@@ -7,7 +7,7 @@ export default function AboutDataDecentral() {
       <Row>
         <Col>
           <h1>
-            <span className="font-lightest">Data</span> Decentralization
+            Data Decentralization
           </h1>
         </Col>
       </Row>

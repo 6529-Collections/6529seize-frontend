@@ -173,8 +173,11 @@ describe("DistributionPage", () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText("Test Collection")).toBeInTheDocument();
-        expect(screen.getByText("Card #123 Distribution")).toBeInTheDocument();
+        expect(
+          screen.getByRole("heading", {
+            name: /Test Collection Card #123 Distribution/,
+          })
+        ).toBeInTheDocument();
       });
     });
 

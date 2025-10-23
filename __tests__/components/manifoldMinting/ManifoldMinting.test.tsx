@@ -215,8 +215,9 @@ describe("Basic Functionality", () => {
     render(<ManifoldMinting {...defaultProps} />);
 
     // Should render title and basic info - component renders "Mint" span and title text
-    expect(screen.getByText("Mint")).toBeInTheDocument();
-    expect(screen.getByText("Test Meme")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Mint Test Meme" })
+    ).toBeInTheDocument();
 
     // Wait for the NFT info to load and display
     await waitFor(

@@ -41,7 +41,7 @@ export default function Home({
           <Row>
             <Col className="d-flex align-items-center gap-3">
               <h1>
-                <span className="font-lightest">Discover</span> NextGen -{" "}
+                Discover NextGen -{" "}
                 {featuredNextgen.name}{" "}
               </h1>
               <Link

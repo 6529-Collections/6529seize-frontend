@@ -6,7 +6,7 @@ export default function AboutSubscriptions() {
       <Row>
         <Col>
           <h1>
-            <span className="font-lightest">Subscription</span> Minting
+            Subscription Minting
           </h1>
         </Col>
       </Row>

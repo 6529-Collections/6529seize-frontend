@@ -7,7 +7,7 @@ export default function AboutNFTDelegation() {
       <Row>
         <Col>
           <h1>
-            <span className="font-lightest">NFT</span> Delegation
+            NFT Delegation
           </h1>
         </Col>
       </Row>

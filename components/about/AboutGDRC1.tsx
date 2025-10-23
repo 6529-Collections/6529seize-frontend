@@ -17,7 +17,7 @@ export default function AboutGDRC1() {
       <Row>
         <Col>
           <h1>
-            <span className="font-lightest">Global</span> Digital Rights Charter
+            Global Digital Rights Charter
           </h1>
         </Col>
       </Row>

@@ -449,8 +449,9 @@ describe("LatestActivity", () => {
       });
 
       // Component should render basic structure
-      expect(screen.getByText("NFT")).toBeInTheDocument();
-      expect(screen.getByText("Activity")).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "NFT Activity" })
+      ).toBeInTheDocument();
       expect(screen.getByText("Collection: All")).toBeInTheDocument();
       expect(screen.getByText("Filter: All")).toBeInTheDocument();
     });
@@ -464,8 +465,9 @@ describe("LatestActivity", () => {
       });
 
       // Should render without initial data
-      expect(screen.getByText("NFT")).toBeInTheDocument();
-      expect(screen.getByText("Activity")).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "NFT Activity" })
+      ).toBeInTheDocument();
       // No activity rows should be present initially
       expect(screen.queryByTestId("activity-row")).not.toBeInTheDocument();
     });

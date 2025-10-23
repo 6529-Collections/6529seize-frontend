@@ -8,7 +8,7 @@ export default function AboutApply() {
       <Row>
         <Col>
           <h1>
-            <span className="font-lightest">Apply</span>
+            Apply
           </h1>
         </Col>
       </Row>

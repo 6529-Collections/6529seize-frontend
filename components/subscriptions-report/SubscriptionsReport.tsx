@@ -153,7 +153,7 @@ export default function SubscriptionsReportComponent() {
       <Row>
         <Col className="d-flex flex-wrap align-items-center justify-content-between">
           <h1>
-            <span className="font-lightest">Subscriptions</span> Report
+            Subscriptions Report
           </h1>
           <div className="tw-flex tw-items-center tw-gap-3">
             {connectedProfile && (!capacitor.isIos || country === "US") && (
