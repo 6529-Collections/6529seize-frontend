@@ -1,0 +1,347 @@
+"use client";
+
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from "react";
+import { useDebounce, useClickAway, useKeyPressEvent } from "react-use";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { GroupsRequestParams } from "@/entities/IGroup";
+import { Mutable, NonNullableNotRequired } from "@/helpers/Types";
+import { commonApiFetch } from "@/services/api/common-api";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
+
+const MAX_RESULTS = 7;
+const DEBOUNCE_MS = 200;
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function HighlightedText({
+  text,
+  query,
+}: {
+  readonly text: string;
+  readonly query: string;
+}) {
+  if (!query) {
+    return <>{text}</>;
+  }
+
+  const matcher = new RegExp(`(${escapeRegExp(query)})`, "ig");
+  const parts = text.split(matcher);
+
+  return (
+    <>
+      {parts.map((part, index) =>
+        matcher.test(part) ? (
+          <span key={`${part}-${index}`} className="tw-text-primary-300">
+            {part}
+          </span>
+        ) : (
+          <span key={`${part}-${index}`} className="tw-text-iron-50">
+            {part}
+          </span>
+        )
+      )}
+    </>
+  );
+}
+
+export default function CreateWaveGroupSearchField({
+  label,
+  defaultLabel,
+  disabled,
+  selectedGroup,
+  onSelect,
+}: {
+  readonly label: string;
+  readonly defaultLabel: string;
+  readonly disabled: boolean;
+  readonly selectedGroup: ApiGroupFull | null;
+  readonly onSelect: (group: ApiGroupFull | null) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const listboxId = useMemo(
+    () => `group-search-${Math.random().toString(36).slice(2, 8)}`,
+    []
+  );
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  const [inputValue, setInputValue] = useState<string>(
+    selectedGroup?.name ?? ""
+  );
+  const [searchCriteria, setSearchCriteria] = useState<string>(
+    selectedGroup?.name ?? ""
+  );
+  const [debouncedValue, setDebouncedValue] = useState<string>(
+    selectedGroup?.name ?? ""
+  );
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState<number>(-1);
+
+  useDebounce(
+    () => {
+      setDebouncedValue(searchCriteria.trim());
+    },
+    DEBOUNCE_MS,
+    [searchCriteria]
+  );
+
+  const { data, isFetching } = useQuery<ApiGroupFull[]>({
+    queryKey: [QueryKey.GROUPS, { group_name: debouncedValue || null }],
+    queryFn: async () => {
+      const params: Mutable<
+        NonNullableNotRequired<GroupsRequestParams>
+      > = {};
+      if (debouncedValue) {
+        params.group_name = debouncedValue;
+      }
+
+      return await commonApiFetch<
+        ApiGroupFull[],
+        NonNullableNotRequired<GroupsRequestParams>
+      >({
+        endpoint: "groups",
+        params,
+      });
+    },
+    enabled: isOpen && !disabled,
+    placeholderData: keepPreviousData,
+  });
+
+  const suggestions = useMemo(
+    () => (data ?? []).slice(0, MAX_RESULTS),
+    [data]
+  );
+
+  const clearSelection = useCallback(() => {
+    setInputValue("");
+    setSearchCriteria("");
+    onSelect(null);
+    setActiveIndex(-1);
+  }, [onSelect]);
+
+  // Keep local state in sync with external selection
+  useEffect(() => {
+    if (selectedGroup) {
+      setInputValue(selectedGroup.name);
+      setSearchCriteria(selectedGroup.name);
+    } else {
+      setInputValue("");
+      setSearchCriteria("");
+    }
+  }, [selectedGroup]);
+
+  useClickAway(wrapperRef, () => {
+    if (!isOpen) return;
+    setIsOpen(false);
+    setActiveIndex(-1);
+  });
+  useKeyPressEvent("Escape", () => {
+    if (!isOpen) return;
+    setIsOpen(false);
+    setActiveIndex(-1);
+  });
+
+  const onInputFocus = () => {
+    if (disabled) return;
+    setIsOpen(true);
+  };
+
+  const handleInputChange = (value: string) => {
+    setInputValue(value);
+    setSearchCriteria(value);
+    setIsOpen(true);
+    setActiveIndex(-1);
+    if (selectedGroup) {
+      onSelect(null);
+    }
+  };
+
+  const onOptionSelect = (group: ApiGroupFull) => {
+    setInputValue(group.name);
+    setSearchCriteria(group.name);
+    onSelect(group);
+    setIsOpen(false);
+    setActiveIndex(-1);
+    inputRef.current?.focus();
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (!isOpen) {
+      if (event.key === "ArrowDown") {
+        setIsOpen(true);
+        setActiveIndex(0);
+        event.preventDefault();
+      }
+      return;
+    }
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setActiveIndex((prev) => {
+        const nextIndex = prev + 1;
+        if (nextIndex >= suggestions.length) {
+          return suggestions.length ? 0 : -1;
+        }
+        return nextIndex;
+      });
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActiveIndex((prev) => {
+        if (suggestions.length === 0) {
+          return -1;
+        }
+        if (prev <= 0) {
+          return suggestions.length - 1;
+        }
+        return prev - 1;
+      });
+    } else if (event.key === "Enter") {
+      if (activeIndex >= 0 && activeIndex < suggestions.length) {
+        event.preventDefault();
+        onOptionSelect(suggestions[activeIndex]);
+      }
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      setIsOpen(false);
+      setActiveIndex(-1);
+    }
+  };
+
+  const showNoResults = !isFetching && isOpen && suggestions.length === 0;
+  const helperText = selectedGroup
+    ? `Selected: ${selectedGroup.name}`
+    : `Default: ${defaultLabel}`;
+
+  return (
+    <div className="tw-flex tw-flex-col tw-gap-y-2" ref={wrapperRef}>
+      <label
+        htmlFor={listboxId}
+        className="tw-text-sm tw-font-medium tw-text-iron-200"
+      >
+        {label}
+      </label>
+      <div className="tw-relative">
+        <input
+          ref={inputRef}
+          id={listboxId}
+          type="text"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded={isOpen}
+          aria-controls={`${listboxId}-listbox`}
+          aria-disabled={disabled}
+          aria-activedescendant={
+            activeIndex >= 0 ? `${listboxId}-option-${activeIndex}` : undefined
+          }
+          value={inputValue}
+          onFocus={onInputFocus}
+          onChange={(event) => handleInputChange(event.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Type to search"
+          disabled={disabled}
+          className="tw-block tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-10 tw-text-sm tw-font-medium tw-text-iron-50 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-border-primary-300 focus:tw-ring-primary-400 focus:tw-outline-none tw-transition tw-duration-150 tw-disabled:tw-bg-iron-800 tw-disabled:tw-text-iron-500"
+          autoComplete="off"
+        />
+        {(inputValue || selectedGroup) && !disabled && (
+          <button
+            type="button"
+            className="tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-iron-400 hover:tw-text-error tw-transition tw-duration-150"
+            onClick={clearSelection}
+            aria-label="Clear selected group"
+          >
+            <svg
+              className="tw-h-4 tw-w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        )}
+
+        {isOpen && !disabled && (
+          <div
+            role="listbox"
+            id={`${listboxId}-listbox`}
+            className="tw-absolute tw-z-50 tw-mt-2 tw-max-h-64 tw-w-full tw-overflow-y-auto tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-shadow-xl"
+          >
+            {isFetching && (
+              <div className="tw-flex tw-items-center tw-justify-center tw-py-4">
+                <CircleLoader size={CircleLoaderSize.SMALL} />
+              </div>
+            )}
+
+            {!isFetching && suggestions.length > 0 && (
+              <ul className="tw-list-none tw-px-0 tw-py-1 tw-m-0">
+                {suggestions.map((group, index) => {
+                  const isActive = index === activeIndex;
+                  const isSelected =
+                    selectedGroup && selectedGroup.id === group.id;
+                  return (
+                    <li
+                      key={group.id}
+                      id={`${listboxId}-option-${index}`}
+                      role="option"
+                      aria-selected={isSelected}
+                      className={`tw-cursor-pointer tw-px-4 tw-py-2 tw-transition tw-duration-150 ${
+                        isActive
+                          ? "tw-bg-iron-800"
+                          : "hover:tw-bg-iron-800 tw-bg-transparent"
+                      }`}
+                      onMouseEnter={() => setActiveIndex(index)}
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => onOptionSelect(group)}
+                    >
+                      <div className="tw-text-sm tw-font-semibold tw-flex tw-flex-col tw-gap-y-1">
+                        <span className="tw-text-iron-50 tw-truncate">
+                          <HighlightedText
+                            text={group.name}
+                            query={searchCriteria}
+                          />
+                        </span>
+                        <span className="tw-text-xs tw-text-iron-400 tw-truncate">
+                          <HighlightedText
+                            text={`@${
+                              group.created_by?.handle ?? "unknown"
+                            }`}
+                            query={searchCriteria}
+                          />
+                        </span>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+
+            {showNoResults && (
+              <div className="tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400">
+                No groups found
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      <p className="tw-text-xs tw-font-medium tw-text-iron-400 tw-mb-0">
+        {helperText}
+      </p>
+    </div>
+  );
+}

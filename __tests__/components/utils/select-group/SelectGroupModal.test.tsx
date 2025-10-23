@@ -48,6 +48,7 @@ describe("SelectGroupModal", () => {
     jest.clearAllMocks();
     useQueryMock.mockReturnValue({ data: [{ id: 1, group_name: "g" }], isFetching: false });
     itemsMock.mockClear();
+    Object.keys(searchProps).forEach((key) => delete searchProps[key]);
   });
 
   afterEach(() => {
@@ -64,8 +65,30 @@ describe("SelectGroupModal", () => {
       searchProps.onUserSelect("bob");
     });
     
+    act(() => {
+      searchProps.onFilterNameSearch("gm");
+    });
+
     await waitFor(() => {
-      expect(useQueryMock).toHaveBeenLastCalledWith(expect.objectContaining({ queryKey: [QueryKey.GROUPS, { group_name: null, author_identity: "bob" }] }));
+      expect(useQueryMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          queryKey: [QueryKey.GROUPS, { group_name: "gm", author_identity: "bob" }],
+        })
+      );
+    });
+  });
+
+  it("clears groups when no data returned", async () => {
+    useQueryMock.mockReturnValueOnce({ data: null, isFetching: false });
+    const onClose = jest.fn();
+    const onGroupSelect = jest.fn();
+
+    render(<SelectGroupModal onClose={onClose} onGroupSelect={onGroupSelect} />);
+
+    await waitFor(() => {
+      expect(itemsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ groups: [], loading: false })
+      );
     });
   });
 });
