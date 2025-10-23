@@ -17,6 +17,32 @@ export default function CommonProfileSearchItems({
   readonly onProfileSelect: (newV: CommunityMemberMinimal | null) => void;
   readonly highlightedIndex?: number | null;
 }) {
+  const buildOptionId = (
+    profile: CommunityMemberMinimal,
+    index: number
+  ): string => {
+    const rawId =
+      profile.wallet ??
+      profile.primary_wallet ??
+      profile.handle ??
+      profile.display ??
+      `index-${index}`;
+
+    const normalized =
+      String(rawId)
+        .trim()
+        .replace(/[^A-Za-z0-9_-]+/g, "-") || `index-${index}`;
+
+    return `profile-search-item-${normalized}`;
+  };
+
+  const highlightedOptionId =
+    highlightedIndex !== null &&
+    highlightedIndex >= 0 &&
+    highlightedIndex < profiles.length
+      ? buildOptionId(profiles[highlightedIndex], highlightedIndex)
+      : undefined;
+
   const noResultsText =
     !searchCriteria || searchCriteria.length < 3
       ? "Type at least 3 characters"
@@ -36,17 +62,22 @@ export default function CommonProfileSearchItems({
               <ul
                 className="tw-flex tw-flex-col tw-gap-y-1 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none"
                 role="listbox"
+                aria-activedescendant={highlightedOptionId}
               >
                 {profiles.length ? (
-                  profiles.map((profile, index) => (
-                    <CommonProfileSearchItem
-                      key={profile.wallet}
-                      profile={profile}
-                      selected={selected}
-                      isHighlighted={highlightedIndex === index}
-                      onProfileSelect={onProfileSelect}
-                    />
-                  ))
+                  profiles.map((profile, index) => {
+                    const optionId = buildOptionId(profile, index);
+                    return (
+                      <CommonProfileSearchItem
+                        key={optionId}
+                        id={optionId}
+                        profile={profile}
+                        selected={selected}
+                        isHighlighted={highlightedIndex === index}
+                        onProfileSelect={onProfileSelect}
+                      />
+                    );
+                  })
                 ) : (
                   <li
                     className="tw-py-2 tw-w-full tw-h-full tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-medium tw-text-white tw-rounded-lg tw-relative tw-select-none tw-px-2"

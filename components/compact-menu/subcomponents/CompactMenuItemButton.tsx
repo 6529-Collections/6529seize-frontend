@@ -64,7 +64,7 @@ export function CompactMenuItemButton({
       data-testid={item["data-testid"]}
       onClick={onClick}
       className={clsx(
-        DEFAULT_ITEM_CLASSES,
+        unstyledItems ? undefined : DEFAULT_ITEM_CLASSES,
         stateClasses,
         focusClasses,
         itemClassName,

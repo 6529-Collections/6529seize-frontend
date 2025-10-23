@@ -9,11 +9,13 @@ export default function CommonProfileSearchItem({
   selected,
   onProfileSelect,
   isHighlighted = false,
+  id,
 }: {
   readonly profile: CommunityMemberMinimal;
   readonly selected: string | null;
   readonly onProfileSelect: (newV: CommunityMemberMinimal | null) => void;
   readonly isHighlighted?: boolean;
+  readonly id: string;
 }) {
   const selectableValue =
     profile.primary_wallet ?? profile.wallet ?? profile.handle ?? null;
@@ -28,7 +30,8 @@ export default function CommonProfileSearchItem({
     <li
       className="tw-h-full"
       role="option"
-      aria-selected={isHighlighted || isSelected}
+      id={id}
+      aria-selected={isSelected}
     >
       <button
         type="button"
