@@ -76,16 +76,16 @@ export default function LayoutWrapper({
     LayoutComponent = SmallScreenLayout;
   }
 
-  const content = (
-    <>
-      {children}
-      <FooterWrapper />
-    </>
-  );
-
   if (isAccessOrRestricted) {
     return <>{children}</>;
   }
 
-  return <LayoutComponent>{content}</LayoutComponent>;
+  return (
+    <LayoutComponent>
+      <>
+        {children}
+        <FooterWrapper />
+      </>
+    </LayoutComponent>
+  );
 }
