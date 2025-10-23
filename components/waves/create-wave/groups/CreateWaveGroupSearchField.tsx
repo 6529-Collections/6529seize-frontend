@@ -3,7 +3,7 @@
 import {
   useCallback,
   useEffect,
-  useMemo,
+  useId,
   useRef,
   useState,
   type KeyboardEvent,
@@ -33,22 +33,23 @@ function HighlightedText({
   readonly text: string;
   readonly query: string;
 }) {
-  if (!query) {
+  const trimmed = query.trim();
+  if (!trimmed) {
     return <>{text}</>;
   }
 
-  const matcher = new RegExp(`(${escapeRegExp(query)})`, "ig");
+  const matcher = new RegExp(`(${escapeRegExp(trimmed)})`, "ig");
   const parts = text.split(matcher);
 
   return (
     <>
       {parts.map((part, index) =>
-        matcher.test(part) ? (
+        index % 2 === 1 ? (
           <span key={`${part}-${index}`} className="tw-text-primary-300">
             {part}
           </span>
         ) : (
-          <span key={`${part}-${index}`} className="tw-text-iron-50">
+          <span key={`${part}-${index}`} className="tw-text-inherit">
             {part}
           </span>
         )
@@ -71,10 +72,9 @@ export default function CreateWaveGroupSearchField({
   readonly onSelect: (group: ApiGroupFull | null) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const listboxId = useMemo(
-    () => `group-search-${Math.random().toString(36).slice(2, 8)}`,
-    []
-  );
+  const baseId = useId();
+  const inputId = `${baseId}-input`;
+  const listboxId = `${baseId}-listbox`;
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const [inputValue, setInputValue] = useState<string>(
@@ -119,16 +119,15 @@ export default function CreateWaveGroupSearchField({
     placeholderData: keepPreviousData,
   });
 
-  const suggestions = useMemo(
-    () => (data ?? []).slice(0, MAX_RESULTS),
-    [data]
-  );
+  const suggestions = (data ?? []).slice(0, MAX_RESULTS);
 
   const clearSelection = useCallback(() => {
     setInputValue("");
     setSearchCriteria("");
     onSelect(null);
+    setIsOpen(true);
     setActiveIndex(-1);
+    inputRef.current?.focus();
   }, [onSelect]);
 
   // Keep local state in sync with external selection
@@ -156,6 +155,7 @@ export default function CreateWaveGroupSearchField({
   const onInputFocus = () => {
     if (disabled) return;
     setIsOpen(true);
+    setActiveIndex(-1);
   };
 
   const handleInputChange = (value: string) => {
@@ -223,42 +223,69 @@ export default function CreateWaveGroupSearchField({
     ? `Selected: ${selectedGroup.name}`
     : `Default: ${defaultLabel}`;
 
+  const hasValue = inputValue.trim().length > 0;
+  const showClearButton = (hasValue || !!selectedGroup) && !disabled;
+  const labelBackground = disabled ? "tw-bg-iron-800" : "tw-bg-iron-900";
+  const inputClasses = [
+    "tw-form-input",
+    "tw-block",
+    "tw-w-full",
+    "tw-rounded-lg",
+    "tw-border-0",
+    "tw-appearance-none",
+    "tw-px-4",
+    "tw-pr-10",
+    "tw-pt-4",
+    "tw-pb-3",
+    "tw-text-base",
+    "tw-font-medium",
+    "tw-shadow-sm",
+    "tw-peer",
+    "tw-ring-1",
+    "tw-ring-inset",
+    "tw-transition",
+    "tw-duration-300",
+    "tw-ease-out",
+    "focus:tw-outline-none",
+    "focus:tw-ring-1",
+    "focus:tw-ring-inset",
+    disabled
+      ? "tw-bg-iron-800 tw-ring-iron-700 tw-text-iron-500 tw-caret-iron-500 placeholder:tw-text-iron-500"
+      : "tw-bg-iron-900 hover:tw-bg-iron-800 focus:tw-bg-iron-900 tw-ring-iron-650 focus:tw-ring-primary-400 focus:tw-border-blue-500 tw-caret-primary-400 placeholder:tw-text-iron-500",
+    hasValue || selectedGroup ? "focus:tw-text-white tw-text-primary-400" : "tw-text-white",
+  ].join(" ");
+
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-2" ref={wrapperRef}>
-      <label
-        htmlFor={listboxId}
-        className="tw-text-sm tw-font-medium tw-text-iron-200"
-      >
-        {label}
-      </label>
-      <div className="tw-relative">
-        <input
-          ref={inputRef}
-          id={listboxId}
-          type="text"
-          role="combobox"
-          aria-autocomplete="list"
-          aria-expanded={isOpen}
-          aria-controls={`${listboxId}-listbox`}
-          aria-disabled={disabled}
-          aria-activedescendant={
-            activeIndex >= 0 ? `${listboxId}-option-${activeIndex}` : undefined
-          }
-          value={inputValue}
-          onFocus={onInputFocus}
-          onChange={(event) => handleInputChange(event.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Type to search"
-          disabled={disabled}
-          className="tw-block tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-10 tw-text-sm tw-font-medium tw-text-iron-50 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-border-primary-300 focus:tw-ring-primary-400 focus:tw-outline-none tw-transition tw-duration-150 tw-disabled:tw-bg-iron-800 tw-disabled:tw-text-iron-500"
-          autoComplete="off"
-        />
-        {(inputValue || selectedGroup) && !disabled && (
-          <button
-            type="button"
-            className="tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-iron-400 hover:tw-text-error tw-transition tw-duration-150"
-            onClick={clearSelection}
-            aria-label="Clear selected group"
+      <div className="tw-group tw-w-full tw-relative">
+        <div className="tw-relative">
+          <input
+            ref={inputRef}
+            id={inputId}
+            type="text"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded={isOpen}
+            aria-controls={listboxId}
+            aria-disabled={disabled}
+            aria-activedescendant={
+              activeIndex >= 0 ? `${listboxId}-option-${activeIndex}` : undefined
+            }
+            value={inputValue}
+            onFocus={onInputFocus}
+            onChange={(event) => handleInputChange(event.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder=" "
+            disabled={disabled}
+            className={inputClasses}
+            autoComplete="off"
+          />
+          {showClearButton && (
+            <button
+              type="button"
+              className="tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-iron-400 hover:tw-text-error tw-transition tw-duration-150"
+              onClick={clearSelection}
+              aria-label="Clear selected group"
           >
             <svg
               className="tw-h-4 tw-w-4"
@@ -273,12 +300,22 @@ export default function CreateWaveGroupSearchField({
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
-        )}
+            )}
+
+          <label
+            htmlFor={inputId}
+            className={`tw-absolute tw-cursor-text tw-text-base tw-font-normal ${
+              disabled ? "tw-text-iron-400" : "tw-text-iron-500"
+            } tw-duration-300 tw-transform -tw-translate-y-4 tw-scale-75 tw-top-2 tw-z-10 tw-origin-[0] ${labelBackground} peer-focus:tw-bg-iron-900 tw-px-2 peer-focus:tw-px-2 peer-focus:tw-text-primary-400 peer-placeholder-shown:tw-scale-100 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-top-1/2 peer-focus:tw-top-2 peer-focus:tw-scale-75 peer-focus:-tw-translate-y-4 rtl:peer-focus:tw-translate-x-1/4 rtl:peer-focus:tw-left-auto tw-start-1`}
+          >
+            {label}
+          </label>
+        </div>
 
         {isOpen && !disabled && (
           <div
             role="listbox"
-            id={`${listboxId}-listbox`}
+            id={listboxId}
             className="tw-absolute tw-z-50 tw-mt-2 tw-max-h-64 tw-w-full tw-overflow-y-auto tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-shadow-xl"
           >
             {isFetching && (
@@ -317,9 +354,7 @@ export default function CreateWaveGroupSearchField({
                         </span>
                         <span className="tw-text-xs tw-text-iron-400 tw-truncate">
                           <HighlightedText
-                            text={`@${
-                              group.created_by?.handle ?? "unknown"
-                            }`}
+                            text={`@${group.created_by?.handle ?? "unknown"}`}
                             query={searchCriteria}
                           />
                         </span>
