@@ -11,7 +11,7 @@ interface TabToggleProps {
   readonly options: readonly TabOption[];
   readonly activeKey: string;
   readonly onSelect: (key: string) => void;
-  readonly fullWidth?: boolean; // New prop to control width
+  readonly fullWidth?: boolean;
   readonly orientation?: "horizontal" | "vertical";
 }
 
@@ -19,7 +19,7 @@ export const TabToggle: React.FC<TabToggleProps> = ({
   options,
   activeKey,
   onSelect,
-  fullWidth = false, // Default to false for backwards compatibility
+  fullWidth = false,
   orientation = "horizontal",
 }) => {
   const isVertical = orientation === "vertical";
@@ -36,18 +36,14 @@ export const TabToggle: React.FC<TabToggleProps> = ({
           role="tab"
           aria-selected={activeKey === option.key}
           aria-controls={option.panelId}
-          className={`tw-whitespace-nowrap tw-text-sm tw-font-medium tw-transition-all tw-duration-150 tw-relative focus:tw-outline-none ${
+          className={`tw-whitespace-nowrap tw-text-sm tw-font-medium tw-transition-all tw-duration-150 tw-relative focus:tw-outline-none tw-border-none tw-rounded-sm ${
             isVertical
-              ? "tw-flex tw-items-center tw-justify-start tw-w-full tw-rounded-lg tw-py-2 tw-pl-3 tw-pr-3"
-              : `tw-px-3 tw-py-2 tw-rounded-full ${
-                  fullWidth
-                    ? "tw-flex-1 tw-text-center tw-justify-center tw-flex"
-                    : ""
-                }`
+              ? "tw-flex tw-items-center tw-justify-start tw-w-full tw-py-2 tw-pl-3"
+              : "tw-flex-1 tw-text-center tw-py-2"
           } ${
             activeKey === option.key
-              ? "tw-bg-iron-800 tw-text-white"
-              : "tw-text-iron-400 tw-bg-transparent hover:tw-text-iron-200 hover:tw-bg-iron-900/30"
+              ? "tw-bg-white tw-text-iron-950"
+              : "tw-text-iron-400 tw-bg-transparent hover:tw-text-iron-100"
           }`}>
           {option.label}
           {option.hasIndicator && (
