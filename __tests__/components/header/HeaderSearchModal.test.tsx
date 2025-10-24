@@ -17,7 +17,7 @@ const mockUseDeviceInfo = jest.fn();
 const useAppWalletsMock = jest.fn();
 const useCookieConsentMock = jest.fn();
 const useSidebarSectionsMock = jest.fn();
-const useCapacitorMock = jest.fn();
+const capacitorMock = jest.fn();
 
 jest.mock("react-use", () => {
   return {
@@ -66,7 +66,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
 }));
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
-  default: () => useCapacitorMock(),
+  default: () => capacitorMock(),
 }));
 jest.mock("@/hooks/useSidebarSections", () => {
   const actual = jest.requireActual("@/hooks/useSidebarSections");
@@ -145,7 +145,7 @@ function setup(options: SetupOptions = {}) {
   });
   useAppWalletsMock.mockReturnValue({ appWalletsSupported: true });
   useCookieConsentMock.mockReturnValue({ country: "US" });
-  useCapacitorMock.mockReturnValue({ isIos: false });
+  capacitorMock.mockReturnValue({ isIos: false });
   useSidebarSectionsMock.mockReturnValue(sidebarSections);
   useWaves.mockReturnValue(
     wavesReturn ?? {

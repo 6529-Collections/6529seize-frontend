@@ -98,8 +98,55 @@ const PRIMARY_NAVIGATION_PAGES: SidebarPageEntry[] = [
 ];
 
 const MIN_SEARCH_LENGTH = 3;
-const NFT_SEARCH_MIN_LENGTH = 3;
+const NFT_SEARCH_MIN_LENGTH = 2;
 const HEADER_SEARCH_RESULTS_PANEL_ID = "header-search-results-panel";
+
+interface PreviewGroupItem {
+  readonly item: HeaderSearchModalItemType;
+  readonly index: number;
+}
+
+interface PreviewGroup {
+  readonly category: FilterableCategory;
+  readonly items: PreviewGroupItem[];
+  readonly total: number;
+}
+
+interface RankedPageMatch {
+  readonly page: PageSearchResult;
+  readonly normalizedTitle: string;
+  readonly priority: number;
+}
+
+const getPageMatchPriority = (
+  normalizedTitle: string,
+  hrefSegments: string[],
+  normalizedBreadcrumbs: string[],
+  normalizedQuery: string
+): number => {
+  if (normalizedTitle === normalizedQuery) return 0;
+  if (hrefSegments.includes(normalizedQuery)) return 1;
+  if (normalizedTitle.startsWith(normalizedQuery)) return 2;
+  if (normalizedBreadcrumbs.includes(normalizedQuery)) return 3;
+  if (normalizedTitle.includes(normalizedQuery)) return 4;
+  if (hrefSegments.some((segment) => segment.includes(normalizedQuery))) {
+    return 5;
+  }
+  return 6;
+};
+
+const pageMatchesQuery = (
+  normalizedTitle: string,
+  normalizedHref: string,
+  normalizedBreadcrumbs: string[],
+  normalizedQuery: string
+) => {
+  if (normalizedTitle.includes(normalizedQuery)) return true;
+  if (normalizedHref.includes(normalizedQuery)) return true;
+  return normalizedBreadcrumbs.some((breadcrumb) =>
+    breadcrumb.includes(normalizedQuery)
+  );
+};
 
 export default function HeaderSearchModal({
   onClose,
@@ -173,7 +220,7 @@ export default function HeaderSearchModal({
         href: entry.href,
         icon: entry.icon,
         breadcrumbs: [entry.section, entry.subsection]
-          .filter((value): value is string => Boolean(value))
+          .filter((value): value is string => !!value)
           .map((value) => value),
       })),
     [allPageEntries]
@@ -298,57 +345,44 @@ export default function HeaderSearchModal({
       return [];
     }
 
-    return pageCatalog
-      .map((page) => {
+    const rankedMatches = pageCatalog.reduce<RankedPageMatch[]>(
+      (accumulator, page) => {
         const normalizedTitle = page.title.toLowerCase();
         const normalizedHref = page.href.toLowerCase();
         const normalizedBreadcrumbs = page.breadcrumbs.map((value) =>
           value.toLowerCase()
         );
 
-        const matches =
-          normalizedTitle.includes(normalizedQuery) ||
-          normalizedHref.includes(normalizedQuery) ||
-          normalizedBreadcrumbs.some((breadcrumb) =>
-            breadcrumb.includes(normalizedQuery)
-          );
-
-        if (!matches) {
-          return null;
+        if (
+          !pageMatchesQuery(
+            normalizedTitle,
+            normalizedHref,
+            normalizedBreadcrumbs,
+            normalizedQuery
+          )
+        ) {
+          return accumulator;
         }
 
         const hrefSegments = normalizedHref.split("/").filter(Boolean);
 
-        const priority =
-          normalizedTitle === normalizedQuery
-            ? 0
-            : hrefSegments.includes(normalizedQuery)
-            ? 1
-            : normalizedTitle.startsWith(normalizedQuery)
-            ? 2
-            : normalizedBreadcrumbs.includes(normalizedQuery)
-            ? 3
-            : normalizedTitle.includes(normalizedQuery)
-            ? 4
-            : hrefSegments.some((segment) => segment.includes(normalizedQuery))
-            ? 5
-            : 6;
-
-        return {
+        accumulator.push({
           page,
           normalizedTitle,
-          priority,
-        };
-      })
-      .filter(
-        (
-          result
-        ): result is {
-          page: PageSearchResult;
-          normalizedTitle: string;
-          priority: number;
-        } => result !== null
-      )
+          priority: getPageMatchPriority(
+            normalizedTitle,
+            hrefSegments,
+            normalizedBreadcrumbs,
+            normalizedQuery
+          ),
+        });
+
+        return accumulator;
+      },
+      []
+    );
+
+    return rankedMatches
       .sort((a, b) => {
         if (a.priority !== b.priority) {
           return a.priority - b.priority;
@@ -392,13 +426,13 @@ export default function HeaderSearchModal({
   const nftsSettled =
     shouldSearchNfts &&
     !isFetchingNfts &&
-    (typeof nfts !== "undefined" || Boolean(nftsError));
+    (nfts !== undefined || Boolean(nftsError));
 
   const profilesSettled =
     shouldSearchDefault &&
     (selectedCategory === CATEGORY.PROFILES || allowProfileFetch) &&
     !isFetchingProfiles &&
-    (typeof profiles !== "undefined" || Boolean(profilesError));
+    (profiles !== undefined || Boolean(profilesError));
 
   useEffect(() => {
     setAllowProfileFetch(false);
@@ -511,35 +545,24 @@ export default function HeaderSearchModal({
   const shouldRenderCategoryToggle =
     categoriesWithResults.length > 0 || selectedCategory !== CATEGORY.ALL;
 
-  const previewGroups = useMemo(() => {
+  const previewGroups = useMemo<PreviewGroup[]>(() => {
     if (selectedCategory !== CATEGORY.ALL) {
-      return [] as {
-        category: FilterableCategory;
-        items: { item: HeaderSearchModalItemType; index: number }[];
-        total: number;
-      }[];
+      return [];
     }
 
     let runningIndex = 0;
-    const groups: {
-      category: FilterableCategory;
-      items: { item: HeaderSearchModalItemType; index: number }[];
-      total: number;
-    }[] = [];
-
-    for (const category of categoriesWithResults) {
+    return categoriesWithResults.map<PreviewGroup>((category) => {
       const items = resultsByCategory[category];
       const previewItems = items
         .slice(0, CATEGORY_PREVIEW_LIMIT)
         .map((item) => ({ item, index: runningIndex++ }));
-      groups.push({
+
+      return {
         category,
         items: previewItems,
         total: items.length,
-      });
-    }
-
-    return groups;
+      };
+    });
   }, [categoriesWithResults, resultsByCategory, selectedCategory]);
 
   const flattenedItems = useMemo(() => {
