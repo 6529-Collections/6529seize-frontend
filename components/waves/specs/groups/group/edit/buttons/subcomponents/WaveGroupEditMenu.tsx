@@ -27,9 +27,6 @@ interface WaveGroupEditMenuProps {
   readonly onRemoveGroup?: () => void;
 }
 
-const MENU_ITEM_CLASS =
-  "tw-flex tw-items-center tw-gap-x-2 tw-rounded-md tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-font-semibold tw-transition tw-duration-200 tw-ease-out";
-
 export default function WaveGroupEditMenu({
   wave,
   type,
@@ -55,8 +52,6 @@ export default function WaveGroupEditMenu({
         id: "include",
         label: "Include identity",
         onSelect: onIncludeIdentity,
-        className:
-          "tw-text-iron-200 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50",
       });
     }
 
@@ -65,8 +60,6 @@ export default function WaveGroupEditMenu({
         id: "exclude",
         label: "Exclude identity",
         onSelect: onExcludeIdentity,
-        className:
-          "tw-text-iron-200 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50",
       });
     }
 
@@ -80,8 +73,6 @@ export default function WaveGroupEditMenu({
         }
         editButtonRef.current?.open();
       },
-      className:
-        "tw-text-iron-200 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50",
     });
 
     if (canRemoveGroup) {
@@ -96,7 +87,7 @@ export default function WaveGroupEditMenu({
           removeButtonRef.current?.open();
         },
         className:
-          "tw-text-red desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-red",
+          "tw-text-red desktop-hover:hover:tw-text-red",
       });
     }
 
@@ -123,10 +114,6 @@ export default function WaveGroupEditMenu({
           </>
         )}
         aria-label="Group options"
-        itemsWrapperClassName="tw-flex tw-flex-col"
-        unstyledItems
-        itemClassName={MENU_ITEM_CLASS}
-        focusItemClassName="tw-bg-iron-800 tw-text-iron-50"
         items={menuItems}
       />
       <WaveGroupEditButton

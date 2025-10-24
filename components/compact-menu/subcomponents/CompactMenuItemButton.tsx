@@ -48,9 +48,13 @@ export function CompactMenuItemButton({
         )
       : undefined;
 
+  const role = item.role ?? "menuitem";
+
   return (
     <button
       type="button"
+      role={role}
+      aria-selected={item.ariaSelected}
       aria-label={item.ariaLabel}
       disabled={item.disabled}
       data-compact-menu-item="true"
@@ -66,7 +70,6 @@ export function CompactMenuItemButton({
         itemClassName,
         item.className,
         item.disabled &&
-          !unstyledItems &&
           "tw-cursor-not-allowed tw-opacity-60 tw-text-iron-500",
       )}
     >
