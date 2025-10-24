@@ -1,8 +1,11 @@
+import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
 import MemeLabPageComponent from "@/components/memelab/MemeLabPage";
 import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
+import { createConfig, http, WagmiProvider } from "wagmi";
+import { mainnet } from "wagmi/chains";
 
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
@@ -113,6 +116,20 @@ jest.mock("@/components/pagination/Pagination", () => ({
   default: () => <div data-testid="pagination" />,
 }));
 
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: jest.fn(() => ({
+    isAuthenticated: false,
+    seizeConnect: jest.fn(),
+    seizeAcceptConnection: jest.fn(),
+    address: undefined,
+    hasInitializationError: false,
+    initializationError: null,
+  })),
+  SeizeConnectProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}));
+
 // Import mocks
 const mockUseRouter = jest.fn();
 const mockUseSearchParams = jest.fn();
@@ -146,7 +163,7 @@ beforeEach(() => {
 
   mockUseAuth.mockReturnValue({
     connectedProfile: {
-      wallets: ["0xabc"],
+      wallets: [{ wallet: "0xabc" }],
     },
   });
 
@@ -361,8 +378,21 @@ describe("MemeLabPageComponent", () => {
 
     setupMockApiCalls(1);
 
+    const mockWagmiConfig = createConfig({
+      chains: [mainnet],
+      transports: {
+        [mainnet.id]: http(),
+      },
+    });
+
     await act(async () => {
-      renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
+      renderWithQueryClient(
+        <WagmiProvider config={mockWagmiConfig}>
+          <SeizeConnectProvider>
+            <MemeLabPageComponent nftId="1" />
+          </SeizeConnectProvider>
+        </WagmiProvider>
+      );
     });
 
     await waitFor(
