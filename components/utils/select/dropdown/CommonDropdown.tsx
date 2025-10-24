@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAnimate } from "framer-motion";
 import { CommonSelectProps } from "../CommonSelect";
 import CommonDropdownItemsWrapper from "./CommonDropdownItemsWrapper";
@@ -23,33 +23,39 @@ export default function CommonDropdown<T, U = unknown>(
     theme = "dark",
     size = "md",
     renderItemChildren,
+    closeOnSelect = true,
   } = props;
   const [isOpen, setIsOpen] = useState(false);
   const [iconScope, animateIcon] = useAnimate();
 
   useEffect(() => {
+    if (!iconScope.current) return;
     if (isOpen) {
       animateIcon(iconScope.current, { rotate: 0 });
     } else {
       animateIcon(iconScope.current, { rotate: -90 });
     }
-  }, [isOpen]);
+  }, [animateIcon, iconScope, isOpen]);
 
-  const getLabel = (): string => {
-    const targetItem = items.find((item) => item.value === activeItem);
+  const activeItemMatch = useMemo(
+    () => items.find((item) => item.value === activeItem),
+    [activeItem, items]
+  );
+
+  const computedLabel = useMemo(() => {
     return (
-      targetItem?.mobileLabel ??
-      targetItem?.label ??
+      activeItemMatch?.mobileLabel ??
+      activeItemMatch?.label ??
       noneLabel ??
       "None Selected"
     );
-  };
+  }, [activeItemMatch, noneLabel]);
 
-  const [label, setLabel] = useState<string>(getLabel());
+  const [label, setLabel] = useState<string>(computedLabel);
 
   useEffect(() => {
-    setLabel(getLabel());
-  }, [activeItem]);
+    setLabel(computedLabel);
+  }, [computedLabel]);
 
   const getSortDirection = (): SortDirection | undefined =>
     "sortDirection" in props ? props.sortDirection : undefined;
@@ -63,8 +69,10 @@ export default function CommonDropdown<T, U = unknown>(
   }, [props]);
 
   const onSelect = (item: T) => {
-    setIsOpen(false);
     setSelected(item);
+    if (closeOnSelect) {
+      setIsOpen(false);
+    }
   };
 
   const buttonRef = useRef<HTMLButtonElement>(null);

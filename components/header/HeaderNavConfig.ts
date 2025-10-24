@@ -47,6 +47,7 @@ export function getDesktopNavigation(_context: NavContext): NavDropdown[] {
         { name: "NextGen", path: "/nextgen" },
         { name: "Meme Lab", path: "/meme-lab" },
         { name: "ReMemes", path: "/rememes" },
+        { name: "xTDH", path: "/xtdh" },
       ],
     },
     {

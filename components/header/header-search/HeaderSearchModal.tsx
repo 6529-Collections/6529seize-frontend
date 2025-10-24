@@ -2,11 +2,11 @@
 
 import { TabToggle } from "@/components/common/TabToggle";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { UserPageTabType } from "@/components/user/layout/UserPageTabs";
 import { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { getProfileTargetRoute } from "@/helpers/Helpers";
+import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import useLocalPreference from "@/hooks/useLocalPreference";
 import { useWaves } from "@/hooks/useWaves";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -148,7 +148,7 @@ export default function HeaderSearchModal({
     const path = getProfileTargetRoute({
       handleOrWallet,
       pathname: pathname ?? "",
-      defaultPath: UserPageTabType.IDENTITY,
+      defaultPath: USER_PAGE_TAB_IDS.IDENTITY,
     });
     router.push(path);
     onClose();

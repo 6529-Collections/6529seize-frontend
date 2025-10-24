@@ -33,7 +33,7 @@ export const SeizeSettingsProvider = ({
   });
 
   useEffect(() => {
-    fetchUrl(`${publicEnv.API_ENDPOINT}/api/settings`).then(
+    fetchUrl<ApiSeizeSettings>(`${publicEnv.API_ENDPOINT}/api/settings`).then(
       (settings: ApiSeizeSettings) => {
         setSeizeSettings({
           ...settings,
