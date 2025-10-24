@@ -21,7 +21,10 @@ export type WaveGroupRemoveButtonHandle = {
 interface WaveGroupRemoveButtonProps {
   readonly wave: ApiWave;
   readonly type: WaveGroupType;
-  readonly onWaveUpdate: (body: ApiUpdateWaveRequest) => Promise<void>;
+  readonly onWaveUpdate: (
+    body: ApiUpdateWaveRequest,
+    opts?: { readonly skipAuth?: boolean },
+  ) => Promise<void>;
   readonly renderTrigger?: ((options: { readonly open: () => void }) => ReactNode) | null;
 }
 
@@ -53,7 +56,7 @@ const WaveGroupRemoveButton = forwardRef<
     [onWaveUpdate],
   );
 
-  let triggerContent: ReactNode | null = null;
+  let triggerContent: ReactNode | null;
 
   if (renderTrigger === null) {
     triggerContent = null;
@@ -67,7 +70,7 @@ const WaveGroupRemoveButton = forwardRef<
         aria-label="Remove"
         title="Remove"
         onClick={handleOpen}
-        className="tw-border-none tw-bg-transparent tw-p-0 tw-items-center">
+        className="tw-border-none tw-bg-transparent tw-p-0 tw-flex tw-items-center">
         <FontAwesomeIcon
           icon={faCircleXmark}
           className="tw-flex-shrink-0 tw-size-5 tw-text-red tw-transition tw-duration-300 tw-ease-out hover:tw-scale-110"

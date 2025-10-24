@@ -98,10 +98,11 @@ export default function GroupCreateWallets({
     );
   }, [iAmIncluded, connectedProfile, type]);
 
+  const toKey = (i: CommunityMemberMinimal) =>
+    (i.wallet ?? i.primary_wallet)?.toLowerCase();
+
   const onIdentitySelect = (identity: CommunityMemberMinimal) => {
     setSelectedIdentities((prev) => {
-      const toKey = (i: CommunityMemberMinimal) =>
-        (i.wallet ?? i.primary_wallet)?.toLowerCase();
       const target = toKey(identity);
       if (!target) return prev;
       if (prev.some((i) => toKey(i) === target)) {

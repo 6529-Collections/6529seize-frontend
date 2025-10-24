@@ -24,10 +24,13 @@ import {
   type ValidationIssue,
   toErrorMessage,
 } from "@/services/groups/groupMutations";
-import { convertWaveToUpdateWave } from "@/helpers/waves/waves.helpers";
-import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { WaveGroupType } from "../../../WaveGroup.types";
-import { getScopedGroup, isGroupAuthor } from "../utils/waveGroupEdit";
+import {
+  buildWaveUpdateBody,
+  getGroupIdFromUpdateBody,
+  getScopedGroup,
+  isGroupAuthor,
+} from "../utils/waveGroupEdit";
 
 const WAVE_GROUP_LABELS = {
   VIEW: "View",
@@ -135,95 +138,6 @@ const createEmptyGroupPayload = (name: string): ApiCreateGroup => ({
   },
   is_private: false,
 });
-
-const getGroupIdFromUpdateBody = (
-  body: ApiUpdateWaveRequest,
-  type: WaveGroupType,
-): string | null => {
-  switch (type) {
-    case WaveGroupType.VIEW:
-      return body.visibility.scope.group_id ?? null;
-    case WaveGroupType.DROP:
-      return body.participation.scope.group_id ?? null;
-    case WaveGroupType.VOTE:
-      return body.voting.scope.group_id ?? null;
-    case WaveGroupType.CHAT:
-      return body.chat.scope.group_id ?? null;
-    case WaveGroupType.ADMIN:
-      return body.wave.admin_group?.group_id ?? null;
-    default:
-      assertUnreachable(type);
-      return null;
-  }
-};
-
-const buildWaveUpdateBody = (
-  wave: ApiWave,
-  type: WaveGroupType,
-  groupId: string | null,
-): ApiUpdateWaveRequest => {
-  const originalBody = convertWaveToUpdateWave(wave);
-  switch (type) {
-    case WaveGroupType.VIEW:
-      return {
-        ...originalBody,
-        visibility: {
-          ...originalBody.visibility,
-          scope: {
-            ...originalBody.visibility.scope,
-            group_id: groupId,
-          },
-        },
-      };
-    case WaveGroupType.DROP:
-      return {
-        ...originalBody,
-        participation: {
-          ...originalBody.participation,
-          scope: {
-            ...originalBody.participation.scope,
-            group_id: groupId,
-          },
-        },
-      };
-    case WaveGroupType.VOTE:
-      return {
-        ...originalBody,
-        voting: {
-          ...originalBody.voting,
-          scope: {
-            ...originalBody.voting.scope,
-            group_id: groupId,
-          },
-        },
-      };
-    case WaveGroupType.CHAT:
-      return {
-        ...originalBody,
-        chat: {
-          ...originalBody.chat,
-          scope: {
-            ...originalBody.chat.scope,
-            group_id: groupId,
-          },
-        },
-      };
-    case WaveGroupType.ADMIN:
-      return {
-        ...originalBody,
-        wave: {
-          ...originalBody.wave,
-          admin_group: {
-            ...originalBody.wave.admin_group,
-            group_id: groupId,
-          },
-        },
-      };
-    default:
-      assertUnreachable(type);
-      return originalBody;
-  }
-};
 
 const buildDefaultGroupName = (
   wave: ApiWave,
@@ -499,7 +413,10 @@ export interface WaveGroupEditButtonsController {
   readonly activeIdentitiesModal: WaveGroupIdentitiesModal | null;
   readonly openIdentitiesModal: (modal: WaveGroupIdentitiesModal) => void;
   readonly closeIdentitiesModal: () => void;
-  readonly updateWave: (body: ApiUpdateWaveRequest) => Promise<void>;
+  readonly updateWave: (
+    body: ApiUpdateWaveRequest,
+    opts?: { readonly skipAuth?: boolean },
+  ) => Promise<void>;
   readonly onIdentityConfirm: (event: {
     identity: string;
     mode: WaveGroupIdentitiesModal;
@@ -631,16 +548,21 @@ export const useWaveGroupEditButtonsController = ({
   });
 
   const updateWave = useCallback(
-    async (body: ApiUpdateWaveRequest) => {
+    async (
+      body: ApiUpdateWaveRequest,
+      opts?: { readonly skipAuth?: boolean },
+    ) => {
       setMutating(true);
-      const { success } = await requestAuth();
-      if (!success) {
-        setToast({
-          type: "error",
-          message: "Failed to authenticate",
-        });
-        setMutating(false);
-        return;
+      if (!opts?.skipAuth) {
+        const { success } = await requestAuth();
+        if (!success) {
+          setToast({
+            type: "error",
+            message: "Failed to authenticate",
+          });
+          setMutating(false);
+          return;
+        }
       }
       await editWaveMutation.mutateAsync(body);
     },
@@ -752,7 +674,7 @@ export const useWaveGroupEditButtonsController = ({
             createdGroup.id,
           );
           waveMutationTriggered = true;
-          await updateWave(updateBody);
+          await updateWave(updateBody, { skipAuth: true });
         } else {
           onWaveCreated();
         }

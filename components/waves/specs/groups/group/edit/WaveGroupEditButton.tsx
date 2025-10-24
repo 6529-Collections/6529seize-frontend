@@ -21,7 +21,10 @@ export type WaveGroupEditButtonHandle = {
 interface WaveGroupEditButtonProps {
   readonly wave: ApiWave;
   readonly type: WaveGroupType;
-  readonly onWaveUpdate: (body: ApiUpdateWaveRequest) => Promise<void>;
+  readonly onWaveUpdate: (
+    body: ApiUpdateWaveRequest,
+    opts?: { readonly skipAuth?: boolean },
+  ) => Promise<void>;
   readonly renderTrigger?: ((options: { readonly open: () => void }) => ReactNode) | null;
 }
 
@@ -45,7 +48,7 @@ const WaveGroupEditButton = forwardRef<
     [handleOpen],
   );
 
-  let triggerContent: ReactNode | null = null;
+  let triggerContent: ReactNode | null;
 
   if (renderTrigger) {
     triggerContent = renderTrigger({ open: handleOpen });

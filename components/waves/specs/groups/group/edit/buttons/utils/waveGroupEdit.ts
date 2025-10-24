@@ -2,6 +2,31 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiGroup } from "@/generated/models/ApiGroup";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { WaveGroupType } from "../../../WaveGroup.types";
+import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
+import { convertWaveToUpdateWave } from "@/helpers/waves/waves.helpers";
+import {
+  getGroupIdByType,
+  updateGroupIdByType,
+} from "../../utils/waveGroupUpdate";
+
+export const clearGroupIdFromUpdateBody = (
+  body: ApiUpdateWaveRequest,
+  type: WaveGroupType,
+): ApiUpdateWaveRequest => updateGroupIdByType(body, type, null);
+
+export const buildWaveUpdateBody = (
+  wave: ApiWave,
+  type: WaveGroupType,
+  groupId: string | null,
+): ApiUpdateWaveRequest => {
+  const originalBody = convertWaveToUpdateWave(wave);
+  return updateGroupIdByType(originalBody, type, groupId);
+};
+
+export const getGroupIdFromUpdateBody = (
+  body: ApiUpdateWaveRequest,
+  type: WaveGroupType,
+): string | null => getGroupIdByType(body, type);
 
 export const getScopedGroup = (
   wave: ApiWave,

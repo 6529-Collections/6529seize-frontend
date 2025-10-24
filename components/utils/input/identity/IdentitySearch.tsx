@@ -125,6 +125,18 @@ export default function IdentitySearch({
     setHighlightedIndex(null);
   };
 
+  const selectProfile = (profile: CommunityMemberMinimal) => {
+    const nextIdentity = getSelectableIdentity(profile);
+    if (!nextIdentity) {
+      return false;
+    }
+
+    const displayValue =
+      profile.handle ?? profile.display ?? nextIdentity;
+    onValueChange(nextIdentity, displayValue);
+    return true;
+  };
+
   const wrapperRef = useRef<HTMLDivElement>(null);
   useClickAway(wrapperRef, () => setIsOpen(false));
   useKeyPressEvent("Escape", () => setIsOpen(false));
@@ -134,7 +146,7 @@ export default function IdentitySearch({
     if (autoFocus) {
       inputRef.current?.focus();
     }
-  }, [autoFocus]);
+  }, []);
 
   useEffect(() => {
     if (!shouldSubmit) {
@@ -183,16 +195,9 @@ export default function IdentitySearch({
       event.preventDefault();
       const profile = data[highlightedIndex];
       if (profile) {
-        const nextIdentity = getSelectableIdentity(profile);
-        if (!nextIdentity) {
-          return;
+        if (selectProfile(profile)) {
+          setShouldSubmit(true);
         }
-
-        const displayValue =
-          profile.handle ?? profile.display ?? nextIdentity;
-        onValueChange(nextIdentity, displayValue);
-
-        setShouldSubmit(true);
       }
     }
   };
@@ -297,13 +302,7 @@ export default function IdentitySearch({
           if (!profile) {
             return;
           }
-          const nextIdentity = getSelectableIdentity(profile);
-          if (!nextIdentity) {
-            return;
-          }
-          const displayValue =
-            profile.handle ?? profile.display ?? nextIdentity;
-          onValueChange(nextIdentity, displayValue);
+          selectProfile(profile);
         }}
       />
       {error && (

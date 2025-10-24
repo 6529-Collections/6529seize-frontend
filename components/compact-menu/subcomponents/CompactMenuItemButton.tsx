@@ -74,6 +74,7 @@ export function CompactMenuItemButton({
         itemClassName,
         item.className,
         item.disabled &&
+          !unstyledItems &&
           "tw-cursor-not-allowed tw-opacity-60 tw-text-iron-500",
       )}
     >

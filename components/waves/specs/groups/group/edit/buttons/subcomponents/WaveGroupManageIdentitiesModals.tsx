@@ -1,18 +1,10 @@
 "use client";
 
 import WaveGroupManageIdentitiesModal, {
-  WaveGroupManageIdentitiesMode,
   WaveGroupManageIdentitiesConfirmEvent,
+  WaveGroupManageIdentitiesMode,
 } from "../../WaveGroupManageIdentitiesModal";
 import { WaveGroupIdentitiesModal } from "../hooks/useWaveGroupEditButtonsController";
-
-const modalModeMap: Record<
-  WaveGroupIdentitiesModal,
-  WaveGroupManageIdentitiesMode
-> = {
-  [WaveGroupIdentitiesModal.INCLUDE]: WaveGroupManageIdentitiesMode.INCLUDE,
-  [WaveGroupIdentitiesModal.EXCLUDE]: WaveGroupManageIdentitiesMode.EXCLUDE,
-};
 
 interface WaveGroupManageIdentitiesModalsProps {
   readonly activeModal: WaveGroupIdentitiesModal | null;
@@ -29,11 +21,14 @@ export default function WaveGroupManageIdentitiesModals({
     return null;
   }
 
-  const mode = modalModeMap[activeModal];
+  const modalMode =
+    activeModal === WaveGroupIdentitiesModal.INCLUDE
+      ? WaveGroupManageIdentitiesMode.INCLUDE
+      : WaveGroupManageIdentitiesMode.EXCLUDE;
 
   return (
     <WaveGroupManageIdentitiesModal
-      mode={mode}
+      mode={modalMode}
       onClose={onClose}
       onConfirm={onConfirm}
     />

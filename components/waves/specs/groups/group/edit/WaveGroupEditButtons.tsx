@@ -12,7 +12,10 @@ import {
 } from "./buttons/hooks/useWaveGroupEditButtonsController";
 import WaveGroupEditMenu from "./buttons/subcomponents/WaveGroupEditMenu";
 import WaveGroupManageIdentitiesModals from "./buttons/subcomponents/WaveGroupManageIdentitiesModals";
-import { WaveGroupManageIdentitiesMode } from "./WaveGroupManageIdentitiesModal";
+import {
+  WaveGroupManageIdentitiesMode,
+  type WaveGroupManageIdentitiesConfirmEvent,
+} from "./WaveGroupManageIdentitiesModal";
 
 export interface WaveGroupEditButtonsProps {
   readonly haveGroup: boolean;
@@ -50,12 +53,12 @@ export default function WaveGroupEditButtons({
   });
 
   const handleIdentityConfirm = useCallback(
-    ({ identity, mode }: { identity: string; mode: WaveGroupManageIdentitiesMode }) => {
-      const action =
+    ({ identity, mode }: WaveGroupManageIdentitiesConfirmEvent) => {
+      const normalizedMode =
         mode === WaveGroupManageIdentitiesMode.INCLUDE
           ? WaveGroupIdentitiesModal.INCLUDE
           : WaveGroupIdentitiesModal.EXCLUDE;
-      onIdentityConfirm({ identity, mode: action });
+      onIdentityConfirm({ identity, mode: normalizedMode });
     },
     [onIdentityConfirm],
   );
@@ -72,10 +75,13 @@ export default function WaveGroupEditButtons({
 
   if (mutating) {
     return (
-      <output aria-live="polite" className="tw-inline-flex tw-items-center tw-gap-2">
+      <div
+        role="status"
+        aria-live="polite"
+        className="tw-inline-flex tw-items-center tw-gap-2">
         <CircleLoader />
         <span className="tw-sr-only">Updating wave group identities</span>
-      </output>
+      </div>
     );
   }
 

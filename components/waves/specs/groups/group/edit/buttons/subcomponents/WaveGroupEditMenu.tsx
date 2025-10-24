@@ -16,7 +16,10 @@ import WaveGroupRemoveButton, {
 interface WaveGroupEditMenuProps {
   readonly wave: ApiWave;
   readonly type: WaveGroupType;
-  readonly onWaveUpdate: (body: ApiUpdateWaveRequest) => Promise<void>;
+  readonly onWaveUpdate: (
+    body: ApiUpdateWaveRequest,
+    opts?: { readonly skipAuth?: boolean },
+  ) => Promise<void>;
   readonly hasGroup: boolean;
   readonly canIncludeIdentity: boolean;
   readonly canExcludeIdentity: boolean;
