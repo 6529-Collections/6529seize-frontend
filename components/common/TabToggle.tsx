@@ -12,6 +12,7 @@ interface TabToggleProps {
   readonly activeKey: string;
   readonly onSelect: (key: string) => void;
   readonly fullWidth?: boolean; // New prop to control width
+  readonly orientation?: "horizontal" | "vertical";
 }
 
 export const TabToggle: React.FC<TabToggleProps> = ({
@@ -19,12 +20,15 @@ export const TabToggle: React.FC<TabToggleProps> = ({
   activeKey,
   onSelect,
   fullWidth = false, // Default to false for backwards compatibility
+  orientation = "horizontal",
 }) => {
+  const isVertical = orientation === "vertical";
+  const containerClasses = isVertical
+    ? "tw-flex tw-flex-col tw-gap-y-1.5"
+    : `tw-flex tw-gap-1 ${fullWidth ? "tw-w-full" : "tw-w-auto"}`;
+
   return (
-    <div
-      className={`tw-flex tw-gap-x-1 ${fullWidth ? "tw-w-full" : "tw-w-auto"}`}
-      role="tablist"
-    >
+    <div className={containerClasses} role="tablist">
       {options.map((option) => (
         <button
           key={option.key}
@@ -32,16 +36,19 @@ export const TabToggle: React.FC<TabToggleProps> = ({
           role="tab"
           aria-selected={activeKey === option.key}
           aria-controls={option.panelId}
-          className={`tw-whitespace-nowrap tw-px-2 tw-py-3 tw-text-sm tw-font-medium tw-border-b-2 tw-border-t-0 tw-border-x-0 tw-border-solid tw-bg-transparent tw-transition-all tw-duration-200 tw-relative ${
-            fullWidth
-              ? "tw-flex-1 tw-text-center tw-justify-center tw-flex"
-              : ""
+          className={`tw-whitespace-nowrap tw-text-sm tw-font-medium tw-transition-all tw-duration-150 tw-relative focus:tw-outline-none ${
+            isVertical
+              ? `tw-flex tw-items-center tw-justify-start tw-w-full tw-rounded-lg tw-py-2 tw-px-3 tw-border tw-border-transparent`
+              : `tw-px-3 tw-py-2 tw-rounded-full tw-border tw-border-transparent ${
+                  fullWidth
+                    ? "tw-flex-1 tw-text-center tw-justify-center tw-flex"
+                    : ""
+                }`
           } ${
             activeKey === option.key
-              ? "tw-text-white tw-border-primary-300"
-              : "tw-text-iron-500 desktop-hover:hover:tw-text-iron-200 tw-border-transparent"
-          }`}
-        >
+              ? "tw-bg-iron-800 tw-text-white tw-border-iron-400"
+              : "tw-text-iron-400 tw-bg-transparent hover:tw-text-iron-200 hover:tw-bg-iron-900/30 hover:tw-border-iron-600"
+          }`}>
           {option.label}
           {option.hasIndicator && (
             <div className="tw-absolute tw-rounded-full -tw-right-1 tw-top-1 tw-bg-red tw-h-2 tw-w-2"></div>

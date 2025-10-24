@@ -23,6 +23,7 @@ interface UseWavesParams {
   readonly waveName: string | null;
   readonly limit?: number;
   readonly refetchInterval?: number;
+  readonly enabled?: boolean;
 }
 
 export function useWaves({
@@ -30,6 +31,7 @@ export function useWaves({
   waveName,
   limit = 20,
   refetchInterval = Infinity,
+  enabled = true,
 }: UseWavesParams) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
@@ -76,7 +78,7 @@ export function useWaves({
     },
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
-    enabled: !usePublicWaves,
+    enabled: enabled && !usePublicWaves,
     refetchInterval,
     ...getDefaultQueryRetry(),
   });
@@ -101,7 +103,7 @@ export function useWaves({
     },
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
-    enabled: usePublicWaves,
+    enabled: enabled && usePublicWaves,
     refetchInterval,
     ...getDefaultQueryRetry(),
   });
@@ -114,10 +116,13 @@ export function useWaves({
   };
 
   const [waves, setWaves] = useState<ApiWave[]>(getWaves());
-  useEffect(
-    () => setWaves(getWaves()),
-    [authQuery.data, publicQuery.data, usePublicWaves]
-  );
+  useEffect(() => {
+    if (!enabled) {
+      setWaves([]);
+      return;
+    }
+    setWaves(getWaves());
+  }, [enabled, authQuery.data, publicQuery.data, usePublicWaves]);
 
   const activeQuery = usePublicWaves ? publicQuery : authQuery;
 
