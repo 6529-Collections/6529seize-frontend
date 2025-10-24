@@ -22,12 +22,12 @@ import useCreateModalState from "@/hooks/useCreateModalState";
 
 interface WebDirectMessagesListProps {
   readonly scrollContainerRef: React.RefObject<HTMLElement | null>;
-  readonly isCondensed?: boolean;
+  readonly isCollapsed?: boolean;
 }
 
 const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
   scrollContainerRef,
-  isCondensed = false,
+  isCollapsed = false,
 }) => {
   const { isAuthenticated } = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
@@ -93,7 +93,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
         hideHeaders={true}
         hidePin={true}
         basePath="/messages"
-        isCondensed={isCondensed}
+        isCollapsed={isCollapsed}
       />
     );
   }
@@ -157,15 +157,15 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
       <div
         className="tw-flex-1 tw-flex tw-flex-col tw-py-4 tw-bg-black"
       >
-        {(shouldRenderCreateDirectMessage || !isCondensed) && (
+        {(shouldRenderCreateDirectMessage || !isCollapsed) && (
           <div
             className={`tw-flex tw-mb-3 ${
-              isCondensed
+              isCollapsed
                 ? "tw-justify-center tw-px-2"
                 : "tw-items-center tw-justify-between tw-px-4"
             }`}
           >
-            {!isCondensed && (
+            {!isCollapsed && (
               <span className="tw-text-xl tw-font-semibold tw-text-iron-50">
                 Messages
               </span>
