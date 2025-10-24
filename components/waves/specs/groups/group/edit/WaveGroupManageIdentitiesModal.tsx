@@ -29,7 +29,7 @@ export default function WaveGroupManageIdentitiesModal({
   readonly onClose: () => void;
   readonly onConfirm: (event: WaveGroupManageIdentitiesConfirmEvent) => void;
 }) {
-  const modalRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   const descriptionId = useId();
   useClickAway(modalRef, onClose);
@@ -90,13 +90,13 @@ export default function WaveGroupManageIdentitiesModal({
         <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
         <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
           <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
-            <div
+            <dialog
               ref={modalRef}
-              role="dialog"
               aria-modal="true"
               aria-labelledby={titleId}
               aria-describedby={descriptionId}
               tabIndex={-1}
+              open
               className="sm:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6">
               <div className="tw-flex tw-justify-between tw-items-start">
                 <div className="tw-flex tw-flex-col tw-gap-y-2">
@@ -149,7 +149,7 @@ export default function WaveGroupManageIdentitiesModal({
                   </button>
                 </div>
               </form>
-            </div>
+            </dialog>
           </div>
         </div>
       </div>

@@ -55,10 +55,7 @@ export default function CommonDropdownItemsDefaultWrapper<T>({
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}>
             <div className="tw-max-h-80 tw-overflow-y-auto tw-overflow-x-hidden">
-              <ul
-                role="menu"
-                aria-orientation="vertical"
-                className="tw-flex tw-flex-col tw-gap-0.5 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
+              <ul className="tw-flex tw-flex-col tw-gap-0.5 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
                 {children}
               </ul>
             </div>

@@ -66,7 +66,7 @@ export default function GroupCreateWallets({
   }, [wallets]);
 
   useEffect(() => {
-    if (!wallets || !wallets.length) {
+    if (!wallets?.length) {
       setUploadedWallets(null);
       return;
     }

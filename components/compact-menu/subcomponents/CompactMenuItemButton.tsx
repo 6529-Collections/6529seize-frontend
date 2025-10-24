@@ -30,20 +30,24 @@ export function CompactMenuItemButton({
   focusItemClassName,
   unstyledItems = false,
 }: CompactMenuItemButtonProps) {
+  const activeDefaultClasses = unstyledItems
+    ? undefined
+    : DEFAULT_ACTIVE_ITEM_CLASSES;
+  const inactiveDefaultClasses = unstyledItems
+    ? undefined
+    : DEFAULT_INACTIVE_ITEM_CLASSES;
+  const focusDefaultClasses = unstyledItems
+    ? undefined
+    : DEFAULT_FOCUS_ITEM_CLASSES;
+
   const stateClasses = isActive
-    ? clsx(
-        unstyledItems ? undefined : DEFAULT_ACTIVE_ITEM_CLASSES,
-        activeItemClassName,
-      )
-    : clsx(
-        unstyledItems ? undefined : DEFAULT_INACTIVE_ITEM_CLASSES,
-        inactiveItemClassName,
-      );
+    ? clsx(activeDefaultClasses, activeItemClassName)
+    : clsx(inactiveDefaultClasses, inactiveItemClassName);
 
   const focusClasses =
     menuActive && !item.disabled && !isActive
       ? clsx(
-          unstyledItems ? undefined : DEFAULT_FOCUS_ITEM_CLASSES,
+          focusDefaultClasses,
           focusItemClassName,
         )
       : undefined;

@@ -1,5 +1,5 @@
 export const normaliseWalletList = (list: readonly string[]): string[] =>
-  list.map((wallet) => wallet.trim().toLowerCase()).sort();
+  list.map((wallet) => wallet.trim().toLowerCase()).sort((a, b) => a.localeCompare(b));
 
 export const walletListsMatch = (
   lhs: readonly string[] | null,

@@ -11,6 +11,7 @@ export default function CommonProfileSearchItems({
   onProfileSelect,
   highlightedIndex = null,
   onHighlightedOptionIdChange,
+  listboxId,
 }: {
   readonly open: boolean;
   readonly profiles: CommunityMemberMinimal[];
@@ -19,6 +20,7 @@ export default function CommonProfileSearchItems({
   readonly onProfileSelect: (newV: CommunityMemberMinimal | null) => void;
   readonly highlightedIndex?: number | null;
   readonly onHighlightedOptionIdChange?: (optionId: string | undefined) => void;
+  readonly listboxId?: string;
 }) {
   const buildOptionId = (
     profile: CommunityMemberMinimal,
@@ -34,9 +36,9 @@ export default function CommonProfileSearchItems({
     const sanitized =
       String(rawId)
         .trim()
-        .replace(/[^a-zA-Z0-9_-]/g, "-")
-        .replace(/-+/g, "-")
-        .replace(/^-|-$/g, "") || "item";
+        .replaceAll(/[^a-zA-Z0-9_-]/g, "-")
+        .replaceAll(/-+/g, "-")
+        .replaceAll(/(^-|-$)/g, "") || "item";
 
     return `profile-search-item-${sanitized}-${index}`;
   };
@@ -75,9 +77,11 @@ export default function CommonProfileSearchItems({
         >
           <div className="tw-absolute tw-overflow-hidden tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
             <div className="tw-py-1 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto">
+              {/* WAI-ARIA combobox pattern expects a listbox container */}
               <ul
-                className="tw-flex tw-flex-col tw-gap-y-1 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none"
+                id={listboxId}
                 role="listbox"
+                className="tw-flex tw-flex-col tw-gap-y-1 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none"
               >
                 {profiles.length ? (
                   profiles.map((profile, index) => {
@@ -96,7 +100,6 @@ export default function CommonProfileSearchItems({
                 ) : (
                   <li
                     className="tw-py-2 tw-w-full tw-h-full tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-medium tw-text-white tw-rounded-lg tw-relative tw-select-none tw-px-2"
-                    role="presentation"
                   >
                     {noResultsText}
                   </li>

@@ -25,12 +25,11 @@ export default function WaveGroupManageIdentitiesModals({
   onClose,
   onConfirm,
 }: WaveGroupManageIdentitiesModalsProps) {
-  const mode =
-    activeModal !== null ? modalModeMap[activeModal] : null;
-
-  if (mode === null) {
+  if (activeModal === null) {
     return null;
   }
+
+  const mode = modalModeMap[activeModal];
 
   return (
     <WaveGroupManageIdentitiesModal

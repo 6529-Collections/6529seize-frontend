@@ -20,6 +20,36 @@ interface TabToggleWithOverflowProps {
   readonly fullWidth?: boolean;
 }
 
+interface OverflowTriggerProps {
+  readonly isOpen: boolean;
+  readonly isActiveInOverflow: boolean;
+  readonly activeLabel?: string;
+  readonly fallbackLabel: string;
+}
+
+const OverflowTrigger: React.FC<OverflowTriggerProps> = ({
+  isOpen,
+  isActiveInOverflow,
+  activeLabel,
+  fallbackLabel,
+}) => (
+  <>
+    {isActiveInOverflow ? activeLabel ?? fallbackLabel : fallbackLabel}
+    <span
+      className={clsx(
+        "tw-ml-0.5 tw-inline-flex tw-transition-transform tw-duration-200",
+        isOpen ? "tw-rotate-180" : "",
+      )}
+    >
+      <FontAwesomeIcon
+        icon={faChevronDown}
+        aria-hidden="true"
+        className="tw-h-3 tw-w-3 tw-opacity-70"
+      />
+    </span>
+  </>
+);
+
 export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
   options,
   activeKey,
@@ -44,7 +74,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
     (tab) => tab.key === activeKey,
   );
   const [focusedTabIndex, setFocusedTabIndex] = React.useState(() =>
-    activeVisibleIndex >= 0 ? activeVisibleIndex : 0,
+    Math.max(activeVisibleIndex, 0),
   );
 
   const handleSelect = (key: string) => {
@@ -67,7 +97,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
       }
 
       const lastIndex = visibleTabs.length - 1;
-      return currentIndex > lastIndex ? lastIndex : currentIndex;
+      return Math.min(currentIndex, lastIndex);
     });
   }, [activeVisibleIndex, visibleTabs.length]);
 
@@ -151,24 +181,12 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
               : "tw-text-iron-400 hover:tw-text-iron-200",
           )}
           trigger={({ isOpen }) => (
-            <>
-              {isActiveInOverflow
-                ? activeOption?.label ??
-                  TAB_TOGGLE_WITH_OVERFLOW_MESSAGES.overflowFallbackLabel
-                : TAB_TOGGLE_WITH_OVERFLOW_MESSAGES.overflowFallbackLabel}
-              <span
-                className={clsx(
-                  "tw-ml-0.5 tw-inline-flex tw-transition-transform tw-duration-200",
-                  isOpen ? "tw-rotate-180" : "",
-                )}
-              >
-                <FontAwesomeIcon
-                  icon={faChevronDown}
-                  aria-hidden="true"
-                  className="tw-h-3 tw-w-3 tw-opacity-70"
-                />
-              </span>
-            </>
+            <OverflowTrigger
+              isOpen={isOpen}
+              isActiveInOverflow={isActiveInOverflow}
+              activeLabel={activeOption?.label}
+              fallbackLabel={TAB_TOGGLE_WITH_OVERFLOW_MESSAGES.overflowFallbackLabel}
+            />
           )}
           items={overflowTabs.map((option) => ({
             id: option.key,

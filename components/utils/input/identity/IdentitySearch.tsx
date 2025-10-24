@@ -54,6 +54,7 @@ export default function IdentitySearch({
   };
 
   const randomId = getRandomObjectId();
+  const listboxId = `${randomId}-listbox`;
 
   const [searchCriteria, setSearchCriteria] = useState<string | null>(identity);
   const [debouncedValue, setDebouncedValue] = useState<string | null>(
@@ -245,6 +246,7 @@ export default function IdentitySearch({
         role="combobox"
         aria-autocomplete="list"
         aria-expanded={isOpen}
+        aria-controls={listboxId}
         aria-activedescendant={
           isOpen && highlightedOptionId ? highlightedOptionId : undefined
         }
@@ -289,6 +291,7 @@ export default function IdentitySearch({
         searchCriteria={searchCriteria}
         profiles={data ?? []}
         highlightedIndex={highlightedIndex}
+        listboxId={listboxId}
         onHighlightedOptionIdChange={setHighlightedOptionId}
         onProfileSelect={(profile) => {
           if (!profile) {

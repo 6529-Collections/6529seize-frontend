@@ -48,18 +48,15 @@ const buildScopeSummary = (
 };
 
 export function useWaveScopePermissions(
-  waveId: string | null | undefined
+  waveId: string | null | undefined = null
 ): UseWaveScopePermissionsResult {
-  const normalizedWaveId = waveId ?? null;
   const { data: wave, isLoading, isFetching } = useWaveData({
-    waveId: normalizedWaveId,
+    waveId: waveId ?? null,
   });
   const { getEligibility } = useWaveEligibility();
   const { connectedProfile } = useAuth();
 
-  const eligibility = normalizedWaveId
-    ? getEligibility(normalizedWaveId)
-    : null;
+  const eligibility = waveId ? getEligibility(waveId) : null;
 
   const scopes = useMemo(() => {
     if (!wave) {

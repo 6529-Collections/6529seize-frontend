@@ -24,10 +24,11 @@ const clearGroupIdAtPath = (
   let currentSource: Record<string, unknown> | undefined = sourceRecord;
   let currentTarget = targetRecord;
 
-  path.forEach((segment, index) => {
+  for (let index = 0; index < path.length; index += 1) {
+    const segment = path[index];
     if (index === path.length - 1) {
       currentTarget[segment] = null;
-      return;
+      break;
     }
 
     const nextSource = (currentSource?.[segment] ?? {}) as Record<
@@ -39,7 +40,7 @@ const clearGroupIdAtPath = (
     currentTarget[segment] = nextTarget;
     currentSource = nextSource;
     currentTarget = nextTarget;
-  });
+  }
 
   return clonedBody;
 };

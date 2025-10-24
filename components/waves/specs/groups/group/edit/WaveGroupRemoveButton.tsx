@@ -53,24 +53,32 @@ const WaveGroupRemoveButton = forwardRef<
     [onWaveUpdate],
   );
 
+  let triggerContent: ReactNode | null = null;
+
+  if (renderTrigger === null) {
+    triggerContent = null;
+  } else if (renderTrigger) {
+    triggerContent = renderTrigger({ open: handleOpen });
+  } else {
+    triggerContent = (
+      <button
+        type="button"
+        aria-haspopup="dialog"
+        aria-label="Remove"
+        title="Remove"
+        onClick={handleOpen}
+        className="tw-border-none tw-bg-transparent tw-p-0 tw-items-center">
+        <FontAwesomeIcon
+          icon={faCircleXmark}
+          className="tw-flex-shrink-0 tw-size-5 tw-text-red tw-transition tw-duration-300 tw-ease-out hover:tw-scale-110"
+        />
+      </button>
+    );
+  }
+
   return (
     <>
-      {renderTrigger ? (
-        renderTrigger({ open: handleOpen })
-      ) : renderTrigger === null ? null : (
-        <button
-          type="button"
-          aria-haspopup="dialog"
-          aria-label="Remove"
-          title="Remove"
-          onClick={handleOpen}
-          className="tw-border-none tw-bg-transparent tw-p-0 tw-items-center">
-          <FontAwesomeIcon
-            icon={faCircleXmark}
-            className="tw-flex-shrink-0 tw-size-5 tw-text-red tw-transition tw-duration-300 tw-ease-out hover:tw-scale-110"
-          />
-        </button>
-      )}
+      {triggerContent}
       <WaveGroupRemove
         wave={wave}
         isEditOpen={isEditOpen}

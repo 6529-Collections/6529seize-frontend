@@ -45,21 +45,29 @@ const WaveGroupEditButton = forwardRef<
     [handleOpen],
   );
 
+  let triggerContent: ReactNode | null = null;
+
+  if (renderTrigger) {
+    triggerContent = renderTrigger({ open: handleOpen });
+  } else if (renderTrigger === null) {
+    triggerContent = null;
+  } else {
+    triggerContent = (
+      <button
+        type="button"
+        aria-label="Edit group"
+        title="Edit"
+        onClick={handleOpen}
+        className="tw-border-none tw-bg-transparent tw-p-0 tw-items-center tw-text-iron-300 hover:tw-text-iron-400 tw-duration-300 tw-ease-out tw-transition-all"
+      >
+        <FontAwesomeIcon icon={faPen} className="tw-h-4 tw-w-4" />
+      </button>
+    );
+  }
+
   return (
     <>
-      {renderTrigger ? (
-        renderTrigger({ open: handleOpen })
-      ) : renderTrigger === null ? null : (
-        <button
-          type="button"
-          aria-label="Edit group"
-          title="Edit"
-          onClick={handleOpen}
-          className="tw-border-none tw-bg-transparent tw-p-0 tw-items-center tw-text-iron-300 hover:tw-text-iron-400 tw-duration-300 tw-ease-out tw-transition-all"
-        >
-          <FontAwesomeIcon icon={faPen} className="tw-h-4 tw-w-4" />
-        </button>
-      )}
+      {triggerContent}
       <WaveGroupEdit
         wave={wave}
         isEditOpen={isEditOpen}

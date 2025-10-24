@@ -3,13 +3,14 @@ import { useMutation } from "@tanstack/react-query";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import {
-  type ValidationIssue,
-  type ValidationResult,
   createGroup,
   hideGroup,
   publishGroup,
-  validateGroupPayload,
+  validateGroupPayload as validateGroupPayloadLocal,
   toErrorMessage,
+} from "@/services/groups/groupMutations";
+import type {
+  ValidationResult as GroupValidationResult,
 } from "@/services/groups/groupMutations";
 
 export interface SubmitArgs {
@@ -29,7 +30,7 @@ export type SubmitResult =
       readonly ok: false;
       readonly reason: "validation" | "auth" | "api" | "busy";
       readonly error: string;
-      readonly validation?: ValidationResult;
+      readonly validation?: GroupValidationResult;
     };
 
 export interface TestArgs {
@@ -46,7 +47,7 @@ export type TestResult =
       readonly ok: false;
       readonly reason: "validation" | "auth" | "api" | "busy";
       readonly error: string;
-      readonly validation?: ValidationResult;
+      readonly validation?: GroupValidationResult;
     };
 
 interface UseGroupMutationsArgs {
@@ -96,8 +97,8 @@ const resolveOldVersionId = ({
 };
 
 export { GROUP_INCLUDE_LIMIT, GROUP_EXCLUDE_LIMIT } from "@/services/groups/groupMutations";
-export { validateGroupPayload };
-export type { ValidationIssue, ValidationResult };
+export { validateGroupPayload } from "@/services/groups/groupMutations";
+export type { ValidationIssue, ValidationResult } from "@/services/groups/groupMutations";
 
 export const useGroupMutations = ({
   requestAuth,
@@ -221,7 +222,7 @@ export const useGroupMutations = ({
         };
       }
 
-      const validation = validateGroupPayload(payload);
+      const validation = validateGroupPayloadLocal(payload);
       if (!validation.valid) {
         return {
           ok: false,
@@ -301,7 +302,7 @@ export const useGroupMutations = ({
       const trimmedName = payload.name.trim();
       const effectiveName = trimmedName.length ? trimmedName : nameFallback;
 
-      const validation = validateGroupPayload(payload);
+      const validation = validateGroupPayloadLocal(payload);
       if (!validation.valid) {
         return {
           ok: false,
@@ -341,7 +342,7 @@ export const useGroupMutations = ({
   );
 
   return {
-    validate: validateGroupPayload,
+    validate: validateGroupPayloadLocal,
     submit,
     runTest,
     updateVisibility,

@@ -30,7 +30,7 @@ export function CompactMenu({
   closeOnSelect,
   "aria-label": ariaLabel,
   unstyledItems,
-}: CompactMenuProps) {
+}: Readonly<CompactMenuProps>) {
   return (
     <Menu as="div" className={clsx("tw-relative", className)}>
       {({ open, close }) => (
@@ -96,7 +96,7 @@ function CompactMenuContent({
   unstyledItems = false,
   isOpen,
   close,
-}: CompactMenuContentProps) {
+}: Readonly<CompactMenuContentProps>) {
   const { menuItemsRef, focusInitialMenuItem } = useCompactMenuFocus(isOpen);
 
   return (
