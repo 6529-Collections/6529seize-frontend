@@ -98,7 +98,7 @@ const PRIMARY_NAVIGATION_PAGES: SidebarPageEntry[] = [
 ];
 
 const MIN_SEARCH_LENGTH = 3;
-const NFT_SEARCH_MIN_LENGTH = 2;
+const NFT_SEARCH_MIN_LENGTH = 3;
 const HEADER_SEARCH_RESULTS_PANEL_ID = "header-search-results-panel";
 
 interface PreviewGroupItem {
@@ -852,10 +852,10 @@ export default function HeaderSearchModal({
       <div className="tailwind-scope tw-cursor-default tw-relative tw-z-1000">
         <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px]"></div>
         <div className="tw-fixed tw-inset-0 tw-z-1000 tw-overflow-y-auto">
-          <div className="tw-flex tw-min-h-full tw-items-start tw-justify-center tw-p-2 tw-text-center lg:tw-items-center sm:tw-p-0">
+          <div className="tw-flex tw-min-h-full tw-items-start tw-justify-center tw-p-4 tw-text-center lg:tw-items-center sm:tw-p-6">
             <div
               ref={modalRef}
-              className="sm:tw-max-w-3xl tw-relative tw-w-full tw-h-[520px] tw-max-h-[70vh] tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-overflow-hidden inset-safe-area tw-flex tw-flex-col tw-min-h-0">
+              className="tw-w-full tw-max-w-[min(100vw-3rem,900px)] sm:tw-max-w-3xl tw-relative tw-h-[520px] tw-max-h-[70vh] tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 tw-overflow-hidden inset-safe-area tw-flex tw-flex-col tw-min-h-0">
               <div className="tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-white/10 tw-pb-4 tw-px-4 tw-mt-4 tw-flex tw-items-center tw-gap-2">
                 {/* Back arrow mobile */}
                 <button
@@ -912,11 +912,12 @@ export default function HeaderSearchModal({
                 </button>
               </div>
               {shouldRenderCategoryToggle && (
-                <div className="tw-pt-3 tw-px-4 md:tw-hidden">
+                <div className="tw-py-3 tw-px-4 md:tw-hidden">
                   <TabToggle
                     options={tabOptions}
                     activeKey={selectedCategory}
                     onSelect={(k) => setSelectedCategory(k as CATEGORY)}
+                    fullWidth
                   />
                 </div>
               )}
@@ -1014,7 +1015,9 @@ export default function HeaderSearchModal({
                       <p className="tw-text-iron-300 tw-font-normal tw-text-sm tw-text-center">
                         Start typing to search 6529.io
                         {shouldShowCountdown &&
-                          ` (${charactersRemaining} to go)`}
+                          ` (${charactersRemaining} more character${
+                            charactersRemaining === 1 ? "" : "s"
+                          })`}
                       </p>
                     </div>
                   )}
