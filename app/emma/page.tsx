@@ -7,7 +7,7 @@ export default function DistributionPlanTool() {
   return (
     <DistributionPlanToolWrapper>
       <div className="tw-flex tw-h-full tw-min-h-screen tw-overflow-x-hidden tw-bg-neutral-900">
-        <div className="tw-flex tw-flex-wrap tw-h-full tw-w-full lg:tw-min-h-screen tw-px-8 xl:tw-px-14 tw-space-y-8 lg:tw-space-y-0">
+        <div className="tw-flex tw-flex-wrap tw-h-full tw-w-full lg:tw-min-h-screen tw-px-2 lg:tw-px-4 xl:tw-px-8 tw-space-y-8 lg:tw-space-y-0">
           <div className="lg:tw-w-1/2 xl:tw-w-[40%] 2xl:tw-w-1/2 tw-pt-8 md:tw-pt-14 lg:tw-pb-12">
             <div className="2xl:tw-max-w-xl tw-mx-auto lg:tw-pr-10 xl:tw-pr-16 2xl:tw-pr-0">
               <div className="tw-flex tw-flex-col">
