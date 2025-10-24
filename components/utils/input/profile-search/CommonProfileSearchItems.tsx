@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { CommunityMemberMinimal } from "@/entities/IProfile";
 import CommonProfileSearchItem from "./CommonProfileSearchItem";
@@ -9,6 +10,7 @@ export default function CommonProfileSearchItems({
   searchCriteria,
   onProfileSelect,
   highlightedIndex = null,
+  onHighlightedOptionIdChange,
 }: {
   readonly open: boolean;
   readonly profiles: CommunityMemberMinimal[];
@@ -16,6 +18,7 @@ export default function CommonProfileSearchItems({
   readonly searchCriteria: string | null;
   readonly onProfileSelect: (newV: CommunityMemberMinimal | null) => void;
   readonly highlightedIndex?: number | null;
+  readonly onHighlightedOptionIdChange?: (optionId: string | undefined) => void;
 }) {
   const buildOptionId = (
     profile: CommunityMemberMinimal,
@@ -41,6 +44,17 @@ export default function CommonProfileSearchItems({
       ? buildOptionId(profiles[highlightedIndex], highlightedIndex)
       : undefined;
 
+  useEffect(() => {
+    if (!onHighlightedOptionIdChange) {
+      return;
+    }
+    if (!open) {
+      onHighlightedOptionIdChange(undefined);
+      return;
+    }
+    onHighlightedOptionIdChange(highlightedOptionId);
+  }, [highlightedOptionId, onHighlightedOptionIdChange, open]);
+
   const noResultsText =
     !searchCriteria || searchCriteria.length < 3
       ? "Type at least 3 characters"
@@ -60,7 +74,6 @@ export default function CommonProfileSearchItems({
               <ul
                 className="tw-flex tw-flex-col tw-gap-y-1 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none"
                 role="listbox"
-                aria-activedescendant={highlightedOptionId}
               >
                 {profiles.length ? (
                   profiles.map((profile, index) => {

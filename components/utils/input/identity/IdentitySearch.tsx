@@ -91,6 +91,9 @@ export default function IdentitySearch({
 
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
+  const [highlightedOptionId, setHighlightedOptionId] = useState<
+    string | undefined
+  >(undefined);
   const [shouldSubmit, setShouldSubmit] = useState(false);
   const onValueChange = (
     newValue: string | null,
@@ -242,6 +245,9 @@ export default function IdentitySearch({
         role="combobox"
         aria-autocomplete="list"
         aria-expanded={isOpen}
+        aria-activedescendant={
+          isOpen && highlightedOptionId ? highlightedOptionId : undefined
+        }
         className={`${INPUT_CLASSES[size]} ${
           error
             ? "tw-ring-error focus:tw-border-error focus:tw-ring-error tw-caret-error"
@@ -283,6 +289,7 @@ export default function IdentitySearch({
         searchCriteria={searchCriteria}
         profiles={data ?? []}
         highlightedIndex={highlightedIndex}
+        onHighlightedOptionIdChange={setHighlightedOptionId}
         onProfileSelect={(profile) => {
           if (!profile) {
             return;

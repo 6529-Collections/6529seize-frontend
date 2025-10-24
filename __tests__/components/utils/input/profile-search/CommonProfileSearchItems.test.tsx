@@ -32,7 +32,8 @@ describe('CommonProfileSearchItems', () => {
     expect(screen.getByText('No results')).toBeInTheDocument();
   });
 
-  it('exposes active descendant for highlighted option', () => {
+  it('notifies highlighted option id when highlighted option changes', () => {
+    const onHighlightedOptionIdChange = jest.fn();
     render(
       <CommonProfileSearchItems
         open
@@ -40,9 +41,10 @@ describe('CommonProfileSearchItems', () => {
         selected={null}
         searchCriteria="abc"
         highlightedIndex={1}
+        onHighlightedOptionIdChange={onHighlightedOptionIdChange}
         onProfileSelect={jest.fn()}
       />
     );
-    expect(screen.getByRole('listbox')).toHaveAttribute('aria-activedescendant', 'profile-search-item-b');
+    expect(onHighlightedOptionIdChange).toHaveBeenCalledWith('profile-search-item-b-1');
   });
 });

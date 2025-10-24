@@ -5,6 +5,7 @@ import { CompactMenu } from "./CompactMenu";
 import clsx from "clsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { TAB_TOGGLE_WITH_OVERFLOW_MESSAGES } from "@/i18n/messages";
 
 interface TabOption {
   readonly key: string;
@@ -23,33 +24,99 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
   options,
   activeKey,
   onSelect,
-  maxVisibleTabs = 3, // Default to showing 3 tabs before overflow
+  maxVisibleTabs = 3,
   fullWidth = false,
 }) => {
-  // Determine which tabs to show directly and which to put in overflow
   const visibleTabs = options.slice(0, maxVisibleTabs);
   const overflowTabs =
     options.length > maxVisibleTabs ? options.slice(maxVisibleTabs) : [];
 
-  // Check if active tab is in overflow
   const isActiveInOverflow = overflowTabs.some((tab) => tab.key === activeKey);
 
-  // Handle tab selection
+  const tabRefs = React.useRef<Array<HTMLButtonElement | null>>([]);
+  const activeVisibleIndex = visibleTabs.findIndex(
+    (tab) => tab.key === activeKey,
+  );
+  const [focusedTabIndex, setFocusedTabIndex] = React.useState(() =>
+    activeVisibleIndex >= 0 ? activeVisibleIndex : 0,
+  );
+
   const handleSelect = (key: string) => {
     onSelect(key);
   };
 
+  React.useEffect(() => {
+    if (activeVisibleIndex >= 0) {
+      setFocusedTabIndex(activeVisibleIndex);
+      return;
+    }
+
+    setFocusedTabIndex((currentIndex) => {
+      if (visibleTabs.length === 0) {
+        return currentIndex;
+      }
+
+      const lastIndex = visibleTabs.length - 1;
+      return currentIndex > lastIndex ? lastIndex : currentIndex;
+    });
+  }, [activeVisibleIndex, visibleTabs.length]);
+
+  const handleVisibleTabKeyDown = React.useCallback(
+    (
+      event: React.KeyboardEvent<HTMLButtonElement>,
+      currentIndex: number,
+    ) => {
+      if (visibleTabs.length <= 1) {
+        return;
+      }
+
+      const { key } = event;
+      if (!["ArrowRight", "ArrowLeft", "Home", "End"].includes(key)) {
+        return;
+      }
+
+      event.preventDefault();
+      const lastIndex = visibleTabs.length - 1;
+      let nextIndex = currentIndex;
+
+      if (key === "ArrowRight") {
+        nextIndex = currentIndex === lastIndex ? 0 : currentIndex + 1;
+      } else if (key === "ArrowLeft") {
+        nextIndex = currentIndex === 0 ? lastIndex : currentIndex - 1;
+      } else if (key === "Home") {
+        nextIndex = 0;
+      } else if (key === "End") {
+        nextIndex = lastIndex;
+      }
+
+      setFocusedTabIndex(nextIndex);
+      tabRefs.current[nextIndex]?.focus();
+    },
+    [visibleTabs.length],
+  );
+
+  const activeOption = options.find((option) => option.key === activeKey);
+
   return (
     <div
       className={clsx("tw-flex tw-gap-x-1", fullWidth ? "tw-w-full" : "tw-w-auto")}>
-      <div className={clsx("tw-flex tw-gap-x-1", fullWidth && "tw-flex-1")}>
-        {/* Show visible tabs */}
-        {visibleTabs.map((option) => (
+      <div
+        role="tablist"
+        aria-orientation="horizontal"
+        className={clsx("tw-flex tw-gap-x-1", fullWidth && "tw-flex-1")}
+      >
+        {visibleTabs.map((option, index) => (
           <button
             key={option.key}
             type="button"
-            aria-pressed={activeKey === option.key}
+            role="tab"
+            aria-selected={activeKey === option.key}
+            tabIndex={index === focusedTabIndex ? 0 : -1}
             onClick={() => handleSelect(option.key)}
+            onKeyDown={(event) => handleVisibleTabKeyDown(event, index)}
+            ref={(element) => {
+              tabRefs.current[index] = element;
+            }}
             className={`tw-flex-1 tw-py-3 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-border-b-2 tw-border-t-0 tw-border-x-0 tw-border-solid tw-bg-transparent tw-transition-all tw-duration-200 ${
               fullWidth ? "tw-text-center tw-justify-center tw-flex" : ""
             } ${
@@ -62,7 +129,6 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
         ))}
       </div>
 
-      {/* Only show overflow dropdown if there are overflow tabs */}
       {overflowTabs.length > 0 && (
         <CompactMenu
           className="tw-relative"
@@ -78,8 +144,9 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
           trigger={({ isOpen }) => (
             <>
               {isActiveInOverflow
-                ? options.find((opt) => opt.key === activeKey)?.label
-                : "More"}
+                ? activeOption?.label ??
+                  TAB_TOGGLE_WITH_OVERFLOW_MESSAGES.overflowFallbackLabel
+                : TAB_TOGGLE_WITH_OVERFLOW_MESSAGES.overflowFallbackLabel}
               <span
                 className={clsx(
                   "tw-ml-0.5 tw-inline-flex tw-transition-transform tw-duration-200",
@@ -99,6 +166,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
             label: option.label,
             onSelect: () => handleSelect(option.key),
             active: activeKey === option.key,
+            ariaSelected: activeKey === option.key,
           }))}
           itemClassName="tw-block tw-w-full tw-border-0 tw-bg-transparent tw-px-4 tw-py-2 tw-text-left tw-text-sm tw-font-medium tw-transition-colors"
           inactiveItemClassName="tw-text-iron-300 hover:tw-bg-iron-800 hover:tw-text-iron-200"
@@ -108,6 +176,8 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
           menuClassName="tw-z-50 tw-mt-2 tw-rounded-md tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 tw-ring-primary-400/20 focus:tw-outline-none"
           itemsWrapperClassName="tw-py-1"
           anchor="bottom end"
+          activeItemId={isActiveInOverflow ? activeKey : undefined}
+          closeOnSelect
           aria-label="More tabs"
         />
       )}

@@ -9,10 +9,10 @@ import {
 } from "react";
 import { faCircleXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { WaveGroupType } from "../WaveGroup.types";
 import WaveGroupRemove from "./WaveGroupRemove";
-import { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
+import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
 
 export type WaveGroupRemoveButtonHandle = {
   open: () => void;
@@ -22,7 +22,7 @@ interface WaveGroupRemoveButtonProps {
   readonly wave: ApiWave;
   readonly type: WaveGroupType;
   readonly onWaveUpdate: (body: ApiUpdateWaveRequest) => Promise<void>;
-  readonly renderTrigger?: ((options: { open: () => void }) => ReactNode) | null;
+  readonly renderTrigger?: ((options: { readonly open: () => void }) => ReactNode) | null;
 }
 
 const WaveGroupRemoveButton = forwardRef<
@@ -69,8 +69,8 @@ const WaveGroupRemoveButton = forwardRef<
         type={type}
         setIsEditOpen={setIsEditOpen}
         onWaveUpdate={async (body) => {
-          setIsEditOpen(false);
           await onWaveUpdate(body);
+          setIsEditOpen(false);
         }}
       />
     </>

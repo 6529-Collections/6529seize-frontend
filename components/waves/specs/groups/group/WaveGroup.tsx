@@ -3,7 +3,7 @@
 import type { ApiWaveScope } from "@/generated/models/ApiWaveScope";
 import WaveGroupTitle from "./WaveGroupTitle";
 import WaveGroupEditButtons from "./edit/WaveGroupEditButtons";
-import { useContext, useMemo } from "react";
+import { useContext } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
@@ -22,10 +22,9 @@ export default function WaveGroup({
   readonly wave: ApiWave;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const showEdit = useMemo(() => {
-    const canEdit = canEditWave({ connectedProfile, activeProfileProxy, wave });
-    return canEdit && !scope.group?.is_direct_message;
-  }, [connectedProfile, activeProfileProxy, wave, scope]);
+  const showEdit =
+    canEditWave({ connectedProfile, activeProfileProxy, wave }) &&
+    !scope.group?.is_direct_message;
 
   return (
     <div className="tw-relative tw-group tw-text-sm tw-flex tw-items-center tw-justify-between tw-w-full tw-h-6">

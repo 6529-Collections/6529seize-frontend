@@ -17,6 +17,7 @@ This table is the single source of truth for active and historical tickets. Keep
 | TKT-0011 | Restore identity search keyboard navigation | In-Progress | P1 | openai-assistant | — | 2025-10-24 |
 | TKT-0012 | Refactor wave group edit buttons for modular clarity | In-Progress | P1 | openai-assistant | [#1544](https://github.com/6529-Collections/6529seize-frontend/pull/1544) | 2025-10-23 |
 | TKT-0013 | Respect unstyled flag in compact menu button | In-Progress | P1 | openai-assistant | — | 2025-10-23 |
+| TKT-0014 | Replace wave publish wait with backend confirmation | Backlog | P1 | openai-assistant | — | 2025-10-24 |
 
 ## Usage Guidelines
 

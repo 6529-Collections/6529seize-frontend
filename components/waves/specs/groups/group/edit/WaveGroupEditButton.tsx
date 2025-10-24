@@ -10,9 +10,9 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen } from "@fortawesome/free-solid-svg-icons";
 import WaveGroupEdit from "./WaveGroupEdit";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { WaveGroupType } from "../WaveGroup.types";
-import { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
+import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
 
 export type WaveGroupEditButtonHandle = {
   open: () => void;
@@ -66,8 +66,8 @@ const WaveGroupEditButton = forwardRef<
         type={type}
         setIsEditOpen={setIsEditOpen}
         onWaveUpdate={async (body) => {
-          setIsEditOpen(false);
           await onWaveUpdate(body);
+          setIsEditOpen(false);
         }}
       />
     </>

@@ -8,46 +8,12 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { CommunityMemberMinimal } from "@/entities/IProfile";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { dedupeWallets, walletListsMatch } from "@/helpers/WalletHelpers";
 import { AuthContext } from "@/components/auth/Auth";
 import GroupCreateIdentitiesSelect from "../identities/select/GroupCreateIdentitiesSelect";
 import CreateGroupWalletsEmma from "./CreateGroupWalletsEmma";
 import CreateGroupWalletsUpload from "./CreateGroupWalletsUpload";
 import { useContext, useEffect, useRef, useState } from "react";
-
-const normaliseWalletList = (list: readonly string[]): string[] =>
-  list.map((wallet) => wallet.trim().toLowerCase()).sort();
-
-const walletListsMatch = (
-  lhs: readonly string[] | null,
-  rhs: readonly string[] | null
-): boolean => {
-  if (lhs === rhs) return true;
-  if (!lhs || !rhs) return lhs === rhs;
-  if (lhs.length !== rhs.length) return false;
-  const a = lhs.map((w) => w.trim().toLowerCase());
-  const b = rhs.map((w) => w.trim().toLowerCase());
-  const seen = new Map<string, number>();
-  for (const w of a) seen.set(w, (seen.get(w) ?? 0) + 1);
-  for (const w of b) {
-    const n = (seen.get(w) ?? 0) - 1;
-    if (n < 0) return false;
-    if (n === 0) seen.delete(w);
-    else seen.set(w, n);
-  }
-  return seen.size === 0;
-};
-
-const dedupeWallets = (wallets: readonly string[]): string[] => {
-  const seen = new Set<string>();
-  return wallets.filter((wallet) => {
-    const normalised = wallet.trim().toLowerCase();
-    if (seen.has(normalised)) {
-      return false;
-    }
-    seen.add(normalised);
-    return true;
-  });
-};
 
 export enum GroupCreateWalletsType {
   INCLUDE = "INCLUDE",
@@ -175,6 +141,7 @@ export default function GroupCreateWallets({
     iAmIncluded,
     primaryWallet,
     type,
+    setWallets,
   ]);
 
   const removeWallets = () => {

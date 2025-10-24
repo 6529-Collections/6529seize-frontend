@@ -6,13 +6,13 @@ import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimation
 import { WaveGroupType } from "../WaveGroup.types";
 import WaveGroupRemoveModal from "./WaveGroupRemoveModal";
 
-const groupTypePaths: Record<WaveGroupType, readonly string[]> = {
+const groupTypePaths = {
   [WaveGroupType.VIEW]: ["visibility", "scope", "group_id"],
   [WaveGroupType.DROP]: ["participation", "scope", "group_id"],
   [WaveGroupType.VOTE]: ["voting", "scope", "group_id"],
   [WaveGroupType.CHAT]: ["chat", "scope", "group_id"],
   [WaveGroupType.ADMIN]: ["wave", "admin_group", "group_id"],
-};
+} as const satisfies Record<WaveGroupType, readonly string[]>;
 
 const clearGroupIdAtPath = (
   body: ApiUpdateWaveRequest,
