@@ -133,7 +133,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
               style={contentContainerStyle}
             >
               {shouldShowLeftSidebar && (
-                <WebBrainLeftSidebar isCondensed={rightVariant === "inline"} />
+                <WebBrainLeftSidebar isCollapsed={rightVariant === "inline"} />
               )}
               {shouldShowMainContent && (
                 <div className="tw-flex-grow tw-flex tw-flex-col tw-h-full tw-min-w-0 tw-border-solid tw-border-r tw-border-iron-800 tw-border-y-0 tw-border-l-0">

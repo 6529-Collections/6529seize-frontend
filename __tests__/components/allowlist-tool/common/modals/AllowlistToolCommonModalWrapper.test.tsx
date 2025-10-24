@@ -103,7 +103,7 @@ describe('AllowlistToolCommonModalWrapper', () => {
         <div>content</div>
       </AllowlistToolCommonModalWrapper>
     );
-    const container = screen.getByRole('dialog').querySelector('div[class*="sm:tw-max-w-2xl"]') as HTMLElement | null;
-    expect(container).not.toBeNull();
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveClass('sm:tw-max-w-2xl');
   });
 });
