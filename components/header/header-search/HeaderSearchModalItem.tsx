@@ -7,7 +7,7 @@ import {
   formatNumberWithCommas,
   getProfileTargetRoute,
 } from "@/helpers/Helpers";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ComponentType } from "react";
 import HeaderSearchModalItemHighlight from "./HeaderSearchModalItemHighlight";
 import UserCICAndLevel from "@/components/user/utils/UserCICAndLevel";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -29,6 +29,7 @@ import {
   getWaveHomeRoute,
   getWaveRoute,
 } from "../../../helpers/navigation.helpers";
+import { DocumentTextIcon } from "@heroicons/react/24/outline";
 
 export interface NFTSearchResult {
   id: number;
@@ -39,10 +40,19 @@ export interface NFTSearchResult {
   image_url: string;
 }
 
+export interface PageSearchResult {
+  type: "PAGE";
+  title: string;
+  href: string;
+  breadcrumbs: string[];
+  icon?: ComponentType<{ className?: string }>;
+}
+
 export type HeaderSearchModalItemType =
   | CommunityMemberMinimal
   | NFTSearchResult
-  | ApiWave;
+  | ApiWave
+  | PageSearchResult;
 
 export default function HeaderSearchModalItem({
   content,
@@ -68,12 +78,14 @@ export default function HeaderSearchModalItem({
     window.matchMedia &&
     window.matchMedia("(hover: hover)").matches;
 
+  const isPage = () => (content as PageSearchResult).type === "PAGE";
   const isProfile = () => content.hasOwnProperty("handle");
   const isNft = () => content.hasOwnProperty("contract");
   const getWave = () => content as ApiWave;
 
   const getProfile = () => content as CommunityMemberMinimal;
   const getNft = () => content as NFTSearchResult;
+  const getPage = () => content as PageSearchResult;
 
   const getNftCollectionMap = () => {
     return {
@@ -104,6 +116,14 @@ export default function HeaderSearchModalItem({
     } else if (isNft()) {
       const nft = getNft();
       return <HeaderSearchModalItemMedia nft={nft} />;
+    } else if (isPage()) {
+      const page = getPage();
+      const Icon = page.icon ?? DocumentTextIcon;
+      return (
+        <div className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900">
+          <Icon className="tw-h-5 tw-w-5 tw-text-iron-200" />
+        </div>
+      );
     } else {
       const wave = getWave();
       return (
@@ -134,6 +154,8 @@ export default function HeaderSearchModalItem({
       const nft = getNft();
       const collectionMap = getNftCollectionMap();
       return `${collectionMap[nft.contract].path}/${nft.id}`;
+    } else if (isPage()) {
+      return getPage().href;
     } else {
       const wave = getWave();
       const currentWaveId = searchParams?.get("wave") ?? undefined;
@@ -160,6 +182,8 @@ export default function HeaderSearchModalItem({
       return getProfile().handle ?? "-";
     } else if (isNft()) {
       return getNft().name;
+    } else if (isPage()) {
+      return getPage().title;
     } else {
       return getWave().name;
     }
@@ -172,6 +196,12 @@ export default function HeaderSearchModalItem({
       const nft = getNft();
       const collectionMap = getNftCollectionMap();
       return `${collectionMap[nft.contract].title} #${nft.id}`;
+    } else if (isPage()) {
+      const page = getPage();
+      if (page.breadcrumbs.length > 0) {
+        return page.breadcrumbs.join(" • ");
+      }
+      return page.href;
     } else {
       const wave = getWave();
       return `Wave #${wave.serial_no}`;

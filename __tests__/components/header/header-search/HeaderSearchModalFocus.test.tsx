@@ -19,6 +19,10 @@ const useKeyMock = useKey as jest.MockedFunction<typeof useKey>;
 const useClickAwayMock = useClickAway as jest.MockedFunction<typeof useClickAway>;
 const useKeyPressEventMock =
   useKeyPressEvent as jest.MockedFunction<typeof useKeyPressEvent>;
+const useAppWalletsMock = jest.fn();
+const useCookieConsentMock = jest.fn();
+const useSidebarSectionsMock = jest.fn();
+const useCapacitorMock = jest.fn();
 
 let escapeHandler: (() => void) | null = null;
 
@@ -54,10 +58,38 @@ jest.mock("@/components/utils/animation/CommonAnimationOpacity", () => ({
 }));
 
 jest.mock("@/hooks/useDeviceInfo");
+jest.mock("@/components/app-wallets/AppWalletsContext", () => ({
+  useAppWallets: () => useAppWalletsMock(),
+}));
+jest.mock("@/components/cookies/CookieConsentContext", () => ({
+  useCookieConsent: () => useCookieConsentMock(),
+}));
+jest.mock("@/hooks/useCapacitor", () => ({
+  __esModule: true,
+  default: () => useCapacitorMock(),
+}));
+jest.mock("@/hooks/useSidebarSections", () => {
+  const actual = jest.requireActual("@/hooks/useSidebarSections");
+  return {
+    __esModule: true,
+    useSidebarSections: (...args: any[]) => useSidebarSectionsMock(...args),
+    mapSidebarSectionsToPages: actual.mapSidebarSectionsToPages,
+  };
+});
 
 const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
   typeof useDeviceInfo
 >;
+
+const defaultSidebarSections = [
+  {
+    key: "tools",
+    name: "Tools",
+    icon: () => null,
+    items: [{ name: "Delegation Center", href: "/delegation/delegation-center" }],
+    subsections: [],
+  },
+];
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -99,8 +131,12 @@ beforeEach(() => {
     error: null,
     refetch: jest.fn(),
   });
-  useLocalPreferenceMock.mockReturnValue(["PROFILES", jest.fn()]);
+  useLocalPreferenceMock.mockReturnValue(["ALL", jest.fn()]);
   useDeviceInfoMock.mockReturnValue({ isApp: false } as any);
+  useAppWalletsMock.mockReturnValue({ appWalletsSupported: true });
+  useCookieConsentMock.mockReturnValue({ country: "US" });
+  useCapacitorMock.mockReturnValue({ isIos: false });
+  useSidebarSectionsMock.mockReturnValue(defaultSidebarSections);
 });
 
 describe("HeaderSearchModal focus management", () => {

@@ -152,3 +152,34 @@ it("renders wave item and uses query to build path", () => {
   expect(link.textContent).toContain("Wave #2");
   expect(screen.getByTestId("media").textContent).toContain("pic.png");
 });
+
+it("renders page item and shows breadcrumbs", () => {
+  useHoverDirty.mockReturnValue(false);
+  useRouter.mockReturnValue({ query: {} });
+  const PageIcon = ({ className }: { className?: string }) => (
+    <div data-testid="page-icon" className={className} />
+  );
+  const page: any = {
+    type: "PAGE",
+    title: "Delegation FAQs",
+    href: "/delegation/delegation-faq",
+    breadcrumbs: ["Tools", "NFT Delegation"],
+    icon: PageIcon,
+  };
+  const onClose = jest.fn();
+  const onHover = jest.fn();
+  render(
+    <HeaderSearchModalItem
+      content={page as any}
+      searchValue="delegation"
+      isSelected={false}
+      onHover={onHover}
+      onClose={onClose}
+    />
+  );
+  const link = screen.getByTestId("link");
+  expect(link).toHaveAttribute("href", "/delegation/delegation-faq");
+  expect(link.textContent).toContain("Delegation FAQs");
+  expect(link.textContent).toContain("Tools • NFT Delegation");
+  expect(screen.getByTestId("page-icon")).toBeInTheDocument();
+});
