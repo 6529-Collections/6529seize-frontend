@@ -30,7 +30,7 @@ export default function AllowlistToolCommonModalWrapper({
   modalSize = AllowlistToolModalSize.SMALL,
   showTitle = true,
 }: AllowlistToolCommonModalWrapperProps) {
-  const modalRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDialogElement>(null);
   useClickAway(modalRef, () => onClose());
   useKeyPressEvent("Escape", () => {
     if (showModal) onClose();
@@ -69,13 +69,12 @@ export default function AllowlistToolCommonModalWrapper({
           <div className="tw-relative tw-flex tw-h-full tw-w-full">
             <div className="tw-absolute tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px]" />
             <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-items-start tw-justify-center tw-overflow-y-auto tw-px-4 tw-pt-10 tw-pb-20 tw-text-center sm:tw-px-0">
-              <div
+              <dialog
                 ref={modalRef}
-                tabIndex={-1}
-                role="dialog"
+                open
                 aria-modal="true"
                 aria-labelledby={showTitle ? titleId : undefined}
-                className={`tw-relative tw-w-full tw-transform tw-rounded-lg tw-bg-neutral-900 tw-text-left tw-shadow-xl tw-transition-all sm:tw-my-8 sm:tw-w-full ${modalSizeClass}`}>
+                className={`tw-relative tw-m-0 tw-w-full tw-max-w-full tw-transform tw-rounded-lg tw-border-0 tw-bg-neutral-900 tw-text-left tw-shadow-xl tw-transition-all tw-p-0 sm:tw-my-8 sm:tw-w-full ${modalSizeClass}`}>
                 {showTitle && (
                   <div className="tw-absolute tw-right-4 tw-top-6 tw-flex tw-justify-between tw-items-center">
                     <p
@@ -95,8 +94,8 @@ export default function AllowlistToolCommonModalWrapper({
                     </button>
                   </div>
                 )}
-                {children}
-              </div>
+                <div>{children}</div>
+              </dialog>
             </div>
           </div>
         </AllowlistToolAnimationOpacity>
