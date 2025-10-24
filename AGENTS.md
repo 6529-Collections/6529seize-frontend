@@ -25,7 +25,7 @@ npm run type-check
 ```
 
 ## Programmatic Checks
-d
+
 Before completing any coding task, ensure the following commands succeed. For a
 quicker check when your changes are small, you may run
 `npm run test:cov:changed` to execute tests only for files changed since `main`:
