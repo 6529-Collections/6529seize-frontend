@@ -1,6 +1,5 @@
 import { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
 import { ApiWave } from "@/generated/models/ApiWave";
-import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { convertWaveToUpdateWave } from "@/helpers/waves/waves.helpers";
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
@@ -19,9 +18,11 @@ const clearGroupIdAtPath = (
   body: ApiUpdateWaveRequest,
   path: readonly string[],
 ): ApiUpdateWaveRequest => {
-  const clonedBody = { ...body } as Record<string, unknown>;
-  let currentSource = body as Record<string, unknown> | undefined;
-  let currentTarget = clonedBody;
+  const clonedBody: ApiUpdateWaveRequest = { ...body };
+  const sourceRecord = body as unknown as Record<string, unknown>;
+  const targetRecord = clonedBody as unknown as Record<string, unknown>;
+  let currentSource: Record<string, unknown> | undefined = sourceRecord;
+  let currentTarget = targetRecord;
 
   path.forEach((segment, index) => {
     if (index === path.length - 1) {
@@ -40,7 +41,7 @@ const clearGroupIdAtPath = (
     currentTarget = nextTarget;
   });
 
-  return clonedBody as ApiUpdateWaveRequest;
+  return clonedBody;
 };
 
 export default function WaveGroupRemove({
@@ -59,11 +60,6 @@ export default function WaveGroupRemove({
   const getBody = (): ApiUpdateWaveRequest => {
     const originalBody = convertWaveToUpdateWave(wave);
     const path = groupTypePaths[type];
-
-    if (!path) {
-      assertUnreachable(type);
-      return originalBody;
-    }
 
     return clearGroupIdAtPath(originalBody, path);
   };
