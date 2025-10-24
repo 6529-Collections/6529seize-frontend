@@ -140,8 +140,11 @@ describe("Home component", () => {
     );
 
     // Check for NextGen discover section
-    expect(screen.getByText("Discover")).toBeInTheDocument();
-    expect(screen.getByText(`NextGen - ${mockCollection.name}`)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        name: `Discover NextGen - ${mockCollection.name}`,
+      })
+    ).toBeInTheDocument();
     expect(screen.getByText("View Collection")).toBeInTheDocument();
     expect(screen.getByTestId("nextgen-slideshow")).toBeInTheDocument();
   });
@@ -332,4 +335,3 @@ describe("Home component error scenarios", () => {
     expect(cols.length).toBeGreaterThan(0);
   });
 });
-

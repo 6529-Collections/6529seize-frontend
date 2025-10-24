@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import MyStreamWave from "../brain/my-stream/MyStreamWave";
 import BrainContent from "../brain/content/BrainContent";
-import CreateWaveModal from "./create-wave/CreateWaveModal";
 import { useAuth } from "../auth/Auth";
 import useDeviceInfo from "../../hooks/useDeviceInfo";
 import PrimaryButton from "../utils/button/PrimaryButton";
@@ -15,13 +14,14 @@ const WavesView: React.FC = () => {
   const searchParams = useSearchParams();
   const { connectedProfile } = useAuth();
   const { isApp } = useDeviceInfo();
-  const { isWaveModalOpen, openWave, close } = useCreateModalState();
+  const { openWave } = useCreateModalState();
 
   const serialisedWaveId = searchParams?.get('wave') || null;
 
   const showPlaceholder = !serialisedWaveId && !isApp;
 
   let content: React.ReactNode = null;
+
 
   if (serialisedWaveId) {
     content = (
@@ -55,22 +55,12 @@ const WavesView: React.FC = () => {
   // internally via MyStreamWaveChat. We pass null to BrainContent because
   // the wave's internal state controls the reply/quote input box.
   return (
-    <>
-      <BrainContent
-        activeDrop={null}
-        onCancelReplyQuote={() => {}}>
-        {content}
-      </BrainContent>
+    <BrainContent
+      activeDrop={null}
+      onCancelReplyQuote={() => { }}>
+      {content}
+    </BrainContent>
 
-      {/* Create Wave Modal */}
-      {connectedProfile && (
-        <CreateWaveModal
-          isOpen={isWaveModalOpen}
-          onClose={close}
-          profile={connectedProfile}
-        />
-      )}
-    </>
   );
 };
 

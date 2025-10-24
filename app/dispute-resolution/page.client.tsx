@@ -15,7 +15,7 @@ export default function DisputeResolutionPage() {
         <Row className="pt-4 pb-4">
           <Col>
             <h1>
-              <span className="font-lightest">Dispute</span> Resolution
+              Dispute Resolution
             </h1>
           </Col>
         </Row>

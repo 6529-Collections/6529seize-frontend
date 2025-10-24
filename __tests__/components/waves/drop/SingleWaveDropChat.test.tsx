@@ -6,7 +6,7 @@ jest.mock('@/hooks/useCapacitor', () => () => false);
 jest.mock('@/components/brain/my-stream/layout/LayoutContext', () => ({ useLayout: () => ({ spaces: { measurementsComplete: true, headerSpace: 10 } }) }));
 
 let capturedProps: any;
-jest.mock('@/components/waves/drops/WaveDropsAll', () => ({ __esModule: true, default: (props: any) => { capturedProps = props; return <div data-testid="drops-all" />; } }));
+jest.mock('@/components/waves/drops/wave-drops-all', () => ({ __esModule: true, default: (props: any) => { capturedProps = props; return <div data-testid="drops-all" />; } }));
 
 jest.mock('@/components/waves/CreateDropWaveWrapper', () => ({ CreateDropWaveWrapper: ({ children }: any) => <div>{children}</div>, CreateDropWaveWrapperContext: { SINGLE_DROP: 'SINGLE_DROP' } }));
 

@@ -9,7 +9,7 @@ export default function AboutMemes() {
       <Row>
         <Col>
           <h1>
-            <span className="font-lightest">Memes</span> Are The Most Important
+            Memes Are The Most Important
             Thing In The World
           </h1>
         </Col>

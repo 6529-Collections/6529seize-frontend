@@ -7,7 +7,7 @@ export default function AboutMinting() {
       <Row>
         <Col>
           <h1>
-            <span className="font-lightest">Minting</span> Meme Cards
+            Minting Meme Cards
           </h1>
         </Col>
       </Row>

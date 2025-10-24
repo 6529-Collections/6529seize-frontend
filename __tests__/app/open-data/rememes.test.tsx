@@ -31,7 +31,9 @@ jest.mock("@/components/providers/metadata", () => ({
 describe("Open Data rememes page", () => {
   it("renders metrics component and sets title", () => {
     render(<RememesDownloads />);
-    expect(screen.getByText("Rememes")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Rememes Downloads" })
+    ).toBeInTheDocument();
   });
 
   it("exposes metadata", async () => {

@@ -19,7 +19,6 @@ describe('ActivityHeader', () => {
     render(<ActivityHeader showViewAll={false} fetching={false} />);
     
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
-    expect(screen.getByText('NFT')).toBeInTheDocument();
     expect(screen.getByText(/Activity/)).toBeInTheDocument();
   });
 
@@ -78,8 +77,7 @@ describe('ActivityHeader', () => {
     it('handles showViewAll=false and fetching=false (minimal state)', () => {
       render(<ActivityHeader showViewAll={false} fetching={false} />);
       
-      expect(screen.getByText('NFT')).toBeInTheDocument();
-      expect(screen.getByText(/Activity/)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'NFT Activity' })).toBeInTheDocument();
       expect(screen.queryByRole('link')).not.toBeInTheDocument();
       expect(screen.queryByTestId('dot-loader')).not.toBeInTheDocument();
     });
@@ -87,8 +85,7 @@ describe('ActivityHeader', () => {
     it('handles showViewAll=false and fetching=true (loading state)', () => {
       render(<ActivityHeader showViewAll={false} fetching={true} />);
       
-      expect(screen.getByText('NFT')).toBeInTheDocument();
-      expect(screen.getByText(/Activity/)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'NFT Activity' })).toBeInTheDocument();
       expect(screen.queryByRole('link')).not.toBeInTheDocument();
       expect(screen.getByTestId('dot-loader')).toBeInTheDocument();
     });
@@ -96,8 +93,7 @@ describe('ActivityHeader', () => {
     it('handles showViewAll=true and fetching=false (view all state)', () => {
       render(<ActivityHeader showViewAll={true} fetching={false} />);
       
-      expect(screen.getByText('NFT')).toBeInTheDocument();
-      expect(screen.getByText(/Activity/)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'NFT Activity' })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'View All' })).toBeInTheDocument();
       expect(screen.queryByTestId('dot-loader')).not.toBeInTheDocument();
     });
@@ -105,8 +101,7 @@ describe('ActivityHeader', () => {
     it('handles showViewAll=true and fetching=true (view all takes precedence)', () => {
       render(<ActivityHeader showViewAll={true} fetching={true} />);
       
-      expect(screen.getByText('NFT')).toBeInTheDocument();
-      expect(screen.getByText(/Activity/)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'NFT Activity' })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'View All' })).toBeInTheDocument();
       expect(screen.queryByTestId('dot-loader')).not.toBeInTheDocument();
     });
@@ -139,12 +134,11 @@ describe('ActivityHeader', () => {
       expect(spanElement).toHaveClass('gap-3');
     });
 
-    it('applies font-lightest class to NFT text', () => {
-      const { container } = render(<ActivityHeader showViewAll={false} fetching={false} />);
-      
-      const nftSpan = container.querySelector('span.font-lightest');
-      expect(nftSpan).toBeInTheDocument();
-      expect(nftSpan).toHaveTextContent('NFT');
+    it('displays NFT Activity heading text', () => {
+      render(<ActivityHeader showViewAll={false} fetching={false} />);
+      expect(
+        screen.getByRole('heading', { name: 'NFT Activity' })
+      ).toBeInTheDocument();
     });
   });
 });

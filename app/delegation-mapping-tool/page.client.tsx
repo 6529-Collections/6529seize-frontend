@@ -36,7 +36,7 @@ export default function DelegationMappingToolPage() {
                   md={{ span: 10, offset: 1 }}
                   lg={{ span: 8, offset: 2 }}>
                   <h1 className="text-center">
-                    <span className="font-lightest">Delegation</span> Mapping
+                    Delegation Mapping
                     Tool
                   </h1>
                 </Col>

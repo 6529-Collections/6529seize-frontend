@@ -179,7 +179,7 @@ export default function LabCollection({
               <Row>
                 <Col>
                   <h1>
-                    <span className="font-lightest">Meme</span> Lab Collections
+                    Meme Lab Collections
                   </h1>
                 </Col>
               </Row>

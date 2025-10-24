@@ -3,7 +3,7 @@
 import React, { useMemo, useRef, useState } from "react";
 import { ApiDrop, ApiWave } from "@/generated/models/ObjectSerializer";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import WaveDropsAll from "../drops/WaveDropsAll";
+import WaveDropsAll from "../drops/wave-drops-all";
 import {
   CreateDropWaveWrapper,
   CreateDropWaveWrapperContext,

@@ -247,6 +247,10 @@ export const useMyStream = () => {
   return context;
 };
 
+export const useMyStreamOptional = (): MyStreamContextType | null => {
+  return useContext(MyStreamContext);
+};
+
 // Create the selector hook for wave messages
 export function useMyStreamWaveMessages(
   waveId: string | null | undefined

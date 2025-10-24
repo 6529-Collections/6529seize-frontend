@@ -462,7 +462,7 @@ export default function TheMemesComponent() {
                 <Col className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                   <span className="d-flex align-items-center gap-3 flex-wrap">
                     <h1 className="no-wrap mb-0">
-                      <span className="font-lightest">The</span> Memes
+                      The Memes
                     </h1>
                     <LFGButton contract={MEMES_CONTRACT} />
                   </span>

@@ -45,7 +45,7 @@ export default function MemeCalendarOverview({
     <div className="tw-flex tw-flex-col tw-gap-3">
       <div className="tw-h-full tw-flex tw-items-center tw-gap-3">
         <h1>
-          <span className="font-lightest">The Memes</span> Minting Calendar
+          The Memes Minting Calendar
         </h1>
         {showViewAll && (
           <Link href={`/meme-calendar`} className="tw-no-underline">

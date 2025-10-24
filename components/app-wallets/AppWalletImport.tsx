@@ -49,7 +49,7 @@ export default function AppWalletImport() {
         <Row className="pt-4">
           <Col>
             <h1>
-              <span className="font-lightest">Import</span> App Wallet
+              Import App Wallet
             </h1>
           </Col>
         </Row>

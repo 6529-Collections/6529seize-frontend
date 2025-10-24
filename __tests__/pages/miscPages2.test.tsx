@@ -193,6 +193,8 @@ describe("misc pages render", () => {
         </AppWalletsProvider>
       </TestProvider>
     );
-    expect(screen.getByText(/App Wallets/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "App Wallets" })
+    ).toBeInTheDocument();
   });
 });

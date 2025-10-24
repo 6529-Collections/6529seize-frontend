@@ -74,7 +74,7 @@ export default function AppWallets() {
     <Container className="pt-4 pb-4">
       <Row>
         <h1>
-          <span className="font-lightest">App</span> Wallets
+          App Wallets
         </h1>
       </Row>
       {printContent()}

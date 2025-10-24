@@ -1,10 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import CommonBorderedRadioButton from "@/components/utils/radio/CommonBorderedRadioButton";
 import {
   CreateWaveGroupConfigType,
-  CreateWaveGroupStatus,
   WaveGroupsConfig,
 } from "@/types/waves.types";
 import {
@@ -13,9 +10,8 @@ import {
 } from "@/helpers/waves/waves.constants";
 import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import CreateWaveGroupItem from "./CreateWaveGroupItem";
-import SelectGroupModalWrapper from "@/components/utils/select-group/SelectGroupModalWrapper";
 import CreateWaveToggle from "../utils/CreateWaveToggle";
+import CreateWaveGroupSearchField from "./CreateWaveGroupSearchField";
 
 export default function CreateWaveGroup({
   waveType,
@@ -50,45 +46,30 @@ export default function CreateWaveGroup({
         return groups.canVote;
       case CreateWaveGroupConfigType.CAN_CHAT:
         return groups.canChat;
+      default:
+        return null;
     }
   };
 
   const selectedGroupId = getSelectedGroupId();
-
-  const [selectedGroup, setSelectedGroup] = useState<ApiGroupFull | null>(
+  const selectedGroup: ApiGroupFull | null =
     selectedGroupId && groupsCache[selectedGroupId]
       ? groupsCache[selectedGroupId]
-      : null
-  );
-
-  const [selected, setSelected] = useState<CreateWaveGroupStatus>(
-    selectedGroup ? CreateWaveGroupStatus.GROUP : CreateWaveGroupStatus.NONE
-  );
-
-  const switchSelected = (selectedType: CreateWaveGroupStatus) => {
-    setSelected(selectedType);
-    setSelectedGroup(null);
-    onGroupSelect(null);
-  };
-
-  const setGroup = (group: ApiGroupFull) => {
-    onGroupSelect(group);
-    setSelectedGroup(group);
-    setSelected(CreateWaveGroupStatus.GROUP);
-  };
-
-  const onSelectedClick = () => {
-    setSelectedGroup(null);
-  };
+      : null;
 
   const isNotChatWave = waveType !== ApiWaveType.Chat;
+  const inputDisabled =
+    isNotChatWave &&
+    groupType === CreateWaveGroupConfigType.CAN_CHAT &&
+    !chatEnabled;
+  const defaultLabel = CREATE_WAVE_NONE_GROUP_LABELS[groupType];
 
   return (
-    <div>
-      <div className="tw-flex tw-items-center">
-        <p className="tw-mb-0 tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-50 tw-tracking-tight">
+    <div className="tw-flex tw-flex-col tw-gap-y-4">
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+        <h3 className="tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-50 tw-tracking-tight tw-mb-0">
           {CREATE_WAVE_SELECT_GROUP_LABELS[waveType][groupType]}
-        </p>
+        </h3>
         {isNotChatWave && groupType === CreateWaveGroupConfigType.CAN_CHAT && (
           <CreateWaveToggle
             enabled={chatEnabled}
@@ -106,7 +87,6 @@ export default function CreateWaveGroup({
         )}
       </div>
 
-      {/* Display description for admin delete permission when enabled */}
       {isNotChatWave &&
         groupType === CreateWaveGroupConfigType.ADMIN &&
         adminCanDeleteDrops && (
@@ -115,36 +95,13 @@ export default function CreateWaveGroup({
           </p>
         )}
 
-      <div className="tw-mt-2 tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-4">
-        <CommonBorderedRadioButton
-          type={CreateWaveGroupStatus.NONE}
-          selected={selected}
-          disabled={
-            isNotChatWave &&
-            groupType === CreateWaveGroupConfigType.CAN_CHAT &&
-            !chatEnabled
-          }
-          label={CREATE_WAVE_NONE_GROUP_LABELS[groupType]}
-          onChange={switchSelected}
-        />
-
-        <CreateWaveGroupItem
-          selectedGroup={selectedGroup}
-          disabled={
-            isNotChatWave &&
-            groupType === CreateWaveGroupConfigType.CAN_CHAT &&
-            !chatEnabled
-          }
-          switchSelected={switchSelected}
-          onSelectedClick={onSelectedClick}
-        />
-
-        <SelectGroupModalWrapper
-          isOpen={selected === CreateWaveGroupStatus.GROUP && !selectedGroup}
-          onClose={() => switchSelected(CreateWaveGroupStatus.NONE)}
-          onGroupSelect={setGroup}
-        />
-      </div>
+      <CreateWaveGroupSearchField
+        label="Search groups…"
+        defaultLabel={defaultLabel}
+        disabled={inputDisabled}
+        selectedGroup={selectedGroup}
+        onSelect={onGroupSelect}
+      />
     </div>
   );
 }

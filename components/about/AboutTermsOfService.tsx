@@ -9,7 +9,7 @@ export default function AboutTermsOfService() {
       <Row>
         <Col>
           <h1>
-            <span className="font-lightest">Terms</span> Of Service
+            Terms Of Service
           </h1>
         </Col>
       </Row>

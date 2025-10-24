@@ -21,9 +21,7 @@ export default function ActivityHeader({
       className="d-flex align-items-center justify-content-between"
     >
       <span className="d-flex flex-wrap align-items-center gap-3">
-        <h1>
-          <span className="font-lightest">NFT</span> Activity{" "}
-        </h1>
+        <h1>NFT Activity</h1>
         {showViewAll ? (
           <Link href="/nft-activity" className={homeStyles.viewAllLink}>
             <span>View All</span>

@@ -329,7 +329,7 @@ export default function WalletCheckerComponent(
       <Row>
         <Col>
           <h1>
-            <span className="font-lightest">Wallet</span> Checker
+            Wallet Checker
           </h1>
         </Col>
       </Row>

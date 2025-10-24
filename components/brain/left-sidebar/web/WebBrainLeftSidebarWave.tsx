@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { usePrefetchWaveData } from "../../../../hooks/usePrefetchWaveData";
@@ -18,7 +18,7 @@ interface WebBrainLeftSidebarWaveProps {
   readonly onHover: (waveId: string) => void;
   readonly showPin?: boolean;
   readonly basePath?: string;
-  readonly condensed?: boolean;
+  readonly collapsed?: boolean;
 }
 
 const WebBrainLeftSidebarWave: React.FC<WebBrainLeftSidebarWaveProps> = ({
@@ -26,7 +26,7 @@ const WebBrainLeftSidebarWave: React.FC<WebBrainLeftSidebarWaveProps> = ({
   onHover,
   showPin = true,
   basePath = "/waves",
-  condensed = false,
+  collapsed = false,
 }) => {
   const searchParams = useSearchParams();
   const prefetchWaveData = usePrefetchWaveData();
@@ -78,11 +78,47 @@ const WebBrainLeftSidebarWave: React.FC<WebBrainLeftSidebarWaveProps> = ({
     }
   };
 
-  const isActive = wave.id === (searchParams?.get("wave") ?? undefined);
-  const tooltipId = `wave-condensed-${wave.id}`;
-  const showTooltip = condensed && !hasTouchScreen;
+  const nameRef = useRef<HTMLDivElement | null>(null);
+  const [isNameTruncated, setIsNameTruncated] = useState(false);
 
-  if (condensed) {
+  useEffect(() => {
+    if (collapsed) {
+      setIsNameTruncated(false);
+      return;
+    }
+
+    const element = nameRef.current;
+    if (!element) {
+      return;
+    }
+
+    const computeIsTruncated = () => {
+      setIsNameTruncated(element.scrollWidth > element.clientWidth);
+    };
+
+    computeIsTruncated();
+
+    let resizeObserver: ResizeObserver | undefined;
+    if (typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(computeIsTruncated);
+      resizeObserver.observe(element);
+    }
+
+    window.addEventListener("resize", computeIsTruncated);
+
+    return () => {
+      window.removeEventListener("resize", computeIsTruncated);
+      resizeObserver?.disconnect();
+    };
+  }, [collapsed, formattedWaveName]);
+
+  const isActive = wave.id === (searchParams?.get("wave") ?? undefined);
+  const tooltipId = `wave-collapsed-${wave.id}`;
+  const showTooltip = collapsed && !hasTouchScreen;
+  const expandedTooltipId = `wave-expanded-${wave.id}`;
+  const showExpandedTooltip = !collapsed && !hasTouchScreen && isNameTruncated;
+
+  if (collapsed) {
     return (
       <div
         className={`tw-group tw-flex tw-items-center tw-justify-center tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
@@ -169,7 +205,7 @@ const WebBrainLeftSidebarWave: React.FC<WebBrainLeftSidebarWaveProps> = ({
       <Link
         href={getHref(wave.id)}
         onMouseEnter={() => onWaveHover(wave.id)}
-        className={`tw-flex tw-flex-1 tw-space-x-3 tw-no-underline tw-py-1 tw-transition-all tw-duration-200 tw-ease-out ${
+        className={`tw-flex tw-flex-1 tw-min-w-0 tw-space-x-3 tw-no-underline tw-py-1 tw-transition-all tw-duration-200 tw-ease-out ${
           isActive
             ? "tw-text-white desktop-hover:group-hover:tw-text-white tw-font-medium"
             : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300 tw-font-normal"
@@ -210,8 +246,15 @@ const WebBrainLeftSidebarWave: React.FC<WebBrainLeftSidebarWaveProps> = ({
             )}
           </div>
         </div>
-        <div className="tw-flex-1">
-          <div className="tw-text-sm -tw-mt-0.5 tw-mb-0.5">
+        <div className="tw-flex-1 tw-min-w-0">
+          <div
+            ref={nameRef}
+            className="tw-text-sm -tw-mt-0.5 tw-mb-0.5 tw-truncate"
+            {...(showExpandedTooltip ? {
+              "data-tooltip-id": expandedTooltipId,
+              "data-tooltip-content": formattedWaveName,
+            } : {})}
+          >
             {formattedWaveName}
           </div>
           {!!wave.newDropsCount.latestDropTimestamp && (
@@ -226,6 +269,27 @@ const WebBrainLeftSidebarWave: React.FC<WebBrainLeftSidebarWaveProps> = ({
       </Link>
       {showPin && (
         <BrainLeftSidebarWavePin waveId={wave.id} isPinned={!!wave.isPinned} />
+      )}
+      {showExpandedTooltip && (
+        <Tooltip
+          id={expandedTooltipId}
+          place="right"
+          positionStrategy="fixed"
+          style={{
+            background: "#37373E",
+            color: "white",
+            padding: "6px 10px",
+            fontSize: "12px",
+            fontWeight: 500,
+            borderRadius: "6px",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+            zIndex: 10000,
+          }}
+        >
+          <span className="tw-text-xs">
+            {formattedWaveName}
+          </span>
+        </Tooltip>
       )}
     </div>
   );

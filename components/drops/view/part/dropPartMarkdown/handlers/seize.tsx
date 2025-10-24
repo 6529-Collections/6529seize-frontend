@@ -2,9 +2,9 @@ import type { ReactElement } from "react";
 
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import {
-  parseSeizeQuoteLink,
-  parseSeizeQueryLink,
   getSeizeBaseOrigin,
+  parseSeizeQueryLink,
+  parseSeizeQuoteLink,
   type SeizeQuoteLinkInfo,
 } from "@/helpers/SeizeLinkParser";
 

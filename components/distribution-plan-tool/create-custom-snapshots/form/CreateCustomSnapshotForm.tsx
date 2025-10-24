@@ -372,7 +372,7 @@ export default function CreateCustomSnapshotForm() {
               <button
                 onClick={() => setIsAddWalletsOpen(true)}
                 type="button"
-                className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent tw-px-4 tw-py-3 tw-underline hover:tw-bg-[#232323] tw-rounded-lg tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border-transparent tw-border-solid tw-border-neutral-700 tw-border-2 hover:tw-border-[#232323] tw-transition tw-duration-300 tw-ease-out">
+                className="tw-inline-flex tw-items-center tw-whitespace-nowrap tw-justify-center tw-cursor-pointer tw-bg-transparent tw-px-4 tw-py-3 tw-underline hover:tw-bg-[#232323] tw-rounded-lg tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border-transparent tw-border-solid tw-border-neutral-700 tw-border-2 hover:tw-border-[#232323] tw-transition tw-duration-300 tw-ease-out">
                 <FontAwesomeIcon
                   icon={faPlus}
                   className="tw-h-5 tw-w-5 tw-mr-2 -tw-ml-1"

@@ -73,7 +73,7 @@ export default function AboutPrimaryAddress() {
       <Row>
         <Col>
           <h1>
-            <span className="font-lightest">On-Chain</span> Primary Address
+            On-Chain Primary Address
           </h1>
         </Col>
       </Row>

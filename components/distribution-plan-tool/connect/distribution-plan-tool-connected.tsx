@@ -18,7 +18,7 @@ export default function DistributionPlanToolConnected() {
   return (
     <div className="tw-flex tw-flex-col">
       <h1 className="tw-text-white">
-        <span className="font-lightest">Sign</span> in
+        Sign in
       </h1>
       <div className="tw-mb-6 tw-max-w-2xl">
         <ul className="tw-text-justify tw-space-y-1 tw-mb-0 tw-mt-2 tw-text-base tw-leading-[1.6] tw-font-normal tw-text-neutral-300">

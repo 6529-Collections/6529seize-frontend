@@ -290,7 +290,7 @@ export default function DistributionPage(props: Readonly<Props>) {
               <Row>
                 <Col className={`${styles.distributionHeader} pb-1`}>
                   <h1 className="text-center mb-0">
-                    <span className="font-lightest">{props.header}</span> Card #
+                    {props.header} Card #
                     {nftId} Distribution
                   </h1>
                   {printMintingLink()}

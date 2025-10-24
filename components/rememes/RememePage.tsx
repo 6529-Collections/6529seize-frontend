@@ -57,7 +57,7 @@ export function printMemeReferences(
       {!hideTitle && (
         <Col xs={12} className="pt-2">
           <h1>
-            <span className="font-lightest">The Memes</span> References
+            The Memes References
           </h1>
         </Col>
       )}

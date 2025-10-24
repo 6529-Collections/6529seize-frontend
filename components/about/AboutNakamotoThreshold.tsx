@@ -7,7 +7,7 @@ export default function AboutNakamotoThreshold() {
       <Row>
         <Col>
           <h1>
-            <span className="font-lightest">Nakamoto</span> Threshold
+            Nakamoto Threshold
           </h1>
         </Col>
       </Row>

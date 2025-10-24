@@ -74,9 +74,7 @@ export function AcceptConnectionSharing(
       <Container className="pt-4 pb-4">
         <Row>
           <Col>
-            <h1>
-              <span className="font-lightest">Accept</span> Connection Sharing
-            </h1>
+            <h1>Accept Connection Sharing</h1>
           </Col>
         </Row>
         <Row className="pt-5">
@@ -102,7 +100,8 @@ export function AcceptConnectionSharing(
               <Col
                 sm={12}
                 md={6}
-                className="d-flex flex-column align-items-center justify-content-center">
+                className="d-flex flex-column align-items-center justify-content-center"
+              >
                 {connectedAddress && !acceptingConnection ? (
                   <>
                     <p className="text-center">
@@ -110,7 +109,8 @@ export function AcceptConnectionSharing(
                     </p>
                     <Button
                       size="lg"
-                      onClick={() => seizeDisconnectAndLogout()}>
+                      onClick={() => seizeDisconnectAndLogout()}
+                    >
                       Disconnect
                     </Button>
                   </>
@@ -121,7 +121,8 @@ export function AcceptConnectionSharing(
                     onClick={() => {
                       setAcceptingConnection(true);
                       acceptConnection();
-                    }}>
+                    }}
+                  >
                     {acceptingConnection ? (
                       <>
                         PROCESSING <Spinner dimension={18} />

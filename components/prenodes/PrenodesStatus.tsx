@@ -203,7 +203,7 @@ export default function PrenodesStatus() {
       <Row className="pb-3">
         <Col>
           <h1>
-            <span className="font-lightest">Prenodes</span> Status{" "}
+            Prenodes Status{" "}
           </h1>
         </Col>
       </Row>

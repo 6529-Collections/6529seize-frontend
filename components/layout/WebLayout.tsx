@@ -1,6 +1,6 @@
 "use client";
 
-import React, { type ReactNode } from "react";
+import React, { type ReactNode, useMemo } from "react";
 import Image from "next/image";
 import WebSidebar from "./sidebar/WebSidebar";
 import { useSidebarController } from "../../hooks/useSidebarController";
@@ -27,16 +27,20 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
   } = useSidebarController();
   const { isRightSidebarOpen } = useSidebarState();
 
-  const cssVars: React.CSSProperties = {
-    ["--sidebar-width" as any]: sidebarWidth,
-    ["--collapsed-width" as any]: SIDEBAR_WIDTHS.COLLAPSED,
-    ["--expanded-width" as any]: SIDEBAR_WIDTHS.EXPANDED,
-    ["--layout-max" as any]: `${DESKTOP_MAX_WIDTH}px`,
-  };
+  const cssVars = useMemo(
+    () =>
+      ({
+        "--sidebar-width": sidebarWidth,
+        "--collapsed-width": SIDEBAR_WIDTHS.COLLAPSED,
+        "--expanded-width": SIDEBAR_WIDTHS.EXPANDED,
+        "--layout-max": `${DESKTOP_MAX_WIDTH}px`,
+      }) as React.CSSProperties,
+    [sidebarWidth]
+  );
 
   return (
     <div
-      className="layout-root tw-flex tw-relative tw-overflow-x-hidden tw-w-full"
+      className="layout-root tw-flex tw-justify-between tw-relative tw-overflow-x-hidden tw-w-full"
       style={cssVars}
       data-mobile={isMobile}
       data-narrow={isNarrow}

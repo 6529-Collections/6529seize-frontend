@@ -9,7 +9,7 @@ export default function AboutPrivacyPolicy() {
       <Row>
         <Col>
           <h1>
-            <span className="font-lightest">Privacy</span> Policy
+            Privacy Policy
           </h1>
         </Col>
       </Row>

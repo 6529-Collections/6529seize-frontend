@@ -31,9 +31,7 @@ export default function AboutHTML(props: Readonly<Props>) {
         <Row>
           <Col>
             <h1>
-              {titleLighter && (
-                <span className="font-lightest">{titleLighter}</span>
-              )}{" "}
+              {titleLighter && `${titleLighter} `}
               {titleDarker}
             </h1>
           </Col>

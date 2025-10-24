@@ -1,17 +1,14 @@
 "use client";
 
 import Footer from "@/components/footer/Footer";
-import { SIDEBAR_WIDTHS } from "@/constants/sidebar";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import useDeviceInfo from "./hooks/useDeviceInfo";
-import { useSidebarController } from "./hooks/useSidebarController";
 
 export default function FooterWrapper() {
   const { isApp } = useDeviceInfo();
   const pathname = usePathname();
   const [homeActiveTab, setHomeActiveTab] = useState<string>("latest");
-  const { sidebarWidth, isMobile, isNarrow } = useSidebarController();
   useEffect(() => {
     const win = (globalThis as typeof globalThis & { window?: Window }).window;
     if (win === undefined) {
@@ -60,18 +57,5 @@ export default function FooterWrapper() {
 
   if (hideFooter) return null;
 
-  // App mode or small-screen web: no left-rail spacing
-  if (isApp || isMobile) return <Footer />;
-
-  // Desktop WebLayout: match main content's sidebar spacing
-  const sidebarSpacing = isNarrow ? SIDEBAR_WIDTHS.COLLAPSED : sidebarWidth;
-
-  return (
-    <div
-      className="tw-w-full tw-max-w-[82.75rem] tw-mx-auto"
-      style={{ paddingLeft: sidebarSpacing }}
-    >
-      <Footer />
-    </div>
-  );
+  return <Footer />;
 }
