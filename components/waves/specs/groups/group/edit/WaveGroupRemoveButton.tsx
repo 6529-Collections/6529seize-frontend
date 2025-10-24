@@ -45,6 +45,14 @@ const WaveGroupRemoveButton = forwardRef<
     [handleOpen],
   );
 
+  const handleWaveUpdate = useCallback(
+    async (body: ApiUpdateWaveRequest) => {
+      await onWaveUpdate(body);
+      setIsEditOpen(false);
+    },
+    [onWaveUpdate],
+  );
+
   return (
     <>
       {renderTrigger ? (
@@ -68,10 +76,7 @@ const WaveGroupRemoveButton = forwardRef<
         isEditOpen={isEditOpen}
         type={type}
         setIsEditOpen={setIsEditOpen}
-        onWaveUpdate={async (body) => {
-          await onWaveUpdate(body);
-          setIsEditOpen(false);
-        }}
+        onWaveUpdate={handleWaveUpdate}
       />
     </>
   );

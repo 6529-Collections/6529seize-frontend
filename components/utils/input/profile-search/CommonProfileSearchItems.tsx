@@ -29,10 +29,14 @@ export default function CommonProfileSearchItems({
       profile.primary_wallet ??
       profile.handle ??
       profile.display ??
-      `index-${index}`;
+      "";
 
-    const normalized = String(rawId).trim() || `index-${index}`;
-    const sanitized = normalized.replace(/\s+/g, "-") || `index-${index}`;
+    const sanitized =
+      String(rawId)
+        .trim()
+        .replace(/[^a-zA-Z0-9_-]/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "") || "item";
 
     return `profile-search-item-${sanitized}-${index}`;
   };

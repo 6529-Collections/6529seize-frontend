@@ -46,6 +46,10 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
   };
 
   React.useEffect(() => {
+    tabRefs.current = tabRefs.current.slice(0, visibleTabs.length);
+  }, [visibleTabs.length]);
+
+  React.useEffect(() => {
     if (activeVisibleIndex >= 0) {
       setFocusedTabIndex(activeVisibleIndex);
       return;
@@ -178,7 +182,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
           anchor="bottom end"
           activeItemId={isActiveInOverflow ? activeKey : undefined}
           closeOnSelect
-          aria-label="More tabs"
+          aria-label={TAB_TOGGLE_WITH_OVERFLOW_MESSAGES.overflowMenuAriaLabel}
         />
       )}
     </div>
