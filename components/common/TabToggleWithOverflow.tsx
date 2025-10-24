@@ -27,9 +27,10 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
   maxVisibleTabs = 3,
   fullWidth = false,
 }) => {
-  const visibleTabs = options.slice(0, maxVisibleTabs);
+  const clampedMax = Math.max(0, Math.floor(maxVisibleTabs));
+  const visibleTabs = options.slice(0, clampedMax);
   const overflowTabs =
-    options.length > maxVisibleTabs ? options.slice(maxVisibleTabs) : [];
+    options.length > clampedMax ? options.slice(clampedMax) : [];
 
   const isActiveInOverflow = overflowTabs.some((tab) => tab.key === activeKey);
 
@@ -104,17 +105,11 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
   return (
     <div
       className={clsx("tw-flex tw-gap-x-1", fullWidth ? "tw-w-full" : "tw-w-auto")}>
-      <div
-        role="tablist"
-        aria-orientation="horizontal"
-        className={clsx("tw-flex tw-gap-x-1", fullWidth && "tw-flex-1")}
-      >
+      <div className={clsx("tw-flex tw-gap-x-1", fullWidth && "tw-flex-1")}>
         {visibleTabs.map((option, index) => (
           <button
             key={option.key}
             type="button"
-            role="tab"
-            aria-selected={activeKey === option.key}
             tabIndex={index === focusedTabIndex ? 0 : -1}
             onClick={() => handleSelect(option.key)}
             onKeyDown={(event) => handleVisibleTabKeyDown(event, index)}
