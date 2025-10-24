@@ -57,6 +57,7 @@ export default function GroupCardDeleteModal({
     if (activeGroupId === group.id) {
       dispatch(setActiveGroupId(null));
     }
+    onClose();
   };
 
   return createPortal(

@@ -28,12 +28,10 @@ export default function CommonProfileSearchItems({
       profile.display ??
       `index-${index}`;
 
-    const normalized =
-      String(rawId)
-        .trim()
-        .replace(/[^A-Za-z0-9_-]+/g, "-") || `index-${index}`;
+    const normalized = String(rawId).trim() || `index-${index}`;
+    const sanitized = normalized.replace(/\s+/g, "-") || `index-${index}`;
 
-    return `profile-search-item-${normalized}`;
+    return `profile-search-item-${sanitized}-${index}`;
   };
 
   const highlightedOptionId =

@@ -9,6 +9,7 @@ import {
   hideGroup,
   publishGroup,
   validateGroupPayload,
+  toErrorMessage,
 } from "@/services/groups/groupMutations";
 
 export interface SubmitArgs {
@@ -61,22 +62,17 @@ export interface UpdateVisibilityArgs {
 }
 
 export type UpdateVisibilityResult =
-  | { readonly ok: true; readonly groupId: string; readonly visible: boolean }
+  | {
+      readonly ok: true;
+      readonly groupId: string;
+      readonly visible: boolean;
+      readonly group?: ApiGroupFull;
+    }
   | {
       readonly ok: false;
       readonly reason: "auth" | "api" | "busy";
       readonly error: string;
     };
-
-const toErrorMessage = (error: unknown): string => {
-  if (typeof error === "string") {
-    return error;
-  }
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-  return "Something went wrong";
-};
 
 const resolveOldVersionId = ({
   previousGroup,
@@ -172,9 +168,10 @@ export const useGroupMutations = ({
         }
       }
 
+      let updatedGroup: ApiGroupFull | undefined;
       try {
         if (visible) {
-          await publishGroupMutation.mutateAsync({
+          updatedGroup = await publishGroupMutation.mutateAsync({
             id: groupId,
             oldVersionId,
           });
@@ -194,6 +191,7 @@ export const useGroupMutations = ({
         ok: true,
         groupId,
         visible,
+        ...(updatedGroup ? { group: updatedGroup } : {}),
       };
     },
     [hideGroupMutation, onGroupCreate, publishGroupMutation, requestAuth]
@@ -283,7 +281,7 @@ export const useGroupMutations = ({
 
       return {
         ok: true,
-        group: created,
+        group: visibilityResult.group ?? created,
         published: true,
       };
     },

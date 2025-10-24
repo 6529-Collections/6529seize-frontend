@@ -10,7 +10,7 @@ import {
 import PencilIcon from "@/components/utils/icons/PencilIcon";
 import WaveGroupEdit from "./WaveGroupEdit";
 import { ApiWave } from "@/generated/models/ApiWave";
-import { WaveGroupType } from "../WaveGroup";
+import { WaveGroupType } from "../WaveGroup.types";
 import { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
 
 export type WaveGroupEditButtonHandle = {
@@ -21,7 +21,7 @@ interface WaveGroupEditButtonProps {
   readonly wave: ApiWave;
   readonly type: WaveGroupType;
   readonly onWaveUpdate: (body: ApiUpdateWaveRequest) => Promise<void>;
-  readonly renderTrigger?: (options: { open: () => void }) => ReactNode;
+  readonly renderTrigger?: ((options: { open: () => void }) => ReactNode) | null;
 }
 
 const WaveGroupEditButton = forwardRef<
@@ -48,7 +48,7 @@ const WaveGroupEditButton = forwardRef<
     <>
       {renderTrigger ? (
         renderTrigger({ open: handleOpen })
-      ) : (
+      ) : renderTrigger === null ? null : (
         <button
           title="Edit"
           onClick={handleOpen}

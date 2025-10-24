@@ -38,7 +38,7 @@ export default function CommonDropdownItem<T, U = unknown>(
   };
 
   return (
-    <li className="tw-h-full">
+    <li className="tw-h-full" role="none">
       <button
         type="button"
         className={`${
@@ -46,6 +46,7 @@ export default function CommonDropdownItem<T, U = unknown>(
         } tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-text-left tw-text-sm tw-font-medium tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${
           isActive ? "tw-bg-iron-800 tw-text-iron-100" : ""
         }`}
+        role="menuitem"
         onClick={onSelected}
         onMouseEnter={() => setShouldRotate(true)}
         onMouseLeave={() => setShouldRotate(false)}>

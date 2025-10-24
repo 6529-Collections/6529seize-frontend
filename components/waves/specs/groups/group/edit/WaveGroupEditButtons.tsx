@@ -1,11 +1,11 @@
 "use client";
 
-import { useContext } from "react";
+import { useCallback, useContext } from "react";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { WaveGroupType } from "../WaveGroup";
+import { WaveGroupType } from "../WaveGroup.types";
 import {
   useWaveGroupEditButtonsController,
   WaveGroupIdentitiesModal,
@@ -49,8 +49,38 @@ export default function WaveGroupEditButtons({
     onWaveCreated,
   });
 
+  const handleIdentityConfirm = useCallback(
+    ({ identity, mode }: { identity: string; mode: WaveGroupManageIdentitiesMode }) => {
+      const action =
+        mode === WaveGroupManageIdentitiesMode.INCLUDE
+          ? WaveGroupIdentitiesModal.INCLUDE
+          : WaveGroupIdentitiesModal.EXCLUDE;
+      onIdentityConfirm({ identity, mode: action });
+    },
+    [onIdentityConfirm],
+  );
+
+  const handleIncludeIdentity = useCallback(
+    () => openIdentitiesModal(WaveGroupIdentitiesModal.INCLUDE),
+    [openIdentitiesModal],
+  );
+
+  const handleExcludeIdentity = useCallback(
+    () => openIdentitiesModal(WaveGroupIdentitiesModal.EXCLUDE),
+    [openIdentitiesModal],
+  );
+
   if (mutating) {
-    return <CircleLoader />;
+    return (
+      <span
+        role="status"
+        aria-live="polite"
+        className="tw-inline-flex tw-items-center tw-gap-2"
+      >
+        <CircleLoader />
+        <span className="tw-sr-only">Updating wave group identities</span>
+      </span>
+    );
   }
 
   return (
@@ -63,23 +93,13 @@ export default function WaveGroupEditButtons({
         canIncludeIdentity={canIncludeIdentity}
         canExcludeIdentity={canExcludeIdentity}
         canRemoveGroup={canRemoveGroup}
-        onIncludeIdentity={() =>
-          openIdentitiesModal(WaveGroupIdentitiesModal.INCLUDE)
-        }
-        onExcludeIdentity={() =>
-          openIdentitiesModal(WaveGroupIdentitiesModal.EXCLUDE)
-        }
+        onIncludeIdentity={handleIncludeIdentity}
+        onExcludeIdentity={handleExcludeIdentity}
       />
       <WaveGroupManageIdentitiesModals
         activeModal={activeIdentitiesModal}
         onClose={closeIdentitiesModal}
-        onConfirm={({ identity, mode }) => {
-          const action =
-            mode === WaveGroupManageIdentitiesMode.INCLUDE
-              ? WaveGroupIdentitiesModal.INCLUDE
-              : WaveGroupIdentitiesModal.EXCLUDE;
-          onIdentityConfirm({ identity, mode: action });
-        }}
+        onConfirm={handleIdentityConfirm}
       />
     </>
   );

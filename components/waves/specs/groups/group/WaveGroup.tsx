@@ -3,19 +3,12 @@
 import { ApiWaveScope } from "@/generated/models/ApiWaveScope";
 import WaveGroupTitle from "./WaveGroupTitle";
 import WaveGroupEditButtons from "./edit/WaveGroupEditButtons";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useMemo } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
 import WaveGroupScope from "./WaveGroupScope";
-
-export enum WaveGroupType {
-  VIEW = "VIEW",
-  DROP = "DROP",
-  VOTE = "VOTE",
-  CHAT = "CHAT",
-  ADMIN = "ADMIN",
-}
+import { WaveGroupType } from "./WaveGroup.types";
 
 export default function WaveGroup({
   scope,
@@ -29,13 +22,9 @@ export default function WaveGroup({
   readonly wave: ApiWave;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const getShowEdit = () =>
-    canEditWave({ connectedProfile, activeProfileProxy, wave });
-
-  const canEditGroup = () => getShowEdit() && !scope.group?.is_direct_message;
-  const [showEdit, setShowEdit] = useState(canEditGroup());
-  useEffect(() => {
-    setShowEdit(canEditGroup());
+  const showEdit = useMemo(() => {
+    const canEdit = canEditWave({ connectedProfile, activeProfileProxy, wave });
+    return canEdit && !scope.group?.is_direct_message;
   }, [connectedProfile, activeProfileProxy, wave, scope]);
 
   return (

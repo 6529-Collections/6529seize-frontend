@@ -10,8 +10,6 @@ export interface CompactMenuItem {
   readonly className?: string;
   readonly active?: boolean;
   readonly "data-testid"?: string;
-  readonly role?: string;
-  readonly ariaSelected?: boolean;
   readonly ariaLabel?: string;
 }
 

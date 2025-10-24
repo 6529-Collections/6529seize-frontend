@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import WaveGroupEdit from '@/components/waves/specs/groups/group/edit/WaveGroupEdit';
-import { WaveGroupType } from '@/components/waves/specs/groups/group/WaveGroup';
+import { WaveGroupType } from '@/components/waves/specs/groups/group/WaveGroup.types';
 import { convertWaveToUpdateWave } from '@/helpers/waves/waves.helpers';
 
 let triggerSelect: (g: any) => void;

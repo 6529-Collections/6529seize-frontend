@@ -4,8 +4,44 @@ import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { convertWaveToUpdateWave } from "@/helpers/waves/waves.helpers";
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
-import { WaveGroupType } from "../WaveGroup";
+import { WaveGroupType } from "../WaveGroup.types";
 import WaveGroupRemoveModal from "./WaveGroupRemoveModal";
+
+const groupTypePaths: Record<WaveGroupType, readonly string[]> = {
+  [WaveGroupType.VIEW]: ["visibility", "scope", "group_id"],
+  [WaveGroupType.DROP]: ["participation", "scope", "group_id"],
+  [WaveGroupType.VOTE]: ["voting", "scope", "group_id"],
+  [WaveGroupType.CHAT]: ["chat", "scope", "group_id"],
+  [WaveGroupType.ADMIN]: ["wave", "admin_group", "group_id"],
+};
+
+const clearGroupIdAtPath = (
+  body: ApiUpdateWaveRequest,
+  path: readonly string[],
+): ApiUpdateWaveRequest => {
+  const clonedBody = { ...body } as Record<string, unknown>;
+  let currentSource = body as Record<string, unknown> | undefined;
+  let currentTarget = clonedBody;
+
+  path.forEach((segment, index) => {
+    if (index === path.length - 1) {
+      currentTarget[segment] = null;
+      return;
+    }
+
+    const nextSource = (currentSource?.[segment] ?? {}) as Record<
+      string,
+      unknown
+    >;
+    const nextTarget = { ...nextSource };
+
+    currentTarget[segment] = nextTarget;
+    currentSource = nextSource;
+    currentTarget = nextTarget;
+  });
+
+  return clonedBody as ApiUpdateWaveRequest;
+};
 
 export default function WaveGroupRemove({
   wave,
@@ -22,66 +58,14 @@ export default function WaveGroupRemove({
 }) {
   const getBody = (): ApiUpdateWaveRequest => {
     const originalBody = convertWaveToUpdateWave(wave);
-    switch (type) {
-      case WaveGroupType.VIEW:
-        return {
-          ...originalBody,
-          visibility: {
-            ...originalBody.visibility,
-            scope: {
-              ...originalBody.visibility.scope,
-              group_id: null,
-            },
-          },
-        };
-      case WaveGroupType.DROP:
-        return {
-          ...originalBody,
-          participation: {
-            ...originalBody.participation,
-            scope: {
-              ...originalBody.participation.scope,
-              group_id: null,
-            },
-          },
-        };
-      case WaveGroupType.VOTE:
-        return {
-          ...originalBody,
-          voting: {
-            ...originalBody.voting,
-            scope: {
-              ...originalBody.voting.scope,
-              group_id: null,
-            },
-          },
-        };
-      case WaveGroupType.CHAT:
-        return {
-          ...originalBody,
-          chat: {
-            ...originalBody.chat,
-            scope: {
-              ...originalBody.chat.scope,
-              group_id: null,
-            },
-          },
-        };
-      case WaveGroupType.ADMIN:
-        return {
-          ...originalBody,
-          wave: {
-            ...originalBody.wave,
-            admin_group: {
-              ...originalBody.wave.admin_group,
-              group_id: null,
-            },
-          },
-        };
-      default:
-        assertUnreachable(type);
-        return originalBody;
+    const path = groupTypePaths[type];
+
+    if (!path) {
+      assertUnreachable(type);
+      return originalBody;
     }
+
+    return clearGroupIdAtPath(originalBody, path);
   };
 
   const onRemove = async (): Promise<void> => {

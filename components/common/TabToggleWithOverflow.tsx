@@ -3,6 +3,8 @@
 import React from "react";
 import { CompactMenu } from "./CompactMenu";
 import clsx from "clsx";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 
 interface TabOption {
   readonly key: string;
@@ -40,16 +42,13 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
   return (
     <div
       className={`tw-flex tw-gap-x-1 ${fullWidth ? "tw-w-full" : "tw-w-auto"}`}>
-      <div
-        role="tablist"
-        aria-orientation="horizontal"
-        className={`tw-flex tw-gap-x-1 ${fullWidth ? "tw-flex-1" : ""}`}>
+      <div className={`tw-flex tw-gap-x-1 ${fullWidth ? "tw-flex-1" : ""}`}>
         {/* Show visible tabs */}
         {visibleTabs.map((option) => (
           <button
             key={option.key}
-            role="tab"
-            aria-selected={activeKey === option.key}
+            type="button"
+            aria-pressed={activeKey === option.key}
             onClick={() => handleSelect(option.key)}
             className={`tw-flex-1 tw-py-3 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-border-b-2 tw-border-t-0 tw-border-x-0 tw-border-solid tw-bg-transparent tw-transition-all tw-duration-200 ${
               fullWidth ? "tw-text-center tw-justify-center tw-flex" : ""
@@ -87,17 +86,11 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
                   isOpen ? "tw-rotate-180" : "",
                 )}
               >
-                <svg
+                <FontAwesomeIcon
+                  icon={faChevronDown}
                   aria-hidden="true"
-                  width="10"
-                  height="6"
-                  viewBox="0 0 8 4"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="tw-opacity-70"
-                >
-                  <path d="M4 4L0 0H8L4 4Z" fill="currentColor" />
-                </svg>
+                  className="tw-h-3 tw-w-3 tw-opacity-70"
+                />
               </span>
             </>
           )}
@@ -106,7 +99,6 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
             label: option.label,
             onSelect: () => handleSelect(option.key),
             active: activeKey === option.key,
-            ariaSelected: activeKey === option.key,
           }))}
           itemClassName="tw-block tw-w-full tw-border-0 tw-bg-transparent tw-px-4 tw-py-2 tw-text-left tw-text-sm tw-font-medium tw-transition-colors"
           inactiveItemClassName="tw-text-iron-300 hover:tw-bg-iron-800 hover:tw-text-iron-200"

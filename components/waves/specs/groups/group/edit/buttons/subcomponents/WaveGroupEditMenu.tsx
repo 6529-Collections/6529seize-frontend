@@ -5,7 +5,7 @@ import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import { CompactMenu, type CompactMenuItem } from "@/components/common/CompactMenu";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
-import { WaveGroupType } from "../../../WaveGroup";
+import { WaveGroupType } from "../../../WaveGroup.types";
 import WaveGroupEditButton, {
   type WaveGroupEditButtonHandle,
 } from "../../WaveGroupEditButton";
@@ -45,8 +45,6 @@ export default function WaveGroupEditMenu({
 }: WaveGroupEditMenuProps) {
   const editButtonRef = useRef<WaveGroupEditButtonHandle | null>(null);
   const removeButtonRef = useRef<WaveGroupRemoveButtonHandle | null>(null);
-  const renderEditTriggerRef = useRef<(() => void) | null>(null);
-  const renderRemoveTriggerRef = useRef<(() => void) | null>(null);
 
   const menuItems = useMemo<CompactMenuItem[]>(() => {
     const items: CompactMenuItem[] = [];
@@ -80,11 +78,7 @@ export default function WaveGroupEditMenu({
           onChangeGroup();
           return;
         }
-        if (editButtonRef.current) {
-          editButtonRef.current.open();
-          return;
-        }
-        renderEditTriggerRef.current?.();
+        editButtonRef.current?.open();
       },
       className:
         "tw-text-iron-200 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50",
@@ -99,11 +93,7 @@ export default function WaveGroupEditMenu({
             onRemoveGroup();
             return;
           }
-          if (removeButtonRef.current) {
-            removeButtonRef.current.open();
-            return;
-          }
-          renderRemoveTriggerRef.current?.();
+          removeButtonRef.current?.open();
         },
         className:
           "tw-text-red desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-red",
@@ -144,10 +134,7 @@ export default function WaveGroupEditMenu({
         wave={wave}
         type={type}
         onWaveUpdate={onWaveUpdate}
-        renderTrigger={({ open }) => {
-          renderEditTriggerRef.current = open;
-          return null;
-        }}
+        renderTrigger={null}
       />
       {canRemoveGroup ? (
         <WaveGroupRemoveButton
@@ -155,10 +142,7 @@ export default function WaveGroupEditMenu({
           wave={wave}
           type={type}
           onWaveUpdate={onWaveUpdate}
-          renderTrigger={({ open }) => {
-            renderRemoveTriggerRef.current = open;
-            return null;
-          }}
+          renderTrigger={null}
         />
       ) : null}
     </div>

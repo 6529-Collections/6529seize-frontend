@@ -1,7 +1,7 @@
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiGroup } from "@/generated/models/ApiGroup";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { WaveGroupType } from "../../../WaveGroup";
+import { WaveGroupType } from "../../../WaveGroup.types";
 
 export const getScopedGroup = (
   wave: ApiWave,
@@ -9,15 +9,15 @@ export const getScopedGroup = (
 ): ApiGroup | null => {
   switch (type) {
     case WaveGroupType.VIEW:
-      return wave.visibility.scope.group ?? null;
+      return wave.visibility?.scope?.group ?? null;
     case WaveGroupType.DROP:
-      return wave.participation.scope.group ?? null;
+      return wave.participation?.scope?.group ?? null;
     case WaveGroupType.VOTE:
-      return wave.voting.scope.group ?? null;
+      return wave.voting?.scope?.group ?? null;
     case WaveGroupType.CHAT:
-      return wave.chat.scope.group ?? null;
+      return wave.chat?.scope?.group ?? null;
     case WaveGroupType.ADMIN:
-      return wave.wave.admin_group.group ?? null;
+      return wave.wave?.admin_group?.group ?? null;
     default:
       return null;
   }

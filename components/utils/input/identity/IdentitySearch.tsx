@@ -8,26 +8,13 @@ import { commonApiFetch } from "@/services/api/common-api";
 import CommonProfileSearchItems from "../profile-search/CommonProfileSearchItems";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { getSelectableIdentity } from "@/components/utils/input/profile-search/getSelectableIdentity";
 export enum IdentitySearchSize {
   SM = "SM",
   MD = "MD",
 }
 
 const MIN_SEARCH_LENGTH = 3;
-
-const getSelectableIdentity = (
-  profile: CommunityMemberMinimal | null | undefined
-): string | null => {
-  if (!profile) {
-    return null;
-  }
-  return (
-    profile.primary_wallet ??
-    profile.wallet ??
-    profile.handle ??
-    null
-  );
-};
 
 export default function IdentitySearch({
   identity,
@@ -98,6 +85,7 @@ export default function IdentitySearch({
 
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
+  const [shouldSubmit, setShouldSubmit] = useState(false);
   const onValueChange = (
     newValue: string | null,
     displayValue?: string | null
@@ -137,6 +125,18 @@ export default function IdentitySearch({
       inputRef.current?.focus();
     }
   }, [autoFocus]);
+
+  useEffect(() => {
+    if (!shouldSubmit) {
+      return;
+    }
+
+    const formElement = inputRef.current?.form;
+    if (formElement) {
+      formElement.requestSubmit();
+    }
+    setShouldSubmit(false);
+  }, [shouldSubmit]);
 
   const handleArrowNavigation = (event: KeyboardEvent<HTMLInputElement>) => {
     if (!data?.length) {
@@ -182,12 +182,7 @@ export default function IdentitySearch({
           profile.handle ?? profile.display ?? nextIdentity;
         onValueChange(nextIdentity, displayValue);
 
-        const formElement = inputRef.current?.form ?? null;
-        if (formElement) {
-          setTimeout(() => {
-            formElement.requestSubmit();
-          }, 0);
-        }
+        setShouldSubmit(true);
       }
     }
   };
@@ -205,25 +200,20 @@ export default function IdentitySearch({
     }
 
     if (identity) {
-      const nextIndex = data.findIndex((profile) => {
+      const matchingIndex = data.findIndex((profile) => {
         const value = getSelectableIdentity(profile);
         return value?.toLowerCase() === identity.toLowerCase();
       });
 
-      if (nextIndex >= 0) {
-        setHighlightedIndex(nextIndex);
+      if (matchingIndex >= 0) {
+        setHighlightedIndex(matchingIndex);
         return;
       }
     }
 
-    setHighlightedIndex((current) => {
-      if (current === null) {
-        return null;
-      }
-
-      const maxIndex = data.length - 1;
-      return current > maxIndex ? maxIndex : current;
-    });
+    setHighlightedIndex((current) =>
+      current === null ? null : Math.min(current, data.length - 1)
+    );
   }, [data, identity]);
 
   return (

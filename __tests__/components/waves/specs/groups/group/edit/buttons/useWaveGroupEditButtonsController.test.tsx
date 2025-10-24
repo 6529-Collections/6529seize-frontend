@@ -4,7 +4,7 @@ import {
   useWaveGroupEditButtonsController,
   WaveGroupIdentitiesModal,
 } from '@/components/waves/specs/groups/group/edit/buttons/hooks/useWaveGroupEditButtonsController';
-import { WaveGroupType } from '@/components/waves/specs/groups/group/WaveGroup';
+import { WaveGroupType } from '@/components/waves/specs/groups/group/WaveGroup.types';
 import { useMutation } from '@tanstack/react-query';
 import {
   createGroup as createGroupMutation,

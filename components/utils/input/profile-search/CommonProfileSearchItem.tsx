@@ -1,8 +1,8 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { CommunityMemberMinimal } from "@/entities/IProfile";
-import {
-  getScaledImageUri,
-  ImageScale,
-} from "@/helpers/image.helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { getSelectableIdentity } from "./getSelectableIdentity";
 
 export default function CommonProfileSearchItem({
   profile,
@@ -17,8 +17,7 @@ export default function CommonProfileSearchItem({
   readonly isHighlighted?: boolean;
   readonly id: string;
 }) {
-  const selectableValue =
-    profile.primary_wallet ?? profile.wallet ?? profile.handle ?? null;
+  const selectableValue = getSelectableIdentity(profile);
   const isSelected =
     typeof selectableValue === "string" &&
     selected?.toLowerCase() === selectableValue.toLowerCase();
@@ -31,7 +30,7 @@ export default function CommonProfileSearchItem({
       className="tw-h-full"
       role="option"
       id={id}
-      aria-selected={isSelected}
+      aria-selected={isHighlighted || isSelected}
     >
       <button
         type="button"
@@ -68,21 +67,10 @@ export default function CommonProfileSearchItem({
             </div>
           </div>
           {isSelected && (
-            <svg
+            <FontAwesomeIcon
+              icon={faCheck}
               className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M20 6L9 17L4 12"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            />
           )}
         </div>
       </button>

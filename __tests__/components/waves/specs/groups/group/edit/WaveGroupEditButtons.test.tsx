@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import WaveGroupEditButtons from '@/components/waves/specs/groups/group/edit/WaveGroupEditButtons';
-import { WaveGroupType } from '@/components/waves/specs/groups/group/WaveGroup';
+import { WaveGroupType } from '@/components/waves/specs/groups/group/WaveGroup.types';
 import { AuthContext } from '@/components/auth/Auth';
 import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 import { useMutation } from '@tanstack/react-query';
@@ -12,6 +12,9 @@ jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupEditButton', () =
   __esModule: true,
   default: ({ onWaveUpdate, renderTrigger }: any) => {
     const handleOpen = () => onWaveUpdate({});
+    if (renderTrigger === null) {
+      return null;
+    }
     return renderTrigger ? <>{renderTrigger({ open: handleOpen })}</> : <button onClick={handleOpen}>edit</button>;
   },
 }));
@@ -20,6 +23,9 @@ jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupRemoveButton', ()
   __esModule: true,
   default: ({ onWaveUpdate, renderTrigger }: any) => {
     const handleOpen = () => onWaveUpdate({});
+    if (renderTrigger === null) {
+      return null;
+    }
     return renderTrigger ? <>{renderTrigger({ open: handleOpen })}</> : <button onClick={handleOpen}>remove</button>;
   },
 }));

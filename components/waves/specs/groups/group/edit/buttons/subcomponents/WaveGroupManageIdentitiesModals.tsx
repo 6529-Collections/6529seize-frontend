@@ -6,6 +6,14 @@ import WaveGroupManageIdentitiesModal, {
 } from "../../WaveGroupManageIdentitiesModal";
 import { WaveGroupIdentitiesModal } from "../hooks/useWaveGroupEditButtonsController";
 
+const modalModeMap: Record<
+  WaveGroupIdentitiesModal,
+  WaveGroupManageIdentitiesMode
+> = {
+  [WaveGroupIdentitiesModal.INCLUDE]: WaveGroupManageIdentitiesMode.INCLUDE,
+  [WaveGroupIdentitiesModal.EXCLUDE]: WaveGroupManageIdentitiesMode.EXCLUDE,
+};
+
 interface WaveGroupManageIdentitiesModalsProps {
   readonly activeModal: WaveGroupIdentitiesModal | null;
   readonly onClose: () => void;
@@ -17,22 +25,18 @@ export default function WaveGroupManageIdentitiesModals({
   onClose,
   onConfirm,
 }: WaveGroupManageIdentitiesModalsProps) {
+  const mode =
+    activeModal !== null ? modalModeMap[activeModal] : null;
+
+  if (mode === null) {
+    return null;
+  }
+
   return (
-    <>
-      {activeModal === WaveGroupIdentitiesModal.INCLUDE ? (
-        <WaveGroupManageIdentitiesModal
-          mode={WaveGroupManageIdentitiesMode.INCLUDE}
-          onClose={onClose}
-          onConfirm={onConfirm}
-        />
-      ) : null}
-      {activeModal === WaveGroupIdentitiesModal.EXCLUDE ? (
-        <WaveGroupManageIdentitiesModal
-          mode={WaveGroupManageIdentitiesMode.EXCLUDE}
-          onClose={onClose}
-          onConfirm={onConfirm}
-        />
-      ) : null}
-    </>
+    <WaveGroupManageIdentitiesModal
+      mode={mode}
+      onClose={onClose}
+      onConfirm={onConfirm}
+    />
   );
 }

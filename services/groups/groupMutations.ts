@@ -5,12 +5,29 @@ import { commonApiPost } from "@/services/api/common-api";
 export const GROUP_INCLUDE_LIMIT = 10000;
 export const GROUP_EXCLUDE_LIMIT = 1000;
 
-export type ValidationIssue = "INCLUDE_LIMIT" | "EXCLUDE_LIMIT" | "NO_FILTERS";
+export type ValidationIssue =
+  | "INCLUDE_LIMIT"
+  | "EXCLUDE_LIMIT"
+  | "NO_FILTERS"
+  | "INVALID_LEVEL_RANGE"
+  | "INVALID_TDH_RANGE"
+  | "INVALID_REP_RANGE"
+  | "INVALID_CIC_RANGE";
 
 export interface ValidationResult {
   readonly valid: boolean;
   readonly issues: ValidationIssue[];
 }
+
+export const toErrorMessage = (error: unknown): string => {
+  if (typeof error === "string") {
+    return error;
+  }
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  return "Something went wrong";
+};
 
 export const sanitiseGroupPayload = (
   payload: ApiCreateGroup,
@@ -22,15 +39,13 @@ export const sanitiseGroupPayload = (
     ...payload.group,
     owns_nfts: [...payload.group.owns_nfts],
     identity_addresses:
-      payload.group.identity_addresses &&
-      payload.group.identity_addresses.length > 0
+      payload.group.identity_addresses?.length
         ? [...payload.group.identity_addresses]
-      : null,
+        : null,
     excluded_identity_addresses:
-      payload.group.excluded_identity_addresses &&
-      payload.group.excluded_identity_addresses.length > 0
+      payload.group.excluded_identity_addresses?.length
         ? [...payload.group.excluded_identity_addresses]
-      : null,
+        : null,
   },
 });
 
@@ -80,6 +95,38 @@ export const validateGroupPayload = (
     issues.push("NO_FILTERS");
   }
 
+  if (
+    payload.group.level.min !== null &&
+    payload.group.level.max !== null &&
+    payload.group.level.min > payload.group.level.max
+  ) {
+    issues.push("INVALID_LEVEL_RANGE");
+  }
+
+  if (
+    payload.group.tdh.min !== null &&
+    payload.group.tdh.max !== null &&
+    payload.group.tdh.min > payload.group.tdh.max
+  ) {
+    issues.push("INVALID_TDH_RANGE");
+  }
+
+  if (
+    payload.group.rep.min !== null &&
+    payload.group.rep.max !== null &&
+    payload.group.rep.min > payload.group.rep.max
+  ) {
+    issues.push("INVALID_REP_RANGE");
+  }
+
+  if (
+    payload.group.cic.min !== null &&
+    payload.group.cic.max !== null &&
+    payload.group.cic.min > payload.group.cic.max
+  ) {
+    issues.push("INVALID_CIC_RANGE");
+  }
+
   return {
     valid: issues.length === 0,
     issues,
@@ -94,6 +141,9 @@ export const createGroup = async ({
   readonly nameOverride?: string;
 }): Promise<ApiGroupFull> => {
   const effectiveName = (nameOverride ?? payload.name).trim();
+  if (!effectiveName) {
+    throw new Error("Group name cannot be empty");
+  }
   const body = sanitiseGroupPayload(payload, effectiveName);
 
   return await commonApiPost<ApiCreateGroup, ApiGroupFull>({
@@ -126,8 +176,8 @@ export const hideGroup = async ({
 }: {
   readonly id: string;
   readonly signal?: AbortSignal;
-}): Promise<void> => {
-  await commonApiPost<{ visible: false }, ApiGroupFull>({
+}): Promise<ApiGroupFull> => {
+  return await commonApiPost<{ visible: false }, ApiGroupFull>({
     endpoint: `groups/${id}/visible`,
     body: { visible: false },
     signal,

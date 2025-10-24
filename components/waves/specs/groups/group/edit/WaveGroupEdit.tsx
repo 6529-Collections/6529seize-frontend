@@ -1,7 +1,7 @@
 import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiWave } from "@/generated/models/ApiWave";
 import SelectGroupModalWrapper from "@/components/utils/select-group/SelectGroupModalWrapper";
-import { WaveGroupType } from "../WaveGroup";
+import { WaveGroupType } from "../WaveGroup.types";
 import { convertWaveToUpdateWave } from "@/helpers/waves/waves.helpers";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";

@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ReactNode, RefObject, useEffect, useRef } from "react";
+import { ReactNode, RefObject, useLayoutEffect, useRef } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 
 export default function CommonDropdownItemsDefaultWrapper<T>({
@@ -30,15 +30,18 @@ export default function CommonDropdownItemsDefaultWrapper<T>({
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  const buttonRight = buttonPosition?.right ?? null;
+
+  useLayoutEffect(() => {
     if (!dynamicPosition) return;
-    if (buttonPosition?.right && dropdownRef.current) {
-      const { right } = buttonPosition;
-      const el = dropdownRef.current;
-      const left = Math.max(0, right - el.offsetWidth);
+    if (!isOpen) return;
+    const el = dropdownRef.current;
+    const width = listRef.current?.offsetWidth ?? el?.offsetWidth ?? 0;
+    if (el && typeof buttonRight === "number") {
+      const left = Math.max(0, buttonRight - width);
       el.style.left = `${left}px`;
     }
-  }, [buttonPosition, dropdownRef, dynamicPosition]);
+  }, [dynamicPosition, isOpen, buttonRight]);
 
   return (
     <div className="tw-absolute tw-z-50" ref={dropdownRef}>
@@ -46,13 +49,16 @@ export default function CommonDropdownItemsDefaultWrapper<T>({
         {isOpen && (
           <motion.div
             ref={listRef}
-            className="tw-mt-2 tw-w-72 tw-min-w-[12rem] tw-rounded-lg tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 tw-ring-white/10 focus:tw-outline-none"
+            className="tw-mt-2 tw-w-72 tw-min-w-[12rem] tw-rounded-lg tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 tw-ring-white/10 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}>
             <div className="tw-max-h-80 tw-overflow-y-auto tw-overflow-x-hidden">
-              <ul className="tw-flex tw-flex-col tw-gap-0.5 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
+              <ul
+                role="menu"
+                aria-orientation="vertical"
+                className="tw-flex tw-flex-col tw-gap-0.5 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
                 {children}
               </ul>
             </div>

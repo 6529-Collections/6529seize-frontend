@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import WaveGroupRemove from '@/components/waves/specs/groups/group/edit/WaveGroupRemove';
-import { WaveGroupType } from '@/components/waves/specs/groups/group/WaveGroup';
+import { WaveGroupType } from '@/components/waves/specs/groups/group/WaveGroup.types';
 import { convertWaveToUpdateWave } from '@/helpers/waves/waves.helpers';
 
 jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupRemoveModal', () => (props: any) => (

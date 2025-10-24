@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useMemo } from "react";
+import { useContext } from "react";
 import { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { AuthContext } from "@/components/auth/Auth";
@@ -29,7 +29,7 @@ export default function GroupCreateActions({
     onGroupCreate,
   });
 
-  const validation = useMemo(() => validate(groupConfig), [groupConfig, validate]);
+  const validation = validate(groupConfig);
   const isActionsDisabled = !validation.valid || isSubmitting;
 
   const onSave = async (): Promise<void> => {

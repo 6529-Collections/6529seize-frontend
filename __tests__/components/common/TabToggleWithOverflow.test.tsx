@@ -106,7 +106,7 @@ describe('TabToggleWithOverflow', () => {
     expect(moreButton).toHaveAttribute('aria-expanded', 'true');
   });
 
-  it('marks overflow tabs with aria-selected when opened', async () => {
+  it('indicates overflow active state via data attribute when opened', async () => {
     const user = userEvent.setup();
     render(
       <TabToggleWithOverflow
@@ -121,11 +121,11 @@ describe('TabToggleWithOverflow', () => {
     await user.click(moreButton);
 
     expect(screen.getByRole('menuitem', { name: 'D' })).toHaveAttribute(
-      'aria-selected',
+      'data-active',
       'true'
     );
     expect(screen.getByRole('menuitem', { name: 'C' })).toHaveAttribute(
-      'aria-selected',
+      'data-active',
       'false'
     );
   });

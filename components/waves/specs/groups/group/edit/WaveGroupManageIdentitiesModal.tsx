@@ -1,6 +1,8 @@
 "use client";
 
-import { FormEvent, useRef, useState } from "react";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FormEvent, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import IdentitySearch, {
@@ -27,6 +29,7 @@ export default function WaveGroupManageIdentitiesModal({
   readonly onConfirm: (event: WaveGroupManageIdentitiesConfirmEvent) => void;
 }) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
   useClickAway(modalRef, onClose);
   useKeyPressEvent("Escape", onClose);
 
@@ -63,10 +66,15 @@ export default function WaveGroupManageIdentitiesModal({
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
           <div
             ref={modalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
             className="sm:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6">
             <div className="tw-flex tw-justify-between tw-items-start">
               <div className="tw-flex tw-flex-col tw-gap-y-2">
-                <p className="tw-text-lg tw-font-semibold tw-text-iron-50 tw-mb-0">
+                <p
+                  id={titleId}
+                  className="tw-text-lg tw-font-semibold tw-text-iron-50 tw-mb-0">
                   {title}
                 </p>
                 <p className="tw-text-sm tw-text-iron-400 tw-mb-0">
@@ -76,21 +84,10 @@ export default function WaveGroupManageIdentitiesModal({
               <button
                 onClick={onClose}
                 type="button"
+                aria-label="Close dialog"
                 className="tw-p-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out">
                 <span className="tw-sr-only">Close</span>
-                <svg
-                  className="tw-h-5 tw-w-5"
-                  aria-hidden="true"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <FontAwesomeIcon icon={faXmark} className="tw-h-5 tw-w-5" />
               </button>
             </div>
             <form onSubmit={handleSubmit}>
