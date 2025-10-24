@@ -273,7 +273,7 @@ export default function CommunityStats() {
       <Row>
         <Col sm={12} md={8} className="pt-4">
           <h1 className="mb-0">
-            <span className="font-lightest">Network</span> Stats
+            Network Stats
           </h1>
         </Col>
         {/* <Col

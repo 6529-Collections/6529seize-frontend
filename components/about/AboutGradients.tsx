@@ -8,7 +8,7 @@ export default function AboutGradients() {
       <Row>
         <Col>
           <h1>
-            <span className="font-lightest">6529</span> Gradient Collection
+            6529 Gradient Collection
           </h1>
         </Col>
       </Row>

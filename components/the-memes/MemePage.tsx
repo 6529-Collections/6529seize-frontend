@@ -336,7 +336,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                   <Row>
                     <Col>
                       <h1>
-                        <span className="font-lightest">The</span> Memes
+                        The Memes
                       </h1>
                     </Col>
                   </Row>

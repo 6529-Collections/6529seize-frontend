@@ -64,7 +64,6 @@ const MessagesView: React.FC = () => {
         {content}
       </BrainContent>
 
-      {/* Create Direct Message Modal */}
       {connectedProfile && (
         <CreateDirectMessageModal
           isOpen={isDirectMessageModalOpen}

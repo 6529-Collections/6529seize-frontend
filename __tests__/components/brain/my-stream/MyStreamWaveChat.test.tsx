@@ -22,7 +22,7 @@ jest.mock('@/components/brain/my-stream/layout/LayoutContext', () => ({
 }));
 
 let capturedProps: any = {};
-jest.mock('@/components/waves/drops/WaveDropsAll', () => ({
+jest.mock('@/components/waves/drops/wave-drops-all', () => ({
   __esModule: true,
   default: (props: any) => {
     capturedProps = props;

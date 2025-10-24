@@ -1176,7 +1176,7 @@ export default function MemeLabPageComponent({
             <Row>
               <Col>
                 <h1>
-                  <span className="font-lightest">Meme</span> Lab
+                  Meme Lab
                 </h1>
               </Col>
               {/* {nft && (

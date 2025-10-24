@@ -1,3 +1,7 @@
+import {
+  EXTRA_MINT_UTC_DAYS,
+  SKIPPED_MINT_UTC_DAYS,
+} from "./meme-calendar.overrides";
 import { HISTORICAL_MINTS } from "./meme-calendar.szn1";
 
 // Constants for division sizes
@@ -21,19 +25,6 @@ const MINT_EASTERN_HOUR = 10;
 const MINT_EASTERN_MINUTE = 40;
 const MINT_END_EASTERN_HOUR = 10;
 const MINT_END_EASTERN_MINUTE = 0;
-
-// Atypical days where a mint did NOT happen even though it was a M/W/F
-// (store as UTC “day” timestamps)
-const SKIPPED_MINT_UTC_DAYS = new Set<number>([
-  Date.UTC(2023, 4, 8), // 2023-05-08
-  Date.UTC(2024, 1, 7), // 2024-02-07
-]);
-
-// Days that DID mint even though they are not the usual Mon/Wed/Fri (UTC).
-const EXTRA_MINT_UTC_DAYS = new Set<number>([
-  Date.UTC(2023, 9, 26), // 2023-10-26 → Meme #157 (off-schedule Thursday)
-  Date.UTC(2023, 10, 28), // 2023-11-28 → Meme #182 (off-schedule Tuesday)
-]);
 
 export const MILLIS_PER_DAY = 1000 * 60 * 60 * 24;
 
@@ -1014,4 +1005,16 @@ export function getUpcomingMintsForCurrentOrNextSeason(
     ...next,
     seasonIndex: nextIdx,
   };
+}
+
+export function getCanonicalNextMintNumber(now: Date = new Date()): number {
+  const upcomingInstant = getNextMintStart(now);
+  const upcomingUtcDay = new Date(
+    Date.UTC(
+      upcomingInstant.getUTCFullYear(),
+      upcomingInstant.getUTCMonth(),
+      upcomingInstant.getUTCDate()
+    )
+  );
+  return getMintNumberForMintDate(upcomingUtcDay);
 }

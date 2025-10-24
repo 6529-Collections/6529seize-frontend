@@ -167,7 +167,7 @@ export default function GradientsComponent() {
                 <Col className="d-flex align-items-center justify-content-between mb-3">
                   <span className="d-flex align-items-center gap-3 flex-wrap">
                     <h1 className="mb-0">
-                      <span className="font-lightest">6529</span> Gradient
+                      6529 Gradient
                     </h1>
                     <LFGButton contract={GRADIENT_CONTRACT} />
                   </span>

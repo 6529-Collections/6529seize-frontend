@@ -11,7 +11,7 @@ test('renders fetched html', async () => {
   await waitFor(() => expect(global.fetch).toHaveBeenCalled());
   const container = document.querySelector('.htmlContainer') as HTMLElement;
   await waitFor(() => expect(container.innerHTML).toContain('hi'));
-  expect(screen.getByText('Hello')).toHaveClass('font-lightest');
+  expect(screen.getByRole('heading', { name: 'Hello World' })).toBeInTheDocument();
 });
 
 test('shows 404 page when fetch fails', async () => {
