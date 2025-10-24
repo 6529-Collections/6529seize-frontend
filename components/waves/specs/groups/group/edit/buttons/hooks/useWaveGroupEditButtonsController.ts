@@ -100,8 +100,8 @@ const cloneGroupPayload = (group: ApiGroupFull): ApiCreateGroup => ({
     cic: { ...group.group.cic },
     level: { ...group.group.level },
     owns_nfts: group.group.owns_nfts.map((nft) => ({ ...nft })),
-    identity_addresses: [],
-    excluded_identity_addresses: [],
+    identity_addresses: null,
+    excluded_identity_addresses: null,
   },
   is_private: group.is_private ?? false,
 });
@@ -125,8 +125,8 @@ const createEmptyGroupPayload = (name: string): ApiCreateGroup => ({
     },
     level: { min: null, max: null },
     owns_nfts: [],
-    identity_addresses: [],
-    excluded_identity_addresses: [],
+    identity_addresses: null,
+    excluded_identity_addresses: null,
   },
   is_private: false,
 });
