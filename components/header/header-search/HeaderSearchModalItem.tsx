@@ -79,8 +79,8 @@ export default function HeaderSearchModalItem({
     window.matchMedia("(hover: hover)").matches;
 
   const isPage = () => (content as PageSearchResult).type === "PAGE";
-  const isProfile = () => content.hasOwnProperty("handle");
-  const isNft = () => content.hasOwnProperty("contract");
+  const isProfile = () => Object.hasOwn(content, "handle");
+  const isNft = () => Object.hasOwn(content, "contract");
   const getWave = () => content as ApiWave;
 
   const getProfile = () => content as CommunityMemberMinimal;

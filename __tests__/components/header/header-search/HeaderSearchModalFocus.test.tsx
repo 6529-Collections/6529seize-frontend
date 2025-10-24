@@ -22,7 +22,7 @@ const useKeyPressEventMock =
 const useAppWalletsMock = jest.fn();
 const useCookieConsentMock = jest.fn();
 const useSidebarSectionsMock = jest.fn();
-const useCapacitorMock = jest.fn();
+const capacitorMock = jest.fn();
 
 let escapeHandler: (() => void) | null = null;
 
@@ -66,7 +66,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
 }));
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
-  default: () => useCapacitorMock(),
+  default: () => capacitorMock(),
 }));
 jest.mock("@/hooks/useSidebarSections", () => {
   const actual = jest.requireActual("@/hooks/useSidebarSections");
@@ -135,7 +135,7 @@ beforeEach(() => {
   useDeviceInfoMock.mockReturnValue({ isApp: false } as any);
   useAppWalletsMock.mockReturnValue({ appWalletsSupported: true });
   useCookieConsentMock.mockReturnValue({ country: "US" });
-  useCapacitorMock.mockReturnValue({ isIos: false });
+  capacitorMock.mockReturnValue({ isIos: false });
   useSidebarSectionsMock.mockReturnValue(defaultSidebarSections);
 });
 

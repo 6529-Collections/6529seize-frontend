@@ -38,16 +38,16 @@ export const TabToggle: React.FC<TabToggleProps> = ({
           aria-controls={option.panelId}
           className={`tw-whitespace-nowrap tw-text-sm tw-font-medium tw-transition-all tw-duration-150 tw-relative focus:tw-outline-none ${
             isVertical
-              ? `tw-flex tw-items-center tw-justify-start tw-w-full tw-rounded-lg tw-py-2 tw-px-3 tw-border tw-border-transparent`
-              : `tw-px-3 tw-py-2 tw-rounded-full tw-border tw-border-transparent ${
+              ? "tw-flex tw-items-center tw-justify-start tw-w-full tw-rounded-lg tw-py-2 tw-pl-3 tw-pr-3"
+              : `tw-px-3 tw-py-2 tw-rounded-full ${
                   fullWidth
                     ? "tw-flex-1 tw-text-center tw-justify-center tw-flex"
                     : ""
                 }`
           } ${
             activeKey === option.key
-              ? "tw-bg-iron-800 tw-text-white tw-border-iron-400"
-              : "tw-text-iron-400 tw-bg-transparent hover:tw-text-iron-200 hover:tw-bg-iron-900/30 hover:tw-border-iron-600"
+              ? "tw-bg-iron-800 tw-text-white"
+              : "tw-text-iron-400 tw-bg-transparent hover:tw-text-iron-200 hover:tw-bg-iron-900/30"
           }`}>
           {option.label}
           {option.hasIndicator && (
