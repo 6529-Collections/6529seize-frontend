@@ -15,32 +15,32 @@ import CreateGroupWalletsUpload from "./CreateGroupWalletsUpload";
 import { useContext, useEffect, useRef, useState } from "react";
 
 const normaliseWalletList = (list: readonly string[]): string[] =>
-  list.map((wallet) => wallet.toLowerCase()).sort();
+  list.map((wallet) => wallet.trim().toLowerCase()).sort();
 
 const walletListsMatch = (
   lhs: readonly string[] | null,
   rhs: readonly string[] | null
 ): boolean => {
-  if (lhs === rhs) {
-    return true;
+  if (lhs === rhs) return true;
+  if (!lhs || !rhs) return lhs === rhs;
+  if (lhs.length !== rhs.length) return false;
+  const a = lhs.map((w) => w.trim().toLowerCase());
+  const b = rhs.map((w) => w.trim().toLowerCase());
+  const seen = new Map<string, number>();
+  for (const w of a) seen.set(w, (seen.get(w) ?? 0) + 1);
+  for (const w of b) {
+    const n = (seen.get(w) ?? 0) - 1;
+    if (n < 0) return false;
+    if (n === 0) seen.delete(w);
+    else seen.set(w, n);
   }
-  if (!lhs || !rhs) {
-    return lhs === rhs;
-  }
-  if (lhs.length !== rhs.length) {
-    return false;
-  }
-  const normalisedLhs = normaliseWalletList(lhs);
-  const normalisedRhs = normaliseWalletList(rhs);
-  return normalisedLhs.every(
-    (wallet, index) => wallet === normalisedRhs[index]
-  );
+  return seen.size === 0;
 };
 
 const dedupeWallets = (wallets: readonly string[]): string[] => {
   const seen = new Set<string>();
   return wallets.filter((wallet) => {
-    const normalised = wallet.toLowerCase();
+    const normalised = wallet.trim().toLowerCase();
     if (seen.has(normalised)) {
       return false;
     }
@@ -121,16 +121,25 @@ export default function GroupCreateWallets({
       return;
     }
     const myWallets =
-      connectedProfile?.wallets?.map((w) => w.wallet.toLowerCase()) ?? [];
+      connectedProfile?.wallets
+        ?.map((w) => w.wallet?.toLowerCase())
+        ?.filter(Boolean) ?? [];
     setSelectedIdentities((prev) =>
-      prev.filter((i) => !myWallets.includes(i.wallet.toLowerCase()))
+      prev.filter((i) => {
+        const key = (i.wallet ?? i.primary_wallet)?.toLowerCase();
+        return !key || !myWallets.includes(key);
+      })
     );
-  }, [iAmIncluded, connectedProfile]);
+  }, [iAmIncluded, connectedProfile, type]);
 
   const onIdentitySelect = (identity: CommunityMemberMinimal) => {
     setSelectedIdentities((prev) => {
-      if (prev.some((i) => i.wallet === identity.wallet)) {
-        return prev.filter((i) => i.wallet !== identity.wallet);
+      const toKey = (i: CommunityMemberMinimal) =>
+        (i.wallet ?? i.primary_wallet)?.toLowerCase();
+      const target = toKey(identity);
+      if (!target) return prev;
+      if (prev.some((i) => toKey(i) === target)) {
+        return prev.filter((i) => toKey(i) !== target);
       }
       return [...prev, identity];
     });
@@ -175,7 +184,12 @@ export default function GroupCreateWallets({
   };
 
   const onRemove = (wallet: string) => {
-    setSelectedIdentities((prev) => prev.filter((i) => i.wallet !== wallet));
+    const target = wallet.toLowerCase();
+    setSelectedIdentities((prev) =>
+      prev.filter(
+        (i) => ((i.wallet ?? i.primary_wallet)?.toLowerCase() ?? "") !== target
+      )
+    );
   };
 
   const isOverLimit = (wallets?.length ?? 0) > walletsLimit;

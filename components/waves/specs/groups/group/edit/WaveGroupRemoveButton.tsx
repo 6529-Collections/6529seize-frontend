@@ -52,6 +52,7 @@ const WaveGroupRemoveButton = forwardRef<
       ) : renderTrigger === null ? null : (
         <button
           type="button"
+          aria-haspopup="dialog"
           aria-label="Remove"
           title="Remove"
           onClick={handleOpen}

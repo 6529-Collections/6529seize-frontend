@@ -30,8 +30,28 @@ export default function WaveGroupManageIdentitiesModal({
 }) {
   const modalRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
+  const descriptionId = useId();
   useClickAway(modalRef, onClose);
-  useKeyPressEvent("Escape", onClose);
+  useKeyPressEvent("Escape", (event: KeyboardEvent) => {
+    if (event.defaultPrevented) {
+      return;
+    }
+
+    const activeElement = document.activeElement as HTMLElement | null;
+    if (
+      activeElement &&
+      modalRef.current?.contains(activeElement) &&
+      (activeElement.tagName === "INPUT" ||
+        activeElement.tagName === "TEXTAREA" ||
+        activeElement.tagName === "SELECT" ||
+        activeElement.isContentEditable ||
+        activeElement.getAttribute("role") === "combobox")
+    ) {
+      return;
+    }
+
+    onClose();
+  });
 
   const title =
     mode === WaveGroupManageIdentitiesMode.INCLUDE
@@ -69,6 +89,7 @@ export default function WaveGroupManageIdentitiesModal({
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
+            aria-describedby={descriptionId}
             className="sm:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6">
             <div className="tw-flex tw-justify-between tw-items-start">
               <div className="tw-flex tw-flex-col tw-gap-y-2">
@@ -77,7 +98,9 @@ export default function WaveGroupManageIdentitiesModal({
                   className="tw-text-lg tw-font-semibold tw-text-iron-50 tw-mb-0">
                   {title}
                 </p>
-                <p className="tw-text-sm tw-text-iron-400 tw-mb-0">
+                <p
+                  id={descriptionId}
+                  className="tw-text-sm tw-text-iron-400 tw-mb-0">
                   {description}
                 </p>
               </div>

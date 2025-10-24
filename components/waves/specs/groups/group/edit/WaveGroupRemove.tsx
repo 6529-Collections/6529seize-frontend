@@ -59,9 +59,7 @@ export default function WaveGroupRemove({
 }) {
   const getBody = (): ApiUpdateWaveRequest => {
     const originalBody = convertWaveToUpdateWave(wave);
-    const path = groupTypePaths[type];
-
-    return clearGroupIdAtPath(originalBody, path);
+    return clearGroupIdAtPath(originalBody, groupTypePaths[type]);
   };
 
   const onRemove = async (): Promise<void> => {

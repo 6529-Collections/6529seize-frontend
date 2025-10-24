@@ -1,10 +1,10 @@
 import { useCallback } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import {
-  ValidationIssue,
-  ValidationResult,
+  type ValidationIssue,
+  type ValidationResult,
   createGroup,
   hideGroup,
   publishGroup,

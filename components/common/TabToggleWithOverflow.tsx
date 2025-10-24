@@ -41,8 +41,8 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
 
   return (
     <div
-      className={`tw-flex tw-gap-x-1 ${fullWidth ? "tw-w-full" : "tw-w-auto"}`}>
-      <div className={`tw-flex tw-gap-x-1 ${fullWidth ? "tw-flex-1" : ""}`}>
+      className={clsx("tw-flex tw-gap-x-1", fullWidth ? "tw-w-full" : "tw-w-auto")}>
+      <div className={clsx("tw-flex tw-gap-x-1", fullWidth && "tw-flex-1")}>
         {/* Show visible tabs */}
         {visibleTabs.map((option) => (
           <button

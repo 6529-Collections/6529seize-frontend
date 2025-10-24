@@ -7,7 +7,8 @@ import {
   useImperativeHandle,
   useState,
 } from "react";
-import PencilIcon from "@/components/utils/icons/PencilIcon";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPen } from "@fortawesome/free-solid-svg-icons";
 import WaveGroupEdit from "./WaveGroupEdit";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { WaveGroupType } from "../WaveGroup.types";
@@ -21,7 +22,7 @@ interface WaveGroupEditButtonProps {
   readonly wave: ApiWave;
   readonly type: WaveGroupType;
   readonly onWaveUpdate: (body: ApiUpdateWaveRequest) => Promise<void>;
-  readonly renderTrigger?: ((options: { open: () => void }) => ReactNode) | null;
+  readonly renderTrigger?: ((options: { readonly open: () => void }) => ReactNode) | null;
 }
 
 const WaveGroupEditButton = forwardRef<
@@ -50,10 +51,13 @@ const WaveGroupEditButton = forwardRef<
         renderTrigger({ open: handleOpen })
       ) : renderTrigger === null ? null : (
         <button
+          type="button"
+          aria-label="Edit group"
           title="Edit"
           onClick={handleOpen}
-          className="tw-border-none tw-bg-transparent tw-p-0 tw-items-center tw-text-iron-300 hover:tw-text-iron-400 tw-duration-300 tw-ease-out tw-transition-all">
-          <PencilIcon />
+          className="tw-border-none tw-bg-transparent tw-p-0 tw-items-center tw-text-iron-300 hover:tw-text-iron-400 tw-duration-300 tw-ease-out tw-transition-all"
+        >
+          <FontAwesomeIcon icon={faPen} className="tw-h-4 tw-w-4" />
         </button>
       )}
       <WaveGroupEdit

@@ -15,7 +15,7 @@ export default function CommonDropdownItemsDefaultWrapper<T>({
   readonly isOpen: boolean;
   readonly setOpen: (isOpen: boolean) => void;
   readonly buttonRef: RefObject<HTMLButtonElement | HTMLDivElement | null>;
-  readonly buttonPosition?: { readonly bottom: number; readonly right: number };
+  readonly buttonPosition?: { readonly right: number };
   readonly dynamicPosition?: boolean;
   readonly children: ReactNode;
 }) {
@@ -49,7 +49,7 @@ export default function CommonDropdownItemsDefaultWrapper<T>({
         {isOpen && (
           <motion.div
             ref={listRef}
-            className="tw-mt-2 tw-w-72 tw-min-w-[12rem] tw-rounded-lg tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 tw-ring-white/10 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20"
+            className="tw-mt-2 tw-w-72 tw-rounded-lg tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 tw-ring-white/10 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
