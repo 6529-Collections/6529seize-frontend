@@ -1,3 +1,5 @@
+"use client";
+
 import { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import DistributionPlanToolPlansTableItem from "./DistributionPlanToolPlansTableItem";
 
@@ -8,7 +10,6 @@ export default function DistributionPlanToolPlansTable({
   plans: AllowlistDescription[];
   onDeleted: (id: string) => void;
 }) {
-
   return (
     <div>
       <div className="tw-mt-8 tw-flow-root">
