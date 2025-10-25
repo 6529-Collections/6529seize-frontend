@@ -401,8 +401,8 @@ const pollGroupVisibility = async ({
 type RequestAuth = () => Promise<{ success: boolean }>;
 
 type SetToast = (options: {
-  message: string | ReactNode;
-  type: TypeOptions;
+  readonly message: string | ReactNode;
+  readonly type: TypeOptions;
 }) => void;
 
 interface UseWaveGroupEditButtonsControllerProps {
@@ -751,7 +751,6 @@ export const useWaveGroupEditButtonsController = ({
       type,
       wave,
       onWaveCreated,
-      editWaveMutation,
       updateWave,
       fetchScopedGroupFull,
       loadIdentityGroupWallets,
