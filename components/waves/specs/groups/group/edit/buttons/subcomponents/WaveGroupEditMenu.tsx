@@ -2,7 +2,7 @@
 
 import { useMemo, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCog } from "@fortawesome/free-solid-svg-icons";
+import { faGear } from "@fortawesome/free-solid-svg-icons";
 import { CompactMenu, type CompactMenuItem } from "@/components/common/CompactMenu";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
@@ -114,7 +114,7 @@ export default function WaveGroupEditMenu({
         trigger={() => (
           <>
             <span className="tw-sr-only">Group options</span>
-            <FontAwesomeIcon icon={faCog} className="tw-size-5 tw-flex-shrink-0" />
+            <FontAwesomeIcon icon={faGear} className="tw-size-5 tw-flex-shrink-0" />
           </>
         )}
         aria-label="Group options"

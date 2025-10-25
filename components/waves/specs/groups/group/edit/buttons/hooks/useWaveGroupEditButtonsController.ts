@@ -207,12 +207,20 @@ const mapValidationToMessage = (
 };
 
 type ScopedGroup = ReturnType<typeof getScopedGroup>;
+type IdentityModalPermissions = Readonly<
+  Record<WaveGroupIdentitiesModal, boolean>
+>;
 
 const isIdentityActionAllowed = (
   mode: WaveGroupIdentitiesModal,
+  permissions: IdentityModalPermissions,
   scopedGroup: ScopedGroup,
   setToast: SetToast,
 ): boolean => {
+  if (permissions[mode]) {
+    return true;
+  }
+
   if (
     mode === WaveGroupIdentitiesModal.INCLUDE &&
     !scopedGroup?.id
@@ -224,7 +232,13 @@ const isIdentityActionAllowed = (
     });
     return false;
   }
-  return true;
+
+  setToast({
+    type: "error",
+    message:
+      "You do not have permission to modify identities for this group.",
+  });
+  return false;
 };
 
 const ensureAuthenticated = async (
@@ -417,10 +431,10 @@ export interface WaveGroupEditButtonsController {
     body: ApiUpdateWaveRequest,
     opts?: { readonly skipAuth?: boolean },
   ) => Promise<void>;
-  readonly onIdentityConfirm: (event: {
+  readonly onIdentityConfirm: (event: Readonly<{
     identity: string;
     mode: WaveGroupIdentitiesModal;
-  }) => void;
+  }>) => void;
 }
 
 export const useWaveGroupEditButtonsController = ({
@@ -517,6 +531,14 @@ export const useWaveGroupEditButtonsController = ({
   const canRemoveGroup =
     haveGroup && type !== WaveGroupType.ADMIN;
 
+  const identityModalPermissions = useMemo<IdentityModalPermissions>(
+    () => ({
+      [WaveGroupIdentitiesModal.INCLUDE]: canIncludeIdentity,
+      [WaveGroupIdentitiesModal.EXCLUDE]: canExcludeIdentity,
+    }),
+    [canIncludeIdentity, canExcludeIdentity],
+  );
+
   const editWaveMutation = useMutation({
     mutationFn: async (body: ApiUpdateWaveRequest) =>
       await commonApiPost<ApiUpdateWaveRequest, ApiWave>({
@@ -571,14 +593,12 @@ export const useWaveGroupEditButtonsController = ({
 
   useEffect(() => {
     if (
-      (activeIdentitiesModal === WaveGroupIdentitiesModal.INCLUDE &&
-        !canIncludeIdentity) ||
-      (activeIdentitiesModal === WaveGroupIdentitiesModal.EXCLUDE &&
-        !canExcludeIdentity)
+      activeIdentitiesModal &&
+      !identityModalPermissions[activeIdentitiesModal]
     ) {
       setActiveIdentitiesModal(null);
     }
-  }, [activeIdentitiesModal, canIncludeIdentity, canExcludeIdentity]);
+  }, [activeIdentitiesModal, identityModalPermissions]);
 
   const openIdentitiesModal = useCallback(
     (modal: WaveGroupIdentitiesModal) => {
@@ -595,16 +615,23 @@ export const useWaveGroupEditButtonsController = ({
     async ({
       identity,
       mode,
-    }: {
+    }: Readonly<{
       identity: string;
       mode: WaveGroupIdentitiesModal;
-    }) => {
+    }>) => {
       const normalisedIdentity = normaliseIdentity(identity);
       if (!normalisedIdentity) {
         return;
       }
 
-      if (!isIdentityActionAllowed(mode, scopedGroup, setToast)) {
+      if (
+        !isIdentityActionAllowed(
+          mode,
+          identityModalPermissions,
+          scopedGroup,
+          setToast,
+        )
+      ) {
         return;
       }
 
@@ -707,6 +734,7 @@ export const useWaveGroupEditButtonsController = ({
       }
     },
     [
+      identityModalPermissions,
       requestAuth,
       scopedGroup,
       setToast,

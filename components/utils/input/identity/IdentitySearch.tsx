@@ -53,7 +53,8 @@ export default function IdentitySearch({
     [IdentitySearchSize.MD]: "tw-top-3.5",
   };
 
-  const randomId = getRandomObjectId();
+  const randomIdRef = useRef(getRandomObjectId());
+  const randomId = randomIdRef.current;
   const listboxId = `${randomId}-listbox`;
 
   const [searchCriteria, setSearchCriteria] = useState<string | null>(identity);
@@ -109,7 +110,8 @@ export default function IdentitySearch({
 
   const onFocusChange = (newV: boolean) => {
     if (newV) {
-      setIsOpen(!!searchCriteria?.length);
+      const len = searchCriteria?.length ?? 0;
+      setIsOpen(len >= MIN_SEARCH_LENGTH);
       return;
     }
     setIsOpen(false);
@@ -118,7 +120,8 @@ export default function IdentitySearch({
 
   const onSearchCriteriaChange = (newV: string | null) => {
     setSearchCriteria(newV);
-    setIsOpen(!!newV?.length);
+    const len = newV?.length ?? 0;
+    setIsOpen(len >= MIN_SEARCH_LENGTH);
     if (!newV) {
       setIdentity(null);
     }
