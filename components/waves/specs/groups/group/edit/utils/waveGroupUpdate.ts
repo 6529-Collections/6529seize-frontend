@@ -61,8 +61,7 @@ export const getGroupIdByType = (
   const path = waveGroupUpdatePaths[type];
   let current: unknown = body;
 
-  for (let index = 0; index < path.length; index += 1) {
-    const segment = path[index];
+  for (const segment of path) {
     if (
       !current ||
       typeof current !== "object" ||

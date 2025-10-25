@@ -452,7 +452,7 @@ export const useWaveGroupEditButtonsController = ({
   }, []);
 
   useQuery({
-    queryKey: [QueryKey.GROUP, scopedGroup?.id],
+    queryKey: [QueryKey.GROUP, scopedGroup?.id ?? ""],
     enabled: !!scopedGroup?.id,
     queryFn: async ({ signal }) => {
       if (!scopedGroup?.id) {

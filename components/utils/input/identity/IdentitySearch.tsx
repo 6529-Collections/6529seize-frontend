@@ -142,8 +142,9 @@ export default function IdentitySearch({
   useKeyPressEvent("Escape", () => setIsOpen(false));
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const shouldAutoFocus = useRef(autoFocus);
   useEffect(() => {
-    if (autoFocus) {
+    if (shouldAutoFocus.current) {
       inputRef.current?.focus();
     }
   }, []);

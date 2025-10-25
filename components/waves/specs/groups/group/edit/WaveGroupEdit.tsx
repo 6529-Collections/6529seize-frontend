@@ -32,6 +32,7 @@ export default function WaveGroupEdit({
   const onGroupSelect = async (group: ApiGroupFull): Promise<void> => {
     const body = getBody({ group });
     await onWaveUpdate(body);
+    setIsEditOpen(false);
   };
 
   return (

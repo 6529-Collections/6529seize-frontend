@@ -75,13 +75,12 @@ export default function WaveGroupEditButtons({
 
   if (mutating) {
     return (
-      <div
-        role="status"
+      <output
         aria-live="polite"
         className="tw-inline-flex tw-items-center tw-gap-2">
         <CircleLoader />
         <span className="tw-sr-only">Updating wave group identities</span>
-      </div>
+      </output>
     );
   }
 

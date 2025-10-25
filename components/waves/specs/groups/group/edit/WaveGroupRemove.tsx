@@ -22,9 +22,8 @@ export default function WaveGroupRemove({
     opts?: { readonly skipAuth?: boolean },
   ) => Promise<void>;
 }) {
-  const getBody = (): ApiUpdateWaveRequest => {
-    return buildWaveUpdateBody(wave, type, null);
-  };
+  const getBody = (): ApiUpdateWaveRequest =>
+    buildWaveUpdateBody(wave, type, null);
 
   const onRemove = async (): Promise<void> => {
     const body = getBody();

@@ -11,6 +11,15 @@ import {
 } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 
+function calculateDropdownLeft(
+  buttonRight: number,
+  dropdownWidth: number,
+  offsetParentLeft: number
+): number {
+  const referenceRight = buttonRight - offsetParentLeft;
+  return Math.max(0, referenceRight - dropdownWidth);
+}
+
 export default function CommonDropdownItemsDefaultWrapper<T>({
   isOpen,
   setOpen,
@@ -49,12 +58,12 @@ export default function CommonDropdownItemsDefaultWrapper<T>({
     const el = dropdownRef.current;
     const width = listRef.current?.offsetWidth ?? el?.offsetWidth ?? 0;
     if (el && typeof buttonRight === "number") {
-      let referenceRight = buttonRight;
       const offsetParent = el.offsetParent;
-      if (offsetParent instanceof HTMLElement) {
-        referenceRight -= offsetParent.getBoundingClientRect().left;
-      }
-      const left = Math.max(0, referenceRight - width);
+      const offsetLeft =
+        offsetParent instanceof HTMLElement
+          ? offsetParent.getBoundingClientRect().left
+          : 0;
+      const left = calculateDropdownLeft(buttonRight, width, offsetLeft);
       el.style.left = `${left}px`;
     }
   }, [dynamicPosition, isOpen, buttonRight]);

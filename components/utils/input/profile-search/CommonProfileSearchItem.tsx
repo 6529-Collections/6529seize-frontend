@@ -26,14 +26,12 @@ export default function CommonProfileSearchItem({
   const onProfileClick = () => onProfileSelect(profile);
 
   return (
-    <li
-      id={id}
-      role="option"
-      aria-selected={isHighlighted || isSelected}
-      className="tw-h-full"
-    >
+    <li className="tw-h-full">
       <button
         type="button"
+        id={id}
+        role="option"
+        aria-selected={isSelected}
         className={`hover:tw-bg-iron-700 tw-py-2 tw-w-full tw-h-full tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out ${
           isHighlighted ? "tw-bg-iron-700" : "tw-bg-transparent"
         }`}
