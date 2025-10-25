@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState, KeyboardEvent } from "react";
+import { useEffect, useRef, useState, KeyboardEvent, useId } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCircleExclamation,
@@ -12,7 +12,6 @@ import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { CommunityMemberMinimal } from "@/entities/IProfile";
 import { commonApiFetch } from "@/services/api/common-api";
 import CommonProfileSearchItems from "../profile-search/CommonProfileSearchItems";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getSelectableIdentity } from "@/components/utils/input/profile-search/getSelectableIdentity";
 export enum IdentitySearchSize {
@@ -53,9 +52,8 @@ export default function IdentitySearch({
     [IdentitySearchSize.MD]: "tw-top-3.5",
   };
 
-  const randomIdRef = useRef(getRandomObjectId());
-  const randomId = randomIdRef.current;
-  const listboxId = `${randomId}-listbox`;
+  const inputId = useId();
+  const listboxId = `${inputId}-listbox`;
 
   const [searchCriteria, setSearchCriteria] = useState<string | null>(identity);
   const [debouncedValue, setDebouncedValue] = useState<string | null>(
@@ -250,7 +248,7 @@ export default function IdentitySearch({
           }
         }}
         onKeyDown={(event) => handleArrowNavigation(event)}
-        id={randomId}
+        id={inputId}
         autoComplete="off"
         role="combobox"
         aria-autocomplete="list"
@@ -286,7 +284,7 @@ export default function IdentitySearch({
         </button>
       )}
       <label
-        htmlFor={randomId}
+        htmlFor={inputId}
         className={`${LABEL_CLASSES[size]} ${
           error
             ? "peer-focus:tw-text-error peer-placeholder-shown:-tw-translate-y-1/4 peer-placeholder-shown:tw-top-1/4"

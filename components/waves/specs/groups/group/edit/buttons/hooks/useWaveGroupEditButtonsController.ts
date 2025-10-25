@@ -48,7 +48,8 @@ const dedupeAddresses = (addresses: readonly string[]): string[] =>
     new Set(
       addresses
         .filter((addr): addr is string => typeof addr === "string")
-        .map((addr) => addr.toLowerCase()),
+        .map((addr) => addr.trim().toLowerCase())
+        .filter((addr) => addr.length > 0),
     ),
   );
 
@@ -675,10 +676,18 @@ export const useWaveGroupEditButtonsController = ({
           nameOverride: trimmedName,
         });
 
-        await publishGroup({
-          id: createdGroup.id,
-          oldVersionId: previousGroupId,
-        });
+        const publishController = new AbortController();
+        abortControllersRef.current.add(publishController);
+        try {
+          await publishGroup({
+            id: createdGroup.id,
+            oldVersionId: previousGroupId,
+            signal: publishController.signal,
+          });
+        } finally {
+          publishController.abort();
+          abortControllersRef.current.delete(publishController);
+        }
 
         await pollGroupVisibility({
           createdGroupId: createdGroup.id,
@@ -711,6 +720,7 @@ export const useWaveGroupEditButtonsController = ({
             ? "Identity successfully included in the group."
             : "Identity successfully excluded from the group.";
 
+        setActiveIdentitiesModal(null);
         setToast({
           message: successMessage,
           type: "success",
