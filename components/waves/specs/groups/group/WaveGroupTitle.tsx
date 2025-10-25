@@ -1,4 +1,4 @@
-import { WaveGroupType } from "./WaveGroup";
+import { WaveGroupType } from "./WaveGroup.types";
 
 export default function WaveGroupTitle({
   type,

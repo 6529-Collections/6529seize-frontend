@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import WaveGroupRemove from '@/components/waves/specs/groups/group/edit/WaveGroupRemove';
-import { WaveGroupType } from '@/components/waves/specs/groups/group/WaveGroup';
+import { WaveGroupType } from '@/components/waves/specs/groups/group/WaveGroup.types';
 import { convertWaveToUpdateWave } from '@/helpers/waves/waves.helpers';
 
 jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupRemoveModal', () => (props: any) => (
@@ -31,19 +31,19 @@ describe('WaveGroupRemove', () => {
 
   it('builds body according to type', async () => {
     const user = userEvent.setup();
-    const onEdit = jest.fn(() => Promise.resolve());
+    const onWaveUpdate = jest.fn(() => Promise.resolve());
     render(
-      <WaveGroupRemove wave={baseWave} type={WaveGroupType.VIEW} isEditOpen={true} setIsEditOpen={jest.fn()} onEdit={onEdit} />
+      <WaveGroupRemove wave={baseWave} type={WaveGroupType.VIEW} isEditOpen={true} setIsEditOpen={jest.fn()} onWaveUpdate={onWaveUpdate} />
     );
     await user.click(screen.getByTestId('remove'));
-    expect(onEdit).toHaveBeenCalled();
-    expect(onEdit.mock.calls[0][0].visibility.scope.group_id).toBeNull();
+    expect(onWaveUpdate).toHaveBeenCalled();
+    expect(onWaveUpdate.mock.calls[0][0].visibility.scope.group_id).toBeNull();
 
-    onEdit.mockClear();
+    onWaveUpdate.mockClear();
     render(
-      <WaveGroupRemove wave={baseWave} type={WaveGroupType.ADMIN} isEditOpen={true} setIsEditOpen={jest.fn()} onEdit={onEdit} />
+      <WaveGroupRemove wave={baseWave} type={WaveGroupType.ADMIN} isEditOpen={true} setIsEditOpen={jest.fn()} onWaveUpdate={onWaveUpdate} />
     );
     await user.click(screen.getAllByTestId('remove')[1]);
-    expect(onEdit.mock.calls[0][0].wave.admin_group.group_id).toBeNull();
+    expect(onWaveUpdate.mock.calls[0][0].wave.admin_group.group_id).toBeNull();
   });
 });

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import WaveGroupTitle from '@/components/waves/specs/groups/group/WaveGroupTitle';
-import { WaveGroupType } from '@/components/waves/specs/groups/group/WaveGroup';
+import { WaveGroupType } from '@/components/waves/specs/groups/group/WaveGroup.types';
 
 describe('WaveGroupTitle', () => {
   it('renders label for each type', () => {

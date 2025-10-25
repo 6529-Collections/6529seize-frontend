@@ -1,10 +1,9 @@
 import { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
 import { ApiWave } from "@/generated/models/ApiWave";
-import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import { convertWaveToUpdateWave } from "@/helpers/waves/waves.helpers";
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
-import { WaveGroupType } from "../WaveGroup";
+import { WaveGroupType } from "../WaveGroup.types";
+import { buildWaveUpdateBody } from "./buttons/utils/waveGroupEdit";
 import WaveGroupRemoveModal from "./WaveGroupRemoveModal";
 
 export default function WaveGroupRemove({
@@ -12,81 +11,23 @@ export default function WaveGroupRemove({
   type,
   isEditOpen,
   setIsEditOpen,
-  onEdit,
+  onWaveUpdate,
 }: {
   readonly wave: ApiWave;
   readonly type: WaveGroupType;
   readonly isEditOpen: boolean;
   readonly setIsEditOpen: (isOpen: boolean) => void;
-  readonly onEdit: (body: ApiUpdateWaveRequest) => Promise<void>;
+  readonly onWaveUpdate: (
+    body: ApiUpdateWaveRequest,
+    opts?: { readonly skipAuth?: boolean },
+  ) => Promise<void>;
 }) {
-  const getBody = (): ApiUpdateWaveRequest => {
-    const originalBody = convertWaveToUpdateWave(wave);
-    switch (type) {
-      case WaveGroupType.VIEW:
-        return {
-          ...originalBody,
-          visibility: {
-            ...originalBody.visibility,
-            scope: {
-              ...originalBody.visibility.scope,
-              group_id: null,
-            },
-          },
-        };
-      case WaveGroupType.DROP:
-        return {
-          ...originalBody,
-          participation: {
-            ...originalBody.participation,
-            scope: {
-              ...originalBody.participation.scope,
-              group_id: null,
-            },
-          },
-        };
-      case WaveGroupType.VOTE:
-        return {
-          ...originalBody,
-          voting: {
-            ...originalBody.voting,
-            scope: {
-              ...originalBody.voting.scope,
-              group_id: null,
-            },
-          },
-        };
-      case WaveGroupType.CHAT:
-        return {
-          ...originalBody,
-          chat: {
-            ...originalBody.chat,
-            scope: {
-              ...originalBody.chat.scope,
-              group_id: null,
-            },
-          },
-        };
-      case WaveGroupType.ADMIN:
-        return {
-          ...originalBody,
-          wave: {
-            ...originalBody.wave,
-            admin_group: {
-              ...originalBody.wave.admin_group,
-              group_id: null,
-            },
-          },
-        };
-      default:
-        assertUnreachable(type);
-        return originalBody;
-    }
-  };
+  const getBody = (): ApiUpdateWaveRequest =>
+    buildWaveUpdateBody(wave, type, null);
 
   const onRemove = async (): Promise<void> => {
     const body = getBody();
-    await onEdit(body);
+    await onWaveUpdate(body);
   };
 
   return (
