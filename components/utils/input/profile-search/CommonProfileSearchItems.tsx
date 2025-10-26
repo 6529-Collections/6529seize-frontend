@@ -25,6 +25,7 @@ export default function CommonProfileSearchItems({
 }) {
   const generatedListboxId = useId();
   const resolvedListboxId = listboxId ?? generatedListboxId;
+  const normalizedSelected = selected?.toLowerCase() ?? null;
 
   const buildOptionId = (
     profile: CommunityMemberMinimal,
@@ -40,9 +41,9 @@ export default function CommonProfileSearchItems({
     const sanitized =
       String(rawId)
         .trim()
-        .replace(/[^a-zA-Z0-9_-]+/g, "-")
-        .replace(/-+/g, "-")
-        .replace(/(^-|-$)/g, "") || "item";
+        .replaceAll(/[^a-zA-Z0-9_-]+/g, "-")
+        .replaceAll(/-+/g, "-")
+        .replaceAll(/(^-|-$)/g, "") || "item";
 
     return `profile-search-item-${sanitized}-${index}`;
   };
@@ -82,6 +83,7 @@ export default function CommonProfileSearchItems({
     !searchCriteria || searchCriteria.length < 3
       ? "Type at least 3 characters"
       : "No results";
+  const selectSize = Math.max(Math.min(optionMetadata.length || 1, 10), 1);
 
   return (
     <AnimatePresence mode="wait" initial={false}>
@@ -95,12 +97,37 @@ export default function CommonProfileSearchItems({
         >
           <div className="tw-absolute tw-overflow-hidden tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
             <div className="tw-py-1 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto">
-              <ul
+              <select
                 id={resolvedListboxId}
-                role="listbox"
                 aria-label="Profile suggestions"
-                aria-multiselectable={false}
                 tabIndex={-1}
+                size={selectSize}
+                className="tw-sr-only"
+              >
+                {optionMetadata.length ? (
+                  optionMetadata.map((meta) => {
+                    const isOptionSelected =
+                      typeof meta.identity === "string" &&
+                      normalizedSelected === meta.identity.toLowerCase();
+                    return (
+                      <option
+                        key={`sr-${meta.optionId}`}
+                        id={meta.optionId}
+                        value={meta.identity ?? meta.optionId}
+                        aria-selected={isOptionSelected}
+                      >
+                        {meta.label}
+                      </option>
+                    );
+                  })
+                ) : (
+                  <option id={`${resolvedListboxId}-empty`} value="">
+                    {noResultsText}
+                  </option>
+                )}
+              </select>
+              <ul
+                aria-hidden="true"
                 className="tw-flex tw-flex-col tw-gap-y-1 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none"
               >
                 {optionMetadata.length ? (
@@ -118,10 +145,7 @@ export default function CommonProfileSearchItems({
                     );
                   })
                 ) : (
-                  <li
-                    role="presentation"
-                    className="tw-py-2 tw-w-full tw-h-full tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-medium tw-text-white tw-rounded-lg tw-relative tw-select-none tw-px-2"
-                  >
+                  <li className="tw-py-2 tw-w-full tw-h-full tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-medium tw-text-white tw-rounded-lg tw-relative tw-select-none tw-px-2">
                     {noResultsText}
                   </li>
                 )}

@@ -310,8 +310,10 @@ const buildIdentityPayload = async ({
       ...basePayload,
       group: {
         ...basePayload.group,
-        identity_addresses: includeWallets,
-        excluded_identity_addresses: excludeWallets,
+        identity_addresses: includeWallets.length ? includeWallets : null,
+        excluded_identity_addresses: excludeWallets.length
+          ? excludeWallets
+          : null,
       },
     },
     previousGroupId: groupFull.id,
