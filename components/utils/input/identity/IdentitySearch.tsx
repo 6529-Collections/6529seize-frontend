@@ -250,7 +250,6 @@ export default function IdentitySearch({
         onKeyDown={(event) => handleArrowNavigation(event)}
         id={inputId}
         autoComplete="off"
-        list={listboxId}
         role="combobox"
         aria-autocomplete="list"
         aria-expanded={isOpen}

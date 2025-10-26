@@ -27,9 +27,12 @@ export default function CommonProfileSearchItem({
     typeof selectableValue === "string" &&
     selected?.toLowerCase() === selectableValue.toLowerCase();
   const title = profile.handle ?? profile.display;
+  const avatarLabel =
+    profile.display ?? profile.handle ?? profile.wallet ?? "Profile";
+  const avatarAltText = `${avatarLabel} avatar`;
 
   const onProfileClick = () => onProfileSelect(profile);
-  const onProfileKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+  const onProfileKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       onProfileClick();
@@ -37,10 +40,9 @@ export default function CommonProfileSearchItem({
   };
 
   return (
-    <li role="presentation" className="tw-list-none">
-      <button
+    <li className="tw-list-none">
+      <div
         id={id}
-        type="button"
         {...LISTBOX_OPTION_ROLE}
         aria-selected={isSelected}
         tabIndex={-1}
@@ -61,8 +63,7 @@ export default function CommonProfileSearchItem({
                         profile.pfp,
                         ImageScale.W_AUTO_H_50
                       )}
-                      alt=""
-                      aria-hidden="true"
+                      alt={avatarAltText}
                       className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
                     />
                   </div>
@@ -87,7 +88,7 @@ export default function CommonProfileSearchItem({
             />
           )}
         </div>
-      </button>
+      </div>
     </li>
   );
 }

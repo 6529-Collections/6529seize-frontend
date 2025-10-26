@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { CommunityMemberMinimal } from "@/entities/IProfile";
 import CommonProfileSearchItem from "./CommonProfileSearchItem";
-import { getSelectableIdentity } from "./getSelectableIdentity";
 
 export default function CommonProfileSearchItems({
   open,
@@ -48,7 +47,7 @@ export default function CommonProfileSearchItems({
     highlightedIndex !== null &&
     highlightedIndex >= 0 &&
     highlightedIndex < profiles.length
-      ? buildOptionId(profiles[highlightedIndex], highlightedIndex)
+      ? `${buildOptionId(profiles[highlightedIndex], highlightedIndex)}-visual`
       : undefined;
 
   useEffect(() => {
@@ -67,44 +66,10 @@ export default function CommonProfileSearchItems({
       ? "Type at least 3 characters"
       : "No results";
   const visualListboxId =
-    listboxId && listboxId.length ? `${listboxId}-visual` : undefined;
-
-  const buildOptionValue = (
-    profile: CommunityMemberMinimal,
-    index: number
-  ): string => {
-    return (
-      getSelectableIdentity(profile) ??
-      profile.wallet ??
-      profile.primary_wallet ??
-      profile.handle ??
-      profile.display ??
-      buildOptionId(profile, index)
-    );
-  };
+    listboxId?.length ? `${listboxId}-visual` : undefined;
 
   return (
     <>
-      {listboxId && (
-        <datalist id={listboxId}>
-          {profiles.map((profile, index) => {
-            const optionValue = buildOptionValue(profile, index);
-            if (!optionValue) {
-              return null;
-            }
-            const optionId = buildOptionId(profile, index);
-            const optionLabel = profile.display ?? profile.handle ?? optionValue;
-            return (
-              <option
-                key={optionId}
-                id={optionId}
-                value={optionValue}
-                label={optionLabel}
-              />
-            );
-          })}
-        </datalist>
-      )}
       <AnimatePresence mode="wait" initial={false}>
         {open && (
           <motion.div
@@ -116,7 +81,7 @@ export default function CommonProfileSearchItems({
           >
             <div className="tw-absolute tw-overflow-hidden tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
               <div className="tw-py-1 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto">
-                {/* Visual dropdown list; accessible semantics provided by the datalist */}
+                {/* Visual dropdown list with ARIA semantics */}
                 <ul
                   id={visualListboxId}
                   tabIndex={-1}

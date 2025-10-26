@@ -192,7 +192,6 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
             label: option.label,
             onSelect: () => handleSelect(option.key),
             active: activeKey === option.key,
-            ariaSelected: activeKey === option.key,
           }))}
           itemClassName="tw-block tw-w-full tw-border-0 tw-bg-transparent tw-px-4 tw-py-2 tw-text-left tw-text-sm tw-font-medium tw-transition-colors"
           inactiveItemClassName="tw-text-iron-300 hover:tw-bg-iron-800 hover:tw-text-iron-200"
