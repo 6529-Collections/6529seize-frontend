@@ -391,6 +391,62 @@ const pollGroupVisibility = async ({
   }
 };
 
+interface CreateAndPublishGroupParams {
+  readonly payload: ApiCreateGroup;
+  readonly previousGroupId: string | null;
+  readonly abortControllersRef: MutableRefObject<Set<AbortController>>;
+  readonly queryClient: QueryClient;
+  readonly waveId: string;
+  readonly waveGroupType: WaveGroupType;
+}
+
+const createAndPublishGroupWithVisibility = async ({
+  payload,
+  previousGroupId,
+  abortControllersRef,
+  queryClient,
+  waveId,
+  waveGroupType,
+}: CreateAndPublishGroupParams): Promise<string> => {
+  const trimmedName = payload.name.trim();
+  const createdGroup = await createGroup({
+    payload: {
+      ...payload,
+      name: trimmedName,
+    },
+    nameOverride: trimmedName,
+  });
+
+  const publishController = new AbortController();
+  abortControllersRef.current.add(publishController);
+  try {
+    await publishGroup({
+      id: createdGroup.id,
+      oldVersionId: previousGroupId,
+      signal: publishController.signal,
+    });
+  } finally {
+    publishController.abort();
+    abortControllersRef.current.delete(publishController);
+  }
+
+  await pollGroupVisibility({
+    createdGroupId: createdGroup.id,
+    waveId,
+    abortControllersRef,
+    queryClient,
+  });
+
+  console.info("[WaveGroupEditButtons] Published updated group", {
+    waveId,
+    waveGroupType,
+    previousGroupId,
+    newGroupId: createdGroup.id,
+  });
+
+  return createdGroup.id;
+};
+
 type RequestAuth = () => Promise<{ success: boolean }>;
 
 type SetToast = (options: {
@@ -658,47 +714,20 @@ export const useWaveGroupEditButtonsController = ({
           return;
         }
 
-        const trimmedName = updatedPayload.name.trim();
-        const createdGroup = await createGroup({
-          payload: {
-            ...updatedPayload,
-            name: trimmedName,
-          },
-          nameOverride: trimmedName,
-        });
-
-        const publishController = new AbortController();
-        abortControllersRef.current.add(publishController);
-        try {
-          await publishGroup({
-            id: createdGroup.id,
-            oldVersionId: previousGroupId,
-            signal: publishController.signal,
-          });
-        } finally {
-          publishController.abort();
-          abortControllersRef.current.delete(publishController);
-        }
-
-        await pollGroupVisibility({
-          createdGroupId: createdGroup.id,
-          waveId: wave.id,
+        const newGroupId = await createAndPublishGroupWithVisibility({
+          payload: updatedPayload,
+          previousGroupId,
           abortControllersRef,
           queryClient,
-        });
-
-        console.info("[WaveGroupEditButtons] Published updated group", {
           waveId: wave.id,
           waveGroupType: type,
-          previousGroupId,
-          newGroupId: createdGroup.id,
         });
 
         if (needsWaveUpdate) {
           const updateBody = buildWaveUpdateBody(
             wave,
             type,
-            createdGroup.id,
+            newGroupId,
           );
           waveMutationTriggered = true;
           await updateWave(updateBody, { skipAuth: true });

@@ -142,14 +142,10 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
   return (
     <div
       className={clsx("tw-flex tw-gap-x-1", fullWidth ? "tw-w-full" : "tw-w-auto")}>
-      <div
-        role="tablist"
-        className={clsx("tw-flex tw-gap-x-1", fullWidth && "tw-flex-1")}
-      >
+      <div className={clsx("tw-flex tw-gap-x-1", fullWidth && "tw-flex-1")}>
         {visibleTabs.map((option, index) => (
           <button
-            role="tab"
-            aria-selected={activeKey === option.key}
+            aria-pressed={activeKey === option.key}
             key={option.key}
             type="button"
             tabIndex={index === focusedTabIndex ? 0 : -1}
@@ -177,7 +173,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
           unstyledMenu
           unstyledItems
           triggerClassName={clsx(
-            "tw-flex tw-items-center tw-gap-0.5 tw-border-0 tw-bg-transparent tw-text-sm tw-font-medium tw-transition-all tw-duration-200 tw-whitespace-nowrap",
+            "tw-flex tw-items-center tw-gap-0.5 tw-border-0 tw-bg-transparent tw-text-sm tw-font-medium tw-transition-all tw-duration-200 tw-whitespace-nowrap focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/50 focus-visible:tw-rounded-sm",
             isActiveInOverflow
               ? "tw-text-primary-300 tw-border-b-2 tw-border-primary-400"
               : "tw-text-iron-400 hover:tw-text-iron-200",

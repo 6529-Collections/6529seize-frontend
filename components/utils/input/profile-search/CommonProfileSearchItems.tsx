@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useId } from "react";
+import { useEffect, useId } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { CommunityMemberMinimal } from "@/entities/IProfile";
 import CommonProfileSearchItem from "./CommonProfileSearchItem";
@@ -67,6 +67,9 @@ export default function CommonProfileSearchItems({
       ? optionMetadata[highlightedIndex].optionId
       : undefined;
 
+  // Keep the callback in the dependency list so highlighted state stays in sync.
+  // Callers should memoize `onHighlightedOptionIdChange` (e.g., with useCallback)
+  // if they want to avoid rerunning the effect when the reference changes.
   useEffect(() => {
     if (!onHighlightedOptionIdChange) {
       return;
@@ -82,8 +85,7 @@ export default function CommonProfileSearchItems({
     !searchCriteria || searchCriteria.length < 3
       ? "Type at least 3 characters"
       : "No results";
-  const visualListboxId =
-    resolvedListboxId?.length ? `${resolvedListboxId}-visual` : undefined;
+  const visualListboxId = resolvedListboxId;
 
   const normalizedSelected = selected?.toLowerCase() ?? null;
   const selectedOptionId = normalizedSelected
@@ -92,48 +94,8 @@ export default function CommonProfileSearchItems({
       )?.optionId
     : undefined;
 
-  const activeOptionId = highlightedOptionId ?? selectedOptionId ?? "";
-  const selectSize = Math.min(Math.max(optionMetadata.length, 1), 10);
-  const nativePlaceholderLabel = optionMetadata.length
-    ? "Navigate the suggestion list with your arrow keys"
-    : noResultsText;
-
-  const handleNativeSelectChange = (
-    event: ChangeEvent<HTMLSelectElement>
-  ): void => {
-    const nextOptionId = event.target.value;
-    if (!nextOptionId.length) {
-      onProfileSelect(null);
-      return;
-    }
-
-    const nextProfile = optionMetadata.find(
-      (meta) => meta.optionId === nextOptionId
-    )?.profile;
-
-    if (nextProfile) {
-      onProfileSelect(nextProfile);
-    }
-  };
-
   return (
     <>
-      <select
-        id={resolvedListboxId}
-        size={selectSize}
-        tabIndex={-1}
-        className="tw-sr-only"
-        aria-label="Profile search results"
-        value={activeOptionId}
-        onChange={handleNativeSelectChange}
-      >
-        <option value="">{nativePlaceholderLabel}</option>
-        {optionMetadata.map((meta) => (
-          <option key={meta.optionId} id={meta.optionId} value={meta.optionId}>
-            {meta.label}
-          </option>
-        ))}
-      </select>
       <AnimatePresence mode="wait" initial={false}>
         {open && (
           <motion.div
@@ -148,12 +110,11 @@ export default function CommonProfileSearchItems({
                 <ul
                   id={visualListboxId}
                   tabIndex={-1}
-                  role="listbox"
                   className="tw-flex tw-flex-col tw-gap-y-1 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none"
                 >
                   {optionMetadata.length ? (
                     optionMetadata.map((meta) => {
-                      const visualOptionId = `${meta.optionId}-visual`;
+                      const visualOptionId = meta.optionId;
                       const isOptionHighlighted = highlightedIndex === meta.index;
                       return (
                         <CommonProfileSearchItem
