@@ -459,9 +459,7 @@ export const useWaveGroupEditButtonsController = ({
 
   useEffect(() => {
     return () => {
-      abortControllersRef.current.forEach((controller) => {
-        controller.abort();
-      });
+      abortControllersRef.current.forEach((controller) => controller.abort());
       abortControllersRef.current.clear();
     };
   }, []);

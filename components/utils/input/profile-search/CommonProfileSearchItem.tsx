@@ -6,7 +6,7 @@ import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getSelectableIdentity } from "./getSelectableIdentity";
 
 const LISTBOX_OPTION_ROLE = {
-  role: "option" as const, // NOSONAR (S6819): WAI-ARIA listbox items must expose role="option"; native <option> cannot render the avatar-rich layout this picker requires.
+  role: "option" as const,
 };
 
 export default function CommonProfileSearchItem({
@@ -15,12 +15,14 @@ export default function CommonProfileSearchItem({
   onProfileSelect,
   isHighlighted = false,
   id,
+  isTabbable = false,
 }: {
   readonly profile: CommunityMemberMinimal;
   readonly selected: string | null;
   readonly onProfileSelect: (newV: CommunityMemberMinimal | null) => void;
   readonly isHighlighted?: boolean;
   readonly id: string;
+  readonly isTabbable?: boolean;
 }) {
   const selectableValue = getSelectableIdentity(profile);
   const isSelected =
@@ -30,6 +32,7 @@ export default function CommonProfileSearchItem({
   const avatarLabel =
     profile.display ?? profile.handle ?? profile.wallet ?? "Profile";
   const avatarAltText = `${avatarLabel} avatar`;
+  const optionTabIndex = isTabbable ? 0 : undefined;
 
   const onProfileClick = () => onProfileSelect(profile);
   const onProfileKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -45,7 +48,7 @@ export default function CommonProfileSearchItem({
         id={id}
         {...LISTBOX_OPTION_ROLE}
         aria-selected={isSelected}
-        tabIndex={-1}
+        tabIndex={optionTabIndex}
         className={`tw-h-full hover:tw-bg-iron-700 tw-py-2 tw-w-full tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out ${
           isHighlighted ? "tw-bg-iron-700" : "tw-bg-transparent"
         }`}
