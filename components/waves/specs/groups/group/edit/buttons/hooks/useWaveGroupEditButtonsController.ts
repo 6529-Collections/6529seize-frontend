@@ -157,10 +157,10 @@ const buildDefaultGroupName = (
 
 const applyIdentityChangeToPayload = (
   payload: ApiCreateGroup,
-  identity: string,
+  normalizedIdentity: string,
   mode: WaveGroupIdentitiesModal,
 ): ApiCreateGroup => {
-  const normalizedIdentity = identity.toLowerCase();
+  // identity is already normalized by the caller
   const includeSet = new Set(
     dedupeAddresses(payload.group.identity_addresses ?? []),
   );
@@ -200,9 +200,9 @@ const mapValidationToMessage = (
     return "This group already contains the maximum number of excluded identities.";
   }
   if (issues.includes("NO_FILTERS")) {
-    return mode === WaveGroupIdentitiesModal.INCLUDE
-      ? "The group must contain at least one filter before adding identities."
-      : "You need to define at least one filter before excluding identities.";
+    return mode === WaveGroupIdentitiesModal.EXCLUDE
+      ? "You need to define at least one filter before excluding identities."
+      : "Unable to update the group with the selected identity.";
   }
   return "Unable to update the group with the selected identity.";
 };
@@ -350,13 +350,12 @@ const pollGroupVisibility = async ({
   const pollController = new AbortController();
   abortControllersRef.current.add(pollController);
   try {
-    const maxAttempts = 10;
     const maxDelayMs = 2000;
     const maxElapsedMs = 10000;
     let delayMs = 200;
     const pollStart = Date.now();
 
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    while (Date.now() - pollStart < maxElapsedMs) {
       try {
         const refreshed = await commonApiFetch<ApiGroupFull>({
           endpoint: `groups/${createdGroupId}`,
@@ -378,20 +377,14 @@ const pollGroupVisibility = async ({
         }
       }
 
-      if (Date.now() - pollStart >= maxElapsedMs) {
-        console.warn(
-          "[WaveGroupEditButtons] Group publish polling timed out",
-          {
-            groupId: createdGroupId,
-            waveId,
-          },
-        );
-        return;
-      }
-
       await waitWithAbort(delayMs, pollController.signal);
       delayMs = Math.min(delayMs * 2, maxDelayMs);
     }
+
+    console.warn("[WaveGroupEditButtons] Group publish polling timed out", {
+      groupId: createdGroupId,
+      waveId,
+    });
   } finally {
     pollController.abort();
     abortControllersRef.current.delete(pollController);
@@ -484,7 +477,7 @@ export const useWaveGroupEditButtonsController = ({
     if (!scopedGroup?.id) {
       return null;
     }
-    return await queryClient.fetchQuery({
+    return await queryClient.ensureQueryData({
       queryKey: [QueryKey.GROUP, scopedGroup.id],
       queryFn: async ({ signal }) =>
         await commonApiFetch<ApiGroupFull>({

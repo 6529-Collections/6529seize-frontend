@@ -135,15 +135,6 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
     [visibleTabs.length],
   );
 
-  const activeOption = options.find((option) => option.key === activeKey);
-  const overflowTriggerElement = (
-    <OverflowTrigger
-      isActiveInOverflow={isActiveInOverflow}
-      activeLabel={activeOption?.label}
-      fallbackLabel={TAB_TOGGLE_WITH_OVERFLOW_MESSAGES.overflowFallbackLabel}
-    />
-  );
-
   return (
     <div
       className={clsx("tw-flex tw-gap-x-1", fullWidth ? "tw-w-full" : "tw-w-auto")}>
@@ -187,7 +178,17 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
               ? "tw-text-primary-300 tw-border-b-2 tw-border-primary-400"
               : "tw-text-iron-400 hover:tw-text-iron-200",
           )}
-          trigger={overflowTriggerElement}
+          trigger={({ isOpen }) => {
+            const activeOption = options.find((option) => option.key === activeKey);
+            return (
+              <OverflowTrigger
+                isOpen={isOpen}
+                isActiveInOverflow={isActiveInOverflow}
+                activeLabel={activeOption?.label}
+                fallbackLabel={TAB_TOGGLE_WITH_OVERFLOW_MESSAGES.overflowFallbackLabel}
+              />
+            );
+          }}
           items={overflowTabs.map((option) => ({
             id: option.key,
             label: option.label,
