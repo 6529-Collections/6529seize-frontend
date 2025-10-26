@@ -136,6 +136,13 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
   );
 
   const activeOption = options.find((option) => option.key === activeKey);
+  const overflowTriggerElement = (
+    <OverflowTrigger
+      isActiveInOverflow={isActiveInOverflow}
+      activeLabel={activeOption?.label}
+      fallbackLabel={TAB_TOGGLE_WITH_OVERFLOW_MESSAGES.overflowFallbackLabel}
+    />
+  );
 
   return (
     <div
@@ -180,16 +187,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
               ? "tw-text-primary-300 tw-border-b-2 tw-border-primary-400"
               : "tw-text-iron-400 hover:tw-text-iron-200",
           )}
-          trigger={({ isOpen }) => (
-            <OverflowTrigger
-              isOpen={isOpen}
-              isActiveInOverflow={isActiveInOverflow}
-              activeLabel={activeOption?.label}
-              fallbackLabel={
-                TAB_TOGGLE_WITH_OVERFLOW_MESSAGES.overflowFallbackLabel
-              }
-            />
-          )}
+          trigger={overflowTriggerElement}
           items={overflowTabs.map((option) => ({
             id: option.key,
             label: option.label,

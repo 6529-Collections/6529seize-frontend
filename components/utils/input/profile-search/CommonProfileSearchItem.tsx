@@ -5,10 +5,6 @@ import { CommunityMemberMinimal } from "@/entities/IProfile";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getSelectableIdentity } from "./getSelectableIdentity";
 
-const LISTBOX_OPTION_ROLE = {
-  role: "option" as const,
-};
-
 export default function CommonProfileSearchItem({
   profile,
   selected,
@@ -32,7 +28,7 @@ export default function CommonProfileSearchItem({
   const avatarLabel =
     profile.display ?? profile.handle ?? profile.wallet ?? "Profile";
   const avatarAltText = `${avatarLabel} avatar`;
-  const optionTabIndex = isTabbable ? 0 : undefined;
+  const optionTabIndex = isTabbable ? 0 : -1;
 
   const onProfileClick = () => onProfileSelect(profile);
   const onProfileKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -46,7 +42,7 @@ export default function CommonProfileSearchItem({
     <li className="tw-list-none">
       <div
         id={id}
-        {...LISTBOX_OPTION_ROLE}
+        role="option"
         aria-selected={isSelected}
         tabIndex={optionTabIndex}
         className={`tw-h-full hover:tw-bg-iron-700 tw-py-2 tw-w-full tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out ${
