@@ -14,6 +14,8 @@ import WaveGroupRemoveButton, {
   type WaveGroupRemoveButtonHandle,
 } from "../../WaveGroupRemoveButton";
 
+const GROUP_OPTIONS_LABEL = "Group options";
+
 interface WaveGroupEditMenuProps {
   readonly wave: ApiWave;
   readonly type: WaveGroupType;
@@ -29,6 +31,19 @@ interface WaveGroupEditMenuProps {
   readonly onExcludeIdentity: () => void;
   readonly onChangeGroup?: () => void;
   readonly onRemoveGroup?: () => void;
+}
+
+interface WaveGroupEditMenuTriggerProps {
+  readonly label: string;
+}
+
+function WaveGroupEditMenuTrigger({ label }: WaveGroupEditMenuTriggerProps) {
+  return (
+    <>
+      <span className="tw-sr-only">{label}</span>
+      <FontAwesomeIcon icon={faGear} className="tw-size-5 tw-flex-shrink-0" />
+    </>
+  );
 }
 
 export default function WaveGroupEditMenu({
@@ -111,13 +126,8 @@ export default function WaveGroupEditMenu({
     <div className="tw-relative">
       <CompactMenu
         triggerClassName="tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-text-iron-200 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
-        trigger={() => (
-          <>
-            <span className="tw-sr-only">Group options</span>
-            <FontAwesomeIcon icon={faGear} className="tw-size-5 tw-flex-shrink-0" />
-          </>
-        )}
-        aria-label="Group options"
+        trigger={<WaveGroupEditMenuTrigger label={GROUP_OPTIONS_LABEL} />}
+        aria-label={GROUP_OPTIONS_LABEL}
         items={menuItems}
       />
       <WaveGroupEditButton
