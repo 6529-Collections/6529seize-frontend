@@ -668,11 +668,8 @@ export const useWaveGroupEditButtonsController = ({
       mode: WaveGroupIdentitiesModal;
     }>) => {
       const normalisedIdentity = normaliseIdentity(identity);
-      if (!normalisedIdentity) {
-        return;
-      }
-
       if (
+        !normalisedIdentity ||
         !isIdentityActionAllowed(
           mode,
           identityModalPermissions,

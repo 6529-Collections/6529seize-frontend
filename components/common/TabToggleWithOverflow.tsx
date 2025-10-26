@@ -92,6 +92,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
   React.useEffect(() => {
     if (activeVisibleIndex >= 0) {
       setFocusedTabIndex(activeVisibleIndex);
+      tabRefs.current[activeVisibleIndex]?.focus();
       return;
     }
 
@@ -142,10 +143,15 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
   return (
     <div
       className={clsx("tw-flex tw-gap-x-1", fullWidth ? "tw-w-full" : "tw-w-auto")}>
-      <div className={clsx("tw-flex tw-gap-x-1", fullWidth && "tw-flex-1")}>
+      <div
+        role="tablist"
+        aria-orientation="horizontal"
+        className={clsx("tw-flex tw-gap-x-1", fullWidth && "tw-flex-1")}
+      >
         {visibleTabs.map((option, index) => (
           <button
-            aria-pressed={activeKey === option.key}
+            role="tab"
+            aria-selected={activeKey === option.key}
             key={option.key}
             type="button"
             tabIndex={index === focusedTabIndex ? 0 : -1}

@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { CommunityMemberMinimal } from "@/entities/IProfile";
@@ -21,40 +22,43 @@ export default function CommonProfileSearchItem({
   const isSelected =
     typeof selectableValue === "string" &&
     selected?.toLowerCase() === selectableValue.toLowerCase();
-  const title = profile.handle ?? profile.display;
+  const title =
+    profile.display ?? profile.handle ?? profile.wallet ?? "Profile";
   const avatarLabel =
     profile.display ?? profile.handle ?? profile.wallet ?? "Profile";
   const avatarAltText = `${avatarLabel} avatar`;
-  const secondaryText = [profile.display, profile.handle, profile.wallet].find(
+  const secondaryText = [profile.handle, profile.wallet, profile.display].find(
     (value) => value && value !== title
   );
 
   const onProfileClick = () => onProfileSelect(profile);
+  const onProfileKeyDown = (event: KeyboardEvent<HTMLLIElement>) => {
+    if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
+      event.preventDefault();
+      onProfileClick();
+    }
+  };
 
   return (
-    <li className="tw-list-none">
-      <button
-        id={id}
-        type="button"
-        tabIndex={-1}
-        role="option"
-        aria-selected={isSelected}
-        className={`tw-h-full hover:tw-bg-iron-700 tw-py-2 tw-w-full tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out ${
-          isHighlighted ? "tw-bg-iron-700" : "tw-bg-transparent"
-        }`}
-        onClick={onProfileClick}
-      >
-        <div className="tw-w-full tw-flex tw-justify-between tw-items-center">
-          <div className="tw-flex tw-space-x-2 tw-items-center">
-            {profile.pfp && (
+    <li
+      id={id}
+      role="option"
+      aria-selected={isSelected}
+      tabIndex={-1}
+      onClick={onProfileClick}
+      onKeyDown={onProfileKeyDown}
+      className={`tw-list-none tw-h-full hover:tw-bg-iron-700 tw-py-2 tw-w-full tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out ${
+        isHighlighted ? "tw-bg-iron-700" : "tw-bg-transparent"
+      }`}
+    >
+      <div className="tw-w-full tw-flex tw-justify-between tw-items-center">
+        <div className="tw-flex tw-space-x-2 tw-items-center">
+          {profile.pfp && (
             <div className="tw-h-6 tw-w-6 tw-rounded-md tw-overflow-hidden tw-ring-1 tw-ring-inset tw-ring-white/10 tw-bg-iron-900">
               <div className="tw-h-full tw-w-full tw-max-w-full">
                 <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center">
                   <img
-                    src={getScaledImageUri(
-                      profile.pfp,
-                      ImageScale.W_AUTO_H_50
-                    )}
+                    src={getScaledImageUri(profile.pfp, ImageScale.W_AUTO_H_50)}
                     alt={avatarAltText}
                     className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
                   />
@@ -82,7 +86,6 @@ export default function CommonProfileSearchItem({
           />
         )}
       </div>
-      </button>
     </li>
   );
 }

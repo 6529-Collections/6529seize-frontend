@@ -40,9 +40,9 @@ export default function CommonProfileSearchItems({
     const sanitized =
       String(rawId)
         .trim()
-        .replaceAll(/[^a-zA-Z0-9_-]/g, "-")
-        .replaceAll(/-+/g, "-")
-        .replaceAll(/(^-|-$)/g, "") || "item";
+        .replace(/[^a-zA-Z0-9_-]+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/(^-|-$)/g, "") || "item";
 
     return `profile-search-item-${sanitized}-${index}`;
   };
@@ -67,9 +67,6 @@ export default function CommonProfileSearchItems({
       ? optionMetadata[highlightedIndex].optionId
       : undefined;
 
-  // Keep the callback in the dependency list so highlighted state stays in sync.
-  // Callers should memoize `onHighlightedOptionIdChange` (e.g., with useCallback)
-  // if they want to avoid rerunning the effect when the reference changes.
   useEffect(() => {
     if (!onHighlightedOptionIdChange) {
       return;
@@ -85,59 +82,54 @@ export default function CommonProfileSearchItems({
     !searchCriteria || searchCriteria.length < 3
       ? "Type at least 3 characters"
       : "No results";
-  const visualListboxId = resolvedListboxId;
-
-  const normalizedSelected = selected?.toLowerCase() ?? null;
-  const selectedOptionId = normalizedSelected
-    ? optionMetadata.find(
-        (meta) => meta.identity?.toLowerCase() === normalizedSelected
-      )?.optionId
-    : undefined;
 
   return (
-    <>
-      <AnimatePresence mode="wait" initial={false}>
-        {open && (
-          <motion.div
-            className="tw-absolute tw-z-50 tw-mt-1.5 tw-w-full tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2 }}
-          >
-            <div className="tw-absolute tw-overflow-hidden tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
-              <div className="tw-py-1 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto">
-                <ul
-                  id={visualListboxId}
-                  tabIndex={-1}
-                  className="tw-flex tw-flex-col tw-gap-y-1 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none"
-                >
-                  {optionMetadata.length ? (
-                    optionMetadata.map((meta) => {
-                      const visualOptionId = meta.optionId;
-                      const isOptionHighlighted = highlightedIndex === meta.index;
-                      return (
-                        <CommonProfileSearchItem
-                          key={meta.optionId}
-                          id={visualOptionId}
-                          profile={meta.profile}
-                          selected={selected}
-                          isHighlighted={isOptionHighlighted}
-                          onProfileSelect={onProfileSelect}
-                        />
-                      );
-                    })
-                  ) : (
-                    <li className="tw-py-2 tw-w-full tw-h-full tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-medium tw-text-white tw-rounded-lg tw-relative tw-select-none tw-px-2">
-                      {noResultsText}
-                    </li>
-                  )}
-                </ul>
-              </div>
+    <AnimatePresence mode="wait" initial={false}>
+      {open && (
+        <motion.div
+          className="tw-absolute tw-z-50 tw-mt-1.5 tw-w-full tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.2 }}
+        >
+          <div className="tw-absolute tw-overflow-hidden tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
+            <div className="tw-py-1 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto">
+              <ul
+                id={resolvedListboxId}
+                role="listbox"
+                aria-label="Profile suggestions"
+                aria-multiselectable={false}
+                tabIndex={-1}
+                className="tw-flex tw-flex-col tw-gap-y-1 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none"
+              >
+                {optionMetadata.length ? (
+                  optionMetadata.map((meta) => {
+                    const isOptionHighlighted = highlightedIndex === meta.index;
+                    return (
+                      <CommonProfileSearchItem
+                        key={meta.optionId}
+                        id={meta.optionId}
+                        profile={meta.profile}
+                        selected={selected}
+                        isHighlighted={isOptionHighlighted}
+                        onProfileSelect={onProfileSelect}
+                      />
+                    );
+                  })
+                ) : (
+                  <li
+                    role="presentation"
+                    className="tw-py-2 tw-w-full tw-h-full tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-medium tw-text-white tw-rounded-lg tw-relative tw-select-none tw-px-2"
+                  >
+                    {noResultsText}
+                  </li>
+                )}
+              </ul>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
