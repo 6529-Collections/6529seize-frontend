@@ -220,8 +220,6 @@ const isIdentityActionAllowed = (
   if (permissions[mode]) {
     return true;
   }
-  // Quick include/exclude is permitted; payload validation enforces filter rules.
-
   setToast({
     type: "error",
     message:
