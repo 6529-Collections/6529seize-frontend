@@ -40,7 +40,7 @@ const WAVE_GROUP_LABELS = {
   ADMIN: "Admin",
 } satisfies Record<WaveGroupType, string>;
 
-const normaliseIdentity = (identity: string): string =>
+const normalizeIdentity = (identity: string): string =>
   identity.trim().toLowerCase();
 
 const dedupeAddresses = (addresses: readonly string[]): string[] =>
@@ -215,24 +215,12 @@ type IdentityModalPermissions = Readonly<
 const isIdentityActionAllowed = (
   mode: WaveGroupIdentitiesModal,
   permissions: IdentityModalPermissions,
-  scopedGroup: ScopedGroup,
   setToast: SetToast,
 ): boolean => {
   if (permissions[mode]) {
     return true;
   }
-
-  if (
-    mode === WaveGroupIdentitiesModal.INCLUDE &&
-    !scopedGroup?.id
-  ) {
-    setToast({
-      type: "error",
-      message:
-        "You need to define group filters before including specific identities.",
-    });
-    return false;
-  }
+  // Quick include/exclude is permitted; payload validation enforces filter rules.
 
   setToast({
     type: "error",
@@ -574,10 +562,8 @@ export const useWaveGroupEditButtonsController = ({
     [scopedGroup, connectedProfile],
   );
 
-  const canIncludeIdentity =
-    scopedGroup !== null && (isWaveAdmin || isAuthor);
-  const canExcludeIdentity =
-    scopedGroup !== null && (isWaveAdmin || isAuthor);
+  const canIncludeIdentity = isWaveAdmin || isAuthor;
+  const canExcludeIdentity = isWaveAdmin || isAuthor;
   const canRemoveGroup =
     haveGroup && type !== WaveGroupType.ADMIN;
 
@@ -626,12 +612,11 @@ export const useWaveGroupEditButtonsController = ({
     ) => {
       setMutating(true);
       if (!opts?.skipAuth) {
-        const { success } = await requestAuth();
-        if (!success) {
-          setToast({
-            type: "error",
-            message: "Failed to authenticate",
-          });
+        const authenticated = await ensureAuthenticated(
+          requestAuth,
+          setToast,
+        );
+        if (!authenticated) {
           setMutating(false);
           return;
         }
@@ -669,13 +654,12 @@ export const useWaveGroupEditButtonsController = ({
       identity: string;
       mode: WaveGroupIdentitiesModal;
     }>) => {
-      const normalisedIdentity = normaliseIdentity(identity);
+      const normalizedIdentity = normalizeIdentity(identity);
       if (
-        !normalisedIdentity ||
+        !normalizedIdentity ||
         !isIdentityActionAllowed(
           mode,
           identityModalPermissions,
-          scopedGroup,
           setToast,
         )
       ) {
@@ -705,7 +689,7 @@ export const useWaveGroupEditButtonsController = ({
 
         const updatedPayload = applyIdentityChangeToPayload(
           payload,
-          normalisedIdentity,
+          normalizedIdentity,
           mode,
         );
 

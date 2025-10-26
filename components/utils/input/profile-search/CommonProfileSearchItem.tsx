@@ -39,11 +39,10 @@ export default function CommonProfileSearchItem({
       data-option-id={id}
       aria-hidden="true"
       className="tw-list-none"
+      onClick={onProfileClick}
+      tabIndex={-1}
     >
-      <button
-        type="button"
-        tabIndex={-1}
-        onClick={onProfileClick}
+      <div
         className={`tw-h-full hover:tw-bg-iron-700 tw-py-2 tw-w-full tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out ${
           isHighlighted ? "tw-bg-iron-700" : "tw-bg-transparent"
         }`}
@@ -83,7 +82,7 @@ export default function CommonProfileSearchItem({
             />
           )}
         </div>
-      </button>
+      </div>
     </li>
   );
 }
