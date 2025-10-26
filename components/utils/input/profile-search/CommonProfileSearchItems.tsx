@@ -148,7 +148,7 @@ export default function CommonProfileSearchItems({
                 <ul
                   id={visualListboxId}
                   tabIndex={-1}
-                  aria-hidden="true"
+                  role="listbox"
                   className="tw-flex tw-flex-col tw-gap-y-1 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none"
                 >
                   {optionMetadata.length ? (

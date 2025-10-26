@@ -452,9 +452,7 @@ export const useWaveGroupEditButtonsController = ({
 
   useEffect(() => {
     return () => {
-      abortControllersRef.current.forEach((controller) => {
-        controller.abort();
-      });
+      abortControllersRef.current.forEach((controller) => controller.abort());
       abortControllersRef.current.clear();
     };
   }, []);
@@ -733,7 +731,9 @@ export const useWaveGroupEditButtonsController = ({
           }
         }
       } finally {
-        setMutating(false);
+        if (!waveMutationTriggered) {
+          setMutating(false);
+        }
       }
     },
     [

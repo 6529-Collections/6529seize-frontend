@@ -41,8 +41,9 @@ export default function CommonProfileSearchItem({
   return (
     <li
       id={id}
-      aria-hidden="true"
       tabIndex={-1}
+      role="option"
+      aria-selected={isSelected}
       className={`tw-list-none tw-h-full hover:tw-bg-iron-700 tw-py-2 tw-w-full tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out ${
         isHighlighted ? "tw-bg-iron-700" : "tw-bg-transparent"
       }`}
