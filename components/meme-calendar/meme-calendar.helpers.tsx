@@ -18,13 +18,13 @@ export const SZN1_RANGE = {
 } as const;
 export const SZN1_SEASON_INDEX = -13;
 
-// ---- Eastern Time mint schedule ----
-const EASTERN_STANDARD_OFFSET_HOURS = -5; // UTC-5 during winter (EST)
-const EASTERN_DAYLIGHT_OFFSET_HOURS = -4; // UTC-4 during summer (EDT)
-const MINT_EASTERN_HOUR = 10;
-const MINT_EASTERN_MINUTE = 40;
-const MINT_END_EASTERN_HOUR = 10;
-const MINT_END_EASTERN_MINUTE = 0;
+const EUROPE_TZ = "Europe/Nicosia"; // EET/EEST
+const EUROPE_WINTER_OFFSET_HOURS = +2; // EET (UTC+2)
+const EUROPE_SUMMER_OFFSET_HOURS = +3; // EEST (UTC+3)
+const MINT_EUROPE_HOUR = 17;
+const MINT_EUROPE_MINUTE = 40;
+const MINT_END_EUROPE_HOUR = 17;
+const MINT_END_EUROPE_MINUTE = 0;
 
 export const MILLIS_PER_DAY = 1000 * 60 * 60 * 24;
 
@@ -101,55 +101,38 @@ export const FIRST_MINT_DATE: Date = (() => {
   return nextMintDateOnOrAfter(phase.startUtcDay);
 })();
 
-// ---- US Eastern Time DST helpers ----
-function getNthWeekdayOfMonthUtc(
-  year: number,
-  monthIndex: number,
-  weekday: number,
-  occurrence: number
-): number {
-  const firstOfMonth = new Date(Date.UTC(year, monthIndex, 1));
-  const firstDow = firstOfMonth.getUTCDay();
-  const offset = (weekday - firstDow + 7) % 7;
-  return 1 + offset + (occurrence - 1) * 7;
-}
-
-function isEasternDaylightTime(utcDay: Date): boolean {
-  const year = utcDay.getUTCFullYear();
-  const month = utcDay.getUTCMonth();
-  const day = utcDay.getUTCDate();
-
-  if (month < 2 || month > 10) {
-    return false;
-  }
-  if (month > 2 && month < 10) {
-    return true;
-  }
-
-  if (month === 2) {
-    const dstStartDay = getNthWeekdayOfMonthUtc(year, 2, 0, 2); // second Sunday in March
-    return day >= dstStartDay;
-  }
-
-  const dstEndDay = getNthWeekdayOfMonthUtc(year, 10, 0, 1); // first Sunday in November
-  return day < dstEndDay;
-}
-
-function getEasternOffsetHours(utcDay: Date): number {
-  return isEasternDaylightTime(utcDay)
-    ? EASTERN_DAYLIGHT_OFFSET_HOURS
-    : EASTERN_STANDARD_OFFSET_HOURS;
-}
-
-function easternWallTimeToUtcInstant(
+export function wallTimeToUtcInstantInZone(
   utcDay: Date,
   hour: number,
   minute: number
 ): Date {
-  const offsetHours = getEasternOffsetHours(utcDay);
-  const out = new Date(utcDay);
-  out.setUTCHours(hour - offsetHours, minute, 0, 0);
-  return out;
+  const mk = (offsetHours: number) => {
+    const out = new Date(utcDay);
+    out.setUTCHours(hour - offsetHours, minute, 0, 0);
+    return out;
+  };
+
+  const winterCandidate = mk(EUROPE_WINTER_OFFSET_HOURS);
+  const summerCandidate = mk(EUROPE_SUMMER_OFFSET_HOURS);
+
+  const showsTargetWallTime = (d: Date) => {
+    const parts = new Intl.DateTimeFormat(undefined, {
+      timeZone: EUROPE_TZ,
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(d);
+    return (
+      parts ===
+      `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`
+    );
+  };
+
+  if (showsTargetWallTime(summerCandidate)) return summerCandidate;
+  if (showsTargetWallTime(winterCandidate)) return winterCandidate;
+
+  // Fallback: prefer the offset that matches the zone's DST on that date (summer first);
+  return summerCandidate;
 }
 
 // ---- Mint schedule helpers (Mon/Wed/Fri only, by UTC weekday) ----
@@ -184,10 +167,10 @@ export function prevMintDateOnOrBefore(d: Date): Date {
 }
 
 export function mintStartInstantUtcForMintDay(utcDay: Date): Date {
-  return easternWallTimeToUtcInstant(
+  return wallTimeToUtcInstantInZone(
     utcDay,
-    MINT_EASTERN_HOUR,
-    MINT_EASTERN_MINUTE
+    MINT_EUROPE_HOUR,
+    MINT_EUROPE_MINUTE
   );
 }
 
@@ -199,10 +182,10 @@ export function mintEndInstantUtcForMintDay(utcDay: Date): Date {
       utcDay.getUTCDate() + 1
     )
   );
-  return easternWallTimeToUtcInstant(
+  return wallTimeToUtcInstantInZone(
     nextDay,
-    MINT_END_EASTERN_HOUR,
-    MINT_END_EASTERN_MINUTE
+    MINT_END_EUROPE_HOUR,
+    MINT_END_EUROPE_MINUTE
   );
 }
 
