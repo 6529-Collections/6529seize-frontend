@@ -1,5 +1,6 @@
 import HeaderSearchModalItem from "@/components/header/header-search/HeaderSearchModalItem";
 import { MEMES_CONTRACT } from "@/constants";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 const useHoverDirty = jest.fn();
@@ -35,11 +36,6 @@ jest.mock("@/helpers/Helpers", () => ({
   getProfileTargetRoute: () => getProfileTargetRouteMock(),
 }));
 
-jest.mock("@/components/user/utils/UserCICAndLevel", () => ({
-  __esModule: true,
-  default: () => <div data-testid="level" />,
-}));
-
 jest.mock(
   "@/components/header/header-search/HeaderSearchModalItemMedia",
   () => ({
@@ -72,24 +68,26 @@ it("renders profile item and handles interactions", () => {
   };
   const onClose = jest.fn();
   const onHover = jest.fn();
+  const queryClient = new QueryClient();
   render(
-    <HeaderSearchModalItem
-      content={profile as any}
-      searchValue="ali"
-      isSelected={false}
-      onHover={onHover}
-      onClose={onClose}
-    />
+    <QueryClientProvider client={queryClient}>
+      <HeaderSearchModalItem
+        content={profile as any}
+        searchValue="ali"
+        isSelected={false}
+        onHover={onHover}
+        onClose={onClose}
+      />
+    </QueryClientProvider>
   );
   expect(onHover).toHaveBeenCalledWith(true);
   const link = screen.getByTestId("link");
   expect(link).toHaveAttribute("href", "/profile-route");
-  expect(screen.getByText("Ali")).toBeInTheDocument();
-  expect(link.textContent).toContain("Alice");
-  expect(screen.getByText("formatted-10")).toBeInTheDocument();
+  expect(screen.getByText(/Alice/i)).toBeInTheDocument();
+  expect(link.textContent).toMatch(/Alice/i);
+  expect(screen.getByText(/TDH: 10 - Level: 1/i)).toBeInTheDocument();
   fireEvent.click(link);
   expect(onClose).toHaveBeenCalled();
-  expect(screen.getByTestId("level")).toBeInTheDocument();
 });
 
 it("renders nft item with collection path", () => {
