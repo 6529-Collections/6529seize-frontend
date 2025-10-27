@@ -48,6 +48,27 @@ export type HeaderSearchModalItemType =
   | ApiWave
   | PageSearchResult;
 
+export const getNftCollectionMap = () => {
+  return {
+    [MEMES_CONTRACT.toLowerCase()]: {
+      title: "The Memes",
+      path: "/the-memes",
+    },
+    [MEMELAB_CONTRACT.toLowerCase()]: {
+      title: "Meme Lab",
+      path: "/meme-lab",
+    },
+    [GRADIENT_CONTRACT.toLowerCase()]: {
+      title: "6529 Gradient",
+      path: "/6529-gradient",
+    },
+    [NEXTGEN_CORE[NEXTGEN_CHAIN_ID].toLowerCase()]: {
+      title: "NextGen",
+      path: "/nextgen/token",
+    },
+  };
+};
+
 export default function HeaderSearchModalItem({
   content,
   searchValue,
@@ -80,27 +101,6 @@ export default function HeaderSearchModalItem({
   const getProfile = () => content as CommunityMemberMinimal;
   const getNft = () => content as NFTSearchResult;
   const getPage = () => content as PageSearchResult;
-
-  const getNftCollectionMap = () => {
-    return {
-      [MEMES_CONTRACT.toLowerCase()]: {
-        title: "The Memes",
-        path: "/the-memes",
-      },
-      [MEMELAB_CONTRACT.toLowerCase()]: {
-        title: "Meme Lab",
-        path: "/meme-lab",
-      },
-      [GRADIENT_CONTRACT.toLowerCase()]: {
-        title: "6529 Gradient",
-        path: "/6529-gradient",
-      },
-      [NEXTGEN_CORE[NEXTGEN_CHAIN_ID].toLowerCase()]: {
-        title: "NextGen",
-        path: "/nextgen/token",
-      },
-    };
-  };
 
   const getMediaIcon = (Icon: ComponentType<{ className?: string }>) => {
     return (

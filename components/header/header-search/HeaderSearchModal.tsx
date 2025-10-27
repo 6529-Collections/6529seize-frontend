@@ -31,6 +31,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import HeaderSearchModalItem, {
+  getNftCollectionMap,
   HeaderSearchModalItemType,
   NFTSearchResult,
   PageSearchResult,
@@ -648,7 +649,9 @@ export default function HeaderSearchModal({
     }
 
     if (isNftResult(item)) {
-      router.push(`/the-memes/${item.id}`);
+      const collectionMap = getNftCollectionMap();
+      const key = item.contract.toLowerCase();
+      router.push(`${collectionMap[key].path}/${item.id}`);
       onClose();
       return;
     }
@@ -777,30 +780,27 @@ export default function HeaderSearchModal({
     }
   }, [selectedItemIndex]);
 
-  const getItemKey = (
-    item: HeaderSearchModalItemType,
-    index: number
-  ): string => {
+  const getItemKey = (item: HeaderSearchModalItemType): string => {
     if (isPageResult(item)) {
-      return `page:${item.href}:${index}`;
+      return `page:${item.href}`;
     }
     if (isNftResult(item)) {
-      return `nft:${item.contract}:${item.id}:${index}`;
+      return `nft:${item.contract}:${item.id}`;
     }
     if (isProfileResult(item)) {
-      const base = (item.handle ?? item.wallet ?? "profile").toLowerCase();
-      return `profile:${base}:${index}`;
+      const base = (item.profile_id ?? item.wallet ?? "profile").toLowerCase();
+      return `profile:${base}`;
     }
     if (isWaveResult(item)) {
-      return `wave:${item.id}:${index}`;
+      return `wave:${item.id}`;
     }
-    return `result:${index}`;
+    return JSON.stringify(item);
   };
 
   const renderItem = (item: HeaderSearchModalItemType, index: number) => (
     <div
       ref={index === selectedItemIndex ? activeElementRef : null}
-      key={getItemKey(item, index)}>
+      key={getItemKey(item)}>
       <HeaderSearchModalItem
         content={item}
         searchValue={debouncedValue}
