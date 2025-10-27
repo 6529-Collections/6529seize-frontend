@@ -1019,8 +1019,8 @@ export default function HeaderSearchModal({
                             ? true
                             : undefined
                         }
-                        className="tw-rounded-lg tw-bg-primary-500 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-950 hover:tw-bg-primary-400 tw-transition tw-duration-150">
-                        Try again
+                        className="tw-items-center tw-rounded-full tw-border tw-border-iron-300 tw-bg-iron-100 tw-px-3 tw-py-1.5 tw-font-medium tw-text-iron-800 hover:tw-border-iron-500 hover:tw-bg-iron-200 tw-transition tw-duration-150">
+                        Try Again
                       </button>
                     </div>
                   )}
