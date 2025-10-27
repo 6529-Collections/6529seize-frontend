@@ -2,7 +2,7 @@ import { renderHook } from '@testing-library/react';
 import useDeviceInfo from '@/hooks/useDeviceInfo';
 
 jest.mock('@/hooks/useCapacitor', () => ({ __esModule: true, default: jest.fn(() => ({ isCapacitor: false })) }));
-const useCapacitorMock = require('@/hooks/useCapacitor').default as jest.Mock;
+const capacitorMock = require('@/hooks/useCapacitor').default as jest.Mock;
 
 defineMatchMedia();
 
@@ -28,7 +28,7 @@ describe('useDeviceInfo', () => {
   });
 
   it('detects capacitor mobile with desktop UA', () => {
-    useCapacitorMock.mockReturnValue({ isCapacitor: true });
+    capacitorMock.mockReturnValue({ isCapacitor: true });
     Object.defineProperty(window.navigator, 'userAgent', { value: 'Macintosh', configurable: true });
     defineMatchMedia(true, true);
     const { result } = renderHook(() => useDeviceInfo());
@@ -37,7 +37,7 @@ describe('useDeviceInfo', () => {
   });
 
   it('returns false for desktop without touch', () => {
-    useCapacitorMock.mockReturnValue({ isCapacitor: false });
+    capacitorMock.mockReturnValue({ isCapacitor: false });
     Object.defineProperty(window.navigator, 'userAgent', { value: 'Mozilla/5.0', configurable: true });
     defineMatchMedia(false, false);
     const { result } = renderHook(() => useDeviceInfo());

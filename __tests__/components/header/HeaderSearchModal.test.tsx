@@ -14,6 +14,10 @@ const useSearchParams = jest.fn();
 const useWaves = jest.fn();
 const useLocalPreference = jest.fn();
 const mockUseDeviceInfo = jest.fn();
+const useAppWalletsMock = jest.fn();
+const useCookieConsentMock = jest.fn();
+const useSidebarSectionsMock = jest.fn();
+const capacitorMock = jest.fn();
 
 jest.mock("react-use", () => {
   return {
@@ -54,6 +58,24 @@ jest.mock(
     (...args: any[]) =>
       useLocalPreference(...args)
 );
+jest.mock("@/components/app-wallets/AppWalletsContext", () => ({
+  useAppWallets: () => useAppWalletsMock(),
+}));
+jest.mock("@/components/cookies/CookieConsentContext", () => ({
+  useCookieConsent: () => useCookieConsentMock(),
+}));
+jest.mock("@/hooks/useCapacitor", () => ({
+  __esModule: true,
+  default: () => capacitorMock(),
+}));
+jest.mock("@/hooks/useSidebarSections", () => {
+  const actual = jest.requireActual("@/hooks/useSidebarSections");
+  return {
+    __esModule: true,
+    useSidebarSections: (...args: any[]) => useSidebarSectionsMock(...args),
+    mapSidebarSectionsToPages: actual.mapSidebarSectionsToPages,
+  };
+});
 jest.mock("@/components/header/header-search/HeaderSearchModalItem", () => {
   const MockHeaderSearchModalItem = (props: any) => (
     <div data-testid="item">{JSON.stringify(props)}</div>
@@ -64,18 +86,31 @@ jest.mock("@/components/header/header-search/HeaderSearchModalItem", () => {
 
 const profile = { handle: "alice", wallet: "0x1", display: "Alice", level: 1 };
 
+const defaultSidebarSections = [
+  {
+    key: "tools",
+    name: "Tools",
+    icon: () => null,
+    items: [
+      { name: "Delegation Center", href: "/delegation/delegation-center" },
+    ],
+    subsections: [],
+  },
+];
+
 interface SetupOptions {
   queryImpl?: (params: {
     queryKey: [QueryKey, string];
     profilesRefetch: jest.Mock<Promise<unknown>, []>;
     nftsRefetch: jest.Mock<Promise<unknown>, []>;
+    enabled?: boolean;
   }) => {
     isFetching: boolean;
     data: unknown;
     error?: Error;
     refetch: jest.Mock<Promise<unknown>, []>;
   };
-  selectedCategory?: "PROFILES" | "NFTS" | "WAVES";
+  selectedCategory?: "ALL" | "PROFILES" | "NFTS" | "WAVES" | "PAGES";
   wavesReturn?: {
     waves: unknown[];
     isFetching: boolean;
@@ -85,16 +120,18 @@ interface SetupOptions {
   profilesRefetch?: jest.Mock<Promise<unknown>, []>;
   nftsRefetch?: jest.Mock<Promise<unknown>, []>;
   wavesRefetch?: jest.Mock<Promise<unknown>, []>;
+  sidebarSections?: typeof defaultSidebarSections;
 }
 
 function setup(options: SetupOptions = {}) {
   const {
     queryImpl,
-    selectedCategory = "PROFILES",
+    selectedCategory = "ALL",
     wavesReturn,
     profilesRefetch = jest.fn(() => Promise.resolve()),
     nftsRefetch = jest.fn(() => Promise.resolve()),
     wavesRefetch = jest.fn(() => Promise.resolve()),
+    sidebarSections = defaultSidebarSections,
   } = options;
   const push = jest.fn();
   const onClose = jest.fn();
@@ -106,6 +143,10 @@ function setup(options: SetupOptions = {}) {
     isMobileDevice: false,
     hasTouchScreen: false,
   });
+  useAppWalletsMock.mockReturnValue({ appWalletsSupported: true });
+  useCookieConsentMock.mockReturnValue({ country: "US" });
+  capacitorMock.mockReturnValue({ isIos: false });
+  useSidebarSectionsMock.mockReturnValue(sidebarSections);
   useWaves.mockReturnValue(
     wavesReturn ?? {
       waves: [],
@@ -116,15 +157,29 @@ function setup(options: SetupOptions = {}) {
   );
   useLocalPreference.mockReturnValue([selectedCategory, jest.fn()]);
   if (queryImpl) {
-    useQueryMock.mockImplementation(({ queryKey }) =>
+    useQueryMock.mockImplementation(({ queryKey, enabled }) =>
       queryImpl({
         queryKey: queryKey as [QueryKey, string],
         profilesRefetch,
         nftsRefetch,
+        enabled,
       })
     );
   } else {
-    useQueryMock.mockImplementation(({ queryKey }) => {
+    useQueryMock.mockImplementation(({ queryKey, enabled }) => {
+      if (enabled === false) {
+        const refetch =
+          queryKey[0] === QueryKey.PROFILE_SEARCH
+            ? profilesRefetch
+            : nftsRefetch;
+        return {
+          isFetching: false,
+          data: undefined,
+          error: undefined,
+          refetch,
+        };
+      }
+
       if (queryKey[0] === QueryKey.PROFILE_SEARCH) {
         return {
           isFetching: false,
@@ -169,7 +224,154 @@ describe("HeaderSearchModal", () => {
     setup();
     const input = screen.getByRole("textbox", { name: "Search" });
     fireEvent.change(input, { target: { value: "abc" } });
+    expect(
+      screen.getByRole("heading", { name: "Profiles" })
+    ).toBeInTheDocument();
     expect(screen.getByTestId("item")).toBeInTheDocument();
+  });
+
+  it("clears search input when the clear button is pressed", () => {
+    setup();
+    const input = screen.getByRole("textbox", { name: "Search" });
+    fireEvent.change(input, { target: { value: "faq" } });
+
+    const clearButton = screen.getByRole("button", { name: "Clear search" });
+    fireEvent.click(clearButton);
+
+    expect(input).toHaveValue("");
+  });
+
+  it("includes navigation pages in search results when query matches", () => {
+    setup();
+    const input = screen.getByRole("textbox", { name: "Search" });
+    fireEvent.change(input, { target: { value: "Delegation" } });
+
+    expect(screen.getByRole("heading", { name: "Pages" })).toBeInTheDocument();
+    const renderedItems = screen
+      .getAllByTestId("item")
+      .map((element) => element.textContent ?? "");
+    expect(
+      renderedItems.some((content) => content.includes('"type":"PAGE"'))
+    ).toBe(true);
+  });
+
+  it("prioritizes exact page title matches ahead of partial matches", async () => {
+    setup({
+      selectedCategory: "PAGES",
+      sidebarSections: [
+        {
+          key: "tools",
+          name: "Tools",
+          icon: () => null,
+          items: [],
+          subsections: [
+            {
+              name: "NFT Delegation",
+              items: [
+                {
+                  name: "Delegation FAQs",
+                  href: "/delegation/delegation-faq",
+                },
+              ],
+            },
+          ],
+        },
+        {
+          key: "about",
+          name: "About",
+          icon: () => null,
+          items: [],
+          subsections: [
+            {
+              name: "Support",
+              items: [{ name: "FAQ", href: "/about/faq" }],
+            },
+          ],
+        },
+      ],
+      queryImpl: () => ({
+        isFetching: false,
+        data: [],
+        error: undefined,
+        refetch: jest.fn(() => Promise.resolve()),
+      }),
+    });
+
+    const input = screen.getByRole("textbox", { name: "Search" });
+    fireEvent.change(input, { target: { value: "faq" } });
+
+    const items = await screen.findAllByTestId("item");
+    expect(items[0].textContent).toContain('"title":"FAQ"');
+    expect(items[1].textContent).toContain('"title":"Delegation FAQs"');
+  });
+
+  it("renders result categories in deterministic order in All view", async () => {
+    const profiles = [
+      { handle: "alice", wallet: "0x1" },
+      { handle: "bob", wallet: "0x2" },
+      { handle: "carol", wallet: "0x3" },
+    ];
+    const nfts = [
+      { id: 1, name: "NFT One", contract: "0xabc" },
+      { id: 2, name: "NFT Two", contract: "0xabc" },
+    ];
+    const waves = [
+      { id: "w1", serial_no: 1 },
+      { id: "w2", serial_no: 2 },
+      { id: "w3", serial_no: 3 },
+      { id: "w4", serial_no: 4 },
+    ];
+
+    setup({
+      sidebarSections: [
+        {
+          key: "about",
+          name: "About",
+          icon: () => null,
+          items: [],
+          subsections: [
+            {
+              name: "Support",
+              items: [{ name: "FAQ", href: "/about/faq" }],
+            },
+          ],
+        },
+      ],
+      queryImpl: ({ queryKey }) => {
+        const [key] = queryKey;
+        if (key === QueryKey.PROFILE_SEARCH) {
+          return {
+            isFetching: false,
+            data: profiles,
+            error: undefined,
+            refetch: jest.fn(() => Promise.resolve()),
+          };
+        }
+        return {
+          isFetching: false,
+          data: nfts,
+          error: undefined,
+          refetch: jest.fn(() => Promise.resolve()),
+        };
+      },
+      wavesReturn: {
+        waves,
+        isFetching: false,
+        error: null,
+        refetch: jest.fn(() => Promise.resolve()),
+      },
+    });
+
+    const input = screen.getByRole("textbox", { name: "Search" });
+    fireEvent.change(input, { target: { value: "faq" } });
+
+    const headings = await screen.findAllByRole("heading", { level: 3 });
+    expect(headings.map((heading) => heading.textContent)).toEqual([
+      "Pages",
+      "NFTs",
+      "Profiles",
+      "Waves",
+    ]);
   });
 
   it("triggers onClose on click away", () => {
@@ -188,7 +390,7 @@ describe("HeaderSearchModal", () => {
 
   it("shows an error message and allows retry when a search fails", async () => {
     const profilesRefetch = jest.fn(() => Promise.resolve());
-    setup({
+    const { wavesRefetch: wavesRefetchMock } = setup({
       profilesRefetch,
       queryImpl: ({ queryKey, profilesRefetch, nftsRefetch }) => {
         const [key, search] = queryKey;
@@ -225,5 +427,6 @@ describe("HeaderSearchModal", () => {
     fireEvent.click(retryButton);
 
     expect(profilesRefetch).toHaveBeenCalled();
+    expect(wavesRefetchMock).toHaveBeenCalled();
   });
 });

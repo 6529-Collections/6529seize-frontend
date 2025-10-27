@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import WaveGroup, { WaveGroupType } from '@/components/waves/specs/groups/group/WaveGroup';
+import WaveGroup from '@/components/waves/specs/groups/group/WaveGroup';
+import { WaveGroupType } from '@/components/waves/specs/groups/group/WaveGroup.types';
 import { AuthContext } from '@/components/auth/Auth';
 
 jest.mock('@/components/waves/specs/groups/group/WaveGroupTitle', () => () => <div data-testid="title" />);
