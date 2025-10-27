@@ -869,6 +869,9 @@ export default function HeaderSearchModal({
           <div className="tw-flex tw-min-h-full tw-items-start tw-justify-center tw-p-4 tw-text-center lg:tw-items-center sm:tw-p-6">
             <div
               ref={modalRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="header-search-input"
               className="tw-w-full tw-max-w-[min(100vw-3rem,900px)] sm:tw-max-w-3xl tw-relative tw-h-[520px] tw-max-h-[70vh] tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 tw-overflow-hidden inset-safe-area tw-flex tw-flex-col tw-min-h-0">
               <div className="tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-white/10 tw-pb-4 tw-px-4 tw-mt-4 tw-flex tw-items-center tw-gap-2">
                 <button
