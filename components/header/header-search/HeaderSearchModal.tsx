@@ -6,7 +6,6 @@ import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import DiscoverIcon from "@/components/common/icons/DiscoverIcon";
 import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
-import { TabToggle } from "@/components/common/TabToggle";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { UserPageTabType } from "@/components/user/layout/UserPageTabs";
@@ -36,6 +35,7 @@ import HeaderSearchModalItem, {
   NFTSearchResult,
   PageSearchResult,
 } from "./HeaderSearchModalItem";
+import { HeaderSearchTabToggle } from "./HeaderSearchTabToggle";
 
 enum STATE {
   INITIAL = "INITIAL",
@@ -929,7 +929,7 @@ export default function HeaderSearchModal({
               </div>
               {shouldRenderCategoryToggle && (
                 <div className="tw-py-3 tw-px-4 md:tw-hidden">
-                  <TabToggle
+                  <HeaderSearchTabToggle
                     options={tabOptions}
                     activeKey={selectedCategory}
                     onSelect={(k) => setSelectedCategory(k as CATEGORY)}
@@ -947,7 +947,7 @@ export default function HeaderSearchModal({
                 {shouldRenderCategoryToggle && (
                   <aside className="tw-hidden md:tw-flex md:tw-flex-col md:tw-gap-2 md:tw-pt-5">
                     <div className="tw-rounded-2xl tw-border tw-border-iron-900/60 tw-bg-iron-950/80 tw-flex tw-flex-col tw-gap-2">
-                      <TabToggle
+                      <HeaderSearchTabToggle
                         options={tabOptions}
                         activeKey={selectedCategory}
                         onSelect={(k) => setSelectedCategory(k as CATEGORY)}
