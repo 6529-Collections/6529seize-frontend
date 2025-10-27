@@ -7,9 +7,13 @@ export default function WaveItemDropped({ wave }: { readonly wave: ApiWave }) {
   const firstXContributors = wave.contributors_overview.slice(0, 5);
   return (
     <div className="tw-flex tw-items-center tw-gap-x-2">
-      <div className="tw-flex -tw-space-x-1">
-        {firstXContributors.map((c) => (
-          <Link href={`${c.contributor_identity}`} key={c.contributor_identity}>
+      <div className="tw-flex tw-items-center -tw-space-x-1">
+        {firstXContributors.map((c) => {
+          const contributorHref = c.contributor_identity
+            ? `/${c.contributor_identity}`
+            : undefined;
+
+          const avatar = (
             <div className="tw-h-6 tw-w-6">
               <img
                 className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-700 tw-ring-[1.5px] tw-ring-black"
@@ -18,19 +22,29 @@ export default function WaveItemDropped({ wave }: { readonly wave: ApiWave }) {
                   ImageScale.W_AUTO_H_50
                 )}
                 alt={`${c.contributor_identity} avatar`}
+                loading="lazy"
+                decoding="async"
               />
             </div>
-          </Link>
-        ))}
+          );
+
+          return contributorHref ? (
+            <Link href={contributorHref} prefetch={false} key={c.contributor_identity}>
+              {avatar}
+            </Link>
+          ) : (
+            <div key={c.contributor_identity ?? c.contributor_pfp}>{avatar}</div>
+          );
+        })}
       </div>
-      <span className="tw-text-sm">
+      <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm">
         <span className="tw-text-iron-50 tw-font-medium">
           {numberWithCommas(wave.metrics.drops_count)}
-        </span>{" "}
+        </span>
         <span className="tw-text-iron-400">
           {wave.metrics.drops_count === 1 ? "Drop" : "Drops"}
         </span>
-      </span>
+      </div>
     </div>
   );
 }
