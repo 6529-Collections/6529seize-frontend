@@ -4,6 +4,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useClickAway, useKey, useKeyPressEvent } from "react-use";
+import type { Handler, KeyFilter } from "react-use/lib/useKey";
 
 jest.mock("focus-trap-react", () => jest.requireActual("focus-trap-react"));
 jest.mock("react-use");
@@ -19,8 +20,9 @@ const useClickAwayMock = useClickAway as jest.MockedFunction<
   typeof useClickAway
 >;
 const useKeyPressEventMock = useKeyPressEvent as jest.MockedFunction<
-  typeof useKeyPressEvent
+  (key: KeyFilter, keydown?: Handler | null, keyup?: Handler | null) => void
 >;
+
 const useAppWalletsMock = jest.fn();
 const useCookieConsentMock = jest.fn();
 const useSidebarSectionsMock = jest.fn();
@@ -101,9 +103,11 @@ beforeEach(() => {
   useKeyMock.mockImplementation(() => {});
   useClickAwayMock.mockImplementation(() => {});
   useKeyPressEventMock.mockImplementation(
-    (targetKey: string, handler: () => void) => {
-      if (targetKey === "Escape") {
-        escapeHandler = handler;
+    (key: KeyFilter, keydown?: Handler | null, _keyup?: Handler | null) => {
+      const isEscape =
+        key === "Escape" || (Array.isArray(key) && key.includes("Escape"));
+      if (isEscape && keydown) {
+        escapeHandler = () => keydown(new KeyboardEvent("keydown"));
       }
     }
   );

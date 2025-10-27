@@ -6,13 +6,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 const useHoverDirty = jest.fn();
-const useRouter = jest.fn();
 
 jest.mock("react-use", () => ({
   useHoverDirty: (...args: any[]) => useHoverDirty(...args),
 }));
 
-jest.mock("../../../hooks/useDeviceInfo", () => ({
+jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
   default: jest.fn(() => ({
     isApp: false,
@@ -28,6 +27,14 @@ jest.mock("next/link", () => ({
       {children}
     </a>
   ),
+}));
+
+const mockUsePathname = jest.fn();
+const mockUseSearchParams = jest.fn();
+
+jest.mock("next/navigation", () => ({
+  usePathname: () => mockUsePathname(),
+  useSearchParams: () => mockUseSearchParams(),
 }));
 
 const getProfileTargetRouteMock = jest.fn(() => "/profile-route");
@@ -49,7 +56,7 @@ jest.mock(
 );
 
 beforeEach(() => {
-  window.matchMedia = jest.fn().mockReturnValue({
+  globalThis.matchMedia = jest.fn().mockReturnValue({
     matches: true,
     addListener: jest.fn(),
     removeListener: jest.fn(),
@@ -87,7 +94,7 @@ const renderComponent = (
 describe("HeaderSearchModalItem", () => {
   it("renders profile item and handles interactions", () => {
     useHoverDirty.mockReturnValue(true);
-    useRouter.mockReturnValue({ query: {} });
+    mockUsePathname.mockReturnValue("/profile-route");
     const profile: any = {
       handle: "alice",
       wallet: "0x1",
@@ -109,7 +116,7 @@ describe("HeaderSearchModalItem", () => {
 
   it("renders nft item with collection path", () => {
     useHoverDirty.mockReturnValue(false);
-    useRouter.mockReturnValue({ query: {} });
+    mockUsePathname.mockReturnValue("/the-memes/1");
     const nft: any = {
       id: 1,
       name: "Meme",
@@ -131,7 +138,10 @@ describe("HeaderSearchModalItem", () => {
 
   it("renders wave item and uses query to build path", () => {
     useHoverDirty.mockReturnValue(false);
-    useRouter.mockReturnValue({ query: { wave: "other" } });
+    mockUsePathname.mockReturnValue("/waves");
+    mockUseSearchParams.mockReturnValue({
+      get: jest.fn((key: string) => (key === "wave" ? "other" : null)),
+    });
     const wave: any = {
       id: "wave1",
       name: "Wave 1",
@@ -148,7 +158,7 @@ describe("HeaderSearchModalItem", () => {
 
   it("renders page item and shows breadcrumbs", () => {
     useHoverDirty.mockReturnValue(false);
-    useRouter.mockReturnValue({ query: {} });
+    mockUsePathname.mockReturnValue("/delegation/delegation-faq");
     const PageIcon = ({ className }: { className?: string }) => (
       <div data-testid="page-icon" className={className} />
     );

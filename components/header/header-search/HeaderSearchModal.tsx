@@ -13,7 +13,9 @@ import { UserPageTabType } from "@/components/user/layout/UserPageTabs";
 import { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getProfileTargetRoute } from "@/helpers/Helpers";
+import { getWaveHomeRoute, getWaveRoute } from "@/helpers/navigation.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useLocalPreference from "@/hooks/useLocalPreference";
 import {
   mapSidebarSectionsToPages,
@@ -29,11 +31,6 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
-import {
-  getWaveHomeRoute,
-  getWaveRoute,
-} from "../../../helpers/navigation.helpers";
-import useDeviceInfo from "../../../hooks/useDeviceInfo";
 import HeaderSearchModalItem, {
   HeaderSearchModalItemType,
   NFTSearchResult,
