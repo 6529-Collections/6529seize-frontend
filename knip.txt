@@ -1,0 +1,251 @@
+
+> 6529seize@1.0.0 deadcode:knip
+> knip
+
+Unused files (14)
+
+
+                                 
+                             
+                                       
+                           
+middleware.tsx                                                       
+next-sitemap.config.js                                               
+                  
+                                       
+                                    
+stubs/empty.js                                                       
+                                             
+                                         
+Unused dependencies (4)
+@openapitools/openapi-generator-cli  package.json:61:6
+@uiw/react-md-editor                 package.json:70:6
+bootstrap                            package.json:72:6
+multiformats                         package.json:96:6
+Unused devDependencies (3)
+@next/bundle-analyzer  package.json:129:6
+glob                   package.json:153:6
+pino-pretty            package.json:159:6
+Unlisted dependencies (67)
+components/distribution-plan-tool/review-distributio…  …istribution-plan/table/ReviewDistributionPlanTable.test.tsx:3:41
+components/distribution-plan-tool/review-distributio…  …ribution-plan/table/ReviewDistributionPlanTableRow.test.tsx:4:44
+services/distribution-plan-api                         …ribution-plan/table/ReviewDistributionPlanTableRow.test.tsx:7:42
+@lexical/utils                                         __tests__/components/DragDropPastePlugin.test.tsx:51:13          
+@lexical/selection                                     …ents/drops/create/lexical/plugins/MaxLengthPlugin.test.tsx:16:66
+@lexical/utils                                         …ents/drops/create/lexical/plugins/MaxLengthPlugin.test.tsx:17:56
+components/drops/create/lexical/plugins/mentions/Men…  …ate/lexical/plugins/mentions/MentionsTypeaheadMenu.test.tsx:8:35
+components/groups/page/create/config/wallets/CreateG…  …/page/create/config/wallets/CreateGroupWalletsEmma.test.tsx:3:36
+components/groups/page/list/card/utils/GroupCardActi…  …s/groups/page/list/card/utils/GroupCardActionStats.test.tsx:3:34
+generated/models/ApiRateMatter                         …s/groups/page/list/card/utils/GroupCardActionStats.test.tsx:6:31
+axios                                                  __tests__/components/ipfs/IPFSService.test.ts:7:19               
+axios                                                  …mponents/waves/create-wave/services/multiPartUpload.test.ts:1:19
+p-limit                                                …mponents/waves/create-wave/services/multiPartUpload.test.ts:2:20
+components/waves/drops/winner/WinnerDropBadge          …ts__/components/waves/drops/winner/WinnerDropBadge.test.tsx:2:29
+components/waves/memes/traits/DropdownTrait            …ests__/components/waves/memes/traits/DropdownTrait.test.tsx:2:31
+components/waves/winners/drops/DefaultWaveWinnerDrop   …mponents/waves/winners/drops/DefaultWaveWinnerDrop.test.tsx:1:22
+date-fns                                               …sts__/components/waves/winners/WaveWinnersTimeline.test.tsx:3:11
+helpers/waves/time.types                               __tests__/helpers/time.types.test.ts:1:8                         
+@jest/globals                                          __tests__/wagmiConfig/wagmiAppWalletConnector.test.ts:10:4       
+@adraffy/ens-normalize                                 app/api/open-graph/ens.ts:13:11                                  
+clsx                                                   components/common/TabToggleWithOverflow.tsx:5:18                 
+clsx                                                   components/compact-menu/index.tsx:5:18                           
+clsx                                                   …onents/compact-menu/subcomponents/CompactMenuItemButton.tsx:1:18
+clsx                                                   …onents/compact-menu/subcomponents/CompactMenuItemsPanel.tsx:3:18
+clsx                                                   components/compact-menu/subcomponents/CompactMenuTrigger.tsx:4:18
+@lexical/rich-text                                     …onents/drops/create/lexical/plugins/DragDropPastePlugin.tsx:4:11
+@lexical/utils                                         …onents/drops/create/lexical/plugins/DragDropPastePlugin.tsx:5:11
+@lexical/list                                          …ents/drops/create/lexical/plugins/enter/EnterKeyPlugin.tsx:14:11
+@lexical/rich-text                                     …ents/drops/create/lexical/plugins/enter/EnterKeyPlugin.tsx:15:11
+@lexical/selection                                     components/drops/create/lexical/plugins/MaxLengthPlugin.tsx:12:11
+@lexical/utils                                         components/drops/create/lexical/plugins/MaxLengthPlugin.tsx:13:11
+@lexical/markdown                                      …nents/drops/create/lexical/transformers/EmojiTransformer.ts:1:11
+@lexical/markdown                                      …ents/drops/create/lexical/transformers/HastagTransformer.ts:1:11
+@lexical/markdown                                      …nents/drops/create/lexical/transformers/ImageTransformer.ts:1:11
+@lexical/markdown                                      …s/drops/create/lexical/transformers/markdownTransformers.ts:1:11
+@lexical/markdown                                      …nts/drops/create/lexical/transformers/MentionTransformer.ts:1:11
+@lexical/code                                          …mponents/drops/create/lexical/utils/codeContextDetection.ts:3:11
+@lexical/list                                          components/drops/create/utils/CreateDropContent.tsx:32:11        
+@lexical/rich-text                                     components/drops/create/utils/CreateDropContent.tsx:33:11        
+@lexical/table                                         components/drops/create/utils/CreateDropContent.tsx:36:11        
+@lexical/code                                          components/drops/create/utils/CreateDropContent.tsx:37:11        
+@lexical/link                                          components/drops/create/utils/CreateDropContent.tsx:38:11        
+unified                                                components/drops/view/part/DropPartMarkdown.tsx:17:16            
+clsx                                                   components/header/AppSidebarMenuItems.tsx:7:18                   
+clsx                                                   components/header/header-search/HeaderSearchButton.tsx:4:18      
+axios                                                  components/ipfs/IPFSService.ts:1:19                              
+form-data                                              components/ipfs/IPFSService.ts:2:22                              
+axios                                                  components/waves/create-wave/services/multiPartUpload.ts:1:19    
+p-limit                                                components/waves/create-wave/services/multiPartUpload.ts:2:20    
+@lexical/list                                          components/waves/CreateDropInput.tsx:29:11                       
+@lexical/rich-text                                     components/waves/CreateDropInput.tsx:30:11                       
+@lexical/table                                         components/waves/CreateDropInput.tsx:33:11                       
+@lexical/code                                          components/waves/CreateDropInput.tsx:34:11                       
+@lexical/link                                          components/waves/CreateDropInput.tsx:35:11                       
+@lexical/markdown                                      components/waves/drops/EditDropLexical.tsx:14:11                 
+@lexical/list                                          components/waves/drops/EditDropLexical.tsx:30:11                 
+@lexical/rich-text                                     components/waves/drops/EditDropLexical.tsx:31:11                 
+@lexical/code                                          components/waves/drops/EditDropLexical.tsx:34:11                 
+@lexical/link                                          components/waves/drops/EditDropLexical.tsx:35:11                 
+@lexical/markdown                                      components/waves/drops/normalizeDropMarkdown.ts:2:4              
+date-fns                                               …nents/waves/drops/participation/ParticipationDropFooter.tsx:6:11
+clsx                                                   components/waves/drops/WaveDropReactions.tsx:21:18               
+clsx                                                   components/waves/GoogleWorkspaceCard.tsx:5:18                    
+date-fns                                               …mponents/waves/winners/WaveWinnersSmallDecisionSelector.tsx:4:11
+date-fns                                               components/waves/winners/WaveWinnersTimeline.tsx:6:11            
+istanbul-lib-coverage                                  scripts/improve-coverage.js:14:25                                
+@reown/appkit-common                                   utils/appkit-initialization.utils.ts:8:16                        
+Unresolved imports (5)
+../../app/api/farcaster/route          __tests__/app/api/farcaster.route.test.ts:48:10                                  
+@/__tests__/generated/models/ApiDrop…  …_/components/memes/drops/meme-participation-drop/MemeDropVoteStats.test.tsx:4:30
+@/__tests__/generated/models/ApiIden…  …ponents/user/identity/statements/add/UserPageIdentityAddStatements.test.tsx:4:29
+@/__tests__/generated/models/ApiDrop   __tests__/components/waves/CreateDropReplying.test.tsx:4:25                      
+babel-jest                             jest.config.js                                                                   
+Unused exports (51)
+mockGradientNFT                        __tests__/fixtures/gradientFixtures.ts:3:14                                      
+commonMocks                            __tests__/utils/editDropTestUtils.tsx:12:14                                      
+createTestQueryClient                  __tests__/utils/editDropTestUtils.tsx:80:14                                      
+createTestWrapper                      __tests__/utils/editDropTestUtils.tsx:87:14                                      
+expectGenericErrorToast                __tests__/utils/editDropTestUtils.tsx:108:14                                     
+expectTimeLimitErrorToast              __tests__/utils/editDropTestUtils.tsx:117:14                                     
+expectSuccessToast                     __tests__/utils/editDropTestUtils.tsx:126:14                                     
+setupDropUpdateMutationTest            __tests__/utils/editDropTestUtils.tsx:136:14                                     
+createSimpleErrorTest                  __tests__/utils/editDropTestUtils.tsx:171:14                                     
+createMockMinimalWaves       function  __tests__/utils/mockFactories.ts:31:17                                           
+renderWithProviders                    __tests__/utils/testContexts.tsx:52:14                                           
+renderWithTitleProvider                __tests__/utils/titleTestUtils.tsx:28:14                                         
+resetTitleMocks                        __tests__/utils/titleTestUtils.tsx:45:14                                         
+default                                components/auth/error-boundary/index.ts:7:32                                     
+WalletErrorBoundary          class     components/auth/error-boundary/WalletErrorBoundary.tsx:18:14                     
+default                                components/auth/error-boundary/WalletErrorBoundary.tsx:92:8                      
+MAX_CUSTOM_SNAPSHOT_ROWS               …bution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotForm.tsx:26:14
+CUSTOM_SNAPSHOT_CHUNK_SIZE             …bution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotForm.tsx:27:14
+checkForAtSignHashtags                 components/drops/create/lexical/plugins/hashtags/HashtagsPlugin.tsx:287:27       
+TweetFallback                          components/drops/view/part/dropPartMarkdown/renderers.tsx:103:61                 
+ProfileActivityFilterTarge…            components/utils/CommonFilterTargetSelect.tsx:7:9                                
+default                                components/waves/drops/blankLinePlaceholders.ts:27:8                             
+duplicateProfilesWithoutUs…            components/waves/drops/reaction-utils.ts:24:14                                   
+WaveDropReaction             function  components/waves/drops/WaveDropReactions.tsx:50:17                               
+isEnsNamePreview                       components/waves/ens/types.ts:79:14                                              
+isEnsAddressPreview                    components/waves/ens/types.ts:83:14                                              
+MEME_NAME_OPTIONS                      components/waves/memes/traits/schema.ts:129:14                                   
+clearGroupIdFromUpdateBody             components/waves/specs/groups/group/edit/buttons/utils/waveGroupEdit.ts:12:14    
+waveGroupUpdatePaths                   components/waves/specs/groups/group/edit/utils/waveGroupUpdate.ts:78:9           
+SIDEBAR_DIMENSIONS                     constants/sidebar.ts:7:14                                                        
+COLLECTIONS_ROUTES                     constants/sidebar.ts:16:14                                                       
+normaliseWalletList                    helpers/WalletHelpers.ts:1:14                                                    
+GROUP_INCLUDE_LIMIT                    hooks/groups/useGroupMutations.ts:99:9                                           
+GROUP_EXCLUDE_LIMIT                    hooks/groups/useGroupMutations.ts:99:30                                          
+validateGroupPayload                   hooks/groups/useGroupMutations.ts:100:9                                          
+SENTINEL_HEIGHT                        hooks/useVirtualizedWaves.ts:12:14                                               
+__testables                            lib/ens/detect.ts:110:14                                                         
+DEFAULT_REDIRECT_STATUS_CO…            lib/security/urlGuard.ts:483:9                                                   
+sanitiseGroupPayload                   services/groups/groupMutations.ts:32:14                                          
+AppKitInitializationError    class     src/errors/appkit-initialization.ts:1:14                                         
+WalletConnectionError        class     src/errors/wallet.ts:1:14                                                        
+isPotentialFarcasterUrl                src/services/farcaster/url.ts:137:14                                             
+login                        function  tests/testHelpers.ts:16:23                                                       
+getErrorCode                           utils/error-sanitizer.ts:242:14                                                  
+formatErrorMessage                     utils/error-sanitizer.ts:270:14                                                  
+validateWalletExists                   utils/wallet-validation.utils.ts:122:9                                           
+validateWalletAddress                  utils/wallet-validation.utils.ts:123:24                                          
+validateWalletAddressHash              utils/wallet-validation.utils.ts:124:25                                          
+validateWalletName                     utils/wallet-validation.utils.ts:125:29                                          
+validatePrivateKey                     utils/wallet-validation.utils.ts:126:22                                          
+validateMnemonic                       utils/wallet-validation.utils.ts:127:22                                          
+Unused exported types (83)
+AuthContextType                type       __tests__/utils/testContexts.tsx:5:13                                         
+CompoundRegistry               type       app/api/open-graph/compound/registry.ts:29:13                                 
+TokenData                      interface  app/nextgen/token/[token]/[[...view]]/page-utils.ts:10:18                     
+LayoutRefType                  type       components/brain/my-stream/layout/LayoutContext.tsx:69:13                     
+NotificationsProps             type       components/brain/notifications/index.tsx:109:14                               
+CompactMenuProps               type       components/common/CompactMenu.tsx:3:19                                        
+CompactMenuProps               type       components/compact-menu/index.tsx:151:31                                      
+MarkdownContentConfig          interface  components/drops/view/part/dropPartMarkdown/content.tsx:33:18                 
+MarkdownContentRenderers       interface  components/drops/view/part/dropPartMarkdown/content.tsx:42:18                 
+CompoundHandler                type       components/drops/view/part/dropPartMarkdown/handlers/compound.tsx:32:13       
+EnsHandler                     type       components/drops/view/part/dropPartMarkdown/handlers/ens.tsx:16:13            
+GoogleWorkspaceHandler         type       components/drops/view/part/dropPartMarkdown/handlers/googleWorkspace.tsx:33:13
+LinkHandlers                   type       components/drops/view/part/dropPartMarkdown/handlers/index.ts:28:13           
+SeizeHandlers                  type       components/drops/view/part/dropPartMarkdown/handlers/seize.tsx:128:13         
+TikTokHandler                  type       components/drops/view/part/dropPartMarkdown/handlers/tiktok.tsx:11:13         
+YoutubeHandler                 type       components/drops/view/part/dropPartMarkdown/handlers/youtube.tsx:11:13        
+LinkRendererConfig             interface  components/drops/view/part/dropPartMarkdown/linkHandlers.tsx:25:18            
+LinkRenderer                   interface  components/drops/view/part/dropPartMarkdown/linkHandlers.tsx:29:18            
+LinkDisplay                    type       components/drops/view/part/dropPartMarkdown/linkTypes.ts:3:13                 
+PepeLinkResult                 type       components/drops/view/part/dropPartMarkdown/pepe.tsx:3:13                     
+TikTokLinkKind                 type       components/drops/view/part/dropPartMarkdown/tiktok.ts:1:13                    
+TikTokLinkInfo                 interface  components/drops/view/part/dropPartMarkdown/tiktok.ts:3:18                    
+YoutubeLinkInfo                interface  components/drops/view/part/dropPartMarkdown/youtube.ts:3:18                   
+YoutubePreviewProps            interface  components/drops/view/part/dropPartMarkdown/youtubePreview.tsx:33:18          
+NavLink                        interface  components/header/HeaderNavConfig.ts:3:18                                     
+NavSection                     interface  components/header/HeaderNavConfig.ts:9:18                                     
+NavDropdown                    interface  components/header/HeaderNavConfig.ts:15:18                                    
+HistoricalMint                 type       components/meme-calendar/meme-calendar.szn1.ts:2:13                           
+RouteNavItem                   type       components/navigation/navTypes.ts:5:13                                        
+ViewNavItem                    type       components/navigation/navTypes.ts:15:13                                       
+ActionNavItem                  type       components/navigation/navTypes.ts:25:13                                       
+SidebarNavItem                 interface  components/navigation/navTypes.ts:49:18                                       
+CompoundLinkGroup              interface  components/waves/compound/types.ts:1:18                                       
+CompoundMarketV2Metrics        interface  components/waves/compound/types.ts:6:18                                       
+CompoundMarketV3Metrics        interface  components/waves/compound/types.ts:17:18                                      
+CompoundCollateralConfig       interface  components/waves/compound/types.ts:43:18                                      
+CompoundAccountV2Position      interface  components/waves/compound/types.ts:67:18                                      
+CompoundAccountV3CollateralP…  interface  components/waves/compound/types.ts:78:18                                      
+CompoundAccountV3Position      interface  components/waves/compound/types.ts:85:18                                      
+CompoundTxSummary              interface  components/waves/compound/types.ts:115:18                                     
+CompoundMarketResponse         type       components/waves/compound/types.ts:138:13                                     
+SliderTheme                    interface  components/waves/drop/types/slider.types.ts:1:18                              
+LightDropProps                 interface  components/waves/drops/LightDrop.tsx:4:18                                     
+ReactionEntry                  type       components/waves/drops/reaction-utils.ts:5:13                                 
+WaveDropsAllProps              interface  components/waves/drops/wave-drops-all/index.tsx:20:18                         
+TextFieldDefinition            interface  components/waves/memes/traits/schema.ts:79:18                                 
+BooleanFieldDefinition         interface  components/waves/memes/traits/schema.ts:100:18                                
+SectionDefinition              interface  components/waves/memes/traits/schema.ts:122:18                                
+WaveGroupEditButtonsControll…  interface  …s/groups/group/edit/buttons/hooks/useWaveGroupEditButtonsController.ts:460:18
+WaveGroupEditButtonsProps      interface  components/waves/specs/groups/group/edit/WaveGroupEditButtons.tsx:20:18       
+MinimalWave                    interface  contexts/wave/hooks/useEnhancedDmWavesList.ts:12:18                           
+Season                         interface  entities/ISeason.ts:1:18                                                      
+TDHMetrics                     interface  entities/ITDH.ts:203:18                                                       
+ConsolidatedTDHMetrics         interface  entities/ITDH.ts:204:18                                                       
+UserPageProps                  interface  helpers/Types.tsx:352:18                                                      
+VideoConversions               interface  helpers/video.helpers.ts:7:18                                                 
+SpecificDeterminedRouteInfo    type       hooks/breadcrumbs.config.ts:299:13                                            
+DynamicRouteType               type       hooks/breadcrumbs.types.ts:6:13                                               
+SubmitResult                   type       hooks/groups/useGroupMutations.ts:23:13                                       
+TestArgs                       interface  hooks/groups/useGroupMutations.ts:36:18                                       
+TestResult                     type       hooks/groups/useGroupMutations.ts:41:13                                       
+UpdateVisibilityArgs           interface  hooks/groups/useGroupMutations.ts:58:18                                       
+UpdateVisibilityResult         type       hooks/groups/useGroupMutations.ts:65:13                                       
+ValidationIssue                type       hooks/groups/useGroupMutations.ts:101:14                                      
+ValidationResult               type       hooks/groups/useGroupMutations.ts:101:31                                      
+ContentState                   type       hooks/useAuthenticatedContent.tsx:8:13                                        
+CreateModalMode                type       hooks/useCreateModalState.ts:15:13                                            
+UseHlsPlayerParams             interface  hooks/useHlsPlayer.ts:6:18                                                    
+LruTtlOptions                  type       lib/cache/lruTtl.ts:1:13                                                      
+UrlGuardErrorKind              type       lib/security/urlGuard.ts:5:13                                                 
+UrlGuardHooks                  interface  lib/security/urlGuard.ts:37:18                                                
+ParsePublicUrlOptions          interface  lib/security/urlGuard.ts:47:18                                                
+StripHtmlTagsOptions           interface  lib/text/html.ts:1:18                                                         
+PinnedWavesService             interface  services/api/pinned-waves-api.ts:6:18                                         
+ArtBlocksTokenId               type       src/services/artblocks/url.ts:184:42                                          
+FarcasterCastIdentifier        interface  src/services/farcaster/url.ts:16:18                                           
+FarcasterProfileIdentifier     interface  src/services/farcaster/url.ts:24:18                                           
+FarcasterChannelIdentifier     interface  src/services/farcaster/url.ts:30:18                                           
+WikimediaLinkResult            interface  src/services/wikimedia/url.ts:1:18                                            
+AppStore                       type       store/store.ts:16:13                                                          
+AppDispatch                    type       store/store.ts:18:13                                                          
+FarcasterBasePreview           interface  types/farcaster.types.ts:9:18                                                 
+FarcasterUnsupportedPreview    interface  types/farcaster.types.ts:87:18                                                
+Unused exported enum members (8)
+Older      ApiDropSearchStrategy              generated/models/ApiDropSearchStrategy.ts:16:5            
+Newer      ApiDropSearchStrategy              generated/models/ApiDropSearchStrategy.ts:17:5            
+Profile    ApiIdentitySubscriptionTargetType  generated/models/ApiIdentitySubscriptionTargetType.ts:16:5
+Wave       ApiIdentitySubscriptionTargetType  generated/models/ApiIdentitySubscriptionTargetType.ts:17:5
+Drop       ApiIdentitySubscriptionTargetType  generated/models/ApiIdentitySubscriptionTargetType.ts:18:5
+Erc1155    ApiNftTokenTypeEnum                generated/models/ApiNft.ts:276:5                          
+Eec721     ApiNftTokenTypeEnum                generated/models/ApiNft.ts:277:5                          
+NotPinned  ApiWavesPinFilter                  generated/models/ApiWavesPinFilter.ts:17:5                
+Duplicate exports (2)
+WalletErrorBoundary|default    components/auth/error-boundary/WalletErrorBoundary.tsx
+normalizeDropMarkdown|default  components/waves/drops/normalizeDropMarkdown.ts       
+Configuration hints (1)

@@ -1,0 +1,4 @@
+{
+  "project": "tsconfig.json",
+  "ignore": "(^generated/|^src/generated/|\\.test\\.|\\.spec\\.|/__tests__/|/stories/|^src/middleware\\.ts|/route\\.(ts|tsx)$|^src/(app|pages)/)"
+}
