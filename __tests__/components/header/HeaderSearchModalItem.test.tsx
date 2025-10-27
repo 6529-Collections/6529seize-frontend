@@ -107,8 +107,8 @@ describe("HeaderSearchModalItem", () => {
     expect(onHover).toHaveBeenCalledWith(true);
     const link = screen.getByTestId("link");
     expect(link).toHaveAttribute("href", "/profile-route");
-    expect(screen.getByText(/Alice/i)).toBeInTheDocument();
-    expect(link.textContent).toMatch(/Alice/i);
+    expect(screen.getByText("alice")).toBeInTheDocument();
+    expect(link.textContent).toContain("alice");
     expect(screen.getByText(/TDH: 10 - Level: 1/i)).toBeInTheDocument();
     fireEvent.click(link);
     expect(onClose).toHaveBeenCalled();
