@@ -4,28 +4,28 @@ import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTransfer } from "./TransferState";
 
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
 import { CommunityMemberMinimal } from "@/entities/IProfile";
+import { ContractType } from "@/enums";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { getUserProfile } from "@/helpers/server.helpers";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useIdentity } from "@/hooks/useIdentity";
+import { commonApiFetch } from "@/services/api/common-api";
 import {
   faAnglesDown,
   faAnglesUp,
   faXmarkCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import TransferModalPfp from "./TransferModalPfp";
-
-import CircleLoader, {
-  CircleLoaderSize,
-} from "@/components/distribution-plan-tool/common/CircleLoader";
-import { ContractType } from "@/enums";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { getUserProfile } from "@/helpers/server.helpers";
-import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { createPortal } from "react-dom";
 import { Address, isAddress, PublicClient } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
+import TransferModalPfp from "./TransferModalPfp";
 
 const MIN_SEARCH_LENGTH = 3;
 
@@ -807,6 +807,8 @@ export default function TransferModal({
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const dialogRef = useRef<HTMLDialogElement | null>(null);
 
+  const [isMounted, setIsMounted] = useState(false);
+
   const [leftHasOverflow, setLeftHasOverflow] = useState(false);
   const [resultsHasOverflow, setResultsHasOverflow] = useState(false);
   const [walletsHasOverflow, setWalletsHasOverflow] = useState(false);
@@ -929,6 +931,11 @@ export default function TransferModal({
     setSelectedProfile(null);
     setSelectedWallet(null);
   }, [open]);
+
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
 
   const debouncedQuery = useDebouncedValue(trimmedQuery, 350);
   const enabled = open && debouncedQuery.length >= MIN_SEARCH_LENGTH;
@@ -1349,7 +1356,8 @@ export default function TransferModal({
     trimmedQuery
   );
 
-  return (
+  const portalTarget = typeof document !== "undefined" ? document.body : null;
+  const modalContent = (
     <dialog
       ref={dialogRef}
       open
@@ -1441,4 +1449,7 @@ export default function TransferModal({
       </div>
     </dialog>
   );
+
+  if (!isMounted || !portalTarget) return null;
+  return createPortal(modalContent, portalTarget);
 }
