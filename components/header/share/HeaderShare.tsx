@@ -248,7 +248,7 @@ function HeaderQRModal({
               priority
               loading="eager"
               src="/6529Core.png"
-              alt="6529 Core"
+              alt="6529 Desktop"
               width={150}
               height={150}
               className="unselectable"
@@ -258,7 +258,7 @@ function HeaderQRModal({
               className="tw-flex tw-items-center tw-gap-2 tw-w-full"
             >
               <FontAwesomeIcon icon={faExternalLink} />
-              <div className="no-wrap">Open in 6529 Core</div>
+              <div className="no-wrap">Open in 6529 Desktop</div>
             </Button>
           </a>
         </div>
@@ -448,7 +448,7 @@ function ModalMenu({
             variant={activeSubTab === SubMode.CORE ? "light" : "outline-light"}
             onClick={() => onTabChange(activeTab, SubMode.CORE)}
           >
-            <span className="font-smaller">6529 Core</span>
+            <span className="font-smaller">6529 Desktop</span>
           </Button>
         )}
       </div>

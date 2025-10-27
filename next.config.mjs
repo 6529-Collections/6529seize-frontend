@@ -101,6 +101,8 @@ function loadAssetsFlagAtRuntime() {
 function sharedConfig(publicEnv, assetPrefix) {
   return {
     assetPrefix,
+    turbopackFileSystemCacheForDev: true,
+    reactCompiler: true,
     reactStrictMode: false,
     compress: true,
     productionBrowserSourceMaps: true,
@@ -117,6 +119,7 @@ function sharedConfig(publicEnv, assetPrefix) {
         "localhost",
         "media.generator.seize.io",
         "d3lqz0a4bldqgf.cloudfront.net",
+        "ipfs.6529.io",
       ],
       minimumCacheTTL: 86400,
     },

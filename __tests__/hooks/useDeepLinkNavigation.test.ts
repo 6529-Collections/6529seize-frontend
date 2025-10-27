@@ -5,8 +5,8 @@ import { App } from "@capacitor/app";
 
 jest.mock("next/navigation", () => ({ useRouter: jest.fn() }));
 jest.mock("@capacitor/app", () => ({ App: { addListener: jest.fn() } }));
-const useCapacitorMock = jest.fn(() => ({ isCapacitor: true }));
-jest.mock("@/hooks/useCapacitor", () => () => useCapacitorMock());
+const capacitorMock = jest.fn(() => ({ isCapacitor: true }));
+jest.mock("@/hooks/useCapacitor", () => () => capacitorMock());
 
 const push = jest.fn();
 (useRouter as jest.Mock).mockReturnValue({ push });
@@ -19,7 +19,7 @@ let callback: any;
 
 beforeEach(() => {
   jest.clearAllMocks();
-  useCapacitorMock.mockImplementation(() => ({ isCapacitor: true }));
+  capacitorMock.mockImplementation(() => ({ isCapacitor: true }));
   (App.addListener as jest.Mock).mockImplementation((_e: any, cb: any) => {
     callback = cb;
     return Promise.resolve({ remove });
@@ -40,7 +40,7 @@ test("navigates on deep link and cleans up", async () => {
 });
 
 test("does not register when not capacitor", () => {
-  useCapacitorMock.mockImplementation(() => ({ isCapacitor: false }));
+  capacitorMock.mockImplementation(() => ({ isCapacitor: false }));
   renderHook(() => useDeepLinkNavigation());
   expect(App.addListener).not.toHaveBeenCalled();
 });
