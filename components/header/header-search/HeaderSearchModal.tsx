@@ -493,6 +493,8 @@ export default function HeaderSearchModal({
     0
   );
   const shouldShowCountdown = searchInputLength > 0 && charactersRemaining > 0;
+  const isAwaitingDebouncedSearch =
+    meetsCharacterThreshold && trimmedDebouncedValue !== trimmedSearchValue;
 
   const isSearching = shouldSearchPages || hasActiveDebouncedSearch;
 
@@ -696,6 +698,11 @@ export default function HeaderSearchModal({
       (shouldSearchNfts && Boolean(nftsError));
 
     if (!hasResults) {
+      if (isAwaitingDebouncedSearch) {
+        setState(STATE.LOADING);
+        return;
+      }
+
       if (anyError) {
         setState(STATE.ERROR);
         return;
@@ -722,6 +729,7 @@ export default function HeaderSearchModal({
     profilesError,
     nftsError,
     wavesError,
+    isAwaitingDebouncedSearch,
   ]);
 
   const handleRetry = () => {
