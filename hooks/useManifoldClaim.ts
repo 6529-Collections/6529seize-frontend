@@ -1,6 +1,7 @@
 "use client";
 
 import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis";
+import { wallTimeToUtcInstantInZone } from "@/components/meme-calendar/meme-calendar.helpers";
 import {
   MANIFOLD_NETWORK,
   MEMES_CONTRACT,
@@ -9,7 +10,6 @@ import {
 } from "@/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
-import { DateTime } from "luxon";
 import { useCallback, useEffect, useState } from "react";
 import { useReadContract } from "wagmi";
 
@@ -33,50 +33,50 @@ export interface MemePhase {
 }
 
 export function buildMemesPhases(mintDate: Time): MemePhase[] {
-  const zone = "America/New_York";
-
-  const base = DateTime.fromJSDate(mintDate.toDate()).setZone(zone);
-
-  const toUtc = (hour: number, minute: number): Time =>
-    Time.seconds(base.set({ hour, minute, second: 0 }).toUTC().toSeconds());
-
-  const toUtcNextDay = (hour: number, minute: number): Time =>
-    Time.seconds(
-      base
-        .plus({ days: 1 })
-        .set({ hour, minute, second: 0 })
-        .toUTC()
-        .toSeconds()
-    );
-
   return [
     {
       id: "0",
       name: "Phase 0 (Allowlist)",
       type: ManifoldPhase.ALLOWLIST,
-      start: toUtc(10, 40),
-      end: toUtc(11, 20),
+      start: Time.fromString(
+        wallTimeToUtcInstantInZone(mintDate.toDate(), 17, 40).toISOString()
+      ),
+      end: Time.fromString(
+        wallTimeToUtcInstantInZone(mintDate.toDate(), 18, 20).toISOString()
+      ),
     },
     {
       id: "1",
       name: "Phase 1 (Allowlist)",
       type: ManifoldPhase.ALLOWLIST,
-      start: toUtc(11, 30),
-      end: toUtc(11, 50),
+      start: Time.fromString(
+        wallTimeToUtcInstantInZone(mintDate.toDate(), 18, 30).toISOString()
+      ),
+      end: Time.fromString(
+        wallTimeToUtcInstantInZone(mintDate.toDate(), 18, 50).toISOString()
+      ),
     },
     {
       id: "2",
       name: "Phase 2 (Allowlist)",
       type: ManifoldPhase.ALLOWLIST,
-      start: toUtc(12, 0),
-      end: toUtc(12, 20),
+      start: Time.fromString(
+        wallTimeToUtcInstantInZone(mintDate.toDate(), 19, 0).toISOString()
+      ),
+      end: Time.fromString(
+        wallTimeToUtcInstantInZone(mintDate.toDate(), 19, 20).toISOString()
+      ),
     },
     {
       id: "public",
       name: "Public Phase",
       type: ManifoldPhase.PUBLIC,
-      start: toUtc(12, 20),
-      end: toUtcNextDay(10, 0),
+      start: Time.fromString(
+        wallTimeToUtcInstantInZone(mintDate.toDate(), 19, 20).toISOString()
+      ),
+      end: Time.fromString(
+        wallTimeToUtcInstantInZone(mintDate.toDate(), 17, 0).toISOString()
+      ),
     },
   ];
 }
@@ -120,7 +120,7 @@ export function useManifoldClaim(
   }, []);
 
   const getMemePhase = useCallback(
-    (phase: ManifoldPhase, start: number, end: number) => {
+    (phase: ManifoldPhase, end: number) => {
       if (!areEqualAddresses(contract, MEMES_CONTRACT)) {
         return undefined;
       }
@@ -129,9 +129,10 @@ export function useManifoldClaim(
         return MEME_PHASES.find((mp) => mp.id === "public");
       }
 
-      return MEME_PHASES.filter((mp) => mp.end >= Time.seconds(end))[0];
+      const endTime = Time.seconds(end);
+      return MEME_PHASES.filter((mp) => mp.end.gte(endTime))[0];
     },
-    []
+    [contract]
   );
 
   const readContract = useReadContract({
@@ -158,11 +159,7 @@ export function useManifoldClaim(
         publicMerkle && claimData.total > 0
           ? ManifoldPhase.PUBLIC
           : ManifoldPhase.ALLOWLIST;
-      const memePhase = getMemePhase(
-        phase,
-        claimData.startDate,
-        claimData.endDate
-      );
+      const memePhase = getMemePhase(phase, claimData.endDate);
       const remaining = Number(claimData.totalMax) - Number(claimData.total);
       const newClaim: ManifoldClaim = {
         instanceId: instanceId,
