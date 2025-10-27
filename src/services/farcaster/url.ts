@@ -133,12 +133,3 @@ export const parseFarcasterResource = (
 
   return parseUserSegments(segments);
 };
-
-export const isPotentialFarcasterUrl = (url: URL): boolean => {
-  if (isFarcasterHost(url.hostname)) {
-    return true;
-  }
-
-  const protocol = url.protocol.toLowerCase();
-  return protocol === "http:" || protocol === "https:";
-};

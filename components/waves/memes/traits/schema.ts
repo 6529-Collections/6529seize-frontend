@@ -126,7 +126,7 @@ export interface SectionDefinition {
 }
 
 // Meme name options constant
-export const MEME_NAME_OPTIONS = [
+const MEME_NAME_OPTIONS = [
   "Seize the Memes of Production",
   "WAGMI",
   "Don't Let the Institutions Steal Your JPGs",

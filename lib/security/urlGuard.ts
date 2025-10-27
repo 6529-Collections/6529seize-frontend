@@ -479,5 +479,3 @@ export async function fetchPublicJson<T>(
 
   return (await response.json()) as T;
 }
-
-export { DEFAULT_REDIRECT_STATUS_CODES };

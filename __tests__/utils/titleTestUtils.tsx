@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 // Mock implementation of TitleContext hooks
-export const mockTitleContext = {
+const mockTitleContext = {
   title: 'Test Title',
   setTitle: jest.fn(),
   notificationCount: 0,

@@ -13,7 +13,7 @@ const MAX_MNEMONIC_WORDS = 24
 /**
  * Validates wallet object exists and is not null/undefined
  */
-function validateWalletExists(wallet: AppWallet): void {
+const validateWalletExists = (wallet: AppWallet): void => {
   if (!wallet) {
     throw new WalletValidationError('Wallet object is null or undefined - cannot process')
   }
@@ -22,7 +22,7 @@ function validateWalletExists(wallet: AppWallet): void {
 /**
  * Validates wallet address field and format
  */
-function validateWalletAddress(wallet: AppWallet): void {
+const validateWalletAddress = (wallet: AppWallet): void => {
   if (!wallet.address) {
     throw new WalletValidationError('Wallet missing required address field')
   }
@@ -39,7 +39,7 @@ function validateWalletAddress(wallet: AppWallet): void {
 /**
  * Validates wallet address_hashed field
  */
-function validateWalletAddressHash(wallet: AppWallet): void {
+const validateWalletAddressHash = (wallet: AppWallet): void => {
   if (!wallet.address_hashed) {
     throw new WalletValidationError('Wallet missing required address_hashed field')
   }
@@ -56,7 +56,7 @@ function validateWalletAddressHash(wallet: AppWallet): void {
 /**
  * Validates wallet name field
  */
-function validateWalletName(wallet: AppWallet): void {
+const validateWalletName = (wallet: AppWallet): void => {
   if (!wallet.name) {
     throw new WalletValidationError('Wallet missing required name field')
   }
@@ -73,7 +73,7 @@ function validateWalletName(wallet: AppWallet): void {
 /**
  * Validates private key if present
  */
-function validatePrivateKey(wallet: AppWallet): void {
+const validatePrivateKey = (wallet: AppWallet): void => {
   if (!wallet.private_key) {
     return
   }
@@ -90,7 +90,7 @@ function validatePrivateKey(wallet: AppWallet): void {
 /**
  * Validates mnemonic if present
  */
-function validateMnemonic(wallet: AppWallet): void {
+const validateMnemonic = (wallet: AppWallet): void => {
   if (!wallet.mnemonic) {
     return
   }
@@ -119,11 +119,3 @@ export function validateWalletSafely(wallet: AppWallet): void {
 }
 
 // Export individual validators for reuse in other parts of the application
-export {
-  validateWalletExists,
-  validateWalletAddress,
-  validateWalletAddressHash,
-  validateWalletName,
-  validatePrivateKey,
-  validateMnemonic
-}

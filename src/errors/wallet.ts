@@ -1,4 +1,4 @@
-export class WalletConnectionError extends Error {
+class WalletConnectionError extends Error {
   constructor(message: string, public readonly cause?: unknown) {
     super(message);
     this.name = 'WalletConnectionError';

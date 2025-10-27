@@ -96,8 +96,6 @@ const resolveOldVersionId = ({
     : null;
 };
 
-export { GROUP_INCLUDE_LIMIT, GROUP_EXCLUDE_LIMIT } from "@/services/groups/groupMutations";
-export { validateGroupPayload } from "@/services/groups/groupMutations";
 export type { ValidationIssue, ValidationResult } from "@/services/groups/groupMutations";
 
 export const useGroupMutations = ({

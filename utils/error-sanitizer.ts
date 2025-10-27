@@ -239,7 +239,7 @@ export const logErrorSecurely = (context: string, error: unknown): void => {
  * Extracts a safe error code from an error object
  * Useful for displaying error codes without exposing sensitive data
  */
-export const getErrorCode = (error: unknown): string | null => {
+const getErrorCode = (error: unknown): string | null => {
   if (!error || typeof error !== "object") {
     return null;
   }
@@ -262,23 +262,4 @@ export const getErrorCode = (error: unknown): string | null => {
   }
 
   return null;
-};
-
-/**
- * Creates a user-friendly error message with optional error code
- */
-export const formatErrorMessage = (
-  error: unknown,
-  includeCode: boolean = false
-): string => {
-  const message = sanitizeErrorForUser(error);
-
-  if (includeCode) {
-    const code = getErrorCode(error);
-    if (code) {
-      return `${message} (Error code: ${code})`;
-    }
-  }
-
-  return message;
 };
