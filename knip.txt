@@ -2,98 +2,72 @@
 > 6529seize@1.0.0 deadcode:knip
 > knip
 
-Unused files (14)
-
-
-                                 
-                             
-                                       
-                           
-middleware.tsx                                                       
-next-sitemap.config.js                                               
-                  
-                                       
-                                    
-stubs/empty.js                                                       
-                                             
-                                         
-Unused dependencies (4)
+Unused files (3)
+middleware.tsx          
+next-sitemap.config.js  
+stubs/empty.js          
+Unused dependencies (3)
 @openapitools/openapi-generator-cli  package.json:61:6
-@uiw/react-md-editor                 package.json:70:6
-bootstrap                            package.json:72:6
-multiformats                         package.json:96:6
-Unused devDependencies (3)
-@next/bundle-analyzer  package.json:129:6
-glob                   package.json:153:6
-pino-pretty            package.json:159:6
-Unlisted dependencies (67)
-components/distribution-plan-tool/review-distributio…  …istribution-plan/table/ReviewDistributionPlanTable.test.tsx:3:41
-components/distribution-plan-tool/review-distributio…  …ribution-plan/table/ReviewDistributionPlanTableRow.test.tsx:4:44
-services/distribution-plan-api                         …ribution-plan/table/ReviewDistributionPlanTableRow.test.tsx:7:42
-@lexical/utils                                         __tests__/components/DragDropPastePlugin.test.tsx:51:13          
-@lexical/selection                                     …ents/drops/create/lexical/plugins/MaxLengthPlugin.test.tsx:16:66
-@lexical/utils                                         …ents/drops/create/lexical/plugins/MaxLengthPlugin.test.tsx:17:56
-components/drops/create/lexical/plugins/mentions/Men…  …ate/lexical/plugins/mentions/MentionsTypeaheadMenu.test.tsx:8:35
-components/groups/page/create/config/wallets/CreateG…  …/page/create/config/wallets/CreateGroupWalletsEmma.test.tsx:3:36
-components/groups/page/list/card/utils/GroupCardActi…  …s/groups/page/list/card/utils/GroupCardActionStats.test.tsx:3:34
-generated/models/ApiRateMatter                         …s/groups/page/list/card/utils/GroupCardActionStats.test.tsx:6:31
-axios                                                  __tests__/components/ipfs/IPFSService.test.ts:7:19               
-axios                                                  …mponents/waves/create-wave/services/multiPartUpload.test.ts:1:19
-p-limit                                                …mponents/waves/create-wave/services/multiPartUpload.test.ts:2:20
-components/waves/drops/winner/WinnerDropBadge          …ts__/components/waves/drops/winner/WinnerDropBadge.test.tsx:2:29
-components/waves/memes/traits/DropdownTrait            …ests__/components/waves/memes/traits/DropdownTrait.test.tsx:2:31
-components/waves/winners/drops/DefaultWaveWinnerDrop   …mponents/waves/winners/drops/DefaultWaveWinnerDrop.test.tsx:1:22
-date-fns                                               …sts__/components/waves/winners/WaveWinnersTimeline.test.tsx:3:11
-helpers/waves/time.types                               __tests__/helpers/time.types.test.ts:1:8                         
-@jest/globals                                          __tests__/wagmiConfig/wagmiAppWalletConnector.test.ts:10:4       
-@adraffy/ens-normalize                                 app/api/open-graph/ens.ts:13:11                                  
-clsx                                                   components/common/TabToggleWithOverflow.tsx:5:18                 
-clsx                                                   components/compact-menu/index.tsx:5:18                           
-clsx                                                   …onents/compact-menu/subcomponents/CompactMenuItemButton.tsx:1:18
-clsx                                                   …onents/compact-menu/subcomponents/CompactMenuItemsPanel.tsx:3:18
-clsx                                                   components/compact-menu/subcomponents/CompactMenuTrigger.tsx:4:18
-@lexical/rich-text                                     …onents/drops/create/lexical/plugins/DragDropPastePlugin.tsx:4:11
-@lexical/utils                                         …onents/drops/create/lexical/plugins/DragDropPastePlugin.tsx:5:11
-@lexical/list                                          …ents/drops/create/lexical/plugins/enter/EnterKeyPlugin.tsx:14:11
-@lexical/rich-text                                     …ents/drops/create/lexical/plugins/enter/EnterKeyPlugin.tsx:15:11
-@lexical/selection                                     components/drops/create/lexical/plugins/MaxLengthPlugin.tsx:12:11
-@lexical/utils                                         components/drops/create/lexical/plugins/MaxLengthPlugin.tsx:13:11
-@lexical/markdown                                      …nents/drops/create/lexical/transformers/EmojiTransformer.ts:1:11
-@lexical/markdown                                      …ents/drops/create/lexical/transformers/HastagTransformer.ts:1:11
-@lexical/markdown                                      …nents/drops/create/lexical/transformers/ImageTransformer.ts:1:11
-@lexical/markdown                                      …s/drops/create/lexical/transformers/markdownTransformers.ts:1:11
-@lexical/markdown                                      …nts/drops/create/lexical/transformers/MentionTransformer.ts:1:11
-@lexical/code                                          …mponents/drops/create/lexical/utils/codeContextDetection.ts:3:11
-@lexical/list                                          components/drops/create/utils/CreateDropContent.tsx:32:11        
-@lexical/rich-text                                     components/drops/create/utils/CreateDropContent.tsx:33:11        
-@lexical/table                                         components/drops/create/utils/CreateDropContent.tsx:36:11        
-@lexical/code                                          components/drops/create/utils/CreateDropContent.tsx:37:11        
-@lexical/link                                          components/drops/create/utils/CreateDropContent.tsx:38:11        
-unified                                                components/drops/view/part/DropPartMarkdown.tsx:17:16            
-clsx                                                   components/header/AppSidebarMenuItems.tsx:7:18                   
-clsx                                                   components/header/header-search/HeaderSearchButton.tsx:4:18      
-axios                                                  components/ipfs/IPFSService.ts:1:19                              
-form-data                                              components/ipfs/IPFSService.ts:2:22                              
-axios                                                  components/waves/create-wave/services/multiPartUpload.ts:1:19    
-p-limit                                                components/waves/create-wave/services/multiPartUpload.ts:2:20    
-@lexical/list                                          components/waves/CreateDropInput.tsx:29:11                       
-@lexical/rich-text                                     components/waves/CreateDropInput.tsx:30:11                       
-@lexical/table                                         components/waves/CreateDropInput.tsx:33:11                       
-@lexical/code                                          components/waves/CreateDropInput.tsx:34:11                       
-@lexical/link                                          components/waves/CreateDropInput.tsx:35:11                       
-@lexical/markdown                                      components/waves/drops/EditDropLexical.tsx:14:11                 
-@lexical/list                                          components/waves/drops/EditDropLexical.tsx:30:11                 
-@lexical/rich-text                                     components/waves/drops/EditDropLexical.tsx:31:11                 
-@lexical/code                                          components/waves/drops/EditDropLexical.tsx:34:11                 
-@lexical/link                                          components/waves/drops/EditDropLexical.tsx:35:11                 
-@lexical/markdown                                      components/waves/drops/normalizeDropMarkdown.ts:2:4              
-date-fns                                               …nents/waves/drops/participation/ParticipationDropFooter.tsx:6:11
-clsx                                                   components/waves/drops/WaveDropReactions.tsx:21:18               
-clsx                                                   components/waves/GoogleWorkspaceCard.tsx:5:18                    
-date-fns                                               …mponents/waves/winners/WaveWinnersSmallDecisionSelector.tsx:4:11
-date-fns                                               components/waves/winners/WaveWinnersTimeline.tsx:6:11            
-istanbul-lib-coverage                                  scripts/improve-coverage.js:14:25                                
-@reown/appkit-common                                   utils/appkit-initialization.utils.ts:8:16                        
+bootstrap                            package.json:71:6
+pino-pretty                          package.json:99:6
+Unlisted dependencies (57)
+@lexical/utils            __tests__/components/DragDropPastePlugin.test.tsx:51:13                         
+@lexical/selection        __tests__/components/drops/create/lexical/plugins/MaxLengthPlugin.test.tsx:16:66
+@lexical/utils            __tests__/components/drops/create/lexical/plugins/MaxLengthPlugin.test.tsx:17:56
+axios                     __tests__/components/ipfs/IPFSService.test.ts:7:19                              
+axios                     __tests__/components/waves/create-wave/services/multiPartUpload.test.ts:1:19    
+p-limit                   __tests__/components/waves/create-wave/services/multiPartUpload.test.ts:2:20    
+date-fns                  __tests__/components/waves/winners/WaveWinnersTimeline.test.tsx:3:11            
+helpers/waves/time.types  __tests__/helpers/time.types.test.ts:1:8                                        
+@jest/globals             __tests__/wagmiConfig/wagmiAppWalletConnector.test.ts:10:4                      
+@adraffy/ens-normalize    app/api/open-graph/ens.ts:13:11                                                 
+clsx                      components/common/TabToggleWithOverflow.tsx:5:18                                
+clsx                      components/compact-menu/index.tsx:5:18                                          
+clsx                      components/compact-menu/subcomponents/CompactMenuItemButton.tsx:1:18            
+clsx                      components/compact-menu/subcomponents/CompactMenuItemsPanel.tsx:3:18            
+clsx                      components/compact-menu/subcomponents/CompactMenuTrigger.tsx:4:18               
+@lexical/rich-text        components/drops/create/lexical/plugins/DragDropPastePlugin.tsx:4:11            
+@lexical/utils            components/drops/create/lexical/plugins/DragDropPastePlugin.tsx:5:11            
+@lexical/list             components/drops/create/lexical/plugins/enter/EnterKeyPlugin.tsx:14:11          
+@lexical/rich-text        components/drops/create/lexical/plugins/enter/EnterKeyPlugin.tsx:15:11          
+@lexical/selection        components/drops/create/lexical/plugins/MaxLengthPlugin.tsx:12:11               
+@lexical/utils            components/drops/create/lexical/plugins/MaxLengthPlugin.tsx:13:11               
+@lexical/markdown         components/drops/create/lexical/transformers/EmojiTransformer.ts:1:11           
+@lexical/markdown         components/drops/create/lexical/transformers/HastagTransformer.ts:1:11          
+@lexical/markdown         components/drops/create/lexical/transformers/ImageTransformer.ts:1:11           
+@lexical/markdown         components/drops/create/lexical/transformers/markdownTransformers.ts:1:11       
+@lexical/markdown         components/drops/create/lexical/transformers/MentionTransformer.ts:1:11         
+@lexical/code             components/drops/create/lexical/utils/codeContextDetection.ts:3:11              
+@lexical/list             components/drops/create/utils/CreateDropContent.tsx:32:11                       
+@lexical/rich-text        components/drops/create/utils/CreateDropContent.tsx:33:11                       
+@lexical/table            components/drops/create/utils/CreateDropContent.tsx:36:11                       
+@lexical/code             components/drops/create/utils/CreateDropContent.tsx:37:11                       
+@lexical/link             components/drops/create/utils/CreateDropContent.tsx:38:11                       
+unified                   components/drops/view/part/DropPartMarkdown.tsx:17:16                           
+clsx                      components/header/AppSidebarMenuItems.tsx:7:18                                  
+clsx                      components/header/header-search/HeaderSearchButton.tsx:4:18                     
+axios                     components/ipfs/IPFSService.ts:1:19                                             
+form-data                 components/ipfs/IPFSService.ts:2:22                                             
+axios                     components/waves/create-wave/services/multiPartUpload.ts:1:19                   
+p-limit                   components/waves/create-wave/services/multiPartUpload.ts:2:20                   
+@lexical/list             components/waves/CreateDropInput.tsx:29:11                                      
+@lexical/rich-text        components/waves/CreateDropInput.tsx:30:11                                      
+@lexical/table            components/waves/CreateDropInput.tsx:33:11                                      
+@lexical/code             components/waves/CreateDropInput.tsx:34:11                                      
+@lexical/link             components/waves/CreateDropInput.tsx:35:11                                      
+@lexical/markdown         components/waves/drops/EditDropLexical.tsx:14:11                                
+@lexical/list             components/waves/drops/EditDropLexical.tsx:30:11                                
+@lexical/rich-text        components/waves/drops/EditDropLexical.tsx:31:11                                
+@lexical/code             components/waves/drops/EditDropLexical.tsx:34:11                                
+@lexical/link             components/waves/drops/EditDropLexical.tsx:35:11                                
+@lexical/markdown         components/waves/drops/normalizeDropMarkdown.ts:2:4                             
+date-fns                  components/waves/drops/participation/ParticipationDropFooter.tsx:6:11           
+clsx                      components/waves/drops/WaveDropReactions.tsx:21:18                              
+clsx                      components/waves/GoogleWorkspaceCard.tsx:5:18                                   
+date-fns                  components/waves/winners/WaveWinnersSmallDecisionSelector.tsx:4:11              
+date-fns                  components/waves/winners/WaveWinnersTimeline.tsx:6:11                           
+istanbul-lib-coverage     scripts/improve-coverage.js:14:25                                               
+@reown/appkit-common      utils/appkit-initialization.utils.ts:8:16                                       
 Unresolved imports (5)
 ../../app/api/farcaster/route          __tests__/app/api/farcaster.route.test.ts:48:10                                  
 @/__tests__/generated/models/ApiDrop…  …_/components/memes/drops/meme-participation-drop/MemeDropVoteStats.test.tsx:4:30
