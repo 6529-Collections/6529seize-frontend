@@ -23,9 +23,15 @@ export const TabToggle: React.FC<TabToggleProps> = ({
   orientation = "horizontal",
 }) => {
   const isVertical = orientation === "vertical";
-  const containerClasses = isVertical
-    ? "tw-flex tw-flex-col tw-gap-y-1.5"
-    : `tw-flex tw-gap-1 ${fullWidth ? "tw-w-full" : "tw-w-auto"}`;
+  const baseClasses = "tw-flex";
+  const directionClasses = isVertical ? "tw-flex-col tw-gap-y-1.5" : "tw-gap-1";
+  const widthClasses = !isVertical
+    ? fullWidth
+      ? "tw-w-full"
+      : "tw-w-auto"
+    : "";
+  const containerClasses =
+    `${baseClasses} ${directionClasses} ${widthClasses}`.trim();
 
   return (
     <div className={containerClasses} role="tablist">
@@ -42,8 +48,8 @@ export const TabToggle: React.FC<TabToggleProps> = ({
               : "tw-flex-1 tw-text-center tw-py-2"
           } ${
             activeKey === option.key
-              ? "tw-bg-white tw-text-iron-950"
-              : "tw-text-iron-400 tw-bg-transparent hover:tw-text-iron-100"
+              ? "tw-bg-white tw-text-black"
+              : "tw-text-white tw-bg-transparent hover:tw-bg-iron-800"
           }`}>
           {option.label}
           {option.hasIndicator && (

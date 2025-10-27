@@ -1,6 +1,6 @@
-import { fireEvent, render, screen } from "@testing-library/react";
 import HeaderSearchModalItem from "@/components/header/header-search/HeaderSearchModalItem";
 import { MEMES_CONTRACT } from "@/constants";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 const useHoverDirty = jest.fn();
 const useRouter = jest.fn();
@@ -51,13 +51,11 @@ jest.mock(
 );
 
 beforeEach(() => {
-  window.matchMedia = jest
-    .fn()
-    .mockReturnValue({
-      matches: true,
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    });
+  window.matchMedia = jest.fn().mockReturnValue({
+    matches: true,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+  });
   jest.clearAllMocks();
 });
 
@@ -170,7 +168,7 @@ it("renders page item and shows breadcrumbs", () => {
   const onHover = jest.fn();
   render(
     <HeaderSearchModalItem
-      content={page as any}
+      content={page}
       searchValue="delegation"
       isSelected={false}
       onHover={onHover}

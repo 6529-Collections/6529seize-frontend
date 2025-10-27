@@ -1,35 +1,32 @@
 "use client";
 
-import { useHoverDirty } from "react-use";
-import { CommunityMemberMinimal } from "@/entities/IProfile";
+import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
+import WavesIcon from "@/components/common/icons/WavesIcon";
 import {
-  cicToType,
-  formatNumberWithCommas,
-  getProfileTargetRoute,
-} from "@/helpers/Helpers";
-import { useEffect, useRef, type ComponentType } from "react";
-import HeaderSearchModalItemHighlight from "./HeaderSearchModalItemHighlight";
-import UserCICAndLevel from "@/components/user/utils/UserCICAndLevel";
-import { usePathname, useSearchParams } from "next/navigation";
+  NEXTGEN_CHAIN_ID,
+  NEXTGEN_CORE,
+} from "@/components/nextGen/nextgen_contracts";
 import { UserPageTabType } from "@/components/user/layout/UserPageTabs";
-import Link from "next/link";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
 } from "@/constants";
-import {
-  NEXTGEN_CORE,
-  NEXTGEN_CHAIN_ID,
-} from "@/components/nextGen/nextgen_contracts";
-import HeaderSearchModalItemMedia from "./HeaderSearchModalItemMedia";
+import { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import useDeviceInfo from "../../../hooks/useDeviceInfo";
+import { getProfileTargetRoute } from "@/helpers/Helpers";
+import { DocumentTextIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect, useRef, type ComponentType } from "react";
+import { useHoverDirty } from "react-use";
 import {
   getWaveHomeRoute,
   getWaveRoute,
 } from "../../../helpers/navigation.helpers";
-import { DocumentTextIcon } from "@heroicons/react/24/outline";
+import useDeviceInfo from "../../../hooks/useDeviceInfo";
+import HeaderSearchModalItemMedia from "./HeaderSearchModalItemMedia";
+import HeaderSearchModalPfp from "./HeaderSearchModalPfp";
 
 export interface NFTSearchResult {
   id: number;
@@ -108,31 +105,41 @@ export default function HeaderSearchModalItem({
     };
   };
 
+  const getMediaIcon = (Icon: ComponentType<{ className?: string }>) => {
+    return (
+      <div className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900">
+        <Icon className="tw-h-5 tw-w-5" />
+      </div>
+    );
+  };
+
   const getMedia = () => {
     if (isProfile()) {
       const profile = getProfile();
-      const cicType = cicToType(profile.cic_rating);
-      return <UserCICAndLevel level={profile.level} cicType={cicType} />;
+      return <HeaderSearchModalPfp level={profile.level} src={profile.pfp} />;
     } else if (isNft()) {
       const nft = getNft();
       return <HeaderSearchModalItemMedia nft={nft} />;
     } else if (isPage()) {
       const page = getPage();
       const Icon = page.icon ?? DocumentTextIcon;
-      return (
-        <div className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900">
-          <Icon className="tw-h-5 tw-w-5 tw-text-iron-200" />
-        </div>
-      );
+      return getMediaIcon(Icon);
     } else {
       const wave = getWave();
-      return (
-        <HeaderSearchModalItemMedia
-          src={wave.picture}
-          alt={wave.name}
-          roundedFull
-        />
-      );
+      if (wave.picture) {
+        return (
+          <HeaderSearchModalItemMedia
+            src={wave.picture}
+            alt={wave.name}
+            roundedFull
+          />
+        );
+      }
+      const isDm = wave.wave.admin_group.group?.is_direct_message;
+      if (isDm) {
+        return getMediaIcon(ChatBubbleIcon);
+      }
+      return getMediaIcon(WavesIcon);
     }
   };
 
@@ -153,7 +160,8 @@ export default function HeaderSearchModalItem({
     } else if (isNft()) {
       const nft = getNft();
       const collectionMap = getNftCollectionMap();
-      return `${collectionMap[nft.contract].path}/${nft.id}`;
+      const key = nft.contract.toLowerCase();
+      return `${collectionMap[key].path}/${nft.id}`;
     } else if (isPage()) {
       return getPage().href;
     } else {
@@ -191,11 +199,13 @@ export default function HeaderSearchModalItem({
 
   const getSecondaryText = () => {
     if (isProfile()) {
-      return getProfile().display ?? "";
+      const profile = getProfile();
+      return `TDH: ${profile.tdh.toLocaleString()} - Level: ${profile.level}`;
     } else if (isNft()) {
       const nft = getNft();
       const collectionMap = getNftCollectionMap();
-      return `${collectionMap[nft.contract].title} #${nft.id}`;
+      const key = nft.contract.toLowerCase();
+      return `${collectionMap[key].title} #${nft.id}`;
     } else if (isPage()) {
       const page = getPage();
       if (page.breadcrumbs.length > 0) {
@@ -207,6 +217,9 @@ export default function HeaderSearchModalItem({
       return `Wave #${wave.serial_no}`;
     }
   };
+
+  const primaryText = getPrimaryText();
+  const secondaryText = getSecondaryText();
 
   return (
     <div
@@ -221,28 +234,18 @@ export default function HeaderSearchModalItem({
         {getMedia()}
         <div className="tw-flex-1 tw-min-w-0">
           <div className="tw-flex tw-items-center tw-gap-3 tw-min-w-0">
-            <span className="tw-flex-1 tw-min-w-0 tw-text-sm tw-font-semibold tw-text-iron-100">
-              <span className="tw-block tw-truncate">
-                <HeaderSearchModalItemHighlight
-                  text={getPrimaryText()}
-                  highlight={searchValue}
-                />
+            <span
+              className="tw-flex-1 tw-min-w-0 tw-text-sm tw-font-semibold tw-text-white"
+              title={primaryText}>
+              <span className="tw-block tw-truncate tw-min-w-0">
+                {primaryText}
               </span>
             </span>
-            {isProfile() && !!getProfile().tdh && (
-              <span className="tw-flex-shrink-0 tw-inline-flex tw-items-center tw-gap-x-1 tw-text-sm tw-font-medium tw-text-iron-100">
-                {formatNumberWithCommas(getProfile().tdh)}{" "}
-                <span className="tw-text-sm tw-font-medium tw-text-iron-400">
-                  TDH
-                </span>
-              </span>
-            )}
           </div>
-          <p className="tw-mb-0 tw-text-sm tw-text-iron-400 tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap tw-min-w-0">
-            <HeaderSearchModalItemHighlight
-              text={getSecondaryText()}
-              highlight={searchValue}
-            />
+          <p
+            className="tw-mb-0 tw-text-sm tw-text-iron-400 tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap tw-min-w-0"
+            title={secondaryText || undefined}>
+            {secondaryText}
           </p>
         </div>
       </Link>
