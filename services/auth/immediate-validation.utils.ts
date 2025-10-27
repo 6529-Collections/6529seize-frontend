@@ -7,7 +7,7 @@ import {
   InvalidRoleStateError
 } from "@/errors/authentication";
 import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import { publicEnv } from "@/config/env";
+import { getNodeEnv, publicEnv } from "@/config/env";
 
 interface ImmediateValidationParams {
   currentAddress: string;
@@ -144,7 +144,7 @@ export const validateAuthImmediate = async ({
 }): Promise<ImmediateValidationResult> => {
   if (
     publicEnv.USE_DEV_AUTH === "true" &&
-    (publicEnv.NODE_ENV ?? process.env.NODE_ENV) !== "production"
+    getNodeEnv() !== "production"
   ) {
     return createValidationResult(true, false, false);
   }

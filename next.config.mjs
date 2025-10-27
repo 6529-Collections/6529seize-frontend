@@ -105,9 +105,6 @@ function sharedConfig(publicEnv, assetPrefix) {
     compress: true,
     productionBrowserSourceMaps: true,
     sassOptions: { quietDeps: true },
-    eslint: {
-      ignoreDuringBuilds: true,
-    },
     experimental: {
       webpackMemoryOptimizations: true,
       webpackBuildWorker: true,
