@@ -25,11 +25,14 @@ export const HeaderSearchTabToggle: React.FC<HeaderSearchTabToggleProps> = ({
   const isVertical = orientation === "vertical";
   const baseClasses = "tw-flex";
   const directionClasses = isVertical ? "tw-flex-col tw-gap-y-1.5" : "tw-gap-1";
-  const widthClasses = isVertical
-    ? ""
-    : fullWidth
-      ? "tw-w-full"
-      : "tw-w-auto";
+  let widthClasses;
+  if (isVertical) {
+    widthClasses = "";
+  } else if (fullWidth) {
+    widthClasses = "tw-w-full";
+  } else {
+    widthClasses = "tw-w-auto";
+  }
   const containerClasses =
     `${baseClasses} ${directionClasses} ${widthClasses}`.trim();
 
