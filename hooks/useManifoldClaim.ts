@@ -39,12 +39,9 @@ export function buildMemesPhases(mintDate: Time): MemePhase[] {
     minute: number,
     nextDay: boolean = false
   ) => {
-    const date = mintDate.toDate();
-    if (nextDay) {
-      date.setDate(date.getDate() + 1);
-    }
+    const ref = nextDay ? mintDate.plusDays(1) : mintDate;
     return Time.fromString(
-      wallTimeToUtcInstantInZone(date, hour, minute).toISOString()
+      wallTimeToUtcInstantInZone(ref.toDate(), hour, minute).toISOString()
     );
   };
 
