@@ -11,6 +11,10 @@ it('calls handlers on actions', () => {
   render(<WaveGroupRemoveModal closeModal={close} removeGroup={remove} />);
   fireEvent.click(screen.getByText('Remove'));
   expect(remove).toHaveBeenCalled();
+  expect(close).not.toHaveBeenCalled();
   fireEvent.click(screen.getByText('Cancel'));
-  expect(close).toHaveBeenCalled();
+  expect(close).toHaveBeenCalledTimes(1);
+  fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+  expect(close).toHaveBeenCalledTimes(2);
+  expect(remove).toHaveBeenCalledTimes(1);
 });
