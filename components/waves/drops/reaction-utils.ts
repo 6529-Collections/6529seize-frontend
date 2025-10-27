@@ -21,7 +21,7 @@ export const cloneReactionEntries = (
   }));
 };
 
-export const duplicateProfilesWithoutUser = (
+const duplicateProfilesWithoutUser = (
   profiles: ApiProfileMin[],
   userId: string | null
 ): ApiProfileMin[] => {

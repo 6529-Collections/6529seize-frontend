@@ -23,8 +23,8 @@ import AllowlistToolCommonModalWrapper, {
 } from "@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
 import CreateCustomSnapshotFormAddWalletsModal from "./CreateCustomSnapshotFormAddWalletsModal";
 
-export const MAX_CUSTOM_SNAPSHOT_ROWS = 100000;
-export const CUSTOM_SNAPSHOT_CHUNK_SIZE = 500;
+const MAX_CUSTOM_SNAPSHOT_ROWS = 100000;
+const CUSTOM_SNAPSHOT_CHUNK_SIZE = 500;
 
 export default function CreateCustomSnapshotForm() {
   const { distributionPlan, setToasts, fetchOperations } = useContext(

@@ -4,11 +4,6 @@ import { useId } from "react";
 
 import { ProfileActivityFilterTargetType } from "@/enums";
 
-export { ProfileActivityFilterTargetType } from "@/enums";
-export {
-  ProfileActivityFilterTargetType as FilterTargetType,
-} from "@/enums";
-
 const TARGETS = [
   { id: ProfileActivityFilterTargetType.ALL, name: "All" },
   { id: ProfileActivityFilterTargetType.OUTGOING, name: "Outgoing" },
