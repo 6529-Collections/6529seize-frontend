@@ -173,7 +173,10 @@ export default function Waves({
     ),
   };
 
-  const activeView = isApp ? viewMode : WavesViewMode.VIEW;
+  const activeView =
+    isApp || viewMode === WavesViewMode.CREATE
+      ? viewMode
+      : WavesViewMode.VIEW;
 
   return (
     <div className="tailwind-scope">
