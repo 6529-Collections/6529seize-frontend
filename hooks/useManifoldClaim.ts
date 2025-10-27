@@ -11,6 +11,7 @@ import {
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
 import { useCallback, useEffect, useState } from "react";
+import type { Abi } from "viem";
 import { useReadContract } from "wagmi";
 
 export enum ManifoldClaimStatus {
@@ -100,7 +101,7 @@ export interface ManifoldClaim {
 export function useManifoldClaim(
   contract: string,
   proxy: string,
-  abi: any,
+  abi: Abi,
   tokenId: number,
   onError?: () => void
 ) {
@@ -111,7 +112,7 @@ export function useManifoldClaim(
     const now = Date.now() / 1000;
     if (now < start) {
       return ManifoldClaimStatus.UPCOMING;
-    } else if (now > start && now < end) {
+    } else if (now >= start && now < end) {
       return ManifoldClaimStatus.ACTIVE;
     }
     return ManifoldClaimStatus.ENDED;
