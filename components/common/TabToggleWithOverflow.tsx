@@ -1,6 +1,11 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React from "react";
+import { CompactMenu } from "./CompactMenu";
+import clsx from "clsx";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { TAB_TOGGLE_WITH_OVERFLOW_MESSAGES } from "@/i18n/messages";
 
 interface TabOption {
   readonly key: string;
@@ -15,102 +20,146 @@ interface TabToggleWithOverflowProps {
   readonly fullWidth?: boolean;
 }
 
+interface OverflowTriggerProps {
+  readonly isOpen?: boolean;
+  readonly isActiveInOverflow: boolean;
+  readonly activeLabel?: string;
+  readonly fallbackLabel: string;
+}
+
+const OverflowTrigger: React.FC<OverflowTriggerProps> = ({
+  isOpen = false,
+  isActiveInOverflow,
+  activeLabel,
+  fallbackLabel,
+}) => (
+  <>
+    {isActiveInOverflow ? activeLabel ?? fallbackLabel : fallbackLabel}
+    <span
+      className={clsx(
+        "tw-ml-0.5 tw-inline-flex tw-transition-transform tw-duration-200",
+        isOpen ? "tw-rotate-180" : "",
+      )}
+    >
+      <FontAwesomeIcon
+        icon={faChevronDown}
+        aria-hidden="true"
+        className="tw-h-3 tw-w-3 tw-opacity-70"
+      />
+    </span>
+  </>
+);
+
 export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
   options,
   activeKey,
   onSelect,
-  maxVisibleTabs = 3, // Default to showing 3 tabs before overflow
+  maxVisibleTabs = 3,
   fullWidth = false,
 }) => {
-  const [isOverflowOpen, setIsOverflowOpen] = useState(false);
-  const overflowRef = useRef<HTMLDivElement>(null);
+  const clampedMax = React.useMemo(
+    () => Math.max(0, Math.floor(maxVisibleTabs)),
+    [maxVisibleTabs],
+  );
+  const [visibleTabs, overflowTabs] = React.useMemo(() => {
+    const v = options.slice(0, clampedMax);
+    const o = options.length > clampedMax ? options.slice(clampedMax) : [];
+    return [v, o] as const;
+  }, [options, clampedMax]);
+  const activeOption = React.useMemo(
+    () => options.find((option) => option.key === activeKey),
+    [options, activeKey],
+  );
 
-  // Determine which tabs to show directly and which to put in overflow
-  const visibleTabs = options.slice(0, maxVisibleTabs);
-  const overflowTabs =
-    options.length > maxVisibleTabs ? options.slice(maxVisibleTabs) : [];
-
-  // Check if active tab is in overflow
   const isActiveInOverflow = overflowTabs.some((tab) => tab.key === activeKey);
 
-  // Close the dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        overflowRef.current &&
-        !overflowRef.current.contains(event.target as Node)
-      ) {
-        setIsOverflowOpen(false);
-      }
-    };
+  const tabRefs = React.useRef<Array<HTMLButtonElement | null>>([]);
+  const activeVisibleIndex = visibleTabs.findIndex(
+    (tab) => tab.key === activeKey,
+  );
+  const [focusedTabIndex, setFocusedTabIndex] = React.useState(() =>
+    Math.max(activeVisibleIndex, 0),
+  );
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!isOverflowOpen) {
-      return undefined;
-    }
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsOverflowOpen(false);
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOverflowOpen]);
-
-  // Handle tab selection
   const handleSelect = (key: string) => {
     onSelect(key);
-    setIsOverflowOpen(false);
   };
 
-  const toggleOverflowMenu = () => {
-    setIsOverflowOpen((prev) => !prev);
-  };
+  React.useEffect(() => {
+    tabRefs.current = tabRefs.current.slice(0, visibleTabs.length);
+  }, [visibleTabs.length]);
 
-  const handleOverflowKeyDown = (
-    event: React.KeyboardEvent<HTMLButtonElement>,
-  ) => {
-    if (
-      event.key === "Enter" ||
-      event.key === " " ||
-      event.key === "Space" ||
-      event.key === "Spacebar"
-    ) {
-      event.preventDefault();
-      toggleOverflowMenu();
+  React.useEffect(() => {
+    if (activeVisibleIndex >= 0) {
+      setFocusedTabIndex(activeVisibleIndex);
+      tabRefs.current[activeVisibleIndex]?.focus();
+      return;
     }
 
-    if (event.key === "Escape") {
+    setFocusedTabIndex((currentIndex) => {
+      if (visibleTabs.length === 0) {
+        return currentIndex;
+      }
+
+      const lastIndex = visibleTabs.length - 1;
+      return Math.min(currentIndex, lastIndex);
+    });
+  }, [activeVisibleIndex, visibleTabs.length]);
+
+  const handleVisibleTabKeyDown = React.useCallback(
+    (
+      event: React.KeyboardEvent<HTMLButtonElement>,
+      currentIndex: number,
+    ) => {
+      if (visibleTabs.length <= 1) {
+        return;
+      }
+
+      const { key } = event;
+      if (!["ArrowRight", "ArrowLeft", "Home", "End"].includes(key)) {
+        return;
+      }
+
       event.preventDefault();
-      setIsOverflowOpen(false);
-    }
-  };
+      const lastIndex = visibleTabs.length - 1;
+      let nextIndex = currentIndex;
+
+      if (key === "ArrowRight") {
+        nextIndex = currentIndex === lastIndex ? 0 : currentIndex + 1;
+      } else if (key === "ArrowLeft") {
+        nextIndex = currentIndex === 0 ? lastIndex : currentIndex - 1;
+      } else if (key === "Home") {
+        nextIndex = 0;
+      } else if (key === "End") {
+        nextIndex = lastIndex;
+      }
+
+      setFocusedTabIndex(nextIndex);
+      tabRefs.current[nextIndex]?.focus();
+    },
+    [visibleTabs.length],
+  );
 
   return (
     <div
-      className={`tw-flex tw-gap-x-1 ${fullWidth ? "tw-w-full" : "tw-w-auto"}`}>
+      className={clsx("tw-flex tw-gap-x-1", fullWidth ? "tw-w-full" : "tw-w-auto")}>
       <div
         role="tablist"
         aria-orientation="horizontal"
-        className={`tw-flex tw-gap-x-1 ${fullWidth ? "tw-flex-1" : ""}`}>
-        {/* Show visible tabs */}
-        {visibleTabs.map((option) => (
+        className={clsx("tw-flex tw-gap-x-1", fullWidth && "tw-flex-1")}
+      >
+        {visibleTabs.map((option, index) => (
           <button
-            key={option.key}
             role="tab"
             aria-selected={activeKey === option.key}
+            key={option.key}
+            type="button"
+            tabIndex={index === focusedTabIndex ? 0 : -1}
             onClick={() => handleSelect(option.key)}
+            onKeyDown={(event) => handleVisibleTabKeyDown(event, index)}
+            ref={(element) => {
+              tabRefs.current[index] = element;
+            }}
             className={`tw-flex-1 tw-py-3 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-border-b-2 tw-border-t-0 tw-border-x-0 tw-border-solid tw-bg-transparent tw-transition-all tw-duration-200 ${
               fullWidth ? "tw-text-center tw-justify-center tw-flex" : ""
             } ${
@@ -123,61 +172,43 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
         ))}
       </div>
 
-      {/* Only show overflow dropdown if there are overflow tabs */}
       {overflowTabs.length > 0 && (
-        <div ref={overflowRef} className="tw-relative">
-          <button
-            type="button"
-            aria-expanded={isOverflowOpen}
-            onClick={toggleOverflowMenu}
-            onKeyDown={handleOverflowKeyDown}
-            className={`tw-whitespace-nowrap tw-py-3 tw-flex tw-items-center tw-gap-0.5 tw-text-sm tw-font-medium tw-border-0 tw-bg-transparent tw-transition-all tw-duration-200 ${
-              isActiveInOverflow
-                ? "tw-text-white tw-border-b-2 tw-border-primary-300"
-                : "tw-text-iron-400 hover:tw-text-iron-200"
-            }`}>
-            {isActiveInOverflow
-              ? options.find((opt) => opt.key === activeKey)?.label
-              : "More"}
-            <span
-              className={`tw-ml-0.5 tw-inline-flex ${
-                isOverflowOpen ? "tw-rotate-180" : ""
-              } tw-transition-transform tw-duration-200`}>
-              <svg
-                aria-hidden="true"
-                width="10"
-                height="6"
-                viewBox="0 0 8 4"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="tw-opacity-70">
-                <path d="M4 4L0 0H8L4 4Z" fill="currentColor" />
-              </svg>
-            </span>
-          </button>
-
-          {/* Overflow dropdown */}
-          {isOverflowOpen && (
-            <div className="tw-absolute tw-right-0 tw-z-20 tw-mt-2 tw-w-36 tw-rounded-md tw-bg-iron-900 tw-ring-1 tw-ring-primary-400/20 tw-shadow-lg">
-              <div className="tw-py-1">
-                {overflowTabs.map((option) => (
-                  <button
-                    key={option.key}
-                    role="tab"
-                    aria-selected={activeKey === option.key}
-                    onClick={() => handleSelect(option.key)}
-                    className={`tw-block tw-w-full tw-px-4 tw-py-2 tw-text-left tw-text-sm tw-bg-transparent tw-border-0 tw-font-medium tw-transition-colors ${
-                      activeKey === option.key
-                        ? "tw-text-primary-300"
-                        : "tw-text-iron-300 hover:tw-bg-iron-800 hover:tw-text-iron-200"
-                    }`}>
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+        <CompactMenu
+          className="tw-relative"
+          unstyledTrigger
+          unstyledMenu
+          unstyledItems
+          triggerClassName={clsx(
+            "tw-flex tw-items-center tw-gap-0.5 tw-border-0 tw-bg-transparent tw-text-sm tw-font-medium tw-transition-all tw-duration-200 tw-whitespace-nowrap focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/50 focus-visible:tw-rounded-sm",
+            isActiveInOverflow
+              ? "tw-text-primary-300 tw-border-b-2 tw-border-primary-400"
+              : "tw-text-iron-400 hover:tw-text-iron-200",
           )}
-        </div>
+          trigger={
+            <OverflowTrigger
+              isActiveInOverflow={isActiveInOverflow}
+              activeLabel={activeOption?.label}
+              fallbackLabel={TAB_TOGGLE_WITH_OVERFLOW_MESSAGES.overflowFallbackLabel}
+            />
+          }
+          items={overflowTabs.map((option) => ({
+            id: option.key,
+            label: option.label,
+            onSelect: () => handleSelect(option.key),
+            active: activeKey === option.key,
+          }))}
+          itemClassName="tw-block tw-w-full tw-border-0 tw-bg-transparent tw-px-4 tw-py-2 tw-text-left tw-text-sm tw-font-medium tw-transition-colors"
+          inactiveItemClassName="tw-text-iron-300 hover:tw-bg-iron-800 hover:tw-text-iron-200"
+          activeItemClassName="tw-text-primary-300"
+          focusItemClassName="tw-bg-iron-800 tw-text-iron-100"
+          menuWidthClassName="tw-w-36"
+          menuClassName="tw-z-50 tw-mt-2 tw-rounded-md tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 tw-ring-primary-400/20 focus:tw-outline-none"
+          itemsWrapperClassName="tw-py-1"
+          anchor="bottom end"
+          activeItemId={isActiveInOverflow ? activeKey : undefined}
+          closeOnSelect
+          aria-label={TAB_TOGGLE_WITH_OVERFLOW_MESSAGES.overflowMenuAriaLabel}
+        />
       )}
     </div>
   );

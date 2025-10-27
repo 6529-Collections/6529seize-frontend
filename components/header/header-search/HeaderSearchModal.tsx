@@ -6,15 +6,15 @@ import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import DiscoverIcon from "@/components/common/icons/DiscoverIcon";
 import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
-import { TabToggle } from "@/components/common/TabToggle";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { UserPageTabType } from "@/components/user/layout/UserPageTabs";
 import { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { getProfileTargetRoute } from "@/helpers/Helpers";
+import { getWaveHomeRoute, getWaveRoute } from "@/helpers/navigation.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useLocalPreference from "@/hooks/useLocalPreference";
 import {
   mapSidebarSectionsToPages,
@@ -30,16 +30,13 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
-import {
-  getWaveHomeRoute,
-  getWaveRoute,
-} from "../../../helpers/navigation.helpers";
-import useDeviceInfo from "../../../hooks/useDeviceInfo";
 import HeaderSearchModalItem, {
+  getNftCollectionMap,
   HeaderSearchModalItemType,
   NFTSearchResult,
   PageSearchResult,
 } from "./HeaderSearchModalItem";
+import { HeaderSearchTabToggle } from "./HeaderSearchTabToggle";
 
 enum STATE {
   INITIAL = "INITIAL",
@@ -496,6 +493,8 @@ export default function HeaderSearchModal({
     0
   );
   const shouldShowCountdown = searchInputLength > 0 && charactersRemaining > 0;
+  const isAwaitingDebouncedSearch =
+    meetsCharacterThreshold && trimmedDebouncedValue !== trimmedSearchValue;
 
   const isSearching = shouldSearchPages || hasActiveDebouncedSearch;
 
@@ -629,16 +628,14 @@ export default function HeaderSearchModal({
 
   const isNftResult = (
     item: HeaderSearchModalItemType
-  ): item is NFTSearchResult =>
-    Object.prototype.hasOwnProperty.call(item, "contract");
+  ): item is NFTSearchResult => Object.hasOwn(item, "contract");
 
   const isProfileResult = (
     item: HeaderSearchModalItemType
-  ): item is CommunityMemberMinimal =>
-    Object.prototype.hasOwnProperty.call(item, "wallet");
+  ): item is CommunityMemberMinimal => Object.hasOwn(item, "wallet");
 
   const isWaveResult = (item: HeaderSearchModalItemType): item is ApiWave =>
-    Object.prototype.hasOwnProperty.call(item, "serial_no");
+    Object.hasOwn(item, "serial_no");
 
   useKeyPressEvent("Enter", () => {
     if (state !== STATE.SUCCESS) return;
@@ -654,7 +651,9 @@ export default function HeaderSearchModal({
     }
 
     if (isNftResult(item)) {
-      router.push(`/the-memes/${item.id}`);
+      const collectionMap = getNftCollectionMap();
+      const key = item.contract.toLowerCase();
+      router.push(`${collectionMap[key].path}/${item.id}`);
       onClose();
       return;
     }
@@ -699,12 +698,17 @@ export default function HeaderSearchModal({
       (shouldSearchNfts && Boolean(nftsError));
 
     if (!hasResults) {
+      if (isAwaitingDebouncedSearch) {
+        setState(STATE.LOADING);
+        return;
+      }
+
       if (anyError) {
         setState(STATE.ERROR);
         return;
       }
 
-      if (anyFetching || isSearching) {
+      if (anyFetching) {
         setState(STATE.LOADING);
         return;
       }
@@ -725,6 +729,7 @@ export default function HeaderSearchModal({
     profilesError,
     nftsError,
     wavesError,
+    isAwaitingDebouncedSearch,
   ]);
 
   const handleRetry = () => {
@@ -783,10 +788,27 @@ export default function HeaderSearchModal({
     }
   }, [selectedItemIndex]);
 
+  const getItemKey = (item: HeaderSearchModalItemType): string => {
+    if (isPageResult(item)) {
+      return `page:${item.href}`;
+    }
+    if (isNftResult(item)) {
+      return `nft:${item.contract}:${item.id}`;
+    }
+    if (isProfileResult(item)) {
+      const base = (item.profile_id ?? item.wallet ?? "profile").toLowerCase();
+      return `profile:${base}`;
+    }
+    if (isWaveResult(item)) {
+      return `wave:${item.id}`;
+    }
+    return JSON.stringify(item);
+  };
+
   const renderItem = (item: HeaderSearchModalItemType, index: number) => (
     <div
       ref={index === selectedItemIndex ? activeElementRef : null}
-      key={getRandomObjectId()}>
+      key={getItemKey(item)}>
       <HeaderSearchModalItem
         content={item}
         searchValue={debouncedValue}
@@ -855,9 +877,10 @@ export default function HeaderSearchModal({
           <div className="tw-flex tw-min-h-full tw-items-start tw-justify-center tw-p-4 tw-text-center lg:tw-items-center sm:tw-p-6">
             <div
               ref={modalRef}
+              aria-modal="true"
+              aria-labelledby="header-search-input"
               className="tw-w-full tw-max-w-[min(100vw-3rem,900px)] sm:tw-max-w-3xl tw-relative tw-h-[520px] tw-max-h-[70vh] tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 tw-overflow-hidden inset-safe-area tw-flex tw-flex-col tw-min-h-0">
               <div className="tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-white/10 tw-pb-4 tw-px-4 tw-mt-4 tw-flex tw-items-center tw-gap-2">
-                {/* Back arrow mobile */}
                 <button
                   type="button"
                   onClick={onClose}
@@ -890,7 +913,7 @@ export default function HeaderSearchModal({
                     value={searchValue}
                     onChange={handleInputChange}
                     className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-pl-11 tw-pr-16 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset  focus:tw-ring-primary-300 tw-text-base sm:text-sm tw-transition tw-duration-300 tw-ease-out"
-                    placeholder="Search"
+                    placeholder="Search 6529.io"
                   />
                   {searchValue.length > 0 && (
                     <button
@@ -913,7 +936,7 @@ export default function HeaderSearchModal({
               </div>
               {shouldRenderCategoryToggle && (
                 <div className="tw-py-3 tw-px-4 md:tw-hidden">
-                  <TabToggle
+                  <HeaderSearchTabToggle
                     options={tabOptions}
                     activeKey={selectedCategory}
                     onSelect={(k) => setSelectedCategory(k as CATEGORY)}
@@ -922,11 +945,16 @@ export default function HeaderSearchModal({
                 </div>
               )}
 
-              <div className="tw-flex tw-flex-1 tw-min-h-0 tw-flex-col md:tw-flex-row md:tw-gap-4 md:tw-px-5 md:tw-pb-5">
+              <div
+                className={`tw-flex tw-flex-1 tw-min-h-0 tw-flex-col md:tw-gap-4 md:tw-px-5 md:tw-pb-5 ${
+                  shouldRenderCategoryToggle
+                    ? "md:tw-grid md:tw-grid-cols-[12rem_minmax(0,1fr)]"
+                    : "md:tw-flex-row"
+                }`}>
                 {shouldRenderCategoryToggle && (
-                  <aside className="tw-hidden md:tw-flex md:tw-flex-col md:tw-gap-2 md:tw-w-48 md:tw-flex-shrink-0 md:tw-pt-5">
+                  <aside className="tw-hidden md:tw-flex md:tw-flex-col md:tw-gap-2 md:tw-pt-5">
                     <div className="tw-rounded-2xl tw-border tw-border-iron-900/60 tw-bg-iron-950/80 tw-flex tw-flex-col tw-gap-2">
-                      <TabToggle
+                      <HeaderSearchTabToggle
                         options={tabOptions}
                         activeKey={selectedCategory}
                         onSelect={(k) => setSelectedCategory(k as CATEGORY)}
@@ -936,13 +964,13 @@ export default function HeaderSearchModal({
                     </div>
                   </aside>
                 )}
-                <div className="tw-flex-1 tw-min-h-0 tw-flex tw-flex-col">
+                <div className="tw-flex-1 tw-min-h-0 tw-flex tw-flex-col md:tw-min-w-0">
                   {state === STATE.SUCCESS && (
                     <div
                       ref={resultsPanelRef}
                       id={HEADER_SEARCH_RESULTS_PANEL_ID}
                       role="tabpanel"
-                      className="tw-flex-1 tw-h-0 tw-min-h-0 tw-scroll-py-2 tw-px-4 md:tw-pl-0 md:tw-pr-2 tw-pt-5 tw-pb-3 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-text-sm tw-text-iron-200">
+                      className="tw-flex-1 tw-h-0 tw-min-h-0 tw-scroll-py-2 tw-px-4 md:tw-pl-0 md:tw-pr-4 tw-pt-5 tw-pb-3 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-text-sm tw-text-iron-200">
                       {renderSuccessContent()}
                     </div>
                   )}
@@ -1001,8 +1029,8 @@ export default function HeaderSearchModal({
                             ? true
                             : undefined
                         }
-                        className="tw-rounded-lg tw-bg-primary-500 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-950 hover:tw-bg-primary-400 tw-transition tw-duration-150">
-                        Try again
+                        className="tw-items-center tw-rounded-full tw-border tw-border-iron-300 tw-bg-iron-100 tw-px-3 tw-py-1.5 tw-font-medium tw-text-iron-800 hover:tw-border-iron-500 hover:tw-bg-iron-200 tw-transition tw-duration-150">
+                        Try Again
                       </button>
                     </div>
                   )}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import WaveGroupEditButtons from '@/components/waves/specs/groups/group/edit/WaveGroupEditButtons';
-import { WaveGroupType } from '@/components/waves/specs/groups/group/WaveGroup';
+import { WaveGroupType } from '@/components/waves/specs/groups/group/WaveGroup.types';
 import { AuthContext } from '@/components/auth/Auth';
 import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 import { useMutation } from '@tanstack/react-query';
@@ -10,12 +10,37 @@ jest.mock('@tanstack/react-query', () => ({ useMutation: jest.fn() }));
 
 jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupEditButton', () => ({
   __esModule: true,
-  default: ({ onEdit }: any) => <button onClick={() => onEdit({})}>edit</button>,
+  default: ({ onWaveUpdate, renderTrigger }: any) => {
+    const handleOpen = () => onWaveUpdate({});
+    if (renderTrigger === null) {
+      return null;
+    }
+    return renderTrigger ? <>{renderTrigger({ open: handleOpen })}</> : <button onClick={handleOpen}>edit</button>;
+  },
 }));
 
 jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupRemoveButton', () => ({
   __esModule: true,
-  default: ({ onEdit }: any) => <button onClick={() => onEdit({})}>remove</button>,
+  default: ({ onWaveUpdate, renderTrigger }: any) => {
+    const handleOpen = () => onWaveUpdate({});
+    if (renderTrigger === null) {
+      return null;
+    }
+    return renderTrigger ? <>{renderTrigger({ open: handleOpen })}</> : <button onClick={handleOpen}>remove</button>;
+  },
+}));
+
+jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupManageIdentitiesModal', () => ({
+  __esModule: true,
+  WaveGroupManageIdentitiesMode: {
+    INCLUDE: 'INCLUDE',
+    EXCLUDE: 'EXCLUDE',
+  },
+  default: ({ mode, onClose }: any) => (
+    <div data-testid={`${mode.toLowerCase()}-modal`}>
+      <button onClick={onClose}>close</button>
+    </div>
+  ),
 }));
 
 jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => ({
@@ -29,6 +54,7 @@ const mutateAsync = jest.fn();
 const auth = {
   setToast: jest.fn(),
   requestAuth: jest.fn().mockResolvedValue({ success: true }),
+  connectedProfile: { id: "profile-1", handle: "alice" },
 } as any;
 
 const wrapper = ({ children }: any) => (
@@ -39,16 +65,45 @@ const wrapper = ({ children }: any) => (
   </AuthContext.Provider>
 );
 
-const wave: any = { id: 'w1' };
+const baseGroup = {
+  id: "group-1",
+  name: "Group 1",
+  author: { id: "profile-1", handle: "alice" },
+  created_at: Date.now(),
+  is_hidden: false,
+  is_direct_message: false,
+};
+
+const wave: any = {
+  id: "w1",
+  visibility: { scope: { group: baseGroup } },
+  participation: {
+    scope: { group: baseGroup },
+    authenticated_user_eligible: true,
+  },
+  voting: {
+    scope: { group: baseGroup },
+    authenticated_user_eligible: true,
+  },
+  chat: {
+    scope: { group: baseGroup },
+    authenticated_user_eligible: true,
+  },
+  wave: {
+    admin_group: { group: baseGroup },
+    authenticated_user_eligible_for_admin: true,
+  },
+};
 
 describe('WaveGroupEditButtons', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('calls mutate on edit', async () => {
+  it('opens menu and calls mutate on edit', async () => {
     render(<WaveGroupEditButtons haveGroup wave={wave} type={WaveGroupType.VIEW} />, { wrapper });
-    fireEvent.click(screen.getByText('edit'));
+    fireEvent.click(screen.getByRole('button', { name: /Group options/i }));
+    fireEvent.click(screen.getByText('Change group'));
     await waitFor(() => expect(auth.requestAuth).toHaveBeenCalled());
     expect(mutateAsync).toHaveBeenCalled();
   });
@@ -56,12 +111,53 @@ describe('WaveGroupEditButtons', () => {
   it('shows error toast when auth fails', async () => {
     auth.requestAuth.mockResolvedValueOnce({ success: false });
     render(<WaveGroupEditButtons haveGroup wave={wave} type={WaveGroupType.VIEW} />, { wrapper });
-    fireEvent.click(screen.getByText('edit'));
+    fireEvent.click(screen.getByRole('button', { name: /Group options/i }));
+    fireEvent.click(screen.getByText('Change group'));
     await waitFor(() => expect(auth.setToast).toHaveBeenCalled());
   });
 
-  it('hides remove button for admin type', () => {
-    const { queryByText } = render(<WaveGroupEditButtons haveGroup wave={wave} type={WaveGroupType.ADMIN} />, { wrapper });
-    expect(queryByText('remove')).toBeNull();
+  it('hides remove option for admin type', async () => {
+    render(<WaveGroupEditButtons haveGroup wave={wave} type={WaveGroupType.ADMIN} />, { wrapper });
+    fireEvent.click(screen.getByRole('button', { name: /Group options/i }));
+    expect(screen.getByText('Change group')).toBeInTheDocument();
+    expect(screen.queryByText('Remove group')).toBeNull();
   });
+
+  it('shows add label when no group is linked', async () => {
+    const waveWithoutGroup = {
+      ...wave,
+      visibility: {
+        ...wave.visibility,
+        scope: { group: null },
+      },
+    };
+
+    render(
+      <WaveGroupEditButtons haveGroup={false} wave={waveWithoutGroup} type={WaveGroupType.VIEW} />,
+      { wrapper },
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /Group options/i }));
+
+    expect(screen.getByText('Add group')).toBeInTheDocument();
+    expect(screen.queryByText('Change group')).toBeNull();
+  });
+});
+jest.mock('@headlessui/react', () => {
+  const close = jest.fn();
+  return {
+    Menu: ({ children, ...props }: any) => (
+      <div {...props}>
+        {typeof children === 'function'
+          ? children({ open: false, close })
+          : children}
+      </div>
+    ),
+    MenuButton: React.forwardRef<HTMLButtonElement, any>(({ children, ...props }, ref) => (
+      <button ref={ref} {...props}>{children}</button>
+    )),
+    MenuItems: ({ children, anchor: _anchor, ...props }: any) => <div {...props}>{children}</div>,
+    MenuItem: ({ children }: any) => children({ close, active: false }),
+    Transition: ({ children }: any) => <>{typeof children === 'function' ? children() : children}</>,
+  };
 });

@@ -8,15 +8,15 @@ let editProps: any;
 
 jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupEdit', () => (props: any) => {
   editProps = props;
-  return <div data-testid="edit" data-open={props.isEditOpen} onClick={() => props.onEdit('body')} />;
+  return <div data-testid="edit" data-open={props.isEditOpen} onClick={() => props.onWaveUpdate('body')} />;
 });
 
 const wave = { id: 'w1' } as ApiWave;
 
 const setup = () => {
-  const onEdit = jest.fn(() => Promise.resolve());
-  render(<WaveGroupEditButton wave={wave} type={'type'} onEdit={onEdit} />);
-  return { onEdit };
+  const onWaveUpdate = jest.fn(() => Promise.resolve());
+  render(<WaveGroupEditButton wave={wave} type={'type'} onWaveUpdate={onWaveUpdate} />);
+  return { onWaveUpdate };
 };
 
 describe('WaveGroupEditButton', () => {
@@ -29,11 +29,10 @@ describe('WaveGroupEditButton', () => {
 
   it('calls onEdit and closes', async () => {
     const user = userEvent.setup();
-    const { onEdit } = setup();
+    const { onWaveUpdate } = setup();
     await user.click(screen.getByTitle('Edit'));
     await user.click(screen.getByTestId('edit'));
-    expect(onEdit).toHaveBeenCalledWith('body');
+    expect(onWaveUpdate).toHaveBeenCalledWith('body');
     expect(editProps.isEditOpen).toBe(false);
   });
 });
-
