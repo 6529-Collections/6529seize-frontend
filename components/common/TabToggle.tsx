@@ -25,7 +25,7 @@ export const TabToggle: React.FC<TabToggleProps> = ({
   const isVertical = orientation === "vertical";
   const baseClasses = "tw-flex";
   const directionClasses = isVertical ? "tw-flex-col tw-gap-y-1.5" : "tw-gap-1";
-  let widthClasses = "";
+  let widthClasses;
   if (isVertical) {
     widthClasses = "";
   } else if (fullWidth) {
