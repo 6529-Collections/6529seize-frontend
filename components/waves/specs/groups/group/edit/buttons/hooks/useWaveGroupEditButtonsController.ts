@@ -160,7 +160,7 @@ const applyIdentityChangeToPayload = (
   normalizedIdentity: string,
   mode: WaveGroupIdentitiesModal,
 ): ApiCreateGroup => {
-  // identity is already normalized by the caller
+
   const includeSet = new Set(
     dedupeAddresses(payload.group.identity_addresses ?? []),
   );
@@ -472,7 +472,7 @@ export interface WaveGroupEditButtonsController {
   readonly onIdentityConfirm: (event: Readonly<{
     identity: string;
     mode: WaveGroupIdentitiesModal;
-  }>) => void;
+  }>) => Promise<void>;
 }
 
 export const useWaveGroupEditButtonsController = ({
