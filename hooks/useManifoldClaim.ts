@@ -33,50 +33,48 @@ export interface MemePhase {
 }
 
 export function buildMemesPhases(mintDate: Time): MemePhase[] {
+  const buildTime = (
+    hour: number,
+    minute: number,
+    nextDay: boolean = false
+  ) => {
+    const date = mintDate.toDate();
+    if (nextDay) {
+      date.setDate(date.getDate() + 1);
+    }
+    return Time.fromString(
+      wallTimeToUtcInstantInZone(date, hour, minute).toISOString()
+    );
+  };
+
   return [
     {
       id: "0",
       name: "Phase 0 (Allowlist)",
       type: ManifoldPhase.ALLOWLIST,
-      start: Time.fromString(
-        wallTimeToUtcInstantInZone(mintDate.toDate(), 17, 40).toISOString()
-      ),
-      end: Time.fromString(
-        wallTimeToUtcInstantInZone(mintDate.toDate(), 18, 20).toISOString()
-      ),
+      start: buildTime(17, 40),
+      end: buildTime(18, 20),
     },
     {
       id: "1",
       name: "Phase 1 (Allowlist)",
       type: ManifoldPhase.ALLOWLIST,
-      start: Time.fromString(
-        wallTimeToUtcInstantInZone(mintDate.toDate(), 18, 30).toISOString()
-      ),
-      end: Time.fromString(
-        wallTimeToUtcInstantInZone(mintDate.toDate(), 18, 50).toISOString()
-      ),
+      start: buildTime(18, 30),
+      end: buildTime(18, 50),
     },
     {
       id: "2",
       name: "Phase 2 (Allowlist)",
       type: ManifoldPhase.ALLOWLIST,
-      start: Time.fromString(
-        wallTimeToUtcInstantInZone(mintDate.toDate(), 19, 0).toISOString()
-      ),
-      end: Time.fromString(
-        wallTimeToUtcInstantInZone(mintDate.toDate(), 19, 20).toISOString()
-      ),
+      start: buildTime(19, 0),
+      end: buildTime(19, 20),
     },
     {
       id: "public",
       name: "Public Phase",
       type: ManifoldPhase.PUBLIC,
-      start: Time.fromString(
-        wallTimeToUtcInstantInZone(mintDate.toDate(), 19, 20).toISOString()
-      ),
-      end: Time.fromString(
-        wallTimeToUtcInstantInZone(mintDate.toDate(), 17, 0).toISOString()
-      ),
+      start: buildTime(19, 20),
+      end: buildTime(17, 0, true),
     },
   ];
 }
@@ -130,7 +128,7 @@ export function useManifoldClaim(
       }
 
       const endTime = Time.seconds(end);
-      return MEME_PHASES.filter((mp) => mp.end.gte(endTime))[0];
+      return MEME_PHASES.find((mp) => mp.end.gte(endTime));
     },
     [contract]
   );
