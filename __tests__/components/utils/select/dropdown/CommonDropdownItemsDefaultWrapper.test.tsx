@@ -40,7 +40,7 @@ test('closes on escape press', () => {
 test('positions dropdown when buttonPosition provided', async () => {
   jest.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(40);
   const { container } = render(
-    <CommonDropdownItemsDefaultWrapper isOpen={true} setOpen={() => {}} buttonRef={{ current: null }} buttonPosition={{ bottom:0, right:100 }}>
+    <CommonDropdownItemsDefaultWrapper isOpen={true} setOpen={() => {}} buttonRef={{ current: null }} buttonPosition={{ right:100 }}>
       <li>item</li>
     </CommonDropdownItemsDefaultWrapper>
   );

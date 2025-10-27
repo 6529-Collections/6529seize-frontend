@@ -1,35 +1,51 @@
-// @ts-nocheck
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import GroupCreateTest from '@/components/groups/page/create/actions/GroupCreateTest';
 import { AuthContext } from '@/components/auth/Auth';
 
-const commonApiPost = jest.fn();
-const commonApiFetch = jest.fn();
+const hookState = {
+  runTest: jest.fn(),
+  isTesting: false,
+  submit: jest.fn(),
+  validate: jest.fn(),
+  updateVisibility: jest.fn(),
+  isUpdatingVisibility: false,
+};
 
-jest.mock('@/services/api/common-api', () => ({
-  commonApiPost: (...args: any[]) => commonApiPost(...args),
-  commonApiFetch: (...args: any[]) => commonApiFetch(...args),
+jest.mock('@/hooks/groups/useGroupMutations', () => ({
+  useGroupMutations: () => hookState,
 }));
 
-const mutateAsyncMock = jest.fn();
-
-const useMutationMock = jest.fn((options: any) => {
-  const mutateAsync = async (param?: any) => {
-    return options.mutationFn(param);
-  };
-  mutateAsyncMock.mockImplementation(mutateAsync);
-  return { mutateAsync: mutateAsyncMock };
-});
-
-const useQueryMock = jest.fn((...args: any[]) => ({ isFetching: false, data: undefined }));
-
+const useQueryMock = jest.fn().mockReturnValue({ isFetching: false, data: undefined });
 jest.mock('@tanstack/react-query', () => ({
-  useMutation: (opts: any) => useMutationMock(opts),
-  // @ts-expect-error - test mock
+  // @ts-expect-error - partial mock for tests
   useQuery: (...args: any[]) => useQueryMock(...args),
   keepPreviousData: {},
 }));
+
+const commonApiFetch = jest.fn();
+jest.mock('@/services/api/common-api', () => ({
+  commonApiFetch: (...args: any[]) => commonApiFetch(...args),
+}));
+
+const defaultGroupConfig = {
+  name: 'My Group',
+  group: {
+    identity_addresses: [],
+    excluded_identity_addresses: [],
+    owns_nfts: [],
+    tdh: { min: null, max: null },
+    rep: { min: null, max: null, user_identity: null, category: null, direction: null },
+    cic: { min: null, max: null, user_identity: null, direction: null },
+    level: { min: null, max: null },
+  },
+};
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  hookState.runTest.mockReset();
+  hookState.isTesting = false;
+});
 
 function renderComponent(props?: Partial<React.ComponentProps<typeof GroupCreateTest>>) {
   const auth = {
@@ -37,40 +53,55 @@ function renderComponent(props?: Partial<React.ComponentProps<typeof GroupCreate
     setToast: jest.fn(),
     connectedProfile: { handle: 'alice' },
   } as any;
+
   render(
     <AuthContext.Provider value={auth}>
-      <GroupCreateTest
-        groupConfig={{ name: 'name', group: {} } as any}
-        disabled={false}
-        {...props}
-      />
+      <GroupCreateTest groupConfig={defaultGroupConfig as any} disabled={false} {...props} />
     </AuthContext.Provider>
   );
+
   return { auth };
 }
 
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
-test('disables button when disabled prop true', () => {
+it('disables button when disabled prop true', () => {
   render(
     <AuthContext.Provider value={{} as any}>
-      <GroupCreateTest groupConfig={{} as any} disabled={true} />
+      <GroupCreateTest groupConfig={defaultGroupConfig as any} disabled />
     </AuthContext.Provider>
   );
+
   expect(screen.getByRole('button', { name: 'Test' })).toBeDisabled();
 });
 
-test('calls mutation and displays loader on click', async () => {
-  const { auth } = renderComponent();
-  const button = screen.getByRole('button', { name: 'Test' });
+it('calls runTest with payload and fallback name', async () => {
+  hookState.runTest.mockResolvedValueOnce({ ok: true, group: { id: '123' } });
+  const customConfig = {
+    ...defaultGroupConfig,
+    name: '',
+  };
 
-  await fireEvent.click(button);
+  renderComponent({ groupConfig: customConfig as any });
 
-  await waitFor(() => expect(auth.requestAuth).toHaveBeenCalled());
-  expect(mutateAsyncMock).toHaveBeenCalledWith({
-    name: 'name',
-    group: {},
+  await fireEvent.click(screen.getByRole('button', { name: 'Test' }));
+
+  await waitFor(() => expect(hookState.runTest).toHaveBeenCalledTimes(1));
+  expect(hookState.runTest).toHaveBeenCalledWith({
+    payload: customConfig,
+    nameFallback: 'alice Test Run',
   });
+});
+
+it('shows toast when runTest fails with api error', async () => {
+  hookState.runTest.mockResolvedValueOnce({
+    ok: false,
+    reason: 'api',
+    error: 'failed',
+  });
+
+  const { auth } = renderComponent();
+
+  await fireEvent.click(screen.getByRole('button', { name: 'Test' }));
+
+  await waitFor(() => expect(hookState.runTest).toHaveBeenCalled());
+  expect(auth.setToast).toHaveBeenCalledWith({ message: 'failed', type: 'error' });
 });

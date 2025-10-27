@@ -1,13 +1,19 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, KeyboardEvent, useId } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faCircleExclamation,
+  faMagnifyingGlass,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { CommunityMemberMinimal } from "@/entities/IProfile";
 import { commonApiFetch } from "@/services/api/common-api";
 import CommonProfileSearchItems from "../profile-search/CommonProfileSearchItems";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { getSelectableIdentity } from "@/components/utils/input/profile-search/getSelectableIdentity";
 export enum IdentitySearchSize {
   SM = "SM",
   MD = "MD",
@@ -20,12 +26,14 @@ export default function IdentitySearch({
   size = IdentitySearchSize.MD,
   label = "Identity",
   error = false,
+  autoFocus = false,
   setIdentity,
 }: {
   readonly identity: string | null;
   readonly size?: IdentitySearchSize;
   readonly error?: boolean;
   readonly label?: string;
+  readonly autoFocus?: boolean;
 
   readonly setIdentity: (identity: string | null) => void;
 }) {
@@ -44,9 +52,8 @@ export default function IdentitySearch({
     [IdentitySearchSize.MD]: "tw-top-3.5",
   };
 
-  const randomId = getRandomObjectId();
-
-  useEffect(() => setSearchCriteria(identity), [identity]);
+  const inputId = useId();
+  const listboxId = `${inputId}-listbox`;
 
   const [searchCriteria, setSearchCriteria] = useState<string | null>(identity);
   const [debouncedValue, setDebouncedValue] = useState<string | null>(
@@ -72,39 +79,184 @@ export default function IdentitySearch({
     enabled: !!debouncedValue && debouncedValue.length >= MIN_SEARCH_LENGTH,
   });
 
+  const selectionUpdateRef = useRef(false);
+
+  useEffect(() => {
+    if (selectionUpdateRef.current) {
+      selectionUpdateRef.current = false;
+      return;
+    }
+    setSearchCriteria(identity);
+  }, [identity]);
+
   const [isOpen, setIsOpen] = useState(false);
-  const onValueChange = (newValue: string | null) => {
+  const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
+  const [highlightedOptionId, setHighlightedOptionId] = useState<
+    string | undefined
+  >(undefined);
+  const [shouldSubmit, setShouldSubmit] = useState(false);
+  const onValueChange = (
+    newValue: string | null,
+    displayValue?: string | null
+  ) => {
+    selectionUpdateRef.current = true;
     setIdentity(newValue);
-    setSearchCriteria(newValue);
+    setSearchCriteria(displayValue ?? newValue);
     setIsOpen(false);
+    setHighlightedIndex(null);
   };
 
   const onFocusChange = (newV: boolean) => {
     if (newV) {
-      setIsOpen(true);
+      const len = searchCriteria?.length ?? 0;
+      setIsOpen(len >= MIN_SEARCH_LENGTH);
+      return;
     }
+    setIsOpen(false);
+    setHighlightedIndex(null);
   };
 
   const onSearchCriteriaChange = (newV: string | null) => {
     setSearchCriteria(newV);
+    const len = newV?.length ?? 0;
+    setIsOpen(len >= MIN_SEARCH_LENGTH);
     if (!newV) {
       setIdentity(null);
     }
+    setHighlightedIndex(null);
+  };
+
+  const selectProfile = (profile: CommunityMemberMinimal) => {
+    const nextIdentity = getSelectableIdentity(profile);
+    if (!nextIdentity) {
+      return false;
+    }
+
+    const displayValue =
+      profile.handle ?? profile.display ?? nextIdentity;
+    onValueChange(nextIdentity, displayValue);
+    return true;
   };
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   useClickAway(wrapperRef, () => setIsOpen(false));
   useKeyPressEvent("Escape", () => setIsOpen(false));
+
+  const inputRef = useRef<HTMLInputElement>(null);
+  const shouldAutoFocus = useRef(autoFocus);
+  useEffect(() => {
+    if (shouldAutoFocus.current) {
+      inputRef.current?.focus();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!shouldSubmit) {
+      return;
+    }
+
+    const formElement = inputRef.current?.form;
+    if (formElement) {
+      formElement.requestSubmit();
+    }
+    setShouldSubmit(false);
+  }, [shouldSubmit]);
+
+  const handleArrowNavigation = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (!data?.length) {
+      return;
+    }
+
+    const maxIndex = data.length - 1;
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setIsOpen(true);
+      setHighlightedIndex((current) => {
+        if (current === null || current >= maxIndex) {
+          return 0;
+        }
+        return current + 1;
+      });
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setIsOpen(true);
+      setHighlightedIndex((current) => {
+        if (current === null || current <= 0) {
+          return maxIndex;
+        }
+        return current - 1;
+      });
+      return;
+    }
+
+    if (event.key === "Enter" && highlightedIndex !== null) {
+      event.preventDefault();
+      const profile = data[highlightedIndex];
+      if (profile) {
+        if (selectProfile(profile)) {
+          setShouldSubmit(true);
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (!isOpen) {
+      setHighlightedIndex(null);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!data?.length) {
+      setHighlightedIndex(null);
+      return;
+    }
+
+    if (identity) {
+      const matchingIndex = data.findIndex((profile) => {
+        const value = getSelectableIdentity(profile);
+        return value?.toLowerCase() === identity.toLowerCase();
+      });
+
+      if (matchingIndex >= 0) {
+        setHighlightedIndex(matchingIndex);
+        return;
+      }
+    }
+
+    setHighlightedIndex((current) =>
+      current === null ? null : Math.min(current, data.length - 1)
+    );
+  }, [data, identity]);
+
   return (
     <div className="tw-group tw-w-full tw-relative" ref={wrapperRef}>
       <input
+        ref={inputRef}
         type="text"
         value={searchCriteria ?? ""}
         onChange={(e) => onSearchCriteriaChange(e.target.value)}
         onFocus={() => onFocusChange(true)}
-        onBlur={() => onFocusChange(false)}
-        id={randomId}
+        onBlur={(e) => {
+          const next = e.relatedTarget as Node | null;
+          if (!next || !wrapperRef.current?.contains(next)) {
+            onFocusChange(false);
+          }
+        }}
+        onKeyDown={(event) => handleArrowNavigation(event)}
+        id={inputId}
         autoComplete="off"
+        role="combobox"
+        aria-autocomplete="list"
+        aria-expanded={isOpen}
+        aria-controls={listboxId}
+        aria-activedescendant={
+          isOpen && highlightedOptionId ? highlightedOptionId : undefined
+        }
         className={`${INPUT_CLASSES[size]} ${
           error
             ? "tw-ring-error focus:tw-border-error focus:tw-ring-error tw-caret-error"
@@ -116,36 +268,23 @@ export default function IdentitySearch({
         }`}
         placeholder=" "
       />
-      <svg
+      <FontAwesomeIcon
+        icon={faMagnifyingGlass}
         className={`${ICON_CLASSES[size]} tw-text-iron-300 tw-pointer-events-none tw-absolute tw-left-3 tw-h-5 tw-w-5`}
-        viewBox="0 0 20 20"
-        fill="currentColor"
-        aria-hidden="true">
-        <path
-          fillRule="evenodd"
-          d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
-          clipRule="evenodd"></path>
-      </svg>
+        aria-hidden="true"
+      />
       {!!identity?.length && (
-        <svg
-          onClick={() => onValueChange(null)}
-          className={`${ICON_CLASSES[size]} tw-cursor-pointer tw-absolute tw-right-3 tw-h-5 tw-w-5 tw-text-iron-400 hover:tw-text-error tw-transition tw-duration-300 tw-ease-out`}
-          viewBox="0 0 24 24"
-          fill="none"
-          aria-hidden="true"
+        <button
+          type="button"
           aria-label="Clear identity"
-          xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M17 7L7 17M7 7L17 17"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+          onClick={() => onValueChange(null)}
+          className={`${ICON_CLASSES[size]} tw-absolute tw-right-3 tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent tw-border-0 tw-p-0 tw-text-iron-400 hover:tw-text-error focus:tw-outline-none focus:tw-ring-0 tw-transition tw-duration-300 tw-ease-out`}
+        >
+          <FontAwesomeIcon icon={faXmark} className="tw-h-5 tw-w-5" />
+        </button>
       )}
       <label
-        htmlFor={randomId}
+        htmlFor={inputId}
         className={`${LABEL_CLASSES[size]} ${
           error
             ? "peer-focus:tw-text-error peer-placeholder-shown:-tw-translate-y-1/4 peer-placeholder-shown:tw-top-1/4"
@@ -158,26 +297,23 @@ export default function IdentitySearch({
         selected={identity}
         searchCriteria={searchCriteria}
         profiles={data ?? []}
-        onProfileSelect={(profile) =>
-          onValueChange(profile?.handle ?? profile?.wallet ?? null)
-        }
+        highlightedIndex={highlightedIndex}
+        listboxId={listboxId}
+        onHighlightedOptionIdChange={setHighlightedOptionId}
+        onProfileSelect={(profile) => {
+          if (!profile) {
+            return;
+          }
+          selectProfile(profile);
+        }}
       />
       {error && (
         <div className="tw-pt-1.5 tw-relative tw-flex tw-items-center tw-gap-x-2">
-          <svg
-            className="tw-size-5 tw-flex-shrink-0 tw-text-error"
-            viewBox="0 0 24 24"
-            fill="none"
+          <FontAwesomeIcon
+            icon={faCircleExclamation}
+            className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-error"
             aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          />
           <div className="tw-text-error tw-text-xs tw-font-medium">
             Please enter identity
           </div>
