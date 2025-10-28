@@ -21,7 +21,8 @@ it("calls on select and shows checkmark when selected", () => {
     throw new Error("List item not found");
   }
   expect(listItem).toHaveAttribute("data-option-id", "profile-search-item-0x1");
-  expect(listItem.querySelector("svg")).toBeInTheDocument();
+  expect(listItem.id).toBe("profile-search-item-0x1-visual");
+  expect(listItem.querySelector('[data-icon="check"]')).not.toBeNull();
   fireEvent.click(listItem);
-  expect(onSelect).toHaveBeenCalled();
+  expect(onSelect).toHaveBeenCalledWith(profile);
 });

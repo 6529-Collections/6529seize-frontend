@@ -111,6 +111,7 @@ describe('TabToggleWithOverflow', () => {
     await waitFor(() =>
       expect(moreButton).toHaveAttribute('aria-expanded', 'true')
     );
+    await screen.findByRole('menuitem', { name: 'C' });
   });
 
   it('indicates overflow active state via data attribute when opened', async () => {
