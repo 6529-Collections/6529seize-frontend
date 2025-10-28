@@ -12,7 +12,6 @@
     //    (Next.js entries are auto-added by the Next plugin)
     "entry": [
       "scripts/**/*.{ts,js,cjs,mjs}",  // local CLIs used via package.json scripts
-      "middleware.tsx",                // Next middleware lives at project root
       "app/**/route.{ts,tsx}"          // Next App Router route handlers (if used)
     ],
   
@@ -25,13 +24,11 @@
   
     // 5) Generated code: keep analyzing, but avoid noisy "unused exports/files" here
     "ignoreIssues": {
-      "generated/**": ["exports", "types", "enumMembers"], // ignore only these issue kinds
-      "middleware.tsx": ["exports"]                        // Next middleware consumed by framework
+      "generated/**": ["exports", "types", "enumMembers"] // ignore only these issue kinds
     },
     "ignoreFiles": [
       "generated/**",        // don't list generated files as "Unused files"
       "tmp_gen_outp/**",
-      "middleware.tsx",
       "next-sitemap.config.js",
       "stubs/empty.js"
     ],
