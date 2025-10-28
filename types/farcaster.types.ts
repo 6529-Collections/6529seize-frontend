@@ -3,7 +3,8 @@ export type FarcasterPreviewResponse =
   | FarcasterProfilePreview
   | FarcasterChannelPreview
   | FarcasterFramePreview
-  | FarcasterUnavailablePreview;
+  | FarcasterUnavailablePreview
+  | FarcasterUnsupportedPreview;
 
 interface FarcasterBasePreview {
   readonly canonicalUrl?: string;
@@ -80,5 +81,10 @@ export interface FarcasterFramePreview extends FarcasterBasePreview {
 
 export interface FarcasterUnavailablePreview extends FarcasterBasePreview {
   readonly type: "unavailable";
+  readonly reason?: string;
+}
+
+export interface FarcasterUnsupportedPreview extends FarcasterBasePreview {
+  readonly type: "unsupported";
   readonly reason?: string;
 }
