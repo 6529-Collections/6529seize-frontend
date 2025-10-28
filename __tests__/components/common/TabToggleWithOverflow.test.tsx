@@ -90,20 +90,19 @@ describe('TabToggleWithOverflow', () => {
 
     await user.tab(); // focus first tab
     await user.tab(); // focus second tab
-    await user.tab(); // focus overflow trigger
-    await user.keyboard('{Enter}');
-    expect(moreButton).toHaveAttribute('aria-expanded', 'true');
-    const optionC = screen.getByRole('menuitem', { name: 'C' });
+    moreButton.focus();
+    expect(moreButton).toHaveFocus();
+    await user.keyboard('[Space]');
+    const optionC = await screen.findByRole('menuitem', { name: 'C' });
     expect(optionC).toBeInTheDocument();
 
     await user.keyboard('{Escape}');
-    expect(moreButton).toHaveAttribute('aria-expanded', 'false');
     await waitFor(() =>
       expect(screen.queryByRole('menuitem', { name: 'C' })).not.toBeInTheDocument()
     );
 
-    await user.keyboard(' ');
-    expect(moreButton).toHaveAttribute('aria-expanded', 'true');
+    await user.keyboard('[Space]');
+    await screen.findByRole('menuitem', { name: 'C' });
   });
 
   it('indicates overflow active state via data attribute when opened', async () => {

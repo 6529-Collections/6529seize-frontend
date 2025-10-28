@@ -19,10 +19,10 @@ describe('IdentitySearch', () => {
 
   it('opens dropdown after typing and selects value', () => {
     render(<IdentitySearch identity={null} setIdentity={setIdentity} />);
-    const input = screen.getByRole('textbox');
+    const input = screen.getByRole('combobox');
     fireEvent.focus(input);
     expect(receivedProps.open).toBe(false);
-    fireEvent.change(input, { target: { value: 'a' } });
+    fireEvent.change(input, { target: { value: 'abc' } });
     expect(receivedProps.open).toBe(true);
     receivedProps.onProfileSelect({ handle: 'user' });
     expect(setIdentity).toHaveBeenCalledWith('user');

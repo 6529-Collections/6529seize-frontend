@@ -24,12 +24,14 @@ describe('CommonProfileSearchItems', () => {
     const { rerender } = render(
       <CommonProfileSearchItems open profiles={[]} selected={null} searchCriteria="ab" onProfileSelect={jest.fn()} />
     );
-    expect(screen.getByText('Type at least 3 characters')).toBeInTheDocument();
+    expect(
+      screen.getByText('Type at least 3 characters', { selector: 'li' })
+    ).toBeInTheDocument();
 
     rerender(
       <CommonProfileSearchItems open profiles={[]} selected={null} searchCriteria="abcd" onProfileSelect={jest.fn()} />
     );
-    expect(screen.getByText('No results')).toBeInTheDocument();
+    expect(screen.getByText('No results', { selector: 'li' })).toBeInTheDocument();
   });
 
   it('notifies highlighted option id when highlighted option changes', () => {
