@@ -16,7 +16,7 @@ interface IpfsContextType {
 
 const IpfsContext = createContext<IpfsContextType | undefined>(undefined);
 
-const getEnv = async () => {
+const readIpfsConfig = () => {
   const apiEndpoint = publicEnv.IPFS_API_ENDPOINT;
   const gatewayEndpoint = publicEnv.IPFS_GATEWAY_ENDPOINT;
 
@@ -24,10 +24,14 @@ const getEnv = async () => {
     throw new Error("Missing IPFS_API_ENDPOINT or IPFS_GATEWAY_ENDPOINT");
   }
 
+  const trimmed = gatewayEndpoint.replace(/\/+$/, "");
+  const gatewayBase = trimmed.replace(/\/ipfs$/i, "") || trimmed;
   const mfsPath = publicEnv.IPFS_MFS_PATH;
 
-  return { apiEndpoint, gatewayEndpoint, mfsPath };
+  return { apiEndpoint, gatewayEndpoint: trimmed, gatewayBase, mfsPath } as const;
 };
+
+const getEnv = async () => readIpfsConfig();
 
 export const IpfsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -64,14 +68,20 @@ export const useIpfsService = (): IpfsService => {
   return context.ipfsService;
 };
 
-export const resolveIpfsUrl = async (url: string) => {
+export const resolveIpfsUrlSync = (url: string) => {
+  if (!url.startsWith("ipfs://")) {
+    return url;
+  }
+
   try {
-    if (url.startsWith("ipfs://")) {
-      const { gatewayEndpoint } = await getEnv();
-      return `${gatewayEndpoint}/ipfs/${url.slice(7)}`;
-    }
+    const { gatewayBase } = readIpfsConfig();
+    return `${gatewayBase}/ipfs/${url.slice(7)}`;
   } catch (error) {
     console.error("Error resolving IPFS URL", error);
+    return url;
   }
-  return url;
+};
+
+export const resolveIpfsUrl = async (url: string) => {
+  return resolveIpfsUrlSync(url);
 };
