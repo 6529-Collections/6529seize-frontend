@@ -37,7 +37,7 @@ const LEVEL_CLASSES: ReadonlyArray<{
 
 const DEFAULT_LEVEL_CLASS = LEVEL_CLASSES.at(-1)?.classes ?? "";
 const CARD_BASE_CLASSES =
-  "tw-@container/wave tw-group tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-backdrop-blur-sm tw-p-2.5 tw-shadow-sm tw-shadow-black/20 tw-transition-all tw-duration-300 tw-ease-out";
+  "tw-@container/wave tw-group tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-backdrop-blur-sm tw-p-2.5 tw-shadow-sm tw-shadow-black/20 tw-transition-all tw-duration-300 tw-ease-out";
 const CARD_INTERACTIVE_CLASSES =
   "tw-cursor-pointer desktop-hover:hover:tw-shadow-lg desktop-hover:hover:tw-shadow-black/40 desktop-hover:hover:tw-translate-y-[-1px] focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 focus-visible:tw-outline-none";
 
@@ -300,7 +300,7 @@ export default function WaveItem({
         {authorSection}
       </div>
 
-      <div className="tw-mt-2 tw-flex tw-items-center tw-justify-between tw-px-3 tw-pt-3 tw-border-t tw-border-white/5">
+      <div className="tw-mt-2 tw-flex tw-items-center tw-justify-between tw-px-3 tw-pt-3">
         <div className="tw-flex tw-items-center tw-gap-4">
           <div className="tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-200">
             <ChatBubbleLeftRightIcon
