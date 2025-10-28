@@ -1,4 +1,4 @@
-export class WalletConnectionError extends Error {
+class WalletConnectionError extends Error {
   constructor(message: string, public readonly cause?: unknown) {
     super(message);
     this.name = 'WalletConnectionError';
@@ -10,6 +10,7 @@ export class WalletValidationError extends WalletConnectionError {
   constructor(message: string, cause?: unknown) {
     super(`Wallet validation failed: ${message}`, cause);
     this.name = 'WalletValidationError';
+    Object.setPrototypeOf(this, WalletValidationError.prototype);
   }
 }
 

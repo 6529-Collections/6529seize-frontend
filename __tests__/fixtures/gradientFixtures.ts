@@ -1,6 +1,6 @@
 import { GRADIENT_CONTRACT } from '@/constants';
 
-export const mockGradientNFT = (overrides: Partial<any> = {}) => ({
+const mockGradientNFT = (overrides: Partial<any> = {}) => ({
   id: 1,
   contract: GRADIENT_CONTRACT,
   name: 'Gradient #1',

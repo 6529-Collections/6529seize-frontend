@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CreateDropReplying from '@/components/waves/CreateDropReplying';
-import { ApiDrop } from '@/__tests__/generated/models/ApiDrop';
+import { ApiDrop } from '@/generated/models/ApiDrop';
 import { ActiveDropAction } from '@/types/dropInteractionTypes';
 
 describe('CreateDropReplying', () => {

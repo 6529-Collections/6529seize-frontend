@@ -4,7 +4,7 @@ const CLOUDFRONT_DOMAIN =
   publicEnv.NEXT_PUBLIC_CLOUDFRONT_DOMAIN ??
   "https://d3lqz0a4bldqgf.cloudfront.net";
 
-export interface VideoConversions {
+interface VideoConversions {
   readonly MP4_1080P: string;
   readonly MP4_720P: string;
   readonly HLS: string;

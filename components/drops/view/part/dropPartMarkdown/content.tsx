@@ -30,7 +30,7 @@ type FindNativeEmoji = (
   emojiId: string
 ) => { skins: NativeEmojiSkin[] } | null;
 
-export interface MarkdownContentConfig {
+interface MarkdownContentConfig {
   readonly textSizeClass: string;
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
   readonly referencedNfts: Array<ApiDropReferencedNFT>;
@@ -39,7 +39,7 @@ export interface MarkdownContentConfig {
   readonly isSmartLink: (href: string) => boolean;
 }
 
-export interface MarkdownContentRenderers {
+interface MarkdownContentRenderers {
   readonly customRenderer: (content: ReactNode | undefined) => ReactNode;
   readonly renderParagraph: (
     params: ClassAttributes<HTMLParagraphElement> &

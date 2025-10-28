@@ -12,5 +12,3 @@ export const createEnsHandler = (): LinkHandler => ({
   render: (href) => <EnsLinkPreview href={href} />,
   display: "block",
 });
-
-export type EnsHandler = ReturnType<typeof createEnsHandler>;

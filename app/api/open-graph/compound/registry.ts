@@ -26,7 +26,7 @@ export type CompoundV3MarketConfig = {
   };
 };
 
-export type CompoundRegistry = {
+type CompoundRegistry = {
   readonly comptroller: `0x${string}`;
   readonly v2Markets: readonly CompoundV2MarketConfig[];
   readonly v3Markets: readonly CompoundV3MarketConfig[];
