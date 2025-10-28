@@ -17,20 +17,28 @@ export default function WaveItemDropped({ wave }: { readonly wave: ApiWave }) {
 
           const avatar = (
             <div className="tw-h-6 tw-w-6">
-              <img
-                className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-700 tw-ring-[1.5px] tw-ring-black tw-transition tw-duration-200 tw-ease-out desktop-hover:group-hover/item:tw-brightness-110 desktop-hover:group-hover/item:tw-scale-[1.05]"
-                src={getScaledImageUri(
-                  c.contributor_pfp,
-                  ImageScale.W_AUTO_H_50
-                )}
-                alt={
-                  c.contributor_identity
-                    ? `${c.contributor_identity} avatar`
-                    : "Contributor avatar"
-                }
-                loading="lazy"
-                decoding="async"
-              />
+              {c.contributor_pfp ? (
+                <img
+                  className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-700 tw-ring-[1.5px] tw-ring-black tw-transition tw-duration-200 tw-ease-out desktop-hover:group-hover/item:tw-brightness-110 desktop-hover:group-hover/item:tw-scale-[1.05]"
+                  src={getScaledImageUri(
+                    c.contributor_pfp,
+                    ImageScale.W_AUTO_H_50
+                  )}
+                  alt={
+                    c.contributor_identity
+                      ? `${c.contributor_identity} avatar`
+                      : "Contributor avatar"
+                  }
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : (
+                <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-700 tw-ring-1 tw-ring-black">
+                  <span className="tw-text-[0.625rem] tw-font-semibold tw-text-iron-300">
+                    {c.contributor_identity?.slice(0, 2).toUpperCase() ?? "?"}
+                  </span>
+                </div>
+              )}
             </div>
           );
 

@@ -23,7 +23,7 @@ test('renders all contributor avatars and plural text', () => {
   const imgs = screen.getAllByRole('img');
   expect(imgs).toHaveLength(wave.contributors_overview.length);
   expect(imgs[0]).toHaveAttribute('src', 'scaled-a.png');
-  expect(imgs[imgs.length - 1]).toHaveAttribute('src', 'scaled-f.png');
+  expect(imgs.at(-1)).toHaveAttribute('src', 'scaled-f.png');
   expect(screen.getByText('2')).toBeInTheDocument();
   expect(screen.getByText('Drops')).toBeInTheDocument();
 });

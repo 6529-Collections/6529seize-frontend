@@ -118,6 +118,8 @@ export default function WaveItem({
   readonly titlePlaceholder?: string;
 }) {
   const author = wave?.author;
+  const authorHref = author?.handle ? `/${author.handle}` : undefined;
+  const authorLevel = author?.level ?? 0;
   const router = useRouter();
   const tooltipBaseId = useId();
 
@@ -230,42 +232,77 @@ export default function WaveItem({
 
       <div className="tw-px-3 tw-pt-3">
         {wave ? (
-          <Link
-            href={`/${wave.author.handle}`}
-            prefetch={false}
-            className="tw-mt-1 tw-group/author tw-no-underline tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1"
-          >
-            <div className="tw-h-6 tw-w-6 tw-flex-shrink-0">
-              {wave?.author.pfp ? (
-                <img
-                  className="tw-h-full tw-w-full tw-rounded-md tw-object-cover tw-bg-iron-800 tw-ring-1 tw-ring-white/10 desktop-hover:group-hover/author:tw-ring-white/30 desktop-hover:group-hover/author:tw-ring-offset-1 desktop-hover:group-hover/author:tw-ring-offset-iron-950 tw-transition tw-duration-300 tw-ease-out"
-                  src={getScaledImageUri(
-                    wave.author.pfp,
-                    ImageScale.W_AUTO_H_50
-                  )}
-                  alt={
-                    wave?.author.handle
-                      ? `${wave.author.handle} avatar`
-                      : "Author avatar"
-                  }
-                  loading="lazy"
-                  decoding="async"
-                />
-              ) : (
-                <div className="tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10" />
-              )}
-            </div>
-            <span className="tw-text-sm tw-font-semibold tw-text-white desktop-hover:group-hover/author:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
-              {wave?.author.handle ?? userPlaceholder}
-            </span>
-            <div
-              className={`${resolveLevelClasses(
-                wave?.author.level
-              )} tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset tw-text-[0.625rem] tw-leading-3`}
+          authorHref ? (
+            <Link
+              href={authorHref}
+              prefetch={false}
+              className="tw-mt-1 tw-group/author tw-no-underline tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1"
             >
-              Level {wave.author.level}
+              <div className="tw-h-6 tw-w-6 tw-flex-shrink-0">
+                {author?.pfp ? (
+                  <img
+                    className="tw-h-full tw-w-full tw-rounded-md tw-object-cover tw-bg-iron-800 tw-ring-1 tw-ring-white/10 desktop-hover:group-hover/author:tw-ring-white/30 desktop-hover:group-hover/author:tw-ring-offset-1 desktop-hover:group-hover/author:tw-ring-offset-iron-950 tw-transition tw-duration-300 tw-ease-out"
+                    src={getScaledImageUri(
+                      author.pfp,
+                      ImageScale.W_AUTO_H_50
+                    )}
+                    alt={
+                      author?.handle
+                        ? `${author.handle} avatar`
+                        : "Author avatar"
+                    }
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : (
+                  <div className="tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10" />
+                )}
+              </div>
+              <span className="tw-text-sm tw-font-semibold tw-text-white desktop-hover:group-hover/author:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
+                {author?.handle ?? userPlaceholder}
+              </span>
+              <div
+                className={`${resolveLevelClasses(
+                  author?.level
+                )} tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset tw-text-[0.625rem] tw-leading-3`}
+              >
+                Level {authorLevel}
+              </div>
+            </Link>
+          ) : (
+            <div className="tw-mt-1 tw-group/author tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+              <div className="tw-h-6 tw-w-6 tw-flex-shrink-0">
+                {author?.pfp ? (
+                  <img
+                    className="tw-h-full tw-w-full tw-rounded-md tw-object-cover tw-bg-iron-800 tw-ring-1 tw-ring-white/10 desktop-hover:group-hover/author:tw-ring-white/30 desktop-hover:group-hover/author:tw-ring-offset-1 desktop-hover:group-hover/author:tw-ring-offset-iron-950 tw-transition tw-duration-300 tw-ease-out"
+                    src={getScaledImageUri(
+                      author.pfp,
+                      ImageScale.W_AUTO_H_50
+                    )}
+                    alt={
+                      author?.handle
+                        ? `${author.handle} avatar`
+                        : "Author avatar"
+                    }
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : (
+                  <div className="tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10" />
+                )}
+              </div>
+              <span className="tw-text-sm tw-font-semibold tw-text-white">
+                {author?.handle ?? userPlaceholder}
+              </span>
+              <div
+                className={`${resolveLevelClasses(
+                  author?.level
+                )} tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset tw-text-[0.625rem] tw-leading-3`}
+              >
+                Level {authorLevel}
+              </div>
             </div>
-          </Link>
+          )
         ) : (
           <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
             <div className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
