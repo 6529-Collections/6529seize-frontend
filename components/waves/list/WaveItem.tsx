@@ -1,6 +1,12 @@
 "use client";
 
-import { KeyboardEvent, MouseEvent, useCallback, useId } from "react";
+import {
+  KeyboardEvent,
+  MouseEvent,
+  ReactNode,
+  useCallback,
+  useId,
+} from "react";
 import {
   ChatBubbleLeftRightIcon,
   UsersIcon,
@@ -15,6 +21,9 @@ import WaveItemFollow from "./WaveItemFollow";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { Tooltip } from "react-tooltip";
 
+const INTERACTIVE_CHILD_SELECTOR =
+  "a, button, input, textarea, select, [data-wave-item-interactive='true']";
+
 const LEVEL_CLASSES: ReadonlyArray<{
   readonly minLevel: number;
   readonly classes: string;
@@ -25,6 +34,79 @@ const LEVEL_CLASSES: ReadonlyArray<{
   { minLevel: 20, classes: "tw-text-[#DAAC60] tw-ring-[#DAAC60]" },
   { minLevel: 0, classes: "tw-text-[#DA8C60] tw-ring-[#DA8C60]" },
 ];
+
+const DEFAULT_LEVEL_CLASS = LEVEL_CLASSES.at(-1)?.classes ?? "";
+const CARD_BASE_CLASSES =
+  "tw-@container/wave tw-group tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-backdrop-blur-sm tw-p-2.5 tw-shadow-sm tw-shadow-black/20 tw-transition-all tw-duration-300 tw-ease-out";
+const CARD_INTERACTIVE_CLASSES =
+  "tw-cursor-pointer desktop-hover:hover:tw-shadow-lg desktop-hover:hover:tw-shadow-black/40 desktop-hover:hover:tw-translate-y-[-1px] focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 focus-visible:tw-outline-none";
+
+type CardContainerProps = {
+  readonly isInteractive: boolean;
+  readonly href?: string;
+  readonly ariaLabel?: string;
+  readonly onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
+  readonly onKeyDown?: (event: KeyboardEvent<HTMLAnchorElement>) => void;
+  readonly children: ReactNode;
+};
+
+function CardContainer({
+  isInteractive,
+  href,
+  ariaLabel,
+  onClick,
+  onKeyDown,
+  children,
+}: CardContainerProps) {
+  const className = `${CARD_BASE_CLASSES} ${
+    isInteractive ? CARD_INTERACTIVE_CLASSES : ""
+  }`;
+
+  if (isInteractive && href) {
+    return (
+      <Link
+        href={href}
+        prefetch={false}
+        className={className}
+        aria-label={ariaLabel}
+        style={{ textDecoration: "none" }}
+        onClick={onClick}
+        onKeyDown={onKeyDown}
+      >
+        {children}
+      </Link>
+    );
+  }
+
+  return (
+    <div className={className} aria-label={ariaLabel}>
+      {children}
+    </div>
+  );
+}
+
+function getCardLabel(href?: string, label?: string | null) {
+  if (!href) {
+    return undefined;
+  }
+  return label ? `View wave ${label}` : "View wave";
+}
+
+function shouldSkipNavigation(
+  target: HTMLElement | null,
+  container: HTMLElement
+) {
+  const interactiveElement = target?.closest(INTERACTIVE_CHILD_SELECTOR);
+  return Boolean(interactiveElement && interactiveElement !== container);
+}
+
+function resolveLevelClasses(level?: number | null) {
+  return (
+    LEVEL_CLASSES.find(
+      (levelClass) => levelClass.minLevel <= (level ?? 0)
+    )?.classes ?? DEFAULT_LEVEL_CLASS
+  );
+}
 
 export default function WaveItem({
   wave,
@@ -58,71 +140,45 @@ export default function WaveItem({
     : undefined;
 
   const labelValue = wave?.name ?? wave?.id;
-
-  const cardLabel =
-    waveHref && labelValue
-      ? `View wave ${labelValue}`
-      : waveHref
-      ? "View wave"
-      : undefined;
-
+  const cardLabel = getCardLabel(waveHref, labelValue);
   const isInteractive = Boolean(waveHref);
-
   const followersTooltipId = wave ? `${tooltipBaseId}-followers` : undefined;
 
-  const getColorClasses = () =>
-    LEVEL_CLASSES.find(
-      (levelClass) => levelClass.minLevel <= (wave?.author.level ?? 0)
-    )?.classes ?? LEVEL_CLASSES[LEVEL_CLASSES.length - 1].classes;
-
-  const navigateToWave = useCallback(() => {
-    if (!waveHref) {
-      return;
-    }
-    router.push(waveHref);
-  }, [router, waveHref]);
-
   const handleCardClick = useCallback(
-    (event: MouseEvent<HTMLDivElement>) => {
-      if (!waveHref || event.defaultPrevented) {
+    (event: MouseEvent<HTMLAnchorElement>) => {
+      if (!waveHref) {
         return;
       }
       const target = event.target as HTMLElement | null;
-      if (
-        target?.closest(
-          "a, button, input, textarea, select, [data-wave-item-interactive='true']"
-        )
-      ) {
+      if (shouldSkipNavigation(target, event.currentTarget)) {
         return;
       }
-      navigateToWave();
+      if (!event.defaultPrevented) {
+        event.preventDefault();
+        router.push(waveHref);
+      }
     },
-    [navigateToWave, waveHref]
+    [router, waveHref]
   );
 
   const handleCardKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
+    (event: KeyboardEvent<HTMLAnchorElement>) => {
       if (!waveHref || event.target !== event.currentTarget) {
         return;
       }
       if (event.key === "Enter" || event.key === " " || event.key === "Space") {
         event.preventDefault();
-        navigateToWave();
+        router.push(waveHref);
       }
     },
-    [navigateToWave, waveHref]
+    [router, waveHref]
   );
 
   return (
-    <div
-      className={`tw-@container/wave tw-group tw-rounded-xl tw-cursor-pointer tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-backdrop-blur-sm tw-p-2.5 tw-shadow-sm tw-shadow-black/20 tw-transition-all tw-duration-300 tw-ease-out ${
-        isInteractive
-          ? "hover:tw-shadow-lg hover:tw-shadow-black/40 hover:tw-translate-y-[-1px] focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 focus-visible:tw-outline-none"
-          : ""
-      }`}
-      role={isInteractive ? "link" : undefined}
-      tabIndex={isInteractive ? 0 : -1}
-      aria-label={cardLabel}
+    <CardContainer
+      isInteractive={isInteractive}
+      href={waveHref}
+      ariaLabel={cardLabel}
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
     >
@@ -140,7 +196,7 @@ export default function WaveItem({
             alt={wave?.name ? `Wave ${wave.name}` : "Wave picture"}
             loading="lazy"
             decoding="async"
-            className="tw-absolute tw-inset-0 tw-h-full tw-w-full tw-object-cover tw-transition-transform tw-duration-500 tw-will-change-transform group-hover:tw-scale-[1.015]"
+            className="tw-absolute tw-inset-0 tw-h-full tw-w-full tw-object-cover tw-transition-transform tw-duration-500 tw-will-change-transform desktop-hover:group-hover:tw-scale-[1.015]"
           />
         )}
         <div
@@ -172,18 +228,17 @@ export default function WaveItem({
         </div>
       </div>
 
-      {/* CREATOR ROW: moved below hero for clarity */}
       <div className="tw-px-3 tw-pt-3">
         {wave ? (
           <Link
             href={`/${wave.author.handle}`}
             prefetch={false}
-            className="tw-mt-1 tw-group tw-no-underline tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1"
+            className="tw-mt-1 tw-group/author tw-no-underline tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1"
           >
             <div className="tw-h-6 tw-w-6 tw-flex-shrink-0">
               {wave?.author.pfp ? (
                 <img
-                  className="tw-h-full tw-w-full tw-rounded-md tw-object-cover tw-bg-iron-800 tw-ring-1 tw-ring-white/10"
+                  className="tw-h-full tw-w-full tw-rounded-md tw-object-cover tw-bg-iron-800 tw-ring-1 tw-ring-white/10 desktop-hover:group-hover/author:tw-ring-white/30 desktop-hover:group-hover/author:tw-ring-offset-1 desktop-hover:group-hover/author:tw-ring-offset-iron-950 tw-transition tw-duration-300 tw-ease-out"
                   src={getScaledImageUri(
                     wave.author.pfp,
                     ImageScale.W_AUTO_H_50
@@ -200,11 +255,13 @@ export default function WaveItem({
                 <div className="tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10" />
               )}
             </div>
-            <span className="tw-text-sm tw-font-semibold tw-text-white group-hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
+            <span className="tw-text-sm tw-font-semibold tw-text-white desktop-hover:group-hover/author:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
               {wave?.author.handle ?? userPlaceholder}
             </span>
             <div
-              className={`${getColorClasses()} tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset tw-text-[0.625rem] tw-leading-3`}
+              className={`${resolveLevelClasses(
+                wave?.author.level
+              )} tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset tw-text-[0.625rem] tw-leading-3`}
             >
               Level {wave.author.level}
             </div>
@@ -279,6 +336,6 @@ export default function WaveItem({
           )}
         </div>
       </div>
-    </div>
+    </CardContainer>
   );
 }
