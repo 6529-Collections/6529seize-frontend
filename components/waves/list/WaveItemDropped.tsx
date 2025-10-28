@@ -8,7 +8,8 @@ export default function WaveItemDropped({ wave }: { readonly wave: ApiWave }) {
   return (
     <div className="tw-flex tw-items-center tw-gap-x-2">
       <div className="tw-flex tw-items-center -tw-space-x-1">
-        {firstXContributors.map((c) => {
+        {firstXContributors.map((c, index) => {
+          const baseKey = `${c.contributor_identity ?? "anon"}-${c.contributor_pfp ?? "no-pfp"}-${index}`;
           const contributorHref = c.contributor_identity
             ? `/${c.contributor_identity}`
             : undefined;
@@ -29,16 +30,16 @@ export default function WaveItemDropped({ wave }: { readonly wave: ApiWave }) {
           );
 
           return contributorHref ? (
-            <Link href={contributorHref} prefetch={false} key={c.contributor_identity}>
+            <Link href={contributorHref} prefetch={false} key={baseKey}>
               {avatar}
             </Link>
           ) : (
-            <div key={c.contributor_identity ?? c.contributor_pfp}>{avatar}</div>
+            <div key={baseKey}>{avatar}</div>
           );
         })}
       </div>
       <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm">
-        <span className="tw-text-iron-50 tw-font-medium">
+        <span className="tw-text-iron-200 tw-font-medium">
           {numberWithCommas(wave.metrics.drops_count)}
         </span>
         <span className="tw-text-iron-400">
