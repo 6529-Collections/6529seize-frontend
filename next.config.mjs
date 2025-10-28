@@ -122,6 +122,7 @@ function sharedConfig(publicEnv, assetPrefix) {
         "ipfs.6529.io",
       ],
       minimumCacheTTL: 86400,
+      qualities: [100, 75],
     },
     transpilePackages: ["react-tweet"],
     poweredByHeader: false,

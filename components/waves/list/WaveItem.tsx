@@ -45,8 +45,8 @@ type CardContainerProps = {
   readonly isInteractive: boolean;
   readonly href?: string;
   readonly ariaLabel?: string;
-  readonly onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
-  readonly onKeyDown?: (event: KeyboardEvent<HTMLAnchorElement>) => void;
+  readonly onClick?: (event: MouseEvent<HTMLDivElement>) => void;
+  readonly onKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => void;
   readonly children: ReactNode;
 };
 
@@ -62,19 +62,19 @@ function CardContainer({
     isInteractive ? CARD_INTERACTIVE_CLASSES : ""
   }`;
 
-  if (isInteractive && href) {
+  if (isInteractive) {
     return (
-      <Link
-        href={href}
-        prefetch={false}
+      <div
         className={className}
+        role="link"
+        tabIndex={0}
+        data-href={href}
         aria-label={ariaLabel}
-        style={{ textDecoration: "none" }}
         onClick={onClick}
         onKeyDown={onKeyDown}
       >
         {children}
-      </Link>
+      </div>
     );
   }
 
@@ -213,7 +213,7 @@ export default function WaveItem({
   }
 
   const handleCardClick = useCallback(
-    (event: MouseEvent<HTMLAnchorElement>) => {
+    (event: MouseEvent<HTMLDivElement>) => {
       if (!waveHref) {
         return;
       }
@@ -230,7 +230,7 @@ export default function WaveItem({
   );
 
   const handleCardKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLAnchorElement>) => {
+    (event: KeyboardEvent<HTMLDivElement>) => {
       if (!waveHref || event.target !== event.currentTarget) {
         return;
       }
