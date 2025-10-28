@@ -608,8 +608,9 @@ describe("Legacy Error Handling and Edge Cases", () => {
     });
 
     // Component should render successfully with API data
-    expect(screen.getByText("Meme")).toBeInTheDocument();
-    expect(screen.getByText("Gas")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Meme Gas" })
+    ).toBeInTheDocument();
     expect(mockFetchUrl).toHaveBeenCalledWith(
       "https://api.test.6529.io/api/memes/artists_names"
     );

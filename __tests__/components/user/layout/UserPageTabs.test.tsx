@@ -9,10 +9,10 @@ jest.mock("next/navigation", () => ({
   usePathname: jest.fn(),
   useSearchParams: jest.fn(),
 }));
-const useCapacitorMock = jest.fn();
+const capacitorMock = jest.fn();
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
-  default: () => useCapacitorMock(),
+  default: () => capacitorMock(),
 }));
 jest.mock("@/components/user/layout/UserPageTab", () => ({
   __esModule: true,
@@ -34,7 +34,7 @@ const renderTabs = (
   (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
   (usePathname as jest.Mock).mockReturnValue("/[user]/rep");
   (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
-  useCapacitorMock.mockReturnValue({ isIos });
+  capacitorMock.mockReturnValue({ isIos });
   (useCookieConsent as jest.Mock).mockReturnValue({
     showCookieConsent: false,
     country,

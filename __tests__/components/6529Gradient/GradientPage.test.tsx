@@ -151,8 +151,9 @@ describe("GradientPage", () => {
       expect(screen.getByText("Gradient #1")).toBeInTheDocument()
     );
 
-    expect(screen.getByText("6529")).toBeInTheDocument();
-    expect(screen.getByText("Gradient")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "6529 Gradient" })
+    ).toBeInTheDocument();
   });
 
   it("displays owner information", async () => {

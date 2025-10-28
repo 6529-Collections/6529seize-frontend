@@ -80,7 +80,9 @@ describe("additional static pages render", () => {
         <ConsolidationMappingTool />
       </TestProvider>
     );
-    expect(screen.getByText(/Consolidation Mapping Tool/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /Consolidation Mapping Tool/i })
+    ).toBeInTheDocument();
   });
 
   it("renders Open Metaverse page", () => {

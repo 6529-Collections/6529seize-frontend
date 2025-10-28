@@ -276,7 +276,7 @@ async function enforceAccessControl(
   return NextResponse.next();
 }
 
-export async function middleware(req: NextRequest) {
+export default async function proxy(req: NextRequest) {
   try {
     const redirectResponse = handleRedirects(req);
     if (redirectResponse) {

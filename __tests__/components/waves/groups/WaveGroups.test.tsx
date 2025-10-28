@@ -6,14 +6,14 @@ import { ApiWaveType } from '@/generated/models/ApiWaveType';
 // Capture props passed to the mocked WaveGroup component
 const captured: any[] = [];
 jest.mock('@/components/waves/specs/groups/group/WaveGroup', () => {
-  const real = jest.requireActual('../../../../components/waves/specs/groups/group/WaveGroup');
+  const { WaveGroupType } = jest.requireActual('../../../../components/waves/specs/groups/group/WaveGroup.types');
   return {
     __esModule: true,
     default: (props: any) => {
       captured.push(props);
       return <div data-testid={`group-${props.type}`} />;
     },
-    WaveGroupType: real.WaveGroupType,
+    WaveGroupType,
   };
 });
 

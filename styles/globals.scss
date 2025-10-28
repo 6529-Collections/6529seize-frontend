@@ -18,7 +18,11 @@
     --collapsed-width: 0px;
     --expanded-width: 0px;
 
-    --layout-margin: max((100vw - var(--layout-max)) / 2, 0px);
+    --scrollbar-compensation: calc(100vw - 100%);
+    --layout-margin: max(
+      ((100vw - var(--layout-max)) - var(--scrollbar-compensation)) / 2,
+      0px
+    );
     --left-rail: calc(var(--layout-margin) + var(--sidebar-width));
   }
 
@@ -179,6 +183,10 @@
   display: none;
 }
 
+html {
+   scrollbar-gutter: stable both-edges;
+}
+
 body {
   background-color: #000000 !important;
   color: variables.$font-color !important;
@@ -267,52 +275,52 @@ b:not(.tailwind-scope b) {
 }
 
 h1 {
-  font-size: 48px;
+  font-size: 20px;
   font-weight: 700;
   color: variables.$font-color;
 }
 
 h2:not(.tailwind-scope h2) {
-  font-size: 36px;
+  font-size: 18px;
   font-weight: 700;
   color: variables.$font-color;
 }
 
 h3:not(.tailwind-scope h3) {
-  font-size: 28px;
+  font-size: 18px;
   font-weight: 700;
   color: variables.$font-color;
 }
 
 h4:not(.tailwind-scope h4) {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 700;
   color: variables.$font-color;
 }
 
 h5:not(.tailwind-scope h5) {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   color: variables.$font-color;
 }
 
 @media only screen and (max-width: 800px) {
   h1 {
-    font-size: 26px;
+    font-size: 18px;
   }
 
   h2:not(.tailwind-scope h2) {
-    font-size: 22px;
+    font-size: 16px;
     font-weight: bold;
   }
 
   h3:not(.tailwind-scope h3) {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
   }
 
   h4:not(.tailwind-scope h4) {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
   }
 

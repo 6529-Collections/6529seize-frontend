@@ -1,7 +1,9 @@
 import { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import { commonApiPost } from "@/services/api/common-api";
+import {
+  createGroup,
+  publishGroup,
+} from "@/services/groups/groupMutations";
 
 /**
  * Creates a group that only includes the specified wallet
@@ -43,21 +45,13 @@ const createOnlyMeGroup = async ({
       },
     };
 
-    const group = await commonApiPost<ApiCreateGroup, ApiGroupFull>({
-      endpoint: `groups`,
-      body: groupConfig,
+    const group = await createGroup({
+      payload: groupConfig,
     });
 
-    if (!group) {
-      return null;
-    }
-
-    await commonApiPost<
-      { visible: true; old_version_id: string | null },
-      ApiGroupFull
-    >({
-      endpoint: `groups/${group.id}/visible`,
-      body: { visible: true, old_version_id: null },
+    await publishGroup({
+      id: group.id,
+      oldVersionId: null,
     });
 
     return group.id;

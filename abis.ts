@@ -1,3 +1,5 @@
+import { Abi } from "viem";
+
 export const DELEGATION_ABI = [
   { inputs: [], stateMutability: "nonpayable", type: "constructor" },
   {
@@ -2858,7 +2860,7 @@ export const NEXTGEN_ADMIN_ABI = [
   },
 ];
 
-export const MEMES_MANIFOLD_PROXY_ABI = [
+export const MEMES_MANIFOLD_PROXY_ABI: Abi = [
   {
     inputs: [
       { internalType: "address", name: "initialOwner", type: "address" },
