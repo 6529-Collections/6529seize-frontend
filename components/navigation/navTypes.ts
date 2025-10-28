@@ -24,7 +24,6 @@ type ViewNavItem = {
 
 export type NavItem = RouteNavItem | ViewNavItem;
 
-// Sidebar-specific types
 export interface SidebarSection {
   key: string;
   name: string;
