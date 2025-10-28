@@ -4,30 +4,44 @@ import WaveGroupEditButtons from '@/components/waves/specs/groups/group/edit/Wav
 import { WaveGroupType } from '@/components/waves/specs/groups/group/WaveGroup.types';
 import { AuthContext } from '@/components/auth/Auth';
 import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-jest.mock('@tanstack/react-query', () => ({ useMutation: jest.fn() }));
+jest.mock('@tanstack/react-query', () => ({
+  useMutation: jest.fn(),
+  useQuery: jest.fn(),
+  useQueryClient: jest.fn(),
+}));
 
 jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupEditButton', () => ({
   __esModule: true,
-  default: ({ onWaveUpdate, renderTrigger }: any) => {
+  default: React.forwardRef(({ onWaveUpdate, renderTrigger }: any, ref: any) => {
     const handleOpen = () => onWaveUpdate({});
+    if (typeof ref === 'function') {
+      ref({ open: handleOpen });
+    } else if (ref) {
+      ref.current = { open: handleOpen };
+    }
     if (renderTrigger === null) {
       return null;
     }
     return renderTrigger ? <>{renderTrigger({ open: handleOpen })}</> : <button onClick={handleOpen}>edit</button>;
-  },
+  }),
 }));
 
 jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupRemoveButton', () => ({
   __esModule: true,
-  default: ({ onWaveUpdate, renderTrigger }: any) => {
+  default: React.forwardRef(({ onWaveUpdate, renderTrigger }: any, ref: any) => {
     const handleOpen = () => onWaveUpdate({});
+    if (typeof ref === 'function') {
+      ref({ open: handleOpen });
+    } else if (ref) {
+      ref.current = { open: handleOpen };
+    }
     if (renderTrigger === null) {
       return null;
     }
     return renderTrigger ? <>{renderTrigger({ open: handleOpen })}</> : <button onClick={handleOpen}>remove</button>;
-  },
+  }),
 }));
 
 jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupManageIdentitiesModal', () => ({
@@ -49,7 +63,15 @@ jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => ({
 }));
 
 const mutateAsync = jest.fn();
+const queryClientMock = {
+  ensureQueryData: jest.fn(),
+  fetchQuery: jest.fn(),
+  setQueryData: jest.fn(),
+};
+
 (useMutation as jest.Mock).mockReturnValue({ mutateAsync });
+(useQuery as jest.Mock).mockReturnValue({ data: undefined });
+(useQueryClient as jest.Mock).mockImplementation(() => queryClientMock);
 
 const auth = {
   setToast: jest.fn(),
@@ -98,6 +120,16 @@ const wave: any = {
 describe('WaveGroupEditButtons', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mutateAsync.mockClear();
+    queryClientMock.ensureQueryData.mockReset();
+    queryClientMock.fetchQuery.mockReset();
+    queryClientMock.setQueryData.mockReset();
+    queryClientMock.ensureQueryData.mockResolvedValue(null);
+    queryClientMock.fetchQuery.mockResolvedValue([]);
+    queryClientMock.setQueryData.mockImplementation(() => {});
+    (useMutation as jest.Mock).mockReturnValue({ mutateAsync });
+    (useQuery as jest.Mock).mockReturnValue({ data: undefined });
+    (useQueryClient as jest.Mock).mockImplementation(() => queryClientMock);
   });
 
   it('opens menu and calls mutate on edit', async () => {
