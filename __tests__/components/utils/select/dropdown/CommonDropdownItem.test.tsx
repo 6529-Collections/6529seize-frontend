@@ -13,16 +13,17 @@ test('calls setSelected on click', () => {
   const setSelected = jest.fn();
   const item = { label: 'Item', value: 'v', key: 'k' };
   render(<CommonDropdownItem item={item} activeItem="" setSelected={setSelected} isMobile={false} />);
-  fireEvent.click(screen.getByRole('button'));
+  fireEvent.click(screen.getByRole('menuitem', { name: /Item/ }));
   expect(setSelected).toHaveBeenCalledWith('v');
 });
 
 test('shows check icon when active', () => {
   const item = { label: 'Item', value: 'v', key: 'k' };
   render(<CommonDropdownItem item={item} activeItem="v" setSelected={jest.fn()} isMobile={false} sortDirection={SortDirection.ASC} />);
+  const menuItem = screen.getByRole('menuitem', { name: /Item/ });
   expect(screen.getByTestId('sort')).toBeInTheDocument();
   expect(screen.getByTestId('sort')).toHaveTextContent('ASC');
-  expect(screen.getByRole('button').querySelector('svg')).toBeInTheDocument();
+  expect(menuItem.querySelector('[data-icon="check"]')).not.toBeNull();
 });
 
 test('handles copy feedback', () => {
