@@ -1,7 +1,7 @@
 import React from "react";
 import { render } from "@testing-library/react";
 import { AuthContext } from "@/components/auth/Auth";
-export type AuthContextType = React.ContextType<typeof AuthContext>;
+type AuthContextType = React.ContextType<typeof AuthContext>;
 
 const defaultConnectedProfile = {
   id: "test-id",

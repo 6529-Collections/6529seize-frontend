@@ -66,7 +66,7 @@ const calculateHeightStyle = (
 
 // Context type definition
 // Define valid ref types for type safety
-export type LayoutRefType =
+type LayoutRefType =
   | "header"
   | "pinned"
   | "tabs"

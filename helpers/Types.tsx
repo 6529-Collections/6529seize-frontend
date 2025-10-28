@@ -348,8 +348,3 @@ export interface PageSSRMetadata {
   ogImage: string;
   twitterCard: "summary" | "summary_large_image";
 }
-
-export interface UserPageProps {
-  profile: ApiIdentity;
-  metadata: PageSSRMetadata;
-}

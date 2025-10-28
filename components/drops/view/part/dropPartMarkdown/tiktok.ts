@@ -1,6 +1,6 @@
-export type TikTokLinkKind = "video" | "profile" | "short";
+type TikTokLinkKind = "video" | "profile" | "short";
 
-export interface TikTokLinkInfo {
+interface TikTokLinkInfo {
   readonly href: string;
   readonly kind: TikTokLinkKind;
 }

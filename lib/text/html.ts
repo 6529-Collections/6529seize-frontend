@@ -1,4 +1,4 @@
-export interface StripHtmlTagsOptions {
+interface StripHtmlTagsOptions {
   readonly maxLength?: number;
   readonly preserveTagSpacing?: boolean;
 }

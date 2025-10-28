@@ -13,7 +13,7 @@ export type FarcasterResourceIdentifier =
   | FarcasterProfileIdentifier
   | FarcasterChannelIdentifier;
 
-export interface FarcasterCastIdentifier {
+interface FarcasterCastIdentifier {
   readonly type: "cast";
   readonly canonicalUrl: string;
   readonly castHash: string;
@@ -21,13 +21,13 @@ export interface FarcasterCastIdentifier {
   readonly channel?: string | null;
 }
 
-export interface FarcasterProfileIdentifier {
+interface FarcasterProfileIdentifier {
   readonly type: "profile";
   readonly canonicalUrl: string;
   readonly username: string;
 }
 
-export interface FarcasterChannelIdentifier {
+interface FarcasterChannelIdentifier {
   readonly type: "channel";
   readonly canonicalUrl: string;
   readonly channel: string;

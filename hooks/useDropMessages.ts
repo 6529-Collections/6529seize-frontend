@@ -72,7 +72,7 @@ export function useDropMessages(waveId: string, dropId: string | null) {
       lastPage.drops.at(-1)?.serial_no
         ? {
             serialNo: lastPage.drops.at(-1)?.serial_no ?? null,
-            strategy: WaveDropsSearchStrategy.FIND_OLDER,
+            strategy: WaveDropsSearchStrategy.Older,
           }
         : null,
     placeholderData: keepPreviousData,
