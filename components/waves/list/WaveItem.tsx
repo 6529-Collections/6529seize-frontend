@@ -278,13 +278,9 @@ export default function WaveItem({
           <div className="tw-flex tw-min-w-0 tw-items-end tw-px-3 tw-pb-3">
             <div className="tw-min-w-0">
               {waveHref ? (
-                <Link
-                  href={waveHref}
-                  prefetch={false}
-                  className="tw-no-underline tw-text-lg tracking-tight tw-font-semibold tw-text-white desktop-hover:hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out tw-line-clamp-1"
-                >
+                <span className="tw-no-underline tw-text-lg tracking-tight tw-font-semibold tw-text-white desktop-hover:hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out tw-line-clamp-1">
                   {wave?.name ?? titlePlaceholder}
-                </Link>
+                </span>
               ) : (
                 <span className="tw-text-lg tw-font-semibold tw-text-white">
                   {wave?.name ?? titlePlaceholder}

@@ -1,3 +1,5 @@
+export const cache = "force-no-store";
+
 import { QueryClient, dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { prefetchWavesOverview } from "@/helpers/stream.helpers";
@@ -38,6 +40,8 @@ export async function generateMetadata({
 }: {
   readonly searchParams: Promise<{ wave?: string }>;
 }) {
+  "use cache: private";
+
   const resolvedParams = await searchParams;
   let title = "Waves";
   let image = "";

@@ -10,10 +10,8 @@ import { fullScreenSupported } from "@/helpers/Helpers";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import Link from "next/link";
 import useCapacitor from "@/hooks/useCapacitor";
-import {
-  ImageScale,
-  getScaledImageUri,
-} from "@/helpers/image.helpers";
+import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
+import { buildTooltipId } from "@/helpers/tooltip.helpers";
 import { Tooltip } from "react-tooltip";
 
 const tooltipProps = {
@@ -38,6 +36,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
+  const openBrowserTooltipId = buildTooltipId("open-browser-markdown", src);
   const [isZoomed, setIsZoomed] = useState(false);
   const { isCapacitor } = useCapacitor();
 
@@ -135,7 +134,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
                 <Link href={src} target="_blank" rel="noopener noreferrer">
                   <button
                     onClick={(e) => e.stopPropagation()}
-                    data-tooltip-id={`open-browser-markdown-${src}`}
+                    data-tooltip-id={openBrowserTooltipId}
                     className={modalButtonClasses}
                     aria-label="Open image in new tab">
                     <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
@@ -179,7 +178,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
       {/* Tooltips inside modal */}
       {!isCapacitor && (
         <>
-          <Tooltip id={`open-browser-markdown-${src}`} {...tooltipProps}>
+          <Tooltip id={openBrowserTooltipId} {...tooltipProps}>
             <span className="tw-text-xs">Open in Browser</span>
           </Tooltip>
 

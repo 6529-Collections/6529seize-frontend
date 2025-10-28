@@ -4,6 +4,7 @@ import { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import { Tooltip } from "react-tooltip";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import { useState } from "react";
+import { buildTooltipId } from "@/helpers/tooltip.helpers";
 
 interface ParticipationDropMetadataProps {
   readonly metadata: ApiDropMetadata[];
@@ -13,21 +14,23 @@ interface ParticipationDropMetadataProps {
 const MetadataItem: React.FC<{ meta: ApiDropMetadata }> = ({ meta }) => {
   const isMobile = useIsMobileDevice();
 
+  const tooltipId = buildTooltipId("metadata", meta.data_key);
+
   return (
     <div className="tw-px-2 tw-py-1 tw-rounded-md tw-bg-iron-800/50 tw-flex tw-flex-col tw-gap-y-1">
       <span className="tw-text-iron-400 tw-text-xs tw-mr-1.5">
         {meta.data_key}:
       </span>
       <>
-        <span 
+        <span
           className="tw-text-iron-200 tw-text-xs tw-font-medium tw-line-clamp-2"
-          data-tooltip-id={`metadata-${meta.data_key}`}
+          data-tooltip-id={tooltipId}
         >
           {meta.data_value}
         </span>
         {!isMobile && (
           <Tooltip
-            id={`metadata-${meta.data_key}`}
+            id={tooltipId}
             place="top"
             style={{
               backgroundColor: "#1F2937",

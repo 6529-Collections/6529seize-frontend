@@ -109,9 +109,6 @@ export async function GET(request: NextRequest) {
   return proxyImage(remoteResult.url);
 }
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 function parseRemoteUrl(target: string): { url: URL } | { response: NextResponse } {
   try {
     const parsed = parsePublicUrl(target, { allowedProtocols: ["https:"] });
