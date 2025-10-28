@@ -142,10 +142,10 @@ export const validateAuthImmediate = async ({
   params: ImmediateValidationParams;
   callbacks: ImmediateValidationCallbacks;
 }): Promise<ImmediateValidationResult> => {
-  if (
-    publicEnv.USE_DEV_AUTH === "true" &&
-    getNodeEnv() !== "production"
-  ) {
+  const nodeEnv = getNodeEnv();
+  const isDevLikeEnv = nodeEnv === "development" || nodeEnv === "test";
+
+  if (publicEnv.USE_DEV_AUTH === "true" && isDevLikeEnv) {
     return createValidationResult(true, false, false);
   }
 
