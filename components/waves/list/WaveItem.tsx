@@ -115,7 +115,7 @@ export default function WaveItem({
 
   return (
     <div
-      className={`group tw-rounded-xl tw-cursor-pointer tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-backdrop-blur-sm tw-p-[10px] tw-shadow-sm tw-shadow-black/20 tw-transition-all tw-duration-300 tw-ease-out${
+      className={`group tw-@container/wave tw-rounded-xl tw-cursor-pointer tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-backdrop-blur-sm tw-p-2.5 tw-shadow-sm tw-shadow-black/20 tw-transition-all tw-duration-300 tw-ease-out${
         isInteractive
           ? "tw-cursor-pointer hover:tw-shadow-lg hover:tw-shadow-black/40 hover:tw-translate-y-[-1px] focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 focus-visible:tw-outline-none"
           : ""
@@ -143,14 +143,14 @@ export default function WaveItem({
             className="tw-absolute tw-inset-0 tw-h-full tw-w-full tw-object-cover tw-transition-transform tw-duration-500 tw-will-change-transform group-hover:tw-scale-[1.015]"
           />
         )}
-
         <div
           className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-40 sm:tw-h-44 md:tw-h-48"
           style={{
             background:
-              "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.6) 35%, rgba(0,0,0,0.28) 65%, rgba(0,0,0,0.0) 100%)",
+              "linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.64) 32%, rgba(0,0,0,0.30) 64%, rgba(0,0,0,0.00) 100%)",
           }}
         />
+        {/* OVERLAY: title only for maximum legibility */}
         <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-flex tw-items-end tw-justify-between tw-gap-3 tw-backdrop-blur-[1px] tw-backdrop-brightness-95">
           <div className="tw-flex tw-min-w-0 tw-items-end px-3 pb-3">
             <div className="tw-min-w-0">
@@ -158,7 +158,7 @@ export default function WaveItem({
                 <Link
                   href={waveHref}
                   prefetch={false}
-                  className="tw-no-underline tw-text-lg tracking-tight tw-font-semibold tw-text-white desktop-hover:hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
+                  className="tw-no-underline tw-text-lg tracking-tight tw-font-semibold tw-text-white desktop-hover:hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out tw-line-clamp-1"
                 >
                   {wave?.name ?? titlePlaceholder}
                 </Link>
@@ -167,59 +167,60 @@ export default function WaveItem({
                   {wave?.name ?? titlePlaceholder}
                 </span>
               )}
-
-              {wave ? (
-                <Link
-                  href={`/${wave.author.handle}`}
-                  prefetch={false}
-                  className="tw-mt-1 tw-group tw-no-underline tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1"
-                >
-                  <div className="tw-h-6 tw-w-6">
-                    {wave?.author.pfp ? (
-                      <img
-                        className="tw-flex-shrink-0 tw-object-cover tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/20 tw-ring-offset-1 tw-ring-offset-iron-800"
-                        src={getScaledImageUri(
-                          wave.author.pfp,
-                          ImageScale.W_AUTO_H_50
-                        )}
-                        alt={
-                          wave?.author.handle
-                            ? `${wave.author.handle} avatar`
-                            : "Author avatar"
-                        }
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    ) : (
-                      <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/20 tw-ring-offset-1 tw-ring-offset-iron-800" />
-                    )}
-                  </div>
-                  <span className="tw-text-sm tw-font-semibold tw-text-white group-hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
-                    {wave?.author.handle ?? userPlaceholder}
-                  </span>
-
-                  <div
-                    className={`${getColorClasses()} tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset tw-text-[0.625rem] tw-leading-3`}
-                  >
-                    Level {wave.author.level}
-                  </div>
-                </Link>
-              ) : (
-                <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-                  <div className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
-                  <span className="tw-text-sm tw-font-semibold tw-text-white">
-                    {userPlaceholder}
-                  </span>
-                </span>
-              )}
             </div>
           </div>
-
           <div className="tw-hidden sm:tw-block" />
         </div>
       </div>
 
-      <div className="tw-mt-3 tw-flex tw-items-center tw-justify-between tw-px-3">
+      {/* CREATOR ROW: moved below hero for clarity */}
+      <div className="tw-px-3 tw-pt-3">
+        {wave ? (
+          <Link
+            href={`/${wave.author.handle}`}
+            prefetch={false}
+            className="tw-mt-1 tw-group tw-no-underline tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1"
+          >
+            <div className="tw-h-6 tw-w-6 tw-flex-shrink-0">
+              {wave?.author.pfp ? (
+                <img
+                  className="tw-h-full tw-w-full tw-rounded-md tw-object-cover tw-bg-iron-800 tw-ring-1 tw-ring-white/10"
+                  src={getScaledImageUri(
+                    wave.author.pfp,
+                    ImageScale.W_AUTO_H_50
+                  )}
+                  alt={
+                    wave?.author.handle
+                      ? `${wave.author.handle} avatar`
+                      : "Author avatar"
+                  }
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : (
+                <div className="tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10" />
+              )}
+            </div>
+            <span className="tw-text-sm tw-font-semibold tw-text-white group-hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
+              {wave?.author.handle ?? userPlaceholder}
+            </span>
+            <div
+              className={`${getColorClasses()} tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset tw-text-[0.625rem] tw-leading-3`}
+            >
+              Level {wave.author.level}
+            </div>
+          </Link>
+        ) : (
+          <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+            <div className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
+            <span className="tw-text-sm tw-font-semibold tw-text-white">
+              {userPlaceholder}
+            </span>
+          </span>
+        )}
+      </div>
+
+      <div className="tw-mt-2 tw-flex tw-items-center tw-justify-between tw-px-3 tw-pt-3 tw-border-t tw-border-white/5">
         <div className="tw-flex tw-items-center tw-gap-4">
           <div className="tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-200">
             <ChatBubbleLeftRightIcon
@@ -263,9 +264,9 @@ export default function WaveItem({
       </div>
 
       <div className="tw-mt-3 tw-flex tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-pb-1">
-        <div className="tw-min-w-0">
+        <div className="tw-min-w-0 tw-flex-1">
           {wave && (
-            <div className="tw-overflow-hidden">
+            <div className="tw-overflow-hidden tw-min-w-0">
               <WaveItemDropped wave={wave} />
             </div>
           )}

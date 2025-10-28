@@ -179,7 +179,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
                   onClicked={openDirectMessage}
                   loading={false}
                   disabled={false}
-                  padding="tw-px-2 tw-py-2"
+                  padding="tw-p-2.5"
                 >
                   <FontAwesomeIcon
                     icon={faPaperPlane}

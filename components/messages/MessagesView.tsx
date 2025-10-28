@@ -46,13 +46,12 @@ const MessagesView: React.FC = () => {
           onClicked={openDirectMessage}
           loading={false}
           disabled={false}
-          padding="tw-px-4 tw-py-2"
         >
           <FontAwesomeIcon
             icon={faPaperPlane}
             className="tw-size-4 tw-flex-shrink-0 tw-mr-2"
           />
-          <span>New Direct Message</span>
+          <span>Create DM</span>
         </PrimaryButton>
       </div>
     );
