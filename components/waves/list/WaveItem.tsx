@@ -115,9 +115,9 @@ export default function WaveItem({
 
   return (
     <div
-      className={`tw-@container/wave tw-rounded-xl tw-cursor-pointer tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-backdrop-blur-sm tw-p-2.5 tw-shadow-sm tw-shadow-black/20 tw-transition-all tw-duration-300 tw-ease-out ${
+      className={`tw-@container/wave tw-group tw-rounded-xl tw-cursor-pointer tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-backdrop-blur-sm tw-p-2.5 tw-shadow-sm tw-shadow-black/20 tw-transition-all tw-duration-300 tw-ease-out ${
         isInteractive
-          ? "tw-cursor-pointer hover:tw-shadow-lg hover:tw-shadow-black/40 hover:tw-translate-y-[-1px] focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 focus-visible:tw-outline-none"
+          ? "hover:tw-shadow-lg hover:tw-shadow-black/40 hover:tw-translate-y-[-1px] focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 focus-visible:tw-outline-none"
           : ""
       }`}
       role={isInteractive ? "link" : undefined}
