@@ -50,8 +50,8 @@ export default function CustomTooltip({
 
   const childRef = useRef<HTMLElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const showTimer = useRef<NodeJS.Timeout | undefined>(undefined);
-  const hideTimer = useRef<NodeJS.Timeout | undefined>(undefined);
+  const showTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const childObserverRef: MutableRefObject<ResizeObserver | null> = useRef(null);
   const tooltipObserverRef: MutableRefObject<ResizeObserver | null> = useRef(null);
   const childElement = React.Children.only(children) as React.ReactElement<TooltipChildHandlers>;
@@ -68,7 +68,9 @@ export default function CustomTooltip({
     try {
       (ref as React.MutableRefObject<HTMLElement | null>).current = node;
     } catch {
-      console.warn("[CustomTooltip] Failed to assign ref (may be read-only)");
+      if (typeof console !== "undefined") {
+        console.warn("[CustomTooltip] Failed to assign ref (may be read-only)");
+      }
     }
   }, []);
 
@@ -83,8 +85,19 @@ export default function CustomTooltip({
       }
 
       setRefValue(originalRef, node);
+
+      if (isVisible && childObserverRef.current) {
+        try {
+          childObserverRef.current.disconnect();
+          if (node) {
+            childObserverRef.current.observe(node);
+          }
+        } catch {
+          // Ignore observer errors
+        }
+      }
     },
-    [originalRef, setRefValue]
+    [originalRef, setRefValue, isVisible]
   );
 
   const mergeHandlers = useCallback(
@@ -215,14 +228,18 @@ export default function CustomTooltip({
 
   const show = useCallback(() => {
     if (disabled) return;
-    clearTimeout(hideTimer.current);
+    if (hideTimer.current !== undefined) {
+      clearTimeout(hideTimer.current);
+    }
     showTimer.current = setTimeout(() => {
       setIsVisible(true);
     }, delayShow);
   }, [disabled, delayShow]);
 
   const hide = useCallback(() => {
-    clearTimeout(showTimer.current);
+    if (showTimer.current !== undefined) {
+      clearTimeout(showTimer.current);
+    }
     hideTimer.current = setTimeout(() => setIsVisible(false), delayHide);
   }, [delayHide]);
 
@@ -286,8 +303,13 @@ export default function CustomTooltip({
     if (!isVisible) return;
     if (!isBrowser) return;
 
+    let rafId: number | null = null;
     const handleReposition = () => {
-      calculatePosition();
+      if (rafId !== null) return;
+      rafId = win.requestAnimationFrame(() => {
+        rafId = null;
+        calculatePosition();
+      });
     };
 
     win.addEventListener("resize", handleReposition);
@@ -296,13 +318,20 @@ export default function CustomTooltip({
     return () => {
       win.removeEventListener("resize", handleReposition);
       win.removeEventListener("scroll", handleReposition, true);
+      if (rafId !== null) {
+        win.cancelAnimationFrame(rafId);
+      }
     };
   }, [isVisible, calculatePosition]);
 
   useEffect(() => {
     return () => {
-      clearTimeout(showTimer.current);
-      clearTimeout(hideTimer.current);
+      if (showTimer.current !== undefined) {
+        clearTimeout(showTimer.current);
+      }
+      if (hideTimer.current !== undefined) {
+        clearTimeout(hideTimer.current);
+      }
       childObserverRef.current?.disconnect();
       tooltipObserverRef.current?.disconnect();
     };
