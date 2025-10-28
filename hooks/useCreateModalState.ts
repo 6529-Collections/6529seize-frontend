@@ -12,7 +12,7 @@ export const CREATE_QUERY_KEY = "create";
 export const CREATE_WAVE_VALUE = "wave";
 export const CREATE_DIRECT_MESSAGE_VALUE = "dm";
 
-export type CreateModalMode =
+type CreateModalMode =
   | typeof CREATE_WAVE_VALUE
   | typeof CREATE_DIRECT_MESSAGE_VALUE
   | null;

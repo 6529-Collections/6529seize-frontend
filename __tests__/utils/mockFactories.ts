@@ -21,22 +21,3 @@ export function createMockMinimalWave(overrides: Partial<MinimalWave> = {}): Min
     ...overrides,
   };
 }
-
-/**
- * Creates multiple mock MinimalWave objects for array-based tests
- * @param count - Number of waves to create
- * @param baseOverrides - Base properties to apply to all waves
- * @returns Array of MinimalWave objects
- */
-export function createMockMinimalWaves(
-  count: number,
-  baseOverrides: Partial<MinimalWave> = {}
-): MinimalWave[] {
-  return Array.from({ length: count }, (_, index) =>
-    createMockMinimalWave({
-      id: `mock-wave-${index + 1}`,
-      name: `Mock Wave ${index + 1}`,
-      ...baseOverrides,
-    })
-  );
-}

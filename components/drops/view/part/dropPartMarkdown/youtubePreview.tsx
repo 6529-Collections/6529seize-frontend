@@ -30,7 +30,7 @@ const normalizeYoutubeHtml = (html: string): string => {
   return normalized;
 };
 
-export interface YoutubePreviewProps {
+interface YoutubePreviewProps {
   readonly href: string;
 }
 

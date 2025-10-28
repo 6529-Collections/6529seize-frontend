@@ -28,14 +28,14 @@ const WaveDropQuoteWithSerialNo: React.FC<WaveDropQuoteWithSerialNoProps> = ({
         limit: 1,
         dropId: null,
         serialNo,
-        strategy: WaveDropsSearchStrategy.FIND_BOTH,
+        strategy: WaveDropsSearchStrategy.Both,
       },
     ],
     queryFn: async () => {
       const params: Record<string, string> = {
         limit: "1",
         serial_no_limit: `${serialNo}`,
-        search_strategy: WaveDropsSearchStrategy.FIND_BOTH,
+        search_strategy: WaveDropsSearchStrategy.Both,
       };
 
       const results = await commonApiFetch<ApiWaveDropsFeed>({

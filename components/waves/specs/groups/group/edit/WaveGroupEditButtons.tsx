@@ -17,7 +17,7 @@ import {
   type WaveGroupManageIdentitiesConfirmEvent,
 } from "./WaveGroupManageIdentitiesModal";
 
-export interface WaveGroupEditButtonsProps {
+interface WaveGroupEditButtonsProps {
   readonly haveGroup: boolean;
   readonly wave: ApiWave;
   readonly type: WaveGroupType;

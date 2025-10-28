@@ -25,6 +25,4 @@ export const createLinkHandlers = (): LinkHandler[] => [
   createFarcasterHandler(),
 ];
 
-export type LinkHandlers = ReturnType<typeof createLinkHandlers>;
-
 export { createSeizeHandlers } from "./seize";

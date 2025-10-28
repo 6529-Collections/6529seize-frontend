@@ -9,11 +9,6 @@ import {
   updateGroupIdByType,
 } from "../../utils/waveGroupUpdate";
 
-export const clearGroupIdFromUpdateBody = (
-  body: ApiUpdateWaveRequest,
-  type: WaveGroupType,
-): ApiUpdateWaveRequest => updateGroupIdByType(body, type, null);
-
 export const buildWaveUpdateBody = (
   wave: ApiWave,
   type: WaveGroupType,

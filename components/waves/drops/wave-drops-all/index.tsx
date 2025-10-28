@@ -17,7 +17,7 @@ import { useWaveDropsNotificationRead } from "./hooks/useWaveDropsNotificationRe
 import { useWaveDropsSerialScroll } from "./hooks/useWaveDropsSerialScroll";
 import { WaveDropsContent } from "./subcomponents/WaveDropsContent";
 
-export interface WaveDropsAllProps {
+interface WaveDropsAllProps {
   readonly waveId: string;
   readonly dropId: string | null;
   readonly onReply: ({

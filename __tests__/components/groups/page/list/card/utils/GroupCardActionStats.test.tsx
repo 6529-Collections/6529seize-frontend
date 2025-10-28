@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import GroupCardActionStats from 'components/groups/page/list/card/utils/GroupCardActionStats';
-import { AuthContext } from 'components/auth/Auth';
+import GroupCardActionStats from '@/components/groups/page/list/card/utils/GroupCardActionStats';
+import { AuthContext } from '@/components/auth/Auth';
 import { useQuery } from '@tanstack/react-query';
-import { ApiRateMatter } from 'generated/models/ApiRateMatter';
+import { ApiRateMatter } from '@/generated/models/ApiRateMatter';
 
 jest.mock('@tanstack/react-query', () => ({ useQuery: jest.fn() }));
 jest.mock('components/distribution-plan-tool/common/CircleLoader', () => ({

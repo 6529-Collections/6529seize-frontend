@@ -4,6 +4,9 @@ import { WalletValidationError } from '@/src/errors/wallet-validation'
 import { AppWallet } from '@/components/app-wallets/AppWalletsContext'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 
+const VALID_PRIVATE_KEY =
+  '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+
 // Jest helper
 const fail = (message?: string): never => {
   throw new Error(message || 'Test failed')
@@ -29,7 +32,7 @@ describe('AppKitAdapterManager', () => {
     name: 'Test Wallet',
     created_at: Date.now(),
     mnemonic: '',
-    private_key: '',
+    private_key: VALID_PRIVATE_KEY,
     imported: false
   }
 
@@ -49,7 +52,7 @@ describe('AppKitAdapterManager', () => {
     name: 'Test Wallet 2',
     created_at: Date.now(),
     mnemonic: '',
-    private_key: '',
+    private_key: VALID_PRIVATE_KEY,
     imported: false
   }
 
@@ -127,12 +130,13 @@ describe('AppKitAdapterManager', () => {
       })
 
       it('should validate mnemonic format without exposing content', () => {
-        const walletWithValidMnemonic = {
-          address: '0x742D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c',
-          address_hashed: 'hash123456789012345678901234567890123456789012345678901234567890', 
-          name: 'Test',
-          mnemonic: 'word1 word2 word3' // Valid mnemonic with proper words
-        }
+      const walletWithValidMnemonic = {
+        address: '0x742D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c',
+        address_hashed: 'hash123456789012345678901234567890123456789012345678901234567890', 
+        name: 'Test',
+        mnemonic: 'word1 word2 word3 word4 word5 word6 word7 word8 word9 word10 word11 word12',
+        private_key: VALID_PRIVATE_KEY
+      }
 
         // Current implementation only validates empty words, which won't occur with split(/\s+/)
         // So any mnemonic with actual words should pass
@@ -169,12 +173,13 @@ describe('AppKitAdapterManager', () => {
       })
 
       it('should throw WalletSecurityError for invalid mnemonic type', () => {
-        const walletWithInvalidMnemonicType = {
-          address: '0x742D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c',
-          address_hashed: 'hash123456789012345678901234567890123456789012345678901234567890',
-          name: 'Test Wallet',
-          mnemonic: 123
-        } as any
+      const walletWithInvalidMnemonicType = {
+        address: '0x742D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c',
+        address_hashed: 'hash123456789012345678901234567890123456789012345678901234567890',
+        name: 'Test Wallet',
+        mnemonic: 123,
+        private_key: VALID_PRIVATE_KEY
+      } as any
 
         expect(() => manager.createAdapter([walletWithInvalidMnemonicType]))
           .toThrow(WalletValidationError)
@@ -183,12 +188,14 @@ describe('AppKitAdapterManager', () => {
       })
 
       it('should accept mnemonic with multiple spaces between words', () => {
-        const walletWithSpacedMnemonic = {
-          address: '0x742D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c',
-          address_hashed: 'hash123456789012345678901234567890123456789012345678901234567890',
-          name: 'Test Wallet',
-          mnemonic: 'word1  word2   word3' // Multiple spaces between words - should be normalized
-        } as AppWallet
+      const walletWithSpacedMnemonic = {
+        address: '0x742D35A1CbF05C7A56C1Bf2dF5e8Dd6cf0DA8c4c',
+        address_hashed: 'hash123456789012345678901234567890123456789012345678901234567890',
+        name: 'Test Wallet',
+        mnemonic:
+          'word1  word2   word3    word4 word5  word6   word7    word8 word9  word10   word11    word12',
+        private_key: VALID_PRIVATE_KEY
+      } as AppWallet
 
         // Current implementation trims and splits by /\s+/ which handles multiple spaces correctly
         expect(() => manager.createAdapter([walletWithSpacedMnemonic]))
@@ -592,7 +599,7 @@ describe('AppKitAdapterManager', () => {
           name: `Wallet ${i}`,
           created_at: Date.now(),
           mnemonic: '',
-          private_key: '',
+          private_key: VALID_PRIVATE_KEY,
           imported: false
         }
         manager.createAdapterWithCache([wallet])
@@ -651,7 +658,7 @@ describe('AppKitAdapterManager', () => {
         name: 'Test Wallet',
         created_at: Date.now(),
         mnemonic: '',
-        private_key: '',
+        private_key: VALID_PRIVATE_KEY,
         imported: false
       } as AppWallet
 
@@ -683,7 +690,7 @@ describe('AppKitAdapterManager', () => {
         name: 'Test Wallet',
         created_at: Date.now(),
         mnemonic: 'word1 word2 word3 word4 word5 word6 word7 word8 word9 word10 word11 word12',
-        private_key: '',
+        private_key: VALID_PRIVATE_KEY,
         imported: false
       } as AppWallet
 

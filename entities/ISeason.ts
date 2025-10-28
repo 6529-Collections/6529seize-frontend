@@ -1,9 +1,3 @@
-export interface Season {
-  season: number;
-  count: number;
-  token_ids: number[];
-}
-
 export interface MemeSeason {
   id: number;
   start_index: number;
