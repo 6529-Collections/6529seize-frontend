@@ -92,16 +92,25 @@ describe('TabToggleWithOverflow', () => {
     await user.tab(); // focus second tab
     moreButton.focus();
     expect(moreButton).toHaveFocus();
-    await user.keyboard('[Space]');
+    await user.keyboard('{Enter}');
+    await waitFor(() =>
+      expect(moreButton).toHaveAttribute('aria-expanded', 'true')
+    );
     const optionC = await screen.findByRole('menuitem', { name: 'C' });
     expect(optionC).toBeInTheDocument();
 
     await user.keyboard('{Escape}');
     await waitFor(() =>
-      expect(screen.queryByRole('menuitem', { name: 'C' })).not.toBeInTheDocument()
+      expect(moreButton).toHaveAttribute('aria-expanded', 'false')
     );
+    await waitFor(() => {
+      expect(screen.queryByRole('menuitem', { name: 'C' })).not.toBeInTheDocument();
+    });
 
-    await user.keyboard('[Space]');
+    await user.keyboard(' ');
+    await waitFor(() =>
+      expect(moreButton).toHaveAttribute('aria-expanded', 'true')
+    );
     await screen.findByRole('menuitem', { name: 'C' });
   });
 

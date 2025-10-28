@@ -15,7 +15,6 @@ jest.mock('@tanstack/react-query', () => {
     useQueryClient: jest.fn(),
   };
 });
-
 jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupEditButton', () => {
   const React = require('react');
   return {
@@ -127,7 +126,12 @@ describe('WaveGroupEditButtons', () => {
     mutateAsync.mockReset();
     queryClientMock = createQueryClientMock();
     (useMutation as jest.Mock).mockReturnValue({ mutateAsync });
-    (useQuery as jest.Mock).mockReturnValue({});
+    (useQuery as jest.Mock).mockImplementation(({ enabled, queryFn }) => {
+      if (enabled && typeof queryFn === 'function') {
+        void queryFn({ signal: undefined });
+      }
+      return { data: undefined };
+    });
     (useQueryClient as jest.Mock).mockReturnValue(queryClientMock);
   });
 

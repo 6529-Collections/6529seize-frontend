@@ -121,9 +121,15 @@ const onWaveCreated = jest.fn();
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mutateAsyncSpy.mockClear();
   queryClientMock = createQueryClientMock();
-  (useQuery as jest.Mock).mockReturnValue({});
   (useQueryClient as jest.Mock).mockReturnValue(queryClientMock);
+  (useQuery as jest.Mock).mockImplementation(({ enabled, queryFn }) => {
+    if (enabled && typeof queryFn === 'function') {
+      void queryFn({ signal: undefined });
+    }
+    return { data: undefined };
+  });
   (useMutation as jest.Mock).mockImplementation((options: any) => ({
     mutateAsync: async (params?: any) => {
       try {
@@ -140,13 +146,17 @@ beforeEach(() => {
       }
     },
   }));
+  mockCommonApiFetch.mockReset();
+  mockCommonApiPost.mockReset();
+  mockCreateGroup.mockReset();
+  mockPublishGroup.mockReset();
+  requestAuth.mockResolvedValue({ success: true });
   mockCommonApiPost.mockResolvedValue({});
   mockCreateGroup.mockResolvedValue({
     ...baseGroupFull,
     id: 'new-group-id',
   });
   mockPublishGroup.mockResolvedValue(undefined);
-  mutateAsyncSpy.mockClear();
 });
 
 describe('useWaveGroupEditButtonsController - identity management', () => {
@@ -162,7 +172,11 @@ describe('useWaveGroupEditButtonsController - identity management', () => {
         return Promise.resolve<string[]>(['0xabcd']);
       }
       if (endpoint === 'groups/new-group-id') {
-        return Promise.resolve({ ...baseGroupFull, id: 'new-group-id', visible: true });
+        return Promise.resolve({
+          ...baseGroupFull,
+          id: 'new-group-id',
+          visible: true,
+        });
       }
       throw new Error(`Unexpected endpoint ${endpoint}`);
     });
@@ -195,7 +209,7 @@ describe('useWaveGroupEditButtonsController - identity management', () => {
       expect.objectContaining({
         id: 'new-group-id',
         oldVersionId: baseGroupFull.id,
-      })
+      }),
     );
     expect(mockCommonApiPost).not.toHaveBeenCalled();
     expect(mutateAsyncSpy).not.toHaveBeenCalled();
@@ -206,11 +220,14 @@ describe('useWaveGroupEditButtonsController - identity management', () => {
     });
   });
 
-  it('creates a new group when no group exists', async () => {
-    mockCommonApiFetch.mockReset();
+  it('creates a new group when no scoped group exists', async () => {
     mockCommonApiFetch.mockImplementation(({ endpoint }: { endpoint: string }) => {
       if (endpoint === 'groups/new-group-id') {
-        return Promise.resolve({ ...baseGroupFull, id: 'new-group-id', visible: true });
+        return Promise.resolve({
+          ...baseGroupFull,
+          id: 'new-group-id',
+          visible: true,
+        });
       }
       throw new Error(`Unexpected endpoint ${endpoint}`);
     });
@@ -239,7 +256,10 @@ describe('useWaveGroupEditButtonsController - identity management', () => {
     expect(requestAuth).toHaveBeenCalled();
     expect(mockCreateGroup).toHaveBeenCalledTimes(1);
     expect(mockPublishGroup).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'new-group-id', oldVersionId: null })
+      expect.objectContaining({
+        id: 'new-group-id',
+        oldVersionId: null,
+      }),
     );
     expect(mockCommonApiPost).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -249,7 +269,7 @@ describe('useWaveGroupEditButtonsController - identity management', () => {
             scope: expect.objectContaining({ group_id: 'new-group-id' }),
           }),
         }),
-      })
+      }),
     );
     expect(mutateAsyncSpy).toHaveBeenCalledTimes(1);
     expect(onWaveCreated).toHaveBeenCalledTimes(1);
@@ -271,7 +291,11 @@ describe('useWaveGroupEditButtonsController - identity management', () => {
         return Promise.resolve<string[]>(['0xccc']);
       }
       if (endpoint === 'groups/new-group-id') {
-        return Promise.resolve({ ...baseGroupFull, id: 'new-group-id', visible: true });
+        return Promise.resolve({
+          ...baseGroupFull,
+          id: 'new-group-id',
+          visible: true,
+        });
       }
       throw new Error(`Unexpected endpoint ${endpoint}`);
     });
@@ -313,7 +337,11 @@ describe('useWaveGroupEditButtonsController - identity management', () => {
         return Promise.resolve(baseGroupFull);
       }
       if (endpoint === 'groups/new-group-id') {
-        return Promise.resolve({ ...baseGroupFull, id: 'new-group-id', visible: true });
+        return Promise.resolve({
+          ...baseGroupFull,
+          id: 'new-group-id',
+          visible: true,
+        });
       }
       return Promise.reject(new Error('Group does not have identity group'));
     });

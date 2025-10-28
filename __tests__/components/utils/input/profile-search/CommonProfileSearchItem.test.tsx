@@ -5,21 +5,24 @@ const profile = { handle: "alice", wallet: "0x1", display: "Alice", pfp: "img.pn
 
 it("calls on select and shows checkmark when selected", () => {
   const onSelect = jest.fn();
-  const { container } = render(
-    <CommonProfileSearchItem
-      profile={profile}
-      selected="0x1"
-      onProfileSelect={onSelect}
-      id="profile-search-item-0x1"
-    />,
+  render(
+    <ul>
+      <CommonProfileSearchItem
+        profile={profile}
+        selected="0x1"
+        onProfileSelect={onSelect}
+        id="profile-search-item-0x1"
+      />
+    </ul>
   );
-
-  expect(screen.getByAltText("Alice avatar")).toBeInTheDocument();
-  const visualItem = container.querySelector<HTMLElement>("#profile-search-item-0x1-visual");
-  expect(visualItem).not.toBeNull();
-  expect(visualItem?.dataset.optionId).toBe("profile-search-item-0x1");
-  expect(visualItem?.querySelector('[data-icon="check"]')).not.toBeNull();
-
-  visualItem && fireEvent.click(visualItem);
+  expect(screen.getByAltText(/Alice avatar/i)).toBeInTheDocument();
+  const listItem = screen.getByText("Alice").closest("li");
+  if (!listItem) {
+    throw new Error("List item not found");
+  }
+  expect(listItem).toHaveAttribute("data-option-id", "profile-search-item-0x1");
+  expect(listItem.id).toBe("profile-search-item-0x1-visual");
+  expect(listItem.querySelector('[data-icon="check"]')).not.toBeNull();
+  fireEvent.click(listItem);
   expect(onSelect).toHaveBeenCalledWith(profile);
 });
