@@ -6,43 +6,44 @@ import { AuthContext } from '@/components/auth/Auth';
 import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-jest.mock('@tanstack/react-query', () => ({
-  useMutation: jest.fn(),
-  useQuery: jest.fn(),
-  useQueryClient: jest.fn(),
-}));
+jest.mock('@tanstack/react-query', () => {
+  const actual = jest.requireActual('@tanstack/react-query');
+  return {
+    ...actual,
+    useMutation: jest.fn(),
+    useQuery: jest.fn(),
+    useQueryClient: jest.fn(),
+  };
+});
+jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupEditButton', () => {
+  const React = require('react');
+  return {
+    __esModule: true,
+    default: React.forwardRef(({ onWaveUpdate, renderTrigger }: any, ref) => {
+      const handleOpen = () => onWaveUpdate({});
+      React.useImperativeHandle(ref, () => ({ open: handleOpen }), [handleOpen]);
+      if (renderTrigger === null) {
+        return null;
+      }
+      return renderTrigger ? <>{renderTrigger({ open: handleOpen })}</> : <button onClick={handleOpen}>edit</button>;
+    }),
+  };
+});
 
-jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupEditButton', () => ({
-  __esModule: true,
-  default: React.forwardRef(({ onWaveUpdate, renderTrigger }: any, ref: any) => {
-    const handleOpen = () => onWaveUpdate({});
-    if (typeof ref === 'function') {
-      ref({ open: handleOpen });
-    } else if (ref) {
-      ref.current = { open: handleOpen };
-    }
-    if (renderTrigger === null) {
-      return null;
-    }
-    return renderTrigger ? <>{renderTrigger({ open: handleOpen })}</> : <button onClick={handleOpen}>edit</button>;
-  }),
-}));
-
-jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupRemoveButton', () => ({
-  __esModule: true,
-  default: React.forwardRef(({ onWaveUpdate, renderTrigger }: any, ref: any) => {
-    const handleOpen = () => onWaveUpdate({});
-    if (typeof ref === 'function') {
-      ref({ open: handleOpen });
-    } else if (ref) {
-      ref.current = { open: handleOpen };
-    }
-    if (renderTrigger === null) {
-      return null;
-    }
-    return renderTrigger ? <>{renderTrigger({ open: handleOpen })}</> : <button onClick={handleOpen}>remove</button>;
-  }),
-}));
+jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupRemoveButton', () => {
+  const React = require('react');
+  return {
+    __esModule: true,
+    default: React.forwardRef(({ onWaveUpdate, renderTrigger }: any, ref) => {
+      const handleOpen = () => onWaveUpdate({});
+      React.useImperativeHandle(ref, () => ({ open: handleOpen }), [handleOpen]);
+      if (renderTrigger === null) {
+        return null;
+      }
+      return renderTrigger ? <>{renderTrigger({ open: handleOpen })}</> : <button onClick={handleOpen}>remove</button>;
+    }),
+  };
+});
 
 jest.mock('@/components/waves/specs/groups/group/edit/WaveGroupManageIdentitiesModal', () => ({
   __esModule: true,
@@ -63,15 +64,17 @@ jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => ({
 }));
 
 const mutateAsync = jest.fn();
-const queryClientMock = {
-  ensureQueryData: jest.fn(),
-  fetchQuery: jest.fn(),
+const createQueryClientMock = () => ({
   setQueryData: jest.fn(),
-};
+  ensureQueryData: jest.fn().mockImplementation(async ({ queryFn }: any) => {
+    return queryFn ? await queryFn({ signal: undefined }) : undefined;
+  }),
+  fetchQuery: jest.fn().mockImplementation(async ({ queryFn }: any) => {
+    return queryFn ? await queryFn({ signal: undefined }) : undefined;
+  }),
+});
 
-(useMutation as jest.Mock).mockReturnValue({ mutateAsync });
-(useQuery as jest.Mock).mockReturnValue({ data: undefined });
-(useQueryClient as jest.Mock).mockImplementation(() => queryClientMock);
+let queryClientMock = createQueryClientMock();
 
 const auth = {
   setToast: jest.fn(),
@@ -120,16 +123,16 @@ const wave: any = {
 describe('WaveGroupEditButtons', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mutateAsync.mockClear();
-    queryClientMock.ensureQueryData.mockReset();
-    queryClientMock.fetchQuery.mockReset();
-    queryClientMock.setQueryData.mockReset();
-    queryClientMock.ensureQueryData.mockResolvedValue(null);
-    queryClientMock.fetchQuery.mockResolvedValue([]);
-    queryClientMock.setQueryData.mockImplementation(() => {});
+    mutateAsync.mockReset();
+    queryClientMock = createQueryClientMock();
     (useMutation as jest.Mock).mockReturnValue({ mutateAsync });
-    (useQuery as jest.Mock).mockReturnValue({ data: undefined });
-    (useQueryClient as jest.Mock).mockImplementation(() => queryClientMock);
+    (useQuery as jest.Mock).mockImplementation(({ enabled, queryFn }) => {
+      if (enabled && typeof queryFn === 'function') {
+        void queryFn({ signal: undefined });
+      }
+      return { data: undefined };
+    });
+    (useQueryClient as jest.Mock).mockReturnValue(queryClientMock);
   });
 
   it('opens menu and calls mutate on edit', async () => {
