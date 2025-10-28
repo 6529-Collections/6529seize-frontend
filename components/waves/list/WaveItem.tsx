@@ -146,6 +146,72 @@ export default function WaveItem({
   const isInteractive = Boolean(waveHref);
   const followersTooltipId = wave ? `${tooltipBaseId}-followers` : undefined;
 
+  const authorAvatar = author?.pfp ? (
+    <img
+      className="tw-h-full tw-w-full tw-rounded-md tw-object-cover tw-bg-iron-800 tw-ring-1 tw-ring-white/10 desktop-hover:group-hover/author:tw-ring-white/30 desktop-hover:group-hover/author:tw-ring-offset-1 desktop-hover:group-hover/author:tw-ring-offset-iron-950 tw-transition tw-duration-300 tw-ease-out"
+      src={getScaledImageUri(author.pfp, ImageScale.W_AUTO_H_50)}
+      alt={
+        author?.handle ? `${author.handle} avatar` : "Author avatar"
+      }
+      loading="lazy"
+      decoding="async"
+    />
+  ) : (
+    <div className="tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10" />
+  );
+
+  const authorLevelBadge = (
+    <div
+      className={`${resolveLevelClasses(
+        author?.level
+      )} tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset tw-text-[0.625rem] tw-leading-3`}
+    >
+      Level {authorLevel}
+    </div>
+  );
+
+  const authorWrapperClass =
+    "tw-mt-1 tw-group/author tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1";
+  const linkedAuthorNameClass =
+    "tw-text-sm tw-font-semibold tw-text-white desktop-hover:group-hover/author:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out";
+  const staticAuthorNameClass = "tw-text-sm tw-font-semibold tw-text-white";
+
+  let authorSection: ReactNode;
+  if (!wave) {
+    authorSection = (
+      <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+        <div className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
+        <span className="tw-text-sm tw-font-semibold tw-text-white">
+          {userPlaceholder}
+        </span>
+      </span>
+    );
+  } else if (authorHref) {
+    authorSection = (
+      <Link
+        href={authorHref}
+        prefetch={false}
+        className={`${authorWrapperClass} tw-no-underline`}
+      >
+        <div className="tw-h-6 tw-w-6 tw-flex-shrink-0">{authorAvatar}</div>
+        <span className={linkedAuthorNameClass}>
+          {author?.handle ?? userPlaceholder}
+        </span>
+        {authorLevelBadge}
+      </Link>
+    );
+  } else {
+    authorSection = (
+      <div className={authorWrapperClass}>
+        <div className="tw-h-6 tw-w-6 tw-flex-shrink-0">{authorAvatar}</div>
+        <span className={staticAuthorNameClass}>
+          {author?.handle ?? userPlaceholder}
+        </span>
+        {authorLevelBadge}
+      </div>
+    );
+  }
+
   const handleCardClick = useCallback(
     (event: MouseEvent<HTMLAnchorElement>) => {
       if (!waveHref) {
@@ -231,86 +297,7 @@ export default function WaveItem({
       </div>
 
       <div className="tw-px-3 tw-pt-3">
-        {wave ? (
-          authorHref ? (
-            <Link
-              href={authorHref}
-              prefetch={false}
-              className="tw-mt-1 tw-group/author tw-no-underline tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1"
-            >
-              <div className="tw-h-6 tw-w-6 tw-flex-shrink-0">
-                {author?.pfp ? (
-                  <img
-                    className="tw-h-full tw-w-full tw-rounded-md tw-object-cover tw-bg-iron-800 tw-ring-1 tw-ring-white/10 desktop-hover:group-hover/author:tw-ring-white/30 desktop-hover:group-hover/author:tw-ring-offset-1 desktop-hover:group-hover/author:tw-ring-offset-iron-950 tw-transition tw-duration-300 tw-ease-out"
-                    src={getScaledImageUri(
-                      author.pfp,
-                      ImageScale.W_AUTO_H_50
-                    )}
-                    alt={
-                      author?.handle
-                        ? `${author.handle} avatar`
-                        : "Author avatar"
-                    }
-                    loading="lazy"
-                    decoding="async"
-                  />
-                ) : (
-                  <div className="tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10" />
-                )}
-              </div>
-              <span className="tw-text-sm tw-font-semibold tw-text-white desktop-hover:group-hover/author:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
-                {author?.handle ?? userPlaceholder}
-              </span>
-              <div
-                className={`${resolveLevelClasses(
-                  author?.level
-                )} tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset tw-text-[0.625rem] tw-leading-3`}
-              >
-                Level {authorLevel}
-              </div>
-            </Link>
-          ) : (
-            <div className="tw-mt-1 tw-group/author tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-              <div className="tw-h-6 tw-w-6 tw-flex-shrink-0">
-                {author?.pfp ? (
-                  <img
-                    className="tw-h-full tw-w-full tw-rounded-md tw-object-cover tw-bg-iron-800 tw-ring-1 tw-ring-white/10 desktop-hover:group-hover/author:tw-ring-white/30 desktop-hover:group-hover/author:tw-ring-offset-1 desktop-hover:group-hover/author:tw-ring-offset-iron-950 tw-transition tw-duration-300 tw-ease-out"
-                    src={getScaledImageUri(
-                      author.pfp,
-                      ImageScale.W_AUTO_H_50
-                    )}
-                    alt={
-                      author?.handle
-                        ? `${author.handle} avatar`
-                        : "Author avatar"
-                    }
-                    loading="lazy"
-                    decoding="async"
-                  />
-                ) : (
-                  <div className="tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10" />
-                )}
-              </div>
-              <span className="tw-text-sm tw-font-semibold tw-text-white">
-                {author?.handle ?? userPlaceholder}
-              </span>
-              <div
-                className={`${resolveLevelClasses(
-                  author?.level
-                )} tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset tw-text-[0.625rem] tw-leading-3`}
-              >
-                Level {authorLevel}
-              </div>
-            </div>
-          )
-        ) : (
-          <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-            <div className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
-            <span className="tw-text-sm tw-font-semibold tw-text-white">
-              {userPlaceholder}
-            </span>
-          </span>
-        )}
+        {authorSection}
       </div>
 
       <div className="tw-mt-2 tw-flex tw-items-center tw-justify-between tw-px-3 tw-pt-3 tw-border-t tw-border-white/5">

@@ -29,7 +29,7 @@ test('renders all contributor avatars and plural text', () => {
 });
 
 test('uses singular label when one drop', () => {
-  const single = { ...wave, metrics: { drops_count: 1 } } as any;
+  const single = { ...wave, metrics: { drops_count: 1 } };
   render(<WaveItemDropped wave={single} />);
   expect(screen.getByText('Drop')).toBeInTheDocument();
 });
