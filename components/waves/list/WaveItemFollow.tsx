@@ -146,7 +146,7 @@ export default function WaveItemFollow({ wave }: { readonly wave: ApiWave }) {
         onClick={onSubscribe}
         type="button"
         disabled={isDisabled}
-        className={`${CLASSES[state]} tw-flex tw-w-full sm:tw-w-auto tw-gap-x-1.5 tw-items-center tw-justify-center tw-border tw-border-solid tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 tw-transition tw-duration-300 tw-ease-out`}>
+        className={`${CLASSES[state]} tw-flex tw-w-full sm:tw-w-auto tw-gap-x-1.5 tw-items-center tw-justify-center tw-border tw-border-solid tw-rounded-lg tw-px-2.5 tw-py-1.5 tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 tw-transition tw-duration-300 tw-ease-out`}>
         {mutating ? (
           <CircleLoader />
         ) : isSubscribed ? (
