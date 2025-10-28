@@ -115,7 +115,7 @@ export default function WaveItem({
 
   return (
     <div
-      className={`group tw-@container/wave tw-rounded-xl tw-cursor-pointer tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-backdrop-blur-sm tw-p-2.5 tw-shadow-sm tw-shadow-black/20 tw-transition-all tw-duration-300 tw-ease-out${
+      className={`tw-@container/wave tw-rounded-xl tw-cursor-pointer tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-backdrop-blur-sm tw-p-2.5 tw-shadow-sm tw-shadow-black/20 tw-transition-all tw-duration-300 tw-ease-out ${
         isInteractive
           ? "tw-cursor-pointer hover:tw-shadow-lg hover:tw-shadow-black/40 hover:tw-translate-y-[-1px] focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 focus-visible:tw-outline-none"
           : ""
@@ -126,7 +126,7 @@ export default function WaveItem({
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
     >
-      <div className="tw-relative tw-aspect-[16/9] tw-overflow-hidden tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800/70">
+      <div className="tw-relative tw-aspect-[16/9] tw-overflow-hidden tw-rounded-xl">
         <div
           className="tw-absolute tw-inset-0 tw-rounded-xl"
           style={{
@@ -150,9 +150,8 @@ export default function WaveItem({
               "linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.64) 32%, rgba(0,0,0,0.30) 64%, rgba(0,0,0,0.00) 100%)",
           }}
         />
-        {/* OVERLAY: title only for maximum legibility */}
-        <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-flex tw-items-end tw-justify-between tw-gap-3 tw-backdrop-blur-[1px] tw-backdrop-brightness-95">
-          <div className="tw-flex tw-min-w-0 tw-items-end px-3 pb-3">
+        <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-flex tw-items-end tw-justify-between tw-gap-3">
+          <div className="tw-flex tw-min-w-0 tw-items-end tw-px-3 tw-pb-3">
             <div className="tw-min-w-0">
               {waveHref ? (
                 <Link
