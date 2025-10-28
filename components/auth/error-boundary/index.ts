@@ -4,4 +4,3 @@
  */
 
 export { WalletErrorBoundary } from './WalletErrorBoundary';
-export { WalletErrorBoundary as default } from './WalletErrorBoundary';

@@ -1,4 +1,4 @@
-export interface SliderTheme {
+interface SliderTheme {
   track: {
     background: string;
     hover: string;

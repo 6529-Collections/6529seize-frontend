@@ -2,7 +2,7 @@ import { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 
-export type ReactionEntry = {
+type ReactionEntry = {
   reaction: string;
   profiles: ApiProfileMin[];
   [key: string]: unknown;
@@ -21,7 +21,7 @@ export const cloneReactionEntries = (
   }));
 };
 
-export const duplicateProfilesWithoutUser = (
+const duplicateProfilesWithoutUser = (
   profiles: ApiProfileMin[],
   userId: string | null
 ): ApiProfileMin[] => {

@@ -18,17 +18,18 @@ const wave: any = {
   ]
 };
 
-test('renders first five contributor avatars and plural text', () => {
+test('renders all contributor avatars and plural text', () => {
   render(<WaveItemDropped wave={wave} />);
   const imgs = screen.getAllByRole('img');
-  expect(imgs).toHaveLength(5); // only first five
+  expect(imgs).toHaveLength(wave.contributors_overview.length);
   expect(imgs[0]).toHaveAttribute('src', 'scaled-a.png');
+  expect(imgs.at(-1)).toHaveAttribute('src', 'scaled-f.png');
   expect(screen.getByText('2')).toBeInTheDocument();
   expect(screen.getByText('Drops')).toBeInTheDocument();
 });
 
 test('uses singular label when one drop', () => {
-  const single = { ...wave, metrics: { drops_count: 1 } } as any;
+  const single = { ...wave, metrics: { drops_count: 1 } };
   render(<WaveItemDropped wave={single} />);
   expect(screen.getByText('Drop')).toBeInTheDocument();
 });

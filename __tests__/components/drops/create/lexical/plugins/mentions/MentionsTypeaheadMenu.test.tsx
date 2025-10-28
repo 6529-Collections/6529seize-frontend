@@ -5,7 +5,7 @@ jest.mock('react-use', () => ({
   useKeyPressEvent: mockUseKeyPressEvent
 }));
 
-import MentionsTypeaheadMenu from 'components/drops/create/lexical/plugins/mentions/MentionsTypeaheadMenu';
+import MentionsTypeaheadMenu from '@/components/drops/create/lexical/plugins/mentions/MentionsTypeaheadMenu';
 
 const options = [{ key: '1', label: 'one' }];
 

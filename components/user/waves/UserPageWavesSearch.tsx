@@ -108,7 +108,7 @@ export default function UserPageWavesSearch({
             disabled={false}>
             <FontAwesomeIcon
               icon={faPaperPlane}
-              className="tw-size-4 tw-mr-1.5 -tw-ml-1.5 tw-flex-shrink-0"
+              className="tw-size-4 tw-mr-2 -tw-ml-1 tw-flex-shrink-0"
             />
             <span>Create DM</span>
           </PrimaryButton>
