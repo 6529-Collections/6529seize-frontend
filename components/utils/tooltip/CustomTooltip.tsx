@@ -1,6 +1,13 @@
 "use client"
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useLayoutEffect,
+  MutableRefObject,
+} from "react";
 import { createPortal } from "react-dom";
 import styles from "./CustomTooltip.module.scss";
 
@@ -13,6 +20,13 @@ interface CustomTooltipProps {
   readonly disabled?: boolean;
   readonly offset?: number;
 }
+
+type TooltipChildHandlers = {
+  onMouseEnter?: React.MouseEventHandler<HTMLElement>;
+  onMouseLeave?: React.MouseEventHandler<HTMLElement>;
+  onFocus?: React.FocusEventHandler<HTMLElement>;
+  onBlur?: React.FocusEventHandler<HTMLElement>;
+};
 
 export default function CustomTooltip({
   children,
@@ -29,15 +43,60 @@ export default function CustomTooltip({
   const [actualPlacement, setActualPlacement] = useState<"top" | "bottom" | "left" | "right">(
     placement === "auto" ? "bottom" : placement
   );
-  
+
   const childRef = useRef<HTMLElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const showTimer = useRef<NodeJS.Timeout | undefined>(undefined);
   const hideTimer = useRef<NodeJS.Timeout | undefined>(undefined);
+  const childObserverRef: MutableRefObject<ResizeObserver | null> = useRef(null);
+  const tooltipObserverRef: MutableRefObject<ResizeObserver | null> = useRef(null);
+
+  const isBrowser = typeof window !== "undefined";
+  const childElement = React.Children.only(children) as React.ReactElement<TooltipChildHandlers>;
+  const originalRef = (childElement as React.ReactElement & {
+    ref?: React.Ref<HTMLElement>;
+  }).ref;
+
+  const setRefValue = useCallback((ref: React.Ref<HTMLElement> | undefined, node: HTMLElement | null) => {
+    if (!ref) return;
+    if (typeof ref === "function") {
+      ref(node);
+      return;
+    }
+    try {
+      (ref as React.MutableRefObject<HTMLElement | null>).current = node;
+    } catch {
+      // noop - defensive guard if ref is read-only
+    }
+  }, []);
+
+  const assignChildNode = useCallback(
+    (node: HTMLElement | null) => {
+      childRef.current = node;
+
+      if (node && typeof node.getBoundingClientRect !== "function") {
+        console.warn(
+          "[CustomTooltip] Child ref is not an HTMLElement; tooltip positioning may fail."
+        );
+      }
+
+      setRefValue(originalRef, node);
+    },
+    [originalRef, setRefValue]
+  );
+
+  const mergeHandlers = useCallback(
+    <E extends React.SyntheticEvent>(ourHandler: (event: E) => void, theirHandler?: (event: E) => void) =>
+      (event: E) => {
+        ourHandler(event);
+        theirHandler?.(event);
+      },
+    []
+  );
 
   const getOptimalPlacement = useCallback((childRect: DOMRect, tooltipRect: DOMRect) => {
     if (placement !== "auto") return placement;
-    
+
     const padding = 8;
     const arrowSize = 8;
     const spaces = {
@@ -133,6 +192,7 @@ export default function CustomTooltip({
 
   const calculatePosition = useCallback(() => {
     if (!childRef.current || !tooltipRef.current) return;
+    if (!isBrowser) return;
 
     const childRect = childRef.current.getBoundingClientRect();
     const tooltipRect = tooltipRef.current.getBoundingClientRect();
@@ -145,7 +205,7 @@ export default function CustomTooltip({
     setPosition({ x: adjustedPosition.x, y: adjustedPosition.y });
     setArrowPosition(arrowPos);
     setActualPlacement(adjustedPosition.finalPlacement as "top" | "bottom" | "left" | "right");
-  }, [getOptimalPlacement, calculateInitialPosition, adjustPositionForViewport, calculateArrowPosition]);
+  }, [getOptimalPlacement, calculateInitialPosition, adjustPositionForViewport, calculateArrowPosition, isBrowser]);
 
   const show = useCallback(() => {
     if (disabled) return;
@@ -160,48 +220,123 @@ export default function CustomTooltip({
     hideTimer.current = setTimeout(() => setIsVisible(false), delayHide);
   }, [delayHide]);
 
+  useLayoutEffect(() => {
+    if (!isVisible) return;
+
+    const frame = requestAnimationFrame(() => {
+      calculatePosition();
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [isVisible, calculatePosition, isBrowser]);
+
   useEffect(() => {
-    if (isVisible) {
-      // Double RAF ensures DOM is fully updated before measuring
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          calculatePosition();
-        });
-      });
+    if (!isVisible) return;
+    if (!tooltipRef.current) return;
+    if (!isBrowser) return;
+
+    if (typeof ResizeObserver === "undefined") {
+      calculatePosition();
+      return;
     }
-  }, [isVisible, calculatePosition]);
+
+    const observer = new ResizeObserver(() => {
+      calculatePosition();
+    });
+
+    tooltipObserverRef.current = observer;
+    observer.observe(tooltipRef.current);
+
+    return () => {
+      observer.disconnect();
+      tooltipObserverRef.current = null;
+    };
+  }, [isVisible, calculatePosition, isBrowser]);
+
+  useEffect(() => {
+    if (!isVisible) return;
+    if (!childRef.current) return;
+    if (!isBrowser) return;
+
+    if (typeof ResizeObserver === "undefined") {
+      calculatePosition();
+      return;
+    }
+
+    const observer = new ResizeObserver(() => {
+      calculatePosition();
+    });
+
+    childObserverRef.current = observer;
+    observer.observe(childRef.current);
+
+    return () => {
+      observer.disconnect();
+      childObserverRef.current = null;
+    };
+  }, [isVisible, calculatePosition, isBrowser]);
+
+  useEffect(() => {
+    if (!isVisible) return;
+    if (!isBrowser) return;
+
+    const handleReposition = () => {
+      calculatePosition();
+    };
+
+    window.addEventListener("resize", handleReposition);
+    window.addEventListener("scroll", handleReposition, true);
+
+    return () => {
+      window.removeEventListener("resize", handleReposition);
+      window.removeEventListener("scroll", handleReposition, true);
+    };
+  }, [isVisible, calculatePosition, isBrowser]);
 
   useEffect(() => {
     return () => {
       clearTimeout(showTimer.current);
       clearTimeout(hideTimer.current);
+      childObserverRef.current?.disconnect();
+      tooltipObserverRef.current?.disconnect();
     };
   }, []);
 
-  const child = React.cloneElement(children, {
-    ref: childRef,
-    onMouseEnter: (e: React.MouseEvent) => {
-      show();
-      (children.props as any).onMouseEnter?.(e);
-    },
-    onMouseLeave: (e: React.MouseEvent) => {
-      hide();
-      (children.props as any).onMouseLeave?.(e);
-    },
-    onFocus: (e: React.FocusEvent) => {
-      show();
-      (children.props as any).onFocus?.(e);
-    },
-    onBlur: (e: React.FocusEvent) => {
-      hide();
-      (children.props as any).onBlur?.(e);
-    },
-  } as any);
+  const clonedChild = React.cloneElement(
+    childElement,
+    {
+      ref: assignChildNode,
+      onMouseEnter: mergeHandlers<React.MouseEvent<HTMLElement>>(
+        () => {
+          show();
+        },
+        childElement.props.onMouseEnter
+      ),
+      onMouseLeave: mergeHandlers<React.MouseEvent<HTMLElement>>(
+        () => {
+          hide();
+        },
+        childElement.props.onMouseLeave
+      ),
+      onFocus: mergeHandlers<React.FocusEvent<HTMLElement>>(
+        () => {
+          show();
+        },
+        childElement.props.onFocus
+      ),
+      onBlur: mergeHandlers<React.FocusEvent<HTMLElement>>(
+        () => {
+          hide();
+        },
+        childElement.props.onBlur
+      ),
+    } as React.Attributes & TooltipChildHandlers
+  );
 
   return (
     <>
-      {child}
-      {isVisible && typeof document !== 'undefined' && createPortal(
+      {clonedChild}
+      {isVisible && typeof document !== "undefined" && createPortal(
         <div
           ref={tooltipRef}
           role="tooltip"
