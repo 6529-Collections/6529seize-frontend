@@ -33,7 +33,7 @@
     "lint:fix": "npx eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "relative-to-alias-imports": "tsx scripts/relative-to-alias-imports.ts",
     "deadcode:knip": "knip",
-    "deadcode:exports": "ts-prune --error",
+    "deadcode:exports": "ts-prune -p tsconfig.ts-prune.json --error",
     "deadcode:deps": "depcheck --ignores=\"eslint,eslint-*,@types/*,jest,ts-jest,playwright,@playwright/test,tailwindcss,postcss,autoprefixer\" --ignore-patterns=\".next,coverage,public,generated,tmp_gen_outp\"",
     "deadcode": "npm run deadcode:knip && npm run deadcode:exports && npm run deadcode:deps"
   },
