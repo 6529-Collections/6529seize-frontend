@@ -19,27 +19,34 @@ import userEvent from '@testing-library/user-event';
 import GroupCardDeleteModal from '@/components/groups/page/list/card/actions/delete/GroupCardDeleteModal';
 import { AuthContext } from '@/components/auth/Auth';
 import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
-import { useMutation } from '@tanstack/react-query';
+const hookState = {
+  updateVisibility: jest.fn(),
+  isUpdatingVisibility: false,
+  submit: jest.fn(),
+  runTest: jest.fn(),
+  validate: jest.fn(),
+  isSubmitting: false,
+  isTesting: false,
+};
 
-jest.mock('@tanstack/react-query');
+jest.mock('@/hooks/groups/useGroupMutations', () => ({
+  useGroupMutations: () => hookState,
+}));
 jest.mock('react-redux', () => ({ useDispatch: jest.fn(() => jest.fn()), useSelector: jest.fn(() => null) }));
 
-const mutateAsync = jest.fn();
-(useMutation as jest.Mock).mockImplementation((opts) => ({
-  mutateAsync: async (p:any) => {
-    await opts.mutationFn(p);
-    opts.onSuccess?.();
-    opts.onSettled?.();
-    return mutateAsync();
-  },
-}));
-
 describe('GroupCardDeleteModal', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    hookState.updateVisibility.mockReset();
+    hookState.isUpdatingVisibility = false;
+  });
+
   const auth = { requestAuth: jest.fn().mockResolvedValue({ success: true }), setToast: jest.fn() } as any;
   const rq = { onGroupRemoved: jest.fn() } as any;
 
   it('deletes group when confirmed', async () => {
     const user = userEvent.setup();
+    hookState.updateVisibility.mockResolvedValueOnce({ ok: true, visible: false, groupId: 'g' });
     render(
       <AuthContext.Provider value={auth}>
         <ReactQueryWrapperContext.Provider value={rq}>
@@ -48,8 +55,11 @@ describe('GroupCardDeleteModal', () => {
       </AuthContext.Provider>
     );
     await user.click(screen.getByRole('button', { name: 'Delete' }));
-    expect(auth.requestAuth).toHaveBeenCalled();
-    expect(mutateAsync).toHaveBeenCalled();
+    expect(hookState.updateVisibility).toHaveBeenCalledWith({
+      groupId: 'g',
+      visible: false,
+    });
+    expect(auth.setToast).toHaveBeenCalledWith({ message: 'Group deleted.', type: 'warning' });
     expect(rq.onGroupRemoved).toHaveBeenCalledWith({ groupId: 'g' });
   });
 

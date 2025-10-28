@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import BrainContentInput from '@/components/brain/content/input/BrainContentInput';
 
 const useWaveDataMock = jest.fn();
-const useCapacitorMock = jest.fn();
+const capacitorMock = jest.fn();
 
 jest.mock('@/hooks/useWaveData', () => ({
   useWaveData: (args: any) => useWaveDataMock(args),
@@ -10,7 +10,7 @@ jest.mock('@/hooks/useWaveData', () => ({
 
 jest.mock('@/hooks/useCapacitor', () => ({
   __esModule: true,
-  default: () => useCapacitorMock(),
+  default: () => capacitorMock(),
 }));
 
 jest.mock('@/components/waves/PrivilegedDropCreator', () => ({
@@ -22,11 +22,11 @@ jest.mock('@/components/waves/PrivilegedDropCreator', () => ({
 describe('BrainContentInput', () => {
   beforeEach(() => {
     useWaveDataMock.mockReset();
-    useCapacitorMock.mockReset();
+    capacitorMock.mockReset();
   });
 
   it('returns null when wave is missing', () => {
-    useCapacitorMock.mockReturnValue({ isCapacitor: false });
+    capacitorMock.mockReturnValue({ isCapacitor: false });
     useWaveDataMock.mockReturnValue({ data: null });
     const { container } = render(
       <BrainContentInput activeDrop={null} onCancelReplyQuote={jest.fn()} />
@@ -35,7 +35,7 @@ describe('BrainContentInput', () => {
   });
 
   it('renders creator and passes wave id', () => {
-    useCapacitorMock.mockReturnValue({ isCapacitor: false });
+    capacitorMock.mockReturnValue({ isCapacitor: false });
     useWaveDataMock.mockReturnValue({ data: { id: 'w1' } });
     render(
       <BrainContentInput
@@ -56,7 +56,7 @@ describe('BrainContentInput', () => {
   it('uses capacitor height and triggers onWaveNotFound', () => {
     const onCancel = jest.fn();
     let onWaveNotFound: (() => void) | null = null;
-    useCapacitorMock.mockReturnValue({ isCapacitor: true });
+    capacitorMock.mockReturnValue({ isCapacitor: true });
     useWaveDataMock.mockImplementation((args: any) => {
       onWaveNotFound = args.onWaveNotFound;
       return { data: { id: 'w2' } };

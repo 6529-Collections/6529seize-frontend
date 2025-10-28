@@ -1,10 +1,10 @@
-import React from "react";
-import { act, render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import HeaderSearchButton from "@/components/header/header-search/HeaderSearchButton";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { act, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { useClickAway, useKey, useKeyPressEvent } from "react-use";
+import type { Handler, KeyFilter } from "react-use/lib/useKey";
 
 jest.mock("focus-trap-react", () => jest.requireActual("focus-trap-react"));
 jest.mock("react-use");
@@ -16,9 +16,17 @@ const useSearchParamsMock = jest.fn();
 const useWavesMock = jest.fn();
 const useLocalPreferenceMock = jest.fn();
 const useKeyMock = useKey as jest.MockedFunction<typeof useKey>;
-const useClickAwayMock = useClickAway as jest.MockedFunction<typeof useClickAway>;
-const useKeyPressEventMock =
-  useKeyPressEvent as jest.MockedFunction<typeof useKeyPressEvent>;
+const useClickAwayMock = useClickAway as jest.MockedFunction<
+  typeof useClickAway
+>;
+const useKeyPressEventMock = useKeyPressEvent as jest.MockedFunction<
+  (key: KeyFilter, keydown?: Handler | null, keyup?: Handler | null) => void
+>;
+
+const useAppWalletsMock = jest.fn();
+const useCookieConsentMock = jest.fn();
+const useSidebarSectionsMock = jest.fn();
+const capacitorMock = jest.fn();
 
 let escapeHandler: (() => void) | null = null;
 
@@ -54,10 +62,40 @@ jest.mock("@/components/utils/animation/CommonAnimationOpacity", () => ({
 }));
 
 jest.mock("@/hooks/useDeviceInfo");
+jest.mock("@/components/app-wallets/AppWalletsContext", () => ({
+  useAppWallets: () => useAppWalletsMock(),
+}));
+jest.mock("@/components/cookies/CookieConsentContext", () => ({
+  useCookieConsent: () => useCookieConsentMock(),
+}));
+jest.mock("@/hooks/useCapacitor", () => ({
+  __esModule: true,
+  default: () => capacitorMock(),
+}));
+jest.mock("@/hooks/useSidebarSections", () => {
+  const actual = jest.requireActual("@/hooks/useSidebarSections");
+  return {
+    __esModule: true,
+    useSidebarSections: (...args: any[]) => useSidebarSectionsMock(...args),
+    mapSidebarSectionsToPages: actual.mapSidebarSectionsToPages,
+  };
+});
 
 const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
   typeof useDeviceInfo
 >;
+
+const defaultSidebarSections = [
+  {
+    key: "tools",
+    name: "Tools",
+    icon: () => null,
+    items: [
+      { name: "Delegation Center", href: "/delegation/delegation-center" },
+    ],
+    subsections: [],
+  },
+];
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -65,9 +103,11 @@ beforeEach(() => {
   useKeyMock.mockImplementation(() => {});
   useClickAwayMock.mockImplementation(() => {});
   useKeyPressEventMock.mockImplementation(
-    (targetKey: string, handler: () => void) => {
-      if (targetKey === "Escape") {
-        escapeHandler = handler;
+    (key: KeyFilter, keydown?: Handler | null, _keyup?: Handler | null) => {
+      const isEscape =
+        key === "Escape" || (Array.isArray(key) && key.includes("Escape"));
+      if (isEscape && keydown) {
+        escapeHandler = () => keydown(new KeyboardEvent("keydown"));
       }
     }
   );
@@ -99,9 +139,15 @@ beforeEach(() => {
     error: null,
     refetch: jest.fn(),
   });
-  useLocalPreferenceMock.mockReturnValue(["PROFILES", jest.fn()]);
+  useLocalPreferenceMock.mockReturnValue(["ALL", jest.fn()]);
   useDeviceInfoMock.mockReturnValue({ isApp: false } as any);
+  useAppWalletsMock.mockReturnValue({ appWalletsSupported: true });
+  useCookieConsentMock.mockReturnValue({ country: "US" });
+  capacitorMock.mockReturnValue({ isIos: false });
+  useSidebarSectionsMock.mockReturnValue(defaultSidebarSections);
 });
+
+const PLACEHOLDER_TEXT = "Search 6529.io";
 
 describe("HeaderSearchModal focus management", () => {
   it("keeps focus trapped within the modal while it is open", async () => {
@@ -111,7 +157,7 @@ describe("HeaderSearchModal focus management", () => {
     const trigger = screen.getByRole("button", { name: /search/i });
     await user.click(trigger);
 
-    const input = await screen.findByPlaceholderText("Search");
+    const input = await screen.findByPlaceholderText(PLACEHOLDER_TEXT);
     await waitFor(() => expect(input).toHaveFocus());
 
     await screen.findByRole("dialog");
@@ -148,13 +194,15 @@ describe("HeaderSearchModal focus management", () => {
     await user.click(closeButton);
 
     await waitFor(() => {
-      expect(screen.queryByPlaceholderText("Search")).not.toBeInTheDocument();
+      expect(
+        screen.queryByPlaceholderText(PLACEHOLDER_TEXT)
+      ).not.toBeInTheDocument();
       expect(trigger).toHaveFocus();
     });
 
     await user.keyboard("[Space]");
 
-    await screen.findByPlaceholderText("Search");
+    await screen.findByPlaceholderText(PLACEHOLDER_TEXT);
 
     expect(escapeHandler).not.toBeNull();
 
@@ -163,7 +211,9 @@ describe("HeaderSearchModal focus management", () => {
     });
 
     await waitFor(() => {
-      expect(screen.queryByPlaceholderText("Search")).not.toBeInTheDocument();
+      expect(
+        screen.queryByPlaceholderText(PLACEHOLDER_TEXT)
+      ).not.toBeInTheDocument();
       expect(trigger).toHaveFocus();
     });
   });

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { TabToggleWithOverflow } from '@/components/common/TabToggleWithOverflow';
@@ -28,13 +28,15 @@ describe('TabToggleWithOverflow', () => {
     expect(screen.getByText('B')).toBeInTheDocument();
 
     // open overflow dropdown
-    await user.click(screen.getByRole('button', { name: 'More' }));
-    const optionC = screen.getByRole('tab', { name: 'C' });
+    await user.click(screen.getByRole('button', { name: 'More tabs' }));
+    const optionC = screen.getByRole('menuitem', { name: 'C' });
     expect(optionC).toBeInTheDocument();
 
     await user.click(optionC);
     expect(onSelect).toHaveBeenCalledWith('c');
-    expect(screen.queryByRole('tab', { name: 'C' })).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.queryByRole('menuitem', { name: 'C' })).not.toBeInTheDocument()
+    );
   });
 
   it('shows active label when active tab is in overflow', () => {
@@ -83,26 +85,28 @@ describe('TabToggleWithOverflow', () => {
       />
     );
 
-    const moreButton = screen.getByRole('button', { name: 'More' });
+    const moreButton = screen.getByRole('button', { name: 'More tabs' });
     expect(moreButton).toHaveAttribute('aria-expanded', 'false');
 
-    moreButton.focus();
+    await user.tab(); // focus first tab
+    await user.tab(); // focus second tab
+    await user.tab(); // focus overflow trigger
     await user.keyboard('{Enter}');
     expect(moreButton).toHaveAttribute('aria-expanded', 'true');
-    const optionC = screen.getByRole('tab', { name: 'C' });
+    const optionC = screen.getByRole('menuitem', { name: 'C' });
     expect(optionC).toBeInTheDocument();
 
-    optionC.focus();
     await user.keyboard('{Escape}');
     expect(moreButton).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.queryByRole('tab', { name: 'C' })).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.queryByRole('menuitem', { name: 'C' })).not.toBeInTheDocument()
+    );
 
-    moreButton.focus();
-    await user.keyboard('{Space}');
+    await user.keyboard(' ');
     expect(moreButton).toHaveAttribute('aria-expanded', 'true');
   });
 
-  it('marks overflow tabs with aria-selected when opened', async () => {
+  it('indicates overflow active state via data attribute when opened', async () => {
     const user = userEvent.setup();
     render(
       <TabToggleWithOverflow
@@ -113,15 +117,15 @@ describe('TabToggleWithOverflow', () => {
       />
     );
 
-    const moreButton = screen.getByRole('button', { name: 'D' });
+    const moreButton = screen.getByRole('button', { name: 'More tabs' });
     await user.click(moreButton);
 
-    expect(screen.getByRole('tab', { name: 'D' })).toHaveAttribute(
-      'aria-selected',
+    expect(screen.getByRole('menuitem', { name: 'D' })).toHaveAttribute(
+      'data-active',
       'true'
     );
-    expect(screen.getByRole('tab', { name: 'C' })).toHaveAttribute(
-      'aria-selected',
+    expect(screen.getByRole('menuitem', { name: 'C' })).toHaveAttribute(
+      'data-active',
       'false'
     );
   });

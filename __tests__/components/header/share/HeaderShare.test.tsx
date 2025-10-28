@@ -315,7 +315,7 @@ describe("HeaderShare", () => {
       // Should show both mobile and browser options
       expect(screen.getByText("6529 Mobile")).toBeInTheDocument();
       expect(screen.getByText("Browser")).toBeInTheDocument();
-      expect(screen.getByText("6529 Core")).toBeInTheDocument();
+      expect(screen.getByText("6529 Desktop")).toBeInTheDocument();
 
       // Click Browser tab
       await userEvent.click(screen.getByText("Browser"));
@@ -339,7 +339,7 @@ describe("HeaderShare", () => {
 
       // Should still show mobile/core options but content changes
       expect(screen.getByText("6529 Mobile")).toBeInTheDocument();
-      expect(screen.getByText("6529 Core")).toBeInTheDocument();
+      expect(screen.getByText("6529 Desktop")).toBeInTheDocument();
     });
   });
 

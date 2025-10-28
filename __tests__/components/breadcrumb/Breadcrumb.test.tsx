@@ -3,12 +3,12 @@ import Breadcrumb, { Crumb } from '@/components/breadcrumb/Breadcrumb';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
 
-const useCapacitorMock = jest.fn();
-jest.mock('@/hooks/useCapacitor', () => ({ __esModule: true, default: () => useCapacitorMock() }));
+const capacitorMock = jest.fn();
+jest.mock('@/hooks/useCapacitor', () => ({ __esModule: true, default: () => capacitorMock() }));
 
 describe('Breadcrumb', () => {
   beforeEach(() => {
-    useCapacitorMock.mockReset();
+    capacitorMock.mockReset();
   });
 
   const crumbs: Crumb[] = [
@@ -18,7 +18,7 @@ describe('Breadcrumb', () => {
   ];
 
   it('renders crumbs with separators on web', () => {
-    useCapacitorMock.mockReturnValue({ isCapacitor: false });
+    capacitorMock.mockReturnValue({ isCapacitor: false });
     render(<Breadcrumb breadcrumbs={crumbs} />);
 
     const links = screen.getAllByRole('link');
@@ -33,7 +33,7 @@ describe('Breadcrumb', () => {
   });
 
   it('adds capacitor classes and placeholder when running on capacitor', () => {
-    useCapacitorMock.mockReturnValue({ isCapacitor: true });
+    capacitorMock.mockReturnValue({ isCapacitor: true });
     render(<Breadcrumb breadcrumbs={crumbs} />);
 
     const container = document.querySelector('.capacitorBreadcrumb');
