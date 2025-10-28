@@ -11,11 +11,15 @@ import {
   publishGroup as publishGroupMutation,
 } from '@/services/groups/groupMutations';
 
-jest.mock('@tanstack/react-query', () => ({
-  useMutation: jest.fn(),
-  useQuery: jest.fn(),
-  useQueryClient: jest.fn(),
-}));
+jest.mock('@tanstack/react-query', () => {
+  const actual = jest.requireActual('@tanstack/react-query');
+  return {
+    ...actual,
+    useMutation: jest.fn(),
+    useQuery: jest.fn(),
+    useQueryClient: jest.fn(),
+  };
+});
 
 const mockCommonApiFetch = jest.fn();
 const mockCommonApiPost = jest.fn();
@@ -36,11 +40,16 @@ jest.mock('@/services/groups/groupMutations', () => {
 
 const mutateAsyncSpy = jest.fn();
 
-const queryClientMock = {
-  ensureQueryData: jest.fn(),
-  fetchQuery: jest.fn(),
+const createQueryClientMock = () => ({
   setQueryData: jest.fn(),
-};
+  ensureQueryData: jest.fn().mockImplementation(async ({ queryFn }: any) => {
+    return queryFn ? await queryFn({ signal: undefined }) : undefined;
+  }),
+  fetchQuery: jest.fn().mockImplementation(async ({ queryFn }: any) => {
+    return queryFn ? await queryFn({ signal: undefined }) : undefined;
+  }),
+});
+let queryClientMock = createQueryClientMock();
 
 const mockCreateGroup = createGroupMutation as jest.Mock;
 const mockPublishGroup = publishGroupMutation as jest.Mock;
@@ -113,19 +122,10 @@ const onWaveCreated = jest.fn();
 beforeEach(() => {
   jest.clearAllMocks();
   mutateAsyncSpy.mockClear();
-  queryClientMock.ensureQueryData.mockReset();
-  queryClientMock.fetchQuery.mockReset();
-  queryClientMock.setQueryData.mockReset();
-  queryClientMock.ensureQueryData.mockImplementation(async ({ queryFn }) => {
-    return queryFn ? await queryFn({ signal: undefined }) : undefined;
-  });
-  queryClientMock.fetchQuery.mockImplementation(async ({ queryFn }) => {
-    return queryFn ? await queryFn({ signal: undefined }) : undefined;
-  });
-  queryClientMock.setQueryData.mockImplementation(() => {});
-  (useQueryClient as jest.Mock).mockImplementation(() => queryClientMock);
+  queryClientMock = createQueryClientMock();
+  (useQueryClient as jest.Mock).mockReturnValue(queryClientMock);
   (useQuery as jest.Mock).mockImplementation(({ enabled, queryFn }) => {
-    if (enabled && typeof queryFn === "function") {
+    if (enabled && typeof queryFn === 'function') {
       void queryFn({ signal: undefined });
     }
     return { data: undefined };
@@ -146,6 +146,11 @@ beforeEach(() => {
       }
     },
   }));
+  mockCommonApiFetch.mockReset();
+  mockCommonApiPost.mockReset();
+  mockCreateGroup.mockReset();
+  mockPublishGroup.mockReset();
+  requestAuth.mockResolvedValue({ success: true });
   mockCommonApiPost.mockResolvedValue({});
   mockCreateGroup.mockResolvedValue({
     ...baseGroupFull,
@@ -256,9 +261,18 @@ describe('useWaveGroupEditButtonsController - identity management', () => {
         oldVersionId: null,
       }),
     );
-    expect(mockCommonApiPost).toHaveBeenCalled();
-    expect(mutateAsyncSpy).toHaveBeenCalled();
-    expect(onWaveCreated).toHaveBeenCalled();
+    expect(mockCommonApiPost).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: 'waves/wave-1',
+        body: expect.objectContaining({
+          visibility: expect.objectContaining({
+            scope: expect.objectContaining({ group_id: 'new-group-id' }),
+          }),
+        }),
+      }),
+    );
+    expect(mutateAsyncSpy).toHaveBeenCalledTimes(1);
+    expect(onWaveCreated).toHaveBeenCalledTimes(1);
     expect(setToast).toHaveBeenCalledWith({
       message: 'Identity successfully included in the group.',
       type: 'success',
