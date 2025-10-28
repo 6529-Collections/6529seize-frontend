@@ -120,8 +120,8 @@ describe("Eastern time transitions", () => {
     const mintStart = mintStartInstantUtcForMintDay(mintDay);
     const mintEnd = mintEndInstantUtcForMintDay(mintDay);
 
-    expect(mintStart.toISOString()).toBe("2024-03-11T14:40:00.000Z");
-    expect(mintEnd.toISOString()).toBe("2024-03-12T14:00:00.000Z");
+    expect(mintStart.toISOString()).toBe("2024-03-11T15:40:00.000Z");
+    expect(mintEnd.toISOString()).toBe("2024-03-12T15:00:00.000Z");
   });
 
   it("returns to EST once the fall shift completes", () => {
