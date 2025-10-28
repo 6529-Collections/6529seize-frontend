@@ -28,6 +28,10 @@ type TooltipChildHandlers = {
   onBlur?: React.FocusEventHandler<HTMLElement>;
 };
 
+const globalScope = globalThis as typeof globalThis & { window?: Window };
+const win = globalScope.window ?? null;
+const isBrowser = win !== null;
+
 export default function CustomTooltip({
   children,
   content,
@@ -50,8 +54,6 @@ export default function CustomTooltip({
   const hideTimer = useRef<NodeJS.Timeout | undefined>(undefined);
   const childObserverRef: MutableRefObject<ResizeObserver | null> = useRef(null);
   const tooltipObserverRef: MutableRefObject<ResizeObserver | null> = useRef(null);
-
-  const isBrowser = typeof window !== "undefined";
   const childElement = React.Children.only(children) as React.ReactElement<TooltipChildHandlers>;
   const originalRef = (childElement as React.ReactElement & {
     ref?: React.Ref<HTMLElement>;
@@ -66,7 +68,7 @@ export default function CustomTooltip({
     try {
       (ref as React.MutableRefObject<HTMLElement | null>).current = node;
     } catch {
-      // noop - defensive guard if ref is read-only
+      console.warn("[CustomTooltip] Failed to assign ref (may be read-only)");
     }
   }, []);
 
@@ -99,11 +101,13 @@ export default function CustomTooltip({
 
     const padding = 8;
     const arrowSize = 8;
+    const viewportHeight = win ? win.innerHeight : 0;
+    const viewportWidth = win ? win.innerWidth : 0;
     const spaces = {
       top: childRect.top - padding,
-      bottom: window.innerHeight - childRect.bottom - padding,
+      bottom: viewportHeight - childRect.bottom - padding,
       left: childRect.left - padding,
-      right: window.innerWidth - childRect.right - padding
+      right: viewportWidth - childRect.right - padding
     };
     
     const requiredVerticalSpace = tooltipRect.height + offset + arrowSize;
@@ -148,24 +152,26 @@ export default function CustomTooltip({
 
   const adjustPositionForViewport = useCallback((position: { x: number, y: number }, childRect: DOMRect, tooltipRect: DOMRect, targetPlacement: string) => {
     const padding = 8;
+    const viewportHeight = win ? win.innerHeight : 0;
+    const viewportWidth = win ? win.innerWidth : 0;
     let { x, y } = position;
     let finalPlacement = targetPlacement;
-    
+
     // Keep tooltip within viewport bounds horizontally
-    const maxX = window.innerWidth - tooltipRect.width - padding;
+    const maxX = viewportWidth - tooltipRect.width - padding;
     x = Math.max(padding, Math.min(x, maxX));
     
     // Adjust vertical position to prevent overlap
     if (targetPlacement === "top" && y < padding) {
       finalPlacement = "bottom";
       y = childRect.bottom + offset;
-    } else if (targetPlacement === "bottom" && y + tooltipRect.height > window.innerHeight - padding) {
+    } else if (targetPlacement === "bottom" && y + tooltipRect.height > viewportHeight - padding) {
       finalPlacement = "top";
       y = childRect.top - tooltipRect.height - offset;
     } else if (targetPlacement === "left" && x < padding) {
       finalPlacement = "right";
       x = childRect.right + offset;
-    } else if (targetPlacement === "right" && x + tooltipRect.width > window.innerWidth - padding) {
+    } else if (targetPlacement === "right" && x + tooltipRect.width > viewportWidth - padding) {
       finalPlacement = "left";
       x = childRect.left - tooltipRect.width - offset;
     }
@@ -205,7 +211,7 @@ export default function CustomTooltip({
     setPosition({ x: adjustedPosition.x, y: adjustedPosition.y });
     setArrowPosition(arrowPos);
     setActualPlacement(adjustedPosition.finalPlacement as "top" | "bottom" | "left" | "right");
-  }, [getOptimalPlacement, calculateInitialPosition, adjustPositionForViewport, calculateArrowPosition, isBrowser]);
+  }, [getOptimalPlacement, calculateInitialPosition, adjustPositionForViewport, calculateArrowPosition]);
 
   const show = useCallback(() => {
     if (disabled) return;
@@ -228,7 +234,7 @@ export default function CustomTooltip({
     });
 
     return () => cancelAnimationFrame(frame);
-  }, [isVisible, calculatePosition, isBrowser]);
+  }, [isVisible, calculatePosition]);
 
   useEffect(() => {
     if (!isVisible) return;
@@ -251,7 +257,7 @@ export default function CustomTooltip({
       observer.disconnect();
       tooltipObserverRef.current = null;
     };
-  }, [isVisible, calculatePosition, isBrowser]);
+  }, [isVisible, calculatePosition]);
 
   useEffect(() => {
     if (!isVisible) return;
@@ -274,7 +280,7 @@ export default function CustomTooltip({
       observer.disconnect();
       childObserverRef.current = null;
     };
-  }, [isVisible, calculatePosition, isBrowser]);
+  }, [isVisible, calculatePosition]);
 
   useEffect(() => {
     if (!isVisible) return;
@@ -284,14 +290,14 @@ export default function CustomTooltip({
       calculatePosition();
     };
 
-    window.addEventListener("resize", handleReposition);
-    window.addEventListener("scroll", handleReposition, true);
+    win.addEventListener("resize", handleReposition);
+    win.addEventListener("scroll", handleReposition, true);
 
     return () => {
-      window.removeEventListener("resize", handleReposition);
-      window.removeEventListener("scroll", handleReposition, true);
+      win.removeEventListener("resize", handleReposition);
+      win.removeEventListener("scroll", handleReposition, true);
     };
-  }, [isVisible, calculatePosition, isBrowser]);
+  }, [isVisible, calculatePosition]);
 
   useEffect(() => {
     return () => {
