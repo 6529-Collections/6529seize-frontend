@@ -1,6 +1,6 @@
-import { ensureTwitterLink, isTwitterLink, parseTwitterLink } from "@/components/drops/view/part/dropPartMarkdown/twitter";
+import { ensureTwitterLink, isTwitterLink } from "@/components/drops/view/part/dropPartMarkdown/twitter";
 
-describe("parseTwitterLink", () => {
+describe("ensureTwitterLink", () => {
   it.each([
     [
       "standard status link with query params",
@@ -32,11 +32,14 @@ describe("parseTwitterLink", () => {
       "https://x.com/someone/status/4433221100",
       "4433221100",
     ],
-  ])("returns tweet id for %s", (_, url, expectedId) => {
-    const result = parseTwitterLink(url);
-    expect(result).not.toBeNull();
-    expect(result?.tweetId).toBe(expectedId);
-    expect(result?.href).toBe(url);
+  ])("returns payload with id for %s", (_, url, expectedId) => {
+    const result = ensureTwitterLink(url);
+    expect(result.tweetId).toBe(expectedId);
+    expect(result.href).toBe(url);
+  });
+
+  it("returns payload when valid", () => {
+    expect(ensureTwitterLink("https://twitter.com/user/status/123").tweetId).toBe("123");
   });
 
   it.each([
@@ -44,18 +47,8 @@ describe("parseTwitterLink", () => {
     ["missing status segment", "https://twitter.com/test/1234567890"],
     ["unsupported domain", "https://example.com/status/1234567890"],
     ["invalid url", "not-a-url"],
-  ])("returns null for %s", (_, url) => {
-    expect(parseTwitterLink(url)).toBeNull();
-  });
-});
-
-describe("ensureTwitterLink", () => {
-  it("returns payload when valid", () => {
-    expect(ensureTwitterLink("https://twitter.com/user/status/123").tweetId).toBe("123");
-  });
-
-  it("throws when invalid", () => {
-    expect(() => ensureTwitterLink("https://twitter.com/user/123")).toThrow("Invalid Twitter/X link");
+  ])("throws when invalid (%s)", (_, url) => {
+    expect(() => ensureTwitterLink(url)).toThrow("Invalid Twitter/X link");
   });
 });
 
@@ -68,5 +61,8 @@ describe("isTwitterLink", () => {
   it("rejects unsupported URLs", () => {
     expect(isTwitterLink("https://x.com/user/321")).toBe(false);
     expect(isTwitterLink("https://example.com/status/321")).toBe(false);
+    expect(isTwitterLink("https://twitter.com/test/status/not-a-number")).toBe(false);
+    expect(isTwitterLink("https://twitter.com/test/1234567890")).toBe(false);
+    expect(isTwitterLink("not-a-url")).toBe(false);
   });
 });

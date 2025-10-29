@@ -1,16 +1,6 @@
-import {
-  isFarcasterHost,
-  parseFarcasterResource,
-} from "@/src/services/farcaster/url";
+import { parseFarcasterResource } from "@/src/services/farcaster/url";
 
 describe("farcaster URL parsing", () => {
-  it("identifies farcaster hosts", () => {
-    expect(isFarcasterHost("warpcast.com")).toBe(true);
-    expect(isFarcasterHost("www.warpcast.com")).toBe(true);
-    expect(isFarcasterHost("farcaster.xyz")).toBe(true);
-    expect(isFarcasterHost("example.com")).toBe(false);
-  });
-
   it("parses user profiles", () => {
     const url = new URL("https://warpcast.com/alice");
     const result = parseFarcasterResource(url);

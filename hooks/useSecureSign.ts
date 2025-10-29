@@ -36,7 +36,7 @@ export class SigningProviderError extends Error {
 /**
  * SECURITY: Provider validation error for runtime type checking
  */
-export class ProviderValidationError extends Error {
+class ProviderValidationError extends Error {
   constructor(message: string, public readonly cause?: unknown) {
     super(message);
     this.name = 'ProviderValidationError';

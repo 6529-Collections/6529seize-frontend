@@ -28,6 +28,16 @@ This table is the single source of truth for active and historical tickets. Keep
 | TKT-0022 | Remove unused BrainLeftSidebarSearchWave dropdown | Review | P2 | openai-assistant | — | 2025-10-28 |
 | TKT-0023 | Remove unused HeaderMobileUtils utilities | In-Progress | P2 | openai-assistant | — | 2025-10-28 |
 | TKT-0024 | Remove unused HeaderUserProfile component | Review | P2 | openai-assistant | — | 2025-10-28 |
+| TKT-0025 | Remove unused WalletConnectionError export | Review | P2 | openai-assistant | — | 2025-10-28 |
+| TKT-0026 | Remove unused DropListItemContentPart export | In-Progress | P2 | openai-assistant | — | 2025-10-28 |
+| TKT-0027 | Remove unused isMintDayDate helper export | Review | P2 | openai-assistant | — | 2025-10-28 |
+| TKT-0028 | Remove unused getCollectionBaseBreadcrums export | In-Progress | P2 | openai-assistant | — | 2025-10-28 |
+| TKT-0029 | Remove unused immediatelyNextMintInstantUTC helper | Review | P2 | openai-assistant | — | 2025-10-28 |
+| TKT-0030 | Remove unused getNextMintNumber helper | In-Progress | P2 | openai-assistant | — | 2025-10-28 |
+| TKT-0031 | Remove unused getPageMetadata helper | In-Progress | P2 | openai-assistant | — | 2025-10-28 |
+| TKT-0032 | Remove unused hasMetadataContent export | In-Progress | P2 | openai-assistant | — | 2025-10-28 |
+| TKT-0033 | Remove unused createIcsDataUrl helper | Review | P2 | openai-assistant | — | 2025-10-28 |
+| TKT-0034 | Remove unused findLightDropBySerialNoWithPagination helper | Review | P2 | openai-assistant | — | 2025-10-28 |
 
 ## Usage Guidelines
 

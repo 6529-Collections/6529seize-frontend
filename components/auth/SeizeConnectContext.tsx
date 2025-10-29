@@ -29,7 +29,7 @@ import { getAddress, isAddress } from "viem";
 import { WalletErrorBoundary } from "./error-boundary";
 
 // Custom error types for better error handling
-export class WalletConnectionError extends Error {
+class WalletConnectionError extends Error {
   constructor(
     message: string,
     public readonly cause?: unknown,
@@ -40,7 +40,7 @@ export class WalletConnectionError extends Error {
   }
 }
 
-export class WalletDisconnectionError extends Error {
+class WalletDisconnectionError extends Error {
   constructor(
     message: string,
     public readonly cause?: unknown,
@@ -51,7 +51,7 @@ export class WalletDisconnectionError extends Error {
   }
 }
 
-export class AuthenticationError extends Error {
+class AuthenticationError extends Error {
   constructor(message: string, public readonly cause?: unknown) {
     super(message);
     this.name = "AuthenticationError";

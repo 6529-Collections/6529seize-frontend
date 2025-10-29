@@ -1,9 +1,6 @@
 import {
-  AuthenticationError,
   SeizeConnectProvider,
   useSeizeConnectContext,
-  WalletConnectionError,
-  WalletDisconnectionError,
 } from "@/components/auth/SeizeConnectContext";
 import { publicEnv } from "@/config/env";
 import * as authUtils from "@/services/auth/auth.utils";
@@ -1266,41 +1263,6 @@ describe("SeizeConnectContext Security Vulnerability Fix", () => {
     });
   });
 
-  describe("Error Classes", () => {
-    it("should create WalletConnectionError with proper structure", () => {
-      const error = new WalletConnectionError(
-        "Test message",
-        new Error("cause"),
-        "TEST_CODE"
-      );
-
-      expect(error.name).toBe("WalletConnectionError");
-      expect(error.message).toBe("Test message");
-      expect(error.cause).toBeInstanceOf(Error);
-      expect(error.code).toBe("TEST_CODE");
-    });
-
-    it("should create WalletDisconnectionError with proper structure", () => {
-      const error = new WalletDisconnectionError(
-        "Test message",
-        new Error("cause"),
-        "TEST_CODE"
-      );
-
-      expect(error.name).toBe("WalletDisconnectionError");
-      expect(error.message).toBe("Test message");
-      expect(error.cause).toBeInstanceOf(Error);
-      expect(error.code).toBe("TEST_CODE");
-    });
-
-    it("should create AuthenticationError with proper structure", () => {
-      const error = new AuthenticationError("Test message", new Error("cause"));
-
-      expect(error.name).toBe("AuthenticationError");
-      expect(error.message).toBe("Test message");
-      expect(error.cause).toBeInstanceOf(Error);
-    });
-  });
 });
 
 describe("Regression Tests: Original Functionality with Secure Implementation", () => {
