@@ -135,11 +135,6 @@ export enum CreateWaveStepStatus {
   PENDING = "PENDING",
 }
 
-export enum CreateWaveGroupStatus {
-  NONE = "NONE",
-  GROUP = "GROUP",
-}
-
 interface SearchWavesParams {
   readonly limit: number;
   readonly serial_no_less_than?: number;

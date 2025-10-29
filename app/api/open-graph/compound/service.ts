@@ -90,7 +90,7 @@ function formatNumber(value: number, precision = 6): string {
   return trimTrailingZeros(fixed);
 }
 
-export function trimTrailingZeros(value: string): string {
+function trimTrailingZeros(value: string): string {
   if (!value.includes(".")) {
     return value;
   }

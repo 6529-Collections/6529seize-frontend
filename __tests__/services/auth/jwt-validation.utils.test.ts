@@ -1,15 +1,11 @@
 import { jwtDecode } from 'jwt-decode';
-import {
+import * as jwtValidationUtils from '@/services/auth/jwt-validation.utils';
+
+const {
   getRole,
-  doJWTValidation,
   validateJwt,
-  validateJwtInputs,
-  validateProxyRole,
-  synchronizeRoles,
-  handleTokenRefresh,
-} from '@/services/auth/jwt-validation.utils';
+} = jwtValidationUtils;
 import {
-  getAuthJwt,
   getRefreshToken,
   getWalletAddress,
   getWalletRole,
@@ -18,7 +14,6 @@ import {
 } from '@/services/auth/auth.utils';
 import { redeemRefreshTokenWithRetries } from '@/services/auth/token-refresh.utils';
 import { areEqualAddresses } from '@/helpers/Helpers';
-import { validateRoleForAuthentication } from '@/utils/role-validation';
 import { logErrorSecurely } from '@/utils/error-sanitizer';
 import {
   TokenRefreshCancelledError,
@@ -34,11 +29,9 @@ jest.mock('jwt-decode');
 jest.mock('@/services/auth/auth.utils');
 jest.mock('@/services/auth/token-refresh.utils');
 jest.mock('@/helpers/Helpers');
-jest.mock('@/utils/role-validation');
 jest.mock('@/utils/error-sanitizer');
 
 const mockedJwtDecode = jwtDecode as jest.MockedFunction<typeof jwtDecode>;
-const mockedGetAuthJwt = getAuthJwt as jest.MockedFunction<typeof getAuthJwt>;
 const mockedGetRefreshToken = getRefreshToken as jest.MockedFunction<typeof getRefreshToken>;
 const mockedGetWalletAddress = getWalletAddress as jest.MockedFunction<typeof getWalletAddress>;
 const mockedGetWalletRole = getWalletRole as jest.MockedFunction<typeof getWalletRole>;
@@ -46,8 +39,6 @@ const mockedSetAuthJwt = setAuthJwt as jest.MockedFunction<typeof setAuthJwt>;
 const mockedSyncWalletRoleWithServer = syncWalletRoleWithServer as jest.MockedFunction<typeof syncWalletRoleWithServer>;
 const mockedRedeemRefreshTokenWithRetries = redeemRefreshTokenWithRetries as jest.MockedFunction<typeof redeemRefreshTokenWithRetries>;
 const mockedAreEqualAddresses = areEqualAddresses as jest.MockedFunction<typeof areEqualAddresses>;
-const mockedValidateRoleForAuthentication = validateRoleForAuthentication as jest.MockedFunction<typeof validateRoleForAuthentication>;
-const mockedLogErrorSecurely = logErrorSecurely as jest.MockedFunction<typeof logErrorSecurely>;
 
 describe('jwt-validation.utils', () => {
   beforeEach(() => {
@@ -104,346 +95,6 @@ describe('jwt-validation.utils', () => {
       expect(result).toBeUndefined();
     });
   });
-
-  describe('doJWTValidation', () => {
-    it('should return false when JWT is null', () => {
-      const result = doJWTValidation({
-        jwt: null,
-        wallet: '0x123',
-        role: null
-      });
-      expect(result).toBe(false);
-    });
-
-    it('should return true for valid, non-expired token with matching wallet', () => {
-      const mockPayload = {
-        id: 'user-id',
-        sub: '0x123',
-        iat: 900000,
-        exp: 1100000, // Not expired (current time is 1000000)
-        role: 'user'
-      };
-      mockedJwtDecode.mockReturnValue(mockPayload);
-
-      const result = doJWTValidation({
-        jwt: 'valid-jwt',
-        wallet: '0x123',
-        role: null
-      });
-
-      expect(result).toBe(true);
-    });
-
-    it('should return false for expired token', () => {
-      const mockPayload = {
-        id: 'user-id',
-        sub: '0x123',
-        iat: 800000,
-        exp: 900000, // Expired (current time is 1000000)
-        role: 'user'
-      };
-      mockedJwtDecode.mockReturnValue(mockPayload);
-
-      const result = doJWTValidation({
-        jwt: 'expired-jwt',
-        wallet: '0x123',
-        role: null
-      });
-
-      expect(result).toBe(false);
-    });
-
-    it('should return false when wallet address does not match', () => {
-      const mockPayload = {
-        id: 'user-id',
-        sub: '0x456',
-        iat: 900000,
-        exp: 1100000,
-        role: 'user'
-      };
-      mockedJwtDecode.mockReturnValue(mockPayload);
-
-      const result = doJWTValidation({
-        jwt: 'valid-jwt',
-        wallet: '0x123',
-        role: null
-      });
-
-      expect(result).toBe(false);
-    });
-
-    it('should handle wallet address case-insensitively', () => {
-      const mockPayload = {
-        id: 'user-id',
-        sub: '0xabc',
-        iat: 900000,
-        exp: 1100000,
-        role: 'user'
-      };
-      mockedJwtDecode.mockReturnValue(mockPayload);
-
-      const result = doJWTValidation({
-        jwt: 'valid-jwt',
-        wallet: '0xABC',
-        role: null
-      });
-
-      expect(result).toBe(true);
-    });
-
-    it('should return false when role does not match expected role', () => {
-      const mockPayload = {
-        id: 'user-id',
-        sub: '0x123',
-        iat: 900000,
-        exp: 1100000,
-        role: 'user'
-      };
-      mockedJwtDecode.mockReturnValue(mockPayload);
-
-      const result = doJWTValidation({
-        jwt: 'valid-jwt',
-        wallet: '0x123',
-        role: 'admin'
-      });
-
-      expect(result).toBe(false);
-    });
-
-    it('should return true when role matches expected role', () => {
-      const mockPayload = {
-        id: 'user-id',
-        sub: '0x123',
-        iat: 900000,
-        exp: 1100000,
-        role: 'admin'
-      };
-      mockedJwtDecode.mockReturnValue(mockPayload);
-
-      const result = doJWTValidation({
-        jwt: 'valid-jwt',
-        wallet: '0x123',
-        role: 'admin'
-      });
-
-      expect(result).toBe(true);
-    });
-  });
-
-  describe('validateJwtInputs', () => {
-    it('should not throw for valid inputs', () => {
-      expect(() => validateJwtInputs('0x123', 'test-operation')).not.toThrow();
-    });
-
-    it('should throw for null wallet', () => {
-      expect(() => validateJwtInputs(null as any, 'test-operation')).toThrow('Invalid wallet address: must be non-empty string');
-    });
-
-    it('should throw for empty wallet', () => {
-      expect(() => validateJwtInputs('', 'test-operation')).toThrow('Invalid wallet address: must be non-empty string');
-    });
-
-    it('should throw for non-string wallet', () => {
-      expect(() => validateJwtInputs(123 as any, 'test-operation')).toThrow('Invalid wallet address: must be non-empty string');
-    });
-
-    it('should throw for null operationId', () => {
-      expect(() => validateJwtInputs('0x123', null as any)).toThrow('Invalid operationId: must be non-empty string');
-    });
-
-    it('should throw for empty operationId', () => {
-      expect(() => validateJwtInputs('0x123', '')).toThrow('Invalid operationId: must be non-empty string');
-    });
-  });
-
-  describe('validateProxyRole', () => {
-    const createMockProfileProxy = (createdById: string): ApiProfileProxy => ({
-      id: 'proxy-1',
-      target_id: 'target-1',
-      created_by: { id: createdById },
-      granted_by: { id: 'granter-1' },
-      actions: [],
-      credit_amount: 0,
-      credit_spent: 0,
-      status: 'ACTIVE',
-      created_at: 1000000,
-      updated_at: 1000000
-    } as ApiProfileProxy);
-
-    it('should not throw for valid proxy role', () => {
-      const validProxy = createMockProfileProxy('admin-role');
-      
-      expect(() => validateProxyRole({
-        role: 'admin-role',
-        activeProfileProxy: validProxy,
-        freshTokenRole: 'admin-role'
-      })).not.toThrow();
-    });
-
-    it('should throw MissingActiveProfileError when no active profile proxy', () => {
-      expect(() => validateProxyRole({
-        role: 'admin-role',
-        activeProfileProxy: null,
-        freshTokenRole: 'admin-role'
-      })).toThrow(MissingActiveProfileError);
-    });
-
-    it('should throw AuthenticationRoleError for invalid proxy structure', () => {
-      const invalidProxy = {
-        id: 'proxy-1',
-        created_by: null
-      } as any;
-
-      expect(() => validateProxyRole({
-        role: 'admin-role',
-        activeProfileProxy: invalidProxy,
-        freshTokenRole: 'admin-role'
-      })).toThrow(AuthenticationRoleError);
-    });
-
-    it('should throw InvalidRoleStateError for role mismatch with proxy creator', () => {
-      const validProxy = createMockProfileProxy('creator-123');
-
-      expect(() => validateProxyRole({
-        role: 'different-role',
-        activeProfileProxy: validProxy,
-        freshTokenRole: 'different-role'
-      })).toThrow(InvalidRoleStateError);
-    });
-
-    it('should throw RoleValidationError for fresh token role mismatch', () => {
-      const validProxy = createMockProfileProxy('admin-role');
-
-      expect(() => validateProxyRole({
-        role: 'admin-role',
-        activeProfileProxy: validProxy,
-        freshTokenRole: 'wrong-role'
-      })).toThrow(RoleValidationError);
-    });
-  });
-
-  describe('synchronizeRoles', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('should log role change when roles differ', () => {
-      synchronizeRoles({
-        walletRole: 'old-role',
-        freshTokenRole: 'new-role',
-        address: '0x123',
-        refreshToken: 'refresh-token',
-        newToken: 'new-jwt-token'
-      });
-
-      expect(mockedLogErrorSecurely).toHaveBeenCalledWith('JWT_ROLE_UPDATE', {
-        message: 'Updating local wallet role from old-role to new-role',
-        oldRole: 'old-role',
-        newRole: 'new-role',
-        address: '0x123'
-      });
-      expect(setAuthJwt).toHaveBeenCalledWith('0x123', 'new-jwt-token', 'refresh-token', 'new-role');
-      expect(syncWalletRoleWithServer).toHaveBeenCalledWith('new-role', '0x123');
-    });
-
-    it('should not log when roles are the same', () => {
-      synchronizeRoles({
-        walletRole: 'same-role',
-        freshTokenRole: 'same-role',
-        address: '0x123',
-        refreshToken: 'refresh-token',
-        newToken: 'new-jwt-token'
-      });
-
-      expect(mockedLogErrorSecurely).not.toHaveBeenCalledWith('JWT_ROLE_UPDATE', expect.anything());
-      expect(setAuthJwt).toHaveBeenCalledWith('0x123', 'new-jwt-token', 'refresh-token', 'same-role');
-      expect(syncWalletRoleWithServer).toHaveBeenCalledWith('same-role', '0x123');
-    });
-
-    it('should handle null roles', () => {
-      synchronizeRoles({
-        walletRole: null,
-        freshTokenRole: null,
-        address: '0x123',
-        refreshToken: 'refresh-token',
-        newToken: 'new-jwt-token'
-      });
-
-      expect(setAuthJwt).toHaveBeenCalledWith('0x123', 'new-jwt-token', 'refresh-token', undefined);
-      expect(syncWalletRoleWithServer).toHaveBeenCalledWith(null, '0x123');
-    });
-  });
-
-  describe('handleTokenRefresh', () => {
-    const mockAbortController = new AbortController();
-    const refreshParams = {
-      wallet: '0x123',
-      role: null,
-      abortSignal: mockAbortController.signal,
-      activeProfileProxy: null
-    };
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('should return false for first-time sign-in (no refresh token)', async () => {
-      mockedGetRefreshToken.mockReturnValue(null);
-
-      const result = await handleTokenRefresh(refreshParams);
-
-      expect(result).toEqual({ isValid: false, wasCancelled: false });
-    });
-
-    it('should throw error when refresh token exists but no wallet address', async () => {
-      mockedGetRefreshToken.mockReturnValue('refresh-token');
-      mockedGetWalletAddress.mockReturnValue(null);
-
-      await expect(handleTokenRefresh(refreshParams)).rejects.toThrow('No wallet address available for JWT renewal');
-    });
-
-    it('should return cancelled when aborted', async () => {
-      const abortController = new AbortController();
-      abortController.abort();
-
-      mockedGetRefreshToken.mockReturnValue('refresh-token');
-      mockedGetWalletAddress.mockReturnValue('0x123');
-
-      const result = await handleTokenRefresh({
-        ...refreshParams,
-        abortSignal: abortController.signal
-      });
-
-      expect(result).toEqual({ isValid: false, wasCancelled: true });
-    });
-
-    it('should successfully refresh token and synchronize roles', async () => {
-      mockedGetRefreshToken.mockReturnValue('refresh-token');
-      mockedGetWalletAddress.mockReturnValue('0x123');
-      mockedGetWalletRole.mockReturnValue('old-role');
-      
-      const mockRefreshResponse = {
-        address: '0x123',
-        token: 'new-jwt-token'
-      };
-      mockedRedeemRefreshTokenWithRetries.mockResolvedValue(mockRefreshResponse);
-      mockedAreEqualAddresses.mockReturnValue(true);
-      mockedJwtDecode.mockReturnValue({
-        id: 'user-id',
-        sub: '0x123',
-        iat: 900000,
-        exp: 1100000,
-        role: 'new-role'
-      });
-
-      const result = await handleTokenRefresh(refreshParams);
-
-      expect(result).toEqual({ isValid: true, wasCancelled: false });
-      expect(setAuthJwt).toHaveBeenCalledWith('0x123', 'new-jwt-token', 'refresh-token', 'new-role');
-      expect(syncWalletRoleWithServer).toHaveBeenCalledWith('new-role', '0x123');
-    });
-  });
-
   describe('validateJwt', () => {
     const mockAbortController = new AbortController();
     const validParams = {
@@ -548,6 +199,41 @@ describe('jwt-validation.utils', () => {
         expect(result).toEqual({ isValid: true, wasCancelled: false });
       });
 
+      it('should treat wallet comparison as case-insensitive', async () => {
+        const mockPayload = {
+          id: 'user-id',
+          sub: '0xabc',
+          iat: 900000,
+          exp: 1100000,
+          role: 'user'
+        };
+        mockedJwtDecode.mockReturnValue(mockPayload);
+
+        const result = await validateJwt({
+          ...validParams,
+          wallet: '0xABC'
+        });
+
+        expect(result).toEqual({ isValid: true, wasCancelled: false });
+      });
+
+      it('should fall back to token refresh when wallet does not match', async () => {
+        const mockPayload = {
+          id: 'user-id',
+          sub: '0x456',
+          iat: 900000,
+          exp: 1100000,
+          role: 'user'
+        };
+        mockedJwtDecode.mockReturnValue(mockPayload);
+        mockedGetRefreshToken.mockReturnValue(null);
+
+        const result = await validateJwt(validParams);
+
+        expect(mockedGetRefreshToken).toHaveBeenCalled();
+        expect(result).toEqual({ isValid: false, wasCancelled: false });
+      });
+
       it('should return isValid=false without throwing for first-time sign-in (no refresh token)', async () => {
         // Mock expired JWT
         const mockPayload = {
@@ -602,7 +288,7 @@ describe('jwt-validation.utils', () => {
         };
         mockedRedeemRefreshTokenWithRetries.mockResolvedValue(mockRefreshResponse);
         mockedAreEqualAddresses.mockReturnValue(true);
-        
+
         // Mock the new token's role extraction
         mockedJwtDecode.mockReturnValueOnce(mockPayload) // First call for initial validation
           .mockReturnValueOnce({ ...mockPayload, role: 'admin' }); // Second call for new token role
@@ -612,6 +298,26 @@ describe('jwt-validation.utils', () => {
         expect(result).toEqual({ isValid: true, wasCancelled: false });
         expect(setAuthJwt).toHaveBeenCalledWith('0x123', 'new-jwt-token', 'refresh-token', 'admin');
         expect(syncWalletRoleWithServer).toHaveBeenCalledWith('admin', '0x123');
+      });
+
+      it('should fall back to token refresh when role does not match expected role', async () => {
+        const mockPayload = {
+          id: 'user-id',
+          sub: '0x123',
+          iat: 900000,
+          exp: 1100000,
+          role: 'user'
+        };
+        mockedJwtDecode.mockReturnValue(mockPayload);
+        mockedGetRefreshToken.mockReturnValue(null);
+
+        const result = await validateJwt({
+          ...validParams,
+          role: 'admin'
+        });
+
+        expect(mockedGetRefreshToken).toHaveBeenCalled();
+        expect(result).toEqual({ isValid: false, wasCancelled: false });
       });
 
       it('should throw error when refresh response address does not match', async () => {

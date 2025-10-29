@@ -63,26 +63,4 @@ export const DEFAULT_WEBSOCKET_CONFIG = {
  *   );
  * }
  * ```
- *
- * 3. For multiple message types:
- *
- * ```tsx
- * import { useWebSocketMessages } from 'services/websocket';
- *
- * interface MessageTypes {
- *   'price-update': PriceData;
- *   'user-activity': ActivityData;
- * }
- *
- * function Dashboard() {
- *   const { dataMap } = useWebSocketMessages<MessageTypes>(['price-update', 'user-activity']);
- *
- *   return (
- *     <div>
- *       {dataMap['price-update'] && <PriceChart data={dataMap['price-update']} />}
- *       {dataMap['user-activity'] && <ActivityFeed data={dataMap['user-activity']} />}
- *     </div>
- *   );
- * }
- * ```
  */

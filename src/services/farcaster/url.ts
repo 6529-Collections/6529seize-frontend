@@ -47,9 +47,6 @@ const buildCanonicalUrl = (segments: readonly string[]): string =>
 const isBlockedProfilePath = (segment: string): boolean =>
   PROFILE_BLOCKED_SEGMENTS.has(segment.toLowerCase());
 
-export const isFarcasterHost = (host: string): boolean =>
-  FARCASTER_HOSTS.has(normalizeHost(host));
-
 const parseChannelSegments = (
   segments: readonly string[]
 ): FarcasterResourceIdentifier | null => {

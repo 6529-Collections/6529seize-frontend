@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import { useWebSocketMessage, useWebSocketMessages, useWebsocketStatus } from '@/services/websocket/useWebSocketMessage';
+import { useWebSocketMessage, useWebsocketStatus } from '@/services/websocket/useWebSocketMessage';
 import { WebSocketStatus } from '@/services/websocket/WebSocketTypes';
 
 jest.mock('@/services/websocket/useWebSocket', () => ({ useWebSocket: jest.fn() }));
@@ -33,33 +33,6 @@ describe('useWebSocketMessage', () => {
     });
     renderHook(() => useWebSocketMessage('TYPE' as any, jest.fn()));
     expect(subscribe).not.toHaveBeenCalled();
-  });
-});
-
-describe('useWebSocketMessages', () => {
-  const subscribe = jest.fn();
-  const unsubA = jest.fn();
-  const unsubB = jest.fn();
-  beforeEach(() => {
-    subscribe.mockReset();
-    unsubA.mockReset();
-    unsubB.mockReset();
-    (useWebSocket as jest.Mock).mockReturnValue({
-      subscribe: jest
-        .fn()
-        .mockImplementation((t) => (t === 'A' ? unsubA : unsubB)),
-      status: WebSocketStatus.CONNECTED,
-    });
-  });
-
-  it('subscribes to all messages and cleans up', () => {
-    const { unmount } = renderHook(() =>
-      useWebSocketMessages({ A: jest.fn(), B: jest.fn() } as any)
-    );
-    expect(useWebSocket().subscribe).toHaveBeenCalledTimes(2);
-    unmount();
-    expect(unsubA).toHaveBeenCalled();
-    expect(unsubB).toHaveBeenCalled();
   });
 });
 

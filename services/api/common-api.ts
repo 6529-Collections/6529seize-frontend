@@ -44,7 +44,7 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
   return res.json();
 };
 
-export interface RetryOptions {
+interface RetryOptions {
   /** Maximum number of retry attempts. Default: 0 (no retries). */
   readonly maxRetries?: number;
   /** Initial delay in milliseconds before the first retry. Default: 1000ms. */

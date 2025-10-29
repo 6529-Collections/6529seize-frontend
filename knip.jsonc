@@ -38,6 +38,10 @@
       "pino-pretty"
     ],
   
+    // Disable Jest and Playwright plugins so test-only usages are reported
+    "jest": false,
+    "playwright": false,
+  
     // 6) Make config mistakes visible in CI
     "treatConfigHintsAsErrors": true
   

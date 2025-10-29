@@ -2,9 +2,6 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import CryptocubePage from "@/app/museum/genesis/cryptocube/page";
 
-jest.mock("@/components/header/Header", () => () => (
-  <div data-testid="header">Header</div>
-));
 jest.mock("@/components/header/HeaderPlaceholder", () => () => (
   <div data-testid="header-placeholder">Header Placeholder</div>
 ));

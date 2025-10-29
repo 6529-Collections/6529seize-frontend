@@ -12,9 +12,6 @@ import Bonafidehan from "@/app/museum/bonafidehan-museum/page";
 import AerialView from "@/app/museum/genesis/aerial-view/page";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
-jest.mock("@/components/header/Header", () => () => (
-  <div data-testid="header" />
-));
 jest.mock("@/components/header/HeaderPlaceholder", () => () => (
   <div data-testid="header-placeholder" />
 ));

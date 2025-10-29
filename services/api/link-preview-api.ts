@@ -1,4 +1,4 @@
-export interface LinkPreviewMedia {
+interface LinkPreviewMedia {
   readonly url?: string | null;
   readonly secureUrl?: string | null;
   readonly type?: string | null;
@@ -8,7 +8,7 @@ export interface LinkPreviewMedia {
   readonly [key: string]: unknown;
 }
 
-export interface LinkPreviewBase {
+interface LinkPreviewBase {
   readonly requestUrl?: string | null;
   readonly url?: string | null;
   readonly title?: string | null;
@@ -66,7 +66,7 @@ export type GoogleWorkspaceLinkPreview =
   | GoogleSheetsLinkPreview
   | GoogleSlidesLinkPreview;
 
-export interface GenericLinkPreviewResponse extends LinkPreviewBase {
+interface GenericLinkPreviewResponse extends LinkPreviewBase {
   readonly type?: string | null;
 }
 

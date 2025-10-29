@@ -1,13 +1,21 @@
-import { SLIDER_THEMES } from '@/components/waves/drop/types/slider.types';
+import { getSliderTheme } from '@/components/waves/drop/types/slider.types';
 
-describe('SLIDER_THEMES', () => {
-  it('contains themes for ranks 1-3 and default', () => {
-    expect(Object.keys(SLIDER_THEMES)).toEqual(expect.arrayContaining(['1','2','3','default']));
-  });
-
-  it('rank 1 theme has expected tooltip colors', () => {
-    const theme = SLIDER_THEMES[1];
+describe('getSliderTheme', () => {
+  it('returns themed tooltip colors for rank 1', () => {
+    const theme = getSliderTheme(1);
     expect(theme.tooltip.background).toContain('#E8D48A');
     expect(theme.tooltip.text).toBe('tw-text-iron-950');
+  });
+
+  it('returns default colors when rank is null', () => {
+    const theme = getSliderTheme(null);
+    expect(theme.tooltip.background).toBe('tw-bg-iron-650');
+    expect(theme.tooltip.text).toBe('tw-text-white');
+  });
+
+  it('returns default colors when rank is outside theme range', () => {
+    const theme = getSliderTheme(999);
+    expect(theme.tooltip.background).toBe('tw-bg-iron-650');
+    expect(theme.tooltip.text).toBe('tw-text-white');
   });
 });

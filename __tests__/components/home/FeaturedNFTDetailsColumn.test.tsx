@@ -1,7 +1,7 @@
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import FeaturedNFTDetailsColumn from "@/components/home/FeaturedNFTDetailsColumn";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
-import useCapacitor, { CapacitorOrientationType } from "@/hooks/useCapacitor";
+import useCapacitor from "@/hooks/useCapacitor";
 import { useManifoldClaimDisplays } from "@/hooks/useManifoldClaimDisplays";
 import { render, screen } from "@testing-library/react";
 
@@ -105,6 +105,9 @@ const mockUseManifoldClaimDisplays =
     typeof useManifoldClaimDisplays
   >;
 
+const PORTRAIT_ORIENTATION =
+  0 as ReturnType<typeof useCapacitor>["orientation"];
+
 // Minimal test data factory - only includes fields actually used by the component
 function createTestNFT(
   overrides: Partial<NFTWithMemesExtendedData> = {}
@@ -188,7 +191,7 @@ describe("FeaturedNFTDetailsColumn", () => {
       platform: "web",
       isActive: true,
       keyboardVisible: false,
-      orientation: CapacitorOrientationType.PORTRAIT,
+      orientation: PORTRAIT_ORIENTATION,
     });
 
     mockUseCookieConsent.mockReturnValue({
@@ -213,7 +216,7 @@ describe("FeaturedNFTDetailsColumn", () => {
       platform,
       isActive: true,
       keyboardVisible: false,
-      orientation: CapacitorOrientationType.PORTRAIT,
+      orientation: PORTRAIT_ORIENTATION,
     });
 
     mockUseCookieConsent.mockReturnValue({
@@ -635,7 +638,7 @@ describe("FeaturedNFTDetailsColumn", () => {
           platform,
           isActive: true,
           keyboardVisible: false,
-          orientation: CapacitorOrientationType.PORTRAIT,
+          orientation: PORTRAIT_ORIENTATION,
         });
 
         mockUseCookieConsent.mockReturnValue({

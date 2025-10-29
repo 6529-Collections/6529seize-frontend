@@ -15,7 +15,6 @@ export const mockTitleContextModule = () => {
   jest.mock('@/contexts/TitleContext', () => ({
     useTitle: () => mockTitleContext,
     useSetTitle: jest.fn(),
-    useSetNotificationCount: jest.fn(),
     useSetWaveData: jest.fn(),
     useSetStreamHasNewItems: jest.fn(),
     TitleProvider: ({ children }: { children: ReactNode }) => children,

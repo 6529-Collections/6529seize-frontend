@@ -11,7 +11,6 @@ import { ethers } from "ethers";
 import { encryptData } from "./app-wallet-helpers";
 import { Time } from "@/helpers/time";
 import useCapacitor from "@/hooks/useCapacitor";
-import EventEmitter from "events";
 
 export interface AppWallet {
   name: string;
@@ -42,8 +41,6 @@ const AppWalletsContext = createContext<AppWalletsContextProps | undefined>(
   undefined
 );
 
-export const appWalletsEventEmitter = new EventEmitter();
-
 const WALLET_KEY_PREFIX = "app-wallet_";
 
 export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -67,7 +64,6 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
     const wallets = await getAllWallets();
 
     setAppWallets(wallets);
-    appWalletsEventEmitter.emit("update", wallets);
     setFetchingAppWallets(false);
   };
 
@@ -96,7 +92,6 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
       setFetchingAppWallets(true);
       const wallets = await getAllWallets();
       setAppWallets(wallets);
-      appWalletsEventEmitter.emit("update", wallets);
       setFetchingAppWallets(false);
     };
 

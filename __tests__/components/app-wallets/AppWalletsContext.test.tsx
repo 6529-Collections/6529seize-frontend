@@ -3,7 +3,6 @@ import { render, screen, waitFor, act } from "@testing-library/react";
 import {
   AppWalletsProvider,
   useAppWallets,
-  appWalletsEventEmitter,
 } from "@/components/app-wallets/AppWalletsContext";
 
 // Mock all the external dependencies to avoid complex async behavior
@@ -160,43 +159,6 @@ describe("AppWalletsContext", () => {
       consoleSpy.mockRestore();
     });
   });
-
-  describe("appWalletsEventEmitter", () => {
-    it("is exported and functional", () => {
-      expect(appWalletsEventEmitter).toBeDefined();
-      expect(typeof appWalletsEventEmitter.on).toBe("function");
-      expect(typeof appWalletsEventEmitter.emit).toBe("function");
-      expect(typeof appWalletsEventEmitter.removeListener).toBe("function");
-    });
-
-    it("can emit and listen to events", () => {
-      const mockListener = jest.fn();
-      appWalletsEventEmitter.on("test-event", mockListener);
-
-      appWalletsEventEmitter.emit("test-event", "test-data");
-
-      expect(mockListener).toHaveBeenCalledWith("test-data");
-      expect(mockListener).toHaveBeenCalledTimes(1);
-
-      appWalletsEventEmitter.removeListener("test-event", mockListener);
-    });
-
-    it("handles multiple listeners", () => {
-      const mockListener1 = jest.fn();
-      const mockListener2 = jest.fn();
-
-      appWalletsEventEmitter.on("multi-test", mockListener1);
-      appWalletsEventEmitter.on("multi-test", mockListener2);
-
-      appWalletsEventEmitter.emit("multi-test", "shared-data");
-
-      expect(mockListener1).toHaveBeenCalledWith("shared-data");
-      expect(mockListener2).toHaveBeenCalledWith("shared-data");
-
-      appWalletsEventEmitter.removeAllListeners("multi-test");
-    });
-  });
-
 
   describe("context value memoization", () => {
     it("provides stable context object with proper memoization", async () => {
@@ -390,42 +352,4 @@ describe("AppWalletsContext", () => {
       });
     });
   });
-
-  describe("Event Emitter Integration", () => {
-    it("emits events when event emitter is used directly", () => {
-      const mockListener = jest.fn();
-      appWalletsEventEmitter.on("test-direct", mockListener);
-
-      appWalletsEventEmitter.emit("test-direct", { data: "test" });
-
-      expect(mockListener).toHaveBeenCalledWith({ data: "test" });
-      appWalletsEventEmitter.removeListener("test-direct", mockListener);
-    });
-
-    it("cleans up event listeners properly", () => {
-      const mockListener1 = jest.fn();
-      const mockListener2 = jest.fn();
-
-      // Add listeners
-      appWalletsEventEmitter.on("test-cleanup", mockListener1);
-      appWalletsEventEmitter.on("test-cleanup", mockListener2);
-
-      // Emit event
-      appWalletsEventEmitter.emit("test-cleanup", "test-data");
-
-      expect(mockListener1).toHaveBeenCalledWith("test-data");
-      expect(mockListener2).toHaveBeenCalledWith("test-data");
-
-      // Remove specific listener
-      appWalletsEventEmitter.removeListener("test-cleanup", mockListener1);
-      appWalletsEventEmitter.emit("test-cleanup", "test-data-2");
-
-      expect(mockListener1).toHaveBeenCalledTimes(1); // Should not be called again
-      expect(mockListener2).toHaveBeenCalledTimes(2); // Should be called again
-
-      // Clean up remaining listeners
-      appWalletsEventEmitter.removeAllListeners("test-cleanup");
-    });
-  });
-
 });

@@ -1,4 +1,4 @@
-import { getFormSections, getInitialTraitsValues, initialTraits } from '@/components/waves/memes/traits/schema';
+import { getFormSections, initialTraits } from '@/components/waves/memes/traits/schema';
 
 describe('traits schema helpers', () => {
   it('replaces profile placeholder', () => {
@@ -7,14 +7,9 @@ describe('traits schema helpers', () => {
     expect(artistField.placeholder).toBe('Bob');
   });
 
-  it('returns initial trait values', () => {
-    const vals = getInitialTraitsValues();
-    expect(vals.pointsPower).toBe(0);
-    expect(vals.punk6529).toBe(false);
-  });
-
-  it('initialTraits constant matches function result', () => {
-    expect(initialTraits).toEqual(getInitialTraitsValues());
+  it('provides initial trait values via constant', () => {
+    expect(initialTraits.pointsPower).toBe(0);
+    expect(initialTraits.punk6529).toBe(false);
   });
 
   it('handles null profile in getFormSections', () => {

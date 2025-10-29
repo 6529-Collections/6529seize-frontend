@@ -38,7 +38,6 @@ import { DELEGATION_ABI } from "@/abis";
 import {
   DELEGATION_ALL_ADDRESS,
   DELEGATION_CONTRACT,
-  NEVER_DATE,
   NULL_ADDRESS,
 } from "@/constants";
 import { areEqualAddresses, getTransactionLink } from "@/helpers/Helpers";
@@ -55,6 +54,13 @@ import {
   PRIMARY_ADDRESS_USE_CASE,
   SUB_DELEGATION_USE_CASE,
 } from "./delegation-constants";
+import {
+  getDelegationsFromData,
+  getParams,
+  getReadParams,
+  type ContractDelegation,
+  type ContractWalletDelegation,
+} from "./CollectionDelegation.utils";
 import { DelegationToast } from "./DelegationCenterMenu";
 import DelegationWallet from "./DelegationWallet";
 import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
@@ -69,77 +75,12 @@ interface Props {
   collection: DelegationCollection;
 }
 
-interface ContractWalletDelegation {
-  wallet: string;
-  fetched?: boolean;
-  expiry?: string;
-  all?: boolean;
-  tokens?: number;
-}
-
-interface ContractDelegation {
-  useCase: any;
-  wallets: ContractWalletDelegation[];
-}
-
 interface Revocation {
   use_case: number;
   wallet: string;
 }
 
-export function getParams(
-  address: string | undefined,
-  collection: string | undefined,
-  functionName: string,
-  useCases: any[]
-) {
-  const params: any = [];
-  useCases.map((uc) => {
-    params.push({
-      address: DELEGATION_CONTRACT.contract,
-      abi: DELEGATION_ABI,
-      chainId: DELEGATION_CONTRACT.chain_id,
-      functionName: functionName,
-      args: [address, collection, uc.use_case],
-    });
-  });
-  params.push({
-    address: DELEGATION_CONTRACT.contract,
-    abi: DELEGATION_ABI,
-    chainId: DELEGATION_CONTRACT.chain_id,
-    functionName: functionName,
-    args: [address, collection, PRIMARY_ADDRESS_USE_CASE.use_case],
-  });
-  params.push({
-    address: DELEGATION_CONTRACT.contract,
-    abi: DELEGATION_ABI,
-    chainId: DELEGATION_CONTRACT.chain_id,
-    functionName: functionName,
-    args: [address, collection, SUB_DELEGATION_USE_CASE.use_case],
-  });
-  params.push({
-    address: DELEGATION_CONTRACT.contract,
-    abi: DELEGATION_ABI,
-    chainId: DELEGATION_CONTRACT.chain_id,
-    functionName: functionName,
-    args: [address, collection, CONSOLIDATION_USE_CASE.use_case],
-  });
-  return params;
-}
-
-export function getReadParams(
-  address: string | undefined,
-  collection: string | undefined,
-  functionName: string,
-  useCases?: any[]
-) {
-  if (!useCases) {
-    useCases = DELEGATION_USE_CASES;
-  }
-  return getParams(address, collection, functionName, useCases);
-}
-
-export function getActiveDelegationsReadParams(
+function getActiveDelegationsReadParams(
   address: `0x${string}` | string | undefined,
   collection: `0x${string}` | string | undefined,
   functionName: string
@@ -147,7 +88,7 @@ export function getActiveDelegationsReadParams(
   return getParams(address, collection, functionName, DELEGATION_USE_CASES);
 }
 
-export function getConsolidationReadParams(
+function getConsolidationReadParams(
   address: `0x${string}` | string | undefined,
   collection: `0x${string}` | string | undefined,
   consolidationAddresses: ContractDelegation
@@ -168,56 +109,6 @@ export function getConsolidationReadParams(
   }
   return [];
 }
-
-export function formatExpiry(myDate: any) {
-  const date = new Date(parseInt(myDate) * 1000);
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(date.getUTCDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-export function getDelegationsFromData(data: any) {
-  const myDelegations: ContractDelegation[] = [];
-  data.map((d: any, index: number) => {
-    const walletDelegations: ContractWalletDelegation[] = [];
-    let useCase = null;
-    if (DELEGATION_USE_CASES.length > index) {
-      useCase = DELEGATION_USE_CASES[index];
-    } else if (index === PRIMARY_ADDRESS_USE_CASE.index) {
-      useCase = PRIMARY_ADDRESS_USE_CASE;
-    } else if (index === SUB_DELEGATION_USE_CASE.index) {
-      useCase = SUB_DELEGATION_USE_CASE;
-    } else if (index === CONSOLIDATION_USE_CASE.index) {
-      useCase = CONSOLIDATION_USE_CASE;
-    }
-
-    if (useCase && d.result) {
-      const delegationsArray = d.result as any[];
-      delegationsArray[0].map((wallet: string, i: number) => {
-        const myDate = delegationsArray[1][i];
-        const myDateDisplay =
-          new Date().getTime() / 1000 > myDate
-            ? `expired`
-            : myDate >= NEVER_DATE
-            ? `active - non-expiring`
-            : `active - expires ${formatExpiry(myDate)}`;
-        walletDelegations.push({
-          wallet: wallet,
-          expiry: myDateDisplay,
-          all: delegationsArray[2][i],
-          tokens: delegationsArray[3][i],
-        });
-      });
-      myDelegations.push({
-        useCase: useCase,
-        wallets: walletDelegations,
-      });
-    }
-  });
-  return myDelegations;
-}
-
 export default function CollectionDelegationComponent(props: Readonly<Props>) {
   const toastRef = useRef<HTMLDivElement>(null);
   const accountResolution = useSeizeConnectContext();

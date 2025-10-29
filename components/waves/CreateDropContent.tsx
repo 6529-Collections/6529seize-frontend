@@ -19,7 +19,6 @@ import {
   CreateDropConfig,
   CreateDropPart,
   CreateDropRequestPart,
-  DropMetadata,
   MentionedUser,
   ReferencedNft,
 } from "@/entities/IDrop";
@@ -72,6 +71,7 @@ import { WsMessageType } from "@/helpers/Types";
 import { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import { convertMetadataToDropMetadata } from "./utils/convertMetadataToDropMetadata";
 
 // Use next/dynamic for lazy loading with SSR support
 const TermsSignatureFlow = dynamic(() => import("../terms/TermsSignatureFlow"));
@@ -218,28 +218,6 @@ const getUpdatedNfts = (
       )
   );
   return [...existingNfts, ...notAddedNfts];
-};
-
-const convertMetadataToDropMetadata = (
-  metadata: CreateDropMetadataType[]
-): DropMetadata[] => {
-  return metadata
-    .filter(
-      (
-        md
-      ): md is CreateDropMetadataType & {
-        key: NonNullable<CreateDropMetadataType["key"]>;
-        value: NonNullable<CreateDropMetadataType["value"]>;
-      } =>
-        md.key !== null &&
-        md.key !== undefined &&
-        md.value !== null &&
-        md.value !== undefined
-    )
-    .map((md) => ({
-      data_key: md.key,
-      data_value: `${md.value}`,
-    }));
 };
 
 type HandleDropPartResult = {
@@ -1159,12 +1137,3 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 };
 
 export default memo(CreateDropContent);
-
-// Export internal helpers for testing
-export {
-  handleDropPart,
-  convertMetadataToDropMetadata,
-  hasMetadataContent,
-  hasSubmissionContent,
-  ensurePartsWithFallback,
-};

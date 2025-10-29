@@ -69,7 +69,7 @@ export class EmojiNode extends DecoratorNode<JSX.Element> {
   }
 }
 
-export const EmojiComponent = ({ emojiId }: { emojiId: string }) => {
+const EmojiComponent = ({ emojiId }: { emojiId: string }) => {
   const { emojiMap, findNativeEmoji } = useEmoji();
 
   const emoji = emojiMap

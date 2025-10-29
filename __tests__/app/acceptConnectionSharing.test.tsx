@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import React, { useMemo } from "react";
 
-import { AcceptConnectionSharing } from "@/app/accept-connection-sharing/page.client";
+import AcceptConnectionSharingPage from "@/app/accept-connection-sharing/page.client";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -62,16 +62,19 @@ describe("AcceptConnectionSharing page", () => {
   it("shows missing parameters message when token or address missing", () => {
     render(
       <TestProvider>
-        <AcceptConnectionSharing token="" address="" />
+        <AcceptConnectionSharingPage />
       </TestProvider>
     );
     expect(screen.getByText(/Missing required parameters/)).toBeInTheDocument();
   });
 
   it("includes provided token and address in the page", () => {
+    (useSearchParams as jest.Mock).mockReturnValue(
+      new URLSearchParams("token=abc12345&address=0x123")
+    );
     render(
       <TestProvider>
-        <AcceptConnectionSharing token="abc12345" address="0x123" />
+        <AcceptConnectionSharingPage />
       </TestProvider>
     );
     expect(screen.getByText(/Incoming Connection/)).toBeInTheDocument();

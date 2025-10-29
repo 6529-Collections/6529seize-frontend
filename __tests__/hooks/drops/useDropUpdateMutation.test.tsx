@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
-import { useDropUpdateMutation, DropUpdateMutationParams } from '@/hooks/drops/useDropUpdateMutation';
+import { useDropUpdateMutation } from '@/hooks/drops/useDropUpdateMutation';
 import { ApiUpdateDropRequest } from '@/generated/models/ApiUpdateDropRequest';
 import { ApiDrop } from '@/generated/models/ApiDrop';
 import { AuthContext } from '@/components/auth/Auth';
@@ -22,6 +22,12 @@ jest.mock('@/contexts/wave/MyStreamContext', () => ({
 
 const mockedCommonApiPost = commonApiPost as jest.MockedFunction<typeof commonApiPost>;
 const mockedUseMyStream = useMyStream as jest.MockedFunction<typeof useMyStream>;
+
+type DropUpdateMutationParams = {
+  dropId: string;
+  request: ApiUpdateDropRequest;
+  currentDrop: ApiDrop;
+};
 
 // Test utilities
 const createMockDrop = (overrides = {}): ApiDrop => ({

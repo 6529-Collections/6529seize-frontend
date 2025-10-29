@@ -1,6 +1,5 @@
 import { publicEnv } from "@/config/env";
 import { configureStore } from "@reduxjs/toolkit";
-import { createWrapper } from "next-redux-wrapper";
 import { editSlice } from "./editSlice";
 import { groupSlice } from "./groupSlice";
 
@@ -15,5 +14,3 @@ export const makeStore = () =>
 
 type AppStore = ReturnType<typeof makeStore>;
 export type AppState = ReturnType<AppStore["getState"]>;
-
-export const wrapper = createWrapper<AppStore>(makeStore);

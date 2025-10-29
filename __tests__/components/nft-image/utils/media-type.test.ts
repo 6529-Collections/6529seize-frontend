@@ -1,4 +1,4 @@
-import { getMediaType, MediaType } from '@/components/nft-image/utils/media-type';
+import { getMediaType } from '@/components/nft-image/utils/media-type';
 import { BaseNFT, NFTLite } from '@/entities/INFT';
 
 describe('media-type utils', () => {
@@ -430,14 +430,14 @@ describe('media-type utils', () => {
           metadata: { animation_details: { format: 'html' } }
         });
         
-        const result: MediaType = getMediaType(nft, true);
+        const result = getMediaType(nft, true);
         expect(result).toBe('html');
       });
 
       it('works with NFTLite type', () => {
         const nft: NFTLite = createMockNFTLite();
         
-        const result: MediaType = getMediaType(nft, false);
+        const result = getMediaType(nft, false);
         expect(result).toBe('image');
       });
     });

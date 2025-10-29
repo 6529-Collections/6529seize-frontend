@@ -1,7 +1,6 @@
 import { SecurityEventType } from "@/src/types/security";
 import {
   createConnectionEventContext,
-  createErrorEventContext,
   createValidationEventContext,
   logError,
   logSecurityEvent,
@@ -374,30 +373,6 @@ describe("Security Logger", () => {
     });
   });
 
-  describe("createErrorEventContext", () => {
-    it("should create context with error code", () => {
-      const context = createErrorEventContext("test-source", "TEST_ERROR");
-
-      expect(context).toEqual({
-        timestamp: expect.any(String),
-        source: "test-source",
-        errorCode: "TEST_ERROR",
-        userAgent: expect.any(String),
-      });
-    });
-
-    it("should create context without error code", () => {
-      const context = createErrorEventContext("test-source");
-
-      expect(context).toEqual({
-        timestamp: expect.any(String),
-        source: "test-source",
-        errorCode: undefined,
-        userAgent: expect.any(String),
-      });
-    });
-  });
-
   describe("Additional sanitization edge cases", () => {
     it("should sanitize multiple addresses in same message", () => {
       const error = new Error(
@@ -548,7 +523,7 @@ describe("Security Logger", () => {
       (global as any).navigator = originalNavigator;
     });
 
-    it("should handle all context creation functions server-side", () => {
+    it("should handle context creation helpers server-side", () => {
       const originalNavigator = global.navigator;
       delete (global as any).navigator;
 
@@ -558,11 +533,9 @@ describe("Security Logger", () => {
         true,
         42
       );
-      const errorContext = createErrorEventContext("server-test", "ERROR_CODE");
 
       expect(connectionContext.userAgent).toBe("server-side");
       expect(validationContext.userAgent).toBe("server-side");
-      expect(errorContext.userAgent).toBe("server-side");
 
       // Restore navigator
       (global as any).navigator = originalNavigator;
@@ -792,7 +765,11 @@ describe("Security Logger", () => {
     });
 
     it("should log AUTH_CLEANUP_FAILURE events", () => {
-      const context = createErrorEventContext("auth-cleanup", "CLEANUP_FAILED");
+      const context = {
+        timestamp: new Date().toISOString(),
+        source: "auth-cleanup",
+        errorCode: "CLEANUP_FAILED",
+      };
       logSecurityEvent(SecurityEventType.AUTH_CLEANUP_FAILURE, context);
 
       expect(mockConsoleWarn).toHaveBeenCalledWith(
@@ -805,7 +782,11 @@ describe("Security Logger", () => {
     });
 
     it("should log INITIALIZATION_ERROR events", () => {
-      const context = createErrorEventContext("initialization", "INIT_TIMEOUT");
+      const context = {
+        timestamp: new Date().toISOString(),
+        source: "initialization",
+        errorCode: "INIT_TIMEOUT",
+      };
       logSecurityEvent(SecurityEventType.INITIALIZATION_ERROR, context);
 
       expect(mockConsoleWarn).toHaveBeenCalledWith(
@@ -896,28 +877,24 @@ describe("Security Logger", () => {
   });
 
   describe("Timestamp validation", () => {
-    it("should create valid ISO timestamps in all context creators", () => {
+    it("should create valid ISO timestamps in context creators", () => {
       const connectionContext = createConnectionEventContext("timestamp-test");
       const validationContext = createValidationEventContext(
         "timestamp-test",
         true
       );
-      const errorContext = createErrorEventContext("timestamp-test");
 
       // Verify all timestamps are valid ISO strings
       expect(() => new Date(connectionContext.timestamp)).not.toThrow();
       expect(() => new Date(validationContext.timestamp)).not.toThrow();
-      expect(() => new Date(errorContext.timestamp)).not.toThrow();
 
       // Verify timestamps are recent (within last second)
       const now = Date.now();
       const connectionTime = new Date(connectionContext.timestamp).getTime();
       const validationTime = new Date(validationContext.timestamp).getTime();
-      const errorTime = new Date(errorContext.timestamp).getTime();
 
       expect(now - connectionTime).toBeLessThan(1000);
       expect(now - validationTime).toBeLessThan(1000);
-      expect(now - errorTime).toBeLessThan(1000);
     });
   });
 });

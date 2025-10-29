@@ -2,14 +2,12 @@ import { Status } from "@/components/nextGen/nextgen_entities";
 import {
   formatNameForUrl,
   getBlurLink,
-  getCollectionBaseBreadcrums,
   getCollectionIdsForAddress,
   getMagicEdenLink,
   getOpenseaLink,
   getStatusFromDates,
   normalizeNextgenTokenID,
 } from "@/components/nextGen/nextgen_helpers";
-import { NextGenCollection } from "@/entities/INextgen";
 
 describe("nextgen_helpers utility functions", () => {
   it("determines status from dates", () => {
@@ -42,16 +40,6 @@ describe("nextgen_helpers utility functions", () => {
     ]);
     const admin = { data: [{ result: true }, { result: false }] };
     expect(getCollectionIdsForAddress(false, false, admin, 3)).toEqual(["1"]);
-  });
-
-  it("returns base breadcrumbs", () => {
-    const col: NextGenCollection = { name: "Cool" } as any;
-    expect(getCollectionBaseBreadcrums(col, "Page")).toEqual([
-      { display: "Home", href: "/" },
-      { display: "NextGen", href: "/nextgen" },
-      { display: "Cool", href: "/nextgen/collection/cool" },
-      { display: "Page" },
-    ]);
   });
 
   it("builds opensea url for testnets", () => {

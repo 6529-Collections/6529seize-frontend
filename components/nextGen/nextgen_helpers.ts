@@ -4,10 +4,8 @@ import { useEffect, useState } from "react";
 import { formatNameForUrl, normalizeNextgenTokenID } from "@/helpers/nextgen-utils";
 import { goerli, mainnet, sepolia } from "viem/chains";
 import { useReadContract, useReadContracts, useWriteContract } from "wagmi";
-import { NextGenCollection } from "@/entities/INextgen";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import { Crumb } from "../breadcrumb/Breadcrumb";
 import {
   NEXTGEN_ADMIN,
   NEXTGEN_CHAIN_ID,
@@ -26,6 +24,11 @@ import {
   Status,
   TokensPerAddress,
 } from "./nextgen_entities";
+
+interface Crumb {
+  display: string;
+  href?: string;
+}
 
 export function useGlobalAdmin(address: string) {
   return useReadContract({
@@ -603,21 +606,4 @@ export enum NextGenTokenListedType {
   ALL = "All",
   LISTED = "Listed",
   NOT_LISTED = "Not Listed",
-}
-
-export function getCollectionBaseBreadcrums(
-  collection: NextGenCollection,
-  page: string
-) {
-  const crumbs = [
-    { display: "Home", href: "/" },
-    { display: "NextGen", href: "/nextgen" },
-    {
-      display: `${collection.name}`,
-      href: `/nextgen/collection/${formatNameForUrl(collection.name)}`,
-    },
-    { display: page },
-  ];
-
-  return crumbs;
 }

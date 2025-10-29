@@ -8,9 +8,6 @@ import IgnitionPage from "@/app/museum/genesis/ignition/page";
 import WatercolorDreamsPage from "@/app/museum/genesis/watercolor-dreams/page";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
-jest.mock("@/components/header/Header", () => () => (
-  <div data-testid="header" />
-));
 jest.mock("@/components/header/HeaderPlaceholder", () => () => (
   <div data-testid="placeholder" />
 ));

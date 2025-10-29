@@ -20,7 +20,7 @@ interface InfiniteQueryData<T> {
   pageParams: unknown[];
 }
 
-export interface UsePinnedWavesServerReturn {
+interface UsePinnedWavesServerReturn {
   pinnedWaves: ApiWave[];
   pinnedIds: string[];
   isLoading: boolean;

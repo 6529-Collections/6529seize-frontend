@@ -190,9 +190,3 @@ export const validateAuthImmediate = async ({
     return handleValidationError(error, isConnected, abortSignal, callbacks);
   }
 };
-
-export type {
-  ImmediateValidationParams,
-  ImmediateValidationCallbacks,
-  ImmediateValidationResult
-};

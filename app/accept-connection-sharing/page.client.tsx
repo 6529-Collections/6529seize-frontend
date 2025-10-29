@@ -20,7 +20,7 @@ interface AcceptConnectionSharingProps {
   role?: string;
 }
 
-export function AcceptConnectionSharing(
+function AcceptConnectionSharing(
   props: Readonly<AcceptConnectionSharingProps>
 ) {
   const router = useRouter();

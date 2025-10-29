@@ -30,19 +30,16 @@ const { getAddress } = jest.requireActual("viem");
 const {
   detectEnsTarget,
   fetchEnsPreview,
-  __clearEnsCachesForTesting,
   EnsPreviewError,
 } = ensModule as {
   detectEnsTarget: (raw: string | null) => any;
   fetchEnsPreview: (target: { kind: string; input: string }) => Promise<any>;
-  __clearEnsCachesForTesting: () => void;
   EnsPreviewError: new (status: number, message: string) => Error;
 };
 
 describe("ENS utilities", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    __clearEnsCachesForTesting();
   });
 
   it("detects ENS names", () => {

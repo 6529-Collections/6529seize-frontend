@@ -153,9 +153,3 @@ export async function fetchTikTokPreview(
   requests.set(cacheKey, requestPromise);
   return requestPromise;
 }
-
-export function __clearTikTokPreviewCache(): void {
-  cache.clear();
-  aliasMap.clear();
-  requests.clear();
-}

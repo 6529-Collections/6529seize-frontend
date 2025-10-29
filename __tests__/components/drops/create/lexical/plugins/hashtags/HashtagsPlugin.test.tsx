@@ -21,12 +21,10 @@ jest.mock('@lexical/react/LexicalComposerContext', () => ({
   useLexicalComposerContext: () => [mockEditor],
 }));
 
-let pluginProps: any = null;
 jest.mock('@lexical/react/LexicalTypeaheadMenuPlugin', () => ({
-  LexicalTypeaheadMenuPlugin: require('react').forwardRef((props: any) => {
-    pluginProps = props;
-    return <div data-testid="lexical" />;
-  }),
+  LexicalTypeaheadMenuPlugin: require('react').forwardRef(() => (
+    <div data-testid="lexical" />
+  )),
   MenuOption: class MockMenuOption {},
   useBasicTypeaheadTriggerMatch: () => () => null,
 }));
@@ -45,8 +43,8 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import NewHashtagsPlugin, {
   HashtagsTypeaheadOption,
-  getPossibleQueryMatch,
 } from '@/components/drops/create/lexical/plugins/hashtags/HashtagsPlugin';
+import { getPossibleQueryMatch } from '@/components/drops/create/lexical/plugins/hashtags/getPossibleQueryMatch';
 
 test('renders without crashing', () => {
   render(<NewHashtagsPlugin onSelect={jest.fn()} />);

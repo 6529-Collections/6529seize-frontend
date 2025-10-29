@@ -3,7 +3,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import PressPage from '@/app/about/press/page';
 
-jest.mock('@/components/header/Header', () => () => <div data-testid="header">Header</div>);
 jest.mock('@/components/header/HeaderPlaceholder', () => () => <div data-testid="header-placeholder">Header Placeholder</div>);
 
 describe('PressPage', () => {

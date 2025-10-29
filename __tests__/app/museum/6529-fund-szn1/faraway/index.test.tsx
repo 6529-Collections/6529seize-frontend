@@ -2,9 +2,6 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import FarawayPage from "@/app/museum/6529-fund-szn1/faraway/page";
 
-jest.mock("@/components/header/Header", () => () => (
-  <div data-testid="header">Header</div>
-));
 jest.mock("@/components/header/HeaderPlaceholder", () => () => (
   <div data-testid="header-placeholder">Header Placeholder</div>
 ));
