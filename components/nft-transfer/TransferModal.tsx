@@ -22,7 +22,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { createPortal, flushSync } from "react-dom";
+import { createPortal } from "react-dom";
 import {
   Address,
   isAddress,
@@ -113,9 +113,12 @@ type TxItem = {
 };
 
 type WalletClientWithWrite = {
-  writeContract: (
-    req: WriteContractParameters
-  ) => Promise<`0x${string}`>;
+  writeContract: (req: WriteContractParameters) => Promise<`0x${string}`>;
+};
+
+const waitForPaint = async () => {
+  if (typeof window === "undefined") return;
+  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 };
 
 function hasWriteContract(client: any): client is WalletClientWithWrite {
@@ -470,22 +473,42 @@ function TxStatusList({
     switch (state) {
       case "awaiting_approval":
         return "#406AFE";
+      case "submitted":
+        return "#a1e1ff";
       case "error":
         return "#ffcccc";
       case "success":
         return "#ccffcc";
+      case "submitted":
+        return "7f99f5";
       default:
-        return "rgba(255, 255, 255, 0.1)";
+        return "rgba(255, 255, 255, 0.9)";
     }
   };
   const getTextColor = (state: TxState) => {
     switch (state) {
-      case "pending":
       case "awaiting_approval":
         return "#fff";
       default:
         return "#000";
     }
+  };
+
+  const txLink = (hash: string) => {
+    if (!explorer) return null;
+    return (
+      <Link
+        href={`${explorer}/tx/${hash}`}
+        target="_blank"
+        rel="noreferrer"
+        className="tw-no-underline tw-ml-2">
+        <button
+          type="button"
+          className="!tw-text-sm tw-rounded-md tw-bg-white hover:tw-bg-white/80 tw-text-black hover:tw-text-black tw-px-2 tw-py-1">
+          View Tx
+        </button>
+      </Link>
+    );
   };
 
   return (
@@ -510,34 +533,21 @@ function TxStatusList({
               <span>Approve in your wallet</span>
             )}
             {t.state === "error" && (
-              <span>Error: {t.error || "Transaction failed"}</span>
+              <span>
+                Error: {t.error || "Transaction failed"}
+                {t.hash && txLink(t.hash)}
+              </span>
             )}
             {t.state === "submitted" && (
               <span>
                 Submitted — waiting for confirmation
-                {t.hash && explorer && (
-                  <Link
-                    href={`${explorer}/tx/${t.hash}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="tw-no-underline tw-ml-2 tw-text-md tw-rounded-md tw-bg-white hover:tw-bg-white/80 tw-text-black hover:tw-text-black tw-font-medium tw-text-sm tw-px-2 tw-py-1">
-                    View Tx
-                  </Link>
-                )}
+                {t.hash && txLink(t.hash)}
               </span>
             )}
             {t.state === "success" && (
               <span>
                 Successful
-                {t.hash && explorer && (
-                  <Link
-                    href={`${explorer}/tx/${t.hash}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="tw-no-underline tw-ml-2 tw-text-md tw-rounded-md tw-bg-white hover:tw-bg-white/80 tw-text-black hover:tw-text-black tw-font-medium tw-text-sm tw-px-2 tw-py-1">
-                    View Tx
-                  </Link>
-                )}
+                {t.hash && txLink(t.hash)}
               </span>
             )}
           </div>
@@ -716,13 +726,14 @@ function BodyByFlow({
 
     return (
       <div className="tw-flex-1 tw-overflow-auto tw-p-6 tw-space-y-4">
-        {anyPending && (
-          <div className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-opacity-80">
-            <span>
-              Follow the prompts in your wallet and keep this tab open.
-            </span>
-          </div>
-        )}
+        <div className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-opacity-80">
+          <span>
+            {anyPending
+              ? "Follow the prompts in your wallet and keep this tab open."
+              : "All transactions have been completed. You can close this window now."}
+          </span>
+        </div>
+
         <TxStatusList txs={txs} publicClient={publicClient} />
       </div>
     );
@@ -1228,13 +1239,12 @@ export default function TransferModal({
           );
 
           const hash = await write(request);
-          flushSync(() => {
-            setTxs((prev) =>
-              prev.map((e) =>
-                e.id === `${key}-batch` ? { ...e, state: "submitted", hash } : e
-              )
-            );
-          });
+          setTxs((prev) =>
+            prev.map((e) =>
+              e.id === `${key}-batch` ? { ...e, state: "submitted", hash } : e
+            )
+          );
+          await waitForPaint();
           const receipt = await publicClient.waitForTransactionReceipt({
             hash,
           });
@@ -1248,6 +1258,7 @@ export default function TransferModal({
                 : e
             )
           );
+          await waitForPaint();
         } catch (e: any) {
           console.error("Error in batch 1155 transfer", e);
           setTxs((prev) =>
@@ -1283,13 +1294,12 @@ export default function TransferModal({
 
             try {
               const hash = await write(request);
-              flushSync(() => {
-                setTxs((prev) =>
-                  prev.map((te) =>
-                    te.id === tid ? { ...te, state: "submitted", hash } : te
-                  )
-                );
-              });
+              setTxs((prev) =>
+                prev.map((te) =>
+                  te.id === tid ? { ...te, state: "submitted", hash } : te
+                )
+              );
+              await waitForPaint();
               const receipt = await publicClient.waitForTransactionReceipt({
                 hash,
               });
@@ -1304,6 +1314,7 @@ export default function TransferModal({
                     : te
                 )
               );
+              await waitForPaint();
             } catch (e: any) {
               setTxs((prev) =>
                 prev.map((te) =>
