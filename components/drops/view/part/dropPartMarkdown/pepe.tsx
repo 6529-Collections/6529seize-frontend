@@ -1,6 +1,6 @@
 import PepeCard, { type PepeKind } from "@/components/waves/pepe/PepeCard";
 
-export type PepeLinkResult = {
+type PepeLinkResult = {
   readonly kind: PepeKind;
   readonly slug: string;
   readonly href: string;

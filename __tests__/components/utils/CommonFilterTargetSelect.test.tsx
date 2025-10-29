@@ -1,8 +1,7 @@
-import CommonFilterTargetSelect, {
-  FilterTargetType,
-} from "@/components/utils/CommonFilterTargetSelect";
+import CommonFilterTargetSelect from "@/components/utils/CommonFilterTargetSelect";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { ProfileActivityFilterTargetType } from "@/enums";
 
 describe("CommonFilterTargetSelect", () => {
   it("renders the filter target options and triggers change on click", async () => {
@@ -11,7 +10,7 @@ describe("CommonFilterTargetSelect", () => {
 
     render(
       <CommonFilterTargetSelect
-        selected={FilterTargetType.ALL}
+        selected={ProfileActivityFilterTargetType.ALL}
         onChange={onChange}
       />
     );
@@ -24,7 +23,9 @@ describe("CommonFilterTargetSelect", () => {
 
     await user.click(screen.getByLabelText("Outgoing"));
 
-    expect(onChange).toHaveBeenCalledWith(FilterTargetType.OUTGOING);
+    expect(onChange).toHaveBeenCalledWith(
+      ProfileActivityFilterTargetType.OUTGOING
+    );
   });
 
   it("supports keyboard navigation between targets", async () => {
@@ -33,7 +34,7 @@ describe("CommonFilterTargetSelect", () => {
 
     const { rerender } = render(
       <CommonFilterTargetSelect
-        selected={FilterTargetType.ALL}
+        selected={ProfileActivityFilterTargetType.ALL}
         onChange={onChange}
       />
     );
@@ -45,13 +46,15 @@ describe("CommonFilterTargetSelect", () => {
 
     await user.keyboard("{ArrowRight}");
 
-    expect(onChange).toHaveBeenCalledWith(FilterTargetType.OUTGOING);
+    expect(onChange).toHaveBeenCalledWith(
+      ProfileActivityFilterTargetType.OUTGOING
+    );
 
     onChange.mockClear();
 
     rerender(
       <CommonFilterTargetSelect
-        selected={FilterTargetType.OUTGOING}
+        selected={ProfileActivityFilterTargetType.OUTGOING}
         onChange={onChange}
       />
     );
@@ -62,6 +65,8 @@ describe("CommonFilterTargetSelect", () => {
 
     await user.keyboard("{ArrowLeft}");
 
-    expect(onChange).toHaveBeenCalledWith(FilterTargetType.ALL);
+    expect(onChange).toHaveBeenCalledWith(
+      ProfileActivityFilterTargetType.ALL
+    );
   });
 });

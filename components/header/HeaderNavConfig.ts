@@ -1,18 +1,18 @@
 import { AboutSection } from "@/enums";
 
-export interface NavLink {
+interface NavLink {
   name: string;
   path: string;
   condition?: (context: NavContext) => boolean;
 }
 
-export interface NavSection {
+interface NavSection {
   name: string;
   items: NavLink[];
   hasDivider?: boolean;
 }
 
-export interface NavDropdown {
+interface NavDropdown {
   title: string;
   condition?: (context: NavContext) => boolean;
   className?: string | ((context: NavContext) => string);
@@ -29,8 +29,8 @@ export interface NavContext {
   pathname?: string;
 }
 
-export function getDesktopNavigation(_context: NavContext): NavDropdown[] {
-  return [
+export function getDesktopNavigation(_context: NavContext) {
+  const navigation: NavDropdown[] = [
     {
       title: "Brain",
       condition: (ctx) => ctx.showWaves,
@@ -186,6 +186,8 @@ export function getDesktopNavigation(_context: NavContext): NavDropdown[] {
       ],
     },
   ];
+
+  return navigation;
 }
 
 export const toolsBottomItems: NavLink[] = [

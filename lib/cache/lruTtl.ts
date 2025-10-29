@@ -1,4 +1,4 @@
-export type LruTtlOptions = {
+type LruTtlOptions = {
   readonly max: number;
   readonly ttlMs: number;
 };

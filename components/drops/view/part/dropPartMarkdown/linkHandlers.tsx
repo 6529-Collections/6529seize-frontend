@@ -22,11 +22,11 @@ import {
   shouldUseOpenGraphPreview,
 } from "./linkUtils";
 
-export interface LinkRendererConfig {
+interface LinkRendererConfig {
   readonly onQuoteClick: (drop: ApiDrop) => void;
 }
 
-export interface LinkRenderer {
+interface LinkRenderer {
   readonly renderAnchor: (
     params: ClassAttributes<HTMLAnchorElement> &
       AnchorHTMLAttributes<HTMLAnchorElement> &

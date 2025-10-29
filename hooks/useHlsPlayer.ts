@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type HlsType from "hls.js";
 
-export interface UseHlsPlayerParams {
+interface UseHlsPlayerParams {
   /** The final video URL to load (m3u8 if isHls=true, or MP4, etc.) */
   src: string;
   /** True if the above src is an .m3u8 that needs Hls.js. */

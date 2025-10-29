@@ -296,7 +296,7 @@ export const DYNAMIC_ROUTE_CONFIGS: ReadonlyArray<RouteDynamicConfig> = [
  * pairing each `config` object from `DYNAMIC_ROUTE_CONFIGS` with its correctly typed `params`.
  * `DeterminedRouteInfo` then unions this with a simple `{ type: "static" }` for non-dynamic routes.
  */
-export type SpecificDeterminedRouteInfo =
+type SpecificDeterminedRouteInfo =
   (typeof DYNAMIC_ROUTE_CONFIGS)[number] extends infer C
     ? C extends { paramExtractor: (...args: any[]) => infer P | undefined }
       ? { readonly config: C; readonly params: P }

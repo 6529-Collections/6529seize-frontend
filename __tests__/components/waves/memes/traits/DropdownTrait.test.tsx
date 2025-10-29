@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { DropdownTrait } from 'components/waves/memes/traits/DropdownTrait';
+import { DropdownTrait } from '@/components/waves/memes/traits/DropdownTrait';
 
 jest.mock('components/waves/memes/traits/TraitWrapper', () => ({
   TraitWrapper: ({ children }: any) => <div data-testid="wrapper">{children}</div>

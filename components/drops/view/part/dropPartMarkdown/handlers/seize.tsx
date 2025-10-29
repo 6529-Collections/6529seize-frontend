@@ -124,5 +124,3 @@ export const createSeizeHandlers = ({
   createSeizeWaveHandler(),
   createSeizeDropHandler(),
 ];
-
-export type SeizeHandlers = ReturnType<typeof createSeizeHandlers>;

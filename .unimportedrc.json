@@ -1,0 +1,22 @@
+{
+    "entry": [
+      "src/app/**/page.{ts,tsx,js,jsx}",
+      "src/app/**/layout.{ts,tsx,js,jsx}",
+      "src/app/**/route.{ts,tsx,js,jsx}",
+      "src/pages/**/*.{ts,tsx,js,jsx}",
+      "src/middleware.ts",
+      "scripts/**/*.{ts,js,cjs,mjs}"
+    ],
+    "extensions": [".ts", ".tsx", ".js", ".jsx"],
+    "ignorePatterns": [
+      "**/.next/**",
+      "coverage/**",
+      "generated/**",
+      "tmp_gen_outp/**"
+    ],
+    "aliases": { "@/*": ["./src/*"] },
+    "rootDir": ".",
+    "respectGitignore": true,
+    "scannedDirs": ["src", "app", "pages", "components", "lib", "hooks", "scripts"]
+  }
+  

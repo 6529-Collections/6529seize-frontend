@@ -283,9 +283,5 @@ const NewHashtagsPlugin = forwardRef<
 });
 
 NewHashtagsPlugin.displayName = "NewHashtagsPlugin";
-export {
-  useHashtagLookupService,
-  checkForAtSignHashtags,
-  getPossibleQueryMatch,
-};
+export { useHashtagLookupService, getPossibleQueryMatch };
 export default NewHashtagsPlugin;

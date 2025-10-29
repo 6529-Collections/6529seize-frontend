@@ -1,5 +1,5 @@
 // ------------------ Historical (SZN1) mints: Jun-Dec 2022 ------------------
-export type HistoricalMint = { id: number; instantUtc: Date };
+type HistoricalMint = { id: number; instantUtc: Date };
 
 // Keep in ascending id order.
 export const HISTORICAL_MINTS: HistoricalMint[] = [

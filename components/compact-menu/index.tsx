@@ -148,4 +148,4 @@ function CompactMenuContent({
   );
 }
 
-export type { CompactMenuItem, CompactMenuProps } from "./types";
+export type { CompactMenuItem } from "./types";

@@ -46,7 +46,11 @@ async function findAvailablePort() {
 async function run() {
   try {
     const port = await findAvailablePort();
-    const env = { ...process.env, PORT: String(port) };
+    const env = {
+      ...process.env,
+      __NEXT_EXPERIMENTAL_MCP_SERVER: "true",
+      PORT: String(port),
+    };
     console.log(`Starting Next.js dev server on port ${port}...`);
 
     const child = spawn(

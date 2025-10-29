@@ -100,4 +100,4 @@ const renderSeizeQuote = (
   return null;
 };
 
-export { renderGifEmbed, renderSeizeQuote, renderTweetEmbed, TweetFallback };
+export { renderGifEmbed, renderSeizeQuote, renderTweetEmbed };

@@ -23,8 +23,3 @@ export const removeBlankLinePlaceholders = (markdown: string): string => {
 
   return markdown.replaceAll(BLANK_LINE_PLACEHOLDER, "");
 };
-
-export default {
-  addBlankLinePlaceholders,
-  removeBlankLinePlaceholders,
-};

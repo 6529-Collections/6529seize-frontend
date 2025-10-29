@@ -75,13 +75,3 @@ export const isEnsPreview = (value: unknown): value is EnsPreview => {
     record.type === "ens.content"
   );
 };
-
-export const isEnsNamePreview = (value: unknown): value is EnsNamePreview => {
-  return isEnsPreview(value) && value.type === "ens.name";
-};
-
-export const isEnsAddressPreview = (
-  value: unknown
-): value is EnsAddressPreview => {
-  return isEnsPreview(value) && value.type === "ens.address";
-};

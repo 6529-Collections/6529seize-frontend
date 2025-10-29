@@ -95,5 +95,3 @@ export const normalizeDropMarkdown = (markdown: string): string => {
 
   return normalizeLineEndings(markdown);
 };
-
-export default normalizeDropMarkdown;

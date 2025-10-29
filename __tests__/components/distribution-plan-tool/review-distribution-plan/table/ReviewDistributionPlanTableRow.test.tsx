@@ -1,10 +1,10 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import ReviewDistributionPlanTableRow from 'components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableRow';
-import { DistributionPlanToolContext } from 'components/distribution-plan-tool/DistributionPlanToolContext';
-import { ReviewDistributionPlanTableItemType } from 'components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTable';
-import { distributionPlanApiFetch } from 'services/distribution-plan-api';
+import ReviewDistributionPlanTableRow from '@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableRow';
+import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
+import { ReviewDistributionPlanTableItemType } from '@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTable';
+import { distributionPlanApiFetch } from '@/services/distribution-plan-api';
 
 jest.mock('services/distribution-plan-api', () => ({
   distributionPlanApiFetch: jest.fn(async () => ({ success: true, data: [{ wallet: '0x1', amount: 1, phaseId: 'p1', phaseComponentId: 'c1' }] }))

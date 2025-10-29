@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import WinnerDropBadge from 'components/waves/drops/winner/WinnerDropBadge';
+import WinnerDropBadge from '@/components/waves/drops/winner/WinnerDropBadge';
 
 describe('WinnerDropBadge', () => {
   it('returns null when no rank or position', () => {

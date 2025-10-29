@@ -341,7 +341,7 @@ export async function fetchNewestWaveMessages(
   if (sinceSerialNo !== null) {
     // Assuming API uses these parameters for fetching newer messages
     params.serial_no_limit = `${sinceSerialNo}`;
-    params.search_strategy = "FIND_NEWER";
+    params.search_strategy = ApiDropSearchStrategy.Newer;
   }
 
   try {

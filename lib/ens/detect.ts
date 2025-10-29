@@ -106,9 +106,3 @@ export const detectEnsTarget = (
 export const isLikelyEnsTarget = (value: string | null | undefined): boolean => {
   return detectEnsTarget(value) !== null;
 };
-
-export const __testables = {
-  extractEnsNameFromUrl,
-  extractAddressCandidate,
-  extractNameCandidate,
-};

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import CreateGroupWalletsEmma from 'components/groups/page/create/config/wallets/CreateGroupWalletsEmma';
-import { AuthContext } from 'components/auth/Auth';
+import CreateGroupWalletsEmma from '@/components/groups/page/create/config/wallets/CreateGroupWalletsEmma';
+import { AuthContext } from '@/components/auth/Auth';
 
 jest.mock('components/utils/input/emma/EmmaListSearch', () => ({
   __esModule: true,

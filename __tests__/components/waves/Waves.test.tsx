@@ -38,6 +38,7 @@ jest.mock("@/components/waves/list/WavesList", () => {
 
 const { useSearchParams } = jest.requireMock("next/navigation");
 const { default: useDeviceInfo } = require("@/hooks/useDeviceInfo");
+const deviceInfoMock = useDeviceInfo as jest.Mock;
 
 const mockRouter = { push: jest.fn(), replace: jest.fn() };
 
@@ -45,6 +46,7 @@ beforeEach(() => {
   mockRouter.push.mockReset();
   mockRouter.replace.mockReset();
   (useRouter as jest.Mock).mockReturnValue(mockRouter);
+  deviceInfoMock.mockReturnValue({ isApp: false });
 });
 
 const baseAuth = {
@@ -82,11 +84,13 @@ function renderWaves(params: Map<string, string | null>) {
 }
 
 it("shows CreateWave when ?create=wave is present", () => {
+  deviceInfoMock.mockReturnValue({ isApp: true });
   renderWaves(new Map([["create", "wave"]]));
   expect(screen.getByTestId("create-wave")).toBeInTheDocument();
 });
 
 it("shows CreateDM when ?create=dm is present", () => {
+  deviceInfoMock.mockReturnValue({ isApp: true });
   renderWaves(new Map([["create", "dm"]]));
   expect(screen.getByTestId("create-dm")).toBeInTheDocument();
 });
@@ -110,7 +114,6 @@ it("navigates on button clicks", async () => {
 });
 
 it("navigates to app create routes when running in app", async () => {
-  const deviceInfoMock = useDeviceInfo as jest.Mock;
   deviceInfoMock.mockReturnValue({ isApp: true });
 
   const user = userEvent.setup();

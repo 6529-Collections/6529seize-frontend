@@ -7,7 +7,7 @@ import { NextgenCollectionView } from "@/enums";
 import { isEmptyObject } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 
-export interface TokenData {
+interface TokenData {
   tokenId: number;
   token: NextGenToken | null;
   traits: NextGenTrait[];

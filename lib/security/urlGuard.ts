@@ -2,7 +2,7 @@ import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
 import { toASCII } from "node:punycode";
 
-export type UrlGuardErrorKind =
+type UrlGuardErrorKind =
   | "missing-url"
   | "invalid-url"
   | "unsupported-protocol"
@@ -34,7 +34,7 @@ export interface UrlGuardHostPolicy {
   readonly blockedHostSuffixes?: readonly string[];
 }
 
-export interface UrlGuardHooks {
+interface UrlGuardHooks {
   readonly onBlockedUrl?: (details: { readonly url: URL; readonly reason: UrlGuardErrorKind; readonly message: string }) => void;
 }
 
@@ -44,7 +44,7 @@ export interface UrlGuardOptions {
   readonly hooks?: UrlGuardHooks;
 }
 
-export interface ParsePublicUrlOptions {
+interface ParsePublicUrlOptions {
   readonly allowedProtocols?: readonly string[];
   readonly missingUrlMessage?: string;
   readonly invalidUrlMessage?: string;
@@ -479,5 +479,3 @@ export async function fetchPublicJson<T>(
 
   return (await response.json()) as T;
 }
-
-export { DEFAULT_REDIRECT_STATUS_CODES };

@@ -88,5 +88,3 @@ export class WalletErrorBoundary extends Component<Props, State> {
     );
   }
 }
-
-export default WalletErrorBoundary;

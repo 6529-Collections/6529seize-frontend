@@ -65,8 +65,14 @@ export function useWaveTopVoters({
         });
       },
       initialPageParam: null,
-      getNextPageParam: (lastPage, allPages) =>
-        lastPage.next ? allPages.length + 1 : null,
+      getNextPageParam: (lastPage, allPages) => {
+        if (!lastPage.next) {
+          return null;
+        }
+        const currentPage =
+          typeof lastPage.page === "number" ? lastPage.page : allPages.length - 1;
+        return currentPage + 1;
+      },
       pages: 3,
       staleTime: 60000,
       ...getDefaultQueryRetry(),
@@ -101,8 +107,14 @@ export function useWaveTopVoters({
       });
     },
     initialPageParam: null,
-    getNextPageParam: (lastPage, allPages) =>
-      lastPage.next ? allPages.length + 1 : null,
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage.next) {
+        return null;
+      }
+      const currentPage =
+        typeof lastPage.page === "number" ? lastPage.page : allPages.length - 1;
+      return currentPage + 1;
+    },
     placeholderData: keepPreviousData,
     enabled: !!connectedProfileHandle,
     staleTime: 60000,

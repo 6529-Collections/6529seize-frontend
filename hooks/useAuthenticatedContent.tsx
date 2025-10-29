@@ -5,7 +5,7 @@ import { AuthContext } from "../components/auth/Auth";
 import { useLayout } from "../components/brain/my-stream/layout/LayoutContext";
 import { useSeizeConnectContext } from "../components/auth/SeizeConnectContext";
 
-export type ContentState =
+type ContentState =
   | "not-authenticated"
   | "loading"
   | "needs-profile"

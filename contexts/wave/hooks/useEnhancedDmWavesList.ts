@@ -2,24 +2,9 @@
 
 import { useCallback, useMemo } from "react";
 import useDmWavesList from "@/hooks/useDmWavesList";
-import useNewDropCounter, {
-  MinimalWaveNewDropsCount,
-  getNewestTimestamp,
-} from "./useNewDropCounter";
+import useNewDropCounter, { getNewestTimestamp } from "./useNewDropCounter";
 import { ApiWave } from "@/generated/models/ApiWave";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
-
-export interface MinimalWave {
-  id: string;
-  name: string;
-  type: ApiWaveType;
-  newDropsCount: MinimalWaveNewDropsCount;
-  picture: string | null;
-  contributors: {
-    pfp: string;
-  }[];
-  isPinned: boolean;
-}
+import type { MinimalWave } from "./useEnhancedWavesList";
 
 function useEnhancedDmWavesList(activeWaveId: string | null) {
   const wavesData = useDmWavesList();

@@ -16,6 +16,7 @@ import type {
   FarcasterFramePreview,
   FarcasterProfilePreview,
   FarcasterUnavailablePreview,
+  FarcasterUnsupportedPreview,
   FarcasterCastEmbed,
 } from "@/types/farcaster.types";
 
@@ -27,7 +28,7 @@ interface FarcasterCardProps {
 
 type SupportedPreview = Exclude<
   FarcasterPreviewResponse,
-  FarcasterUnavailablePreview | { type: "unsupported" }
+  FarcasterUnavailablePreview | FarcasterUnsupportedPreview
 >;
 
 type FarcasterCardState =

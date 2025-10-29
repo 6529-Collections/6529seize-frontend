@@ -19,10 +19,8 @@
     --expanded-width: 0px;
 
     --scrollbar-compensation: calc(100vw - 100%);
-    --layout-margin: max(
-      ((100vw - var(--layout-max)) - var(--scrollbar-compensation)) / 2,
-      0px
-    );
+    --layout-margin: max(((100vw - var(--layout-max)) - var(--scrollbar-compensation)) / 2,
+        0px);
     --left-rail: calc(var(--layout-margin) + var(--sidebar-width));
   }
 
@@ -80,14 +78,18 @@
 
 // add the code bellow
 @layer utilities {
+
   /* Hide scrollbar for Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
   /* Hide scrollbar for IE, Edge and Firefox */
   .no-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
 
   /* Prevent text selection on touch devices only */
@@ -143,6 +145,7 @@
 
     /* Override text cursor for excluded elements */
     [data-text-selection-exclude="true"] {
+
       p,
       h1,
       h2,
@@ -183,9 +186,13 @@
   display: none;
 }
 
-html {
-   scrollbar-gutter: stable both-edges;
+
+@media only screen and (min-width: 1300px) {
+  html {
+    scrollbar-gutter: stable both-edges;
+  }
 }
+
 
 body {
   background-color: #000000 !important;
@@ -229,14 +236,13 @@ a {
 
 @media (hover: hover) {
   a:hover {
-    color: color.scale(
-      variables.$font-color,
-      $lightness: -(variables.$darken-percentage)
-    );
+    color: color.scale(variables.$font-color,
+        $lightness: -(variables.$darken-percentage));
   }
 }
 
 @media only screen and (max-width: 1200px) {
+
   body,
   button:not(.tailwind-scope button),
   textarea:not(.tailwind-scope textarea),
@@ -250,6 +256,7 @@ a {
 }
 
 @media only screen and (max-width: 800px) {
+
   body,
   button:not(.tailwind-scope button),
   textarea:not(.tailwind-scope textarea),
@@ -263,6 +270,7 @@ a {
 }
 
 * {
+
   &:before,
   &:after {
     position: absolute;
@@ -548,10 +556,8 @@ h5:not(.tailwind-scope h5) {
   color: white !important;
 
   &:hover {
-    background-color: color.adjust(
-      $color: variables.$project-green,
-      $lightness: 5%
-    );
+    background-color: color.adjust($color: variables.$project-green,
+        $lightness: 5%);
   }
 }
 
@@ -609,47 +615,40 @@ h5:not(.tailwind-scope h5) {
 }
 
 .horizontal-menu-hide-scrollbar {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 .horizontal-menu-hide-scrollbar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera*/
+  display: none;
+  /* Chrome, Safari, Opera*/
 }
 
 .horizontal-menu-scrollable-x {
-  -webkit-overflow-scrolling: touch; /* For momentum scroll on iOS */
+  -webkit-overflow-scrolling: touch;
+  /* For momentum scroll on iOS */
 }
 
 // Scroll shadow for content overflow indication
 .scroll-shadow {
   background:
-    /* Shadow at the top */ linear-gradient(
-        to bottom,
-        rgba(14, 16, 21, 0.8) 0%,
-        rgba(14, 16, 21, 0) 10px
-      )
-      0 0,
+    /* Shadow at the top */
+    linear-gradient(to bottom,
+      rgba(14, 16, 21, 0.8) 0%,
+      rgba(14, 16, 21, 0) 10px) 0 0,
     /* Shadow at the bottom */
-      linear-gradient(
-        to top,
-        rgba(14, 16, 21, 0.8) 0%,
-        rgba(14, 16, 21, 0) 10px
-      )
-      0 100%,
+    linear-gradient(to top,
+      rgba(14, 16, 21, 0.8) 0%,
+      rgba(14, 16, 21, 0) 10px) 0 100%,
     /* Preventing the shadows from overlapping the content */
-      radial-gradient(
-        farthest-side at 50% 0,
-        rgba(0, 0, 0, 0.2),
-        rgba(0, 0, 0, 0)
-      )
-      0 0,
-    radial-gradient(
-        farthest-side at 50% 100%,
-        rgba(0, 0, 0, 0.2),
-        rgba(0, 0, 0, 0)
-      )
-      0 100%;
+    radial-gradient(farthest-side at 50% 0,
+      rgba(0, 0, 0, 0.2),
+      rgba(0, 0, 0, 0)) 0 0,
+    radial-gradient(farthest-side at 50% 100%,
+      rgba(0, 0, 0, 0.2),
+      rgba(0, 0, 0, 0)) 0 100%;
 
   background-repeat: no-repeat;
   background-size: 100% 10px, 100% 10px, 100% 10px, 100% 10px;
@@ -659,12 +658,15 @@ h5:not(.tailwind-scope h5) {
 }
 
 .table-scroll-container {
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  /* Internet Explorer 10+ */
+  scrollbar-width: none;
+  /* Firefox */
   overflow-x: auto;
 
   &::-webkit-scrollbar {
-    display: none; /* Safari and Chrome */
+    display: none;
+    /* Safari and Chrome */
   }
 }
 
@@ -692,6 +694,7 @@ pre code {
 .word-break {
   word-break: break-word;
 }
+
 .react-toggle--disabled {
   opacity: 0.75;
 }
@@ -725,6 +728,7 @@ pre code {
 
 /* X card */
 @media (max-width: 390px) {
+
   a.tw-no-underline .react-tweet-theme.tweet-container_root__0rJLq,
   a.tw-no-underline .react-tweet-theme.tweet-container_root__0rJLq * {
     white-space: pre-wrap !important;

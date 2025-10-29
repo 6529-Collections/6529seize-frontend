@@ -74,5 +74,3 @@ export const getGroupIdByType = (
 
   return typeof current === "string" || current === null ? current : null;
 };
-
-export { waveGroupUpdatePaths };

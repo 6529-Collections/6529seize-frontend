@@ -6,7 +6,7 @@ export type FarcasterPreviewResponse =
   | FarcasterUnavailablePreview
   | FarcasterUnsupportedPreview;
 
-export interface FarcasterBasePreview {
+interface FarcasterBasePreview {
   readonly canonicalUrl?: string;
 }
 
@@ -84,6 +84,7 @@ export interface FarcasterUnavailablePreview extends FarcasterBasePreview {
   readonly reason?: string;
 }
 
-export interface FarcasterUnsupportedPreview {
+export interface FarcasterUnsupportedPreview extends FarcasterBasePreview {
   readonly type: "unsupported";
+  readonly reason?: string;
 }

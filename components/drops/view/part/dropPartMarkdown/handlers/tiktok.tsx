@@ -7,5 +7,3 @@ export const createTikTokHandler = (): LinkHandler => ({
   render: (href) => <TikTokCard href={href} />,
   display: "block",
 });
-
-export type TikTokHandler = ReturnType<typeof createTikTokHandler>;

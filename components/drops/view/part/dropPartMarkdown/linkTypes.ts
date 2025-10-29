@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 
-export type LinkDisplay = "block" | "inline";
+type LinkDisplay = "block" | "inline";
 
 export interface LinkHandler {
   readonly match: (href: string) => boolean;

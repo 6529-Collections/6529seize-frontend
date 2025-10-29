@@ -30,7 +30,6 @@ jest.mock("@/components/drops/view/part/dropPartMarkdown/renderers", () => ({
   renderTweetEmbed: jest.fn((href: string) => (
     <div data-testid="tweet" data-href={href} />
   )),
-  TweetFallback: () => null,
 }));
 
 jest.mock("@/src/components/waves/ArtBlocksTokenCard", () => ({

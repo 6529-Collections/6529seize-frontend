@@ -47,7 +47,7 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
   );
 };
 
-export function WaveDropReaction({
+function WaveDropReaction({
   drop,
   reaction,
 }: {

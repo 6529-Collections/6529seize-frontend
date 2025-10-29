@@ -29,7 +29,7 @@ export const toErrorMessage = (error: unknown): string => {
   return "Something went wrong";
 };
 
-export const sanitiseGroupPayload = (
+const sanitiseGroupPayload = (
   payload: ApiCreateGroup,
   name: string
 ): ApiCreateGroup => ({

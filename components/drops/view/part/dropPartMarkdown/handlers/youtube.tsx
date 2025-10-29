@@ -7,5 +7,3 @@ export const createYoutubeHandler = (): LinkHandler => ({
   render: (href) => <YoutubePreview href={href} />,
   display: "block",
 });
-
-export type YoutubeHandler = ReturnType<typeof createYoutubeHandler>;

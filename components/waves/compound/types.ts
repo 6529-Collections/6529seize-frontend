@@ -1,9 +1,9 @@
-export interface CompoundLinkGroup {
+interface CompoundLinkGroup {
   readonly marketUrl?: string;
   readonly etherscan?: string;
 }
 
-export interface CompoundMarketV2Metrics {
+interface CompoundMarketV2Metrics {
   readonly supplyApy: string;
   readonly borrowApy: string;
   readonly utilization: string;
@@ -14,7 +14,7 @@ export interface CompoundMarketV2Metrics {
   readonly exchangeRate: string;
 }
 
-export interface CompoundMarketV3Metrics {
+interface CompoundMarketV3Metrics {
   readonly supplyApy: string;
   readonly borrowApy: string;
   readonly utilization: string;
@@ -40,7 +40,7 @@ export interface CompoundMarketV2Response {
   readonly links: CompoundLinkGroup;
 }
 
-export interface CompoundCollateralConfig {
+interface CompoundCollateralConfig {
   readonly address: string;
   readonly symbol: string;
   readonly decimals: number;
@@ -64,7 +64,7 @@ export interface CompoundMarketV3Response {
   readonly links: CompoundLinkGroup;
 }
 
-export interface CompoundAccountV2Position {
+interface CompoundAccountV2Position {
   readonly cToken: string;
   readonly symbol: string;
   readonly supplyUnderlying: string;
@@ -75,14 +75,14 @@ export interface CompoundAccountV2Position {
   readonly usdPrice?: string;
 }
 
-export interface CompoundAccountV3CollateralPosition {
+interface CompoundAccountV3CollateralPosition {
   readonly asset: string;
   readonly amount: string;
   readonly usdPrice?: string;
   readonly collateralFactor: string;
 }
 
-export interface CompoundAccountV3Position {
+interface CompoundAccountV3Position {
   readonly comet: string;
   readonly baseSymbol: string;
   readonly supplyBase: string;
@@ -112,7 +112,7 @@ export interface CompoundAccountResponse {
   readonly links?: CompoundLinkGroup;
 }
 
-export interface CompoundTxSummary {
+interface CompoundTxSummary {
   readonly version?: "v2" | "v3";
   readonly action?: string;
   readonly market?: {
@@ -135,7 +135,7 @@ export interface CompoundTxResponse {
   readonly links?: CompoundLinkGroup;
 }
 
-export type CompoundMarketResponse =
+type CompoundMarketResponse =
   | CompoundMarketV2Response
   | CompoundMarketV3Response;
 

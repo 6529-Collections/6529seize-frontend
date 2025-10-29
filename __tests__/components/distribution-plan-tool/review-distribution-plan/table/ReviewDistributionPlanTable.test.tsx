@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import ReviewDistributionPlanTable from 'components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTable';
-import { DistributionPlanToolContext } from 'components/distribution-plan-tool/DistributionPlanToolContext';
+import ReviewDistributionPlanTable from '@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTable';
+import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
 
 const headerMock = jest.fn(() => <div data-testid="header" />);
 const bodyMock = jest.fn(() => <div data-testid="body" />);

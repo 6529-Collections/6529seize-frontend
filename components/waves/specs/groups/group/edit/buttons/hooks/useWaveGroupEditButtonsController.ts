@@ -457,7 +457,7 @@ export enum WaveGroupIdentitiesModal {
   EXCLUDE = "exclude",
 }
 
-export interface WaveGroupEditButtonsController {
+interface WaveGroupEditButtonsController {
   readonly mutating: boolean;
   readonly canIncludeIdentity: boolean;
   readonly canExcludeIdentity: boolean;

@@ -3,7 +3,7 @@ import { Crumb } from "@/components/breadcrumb/Breadcrumb";
 /**
  * Defines the recognized types for dynamic routes within the breadcrumb system.
  */
-export type DynamicRouteType =
+type DynamicRouteType =
   | "gradient"
   | "profile"
   | "meme"

@@ -32,7 +32,7 @@ describe('WaveDropQuoteWithSerialNo', () => {
           limit: 1,
           dropId: null,
           serialNo: 5,
-          strategy: WaveDropsSearchStrategy.FIND_BOTH,
+          strategy: WaveDropsSearchStrategy.Both,
         },
       ],
       queryFn: expect.any(Function),

@@ -86,7 +86,7 @@ export const ArtistActiveSubmissionContent: React.FC<
         className={`tw-relative tw-z-[100] tw-p-6 ${
           isApp
             ? ""
-            : "tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-max-h-[calc(75vh-120px)] sm:tw-max-h-[calc(80vh-120px)]"
+            : "tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-max-h-[calc(75vh-120px)] sm:tw-max-h-[calc(90vh-140px)]"
         }`}
       >
         {(() => {

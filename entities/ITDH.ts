@@ -200,11 +200,6 @@ interface BaseTDHMetrics extends TDH {
   dense_rank_unique_memes_season6__ties: number;
 }
 
-export interface TDHMetrics extends TDH, BaseTDHMetrics {}
-export interface ConsolidatedTDHMetrics
-  extends ConsolidatedTDH,
-    BaseTDHMetrics {}
-
 export interface TDHCalc {
   date: Date;
   block: number;

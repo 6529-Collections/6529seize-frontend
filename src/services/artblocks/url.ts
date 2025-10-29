@@ -180,5 +180,3 @@ export const buildTokenApiUrl = ({
 
   return endpoints;
 };
-
-export type { ArtBlocksTokenIdentifier as ArtBlocksTokenId };

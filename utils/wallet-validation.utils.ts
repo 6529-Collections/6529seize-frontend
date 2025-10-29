@@ -1,7 +1,6 @@
 import { AppWallet } from '@/components/app-wallets/AppWalletsContext'
 import { WalletValidationError, WalletSecurityError } from '@/src/errors/wallet-validation'
 
-// Constants for validation patterns
 const ETHEREUM_ADDRESS_PATTERN = /^0x[a-fA-F0-9]{40}$/
 const MIN_HASH_LENGTH = 64
 const MIN_NAME_LENGTH = 1
@@ -10,19 +9,13 @@ const MIN_PRIVATE_KEY_LENGTH = 32
 const MIN_MNEMONIC_WORDS = 12
 const MAX_MNEMONIC_WORDS = 24
 
-/**
- * Validates wallet object exists and is not null/undefined
- */
-function validateWalletExists(wallet: AppWallet): void {
+const validateWalletExists = (wallet: AppWallet): void => {
   if (!wallet) {
     throw new WalletValidationError('Wallet object is null or undefined - cannot process')
   }
 }
 
-/**
- * Validates wallet address field and format
- */
-function validateWalletAddress(wallet: AppWallet): void {
+const validateWalletAddress = (wallet: AppWallet): void => {
   if (!wallet.address) {
     throw new WalletValidationError('Wallet missing required address field')
   }
@@ -36,10 +29,7 @@ function validateWalletAddress(wallet: AppWallet): void {
   }
 }
 
-/**
- * Validates wallet address_hashed field
- */
-function validateWalletAddressHash(wallet: AppWallet): void {
+const validateWalletAddressHash = (wallet: AppWallet): void => {
   if (!wallet.address_hashed) {
     throw new WalletValidationError('Wallet missing required address_hashed field')
   }
@@ -53,10 +43,7 @@ function validateWalletAddressHash(wallet: AppWallet): void {
   }
 }
 
-/**
- * Validates wallet name field
- */
-function validateWalletName(wallet: AppWallet): void {
+const validateWalletName = (wallet: AppWallet): void => {
   if (!wallet.name) {
     throw new WalletValidationError('Wallet missing required name field')
   }
@@ -70,12 +57,9 @@ function validateWalletName(wallet: AppWallet): void {
   }
 }
 
-/**
- * Validates private key if present
- */
-function validatePrivateKey(wallet: AppWallet): void {
+const validatePrivateKey = (wallet: AppWallet): void => {
   if (!wallet.private_key) {
-    return
+    throw new WalletSecurityError('Private key is required')
   }
   
   if (typeof wallet.private_key !== 'string') {
@@ -87,10 +71,7 @@ function validatePrivateKey(wallet: AppWallet): void {
   }
 }
 
-/**
- * Validates mnemonic if present
- */
-function validateMnemonic(wallet: AppWallet): void {
+const validateMnemonic = (wallet: AppWallet): void => {
   if (!wallet.mnemonic) {
     return
   }
@@ -100,15 +81,16 @@ function validateMnemonic(wallet: AppWallet): void {
   }
   
   const words = wallet.mnemonic.trim().split(/\s+/)
- 
+
   if (words.some(word => !word || word.length === 0)) {
     throw new WalletSecurityError('Mnemonic contains empty words - security violation detected')
   }
+
+  if (words.length < MIN_MNEMONIC_WORDS || words.length > MAX_MNEMONIC_WORDS) {
+    throw new WalletSecurityError(`Mnemonic must contain between ${MIN_MNEMONIC_WORDS} and ${MAX_MNEMONIC_WORDS} words`)
+  }
 }
 
-/**
- * Security validation: Fail-fast wallet validation without exposing sensitive data
- */
 export function validateWalletSafely(wallet: AppWallet): void {
   validateWalletExists(wallet)
   validateWalletAddress(wallet)
@@ -116,14 +98,4 @@ export function validateWalletSafely(wallet: AppWallet): void {
   validateWalletName(wallet)
   validatePrivateKey(wallet)
   validateMnemonic(wallet)
-}
-
-// Export individual validators for reuse in other parts of the application
-export {
-  validateWalletExists,
-  validateWalletAddress,
-  validateWalletAddressHash,
-  validateWalletName,
-  validatePrivateKey,
-  validateMnemonic
 }

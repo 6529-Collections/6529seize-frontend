@@ -20,7 +20,7 @@ export interface SubmitArgs {
   readonly publish?: boolean;
 }
 
-export type SubmitResult =
+type SubmitResult =
   | {
       readonly ok: true;
       readonly group: ApiGroupFull;
@@ -33,12 +33,12 @@ export type SubmitResult =
       readonly validation?: GroupValidationResult;
     };
 
-export interface TestArgs {
+interface TestArgs {
   readonly payload: ApiCreateGroup;
   readonly nameFallback: string;
 }
 
-export type TestResult =
+type TestResult =
   | {
       readonly ok: true;
       readonly group: ApiGroupFull;
@@ -55,14 +55,14 @@ interface UseGroupMutationsArgs {
   readonly onGroupCreate?: () => void;
 }
 
-export interface UpdateVisibilityArgs {
+interface UpdateVisibilityArgs {
   readonly groupId: string;
   readonly visible: boolean;
   readonly oldVersionId?: string | null;
   readonly skipAuth?: boolean;
 }
 
-export type UpdateVisibilityResult =
+type UpdateVisibilityResult =
   | {
       readonly ok: true;
       readonly groupId: string;
@@ -95,10 +95,6 @@ const resolveOldVersionId = ({
     ? previousGroup.id
     : null;
 };
-
-export { GROUP_INCLUDE_LIMIT, GROUP_EXCLUDE_LIMIT } from "@/services/groups/groupMutations";
-export { validateGroupPayload } from "@/services/groups/groupMutations";
-export type { ValidationIssue, ValidationResult } from "@/services/groups/groupMutations";
 
 export const useGroupMutations = ({
   requestAuth,

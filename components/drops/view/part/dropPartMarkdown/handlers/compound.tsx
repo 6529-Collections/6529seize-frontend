@@ -28,5 +28,3 @@ export const createCompoundHandler = (): LinkHandler => ({
   render: (href) => <CompoundPreview href={href} />,
   display: "block",
 });
-
-export type CompoundHandler = ReturnType<typeof createCompoundHandler>;
