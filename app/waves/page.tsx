@@ -11,6 +11,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { cookies } from "next/headers";
 import { unstable_noStore as noStore } from "next/cache";
 import type { Metadata } from "next";
+import { formatAddress } from "@/helpers/Helpers";
 
 type WaveRequestContext = {
   readonly waveId: string | null;
@@ -104,10 +105,70 @@ export async function generateMetadata({
     });
   }
 
-  const shortUuid = `${waveId.slice(0, 8)}...${waveId.slice(-4)}`;
+  const shortUuid =
+    waveId.length > 12 ? `${waveId.slice(0, 8)}...${waveId.slice(-4)}` : waveId;
+  const { wave } = await fetchWaveContext(waveId);
 
-  return getAppMetadata({
-    title: `Wave ${shortUuid} | Waves`,
-    description: "Browse and explore waves",
-  });
+  if (!wave) {
+    return getAppMetadata({
+      title: `Wave ${shortUuid} | Waves`,
+      description: "Browse and explore waves",
+    });
+  }
+
+  const formatCount = (value: number | null | undefined): string | null => {
+    if (typeof value !== "number" || !Number.isFinite(value)) {
+      return null;
+    }
+    return new Intl.NumberFormat("en-US").format(value);
+  };
+
+  const waveName =
+    typeof wave.name === "string" && wave.name.trim().length > 0
+      ? wave.name.trim()
+      : `Wave ${shortUuid}`;
+
+  const authorHandle =
+    wave.author?.handle && wave.author.handle.trim().length > 0
+      ? `@${wave.author.handle}`
+      : formatAddress(wave.author?.primary_address ?? "");
+
+  const subscribersCount = wave.metrics?.subscribers_count;
+  const dropsCount = wave.metrics?.drops_count;
+  const descriptionParts: string[] = [];
+
+  if (authorHandle) {
+    descriptionParts.push(`Created by ${authorHandle}`);
+  }
+
+  const subscribers = formatCount(subscribersCount);
+  if (subscribers) {
+    descriptionParts.push(
+      `${subscribers} ${
+        subscribersCount === 1 ? "subscriber" : "subscribers"
+      }`
+    );
+  }
+
+  const drops = formatCount(dropsCount);
+  if (drops) {
+    descriptionParts.push(
+      `${drops} ${dropsCount === 1 ? "drop" : "drops"} shared`
+    );
+  }
+
+  const metadata: Parameters<typeof getAppMetadata>[0] = {
+    title: `${waveName} | Waves`,
+    description:
+      descriptionParts.length > 0
+        ? `${waveName} — ${descriptionParts.join(" • ")}`
+        : "Browse and explore waves",
+  };
+
+  if (wave.picture) {
+    metadata.ogImage = wave.picture;
+    metadata.twitterCard = "summary_large_image";
+  }
+
+  return getAppMetadata(metadata);
 }
