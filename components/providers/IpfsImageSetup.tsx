@@ -80,7 +80,12 @@ const patchElementAttributeWrites = () => {
       configurable: descriptor.configurable,
       enumerable: descriptor.enumerable ?? false,
       get: descriptor.get,
-      set(value: string) {
+      set(value: unknown) {
+        if (typeof value !== "string") {
+          descriptor.set!.call(this, value);
+          return;
+        }
+
         descriptor.set!.call(this, transform(value));
       },
     });
