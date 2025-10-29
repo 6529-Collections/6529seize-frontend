@@ -43,16 +43,14 @@ const CARD_INTERACTIVE_CLASSES =
 
 type CardContainerProps = {
   readonly isInteractive: boolean;
-  readonly href?: string;
   readonly ariaLabel?: string;
-  readonly onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
-  readonly onKeyDown?: (event: KeyboardEvent<HTMLAnchorElement>) => void;
+  readonly onClick?: (event: MouseEvent<HTMLElement>) => void;
+  readonly onKeyDown?: (event: KeyboardEvent<HTMLElement>) => void;
   readonly children: ReactNode;
 };
 
 function CardContainer({
   isInteractive,
-  href,
   ariaLabel,
   onClick,
   onKeyDown,
@@ -62,19 +60,18 @@ function CardContainer({
     isInteractive ? CARD_INTERACTIVE_CLASSES : ""
   }`;
 
-  if (isInteractive && href) {
+  if (isInteractive) {
     return (
-      <Link
-        href={href}
-        prefetch={false}
+      <div
         className={className}
         aria-label={ariaLabel}
-        style={{ textDecoration: "none" }}
+        role="link"
+        tabIndex={0}
         onClick={onClick}
         onKeyDown={onKeyDown}
       >
         {children}
-      </Link>
+      </div>
     );
   }
 
@@ -213,12 +210,16 @@ export default function WaveItem({
   }
 
   const handleCardClick = useCallback(
-    (event: MouseEvent<HTMLAnchorElement>) => {
+    (event: MouseEvent<HTMLElement>) => {
       if (!waveHref) {
         return;
       }
       const target = event.target as HTMLElement | null;
       if (shouldSkipNavigation(target, event.currentTarget)) {
+        return;
+      }
+      if (event.button === 1 || event.metaKey || event.ctrlKey) {
+        window.open(waveHref, "_blank", "noopener,noreferrer");
         return;
       }
       if (!event.defaultPrevented) {
@@ -230,7 +231,7 @@ export default function WaveItem({
   );
 
   const handleCardKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLAnchorElement>) => {
+    (event: KeyboardEvent<HTMLElement>) => {
       if (!waveHref || event.target !== event.currentTarget) {
         return;
       }
@@ -245,7 +246,6 @@ export default function WaveItem({
   return (
     <CardContainer
       isInteractive={isInteractive}
-      href={waveHref}
       ariaLabel={cardLabel}
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
