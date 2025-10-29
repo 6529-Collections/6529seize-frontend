@@ -78,8 +78,7 @@ const PHASE_DEFINITIONS: PhaseDefinition[] = [
   },
 ];
 
-export function buildMemesPhases(): MemePhase[] {
-  const mintDate = Time.now();
+export function buildMemesPhases(mintDate: Time = Time.now()): MemePhase[] {
   const resolveTime = ({
     hour,
     minute,
@@ -100,8 +99,6 @@ export function buildMemesPhases(): MemePhase[] {
     end: resolveTime(end),
   }));
 }
-
-const MEME_PHASES = buildMemesPhases();
 
 export interface ManifoldClaim {
   instanceId: number;
@@ -140,17 +137,19 @@ export function useManifoldClaim(
   }, []);
 
   const getMemePhase = useCallback(
-    (phase: ManifoldPhase, end: number) => {
+    (phase: ManifoldPhase, start: number, end: number) => {
       if (!areEqualAddresses(contract, MEMES_CONTRACT)) {
         return undefined;
       }
 
+      const memePhases = buildMemesPhases(Time.seconds(start));
+
       if (phase === ManifoldPhase.PUBLIC) {
-        return MEME_PHASES.find((mp) => mp.id === "public");
+        return memePhases.find((mp) => mp.id === "public");
       }
 
       const endTime = Time.seconds(end);
-      return MEME_PHASES.find((mp) => mp.end.gte(endTime));
+      return memePhases.find((mp) => mp.end.gte(endTime));
     },
     [contract]
   );
@@ -179,7 +178,11 @@ export function useManifoldClaim(
         publicMerkle && claimData.total > 0
           ? ManifoldPhase.PUBLIC
           : ManifoldPhase.ALLOWLIST;
-      const memePhase = getMemePhase(phase, claimData.endDate);
+      const memePhase = getMemePhase(
+        phase,
+        claimData.startDate,
+        claimData.endDate
+      );
       const remaining = Number(claimData.totalMax) - Number(claimData.total);
       const newClaim: ManifoldClaim = {
         instanceId: instanceId,
