@@ -322,7 +322,7 @@ const WaveDrop = ({
       } ${isProfileView ? "tw-mb-3" : ""} tw-w-full`}>
       <div
         className={dropClasses}
-        data-wave-drop-id={drop.stableKey ?? drop.id}
+        data-wave-drop-id={drop.stableHash ?? drop.id}
         data-serial-no={drop.serial_no}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}

@@ -275,7 +275,7 @@ const buildClipboardMessage = (drop: ExtendedDrop): ClipboardMessage => {
   const uniqueAttachments = Array.from(new Set(mediaUrls));
 
   return {
-    id: drop.stableKey ?? drop.id,
+    id: drop.stableHash ?? drop.id,
     author: drop.author?.handle ?? "Unknown",
     timestamp: drop.created_at,
     markdownContent,
@@ -714,7 +714,7 @@ export const useWaveDropsClipboard = ({
 
   const clipboardMessages = useMemo(() => {
     return new Map(
-      chatDrops.map((drop) => [drop.stableKey ?? drop.id, buildClipboardMessage(drop)])
+      chatDrops.map((drop) => [drop.stableHash ?? drop.id, buildClipboardMessage(drop)])
     );
   }, [chatDrops]);
 
