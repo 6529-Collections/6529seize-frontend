@@ -17,7 +17,7 @@ export const SZN1_RANGE = {
 } as const;
 export const SZN1_SEASON_INDEX = -13;
 
-const EUROPE_TZ = "Europe/Nicosia"; // EET/EEST
+const EUROPE_TZ = "Europe/Athens"; // EET/EEST
 const EUROPE_WINTER_OFFSET_HOURS = +2; // EET (UTC+2)
 const EUROPE_SUMMER_OFFSET_HOURS = +3; // EEST (UTC+3)
 const MINT_EUROPE_HOUR = 17;
