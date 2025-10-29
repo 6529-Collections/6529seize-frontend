@@ -1316,6 +1316,7 @@ export default function TransferModal({
               );
               await waitForPaint();
             } catch (e: any) {
+              console.error("Error in 721 transfer", e);
               setTxs((prev) =>
                 prev.map((te) =>
                   te.id === tid
