@@ -291,7 +291,7 @@ export default function WaveItem({
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
     >
-      <div className="tw-relative tw-aspect-[16/9] tw-overflow-hidden tw-rounded-xl">
+      <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-aspect-[16/8.5] sm:tw-aspect-[16/9]">
         <div
           className="tw-absolute tw-inset-0 tw-rounded-xl"
           style={{
@@ -309,7 +309,7 @@ export default function WaveItem({
           />
         )}
         <div
-          className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-40 sm:tw-h-44 md:tw-h-48"
+          className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-36 sm:tw-h-44 md:tw-h-48"
           style={{
             background:
               "linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.64) 32%, rgba(0,0,0,0.30) 64%, rgba(0,0,0,0.00) 100%)",

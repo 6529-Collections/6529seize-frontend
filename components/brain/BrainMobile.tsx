@@ -43,7 +43,7 @@ export enum BrainView {
 }
 
 interface Props {
-  children: ReactNode;
+  readonly children: ReactNode;
 }
 
 const BrainMobile: React.FC<Props> = ({ children }) => {

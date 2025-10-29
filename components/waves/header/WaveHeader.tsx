@@ -48,7 +48,7 @@ export default function WaveHeader({
 
   return (
     <div
-      className={`tw-h-full tw-bg-iron-950 tw-relative tw-overflow-auto ${ringClasses}`}
+      className={`tw-bg-iron-950 tw-relative tw-overflow-auto ${ringClasses}`}
     >
       <div
         className={`${
