@@ -22,7 +22,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { createPortal } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import { Address, isAddress, PublicClient } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import TransferModalPfp from "./TransferModalPfp";
@@ -1204,8 +1204,8 @@ export default function TransferModal({
       if (is1155) {
         // Try batch
         try {
-          const ids = citems.map((x: any) => x.tokenId);
-          const amts = citems.map((x: any) => x.qty);
+          const ids = citems.map((x: TxItem) => x.tokenId);
+          const amts = citems.map((x: TxItem) => x.qty);
           const { request } = await publicClient.simulateContract({
             account: address,
             address: contract as Address,
@@ -1221,11 +1221,13 @@ export default function TransferModal({
           );
 
           const hash = await write(request);
-          setTxs((prev) =>
-            prev.map((e) =>
-              e.id === `${key}-batch` ? { ...e, state: "submitted", hash } : e
-            )
-          );
+          flushSync(() => {
+            setTxs((prev) =>
+              prev.map((e) =>
+                e.id === `${key}-batch` ? { ...e, state: "submitted", hash } : e
+              )
+            );
+          });
           const receipt = await publicClient.waitForTransactionReceipt({
             hash,
           });
@@ -1274,11 +1276,13 @@ export default function TransferModal({
 
             try {
               const hash = await write(request);
-              setTxs((prev) =>
-                prev.map((te) =>
-                  te.id === tid ? { ...te, state: "submitted", hash } : te
-                )
-              );
+              flushSync(() => {
+                setTxs((prev) =>
+                  prev.map((te) =>
+                    te.id === tid ? { ...te, state: "submitted", hash } : te
+                  )
+                );
+              });
               const receipt = await publicClient.waitForTransactionReceipt({
                 hash,
               });
