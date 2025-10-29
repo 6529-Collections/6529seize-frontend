@@ -1114,10 +1114,9 @@ export const useWaveDropsClipboard = ({
   }, [fullDrops, quoteDropLookup]);
 
   const formatRef = useRef<ClipboardFormat>("plain");
-  const containerNode = containerRef.current;
 
   useEffect(() => {
-    const container = containerNode;
+    const container = containerRef.current;
     if (!container) {
       return;
     }
@@ -1204,5 +1203,5 @@ export const useWaveDropsClipboard = ({
       globalThis.removeEventListener?.("keydown", handleKeyDown);
       container.removeEventListener("copy", handleCopy);
     };
-  }, [clipboardMessages, containerNode]);
+  }, [clipboardMessages, containerRef]);
 };
