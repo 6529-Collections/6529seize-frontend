@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
@@ -15,6 +15,7 @@ import { ActiveDropState } from "@/types/dropInteractionTypes";
 import WaveDropsScrollingOverlay from "@/components/waves/drops/WaveDropsScrollingOverlay";
 import { useWaveDropsNotificationRead } from "./hooks/useWaveDropsNotificationRead";
 import { useWaveDropsSerialScroll } from "./hooks/useWaveDropsSerialScroll";
+import { useWaveDropsClipboard } from "./hooks/useWaveDropsClipboard";
 import { WaveDropsContent } from "./subcomponents/WaveDropsContent";
 
 interface WaveDropsAllProps {
@@ -51,6 +52,7 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   const router = useRouter();
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
   const { connectedProfile } = useAuth();
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const { waveMessages, fetchNextPage, waitAndRevealDrop } =
     useVirtualizedWaveDrops(waveId, dropId);
@@ -65,6 +67,16 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   useWaveDropsNotificationRead({
     waveId,
     removeWaveDeliveredNotifications,
+  });
+
+  const dropsForClipboard = useMemo(
+    () => waveMessages?.drops ?? [],
+    [waveMessages?.drops]
+  );
+
+  useWaveDropsClipboard({
+    containerRef,
+    drops: dropsForClipboard,
   });
 
   const {
@@ -133,7 +145,9 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   );
 
   return (
-    <div className="tw-flex tw-flex-col tw-h-full tw-justify-end tw-relative tw-overflow-y-auto tw-bg-iron-950">
+    <div
+      ref={containerRef}
+      className="tw-flex tw-flex-col tw-h-full tw-justify-end tw-relative tw-overflow-y-auto tw-bg-iron-950">
       <WaveDropsContent
         waveMessages={waveMessages}
         dropId={dropId}
