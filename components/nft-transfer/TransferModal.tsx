@@ -1356,7 +1356,7 @@ export default function TransferModal({
     trimmedQuery
   );
 
-  const portalTarget = typeof document !== "undefined" ? document.body : null;
+  const portalTarget = typeof document === "undefined" ? null : document.body;
   const modalContent = (
     <dialog
       ref={dialogRef}
