@@ -3,7 +3,7 @@ import {
   formatToFullDivision,
   getCardsRemainingUntilEndOf,
   getMintNumberForMintDate,
-  getNextMintNumber,
+  getMintTimelineDetails,
   getNextMintStart,
   getRangeDatesByZoom,
   getSeasonIndexForDate,
@@ -11,7 +11,6 @@ import {
   isMintEligibleUtcDay,
   isMintingActive,
   isMintingToday,
-  mintEndInstantUtcForMintDay,
   mintStartInstantUtcForMintDay,
   nextMintDateOnOrAfter,
   printCalendarInvites,
@@ -118,10 +117,12 @@ describe("Eastern time transitions", () => {
     expect(mintDay.toISOString()).toBe("2024-03-11T00:00:00.000Z");
 
     const mintStart = mintStartInstantUtcForMintDay(mintDay);
-    const mintEnd = mintEndInstantUtcForMintDay(mintDay);
+    const mintEnd = getMintTimelineDetails(
+      getMintNumberForMintDate(mintDay)
+    ).mintEndUtc;
 
-    expect(mintStart.toISOString()).toBe("2024-03-11T14:40:00.000Z");
-    expect(mintEnd.toISOString()).toBe("2024-03-12T14:00:00.000Z");
+    expect(mintStart.toISOString()).toBe("2024-03-11T15:40:00.000Z");
+    expect(mintEnd.toISOString()).toBe("2024-03-12T15:00:00.000Z");
   });
 
   it("returns to EST once the fall shift completes", () => {
@@ -130,7 +131,9 @@ describe("Eastern time transitions", () => {
     expect(mintDay.toISOString()).toBe("2024-11-04T00:00:00.000Z");
 
     const mintStart = mintStartInstantUtcForMintDay(mintDay);
-    const mintEnd = mintEndInstantUtcForMintDay(mintDay);
+    const mintEnd = getMintTimelineDetails(
+      getMintNumberForMintDate(mintDay)
+    ).mintEndUtc;
 
     expect(mintStart.toISOString()).toBe("2024-11-04T15:40:00.000Z");
     expect(mintEnd.toISOString()).toBe("2024-11-05T15:00:00.000Z");
@@ -171,13 +174,6 @@ describe("mint timing helpers", () => {
     expect(isMintingActive(afterWindow)).toBe(false);
   });
 
-  it("returns the current or upcoming mint number", () => {
-    const nextMintNumber = getMintNumberForMintDate(nextMintDay);
-
-    expect(getNextMintNumber(beforeMint)).toBe(mintNumber);
-    expect(getNextMintNumber(duringMint)).toBe(mintNumber);
-    expect(getNextMintNumber(afterWindow)).toBe(nextMintNumber);
-  });
 });
 
 describe("getCardsRemainingUntilEndOf", () => {

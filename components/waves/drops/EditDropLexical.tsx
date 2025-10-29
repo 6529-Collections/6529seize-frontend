@@ -54,7 +54,7 @@ import EmojiPlugin from "@/components/drops/create/lexical/plugins/emoji/EmojiPl
 import { EmojiNode } from "@/components/drops/create/lexical/nodes/EmojiNode";
 import { SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
-import normalizeDropMarkdown, { exportDropMarkdown } from "./normalizeDropMarkdown";
+import { normalizeDropMarkdown, exportDropMarkdown } from "./normalizeDropMarkdown";
 import {
   addBlankLinePlaceholders,
   removeBlankLinePlaceholders,

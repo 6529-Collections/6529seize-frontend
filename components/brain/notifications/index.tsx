@@ -105,5 +105,3 @@ export default function Notifications({
     </div>
   );
 }
-
-export type { NotificationsProps };

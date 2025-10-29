@@ -1,0 +1,5 @@
+{
+  "project": "tsconfig.ts-prune.json",
+  "ignore": "(^generated/|^src/generated/|\\.test\\.|\\.spec\\.|/__tests__/|/stories/|^src/middleware\\.ts|/route\\.(ts|tsx)$|^src/(app|pages)/|^app/.*(page|layout|loading|error|not-found|route|template|default)\\.tsx)",
+  "skip": "(\\.test\\.|\\.spec\\.|/__tests__/|^tests/)"
+}

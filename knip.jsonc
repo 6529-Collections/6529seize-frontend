@@ -1,0 +1,51 @@
+{
+    "$schema": "https://unpkg.com/knip@5/schema-jsonc.json",
+  
+    // 1) Tell Knip where your code lives (project graph)
+    "project": [
+      "**/*.{ts,tsx,js,jsx,cjs,mjs}",
+      "!{node_modules,.next,coverage,public}/**",
+      "!{tmp_gen_outp}/**"
+    ],
+  
+    // 2) Optionally add entries Knip can't infer from scripts/configs
+    //    (Next.js entries are auto-added by the Next plugin)
+    "entry": [
+      "scripts/**/*.{ts,js,cjs,mjs}",  // local CLIs used via package.json scripts
+      "app/**/route.{ts,tsx}"          // Next App Router route handlers (if used)
+    ],
+  
+    // 3) Paths: Knip auto-imports TS path aliases from tsconfig,
+    //    but you can add manual aliases here if needed.
+    // "paths": { "@/*": ["./src/*"] },
+  
+    // 4) Report unused exports even in entry files (private repos benefit from this)
+    "includeEntryExports": true,
+  
+    // 5) Generated code: keep analyzing, but avoid noisy "unused exports/files" here
+    "ignoreIssues": {
+      "generated/**": ["exports", "types", "enumMembers"] // ignore only these issue kinds
+    },
+    "ignoreFiles": [
+      "generated/**",        // don't list generated files as "Unused files"
+      "tmp_gen_outp/**",
+      "next-sitemap.config.js",
+      "stubs/empty.js"
+    ],
+    "ignoreDependencies": [
+      "@openapitools/openapi-generator-cli",
+      "bootstrap",
+      "pino-pretty"
+    ],
+  
+    // Disable Jest and Playwright plugins so test-only usages are reported
+    "jest": false,
+    "playwright": false,
+  
+    // 6) Make config mistakes visible in CI
+    "treatConfigHintsAsErrors": true
+  
+    // Plugins: usually automatic. Example to force-enable if needed:
+    // "playwright": true
+  }
+  

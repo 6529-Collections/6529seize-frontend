@@ -5,13 +5,21 @@ import {
   WaveGroupIdentitiesModal,
 } from '@/components/waves/specs/groups/group/edit/buttons/hooks/useWaveGroupEditButtonsController';
 import { WaveGroupType } from '@/components/waves/specs/groups/group/WaveGroup.types';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createGroup as createGroupMutation,
   publishGroup as publishGroupMutation,
 } from '@/services/groups/groupMutations';
 
-jest.mock('@tanstack/react-query', () => ({ useMutation: jest.fn() }));
+jest.mock('@tanstack/react-query', () => {
+  const actual = jest.requireActual('@tanstack/react-query');
+  return {
+    ...actual,
+    useMutation: jest.fn(),
+    useQuery: jest.fn(),
+    useQueryClient: jest.fn(),
+  };
+});
 
 const mockCommonApiFetch = jest.fn();
 const mockCommonApiPost = jest.fn();
@@ -32,22 +40,16 @@ jest.mock('@/services/groups/groupMutations', () => {
 
 const mutateAsyncSpy = jest.fn();
 
-(useMutation as jest.Mock).mockImplementation((options: any) => ({
-  mutateAsync: async (params?: any) => {
-    try {
-      const result = await options.mutationFn(params);
-      options.onSuccess?.(result, params, undefined);
-      options.onSettled?.(result, undefined, params, undefined);
-      mutateAsyncSpy(params);
-      return result;
-    } catch (error) {
-      options.onError?.(error, params, undefined);
-      options.onSettled?.(undefined, error, params, undefined);
-      mutateAsyncSpy(params);
-      throw error;
-    }
-  },
-}));
+const createQueryClientMock = () => ({
+  setQueryData: jest.fn(),
+  ensureQueryData: jest.fn().mockImplementation(async ({ queryFn }: any) => {
+    return queryFn ? await queryFn({ signal: undefined }) : undefined;
+  }),
+  fetchQuery: jest.fn().mockImplementation(async ({ queryFn }: any) => {
+    return queryFn ? await queryFn({ signal: undefined }) : undefined;
+  }),
+});
+let queryClientMock = createQueryClientMock();
 
 const mockCreateGroup = createGroupMutation as jest.Mock;
 const mockPublishGroup = publishGroupMutation as jest.Mock;
@@ -119,13 +121,42 @@ const onWaveCreated = jest.fn();
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mutateAsyncSpy.mockClear();
+  queryClientMock = createQueryClientMock();
+  (useQueryClient as jest.Mock).mockReturnValue(queryClientMock);
+  (useQuery as jest.Mock).mockImplementation(({ enabled, queryFn }) => {
+    if (enabled && typeof queryFn === 'function') {
+      void queryFn({ signal: undefined });
+    }
+    return { data: undefined };
+  });
+  (useMutation as jest.Mock).mockImplementation((options: any) => ({
+    mutateAsync: async (params?: any) => {
+      try {
+        const result = await options.mutationFn(params);
+        options.onSuccess?.(result, params, undefined);
+        options.onSettled?.(result, undefined, params, undefined);
+        mutateAsyncSpy(params);
+        return result;
+      } catch (error) {
+        options.onError?.(error, params, undefined);
+        options.onSettled?.(undefined, error, params, undefined);
+        mutateAsyncSpy(params);
+        throw error;
+      }
+    },
+  }));
+  mockCommonApiFetch.mockReset();
+  mockCommonApiPost.mockReset();
+  mockCreateGroup.mockReset();
+  mockPublishGroup.mockReset();
+  requestAuth.mockResolvedValue({ success: true });
   mockCommonApiPost.mockResolvedValue({});
   mockCreateGroup.mockResolvedValue({
     ...baseGroupFull,
     id: 'new-group-id',
   });
   mockPublishGroup.mockResolvedValue(undefined);
-  mutateAsyncSpy.mockClear();
 });
 
 describe('useWaveGroupEditButtonsController - identity management', () => {
@@ -139,6 +170,13 @@ describe('useWaveGroupEditButtonsController - identity management', () => {
       }
       if (endpoint === `groups/${baseGroupFull.id}/identity_groups/${baseGroupFull.group.excluded_identity_group_id}`) {
         return Promise.resolve<string[]>(['0xabcd']);
+      }
+      if (endpoint === 'groups/new-group-id') {
+        return Promise.resolve({
+          ...baseGroupFull,
+          id: 'new-group-id',
+          visible: true,
+        });
       }
       throw new Error(`Unexpected endpoint ${endpoint}`);
     });
@@ -167,10 +205,12 @@ describe('useWaveGroupEditButtonsController - identity management', () => {
     const payloadArg = mockCreateGroup.mock.calls[0][0].payload;
     expect(payloadArg.group.identity_addresses).toEqual(['0xabcd']);
     expect(payloadArg.group.excluded_identity_addresses).toBeNull();
-    expect(mockPublishGroup).toHaveBeenCalledWith({
-      id: 'new-group-id',
-      oldVersionId: baseGroupFull.id,
-    });
+    expect(mockPublishGroup).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'new-group-id',
+        oldVersionId: baseGroupFull.id,
+      }),
+    );
     expect(mockCommonApiPost).not.toHaveBeenCalled();
     expect(mutateAsyncSpy).not.toHaveBeenCalled();
     expect(onWaveCreated).toHaveBeenCalledTimes(1);
@@ -180,8 +220,17 @@ describe('useWaveGroupEditButtonsController - identity management', () => {
     });
   });
 
-  it('blocks including identities when no group exists', async () => {
-    mockCommonApiFetch.mockReset();
+  it('creates a new group when no scoped group exists', async () => {
+    mockCommonApiFetch.mockImplementation(({ endpoint }: { endpoint: string }) => {
+      if (endpoint === 'groups/new-group-id') {
+        return Promise.resolve({
+          ...baseGroupFull,
+          id: 'new-group-id',
+          visible: true,
+        });
+      }
+      throw new Error(`Unexpected endpoint ${endpoint}`);
+    });
 
     const { result } = renderHook(() =>
       useWaveGroupEditButtonsController({
@@ -195,7 +244,7 @@ describe('useWaveGroupEditButtonsController - identity management', () => {
       }),
     );
 
-    expect(result.current.canIncludeIdentity).toBe(false);
+    expect(result.current.canIncludeIdentity).toBe(true);
 
     await act(async () => {
       await result.current.onIdentityConfirm({
@@ -204,15 +253,29 @@ describe('useWaveGroupEditButtonsController - identity management', () => {
       });
     });
 
-    expect(requestAuth).not.toHaveBeenCalled();
-    expect(mockCreateGroup).not.toHaveBeenCalled();
-    expect(mockPublishGroup).not.toHaveBeenCalled();
-    expect(mockCommonApiPost).not.toHaveBeenCalled();
-    expect(mutateAsyncSpy).not.toHaveBeenCalled();
-    expect(onWaveCreated).not.toHaveBeenCalled();
+    expect(requestAuth).toHaveBeenCalled();
+    expect(mockCreateGroup).toHaveBeenCalledTimes(1);
+    expect(mockPublishGroup).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'new-group-id',
+        oldVersionId: null,
+      }),
+    );
+    expect(mockCommonApiPost).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: 'waves/wave-1',
+        body: expect.objectContaining({
+          visibility: expect.objectContaining({
+            scope: expect.objectContaining({ group_id: 'new-group-id' }),
+          }),
+        }),
+      }),
+    );
+    expect(mutateAsyncSpy).toHaveBeenCalledTimes(1);
+    expect(onWaveCreated).toHaveBeenCalledTimes(1);
     expect(setToast).toHaveBeenCalledWith({
-      message: 'You need to define group filters before including specific identities.',
-      type: 'error',
+      message: 'Identity successfully included in the group.',
+      type: 'success',
     });
   });
 
@@ -226,6 +289,13 @@ describe('useWaveGroupEditButtonsController - identity management', () => {
       }
       if (endpoint === `groups/${baseGroupFull.id}/identity_groups/${baseGroupFull.group.excluded_identity_group_id}`) {
         return Promise.resolve<string[]>(['0xccc']);
+      }
+      if (endpoint === 'groups/new-group-id') {
+        return Promise.resolve({
+          ...baseGroupFull,
+          id: 'new-group-id',
+          visible: true,
+        });
       }
       throw new Error(`Unexpected endpoint ${endpoint}`);
     });
@@ -265,6 +335,13 @@ describe('useWaveGroupEditButtonsController - identity management', () => {
     mockCommonApiFetch.mockImplementation(({ endpoint }: { endpoint: string }) => {
       if (endpoint === `groups/${baseGroupFull.id}`) {
         return Promise.resolve(baseGroupFull);
+      }
+      if (endpoint === 'groups/new-group-id') {
+        return Promise.resolve({
+          ...baseGroupFull,
+          id: 'new-group-id',
+          visible: true,
+        });
       }
       return Promise.reject(new Error('Group does not have identity group'));
     });

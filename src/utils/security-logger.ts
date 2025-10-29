@@ -208,18 +208,3 @@ export const createValidationEventContext = (
   userAgent:
     typeof navigator === "undefined" ? "server-side" : navigator.userAgent,
 });
-
-/**
- * Creates a minimal security context for error events
- * Contains ONLY safe diagnostic data
- */
-export const createErrorEventContext = (
-  source: string,
-  errorCode?: string
-): SecurityEventContext => ({
-  timestamp: new Date().toISOString(),
-  source,
-  errorCode,
-  userAgent:
-    typeof navigator === "undefined" ? "server-side" : navigator.userAgent,
-});

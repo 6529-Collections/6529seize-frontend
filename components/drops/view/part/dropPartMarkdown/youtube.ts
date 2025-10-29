@@ -1,6 +1,6 @@
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 
-export interface YoutubeLinkInfo {
+interface YoutubeLinkInfo {
   readonly videoId: string;
   readonly url: string;
 }

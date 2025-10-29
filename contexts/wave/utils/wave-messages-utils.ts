@@ -341,7 +341,7 @@ export async function fetchNewestWaveMessages(
   if (sinceSerialNo !== null) {
     // Assuming API uses these parameters for fetching newer messages
     params.serial_no_limit = `${sinceSerialNo}`;
-    params.search_strategy = "FIND_NEWER";
+    params.search_strategy = ApiDropSearchStrategy.Newer;
   }
 
   try {
@@ -407,7 +407,7 @@ interface LightDropsApiParams {
   // Add any other specific, known query parameters for /light-drops from openapi.yaml if they exist
 }
 
-export async function findLightDropBySerialNoWithPagination(
+async function findLightDropBySerialNoWithPagination(
   targetSerialNo: number,
   apiParams: LightDropsApiParams, // wave_id and max_serial_no are mandatory here
   signal?: AbortSignal

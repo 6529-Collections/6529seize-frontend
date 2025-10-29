@@ -45,7 +45,7 @@ const UrlGuardError = MockUrlGuardError;
 const originalFetch = global.fetch;
 const mockFetch = jest.fn();
 
-let GET: typeof import("../../app/api/farcaster/route").GET;
+let GET: typeof import("@/app/api/farcaster/route").GET;
 
 const resetUrlGuardMocks = () => {
   parsePublicUrlMock.mockReset();
@@ -58,7 +58,7 @@ const resetUrlGuardMocks = () => {
 const loadRoute = async () => {
   jest.resetModules();
   resetUrlGuardMocks();
-  ({ GET } = await import("../../../app/api/farcaster/route"));
+  ({ GET } = await import("@/app/api/farcaster/route"));
 };
 
 describe("farcaster API route", () => {
