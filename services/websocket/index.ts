@@ -10,8 +10,8 @@
 
 import { publicEnv } from "@/config/env";
 
-// Types
-export * from "./WebSocketTypes";
+// Types (re-export only the publicly consumed ones)
+export type { WebSocketConfig } from "./WebSocketTypes";
 
 // Context and Provider
 // Hooks
