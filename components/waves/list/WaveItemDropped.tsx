@@ -81,7 +81,7 @@ export default function WaveItemDropped({ wave }: { readonly wave: ApiWave }) {
                   data-wave-item-interactive="true"
                   onClick={handleContributorClick(contributorHref)}
                   onAuxClick={handleContributorAuxClick(contributorHref)}
-                  className="tw-bg-transparent tw-border-none tw-p-0 tw-m-0 tw-inline-flex"
+                  className="tw-cursor-pointer tw-bg-transparent tw-border-none tw-p-0 tw-m-0 tw-inline-flex"
                   aria-label={
                     c.contributor_identity
                       ? `View @${c.contributor_identity}`

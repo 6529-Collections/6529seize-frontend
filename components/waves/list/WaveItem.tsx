@@ -222,7 +222,7 @@ export default function WaveItem({
         data-wave-item-interactive="true"
         onClick={handleAuthorClick}
         onAuxClick={handleAuthorAuxClick}
-        className={`${authorWrapperClass} tw-no-underline tw-bg-transparent tw-border-none tw-p-0 tw-text-left`}
+        className={`${authorWrapperClass} tw-cursor-pointer tw-no-underline tw-bg-transparent tw-border-none tw-p-0 tw-text-left`}
         aria-label={
           author?.handle
             ? `View @${author.handle}`
