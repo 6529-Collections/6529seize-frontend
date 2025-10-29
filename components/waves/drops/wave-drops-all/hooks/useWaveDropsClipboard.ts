@@ -1,7 +1,6 @@
 "use client";
 
 import { RefObject, useEffect, useMemo, useRef } from "react";
-import { toast } from "react-toastify";
 import {
   Drop,
   DropSize,
@@ -599,18 +598,6 @@ export const useWaveDropsClipboard = ({
             // Silently ignore clipboard promise failures – the event clipboard fallback already ran.
           });
       }
-
-      const count = messages.length;
-      toast.success(
-        count === 1 ? "Message copied" : `Copied ${count} messages`,
-        {
-          autoClose: 1000,
-          hideProgressBar: true,
-          pauseOnHover: false,
-          closeOnClick: true,
-          draggable: false,
-        }
-      );
 
       formatRef.current = "plain";
     };
