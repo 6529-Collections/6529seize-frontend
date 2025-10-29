@@ -76,7 +76,16 @@ const escapeAttributeValue = (value: string): string => {
     return CSS.escape(value);
   }
 
-  return value.replaceAll(/[\u0000-\x1F\x7F"\\[\]]/g, String.raw`\$&`);
+  let out = "";
+  for (const ch of value) {
+    const code = ch.codePointAt(0)!;
+    if (code <= 0x1f || code === 0x7f || ch === "\"" || ch === "\\" || ch === "[" || ch === "]") {
+      out += "\\" + ch;
+    } else {
+      out += ch;
+    }
+  }
+  return out;
 };
 
 const findDropElement = (node: Node | null): HTMLElement | null => {
@@ -142,6 +151,7 @@ const toPlainText = (markdown: string): string =>
     .replaceAll(/~~(.*?)~~/g, "$1")
     .replaceAll(/(^|\n)#{1,6}\s+/g, "$1")
     .replaceAll(/(^|\n)\s*[-*+]\s+/g, "$1")
+    .replaceAll(/(^|\n)\s*\d+[.)]\s+/g, "$1")
     .replaceAll(/(^|\n)>\s?/g, "$1")
     .replaceAll(/\n{3,}/g, "\n\n")
     .trim();
@@ -154,6 +164,69 @@ type EmbedInfo = {
 };
 
 const EMBED_KEY_SEPARATORS = [":", "::", ".", "-", "_"] as const;
+
+const createEmptyEmbed = (): EmbedInfo => ({ extras: [] });
+
+const ensureFieldValue = <K extends "title" | "url" | "description">(
+  group: EmbedInfo,
+  field: K,
+  value: string
+): EmbedInfo => {
+  if (group[field]) {
+    return group;
+  }
+  return { ...group, [field]: value };
+};
+
+const appendUniqueExtra = (group: EmbedInfo, value: string): EmbedInfo => {
+  if (group.extras.includes(value)) {
+    return group;
+  }
+  return { ...group, extras: [...group.extras, value] };
+};
+
+const splitEmbedKey = (normalizedKey: string) => {
+  for (const separator of EMBED_KEY_SEPARATORS) {
+    const index = normalizedKey.lastIndexOf(separator);
+    if (index > -1) {
+      return {
+        groupKey: normalizedKey.slice(0, index) || "default",
+        fieldKey: normalizedKey.slice(index + separator.length),
+      };
+    }
+  }
+
+  return { groupKey: "default", fieldKey: normalizedKey };
+};
+
+const applyMetadataToGroup = (
+  group: EmbedInfo,
+  fieldKey: string,
+  dataKey: string | undefined,
+  dataValue: string
+): EmbedInfo => {
+  if (fieldKey.includes("title")) {
+    return ensureFieldValue(group, "title", dataValue);
+  }
+
+  if (fieldKey.includes("url")) {
+    return ensureFieldValue(group, "url", dataValue);
+  }
+
+  if (fieldKey.includes("description")) {
+    return ensureFieldValue(group, "description", dataValue);
+  }
+
+  if (dataValue.startsWith("http")) {
+    if (!group.url) {
+      return ensureFieldValue(group, "url", dataValue);
+    }
+    return appendUniqueExtra(group, dataValue);
+  }
+
+  const extraLabel = `${dataKey}: ${dataValue}`;
+  return appendUniqueExtra(group, extraLabel);
+};
 
 const extractEmbeds = (metadata: ApiDropMetadata[]): EmbedInfo[] => {
   if (!metadata.length) {
@@ -168,50 +241,13 @@ const extractEmbeds = (metadata: ApiDropMetadata[]): EmbedInfo[] => {
     }
 
     const normalizedKey = data_key?.toLowerCase?.() ?? "";
-    let groupKey = "default";
-    let fieldKey = normalizedKey;
+    const { groupKey, fieldKey } = splitEmbedKey(normalizedKey);
+    const group = groups.get(groupKey) ?? createEmptyEmbed();
 
-    for (const separator of EMBED_KEY_SEPARATORS) {
-      const index = normalizedKey.lastIndexOf(separator);
-      if (index > -1) {
-        groupKey = normalizedKey.slice(0, index) || "default";
-        fieldKey = normalizedKey.slice(index + separator.length);
-        break;
-      }
-    }
-
-    const group = groups.get(groupKey) ?? { extras: [] };
-    let nextGroup = group;
-
-    if (fieldKey.includes("title")) {
-      if (!nextGroup.title) {
-        nextGroup = { ...nextGroup, title: data_value };
-      }
-    } else if (fieldKey.includes("url")) {
-      if (!nextGroup.url) {
-        nextGroup = { ...nextGroup, url: data_value };
-      }
-    } else if (fieldKey.includes("description")) {
-      if (!nextGroup.description) {
-        nextGroup = { ...nextGroup, description: data_value };
-      }
-    } else if (data_value.startsWith("http")) {
-      if (!nextGroup.url) {
-        nextGroup = { ...nextGroup, url: data_value };
-      } else if (!nextGroup.extras.includes(data_value)) {
-        nextGroup = {
-          ...nextGroup,
-          extras: [...nextGroup.extras, data_value],
-        };
-      }
-    } else {
-      nextGroup = {
-        ...nextGroup,
-        extras: [...nextGroup.extras, `${data_key}: ${data_value}`],
-      };
-    }
-
-    groups.set(groupKey, nextGroup);
+    groups.set(
+      groupKey,
+      applyMetadataToGroup(group, fieldKey, data_key, data_value)
+    );
   }
 
   return Array.from(groups.values()).filter(
@@ -411,6 +447,41 @@ const createMarkdownEmbedLines: EmbedLineBuilder = (embed) => {
   return lines;
 };
 
+type DropPart = ExtendedDrop["parts"][number];
+
+const buildPartSegments = (
+  part: DropPart,
+  quoteLookup: Map<string, QuoteDropSource>
+): string[] => {
+  const segments: string[] = [];
+  const content = (part.content ?? "").trim();
+
+  if (content.length > 0) {
+    segments.push(content);
+  }
+
+  const quoted = part.quoted_drop;
+  if (!quoted) {
+    return segments;
+  }
+
+  const quoteSegment = formatReference(
+    {
+      label: "Quote from",
+      dropId: quoted.drop_id,
+      dropPartId: quoted.drop_part_id,
+      drop: quoted.drop,
+    },
+    quoteLookup
+  );
+
+  if (quoteSegment) {
+    segments.push(quoteSegment);
+  }
+
+  return segments;
+};
+
 const buildClipboardMessage = (
   drop: ExtendedDrop,
   quoteLookup: Map<string, QuoteDropSource>
@@ -435,26 +506,7 @@ const buildClipboardMessage = (
   }
 
   for (const part of drop.parts) {
-    const content = (part.content ?? "").trim();
-    if (content.length > 0) {
-      markdownSegments.push(content);
-    }
-
-    if (part.quoted_drop) {
-      const quoteSegment = formatReference(
-        {
-          label: "Quote from",
-          dropId: part.quoted_drop.drop_id,
-          dropPartId: part.quoted_drop.drop_part_id,
-          drop: part.quoted_drop.drop,
-        },
-        quoteLookup
-      );
-
-      if (quoteSegment) {
-        markdownSegments.push(quoteSegment);
-      }
-    }
+    markdownSegments.push(...buildPartSegments(part, quoteLookup));
   }
 
   const markdownContent = markdownSegments.join("\n\n").trim();
@@ -618,7 +670,7 @@ const formatMessages = (
   messages: ClipboardMessage[],
   format: ClipboardFormat
 ): string => {
-  if (!messages.length) {
+  if (messages.length === 0) {
     return "";
   }
 
@@ -728,10 +780,13 @@ const resolveSelectionContext = (
   const messages: ClipboardMessage[] = [];
   for (const id of selectedIds) {
     const message = clipboardMessages.get(id);
-    if (!message) {
-      return null;
+    if (message) {
+      messages.push(message);
     }
-    messages.push(message);
+  }
+
+  if (messages.length === 0) {
+    return null;
   }
 
   messages.sort((a, b) => {
@@ -852,7 +907,7 @@ const collectPartialSegments = (
   if (
     boundaries.startDropId &&
     boundaries.startElementForRange &&
-    !boundaries.startFullySelected
+    boundaries.startFullySelected === false
   ) {
     usedPartialHandling = true;
     const text = getSelectedTextForElement(
@@ -862,12 +917,17 @@ const collectPartialSegments = (
     partialSegments.set(boundaries.startDropId, text);
   }
 
+  const isSameDrop =
+    boundaries.startDropId !== null &&
+    boundaries.startDropId === boundaries.endDropId;
+  const endPartiallySelected =
+    boundaries.endFullySelected === false ||
+    (isSameDrop && boundaries.startFullySelected === false);
+
   if (
     boundaries.endDropId &&
     boundaries.endElementForRange &&
-    (!boundaries.endFullySelected ||
-      (boundaries.startDropId === boundaries.endDropId &&
-        !boundaries.startFullySelected))
+    endPartiallySelected
   ) {
     usedPartialHandling = true;
     const text = getSelectedTextForElement(
@@ -980,9 +1040,10 @@ export const useWaveDropsClipboard = ({
   }, [fullDrops, quoteDropLookup]);
 
   const formatRef = useRef<ClipboardFormat>("plain");
+  const containerNode = containerRef.current;
 
   useEffect(() => {
-    const container = containerRef.current;
+    const container = containerNode;
     if (!container) {
       return;
     }
@@ -1069,5 +1130,5 @@ export const useWaveDropsClipboard = ({
       globalThis.removeEventListener?.("keydown", handleKeyDown);
       container.removeEventListener("copy", handleCopy);
     };
-  }, [clipboardMessages, containerRef]);
+  }, [clipboardMessages, containerNode]);
 };
