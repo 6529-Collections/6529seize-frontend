@@ -942,6 +942,22 @@ export const useWaveDropsClipboard = ({
         return;
       }
 
+      const selection = globalThis.getSelection?.() ?? null;
+      const targetNode = event.target instanceof Node ? event.target : null;
+      const anchorNode = selection?.anchorNode ?? null;
+      const focusNode = selection?.focusNode ?? null;
+      const isInContainer = (node: Node | null) =>
+        !!node && container.contains(node);
+
+      if (
+        !isInContainer(targetNode) &&
+        !isInContainer(anchorNode) &&
+        !isInContainer(focusNode)
+      ) {
+        formatRef.current = "plain";
+        return;
+      }
+
       formatRef.current = event.shiftKey ? "markdown" : "plain";
     };
 
