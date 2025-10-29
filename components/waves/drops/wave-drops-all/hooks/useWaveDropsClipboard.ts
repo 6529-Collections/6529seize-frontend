@@ -499,9 +499,14 @@ const resolveSelectionContext = (
     return null;
   }
 
-  const messages = selectedIds
-    .map((id) => clipboardMessages.get(id))
-    .filter((message): message is ClipboardMessage => !!message);
+  const messages: ClipboardMessage[] = [];
+  for (const id of selectedIds) {
+    const message = clipboardMessages.get(id);
+    if (!message) {
+      return null;
+    }
+    messages.push(message);
+  }
 
   if (!messages.length) {
     return null;
