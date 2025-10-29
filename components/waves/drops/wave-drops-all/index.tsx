@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
-import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { Drop, DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
 import { useScrollBehavior } from "@/hooks/useScrollBehavior";
 import { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
@@ -17,6 +17,8 @@ import { useWaveDropsNotificationRead } from "./hooks/useWaveDropsNotificationRe
 import { useWaveDropsSerialScroll } from "./hooks/useWaveDropsSerialScroll";
 import { useWaveDropsClipboard } from "./hooks/useWaveDropsClipboard";
 import { WaveDropsContent } from "./subcomponents/WaveDropsContent";
+
+const EMPTY_DROPS: Drop[] = [];
 
 interface WaveDropsAllProps {
   readonly waveId: string;
@@ -70,7 +72,7 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   });
 
   const dropsForClipboard = useMemo(
-    () => waveMessages?.drops ?? [],
+    () => waveMessages?.drops ?? EMPTY_DROPS,
     [waveMessages?.drops]
   );
 

@@ -24,7 +24,7 @@ interface ClipboardMessage {
 }
 
 interface UseWaveDropsClipboardOptions {
-  readonly containerRef: RefObject<HTMLElement | null>;
+  readonly containerRef: RefObject<HTMLDivElement | null>;
   readonly drops: Drop[] | undefined;
 }
 
@@ -51,12 +51,12 @@ const nodeIsEditable = (node: Node | null): boolean => {
     }
   }
 
-  const parent = isHTMLElement(node) ? node.parentElement : node.parentElement;
+  const parent = node.parentElement;
   if (!parent) {
     return false;
   }
 
-  if (parent.closest("[contenteditable=\"true\"]")) {
+  if (parent.isContentEditable) {
     return true;
   }
 
@@ -64,9 +64,11 @@ const nodeIsEditable = (node: Node | null): boolean => {
     return true;
   }
 
-  return (
-    parent.closest("[data-wave-clipboard-allow-default=\"true\"]") !== null
+  const allowDefaultElement = parent.closest(
+    "[data-wave-clipboard-allow-default=\"true\"]"
   );
+
+  return allowDefaultElement !== null;
 };
 
 const escapeAttributeValue = (value: string): string => {
@@ -74,7 +76,7 @@ const escapeAttributeValue = (value: string): string => {
     return CSS.escape(value);
   }
 
-  return value.replace(/["\\]/g, "\\$&");
+  return value.replaceAll(/[\0-\x1F\x7F"\\\[\]]/g, String.raw`\$&`);
 };
 
 const findDropElement = (node: Node | null): HTMLElement | null => {
@@ -82,8 +84,13 @@ const findDropElement = (node: Node | null): HTMLElement | null => {
     return null;
   }
 
-  let current: HTMLElement | null =
-    node instanceof HTMLElement ? node : (node.parentElement ?? null);
+  let current: HTMLElement | null = null;
+
+  if (node instanceof HTMLElement) {
+    current = node;
+  } else if (node.parentElement) {
+    current = node.parentElement;
+  }
 
   while (current) {
     if (current.dataset?.waveDropId) {
@@ -101,8 +108,6 @@ const isRangeFullyCoveringElement = (range: Range, element: HTMLElement): boolea
 
   const coversStart = range.compareBoundaryPoints(Range.START_TO_START, elementRange) <= 0;
   const coversEnd = range.compareBoundaryPoints(Range.END_TO_END, elementRange) >= 0;
-
-  elementRange.detach?.();
 
   return coversStart && coversEnd;
 };
@@ -123,24 +128,22 @@ const getSelectedTextForElement = (range: Range, element: HTMLElement): string =
 
   const text = clipped.toString();
 
-  clipped.detach?.();
-  elementRange.detach?.();
-
   return text;
 };
 
 const toPlainText = (markdown: string): string =>
   markdown
-    .replace(/```([\s\S]*?)```/g, (_, code) => code.trim())
-    .replace(/`([^`]+)`/g, "$1")
-    .replace(/!\[.*?]\((.*?)\)/g, (_, url: string) => url)
-    .replace(/\[(.*?)]\((.*?)\)/g, "$1 ($2)")
-    .replace(/(?:\*\*|__)(.*?)\1/g, "$1")
-    .replace(/(^|[^\w])\*([^*\s][^*]*?)\*(?=$|[^\w])/g, (_, prefix: string, content: string) => `${prefix}${content}`)
-    .replace(/(^|[^\w])_([^_\s][^_]*?)_(?=$|[^\w])/g, (_, prefix: string, content: string) => `${prefix}${content}`)
-    .replace(/~~([^~]+)~~/g, "$1")
-    .replace(/^\s{0,3}>\s?/gm, "")
-    .replace(/\n{3,}/g, "\n\n")
+    .replaceAll(/```([\s\S]*?)```/g, (_, code) => code.trim())
+    .replaceAll(/`([^`]+)`/g, "$1")
+    .replaceAll(/!\[[^\]]*]\(([^)]+)\)/g, "$1")
+    .replaceAll(/\[([^\]]+)\]\(([^)]+)\)/g, "$1 ($2)")
+    .replaceAll(/(\*\*|__)(.*?)\1/g, "$2")
+    .replaceAll(/(\*|_)(.*?)\1/g, "$2")
+    .replaceAll(/~~(.*?)~~/g, "$1")
+    .replaceAll(/(^|\n)#{1,6}\s+/g, "$1")
+    .replaceAll(/(^|\n)\s*[-*+]\s+/g, "$1")
+    .replaceAll(/(^|\n)>\s?/g, "$1")
+    .replaceAll(/\n{3,}/g, "\n\n")
     .trim();
 
 type EmbedInfo = {
@@ -159,9 +162,9 @@ const extractEmbeds = (metadata: ApiDropMetadata[]): EmbedInfo[] => {
 
   const groups = new Map<string, EmbedInfo>();
 
-  metadata.forEach(({ data_key, data_value }) => {
+  for (const { data_key, data_value } of metadata) {
     if (!data_value) {
-      return;
+      continue;
     }
 
     const normalizedKey = data_key?.toLowerCase?.() ?? "";
@@ -177,7 +180,7 @@ const extractEmbeds = (metadata: ApiDropMetadata[]): EmbedInfo[] => {
       }
     }
 
-    const group = groups.get(groupKey) ?? { extras: [] as string[] };
+    const group = groups.get(groupKey) ?? { extras: [] };
     let nextGroup = group;
 
     if (fieldKey.includes("title")) {
@@ -209,7 +212,7 @@ const extractEmbeds = (metadata: ApiDropMetadata[]): EmbedInfo[] => {
     }
 
     groups.set(groupKey, nextGroup);
-  });
+  }
 
   return Array.from(groups.values()).filter(
     (group) =>
@@ -280,7 +283,9 @@ const buildClipboardMessage = (drop: ExtendedDrop): ClipboardMessage => {
     embedPlainLines: embedPlainLines.filter(Boolean),
     embedMarkdownLines: embedMarkdownLines.filter(Boolean),
     attachmentPlainLines: uniqueAttachments,
-    attachmentMarkdownLines: uniqueAttachments,
+    attachmentMarkdownLines: uniqueAttachments.map(
+      (url) => `[attachment](${url})`
+    ),
   };
 };
 
@@ -295,6 +300,68 @@ const formatTimestamp = (timestamp: number): string => {
   }
 };
 
+type FormatContent = {
+  primaryContent: string;
+  embedLines: string[];
+  attachmentLines: string[];
+};
+
+const resolveFormatContent = (
+  message: ClipboardMessage,
+  format: ClipboardFormat
+): FormatContent => {
+  const isMarkdown = format === "markdown";
+  let primarySource: string | null | undefined;
+  let embedSource: string[] | null | undefined;
+  let attachmentSource: string[] | null | undefined;
+
+  if (isMarkdown) {
+    primarySource = message.markdownContent;
+    embedSource = message.embedMarkdownLines;
+    attachmentSource = message.attachmentMarkdownLines;
+  } else {
+    primarySource = message.plainContent;
+    embedSource = message.embedPlainLines;
+    attachmentSource = message.attachmentPlainLines;
+  }
+
+  const primaryContent = (primarySource ?? "").trim();
+  const embedLines = embedSource ?? [];
+  const attachmentLines = attachmentSource ?? [];
+
+  return {
+    primaryContent,
+    embedLines,
+    attachmentLines,
+  };
+};
+
+const createHeading = (
+  authorLabel: string,
+  timeLabel: string,
+  format: ClipboardFormat,
+  isSingle: boolean
+): string => {
+  const timeSuffix = timeLabel ? " (" + timeLabel + ")" : "";
+  const markdownTimePrefix = timeLabel ? "**" + timeLabel + "** " : "";
+  const plainTimePrefix = timeLabel ? timeLabel + " " : "";
+  const markdownAuthorLabel = "**" + authorLabel + "**";
+
+  if (format === "markdown") {
+    if (isSingle) {
+      return markdownAuthorLabel + timeSuffix + ":";
+    }
+
+    return markdownTimePrefix + markdownAuthorLabel + ":";
+  }
+
+  if (isSingle) {
+    return authorLabel + timeSuffix + ":";
+  }
+
+  return plainTimePrefix + authorLabel + ":";
+};
+
 const formatMessage = (
   message: ClipboardMessage,
   format: ClipboardFormat,
@@ -302,49 +369,24 @@ const formatMessage = (
 ): string => {
   const timeLabel = formatTimestamp(message.timestamp);
   const authorLabel = message.author || "Unknown";
-  const heading =
-    format === "markdown"
-      ? isSingle
-        ? `**${authorLabel}**${timeLabel ? ` (${timeLabel})` : ""}:`
-        : `${timeLabel ? `**${timeLabel}** ` : ""}**${authorLabel}**:`
-      : isSingle
-      ? `${authorLabel}${timeLabel ? ` (${timeLabel})` : ""}:`
-      : `${timeLabel ? `${timeLabel} ` : ""}${authorLabel}:`;
+  const formatContent = resolveFormatContent(message, format);
+  const heading = createHeading(authorLabel, timeLabel, format, isSingle);
 
-  const primaryContent =
-    format === "markdown"
-      ? message.markdownContent.trim()
-      : message.plainContent.trim();
+  const sections = [
+    formatContent.primaryContent,
+    ...formatContent.embedLines,
+    ...formatContent.attachmentLines,
+  ].filter((section) => section.length > 0);
 
-  const embedLines =
-    format === "markdown"
-      ? message.embedMarkdownLines
-      : message.embedPlainLines;
-  const attachmentLines =
-    format === "markdown"
-      ? message.attachmentMarkdownLines
-      : message.attachmentPlainLines;
-
-  const additionalSections = [...embedLines, ...attachmentLines].filter(
-    (line) => line && line.length > 0
-  );
-
-  if (!primaryContent && additionalSections.length === 0) {
+  if (sections.length === 0) {
     return heading;
   }
 
-  const [firstSection, ...rest] = [
-    primaryContent,
-    ...additionalSections,
-  ].filter((section) => section && section.length > 0);
+  const [firstSection, ...rest] = sections;
+  let block = (heading + " " + firstSection).trimEnd();
 
-  if (!firstSection) {
-    return heading;
-  }
-
-  let block = `${heading} ${firstSection}`.trimEnd();
   if (rest.length > 0) {
-    block += `\n\n${rest.join("\n\n")}`;
+    block += "\n\n" + rest.join("\n\n");
   }
 
   return block;
@@ -405,6 +447,253 @@ const gatherSelectedMessageIds = (
   return ids;
 };
 
+type SelectionContext = {
+  messages: ClipboardMessage[];
+  selectedIds: string[];
+  selectionRange: Range | null;
+};
+
+type RangeBoundaryContext = {
+  startDropId: string | null;
+  endDropId: string | null;
+  startElementForRange: HTMLElement | null;
+  endElementForRange: HTMLElement | null;
+  startFullySelected: boolean;
+  endFullySelected: boolean;
+};
+
+type PartialSegmentsResult = {
+  partialSegments: Map<string, string>;
+  usedPartialHandling: boolean;
+};
+
+const resolveSelectionContext = (
+  selection: Selection | null,
+  container: HTMLElement,
+  clipboardMessages: Map<string, ClipboardMessage>
+): SelectionContext | null => {
+  if (!selection || selection.isCollapsed) {
+    return null;
+  }
+
+  const anchorNodeParent = selection.anchorNode;
+  const focusNodeParent = selection.focusNode;
+
+  const anchorInside = anchorNodeParent
+    ? container.contains(anchorNodeParent)
+    : false;
+  const focusInside = focusNodeParent
+    ? container.contains(focusNodeParent)
+    : false;
+
+  if (!anchorInside && !focusInside) {
+    return null;
+  }
+
+  if (nodeIsEditable(anchorNodeParent) || nodeIsEditable(focusNodeParent)) {
+    return null;
+  }
+
+  const selectedIds = gatherSelectedMessageIds(selection, container);
+  if (!selectedIds.length) {
+    return null;
+  }
+
+  const messages = selectedIds
+    .map((id) => clipboardMessages.get(id))
+    .filter((message): message is ClipboardMessage => !!message);
+
+  if (!messages.length) {
+    return null;
+  }
+
+  messages.sort((a, b) => {
+    if (a.timestamp === b.timestamp) {
+      return a.id.localeCompare(b.id);
+    }
+    return a.timestamp - b.timestamp;
+  });
+
+  const selectionRange =
+    selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+
+  return {
+    messages,
+    selectedIds,
+    selectionRange,
+  };
+};
+
+const buildRangePayload = (
+  selectionRange: Range,
+  selectedIds: string[],
+  container: HTMLElement,
+  messages: ClipboardMessage[],
+  format: ClipboardFormat
+): string | undefined => {
+  const messagesById = new Map(
+    messages.map((message) => [message.id, message] as const)
+  );
+
+  const dropElements = collectDropElements(container, selectedIds);
+  const boundaries = resolveRangeBoundaries(selectionRange, dropElements);
+  const { partialSegments, usedPartialHandling } = collectPartialSegments(
+    selectionRange,
+    boundaries
+  );
+
+  const segments = buildSegmentsFromSelection({
+    selectedIds,
+    partialSegments,
+    messagesById,
+    format,
+  });
+
+  if (segments.length > 0 || usedPartialHandling) {
+    return segments.join("\n\n");
+  }
+
+  return undefined;
+};
+
+const collectDropElements = (
+  container: HTMLElement,
+  selectedIds: string[]
+): Map<string, HTMLElement> => {
+  const dropElements = new Map<string, HTMLElement>();
+
+  for (const id of selectedIds) {
+    const escapedId = escapeAttributeValue(id);
+    const element = container.querySelector<HTMLElement>(
+      `[data-wave-drop-id="${escapedId}"]`
+    );
+
+    if (element) {
+      dropElements.set(id, element);
+    }
+  }
+
+  return dropElements;
+};
+
+const resolveRangeBoundaries = (
+  selectionRange: Range,
+  dropElements: Map<string, HTMLElement>
+): RangeBoundaryContext => {
+  const startElement = findDropElement(selectionRange.startContainer);
+  const endElement = findDropElement(selectionRange.endContainer);
+  const startDropId = startElement?.dataset?.waveDropId ?? null;
+  const endDropId = endElement?.dataset?.waveDropId ?? null;
+
+  const startElementForRange =
+    startDropId != null
+      ? dropElements.get(startDropId) ?? startElement ?? null
+      : startElement ?? null;
+  const endElementForRange =
+    endDropId != null
+      ? dropElements.get(endDropId) ?? endElement ?? null
+      : endElement ?? null;
+
+  const startFullySelected = Boolean(
+    startDropId &&
+      startElementForRange &&
+      isRangeFullyCoveringElement(selectionRange, startElementForRange)
+  );
+  const endFullySelected = Boolean(
+    endDropId &&
+      endElementForRange &&
+      isRangeFullyCoveringElement(selectionRange, endElementForRange)
+  );
+
+  return {
+    startDropId,
+    endDropId,
+    startElementForRange,
+    endElementForRange,
+    startFullySelected,
+    endFullySelected,
+  };
+};
+
+const collectPartialSegments = (
+  selectionRange: Range,
+  boundaries: RangeBoundaryContext
+): PartialSegmentsResult => {
+  const partialSegments = new Map<string, string>();
+  let usedPartialHandling = false;
+
+  if (
+    boundaries.startDropId &&
+    boundaries.startElementForRange &&
+    !boundaries.startFullySelected
+  ) {
+    usedPartialHandling = true;
+    const text = getSelectedTextForElement(
+      selectionRange,
+      boundaries.startElementForRange
+    );
+    partialSegments.set(boundaries.startDropId, text);
+  }
+
+  if (
+    boundaries.endDropId &&
+    boundaries.endElementForRange &&
+    (!boundaries.endFullySelected ||
+      (boundaries.startDropId === boundaries.endDropId &&
+        !boundaries.startFullySelected))
+  ) {
+    usedPartialHandling = true;
+    const text = getSelectedTextForElement(
+      selectionRange,
+      boundaries.endElementForRange
+    );
+    partialSegments.set(boundaries.endDropId, text);
+  }
+
+  return { partialSegments, usedPartialHandling };
+};
+
+type BuildSegmentsOptions = {
+  selectedIds: string[];
+  partialSegments: Map<string, string>;
+  messagesById: Map<string, ClipboardMessage>;
+  format: ClipboardFormat;
+};
+
+const buildSegmentsFromSelection = ({
+  selectedIds,
+  partialSegments,
+  messagesById,
+  format,
+}: BuildSegmentsOptions): string[] => {
+  const fullMessageIds = selectedIds.filter((id) => !partialSegments.has(id));
+  const totalFullMessages = fullMessageIds.length;
+  const segments: string[] = [];
+
+  for (const id of selectedIds) {
+    const partial = partialSegments.get(id);
+    if (partial !== undefined) {
+      segments.push(partial);
+      continue;
+    }
+
+    const message = messagesById.get(id);
+    if (!message) {
+      continue;
+    }
+
+    const segment = formatMessage(
+      message,
+      format,
+      totalFullMessages === 1
+    );
+
+    segments.push(segment);
+  }
+
+  return segments;
+};
+
 export const useWaveDropsClipboard = ({
   containerRef,
   drops,
@@ -445,150 +734,30 @@ export const useWaveDropsClipboard = ({
     };
 
     const handleCopy = (event: ClipboardEvent) => {
-      const selection = globalThis.getSelection?.();
-
-      if (!selection || selection.isCollapsed) {
-        formatRef.current = "plain";
-        return;
-      }
-
-      const anchorNodeParent = selection.anchorNode;
-      const focusNodeParent = selection.focusNode;
-
-      if (
-        !container.contains(anchorNodeParent) &&
-        !container.contains(focusNodeParent)
-      ) {
-        formatRef.current = "plain";
-        return;
-      }
-
-      if (nodeIsEditable(anchorNodeParent) || nodeIsEditable(focusNodeParent)) {
-        formatRef.current = "plain";
-        return;
-      }
-
-      const selectedIds = gatherSelectedMessageIds(selection, container);
-
-      if (!selectedIds.length) {
-        formatRef.current = "plain";
-        return;
-      }
-
-      const messages = selectedIds
-        .map((id) => clipboardMessages.get(id))
-        .filter((message): message is ClipboardMessage => !!message);
-
-      if (!messages.length) {
-        formatRef.current = "plain";
-        return;
-      }
-
-      messages.sort((a, b) => {
-        if (a.timestamp === b.timestamp) {
-          return a.id.localeCompare(b.id);
-        }
-        return a.timestamp - b.timestamp;
-      });
-
-      const messagesById = new Map(
-        messages.map((message) => [message.id, message] as const)
+      const selection = globalThis.getSelection?.() ?? null;
+      const context = resolveSelectionContext(
+        selection,
+        container,
+        clipboardMessages
       );
 
-      const selectionRange =
-        selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-
-      let payload: string | undefined;
-
-      if (selectionRange) {
-        const dropElements = new Map<string, HTMLElement>();
-
-        for (const id of selectedIds) {
-          const escapedId = escapeAttributeValue(id);
-          const element = container.querySelector<HTMLElement>(
-            `[data-wave-drop-id="${escapedId}"]`
-          );
-          if (element) {
-            dropElements.set(id, element);
-          }
-        }
-
-        const startElement = findDropElement(selectionRange.startContainer);
-        const endElement = findDropElement(selectionRange.endContainer);
-        const startDropId = startElement?.dataset?.waveDropId ?? null;
-        const endDropId = endElement?.dataset?.waveDropId ?? null;
-
-        const startElementForRange =
-          (startDropId && dropElements.get(startDropId)) ?? startElement ?? null;
-        const endElementForRange =
-          (endDropId && dropElements.get(endDropId)) ?? endElement ?? null;
-
-        const startFullySelected =
-          !!(
-            startDropId &&
-            startElementForRange &&
-            isRangeFullyCoveringElement(selectionRange, startElementForRange)
-          );
-        const endFullySelected =
-          !!(
-            endDropId &&
-            endElementForRange &&
-            isRangeFullyCoveringElement(selectionRange, endElementForRange)
-          );
-
-        const partialSegments = new Map<string, string>();
-        let usedPartialHandling = false;
-
-        if (startDropId && startElementForRange && !startFullySelected) {
-          usedPartialHandling = true;
-          const text = getSelectedTextForElement(selectionRange, startElementForRange);
-          partialSegments.set(startDropId, text);
-        }
-
-        if (
-          endDropId &&
-          endElementForRange &&
-          (!endFullySelected || (startDropId === endDropId && !startFullySelected))
-        ) {
-          usedPartialHandling = true;
-          const text = getSelectedTextForElement(selectionRange, endElementForRange);
-          partialSegments.set(endDropId, text);
-        }
-
-        const fullMessageIds = selectedIds.filter((id) => !partialSegments.has(id));
-        const totalFullMessages = fullMessageIds.length;
-
-        const segments: string[] = [];
-
-        for (const id of selectedIds) {
-          if (partialSegments.has(id)) {
-            const partial = partialSegments.get(id) ?? "";
-            segments.push(partial);
-            continue;
-          }
-
-          const message = messagesById.get(id);
-          if (!message) {
-            continue;
-          }
-
-          const segment = formatMessage(
-            message,
-            formatRef.current,
-            totalFullMessages === 1
-          );
-
-          segments.push(segment);
-        }
-
-        if (segments.length > 0 || usedPartialHandling) {
-          payload = segments.join("\n\n");
-        }
+      if (!context) {
+        formatRef.current = "plain";
+        return;
       }
 
-      if (!payload) {
-        payload = formatMessages(messages, formatRef.current);
-      }
+      const rangePayload = context.selectionRange
+        ? buildRangePayload(
+            context.selectionRange,
+            context.selectedIds,
+            container,
+            context.messages,
+            formatRef.current
+          )
+        : undefined;
+
+      const payload =
+        rangePayload ?? formatMessages(context.messages, formatRef.current);
 
       if (!payload) {
         formatRef.current = "plain";
@@ -599,24 +768,23 @@ export const useWaveDropsClipboard = ({
 
       if (event.clipboardData) {
         event.clipboardData.setData("text/plain", payload);
+        if (formatRef.current === "markdown") {
+          event.clipboardData.setData("text/markdown", payload);
+        }
       }
 
       if (navigator?.clipboard?.writeText) {
-        void navigator.clipboard
-          .writeText(payload)
-          .catch(() => {
-            // Silently ignore clipboard promise failures – the event clipboard fallback already ran.
-          });
+        void navigator.clipboard.writeText(payload).catch(() => {});
       }
 
       formatRef.current = "plain";
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    globalThis.addEventListener?.("keydown", handleKeyDown);
     container.addEventListener("copy", handleCopy);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      globalThis.removeEventListener?.("keydown", handleKeyDown);
       container.removeEventListener("copy", handleCopy);
     };
   }, [clipboardMessages, containerRef]);
