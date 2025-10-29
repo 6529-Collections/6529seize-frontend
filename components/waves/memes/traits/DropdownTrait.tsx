@@ -1,8 +1,19 @@
 "use client";
 
+import type { TraitsData } from "../submission/types/TraitsData";
 import React, { useCallback, useRef } from "react";
-import { DropdownTraitProps } from "./types";
 import { TraitWrapper } from "./TraitWrapper";
+
+interface DropdownTraitProps {
+  readonly label: string;
+  readonly field: keyof TraitsData;
+  readonly className?: string;
+  readonly error?: string | null;
+  readonly onBlur?: (field: keyof TraitsData) => void;
+  readonly options: readonly string[];
+  readonly traits: TraitsData;
+  readonly updateText: (field: keyof TraitsData, value: string) => void;
+}
 
 /**
  * Simplified DropdownTrait component with direct state management
