@@ -45,6 +45,7 @@ function DropListItemContentMediaImage({
   const [retryTick, setRetryTick] = useState(0);
 
   const imgRef = useRef<HTMLImageElement>(null);
+  const modalImageRef = useRef<HTMLImageElement>(null);
   const [isZoomed, setIsZoomed] = useState(false);
   const { isCapacitor } = useCapacitor();
 
@@ -91,11 +92,12 @@ function DropListItemContentMediaImage({
   const handleFullScreen = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       event.stopPropagation();
-      if (imgRef.current) {
-        imgRef.current.requestFullscreen();
+      const fullscreenTarget = modalImageRef.current ?? imgRef.current;
+      if (fullscreenTarget) {
+        fullscreenTarget.requestFullscreen();
       }
     },
-    [imgRef]
+    []
   );
 
   const loadingPlaceholderStyle: React.CSSProperties = {
@@ -142,6 +144,7 @@ function DropListItemContentMediaImage({
                   wrapperClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
                   contentClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
                   <img
+                    ref={modalImageRef}
                     src={src}
                     alt="Full size drop media"
                     style={{ pointerEvents: "auto" }}
