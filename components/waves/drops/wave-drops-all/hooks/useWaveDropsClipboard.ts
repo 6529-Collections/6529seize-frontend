@@ -136,7 +136,10 @@ const toPlainText = (markdown: string): string =>
     .replace(/!\[.*?]\((.*?)\)/g, (_, url: string) => url)
     .replace(/\[(.*?)]\((.*?)\)/g, "$1 ($2)")
     .replace(/(?:\*\*|__)(.*?)\1/g, "$1")
-    .replace(/[_*~>]/g, "")
+    .replace(/(^|[^\w])\*([^*\s][^*]*?)\*(?=$|[^\w])/g, (_, prefix: string, content: string) => `${prefix}${content}`)
+    .replace(/(^|[^\w])_([^_\s][^_]*?)_(?=$|[^\w])/g, (_, prefix: string, content: string) => `${prefix}${content}`)
+    .replace(/~~([^~]+)~~/g, "$1")
+    .replace(/^\s{0,3}>\s?/gm, "")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 
