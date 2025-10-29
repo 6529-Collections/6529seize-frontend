@@ -7,7 +7,7 @@ import {
   checkVideoAvailability,
 } from "@/helpers/video.helpers";
 
-export interface UseOptimizedVideoOptions {
+interface UseOptimizedVideoOptions {
   /** ms between checks */
   readonly pollInterval?: number;
   readonly maxRetries?: number;
@@ -17,7 +17,7 @@ export interface UseOptimizedVideoOptions {
   readonly exponentialBackoff?: boolean;
 }
 
-export interface UseOptimizedVideoResult {
+interface UseOptimizedVideoResult {
   /** The best URL found (HLS or MP4). Falls back to original if none found. */
   readonly playableUrl: string;
   /** True if the returned URL is a known optimized one (HLS or MP4_720/1080). */

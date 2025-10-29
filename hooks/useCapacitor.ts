@@ -5,7 +5,7 @@ import { Capacitor, PluginListenerHandle } from "@capacitor/core";
 import { Keyboard } from "@capacitor/keyboard";
 import { useEffect, useState } from "react";
 
-export enum CapacitorOrientationType {
+enum CapacitorOrientationType {
   PORTRAIT,
   LANDSCAPE,
 }

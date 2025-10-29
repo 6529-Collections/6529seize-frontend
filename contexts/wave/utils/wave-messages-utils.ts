@@ -407,7 +407,7 @@ interface LightDropsApiParams {
   // Add any other specific, known query parameters for /light-drops from openapi.yaml if they exist
 }
 
-export async function findLightDropBySerialNoWithPagination(
+async function findLightDropBySerialNoWithPagination(
   targetSerialNo: number,
   apiParams: LightDropsApiParams, // wave_id and max_serial_no are mandatory here
   signal?: AbortSignal

@@ -19,7 +19,7 @@ export interface ExtendedDrop extends ApiDrop {
   stableHash: string;
 }
 
-export interface ExtendedLightDrop extends ApiLightDrop {
+interface ExtendedLightDrop extends ApiLightDrop {
   type: DropSize.LIGHT;
   waveId: string;
   stableKey: string;

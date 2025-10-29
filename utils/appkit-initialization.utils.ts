@@ -17,7 +17,7 @@ export interface AppKitInitializationConfig {
 }
 
 // Result interface
-export interface AppKitInitializationResult {
+interface AppKitInitializationResult {
   adapter: WagmiAdapter;
 }
 

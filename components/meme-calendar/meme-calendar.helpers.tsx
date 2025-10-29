@@ -9,7 +9,6 @@ export const SEASONS_PER_YEAR = 4;
 export const SEASONS_PER_EPOCH = SEASONS_PER_YEAR * 4; // 16 seasons per epoch (4 years)
 export const SEASONS_PER_PERIOD = SEASONS_PER_EPOCH * 5; // 80 seasons per period (20 years)
 export const SEASONS_PER_ERA = SEASONS_PER_PERIOD * 5; // 400 seasons per era (100 years)
-export const SEASONS_PER_EON = SEASONS_PER_ERA * 10; // 4000 seasons per eon (1000 years)
 
 // Historical SZN1 details
 export const SZN1_RANGE = {
@@ -18,7 +17,7 @@ export const SZN1_RANGE = {
 } as const;
 export const SZN1_SEASON_INDEX = -13;
 
-const EUROPE_TZ = "Europe/Nicosia"; // EET/EEST
+const EUROPE_TZ = "Europe/Athens"; // EET/EEST
 const EUROPE_WINTER_OFFSET_HOURS = +2; // EET (UTC+2)
 const EUROPE_SUMMER_OFFSET_HOURS = +3; // EEST (UTC+3)
 const MINT_EUROPE_HOUR = 17;
@@ -26,7 +25,7 @@ const MINT_EUROPE_MINUTE = 40;
 const MINT_END_EUROPE_HOUR = 17;
 const MINT_END_EUROPE_MINUTE = 0;
 
-export const MILLIS_PER_DAY = 1000 * 60 * 60 * 24;
+const MILLIS_PER_DAY = 1000 * 60 * 60 * 24;
 
 // UTC helpers
 function startOfUtcDay(d: Date): Date {
@@ -68,7 +67,7 @@ const HISTORIC_MINT_PHASES: Array<{ startUtcDay: Date; endUtcDay: Date }> = [
 ];
 
 // Helper: does this UTC day fall in a mintable phase?
-export function isInHistoricPhase(utcDay: Date): boolean {
+function isInHistoricPhase(utcDay: Date): boolean {
   const t = +startOfUtcDay(utcDay);
   for (const p of HISTORIC_MINT_PHASES) {
     if (t >= +p.startUtcDay && t <= +p.endUtcDay) return true;
@@ -89,7 +88,7 @@ export function isMintEligibleUtcDay(utcDay: Date): boolean {
 }
 
 // First actual mint *day* in our modeled world (SZN2 onward)
-export const FIRST_MINT_DATE: Date = (() => {
+const FIRST_MINT_DATE: Date = (() => {
   // find first Mon/Wed/Fri on/after 2023-01-01 that is inside the first phase
   const phase = HISTORIC_MINT_PHASES[0];
   let d = startOfUtcDay(phase.startUtcDay);
@@ -136,10 +135,10 @@ export function wallTimeToUtcInstantInZone(
 }
 
 // ---- Mint schedule helpers (Mon/Wed/Fri only, by UTC weekday) ----
-export function isMintDow(dow: number): boolean {
+function isMintDow(dow: number): boolean {
   return dow === 1 || dow === 3 || dow === 5; // Mon/Wed/Fri
 }
-export function isMintDayDate(d: Date): boolean {
+function isMintDayDate(d: Date): boolean {
   // IMPORTANT: use UTC weekday
   return isMintDow(d.getUTCDay());
 }
@@ -155,7 +154,7 @@ export function nextMintDateOnOrAfter(d: Date = new Date()): Date {
   return x;
 }
 
-export function prevMintDateOnOrBefore(d: Date): Date {
+function prevMintDateOnOrBefore(d: Date): Date {
   let x = startOfUtcDay(d);
   // if we go before the first historic mint, just return the first historic mint day
   if (+x < +FIRST_MINT_DATE) return new Date(FIRST_MINT_DATE);
@@ -174,7 +173,7 @@ export function mintStartInstantUtcForMintDay(utcDay: Date): Date {
   );
 }
 
-export function mintEndInstantUtcForMintDay(utcDay: Date): Date {
+function mintEndInstantUtcForMintDay(utcDay: Date): Date {
   const nextDay = new Date(
     Date.UTC(
       utcDay.getUTCFullYear(),
@@ -237,7 +236,7 @@ function getActiveMintWindow(
   return null;
 }
 
-export function immediatelyNextMintInstantUTC(now: Date): Date {
+function immediatelyNextMintInstantUTC(now: Date): Date {
   const firstMintInstant = mintStartInstantUtcForMintDay(FIRST_MINT_DATE);
   if (now < firstMintInstant) return firstMintInstant;
 
@@ -256,11 +255,6 @@ export function immediatelyNextMintInstantUTC(now: Date): Date {
   );
   const nextMintDay = nextMintDateOnOrAfter(tomorrowUtc);
   return mintStartInstantUtcForMintDay(nextMintDay);
-}
-
-// Backwards-compat alias (old code expected a Date). Returns the mint *instant* in UTC.
-export function immediatelyNextMintDate(now: Date): Date {
-  return immediatelyNextMintInstantUTC(now);
 }
 
 /**
@@ -328,7 +322,7 @@ export function getMintNumberForMintDate(date: Date): number {
 }
 
 // Helper: get the number of whole months between two dates (UTC-based compare)
-export function monthsBetween(a: Date, b: Date): number {
+function monthsBetween(a: Date, b: Date): number {
   const ay = a.getUTCFullYear();
   const am = a.getUTCMonth();
   const by = b.getUTCFullYear();
@@ -517,27 +511,8 @@ export function getCardsRemainingUntilEndOf(
   return Math.max(0, endNumber - startNumber + 1);
 }
 
-/**
- * Compute the ordinal mint number. If a non‑mint day is passed, snap forward to next mint day.
- */
-export function getMintNumber(date: Date): number {
-  const d = startOfUtcDay(date);
-  const mintDay = isMintDayDate(d) ? d : nextMintDateOnOrAfter(d);
-  return getMintNumberForMintDate(mintDay);
-}
-
 export function getNextMintStart(now: Date = new Date()): Date {
   return immediatelyNextMintInstantUTC(now);
-}
-
-export function getNextMintNumber(now: Date = new Date()): number {
-  const active = getActiveMintWindow(now);
-  if (active) {
-    return getMintNumberForMintDate(active.mintDayUtc);
-  }
-  const nextMintInstant = getNextMintStart(now);
-  const nextMintDay = startOfUtcDay(nextMintInstant);
-  return getMintNumberForMintDate(nextMintDay);
 }
 
 export function isMintingActive(d: Date = new Date()): boolean {
@@ -548,37 +523,6 @@ export function isMintingActive(d: Date = new Date()): boolean {
 
 export function isMintingToday(): boolean {
   return isMintEligibleUtcDay(startOfUtcDay(new Date()));
-}
-
-// Inverse: mint number -> mint *instant* (UTC)
-// ---- helpers used by inverse mapping ----
-export function firstEligibleInRange(
-  startUtcDay: Date,
-  endUtcDay: Date
-): Date | null {
-  let d = startOfUtcDay(startUtcDay);
-  const end = startOfUtcDay(endUtcDay);
-  while (+d <= +end) {
-    if (isMintEligibleUtcDay(d)) return d;
-    d.setUTCDate(d.getUTCDate() + 1);
-  }
-  return null;
-}
-
-export function nthEligibleInRange(
-  startEligibleUtcDay: Date,
-  nZeroBased: number,
-  endUtcDay?: Date
-): Date {
-  // step forward nZeroBased eligible (Mon/Wed/Fri & eligible) days
-  let d = new Date(startEligibleUtcDay);
-  let left = nZeroBased;
-  while (left > 0) {
-    d.setUTCDate(d.getUTCDate() + 1);
-    if (endUtcDay && +d > +endUtcDay) break; // guard
-    if (isMintEligibleUtcDay(d)) left--;
-  }
-  return d;
 }
 
 // Inverse: mint number -> mint *instant* (UTC)
@@ -613,9 +557,9 @@ export function dateFromMintNumber(n: number): Date {
   return mintStartInstantUtcForMintDay(currentUtcDay);
 }
 
-export type DateRange = { start: Date; end: Date };
+type DateRange = { start: Date; end: Date };
 
-export interface MintTimelineDetails {
+interface MintTimelineDetails {
   readonly mintNumber: number;
   readonly instantUtc: Date;
   readonly mintDayUtc: Date;
@@ -758,7 +702,7 @@ function ymdHmsUtc(d: Date): string {
   const ss = String(d.getUTCSeconds()).padStart(2, "0");
   return `${y}${m}${da}T${hh}${mm}${ss}Z`;
 }
-export function createGoogleCalendarUrl(
+function createGoogleCalendarUrl(
   startInstantUtc: Date,
   endInstantUtc: Date,
   title: string,
@@ -772,7 +716,7 @@ export function createGoogleCalendarUrl(
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
-export function createIcsDataUrl(
+function createIcsDataUrl(
   startInstantUtc: Date,
   endInstantUtc: Date,
   title: string,
@@ -921,7 +865,7 @@ export interface SeasonMintScanResult {
  * - Clamps the scan start to **today (UTC)** so only *future* mint instants are returned.
  * - Honors all scheduling rules via `isMintEligibleUtcDay` and `mintStartInstantUtcForMintDay`.
  */
-export function getUpcomingMintsBetween(
+function getUpcomingMintsBetween(
   start: Date,
   end: Date,
   now: Date = new Date()

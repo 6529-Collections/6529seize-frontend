@@ -409,7 +409,7 @@ interface MemeCalendarOverviewUpcomingMintsProps {
   readonly displayTz: DisplayTz;
 }
 
-export function MemeCalendarOverviewUpcomingMints({
+function MemeCalendarOverviewUpcomingMints({
   displayTz,
 }: MemeCalendarOverviewUpcomingMintsProps) {
   const [now] = useState(new Date());
