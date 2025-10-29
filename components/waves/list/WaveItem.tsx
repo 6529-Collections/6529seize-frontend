@@ -1,18 +1,11 @@
 "use client";
 
-import {
-  KeyboardEvent,
-  MouseEvent,
-  ReactNode,
-  useCallback,
-  useId,
-} from "react";
+import { ReactNode, useId } from "react";
 import {
   ChatBubbleLeftRightIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { getRandomColorWithSeed, numberWithCommas } from "@/helpers/Helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
@@ -20,9 +13,6 @@ import WaveItemDropped from "./WaveItemDropped";
 import WaveItemFollow from "./WaveItemFollow";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { Tooltip } from "react-tooltip";
-
-const INTERACTIVE_CHILD_SELECTOR =
-  "a, button, input, textarea, select, [data-wave-item-interactive='true']";
 
 const LEVEL_CLASSES: ReadonlyArray<{
   readonly minLevel: number;
@@ -45,8 +35,6 @@ type CardContainerProps = {
   readonly isInteractive: boolean;
   readonly href?: string;
   readonly ariaLabel?: string;
-  readonly onClick?: (event: MouseEvent<HTMLDivElement>) => void;
-  readonly onKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => void;
   readonly children: ReactNode;
 };
 
@@ -54,26 +42,28 @@ function CardContainer({
   isInteractive,
   href,
   ariaLabel,
-  onClick,
-  onKeyDown,
   children,
 }: CardContainerProps) {
   const className = `${CARD_BASE_CLASSES} ${
     isInteractive ? CARD_INTERACTIVE_CLASSES : ""
   }`;
 
-  if (isInteractive) {
+  if (isInteractive && href) {
     return (
-      <div
-        className={className}
-        role="link"
-        tabIndex={0}
-        data-href={href}
-        aria-label={ariaLabel}
-        onClick={onClick}
-        onKeyDown={onKeyDown}
-      >
-        {children}
+      <div className={`${className} tw-relative`} aria-label={ariaLabel}>
+        <Link
+          href={href}
+          prefetch={false}
+          aria-label={ariaLabel}
+          className="tw-absolute tw-inset-0 tw-rounded-xl tw-z-10 tw-pointer-events-auto focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 focus-visible:tw-outline-none"
+        >
+          <span className="tw-sr-only">
+            {ariaLabel ?? "View wave details"}
+          </span>
+        </Link>
+        <div className="tw-relative">
+          {children}
+        </div>
       </div>
     );
   }
@@ -90,14 +80,6 @@ function getCardLabel(href?: string, label?: string | null) {
     return undefined;
   }
   return label ? `View wave ${label}` : "View wave";
-}
-
-function shouldSkipNavigation(
-  target: HTMLElement | null,
-  container: HTMLElement
-) {
-  const interactiveElement = target?.closest(INTERACTIVE_CHILD_SELECTOR);
-  return Boolean(interactiveElement && interactiveElement !== container);
 }
 
 function resolveLevelClasses(level?: number | null) {
@@ -120,7 +102,6 @@ export default function WaveItem({
   const author = wave?.author;
   const authorHref = author?.handle ? `/${author.handle}` : undefined;
   const authorLevel = author?.level ?? 0;
-  const router = useRouter();
   const tooltipBaseId = useId();
 
   const banner1 =
@@ -191,7 +172,7 @@ export default function WaveItem({
       <Link
         href={authorHref}
         prefetch={false}
-        className={`${authorWrapperClass} tw-no-underline`}
+        className={`${authorWrapperClass} tw-no-underline tw-relative tw-z-20 tw-pointer-events-auto`}
       >
         <div className="tw-h-6 tw-w-6 tw-flex-shrink-0">{authorAvatar}</div>
         <span className={linkedAuthorNameClass}>
@@ -212,43 +193,11 @@ export default function WaveItem({
     );
   }
 
-  const handleCardClick = useCallback(
-    (event: MouseEvent<HTMLDivElement>) => {
-      if (!waveHref) {
-        return;
-      }
-      const target = event.target as HTMLElement | null;
-      if (shouldSkipNavigation(target, event.currentTarget)) {
-        return;
-      }
-      if (!event.defaultPrevented) {
-        event.preventDefault();
-        router.push(waveHref);
-      }
-    },
-    [router, waveHref]
-  );
-
-  const handleCardKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
-      if (!waveHref || event.target !== event.currentTarget) {
-        return;
-      }
-      if (event.key === "Enter" || event.key === " " || event.key === "Space") {
-        event.preventDefault();
-        router.push(waveHref);
-      }
-    },
-    [router, waveHref]
-  );
-
   return (
     <CardContainer
       isInteractive={isInteractive}
       href={waveHref}
       ariaLabel={cardLabel}
-      onClick={handleCardClick}
-      onKeyDown={handleCardKeyDown}
     >
       <div className="tw-relative tw-aspect-[16/9] tw-overflow-hidden tw-rounded-xl">
         <div
@@ -278,9 +227,13 @@ export default function WaveItem({
           <div className="tw-flex tw-min-w-0 tw-items-end tw-px-3 tw-pb-3">
             <div className="tw-min-w-0">
               {waveHref ? (
-                <span className="tw-no-underline tw-text-lg tracking-tight tw-font-semibold tw-text-white desktop-hover:hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out tw-line-clamp-1">
+                <Link
+                  href={waveHref}
+                  prefetch={false}
+                  className="tw-no-underline tw-text-lg tracking-tight tw-font-semibold tw-text-white desktop-hover:hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out tw-line-clamp-1 tw-relative tw-z-20 tw-pointer-events-auto"
+                >
                   {wave?.name ?? titlePlaceholder}
-                </span>
+                </Link>
               ) : (
                 <span className="tw-text-lg tw-font-semibold tw-text-white">
                   {wave?.name ?? titlePlaceholder}
@@ -306,21 +259,34 @@ export default function WaveItem({
             <span className="tw-font-medium">Chat</span>
           </div>
 
-          <div
-            className="tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-200"
-            {...(followersTooltipId
-              ? { "data-tooltip-id": followersTooltipId }
-              : {})}
-          >
-            <UsersIcon
-              aria-hidden="true"
-              className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-400"
-            />
-            <span className="tw-font-medium">
-              {numberWithCommas(wave?.metrics.subscribers_count ?? 0)}
-            </span>
-            <span className="tw-text-iron-400 xl:tw-hidden">Joined</span>
-          </div>
+          {waveHref && followersTooltipId ? (
+            <Link
+              href={waveHref}
+              prefetch={false}
+              className="tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-200 tw-no-underline tw-relative tw-z-20 tw-pointer-events-auto"
+              data-tooltip-id={followersTooltipId}
+            >
+              <UsersIcon
+                aria-hidden="true"
+                className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-400"
+              />
+              <span className="tw-font-medium">
+                {numberWithCommas(wave?.metrics.subscribers_count ?? 0)}
+              </span>
+              <span className="tw-text-iron-400 xl:tw-hidden">Joined</span>
+            </Link>
+          ) : (
+            <div className="tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-200">
+              <UsersIcon
+                aria-hidden="true"
+                className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-400"
+              />
+              <span className="tw-font-medium">
+                {numberWithCommas(wave?.metrics.subscribers_count ?? 0)}
+              </span>
+              <span className="tw-text-iron-400 xl:tw-hidden">Joined</span>
+            </div>
+          )}
         </div>
 
         {wave && followersTooltipId && (
@@ -350,7 +316,10 @@ export default function WaveItem({
 
         <div className="tw-flex tw-items-center">
           {wave && (
-            <div data-wave-item-interactive="true">
+            <div
+              data-wave-item-interactive="true"
+              className="tw-relative tw-z-20 tw-pointer-events-auto"
+            >
               <WaveItemFollow wave={wave} />
             </div>
           )}

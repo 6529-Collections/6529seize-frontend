@@ -45,7 +45,11 @@ export default function WaveItemDropped({ wave }: { readonly wave: ApiWave }) {
           return (
             <div key={baseKey} className="tw-block tw-group/item">
               {contributorHref ? (
-                <Link href={contributorHref} prefetch={false}>
+                <Link
+                  href={contributorHref}
+                  prefetch={false}
+                  className="tw-relative tw-z-20 tw-pointer-events-auto"
+                >
                   {avatar}
                 </Link>
               ) : (

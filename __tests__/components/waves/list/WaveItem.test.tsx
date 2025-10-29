@@ -2,14 +2,6 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import WaveItem from '@/components/waves/list/WaveItem';
 
-const push = jest.fn();
-
-jest.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push,
-  }),
-}));
-
 jest.mock('@/components/waves/list/WaveItemDropped', () => () => <a data-testid="dropped" href="#dropped">Dropped</a>);
 jest.mock('@/components/waves/list/WaveItemFollow', () => () => (
   <button data-testid="follow" type="button">
@@ -33,10 +25,6 @@ const wave = {
 } as any;
 
 describe('WaveItem', () => {
-  beforeEach(() => {
-    push.mockClear();
-  });
-
   it('renders wave data', () => {
     render(<WaveItem wave={wave} />);
     expect(screen.getByText('My Wave')).toBeInTheDocument();
@@ -52,31 +40,23 @@ describe('WaveItem', () => {
     expect(screen.getByText('title')).toBeInTheDocument();
   });
 
-  it('navigates when the card surface is clicked', () => {
+  it('exposes the card surface as an anchor element', () => {
     render(<WaveItem wave={wave} />);
-    fireEvent.click(screen.getByLabelText('View wave My Wave'));
-    expect(push).toHaveBeenCalledWith('/waves?wave=w1');
-  });
-
-  it('navigates when pressing Enter while the card is focused', () => {
-    render(<WaveItem wave={wave} />);
-    const card = screen.getByLabelText('View wave My Wave');
-    card.focus();
-    fireEvent.keyDown(card, { key: 'Enter' });
-    expect(push).toHaveBeenCalledWith('/waves?wave=w1');
-  });
-
-  it('navigates when pressing Space while the card is focused', () => {
-    render(<WaveItem wave={wave} />);
-    const card = screen.getByLabelText('View wave My Wave');
-    card.focus();
-    fireEvent.keyDown(card, { key: ' ' });
-    expect(push).toHaveBeenCalledWith('/waves?wave=w1');
+    const card = screen.getByRole('link', { name: 'View wave My Wave' });
+    expect(card.tagName).toBe('A');
+    expect(card).toHaveAttribute('href', '/waves?wave=w1');
+    const clickHandler = jest.fn();
+    card.addEventListener('click', clickHandler);
+    fireEvent.click(card);
+    expect(clickHandler).toHaveBeenCalled();
   });
 
   it('does not navigate when clicking on the follow button', () => {
     render(<WaveItem wave={wave} />);
+    const card = screen.getByRole('link', { name: 'View wave My Wave' });
+    const clickHandler = jest.fn();
+    card.addEventListener('click', clickHandler);
     fireEvent.click(screen.getByTestId('follow'));
-    expect(push).not.toHaveBeenCalled();
+    expect(clickHandler).not.toHaveBeenCalled();
   });
 });
