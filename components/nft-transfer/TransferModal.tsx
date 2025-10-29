@@ -23,7 +23,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { createPortal, flushSync } from "react-dom";
-import { Address, isAddress, PublicClient } from "viem";
+import {
+  Address,
+  isAddress,
+  PublicClient,
+  type WriteContractParameters,
+} from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import TransferModalPfp from "./TransferModalPfp";
 
@@ -108,7 +113,9 @@ type TxItem = {
 };
 
 type WalletClientWithWrite = {
-  writeContract: (req: any) => Promise<`0x${string}`>;
+  writeContract: (
+    req: WriteContractParameters
+  ) => Promise<`0x${string}`>;
 };
 
 function hasWriteContract(client: any): client is WalletClientWithWrite {
@@ -682,7 +689,7 @@ function BodyByFlow({
   readonly leftHasOverflow: boolean;
   readonly leftAtEnd: boolean;
   readonly selectedProfile: CommunityMemberMinimal | null;
-  readonly profile: any;
+  readonly profile: ApiIdentity | null;
   readonly isIdentityLoading: boolean;
   readonly setSelectedProfile: (v: CommunityMemberMinimal | null) => void;
   readonly setSelectedWallet: (v: string | null) => void;
