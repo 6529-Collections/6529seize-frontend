@@ -868,9 +868,9 @@ const resolveRangeBoundaries = (
   const endDropId = endElement?.dataset?.waveDropId ?? null;
 
   const startElementForRange =
-    startDropId != null
-      ? dropElements.get(startDropId) ?? startElement ?? null
-      : startElement ?? null;
+    startDropId == null
+      ? startElement ?? null
+      : dropElements.get(startDropId) ?? startElement ?? null;
   const endElementForRange =
     endDropId != null
       ? dropElements.get(endDropId) ?? endElement ?? null
