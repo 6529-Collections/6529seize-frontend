@@ -26,7 +26,7 @@ export const MEME_TABS: MemeTab[] = [
   { focus: MEME_FOCUS.TIMELINE, title: "Timeline" },
 ];
 
-export interface MemeTab {
+interface MemeTab {
   focus: MEME_FOCUS;
   title: string;
 }

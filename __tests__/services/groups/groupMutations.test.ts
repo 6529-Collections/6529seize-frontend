@@ -1,6 +1,4 @@
 import {
-  GROUP_EXCLUDE_LIMIT,
-  GROUP_INCLUDE_LIMIT,
   ValidationIssue,
   validateGroupPayload,
 } from '@/services/groups/groupMutations';
@@ -28,6 +26,8 @@ const createPayload = (overrides: Partial<ApiCreateGroup> = {}): ApiCreateGroup 
 const expectIssue = (issues: ValidationIssue[], issue: ValidationIssue) => {
   expect(issues).toContain(issue);
 };
+
+const EXCLUDE_LIMIT = 1000;
 
 describe('validateGroupPayload', () => {
   it('marks payload valid when include wallets present', () => {
@@ -63,7 +63,7 @@ describe('validateGroupPayload', () => {
   });
 
   it('flags include list above limit', () => {
-    const include = Array.from({ length: GROUP_INCLUDE_LIMIT + 1 }, (_, idx) => `0x${idx}`);
+    const include = Array.from({ length: 10_000 + 1 }, (_, idx) => `0x${idx}`);
     const result = validateGroupPayload(
       createPayload({
         group: {
@@ -76,7 +76,7 @@ describe('validateGroupPayload', () => {
   });
 
   it('flags exclude list above limit', () => {
-    const exclude = Array.from({ length: GROUP_EXCLUDE_LIMIT + 1 }, (_, idx) => `0x${idx}`);
+    const exclude = Array.from({ length: EXCLUDE_LIMIT + 1 }, (_, idx) => `0x${idx}`);
     const result = validateGroupPayload(
       createPayload({
         group: {

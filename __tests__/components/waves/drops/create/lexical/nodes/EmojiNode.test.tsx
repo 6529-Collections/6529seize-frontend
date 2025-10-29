@@ -22,10 +22,7 @@ jest.mock("lexical", () => {
 });
 
 // Adjust the import paths below to match your project structure
-import {
-  EmojiNode,
-  EmojiComponent,
-} from "@/components/drops/create/lexical/nodes/EmojiNode";
+import { EmojiNode } from "@/components/drops/create/lexical/nodes/EmojiNode";
 import { useEmoji } from "@/contexts/EmojiContext";
 
 jest.mock("@/contexts/EmojiContext");
@@ -72,7 +69,7 @@ describe("EmojiNode class", () => {
     const el = node.decorate({} as any, {} as any);
     expect(React.isValidElement(el)).toBe(true);
     // @ts-ignore
-    expect((el.type as any).name).toBe(EmojiComponent.name);
+    expect((el.type as any).name).toBe("EmojiComponent");
     // @ts-ignore
     expect(el.props.emojiId).toBe(TEST_ID);
   });
@@ -100,6 +97,12 @@ describe("EmojiComponent", () => {
     jest.resetAllMocks();
   });
 
+  const renderEmojiComponent = (emojiId: string) => {
+    const emojiNode = new EmojiNode(emojiId);
+    const element = emojiNode.decorate({} as any, {} as any);
+    render(element);
+  };
+
   it("renders <img> when emoji found in emojiMap", () => {
     const fakeEmoji = {
       id: "heart",
@@ -122,7 +125,7 @@ describe("EmojiComponent", () => {
       findNativeEmoji: jest.fn(),
     });
 
-    render(<EmojiComponent emojiId="heart" />);
+    renderEmojiComponent("heart");
     const img = screen.getByRole("img");
     expect(img).toHaveAttribute("src", fakeEmoji.skins[0].src);
     expect(img).toHaveAttribute("alt", "heart");
@@ -151,7 +154,7 @@ describe("EmojiComponent", () => {
       findNativeEmoji: jest.fn().mockReturnValue(native),
     });
 
-    render(<EmojiComponent emojiId="wave" />);
+    renderEmojiComponent("wave");
     expect(screen.getByText("👋")).toBeInTheDocument();
   });
 
@@ -164,7 +167,7 @@ describe("EmojiComponent", () => {
       findNativeEmoji: jest.fn().mockReturnValue(null),
     });
 
-    render(<EmojiComponent emojiId="unknown" />);
+    renderEmojiComponent("unknown");
     expect(screen.getByText(":unknown:")).toBeInTheDocument();
   });
 });

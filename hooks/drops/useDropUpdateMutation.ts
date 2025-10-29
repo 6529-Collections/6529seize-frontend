@@ -10,7 +10,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 
-export interface DropUpdateMutationParams {
+interface DropUpdateMutationParams {
   dropId: string;
   request: ApiUpdateDropRequest;
   currentDrop: ApiDrop;

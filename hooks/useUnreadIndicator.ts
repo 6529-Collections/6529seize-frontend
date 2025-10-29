@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useUnreadNotifications } from "./useUnreadNotifications";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 
-export type UnreadIndicatorType = "notifications" | "messages";
+type UnreadIndicatorType = "notifications" | "messages";
 
 interface UseUnreadIndicatorProps {
   readonly type: UnreadIndicatorType;

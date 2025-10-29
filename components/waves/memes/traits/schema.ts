@@ -495,7 +495,7 @@ export function getFormSections(
 }
 
 // Get initial trait values
-export function getInitialTraitsValues(): TraitsData {
+function getInitialTraitsValues(): TraitsData {
   const initialValues: Record<string, any> = {
     title: "",
     description: "",
