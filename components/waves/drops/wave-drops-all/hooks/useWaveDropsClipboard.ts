@@ -140,12 +140,81 @@ const getSelectedTextForElement = (range: Range, element: HTMLElement): string =
   return text;
 };
 
-const toPlainText = (markdown: string): string =>
-  markdown
+const replaceMarkdownLinks = (input: string): string => {
+  if (!input.includes("[")) {
+    return input;
+  }
+
+  let result = "";
+  let cursor = 0;
+
+  while (cursor < input.length) {
+    const openBracket = input.indexOf("[", cursor);
+    if (openBracket === -1) {
+      result += input.slice(cursor);
+      break;
+    }
+
+    const isImage = openBracket > cursor && input[openBracket - 1] === "!";
+    const segmentEnd = isImage ? openBracket - 1 : openBracket;
+
+    result += input.slice(cursor, segmentEnd);
+
+    const closeBracket = input.indexOf("]", openBracket + 1);
+    if (closeBracket === -1) {
+      result += input.slice(segmentEnd);
+      break;
+    }
+
+    if (closeBracket + 1 >= input.length || input[closeBracket + 1] !== "(") {
+      result += input.slice(segmentEnd, closeBracket + 1);
+      cursor = closeBracket + 1;
+      continue;
+    }
+
+    let depth = 1;
+    let urlCursor = closeBracket + 2;
+
+    while (urlCursor < input.length && depth > 0) {
+      const char = input[urlCursor];
+      if (char === "(") {
+        depth += 1;
+      } else if (char === ")") {
+        depth -= 1;
+      }
+      urlCursor += 1;
+    }
+
+    if (depth !== 0) {
+      result += input.slice(segmentEnd, urlCursor);
+      cursor = urlCursor;
+      continue;
+    }
+
+    const urlEnd = urlCursor - 1;
+    const label = input.slice(openBracket + 1, closeBracket);
+    const url = input.slice(closeBracket + 2, urlEnd);
+
+    if (isImage) {
+      result += url;
+    } else if (label && url) {
+      result += `${label} (${url})`;
+    } else {
+      result += label || url;
+    }
+
+    cursor = urlCursor;
+  }
+
+  return result;
+};
+
+const toPlainText = (markdown: string): string => {
+  const withoutLinkMarkup = replaceMarkdownLinks(markdown);
+
+  return withoutLinkMarkup
     .replaceAll(/```([\s\S]*?)```/g, (_, code) => code.trim())
     .replaceAll(/`([^`]+)`/g, "$1")
-    .replaceAll(/!\[[^\]]*]\(([^)]+)\)/g, "$1")
-    .replaceAll(/\[([^\]]+)\]\(([^)]+)\)/g, "$1 ($2)")
     .replaceAll(/(\*\*|__)(.*?)\1/g, "$2")
     .replaceAll(/([*_])(.*?)\1/g, "$2")
     .replaceAll(/~~(.*?)~~/g, "$1")
@@ -155,6 +224,7 @@ const toPlainText = (markdown: string): string =>
     .replaceAll(/(^|\n)>\s?/g, "$1")
     .replaceAll(/\n{3,}/g, "\n\n")
     .trim();
+};
 
 type EmbedInfo = {
   readonly title?: string;
