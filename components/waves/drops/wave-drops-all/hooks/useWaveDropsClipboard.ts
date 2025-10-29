@@ -79,7 +79,7 @@ const escapeAttributeValue = (value: string): string => {
   let out = "";
   for (const ch of value) {
     const code = ch.codePointAt(0)!;
-    if (code <= 0x1f || code === 0x7f || ch === "\"" || ch === "\\" || ch === "[" || ch === "]") {
+    if (code <= 0x1F || code === 0x7F || ch === "\"" || ch === "\\" || ch === "[" || ch === "]") {
       out += "\\" + ch;
     } else {
       out += ch;
@@ -941,10 +941,10 @@ const collectPartialSegments = (
 };
 
 type BuildSegmentsOptions = {
-  selectedIds: string[];
-  partialSegments: Map<string, string>;
-  messagesById: Map<string, ClipboardMessage>;
-  format: ClipboardFormat;
+  readonly selectedIds: string[];
+  readonly partialSegments: Map<string, string>;
+  readonly messagesById: Map<string, ClipboardMessage>;
+  readonly format: ClipboardFormat;
 };
 
 const buildSegmentsFromSelection = ({
