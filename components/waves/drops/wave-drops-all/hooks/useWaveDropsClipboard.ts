@@ -178,30 +178,37 @@ const extractEmbeds = (metadata: ApiDropMetadata[]): EmbedInfo[] => {
     }
 
     const group = groups.get(groupKey) ?? { extras: [] as string[] };
+    let nextGroup = group;
 
     if (fieldKey.includes("title")) {
-      if (!group.title) {
-        group.title = data_value;
+      if (!nextGroup.title) {
+        nextGroup = { ...nextGroup, title: data_value };
       }
     } else if (fieldKey.includes("url")) {
-      if (!group.url) {
-        group.url = data_value;
+      if (!nextGroup.url) {
+        nextGroup = { ...nextGroup, url: data_value };
       }
     } else if (fieldKey.includes("description")) {
-      if (!group.description) {
-        group.description = data_value;
+      if (!nextGroup.description) {
+        nextGroup = { ...nextGroup, description: data_value };
       }
     } else if (data_value.startsWith("http")) {
-      if (!group.url) {
-        group.url = data_value;
-      } else if (!group.extras.includes(data_value)) {
-        group.extras.push(data_value);
+      if (!nextGroup.url) {
+        nextGroup = { ...nextGroup, url: data_value };
+      } else if (!nextGroup.extras.includes(data_value)) {
+        nextGroup = {
+          ...nextGroup,
+          extras: [...nextGroup.extras, data_value],
+        };
       }
     } else {
-      group.extras.push(`${data_key}: ${data_value}`);
+      nextGroup = {
+        ...nextGroup,
+        extras: [...nextGroup.extras, `${data_key}: ${data_value}`],
+      };
     }
 
-    groups.set(groupKey, group);
+    groups.set(groupKey, nextGroup);
   });
 
   return Array.from(groups.values()).filter(
