@@ -117,7 +117,7 @@ type WalletClientWithWrite = {
 };
 
 const waitForPaint = async () => {
-  if (typeof globalThis.window === "undefined") return;
+  if (!globalThis.window) return;
   await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 };
 
