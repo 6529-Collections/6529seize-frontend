@@ -223,18 +223,178 @@ const extractEmbeds = (metadata: ApiDropMetadata[]): EmbedInfo[] => {
   );
 };
 
-const buildClipboardMessage = (drop: ExtendedDrop): ClipboardMessage => {
-  const markdownContent = drop.parts
-    .map((part) => part.content ?? "")
-    .filter((value) => (value ?? "").trim().length > 0)
-    .join("\n\n")
-    .trim();
+type QuoteDropSource = {
+  readonly author?: { readonly handle?: string | null };
+  readonly parts?: ReadonlyArray<{
+    readonly part_id: number;
+    readonly content: string | null;
+  }>;
+  readonly created_at?: number | null;
+  readonly wave?: { readonly name?: string | null } | null;
+};
+
+const mergeQuoteDropSources = (
+  primary?: QuoteDropSource | null,
+  secondary?: QuoteDropSource | null
+): QuoteDropSource | undefined => {
+  if (!primary && !secondary) {
+    return undefined;
+  }
+
+  if (!primary) {
+    return secondary ?? undefined;
+  }
+
+  if (!secondary) {
+    return primary ?? undefined;
+  }
+
+  return {
+    author: primary.author ?? secondary.author,
+    parts: primary.parts ?? secondary.parts,
+    created_at: primary.created_at ?? secondary.created_at,
+    wave: primary.wave ?? secondary.wave,
+  };
+};
+
+const registerQuoteDropSource = (
+  registry: Map<string, QuoteDropSource>,
+  dropId: string,
+  source: QuoteDropSource | null | undefined
+): void => {
+  if (!source) {
+    return;
+  }
+
+  const merged = mergeQuoteDropSources(registry.get(dropId), source);
+  if (merged) {
+    registry.set(dropId, merged);
+  }
+};
+
+type DropReferenceDescriptor = {
+  readonly label: string;
+  readonly dropId: string;
+  readonly dropPartId: number;
+  readonly isDeleted?: boolean;
+  readonly drop?: QuoteDropSource | null;
+};
+
+const buildClipboardMessage = (
+  drop: ExtendedDrop,
+  quoteLookup: Map<string, QuoteDropSource>
+): ClipboardMessage => {
+  const formatReference = (
+    descriptor: DropReferenceDescriptor
+  ): string | null => {
+    if (descriptor.isDeleted) {
+      return `> **${descriptor.label}** (original message deleted: ${descriptor.dropId}#${descriptor.dropPartId})`;
+    }
+
+    const referencedDrop = mergeQuoteDropSources(
+      descriptor.drop ?? undefined,
+      quoteLookup.get(descriptor.dropId)
+    );
+
+    const authorHandle = referencedDrop?.author?.handle?.trim();
+    const referencedPartContent =
+      referencedDrop?.parts?.find(
+        (part) => part.part_id === descriptor.dropPartId
+      )?.content ?? "";
+    const normalizedContent =
+      typeof referencedPartContent === "string"
+        ? referencedPartContent.trim()
+        : "";
+    const waveName = referencedDrop?.wave?.name?.trim();
+
+    if (!authorHandle && !normalizedContent && !waveName) {
+      return `> **${descriptor.label}** (${descriptor.dropId}#${descriptor.dropPartId})`;
+    }
+
+    const headingParts = [descriptor.label, authorHandle]
+      .filter((part) => part && part.length > 0)
+      .join(" ")
+      .trim();
+
+    const headingLine = `> **${headingParts}${
+      normalizedContent.length > 0 ? ":" : ""
+    }**`;
+
+    const lines: string[] = [headingLine];
+
+    if (normalizedContent.length > 0) {
+      const contentLines = normalizedContent.split("\n");
+      for (const line of contentLines) {
+        lines.push(line.trim().length > 0 ? `> ${line}` : ">");
+      }
+    }
+
+    if (waveName) {
+      lines.push(`> in ${waveName}`);
+    }
+
+    return lines.join("\n");
+  };
+
+  const markdownSegments: string[] = [];
+
+  const replySegment = drop.reply_to
+    ? formatReference({
+        label: "Replying to",
+        dropId: drop.reply_to.drop_id,
+        dropPartId: drop.reply_to.drop_part_id,
+        isDeleted: drop.reply_to.is_deleted,
+        drop: drop.reply_to.drop,
+      })
+    : null;
+
+  if (replySegment) {
+    markdownSegments.push(replySegment);
+  }
+
+  for (const part of drop.parts) {
+    const content = (part.content ?? "").trim();
+    if (content.length > 0) {
+      markdownSegments.push(content);
+    }
+
+    if (part.quoted_drop) {
+      const quoteSegment = formatReference({
+        label: "Quote from",
+        dropId: part.quoted_drop.drop_id,
+        dropPartId: part.quoted_drop.drop_part_id,
+        drop: part.quoted_drop.drop,
+      });
+
+      if (quoteSegment) {
+        markdownSegments.push(quoteSegment);
+      }
+    }
+  }
+
+  const markdownContent = markdownSegments.join("\n\n").trim();
 
   const plainContent = markdownContent ? toPlainText(markdownContent) : "";
 
   const embedInfos = extractEmbeds(drop.metadata ?? []);
 
-  const embedPlainLines = embedInfos.flatMap((embed) => {
+  const summaryPlainLines: string[] = [];
+  const summaryMarkdownLines: string[] = [];
+
+  if (drop.drop_type !== ApiDropType.Chat) {
+    summaryPlainLines.push(`Type: ${drop.drop_type}`);
+    summaryMarkdownLines.push(`**Type:** ${drop.drop_type}`);
+  }
+
+  if (drop.drop_type === ApiDropType.Winner) {
+    const winnerRank = drop.winning_context?.place ?? drop.rank;
+    if (winnerRank !== null && winnerRank !== undefined) {
+      summaryPlainLines.push(`Rank: ${winnerRank}`);
+      summaryMarkdownLines.push(`**Rank:** ${winnerRank}`);
+    }
+  }
+
+  const embedPlainDetails = embedInfos.flatMap((embed) => {
     const lines: string[] = [];
     if (embed.title && embed.url) {
       lines.push(`${embed.title} — ${embed.url}`);
@@ -250,7 +410,7 @@ const buildClipboardMessage = (drop: ExtendedDrop): ClipboardMessage => {
     return lines;
   });
 
-  const embedMarkdownLines = embedInfos.flatMap((embed) => {
+  const embedMarkdownDetails = embedInfos.flatMap((embed) => {
     const lines: string[] = [];
     if (embed.title && embed.url) {
       lines.push(`[${embed.title}](${embed.url})`);
@@ -266,6 +426,14 @@ const buildClipboardMessage = (drop: ExtendedDrop): ClipboardMessage => {
     return lines;
   });
 
+  const embedPlainLines = [...summaryPlainLines, ...embedPlainDetails].filter(
+    Boolean
+  );
+  const embedMarkdownLines = [
+    ...summaryMarkdownLines,
+    ...embedMarkdownDetails,
+  ].filter(Boolean);
+
   const mediaUrls = drop.parts.flatMap((part) =>
     part.media
       .map((media) => media.url)
@@ -277,11 +445,11 @@ const buildClipboardMessage = (drop: ExtendedDrop): ClipboardMessage => {
   return {
     id: drop.stableHash ?? drop.id,
     author: drop.author?.handle ?? "Unknown",
-    timestamp: drop.created_at,
-    markdownContent,
-    plainContent,
-    embedPlainLines: embedPlainLines.filter(Boolean),
-    embedMarkdownLines: embedMarkdownLines.filter(Boolean),
+   timestamp: drop.created_at,
+   markdownContent,
+   plainContent,
+    embedPlainLines,
+    embedMarkdownLines,
     attachmentPlainLines: uniqueAttachments,
     attachmentMarkdownLines: uniqueAttachments.map(
       (url) => `[attachment](${url})`
@@ -703,20 +871,59 @@ export const useWaveDropsClipboard = ({
   containerRef,
   drops,
 }: UseWaveDropsClipboardOptions): void => {
-  const chatDrops = useMemo(
+  const fullDrops = useMemo(
     () =>
       (drops ?? []).filter(
         (drop): drop is ExtendedDrop =>
-          drop.type === DropSize.FULL && drop.drop_type === ApiDropType.Chat
+          drop.type === DropSize.FULL
       ),
     [drops]
   );
 
+  const quoteDropLookup = useMemo(() => {
+    const registry = new Map<string, QuoteDropSource>();
+
+    for (const drop of fullDrops) {
+      registerQuoteDropSource(registry, drop.id, {
+        author: drop.author,
+        parts: drop.parts,
+        created_at: drop.created_at,
+        wave: drop.wave,
+      });
+
+      if (drop.reply_to?.drop) {
+        registerQuoteDropSource(registry, drop.reply_to.drop_id, {
+          author: drop.reply_to.drop.author,
+          parts: drop.reply_to.drop.parts,
+          created_at: drop.reply_to.drop.created_at,
+          wave: drop.wave,
+        });
+      }
+
+      for (const part of drop.parts) {
+        const quoted = part.quoted_drop;
+        if (quoted?.drop) {
+          registerQuoteDropSource(registry, quoted.drop_id, {
+            author: quoted.drop.author,
+            parts: quoted.drop.parts,
+            created_at: quoted.drop.created_at,
+            wave: drop.wave,
+          });
+        }
+      }
+    }
+
+    return registry;
+  }, [fullDrops]);
+
   const clipboardMessages = useMemo(() => {
     return new Map(
-      chatDrops.map((drop) => [drop.stableHash ?? drop.id, buildClipboardMessage(drop)])
+      fullDrops.map((drop) => [
+        drop.stableHash ?? drop.id,
+        buildClipboardMessage(drop, quoteDropLookup),
+      ])
     );
-  }, [chatDrops]);
+  }, [fullDrops, quoteDropLookup]);
 
   const formatRef = useRef<ClipboardFormat>("plain");
 
