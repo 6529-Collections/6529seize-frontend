@@ -1,7 +1,17 @@
 import React from "react";
-import { TraitWrapperProps } from "./types";
 import ValidationError from "../submission/ui/ValidationError";
 import { CheckCircleIcon } from "@heroicons/react/24/outline";
+
+interface TraitWrapperProps {
+  readonly label: string;
+  readonly readOnly?: boolean;
+  readonly children: React.ReactNode;
+  readonly isBoolean?: boolean;
+  readonly className?: string;
+  readonly error?: string | null;
+  readonly id?: string;
+  readonly isFieldFilled?: boolean;
+}
 
 export const TraitWrapper: React.FC<TraitWrapperProps> = ({
   label,
