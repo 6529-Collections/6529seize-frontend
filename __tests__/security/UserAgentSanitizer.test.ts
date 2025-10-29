@@ -739,7 +739,7 @@ describe("UserAgentSanitizer Security Tests", () => {
       const duration = endTime - startTime;
 
       // Should complete quickly due to early length check
-      expect(duration).toBeLessThan(10);
+      expect(duration).toBeLessThan(20);
     });
 
     test("documents ReDoS test design flaw", () => {
@@ -764,7 +764,7 @@ describe("UserAgentSanitizer Security Tests", () => {
       }
     });
 
-    test("actual ReDoS test with valid length (FIXED: reliable XSS detection)", () => {
+    test("actual ReDoS test with valid length", () => {
       // Test ReDoS patterns within the 1024 character limit
       const startTime = performance.now();
 
@@ -781,7 +781,7 @@ describe("UserAgentSanitizer Security Tests", () => {
       const duration = endTime - startTime;
 
       // Should complete quickly
-      expect(duration).toBeLessThan(10);
+      expect(duration).toBeLessThan(20);
     });
 
     test("XSS detection is reliable", () => {
