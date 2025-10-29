@@ -24,6 +24,7 @@ This table is the single source of truth for active and historical tickets. Keep
 | TKT-0018 | Clean up UrlGuardHooks export | In-Progress | P1 | openai-assistant | — | 2025-10-28 |
 | TKT-0019 | Make Wave card fully clickable | In-Progress | P1 | openai-assistant | — | 2025-10-27 |
 | TKT-0020 | Harden CustomTooltip positioning robustness | In-Progress | P1 | openai-assistant | — | 2025-10-28 |
+| TKT-0021 | Restore Discover create wave modal | In-Progress | P1 | openai-assistant | — | 2025-10-29 |
 
 ## Usage Guidelines
 
