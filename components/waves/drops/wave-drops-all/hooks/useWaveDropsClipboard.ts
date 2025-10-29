@@ -989,7 +989,11 @@ export const useWaveDropsClipboard = ({
     () =>
       (drops ?? []).filter(
         (drop): drop is ExtendedDrop =>
-          drop.type === DropSize.FULL
+          drop.type === DropSize.FULL &&
+          typeof drop.stableKey === "string" &&
+          drop.stableKey.length > 0 &&
+          typeof drop.stableHash === "string" &&
+          drop.stableHash.length > 0
       ),
     [drops]
   );
