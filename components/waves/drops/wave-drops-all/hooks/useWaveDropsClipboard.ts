@@ -70,6 +70,66 @@ const nodeIsEditable = (node: Node | null): boolean => {
   );
 };
 
+const escapeAttributeValue = (value: string): string => {
+  if (typeof CSS !== "undefined" && typeof CSS.escape === "function") {
+    return CSS.escape(value);
+  }
+
+  return value.replace(/["\\]/g, "\\$&");
+};
+
+const findDropElement = (node: Node | null): HTMLElement | null => {
+  if (!node) {
+    return null;
+  }
+
+  let current: HTMLElement | null =
+    node instanceof HTMLElement ? node : (node.parentElement ?? null);
+
+  while (current) {
+    if (current.dataset?.waveDropId) {
+      return current;
+    }
+    current = current.parentElement;
+  }
+
+  return null;
+};
+
+const isRangeFullyCoveringElement = (range: Range, element: HTMLElement): boolean => {
+  const elementRange = document.createRange();
+  elementRange.selectNodeContents(element);
+
+  const coversStart = range.compareBoundaryPoints(Range.START_TO_START, elementRange) <= 0;
+  const coversEnd = range.compareBoundaryPoints(Range.END_TO_END, elementRange) >= 0;
+
+  elementRange.detach?.();
+
+  return coversStart && coversEnd;
+};
+
+const getSelectedTextForElement = (range: Range, element: HTMLElement): string => {
+  const elementRange = document.createRange();
+  elementRange.selectNodeContents(element);
+
+  const clipped = range.cloneRange();
+
+  if (clipped.compareBoundaryPoints(Range.START_TO_START, elementRange) < 0) {
+    clipped.setStart(elementRange.startContainer, elementRange.startOffset);
+  }
+
+  if (clipped.compareBoundaryPoints(Range.END_TO_END, elementRange) > 0) {
+    clipped.setEnd(elementRange.endContainer, elementRange.endOffset);
+  }
+
+  const text = clipped.toString();
+
+  clipped.detach?.();
+  elementRange.detach?.();
+
+  return text;
+};
+
 const toPlainText = (markdown: string): string =>
   markdown
     .replace(/```([\s\S]*?)```/g, (_, code) => code.trim())
@@ -422,7 +482,104 @@ export const useWaveDropsClipboard = ({
         return a.timestamp - b.timestamp;
       });
 
-      const payload = formatMessages(messages, formatRef.current);
+      const messagesById = new Map(
+        messages.map((message) => [message.id, message] as const)
+      );
+
+      const selectionRange =
+        selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+
+      let payload: string | undefined;
+
+      if (selectionRange) {
+        const dropElements = new Map<string, HTMLElement>();
+
+        for (const id of selectedIds) {
+          const escapedId = escapeAttributeValue(id);
+          const element = container.querySelector<HTMLElement>(
+            `[data-wave-drop-id="${escapedId}"]`
+          );
+          if (element) {
+            dropElements.set(id, element);
+          }
+        }
+
+        const startElement = findDropElement(selectionRange.startContainer);
+        const endElement = findDropElement(selectionRange.endContainer);
+        const startDropId = startElement?.dataset?.waveDropId ?? null;
+        const endDropId = endElement?.dataset?.waveDropId ?? null;
+
+        const startElementForRange =
+          (startDropId && dropElements.get(startDropId)) ?? startElement ?? null;
+        const endElementForRange =
+          (endDropId && dropElements.get(endDropId)) ?? endElement ?? null;
+
+        const startFullySelected =
+          !!(
+            startDropId &&
+            startElementForRange &&
+            isRangeFullyCoveringElement(selectionRange, startElementForRange)
+          );
+        const endFullySelected =
+          !!(
+            endDropId &&
+            endElementForRange &&
+            isRangeFullyCoveringElement(selectionRange, endElementForRange)
+          );
+
+        const partialSegments = new Map<string, string>();
+        let usedPartialHandling = false;
+
+        if (startDropId && startElementForRange && !startFullySelected) {
+          usedPartialHandling = true;
+          const text = getSelectedTextForElement(selectionRange, startElementForRange);
+          partialSegments.set(startDropId, text);
+        }
+
+        if (
+          endDropId &&
+          endElementForRange &&
+          (!endFullySelected || (startDropId === endDropId && !startFullySelected))
+        ) {
+          usedPartialHandling = true;
+          const text = getSelectedTextForElement(selectionRange, endElementForRange);
+          partialSegments.set(endDropId, text);
+        }
+
+        const fullMessageIds = selectedIds.filter((id) => !partialSegments.has(id));
+        const totalFullMessages = fullMessageIds.length;
+
+        const segments: string[] = [];
+
+        for (const id of selectedIds) {
+          if (partialSegments.has(id)) {
+            const partial = partialSegments.get(id) ?? "";
+            segments.push(partial);
+            continue;
+          }
+
+          const message = messagesById.get(id);
+          if (!message) {
+            continue;
+          }
+
+          const segment = formatMessage(
+            message,
+            formatRef.current,
+            totalFullMessages === 1
+          );
+
+          segments.push(segment);
+        }
+
+        if (segments.length > 0 || usedPartialHandling) {
+          payload = segments.join("\n\n");
+        }
+      }
+
+      if (!payload) {
+        payload = formatMessages(messages, formatRef.current);
+      }
 
       if (!payload) {
         formatRef.current = "plain";
@@ -467,4 +624,3 @@ export const useWaveDropsClipboard = ({
     };
   }, [clipboardMessages, containerRef]);
 };
-
