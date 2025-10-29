@@ -3,11 +3,6 @@ import MissionPage from "@/app/about/mission/page";
 import { render, screen } from "@testing-library/react";
 
 // Mock the Header component since it's dynamically imported
-jest.mock("@/components/header/Header", () => {
-  return function MockHeader() {
-    return <div data-testid="header">Header</div>;
-  };
-});
 
 // Mock HeaderPlaceholder
 jest.mock("@/components/header/HeaderPlaceholder", () => {

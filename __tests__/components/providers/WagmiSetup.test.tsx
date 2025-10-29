@@ -3,10 +3,7 @@
  * Tests fail-fast behavior, retry limits, timeout protection, initialization security, and error handling
  */
 
-import {
-  appWalletsEventEmitter,
-  useAppWallets,
-} from "@/components/app-wallets/AppWalletsContext";
+import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useAuth } from "@/components/auth/Auth";
 import WagmiSetup from "@/components/providers/WagmiSetup";
 import { act, render, waitFor } from "@testing-library/react";
@@ -26,11 +23,6 @@ jest.mock("capacitor-secure-storage-plugin", () => ({
 jest.mock("@/components/auth/Auth");
 jest.mock("@/components/app-wallets/AppWalletsContext", () => ({
   useAppWallets: jest.fn(),
-  appWalletsEventEmitter: {
-    on: jest.fn(),
-    off: jest.fn(),
-    emit: jest.fn(),
-  },
 }));
 jest.mock("@/hooks/useAppWalletPasswordModal", () => ({
   useAppWalletPasswordModal: () => ({
@@ -465,11 +457,6 @@ describe("WagmiSetup Security Tests", () => {
         expect(mockInitializeAppKit).toHaveBeenCalled();
       });
 
-      // Trigger app wallet update to create debounced timeout
-      act(() => {
-        appWalletsEventEmitter.emit("update", []);
-      });
-
       // Unmount component before timeout executes
       await act(async () => {
         unmount();
@@ -605,11 +592,6 @@ describe("WagmiSetup Security Tests", () => {
     it("should properly synchronize state updates during concurrent operations", async () => {
       // Mock a scenario where app wallet updates happen during initialization
       mockInitializeAppKit.mockImplementation(() => {
-        // Simulate app wallet update during initialization
-        setTimeout(() => {
-          appWalletsEventEmitter.emit("update", []);
-        }, 50);
-
         return {
           adapter: {
             wagmiConfig: { chains: [], client: {} },
@@ -709,11 +691,8 @@ describe("WagmiSetup Security Tests", () => {
       });
 
       await act(async () => {
-        // After initialization is done, trigger some state changes via app wallet updates
-        appWalletsEventEmitter.emit("update", []);
-
-        // Allow debounced updates to process
-        jest.advanceTimersByTime(400);
+        // Allow any pending timers to process after initialization
+        jest.runOnlyPendingTimers();
       });
 
       // Security check: No errors should be logged during lifecycle

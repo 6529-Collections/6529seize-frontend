@@ -10,8 +10,6 @@ export const getHomeLatestRoute = (): string => "/";
 
 export const getHomeFeedRoute = (): string => "/?tab=feed";
 
-export const getHomeRoute = (_isApp: boolean): string => "/";
-
 export const getWavesBaseRoute = (isApp: boolean): string =>
   isApp ? "/?view=waves" : "/waves";
 
