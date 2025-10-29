@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import WaveItemDropped from '@/components/waves/list/WaveItemDropped';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
+jest.mock('next/navigation', () => ({ useRouter: () => ({ push: jest.fn() }) }));
 
 jest.mock('@/helpers/Helpers', () => ({ numberWithCommas: (n: number) => n.toString() }));
 jest.mock('@/helpers/image.helpers', () => ({ getScaledImageUri: (u: string) => `scaled-${u}`, ImageScale: { W_AUTO_H_50: 'scale' } }));

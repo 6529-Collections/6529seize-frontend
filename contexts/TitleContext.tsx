@@ -202,15 +202,6 @@ export const useSetTitle = (pageTitle: string) => {
   }, [pageTitle, setTitle, pathname]);
 };
 
-// Hook to set notification count
-export const useSetNotificationCount = (count: number) => {
-  const { setNotificationCount } = useTitle();
-
-  useEffect(() => {
-    setNotificationCount(count);
-  }, [count, setNotificationCount]);
-};
-
 // Hook to set wave data for title
 export const useSetWaveData = (
   data: { name: string; newItemsCount: number } | null
