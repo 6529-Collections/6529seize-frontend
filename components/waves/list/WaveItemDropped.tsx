@@ -1,10 +1,41 @@
-import Link from "next/link";
+import { MouseEvent, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 export default function WaveItemDropped({ wave }: { readonly wave: ApiWave }) {
   const contributors = wave.contributors_overview ?? [];
+  const router = useRouter();
+
+  const handleContributorClick = useCallback(
+    (href: string) =>
+      (event: MouseEvent<HTMLButtonElement>) => {
+        if (event.metaKey || event.ctrlKey) {
+          event.preventDefault();
+          event.stopPropagation();
+          window.open(href, "_blank", "noopener,noreferrer");
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        router.push(href);
+      },
+    [router]
+  );
+
+  const handleContributorAuxClick = useCallback(
+    (href: string) =>
+      (event: MouseEvent<HTMLButtonElement>) => {
+        if (event.button !== 1) {
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        window.open(href, "_blank", "noopener,noreferrer");
+      },
+    []
+  );
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-2 tw-min-w-0">
@@ -45,9 +76,20 @@ export default function WaveItemDropped({ wave }: { readonly wave: ApiWave }) {
           return (
             <div key={baseKey} className="tw-block tw-group/item">
               {contributorHref ? (
-                <Link href={contributorHref} prefetch={false}>
+                <button
+                  type="button"
+                  data-wave-item-interactive="true"
+                  onClick={handleContributorClick(contributorHref)}
+                  onAuxClick={handleContributorAuxClick(contributorHref)}
+                  className="tw-bg-transparent tw-border-none tw-p-0 tw-m-0 tw-inline-flex"
+                  aria-label={
+                    c.contributor_identity
+                      ? `View @${c.contributor_identity}`
+                      : "View contributor profile"
+                  }
+                >
                   {avatar}
-                </Link>
+                </button>
               ) : (
                 avatar
               )}

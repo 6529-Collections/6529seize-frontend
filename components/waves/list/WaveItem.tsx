@@ -43,14 +43,16 @@ const CARD_INTERACTIVE_CLASSES =
 
 type CardContainerProps = {
   readonly isInteractive: boolean;
+  readonly href?: string;
   readonly ariaLabel?: string;
-  readonly onClick?: (event: MouseEvent<HTMLElement>) => void;
-  readonly onKeyDown?: (event: KeyboardEvent<HTMLElement>) => void;
+  readonly onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
+  readonly onKeyDown?: (event: KeyboardEvent<HTMLAnchorElement>) => void;
   readonly children: ReactNode;
 };
 
 function CardContainer({
   isInteractive,
+  href,
   ariaLabel,
   onClick,
   onKeyDown,
@@ -58,20 +60,20 @@ function CardContainer({
 }: CardContainerProps) {
   const className = `${CARD_BASE_CLASSES} ${
     isInteractive ? CARD_INTERACTIVE_CLASSES : ""
-  }`;
+  } tw-no-underline`;
 
-  if (isInteractive) {
+  if (isInteractive && href) {
     return (
-      <div
+      <Link
+        href={href}
+        prefetch={false}
         className={className}
         aria-label={ariaLabel}
-        role="link"
-        tabIndex={0}
         onClick={onClick}
         onKeyDown={onKeyDown}
       >
         {children}
-      </div>
+      </Link>
     );
   }
 
@@ -173,6 +175,36 @@ export default function WaveItem({
     "tw-text-sm tw-font-semibold tw-text-white desktop-hover:group-hover/author:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out";
   const staticAuthorNameClass = "tw-text-sm tw-font-semibold tw-text-white";
 
+  const handleAuthorClick = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      if (!authorHref) {
+        return;
+      }
+      if (event.metaKey || event.ctrlKey) {
+        event.preventDefault();
+        event.stopPropagation();
+        window.open(authorHref, "_blank", "noopener,noreferrer");
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      router.push(authorHref);
+    },
+    [authorHref, router]
+  );
+
+  const handleAuthorAuxClick = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      if (!authorHref || event.button !== 1) {
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      window.open(authorHref, "_blank", "noopener,noreferrer");
+    },
+    [authorHref]
+  );
+
   let authorSection: ReactNode;
   if (!wave) {
     authorSection = (
@@ -185,17 +217,24 @@ export default function WaveItem({
     );
   } else if (authorHref) {
     authorSection = (
-      <Link
-        href={authorHref}
-        prefetch={false}
-        className={`${authorWrapperClass} tw-no-underline`}
+      <button
+        type="button"
+        data-wave-item-interactive="true"
+        onClick={handleAuthorClick}
+        onAuxClick={handleAuthorAuxClick}
+        className={`${authorWrapperClass} tw-no-underline tw-bg-transparent tw-border-none tw-p-0 tw-text-left`}
+        aria-label={
+          author?.handle
+            ? `View @${author.handle}`
+            : "View author profile"
+        }
       >
         <div className="tw-h-6 tw-w-6 tw-flex-shrink-0">{authorAvatar}</div>
         <span className={linkedAuthorNameClass}>
           {author?.handle ?? userPlaceholder}
         </span>
         {authorLevelBadge}
-      </Link>
+      </button>
     );
   } else {
     authorSection = (
@@ -210,16 +249,17 @@ export default function WaveItem({
   }
 
   const handleCardClick = useCallback(
-    (event: MouseEvent<HTMLElement>) => {
+    (event: MouseEvent<HTMLAnchorElement>) => {
       if (!waveHref) {
         return;
       }
       const target = event.target as HTMLElement | null;
       if (shouldSkipNavigation(target, event.currentTarget)) {
+        event.preventDefault();
+        event.stopPropagation();
         return;
       }
       if (event.button === 1 || event.metaKey || event.ctrlKey) {
-        window.open(waveHref, "_blank", "noopener,noreferrer");
         return;
       }
       if (!event.defaultPrevented) {
@@ -231,7 +271,7 @@ export default function WaveItem({
   );
 
   const handleCardKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLElement>) => {
+    (event: KeyboardEvent<HTMLAnchorElement>) => {
       if (!waveHref || event.target !== event.currentTarget) {
         return;
       }
@@ -246,6 +286,7 @@ export default function WaveItem({
   return (
     <CardContainer
       isInteractive={isInteractive}
+      href={waveHref}
       ariaLabel={cardLabel}
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
@@ -277,19 +318,9 @@ export default function WaveItem({
         <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-flex tw-items-end tw-justify-between tw-gap-3">
           <div className="tw-flex tw-min-w-0 tw-items-end tw-px-3 tw-pb-3">
             <div className="tw-min-w-0">
-              {waveHref ? (
-                <Link
-                  href={waveHref}
-                  prefetch={false}
-                  className="tw-no-underline tw-text-lg tracking-tight tw-font-semibold tw-text-white desktop-hover:hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out tw-line-clamp-1"
-                >
-                  {wave?.name ?? titlePlaceholder}
-                </Link>
-              ) : (
-                <span className="tw-text-lg tw-font-semibold tw-text-white">
-                  {wave?.name ?? titlePlaceholder}
-                </span>
-              )}
+              <span className="tw-text-lg tw-font-semibold tw-text-white desktop-hover:group-hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out tw-line-clamp-1">
+                {wave?.name ?? titlePlaceholder}
+              </span>
             </div>
           </div>
           <div className="tw-hidden sm:tw-block" />
