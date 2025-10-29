@@ -1,3 +1,5 @@
+"use client";
+
 import { MouseEvent, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ApiWave } from "@/generated/models/ApiWave";
