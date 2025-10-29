@@ -755,5 +755,5 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// ts-prune-ignore-next-line: Next.js reads this named export as route config
 export const dynamic = "force-dynamic";
-export const revalidate = 0;

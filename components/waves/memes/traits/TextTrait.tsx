@@ -1,9 +1,21 @@
 "use client";
 
+import type { TraitsData } from "../submission/types/TraitsData";
 import React, { useRef, useCallback, useMemo } from "react";
 import { useDebounce } from "react-use";
-import { TextTraitProps } from "./types";
 import { TraitWrapper } from "./TraitWrapper";
+
+type TextTraitProps = {
+  readonly label: string;
+  readonly field: keyof TraitsData;
+  readonly traits: TraitsData;
+  readonly updateText: (field: keyof TraitsData, value: string) => void;
+  readonly readOnly?: boolean;
+  readonly placeholder?: string;
+  readonly className?: string;
+  readonly error?: string | null;
+  readonly onBlur?: (field: keyof TraitsData) => void;
+};
 
 /**
  * Extremely simplified TextTrait component using uncontrolled inputs

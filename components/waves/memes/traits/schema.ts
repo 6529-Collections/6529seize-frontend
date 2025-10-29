@@ -495,7 +495,7 @@ export function getFormSections(
 }
 
 // Get initial trait values
-function getInitialTraitsValues(): TraitsData {
+export function getInitialTraitsValues(): TraitsData {
   const initialValues: Record<string, any> = {
     title: "",
     description: "",
@@ -520,9 +520,6 @@ function getInitialTraitsValues(): TraitsData {
 
   return initialValues as TraitsData;
 }
-
-// Function to be imported directly in useArtworkSubmissionForm to avoid circular dependency
-export const initialTraits: TraitsData = getInitialTraitsValues();
 
 export const MEME_TRAITS_SORT_ORDER = [
   "artist",

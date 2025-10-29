@@ -2,8 +2,21 @@
 
 import React, { useRef, useCallback, useMemo } from "react";
 import { useDebounce } from "react-use";
-import { NumberTraitProps } from "./types";
+import type { TraitsData } from "../submission/types/TraitsData";
 import { TraitWrapper } from "./TraitWrapper";
+
+interface NumberTraitProps {
+  readonly label: string;
+  readonly field: keyof TraitsData;
+  readonly className?: string;
+  readonly error?: string | null;
+  readonly onBlur?: (field: keyof TraitsData) => void;
+  readonly readOnly?: boolean;
+  readonly min: number;
+  readonly max: number;
+  readonly traits: TraitsData;
+  readonly updateNumber: (field: keyof TraitsData, value: number) => void;
+}
 
 /**
  * Improved number input component with better UX for handling zero values

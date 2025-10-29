@@ -94,6 +94,7 @@ function mapGuardErrorToResponse(error: UrlGuardError): NextResponse {
   }
 }
 
+// ts-prune-ignore-next: Next.js uses exported HTTP verb handlers via convention.
 export async function GET(request: NextRequest) {
   const target = request.nextUrl.searchParams.get("url");
 
@@ -109,7 +110,9 @@ export async function GET(request: NextRequest) {
   return proxyImage(remoteResult.url);
 }
 
+// ts-prune-ignore-next: Next.js framework consumes this export via route conventions.
 export const dynamic = "force-dynamic";
+// ts-prune-ignore-next: Next.js framework consumes this export via route conventions.
 export const revalidate = 0;
 
 function parseRemoteUrl(target: string): { url: URL } | { response: NextResponse } {

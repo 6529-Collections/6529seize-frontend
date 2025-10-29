@@ -1,8 +1,18 @@
 "use client";
 
 import React, { useRef, useEffect, useCallback } from "react";
-import { BooleanTraitProps } from "./types";
+import type { TraitsData } from "../submission/types/TraitsData";
 import { TraitWrapper } from "./TraitWrapper";
+
+type BooleanTraitProps = {
+  readonly label: string;
+  readonly field: keyof TraitsData;
+  readonly className?: string;
+  readonly error?: string | null;
+  readonly onBlur?: (field: keyof TraitsData) => void;
+  readonly traits: TraitsData;
+  readonly updateBoolean: (field: keyof TraitsData, value: boolean) => void;
+};
 
 /**
  * Simplified BooleanTrait component using a ref-based approach

@@ -1,5 +1,10 @@
 import React, { memo } from "react";
-import { SectionProps } from "./types";
+
+interface SectionProps {
+  readonly title: string;
+  readonly children: React.ReactNode;
+  readonly className?: string;
+}
 
 /**
  * Base Section component

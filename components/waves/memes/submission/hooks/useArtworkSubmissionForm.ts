@@ -4,6 +4,7 @@ import { useReducer, useEffect, useCallback } from "react";
 import { TraitsData } from "../types/TraitsData";
 import { SubmissionStep } from "../types/Steps";
 import { useAuth } from "@/components/auth/Auth";
+import { getInitialTraitsValues } from "@/components/waves/memes/traits/schema";
 
 /**
  * Action types for the form reducer - drastically simplified
@@ -81,8 +82,8 @@ function formReducer(state: FormState, action: FormAction): FormState {
 export function useArtworkSubmissionForm() {
   const { connectedProfile } = useAuth();
 
-  // Import the pre-computed initial values
-  const { initialTraits } = require("@/components/waves/memes/traits/schema");
+  // Pre-compute initial values for traits without triggering circular dependencies
+  const initialTraits = getInitialTraitsValues();
 
   // Create the initial state
   const initialState: FormState = {
