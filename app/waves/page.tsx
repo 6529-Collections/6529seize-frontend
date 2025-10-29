@@ -64,7 +64,7 @@ export default async function WavesPage({
   const context = await fetchWaveContext(resolvedParams.wave ?? null, cookieStore);
   const queryClient = new QueryClient();
 
-  if (context.waveId) {
+  if (context.waveId && context.wave) {
     queryClient.setQueryData([QueryKey.WAVE, { wave_id: context.waveId }], context.wave);
   }
 
