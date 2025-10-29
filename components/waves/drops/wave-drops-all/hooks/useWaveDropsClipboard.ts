@@ -76,7 +76,7 @@ const escapeAttributeValue = (value: string): string => {
     return CSS.escape(value);
   }
 
-  return value.replaceAll(/[\0-\x1F\x7F"\\\[\]]/g, String.raw`\$&`);
+  return value.replaceAll(/[\u0000-\x1F\x7F"\\[\]]/g, String.raw`\$&`);
 };
 
 const findDropElement = (node: Node | null): HTMLElement | null => {
@@ -138,7 +138,7 @@ const toPlainText = (markdown: string): string =>
     .replaceAll(/!\[[^\]]*]\(([^)]+)\)/g, "$1")
     .replaceAll(/\[([^\]]+)\]\(([^)]+)\)/g, "$1 ($2)")
     .replaceAll(/(\*\*|__)(.*?)\1/g, "$2")
-    .replaceAll(/(\*|_)(.*?)\1/g, "$2")
+    .replaceAll(/([*_])(.*?)\1/g, "$2")
     .replaceAll(/~~(.*?)~~/g, "$1")
     .replaceAll(/(^|\n)#{1,6}\s+/g, "$1")
     .replaceAll(/(^|\n)\s*[-*+]\s+/g, "$1")
@@ -280,72 +280,154 @@ type DropReferenceDescriptor = {
   readonly drop?: QuoteDropSource | null;
 };
 
+const formatDeletedReference = (
+  descriptor: DropReferenceDescriptor
+): string =>
+  `> **${descriptor.label}** (original message deleted: ${descriptor.dropId}#${descriptor.dropPartId})`;
+
+const formatFallbackReference = (
+  descriptor: DropReferenceDescriptor
+): string =>
+  `> **${descriptor.label}** (${descriptor.dropId}#${descriptor.dropPartId})`;
+
+const resolveReferenceDetails = (
+  descriptor: DropReferenceDescriptor,
+  quoteLookup: Map<string, QuoteDropSource>
+) => {
+  const mergedDrop = mergeQuoteDropSources(
+    descriptor.drop ?? undefined,
+    quoteLookup.get(descriptor.dropId)
+  );
+
+  const authorHandle = mergedDrop?.author?.handle?.trim() ?? "";
+  const referencedPartContent = mergedDrop?.parts?.find(
+    (part) => part.part_id === descriptor.dropPartId
+  )?.content;
+  const normalizedContent =
+    typeof referencedPartContent === "string"
+      ? referencedPartContent.trim()
+      : "";
+  const waveName = mergedDrop?.wave?.name?.trim() ?? "";
+
+  return { authorHandle, normalizedContent, waveName };
+};
+
+const buildReferenceContentLines = (content: string): string[] => {
+  if (!content) {
+    return [];
+  }
+
+  const contentLines = content.split("\n");
+  return contentLines.map((line) => {
+    const trimmed = line.trim();
+    return trimmed.length > 0 ? `> ${line}` : ">";
+  });
+};
+
+const buildReferenceHeading = (
+  label: string,
+  authorHandle: string,
+  hasContent: boolean
+): string => {
+  const headingParts = [label, authorHandle]
+    .filter((part) => part && part.length > 0)
+    .join(" ")
+    .trim();
+
+  const suffix = hasContent ? ":" : "";
+
+  return `> **${headingParts}${suffix}**`;
+};
+
+const formatReference = (
+  descriptor: DropReferenceDescriptor,
+  quoteLookup: Map<string, QuoteDropSource>
+): string | null => {
+  if (descriptor.isDeleted) {
+    return formatDeletedReference(descriptor);
+  }
+
+  const { authorHandle, normalizedContent, waveName } =
+    resolveReferenceDetails(descriptor, quoteLookup);
+
+  if (!authorHandle && !normalizedContent && !waveName) {
+    return formatFallbackReference(descriptor);
+  }
+
+  const lines = [
+    buildReferenceHeading(descriptor.label, authorHandle, normalizedContent.length > 0),
+    ...buildReferenceContentLines(normalizedContent),
+  ];
+
+  if (waveName) {
+    lines.push(`> in ${waveName}`);
+  }
+
+  return lines.join("\n");
+};
+
+type EmbedLineBuilder = (embed: EmbedInfo) => string[];
+
+const buildEmbedLines = (
+  embedInfos: EmbedInfo[],
+  builder: EmbedLineBuilder
+): string[] => embedInfos.flatMap(builder);
+
+const createPlainEmbedLines: EmbedLineBuilder = (embed) => {
+  const lines: string[] = [];
+  if (embed.title && embed.url) {
+    lines.push(`${embed.title} — ${embed.url}`);
+  } else if (embed.title) {
+    lines.push(embed.title);
+  } else if (embed.url) {
+    lines.push(embed.url);
+  }
+
+  if (embed.description) {
+    lines.push(embed.description);
+  }
+
+  lines.push(...embed.extras);
+
+  return lines;
+};
+
+const createMarkdownEmbedLines: EmbedLineBuilder = (embed) => {
+  const lines: string[] = [];
+  if (embed.title && embed.url) {
+    lines.push(`[${embed.title}](${embed.url})`);
+  } else if (embed.title) {
+    lines.push(`**${embed.title}**`);
+  } else if (embed.url) {
+    lines.push(embed.url);
+  }
+
+  if (embed.description) {
+    lines.push(embed.description);
+  }
+
+  lines.push(...embed.extras);
+
+  return lines;
+};
+
 const buildClipboardMessage = (
   drop: ExtendedDrop,
   quoteLookup: Map<string, QuoteDropSource>
 ): ClipboardMessage => {
-  const formatReference = (
-    descriptor: DropReferenceDescriptor
-  ): string | null => {
-    if (descriptor.isDeleted) {
-      return `> **${descriptor.label}** (original message deleted: ${descriptor.dropId}#${descriptor.dropPartId})`;
-    }
-
-    const referencedDrop = mergeQuoteDropSources(
-      descriptor.drop ?? undefined,
-      quoteLookup.get(descriptor.dropId)
-    );
-
-    const authorHandle = referencedDrop?.author?.handle?.trim();
-    const referencedPartContent =
-      referencedDrop?.parts?.find(
-        (part) => part.part_id === descriptor.dropPartId
-      )?.content ?? "";
-    const normalizedContent =
-      typeof referencedPartContent === "string"
-        ? referencedPartContent.trim()
-        : "";
-    const waveName = referencedDrop?.wave?.name?.trim();
-
-    if (!authorHandle && !normalizedContent && !waveName) {
-      return `> **${descriptor.label}** (${descriptor.dropId}#${descriptor.dropPartId})`;
-    }
-
-    const headingParts = [descriptor.label, authorHandle]
-      .filter((part) => part && part.length > 0)
-      .join(" ")
-      .trim();
-
-    const headingLine = `> **${headingParts}${
-      normalizedContent.length > 0 ? ":" : ""
-    }**`;
-
-    const lines: string[] = [headingLine];
-
-    if (normalizedContent.length > 0) {
-      const contentLines = normalizedContent.split("\n");
-      for (const line of contentLines) {
-        lines.push(line.trim().length > 0 ? `> ${line}` : ">");
-      }
-    }
-
-    if (waveName) {
-      lines.push(`> in ${waveName}`);
-    }
-
-    return lines.join("\n");
-  };
-
   const markdownSegments: string[] = [];
 
   const replySegment = drop.reply_to
-    ? formatReference({
-        label: "Replying to",
-        dropId: drop.reply_to.drop_id,
-        dropPartId: drop.reply_to.drop_part_id,
-        isDeleted: drop.reply_to.is_deleted,
-        drop: drop.reply_to.drop,
-      })
+    ? formatReference(
+        {
+          label: "Replying to",
+          dropId: drop.reply_to.drop_id,
+          dropPartId: drop.reply_to.drop_part_id,
+          isDeleted: drop.reply_to.is_deleted,
+          drop: drop.reply_to.drop,
+        },
+        quoteLookup
+      )
     : null;
 
   if (replySegment) {
@@ -359,12 +441,15 @@ const buildClipboardMessage = (
     }
 
     if (part.quoted_drop) {
-      const quoteSegment = formatReference({
-        label: "Quote from",
-        dropId: part.quoted_drop.drop_id,
-        dropPartId: part.quoted_drop.drop_part_id,
-        drop: part.quoted_drop.drop,
-      });
+      const quoteSegment = formatReference(
+        {
+          label: "Quote from",
+          dropId: part.quoted_drop.drop_id,
+          dropPartId: part.quoted_drop.drop_part_id,
+          drop: part.quoted_drop.drop,
+        },
+        quoteLookup
+      );
 
       if (quoteSegment) {
         markdownSegments.push(quoteSegment);
@@ -394,44 +479,13 @@ const buildClipboardMessage = (
     }
   }
 
-  const embedPlainDetails = embedInfos.flatMap((embed) => {
-    const lines: string[] = [];
-    if (embed.title && embed.url) {
-      lines.push(`${embed.title} — ${embed.url}`);
-    } else if (embed.title) {
-      lines.push(embed.title);
-    } else if (embed.url) {
-      lines.push(embed.url);
-    }
-    if (embed.description) {
-      lines.push(embed.description);
-    }
-    lines.push(...embed.extras);
-    return lines;
-  });
-
-  const embedMarkdownDetails = embedInfos.flatMap((embed) => {
-    const lines: string[] = [];
-    if (embed.title && embed.url) {
-      lines.push(`[${embed.title}](${embed.url})`);
-    } else if (embed.title) {
-      lines.push(`**${embed.title}**`);
-    } else if (embed.url) {
-      lines.push(embed.url);
-    }
-    if (embed.description) {
-      lines.push(embed.description);
-    }
-    lines.push(...embed.extras);
-    return lines;
-  });
-
-  const embedPlainLines = [...summaryPlainLines, ...embedPlainDetails].filter(
-    Boolean
-  );
+  const embedPlainLines = [
+    ...summaryPlainLines,
+    ...buildEmbedLines(embedInfos, createPlainEmbedLines),
+  ].filter(Boolean);
   const embedMarkdownLines = [
     ...summaryMarkdownLines,
-    ...embedMarkdownDetails,
+    ...buildEmbedLines(embedInfos, createMarkdownEmbedLines),
   ].filter(Boolean);
 
   const mediaUrls = drop.parts.flatMap((part) =>
@@ -445,9 +499,9 @@ const buildClipboardMessage = (
   return {
     id: drop.stableHash ?? drop.id,
     author: drop.author?.handle ?? "Unknown",
-   timestamp: drop.created_at,
-   markdownContent,
-   plainContent,
+    timestamp: drop.created_at,
+    markdownContent,
+    plainContent,
     embedPlainLines,
     embedMarkdownLines,
     attachmentPlainLines: uniqueAttachments,
@@ -640,7 +694,11 @@ const resolveSelectionContext = (
   container: HTMLElement,
   clipboardMessages: Map<string, ClipboardMessage>
 ): SelectionContext | null => {
-  if (!selection || selection.isCollapsed) {
+  if (selection === null) {
+    return null;
+  }
+
+  if (selection.isCollapsed) {
     return null;
   }
 
@@ -663,7 +721,7 @@ const resolveSelectionContext = (
   }
 
   const selectedIds = gatherSelectedMessageIds(selection, container);
-  if (!selectedIds.length) {
+  if (selectedIds.length === 0) {
     return null;
   }
 
@@ -674,10 +732,6 @@ const resolveSelectionContext = (
       return null;
     }
     messages.push(message);
-  }
-
-  if (!messages.length) {
-    return null;
   }
 
   messages.sort((a, b) => {
