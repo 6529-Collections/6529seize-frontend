@@ -117,7 +117,7 @@ type WalletClientWithWrite = {
 };
 
 const waitForPaint = async () => {
-  if (typeof window === "undefined") return;
+  if (typeof globalThis.window === "undefined") return;
   await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 };
 
@@ -479,19 +479,13 @@ function TxStatusList({
         return "#ffcccc";
       case "success":
         return "#ccffcc";
-      case "submitted":
-        return "7f99f5";
       default:
         return "rgba(255, 255, 255, 0.9)";
     }
   };
   const getTextColor = (state: TxState) => {
-    switch (state) {
-      case "awaiting_approval":
-        return "#fff";
-      default:
-        return "#000";
-    }
+    if (state === "awaiting_approval") return "#fff";
+    return "#000";
   };
 
   const txLink = (hash: string) => {
