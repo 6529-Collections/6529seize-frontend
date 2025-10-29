@@ -81,7 +81,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   return (
     <div className={containerClassName} style={leaderboardViewStyle}>
       {/* Main content container */}
-      <div className="tw-pt-4">
+      <div className="tw-pt-2 md:tw-pt-4">
         <WaveLeaderboardTime wave={wave} />
       </div>
 
