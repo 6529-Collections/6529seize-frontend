@@ -242,14 +242,6 @@ type WarpcastChannelResponse = {
   };
 };
 
-type WarpcastFrameResponse = {
-  readonly result?: {
-    readonly frame?: {
-      readonly url?: string;
-    };
-  };
-};
-
 const mapWarpcastUser = (
   data: WarpcastUserResponse | null,
   canonicalUrl: string
