@@ -1,4 +1,3 @@
-````markdown
 # Lint-First Refactor Guide (Next.js 16 + React 19.2)
 
 This document is the single source of truth for how we fix ESLint issues and make **small, safe** improvements while adopting React 19.2 and Next.js 16 features.
@@ -65,7 +64,7 @@ This document is the single source of truth for how we fix ESLint issues and mak
   ```ts
   // eslint-disable-next-line unused-imports/no-unused-vars -- exported API, referenced outside this file
   export type AllowlistWalletPool = { ... }
-````
+  ```
 
 * Prefer `import type {...}` and `export type` for type-only symbols.
 
@@ -199,14 +198,11 @@ Avoid `"use cache: private"` and `"use cache: remote"` unless you clearly match 
 * **Server & Client Components**:
   [https://nextjs.org/docs/app/getting-started/server-and-client-components](https://nextjs.org/docs/app/getting-started/server-and-client-components)
 
-```
-
 ---
 
 - React 19.2 introduces **`useEffectEvent`** to split event-like logic from Effects; the **hooks linter v6** understands that Effect Events are not dependencies. This prevents unnecessary reconnections/re-subscriptions when unrelated values (like theme) change. :contentReference[oaicite:1]{index=1}  
 - The **“You might not need an Effect”** doc emphasizes removing Effects used for pure derivations or event handling to reduce bugs and improve performance. :contentReference[oaicite:2]{index=2}  
 - Next.js 16 ships **Cache Components** (opt-in) centered on the `"use cache"` directive; enable via `cacheComponents: true`. Use only when safe and inputs are serializable. :contentReference[oaicite:3]{index=3}  
 - **Next.js Devtools MCP** exposes project/runtime insights to AI agents (errors, logs, page metadata, server actions). It’s designed for exactly this workflow. :contentReference[oaicite:4]{index=4}
-```
 
 [1]: https://react.dev/blog/2025/10/01/react-19-2 "React 19.2 – React"
