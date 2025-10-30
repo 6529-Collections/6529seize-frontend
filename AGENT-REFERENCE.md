@@ -70,11 +70,11 @@ This document is the single source of truth for how we fix ESLint issues and mak
 
 ### 2) `react-hooks/exhaustive-deps`
 
-**Step A: Remove unnecessary Effects**
+#### Step A: Remove unnecessary Effects
 
 * If the Effect only derives state from props/state, compute it during render or with `useMemo`.
 
-**Step B: Extract event-like logic with `useEffectEvent`**
+#### Step B: Extract event-like logic with `useEffectEvent`
 
 * **Before**
 
@@ -96,7 +96,7 @@ This document is the single source of truth for how we fix ESLint issues and mak
 * Add real reactive inputs (IDs, query, flags) to the dependencies. Event payload values belong in the Effect Event.
   Docs: [https://react.dev/reference/react/useEffectEvent](https://react.dev/reference/react/useEffectEvent)
 
-**Step C: Router/search params patterns**
+#### Step C: Router/search params patterns
 
 * Prefer server-side defaults (redirects in Server Components or default params) instead of client `useEffect` to push/replace.
 * If you must react to URL changes client-side, it’s fine for the Effect to depend on `searchParams`. Keep navigation calls inside an Effect Event to avoid dependency bloat.
@@ -111,12 +111,12 @@ Add **only** when all are true:
 * Cache keys are clear from the inputs (no hidden header/cookie dependence).
 * There is a real win (expensive read, stable result).
 
-**Examples**
+#### Examples
 
 * Route handler assembling a public, static OG image response: OK to cache if inputs are explicit.
 * Server utility fetching immutable docs by ID: OK to cache at function level.
 
-**How**
+#### How
 
 ```ts
 // At file or function top:
@@ -200,9 +200,9 @@ Avoid `"use cache: private"` and `"use cache: remote"` unless you clearly match 
 
 ---
 
-- React 19.2 introduces **`useEffectEvent`** to split event-like logic from Effects; the **hooks linter v6** understands that Effect Events are not dependencies. This prevents unnecessary reconnections/re-subscriptions when unrelated values (like theme) change. :contentReference[oaicite:1]{index=1}  
-- The **“You might not need an Effect”** doc emphasizes removing Effects used for pure derivations or event handling to reduce bugs and improve performance. :contentReference[oaicite:2]{index=2}  
-- Next.js 16 ships **Cache Components** (opt-in) centered on the `"use cache"` directive; enable via `cacheComponents: true`. Use only when safe and inputs are serializable. :contentReference[oaicite:3]{index=3}  
+```text
+- React 19.2 introduces **`useEffectEvent`** to split event-like logic from Effects; the **hooks linter v6** understands that Effect Events are not dependencies. This prevents unnecessary reconnections/re-subscriptions when unrelated values (like theme) change. :contentReference[oaicite:1]{index=1}
+- The **“You might not need an Effect”** doc emphasizes removing Effects used for pure derivations or event handling to reduce bugs and improve performance. :contentReference[oaicite:2]{index=2}
+- Next.js 16 ships **Cache Components** (opt-in) centered on the `"use cache"` directive; enable via `cacheComponents: true`. Use only when safe and inputs are serializable. :contentReference[oaicite:3]{index=3}
 - **Next.js Devtools MCP** exposes project/runtime insights to AI agents (errors, logs, page metadata, server actions). It’s designed for exactly this workflow. :contentReference[oaicite:4]{index=4}
-
-[1]: https://react.dev/blog/2025/10/01/react-19-2 "React 19.2 – React"
+```

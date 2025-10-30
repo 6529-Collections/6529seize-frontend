@@ -1,7 +1,8 @@
 "use client";
+
+import { useQuery } from "@tanstack/react-query";
 import csvParser from "csv-parser";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 
 interface PrimaryAddressData {
@@ -12,68 +13,29 @@ interface PrimaryAddressData {
 }
 
 export default function AboutPrimaryAddress() {
-  const [data, setData] = useState<PrimaryAddressData[]>([]);
-
   const tdStyle = {
     border: "1px solid white",
     padding: "15px",
     verticalAlign: "middle",
   };
 
-  const populateData = useCallback(
-    (body: Blob) => {
-      const reader = new FileReader();
+  const {
+    data: primaryAddressData = [],
+    isLoading,
+    error,
+  } = useQuery<PrimaryAddressData[], Error>({
+    queryKey: ["primaryAddressData"],
+    queryFn: fetchPrimaryAddressData,
+  });
 
-      reader.onload = () => {
-        const data = reader.result;
-        const results: PrimaryAddressData[] = [];
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
-        if (!data) {
-          return;
-        }
-
-        const parser = csvParser({ headers: false })
-          .on("data", (row: any) => {
-            const r = {
-              profile_id: row["0"],
-              handle: row["1"],
-              current_primary: row["2"],
-              new_primary: row["3"],
-            };
-            results.push(r);
-          })
-          .on("end", () => {
-            results.sort((a, b) => {
-              return a.handle.localeCompare(b.handle);
-            });
-            setData(results);
-          })
-          .on("error", (err: any) => {
-            console.error(err);
-          });
-
-        parser.write(data);
-        parser.end();
-      };
-
-      reader.readAsText(body);
-    },
-    [setData],
-  );
-
-  useEffect(() => {
-    const filePath = "/primary_address.csv";
-    fetch(filePath)
-      .then((response) => response.blob())
-      .then((body) => {
-        if (body) {
-          populateData(body);
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }, [populateData]);
+  if (error) {
+    const message = error.message ?? "Failed to load primary address data";
+    return <div>Error: {message}</div>;
+  }
 
   return (
     <Container>
@@ -137,7 +99,7 @@ export default function AboutPrimaryAddress() {
               </tr>
             </thead>
             <tbody>
-              {data.map((item) => (
+              {primaryAddressData.map((item) => (
                 <tr key={item.handle}>
                   <td style={tdStyle}>
                     <Link
@@ -160,4 +122,75 @@ export default function AboutPrimaryAddress() {
       </Row>
     </Container>
   );
+}
+
+async function fetchPrimaryAddressData(): Promise<PrimaryAddressData[]> {
+  const response = await fetch("/primary_address.csv");
+  if (!response.ok) {
+    throw new Error(`Failed to fetch primary address data (${response.status})`);
+  }
+
+  const body = await response.blob();
+
+  if (!body) {
+    throw new Error("No primary address data found");
+  }
+
+  const csvContent = await readBlobAsText(body);
+  return parsePrimaryAddressCsv(csvContent);
+}
+
+function readBlobAsText(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const result = reader.result;
+
+      if (typeof result !== "string") {
+        reject(new Error("Invalid primary address data format"));
+        return;
+      }
+
+      resolve(result);
+    };
+
+    reader.onerror = () => {
+      reject(new Error("Failed to read primary address data"));
+    };
+
+    reader.readAsText(blob);
+  });
+}
+
+function parsePrimaryAddressCsv(csvContent: string): Promise<PrimaryAddressData[]> {
+  return new Promise((resolve, reject) => {
+    const results: PrimaryAddressData[] = [];
+
+    const parser = csvParser({ headers: false })
+      .on("data", (row: Record<string, string>) => {
+        results.push({
+          profile_id: row["0"],
+          handle: row["1"],
+          current_primary: row["2"],
+          new_primary: row["3"],
+        });
+      })
+      .on("end", () => {
+        results.sort((a, b) => a.handle.localeCompare(b.handle));
+        resolve(results);
+      })
+      .on("error", (err: Error) => {
+        console.error(err);
+        reject(new Error("Failed to parse primary address data"));
+      });
+
+    try {
+      parser.write(csvContent);
+      parser.end();
+    } catch (err) {
+      console.error(err);
+      reject(new Error("Failed to parse primary address data"));
+    }
+  });
 }

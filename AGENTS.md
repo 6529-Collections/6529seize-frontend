@@ -1,5 +1,3 @@
-Awesome—let’s turn your **AGENTS.md** into a “single source of truth” that bakes in Next.js 16, React 19.2 (including `useEffectEvent`), Next DevTools MCP, and your modernization-first lint policy. Below is a **drop‑in replacement** you can paste over your current file.
-
 ---
 
 # AGENTS.md – Agent Playbook for Next.js Frontend
@@ -206,7 +204,7 @@ Use the `/codex/` directory as the source of truth for planning and ticket execu
 * One logical change per commit.
 * **DCO required** on every commit:
 
-  ```
+  ```text
   Signed-off-by: Your Full Name <your-GH-ID+username@users.noreply.github.com>
   ```
 
@@ -229,5 +227,3 @@ Use the `/codex/` directory as the source of truth for planning and ticket execu
 [8]: https://nextjs.org/docs/app/guides/upgrading/version-16?utm_source=chatgpt.com "Upgrading: Version 16"
 [9]: https://react.dev/blog/2025/10/01/react-19-2?utm_source=chatgpt.com "React 19.2"
 [10]: https://nextjs.org/docs/app/getting-started/proxy?utm_source=chatgpt.com "Getting Started: Proxy"
-[11]: https://nextjs.org/docs/app/api-reference/config/next-config-js/reactCompiler?utm_source=chatgpt.com "next.config.js: reactCompiler"
-[12]: https://nextjs.org/docs/app/api-reference/config/next-config-js/cacheComponents?utm_source=chatgpt.com "next.config.js: cacheComponents"
