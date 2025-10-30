@@ -34,15 +34,14 @@ export default function UserPageIdentityStatements({
   const { isLoading, data: statements } = useQuery<CicStatement[]>({
     queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, user],
     queryFn: async () => {
-      const activeUser = user;
-      if (!activeUser) {
+      if (!user) {
         throw new Error(
           "UserPageIdentityStatements attempted to fetch without a user param"
         );
       }
 
       return await commonApiFetch<CicStatement[]>({
-        endpoint: `profiles/${activeUser}/cic/statements`,
+        endpoint: `profiles/${user}/cic/statements`,
       });
     },
     enabled: !!user,

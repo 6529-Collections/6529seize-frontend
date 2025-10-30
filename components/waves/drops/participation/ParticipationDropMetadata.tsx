@@ -8,13 +8,17 @@ import { buildTooltipId } from "@/helpers/tooltip.helpers";
 
 interface ParticipationDropMetadataProps {
   readonly metadata: ApiDropMetadata[];
+  readonly contextId?: string | number;
 }
 
 // Component to display individual metadata items in cards
-const MetadataItem: React.FC<{ meta: ApiDropMetadata }> = ({ meta }) => {
+const MetadataItem: React.FC<{
+  readonly meta: ApiDropMetadata;
+  readonly contextId?: string | number;
+}> = ({ meta, contextId }) => {
   const isMobile = useIsMobileDevice();
 
-  const tooltipId = buildTooltipId("metadata", meta.data_key);
+  const tooltipId = buildTooltipId("metadata", contextId, meta.data_key);
 
   return (
     <div className="tw-px-2 tw-py-1 tw-rounded-md tw-bg-iron-800/50 tw-flex tw-flex-col tw-gap-y-1">
@@ -48,6 +52,7 @@ const MetadataItem: React.FC<{ meta: ApiDropMetadata }> = ({ meta }) => {
 
 export default function ParticipationDropMetadata({
   metadata,
+  contextId,
 }: ParticipationDropMetadataProps) {
   const [showAllMetadata, setShowAllMetadata] = useState(false);
 
@@ -68,7 +73,11 @@ export default function ParticipationDropMetadata({
       <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-4 tw-gap-2">
         {/* Always show first 2 items */}
         {metadata.slice(0, 2).map((meta) => (
-          <MetadataItem key={meta.data_key} meta={meta} />
+          <MetadataItem
+            key={meta.data_key}
+            meta={meta}
+            contextId={contextId}
+          />
         ))}
 
         {/* Show more button or additional items */}
@@ -76,7 +85,11 @@ export default function ParticipationDropMetadata({
           (showAllMetadata ? (
             <>
               {metadata.slice(2).map((meta) => (
-                <MetadataItem key={meta.data_key} meta={meta} />
+                <MetadataItem
+                  key={meta.data_key}
+                  meta={meta}
+                  contextId={contextId}
+                />
               ))}
               <button
                 onClick={handleShowLess}

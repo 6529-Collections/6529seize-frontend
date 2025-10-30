@@ -3,13 +3,7 @@
 import { useEffect } from "react";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 
-declare global {
-  interface Window {
-    __ipfsRewritePatched?: boolean;
-  }
-}
-
-const IPFS_URL_PATTERN = /ipfs:\/\/[^\s"'`]+/gi;
+const IPFS_URL_PATTERN = /ipfs:\/\/[^\s"'`]+/g;
 const ATTRIBUTES_TO_REWRITE = [
   "src",
   "srcset",
@@ -21,120 +15,14 @@ const ATTRIBUTES_TO_REWRITE = [
 const ATTRIBUTES_SELECTOR = ATTRIBUTES_TO_REWRITE.map((attr) => `[${attr}]`).join(",");
 
 const replaceIpfsScheme = (value: string) =>
-  value.replace(IPFS_URL_PATTERN, (match) => resolveIpfsUrlSync(match));
+  value.replaceAll(IPFS_URL_PATTERN, (match) => resolveIpfsUrlSync(match));
 
 const rewriteAttributeValue = (value: string | null) => {
-  if (!value || !value.includes("ipfs://")) {
+  if (!value?.includes("ipfs://")) {
     return value;
   }
 
   return replaceIpfsScheme(value);
-};
-
-const ATTRIBUTE_PATCH_FLAG = Symbol("ipfsAttributePatched");
-
-type ElementCtor = { prototype: Element } | undefined;
-
-const patchElementAttributeWrites = () => {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  if (window.__ipfsRewritePatched) {
-    return;
-  }
-
-  window.__ipfsRewritePatched = true;
-
-  const transform = (value: string) => replaceIpfsScheme(value);
-
-  const patchAttributeMethods = (Ctor: ElementCtor) => {
-    if (!Ctor) {
-      return;
-    }
-
-    const proto = Ctor.prototype as Element & {
-      [ATTRIBUTE_PATCH_FLAG]?: boolean;
-    };
-
-    if (!proto || proto[ATTRIBUTE_PATCH_FLAG]) {
-      return;
-    }
-
-    const originalSetAttribute = proto.setAttribute;
-    if (typeof originalSetAttribute === "function") {
-      proto.setAttribute = function (name: string, value: string) {
-        if (typeof value === "string" && ATTRIBUTES_TO_REWRITE.includes(name)) {
-          return originalSetAttribute.call(this, name, transform(value));
-        }
-        return originalSetAttribute.call(this, name, value);
-      };
-    }
-
-    const originalSetAttributeNS = proto.setAttributeNS;
-    if (typeof originalSetAttributeNS === "function") {
-      proto.setAttributeNS = function (
-        namespace: string | null,
-        name: string,
-        value: string
-      ) {
-        if (typeof value === "string" && ATTRIBUTES_TO_REWRITE.includes(name)) {
-          return originalSetAttributeNS.call(
-            this,
-            namespace,
-            name,
-            transform(value)
-          );
-        }
-        return originalSetAttributeNS.call(this, namespace, name, value);
-      };
-    }
-
-    Object.defineProperty(proto, ATTRIBUTE_PATCH_FLAG, {
-      value: true,
-      configurable: false,
-      writable: false,
-    });
-  };
-
-  patchAttributeMethods(window.HTMLImageElement);
-  patchAttributeMethods(window.HTMLSourceElement);
-  patchAttributeMethods(window.HTMLVideoElement);
-  patchAttributeMethods(window.HTMLAudioElement);
-  patchAttributeMethods(window.HTMLLinkElement);
-  patchAttributeMethods(window.HTMLAnchorElement);
-  patchAttributeMethods(window.SVGImageElement as unknown as { prototype: Element });
-
-  const patchProperty = (Ctor: { prototype: any } | undefined, prop: string) => {
-    if (!Ctor) return;
-    const descriptor = Object.getOwnPropertyDescriptor(Ctor.prototype, prop);
-    if (!descriptor || !descriptor.set) {
-      return;
-    }
-
-    Object.defineProperty(Ctor.prototype, prop, {
-      configurable: descriptor.configurable,
-      enumerable: descriptor.enumerable ?? false,
-      get: descriptor.get,
-      set(value: unknown) {
-        if (typeof value !== "string") {
-          descriptor.set!.call(this, value);
-          return;
-        }
-
-        descriptor.set!.call(this, transform(value));
-      },
-    });
-  };
-
-  patchProperty(window.HTMLImageElement, "src");
-  patchProperty(window.HTMLImageElement, "srcset");
-  patchProperty(window.HTMLSourceElement, "src");
-  patchProperty(window.HTMLSourceElement, "srcset");
-  patchProperty(window.HTMLVideoElement, "poster");
-  patchProperty(window.HTMLVideoElement, "src");
-  patchProperty(window.HTMLAudioElement, "src");
-  patchProperty(window.HTMLLinkElement, "href");
 };
 
 export default function IpfsImageSetup() {
@@ -144,18 +32,16 @@ export default function IpfsImageSetup() {
 
 function useIpfsImageSetup() {
   useEffect(() => {
-    patchElementAttributeWrites();
-
     const applyToNode = (node: Element) => {
-      ATTRIBUTES_TO_REWRITE.forEach((attr) => {
+      for (const attr of ATTRIBUTES_TO_REWRITE) {
         const currentValue = node.getAttribute(attr);
-        if (!currentValue) return;
+        if (!currentValue) continue;
 
         const rewritten = rewriteAttributeValue(currentValue);
         if (rewritten && rewritten !== currentValue) {
           node.setAttribute(attr, rewritten);
         }
-      });
+      }
     };
 
     const processNode = (node: Node) => {
@@ -164,38 +50,100 @@ function useIpfsImageSetup() {
       }
 
       applyToNode(node);
-      node.querySelectorAll(ATTRIBUTES_SELECTOR).forEach((child) => {
-        applyToNode(child as Element);
-      });
+      for (const child of Array.from(
+        node.querySelectorAll(ATTRIBUTES_SELECTOR),
+      )) {
+        applyToNode(child);
+      }
     };
 
     const applyToTree = () => {
-      document
-        .querySelectorAll(ATTRIBUTES_SELECTOR)
-        .forEach((el) => applyToNode(el as Element));
+      for (const el of Array.from(
+        document.querySelectorAll(ATTRIBUTES_SELECTOR),
+      )) {
+        applyToNode(el);
+      }
     };
 
     applyToTree();
 
-    const observer = new MutationObserver((mutations) => {
-      for (const mutation of mutations) {
+    let pendingMutations: MutationRecord[] = [];
+    let rafId: number | null = null;
+
+    const flushMutations = () => {
+      const records = pendingMutations;
+      pendingMutations = [];
+      rafId = null;
+
+      for (const mutation of records) {
         if (mutation.type === "attributes") {
-          const target = mutation.target as Element;
           const attrName = mutation.attributeName;
-          if (attrName) {
-            const attrValue = target.getAttribute(attrName);
-            if (!attrValue || !attrValue.includes("ipfs://")) {
-              continue;
-            }
+          if (!attrName) {
+            continue;
           }
+
+          const target = mutation.target;
+          if (!(target instanceof Element)) {
+            continue;
+          }
+
+          const attrValue = target.getAttribute(attrName);
+          if (
+            attrValue === mutation.oldValue ||
+            !attrValue?.includes("ipfs://")
+          ) {
+            continue;
+          }
+
           applyToNode(target);
           continue;
         }
 
-        mutation.addedNodes.forEach((node) => {
+        for (const node of Array.from(mutation.addedNodes)) {
           processNode(node);
-        });
+        }
       }
+    };
+
+    const scheduleMutationFlush = (mutations: MutationRecord[]) => {
+      pendingMutations.push(...mutations);
+      if (rafId !== null) {
+        return;
+      }
+
+      if (typeof globalThis.requestAnimationFrame === "function") {
+        rafId = globalThis.requestAnimationFrame(flushMutations);
+        return;
+      }
+
+      flushMutations();
+    };
+
+    const observer = new MutationObserver((mutations) => {
+      const relevantMutations = mutations.filter((mutation) => {
+        if (mutation.type !== "attributes") {
+          return true;
+        }
+
+        const attrName = mutation.attributeName;
+        if (!attrName) {
+          return false;
+        }
+
+        const target = mutation.target;
+        if (!(target instanceof Element)) {
+          return false;
+        }
+
+        const attrValue = target.getAttribute(attrName);
+        return attrValue?.includes("ipfs://") ?? false;
+      });
+
+      if (relevantMutations.length === 0) {
+        return;
+      }
+
+      scheduleMutationFlush(relevantMutations);
     });
 
     observer.observe(document.body, {
@@ -203,9 +151,14 @@ function useIpfsImageSetup() {
       subtree: true,
       attributes: true,
       attributeFilter: ATTRIBUTES_TO_REWRITE,
+      attributeOldValue: true,
     });
 
     return () => {
+      if (rafId !== null) {
+        globalThis.cancelAnimationFrame?.(rafId);
+      }
+      pendingMutations = [];
       observer.disconnect();
     };
   }, []);

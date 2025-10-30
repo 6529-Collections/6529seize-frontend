@@ -29,10 +29,8 @@ async function fetchWaveContext(
   noStore();
   const cookieStore = providedCookies ?? (await cookies());
   const headers = await getAppCommonHeaders();
-  const feedItemsFetchedRaw =
-    cookieStore.get(String(QueryKey.FEED_ITEMS))?.value ?? null;
-  const feedItemsFetchedAt =
-    feedItemsFetchedRaw !== null ? Number(feedItemsFetchedRaw) : null;
+  const feedItemsFetchedRaw = cookieStore.get(String(QueryKey.FEED_ITEMS))?.value;
+  const feedItemsFetchedAt = Number.parseInt(feedItemsFetchedRaw ?? "", 10);
 
   const wave =
     waveId === null
@@ -96,7 +94,7 @@ export async function generateMetadata({
   const resolvedParams = await searchParams;
   const waveId = resolvedParams.wave ?? null;
 
-  if (!waveId) {
+  if (waveId === null) {
     return getAppMetadata({
       title: "Waves",
       description: "Browse and explore waves",
@@ -107,19 +105,12 @@ export async function generateMetadata({
     waveId.length > 12 ? `${waveId.slice(0, 8)}...${waveId.slice(-4)}` : waveId;
   const { wave } = await fetchWaveContext(waveId);
 
-  if (!wave) {
+  if (wave === null) {
     return getAppMetadata({
       title: `Wave ${shortUuid} | Waves`,
       description: "Browse and explore waves",
     });
   }
-
-  const formatCount = (value: number | null | undefined): string | null => {
-    if (typeof value !== "number" || !Number.isFinite(value)) {
-      return null;
-    }
-    return new Intl.NumberFormat("en-US").format(value);
-  };
 
   const waveName =
     typeof wave.name === "string" && wave.name.trim().length > 0
@@ -133,27 +124,16 @@ export async function generateMetadata({
 
   const subscribersCount = wave.metrics?.subscribers_count;
   const dropsCount = wave.metrics?.drops_count;
-  const descriptionParts: string[] = [];
-
-  if (authorHandle) {
-    descriptionParts.push(`Created by ${authorHandle}`);
-  }
-
   const subscribers = formatCount(subscribersCount);
-  if (subscribers) {
-    descriptionParts.push(
+  const drops = formatCount(dropsCount);
+  const descriptionParts = [
+    authorHandle && `Created by ${authorHandle}`,
+    subscribers &&
       `${subscribers} ${
         subscribersCount === 1 ? "subscriber" : "subscribers"
-      }`
-    );
-  }
-
-  const drops = formatCount(dropsCount);
-  if (drops) {
-    descriptionParts.push(
-      `${drops} ${dropsCount === 1 ? "drop" : "drops"} shared`
-    );
-  }
+      }`,
+    drops && `${drops} ${dropsCount === 1 ? "drop" : "drops"} shared`,
+  ].filter((part): part is string => Boolean(part));
 
   const metadata: Parameters<typeof getAppMetadata>[0] = {
     title: `${waveName} | Waves`,
@@ -163,10 +143,20 @@ export async function generateMetadata({
         : "Browse and explore waves",
   };
 
-  if (wave.picture) {
-    metadata.ogImage = wave.picture;
-    metadata.twitterCard = "summary_large_image";
-  }
+  return getAppMetadata(
+    wave.picture
+      ? {
+          ...metadata,
+          ogImage: wave.picture,
+          twitterCard: "summary_large_image",
+        }
+      : metadata
+  );
+}
 
-  return getAppMetadata(metadata);
+function formatCount(value: number | null | undefined): string | null {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return null;
+  }
+  return new Intl.NumberFormat("en-US").format(value);
 }

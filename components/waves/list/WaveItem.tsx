@@ -298,7 +298,7 @@ export default function WaveItem({
       if (!waveHref || event.target !== event.currentTarget) {
         return;
       }
-      if (event.key === "Enter" || event.key === " " || event.key === "Space") {
+      if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
         router.push(waveHref);
       }

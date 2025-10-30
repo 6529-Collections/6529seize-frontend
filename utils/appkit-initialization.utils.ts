@@ -99,7 +99,6 @@ function buildAppKitConfig(adapter: WagmiAdapter) {
       ],
     },
     themeVariables: {
-      // Prevent AppKit from preloading its bundled KHTeka font assets.
       "--w3m-font-family": "'Montserrat', sans-serif",
     },
     enableWalletGuide: false,

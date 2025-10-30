@@ -349,6 +349,12 @@ export async function fetchNewestWaveMessages(
       endpoint: `waves/${waveId}/drops`,
       params,
       signal,
+      retryOptions: {
+        maxRetries: 2,
+        initialDelayMs: 300,
+        backoffFactor: 1.5,
+        jitter: 0.1,
+      },
     });
 
     // Update centralized eligibility if callback provided
