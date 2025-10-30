@@ -3,17 +3,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState, KeyboardEvent, useId } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCircleExclamation,
-  faMagnifyingGlass,
-  faXmark,
-} from "@fortawesome/free-solid-svg-icons";
+import { faCircleExclamation, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { CommunityMemberMinimal } from "@/entities/IProfile";
 import { commonApiFetch } from "@/services/api/common-api";
 import CommonProfileSearchItems from "../profile-search/CommonProfileSearchItems";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getSelectableIdentity } from "@/components/utils/input/profile-search/getSelectableIdentity";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+
 export enum IdentitySearchSize {
   SM = "SM",
   MD = "MD",
@@ -268,8 +266,7 @@ export default function IdentitySearch({
         }`}
         placeholder=" "
       />
-      <FontAwesomeIcon
-        icon={faMagnifyingGlass}
+      <MagnifyingGlassIcon
         className={`${ICON_CLASSES[size]} tw-text-iron-300 tw-pointer-events-none tw-absolute tw-left-3 tw-h-5 tw-w-5`}
         aria-hidden="true"
       />

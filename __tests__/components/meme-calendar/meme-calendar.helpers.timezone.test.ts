@@ -1,5 +1,4 @@
 import {
-  mintEndInstantUtcForMintDay,
   mintStartInstantUtcForMintDay,
   nextMintDateOnOrAfter,
   wallTimeToUtcInstantInZone,
@@ -15,6 +14,17 @@ const formatAthensTime = (date: Date): string =>
 
 const isoDate = (y: number, m: number, d: number): Date =>
   new Date(Date.UTC(y, m, d));
+
+const mintEndInstantUtcForMintDay = (mintDay: Date): Date => {
+  const nextDay = new Date(
+    Date.UTC(
+      mintDay.getUTCFullYear(),
+      mintDay.getUTCMonth(),
+      mintDay.getUTCDate() + 1
+    )
+  );
+  return wallTimeToUtcInstantInZone(nextDay, 17, 0);
+};
 
 describe("meme calendar timezone handling", () => {
   it("keeps mint start anchored to 17:40 Athens time across 2024", () => {

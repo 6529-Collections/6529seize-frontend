@@ -33,7 +33,7 @@ export const DefaultSingleWaveDrop: React.FC<DefaultSingleWaveDropProps> = ({
   );
 
   return (
-    <div className="tw-w-full tw-h-full tw-bg-iron-950 tw-flex tw-flex-col  tw-pb-[env(safe-area-inset-bottom,0px)]">
+    <div className="tw-w-full tw-h-full tw-bg-iron-950 tw-flex tw-flex-col tw-pb-[env(safe-area-inset-bottom,0px)]">
       <SingleWaveDropHeader
         activeTab={activeTab}
         setActiveTab={setActiveTab}
