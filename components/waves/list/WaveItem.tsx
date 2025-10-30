@@ -54,16 +54,16 @@ const shouldSkipNavigation = (
   let current: HTMLElement | null = target;
 
   while (current) {
+    if (current === root) {
+      break;
+    }
+
     if (current.dataset?.waveItemInteractive === "true") {
       return true;
     }
 
     if (INTERACTIVE_TAGS.has(current.tagName)) {
       return true;
-    }
-
-    if (current === root) {
-      break;
     }
 
     current = current.parentElement;
@@ -364,9 +364,7 @@ export default function WaveItem({
           </div>
 
           {waveHref && followersTooltipId ? (
-            <Link
-              href={waveHref}
-              prefetch={false}
+            <span
               className="tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-200 tw-no-underline tw-relative tw-z-20 tw-pointer-events-auto"
               data-tooltip-id={followersTooltipId}
             >
@@ -378,7 +376,7 @@ export default function WaveItem({
                 {numberWithCommas(wave?.metrics.subscribers_count ?? 0)}
               </span>
               <span className="tw-text-iron-400 xl:tw-hidden">Joined</span>
-            </Link>
+            </span>
           ) : (
             <div className="tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-200">
               <UsersIcon

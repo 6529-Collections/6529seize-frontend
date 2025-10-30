@@ -1,4 +1,4 @@
-export const cache = "force-no-store";
+export const dynamic = "force-dynamic";
 
 import "@/components/drops/create/lexical/lexical.styles.scss";
 import "@/styles/Home.module.scss";

@@ -57,7 +57,6 @@ export default async function WavesPage({
 }: {
   readonly searchParams: Promise<{ wave?: string; drop?: string }>;
 }) {
-  "use cache: private";
   noStore();
   const resolvedParams = await searchParams;
   const cookieStore = await cookies();
@@ -93,7 +92,6 @@ export async function generateMetadata({
 }: {
   readonly searchParams: Promise<{ wave?: string }>;
 }): Promise<Metadata> {
-  "use cache: private";
   noStore();
   const resolvedParams = await searchParams;
   const waveId = resolvedParams.wave ?? null;
