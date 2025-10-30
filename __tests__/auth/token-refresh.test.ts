@@ -8,20 +8,15 @@ import {
   TokenRefreshNetworkError,
   TokenRefreshServerError,
 } from "@/errors/authentication";
-import * as commonApiModule from "@/services/api/common-api";
 import { redeemRefreshTokenWithRetries } from "@/services/auth/token-refresh.utils";
 
-const mockCommonApiPost = jest.spyOn(commonApiModule, "commonApiPost");
+const fetchMock = global.fetch as jest.Mock;
 const validAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
 const refreshToken = "refresh-token";
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockCommonApiPost.mockReset();
-});
-
-afterAll(() => {
-  mockCommonApiPost.mockRestore();
+  fetchMock.mockReset();
 });
 
 describe("Token refresh error hierarchy", () => {
@@ -75,23 +70,29 @@ describe("redeemRefreshTokenWithRetries", () => {
     await expect(
       redeemRefreshTokenWithRetries("", refreshToken, null),
     ).rejects.toThrow("Invalid walletAddress: must be non-empty string");
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("rejects when refresh token is missing", async () => {
     await expect(
       redeemRefreshTokenWithRetries(validAddress, "" as any, null),
     ).rejects.toThrow("Invalid refreshToken: must be non-empty string");
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("rejects when retry count is outside allowed range", async () => {
     await expect(
       redeemRefreshTokenWithRetries(validAddress, refreshToken, null, 0),
     ).rejects.toThrow("Invalid retryCount: must be between 1 and 10");
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("returns the server payload on success and forwards parameters", async () => {
     const payload = { token: "new-token", address: validAddress };
-    mockCommonApiPost.mockResolvedValue(payload);
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => payload,
+    });
 
     const result = await redeemRefreshTokenWithRetries(
       validAddress,
@@ -101,22 +102,28 @@ describe("redeemRefreshTokenWithRetries", () => {
     );
 
     expect(result).toEqual(payload);
-    expect(mockCommonApiPost).toHaveBeenCalledWith({
-      endpoint: "auth/redeem-refresh-token",
-      body: {
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, options] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("https://api.test.6529.io/api/auth/redeem-refresh-token");
+    expect(options).toMatchObject({
+      method: "POST",
+      body: JSON.stringify({
         address: validAddress,
         token: refreshToken,
         role: "user-role",
-      },
-      signal: undefined,
+      }),
     });
+    expect(options.signal).toBeUndefined();
+    expect(options.headers).toEqual(
+      expect.objectContaining({ "Content-Type": "application/json" }),
+    );
   });
 
   it("wraps network failures in TokenRefreshNetworkError", async () => {
     const networkError = Object.assign(new Error("connection lost"), {
       code: "ECONNREFUSED",
     });
-    mockCommonApiPost.mockRejectedValue(networkError);
+    fetchMock.mockRejectedValue(networkError);
 
     await expect(
       redeemRefreshTokenWithRetries(validAddress, refreshToken, null, 1),
@@ -125,12 +132,13 @@ describe("redeemRefreshTokenWithRetries", () => {
 
   it("wraps HTTP failures in TokenRefreshServerError with status", async () => {
     const serverError = { status: 401, message: "Unauthorized", response: {} };
-    mockCommonApiPost.mockRejectedValue(serverError);
+    fetchMock.mockRejectedValue(serverError);
 
     await expect(
       redeemRefreshTokenWithRetries(validAddress, refreshToken, null, 1),
     ).rejects.toThrow("Server error 401 on attempt 1: Unauthorized");
 
+    // Ensure the instance includes response metadata
     const error = await redeemRefreshTokenWithRetries(
       validAddress,
       refreshToken,
@@ -156,10 +164,14 @@ describe("redeemRefreshTokenWithRetries", () => {
         controller.signal,
       ),
     ).rejects.toThrow(TokenRefreshCancelledError);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("surfaces response validation issues as TokenRefreshServerError", async () => {
-    mockCommonApiPost.mockResolvedValue({ token: null, address: validAddress });
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({ token: null, address: validAddress }),
+    });
 
     await expect(
       redeemRefreshTokenWithRetries(validAddress, refreshToken, null, 1),
@@ -168,9 +180,12 @@ describe("redeemRefreshTokenWithRetries", () => {
 
   it("retries transient errors up to retry count", async () => {
     const transient = new Error("temporary");
-    mockCommonApiPost
+    fetchMock
       .mockRejectedValueOnce(transient)
-      .mockResolvedValueOnce({ token: "second", address: validAddress });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ token: "second", address: validAddress }),
+      });
 
     const result = await redeemRefreshTokenWithRetries(
       validAddress,
@@ -180,11 +195,11 @@ describe("redeemRefreshTokenWithRetries", () => {
     );
 
     expect(result.token).toBe("second");
-    expect(mockCommonApiPost).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it("falls back to TokenRefreshError for unknown issues", async () => {
-    mockCommonApiPost.mockRejectedValue({ message: "boom" });
+    fetchMock.mockRejectedValue({ message: "boom" });
 
     await expect(
       redeemRefreshTokenWithRetries(validAddress, refreshToken, null, 1),
