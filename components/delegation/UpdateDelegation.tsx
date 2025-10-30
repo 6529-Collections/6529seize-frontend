@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import { Col, Container, Form, Row } from "react-bootstrap";
 import { useEnsAddress, useEnsName } from "wagmi";
 import styles from "./Delegation.module.scss";
@@ -68,14 +68,34 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
     chainId: 1,
   });
 
-  useEffect(() => {
-    if (newDelegationToAddressEns.data) {
-      setDelegationToAddress(delegationToInput);
-      setDelegationToInput(
-        `${newDelegationToAddressEns.data} - ${delegationToInput}`
-      );
+  const appendEnsLabelForAddress = useEffectEvent((ensName: string) => {
+    let updatedAddress: string | null = null;
+
+    setDelegationToInput((currentInput) => {
+      if (
+        !currentInput ||
+        !currentInput.startsWith("0x") ||
+        currentInput.includes(" - ")
+      ) {
+        return currentInput;
+      }
+
+      updatedAddress = currentInput;
+      return `${ensName} - ${currentInput}`;
+    });
+
+    if (updatedAddress) {
+      setDelegationToAddress(updatedAddress);
     }
-  }, [newDelegationToAddressEns.data]);
+  });
+
+  useEffect(() => {
+    if (!newDelegationToAddressEns.data) {
+      return;
+    }
+
+    appendEnsLabelForAddress(newDelegationToAddressEns.data);
+  }, [appendEnsLabelForAddress, newDelegationToAddressEns.data]);
 
   const newDelegationToAddressFromEns = useEnsAddress({
     name:
@@ -85,14 +105,43 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
     chainId: 1,
   });
 
-  useEffect(() => {
-    if (newDelegationToAddressFromEns.data) {
-      setDelegationToAddress(newDelegationToAddressFromEns.data);
-      setDelegationToInput(
-        `${delegationToInput} - ${newDelegationToAddressFromEns.data}`
-      );
+  const appendAddressForEnsLabel = useEffectEvent(
+    (resolvedAddress: string) => {
+      setDelegationToAddress(resolvedAddress);
+
+      setDelegationToInput((currentInput) => {
+        if (!currentInput) {
+          return currentInput;
+        }
+
+        const [label] = currentInput.split(" - ");
+        if (!label) {
+          return currentInput;
+        }
+
+        const prefix = `${label} - `;
+        const nextValue = `${prefix}${resolvedAddress}`;
+
+        if (currentInput.endsWith(".eth")) {
+          return currentInput === nextValue ? currentInput : nextValue;
+        }
+
+        if (currentInput.startsWith(prefix)) {
+          return currentInput === nextValue ? currentInput : nextValue;
+        }
+
+        return currentInput;
+      });
     }
-  }, [newDelegationToAddressFromEns.data]);
+  );
+
+  useEffect(() => {
+    if (!newDelegationToAddressFromEns.data) {
+      return;
+    }
+
+    appendAddressForEnsLabel(newDelegationToAddressFromEns.data);
+  }, [appendAddressForEnsLabel, newDelegationToAddressFromEns.data]);
 
   const contractWriteDelegationConfigParams = {
     address: DELEGATION_CONTRACT.contract,

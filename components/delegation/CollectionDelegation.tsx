@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useEffectEvent, useRef, useState } from "react";
 import Link from "next/link";
 import {
   Accordion,
@@ -109,6 +109,35 @@ function getConsolidationReadParams(
   }
   return [];
 }
+
+function getDelegationsCount(delegations: ContractDelegation[]) {
+  let count = 0;
+  delegations.forEach((delegation) => {
+    if (delegation.wallets.length > 0) {
+      count += delegation.wallets.length;
+    }
+  });
+  return count;
+}
+
+function getActiveKeys(
+  outDelegations: ContractDelegation[],
+  inDelegations: ContractDelegation[]
+) {
+  const outCount = getDelegationsCount(outDelegations);
+  const inCount = getDelegationsCount(inDelegations);
+
+  if (outCount > 0 && inCount > 0) {
+    return ["0", "1"];
+  }
+  if (outCount > 0) {
+    return ["0"];
+  }
+  if (inCount > 0) {
+    return ["1"];
+  }
+  return [""];
+}
 export default function CollectionDelegationComponent(props: Readonly<Props>) {
   const toastRef = useRef<HTMLDivElement>(null);
   const accountResolution = useSeizeConnectContext();
@@ -165,10 +194,6 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     return networkResolution === DELEGATION_CONTRACT.chain_id;
   }
 
-  useEffect(() => {
-    reset();
-  }, [accountResolution.address]);
-
   function getSwitchToHtml() {
     return `<span style="color: red !important;">Switch to ${
       DELEGATION_CONTRACT.chain_id === 1
@@ -212,21 +237,29 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   });
 
   useEffect(() => {
-    if (retrieveOutgoingConsolidations.data) {
-      const activeConsolidations: any[] = [];
-      outgoingDelegations[CONSOLIDATION_USE_CASE.index].wallets.map(
-        (w, index) => {
-          activeConsolidations.push({
-            wallet: w.wallet,
-            status: retrieveOutgoingConsolidations.data[index].result
-              ? "consolidation active"
-              : "consolidation incomplete",
-          });
-        }
-      );
-      setOutgoingActiveConsolidations(activeConsolidations);
+    if (!retrieveOutgoingConsolidations.data) {
+      return;
     }
-  }, [retrieveOutgoingConsolidations.data]);
+
+    const consolidationDelegations =
+      outgoingDelegations[CONSOLIDATION_USE_CASE.index];
+
+    if (!consolidationDelegations?.wallets.length) {
+      setOutgoingActiveConsolidations([]);
+      return;
+    }
+
+    const activeConsolidations = consolidationDelegations.wallets.map(
+      (walletDelegation, index) => ({
+        wallet: walletDelegation.wallet,
+        status: retrieveOutgoingConsolidations.data?.[index]?.result
+          ? "consolidation active"
+          : "consolidation incomplete",
+      })
+    );
+
+    setOutgoingActiveConsolidations(activeConsolidations);
+  }, [outgoingDelegations, retrieveOutgoingConsolidations.data]);
 
   const retrieveIncomingDelegations = useReadContracts({
     contracts: getActiveDelegationsReadParams(
@@ -263,21 +296,29 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   });
 
   useEffect(() => {
-    if (retrieveIncomingConsolidations.data) {
-      const activeConsolidations: any[] = [];
-      incomingDelegations[CONSOLIDATION_USE_CASE.index].wallets.map(
-        (w, index) => {
-          activeConsolidations.push({
-            wallet: w.wallet,
-            status: retrieveIncomingConsolidations.data[index].result
-              ? "consolidation active"
-              : "consolidation incomplete",
-          });
-        }
-      );
-      setIncomingActiveConsolidations(activeConsolidations);
+    if (!retrieveIncomingConsolidations.data) {
+      return;
     }
-  }, [retrieveIncomingConsolidations.data]);
+
+    const consolidationDelegations =
+      incomingDelegations[CONSOLIDATION_USE_CASE.index];
+
+    if (!consolidationDelegations?.wallets.length) {
+      setIncomingActiveConsolidations([]);
+      return;
+    }
+
+    const activeConsolidations = consolidationDelegations.wallets.map(
+      (walletDelegation, index) => ({
+        wallet: walletDelegation.wallet,
+        status: retrieveIncomingConsolidations.data?.[index]?.result
+          ? "consolidation active"
+          : "consolidation incomplete",
+      })
+    );
+
+    setIncomingActiveConsolidations(activeConsolidations);
+  }, [incomingDelegations, retrieveIncomingConsolidations.data]);
 
   const useCaseLockStatusesGlobalParams = areEqualAddresses(
     props.collection.contract,
@@ -312,6 +353,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
       refetchInterval: 10000,
     },
   });
+
+  const { refetch: refetchUseCaseLockStatuses } = useCaseLockStatuses;
 
   const [revokeDelegationParams, setRevokeDelegationParams] = useState<any>();
   const [batchRevokeDelegationParams, setBatchRevokeDelegationParams] =
@@ -391,9 +434,13 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
 
   useEffect(() => {
     if (accountResolution.isConnected) {
-      useCaseLockStatuses.refetch();
+      refetchUseCaseLockStatuses();
     }
-  }, [waitUseCaseLockWrite.isSuccess]);
+  }, [
+    accountResolution.isConnected,
+    refetchUseCaseLockStatuses,
+    waitUseCaseLockWrite.isSuccess,
+  ]);
 
   useEffect(() => {
     if (contractWriteRevoke.error) {
@@ -543,6 +590,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   }, [
     collectionLockWrite.error,
     collectionLockWrite.data,
+    collectionLockRead.data,
     waitCollectionLockWrite.isLoading,
   ]);
 
@@ -596,6 +644,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   }, [
     useCaseLockWrite.error,
     useCaseLockWrite.data,
+    lockUseCaseIndex,
+    useCaseLockStatuses.data,
     waitUseCaseLockWrite.isLoading,
   ]);
 
@@ -603,7 +653,11 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     if (!showToast && outgoingDelegationsLoaded && incomingDelegationsLoaded) {
       setToast(undefined);
     }
-  }, [showToast]);
+  }, [
+    incomingDelegationsLoaded,
+    outgoingDelegationsLoaded,
+    showToast,
+  ]);
 
   useEffect(() => {
     if (toast) {
@@ -630,7 +684,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         functionName: "revokeDelegationAddress",
       });
     }
-  }, [revokeDelegationParams]);
+  }, [contractWriteRevoke, revokeDelegationParams]);
 
   useEffect(() => {
     if (batchRevokeDelegationParams && !batchRevokeDelegationParams.loading) {
@@ -652,7 +706,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     }
   }, [batchRevokeDelegationParams, contractWriteBatchRevoke]);
 
-  function reset() {
+  const reset = useEffectEvent(() => {
     setOutgoingDelegations([]);
     setOutgoingDelegationsLoaded(false);
     retrieveOutgoingDelegations.refetch();
@@ -669,35 +723,11 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     useCaseLockWrite.reset();
     collectionLockWrite.reset();
     contractWriteRevoke.reset();
-  }
+  });
 
-  function getDelegationsCount(delegations: ContractDelegation[]) {
-    let count: number = 0;
-    delegations.map((del) => {
-      if (del.wallets.length > 0) {
-        count += del.wallets.length;
-      }
-    });
-    return count;
-  }
-
-  function getActiveKeys(
-    outDelegations: ContractDelegation[],
-    inDelegations: ContractDelegation[]
-  ) {
-    const outCount = getDelegationsCount(outDelegations);
-    const inCount = getDelegationsCount(inDelegations);
-    if (outCount > 0 && inCount > 0) {
-      return ["0", "1"];
-    }
-    if (outCount > 0) {
-      return ["0"];
-    }
-    if (inCount > 0) {
-      return ["1"];
-    }
-    return [""];
-  }
+  useEffect(() => {
+    reset();
+  }, [accountResolution.address, reset]);
 
   useEffect(() => {
     const outDelegations = [...outgoingDelegations].filter(
@@ -738,7 +768,13 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         )
       );
     }
-  }, [outgoingDelegations, incomingDelegations]);
+  }, [
+    incomingDelegations,
+    outgoingDelegations,
+    consolidationKeysChanged,
+    delegationKeysChanged,
+    subDelegationKeysChanged,
+  ]);
 
   function printDelegations() {
     const outDelegations = [...outgoingDelegations].filter(
@@ -1160,7 +1196,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                               #{del.useCase.use_case} - {del.useCase.display}
                             </td>
                           </tr>
-                          {del.wallets.map((w, addressIndex: number) => {
+                          {del.wallets.map((w) => {
                             const consolidationStatus =
                               outgoingActiveConsolidations.find((i) =>
                                 areEqualAddresses(w.wallet, i.wallet)
@@ -1211,7 +1247,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                           let message = "Confirm in your wallet...";
                           if (chainsMatch()) {
                             setBatchRevokeDelegationParams({
-                              collections: [...bulkRevocations].map((br) =>
+                              collections: [...bulkRevocations].map(() =>
                                 areEqualAddresses(
                                   props.collection.contract,
                                   DELEGATION_ALL_ADDRESS

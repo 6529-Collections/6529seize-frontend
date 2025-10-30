@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useEffectEvent } from "react";
 import {
   DistributionPlanToolContext,
   DistributionPlanToolStep,
@@ -18,24 +18,53 @@ export default function CreatePlan({ id }: { readonly id: string }) {
   const router = useRouter();
 
   const { setState } = useContext(DistributionPlanToolContext);
+
+  const redirectToEmma = useEffectEvent(() => {
+    router.push("/emma");
+  });
+
+  const applyDistributionPlan = useEffectEvent(
+    (distributionPlan: AllowlistDescription) => {
+      void setState(distributionPlan);
+    }
+  );
+
   useEffect(() => {
     if (!id) {
       alert("No id found");
-      router.push("/emma");
+      redirectToEmma();
       return;
     }
+
+    let isActive = true;
+
     const fetchAllowlist = async () => {
-      const data = await distributionPlanApiFetch<AllowlistDescription>(
-        `/allowlists/${id}`
-      );
-      if (!data.success) {
-        router.push("/emma");
-        return;
+      try {
+        const response = await distributionPlanApiFetch<AllowlistDescription>(
+          `/allowlists/${id}`
+        );
+
+        if (!isActive) return;
+
+        if (!response.success || !response.data) {
+          redirectToEmma();
+          return;
+        }
+
+        applyDistributionPlan(response.data);
+      } catch {
+        if (isActive) {
+          redirectToEmma();
+        }
       }
-      setState(data.data);
     };
+
     fetchAllowlist();
-  }, []);
+
+    return () => {
+      isActive = false;
+    };
+  }, [id, applyDistributionPlan, redirectToEmma]);
 
   return (
     <div>

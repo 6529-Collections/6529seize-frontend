@@ -13,9 +13,9 @@ interface ComponentConfigMetaProps {
 }
 
 export default function ComponentConfigMeta({
-  tags,
-  walletsCount,
-  isLoading,
+  tags: _tags,
+  walletsCount: _walletsCount,
+  isLoading: _isLoading,
 }: ComponentConfigMetaProps) {
   return (
     <div className="tw-space-y-1 tw-self-center">

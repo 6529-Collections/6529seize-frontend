@@ -22,7 +22,7 @@ interface MyStreamWaveFAQProps {
   readonly wave: ApiWave;
 }
 
-const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
+const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
   const { setActiveContentTab } = useContentTab();
   const { faqViewStyle } = useLayout();
 

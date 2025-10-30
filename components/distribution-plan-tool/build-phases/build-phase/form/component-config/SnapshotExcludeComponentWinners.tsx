@@ -130,7 +130,7 @@ export default function SnapshotExcludeComponentWinners({
   };
   const [loading] = useState<boolean>(false);
 
-  const [localUniqueWalletsCount, setLocalUniqueWalletsCount] = useState<
+  const [localUniqueWalletsCount, _setLocalUniqueWalletsCount] = useState<
     number | null
   >(null);
 

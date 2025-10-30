@@ -23,7 +23,7 @@ interface WebUnifiedWavesListProps {
 
 const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = ({
   waves,
-  activeWaveId,
+  activeWaveId: _activeWaveId,
   fetchNextPage,
   hasNextPage,
   isFetching,

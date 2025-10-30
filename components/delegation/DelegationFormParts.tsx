@@ -24,6 +24,7 @@ import styles from "./Delegation.module.scss";
 function DelegationAddressInput(
   props: Readonly<{ setAddress: (address: string) => void }>
 ) {
+  const { setAddress } = props;
   const [newDelegationInput, setNewDelegationInput] = useState("");
   const [newDelegationAddress, setNewDelegationAddress] = useState("");
 
@@ -35,12 +36,16 @@ function DelegationAddressInput(
   });
 
   useEffect(() => {
-    if (newDelegationAddressEns.data) {
-      setNewDelegationAddress(newDelegationInput);
-      setNewDelegationInput(
-        `${newDelegationAddressEns.data} - ${newDelegationInput}`
-      );
+    const ensName = newDelegationAddressEns.data;
+    if (!ensName) {
+      return;
     }
+    setNewDelegationInput((prev) => {
+      if (!prev || prev.includes(" - ")) {
+        return prev;
+      }
+      return `${ensName} - ${prev}`;
+    });
   }, [newDelegationAddressEns.data]);
 
   const newDelegationToAddressFromEns = useEnsAddress({
@@ -49,17 +54,34 @@ function DelegationAddressInput(
   });
 
   useEffect(() => {
-    if (newDelegationToAddressFromEns.data) {
-      setNewDelegationAddress(newDelegationToAddressFromEns.data);
-      setNewDelegationInput(
-        `${newDelegationInput} - ${newDelegationToAddressFromEns.data}`
-      );
+    const resolvedAddress = newDelegationToAddressFromEns.data;
+    if (!resolvedAddress) {
+      return;
     }
+    setNewDelegationAddress(resolvedAddress);
+    setNewDelegationInput((prev) => {
+      if (!prev || prev.includes(` - ${resolvedAddress}`)) {
+        return prev;
+      }
+
+      const parts = prev.split(" - ");
+      if (parts.length === 1) {
+        return `${prev} - ${resolvedAddress}`;
+      }
+
+      const lastPart = parts[parts.length - 1];
+      if (lastPart?.toLowerCase().startsWith("0x")) {
+        parts[parts.length - 1] = resolvedAddress;
+        return parts.join(" - ");
+      }
+
+      return `${prev} - ${resolvedAddress}`;
+    });
   }, [newDelegationToAddressFromEns.data]);
 
   useEffect(() => {
-    props.setAddress(newDelegationAddress);
-  }, [newDelegationAddress]);
+    setAddress(newDelegationAddress);
+  }, [setAddress, newDelegationAddress]);
 
   return (
     <Form.Control
@@ -263,43 +285,6 @@ export function DelegationFormDelegateAddressFormGroup(
   );
 }
 
-function DelegationButtons(
-  props: Readonly<{
-    showCancel: boolean;
-    onSubmit: () => void;
-    onHide: () => void;
-    isLoading: boolean;
-  }>
-) {
-  return (
-    <>
-      {props.showCancel && (
-        <button
-          className={styles.newDelegationCancelBtn}
-          onClick={() => props.onHide()}>
-          Cancel
-        </button>
-      )}
-      <button
-        className={`${styles.newDelegationSubmitBtn} ${
-          props.isLoading ? `${styles.newDelegationSubmitBtnDisabled}` : ``
-        }`}
-        onClick={() => {
-          props.onSubmit();
-        }}>
-        Submit{" "}
-        {props.isLoading && (
-          <div className="d-inline">
-            <output className={`spinner-border ${styles.loader}`}>
-              <span className="sr-only"></span>
-            </output>
-          </div>
-        )}
-      </button>
-    </>
-  );
-}
-
 export function DelegationSubmitGroups(
   props: Readonly<{
     title: string;
@@ -312,6 +297,16 @@ export function DelegationSubmitGroups(
     submitBtnLabel?: string;
   }>
 ) {
+  const {
+    title,
+    writeParams,
+    showCancel,
+    gasError,
+    validate,
+    onHide,
+    onSetToast,
+    submitBtnLabel,
+  } = props;
   const writeDelegation = useWriteContract();
   const waitWriteDelegation = useWaitForTransactionReceipt({
     confirmations: 1,
@@ -320,14 +315,14 @@ export function DelegationSubmitGroups(
   const [errors, setErrors] = useState<string[]>([]);
 
   function submitDelegation() {
-    const newErrors = props.validate();
-    if (newErrors.length > 0 || props.gasError) {
+    const newErrors = validate();
+    if (newErrors.length > 0 || gasError) {
       setErrors(newErrors);
       window.scrollBy(0, 100);
     } else {
-      writeDelegation.writeContract(props.writeParams);
-      props.onSetToast({
-        title: props.title,
+      writeDelegation.writeContract(writeParams);
+      onSetToast({
+        title,
         message: "Confirm in your wallet...",
       });
     }
@@ -344,22 +339,22 @@ export function DelegationSubmitGroups(
 
   useEffect(() => {
     if (writeDelegation.error) {
-      props.onSetToast({
-        title: props.title,
+      onSetToast({
+        title,
         message: writeDelegation.error.message.split("Request Arguments")[0],
       });
     }
     if (writeDelegation.data) {
       if (waitWriteDelegation.isLoading) {
-        props.onSetToast({
-          title: props.title,
+        onSetToast({
+          title,
           message: `Transaction submitted...
                     ${getTransactionAnchor(writeDelegation.data)}
                     <br />Waiting for confirmation...`,
         });
       } else {
-        props.onSetToast({
-          title: props.title,
+        onSetToast({
+          title,
           message: `Transaction Successful!
                     ${getTransactionAnchor(writeDelegation.data)}`,
         });
@@ -369,6 +364,8 @@ export function DelegationSubmitGroups(
     writeDelegation.error,
     writeDelegation.data,
     waitWriteDelegation.isLoading,
+    onSetToast,
+    title,
   ]);
 
   function isLoading() {
@@ -385,10 +382,10 @@ export function DelegationSubmitGroups(
         <Col
           sm={8}
           className="d-flex align-items-center justify-content-center">
-          {props.showCancel && (
+          {showCancel && (
             <button
               className={styles.newDelegationCancelBtn}
-              onClick={() => props.onHide()}>
+              onClick={() => onHide()}>
               Cancel
             </button>
           )}
@@ -400,7 +397,7 @@ export function DelegationSubmitGroups(
               e.preventDefault();
               submitDelegation();
             }}>
-            {props.submitBtnLabel ?? "Submit"}{" "}
+            {submitBtnLabel ?? "Submit"}{" "}
             {isLoading() && (
               <div className="d-inline">
                 <output className={`spinner-border ${styles.loader}`}>
@@ -411,7 +408,7 @@ export function DelegationSubmitGroups(
           </button>
         </Col>
       </Form.Group>
-      {(errors.length > 0 || props.gasError) && (
+      {(errors.length > 0 || gasError) && (
         <Form.Group
           as={Row}
           className={`pt-2 pb-2 ${styles.newDelegationError}`}>
@@ -420,10 +417,10 @@ export function DelegationSubmitGroups(
           </Form.Label>
           <Col sm={8} className="d-flex align-items-center">
             <ul className="mb-0">
-              {errors.map((e, index) => (
+              {errors.map((e) => (
                 <li key={getRandomObjectId()}>{e}</li>
               ))}
-              {props.gasError && <li>{props.gasError}</li>}
+              {gasError && <li>{gasError}</li>}
             </ul>
           </Col>
         </Form.Group>

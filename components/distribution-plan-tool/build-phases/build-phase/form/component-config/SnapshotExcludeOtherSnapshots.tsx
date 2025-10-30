@@ -38,9 +38,7 @@ export default function SnapshotExcludeOtherSnapshots({
   title: string;
   onClose: () => void;
 }) {
-  const { operations, distributionPlan, setToasts } = useContext(
-    DistributionPlanToolContext
-  );
+  const { operations, setToasts } = useContext(DistributionPlanToolContext);
 
   const [poolTypeToString] = useState<Record<Pool, string>>({
     [Pool.CUSTOM_TOKEN_POOL]: "Custom Snapshot",
@@ -72,9 +70,7 @@ export default function SnapshotExcludeOtherSnapshots({
       setSelectedOptions([...selectedOptions, option]);
     }
   };
-  const [localUniqueWalletsCount, setLocalUniqueWalletsCount] = useState<
-    number | null
-  >(null);
+  const localUniqueWalletsCount = null;
 
   const [snapshotsToExclude, setSnapshotsToExclude] = useState<
     PhaseGroupSnapshotConfigExcludeSnapshot[]
@@ -133,7 +129,7 @@ export default function SnapshotExcludeOtherSnapshots({
     );
   }, [selectedOptions, operations, setToasts, poolTypeToString]);
 
-  const [loading, setLoading] = useState(false);
+  const loading = false;
 
   // useEffect(() => {
   //   const getCustomTokenPoolWallets = (): string[] => {

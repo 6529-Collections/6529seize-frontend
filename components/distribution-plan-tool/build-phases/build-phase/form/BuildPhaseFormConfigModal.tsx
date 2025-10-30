@@ -441,9 +441,7 @@ export default function BuildPhaseFormConfigModal({
     distributionPlanId: string;
   }): Promise<{ success: boolean }> => {
     const endpoint = `/allowlists/${distributionPlanId}/operations/batch`;
-    const { success, data } = await distributionPlanApiPost<
-      AllowlistOperation[]
-    >({
+    const { success } = await distributionPlanApiPost<AllowlistOperation[]>({
       endpoint,
       body: ops,
     });
@@ -710,13 +708,13 @@ export default function BuildPhaseFormConfigModal({
     setModalTitle(`Configure group "${name}"`);
   }, [name]);
 
-  const [uniqueWalletsCountByOperations, setUniqueWalletsCountByOperations] =
+  const [uniqueWalletsCountByOperations, _setUniqueWalletsCountByOperations] =
     useState<number | null>(null);
 
   const [isLoadingUniqueWalletsCount, setIsLoadingUniqueWalletsCount] =
     useState<boolean>(false);
 
-  const [loadingUniqueWalletsCountIds, setLoadingUniqueWalletsCountIds] =
+  const [loadingUniqueWalletsCountIds, _setLoadingUniqueWalletsCountIds] =
     useState<string[]>([]);
 
   useEffect(() => {
@@ -779,7 +777,7 @@ export default function BuildPhaseFormConfigModal({
     setUniqueCountOps(ops);
   }, [newOperations, operations]);
 
-  const [debouncedUniqueCountOps, setDebouncedUniqueCountOps] = useState<
+  const [_debouncedUniqueCountOps, setDebouncedUniqueCountOps] = useState<
     AllowlistOperationBase[]
   >([]);
   useDebounce(

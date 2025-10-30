@@ -139,6 +139,8 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     );
   }, [
     wave,
+    isMemesWave,
+    isChatWave,
     isUpcoming,
     isCompleted,
     isInProgress,
@@ -183,7 +185,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     ) {
       setActiveTab(options[0].key);
     }
-  }, [isMemesWave, activeTab, options]);
+  }, [isMemesWave, activeTab, options, setActiveTab]);
 
   // For simple waves, don't render any tabs
   if (isChatWave) {

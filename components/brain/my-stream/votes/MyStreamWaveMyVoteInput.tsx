@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { AuthContext } from "@/components/auth/Auth";
 import { DropRateChangeRequest } from "@/entities/IDrop";
@@ -23,13 +23,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   const minRating = drop.context_profile_context?.min_rating ?? 0;
   const maxRating = drop.context_profile_context?.max_rating ?? 0;
   const [voteValue, setVoteValue] = useState<number>(currentVoteValue);
-  const [isEditing, setIsEditing] = useState(false);
-
-  useEffect(() => {
-    if (currentVoteValue !== voteValue) {
-      setIsEditing(true);
-    }
-  }, [voteValue]);
+  const isEditing = voteValue !== currentVoteValue;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
@@ -53,7 +47,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
           category: DEFAULT_DROP_RATE_CATEGORY,
         },
       }),
-    onSuccess: (response: ApiDrop) => {
+    onSuccess: (_response: ApiDrop) => {
       // Show success toast
       setToast({
         message: "Vote updated",
@@ -91,7 +85,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       await rateChangeMutation.mutateAsync({
         rate: voteValue,
       });
-    } catch (error) {
+    } catch (_error) {
       // Any errors not caught in mutation will be handled here
       setToast({
         message: "Something went wrong",

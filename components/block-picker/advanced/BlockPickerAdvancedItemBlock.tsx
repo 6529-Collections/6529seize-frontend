@@ -35,7 +35,7 @@ export default function BlockPickerAdvancedItemBlock({
     parts.push(number.substring(lastIndex));
   }
 
-  const [copyState, copyToClipboard] = useCopyToClipboard();
+  const [, copyToClipboard] = useCopyToClipboard();
   const [coping, setCoping] = useState(false);
 
   const copy = () => {

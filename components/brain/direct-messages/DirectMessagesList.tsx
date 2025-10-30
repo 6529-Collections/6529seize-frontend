@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useContext } from "react";
+import React, { useRef, useEffect, useContext, useEffectEvent } from "react";
 import UnifiedWavesListWaves, {
   UnifiedWavesListWavesHandle,
 } from "../left-sidebar/waves/UnifiedWavesListWaves";
@@ -30,47 +30,49 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
   const listRef = useRef<UnifiedWavesListWavesHandle>(null);
   const hasFetchedRef = useRef(false);
   const { directMessages, registerWave } = useMyStream();
+  const {
+    list,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching,
+    fetchNextPage,
+  } = directMessages;
 
   // Reset the fetch flag when dependencies change
   useEffect(() => {
     hasFetchedRef.current = false;
-  }, [directMessages.hasNextPage, directMessages.isFetchingNextPage]);
+  }, [hasNextPage, isFetchingNextPage]);
+
+  const fetchNextPageIfNeeded = useEffectEvent(() => {
+    if (!hasNextPage || isFetchingNextPage || hasFetchedRef.current) {
+      return;
+    }
+
+    hasFetchedRef.current = true;
+    fetchNextPage();
+  });
 
   useEffect(() => {
-    const node = listRef.current?.sentinelRef.current;
-    if (
-      !node ||
-      !directMessages.hasNextPage ||
-      directMessages.isFetchingNextPage
-    )
+    const listHandle = listRef.current;
+    const sentinel = listHandle?.sentinelRef.current;
+
+    if (!sentinel || !hasNextPage || isFetchingNextPage) {
       return;
+    }
 
-    const cb = (entries: IntersectionObserverEntry[]) => {
-      const [entry] = entries;
-      if (
-        entry.isIntersecting &&
-        directMessages.hasNextPage &&
-        !directMessages.isFetchingNextPage &&
-        !hasFetchedRef.current
-      ) {
-        hasFetchedRef.current = true;
-        directMessages.fetchNextPage();
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        fetchNextPageIfNeeded();
       }
-    };
-
-    const obs = new IntersectionObserver(cb, {
-      root: listRef.current?.containerRef.current,
+    }, {
+      root: listHandle?.containerRef.current,
       rootMargin: "100px",
     });
 
-    obs.observe(node);
+    observer.observe(sentinel);
 
-    return () => obs.disconnect();
-  }, [
-    listRef.current?.sentinelRef.current,
-    directMessages.hasNextPage,
-    directMessages.isFetchingNextPage,
-  ]);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage]);
 
   const shouldShowPlaceholder = !isAuthenticated || !connectedProfile?.handle;
 
@@ -121,7 +123,7 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
 
         <UnifiedWavesListWaves
           ref={listRef}
-          waves={directMessages.list.map((w) => ({ ...w, isPinned: false }))}
+          waves={list.map((w) => ({ ...w, isPinned: false }))}
           onHover={registerWave}
           hideToggle
           hidePin
@@ -129,14 +131,12 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
           scrollContainerRef={scrollContainerRef}
         />
 
-        <UnifiedWavesListLoader
-          isFetchingNextPage={directMessages.isFetchingNextPage}
-        />
+        <UnifiedWavesListLoader isFetchingNextPage={isFetchingNextPage} />
 
         <UnifiedWavesListEmpty
-          sortedWaves={directMessages.list}
-          isFetching={directMessages.isFetching}
-          isFetchingNextPage={directMessages.isFetchingNextPage}
+          sortedWaves={list}
+          isFetching={isFetching}
+          isFetchingNextPage={isFetchingNextPage}
           emptyMessage="No messages to display"
         />
       </div>

@@ -24,17 +24,13 @@ export default function CommunityDownloadsComponent(props: Readonly<Props>) {
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
 
-  function fetchResults(mypage: number) {
-    const fullUrl = `${props.url}?page_size=${PAGE_SIZE}&page=${mypage}`;
+  useEffect(() => {
+    const fullUrl = `${props.url}?page_size=${PAGE_SIZE}&page=${page}`;
     fetchUrl(fullUrl).then((response: ApiUploadsPage) => {
       setTotalResults(response.count);
       setDownloads(response.data || []);
     });
-  }
-
-  useEffect(() => {
-    fetchResults(page);
-  }, [page]);
+  }, [page, props.url]);
 
   return (
     <DownloadsLayout title={props.title}>
