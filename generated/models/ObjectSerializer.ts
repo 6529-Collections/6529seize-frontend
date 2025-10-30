@@ -126,6 +126,8 @@ export * from '../models/ApiReplyToDropResponse';
 export * from '../models/ApiSeizeSettings';
 export * from '../models/ApiStartMultipartMediaUploadResponse';
 export * from '../models/ApiTargetAndSubscriptionActions';
+export * from '../models/ApiTdhEdition';
+export * from '../models/ApiTdhEditionsPage';
 export * from '../models/ApiTdhGrant';
 export * from '../models/ApiTdhGrantStatus';
 export * from '../models/ApiTdhGrantTargetChain';
@@ -262,7 +264,7 @@ import { ApiGroupLevelFilter } from '../models/ApiGroupLevelFilter';
 import { ApiGroupOwnsNft, ApiGroupOwnsNftNameEnum    } from '../models/ApiGroupOwnsNft';
 import { ApiGroupRepFilter      } from '../models/ApiGroupRepFilter';
 import { ApiGroupTdhFilter } from '../models/ApiGroupTdhFilter';
-import { ApiIdentity                     } from '../models/ApiIdentity';
+import { ApiIdentity                        } from '../models/ApiIdentity';
 import { ApiIdentityAndSubscriptionActions } from '../models/ApiIdentityAndSubscriptionActions';
 import { ApiIdentitySubscriptionActions } from '../models/ApiIdentitySubscriptionActions';
 import { ApiIdentitySubscriptionTargetAction } from '../models/ApiIdentitySubscriptionTargetAction';
@@ -307,6 +309,8 @@ import { ApiReplyToDropResponse } from '../models/ApiReplyToDropResponse';
 import { ApiSeizeSettings } from '../models/ApiSeizeSettings';
 import { ApiStartMultipartMediaUploadResponse } from '../models/ApiStartMultipartMediaUploadResponse';
 import { ApiTargetAndSubscriptionActions } from '../models/ApiTargetAndSubscriptionActions';
+import { ApiTdhEdition } from '../models/ApiTdhEdition';
+import { ApiTdhEditionsPage } from '../models/ApiTdhEditionsPage';
 import { ApiTdhGrant             } from '../models/ApiTdhGrant';
 import { ApiTdhGrantStatus } from '../models/ApiTdhGrantStatus';
 import { ApiTdhGrantTargetChain } from '../models/ApiTdhGrantTargetChain';
@@ -520,6 +524,8 @@ let typeMap: {[index: string]: any} = {
     "ApiSeizeSettings": ApiSeizeSettings,
     "ApiStartMultipartMediaUploadResponse": ApiStartMultipartMediaUploadResponse,
     "ApiTargetAndSubscriptionActions": ApiTargetAndSubscriptionActions,
+    "ApiTdhEdition": ApiTdhEdition,
+    "ApiTdhEditionsPage": ApiTdhEditionsPage,
     "ApiTdhGrant": ApiTdhGrant,
     "ApiTdhGrantsPage": ApiTdhGrantsPage,
     "ApiTransaction": ApiTransaction,

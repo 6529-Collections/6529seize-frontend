@@ -120,10 +120,22 @@ export default function UserPageXtdhReceived({
       handleRetry: nftsStateData.handleRetry,
       clearFiltersLabel: NFTS_CLEAR_FILTERS_LABEL,
       emptyStateCopy: NFTS_EMPTY_STATE_COPY,
+      searchQuery: "",
+      handleSearchChange: () => {
+        /* no-op */
+      },
+      ownershipFilter: "all",
+      handleOwnershipFilterChange: () => {
+        /* no-op */
+      },
+      discoveryFilter: "none",
+      handleDiscoveryFilterChange: () => {
+        /* no-op */
+      },
     }),
     [nftsStateData, profileId],
   );
-  
+
 
   return (
     <XtdhReceivedSection

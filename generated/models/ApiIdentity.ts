@@ -23,6 +23,9 @@ export class ApiIdentity {
     'rep': number;
     'level': number;
     'tdh': number;
+    'xtdh': number;
+    'produced_xtdh': number;
+    'granted_xtdh': number;
     'tdh_rate': number;
     'consolidation_key': string;
     'display': string;
@@ -85,7 +88,25 @@ export class ApiIdentity {
             "name": "tdh",
             "baseName": "tdh",
             "type": "number",
-            "format": "int65"
+            "format": "double"
+        },
+        {
+            "name": "xtdh",
+            "baseName": "xtdh",
+            "type": "number",
+            "format": "double"
+        },
+        {
+            "name": "produced_xtdh",
+            "baseName": "produced_xtdh",
+            "type": "number",
+            "format": "double"
+        },
+        {
+            "name": "granted_xtdh",
+            "baseName": "granted_xtdh",
+            "type": "number",
+            "format": "double"
         },
         {
             "name": "tdh_rate",
