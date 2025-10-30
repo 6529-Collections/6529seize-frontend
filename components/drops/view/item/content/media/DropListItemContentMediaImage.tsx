@@ -32,11 +32,13 @@ function DropListItemContentMediaImage({
   maxRetries = 0,
   onContainerClick,
   isCompetitionDrop = false,
+  imageScale = ImageScale.AUTOx450,
 }: {
   readonly src: string;
   readonly maxRetries?: number;
   readonly onContainerClick?: () => void;
   readonly isCompetitionDrop?: boolean;
+  readonly imageScale?: ImageScale;
 }) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const [loaded, setLoaded] = useState(false);
@@ -273,7 +275,7 @@ function DropListItemContentMediaImage({
           <FallbackImage
             key={retryTick}
             ref={imgRef}
-            primarySrc={getScaledImageUri(src, ImageScale.AUTOx450)}
+            primarySrc={getScaledImageUri(src, imageScale)}
             fallbackSrc={src}
             alt="Drop media"
             className={`tw-object-contain tw-max-w-full tw-max-h-full ${

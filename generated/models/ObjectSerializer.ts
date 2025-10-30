@@ -46,6 +46,7 @@ export * from '../models/ApiCreateNewWaveScope';
 export * from '../models/ApiCreateNewWaveVisibilityConfig';
 export * from '../models/ApiCreateNewWaveVotingConfig';
 export * from '../models/ApiCreateOrUpdateProfileRequest';
+export * from '../models/ApiCreateTdhGrant';
 export * from '../models/ApiCreateWaveConfig';
 export * from '../models/ApiCreateWaveDropRequest';
 export * from '../models/ApiDrop';
@@ -104,6 +105,7 @@ export * from '../models/ApiOwnerBalance';
 export * from '../models/ApiOwnerBalanceMemes';
 export * from '../models/ApiOwnerBalancePage';
 export * from '../models/ApiPageBase';
+export * from '../models/ApiPageSortDirection';
 export * from '../models/ApiPageWithNextUriBase';
 export * from '../models/ApiProfileClassification';
 export * from '../models/ApiProfileMin';
@@ -124,6 +126,12 @@ export * from '../models/ApiReplyToDropResponse';
 export * from '../models/ApiSeizeSettings';
 export * from '../models/ApiStartMultipartMediaUploadResponse';
 export * from '../models/ApiTargetAndSubscriptionActions';
+export * from '../models/ApiTdhEdition';
+export * from '../models/ApiTdhEditionsPage';
+export * from '../models/ApiTdhGrant';
+export * from '../models/ApiTdhGrantStatus';
+export * from '../models/ApiTdhGrantTargetChain';
+export * from '../models/ApiTdhGrantsPage';
 export * from '../models/ApiTransaction';
 export * from '../models/ApiTransactionPage';
 export * from '../models/ApiUpdateDropRequest';
@@ -221,6 +229,7 @@ import { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
 import { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisibilityConfig';
 import { ApiCreateNewWaveVotingConfig         } from '../models/ApiCreateNewWaveVotingConfig';
 import { ApiCreateOrUpdateProfileRequest        } from '../models/ApiCreateOrUpdateProfileRequest';
+import { ApiCreateTdhGrant       } from '../models/ApiCreateTdhGrant';
 import { ApiCreateWaveConfig        } from '../models/ApiCreateWaveConfig';
 import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
 import { ApiDrop                          } from '../models/ApiDrop';
@@ -279,6 +288,7 @@ import { ApiOwnerBalance } from '../models/ApiOwnerBalance';
 import { ApiOwnerBalanceMemes } from '../models/ApiOwnerBalanceMemes';
 import { ApiOwnerBalancePage } from '../models/ApiOwnerBalancePage';
 import { ApiPageBase } from '../models/ApiPageBase';
+import { ApiPageSortDirection } from '../models/ApiPageSortDirection';
 import { ApiPageWithNextUriBase } from '../models/ApiPageWithNextUriBase';
 import { ApiProfileClassification } from '../models/ApiProfileClassification';
 import { ApiProfileMin } from '../models/ApiProfileMin';
@@ -299,6 +309,12 @@ import { ApiReplyToDropResponse } from '../models/ApiReplyToDropResponse';
 import { ApiSeizeSettings } from '../models/ApiSeizeSettings';
 import { ApiStartMultipartMediaUploadResponse } from '../models/ApiStartMultipartMediaUploadResponse';
 import { ApiTargetAndSubscriptionActions } from '../models/ApiTargetAndSubscriptionActions';
+import { ApiTdhEdition } from '../models/ApiTdhEdition';
+import { ApiTdhEditionsPage } from '../models/ApiTdhEditionsPage';
+import { ApiTdhGrant             } from '../models/ApiTdhGrant';
+import { ApiTdhGrantStatus } from '../models/ApiTdhGrantStatus';
+import { ApiTdhGrantTargetChain } from '../models/ApiTdhGrantTargetChain';
+import { ApiTdhGrantsPage } from '../models/ApiTdhGrantsPage';
 import { ApiTransaction } from '../models/ApiTransaction';
 import { ApiTransactionPage } from '../models/ApiTransactionPage';
 import { ApiUpdateDropRequest } from '../models/ApiUpdateDropRequest';
@@ -372,9 +388,12 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiIdentitySubscriptionTargetType",
     "ApiNftTokenTypeEnum",
     "ApiNotificationCause",
+    "ApiPageSortDirection",
     "ApiProfileClassification",
     "ApiProfileProxyActionType",
     "ApiRateMatter",
+    "ApiTdhGrantStatus",
+    "ApiTdhGrantTargetChain",
     "ApiWaveCreditScope",
     "ApiWaveCreditType",
     "ApiWaveMetadataType",
@@ -437,6 +456,7 @@ let typeMap: {[index: string]: any} = {
     "ApiCreateNewWaveVisibilityConfig": ApiCreateNewWaveVisibilityConfig,
     "ApiCreateNewWaveVotingConfig": ApiCreateNewWaveVotingConfig,
     "ApiCreateOrUpdateProfileRequest": ApiCreateOrUpdateProfileRequest,
+    "ApiCreateTdhGrant": ApiCreateTdhGrant,
     "ApiCreateWaveConfig": ApiCreateWaveConfig,
     "ApiCreateWaveDropRequest": ApiCreateWaveDropRequest,
     "ApiDrop": ApiDrop,
@@ -504,6 +524,10 @@ let typeMap: {[index: string]: any} = {
     "ApiSeizeSettings": ApiSeizeSettings,
     "ApiStartMultipartMediaUploadResponse": ApiStartMultipartMediaUploadResponse,
     "ApiTargetAndSubscriptionActions": ApiTargetAndSubscriptionActions,
+    "ApiTdhEdition": ApiTdhEdition,
+    "ApiTdhEditionsPage": ApiTdhEditionsPage,
+    "ApiTdhGrant": ApiTdhGrant,
+    "ApiTdhGrantsPage": ApiTdhGrantsPage,
     "ApiTransaction": ApiTransaction,
     "ApiTransactionPage": ApiTransactionPage,
     "ApiUpdateDropRequest": ApiUpdateDropRequest,
