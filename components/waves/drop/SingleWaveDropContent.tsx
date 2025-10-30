@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { SingleWaveDropContentMetadata } from "./SingleWaveDropContentMetadata";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import WaveDropContent from "../drops/WaveDropContent";
+import { ImageScale } from "@/helpers/image.helpers";
 
 interface SingleWaveDropContentProps {
   readonly drop: ExtendedDrop;
@@ -22,6 +23,7 @@ export const SingleWaveDropContent: React.FC<SingleWaveDropContentProps> = ({
         onLongPress={() => {}}
         onQuoteClick={() => {}}
         setLongPressTriggered={() => {}}
+        mediaImageScale={ImageScale.AUTOx1080}
       />
       {!!drop.metadata.length && <SingleWaveDropContentMetadata drop={drop} />}
     </div>

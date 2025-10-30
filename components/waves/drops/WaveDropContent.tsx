@@ -2,6 +2,7 @@ import React from "react";
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import WaveDropPart from "./WaveDropPart";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ImageScale } from "@/helpers/image.helpers";
 
 interface WaveDropContentProps {
   readonly drop: ExtendedDrop;
@@ -17,6 +18,7 @@ interface WaveDropContentProps {
   readonly onSave?: (newContent: string) => void;
   readonly onCancel?: () => void;
   readonly isCompetitionDrop?: boolean;
+  readonly mediaImageScale?: ImageScale;
 }
 
 const WaveDropContent: React.FC<WaveDropContentProps> = ({
@@ -33,6 +35,7 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
   onSave,
   onCancel,
   isCompetitionDrop = false,
+  mediaImageScale = ImageScale.AUTOx450,
 }) => {
   return (
     <WaveDropPart
@@ -48,6 +51,7 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
       onSave={onSave}
       onCancel={onCancel}
       isCompetitionDrop={isCompetitionDrop}
+      mediaImageScale={mediaImageScale}
     />
   );
 };
