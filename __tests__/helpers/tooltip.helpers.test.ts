@@ -22,10 +22,10 @@ describe("buildTooltipId", () => {
     );
 
     expect(first).toMatch(
-      /^metadata-label-https---example-com-foo-bar-[0-9a-z]+$/,
+      /^metadata-label-https-example-com-foo-bar-[0-9a-z]+$/,
     );
     expect(second).toMatch(
-      /^metadata-label-https---example-com-foo-bar-[0-9a-z]+$/,
+      /^metadata-label-https-example-com-foo-bar-[0-9a-z]+$/,
     );
     expect(first).not.toBe(second);
     expect(first).toBe(

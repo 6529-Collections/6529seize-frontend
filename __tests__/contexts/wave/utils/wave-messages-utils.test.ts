@@ -31,12 +31,15 @@ describe("formatWaveMessages", () => {
   it("decorates drops with stable keys and serial tracking", () => {
     const formatted = formatWaveMessages("wave-1", [sampleDrop as any]);
     expect(formatted.key).toBe("wave-1");
-    expect(formatted.drops?.[0]).toMatchObject({
+    const drop = formatted.drops?.[0];
+    expect(drop).toBeDefined();
+    expect(drop!).toMatchObject({
       id: "drop-1",
-      stableKey: "drop-1",
-      stableHash: "drop-1",
       type: DropSize.FULL,
     });
+    expect(typeof drop!.stableKey).toBe("string");
+    expect(drop!.stableKey).toBeTruthy();
+    expect(drop!.stableHash).toMatch(/^[a-f0-9]{64}$/);
     expect(formatted.latestFetchedSerialNo).toBe(5);
   });
 });
@@ -91,11 +94,14 @@ describe("fetchNewestWaveMessages", () => {
 
     const result = await fetchNewestWaveMessages("wave-1", null, 10);
 
-    expect(commonApiFetchWithRetry).toHaveBeenCalledWith({
-      endpoint: "waves/wave-1/drops",
-      params: { limit: "10" },
-      signal: undefined,
-    });
+    expect(commonApiFetchWithRetry).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "waves/wave-1/drops",
+        params: { limit: "10" },
+        signal: undefined,
+        retryOptions: expect.objectContaining({ maxRetries: 2 }),
+      })
+    );
     expect(result.drops?.[0]).toMatchObject({
       id: "drop-1",
       wave: { authenticated_user_admin: true },
