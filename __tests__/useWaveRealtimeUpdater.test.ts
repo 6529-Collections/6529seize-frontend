@@ -11,9 +11,15 @@ jest.mock("@/services/websocket/useWebSocketMessage", () => ({
 
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
+  commonApiPostWithoutBodyAndResponse: jest
+    .fn()
+    .mockResolvedValue(undefined),
 }));
 
-const { commonApiFetch } = require("@/services/api/common-api");
+const {
+  commonApiFetch,
+  commonApiPostWithoutBodyAndResponse,
+} = require("@/services/api/common-api");
 
 const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -23,6 +29,7 @@ describe("useWaveRealtimeUpdater", () => {
   });
 
   const baseProps = (store: any) => ({
+    activeWaveId: null as string | null,
     getData: (key: any) => store[key],
     updateData: jest.fn((update: any) => {
       store[update.key] = { ...store[update.key], ...update };
@@ -176,5 +183,51 @@ describe("useWaveRealtimeUpdater", () => {
     const { result } = renderHook(() => useWaveRealtimeUpdater(props));
     await act(async () => result.current.processDropRemoved("wave1", "d8"));
     expect(props.removeDrop).toHaveBeenCalledWith("wave1", "d8");
+  });
+
+  it("marks active wave as read and removes delivered notifications", async () => {
+    const store = {
+      wave1: { drops: [], latestFetchedSerialNo: 10 },
+    };
+    const props = baseProps(store);
+    props.activeWaveId = "wave1";
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = { id: "d9", wave: { id: "wave1" }, author: {} };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_INSERT
+      )
+    );
+    await flushPromises();
+
+    expect(props.removeWaveDeliveredNotifications).toHaveBeenCalledWith(
+      "wave1"
+    );
+    expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave1/read",
+    });
+  });
+
+  it("does not mark non-active wave as read", async () => {
+    const store = {
+      wave1: { drops: [], latestFetchedSerialNo: 10 },
+    };
+    const props = baseProps(store);
+    props.activeWaveId = "wave2";
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = { id: "d10", wave: { id: "wave1" }, author: {} };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_INSERT
+      )
+    );
+    await flushPromises();
+
+    expect(props.removeWaveDeliveredNotifications).not.toHaveBeenCalled();
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
   });
 });

@@ -1,19 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
-import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
-import { WsDropUpdateMessage, WsMessageType } from "@/helpers/Types";
-import { WaveDataStoreUpdater } from "./types";
 import { ApiDrop } from "@/generated/models/ApiDrop";
+import { WsDropUpdateMessage, WsMessageType } from "@/helpers/Types";
 import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
   commonApiFetch,
   commonApiPostWithoutBodyAndResponse,
 } from "@/services/api/common-api";
+import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
+import { useCallback, useEffect, useRef } from "react";
 import { useWaveEligibility } from "../WaveEligibilityContext";
-import { debounce } from "lodash";
+import { WaveDataStoreUpdater } from "./types";
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
+  readonly activeWaveId: string | null;
   readonly registerWave: (waveId: string) => void;
   readonly syncNewestMessages: (
     waveId: string,
@@ -35,6 +35,7 @@ type ProcessIncomingDropFn = (
 ) => void;
 
 export function useWaveRealtimeUpdater({
+  activeWaveId,
   getData,
   updateData,
   registerWave,
@@ -125,6 +126,14 @@ export function useWaveRealtimeUpdater({
   // WebSocket message handler
   const processIncomingDrop: ProcessIncomingDropFn = useCallback(
     async (drop: ApiDrop, type: ProcessIncomingDropType) => {
+      const markWaveAsRead = (waveId: string) => {
+        void commonApiPostWithoutBodyAndResponse({
+          endpoint: `notifications/wave/${waveId}/read`,
+        }).catch((error) =>
+          console.error("Failed to mark wave as read:", error)
+        );
+      };
+
       if (!drop?.wave?.id) {
         return;
       }
@@ -226,10 +235,19 @@ export function useWaveRealtimeUpdater({
         initiateFetchNewestCycle(waveId, serialNoForFetch);
       }
 
-      void removeWaveDeliveredNotifications(waveId);
-      markWaveAsReadDebounced(waveId);
+      if (activeWaveId === waveId) {
+        void removeWaveDeliveredNotifications(waveId);
+        markWaveAsRead(waveId);
+      }
     },
-    [getData, updateData, registerWave, initiateFetchNewestCycle]
+    [
+      activeWaveId,
+      getData,
+      updateData,
+      registerWave,
+      initiateFetchNewestCycle,
+      removeWaveDeliveredNotifications,
+    ]
   );
 
   const processDropRemoved = useCallback(
@@ -238,12 +256,6 @@ export function useWaveRealtimeUpdater({
     },
     [removeDrop]
   );
-
-  const markWaveAsReadDebounced = debounce((waveId: string) => {
-    void commonApiPostWithoutBodyAndResponse({
-      endpoint: `notifications/wave/${waveId}/read`,
-    }).catch((error) => console.error("Failed to mark wave as read:", error));
-  }, 2000);
 
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_UPDATE,
