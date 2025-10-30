@@ -38,7 +38,7 @@ npm run type-check
 
 ## Programmatic Checks (must pass before completing any task)
 
-Run all of the following (unless you are only editing docs or non-code, in which case tests may be skipped):
+Run all the following (unless you are only editing docs or non-code, in which case tests may be skipped):
 
 ```bash
 npm run test
@@ -88,7 +88,7 @@ Enable the **Next DevTools MCP server** so agents can query live routes, errors,
 2. **Prefer Server over Client** where possible. Data reads: Server Components with inline fetches. Mutations: Server Functions / Server Actions (`'use server'`). Avoid client Effects for data fetching unless truly needed. ([Next.js][4])
 3. **Effects are last resort.** If there’s no external system, remove the Effect and compute during render. If you must listen to external events but need the latest props/state without re‑running the Effect, use **`useEffectEvent`**. ([React][5])
 4. **Use framework APIs:** internal links → `<Link>`, images → `next/image`, and adopt Next’s ESLint rules (Core Web Vitals). ([Next.js][1])
-5. **Cache explicitly where it helps.** With Next 16, caching is **opt‑in** via the `"use cache"` directive and related Cache Components features (see below). ([Next.js][6])
+5. **Cache explicitly where it helps.** With Next 16, caching is **opt-in** via the `"use cache"` directive and related Cache Components features (see below). ([Next.js][6])
 6. **Commit small, surgical diffs.** If you uncover a broader refactor, open a follow‑up ticket rather than ballooning a lint‑fix PR.
 
 ---
@@ -105,7 +105,7 @@ Enable the **Next DevTools MCP server** so agents can query live routes, errors,
   ```
 
   ([Next.js][6])
-* **Cache Components / `"use cache"`:** Caching is explicit. You can place `"use cache"` at the top of a Server Component, route, or function to opt‑in caching; configure `cacheComponents: true` in `next.config.ts` as needed. Prefer tagging/expiration APIs over ad‑hoc hacks. ([Next.js][7])
+* **Cache Components / `"use cache"`:** Caching is explicit. You can place `"use cache"` at the top of a Server Component, route, or function to opt-in caching; configure `cacheComponents: true` in `next.config.ts` as needed. Prefer tagging/expiration APIs over ad-hoc hacks. ([Next.js][7])
 * **Turbopack default:** Dev and build use Turbopack by default in v16—don’t pass `--turbopack`. ([Next.js][8])
 
 ---

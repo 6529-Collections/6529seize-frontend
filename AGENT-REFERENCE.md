@@ -17,18 +17,18 @@ This document is the single source of truth for how we fix ESLint issues and mak
 ## React 19.2: What we use
 
 - **Effect Events (`useEffectEvent`)** — Extract event-like logic out of `useEffect` so the effect’s dependencies stay minimal. Lint v6 understands that Effect Events are not dependencies.  
-  Docs: https://react.dev/reference/react/useEffectEvent  
-  Release notes: https://react.dev/blog/2025/10/01/react-19-2  ← see sections on `useEffectEvent` and `eslint-plugin-react-hooks v6`.
+  Docs: <https://react.dev/reference/react/useEffectEvent>  
+  Release notes: <https://react.dev/blog/2025/10/01/react-19-2>  ← see sections on `useEffectEvent` and `eslint-plugin-react-hooks v6`.
 
 - **“You might not need an Effect”** — Most state derivations and event responses should not be in Effects.  
-  Guide: https://react.dev/learn/you-might-not-need-an-effect
+  Guide: <https://react.dev/learn/you-might-not-need-an-effect>
 
 - **Server rendering + caching primitives** — `cache()` and `cacheSignal()` may appear in RSC utilities. Use sparingly and only where obvious.  
-  `cacheSignal`: https://react.dev/reference/react/cacheSignal
+  `cacheSignal`: <https://react.dev/reference/react/cacheSignal>
 
 **Notes**
 - When converting code to `useEffectEvent`, call the event only from within Effects. Don’t pass it as a prop or store it; treat it like an effect-local event. See the release post for constraints.  
-  https://react.dev/blog/2025/10/01/react-19-2
+  <https://react.dev/blog/2025/10/01/react-19-2>
 
 ---
 
@@ -38,20 +38,20 @@ This document is the single source of truth for how we fix ESLint issues and mak
   - Enable in `next.config.ts`: `cacheComponents: true`.  
   - Apply `"use cache"` to routes/components/functions that return stable, serializable results safe to cache.  
   - Prefer **no change** unless the gain is obvious and inputs are pure.  
-  Blog: https://nextjs.org/blog/next-16  
-  Directive docs: https://nextjs.org/docs/app/api-reference/directives/use-cache  
-  Config: https://nextjs.org/docs/app/api-reference/config/next-config-js/cacheComponents
+  Blog: <https://nextjs.org/blog/next-16>  
+  Directive docs: <https://nextjs.org/docs/app/api-reference/directives/use-cache>  
+  Config: <https://nextjs.org/docs/app/api-reference/config/next-config-js/cacheComponents>
 
 - **Next.js Devtools MCP** (required tool)  
   - We have `next-devtools-mcp` installed. Use it for project metadata, page rendering info, unified logs, and error surfacing.  
-  Guide: https://nextjs.org/docs/app/guides/mcp
+  Guide: <https://nextjs.org/docs/app/guides/mcp>
 
 - **Server & Client Components**  
   - Default to Server Components; use `"use client"` only for stateful interactive UI or browser-only APIs.  
-  Docs: https://nextjs.org/docs/app/getting-started/server-and-client-components
+  Docs: <https://nextjs.org/docs/app/getting-started/server-and-client-components>
 
 **Optional (case-by-case)**  
-- Updated `revalidateTag` and `updateTag` APIs exist; do not change unless the file already uses these. See release blog for details: https://nextjs.org/blog/next-16
+- Updated `revalidateTag` and `updateTag` APIs exist; do not change unless the file already uses these. See release blog for details: <https://nextjs.org/blog/next-16>
 
 ---
 

@@ -33,8 +33,7 @@ export default function AboutPrimaryAddress() {
   }
 
   if (error) {
-    const message = error.message ?? "Failed to load primary address data";
-    return <div>Error: {message}</div>;
+    return <div>Error: {error.message}</div>;
   }
 
   return (
@@ -130,37 +129,8 @@ async function fetchPrimaryAddressData(): Promise<PrimaryAddressData[]> {
     throw new Error(`Failed to fetch primary address data (${response.status})`);
   }
 
-  const body = await response.blob();
-
-  if (!body) {
-    throw new Error("No primary address data found");
-  }
-
-  const csvContent = await readBlobAsText(body);
+  const csvContent = await response.text();
   return parsePrimaryAddressCsv(csvContent);
-}
-
-function readBlobAsText(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      const result = reader.result;
-
-      if (typeof result !== "string") {
-        reject(new Error("Invalid primary address data format"));
-        return;
-      }
-
-      resolve(result);
-    };
-
-    reader.onerror = () => {
-      reject(new Error("Failed to read primary address data"));
-    };
-
-    reader.readAsText(blob);
-  });
 }
 
 function parsePrimaryAddressCsv(csvContent: string): Promise<PrimaryAddressData[]> {
