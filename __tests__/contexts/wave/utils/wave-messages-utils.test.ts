@@ -39,7 +39,7 @@ describe("formatWaveMessages", () => {
     });
     expect(typeof drop!.stableKey).toBe("string");
     expect(drop!.stableKey).toBeTruthy();
-    expect(drop!.stableHash).toMatch(/^[a-f0-9]{64}$/);
+    expect(drop!.stableHash).toBe(drop!.id);
     expect(formatted.latestFetchedSerialNo).toBe(5);
   });
 });
