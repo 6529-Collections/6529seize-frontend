@@ -51,19 +51,47 @@ export default function GradientsComponent() {
   const [sort, setSort] = useState<Sort>(Sort.ID);
 
   useEffect(() => {
-    const sortParam = (searchParams?.get("sort") as Sort) || Sort.ID;
-    const dirParam =
-      (searchParams?.get("sort_dir")?.toUpperCase() as SortDirection) ||
-      SortDirection.ASC;
+    const rawSort = searchParams.get("sort")?.toLowerCase() as Sort | undefined;
+    const nextSort = rawSort === Sort.TDH ? Sort.TDH : Sort.ID;
 
-    setSort(sortParam);
-    setSortDir(dirParam);
+    const rawSortDir = searchParams
+      .get("sort_dir")
+      ?.toUpperCase() as SortDirection | undefined;
+    const nextSortDir =
+      rawSortDir === SortDirection.DESC ? SortDirection.DESC : SortDirection.ASC;
+
+    setSort((current) => (current === nextSort ? current : nextSort));
+    setSortDir((current) =>
+      current === nextSortDir ? current : nextSortDir
+    );
+  }, [searchParams]);
+
+  useEffect(() => {
+    let isMounted = true;
 
     const url = `${publicEnv.API_ENDPOINT}/api/nfts/gradients?page_size=101`;
-    fetchAllPages(url).then((raw: GradientNFT[]) => {
-      setNftsRaw(raw);
-      setNftsLoaded(true);
-    });
+    fetchAllPages(url)
+      .then((raw: GradientNFT[]) => {
+        if (!isMounted) {
+          return;
+        }
+        setNftsRaw(raw);
+      })
+      .catch(() => {
+        if (!isMounted) {
+          return;
+        }
+        setNftsRaw([]);
+      })
+      .finally(() => {
+        if (isMounted) {
+          setNftsLoaded(true);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -74,7 +102,7 @@ export default function GradientsComponent() {
     router.replace(`/6529-gradient?${params.toString()}`, {
       scroll: false,
     });
-  }, [sort, sortDir]);
+  }, [router, sort, sortDir]);
 
   useEffect(() => {
     if (!nftsLoaded) return;
@@ -94,7 +122,7 @@ export default function GradientsComponent() {
     }
 
     setNfts(sorted);
-  }, [sort, sortDir, nftsLoaded]);
+  }, [nftsLoaded, nftsRaw, sort, sortDir]);
 
   function printNft(nft: GradientNFT) {
     return (

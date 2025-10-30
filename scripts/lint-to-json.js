@@ -3,9 +3,8 @@
  * Transform lint.txt output into lint.json summary.
  *
  * lint.json will be an array of objects with:
- * - key: absolute path to the file.
- * - item: combined warning lines exactly as in lint.txt.
- * - count: number of warnings captured for that path.
+ * - key: relative path to the file.
+ * - item: relative path followed by combined warning lines from lint.txt.
  *
  * Usage: node scripts/lint-to-json.js [inputPath] [outputPath]
  * Defaults: lint.txt -> lint.json relative to repo root.
@@ -16,6 +15,14 @@ import path from "node:path";
 const [inputArg, outputArg] = process.argv.slice(2);
 const inputPath = inputArg ?? path.resolve(process.cwd(), "lint.txt");
 const outputPath = outputArg ?? path.resolve(process.cwd(), "lint.json");
+const repoRoot = process.cwd();
+
+const toRelativePath = (filePath) => {
+  if (!filePath) return filePath;
+  const resolved = path.resolve(repoRoot, filePath);
+  const relative = path.relative(repoRoot, resolved);
+  return relative || path.basename(resolved);
+};
 
 const fileContents = fs.readFileSync(inputPath, "utf8");
 const lines = fileContents.split(/\r?\n/);
@@ -27,10 +34,11 @@ let currentWarnings = [];
 const flushCurrent = () => {
   if (!currentPath) return;
 
+  const relativePath = toRelativePath(currentPath);
   const warningText = currentWarnings.join("\n\n");
   entries.push({
-    key: currentPath,
-    item: warningText,
+    key: relativePath,
+    item: [relativePath, warningText].filter(Boolean).join("\n\n"),
     prompt: null,
   });
 

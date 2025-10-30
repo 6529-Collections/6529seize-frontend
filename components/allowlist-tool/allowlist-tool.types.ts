@@ -46,14 +46,6 @@ export interface AllowlistCustomTokenPool {
   readonly tokensCount: number;
 }
 
-interface AllowlistWalletPool {
-  readonly id: string;
-  readonly allowlistId: string;
-  readonly name: string;
-  readonly description: string;
-  readonly walletsCount: number;
-}
-
 interface AllowlistPhase {
   readonly id: string;
   readonly allowlistId: string;
@@ -161,31 +153,10 @@ export type Mutable<T, K extends keyof T> = Omit<T, K> & {
   -readonly [P in K]: T[P];
 };
 
-interface AllowlistOperationDescription {
-  readonly code: AllowlistOperationCode;
-  readonly title: string;
-  readonly description: string;
-}
-
 export enum AllowlistRunStatus {
   PENDING = "PENDING",
   CLAIMED = "CLAIMED",
   FAILED = "FAILED",
-}
-
-enum AllowlistToolEntity {
-  TRANSFER_POOLS = "TRANSFER_POOLS",
-  TRANSFER_POOL = "TRANSFER_POOL",
-  TOKEN_POOLS = "TOKEN_POOLS",
-  TOKEN_POOL = "TOKEN_POOL",
-  CUSTOM_TOKEN_POOLS = "CUSTOM_TOKEN_POOLS",
-  CUSTOM_TOKEN_POOL = "CUSTOM_TOKEN_POOL",
-  WALLET_POOLS = "WALLET_POOLS",
-  WALLET_POOL = "WALLET_POOL",
-  PHASES = "PHASES",
-  PHASE = "PHASE",
-  COMPONENT = "COMPONENT",
-  ITEM = "ITEM",
 }
 
 export interface AllowlistResult {
@@ -195,41 +166,6 @@ export interface AllowlistResult {
   readonly allowlistId: string;
   readonly phaseComponentId: string;
   readonly amount: number;
-}
-
-interface AllowlistToolOperationsGrouped {
-  transferPools: {
-    operations: AllowlistOperation[];
-    pools: Record<string, AllowlistOperation[]>;
-  };
-  tokenPools: {
-    operations: AllowlistOperation[];
-    pools: Record<string, AllowlistOperation[]>;
-  };
-  customTokenPools: {
-    operations: AllowlistOperation[];
-    pools: Record<string, AllowlistOperation[]>;
-  };
-  walletPools: {
-    operations: AllowlistOperation[];
-    pools: Record<string, AllowlistOperation[]>;
-  };
-  phases: {
-    operations: AllowlistOperation[];
-    phases: Record<
-      string,
-      {
-        operations: AllowlistOperation[];
-        components: Record<
-          string,
-          {
-            operations: AllowlistOperation[];
-            items: Record<string, AllowlistOperation[]>;
-          }
-        >;
-      }
-    >;
-  };
 }
 
 export interface DistributionPlanSearchContractMetadataResult {

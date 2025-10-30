@@ -1,7 +1,7 @@
 "use client";
 import csvParser from "csv-parser";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 
 interface PrimaryAddressData {
@@ -20,6 +20,47 @@ export default function AboutPrimaryAddress() {
     verticalAlign: "middle",
   };
 
+  const populateData = useCallback(
+    (body: Blob) => {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        const data = reader.result;
+        const results: PrimaryAddressData[] = [];
+
+        if (!data) {
+          return;
+        }
+
+        const parser = csvParser({ headers: false })
+          .on("data", (row: any) => {
+            const r = {
+              profile_id: row["0"],
+              handle: row["1"],
+              current_primary: row["2"],
+              new_primary: row["3"],
+            };
+            results.push(r);
+          })
+          .on("end", () => {
+            results.sort((a, b) => {
+              return a.handle.localeCompare(b.handle);
+            });
+            setData(results);
+          })
+          .on("error", (err: any) => {
+            console.error(err);
+          });
+
+        parser.write(data);
+        parser.end();
+      };
+
+      reader.readAsText(body);
+    },
+    [setData],
+  );
+
   useEffect(() => {
     const filePath = "/primary_address.csv";
     fetch(filePath)
@@ -28,45 +69,11 @@ export default function AboutPrimaryAddress() {
         if (body) {
           populateData(body);
         }
+      })
+      .catch((error) => {
+        console.error(error);
       });
-  }, []);
-
-  function populateData(body: Blob) {
-    const reader = new FileReader();
-
-    reader.onload = async () => {
-      const data = reader.result;
-      const results: PrimaryAddressData[] = [];
-
-      const parser = csvParser({ headers: false })
-        .on("data", (row: any) => {
-          const r = {
-            profile_id: row["0"],
-            handle: row["1"],
-            current_primary: row["2"],
-            new_primary: row["3"],
-          };
-          results.push(r);
-        })
-        .on("end", () => {
-          setResults(results);
-        })
-        .on("error", (err: any) => {
-          console.error(err);
-        });
-
-      parser.write(data);
-      parser.end();
-    };
-    reader.readAsText(body);
-  }
-
-  function setResults(results: PrimaryAddressData[]) {
-    results.sort((a, b) => {
-      return a.handle.localeCompare(b.handle);
-    });
-    setData(results);
-  }
+  }, [populateData]);
 
   return (
     <Container>
