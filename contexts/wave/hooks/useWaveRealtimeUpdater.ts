@@ -243,7 +243,6 @@ export function useWaveRealtimeUpdater({
   );
 
   const markWaveAsRead = (waveId: string) => {
-    console.log("Marking wave as read in useWaveRealtimeUpdater", waveId);
     void commonApiPostWithoutBodyAndResponse({
       endpoint: `notifications/wave/${waveId}/read`,
     }).catch((error) => console.error("Failed to mark wave as read:", error));
