@@ -68,7 +68,7 @@ export default async function WavesPage({
   }
 
   if (
-    context.feedItemsFetchedAt !== null &&
+    context.feedItemsFetchedAt === null ||
     context.feedItemsFetchedAt < Time.now().toMillis() - 60000
   ) {
     try {
