@@ -310,7 +310,7 @@ export default function WaveItem({
       if (!waveHref || event.target !== event.currentTarget) {
         return;
       }
-      if (event.key === "Enter") {
+      if (event.key === "Enter" || event.key === " " || event.key === "Space") {
         event.preventDefault();
         router.push(waveHref);
       }
