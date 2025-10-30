@@ -69,11 +69,18 @@ export default async function WavesPage({
     context.feedItemsFetchedAt !== null &&
     context.feedItemsFetchedAt < Time.now().toMillis() - 60000
   ) {
-    await prefetchWavesOverview({
-      queryClient,
-      headers: context.headers,
-      waveId: context.waveId,
-    });
+    try {
+      await prefetchWavesOverview({
+        queryClient,
+        headers: context.headers,
+        waveId: context.waveId,
+      });
+    } catch (error) {
+      console.warn("Waves overview prefetch failed", {
+        waveId: context.waveId,
+        error,
+      });
+    }
   }
 
   return (
@@ -133,7 +140,7 @@ export async function generateMetadata({
         subscribersCount === 1 ? "subscriber" : "subscribers"
       }`,
     drops && `${drops} ${dropsCount === 1 ? "drop" : "drops"} shared`,
-  ].filter((part): part is string => Boolean(part));
+  ].filter((part): part is string => typeof part === "string");
 
   const metadata: Parameters<typeof getAppMetadata>[0] = {
     title: `${waveName} | Waves`,

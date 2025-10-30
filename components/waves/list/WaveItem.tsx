@@ -7,10 +7,8 @@ import {
   useCallback,
   useId,
 } from "react";
-import {
-  ChatBubbleLeftRightIcon,
-  UsersIcon,
-} from "@heroicons/react/24/outline";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faComments, faUsers } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ApiWave } from "@/generated/models/ApiWave";
@@ -168,6 +166,20 @@ export default function WaveItem({
   const isInteractive = Boolean(waveHref);
   const followersTooltipId = wave ? `${tooltipBaseId}-followers` : undefined;
 
+  const followersContent = (
+    <>
+      <FontAwesomeIcon
+        icon={faUsers}
+        aria-hidden="true"
+        className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-400"
+      />
+      <span className="tw-font-medium">
+        {numberWithCommas(wave?.metrics.subscribers_count ?? 0)}
+      </span>
+      <span className="tw-text-iron-400 xl:tw-hidden">Joined</span>
+    </>
+  );
+
   const authorAvatar = author?.pfp ? (
     <img
       className="tw-h-full tw-w-full tw-rounded-md tw-object-cover tw-bg-iron-800 tw-ring-1 tw-ring-white/10 desktop-hover:group-hover/author:tw-ring-white/30 desktop-hover:group-hover/author:tw-ring-offset-1 desktop-hover:group-hover/author:tw-ring-offset-iron-950 tw-transition tw-duration-300 tw-ease-out"
@@ -298,7 +310,7 @@ export default function WaveItem({
       if (!waveHref || event.target !== event.currentTarget) {
         return;
       }
-      if (event.key === "Enter" || event.key === " ") {
+      if (event.key === "Enter") {
         event.preventDefault();
         router.push(waveHref);
       }
@@ -356,7 +368,8 @@ export default function WaveItem({
       <div className="tw-mt-2 tw-flex tw-items-center tw-justify-between tw-px-3 tw-pt-3">
         <div className="tw-flex tw-items-center tw-gap-4">
           <div className="tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-200">
-            <ChatBubbleLeftRightIcon
+            <FontAwesomeIcon
+              icon={faComments}
               aria-hidden="true"
               className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-400"
             />
@@ -368,25 +381,11 @@ export default function WaveItem({
               className="tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-200 tw-no-underline tw-relative tw-z-20 tw-pointer-events-auto"
               data-tooltip-id={followersTooltipId}
             >
-              <UsersIcon
-                aria-hidden="true"
-                className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-400"
-              />
-              <span className="tw-font-medium">
-                {numberWithCommas(wave?.metrics.subscribers_count ?? 0)}
-              </span>
-              <span className="tw-text-iron-400 xl:tw-hidden">Joined</span>
+              {followersContent}
             </span>
           ) : (
             <div className="tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-200">
-              <UsersIcon
-                aria-hidden="true"
-                className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-400"
-              />
-              <span className="tw-font-medium">
-                {numberWithCommas(wave?.metrics.subscribers_count ?? 0)}
-              </span>
-              <span className="tw-text-iron-400 xl:tw-hidden">Joined</span>
+              {followersContent}
             </div>
           )}
         </div>

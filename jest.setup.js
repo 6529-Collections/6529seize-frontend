@@ -67,22 +67,6 @@ Object.defineProperty(window, "matchMedia", {
   })),
 });
 
-// Provide ResizeObserver for components relying on it
-if (typeof globalThis.ResizeObserver === "undefined") {
-  globalThis.ResizeObserver = class {
-    // no-op for test environment
-    observe() {
-      /* noop */
-    }
-    unobserve() {
-      /* noop */
-    }
-    disconnect() {
-      /* noop */
-    }
-  };
-}
-
 /**
  * Provide a sane default PUBLIC_RUNTIME blob for tests that indirectly import config/env.
  * Individual tests can override by mocking `@/config/env` or by setting PUBLIC_RUNTIME themselves
@@ -121,7 +105,7 @@ globalThis.ResizeObserver = class ResizeObserver {
   disconnect() {} // Intentionally empty - no actual observation needed in tests
 };
 
-if (typeof globalThis.fetch === "undefined") {
+if (globalThis.fetch === undefined) {
   globalThis.fetch = jest.fn(() =>
     Promise.resolve({
       ok: true,
@@ -154,7 +138,7 @@ if (typeof globalThis.window !== "undefined") {
 }
 
 // Mock AbortSignal for Node.js environment
-if (typeof globalThis.AbortSignal === "undefined") {
+if (globalThis.AbortSignal === undefined) {
   globalThis.AbortSignal = class MockAbortSignal {
     constructor() {
       this.aborted = false;
@@ -183,10 +167,19 @@ if (globalThis.Request === undefined) {
       this.body = init.body ?? null;
       this.signal = init.signal ?? null;
     }
+
+    clone() {
+      return new TestRequest(this, {
+        method: this.method,
+        headers: this.headers,
+        body: this.body,
+        signal: this.signal,
+      });
+    }
   }
 
   globalThis.Request = TestRequest;
-  if (typeof globalThis.window !== "undefined") {
+  if (globalThis.window !== undefined) {
     globalThis.window.Request = TestRequest;
   }
 }

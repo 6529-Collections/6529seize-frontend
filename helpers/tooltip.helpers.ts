@@ -34,7 +34,7 @@ export function buildTooltipId(
     .replaceAll(INVALID_ATTR_CHARS, "-")
     .toLowerCase()
     .replaceAll(/-+/g, "-")
-    .replaceAll(/^-|-$/g, "");
+    .replaceAll(/(?:^-|-$)/g, "");
 
   if (sanitized === raw) {
     return sanitized;
