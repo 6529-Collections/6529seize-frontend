@@ -24,8 +24,14 @@ const readIpfsConfig = () => {
     throw new Error("Missing IPFS_API_ENDPOINT or IPFS_GATEWAY_ENDPOINT");
   }
 
-  const trimmed = gatewayEndpoint.replace(/\/+$/, "");
-  const gatewayBase = trimmed.replace(/\/ipfs$/i, "") || trimmed;
+  let trimmed = gatewayEndpoint;
+  while (trimmed.endsWith("/")) {
+    trimmed = trimmed.slice(0, -1);
+  }
+
+  const gatewayBase = trimmed.endsWith("/ipfs")
+    ? trimmed.slice(0, -5)
+    : trimmed;
   const mfsPath = publicEnv.IPFS_MFS_PATH;
 
   return { apiEndpoint, gatewayEndpoint: trimmed, gatewayBase, mfsPath } as const;

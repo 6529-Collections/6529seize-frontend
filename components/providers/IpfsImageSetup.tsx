@@ -31,6 +31,10 @@ const rewriteAttributeValue = (value: string | null) => {
   return replaceIpfsScheme(value);
 };
 
+const ATTRIBUTE_PATCH_FLAG = Symbol("ipfsAttributePatched");
+
+type ElementCtor = { prototype: Element } | undefined;
+
 const patchElementAttributeWrites = () => {
   if (typeof window === "undefined") {
     return;
@@ -44,30 +48,62 @@ const patchElementAttributeWrites = () => {
 
   const transform = (value: string) => replaceIpfsScheme(value);
 
-  const originalSetAttribute = Element.prototype.setAttribute;
-  Element.prototype.setAttribute = function (name: string, value: string) {
-    if (typeof value === "string" && ATTRIBUTES_TO_REWRITE.includes(name)) {
-      return originalSetAttribute.call(this, name, transform(value));
+  const patchAttributeMethods = (Ctor: ElementCtor) => {
+    if (!Ctor) {
+      return;
     }
-    return originalSetAttribute.call(this, name, value);
+
+    const proto = Ctor.prototype as Element & {
+      [ATTRIBUTE_PATCH_FLAG]?: boolean;
+    };
+
+    if (!proto || proto[ATTRIBUTE_PATCH_FLAG]) {
+      return;
+    }
+
+    const originalSetAttribute = proto.setAttribute;
+    if (typeof originalSetAttribute === "function") {
+      proto.setAttribute = function (name: string, value: string) {
+        if (typeof value === "string" && ATTRIBUTES_TO_REWRITE.includes(name)) {
+          return originalSetAttribute.call(this, name, transform(value));
+        }
+        return originalSetAttribute.call(this, name, value);
+      };
+    }
+
+    const originalSetAttributeNS = proto.setAttributeNS;
+    if (typeof originalSetAttributeNS === "function") {
+      proto.setAttributeNS = function (
+        namespace: string | null,
+        name: string,
+        value: string
+      ) {
+        if (typeof value === "string" && ATTRIBUTES_TO_REWRITE.includes(name)) {
+          return originalSetAttributeNS.call(
+            this,
+            namespace,
+            name,
+            transform(value)
+          );
+        }
+        return originalSetAttributeNS.call(this, namespace, name, value);
+      };
+    }
+
+    Object.defineProperty(proto, ATTRIBUTE_PATCH_FLAG, {
+      value: true,
+      configurable: false,
+      writable: false,
+    });
   };
 
-  const originalSetAttributeNS = Element.prototype.setAttributeNS;
-  Element.prototype.setAttributeNS = function (
-    namespace: string | null,
-    name: string,
-    value: string
-  ) {
-    if (typeof value === "string" && ATTRIBUTES_TO_REWRITE.includes(name)) {
-      return originalSetAttributeNS.call(
-        this,
-        namespace,
-        name,
-        transform(value)
-      );
-    }
-    return originalSetAttributeNS.call(this, namespace, name, value);
-  };
+  patchAttributeMethods(window.HTMLImageElement);
+  patchAttributeMethods(window.HTMLSourceElement);
+  patchAttributeMethods(window.HTMLVideoElement);
+  patchAttributeMethods(window.HTMLAudioElement);
+  patchAttributeMethods(window.HTMLLinkElement);
+  patchAttributeMethods(window.HTMLAnchorElement);
+  patchAttributeMethods(window.SVGImageElement as unknown as { prototype: Element });
 
   const patchProperty = (Ctor: { prototype: any } | undefined, prop: string) => {
     if (!Ctor) return;
@@ -101,8 +137,6 @@ const patchElementAttributeWrites = () => {
   patchProperty(window.HTMLLinkElement, "href");
 };
 
-patchElementAttributeWrites();
-
 export default function IpfsImageSetup() {
   useIpfsImageSetup();
   return null;
@@ -110,6 +144,8 @@ export default function IpfsImageSetup() {
 
 function useIpfsImageSetup() {
   useEffect(() => {
+    patchElementAttributeWrites();
+
     const applyToNode = (node: Element) => {
       ATTRIBUTES_TO_REWRITE.forEach((attr) => {
         const currentValue = node.getAttribute(attr);
@@ -144,7 +180,15 @@ function useIpfsImageSetup() {
     const observer = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
         if (mutation.type === "attributes") {
-          applyToNode(mutation.target as Element);
+          const target = mutation.target as Element;
+          const attrName = mutation.attributeName;
+          if (attrName) {
+            const attrValue = target.getAttribute(attrName);
+            if (!attrValue || !attrValue.includes("ipfs://")) {
+              continue;
+            }
+          }
+          applyToNode(target);
           continue;
         }
 
