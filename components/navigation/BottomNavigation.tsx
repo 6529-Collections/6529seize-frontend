@@ -15,7 +15,7 @@ import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getNotificationsRoute } from "@/helpers/navigation.helpers";
 
-export const items: NavItemData[] = [
+const items: NavItemData[] = [
   {
     kind: "route",
     name: "Home",

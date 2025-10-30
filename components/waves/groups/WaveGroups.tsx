@@ -15,7 +15,7 @@ export default function WaveGroups({ wave, useRing = true }: WaveGroupsProps) {
     : "tw-rounded-b-xl lg:tw-rounded-b-none";
 
   return (
-    <div className="tw-w-full tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0">
+    <div className="tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0">
       <div className={`tw-h-full tw-bg-iron-950 tw-relative ${ringClasses}`}>
         <div className="tw-h-full tw-overflow-y-auto tw-overflow-x-hidden no-scrollbar">
           <div className="tw-pb-4">

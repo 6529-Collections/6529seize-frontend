@@ -21,6 +21,7 @@ interface HighlightDropWrapperProps {
   readonly fadeMs?: number;
   readonly visibilityThreshold?: number;
   readonly id?: string;
+  readonly waveDropId?: string;
 }
 
 const MAX_VISIBILITY_WAIT_MS = 4000;
@@ -39,6 +40,7 @@ const HighlightDropWrapper = forwardRef<
       fadeMs = 500,
       visibilityThreshold = 0.6,
       id,
+      waveDropId,
     },
     forwardedRef
   ) => {
@@ -242,7 +244,13 @@ const HighlightDropWrapper = forwardRef<
     );
 
     return (
-      <div ref={setNode} id={id} className={classes} style={transitionStyle}>
+      <div
+        ref={setNode}
+        id={id}
+        className={classes}
+        style={transitionStyle}
+        data-wave-drop-id={waveDropId}
+      >
         {children}
       </div>
     );

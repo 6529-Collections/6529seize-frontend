@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useMemo, type JSX } from "react";
 import CreateDirectMessage from "./create-dm/CreateDirectMessage";
 import CreateWave from "./create-wave/CreateWave";
+import CreateWaveModal from "./create-wave/CreateWaveModal";
 import WavesList from "./list/WavesList";
 import ConnectWallet from "@/components/common/ConnectWallet";
 import { getWavesBaseRoute } from "@/helpers/navigation.helpers";
@@ -45,6 +46,7 @@ export default function Waves({
     openDirectMessage,
     close,
     isApp,
+    isWaveModalOpen,
   } = useCreateModalState();
 
   useSetTitle(documentTitle);
@@ -173,21 +175,25 @@ export default function Waves({
     ),
   };
 
-  const activeView =
-    isApp || viewMode === WavesViewMode.CREATE
-      ? viewMode
-      : WavesViewMode.VIEW;
+  const activeView = isApp ? viewMode : WavesViewMode.VIEW;
 
   return (
     <div className="tailwind-scope">
       {components[activeView]}
 
       {!isApp && connectedProfile && (
-        <CreateDirectMessageModal
-          isOpen={isDirectMessageModalOpen}
-          onClose={handleViewReset}
-          profile={connectedProfile}
-        />
+        <>
+          <CreateWaveModal
+            isOpen={isWaveModalOpen}
+            onClose={handleViewReset}
+            profile={connectedProfile}
+          />
+          <CreateDirectMessageModal
+            isOpen={isDirectMessageModalOpen}
+            onClose={handleViewReset}
+            profile={connectedProfile}
+          />
+        </>
       )}
     </div>
   );

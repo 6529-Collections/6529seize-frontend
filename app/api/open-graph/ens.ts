@@ -86,7 +86,7 @@ const NAME_WRAPPER_ABI = [
   },
 ] as const;
 
-export const publicClient = createPublicClient({
+const publicClient = createPublicClient({
   chain: mainnet,
   transport: fallback([http(), http("https://rpc1.6529.io")]),
 });
@@ -599,12 +599,6 @@ export async function fetchEnsPreview(target: EnsTarget): Promise<EnsPreview> {
   }
 
   return fetchEnsAddress(target.input);
-}
-
-export function __clearEnsCachesForTesting(): void {
-  nameCache.clear();
-  addressCache.clear();
-  ownershipCache.clear();
 }
 
 export { detectEnsTarget } from "@/lib/ens/detect";

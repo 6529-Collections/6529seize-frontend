@@ -25,6 +25,20 @@ export enum ManifoldPhase {
   PUBLIC = "Public Phase",
 }
 
+interface PhaseBoundary {
+  hour: number;
+  minute: number;
+  dayOffset?: number;
+}
+
+interface PhaseDefinition {
+  id: string;
+  name: string;
+  type: ManifoldPhase;
+  start: PhaseBoundary;
+  end: PhaseBoundary;
+}
+
 export interface MemePhase {
   id: string;
   name: string;
@@ -33,51 +47,58 @@ export interface MemePhase {
   end: Time;
 }
 
-export function buildMemesPhases(mintDate: Time): MemePhase[] {
-  const buildTime = (
-    hour: number,
-    minute: number,
-    nextDay: boolean = false
-  ) => {
-    const ref = nextDay ? mintDate.plusDays(1) : mintDate;
-    return Time.fromString(
-      wallTimeToUtcInstantInZone(ref.toDate(), hour, minute).toISOString()
+const PHASE_DEFINITIONS: PhaseDefinition[] = [
+  {
+    id: "0",
+    name: "Phase 0 (Allowlist)",
+    type: ManifoldPhase.ALLOWLIST,
+    start: { hour: 17, minute: 40 },
+    end: { hour: 18, minute: 20 },
+  },
+  {
+    id: "1",
+    name: "Phase 1 (Allowlist)",
+    type: ManifoldPhase.ALLOWLIST,
+    start: { hour: 18, minute: 30 },
+    end: { hour: 18, minute: 50 },
+  },
+  {
+    id: "2",
+    name: "Phase 2 (Allowlist)",
+    type: ManifoldPhase.ALLOWLIST,
+    start: { hour: 19, minute: 0 },
+    end: { hour: 19, minute: 20 },
+  },
+  {
+    id: "public",
+    name: "Public Phase",
+    type: ManifoldPhase.PUBLIC,
+    start: { hour: 19, minute: 20 },
+    end: { hour: 17, minute: 0, dayOffset: 1 },
+  },
+];
+
+export function buildMemesPhases(mintDate: Time = Time.now()): MemePhase[] {
+  const resolveTime = ({
+    hour,
+    minute,
+    dayOffset = 0,
+  }: PhaseBoundary): Time => {
+    const reference = dayOffset === 0 ? mintDate : mintDate.plusDays(dayOffset);
+    const instant = wallTimeToUtcInstantInZone(
+      reference.toDate(),
+      hour,
+      minute
     );
+    return Time.millis(instant.getTime());
   };
 
-  return [
-    {
-      id: "0",
-      name: "Phase 0 (Allowlist)",
-      type: ManifoldPhase.ALLOWLIST,
-      start: buildTime(17, 40),
-      end: buildTime(18, 20),
-    },
-    {
-      id: "1",
-      name: "Phase 1 (Allowlist)",
-      type: ManifoldPhase.ALLOWLIST,
-      start: buildTime(18, 30),
-      end: buildTime(18, 50),
-    },
-    {
-      id: "2",
-      name: "Phase 2 (Allowlist)",
-      type: ManifoldPhase.ALLOWLIST,
-      start: buildTime(19, 0),
-      end: buildTime(19, 20),
-    },
-    {
-      id: "public",
-      name: "Public Phase",
-      type: ManifoldPhase.PUBLIC,
-      start: buildTime(19, 20),
-      end: buildTime(17, 0, true),
-    },
-  ];
+  return PHASE_DEFINITIONS.map(({ start, end, ...phase }) => ({
+    ...phase,
+    start: resolveTime(start),
+    end: resolveTime(end),
+  }));
 }
-
-const MEME_PHASES = buildMemesPhases(Time.now());
 
 export interface ManifoldClaim {
   instanceId: number;
@@ -106,7 +127,7 @@ export function useManifoldClaim(
   const [refetchInterval, setRefetchInterval] = useState<number>(5000);
 
   const getStatus = useCallback((start: number, end: number) => {
-    const now = Date.now() / 1000;
+    const now = Time.now().toSeconds();
     if (now < start) {
       return ManifoldClaimStatus.UPCOMING;
     } else if (now >= start && now < end) {
@@ -116,17 +137,19 @@ export function useManifoldClaim(
   }, []);
 
   const getMemePhase = useCallback(
-    (phase: ManifoldPhase, end: number) => {
+    (phase: ManifoldPhase, start: number, end: number) => {
       if (!areEqualAddresses(contract, MEMES_CONTRACT)) {
         return undefined;
       }
 
+      const memePhases = buildMemesPhases(Time.seconds(start));
+
       if (phase === ManifoldPhase.PUBLIC) {
-        return MEME_PHASES.find((mp) => mp.id === "public");
+        return memePhases.find((mp) => mp.id === "public");
       }
 
       const endTime = Time.seconds(end);
-      return MEME_PHASES.find((mp) => mp.end.gte(endTime));
+      return memePhases.find((mp) => mp.end.gte(endTime));
     },
     [contract]
   );
@@ -155,7 +178,11 @@ export function useManifoldClaim(
         publicMerkle && claimData.total > 0
           ? ManifoldPhase.PUBLIC
           : ManifoldPhase.ALLOWLIST;
-      const memePhase = getMemePhase(phase, claimData.endDate);
+      const memePhase = getMemePhase(
+        phase,
+        claimData.startDate,
+        claimData.endDate
+      );
       const remaining = Number(claimData.totalMax) - Number(claimData.total);
       const newClaim: ManifoldClaim = {
         instanceId: instanceId,

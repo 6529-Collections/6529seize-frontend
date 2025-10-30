@@ -1,5 +1,7 @@
 import { renderHook, act } from "@testing-library/react";
-import { usePinnedWaves, MAX_PINNED_WAVES } from "@/hooks/usePinnedWaves";
+import { usePinnedWaves } from "@/hooks/usePinnedWaves";
+
+const MAX_PINNED_WAVES = 10;
 
 it("adds and removes ids and persists to localStorage", () => {
   const { result } = renderHook(() => usePinnedWaves());
