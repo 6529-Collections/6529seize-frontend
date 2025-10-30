@@ -10,13 +10,19 @@ import {
 } from "@/errors/authentication";
 import { redeemRefreshTokenWithRetries } from "@/services/auth/token-refresh.utils";
 
-const fetchMock = global.fetch as jest.Mock;
+const originalFetch = global.fetch;
+let fetchMock: jest.Mock;
 const validAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
 const refreshToken = "refresh-token";
 
 beforeEach(() => {
   jest.clearAllMocks();
-  fetchMock.mockReset();
+  fetchMock = jest.fn();
+  global.fetch = fetchMock as unknown as typeof fetch;
+});
+
+afterEach(() => {
+  global.fetch = originalFetch;
 });
 
 describe("Token refresh error hierarchy", () => {
