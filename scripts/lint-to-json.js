@@ -31,6 +31,19 @@ const entries = [];
 let currentPath = null;
 let currentWarnings = [];
 
+const isLikelyPathLine = (line) => {
+  if (!line) return false;
+  if (/^\s/.test(line)) return false;
+
+  const trimmed = line.trim();
+  if (/^(✖|✔)/.test(trimmed)) return false;
+
+  if (path.isAbsolute(trimmed)) return true;
+  if (/^[.]{1,2}[\\/]/.test(trimmed)) return true;
+  if (/[\\/]/.test(trimmed)) return true;
+  return /\.[a-zA-Z0-9]+$/.test(trimmed);
+};
+
 const flushCurrent = () => {
   if (!currentPath) return;
 
@@ -51,13 +64,13 @@ for (const line of lines) {
     continue;
   }
 
-  if (/^\/.+/.test(line)) {
+  if (isLikelyPathLine(line)) {
     flushCurrent();
     currentPath = line.trim();
     continue;
   }
 
-  if (currentPath && line.startsWith("  ")) {
+  if (currentPath && /^\s+/.test(line)) {
     currentWarnings.push(line);
     continue;
   }
