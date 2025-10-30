@@ -133,7 +133,7 @@ class MockAbortController {
 
 // Set on all global objects to ensure it's available during module loading
 globalThis.AbortController = MockAbortController;
-if (typeof globalThis.window !== "undefined") {
+if (globalThis.window !== undefined) {
   globalThis.window.AbortController = MockAbortController;
 }
 

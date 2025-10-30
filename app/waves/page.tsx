@@ -26,7 +26,6 @@ async function fetchWaveContext(
   waveId: string | null,
   providedCookies?: CookieStore
 ): Promise<WaveRequestContext> {
-  noStore();
   const cookieStore = providedCookies ?? (await cookies());
   const headers = await getAppCommonHeaders();
   const feedItemsFetchedRaw = cookieStore.get(String(QueryKey.FEED_ITEMS))?.value;
@@ -38,7 +37,10 @@ async function fetchWaveContext(
       : await commonApiFetch<ApiWave>({
           endpoint: `waves/${waveId}`,
           headers,
-        }).catch(() => null);
+        }).catch((error) => {
+          console.warn("Failed to fetch wave", { waveId, error });
+          return null;
+        });
 
   return {
     waveId,
