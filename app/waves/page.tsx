@@ -5,13 +5,13 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { getAppMetadata } from "@/components/providers/metadata";
 import WavesPageClient from "./page.client";
-import { Suspense } from "react";
 import { Time } from "@/helpers/time";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { cookies } from "next/headers";
 import { unstable_noStore as noStore } from "next/cache";
 import type { Metadata } from "next";
 import { formatAddress } from "@/helpers/Helpers";
+import { formatCount } from "@/helpers/format.helpers";
 
 type WaveRequestContext = {
   readonly waveId: string | null;
@@ -86,11 +86,9 @@ export default async function WavesPage({
   }
 
   return (
-    <Suspense fallback={null}>
-      <HydrationBoundary state={dehydrate(queryClient)}>
-        <WavesPageClient />
-      </HydrationBoundary>
-    </Suspense>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <WavesPageClient />
+    </HydrationBoundary>
   );
 }
 
@@ -161,11 +159,4 @@ export async function generateMetadata({
         }
       : metadata
   );
-}
-
-function formatCount(value: number | null | undefined): string | null {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    return null;
-  }
-  return new Intl.NumberFormat("en-US").format(value);
 }
