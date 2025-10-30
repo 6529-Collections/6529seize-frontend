@@ -166,3 +166,21 @@ if (typeof global.AbortSignal === "undefined") {
     }
   };
 }
+
+if (typeof global.Request === "undefined") {
+  class TestRequest {
+    constructor(input, init = {}) {
+      this.url = typeof input === "string" ? input : input?.url ?? "";
+      this.method = init.method ?? "GET";
+      this.headers = init.headers ?? {};
+      this.body = init.body ?? null;
+      this.signal = init.signal ?? null;
+    }
+  }
+
+  global.Request = TestRequest;
+  globalThis.Request = TestRequest;
+  if (typeof window !== "undefined") {
+    window.Request = TestRequest;
+  }
+}

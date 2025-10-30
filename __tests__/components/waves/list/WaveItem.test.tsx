@@ -2,6 +2,14 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import WaveItem from '@/components/waves/list/WaveItem';
 
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn(),
+  }),
+}));
+
 jest.mock('@/components/waves/list/WaveItemDropped', () => () => <a data-testid="dropped" href="#dropped">Dropped</a>);
 jest.mock('@/components/waves/list/WaveItemFollow', () => () => (
   <button data-testid="follow" type="button">
