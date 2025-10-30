@@ -33,7 +33,7 @@ const getPathSegments = (value: string): string[] =>
     .map((segment) => segment.trim())
     .filter((segment) => segment.length > 0);
 
-export const parseTwitterLink = (href: string): { href: string; tweetId: string } | null => {
+const parseTwitterLink = (href: string): { href: string; tweetId: string } | null => {
   let url: URL;
 
   try {

@@ -1,4 +1,4 @@
-export interface SliderTheme {
+interface SliderTheme {
   track: {
     background: string;
     hover: string;
@@ -21,7 +21,7 @@ export interface SliderTheme {
 
 type RankKey = 1 | 2 | 3 | "default";
 
-export const SLIDER_THEMES: Record<RankKey, SliderTheme> = {
+const SLIDER_THEMES: Record<RankKey, SliderTheme> = {
   1: {
     track: {
       background: "tw-bg-gradient-to-r tw-from-[#E8D48A]/10 tw-via-[#42382A]/20 tw-to-[#E8D48A]/10",

@@ -10,8 +10,8 @@
 
 import { publicEnv } from "@/config/env";
 
-// Types
-export * from "./WebSocketTypes";
+// Types (re-export only the publicly consumed ones)
+export type { WebSocketConfig } from "./WebSocketTypes";
 
 // Context and Provider
 // Hooks
@@ -59,28 +59,6 @@ export const DEFAULT_WEBSOCKET_CONFIG = {
  *   return (
  *     <div>
  *       {data && <NotificationBadge notification={data} />}
- *     </div>
- *   );
- * }
- * ```
- *
- * 3. For multiple message types:
- *
- * ```tsx
- * import { useWebSocketMessages } from 'services/websocket';
- *
- * interface MessageTypes {
- *   'price-update': PriceData;
- *   'user-activity': ActivityData;
- * }
- *
- * function Dashboard() {
- *   const { dataMap } = useWebSocketMessages<MessageTypes>(['price-update', 'user-activity']);
- *
- *   return (
- *     <div>
- *       {dataMap['price-update'] && <PriceChart data={dataMap['price-update']} />}
- *       {dataMap['user-activity'] && <ActivityFeed data={dataMap['user-activity']} />}
  *     </div>
  *   );
  * }

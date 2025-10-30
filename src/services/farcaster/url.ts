@@ -13,7 +13,7 @@ export type FarcasterResourceIdentifier =
   | FarcasterProfileIdentifier
   | FarcasterChannelIdentifier;
 
-export interface FarcasterCastIdentifier {
+interface FarcasterCastIdentifier {
   readonly type: "cast";
   readonly canonicalUrl: string;
   readonly castHash: string;
@@ -21,13 +21,13 @@ export interface FarcasterCastIdentifier {
   readonly channel?: string | null;
 }
 
-export interface FarcasterProfileIdentifier {
+interface FarcasterProfileIdentifier {
   readonly type: "profile";
   readonly canonicalUrl: string;
   readonly username: string;
 }
 
-export interface FarcasterChannelIdentifier {
+interface FarcasterChannelIdentifier {
   readonly type: "channel";
   readonly canonicalUrl: string;
   readonly channel: string;
@@ -46,9 +46,6 @@ const buildCanonicalUrl = (segments: readonly string[]): string =>
 
 const isBlockedProfilePath = (segment: string): boolean =>
   PROFILE_BLOCKED_SEGMENTS.has(segment.toLowerCase());
-
-export const isFarcasterHost = (host: string): boolean =>
-  FARCASTER_HOSTS.has(normalizeHost(host));
 
 const parseChannelSegments = (
   segments: readonly string[]
@@ -132,13 +129,4 @@ export const parseFarcasterResource = (
   }
 
   return parseUserSegments(segments);
-};
-
-export const isPotentialFarcasterUrl = (url: URL): boolean => {
-  if (isFarcasterHost(url.hostname)) {
-    return true;
-  }
-
-  const protocol = url.protocol.toLowerCase();
-  return protocol === "http:" || protocol === "https:";
 };

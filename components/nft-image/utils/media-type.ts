@@ -1,6 +1,6 @@
 import { BaseNFT, NFTLite } from "@/entities/INFT";
 
-export type MediaType = 'html' | 'glb' | 'video' | 'image';
+type MediaType = 'html' | 'glb' | 'video' | 'image';
 
 export function getMediaType(nft: BaseNFT | NFTLite, animation: boolean): MediaType {
   if (!animation || !nft.animation) {

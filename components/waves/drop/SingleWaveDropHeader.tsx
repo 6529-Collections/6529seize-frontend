@@ -15,7 +15,7 @@ export const SingleWaveDropHeader: React.FC<SingleWaveDropHeaderProps> = ({
   onClose,
 }) => {
   return (
-    <div className="lg:tw-hidden tw-inline-flex tw-w-full tw-justify-between">
+    <div className="lg:tw-hidden tw-inline-flex tw-w-full tw-justify-between tw-items-center tw-relative tw-px-4 tw-pt-[env(safe-area-inset-top,0px)] tw-gap-3">
       <SingleWaveDropTabs activeTab={activeTab} setActiveTab={setActiveTab} />
       <SingleWaveDropClose onClose={onClose} />
     </div>

@@ -1,8 +1,7 @@
 import React from "react";
 import { render } from "@testing-library/react";
 import { AuthContext } from "@/components/auth/Auth";
-import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
-export type AuthContextType = React.ContextType<typeof AuthContext>;
+type AuthContextType = React.ContextType<typeof AuthContext>;
 
 const defaultConnectedProfile = {
   id: "test-id",
@@ -46,18 +45,5 @@ export const renderWithAuth = (
     <AuthContext.Provider value={createMockAuthContext(authValue)}>
       {component}
     </AuthContext.Provider>
-  );
-};
-
-export const renderWithProviders = (
-  component: React.ReactElement,
-  authValue: Partial<AuthContextType> = {}
-) => {
-  return render(
-    <CookieConsentProvider>
-      <AuthContext.Provider value={createMockAuthContext(authValue)}>
-        {component}
-      </AuthContext.Provider>
-    </CookieConsentProvider>
   );
 };

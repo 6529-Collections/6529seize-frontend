@@ -20,6 +20,7 @@ import type {
   FarcasterPreviewResponse,
   FarcasterProfilePreview,
   FarcasterUnavailablePreview,
+  FarcasterUnsupportedPreview,
 } from "@/types/farcaster.types";
 
 const WARPCAST_API_BASE =
@@ -653,6 +654,15 @@ const toUnavailable = (
   reason,
 });
 
+const toUnsupported = (
+  canonicalUrl?: string,
+  reason?: string
+): FarcasterUnsupportedPreview => ({
+  type: "unsupported",
+  canonicalUrl,
+  reason,
+});
+
 const handleResource = async (
   resource: FarcasterResourceIdentifier
 ): Promise<FarcasterPreviewResponse> => {
@@ -677,7 +687,7 @@ const handleResource = async (
     );
   }
 
-  return { type: "unsupported" };
+  return toUnsupported(undefined, "Unsupported Farcaster resource");
 };
 
 const isUrlGuardError = (error: unknown): error is UrlGuardError =>
@@ -729,7 +739,9 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ type: "unsupported" });
+    return NextResponse.json(
+      toUnsupported(targetUrl.toString(), "Unsupported Farcaster URL")
+    );
   } catch (error) {
     if (isUrlGuardError(error)) {
       return handleGuardError(error, error.statusCode);
@@ -743,5 +755,5 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// ts-prune-ignore-next-line: Next.js reads this named export as route config
 export const dynamic = "force-dynamic";
-export const revalidate = 0;

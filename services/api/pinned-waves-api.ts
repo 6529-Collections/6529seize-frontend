@@ -3,7 +3,7 @@ import { ApiWave } from '@/generated/models/ApiWave';
 import { ApiWavesPinFilter } from '@/generated/models/ApiWavesPinFilter';
 import { ApiWavesOverviewType } from '@/generated/models/ApiWavesOverviewType';
 
-export interface PinnedWavesService {
+interface PinnedWavesService {
   fetchPinnedWaves: () => Promise<ApiWave[]>;
   pinWave: (waveId: string) => Promise<void>;
   unpinWave: (waveId: string) => Promise<void>;

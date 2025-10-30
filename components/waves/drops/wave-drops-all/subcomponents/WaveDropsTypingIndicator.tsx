@@ -15,7 +15,7 @@ export const WaveDropsTypingIndicator: React.FC<
 
   return (
     <div
-      className={`tw-absolute tw-bottom-0 tw-left-0 tw-z-10 tw-inset-x-0 tw-mr-2 tw-px-4 tw-py-1 tw-flex tw-items-center tw-gap-x-2 tw-bg-iron-950 tw-transition-opacity tw-duration-300 tw-ease-in-out ${visibilityClass}`}
+      className={`tw-absolute tw-bottom-0 tw-left-0 tw-z-10 tw-inset-x-0 tw-mr-2 tw-px-4 tw-pb-1.5 tw-pt-1.5 tw-flex tw-items-center tw-gap-x-2 tw-transition-opacity tw-duration-300 tw-ease-in-out tw-bg-gradient-to-t tw-from-iron-950 tw-via-iron-950/90 tw-to-transparent ${visibilityClass}`}
     >
       <div className="tw-flex tw-items-center tw-gap-x-0.5">
         <FontAwesomeIcon

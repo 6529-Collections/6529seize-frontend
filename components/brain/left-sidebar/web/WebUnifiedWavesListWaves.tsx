@@ -94,7 +94,7 @@ const WebUnifiedWavesListWaves = forwardRef<
       sentinelRef,
     }));
 
-    const shouldRenderCreateWaveButton = !isApp && !!connectedProfile;
+    const showCreateWaveButton = !isApp && !!connectedProfile;
 
     const { pinnedWaves, regularWaves } = useMemo(() => {
       const pinned: MinimalWave[] = [];
@@ -129,7 +129,7 @@ const WebUnifiedWavesListWaves = forwardRef<
         <div className="tw-flex tw-flex-col">
           {!hideHeaders &&
             (isCollapsed ? (
-              shouldRenderCreateWaveButton && (
+              showCreateWaveButton && (
                 <div className="tw-flex tw-justify-center tw-px-2 tw-mb-3.5">
                   <div
                     data-tooltip-id="create-wave-tooltip"
@@ -139,7 +139,7 @@ const WebUnifiedWavesListWaves = forwardRef<
                       onClicked={openWave}
                       loading={false}
                       disabled={false}
-                      padding="tw-px-2 tw-py-2"
+                      padding="tw-p-2.5"
                     >
                       <FontAwesomeIcon
                         icon={faPlus}
@@ -153,7 +153,7 @@ const WebUnifiedWavesListWaves = forwardRef<
               <SectionHeader
                 label="Waves"
                 rightContent={
-                  shouldRenderCreateWaveButton ? (
+                  showCreateWaveButton ? (
                     <div
                       data-tooltip-id="create-wave-tooltip"
                       data-tooltip-content="Create wave"
@@ -162,7 +162,7 @@ const WebUnifiedWavesListWaves = forwardRef<
                         onClicked={openWave}
                         loading={false}
                         disabled={false}
-                        padding="tw-px-2 tw-py-2"
+                        padding="tw-p-2.5"
                       >
                         <FontAwesomeIcon
                           icon={faPlus}

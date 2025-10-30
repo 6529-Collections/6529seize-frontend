@@ -1,4 +1,4 @@
-export interface WikimediaLinkResult {
+interface WikimediaLinkResult {
   readonly href: string;
 }
 
@@ -40,4 +40,3 @@ export const parseWikimediaLink = (href: string): WikimediaLinkResult | null => 
     return null;
   }
 };
-

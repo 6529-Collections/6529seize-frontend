@@ -46,7 +46,7 @@ export const getRole = (jwt: string | null): string | null => {
   return decodedJwt.role;
 };
 
-export const doJWTValidation = ({
+const doJWTValidation = ({
   jwt,
   wallet,
   role,
@@ -64,7 +64,7 @@ export const doJWTValidation = ({
   );
 };
 
-export const validateJwtInputs = (wallet: string, operationId: string): void => {
+const validateJwtInputs = (wallet: string, operationId: string): void => {
   if (!wallet || typeof wallet !== 'string') {
     throw new Error('Invalid wallet address: must be non-empty string');
   }
@@ -73,7 +73,7 @@ export const validateJwtInputs = (wallet: string, operationId: string): void => 
   }
 };
 
-export const validateProxyRole = ({
+const validateProxyRole = ({
   role,
   activeProfileProxy,
   freshTokenRole,
@@ -108,7 +108,7 @@ export const validateProxyRole = ({
   }
 };
 
-export const synchronizeRoles = ({
+const synchronizeRoles = ({
   walletRole,
   freshTokenRole,
   address,
@@ -145,7 +145,7 @@ export const synchronizeRoles = ({
   syncWalletRoleWithServer(freshTokenRole, address);
 };
 
-export const handleTokenRefresh = async ({
+const handleTokenRefresh = async ({
   wallet,
   role,
   abortSignal,

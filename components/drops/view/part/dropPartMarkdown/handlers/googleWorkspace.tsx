@@ -29,5 +29,3 @@ export const createGoogleWorkspaceHandler = (): LinkHandler => ({
   render: (href) => <GoogleWorkspacePreview href={href} />,
   display: "block",
 });
-
-export type GoogleWorkspaceHandler = ReturnType<typeof createGoogleWorkspaceHandler>;

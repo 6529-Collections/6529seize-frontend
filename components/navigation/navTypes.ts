@@ -2,7 +2,7 @@ import React from "react";
 
 export type ViewKey = "waves" | "messages";
 
-export type RouteNavItem = {
+type RouteNavItem = {
   kind: "route";
   name: string;
   href: string;
@@ -12,7 +12,7 @@ export type RouteNavItem = {
   disabled?: boolean;
 };
 
-export type ViewNavItem = {
+type ViewNavItem = {
   kind: "view";
   name: string;
   viewKey: ViewKey;
@@ -22,19 +22,8 @@ export type ViewNavItem = {
   disabled?: boolean;
 };
 
-export type ActionNavItem = {
-  kind: "action";
-  name: string;
-  action: () => void;
-  icon: string;
-  iconComponent?: React.ComponentType<{ className?: string }>;
-  iconSizeClass?: string;
-  disabled?: boolean;
-};
+export type NavItem = RouteNavItem | ViewNavItem;
 
-export type NavItem = RouteNavItem | ViewNavItem | ActionNavItem;
-
-// Sidebar-specific types
 export interface SidebarSection {
   key: string;
   name: string;
@@ -46,7 +35,7 @@ export interface SidebarSection {
   }[];
 }
 
-export interface SidebarNavItem {
+interface SidebarNavItem {
   name: string;
   href: string;
-} 
+}

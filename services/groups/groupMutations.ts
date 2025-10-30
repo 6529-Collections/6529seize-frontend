@@ -2,8 +2,8 @@ import { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { commonApiPost } from "@/services/api/common-api";
 
-export const GROUP_INCLUDE_LIMIT = 10000;
-export const GROUP_EXCLUDE_LIMIT = 1000;
+const GROUP_INCLUDE_LIMIT = 10000;
+const GROUP_EXCLUDE_LIMIT = 1000;
 
 export type ValidationIssue =
   | "INCLUDE_LIMIT"
@@ -29,7 +29,7 @@ export const toErrorMessage = (error: unknown): string => {
   return "Something went wrong";
 };
 
-export const sanitiseGroupPayload = (
+const sanitiseGroupPayload = (
   payload: ApiCreateGroup,
   name: string
 ): ApiCreateGroup => ({

@@ -9,7 +9,7 @@ export interface VirtualItem {
   size: number;
 }
 
-export const SENTINEL_HEIGHT = 40;
+const SENTINEL_HEIGHT = 40;
 
 export function useVirtualizedWaves<T>(
   items: readonly T[],

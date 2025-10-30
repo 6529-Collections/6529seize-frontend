@@ -1,29 +1,4 @@
-import {
-  createCompoundPlan,
-  trimTrailingZeros,
-} from "@/app/api/open-graph/compound/service";
-
-describe("trimTrailingZeros", () => {
-  it("removes trailing zeros after the decimal point", () => {
-    expect(trimTrailingZeros("123.4500")).toBe("123.45");
-    expect(trimTrailingZeros("-45.6000")).toBe("-45.6");
-  });
-
-  it("removes the decimal point when the fractional part becomes empty", () => {
-    expect(trimTrailingZeros("123.000")).toBe("123");
-    expect(trimTrailingZeros("0.")).toBe("0");
-  });
-
-  it("leaves numbers without trailing zeros unchanged", () => {
-    expect(trimTrailingZeros("123.0001")).toBe("123.0001");
-    expect(trimTrailingZeros("123")).toBe("123");
-  });
-
-  it("handles long sequences of zeros without excessive backtracking", () => {
-    const value = `1.${"0".repeat(10_000)}`;
-    expect(trimTrailingZeros(value)).toBe("1");
-  });
-});
+import { createCompoundPlan } from "@/app/api/open-graph/compound/service";
 
 describe("createCompoundPlan", () => {
   const txHash = `0x${"a".repeat(64)}`;

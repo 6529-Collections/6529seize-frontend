@@ -10,7 +10,7 @@ import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { Fragment } from "react";
 import { useIdentity } from "@/hooks/useIdentity";
 
-export type MenuItem = {
+type MenuItem = {
   readonly label: string;
   readonly path?: string;
   readonly icon?: React.ElementType;

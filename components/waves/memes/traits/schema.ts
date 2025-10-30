@@ -76,7 +76,7 @@ export interface BaseFieldDefinition {
 /**
  * Text input field definition
  */
-export interface TextFieldDefinition extends BaseFieldDefinition {
+interface TextFieldDefinition extends BaseFieldDefinition {
   readonly type: FieldType.TEXT;
   readonly readOnly?: boolean;
   readonly placeholder?: string;
@@ -97,7 +97,7 @@ export interface NumberFieldDefinition extends BaseFieldDefinition {
 /**
  * Boolean toggle field definition
  */
-export interface BooleanFieldDefinition extends BaseFieldDefinition {
+interface BooleanFieldDefinition extends BaseFieldDefinition {
   readonly type: FieldType.BOOLEAN;
   readonly initialValue?: boolean;
 }
@@ -119,14 +119,14 @@ export type FieldDefinition =
   | DropdownFieldDefinition;
 
 // Section definition
-export interface SectionDefinition {
+interface SectionDefinition {
   readonly title: string;
   readonly layout: "single" | "double";
   readonly fields: readonly FieldDefinition[];
 }
 
 // Meme name options constant
-export const MEME_NAME_OPTIONS = [
+const MEME_NAME_OPTIONS = [
   "Seize the Memes of Production",
   "WAGMI",
   "Don't Let the Institutions Steal Your JPGs",
@@ -520,9 +520,6 @@ export function getInitialTraitsValues(): TraitsData {
 
   return initialValues as TraitsData;
 }
-
-// Function to be imported directly in useArtworkSubmissionForm to avoid circular dependency
-export const initialTraits: TraitsData = getInitialTraitsValues();
 
 export const MEME_TRAITS_SORT_ORDER = [
   "artist",
