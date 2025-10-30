@@ -2,6 +2,8 @@ export enum ImageScale {
   W_AUTO_H_50 = "AUTOx50",
   W_200_H_200 = "200x200",
   AUTOx450 = "AUTOx450",
+  AUTOx800 = "AUTOx800",
+  AUTOx1080 = "AUTOx1080",
 }
 
 const SCALABLE_PREFIXES = [

@@ -21,6 +21,7 @@ import { WinnerBadge } from "./WinnerBadge";
 import { SingleWaveDropTraits } from "./SingleWaveDropTraits";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import WaveDropDeleteButton from "@/components/utils/button/WaveDropDeleteButton";
+import { ImageScale } from "@/helpers/image.helpers";
 
 interface MemesSingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
@@ -86,6 +87,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
                   media_mime_type={artworkMedia.mime_type}
                   media_url={artworkMedia.url}
                   isCompetitionDrop={true}
+                  imageScale={ImageScale.AUTOx1080}
                 />
               </div>
             )}
