@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import { Tooltip } from "react-tooltip";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
+import { buildTooltipId } from "@/helpers/tooltip.helpers";
 
 interface SingleWaveDropContentMetadataProps {
   readonly drop: ApiDrop;
@@ -16,21 +17,23 @@ const MetadataItem: React.FC<{ label: string; value: string }> = ({
 }) => {
   const isMobile = useIsMobileDevice();
 
+  const tooltipId = buildTooltipId("metadata", label, value);
+
   return (
     <div className="tw-px-2 tw-py-1 tw-rounded-md tw-bg-iron-800 tw-flex tw-flex-col tw-gap-y-1.5">
       <span className="tw-text-iron-400 tw-text-xs tw-mr-1.5 tw-uppercase tw-font-normal">
         {label}:
       </span>
       <>
-        <span 
+        <span
           className="tw-text-iron-50 tw-text-xs tw-font-medium tw-truncate"
-          data-tooltip-id={`metadata-${label}-${value}`}
+          data-tooltip-id={tooltipId}
         >
           {value}
         </span>
         {!isMobile && (
           <Tooltip
-            id={`metadata-${label}-${value}`}
+            id={tooltipId}
             place="top"
             style={{
               backgroundColor: "#1F2937",

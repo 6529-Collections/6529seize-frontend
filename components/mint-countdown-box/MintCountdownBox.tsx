@@ -81,6 +81,7 @@ export default function MintCountdownBox(props: Readonly<Props>) {
             id="allowlist-info"
             place="left"
             opacity={1}
+            border="1px solid rgba(255, 255, 255, 0.15)"
             style={{
               backgroundColor: "#37373E",
               color: "white",
@@ -88,7 +89,6 @@ export default function MintCountdownBox(props: Readonly<Props>) {
               maxWidth: "250px",
               fontSize: "14px",
               lineHeight: "1.4",
-              border: "1px solid rgba(255, 255, 255, 0.15)",
               boxShadow: "0 4px 12px rgba(0, 0, 0, 0.4)",
               borderRadius: "6px",
             }}

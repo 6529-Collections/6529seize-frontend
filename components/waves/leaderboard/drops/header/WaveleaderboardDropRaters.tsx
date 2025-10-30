@@ -63,9 +63,8 @@ export const WaveLeaderboardDropRaters: React.FC<
       <div className="tw-flex tw-items-center tw-gap-2 tw-whitespace-nowrap">
         <div className="tw-flex -tw-space-x-1.5 tw-items-center">
           {drop.top_raters.map((voter, index) => (
-            <>
+            <React.Fragment key={voter.profile.id}>
               <div
-                key={voter.profile.id}
                 className="tw-relative tw-transition-transform hover:tw-scale-110 hover:tw-z-10"
                 style={{ zIndex: drop.top_raters.length - index }}
                 data-tooltip-id={`voter-${drop.id}-${voter.profile.id}`}
@@ -101,7 +100,7 @@ export const WaveLeaderboardDropRaters: React.FC<
                   {drop.wave.voting_credit_type}
                 </span>
               </Tooltip>
-            </>
+            </React.Fragment>
           ))}
         </div>
         <span className="tw-text-sm tw-text-iron-400">

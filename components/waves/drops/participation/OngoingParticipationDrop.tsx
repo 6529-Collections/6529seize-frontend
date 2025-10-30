@@ -100,7 +100,10 @@ export default function OngoingParticipationDrop({
       </div>
 
       <div className="tw-flex tw-w-full tw-flex-col">
-        <ParticipationDropMetadata metadata={drop.metadata} />
+        <ParticipationDropMetadata
+          metadata={drop.metadata}
+          contextId={drop.id}
+        />
         <ParticipationDropFooter drop={drop} />
       </div>
 
