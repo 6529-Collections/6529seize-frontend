@@ -36,8 +36,8 @@ export default function FooterWrapper() {
       current === nextTab ? current : nextTab
     );
 
-    const handleTabChange = (event: Event) => {
-      const detail = (event as CustomEvent<{ tab?: HomeTab }>).detail;
+    const handleTabChange = (event: CustomEvent<{ tab?: HomeTab }>) => {
+      const detail = event.detail;
       if (!detail?.tab || !isHomeTab(detail.tab)) {
         return;
       }
