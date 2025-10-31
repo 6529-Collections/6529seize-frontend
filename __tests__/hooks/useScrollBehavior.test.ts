@@ -239,7 +239,7 @@ describe('useScrollBehavior', () => {
       triggerResize(container);
     });
 
-    expect(container.scrollTop).toBe(-300);
+    expect(container.scrollTop).toBe(-200);
     expect(result.current.scrollIntent).toBe('reading');
   });
 

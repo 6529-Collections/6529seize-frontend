@@ -189,13 +189,24 @@ export const useScrollBehavior = () => {
       }
 
       const heightDelta = currentHeight - previousHeight;
+      if (heightDelta === 0) {
+        prevScrollHeightRef.current = currentHeight;
+        lastScrollTopRef.current = target.scrollTop;
+        return;
+      }
+
       const shouldStickToBottom =
         intentRef.current === "pinned" && isAtBottomRef.current;
 
       if (shouldStickToBottom) {
         target.scrollTop = 0;
       } else {
-        target.scrollTop -= heightDelta;
+        const newMaxScroll = Math.max(target.scrollHeight - target.clientHeight, 0);
+        const desiredScrollTop = Math.max(
+          -newMaxScroll,
+          Math.min(0, lastScrollTopRef.current)
+        );
+        target.scrollTop = desiredScrollTop;
       }
 
       prevScrollHeightRef.current = target.scrollHeight;
