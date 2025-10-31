@@ -64,11 +64,8 @@ export const WaveDropsReverseContainer = forwardRef<
         const container = scrollContainerRef.current;
         if (!container) return;
         const { scrollTop } = container;
-        // In a flex-col-reverse container, we're at the visual bottom when scrollTop is near 0
         const currentIsAtBottom = scrollTop > -5;
         isAtBottom.current = currentIsAtBottom;
-        // In a flex-col-reverse container, scrolling "up" means the scrollTop is increasing
-        // and scrolling "down" means the scrollTop is decreasing
         const direction = scrollTop < lastScrollTop.current ? "up" : "down";
         onUserScroll?.(direction, currentIsAtBottom);
         lastScrollTop.current = scrollTop;
@@ -76,7 +73,6 @@ export const WaveDropsReverseContainer = forwardRef<
       });
     }, [onUserScroll]);
 
-    // Cleanup for any pending animation frames
     useEffect(() => {
       return () => {
         if (scrollRafId.current) {

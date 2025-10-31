@@ -9,9 +9,9 @@ import { useDropMessages } from "./useDropMessages";
 
 interface VirtualizedWaveMessages extends Omit<WaveMessages, "drops"> {
   readonly drops: Drop[];
-  readonly allDropsCount: number; // Total number of available drops in cache
-  readonly loadMoreLocally: () => void; // Function to load more from cache
-  readonly hasMoreLocal: boolean; // Whether there are more items to load locally
+  readonly allDropsCount: number;
+  readonly loadMoreLocally: () => void;
+  readonly hasMoreLocal: boolean;
   readonly fetchNextPageForDrop: () => void;
   readonly waitAndRevealDrop: (
     serialNo: number,
@@ -21,7 +21,6 @@ interface VirtualizedWaveMessages extends Omit<WaveMessages, "drops"> {
 }
 
 const getShouldRefresh = (old: Drop[], newDrops: Drop[]) => {
-  // loop throught new, find corresponding old, if found, compare reactions, if they are different, return true
   for (const newDrop of newDrops) {
     const oldDrop = old.find(
       (oldDrop) => oldDrop.serial_no === newDrop.serial_no
@@ -37,21 +36,11 @@ const getShouldRefresh = (old: Drop[], newDrops: Drop[]) => {
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-/**
- * Hook that provides virtualized pagination for wave messages
- * Instead of returning all cached messages at once, it returns them in chunks
- *
- * @param waveId - The ID of the wave to get messages for
- * @param dropId - The ID of the drop to get messages for
- * @param pageSize - Number of drops to load at a time (default: 50)
- * @returns VirtualizedWaveMessages with pagination controls
- */
 export function useVirtualizedWaveMessages(
   waveId: string,
   dropId: string | null,
   pageSize: number = 50
 ): VirtualizedWaveMessages | undefined {
-  // Get the original data from the real hooks
   const fullWaveMessages = useMyStreamWaveMessages(waveId);
 
   const fullWaveMessagesRef = useRef<WaveMessages | null>(null);
@@ -72,24 +61,19 @@ export function useVirtualizedWaveMessages(
 
   const fullWaveMessagesForDrop = useDropMessages(waveId, dropId);
 
-  // Track the number of items to show from the cache
   const [virtualLimit, setVirtualLimit] = useState<number>(pageSize);
 
-  // Track whether we have more local items to load
   const [hasMoreLocal, setHasMoreLocal] = useState<boolean>(false);
 
-  // Keep track of whether we've initialized with the first batch
   const hasInitialized = useRef<boolean>(false);
   const previousDropsCountRef = useRef<number>(0);
 
-  // Update hasMoreLocal when fullWaveMessages changes
   useEffect(() => {
     if (dropId) {
       if (fullWaveMessagesForDrop) {
         const totalDrops = fullWaveMessagesForDrop.drops.length;
         setHasMoreLocal(totalDrops > virtualLimit);
 
-        // If we haven't initialized yet and we have drops, set the flag
         if (!hasInitialized.current && totalDrops > 0) {
           hasInitialized.current = true;
         }
@@ -103,7 +87,6 @@ export function useVirtualizedWaveMessages(
       const totalDrops = fullWaveMessagesRef.current.drops.length;
       setHasMoreLocal(totalDrops > virtualLimit);
 
-      // If we haven't initialized yet and we have drops, set the flag
       if (!hasInitialized.current && totalDrops > 0) {
         hasInitialized.current = true;
       }
@@ -118,7 +101,6 @@ export function useVirtualizedWaveMessages(
     fullWaveMessagesForDrop,
   ]);
 
-  // Reset virtualLimit when the waveId changes
   useEffect(() => {
     setVirtualLimit(pageSize);
     hasInitialized.current = false;
@@ -145,14 +127,13 @@ export function useVirtualizedWaveMessages(
         }
 
         const nextLimit = Math.min(totalDrops, currentLimit + pageSize);
-        return nextLimit > currentLimit ? nextLimit : currentLimit;
+        return nextLimit;
       });
     }
 
     previousDropsCountRef.current = totalDrops;
   }, [dropId, fullWaveMessages, fullWaveMessagesForDrop, pageSize]);
 
-  // Function to load more messages from local cache
   const loadMoreLocally = useCallback(() => {
     if (dropId) {
       if (
@@ -200,13 +181,12 @@ export function useVirtualizedWaveMessages(
     ) => {
       const startTime = Date.now();
       while (Date.now() - startTime < maxWaitTimeMs) {
-        // Check if the specific drop is present in the *currently loaded full list*
         if (
           fullWaveMessagesRef?.current?.drops?.some(
             (drop) => drop.serial_no === serialNo
           )
         ) {
-          revealDrop(serialNo); // Call the hook's revealDrop to update virtualLimit
+          revealDrop(serialNo);
           return true;
         }
         await delay(pollIntervalMs);
@@ -223,12 +203,10 @@ export function useVirtualizedWaveMessages(
     return undefined;
   }
 
-  // If no full wave messages, return undefined
   if (!fullWaveMessagesRef.current) {
     return undefined;
   }
 
-  // Get the virtualized subset of drops
   const virtualizedDrops = dropId
     ? fullWaveMessagesForDrop.drops.slice(0, virtualLimit)
     : fullWaveMessagesRef.current.drops.slice(0, virtualLimit);
@@ -253,7 +231,6 @@ export function useVirtualizedWaveMessages(
     ? fullWaveMessagesForDrop.drops.length
     : fullWaveMessagesRef.current.drops.length;
 
-  // Return the virtualized data with the same shape as the original
   return {
     hasNextPage,
     id: waveId,
