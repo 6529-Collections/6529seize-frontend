@@ -92,6 +92,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                   media_mime_type={artWork.mime_type}
                   media_url={artWork.url}
                   imageScale={ImageScale.AUTOx450}
+                  isCompetitionDrop={true}
                 />
               )}
             </div>
