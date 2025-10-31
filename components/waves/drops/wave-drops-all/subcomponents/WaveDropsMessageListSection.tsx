@@ -4,13 +4,16 @@ import { WaveDropsReverseContainer } from "@/components/waves/drops/WaveDropsRev
 import { WaveDropsScrollBottomButton } from "@/components/waves/drops/WaveDropsScrollBottomButton";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
 
 type WaveMessagesResult = ReturnType<typeof useVirtualizedWaveDrops>["waveMessages"];
 
 interface WaveDropsMessageListSectionProps {
   readonly waveMessages: WaveMessagesResult;
+  readonly visibleDrops: Drop[];
+  readonly pendingCount: number;
+  readonly onRevealPending: () => void;
   readonly dropId: string | null;
   readonly scrollContainerRef: MutableRefObject<HTMLDivElement | null>;
   readonly bottomAnchorRef: MutableRefObject<HTMLDivElement | null>;
@@ -45,6 +48,9 @@ export const WaveDropsMessageListSection: React.FC<
   WaveDropsMessageListSectionProps
 > = ({
   waveMessages,
+  visibleDrops,
+  pendingCount,
+  onRevealPending,
   dropId,
   scrollContainerRef,
   bottomAnchorRef,
@@ -75,7 +81,7 @@ export const WaveDropsMessageListSection: React.FC<
         <DropsList
           scrollContainerRef={scrollContainerRef}
           onReplyClick={queueSerialTarget}
-          drops={waveMessages?.drops ?? []}
+          drops={visibleDrops}
           showWaveInfo={false}
           onReply={onReply}
           onQuote={onQuote}
@@ -94,6 +100,8 @@ export const WaveDropsMessageListSection: React.FC<
       <WaveDropsScrollBottomButton
         isAtBottom={isAtBottom}
         scrollToBottom={scrollToBottom}
+        pendingCount={pendingCount}
+        onRevealPending={onRevealPending}
       />
     </>
   );

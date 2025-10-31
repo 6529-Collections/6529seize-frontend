@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
@@ -19,6 +19,9 @@ import { useWaveDropsClipboard } from "./hooks/useWaveDropsClipboard";
 import { WaveDropsContent } from "./subcomponents/WaveDropsContent";
 
 const EMPTY_DROPS: Drop[] = [];
+
+const getDropKey = (drop: Drop) =>
+  drop.stableKey ?? drop.stableHash ?? drop.id ?? String(drop.serial_no);
 
 interface WaveDropsAllProps {
   readonly waveId: string;
@@ -59,12 +62,114 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   const { waveMessages, fetchNextPage, waitAndRevealDrop } =
     useVirtualizedWaveDrops(waveId, dropId);
 
+  const {
+    scrollContainerRef,
+    bottomAnchorRef,
+    isAtBottom,
+    shouldPinToBottom,
+    scrollToVisualBottom,
+  } = useScrollBehavior();
+
+  const [pendingDrops, setPendingDrops] = useState<Drop[]>([]);
+  const lastDropCountRef = useRef<number>(0);
+  const lastWaveIdRef = useRef<string | null>(null);
+  const pendingDropsRef = useRef<Drop[]>([]);
+
+  const updatePendingDrops = useCallback(
+    (updater: (prev: Drop[]) => Drop[])
+  ) => {
+    setPendingDrops((prev) => {
+      const next = updater(prev);
+      pendingDropsRef.current = next;
+      return next;
+    });
+  }, []);
+
+  const flushPendingDrops = useCallback(() => {
+    if (pendingDropsRef.current.length === 0) return;
+    pendingDropsRef.current = [];
+    setPendingDrops([]);
+  }, []);
+
+  useEffect(() => {
+    if (!waveMessages) {
+      lastDropCountRef.current = 0;
+      lastWaveIdRef.current = null;
+      flushPendingDrops();
+      return;
+    }
+
+    const drops = waveMessages.drops;
+    const total = drops.length;
+    const currentWaveId = waveMessages.id ?? null;
+
+    if (lastWaveIdRef.current !== currentWaveId) {
+      lastWaveIdRef.current = currentWaveId;
+      lastDropCountRef.current = 0;
+      flushPendingDrops();
+    }
+
+    const previousTotal = lastDropCountRef.current;
+
+    lastDropCountRef.current = total;
+
+    if (shouldPinToBottom) {
+      if (pendingDropsRef.current.length > 0) {
+        flushPendingDrops();
+      }
+      return;
+    }
+
+    if (total > previousTotal) {
+      if (previousTotal === 0) {
+        return;
+      }
+      const appended = drops.slice(previousTotal);
+      const stableAppended = appended.filter(
+        (drop) => !drop.id?.startsWith("temp-")
+      );
+      if (stableAppended.length > 0) {
+        updatePendingDrops((prev) => {
+          const existing = new Set(prev.map(getDropKey));
+          const merged = [...prev];
+          stableAppended.forEach((drop) => {
+            const key = getDropKey(drop);
+            if (!existing.has(key)) {
+              existing.add(key);
+              merged.push(drop);
+            }
+          });
+          return merged;
+        });
+      }
+    } else if (total < previousTotal && pendingDropsRef.current.length > 0) {
+      const validKeys = new Set(
+        drops.map((drop) => getDropKey(drop))
+      );
+      updatePendingDrops((prev) =>
+        prev.filter((drop) => validKeys.has(getDropKey(drop)))
+      );
+    }
+  }, [waveMessages, shouldPinToBottom, flushPendingDrops, updatePendingDrops]);
+
+  const pendingCount = pendingDrops.length;
+
+  const visibleDrops = useMemo(() => {
+    if (!waveMessages) return EMPTY_DROPS;
+    if (pendingCount === 0) return waveMessages.drops;
+    const limit = Math.max(waveMessages.drops.length - pendingCount, 0);
+    return waveMessages.drops.slice(0, limit);
+  }, [waveMessages, pendingCount]);
+
+  const handleRevealPending = useCallback(() => {
+    flushPendingDrops();
+    scrollToVisualBottom();
+  }, [flushPendingDrops, scrollToVisualBottom]);
+
   const typingMessage = useWaveIsTyping(
     waveId,
     connectedProfile?.handle ?? null
   );
-
-  const scrollBehavior = useScrollBehavior();
 
   useWaveDropsNotificationRead({
     waveId,
@@ -93,9 +198,9 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
     waveMessages,
     fetchNextPage,
     waitAndRevealDrop,
-    scrollContainerRef: scrollBehavior.scrollContainerRef,
-    shouldPinToBottom: scrollBehavior.shouldPinToBottom,
-    scrollToVisualBottom: scrollBehavior.scrollToVisualBottom,
+    scrollContainerRef,
+    shouldPinToBottom,
+    scrollToVisualBottom,
   });
 
   const handleTopIntersection = useCallback(async () => {
@@ -146,15 +251,28 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
     [router, waveId, queueSerialTarget]
   );
 
+  useEffect(() => {
+    if (!serialTarget || pendingCount === 0 || !waveMessages) return;
+    const hasPendingTarget = pendingDropsRef.current.some(
+      (drop) => drop.serial_no === serialTarget
+    );
+    if (hasPendingTarget) {
+      handleRevealPending();
+    }
+  }, [serialTarget, pendingCount, waveMessages, handleRevealPending]);
+
   return (
     <div
       ref={containerRef}
       className="tw-flex tw-flex-col tw-h-full tw-justify-end tw-relative tw-overflow-y-auto tw-bg-iron-950">
       <WaveDropsContent
         waveMessages={waveMessages}
+        visibleDrops={visibleDrops}
+        pendingCount={pendingCount}
+        onRevealPending={handleRevealPending}
         dropId={dropId}
-        scrollContainerRef={scrollBehavior.scrollContainerRef}
-        bottomAnchorRef={scrollBehavior.bottomAnchorRef}
+        scrollContainerRef={scrollContainerRef}
+        bottomAnchorRef={bottomAnchorRef}
         onTopIntersection={handleTopIntersection}
         onReply={onReply}
         onQuote={onQuote}
@@ -163,8 +281,8 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
         serialTarget={serialTarget}
         targetDropRef={targetDropRef}
         onQuoteClick={handleQuoteClick}
-        isAtBottom={scrollBehavior.isAtBottom}
-        scrollToBottom={scrollBehavior.scrollToVisualBottom}
+        isAtBottom={isAtBottom}
+        scrollToBottom={scrollToVisualBottom}
         typingMessage={typingMessage}
         onDropContentClick={onDropContentClick}
       />

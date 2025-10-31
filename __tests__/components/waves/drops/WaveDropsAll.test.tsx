@@ -65,7 +65,8 @@ jest.mock('@/components/waves/drops/WaveDropsScrollBottomButton', () => ({
   __esModule: true,
   WaveDropsScrollBottomButton: (props: any) => {
     scrollButtonProps = props;
-    return <button data-testid="scroll-bottom-btn" onClick={props.scrollToBottom} />;
+    const handleClick = props.onRevealPending ?? props.scrollToBottom;
+    return <button data-testid="scroll-bottom-btn" onClick={handleClick} />;
   }
 }));
 
@@ -444,6 +445,7 @@ describe('WaveDropsAll', () => {
       renderComponent();
       
       expect(scrollButtonProps.isAtBottom).toBe(false);
+      expect(scrollButtonProps.pendingCount).toBe(0);
       expect(scrollButtonProps.scrollToBottom).toBe(mockScrollToVisualBottom);
     });
 
@@ -465,6 +467,134 @@ describe('WaveDropsAll', () => {
       
       expect(mockScrollToVisualBottom).toHaveBeenCalled();
     }, 15000);
+
+    it('buffers new drops while user is reading', async () => {
+      const initialDrop = createMockDrop({ id: 'drop-1', serial_no: 1 });
+      const newDrop = createMockDrop({ id: 'drop-2', serial_no: 2 });
+
+      setupMocks({
+        waveMessages: { drops: [initialDrop] },
+        scrollBehavior: {
+          isAtBottom: false,
+          shouldPinToBottom: false,
+          scrollIntent: 'reading'
+        }
+      });
+
+      useVirtualizedWaveDropsMock.mockReturnValue({
+        waveMessages: {
+          isLoading: false,
+          isLoadingNextPage: false,
+          hasNextPage: false,
+          drops: [initialDrop, newDrop]
+        },
+        fetchNextPage: mockFetchNextPage,
+        waitAndRevealDrop: mockWaitAndRevealDrop
+      });
+
+      useVirtualizedWaveDropsMock
+        .mockReturnValueOnce({
+          waveMessages: {
+            isLoading: false,
+            isLoadingNextPage: false,
+            hasNextPage: false,
+            drops: [initialDrop]
+          },
+          fetchNextPage: mockFetchNextPage,
+          waitAndRevealDrop: mockWaitAndRevealDrop
+        })
+        .mockReturnValueOnce({
+          waveMessages: {
+            isLoading: false,
+            isLoadingNextPage: false,
+            hasNextPage: false,
+            drops: [initialDrop, newDrop]
+          },
+          fetchNextPage: mockFetchNextPage,
+          waitAndRevealDrop: mockWaitAndRevealDrop
+        });
+
+      const { rerender, props } = renderComponent();
+
+      await waitFor(() => {
+        expect(dropsProps.drops).toEqual([initialDrop]);
+      });
+
+      rerender(<WaveDropsAll {...props} />);
+
+      await waitFor(() => {
+        expect(dropsProps.drops).toEqual([initialDrop]);
+        expect(scrollButtonProps.pendingCount).toBe(1);
+      });
+    });
+
+    it('reveals pending drops when the toast is tapped', async () => {
+      const initialDrop = createMockDrop({ id: 'drop-1', serial_no: 1 });
+      const newDrop = createMockDrop({ id: 'drop-2', serial_no: 2 });
+
+      setupMocks({
+        waveMessages: { drops: [initialDrop] },
+        scrollBehavior: {
+          isAtBottom: false,
+          shouldPinToBottom: false,
+          scrollIntent: 'reading'
+        }
+      });
+
+      useVirtualizedWaveDropsMock.mockReturnValue({
+        waveMessages: {
+          isLoading: false,
+          isLoadingNextPage: false,
+          hasNextPage: false,
+          drops: [initialDrop, newDrop]
+        },
+        fetchNextPage: mockFetchNextPage,
+        waitAndRevealDrop: mockWaitAndRevealDrop
+      });
+
+      useVirtualizedWaveDropsMock
+        .mockReturnValueOnce({
+          waveMessages: {
+            isLoading: false,
+            isLoadingNextPage: false,
+            hasNextPage: false,
+            drops: [initialDrop]
+          },
+          fetchNextPage: mockFetchNextPage,
+          waitAndRevealDrop: mockWaitAndRevealDrop
+        })
+        .mockReturnValueOnce({
+          waveMessages: {
+            isLoading: false,
+            isLoadingNextPage: false,
+            hasNextPage: false,
+            drops: [initialDrop, newDrop]
+          },
+          fetchNextPage: mockFetchNextPage,
+          waitAndRevealDrop: mockWaitAndRevealDrop
+        });
+
+      const { rerender, props } = renderComponent();
+
+      await waitFor(() => {
+        expect(dropsProps.drops).toEqual([initialDrop]);
+      });
+
+      rerender(<WaveDropsAll {...props} />);
+
+      await waitFor(() => {
+        expect(scrollButtonProps.pendingCount).toBe(1);
+      });
+
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      await user.click(screen.getByTestId('scroll-bottom-btn'));
+
+      await waitFor(() => {
+        expect(mockScrollToVisualBottom).toHaveBeenCalled();
+        expect(scrollButtonProps.pendingCount).toBe(0);
+        expect(dropsProps.drops).toEqual([initialDrop, newDrop]);
+      });
+    });
 
     it('scrolls to bottom for temp drops when shouldPinToBottom is true', () => {
       const tempDrop = createMockDrop({ id: 'temp-123', serial_no: 1 });
@@ -526,6 +656,7 @@ describe('WaveDropsAll', () => {
       
       // Verify scroll button receives isAtBottom state
       expect(scrollButtonProps.isAtBottom).toBe(true);
+      expect(scrollButtonProps.pendingCount).toBe(0);
       expect(scrollButtonProps.scrollToBottom).toBe(mockScrollToVisualBottom);
     });
 
@@ -549,6 +680,7 @@ describe('WaveDropsAll', () => {
       });
       
       expect(scrollButtonProps.isAtBottom).toBe(false);
+      expect(scrollButtonProps.pendingCount).toBe(0);
     });
   });
 

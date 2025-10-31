@@ -5,7 +5,7 @@ import CircleLoader, {
 import WaveDropsEmptyPlaceholder from "@/components/waves/drops/WaveDropsEmptyPlaceholder";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
 import { WaveDropsMessageListSection } from "./WaveDropsMessageListSection";
 import { WaveDropsTypingIndicator } from "./WaveDropsTypingIndicator";
@@ -14,6 +14,9 @@ type WaveMessagesResult = ReturnType<typeof useVirtualizedWaveDrops>["waveMessag
 
 interface WaveDropsContentProps {
   readonly waveMessages: WaveMessagesResult;
+  readonly visibleDrops: Drop[];
+  readonly pendingCount: number;
+  readonly onRevealPending: () => void;
   readonly dropId: string | null;
   readonly scrollContainerRef: MutableRefObject<HTMLDivElement | null>;
   readonly bottomAnchorRef: MutableRefObject<HTMLDivElement | null>;
@@ -45,6 +48,9 @@ interface WaveDropsContentProps {
 
 export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   waveMessages,
+  visibleDrops,
+  pendingCount,
+  onRevealPending,
   dropId,
   scrollContainerRef,
   bottomAnchorRef,
@@ -85,6 +91,9 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
     <>
       <WaveDropsMessageListSection
         waveMessages={waveMessages}
+        visibleDrops={visibleDrops}
+        pendingCount={pendingCount}
+        onRevealPending={onRevealPending}
         dropId={dropId}
         scrollContainerRef={scrollContainerRef}
         bottomAnchorRef={bottomAnchorRef}
