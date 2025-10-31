@@ -5,6 +5,7 @@ import TransferPanel from "@/components/nft-transfer/TransferPanel";
 import { useTransfer } from "@/components/nft-transfer/TransferState";
 import TransferToggle from "@/components/nft-transfer/TransferToggle";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { publicEnv } from "@/config/env";
 import {
   CollectedCard,
   CollectedCollectionType,
@@ -16,6 +17,7 @@ import { MEMES_SEASON } from "@/enums";
 import { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { Page } from "@/helpers/Types";
+import { fetchAllPages } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
@@ -233,49 +235,6 @@ export default function UserPageCollected({
   const [filters, setFilters] = useState<ProfileCollectedFilters>(getFilters());
 
   const { enabled: transferEnabled } = useTransfer();
-  const previousAddressRef = useRef<string | null>(null);
-  const hadForcedRef = useRef<boolean>(false);
-
-  useEffect(() => {
-    // Only enforce if transfer is available on this profile (owns wallet & not mobile)
-    if (!showTransfer) return;
-
-    const currentParamAddress =
-      searchParams?.get(SEARCH_PARAMS_FIELDS.address) ?? null;
-    const connected = connectedAddress?.toLowerCase() ?? null;
-
-    if (transferEnabled) {
-      if (!hadForcedRef.current) {
-        previousAddressRef.current = currentParamAddress;
-      }
-      hadForcedRef.current = true;
-
-      // Force to connected wallet
-      if (currentParamAddress !== connected) {
-        updateFields([
-          { name: "address", value: connected },
-          { name: "page", value: "1" },
-        ]);
-      }
-    } else if (hadForcedRef.current) {
-      const restore = previousAddressRef.current;
-      previousAddressRef.current = null;
-      hadForcedRef.current = false;
-
-      if (restore !== currentParamAddress) {
-        updateFields([
-          { name: "address", value: restore },
-          { name: "page", value: "1" },
-        ]);
-      }
-    }
-  }, [
-    transferEnabled,
-    connectedAddress,
-    showTransfer,
-    updateFields,
-    searchParams,
-  ]);
 
   const setCollection = async (
     collection: CollectedCollectionType | null
@@ -431,11 +390,25 @@ export default function UserPageCollected({
       if (filters.szn) {
         params.szn = SZN_TO_SEARCH_PARAMS[filters.szn];
       }
+
       return await commonApiFetch<Page<CollectedCard>>({
         endpoint: `profiles/${filters.handleOrWallet}/collected`,
         params,
       });
     },
+    placeholderData: keepPreviousData,
+  });
+
+  const { isFetching: isFetchingTransfer, data: dataTransfer } = useQuery<
+    CollectedCard[]
+  >({
+    queryKey: [QueryKey.PROFILE_COLLECTED_TRANSFER, filters, connectedAddress],
+    queryFn: async () => {
+      const allPagesUrl = `${publicEnv.API_ENDPOINT}/api/profiles/${connectedAddress}/collected?&page_size=200&seized=${CollectionSeized.SEIZED}`;
+      const data = await fetchAllPages<CollectedCard>(allPagesUrl);
+      return data;
+    },
+    enabled: showTransfer && transferEnabled,
     placeholderData: keepPreviousData,
   });
 
@@ -508,7 +481,7 @@ export default function UserPageCollected({
 
   return (
     <div className="tailwind-scope">
-      {isInitialLoading ? (
+      {isInitialLoading || isFetchingTransfer ? (
         <UserPageCollectedFirstLoading />
       ) : (
         <>
@@ -527,27 +500,25 @@ export default function UserPageCollected({
             />
           </div>
 
-          {showTransfer && (
+          {showTransfer && data?.data && data.data.length > 0 && (
             <div className="tw-mt-6 tw-flex tw-justify-end">
               <TransferToggle />
             </div>
           )}
 
           <div className="tw-mt-6 tw-flex tw-gap-6">
-            <div className="tw-flex-1">
-              <UserPageCollectedCards
-                cards={data?.data ?? []}
-                totalPages={totalPages}
-                page={filters.page}
-                showDataRow={showDataRow}
-                filters={filters}
-                setPage={setPage}
-              />
-            </div>
-
-            {/* appears only when transfer is enabled */}
-            {showTransfer && transferEnabled && <TransferPanel />}
+            <UserPageCollectedCards
+              cards={data?.data ?? []}
+              totalPages={totalPages}
+              page={filters.page}
+              showDataRow={showDataRow}
+              filters={filters}
+              setPage={setPage}
+              dataTransfer={dataTransfer ?? []}
+            />
           </div>
+          {/* appears only when transfer is enabled */}
+          {showTransfer && transferEnabled && <TransferPanel />}
         </>
       )}
     </div>
