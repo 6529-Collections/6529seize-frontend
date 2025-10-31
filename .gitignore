@@ -91,3 +91,4 @@ test.html
 # generated env schema for Node runtime
 /config/env.schema.runtime.cjs
 .githooks/
+scripts/lint-to-json.js

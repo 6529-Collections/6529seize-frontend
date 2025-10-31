@@ -7,10 +7,8 @@ import {
   useCallback,
   useId,
 } from "react";
-import {
-  ChatBubbleLeftRightIcon,
-  UsersIcon,
-} from "@heroicons/react/24/outline";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faComments, faUsers } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ApiWave } from "@/generated/models/ApiWave";
@@ -20,9 +18,6 @@ import WaveItemDropped from "./WaveItemDropped";
 import WaveItemFollow from "./WaveItemFollow";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { Tooltip } from "react-tooltip";
-
-const INTERACTIVE_CHILD_SELECTOR =
-  "a, button, input, textarea, select, [data-wave-item-interactive='true']";
 
 const LEVEL_CLASSES: ReadonlyArray<{
   readonly minLevel: number;
@@ -41,13 +36,47 @@ const CARD_BASE_CLASSES =
 const CARD_INTERACTIVE_CLASSES =
   "tw-cursor-pointer desktop-hover:hover:tw-shadow-lg desktop-hover:hover:tw-shadow-black/40 desktop-hover:hover:tw-translate-y-[-1px] focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 focus-visible:tw-outline-none";
 
+const INTERACTIVE_TAGS = new Set([
+  "A",
+  "BUTTON",
+  "INPUT",
+  "SELECT",
+  "TEXTAREA",
+  "LABEL",
+]);
+
+const shouldSkipNavigation = (
+  target: HTMLElement | null,
+  root: HTMLElement
+): boolean => {
+  let current: HTMLElement | null = target;
+
+  while (current) {
+    if (current === root) {
+      break;
+    }
+
+    if (current.dataset?.waveItemInteractive === "true") {
+      return true;
+    }
+
+    if (INTERACTIVE_TAGS.has(current.tagName)) {
+      return true;
+    }
+
+    current = current.parentElement;
+  }
+
+  return false;
+};
+
 type CardContainerProps = {
   readonly isInteractive: boolean;
   readonly href?: string;
   readonly ariaLabel?: string;
+  readonly children: ReactNode;
   readonly onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
   readonly onKeyDown?: (event: KeyboardEvent<HTMLAnchorElement>) => void;
-  readonly children: ReactNode;
 };
 
 function CardContainer({
@@ -91,14 +120,6 @@ function getCardLabel(href?: string, label?: string | null) {
   return label ? `View wave ${label}` : "View wave";
 }
 
-function shouldSkipNavigation(
-  target: HTMLElement | null,
-  container: HTMLElement
-) {
-  const interactiveElement = target?.closest(INTERACTIVE_CHILD_SELECTOR);
-  return Boolean(interactiveElement && interactiveElement !== container);
-}
-
 function resolveLevelClasses(level?: number | null) {
   return (
     LEVEL_CLASSES.find(
@@ -116,10 +137,10 @@ export default function WaveItem({
   readonly userPlaceholder?: string;
   readonly titlePlaceholder?: string;
 }) {
+  const router = useRouter();
   const author = wave?.author;
   const authorHref = author?.handle ? `/${author.handle}` : undefined;
   const authorLevel = author?.level ?? 0;
-  const router = useRouter();
   const tooltipBaseId = useId();
 
   const banner1 =
@@ -144,6 +165,20 @@ export default function WaveItem({
   const cardLabel = getCardLabel(waveHref, labelValue);
   const isInteractive = Boolean(waveHref);
   const followersTooltipId = wave ? `${tooltipBaseId}-followers` : undefined;
+
+  const followersContent = (
+    <>
+      <FontAwesomeIcon
+        icon={faUsers}
+        aria-hidden="true"
+        className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-400"
+      />
+      <span className="tw-font-medium">
+        {numberWithCommas(wave?.metrics.subscribers_count ?? 0)}
+      </span>
+      <span className="tw-text-iron-400 xl:tw-hidden">Joined</span>
+    </>
+  );
 
   const authorAvatar = author?.pfp ? (
     <img
@@ -282,7 +317,6 @@ export default function WaveItem({
     },
     [router, waveHref]
   );
-
   return (
     <CardContainer
       isInteractive={isInteractive}
@@ -334,28 +368,26 @@ export default function WaveItem({
       <div className="tw-mt-2 tw-flex tw-items-center tw-justify-between tw-px-3 tw-pt-3">
         <div className="tw-flex tw-items-center tw-gap-4">
           <div className="tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-200">
-            <ChatBubbleLeftRightIcon
+            <FontAwesomeIcon
+              icon={faComments}
               aria-hidden="true"
               className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-400"
             />
             <span className="tw-font-medium">Chat</span>
           </div>
 
-          <div
-            className="tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-200"
-            {...(followersTooltipId
-              ? { "data-tooltip-id": followersTooltipId }
-              : {})}
-          >
-            <UsersIcon
-              aria-hidden="true"
-              className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-400"
-            />
-            <span className="tw-font-medium">
-              {numberWithCommas(wave?.metrics.subscribers_count ?? 0)}
+          {waveHref && followersTooltipId ? (
+            <span
+              className="tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-200 tw-no-underline tw-relative tw-z-20 tw-pointer-events-auto"
+              data-tooltip-id={followersTooltipId}
+            >
+              {followersContent}
             </span>
-            <span className="tw-text-iron-400 xl:tw-hidden">Joined</span>
-          </div>
+          ) : (
+            <div className="tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-200">
+              {followersContent}
+            </div>
+          )}
         </div>
 
         {wave && followersTooltipId && (
@@ -385,7 +417,10 @@ export default function WaveItem({
 
         <div className="tw-flex tw-items-center">
           {wave && (
-            <div data-wave-item-interactive="true">
+            <div
+              data-wave-item-interactive="true"
+              className="tw-relative tw-z-20 tw-pointer-events-auto"
+            >
               <WaveItemFollow wave={wave} />
             </div>
           )}

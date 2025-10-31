@@ -24,9 +24,9 @@ export default function UserCICTypeIconWrapper({
         clickable={true}
         place="bottom"
         opacity={1}
+        border="1px solid #333"
         style={{
           backgroundColor: "#26272B",
-          border: "1px solid #333",
           borderRadius: "8px",
           padding: "0",
           maxWidth: "360px",

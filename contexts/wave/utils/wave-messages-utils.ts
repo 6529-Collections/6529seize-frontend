@@ -1,20 +1,20 @@
 import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
-import {
-  commonApiFetch,
-  commonApiFetchWithRetry,
-} from "@/services/api/common-api";
-import { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
 import { ApiDrop } from "@/generated/models/ApiDrop";
-import {
-  DropSize,
-  getStableDropKey,
-  Drop,
-} from "@/helpers/waves/drop.helpers";
-import { WaveMessagesUpdate } from "../hooks/types";
+import { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
 import {
   ApiDropSearchStrategy,
   ApiLightDrop,
 } from "@/generated/models/ObjectSerializer";
+import {
+  Drop,
+  DropSize,
+  getStableDropKey,
+} from "@/helpers/waves/drop.helpers";
+import {
+  commonApiFetch,
+  commonApiFetchWithRetry,
+} from "@/services/api/common-api";
+import { WaveMessagesUpdate } from "../hooks/types";
 
 /**
  * Fetches wave messages (drops) for a specific wave
@@ -345,10 +345,16 @@ export async function fetchNewestWaveMessages(
   }
 
   try {
-    const data = await commonApiFetch<ApiWaveDropsFeed>({
+    const data = await commonApiFetchWithRetry<ApiWaveDropsFeed>({
       endpoint: `waves/${waveId}/drops`,
       params,
       signal,
+      retryOptions: {
+        maxRetries: 2,
+        initialDelayMs: 300,
+        backoffFactor: 1.5,
+        jitter: 0.1,
+      },
     });
 
     // Update centralized eligibility if callback provided
