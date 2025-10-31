@@ -47,6 +47,7 @@ export const useNotificationsScroll = ({
   const isPinnedToBottomRef = useRef(true);
   const isPrependingRef = useRef(false);
   const previousScrollHeightRef = useRef(0);
+  const lastMeasuredScrollHeightRef = useRef(0);
 
   const shouldEnableInfiniteScroll =
     isAuthenticated && !showLoader && !showNoItems && !showErrorState;
@@ -166,30 +167,28 @@ export const useNotificationsScroll = ({
       };
     }
 
-    if (typeof MutationObserver !== "undefined") {
-      const mutationObserver = new MutationObserver(() => {
+    const intervalId = globalThis.setInterval(() => {
+      const container = scrollContainerRef.current;
+      if (!container) {
+        return;
+      }
+
+      if (!hasInitializedScrollRef.current || !isPinnedToBottomRef.current) {
+        return;
+      }
+
+      const currentScrollHeight = container.scrollHeight;
+      if (currentScrollHeight !== lastMeasuredScrollHeightRef.current) {
+        lastMeasuredScrollHeightRef.current = currentScrollHeight;
         scheduleStickToBottom();
-      });
-
-      mutationObserver.observe(observationTarget, {
-        attributes: true,
-        childList: true,
-        subtree: true,
-        characterData: true,
-      });
-
-      return () => {
-        if (rafId !== null) {
-          cancelAnimationFrame(rafId);
-        }
-        mutationObserver.disconnect();
-      };
-    }
+      }
+    }, 250);
 
     return () => {
       if (rafId !== null) {
         cancelAnimationFrame(rafId);
       }
+      globalThis.clearInterval(intervalId);
     };
   }, [items, showErrorState, showLoader, showNoItems]);
 
