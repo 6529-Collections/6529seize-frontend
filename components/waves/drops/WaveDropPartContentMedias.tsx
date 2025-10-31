@@ -35,6 +35,7 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
               media_mime_type={media.mime_type}
               media_url={media.url}
               disableMediaInteraction={disableMediaInteraction}
+              imageScale={imageScale}
             />
           ) : (
             <DropListItemContentMedia
