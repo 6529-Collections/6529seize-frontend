@@ -49,10 +49,6 @@ function MediaDisplayImage({ src, imageScale = ImageScale.AUTOx600 }: Props) {
           className={`tw-object-contain tw-max-w-full ${
             isLoading ? "tw-opacity-0" : "tw-opacity-100"
           }`}
-          style={{
-            maxWidth: "100%",
-            maxHeight: "100%",
-          }}
           onLoad={handleImageLoad}
           onError={handleImageLoad}
         />
