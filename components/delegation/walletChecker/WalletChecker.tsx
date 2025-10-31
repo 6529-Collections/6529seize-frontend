@@ -200,6 +200,7 @@ export default function WalletCheckerComponent(
             ...(secondResponse.data as WalletConsolidation[]),
           ];
         } catch {
+          console.error(`Failed to fetch consolidations for related wallet: ${newWallet}`);
           return firstData;
         }
       }
@@ -259,9 +260,7 @@ export default function WalletCheckerComponent(
     }
   }, [consolidatedWalletsStatus, consolidatedWalletsResponse]);
 
-  const refetchConsolidatedWallets = useCallback(() => {
-    return refetchConsolidatedWalletsRaw();
-  }, [refetchConsolidatedWalletsRaw]);
+  const refetchConsolidatedWallets = refetchConsolidatedWalletsRaw;
 
   const activeDelegation = useMemo(() => {
     if (!delegationsLoaded) {

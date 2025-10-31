@@ -84,22 +84,19 @@ export default function SnapshotExcludeOtherSnapshots({
   >([]);
 
   useEffect(() => {
-    const poolStringToPoolType = (str: string): Pool => {
-      const poolType = Object.entries(POOL_TYPE_TO_STRING)
-        .find(([, value]) => value === str)
-        ?.at(0);
-      if (!poolType) {
-        setToasts({
-          type: "error",
-          messages: [`Unknown pool type: ${str}`],
-        });
-        throw new Error(`Unknown pool type: ${str}`);
-      }
-      return poolType as Pool;
-    };
     setSnapshotsToExclude(
       selectedOptions.map((o) => {
-        const snapshotType = poolStringToPoolType(o.subTitle ?? "");
+        const snapshot = snapshots.find(
+          (snapshotItem) => snapshotItem.id === o.value
+        );
+        if (!snapshot) {
+          setToasts({
+            type: "error",
+            messages: [`Unknown snapshot id: ${o.value}`],
+          });
+          throw new Error(`Unknown snapshot id: ${o.value}`);
+        }
+        const snapshotType = snapshot.poolType;
         const extraWallets: string[] =
           snapshotType === Pool.TOKEN_POOL
             ? []
@@ -136,7 +133,7 @@ export default function SnapshotExcludeOtherSnapshots({
         };
       })
     );
-  }, [selectedOptions, operations, setToasts]);
+  }, [selectedOptions, operations, setToasts, snapshots]);
 
   const distributionPlanId = distributionPlan?.id ?? null;
   const currentSnapshotExtraWallets = useMemo(() => {

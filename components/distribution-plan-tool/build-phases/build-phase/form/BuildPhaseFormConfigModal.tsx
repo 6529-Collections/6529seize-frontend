@@ -55,7 +55,7 @@ export enum RandomHoldersType {
 export interface DistributionPlanSnapshot {
   readonly id: string;
   readonly name: string;
-  readonly poolType: Pool.TOKEN_POOL | Pool.CUSTOM_TOKEN_POOL;
+  readonly poolType: Pool;
   readonly walletsCount: number | null;
 }
 
@@ -68,7 +68,7 @@ export interface PhaseGroupSnapshotConfigExcludeSnapshot {
 export interface PhaseGroupSnapshotConfig {
   groupSnapshotId: string | null;
   snapshotId: string | null;
-  snapshotType: Pool.TOKEN_POOL | Pool.CUSTOM_TOKEN_POOL | null;
+  snapshotType: Pool | null;
   snapshotSchema: string | null;
   excludeComponentWinners: string[];
   excludeSnapshots: PhaseGroupSnapshotConfigExcludeSnapshot[];
@@ -250,7 +250,7 @@ export default function BuildPhaseFormConfigModal({
     uniqueWalletsCount,
   }: {
     snapshotId: string;
-    snapshotType: Pool.TOKEN_POOL | Pool.CUSTOM_TOKEN_POOL;
+    snapshotType: Pool;
     uniqueWalletsCount: number | null;
   }) => {
     const contractSchema =
