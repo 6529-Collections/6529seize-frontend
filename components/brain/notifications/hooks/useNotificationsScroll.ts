@@ -167,9 +167,7 @@ export const useNotificationsScroll = ({
       };
     }
 
-    lastMeasuredScrollHeightRef.current = scrollElement.scrollHeight;
-
-    const intervalId = window.setInterval(() => {
+    const intervalId = globalThis.setInterval(() => {
       const container = scrollContainerRef.current;
       if (!container) {
         return;
@@ -190,7 +188,7 @@ export const useNotificationsScroll = ({
       if (rafId !== null) {
         cancelAnimationFrame(rafId);
       }
-      window.clearInterval(intervalId);
+      globalThis.clearInterval(intervalId);
     };
   }, [items, showErrorState, showLoader, showNoItems]);
 
