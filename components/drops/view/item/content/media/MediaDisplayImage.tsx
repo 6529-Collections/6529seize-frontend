@@ -45,12 +45,11 @@ function MediaDisplayImage({ src, imageScale = ImageScale.AUTOx600 }: Props) {
           fallbackSrc={src}
           alt="Media content"
           fill
-          sizes="(max-width: 768px) 100vw, 450px"
+          sizes="(max-width: 768px) 100vw, 600px"
           className={`tw-object-contain tw-max-w-full ${
             isLoading ? "tw-opacity-0" : "tw-opacity-100"
           }`}
           style={{
-            objectFit: "contain",
             maxWidth: "100%",
             maxHeight: "100%",
           }}

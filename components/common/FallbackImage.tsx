@@ -49,9 +49,9 @@ export const FallbackImage = React.forwardRef<
       }
     };
 
-    const shouldOptimize = useMemo(() => {
+    const skipOptimization = useMemo(() => {
       if (optimize === false) {
-        return false;
+        return true;
       }
 
       const targetSrc = src ?? primarySrc;
@@ -59,19 +59,19 @@ export const FallbackImage = React.forwardRef<
       const isAnimatedGif =
         /\.gif(?:$|\?)/i.test(primarySrc) || /\.gif(?:$|\?)/i.test(fallbackSrc);
       if (isAnimatedGif) {
-        return false;
+        return true;
       }
 
       if (optimize === true) {
-        return true;
+        return false;
       }
 
       try {
         const parsed = new URL(targetSrc);
         const hostname = parsed.hostname.toLowerCase();
-        return hostname.includes("cloudfront.net");
+        return !hostname.includes("cloudfront.net");
       } catch {
-        return false;
+        return true;
       }
     }, [fallbackSrc, optimize, primarySrc, src]);
 
@@ -81,7 +81,7 @@ export const FallbackImage = React.forwardRef<
         src={src}
         alt={alt}
         onError={handleError}
-        unoptimized={!shouldOptimize}
+        unoptimized={skipOptimization}
         {...imageProps}
       />
     );
