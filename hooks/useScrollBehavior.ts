@@ -17,17 +17,33 @@ const INTENT_THRESHOLD = 20;
 const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max);
 
-const getMetrics = (element: HTMLDivElement) => {
+interface ScrollMetrics {
+  scrollTop: number;
+  normalizedTop: number;
+  distanceFromBottom: number;
+  distanceFromTop: number;
+  maxScroll: number;
+  usesNegativeScroll: boolean;
+}
+
+const getMetrics = (element: HTMLDivElement): ScrollMetrics => {
   const { scrollTop, scrollHeight, clientHeight } = element;
   const maxScroll = Math.max(scrollHeight - clientHeight, 0);
-  const normalizedTop = clamp(maxScroll + scrollTop, 0, maxScroll);
+  const usesNegativeScroll = scrollTop <= 0 && maxScroll > 0;
+  const normalizedTopRaw = usesNegativeScroll
+    ? maxScroll + scrollTop
+    : scrollTop;
+  const normalizedTop = clamp(normalizedTopRaw, 0, maxScroll);
   const distanceFromBottom = maxScroll - normalizedTop;
   const distanceFromTop = normalizedTop;
 
   return {
     scrollTop,
+    normalizedTop,
     distanceFromBottom,
     distanceFromTop,
+    maxScroll,
+    usesNegativeScroll,
   };
 };
 
@@ -46,6 +62,9 @@ export const useScrollBehavior = () => {
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
   const mutationObserverRef = useRef<MutationObserver | null>(null);
   const rafRef = useRef<number | null>(null);
+  const usesNegativeScrollRef = useRef(false);
+  const lastDistanceFromBottomRef = useRef(0);
+  const lastMaxScrollRef = useRef(0);
 
   const setIntent = useCallback((nextIntent: ScrollIntent) => {
     if (intentRef.current !== nextIntent) {
@@ -55,8 +74,13 @@ export const useScrollBehavior = () => {
   }, []);
 
   const updateScrollState = useCallback((element: HTMLDivElement) => {
-    const { distanceFromBottom, distanceFromTop, scrollTop } =
-      getMetrics(element);
+    const {
+      distanceFromBottom,
+      distanceFromTop,
+      scrollTop,
+      maxScroll,
+      usesNegativeScroll,
+    } = getMetrics(element);
 
     const nearBottom = distanceFromBottom <= BOTTOM_THRESHOLD;
     const nearTop = distanceFromTop <= TOP_THRESHOLD;
@@ -64,6 +88,9 @@ export const useScrollBehavior = () => {
     setIsAtBottom(nearBottom);
     setIsAtTop(nearTop);
     isAtBottomRef.current = nearBottom;
+    usesNegativeScrollRef.current = usesNegativeScroll;
+    lastDistanceFromBottomRef.current = distanceFromBottom;
+    lastMaxScrollRef.current = maxScroll;
 
     const delta = Math.abs(scrollTop - lastScrollTopRef.current);
 
@@ -92,8 +119,10 @@ export const useScrollBehavior = () => {
     }
 
     setIntent("pinned");
+    const maxScroll = Math.max(element.scrollHeight - element.clientHeight, 0);
+    const bottomScrollTop = usesNegativeScrollRef.current ? 0 : maxScroll;
     element.scrollTo({
-      top: 0,
+      top: bottomScrollTop,
       behavior: "smooth",
     });
 
@@ -115,9 +144,10 @@ export const useScrollBehavior = () => {
     }
 
     const maxScroll = Math.max(element.scrollHeight - element.clientHeight, 0);
+    const topScrollTop = usesNegativeScrollRef.current ? -maxScroll : 0;
     setIntent("reading");
     element.scrollTo({
-      top: -maxScroll,
+      top: topScrollTop,
       behavior: "smooth",
     });
   }, [setIntent]);
@@ -129,11 +159,12 @@ export const useScrollBehavior = () => {
     }
 
     container.addEventListener("scroll", handleScroll, { passive: true });
+    updateScrollState(container);
 
     return () => {
       container.removeEventListener("scroll", handleScroll);
     };
-  }, [handleScroll]);
+  }, [handleScroll, updateScrollState]);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -180,42 +211,40 @@ export const useScrollBehavior = () => {
 
       if (previousHeight === 0) {
         prevScrollHeightRef.current = currentHeight;
-        lastScrollTopRef.current = target.scrollTop;
+        updateScrollState(target);
         return;
       }
 
       if (previousHeight === currentHeight) {
-        return;
-      }
-
-      const heightDelta = currentHeight - previousHeight;
-      if (heightDelta === 0) {
         prevScrollHeightRef.current = currentHeight;
-        lastScrollTopRef.current = target.scrollTop;
+        updateScrollState(target);
         return;
       }
 
       const shouldStickToBottom =
         intentRef.current === "pinned" && isAtBottomRef.current;
+      const maxScroll = Math.max(target.scrollHeight - target.clientHeight, 0);
 
       if (shouldStickToBottom) {
-        target.scrollTop = 0;
+        target.scrollTop = usesNegativeScrollRef.current ? 0 : maxScroll;
       } else {
-        const newMaxScroll = Math.max(target.scrollHeight - target.clientHeight, 0);
-        const desiredScrollTop = Math.max(
-          -newMaxScroll,
-          Math.min(0, lastScrollTopRef.current)
+        const previousDistance = Math.min(
+          lastDistanceFromBottomRef.current,
+          lastMaxScrollRef.current
         );
-        target.scrollTop = desiredScrollTop;
+        const nextDistance = Math.min(previousDistance, maxScroll);
+        const nextNormalizedTop = maxScroll - nextDistance;
+        target.scrollTop = usesNegativeScrollRef.current
+          ? nextNormalizedTop - maxScroll
+          : nextNormalizedTop;
       }
 
-      prevScrollHeightRef.current = target.scrollHeight;
-      lastScrollTopRef.current = target.scrollTop;
+      prevScrollHeightRef.current = currentHeight;
       updateScrollState(target);
     };
 
     prevScrollHeightRef.current = element.scrollHeight;
-    lastScrollTopRef.current = element.scrollTop;
+    updateScrollState(element);
 
     if (typeof ResizeObserver !== "undefined") {
       const resizeObserver = new ResizeObserver(handleContentResize);

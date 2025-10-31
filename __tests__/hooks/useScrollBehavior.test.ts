@@ -185,6 +185,24 @@ describe('useScrollBehavior', () => {
     expect(result.current.scrollIntent).toBe('pinned');
   });
 
+  it('scrollToVisualBottom adapts for positive scroll offsets', () => {
+    const container = createMockScrollContainer({ scrollTop: 200 });
+    const { result } = setupHook({ container });
+
+    act(() => {
+      result.current.handleScroll();
+    });
+
+    act(() => {
+      result.current.scrollToVisualBottom();
+    });
+
+    expect(mockScrollTo).toHaveBeenLastCalledWith({
+      top: container.scrollHeight - container.clientHeight,
+      behavior: 'smooth',
+    });
+  });
+
   it('scrollToVisualTop scrolls to the visual top and marks reading intent', () => {
     const container = createMockScrollContainer({ scrollHeight: 900, clientHeight: 400 });
     const { result } = setupHook({ container });
@@ -241,6 +259,22 @@ describe('useScrollBehavior', () => {
 
     expect(container.scrollTop).toBe(-200);
     expect(result.current.scrollIntent).toBe('reading');
+  });
+
+  it('preserves distance from bottom for positive scroll orientations', () => {
+    const container = createMockScrollContainer({ scrollTop: 200 });
+    const { result } = setupHook({ container });
+
+    act(() => {
+      result.current.handleScroll();
+    });
+
+    act(() => {
+      container.scrollHeight = 1100;
+      triggerResize(container);
+    });
+
+    expect(container.scrollTop).toBe(300);
   });
 
   it('sticks to bottom when content grows while pinned', () => {
