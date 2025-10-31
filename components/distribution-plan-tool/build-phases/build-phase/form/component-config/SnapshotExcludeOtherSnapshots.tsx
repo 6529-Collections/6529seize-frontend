@@ -164,6 +164,15 @@ export default function SnapshotExcludeOtherSnapshots({
     !!config.snapshotId &&
     !!config.snapshotType;
 
+  const serializedSnapshotsToExclude = useMemo(
+    () => JSON.stringify(snapshotsToExclude),
+    [snapshotsToExclude]
+  );
+  const serializedCurrentSnapshotExtraWallets = useMemo(
+    () => JSON.stringify(currentSnapshotExtraWallets),
+    [currentSnapshotExtraWallets]
+  );
+
   const {
     data: fetchedUniqueWalletsCount,
     isFetching: isUniqueWalletsCountLoading,
@@ -174,8 +183,8 @@ export default function SnapshotExcludeOtherSnapshots({
       distributionPlanId,
       config.snapshotId,
       "unique-wallets-count",
-      snapshotsToExclude,
-      currentSnapshotExtraWallets,
+      serializedSnapshotsToExclude,
+      serializedCurrentSnapshotExtraWallets,
     ],
     queryFn: async () => {
       if (!distributionPlanId || !config.snapshotId) {

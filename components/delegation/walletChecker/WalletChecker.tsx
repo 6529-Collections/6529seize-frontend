@@ -370,6 +370,12 @@ export default function WalletCheckerComponent(
         }
 
         if (!walletAddressFromEns.data || walletAddressFromEns.isError) {
+          setFetchedAddress("");
+          setDelegations([]);
+          setDelegationsLoaded(false);
+          setConsolidations([]);
+          setConsolidationsLoaded(false);
+          setConsolidatedWallets([]);
           setAddressError(true);
           setChecking(false);
         }
@@ -377,6 +383,12 @@ export default function WalletCheckerComponent(
         return;
       }
 
+      setFetchedAddress("");
+      setDelegations([]);
+      setDelegationsLoaded(false);
+      setConsolidations([]);
+      setConsolidationsLoaded(false);
+      setConsolidatedWallets([]);
       setAddressError(true);
       setChecking(false);
       return;
