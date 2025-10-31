@@ -69,25 +69,12 @@ export function useVirtualizedWaveMessages(
   const previousDropsCountRef = useRef<number>(0);
 
   useEffect(() => {
-    if (dropId) {
-      if (fullWaveMessagesForDrop) {
-        const totalDrops = fullWaveMessagesForDrop.drops.length;
-        setHasMoreLocal(totalDrops > virtualLimit);
+    const activeMessages = dropId
+      ? fullWaveMessagesForDrop
+      : fullWaveMessages ?? fullWaveMessagesRef.current;
 
-        if (!hasInitialized.current && totalDrops > 0) {
-          hasInitialized.current = true;
-        }
-      } else {
-        setHasMoreLocal(false);
-        hasInitialized.current = false;
-      }
-    }
-
-    const currentFullWaveMessages =
-      fullWaveMessages ?? fullWaveMessagesRef.current;
-
-    if (currentFullWaveMessages) {
-      const totalDrops = currentFullWaveMessages.drops.length;
+    if (activeMessages) {
+      const totalDrops = activeMessages.drops.length;
       setHasMoreLocal(totalDrops > virtualLimit);
 
       if (!hasInitialized.current && totalDrops > 0) {
@@ -138,20 +125,15 @@ export function useVirtualizedWaveMessages(
   }, [dropId, fullWaveMessages, fullWaveMessagesForDrop, pageSize]);
 
   const loadMoreLocally = useCallback(() => {
-    if (dropId) {
-      if (
-        fullWaveMessagesForDrop &&
-        fullWaveMessagesForDrop.drops.length > virtualLimit
-      ) {
-        setVirtualLimit((prevLimit) => prevLimit + pageSize);
-      }
-    } else if (
-      fullWaveMessagesRef.current &&
-      fullWaveMessagesRef.current.drops.length > virtualLimit
-    ) {
-      setVirtualLimit((prevLimit) => prevLimit + pageSize);
-    }
-  }, [virtualLimit, pageSize, fullWaveMessagesForDrop, dropId]);
+    setVirtualLimit((prevLimit) => {
+      const messages = dropId
+        ? fullWaveMessagesForDrop
+        : fullWaveMessagesRef.current;
+      const totalDrops = messages?.drops.length ?? 0;
+
+      return totalDrops > prevLimit ? prevLimit + pageSize : prevLimit;
+    });
+  }, [pageSize, fullWaveMessagesForDrop, dropId]);
 
   const revealDrop = useCallback(
     (serialNo: number) => {
