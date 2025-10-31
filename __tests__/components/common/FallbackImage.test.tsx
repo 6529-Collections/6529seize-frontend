@@ -10,8 +10,8 @@ jest.mock("next/image", () => ({
   __esModule: true,
   default: forwardRef<HTMLImageElement, MockNextImageProps>(
     // eslint-disable-next-line react/display-name
-    ({ fill: _fill, unoptimized: _unoptimized, ...props }, ref) => (
-      <img ref={ref} {...props} />
+    ({ fill: _fill, unoptimized: _unoptimized, alt, ...rest }, ref) => (
+      <img ref={ref} alt={alt ?? ""} {...rest} />
     )
   ),
 }));
