@@ -1,46 +1,53 @@
 "use client";
 
 import Footer from "@/components/footer/Footer";
+import {
+  HOME_TAB_EVENT,
+  getStoredHomeTab,
+  type HomeTab,
+} from "@/components/home/useHomeTabs";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import useDeviceInfo from "./hooks/useDeviceInfo";
 
+const HOME_TAB_QUERY_PARAM = "tab";
+
+const isHomeTab = (value: unknown): value is HomeTab =>
+  value === "feed" || value === "latest";
+
 export default function FooterWrapper() {
   const { isApp } = useDeviceInfo();
   const pathname = usePathname();
-  const [homeActiveTab, setHomeActiveTab] = useState<string>("latest");
+  const [homeActiveTab, setHomeActiveTab] = useState<HomeTab>(() =>
+    getStoredHomeTab()
+  );
   useEffect(() => {
     const win = (globalThis as typeof globalThis & { window?: Window }).window;
     if (win === undefined) {
       return;
     }
 
-    const determineInitialTab = () => {
-      try {
-        const params = new URLSearchParams(win.location?.search ?? "");
-        const tabFromQuery = params.get("tab");
-        const savedTab = win.localStorage.getItem("home.activeTab");
-        const resolvedTab = tabFromQuery ?? savedTab;
-        if (resolvedTab) {
-          setHomeActiveTab(resolvedTab);
-        }
-      } catch (error) {
-        console.warn("Failed to determine active home tab", error);
+    const params = new URLSearchParams(win.location?.search ?? "");
+    const tabFromQuery = params.get(HOME_TAB_QUERY_PARAM);
+    const nextTab = isHomeTab(tabFromQuery)
+      ? tabFromQuery
+      : getStoredHomeTab();
+    setHomeActiveTab((current) =>
+      current === nextTab ? current : nextTab
+    );
+
+    const handleTabChange = (event: Event) => {
+      const detail = (event as CustomEvent<{ tab?: HomeTab }>).detail;
+      if (!detail?.tab || !isHomeTab(detail.tab)) {
+        return;
       }
+      setHomeActiveTab(detail.tab);
     };
 
-    determineInitialTab();
-
-    const handleTabChange = (event: CustomEvent<{ tab?: string }>) => {
-      if (event.detail?.tab) {
-        setHomeActiveTab(event.detail.tab);
-      }
-    };
-
-    win.addEventListener("homeTabChange", handleTabChange as EventListener);
+    win.addEventListener(HOME_TAB_EVENT, handleTabChange as EventListener);
 
     return () => {
-      win.removeEventListener("homeTabChange", handleTabChange as EventListener);
+      win.removeEventListener(HOME_TAB_EVENT, handleTabChange as EventListener);
     };
   }, []);
 
