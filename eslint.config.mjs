@@ -1,6 +1,7 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
 import unusedImports from "eslint-plugin-unused-imports";
+import reactCompiler from "eslint-plugin-react-compiler";
 import reactHooks from "eslint-plugin-react-hooks";
 import tseslint from "typescript-eslint";
 import path from "node:path";
@@ -27,6 +28,7 @@ export default defineConfig([globalIgnores([
     plugins: {
         "unused-imports": unusedImports,
         "react-hooks": reactHooks,
+        "react-compiler": reactCompiler,
         "@typescript-eslint": tseslint.plugin,
     },
 
@@ -36,6 +38,7 @@ export default defineConfig([globalIgnores([
         "react/display-name": "off",
         "react-hooks/rules-of-hooks": "warn",
         "react-hooks/exhaustive-deps": "warn",
+        "react-compiler/react-compiler": "warn",
         "react-hooks/preserve-manual-memoization": "off",
         "react-hooks/error-boundaries": "off",
         "react-hooks/set-state-in-effect": "off",

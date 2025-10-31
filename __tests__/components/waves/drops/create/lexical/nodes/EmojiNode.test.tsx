@@ -110,6 +110,9 @@ describe("EmojiComponent", () => {
       keywords: "heart",
       skins: [{ src: "https://cdn/heart.png", native: "❤️" }],
     };
+    const findCustomEmoji = jest.fn((id: string) =>
+      id === fakeEmoji.id ? fakeEmoji : null
+    );
     mockUseEmoji.mockReturnValue({
       emojiMap: [
         {
@@ -123,6 +126,7 @@ describe("EmojiComponent", () => {
       categories: [],
       categoryIcons: {},
       findNativeEmoji: jest.fn(),
+      findCustomEmoji,
     });
 
     renderEmojiComponent("heart");
@@ -152,6 +156,7 @@ describe("EmojiComponent", () => {
       categories: [],
       categoryIcons: {},
       findNativeEmoji: jest.fn().mockReturnValue(native),
+      findCustomEmoji: jest.fn().mockReturnValue(null),
     });
 
     renderEmojiComponent("wave");
@@ -165,6 +170,7 @@ describe("EmojiComponent", () => {
       categories: [],
       categoryIcons: {},
       findNativeEmoji: jest.fn().mockReturnValue(null),
+      findCustomEmoji: jest.fn().mockReturnValue(null),
     });
 
     renderEmojiComponent("unknown");

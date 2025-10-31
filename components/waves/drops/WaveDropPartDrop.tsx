@@ -3,6 +3,7 @@ import { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropPart } from "@/generated/models/ApiDropPart";
 import WaveDropPartTitle from "./WaveDropPartTitle";
 import WaveDropPartContent from "./WaveDropPartContent";
+import { ImageScale } from "@/helpers/image.helpers";
 
 interface WaveDropPartDropProps {
   drop: ApiDrop;
@@ -18,6 +19,7 @@ interface WaveDropPartDropProps {
   onSave?: (newContent: string) => void;
   onCancel?: () => void;
   isCompetitionDrop?: boolean;
+  mediaImageScale?: ImageScale;
 }
 
 const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
@@ -34,6 +36,7 @@ const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
   onSave,
   onCancel,
   isCompetitionDrop = false,
+  mediaImageScale = ImageScale.AUTOx450,
 }) => {
   return (
     <div className="tw-flex tw-gap-x-3 tw-h-full tw-relative">
@@ -57,6 +60,7 @@ const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
             onCancel={onCancel}
             drop={drop}
             isCompetitionDrop={isCompetitionDrop}
+            mediaImageScale={mediaImageScale}
           />
         </div>
       </div>

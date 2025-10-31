@@ -179,7 +179,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
           unstyledMenu
           unstyledItems
           triggerClassName={clsx(
-            "tw-flex tw-items-center tw-gap-0.5 tw-border-0 tw-bg-transparent tw-text-sm tw-font-medium tw-transition-all tw-duration-200 tw-whitespace-nowrap focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/50 focus-visible:tw-rounded-sm",
+            "tw-flex-1 tw-py-3 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-border-b-2 tw-border-t-0 tw-border-x-0 tw-border-solid tw-bg-transparent tw-transition-all tw-duration-200",
             isActiveInOverflow
               ? "tw-text-primary-300 tw-border-b-2 tw-border-primary-400"
               : "tw-text-iron-400 hover:tw-text-iron-200",

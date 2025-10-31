@@ -1,6 +1,7 @@
 import dynamic from "next/dynamic";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import DropListItemContentMediaAudio from "./DropListItemContentMediaAudio";
+import { ImageScale } from "@/helpers/image.helpers";
 
 import DropListItemContentMediaImage from "./DropListItemContentMediaImage";
 import DropListItemContentMediaVideo from "./DropListItemContentMediaVideo";
@@ -24,12 +25,14 @@ export default function DropListItemContentMedia({
   media_mime_type,
   media_url,
   onContainerClick,
-  isCompetitionDrop = false
+  isCompetitionDrop = false,
+  imageScale = ImageScale.AUTOx450,
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;
   readonly onContainerClick?: () => void;
   readonly isCompetitionDrop?: boolean;
+  readonly imageScale?: ImageScale;
 }) {
   const getMediaType = (): MediaType => {
     if (media_mime_type.includes("image")) {
@@ -60,6 +63,7 @@ export default function DropListItemContentMedia({
           src={media_url}
           onContainerClick={onContainerClick}
           isCompetitionDrop={isCompetitionDrop}
+          imageScale={imageScale}
         />
       );
     case MediaType.VIDEO:

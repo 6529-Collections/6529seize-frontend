@@ -2,14 +2,15 @@
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import {
-  faAnglesDown,
-  faAnglesUp,
+  faChevronDown,
+  faChevronUp,
   faMinusCircle,
   faPlusCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import TransferModal from "./TransferModal";
 import { useTransfer } from "./TransferState";
 
@@ -18,9 +19,7 @@ export default function TransferPanel() {
   const { isConnected } = useSeizeConnectContext();
 
   const [showModal, setShowModal] = useState(false);
-  const listRef = useRef<HTMLUListElement | null>(null);
-  const [listHasOverflow, setListHasOverflow] = useState(false);
-  const [listAtEnd, setListAtEnd] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     if (!isConnected && t.enabled) {
@@ -29,198 +28,211 @@ export default function TransferPanel() {
     }
   }, [isConnected, t]);
 
+  useEffect(() => {
+    if (isExpanded) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isExpanded]);
+
   const items = Array.from(t.selected.values());
 
-  // Scroll to top when items increase (new selection added)
-  const prevItemsLenRef = useRef(items.length);
   useEffect(() => {
-    if (items.length > prevItemsLenRef.current && listRef.current) {
-      // Scroll the selection list to the top when a new item is added
-      listRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    if (isExpanded && items.length === 0) {
+      setIsExpanded(false);
     }
-    prevItemsLenRef.current = items.length;
-  }, [items.length]);
-
-  useEffect(() => {
-    const el = listRef.current;
-    if (!el) {
-      setListHasOverflow(false);
-      setListAtEnd(false);
-      return;
-    }
-
-    const hasOverflow = (node: HTMLElement | null) =>
-      !!node && node.scrollHeight > node.clientHeight;
-
-    const nearBottom = (node: HTMLElement | null) => {
-      if (!node) return false;
-      const threshold = 4; // px tolerance
-      return (
-        node.scrollTop + node.clientHeight >= node.scrollHeight - threshold
-      );
-    };
-
-    const check = () => {
-      setListHasOverflow(hasOverflow(el));
-      setListAtEnd(nearBottom(el));
-    };
-
-    // Initial check
-    check();
-
-    // Re-check on resize
-    window.addEventListener("resize", check);
-
-    // Listen for scroll on the list to flip the arrow
-    const onScroll = () => setListAtEnd(nearBottom(el));
-    el.addEventListener("scroll", onScroll);
-
-    return () => {
-      window.removeEventListener("resize", check);
-      el.removeEventListener("scroll", onScroll);
-    };
-  }, [items.length]);
+  }, [items.length, isExpanded]);
 
   if (!t.enabled) return null;
 
   return (
     <>
-      <aside className="tw-sticky tw-top-2 tw-ring-[3px] tw-ring-white/30 tw-w-80 tw-shrink-0 tw-rounded-2xl tw-border tw-border-white/10 tw-bg-black/70 tw-backdrop-blur tw-p-4 tw-flex tw-flex-col tw-max-h-[calc(100vh-1rem)] tw-overflow-hidden tw-self-start">
-        <div className="tw-text-xs tw-leading-tight tw-opacity-70">
-          * You can only transfer NFTs from the address you are currently
-          connected to.
-        </div>
-        <div className="tw-flex tw-items-center tw-justify-between tw-my-2">
-          <span className="tw-text-sm tw-font-medium">
-            Selected <b>{t.count}</b> {t.count === 1 ? "NFT" : "NFTs"} ·{" "}
-            <b>{t.totalQty}</b> {t.totalQty === 1 ? "item" : "items"}
-          </span>
-          {t.count > 0 && (
-            <button
-              type="button"
-              onClick={t.clear}
-              className="tw-text-sm tw-rounded-lg tw-bg-white tw-text-black tw-py-1 tw-border-2 tw-border-solid tw-border-[#444]">
-              Clear
-            </button>
-          )}
-        </div>
-
-        {items.length === 0 ? (
-          <p className="tw-text-xs tw-opacity-70">Choose cards to transfer.</p>
-        ) : (
-          <ul
-            ref={listRef}
-            className={`tw-overflow-auto tw-space-y-2 tw-px-0 tw-mb-1 tw-pr-3 tw-[scrollbar-gutter:stable] tw-scrollbar-thin tw-scrollbar-thumb-white/30 tw-scrollbar-track-transparent hover:tw-scrollbar-thumb-white/50 ${
-              listHasOverflow ? "tw-flex-1 tw-min-h-0" : ""
-            }`}>
-            {items.map((it) => {
-              const max = Math.max(1, it.max ?? 1);
-              const qty = Math.min(Math.max(1, it.qty ?? 1), max);
-
-              const [collection, tokenId] = it.key.split(":");
-              const label = `${collection} #${tokenId}`;
-
-              return (
-                <li
-                  key={it.key}
-                  className="tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/10 tw-p-2">
-                  {it.thumbUrl ? (
-                    <div className="tw-relative tw-h-10 tw-w-10 tw-rounded-md tw-overflow-hidden tw-bg-white/10">
-                      <Image
-                        alt={it.title ?? it.key}
-                        src={it.thumbUrl}
-                        fill
-                        sizes="40px"
-                        className="tw-object-contain"
-                        quality={90}
-                      />
-                    </div>
-                  ) : (
-                    <div className="tw-h-10 tw-w-10 tw-rounded-lg tw-bg-white/10" />
-                  )}
-
-                  <div className="tw-min-w-0 tw-flex-1">
-                    <div className="tw-truncate tw-text-xs">
-                      {it.title ?? label}
-                    </div>
-                    <div className="tw-truncate tw-text-[10px] tw-opacity-75">
-                      {label}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="tw-fixed tw-inset-0 tw-bg-black/50 tw-backdrop-blur-sm tw-z-40"
+            onClick={() => setIsExpanded(false)}
+            aria-hidden="true"
+          />
+        )}
+      </AnimatePresence>
+      <div
+        className={[
+          "tw-sticky tw-bottom-0 tw-z-50 tw-mt-5",
+          "-tw-mx-2 lg:-tw-mx-6 xl:-tw-mx-8",
+          "tw-w-[calc(100%+theme(space.4))] lg:tw-w-[calc(100%+theme(space.12))] xl:tw-w-[calc(100%+theme(space.16))]",
+          "tw-animate-slideUp",
+        ]
+          .filter(Boolean)
+          .join(" ")}>
+        <div
+          className="tw-border-solid tw-border-[#37373ee6] tw-border-l-0 tw-bg-black tw-text-iron-50 tw-select-none tw-flex tw-flex-col"
+          onClick={(e) => e.stopPropagation()}>
+          <div className="tw-px-4 tw-py-4 tw-flex tw-items-center tw-gap-3 tw-pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+            {items.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="tw-inline-flex tw-items-center tw-justify-center tw-h-9 tw-w-9 tw-rounded-full tw-bg-white hover:tw-bg-white/90 tw-text-black tw-transition-colors tw-shrink-0 tw-border-[#444]"
+                aria-label={isExpanded ? "Collapse panel" : "Expand panel"}>
+                <FontAwesomeIcon
+                  icon={isExpanded ? faChevronDown : faChevronUp}
+                  className="tw-size-4"
+                />
+              </button>
+            )}
+            {items.length > 0 && (
+              <div className="tw-flex tw-items-center tw-overflow-hidden">
+                {items.map((it, index) => (
+                  <div
+                    key={it.key}
+                    className="tw-relative tw-flex-shrink-0"
+                    style={{
+                      marginLeft: index > 0 ? "-12px" : "0",
+                      zIndex: items.length - index,
+                    }}>
+                    <div className="tw-relative tw-h-10 tw-w-10 tw-rounded-lg tw-overflow-hidden tw-border-2 tw-border-solid tw-border-[#444] tw-bg-white/10">
+                      {it.thumbUrl ? (
+                        <Image
+                          alt={it.title ?? it.key}
+                          src={it.thumbUrl}
+                          fill
+                          sizes="40px"
+                          className="tw-object-cover"
+                          quality={90}
+                        />
+                      ) : (
+                        <div className="tw-h-full tw-w-full tw-bg-white/10" />
+                      )}
                     </div>
                   </div>
-                  {max > 1 && (
-                    <div className="tw-flex tw-items-center tw-gap-1">
-                      <button
-                        type="button"
-                        onClick={() => t.decQty(it.key)}
-                        disabled={qty <= 1}
-                        aria-label="Decrease quantity"
-                        className="tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none tw-flex tw-items-center tw-justify-center"
-                        data-testid="transfer-panel-minus">
-                        <FontAwesomeIcon
-                          icon={faMinusCircle}
-                          className="tw-size-6 tw-cursor-pointer"
-                          color={qty <= 1 ? "#60606C" : "#fff"}
-                        />
-                      </button>
-                      <div className="tw-min-w-[2ch] tw-text-center tw-text-xs tw-tabular-nums tw-select-none">
-                        {qty}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => t.incQty(it.key)}
-                        disabled={qty >= max}
-                        aria-label="Increase quantity"
-                        className="tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none tw-flex tw-items-center tw-justify-center"
-                        data-testid="transfer-panel-plus">
-                        <FontAwesomeIcon
-                          icon={faPlusCircle}
-                          className="tw-size-6 tw-cursor-pointer"
-                          color={qty >= max ? "#60606C" : "#fff"}
-                        />
-                      </button>
-                    </div>
-                  )}
-
-                  <button
-                    type="button"
-                    className="tw-inline-flex tw-items-center tw-justify-center tw-h-6 tw-w-6 tw-rounded-full tw-bg-[#ef4444] tw-font-medium tw-text-white hover:tw-bg-[#d92b2b] tw-text-lg tw-p-0 tw-border-0"
-                    onClick={() => t.unselect(it.key)}
-                    aria-label="Remove">
-                    &times;
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-
-        {listHasOverflow && (
-          <div className="tw-text-xs tw-opacity-75 tw-text-center">
-            <FontAwesomeIcon icon={listAtEnd ? faAnglesUp : faAnglesDown} />{" "}
-            Scroll for more
+                ))}
+              </div>
+            )}
+            <div className="tw-flex-1 tw-text-sm tw-font-medium tw-text-center">
+              {items.length === 0 && <>Select some NFTs to transfer</>}
+            </div>
+            {items.length > 0 && (
+              <div className="tw-text-sm tw-font-medium tw-text-white tw-bg-primary-400 tw-px-4 tw-py-1.5 tw-rounded-full">
+                {t.totalQty} {t.totalQty === 1 ? "item" : "items"}
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                t.setEnabled(false);
+                t.clear();
+              }}
+              className="tw-rounded-lg tw-bg-white/10 hover:tw-bg-white/20 tw-text-white tw-py-2 tw-px-4 tw-text-sm tw-font-medium tw-border-2 tw-border-solid tw-border-[#444] tw-transition-colors tw-shrink-0 tw-min-w-[100px]">
+              Cancel
+            </button>
+            {items.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowModal(true)}
+                className="tw-rounded-lg tw-bg-white tw-text-black tw-px-4 tw-py-2 tw-text-sm tw-font-medium hover:tw-bg-white/90 tw-transition-colors tw-shrink-0 tw-min-w-[100px]">
+                Continue
+              </button>
+            )}
           </div>
-        )}
-        <div className="tw-mt-3 tw-flex tw-gap-3">
-          <button
-            type="button"
-            onClick={() => {
-              t.setEnabled(false);
-              t.clear();
-            }}
-            className="tw-flex-1 tw-rounded-lg tw-bg-white/10 hover:tw-bg-white/20 tw-text-white tw-py-1 tw-border-2 tw-border-solid tw-border-[#444]">
-            Cancel
-          </button>
-          <button
-            type="button"
-            disabled={t.totalQty === 0}
-            onClick={() => setShowModal(true)}
-            className="tw-flex-1 tw-rounded-lg tw-bg-white tw-text-black tw-py-1 disabled:tw-opacity-75 disabled:tw-cursor-not-allowed tw-border-2 tw-border-solid tw-border-[#444]">
-            Continue
-          </button>
-        </div>
-      </aside>
+          <AnimatePresence>
+            {isExpanded && items.length > 0 && (
+              <motion.div
+                initial={{ height: 0 }}
+                animate={{ height: "auto" }}
+                exit={{ height: 0 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="tw-overflow-hidden">
+                <div className="tw-max-h-[40vh] tw-overflow-auto tw-px-4 tw-pb-4">
+                  <ul className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-2 tw-p-0">
+                    {items.map((it) => {
+                      const max = Math.max(1, it.max ?? 1);
+                      const qty = Math.min(Math.max(1, it.qty ?? 1), max);
+                      const [collection, tokenId] = it.key.split(":");
+                      const label = `${collection} #${tokenId}`;
 
-      {/* Modal */}
+                      return (
+                        <li
+                          key={it.key}
+                          className="tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/10 tw-p-2">
+                          {it.thumbUrl ? (
+                            <div className="tw-relative tw-h-10 tw-w-10 tw-rounded-md tw-overflow-hidden tw-bg-white/10 tw-shrink-0">
+                              <Image
+                                alt={it.title ?? it.key}
+                                src={it.thumbUrl}
+                                fill
+                                sizes="40px"
+                                className="tw-object-contain"
+                                quality={90}
+                              />
+                            </div>
+                          ) : (
+                            <div className="tw-h-10 tw-w-10 tw-rounded-md tw-bg-white/10 tw-shrink-0" />
+                          )}
+                          <div className="tw-min-w-0 tw-flex-1">
+                            <div className="tw-truncate tw-text-xs">
+                              {it.title ?? label}
+                            </div>
+                            <div className="tw-truncate tw-text-[10px] tw-opacity-75">
+                              {label}
+                            </div>
+                          </div>
+                          {max > 1 && (
+                            <div className="tw-flex tw-items-center tw-gap-1 tw-shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => t.decQty(it.key)}
+                                disabled={qty <= 1}
+                                aria-label="Decrease quantity"
+                                className="tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none tw-flex tw-items-center tw-justify-center">
+                                <FontAwesomeIcon
+                                  icon={faMinusCircle}
+                                  className="tw-size-6 tw-cursor-pointer"
+                                  color={qty <= 1 ? "#60606C" : "#fff"}
+                                />
+                              </button>
+                              <div className="tw-min-w-[2ch] tw-text-center tw-text-xs tw-tabular-nums tw-select-none">
+                                {qty}
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => t.incQty(it.key)}
+                                disabled={qty >= max}
+                                aria-label="Increase quantity"
+                                className="tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none tw-flex tw-items-center tw-justify-center">
+                                <FontAwesomeIcon
+                                  icon={faPlusCircle}
+                                  className="tw-size-6 tw-cursor-pointer"
+                                  color={qty >= max ? "#60606C" : "#fff"}
+                                />
+                              </button>
+                            </div>
+                          )}
+                          <button
+                            type="button"
+                            className="tw-inline-flex tw-items-center tw-justify-center tw-h-6 tw-w-6 tw-rounded-full tw-bg-[#ef4444] tw-font-medium tw-text-white hover:tw-bg-[#d92b2b] tw-text-lg tw-p-0 tw-border-0 tw-shrink-0"
+                            onClick={() => t.unselect(it.key)}
+                            aria-label="Remove">
+                            &times;
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
       <TransferModal
         open={showModal}
         onClose={(opts) => {

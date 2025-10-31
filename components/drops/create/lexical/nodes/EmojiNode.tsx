@@ -70,11 +70,9 @@ export class EmojiNode extends DecoratorNode<JSX.Element> {
 }
 
 const EmojiComponent = ({ emojiId }: { emojiId: string }) => {
-  const { emojiMap, findNativeEmoji } = useEmoji();
+  const { findCustomEmoji, findNativeEmoji } = useEmoji();
 
-  const emoji = emojiMap
-    .flatMap((cat) => cat.emojis)
-    .find((e) => e.id === emojiId);
+  const emoji = findCustomEmoji(emojiId);
 
   if (!emoji) {
     const nativeEmoji = findNativeEmoji(emojiId);

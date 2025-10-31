@@ -22,6 +22,9 @@ jest.mock('@/components/app-wallets/AppWalletsContext');
       const onClose = jest.fn();
       (useAppWallets as jest.Mock).mockReturnValue({ appWalletsSupported: true });
       render(<AppSidebar open={true} onClose={onClose} />);
+      expect(menuProps.menu).toEqual(expect.arrayContaining([
+        expect.objectContaining({ label: 'Discover', path: '/discover' }),
+      ]));
       expect(menuProps.menu.find((m: any) => m.label === 'Tools').children[0]).toEqual({ label: 'App Wallets', path: '/tools/app-wallets' });
       headerProps.onClose();
       expect(onClose).toHaveBeenCalled();

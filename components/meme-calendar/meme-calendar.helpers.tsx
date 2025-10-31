@@ -173,7 +173,7 @@ export function mintStartInstantUtcForMintDay(utcDay: Date): Date {
   );
 }
 
-function mintEndInstantUtcForMintDay(utcDay: Date): Date {
+export function mintEndInstantUtcForMintDay(utcDay: Date): Date {
   const nextDay = new Date(
     Date.UTC(
       utcDay.getUTCFullYear(),

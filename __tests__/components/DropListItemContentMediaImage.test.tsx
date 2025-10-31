@@ -4,7 +4,7 @@ import DropListItemContentMediaImage from '@/components/drops/view/item/content/
 
 jest.mock('@/helpers/image.helpers', () => ({
   getScaledImageUri: (_src: string) => _src,
-  ImageScale: { AUTOx450: 'AUTOx450' },
+  ImageScale: { AUTOx450: 'AUTOx450', AUTOx1080: 'AUTOx1080' },
 }));
 
 jest.mock('@/helpers/Helpers', () => ({

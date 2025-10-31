@@ -25,6 +25,31 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiDelete: jest.fn(),
 }));
 
+const mockUseEmoji = useEmoji as jest.Mock;
+
+type NativeEmojiMock = { skins: Array<{ native: string }> };
+
+const createEmojiContextValue = (
+  emojiMap: Array<{ category: string; emojis: Array<{ id: string; skins: Array<{ src: string }> }> }> = [],
+  findNativeEmoji: (id: string) => NativeEmojiMock | null = () => null
+) => ({
+  emojiMap,
+  loading: false,
+  categories: [],
+  categoryIcons: {},
+  findNativeEmoji,
+  findCustomEmoji: (id: string) => {
+    const normalized = id.replaceAll(":", "");
+    for (const category of emojiMap) {
+      const found = category.emojis.find((emoji) => emoji.id === normalized);
+      if (found) {
+        return found;
+      }
+    }
+    return null;
+  },
+});
+
 describe("WaveDropReactions", () => {
   const getMyStreamMock = () =>
     (require("@/contexts/wave/MyStreamContext") as {
@@ -40,20 +65,22 @@ describe("WaveDropReactions", () => {
   });
 
   it("renders multiple WaveDropReaction buttons", () => {
-    (useEmoji as jest.Mock).mockReturnValue({
-      emojiMap: [
-        {
-          category: "people",
-          emojis: [{ id: "gm", skins: [{ src: "gm.png" }] }],
-        },
-        {
-          category: "people",
-          emojis: [{ id: "gm1", skins: [{ src: "gm1.png" }] }],
-        },
-      ],
-      findNativeEmoji: (id: string) =>
-        id === "nonexistent" ? { skins: [{ native: "😊" }] } : null,
-    });
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "gm.png" }] }],
+          },
+          {
+            category: "people",
+            emojis: [{ id: "gm1", skins: [{ src: "gm1.png" }] }],
+          },
+        ],
+        (id: string) =>
+          id === "nonexistent" ? { skins: [{ native: "😊" }] } : null
+      )
+    );
 
     render(
       <WaveDropReactions
@@ -75,15 +102,17 @@ describe("WaveDropReactions", () => {
   });
 
   it("renders with emoji image when emoji found", () => {
-    (useEmoji as jest.Mock).mockReturnValue({
-      emojiMap: [
-        {
-          category: "people",
-          emojis: [{ id: "gm", skins: [{ src: "gm.png" }] }],
-        },
-      ],
-      findNativeEmoji: () => null,
-    });
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "gm.png" }] }],
+          },
+        ],
+        () => null
+      )
+    );
 
     render(
       <WaveDropReactions
@@ -104,11 +133,13 @@ describe("WaveDropReactions", () => {
   });
 
   it("renders with native emoji when not found in emojiMap", () => {
-    (useEmoji as jest.Mock).mockReturnValue({
-      emojiMap: [],
-      findNativeEmoji: (id: string) =>
-        id === "grinning" ? { skins: [{ native: "😊" }] } : null,
-    });
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [],
+        (id: string) =>
+          id === "grinning" ? { skins: [{ native: "😊" }] } : null
+      )
+    );
 
     render(
       <WaveDropReactions
@@ -130,10 +161,7 @@ describe("WaveDropReactions", () => {
   });
 
   it("returns null if no emoji found", () => {
-    (useEmoji as jest.Mock).mockReturnValue({
-      emojiMap: [],
-      findNativeEmoji: () => null,
-    });
+    mockUseEmoji.mockReturnValue(createEmojiContextValue());
 
     render(<WaveDropReactions drop={{ id: "test-drop" } as any} />);
     // Since no emoji is found, these buttons will render nothing
@@ -141,15 +169,17 @@ describe("WaveDropReactions", () => {
   });
 
   it("toggles count and selected state on button click", async () => {
-    (useEmoji as jest.Mock).mockReturnValue({
-      emojiMap: [
-        {
-          category: "people",
-          emojis: [{ id: "gm", skins: [{ src: "gm.png" }] }],
-        },
-      ],
-      findNativeEmoji: () => null,
-    });
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "gm.png" }] }],
+          },
+        ],
+        () => null
+      )
+    );
 
     (commonApi.commonApiPost as jest.Mock).mockResolvedValue({
       id: "test-drop",

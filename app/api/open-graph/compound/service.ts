@@ -798,7 +798,7 @@ async function fetchV3Account(address: Address): Promise<{
   return {
     v3Positions: v3Positions
       .filter((position) => position.hasPosition)
-      .map(({ hasPosition, ...rest }) => rest),
+      .map(({ hasPosition: _ignored, ...rest }) => rest),
   };
 }
 

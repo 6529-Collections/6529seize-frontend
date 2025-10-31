@@ -3,6 +3,7 @@
 import React, { forwardRef, useRef, useEffect, useCallback } from "react";
 import { useIntersectionObserver } from "@/hooks/scroll/useIntersectionObserver";
 
+const TOP_SENTINEL_ROOT_MARGIN = "200px 0px 0px 0px";
 
 interface WaveDropsReverseContainerProps {
   readonly children: React.ReactNode;
@@ -48,7 +49,7 @@ export const WaveDropsReverseContainer = forwardRef<
       topSentinelRef,
       {
         root: scrollContainerRef.current,
-        rootMargin: "1px 0px 0px 0px",
+        rootMargin: TOP_SENTINEL_ROOT_MARGIN,
         threshold: 0,
       },
       handleIntersection,
@@ -63,11 +64,8 @@ export const WaveDropsReverseContainer = forwardRef<
         const container = scrollContainerRef.current;
         if (!container) return;
         const { scrollTop } = container;
-        // In a flex-col-reverse container, we're at the visual bottom when scrollTop is near 0
         const currentIsAtBottom = scrollTop > -5;
         isAtBottom.current = currentIsAtBottom;
-        // In a flex-col-reverse container, scrolling "up" means the scrollTop is increasing
-        // and scrolling "down" means the scrollTop is decreasing
         const direction = scrollTop < lastScrollTop.current ? "up" : "down";
         onUserScroll?.(direction, currentIsAtBottom);
         lastScrollTop.current = scrollTop;
@@ -75,7 +73,6 @@ export const WaveDropsReverseContainer = forwardRef<
       });
     }, [onUserScroll]);
 
-    // Cleanup for any pending animation frames
     useEffect(() => {
       return () => {
         if (scrollRafId.current) {

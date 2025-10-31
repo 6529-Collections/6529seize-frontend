@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  getScaledImageUri,
-  ImageScale,
-} from "@/helpers/image.helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getTimeAgoShort, numberWithCommas } from "@/helpers/Helpers";
 import Link from "next/link";
 import Drop, {
@@ -49,7 +46,7 @@ export default function NotificationDropReacted({
   onDropContentClick,
 }: Props) {
   const router = useRouter();
-  const { emojiMap, findNativeEmoji } = useEmoji();
+  const { findCustomEmoji, findNativeEmoji } = useEmoji();
   const { isApp } = useDeviceInfo();
 
   // Determine if this notification is a "vote" or a "reaction"
@@ -100,9 +97,7 @@ export default function NotificationDropReacted({
     ).additional_context.reaction.replaceAll(":", "");
     let emojiNode: React.ReactNode = null;
 
-    const custom = emojiMap
-      .flatMap((cat) => cat.emojis)
-      .find((e) => e.id === rawId);
+    const custom = findCustomEmoji(rawId);
     if (custom) {
       emojiNode = (
         <img

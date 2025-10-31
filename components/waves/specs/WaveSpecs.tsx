@@ -15,9 +15,8 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
     : "";
 
   return (
-    <div>
       <div
-        className={`tw-h-full tw-bg-iron-950 tw-relative tw-overflow-auto ${ringClasses}`}
+        className={`tw-bg-iron-950 tw-relative tw-overflow-auto ${ringClasses}`}
       >
         <div className="tw-pb-4">
           <div className="tw-px-4 tw-pt-3 tw-flex tw-justify-between tw-items-center">
@@ -50,6 +49,5 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
           </div>
         </div>
       </div>
-    </div>
   );
 }

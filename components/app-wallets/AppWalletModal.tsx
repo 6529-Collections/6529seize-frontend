@@ -39,6 +39,7 @@ export function CreateAppWalletModal(
     onHide: (isSuccess?: boolean) => void;
   }>
 ) {
+  const { show, import: importData, onHide } = props;
   const { createAppWallet, importAppWallet } = useAppWallets();
   const { setToast } = useAuth();
   const [walletName, setWalletName] = useState("");
@@ -50,12 +51,15 @@ export function CreateAppWalletModal(
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleHide = (isSuccess?: boolean) => {
-    setWalletName("");
-    setWalletPass("");
-    setError("");
-    props.onHide(isSuccess);
-  };
+  const handleHide = useCallback(
+    (isSuccess?: boolean) => {
+      setWalletName("");
+      setWalletPass("");
+      setError("");
+      onHide(isSuccess);
+    },
+    [onHide]
+  );
 
   const handleCreate = useCallback(async () => {
     if (walletPass.length < SEED_MIN_PASS_LENGTH) {
@@ -85,10 +89,10 @@ export function CreateAppWalletModal(
       handleHide(true);
     }
     setIsAdding(false);
-  }, [walletName, walletPass, isAdding]);
+  }, [createAppWallet, handleHide, setToast, walletName, walletPass]);
 
   const handleImport = useCallback(async () => {
-    if (!props.import) return;
+    if (!importData) return;
 
     if (walletPass.length < SEED_MIN_PASS_LENGTH) {
       showAppWalletError(
@@ -106,9 +110,9 @@ export function CreateAppWalletModal(
     const success = await importAppWallet(
       walletName,
       walletPass,
-      props.import.address,
-      props.import.mnemonic,
-      props.import.privateKey
+      importData.address,
+      importData.mnemonic,
+      importData.privateKey
     );
     if (!success) {
       setToast({
@@ -120,18 +124,18 @@ export function CreateAppWalletModal(
       handleHide(true);
     }
     setIsAdding(false);
-  }, [walletName, walletPass, isAdding]);
+  }, [handleHide, importAppWallet, importData, setToast, walletName, walletPass]);
 
   return (
     <Modal
-      show={props.show}
+      show={show}
       onHide={() => handleHide()}
       backdrop
       keyboard={false}
       centered>
       <Modal.Header className={styles.modalHeader}>
         <Modal.Title>
-          {props.import ? `Import` : `Create New`} Wallet
+          {importData ? `Import` : `Create New`} Wallet
         </Modal.Title>
       </Modal.Header>
       <Modal.Body className={styles.modalContent}>
@@ -199,7 +203,7 @@ export function CreateAppWalletModal(
         <Button variant="secondary" onClick={() => handleHide()}>
           Cancel
         </Button>
-        {props.import ? (
+        {importData ? (
           <Button
             variant="primary"
             disabled={!walletName || !walletPass || isAdding}
@@ -233,16 +237,17 @@ export function UnlockAppWalletModal(
   const [unlocking, setUnlocking] = useState(false);
   const [error, setError] = useState("");
 
+  const { show, address, address_hashed, onUnlock, onHide } = props;
   const inputRef = useRef<HTMLInputElement>(null);
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleHide = () => {
+  const handleHide = useCallback(() => {
     setWalletPass("");
     setError("");
     setUnlocking(false);
-    props.onHide();
-  };
+    onHide();
+  }, [onHide]);
 
   const handleKeyPress = (e: any) => {
     if (e.key === "Enter" && walletPass) {
@@ -250,12 +255,12 @@ export function UnlockAppWalletModal(
     }
   };
 
-  const showUnlockError = () => {
+  const showUnlockError = useCallback(() => {
     setUnlocking(false);
     showAppWalletError(timeoutRef, setError, "Failed to unlock wallet");
     inputRef.current?.focus();
     inputRef.current?.select();
-  };
+  }, []);
 
   const handleUnlock = useCallback(async () => {
     setError("");
@@ -264,12 +269,12 @@ export function UnlockAppWalletModal(
     const doUnlock = async () => {
       try {
         const decryptedAddress = await decryptData(
-          props.address,
-          props.address_hashed,
+          address,
+          address_hashed,
           walletPass
         );
-        if (areEqualAddresses(props.address, decryptedAddress)) {
-          props.onUnlock(walletPass);
+        if (areEqualAddresses(address, decryptedAddress)) {
+          onUnlock(walletPass);
           handleHide();
         } else {
           showUnlockError();
@@ -281,11 +286,11 @@ export function UnlockAppWalletModal(
     };
 
     setTimeout(doUnlock, 0);
-  }, [walletPass, unlocking]);
+  }, [address, address_hashed, handleHide, onUnlock, showUnlockError, walletPass]);
 
   return (
     <Modal
-      show={props.show}
+      show={show}
       onHide={() => handleHide()}
       backdrop
       keyboard={false}

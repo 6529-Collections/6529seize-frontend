@@ -1,12 +1,13 @@
 import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import AboutPrimaryAddress from '@/components/about/AboutPrimaryAddress';
 
 jest.mock('csv-parser', () => {
   return () => {
-    const handlers: Record<string, Function[]> = {};
+    const handlers: Record<string, Array<(...args: any[]) => void>> = {};
     const parser = {
-      on(event: string, cb: Function) {
+      on(event: string, cb: (...args: any[]) => void) {
         handlers[event] = handlers[event] || [];
         handlers[event].push(cb);
         return parser;
@@ -25,7 +26,8 @@ jest.mock('csv-parser', () => {
       },
       end() {
         handlers['end']?.forEach(fn => fn());
-      }
+        return parser;
+      },
     };
     return parser;
   };
@@ -33,25 +35,35 @@ jest.mock('csv-parser', () => {
 
 describe('AboutPrimaryAddress', () => {
   const csv = '2,beta,bcur,bnew\n1,alpha,acur,anew';
+  const originalFetch = global.fetch;
+  let queryClient: QueryClient;
+  const renderWithQueryClient = () =>
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AboutPrimaryAddress />
+      </QueryClientProvider>
+    );
 
   beforeEach(() => {
-    global.fetch = jest.fn().mockResolvedValue({
-      blob: () => Promise.resolve(new Blob([csv]))
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+      },
     });
-    class MockFileReader {
-      result: string | ArrayBuffer | null = null;
-      onload: null | (() => void) = null;
-      readAsText(_blob: Blob) {
-        this.result = csv;
-        this.onload && this.onload();
-      }
-    }
-    // @ts-ignore
-    global.FileReader = MockFileReader;
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      text: () => Promise.resolve(csv),
+    }) as jest.MockedFunction<typeof fetch>;
+  });
+
+  afterEach(() => {
+    queryClient.clear();
+    jest.clearAllMocks();
+    global.fetch = originalFetch;
   });
 
   it('fetches csv and displays sorted table', async () => {
-    render(<AboutPrimaryAddress />);
+    renderWithQueryClient();
     await waitFor(() => {
       expect(screen.getByText('alpha')).toBeInTheDocument();
     });

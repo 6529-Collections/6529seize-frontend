@@ -4,6 +4,7 @@ import React, { memo, useState, useEffect, useRef } from "react";
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import WaveDropPartDrop from "./WaveDropPartDrop";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ImageScale } from "@/helpers/image.helpers";
 
 interface WaveDropPartProps {
   readonly drop: ExtendedDrop;
@@ -18,6 +19,7 @@ interface WaveDropPartProps {
   readonly onSave?: (newContent: string) => void;
   readonly onCancel?: () => void;
   readonly isCompetitionDrop?: boolean;
+  readonly mediaImageScale?: ImageScale;
 }
 
 const LONG_PRESS_DURATION = 500; // milliseconds
@@ -37,6 +39,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
     onSave,
     onCancel,
     isCompetitionDrop = false,
+    mediaImageScale = ImageScale.AUTOx450,
   }) => {
     const [activePart, setActivePart] = useState(drop.parts[activePartIndex]);
 
@@ -129,6 +132,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
             onSave={onSave}
             onCancel={onCancel}
             isCompetitionDrop={isCompetitionDrop}
+            mediaImageScale={mediaImageScale}
           />
         </div>
       </div>

@@ -8,6 +8,7 @@ import { ReferencedNft } from "@/entities/IDrop";
 import { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import WaveDropPartContentMarkdown from "./WaveDropPartContentMarkdown";
+import { ImageScale } from "@/helpers/image.helpers";
 
 interface WaveDropPartContentProps {
   readonly mentionedUsers: ApiDropMentionedUser[];
@@ -26,6 +27,7 @@ interface WaveDropPartContentProps {
   readonly onCancel?: () => void;
   readonly drop?: ApiDrop;
   readonly isCompetitionDrop?: boolean;
+  readonly mediaImageScale?: ImageScale;
 }
 
 const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
@@ -45,6 +47,7 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
   onCancel,
   drop,
   isCompetitionDrop = false,
+  mediaImageScale = ImageScale.AUTOx450,
 }) => {
   const contentRef = React.useRef<HTMLDivElement>(null);
 
@@ -130,7 +133,11 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
             />
           </div>
           {!!activePart.media.length && (
-            <WaveDropPartContentMedias activePart={activePart} isCompetitionDrop={isCompetitionDrop} />
+            <WaveDropPartContentMedias
+              activePart={activePart}
+              isCompetitionDrop={isCompetitionDrop}
+              imageScale={mediaImageScale}
+            />
           )}
         </div>
 

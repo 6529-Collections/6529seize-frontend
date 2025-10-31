@@ -4,8 +4,8 @@ import { TextDecoder, TextEncoder } from "node:util";
 // Load environment variables for tests
 config({ path: ".env.development" });
 
-global.TextEncoder = TextEncoder;
-global.TextDecoder = TextDecoder;
+globalThis.TextEncoder = TextEncoder;
+globalThis.TextDecoder = TextDecoder;
 
 require("@testing-library/jest-dom");
 
@@ -24,7 +24,7 @@ Object.defineProperty(window, "getComputedStyle", {
 });
 
 // Mock CSS module imports
-global.CSS = {
+globalThis.CSS = {
   supports: () => false,
   escape: (str) => str,
 };
@@ -36,7 +36,7 @@ Object.defineProperty(window, "scrollTo", {
 });
 
 // Mock CSS functions that dom-helpers/css might use
-global.css = (element, property, value) => {
+globalThis.css = (element, property, value) => {
   if (arguments.length === 3) {
     return element;
   }
@@ -67,22 +67,6 @@ Object.defineProperty(window, "matchMedia", {
   })),
 });
 
-// Provide ResizeObserver for components relying on it
-if (typeof global.ResizeObserver === "undefined") {
-  global.ResizeObserver = class {
-    // no-op for test environment
-    observe() {
-      /* noop */
-    }
-    unobserve() {
-      /* noop */
-    }
-    disconnect() {
-      /* noop */
-    }
-  };
-}
-
 /**
  * Provide a sane default PUBLIC_RUNTIME blob for tests that indirectly import config/env.
  * Individual tests can override by mocking `@/config/env` or by setting PUBLIC_RUNTIME themselves
@@ -109,7 +93,7 @@ if (!process.env.PUBLIC_RUNTIME) {
 }
 
 // Mock ResizeObserver for react-tooltip
-global.ResizeObserver = class ResizeObserver {
+globalThis.ResizeObserver = class ResizeObserver {
   constructor(callback) {
     this.callback = callback;
   }
@@ -121,8 +105,8 @@ global.ResizeObserver = class ResizeObserver {
   disconnect() {} // Intentionally empty - no actual observation needed in tests
 };
 
-if (typeof global.fetch === "undefined") {
-  global.fetch = jest.fn(() =>
+if (globalThis.fetch === undefined) {
+  globalThis.fetch = jest.fn(() =>
     Promise.resolve({
       ok: true,
       json: () => Promise.resolve([]),
@@ -148,15 +132,14 @@ class MockAbortController {
 }
 
 // Set on all global objects to ensure it's available during module loading
-global.AbortController = MockAbortController;
 globalThis.AbortController = MockAbortController;
-if (typeof globalThis !== "undefined") {
-  window.AbortController = MockAbortController;
+if (globalThis.window !== undefined) {
+  globalThis.window.AbortController = MockAbortController;
 }
 
 // Mock AbortSignal for Node.js environment
-if (typeof global.AbortSignal === "undefined") {
-  global.AbortSignal = class MockAbortSignal {
+if (globalThis.AbortSignal === undefined) {
+  globalThis.AbortSignal = class MockAbortSignal {
     constructor() {
       this.aborted = false;
       this.reason = undefined;
@@ -164,5 +147,39 @@ if (typeof global.AbortSignal === "undefined") {
       this.removeEventListener = jest.fn();
       this.throwIfAborted = jest.fn();
     }
+
+    reset() {
+      this.aborted = false;
+      this.reason = undefined;
+      this.addEventListener.mockClear();
+      this.removeEventListener.mockClear();
+      this.throwIfAborted.mockClear();
+    }
   };
+}
+
+if (globalThis.Request === undefined) {
+  class TestRequest {
+    constructor(input, init = {}) {
+      this.url = typeof input === "string" ? input : input?.url ?? "";
+      this.method = init.method ?? "GET";
+      this.headers = init.headers ?? {};
+      this.body = init.body ?? null;
+      this.signal = init.signal ?? null;
+    }
+
+    clone() {
+      return new TestRequest(this, {
+        method: this.method,
+        headers: this.headers,
+        body: this.body,
+        signal: this.signal,
+      });
+    }
+  }
+
+  globalThis.Request = TestRequest;
+  if (globalThis.window !== undefined) {
+    globalThis.window.Request = TestRequest;
+  }
 }

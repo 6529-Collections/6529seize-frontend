@@ -32,7 +32,7 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
     url += `?${queryParams.toString()}`;
   }
   const res = await fetch(url, {
-    headers: getHeaders(param.headers),
+    headers: getHeaders(param.headers, false),
     signal: param.signal,
   });
   if (!res.ok) {

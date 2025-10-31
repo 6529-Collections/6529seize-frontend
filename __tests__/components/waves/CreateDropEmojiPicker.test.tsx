@@ -68,6 +68,9 @@ describe("CreateDropEmojiPicker", () => {
       emojiMap: [],
       categories: [],
       categoryIcons: {},
+      loading: false,
+      findNativeEmoji: jest.fn(),
+      findCustomEmoji: jest.fn(),
     });
     // Default to desktop
     mockUseIsMobile.mockReturnValue(false);

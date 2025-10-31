@@ -2,8 +2,9 @@ openapi: 3.0.3
 info:
   title: 6529.io API
   description: >-
-    This is the API interface description. Brief terminology overview and an authentication example
-    can be found at <a href="https://6529.io/about/api">https://6529.io/about/api</a>.
+    This is the API interface description. Brief terminology overview and an
+    authentication example can be found at <a
+    href="https://6529.io/about/api">https://6529.io/about/api</a>.
   version: 1.0.0
 servers:
   - url: /api
@@ -2226,6 +2227,315 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiIncomingIdentitySubscriptionsPage"
+  /tdh-editions/wallet/{wallet}:
+    get:
+      tags:
+        - TDH Editions
+      summary: Get TDH editions for a wallet
+      operationId: getTdhEditionsByWallet
+      parameters:
+        - name: wallet
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: contract
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: token_id
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: edition_id
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - id
+              - hodl_rate
+              - days_held
+              - balance
+              - edition_id
+              - contract
+            default: id
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiPageSortDirection"
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiTdhEditionsPage"
+        "400":
+          description: Invalid wallet
+  /tdh-editions/consolidation/{consolidation_key}:
+    get:
+      tags:
+        - TDH Editions
+      summary: Get TDH editions by consolidation key
+      operationId: getTdhEditionsByConsolidationKey
+      parameters:
+        - name: consolidation_key
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: contract
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: token_id
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: edition_id
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - id
+              - hodl_rate
+              - days_held
+              - balance
+              - edition_id
+              - contract
+            default: id
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiPageSortDirection"
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiTdhEditionsPage"
+        "404":
+          description: Consolidation key not found
+  /tdh-editions/identity/{identity}:
+    get:
+      tags:
+        - TDH Editions
+      summary: Get TDH editions for an identity, wallet address, or ENS
+      operationId: getTdhEditionsByIdentity
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Identity handle, profile id, wallet address, or ENS name
+        - name: contract
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: token_id
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: edition_id
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - id
+              - hodl_rate
+              - days_held
+              - balance
+              - edition_id
+              - contract
+            default: id
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiPageSortDirection"
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiTdhEditionsPage"
+        "404":
+          description: Identity not found
+  /tdh-grants:
+    get:
+      tags:
+        - TdhGrants
+      summary: Get TDH grants
+      operationId: getTdhGrants
+      parameters:
+        - name: grantor
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: target_contract
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: target_chain
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiTdhGrantStatus"
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiPageSortDirection"
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - created_at
+              - valid_from
+              - valid_to
+              - tdh_rate
+            default: created_at
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 2000
+            default: 100
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiTdhGrantsPage"
+        "400":
+          description: Invalid request
+    post:
+      tags:
+        - TdhGrants
+      summary: Create a TDH grant
+      operationId: grantTdh
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCreateTdhGrant"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiTdhGrant"
+        "400":
+          description: Invalid request
   /transactions:
     get:
       tags:
@@ -2430,8 +2740,7 @@ paths:
     get:
       tags:
         - Waves
-      summary: >-
-        Get overview of waves by different criteria.
+      summary: Get overview of waves by different criteria.
       operationId: getWavesOverview
       parameters:
         - name: limit
@@ -3996,6 +4305,37 @@ components:
         pfp_url:
           type: string
           nullable: true
+    ApiCreateTdhGrant:
+      type: object
+      required:
+        - target_chain
+        - target_contract
+        - target_tokens
+        - valid_to
+        - tdh_rate
+        - is_irrevocable
+      properties:
+        target_chain:
+          $ref: "#/components/schemas/ApiTdhGrantTargetChain"
+        target_contract:
+          type: string
+        target_tokens:
+          type: array
+          items:
+            type: string
+          description: >-
+            List of token numbers. Each element can also be a span in form of
+            start-end. Leave empty if all tokens are targets.
+        valid_to:
+          type: number
+          format: int64
+          nullable: true
+        tdh_rate:
+          type: number
+          format: int64
+        is_irrevocable:
+          type: boolean
+          description: If true then the grant must be covered with lock contracts
     ApiCreateWaveConfig:
       type: object
       required:
@@ -5439,6 +5779,11 @@ components:
           format: int64
         next:
           type: boolean
+    ApiPageSortDirection:
+      type: string
+      enum:
+        - ASC
+        - DESC
     ApiPageWithNextUriBase:
       type: object
       required:
@@ -5810,6 +6155,127 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiIdentitySubscriptionTargetAction"
+    ApiTdhEdition:
+      type: object
+      required:
+        - contract
+        - id
+        - edition_id
+        - balance
+        - days_held
+        - hodl_rate
+      properties:
+        contract:
+          type: string
+        id:
+          type: integer
+          format: int64
+        edition_id:
+          type: integer
+          format: int64
+        balance:
+          type: integer
+          format: int64
+        hodl_rate:
+          type: integer
+          format: int64
+        days_held:
+          type: integer
+          format: int64
+        wallet:
+          type: string
+          nullable: true
+        consolidation_key:
+          type: string
+          nullable: true
+        profile:
+          $ref: "#/components/schemas/ApiProfileMin"
+          nullable: true
+    ApiTdhEditionsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithNextUriBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiTdhEdition"
+    ApiTdhGrant:
+      type: object
+      required:
+        - id
+        - grantor
+        - target_chain
+        - target_contract
+        - target_tokens
+        - created_at
+        - valid_from
+        - valid_to
+        - tdh_rate
+        - error_details
+        - status
+        - is_irrevocable
+      properties:
+        id:
+          type: string
+        grantor:
+          $ref: "#/components/schemas/ApiProfileMin"
+        target_chain:
+          $ref: "#/components/schemas/ApiTdhGrantTargetChain"
+        target_contract:
+          type: string
+        target_tokens:
+          type: array
+          items:
+            type: string
+          description: >-
+            List of token numbers. Each element can also be a span in form of
+            start-end. All tokens if empty.
+        created_at:
+          type: number
+          format: int64
+        valid_from:
+          type: number
+          format: int64
+          nullable: true
+        valid_to:
+          type: number
+          format: int64
+          nullable: true
+        tdh_rate:
+          type: number
+          format: int64
+        error_details:
+          type: string
+          nullable: true
+        status:
+          $ref: "#/components/schemas/ApiTdhGrantStatus"
+        is_irrevocable:
+          type: boolean
+          description: If true then the grant must be covered with lock contracts
+    ApiTdhGrantsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiTdhGrant"
+    ApiTdhGrantStatus:
+      type: string
+      enum:
+        - PENDING
+        - FAILED
+        - GRANTED
+    ApiTdhGrantTargetChain:
+      type: string
+      enum:
+        - ETHEREUM_MAINNET
     ApiTransaction:
       type: object
       required:
@@ -5940,14 +6406,16 @@ components:
           nullable: false
           description: >-
             Decisions after this time will not be made. Should not overlap with
-            other pauses. Needs to be in the future. Can not be updated after pause creation.
+            other pauses. Needs to be in the future. Can not be updated after
+            pause creation.
         end_time:
           type: integer
           format: int64
           nullable: false
           description: >-
             Decisions before this time will not be made. Should not overlap with
-            other pauses. Needs to be after start_time, after now and after wave.next_decision_time
+            other pauses. Needs to be after start_time, after now and after
+            wave.next_decision_time
     ApiUpdateWaveRequest:
       type: object
       required:

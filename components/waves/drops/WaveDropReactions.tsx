@@ -13,6 +13,7 @@ import { formatLargeNumber } from "@/helpers/Helpers";
 import { useEmoji } from "@/contexts/EmojiContext";
 import { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import { Tooltip } from "react-tooltip";
+import { buildTooltipId } from "@/helpers/tooltip.helpers";
 import {
   commonApiDelete,
   commonApiPost,
@@ -104,6 +105,10 @@ function WaveDropReaction({
   const emojiId = useMemo(
     () => reaction.reaction.replaceAll(":", ""),
     [reaction.reaction]
+  );
+  const tooltipId = useMemo(
+    () => buildTooltipId("reaction", drop.id, emojiId),
+    [drop.id, emojiId]
   );
 
   // small + tooltip emoji nodes
@@ -322,7 +327,7 @@ function WaveDropReaction({
     <>
       <button
         onClick={handleClick}
-        data-tooltip-id={`reaction-${drop.id}-${emojiId}`}
+        data-tooltip-id={tooltipId}
         data-text-selection-exclude="true"
         className={clsx(
           "tw-inline-flex tw-items-center tw-gap-x-2 tw-mt-1 tw-py-1 tw-px-2 tw-rounded-lg tw-shadow-sm tw-border tw-border-solid hover:tw-text-iron-100",
@@ -344,7 +349,7 @@ function WaveDropReaction({
         </div>
       </button>
       <Tooltip
-        id={`reaction-${drop.id}-${emojiId}`}
+        id={tooltipId}
         delayShow={250}
         place="bottom"
         opacity={1}

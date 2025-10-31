@@ -64,7 +64,14 @@ const originalArtBlocksFlags = {
 
 jest.mock("@/hooks/isMobileScreen", () => () => false);
 jest.mock("@/contexts/EmojiContext", () => ({
-  useEmoji: () => ({ emojiMap: [] }),
+  useEmoji: () => ({
+    emojiMap: [],
+    loading: false,
+    categories: [],
+    categoryIcons: {},
+    findNativeEmoji: jest.fn(),
+    findCustomEmoji: jest.fn(),
+  }),
 }));
 
 const tweetMock = jest.fn(({ id, components, onError }: any) => {

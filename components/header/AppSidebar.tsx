@@ -12,6 +12,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Fragment, useCallback, useEffect, useMemo } from "react";
 import { useAppWallets } from "../app-wallets/AppWalletsContext";
+import DiscoverIcon from "../common/icons/DiscoverIcon";
 import UsersIcon from "../common/icons/UsersIcon";
 import AppSidebarHeader from "./AppSidebarHeader";
 import AppSidebarMenuItems from "./AppSidebarMenuItems";
@@ -19,6 +20,23 @@ import AppUserConnect from "./AppUserConnect";
 
 const MENU = [
   { label: "Profile", path: "/profile", icon: UserIcon },
+  { label: "Discover", path: "/discover", icon: DiscoverIcon },
+  {
+    label: "Network",
+    icon: UsersIcon,
+    children: [
+      { label: "Identities", path: "/network" },
+      { label: "Activity", path: "/network/activity" },
+      { label: "Groups", path: "/network/groups" },
+      { label: "NFT Activity", path: "/nft-activity" },
+      { label: "Memes Calendar", path: "/meme-calendar" },
+      { label: "TDH", path: "/network/tdh" },
+      { label: "Metrics", section: true },
+      { label: "Definitions", path: "/network/definitions" },
+      { label: "Network Stats", path: "/network/stats" },
+      { label: "Levels", path: "/network/levels" },
+    ],
+  },
   {
     label: "Tools",
     icon: WrenchIcon,
@@ -68,22 +86,6 @@ const MENU = [
       { label: "ENS", path: "/about/ens" },
       { label: "License", path: "/about/license" },
       { label: "Release Notes", path: "/about/release-notes" },
-    ],
-  },
-  {
-    label: "Network",
-    icon: UsersIcon,
-    children: [
-      { label: "Identities", path: "/network" },
-      { label: "Network Activity", path: "/network/activity" },
-      { label: "Groups", path: "/network/groups" },
-      { label: "NFT Activity", path: "/nft-activity" },
-      { label: "Memes Calendar", path: "/meme-calendar" },
-      { label: "TDH", path: "/network/tdh" },
-      { label: "Metrics", section: true },
-      { label: "Definitions", path: "/network/definitions" },
-      { label: "Network Stats", path: "/network/stats" },
-      { label: "Levels", path: "/network/levels" },
     ],
   },
 ];

@@ -11,6 +11,8 @@ import { ApiDropPart } from "@/generated/models/ApiDropPart";
 import DropPartMarkdownWithPropLogger from "@/components/drops/view/part/DropPartMarkdownWithPropLogger";
 import WaveDropTime from "./time/WaveDropTime";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import Image from "next/image";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 
 interface WaveDropQuoteProps {
   readonly drop: ApiDrop | null;
@@ -38,24 +40,30 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
   const renderProfilePicture = () => {
     if (!drop) {
       return (
-        <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-md tw-overflow-hidden tw-bg-iron-900 tw-animate-pulse"></div>
+        <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-md tw-overflow-hidden tw-bg-iron-900 tw-animate-pulse" />
       );
     }
 
-    if (drop.author.pfp) {
+    const resolvedPfp = drop.author.pfp
+      ? resolveIpfsUrlSync(drop.author.pfp)
+      : null;
+
+    if (resolvedPfp) {
       return (
-        <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-md tw-overflow-hidden">
-          <img
-            src={drop.author.pfp}
+        <div className="tw-relative tw-h-full tw-w-full">
+          <Image
+            src={resolvedPfp}
             alt={`${drop.author.handle}'s profile picture`}
-            className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-cover"
+            fill
+            sizes="24px"
+            className="tw-rounded-md tw-object-cover tw-bg-transparent"
           />
         </div>
       );
     }
 
     return (
-      <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-md tw-overflow-hidden tw-bg-iron-900"></div>
+      <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-md tw-overflow-hidden tw-bg-iron-900" />
     );
   };
 

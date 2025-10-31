@@ -114,7 +114,6 @@ export async function GET(request: NextRequest) {
 export const dynamic = "force-dynamic";
 // ts-prune-ignore-next: Next.js framework consumes this export via route conventions.
 export const revalidate = 0;
-
 function parseRemoteUrl(target: string): { url: URL } | { response: NextResponse } {
   try {
     const parsed = parsePublicUrl(target, { allowedProtocols: ["https:"] });

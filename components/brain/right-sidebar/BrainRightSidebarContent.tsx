@@ -11,7 +11,7 @@ const BrainRightSidebarContent: React.FC<BrainRightSidebarContentProps> = ({
   wave,
 }) => {
   return (
-    <div className="tw-flex tw-flex-col tw-h-full tw-overflow-y-auto">
+    <div className="tw-flex tw-flex-col tw-overflow-y-auto">
       <WaveSpecs wave={wave} useRing={false} />
       <WaveGroups wave={wave} useRing={false} />
     </div>

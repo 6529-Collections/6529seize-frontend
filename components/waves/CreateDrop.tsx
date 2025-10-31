@@ -25,6 +25,7 @@ import { ActiveDropState } from "@/types/dropInteractionTypes";
 import { DropMode } from "./PrivilegedDropCreator";
 import { DropPrivileges } from "@/hooks/useDropPriviledges";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -59,7 +60,7 @@ export default function CreateDrop({
   useKeyPressEvent("Escape", () => onCancelReplyQuote());
   const [isStormMode, setIsStormMode] = useState(false);
   const [drop, setDrop] = useState<CreateDropConfig | null>(null);
-  const { processDropRemoved } = useMyStream();
+  const { processDropRemoved, processIncomingDrop } = useMyStream();
   const getIsDropMode = () => {
     if (fixedDropMode === DropMode.CHAT) {
       return false;
@@ -133,10 +134,16 @@ export default function CreateDrop({
 
   const addDropMutation = useMutation({
     mutationFn: async (body: DropMutationBody) => {
-      await commonApiPost<ApiCreateDropRequest, ApiDrop>({
+      return commonApiPost<ApiCreateDropRequest, ApiDrop>({
         endpoint: `drops`,
         body: body.drop,
       });
+    },
+    onSuccess: (serverDrop, body) => {
+      if (body.dropId) {
+        processDropRemoved(body.drop.wave_id, body.dropId);
+      }
+      processIncomingDrop(serverDrop, ProcessIncomingDropType.DROP_INSERT);
     },
     onError: (error, body) => {
       setTimeout(() => {

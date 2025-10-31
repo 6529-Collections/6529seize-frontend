@@ -1,35 +1,35 @@
 "use client";
 
+import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiLightDrop } from "@/generated/models/ApiLightDrop";
+import { Drop } from "@/helpers/waves/drop.helpers";
+import useCapacitor from "@/hooks/useCapacitor";
+import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
 import React, {
   createContext,
-  useContext,
-  useMemo,
   ReactNode,
+  useContext,
   useEffect,
-  useState,
+  useMemo,
   useRef,
+  useState,
 } from "react";
+import { WaveMessages } from "./hooks/types";
 import { useActiveWaveManager } from "./hooks/useActiveWaveManager";
 import useEnhancedDmWavesList from "./hooks/useEnhancedDmWavesList";
+import useEnhancedWavesList, {
+  MinimalWave,
+} from "./hooks/useEnhancedWavesList";
+import { useWaveDataManager } from "./hooks/useWaveDataManager";
 import useWaveMessagesStore, {
   Listener as WaveMessagesListener,
 } from "./hooks/useWaveMessagesStore";
-import { useWaveDataManager } from "./hooks/useWaveDataManager";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import { NextPageProps } from "./hooks/useWavePagination";
 import {
   ProcessIncomingDropType,
   useWaveRealtimeUpdater,
 } from "./hooks/useWaveRealtimeUpdater";
-import { Drop } from "@/helpers/waves/drop.helpers";
-import { WaveMessages } from "./hooks/types";
-import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
-import useCapacitor from "@/hooks/useCapacitor";
-import { ApiLightDrop } from "@/generated/models/ApiLightDrop";
-import { NextPageProps } from "./hooks/useWavePagination";
-import useEnhancedWavesList, {
-  MinimalWave,
-} from "./hooks/useEnhancedWavesList";
-import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
 
 // Define nested structures for context data
 interface WavesContextData {
@@ -110,6 +110,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
 
   // Instantiate the real-time updater hook
   const { processIncomingDrop, processDropRemoved } = useWaveRealtimeUpdater({
+    activeWaveId,
     getData: waveMessagesStore.getData,
     updateData: waveMessagesStore.updateData,
     registerWave: waveDataManager.registerWave,

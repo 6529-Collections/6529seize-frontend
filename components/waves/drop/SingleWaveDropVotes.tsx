@@ -1,3 +1,5 @@
+ "use client";
+
 import React from "react";
 import { ApiDrop } from "@/generated/models/ObjectSerializer";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
@@ -5,6 +7,8 @@ import { Tooltip } from "react-tooltip";
 import Link from "next/link";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
+import Image from "next/image";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 
 interface SingleWaveDropVotesProps {
   readonly drop: ApiDrop;
@@ -51,12 +55,16 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
             <div key={voter.profile.handle}>
               <Link href={`/${voter.profile.handle}`}>
                 {voter.profile.pfp ? (
-                  <img
-                    className="tw-size-6 tw-rounded-md tw-ring-2 tw-ring-iron-950"
-                    src={voter.profile.pfp}
-                    alt="Recent voter"
-                    data-tooltip-id={`wave-voter-${voter.profile.handle}`}
-                  />
+                  <div className="tw-relative tw-size-6">
+                    <Image
+                      className="tw-rounded-md tw-ring-2 tw-ring-iron-950 tw-object-cover"
+                      src={resolveIpfsUrlSync(voter.profile.pfp)}
+                      alt="Recent voter"
+                      fill
+                      sizes="24px"
+                      data-tooltip-id={`wave-voter-${voter.profile.handle}`}
+                    />
+                  </div>
                 ) : (
                   <div 
                     className="tw-size-6 tw-rounded-md tw-ring-2 tw-ring-iron-950 tw-bg-iron-800" 

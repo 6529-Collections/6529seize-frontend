@@ -1,9 +1,13 @@
+ "use client";
+
 import Link from "next/link";
+import Image from "next/image";
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import { useDropContent } from "./useDropContent";
 import DropLoading from "./DropLoading";
 import DropNotFound from "./DropNotFound";
 import ContentDisplay from "./ContentDisplay";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 
 interface WaveDropReplyProps {
   readonly dropId: string;
@@ -38,19 +42,17 @@ export default function WaveDropReply({
 
     return (
       <div className="tw-flex tw-gap-x-1.5">
-        <div className="tw-h-6 tw-w-6 tw-bg-iron-800 tw-relative tw-flex-shrink-0 tw-rounded-md z-10">
+        <div className="tw-relative tw-z-10 tw-flex-shrink-0 tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800 tw-overflow-hidden">
           {drop.author.pfp ? (
-            <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-md tw-overflow-hidden tw-bg-iron-900">
-              <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-md tw-overflow-hidden">
-                <img
-                  src={drop.author.pfp}
-                  alt={`${drop.author.handle}'s avatar`}
-                  className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
-                />
-              </div>
-            </div>
+            <Image
+              src={resolveIpfsUrlSync(drop.author.pfp)}
+              alt={`${drop.author.handle}'s avatar`}
+              fill
+              sizes="24px"
+              className="tw-rounded-md tw-bg-transparent tw-object-contain"
+            />
           ) : (
-            <div className="tw-h-full tw-w-full tw-bg-iron-900 tw-rounded-md tw-ring-1 tw-ring-inset tw-ring-white/10" />
+            <div className="tw-h-full tw-w-full tw-rounded-md tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10" />
           )}
         </div>
         <div className="tw-flex-1">

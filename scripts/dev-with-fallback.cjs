@@ -55,7 +55,7 @@ async function run() {
 
     const child = spawn(
       "next",
-      ["dev", "--turbopack", "-p", String(port), ...extraArgs],
+      ["dev", "-p", String(port), ...extraArgs],
       {
         stdio: "inherit",
         env,

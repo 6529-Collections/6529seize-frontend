@@ -1,6 +1,7 @@
 import IdentitySearch, {
   IdentitySearchSize,
 } from "@/components/utils/input/identity/IdentitySearch";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 export default function WavesListSearch({
   identity,
@@ -17,18 +18,10 @@ export default function WavesListSearch({
     <div className="tw-flex tw-flex-col tw-w-full sm:tw-flex-row sm:tw-items-center tw-gap-4 xl:tw-w-1/2 xl:tw-pr-3">
       <div className="tw-flex-1">
         <div className="tw-relative">
-          <svg
+          <MagnifyingGlassIcon
             className="tw-text-iron-300 tw-pointer-events-none tw-absolute tw-left-3 tw-top-3 tw-h-5 tw-w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
             aria-hidden="true"
-          >
-            <path
-              fillRule="evenodd"
-              d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
-              clipRule="evenodd"
-            ></path>
-          </svg>
+          />
           {waveName && (
             <svg
               onClick={() => setWaveName(null)}

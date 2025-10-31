@@ -119,7 +119,7 @@ export default function AppWalletComponent(
         url: result.uri,
         dialogTitle: "Share or Save File",
       });
-    } catch (e) {
+    } catch (_error) {
       alert("Unable to write file");
     }
   };
@@ -154,7 +154,7 @@ export default function AppWalletComponent(
         });
       }
     },
-    [account.address]
+    [account.address, deleteAppWallet, router, setToast]
   );
 
   if (fetchingAppWallets) {

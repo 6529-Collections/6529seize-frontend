@@ -56,6 +56,7 @@ export default function NotificationsCauseFilter({
     prefetchNotifications({
       identity: connectedProfile.handle,
       cause: filter.cause,
+      pages: 1,
     });
   };
 

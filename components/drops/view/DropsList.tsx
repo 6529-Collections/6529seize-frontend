@@ -124,6 +124,11 @@ const DropsList = memo(function DropsList({
           <HighlightDropWrapper
             key={drop.stableKey}
             id={`drop-${drop.serial_no}`}
+            waveDropId={
+              drop.type === DropSize.FULL
+                ? drop.stableHash ?? drop.id ?? drop.stableKey
+                : undefined
+            }
             ref={
               getItemData.serialNo === drop.serial_no
                 ? getItemData.targetDropRef

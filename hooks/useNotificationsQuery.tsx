@@ -92,7 +92,7 @@ export function useNotificationsQuery({
       return;
     }
 
-    prefetch({ identity, limit, cause });
+    prefetch({ identity, limit, cause, pages: 1 });
   }, [prefetch, identity, activeProfileProxy, limit, cause]);
 
   /**
@@ -155,10 +155,12 @@ export function usePrefetchNotifications() {
       identity,
       cause = null,
       limit = "30",
+      pages = 3,
     }: {
       identity: string | null;
       cause?: ApiNotificationCause[] | null;
       limit?: string;
+      pages?: number;
     }) => {
       if (!identity) {
         return;
@@ -175,7 +177,7 @@ export function usePrefetchNotifications() {
         initialPageParam: null,
         getNextPageParam: (lastPage) =>
           lastPage.notifications.at(-1)?.id ?? null,
-        pages: 3,
+        pages,
         staleTime: 60000,
       });
     },

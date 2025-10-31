@@ -1,8 +1,10 @@
 import {
   IpfsProvider,
   resolveIpfsUrl,
+  resolveIpfsUrlSync,
   useIpfsService,
 } from "@/components/ipfs/IPFSContext";
+import { publicEnv } from "@/config/env";
 import IpfsService from "@/components/ipfs/IPFSService";
 import { render, renderHook, waitFor } from "@testing-library/react";
 
@@ -10,8 +12,11 @@ jest.mock("@/components/ipfs/IPFSService");
 
 const MockIpfsService = IpfsService as jest.MockedClass<typeof IpfsService>;
 
+const originalEnv = { ...publicEnv };
+
 beforeEach(() => {
   jest.clearAllMocks();
+  Object.assign(publicEnv, originalEnv);
 });
 
 describe("IpfsContext", () => {
@@ -46,8 +51,12 @@ describe("IpfsContext", () => {
     expect(url).toBe("https://ipfs.test.6529.io/ipfs/abc");
   });
 
+  it("resolves synchronously when needed", () => {
+    expect(resolveIpfsUrlSync("ipfs://sync"))
+      .toBe("https://ipfs.test.6529.io/ipfs/sync");
+  });
+
   it("returns original url if env missing", async () => {
-    const { publicEnv } = require("@/config/env");
     publicEnv.IPFS_GATEWAY_ENDPOINT = undefined;
     publicEnv.IPFS_API_ENDPOINT = undefined;
     const consoleSpy = jest

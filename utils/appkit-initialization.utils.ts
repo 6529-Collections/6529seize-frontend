@@ -98,6 +98,9 @@ function buildAppKitConfig(adapter: WagmiAdapter) {
         "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
       ],
     },
+    themeVariables: {
+      "--w3m-font-family": "'Montserrat', sans-serif",
+    },
     enableWalletGuide: false,
     featuredWalletIds: ["metamask", "walletConnect"],
     allWallets: "SHOW" as const,

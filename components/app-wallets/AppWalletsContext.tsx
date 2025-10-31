@@ -51,6 +51,7 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
   const [appWalletsSupported, setAppWalletsSupported] = useState(false);
 
   const capacitor = useCapacitor();
+  const { isCapacitor } = capacitor;
 
   const fetchAppWallets = async () => {
     if (!appWalletsSupported) {
@@ -68,10 +69,11 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   useEffect(() => {
+    let cancelled = false;
+
     const initialize = async () => {
-      // Step 1: Check support (fresh local variable)
       let supported = false;
-      if (capacitor.isCapacitor) {
+      if (isCapacitor) {
         try {
           await SecureStoragePlugin.keys();
           supported = true;
@@ -79,24 +81,36 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
           console.error("SecureStoragePlugin is not available:", error);
         }
       }
-      
+
+      if (cancelled) {
+        return;
+      }
+
       setAppWalletsSupported(supported);
-      
-      // Step 2: Handle wallets based on fresh support value
+
       if (!supported) {
-        setFetchingAppWallets(false);
         setAppWallets([]);
+        setFetchingAppWallets(false);
         return;
       }
 
       setFetchingAppWallets(true);
       const wallets = await getAllWallets();
+
+      if (cancelled) {
+        return;
+      }
+
       setAppWallets(wallets);
       setFetchingAppWallets(false);
     };
 
     initialize();
-  }, []); // Run only once on mount
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isCapacitor]);
 
   const createAppWallet = async (
     name: string,
@@ -199,7 +213,14 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
       importAppWallet,
       deleteAppWallet,
     }),
-    [fetchingAppWallets, appWallets, appWalletsSupported]
+    [
+      fetchingAppWallets,
+      appWallets,
+      appWalletsSupported,
+      createAppWallet,
+      importAppWallet,
+      deleteAppWallet,
+    ]
   );
 
   return (
