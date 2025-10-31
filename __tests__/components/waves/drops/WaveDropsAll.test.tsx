@@ -148,7 +148,7 @@ interface MockSetupOptions {
   scrollBehavior?: {
     isAtBottom?: boolean;
     shouldPinToBottom?: boolean;
-    scrollIntent?: 'pinned' | 'reading' | 'auto';
+    scrollIntent?: 'pinned' | 'reading';
   };
   auth?: {
     connectedProfile?: { handle: string } | null;

@@ -1,116 +1,256 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
-type ScrollIntent = 'pinned' | 'reading' | 'auto';
+type ScrollIntent = "pinned" | "reading";
+
+const BOTTOM_THRESHOLD = 48;
+const TOP_THRESHOLD = 48;
+const INTENT_THRESHOLD = 20;
+
+const clamp = (value: number, min: number, max: number) =>
+  Math.min(Math.max(value, min), max);
+
+const getMetrics = (element: HTMLDivElement) => {
+  const { scrollTop, scrollHeight, clientHeight } = element;
+  const maxScroll = Math.max(scrollHeight - clientHeight, 0);
+  const normalizedTop = clamp(maxScroll + scrollTop, 0, maxScroll);
+  const distanceFromBottom = maxScroll - normalizedTop;
+  const distanceFromTop = normalizedTop;
+
+  return {
+    scrollTop,
+    distanceFromBottom,
+    distanceFromTop,
+  };
+};
 
 export const useScrollBehavior = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [isAtBottom, setIsAtBottom] = useState(true);
-  const [isAtTop, setIsAtTop] = useState(false);
-  const [scrollIntent, setScrollIntent] = useState<ScrollIntent>('pinned');
-  
-  const lastScrollTopRef = useRef(0);
   const bottomAnchorRef = useRef<HTMLDivElement>(null);
 
-  // scrollToVisualBottom scrolls to the newest messages (visually at the bottom)
-  const scrollToVisualBottom = useCallback(() => {
-    if (scrollContainerRef.current) {
-      // For a flex-col-reverse container, new messages (bottom) are at scrollTop = 0
-      scrollContainerRef.current.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
-      // Reset to pinned when user manually scrolls to bottom
-      setScrollIntent('pinned');
+  const [isAtBottom, setIsAtBottom] = useState(true);
+  const [isAtTop, setIsAtTop] = useState(false);
+  const [scrollIntent, setScrollIntent] = useState<ScrollIntent>("pinned");
+
+  const lastScrollTopRef = useRef(0);
+  const intentRef = useRef<ScrollIntent>("pinned");
+  const isAtBottomRef = useRef(true);
+  const prevScrollHeightRef = useRef(0);
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
+  const mutationObserverRef = useRef<MutationObserver | null>(null);
+  const rafRef = useRef<number | null>(null);
+
+  const setIntent = useCallback((nextIntent: ScrollIntent) => {
+    if (intentRef.current !== nextIntent) {
+      intentRef.current = nextIntent;
+      setScrollIntent(nextIntent);
     }
   }, []);
 
-  // scrollToVisualTop scrolls to the oldest messages (visually at the top)
-  const scrollToVisualTop = useCallback(() => {
-    if (scrollContainerRef.current) {
-      // For a flex-col-reverse container, old messages (top) need max scrollTop
-      const container = scrollContainerRef.current;
+  const updateScrollState = useCallback((element: HTMLDivElement) => {
+    const { distanceFromBottom, distanceFromTop, scrollTop } =
+      getMetrics(element);
 
-      // Calculate maximum scroll position
-      const maxScrollPosition = container.scrollHeight - container.clientHeight;
+    const nearBottom = distanceFromBottom <= BOTTOM_THRESHOLD;
+    const nearTop = distanceFromTop <= TOP_THRESHOLD;
 
-      // Set scroll position directly
-      container.scrollTo({
-        top: -maxScrollPosition,
-        behavior: "smooth",
-      });
-    }
-  }, []);
+    setIsAtBottom(nearBottom);
+    setIsAtTop(nearTop);
+    isAtBottomRef.current = nearBottom;
 
-  // Robust scroll detection with intent-based pinning
-  const handleScroll = useCallback(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
+    const delta = Math.abs(scrollTop - lastScrollTopRef.current);
 
-    const { scrollTop, scrollHeight, clientHeight } = container;
-
-    // In a flex-reversed container, check if we're near bottom with larger threshold
-    const distanceFromBottom = Math.abs(scrollTop); // In flex-col-reverse, bottom is near 0
-    const newIsAtBottom = distanceFromBottom < 50; // Increased threshold for layout shifts
-
-    // For flex-col-reverse, visual top detection
-    const maxNegativeScroll = -(scrollHeight - clientHeight);
-    const newIsAtTop = Math.abs(scrollTop - maxNegativeScroll) < 50;
-
-    setIsAtBottom(newIsAtBottom);
-    setIsAtTop(newIsAtTop);
-
-    // Intent detection - filter out small/accidental scrolls
-    const scrollDelta = Math.abs(scrollTop - lastScrollTopRef.current);
-    
-    if (scrollDelta > 20 && !newIsAtBottom) {
-      // Significant scroll away from bottom = user is reading
-      setScrollIntent('reading');
-    } else if (newIsAtBottom) {
-      // User scrolled back to bottom
-      setScrollIntent('pinned');
+    if (delta > INTENT_THRESHOLD && !nearBottom) {
+      setIntent("reading");
+    } else if (nearBottom) {
+      setIntent("pinned");
     }
 
     lastScrollTopRef.current = scrollTop;
-  }, []);
+  }, [setIntent]);
 
+  const handleScroll = useCallback(() => {
+    const element = scrollContainerRef.current;
+    if (!element) {
+      return;
+    }
 
-  // Intersection Observer for robust bottom detection
-  useEffect(() => {
-    if (!bottomAnchorRef.current || !scrollContainerRef.current) return;
+    updateScrollState(element);
+  }, [updateScrollState]);
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        const isIntersecting = entry.isIntersecting;
-        setIsAtBottom(isIntersecting);
-        
-        // If anchor comes into view, we're definitely at bottom
-        if (isIntersecting) {
-          setScrollIntent('pinned');
-        }
-      },
-      {
-        root: scrollContainerRef.current,
-        threshold: 0,
-        rootMargin: '50px' // Handle layout shifts
+  const scrollToVisualBottom = useCallback(() => {
+    const element = scrollContainerRef.current;
+    if (!element) {
+      return;
+    }
+
+    setIntent("pinned");
+    element.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+    }
+
+    rafRef.current = requestAnimationFrame(() => {
+      if (scrollContainerRef.current) {
+        updateScrollState(scrollContainerRef.current);
       }
-    );
+    });
+  }, [setIntent, updateScrollState]);
 
-    observer.observe(bottomAnchorRef.current);
-    return () => observer.disconnect();
-  }, []);
+  const scrollToVisualTop = useCallback(() => {
+    const element = scrollContainerRef.current;
+    if (!element) {
+      return;
+    }
+
+    const maxScroll = Math.max(element.scrollHeight - element.clientHeight, 0);
+    setIntent("reading");
+    element.scrollTo({
+      top: -maxScroll,
+      behavior: "smooth",
+    });
+  }, [setIntent]);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
-    if (container) {
-      container.addEventListener("scroll", handleScroll);
-      return () => container.removeEventListener("scroll", handleScroll);
+    if (!container) {
+      return;
     }
+
+    container.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      container.removeEventListener("scroll", handleScroll);
+    };
   }, [handleScroll]);
 
-  // Should pin when user intends to stay at bottom AND is actually at bottom
-  const shouldPinToBottom = scrollIntent === 'pinned' && isAtBottom;
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    const anchor = bottomAnchorRef.current;
+
+    if (!container || !anchor || typeof IntersectionObserver === "undefined") {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsAtBottom(entry.isIntersecting);
+        isAtBottomRef.current = entry.isIntersecting;
+        if (entry.isIntersecting) {
+          setIntent("pinned");
+        }
+      },
+      {
+        root: container,
+        threshold: 0,
+        rootMargin: "48px",
+      }
+    );
+
+    observer.observe(anchor);
+
+    return () => observer.disconnect();
+  }, [setIntent]);
+
+  useLayoutEffect(() => {
+    const element = scrollContainerRef.current;
+    if (!element) {
+      return;
+    }
+
+    const handleContentResize = () => {
+      const target = scrollContainerRef.current;
+      if (!target) {
+        return;
+      }
+
+      const previousHeight = prevScrollHeightRef.current;
+      const currentHeight = target.scrollHeight;
+
+      if (previousHeight === 0) {
+        prevScrollHeightRef.current = currentHeight;
+        lastScrollTopRef.current = target.scrollTop;
+        return;
+      }
+
+      if (previousHeight === currentHeight) {
+        return;
+      }
+
+      const heightDelta = currentHeight - previousHeight;
+      const shouldStickToBottom =
+        intentRef.current === "pinned" && isAtBottomRef.current;
+
+      if (shouldStickToBottom) {
+        target.scrollTop = 0;
+      } else {
+        target.scrollTop -= heightDelta;
+      }
+
+      prevScrollHeightRef.current = target.scrollHeight;
+      lastScrollTopRef.current = target.scrollTop;
+      updateScrollState(target);
+    };
+
+    prevScrollHeightRef.current = element.scrollHeight;
+    lastScrollTopRef.current = element.scrollTop;
+
+    if (typeof ResizeObserver !== "undefined") {
+      const resizeObserver = new ResizeObserver(handleContentResize);
+      resizeObserver.observe(element);
+      resizeObserverRef.current = resizeObserver;
+
+      return () => {
+        resizeObserver.disconnect();
+        resizeObserverRef.current = null;
+      };
+    }
+
+    if (typeof MutationObserver !== "undefined") {
+      const mutationObserver = new MutationObserver(handleContentResize);
+      mutationObserver.observe(element, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+      });
+      mutationObserverRef.current = mutationObserver;
+
+      return () => {
+        mutationObserver.disconnect();
+        mutationObserverRef.current = null;
+      };
+    }
+
+    const intervalId = window.setInterval(handleContentResize, 200);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [updateScrollState]);
+
+  useEffect(() => {
+    return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      resizeObserverRef.current?.disconnect();
+      mutationObserverRef.current?.disconnect();
+    };
+  }, []);
+
+  const shouldPinToBottom = scrollIntent === "pinned" && isAtBottom;
 
   return {
     scrollContainerRef,

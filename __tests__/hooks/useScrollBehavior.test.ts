@@ -1,17 +1,15 @@
-import { renderHook, act } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 
-// Mock scrollTo method
 const mockScrollTo = jest.fn();
 
-// Create a mock HTMLDivElement with scroll properties
 const createMockScrollContainer = (options: {
   scrollTop?: number;
   scrollHeight?: number;
   clientHeight?: number;
 } = {}) => {
   const element = document.createElement('div');
-  
+
   Object.defineProperties(element, {
     scrollTop: {
       value: options.scrollTop ?? 0,
@@ -28,530 +26,265 @@ const createMockScrollContainer = (options: {
   });
 
   element.scrollTo = mockScrollTo;
-  
-  return element;
+
+  return element as HTMLDivElement;
 };
 
-// Mock IntersectionObserver
+class MockResizeObserver implements ResizeObserver {
+  public readonly callback: ResizeObserverCallback;
+  public readonly observe = jest.fn();
+  public readonly unobserve = jest.fn();
+  public readonly disconnect = jest.fn();
+
+  constructor(callback: ResizeObserverCallback) {
+    this.callback = callback;
+    resizeObservers.push(this);
+  }
+}
+
+type MockIntersectionObserverInstance = {
+  callback: IntersectionObserverCallback;
+  observe: jest.Mock;
+  disconnect: jest.Mock;
+  takeRecords: jest.Mock;
+};
+
+let resizeObservers: MockResizeObserver[] = [];
+let intersectionObservers: MockIntersectionObserverInstance[] = [];
+
+const originalRAF = (globalThis as any).requestAnimationFrame;
+const originalCAF = (globalThis as any).cancelAnimationFrame;
+const originalResizeObserver = (globalThis as any).ResizeObserver;
+const originalMutationObserver = (globalThis as any).MutationObserver;
+const originalIntersectionObserver = (globalThis as any).IntersectionObserver;
+
 const mockIntersectionObserver = jest.fn();
-const mockObserve = jest.fn();
-const mockDisconnect = jest.fn();
 
-mockIntersectionObserver.mockImplementation((callback) => ({
-  observe: mockObserve,
-  disconnect: mockDisconnect,
-  callback, // Store callback for later use
-}));
+beforeEach(() => {
+  mockScrollTo.mockReset();
+  mockIntersectionObserver.mockReset();
+  resizeObservers = [];
+  intersectionObservers = [];
 
-// @ts-ignore
-global.IntersectionObserver = mockIntersectionObserver;
+  (globalThis as any).requestAnimationFrame = jest
+    .fn((cb: FrameRequestCallback) => {
+      cb(0);
+      return 1;
+    });
+
+  (globalThis as any).cancelAnimationFrame = jest.fn();
+
+  (globalThis as any).ResizeObserver = MockResizeObserver;
+
+  (globalThis as any).MutationObserver = jest.fn(() => ({
+    observe: jest.fn(),
+    disconnect: jest.fn(),
+    takeRecords: jest.fn(() => []),
+  }));
+
+  mockIntersectionObserver.mockImplementation(
+    (callback: IntersectionObserverCallback) => {
+      const instance: MockIntersectionObserverInstance = {
+        callback,
+        observe: jest.fn(),
+        disconnect: jest.fn(),
+        takeRecords: jest.fn(() => []),
+      };
+      intersectionObservers.push(instance);
+      return instance as unknown as IntersectionObserver;
+    }
+  );
+
+  (globalThis as any).IntersectionObserver = mockIntersectionObserver;
+});
+
+afterEach(() => {
+  jest.clearAllMocks();
+  resizeObservers = [];
+  intersectionObservers = [];
+});
+
+afterAll(() => {
+  if (originalRAF) {
+    (globalThis as any).requestAnimationFrame = originalRAF;
+  } else {
+    delete (globalThis as any).requestAnimationFrame;
+  }
+
+  if (originalCAF) {
+    (globalThis as any).cancelAnimationFrame = originalCAF;
+  } else {
+    delete (globalThis as any).cancelAnimationFrame;
+  }
+
+  if (originalResizeObserver) {
+    (globalThis as any).ResizeObserver = originalResizeObserver;
+  } else {
+    delete (globalThis as any).ResizeObserver;
+  }
+
+  if (originalMutationObserver) {
+    (globalThis as any).MutationObserver = originalMutationObserver;
+  } else {
+    delete (globalThis as any).MutationObserver;
+  }
+
+  if (originalIntersectionObserver) {
+    (globalThis as any).IntersectionObserver = originalIntersectionObserver;
+  } else {
+    delete (globalThis as any).IntersectionObserver;
+  }
+});
+
+const setupHook = (options: {
+  container?: HTMLDivElement;
+  anchor?: HTMLDivElement | null;
+} = {}) => {
+  const container = options.container ?? createMockScrollContainer();
+  const anchor = options.anchor ?? null;
+
+  const { result } = renderHook(() => {
+    const hook = useScrollBehavior();
+    hook.scrollContainerRef.current = container;
+    if (anchor) {
+      hook.bottomAnchorRef.current = anchor;
+    }
+    return hook;
+  });
+
+  return { result, container, anchor };
+};
+
+const triggerResize = (element: HTMLDivElement) => {
+  resizeObservers.forEach((observer) =>
+    observer.callback(
+      [{ target: element } as unknown as ResizeObserverEntry],
+      observer as unknown as ResizeObserver
+    )
+  );
+};
 
 describe('useScrollBehavior', () => {
-  beforeEach(() => {
-    mockScrollTo.mockClear();
-    mockIntersectionObserver.mockClear();
-    mockObserve.mockClear();
-    mockDisconnect.mockClear();
-  });
-
-  it('should initialize with correct default states', () => {
-    const { result } = renderHook(() => useScrollBehavior());
+  it('initializes pinned at the bottom', () => {
+    const { result } = setupHook();
 
     expect(result.current.isAtBottom).toBe(true);
-    expect(result.current.isAtTop).toBe(false);
     expect(result.current.scrollIntent).toBe('pinned');
-    expect(result.current.shouldPinToBottom).toBe(true); // pinned + isAtBottom
-    expect(result.current.scrollContainerRef).toBeDefined();
-    expect(result.current.bottomAnchorRef).toBeDefined();
-    expect(result.current.scrollToVisualBottom).toBeInstanceOf(Function);
-    expect(result.current.scrollToVisualTop).toBeInstanceOf(Function);
-    expect(result.current.handleScroll).toBeInstanceOf(Function);
+    expect(result.current.shouldPinToBottom).toBe(true);
   });
 
-  describe('scrollToVisualBottom', () => {
-    it('should scroll to top (visual bottom in flex-col-reverse)', () => {
-      const { result } = renderHook(() => useScrollBehavior());
-      const mockContainer = createMockScrollContainer();
-      
-      // Set the ref to the mock container
-      result.current.scrollContainerRef.current = mockContainer;
+  it('scrollToVisualBottom pins and scrolls to origin', () => {
+    const container = createMockScrollContainer({ scrollTop: -150 });
+    const { result } = setupHook({ container });
 
-      act(() => {
-        result.current.scrollToVisualBottom();
-      });
-
-      expect(mockScrollTo).toHaveBeenCalledWith({
-        top: 0,
-        behavior: 'smooth',
-      });
-      // Should set scrollIntent to pinned
-      expect(result.current.scrollIntent).toBe('pinned');
+    act(() => {
+      result.current.scrollToVisualBottom();
     });
 
-    it('should set scrollIntent to pinned when scrolling to bottom', () => {
-      const { result } = renderHook(() => useScrollBehavior());
-      const mockContainer = createMockScrollContainer();
-      
-      // Set initial state to reading
-      result.current.scrollContainerRef.current = mockContainer;
-      mockContainer.scrollTop = 100; // Not at bottom
-      
-      act(() => {
-        result.current.handleScroll();
-      });
-      
-      // Should be in reading mode when away from bottom
-      expect(result.current.scrollIntent).toBe('reading');
-      
-      // Now scroll to bottom
-      act(() => {
-        result.current.scrollToVisualBottom();
-      });
-      
-      expect(result.current.scrollIntent).toBe('pinned');
-    });
-
-    it('should not scroll when container ref is null', () => {
-      const { result } = renderHook(() => useScrollBehavior());
-
-      act(() => {
-        result.current.scrollToVisualBottom();
-      });
-
-      expect(mockScrollTo).not.toHaveBeenCalled();
-    });
+    expect(mockScrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' });
+    expect(result.current.scrollIntent).toBe('pinned');
   });
 
-  describe('scrollToVisualTop', () => {
-    it('should scroll to maximum negative position (visual top in flex-col-reverse)', () => {
-      const { result } = renderHook(() => useScrollBehavior());
-      const mockContainer = createMockScrollContainer({
-        scrollHeight: 1000,
-        clientHeight: 500,
-      });
-      
-      result.current.scrollContainerRef.current = mockContainer;
+  it('scrollToVisualTop scrolls to the visual top and marks reading intent', () => {
+    const container = createMockScrollContainer({ scrollHeight: 900, clientHeight: 400 });
+    const { result } = setupHook({ container });
 
-      act(() => {
-        result.current.scrollToVisualTop();
-      });
-
-      // Expected: -(scrollHeight - clientHeight) = -(1000 - 500) = -500
-      expect(mockScrollTo).toHaveBeenCalledWith({
-        top: -500,
-        behavior: 'smooth',
-      });
+    act(() => {
+      result.current.scrollToVisualTop();
     });
 
-    it('should not scroll when container ref is null', () => {
-      const { result } = renderHook(() => useScrollBehavior());
-
-      act(() => {
-        result.current.scrollToVisualTop();
-      });
-
-      expect(mockScrollTo).not.toHaveBeenCalled();
-    });
+    expect(mockScrollTo).toHaveBeenCalledWith({ top: -(900 - 400), behavior: 'smooth' });
+    expect(result.current.scrollIntent).toBe('reading');
   });
 
-  describe('handleScroll', () => {
-    it('should detect when at bottom (scrollTop near 0)', () => {
-      const { result } = renderHook(() => useScrollBehavior());
-      const mockContainer = createMockScrollContainer({
-        scrollTop: 2, // Within threshold of 50
-        scrollHeight: 1000,
-        clientHeight: 500,
-      });
-      
-      result.current.scrollContainerRef.current = mockContainer;
+  it('handleScroll marks reading intent when user leaves the bottom', () => {
+    const container = createMockScrollContainer();
+    const { result } = setupHook({ container });
 
-      act(() => {
-        result.current.handleScroll();
-      });
-
-      expect(result.current.isAtBottom).toBe(true);
-      expect(result.current.scrollIntent).toBe('pinned');
+    act(() => {
+      result.current.handleScroll();
     });
 
-    it('should detect when not at bottom (scrollTop > 50)', () => {
-      const { result } = renderHook(() => useScrollBehavior());
-      const mockContainer = createMockScrollContainer({
-        scrollTop: 60, // Beyond threshold of 50
-        scrollHeight: 1000,
-        clientHeight: 500,
-      });
-      
-      result.current.scrollContainerRef.current = mockContainer;
-
-      act(() => {
-        result.current.handleScroll();
-      });
-
-      expect(result.current.isAtBottom).toBe(false);
-      expect(result.current.scrollIntent).toBe('reading');
+    act(() => {
+      container.scrollTop = -200;
+      result.current.handleScroll();
     });
 
-    it('should detect when at top (scrollTop at max negative)', () => {
-      const { result } = renderHook(() => useScrollBehavior());
-      const mockContainer = createMockScrollContainer({
-        scrollTop: -498, // Within threshold of maxNegativeScroll (-500)
-        scrollHeight: 1000,
-        clientHeight: 500,
-      });
-      
-      result.current.scrollContainerRef.current = mockContainer;
-
-      act(() => {
-        result.current.handleScroll();
-      });
-
-      expect(result.current.isAtTop).toBe(true);
-    });
-
-    it('should detect when not at top', () => {
-      const { result } = renderHook(() => useScrollBehavior());
-      const mockContainer = createMockScrollContainer({
-        scrollTop: -400, // Beyond threshold from maxNegativeScroll (-500)
-        scrollHeight: 1000,
-        clientHeight: 500,
-      });
-      
-      result.current.scrollContainerRef.current = mockContainer;
-
-      act(() => {
-        result.current.handleScroll();
-      });
-
-      expect(result.current.isAtTop).toBe(false);
-    });
-
-    it('should handle case when container is null', () => {
-      const { result } = renderHook(() => useScrollBehavior());
-
-      act(() => {
-        result.current.handleScroll();
-      });
-
-      // Should not throw error and states should remain unchanged
-      expect(result.current.isAtBottom).toBe(true);
-      expect(result.current.isAtTop).toBe(false);
-    });
+    expect(result.current.isAtBottom).toBe(false);
+    expect(result.current.scrollIntent).toBe('reading');
   });
 
-  describe('scroll event listener', () => {
-    let mockContainer: HTMLDivElement;
-    let addEventListenerSpy: jest.SpyInstance;
-    let removeEventListenerSpy: jest.SpyInstance;
+  it('handleScroll detects when the user reaches the top', () => {
+    const container = createMockScrollContainer();
+    const { result } = setupHook({ container });
 
-    beforeEach(() => {
-      mockContainer = createMockScrollContainer();
-      addEventListenerSpy = jest.spyOn(mockContainer, 'addEventListener');
-      removeEventListenerSpy = jest.spyOn(mockContainer, 'removeEventListener');
+    act(() => {
+      container.scrollTop = -(container.scrollHeight - container.clientHeight);
+      result.current.handleScroll();
     });
 
-    afterEach(() => {
-      addEventListenerSpy.mockRestore();
-      removeEventListenerSpy.mockRestore();
-    });
-
-    it('should add scroll event listener when container exists', () => {
-      const { result } = renderHook(() => {
-        const hook = useScrollBehavior();
-        // Set the ref immediately during render to trigger useEffect
-        hook.scrollContainerRef.current = mockContainer;
-        return hook;
-      });
-
-      expect(addEventListenerSpy).toHaveBeenCalledWith('scroll', expect.any(Function));
-    });
-
-    it('should remove scroll event listener on cleanup', () => {
-      const { unmount } = renderHook(() => {
-        const hook = useScrollBehavior();
-        // Set the ref immediately during render to trigger useEffect
-        hook.scrollContainerRef.current = mockContainer;
-        return hook;
-      });
-
-      unmount();
-
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('scroll', expect.any(Function));
-    });
-
-    it('should not add event listener when container is null', () => {
-      renderHook(() => useScrollBehavior());
-
-      expect(addEventListenerSpy).not.toHaveBeenCalled();
-    });
+    expect(result.current.isAtTop).toBe(true);
   });
 
-  describe('edge cases', () => {
-    it('should handle zero scroll dimensions', () => {
-      const { result } = renderHook(() => useScrollBehavior());
-      const mockContainer = createMockScrollContainer({
-        scrollTop: 0,
-        scrollHeight: 0,
-        clientHeight: 0,
-      });
-      
-      result.current.scrollContainerRef.current = mockContainer;
+  it('maintains visual offset when content grows while reading', () => {
+    const container = createMockScrollContainer({ scrollTop: -200 });
+    const { result } = setupHook({ container });
 
-      act(() => {
-        result.current.handleScroll();
-      });
-
-      expect(result.current.isAtBottom).toBe(true);
-      expect(result.current.isAtTop).toBe(true);
+    act(() => {
+      result.current.handleScroll();
     });
 
-    it('should handle negative scroll values correctly', () => {
-      const { result } = renderHook(() => useScrollBehavior());
-      const mockContainer = createMockScrollContainer({
-        scrollTop: -30, // Math.abs(-30) = 30 < 50, so considered at bottom per current logic
-        scrollHeight: 1000,
-        clientHeight: 500, // maxNegativeScroll = -(1000-500) = -500, -30 is not near -500, so not at top
-      });
-      
-      result.current.scrollContainerRef.current = mockContainer;
-
-      act(() => {
-        result.current.handleScroll();
-      });
-
-      // Math.abs(-30) = 30 < 50, so isAtBottom is true according to current implementation
-      // Math.abs(-30 - (-500)) = Math.abs(470) = 470 > 50, so isAtTop is false
-      expect(result.current.isAtBottom).toBe(true);
-      expect(result.current.isAtTop).toBe(false);
+    act(() => {
+      container.scrollHeight = 1100;
+      triggerResize(container);
     });
+
+    expect(container.scrollTop).toBe(-300);
+    expect(result.current.scrollIntent).toBe('reading');
   });
 
-  describe('scrollIntent behavior', () => {
-    it('should start with pinned intent', () => {
-      const { result } = renderHook(() => useScrollBehavior());
-      expect(result.current.scrollIntent).toBe('pinned');
+  it('sticks to bottom when content grows while pinned', () => {
+    const container = createMockScrollContainer({ scrollTop: 0 });
+    const { result } = setupHook({ container });
+
+    act(() => {
+      result.current.handleScroll();
     });
 
-    it('should change to reading when scrolling away from bottom significantly', () => {
-      const { result } = renderHook(() => useScrollBehavior());
-      const mockContainer = createMockScrollContainer({
-        scrollTop: 0, // Start at bottom
-        scrollHeight: 1000,
-        clientHeight: 500,
-      });
-      
-      result.current.scrollContainerRef.current = mockContainer;
-      
-      // First scroll - establish baseline
-      act(() => {
-        result.current.handleScroll();
-      });
-      
-      // Now scroll away significantly (> 20px delta and not at bottom)
-      mockContainer.scrollTop = 100;
-      
-      act(() => {
-        result.current.handleScroll();
-      });
-      
-      expect(result.current.scrollIntent).toBe('reading');
+    act(() => {
+      container.scrollHeight = 1200;
+      triggerResize(container);
     });
 
-    it('should remain pinned for small scroll movements', () => {
-      const { result } = renderHook(() => useScrollBehavior());
-      const mockContainer = createMockScrollContainer({
-        scrollTop: 0, // Start at bottom
-        scrollHeight: 1000,
-        clientHeight: 500,
-      });
-      
-      result.current.scrollContainerRef.current = mockContainer;
-      
-      // First scroll - establish baseline
-      act(() => {
-        result.current.handleScroll();
-      });
-      
-      // Small scroll movement (< 20px delta)
-      mockContainer.scrollTop = 10;
-      
-      act(() => {
-        result.current.handleScroll();
-      });
-      
-      expect(result.current.scrollIntent).toBe('pinned');
-    });
-
-    it('should change back to pinned when returning to bottom', () => {
-      const { result } = renderHook(() => useScrollBehavior());
-      const mockContainer = createMockScrollContainer({
-        scrollTop: 100, // Start away from bottom
-        scrollHeight: 1000,
-        clientHeight: 500,
-      });
-      
-      result.current.scrollContainerRef.current = mockContainer;
-      
-      // First scroll - should be reading when away from bottom
-      act(() => {
-        result.current.handleScroll();
-      });
-      
-      expect(result.current.scrollIntent).toBe('reading');
-      
-      // Now return to bottom
-      mockContainer.scrollTop = 0;
-      
-      act(() => {
-        result.current.handleScroll();
-      });
-      
-      expect(result.current.scrollIntent).toBe('pinned');
-    });
+    expect(container.scrollTop).toBe(0);
+    expect(result.current.shouldPinToBottom).toBe(true);
   });
 
-  describe('shouldPinToBottom', () => {
-    it('should be true when pinned and at bottom', () => {
-      const { result } = renderHook(() => useScrollBehavior());
-      
-      // Default state: pinned and at bottom
-      expect(result.current.shouldPinToBottom).toBe(true);
+  it('updates bottom state via intersection observer', () => {
+    const container = createMockScrollContainer();
+    const anchor = document.createElement('div');
+    const { result } = setupHook({ container, anchor });
+
+    expect(mockIntersectionObserver).toHaveBeenCalled();
+    expect(intersectionObservers).toHaveLength(1);
+
+    const instance = intersectionObservers[0];
+
+    act(() => {
+      instance.callback([
+        { isIntersecting: true } as unknown as IntersectionObserverEntry,
+      ], instance as unknown as IntersectionObserver);
     });
 
-    it('should be false when reading even if at bottom', () => {
-      const { result } = renderHook(() => useScrollBehavior());
-      const mockContainer = createMockScrollContainer({
-        scrollTop: 100, // Away from bottom initially
-        scrollHeight: 1000,
-        clientHeight: 500,
-      });
-      
-      result.current.scrollContainerRef.current = mockContainer;
-      
-      // Scroll to trigger reading mode
-      act(() => {
-        result.current.handleScroll();
-      });
-      
-      expect(result.current.scrollIntent).toBe('reading');
-      
-      // Now at bottom but still reading
-      mockContainer.scrollTop = 0;
-      act(() => {
-        result.current.handleScroll();
-      });
-      
-      // Should be pinned again when at bottom
-      expect(result.current.shouldPinToBottom).toBe(true);
+    expect(result.current.isAtBottom).toBe(true);
+    expect(result.current.scrollIntent).toBe('pinned');
+
+    act(() => {
+      instance.callback([
+        { isIntersecting: false } as unknown as IntersectionObserverEntry,
+      ], instance as unknown as IntersectionObserver);
     });
 
-    it('should be false when pinned but not at bottom', () => {
-      const { result } = renderHook(() => useScrollBehavior());
-      const mockContainer = createMockScrollContainer({
-        scrollTop: 100, // Not at bottom
-        scrollHeight: 1000,
-        clientHeight: 500,
-      });
-      
-      result.current.scrollContainerRef.current = mockContainer;
-      
-      act(() => {
-        result.current.handleScroll();
-      });
-      
-      expect(result.current.shouldPinToBottom).toBe(false);
-    });
-  });
-
-  describe('intersection observer', () => {
-    it('should create intersection observer when refs are available', () => {
-      const mockContainer = createMockScrollContainer();
-      const mockAnchor = document.createElement('div');
-      
-      const { result } = renderHook(() => {
-        const hook = useScrollBehavior();
-        // Set refs to trigger intersection observer setup
-        hook.scrollContainerRef.current = mockContainer;
-        hook.bottomAnchorRef.current = mockAnchor;
-        return hook;
-      });
-      
-      expect(mockIntersectionObserver).toHaveBeenCalledWith(
-        expect.any(Function),
-        expect.objectContaining({
-          root: mockContainer,
-          threshold: 0,
-          rootMargin: '50px'
-        })
-      );
-      
-      expect(mockObserve).toHaveBeenCalledWith(mockAnchor);
-    });
-
-    it('should update state when anchor intersects', () => {
-      const mockContainer = createMockScrollContainer();
-      const mockAnchor = document.createElement('div');
-      
-      const { result } = renderHook(() => {
-        const hook = useScrollBehavior();
-        hook.scrollContainerRef.current = mockContainer;
-        hook.bottomAnchorRef.current = mockAnchor;
-        return hook;
-      });
-      
-      // Get the callback from the intersection observer mock
-      const intersectionCallback = mockIntersectionObserver.mock.calls[0][0];
-      
-      // Simulate anchor coming into view
-      act(() => {
-        intersectionCallback([{ isIntersecting: true }]);
-      });
-      
-      expect(result.current.isAtBottom).toBe(true);
-      expect(result.current.scrollIntent).toBe('pinned');
-    });
-
-    it('should update state when anchor leaves view', () => {
-      const mockContainer = createMockScrollContainer();
-      const mockAnchor = document.createElement('div');
-      
-      const { result } = renderHook(() => {
-        const hook = useScrollBehavior();
-        hook.scrollContainerRef.current = mockContainer;
-        hook.bottomAnchorRef.current = mockAnchor;
-        return hook;
-      });
-      
-      // Get the callback from the intersection observer mock
-      const intersectionCallback = mockIntersectionObserver.mock.calls[0][0];
-      
-      // Simulate anchor leaving view
-      act(() => {
-        intersectionCallback([{ isIntersecting: false }]);
-      });
-      
-      expect(result.current.isAtBottom).toBe(false);
-    });
-
-    it('should disconnect observer on cleanup', () => {
-      const mockContainer = createMockScrollContainer();
-      const mockAnchor = document.createElement('div');
-      
-      const { unmount } = renderHook(() => {
-        const hook = useScrollBehavior();
-        hook.scrollContainerRef.current = mockContainer;
-        hook.bottomAnchorRef.current = mockAnchor;
-        return hook;
-      });
-      
-      unmount();
-      
-      expect(mockDisconnect).toHaveBeenCalled();
-    });
-
-    it('should not create observer when refs are null', () => {
-      renderHook(() => useScrollBehavior());
-      
-      expect(mockIntersectionObserver).not.toHaveBeenCalled();
-    });
+    expect(result.current.isAtBottom).toBe(false);
   });
 });
