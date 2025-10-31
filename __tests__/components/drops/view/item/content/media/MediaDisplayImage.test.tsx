@@ -1,4 +1,4 @@
-import React from "react";
+import React, { createRef, forwardRef, type ComponentProps } from "react";
 import { fireEvent, render } from "@testing-library/react";
 
 jest.mock("@/helpers/image.helpers", () => ({
@@ -7,19 +7,28 @@ jest.mock("@/helpers/image.helpers", () => ({
 }));
 
 jest.mock("@/hooks/useInView", () => ({
-  useInView: jest.fn(() => [React.createRef(), true] as any),
+  useInView: jest.fn(
+    (): [React.RefObject<HTMLDivElement | null>, boolean] => [
+      createRef<HTMLDivElement>(),
+      true,
+    ]
+  ),
 }));
 
-jest.mock("next/image", () => {
-  const React = require("react") as typeof import("react");
-  return {
-    __esModule: true,
-    default: React.forwardRef<HTMLImageElement, React.ComponentProps<"img">>(
-      // eslint-disable-next-line react/display-name
-      (props, ref) => <img ref={ref} {...props} />
-    ),
-  };
-});
+type MockNextImageProps = ComponentProps<"img"> & {
+  readonly fill?: boolean;
+  readonly unoptimized?: boolean;
+};
+
+jest.mock("next/image", () => ({
+  __esModule: true,
+  default: forwardRef<HTMLImageElement, MockNextImageProps>(
+    // eslint-disable-next-line react/display-name
+    ({ fill: _fill, unoptimized: _unoptimized, ...props }, ref) => (
+      <img ref={ref} {...props} />
+    )
+  ),
+}));
 
 import MediaDisplayImage from "@/components/drops/view/item/content/media/MediaDisplayImage";
 
@@ -35,7 +44,12 @@ describe("MediaDisplayImage", () => {
       container.querySelector(".tw-bg-iron-800")
     ).toBeInTheDocument();
 
-    const img = container.querySelector("img") as HTMLImageElement;
+    const img = container.querySelector("img");
+
+    if (!(img instanceof HTMLImageElement)) {
+      throw new Error("Expected an HTMLImageElement");
+    }
+
     expect(img).toBeInTheDocument();
     expect(getScaledImageUri).toHaveBeenCalledWith("test.jpg", "AUTOx600");
     expect(img.src).toContain("scaled-url");

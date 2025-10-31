@@ -1,15 +1,20 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { forwardRef, type ComponentProps } from "react";
 
-jest.mock("next/image", () => {
-  const React = require("react") as typeof import("react");
-  return {
-    __esModule: true,
-    default: React.forwardRef<HTMLImageElement, React.ComponentProps<"img">>(
-      // eslint-disable-next-line react/display-name
-      (props, ref) => <img ref={ref} {...props} />
-    ),
-  };
-});
+type MockNextImageProps = ComponentProps<"img"> & {
+  readonly fill?: boolean;
+  readonly unoptimized?: boolean;
+};
+
+jest.mock("next/image", () => ({
+  __esModule: true,
+  default: forwardRef<HTMLImageElement, MockNextImageProps>(
+    // eslint-disable-next-line react/display-name
+    ({ fill: _fill, unoptimized: _unoptimized, ...props }, ref) => (
+      <img ref={ref} {...props} />
+    )
+  ),
+}));
 
 import { FallbackImage } from "../../../components/common/FallbackImage";
 
