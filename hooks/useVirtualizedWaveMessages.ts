@@ -138,7 +138,7 @@ export function useVirtualizedWaveMessages(
     const totalDrops = activeWaveMessages.drops.length;
     const previousTotal = previousDropsCountRef.current;
 
-    if (hasInitialized.current && totalDrops > previousTotal) {
+    if (hasInitialized.current && previousTotal > 0 && totalDrops > previousTotal) {
       setVirtualLimit((currentLimit) => {
         if (currentLimit >= totalDrops) {
           return currentLimit;

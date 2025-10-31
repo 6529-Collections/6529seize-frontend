@@ -3,6 +3,7 @@
 import React, { forwardRef, useRef, useEffect, useCallback } from "react";
 import { useIntersectionObserver } from "@/hooks/scroll/useIntersectionObserver";
 
+const TOP_SENTINEL_ROOT_MARGIN = "200px 0px 0px 0px";
 
 interface WaveDropsReverseContainerProps {
   readonly children: React.ReactNode;
@@ -48,7 +49,7 @@ export const WaveDropsReverseContainer = forwardRef<
       topSentinelRef,
       {
         root: scrollContainerRef.current,
-        rootMargin: "1px 0px 0px 0px",
+        rootMargin: TOP_SENTINEL_ROOT_MARGIN,
         threshold: 0,
       },
       handleIntersection,
