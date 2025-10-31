@@ -22,7 +22,6 @@ import ComponentSelectRandomHolders from "./component-config/ComponentSelectRand
 import ComponentAddSpots from "./component-config/ComponentAddSpots";
 import FinalizeComponent from "./component-config/FinalizeComponent";
 import SnapshotExcludeOtherSnapshots from "./component-config/SnapshotExcludeOtherSnapshots";
-import { useDebounce } from "react-use";
 import { ComponentRandomHoldersWeightType } from "./component-config/utils/ComponentRandomHoldersWeight";
 import {
   distributionPlanApiFetch,
@@ -95,19 +94,21 @@ export interface PhaseGroupConfig {
   uniqueWalletsCount: number | null;
 }
 
+interface BuildPhaseFormConfigModalProps {
+  readonly name: string;
+  readonly description: string;
+  readonly selectedPhase: BuildPhasesPhase;
+  readonly phases: BuildPhasesPhase[];
+  readonly onClose: () => void;
+}
+
 export default function BuildPhaseFormConfigModal({
   name,
   description,
   selectedPhase,
   phases,
   onClose,
-}: {
-  name: string;
-  description: string;
-  selectedPhase: BuildPhasesPhase;
-  phases: BuildPhasesPhase[];
-  onClose: () => void;
-}) {
+}: BuildPhaseFormConfigModalProps) {
   const [configStep, setConfigStep] = useState<PhaseConfigStep>(
     PhaseConfigStep.SELECT_SNAPSHOT
   );
@@ -708,141 +709,6 @@ export default function BuildPhaseFormConfigModal({
     setModalTitle(`Configure group "${name}"`);
   }, [name]);
 
-  const [uniqueWalletsCountByOperations, _setUniqueWalletsCountByOperations] =
-    useState<number | null>(null);
-
-  const [isLoadingUniqueWalletsCount, setIsLoadingUniqueWalletsCount] =
-    useState<boolean>(false);
-
-  const [loadingUniqueWalletsCountIds, _setLoadingUniqueWalletsCountIds] =
-    useState<string[]>([]);
-
-  useEffect(() => {
-    if (!!loadingUniqueWalletsCountIds.length) {
-      setIsLoadingUniqueWalletsCount(true);
-      return;
-    }
-    setIsLoadingUniqueWalletsCount(false);
-  }, [loadingUniqueWalletsCountIds]);
-
-  const [uniqueCountOps, setUniqueCountOps] = useState<
-    AllowlistOperationBase[]
-  >([]);
-
-  useEffect(() => {
-    const customTokenPoolIds = new Set(
-      newOperations
-        .filter(
-          (o) =>
-            o.code === AllowlistOperationCode.ADD_ITEM &&
-            o.params.poolType === Pool.CUSTOM_TOKEN_POOL
-        )
-        .map((o) => o.params.poolId)
-    );
-
-    const excludeCustomTokenPoolIds = new Set(
-      newOperations.flatMap((o) => {
-        if (
-          o.code ===
-          AllowlistOperationCode.ITEM_REMOVE_WALLETS_FROM_CERTAIN_TOKEN_POOLS
-        ) {
-          return o.params.pools
-            .filter((p: any) => p.poolType === Pool.CUSTOM_TOKEN_POOL)
-            .map((p: any) => p.poolId);
-        }
-        return [];
-      })
-    );
-
-    const customTokenPoolOperations = operations
-      .filter(
-        (o) =>
-          o.code === AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL &&
-          (customTokenPoolIds.has(o.params.id) ||
-            excludeCustomTokenPoolIds.has(o.params.id))
-      )
-      .map((o) => ({
-        code: o.code,
-        params: o.params,
-      }));
-
-    const tokenPoolOperations = operations.filter(
-      (o) => o.code === AllowlistOperationCode.CREATE_TOKEN_POOL
-    );
-    const ops = [
-      ...tokenPoolOperations,
-      ...customTokenPoolOperations,
-      ...newOperations,
-    ];
-    setUniqueCountOps(ops);
-  }, [newOperations, operations]);
-
-  const [_debouncedUniqueCountOps, setDebouncedUniqueCountOps] = useState<
-    AllowlistOperationBase[]
-  >([]);
-  useDebounce(
-    () => {
-      setDebouncedUniqueCountOps(uniqueCountOps);
-    },
-    1000,
-    [uniqueCountOps]
-  );
-
-  // useEffect(() => {
-  //   const getUniqueWalletsCount = async (distributionPlanId: string) => {
-  //     const endpoint = `/allowlists/${distributionPlanId}/unique-wallets-count`;
-  //     const uniqueId = getRandomObjectId();
-  //     setLoadingUniqueWalletsCountIds((ids) => [...ids, uniqueId]);
-  //     const { success, data } = await distributionPlanApiPost<number>({
-  //       endpoint,
-  //       body: debouncedUniqueCountOps,
-  //     });
-  //     if (!success) {
-  //       setLoadingUniqueWalletsCountIds((ids) =>
-  //         ids.filter((id) => id !== uniqueId)
-  //       );
-  //       return { success: false };
-  //     }
-  //     setUniqueWalletsCountByOperations(data);
-  //     setLoadingUniqueWalletsCountIds((ids) =>
-  //       ids.filter((id) => id !== uniqueId)
-  //     );
-  //     return { success: true };
-  //   };
-
-  //   if (!distributionPlan) {
-  //     setUniqueWalletsCountByOperations(null);
-  //     return;
-  //   }
-
-  //   if (isAddingOperations) {
-  //     return;
-  //   }
-
-  //   if (
-  //     ![
-  //       PhaseConfigStep.FINALIZE_SNAPSHOT,
-  //       PhaseConfigStep.COMPONENT_ADD_SPOTS,
-  //       PhaseConfigStep.FINALIZE_COMPONENTS,
-  //     ].includes(configStep)
-  //   ) {
-  //     return;
-  //   }
-
-  //   if (debouncedUniqueCountOps.length < 0) {
-  //     setUniqueWalletsCountByOperations(null);
-  //     return;
-  //   }
-
-  //   getUniqueWalletsCount(distributionPlan.id);
-  // }, [
-  //   distributionPlan,
-  //   setToasts,
-  //   configStep,
-  //   debouncedUniqueCountOps,
-  //   isAddingOperations,
-  // ]);
-
   return (
     <div className="tw-gap-y-6 tw-flex tw-flex-col tw-divide-y tw-divide-solid tw-divide-neutral-700 tw-divide-x-0">
       {(() => {
@@ -919,8 +785,6 @@ export default function BuildPhaseFormConfigModal({
                 onAddAnotherSnapshot={onAddAnotherSnapshot}
                 onRemoveGroupSnapshot={onRemoveGroupSnapshot}
                 title={modalTitle}
-                uniqueWalletsCount={uniqueWalletsCountByOperations}
-                isLoadingUniqueWalletsCount={isLoadingUniqueWalletsCount}
                 onClose={onClose}
                 phases={targetPhases}
               />
@@ -931,8 +795,6 @@ export default function BuildPhaseFormConfigModal({
                 onNextStep={onNextStep}
                 onSelectRandomHolders={onSelectRandomHolders}
                 title={modalTitle}
-                uniqueWalletsCount={uniqueWalletsCountByOperations}
-                isLoadingUniqueWalletsCount={isLoadingUniqueWalletsCount}
                 onClose={onClose}
               />
             );
@@ -941,8 +803,6 @@ export default function BuildPhaseFormConfigModal({
               <ComponentAddSpots
                 onSelectMaxMintCount={onSelectMaxMintCount}
                 title={modalTitle}
-                uniqueWalletsCount={uniqueWalletsCountByOperations}
-                isLoadingUniqueWalletsCount={isLoadingUniqueWalletsCount}
                 onClose={onClose}
               />
             );
@@ -956,8 +816,6 @@ export default function BuildPhaseFormConfigModal({
                 onRemoveGroupSnapshot={onRemoveGroupSnapshot}
                 loading={isAddingOperations}
                 title={modalTitle}
-                uniqueWalletsCount={uniqueWalletsCountByOperations}
-                isLoadingUniqueWalletsCount={isLoadingUniqueWalletsCount}
                 onClose={onClose}
                 phases={targetPhases}
               />

@@ -22,7 +22,6 @@ const BrainLeftSidebarWaves: React.FC<BrainLeftSidebarWavesProps> = ({
   return (
     <UnifiedWavesList
       waves={waves.list}
-      activeWaveId={activeWave.id}
       fetchNextPage={onNextPage}
       hasNextPage={waves.hasNextPage}
       isFetching={waves.isFetching}

@@ -14,7 +14,6 @@ import UnifiedWavesListWaves, {
 
 interface UnifiedWavesListProps {
   readonly waves: MinimalWave[];
-  readonly activeWaveId: string | null;
   readonly fetchNextPage: () => void;
   readonly hasNextPage: boolean | undefined;
   readonly isFetching: boolean;
@@ -25,7 +24,6 @@ interface UnifiedWavesListProps {
 
 const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
   waves,
-  activeWaveId: _activeWaveId,
   fetchNextPage,
   hasNextPage,
   isFetching,
@@ -75,7 +73,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
     obs.observe(sentinel);
 
     return () => obs.disconnect();
-  }, [hasNextPage, isFetchingNextPage, triggerFetchNextPage]);
+  }, [hasNextPage, isFetchingNextPage]);
 
   return (
     <div className="tw-mb-4">

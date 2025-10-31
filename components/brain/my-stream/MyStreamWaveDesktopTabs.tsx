@@ -165,17 +165,21 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     [MyStreamWaveTab.FAQ]: "FAQ",
   };
 
-  const options: TabOption[] = availableTabs
-    .filter(
-      (tab) =>
-        isMemesWave ||
-        ![MyStreamWaveTab.MY_VOTES, MyStreamWaveTab.FAQ].includes(tab)
-    )
-    .map((tab) => ({
-      key: tab,
-      label: tabLabels[tab],
-      panelId: getContentTabPanelId(tab),
-    }));
+  const options: TabOption[] = React.useMemo(
+    () =>
+      availableTabs
+        .filter(
+          (tab) =>
+            isMemesWave ||
+            ![MyStreamWaveTab.MY_VOTES, MyStreamWaveTab.FAQ].includes(tab)
+        )
+        .map((tab) => ({
+          key: tab,
+          label: tabLabels[tab],
+          panelId: getContentTabPanelId(tab),
+        })),
+    [availableTabs, isMemesWave]
+  );
 
   useEffect(() => {
     if (

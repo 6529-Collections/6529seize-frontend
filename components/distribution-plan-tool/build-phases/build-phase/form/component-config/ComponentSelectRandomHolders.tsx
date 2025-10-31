@@ -22,8 +22,8 @@ export default function ComponentSelectRandomHolders({
   onNextStep,
   onSelectRandomHolders,
   title,
-  uniqueWalletsCount,
-  isLoadingUniqueWalletsCount,
+  uniqueWalletsCount = null,
+  isLoadingUniqueWalletsCount = false,
   onClose,
 }: {
   onNextStep: (step: PhaseConfigStep) => void;
@@ -34,8 +34,8 @@ export default function ComponentSelectRandomHolders({
     seed: string;
   }) => void;
   title: string;
-  uniqueWalletsCount: number | null;
-  isLoadingUniqueWalletsCount: boolean;
+  uniqueWalletsCount?: number | null;
+  isLoadingUniqueWalletsCount?: boolean;
   onClose: () => void;
 }) {
   const { setToasts, distributionPlan } = useContext(

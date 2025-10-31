@@ -27,9 +27,12 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
+    if (inputValue === "") {
+      setVoteValue(currentVoteValue);
+      return;
+    }
 
-    if (inputValue === "" || inputValue === "-") {
-      setVoteValue(inputValue as any);
+    if (inputValue === "-") {
       return;
     }
 
@@ -48,14 +51,12 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
         },
       }),
     onSuccess: (_response: ApiDrop) => {
-      // Show success toast
       setToast({
         message: "Vote updated",
         type: "success",
       });
     },
     onError: (error) => {
-      // Show error toast
       setToast({
         message: error as unknown as string,
         type: "error",
@@ -69,11 +70,9 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
 
     setIsProcessing(true);
 
-    // Show loading message via button state (the button will show loading state)
     try {
       const { success } = await requestAuth();
       if (!success) {
-        // Show authentication error
         setToast({
           message: "Authentication failed",
           type: "error",
@@ -85,10 +84,13 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       await rateChangeMutation.mutateAsync({
         rate: voteValue,
       });
-    } catch (_error) {
-      // Any errors not caught in mutation will be handled here
+    } catch (error) {
+      console.error("Failed to submit vote:", error);
+
+      const errorMessage =
+        error instanceof Error ? error.message : "Something went wrong";
       setToast({
-        message: "Something went wrong",
+        message: errorMessage,
         type: "error",
       });
     } finally {

@@ -24,8 +24,8 @@ export default function CreatePlan({ id }: { readonly id: string }) {
   });
 
   const applyDistributionPlan = useEffectEvent(
-    (distributionPlan: AllowlistDescription) => {
-      void setState(distributionPlan);
+    async (distributionPlan: AllowlistDescription) => {
+      await setState(distributionPlan);
     }
   );
 
@@ -51,7 +51,7 @@ export default function CreatePlan({ id }: { readonly id: string }) {
           return;
         }
 
-        applyDistributionPlan(response.data);
+        await applyDistributionPlan(response.data);
       } catch {
         if (isActive) {
           redirectToEmma();

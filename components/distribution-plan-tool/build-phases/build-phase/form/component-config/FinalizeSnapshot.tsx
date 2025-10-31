@@ -19,8 +19,8 @@ export default function FinalizeSnapshot({
   groupSnapshots,
   snapshots,
   title,
-  uniqueWalletsCount,
-  isLoadingUniqueWalletsCount,
+  uniqueWalletsCount = null,
+  isLoadingUniqueWalletsCount = false,
   onClose,
   phases,
 }: {
@@ -31,8 +31,8 @@ export default function FinalizeSnapshot({
   groupSnapshots: PhaseGroupSnapshotConfig[];
   snapshots: DistributionPlanSnapshot[];
   title: string;
-  uniqueWalletsCount: number | null;
-  isLoadingUniqueWalletsCount: boolean;
+  uniqueWalletsCount?: number | null;
+  isLoadingUniqueWalletsCount?: boolean;
   onClose: () => void;
   phases: BuildPhasesPhase[];
 }) {

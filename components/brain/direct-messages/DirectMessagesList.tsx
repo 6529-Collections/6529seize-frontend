@@ -131,7 +131,10 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
           scrollContainerRef={scrollContainerRef}
         />
 
-        <UnifiedWavesListLoader isFetchingNextPage={isFetchingNextPage} />
+        <UnifiedWavesListLoader
+          isFetching={isFetching && list.length === 0}
+          isFetchingNextPage={isFetchingNextPage}
+        />
 
         <UnifiedWavesListEmpty
           sortedWaves={list}

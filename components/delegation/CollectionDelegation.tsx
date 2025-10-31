@@ -112,11 +112,11 @@ function getConsolidationReadParams(
 
 function getDelegationsCount(delegations: ContractDelegation[]) {
   let count = 0;
-  delegations.forEach((delegation) => {
+  for (const delegation of delegations) {
     if (delegation.wallets.length > 0) {
       count += delegation.wallets.length;
     }
-  });
+  }
   return count;
 }
 
@@ -268,7 +268,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
       "retrieveDelegatorsTokensIDsandExpiredDates"
     ),
     query: {
-      enabled: accountResolution.isConnected && incomingDelegations.length > 0,
+      enabled: accountResolution.isConnected,
       refetchInterval: 10000,
     },
   });

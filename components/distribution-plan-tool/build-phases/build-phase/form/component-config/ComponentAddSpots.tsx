@@ -10,14 +10,14 @@ import ComponentConfigMeta from "./ComponentConfigMeta";
 export default function ComponentAddSpots({
   onSelectMaxMintCount,
   title,
-  uniqueWalletsCount,
-  isLoadingUniqueWalletsCount,
+  uniqueWalletsCount = null,
+  isLoadingUniqueWalletsCount = false,
   onClose,
 }: {
   onSelectMaxMintCount: (maxMints: number) => void;
   title: string;
-  uniqueWalletsCount: number | null;
-  isLoadingUniqueWalletsCount: boolean;
+  uniqueWalletsCount?: number | null;
+  isLoadingUniqueWalletsCount?: boolean;
   onClose: () => void;
 }) {
   const { setToasts } = useContext(DistributionPlanToolContext);

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEnsResolution } from "@/hooks/useEnsResolution";
 import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "@/constants";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { areEqualAddresses, getTransactionLink } from "@/helpers/Helpers";
@@ -9,7 +10,6 @@ import { useEffect, useState } from "react";
 import { Col, Container, Form, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import {
-  useEnsAddress,
   useEnsName,
   useWaitForTransactionReceipt,
   useWriteContract,
@@ -25,73 +25,22 @@ function DelegationAddressInput(
   props: Readonly<{ setAddress: (address: string) => void }>
 ) {
   const { setAddress } = props;
-  const [newDelegationInput, setNewDelegationInput] = useState("");
-  const [newDelegationAddress, setNewDelegationAddress] = useState("");
-
-  const newDelegationAddressEns = useEnsName({
-    address: newDelegationInput?.startsWith("0x")
-      ? (newDelegationInput as `0x${string}`)
-      : undefined,
+  const { inputValue, address, handleInputChange } = useEnsResolution({
     chainId: 1,
   });
 
   useEffect(() => {
-    const ensName = newDelegationAddressEns.data;
-    if (!ensName) {
-      return;
-    }
-    setNewDelegationInput((prev) => {
-      if (!prev || prev.includes(" - ")) {
-        return prev;
-      }
-      return `${ensName} - ${prev}`;
-    });
-  }, [newDelegationAddressEns.data]);
-
-  const newDelegationToAddressFromEns = useEnsAddress({
-    name: newDelegationInput?.endsWith(".eth") ? newDelegationInput : undefined,
-    chainId: 1,
-  });
-
-  useEffect(() => {
-    const resolvedAddress = newDelegationToAddressFromEns.data;
-    if (!resolvedAddress) {
-      return;
-    }
-    setNewDelegationAddress(resolvedAddress);
-    setNewDelegationInput((prev) => {
-      if (!prev || prev.includes(` - ${resolvedAddress}`)) {
-        return prev;
-      }
-
-      const parts = prev.split(" - ");
-      if (parts.length === 1) {
-        return `${prev} - ${resolvedAddress}`;
-      }
-
-      const lastPart = parts[parts.length - 1];
-      if (lastPart?.toLowerCase().startsWith("0x")) {
-        parts[parts.length - 1] = resolvedAddress;
-        return parts.join(" - ");
-      }
-
-      return `${prev} - ${resolvedAddress}`;
-    });
-  }, [newDelegationToAddressFromEns.data]);
-
-  useEffect(() => {
-    setAddress(newDelegationAddress);
-  }, [setAddress, newDelegationAddress]);
+    setAddress(address);
+  }, [setAddress, address]);
 
   return (
     <Form.Control
       placeholder={"0x... or ENS"}
       className={`${styles.formInput}`}
       type="text"
-      value={newDelegationInput}
+      value={inputValue}
       onChange={(e) => {
-        setNewDelegationInput(e.target.value);
-        setNewDelegationAddress(e.target.value);
+        handleInputChange(e.target.value);
       }}
     />
   );

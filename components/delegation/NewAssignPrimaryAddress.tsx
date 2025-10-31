@@ -115,10 +115,9 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
       newErrors.push("Missing or invalid Address");
     } else if (
       (subdelegation &&
-        selectedToAddress.toUpperCase() ==
-          subdelegation.originalDelegator.toUpperCase()) ||
+        areEqualAddresses(selectedToAddress, subdelegation.originalDelegator)) ||
       (!subdelegation &&
-        selectedToAddress.toUpperCase() === address.toUpperCase())
+        areEqualAddresses(selectedToAddress, address))
     ) {
       newErrors.push("Invalid Address - cannot delegate to your own wallet");
     }

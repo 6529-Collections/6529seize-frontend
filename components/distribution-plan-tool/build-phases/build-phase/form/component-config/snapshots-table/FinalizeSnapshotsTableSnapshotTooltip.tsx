@@ -7,8 +7,8 @@ export default function FinalizeSnapshotsTableSnapshotTooltip({
   snapshotId,
   snapshotType,
 }: {
-  snapshotId: string | null;
-  snapshotType: Pool | null;
+  readonly snapshotId: string | null;
+  readonly snapshotType: Pool | null;
 }) {
   if (!snapshotId || !snapshotType) {
     return <div></div>;

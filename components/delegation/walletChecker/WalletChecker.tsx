@@ -1,5 +1,6 @@
 "use client";
 
+import { useEnsResolution } from "@/hooks/useEnsResolution";
 import { publicEnv } from "@/config/env";
 import {
   faCheck,
@@ -8,8 +9,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button, Col, Container, Form, Row, Table } from "react-bootstrap";
-import { useEnsAddress, useEnsName } from "wagmi";
 import {
   DELEGATION_ALL_ADDRESS,
   MEMES_CONTRACT,
@@ -35,6 +36,25 @@ interface ConsolidationDisplay {
   to_display: string | undefined;
 }
 
+function resolveConsolidationDisplay(
+  wallet: string,
+  candidates: ConsolidationDisplay[]
+): string | undefined {
+  let fallback: string | undefined;
+
+  for (const candidate of candidates) {
+    if (areEqualAddresses(candidate.from, wallet)) {
+      return candidate.from_display;
+    }
+
+    if (!fallback && areEqualAddresses(candidate.to, wallet)) {
+      fallback = candidate.to_display;
+    }
+  }
+
+  return fallback;
+}
+
 export default function WalletCheckerComponent(
   props: Readonly<{
     address_query: string;
@@ -44,8 +64,13 @@ export default function WalletCheckerComponent(
   const { address_query, setAddressQuery } = props;
 
   const [fetchedAddress, setFetchedAddress] = useState<string>("");
-  const [walletInput, setWalletInput] = useState(address_query ?? "");
-  const [walletAddress, setWalletAddress] = useState(address_query ?? "");
+  const {
+    inputValue: walletInput,
+    address: walletAddress,
+    handleInputChange: handleWalletInputChange,
+    ensNameQuery: walletAddressEns,
+    ensAddressQuery: walletAddressFromEns,
+  } = useEnsResolution({ initialValue: address_query ?? "", chainId: 1 });
 
   const [checking, setChecking] = useState(!!address_query);
   const [addressError, setAddressError] = useState(false);
@@ -62,77 +87,46 @@ export default function WalletCheckerComponent(
   >([]);
   const [consolidationsLoaded, setConsolidationsLoaded] = useState(false);
 
-  const walletAddressEns = useEnsName({
-    address:
-      walletInput && walletInput.startsWith("0x")
-        ? (walletInput as `0x${string}`)
-        : undefined,
-    chainId: 1,
-  });
+  const shouldFetchDelegations = checking && isValidEthAddress(walletAddress);
 
-  useEffect(() => {
-    const ensName = walletAddressEns.data;
-    if (!ensName) {
-      return;
-    }
-
-    setWalletInput((current) => {
-      if (!current || current.startsWith(`${ensName} - `)) {
-        return current;
-      }
-
-      setWalletAddress(current);
-      return `${ensName} - ${current}`;
-    });
-  }, [walletAddressEns.data]);
-
-  const walletAddressFromEns = useEnsAddress({
-    name: walletInput && walletInput.endsWith(".eth") ? walletInput : undefined,
-    chainId: 1,
-  });
-
-  useEffect(() => {
-    const resolvedAddress = walletAddressFromEns.data;
-    if (!resolvedAddress) {
-      return;
-    }
-
-    setWalletAddress(resolvedAddress);
-    setWalletInput((current) => {
-      if (!current) {
-        return resolvedAddress;
-      }
-
-      if (current.endsWith(` - ${resolvedAddress}`)) {
-        return current;
-      }
-
-      return `${current} - ${resolvedAddress}`;
-    });
-  }, [walletAddressFromEns.data]);
-
-  const fetchDelegations = useCallback((address: string) => {
-    const url = `${publicEnv.API_ENDPOINT}/api/delegations/${address}`;
-    fetchUrl(url).then((response: DBResponse) => {
+  useQuery({
+    queryKey: ["delegations", walletAddress],
+    queryFn: async () => {
+      const url = `${publicEnv.API_ENDPOINT}/api/delegations/${walletAddress}`;
+      return (await fetchUrl(url)) as DBResponse;
+    },
+    enabled: shouldFetchDelegations,
+    refetchOnWindowFocus: false,
+    onSuccess: (response: DBResponse) => {
+      const allDelegations = Array.isArray(response.data)
+        ? (response.data as Delegation[])
+        : [];
       setDelegations(
-        [...response.data].filter(
-          (d) => d.use_case != SUB_DELEGATION_USE_CASE.use_case
+        allDelegations.filter(
+          (delegation) =>
+            delegation.use_case !== SUB_DELEGATION_USE_CASE.use_case
         )
       );
       setSubDelegations(
-        [...response.data].filter(
-          (d) => d.use_case === SUB_DELEGATION_USE_CASE.use_case
+        allDelegations.filter(
+          (delegation) =>
+            delegation.use_case === SUB_DELEGATION_USE_CASE.use_case
         )
       );
       setDelegationsLoaded(true);
-    });
-  }, []);
+    },
+    onError: () => {
+      setDelegations([]);
+      setSubDelegations([]);
+      setDelegationsLoaded(true);
+    },
+  });
 
   const setAllConsolidations = useCallback(
     (nextConsolidations: WalletConsolidation[]) => {
       const normalized: ConsolidationDisplay[] = [];
 
-      nextConsolidations.forEach((consolidation) => {
+      for (const consolidation of nextConsolidations) {
         const primary: ConsolidationDisplay = {
           from: consolidation.wallet1,
           from_display: consolidation.wallet1_display,
@@ -141,7 +135,7 @@ export default function WalletCheckerComponent(
         };
 
         if (
-          !normalized.find(
+          !normalized.some(
             (existing) =>
               areEqualAddresses(existing.from, primary.from) &&
               areEqualAddresses(existing.to, primary.to)
@@ -159,7 +153,7 @@ export default function WalletCheckerComponent(
           };
 
           if (
-            !normalized.find(
+            !normalized.some(
               (existing) =>
                 areEqualAddresses(existing.from, reciprocal.from) &&
                 areEqualAddresses(existing.to, reciprocal.to)
@@ -168,7 +162,7 @@ export default function WalletCheckerComponent(
             normalized.push(reciprocal);
           }
         }
-      });
+      }
 
       setConsolidations(normalized);
       setConsolidationsLoaded(true);
@@ -176,49 +170,62 @@ export default function WalletCheckerComponent(
     []
   );
 
-  const fetchConsolidations = useCallback(
-    (address: string) => {
-      const url = `${publicEnv.API_ENDPOINT}/api/consolidations/${address}?show_incomplete=true`;
-      fetchUrl(url).then((response1: DBResponse) => {
-        if (response1.data.length > 0) {
-          const newWallet = areEqualAddresses(address, response1.data[0].wallet1)
-            ? response1.data[0].wallet2
-            : response1.data[0].wallet1;
-          const newUrl = `${publicEnv.API_ENDPOINT}/api/consolidations/${newWallet}?show_incomplete=true`;
-          fetchUrl(newUrl).then((response2: DBResponse) => {
-            setAllConsolidations([...response1.data, ...response2.data]);
-          });
-        } else {
-          setAllConsolidations(response1.data);
-        }
-      });
+  useQuery({
+    queryKey: ["consolidations", walletAddress],
+    queryFn: async () => {
+      const baseUrl = `${publicEnv.API_ENDPOINT}/api/consolidations/${walletAddress}?show_incomplete=true`;
+      const firstResponse = (await fetchUrl(baseUrl)) as DBResponse;
+      const firstData = firstResponse.data as WalletConsolidation[];
+
+      if (firstData.length > 0) {
+        const newWallet = areEqualAddresses(walletAddress, firstData[0].wallet1)
+          ? firstData[0].wallet2
+          : firstData[0].wallet1;
+        const nextUrl = `${publicEnv.API_ENDPOINT}/api/consolidations/${newWallet}?show_incomplete=true`;
+        const secondResponse = (await fetchUrl(nextUrl)) as DBResponse;
+        return [...firstData, ...(secondResponse.data as WalletConsolidation[])];
+      }
+
+      return firstData;
     },
-    [setAllConsolidations]
-  );
+    enabled: shouldFetchDelegations,
+    refetchOnWindowFocus: false,
+    onSuccess: (nextConsolidations: WalletConsolidation[]) => {
+      setAllConsolidations(nextConsolidations);
+    },
+    onError: () => {
+      setConsolidations([]);
+      setConsolidationsLoaded(true);
+    },
+  });
 
-  const fetchConsolidatedWallets = useCallback(
-    (address: string, consolidationLookup: ConsolidationDisplay[]) => {
-      const url = `${publicEnv.API_ENDPOINT}/api/consolidations/${address}`;
-      fetchUrl(url).then((response: DBResponse) => {
-        const mappedWallets = response.data.map((wallet: string) => {
-          const fromMatch = consolidationLookup.find((c) =>
-            areEqualAddresses(c.from, wallet)
-          );
-          const toMatch = consolidationLookup.find((c) =>
-            areEqualAddresses(c.to, wallet)
-          );
+  const { refetch: refetchConsolidatedWallets } = useQuery({
+    queryKey: ["consolidated-wallets", fetchedAddress],
+    queryFn: async () => {
+      const url = `${publicEnv.API_ENDPOINT}/api/consolidations/${fetchedAddress}`;
+      const response = (await fetchUrl(url)) as DBResponse;
+      const wallets = response.data as string[];
 
-          return {
-            address: wallet,
-            display: fromMatch?.from_display ?? toMatch?.to_display,
-          };
+      const mappedWallets: { address: string; display: string | undefined }[] = [];
+
+      for (const wallet of wallets) {
+        mappedWallets.push({
+          address: wallet,
+          display: resolveConsolidationDisplay(wallet, consolidations),
         });
+      }
 
-        setConsolidatedWallets(mappedWallets);
-      });
+      return mappedWallets;
     },
-    []
-  );
+    enabled: false,
+    refetchOnWindowFocus: false,
+    onSuccess: (mappedWallets) => {
+      setConsolidatedWallets(mappedWallets);
+    },
+    onError: () => {
+      setConsolidatedWallets([]);
+    },
+  });
 
   const activeDelegation = useMemo(() => {
     if (!delegationsLoaded) {
@@ -259,7 +266,7 @@ export default function WalletCheckerComponent(
 
     return consolidations.filter(
       (candidate) =>
-        !consolidations.find(
+        !consolidations.some(
           (comparison) =>
             areEqualAddresses(comparison.to, candidate.from) &&
             areEqualAddresses(comparison.from, candidate.to)
@@ -272,12 +279,17 @@ export default function WalletCheckerComponent(
       return;
     }
 
-    fetchConsolidatedWallets(fetchedAddress, consolidations);
+    if (!consolidations.length) {
+      setConsolidatedWallets([]);
+      return;
+    }
+
+    void refetchConsolidatedWallets();
   }, [
     consolidationsLoaded,
     consolidations,
     fetchedAddress,
-    fetchConsolidatedWallets,
+    refetchConsolidatedWallets,
   ]);
 
   function getUseCaseDisplay(useCase: number) {
@@ -326,14 +338,10 @@ export default function WalletCheckerComponent(
     setConsolidationsLoaded(false);
     setConsolidations([]);
     setConsolidatedWallets([]);
-    fetchDelegations(walletAddress);
-    fetchConsolidations(walletAddress);
   }, [
     checking,
     walletAddress,
     setAddressQuery,
-    fetchDelegations,
-    fetchConsolidations,
   ]);
 
   useEffect(() => {
@@ -380,8 +388,7 @@ export default function WalletCheckerComponent(
                   type="text"
                   value={walletInput}
                   onChange={(e) => {
-                    setWalletInput(e.target.value);
-                    setWalletAddress(e.target.value);
+                    handleWalletInputChange(e.target.value);
                     setAddressError(false);
                   }}
                 />
@@ -398,8 +405,7 @@ export default function WalletCheckerComponent(
                 className="d-flex align-items-center justify-content-center gap-3">
                 <Button
                   onClick={() => {
-                    setWalletInput("");
-                    setWalletAddress("");
+                    handleWalletInputChange("");
                     setDelegationsLoaded(false);
                     setDelegations([]);
                     setConsolidationsLoaded(false);
