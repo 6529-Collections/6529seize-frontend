@@ -80,6 +80,7 @@ export function useVirtualizedWaveMessages(
 
   // Keep track of whether we've initialized with the first batch
   const hasInitialized = useRef<boolean>(false);
+  const previousDropsCountRef = useRef<number>(0);
 
   // Update hasMoreLocal when fullWaveMessages changes
   useEffect(() => {
@@ -121,7 +122,35 @@ export function useVirtualizedWaveMessages(
   useEffect(() => {
     setVirtualLimit(pageSize);
     hasInitialized.current = false;
+    previousDropsCountRef.current = 0;
   }, [waveId, pageSize, dropId]);
+
+  useEffect(() => {
+    const activeWaveMessages = dropId
+      ? fullWaveMessagesForDrop
+      : fullWaveMessages;
+
+    if (!activeWaveMessages) {
+      previousDropsCountRef.current = 0;
+      return;
+    }
+
+    const totalDrops = activeWaveMessages.drops.length;
+    const previousTotal = previousDropsCountRef.current;
+
+    if (hasInitialized.current && totalDrops > previousTotal) {
+      setVirtualLimit((currentLimit) => {
+        if (currentLimit >= totalDrops) {
+          return currentLimit;
+        }
+
+        const nextLimit = Math.min(totalDrops, currentLimit + pageSize);
+        return nextLimit > currentLimit ? nextLimit : currentLimit;
+      });
+    }
+
+    previousDropsCountRef.current = totalDrops;
+  }, [dropId, fullWaveMessages, fullWaveMessagesForDrop, pageSize]);
 
   // Function to load more messages from local cache
   const loadMoreLocally = useCallback(() => {
