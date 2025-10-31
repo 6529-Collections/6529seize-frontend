@@ -193,8 +193,15 @@ export default function WalletCheckerComponent(
           ? firstData[0].wallet2
           : firstData[0].wallet1;
         const nextUrl = `${publicEnv.API_ENDPOINT}/api/consolidations/${newWallet}?show_incomplete=true`;
-        const secondResponse = (await fetchUrl(nextUrl)) as DBResponse;
-        return [...firstData, ...(secondResponse.data as WalletConsolidation[])];
+        try {
+          const secondResponse = (await fetchUrl(nextUrl)) as DBResponse;
+          return [
+            ...firstData,
+            ...(secondResponse.data as WalletConsolidation[]),
+          ];
+        } catch {
+          return firstData;
+        }
       }
 
       return firstData;

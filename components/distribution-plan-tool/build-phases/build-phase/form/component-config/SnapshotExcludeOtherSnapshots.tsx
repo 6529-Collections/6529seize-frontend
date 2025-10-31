@@ -204,22 +204,20 @@ export default function SnapshotExcludeOtherSnapshots({
   });
 
   useEffect(() => {
-    if (!shouldFetchUniqueWalletsCount) {
+    if (!shouldFetchUniqueWalletsCount || isUniqueWalletsCountError) {
       setLocalUniqueWalletsCount(config.uniqueWalletsCount);
+      return;
     }
-  }, [shouldFetchUniqueWalletsCount, config.uniqueWalletsCount]);
 
-  useEffect(() => {
     if (typeof fetchedUniqueWalletsCount === "number") {
       setLocalUniqueWalletsCount(fetchedUniqueWalletsCount);
     }
-  }, [fetchedUniqueWalletsCount]);
-
-  useEffect(() => {
-    if (isUniqueWalletsCountError) {
-      setLocalUniqueWalletsCount(config.uniqueWalletsCount);
-    }
-  }, [isUniqueWalletsCountError, config.uniqueWalletsCount]);
+  }, [
+    shouldFetchUniqueWalletsCount,
+    isUniqueWalletsCountError,
+    fetchedUniqueWalletsCount,
+    config.uniqueWalletsCount,
+  ]);
 
   const onNext = () => {
     onSelectExcludeOtherSnapshots({
