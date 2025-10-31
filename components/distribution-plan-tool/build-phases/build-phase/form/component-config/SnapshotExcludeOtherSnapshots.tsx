@@ -29,6 +29,16 @@ const POOL_TYPE_TO_STRING: Record<Pool, string> = {
   [Pool.WALLET_POOL]: "Wallets",
 };
 
+const extractOwnersFromTokens = (
+  tokens: CustomTokenPoolParamsToken[] | undefined
+): string[] => {
+  const owners = (tokens ?? [])
+    .map((token) => token?.owner)
+    .filter((owner: unknown): owner is string => typeof owner === "string")
+    .map((owner) => owner.toLowerCase());
+  return Array.from(new Set(owners));
+};
+
 export default function SnapshotExcludeOtherSnapshots({
   snapshots,
   config,
@@ -111,19 +121,15 @@ export default function SnapshotExcludeOtherSnapshots({
                 )
               )
             : snapshotType === Pool.CUSTOM_TOKEN_POOL
-            ? Array.from(
-                new Set(
-                  operations
-                    .find(
-                      (o2) =>
-                        o2.code ===
-                          AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL &&
-                        o2.params.id === o.value
-                    )
-                    ?.params.tokens.map(
-                      (token: CustomTokenPoolParamsToken) => token.owner
-                    ) ?? []
-                )
+            ? extractOwnersFromTokens(
+                (operations
+                  .find(
+                    (o2) =>
+                      o2.code ===
+                        AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL &&
+                      o2.params.id === o.value
+                  )
+                  ?.params.tokens) as CustomTokenPoolParamsToken[] | undefined
               )
             : assertUnreachable(snapshotType);
         return {
@@ -151,11 +157,7 @@ export default function SnapshotExcludeOtherSnapshots({
     }
     const tokens = operation.params
       .tokens as CustomTokenPoolParamsToken[] | undefined;
-    const owners = (tokens ?? [])
-      .map((token) => token?.owner)
-      .filter((owner: unknown): owner is string => typeof owner === "string")
-      .map((owner) => owner.toLowerCase());
-    return Array.from(new Set(owners));
+    return extractOwnersFromTokens(tokens);
   }, [config.snapshotId, config.snapshotType, operations]);
 
   const shouldFetchUniqueWalletsCount =
