@@ -108,7 +108,7 @@ export const ArtistPreviewModal: React.FC<
               leaveFrom="tw-opacity-100"
               leaveTo="tw-opacity-100"
             >
-              <Dialog.Panel className="tw-relative tw-w-full tw-max-w-5xl tw-max-h-[90vh] sm:tw-max-h-[85vh] tw-rounded-xl tw-bg-iron-950 tw-border tw-border-iron-800 tw-overflow-hidden tw-shadow-2xl tw-shadow-black/25 tw-m-0 tw-p-0" onClick={(e) => e.stopPropagation()}>
+              <Dialog.Panel className="tw-relative tw-w-full tw-max-w-5xl tw-max-h-[90vh] tw-rounded-xl tw-bg-iron-950 tw-border tw-border-iron-800 tw-overflow-hidden tw-shadow-2xl tw-shadow-black/25 tw-m-0 tw-p-0" onClick={(e) => e.stopPropagation()}>
                 <ArtistPreviewModalContent
                   user={user}
                   isOpen={isOpen}

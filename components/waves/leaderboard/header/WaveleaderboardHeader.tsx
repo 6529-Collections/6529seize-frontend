@@ -33,8 +33,8 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   const breakpoint = useBreakpoint();
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-4 tw-@container">
-      <div className="tw-flex tw-items-center tw-gap-2 tw-overflow-x-auto tw-bg-black">
+    <div className="tw-flex tw-flex-col tw-gap-y-4 tw-@container tw-bg-black tw-pt-2">
+      <div className="tw-flex tw-items-center tw-gap-2 tw-overflow-x-auto">
         <div className="tw-mb-2 tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-4">
           {isMemesWave && (
             <div className="tw-flex tw-items-center tw-gap-x-2">
