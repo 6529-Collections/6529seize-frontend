@@ -69,7 +69,10 @@ export const FallbackImage = React.forwardRef<
       try {
         const parsed = new URL(targetSrc);
         const hostname = parsed.hostname.toLowerCase();
-        return !hostname.includes("cloudfront.net");
+        const isCloudfrontHost =
+          hostname === "cloudfront.net" ||
+          hostname.endsWith(".cloudfront.net");
+        return !isCloudfrontHost;
       } catch {
         return true;
       }
