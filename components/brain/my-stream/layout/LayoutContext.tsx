@@ -50,6 +50,16 @@ type View =
   | "mobileWaves"
   | "mobileAbout";
 
+const spacesAreEqual = (a: LayoutSpaces, b: LayoutSpaces) =>
+  a.headerSpace === b.headerSpace &&
+  a.pinnedSpace === b.pinnedSpace &&
+  a.tabsSpace === b.tabsSpace &&
+  a.spacerSpace === b.spacerSpace &&
+  a.mobileTabsSpace === b.mobileTabsSpace &&
+  a.mobileNavSpace === b.mobileNavSpace &&
+  a.contentSpace === b.contentSpace &&
+  a.measurementsComplete === b.measurementsComplete;
+
 // Helper function to calculate height style
 const calculateHeightStyle = (
   view: View,
@@ -299,7 +309,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       window.innerHeight - totalOccupiedSpace
     );
 
-    setSpaces({
+    const nextSpaces: LayoutSpaces = {
       headerSpace: headerHeight,
       pinnedSpace: pinnedHeight,
       tabsSpace: tabsHeight,
@@ -308,7 +318,11 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       mobileNavSpace: mobileNavHeight,
       contentSpace: calculatedContentSpace,
       measurementsComplete: true,
-    });
+    };
+
+    setSpaces((prevSpaces) =>
+      spacesAreEqual(prevSpaces, nextSpaces) ? prevSpaces : nextSpaces
+    );
   }, []);
 
   // Set up ResizeObserver to monitor elements and recalculate on changes
