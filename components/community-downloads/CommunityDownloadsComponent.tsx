@@ -16,17 +16,17 @@ import {
 const PAGE_SIZE = 25;
 
 interface Props {
-  title: string;
-  url: string;
+  readonly title: string;
+  readonly url: string;
 }
 
 export default function CommunityDownloadsComponent(props: Readonly<Props>) {
   const [page, setPage] = useState(1);
-  const fullUrl = `${props.url}?page_size=${PAGE_SIZE}&page=${page}`;
 
   const { data, isError } = useQuery<ApiUploadsPage>({
     queryKey: ["community-downloads", props.url, page],
-    queryFn: () => fetchUrl(fullUrl),
+    queryFn: () =>
+      fetchUrl(`${props.url}?page_size=${PAGE_SIZE}&page=${page}`),
     placeholderData: keepPreviousData,
   });
 

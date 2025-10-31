@@ -20,25 +20,43 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   const { requestAuth, setToast } = useContext(AuthContext);
   const [isProcessing, setIsProcessing] = useState(false);
   const currentVoteValue = drop.context_profile_context?.rating ?? 0;
+  const currentVoteValueString = String(currentVoteValue);
   const minRating = drop.context_profile_context?.min_rating ?? 0;
   const maxRating = drop.context_profile_context?.max_rating ?? 0;
-  const [voteValue, setVoteValue] = useState<number>(currentVoteValue);
-  const isEditing = voteValue !== currentVoteValue;
+  const [voteValue, setVoteValue] = useState<string>(currentVoteValueString);
+  const parsedVoteValue = Number.parseInt(voteValue, 10);
+  const hasValidVoteValue = !Number.isNaN(parsedVoteValue);
+  const isEditing = hasValidVoteValue && parsedVoteValue !== currentVoteValue;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
     if (inputValue === "") {
-      setVoteValue(currentVoteValue);
+      setVoteValue("");
       return;
     }
 
     if (inputValue === "-") {
+      setVoteValue(inputValue);
       return;
     }
 
-    const value = parseInt(inputValue);
-    if (isNaN(value)) return;
-    setVoteValue(Math.min(Math.max(value, minRating), maxRating));
+    const value = Number.parseInt(inputValue, 10);
+    if (Number.isNaN(value)) return;
+    const clampedValue = Math.min(Math.max(value, minRating), maxRating);
+    setVoteValue(String(clampedValue));
+  };
+
+  const handleBlur = () => {
+    if (!hasValidVoteValue || voteValue === "" || voteValue === "-") {
+      setVoteValue(currentVoteValueString);
+      return;
+    }
+
+    const clampedValue = Math.min(
+      Math.max(parsedVoteValue, minRating),
+      maxRating,
+    );
+    setVoteValue(String(clampedValue));
   };
 
   const rateChangeMutation = useMutation({
@@ -68,6 +86,17 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   const handleSubmit = async () => {
     if (isProcessing || isResetting) return;
 
+    if (!hasValidVoteValue) {
+      setVoteValue(currentVoteValueString);
+      return;
+    }
+
+    const clampedValue = Math.min(
+      Math.max(parsedVoteValue, minRating),
+      maxRating,
+    );
+    setVoteValue(String(clampedValue));
+
     setIsProcessing(true);
 
     try {
@@ -82,7 +111,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       }
 
       await rateChangeMutation.mutateAsync({
-        rate: voteValue,
+        rate: clampedValue,
       });
     } catch (error) {
       console.error("Failed to submit vote:", error);
@@ -113,6 +142,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
           type="text"
           value={voteValue}
           onChange={handleInputChange}
+          onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           disabled={isResetting}
           pattern="-?[0-9]*"

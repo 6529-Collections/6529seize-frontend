@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useRef, useEffect, useContext, useEffectEvent } from "react";
+import React, {
+  useRef,
+  useEffect,
+  useContext,
+  useEffectEvent,
+  useMemo,
+} from "react";
 import UnifiedWavesListWaves, {
   UnifiedWavesListWavesHandle,
 } from "../left-sidebar/waves/UnifiedWavesListWaves";
@@ -26,7 +32,6 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
   const { connectedProfile } = useContext(AuthContext);
   const { isApp } = useDeviceInfo();
 
-  // Moved all hooks to the top level, before any conditional logic
   const listRef = useRef<UnifiedWavesListWavesHandle>(null);
   const hasFetchedRef = useRef(false);
   const { directMessages, registerWave } = useMyStream();
@@ -38,7 +43,6 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
     fetchNextPage,
   } = directMessages;
 
-  // Reset the fetch flag when dependencies change
   useEffect(() => {
     hasFetchedRef.current = false;
   }, [hasNextPage, isFetchingNextPage]);
@@ -75,6 +79,10 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
   }, [hasNextPage, isFetchingNextPage]);
 
   const shouldShowPlaceholder = !isAuthenticated || !connectedProfile?.handle;
+  const wavesWithPinned = useMemo(
+    () => list.map((w) => ({ ...w, isPinned: false })),
+    [list],
+  );
 
   if (shouldShowPlaceholder) {
     if (!isAuthenticated) {
@@ -123,7 +131,7 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
 
         <UnifiedWavesListWaves
           ref={listRef}
-          waves={list.map((w) => ({ ...w, isPinned: false }))}
+          waves={wavesWithPinned}
           onHover={registerWave}
           hideToggle
           hidePin

@@ -89,7 +89,10 @@ export default function WalletCheckerComponent(
 
   const shouldFetchDelegations = checking && isValidEthAddress(walletAddress);
 
-  useQuery({
+  const {
+    data: delegationsResponse,
+    status: delegationsStatus,
+  } = useQuery<DBResponse>({
     queryKey: ["delegations", walletAddress],
     queryFn: async () => {
       const url = `${publicEnv.API_ENDPOINT}/api/delegations/${walletAddress}`;
@@ -97,9 +100,12 @@ export default function WalletCheckerComponent(
     },
     enabled: shouldFetchDelegations,
     refetchOnWindowFocus: false,
-    onSuccess: (response: DBResponse) => {
-      const allDelegations = Array.isArray(response.data)
-        ? (response.data as Delegation[])
+  });
+
+  useEffect(() => {
+    if (delegationsStatus === "success" && delegationsResponse) {
+      const allDelegations = Array.isArray(delegationsResponse.data)
+        ? (delegationsResponse.data as Delegation[])
         : [];
       setDelegations(
         allDelegations.filter(
@@ -114,13 +120,15 @@ export default function WalletCheckerComponent(
         )
       );
       setDelegationsLoaded(true);
-    },
-    onError: () => {
+      return;
+    }
+
+    if (delegationsStatus === "error") {
       setDelegations([]);
       setSubDelegations([]);
       setDelegationsLoaded(true);
-    },
-  });
+    }
+  }, [delegationsStatus, delegationsResponse]);
 
   const setAllConsolidations = useCallback(
     (nextConsolidations: WalletConsolidation[]) => {
@@ -170,7 +178,10 @@ export default function WalletCheckerComponent(
     []
   );
 
-  useQuery({
+  const {
+    data: consolidationsResponse,
+    status: consolidationsStatus,
+  } = useQuery<WalletConsolidation[]>({
     queryKey: ["consolidations", walletAddress],
     queryFn: async () => {
       const baseUrl = `${publicEnv.API_ENDPOINT}/api/consolidations/${walletAddress}?show_incomplete=true`;
@@ -190,16 +201,25 @@ export default function WalletCheckerComponent(
     },
     enabled: shouldFetchDelegations,
     refetchOnWindowFocus: false,
-    onSuccess: (nextConsolidations: WalletConsolidation[]) => {
-      setAllConsolidations(nextConsolidations);
-    },
-    onError: () => {
-      setConsolidations([]);
-      setConsolidationsLoaded(true);
-    },
   });
 
-  const { refetch: refetchConsolidatedWallets } = useQuery({
+  useEffect(() => {
+    if (consolidationsStatus === "success" && consolidationsResponse) {
+      setAllConsolidations(consolidationsResponse);
+      return;
+    }
+
+    if (consolidationsStatus === "error") {
+      setConsolidations([]);
+      setConsolidationsLoaded(true);
+    }
+  }, [consolidationsStatus, consolidationsResponse, setAllConsolidations]);
+
+  const {
+    refetch: refetchConsolidatedWalletsRaw,
+    data: consolidatedWalletsResponse,
+    status: consolidatedWalletsStatus,
+  } = useQuery<{ address: string; display: string | undefined }[]>({
     queryKey: ["consolidated-wallets", fetchedAddress],
     queryFn: async () => {
       const url = `${publicEnv.API_ENDPOINT}/api/consolidations/${fetchedAddress}`;
@@ -219,13 +239,22 @@ export default function WalletCheckerComponent(
     },
     enabled: false,
     refetchOnWindowFocus: false,
-    onSuccess: (mappedWallets) => {
-      setConsolidatedWallets(mappedWallets);
-    },
-    onError: () => {
-      setConsolidatedWallets([]);
-    },
   });
+
+  useEffect(() => {
+    if (consolidatedWalletsStatus === "success" && consolidatedWalletsResponse) {
+      setConsolidatedWallets(consolidatedWalletsResponse);
+      return;
+    }
+
+    if (consolidatedWalletsStatus === "error") {
+      setConsolidatedWallets([]);
+    }
+  }, [consolidatedWalletsStatus, consolidatedWalletsResponse]);
+
+  const refetchConsolidatedWallets = useCallback(() => {
+    return refetchConsolidatedWalletsRaw();
+  }, [refetchConsolidatedWalletsRaw]);
 
   const activeDelegation = useMemo(() => {
     if (!delegationsLoaded) {
@@ -284,7 +313,9 @@ export default function WalletCheckerComponent(
       return;
     }
 
-    void refetchConsolidatedWallets();
+    refetchConsolidatedWallets().catch(() => {
+      // Query state updates trigger the effect above to clear data on failure.
+    });
   }, [
     consolidationsLoaded,
     consolidations,

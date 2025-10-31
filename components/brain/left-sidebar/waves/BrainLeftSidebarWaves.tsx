@@ -9,9 +9,7 @@ interface BrainLeftSidebarWavesProps {
 const BrainLeftSidebarWaves: React.FC<BrainLeftSidebarWavesProps> = ({
   scrollContainerRef,
 }) => {
-
-  
-  const { waves, activeWave, registerWave } = useMyStream();
+  const { waves, registerWave } = useMyStream();
 
   const onNextPage = () => {
     if (waves.hasNextPage && !waves.isFetchingNextPage && !waves.isFetching) {

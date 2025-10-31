@@ -11,7 +11,6 @@ import WebUnifiedWavesListWaves, {
 
 interface WebUnifiedWavesListProps {
   readonly waves: MinimalWave[];
-  readonly activeWaveId: string | null;
   readonly fetchNextPage: () => void;
   readonly hasNextPage: boolean | undefined;
   readonly isFetching: boolean;

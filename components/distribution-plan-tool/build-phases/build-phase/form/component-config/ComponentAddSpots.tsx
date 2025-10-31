@@ -2,7 +2,7 @@
 
 import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import ComponentConfigMeta from "./ComponentConfigMeta";
@@ -14,11 +14,11 @@ export default function ComponentAddSpots({
   isLoadingUniqueWalletsCount = false,
   onClose,
 }: {
-  onSelectMaxMintCount: (maxMints: number) => void;
-  title: string;
-  uniqueWalletsCount?: number | null;
-  isLoadingUniqueWalletsCount?: boolean;
-  onClose: () => void;
+  readonly onSelectMaxMintCount: (maxMints: number) => void;
+  readonly title: string;
+  readonly uniqueWalletsCount?: number | null;
+  readonly isLoadingUniqueWalletsCount?: boolean;
+  readonly onClose: () => void;
 }) {
   const { setToasts } = useContext(DistributionPlanToolContext);
 
@@ -43,26 +43,7 @@ export default function ComponentAddSpots({
     onSelectMaxMintCount(maxMints);
   };
 
-  const [isDisabled, setIsDisabled] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (!maxMints) {
-      setIsDisabled(true);
-      return;
-    }
-
-    if (typeof maxMints !== "number") {
-      setIsDisabled(true);
-      return;
-    }
-
-    if (typeof maxMints === "number" && maxMints < 1) {
-      setIsDisabled(true);
-      return;
-    }
-
-    setIsDisabled(false);
-  }, [maxMints]);
+  const isDisabled = !maxMints || typeof maxMints !== "number" || maxMints < 1;
 
   return (
     <div className="tw-p-6">

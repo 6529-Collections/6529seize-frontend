@@ -1,7 +1,7 @@
 "use client";
 
 import { useEnsResolution } from "@/hooks/useEnsResolution";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Col, Container, Form, Row } from "react-bootstrap";
 import { useEnsName } from "wagmi";
 import styles from "./Delegation.module.scss";

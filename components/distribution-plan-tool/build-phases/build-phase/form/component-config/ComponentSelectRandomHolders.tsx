@@ -25,7 +25,7 @@ export default function ComponentSelectRandomHolders({
   uniqueWalletsCount = null,
   isLoadingUniqueWalletsCount = false,
   onClose,
-}: {
+}: Readonly<{
   onNextStep: (step: PhaseConfigStep) => void;
   onSelectRandomHolders: (param: {
     value: number;
@@ -37,7 +37,7 @@ export default function ComponentSelectRandomHolders({
   uniqueWalletsCount?: number | null;
   isLoadingUniqueWalletsCount?: boolean;
   onClose: () => void;
-}) {
+}>) {
   const { setToasts, distributionPlan } = useContext(
     DistributionPlanToolContext
   );

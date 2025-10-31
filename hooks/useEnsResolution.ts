@@ -24,7 +24,7 @@ export function useEnsResolution(
 
   const ensNameQuery = useEnsName({
     address:
-      inputValue && inputValue.startsWith("0x")
+      inputValue?.startsWith("0x")
         ? (inputValue as `0x${string}`)
         : undefined,
     chainId,
@@ -32,7 +32,7 @@ export function useEnsResolution(
 
   const ensAddressQuery = useEnsAddress({
     name:
-      inputValue && inputValue.endsWith(".eth")
+      inputValue?.endsWith(".eth")
         ? inputValue
         : undefined,
     chainId,
@@ -114,9 +114,9 @@ function normalizeInputWithResolvedAddress(
     return `${current}${LABEL_SEPARATOR}${resolvedAddress}`;
   }
 
-  const lastPart = parts[parts.length - 1];
-  if (lastPart && lastPart.toLowerCase().startsWith("0x")) {
-    parts[parts.length - 1] = resolvedAddress;
+  const lastIndex = parts.length - 1;
+  if (parts[lastIndex]?.toLowerCase()?.startsWith("0x")) {
+    parts[lastIndex] = resolvedAddress;
     return parts.join(LABEL_SEPARATOR);
   }
 

@@ -11,6 +11,20 @@ import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import ComponentConfigMeta from "./ComponentConfigMeta";
 import { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
 
+interface FinalizeSnapshotProps {
+  readonly onConfigureGroup: () => void;
+  readonly onAddAnotherSnapshot: () => void;
+  readonly onRemoveGroupSnapshot: (groupSnapshotId: string) => void;
+  readonly onStartAgain: () => void;
+  readonly groupSnapshots: PhaseGroupSnapshotConfig[];
+  readonly snapshots: DistributionPlanSnapshot[];
+  readonly title: string;
+  readonly uniqueWalletsCount?: number | null;
+  readonly isLoadingUniqueWalletsCount?: boolean;
+  readonly onClose: () => void;
+  readonly phases: BuildPhasesPhase[];
+}
+
 export default function FinalizeSnapshot({
   onConfigureGroup,
   onAddAnotherSnapshot,
@@ -23,28 +37,12 @@ export default function FinalizeSnapshot({
   isLoadingUniqueWalletsCount = false,
   onClose,
   phases,
-}: {
-  onConfigureGroup: () => void;
-  onAddAnotherSnapshot: () => void;
-  onRemoveGroupSnapshot: (groupSnapshotId: string) => void;
-  onStartAgain: () => void;
-  groupSnapshots: PhaseGroupSnapshotConfig[];
-  snapshots: DistributionPlanSnapshot[];
-  title: string;
-  uniqueWalletsCount?: number | null;
-  isLoadingUniqueWalletsCount?: boolean;
-  onClose: () => void;
-  phases: BuildPhasesPhase[];
-}) {
+}: FinalizeSnapshotProps) {
   useEffect(() => {
     if (!groupSnapshots.length) {
       onStartAgain();
     }
   }, [groupSnapshots, onStartAgain]);
-
-  const configure = () => {
-    onConfigureGroup();
-  };
 
   return (
     <div className="tw-p-6">
@@ -79,7 +77,7 @@ export default function FinalizeSnapshot({
             Add another snapshot
           </button>
           <button
-            onClick={configure}
+            onClick={onConfigureGroup}
             type="button"
             className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out">
             Configure Group

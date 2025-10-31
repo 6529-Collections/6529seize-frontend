@@ -1,12 +1,15 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import AllowlistToolSelectMenuMultiple, {
   AllowlistToolSelectMenuMultipleOption,
 } from "@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple";
 import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
 import { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
-import { PhaseConfigStep } from "../BuildPhaseFormConfigModal";
+import {
+  PhaseConfigStep,
+  PhaseGroupSnapshotConfig,
+} from "../BuildPhaseFormConfigModal";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
@@ -18,14 +21,9 @@ const SELECT_ALL_OPTION: AllowlistToolSelectMenuMultipleOption = {
   value: "select-all",
 };
 
-export default function SnapshotExcludeComponentWinners({
-  phases,
-  onNextStep,
-  onSelectExcludeComponentWinners,
-  title,
-  onClose,
-}: readonly {
-  phases: readonly BuildPhasesPhase[];
+type SnapshotExcludeComponentWinnersProps = {
+  readonly config: PhaseGroupSnapshotConfig;
+  readonly phases: ReadonlyArray<BuildPhasesPhase>;
   onNextStep: (step: PhaseConfigStep) => void;
   onSelectExcludeComponentWinners: (param: {
     excludeComponentWinners: string[];
@@ -33,23 +31,19 @@ export default function SnapshotExcludeComponentWinners({
   }) => void;
   title: string;
   onClose: () => void;
-}) {
-  const { setToasts } = useContext(DistributionPlanToolContext);
-  const [options, setOptions] = useState<
-    AllowlistToolSelectMenuMultipleOption[]
-  >([
-    SELECT_ALL_OPTION,
-    ...phases.flatMap((p) =>
-      p.components.map((c) => ({
-        title: c.name,
-        subTitle: p.name,
-        value: c.id,
-      }))
-    ),
-  ]);
+};
 
-  useEffect(() => {
-    setOptions([
+export default function SnapshotExcludeComponentWinners({
+  config,
+  phases,
+  onNextStep,
+  onSelectExcludeComponentWinners,
+  title,
+  onClose,
+}: SnapshotExcludeComponentWinnersProps) {
+  const { setToasts } = useContext(DistributionPlanToolContext);
+  const options = useMemo<AllowlistToolSelectMenuMultipleOption[]>(
+    () => [
       SELECT_ALL_OPTION,
       ...phases.flatMap((p) =>
         p.components.map((c) => ({
@@ -58,12 +52,35 @@ export default function SnapshotExcludeComponentWinners({
           value: c.id,
         }))
       ),
-    ]);
-  }, [phases]);
+    ],
+    [phases]
+  );
 
   const [selectedOptions, setSelectedOptions] = useState<
     AllowlistToolSelectMenuMultipleOption[]
   >([]);
+
+  useEffect(() => {
+    if (!config.excludeComponentWinners.length) {
+      setSelectedOptions([]);
+      return;
+    }
+
+    const componentOptions = options.filter(
+      (option) => option.value !== SELECT_ALL_OPTION.value
+    );
+
+    const selected = componentOptions.filter((option) =>
+      config.excludeComponentWinners.includes(option.value)
+    );
+
+    if (selected.length === componentOptions.length && componentOptions.length) {
+      setSelectedOptions(options);
+      return;
+    }
+
+    setSelectedOptions(selected);
+  }, [config.excludeComponentWinners, options]);
 
   const toggleSelectAll = () => {
     if (selectedOptions.length === options.length) {
@@ -99,17 +116,13 @@ export default function SnapshotExcludeComponentWinners({
     );
   };
 
-  const [excludeComponentWinners, setExcludeComponentWinners] = useState<
-    string[]
-  >([]);
-
-  useEffect(() => {
-    setExcludeComponentWinners(
+  const excludeComponentWinners = useMemo(
+    () =>
       selectedOptions
         .filter((o) => o.value !== SELECT_ALL_OPTION.value)
-        .map((o) => o.value)
-    );
-  }, [selectedOptions]);
+        .map((o) => o.value),
+    [selectedOptions]
+  );
 
   const onExcludePreviousWinners = () => {
     if (selectedOptions.length === 0) {
@@ -121,12 +134,9 @@ export default function SnapshotExcludeComponentWinners({
     }
     onSelectExcludeComponentWinners({
       excludeComponentWinners,
-      uniqueWalletsCount: localUniqueWalletsCount,
+      uniqueWalletsCount: config.uniqueWalletsCount,
     });
   };
-  const loading = false;
-
-  const localUniqueWalletsCount = null;
 
   return (
     <div className="tw-relative tw-p-6">
@@ -154,8 +164,8 @@ export default function SnapshotExcludeComponentWinners({
         onNext={() => onExcludePreviousWinners()}>
         <ComponentConfigMeta
           tags={[]}
-          walletsCount={localUniqueWalletsCount}
-          isLoading={loading}
+          walletsCount={null}
+          isLoading={false}
         />
       </ComponentConfigNextBtn>
     </div>
