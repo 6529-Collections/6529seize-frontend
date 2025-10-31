@@ -313,9 +313,7 @@ export default function WalletCheckerComponent(
       return;
     }
 
-    refetchConsolidatedWallets().catch(() => {
-      // Query state updates trigger the effect above to clear data on failure.
-    });
+    refetchConsolidatedWallets().catch(() => {});
   }, [
     consolidationsLoaded,
     consolidations,
@@ -355,7 +353,24 @@ export default function WalletCheckerComponent(
       return;
     }
 
+    const ensCandidate =
+      walletInput?.split(" - ")[0]?.trim().toLowerCase() ?? "";
+    const isEnsInput = ensCandidate.endsWith(".eth");
+
     if (!walletAddress || !isValidEthAddress(walletAddress)) {
+      if (isEnsInput) {
+        if (walletAddressFromEns.isLoading) {
+          return;
+        }
+
+        if (!walletAddressFromEns.data || walletAddressFromEns.isError) {
+          setAddressError(true);
+          setChecking(false);
+        }
+
+        return;
+      }
+
       setAddressError(true);
       setChecking(false);
       return;
@@ -372,6 +387,10 @@ export default function WalletCheckerComponent(
   }, [
     checking,
     walletAddress,
+    walletInput,
+    walletAddressFromEns.isLoading,
+    walletAddressFromEns.data,
+    walletAddressFromEns.isError,
     setAddressQuery,
   ]);
 

@@ -76,7 +76,7 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
     observer.observe(sentinel);
 
     return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage]);
+  }, [hasNextPage, isFetchingNextPage, list.length > 0]);
 
   const shouldShowPlaceholder = !isAuthenticated || !connectedProfile?.handle;
   const wavesWithPinned = useMemo(

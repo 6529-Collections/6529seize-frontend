@@ -23,7 +23,7 @@ interface Props {
 export default function CommunityDownloadsComponent(props: Readonly<Props>) {
   const [page, setPage] = useState(1);
 
-  const { data, isError } = useQuery<ApiUploadsPage>({
+  const { data, isError, isLoading } = useQuery<ApiUploadsPage>({
     queryKey: ["community-downloads", props.url, page],
     queryFn: () =>
       fetchUrl(`${props.url}?page_size=${PAGE_SIZE}&page=${page}`),
@@ -40,6 +40,12 @@ export default function CommunityDownloadsComponent(props: Readonly<Props>) {
 
   return (
     <DownloadsLayout title={props.title}>
+      {isLoading && !data && (
+        <div className="tw-text-center tw-pb-3">
+          Loading downloads...
+        </div>
+      )}
+
       {isError && (
         <div className="tw-text-center tw-text-red-500 tw-pb-3">
           Failed to load community downloads. Please try again.

@@ -13,7 +13,7 @@ const WebBrainLeftSidebarWaves: React.FC<WebBrainLeftSidebarWavesProps> = ({
 }) => {
 
   
-  const { waves, activeWave, registerWave } = useMyStream();
+  const { waves, registerWave } = useMyStream();
 
   const onNextPage = () => {
     if (waves.hasNextPage && !waves.isFetchingNextPage && !waves.isFetching) {

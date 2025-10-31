@@ -24,13 +24,13 @@ const SELECT_ALL_OPTION: AllowlistToolSelectMenuMultipleOption = {
 type SnapshotExcludeComponentWinnersProps = {
   readonly config: PhaseGroupSnapshotConfig;
   readonly phases: ReadonlyArray<BuildPhasesPhase>;
-  onNextStep: (step: PhaseConfigStep) => void;
-  onSelectExcludeComponentWinners: (param: {
+  readonly onNextStep: (step: PhaseConfigStep) => void;
+  readonly onSelectExcludeComponentWinners: (param: {
     excludeComponentWinners: string[];
     uniqueWalletsCount: number | null;
   }) => void;
-  title: string;
-  onClose: () => void;
+  readonly title: string;
+  readonly onClose: () => void;
 };
 
 export default function SnapshotExcludeComponentWinners({
@@ -164,7 +164,7 @@ export default function SnapshotExcludeComponentWinners({
         onNext={() => onExcludePreviousWinners()}>
         <ComponentConfigMeta
           tags={[]}
-          walletsCount={null}
+          walletsCount={config.uniqueWalletsCount}
           isLoading={false}
         />
       </ComponentConfigNextBtn>

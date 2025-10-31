@@ -37,15 +37,15 @@ export default function SnapshotExcludeOtherSnapshots({
   title,
   onClose,
 }: {
-  snapshots: DistributionPlanSnapshot[];
-  config: PhaseGroupSnapshotConfig;
-  onSkip: () => void;
-  onSelectExcludeOtherSnapshots: (param: {
+  readonly snapshots: DistributionPlanSnapshot[];
+  readonly config: PhaseGroupSnapshotConfig;
+  readonly onSkip: () => void;
+  readonly onSelectExcludeOtherSnapshots: (param: {
     snapshotsToExclude: PhaseGroupSnapshotConfigExcludeSnapshot[];
     uniqueWalletsCount: number | null;
   }) => void;
-  title: string;
-  onClose: () => void;
+  readonly title: string;
+  readonly onClose: () => void;
 }) {
   const { operations, distributionPlan, setToasts } = useContext(
     DistributionPlanToolContext
