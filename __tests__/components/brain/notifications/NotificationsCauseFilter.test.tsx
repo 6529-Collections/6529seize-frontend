@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import NotificationsCauseFilter from '@/components/brain/notifications/NotificationsCauseFilter';
+import { ApiNotificationCause } from '@/generated/models/ApiNotificationCause';
 import { AuthContext } from '@/components/auth/Auth';
 import { usePrefetchNotifications } from '@/hooks/useNotificationsQuery';
 
@@ -25,7 +26,14 @@ describe('NotificationsCauseFilter', () => {
 
     const buttons = screen.getAllByRole('button');
     await userEvent.hover(buttons[1]);
-    expect(prefetch).toHaveBeenCalledWith({ identity: 'tester', cause: expect.any(Array) });
+    expect(prefetch).toHaveBeenCalledWith({
+      identity: 'tester',
+      cause: [
+        ApiNotificationCause.IdentityMentioned,
+        ApiNotificationCause.DropQuoted,
+      ],
+      pages: 1,
+    });
 
     await userEvent.click(buttons[2]);
     expect(setActive).toHaveBeenCalled();

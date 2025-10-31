@@ -32,6 +32,7 @@ interface EmojiContextType {
   categories: string[];
   categoryIcons: Record<string, { src: string }>;
   findNativeEmoji: (emojiId: string) => NativeEmoji | null;
+  findCustomEmoji: (emojiId: string) => Emoji | null;
 }
 
 const EmojiContext = createContext<EmojiContextType | undefined>(undefined);
@@ -96,20 +97,55 @@ export const EmojiProvider = ({ children }: { children: React.ReactNode }) => {
     fetchEmojis();
   }, []);
 
-  const findNativeEmoji = useCallback((emojiId: string) => {
-    const emojiText = emojiId.replaceAll(":", "");
-    const emoji = Object.values((data as any).emojis).find(
-      (e: any) => e.id === emojiText
-    );
-    if (emoji) {
-      return emoji as NativeEmoji;
+  const customEmojiIndex = useMemo(() => {
+    const index = new Map<string, Emoji>();
+    for (const category of emojiMap) {
+      for (const emoji of category.emojis) {
+        index.set(emoji.id, emoji);
+      }
     }
-    return null;
-  }, []);
+    return index;
+  }, [emojiMap]);
+
+  const findCustomEmoji = useCallback(
+    (emojiId: string) => customEmojiIndex.get(emojiId.replaceAll(":", "")) || null,
+    [customEmojiIndex]
+  );
+
+  const nativeEmojiCache = useMemo(() => new Map<string, NativeEmoji | null>(), []);
+
+  const findNativeEmoji = useCallback(
+    (emojiId: string) => {
+      const normalizedId = emojiId.replaceAll(":", "");
+      if (nativeEmojiCache.has(normalizedId)) {
+        return nativeEmojiCache.get(normalizedId) ?? null;
+      }
+
+      const emoji = (data as any).emojis?.[normalizedId] as NativeEmoji | undefined;
+      const result = emoji ?? null;
+      nativeEmojiCache.set(normalizedId, result);
+      return result;
+    },
+    [nativeEmojiCache]
+  );
 
   const value = useMemo(
-    () => ({ emojiMap, loading, categories, categoryIcons, findNativeEmoji }),
-    [emojiMap, loading, categories, categoryIcons, findNativeEmoji]
+    () => ({
+      emojiMap,
+      loading,
+      categories,
+      categoryIcons,
+      findNativeEmoji,
+      findCustomEmoji,
+    }),
+    [
+      emojiMap,
+      loading,
+      categories,
+      categoryIcons,
+      findNativeEmoji,
+      findCustomEmoji,
+    ]
   );
 
   return (
