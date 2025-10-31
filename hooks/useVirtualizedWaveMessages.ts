@@ -83,8 +83,11 @@ export function useVirtualizedWaveMessages(
       }
     }
 
-    if (fullWaveMessagesRef.current) {
-      const totalDrops = fullWaveMessagesRef.current.drops.length;
+    const currentFullWaveMessages =
+      fullWaveMessages ?? fullWaveMessagesRef.current;
+
+    if (currentFullWaveMessages) {
+      const totalDrops = currentFullWaveMessages.drops.length;
       setHasMoreLocal(totalDrops > virtualLimit);
 
       if (!hasInitialized.current && totalDrops > 0) {
@@ -96,7 +99,7 @@ export function useVirtualizedWaveMessages(
     }
   }, [
     dropId,
-    fullWaveMessagesRef.current,
+    fullWaveMessages,
     virtualLimit,
     fullWaveMessagesForDrop,
   ]);
@@ -148,13 +151,7 @@ export function useVirtualizedWaveMessages(
     ) {
       setVirtualLimit((prevLimit) => prevLimit + pageSize);
     }
-  }, [
-    fullWaveMessagesRef.current,
-    virtualLimit,
-    pageSize,
-    fullWaveMessagesForDrop,
-    dropId,
-  ]);
+  }, [virtualLimit, pageSize, fullWaveMessagesForDrop, dropId]);
 
   const revealDrop = useCallback(
     (serialNo: number) => {
@@ -170,7 +167,7 @@ export function useVirtualizedWaveMessages(
         }
       }
     },
-    [fullWaveMessagesRef.current]
+    []
   );
 
   const waitAndRevealDrop = useCallback(
@@ -196,7 +193,7 @@ export function useVirtualizedWaveMessages(
       );
       return false;
     },
-    [revealDrop, fullWaveMessagesRef.current]
+    [revealDrop, waveId]
   );
 
   if (dropId && !fullWaveMessagesForDrop) {
