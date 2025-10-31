@@ -68,7 +68,11 @@ beforeEach(() => {
         emojis: [{ id: 'smile', name: 'Smile', keywords: 'happy', skins: [{ src: '' }] }],
       },
     ],
+    loading: false,
+    categories: [],
+    categoryIcons: {},
     findNativeEmoji: jest.fn(() => null),
+    findCustomEmoji: jest.fn((id: string) => (id.replaceAll(':', '') === 'smile' ? { id: 'smile', name: 'Smile', keywords: 'happy', skins: [{ src: '' }] } : null)),
   });
 });
 
