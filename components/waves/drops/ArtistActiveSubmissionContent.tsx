@@ -81,12 +81,11 @@ export const ArtistActiveSubmissionContent: React.FC<
 
   return (
     <>
-      {/* Content */}
       <div
         className={`tw-relative tw-z-[100] tw-p-6 ${
           isApp
             ? ""
-            : "tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-max-h-[calc(75vh-120px)] sm:tw-max-h-[calc(90vh-140px)]"
+            : "tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-max-h-[calc(75vh-120px)] sm:tw-max-h-[calc(90vh-160px)]"
         }`}
       >
         {(() => {
@@ -95,24 +94,9 @@ export const ArtistActiveSubmissionContent: React.FC<
               <div className="tw-flex tw-items-center tw-justify-center tw-h-96">
                 <div className="tw-flex tw-flex-col tw-items-center tw-gap-4">
                   <div className="tw-animate-spin tw-rounded-full tw-h-8 tw-w-8 tw-border-b tw-border-solid tw-border-t-0 tw-border-x-0 tw-border-iron-400"></div>
-                  <span
-                    className="tw-text-iron-400 tw-text-sm"
-                    style={{
-                      animation: "fadeInOut 2s ease-in-out infinite alternate",
-                    }}
-                  >
+                  <span className="tw-text-iron-400 tw-text-sm tw-animate-fade-in-out">
                     Loading submissions...
                   </span>
-                  <style>{`
-                    @keyframes fadeInOut {
-                      0% {
-                        opacity: 0.8;
-                      }
-                      100% {
-                        opacity: 0.4;
-                      }
-                    }
-                  `}</style>
                 </div>
               </div>
             );

@@ -128,7 +128,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   }, []);
 
   return (
-    <div className="tw-mb-2">
+    <div>
       {multiDecision ? (
         <div className="tw-rounded-lg tw-bg-iron-950 tw-overflow-hidden">
           {(() => {

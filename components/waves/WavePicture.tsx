@@ -1,4 +1,5 @@
 import React from "react";
+import { FallbackImage } from "@/components/common/FallbackImage";
 
 interface WavePictureProps {
   readonly name: string;
@@ -66,11 +67,16 @@ export default function WavePicture({
 }: WavePictureProps) {
   if (picture) {
     return (
-      <img
-        src={picture}
-        alt={name}
-        className="tw-w-full tw-h-full tw-object-cover tw-rounded-full"
-      />
+      <div className="tw-w-full tw-h-full tw-relative tw-rounded-full tw-overflow-hidden">
+        <FallbackImage
+          primarySrc={picture}
+          fallbackSrc={picture}
+          alt={name}
+          fill
+          sizes="64px"
+          className="tw-object-cover"
+        />
+      </div>
     );
   }
 
@@ -100,10 +106,13 @@ export default function WavePicture({
             className="tw-absolute tw-inset-0"
             style={{ clipPath: clip }}
           >
-            <img
-              src={pfp}
+            <FallbackImage
+              primarySrc={pfp}
+              fallbackSrc={pfp}
               alt={`Contributor-${i}`}
-              className="tw-w-full tw-h-full tw-object-cover tw-block tw-rounded-full"
+              fill
+              sizes="64px"
+              className="tw-object-cover tw-block tw-rounded-full"
             />
           </div>
         );

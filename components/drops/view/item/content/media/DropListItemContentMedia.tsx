@@ -26,7 +26,7 @@ export default function DropListItemContentMedia({
   media_url,
   onContainerClick,
   isCompetitionDrop = false,
-  imageScale = ImageScale.AUTOx450,
+  imageScale = ImageScale.AUTOx800,
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;

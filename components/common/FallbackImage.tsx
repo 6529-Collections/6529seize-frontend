@@ -1,13 +1,16 @@
 "use client";
 
-import React from "react";
+import Image, { type ImageProps } from "next/image";
+import React, { useMemo } from "react";
 
-type FallbackImageProps = React.ImgHTMLAttributes<HTMLImageElement> & {
+type FallbackImageProps = Omit<ImageProps, "src" | "alt"> & {
   readonly primarySrc: string;
   readonly fallbackSrc: string;
+  readonly alt?: string;
   readonly onPrimaryError?: (
     event: React.SyntheticEvent<HTMLImageElement, Event>
   ) => void;
+  readonly optimize?: boolean;
 };
 
 export const FallbackImage = React.forwardRef<
@@ -15,7 +18,15 @@ export const FallbackImage = React.forwardRef<
   FallbackImageProps
 >(
   (
-    { primarySrc, fallbackSrc, alt = "", onError, onPrimaryError, ...rest },
+    {
+      primarySrc,
+      fallbackSrc,
+      alt = "",
+      onError,
+      onPrimaryError,
+      optimize,
+      ...imageProps
+    },
     ref
   ) => {
     const [src, setSrc] = React.useState(primarySrc);
@@ -38,14 +49,40 @@ export const FallbackImage = React.forwardRef<
       }
     };
 
+    const shouldOptimize = useMemo(() => {
+      if (optimize === false) {
+        return false;
+      }
+
+      const targetSrc = src ?? primarySrc;
+
+      const isAnimatedGif =
+        /\.gif(?:$|\?)/i.test(primarySrc) || /\.gif(?:$|\?)/i.test(fallbackSrc);
+      if (isAnimatedGif) {
+        return false;
+      }
+
+      if (optimize === true) {
+        return true;
+      }
+
+      try {
+        const parsed = new URL(targetSrc);
+        const hostname = parsed.hostname.toLowerCase();
+        return hostname.includes("cloudfront.net");
+      } catch {
+        return false;
+      }
+    }, [fallbackSrc, optimize, primarySrc, src]);
+
     return (
-      <img
+      <Image
         ref={ref}
         src={src}
         alt={alt}
         onError={handleError}
-        loading="lazy"
-        {...rest}
+        unoptimized={!shouldOptimize}
+        {...imageProps}
       />
     );
   }
