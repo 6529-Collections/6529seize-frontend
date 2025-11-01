@@ -35,6 +35,18 @@ jest.mock('@/components/notifications/NotificationsContext');
 jest.mock('@/components/auth/Auth');
 jest.mock('@/services/api/common-api');
 jest.mock('next/navigation');
+jest.mock('@/hooks/useCapacitor', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    isCapacitor: false,
+    platform: 'web',
+    isIos: false,
+    isAndroid: false,
+    orientation: 0,
+    keyboardVisible: false,
+    isActive: false
+  }))
+}));
 
 // Mock components with proper prop capturing
 let containerProps: any;
@@ -103,6 +115,17 @@ const mockRemoveNotifications = jest.fn();
 const mockCommonApiPost = jest.fn();
 
 const useVirtualizedWaveDropsMock = useVirtualizedWaveDrops as jest.MockedFunction<typeof useVirtualizedWaveDrops>;
+const useCapacitorMock = require('@/hooks/useCapacitor').default as jest.Mock;
+
+const defaultCapacitorState = {
+  isCapacitor: false,
+  platform: 'web',
+  isIos: false,
+  isAndroid: false,
+  orientation: 0,
+  keyboardVisible: false,
+  isActive: false
+};
 
 // Helper to create mock drops
 const createMockDrop = (overrides: Partial<ApiDrop> = {}): ApiDrop => ({
@@ -155,6 +178,10 @@ interface MockSetupOptions {
     connectedProfile?: { handle: string } | null;
   };
   typingMessage?: string | null;
+  capacitor?: {
+    isCapacitor?: boolean;
+    platform?: string;
+  };
 }
 
 function setupMocks(options: MockSetupOptions = {}) {
@@ -163,6 +190,17 @@ function setupMocks(options: MockSetupOptions = {}) {
   containerProps = undefined;
   dropsProps = undefined;
   scrollButtonProps = undefined;
+
+  const platform = options.capacitor?.platform ?? 'web';
+  const isCapacitorEnv = options.capacitor?.isCapacitor ?? false;
+
+  useCapacitorMock.mockReturnValue({
+    ...defaultCapacitorState,
+    isCapacitor: isCapacitorEnv,
+    platform,
+    isIos: platform === 'ios',
+    isAndroid: platform === 'android'
+  });
   
   // Setup useVirtualizedWaveDrops mock
   const defaultWaveMessages: WaveMessagesMock = {
@@ -478,7 +516,8 @@ describe('WaveDropsAll', () => {
           isAtBottom: false,
           shouldPinToBottom: false,
           scrollIntent: 'reading'
-        }
+        },
+        capacitor: { isCapacitor: true, platform: 'ios' }
       });
 
       useVirtualizedWaveDropsMock.mockReturnValue({
@@ -528,6 +567,67 @@ describe('WaveDropsAll', () => {
       });
     });
 
+    it('shows new drops immediately when not running in Capacitor', async () => {
+      const initialDrop = createMockDrop({ id: 'drop-1', serial_no: 1 });
+      const newDrop = createMockDrop({ id: 'drop-2', serial_no: 2 });
+
+      setupMocks({
+        waveMessages: { drops: [initialDrop] },
+        scrollBehavior: {
+          isAtBottom: false,
+          shouldPinToBottom: false,
+          scrollIntent: 'reading'
+        },
+        capacitor: { isCapacitor: false, platform: 'web' }
+      });
+
+      useVirtualizedWaveDropsMock.mockReturnValue({
+        waveMessages: {
+          isLoading: false,
+          isLoadingNextPage: false,
+          hasNextPage: false,
+          drops: [initialDrop, newDrop]
+        },
+        fetchNextPage: mockFetchNextPage,
+        waitAndRevealDrop: mockWaitAndRevealDrop
+      });
+
+      useVirtualizedWaveDropsMock
+        .mockReturnValueOnce({
+          waveMessages: {
+            isLoading: false,
+            isLoadingNextPage: false,
+            hasNextPage: false,
+            drops: [initialDrop]
+          },
+          fetchNextPage: mockFetchNextPage,
+          waitAndRevealDrop: mockWaitAndRevealDrop
+        })
+        .mockReturnValueOnce({
+          waveMessages: {
+            isLoading: false,
+            isLoadingNextPage: false,
+            hasNextPage: false,
+            drops: [initialDrop, newDrop]
+          },
+          fetchNextPage: mockFetchNextPage,
+          waitAndRevealDrop: mockWaitAndRevealDrop
+        });
+
+      const { rerender, props } = renderComponent();
+
+      await waitFor(() => {
+        expect(dropsProps.drops).toEqual([initialDrop]);
+      });
+
+      rerender(<WaveDropsAll {...props} />);
+
+      await waitFor(() => {
+        expect(dropsProps.drops).toEqual([initialDrop, newDrop]);
+        expect(scrollButtonProps.pendingCount).toBe(0);
+      });
+    });
+
     it('reveals pending drops when the toast is tapped', async () => {
       const initialDrop = createMockDrop({ id: 'drop-1', serial_no: 1 });
       const newDrop = createMockDrop({ id: 'drop-2', serial_no: 2 });
@@ -538,7 +638,8 @@ describe('WaveDropsAll', () => {
           isAtBottom: false,
           shouldPinToBottom: false,
           scrollIntent: 'reading'
-        }
+        },
+        capacitor: { isCapacitor: true, platform: 'ios' }
       });
 
       useVirtualizedWaveDropsMock.mockReturnValue({

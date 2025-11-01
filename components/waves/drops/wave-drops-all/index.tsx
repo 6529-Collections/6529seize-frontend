@@ -7,6 +7,7 @@ import { useNotificationsContext } from "@/components/notifications/Notification
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { Drop, DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
+import useCapacitor from "@/hooks/useCapacitor";
 import { useScrollBehavior } from "@/hooks/useScrollBehavior";
 import { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
 import { useWaveIsTyping } from "@/hooks/useWaveIsTyping";
@@ -62,6 +63,9 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   const { waveMessages, fetchNextPage, waitAndRevealDrop } =
     useVirtualizedWaveDrops(waveId, dropId);
 
+  const { isCapacitor, isIos } = useCapacitor();
+  const shouldBufferPendingDrops = isCapacitor && isIos;
+
   const {
     scrollContainerRef,
     bottomAnchorRef,
@@ -100,9 +104,18 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
       return;
     }
 
-    const drops = waveMessages.drops;
+    const drops = waveMessages.drops ?? EMPTY_DROPS;
     const total = drops.length;
     const currentWaveId = waveMessages.id ?? null;
+
+    if (!shouldBufferPendingDrops) {
+      lastWaveIdRef.current = currentWaveId;
+      lastDropCountRef.current = total;
+      if (pendingDropsRef.current.length > 0) {
+        flushPendingDrops();
+      }
+      return;
+    }
 
     if (lastWaveIdRef.current !== currentWaveId) {
       lastWaveIdRef.current = currentWaveId;
@@ -151,21 +164,32 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
         prev.filter((drop) => validKeys.has(getDropKey(drop)))
       );
     }
-  }, [waveMessages, shouldPinToBottom, flushPendingDrops, updatePendingDrops]);
+  }, [
+    waveMessages,
+    shouldPinToBottom,
+    flushPendingDrops,
+    updatePendingDrops,
+    shouldBufferPendingDrops,
+  ]);
 
-  const pendingCount = pendingDrops.length;
+  const pendingCount = shouldBufferPendingDrops ? pendingDrops.length : 0;
 
   const visibleDrops = useMemo(() => {
     if (!waveMessages) return EMPTY_DROPS;
-    if (pendingCount === 0) return waveMessages.drops;
-    const limit = Math.max(waveMessages.drops.length - pendingCount, 0);
-    return waveMessages.drops.slice(0, limit);
-  }, [waveMessages, pendingCount]);
+    const allDrops = waveMessages.drops ?? EMPTY_DROPS;
+    if (!shouldBufferPendingDrops || pendingCount === 0) {
+      return allDrops;
+    }
+    const limit = Math.max(allDrops.length - pendingCount, 0);
+    return allDrops.slice(0, limit);
+  }, [waveMessages, pendingCount, shouldBufferPendingDrops]);
 
   const handleRevealPending = useCallback(() => {
-    flushPendingDrops();
+    if (shouldBufferPendingDrops) {
+      flushPendingDrops();
+    }
     scrollToVisualBottom();
-  }, [flushPendingDrops, scrollToVisualBottom]);
+  }, [shouldBufferPendingDrops, flushPendingDrops, scrollToVisualBottom]);
 
   const typingMessage = useWaveIsTyping(
     waveId,
@@ -253,14 +277,27 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   );
 
   useEffect(() => {
-    if (!serialTarget || pendingCount === 0 || !waveMessages) return;
+    if (
+      !shouldBufferPendingDrops ||
+      !serialTarget ||
+      pendingCount === 0 ||
+      !waveMessages
+    ) {
+      return;
+    }
     const hasPendingTarget = pendingDropsRef.current.some(
       (drop) => drop.serial_no === serialTarget
     );
     if (hasPendingTarget) {
       handleRevealPending();
     }
-  }, [serialTarget, pendingCount, waveMessages, handleRevealPending]);
+  }, [
+    serialTarget,
+    pendingCount,
+    waveMessages,
+    handleRevealPending,
+    shouldBufferPendingDrops,
+  ]);
 
   return (
     <div
