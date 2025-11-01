@@ -76,14 +76,15 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   const pendingDropsRef = useRef<Drop[]>([]);
 
   const updatePendingDrops = useCallback(
-    (updater: (prev: Drop[]) => Drop[])
-  ) => {
-    setPendingDrops((prev) => {
-      const next = updater(prev);
-      pendingDropsRef.current = next;
-      return next;
-    });
-  }, []);
+    (updater: (prev: Drop[]) => Drop[]) => {
+      setPendingDrops((prev) => {
+        const next = updater(prev);
+        pendingDropsRef.current = next;
+        return next;
+      });
+    },
+    []
+  );
 
   const flushPendingDrops = useCallback(() => {
     if (pendingDropsRef.current.length === 0) return;
