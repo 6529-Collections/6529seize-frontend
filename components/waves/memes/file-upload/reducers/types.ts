@@ -1,4 +1,7 @@
-import type { InteractiveMediaMimeType } from "../../submission/constants/media";
+import type {
+  InteractiveMediaMimeType,
+  InteractiveMediaProvider,
+} from "../../submission/constants/media";
 
 /**
  * Type definitions for the file upload system
@@ -78,16 +81,26 @@ export interface MemesArtSubmissionFileProps {
   readonly mediaSource: "upload" | "url";
   /** Update media source mode */
   readonly setMediaSource: (mode: "upload" | "url") => void;
-  /** External media URL (when using URL mode) */
-  readonly externalUrl: string;
+  /** Raw hash or CID when using hosted interactive content */
+  readonly externalHash: string;
+  /** Selected decentralized hosting provider */
+  readonly externalProvider: InteractiveMediaProvider;
+  /** Fully constructed URL from the hash */
+  readonly externalConstructedUrl: string;
+  /** URL used for previewing inside the modal */
+  readonly externalPreviewUrl: string;
   /** External media MIME type */
   readonly externalMimeType: InteractiveMediaMimeType;
   /** Validation error for external media */
   readonly externalError: string | null;
   /** Whether external media input is valid */
   readonly isExternalMediaValid: boolean;
-  /** Handler for changing the external media URL */
-  readonly onExternalUrlChange: (value: string) => void;
+  /** Handler for changing the interactive hash input */
+  readonly onExternalHashChange: (value: string) => void;
+  /** Handler for changing the hosting provider */
+  readonly onExternalProviderChange: (
+    value: InteractiveMediaProvider
+  ) => void;
   /** Handler for changing the external media MIME type */
   readonly onExternalMimeTypeChange: (
     value: InteractiveMediaMimeType

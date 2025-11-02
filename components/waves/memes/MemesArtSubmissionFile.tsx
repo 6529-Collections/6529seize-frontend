@@ -26,6 +26,8 @@ import { FILE_INPUT_ACCEPT } from "./file-upload/utils/constants";
 import {
   ALLOWED_INTERACTIVE_MEDIA_MIME_TYPES,
   DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE,
+  INTERACTIVE_MEDIA_PROVIDERS,
+  type InteractiveMediaProvider,
 } from "./submission/constants/media";
 
 /**
@@ -44,11 +46,15 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
   handleFileSelect,
   mediaSource,
   setMediaSource,
-  externalUrl,
+  externalHash,
+  externalProvider,
+  externalConstructedUrl,
+  externalPreviewUrl,
   externalMimeType,
   externalError,
   isExternalMediaValid,
-  onExternalUrlChange,
+  onExternalHashChange,
+  onExternalProviderChange,
   onExternalMimeTypeChange,
   onClearExternalMedia,
 }) => {
@@ -148,6 +154,29 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
       }
     },
     [setMediaSource, onExternalMimeTypeChange],
+  );
+
+  const providerOptions = useMemo(
+    () =>
+      INTERACTIVE_MEDIA_PROVIDERS.map((provider) => ({
+        key: provider.key,
+        label: provider.label,
+        panelId: `memes-art-submission-provider-${provider.key}`,
+      })),
+    [],
+  );
+
+  const handleProviderSelect = useCallback(
+    (key: string) => {
+      if (key === externalProvider) {
+        return;
+      }
+
+      if (key === "ipfs" || key === "arweave") {
+        onExternalProviderChange(key as InteractiveMediaProvider);
+      }
+    },
+    [externalProvider, onExternalProviderChange],
   );
 
   // Check browser compatibility on mount
@@ -303,24 +332,42 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
             tw-rounded-xl tw-border tw-border-iron-800 tw-p-4
           `}>
           <div className="tw-flex tw-flex-col tw-gap-2">
+            <span className="tw-text-sm tw-font-medium tw-text-iron-200">
+              Hosting Network
+            </span>
+            <div className="tw-inline-flex tw-bg-iron-900 tw-border tw-border-iron-800 tw-rounded-lg tw-p-1">
+              <TabToggle
+                options={providerOptions}
+                activeKey={externalProvider}
+                onSelect={handleProviderSelect}
+              />
+            </div>
+          </div>
+
+          <div className="tw-flex tw-flex-col tw-gap-2">
             <label
-              htmlFor="memes-interactive-media-url"
+              htmlFor="memes-interactive-media-hash"
               className="tw-text-sm tw-font-medium tw-text-iron-200">
-              Hosted HTML URL
+              Content Hash or Path
             </label>
             <input
-              id="memes-interactive-media-url"
-              type="url"
-              inputMode="url"
+              id="memes-interactive-media-hash"
+              type="text"
               autoComplete="off"
               className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-600"
-              placeholder="https://your-hosting.example/path/index.html"
-              value={externalUrl}
-              onChange={(event) => onExternalUrlChange(event.target.value)}
+              placeholder="bafy.../index.html"
+              value={externalHash}
+              onChange={(event) => onExternalHashChange(event.target.value)}
               aria-invalid={Boolean(externalError)}
             />
             {externalError && (
               <p className="tw-text-xs tw-text-red-400">{externalError}</p>
+            )}
+            {externalConstructedUrl && !externalError && (
+              <p className="tw-text-xs tw-text-iron-400">
+                Resulting URL{" "}
+                <span className="tw-text-iron-100">{externalConstructedUrl}</span>
+              </p>
             )}
           </div>
 
@@ -341,19 +388,21 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
               type="button"
               onClick={onClearExternalMedia}
               className="tw-text-xs tw-font-medium tw-text-iron-200 tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-1.5 hover:tw-bg-iron-800 tw-transition disabled:tw-opacity-40 disabled:tw-cursor-not-allowed"
-              disabled={!externalUrl}>
-              Clear URL
+              disabled={!externalHash}>
+              Clear Hash
             </button>
             <span className="tw-text-xs tw-text-iron-400">
-              Previewed inside a sandboxed iframe for safety.
+              {externalProvider === "ipfs"
+                ? "Previewed via gateway.pinata.cloud inside a sandboxed iframe."
+                : "Previewed directly from arweave.net inside a sandboxed iframe."}
             </span>
           </div>
 
           <div className="tw-flex-1 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-950 tw-overflow-hidden">
             {isExternalMediaValid ? (
               <iframe
-                key={externalUrl}
-                src={externalUrl}
+                key={externalPreviewUrl}
+                src={externalPreviewUrl}
                 sandbox="allow-scripts allow-pointer-lock allow-popups"
                 referrerPolicy="no-referrer"
                 className="tw-w-full tw-h-full tw-bg-white"
@@ -362,7 +411,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
             ) : (
               <div className="tw-h-full tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-text-center tw-text-sm tw-text-iron-400 tw-px-4">
                 <span>
-                  Provide a valid https:// URL that serves HTML to enable the preview.
+                  Provide a valid hash or CID to enable the preview.
                 </span>
                 <span className="tw-text-iron-500">
                   The final artwork is rendered securely inside a sandboxed iframe.

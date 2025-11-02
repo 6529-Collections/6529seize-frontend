@@ -6,15 +6,19 @@ import { SubmissionStep } from "../types/Steps";
 import { useAuth } from "@/components/auth/Auth";
 import { getInitialTraitsValues } from "@/components/waves/memes/traits/schema";
 import {
-  ALLOWED_INTERACTIVE_MEDIA_MIME_TYPE_SET,
   DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE,
   InteractiveMediaMimeType,
+  InteractiveMediaProvider,
 } from "../constants/media";
 
 type MediaSource = "upload" | "url";
 
 interface ExternalMediaState {
+  input: string;
+  sanitizedHash: string;
+  provider: InteractiveMediaProvider;
   url: string;
+  previewUrl: string;
   mimeType: InteractiveMediaMimeType;
   error: string | null;
   isValid: boolean;
@@ -47,33 +51,66 @@ interface FormState {
   externalMedia: ExternalMediaState;
 }
 
-const validateExternalMedia = (
-  url: string,
+const sanitizeInteractiveHash = (
+  input: string,
+  provider: InteractiveMediaProvider
+): string => {
+  if (!input) {
+    return "";
+  }
+
+  let value = input.trim();
+
+  if (provider === "ipfs") {
+    value = value.replace(/^ipfs:\/\//i, "");
+    value = value.replace(/^https?:\/\/[^/]+\/ipfs\//i, "");
+    value = value.replace(/^ipfs\//i, "");
+  } else if (provider === "arweave") {
+    value = value.replace(/^https?:\/\/(?:www\.)?arweave\.net\//i, "");
+  }
+
+  value = value.replace(/^\/+/, "");
+  return value;
+};
+
+const buildExternalMediaState = (
+  input: string,
+  provider: InteractiveMediaProvider,
   mimeType: InteractiveMediaMimeType
-): { error: string | null; isValid: boolean } => {
-  const trimmed = url.trim();
-  if (!trimmed) {
-    return { error: null, isValid: false };
+): ExternalMediaState => {
+  const trimmedInput = input.trim();
+  const sanitizedHash = sanitizeInteractiveHash(trimmedInput, provider);
+  const hasHash = sanitizedHash.length > 0;
+
+  let error: string | null = null;
+  if (trimmedInput && !hasHash) {
+    error = "Enter a valid hash or CID.";
+  } else if (/\s/.test(sanitizedHash)) {
+    error = "Hashes cannot contain whitespace.";
   }
 
-  if (trimmed.length > 2048) {
-    return { error: "URL is too long.", isValid: false };
-  }
+  const isValid = hasHash && !error;
+  const url = isValid
+    ? provider === "arweave"
+      ? `https://arweave.net/${sanitizedHash}`
+      : `ipfs://${sanitizedHash}`
+    : "";
+  const previewUrl = isValid
+    ? provider === "arweave"
+      ? url
+      : `https://gateway.pinata.cloud/ipfs/${sanitizedHash}`
+    : "";
 
-  try {
-    const parsed = new URL(trimmed);
-    if (parsed.protocol !== "https:") {
-      return { error: "Only https:// URLs are allowed.", isValid: false };
-    }
-  } catch {
-    return { error: "Enter a valid https:// URL.", isValid: false };
-  }
-
-  if (!ALLOWED_INTERACTIVE_MEDIA_MIME_TYPE_SET.has(mimeType)) {
-    return { error: "Select a supported media type.", isValid: false };
-  }
-
-  return { error: null, isValid: true };
+  return {
+    input,
+    sanitizedHash,
+    provider,
+    url,
+    previewUrl,
+    mimeType,
+    error,
+    isValid,
+  };
 };
 
 function formReducer(state: FormState, action: FormAction): FormState {
@@ -180,7 +217,11 @@ export function useArtworkSubmissionForm() {
     mediaSource: "upload",
     selectedFile: null,
     externalMedia: {
+      input: "",
+      sanitizedHash: "",
+      provider: "ipfs",
       url: "",
+      previewUrl: "",
       mimeType: DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE,
       error: null,
       isValid: false,
@@ -196,28 +237,47 @@ export function useArtworkSubmissionForm() {
     [dispatch]
   );
 
-  const setExternalMedia = useCallback(
-    (url: string, mimeType: InteractiveMediaMimeType) => {
-      const { error, isValid } = validateExternalMedia(url, mimeType);
-      dispatch({
-        type: "SET_EXTERNAL_MEDIA",
-        payload: { url, mimeType, error, isValid },
-      });
+  const updateExternalMediaState = useCallback(
+    (input: string, provider: InteractiveMediaProvider) => {
+      const nextExternalMedia = buildExternalMediaState(
+        input,
+        provider,
+        state.externalMedia.mimeType
+      );
+      dispatch({ type: "SET_EXTERNAL_MEDIA", payload: nextExternalMedia });
     },
-    [dispatch]
+    [dispatch, state.externalMedia.mimeType]
+  );
+
+  const setExternalMediaHash = useCallback(
+    (hash: string) => {
+      updateExternalMediaState(hash, state.externalMedia.provider);
+    },
+    [updateExternalMediaState, state.externalMedia.provider]
+  );
+
+  const setExternalMediaProvider = useCallback(
+    (provider: InteractiveMediaProvider) => {
+      updateExternalMediaState(state.externalMedia.input, provider);
+    },
+    [updateExternalMediaState, state.externalMedia.input]
+  );
+
+  const setExternalMediaMimeType = useCallback(
+    (mimeType: InteractiveMediaMimeType) => {
+      const nextExternalMedia = buildExternalMediaState(
+        state.externalMedia.input,
+        state.externalMedia.provider,
+        mimeType
+      );
+      dispatch({ type: "SET_EXTERNAL_MEDIA", payload: nextExternalMedia });
+    },
+    [dispatch, state.externalMedia.input, state.externalMedia.provider]
   );
 
   const clearExternalMedia = useCallback(() => {
-    dispatch({
-      type: "SET_EXTERNAL_MEDIA",
-      payload: {
-        url: "",
-        mimeType: state.externalMedia.mimeType,
-        error: null,
-        isValid: false,
-      },
-    });
-  }, [dispatch, state.externalMedia.mimeType]);
+    updateExternalMediaState("", state.externalMedia.provider);
+  }, [updateExternalMediaState, state.externalMedia.provider]);
 
   const handleFileSelect = useCallback(
     (file: File) => {
@@ -268,6 +328,9 @@ export function useArtworkSubmissionForm() {
       mediaSource: state.mediaSource,
       selectedFile: state.selectedFile,
       externalUrl: state.externalMedia.url,
+      externalPreviewUrl: state.externalMedia.previewUrl,
+      externalProvider: state.externalMedia.provider,
+      externalHash: state.externalMedia.sanitizedHash,
       externalMimeType: state.externalMedia.mimeType,
       isExternalValid: state.externalMedia.isValid,
     }),
@@ -278,21 +341,18 @@ export function useArtworkSubmissionForm() {
     (uploaded: boolean) => {
       if (!uploaded) {
         if (state.mediaSource === "url") {
-          dispatch({
-            type: "SET_EXTERNAL_MEDIA",
-            payload: {
-              url: "",
-              mimeType: state.externalMedia.mimeType,
-              error: null,
-              isValid: false,
-            },
-          });
+          updateExternalMediaState("", state.externalMedia.provider);
         } else {
           dispatch({ type: "RESET_UPLOAD_MEDIA" });
         }
       }
     },
-    [state.mediaSource, state.externalMedia.mimeType, dispatch]
+    [
+      state.mediaSource,
+      state.externalMedia.provider,
+      updateExternalMediaState,
+      dispatch,
+    ]
   );
 
   const updateTraitField = useCallback(
@@ -317,16 +377,21 @@ export function useArtworkSubmissionForm() {
     handleContinueFromTerms,
 
     artworkUploaded: state.artworkUploaded,
-    artworkUrl: state.artworkUrl,
-    selectedFile: state.selectedFile,
-    mediaSource: state.mediaSource,
-    externalMediaUrl: state.externalMedia.url,
+   artworkUrl: state.artworkUrl,
+   selectedFile: state.selectedFile,
+   mediaSource: state.mediaSource,
+   externalMediaUrl: state.externalMedia.url,
+    externalMediaPreviewUrl: state.externalMedia.previewUrl,
+    externalMediaHashInput: state.externalMedia.input,
+    externalMediaProvider: state.externalMedia.provider,
     externalMediaMimeType: state.externalMedia.mimeType,
     externalMediaError: state.externalMedia.error,
     isExternalMediaValid: state.externalMedia.isValid,
     setArtworkUploaded,
     setMediaSource,
-    setExternalMedia,
+    setExternalMediaHash,
+    setExternalMediaProvider,
+    setExternalMediaMimeType,
     clearExternalMedia,
     handleFileSelect,
 

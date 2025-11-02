@@ -8,7 +8,10 @@ import ArtworkDetails from "../details/ArtworkDetails";
 import MemesArtSubmissionTraits from "@/components/waves/memes/MemesArtSubmissionTraits";
 import SubmissionProgress, { SubmissionPhase } from "../ui/SubmissionProgress";
 import { useTraitsValidation } from "../validation";
-import type { InteractiveMediaMimeType } from "../constants/media";
+import type {
+  InteractiveMediaMimeType,
+  InteractiveMediaProvider,
+} from "../constants/media";
 
 /**
  * Required fields for submission
@@ -129,11 +132,15 @@ interface ArtworkStepProps {
   readonly handleFileSelect: (file: File) => void;
   readonly mediaSource: "upload" | "url";
   readonly setMediaSource: (mode: "upload" | "url") => void;
-  readonly externalUrl: string;
+  readonly externalHash: string;
+  readonly externalProvider: InteractiveMediaProvider;
+  readonly externalConstructedUrl: string;
+  readonly externalPreviewUrl: string;
   readonly externalMimeType: InteractiveMediaMimeType;
   readonly externalError: string | null;
   readonly isExternalMediaValid: boolean;
-  readonly onExternalUrlChange: (value: string) => void;
+  readonly onExternalHashChange: (value: string) => void;
+  readonly onExternalProviderChange: (value: InteractiveMediaProvider) => void;
   readonly onExternalMimeTypeChange: (value: InteractiveMediaMimeType) => void;
   readonly onClearExternalMedia: () => void;
   readonly onSubmit: () => void;
@@ -168,11 +175,15 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
   handleFileSelect,
   mediaSource,
   setMediaSource,
-  externalUrl,
+  externalHash,
+  externalProvider,
+  externalConstructedUrl,
+  externalPreviewUrl,
   externalMimeType,
   externalError,
   isExternalMediaValid,
-  onExternalUrlChange,
+  onExternalHashChange,
+  onExternalProviderChange,
   onExternalMimeTypeChange,
   onClearExternalMedia,
   onSubmit,
@@ -299,11 +310,15 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
                 handleFileSelect={handleFileSelect}
                 mediaSource={mediaSource}
                 setMediaSource={setMediaSource}
-                externalUrl={externalUrl}
+                externalHash={externalHash}
+                externalProvider={externalProvider}
+                externalConstructedUrl={externalConstructedUrl}
+                externalPreviewUrl={externalPreviewUrl}
                 externalMimeType={externalMimeType}
                 externalError={externalError}
                 isExternalMediaValid={isExternalMediaValid}
-                onExternalUrlChange={onExternalUrlChange}
+                onExternalHashChange={onExternalHashChange}
+                onExternalProviderChange={onExternalProviderChange}
                 onExternalMimeTypeChange={onExternalMimeTypeChange}
                 onClearExternalMedia={onClearExternalMedia}
               />

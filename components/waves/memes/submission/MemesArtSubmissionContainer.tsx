@@ -141,16 +141,16 @@ const MemesArtSubmissionContainer: React.FC<
         handleFileSelect={handleFileSelect}
         mediaSource={form.mediaSource}
         setMediaSource={form.setMediaSource}
-        externalUrl={form.externalMediaUrl}
+        externalHash={form.externalMediaHashInput}
+        externalProvider={form.externalMediaProvider}
+        externalConstructedUrl={form.externalMediaUrl}
+        externalPreviewUrl={form.externalMediaPreviewUrl}
         externalMimeType={form.externalMediaMimeType}
         externalError={form.externalMediaError}
         isExternalMediaValid={form.isExternalMediaValid}
-        onExternalUrlChange={(value) =>
-          form.setExternalMedia(value, form.externalMediaMimeType)
-        }
-        onExternalMimeTypeChange={(value) =>
-          form.setExternalMedia(form.externalMediaUrl, value)
-        }
+        onExternalHashChange={form.setExternalMediaHash}
+        onExternalProviderChange={form.setExternalMediaProvider}
+        onExternalMimeTypeChange={form.setExternalMediaMimeType}
         onClearExternalMedia={form.clearExternalMedia}
         onSubmit={handleSubmit}
         onCancel={onClose}

@@ -41,6 +41,9 @@ describe('MemesArtSubmissionContainer', () => {
       selectedFile: null,
       mediaSource: 'upload',
       externalMediaUrl: '',
+      externalMediaPreviewUrl: '',
+      externalMediaHashInput: '',
+      externalMediaProvider: 'ipfs',
       externalMediaMimeType: 'text/html',
       externalMediaError: null,
       isExternalMediaValid: false,
@@ -63,17 +66,39 @@ describe('MemesArtSubmissionContainer', () => {
       formState.mediaSource = mode;
     });
 
-    formState.setExternalMedia = jest.fn(
-      (url: string, mimeType: InteractiveMediaMimeType) => {
-        formState.externalMediaUrl = url;
+    formState.setExternalMediaHash = jest.fn((hash: string) => {
+      formState.externalMediaHashInput = hash;
+      if (hash) {
+        formState.externalMediaUrl = `${formState.externalMediaProvider === 'arweave' ? 'https://arweave.net/' : 'ipfs://'}${hash}`;
+        formState.externalMediaPreviewUrl =
+          formState.externalMediaProvider === 'arweave'
+            ? formState.externalMediaUrl
+            : `https://gateway.pinata.cloud/ipfs/${hash}`;
+        formState.isExternalMediaValid = true;
+        formState.externalMediaError = null;
+      } else {
+        formState.externalMediaUrl = '';
+        formState.externalMediaPreviewUrl = '';
+        formState.isExternalMediaValid = false;
+        formState.externalMediaError = null;
+      }
+    });
+
+    formState.setExternalMediaProvider = jest.fn((provider: 'ipfs' | 'arweave') => {
+      formState.externalMediaProvider = provider;
+      formState.setExternalMediaHash(formState.externalMediaHashInput);
+    });
+
+    formState.setExternalMediaMimeType = jest.fn(
+      (mimeType: InteractiveMediaMimeType) => {
         formState.externalMediaMimeType = mimeType;
-        formState.isExternalMediaValid = !!url;
-        formState.externalMediaError = url ? null : null;
       }
     );
 
     formState.clearExternalMedia = jest.fn(() => {
+      formState.externalMediaHashInput = '';
       formState.externalMediaUrl = '';
+      formState.externalMediaPreviewUrl = '';
       formState.isExternalMediaValid = false;
       formState.externalMediaError = null;
     });
@@ -83,6 +108,9 @@ describe('MemesArtSubmissionContainer', () => {
       mediaSource: formState.mediaSource,
       selectedFile: formState.selectedFile,
       externalUrl: formState.externalMediaUrl,
+      externalPreviewUrl: formState.externalMediaPreviewUrl,
+      externalProvider: formState.externalMediaProvider,
+      externalHash: formState.externalMediaHashInput,
       externalMimeType: formState.externalMediaMimeType,
       isExternalValid: formState.isExternalMediaValid,
     }));

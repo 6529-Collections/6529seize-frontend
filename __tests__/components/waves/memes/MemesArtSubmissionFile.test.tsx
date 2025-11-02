@@ -155,7 +155,8 @@ describe('MemesArtSubmissionFile', () => {
   const mockSetArtworkUploaded = jest.fn();
   const mockHandleFileSelect = jest.fn();
   const mockSetMediaSource = jest.fn();
-  const mockOnExternalUrlChange = jest.fn();
+  const mockOnExternalHashChange = jest.fn();
+  const mockOnExternalProviderChange = jest.fn();
   const mockOnExternalMimeTypeChange =
     jest.fn<(value: InteractiveMediaMimeType) => void>();
   const mockOnClearExternalMedia = jest.fn();
@@ -167,11 +168,15 @@ describe('MemesArtSubmissionFile', () => {
     handleFileSelect: mockHandleFileSelect,
     mediaSource: 'upload',
     setMediaSource: mockSetMediaSource,
-    externalUrl: '',
+    externalHash: '',
+    externalProvider: 'ipfs',
+    externalConstructedUrl: '',
+    externalPreviewUrl: '',
     externalMimeType: 'text/html',
     externalError: null,
     isExternalMediaValid: false,
-    onExternalUrlChange: mockOnExternalUrlChange,
+    onExternalHashChange: mockOnExternalHashChange,
+    onExternalProviderChange: mockOnExternalProviderChange,
     onExternalMimeTypeChange: mockOnExternalMimeTypeChange,
     onClearExternalMedia: mockOnClearExternalMedia,
   };
@@ -191,7 +196,8 @@ describe('MemesArtSubmissionFile', () => {
     mockHandleRetry.mockClear();
     mockHandleRemoveFile.mockClear();
     mockSetMediaSource.mockClear();
-    mockOnExternalUrlChange.mockClear();
+    mockOnExternalHashChange.mockClear();
+    mockOnExternalProviderChange.mockClear();
     mockOnExternalMimeTypeChange.mockClear();
     mockOnClearExternalMedia.mockClear();
   });
