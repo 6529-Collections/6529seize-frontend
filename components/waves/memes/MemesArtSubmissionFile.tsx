@@ -393,7 +393,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
             </button>
             <span className="tw-text-xs tw-text-iron-400">
               {externalProvider === "ipfs"
-                ? "Previewed via the configured IPFS gateway inside a sandboxed iframe."
+                ? "Previewed via nftstorage.link inside a sandboxed iframe."
                 : "Previewed directly from arweave.net inside a sandboxed iframe."}
             </span>
           </div>
