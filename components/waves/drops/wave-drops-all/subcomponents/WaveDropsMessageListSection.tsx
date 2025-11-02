@@ -37,6 +37,8 @@ interface WaveDropsMessageListSectionProps {
   readonly isAtBottom: boolean;
   readonly scrollToBottom: () => void;
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
+  readonly pendingCount: number;
+  readonly onRevealPending: () => void;
 }
 
 const MIN_DROPS_FOR_PAGINATION = 25;
@@ -59,6 +61,8 @@ export const WaveDropsMessageListSection: React.FC<
   isAtBottom,
   scrollToBottom,
   onDropContentClick,
+  pendingCount,
+  onRevealPending,
 }) => {
   const hasNextPage =
     !!waveMessages?.hasNextPage &&
@@ -94,6 +98,8 @@ export const WaveDropsMessageListSection: React.FC<
       <WaveDropsScrollBottomButton
         isAtBottom={isAtBottom}
         scrollToBottom={scrollToBottom}
+        newMessagesCount={pendingCount}
+        onRevealNewMessages={onRevealPending}
       />
     </>
   );

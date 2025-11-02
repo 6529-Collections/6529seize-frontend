@@ -23,6 +23,7 @@ describe('useDeviceInfo', () => {
     defineMatchMedia(true, false);
     const { result } = renderHook(() => useDeviceInfo());
     expect(result.current.isMobileDevice).toBe(true);
+    expect(result.current.isAppleMobile).toBe(true);
     expect(result.current.hasTouchScreen).toBe(true);
     expect(result.current.isApp).toBe(false);
   });
@@ -34,6 +35,7 @@ describe('useDeviceInfo', () => {
     const { result } = renderHook(() => useDeviceInfo());
     expect(result.current.isMobileDevice).toBe(true);
     expect(result.current.isApp).toBe(true);
+    expect(result.current.isAppleMobile).toBe(true);
   });
 
   it('returns false for desktop without touch', () => {
@@ -43,5 +45,6 @@ describe('useDeviceInfo', () => {
     const { result } = renderHook(() => useDeviceInfo());
     expect(result.current.isMobileDevice).toBe(false);
     expect(result.current.hasTouchScreen).toBe(false);
+    expect(result.current.isAppleMobile).toBe(false);
   });
 });
