@@ -10,6 +10,7 @@ import {
   InteractiveMediaMimeType,
   InteractiveMediaProvider,
 } from "../constants/media";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 
 type MediaSource = "upload" | "url";
 
@@ -98,7 +99,7 @@ const buildExternalMediaState = (
   const previewUrl = isValid
     ? provider === "arweave"
       ? url
-      : `https://gateway.pinata.cloud/ipfs/${sanitizedHash}`
+      : resolveIpfsUrlSync(`ipfs://${sanitizedHash}`)
     : "";
 
   return {
