@@ -2,7 +2,7 @@ import React, { ComponentProps } from 'react';
 import { render, screen } from '@testing-library/react';
 import ArtworkStep from '@/components/waves/memes/submission/steps/ArtworkStep';
 import { TraitsData } from '@/components/waves/memes/submission/types/TraitsData';
-import type { ExternalMediaMimeType } from '@/components/waves/memes/submission/constants/media';
+import type { InteractiveMediaMimeType } from '@/components/waves/memes/submission/constants/media';
 
 jest.mock('@/components/waves/memes/MemesArtSubmissionFile', () => () => <div data-testid="file" />);
 jest.mock('@/components/waves/memes/submission/details/ArtworkDetails', () => (props: any) => (
@@ -79,11 +79,11 @@ const createProps = (
   mediaSource: 'upload' as const,
   setMediaSource: () => {},
   externalUrl: '',
-  externalMimeType: 'text/html' as ExternalMediaMimeType,
+  externalMimeType: 'text/html' as InteractiveMediaMimeType,
   externalError: null as string | null,
   isExternalMediaValid: false,
   onExternalUrlChange: () => {},
-  onExternalMimeTypeChange: (_value: ExternalMediaMimeType) => {},
+  onExternalMimeTypeChange: (_value: InteractiveMediaMimeType) => {},
   onClearExternalMedia: () => {},
   onSubmit: () => {},
   updateTraitField: () => {},

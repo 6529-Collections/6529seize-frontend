@@ -1,4 +1,4 @@
-import type { ExternalMediaMimeType } from "../../submission/constants/media";
+import type { InteractiveMediaMimeType } from "../../submission/constants/media";
 
 /**
  * Type definitions for the file upload system
@@ -81,7 +81,7 @@ export interface MemesArtSubmissionFileProps {
   /** External media URL (when using URL mode) */
   readonly externalUrl: string;
   /** External media MIME type */
-  readonly externalMimeType: ExternalMediaMimeType;
+  readonly externalMimeType: InteractiveMediaMimeType;
   /** Validation error for external media */
   readonly externalError: string | null;
   /** Whether external media input is valid */
@@ -90,7 +90,7 @@ export interface MemesArtSubmissionFileProps {
   readonly onExternalUrlChange: (value: string) => void;
   /** Handler for changing the external media MIME type */
   readonly onExternalMimeTypeChange: (
-    value: ExternalMediaMimeType
+    value: InteractiveMediaMimeType
   ) => void;
   /** Reset external media selection */
   readonly onClearExternalMedia: () => void;

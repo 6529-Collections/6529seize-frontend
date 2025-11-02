@@ -13,7 +13,7 @@ import { TraitsData } from "../types/TraitsData";
 import { SubmissionPhase } from "../ui/SubmissionProgress";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
-import type { ExternalMediaMimeType } from "../constants/media";
+import type { InteractiveMediaMimeType } from "../constants/media";
 
 /**
  * Interface for the artwork submission data
@@ -22,7 +22,7 @@ interface ArtworkSubmissionData {
   imageFile?: File;
   externalMedia?: {
     url: string;
-    mimeType: ExternalMediaMimeType;
+    mimeType: InteractiveMediaMimeType;
   };
   traits: TraitsData;
   waveId: string;

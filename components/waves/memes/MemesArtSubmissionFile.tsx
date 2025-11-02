@@ -24,8 +24,8 @@ import type { MemesArtSubmissionFileProps } from "./file-upload/reducers/types";
 import { isBrowserSupported } from "./file-upload/utils/browserDetection";
 import { FILE_INPUT_ACCEPT } from "./file-upload/utils/constants";
 import {
-  ALLOWED_EXTERNAL_MEDIA_MIME_TYPES,
-  DEFAULT_EXTERNAL_MEDIA_MIME_TYPE,
+  ALLOWED_INTERACTIVE_MEDIA_MIME_TYPES,
+  DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE,
 } from "./submission/constants/media";
 
 /**
@@ -130,8 +130,8 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
     },
     {
       key: "url",
-      label: "Use IPFS URL",
-      panelId: "memes-art-submission-url-panel",
+      label: "Interactive HTML",
+      panelId: "memes-art-submission-interactive-panel",
     },
   ] as const;
 
@@ -143,7 +143,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
       }
 
       if (key === "url") {
-        onExternalMimeTypeChange(DEFAULT_EXTERNAL_MEDIA_MIME_TYPE);
+        onExternalMimeTypeChange(DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE);
         setMediaSource("url");
       }
     },
@@ -196,7 +196,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
   const showUploadUi = mediaSource === "upload";
 
   const mediaTypeLabel = useMemo(() => {
-    const match = ALLOWED_EXTERNAL_MEDIA_MIME_TYPES.find(
+    const match = ALLOWED_INTERACTIVE_MEDIA_MIME_TYPES.find(
       (type) => type.value === externalMimeType,
     );
     return match?.label ?? externalMimeType;
@@ -205,9 +205,9 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
   useEffect(() => {
     if (
       mediaSource === "url" &&
-      externalMimeType !== DEFAULT_EXTERNAL_MEDIA_MIME_TYPE
+      externalMimeType !== DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE
     ) {
-      onExternalMimeTypeChange(DEFAULT_EXTERNAL_MEDIA_MIME_TYPE);
+      onExternalMimeTypeChange(DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE);
     }
   }, [
     mediaSource,
@@ -296,7 +296,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
         </motion.div>
       ) : (
         <div
-          id="memes-art-submission-url-panel"
+          id="memes-art-submission-interactive-panel"
           className={`
             tw-flex tw-flex-col tw-gap-4 tw-flex-1
             tw-bg-gradient-to-br tw-from-iron-900 tw-to-iron-950
@@ -304,17 +304,17 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
           `}>
           <div className="tw-flex tw-flex-col tw-gap-2">
             <label
-              htmlFor="memes-external-media-url"
+              htmlFor="memes-interactive-media-url"
               className="tw-text-sm tw-font-medium tw-text-iron-200">
-              IPFS Gateway URL
+              Hosted HTML URL
             </label>
             <input
-              id="memes-external-media-url"
+              id="memes-interactive-media-url"
               type="url"
               inputMode="url"
               autoComplete="off"
               className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-600"
-              placeholder="https://gateway.pinata.cloud/ipfs/<cid>/index.html"
+              placeholder="https://your-hosting.example/path/index.html"
               value={externalUrl}
               onChange={(event) => onExternalUrlChange(event.target.value)}
               aria-invalid={Boolean(externalError)}
@@ -331,7 +331,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
             <div className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-200 tw-flex tw-items-center tw-justify-between">
               <span>{mediaTypeLabel}</span>
               <span className="tw-text-xs tw-text-iron-500">
-                Fixed for IPFS submissions
+                Fixed to interactive HTML (text/html)
               </span>
             </div>
           </div>
@@ -362,7 +362,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
             ) : (
               <div className="tw-h-full tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-text-center tw-text-sm tw-text-iron-400 tw-px-4">
                 <span>
-                  Provide a valid https:// IPFS gateway URL to enable the preview.
+                  Provide a valid https:// URL that serves HTML to enable the preview.
                 </span>
                 <span className="tw-text-iron-500">
                   The final artwork is rendered securely inside a sandboxed iframe.

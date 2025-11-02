@@ -6,7 +6,7 @@ import { SubmissionStep } from '@/components/waves/memes/submission/types/Steps'
 import { useArtworkSubmissionForm } from '@/components/waves/memes/submission/hooks/useArtworkSubmissionForm';
 import { useArtworkSubmissionMutation } from '@/components/waves/memes/submission/hooks/useArtworkSubmissionMutation';
 import { useSeizeConnectContext } from '@/components/auth/SeizeConnectContext';
-import type { ExternalMediaMimeType } from '@/components/waves/memes/submission/constants/media';
+import type { InteractiveMediaMimeType } from '@/components/waves/memes/submission/constants/media';
 
 jest.mock('@/components/waves/memes/submission/hooks/useArtworkSubmissionForm');
 jest.mock('@/components/waves/memes/submission/hooks/useArtworkSubmissionMutation');
@@ -64,7 +64,7 @@ describe('MemesArtSubmissionContainer', () => {
     });
 
     formState.setExternalMedia = jest.fn(
-      (url: string, mimeType: ExternalMediaMimeType) => {
+      (url: string, mimeType: InteractiveMediaMimeType) => {
         formState.externalMediaUrl = url;
         formState.externalMediaMimeType = mimeType;
         formState.isExternalMediaValid = !!url;

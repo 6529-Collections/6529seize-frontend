@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import MemesArtSubmissionFile from '@/components/waves/memes/MemesArtSubmissionFile';
 import { AuthContext } from '@/components/auth/Auth';
 import type { MemesArtSubmissionFileProps } from '@/components/waves/memes/file-upload/reducers/types';
-import type { ExternalMediaMimeType } from '@/components/waves/memes/submission/constants/media';
+import type { InteractiveMediaMimeType } from '@/components/waves/memes/submission/constants/media';
 
 // Mock framer-motion to avoid AbortSignal compatibility issues
 jest.mock('framer-motion', () => {
@@ -157,7 +157,7 @@ describe('MemesArtSubmissionFile', () => {
   const mockSetMediaSource = jest.fn();
   const mockOnExternalUrlChange = jest.fn();
   const mockOnExternalMimeTypeChange =
-    jest.fn<(value: ExternalMediaMimeType) => void>();
+    jest.fn<(value: InteractiveMediaMimeType) => void>();
   const mockOnClearExternalMedia = jest.fn();
 
   const baseProps: MemesArtSubmissionFileProps = {

@@ -1,4 +1,5 @@
-export const ALLOWED_EXTERNAL_MEDIA_MIME_TYPES = [
+// Supported MIME types when creators embed hosted interactive experiences.
+export const ALLOWED_INTERACTIVE_MEDIA_MIME_TYPES = [
   { value: "text/html", label: "Interactive HTML" },
   { value: "image/png", label: "Image (PNG)" },
   { value: "image/jpeg", label: "Image (JPG)" },
@@ -6,18 +7,18 @@ export const ALLOWED_EXTERNAL_MEDIA_MIME_TYPES = [
   { value: "video/webm", label: "Video (WebM)" },
 ] as const;
 
-export const DEFAULT_EXTERNAL_MEDIA_MIME_TYPE =
-  ALLOWED_EXTERNAL_MEDIA_MIME_TYPES[0].value;
+export const DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE =
+  ALLOWED_INTERACTIVE_MEDIA_MIME_TYPES[0].value;
 
-export type ExternalMediaMimeType =
-  (typeof ALLOWED_EXTERNAL_MEDIA_MIME_TYPES)[number]["value"];
+export type InteractiveMediaMimeType =
+  (typeof ALLOWED_INTERACTIVE_MEDIA_MIME_TYPES)[number]["value"];
 
-export const ALLOWED_EXTERNAL_MEDIA_MIME_TYPE_SET =
-  new Set<ExternalMediaMimeType>(
-    ALLOWED_EXTERNAL_MEDIA_MIME_TYPES.map((item) => item.value)
+export const ALLOWED_INTERACTIVE_MEDIA_MIME_TYPE_SET =
+  new Set<InteractiveMediaMimeType>(
+    ALLOWED_INTERACTIVE_MEDIA_MIME_TYPES.map((item) => item.value)
   );
 
-export const isAllowedExternalMediaMimeType = (
+export const isAllowedInteractiveMediaMimeType = (
   value: string
-): value is ExternalMediaMimeType =>
-  ALLOWED_EXTERNAL_MEDIA_MIME_TYPES.some((item) => item.value === value);
+): value is InteractiveMediaMimeType =>
+  ALLOWED_INTERACTIVE_MEDIA_MIME_TYPES.some((item) => item.value === value);

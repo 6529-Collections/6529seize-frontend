@@ -6,16 +6,16 @@ import { SubmissionStep } from "../types/Steps";
 import { useAuth } from "@/components/auth/Auth";
 import { getInitialTraitsValues } from "@/components/waves/memes/traits/schema";
 import {
-  ALLOWED_EXTERNAL_MEDIA_MIME_TYPE_SET,
-  DEFAULT_EXTERNAL_MEDIA_MIME_TYPE,
-  ExternalMediaMimeType,
+  ALLOWED_INTERACTIVE_MEDIA_MIME_TYPE_SET,
+  DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE,
+  InteractiveMediaMimeType,
 } from "../constants/media";
 
 type MediaSource = "upload" | "url";
 
 interface ExternalMediaState {
   url: string;
-  mimeType: ExternalMediaMimeType;
+  mimeType: InteractiveMediaMimeType;
   error: string | null;
   isValid: boolean;
 }
@@ -49,7 +49,7 @@ interface FormState {
 
 const validateExternalMedia = (
   url: string,
-  mimeType: ExternalMediaMimeType
+  mimeType: InteractiveMediaMimeType
 ): { error: string | null; isValid: boolean } => {
   const trimmed = url.trim();
   if (!trimmed) {
@@ -69,7 +69,7 @@ const validateExternalMedia = (
     return { error: "Enter a valid https:// URL.", isValid: false };
   }
 
-  if (!ALLOWED_EXTERNAL_MEDIA_MIME_TYPE_SET.has(mimeType)) {
+  if (!ALLOWED_INTERACTIVE_MEDIA_MIME_TYPE_SET.has(mimeType)) {
     return { error: "Select a supported media type.", isValid: false };
   }
 
@@ -181,7 +181,7 @@ export function useArtworkSubmissionForm() {
     selectedFile: null,
     externalMedia: {
       url: "",
-      mimeType: DEFAULT_EXTERNAL_MEDIA_MIME_TYPE,
+      mimeType: DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE,
       error: null,
       isValid: false,
     },
@@ -197,7 +197,7 @@ export function useArtworkSubmissionForm() {
   );
 
   const setExternalMedia = useCallback(
-    (url: string, mimeType: ExternalMediaMimeType) => {
+    (url: string, mimeType: InteractiveMediaMimeType) => {
       const { error, isValid } = validateExternalMedia(url, mimeType);
       dispatch({
         type: "SET_EXTERNAL_MEDIA",

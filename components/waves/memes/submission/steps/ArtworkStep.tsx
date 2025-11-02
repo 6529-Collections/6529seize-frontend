@@ -8,7 +8,7 @@ import ArtworkDetails from "../details/ArtworkDetails";
 import MemesArtSubmissionTraits from "@/components/waves/memes/MemesArtSubmissionTraits";
 import SubmissionProgress, { SubmissionPhase } from "../ui/SubmissionProgress";
 import { useTraitsValidation } from "../validation";
-import type { ExternalMediaMimeType } from "../constants/media";
+import type { InteractiveMediaMimeType } from "../constants/media";
 
 /**
  * Required fields for submission
@@ -130,11 +130,11 @@ interface ArtworkStepProps {
   readonly mediaSource: "upload" | "url";
   readonly setMediaSource: (mode: "upload" | "url") => void;
   readonly externalUrl: string;
-  readonly externalMimeType: ExternalMediaMimeType;
+  readonly externalMimeType: InteractiveMediaMimeType;
   readonly externalError: string | null;
   readonly isExternalMediaValid: boolean;
   readonly onExternalUrlChange: (value: string) => void;
-  readonly onExternalMimeTypeChange: (value: ExternalMediaMimeType) => void;
+  readonly onExternalMimeTypeChange: (value: InteractiveMediaMimeType) => void;
   readonly onClearExternalMedia: () => void;
   readonly onSubmit: () => void;
   readonly onCancel?: () => void; // Added cancel handler prop
