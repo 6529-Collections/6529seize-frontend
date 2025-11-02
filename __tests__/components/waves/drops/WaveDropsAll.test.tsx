@@ -626,7 +626,18 @@ describe('WaveDropsAll', () => {
     expect(dropsProps.drops).toHaveLength(1);
     expect(scrollButtonProps.newMessagesCount).toBe(1);
 
-    await userEvent.click(screen.getByTestId('scroll-bottom-btn'));
+    const user = userEvent.setup({
+      // Provide fake timer advancement so userEvent resolves under fake timers
+      advanceTimers: jest.advanceTimersByTime
+    });
+
+    await act(async () => {
+      await user.click(screen.getByTestId('scroll-bottom-btn'));
+    });
+
+    act(() => {
+      jest.runOnlyPendingTimers();
+    });
 
     await waitFor(() => {
       expect(dropsProps.drops).toHaveLength(2);
