@@ -4,6 +4,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -24,7 +25,7 @@ import { isBrowserSupported } from "./file-upload/utils/browserDetection";
 import { FILE_INPUT_ACCEPT } from "./file-upload/utils/constants";
 import {
   ALLOWED_EXTERNAL_MEDIA_MIME_TYPES,
-  isAllowedExternalMediaMimeType,
+  DEFAULT_EXTERNAL_MEDIA_MIME_TYPE,
 } from "./submission/constants/media";
 
 /**
@@ -136,11 +137,17 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
 
   const handleTabSelect = useCallback(
     (key: string) => {
-      if (key === "upload" || key === "url") {
-        setMediaSource(key);
+      if (key === "upload") {
+        setMediaSource("upload");
+        return;
+      }
+
+      if (key === "url") {
+        onExternalMimeTypeChange(DEFAULT_EXTERNAL_MEDIA_MIME_TYPE);
+        setMediaSource("url");
       }
     },
-    [setMediaSource],
+    [setMediaSource, onExternalMimeTypeChange],
   );
 
   // Check browser compatibility on mount
@@ -187,6 +194,26 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
   }, [currentFile, objectUrl, artworkUrl]);
 
   const showUploadUi = mediaSource === "upload";
+
+  const mediaTypeLabel = useMemo(() => {
+    const match = ALLOWED_EXTERNAL_MEDIA_MIME_TYPES.find(
+      (type) => type.value === externalMimeType,
+    );
+    return match?.label ?? externalMimeType;
+  }, [externalMimeType]);
+
+  useEffect(() => {
+    if (
+      mediaSource === "url" &&
+      externalMimeType !== DEFAULT_EXTERNAL_MEDIA_MIME_TYPE
+    ) {
+      onExternalMimeTypeChange(DEFAULT_EXTERNAL_MEDIA_MIME_TYPE);
+    }
+  }, [
+    mediaSource,
+    externalMimeType,
+    onExternalMimeTypeChange,
+  ]);
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-4 tw-h-full">
@@ -298,27 +325,15 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
           </div>
 
           <div className="tw-flex tw-flex-col tw-gap-2">
-            <label
-              htmlFor="memes-external-media-mime"
-              className="tw-text-sm tw-font-medium tw-text-iron-200">
+            <span className="tw-text-sm tw-font-medium tw-text-iron-200">
               Media Type
-            </label>
-            <select
-              id="memes-external-media-mime"
-              className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-600"
-              value={externalMimeType}
-              onChange={(event) => {
-                const value = event.target.value;
-                if (isAllowedExternalMediaMimeType(value)) {
-                  onExternalMimeTypeChange(value);
-                }
-              }}>
-              {ALLOWED_EXTERNAL_MEDIA_MIME_TYPES.map((type) => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
-                </option>
-              ))}
-            </select>
+            </span>
+            <div className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-200 tw-flex tw-items-center tw-justify-between">
+              <span>{mediaTypeLabel}</span>
+              <span className="tw-text-xs tw-text-iron-500">
+                Fixed for IPFS submissions
+              </span>
+            </div>
           </div>
 
           <div className="tw-flex tw-items-center tw-gap-3">
