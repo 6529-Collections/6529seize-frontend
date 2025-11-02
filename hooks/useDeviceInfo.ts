@@ -31,7 +31,6 @@ export default function useDeviceInfo(): DeviceInfo {
         isApp: false,
         isAppleMobile: false,
       };
-      console.log("useDeviceInfo:isAppleMobile", info.isAppleMobile);
       return info;
     }
 
@@ -65,7 +64,6 @@ export default function useDeviceInfo(): DeviceInfo {
       isApp: isCapacitor,
       isAppleMobile: appleMobile,
     };
-    console.log("useDeviceInfo:isAppleMobile", info.isAppleMobile);
     return info;
   }, [isCapacitor]);
 
