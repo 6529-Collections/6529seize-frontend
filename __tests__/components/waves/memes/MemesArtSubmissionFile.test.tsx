@@ -2,6 +2,8 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import MemesArtSubmissionFile from '@/components/waves/memes/MemesArtSubmissionFile';
 import { AuthContext } from '@/components/auth/Auth';
+import type { MemesArtSubmissionFileProps } from '@/components/waves/memes/file-upload/reducers/types';
+import type { ExternalMediaMimeType } from '@/components/waves/memes/submission/constants/media';
 
 // Mock framer-motion to avoid AbortSignal compatibility issues
 jest.mock('framer-motion', () => {
@@ -152,6 +154,32 @@ describe('MemesArtSubmissionFile', () => {
   const mockSetToast = jest.fn();
   const mockSetArtworkUploaded = jest.fn();
   const mockHandleFileSelect = jest.fn();
+  const mockSetMediaSource = jest.fn();
+  const mockOnExternalUrlChange = jest.fn();
+  const mockOnExternalMimeTypeChange =
+    jest.fn<(value: ExternalMediaMimeType) => void>();
+  const mockOnClearExternalMedia = jest.fn();
+
+  const baseProps: MemesArtSubmissionFileProps = {
+    artworkUploaded: false,
+    artworkUrl: 'url',
+    setArtworkUploaded: mockSetArtworkUploaded,
+    handleFileSelect: mockHandleFileSelect,
+    mediaSource: 'upload',
+    setMediaSource: mockSetMediaSource,
+    externalUrl: '',
+    externalMimeType: 'text/html',
+    externalError: null,
+    isExternalMediaValid: false,
+    onExternalUrlChange: mockOnExternalUrlChange,
+    onExternalMimeTypeChange: mockOnExternalMimeTypeChange,
+    onClearExternalMedia: mockOnClearExternalMedia,
+  };
+
+  const renderComponent = (
+    overrideProps: Partial<MemesArtSubmissionFileProps> = {}
+  ) =>
+    render(<MemesArtSubmissionFile {...baseProps} {...overrideProps} />);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -162,19 +190,16 @@ describe('MemesArtSubmissionFile', () => {
     mockProcessFile.mockClear();
     mockHandleRetry.mockClear();
     mockHandleRemoveFile.mockClear();
+    mockSetMediaSource.mockClear();
+    mockOnExternalUrlChange.mockClear();
+    mockOnExternalMimeTypeChange.mockClear();
+    mockOnClearExternalMedia.mockClear();
   });
 
   describe('Error Handling - Fail Fast', () => {
     it('renders with default AuthContext when provider is missing', () => {
       // Component should render with default context values when no provider is present
-      const { container } = render(
-        <MemesArtSubmissionFile
-          artworkUploaded={false}
-          artworkUrl="url"
-          setArtworkUploaded={mockSetArtworkUploaded}
-          handleFileSelect={mockHandleFileSelect}
-        />
-      );
+      const { container } = renderComponent();
       
       // Should render the main container without errors
       expect(container.firstChild).toBeInTheDocument();
@@ -188,6 +213,7 @@ describe('MemesArtSubmissionFile', () => {
       const { container } = render(
         <AuthContext.Provider value={{ setToast: mockSetToast } as any}>
           <MemesArtSubmissionFile
+            {...baseProps}
             artworkUploaded={null as any}
             artworkUrl={undefined as any}
             setArtworkUploaded={mockSetArtworkUploaded}
@@ -207,12 +233,7 @@ describe('MemesArtSubmissionFile', () => {
     it('shows warning when browser unsupported and calls setToast', async () => {
       render(
         <AuthContext.Provider value={{ setToast: mockSetToast } as any}>
-          <MemesArtSubmissionFile
-            artworkUploaded={false}
-            artworkUrl="url"
-            setArtworkUploaded={mockSetArtworkUploaded}
-            handleFileSelect={mockHandleFileSelect}
-          />
+          <MemesArtSubmissionFile {...baseProps} />
         </AuthContext.Provider>
       );
       

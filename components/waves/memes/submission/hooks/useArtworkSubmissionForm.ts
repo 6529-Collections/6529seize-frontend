@@ -5,35 +5,77 @@ import { TraitsData } from "../types/TraitsData";
 import { SubmissionStep } from "../types/Steps";
 import { useAuth } from "@/components/auth/Auth";
 import { getInitialTraitsValues } from "@/components/waves/memes/traits/schema";
+import {
+  ALLOWED_EXTERNAL_MEDIA_MIME_TYPE_SET,
+  DEFAULT_EXTERNAL_MEDIA_MIME_TYPE,
+  ExternalMediaMimeType,
+} from "../constants/media";
 
-/**
- * Action types for the form reducer - drastically simplified
- */
+type MediaSource = "upload" | "url";
+
+interface ExternalMediaState {
+  url: string;
+  mimeType: ExternalMediaMimeType;
+  error: string | null;
+  isValid: boolean;
+}
+
 type FormAction =
   | { type: "SET_STEP"; payload: SubmissionStep }
   | { type: "SET_AGREEMENTS"; payload: boolean }
-  | { type: "SET_ARTWORK_UPLOADED"; payload: boolean }
-  | { type: "SET_ARTWORK_URL"; payload: string }
   | {
       type: "SET_TRAIT_FIELD";
       payload: { field: keyof TraitsData; value: any };
     }
-  | { type: "SET_MULTIPLE_TRAITS"; payload: Partial<TraitsData> };
+  | { type: "SET_MULTIPLE_TRAITS"; payload: Partial<TraitsData> }
+  | { type: "SET_MEDIA_SOURCE"; payload: MediaSource }
+  | { type: "SET_EXTERNAL_MEDIA"; payload: ExternalMediaState }
+  | {
+      type: "SET_UPLOAD_MEDIA";
+      payload: { file: File; artworkUrl: string };
+    }
+  | { type: "RESET_UPLOAD_MEDIA" };
 
-/**
- * State interface for the form reducer
- */
 interface FormState {
   currentStep: SubmissionStep;
   agreements: boolean;
   artworkUploaded: boolean;
   artworkUrl: string;
   traits: TraitsData;
+  mediaSource: MediaSource;
+  selectedFile: File | null;
+  externalMedia: ExternalMediaState;
 }
 
-/**
- * Ultra-simplified reducer function for the artwork submission form
- */
+const validateExternalMedia = (
+  url: string,
+  mimeType: ExternalMediaMimeType
+): { error: string | null; isValid: boolean } => {
+  const trimmed = url.trim();
+  if (!trimmed) {
+    return { error: null, isValid: false };
+  }
+
+  if (trimmed.length > 2048) {
+    return { error: "URL is too long.", isValid: false };
+  }
+
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol !== "https:") {
+      return { error: "Only https:// URLs are allowed.", isValid: false };
+    }
+  } catch {
+    return { error: "Enter a valid https:// URL.", isValid: false };
+  }
+
+  if (!ALLOWED_EXTERNAL_MEDIA_MIME_TYPE_SET.has(mimeType)) {
+    return { error: "Select a supported media type.", isValid: false };
+  }
+
+  return { error: null, isValid: true };
+};
+
 function formReducer(state: FormState, action: FormAction): FormState {
   switch (action.type) {
     case "SET_STEP":
@@ -42,14 +84,7 @@ function formReducer(state: FormState, action: FormAction): FormState {
     case "SET_AGREEMENTS":
       return { ...state, agreements: action.payload };
 
-    case "SET_ARTWORK_UPLOADED":
-      return { ...state, artworkUploaded: action.payload };
-
-    case "SET_ARTWORK_URL":
-      return { ...state, artworkUrl: action.payload };
-
-    case "SET_TRAIT_FIELD": {
-      // Simple direct update - no special handling
+    case "SET_TRAIT_FIELD":
       return {
         ...state,
         traits: {
@@ -57,16 +92,73 @@ function formReducer(state: FormState, action: FormAction): FormState {
           [action.payload.field]: action.payload.value,
         },
       };
-    }
 
-    case "SET_MULTIPLE_TRAITS": {
-      // Simple merge - no special handling
+    case "SET_MULTIPLE_TRAITS":
       return {
         ...state,
         traits: {
           ...state.traits,
           ...action.payload,
         },
+      };
+
+    case "SET_MEDIA_SOURCE": {
+      const nextSource = action.payload;
+      if (nextSource === "upload") {
+        const hasFile = state.selectedFile !== null;
+        return {
+          ...state,
+          mediaSource: nextSource,
+          artworkUploaded: hasFile,
+          artworkUrl: hasFile ? state.artworkUrl : "",
+        };
+      }
+
+      return {
+        ...state,
+        mediaSource: nextSource,
+        artworkUploaded: state.externalMedia.isValid,
+        artworkUrl: state.externalMedia.isValid
+          ? state.externalMedia.url
+          : "",
+      };
+    }
+
+    case "SET_EXTERNAL_MEDIA": {
+      const externalMedia = action.payload;
+      const shouldApply = state.mediaSource === "url";
+      return {
+        ...state,
+        externalMedia,
+        artworkUploaded: shouldApply
+          ? externalMedia.isValid
+          : state.artworkUploaded,
+        artworkUrl:
+          shouldApply && externalMedia.isValid
+            ? externalMedia.url
+            : shouldApply
+            ? ""
+            : state.artworkUrl,
+      };
+    }
+
+    case "SET_UPLOAD_MEDIA":
+      return {
+        ...state,
+        selectedFile: action.payload.file,
+        artworkUrl: action.payload.artworkUrl,
+        artworkUploaded: true,
+        mediaSource: "upload",
+      };
+
+    case "RESET_UPLOAD_MEDIA": {
+      const shouldFallbackToExternal =
+        state.mediaSource === "url" && state.externalMedia.isValid;
+      return {
+        ...state,
+        selectedFile: null,
+        artworkUrl: shouldFallbackToExternal ? state.externalMedia.url : "",
+        artworkUploaded: shouldFallbackToExternal,
       };
     }
 
@@ -75,64 +167,76 @@ function formReducer(state: FormState, action: FormAction): FormState {
   }
 }
 
-/**
- * Extremely simplified hook to manage artwork submission form state
- * Uses uncontrolled inputs for maximum typing performance
- */
 export function useArtworkSubmissionForm() {
   const { connectedProfile } = useAuth();
-
-  // Pre-compute initial values for traits without triggering circular dependencies
   const initialTraits = getInitialTraitsValues();
 
-  // Create the initial state
   const initialState: FormState = {
     currentStep: SubmissionStep.AGREEMENT,
     agreements: false,
     artworkUploaded: false,
     artworkUrl: "",
     traits: initialTraits,
+    mediaSource: "upload",
+    selectedFile: null,
+    externalMedia: {
+      url: "",
+      mimeType: DEFAULT_EXTERNAL_MEDIA_MIME_TYPE,
+      error: null,
+      isValid: false,
+    },
   };
 
-  // Use reducer for state management
   const [state, dispatch] = useReducer(formReducer, initialState);
 
-  // Extract values for convenience
-  const { currentStep, agreements, artworkUploaded, artworkUrl, traits } =
-    state;
-
-  // Extremely simple and direct update function
-  const updateTraitField = useCallback(
-    <K extends keyof TraitsData>(field: K, value: TraitsData[K]) => {
-      dispatch({
-        type: "SET_TRAIT_FIELD",
-        payload: { field, value },
-      });
+  const setMediaSource = useCallback(
+    (mode: MediaSource) => {
+      dispatch({ type: "SET_MEDIA_SOURCE", payload: mode });
     },
-    []
+    [dispatch]
   );
 
-  // Multiple traits update function
-  const setTraits = useCallback((traitsUpdate: Partial<TraitsData>) => {
-    dispatch({ type: "SET_MULTIPLE_TRAITS", payload: traitsUpdate });
-  }, []);
+  const setExternalMedia = useCallback(
+    (url: string, mimeType: ExternalMediaMimeType) => {
+      const { error, isValid } = validateExternalMedia(url, mimeType);
+      dispatch({
+        type: "SET_EXTERNAL_MEDIA",
+        payload: { url, mimeType, error, isValid },
+      });
+    },
+    [dispatch]
+  );
 
-  // Handle file selection
-  const handleFileSelect = useCallback((file: File) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      dispatch({ type: "SET_ARTWORK_URL", payload: reader.result as string });
-      dispatch({ type: "SET_ARTWORK_UPLOADED", payload: true });
-    };
-    reader.readAsDataURL(file);
-  }, []);
+  const clearExternalMedia = useCallback(() => {
+    dispatch({
+      type: "SET_EXTERNAL_MEDIA",
+      payload: {
+        url: "",
+        mimeType: state.externalMedia.mimeType,
+        error: null,
+        isValid: false,
+      },
+    });
+  }, [dispatch, state.externalMedia.mimeType]);
 
-  // Handle continuing from terms
+  const handleFileSelect = useCallback(
+    (file: File) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        dispatch({
+          type: "SET_UPLOAD_MEDIA",
+          payload: { file, artworkUrl: reader.result as string },
+        });
+      };
+      reader.readAsDataURL(file);
+    },
+    [dispatch]
+  );
+
   const handleContinueFromTerms = useCallback(() => {
     dispatch({ type: "SET_STEP", payload: SubmissionStep.ARTWORK });
   }, []);
 
-  // Initialize traits with profile info
   useEffect(() => {
     const userProfile = connectedProfile?.handle ?? "";
     if (userProfile) {
@@ -146,43 +250,91 @@ export function useArtworkSubmissionForm() {
     }
   }, [connectedProfile]);
 
-  // Prepare submission data
   const getSubmissionData = useCallback(() => {
+    const { traits, artworkUrl } = state;
     return {
       imageUrl: artworkUrl,
       traits: {
         ...traits,
-        // Ensure these fields have values
         title: traits.title ?? "Artwork Title",
-        description: traits.description ?? "Artwork for The Memes collection.",
+        description:
+          traits.description ?? "Artwork for The Memes collection.",
       },
     };
-  }, [artworkUrl, traits]);
+  }, [state]);
 
-  // Return the API for the form
+  const getMediaSelection = useCallback(
+    () => ({
+      mediaSource: state.mediaSource,
+      selectedFile: state.selectedFile,
+      externalUrl: state.externalMedia.url,
+      externalMimeType: state.externalMedia.mimeType,
+      isExternalValid: state.externalMedia.isValid,
+    }),
+    [state]
+  );
+
+  const setArtworkUploaded = useCallback(
+    (uploaded: boolean) => {
+      if (!uploaded) {
+        if (state.mediaSource === "url") {
+          dispatch({
+            type: "SET_EXTERNAL_MEDIA",
+            payload: {
+              url: "",
+              mimeType: state.externalMedia.mimeType,
+              error: null,
+              isValid: false,
+            },
+          });
+        } else {
+          dispatch({ type: "RESET_UPLOAD_MEDIA" });
+        }
+      }
+    },
+    [state.mediaSource, state.externalMedia.mimeType, dispatch]
+  );
+
+  const updateTraitField = useCallback(
+    <K extends keyof TraitsData>(field: K, value: TraitsData[K]) => {
+      dispatch({
+        type: "SET_TRAIT_FIELD",
+        payload: { field, value },
+      });
+    },
+    []
+  );
+
+  const setTraits = useCallback((traitsUpdate: Partial<TraitsData>) => {
+    dispatch({ type: "SET_MULTIPLE_TRAITS", payload: traitsUpdate });
+  }, []);
+
   return {
-    // Current step
-    currentStep,
-
-    // Agreement step
-    agreements,
+    currentStep: state.currentStep,
+    agreements: state.agreements,
     setAgreements: (value: boolean) =>
       dispatch({ type: "SET_AGREEMENTS", payload: value }),
     handleContinueFromTerms,
 
-    // Artwork step
-    artworkUploaded,
-    artworkUrl,
-    setArtworkUploaded: (value: boolean) =>
-      dispatch({ type: "SET_ARTWORK_UPLOADED", payload: value }),
+    artworkUploaded: state.artworkUploaded,
+    artworkUrl: state.artworkUrl,
+    selectedFile: state.selectedFile,
+    mediaSource: state.mediaSource,
+    externalMediaUrl: state.externalMedia.url,
+    externalMediaMimeType: state.externalMedia.mimeType,
+    externalMediaError: state.externalMedia.error,
+    isExternalMediaValid: state.externalMedia.isValid,
+    setArtworkUploaded,
+    setMediaSource,
+    setExternalMedia,
+    clearExternalMedia,
     handleFileSelect,
 
-    // Traits
-    traits,
+    traits: state.traits,
     setTraits,
     updateTraitField,
 
-    // Submission
     getSubmissionData,
+    getMediaSelection,
   };
 }
