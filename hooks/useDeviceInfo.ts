@@ -7,6 +7,7 @@ interface DeviceInfo {
   readonly isMobileDevice: boolean;
   readonly hasTouchScreen: boolean;
   readonly isApp: boolean;
+  readonly isAppleMobile: boolean;
 }
 
 /**
@@ -23,8 +24,15 @@ export default function useDeviceInfo(): DeviceInfo {
   const { isCapacitor } = useCapacitor();
 
   const getInfo = useCallback((): DeviceInfo => {
-    if (typeof window === "undefined" || typeof navigator === "undefined")
-      return { isMobileDevice: false, hasTouchScreen: false, isApp: false };
+    if (typeof window === "undefined" || typeof navigator === "undefined") {
+      const info: DeviceInfo = {
+        isMobileDevice: false,
+        hasTouchScreen: false,
+        isApp: false,
+        isAppleMobile: false,
+      };
+      return info;
+    }
 
     const win = window as any;
     const nav = navigator as Navigator & {
@@ -43,13 +51,20 @@ export default function useDeviceInfo(): DeviceInfo {
     const classicMobile =
       /Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
     const iPadDesktopUA = ua.includes("Macintosh") && hasTouchScreen;
+    const appleMobile = /(iPhone|iPad|iPod)/i.test(ua) || iPadDesktopUA;
     const widthMobile = win.matchMedia("(max-width: 768px)").matches;
 
     const isMobileDevice =
       uaDataMobile ??
       (classicMobile || (isCapacitor && (iPadDesktopUA || widthMobile)));
 
-    return { isMobileDevice, hasTouchScreen, isApp: isCapacitor };
+    const info: DeviceInfo = {
+      isMobileDevice,
+      hasTouchScreen,
+      isApp: isCapacitor,
+      isAppleMobile: appleMobile,
+    };
+    return info;
   }, [isCapacitor]);
 
   const [info, setInfo] = useState<DeviceInfo>(() => getInfo());

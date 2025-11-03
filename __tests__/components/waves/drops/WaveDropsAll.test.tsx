@@ -35,6 +35,15 @@ jest.mock('@/components/notifications/NotificationsContext');
 jest.mock('@/components/auth/Auth');
 jest.mock('@/services/api/common-api');
 jest.mock('next/navigation');
+jest.mock('@/hooks/useDeviceInfo', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    isAppleMobile: false,
+    isMobileDevice: false,
+    hasTouchScreen: false,
+    isApp: false
+  }))
+}));
 
 // Mock components with proper prop capturing
 let containerProps: any;
@@ -65,7 +74,14 @@ jest.mock('@/components/waves/drops/WaveDropsScrollBottomButton', () => ({
   __esModule: true,
   WaveDropsScrollBottomButton: (props: any) => {
     scrollButtonProps = props;
-    return <button data-testid="scroll-bottom-btn" onClick={props.scrollToBottom} />;
+    const handleClick = () => {
+      if (props.newMessagesCount > 0 && props.onRevealNewMessages) {
+        props.onRevealNewMessages();
+      } else {
+        props.scrollToBottom();
+      }
+    };
+    return <button data-testid="scroll-bottom-btn" onClick={handleClick} />;
   }
 }));
 
@@ -154,6 +170,12 @@ interface MockSetupOptions {
     connectedProfile?: { handle: string } | null;
   };
   typingMessage?: string | null;
+  deviceInfo?: {
+    isAppleMobile?: boolean;
+    isMobileDevice?: boolean;
+    hasTouchScreen?: boolean;
+    isApp?: boolean;
+  };
 }
 
 function setupMocks(options: MockSetupOptions = {}) {
@@ -184,11 +206,13 @@ function setupMocks(options: MockSetupOptions = {}) {
           ...(options.waveMessages ?? {})
         };
 
-  useVirtualizedWaveDropsMock.mockReturnValue({
-    waveMessages: waveMessagesMock as any,
+  let currentWaveMessages = waveMessagesMock as WaveMessagesMock | undefined;
+
+  useVirtualizedWaveDropsMock.mockImplementation(() => ({
+    waveMessages: currentWaveMessages as any,
     fetchNextPage: mockFetchNextPage,
     waitAndRevealDrop: mockWaitAndRevealDrop
-  });
+  }));
 
   // Setup useScrollBehavior mock
   require('@/hooks/useScrollBehavior').useScrollBehavior.mockReturnValue({
@@ -224,6 +248,20 @@ function setupMocks(options: MockSetupOptions = {}) {
   require('@/services/api/common-api').commonApiPostWithoutBodyAndResponse.mockImplementation(
     mockCommonApiPost.mockResolvedValue(undefined)
   );
+
+  require('@/hooks/useDeviceInfo').default.mockReturnValue({
+    isAppleMobile: options.deviceInfo?.isAppleMobile ?? false,
+    isMobileDevice: options.deviceInfo?.isMobileDevice ?? false,
+    hasTouchScreen: options.deviceInfo?.hasTouchScreen ?? false,
+    isApp: options.deviceInfo?.isApp ?? false
+  });
+
+  return {
+    getWaveMessages: () => currentWaveMessages,
+    setWaveMessages: (nextWaveMessages: WaveMessagesMock | undefined) => {
+      currentWaveMessages = nextWaveMessages;
+    }
+  };
 }
 
 interface RenderOptions {
@@ -546,11 +584,69 @@ describe('WaveDropsAll', () => {
       // Wait for component to render
       await waitFor(() => {
         expect(screen.getByTestId('drops-list')).toBeInTheDocument();
-      });
-      
-      expect(scrollButtonProps.isAtBottom).toBe(false);
     });
+
+    expect(scrollButtonProps.isAtBottom).toBe(false);
   });
+
+  it('defers new drops on Apple mobile when user is reading and shows reveal badge', async () => {
+    const initialDrop = createMockDrop({ id: 'drop-1', serial_no: 1 });
+    const newDrop = createMockDrop({
+      id: 'drop-2',
+      serial_no: 2,
+      created_at: Date.now() + 1000
+    });
+
+    const { getWaveMessages, setWaveMessages } = setupMocks({
+      waveMessages: { drops: [initialDrop] },
+      scrollBehavior: {
+        isAtBottom: false,
+        shouldPinToBottom: false,
+        scrollIntent: 'reading'
+      },
+      deviceInfo: { isAppleMobile: true }
+    });
+
+    const renderResult = renderComponent();
+    const { props } = renderResult;
+
+    expect(scrollButtonProps.newMessagesCount).toBe(0);
+
+    expect(getWaveMessages()).toBeDefined();
+
+    act(() => {
+      const currentWaveMessages = getWaveMessages();
+      setWaveMessages({
+        ...(currentWaveMessages ?? {}),
+        drops: [newDrop, initialDrop]
+      });
+      renderResult.rerender(<WaveDropsAll {...props} />);
+    });
+
+    expect(dropsProps.drops).toHaveLength(1);
+    expect(scrollButtonProps.newMessagesCount).toBe(1);
+
+    const user = userEvent.setup({
+      // Provide fake timer advancement so userEvent resolves under fake timers
+      advanceTimers: jest.advanceTimersByTime
+    });
+
+    await act(async () => {
+      await user.click(screen.getByTestId('scroll-bottom-btn'));
+    });
+
+    act(() => {
+      jest.runOnlyPendingTimers();
+    });
+
+    await waitFor(() => {
+      expect(dropsProps.drops).toHaveLength(2);
+      expect(scrollButtonProps.newMessagesCount).toBe(0);
+    });
+
+    expect(mockScrollToVisualBottom).toHaveBeenCalled();
+  });
+});
 
   describe('Virtualization and Pagination', () => {
     it('passes pagination props to reverse container', async () => {

@@ -28,12 +28,22 @@ jest.mock('@/components/brain/left-sidebar/waves/UnifiedWavesListWaves', () => {
   };
 });
 
-type DeviceInfo = { isApp: boolean; isMobileDevice: boolean; hasTouchScreen: boolean };
+type DeviceInfo = {
+  isApp: boolean;
+  isMobileDevice: boolean;
+  hasTouchScreen: boolean;
+  isAppleMobile: boolean;
+};
 const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<typeof useDeviceInfo>;
 
 beforeEach(() => {
   sentinel = null;
-  useDeviceInfoMock.mockReturnValue({ isApp: false, isMobileDevice: false, hasTouchScreen: false } as DeviceInfo);
+  useDeviceInfoMock.mockReturnValue({
+    isApp: false,
+    isMobileDevice: false,
+    hasTouchScreen: false,
+    isAppleMobile: false,
+  } as DeviceInfo);
 });
 
 afterEach(() => {
@@ -59,7 +69,12 @@ describe('UnifiedWavesList', () => {
   });
 
   it('triggers fetchNextPage when sentinel intersects', () => {
-    useDeviceInfoMock.mockReturnValue({ isApp: true, isMobileDevice: false, hasTouchScreen: false } as DeviceInfo);
+    useDeviceInfoMock.mockReturnValue({
+      isApp: true,
+      isMobileDevice: false,
+      hasTouchScreen: false,
+      isAppleMobile: false,
+    } as DeviceInfo);
     const fetchNextPage = jest.fn();
     const observerInstances: any[] = [];
     (global as any).IntersectionObserver = class {

@@ -9,14 +9,10 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 
 export default function CookiesBanner() {
-  const { isApp } = useDeviceInfo();
+  const { isApp, isAppleMobile } = useDeviceInfo();
   const isMobile = useIsMobileDevice();
   const pathname = usePathname() ?? "";
   const { consent, reject } = useCookieConsent();
-
-  const isIOS =
-    typeof navigator !== "undefined" &&
-    /iPad|iPhone|iPod/.test(navigator.userAgent);
 
   if (["/restricted", "/access"].includes(pathname)) {
     return <></>;
@@ -25,7 +21,7 @@ export default function CookiesBanner() {
   return (
     <div
       className={`${styles.banner} ${isApp ? styles.bannerMobile : ""} ${
-        isApp && isIOS ? styles.bannerIOS : ""
+        isApp && isAppleMobile ? styles.bannerIOS : ""
       } d-flex align-items-center justify-content-between gap-2 ${
         isApp ? `flex-column` : ""
       }`}

@@ -3,6 +3,7 @@ import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 
 // Import the media display components
 import MediaDisplayImage from "./MediaDisplayImage";
+import { ImageScale } from "@/helpers/image.helpers";
 import MediaDisplayVideo from "./MediaDisplayVideo";
 import MediaDisplayAudio from "./MediaDisplayAudio";
 
@@ -27,10 +28,12 @@ export default function MediaDisplay({
   media_mime_type,
   media_url,
   disableMediaInteraction = false,
+  imageScale = ImageScale.AUTOx600,
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;
   readonly disableMediaInteraction?: boolean; // Set to true in gallery context to disable all media interaction (controls and click handlers)
+  readonly imageScale?: ImageScale;
 }) {
   const getMediaType = (): MediaType => {
     if (media_mime_type.includes("image")) {
@@ -55,7 +58,7 @@ export default function MediaDisplay({
 
   switch (mediaType) {
     case MediaType.IMAGE:
-      return <MediaDisplayImage src={media_url} />;
+      return <MediaDisplayImage src={media_url} imageScale={imageScale} />;
     case MediaType.VIDEO:
       return <MediaDisplayVideo 
         src={media_url} 

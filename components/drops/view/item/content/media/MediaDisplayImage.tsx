@@ -1,17 +1,16 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import {
-  getScaledImageUri,
-  ImageScale,
-} from "@/helpers/image.helpers";
+import { FallbackImage } from "@/components/common/FallbackImage";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { useInView } from "@/hooks/useInView";
 
 interface Props {
   readonly src: string;
+  readonly imageScale?: ImageScale;
 }
 
-function MediaDisplayImage({ src }: Props) {
+function MediaDisplayImage({ src, imageScale = ImageScale.AUTOx600 }: Props) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -41,19 +40,17 @@ function MediaDisplayImage({ src }: Props) {
         />
       )}
       {inView && (
-        <img
-          src={getScaledImageUri(src, ImageScale.AUTOx450)}
+        <FallbackImage
+          primarySrc={getScaledImageUri(src, imageScale)}
+          fallbackSrc={src}
           alt="Media content"
-          loading="lazy"
-          decoding="async"
+          fill
+          sizes="(max-width: 768px) 100vw, 600px"
           className={`tw-object-contain tw-max-w-full ${
             isLoading ? "tw-opacity-0" : "tw-opacity-100"
           }`}
-          style={{
-            maxWidth: "100%",
-            maxHeight: "100%",
-          }}
           onLoad={handleImageLoad}
+          onError={handleImageLoad}
         />
       )}
     </div>

@@ -78,35 +78,76 @@ export const useScrollBehavior = () => {
 
   // Intersection Observer for robust bottom detection
   useEffect(() => {
-    if (!bottomAnchorRef.current || !scrollContainerRef.current) return;
+    let rafId: number | null = null;
+    let observer: IntersectionObserver | null = null;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        const isIntersecting = entry.isIntersecting;
-        setIsAtBottom(isIntersecting);
-        
-        // If anchor comes into view, we're definitely at bottom
-        if (isIntersecting) {
-          setScrollIntent('pinned');
-        }
-      },
-      {
-        root: scrollContainerRef.current,
-        threshold: 0,
-        rootMargin: '50px' // Handle layout shifts
+    const setupObserver = () => {
+      const container = scrollContainerRef.current;
+      const anchor = bottomAnchorRef.current;
+
+      if (!container || !anchor) {
+        rafId = requestAnimationFrame(setupObserver);
+        return;
       }
-    );
 
-    observer.observe(bottomAnchorRef.current);
-    return () => observer.disconnect();
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          const isIntersecting = entry.isIntersecting;
+          setIsAtBottom(isIntersecting);
+
+          // If anchor comes into view, we're definitely at bottom
+          if (isIntersecting) {
+            setScrollIntent('pinned');
+          }
+        },
+        {
+          root: container,
+          threshold: 0,
+          rootMargin: '50px', // Handle layout shifts
+        }
+      );
+
+      observer.observe(anchor);
+    };
+
+    setupObserver();
+
+    return () => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+      observer?.disconnect();
+    };
   }, []);
 
   useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (container) {
+    let rafId: number | null = null;
+    let attachedContainer: HTMLDivElement | null = null;
+
+    const attachListener = () => {
+      const container = scrollContainerRef.current;
+      if (!container) {
+        rafId = requestAnimationFrame(attachListener);
+        return;
+      }
+
+      attachedContainer = container;
       container.addEventListener("scroll", handleScroll);
-      return () => container.removeEventListener("scroll", handleScroll);
-    }
+      // Run once to ensure initial state reflects current scroll position
+      handleScroll();
+    };
+
+    attachListener();
+
+    return () => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+
+      if (attachedContainer) {
+        attachedContainer.removeEventListener("scroll", handleScroll);
+      }
+    };
   }, [handleScroll]);
 
   // Should pin when user intends to stay at bottom AND is actually at bottom

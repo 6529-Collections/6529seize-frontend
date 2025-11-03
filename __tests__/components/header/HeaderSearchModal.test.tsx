@@ -142,6 +142,7 @@ function setup(options: SetupOptions = {}) {
     isApp: false,
     isMobileDevice: false,
     hasTouchScreen: false,
+    isAppleMobile: false,
   });
   useAppWalletsMock.mockReturnValue({ appWalletsSupported: true });
   useCookieConsentMock.mockReturnValue({ country: "US" });
