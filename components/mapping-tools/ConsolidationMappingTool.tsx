@@ -115,8 +115,8 @@ export default function ConsolidationMappingTool() {
                 isFirstRow = false;
               } else {
                 const address = row["_0"];
-                const token_id = Number.parseInt(row["_1"]);
-                const balance = parseInt(row["_2"]);
+                const token_id = Number.parseInt(row["_1"], 10);
+                const balance = Number.parseInt(row["_2"], 10);
                 const contract = row["_3"];
                 const name = row["_4"];
                 results.push({ address, token_id, balance, contract, name });

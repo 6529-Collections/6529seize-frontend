@@ -11,10 +11,17 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "../distribution-plan-tool/common/CircleLoader";
 import TransferModal from "./TransferModal";
 import { useTransfer } from "./TransferState";
 
-export default function TransferPanel() {
+export default function TransferPanel({
+  isLoading = false,
+}: {
+  readonly isLoading?: boolean;
+}) {
   const t = useTransfer();
   const { isConnected } = useSeizeConnectContext();
 
@@ -161,7 +168,14 @@ export default function TransferPanel() {
               </div>
             )}
             <div className="tw-flex-1 tw-text-sm tw-font-medium tw-text-center">
-              {items.length === 0 && <>Select some NFTs to transfer</>}
+              {isLoading ? (
+                <div className="tw-flex tw-items-center tw-justify-center tw-gap-1">
+                  <span>Loading transfer data</span>
+                  <CircleLoader size={CircleLoaderSize.SMALL} />
+                </div>
+              ) : items.length === 0 ? (
+                <>Select some NFTs to transfer</>
+              ) : null}
             </div>
             {items.length > 0 && (
               <div className="tw-text-sm tw-font-medium tw-text-white tw-bg-primary-500 tw-px-4 tw-py-1.5 tw-rounded-full">

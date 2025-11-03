@@ -22,6 +22,7 @@ export default function UserPageCollectedCards({
   filters,
   setPage,
   dataTransfer,
+  isTransferLoading = false,
 }: {
   readonly cards: CollectedCard[];
   readonly totalPages: number;
@@ -30,6 +31,7 @@ export default function UserPageCollectedCards({
   readonly filters: ProfileCollectedFilters;
   readonly setPage: (page: number) => void;
   readonly dataTransfer: CollectedCard[];
+  readonly isTransferLoading?: boolean;
 }) {
   const t = useTransfer();
   const isTransferEnabled = t.enabled;
@@ -68,6 +70,7 @@ export default function UserPageCollectedCards({
                   selected={selected}
                   copiesMax={max}
                   qtySelected={qty}
+                  isTransferLoading={isTransferLoading}
                   onToggle={() =>
                     t.toggleSelect({
                       key: selKey,
