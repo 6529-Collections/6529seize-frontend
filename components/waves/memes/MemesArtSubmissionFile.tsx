@@ -383,7 +383,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
             </div>
           </div>
 
-          <div className="tw-flex tw-items-center tw-gap-3">
+          <div className="tw-flex tw-items-center">
             <button
               type="button"
               onClick={onClearExternalMedia}
@@ -391,11 +391,6 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
               disabled={!externalHash}>
               Clear Hash
             </button>
-            <span className="tw-text-xs tw-text-iron-400">
-              {externalProvider === "ipfs"
-                ? "Previewed via nftstorage.link inside a sandboxed iframe."
-                : "Previewed directly from arweave.net inside a sandboxed iframe."}
-            </span>
           </div>
 
           <div className="tw-flex-1 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-950 tw-overflow-hidden">
