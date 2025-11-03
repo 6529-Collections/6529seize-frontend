@@ -13,7 +13,6 @@ import {
   useTransfer,
 } from "@/components/nft-transfer/TransferState";
 import { ContractType } from "@/enums";
-import { areEqualAddresses } from "@/helpers/Helpers";
 
 export default function UserPageCollectedCards({
   cards,
@@ -51,7 +50,7 @@ export default function UserPageCollectedCards({
               const dataTransferItem = dataTransfer?.find(
                 (item: CollectedCard) =>
                   item.token_id === card.token_id &&
-                  areEqualAddresses(item.collection, card.collection)
+                  item.collection === card.collection
               );
               const max = dataTransferItem?.seized_count ?? 0;
               const qty = selectedItem?.qty ?? 0;

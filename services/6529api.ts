@@ -48,7 +48,7 @@ function getNextUrl(currentUrl: string, next?: string | boolean): string {
   // If `next === true`, increment the `page` query param
   const u = new URL(currentUrl);
   const cur = u.searchParams.get("page");
-  const curNum = cur ? parseInt(cur, 10) || 1 : 1;
+  const curNum = cur ? Number.parseInt(cur, 10) || 1 : 1;
   u.searchParams.set("page", String(curNum + 1));
   return u.toString();
 }
