@@ -33,10 +33,6 @@ export default function TransferToggle() {
     window.scrollTo({ top: absoluteY, behavior: "smooth" });
   };
 
-  if (t.enabled) {
-    return null;
-  }
-
   return (
     <button
       ref={buttonRef}
@@ -48,11 +44,19 @@ export default function TransferToggle() {
           return;
         }
 
-        scrollToButton();
-        t.setEnabled(true);
+        if (t.enabled) {
+          t.clear();
+          t.setEnabled(false);
+        } else {
+          scrollToButton();
+          t.setEnabled(true);
+        }
       }}
-      className="tw-inline-flex tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-iron-900 hover:tw-ring-iron-600 hover:tw-bg-iron-800 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-px-5 tw-py-3 tw-font-semibold tw-text-sm">
-      Transfer
+      className={[
+        "tw-inline-flex tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 hover:tw-ring-iron-600 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-px-5 tw-py-3 tw-font-semibold tw-text-sm",
+        "tw-bg-primary-500 hover:tw-bg-primary-600",
+      ].join(" ")}>
+      {t.enabled ? "Exit Transfer" : "Transfer"}
       <FontAwesomeIcon icon={faRightLeft} />
     </button>
   );

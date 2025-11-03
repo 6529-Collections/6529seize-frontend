@@ -10,7 +10,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import TransferModal from "./TransferModal";
 import { useTransfer } from "./TransferState";
 
@@ -20,6 +20,7 @@ export default function TransferPanel() {
 
   const [showModal, setShowModal] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const previousOverflowRef = useRef<string>("");
 
   useEffect(() => {
     if (!isConnected && t.enabled) {
@@ -29,13 +30,13 @@ export default function TransferPanel() {
   }, [isConnected, t]);
 
   useEffect(() => {
-    if (isExpanded) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    if (!isExpanded) return;
+
+    previousOverflowRef.current = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflowRef.current;
     };
   }, [isExpanded]);
 
@@ -46,6 +47,19 @@ export default function TransferPanel() {
       setIsExpanded(false);
     }
   }, [items.length, isExpanded]);
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isExpanded) {
+        setIsExpanded(false);
+      }
+    };
+
+    if (isExpanded) {
+      globalThis.addEventListener("keydown", handleEscape);
+      return () => globalThis.removeEventListener("keydown", handleEscape);
+    }
+  }, [isExpanded]);
 
   if (!t.enabled) return null;
 
@@ -74,8 +88,37 @@ export default function TransferPanel() {
           .filter(Boolean)
           .join(" ")}>
         <div
-          className="tw-border-solid tw-border-[#37373ee6] tw-border-l-0 tw-bg-black tw-text-iron-50 tw-select-none tw-flex tw-flex-col"
-          onClick={(e) => e.stopPropagation()}>
+          {...(!isExpanded && items.length > 0
+            ? {
+                role: "button",
+                tabIndex: 0,
+                "aria-label": "Expand transfer panel",
+                onClick: (e: React.MouseEvent<HTMLDivElement>) => {
+                  e.stopPropagation();
+                  const target = e.target as HTMLElement;
+                  if (!target.closest("button")) {
+                    setIsExpanded(true);
+                  }
+                },
+                onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const target = e.target as HTMLElement;
+                    if (!target.closest("button")) {
+                      setIsExpanded(true);
+                    }
+                  }
+                },
+              }
+            : {
+                onClick: (e: React.MouseEvent<HTMLDivElement>) => {
+                  e.stopPropagation();
+                },
+              })}
+          className={`tw-border-solid tw-border-[#37373ee6] tw-border-l-0 tw-bg-black tw-text-iron-50 tw-select-none tw-flex tw-flex-col ${
+            !isExpanded && items.length > 0 ? "tw-cursor-pointer" : ""
+          }`}>
           <div className="tw-px-4 tw-py-4 tw-flex tw-items-center tw-gap-3 tw-pb-[calc(env(safe-area-inset-bottom)+1rem)]">
             {items.length > 0 && (
               <button
@@ -121,7 +164,7 @@ export default function TransferPanel() {
               {items.length === 0 && <>Select some NFTs to transfer</>}
             </div>
             {items.length > 0 && (
-              <div className="tw-text-sm tw-font-medium tw-text-white tw-bg-primary-400 tw-px-4 tw-py-1.5 tw-rounded-full">
+              <div className="tw-text-sm tw-font-medium tw-text-white tw-bg-primary-500 tw-px-4 tw-py-1.5 tw-rounded-full">
                 {t.totalQty} {t.totalQty === 1 ? "item" : "items"}
               </div>
             )}
