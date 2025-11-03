@@ -87,7 +87,6 @@ export default function UserPageCollectedCard({
         "tw-flex tw-items-start tw-justify-end",
         "tw-p-2",
       ].join(" ")}>
-      {/* Banner when not selected and cannot select */}
       {isNotSelectable && (
         <div className="tw-pointer-events-auto tw-absolute tw-inset-0 tw-flex tw-items-start tw-justify-center tw-p-2">
           <div className="tw-bg-iron-900/95 tw-text-iron-300 tw-text-xs tw-font-medium tw-px-3 tw-py-1.5 tw-rounded-md tw-ring-1 tw-ring-white/20 tw-opacity-75 group-hover:tw-opacity-100 tw-transition-opacity tw-duration-200">
@@ -102,7 +101,6 @@ export default function UserPageCollectedCard({
           </div>
         </div>
       )}
-      {/* HOVER '+' when not selected and can select */}
       {isSelectable && (
         <button
           type="button"
@@ -123,7 +121,6 @@ export default function UserPageCollectedCard({
         </button>
       )}
 
-      {/* SELECTED controls */}
       {isSelectedAndCanSelect && (
         <div className="tw-pointer-events-auto tw-flex tw-items-center tw-gap-2">
           {contractType === ContractType.ERC1155 ? (
