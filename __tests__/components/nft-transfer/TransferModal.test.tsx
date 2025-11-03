@@ -238,10 +238,19 @@ describe("TransferModal", () => {
     await waitFor(() => {
       expect(simulateContract.mock.calls.length).toBeGreaterThanOrEqual(2);
     });
-    expect(writeContract.mock.calls.length).toBeGreaterThanOrEqual(2);
-    expect(waitForReceipt.mock.calls.length).toBeGreaterThanOrEqual(2);
+
+    await waitFor(() => {
+      expect(writeContract.mock.calls.length).toBeGreaterThanOrEqual(2);
+    });
 
     await screen.findByText(/all 2 transactions successful/i);
+
+    await waitFor(
+      () => {
+        expect(waitForReceipt.mock.calls.length).toBeGreaterThanOrEqual(2);
+      },
+      { timeout: 3000 }
+    );
 
     // Each tx card should show "Successful" (exact match; exclude header text)
     const successBadges = await screen.findAllByText(/^Successful$/i);
