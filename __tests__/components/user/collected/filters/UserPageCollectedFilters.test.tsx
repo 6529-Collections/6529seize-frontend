@@ -144,7 +144,7 @@ describe('UserPageCollectedFilters', () => {
       current: document.createElement('div')
     };
     
-    global.ResizeObserver = jest.fn().mockImplementation((callback) => ({
+    globalThis.ResizeObserver = jest.fn().mockImplementation((callback) => ({
       observe: jest.fn(),
       unobserve: jest.fn(),
       disconnect: jest.fn(),
