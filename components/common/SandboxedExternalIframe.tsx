@@ -39,7 +39,6 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
   sandbox = DEFAULT_SANDBOX,
   fallback = null,
 }) => {
-  console.log(src)
   if (!isAllowedHost(src)) {
     return fallback ? <>{fallback}</> : null;
   }
