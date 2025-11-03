@@ -54,7 +54,7 @@ export default function TransferToggle() {
       }}
       className={[
         "tw-inline-flex tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 hover:tw-ring-iron-600 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-px-5 tw-py-3 tw-font-semibold tw-text-sm",
-        "tw-bg-primary-500 hover:tw-bg-primary-600",
+        "tw-bg-primary-500 hover:tw-bg-primary-600 tw-whitespace-nowrap",
       ].join(" ")}>
       {t.enabled ? "Exit Transfer" : "Transfer"}
       <FontAwesomeIcon icon={faRightLeft} />
