@@ -52,6 +52,13 @@ export default function UserPageCollectedCard({
     COLLECTED_COLLECTIONS_META[card.collection].dataRows.seizedCount &&
     !!card.seized_count;
 
+  const getSeizedCountDisplay = () => {
+    if (isSelectMode) {
+      return formatNumberWithCommasOrDash(copiesMax);
+    }
+    return formatNumberWithCommasOrDash(card.seized_count ?? 0);
+  };
+
   const getTdhDisplay = () => {
     if (card.collection === CollectedCollectionType.MEMELAB) {
       return "N/A";
@@ -174,30 +181,58 @@ export default function UserPageCollectedCard({
 
   const isDisabled = isSelectMode && !canSelect;
 
+  const getRingClasses = () => {
+    if (selected) {
+      return "tw-ring-2 tw-ring-primary-500 tw-ring-inset";
+    }
+    if (isDisabled) {
+      return "tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-opacity-60";
+    }
+    return "tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600/60 hover:tw-to-white/10";
+  };
+
+  const getCursorClasses = () => {
+    if (isSelectModeAndCanSelect) {
+      return "tw-cursor-pointer";
+    }
+    if (isDisabled) {
+      return "tw-cursor-not-allowed";
+    }
+    return "";
+  };
+
+  const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isSelectModeAndCanSelect && !selected) {
+      e.preventDefault();
+      onToggle();
+    }
+  };
+
+  const handleCardKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (
+      isSelectModeAndCanSelect &&
+      !selected &&
+      (e.key === "Enter" || e.key === " ")
+    ) {
+      e.preventDefault();
+      onToggle();
+    }
+  };
+
   const CardBody = (
     <div
+      role={isSelectModeAndCanSelect && !selected ? "button" : undefined}
+      tabIndex={isSelectModeAndCanSelect && !selected ? 0 : undefined}
       className={[
         "tw-group tw-relative",
         "tw-flex tw-flex-col tw-bg-gradient-to-br tw-from-iron-900 tw-to-white/5 tw-rounded-lg tw-overflow-hidden tw-px-0.5 tw-pt-0.5 tw-transition tw-duration-300 tw-ease-out",
-        selected
-          ? "tw-ring-2 tw-ring-primary-500 tw-ring-inset"
-          : isDisabled
-          ? "tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-opacity-60"
-          : "tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600/60 hover:tw-to-white/10",
-        isSelectModeAndCanSelect
-          ? "tw-cursor-pointer"
-          : isDisabled
-          ? "tw-cursor-not-allowed"
-          : "",
-      ].join(" ")}
-      onClick={
-        isSelectModeAndCanSelect && !selected
-          ? (e) => {
-              e.preventDefault();
-              onToggle();
-            }
-          : undefined
-      }>
+        getRingClasses(),
+        getCursorClasses(),
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      onClick={handleCardClick}
+      onKeyDown={handleCardKeyDown}>
       {OverlayControls}
 
       <div className="tw-flex tw-flex-wrap">
@@ -229,10 +264,7 @@ export default function UserPageCollectedCard({
             </span>
             {showSeizedCount && (
               <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium tw-text-iron-400 tw-flex tw-items-center tw-gap-0.5">
-                {isSelectMode
-                  ? formatNumberWithCommasOrDash(copiesMax)
-                  : formatNumberWithCommasOrDash(card.seized_count ?? 0)}
-                x
+                {getSeizedCountDisplay()} x
                 {hasBalanceMismatch && (
                   <>
                     <span

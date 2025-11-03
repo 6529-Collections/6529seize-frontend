@@ -87,12 +87,28 @@ export default function TransferPanel() {
           .filter(Boolean)
           .join(" ")}>
         <div
+          role={!isExpanded && items.length > 0 ? "button" : undefined}
+          tabIndex={!isExpanded && items.length > 0 ? 0 : undefined}
           className={`tw-border-solid tw-border-[#37373ee6] tw-border-l-0 tw-bg-black tw-text-iron-50 tw-select-none tw-flex tw-flex-col ${
             !isExpanded && items.length > 0 ? "tw-cursor-pointer" : ""
           }`}
           onClick={(e) => {
             e.stopPropagation();
             if (!isExpanded && items.length > 0) {
+              const target = e.target as HTMLElement;
+              if (!target.closest("button")) {
+                setIsExpanded(true);
+              }
+            }
+          }}
+          onKeyDown={(e) => {
+            if (
+              !isExpanded &&
+              items.length > 0 &&
+              (e.key === "Enter" || e.key === " ")
+            ) {
+              e.preventDefault();
+              e.stopPropagation();
               const target = e.target as HTMLElement;
               if (!target.closest("button")) {
                 setIsExpanded(true);
