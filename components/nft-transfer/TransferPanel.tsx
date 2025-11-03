@@ -49,6 +49,21 @@ export default function TransferPanel({
 
   const items = Array.from(t.selected.values());
 
+  const getCenterMessage = () => {
+    if (isLoading) {
+      return (
+        <div className="tw-flex tw-items-center tw-justify-center tw-gap-1">
+          <span>Loading transfer data</span>
+          <CircleLoader size={CircleLoaderSize.SMALL} />
+        </div>
+      );
+    }
+    if (items.length === 0) {
+      return <>Select some NFTs to transfer</>;
+    }
+    return null;
+  };
+
   useEffect(() => {
     if (isExpanded && items.length === 0) {
       setIsExpanded(false);
@@ -168,14 +183,7 @@ export default function TransferPanel({
               </div>
             )}
             <div className="tw-flex-1 tw-text-sm tw-font-medium tw-text-center">
-              {isLoading ? (
-                <div className="tw-flex tw-items-center tw-justify-center tw-gap-1">
-                  <span>Loading transfer data</span>
-                  <CircleLoader size={CircleLoaderSize.SMALL} />
-                </div>
-              ) : items.length === 0 ? (
-                <>Select some NFTs to transfer</>
-              ) : null}
+              {getCenterMessage()}
             </div>
             {items.length > 0 && (
               <div className="tw-text-sm tw-font-medium tw-text-white tw-bg-primary-500 tw-px-4 tw-py-1.5 tw-rounded-full">
