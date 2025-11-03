@@ -437,4 +437,56 @@ describe('MemesArtSubmissionFile', () => {
       expect(true).toBe(true); // No errors during unmount
     });
   });
+
+  describe('Interactive media preview security', () => {
+    const renderInteractivePreview = (
+      overrideProps: Partial<MemesArtSubmissionFileProps> = {}
+    ) =>
+      render(
+        <AuthContext.Provider value={{ setToast: mockSetToast } as any}>
+          <MemesArtSubmissionFile
+            {...baseProps}
+            mediaSource="url"
+            externalHash="bafyHash"
+            externalConstructedUrl="https://ipfs.io/ipfs/bafyHash"
+            isExternalMediaValid={true}
+            externalPreviewUrl="https://ipfs.io/ipfs/bafyHash"
+            {...overrideProps}
+          />
+        </AuthContext.Provider>
+      );
+
+    it('renders sandboxed iframe for approved ipfs.io URLs', () => {
+      renderInteractivePreview();
+
+      const iframe = screen.getByTitle('Interactive artwork preview');
+      expect(iframe).toBeInTheDocument();
+      expect(iframe).toHaveAttribute('src', 'https://ipfs.io/ipfs/bafyHash');
+      expect(iframe).toHaveAttribute('sandbox');
+      expect(iframe.getAttribute('sandbox')).toContain('allow-scripts');
+    });
+
+    it('renders sandboxed iframe for approved arweave.net URLs', () => {
+      renderInteractivePreview({
+        externalProvider: 'arweave',
+        externalPreviewUrl: 'https://arweave.net/abcdef',
+        externalConstructedUrl: 'https://arweave.net/abcdef',
+      });
+
+      const iframe = screen.getByTitle('Interactive artwork preview');
+      expect(iframe).toBeInTheDocument();
+      expect(iframe).toHaveAttribute('src', 'https://arweave.net/abcdef');
+    });
+
+    it('blocks previews from unapproved domains', () => {
+      renderInteractivePreview({
+        externalPreviewUrl: 'https://example.com/bad',
+      });
+
+      expect(
+        screen.getByText('Preview unavailable for unapproved domains.')
+      ).toBeInTheDocument();
+      expect(screen.queryByTitle('Interactive artwork preview')).not.toBeInTheDocument();
+    });
+  });
 });

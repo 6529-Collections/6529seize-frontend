@@ -11,6 +11,7 @@ import React, {
 import { motion } from "framer-motion";
 import { AuthContext } from "@/components/auth/Auth";
 import { TabToggle } from "@/components/common/TabToggle";
+import SandboxedExternalIframe from "@/components/common/SandboxedExternalIframe";
 
 import FilePreview from "./file-upload/components/FilePreview";
 import UploadArea from "./file-upload/components/UploadArea";
@@ -224,6 +225,16 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
 
   const showUploadUi = mediaSource === "upload";
 
+  const renderPreviewMessage = useCallback(
+    (primary: string, secondary: string) => (
+      <div className="tw-h-full tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-text-center tw-text-sm tw-text-iron-400 tw-px-4">
+        <span>{primary}</span>
+        <span className="tw-text-iron-500">{secondary}</span>
+      </div>
+    ),
+    [],
+  );
+
   const mediaTypeLabel = useMemo(() => {
     const match = ALLOWED_INTERACTIVE_MEDIA_MIME_TYPES.find(
       (type) => type.value === externalMimeType,
@@ -395,23 +406,21 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
 
           <div className="tw-flex-1 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-950 tw-overflow-hidden">
             {isExternalMediaValid ? (
-              <iframe
+              <SandboxedExternalIframe
                 key={externalPreviewUrl}
                 src={externalPreviewUrl}
-                sandbox="allow-scripts allow-pointer-lock allow-popups"
-                referrerPolicy="no-referrer"
-                className="tw-w-full tw-h-full tw-bg-white"
                 title="Interactive artwork preview"
+                className="tw-w-full tw-h-full"
+                fallback={renderPreviewMessage(
+                  "Preview unavailable for unapproved domains.",
+                  "Only ipfs.io or arweave.net previews are permitted.",
+                )}
               />
             ) : (
-              <div className="tw-h-full tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-text-center tw-text-sm tw-text-iron-400 tw-px-4">
-                <span>
-                  Provide a valid hash or CID to enable the preview.
-                </span>
-                <span className="tw-text-iron-500">
-                  The final artwork is rendered securely inside a sandboxed iframe.
-                </span>
-              </div>
+              renderPreviewMessage(
+                "Provide a valid hash or CID to enable the preview.",
+                "The final artwork is rendered securely inside a sandboxed iframe.",
+              )
             )}
           </div>
         </div>
