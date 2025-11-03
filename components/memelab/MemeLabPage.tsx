@@ -224,7 +224,7 @@ export default function MemeLabPageComponent({
 
   useEffect(() => {
     async function fetchHistory(url: string) {
-      return fetchAllPages(url).then((response: NFTHistory[]) => {
+      return fetchAllPages<NFTHistory>(url).then((response) => {
         setNftHistory(response);
       });
     }
@@ -1175,9 +1175,7 @@ export default function MemeLabPageComponent({
           <Container className="pt-4 pb-4">
             <Row>
               <Col>
-                <h1>
-                  Meme Lab
-                </h1>
+                <h1>Meme Lab</h1>
               </Col>
               {/* {nft && (
                   <Col className="d-flex align-items-center justify-content-end">

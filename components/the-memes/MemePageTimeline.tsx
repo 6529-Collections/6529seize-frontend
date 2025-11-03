@@ -1,11 +1,11 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
-import { useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
 import { MEMES_CONTRACT } from "@/constants";
 import { NFT, NFTHistory } from "@/entities/INFT";
 import { fetchAllPages } from "@/services/6529api";
+import { useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
 import Timeline from "../timeline/Timeline";
 
 export function MemePageTimeline(props: {
@@ -16,7 +16,7 @@ export function MemePageTimeline(props: {
 
   useEffect(() => {
     async function fetchHistory(url: string) {
-      return fetchAllPages(url).then((response: NFTHistory[]) => {
+      return fetchAllPages<NFTHistory>(url).then((response) => {
         setNftHistory(response);
       });
     }
