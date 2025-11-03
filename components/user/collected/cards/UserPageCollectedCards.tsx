@@ -55,10 +55,9 @@ export default function UserPageCollectedCards({
               );
               const max = dataTransferItem?.seized_count ?? 0;
               const qty = selectedItem?.qty ?? 0;
-              const contractType =
-                COLLECTED_COLLECTION_TYPE_TO_CONTRACT_TYPE[
-                  card.collection
-                ] as ContractType;
+              const contractType = COLLECTED_COLLECTION_TYPE_TO_CONTRACT_TYPE[
+                card.collection
+              ] as ContractType;
 
               return (
                 <UserPageCollectedCard

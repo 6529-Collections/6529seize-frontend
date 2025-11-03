@@ -3,7 +3,6 @@
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import TransferPanel from "@/components/nft-transfer/TransferPanel";
 import { useTransfer } from "@/components/nft-transfer/TransferState";
-import TransferToggle from "@/components/nft-transfer/TransferToggle";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { publicEnv } from "@/config/env";
 import {
@@ -93,10 +92,6 @@ export default function UserPageCollected({
   const params = useParams();
   const router = useRouter();
   const user = params?.user?.toString().toLowerCase() ?? "";
-
-  const showTransfer = profile.wallets?.some((w) =>
-    areEqualAddresses(w.wallet, connectedAddress)
-  );
 
   const convertSeized = ({
     seized,
@@ -399,6 +394,14 @@ export default function UserPageCollected({
     placeholderData: keepPreviousData,
   });
 
+  const showTransfer = !!(
+    profile.wallets?.some((w) =>
+      areEqualAddresses(w.wallet, connectedAddress)
+    ) &&
+    data?.data &&
+    data.data.length > 0
+  );
+
   const { isFetching: isFetchingTransfer, data: dataTransfer } = useQuery<
     CollectedCard[]
   >({
@@ -442,52 +445,13 @@ export default function UserPageCollected({
 
   const scrollContainer = useRef<HTMLDivElement>(null);
 
-  const calculateScroll = ({
-    direction,
-    scrollLeft,
-    scrollRight,
-    scrollStep,
-  }: {
-    direction: "left" | "right";
-    scrollLeft: number;
-    scrollRight: number;
-    scrollStep: number;
-  }): number => {
-    switch (direction) {
-      case "left":
-        return -1 * (scrollLeft > scrollStep ? scrollStep : scrollLeft);
-      case "right":
-        return scrollRight > scrollStep ? scrollStep : scrollRight;
-      default:
-        return 0;
-    }
-  };
-
-  const scrollHorizontally = (direction: "left" | "right") => {
-    if (!scrollContainer.current) return;
-    const scrollLeft = scrollContainer.current.scrollLeft;
-    const scrollWidth = scrollContainer.current.scrollWidth;
-    const clientWidth = scrollContainer.current.clientWidth;
-    const scrollRight = scrollWidth - scrollLeft - clientWidth;
-    const scrollStep = clientWidth / 1.1;
-
-    scrollContainer.current.scrollTo({
-      left:
-        scrollLeft +
-        calculateScroll({ direction, scrollLeft, scrollRight, scrollStep }),
-      behavior: "smooth",
-    });
-  };
-
   return (
     <div className="tailwind-scope">
       {isInitialLoading || isFetchingTransfer ? (
         <UserPageCollectedFirstLoading />
       ) : (
         <>
-          <div
-            className="tw-overflow-x-auto horizontal-menu-hide-scrollbar horizontal-menu-scrollable-x"
-            ref={scrollContainer}>
+          <div ref={scrollContainer}>
             <UserPageCollectedFilters
               profile={profile}
               filters={filters}
@@ -496,15 +460,9 @@ export default function UserPageCollected({
               setSortBy={setSortBy}
               setSeized={setSeized}
               setSzn={setSzn}
-              scrollHorizontally={scrollHorizontally}
+              showTransfer={showTransfer}
             />
           </div>
-
-          {showTransfer && data?.data && data.data.length > 0 && (
-            <div className="tw-mt-6 tw-flex tw-justify-end">
-              <TransferToggle />
-            </div>
-          )}
 
           <div className="tw-mt-6 tw-flex tw-gap-6">
             <UserPageCollectedCards
