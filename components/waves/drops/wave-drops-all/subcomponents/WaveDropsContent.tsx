@@ -41,6 +41,8 @@ interface WaveDropsContentProps {
   readonly scrollToBottom: () => void;
   readonly typingMessage: string | null;
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
+  readonly pendingCount: number;
+  readonly onRevealPending: () => void;
 }
 
 export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
@@ -60,6 +62,8 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   scrollToBottom,
   typingMessage,
   onDropContentClick,
+  pendingCount,
+  onRevealPending,
 }) => {
   const dropsCount = waveMessages?.drops?.length ?? 0;
   const isInitialLoading =
@@ -99,6 +103,8 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
         isAtBottom={isAtBottom}
         scrollToBottom={scrollToBottom}
         onDropContentClick={onDropContentClick}
+        pendingCount={pendingCount}
+        onRevealPending={onRevealPending}
       />
       <WaveDropsTypingIndicator typingMessage={typingMessage} />
     </>

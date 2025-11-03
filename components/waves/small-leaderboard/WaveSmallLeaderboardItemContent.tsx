@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import WaveDropPartContentMedias from "../drops/WaveDropPartContentMedias";
 import WaveDropPartContentMarkdown from "../drops/WaveDropPartContentMarkdown";
+import { ImageScale } from "@/helpers/image.helpers";
 
 interface WaveSmallLeaderboardItemContentProps {
   readonly drop: ExtendedDrop;
@@ -37,6 +38,7 @@ export const WaveSmallLeaderboardItemContent: React.FC<
           <WaveDropPartContentMedias
             activePart={drop.parts[0]}
             disableMediaInteraction={true}
+            imageScale={ImageScale.AUTOx450}
           />
         )}
         <WaveDropPartContentMarkdown
