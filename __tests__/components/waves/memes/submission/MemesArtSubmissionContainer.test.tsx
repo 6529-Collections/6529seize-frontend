@@ -46,6 +46,7 @@ describe('MemesArtSubmissionContainer', () => {
       externalMediaProvider: 'ipfs',
       externalMediaMimeType: 'text/html',
       externalMediaError: null,
+      externalMediaValidationStatus: 'idle',
       isExternalMediaValid: false,
     };
 
@@ -72,14 +73,16 @@ describe('MemesArtSubmissionContainer', () => {
         formState.externalMediaUrl = `${formState.externalMediaProvider === 'arweave' ? 'https://arweave.net/' : 'ipfs://'}${hash}`;
         formState.externalMediaPreviewUrl =
           formState.externalMediaProvider === 'arweave'
-            ? formState.externalMediaUrl
-            : `https://gateway.pinata.cloud/ipfs/${hash}`;
+            ? `https://arweave.net/${hash}`
+            : `https://ipfs.io/ipfs/${hash}`;
         formState.isExternalMediaValid = true;
+        formState.externalMediaValidationStatus = 'valid';
         formState.externalMediaError = null;
       } else {
         formState.externalMediaUrl = '';
         formState.externalMediaPreviewUrl = '';
         formState.isExternalMediaValid = false;
+        formState.externalMediaValidationStatus = 'idle';
         formState.externalMediaError = null;
       }
     });
@@ -100,6 +103,7 @@ describe('MemesArtSubmissionContainer', () => {
       formState.externalMediaUrl = '';
       formState.externalMediaPreviewUrl = '';
       formState.isExternalMediaValid = false;
+       formState.externalMediaValidationStatus = 'idle';
       formState.externalMediaError = null;
     });
 

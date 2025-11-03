@@ -174,6 +174,7 @@ describe('MemesArtSubmissionFile', () => {
     externalPreviewUrl: '',
     externalMimeType: 'text/html',
     externalError: null,
+    externalValidationStatus: 'idle',
     isExternalMediaValid: false,
     onExternalHashChange: mockOnExternalHashChange,
     onExternalProviderChange: mockOnExternalProviderChange,
@@ -439,7 +440,7 @@ describe('MemesArtSubmissionFile', () => {
   });
 
   describe('Interactive media preview security', () => {
-    const renderInteractivePreview = (
+  const renderInteractivePreview = (
       overrideProps: Partial<MemesArtSubmissionFileProps> = {}
     ) =>
       render(
@@ -451,6 +452,7 @@ describe('MemesArtSubmissionFile', () => {
             externalConstructedUrl="https://ipfs.io/ipfs/bafyHash"
             isExternalMediaValid={true}
             externalPreviewUrl="https://ipfs.io/ipfs/bafyHash"
+            externalValidationStatus="valid"
             {...overrideProps}
           />
         </AuthContext.Provider>
@@ -471,6 +473,7 @@ describe('MemesArtSubmissionFile', () => {
         externalProvider: 'arweave',
         externalPreviewUrl: 'https://arweave.net/abcdef',
         externalConstructedUrl: 'https://arweave.net/abcdef',
+        externalValidationStatus: 'valid',
       });
 
       const iframe = screen.getByTitle('Interactive artwork preview');
@@ -478,13 +481,56 @@ describe('MemesArtSubmissionFile', () => {
       expect(iframe).toHaveAttribute('src', 'https://arweave.net/abcdef');
     });
 
+    it('renders sandboxed iframe for approved arweave subdomains', () => {
+      renderInteractivePreview({
+        externalProvider: 'arweave',
+        externalPreviewUrl: 'https://ifx4blsbsfs22lskmlsb6zsazvhxcoibl4nkk3checvtipo6hkhq.arweave.net/index.html',
+        externalConstructedUrl: 'https://arweave.net/QW_ArkGRZa0uSmLkH2ZAzU9xOQFfGqVsRyCrND3eOo8/index.html',
+        externalValidationStatus: 'valid',
+      });
+
+      const iframe = screen.getByTitle('Interactive artwork preview');
+      expect(iframe).toBeInTheDocument();
+      expect(iframe).toHaveAttribute(
+        'src',
+        'https://ifx4blsbsfs22lskmlsb6zsazvhxcoibl4nkk3checvtipo6hkhq.arweave.net/index.html'
+      );
+    });
+
     it('blocks previews from unapproved domains', () => {
       renderInteractivePreview({
         externalPreviewUrl: 'https://example.com/bad',
+        externalValidationStatus: 'valid',
+        isExternalMediaValid: true,
       });
 
       expect(
-        screen.getByText('Preview unavailable for unapproved domains.')
+        screen.getByText('Preview unavailable for unapproved domains or file types.')
+      ).toBeInTheDocument();
+      expect(screen.queryByTitle('Interactive artwork preview')).not.toBeInTheDocument();
+    });
+
+    it('blocks previews from allowed hosts when extension is unsafe', () => {
+      renderInteractivePreview({
+        externalPreviewUrl: 'https://ipfs.io/ipfs/bad/file.exe',
+        externalValidationStatus: 'valid',
+        isExternalMediaValid: true,
+      });
+
+      expect(
+        screen.getByText('Preview unavailable for unapproved domains or file types.')
+      ).toBeInTheDocument();
+      expect(screen.queryByTitle('Interactive artwork preview')).not.toBeInTheDocument();
+    });
+    it('shows validation pending message before iframe renders', () => {
+      renderInteractivePreview({
+        isExternalMediaValid: false,
+        externalValidationStatus: 'pending',
+        externalPreviewUrl: 'https://ipfs.io/ipfs/bafyHash',
+      });
+
+      expect(
+        screen.getByText("Validating preview...")
       ).toBeInTheDocument();
       expect(screen.queryByTitle('Interactive artwork preview')).not.toBeInTheDocument();
     });

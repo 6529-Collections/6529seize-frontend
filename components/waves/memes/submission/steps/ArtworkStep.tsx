@@ -138,6 +138,7 @@ interface ArtworkStepProps {
   readonly externalPreviewUrl: string;
   readonly externalMimeType: InteractiveMediaMimeType;
   readonly externalError: string | null;
+  readonly externalValidationStatus: "idle" | "pending" | "valid" | "invalid";
   readonly isExternalMediaValid: boolean;
   readonly onExternalHashChange: (value: string) => void;
   readonly onExternalProviderChange: (value: InteractiveMediaProvider) => void;
@@ -181,6 +182,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
   externalPreviewUrl,
   externalMimeType,
   externalError,
+  externalValidationStatus,
   isExternalMediaValid,
   onExternalHashChange,
   onExternalProviderChange,
@@ -316,6 +318,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
                 externalPreviewUrl={externalPreviewUrl}
                 externalMimeType={externalMimeType}
                 externalError={externalError}
+                externalValidationStatus={externalValidationStatus}
                 isExternalMediaValid={isExternalMediaValid}
                 onExternalHashChange={onExternalHashChange}
                 onExternalProviderChange={onExternalProviderChange}

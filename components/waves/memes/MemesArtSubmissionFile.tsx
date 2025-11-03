@@ -53,6 +53,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
   externalPreviewUrl,
   externalMimeType,
   externalError,
+  externalValidationStatus,
   isExternalMediaValid,
   onExternalHashChange,
   onExternalProviderChange,
@@ -235,6 +236,27 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
     [],
   );
 
+  const previewFallback = useMemo(() => {
+    if (externalValidationStatus === "pending") {
+      return renderPreviewMessage(
+        "Validating preview...",
+        "We're verifying the gateway serves an HTML document.",
+      );
+    }
+
+    if (externalValidationStatus === "invalid" && externalError) {
+      return renderPreviewMessage(
+        externalError,
+        "Only ipfs.io or arweave.net HTML documents can be embedded.",
+      );
+    }
+
+    return renderPreviewMessage(
+      "Provide a valid hash or CID to enable the preview.",
+      "The final artwork is rendered securely inside a sandboxed iframe.",
+    );
+  }, [externalValidationStatus, externalError, renderPreviewMessage]);
+
   const mediaTypeLabel = useMemo(() => {
     const match = ALLOWED_INTERACTIVE_MEDIA_MIME_TYPES.find(
       (type) => type.value === externalMimeType,
@@ -410,17 +432,14 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
                 key={externalPreviewUrl}
                 src={externalPreviewUrl}
                 title="Interactive artwork preview"
-                className="tw-w-full tw-h-full"
+                className="tw-w-full tw-h-full tw-bg-white"
                 fallback={renderPreviewMessage(
-                  "Preview unavailable for unapproved domains.",
-                  "Only ipfs.io or arweave.net previews are permitted.",
+                  "Preview unavailable for unapproved domains or file types.",
+                  "Only ipfs.io or arweave.net HTML documents can be embedded.",
                 )}
               />
             ) : (
-              renderPreviewMessage(
-                "Provide a valid hash or CID to enable the preview.",
-                "The final artwork is rendered securely inside a sandboxed iframe.",
-              )
+              previewFallback
             )}
           </div>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useReducer, useEffect, useCallback } from "react";
+import { useReducer, useEffect, useCallback, useRef } from "react";
 import { TraitsData } from "../types/TraitsData";
 import { SubmissionStep } from "../types/Steps";
 import { useAuth } from "@/components/auth/Auth";
@@ -10,6 +10,11 @@ import {
   InteractiveMediaMimeType,
   InteractiveMediaProvider,
 } from "../constants/media";
+import {
+  INTERACTIVE_MEDIA_HTML_EXTENSIONS,
+  INTERACTIVE_MEDIA_GATEWAY_BASE_URL,
+} from "../constants/security";
+import { validateInteractivePreview } from "../actions/validateInteractivePreview";
 
 type MediaSource = "upload" | "url";
 
@@ -21,6 +26,7 @@ interface ExternalMediaState {
   previewUrl: string;
   mimeType: InteractiveMediaMimeType;
   error: string | null;
+  status: "idle" | "pending" | "valid" | "invalid";
   isValid: boolean;
 }
 
@@ -34,6 +40,14 @@ type FormAction =
   | { type: "SET_MULTIPLE_TRAITS"; payload: Partial<TraitsData> }
   | { type: "SET_MEDIA_SOURCE"; payload: MediaSource }
   | { type: "SET_EXTERNAL_MEDIA"; payload: ExternalMediaState }
+  | {
+      type: "SET_EXTERNAL_MEDIA_VALIDATION";
+      payload: {
+        status: ExternalMediaState["status"];
+        error: string | null;
+        finalUrl?: string;
+      };
+    }
   | {
       type: "SET_UPLOAD_MEDIA";
       payload: { file: File; artworkUrl: string };
@@ -89,17 +103,46 @@ const buildExternalMediaState = (
     error = "Hashes cannot contain whitespace.";
   }
 
-  const isValid = hasHash && !error;
-  const url = isValid
-    ? provider === "arweave"
-      ? `https://arweave.net/${sanitizedHash}`
-      : `ipfs://${sanitizedHash}`
-    : "";
-  const previewUrl = isValid
-    ? provider === "arweave"
-      ? url
-      : `https://ipfs.io/ipfs/${sanitizedHash}`
-    : "";
+  const hashWithoutQuery = sanitizedHash.replace(/[?#].*$/, "");
+  const pathSegments = hashWithoutQuery.split("/").filter(Boolean);
+  if (!error && pathSegments.some((segment) => segment === "..")) {
+    error = "Remove path traversal segments from the hash.";
+  }
+
+  if (!error && /[?#]/.test(sanitizedHash)) {
+    error = "Remove query strings or fragments from the hash.";
+  }
+
+  if (!error && pathSegments.length > 0) {
+    const lastSegment = pathSegments[pathSegments.length - 1] ?? "";
+    const lastSegmentWithoutSuffix = lastSegment.split(/[?#]/)[0] ?? "";
+    const extensionIndex = lastSegmentWithoutSuffix.lastIndexOf(".");
+    if (extensionIndex !== -1) {
+      const extension = lastSegmentWithoutSuffix
+        .slice(extensionIndex + 1)
+        .toLowerCase();
+      if (!INTERACTIVE_MEDIA_HTML_EXTENSIONS.has(extension)) {
+        error = "Interactive previews must reference an HTML file.";
+      }
+    }
+  }
+
+  let status: ExternalMediaState["status"] = "idle";
+  if (hasHash) {
+    status = error ? "invalid" : "pending";
+  }
+
+  const previewUrl =
+    status !== "idle" && !error
+      ? `${INTERACTIVE_MEDIA_GATEWAY_BASE_URL[provider]}${sanitizedHash}`
+      : "";
+
+  const url =
+    status !== "idle" && !error
+      ? provider === "arweave"
+        ? previewUrl
+        : `ipfs://${sanitizedHash}`
+      : "";
 
   return {
     input,
@@ -109,7 +152,8 @@ const buildExternalMediaState = (
     previewUrl,
     mimeType,
     error,
-    isValid,
+    status,
+    isValid: status === "valid",
   };
 };
 
@@ -179,6 +223,34 @@ function formReducer(state: FormState, action: FormAction): FormState {
       };
     }
 
+    case "SET_EXTERNAL_MEDIA_VALIDATION": {
+      const { status, error, finalUrl } = action.payload;
+      const isValid = status === "valid";
+      const externalMedia = {
+        ...state.externalMedia,
+        status,
+        isValid,
+        error,
+        previewUrl: isValid
+          ? finalUrl ?? state.externalMedia.previewUrl
+          : "",
+      };
+
+      const shouldApply = state.mediaSource === "url";
+
+      return {
+        ...state,
+        externalMedia,
+        artworkUploaded: shouldApply ? isValid : state.artworkUploaded,
+        artworkUrl:
+          shouldApply && isValid
+            ? externalMedia.url
+            : shouldApply
+            ? ""
+            : state.artworkUrl,
+      };
+    }
+
     case "SET_UPLOAD_MEDIA":
       return {
         ...state,
@@ -224,11 +296,13 @@ export function useArtworkSubmissionForm() {
       previewUrl: "",
       mimeType: DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE,
       error: null,
+      status: "idle",
       isValid: false,
     },
   };
 
   const [state, dispatch] = useReducer(formReducer, initialState);
+  const validationRequestKeyRef = useRef<string | null>(null);
 
   const setMediaSource = useCallback(
     (mode: MediaSource) => {
@@ -296,6 +370,85 @@ export function useArtworkSubmissionForm() {
   const handleContinueFromTerms = useCallback(() => {
     dispatch({ type: "SET_STEP", payload: SubmissionStep.ARTWORK });
   }, []);
+
+  useEffect(() => {
+    if (state.mediaSource !== "url") {
+      validationRequestKeyRef.current = null;
+      return;
+    }
+
+    const { status, sanitizedHash, provider } = state.externalMedia;
+
+    if (status !== "pending" || !sanitizedHash) {
+      return;
+    }
+
+    const validationKey = `${provider}:${sanitizedHash}`;
+    validationRequestKeyRef.current = validationKey;
+
+    let cancelled = false;
+
+    const runValidation = async () => {
+      try {
+        const result = await validateInteractivePreview({
+          provider,
+          path: sanitizedHash,
+        });
+
+        if (cancelled || validationRequestKeyRef.current !== validationKey) {
+          return;
+        }
+
+        if (result.ok) {
+          dispatch({
+            type: "SET_EXTERNAL_MEDIA_VALIDATION",
+            payload: {
+              status: "valid",
+              error: null,
+              finalUrl: result.finalUrl,
+            },
+          });
+          validationRequestKeyRef.current = null;
+        } else {
+          dispatch({
+            type: "SET_EXTERNAL_MEDIA_VALIDATION",
+            payload: {
+              status: "invalid",
+              error:
+                result.reason ??
+                "Interactive media must respond with an HTML document.",
+            },
+          });
+          validationRequestKeyRef.current = null;
+        }
+      } catch (error) {
+        if (cancelled || validationRequestKeyRef.current !== validationKey) {
+          return;
+        }
+
+        dispatch({
+          type: "SET_EXTERNAL_MEDIA_VALIDATION",
+          payload: {
+            status: "invalid",
+            error: "Unable to verify media URL. Try again later.",
+          },
+        });
+        validationRequestKeyRef.current = null;
+      }
+    };
+
+    runValidation();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    state.mediaSource,
+    state.externalMedia.status,
+    state.externalMedia.sanitizedHash,
+    state.externalMedia.provider,
+    dispatch,
+  ]);
 
   useEffect(() => {
     const userProfile = connectedProfile?.handle ?? "";
@@ -386,6 +539,7 @@ export function useArtworkSubmissionForm() {
     externalMediaProvider: state.externalMedia.provider,
     externalMediaMimeType: state.externalMedia.mimeType,
     externalMediaError: state.externalMedia.error,
+    externalMediaValidationStatus: state.externalMedia.status,
     isExternalMediaValid: state.externalMedia.isValid,
     setArtworkUploaded,
     setMediaSource,

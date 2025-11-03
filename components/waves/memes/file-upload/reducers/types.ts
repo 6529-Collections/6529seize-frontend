@@ -93,6 +93,8 @@ export interface MemesArtSubmissionFileProps {
   readonly externalMimeType: InteractiveMediaMimeType;
   /** Validation error for external media */
   readonly externalError: string | null;
+  /** Current validation status for external media */
+  readonly externalValidationStatus: "idle" | "pending" | "valid" | "invalid";
   /** Whether external media input is valid */
   readonly isExternalMediaValid: boolean;
   /** Handler for changing the interactive hash input */

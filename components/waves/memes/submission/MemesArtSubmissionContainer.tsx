@@ -147,6 +147,7 @@ const MemesArtSubmissionContainer: React.FC<
         externalPreviewUrl={form.externalMediaPreviewUrl}
         externalMimeType={form.externalMediaMimeType}
         externalError={form.externalMediaError}
+        externalValidationStatus={form.externalMediaValidationStatus}
         isExternalMediaValid={form.isExternalMediaValid}
         onExternalHashChange={form.setExternalMediaHash}
         onExternalProviderChange={form.setExternalMediaProvider}

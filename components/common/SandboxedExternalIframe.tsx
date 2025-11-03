@@ -1,13 +1,10 @@
 "use client";
 
 import React from "react";
-
-const ALLOWED_HOSTS = new Set([
-  "ipfs.io",
-  "www.ipfs.io",
-  "arweave.net",
-  "www.arweave.net",
-]);
+import {
+  INTERACTIVE_MEDIA_HTML_EXTENSIONS,
+  isInteractiveMediaAllowedHost,
+} from "@/components/waves/memes/submission/constants/security";
 
 const DEFAULT_SANDBOX = "allow-scripts allow-pointer-lock allow-popups";
 
@@ -19,16 +16,44 @@ export interface SandboxedExternalIframeProps {
   readonly fallback?: React.ReactNode;
 }
 
-const isAllowedHost = (src: string): boolean => {
+const hasAllowedHtmlExtension = (url: URL): boolean => {
+  const path = url.pathname ?? "";
+  const segments = path.split("/").filter(Boolean);
+  if (segments.some((segment) => segment === "..")) {
+    return false;
+  }
+
+  const lastSegment = segments[segments.length - 1] ?? "";
+  if (!lastSegment) {
+    return true;
+  }
+
+  if (!lastSegment.includes(".")) {
+    return true;
+  }
+
+  const extension = lastSegment.slice(lastSegment.lastIndexOf(".") + 1).toLowerCase();
+  return INTERACTIVE_MEDIA_HTML_EXTENSIONS.has(extension);
+};
+
+const getAllowedUrl = (src: string): URL | null => {
   try {
     const parsedUrl = new URL(src);
     if (parsedUrl.protocol !== "https:") {
-      return false;
+      return null;
     }
 
-    return ALLOWED_HOSTS.has(parsedUrl.hostname.toLowerCase());
+    if (parsedUrl.search || parsedUrl.hash) {
+      return null;
+    }
+
+    if (!isInteractiveMediaAllowedHost(parsedUrl.hostname)) {
+      return null;
+    }
+
+    return parsedUrl;
   } catch {
-    return false;
+    return null;
   }
 };
 
@@ -39,7 +64,12 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
   sandbox = DEFAULT_SANDBOX,
   fallback = null,
 }) => {
-  if (!isAllowedHost(src)) {
+  const parsedUrl = getAllowedUrl(src);
+  if (!parsedUrl) {
+    return fallback ? <>{fallback}</> : null;
+  }
+
+  if (!hasAllowedHtmlExtension(parsedUrl)) {
     return fallback ? <>{fallback}</> : null;
   }
 
@@ -56,4 +86,3 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
 };
 
 export default SandboxedExternalIframe;
-
