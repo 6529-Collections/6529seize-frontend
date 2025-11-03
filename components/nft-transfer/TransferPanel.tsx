@@ -34,7 +34,7 @@ export default function TransferPanel({
       t.setEnabled(false);
       t.clear();
     }
-  }, [isConnected, t]);
+  }, [isConnected, t.enabled, t.setEnabled, t.clear]);
 
   useEffect(() => {
     if (!isExpanded) return;

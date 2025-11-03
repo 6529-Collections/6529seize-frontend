@@ -20,7 +20,7 @@ describe('UserPageCollectedCard', () => {
     expect(screen.getByText('2')).toBeInTheDocument();
     expect(screen.getByText('Rank')).toBeInTheDocument();
     expect(screen.getByText('3')).toBeInTheDocument();
-    expect(screen.getByText('1x')).toBeInTheDocument();
+    expect(screen.getByText(/1\s+x/)).toBeInTheDocument();
   });
 
   it('handles memelab collection', () => {

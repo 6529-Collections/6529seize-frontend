@@ -29,14 +29,14 @@ describe('6529api service', () => {
   it('fetchAllPages concatenates pages', async () => {
     (getStagingAuth as jest.Mock).mockReturnValue(null);
     (global.fetch as jest.Mock)
-      .mockResolvedValueOnce({ status: 200, json: async () => ({ data: ['a'], next: '/next' }) })
+      .mockResolvedValueOnce({ status: 200, json: async () => ({ data: ['a'], next: 'http://localhost/next' }) })
       .mockResolvedValueOnce({ status: 200, json: async () => ({ data: ['b'] }) });
 
-    const result = await fetchAllPages('/start');
+    const result = await fetchAllPages('http://localhost/start');
 
     expect(global.fetch).toHaveBeenCalledTimes(2);
-    expect(global.fetch).toHaveBeenNthCalledWith(1, '/start', { headers: {} });
-    expect(global.fetch).toHaveBeenNthCalledWith(2, '/next', { headers: {} });
+    expect(global.fetch).toHaveBeenNthCalledWith(1, 'http://localhost/start', { headers: {} });
+    expect(global.fetch).toHaveBeenNthCalledWith(2, 'http://localhost/next', { headers: {} });
     expect(result).toEqual(['a', 'b']);
   });
 

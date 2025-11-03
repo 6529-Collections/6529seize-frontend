@@ -1,4 +1,5 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import TransferModal from "@/components/nft-transfer/TransferModal";
 import { ContractType } from "@/enums";
@@ -178,21 +179,22 @@ describe("TransferModal", () => {
   };
 
   const selectRecipientFlow = async () => {
+    const user = userEvent.setup();
     openModal();
 
     const input = screen.getByPlaceholderText(/search by handle/i);
-    fireEvent.change(input, { target: { value: "rec" } });
+    await user.type(input, "rec");
 
     await waitFor(() => expect(mockCommonApiFetch).toHaveBeenCalled());
 
     const recipientBtn = await screen.findByRole("button", {
       name: /recipient/i,
     });
-    fireEvent.click(recipientBtn);
+    await user.click(recipientBtn);
     const walletBtn = await screen.findByRole("button", {
       name: /0x1111111111111111111111111111111111111111/i,
     });
-    fireEvent.click(walletBtn);
+    await user.click(walletBtn);
   };
 
   it("disables transfer confirmation until a wallet is selected", () => {
@@ -233,15 +235,25 @@ describe("TransferModal", () => {
       .mockResolvedValueOnce({ status: "success" })
       .mockResolvedValueOnce({ status: "success" });
 
-    fireEvent.click(screen.getByRole("button", { name: /^transfer$/i }));
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: /^transfer$/i }));
 
     await waitFor(() => {
       expect(simulateContract.mock.calls.length).toBeGreaterThanOrEqual(2);
     });
-    expect(writeContract.mock.calls.length).toBeGreaterThanOrEqual(2);
-    expect(waitForReceipt.mock.calls.length).toBeGreaterThanOrEqual(2);
+
+    await waitFor(() => {
+      expect(writeContract.mock.calls.length).toBeGreaterThanOrEqual(2);
+    });
 
     await screen.findByText(/all 2 transactions successful/i);
+
+    await waitFor(
+      () => {
+        expect(waitForReceipt.mock.calls.length).toBeGreaterThanOrEqual(2);
+      },
+      { timeout: 3000 }
+    );
 
     // Each tx card should show "Successful" (exact match; exclude header text)
     const successBadges = await screen.findAllByText(/^Successful$/i);
@@ -291,7 +303,8 @@ describe("TransferModal", () => {
     writeContract.mockResolvedValueOnce("0xhash721");
     waitForReceipt.mockResolvedValueOnce({ status: "success" });
 
-    fireEvent.click(screen.getByRole("button", { name: /^transfer$/i }));
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: /^transfer$/i }));
 
     await screen.findByText(/transfer successful/i);
     const successBadges = await screen.findAllByText(/^successful$/i);
@@ -341,7 +354,8 @@ describe("TransferModal", () => {
     // Force failure on receipt
     waitForReceipt.mockResolvedValueOnce({ status: "error" });
 
-    fireEvent.click(screen.getByRole("button", { name: /^transfer$/i }));
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: /^transfer$/i }));
 
     await screen.findByText(/transfer failed/i);
     const errorBadges = await screen.findAllByText(/error/i);
@@ -377,7 +391,8 @@ describe("TransferModal", () => {
       .mockResolvedValueOnce({ status: "success" })
       .mockResolvedValueOnce({ status: "error" });
 
-    fireEvent.click(screen.getByRole("button", { name: /^transfer$/i }));
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: /^transfer$/i }));
 
     await screen.findByText(/transfer complete: 1 successful, 1 failed/i);
 
@@ -394,7 +409,8 @@ describe("TransferModal", () => {
 
     await selectRecipientFlow();
 
-    fireEvent.click(screen.getByRole("button", { name: /^transfer$/i }));
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: /^transfer$/i }));
 
     expect(
       await screen.findByText(/client not ready\. please reconnect\./i)
@@ -406,7 +422,8 @@ describe("TransferModal", () => {
 
     await selectRecipientFlow();
 
-    fireEvent.click(screen.getByRole("button", { name: /^transfer$/i }));
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: /^transfer$/i }));
 
     expect(
       await screen.findByText(/wallet not ready\. please reconnect\./i)
@@ -476,7 +493,8 @@ describe("TransferModal", () => {
     writeContract.mockResolvedValueOnce("0xhash1155batch");
     waitForReceipt.mockResolvedValueOnce({ status: "success" });
 
-    fireEvent.click(screen.getByRole("button", { name: /^transfer$/i }));
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: /^transfer$/i }));
 
     // Batch label should be sorted ascending by tokenId and clamped quantities: #3(x2) then #5(x1)
     await screen.findByText(/MEMES #3\(x2\) - #5\(x1\)/i);
@@ -551,7 +569,8 @@ describe("TransferModal", () => {
       .mockResolvedValueOnce({ status: "success" })
       .mockResolvedValueOnce({ status: "success" });
 
-    fireEvent.click(screen.getByRole("button", { name: /^transfer$/i }));
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: /^transfer$/i }));
 
     // Two cards rendered — one per origin group
     const cards = await screen.findAllByText(/Originator: ext:/i);
@@ -614,7 +633,8 @@ describe("TransferModal", () => {
       .mockResolvedValueOnce({ status: "success" })
       .mockResolvedValueOnce({ status: "success" });
 
-    fireEvent.click(screen.getByRole("button", { name: /^transfer$/i }));
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: /^transfer$/i }));
 
     // Two separate entries should render with labels for each token
     await screen.findByText(/POSTER #7/i);
