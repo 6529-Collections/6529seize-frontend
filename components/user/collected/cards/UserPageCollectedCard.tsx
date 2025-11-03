@@ -221,8 +221,15 @@ export default function UserPageCollectedCard({
 
   const CardBody = (
     <div
-      role={isSelectModeAndCanSelect && !selected ? "button" : undefined}
-      tabIndex={isSelectModeAndCanSelect && !selected ? 0 : undefined}
+      {...(isSelectModeAndCanSelect && !selected
+        ? {
+            role: "button",
+            tabIndex: 0,
+            "aria-label": "Select NFT for transfer",
+            onClick: handleCardClick,
+            onKeyDown: handleCardKeyDown,
+          }
+        : {})}
       className={[
         "tw-group tw-relative",
         "tw-flex tw-flex-col tw-bg-gradient-to-br tw-from-iron-900 tw-to-white/5 tw-rounded-lg tw-overflow-hidden tw-px-0.5 tw-pt-0.5 tw-transition tw-duration-300 tw-ease-out",
@@ -230,9 +237,7 @@ export default function UserPageCollectedCard({
         getCursorClasses(),
       ]
         .filter(Boolean)
-        .join(" ")}
-      onClick={handleCardClick}
-      onKeyDown={handleCardKeyDown}>
+        .join(" ")}>
       {OverlayControls}
 
       <div className="tw-flex tw-flex-wrap">

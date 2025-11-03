@@ -87,34 +87,37 @@ export default function TransferPanel() {
           .filter(Boolean)
           .join(" ")}>
         <div
-          role={!isExpanded && items.length > 0 ? "button" : undefined}
-          tabIndex={!isExpanded && items.length > 0 ? 0 : undefined}
+          {...(!isExpanded && items.length > 0
+            ? {
+                role: "button",
+                tabIndex: 0,
+                "aria-label": "Expand transfer panel",
+                onClick: (e: React.MouseEvent<HTMLDivElement>) => {
+                  e.stopPropagation();
+                  const target = e.target as HTMLElement;
+                  if (!target.closest("button")) {
+                    setIsExpanded(true);
+                  }
+                },
+                onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const target = e.target as HTMLElement;
+                    if (!target.closest("button")) {
+                      setIsExpanded(true);
+                    }
+                  }
+                },
+              }
+            : {
+                onClick: (e: React.MouseEvent<HTMLDivElement>) => {
+                  e.stopPropagation();
+                },
+              })}
           className={`tw-border-solid tw-border-[#37373ee6] tw-border-l-0 tw-bg-black tw-text-iron-50 tw-select-none tw-flex tw-flex-col ${
             !isExpanded && items.length > 0 ? "tw-cursor-pointer" : ""
-          }`}
-          onClick={(e) => {
-            e.stopPropagation();
-            if (!isExpanded && items.length > 0) {
-              const target = e.target as HTMLElement;
-              if (!target.closest("button")) {
-                setIsExpanded(true);
-              }
-            }
-          }}
-          onKeyDown={(e) => {
-            if (
-              !isExpanded &&
-              items.length > 0 &&
-              (e.key === "Enter" || e.key === " ")
-            ) {
-              e.preventDefault();
-              e.stopPropagation();
-              const target = e.target as HTMLElement;
-              if (!target.closest("button")) {
-                setIsExpanded(true);
-              }
-            }
-          }}>
+          }`}>
           <div className="tw-px-4 tw-py-4 tw-flex tw-items-center tw-gap-3 tw-pb-[calc(env(safe-area-inset-bottom)+1rem)]">
             {items.length > 0 && (
               <button

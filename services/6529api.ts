@@ -37,20 +37,27 @@ export async function fetchAllPages<T>(startUrl: string): Promise<T[]> {
 }
 
 function getNextUrl(currentUrl: string, next?: string | boolean): string {
-  if (!next) return ""; // no next page
+  if (!next) return "";
 
-  // If the API gives a full/relative URL, use it
   if (typeof next === "string") {
-    // Support relative `next` by resolving against the current URL
-    return new URL(next, currentUrl).toString();
+    try {
+      return new URL(next, currentUrl).toString();
+    } catch (error) {
+      console.error("Invalid next URL:", next, error);
+      return "";
+    }
   }
 
-  // If `next === true`, increment the `page` query param
-  const u = new URL(currentUrl);
-  const cur = u.searchParams.get("page");
-  const curNum = cur ? Number.parseInt(cur, 10) || 1 : 1;
-  u.searchParams.set("page", String(curNum + 1));
-  return u.toString();
+  try {
+    const u = new URL(currentUrl);
+    const cur = u.searchParams.get("page");
+    const curNum = cur ? parseInt(cur, 10) || 1 : 1;
+    u.searchParams.set("page", String(curNum + 1));
+    return u.toString();
+  } catch (error) {
+    console.error("Invalid current URL:", currentUrl, error);
+    return "";
+  }
 }
 
 export async function postData(url: string, body: any) {
