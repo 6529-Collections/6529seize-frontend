@@ -217,8 +217,8 @@ function SelectedSummaryList({
   readonly leftAtEnd: boolean;
 }) {
   return (
-    <div className="tw-flex tw-flex-col tw-space-y-2 tw-min-h-0">
-      <div className="tw-font-semibold">
+    <div className="tw-flex tw-flex-col tw-space-y-2 tw-min-h-0 tw-max-h-full tw-overflow-hidden">
+      <div className="tw-font-semibold tw-flex-shrink-0">
         You're transferring <span className="tw-font-bold">{items.length}</span>{" "}
         {items.length === 1 ? "NFT" : "NFTs"} ·{" "}
         <span className="tw-font-bold">
@@ -265,7 +265,7 @@ function SelectedSummaryList({
         })}
       </ul>
       {leftHasOverflow && (
-        <div className="tw-text-xs tw-opacity-75 tw-text-center">
+        <div className="tw-text-xs tw-opacity-75 tw-text-center tw-flex-shrink-0">
           <FontAwesomeIcon icon={leftAtEnd ? faAnglesUp : faAnglesDown} />{" "}
           Scroll for more
         </div>
@@ -715,8 +715,8 @@ function BodyByFlow({
     const anyPending = anyTxsPending(txs);
 
     return (
-      <div className="tw-flex-1 tw-overflow-auto tw-p-6 tw-space-y-4">
-        <div className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-opacity-80">
+      <div className="tw-flex-1 tw-overflow-auto tw-p-4 sm:tw-p-6 tw-space-y-4">
+        <div className="tw-flex tw-items-center tw-gap-2 tw-text-xs sm:tw-text-sm tw-opacity-80">
           <span>
             {anyPending
               ? "Follow the prompts in your wallet and keep this tab open."
@@ -730,14 +730,16 @@ function BodyByFlow({
   }
 
   return (
-    <div className="tw-flex-1 tw-overflow-hidden tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-6 tw-px-4 tw-py-2">
-      <SelectedSummaryList
-        items={items}
-        leftListRef={leftListRef}
-        leftHasOverflow={leftHasOverflow}
-        leftAtEnd={leftAtEnd}
-      />
-      <div className="tw-flex tw-flex-col tw-space-y-2 tw-min-h-0">
+    <div className="tw-flex-1 tw-overflow-hidden tw-flex tw-flex-col lg:tw-grid lg:tw-grid-cols-2 tw-gap-6 tw-px-4 tw-py-2">
+      <div className="tw-min-h-0 tw-max-h-[50%] lg:tw-max-h-none">
+        <SelectedSummaryList
+          items={items}
+          leftListRef={leftListRef}
+          leftHasOverflow={leftHasOverflow}
+          leftAtEnd={leftAtEnd}
+        />
+      </div>
+      <div className="tw-flex tw-flex-col tw-space-y-2 tw-min-h-0 tw-flex-1 lg:tw-flex-initial">
         <div
           className={`tw-font-semibold ${
             selectedProfile ? "tw-mb-2" : "tw-mb-0"
@@ -1382,24 +1384,24 @@ export default function TransferModal({
         if (!trxPending) handleClose();
       }}
       className={[
-        "tw-w-full tw-h-full tw-fixed tw-inset-0 tw-z-[1000] tw-bg-white/10 tw-backdrop-blur-sm tw-flex tw-items-center tw-justify-center tw-p-4 md:tw-p-8",
+        "tw-w-full tw-h-full tw-fixed tw-inset-0 tw-z-[1000] tw-bg-white/10 tw-backdrop-blur-sm tw-flex tw-items-center tw-justify-center tw-p-0",
         isClosing
           ? "tw-opacity-0 tw-transition-opacity tw-duration-150"
           : "tw-opacity-100 tw-transition-opacity tw-duration-150",
       ].join(" ")}>
       <div
         className={[
-          "tw-w-[70vw] tw-max-w-[1100px] tw-h-[75vh] tw-max-h-[900px] tw-rounded-2xl tw-bg-[#0c0c0d] tw-ring-[3px] tw-ring-white/30 tw-text-white tw-shadow-xl tw-overflow-hidden tw-flex tw-flex-col",
+          "tw-w-full tw-h-full sm:tw-w-[90vw] sm:tw-h-[85dvh] md:tw-w-[70vw] md:tw-h-[75vh] tw-max-w-[1100px] tw-max-h-[900px] sm:tw-rounded-2xl tw-bg-[#0c0c0d] sm:tw-ring-[3px] tw-ring-white/30 tw-text-white tw-shadow-xl tw-overflow-hidden tw-flex tw-flex-col",
           isClosing
             ? "tw-scale-95 tw-opacity-0 tw-transition-all tw-duration-150"
             : "tw-scale-100 tw-opacity-100 tw-transition-all tw-duration-150",
           flow === "submission" || isClosing
-            ? "tw-h-fit tw-max-h-[90vh]"
-            : "tw-h-[75vh]",
+            ? "tw-h-fit sm:tw-max-h-[90dvh] md:tw-max-h-[90vh]"
+            : "",
         ].join(" ")}>
         {/* header */}
-        <div className="tw-flex tw-items-center tw-justify-between tw-border-0 tw-border-b-[3px] tw-border-solid tw-border-white/30 tw-p-4">
-          <div className="tw-text-lg tw-font-semibold">
+        <div className="tw-flex tw-items-center tw-justify-between tw-border-0 tw-border-b-[3px] tw-border-solid tw-border-white/30 tw-p-3 sm:tw-p-4">
+          <div className="tw-text-base sm:tw-text-lg tw-font-semibold tw-flex-1 tw-min-w-0 tw-pr-2">
             <FlowTitle flow={flow} txs={txs} />
           </div>
           <HeaderRight
@@ -1449,7 +1451,7 @@ export default function TransferModal({
         />
 
         {/* footer */}
-        <div className="tw-flex tw-justify-end tw-gap-3 tw-border-0 tw-border-t-[3px] tw-border-solid tw-border-white/30 tw-p-4">
+        <div className="tw-flex tw-justify-end tw-gap-2 sm:tw-gap-3 tw-border-0 tw-border-t-[3px] tw-border-solid tw-border-white/30 tw-p-3 sm:tw-p-4">
           <FooterActions
             flow={flow}
             canConfirm={!!canConfirm}
