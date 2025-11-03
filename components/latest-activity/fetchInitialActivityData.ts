@@ -33,9 +33,9 @@ export async function fetchInitialActivityData(
         ) as Promise<DBResponse>,
 
         // Gradients data
-        fetchAllPages(
+        fetchAllPages<NFT>(
           `${publicEnv.API_ENDPOINT}/api/nfts/gradients?&page_size=101`
-        ) as Promise<NFT[]>,
+        ),
 
         // NextGen collections
         commonApiFetch<{

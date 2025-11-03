@@ -447,7 +447,7 @@ export default function UserPageCollected({
 
   return (
     <div className="tailwind-scope">
-      {isInitialLoading || isFetchingTransfer ? (
+      {isInitialLoading ? (
         <UserPageCollectedFirstLoading />
       ) : (
         <>
@@ -473,9 +473,12 @@ export default function UserPageCollected({
               filters={filters}
               setPage={setPage}
               dataTransfer={dataTransfer ?? []}
+              isTransferLoading={isFetchingTransfer}
             />
           </div>
-          {showTransfer && transferEnabled && <TransferPanel />}
+          {showTransfer && transferEnabled && (
+            <TransferPanel isLoading={isFetchingTransfer} />
+          )}
         </>
       )}
     </div>

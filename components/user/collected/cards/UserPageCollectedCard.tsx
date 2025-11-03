@@ -1,3 +1,6 @@
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
 import { CollectedCard, CollectedCollectionType } from "@/entities/IProfile";
 import { ContractType } from "@/enums";
 import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
@@ -24,6 +27,7 @@ export default function UserPageCollectedCard({
   onDecQty,
   copiesMax,
   qtySelected = 0,
+  isTransferLoading = false,
 }: {
   readonly card: CollectedCard;
   readonly contractType: ContractType;
@@ -35,6 +39,7 @@ export default function UserPageCollectedCard({
   readonly onDecQty: () => void;
   readonly copiesMax: number;
   readonly qtySelected?: number;
+  readonly isTransferLoading?: boolean;
 }) {
   const collectionMeta = COLLECTED_COLLECTIONS_META[card.collection];
   const path = `${collectionMeta.cardPath}/${card.token_id}`;
@@ -86,7 +91,14 @@ export default function UserPageCollectedCard({
       {isNotSelectable && (
         <div className="tw-pointer-events-auto tw-absolute tw-inset-0 tw-flex tw-items-start tw-justify-center tw-p-2">
           <div className="tw-bg-iron-900/95 tw-text-iron-300 tw-text-xs tw-font-medium tw-px-3 tw-py-1.5 tw-rounded-md tw-ring-1 tw-ring-white/20 tw-opacity-75 group-hover:tw-opacity-100 tw-transition-opacity tw-duration-200">
-            Not owned by your connected wallet
+            {isTransferLoading ? (
+              <div className="tw-flex tw-items-center tw-gap-1">
+                <span>Loading</span>
+                <CircleLoader size={CircleLoaderSize.SMALL} />
+              </div>
+            ) : (
+              "Not owned by your connected wallet"
+            )}
           </div>
         </div>
       )}

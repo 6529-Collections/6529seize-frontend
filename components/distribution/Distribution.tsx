@@ -90,10 +90,12 @@ export default function DistributionPage(props: Readonly<Props>) {
     if (nftId) {
       const distributionPhotosUrl = `${publicEnv.API_ENDPOINT}/api/distribution_photos/${props.contract}/${nftId}`;
 
-      fetchAllPages(distributionPhotosUrl).then((distributionPhotos: any[]) => {
-        setDistributionPhotos(distributionPhotos);
-        fetchDistribution();
-      });
+      fetchAllPages<DistributionPhoto>(distributionPhotosUrl).then(
+        (distributionPhotos) => {
+          setDistributionPhotos(distributionPhotos);
+          fetchDistribution();
+        }
+      );
     }
   }, [nftId]);
 
@@ -290,8 +292,7 @@ export default function DistributionPage(props: Readonly<Props>) {
               <Row>
                 <Col className={`${styles.distributionHeader} pb-1`}>
                   <h1 className="text-center mb-0">
-                    {props.header} Card #
-                    {nftId} Distribution
+                    {props.header} Card #{nftId} Distribution
                   </h1>
                   {printMintingLink()}
                 </Col>

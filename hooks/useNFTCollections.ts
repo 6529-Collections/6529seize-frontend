@@ -1,10 +1,10 @@
 import { publicEnv } from "@/config/env";
-import { useEffect, useState } from "react";
 import { DBResponse } from "@/entities/IDBResponse";
 import { NFT } from "@/entities/INFT";
 import { NextGenCollection } from "@/entities/INextgen";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
+import { useEffect, useState } from "react";
 
 interface UseNFTCollectionsReturn {
   // Data
@@ -35,9 +35,9 @@ export function useNFTCollections(initialCollections?: {
     fetchUrl(`${publicEnv.API_ENDPOINT}/api/memes_lite`).then(
       (memeResponse: DBResponse) => {
         setNfts(memeResponse.data);
-        fetchAllPages(
+        fetchAllPages<NFT>(
           `${publicEnv.API_ENDPOINT}/api/nfts/gradients?&page_size=101`
-        ).then((gradients: NFT[]) => {
+        ).then((gradients) => {
           setNfts([...memeResponse.data, ...gradients]);
           setLoading(false);
         });

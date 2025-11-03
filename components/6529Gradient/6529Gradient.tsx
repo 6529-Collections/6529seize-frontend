@@ -54,24 +54,24 @@ export default function GradientsComponent() {
     const rawSort = searchParams.get("sort")?.toLowerCase() as Sort | undefined;
     const nextSort = rawSort === Sort.TDH ? Sort.TDH : Sort.ID;
 
-    const rawSortDir = searchParams
-      .get("sort_dir")
-      ?.toUpperCase() as SortDirection | undefined;
+    const rawSortDir = searchParams.get("sort_dir")?.toUpperCase() as
+      | SortDirection
+      | undefined;
     const nextSortDir =
-      rawSortDir === SortDirection.DESC ? SortDirection.DESC : SortDirection.ASC;
+      rawSortDir === SortDirection.DESC
+        ? SortDirection.DESC
+        : SortDirection.ASC;
 
     setSort((current) => (current === nextSort ? current : nextSort));
-    setSortDir((current) =>
-      current === nextSortDir ? current : nextSortDir
-    );
+    setSortDir((current) => (current === nextSortDir ? current : nextSortDir));
   }, [searchParams]);
 
   useEffect(() => {
     let isMounted = true;
 
     const url = `${publicEnv.API_ENDPOINT}/api/nfts/gradients?page_size=101`;
-    fetchAllPages(url)
-      .then((raw: GradientNFT[]) => {
+    fetchAllPages<GradientNFT>(url)
+      .then((raw) => {
         if (!isMounted) {
           return;
         }
@@ -194,9 +194,7 @@ export default function GradientsComponent() {
               <Row>
                 <Col className="d-flex align-items-center justify-content-between mb-3">
                   <span className="d-flex align-items-center gap-3 flex-wrap">
-                    <h1 className="mb-0">
-                      6529 Gradient
-                    </h1>
+                    <h1 className="mb-0">6529 Gradient</h1>
                     <LFGButton contract={GRADIENT_CONTRACT} />
                   </span>
                 </Col>
