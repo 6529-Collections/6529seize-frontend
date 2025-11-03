@@ -17,6 +17,38 @@ interface ValidateInteractivePreviewArgs {
 
 const MAX_BYTES_TO_PEEK = 1024;
 
+// Guard against SSRF by ensuring the gateway path is a plain relative fragment.
+const isSafeRelativePath = (path: string): boolean => {
+  if (typeof path !== "string") {
+    return false;
+  }
+
+  const trimmed = path.trim();
+
+  if (!trimmed || trimmed !== path) {
+    return false;
+  }
+
+  const lower = trimmed.toLowerCase();
+
+  if (
+    trimmed.startsWith("/") ||
+    trimmed.startsWith("\\") ||
+    trimmed.startsWith("//") ||
+    trimmed.startsWith("\\\\") ||
+    lower.startsWith("http:") ||
+    lower.startsWith("https:") ||
+    lower.includes("://") ||
+    trimmed.includes("..") ||
+    trimmed.includes("\n") ||
+    trimmed.includes("\r")
+  ) {
+    return false;
+  }
+
+  return true;
+};
+
 const isAllowedContentType = (contentType: string | null): boolean => {
   if (!contentType) {
     return false;
@@ -71,13 +103,28 @@ export async function validateInteractivePreview({
     return { ok: false, reason: "Hash or path is required." };
   }
 
+  if (!isSafeRelativePath(path)) {
+    return {
+      ok: false,
+      reason: "Invalid path: only relative paths under the gateway origin are allowed.",
+    };
+  }
+
   const targetUrl = buildGatewayUrl(provider, path);
 
   let response: Response;
-
   try {
     response = await performGatewayRequest(targetUrl, "HEAD");
   } catch (error) {
+    console.error(
+      "[validateInteractivePreview] HEAD request failed",
+      {
+        provider,
+        path,
+        targetUrl,
+        error,
+      }
+    );
     return {
       ok: false,
       reason: "Unable to reach the content gateway.",
@@ -93,6 +140,15 @@ export async function validateInteractivePreview({
     try {
       response = await performGatewayRequest(targetUrl, "GET");
     } catch (error) {
+      console.error(
+        "[validateInteractivePreview] Fallback GET request failed",
+        {
+          provider,
+          path,
+          targetUrl,
+          error,
+        }
+      );
       return {
         ok: false,
         reason: "Unable to reach the content gateway.",

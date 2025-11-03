@@ -175,7 +175,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
       }
 
       if (key === "ipfs" || key === "arweave") {
-        onExternalProviderChange(key as InteractiveMediaProvider);
+        onExternalProviderChange(key);
       }
     },
     [externalProvider, onExternalProviderChange],

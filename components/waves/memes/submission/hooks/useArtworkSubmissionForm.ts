@@ -87,6 +87,35 @@ const sanitizeInteractiveHash = (
   return value;
 };
 
+const isSafeRelativeGatewayPath = (path: string): boolean => {
+  if (!path) {
+    return false;
+  }
+
+  const trimmed = path.trim();
+  if (trimmed !== path) {
+    return false;
+  }
+
+  const lower = trimmed.toLowerCase();
+
+  if (
+    trimmed.startsWith("/") ||
+    trimmed.startsWith("\\") ||
+    trimmed.startsWith("//") ||
+    trimmed.startsWith("\\\\") ||
+    lower.startsWith("http:") ||
+    lower.startsWith("https:") ||
+    lower.includes("://") ||
+    trimmed.includes("\n") ||
+    trimmed.includes("\r")
+  ) {
+    return false;
+  }
+
+  return true;
+};
+
 const buildExternalMediaState = (
   input: string,
   provider: InteractiveMediaProvider,
@@ -103,9 +132,21 @@ const buildExternalMediaState = (
     error = "Hashes cannot contain whitespace.";
   }
 
-  const hashWithoutQuery = sanitizedHash.replace(/[?#].*$/, "");
+  // Drop query/fragment markers without regex backtracking risk.
+  const queryIndex = sanitizedHash.indexOf("?");
+  const fragmentIndex = sanitizedHash.indexOf("#");
+  const cutIndex = Math.min(
+    queryIndex === -1 ? sanitizedHash.length : queryIndex,
+    fragmentIndex === -1 ? sanitizedHash.length : fragmentIndex
+  );
+  const hashWithoutQuery = sanitizedHash.slice(0, cutIndex);
   const pathSegments = hashWithoutQuery.split("/").filter(Boolean);
-  if (!error && pathSegments.some((segment) => segment === "..")) {
+
+  if (!error && !isSafeRelativeGatewayPath(sanitizedHash)) {
+    error = "Only relative paths under the gateway origin are allowed.";
+  }
+
+  if (!error && pathSegments.includes("..")) {
     error = "Remove path traversal segments from the hash.";
   }
 
@@ -114,7 +155,7 @@ const buildExternalMediaState = (
   }
 
   if (!error && pathSegments.length > 0) {
-    const lastSegment = pathSegments[pathSegments.length - 1] ?? "";
+    const lastSegment = pathSegments.at(-1) ?? "";
     const lastSegmentWithoutSuffix = lastSegment.split(/[?#]/)[0] ?? "";
     const extensionIndex = lastSegmentWithoutSuffix.lastIndexOf(".");
     if (extensionIndex !== -1) {
@@ -137,12 +178,10 @@ const buildExternalMediaState = (
       ? `${INTERACTIVE_MEDIA_GATEWAY_BASE_URL[provider]}${sanitizedHash}`
       : "";
 
-  const url =
-    status !== "idle" && !error
-      ? provider === "arweave"
-        ? previewUrl
-        : `ipfs://${sanitizedHash}`
-      : "";
+  let url = "";
+  if (status !== "idle" && !error) {
+    url = provider === "arweave" ? previewUrl : `ipfs://${sanitizedHash}`;
+  }
 
   return {
     input,
@@ -208,18 +247,17 @@ function formReducer(state: FormState, action: FormAction): FormState {
     case "SET_EXTERNAL_MEDIA": {
       const externalMedia = action.payload;
       const shouldApply = state.mediaSource === "url";
+      let artworkUrl = state.artworkUrl;
+      if (shouldApply) {
+        artworkUrl = externalMedia.isValid ? externalMedia.url : "";
+      }
       return {
         ...state,
         externalMedia,
         artworkUploaded: shouldApply
           ? externalMedia.isValid
           : state.artworkUploaded,
-        artworkUrl:
-          shouldApply && externalMedia.isValid
-            ? externalMedia.url
-            : shouldApply
-            ? ""
-            : state.artworkUrl,
+        artworkUrl,
       };
     }
 
@@ -237,17 +275,16 @@ function formReducer(state: FormState, action: FormAction): FormState {
       };
 
       const shouldApply = state.mediaSource === "url";
+      let artworkUrl = state.artworkUrl;
+      if (shouldApply) {
+        artworkUrl = isValid ? externalMedia.url : "";
+      }
 
       return {
         ...state,
         externalMedia,
         artworkUploaded: shouldApply ? isValid : state.artworkUploaded,
-        artworkUrl:
-          shouldApply && isValid
-            ? externalMedia.url
-            : shouldApply
-            ? ""
-            : state.artworkUrl,
+        artworkUrl,
       };
     }
 
@@ -422,6 +459,14 @@ export function useArtworkSubmissionForm() {
           validationRequestKeyRef.current = null;
         }
       } catch (error) {
+        console.error(
+          "[useArtworkSubmissionForm] validateInteractivePreview failed",
+          {
+            provider,
+            sanitizedHash,
+            error,
+          }
+        );
         if (cancelled || validationRequestKeyRef.current !== validationKey) {
           return;
         }

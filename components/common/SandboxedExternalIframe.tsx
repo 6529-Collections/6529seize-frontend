@@ -19,11 +19,11 @@ export interface SandboxedExternalIframeProps {
 const hasAllowedHtmlExtension = (url: URL): boolean => {
   const path = url.pathname ?? "";
   const segments = path.split("/").filter(Boolean);
-  if (segments.some((segment) => segment === "..")) {
+  if (segments.includes("..")) {
     return false;
   }
 
-  const lastSegment = segments[segments.length - 1] ?? "";
+  const lastSegment = segments.at(-1) ?? "";
   if (!lastSegment) {
     return true;
   }
