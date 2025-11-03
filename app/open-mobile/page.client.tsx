@@ -6,11 +6,13 @@ import { publicEnv } from "@/config/env";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 export default function OpenMobilePage() {
   const searchParams = useSearchParams();
   const pathParam = searchParams?.get("path") || "";
   const [decodedPath, setDecodedPath] = useState<string | null>(null);
+  const { isAppleMobile } = useDeviceInfo();
 
   useEffect(() => {
     if (typeof window === "undefined" || !pathParam) {
@@ -39,10 +41,9 @@ export default function OpenMobilePage() {
 
     const userAgent =
       typeof navigator === "undefined" ? "" : navigator.userAgent;
-    const isIos = /iPad|iPhone|iPod/.test(userAgent);
     const isAndroid = /android/i.test(userAgent);
 
-    if (isIos) {
+    if (isAppleMobile) {
       return shareIos;
     } else if (isAndroid) {
       return shareAndroid;

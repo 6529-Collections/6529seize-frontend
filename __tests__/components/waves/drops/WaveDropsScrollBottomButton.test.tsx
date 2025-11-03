@@ -19,4 +19,19 @@ describe('WaveDropsScrollBottomButton', () => {
     await userEvent.click(screen.getByRole('button'));
     expect(scrollToBottom).toHaveBeenCalled();
   });
+
+  it('renders pending badge and triggers reveal handler', async () => {
+    const onReveal = jest.fn();
+    render(
+      <WaveDropsScrollBottomButton
+        isAtBottom={false}
+        scrollToBottom={jest.fn()}
+        newMessagesCount={3}
+        onRevealNewMessages={onReveal}
+      />
+    );
+    expect(screen.getByText('3 new messages')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /reveal new messages/i }));
+    expect(onReveal).toHaveBeenCalled();
+  });
 });
