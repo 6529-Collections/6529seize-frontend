@@ -1,51 +1,12 @@
 const mockIsNullAddress = jest.fn(() => false);
 
-jest.mock("@/helpers/Helpers", () => ({
-  isNullAddress: mockIsNullAddress,
-}));
-
-jest.mock("@/enums", () => ({
-  NextgenCollectionView: {
-    ABOUT: "About",
-    PROVENANCE: "Provenance",
-    DISPLAY_CENTER: "Display Center",
-    RARITY: "Rarity",
-    OVERVIEW: "Overview",
-    TOP_TRAIT_SETS: "Trait Sets",
-  },
-  ProfileActivityLogType: {
-    RATING_EDIT: "RATING_EDIT",
-    HANDLE_EDIT: "HANDLE_EDIT",
-    CLASSIFICATION_EDIT: "CLASSIFICATION_EDIT",
-    SOCIALS_EDIT: "SOCIALS_EDIT",
-    NFT_ACCOUNTS_EDIT: "NFT_ACCOUNTS_EDIT",
-    CONTACTS_EDIT: "CONTACTS_EDIT",
-    SOCIAL_VERIFICATION_POST_EDIT: "SOCIAL_VERIFICATION_POST_EDIT",
-    BANNER_1_EDIT: "BANNER_1_EDIT",
-    BANNER_2_EDIT: "BANNER_2_EDIT",
-    PFP_EDIT: "PFP_EDIT",
-    PROFILE_ARCHIVED: "PROFILE_ARCHIVED",
-    GENERAL_CIC_STATEMENT_EDIT: "GENERAL_CIC_STATEMENT_EDIT",
-    PROXY_CREATED: "PROXY_CREATED",
-    PROXY_ACTION_CREATED: "PROXY_ACTION_CREATED",
-    PROXY_ACTION_STATE_CHANGED: "PROXY_ACTION_STATE_CHANGED",
-    PROXY_ACTION_CHANGED: "PROXY_ACTION_CHANGED",
-    DROP_COMMENT: "DROP_COMMENT",
-    DROP_RATING_EDIT: "DROP_RATING_EDIT",
-    DROP_CREATED: "DROP_CREATED",
-    PROXY_DROP_RATING_EDIT: "PROXY_DROP_RATING_EDIT",
-  },
-  ProfileActivityFilterTargetType: {
-    ALL: "ALL",
-    INCOMING: "INCOMING",
-    OUTGOING: "OUTGOING",
-  },
-}));
-
-// Mock entities that cause circular dependencies
-jest.mock("@/entities/IProfile", () => ({
-  PROFILE_ACTIVITY_TYPE_TO_TEXT: {},
-}));
+jest.mock("@/helpers/Helpers", () => {
+  const actual = jest.requireActual("@/helpers/Helpers");
+  return {
+    ...actual,
+    isNullAddress: mockIsNullAddress,
+  };
+});
 
 // Mock user components that cause dependency issues
 jest.mock("@/components/user/utils/UserCICAndLevel", () => ({
@@ -78,7 +39,20 @@ jest.mock("next/navigation", () => {
   };
 });
 
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: jest.fn(() => ({
+    isAuthenticated: false,
+    seizeConnect: jest.fn(),
+    seizeAcceptConnection: jest.fn(),
+    address: undefined,
+    hasInitializationError: false,
+    initializationError: null,
+  })),
+  SeizeConnectProvider: ({ children }: { children: any }) => <>{children}</>,
+}));
+
 import NextGenTokenPage from "@/components/nextGen/collections/nextgenToken/NextGenToken";
+import { NextgenCollectionView } from "@/enums";
 import { render, screen } from "@testing-library/react";
 
 jest.mock("react-bootstrap", () => {
@@ -163,7 +137,7 @@ const baseProps = {
   } as any,
   traits: [] as any[],
   tokenCount: 2,
-  view: "About" as any, // Updated to match actual enum values
+  view: NextgenCollectionView.ABOUT,
   setView: jest.fn(),
 };
 
@@ -201,7 +175,7 @@ describe("NextGenTokenPage", () => {
 
   describe("view switching", () => {
     it("renders About view components by default", () => {
-      renderComponent({ view: "About" });
+      renderComponent({ view: NextgenCollectionView.ABOUT });
       expect(screen.getByTestId("about")).toBeInTheDocument();
       expect(screen.getByTestId("traits")).toBeInTheDocument();
       expect(screen.queryByTestId("provenance")).not.toBeInTheDocument();
@@ -210,7 +184,7 @@ describe("NextGenTokenPage", () => {
     });
 
     it("renders Provenance view when selected", () => {
-      renderComponent({ view: "Provenance" });
+      renderComponent({ view: NextgenCollectionView.PROVENANCE });
       expect(screen.getByTestId("provenance")).toBeInTheDocument();
       expect(screen.queryByTestId("about")).not.toBeInTheDocument();
       expect(screen.queryByTestId("traits")).not.toBeInTheDocument();
@@ -219,7 +193,7 @@ describe("NextGenTokenPage", () => {
     });
 
     it("renders Display Center view when selected", () => {
-      renderComponent({ view: "Display Center" });
+      renderComponent({ view: NextgenCollectionView.DISPLAY_CENTER });
       expect(screen.getByTestId("render")).toBeInTheDocument();
       expect(screen.queryByTestId("about")).not.toBeInTheDocument();
       expect(screen.queryByTestId("traits")).not.toBeInTheDocument();
@@ -228,7 +202,7 @@ describe("NextGenTokenPage", () => {
     });
 
     it("renders Rarity view when selected", () => {
-      renderComponent({ view: "Rarity" });
+      renderComponent({ view: NextgenCollectionView.RARITY });
       expect(screen.getByTestId("rarity")).toBeInTheDocument();
       expect(screen.queryByTestId("about")).not.toBeInTheDocument();
       expect(screen.queryByTestId("traits")).not.toBeInTheDocument();
@@ -332,7 +306,7 @@ describe("NextGenTokenPage", () => {
         setView: mockSetView,
         traits: mockTraits,
         tokenCount: 5,
-        view: "About",
+        view: NextgenCollectionView.ABOUT,
       });
 
       // About view should render with traits filtered (Collection Name should be filtered out)
