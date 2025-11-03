@@ -475,7 +475,6 @@ export default function UserPageCollected({
               dataTransfer={dataTransfer ?? []}
             />
           </div>
-          {/* appears only when transfer is enabled */}
           {showTransfer && transferEnabled && <TransferPanel />}
         </>
       )}

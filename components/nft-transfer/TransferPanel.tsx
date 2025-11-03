@@ -10,7 +10,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import TransferModal from "./TransferModal";
 import { useTransfer } from "./TransferState";
 
@@ -20,6 +20,7 @@ export default function TransferPanel() {
 
   const [showModal, setShowModal] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const previousOverflowRef = useRef<string>("");
 
   useEffect(() => {
     if (!isConnected && t.enabled) {
@@ -29,13 +30,13 @@ export default function TransferPanel() {
   }, [isConnected, t]);
 
   useEffect(() => {
-    if (isExpanded) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    if (!isExpanded) return;
+
+    previousOverflowRef.current = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflowRef.current;
     };
   }, [isExpanded]);
 
