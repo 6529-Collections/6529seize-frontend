@@ -31,15 +31,15 @@ const profile = { id: '1' } as any;
 describe('UserPageIdentityStatementsAddButton', () => {
   it('opens and closes the add statements modal', async () => {
     render(<UserPageIdentityStatementsAddButton profile={profile} />);
-    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(screen.queryByTestId('modal-content')).toBeNull();
 
     await userEvent.click(screen.getByRole('button', { name: /add/i }));
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByTestId('modal-content')).toBeInTheDocument();
     expect(modalProps.profile).toBe(profile);
 
     await act(async () => {
       modalProps.onClose();
     });
-    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(screen.queryByTestId('modal-content')).toBeNull();
   });
 });

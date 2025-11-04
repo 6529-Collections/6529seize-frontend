@@ -1,6 +1,6 @@
 import {
-  DISTRIBUTION_PLAN_STEPS,
-  DistributionPlanStepDescription,
+    DISTRIBUTION_PLAN_STEPS,
+    DistributionPlanStepDescription,
 } from "./DistributionPlanToolSidebar";
 
 export default function DistributionPlanStepCurrent({
@@ -14,7 +14,7 @@ export default function DistributionPlanStepCurrent({
     <li className="tw-relative tw-pb-10">
       {!isLastStep && (
         <div
-          className="tw-absolute tw-left-[13.25px] tw-top-4 -tw-ml-px tw-mt-0.5 tw-h-full tw-w-0.5 tw-bg-neutral-600"
+          className="tw-absolute tw-left-[13.25px] tw-top-4 -tw-ml-px tw-mt-0.5 tw-h-full tw-w-0.5 tw-bg-iron-600"
           aria-hidden="true"></div>
       )}
       <div
@@ -29,7 +29,7 @@ export default function DistributionPlanStepCurrent({
           <span className="tw-text-sm tw-font-medium tw-text-white">
             {step.label}
           </span>
-          <span className="tw-text-sm tw-text-neutral-500">
+          <span className="tw-text-sm tw-text-iron-500">
             {step.description}
           </span>
         </span>

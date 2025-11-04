@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { MEMES_CONTRACT } from "@/constants";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
+import { useEffect, useState } from "react";
 
 type MemesSeason = `SZN${number}`;
 
@@ -93,7 +93,7 @@ export default function CreateSnapshotFormSearchCollectionMemesModal({
             <legend className="tw-text-base tw-font-semibold tw-leading-6 tw-text-white">
               Seasons
             </legend>
-            <div className="tw-mt-4 tw-divide-y tw-divide-solid tw-divide-neutral-800 tw-divide-x-0 tw-border-solid tw-border-x-0 tw-border-b tw-border-t tw-border-neutral-800">
+            <div className="tw-mt-4 tw-divide-y tw-divide-solid tw-divide-iron-800 tw-divide-x-0 tw-border-solid tw-border-x-0 tw-border-b tw-border-t tw-border-iron-800">
               {options.map((option) => (
                 <div
                   onClick={() => handleSelect(option.value)}
@@ -112,7 +112,7 @@ export default function CreateSnapshotFormSearchCollectionMemesModal({
                         e.stopPropagation();
                         handleSelect(option.value);
                       }}
-                      className="tw-cursor-pointer tw-form-checkbox tw-h-4 tw-w-4 tw-bg-neutral-800 tw-rounded tw-border-solid tw-border-gray-600 tw-text-primary-500 focus:tw-ring-primary-500"
+                      className="tw-cursor-pointer tw-form-checkbox tw-h-4 tw-w-4 tw-bg-iron-800 tw-rounded tw-border-solid tw-border-gray-600 tw-text-primary-500 focus:tw-ring-primary-500"
                     />
                   </div>
                 </div>
@@ -130,7 +130,7 @@ export default function CreateSnapshotFormSearchCollectionMemesModal({
               fill="none"
               xmlns="http://www.w3.org/2000/svg">
               <path
-                className="tw-text-neutral-600"
+                className="tw-text-iron-600"
                 d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
                 fill="currentColor"></path>
               <path

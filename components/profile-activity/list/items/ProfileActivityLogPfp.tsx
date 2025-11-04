@@ -1,10 +1,10 @@
 import { ProfileActivityLogPfpEdit } from "@/entities/IProfile";
+import {
+    getScaledImageUri,
+    ImageScale,
+} from "@/helpers/image.helpers";
 import Image from "next/image";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
-import {
-  getScaledImageUri,
-  ImageScale,
-} from "@/helpers/image.helpers";
 
 export default function ProfileActivityLogPfp({
   log,
@@ -37,7 +37,7 @@ export default function ProfileActivityLogPfp({
             )}
           </div>
           <svg
-            className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-neutral-400"
+            className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-400"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"

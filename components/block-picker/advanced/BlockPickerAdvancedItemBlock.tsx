@@ -48,7 +48,7 @@ export default function BlockPickerAdvancedItemBlock({
     <div>
       <svg
         onClick={copy}
-        className="tw-h-5 tw-cursor-pointer tw-w-5 tw-mr-2.5  tw-text-neutral-300 hover:tw-text-white tw-transition tw-duration-300 tw-ease-out"
+        className="tw-h-5 tw-cursor-pointer tw-w-5 tw-mr-2.5  tw-text-iron-300 hover:tw-text-white tw-transition tw-duration-300 tw-ease-out"
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg">

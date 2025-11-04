@@ -1,26 +1,26 @@
 "use client";
 
-import { forwardRef, useImperativeHandle, useRef, useState } from "react";
-import CreateDropFullMobileWrapper from "./CreateDropFullMobileWrapper";
-import { EditorState } from "lexical";
-import {
-  CreateDropConfig,
-  DropMetadata,
-  MentionedUser,
-  ReferencedNft,
-} from "@/entities/IDrop";
-import CreateDropContent, {
-  CreateDropContentHandles,
-} from "@/components/drops/create/utils/CreateDropContent";
-import CreateDropFullMobileMetadata from "./CreateDropFullMobileMetadata";
-import { CreateDropType, CreateDropViewType } from "@/components/drops/create/types";
-import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import { CreateDropType, CreateDropViewType } from "@/components/drops/create/types";
+import CreateDropContent, {
+    CreateDropContentHandles,
+} from "@/components/drops/create/utils/CreateDropContent";
 import CreateDropSelectedFileIcon from "@/components/drops/create/utils/file/CreateDropSelectedFileIcon";
 import CreateDropSelectedFilePreview from "@/components/drops/create/utils/file/CreateDropSelectedFilePreview";
+import {
+    CreateDropConfig,
+    DropMetadata,
+    MentionedUser,
+    ReferencedNft,
+} from "@/entities/IDrop";
 import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
 import { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
+import { EditorState } from "lexical";
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import CreateDropFullMobileMetadata from "./CreateDropFullMobileMetadata";
+import CreateDropFullMobileWrapper from "./CreateDropFullMobileWrapper";
 
 enum TITLE_STATE {
   BUTTON = "BUTTON",
@@ -165,7 +165,7 @@ const CreateDropFullMobile = forwardRef<
                 value={title ?? ""}
                 onChange={(e) => onTitle(e.target.value)}
                 maxLength={250}
-                className="tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-2.5 tw-pr-3 tw-bg-iron-800 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-bg-iron-900 focus:tw-ring-1 focus:tw-ring-inset hover:tw-ring-neutral-700 focus:tw-ring-primary-400 tw-text-md tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-2.5 tw-pr-3 tw-bg-iron-800 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-bg-iron-900 focus:tw-ring-1 focus:tw-ring-inset hover:tw-ring-iron-700 focus:tw-ring-primary-400 tw-text-md tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
               />
             )}
             <CreateDropContent

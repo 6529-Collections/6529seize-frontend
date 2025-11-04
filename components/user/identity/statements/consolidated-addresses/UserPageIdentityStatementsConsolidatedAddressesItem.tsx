@@ -7,9 +7,9 @@ import EtherscanIcon from "@/components/user/utils/icons/EtherscanIcon";
 import OpenseaIcon from "@/components/user/utils/icons/OpenseaIcon";
 import CopyIcon from "@/components/utils/icons/CopyIcon";
 import {
-  DELEGATION_ALL_ADDRESS,
-  DELEGATION_CONTRACT,
-  NEVER_DATE,
+    DELEGATION_ALL_ADDRESS,
+    DELEGATION_CONTRACT,
+    NEVER_DATE,
 } from "@/constants";
 import { ApiWallet } from "@/generated/models/ApiWallet";
 import { getTransactionLink } from "@/helpers/Helpers";
@@ -141,7 +141,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
 
   return (
     <li>
-      <div className="tw-h-5 tw-group tw-flex tw-items-center tw-group tw-text-sm sm:tw-text-md tw-font-medium tw-text-neutral-200 hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
+      <div className="tw-h-5 tw-group tw-flex tw-items-center tw-group tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-200 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
         <button
           onClick={goToOpensea}
           aria-label="Go to Opensea"
@@ -249,7 +249,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
         </div>
       </div>
       {statusMessage && (
-        <div className="pt-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-neutral-200 d-flex flex-column gap-1">
+        <div className="pt-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-200 d-flex flex-column gap-1">
           {statusMessage}
         </div>
       )}

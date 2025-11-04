@@ -10,7 +10,7 @@ export default function ProfileActivityLogProfileArchived({
       <span className="tw-whitespace-nowrap tw-text-base tw-text-iron-300 tw-font-medium">
         profile
       </span>
-      <span className="tw-whitespace-nowrap tw-text-base tw-font-medium tw-text-iron-100">
+      <span className="tw-whitespace-nowrap tw-text-base tw-font-medium tw-text-iron-200">
         {log.contents.handle}
       </span>
       <span className="tw-whitespace-nowrap tw-text-base tw-text-iron-300 tw-font-medium">
