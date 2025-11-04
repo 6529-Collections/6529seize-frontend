@@ -3,6 +3,11 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import useCapacitor from "@/hooks/useCapacitor";
+import {
+  faChevronLeft,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { usePathname } from "next/navigation";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import UserPageTab from "./UserPageTab";
@@ -234,20 +239,10 @@ export default function UserPageTabs() {
             onClick={scrollLeft}
             aria-label="Scroll tabs left"
             className="tw-absolute tw-left-0 tw-top-1/2 tw--translate-y-1/2 tw-z-20 tw-inline-flex tw-items-center tw-justify-start tw-group tw-p-0 tw-h-10 tw-w-10 tw-bg-transparent tw-border-none tw-outline-none">
-            <svg
-              className="tw-h-6 tw-w-6 tw-text-iron-200 group-hover:tw-text-iron-300 tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M6 9L12 15L18 9"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <FontAwesomeIcon
+              icon={faChevronLeft}
+              className="tw-h-6 tw-w-6 tw-text-iron-200 group-hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out"
+            />
           </button>
         </>
       )}
@@ -258,20 +253,10 @@ export default function UserPageTabs() {
             onClick={scrollRight}
             aria-label="Scroll tabs right"
             className="tw-absolute tw-right-0 tw-top-1/2 tw--translate-y-1/2 tw-z-20 tw-inline-flex tw-items-center tw-justify-end tw-group tw-p-0 tw-h-10 tw-w-10 tw-bg-transparent tw-border-none tw-outline-none">
-            <svg
-              className="tw-h-6 tw-w-6 tw-text-iron-200 group-hover:tw-text-iron-300 -tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M6 9L12 15L18 9"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <FontAwesomeIcon
+              icon={faChevronRight}
+              className="tw-h-6 tw-w-6 tw-text-iron-200 group-hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out"
+            />
           </button>
         </>
       )}

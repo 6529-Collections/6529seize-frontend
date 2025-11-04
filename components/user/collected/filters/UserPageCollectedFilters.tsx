@@ -9,6 +9,11 @@ import {
 } from "@/entities/IProfile";
 import { MEMES_SEASON } from "@/enums";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import {
+  faChevronLeft,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { RefObject, useEffect, useRef, useState } from "react";
 import { ProfileCollectedFilters } from "../UserPageCollected";
 import { COLLECTED_COLLECTIONS_META } from "./user-page-collected-filters.helpers";
@@ -88,13 +93,13 @@ export default function UserPageCollectedFilters({
   const scrollLeft = () => {
     const container = scrollContainerRef.current;
     if (!container) return;
-    container.scrollBy({ left: -50, behavior: "smooth" });
+    container.scrollBy({ left: -150, behavior: "smooth" });
   };
 
   const scrollRight = () => {
     const container = scrollContainerRef.current;
     if (!container) return;
-    container.scrollBy({ left: 50, behavior: "smooth" });
+    container.scrollBy({ left: 150, behavior: "smooth" });
   };
 
   const getShowSeized = (collection: CollectedCollectionType | null): boolean =>
@@ -154,20 +159,10 @@ export default function UserPageCollectedFilters({
             onClick={scrollLeft}
             aria-label="Scroll filters left"
             className="tw-absolute tw-left-0 tw-top-1/2 tw--translate-y-1/2 tw-z-20 tw-inline-flex tw-items-center tw-justify-start tw-group tw-p-0 tw-h-10 tw-w-10 tw-bg-transparent tw-border-none tw-outline-none">
-            <svg
-              className="tw-h-6 tw-w-6 tw-text-iron-200 group-hover:tw-text-iron-300 tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M6 9L12 15L18 9"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <FontAwesomeIcon
+              icon={faChevronLeft}
+              className="tw-h-6 tw-w-6 tw-text-iron-200 group-hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out"
+            />
           </button>
         </>
       )}
@@ -178,20 +173,10 @@ export default function UserPageCollectedFilters({
             onClick={scrollRight}
             aria-label="Scroll filters right"
             className="tw-absolute tw-right-0 tw-top-1/2 tw--translate-y-1/2 tw-z-20 tw-inline-flex tw-items-center tw-justify-end tw-group tw-p-0 tw-h-10 tw-w-10 tw-bg-transparent tw-border-none tw-outline-none">
-            <svg
-              className="tw-h-6 tw-w-6 tw-text-iron-200 group-hover:tw-text-iron-300 -tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M6 9L12 15L18 9"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <FontAwesomeIcon
+              icon={faChevronRight}
+              className="tw-h-6 tw-w-6 tw-text-iron-200 group-hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out"
+            />
           </button>
         </>
       )}
