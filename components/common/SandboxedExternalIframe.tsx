@@ -1,11 +1,7 @@
 "use client";
 
-import React from "react";
-import {
-  canonicalizeInteractiveMediaHostname,
-  isInteractiveMediaAllowedHost,
-  isInteractiveMediaContentPathAllowed,
-} from "@/components/waves/memes/submission/constants/security";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { canonicalizeInteractiveMediaUrl } from "@/components/waves/memes/submission/constants/security";
 
 // Sandbox policy for external interactive media:
 // - allow-scripts: Required for interactive HTML content.
@@ -19,84 +15,103 @@ export interface SandboxedExternalIframeProps {
   readonly fallback?: React.ReactNode;
 }
 
-const getAllowedUrl = (src: string): URL | null => {
-  try {
-    const parsedUrl = new URL(src);
-    if (parsedUrl.protocol !== "https:") {
-      return null;
-    }
-
-    if (parsedUrl.username || parsedUrl.password) {
-      return null;
-    }
-
-    if (parsedUrl.search || parsedUrl.hash) {
-      return null;
-    }
-
-    const normalizedHostname = canonicalizeInteractiveMediaHostname(
-      parsedUrl.hostname
-    );
-    if (!normalizedHostname) {
-      return null;
-    }
-
-    if (normalizedHostname !== parsedUrl.hostname) {
-      parsedUrl.hostname = normalizedHostname;
-    }
-
-    if (parsedUrl.port) {
-      if (parsedUrl.port === "443") {
-        parsedUrl.port = "";
-      } else {
-        return null;
-      }
-    }
-
-    if (!isInteractiveMediaAllowedHost(parsedUrl.hostname)) {
-      return null;
-    }
-
-    if (
-      !isInteractiveMediaContentPathAllowed(
-        parsedUrl.hostname,
-        parsedUrl.pathname
-      )
-    ) {
-      return null;
-    }
-
-    return parsedUrl;
-  } catch {
-    return null;
-  }
-};
-
+/**
+ * Render untrusted interactive media inside a strongly sandboxed iframe.
+ *
+ * Security notes:
+ * - keep allow-same-origin disabled to force an opaque origin boundary.
+ * - deny all Permission Policy features via an explicit empty `allow` attribute.
+ * - enforce HTTPS and strip referrers; credentialless removes ambient cookies where supported.
+ * - the sandbox isolates the frame even if it redirects after the initial load.
+ */
 const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
   src,
   title,
   className,
   fallback = null,
 }) => {
-  const parsedUrl = getAllowedUrl(src);
-  if (!parsedUrl) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  const canonicalSrc = useMemo(
+    () => canonicalizeInteractiveMediaUrl(src),
+    [src]
+  );
+
+  useEffect(() => {
+    if (!canonicalSrc) {
+      return;
+    }
+
+    if (isVisible) {
+      return;
+    }
+
+    const element = containerRef.current;
+    if (!element) {
+      return;
+    }
+
+    if (typeof window === "undefined" || !("IntersectionObserver" in window)) {
+      setIsVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries, observerInstance) => {
+        const isIntersecting = entries.some((entry) => entry.isIntersecting);
+        if (isIntersecting) {
+          setIsVisible(true);
+          observerInstance.disconnect();
+        }
+      },
+      { root: null, threshold: 0.1 }
+    );
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [canonicalSrc, isVisible]);
+
+  if (!canonicalSrc) {
     return fallback ? <>{fallback}</> : null;
   }
 
-  return (
-    <iframe
-      src={parsedUrl.toString()}
-      title={title}
-      className={className}
-      sandbox={DEFAULT_SANDBOX}
+  const placeholder = (
+    <div className={className} aria-hidden="true" role="presentation" />
+  );
+
+  const iframeProps = useMemo(() => {
+    const baseProps = {
+      src: canonicalSrc,
+      title,
+      className,
+      sandbox: DEFAULT_SANDBOX,
       // `allow=""` intentionally denies all Permission Policy features beyond the sandbox defaults.
-      allow=""
-      referrerPolicy="no-referrer"
-      loading="lazy"
-      {...({
-        credentialless: "",
-      } as React.IframeHTMLAttributes<HTMLIFrameElement>)}
-    />
+      allow: "",
+      referrerPolicy: "no-referrer",
+      loading: "lazy",
+    } as React.IframeHTMLAttributes<HTMLIFrameElement> & {
+      fetchPriority?: "high" | "low" | "auto";
+      credentialless?: string;
+    };
+
+    baseProps.fetchPriority = "low";
+    baseProps.credentialless = "";
+
+    return baseProps;
+  }, [canonicalSrc, className, title]);
+
+  return (
+    <div ref={containerRef}>
+      {isVisible ? (
+        <iframe {...iframeProps} />
+      ) : (
+        placeholder
+      )}
+    </div>
   );
 };
 

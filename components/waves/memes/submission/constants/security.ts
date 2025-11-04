@@ -6,15 +6,15 @@ const INTERACTIVE_MEDIA_IPFS_HOSTS = new Set<string>([
 ]);
 
 const ARWEAVE_ROOT_HOSTS = new Set<string>(["arweave.net", "www.arweave.net"]);
-const ARWEAVE_SUBDOMAIN_PATTERN = /^([a-z0-9_-]{43})\.arweave\.net$/;
+const ARWEAVE_SUBDOMAIN_PATTERN = /^([a-z0-9_-]{43,87})\.arweave\.net$/;
 
 const CIDV0_PATTERN = /^Qm[1-9A-HJ-NP-Za-km-z]{44}$/;
 const CIDV1_PATTERN = /^b[a-z2-7]{52,}$/;
 
-const ARWEAVE_TX_ID_PATTERN = /^[a-zA-Z0-9_-]{43}$/;
+const ARWEAVE_TX_ID_PATTERN = /^[a-zA-Z0-9_-]{43,87}$/;
 
-const IPFS_PATH_PATTERN = /^\/ipfs\/([^/]+)(?:\/)?$/;
-const ARWEAVE_PATH_PATTERN = /^\/([^/]+)(?:\/)?$/;
+const IPFS_PATH_PATTERN = /^\/ipfs\/([^/]+)$/;
+const ARWEAVE_PATH_PATTERN = /^\/([^/]+)$/;
 
 export const canonicalizeInteractiveMediaHostname = (
   hostname: string
@@ -129,6 +129,66 @@ export const isInteractiveMediaContentPathAllowed = (
   }
 
   return false;
+};
+
+export const canonicalizeInteractiveMediaUrl = (src: string): string | null => {
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(src);
+  } catch {
+    return null;
+  }
+
+  if (parsedUrl.protocol !== "https:") {
+    return null;
+  }
+
+  if (parsedUrl.username || parsedUrl.password) {
+    return null;
+  }
+
+  if (parsedUrl.search || parsedUrl.hash) {
+    return null;
+  }
+
+  if (parsedUrl.port) {
+    if (parsedUrl.port === "443") {
+      parsedUrl.port = "";
+    } else {
+      return null;
+    }
+  }
+
+  const normalizedHostname = canonicalizeInteractiveMediaHostname(
+    parsedUrl.hostname
+  );
+  if (!normalizedHostname) {
+    return null;
+  }
+
+  if (normalizedHostname !== parsedUrl.hostname) {
+    parsedUrl.hostname = normalizedHostname;
+  }
+
+  if (!isInteractiveMediaAllowedHost(parsedUrl.hostname)) {
+    return null;
+  }
+
+  if (
+    !isInteractiveMediaContentPathAllowed(
+      parsedUrl.hostname,
+      parsedUrl.pathname
+    )
+  ) {
+    return null;
+  }
+
+  parsedUrl.username = "";
+  parsedUrl.password = "";
+  parsedUrl.hash = "";
+  parsedUrl.search = "";
+
+  return parsedUrl.toString();
 };
 
 export const INTERACTIVE_MEDIA_GATEWAY_BASE_URL: Record<
