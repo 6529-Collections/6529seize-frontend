@@ -1,10 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  INTERACTIVE_MEDIA_HTML_EXTENSIONS,
-  isInteractiveMediaAllowedHost,
-} from "@/components/waves/memes/submission/constants/security";
+import { isInteractiveMediaAllowedHost } from "@/components/waves/memes/submission/constants/security";
 
 // Sandbox policy for external interactive media:
 // - allow-scripts: Required for interactive HTML content.
@@ -20,6 +17,8 @@ export interface SandboxedExternalIframeProps {
   readonly fallback?: React.ReactNode;
 }
 
+const HASH_SEGMENT_PATTERN = /^[A-Za-z0-9]{1,128}$/;
+
 const hasAllowedHtmlExtension = (url: URL): boolean => {
   const path = url.pathname ?? "";
   const segments = path.split("/").filter(Boolean);
@@ -29,15 +28,14 @@ const hasAllowedHtmlExtension = (url: URL): boolean => {
 
   const lastSegment = segments.at(-1) ?? "";
   if (!lastSegment) {
-    return true;
+    return false;
   }
 
-  if (!lastSegment.includes(".")) {
-    return true;
+  if (!HASH_SEGMENT_PATTERN.test(lastSegment)) {
+    return false;
   }
 
-  const extension = lastSegment.slice(lastSegment.lastIndexOf(".") + 1).toLowerCase();
-  return INTERACTIVE_MEDIA_HTML_EXTENSIONS.has(extension);
+  return true;
 };
 
 const getAllowedUrl = (src: string): URL | null => {

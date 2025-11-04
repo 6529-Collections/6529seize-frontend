@@ -18,6 +18,8 @@ interface ValidateInteractivePreviewArgs {
 const MAX_BYTES_TO_PEEK = 1024;
 
 // Guard against SSRF by ensuring the gateway path is a plain relative fragment.
+const SAFE_RELATIVE_PATH_PATTERN = /^[A-Za-z0-9]{1,128}$/;
+
 const isSafeRelativePath = (path: string): boolean => {
   if (typeof path !== "string") {
     return false;
@@ -26,6 +28,10 @@ const isSafeRelativePath = (path: string): boolean => {
   const trimmed = path.trim();
 
   if (!trimmed || trimmed !== path) {
+    return false;
+  }
+
+  if (!SAFE_RELATIVE_PATH_PATTERN.test(trimmed)) {
     return false;
   }
 
