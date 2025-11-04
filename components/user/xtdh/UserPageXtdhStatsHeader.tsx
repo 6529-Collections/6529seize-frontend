@@ -2,7 +2,8 @@
 
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { useIdentityTdhStats } from "@/hooks/useIdentityTdhStats";
-import { useXtdhStats } from "@/hooks/useXtdhStats";
+
+const UNAVAILABLE_LABEL = "Unavailable";
 
 interface UserPageXtdhStatsHeaderProps {
   readonly profileId: string | null;
@@ -19,33 +20,19 @@ export default function UserPageXtdhStatsHeader({
     isError,
     error,
     refetch,
-  } = useXtdhStats({ profile: normalizedProfileId });
-
-  const {
-    data: identityStats,
-    isLoading: identityLoading,
-    isError: identityIsError,
-    error: identityError,
-    refetch: refetchIdentityStats,
   } = useIdentityTdhStats({
     identity: normalizedProfileId,
     enabled: Boolean(normalizedProfileId),
   });
 
-  if (isLoading || identityLoading) {
+  if (isLoading) {
     return <UserPageXtdhStatsHeaderSkeleton />;
   }
 
-  if (isError || identityIsError || !data) {
-    const message =
-      error?.message ?? identityError?.message ?? "Failed to load xTDH stats.";
+  if (isError || !data) {
+    const message = error?.message ?? "Failed to load xTDH stats.";
     const handleRetry = () => {
-      if (isError) {
-        void refetch();
-      }
-      if (identityIsError && normalizedProfileId) {
-        void refetchIdentityStats();
-      }
+      void refetch();
     };
     return (
       <UserPageXtdhStatsHeaderError
@@ -55,21 +42,35 @@ export default function UserPageXtdhStatsHeader({
     );
   }
 
-  const xtdhRate = identityStats?.xtdhRate ?? data.dailyCapacity;
-  const baseTdhRate = identityStats?.baseTdhRate ?? data.baseTdhRate;
-  const multiplier = identityStats?.xtdhMultiplier ?? data.multiplier;
-  const xtdhRateGranted = data.xtdhRateGranted;
-  const xtdhRateAvailable = Math.max(data.xtdhRateAutoAccruing, 0);
-  const grantingPercentage = xtdhRate > 0 ? (xtdhRateGranted / xtdhRate) * 100 : 0;
+  const xtdhRate = data.xtdhRate;
+  const baseTdhRate = data.baseTdhRate;
+  const multiplier = data.xtdhMultiplier;
+  const xtdhRateGranted = data.grantedXtdhPerDay;
+  const xtdhRateAvailable =
+    typeof xtdhRate === "number" && typeof xtdhRateGranted === "number"
+      ? Math.max(xtdhRate - xtdhRateGranted, 0)
+      : null;
+  const hasAllocationMetrics =
+    typeof xtdhRate === "number" && typeof xtdhRateGranted === "number";
+  const grantingPercentage =
+    hasAllocationMetrics && xtdhRate > 0 ? (xtdhRateGranted / xtdhRate) * 100 : 0;
   const clampedPercentage = Math.min(Math.max(grantingPercentage, 0), 100);
 
   const baseRateDisplay = formatDisplay(baseTdhRate);
   const multiplierDisplay = formatDisplay(multiplier, 2);
   const xtdhRateDisplay = formatDisplay(xtdhRate);
-  const grantedDisplay = formatDisplay(xtdhRateGranted);
-  const availableDisplay = formatDisplay(xtdhRateAvailable);
-  const receivedRateDisplay = formatDisplay(data.xtdhRateReceived);
-  const totalReceivedDisplay = formatDisplay(data.totalXtdhReceived);
+  const grantedDisplay = hasAllocationMetrics
+    ? formatDisplay(xtdhRateGranted)
+    : UNAVAILABLE_LABEL;
+  const availableDisplay = hasAllocationMetrics
+    ? formatDisplay(xtdhRateAvailable)
+    : UNAVAILABLE_LABEL;
+  const receivedRateDisplay = UNAVAILABLE_LABEL;
+  const totalReceivedDisplay = formatDisplay(data.totalReceivedXtdh);
+  const totalGrantedDisplay = formatDisplay(data.totalGrantedXtdh);
+  const progressAriaValueText = hasAllocationMetrics
+    ? `${grantedDisplay} out of ${xtdhRateDisplay} xTDH rate granted, ${availableDisplay} available`
+    : "Allocation data unavailable";
 
   return (
     <section
@@ -123,7 +124,7 @@ export default function UserPageXtdhStatsHeader({
               aria-valuemin={0}
               aria-valuemax={100}
               aria-valuenow={Math.floor(clampedPercentage)}
-              aria-valuetext={`${grantedDisplay} out of ${xtdhRateDisplay} xTDH rate granted, ${availableDisplay} available`}
+              aria-valuetext={progressAriaValueText}
             />
           </div>
           <p className="tw-text-sm tw-text-iron-200">
@@ -155,6 +156,9 @@ export default function UserPageXtdhStatsHeader({
           <span className="tw-font-semibold">{totalReceivedDisplay}</span>
           {" total received"}
         </p>
+        <p className="tw-mt-1 tw-text-xs tw-text-iron-400">
+          Total granted: <span className="tw-font-semibold tw-text-iron-200">{totalGrantedDisplay}</span>
+        </p>
       </div>
     </section>
   );
@@ -179,7 +183,7 @@ function normalizeProfileIdentifier(value: string | null): string | null {
 
 function formatDisplay(value: number | null | undefined, decimals = 0) {
   if (typeof value !== "number" || Number.isNaN(value)) {
-    return "-";
+    return UNAVAILABLE_LABEL;
   }
 
   const factor = Math.pow(10, decimals);
