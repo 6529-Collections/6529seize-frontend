@@ -254,12 +254,11 @@ export default function CreateSnapshotForm() {
         </div>
         <div className="tw-flex tw-items-center tw-w-full tw-gap-x-4">
           <div className="tw-flex-1 tw-mt-4">
-            <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
-              <label className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
-                <span>Token ID(s)</span>
-                <svg
-                  className="tw-h-5 tw-w-5 tw-text-iron-500 tw-cursor-pointer"
-                  viewBox="0 0 24 24"
+            <label className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
+              <span>Token ID(s)</span>
+              <svg
+                className="tw-h-5 tw-w-5 tw-text-iron-500 tw-cursor-pointer"
+                viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                   data-tooltip-id="token-ids-tooltip">
@@ -281,7 +280,6 @@ export default function CreateSnapshotForm() {
                   }}>
                   Example: 1,3,54-78
                 </Tooltip>
-              </label>
             </label>
             <div className="tw-mt-2">
               <input

@@ -21,7 +21,7 @@ import {
     commonApiPostForm,
 } from "@/services/api/common-api";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { FormEvent, useContext, useEffect, useRef, useState } from "react";
+import { FormEvent, KeyboardEvent, useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
 export default function UserPageHeaderEditPfp({
@@ -191,11 +191,22 @@ export default function UserPageHeaderEditPfp({
     return null;
   }
 
+  const handleBackdropKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
+      event.preventDefault();
+      onClose();
+    }
+  };
+
   return createPortal(
     <div className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1100] tw-cursor-default">
       <div
-        className="tw-absolute tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px]"
+        role="button"
+        tabIndex={0}
+        aria-label="Close edit profile picture modal"
+        className="tw-absolute tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px] tw-cursor-pointer"
         onClick={onClose}
+        onKeyDown={handleBackdropKeyDown}
       />
       <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-overflow-y-auto tw-items-center tw-justify-center tw-p-2 lg:tw-p-4">
         <div
