@@ -1,24 +1,24 @@
 "use client";
 
-import { useContext, useState } from "react";
-import { Modal, Button, Col, Container, Row } from "react-bootstrap";
-import {
-  SUBSCRIPTIONS_ADMIN_WALLETS,
-  MEMES_CONTRACT,
-} from "@/constants";
-import { areEqualAddresses, formatAddress } from "@/helpers/Helpers";
 import { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import { AuthContext } from "@/components/auth/Auth";
-import {
-  ReviewDistributionPlanTableItem,
-  ReviewDistributionPlanTableItemType,
-} from "./ReviewDistributionPlanTable";
-import {
-  commonApiFetch,
-  commonApiPost,
-} from "@/services/api/common-api";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import {
+    MEMES_CONTRACT,
+    SUBSCRIPTIONS_ADMIN_WALLETS,
+} from "@/constants";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { areEqualAddresses, formatAddress } from "@/helpers/Helpers";
+import {
+    commonApiFetch,
+    commonApiPost,
+} from "@/services/api/common-api";
+import { useContext, useState } from "react";
+import { Button, Col, Container, Modal, Row } from "react-bootstrap";
+import {
+    ReviewDistributionPlanTableItem,
+    ReviewDistributionPlanTableItemType,
+} from "./ReviewDistributionPlanTable";
 
 interface WalletResult {
   wallet: string;
@@ -52,7 +52,7 @@ export function SubscriptionLinks(
           onClick={() => setShowConfirm(true)}
           disabled={downloading}
           type="button"
-          className="tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-neutral-400 tw-bg-neutral-400/10 tw-ring-neutral-400/20 hover:tw-bg-neutral-400/20 tw-ease-out tw-transition tw-duration-300">
+          className="tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-400 tw-bg-iron-400/10 tw-ring-iron-400/20 hover:tw-bg-iron-400/20 tw-ease-out tw-transition tw-duration-300">
           {downloading ? (
             <span className="d-flex gap-2 align-items-center">
               <CircleLoader />

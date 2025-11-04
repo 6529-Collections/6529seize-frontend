@@ -1,15 +1,15 @@
 "use client";
 
-import { useContext, useState } from "react";
-import { commonApiPost } from "@/services/api/common-api";
+import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+import { commonApiPost } from "@/services/api/common-api";
+import { useContext, useState } from "react";
 import {
-  SubscriptionConfirm,
-  download,
-  isSubscriptionsAdmin,
+    SubscriptionConfirm,
+    download,
+    isSubscriptionsAdmin,
 } from "./ReviewDistributionPlanTableSubscription";
-import { AuthContext } from "@/components/auth/Auth";
 
 export function ReviewDistributionPlanTableSubscriptionFooter() {
   const { distributionPlan } = useContext(DistributionPlanToolContext);
@@ -56,7 +56,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
         onClick={() => setShowPublicDownload(true)}
         disabled={isDownloading}
         type="button"
-        className="tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-neutral-400 tw-bg-neutral-400/10 tw-ring-neutral-400/20 hover:tw-bg-neutral-400/20 tw-ease-out tw-transition tw-duration-300">
+        className="tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-400 tw-bg-iron-400/10 tw-ring-iron-400/20 hover:tw-bg-iron-400/20 tw-ease-out tw-transition tw-duration-300">
         {isDownloading ? (
           <span className="d-flex gap-2 align-items-center">
             <CircleLoader />
@@ -70,7 +70,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
         onClick={() => setShowSubscriptionsReset(true)}
         disabled={isResetting}
         type="button"
-        className="tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-neutral-400 tw-bg-neutral-400/10 tw-ring-neutral-400/20 hover:tw-bg-neutral-400/20 tw-ease-out tw-transition tw-duration-300">
+        className="tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-400 tw-bg-iron-400/10 tw-ring-iron-400/20 hover:tw-bg-iron-400/20 tw-ease-out tw-transition tw-duration-300">
         {isResetting ? (
           <span className="d-flex gap-2 align-items-center">
             <CircleLoader />

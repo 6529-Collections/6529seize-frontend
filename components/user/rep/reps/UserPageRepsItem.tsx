@@ -1,13 +1,13 @@
 "use client";
 
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import { RatingStats } from "@/entities/IProfile";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
+import { AnimatePresence } from "framer-motion";
 export default function UserPageRepsItem({
   rep,
   profile,
@@ -69,7 +69,7 @@ export default function UserPageRepsItem({
           </span>
         </span>
       </button>
-      <CommonAnimationWrapper mode="sync" initial={true}>
+      <AnimatePresence mode="sync" initial={true}>
         {isEditRepModalOpen && (
           <CommonAnimationOpacity
             key="modal"
@@ -83,7 +83,7 @@ export default function UserPageRepsItem({
             />
           </CommonAnimationOpacity>
         )}
-      </CommonAnimationWrapper>
+      </AnimatePresence>
     </>
   );
 }

@@ -117,7 +117,7 @@ export default function ProfileActivityLogRate({
         (total {newRatingStr})
       </span>
       {log.contents.rating_matter === RateMatter.REP && (
-        <span className="tw-whitespace-nowrap tw-text-base tw-font-medium tw-text-iron-100">
+        <span className="tw-whitespace-nowrap tw-text-base tw-font-medium tw-text-iron-200">
           {log.contents.rating_category}
         </span>
       )}

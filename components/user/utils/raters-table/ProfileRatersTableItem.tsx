@@ -67,7 +67,7 @@ export default function ProfileRatersTableItem({
             <Link
               href={profileRoute}
               className="tw-no-underline tw-p-0 tw-flex tw-items-center">
-              <span className="tw-whitespace-nowrap hover:tw-underline tw-cursor-pointer tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-100">
+              <span className="tw-whitespace-nowrap hover:tw-underline tw-cursor-pointer tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-200">
                 {rating.handle}
               </span>
             </Link>

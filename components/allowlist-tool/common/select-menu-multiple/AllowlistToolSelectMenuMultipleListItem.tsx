@@ -24,7 +24,7 @@ export default function AllowlistToolSelectMenuListItem({
         e.stopPropagation();
         toggleSelectedOption(option);
       }}
-      className="tw-group tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-py-2.5 tw-pl-3 tw-pr-9 hover:tw-bg-neutral-700 tw-transition tw-duration-300 tw-ease-out"
+      className="tw-group tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-py-2.5 tw-pl-3 tw-pr-9 hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
       role="option"
       aria-selected="true">
       <div className="tw-w-full tw-flex tw-justify-between tw-items-center tw-pr-4">
@@ -32,7 +32,7 @@ export default function AllowlistToolSelectMenuListItem({
           {option.title}
         </span>
         {option.subTitle && (
-          <span className="tw-font-light tw-text-neutral-500 tw-text-xs tw-block tw-truncate group-hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out">
+          <span className="tw-font-light tw-text-iron-500 tw-text-xs tw-block tw-truncate group-hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
             {option.subTitle}
           </span>
         )}

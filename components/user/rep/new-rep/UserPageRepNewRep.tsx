@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
 import {
@@ -10,6 +9,7 @@ import {
 } from "@/entities/IProfile";
 import UserPageRepNewRepSearch from "./UserPageRepNewRepSearch";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { AnimatePresence } from "framer-motion";
 
 export default function UserPageRepNewRep({
   profile,
@@ -48,7 +48,7 @@ export default function UserPageRepNewRep({
         repRates={repRates}
         profile={profile}
       />
-      <CommonAnimationWrapper mode="sync" initial={true}>
+      <AnimatePresence mode="sync" initial={true}>
         {isAddNewRepModalOpen && repToAdd && (
           <CommonAnimationOpacity
             key="modal"
@@ -62,7 +62,7 @@ export default function UserPageRepNewRep({
             />
           </CommonAnimationOpacity>
         )}
-      </CommonAnimationWrapper>
+      </AnimatePresence>
     </>
   );
 }

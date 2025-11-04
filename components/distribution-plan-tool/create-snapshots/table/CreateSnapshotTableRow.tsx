@@ -1,12 +1,12 @@
 "use client";
 
-import { useCopyToClipboard } from "react-use";
+import { DistributionPlanTokenPoolDownloadStatus } from "@/components/allowlist-tool/allowlist-tool.types";
 import DistributionPlanTableRowWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper";
 import { truncateTextMiddle } from "@/helpers/AllowlistToolHelpers";
 import { useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
+import { useCopyToClipboard } from "react-use";
 import { CreateSnapshotSnapshot } from "../CreateSnapshots";
-import { DistributionPlanTokenPoolDownloadStatus } from "@/components/allowlist-tool/allowlist-tool.types";
 import CreateSnapshotTableRowDownload from "./CreateSnapshotTableRowDownload";
 
 export default function CreateSnapshotTableRow({
@@ -130,7 +130,7 @@ export default function CreateSnapshotTableRow({
       </td>
       <td
         onClick={copyContract}
-        className="tw-cursor-pointer tw-group tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300 hover:tw-text-white tw-transition tw-duration-300 tw-ease-out">
+        className="tw-cursor-pointer tw-group tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-iron-300 hover:tw-text-white tw-transition tw-duration-300 tw-ease-out">
         <div className="tw-h-full tw-flex tw-items-center">
           <span>{contractText}</span>
           <svg
@@ -150,7 +150,7 @@ export default function CreateSnapshotTableRow({
       </td>
       <td
         onClick={copyBlockNumber}
-        className="tw-cursor-pointer tw-group tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300 hover:tw-text-white tw-transition tw-duration-300 tw-ease-out">
+        className="tw-cursor-pointer tw-group tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-iron-300 hover:tw-text-white tw-transition tw-duration-300 tw-ease-out">
         <div className="tw-h-full tw-flex tw-items-center">
           <span>{blockNoText}</span>
           <svg
@@ -168,13 +168,13 @@ export default function CreateSnapshotTableRow({
           </svg>
         </div>
       </td>
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-iron-300">
         <div className="tw-h-full tw-flex tw-items-center">
           <span>{tokenIdsTruncated}</span>
           <div className="tw-pl-2 -tw-mt-0.5">
             <svg
               data-tooltip-id={`token-ids-tooltip-${snapshot.id}`}
-              className="tw-h-4 tw-w-4 tw-text-neutral-500 tw-cursor-pointer"
+              className="tw-h-4 tw-w-4 tw-text-iron-500 tw-cursor-pointer"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg">
@@ -204,7 +204,7 @@ export default function CreateSnapshotTableRow({
         onClick={copyConsolidatedBlockNumber}
         className={`${
           haveConsolidatedBlockNo ? "tw-cursor-pointer" : ""
-        } tw-group tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300 hover:tw-text-white tw-transition tw-duration-300 tw-ease-out`}>
+        } tw-group tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-iron-300 hover:tw-text-white tw-transition tw-duration-300 tw-ease-out`}>
         {haveConsolidatedBlockNo && (
           <div className="tw-h-full tw-flex tw-items-center">
             <span> {consolidatedBlockNoText}</span>
@@ -224,13 +224,13 @@ export default function CreateSnapshotTableRow({
           </div>
         )}
       </td>
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-iron-300">
         {snapshot.walletsCount ?? "N/A"}
       </td>
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-iron-300">
         {snapshot.tokensCount ?? "N/A"}
       </td>
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-iron-300">
         {isGeneratingSnapshot ? (
           <svg
             aria-hidden="true"
@@ -240,7 +240,7 @@ export default function CreateSnapshotTableRow({
             fill="none"
             xmlns="http://www.w3.org/2000/svg">
             <path
-              className="tw-text-neutral-600"
+              className="tw-text-iron-600"
               d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
               fill="currentColor"></path>
             <path
@@ -259,7 +259,7 @@ export default function CreateSnapshotTableRow({
           </span>
         )}
       </td>
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-neutral-300">
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-iron-300">
         {isCompleted && (
           <CreateSnapshotTableRowDownload tokenPoolId={snapshot.id} />
         )}

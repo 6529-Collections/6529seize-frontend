@@ -1,21 +1,21 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
-import {
-  STATEMENT_GROUP,
-  STATEMENT_META,
-  STATEMENT_TYPE,
-} from "@/helpers/Types";
-import UserPageIdentityAddStatementsInput from "./UserPageIdentityAddStatementsInput";
-import {
-  ApiCreateOrUpdateProfileCicStatement,
-  CicStatement,
-} from "@/entities/IProfile";
-import { useMutation } from "@tanstack/react-query";
-import { commonApiPost } from "@/services/api/common-api";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
+    ApiCreateOrUpdateProfileCicStatement,
+    CicStatement,
+} from "@/entities/IProfile";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import {
+    STATEMENT_GROUP,
+    STATEMENT_META,
+    STATEMENT_TYPE,
+} from "@/helpers/Types";
+import { commonApiPost } from "@/services/api/common-api";
+import { useMutation } from "@tanstack/react-query";
+import { useContext, useEffect, useState } from "react";
+import UserPageIdentityAddStatementsInput from "./UserPageIdentityAddStatementsInput";
 export default function UserPageIdentityAddStatementsForm({
   profile,
   activeType,
@@ -116,7 +116,7 @@ export default function UserPageIdentityAddStatementsForm({
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg">
                   <path
-                    className="tw-text-neutral-600"
+                    className="tw-text-iron-600"
                     d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
                     fill="currentColor"></path>
                   <path
