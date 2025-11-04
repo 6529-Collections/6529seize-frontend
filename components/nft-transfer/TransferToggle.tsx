@@ -11,19 +11,20 @@ export default function TransferToggle() {
   const { isConnected, seizeConnect, seizeConnectOpen } =
     useSeizeConnectContext();
   const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const { setEnabled } = t;
 
   const wantTransferAfterConnect = useRef(false);
 
   useEffect(() => {
     if (isConnected && wantTransferAfterConnect.current) {
-      t.setEnabled(true);
+      setEnabled(true);
       wantTransferAfterConnect.current = false;
     }
 
     if (!isConnected && !seizeConnectOpen && wantTransferAfterConnect.current) {
       wantTransferAfterConnect.current = false;
     }
-  }, [isConnected, seizeConnectOpen, t]);
+  }, [isConnected, seizeConnectOpen, setEnabled]);
 
   const scrollToButton = () => {
     if (!buttonRef.current) return;
