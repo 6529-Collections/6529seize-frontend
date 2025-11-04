@@ -83,6 +83,14 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
     <div className={className} aria-hidden="true" role="presentation" />
   );
 
+  const parsedCanonicalUrl = useMemo(() => {
+    try {
+      return new URL(canonicalSrc);
+    } catch {
+      return null;
+    }
+  }, [canonicalSrc]);
+
   const iframeProps = useMemo(() => {
     const baseProps = {
       src: canonicalSrc,
@@ -104,13 +112,33 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
     return baseProps;
   }, [canonicalSrc, className, title]);
 
+  const banner = (
+    <div
+      className="tw-flex tw-items-center tw-justify-between tw-gap-2 tw-rounded-t-md tw-border tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-py-2"
+      aria-live="polite"
+    >
+      <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-300">
+        Untrusted interactive content
+      </span>
+      {parsedCanonicalUrl ? (
+        <a
+          href={canonicalSrc}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="tw-text-xs tw-font-medium tw-text-primary-300 hover:tw-text-primary-200 tw-transition"
+        >
+          {parsedCanonicalUrl.hostname}
+        </a>
+      ) : (
+        <span className="tw-text-xs tw-text-iron-400">{canonicalSrc}</span>
+      )}
+    </div>
+  );
+
   return (
     <div ref={containerRef}>
-      {isVisible ? (
-        <iframe {...iframeProps} />
-      ) : (
-        placeholder
-      )}
+      {banner}
+      {isVisible ? <iframe {...iframeProps} /> : placeholder}
     </div>
   );
 };
