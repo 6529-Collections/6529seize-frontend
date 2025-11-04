@@ -153,9 +153,9 @@ export default function UserPageCollectedFilters({
           <button
             onClick={scrollLeft}
             aria-label="Scroll filters left"
-            className="tw-absolute tw-left-2 tw-top-1/2 tw--translate-y-1/2 tw-z-20 tw-inline-flex tw-items-center tw-justify-center tw-group tw-p-0 tw-h-8 tw-w-8 tw-bg-iron-700 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-rounded-md tw-border-none">
+            className="tw-absolute tw-left-0 tw-top-1/2 tw--translate-y-1/2 tw-z-20 tw-inline-flex tw-items-center tw-justify-start tw-group tw-p-0 tw-h-10 tw-w-10 tw-bg-transparent tw-border-none tw-outline-none">
             <svg
-              className="tw-h-5 tw-w-5 tw-text-iron-200 group-hover:tw-text-iron-400 tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-h-6 tw-w-6 tw-text-iron-200 group-hover:tw-text-iron-300 tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"
@@ -177,9 +177,9 @@ export default function UserPageCollectedFilters({
           <button
             onClick={scrollRight}
             aria-label="Scroll filters right"
-            className="tw-absolute tw-right-2 tw-top-1/2 tw--translate-y-1/2 tw-z-20 tw-inline-flex tw-items-center tw-justify-center tw-group tw-p-0 tw-h-8 tw-w-8 tw-bg-iron-700 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-rounded-md tw-border-none">
+            className="tw-absolute tw-right-0 tw-top-1/2 tw--translate-y-1/2 tw-z-20 tw-inline-flex tw-items-center tw-justify-end tw-group tw-p-0 tw-h-10 tw-w-10 tw-bg-transparent tw-border-none tw-outline-none">
             <svg
-              className="tw-h-5 tw-w-5 tw-text-iron-200 group-hover:tw-text-iron-400 -tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-h-6 tw-w-6 tw-text-iron-200 group-hover:tw-text-iron-300 -tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
               viewBox="0 0 24 24"
               aria-hidden="true"
               fill="none"

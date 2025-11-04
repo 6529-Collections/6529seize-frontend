@@ -1391,7 +1391,7 @@ export default function TransferModal({
       ].join(" ")}>
       <div
         className={[
-          "tw-w-full tw-h-full sm:tw-w-[90vw] sm:tw-h-[85dvh] md:tw-w-[70vw] md:tw-h-[75vh] tw-max-w-[1100px] tw-max-h-[900px] sm:tw-rounded-2xl tw-bg-[#0c0c0d] sm:tw-ring-[3px] tw-ring-white/30 tw-text-white tw-shadow-xl tw-overflow-hidden tw-flex tw-flex-col",
+          "tw-w-[95vw] tw-h-[90dvh] sm:tw-w-[90vw] sm:tw-h-[85dvh] md:tw-w-[70vw] md:tw-h-[75vh] tw-max-w-[1100px] tw-max-h-[900px] tw-rounded-2xl tw-bg-[#0c0c0d] tw-ring-[3px] tw-ring-white/30 tw-text-white tw-shadow-xl tw-overflow-hidden tw-flex tw-flex-col",
           isClosing
             ? "tw-scale-95 tw-opacity-0 tw-transition-all tw-duration-150"
             : "tw-scale-100 tw-opacity-100 tw-transition-all tw-duration-150",

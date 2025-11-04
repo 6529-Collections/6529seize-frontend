@@ -1,14 +1,11 @@
 "use client";
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import useIsMobileScreen from "@/hooks/isMobileScreen";
 import {
   faChevronDown,
   faChevronUp,
   faMinusCircle,
   faPlusCircle,
-  faRightLeft,
-  faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AnimatePresence, motion } from "framer-motion";
@@ -27,7 +24,6 @@ export default function TransferPanel({
 }) {
   const t = useTransfer();
   const { isConnected } = useSeizeConnectContext();
-  const isMobile = useIsMobileScreen();
 
   const [showModal, setShowModal] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -106,8 +102,7 @@ export default function TransferPanel({
       </AnimatePresence>
       <div
         className={[
-          "tw-sticky tw-z-50 tw-mt-5",
-          isMobile ? "tw-bottom-20" : "tw-bottom-0",
+          "tw-sticky tw-z-50 tw-mt-5 tw-bottom-0",
           "-tw-mx-2 lg:-tw-mx-6 xl:-tw-mx-8",
           "tw-w-[calc(100%+theme(space.4))] lg:tw-w-[calc(100%+theme(space.12))] xl:tw-w-[calc(100%+theme(space.16))]",
           "tw-animate-slideUp",
@@ -143,10 +138,18 @@ export default function TransferPanel({
                   e.stopPropagation();
                 },
               })}
-          className={`tw-border-solid tw-border-[#37373ee6] tw-border-l-0 tw-bg-black tw-text-iron-50 tw-select-none tw-flex tw-flex-col ${
-            !isExpanded && items.length > 0 && !isLoading ? "tw-cursor-pointer" : ""
-          } ${isLoading ? "tw-opacity-60" : ""}`}>
-          <div className="tw-px-4 tw-py-4 tw-flex tw-items-center tw-gap-3 tw-pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+          className={[
+            "tw-border-solid tw-border-[#37373ee6] tw-border-l-0",
+            "tw-bg-black tw-text-iron-50",
+            "tw-select-none tw-flex tw-flex-col",
+            !isExpanded &&
+              items.length > 0 &&
+              !isLoading &&
+              "tw-cursor-pointer",
+          ]
+            .filter(Boolean)
+            .join(" ")}>
+          <div className="tw-px-4 tw-py-4 tw-flex tw-items-center tw-gap-3">
             {items.length > 0 && (
               <button
                 type="button"
@@ -201,9 +204,7 @@ export default function TransferPanel({
               }>
               {items.length > 0 && (
                 <div className="tw-text-sm tw-font-medium tw-text-white tw-bg-primary-500 tw-px-4 tw-py-1.5 tw-rounded-full tw-whitespace-nowrap">
-                  {isMobile
-                    ? `${t.totalQty}x`
-                    : `${t.totalQty} ${t.totalQty === 1 ? "item" : "items"}`}
+                  {t.totalQty} {t.totalQty === 1 ? "item" : "items"}
                 </div>
               )}
               <button
@@ -213,37 +214,17 @@ export default function TransferPanel({
                   t.clear();
                 }}
                 disabled={isLoading}
-                className={`${
-                  isMobile ? "tw-rounded-full" : "tw-rounded-lg"
-                } tw-bg-white/10 hover:tw-bg-white/20 tw-text-white tw-border-2 tw-border-solid tw-border-[#444] tw-transition-colors tw-shrink-0 tw-flex tw-items-center tw-justify-center disabled:tw-opacity-50 disabled:tw-cursor-not-allowed ${
-                  isMobile
-                    ? "tw-p-2 tw-w-9 tw-h-9"
-                    : "tw-py-2 tw-px-4 tw-text-sm tw-font-medium tw-min-w-[100px]"
-                }`}
+                className="tw-rounded-lg tw-bg-white/10 hover:tw-bg-white/20 tw-text-white tw-border-2 tw-border-solid tw-border-[#444] tw-transition-colors tw-shrink-0 tw-flex tw-items-center tw-justify-center disabled:tw-opacity-50 disabled:tw-cursor-not-allowed tw-py-2 tw-px-4 tw-text-sm tw-font-medium tw-min-w-[100px]"
                 aria-label="Cancel">
-                {isMobile ? (
-                  <FontAwesomeIcon icon={faXmark} className="tw-size-4" />
-                ) : (
-                  "Cancel"
-                )}
+                Cancel
               </button>
               {items.length > 0 && (
                 <button
                   type="button"
                   onClick={() => setShowModal(true)}
-                  className={`${
-                    isMobile ? "tw-rounded-full" : "tw-rounded-lg"
-                  } tw-bg-white tw-text-black hover:tw-bg-white/90 tw-transition-colors tw-shrink-0 tw-flex tw-items-center tw-justify-center ${
-                    isMobile
-                      ? "tw-p-2 tw-w-9 tw-h-9"
-                      : "tw-py-2 tw-px-4 tw-text-sm tw-font-medium tw-min-w-[100px]"
-                  }`}
+                  className="tw-rounded-lg tw-bg-white tw-text-black hover:tw-bg-white/90 tw-transition-colors tw-shrink-0 tw-flex tw-items-center tw-justify-center tw-py-2 tw-px-4 tw-text-sm tw-font-medium tw-min-w-[100px]"
                   aria-label="Continue">
-                  {isMobile ? (
-                    <FontAwesomeIcon icon={faRightLeft} className="tw-size-4" />
-                  ) : (
-                    "Continue"
-                  )}
+                  Continue
                 </button>
               )}
             </div>
