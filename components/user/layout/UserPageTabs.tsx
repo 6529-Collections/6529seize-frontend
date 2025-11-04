@@ -108,7 +108,6 @@ export default function UserPageTabs() {
   const contentContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
-  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const getTabsToShow = useCallback(() => {
     let allTabs = Object.values(UserPageTabType);
@@ -143,34 +142,6 @@ export default function UserPageTabs() {
     container.addEventListener("scroll", checkScroll);
     window.addEventListener("resize", checkScroll);
 
-    const handleTouchStart = (e: TouchEvent) => {
-      const touch = e.touches[0];
-      touchStartRef.current = { x: touch.clientX, y: touch.clientY };
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (!touchStartRef.current) return;
-      const touch = e.touches[0];
-      const deltaX = Math.abs(touch.clientX - touchStartRef.current.x);
-      const deltaY = Math.abs(touch.clientY - touchStartRef.current.y);
-
-      if (deltaX > deltaY) {
-        e.preventDefault();
-      }
-    };
-
-    const handleTouchEnd = () => {
-      touchStartRef.current = null;
-    };
-
-    container.addEventListener("touchstart", handleTouchStart, {
-      passive: true,
-    });
-    container.addEventListener("touchmove", handleTouchMove, {
-      passive: false,
-    });
-    container.addEventListener("touchend", handleTouchEnd, { passive: true });
-
     const resizeObserver = new ResizeObserver(() => {
       checkScroll();
     });
@@ -182,9 +153,6 @@ export default function UserPageTabs() {
     return () => {
       container.removeEventListener("scroll", checkScroll);
       window.removeEventListener("resize", checkScroll);
-      container.removeEventListener("touchstart", handleTouchStart);
-      container.removeEventListener("touchmove", handleTouchMove);
-      container.removeEventListener("touchend", handleTouchEnd);
       resizeObserver.disconnect();
     };
   }, []);
@@ -234,7 +202,7 @@ export default function UserPageTabs() {
       </div>
       {canScrollLeft && (
         <>
-          <div className="tw-absolute tw-left-0 tw-top-0 tw-bottom-0 tw-w-24 tw-pointer-events-none tw-z-10 tw-bg-gradient-to-r tw-from-iron-950 tw-via-iron-950/80 tw-to-transparent" />
+          <div className="tw-absolute tw-left-0 tw-top-0 tw-bottom-0 tw-w-24 tw-pointer-events-none tw-z-10 tw-bg-gradient-to-r tw-from-black tw-via-black/40 tw-to-black/0" />
           <button
             onClick={scrollLeft}
             aria-label="Scroll tabs left"
@@ -248,7 +216,7 @@ export default function UserPageTabs() {
       )}
       {canScrollRight && (
         <>
-          <div className="tw-absolute tw-right-0 tw-top-0 tw-bottom-0 tw-w-24 tw-pointer-events-none tw-z-10 tw-bg-gradient-to-l tw-from-iron-950 tw-via-iron-950/80 tw-to-transparent" />
+          <div className="tw-absolute tw-right-0 tw-top-0 tw-bottom-0 tw-w-24 tw-pointer-events-none tw-z-10 tw-bg-gradient-to-l tw-from-black tw-via-black/40 tw-to-black/0" />
           <button
             onClick={scrollRight}
             aria-label="Scroll tabs right"

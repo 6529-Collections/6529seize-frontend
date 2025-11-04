@@ -154,7 +154,7 @@ export default function UserPageCollectedFilters({
       </div>
       {canScrollLeft && (
         <>
-          <div className="tw-absolute tw-left-0 tw-top-0 tw-bottom-0 tw-w-24 tw-pointer-events-none tw-z-10 tw-bg-gradient-to-r tw-from-iron-950 tw-via-iron-950/80 tw-to-transparent" />
+          <div className="tw-absolute tw-left-0 tw-top-0 tw-bottom-0 tw-w-24 tw-pointer-events-none tw-z-10 tw-bg-gradient-to-r tw-from-black tw-via-black/40 tw-to-black/0" />
           <button
             onClick={scrollLeft}
             aria-label="Scroll filters left"
@@ -168,7 +168,7 @@ export default function UserPageCollectedFilters({
       )}
       {canScrollRight && (
         <>
-          <div className="tw-absolute tw-right-0 tw-top-0 tw-bottom-0 tw-w-24 tw-pointer-events-none tw-z-10 tw-bg-gradient-to-l tw-from-iron-950 tw-via-iron-950/80 tw-to-transparent" />
+          <div className="tw-absolute tw-right-0 tw-top-0 tw-bottom-0 tw-w-24 tw-pointer-events-none tw-z-10 tw-bg-gradient-to-l tw-from-black tw-via-black/40 tw-to-black/0" />
           <button
             onClick={scrollRight}
             aria-label="Scroll filters right"
