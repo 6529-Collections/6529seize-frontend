@@ -116,7 +116,8 @@ export default function UserPageHeaderEditBanner({
       open
       aria-modal="true"
       aria-labelledby={dialogTitleId}
-      className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1100] tw-cursor-default tw-bg-transparent tw-border-0">
+      className="tailwind-scope tw-m-0 tw-p-0 tw-border-0 tw-bg-transparent tw-w-screen tw-h-[100dvh] tw-cursor-default"
+      style={{ inset: 0, position: "fixed", zIndex: 1100 }}>
       <button
         type="button"
         aria-label="Close edit banner modal"
