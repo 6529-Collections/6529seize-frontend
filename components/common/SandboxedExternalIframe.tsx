@@ -17,9 +17,9 @@ export interface SandboxedExternalIframeProps {
   readonly fallback?: React.ReactNode;
 }
 
-const HASH_SEGMENT_PATTERN = /^[A-Za-z0-9]{1,128}$/;
+const CONTENT_IDENTIFIER_PATTERN = /^[A-Za-z0-9_-]{1,128}$/;
 
-const hasAllowedHtmlExtension = (url: URL): boolean => {
+const hasValidContentIdentifier = (url: URL): boolean => {
   const path = url.pathname ?? "";
   const segments = path.split("/").filter(Boolean);
   if (segments.includes("..")) {
@@ -31,7 +31,7 @@ const hasAllowedHtmlExtension = (url: URL): boolean => {
     return false;
   }
 
-  if (!HASH_SEGMENT_PATTERN.test(lastSegment)) {
+  if (!CONTENT_IDENTIFIER_PATTERN.test(lastSegment)) {
     return false;
   }
 
@@ -71,7 +71,7 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
     return fallback ? <>{fallback}</> : null;
   }
 
-  if (!hasAllowedHtmlExtension(parsedUrl)) {
+  if (!hasValidContentIdentifier(parsedUrl)) {
     return fallback ? <>{fallback}</> : null;
   }
 
