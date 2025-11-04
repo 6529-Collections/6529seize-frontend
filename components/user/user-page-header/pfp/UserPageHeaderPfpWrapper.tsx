@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import PencilIcon from "@/components/utils/icons/PencilIcon";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
-import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
+import { createPortal } from "react-dom";
 import UserPageHeaderEditPfp from "./UserPageHeaderEditPfp";
 
 export default function UserPageHeaderPfpWrapper({
@@ -17,6 +16,30 @@ export default function UserPageHeaderPfpWrapper({
   readonly children: React.ReactNode;
 }) {
   const [isEditPfpOpen, setIsEditPfpOpen] = useState<boolean>(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isEditPfpOpen || typeof document === "undefined") {
+      return;
+    }
+    const previousOverflow = document.body.style.overflow;
+    const previousPaddingRight = document.body.style.paddingRight;
+    const scrollbarGap =
+      window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.overflow = "hidden";
+    if (scrollbarGap > 0) {
+      document.body.style.paddingRight = `${scrollbarGap}px`;
+    }
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.body.style.paddingRight = previousPaddingRight;
+    };
+  }, [isEditPfpOpen]);
 
   return (
     <div>
@@ -35,20 +58,14 @@ export default function UserPageHeaderPfpWrapper({
           </div>
         )}
       </button>
-      <CommonAnimationWrapper mode="sync" initial={true}>
-        {isEditPfpOpen && (
-          <CommonAnimationOpacity
-            key="modal"
-            elementClasses="tw-absolute tw-z-[1000]"
-            elementRole="dialog"
-            onClicked={(e) => e.stopPropagation()}>
-            <UserPageHeaderEditPfp
-              profile={profile}
-              onClose={() => setIsEditPfpOpen(false)}
-            />
-          </CommonAnimationOpacity>
+      {isMounted && isEditPfpOpen &&
+        createPortal(
+          <UserPageHeaderEditPfp
+            profile={profile}
+            onClose={() => setIsEditPfpOpen(false)}
+          />,
+          document.body
         )}
-      </CommonAnimationWrapper>
     </div>
   );
 }

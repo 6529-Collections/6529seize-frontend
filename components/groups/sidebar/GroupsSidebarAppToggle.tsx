@@ -1,7 +1,7 @@
-import { FC } from "react";
-import { useSelector } from "react-redux";
 import { selectActiveGroupId } from "@/store/groupSlice";
 import { FunnelIcon } from "@heroicons/react/24/outline";
+import { FC } from "react";
+import { useSelector } from "react-redux";
 interface Props {
   readonly open: boolean;
   readonly setOpen: (open: boolean) => void;
@@ -17,7 +17,7 @@ const GroupsSidebarAppToggle: FC<Props> = ({ open, setOpen }) => {
   return (
     <button
       className={`tw-fixed tw-mt-2 tw-z-40 tw-bg-iron-950 active:tw-bg-iron-800 tw-border tw-border-l-0 tw-border-solid 
-      tw-border-neutral-600 tw-p-2 tw-rounded-r-lg  focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out ${color}`}
+      tw-border-iron-600 tw-p-2 tw-rounded-r-lg  focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out ${color}`}
       onClick={() => setOpen(!open)}
       aria-label="Toggle groups sidebar"
     >

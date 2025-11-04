@@ -9,7 +9,7 @@ export default function BlockPickerResultHeader({
   blocknumber: number;
 }) {
   return (
-    <div className="tw-mt-8 tw-pt-6 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-neutral-700">
+    <div className="tw-mt-8 tw-pt-6 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-700">
       <div className="sm:tw-flex sm:tw-items-baseline sm:tw-justify-between">
         <div className="tw-inline-flex tw-items-center tw-space-x-2">
           <div className="tw-space-x-1">
@@ -19,7 +19,7 @@ export default function BlockPickerResultHeader({
                 blockParts={[blocknumber.toString()]}
               />
             </span>
-            <span className="tw-mt-0.5 tw-text-neutral-300">
+            <span className="tw-mt-0.5 tw-text-iron-300">
               is the closest predicted block to{" "}
               {new Date(timestamp).toLocaleString(undefined, {
                 month: "short",

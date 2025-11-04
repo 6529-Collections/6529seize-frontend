@@ -10,7 +10,7 @@ export default function DistributionPlanToolWrapper({
   useSetTitle("EMMA | Tools");
 
   return (
-    <div className="tw-bg-neutral-900">
+    <div className="tw-bg-iron-900">
       <div
         id="allowlist-tool"
         className="tailwind-scope tw-overflow-y-auto tw-min-h-screen tw-relative">

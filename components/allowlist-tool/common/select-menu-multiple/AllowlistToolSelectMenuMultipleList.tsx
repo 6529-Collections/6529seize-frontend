@@ -28,7 +28,7 @@ export default function AllowlistToolSelectMenuList({
           />
         ))}
       {options.length === 0 && (
-        <li className="tw-p-2 tw-text-neutral-300">
+        <li className="tw-p-2 tw-text-iron-300">
           No options found
         </li>
       )}

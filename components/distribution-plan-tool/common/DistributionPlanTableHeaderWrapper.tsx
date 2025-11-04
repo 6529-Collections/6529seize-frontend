@@ -4,7 +4,7 @@ export default function DistributionPlanTableHeaderWrapper({
   children: React.ReactNode;
 }) {
   return (
-    <thead className="tw-bg-neutral-800">
+    <thead className="tw-bg-iron-800">
       <tr>{children}</tr>
     </thead>
   );

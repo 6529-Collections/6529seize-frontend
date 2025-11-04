@@ -2,7 +2,7 @@ export default function DistributionPlanToolPlansNoPlans() {
   return (
     <div className="tw-mt-24 tw-text-center">
       <svg
-        className="tw-h-12 tw-w-12 tw-text-neutral-500"
+        className="tw-h-12 tw-w-12 tw-text-iron-500"
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -15,10 +15,10 @@ export default function DistributionPlanToolPlansNoPlans() {
           strokeLinejoin="round"
         />
       </svg>
-      <p className="tw-mt-2 tw-text-lg tw-text-neutral-50 tw-font-medium tw-mb-0">
+      <p className="tw-mt-2 tw-text-lg tw-text-iron-50 tw-font-medium tw-mb-0">
         No plan
       </p>
-      <p className="tw-mt-2 tw-text-sm tw-font-light tw-text-neutral-400 tw-mb-0">
+      <p className="tw-mt-2 tw-text-sm tw-font-light tw-text-iron-400 tw-mb-0">
         Get started by creating a new distribution plan.
       </p>
     </div>

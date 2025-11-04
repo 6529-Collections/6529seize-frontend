@@ -20,7 +20,7 @@ export default function UserPageRepActivityLog({
         Rep Activity Log
       </UserTableHeaderWrapper>
       <div className="tw-mt-2 lg:tw-mt-4">
-        <div className="tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl">
+        <div className="tw-bg-iron-950 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl">
           <ProfileActivityLogs
             initialParams={initialActivityLogParams}
             withFilters={false}

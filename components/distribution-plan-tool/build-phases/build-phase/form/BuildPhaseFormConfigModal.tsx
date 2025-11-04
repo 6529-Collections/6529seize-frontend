@@ -1,34 +1,34 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
 import {
-  assertUnreachable,
-  getRandomObjectId,
-} from "@/helpers/AllowlistToolHelpers";
-import SelectSnapshot from "./component-config/select-snapshot/SelectSnapshot";
+    AllowlistOperation,
+    AllowlistOperationBase,
+    AllowlistOperationCode,
+    DistributionPlanSearchContractMetadataResult,
+    Pool,
+} from "@/components/allowlist-tool/allowlist-tool.types";
+import { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import {
-  AllowlistOperation,
-  AllowlistOperationBase,
-  AllowlistOperationCode,
-  DistributionPlanSearchContractMetadataResult,
-  Pool,
-} from "@/components/allowlist-tool/allowlist-tool.types";
-import SnapshotExcludeComponentWinners from "./component-config/SnapshotExcludeComponentWinners";
-import { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
-import SnapshotSelectTopHolders from "./component-config/SnapshotSelectTopHolders";
-import FinalizeSnapshot from "./component-config/FinalizeSnapshot";
-import ComponentSelectRandomHolders from "./component-config/ComponentSelectRandomHolders";
-import ComponentAddSpots from "./component-config/ComponentAddSpots";
-import FinalizeComponent from "./component-config/FinalizeComponent";
-import SnapshotExcludeOtherSnapshots from "./component-config/SnapshotExcludeOtherSnapshots";
-import { useDebounce } from "react-use";
-import { ComponentRandomHoldersWeightType } from "./component-config/utils/ComponentRandomHoldersWeight";
+    assertUnreachable,
+    getRandomObjectId,
+} from "@/helpers/AllowlistToolHelpers";
 import {
-  distributionPlanApiFetch,
-  distributionPlanApiPost,
+    distributionPlanApiFetch,
+    distributionPlanApiPost,
 } from "@/services/distribution-plan-api";
+import { useContext, useEffect, useState } from "react";
+import { useDebounce } from "react-use";
+import ComponentAddSpots from "./component-config/ComponentAddSpots";
+import ComponentSelectRandomHolders from "./component-config/ComponentSelectRandomHolders";
+import FinalizeComponent from "./component-config/FinalizeComponent";
+import FinalizeSnapshot from "./component-config/FinalizeSnapshot";
+import SelectSnapshot from "./component-config/select-snapshot/SelectSnapshot";
+import SnapshotExcludeComponentWinners from "./component-config/SnapshotExcludeComponentWinners";
+import SnapshotExcludeOtherSnapshots from "./component-config/SnapshotExcludeOtherSnapshots";
 import SnapshotSelectTokenIds from "./component-config/SnapshotSelectTokenIds";
+import SnapshotSelectTopHolders from "./component-config/SnapshotSelectTopHolders";
+import { ComponentRandomHoldersWeightType } from "./component-config/utils/ComponentRandomHoldersWeight";
 
 export enum PhaseConfigStep {
   SELECT_SNAPSHOT = "SELECT_SNAPSHOT",
@@ -846,7 +846,7 @@ export default function BuildPhaseFormConfigModal({
   // ]);
 
   return (
-    <div className="tw-gap-y-6 tw-flex tw-flex-col tw-divide-y tw-divide-solid tw-divide-neutral-700 tw-divide-x-0">
+    <div className="tw-gap-y-6 tw-flex tw-flex-col tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0">
       {(() => {
         switch (configStep) {
           case PhaseConfigStep.SELECT_SNAPSHOT:

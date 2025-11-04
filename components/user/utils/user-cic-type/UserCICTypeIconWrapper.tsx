@@ -18,11 +18,11 @@ export default function UserCICTypeIconWrapper({
       >
         <UserCICTypeIcon cic={profile.cic} />
       </div>
-      
+        
       <Tooltip
         id={tooltipId}
         clickable={true}
-        place="bottom"
+        place="right"
         opacity={1}
         border="1px solid #333"
         style={{
@@ -30,7 +30,7 @@ export default function UserCICTypeIconWrapper({
           borderRadius: "8px",
           padding: "0",
           maxWidth: "360px",
-          zIndex: 999999,
+        zIndex: 9999,
         }}
       >
         <UserCICTypeIconTooltip profile={profile} />

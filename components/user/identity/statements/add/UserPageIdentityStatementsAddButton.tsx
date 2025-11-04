@@ -1,9 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import UserPageIdentityAddStatements from "./UserPageIdentityAddStatements";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
-import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 
@@ -14,6 +12,11 @@ export default function UserPageIdentityStatementsAddButton({
 }) {
   const [isAddStatementsOpen, setIsAddStatementsOpen] =
     useState<boolean>(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   return (
     <div>
@@ -37,20 +40,12 @@ export default function UserPageIdentityStatementsAddButton({
         <span>Add</span>
       </PrimaryButton>
 
-      <CommonAnimationWrapper mode="sync" initial={true}>
-        {isAddStatementsOpen && (
-          <CommonAnimationOpacity
-            key="modal"
-            elementClasses="tw-absolute tw-z-10"
-            elementRole="dialog"
-            onClicked={(e) => e.stopPropagation()}>
-            <UserPageIdentityAddStatements
-              profile={profile}
-              onClose={() => setIsAddStatementsOpen(false)}
-            />
-          </CommonAnimationOpacity>
-        )}
-      </CommonAnimationWrapper>
+      {isMounted && isAddStatementsOpen && (
+        <UserPageIdentityAddStatements
+          profile={profile}
+          onClose={() => setIsAddStatementsOpen(false)}
+        />
+      )}
     </div>
   );
 }

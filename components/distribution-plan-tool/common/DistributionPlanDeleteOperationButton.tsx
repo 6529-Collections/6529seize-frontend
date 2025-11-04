@@ -1,9 +1,9 @@
 "use client";
 
-import { useContext, useState } from "react";
 import AllowlistToolLoader from "@/components/allowlist-tool/common/AllowlistToolLoader";
-import { DistributionPlanToolContext } from "../DistributionPlanToolContext";
 import { distributionPlanApiDelete } from "@/services/distribution-plan-api";
+import { useContext, useState } from "react";
+import { DistributionPlanToolContext } from "../DistributionPlanToolContext";
 
 export default function DistributionPlanDeleteOperationButton({
   allowlistId,
@@ -32,7 +32,7 @@ export default function DistributionPlanDeleteOperationButton({
       disabled={loading}
       type="button"
       title="Delete"
-      className="tw-rounded-full tw-group tw-p-2 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-neutral-400 tw-bg-neutral-400/10 tw-ring-neutral-400/20">
+      className="tw-rounded-full tw-group tw-p-2 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-400 tw-bg-iron-400/10 tw-ring-iron-400/20">
       {loading ? (
         <AllowlistToolLoader />
       ) : (

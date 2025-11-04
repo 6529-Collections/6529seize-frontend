@@ -15,22 +15,22 @@ export default function LevelsClient() {
           <div className="tw-my-6 tw-flex tw-flex-col">
             <ProgressChart />
             <ul className="tw-ml-4 tw-pl-0">
-              <li className="tw-text-justify tw-mb-0 tw-mt-2 tw-font-normal tw-text-base tw-text-neutral-100">
+              <li className="tw-text-justify tw-mb-0 tw-mt-2 tw-font-normal tw-text-base tw-text-iron-100">
                 Levels are our integrated metric of TDH and Rep.
               </li>
-              <li className="tw-text-justify tw-mb-0 tw-mt-2 tw-font-normal tw-text-base tw-text-neutral-100">
+              <li className="tw-text-justify tw-mb-0 tw-mt-2 tw-font-normal tw-text-base tw-text-iron-100">
                 TDH and rep are added together and the level is determined by
                 the table below. It is our most integrated measure of trust in
                 our ecosystem.
               </li>
-              <li className="tw-text-justify tw-mb-0 tw-mt-2 tw-font-normal tw-text-base tw-text-neutral-100">
+              <li className="tw-text-justify tw-mb-0 tw-mt-2 tw-font-normal tw-text-base tw-text-iron-100">
                 Levels start at zero and are currently capped at 100 (for
                 25,000,000 TDH).
               </li>
-              <li className="tw-text-justify tw-mb-0 tw-mt-2 tw-font-normal tw-text-base tw-text-neutral-100">
+              <li className="tw-text-justify tw-mb-0 tw-mt-2 tw-font-normal tw-text-base tw-text-iron-100">
                 Levels are determined by the table below.
               </li>
-              <li className="tw-text-justify tw-mb-0 tw-mt-2 tw-font-normal tw-text-base tw-text-neutral-100">
+              <li className="tw-text-justify tw-mb-0 tw-mt-2 tw-font-normal tw-text-base tw-text-iron-100">
                 As with all metrics, they may be adjusted to better meet their
                 objectives.
               </li>

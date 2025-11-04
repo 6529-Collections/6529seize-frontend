@@ -1,27 +1,27 @@
 "use client";
 
-import { useContext, useEffect, useMemo, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { useMutation } from "@tanstack/react-query";
+import {
+    AllowlistOperation,
+    AllowlistOperationCode,
+    CustomTokenPoolParamsToken,
+    ResolvedEns,
+} from "@/components/allowlist-tool/allowlist-tool.types";
+import AllowlistToolCommonModalWrapper, {
+    AllowlistToolModalSize,
+} from "@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
+import DistributionPlanAddOperationBtn from "@/components/distribution-plan-tool/common/DistributionPlanAddOperationBtn";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import {
-  AllowlistOperation,
-  AllowlistOperationCode,
-  CustomTokenPoolParamsToken,
-  ResolvedEns,
-} from "@/components/allowlist-tool/allowlist-tool.types";
-import {
-  getRandomObjectId,
-  isEthereumAddress,
+    getRandomObjectId,
+    isEthereumAddress,
 } from "@/helpers/AllowlistToolHelpers";
-import DistributionPlanAddOperationBtn from "@/components/distribution-plan-tool/common/DistributionPlanAddOperationBtn";
-import CreateCustomSnapshotFormTable from "./CreateCustomSnapshotFormTable";
 import { distributionPlanApiPost } from "@/services/distribution-plan-api";
-import AllowlistToolCommonModalWrapper, {
-  AllowlistToolModalSize,
-} from "@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useMutation } from "@tanstack/react-query";
+import { useContext, useEffect, useMemo, useState } from "react";
 import CreateCustomSnapshotFormAddWalletsModal from "./CreateCustomSnapshotFormAddWalletsModal";
+import CreateCustomSnapshotFormTable from "./CreateCustomSnapshotFormTable";
 
 const MAX_CUSTOM_SNAPSHOT_ROWS = 100000;
 const CUSTOM_SNAPSHOT_CHUNK_SIZE = 500;
@@ -352,7 +352,7 @@ export default function CreateCustomSnapshotForm() {
       <form onSubmit={handleSubmit}>
         <div className="tw-flex tw-gap-x-4 tw-items-end">
           <div className="tw-w-80">
-            <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
+            <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
               Name
             </label>
             <div className="tw-mt-2">
@@ -363,7 +363,7 @@ export default function CreateCustomSnapshotForm() {
                 autoComplete="off"
                 value={formValues.name}
                 onChange={handleChange}
-                className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 hover:tw-ring-neutral-700 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700/40 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
               />
             </div>
           </div>
@@ -372,7 +372,7 @@ export default function CreateCustomSnapshotForm() {
               <button
                 onClick={() => setIsAddWalletsOpen(true)}
                 type="button"
-                className="tw-inline-flex tw-items-center tw-whitespace-nowrap tw-justify-center tw-cursor-pointer tw-bg-transparent tw-px-4 tw-py-3 tw-underline hover:tw-bg-[#232323] tw-rounded-lg tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border-transparent tw-border-solid tw-border-neutral-700 tw-border-2 hover:tw-border-[#232323] tw-transition tw-duration-300 tw-ease-out">
+                className="tw-inline-flex tw-items-center tw-whitespace-nowrap tw-justify-center tw-cursor-pointer tw-bg-transparent tw-px-4 tw-py-3 tw-underline hover:tw-bg-[#232323] tw-rounded-lg tw-text-sm tw-font-medium tw-text-white tw-w-full tw-border-transparent tw-border-solid tw-border-iron-700 tw-border-2 hover:tw-border-[#232323] tw-transition tw-duration-300 tw-ease-out">
                 <FontAwesomeIcon
                   icon={faPlus}
                   className="tw-h-5 tw-w-5 tw-mr-2 -tw-ml-1"
@@ -388,15 +388,15 @@ export default function CreateCustomSnapshotForm() {
                 : "Add custom snapshot"}
             </DistributionPlanAddOperationBtn>
             <div className="tw-mt-3 tw-space-y-2">
-              <p className="tw-text-xs tw-text-neutral-300">
+              <p className="tw-text-xs tw-text-iron-300">
                 Snapshots are limited to {CUSTOM_SNAPSHOT_CHUNK_SIZE.toLocaleString()} wallets. We'll split larger uploads automatically.
               </p>
               {snapshotSummary && (
-                <p className="tw-text-xs tw-text-neutral-100">{snapshotSummary}</p>
+                <p className="tw-text-xs tw-text-iron-100">{snapshotSummary}</p>
               )}
               {uploadState && uploadState.total > 0 && (
                 <div>
-                  <div className="tw-h-2 tw-w-60 tw-overflow-hidden tw-rounded-full tw-bg-neutral-700">
+                  <div className="tw-h-2 tw-w-60 tw-overflow-hidden tw-rounded-full tw-bg-iron-700">
                     <div
                       className="tw-h-2 tw-rounded-full tw-bg-primary-500 tw-transition-all tw-duration-300"
                       style={{
@@ -409,7 +409,7 @@ export default function CreateCustomSnapshotForm() {
                       }}
                     />
                   </div>
-                  <p className="tw-mt-2 tw-text-xs tw-text-neutral-200">
+                  <p className="tw-mt-2 tw-text-xs tw-text-iron-200">
                     {uploadState.processed < uploadState.total
                       ? `Creating snapshot ${Math.min(
                           uploadState.processed + 1,

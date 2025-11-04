@@ -9,6 +9,7 @@ import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { useContext, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
 export default function UserPageHeaderEditBanner({
   profile,
@@ -104,29 +105,33 @@ export default function UserPageHeaderEditBanner({
     await updateUser.mutateAsync(body);
   };
 
-  return (
-    <div className="tw-relative tw-z-10">
-      <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50"></div>
-      <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
-        <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-text-center sm:tw-items-center tw-p-2 lg:tw-p-0">
-          <div
-            ref={modalRef}
-            className={`sm:tw-max-w-3xl md:tw-max-w-2xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6 lg:tw-p-8`}>
-            <form
-              onSubmit={onSubmit}
-              className="tw-flex tw-flex-col tw-gap-y-6">
-              <UserSettingsBackground
-                bgColor1={bgColor1}
-                bgColor2={bgColor2}
-                setBgColor1={setBgColor1}
-                setBgColor2={setBgColor2}
-              />
+  if (typeof document === "undefined") {
+    return null;
+  }
 
-              <UserSettingsSave loading={mutating} disabled={!haveChanges} />
-            </form>
-          </div>
+  return createPortal(
+    <div className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1100] tw-cursor-default">
+      <div
+        className="tw-absolute tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px]"
+        onClick={onClose}
+      />
+      <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-overflow-y-auto tw-items-center tw-justify-center tw-p-2 lg:tw-p-4">
+        <div
+          ref={modalRef}
+          className="tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 tw-p-6 lg:tw-p-8 sm:tw-max-w-3xl md:tw-max-w-2xl">
+          <form onSubmit={onSubmit} className="tw-flex tw-flex-col tw-gap-y-6">
+            <UserSettingsBackground
+              bgColor1={bgColor1}
+              bgColor2={bgColor2}
+              setBgColor1={setBgColor1}
+              setBgColor2={setBgColor2}
+            />
+
+            <UserSettingsSave loading={mutating} disabled={!haveChanges} />
+          </form>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
