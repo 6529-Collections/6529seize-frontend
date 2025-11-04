@@ -1,10 +1,9 @@
 import { useCallback, useContext, useMemo } from "react";
 
 import { AuthContext } from "@/components/auth/Auth";
-import { useXtdhOverviewStats } from "@/hooks/useXtdhOverview";
-import { useXtdhStats } from "@/hooks/useXtdhStats";
 import { deriveProfileIdentifier } from "@/components/xtdh/profile-utils";
-
+import { useIdentityTdhStats } from "@/hooks/useIdentityTdhStats";
+import { useXtdhOverviewStats } from "@/hooks/useXtdhOverview";
 import type { NetworkStats, UserSectionState } from "./types";
 import { buildNetworkStats, buildUserSectionState } from "./data-builders";
 
@@ -51,7 +50,7 @@ export function useXtdhStatsOverviewData({
     error: userError,
     refetch: refetchUserStats,
     isFetching: isUserFetching,
-  } = useXtdhStats({ profile: profileKey, enabled });
+  } = useIdentityTdhStats({ identity: profileKey, enabled });
 
   const handleRetry = useCallback(() => {
     void refetch();
@@ -82,7 +81,7 @@ export function useXtdhStatsOverviewData({
     () =>
       buildUserSectionState({
         connectedProfile,
-        profileKey,
+        identity: profileKey,
         isLoading: isUserLoading,
         isError: isUserError,
         error: userError,

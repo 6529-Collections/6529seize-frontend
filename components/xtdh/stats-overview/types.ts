@@ -2,12 +2,12 @@ import type { ReactNode } from "react";
 import type { XtdhMultiplierMilestone } from "@/types/xtdh";
 
 export interface UserStatsData {
-  readonly baseTdhRate: number;
-  readonly multiplier: number;
+  readonly baseTdhRate: number | null;
+  readonly multiplier: number | null;
   readonly dailyCapacity: number;
   readonly allocatedDaily: number;
   readonly autoAccruingDaily: number;
-  readonly allocationsCount: number;
+  readonly allocationsCount: number | null;
   readonly collectionsAllocatedCount: number;
   readonly tokensAllocatedCount: number;
   readonly totalXtdhReceived: number;

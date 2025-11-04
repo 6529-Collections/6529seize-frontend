@@ -16,6 +16,8 @@ import {
 } from "./utils";
 import { UserStatusSkeleton } from "./Skeletons";
 
+const NOT_AVAILABLE_LABEL = "Not available yet";
+
 interface UserXtdhStatusSectionProps {
   readonly state: UserSectionState;
   readonly onRetry?: () => void;
@@ -91,40 +93,43 @@ export function UserXtdhStatusSection({
     ? undefined
     : formatPercentLabel(percentAllocated, "Allocated");
   const footnote = isEmptyState ? "No capacity yet" : undefined;
-  const baseTdhMetricValue = formatRateValue(state.baseTdhRate);
-  const allocationsValue = formatPlainNumber(state.allocationsCount);
+  const baseTdhMetricValue =
+    typeof state.baseTdhRate === "number" && Number.isFinite(state.baseTdhRate)
+      ? formatRateValue(state.baseTdhRate)
+      : NOT_AVAILABLE_LABEL;
+  const baseTdhSuffix =
+    typeof state.baseTdhRate === "number" && Number.isFinite(state.baseTdhRate)
+      ? "/day"
+      : undefined;
+  const allocationsValue =
+    typeof state.allocationsCount === "number" &&
+    Number.isFinite(state.allocationsCount)
+      ? formatPlainNumber(state.allocationsCount)
+      : NOT_AVAILABLE_LABEL;
   const collectionsValue = formatPlainNumber(state.collectionsAllocatedCount);
   const tokensValue = formatPlainNumber(state.tokensAllocatedCount);
   const primaryMetrics = [
     {
       label: "Base TDH Rate",
       value: baseTdhMetricValue,
-      valueSuffix: "/day",
+      valueSuffix: baseTdhSuffix,
       tooltip:
         "Your daily Base TDH generation rate (from Memes + Gradients). xTDH is calculated from this.",
-      helperText: isEmptyState ? "Need Memes/Gradients" : undefined,
-      tone: isEmptyState ? "muted" : undefined,
     },
     {
       label: "Your Allocations",
       value: allocationsValue,
       tooltip: "Number of allocations you have actively granted.",
-      helperText: isEmptyState ? "Start allocating" : undefined,
-      tone: isEmptyState ? "muted" : undefined,
     },
     {
       label: "Collections",
       value: collectionsValue,
       tooltip: "Collections you have allocated xTDH to.",
-      helperText: isEmptyState ? "No allocations yet" : undefined,
-      tone: isEmptyState ? "muted" : undefined,
     },
     {
       label: "Tokens",
       value: tokensValue,
       tooltip: "Individual tokens you have allocated xTDH to.",
-      helperText: isEmptyState ? "No allocations yet" : undefined,
-      tone: isEmptyState ? "muted" : undefined,
     },
   ] as const;
   const secondaryMetrics = [
@@ -133,15 +138,11 @@ export function UserXtdhStatusSection({
       value: formatPlainNumber(state.totalXtdhReceived),
       tooltip:
         "Total xTDH you've earned through auto-accrual and from collections allocating to your NFTs.",
-      helperText: isEmptyState ? "No xTDH yet" : undefined,
-      tone: isEmptyState ? "muted" : undefined,
     },
     {
       label: "Your xTDH Granted",
       value: formatPlainNumber(state.totalXtdhGranted),
       tooltip: "Total xTDH you've given out through your allocations.",
-      helperText: isEmptyState ? "No xTDH yet" : undefined,
-      tone: isEmptyState ? "muted" : undefined,
     },
   ] as const;
   const subtitle = isEmptyState
@@ -156,15 +157,18 @@ export function UserXtdhStatusSection({
             {title}
             <p className="tw-mt-1 tw-text-sm tw-text-iron-300">
               {subtitle}
+              {isEmptyState ? (
+                <>
+                  {" "}
+                  <Link
+                    href="/network/metrics#tdh"
+                    className="tw-font-semibold tw-text-primary-300 hover:tw-text-primary-200"
+                  >
+                    Learn about earning TDH
+                  </Link>
+                </>
+              ) : null}
             </p>
-            {isEmptyState ? (
-              <Link
-                href="/network/metrics#tdh"
-                className="tw-inline-flex tw-text-sm tw-font-semibold tw-text-primary-300 hover:tw-text-primary-200"
-              >
-                Learn about earning TDH
-              </Link>
-            ) : null}
           </div>
           <CapacityProgressCard
             title="YOUR DAILY XTDH CAPACITY"

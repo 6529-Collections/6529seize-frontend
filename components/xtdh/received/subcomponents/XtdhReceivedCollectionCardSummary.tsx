@@ -68,6 +68,8 @@ export function XtdhReceivedCollectionCardSummary({
         primarySrc={collection.collectionImage}
         fallbackSrc="/pebbles-loading.jpeg"
         alt={`${collection.collectionName} cover`}
+        width={64}
+        height={64}
         className="tw-h-16 tw-w-16 tw-flex-shrink-0 tw-rounded-2xl tw-border tw-border-iron-700 tw-bg-iron-900 tw-object-cover"
       />
       <div className="tw-min-w-0 tw-flex-1 tw-space-y-1">

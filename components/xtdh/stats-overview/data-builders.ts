@@ -1,18 +1,98 @@
-import type { XtdhOverviewStats, XtdhStatsResponse } from "@/types/xtdh";
+import type { ApiTdhStats } from "@/generated/models/ApiTdhStats";
+import type { XtdhOverviewStats } from "@/types/xtdh";
 
 import type {
   MultiplierCycleProgress,
   NetworkStats,
   UserSectionState,
+  UserStatsData,
 } from "./types";
-import {
-  calculatePercentage,
-  clampToRange,
-  parseCountdownToDays,
-} from "./utils";
+import { calculatePercentage, clampToRange, parseCountdownToDays } from "./utils";
 
 const MIN_CYCLE_DAYS = 30;
 const DEFAULT_ELAPSED_BUFFER_DAYS = 20;
+
+export function buildUserSectionState({
+  connectedProfile,
+  identity,
+  isLoading,
+  isError,
+  error,
+  data,
+}: {
+  readonly connectedProfile: unknown;
+  readonly identity: string | null;
+  readonly isLoading: boolean;
+  readonly isError: boolean;
+  readonly error: unknown;
+  readonly data: ApiTdhStats | undefined;
+}): UserSectionState {
+  if (!connectedProfile || !identity) {
+    return { kind: "unauthenticated" };
+  }
+
+  if (isLoading && !data) {
+    return { kind: "loading" };
+  }
+
+  if (isError || !data) {
+    const message = error instanceof Error ? error.message : undefined;
+    return { kind: "error", message };
+  }
+
+  const dailyCapacity = clampToRange(
+    sanitizeNonNegativeNumber(data.xtdh_rate),
+    0,
+    Number.MAX_SAFE_INTEGER
+  );
+  const allocatedDaily = clampToRange(
+    sanitizeNonNegativeNumber(data.granted_xtdh_per_day),
+    0,
+    dailyCapacity
+  );
+  const autoAccruingDaily = clampToRange(
+    dailyCapacity - allocatedDaily,
+    0,
+    dailyCapacity
+  );
+
+  const collectionsAllocatedCount = sanitizeCount(
+    data.granted_target_collections_count
+  );
+  const tokensAllocatedCount = sanitizeCount(
+    data.granted_target_tokens_count
+  );
+  const totalXtdhReceived = sanitizeNonNegativeNumber(data.received_xtdh);
+  const totalXtdhGranted = sanitizeNonNegativeNumber(data.granted_xtdh);
+  const multiplier = isFiniteNumber(data.xtdh_multiplier)
+    ? Math.max(data.xtdh_multiplier, 0)
+    : null;
+
+  const userData: UserStatsData = {
+    baseTdhRate: null,
+    multiplier,
+    dailyCapacity,
+    allocatedDaily,
+    autoAccruingDaily,
+    allocationsCount: null,
+    collectionsAllocatedCount,
+    tokensAllocatedCount,
+    totalXtdhReceived,
+    totalXtdhGranted,
+  };
+
+  if (dailyCapacity <= 0) {
+    return {
+      kind: "no_base_tdh",
+      ...userData,
+    };
+  }
+
+  return {
+    kind: "ready",
+    ...userData,
+  };
+}
 
 export function buildNetworkStats(
   data: XtdhOverviewStats
@@ -111,117 +191,18 @@ export function buildMultiplierCycleProgress(
   };
 }
 
-export function buildUserSectionState({
-  connectedProfile,
-  profileKey,
-  isLoading,
-  isError,
-  error,
-  data,
-}: {
-  readonly connectedProfile: unknown;
-  readonly profileKey: string | null;
-  readonly isLoading: boolean;
-  readonly isError: boolean;
-  readonly error: unknown;
-  readonly data: XtdhStatsResponse | undefined;
-}): UserSectionState {
-  if (!connectedProfile || !profileKey) {
-    return { kind: "unauthenticated" };
+function sanitizeNonNegativeNumber(value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+    return 0;
   }
+  return value;
+}
 
-  if (isLoading && !data) {
-    return { kind: "loading" };
+function sanitizeCount(value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+    return 0;
   }
-
-  if (isError || !data) {
-    const message = error instanceof Error ? error.message : undefined;
-    return { kind: "error", message };
-  }
-
-  if (!isNonNegativeNumber(data.baseTdhRate)) {
-    return { kind: "error", message: "Invalid xTDH user data" };
-  }
-
-  if (!isFiniteNumber(data.multiplier) || data.multiplier < 0) {
-    return { kind: "error", message: "Invalid xTDH user data" };
-  }
-
-  if (!isNonNegativeNumber(data.dailyCapacity)) {
-    return { kind: "error", message: "Invalid xTDH user data" };
-  }
-
-  if (!isNonNegativeNumber(data.xtdhRateGranted)) {
-    return { kind: "error", message: "Invalid xTDH user data" };
-  }
-
-  if (!isNonNegativeNumber(data.xtdhRateAutoAccruing)) {
-    return { kind: "error", message: "Invalid xTDH user data" };
-  }
-
-  if (!isNonNegativeNumber(data.allocationsCount) || !Number.isInteger(data.allocationsCount)) {
-    return { kind: "error", message: "Invalid xTDH user data" };
-  }
-
-  if (
-    !isNonNegativeNumber(data.collectionsAllocatedCount) ||
-    !Number.isInteger(data.collectionsAllocatedCount)
-  ) {
-    return { kind: "error", message: "Invalid xTDH user data" };
-  }
-
-  if (
-    !isNonNegativeNumber(data.tokensAllocatedCount) ||
-    !Number.isInteger(data.tokensAllocatedCount)
-  ) {
-    return { kind: "error", message: "Invalid xTDH user data" };
-  }
-
-  if (!isNonNegativeNumber(data.totalXtdhReceived)) {
-    return { kind: "error", message: "Invalid xTDH user data" };
-  }
-
-  if (!isNonNegativeNumber(data.totalXtdhGranted)) {
-    return { kind: "error", message: "Invalid xTDH user data" };
-  }
-
-  const dailyCapacity = clampToRange(data.dailyCapacity, 0, Number.MAX_SAFE_INTEGER);
-  const allocatedDaily = clampToRange(data.xtdhRateGranted, 0, dailyCapacity);
-  const autoAccruingDaily = clampToRange(
-    data.xtdhRateAutoAccruing,
-    0,
-    dailyCapacity
-  );
-
-  if (data.baseTdhRate <= 0) {
-    return {
-      kind: "no_base_tdh",
-      baseTdhRate: data.baseTdhRate,
-      multiplier: data.multiplier,
-      dailyCapacity,
-      allocatedDaily,
-      autoAccruingDaily,
-      allocationsCount: data.allocationsCount,
-      collectionsAllocatedCount: data.collectionsAllocatedCount,
-      tokensAllocatedCount: data.tokensAllocatedCount,
-      totalXtdhReceived: data.totalXtdhReceived,
-      totalXtdhGranted: data.totalXtdhGranted,
-    };
-  }
-
-  return {
-    kind: "ready",
-    baseTdhRate: data.baseTdhRate,
-    multiplier: data.multiplier,
-    dailyCapacity,
-    allocatedDaily,
-    autoAccruingDaily,
-    allocationsCount: data.allocationsCount,
-    collectionsAllocatedCount: data.collectionsAllocatedCount,
-    tokensAllocatedCount: data.tokensAllocatedCount,
-    totalXtdhReceived: data.totalXtdhReceived,
-    totalXtdhGranted: data.totalXtdhGranted,
-  };
+  return Math.trunc(value);
 }
 
 function isNonNegativeNumber(value: unknown): value is number {

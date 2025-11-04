@@ -25,7 +25,8 @@ export function StatsMetricsGrid({
 }
 
 function MetricTile({ metric }: { readonly metric: StatsMetric }) {
-  const baseValueClasses = "tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50";
+  const baseValueClasses =
+    "tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50 tw-whitespace-nowrap";
   const valueClasses =
     metric.tone === "muted" ? `${baseValueClasses} tw-opacity-70` : baseValueClasses;
 
