@@ -2227,6 +2227,27 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiIncomingIdentitySubscriptionsPage"
+  /tdh-stats/{identity}:
+    get:
+      tags:
+        - TDH stats
+      summary: Get identities TDH stats
+      operationId: getIdentitiesTdhStats
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiTdhStats"
+        "404":
+          description: Not found
   /tdh-editions/wallet/{wallet}:
     get:
       tags:
@@ -5114,9 +5135,6 @@ components:
         - rep
         - level
         - tdh
-        - xtdh
-        - produced_xtdh
-        - granted_xtdh
         - tdh_rate
         - display
         - consolidation_key
@@ -5150,15 +5168,6 @@ components:
           type: integer
           format: int65
         tdh:
-          type: number
-          format: double
-        xtdh:
-          type: number
-          format: double
-        produced_xtdh:
-          type: number
-          format: double
-        granted_xtdh:
           type: number
           format: double
         tdh_rate:
@@ -5630,6 +5639,10 @@ components:
         - memelab_balance_rank
         - unique_memelab_rank
         - boosted_tdh_rank
+        - total_tdh
+        - total_tdh_rank
+        - xtdh
+        - xtdh_rank
         - boosted_memes_tdh_rank
         - boosted_gradients_tdh_rank
         - boosted_nextgen_tdh_rank
@@ -5724,6 +5737,18 @@ components:
           type: integer
           format: int64
         boosted_nextgen_tdh_rank:
+          type: integer
+          format: int64
+        total_tdh:
+          type: number
+          format: double
+        total_tdh_rank:
+          type: integer
+          format: int64
+        xtdh:
+          type: number
+          format: double
+        xtdh_rank:
           type: integer
           format: int64
     ApiOwnerBalanceMemes:
@@ -5831,9 +5856,6 @@ components:
         - cic
         - rep
         - tdh
-        - xtdh
-        - produced_xtdh
-        - granted_xtdh
         - level
         - tdh_rate
         - primary_address
@@ -5866,15 +5888,6 @@ components:
           type: number
           format: int64
         tdh:
-          type: number
-          format: double
-        xtdh:
-          type: number
-          format: double
-        produced_xtdh:
-          type: number
-          format: double
-        granted_xtdh:
           type: number
           format: double
         tdh_rate:
@@ -6300,6 +6313,57 @@ components:
       type: string
       enum:
         - ETHEREUM_MAINNET
+    ApiTdhStats:
+      type: object
+      required:
+        - identity
+        - total_tdh
+        - base_tdh
+        - tdh_rate
+        - xtdh
+        - xtdh_rate
+        - xtdh_multiplier
+        - granted_xtdh_per_day
+        - granted_xtdh
+        - received_xtdh
+        - granted_target_collections_count
+        - granted_target_tokens_count
+      properties:
+        identity:
+          $ref: "#/components/schemas/ApiIdentity"
+        total_tdh:
+          type: number
+          format: double
+        base_tdh:
+          type: number
+          format: int64
+        tdh_rate:
+          type: number
+          format: int64
+        xtdh:
+          type: number
+          format: double
+        xtdh_rate:
+          type: number
+          format: double
+        xtdh_multiplier:
+          type: number
+          format: double
+        granted_xtdh_per_day:
+          type: number
+          format: double
+        granted_xtdh:
+          type: number
+          format: double
+        received_xtdh:
+          type: number
+          format: double
+        granted_target_collections_count:
+          type: number
+          format: int64
+        granted_target_tokens_count:
+          type: number
+          format: int64
     ApiTransaction:
       type: object
       required:
