@@ -9,18 +9,46 @@ interface UseIdentityTdhStatsOptions {
   readonly enabled?: boolean;
 }
 
-async function fetchIdentityTdhStats(identity: string): Promise<ApiTdhStats> {
+export interface IdentityTdhStats {
+  readonly xtdhRate: number;
+  readonly grantedXtdhPerDay: number;
+  readonly grantedCollectionsCount: number;
+  readonly grantedTokensCount: number;
+  readonly totalReceivedXtdh: number;
+  readonly totalGrantedXtdh: number;
+  readonly xtdhMultiplier: number | null;
+  readonly baseTdhRate: number | null;
+}
+
+async function fetchIdentityTdhStats(identity: string): Promise<IdentityTdhStats> {
   const encodedIdentity = encodeURIComponent(identity);
-  return await commonApiFetch<ApiTdhStats>({
+  const response = await commonApiFetch<ApiTdhStats>({
     endpoint: `tdh-stats/${encodedIdentity}`,
   });
+
+  return {
+    xtdhRate: sanitizeNonNegativeNumber(response.xtdh_rate),
+    grantedXtdhPerDay: sanitizeNonNegativeNumber(response.granted_xtdh_per_day),
+    grantedCollectionsCount: sanitizeCount(response.granted_target_collections_count),
+    grantedTokensCount: sanitizeCount(response.granted_target_tokens_count),
+    totalReceivedXtdh: sanitizeNonNegativeNumber(response.received_xtdh),
+    totalGrantedXtdh: sanitizeNonNegativeNumber(response.granted_xtdh),
+    xtdhMultiplier:
+      typeof response.xtdh_multiplier === "number" && Number.isFinite(response.xtdh_multiplier)
+        ? Math.max(response.xtdh_multiplier, 0)
+        : null,
+    baseTdhRate:
+      typeof response.tdh_rate === "number" && Number.isFinite(response.tdh_rate) && response.tdh_rate >= 0
+        ? response.tdh_rate
+        : null,
+  };
 }
 
 export function useIdentityTdhStats({
   identity,
   enabled = true,
 }: Readonly<UseIdentityTdhStatsOptions>) {
-  return useQuery<ApiTdhStats, Error>({
+  return useQuery<IdentityTdhStats, Error>({
     queryKey: [QueryKey.IDENTITY_TDH_STATS, identity?.toLowerCase()],
     queryFn: async () => {
       if (!identity) {
@@ -37,4 +65,18 @@ export function useIdentityTdhStats({
     refetchOnWindowFocus: false,
     refetchOnMount: true,
   });
+}
+
+function sanitizeNonNegativeNumber(value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+    return 0;
+  }
+  return value;
+}
+
+function sanitizeCount(value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+    return 0;
+  }
+  return Math.trunc(value);
 }

@@ -1,4 +1,11 @@
+"use client";
+
+import { useMemo } from "react";
 import Link from "next/link";
+
+import { useAuth } from "@/components/auth/Auth";
+import { deriveProfileIdentifier } from "@/components/xtdh/profile-utils";
+import { useIdentityTdhStats } from "@/hooks/useIdentityTdhStats";
 
 import { CapacityProgressCard } from "./CapacityProgressCard";
 import {
@@ -6,7 +13,6 @@ import {
   SECTION_HEADER_CLASS,
 } from "./constants";
 import { StatsMetricsGrid } from "./StatsMetricsGrid";
-import type { UserSectionState } from "./types";
 import {
   calculatePercentage,
   clampToRange,
@@ -18,25 +24,30 @@ import { UserStatusSkeleton } from "./Skeletons";
 
 const NOT_AVAILABLE_LABEL = "Not available yet";
 
-interface UserXtdhStatusSectionProps {
-  readonly state: UserSectionState;
-  readonly onRetry?: () => void;
-}
+export function UserXtdhStatusSection(): JSX.Element {
+  const { connectedProfile } = useAuth();
+  const identity = useMemo(
+    () => deriveProfileIdentifier(connectedProfile),
+    [connectedProfile]
+  );
 
-export function UserXtdhStatusSection({
-  state,
-  onRetry,
-}: Readonly<UserXtdhStatusSectionProps>) {
-  if (state.kind === "loading") {
-    return <UserStatusSkeleton />;
-  }
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useIdentityTdhStats({
+    identity,
+    enabled: Boolean(identity),
+  });
 
   const baseClass = OVERVIEW_CARD_CLASS;
   const title = (
     <h2 className="tw-m-0 tw-text-lg tw-font-semibold">Your xTDH Status</h2>
   );
 
-  if (state.kind === "unauthenticated") {
+  if (!connectedProfile || !identity) {
     return (
       <section className={baseClass} role="region" aria-label="Your xTDH status">
         {title}
@@ -55,59 +66,59 @@ export function UserXtdhStatusSection({
     );
   }
 
-  if (state.kind === "error") {
+  if (isLoading && !data) {
+    return <UserStatusSkeleton />;
+  }
+
+  if (isError || !data) {
     return (
       <section className={baseClass} role="region" aria-label="Your xTDH status">
         {title}
         <p className="tw-mt-2 tw-text-sm tw-text-iron-300">
-          {state.message ?? "Unable to load xTDH data"}
+          {error?.message ?? "Unable to load xTDH data"}
         </p>
-        {onRetry ? (
-          <div className="tw-mt-auto tw-flex tw-justify-end">
-            <button
-              type="button"
-              onClick={onRetry}
-              className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-primary-500 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-50 tw-transition hover:tw-bg-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-0"
-            >
-              Retry
-            </button>
-          </div>
-        ) : null}
+        <div className="tw-mt-auto tw-flex tw-justify-end">
+          <button
+            type="button"
+            onClick={() => {
+              void refetch();
+            }}
+            className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-primary-500 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-50 tw-transition hover:tw-bg-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-0"
+          >
+            Retry
+          </button>
+        </div>
       </section>
     );
   }
 
-  if (state.kind !== "ready" && state.kind !== "no_base_tdh") {
-    return <UserStatusSkeleton />;
-  }
-
-  const isEmptyState = state.kind === "no_base_tdh";
+  const dailyCapacity = Math.max(data.xtdhRate, 0);
+  const allocated = clampToRange(data.grantedXtdhPerDay, 0, dailyCapacity);
+  const autoAccruing = clampToRange(
+    dailyCapacity - allocated,
+    0,
+    dailyCapacity
+  );
+  const isEmptyState = dailyCapacity <= 0;
   const cardAriaLabel = isEmptyState
     ? "Your xTDH status - No Base TDH"
     : "Your xTDH status";
-  const capacity = Math.max(state.dailyCapacity, 0);
-  const allocated = clampToRange(state.allocatedDaily, 0, capacity);
-  const autoAccruing = clampToRange(state.autoAccruingDaily, 0, capacity);
-  const percentAllocated = calculatePercentage(allocated, capacity);
+  const percentAllocated = calculatePercentage(allocated, dailyCapacity);
   const percentLabel = isEmptyState
     ? undefined
     : formatPercentLabel(percentAllocated, "Allocated");
   const footnote = isEmptyState ? "No capacity yet" : undefined;
   const baseTdhMetricValue =
-    typeof state.baseTdhRate === "number" && Number.isFinite(state.baseTdhRate)
-      ? formatRateValue(state.baseTdhRate)
+    typeof data.baseTdhRate === "number" && Number.isFinite(data.baseTdhRate)
+      ? formatRateValue(data.baseTdhRate)
       : NOT_AVAILABLE_LABEL;
   const baseTdhSuffix =
-    typeof state.baseTdhRate === "number" && Number.isFinite(state.baseTdhRate)
+    typeof data.baseTdhRate === "number" && Number.isFinite(data.baseTdhRate)
       ? "/day"
       : undefined;
-  const allocationsValue =
-    typeof state.allocationsCount === "number" &&
-    Number.isFinite(state.allocationsCount)
-      ? formatPlainNumber(state.allocationsCount)
-      : NOT_AVAILABLE_LABEL;
-  const collectionsValue = formatPlainNumber(state.collectionsAllocatedCount);
-  const tokensValue = formatPlainNumber(state.tokensAllocatedCount);
+  const allocationsValue = NOT_AVAILABLE_LABEL;
+  const collectionsValue = formatPlainNumber(data.grantedCollectionsCount);
+  const tokensValue = formatPlainNumber(data.grantedTokensCount);
   const primaryMetrics = [
     {
       label: "Base TDH Rate",
@@ -135,13 +146,13 @@ export function UserXtdhStatusSection({
   const secondaryMetrics = [
     {
       label: "Your xTDH Accrued",
-      value: formatPlainNumber(state.totalXtdhReceived),
+      value: formatPlainNumber(data.totalReceivedXtdh),
       tooltip:
         "Total xTDH you've earned through auto-accrual and from collections allocating to your NFTs.",
     },
     {
       label: "Your xTDH Granted",
-      value: formatPlainNumber(state.totalXtdhGranted),
+      value: formatPlainNumber(data.totalGrantedXtdh),
       tooltip: "Total xTDH you've given out through your allocations.",
     },
   ] as const;
@@ -172,7 +183,7 @@ export function UserXtdhStatusSection({
           </div>
           <CapacityProgressCard
             title="YOUR DAILY XTDH CAPACITY"
-            total={capacity}
+            total={dailyCapacity}
             allocated={allocated}
             reserved={autoAccruing}
             allocatedLabel="Allocated"

@@ -1,11 +1,12 @@
 import { useCallback, useContext, useMemo } from "react";
+import { useIsFetching, useQueryClient } from "@tanstack/react-query";
 
 import { AuthContext } from "@/components/auth/Auth";
 import { deriveProfileIdentifier } from "@/components/xtdh/profile-utils";
-import { useIdentityTdhStats } from "@/hooks/useIdentityTdhStats";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useXtdhOverviewStats } from "@/hooks/useXtdhOverview";
-import type { NetworkStats, UserSectionState } from "./types";
-import { buildNetworkStats, buildUserSectionState } from "./data-builders";
+import type { NetworkStats } from "./types";
+import { buildNetworkStats } from "./data-builders";
 
 type NetworkState =
   | { kind: "loading" }
@@ -18,7 +19,6 @@ interface UseXtdhStatsOverviewDataOptions {
 
 interface UseXtdhStatsOverviewDataResult {
   readonly networkState: NetworkState;
-  readonly userState: UserSectionState;
   readonly showRefreshing: boolean;
   readonly handleRetry: () => void;
 }
@@ -33,6 +33,10 @@ export function useXtdhStatsOverviewData({
     () => deriveProfileIdentifier(connectedProfile),
     [connectedProfile]
   );
+  const normalizedIdentity = useMemo(
+    () => profileKey?.toLowerCase(),
+    [profileKey]
+  );
 
   const {
     data,
@@ -43,21 +47,20 @@ export function useXtdhStatsOverviewData({
     isFetching: isNetworkFetching,
   } = useXtdhOverviewStats(enabled);
 
-  const {
-    data: userData,
-    isLoading: isUserLoading,
-    isError: isUserError,
-    error: userError,
-    refetch: refetchUserStats,
-    isFetching: isUserFetching,
-  } = useIdentityTdhStats({ identity: profileKey, enabled });
+  const queryClient = useQueryClient();
+  const userQueryKey = useMemo(
+    () => [QueryKey.IDENTITY_TDH_STATS, normalizedIdentity],
+    [normalizedIdentity]
+  );
+
+  const userFetching = useIsFetching({ queryKey: userQueryKey });
 
   const handleRetry = useCallback(() => {
     void refetch();
     if (profileKey) {
-      void refetchUserStats();
+      void queryClient.invalidateQueries({ queryKey: userQueryKey });
     }
-  }, [profileKey, refetch, refetchUserStats]);
+  }, [profileKey, queryClient, refetch, userQueryKey]);
 
   const networkStats = useMemo(
     () => (data ? buildNetworkStats(data) : null),
@@ -77,32 +80,11 @@ export function useXtdhStatsOverviewData({
     return { kind: "ready", stats: networkStats };
   }, [isLoading, data, networkStats, isError, error]);
 
-  const userState = useMemo(
-    () =>
-      buildUserSectionState({
-        connectedProfile,
-        identity: profileKey,
-        isLoading: isUserLoading,
-        isError: isUserError,
-        error: userError,
-        data: userData,
-      }),
-    [
-      connectedProfile,
-      profileKey,
-      isUserLoading,
-      isUserError,
-      userError,
-      userData,
-    ]
-  );
-
   const showRefreshing =
-    isNetworkFetching || (profileKey !== null && isUserFetching);
+    isNetworkFetching || userFetching > 0;
 
   return {
     networkState,
-    userState,
     showRefreshing,
     handleRetry,
   };

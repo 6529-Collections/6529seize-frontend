@@ -17,7 +17,6 @@ export default function XtdhStatsOverview({
 }: Readonly<XtdhStatsOverviewProps>) {
   const {
     networkState,
-    userState,
     showRefreshing,
     handleRetry,
   } = useXtdhStatsOverviewData({ enabled });
@@ -64,7 +63,7 @@ export default function XtdhStatsOverview({
         </div>
         <div className="tw-grid tw-items-start tw-gap-6 xl:tw-grid-cols-2">
           <NetworkStatsSection stats={networkStats} />
-          <UserXtdhStatusSection state={userState} onRetry={handleRetry} />
+          <UserXtdhStatusSection />
         </div>
       </div>
     </section>
