@@ -99,4 +99,42 @@ describe('useArtworkSubmissionForm', () => {
     expect(result.current.externalMediaPreviewUrl).toBe('');
     expect(result.current.externalMediaValidationStatus).toBe('invalid');
   });
+
+  it('restores uploaded artwork URL when switching back from external media', async () => {
+    const { result } = renderHook(() => useArtworkSubmissionForm());
+    class MockFileReader {
+      onloadend: (() => void) | null = null;
+      result = 'data-upload';
+      readAsDataURL() {
+        this.onloadend?.();
+      }
+    }
+    global.FileReader = MockFileReader as any;
+
+    act(() => {
+      result.current.handleFileSelect(new File(['x'], 'a.png'));
+    });
+
+    expect(result.current.mediaSource).toBe('upload');
+    expect(result.current.artworkUrl).toBe('data-upload');
+
+    act(() => {
+      result.current.setMediaSource('url');
+    });
+    act(() => {
+      result.current.setExternalMediaHash('bafyHash/index.html');
+    });
+
+    await waitFor(() => {
+      expect(result.current.isExternalMediaValid).toBe(true);
+    });
+    expect(result.current.artworkUrl).toContain('ipfs://');
+
+    act(() => {
+      result.current.setMediaSource('upload');
+    });
+
+    expect(result.current.artworkUrl).toBe('data-upload');
+    expect(result.current.artworkUploaded).toBe(true);
+  });
 });

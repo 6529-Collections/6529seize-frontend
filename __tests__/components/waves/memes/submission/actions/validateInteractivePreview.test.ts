@@ -1,4 +1,5 @@
 import { validateInteractivePreview } from '@/components/waves/memes/submission/actions/validateInteractivePreview';
+import { INTERACTIVE_MEDIA_GATEWAY_BASE_URL } from '@/components/waves/memes/submission/constants/security';
 
 const originalFetch = global.fetch;
 
@@ -129,5 +130,40 @@ describe('validateInteractivePreview', () => {
 
     expect(result.ok).toBe(false);
     expect(result.reason).toBe('Unable to reach the content gateway.');
+  });
+
+  it('fails fast when HEAD request returns 400 without retrying GET', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      createResponse(400, { 'content-type': 'text/plain' })
+    );
+
+    const result = await validateInteractivePreview({
+      provider: 'ipfs',
+      path: 'bafyHash/index.html',
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.reason).toBe('Gateway returned 400.');
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects requests whose resolved target host is unapproved before making a network call', async () => {
+    const originalBase = INTERACTIVE_MEDIA_GATEWAY_BASE_URL.ipfs;
+    INTERACTIVE_MEDIA_GATEWAY_BASE_URL.ipfs = 'https://example.com/';
+
+    try {
+      const result = await validateInteractivePreview({
+        provider: 'ipfs',
+        path: 'bafyHash/index.html',
+      });
+
+      expect(result.ok).toBe(false);
+      expect(result.reason).toBe(
+        'Invalid path: resolved target is not permitted under allowed gateway hosts.'
+      );
+      expect(global.fetch).not.toHaveBeenCalled();
+    } finally {
+      INTERACTIVE_MEDIA_GATEWAY_BASE_URL.ipfs = originalBase;
+    }
   });
 });

@@ -78,12 +78,20 @@ const performGatewayRequest = async (
     headers.Range = `bytes=0-${MAX_BYTES_TO_PEEK}`;
   }
 
-  return fetch(url, {
-    method,
-    cache: "no-store",
-    redirect: "follow",
-    headers,
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    return await fetch(url, {
+      method,
+      cache: "no-store",
+      redirect: "follow",
+      headers,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
 };
 
 const buildGatewayUrl = (
@@ -112,6 +120,14 @@ export async function validateInteractivePreview({
 
   const targetUrl = buildGatewayUrl(provider, path);
 
+  // Block requests whose resolved host is not part of the trusted gateways.
+  if (!ensureAllowedHost(targetUrl)) {
+    return {
+      ok: false,
+      reason: "Invalid path: resolved target is not permitted under allowed gateway hosts.",
+    };
+  }
+
   let response: Response;
   try {
     response = await performGatewayRequest(targetUrl, "HEAD");
@@ -134,7 +150,6 @@ export async function validateInteractivePreview({
   if (
     response.status === 405 ||
     response.status === 403 ||
-    response.status === 400 ||
     response.status === 501
   ) {
     try {

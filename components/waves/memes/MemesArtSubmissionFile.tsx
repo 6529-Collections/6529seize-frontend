@@ -31,6 +31,13 @@ import {
   type InteractiveMediaProvider,
 } from "./submission/constants/media";
 
+const renderPreviewMessage = (primary: string, secondary: string) => (
+  <div className="tw-h-full tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-text-center tw-text-sm tw-text-iron-400 tw-px-4">
+    <span>{primary}</span>
+    <span className="tw-text-iron-500">{secondary}</span>
+  </div>
+);
+
 /**
  * Memes Art Submission File Component
  *
@@ -226,16 +233,6 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
 
   const showUploadUi = mediaSource === "upload";
 
-  const renderPreviewMessage = useCallback(
-    (primary: string, secondary: string) => (
-      <div className="tw-h-full tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-text-center tw-text-sm tw-text-iron-400 tw-px-4">
-        <span>{primary}</span>
-        <span className="tw-text-iron-500">{secondary}</span>
-      </div>
-    ),
-    [],
-  );
-
   const previewFallback = useMemo(() => {
     if (externalValidationStatus === "pending") {
       return renderPreviewMessage(
@@ -255,7 +252,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
       "Provide a valid hash or CID to enable the preview.",
       "The final artwork is rendered securely inside a sandboxed iframe.",
     );
-  }, [externalValidationStatus, externalError, renderPreviewMessage]);
+  }, [externalValidationStatus, externalError]);
 
   const mediaTypeLabel = useMemo(() => {
     const match = ALLOWED_INTERACTIVE_MEDIA_MIME_TYPES.find(
@@ -263,19 +260,6 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
     );
     return match?.label ?? externalMimeType;
   }, [externalMimeType]);
-
-  useEffect(() => {
-    if (
-      mediaSource === "url" &&
-      externalMimeType !== DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE
-    ) {
-      onExternalMimeTypeChange(DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE);
-    }
-  }, [
-    mediaSource,
-    externalMimeType,
-    onExternalMimeTypeChange,
-  ]);
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-4 tw-h-full">

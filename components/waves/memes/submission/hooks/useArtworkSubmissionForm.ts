@@ -59,6 +59,7 @@ interface FormState {
   agreements: boolean;
   artworkUploaded: boolean;
   artworkUrl: string;
+  uploadArtworkUrl: string;
   traits: TraitsData;
   mediaSource: MediaSource;
   selectedFile: File | null;
@@ -133,13 +134,7 @@ const buildExternalMediaState = (
   }
 
   // Drop query/fragment markers without regex backtracking risk.
-  const queryIndex = sanitizedHash.indexOf("?");
-  const fragmentIndex = sanitizedHash.indexOf("#");
-  const cutIndex = Math.min(
-    queryIndex === -1 ? sanitizedHash.length : queryIndex,
-    fragmentIndex === -1 ? sanitizedHash.length : fragmentIndex
-  );
-  const hashWithoutQuery = sanitizedHash.slice(0, cutIndex);
+  const hashWithoutQuery = sanitizedHash.split(/[?#]/)[0] ?? sanitizedHash;
   const pathSegments = hashWithoutQuery.split("/").filter(Boolean);
 
   if (!error && !isSafeRelativeGatewayPath(sanitizedHash)) {
@@ -230,7 +225,7 @@ function formReducer(state: FormState, action: FormAction): FormState {
           ...state,
           mediaSource: nextSource,
           artworkUploaded: hasFile,
-          artworkUrl: hasFile ? state.artworkUrl : "",
+          artworkUrl: hasFile ? state.uploadArtworkUrl : "",
         };
       }
 
@@ -293,6 +288,7 @@ function formReducer(state: FormState, action: FormAction): FormState {
         ...state,
         selectedFile: action.payload.file,
         artworkUrl: action.payload.artworkUrl,
+        uploadArtworkUrl: action.payload.artworkUrl,
         artworkUploaded: true,
         mediaSource: "upload",
       };
@@ -304,6 +300,7 @@ function formReducer(state: FormState, action: FormAction): FormState {
         ...state,
         selectedFile: null,
         artworkUrl: shouldFallbackToExternal ? state.externalMedia.url : "",
+        uploadArtworkUrl: "",
         artworkUploaded: shouldFallbackToExternal,
       };
     }
@@ -322,6 +319,7 @@ export function useArtworkSubmissionForm() {
     agreements: false,
     artworkUploaded: false,
     artworkUrl: "",
+    uploadArtworkUrl: "",
     traits: initialTraits,
     mediaSource: "upload",
     selectedFile: null,

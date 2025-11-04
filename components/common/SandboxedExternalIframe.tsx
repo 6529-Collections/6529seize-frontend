@@ -6,7 +6,11 @@ import {
   isInteractiveMediaAllowedHost,
 } from "@/components/waves/memes/submission/constants/security";
 
-const DEFAULT_SANDBOX = "allow-scripts allow-pointer-lock allow-popups";
+// Sandbox policy for external interactive media:
+// - allow-scripts: Required for interactive HTML content.
+// - allow-pointer-lock: Enables immersive pointer capture for canvas / 3D experiences.
+// - intentionally omits allow-same-origin and allow-popups to preserve isolation and block window spawning.
+const DEFAULT_SANDBOX = "allow-scripts allow-pointer-lock";
 
 export interface SandboxedExternalIframeProps {
   readonly src: string;
@@ -79,6 +83,7 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
       title={title}
       className={className}
       sandbox={sandbox}
+      allow=""
       referrerPolicy="no-referrer"
       loading="lazy"
     />
