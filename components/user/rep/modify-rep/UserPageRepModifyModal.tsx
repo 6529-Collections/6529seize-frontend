@@ -228,7 +228,7 @@ export default function UserPageRepModifyModal({
   }, []);
 
   useEffect(() => {
-    if (typeof document === "undefined" || typeof globalThis.window === "undefined") {
+    if (globalThis.document === undefined || globalThis.window === undefined) {
       return;
     }
 
@@ -401,7 +401,7 @@ export default function UserPageRepModifyModal({
     });
   };
 
-  if (!isMounted || typeof document === "undefined") {
+  if (!isMounted || globalThis.document === undefined) {
     return null;
   }
 

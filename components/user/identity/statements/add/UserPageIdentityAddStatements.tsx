@@ -37,8 +37,8 @@ export default function UserPageIdentityAddStatements({
   useEffect(() => {
     if (
       !isMounted ||
-      typeof document === "undefined" ||
-      typeof globalThis.window === "undefined"
+      globalThis.document === undefined ||
+      globalThis.window === undefined
     ) {
       return;
     }
@@ -66,7 +66,7 @@ export default function UserPageIdentityAddStatements({
     [STATEMENT_ADD_VIEW.SOCIAL_MEDIA_VERIFICATION_POST]: "sm:tw-max-w-lg",
   };
 
-  if (!isMounted || typeof document === "undefined") {
+  if (!isMounted || globalThis.document === undefined) {
     return null;
   }
 
