@@ -13,7 +13,7 @@ export default function AppWalletPage(props: { readonly address: string }) {
 
   useEffect(() => {
     setTitle(`${formatAddress(address)} | App Wallets | 6529.io`);
-  }, [setTitle]);
+  }, [address, setTitle]);
 
   return (
     <main className={styles.main}>

@@ -617,10 +617,7 @@ const buildSummaryCard = async (
   }
 };
 
-const buildCommonsCard = async (
-  target: CommonsFileTarget,
-  languages: readonly string[]
-): Promise<WikimediaCardResponse> => {
+const buildCommonsCard = async (target: CommonsFileTarget): Promise<WikimediaCardResponse> => {
   const fileTitle = target.fileName.startsWith("File:") ? target.fileName : `File:${target.fileName}`;
   const canonicalUrl = `https://commons.wikimedia.org/wiki/${encodeURIComponent(fileTitle)}`;
   const pageUrl = target.fragment ? `${canonicalUrl}#${target.fragment.raw}` : canonicalUrl;
@@ -917,7 +914,7 @@ const buildWikidataCard = async (
     const imageClaim = claims["P18"]?.[0]?.mainsnak?.datavalue;
     if (imageClaim && imageClaim.type === "string" && typeof imageClaim.value === "string") {
       const fileName = imageClaim.value.startsWith("File:") ? imageClaim.value : `File:${imageClaim.value}`;
-      const commonsData = await buildCommonsCard({ type: "commons-file", fileName }, languages);
+      const commonsData = await buildCommonsCard({ type: "commons-file", fileName });
       if (commonsData.kind === "commons-file" && commonsData.thumbnail) {
         image = commonsData.thumbnail;
       }
@@ -971,7 +968,7 @@ const buildCard = async (
     case "summary":
       return buildSummaryCard(target, languages);
     case "commons-file":
-      return buildCommonsCard(target, languages);
+      return buildCommonsCard(target);
     case "wikidata":
       return buildWikidataCard(target, languages);
   }

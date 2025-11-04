@@ -18,7 +18,7 @@ jest.mock('@/components/waves/drops/WaveDropActionsAddReaction', () => () => <di
 jest.mock('@/hooks/drops/useDropInteractionRules', () => ({ useDropInteractionRules: jest.fn() }));
 jest.mock('@/contexts/SeizeSettingsContext', () => ({ useSeizeSettings: jest.fn() }));
 jest.mock('@/contexts/EmojiContext', () => ({ 
-  useEmoji: () => ({ emojiMap: [], loading: false, categories: [], categoryIcons: {}, findNativeEmoji: jest.fn() })
+  useEmoji: () => ({ emojiMap: [], loading: false, categories: [], categoryIcons: {}, findNativeEmoji: jest.fn(), findCustomEmoji: jest.fn() })
 }));
 
 const rulesMock = useDropInteractionRules as jest.Mock;

@@ -8,6 +8,7 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
     isApp: false,
     isMobileDevice: false,
     hasTouchScreen: false,
+    isAppleMobile: false,
   }),
 }));
 

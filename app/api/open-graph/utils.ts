@@ -674,7 +674,7 @@ export function buildResponse(
   url: URL,
   html: string,
   contentType: string | null,
-  finalUrl?: string
+  _finalUrl?: string
 ): LinkPreviewResponse {
 
 

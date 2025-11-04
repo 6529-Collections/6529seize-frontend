@@ -57,6 +57,9 @@ jest.mock("@/contexts/EmojiContext", () => ({
     emojiMap: [],
     categories: [],
     categoryIcons: {},
+    loading: false,
+    findNativeEmoji: jest.fn(),
+    findCustomEmoji: jest.fn(),
   })),
 }));
 

@@ -5,8 +5,8 @@ import WavePicture from '@/components/waves/WavePicture';
 describe('WavePicture', () => {
   it('renders picture image when provided', () => {
     render(<WavePicture name="wave" picture="pic.jpg" contributors={[]} />);
-    const img = screen.getByRole('img');
-    expect(img).toHaveAttribute('src', 'pic.jpg');
+    const img = screen.getByRole('img', { name: 'wave' });
+    expect(img.getAttribute('src')).toContain('pic.jpg');
     expect(img).toHaveAttribute('alt', 'wave');
   });
 

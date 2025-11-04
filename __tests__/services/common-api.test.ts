@@ -1,4 +1,4 @@
-import { commonApiFetch } from "@/services/api/common-api";
+import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
 
 jest.mock("@/services/auth/auth.utils", () => ({
@@ -6,16 +6,18 @@ jest.mock("@/services/auth/auth.utils", () => ({
   getAuthJwt: jest.fn(),
 }));
 
-describe("commonApiFetch", () => {
-  beforeEach(() => {
-    (global as any).fetch = jest.fn();
-    jest.resetAllMocks();
-  });
+const fetchMock = global.fetch as jest.Mock;
 
+beforeEach(() => {
+  jest.clearAllMocks();
+  fetchMock.mockReset();
+});
+
+describe("commonApiFetch", () => {
   it("builds url with params and headers", async () => {
     (getStagingAuth as jest.Mock).mockReturnValue("s");
     (getAuthJwt as jest.Mock).mockReturnValue("jwt");
-    (global.fetch as jest.Mock).mockResolvedValue({
+    fetchMock.mockResolvedValue({
       ok: true,
       json: async () => ({ result: 1 }),
     });
@@ -25,16 +27,15 @@ describe("commonApiFetch", () => {
       params: { foo: "bar", typ: "nic" },
     });
 
-    expect(globalThis.fetch).toHaveBeenCalledWith(
+    expect(fetchMock).toHaveBeenCalledWith(
       "https://api.test.6529.io/api/test?foo=bar&typ=cic",
-      {
-        headers: {
-          "Content-Type": "application/json",
+      expect.objectContaining({
+        headers: expect.objectContaining({
           "x-6529-auth": "s",
           Authorization: "Bearer jwt",
-        },
+        }),
         signal: undefined,
-      }
+      }),
     );
     expect(result).toEqual({ result: 1 });
   });
@@ -42,40 +43,51 @@ describe("commonApiFetch", () => {
   it("rejects with error body when not ok", async () => {
     (getStagingAuth as jest.Mock).mockReturnValue(null);
     (getAuthJwt as jest.Mock).mockReturnValue(null);
-    (global.fetch as jest.Mock).mockResolvedValue({
+    fetchMock.mockResolvedValue({
       ok: false,
       statusText: "Bad",
       json: async () => ({ error: "err" }),
     });
 
     await expect(commonApiFetch({ endpoint: "bad" })).rejects.toBe("err");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://api.test.6529.io/api/bad",
+      expect.objectContaining({
+        headers: {},
+        signal: undefined,
+      }),
+    );
   });
 });
 
 describe("commonApiPost", () => {
   beforeEach(() => {
-    (global as any).fetch = jest.fn();
+    fetchMock.mockReset();
   });
 
   it("posts data and returns json", async () => {
     (getStagingAuth as jest.Mock).mockReturnValue("a");
     (getAuthJwt as jest.Mock).mockReturnValue(null);
-    (global.fetch as jest.Mock).mockResolvedValue({
+    fetchMock.mockResolvedValue({
       ok: true,
       json: async () => ({ res: 1 }),
     });
-    const { commonApiPost } = await import("@/services/api/common-api");
+
     const result = await commonApiPost<{ v: number }, { res: number }>({
       endpoint: "e",
       body: { v: 1 },
     });
-    expect(globalThis.fetch).toHaveBeenCalledWith(
+
+    expect(fetchMock).toHaveBeenCalledWith(
       "https://api.test.6529.io/api/e",
-      {
+      expect.objectContaining({
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-6529-auth": "a" },
+        headers: expect.objectContaining({
+          "Content-Type": "application/json",
+          "x-6529-auth": "a",
+        }),
         body: JSON.stringify({ v: 1 }),
-      }
+      }),
     );
     expect(result).toEqual({ res: 1 });
   });
@@ -83,14 +95,24 @@ describe("commonApiPost", () => {
   it("rejects on error", async () => {
     (getStagingAuth as jest.Mock).mockReturnValue(null);
     (getAuthJwt as jest.Mock).mockReturnValue(null);
-    (global.fetch as jest.Mock).mockResolvedValue({
+    fetchMock.mockResolvedValue({
       ok: false,
       statusText: "B",
       json: async () => ({ error: "err" }),
     });
-    const { commonApiPost } = await import("@/services/api/common-api");
+
     await expect(commonApiPost({ endpoint: "e", body: {} })).rejects.toBe(
-      "err"
+      "err",
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://api.test.6529.io/api/e",
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({
+          "Content-Type": "application/json",
+        }),
+        body: JSON.stringify({}),
+      }),
     );
   });
 });

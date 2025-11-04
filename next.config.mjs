@@ -114,6 +114,7 @@ function sharedConfig(publicEnv, assetPrefix) {
       loader: "default",
       domains: [
         "6529.io",
+        "staging.6529.io",
         "arweave.net",
         "localhost",
         "media.generator.seize.io",
@@ -124,6 +125,8 @@ function sharedConfig(publicEnv, assetPrefix) {
         "ipfs.6529.io",
       ],
       minimumCacheTTL: 86400,
+      formats: ["image/avif", "image/webp"],
+      qualities: [100, 75],
     },
     transpilePackages: ["react-tweet"],
     poweredByHeader: false,
