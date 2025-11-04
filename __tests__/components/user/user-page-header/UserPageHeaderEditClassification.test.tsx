@@ -58,10 +58,13 @@ describe('UserPageHeaderEditClassification', () => {
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>
     );
-    const form = document.querySelector('form') as HTMLFormElement | null;
+    const form = document.querySelector('form');
     expect(form).not.toBeNull();
+    if (!form) {
+      throw new Error('Form not found');
+    }
     await act(async () => {
-      fireEvent.submit(form!);
+      fireEvent.submit(form);
     });
     expect(requestAuth).toHaveBeenCalled();
     expect(mutate).toHaveBeenCalledWith({ handle: 'alice', classification: ApiProfileClassification.Pseudonym });
@@ -79,10 +82,13 @@ describe('UserPageHeaderEditClassification', () => {
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>
     );
-    const form = document.querySelector('form') as HTMLFormElement | null;
+    const form = document.querySelector('form');
     expect(form).not.toBeNull();
+    if (!form) {
+      throw new Error('Form not found');
+    }
     await act(async () => {
-      fireEvent.submit(form!);
+      fireEvent.submit(form);
     });
     expect(setToast).toHaveBeenCalled();
     expect(mutate).not.toHaveBeenCalled();

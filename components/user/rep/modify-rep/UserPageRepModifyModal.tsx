@@ -228,14 +228,15 @@ export default function UserPageRepModifyModal({
   }, []);
 
   useEffect(() => {
-    if (typeof document === "undefined" || typeof window === "undefined") {
+    if (typeof document === "undefined" || typeof globalThis.window === "undefined") {
       return;
     }
 
+    const currentWindow = globalThis.window;
     const previousOverflow = document.body.style.overflow;
     const previousPaddingRight = document.body.style.paddingRight;
     const scrollbarGap =
-      window.innerWidth - document.documentElement.clientWidth;
+      currentWindow.innerWidth - document.documentElement.clientWidth;
 
     document.body.style.overflow = "hidden";
     if (scrollbarGap > 0) {
