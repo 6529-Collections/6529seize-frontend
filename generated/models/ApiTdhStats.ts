@@ -26,6 +26,7 @@ export class ApiTdhStats {
     'received_xtdh': number;
     'granted_target_collections_count': number;
     'granted_target_tokens_count': number;
+    'available_grant_rate': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -101,6 +102,12 @@ export class ApiTdhStats {
             "baseName": "granted_target_tokens_count",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "available_grant_rate",
+            "baseName": "available_grant_rate",
+            "type": "number",
+            "format": "double"
         }    ];
 
     static getAttributeTypeMap() {

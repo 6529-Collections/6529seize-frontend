@@ -6328,6 +6328,7 @@ components:
         - received_xtdh
         - granted_target_collections_count
         - granted_target_tokens_count
+        - available_grant_rate
       properties:
         identity:
           $ref: "#/components/schemas/ApiIdentity"
@@ -6364,6 +6365,9 @@ components:
         granted_target_tokens_count:
           type: number
           format: int64
+        available_grant_rate:
+          type: number
+          format: double
     ApiTransaction:
       type: object
       required:
