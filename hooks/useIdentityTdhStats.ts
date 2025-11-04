@@ -26,8 +26,17 @@ async function fetchIdentityTdhStats(identity: string): Promise<IdentityTdhStats
     endpoint: `tdh-stats/${encodedIdentity}`,
   });
 
+  const xtdhRate = sanitizeNonNegativeNumber(response.xtdh_rate);
+  const baseTdhRate =
+    typeof response.tdh_rate === "number" &&
+    Number.isFinite(response.tdh_rate) &&
+    typeof response.xtdh_rate === "number" &&
+    Number.isFinite(response.xtdh_rate)
+      ? Math.max(response.tdh_rate - response.xtdh_rate, 0)
+      : null;
+
   return {
-    xtdhRate: sanitizeNonNegativeNumber(response.xtdh_rate),
+    xtdhRate,
     grantedXtdhPerDay: sanitizeNonNegativeNumber(response.granted_xtdh_per_day),
     grantedCollectionsCount: sanitizeCount(response.granted_target_collections_count),
     grantedTokensCount: sanitizeCount(response.granted_target_tokens_count),
@@ -37,10 +46,7 @@ async function fetchIdentityTdhStats(identity: string): Promise<IdentityTdhStats
       typeof response.xtdh_multiplier === "number" && Number.isFinite(response.xtdh_multiplier)
         ? Math.max(response.xtdh_multiplier, 0)
         : null,
-    baseTdhRate:
-      typeof response.tdh_rate === "number" && Number.isFinite(response.tdh_rate) && response.tdh_rate >= 0
-        ? response.tdh_rate
-        : null,
+    baseTdhRate,
   };
 }
 

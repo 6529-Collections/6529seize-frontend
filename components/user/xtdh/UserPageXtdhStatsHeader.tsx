@@ -1,6 +1,7 @@
 "use client";
 
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { useIdentityTdhStats } from "@/hooks/useIdentityTdhStats";
 import { useXtdhStats } from "@/hooks/useXtdhStats";
 
 interface UserPageXtdhStatsHeaderProps {
@@ -10,36 +11,60 @@ interface UserPageXtdhStatsHeaderProps {
 export default function UserPageXtdhStatsHeader({
   profileId,
 }: Readonly<UserPageXtdhStatsHeaderProps>) {
+  const normalizedProfileId = normalizeProfileIdentifier(profileId);
+
   const {
     data,
     isLoading,
     isError,
     error,
     refetch,
-  } = useXtdhStats({ profile: profileId });
+  } = useXtdhStats({ profile: normalizedProfileId });
 
-  if (isLoading) {
+  const {
+    data: identityStats,
+    isLoading: identityLoading,
+    isError: identityIsError,
+    error: identityError,
+    refetch: refetchIdentityStats,
+  } = useIdentityTdhStats({
+    identity: normalizedProfileId,
+    enabled: Boolean(normalizedProfileId),
+  });
+
+  if (isLoading || identityLoading) {
     return <UserPageXtdhStatsHeaderSkeleton />;
   }
 
-  if (isError || !data) {
-    const message = error instanceof Error ? error.message : undefined;
+  if (isError || identityIsError || !data) {
+    const message =
+      error?.message ?? identityError?.message ?? "Failed to load xTDH stats.";
+    const handleRetry = () => {
+      if (isError) {
+        void refetch();
+      }
+      if (identityIsError && normalizedProfileId) {
+        void refetchIdentityStats();
+      }
+    };
     return (
       <UserPageXtdhStatsHeaderError
-        message={message ?? "Failed to load xTDH stats."}
-        onRetry={refetch}
+        message={message}
+        onRetry={handleRetry}
       />
     );
   }
 
-  const xtdhRate = data.dailyCapacity;
+  const xtdhRate = identityStats?.xtdhRate ?? data.dailyCapacity;
+  const baseTdhRate = identityStats?.baseTdhRate ?? data.baseTdhRate;
+  const multiplier = identityStats?.xtdhMultiplier ?? data.multiplier;
   const xtdhRateGranted = data.xtdhRateGranted;
   const xtdhRateAvailable = Math.max(data.xtdhRateAutoAccruing, 0);
   const grantingPercentage = xtdhRate > 0 ? (xtdhRateGranted / xtdhRate) * 100 : 0;
   const clampedPercentage = Math.min(Math.max(grantingPercentage, 0), 100);
 
-  const baseRateDisplay = formatDisplay(data.baseTdhRate);
-  const multiplierDisplay = formatDisplay(data.multiplier, 2);
+  const baseRateDisplay = formatDisplay(baseTdhRate);
+  const multiplierDisplay = formatDisplay(multiplier, 2);
   const xtdhRateDisplay = formatDisplay(xtdhRate);
   const grantedDisplay = formatDisplay(xtdhRateGranted);
   const availableDisplay = formatDisplay(xtdhRateAvailable);
@@ -135,8 +160,25 @@ export default function UserPageXtdhStatsHeader({
   );
 }
 
-function formatDisplay(value: number, decimals = 0) {
-  if (Number.isNaN(value)) {
+function normalizeProfileIdentifier(value: string | null): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const withoutAtSymbol = trimmed.startsWith("@")
+    ? trimmed.slice(1)
+    : trimmed;
+
+  return withoutAtSymbol.toLowerCase();
+}
+
+function formatDisplay(value: number | null | undefined, decimals = 0) {
+  if (typeof value !== "number" || Number.isNaN(value)) {
     return "-";
   }
 
