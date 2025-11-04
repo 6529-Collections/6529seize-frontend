@@ -187,7 +187,7 @@ const buildExternalMediaState = (
     mimeType,
     error,
     status,
-    isValid: status === "valid",
+    isValid: false,
   };
 };
 

@@ -28,7 +28,6 @@ import {
   ALLOWED_INTERACTIVE_MEDIA_MIME_TYPES,
   DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE,
   INTERACTIVE_MEDIA_PROVIDERS,
-  type InteractiveMediaProvider,
 } from "./submission/constants/media";
 
 const renderPreviewMessage = (primary: string, secondary: string) => (
