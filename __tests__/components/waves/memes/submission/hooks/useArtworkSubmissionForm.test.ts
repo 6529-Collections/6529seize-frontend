@@ -1,6 +1,8 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useArtworkSubmissionForm } from '@/components/waves/memes/submission/hooks/useArtworkSubmissionForm';
 
+const CID_V1 = 'bafybeigdyrztobg3tv6zj5n6xvztf4k5p3xf7r6xkqfq5jz3o5quftdjum';
+
 jest.mock('@/components/waves/memes/traits/schema', () => ({
   getInitialTraitsValues: () => ({
     title: '',
@@ -55,7 +57,7 @@ describe('useArtworkSubmissionForm', () => {
     act(() => { result.current.setExternalMediaHash('bafyBad/binary.exe'); });
 
     expect(result.current.isExternalMediaValid).toBe(false);
-    expect(result.current.externalMediaError).toBe('Interactive previews must reference an HTML file.');
+    expect(result.current.externalMediaError).toBe('IPFS embeds must reference the root CID without subpaths.');
     expect(result.current.externalMediaPreviewUrl).toBe('');
     expect(result.current.externalMediaValidationStatus).toBe('invalid');
     expect(validateInteractivePreview).not.toHaveBeenCalled();
@@ -65,7 +67,7 @@ describe('useArtworkSubmissionForm', () => {
     const { result } = renderHook(() => useArtworkSubmissionForm());
 
     act(() => { result.current.setMediaSource('url'); });
-    act(() => { result.current.setExternalMediaHash('bafyHash/index.html'); });
+    act(() => { result.current.setExternalMediaHash(CID_V1); });
 
     await waitFor(() => {
       expect(result.current.isExternalMediaValid).toBe(true);
@@ -73,10 +75,10 @@ describe('useArtworkSubmissionForm', () => {
 
     expect(validateInteractivePreview).toHaveBeenCalledWith({
       provider: 'ipfs',
-      path: 'bafyHash/index.html',
+      path: CID_V1,
     });
     expect(result.current.externalMediaError).toBeNull();
-    expect(result.current.externalMediaPreviewUrl).toBe('https://ipfs.io/ipfs/bafyHash/index.html');
+    expect(result.current.externalMediaPreviewUrl).toBe(`https://ipfs.io/ipfs/${CID_V1}`);
     expect(result.current.externalMediaValidationStatus).toBe('valid');
   });
 
@@ -89,7 +91,7 @@ describe('useArtworkSubmissionForm', () => {
     const { result } = renderHook(() => useArtworkSubmissionForm());
 
     act(() => { result.current.setMediaSource('url'); });
-    act(() => { result.current.setExternalMediaHash('bafyHash/index.html'); });
+    act(() => { result.current.setExternalMediaHash(CID_V1); });
 
     await waitFor(() => {
       expect(result.current.externalMediaError).toBe('Gateway returned 404.');
@@ -122,7 +124,7 @@ describe('useArtworkSubmissionForm', () => {
       result.current.setMediaSource('url');
     });
     act(() => {
-      result.current.setExternalMediaHash('bafyHash/index.html');
+      result.current.setExternalMediaHash(CID_V1);
     });
 
     await waitFor(() => {

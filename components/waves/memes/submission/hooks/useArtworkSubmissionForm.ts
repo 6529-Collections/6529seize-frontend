@@ -11,8 +11,8 @@ import {
   InteractiveMediaProvider,
 } from "../constants/media";
 import {
-  INTERACTIVE_MEDIA_HTML_EXTENSIONS,
   INTERACTIVE_MEDIA_GATEWAY_BASE_URL,
+  isInteractiveMediaContentIdentifier,
 } from "../constants/security";
 import { validateInteractivePreview } from "../actions/validateInteractivePreview";
 
@@ -123,7 +123,7 @@ const buildExternalMediaState = (
   mimeType: InteractiveMediaMimeType
 ): ExternalMediaState => {
   const trimmedInput = input.trim();
-  const sanitizedHash = sanitizeInteractiveHash(trimmedInput, provider);
+  let sanitizedHash = sanitizeInteractiveHash(trimmedInput, provider);
   const hasHash = sanitizedHash.length > 0;
 
   let error: string | null = null;
@@ -134,32 +134,39 @@ const buildExternalMediaState = (
   }
 
   // Drop query/fragment markers without regex backtracking risk.
-  const hashWithoutQuery = sanitizedHash.split(/[?#]/)[0] ?? sanitizedHash;
-  const pathSegments = hashWithoutQuery.split("/").filter(Boolean);
-
   if (!error && !isSafeRelativeGatewayPath(sanitizedHash)) {
     error = "Only relative paths under the gateway origin are allowed.";
   }
 
-  if (!error && pathSegments.includes("..")) {
+  if (!error) {
+    const hashWithoutQuery = sanitizedHash.split(/[?#]/)[0] ?? sanitizedHash;
+    if (hashWithoutQuery !== sanitizedHash) {
+      error = "Remove query strings or fragments from the hash.";
+    }
+    sanitizedHash = hashWithoutQuery;
+  }
+
+  if (!error && sanitizedHash.includes("/")) {
+    error =
+      provider === "ipfs"
+        ? "IPFS embeds must reference the root CID without subpaths."
+        : "Arweave embeds must reference the transaction ID without subpaths.";
+  }
+
+  if (!error && sanitizedHash.includes("..")) {
     error = "Remove path traversal segments from the hash.";
   }
 
-  if (!error && /[?#]/.test(sanitizedHash)) {
-    error = "Remove query strings or fragments from the hash.";
-  }
-
-  if (!error && pathSegments.length > 0) {
-    const lastSegment = pathSegments.at(-1) ?? "";
-    const lastSegmentWithoutSuffix = lastSegment.split(/[?#]/)[0] ?? "";
-    const extensionIndex = lastSegmentWithoutSuffix.lastIndexOf(".");
-    if (extensionIndex !== -1) {
-      const extension = lastSegmentWithoutSuffix
-        .slice(extensionIndex + 1)
-        .toLowerCase();
-      if (!INTERACTIVE_MEDIA_HTML_EXTENSIONS.has(extension)) {
-        error = "Interactive previews must reference an HTML file.";
-      }
+  if (!error && sanitizedHash) {
+    const isValidIdentifier = isInteractiveMediaContentIdentifier(
+      provider,
+      sanitizedHash
+    );
+    if (!isValidIdentifier) {
+      error =
+        provider === "ipfs"
+          ? "Enter a valid IPFS CID (CIDv0 or CIDv1)."
+          : "Enter a valid Arweave transaction ID.";
     }
   }
 

@@ -1,6 +1,9 @@
 import { validateInteractivePreview } from '@/components/waves/memes/submission/actions/validateInteractivePreview';
 import { INTERACTIVE_MEDIA_GATEWAY_BASE_URL } from '@/components/waves/memes/submission/constants/security';
 
+const CID_V1 = 'bafybeigdyrztobg3tv6zj5n6xvztf4k5p3xf7r6xkqfq5jz3o5quftdjum';
+const ARWEAVE_TX_ID = 'QW_ArkGRZa0uSmLkH2ZAzU9xOQFfGqVsRyCrND3eOo8';
+
 const originalFetch = global.fetch;
 
 const setResponseUrl = (response: Response, url: string) => {
@@ -15,7 +18,7 @@ const setResponseUrl = (response: Response, url: string) => {
 const createResponse = (
   status: number,
   headers: Record<string, string>,
-  url = 'https://ipfs.io/ipfs/example'
+  url = `https://ipfs.io/ipfs/${CID_V1}`
 ) => {
   const response = new Response(null, {
     status,
@@ -41,14 +44,14 @@ describe('validateInteractivePreview', () => {
 
     const result = await validateInteractivePreview({
       provider: 'ipfs',
-      path: 'bafyHash/index.html',
+      path: CID_V1,
     });
 
     expect(result.ok).toBe(true);
     expect(result.contentType).toBe('text/html; charset=utf-8');
     expect(global.fetch).toHaveBeenCalledTimes(1);
     expect(global.fetch).toHaveBeenLastCalledWith(
-      expect.stringContaining('https://ipfs.io/ipfs/bafyHash/index.html'),
+      expect.stringContaining(`https://ipfs.io/ipfs/${CID_V1}`),
       expect.objectContaining({ method: 'HEAD' })
     );
   });
@@ -57,19 +60,19 @@ describe('validateInteractivePreview', () => {
     (global.fetch as jest.Mock)
       .mockResolvedValueOnce(createResponse(405, { 'content-type': 'text/plain' }))
       .mockResolvedValueOnce(
-        createResponse(206, { 'content-type': 'text/html' }, 'https://arweave.net/example')
+        createResponse(206, { 'content-type': 'text/html' }, `https://arweave.net/${ARWEAVE_TX_ID}`)
       );
 
     const result = await validateInteractivePreview({
       provider: 'arweave',
-      path: 'abc/index.html',
+      path: ARWEAVE_TX_ID,
     });
 
     expect(result.ok).toBe(true);
     expect(global.fetch).toHaveBeenCalledTimes(2);
     expect(global.fetch).toHaveBeenNthCalledWith(
       2,
-      expect.stringContaining('https://arweave.net/abc/index.html'),
+      expect.stringContaining(`https://arweave.net/${ARWEAVE_TX_ID}`),
       expect.objectContaining({ method: 'GET', headers: { Range: 'bytes=0-1024' } })
     );
   });
@@ -79,13 +82,13 @@ describe('validateInteractivePreview', () => {
       createResponse(
         200,
         { 'content-type': 'text/html' },
-        'https://ifx4blsbsfs22lskmlsb6zsazvhxcoibl4nkk3checvtipo6hkhq.arweave.net/index.html'
+        `https://${ARWEAVE_TX_ID.toLowerCase()}.arweave.net/`
       )
     );
 
     const result = await validateInteractivePreview({
       provider: 'arweave',
-      path: 'QW_ArkGRZa0uSmLkH2ZAzU9xOQFfGqVsRyCrND3eOo8/index.html',
+      path: ARWEAVE_TX_ID,
     });
 
     expect(result.ok).toBe(true);
@@ -99,7 +102,7 @@ describe('validateInteractivePreview', () => {
 
     const result = await validateInteractivePreview({
       provider: 'ipfs',
-      path: 'bafyHash/index.html',
+      path: CID_V1,
     });
 
     expect(result.ok).toBe(false);
@@ -113,7 +116,7 @@ describe('validateInteractivePreview', () => {
 
     const result = await validateInteractivePreview({
       provider: 'ipfs',
-      path: 'bafyHash/index.html',
+      path: CID_V1,
     });
 
     expect(result.ok).toBe(false);
@@ -125,7 +128,7 @@ describe('validateInteractivePreview', () => {
 
     const result = await validateInteractivePreview({
       provider: 'ipfs',
-      path: 'bafyHash/index.html',
+      path: CID_V1,
     });
 
     expect(result.ok).toBe(false);
@@ -139,12 +142,91 @@ describe('validateInteractivePreview', () => {
 
     const result = await validateInteractivePreview({
       provider: 'ipfs',
-      path: 'bafyHash/index.html',
+      path: CID_V1,
     });
 
     expect(result.ok).toBe(false);
     expect(result.reason).toBe('Gateway returned 400.');
     expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('accepts responses from trailing-dot hosts after canonicalization', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      createResponse(
+        200,
+        { 'content-type': 'text/html' },
+        `https://ipfs.io./ipfs/${CID_V1}`
+      )
+    );
+
+    const result = await validateInteractivePreview({
+      provider: 'ipfs',
+      path: CID_V1,
+    });
+
+    expect(result.ok).toBe(true);
+  });
+
+  it('rejects responses that include credentials', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      createResponse(
+        200,
+        { 'content-type': 'text/html' },
+        `https://user:pass@ipfs.io/ipfs/${CID_V1}`
+      )
+    );
+
+    const result = await validateInteractivePreview({
+      provider: 'ipfs',
+      path: CID_V1,
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.reason).toBe(
+      'Invalid path: resolved target is not permitted under allowed gateway hosts.'
+    );
+  });
+
+  it('rejects responses that use a non-default https port', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      createResponse(
+        200,
+        { 'content-type': 'text/html' },
+        `https://ipfs.io:444/ipfs/${CID_V1}`
+      )
+    );
+
+    const result = await validateInteractivePreview({
+      provider: 'ipfs',
+      path: CID_V1,
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.reason).toBe(
+      'Invalid path: resolved target is not permitted under allowed gateway hosts.'
+    );
+  });
+
+  it('rejects identifiers containing path separators before requesting the gateway', async () => {
+    const result = await validateInteractivePreview({
+      provider: 'ipfs',
+      path: `${CID_V1}/index.html`,
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.reason).toBe('Invalid path: only relative paths under the gateway origin are allowed.');
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('rejects identifiers that do not match provider expectations', async () => {
+    const result = await validateInteractivePreview({
+      provider: 'ipfs',
+      path: 'not-a-valid-cid',
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.reason).toBe('Invalid path: expected a CIDv0 or CIDv1 root hash.');
+    expect(global.fetch).not.toHaveBeenCalled();
   });
 
   it('rejects requests whose resolved target host is unapproved before making a network call', async () => {
@@ -154,7 +236,7 @@ describe('validateInteractivePreview', () => {
     try {
       const result = await validateInteractivePreview({
         provider: 'ipfs',
-        path: 'bafyHash/index.html',
+        path: CID_V1,
       });
 
       expect(result.ok).toBe(false);

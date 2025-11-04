@@ -4,7 +4,10 @@ import {
   INTERACTIVE_MEDIA_ALLOWED_CONTENT_TYPES,
   INTERACTIVE_MEDIA_GATEWAY_BASE_URL,
   InteractiveMediaValidationResult,
+  canonicalizeInteractiveMediaHostname,
   isInteractiveMediaAllowedHost,
+  isInteractiveMediaContentIdentifier,
+  isInteractiveMediaContentPathAllowed,
 } from "../constants/security";
 import { InteractiveMediaProvider } from "../constants/media";
 
@@ -16,44 +19,6 @@ interface ValidateInteractivePreviewArgs {
 }
 
 const MAX_BYTES_TO_PEEK = 1024;
-
-// Guard against SSRF by ensuring the gateway path is a plain relative fragment.
-const SAFE_RELATIVE_PATH_PATTERN = /^[A-Za-z0-9_-]{1,128}$/;
-
-const isSafeRelativePath = (path: string): boolean => {
-  if (typeof path !== "string") {
-    return false;
-  }
-
-  const trimmed = path.trim();
-
-  if (!trimmed || trimmed !== path) {
-    return false;
-  }
-
-  if (!SAFE_RELATIVE_PATH_PATTERN.test(trimmed)) {
-    return false;
-  }
-
-  const lower = trimmed.toLowerCase();
-
-  if (
-    trimmed.startsWith("/") ||
-    trimmed.startsWith("\\") ||
-    trimmed.startsWith("//") ||
-    trimmed.startsWith("\\\\") ||
-    lower.startsWith("http:") ||
-    lower.startsWith("https:") ||
-    lower.includes("://") ||
-    trimmed.includes("..") ||
-    trimmed.includes("\n") ||
-    trimmed.includes("\r")
-  ) {
-    return false;
-  }
-
-  return true;
-};
 
 const isAllowedContentType = (contentType: string | null): boolean => {
   if (!contentType) {
@@ -69,7 +34,34 @@ const isAllowedContentType = (contentType: string | null): boolean => {
 const ensureAllowedHost = (url: string): boolean => {
   try {
     const parsed = new URL(url);
-    return isInteractiveMediaAllowedHost(parsed.hostname);
+    if (parsed.protocol !== "https:") {
+      return false;
+    }
+    if (parsed.username || parsed.password) {
+      return false;
+    }
+    if (parsed.port) {
+      if (parsed.port === "443") {
+        parsed.port = "";
+      } else {
+        return false;
+      }
+    }
+
+    const normalizedHostname = canonicalizeInteractiveMediaHostname(
+      parsed.hostname
+    );
+    if (!normalizedHostname) {
+      return false;
+    }
+    if (normalizedHostname !== parsed.hostname) {
+      parsed.hostname = normalizedHostname;
+    }
+
+    return (
+      isInteractiveMediaAllowedHost(parsed.hostname) &&
+      isInteractiveMediaContentPathAllowed(parsed.hostname, parsed.pathname)
+    );
   } catch {
     return false;
   }
@@ -117,14 +109,44 @@ export async function validateInteractivePreview({
     return { ok: false, reason: "Hash or path is required." };
   }
 
-  if (!isSafeRelativePath(path)) {
+  const trimmedPath = path.trim();
+  if (!trimmedPath || trimmedPath !== path) {
     return {
       ok: false,
       reason: "Invalid path: only relative paths under the gateway origin are allowed.",
     };
   }
 
-  const targetUrl = buildGatewayUrl(provider, path);
+  if (
+    trimmedPath.includes("/") ||
+    trimmedPath.includes("\\") ||
+    trimmedPath.includes("//") ||
+    trimmedPath.includes("\\\\") ||
+    trimmedPath.includes("..") ||
+    trimmedPath.includes("\n") ||
+    trimmedPath.includes("\r") ||
+    trimmedPath.includes("\t") ||
+    trimmedPath.includes("://") ||
+    trimmedPath.includes("?") ||
+    trimmedPath.includes("#")
+  ) {
+    return {
+      ok: false,
+      reason: "Invalid path: only relative paths under the gateway origin are allowed.",
+    };
+  }
+
+  if (!isInteractiveMediaContentIdentifier(provider, trimmedPath)) {
+    return {
+      ok: false,
+      reason:
+        provider === "ipfs"
+          ? "Invalid path: expected a CIDv0 or CIDv1 root hash."
+          : "Invalid path: expected an Arweave transaction ID.",
+    };
+  }
+
+  const targetUrl = buildGatewayUrl(provider, trimmedPath);
 
   // Block requests whose resolved host is not part of the trusted gateways.
   if (!ensureAllowedHost(targetUrl)) {
