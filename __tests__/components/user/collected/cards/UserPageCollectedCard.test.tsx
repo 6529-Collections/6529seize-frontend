@@ -33,7 +33,7 @@ describe("UserPageCollectedCard", () => {
     expect(screen.getByText("3")).toBeInTheDocument();
     expect(
       screen.getByText((content, element) => {
-        const text = element?.textContent?.replace(/\s+/g, " ").trim() || "";
+        const text = element?.textContent?.replaceAll(" ", "").trim() || "";
         return /^1\s*x$/.test(text);
       })
     ).toBeInTheDocument();
