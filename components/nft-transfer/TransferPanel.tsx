@@ -282,7 +282,7 @@ export default function TransferPanel({
                                 <FontAwesomeIcon
                                   icon={faMinusCircle}
                                   className="tw-size-6 tw-cursor-pointer"
-                                  color={qty <= 1 ? "#60606C" : "#fff"}
+                                  color={qty <= 1 ? "#aaa" : "#fff"}
                                 />
                               </button>
                               <div className="tw-min-w-[2ch] tw-text-center tw-text-sm tw-tabular-nums tw-select-none">
@@ -297,7 +297,7 @@ export default function TransferPanel({
                                 <FontAwesomeIcon
                                   icon={faPlusCircle}
                                   className="tw-size-6 tw-cursor-pointer"
-                                  color={qty >= max ? "#60606C" : "#fff"}
+                                  color={qty >= max ? "#aaa" : "#fff"}
                                 />
                               </button>
                             </div>

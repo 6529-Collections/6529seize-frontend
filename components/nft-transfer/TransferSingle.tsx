@@ -138,7 +138,7 @@ function TransferSingleImpl(props: TransferSingleProps) {
               <FontAwesomeIcon
                 icon={faMinusCircle}
                 className="tw-size-6 tw-cursor-pointer"
-                color={selectedQty <= 1 ? "#60606C" : "#fff"}
+                color={selectedQty <= 1 ? "#aaa" : "#fff"}
               />
             </button>
             <div className="tw-min-w-[2ch] tw-text-center tw-text-sm tw-tabular-nums tw-select-none">
@@ -154,7 +154,7 @@ function TransferSingleImpl(props: TransferSingleProps) {
               <FontAwesomeIcon
                 icon={faPlusCircle}
                 className="tw-size-6 tw-cursor-pointer"
-                color={selectedQty >= max ? "#60606C" : "#fff"}
+                color={selectedQty >= max ? "#aaa" : "#fff"}
               />
             </button>
           </div>
