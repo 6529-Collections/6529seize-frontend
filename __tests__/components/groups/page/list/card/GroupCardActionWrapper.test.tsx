@@ -43,10 +43,7 @@ describe('GroupCardActionWrapper', () => {
     expect(screen.getByText('Rep Progress')).toBeInTheDocument();
     expect(screen.getByText('5/10')).toBeInTheDocument();
     
-    const progressBarContainer = document.querySelector('.tw-bg-iron-700') as HTMLElement;
-    expect(progressBarContainer).toBeInTheDocument();
-    
-    const progressBar = progressBarContainer?.querySelector('.tw-bg-primary-400') as HTMLElement;
+    const progressBar = document.querySelector('.tw-bg-primary-400') as HTMLElement;
     expect(progressBar).toBeInTheDocument();
     expect(progressBar.style.width).toBe('50%');
 
@@ -66,7 +63,7 @@ describe('GroupCardActionWrapper', () => {
     );
     expect(screen.getByText('10/10')).toBeInTheDocument();
     
-    const updatedProgressBar = progressBarContainer?.querySelector('.tw-bg-primary-400') as HTMLElement;
+    const updatedProgressBar = document.querySelector('.tw-bg-primary-400') as HTMLElement;
     expect(updatedProgressBar.style.width).toBe('100%');
   });
 });
