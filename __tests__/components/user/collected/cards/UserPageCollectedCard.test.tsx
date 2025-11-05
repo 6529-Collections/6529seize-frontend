@@ -3,7 +3,7 @@ import { CollectedCard, CollectedCollectionType } from "@/entities/IProfile";
 import { ContractType } from "@/enums";
 import { render, screen } from "@testing-library/react";
 
-const memeCard = {
+const memeCard: CollectedCard = {
   collection: CollectedCollectionType.MEMES,
   token_id: 1,
   token_name: "Card",
@@ -11,13 +11,14 @@ const memeCard = {
   tdh: 2,
   rank: 3,
   seized_count: 1,
+  szn: null,
 };
 
 describe("UserPageCollectedCard", () => {
   it("shows data row and seized count for memes", () => {
     render(
       <UserPageCollectedCard
-        card={memeCard as any}
+        card={memeCard}
         contractType={ContractType.ERC1155}
         showDataRow={true}
         onToggle={() => {}}
