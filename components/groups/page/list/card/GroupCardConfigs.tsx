@@ -203,7 +203,7 @@ export default function GroupCardConfigs({
               scrollContainer("left");
             }}
             aria-label="Scroll left"
-            className="tw-absolute tw-left-0 tw-top-1/2 tw-z-30 tw-inline-flex tw-h-7 tw-w-7 tw-translate-y-[-50%] -tw-translate-x-3 tw-items-center tw-justify-center tw-rounded-full tw-bg-white/5 tw-text-white tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500 desktop-hover:hover:tw-bg-white/10"
+            className="tw-absolute tw-left-0 tw-top-1/2 tw-z-30 tw-inline-flex tw-border tw-border-solid tw-border-white/ tw-h-7 tw-w-7 tw-translate-y-[-50%] -tw-translate-x-3 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-text-white tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500 desktop-hover:hover:tw-bg-white/10"
           >
             <svg
               className="tw-h-4 tw-w-4 tw-text-iron-200 desktop-hover:hover:tw-text-white tw-rotate-90 tw-transition tw-duration-200 tw-ease-out"
@@ -223,7 +223,7 @@ export default function GroupCardConfigs({
           </button>
         )}
         <div
-          className="tw-flex tw-items-center tw-gap-2 tw-overflow-x-auto tw-py-0.5 horizontal-menu-hide-scrollbar"
+          className="tw-flex tw-items-center tw-gap-x-4 gap-y-2 tw-overflow-x-auto tw-py-0.5 horizontal-menu-hide-scrollbar"
           ref={containerRef}
           onScroll={checkForHiddenContent}
         >
@@ -238,7 +238,7 @@ export default function GroupCardConfigs({
               scrollContainer("right");
             }}
             aria-label="Scroll right"
-            className="tw-absolute tw-right-0 tw-top-1/2 tw-z-30 tw-inline-flex tw-h-7 tw-w-7 tw-translate-y-[-50%] tw-translate-x-3 tw-items-center tw-justify-center tw-rounded-full tw-bg-white/5 tw-text-white tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500 desktop-hover:hover:tw-bg-white/10"
+            className="tw-absolute tw-right-0 tw-border tw-border-solid tw-border-white/5 tw-top-1/2 tw-z-30 tw-inline-flex tw-h-7 tw-w-7 tw-translate-y-[-50%] tw-translate-x-3 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-text-white tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500 desktop-hover:hover:tw-bg-white/10"
           >
             <svg
               className="tw-h-4 tw-w-4 tw-text-iron-200 desktop-hover:hover:tw-text-white -tw-rotate-90 tw-transition tw-duration-200 tw-ease-out"

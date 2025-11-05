@@ -124,7 +124,7 @@ export default function GroupCard({
         ></button>
       )}
       <div
-        className={`tw-relative tw-overflow-hidden tw-group tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-backdrop-blur-sm tw-p-2.5 tw-shadow-sm tw-shadow-black/20 tw-transition-all tw-duration-300 tw-ease-out tw-cursor-pointer desktop-hover:hover:tw-shadow-lg desktop-hover:hover:tw-shadow-black/40 desktop-hover:hover:tw-translate-y-[-1px] focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 focus-visible:tw-outline-none tw-no-underline ${
+        className={`tw-relative tw-overflow-hidden tw-group tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-backdrop-blur-sm tw-shadow-sm tw-shadow-black/20 tw-transition-all tw-duration-300 tw-ease-out tw-cursor-pointer desktop-hover:hover:tw-shadow-lg desktop-hover:hover:tw-shadow-black/40 desktop-hover:hover:tw-translate-y-[-1px] focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 focus-visible:tw-outline-none tw-no-underline ${
           isIdle
             ? "tw-group desktop-hover:hover:tw-shadow-lg desktop-hover:hover:tw-shadow-black/40 desktop-hover:hover:tw-translate-y-[-1px]"
             : ""

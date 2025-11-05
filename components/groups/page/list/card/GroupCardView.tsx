@@ -19,7 +19,7 @@ export default function GroupCardView({
   readonly titlePlaceholder?: string;
 }) {
   return (
-    <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-y-5 tw-px-4 tw-py-5 sm:tw-px-5 sm:tw-py-6">
+    <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-y-4 tw-px-4 tw-py-4 sm:tw-px-5 sm:tw-py-5">
       <GroupCardHeader
         group={group}
         onEditClick={onEditClick}
