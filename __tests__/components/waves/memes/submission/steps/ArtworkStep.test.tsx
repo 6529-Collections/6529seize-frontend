@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { ComponentProps } from 'react';
 import { render, screen } from '@testing-library/react';
 import ArtworkStep from '@/components/waves/memes/submission/steps/ArtworkStep';
 import { TraitsData } from '@/components/waves/memes/submission/types/TraitsData';
+import type { InteractiveMediaMimeType } from '@/components/waves/memes/submission/constants/media';
 
 jest.mock('@/components/waves/memes/MemesArtSubmissionFile', () => () => <div data-testid="file" />);
 jest.mock('@/components/waves/memes/submission/details/ArtworkDetails', () => (props: any) => (
@@ -67,20 +68,36 @@ function createTraits(): TraitsData {
   };
 }
 
+const createProps = (
+  override: Partial<ComponentProps<typeof ArtworkStep>> = {}
+) => ({
+  traits: createTraits(),
+  artworkUploaded: false,
+  artworkUrl: '',
+  setArtworkUploaded: () => {},
+  handleFileSelect: () => {},
+  mediaSource: 'upload' as const,
+  setMediaSource: () => {},
+  externalHash: '',
+  externalProvider: 'ipfs',
+  externalConstructedUrl: '',
+  externalPreviewUrl: '',
+  externalMimeType: 'text/html' as InteractiveMediaMimeType,
+  externalError: null as string | null,
+  isExternalMediaValid: false,
+  onExternalHashChange: () => {},
+  onExternalProviderChange: () => {},
+  onExternalMimeTypeChange: (_value: InteractiveMediaMimeType) => {},
+  onClearExternalMedia: () => {},
+  onSubmit: () => {},
+  updateTraitField: () => {},
+  setTraits: () => {},
+  ...override,
+});
+
 describe('ArtworkStep', () => {
   it('shows upload tooltip when artwork missing', () => {
-    render(
-      <ArtworkStep
-        traits={createTraits()}
-        artworkUploaded={false}
-        artworkUrl=""
-        setArtworkUploaded={() => {}}
-        handleFileSelect={() => {}}
-        onSubmit={() => {}}
-        updateTraitField={() => {}}
-        setTraits={() => {}}
-      />
-    );
+    render(<ArtworkStep {...createProps()} />);
     expect(screen.getByTestId('submit')).toBeDisabled();
     expect(screen.getByTestId('submit').getAttribute('title')).toMatch('Please upload artwork');
   });
@@ -108,14 +125,7 @@ describe('ArtworkStep', () => {
     traits.boost = 'bo';
     render(
       <ArtworkStep
-        traits={traits}
-        artworkUploaded={true}
-        artworkUrl="url"
-        setArtworkUploaded={() => {}}
-        handleFileSelect={() => {}}
-        onSubmit={() => {}}
-        updateTraitField={() => {}}
-        setTraits={() => {}}
+        {...createProps({ traits, artworkUploaded: true, artworkUrl: 'url' })}
       />
     );
     expect(screen.getByTestId('submit')).not.toBeDisabled();
@@ -127,14 +137,12 @@ describe('ArtworkStep', () => {
     const onSubmit = jest.fn();
     render(
       <ArtworkStep
-        traits={{ ...traits, title: 't', description: 'd' }}
-        artworkUploaded={true}
-        artworkUrl="u"
-        setArtworkUploaded={() => {}}
-        handleFileSelect={() => {}}
-        onSubmit={onSubmit}
-        updateTraitField={() => {}}
-        setTraits={() => {}}
+        {...createProps({
+          traits: { ...traits, title: 't', description: 'd' },
+          artworkUploaded: true,
+          artworkUrl: 'u',
+          onSubmit,
+        })}
       />
     );
     screen.getByTestId('submit').click();
@@ -148,16 +156,13 @@ describe('ArtworkStep', () => {
     const onCancel = jest.fn();
     render(
       <ArtworkStep
-        traits={traits}
-        artworkUploaded={true}
-        artworkUrl="url"
-        setArtworkUploaded={() => {}}
-        handleFileSelect={() => {}}
-        onSubmit={() => {}}
-        onCancel={onCancel}
-        updateTraitField={() => {}}
-        setTraits={() => {}}
-        submissionPhase="uploading"
+        {...createProps({
+          traits,
+          artworkUploaded: true,
+          artworkUrl: 'url',
+          onCancel,
+          submissionPhase: 'uploading',
+        })}
       />
     );
     const btn = screen.getByRole('button', { name: /cancel/i });
