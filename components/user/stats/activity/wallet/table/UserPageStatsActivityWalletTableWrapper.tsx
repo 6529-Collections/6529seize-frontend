@@ -57,7 +57,7 @@ export default function UserPageStatsActivityWalletTableWrapper({
   }
 
   return (
-    <div className="tw-mt-2 lg:tw-mt-4 tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl">
+    <div className="tw-mt-2 lg:tw-mt-4 tw-bg-iron-950 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl">
       <div className="tw-w-full tw-inline-flex tw-justify-between tw-space-x-4 tw-items-center tw-px-4 sm:tw-px-6 tw-mt-6">
         <UserPageStatsActivityWalletFilter
           activeFilter={filter}

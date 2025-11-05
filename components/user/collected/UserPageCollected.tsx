@@ -16,6 +16,7 @@ import { MEMES_SEASON } from "@/enums";
 import { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { Page } from "@/helpers/Types";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { fetchAllPages } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -82,6 +83,7 @@ export default function UserPageCollected({
   readonly profile: ApiIdentity;
 }) {
   const { address: connectedAddress } = useSeizeConnectContext();
+  const isMobile = useIsMobileScreen();
   const defaultSortBy = CollectionSort.TOKEN_ID;
   const defaultSortDirection = SortDirection.DESC;
   const defaultSeized = CollectionSeized.SEIZED;
@@ -394,13 +396,15 @@ export default function UserPageCollected({
     placeholderData: keepPreviousData,
   });
 
-  const showTransfer = !!(
-    profile.wallets?.some((w) =>
-      areEqualAddresses(w.wallet, connectedAddress)
-    ) &&
-    data?.data &&
-    data.data.length > 0
-  );
+  const showTransfer =
+    !isMobile &&
+    !!(
+      profile.wallets?.some((w) =>
+        areEqualAddresses(w.wallet, connectedAddress)
+      ) &&
+      data?.data &&
+      data.data.length > 0
+    );
 
   const { isFetching: isFetchingTransfer, data: dataTransfer } = useQuery<
     CollectedCard[]

@@ -344,10 +344,10 @@ describe('UserPageCollectedFilters', () => {
     const rightArrow = screen.getByLabelText('Scroll filters right');
     
     fireEvent.click(leftArrow);
-    expect(scrollBySpy).toHaveBeenCalledWith({ left: -50, behavior: 'smooth' });
+    expect(scrollBySpy).toHaveBeenCalledWith({ left: -150, behavior: 'smooth' });
     
     fireEvent.click(rightArrow);
-    expect(scrollBySpy).toHaveBeenCalledWith({ left: 50, behavior: 'smooth' });
+    expect(scrollBySpy).toHaveBeenCalledWith({ left: 150, behavior: 'smooth' });
   });
 
   it('sets up event listeners on mount and cleans up on unmount', async () => {

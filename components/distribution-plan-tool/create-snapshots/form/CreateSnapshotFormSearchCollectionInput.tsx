@@ -17,7 +17,7 @@ export default function CreateSnapshotFormSearchCollectionInput({
     <div className="tw-max-w-lg">
       <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-flex tw-items-center tw-pl-3">
         <svg
-          className="tw-h-5 tw-w-5 tw-text-neutral-300"
+          className="tw-h-5 tw-w-5 tw-text-iron-300"
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -42,7 +42,7 @@ export default function CreateSnapshotFormSearchCollectionInput({
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              className="tw-text-neutral-600"
+              className="tw-text-iron-600"
               d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
               fill="currentColor"
             ></path>
@@ -61,7 +61,7 @@ export default function CreateSnapshotFormSearchCollectionInput({
         value={keyword}
         onChange={handleKeywordChange}
         autoComplete="off"
-        className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-pl-10 tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 focus:tw-bg-transparent tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-neutral-700 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+        className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-pl-10 tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-700/40 focus:tw-bg-transparent tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700/40 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-iron-700 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
       />
     </div>
   );

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import PencilIcon, { PencilIconSize } from "@/components/utils/icons/PencilIcon";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
+import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
+import PencilIcon, { PencilIconSize } from "@/components/utils/icons/PencilIcon";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { useState } from "react";
 import UserPageHeaderEditClassification from "./UserPageHeaderEditClassification";
 
 export default function UserPageClassificationWrapper({
@@ -25,11 +25,11 @@ export default function UserPageClassificationWrapper({
         disabled={!canEdit}
         aria-label="Edit classification"
         className={`${
-          canEdit ? "hover:tw-text-neutral-400" : ""
+          canEdit ? "hover:tw-text-iron-400" : ""
         } tw-group tw-bg-transparent tw-border-none tw-m-0 tw-p-0 tw-relative tw-transition tw-duration-300 tw-ease-out`}>
         {children}
         {canEdit && (
-          <div className="group-hover:tw-block tw-hidden tw-absolute tw-text-neutral-400">
+          <div className="group-hover:tw-block tw-hidden tw-absolute tw-text-iron-400">
             <div className="tw-absolute -tw-top-4 sm:-tw-top-5 -tw-left-4 sm:-tw-left-5">
               <PencilIcon size={PencilIconSize.SMALL} />
             </div>

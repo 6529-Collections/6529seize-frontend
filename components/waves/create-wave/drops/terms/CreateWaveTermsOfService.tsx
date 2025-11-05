@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { useState } from "react";
 
 export default function CreateWaveTermsOfService({
   waveType,
@@ -33,7 +33,7 @@ export default function CreateWaveTermsOfService({
     <div className="tw-space-y-4">
       <div>
         <div className="tw-flex tw-items-center tw-justify-between">
-          <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
+          <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
             Participation Terms
           </h3>
           <label htmlFor="tos-toggle" className="tw-flex tw-cursor-pointer">

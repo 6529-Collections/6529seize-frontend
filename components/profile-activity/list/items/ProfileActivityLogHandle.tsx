@@ -15,11 +15,11 @@ export default function ProfileActivityLogHandle({
       </span>
       {!isAdded && (
         <>
-          <span className="tw-whitespace-nowrap tw-text-base tw-font-medium tw-text-neutral-100">
+          <span className="tw-whitespace-nowrap tw-text-base tw-font-medium tw-text-iron-100">
             {log.contents.old_value}
           </span>
           <svg
-            className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-neutral-400"
+            className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-400"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -35,7 +35,7 @@ export default function ProfileActivityLogHandle({
         </>
       )}
 
-      <span className="tw-whitespace-nowrap tw-text-base tw-font-medium tw-text-iron-100">
+      <span className="tw-whitespace-nowrap tw-text-base tw-font-medium tw-text-iron-200">
         {log.contents.new_value}
       </span>
     </>

@@ -109,7 +109,7 @@ export default function UserPageStatsActivityDistributions({
   return (
     <div className="tw-mt-4 md:tw-mt-5">
       <div className="tw-flex">
-        <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
+        <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
           Distributions
         </h3>
       </div>

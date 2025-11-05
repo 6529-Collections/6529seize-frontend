@@ -1,7 +1,6 @@
-import { render, screen } from '@testing-library/react';
-import React from 'react';
 import DropPlaceholder from '@/components/waves/DropPlaceholder';
 import { ChatRestriction, SubmissionRestriction } from '@/hooks/useDropPriviledges';
+import { render, screen } from '@testing-library/react';
 
 describe('DropPlaceholder', () => {
   describe('chat restrictions', () => {
@@ -187,7 +186,7 @@ describe('DropPlaceholder', () => {
       render(<DropPlaceholder type="chat" />);
       
       const message = screen.getByText('Action not available');
-      expect(message).toHaveClass('tw-text-neutral-400');
+      expect(message).toHaveClass('tw-text-iron-400');
     });
   });
 
@@ -203,11 +202,11 @@ describe('DropPlaceholder', () => {
         'tw-justify-center',
         'tw-px-4',
         'tw-py-3',
-        'tw-bg-neutral-900/50',
+        'tw-bg-iron-900/50',
         'tw-backdrop-blur',
         'tw-rounded-xl',
         'tw-border',
-        'tw-border-neutral-800/50'
+        'tw-border-iron-800/50'
       );
     });
 

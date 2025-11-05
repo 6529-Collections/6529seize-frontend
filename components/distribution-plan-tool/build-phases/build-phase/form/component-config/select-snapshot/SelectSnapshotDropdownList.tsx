@@ -27,7 +27,7 @@ export default function SelectSnapshotDropdownList({
           />
         ))}
       {snapshots.length === 0 && (
-        <li className="tw-p-2 tw-text-neutral-300">No snapshots found</li>
+        <li className="tw-p-2 tw-text-iron-300">No snapshots found</li>
       )}
     </ul>
   );

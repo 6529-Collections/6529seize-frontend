@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import {
-  DistributionPlanSnapshot,
-  PhaseGroupSnapshotConfig,
-  TopHolderType,
-} from "@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal";
-import AllowlistToolAnimationWrapper from "@/components/allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
 import { Pool } from "@/components/allowlist-tool/allowlist-tool.types";
-import FinalizeSnapshotsTableRow from "./FinalizeSnapshotsTableRow";
+import AllowlistToolAnimationWrapper from "@/components/allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
+import {
+    DistributionPlanSnapshot,
+    PhaseGroupSnapshotConfig,
+    TopHolderType,
+} from "@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal";
 import { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
+import { useEffect, useState } from "react";
+import FinalizeSnapshotsTableRow from "./FinalizeSnapshotsTableRow";
 
 export interface FinalizeSnapshotRow {
   readonly groupSnapshotId: string;
@@ -135,46 +135,46 @@ export default function FinalizeSnapshotsTable({
   return (
     <div className="tw-mt-6 tw-flow-root">
       <div className="tw-overflow-x-auto tw-ring-1 tw-ring-white/10 tw-rounded-lg">
-        <table className="tw-min-w-full tw-divide-y tw-divide-neutral-700/60">
-          <thead className="tw-bg-neutral-800/60">
+        <table className="tw-min-w-full tw-divide-y tw-divide-iron-700/60">
+          <thead className="tw-bg-iron-800/60">
             <tr>
               <th
                 scope="col"
-                className="tw-py-3 tw-pl-4 tw-pr-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6">
+                className="tw-py-3 tw-pl-4 tw-pr-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-iron-400 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6">
                 Name
               </th>
               <th
                 scope="col"
-                className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]">
+                className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-iron-400 tw-uppercase tw-tracking-[0.25px]">
                 Wallets
               </th>
               <th
                 scope="col"
-                className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]">
+                className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-iron-400 tw-uppercase tw-tracking-[0.25px]">
                 Exclude snapshots
               </th>
               <th
                 scope="col"
-                className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]">
+                className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-iron-400 tw-uppercase tw-tracking-[0.25px]">
                 Exclude components
               </th>
               <th
                 scope="col"
-                className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]">
+                className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-iron-400 tw-uppercase tw-tracking-[0.25px]">
                 Required Tokens
               </th>
               <th
                 scope="col"
-                className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]">
+                className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-iron-400 tw-uppercase tw-tracking-[0.25px]">
                 Top holders
               </th>
 
               <th
                 scope="col"
-                className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"></th>
+                className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-iron-400 tw-uppercase tw-tracking-[0.25px]"></th>
             </tr>
           </thead>
-          <tbody className="tw-bg-neutral-800/60 tw-divide-y tw-divide-neutral-700/40">
+          <tbody className="tw-bg-iron-800/60 tw-divide-y tw-divide-iron-700/40">
             <AllowlistToolAnimationWrapper mode="wait" initial={false}>
               {rows.map((row) => (
                 <FinalizeSnapshotsTableRow

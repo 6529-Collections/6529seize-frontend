@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useEffect, useId, useRef, useState } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import React, { useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import AllowlistToolAnimationOpacity from "../animation/AllowlistToolAnimationOpacity";
 import AllowlistToolAnimationWrapper from "../animation/AllowlistToolAnimationWrapper";
-import { createPortal } from "react-dom";
 
 export enum AllowlistToolModalSize {
   SMALL = "SMALL",
@@ -74,7 +74,7 @@ export default function AllowlistToolCommonModalWrapper({
                 open
                 aria-modal="true"
                 aria-labelledby={showTitle ? titleId : undefined}
-                className={`tw-relative tw-m-0 tw-w-full tw-max-w-full tw-transform tw-rounded-lg tw-border-0 tw-bg-neutral-900 tw-text-left tw-shadow-xl tw-transition-all tw-p-0 sm:tw-my-8 sm:tw-w-full ${modalSizeClass}`}>
+                className={`tw-relative tw-m-0 tw-w-full tw-max-w-full tw-transform tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-left tw-shadow-xl tw-transition-all tw-p-0 sm:tw-my-8 sm:tw-w-full ${modalSizeClass}`}>
                 {showTitle && (
                   <div className="tw-absolute tw-right-4 tw-top-6 tw-flex tw-justify-between tw-items-center">
                     <p
@@ -88,7 +88,7 @@ export default function AllowlistToolCommonModalWrapper({
                         onClose();
                       }}
                       type="button"
-                      className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-neutral-900 tw-border-0 tw-text-neutral-400 hover:tw-text-neutral-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out">
+                      className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out">
                       <span className="sr-only tw-text-sm">Close</span>
                       <XMarkIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" aria-hidden="true" />
                     </button>

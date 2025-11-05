@@ -19,7 +19,7 @@ export default function ProfileActivityLogNFTAccount({
       <span className="tw-whitespace-nowrap tw-text-base tw-text-iron-300 tw-font-medium">
         NFT Account
       </span>
-      <div className="tw-flex tw-items-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-100">
+      <div className="tw-flex tw-items-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-200">
         <SocialStatementIcon
           statementType={log.contents.statement.statement_type}
         />

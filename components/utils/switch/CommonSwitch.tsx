@@ -13,7 +13,7 @@ export default function CommonSwitch({
   setIsOn,
 }: CommonSwitchProps): React.JSX.Element {
   const onBackground = "tw-bg-primary-500";
-  const offBackground = "tw-bg-neutral-700";
+  const offBackground = "tw-bg-iron-700";
   const toggleOnPosition = "tw-translate-x-5";
   const toggleOffPosition = "tw-translate-x-0";
 

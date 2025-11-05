@@ -23,7 +23,7 @@ export default function UserPageLayout({
         profile={initialProfile}
         handleOrWallet={normalizedHandleOrWallet}
       />
-      <div className="tw-bg-iron-950 tw-min-h-screen tw-pb-16 lg:tw-pb-20">
+      <div className="tw-bg-black tw-min-h-screen tw-pb-16 lg:tw-pb-20 tw-border-r tw-border-iron-800 tw-border-solid tw-border-y-0 tw-border-l-0">
         <UserPageHeader
           profile={initialProfile}
           handleOrWallet={normalizedHandleOrWallet}

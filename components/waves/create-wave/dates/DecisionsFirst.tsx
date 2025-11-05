@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import CommonCalendar from "@/components/utils/calendar/CommonCalendar";
 import TimePicker from "@/components/common/TimePicker";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import TooltipIconButton from "@/components/common/TooltipIconButton";
+import CommonCalendar from "@/components/utils/calendar/CommonCalendar";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { useCallback, useEffect, useState } from "react";
 
 interface DecisionsFirstProps {
   readonly firstDecisionTime: number;
@@ -128,7 +128,7 @@ export default function DecisionsFirst({
   return (
     <div className="tw-col-span-2">
       <div className="tw-flex tw-items-center tw-gap-x-2 tw-mb-3">
-        <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
+        <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
           First Winners Announcement
         </p>
         <TooltipIconButton

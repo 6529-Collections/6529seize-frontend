@@ -16,36 +16,36 @@ export default function DistributionPlanToolPlansTable({
         <div className="-tw-mx-4 tw-overflow-x-auto sm:-tw-mx-6 lg:-tw-mx-8">
           <div className="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-6 lg:tw-px-8">
             <div className="tw-overflow-hidden tw-shadow tw-ring-1 tw-ring-white/10 tw-rounded-lg">
-              <table className="tw-min-w-full tw-divide-y tw-divide-neutral-700/60">
-                <thead className="tw-bg-neutral-800/60">
+              <table className="tw-min-w-full tw-divide-y tw-divide-iron-700/60">
+                <thead className="tw-bg-iron-800/60">
                   <tr>
                     <th
                       scope="col"
-                      className="tw-py-3 tw-px-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6"
+                      className="tw-py-3 tw-px-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-iron-400 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6"
                     >
                       Name
                     </th>
                     <th
                       scope="col"
-                      className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
+                      className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-iron-400 tw-uppercase tw-tracking-[0.25px]"
                     >
                       Description
                     </th>
                     <th
                       scope="col"
-                      className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]"
+                      className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-iron-400 tw-uppercase tw-tracking-[0.25px]"
                     >
                       Date
                     </th>
                     <th
                       scope="col"
-                      className="tw-sr-only tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px] sm:tw-pr-6"
+                      className="tw-sr-only tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-iron-400 tw-uppercase tw-tracking-[0.25px] sm:tw-pr-6"
                     >
                       Delete
                     </th>
                   </tr>
                 </thead>
-                <tbody className="tw-bg-neutral-900 tw-divide-y tw-divide-neutral-700/40">
+                <tbody className="tw-bg-iron-900 tw-divide-y tw-divide-iron-700/40">
                   {plans.map((plan) => (
                     <DistributionPlanToolPlansTableItem
                       plan={plan}

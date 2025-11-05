@@ -175,7 +175,7 @@ export default function ProfileActivityLogs({
       {logs ? (
         <div>
           {logs?.data.length ? (
-            <div className="tw-flow-root tw-scroll-py-3 tw-overflow-auto">
+            <div className="tw-flow-root tw-scroll-py-3 tw-overflow-y-auto tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
               <ProfileActivityLogsList
                 logs={logs.data}
                 user={initialParams.handleOrWallet}

@@ -11,10 +11,10 @@ export default function CreateCustomSnapshotFormTableItem({
 }) {
   return (
     <tr>
-      <td className="tw-w-8 tw-whitespace-nowrap tw-py-3.5 tw-pl-4 tw-pr-3 tw-text-sm tw-font-light tw-text-neutral-400 sm:pl-6">
+      <td className="tw-w-8 tw-whitespace-nowrap tw-py-3.5 tw-pl-4 tw-pr-3 tw-text-sm tw-font-light tw-text-iron-400 sm:pl-6">
         {index + 1}
       </td>
-      <td className="tw-whitespace-nowrap tw-py-3.5 tw-pl-3 tw-pr-3 tw-text-sm tw-font-medium tw-text-neutral-50 sm:pl-6">
+      <td className="tw-whitespace-nowrap tw-py-3.5 tw-pl-3 tw-pr-3 tw-text-sm tw-font-medium tw-text-iron-50 sm:pl-6">
         {token.owner}
       </td>
       <td className="tw-whitespace-nowrap tw-py-3.5 tw-pl-3 tw-pr-4 tw-text-right tw-text-sm tw-font-medium sm:tw-pr-6">
@@ -22,7 +22,7 @@ export default function CreateCustomSnapshotFormTableItem({
           type="button"
           title="Delete"
           onClick={() => onRemoveToken(index)}
-          className="tw-rounded-full tw-group tw-p-2 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-neutral-400 tw-bg-neutral-400/10 tw-ring-neutral-400/20"
+          className="tw-rounded-full tw-group tw-p-2 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-400 tw-bg-iron-400/10 tw-ring-iron-400/20"
         >
           <svg
             className="tw-h-4 tw-w-4 group-hover:tw-text-error tw-transition tw-duration-300 tw-ease-out"

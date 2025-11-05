@@ -1,6 +1,5 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
 import BuildPhaseTableHeader from '@/components/distribution-plan-tool/build-phases/build-phase/table/BuildPhaseTableHeader';
+import { render, screen } from '@testing-library/react';
 
 describe('BuildPhaseTableHeader', () => {
   it('renders the expected column headers', () => {
@@ -22,6 +21,6 @@ describe('BuildPhaseTableHeader', () => {
       </table>
     );
     const thead = container.querySelector('thead');
-    expect(thead).toHaveClass('tw-bg-neutral-800');
+    expect(thead).toHaveClass('tw-bg-iron-800');
   });
 });

@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { RatingStats } from "@/entities/IProfile";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import UserPageRepModifyModal from "@/components/user/rep/modify-rep/UserPageRepModifyModal";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { AnimatePresence } from "framer-motion";
 export default function UserPageRepRepsTableItem({
   rep,
   profile,
@@ -57,7 +57,7 @@ export default function UserPageRepRepsTableItem({
               ? formatNumberWithCommas(rep.rater_contribution)
               : " "}
           </td>
-          <CommonAnimationWrapper mode="sync" initial={true}>
+          <AnimatePresence mode="sync" initial={true}>
             {isEditRepModalOpen && (
               <CommonAnimationOpacity
                 key="modal"
@@ -71,7 +71,7 @@ export default function UserPageRepRepsTableItem({
                 />
               </CommonAnimationOpacity>
             )}
-          </CommonAnimationWrapper>
+          </AnimatePresence>
         </>
       )}
     </tr>

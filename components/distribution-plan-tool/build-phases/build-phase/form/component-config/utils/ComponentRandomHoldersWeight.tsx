@@ -34,7 +34,7 @@ export default function ComponentRandomHoldersWeight({
   ];
   return (
     <fieldset>
-      <legend className="tw-text-sm tw-font-medium tw-text-neutral-100">
+      <legend className="tw-text-sm tw-font-medium tw-text-iron-100">
         Weighted by
       </legend>
       <div className="tw-space-y-4 sm:tw-flex sm:tw-items-center sm:tw-space-x-10 sm:tw-space-y-0">

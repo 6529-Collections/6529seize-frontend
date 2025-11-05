@@ -1,21 +1,21 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { AllowlistResult } from "@/components/allowlist-tool/allowlist-tool.types";
 import DistributionPlanTableRowWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper";
-import {
-  FetchResultsType,
-  FullResultWallet,
-  ReviewDistributionPlanTableItem,
-  ReviewDistributionPlanTableItemType,
-  ReviewDistributionPlanTablePhase,
-} from "./ReviewDistributionPlanTable";
+import RoundedCsvIconButton from "@/components/distribution-plan-tool/common/RoundedCsvIconButton";
+import RoundedJsonIconButton from "@/components/distribution-plan-tool/common/RoundedJsonIconButton";
+import RoundedManifoldIconButton from "@/components/distribution-plan-tool/common/RoundedManifoldIconButton";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import { AllowlistResult } from "@/components/allowlist-tool/allowlist-tool.types";
-import RoundedJsonIconButton from "@/components/distribution-plan-tool/common/RoundedJsonIconButton";
-import RoundedCsvIconButton from "@/components/distribution-plan-tool/common/RoundedCsvIconButton";
-import RoundedManifoldIconButton from "@/components/distribution-plan-tool/common/RoundedManifoldIconButton";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
+import { useContext, useEffect, useState } from "react";
+import {
+    FetchResultsType,
+    FullResultWallet,
+    ReviewDistributionPlanTableItem,
+    ReviewDistributionPlanTableItemType,
+    ReviewDistributionPlanTablePhase,
+} from "./ReviewDistributionPlanTable";
 import { SubscriptionLinks } from "./ReviewDistributionPlanTableSubscription";
 
 export default function ReviewDistributionPlanTableRow({
@@ -176,14 +176,14 @@ export default function ReviewDistributionPlanTableRow({
         "tw-whitespace-nowrap tw-py-4 tw-pr-3 tw-text-sm  tw-text-white tw-pl-8 sm:tw-pl-12 tw-font-light"
       );
       setCommonClasses(
-        "tw-whitespace-nowrap tw-pl-3 tw-pr-4 tw-py-4 tw-text-sm tw-text-neutral-300 tw-font-light"
+        "tw-whitespace-nowrap tw-pl-3 tw-pr-4 tw-py-4 tw-text-sm tw-text-iron-300 tw-font-light"
       );
     } else {
       setNameClasses(
-        "tw-whitespace-nowrap tw-py-4 tw-pr-3 tw-text-sm tw-text-neutral-50 tw-pl-4 sm:tw-pl-6 tw-font-bold"
+        "tw-whitespace-nowrap tw-py-4 tw-pr-3 tw-text-sm tw-text-iron-50 tw-pl-4 sm:tw-pl-6 tw-font-bold"
       );
       setCommonClasses(
-        "tw-whitespace-nowrap tw-pl-3 tw-pr-4 tw-py-4 tw-text-sm tw-text-neutral-50 tw-font-bold"
+        "tw-whitespace-nowrap tw-pl-3 tw-pr-4 tw-py-4 tw-text-sm tw-text-iron-50 tw-font-bold"
       );
     }
   }, [item.type]);

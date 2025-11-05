@@ -1,12 +1,12 @@
 "use client";
 
+import {
+    AllowlistOperationCode,
+} from "@/components/allowlist-tool/allowlist-tool.types";
 import { useContext, useState } from "react";
 import {
-  AllowlistOperationCode,
-} from "@/components/allowlist-tool/allowlist-tool.types";
-import {
-  DistributionPlanToolContext,
-  DistributionPlanToolStep,
+    DistributionPlanToolContext,
+    DistributionPlanToolStep,
 } from "../DistributionPlanToolContext";
 
 const STEP_META: Record<
@@ -143,7 +143,7 @@ export default function StepHeader({
         </div>
       </div>
       <div className="tw-max-w-3xl">
-        <p className="tw-mb-0 tw-block tw-font-light tw-text-base tw-text-neutral-400">
+        <p className="tw-mb-0 tw-block tw-font-light tw-text-base tw-text-iron-400">
           {STEP_META[step].description} {description}
         </p>
       </div>

@@ -32,7 +32,7 @@ export default function ComponentConfigNextBtn({
   useEffect(() => {
     if (disabled) {
       setButtonClasses(
-        "tw-flex tw-items-center tw-justify-center tw-relative tw-bg-neutral-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-border-neutral-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+        "tw-flex tw-items-center tw-justify-center tw-relative tw-bg-iron-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-border-iron-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
       );
     } else {
       setButtonClasses(
@@ -49,7 +49,7 @@ export default function ComponentConfigNextBtn({
           <button
             onClick={onSkip}
             type="button"
-            className="tw-cursor-pointer tw-bg-transparent hover:tw-bg-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out">
+            className="tw-cursor-pointer tw-bg-transparent hover:tw-bg-iron-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid tw-border-iron-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out">
             Skip
           </button>
         )}
@@ -71,7 +71,7 @@ export default function ComponentConfigNextBtn({
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg">
                 <path
-                  className="tw-text-neutral-600"
+                  className="tw-text-iron-600"
                   d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
                   fill="currentColor"></path>
                 <path

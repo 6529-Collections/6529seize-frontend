@@ -1,17 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
 import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
+import { useEffect, useState } from "react";
 import {
-  DistributionPlanSnapshot,
-  PhaseGroupConfig,
-  PhaseGroupSnapshotConfig,
-  RandomHoldersType,
+    DistributionPlanSnapshot,
+    PhaseGroupConfig,
+    PhaseGroupSnapshotConfig,
+    RandomHoldersType,
 } from "../BuildPhaseFormConfigModal";
-import FinalizeSnapshotsTable from "./snapshots-table/FinalizeSnapshotsTable";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import ComponentConfigMeta from "./ComponentConfigMeta";
-import { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
+import FinalizeSnapshotsTable from "./snapshots-table/FinalizeSnapshotsTable";
 
 export default function FinalizeComponent({
   onSave,
@@ -85,16 +85,16 @@ export default function FinalizeComponent({
       )}
       <div className="tw-mt-2 tw-inline-flex tw-gap-x-6">
         {!!phaseGroupConfig.randomHoldersFilter?.value && (
-          <span className="tw-block tw-text-sm tw-text-neutral-400 tw-font-light">
+          <span className="tw-block tw-text-sm tw-text-iron-400 tw-font-light">
             Random wallets:{" "}
-            <span className="tw-font-medium  tw-text-neutral-100">
+            <span className="tw-font-medium  tw-text-iron-100">
               {randomWalletsText}
             </span>
           </span>
         )}
-        <span className="tw-block tw-text-xs tw-text-neutral-400 tw-font-light">
+        <span className="tw-block tw-text-xs tw-text-iron-400 tw-font-light">
           Max mints per wallet:{" "}
-          <span className="tw-pl-1 tw-font-medium tw-text-neutral-100">
+          <span className="tw-pl-1 tw-font-medium tw-text-iron-100">
             {" "}
             {phaseGroupConfig.maxMintCount}
           </span>
@@ -111,7 +111,7 @@ export default function FinalizeComponent({
             disabled={loading}
             onClick={onStartAgain}
             type="button"
-            className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent hover:tw-bg-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out">
+            className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent hover:tw-bg-iron-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid tw-border-iron-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out">
             Start again
           </button>
           <button
@@ -131,7 +131,7 @@ export default function FinalizeComponent({
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg">
                 <path
-                  className="tw-text-neutral-600"
+                  className="tw-text-iron-600"
                   d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
                   fill="currentColor"></path>
                 <path

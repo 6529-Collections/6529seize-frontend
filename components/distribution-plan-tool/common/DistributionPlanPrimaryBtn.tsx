@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function DistributionPlanPrimaryBtn({
   children,
@@ -30,7 +30,7 @@ export default function DistributionPlanPrimaryBtn({
   useEffect(() => {
     if (isDisabled) {
       setButtonClasses(
-        "tw-flex tw-items-center tw-justify-center tw-relative tw-bg-neutral-700 tw-px-4 tw-py-3 tw-font-medium tw-text-sm tw-text-white tw-border tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+        "tw-flex tw-items-center tw-justify-center tw-relative tw-bg-iron-700 tw-px-4 tw-py-3 tw-font-medium tw-text-sm tw-text-white tw-border tw-border-iron-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
       );
     } else {
       setButtonClasses(
@@ -57,7 +57,7 @@ export default function DistributionPlanPrimaryBtn({
           fill="none"
           xmlns="http://www.w3.org/2000/svg">
           <path
-            className="tw-text-neutral-600"
+            className="tw-text-iron-600"
             d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
             fill="currentColor"></path>
           <path

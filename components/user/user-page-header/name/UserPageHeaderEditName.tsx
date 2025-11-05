@@ -10,6 +10,7 @@ import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useContext, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
 export default function UserPageHeaderEditName({
   profile,
@@ -110,31 +111,39 @@ export default function UserPageHeaderEditName({
   const [available, setAvailable] = useState<boolean>(false);
   const [checkingUsername, setCheckingUsername] = useState<boolean>(false);
 
-  return (
-    <div className="tw-relative tw-z-10">
-      <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50"></div>
-      <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
-        <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-text-center sm:tw-items-center tw-p-2 lg:tw-p-0">
-          <div
-            ref={modalRef}
-            className={`tw-max-w-full md:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6 lg:tw-p-8`}>
-            <form onSubmit={onSubmit} className="tw-flex tw-flex-col">
-              <UserSettingsUsername
-                userName={userName}
-                originalUsername={profile.handle ?? ""}
-                setUserName={setUserName}
-                setIsAvailable={setAvailable}
-                setIsLoading={setCheckingUsername}
-              />
+  if (typeof document === "undefined") {
+    return null;
+  }
 
-              <UserSettingsSave
-                loading={mutating}
-                disabled={!haveChanges || !available || checkingUsername}
-              />
-            </form>
-          </div>
+  return createPortal(
+    <div className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1100] tw-cursor-default">
+      <button
+        type="button"
+        aria-label="Close edit username modal"
+        className="tw-absolute tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px] tw-cursor-pointer tw-border-none tw-p-0"
+        onClick={onClose}
+      />
+      <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-overflow-y-auto tw-items-center tw-justify-center tw-p-2 lg:tw-p-4">
+        <div
+          ref={modalRef}
+          className="tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 tw-p-6 lg:tw-p-8 md:tw-max-w-xl">
+          <form onSubmit={onSubmit} className="tw-flex tw-flex-col">
+            <UserSettingsUsername
+              userName={userName}
+              originalUsername={profile.handle ?? ""}
+              setUserName={setUserName}
+              setIsAvailable={setAvailable}
+              setIsLoading={setCheckingUsername}
+            />
+
+            <UserSettingsSave
+              loading={mutating}
+              disabled={!haveChanges || !available || checkingUsername}
+            />
+          </form>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

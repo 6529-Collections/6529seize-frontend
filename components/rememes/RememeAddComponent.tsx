@@ -76,28 +76,39 @@ export default function RememeAddComponent(props: Readonly<Props>) {
 
     try {
       const split = tokenIds.split(",");
-      split.map((s) => {
-        if (s.includes("-")) {
-          const range = s.split("-");
+      for (const s of split) {
+        const trimmed = s.trim();
+        if (trimmed.includes("-")) {
+          const range = trimmed.split("-");
           if (range.length === 2) {
-            const start = parseInt(range[0]);
-            const end = parseInt(range[1]);
-            if (start < end) {
-              const rangeArray = [];
+            const start = Number.parseInt(range[0].trim());
+            const end = Number.parseInt(range[1].trim());
+            const MAX_RANGE_SIZE = 1000;
+            if (
+              !Number.isNaN(start) &&
+              !Number.isNaN(end) &&
+              start <= end &&
+              end - start < MAX_RANGE_SIZE
+            ) {
               for (let i = start; i <= end; i++) {
-                rangeArray.push(i);
-              }
-              rangeArray.map((i) => {
                 ids.push(i.toString());
-              });
+              }
+            } else if (
+              !Number.isNaN(start) &&
+              !Number.isNaN(end) &&
+              end - start >= MAX_RANGE_SIZE
+            ) {
+              throw new Error(
+                `Range too large: ${start}-${end} (max ${MAX_RANGE_SIZE})`
+              );
             }
           }
-        } else {
-          ids.push(s);
+        } else if (trimmed) {
+          ids.push(trimmed);
         }
-      });
-      return ids;
-    } catch (e) {
+      }
+      return ids.length > 0 ? ids : undefined;
+    } catch {
       return undefined;
     }
   }

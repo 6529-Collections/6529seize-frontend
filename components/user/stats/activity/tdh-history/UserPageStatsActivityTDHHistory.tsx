@@ -1,10 +1,10 @@
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { TDHHistory } from "@/entities/ITDH";
-import { useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "@/services/api/common-api";
-import UserPageStatsActivityTDHHistoryCharts from "./UserPageStatsActivityTDHHistoryCharts";
-import CommonCardSkeleton from "@/components/utils/animation/CommonCardSkeleton";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import CommonCardSkeleton from "@/components/utils/animation/CommonCardSkeleton";
+import { TDHHistory } from "@/entities/ITDH";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { commonApiFetch } from "@/services/api/common-api";
+import { useQuery } from "@tanstack/react-query";
+import UserPageStatsActivityTDHHistoryCharts from "./UserPageStatsActivityTDHHistoryCharts";
 
 export default function UserPageStatsActivityTDHHistory({
   profile,
@@ -45,7 +45,7 @@ export default function UserPageStatsActivityTDHHistory({
   return (
     <div className="tw-mt-4 md:tw-mt-5">
       <div className="tw-flex">
-        <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
+        <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
           TDH History
         </h3>
       </div>

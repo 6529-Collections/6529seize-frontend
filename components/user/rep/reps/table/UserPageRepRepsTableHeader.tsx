@@ -27,7 +27,7 @@ export default function UserPageRepRepsTableHeader({
   useEffect(() => setTypes(getTypes(showMyRates)), [showMyRates]);
 
   return (
-    <thead className="tw-bg-iron-900 tw-border-b tw-border-x-0 tw-border-t-0 tw-border-white/10">
+    <thead className="tw-bg-iron-950 tw-border-b tw-border-x-0 tw-border-t-0 tw-border-white/10">
       <tr>
         <th
           scope="col"

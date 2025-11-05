@@ -1,6 +1,5 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
 import CreatePhasesTableHeader from '@/components/distribution-plan-tool/create-phases/table/CreatePhasesTableHeader';
+import { render, screen } from '@testing-library/react';
 
 describe('CreatePhasesTableHeader', () => {
   it('renders expected column headers', () => {
@@ -20,6 +19,6 @@ describe('CreatePhasesTableHeader', () => {
       </table>
     );
     const thead = container.querySelector('thead');
-    expect(thead).toHaveClass('tw-bg-neutral-800');
+    expect(thead).toHaveClass('tw-bg-iron-800');
   });
 });

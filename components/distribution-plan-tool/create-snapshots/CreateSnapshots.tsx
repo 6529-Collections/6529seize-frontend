@@ -1,23 +1,23 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
 import {
-  DistributionPlanToolContext,
-  DistributionPlanToolStep,
-} from "../DistributionPlanToolContext";
-import {
-  AllowlistOperationCode,
-  DistributionPlanTokenPoolDownload,
-  DistributionPlanTokenPoolDownloadStatus,
+    AllowlistOperationCode,
+    DistributionPlanTokenPoolDownload,
+    DistributionPlanTokenPoolDownloadStatus,
 } from "@/components/allowlist-tool/allowlist-tool.types";
-import CreateSnapshotTable from "./table/CreateSnapshotTable";
-import CreateSnapshotForm from "./form/CreateSnapshotForm";
-import StepHeader from "../common/StepHeader";
+import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
+import { useContext, useEffect, useState } from "react";
+import { useInterval } from "react-use";
+import DistributionPlanEmptyTablePlaceholder from "../common/DistributionPlanEmptyTablePlaceholder";
 import DistributionPlanNextStepBtn from "../common/DistributionPlanNextStepBtn";
 import DistributionPlanStepWrapper from "../common/DistributionPlanStepWrapper";
-import DistributionPlanEmptyTablePlaceholder from "../common/DistributionPlanEmptyTablePlaceholder";
-import { useInterval } from "react-use";
-import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
+import StepHeader from "../common/StepHeader";
+import {
+    DistributionPlanToolContext,
+    DistributionPlanToolStep,
+} from "../DistributionPlanToolContext";
+import CreateSnapshotForm from "./form/CreateSnapshotForm";
+import CreateSnapshotTable from "./table/CreateSnapshotTable";
 
 export interface CreateSnapshotSnapshot {
   id: string;
@@ -140,7 +140,7 @@ export default function CreateSnapshots() {
   return (
     <div>
       <StepHeader step={DistributionPlanToolStep.CREATE_SNAPSHOTS} />
-      <p className="tw-mt-2 tw-block tw-font-semibold tw-text-sm tw-text-neutral-100">
+      <p className="tw-mt-2 tw-block tw-font-semibold tw-text-sm tw-text-iron-100">
         * Please note: During this stage, some processes may take a moment to
         load.
       </p>

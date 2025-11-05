@@ -1,7 +1,7 @@
 export default function UserPageIdentityActivityLogContactIcon() {
   return (
     <svg
-      className="tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-100"
+      className="tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-iron-100"
       aria-hidden="true"
       viewBox="0 0 24 24"
       fill="none"

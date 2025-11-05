@@ -1,21 +1,21 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
-import DistributionPlanTableHeaderWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableHeaderWrapper";
 import {
-  FetchResultsType,
-  FullResultWallet,
-  ReviewDistributionPlanTablePhase,
-} from "./ReviewDistributionPlanTable";
-import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
-import {
-  AllowlistResult,
+    AllowlistResult,
 } from "@/components/allowlist-tool/allowlist-tool.types";
-import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import RoundedJsonIconButton from "@/components/distribution-plan-tool/common/RoundedJsonIconButton";
+import DistributionPlanTableHeaderWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableHeaderWrapper";
 import RoundedCsvIconButton from "@/components/distribution-plan-tool/common/RoundedCsvIconButton";
+import RoundedJsonIconButton from "@/components/distribution-plan-tool/common/RoundedJsonIconButton";
 import RoundedManifoldIconButton from "@/components/distribution-plan-tool/common/RoundedManifoldIconButton";
+import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
+import { useContext, useEffect, useState } from "react";
+import {
+    FetchResultsType,
+    FullResultWallet,
+    ReviewDistributionPlanTablePhase,
+} from "./ReviewDistributionPlanTable";
 
 export default function ReviewDistributionPlanTableHeader({
   rows,
@@ -125,23 +125,23 @@ export default function ReviewDistributionPlanTableHeader({
     <DistributionPlanTableHeaderWrapper>
       <th
         scope="col"
-        className="tw-py-3 tw-pl-4 tw-pr-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6">
+        className="tw-py-3 tw-pl-4 tw-pr-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-iron-400 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6">
         Name
       </th>
 
       <th
         scope="col"
-        className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]">
+        className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-iron-400 tw-uppercase tw-tracking-[0.25px]">
         Description
       </th>
       <th
         scope="col"
-        className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]">
+        className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-iron-400 tw-uppercase tw-tracking-[0.25px]">
         Wallets
       </th>
       <th
         scope="col"
-        className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-neutral-400 tw-uppercase tw-tracking-[0.25px]">
+        className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-iron-400 tw-uppercase tw-tracking-[0.25px]">
         Spots
       </th>
       <th

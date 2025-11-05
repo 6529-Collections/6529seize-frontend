@@ -22,6 +22,7 @@ import {
 } from "@/services/api/common-api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { FormEvent, useContext, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
 export default function UserPageHeaderEditPfp({
   profile,
@@ -186,53 +187,61 @@ export default function UserPageHeaderEditPfp({
     await updatePfp.mutateAsync(formData);
   };
 
-  return (
-    <div className="tw-relative tw-z-50">
-      <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50"></div>
-      <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
-        <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-text-center sm:tw-items-center tw-p-2 lg:tw-p-0">
-          <div
-            ref={modalRef}
-            className={`sm:tw-max-w-3xl md:tw-max-w-2xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6 lg:tw-p-8`}>
-            <form onSubmit={onSubmit}>
-              <UserSettingsImgSelectMeme
-                memes={memes ?? []}
-                onMeme={setSelectedMemeAndRemoveFile}
-              />
+  if (typeof document === "undefined") {
+    return null;
+  }
 
-              <div className="tw-inline-flex tw-items-center tw-my-2 tw-justify-center tw-w-full">
-                <hr className="tw-w-full tw-h-px tw-border tw-bg-iron-800" />
-                <span className="tw-absolute tw-px-3 tw-font-semibold tw-text-sm tw-uppercase tw-text-iron-300">
-                  or
-                </span>
-              </div>
+  return createPortal(
+    <div className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1100] tw-cursor-default">
+      <button
+        type="button"
+        aria-label="Close edit profile picture modal"
+        className="tw-absolute tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px] tw-cursor-pointer tw-border-none tw-p-0"
+        onClick={onClose}
+      />
+      <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-overflow-y-auto tw-items-center tw-justify-center tw-p-2 lg:tw-p-4">
+        <div
+          ref={modalRef}
+          className="sm:tw-max-w-3xl md:tw-max-w-2xl tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6 lg:tw-p-8">
+          <form onSubmit={onSubmit}>
+            <UserSettingsImgSelectMeme
+              memes={memes ?? []}
+              onMeme={setSelectedMemeAndRemoveFile}
+            />
 
-              <UserSettingsImgSelectFile
-                imageToShow={imageToShow}
-                setFile={setFileAndRemoveMeme}
-              />
-              {error && (
-                <p className="tw-mt-3 tw-text-sm tw-text-red">{error}</p>
-              )}
-              <div className="tw-pt-6">
-                <div className="sm:tw-flex sm:tw-flex-row-reverse tw-gap-x-3">
-                  <UserSettingsSave
-                    loading={saving}
-                    disabled={!file && !selectedMeme}
-                    title="Save PFP"
-                  />
-                  <SecondaryButton
-                    disabled={saving}
-                    onClicked={onClose}
-                    className="tw-w-full sm:tw-w-auto tw-mt-3 sm:tw-mt-0">
-                    Cancel
-                  </SecondaryButton>
-                </div>
+            <div className="tw-inline-flex tw-items-center tw-my-2 tw-justify-center tw-w-full">
+              <hr className="tw-w-full tw-h-px tw-border tw-bg-iron-800" />
+              <span className="tw-absolute tw-px-3 tw-font-semibold tw-text-sm tw-uppercase tw-text-iron-300">
+                or
+              </span>
+            </div>
+
+            <UserSettingsImgSelectFile
+              imageToShow={imageToShow}
+              setFile={setFileAndRemoveMeme}
+            />
+            {error && (
+              <p className="tw-mt-3 tw-text-sm tw-text-red">{error}</p>
+            )}
+            <div className="tw-pt-6">
+              <div className="sm:tw-flex sm:tw-flex-row-reverse tw-gap-x-3">
+                <UserSettingsSave
+                  loading={saving}
+                  disabled={!file && !selectedMeme}
+                  title="Save PFP"
+                />
+                <SecondaryButton
+                  disabled={saving}
+                  onClicked={onClose}
+                  className="tw-w-full sm:tw-w-auto tw-mt-3 sm:tw-mt-0">
+                  Cancel
+                </SecondaryButton>
               </div>
-            </form>
-          </div>
+            </div>
+          </form>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

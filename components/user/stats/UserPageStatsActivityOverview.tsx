@@ -1,19 +1,19 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
-import { Accordion, Col, Container, Row, Table } from "react-bootstrap";
 import {
-  AggregatedActivity,
-  AggregatedActivityMemes,
+    AggregatedActivity,
+    AggregatedActivityMemes,
 } from "@/entities/IAggregatedActivity";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
+import { Fragment, useEffect, useState } from "react";
+import { Accordion, Col, Container, Row, Table } from "react-bootstrap";
 import { getStatsPath } from "./userPageStats.helpers";
 import styles from "./UserPageStats.module.scss";
 import {
-  UserPageStatsTableHead,
-  UserPageStatsTableHr,
+    UserPageStatsTableHead,
+    UserPageStatsTableHr,
 } from "./UserPageStatsTableShared";
 
 function printEthValue(value: number | undefined) {
@@ -71,7 +71,7 @@ export default function UserPageStatsActivityOverview({
   return (
     <div className="pt-2 pb-2">
       <div className="tw-flex pt-2 pb-2">
-        <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
+        <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
           Activity Overview
         </h3>
       </div>

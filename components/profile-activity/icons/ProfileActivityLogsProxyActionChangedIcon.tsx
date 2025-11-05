@@ -1,7 +1,7 @@
 export default function ProfileActivityLogsProxyActionChangedIcon() {
   return (
     <svg
-      className="tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-100"
+      className="tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-iron-100"
       width="24"
       height="24"
       viewBox="0 0 24 24"

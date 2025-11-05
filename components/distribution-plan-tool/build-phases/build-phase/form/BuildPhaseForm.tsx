@@ -1,14 +1,14 @@
 "use client";
 
-import { useContext, useState } from "react";
+import AllowlistToolCommonModalWrapper, {
+    AllowlistToolModalSize,
+} from "@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
 import DistributionPlanAddOperationBtn from "@/components/distribution-plan-tool/common/DistributionPlanAddOperationBtn";
-import AllowlistToolCommonModalWrapper, {
-  AllowlistToolModalSize,
-} from "@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
-import BuildPhaseFormConfigModal from "./BuildPhaseFormConfigModal";
+import { useContext, useState } from "react";
 import { Tooltip } from "react-tooltip";
+import BuildPhaseFormConfigModal from "./BuildPhaseFormConfigModal";
 
 export default function BuildPhaseForm({
   selectedPhase,
@@ -52,11 +52,11 @@ export default function BuildPhaseForm({
     <>
       <form onSubmit={handleSubmit} className="tw-flex tw-items-end tw-gap-x-4">
         <div className="tw-w-80">
-          <label className="tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100 tw-inline-flex">
+          <label className="tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100 tw-inline-flex">
             Group Name
             <div className="tw-pl-2">
               <svg
-                className="tw-h-5 tw-w-5 tw-text-neutral-500 tw-cursor-pointer"
+                className="tw-h-5 tw-w-5 tw-text-iron-500 tw-cursor-pointer"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -79,16 +79,16 @@ export default function BuildPhaseForm({
               onChange={handleFormChange}
               required
               autoComplete="off"
-              className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 placeholder:tw-text-neutral-500  focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-neutral-700 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700/40 placeholder:tw-text-iron-500  focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-iron-700 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
             />
           </div>
         </div>
         <div className="tw-w-80">
-          <label className="tw-inline-flex tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
+          <label className="tw-inline-flex tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
             Description
             <div className="tw-pl-2">
               <svg
-                className="tw-h-5 tw-w-5 tw-text-neutral-500 tw-cursor-pointer"
+                className="tw-h-5 tw-w-5 tw-text-iron-500 tw-cursor-pointer"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -111,7 +111,7 @@ export default function BuildPhaseForm({
               value={formValues.description}
               onChange={handleFormChange}
               autoComplete="off"
-              className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-neutral-700 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700/40 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-iron-700 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
             />
           </div>
         </div>

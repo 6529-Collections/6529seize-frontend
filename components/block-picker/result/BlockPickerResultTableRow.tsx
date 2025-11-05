@@ -2,7 +2,7 @@
 
 import { PredictBlockNumbersResponseApiModel } from "@/app/tools/block-finder/page.client";
 import AllowlistToolCommonModalWrapper, {
-  AllowlistToolModalSize,
+    AllowlistToolModalSize,
 } from "@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -19,7 +19,7 @@ export default function BlockPickerResultTableRow({
     <>
       <tr
         onClick={() => setShowModal(true)}
-        className={`tw-group hover:tw-bg-neutral-800/60 tw-transition tw-duration-300 tw-ease-out ${
+        className={`tw-group hover:tw-bg-iron-800/60 tw-transition tw-duration-300 tw-ease-out ${
           showModal ? "" : "tw-cursor-pointer"
         }`}>
         <td className="tw-align-baseline tw-w-px tw-whitespace-nowrap tw-py-3 tw-px-4 tw-text-sm tw-font-medium tw-text-white tw-text-center">

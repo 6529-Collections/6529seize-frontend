@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
+import { useState } from "react";
+import { Tooltip } from "react-tooltip";
 import { PhaseConfigStep } from "../BuildPhaseFormConfigModal";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import ComponentConfigMeta from "./ComponentConfigMeta";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
-import { Tooltip } from "react-tooltip";
 
 export default function SnapshotSelectTokenIds({
   title,
@@ -39,11 +39,11 @@ export default function SnapshotSelectTokenIds({
 
       <div className="tw-mt-6">
         <div className="tw-flex-1 tw-mt-4">
-          <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
-            <label className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
+          <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
+            <label className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
               <span>Token ID(s)</span>
               <svg
-                className="tw-h-5 tw-w-5 tw-text-neutral-500 tw-cursor-pointer"
+                className="tw-h-5 tw-w-5 tw-text-iron-500 tw-cursor-pointer"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -76,7 +76,7 @@ export default function SnapshotSelectTokenIds({
               onChange={handleChange}
               autoComplete="off"
               placeholder="Example: 1,3,54-78"
-              className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-neutral-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 placeholder:tw-text-neutral-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-neutral-700 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700/40 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-iron-700 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
             />
           </div>
         </div>

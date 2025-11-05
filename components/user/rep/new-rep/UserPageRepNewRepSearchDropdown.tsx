@@ -15,7 +15,7 @@ export default function UserPageRepNewRepSearchDropdown({
 }) {
   return (
     <div className="tw-absolute tw-z-10 tw-mt-1 tw-overflow-hidden tw-max-w-full tw-w-full tw-rounded-md tw-bg-iron-900 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
-      <div className="tw-py-1 tw-flow-root tw-max-h-[calc(240px+_-5vh)] tw-overflow-x-hidden tw-overflow-y-auto">
+      <div className="tw-py-1 tw-flow-root tw-max-h-[calc(240px+_-5vh)] tw-overflow-x-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
         <ul className="tw-flex tw-flex-col tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
           {state === RepSearchState.MIN_LENGTH_ERROR && (
             <li className="tw-group tw-justify-between tw-w-full tw-flex tw-rounded-lg tw-relative  tw-select-none tw-p-2 tw-text-iron-200 tw-font-normal tw-text-sm">

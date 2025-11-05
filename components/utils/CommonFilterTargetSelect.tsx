@@ -32,7 +32,7 @@ export default function CommonFilterTargetSelect({
           return (
             <div
               key={target.id}
-              className="tw-flex tw-items-center tw-bg-iron-900">
+              className="tw-flex tw-items-center">
               <input
                 id={inputId}
                 name={groupName}

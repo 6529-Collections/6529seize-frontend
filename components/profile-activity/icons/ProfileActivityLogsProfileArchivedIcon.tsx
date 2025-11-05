@@ -1,7 +1,7 @@
 export default function ProfileActivityLogsProfileArchivedIcon() {
   return (
     <svg
-      className="tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-100"
+      className="tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-iron-100"
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

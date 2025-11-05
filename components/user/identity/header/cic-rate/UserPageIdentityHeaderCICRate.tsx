@@ -277,7 +277,7 @@ export default function UserPageIdentityHeaderCICRate({
       className={`${
         isTooltip
           ? ""
-          : "tw-bg-iron-900 tw-px-4 tw-py-6 lg:tw-p-8 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800"
+          : "tw-bg-iron-950 tw-px-4 tw-py-6 lg:tw-p-8 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800"
       } `}>
       <UserPageIdentityHeaderCICRateStats
         isTooltip={isTooltip}
@@ -299,12 +299,12 @@ export default function UserPageIdentityHeaderCICRate({
               htmlFor="nic-rating-input"
               className={`${
                 isTooltip ? "tw-max-w-[12rem]" : "tw-w-full sm:tw-w-auto"
-              } tw-block tw-text-sm tw-font-normal tw-text-iron-300`}>
+              } tw-block tw-text-sm tw-font-normal tw-text-iron-200`}>
               Your total NIC Rating of{" "}
               <span className="tw-whitespace-nowrap">{profile.query}:</span>
             </label>
             <div className="tw-w-full tw-relative tw-flex tw-mt-1.5">
-              <span className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-iron-950 tw-rounded-l-lg tw-border tw-border-solid tw-border-iron-700 tw-px-3">
+              <span className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-iron-800 tw-rounded-l-lg tw-border tw-border-solid tw-border-iron-800 tw-px-3">
                 <svg
                   className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0 tw-text-iron-500"
                   viewBox="0 0 24 24"
@@ -342,7 +342,7 @@ export default function UserPageIdentityHeaderCICRate({
                 autoComplete="off"
                 className={`${
                   isTooltip ? "tw-max-w-[12rem]" : "tw-w-full sm:tw-w-auto"
-                } -tw-ml-0.5 tw-appearance-none tw-block tw-rounded-l-none tw-rounded-r-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-950 tw-text-iron-300 tw-font-medium tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base tw-transition tw-duration-300 tw-ease-out`}
+                } -tw-ml-0.5 tw-appearance-none tw-block tw-rounded-l-none tw-rounded-r-lg tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-py-3 tw-px-3 tw-bg-iron-900 focus:tw-bg-iron-950 tw-text-iron-100 tw-font-medium tw-caret-primary-400 tw-shadow-sm hover:tw-ring-iron-600 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base tw-transition tw-duration-300 tw-ease-out`}
               />
             </div>
           </div>

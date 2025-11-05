@@ -150,7 +150,7 @@ export default function UserPageRepNewRepSearch({
   }, [debouncedValue, isFetching, categories]);
 
   return (
-    <div className="tw-max-w-full tw-relative tw-bg-iron-900 tw-px-4 tw-py-6 lg:tw-px-8 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800">
+    <div className="tw-max-w-full tw-relative tw-bg-iron-950 tw-px-4 tw-py-6 lg:tw-px-8 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800">
       <div className="tw-w-full tw-flex tw-flex-col lg:tw-flex-row tw-gap-y-8 lg:tw-gap-x-16 lg:tw-justify-between tw-items-start">
         <div className="tw-w-full lg:tw-w-1/2">
           <UserPageRepNewRepSearchHeader
@@ -186,7 +186,7 @@ export default function UserPageRepNewRepSearch({
                     value={repSearch}
                     onChange={handleRepSearchChange}
                     onFocus={() => setIsOpen(true)}
-                    className="tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-pl-11 tw-pr-4 tw-bg-iron-950 focus:tw-bg-iron-950  tw-text-iron-300 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 placeholder:tw-text-iron-500 focus:tw-outline-none  focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base tw-transition tw-duration-300 tw-ease-out"
+                    className="tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-py-3 tw-pl-11 tw-pr-3 tw-bg-iron-900 focus:tw-bg-iron-950 tw-text-iron-100 tw-font-normal tw-caret-primary-400 tw-shadow-sm hover:tw-ring-iron-700 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-iron-700 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
                     placeholder="Category to grant rep for"
                   />
                   {checkingAvailability && (
@@ -200,7 +200,7 @@ export default function UserPageRepNewRepSearch({
             <AnimatePresence mode="wait" initial={false}>
               {isOpen && (
                 <motion.div
-                  className="tw-origin-top-right tw-absolute tw-z-10  tw-mt-1 tw-w-full tw-max-w-xs tw-rounded-lg tw-shadow-xl tw-bg-iron-900 tw-ring-1 tw-ring-black tw-ring-opacity-5"
+                  className="tw-origin-top-right tw-absolute tw-z-10  tw-mt-1 tw-w-full tw-max-w-xs tw-rounded-lg tw-shadow-xl tw-bg-iron-950 tw-ring-1 tw-ring-black tw-ring-opacity-5"
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
