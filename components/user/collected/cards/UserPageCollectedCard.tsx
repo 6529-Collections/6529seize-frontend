@@ -151,7 +151,7 @@ export default function UserPageCollectedCard({
                 />
               </button>
               <div className="tw-min-w-[2ch] tw-text-center tw-text-sm tw-tabular-nums tw-text-white">
-                {qtySelected}
+                {qtySelected}/{copiesMax}
               </div>
               <button
                 type="button"
