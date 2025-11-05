@@ -81,12 +81,12 @@ export default function RememeAddComponent(props: Readonly<Props>) {
         if (trimmed.includes("-")) {
           const range = trimmed.split("-");
           if (range.length === 2) {
-            const start = parseInt(range[0].trim());
-            const end = parseInt(range[1].trim());
+            const start = Number.parseInt(range[0].trim());
+            const end = Number.parseInt(range[1].trim());
             const MAX_RANGE_SIZE = 1000;
             if (
-              !isNaN(start) &&
-              !isNaN(end) &&
+              !Number.isNaN(start) &&
+              !Number.isNaN(end) &&
               start <= end &&
               end - start < MAX_RANGE_SIZE
             ) {
@@ -94,8 +94,8 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                 ids.push(i.toString());
               }
             } else if (
-              !isNaN(start) &&
-              !isNaN(end) &&
+              !Number.isNaN(start) &&
+              !Number.isNaN(end) &&
               end - start >= MAX_RANGE_SIZE
             ) {
               throw new Error(
