@@ -17,6 +17,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import {
   faAnglesDown,
   faAnglesUp,
+  faExclamationTriangle,
   faXmarkCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -609,7 +610,7 @@ function FooterActions({
 }) {
   if (flow === "review") {
     return (
-      <>
+      <div className="tw-flex tw-items-center tw-gap-2">
         <button
           type="button"
           onClick={onCancel}
@@ -623,7 +624,7 @@ function FooterActions({
           className="tw-rounded-lg tw-bg-white tw-text-black tw-px-4 tw-py-2 tw-border-2 tw-border-solid tw-border-[#444] disabled:tw-opacity-60 disabled:tw-cursor-not-allowed tw-font-medium">
           Transfer
         </button>
-      </>
+      </div>
     );
   }
 
@@ -1451,7 +1452,24 @@ export default function TransferModal({
         />
 
         {/* footer */}
-        <div className="tw-flex tw-justify-end tw-gap-2 sm:tw-gap-3 tw-border-0 tw-border-t-[3px] tw-border-solid tw-border-white/30 tw-p-3 sm:tw-p-4">
+        <div className="tw-flex tw-justify-between tw-items-center tw-gap-2 sm:tw-gap-3 tw-border-0 tw-border-t-[3px] tw-border-solid tw-border-white/30 tw-p-3 sm:tw-p-4">
+          <div className="tw-flex tw-items-center tw-gap-2">
+            {anyTxsPending(txs) && (
+              <>
+                <FontAwesomeIcon
+                  icon={faExclamationTriangle}
+                  className="tw-size-8"
+                  color="#FFD60A"
+                />
+                <span className="tw-text-sm tw-font-medium tw-text-[#FFD60A]">
+                  Double-check the recipient address and token details before
+                  signing.
+                  <br />
+                  NFT transfers are irreversible once submitted on-chain.
+                </span>
+              </>
+            )}
+          </div>
           <FooterActions
             flow={flow}
             canConfirm={!!canConfirm}

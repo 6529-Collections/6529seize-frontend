@@ -644,4 +644,44 @@ describe("TransferModal", () => {
     const erc721Origins = await screen.findAllByText(/Originator: erc721/i);
     expect(erc721Origins.length).toBe(2);
   });
+
+  it("displays warning banner when transactions are pending", async () => {
+    await selectRecipientFlow();
+
+    const publicClient = mockUsePublicClient.mock.results.at(-1)?.value;
+    const walletWrapper = mockUseWalletClient.mock.results.at(-1)?.value;
+
+    const simulateContract = publicClient.simulateContract as jest.Mock;
+    const readContract = publicClient.readContract as jest.Mock;
+    const writeContract = walletWrapper.data.writeContract as jest.Mock;
+
+    readContract.mockResolvedValue(
+      "0x0000000000000000000000000000000000000abc"
+    );
+
+    simulateContract
+      .mockResolvedValueOnce({ request: { type: "1155" } })
+      .mockResolvedValueOnce({ request: { type: "721" } });
+
+    writeContract
+      .mockResolvedValueOnce("0xhash1155")
+      .mockResolvedValueOnce("0xhash721");
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: /^transfer$/i }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          /Double-check the recipient address and token details before/i
+        )
+      ).toBeInTheDocument();
+    });
+
+    expect(
+      screen.getByText(
+        /NFT transfers are irreversible once submitted on-chain/i
+      )
+    ).toBeInTheDocument();
+  });
 });

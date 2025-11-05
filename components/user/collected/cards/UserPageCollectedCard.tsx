@@ -163,7 +163,11 @@ export default function UserPageCollectedCard({
                 disabled={qtySelected >= copiesMax}
                 aria-label="Increase quantity"
                 className="tw-flex tw-items-center tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none disabled:tw-opacity-50">
-                <FontAwesomeIcon icon={faPlusCircle} className="tw-size-5" />
+                <FontAwesomeIcon
+                  icon={faPlusCircle}
+                  className="tw-size-5"
+                  color="#fff"
+                />
               </button>
             </div>
           ) : (
