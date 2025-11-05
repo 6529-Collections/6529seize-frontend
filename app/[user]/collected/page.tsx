@@ -5,6 +5,7 @@ const { Page, generateMetadata } = createUserTabPage({
   subroute: "collected",
   metaLabel: "Collected",
   Tab: UserPageCollected,
+  enableTransfer: true,
 });
 
 export default Page;

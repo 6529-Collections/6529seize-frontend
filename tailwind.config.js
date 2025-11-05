@@ -101,6 +101,26 @@ module.exports = {
             opacity: '1'
           }
         },
+        'slideUp': {
+          '0%': { 
+            opacity: '0',
+            transform: 'translateY(20px)'
+          },
+          '100%': { 
+            opacity: '1',
+            transform: 'translateY(0)'
+          }
+        },
+        'slideDown': {
+          '0%': { 
+            opacity: '1',
+            transform: 'translateY(0)'
+          },
+          '100%': { 
+            opacity: '0',
+            transform: 'translateY(20px)'
+          }
+        },
         'shake': {
           '0%, 100%': { transform: 'translateX(0)' },
           '20%, 60%': { transform: 'translateX(-4px)' },
@@ -128,6 +148,8 @@ module.exports = {
         'gradient-x': 'gradient-x 3s ease infinite',
         'spin-slow': 'spin 15s linear infinite',
         'fadeIn': 'fadeIn 0.3s ease-out forwards',
+        'slideUp': 'slideUp 0.3s ease-out forwards',
+        'slideDown': 'slideDown 0.3s ease-out forwards',
         'shake': 'shake 0.3s ease-in-out',
         'gallery-reveal': 'gallery-reveal 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards',
         'fade-in-out': 'fade-in-out 2s ease-in-out infinite alternate'

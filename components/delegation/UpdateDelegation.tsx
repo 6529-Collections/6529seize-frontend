@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEnsResolution } from "@/hooks/useEnsResolution";
+import { useState } from "react";
 import { Col, Container, Form, Row } from "react-bootstrap";
-import { useEnsAddress, useEnsName } from "wagmi";
+import { useEnsName } from "wagmi";
 import styles from "./Delegation.module.scss";
 
 import { DELEGATION_ABI } from "@/abis";
@@ -50,8 +51,11 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
     undefined
   );
 
-  const [delegationToInput, setDelegationToInput] = useState("");
-  const [delegationToAddress, setDelegationToAddress] = useState("");
+  const {
+    inputValue: delegationToInput,
+    address: delegationToAddress,
+    handleInputChange: handleDelegationInputChange,
+  } = useEnsResolution({ chainId: 1 });
 
   const [gasError, setGasError] = useState<string>();
 
@@ -59,40 +63,6 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
     address: props.delegation.wallet as `0x${string}`,
     chainId: 1,
   });
-
-  const newDelegationToAddressEns = useEnsName({
-    address:
-      delegationToInput && delegationToInput.startsWith("0x")
-        ? (delegationToInput as `0x${string}`)
-        : undefined,
-    chainId: 1,
-  });
-
-  useEffect(() => {
-    if (newDelegationToAddressEns.data) {
-      setDelegationToAddress(delegationToInput);
-      setDelegationToInput(
-        `${newDelegationToAddressEns.data} - ${delegationToInput}`
-      );
-    }
-  }, [newDelegationToAddressEns.data]);
-
-  const newDelegationToAddressFromEns = useEnsAddress({
-    name:
-      delegationToInput && delegationToInput.endsWith(".eth")
-        ? delegationToInput
-        : undefined,
-    chainId: 1,
-  });
-
-  useEffect(() => {
-    if (newDelegationToAddressFromEns.data) {
-      setDelegationToAddress(newDelegationToAddressFromEns.data);
-      setDelegationToInput(
-        `${delegationToInput} - ${newDelegationToAddressFromEns.data}`
-      );
-    }
-  }, [newDelegationToAddressFromEns.data]);
 
   const contractWriteDelegationConfigParams = {
     address: DELEGATION_CONTRACT.contract,
@@ -235,8 +205,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                   type="text"
                   value={delegationToInput}
                   onChange={(e) => {
-                    setDelegationToInput(e.target.value);
-                    setDelegationToAddress(e.target.value);
+                    handleDelegationInputChange(e.target.value);
                     setGasError(undefined);
                   }}
                 />

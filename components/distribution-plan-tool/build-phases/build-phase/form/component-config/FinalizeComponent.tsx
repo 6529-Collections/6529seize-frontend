@@ -21,11 +21,11 @@ export default function FinalizeComponent({
   snapshots,
   loading,
   title,
-  uniqueWalletsCount,
-  isLoadingUniqueWalletsCount,
+  uniqueWalletsCount = null,
+  isLoadingUniqueWalletsCount = false,
   onClose,
   phases,
-}: {
+}: Readonly<{
   onSave: () => void;
   onStartAgain: () => void;
   onRemoveGroupSnapshot: (groupSnapshotId: string) => void;
@@ -33,11 +33,11 @@ export default function FinalizeComponent({
   snapshots: DistributionPlanSnapshot[];
   loading: boolean;
   title: string;
-  uniqueWalletsCount: number | null;
-  isLoadingUniqueWalletsCount: boolean;
+  uniqueWalletsCount?: number | null;
+  isLoadingUniqueWalletsCount?: boolean;
   onClose: () => void;
   phases: BuildPhasesPhase[];
-}) {
+}>) {
   const [groupSnapshots, setGroupSnapshots] = useState<
     PhaseGroupSnapshotConfig[]
   >(phaseGroupConfig.snapshots);

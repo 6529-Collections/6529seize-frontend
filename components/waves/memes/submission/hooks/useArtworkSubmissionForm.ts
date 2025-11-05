@@ -1,39 +1,203 @@
 "use client";
 
-import { useReducer, useEffect, useCallback } from "react";
+import { useReducer, useEffect, useCallback, useRef } from "react";
 import { TraitsData } from "../types/TraitsData";
 import { SubmissionStep } from "../types/Steps";
 import { useAuth } from "@/components/auth/Auth";
 import { getInitialTraitsValues } from "@/components/waves/memes/traits/schema";
+import {
+  DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE,
+  InteractiveMediaMimeType,
+  InteractiveMediaProvider,
+} from "../constants/media";
+import {
+  INTERACTIVE_MEDIA_GATEWAY_BASE_URL,
+  isInteractiveMediaContentIdentifier,
+} from "../constants/security";
+import { validateInteractivePreview } from "../actions/validateInteractivePreview";
 
-/**
- * Action types for the form reducer - drastically simplified
- */
+type MediaSource = "upload" | "url";
+
+interface ExternalMediaState {
+  input: string;
+  sanitizedHash: string;
+  provider: InteractiveMediaProvider;
+  url: string;
+  previewUrl: string;
+  mimeType: InteractiveMediaMimeType;
+  error: string | null;
+  status: "idle" | "pending" | "valid" | "invalid";
+  isValid: boolean;
+}
+
 type FormAction =
   | { type: "SET_STEP"; payload: SubmissionStep }
   | { type: "SET_AGREEMENTS"; payload: boolean }
-  | { type: "SET_ARTWORK_UPLOADED"; payload: boolean }
-  | { type: "SET_ARTWORK_URL"; payload: string }
   | {
       type: "SET_TRAIT_FIELD";
       payload: { field: keyof TraitsData; value: any };
     }
-  | { type: "SET_MULTIPLE_TRAITS"; payload: Partial<TraitsData> };
+  | { type: "SET_MULTIPLE_TRAITS"; payload: Partial<TraitsData> }
+  | { type: "SET_MEDIA_SOURCE"; payload: MediaSource }
+  | { type: "SET_EXTERNAL_MEDIA"; payload: ExternalMediaState }
+  | {
+      type: "SET_EXTERNAL_MEDIA_VALIDATION";
+      payload: {
+        status: ExternalMediaState["status"];
+        error: string | null;
+        finalUrl?: string;
+      };
+    }
+  | {
+      type: "SET_UPLOAD_MEDIA";
+      payload: { file: File; artworkUrl: string };
+    }
+  | { type: "RESET_UPLOAD_MEDIA" };
 
-/**
- * State interface for the form reducer
- */
 interface FormState {
   currentStep: SubmissionStep;
   agreements: boolean;
   artworkUploaded: boolean;
   artworkUrl: string;
+  uploadArtworkUrl: string;
   traits: TraitsData;
+  mediaSource: MediaSource;
+  selectedFile: File | null;
+  externalMedia: ExternalMediaState;
 }
 
-/**
- * Ultra-simplified reducer function for the artwork submission form
- */
+const sanitizeInteractiveHash = (
+  input: string,
+  provider: InteractiveMediaProvider
+): string => {
+  if (!input) {
+    return "";
+  }
+
+  let value = input.trim();
+
+  if (provider === "ipfs") {
+    value = value.replace(/^ipfs:\/\//i, "");
+    value = value.replace(/^https?:\/\/[^/]+\/ipfs\//i, "");
+    value = value.replace(/^ipfs\//i, "");
+  } else if (provider === "arweave") {
+    value = value.replace(/^https?:\/\/(?:www\.)?arweave\.net\//i, "");
+  }
+
+  value = value.replace(/^\/+/, "");
+  return value;
+};
+
+const isSafeRelativeGatewayPath = (path: string): boolean => {
+  if (!path) {
+    return false;
+  }
+
+  const trimmed = path.trim();
+  if (trimmed !== path) {
+    return false;
+  }
+
+  const lower = trimmed.toLowerCase();
+
+  if (
+    trimmed.startsWith("/") ||
+    trimmed.startsWith("\\") ||
+    trimmed.startsWith("//") ||
+    trimmed.startsWith("\\\\") ||
+    lower.startsWith("http:") ||
+    lower.startsWith("https:") ||
+    lower.includes("://") ||
+    trimmed.includes("\n") ||
+    trimmed.includes("\r")
+  ) {
+    return false;
+  }
+
+  return true;
+};
+
+const buildExternalMediaState = (
+  input: string,
+  provider: InteractiveMediaProvider,
+  mimeType: InteractiveMediaMimeType
+): ExternalMediaState => {
+  const trimmedInput = input.trim();
+  let sanitizedHash = sanitizeInteractiveHash(trimmedInput, provider);
+  const hasHash = sanitizedHash.length > 0;
+
+  let error: string | null = null;
+  if (trimmedInput && !hasHash) {
+    error = "Enter a valid hash or CID.";
+  } else if (/\s/.test(sanitizedHash)) {
+    error = "Hashes cannot contain whitespace.";
+  }
+
+  // Drop query/fragment markers without regex backtracking risk.
+  if (!error && !isSafeRelativeGatewayPath(sanitizedHash)) {
+    error = "Only relative paths under the gateway origin are allowed.";
+  }
+
+  if (!error) {
+    const hashWithoutQuery = sanitizedHash.split(/[?#]/)[0] ?? sanitizedHash;
+    if (hashWithoutQuery !== sanitizedHash) {
+      error = "Remove query strings or fragments from the hash.";
+    }
+    sanitizedHash = hashWithoutQuery;
+  }
+
+  if (!error && sanitizedHash.includes("/")) {
+    error =
+      provider === "ipfs"
+        ? "IPFS embeds must reference the root CID without subpaths."
+        : "Arweave embeds must reference the transaction ID without subpaths.";
+  }
+
+  if (!error && sanitizedHash.includes("..")) {
+    error = "Remove path traversal segments from the hash.";
+  }
+
+  if (!error && sanitizedHash) {
+    const isValidIdentifier = isInteractiveMediaContentIdentifier(
+      provider,
+      sanitizedHash
+    );
+    if (!isValidIdentifier) {
+      error =
+        provider === "ipfs"
+          ? "Enter a valid IPFS CID (CIDv0 or CIDv1)."
+          : "Enter a valid Arweave transaction ID.";
+    }
+  }
+
+  let status: ExternalMediaState["status"] = "idle";
+  if (hasHash) {
+    status = error ? "invalid" : "pending";
+  }
+
+  const previewUrl =
+    status !== "idle" && !error
+      ? `${INTERACTIVE_MEDIA_GATEWAY_BASE_URL[provider]}${sanitizedHash}`
+      : "";
+
+  let url = "";
+  if (status !== "idle" && !error) {
+    url = provider === "arweave" ? previewUrl : `ipfs://${sanitizedHash}`;
+  }
+
+  return {
+    input,
+    sanitizedHash,
+    provider,
+    url,
+    previewUrl,
+    mimeType,
+    error,
+    status,
+    isValid: false,
+  };
+};
+
 function formReducer(state: FormState, action: FormAction): FormState {
   switch (action.type) {
     case "SET_STEP":
@@ -42,14 +206,7 @@ function formReducer(state: FormState, action: FormAction): FormState {
     case "SET_AGREEMENTS":
       return { ...state, agreements: action.payload };
 
-    case "SET_ARTWORK_UPLOADED":
-      return { ...state, artworkUploaded: action.payload };
-
-    case "SET_ARTWORK_URL":
-      return { ...state, artworkUrl: action.payload };
-
-    case "SET_TRAIT_FIELD": {
-      // Simple direct update - no special handling
+    case "SET_TRAIT_FIELD":
       return {
         ...state,
         traits: {
@@ -57,16 +214,101 @@ function formReducer(state: FormState, action: FormAction): FormState {
           [action.payload.field]: action.payload.value,
         },
       };
-    }
 
-    case "SET_MULTIPLE_TRAITS": {
-      // Simple merge - no special handling
+    case "SET_MULTIPLE_TRAITS":
       return {
         ...state,
         traits: {
           ...state.traits,
           ...action.payload,
         },
+      };
+
+    case "SET_MEDIA_SOURCE": {
+      const nextSource = action.payload;
+      if (nextSource === "upload") {
+        const hasFile = state.selectedFile !== null;
+        return {
+          ...state,
+          mediaSource: nextSource,
+          artworkUploaded: hasFile,
+          artworkUrl: hasFile ? state.uploadArtworkUrl : "",
+        };
+      }
+
+      return {
+        ...state,
+        mediaSource: nextSource,
+        artworkUploaded: state.externalMedia.isValid,
+        artworkUrl: state.externalMedia.isValid
+          ? state.externalMedia.url
+          : "",
+      };
+    }
+
+    case "SET_EXTERNAL_MEDIA": {
+      const externalMedia = action.payload;
+      const shouldApply = state.mediaSource === "url";
+      let artworkUrl = state.artworkUrl;
+      if (shouldApply) {
+        artworkUrl = externalMedia.isValid ? externalMedia.url : "";
+      }
+      return {
+        ...state,
+        externalMedia,
+        artworkUploaded: shouldApply
+          ? externalMedia.isValid
+          : state.artworkUploaded,
+        artworkUrl,
+      };
+    }
+
+    case "SET_EXTERNAL_MEDIA_VALIDATION": {
+      const { status, error, finalUrl } = action.payload;
+      const isValid = status === "valid";
+      const externalMedia = {
+        ...state.externalMedia,
+        status,
+        isValid,
+        error,
+        previewUrl: isValid
+          ? finalUrl ?? state.externalMedia.previewUrl
+          : "",
+      };
+
+      const shouldApply = state.mediaSource === "url";
+      let artworkUrl = state.artworkUrl;
+      if (shouldApply) {
+        artworkUrl = isValid ? externalMedia.url : "";
+      }
+
+      return {
+        ...state,
+        externalMedia,
+        artworkUploaded: shouldApply ? isValid : state.artworkUploaded,
+        artworkUrl,
+      };
+    }
+
+    case "SET_UPLOAD_MEDIA":
+      return {
+        ...state,
+        selectedFile: action.payload.file,
+        artworkUrl: action.payload.artworkUrl,
+        uploadArtworkUrl: action.payload.artworkUrl,
+        artworkUploaded: true,
+        mediaSource: "upload",
+      };
+
+    case "RESET_UPLOAD_MEDIA": {
+      const shouldFallbackToExternal =
+        state.mediaSource === "url" && state.externalMedia.isValid;
+      return {
+        ...state,
+        selectedFile: null,
+        artworkUrl: shouldFallbackToExternal ? state.externalMedia.url : "",
+        uploadArtworkUrl: "",
+        artworkUploaded: shouldFallbackToExternal,
       };
     }
 
@@ -75,64 +317,189 @@ function formReducer(state: FormState, action: FormAction): FormState {
   }
 }
 
-/**
- * Extremely simplified hook to manage artwork submission form state
- * Uses uncontrolled inputs for maximum typing performance
- */
 export function useArtworkSubmissionForm() {
   const { connectedProfile } = useAuth();
-
-  // Pre-compute initial values for traits without triggering circular dependencies
   const initialTraits = getInitialTraitsValues();
 
-  // Create the initial state
   const initialState: FormState = {
     currentStep: SubmissionStep.AGREEMENT,
     agreements: false,
     artworkUploaded: false,
     artworkUrl: "",
+    uploadArtworkUrl: "",
     traits: initialTraits,
+    mediaSource: "upload",
+    selectedFile: null,
+    externalMedia: {
+      input: "",
+      sanitizedHash: "",
+      provider: "ipfs",
+      url: "",
+      previewUrl: "",
+      mimeType: DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE,
+      error: null,
+      status: "idle",
+      isValid: false,
+    },
   };
 
-  // Use reducer for state management
   const [state, dispatch] = useReducer(formReducer, initialState);
+  const validationRequestKeyRef = useRef<string | null>(null);
 
-  // Extract values for convenience
-  const { currentStep, agreements, artworkUploaded, artworkUrl, traits } =
-    state;
-
-  // Extremely simple and direct update function
-  const updateTraitField = useCallback(
-    <K extends keyof TraitsData>(field: K, value: TraitsData[K]) => {
-      dispatch({
-        type: "SET_TRAIT_FIELD",
-        payload: { field, value },
-      });
+  const setMediaSource = useCallback(
+    (mode: MediaSource) => {
+      dispatch({ type: "SET_MEDIA_SOURCE", payload: mode });
     },
-    []
+    [dispatch]
   );
 
-  // Multiple traits update function
-  const setTraits = useCallback((traitsUpdate: Partial<TraitsData>) => {
-    dispatch({ type: "SET_MULTIPLE_TRAITS", payload: traitsUpdate });
-  }, []);
+  const updateExternalMediaState = useCallback(
+    (input: string, provider: InteractiveMediaProvider) => {
+      const nextExternalMedia = buildExternalMediaState(
+        input,
+        provider,
+        state.externalMedia.mimeType
+      );
+      dispatch({ type: "SET_EXTERNAL_MEDIA", payload: nextExternalMedia });
+    },
+    [dispatch, state.externalMedia.mimeType]
+  );
 
-  // Handle file selection
-  const handleFileSelect = useCallback((file: File) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      dispatch({ type: "SET_ARTWORK_URL", payload: reader.result as string });
-      dispatch({ type: "SET_ARTWORK_UPLOADED", payload: true });
-    };
-    reader.readAsDataURL(file);
-  }, []);
+  const setExternalMediaHash = useCallback(
+    (hash: string) => {
+      updateExternalMediaState(hash, state.externalMedia.provider);
+    },
+    [updateExternalMediaState, state.externalMedia.provider]
+  );
 
-  // Handle continuing from terms
+  const setExternalMediaProvider = useCallback(
+    (provider: InteractiveMediaProvider) => {
+      updateExternalMediaState(state.externalMedia.input, provider);
+    },
+    [updateExternalMediaState, state.externalMedia.input]
+  );
+
+  const setExternalMediaMimeType = useCallback(
+    (mimeType: InteractiveMediaMimeType) => {
+      const nextExternalMedia = buildExternalMediaState(
+        state.externalMedia.input,
+        state.externalMedia.provider,
+        mimeType
+      );
+      dispatch({ type: "SET_EXTERNAL_MEDIA", payload: nextExternalMedia });
+    },
+    [dispatch, state.externalMedia.input, state.externalMedia.provider]
+  );
+
+  const clearExternalMedia = useCallback(() => {
+    updateExternalMediaState("", state.externalMedia.provider);
+  }, [updateExternalMediaState, state.externalMedia.provider]);
+
+  const handleFileSelect = useCallback(
+    (file: File) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        dispatch({
+          type: "SET_UPLOAD_MEDIA",
+          payload: { file, artworkUrl: reader.result as string },
+        });
+      };
+      reader.readAsDataURL(file);
+    },
+    [dispatch]
+  );
+
   const handleContinueFromTerms = useCallback(() => {
     dispatch({ type: "SET_STEP", payload: SubmissionStep.ARTWORK });
   }, []);
 
-  // Initialize traits with profile info
+  useEffect(() => {
+    if (state.mediaSource !== "url") {
+      validationRequestKeyRef.current = null;
+      return;
+    }
+
+    const { status, sanitizedHash, provider } = state.externalMedia;
+
+    if (status !== "pending" || !sanitizedHash) {
+      return;
+    }
+
+    const validationKey = `${provider}:${sanitizedHash}`;
+    validationRequestKeyRef.current = validationKey;
+
+    let cancelled = false;
+
+    const runValidation = async () => {
+      try {
+        const result = await validateInteractivePreview({
+          provider,
+          path: sanitizedHash,
+        });
+
+        if (cancelled || validationRequestKeyRef.current !== validationKey) {
+          return;
+        }
+
+        if (result.ok) {
+          dispatch({
+            type: "SET_EXTERNAL_MEDIA_VALIDATION",
+            payload: {
+              status: "valid",
+              error: null,
+              finalUrl: result.finalUrl,
+            },
+          });
+          validationRequestKeyRef.current = null;
+        } else {
+          dispatch({
+            type: "SET_EXTERNAL_MEDIA_VALIDATION",
+            payload: {
+              status: "invalid",
+              error:
+                result.reason ??
+                "Interactive media must respond with an HTML document.",
+            },
+          });
+          validationRequestKeyRef.current = null;
+        }
+      } catch (error) {
+        console.error(
+          "[useArtworkSubmissionForm] validateInteractivePreview failed",
+          {
+            provider,
+            sanitizedHash,
+            error,
+          }
+        );
+        if (cancelled || validationRequestKeyRef.current !== validationKey) {
+          return;
+        }
+
+        dispatch({
+          type: "SET_EXTERNAL_MEDIA_VALIDATION",
+          payload: {
+            status: "invalid",
+            error: "Unable to verify media URL. Try again later.",
+          },
+        });
+        validationRequestKeyRef.current = null;
+      }
+    };
+
+    runValidation();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    state.mediaSource,
+    state.externalMedia.status,
+    state.externalMedia.sanitizedHash,
+    state.externalMedia.provider,
+    dispatch,
+  ]);
+
   useEffect(() => {
     const userProfile = connectedProfile?.handle ?? "";
     if (userProfile) {
@@ -146,43 +513,97 @@ export function useArtworkSubmissionForm() {
     }
   }, [connectedProfile]);
 
-  // Prepare submission data
   const getSubmissionData = useCallback(() => {
+    const { traits, artworkUrl } = state;
     return {
       imageUrl: artworkUrl,
       traits: {
         ...traits,
-        // Ensure these fields have values
         title: traits.title ?? "Artwork Title",
-        description: traits.description ?? "Artwork for The Memes collection.",
+        description:
+          traits.description ?? "Artwork for The Memes collection.",
       },
     };
-  }, [artworkUrl, traits]);
+  }, [state]);
 
-  // Return the API for the form
+  const getMediaSelection = useCallback(
+    () => ({
+      mediaSource: state.mediaSource,
+      selectedFile: state.selectedFile,
+      externalUrl: state.externalMedia.url,
+      externalPreviewUrl: state.externalMedia.previewUrl,
+      externalProvider: state.externalMedia.provider,
+      externalHash: state.externalMedia.sanitizedHash,
+      externalMimeType: state.externalMedia.mimeType,
+      isExternalValid: state.externalMedia.isValid,
+    }),
+    [state]
+  );
+
+  const setArtworkUploaded = useCallback(
+    (uploaded: boolean) => {
+      if (!uploaded) {
+        if (state.mediaSource === "url") {
+          updateExternalMediaState("", state.externalMedia.provider);
+        } else {
+          dispatch({ type: "RESET_UPLOAD_MEDIA" });
+        }
+      }
+    },
+    [
+      state.mediaSource,
+      state.externalMedia.provider,
+      updateExternalMediaState,
+      dispatch,
+    ]
+  );
+
+  const updateTraitField = useCallback(
+    <K extends keyof TraitsData>(field: K, value: TraitsData[K]) => {
+      dispatch({
+        type: "SET_TRAIT_FIELD",
+        payload: { field, value },
+      });
+    },
+    []
+  );
+
+  const setTraits = useCallback((traitsUpdate: Partial<TraitsData>) => {
+    dispatch({ type: "SET_MULTIPLE_TRAITS", payload: traitsUpdate });
+  }, []);
+
   return {
-    // Current step
-    currentStep,
-
-    // Agreement step
-    agreements,
+    currentStep: state.currentStep,
+    agreements: state.agreements,
     setAgreements: (value: boolean) =>
       dispatch({ type: "SET_AGREEMENTS", payload: value }),
     handleContinueFromTerms,
 
-    // Artwork step
-    artworkUploaded,
-    artworkUrl,
-    setArtworkUploaded: (value: boolean) =>
-      dispatch({ type: "SET_ARTWORK_UPLOADED", payload: value }),
+    artworkUploaded: state.artworkUploaded,
+   artworkUrl: state.artworkUrl,
+   selectedFile: state.selectedFile,
+   mediaSource: state.mediaSource,
+   externalMediaUrl: state.externalMedia.url,
+    externalMediaPreviewUrl: state.externalMedia.previewUrl,
+    externalMediaHashInput: state.externalMedia.input,
+    externalMediaProvider: state.externalMedia.provider,
+    externalMediaMimeType: state.externalMedia.mimeType,
+    externalMediaError: state.externalMedia.error,
+    externalMediaValidationStatus: state.externalMedia.status,
+    isExternalMediaValid: state.externalMedia.isValid,
+    setArtworkUploaded,
+    setMediaSource,
+    setExternalMediaHash,
+    setExternalMediaProvider,
+    setExternalMediaMimeType,
+    clearExternalMedia,
     handleFileSelect,
 
-    // Traits
-    traits,
+    traits: state.traits,
     setTraits,
     updateTraitField,
 
-    // Submission
     getSubmissionData,
+    getMediaSelection,
   };
 }

@@ -6,12 +6,14 @@ import MediaDisplayImage from "./MediaDisplayImage";
 import { ImageScale } from "@/helpers/image.helpers";
 import MediaDisplayVideo from "./MediaDisplayVideo";
 import MediaDisplayAudio from "./MediaDisplayAudio";
+import SandboxedExternalIframe from "@/components/common/SandboxedExternalIframe";
 
 enum MediaType {
   IMAGE = "IMAGE",
   VIDEO = "VIDEO",
   AUDIO = "AUDIO",
   GLB = "GLB",
+  HTML = "HTML",
   UNKNOWN = "UNKNOWN",
 }
 
@@ -45,11 +47,14 @@ export default function MediaDisplay({
     if (media_mime_type.includes("audio")) {
       return MediaType.AUDIO;
     }
-    if (media_mime_type === "model/gltf-binary" || 
-        media_mime_type === "model/gltf+json" ||
-        media_url.endsWith(".glb") || 
-        media_url.endsWith(".gltf")) {
+    if (media_mime_type === "model/gltf-binary" ||
+      media_mime_type === "model/gltf+json" ||
+      media_url.endsWith(".glb") ||
+      media_url.endsWith(".gltf")) {
       return MediaType.GLB;
+    }
+    if (media_mime_type === "text/html") {
+      return MediaType.HTML;
     }
     return MediaType.UNKNOWN;
   };
@@ -60,15 +65,17 @@ export default function MediaDisplay({
     case MediaType.IMAGE:
       return <MediaDisplayImage src={media_url} imageScale={imageScale} />;
     case MediaType.VIDEO:
-      return <MediaDisplayVideo 
-        src={media_url} 
-        showControls={!disableMediaInteraction} 
-        disableClickHandler={disableMediaInteraction} 
+      return <MediaDisplayVideo
+        src={media_url}
+        showControls={!disableMediaInteraction}
+        disableClickHandler={disableMediaInteraction}
       />;
     case MediaType.AUDIO:
       return <MediaDisplayAudio src={media_url} showControls={!disableMediaInteraction} />;
     case MediaType.GLB:
       return <MediaDisplayGLB src={media_url} disableMediaInteractions={disableMediaInteraction} />;
+    case MediaType.HTML:
+      return <SandboxedExternalIframe title="" src={media_url.replace("ipfs://", "https://ipfs.io/ipfs/")} className="tw-w-full tw-h-full" />;
     case MediaType.UNKNOWN:
       return <></>;
     default:

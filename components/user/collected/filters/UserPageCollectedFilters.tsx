@@ -1,20 +1,27 @@
 "use client";
 
-import { RefObject, useEffect, useRef, useState } from "react";
+import TransferToggle from "@/components/nft-transfer/TransferToggle";
+import UserAddressesSelectDropdown from "@/components/user/utils/addresses-select/UserAddressesSelectDropdown";
 import {
   CollectedCollectionType,
   CollectionSeized,
   CollectionSort,
 } from "@/entities/IProfile";
 import { MEMES_SEASON } from "@/enums";
-import { ProfileCollectedFilters } from "../UserPageCollected";
-import UserPageCollectedFiltersCollection from "./UserPageCollectedFiltersCollection";
-import UserPageCollectedFiltersSortBy from "./UserPageCollectedFiltersSortBy";
-import UserPageCollectedFiltersSeized from "./UserPageCollectedFiltersSeized";
-import UserPageCollectedFiltersSzn from "./UserPageCollectedFiltersSzn";
-import UserAddressesSelectDropdown from "@/components/user/utils/addresses-select/UserAddressesSelectDropdown";
-import { COLLECTED_COLLECTIONS_META } from "./user-page-collected-filters.helpers";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import {
+  faChevronLeft,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { RefObject, useEffect, useRef, useState } from "react";
+import { ProfileCollectedFilters } from "../UserPageCollected";
+import { COLLECTED_COLLECTIONS_META } from "./user-page-collected-filters.helpers";
+import UserPageCollectedFiltersCollection from "./UserPageCollectedFiltersCollection";
+import UserPageCollectedFiltersSeized from "./UserPageCollectedFiltersSeized";
+import UserPageCollectedFiltersSortBy from "./UserPageCollectedFiltersSortBy";
+import UserPageCollectedFiltersSzn from "./UserPageCollectedFiltersSzn";
+
 export default function UserPageCollectedFilters({
   profile,
   filters,
@@ -23,7 +30,7 @@ export default function UserPageCollectedFilters({
   setSortBy,
   setSeized,
   setSzn,
-  scrollHorizontally,
+  showTransfer,
 }: {
   readonly profile: ApiIdentity;
   readonly filters: ProfileCollectedFilters;
@@ -32,78 +39,68 @@ export default function UserPageCollectedFilters({
   readonly setSortBy: (sortBy: CollectionSort) => void;
   readonly setSeized: (seized: CollectionSeized | null) => void;
   readonly setSzn: (szn: MEMES_SEASON | null) => void;
-  readonly scrollHorizontally: (direction: "left" | "right") => void;
+  readonly showTransfer: boolean;
 }) {
-  const mostLeftFilterRef = useRef<HTMLDivElement>(null);
-  const mostRightFilterRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const contentContainerRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
 
-  const leftArrowRef = useRef<HTMLButtonElement>(null);
-  const rightArrowRef = useRef<HTMLButtonElement>(null);
+  const checkScroll = () => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
 
-  const [isMostLeftFilterVisible, setIsMostLeftFilterVisible] =
-    useState<boolean>(false);
-  const [isMostRightFilterVisible, setIsMostRightFilterVisible] =
-    useState<boolean>(false);
-
-  const checkVisibility = (
-    elementRef: RefObject<HTMLDivElement | null>
-  ): boolean => {
-    if (window.matchMedia("(pointer: coarse)").matches) return true;
-    const element = elementRef.current;
-    const container = containerRef.current;
-
-    if (element && container) {
-      const containerRect = container.getBoundingClientRect();
-      const elementRect = element.getBoundingClientRect();
-      const fullyVisible =
-        +elementRect.left.toFixed(0) >= +containerRect.left.toFixed(0) &&
-        +elementRect.right.toFixed(0) <= +containerRect.right.toFixed(0);
-
-      return fullyVisible;
-    }
-    return false;
-  };
-
-  const getContainerLeftRightPositions = () => {
-    const container = containerRef.current;
-    if (container) {
-      const { left, right } = container.getBoundingClientRect();
-      return { left, right };
-    }
-    return { left: 0, right: 0 };
-  };
-
-  const setVisibility = () => {
-    const { left, right } = getContainerLeftRightPositions();
-    const viewportWidth = window.innerWidth;
-    const leftArrow = leftArrowRef.current;
-    const rightArrow = rightArrowRef.current;
-    const isDesktop = viewportWidth >= 1024;
-    const newLeft = isDesktop ? left - 40 : left - 20;
-    const newRight = isDesktop ? right + 8 : right - 12;
-    if (leftArrow) {
-      leftArrow.style.left = `${newLeft}px`;
-    }
-    if (rightArrow) {
-      rightArrow.style.left = `${newRight}px`;
-    }
-
-    setIsMostLeftFilterVisible(checkVisibility(mostLeftFilterRef));
-    setIsMostRightFilterVisible(checkVisibility(mostRightFilterRef));
+    const { scrollLeft, scrollWidth, clientWidth } = container;
+    setCanScrollLeft(scrollLeft > 0);
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
   };
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener("scroll", setVisibility);
-      window.addEventListener("resize", setVisibility);
-      setVisibility();
-      return () => {
-        container.removeEventListener("scroll", setVisibility);
-        window.removeEventListener("resize", setVisibility);
-      };
+    const container = scrollContainerRef.current;
+    const contentContainer = contentContainerRef.current;
+    if (!container) return;
+
+    checkScroll();
+    container.addEventListener("scroll", checkScroll);
+    window.addEventListener("resize", checkScroll);
+
+    const resizeObserver = new ResizeObserver(() => {
+      checkScroll();
+    });
+    resizeObserver.observe(container);
+    if (contentContainer) {
+      resizeObserver.observe(contentContainer);
     }
+
+    return () => {
+      container.removeEventListener("scroll", checkScroll);
+      window.removeEventListener("resize", checkScroll);
+      resizeObserver.disconnect();
+    };
   }, []);
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        checkScroll();
+      });
+    });
+  }, [filters.collection]);
+
+  const scrollLeft = () => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    container.scrollBy({ left: -150, behavior: "smooth" });
+  };
+
+  const scrollRight = () => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    container.scrollBy({ left: 150, behavior: "smooth" });
+  };
 
   const getShowSeized = (collection: CollectedCollectionType | null): boolean =>
     collection ? COLLECTED_COLLECTIONS_META[collection].filters.seized : false;
@@ -112,90 +109,77 @@ export default function UserPageCollectedFilters({
     collection ? COLLECTED_COLLECTIONS_META[collection].filters.szn : false;
 
   return (
-    <div className="tailwind-scope">
-      <div className="tw-w-full tw-flex tw-justify-between tw-gap-3 tw-items-center">
-        {!isMostLeftFilterVisible && (
-          <button
-            ref={leftArrowRef}
-            aria-label="Scroll filters left"
-            className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-z-10 tw-p-0 tw-h-8 tw-w-8 tw-left-0 tw-bg-iron-700 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-rounded-md tw-border-none"
-            onClick={() => scrollHorizontally("left")}>
-            <svg
-              className="tw-h-5 tw-w-5 tw-text-iron-200 group-hover:tw-text-iron-400 tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M6 9L12 15L18 9"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-        )}
-        {!isMostRightFilterVisible && (
-          <button
-            ref={rightArrowRef}
-            aria-label="Scroll filters right"
-            className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-z-10 tw-p-0 tw-h-8 tw-w-8 tw-right-0 tw-bg-iron-700 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-rounded-md tw-border-none"
-            onClick={() => scrollHorizontally("right")}>
-            <svg
-              className="tw-h-5 tw-w-5 tw-text-iron-200 group-hover:tw-text-iron-400 -tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M6 9L12 15L18 9"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-        )}
-        <div className="tailwind-scope tw-gap-x-3 lg:tw-gap-x-4 tw-gap-y-3 tw-flex tw-items-center">
-          <div ref={mostLeftFilterRef}>
+    <div className="tw-relative tw-w-full">
+      <div
+        ref={scrollContainerRef}
+        className="tw-w-full tw-overflow-x-auto [&::-webkit-scrollbar]:tw-hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div
+          ref={contentContainerRef}
+          className="tw-flex tw-nowrap tw-justify-between tw-gap-x-3 lg:tw-gap-x-4 tw-items-center tw-w-full tw-min-w-max">
+          <div className="tw-flex tw-nowrap tw-gap-x-3 lg:tw-gap-x-4 tw-items-center tw-flex-shrink-0">
+            {showTransfer && <TransferToggle />}
             <UserPageCollectedFiltersCollection
               selected={filters.collection}
               setSelected={setCollection}
             />
+            <UserPageCollectedFiltersSortBy
+              selected={filters.sortBy}
+              direction={filters.sortDirection}
+              collection={filters.collection}
+              setSelected={setSortBy}
+            />
+            {getShowSeized(filters.collection) && (
+              <UserPageCollectedFiltersSeized
+                selected={filters.seized}
+                containerRef={containerRef}
+                setSelected={setSeized}
+              />
+            )}
+            {getShowSzn(filters.collection) && (
+              <UserPageCollectedFiltersSzn
+                selected={filters.szn}
+                containerRef={containerRef}
+                setSelected={setSzn}
+              />
+            )}
           </div>
-          <UserPageCollectedFiltersSortBy
-            selected={filters.sortBy}
-            direction={filters.sortDirection}
-            collection={filters.collection}
-            setSelected={setSortBy}
-          />
-
-          {getShowSeized(filters.collection) && (
-            <UserPageCollectedFiltersSeized
-              selected={filters.seized}
+          <div className="tw-flex-shrink-0">
+            <UserAddressesSelectDropdown
+              wallets={profile.wallets ?? []}
               containerRef={containerRef}
-              setSelected={setSeized}
+              onActiveAddress={() => undefined}
             />
-          )}
-
-          {getShowSzn(filters.collection) && (
-            <UserPageCollectedFiltersSzn
-              selected={filters.szn}
-              containerRef={containerRef}
-              setSelected={setSzn}
-            />
-          )}
-        </div>
-        <div ref={mostRightFilterRef}>
-          <UserAddressesSelectDropdown
-            wallets={profile.wallets ?? []}
-            containerRef={containerRef}
-            onActiveAddress={() => undefined}
-          />
+          </div>
         </div>
       </div>
+      {canScrollLeft && (
+        <>
+          <div className="tw-absolute tw-left-0 tw-top-0 tw-bottom-0 tw-w-24 tw-pointer-events-none tw-z-10 tw-bg-gradient-to-r tw-from-black tw-via-black/40 tw-to-black/0" />
+          <button
+            onClick={scrollLeft}
+            aria-label="Scroll filters left"
+            className="tw-absolute tw-left-0 tw-top-1/2 tw--translate-y-1/2 tw-z-20 tw-inline-flex tw-items-center tw-justify-start tw-group tw-p-0 tw-h-10 tw-w-10 tw-bg-transparent tw-border-none tw-outline-none">
+            <FontAwesomeIcon
+              icon={faChevronLeft}
+              className="tw-h-6 tw-w-6 tw-text-iron-200 group-hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out"
+            />
+          </button>
+        </>
+      )}
+      {canScrollRight && (
+        <>
+          <div className="tw-absolute tw-right-0 tw-top-0 tw-bottom-0 tw-w-24 tw-pointer-events-none tw-z-10 tw-bg-gradient-to-l tw-from-black tw-via-black/40 tw-to-black/0" />
+          <button
+            onClick={scrollRight}
+            aria-label="Scroll filters right"
+            className="tw-absolute tw-right-0 tw-top-1/2 tw--translate-y-1/2 tw-z-20 tw-inline-flex tw-items-center tw-justify-end tw-group tw-p-0 tw-h-10 tw-w-10 tw-bg-transparent tw-border-none tw-outline-none">
+            <FontAwesomeIcon
+              icon={faChevronRight}
+              className="tw-h-6 tw-w-6 tw-text-iron-200 group-hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out"
+            />
+          </button>
+        </>
+      )}
     </div>
   );
 }

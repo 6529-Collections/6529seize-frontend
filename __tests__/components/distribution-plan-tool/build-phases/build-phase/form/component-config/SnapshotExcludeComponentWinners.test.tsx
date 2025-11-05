@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import SnapshotExcludeComponentWinners from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/SnapshotExcludeComponentWinners';
+import type { PhaseGroupSnapshotConfig } from '@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal';
 import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
 
 jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigNextBtn', () => ({
@@ -37,11 +38,23 @@ const phases = [
   { id: 'p1', name: 'Phase1', components: [{ id: 'c1', name: 'Comp1' }] },
 ] as any;
 
+const baseConfig: PhaseGroupSnapshotConfig = {
+  groupSnapshotId: 'g1',
+  snapshotId: 's1',
+  snapshotType: null,
+  snapshotSchema: null,
+  excludeComponentWinners: [],
+  excludeSnapshots: [],
+  topHoldersFilter: null,
+  tokenIds: null,
+  uniqueWalletsCount: null,
+};
+
 test('shows error toast when nothing selected', () => {
   const setToasts = jest.fn();
   render(
     <DistributionPlanToolContext.Provider value={{ setToasts } as any}>
-      <SnapshotExcludeComponentWinners phases={phases} onNextStep={jest.fn()} onSelectExcludeComponentWinners={jest.fn()} title="t" onClose={jest.fn()} />
+      <SnapshotExcludeComponentWinners config={baseConfig} phases={phases} onNextStep={jest.fn()} onSelectExcludeComponentWinners={jest.fn()} title="t" onClose={jest.fn()} />
     </DistributionPlanToolContext.Provider>
   );
   fireEvent.click(screen.getByTestId('next'));
@@ -50,10 +63,14 @@ test('shows error toast when nothing selected', () => {
 
 test('returns selected component ids on next', () => {
   const onSelect = jest.fn();
+  const config: PhaseGroupSnapshotConfig = {
+    ...baseConfig,
+    uniqueWalletsCount: 42,
+  };
   render(
-    <SnapshotExcludeComponentWinners phases={phases} onNextStep={jest.fn()} onSelectExcludeComponentWinners={onSelect} title="t" onClose={jest.fn()} />, { wrapper: Wrapper }
+    <SnapshotExcludeComponentWinners config={config} phases={phases} onNextStep={jest.fn()} onSelectExcludeComponentWinners={onSelect} title="t" onClose={jest.fn()} />, { wrapper: Wrapper }
   );
   fireEvent.click(screen.getByTestId('opt-c1'));
   fireEvent.click(screen.getByTestId('next'));
-  expect(onSelect).toHaveBeenCalledWith({ excludeComponentWinners: ['c1'], uniqueWalletsCount: null });
+  expect(onSelect).toHaveBeenCalledWith({ excludeComponentWinners: ['c1'], uniqueWalletsCount: 42 });
 });

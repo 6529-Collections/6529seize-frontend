@@ -8,6 +8,10 @@ import ArtworkDetails from "../details/ArtworkDetails";
 import MemesArtSubmissionTraits from "@/components/waves/memes/MemesArtSubmissionTraits";
 import SubmissionProgress, { SubmissionPhase } from "../ui/SubmissionProgress";
 import { useTraitsValidation } from "../validation";
+import type {
+  InteractiveMediaMimeType,
+  InteractiveMediaProvider,
+} from "../constants/media";
 
 /**
  * Required fields for submission
@@ -126,6 +130,20 @@ interface ArtworkStepProps {
   readonly artworkUrl: string;
   readonly setArtworkUploaded: (uploaded: boolean) => void;
   readonly handleFileSelect: (file: File) => void;
+  readonly mediaSource: "upload" | "url";
+  readonly setMediaSource: (mode: "upload" | "url") => void;
+  readonly externalHash: string;
+  readonly externalProvider: InteractiveMediaProvider;
+  readonly externalConstructedUrl: string;
+  readonly externalPreviewUrl: string;
+  readonly externalMimeType: InteractiveMediaMimeType;
+  readonly externalError: string | null;
+  readonly externalValidationStatus: "idle" | "pending" | "valid" | "invalid";
+  readonly isExternalMediaValid: boolean;
+  readonly onExternalHashChange: (value: string) => void;
+  readonly onExternalProviderChange: (value: InteractiveMediaProvider) => void;
+  readonly onExternalMimeTypeChange: (value: InteractiveMediaMimeType) => void;
+  readonly onClearExternalMedia: () => void;
   readonly onSubmit: () => void;
   readonly onCancel?: () => void; // Added cancel handler prop
   readonly updateTraitField: <K extends keyof TraitsData>(
@@ -156,6 +174,20 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
   artworkUrl,
   setArtworkUploaded,
   handleFileSelect,
+  mediaSource,
+  setMediaSource,
+  externalHash,
+  externalProvider,
+  externalConstructedUrl,
+  externalPreviewUrl,
+  externalMimeType,
+  externalError,
+  externalValidationStatus,
+  isExternalMediaValid,
+  onExternalHashChange,
+  onExternalProviderChange,
+  onExternalMimeTypeChange,
+  onClearExternalMedia,
   onSubmit,
   onCancel,
   updateTraitField,
@@ -278,6 +310,20 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
                 artworkUrl={artworkUrl}
                 setArtworkUploaded={setArtworkUploaded}
                 handleFileSelect={handleFileSelect}
+                mediaSource={mediaSource}
+                setMediaSource={setMediaSource}
+                externalHash={externalHash}
+                externalProvider={externalProvider}
+                externalConstructedUrl={externalConstructedUrl}
+                externalPreviewUrl={externalPreviewUrl}
+                externalMimeType={externalMimeType}
+                externalError={externalError}
+                externalValidationStatus={externalValidationStatus}
+                isExternalMediaValid={isExternalMediaValid}
+                onExternalHashChange={onExternalHashChange}
+                onExternalProviderChange={onExternalProviderChange}
+                onExternalMimeTypeChange={onExternalMimeTypeChange}
+                onClearExternalMedia={onClearExternalMedia}
               />
             </div>
           </div>

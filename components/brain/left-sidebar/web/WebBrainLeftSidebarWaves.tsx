@@ -13,7 +13,7 @@ const WebBrainLeftSidebarWaves: React.FC<WebBrainLeftSidebarWavesProps> = ({
 }) => {
 
   
-  const { waves, activeWave, registerWave } = useMyStream();
+  const { waves, registerWave } = useMyStream();
 
   const onNextPage = () => {
     if (waves.hasNextPage && !waves.isFetchingNextPage && !waves.isFetching) {
@@ -24,7 +24,6 @@ const WebBrainLeftSidebarWaves: React.FC<WebBrainLeftSidebarWavesProps> = ({
   return (
     <WebUnifiedWavesList
       waves={waves.list}
-      activeWaveId={activeWave.id}
       fetchNextPage={onNextPage}
       hasNextPage={waves.hasNextPage}
       isFetching={waves.isFetching}

@@ -1,12 +1,12 @@
 "use client";
 
-import React, { type ReactNode, useMemo } from "react";
 import Image from "next/image";
-import WebSidebar from "./sidebar/WebSidebar";
-import { useSidebarController } from "../../hooks/useSidebarController";
+import React, { type ReactNode, useMemo } from "react";
 import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
+import { useSidebarController } from "../../hooks/useSidebarController";
 import { SidebarProvider, useSidebarState } from "../../hooks/useSidebarState";
 import ClientOnly from "../client-only/ClientOnly";
+import WebSidebar from "./sidebar/WebSidebar";
 
 const DESKTOP_MAX_WIDTH = 1324;
 
@@ -34,20 +34,19 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
         "--collapsed-width": SIDEBAR_WIDTHS.COLLAPSED,
         "--expanded-width": SIDEBAR_WIDTHS.EXPANDED,
         "--layout-max": `${DESKTOP_MAX_WIDTH}px`,
-      }) as React.CSSProperties,
+      } as React.CSSProperties),
     [sidebarWidth]
   );
 
   return (
     <div
-      className="layout-root tw-flex tw-justify-between tw-relative tw-overflow-x-hidden tw-w-full"
+      className="layout-root tw-flex tw-justify-between tw-relative tw-w-full"
       style={cssVars}
       data-mobile={isMobile}
       data-narrow={isNarrow}
       data-offcanvas={isOffcanvasOpen}
       data-right-open={isRightSidebarOpen}
-      data-small={isSmall ? "true" : "false"}
-    >
+      data-small={isSmall ? "true" : "false"}>
       <div className="tailwind-scope">
         <WebSidebar
           isCollapsed={isCollapsed}
@@ -64,8 +63,7 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
         data-mobile={isMobile}
         data-narrow={isNarrow}
         data-offcanvas={isOffcanvasOpen}
-        data-right-open={isRightSidebarOpen}
-      >
+        data-right-open={isRightSidebarOpen}>
         {children}
       </main>
     </div>
@@ -88,11 +86,12 @@ const WebLayout = ({ children, isSmall = false }: WebLayoutProps) => (
               height={326}
               className="tw-rounded-md tw-shadow-lg tw-max-w-[40vw] md:tw-max-w-[180px] tw-h-auto"
             />
-            <h1 className="tw-text-xl tw-font-bold tw-text-white">Loading...</h1>
+            <h1 className="tw-text-xl tw-font-bold tw-text-white">
+              Loading...
+            </h1>
           </div>
         </div>
-      }
-    >
+      }>
       <WebLayoutContent isSmall={isSmall}>{children}</WebLayoutContent>
     </ClientOnly>
   </SidebarProvider>

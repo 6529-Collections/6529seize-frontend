@@ -20,7 +20,7 @@ export default function SelectSnapshot({
   snapshots: DistributionPlanSnapshot[];
   onSelectSnapshot: (param: {
     snapshotId: string;
-    snapshotType: Pool.TOKEN_POOL | Pool.CUSTOM_TOKEN_POOL;
+    snapshotType: Pool;
     uniqueWalletsCount: number | null;
   }) => void;
   title: string;

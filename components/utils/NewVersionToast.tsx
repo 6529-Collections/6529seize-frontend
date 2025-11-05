@@ -1,15 +1,13 @@
 "use client";
 
-import React, { type JSX } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRefresh } from "@fortawesome/free-solid-svg-icons";
-import { useIsVersionStale } from "@/hooks/useIsVersionStale";
-import { useRouter } from "next/navigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useIsVersionStale } from "@/hooks/useIsVersionStale";
+import { faRefresh } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { type JSX } from "react";
 
 const NewVersionToast = (): JSX.Element | null => {
   const isVersionStale = useIsVersionStale();
-  const router = useRouter();
   const { isApp } = useDeviceInfo();
 
   if (!isVersionStale) {
@@ -35,7 +33,7 @@ const NewVersionToast = (): JSX.Element | null => {
         </span>
 
         <button
-          onClick={() => router.refresh()}
+          onClick={() => globalThis.location.reload()}
           aria-label="Refresh page"
           title="Refresh page"
           className="tw-flex tw-items-center tw-justify-center tw-gap-x-2
