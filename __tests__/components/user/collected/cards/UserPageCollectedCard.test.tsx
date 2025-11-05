@@ -1,5 +1,5 @@
 import UserPageCollectedCard from "@/components/user/collected/cards/UserPageCollectedCard";
-import { CollectedCollectionType } from "@/entities/IProfile";
+import { CollectedCard, CollectedCollectionType } from "@/entities/IProfile";
 import { ContractType } from "@/enums";
 import { render, screen } from "@testing-library/react";
 
@@ -40,14 +40,15 @@ describe("UserPageCollectedCard", () => {
   });
 
   it("handles memelab collection", () => {
-    const card = {
+    const card: CollectedCard = {
       ...memeCard,
       collection: CollectedCollectionType.MEMELAB,
       seized_count: 0,
+      szn: null,
     };
     render(
       <UserPageCollectedCard
-        card={card as any}
+        card={card}
         contractType={ContractType.ERC1155}
         showDataRow={true}
         onToggle={() => {}}
