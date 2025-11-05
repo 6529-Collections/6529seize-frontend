@@ -141,8 +141,8 @@ function TransferSingleImpl(props: TransferSingleProps) {
                 color={selectedQty <= 1 ? "#60606C" : "#fff"}
               />
             </button>
-            <div className="tw-min-w-[2ch] tw-text-center tw-text-xs tw-tabular-nums tw-select-none">
-              {selectedQty}
+            <div className="tw-min-w-[2ch] tw-text-center tw-text-sm tw-tabular-nums tw-select-none">
+              {selectedQty}/{max}
             </div>
             <button
               type="button"
