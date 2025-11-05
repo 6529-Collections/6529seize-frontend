@@ -25,6 +25,9 @@ export default function SelectSnapshotDropdownListItem({
       case Pool.CUSTOM_TOKEN_POOL:
         setSubTitle("Custom Snapshot");
         break;
+      case Pool.WALLET_POOL:
+        setSubTitle("Wallets");
+        break;
       default:
         assertUnreachable(snapshot.poolType);
     }

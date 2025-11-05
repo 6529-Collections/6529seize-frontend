@@ -119,7 +119,7 @@ export default function AppWalletComponent(
         url: result.uri,
         dialogTitle: "Share or Save File",
       });
-    } catch (_error) {
+    } catch {
       alert("Unable to write file");
     }
   };

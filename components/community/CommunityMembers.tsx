@@ -4,7 +4,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { CommunityMemberOverview } from "@/entities/IProfile";
 import { Page } from "@/helpers/Types";
 import { CommunityMembersQuery } from "@/app/network/page";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { commonApiFetch } from "@/services/api/common-api";
 import { SortDirection } from "@/entities/ISort";
 import CommunityMembersTable from "./members-table/CommunityMembersTable";
@@ -45,31 +45,37 @@ export default function CommunityMembers() {
 
   const activeGroupId = useSelector(selectActiveGroupId);
 
-  const convertSortBy = (sort: string | null): CommunityMembersSortOption => {
-    if (!sort) return defaultSortBy;
-    if (
-      Object.values(CommunityMembersSortOption).includes(
-        sort.toLowerCase() as any
-      )
-    ) {
-      return sort.toLowerCase() as CommunityMembersSortOption;
-    }
-    return defaultSortBy;
-  };
+  const convertSortBy = useCallback(
+    (sort: string | null): CommunityMembersSortOption => {
+      if (!sort) return defaultSortBy;
+      if (
+        Object.values(CommunityMembersSortOption).includes(
+          sort.toLowerCase() as any
+        )
+      ) {
+        return sort.toLowerCase() as CommunityMembersSortOption;
+      }
+      return defaultSortBy;
+    },
+    [defaultSortBy]
+  );
 
-  const convertSortDirection = (
-    sortDirection: string | null
-  ): SortDirection => {
-    if (!sortDirection) return defaultSortDirection;
-    if (
-      Object.values(SortDirection).includes(sortDirection.toUpperCase() as any)
-    ) {
-      return sortDirection.toUpperCase() as SortDirection;
-    }
-    return defaultSortDirection;
-  };
+  const convertSortDirection = useCallback(
+    (sortDirection: string | null): SortDirection => {
+      if (!sortDirection) return defaultSortDirection;
+      if (
+        Object.values(SortDirection).includes(
+          sortDirection.toUpperCase() as any
+        )
+      ) {
+        return sortDirection.toUpperCase() as SortDirection;
+      }
+      return defaultSortDirection;
+    },
+    [defaultSortDirection]
+  );
 
-  const getParamsFromUrl = (): CommunityMembersQuery => {
+  const params = useMemo<CommunityMembersQuery>(() => {
     const page = parseInt(searchParams?.get(SEARCH_PARAMS_FIELDS.page) || "");
     const sortBy = searchParams?.get(SEARCH_PARAMS_FIELDS.sortBy);
     const sortDirection = searchParams?.get(SEARCH_PARAMS_FIELDS.sortDirection);
@@ -86,26 +92,31 @@ export default function CommunityMembers() {
       query.group_id = group;
     }
     return query;
-  };
+  }, [
+    convertSortBy,
+    convertSortDirection,
+    defaultPage,
+    defaultPageSize,
+    defaultSortBy,
+    defaultSortDirection,
+    searchParams,
+  ]);
 
-  const createQueryString = (
-    updateItems: QueryUpdateInput[],
-    lowerCase: boolean = true
-  ): string => {
-    const searchParamsStr = new URLSearchParams(searchParams?.toString());
-    for (const { name, value } of updateItems) {
-      const key = SEARCH_PARAMS_FIELDS[name];
-      if (!value) {
-        searchParamsStr.delete(key);
-      } else {
-        searchParamsStr.set(key, lowerCase ? value.toLowerCase() : value);
+  const createQueryString = useCallback(
+    (updateItems: QueryUpdateInput[], lowerCase: boolean = true): string => {
+      const searchParamsStr = new URLSearchParams(searchParams?.toString());
+      for (const { name, value } of updateItems) {
+        const key = SEARCH_PARAMS_FIELDS[name];
+        if (!value) {
+          searchParamsStr.delete(key);
+        } else {
+          searchParamsStr.set(key, lowerCase ? value.toLowerCase() : value);
+        }
       }
-    }
-    return searchParamsStr.toString();
-  };
-
-  const [params, setParams] = useState(getParamsFromUrl());
-  useEffect(() => setParams(getParamsFromUrl()), [searchParams]);
+      return searchParamsStr.toString();
+    },
+    [searchParams]
+  );
 
   const calculateSortDirection = ({
     newSortBy,
@@ -125,8 +136,9 @@ export default function CommunityMembers() {
     return defaultSortDirection;
   };
 
-  const [debouncedParams, setDebouncedParams] =
-    useState<CommunityMembersQuery>(params);
+  const [debouncedParams, setDebouncedParams] = useState<CommunityMembersQuery>(
+    () => params
+  );
 
   useDebounce(() => setDebouncedParams(params), 200, [params]);
 
@@ -156,16 +168,16 @@ export default function CommunityMembers() {
     placeholderData: keepPreviousData,
   });
 
-  const updateFields = (
-    updateItems: QueryUpdateInput[],
-    lowerCase: boolean = true
-  ): void => {
-    const queryString = createQueryString(updateItems, lowerCase);
-    const path = queryString ? pathname + "?" + queryString : pathname;
-    if (path) {
-      router.replace(path);
-    }
-  };
+  const updateFields = useCallback(
+    (updateItems: QueryUpdateInput[], lowerCase: boolean = true): void => {
+      const queryString = createQueryString(updateItems, lowerCase);
+      const path = queryString ? `${pathname}?${queryString}` : pathname;
+      if (path) {
+        router.replace(path);
+      }
+    },
+    [createQueryString, pathname, router]
+  );
 
   const setSortBy = async (
     sortBy: CommunityMembersSortOption
@@ -205,17 +217,20 @@ export default function CommunityMembers() {
       ];
       updateFields(items, false);
     }
-  }, [activeGroupId]);
+  }, [activeGroupId, params.group_id, updateFields]);
 
-  const setPage = async (page: number): Promise<void> => {
-    const items: QueryUpdateInput[] = [
-      {
-        name: "page",
-        value: page.toString(),
-      },
-    ];
-    await updateFields(items);
-  };
+  const setPage = useCallback(
+    async (page: number): Promise<void> => {
+      const items: QueryUpdateInput[] = [
+        {
+          name: "page",
+          value: page.toString(),
+        },
+      ];
+      await updateFields(items);
+    },
+    [updateFields]
+  );
 
   const [totalPages, setTotalPages] = useState<number>(1);
 
@@ -229,7 +244,13 @@ export default function CommunityMembers() {
     const pagesCount = Math.ceil(members.count / debouncedParams.page_size);
     if (pagesCount < debouncedParams.page) setPage(pagesCount);
     setTotalPages(pagesCount);
-  }, [members?.count, isLoading]);
+  }, [
+    debouncedParams.page,
+    debouncedParams.page_size,
+    isLoading,
+    members?.count,
+    setPage,
+  ]);
 
   const goToNerd = () => router.push("/network/nerd");
 

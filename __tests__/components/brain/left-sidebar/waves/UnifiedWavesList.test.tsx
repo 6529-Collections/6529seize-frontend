@@ -55,7 +55,6 @@ describe('UnifiedWavesList', () => {
     render(
       <UnifiedWavesList
         waves={[]}
-        activeWaveId={null}
         fetchNextPage={jest.fn()}
         hasNextPage={false}
         isFetching={false}
@@ -87,7 +86,6 @@ describe('UnifiedWavesList', () => {
     render(
       <UnifiedWavesList
         waves={[createMockMinimalWave({ id: '1', isPinned: false })]}
-        activeWaveId={null}
         fetchNextPage={fetchNextPage}
         hasNextPage={true}
         isFetching={false}

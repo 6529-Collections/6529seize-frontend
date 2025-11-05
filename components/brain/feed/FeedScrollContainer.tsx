@@ -76,7 +76,7 @@ export const FeedScrollContainer = forwardRef<
 
         return () => observer.disconnect();
       }
-    }, []);
+    }, [ref]);
 
     useEffect(() => {
       if (
@@ -90,18 +90,19 @@ export const FeedScrollContainer = forwardRef<
       }
 
       const scrollContainer = ref.current;
+      const observedFeedItems = observedFeedItemsRef.current;
       if (!scrollContainer) {
         return;
       }
 
       const updateOutOfViewCount = (element: Element, isAbove: boolean) => {
-        const previous = observedFeedItemsRef.current.get(element) ?? false;
+        const previous = observedFeedItems.get(element) ?? false;
 
         if (previous === isAbove) {
           return;
         }
 
-        observedFeedItemsRef.current.set(element, isAbove);
+        observedFeedItems.set(element, isAbove);
         outOfViewAboveCountRef.current += isAbove ? 1 : -1;
 
         if (outOfViewAboveCountRef.current < 0) {
@@ -126,20 +127,20 @@ export const FeedScrollContainer = forwardRef<
       );
 
       const observeElement = (element: Element) => {
-        if (observedFeedItemsRef.current.has(element)) {
+        if (observedFeedItems.has(element)) {
           return;
         }
 
-        observedFeedItemsRef.current.set(element, false);
+        observedFeedItems.set(element, false);
         intersectionObserver.observe(element);
       };
 
       const unobserveElement = (element: Element) => {
-        if (!observedFeedItemsRef.current.has(element)) {
+        if (!observedFeedItems.has(element)) {
           return;
         }
 
-        const wasAbove = observedFeedItemsRef.current.get(element) ?? false;
+        const wasAbove = observedFeedItems.get(element) ?? false;
         if (wasAbove) {
           outOfViewAboveCountRef.current = Math.max(
             0,
@@ -147,7 +148,7 @@ export const FeedScrollContainer = forwardRef<
           );
         }
 
-        observedFeedItemsRef.current.delete(element);
+        observedFeedItems.delete(element);
         intersectionObserver.unobserve(element);
       };
 
@@ -176,7 +177,7 @@ export const FeedScrollContainer = forwardRef<
       };
 
       const initializeFeedItems = () => {
-        observedFeedItemsRef.current.clear();
+        observedFeedItems.clear();
         outOfViewAboveCountRef.current = 0;
 
         const initialElements = contentRef.current?.querySelectorAll(
@@ -219,7 +220,7 @@ export const FeedScrollContainer = forwardRef<
       return () => {
         feedItemsMutationObserver.disconnect();
         intersectionObserver.disconnect();
-        observedFeedItemsRef.current.clear();
+        observedFeedItems.clear();
         outOfViewAboveCountRef.current = 0;
       };
     }, [ref]);

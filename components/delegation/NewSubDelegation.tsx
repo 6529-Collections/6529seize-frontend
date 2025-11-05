@@ -91,10 +91,6 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
         },
       };
 
-  function clearErrors() {
-    setGasError(undefined);
-  }
-
   function validate() {
     const newErrors: string[] = [];
     if (!newDelegationCollection || newDelegationCollection === "0") {

@@ -139,6 +139,8 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     );
   }, [
     wave,
+    isMemesWave,
+    isChatWave,
     isUpcoming,
     isCompleted,
     isInProgress,
@@ -163,17 +165,21 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     [MyStreamWaveTab.FAQ]: "FAQ",
   };
 
-  const options: TabOption[] = availableTabs
-    .filter(
-      (tab) =>
-        isMemesWave ||
-        ![MyStreamWaveTab.MY_VOTES, MyStreamWaveTab.FAQ].includes(tab)
-    )
-    .map((tab) => ({
-      key: tab,
-      label: tabLabels[tab],
-      panelId: getContentTabPanelId(tab),
-    }));
+  const options: TabOption[] = React.useMemo(
+    () =>
+      availableTabs
+        .filter(
+          (tab) =>
+            isMemesWave ||
+            ![MyStreamWaveTab.MY_VOTES, MyStreamWaveTab.FAQ].includes(tab)
+        )
+        .map((tab) => ({
+          key: tab,
+          label: tabLabels[tab],
+          panelId: getContentTabPanelId(tab),
+        })),
+    [availableTabs, isMemesWave]
+  );
 
   useEffect(() => {
     if (
@@ -183,7 +189,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     ) {
       setActiveTab(options[0].key);
     }
-  }, [isMemesWave, activeTab, options]);
+  }, [isMemesWave, activeTab, options, setActiveTab]);
 
   // For simple waves, don't render any tabs
   if (isChatWave) {
