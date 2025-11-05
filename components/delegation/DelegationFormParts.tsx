@@ -6,7 +6,7 @@ import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { areEqualAddresses, getTransactionLink } from "@/helpers/Helpers";
 import { faInfoCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import { Col, Container, Form, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import {
@@ -262,6 +262,11 @@ export function DelegationSubmitGroups(
     hash: writeDelegation.data,
   });
   const [errors, setErrors] = useState<string[]>([]);
+  const emitToast = useEffectEvent(
+    (toast: { title: string; message: string }) => {
+      onSetToast(toast);
+    }
+  );
 
   function submitDelegation() {
     const newErrors = validate();
@@ -288,21 +293,21 @@ export function DelegationSubmitGroups(
 
   useEffect(() => {
     if (writeDelegation.error) {
-      onSetToast({
+      emitToast({
         title,
         message: writeDelegation.error.message.split("Request Arguments")[0],
       });
     }
     if (writeDelegation.data) {
       if (waitWriteDelegation.isLoading) {
-        onSetToast({
+        emitToast({
           title,
           message: `Transaction submitted...
                     ${getTransactionAnchor(writeDelegation.data)}
                     <br />Waiting for confirmation...`,
         });
       } else {
-        onSetToast({
+        emitToast({
           title,
           message: `Transaction Successful!
                     ${getTransactionAnchor(writeDelegation.data)}`,
@@ -313,7 +318,6 @@ export function DelegationSubmitGroups(
     writeDelegation.error,
     writeDelegation.data,
     waitWriteDelegation.isLoading,
-    onSetToast,
     title,
   ]);
 
