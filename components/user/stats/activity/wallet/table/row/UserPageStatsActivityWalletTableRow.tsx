@@ -236,7 +236,13 @@ export default function UserPageStatsActivityWalletTableRow({
   };
 
   const getLinkContent = () => {
-    let name = nftLite?.name ?? "";
+    let name;
+    if (isMemesContract(transaction.contract)) {
+      name = `${nftLite?.name} (The Memes #${transaction.token_id})`;
+    }
+    if (isMemeLabContract(transaction.contract)) {
+      name = `${nftLite?.name} (MemeLab #${transaction.token_id})`;
+    }
     if (isNextgenContract(transaction.contract)) {
       const normalizedToken = normalizeNextgenTokenID(transaction.token_id);
       const collectionName =
