@@ -409,20 +409,21 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
             </button>
           </div>
 
-          <div className="tw-flex-1 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-950 tw-overflow-hidden">
+          <div className="tw-flex-1 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-950 tw-overflow-hidden tw-flex tw-flex-col tw-min-h-[360px]">
             {isExternalMediaValid ? (
               <SandboxedExternalIframe
                 key={externalPreviewUrl}
                 src={externalPreviewUrl}
                 title="Interactive artwork preview"
-                className="tw-w-full tw-h-full tw-bg-white"
+                className="tw-bg-transparent"
+                containerClassName="tw-flex-1 tw-flex tw-flex-col"
                 fallback={renderPreviewMessage(
                   "Preview unavailable for unapproved domains or file types.",
                   "Only ipfs.io or arweave.net HTML documents can be embedded.",
                 )}
               />
             ) : (
-              previewFallback
+              <div className="tw-flex-1 tw-flex tw-flex-col">{previewFallback}</div>
             )}
           </div>
         </div>

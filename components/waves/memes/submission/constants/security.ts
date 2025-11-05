@@ -103,12 +103,25 @@ export const isInteractiveMediaContentPathAllowed = (
   }
 
   if (provider === "ipfs") {
-    const match = IPFS_PATH_PATTERN.exec(pathname);
+    let normalizedPath = pathname;
+    while (normalizedPath.endsWith("/") && normalizedPath !== "/") {
+      normalizedPath = normalizedPath.slice(0, -1);
+    }
+
+    const match = IPFS_PATH_PATTERN.exec(normalizedPath);
     if (!match) {
       return false;
     }
 
-    return isInteractiveMediaContentIdentifier(provider, match[1]);
+    if (!isInteractiveMediaContentIdentifier(provider, match[1])) {
+      return false;
+    }
+
+    if (normalizedPath === pathname) {
+      return true;
+    }
+
+    return pathname === `${normalizedPath}/`;
   }
 
   if (provider === "arweave") {

@@ -13,6 +13,7 @@ export interface SandboxedExternalIframeProps {
   readonly title: string;
   readonly className?: string;
   readonly fallback?: React.ReactNode;
+  readonly containerClassName?: string;
 }
 
 /**
@@ -29,6 +30,7 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
   title,
   className,
   fallback = null,
+  containerClassName,
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -37,6 +39,13 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
     () => canonicalizeInteractiveMediaUrl(src),
     [src]
   );
+
+  const frameClassName = useMemo(() => {
+    const classes = ["tw-h-full", "tw-w-full", className].filter(
+      (value): value is string => Boolean(value)
+    );
+    return classes.join(" ");
+  }, [className]);
 
   useEffect(() => {
     if (!canonicalSrc) {
@@ -95,7 +104,6 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
     const baseProps = {
       src: canonicalSrc,
       title,
-      className,
       sandbox: DEFAULT_SANDBOX,
       // `allow=""` intentionally denies all Permission Policy features beyond the sandbox defaults.
       allow: "",
@@ -108,16 +116,17 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
 
     baseProps.fetchPriority = "low";
     baseProps.credentialless = "";
+    baseProps.className = frameClassName;
 
     return baseProps;
-  }, [canonicalSrc, className, title]);
+  }, [canonicalSrc, frameClassName, title]);
 
   if (!canonicalSrc || !iframeProps) {
     return fallback ? <>{fallback}</> : null;
   }
 
   const placeholder = (
-    <div className={className} aria-hidden="true" role="presentation" />
+    <div className={frameClassName} aria-hidden="true" role="presentation" />
   );
 
   const banner = (
@@ -143,10 +152,16 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
     </div>
   );
 
+  const containerClasses = ["tw-flex", "tw-flex-col", "tw-h-full", containerClassName]
+    .filter((value): value is string => Boolean(value))
+    .join(" ");
+
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} className={containerClasses}>
       {banner}
-      {isVisible ? <iframe {...iframeProps} /> : placeholder}
+      <div className="tw-flex-1 tw-min-h-0 tw-overflow-hidden">
+        {isVisible ? <iframe {...iframeProps} /> : placeholder}
+      </div>
     </div>
   );
 };
