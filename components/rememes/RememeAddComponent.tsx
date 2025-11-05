@@ -76,27 +76,26 @@ export default function RememeAddComponent(props: Readonly<Props>) {
 
     try {
       const split = tokenIds.split(",");
-      split.map((s) => {
-        if (s.includes("-")) {
-          const range = s.split("-");
+      split.forEach((s) => {
+        const trimmed = s.trim();
+        if (trimmed.includes("-")) {
+          const range = trimmed.split("-");
           if (range.length === 2) {
-            const start = parseInt(range[0]);
-            const end = parseInt(range[1]);
-            if (start < end) {
-              const rangeArray = [];
+            const start = parseInt(range[0].trim());
+            const end = parseInt(range[1].trim());
+            if (!isNaN(start) && !isNaN(end) && start < end) {
               for (let i = start; i <= end; i++) {
-                rangeArray.push(i);
-              }
-              rangeArray.map((i) => {
                 ids.push(i.toString());
-              });
+              }
             }
           }
         } else {
-          ids.push(s);
+          if (trimmed) {
+            ids.push(trimmed);
+          }
         }
       });
-      return ids;
+      return ids.length > 0 ? ids : undefined;
     } catch (e) {
       return undefined;
     }
