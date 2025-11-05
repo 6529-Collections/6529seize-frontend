@@ -654,6 +654,7 @@ describe("TransferModal", () => {
     const simulateContract = publicClient.simulateContract as jest.Mock;
     const readContract = publicClient.readContract as jest.Mock;
     const writeContract = walletWrapper.data.writeContract as jest.Mock;
+    const waitForReceipt = publicClient.waitForTransactionReceipt as jest.Mock;
 
     readContract.mockResolvedValue(
       "0x0000000000000000000000000000000000000abc"
@@ -666,6 +667,8 @@ describe("TransferModal", () => {
     writeContract
       .mockResolvedValueOnce("0xhash1155")
       .mockResolvedValueOnce("0xhash721");
+
+    waitForReceipt.mockImplementation(() => new Promise(() => {}));
 
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: /^transfer$/i }));

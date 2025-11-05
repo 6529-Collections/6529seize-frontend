@@ -496,7 +496,7 @@ function TxStatusList({
         href={`${explorer}/tx/${hash}`}
         target="_blank"
         rel="noreferrer"
-        className="tw-inline-block tw-no-underline tw-ml-2 !tw-text-sm tw-rounded-md tw-bg-white hover:tw-bg-white/80 tw-text-black hover:tw-text-black tw-px-2 tw-py-1">
+        className="tw-inline-block tw-no-underline tw-ml-2 !tw-text-sm tw-rounded-md tw-bg-white hover:tw-bg-white/80 tw-text-black hover:tw-text-black tw-px-2 tw-py-1 tw-border tw-border-solid tw-border-black">
         View Tx
       </Link>
     );
