@@ -10,6 +10,7 @@ import Museum from "@/app/museum/page";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { redirect } from "next/navigation";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({
@@ -105,11 +106,18 @@ describe("static pages render", () => {
   });
 
   it("emma plan page renders", async () => {
-    // Await the server component to get the JSX
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    });
     const jsx = await EmmaPlan({ params: Promise.resolve({ id: "1" }) });
 
-    // Now render the resolved JSX
-    render(jsx);
+    render(
+      <QueryClientProvider client={queryClient}>{jsx}</QueryClientProvider>
+    );
 
     expect(screen.getByTestId("sidebar")).toBeInTheDocument();
   });

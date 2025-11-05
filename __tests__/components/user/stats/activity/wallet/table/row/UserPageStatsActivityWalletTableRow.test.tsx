@@ -11,6 +11,7 @@ jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: 
 describe('UserPageStatsActivityWalletTableRow', () => {
   const profile: any = { wallets: [{ wallet: '0xabc' }] };
   const memes: any[] = [{ id: '1', name: 'meme', icon: 'm.png' }];
+  const memeLab: any[] = [];
   const nextgens: any[] = [];
 
   const baseTx: any = {
@@ -26,11 +27,11 @@ describe('UserPageStatsActivityWalletTableRow', () => {
   it('renders sale info with value and link', () => {
     render(
       <table><tbody>
-        <UserPageStatsActivityWalletTableRow transaction={baseTx} profile={profile} memes={memes} nextgenCollections={nextgens} />
+        <UserPageStatsActivityWalletTableRow transaction={baseTx} profile={profile} memes={memes} memeLab={memeLab} nextgenCollections={nextgens} />
       </tbody></table>
     );
     expect(screen.getByText('sold')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'meme' })).toHaveAttribute('href', '/the-memes/1');
+    expect(screen.getByRole('link', { name: 'meme (The Memes #1)' })).toHaveAttribute('href', '/the-memes/1');
     expect(screen.getByText('2')).toBeInTheDocument();
   });
 });

@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useClickAway } from "react-use";
 
 export interface NFTLite {
-  animation: any;
+  animation: string | null;
   contract: string;
   icon: string | null;
   id: 1;
