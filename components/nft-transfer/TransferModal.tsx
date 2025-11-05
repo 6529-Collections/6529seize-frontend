@@ -1454,7 +1454,7 @@ export default function TransferModal({
         {/* footer */}
         <div className="tw-flex tw-justify-between tw-items-center tw-gap-2 sm:tw-gap-3 tw-border-0 tw-border-t-[3px] tw-border-solid tw-border-white/30 tw-p-3 sm:tw-p-4">
           <div className="tw-flex tw-items-center tw-gap-2">
-            {anyTxsPending(txs) && (
+            {flow === "submission" && anyTxsPending(txs) && (
               <>
                 <FontAwesomeIcon
                   icon={faExclamationTriangle}
