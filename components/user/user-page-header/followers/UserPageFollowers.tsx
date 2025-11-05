@@ -23,7 +23,7 @@ export default function UserPageFollowers({
       href={`/${safeHandleOrWallet}/followers`}
       className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
     >
-      <span className="tw-text-base tw-font-medium tw-text-iron-50">
+      <span className="tw-text-base tw-font-semibold tw-text-iron-50">
         {formatNumberWithCommas(count)}
       </span>
       <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400">

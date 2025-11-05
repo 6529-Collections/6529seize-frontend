@@ -120,12 +120,12 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
   return (
     <div>
       <div className="tw-flex tw-items-center tw-space-x-4">
-        <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-700">
-          <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
+        <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800">
+        <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-100">
             <EthereumIcon />
           </div>
         </div>
-        <span className="tw-text-base tw-font-semibold tw-text-iron-50">
+        <span className="tw-text-base tw-font-semibold tw-text-iron-100">
           Consolidated Addresses
         </span>
       </div>
@@ -143,14 +143,14 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
       <div className="tw-space-x-3 tw-pt-5 xl:tw-pt-4">
         <Link
           href={`/delegation/wallet-checker?address=${primaryAddress}`}
-          className="tw-no-underline tw-relative tw-text-xs tw-font-medium tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-2 tw-text-iron-200 hover:tw-text-iron-200 focus:tw-outline-none tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out">
+          className="tw-no-underline tw-relative tw-text-xs tw-font-medium tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-2 tw-text-iron-200 hover:tw-text-iron-200 focus:tw-outline-none tw-border tw-border-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-800 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out">
           Wallet Checker
         </Link>
         <AnimatePresence mode="wait" initial={false}>
           {showDelegationCenter && (
             <Link
               href="/delegation/delegation-center"
-              className="tw-no-underline tw-relative tw-text-xs tw-font-medium tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-2 tw-text-iron-200 hover:tw-text-iron-200 focus:tw-outline-none tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out">
+              className="tw-no-underline tw-relative tw-text-xs tw-font-medium tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-2 tw-text-iron-200 hover:tw-text-iron-200 focus:tw-outline-none tw-border tw-border-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-800 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out">
               Delegation Center
             </Link>
           )}

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Pool } from "@/components/allowlist-tool/allowlist-tool.types";
 import { DistributionPlanSnapshot } from "@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import { Pool } from "@/components/allowlist-tool/allowlist-tool.types";
+import { useEffect, useState } from "react";
 
 export default function SelectSnapshotDropdownListItem({
   snapshot,
@@ -43,7 +43,7 @@ export default function SelectSnapshotDropdownListItem({
         e.stopPropagation();
         setSelectedSnapshot(snapshot);
       }}
-      className="tw-group tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-py-2.5 tw-pl-3 tw-pr-9 hover:tw-bg-neutral-700 tw-transition tw-duration-300 tw-ease-out"
+      className="tw-group tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-py-2.5 tw-pl-3 tw-pr-9 hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
       role="option"
       aria-selected="true">
       <div className="tw-w-full tw-flex tw-justify-between tw-items-center tw-gap-x-4 tw-pr-4">
@@ -54,12 +54,12 @@ export default function SelectSnapshotDropdownListItem({
         </div>
 
         <div className="tw-flex-1 tw-text-right">
-          <span className="tw-font-light tw-text-neutral-500 tw-text-xs tw-block tw-truncate group-hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out">
+          <span className="tw-font-light tw-text-iron-500 tw-text-xs tw-block tw-truncate group-hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
             {subTitle}
           </span>
         </div>
         <div className="tw-flex-1 tw-text-right">
-          <span className="tw-pl-2 tw-font-light tw-text-neutral-500 tw-text-xs tw-truncate group-hover:tw-text-neutral-400 tw-transition tw-duration-300 tw-ease-out">
+          <span className="tw-pl-2 tw-font-light tw-text-iron-500 tw-text-xs tw-truncate group-hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
             {snapshot.walletsCount} wallets
           </span>
         </div>

@@ -1,7 +1,7 @@
 export default function WebsiteIcon() {
   return (
     <svg
-      className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-neutral-100 tw-align-top"
+      className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-100 tw-align-top"
       aria-hidden="true"
       viewBox="0 0 24 24"
       fill="none"

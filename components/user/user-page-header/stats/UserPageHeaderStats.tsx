@@ -45,7 +45,7 @@ export default function UserPageHeaderStats({
           href={`/${routeHandle}/collected`}
           className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
-          <span className="tw-text-base tw-font-medium tw-text-iron-50">
+          <span className="tw-text-base tw-font-semibold tw-text-iron-50">
             {formatNumberWithCommas(profile.tdh)}
           </span>
           <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400">
@@ -57,7 +57,7 @@ export default function UserPageHeaderStats({
           className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
           data-tooltip-id="tdh-rate-tooltip"
         >
-          <span className="tw-text-base tw-font-medium tw-text-iron-50">
+          <span className="tw-text-base tw-font-semibold tw-text-iron-50">
             {formatNumberWithCommas(profile.tdh_rate)}
           </span>
           <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400 tw-whitespace-nowrap">
@@ -68,7 +68,7 @@ export default function UserPageHeaderStats({
           href={`/${routeHandle}/rep`}
           className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
-          <span className="tw-text-base tw-font-medium tw-text-iron-50">
+          <span className="tw-text-base tw-font-semibold tw-text-iron-50">
             {formatNumberWithCommas(profile.rep)}
           </span>
           <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400">

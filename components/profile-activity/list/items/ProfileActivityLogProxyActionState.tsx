@@ -37,11 +37,11 @@ export default function ProfileActivityLogProxyActionState({
         tabTarget={tabTarget}
       />
       <ProfileActivityLogItemAction action="proxy" />
-      <span className="tw-whitespace-nowrap tw-text-base tw-font-medium tw-text-iron-100">
+      <span className="tw-whitespace-nowrap tw-text-base tw-font-medium tw-text-iron-200">
         {PROFILE_PROXY_ACTION_LABELS[log.contents.type]}
       </span>
       <ProfileActivityLogItemAction action="status to" />
-      <span className="tw-whitespace-nowrap tw-text-base tw-font-medium tw-text-iron-100">
+      <span className="tw-whitespace-nowrap tw-text-base tw-font-medium tw-text-iron-200">
         {ACTION[log.contents.state_change_type]}
       </span>
     </>

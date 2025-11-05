@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect } from "react";
+import { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
 import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
+import { useEffect } from "react";
 import {
-  DistributionPlanSnapshot,
-  PhaseGroupSnapshotConfig,
+    DistributionPlanSnapshot,
+    PhaseGroupSnapshotConfig,
 } from "../BuildPhaseFormConfigModal";
-import FinalizeSnapshotsTable from "./snapshots-table/FinalizeSnapshotsTable";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import ComponentConfigMeta from "./ComponentConfigMeta";
-import { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
+import FinalizeSnapshotsTable from "./snapshots-table/FinalizeSnapshotsTable";
 
 interface FinalizeSnapshotProps {
   readonly onConfigureGroup: () => void;
@@ -73,7 +73,7 @@ export default function FinalizeSnapshot({
           <button
             onClick={onAddAnotherSnapshot}
             type="button"
-            className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent hover:tw-bg-neutral-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid tw-border-neutral-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out">
+            className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent hover:tw-bg-iron-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid tw-border-iron-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out">
             Add another snapshot
           </button>
           <button

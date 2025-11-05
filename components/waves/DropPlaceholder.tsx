@@ -64,14 +64,14 @@ export default function DropPlaceholder({ type, chatRestriction, submissionRestr
         case SubmissionRestriction.MAX_DROPS_REACHED:
           return "tw-text-red";
         default:
-          return "tw-text-neutral-400";
+          return "tw-text-iron-400";
       }
     }
-    return "tw-text-neutral-400";
+    return "tw-text-iron-400";
   };
 
   return (
-    <div className="tw-min-h-[48px] tw-flex tw-items-center tw-justify-center tw-px-4 tw-py-3 tw-bg-neutral-900/50 tw-backdrop-blur tw-rounded-xl tw-border tw-border-neutral-800/50">
+    <div className="tw-min-h-[48px] tw-flex tw-items-center tw-justify-center tw-px-4 tw-py-3 tw-bg-iron-900/50 tw-backdrop-blur tw-rounded-xl tw-border tw-border-iron-800/50">
       <div className="tw-flex tw-flex-col">
         <p className={`tw-text-sm tw-font-medium tw-mb-0 ${getColor()}`}>{getMessage()}</p>
       </div>

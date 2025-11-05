@@ -1,11 +1,11 @@
 "use client";
 
 import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
-import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
-import { useContext, useState } from "react";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+import { useContext, useState } from "react";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import ComponentConfigMeta from "./ComponentConfigMeta";
+import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 
 export default function ComponentAddSpots({
   onSelectMaxMintCount,
@@ -56,7 +56,7 @@ export default function ComponentAddSpots({
           Count
         </label>
         <div className="tw-mt-1.5">
-          <div className="tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-neutral-700/40 hover:tw-ring-neutral-700 focus-within:tw-ring-1 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
+          <div className="tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset tw-ring-iron-700/40 hover:tw-ring-iron-700 focus-within:tw-ring-1 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
             <input
               type="number"
               value={maxMints}
@@ -65,7 +65,7 @@ export default function ComponentAddSpots({
                   ? setMaxMints(Number(event.target.value))
                   : setMaxMints("")
               }
-              className="tw-form-input tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
+              className="tw-form-input tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-iron-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
               placeholder="Max mint count per wallet"
             />
           </div>
