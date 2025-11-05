@@ -277,8 +277,8 @@ export default function UserPageCollectedCard({
               {card.token_name}
             </span>
             {showSeizedCount && (
-              <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium tw-text-iron-400 tw-flex tw-items-center tw-gap-0.5">
-                {getSeizedCountDisplay()} x
+              <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium tw-text-iron-400 tw-flex tw-items-center tw-gap-0.5 tw-whitespace-nowrap">
+                {getSeizedCountDisplay()}x
                 {hasBalanceMismatch && (
                   <>
                     <span
