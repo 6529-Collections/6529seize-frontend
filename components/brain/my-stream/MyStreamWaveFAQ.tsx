@@ -14,7 +14,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
 import { useContentTab } from "../ContentTabContext";
 import { useLayout } from "./layout/LayoutContext";
 
@@ -22,7 +22,7 @@ interface MyStreamWaveFAQProps {
   readonly wave: ApiWave;
 }
 
-const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
+const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
   const { setActiveContentTab } = useContentTab();
   const { faqViewStyle } = useLayout();
 
@@ -30,9 +30,8 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
     setActiveContentTab(MyStreamWaveTab.FAQ);
   }, [setActiveContentTab]);
 
-  const containerClassName = useMemo(() => {
-    return "tw-w-full tw-flex tw-flex-col tw-pt-4 lg:tw-pr-2 tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-desktop-hover:hover:desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-h-full";
-  }, []);
+  const containerClassName =
+    "tw-w-full tw-flex tw-flex-col tw-pt-4 lg:tw-pr-2 tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-desktop-hover:hover:desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-h-full";
 
   return (
     <div className={containerClassName} style={faqViewStyle}>

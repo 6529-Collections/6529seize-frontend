@@ -35,7 +35,7 @@ export default function CommunityMembersTableHeaderSortableContent({
   useEffect(() => setRotate(false), [sortDirection]);
   useEffect(
     () => setRotate(isActive && hoveringOption === sort),
-    [hoveringOption]
+    [hoveringOption, isActive, sort]
   );
   const showLoader = isLoading && isActive;
   return (

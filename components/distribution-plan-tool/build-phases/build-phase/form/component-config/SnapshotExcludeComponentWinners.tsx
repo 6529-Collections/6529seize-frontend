@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import AllowlistToolSelectMenuMultiple, {
   AllowlistToolSelectMenuMultipleOption,
 } from "@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple";
@@ -21,39 +21,29 @@ const SELECT_ALL_OPTION: AllowlistToolSelectMenuMultipleOption = {
   value: "select-all",
 };
 
+type SnapshotExcludeComponentWinnersProps = {
+  readonly config: PhaseGroupSnapshotConfig;
+  readonly phases: ReadonlyArray<BuildPhasesPhase>;
+  readonly onNextStep: (step: PhaseConfigStep) => void;
+  readonly onSelectExcludeComponentWinners: (param: {
+    excludeComponentWinners: string[];
+    uniqueWalletsCount: number | null;
+  }) => void;
+  readonly title: string;
+  readonly onClose: () => void;
+};
+
 export default function SnapshotExcludeComponentWinners({
+  config,
   phases,
   onNextStep,
   onSelectExcludeComponentWinners,
   title,
   onClose,
-}: {
-  config: PhaseGroupSnapshotConfig;
-  phases: BuildPhasesPhase[];
-  onNextStep: (step: PhaseConfigStep) => void;
-  onSelectExcludeComponentWinners: (param: {
-    excludeComponentWinners: string[];
-    uniqueWalletsCount: number | null;
-  }) => void;
-  title: string;
-  onClose: () => void;
-}) {
+}: SnapshotExcludeComponentWinnersProps) {
   const { setToasts } = useContext(DistributionPlanToolContext);
-  const [options, setOptions] = useState<
-    AllowlistToolSelectMenuMultipleOption[]
-  >([
-    SELECT_ALL_OPTION,
-    ...phases.flatMap((p) =>
-      p.components.map((c) => ({
-        title: c.name,
-        subTitle: p.name,
-        value: c.id,
-      }))
-    ),
-  ]);
-
-  useEffect(() => {
-    setOptions([
+  const options = useMemo<AllowlistToolSelectMenuMultipleOption[]>(
+    () => [
       SELECT_ALL_OPTION,
       ...phases.flatMap((p) =>
         p.components.map((c) => ({
@@ -62,12 +52,35 @@ export default function SnapshotExcludeComponentWinners({
           value: c.id,
         }))
       ),
-    ]);
-  }, [phases]);
+    ],
+    [phases]
+  );
 
   const [selectedOptions, setSelectedOptions] = useState<
     AllowlistToolSelectMenuMultipleOption[]
   >([]);
+
+  useEffect(() => {
+    if (!config.excludeComponentWinners.length) {
+      setSelectedOptions([]);
+      return;
+    }
+
+    const componentOptions = options.filter(
+      (option) => option.value !== SELECT_ALL_OPTION.value
+    );
+
+    const selected = componentOptions.filter((option) =>
+      config.excludeComponentWinners.includes(option.value)
+    );
+
+    if (selected.length === componentOptions.length && componentOptions.length) {
+      setSelectedOptions(options);
+      return;
+    }
+
+    setSelectedOptions(selected);
+  }, [config.excludeComponentWinners, options]);
 
   const toggleSelectAll = () => {
     if (selectedOptions.length === options.length) {
@@ -103,17 +116,13 @@ export default function SnapshotExcludeComponentWinners({
     );
   };
 
-  const [excludeComponentWinners, setExcludeComponentWinners] = useState<
-    string[]
-  >([]);
-
-  useEffect(() => {
-    setExcludeComponentWinners(
+  const excludeComponentWinners = useMemo(
+    () =>
       selectedOptions
         .filter((o) => o.value !== SELECT_ALL_OPTION.value)
-        .map((o) => o.value)
-    );
-  }, [selectedOptions]);
+        .map((o) => o.value),
+    [selectedOptions]
+  );
 
   const onExcludePreviousWinners = () => {
     if (selectedOptions.length === 0) {
@@ -125,65 +134,9 @@ export default function SnapshotExcludeComponentWinners({
     }
     onSelectExcludeComponentWinners({
       excludeComponentWinners,
-      uniqueWalletsCount: localUniqueWalletsCount,
+      uniqueWalletsCount: config.uniqueWalletsCount,
     });
   };
-  const [loading] = useState<boolean>(false);
-
-  const [localUniqueWalletsCount, setLocalUniqueWalletsCount] = useState<
-    number | null
-  >(null);
-
-  // useEffect(() => {
-  //   const getCustomTokenPoolWallets = (): string[] => {
-  //     const operation = operations.find(
-  //       (o) =>
-  //         o.code === AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL &&
-  //         o.params.id === config.snapshotId
-  //     );
-  //     if (!operation) {
-  //       return [];
-  //     }
-
-  //     return operation.params.tokens.map((t: any) => t.owner.toLowerCase());
-  //   };
-
-  //   const fetchUniqueWalletsCount = async () => {
-  //     if (!excludeComponentWinners.length) {
-  //       setLocalUniqueWalletsCount(config.uniqueWalletsCount);
-  //       return;
-  //     }
-  //     if (!distributionPlan || !config.snapshotType) return;
-  //     const extraWallets =
-  //       config.snapshotType === Pool.CUSTOM_TOKEN_POOL
-  //         ? getCustomTokenPoolWallets()
-  //         : [];
-  //     setLoading(true);
-  //     const endpoint = `/allowlists/${distributionPlan.id}/token-pool-downloads/token-pool/${config.snapshotId}/unique-wallets-count`;
-  //     const { success, data } = await distributionPlanApiPost<number>({
-  //       endpoint,
-  //       body: {
-  //         excludeComponentWinners,
-  //         excludeSnapshots: config.excludeSnapshots,
-  //         extraWallets,
-  //       },
-  //     });
-  //     if (!success) {
-  //       setLoading(false);
-  //       return { success: false };
-  //     }
-  //     setLocalUniqueWalletsCount(data);
-  //     setLoading(false);
-  //     return { success: true };
-  //   };
-  //   fetchUniqueWalletsCount();
-  // }, [
-  //   excludeComponentWinners,
-  //   distributionPlan,
-  //   config,
-  //   setToasts,
-  //   operations,
-  // ]);
 
   return (
     <div className="tw-relative tw-p-6">
@@ -211,8 +164,8 @@ export default function SnapshotExcludeComponentWinners({
         onNext={() => onExcludePreviousWinners()}>
         <ComponentConfigMeta
           tags={[]}
-          walletsCount={localUniqueWalletsCount}
-          isLoading={loading}
+          walletsCount={config.uniqueWalletsCount}
+          isLoading={false}
         />
       </ComponentConfigNextBtn>
     </div>

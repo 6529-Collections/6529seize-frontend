@@ -6,6 +6,7 @@ import React, {
   useState,
   useEffect,
   useMemo,
+  useCallback,
   ReactNode,
 } from "react";
 import {
@@ -73,7 +74,25 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   const [showCookieConsent, setShowCookieConsent] = useState(false);
   const [country, setCountry] = useState("");
 
-  const getCookieConsent = async (isFirstLoad: boolean = false) => {
+  const loadPerformanceCookies = useCallback(() => {
+    const script1 = document.createElement("script");
+    script1.src = `https://www.googletagmanager.com/gtag/js?id=${GTM_ID}`;
+    script1.async = true;
+    document.head.appendChild(script1);
+
+    const script2 = document.createElement("script");
+    script2.innerHTML = `
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '${GTM_ID}', {
+            'cookie_expires': 31536000
+        });
+      `;
+    document.head.appendChild(script2);
+  }, []);
+
+  const getCookieConsent = useCallback(async (isFirstLoad: boolean = false) => {
     try {
       const essentialCookies = getCookieConsentByName(CONSENT_ESSENTIAL_COOKIE);
       const performanceCookies = getCookieConsentByName(
@@ -108,9 +127,9 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
     } catch (error) {
       console.error("Failed to fetch cookie consent status", error);
     }
-  };
+  }, [loadPerformanceCookies]);
 
-  const consent = async () => {
+  const consent = useCallback(async () => {
     try {
       await commonApiPost({ endpoint: `policies/cookies-consent`, body: {} });
       Cookies.set(CONSENT_ESSENTIAL_COOKIE, "true", { expires: 365 });
@@ -123,9 +142,9 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
         message: "Something went wrong...",
       });
     }
-  };
+  }, [getCookieConsent, setToast]);
 
-  const reject = async () => {
+  const reject = useCallback(async () => {
     try {
       await commonApiDelete({ endpoint: `policies/cookies-consent` });
       Cookies.set(CONSENT_ESSENTIAL_COOKIE, "true", { expires: 365 });
@@ -142,25 +161,7 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
         message: "Something went wrong...",
       });
     }
-  };
-
-  const loadPerformanceCookies = () => {
-    const script1 = document.createElement("script");
-    script1.src = `https://www.googletagmanager.com/gtag/js?id=${GTM_ID}`;
-    script1.async = true;
-    document.head.appendChild(script1);
-
-    const script2 = document.createElement("script");
-    script2.innerHTML = `
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', '${GTM_ID}', {
-            'cookie_expires': 31536000
-        });
-      `;
-    document.head.appendChild(script2);
-  };
+  }, [getCookieConsent, setToast]);
 
   const value = useMemo(
     () => ({ consent, reject, showCookieConsent, country }),
@@ -169,7 +170,7 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
 
   useEffect(() => {
     getCookieConsent(true);
-  }, []);
+  }, [getCookieConsent]);
 
   return (
     <CookieConsentContext.Provider value={value}>

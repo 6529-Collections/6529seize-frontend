@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { AuthContext } from "@/components/auth/Auth";
 import { DropRateChangeRequest } from "@/entities/IDrop";
@@ -20,28 +20,43 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   const { requestAuth, setToast } = useContext(AuthContext);
   const [isProcessing, setIsProcessing] = useState(false);
   const currentVoteValue = drop.context_profile_context?.rating ?? 0;
+  const currentVoteValueString = String(currentVoteValue);
   const minRating = drop.context_profile_context?.min_rating ?? 0;
   const maxRating = drop.context_profile_context?.max_rating ?? 0;
-  const [voteValue, setVoteValue] = useState<number>(currentVoteValue);
-  const [isEditing, setIsEditing] = useState(false);
-
-  useEffect(() => {
-    if (currentVoteValue !== voteValue) {
-      setIsEditing(true);
-    }
-  }, [voteValue]);
+  const [voteValue, setVoteValue] = useState<string>(currentVoteValueString);
+  const parsedVoteValue = Number.parseInt(voteValue, 10);
+  const hasValidVoteValue = !Number.isNaN(parsedVoteValue);
+  const isEditing = hasValidVoteValue && parsedVoteValue !== currentVoteValue;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
-
-    if (inputValue === "" || inputValue === "-") {
-      setVoteValue(inputValue as any);
+    if (inputValue === "") {
+      setVoteValue("");
       return;
     }
 
-    const value = parseInt(inputValue);
-    if (isNaN(value)) return;
-    setVoteValue(Math.min(Math.max(value, minRating), maxRating));
+    if (inputValue === "-") {
+      setVoteValue(inputValue);
+      return;
+    }
+
+    const value = Number.parseInt(inputValue, 10);
+    if (Number.isNaN(value)) return;
+    const clampedValue = Math.min(Math.max(value, minRating), maxRating);
+    setVoteValue(String(clampedValue));
+  };
+
+  const handleBlur = () => {
+    if (!hasValidVoteValue || voteValue === "" || voteValue === "-") {
+      setVoteValue(currentVoteValueString);
+      return;
+    }
+
+    const clampedValue = Math.min(
+      Math.max(parsedVoteValue, minRating),
+      maxRating,
+    );
+    setVoteValue(String(clampedValue));
   };
 
   const rateChangeMutation = useMutation({
@@ -53,15 +68,13 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
           category: DEFAULT_DROP_RATE_CATEGORY,
         },
       }),
-    onSuccess: (response: ApiDrop) => {
-      // Show success toast
+    onSuccess: (_response: ApiDrop) => {
       setToast({
         message: "Vote updated",
         type: "success",
       });
     },
     onError: (error) => {
-      // Show error toast
       setToast({
         message: error as unknown as string,
         type: "error",
@@ -73,13 +86,22 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   const handleSubmit = async () => {
     if (isProcessing || isResetting) return;
 
+    if (!hasValidVoteValue) {
+      setVoteValue(currentVoteValueString);
+      return;
+    }
+
+    const clampedValue = Math.min(
+      Math.max(parsedVoteValue, minRating),
+      maxRating,
+    );
+    setVoteValue(String(clampedValue));
+
     setIsProcessing(true);
 
-    // Show loading message via button state (the button will show loading state)
     try {
       const { success } = await requestAuth();
       if (!success) {
-        // Show authentication error
         setToast({
           message: "Authentication failed",
           type: "error",
@@ -89,12 +111,15 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       }
 
       await rateChangeMutation.mutateAsync({
-        rate: voteValue,
+        rate: clampedValue,
       });
     } catch (error) {
-      // Any errors not caught in mutation will be handled here
+      console.error("Failed to submit vote:", error);
+
+      const errorMessage =
+        error instanceof Error ? error.message : "Something went wrong";
       setToast({
-        message: "Something went wrong",
+        message: errorMessage,
         type: "error",
       });
     } finally {
@@ -117,6 +142,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
           type="text"
           value={voteValue}
           onChange={handleInputChange}
+          onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           disabled={isResetting}
           pattern="-?[0-9]*"

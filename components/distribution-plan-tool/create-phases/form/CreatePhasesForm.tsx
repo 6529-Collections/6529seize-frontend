@@ -10,7 +10,7 @@ import { distributionPlanApiPost } from "@/services/distribution-plan-api";
 import { useContext, useState } from "react";
 
 export default function CreatePhasesForm() {
-  const { setToasts, distributionPlan, fetchOperations } = useContext(
+  const { distributionPlan, fetchOperations } = useContext(
     DistributionPlanToolContext
   );
 
@@ -32,7 +32,7 @@ export default function CreatePhasesForm() {
     setIsLoading(true);
     const endpoint = `/allowlists/${distributionPlan.id}/operations`;
     const phaseId = getRandomObjectId();
-    const { success, data } = await distributionPlanApiPost({
+    const { success } = await distributionPlanApiPost({
       endpoint,
       body: {
         code: AllowlistOperationCode.ADD_PHASE,

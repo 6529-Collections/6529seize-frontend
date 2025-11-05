@@ -11,7 +11,6 @@ import WebUnifiedWavesListWaves, {
 
 interface WebUnifiedWavesListProps {
   readonly waves: MinimalWave[];
-  readonly activeWaveId: string | null;
   readonly fetchNextPage: () => void;
   readonly hasNextPage: boolean | undefined;
   readonly isFetching: boolean;
@@ -21,17 +20,17 @@ interface WebUnifiedWavesListProps {
   readonly isCollapsed?: boolean;
 }
 
-const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = ({
-  waves,
-  activeWaveId,
-  fetchNextPage,
-  hasNextPage,
-  isFetching,
-  isFetchingNextPage,
-  onHover,
-  scrollContainerRef,
-  isCollapsed = false,
-}) => {
+const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
+  const {
+    waves,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    onHover,
+    scrollContainerRef,
+    isCollapsed = false,
+  } = props;
   // Refs to the scroll container and sentinel
   const listRef = useRef<WebUnifiedWavesListWavesHandle>(null);
 
