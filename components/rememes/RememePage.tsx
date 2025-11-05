@@ -56,9 +56,7 @@ export function printMemeReferences(
     <Row className="pt-2">
       {!hideTitle && (
         <Col xs={12} className="pt-2">
-          <h1>
-            The Memes References
-          </h1>
+          <h1>The Memes References</h1>
         </Col>
       )}
       {memesLoaded ? (
@@ -155,13 +153,13 @@ export default function RememePage(props: Readonly<Props>) {
 
   useEffect(() => {
     if (rememe) {
-      fetchAllPages(
+      fetchAllPages<NFT>(
         `${
           publicEnv.API_ENDPOINT
         }/api/nfts?contract=${MEMES_CONTRACT}&id=${rememe.meme_references.join(
           ","
         )}`
-      ).then((responseNfts: NFT[]) => {
+      ).then((responseNfts) => {
         setMemes(responseNfts.sort((a, b) => a.id - b.id));
       });
     }

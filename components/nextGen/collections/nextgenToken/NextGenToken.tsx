@@ -1,19 +1,25 @@
 "use client";
 
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import TransferSingle from "@/components/nft-transfer/TransferSingle";
+import { NEXTGEN_CONTRACT } from "@/constants";
 import {
   NextGenCollection,
   NextGenToken,
   NextGenTrait,
 } from "@/entities/INextgen";
-import { NextgenCollectionView } from "@/enums";
-import { isNullAddress } from "@/helpers/Helpers";
+import { CollectedCollectionType } from "@/entities/IProfile";
+import { ContractType, NextgenCollectionView } from "@/enums";
+import { areEqualAddresses, isNullAddress } from "@/helpers/Helpers";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import {
   faChevronCircleLeft,
   faChevronCircleRight,
   faFire,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useMemo } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import { printViewButton } from "../collectionParts/NextGenCollection";
@@ -38,6 +44,41 @@ interface Props {
 
 export default function NextGenTokenPage(props: Readonly<Props>) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const { address: connectedAddress } = useSeizeConnectContext();
+
+  const isConnectedAddressOwner = useMemo(() => {
+    return areEqualAddresses(connectedAddress, props.token.owner);
+  }, [props.token.owner, connectedAddress]);
+
+  const isMdUp = useMediaQuery("(min-width: 768px)");
+
+  const transferSingle = useMemo(() => {
+    if (!isConnectedAddressOwner) {
+      return null;
+    }
+
+    return (
+      <div className="mb-4">
+        <TransferSingle
+          collectionType={CollectedCollectionType.NEXTGEN}
+          contractType={ContractType.ERC721}
+          contract={NEXTGEN_CONTRACT}
+          tokenId={props.token.id}
+          max={1}
+          title={props.token.name ?? `6529 NextGen #${props.token.id}`}
+          thumbUrl={props.token.thumbnail_url}
+        />
+      </div>
+    );
+  }, [
+    props.token.id,
+    props.token.name,
+    props.token.thumbnail_url,
+    isConnectedAddressOwner,
+  ]);
 
   function printDetails() {
     return (
@@ -66,16 +107,18 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
             )}
           </Col>
         </Row>
-        <Row>
+        <Row className="pt-4 pb-4">
           {props.view === NextgenCollectionView.ABOUT && (
             <>
-              <Col sm={12} md={6} className="pt-4 pb-4">
+              <Col xs={12}>{isMdUp ? null : transferSingle}</Col>
+              <Col sm={12} md={6}>
                 <NextGenTokenAbout
                   collection={props.collection}
                   token={props.token}
                 />
               </Col>
-              <Col sm={12} md={6} className="pt-4 pb-4">
+              <Col sm={12} md={6}>
+                {isMdUp ? transferSingle : null}
                 <NextgenTokenTraits
                   collection={props.collection}
                   token={props.token}
@@ -119,7 +162,6 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
     const hasPreviousToken = props.token.normalised_id > 0;
     const prev = (
       <FontAwesomeIcon
-        title="Previous Token"
         icon={faChevronCircleLeft}
         data-tooltip-id={
           hasPreviousToken ? `prev-token-${props.token.id}` : undefined
@@ -128,12 +170,14 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
           if (!hasPreviousToken) {
             return;
           }
-          const currentHref = window.location.href;
-          const prevHref = currentHref.replace(
-            props.token.id.toString(),
-            (props.token.id - 1).toString()
+          const newPathname = pathname.replace(
+            /\/(\d+)(\/?)$/,
+            `/${props.token.id - 1}$2`
           );
-          router.push(prevHref, { scroll: false });
+          const query = searchParams.toString();
+          router.push(query ? `${newPathname}?${query}` : newPathname, {
+            scroll: false,
+          });
         }}
         style={{
           height: "35px",
@@ -148,9 +192,9 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
         {hasPreviousToken && (
           <Tooltip
             id={`prev-token-${props.token.id}`}
+            delayShow={250}
+            variant="light"
             style={{
-              backgroundColor: "#1F2937",
-              color: "white",
               padding: "4px 8px",
             }}>
             Previous Token
@@ -172,12 +216,14 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
           if (!hasNextToken) {
             return;
           }
-          const currentHref = window.location.href;
-          const nextHref = currentHref.replace(
-            props.token.id.toString(),
-            (props.token.id + 1).toString()
+          const newPathname = pathname.replace(
+            /\/(\d+)(\/?)$/,
+            `/${props.token.id + 1}$2`
           );
-          router.push(nextHref, { scroll: false });
+          const query = searchParams.toString();
+          router.push(query ? `${newPathname}?${query}` : newPathname, {
+            scroll: false,
+          });
         }}
         style={{
           height: "35px",
@@ -192,9 +238,9 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
         {hasNextToken && (
           <Tooltip
             id={`next-token-${props.token.id}`}
+            delayShow={250}
+            variant="light"
             style={{
-              backgroundColor: "#1F2937",
-              color: "white",
               padding: "4px 8px",
             }}>
             Next Token

@@ -191,3 +191,8 @@ export enum ProfileRatersParamsOrderBy {
   RATING = "RATING",
   LAST_MODIFIED = "LAST_MODIFIED",
 }
+
+export enum ContractType {
+  ERC721 = "ERC721",
+  ERC1155 = "ERC1155",
+}

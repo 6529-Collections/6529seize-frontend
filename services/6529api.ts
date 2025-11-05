@@ -1,6 +1,7 @@
+import { Paginated } from "@/components/pagination/Pagination";
+import { API_AUTH_COOKIE } from "@/constants";
 import { DBResponse } from "@/entities/IDBResponse";
 import Cookies from "js-cookie";
-import { API_AUTH_COOKIE } from "@/constants";
 import { getStagingAuth } from "./auth/auth.utils";
 
 function headersToObject(headers: Headers): Record<string, string> {
@@ -32,17 +33,45 @@ export async function fetchUrl<T = DBResponse>(
   return (await res.json()) as T;
 }
 
-export async function fetchAllPages(url: string, data?: any[]): Promise<any[]> {
-  let allData: any[] = [];
-  if (data) {
-    allData = data;
+export async function fetchAllPages<T>(startUrl: string): Promise<T[]> {
+  const all: T[] = [];
+  let url = startUrl;
+
+  while (url) {
+    const response = (await fetchUrl(url)) as Paginated<T>;
+
+    if (Array.isArray(response.data)) {
+      all.push(...response.data);
+    }
+
+    url = getNextUrl(url, response.next);
   }
-  const response = await fetchUrl<DBResponse>(url);
-  allData = [...allData].concat(response.data);
-  if (response.next) {
-    return fetchAllPages(response.next, allData);
+
+  return all;
+}
+
+function getNextUrl(currentUrl: string, next?: string | boolean): string {
+  if (!next) return "";
+
+  if (typeof next === "string") {
+    try {
+      return new URL(next, currentUrl).toString();
+    } catch (error) {
+      console.error("Invalid next URL:", next, error);
+      return "";
+    }
   }
-  return allData;
+
+  try {
+    const u = new URL(currentUrl);
+    const cur = u.searchParams.get("page");
+    const curNum = cur ? Number.parseInt(cur, 10) || 1 : 1;
+    u.searchParams.set("page", String(curNum + 1));
+    return u.toString();
+  } catch (error) {
+    console.error("Invalid current URL:", currentUrl, error);
+    return "";
+  }
 }
 
 export async function postData(url: string, body: any, init?: RequestInit) {

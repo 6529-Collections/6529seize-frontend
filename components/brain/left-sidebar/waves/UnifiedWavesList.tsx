@@ -5,7 +5,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useEffectEvent, useRef } from "react";
 import UnifiedWavesListEmpty from "./UnifiedWavesListEmpty";
 import { UnifiedWavesListLoader } from "./UnifiedWavesListLoader";
 import UnifiedWavesListWaves, {
@@ -14,7 +14,6 @@ import UnifiedWavesListWaves, {
 
 interface UnifiedWavesListProps {
   readonly waves: MinimalWave[];
-  readonly activeWaveId: string | null;
   readonly fetchNextPage: () => void;
   readonly hasNextPage: boolean | undefined;
   readonly isFetching: boolean;
@@ -25,7 +24,6 @@ interface UnifiedWavesListProps {
 
 const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
   waves,
-  activeWaveId,
   fetchNextPage,
   hasNextPage,
   isFetching,
@@ -40,6 +38,11 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
   // Track if we've triggered a fetch to avoid multiple triggers
   const hasFetchedRef = useRef(false);
 
+  const triggerFetchNextPage = useEffectEvent(() => {
+    hasFetchedRef.current = true;
+    fetchNextPage();
+  });
+
   // Reset the fetch flag when dependencies change
   useEffect(() => {
     hasFetchedRef.current = false;
@@ -47,8 +50,8 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
 
   // Set up intersection observer for infinite scrolling
   useEffect(() => {
-    const node = listRef.current?.sentinelRef.current;
-    if (!node || !hasNextPage || isFetchingNextPage) return;
+    const sentinel = listRef.current?.sentinelRef.current;
+    if (!sentinel || !hasNextPage || isFetchingNextPage) return;
 
     const cb = (entries: IntersectionObserverEntry[]) => {
       const [entry] = entries;
@@ -58,8 +61,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
         !isFetchingNextPage &&
         !hasFetchedRef.current
       ) {
-        hasFetchedRef.current = true;
-        fetchNextPage();
+        triggerFetchNextPage();
       }
     };
 
@@ -68,10 +70,10 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
       rootMargin: "100px",
     });
 
-    obs.observe(node);
+    obs.observe(sentinel);
 
     return () => obs.disconnect();
-  }, [listRef.current?.sentinelRef.current, hasNextPage, isFetchingNextPage]);
+  }, [hasNextPage, isFetchingNextPage]);
 
   return (
     <div className="tw-mb-4">

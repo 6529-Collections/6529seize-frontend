@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import AllowlistToolSelectMenuMultiple, {
   AllowlistToolSelectMenuMultipleOption,
 } from "@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple";
@@ -14,11 +14,30 @@ import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/c
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import {
   AllowlistOperationCode,
+  CustomTokenPoolParamsToken,
   Pool,
 } from "@/components/allowlist-tool/allowlist-tool.types";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 import ComponentConfigMeta from "./ComponentConfigMeta";
+import { distributionPlanApiPost } from "@/services/distribution-plan-api";
+import { useQuery } from "@tanstack/react-query";
+
+const POOL_TYPE_TO_STRING: Record<Pool, string> = {
+  [Pool.CUSTOM_TOKEN_POOL]: "Custom Snapshot",
+  [Pool.TOKEN_POOL]: "Snapshot",
+  [Pool.WALLET_POOL]: "Wallets",
+};
+
+const extractOwnersFromTokens = (
+  tokens: CustomTokenPoolParamsToken[] | undefined
+): string[] => {
+  const owners = (tokens ?? [])
+    .map((token) => token?.owner)
+    .filter((owner: unknown): owner is string => typeof owner === "string")
+    .map((owner) => owner.toLowerCase());
+  return Array.from(new Set(owners));
+};
 
 export default function SnapshotExcludeOtherSnapshots({
   snapshots,
@@ -28,31 +47,25 @@ export default function SnapshotExcludeOtherSnapshots({
   title,
   onClose,
 }: {
-  snapshots: DistributionPlanSnapshot[];
-  config: PhaseGroupSnapshotConfig;
-  onSkip: () => void;
-  onSelectExcludeOtherSnapshots: (param: {
+  readonly snapshots: DistributionPlanSnapshot[];
+  readonly config: PhaseGroupSnapshotConfig;
+  readonly onSkip: () => void;
+  readonly onSelectExcludeOtherSnapshots: (param: {
     snapshotsToExclude: PhaseGroupSnapshotConfigExcludeSnapshot[];
     uniqueWalletsCount: number | null;
   }) => void;
-  title: string;
-  onClose: () => void;
+  readonly title: string;
+  readonly onClose: () => void;
 }) {
   const { operations, distributionPlan, setToasts } = useContext(
     DistributionPlanToolContext
   );
 
-  const [poolTypeToString] = useState<Record<Pool, string>>({
-    [Pool.CUSTOM_TOKEN_POOL]: "Custom Snapshot",
-    [Pool.TOKEN_POOL]: "Snapshot",
-    [Pool.WALLET_POOL]: "Wallets",
-  });
-
   const options: AllowlistToolSelectMenuMultipleOption[] = snapshots
     .filter((s) => s.id !== config.snapshotId)
     .map((s) => ({
       title: s.name,
-      subTitle: poolTypeToString[s.poolType],
+      subTitle: POOL_TYPE_TO_STRING[s.poolType],
       value: s.id,
     }));
 
@@ -74,29 +87,26 @@ export default function SnapshotExcludeOtherSnapshots({
   };
   const [localUniqueWalletsCount, setLocalUniqueWalletsCount] = useState<
     number | null
-  >(null);
+  >(config.uniqueWalletsCount);
 
   const [snapshotsToExclude, setSnapshotsToExclude] = useState<
     PhaseGroupSnapshotConfigExcludeSnapshot[]
   >([]);
 
   useEffect(() => {
-    const poolStringToPoolType = (str: string): Pool => {
-      const poolType = Object.entries(poolTypeToString)
-        .find(([, value]) => value === str)
-        ?.at(0);
-      if (!poolType) {
-        setToasts({
-          type: "error",
-          messages: [`Unknown pool type: ${str}`],
-        });
-        throw new Error(`Unknown pool type: ${str}`);
-      }
-      return poolType as Pool;
-    };
     setSnapshotsToExclude(
       selectedOptions.map((o) => {
-        const snapshotType = poolStringToPoolType(o.subTitle ?? "");
+        const snapshot = snapshots.find(
+          (snapshotItem) => snapshotItem.id === o.value
+        );
+        if (!snapshot) {
+          setToasts({
+            type: "error",
+            messages: [`Unknown snapshot id: ${o.value}`],
+          });
+          throw new Error(`Unknown snapshot id: ${o.value}`);
+        }
+        const snapshotType = snapshot.poolType;
         const extraWallets: string[] =
           snapshotType === Pool.TOKEN_POOL
             ? []
@@ -111,17 +121,15 @@ export default function SnapshotExcludeOtherSnapshots({
                 )
               )
             : snapshotType === Pool.CUSTOM_TOKEN_POOL
-            ? Array.from(
-                new Set(
-                  operations
-                    .find(
-                      (o2) =>
-                        o2.code ===
-                          AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL &&
-                        o2.params.id === o.value
-                    )
-                    ?.params.tokens.map((t: any) => t.owner) ?? []
-                )
+            ? extractOwnersFromTokens(
+                (operations
+                  .find(
+                    (o2) =>
+                      o2.code ===
+                        AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL &&
+                      o2.params.id === o.value
+                  )
+                  ?.params.tokens) as CustomTokenPoolParamsToken[] | undefined
               )
             : assertUnreachable(snapshotType);
         return {
@@ -131,53 +139,93 @@ export default function SnapshotExcludeOtherSnapshots({
         };
       })
     );
-  }, [selectedOptions, operations, setToasts, poolTypeToString]);
+  }, [selectedOptions, operations, setToasts, snapshots]);
 
-  const [loading, setLoading] = useState(false);
+  const distributionPlanId = distributionPlan?.id ?? null;
+  const currentSnapshotExtraWallets = useMemo(() => {
+    if (config.snapshotType !== Pool.CUSTOM_TOKEN_POOL) {
+      return [];
+    }
+    const operation = operations.find(
+      (operationItem) =>
+        operationItem.code ===
+          AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL &&
+        operationItem.params.id === config.snapshotId
+    );
+    if (!operation) {
+      return [];
+    }
+    const tokens = operation.params
+      .tokens as CustomTokenPoolParamsToken[] | undefined;
+    return extractOwnersFromTokens(tokens);
+  }, [config.snapshotId, config.snapshotType, operations]);
 
-  // useEffect(() => {
-  //   const getCustomTokenPoolWallets = (): string[] => {
-  //     const operation = operations.find(
-  //       (o) =>
-  //         o.code === AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL &&
-  //         o.params.id === config.snapshotId
-  //     );
-  //     if (!operation) {
-  //       return [];
-  //     }
+  const shouldFetchUniqueWalletsCount =
+    !!snapshotsToExclude.length &&
+    !!distributionPlanId &&
+    !!config.snapshotId &&
+    !!config.snapshotType;
 
-  //     return operation.params.tokens.map((t: any) => t.owner.toLowerCase());
-  //   };
+  const serializedSnapshotsToExclude = useMemo(
+    () => JSON.stringify(snapshotsToExclude),
+    [snapshotsToExclude]
+  );
+  const serializedCurrentSnapshotExtraWallets = useMemo(
+    () => JSON.stringify(currentSnapshotExtraWallets),
+    [currentSnapshotExtraWallets]
+  );
 
-  //   const fetchUniqueWalletsCount = async () => {
-  //     if (!snapshotsToExclude.length) {
-  //       setLocalUniqueWalletsCount(config.uniqueWalletsCount);
-  //       return;
-  //     }
-  //     if (!distributionPlan || !config.snapshotType) return;
-  //     const extraWallets =
-  //       config.snapshotType === Pool.CUSTOM_TOKEN_POOL
-  //         ? getCustomTokenPoolWallets()
-  //         : [];
-  //     setLoading(true);
-  //     const endpoint = `/allowlists/${distributionPlan.id}/token-pool-downloads/token-pool/${config.snapshotId}/unique-wallets-count`;
-  //     const { success, data } = await distributionPlanApiPost<number>({
-  //       endpoint,
-  //       body: {
-  //         excludeComponentWinners: [],
-  //         excludeSnapshots: snapshotsToExclude,
-  //         extraWallets,
-  //       },
-  //     });
-  //     setLoading(false);
-  //     if (!success) {
-  //       return { success: false };
-  //     }
-  //     setLocalUniqueWalletsCount(data);
-  //     return { success: true };
-  //   };
-  //   fetchUniqueWalletsCount();
-  // }, [config, distributionPlan, snapshotsToExclude, setToasts, operations]);
+  const {
+    data: fetchedUniqueWalletsCount,
+    isFetching: isUniqueWalletsCountLoading,
+    isError: isUniqueWalletsCountError,
+  } = useQuery<number>({
+    queryKey: [
+      "distribution-plan",
+      distributionPlanId,
+      config.snapshotId,
+      "unique-wallets-count",
+      serializedSnapshotsToExclude,
+      serializedCurrentSnapshotExtraWallets,
+    ],
+    queryFn: async () => {
+      if (!distributionPlanId || !config.snapshotId) {
+        throw new Error("Missing required distribution plan data");
+      }
+
+      const { success, data } = await distributionPlanApiPost<number>({
+        endpoint: `/allowlists/${distributionPlanId}/token-pool-downloads/token-pool/${config.snapshotId}/unique-wallets-count`,
+        body: {
+          excludeComponentWinners: [],
+          excludeSnapshots: snapshotsToExclude,
+          extraWallets: currentSnapshotExtraWallets,
+        },
+      });
+
+      if (!success || typeof data !== "number") {
+        throw new Error("Failed to fetch unique wallets count");
+      }
+
+      return data;
+    },
+    enabled: shouldFetchUniqueWalletsCount,
+  });
+
+  useEffect(() => {
+    if (!shouldFetchUniqueWalletsCount || isUniqueWalletsCountError) {
+      setLocalUniqueWalletsCount(config.uniqueWalletsCount);
+      return;
+    }
+
+    if (typeof fetchedUniqueWalletsCount === "number") {
+      setLocalUniqueWalletsCount(fetchedUniqueWalletsCount);
+    }
+  }, [
+    shouldFetchUniqueWalletsCount,
+    isUniqueWalletsCountError,
+    fetchedUniqueWalletsCount,
+    config.uniqueWalletsCount,
+  ]);
 
   const onNext = () => {
     onSelectExcludeOtherSnapshots({
@@ -212,7 +260,7 @@ export default function SnapshotExcludeOtherSnapshots({
         <ComponentConfigMeta
           tags={[]}
           walletsCount={localUniqueWalletsCount}
-          isLoading={loading}
+          isLoading={isUniqueWalletsCountLoading}
         />
       </ComponentConfigNextBtn>
     </div>

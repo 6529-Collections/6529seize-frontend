@@ -1,6 +1,10 @@
 "use client";
 
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import TransferPanel from "@/components/nft-transfer/TransferPanel";
+import { useTransfer } from "@/components/nft-transfer/TransferState";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { publicEnv } from "@/config/env";
 import {
   CollectedCard,
   CollectedCollectionType,
@@ -10,7 +14,10 @@ import {
 import { SortDirection } from "@/entities/ISort";
 import { MEMES_SEASON } from "@/enums";
 import { ApiIdentity } from "@/generated/models/ObjectSerializer";
+import { areEqualAddresses } from "@/helpers/Helpers";
 import { Page } from "@/helpers/Types";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
+import { fetchAllPages } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
@@ -19,7 +26,7 @@ import {
   useRouter,
   useSearchParams,
 } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import UserPageCollectedCards from "./cards/UserPageCollectedCards";
 import {
   COLLECTED_COLLECTIONS_META,
@@ -27,7 +34,6 @@ import {
 } from "./filters/user-page-collected-filters.helpers";
 import UserPageCollectedFilters from "./filters/UserPageCollectedFilters";
 import UserPageCollectedFirstLoading from "./UserPageCollectedFirstLoading";
-
 export interface ProfileCollectedFilters {
   readonly handleOrWallet: string;
   readonly accountForConsolidations: boolean;
@@ -76,6 +82,8 @@ export default function UserPageCollected({
 }: {
   readonly profile: ApiIdentity;
 }) {
+  const { address: connectedAddress } = useSeizeConnectContext();
+  const isMobile = useIsMobileScreen();
   const defaultSortBy = CollectionSort.TOKEN_ID;
   const defaultSortDirection = SortDirection.DESC;
   const defaultSeized = CollectionSeized.SEIZED;
@@ -162,7 +170,7 @@ export default function UserPageCollected({
     );
   };
 
-  const getFilters = (): ProfileCollectedFilters => {
+  const getFilters = useCallback((): ProfileCollectedFilters => {
     const address = searchParams?.get(SEARCH_PARAMS_FIELDS.address);
     const collection = searchParams?.get(SEARCH_PARAMS_FIELDS.collection);
     const seized = searchParams?.get(SEARCH_PARAMS_FIELDS.seized);
@@ -190,34 +198,40 @@ export default function UserPageCollected({
       }),
       sortDirection: convertSortDirection(sortDirection ?? null),
     };
-  };
+  }, [searchParams, profile.handle, user]);
 
-  const createQueryString = (updateItems: QueryUpdateInput[]): string => {
-    const params = new URLSearchParams(searchParams?.toString() ?? "");
-    for (const { name, value } of updateItems) {
-      const key = SEARCH_PARAMS_FIELDS[name];
-      if (!value) {
-        params.delete(key);
-      } else {
-        params.set(key, value.toLowerCase());
+  const createQueryString = useCallback(
+    (updateItems: QueryUpdateInput[]): string => {
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
+      for (const { name, value } of updateItems) {
+        const key = SEARCH_PARAMS_FIELDS[name];
+        if (!value) {
+          params.delete(key);
+        } else {
+          params.set(key, value.toLowerCase());
+        }
       }
-    }
-    return params.toString();
-  };
+      return params.toString();
+    },
+    [searchParams]
+  );
 
-  const updateFields = async (
-    updateItems: QueryUpdateInput[]
-  ): Promise<void> => {
-    const queryString = createQueryString(updateItems);
-    const path = queryString ? pathname + "?" + queryString : pathname;
-    if (path) {
-      router.replace(path, {
-        scroll: false,
-      });
-    }
-  };
+  const updateFields = useCallback(
+    async (updateItems: QueryUpdateInput[]): Promise<void> => {
+      const queryString = createQueryString(updateItems);
+      const path = queryString ? pathname + "?" + queryString : pathname;
+      if (path) {
+        router.replace(path, {
+          scroll: false,
+        });
+      }
+    },
+    [pathname, router, createQueryString]
+  );
 
   const [filters, setFilters] = useState<ProfileCollectedFilters>(getFilters());
+
+  const { enabled: transferEnabled } = useTransfer();
 
   const setCollection = async (
     collection: CollectedCollectionType | null
@@ -339,7 +353,10 @@ export default function UserPageCollected({
     await updateFields(items);
   };
 
-  useEffect(() => setFilters(getFilters()), [searchParams]);
+  useEffect(
+    () => setFilters(getFilters()),
+    [searchParams, profile, user, connectedAddress, getFilters]
+  );
 
   const {
     isFetching,
@@ -370,11 +387,35 @@ export default function UserPageCollected({
       if (filters.szn) {
         params.szn = SZN_TO_SEARCH_PARAMS[filters.szn];
       }
+
       return await commonApiFetch<Page<CollectedCard>>({
         endpoint: `profiles/${filters.handleOrWallet}/collected`,
         params,
       });
     },
+    placeholderData: keepPreviousData,
+  });
+
+  const showTransfer =
+    !isMobile &&
+    !!(
+      profile.wallets?.some((w) =>
+        areEqualAddresses(w.wallet, connectedAddress)
+      ) &&
+      data?.data &&
+      data.data.length > 0
+    );
+
+  const { isFetching: isFetchingTransfer, data: dataTransfer } = useQuery<
+    CollectedCard[]
+  >({
+    queryKey: [QueryKey.PROFILE_COLLECTED_TRANSFER, filters, connectedAddress],
+    queryFn: async () => {
+      const allPagesUrl = `${publicEnv.API_ENDPOINT}/api/profiles/${connectedAddress}/collected?&page_size=200&seized=${CollectionSeized.SEIZED}`;
+      const data = await fetchAllPages<CollectedCard>(allPagesUrl);
+      return data;
+    },
+    enabled: showTransfer && transferEnabled,
     placeholderData: keepPreviousData,
   });
 
@@ -408,52 +449,13 @@ export default function UserPageCollected({
 
   const scrollContainer = useRef<HTMLDivElement>(null);
 
-  const calculateScroll = ({
-    direction,
-    scrollLeft,
-    scrollRight,
-    scrollStep,
-  }: {
-    direction: "left" | "right";
-    scrollLeft: number;
-    scrollRight: number;
-    scrollStep: number;
-  }): number => {
-    switch (direction) {
-      case "left":
-        return -1 * (scrollLeft > scrollStep ? scrollStep : scrollLeft);
-      case "right":
-        return scrollRight > scrollStep ? scrollStep : scrollRight;
-      default:
-        return 0;
-    }
-  };
-
-  const scrollHorizontally = (direction: "left" | "right") => {
-    if (!scrollContainer.current) return;
-    const scrollLeft = scrollContainer.current.scrollLeft;
-    const scrollWidth = scrollContainer.current.scrollWidth;
-    const clientWidth = scrollContainer.current.clientWidth;
-    const scrollRight = scrollWidth - scrollLeft - clientWidth;
-    const scrollStep = clientWidth / 1.1;
-
-    scrollContainer.current.scrollTo({
-      left:
-        scrollLeft +
-        calculateScroll({ direction, scrollLeft, scrollRight, scrollStep }),
-      behavior: "smooth",
-    });
-  };
-
   return (
     <div className="tailwind-scope">
       {isInitialLoading ? (
         <UserPageCollectedFirstLoading />
       ) : (
         <>
-          <div
-            className="tw-overflow-x-auto horizontal-menu-hide-scrollbar horizontal-menu-scrollable-x"
-            ref={scrollContainer}>
+          <div ref={scrollContainer}>
             <UserPageCollectedFilters
               profile={profile}
               filters={filters}
@@ -462,10 +464,11 @@ export default function UserPageCollected({
               setSortBy={setSortBy}
               setSeized={setSeized}
               setSzn={setSzn}
-              scrollHorizontally={scrollHorizontally}
+              showTransfer={showTransfer}
             />
           </div>
-          <div className="tw-mt-6">
+
+          <div className="tw-mt-6 tw-flex tw-gap-6">
             <UserPageCollectedCards
               cards={data?.data ?? []}
               totalPages={totalPages}
@@ -473,8 +476,13 @@ export default function UserPageCollected({
               showDataRow={showDataRow}
               filters={filters}
               setPage={setPage}
+              dataTransfer={dataTransfer ?? []}
+              isTransferLoading={isFetchingTransfer}
             />
           </div>
+          {showTransfer && transferEnabled && (
+            <TransferPanel isLoading={isFetchingTransfer} />
+          )}
         </>
       )}
     </div>

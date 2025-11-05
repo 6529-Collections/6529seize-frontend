@@ -1,13 +1,13 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
+import { Consolidation } from "@/entities/IDelegation";
+import { areEqualAddresses } from "@/helpers/Helpers";
+import { fetchAllPages } from "@/services/6529api";
 import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
-import { Consolidation } from "@/entities/IDelegation";
-import { areEqualAddresses } from "@/helpers/Helpers";
-import { fetchAllPages } from "@/services/6529api";
 import styles from "./MappingTool.module.scss";
 
 const csvParser = require("csv-parser");
@@ -100,7 +100,7 @@ export default function ConsolidationMappingTool() {
 
   useEffect(() => {
     async function fetchConsolidations(url: string) {
-      fetchAllPages(url).then((consolidations: Consolidation[]) => {
+      fetchAllPages<Consolidation>(url).then((consolidations) => {
         setConsolidations(consolidations);
         const reader = new FileReader();
 
@@ -115,8 +115,8 @@ export default function ConsolidationMappingTool() {
                 isFirstRow = false;
               } else {
                 const address = row["_0"];
-                const token_id = parseInt(row["_1"]);
-                const balance = parseInt(row["_2"]);
+                const token_id = Number.parseInt(row["_1"], 10);
+                const balance = Number.parseInt(row["_2"], 10);
                 const contract = row["_3"];
                 const name = row["_4"];
                 results.push({ address, token_id, balance, contract, name });
