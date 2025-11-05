@@ -1,7 +1,13 @@
 "use client";
 
 import { ContractType } from "@/enums";
-import React, { createContext, useContext, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 
 export type TransferItem = {
   key: string;
@@ -51,96 +57,109 @@ export function TransferProvider({
     () => new Map()
   );
 
-  const api = useMemo<TransferContextShape>(() => {
-    const isSelected = (key: string) => selected.has(key);
+  const isSelected = useCallback(
+    (key: string) => selected.has(key),
+    [selected]
+  );
 
-    const select = (item: TransferItem) => {
-      const max = Math.max(1, item.max ?? 1);
-      setSelected((prev) => {
-        const next = new Map(prev);
-        next.set(item.key, {
+  const select = useCallback((item: TransferItem) => {
+    const max = Math.max(1, item.max ?? 1);
+    setSelected((prev) => {
+      const next = new Map(prev);
+      next.set(item.key, {
+        ...item,
+        max,
+        qty: clamp(item.qty ?? 1, 1, max),
+      });
+      return next;
+    });
+  }, []);
+
+  const unselect = useCallback((key: string) => {
+    setSelected((prev) => {
+      const next = new Map(prev);
+      next.delete(key);
+      return next;
+    });
+  }, []);
+
+  const toggleSelect = useCallback((item: TransferItem) => {
+    setSelected((prev) => {
+      const next = new Map(prev);
+      if (next.has(item.key)) {
+        next.delete(item.key);
+      } else {
+        const max = Math.max(1, item.max ?? 1);
+        const newItem = {
           ...item,
           max,
-          qty: clamp(item.qty ?? 1, 1, max),
-        });
-        return next;
-      });
-    };
-
-    const unselect = (key: string) =>
-      setSelected((prev) => {
-        const next = new Map(prev);
-        next.delete(key);
-        return next;
-      });
-
-    const toggleSelect = (item: TransferItem) => {
-      setSelected((prev) => {
-        const next = new Map(prev);
-        if (next.has(item.key)) {
-          next.delete(item.key);
-        } else {
-          const max = Math.max(1, item.max ?? 1);
-          const newItem = {
-            ...item,
-            max,
-            qty: 1,
-          };
-          const newMap = new Map();
-          newMap.set(item.key, newItem);
-          for (const [key, value] of Array.from(next.entries())) {
-            newMap.set(key, value);
-          }
-          return newMap;
+          qty: 1,
+        };
+        const newMap = new Map();
+        newMap.set(item.key, newItem);
+        for (const [key, value] of Array.from(next.entries())) {
+          newMap.set(key, value);
         }
-        return next;
-      });
-    };
+        return newMap;
+      }
+      return next;
+    });
+  }, []);
 
-    const setQty = (key: string, qty: number) =>
-      setSelected((prev) => {
-        if (!prev.has(key)) return prev;
-        const it = prev.get(key)!;
-        const max = Math.max(1, it.max ?? 1);
-        const next = new Map(prev);
-        next.set(key, { ...it, qty: clamp(qty, 1, max) });
-        return next;
-      });
+  const setQty = useCallback((key: string, qty: number) => {
+    setSelected((prev) => {
+      if (!prev.has(key)) return prev;
+      const it = prev.get(key)!;
+      const max = Math.max(1, it.max ?? 1);
+      const next = new Map(prev);
+      next.set(key, { ...it, qty: clamp(qty, 1, max) });
+      return next;
+    });
+  }, []);
 
-    const incQty = (key: string) =>
-      setSelected((prev) => {
-        if (!prev.has(key)) return prev;
-        const it = prev.get(key)!;
-        const max = Math.max(1, it.max ?? 1);
-        const qty = clamp((it.qty ?? 1) + 1, 1, max);
-        const next = new Map(prev);
-        next.set(key, { ...it, qty });
-        return next;
-      });
+  const incQty = useCallback((key: string) => {
+    setSelected((prev) => {
+      if (!prev.has(key)) return prev;
+      const it = prev.get(key)!;
+      const max = Math.max(1, it.max ?? 1);
+      const qty = clamp((it.qty ?? 1) + 1, 1, max);
+      const next = new Map(prev);
+      next.set(key, { ...it, qty });
+      return next;
+    });
+  }, []);
 
-    const decQty = (key: string) =>
-      setSelected((prev) => {
-        if (!prev.has(key)) return prev;
-        const it = prev.get(key)!;
-        const max = Math.max(1, it.max ?? 1);
-        const qty = clamp((it.qty ?? 1) - 1, 1, max);
-        const next = new Map(prev);
-        next.set(key, { ...it, qty });
-        return next;
-      });
+  const decQty = useCallback((key: string) => {
+    setSelected((prev) => {
+      if (!prev.has(key)) return prev;
+      const it = prev.get(key)!;
+      const max = Math.max(1, it.max ?? 1);
+      const qty = clamp((it.qty ?? 1) - 1, 1, max);
+      const next = new Map(prev);
+      next.set(key, { ...it, qty });
+      return next;
+    });
+  }, []);
 
-    const clear = () => setSelected(new Map());
+  const clear = useCallback(() => {
+    setSelected(new Map());
+  }, []);
 
-    const count = selected.size;
-    const totalQty = Array.from(selected.values()).reduce(
-      (sum, it) => sum + (it.qty ?? 1),
-      0
-    );
+  const toggle = useCallback(() => {
+    setEnabled((v) => !v);
+  }, []);
 
-    return {
+  const count = selected.size;
+  const totalQty = Array.from(selected.values()).reduce(
+    (sum, it) => sum + (it.qty ?? 1),
+    0
+  );
+
+  const api = useMemo<TransferContextShape>(
+    () => ({
       enabled,
       setEnabled,
-      toggle: () => setEnabled((v) => !v),
+      toggle,
 
       selected,
       isSelected,
@@ -155,8 +174,24 @@ export function TransferProvider({
       clear,
       count,
       totalQty,
-    };
-  }, [enabled, selected]);
+    }),
+    [
+      enabled,
+      setEnabled,
+      toggle,
+      selected,
+      isSelected,
+      select,
+      unselect,
+      toggleSelect,
+      setQty,
+      incQty,
+      decQty,
+      clear,
+      count,
+      totalQty,
+    ]
+  );
 
   return (
     <TransferContext.Provider value={api}>{children}</TransferContext.Provider>

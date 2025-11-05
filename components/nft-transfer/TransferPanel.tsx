@@ -24,17 +24,18 @@ export default function TransferPanel({
 }) {
   const t = useTransfer();
   const { isConnected } = useSeizeConnectContext();
+  const { enabled, setEnabled, clear } = t;
 
   const [showModal, setShowModal] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const previousOverflowRef = useRef<string>("");
 
   useEffect(() => {
-    if (!isConnected && t.enabled) {
-      t.setEnabled(false);
-      t.clear();
+    if (!isConnected && enabled) {
+      setEnabled(false);
+      clear();
     }
-  }, [isConnected, t.enabled, t.setEnabled, t.clear]);
+  }, [isConnected, enabled, setEnabled, clear]);
 
   useEffect(() => {
     if (!isExpanded) return;
