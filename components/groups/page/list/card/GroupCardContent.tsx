@@ -18,20 +18,25 @@ export default function GroupCardContent({
   readonly titlePlaceholder?: string;
 }) {
   const { connectedProfile } = useContext(AuthContext);
+  const buttonBaseClasses =
+    "tw-relative tw-z-30 tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/12 tw-bg-white/5 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-100 tw-shadow-sm tw-shadow-black/20 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500";
   const disabledClasses =
-    "tw-opacity-50 tw-text-iron-600 tw-border-iron-800 tw-cursor-default";
-  const nonDisabledClasses =
-    "hover:tw-bg-iron-700 tw-border-iron-700 tw-text-iron-300 hover:tw-text-iron-50";
+    "tw-cursor-not-allowed tw-border-white/5 tw-bg-white/5 tw-text-iron-400 tw-opacity-45";
+  const enabledClasses =
+    "desktop-hover:hover:tw-border-white/25 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-white";
+
   return (
-    <div className="tw-flex-1 tw-px-4 sm:tw-px-5">
-      <div className="tw-flex tw-items-center tw-gap-x-3 tw-justify-between">
-        <p
-          title={group?.name ?? ""}
-          className="tw-mb-0 tw-text-xl tw-text-iron-50 tw-font-semibold tw-whitespace-nowrap tw-overflow-hidden tw-text-overflow-ellipsis tw-truncate">
-          {group?.name ?? titlePlaceholder ?? ""}
-        </p>
+    <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-y-3">
+      <div className="tw-flex tw-flex-wrap tw-items-end tw-justify-between tw-gap-x-4 tw-gap-y-2">
+        <div className="tw-min-w-0 tw-flex-1">
+          <p
+            title={group?.name ?? ""}
+            className="tw-mb-0 tw-line-clamp-2 tw-text-lg tw-font-semibold tw-leading-tight tw-text-iron-50">
+            {group?.name ?? titlePlaceholder ?? ""}
+          </p>
+        </div>
         {!!connectedProfile?.handle && setState && (
-          <div className="tw-flex tw-items-center tw-gap-x-3">
+          <div className="tw-flex tw-flex-shrink-0 tw-flex-wrap tw-items-center tw-justify-end tw-gap-1.5">
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -39,9 +44,10 @@ export default function GroupCardContent({
               }}
               type="button"
               disabled={haveActiveGroupVoteAll}
-              className={`${
-                haveActiveGroupVoteAll ? disabledClasses : nonDisabledClasses
-              } tw-relative tw-z-20 tw-whitespace-nowrap tw-inline-flex tw-items-center tw-bg-iron-800 tw-border tw-border-solid tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out`}>
+              className={`${buttonBaseClasses} ${
+                haveActiveGroupVoteAll ? disabledClasses : enabledClasses
+              }`}
+            >
               Rep all
             </button>
             <button
@@ -51,9 +57,10 @@ export default function GroupCardContent({
               }}
               type="button"
               disabled={haveActiveGroupVoteAll}
-              className={`${
-                haveActiveGroupVoteAll ? disabledClasses : nonDisabledClasses
-              } tw-relative tw-z-20 tw-whitespace-nowrap tw-inline-flex tw-items-center tw-bg-iron-800 tw-border tw-border-solid tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out`}>
+              className={`${buttonBaseClasses} ${
+                haveActiveGroupVoteAll ? disabledClasses : enabledClasses
+              }`}
+            >
               NIC all
             </button>
           </div>
