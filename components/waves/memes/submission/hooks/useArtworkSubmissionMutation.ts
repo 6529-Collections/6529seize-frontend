@@ -13,12 +13,17 @@ import { TraitsData } from "../types/TraitsData";
 import { SubmissionPhase } from "../ui/SubmissionProgress";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
+import type { InteractiveMediaMimeType } from "../constants/media";
 
 /**
  * Interface for the artwork submission data
  */
 interface ArtworkSubmissionData {
-  imageFile: File;
+  imageFile?: File;
+  externalMedia?: {
+    url: string;
+    mimeType: InteractiveMediaMimeType;
+  };
   traits: TraitsData;
   waveId: string;
   termsOfService: string | null;
@@ -208,20 +213,34 @@ export function useArtworkSubmissionMutation() {
       setSubmissionError(undefined);
 
       // Validate required fields
-      if (!data.imageFile) {
+      const hasFile = Boolean(data.imageFile);
+      const externalUrl = data.externalMedia?.url?.trim() ?? "";
+      const hasExternal = externalUrl.length > 0;
+
+      if (!hasFile && !hasExternal) {
         setToast({
-          message: "Please upload an artwork file",
+          message: "Please upload a file or provide a valid media URL",
+          type: "error",
+        });
+        return null;
+      }
+
+      if (hasExternal && !data.externalMedia?.mimeType) {
+        setToast({
+          message: "Please select the media type for your URL",
           type: "error",
         });
         return null;
       }
 
       // Debug logging for file info
-      console.log("Uploading file:", {
-        name: data.imageFile.name,
-        type: data.imageFile.type,
-        size: data.imageFile.size
-      });
+      if (hasFile && data.imageFile) {
+        console.log("Uploading file:", {
+          name: data.imageFile.name,
+          type: data.imageFile.type,
+          size: data.imageFile.size,
+        });
+      }
 
       if (!data.traits.title) {
         setToast({
@@ -234,11 +253,22 @@ export function useArtworkSubmissionMutation() {
       // Create callbacks object
       const callbacks = { onPhaseChange: options?.onPhaseChange };
 
-      // Step 1: Upload the media file
-      const media = await uploadMutation.mutateAsync({
-        file: data.imageFile,
-        callbacks,
-      });
+      // Step 1: Resolve the media payload (upload when necessary)
+      let media: ApiDropMedia;
+
+      if (hasFile && data.imageFile) {
+        media = await uploadMutation.mutateAsync({
+          file: data.imageFile,
+          callbacks,
+        });
+      } else if (hasExternal && data.externalMedia) {
+        media = {
+          url: externalUrl,
+          mime_type: data.externalMedia.mimeType,
+        };
+      } else {
+        return null;
+      }
 
       // Step 2: Transform data to API format
       const transformedRequest = transformToApiRequest({

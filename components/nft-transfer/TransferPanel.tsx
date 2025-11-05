@@ -272,7 +272,7 @@ export default function TransferPanel({
                             </div>
                           </div>
                           {max > 1 && (
-                            <div className="tw-flex tw-items-center tw-gap-1 tw-shrink-0">
+                            <div className="tw-flex tw-items-center tw-justify-center tw-gap-1.5 tw-bg-primary-500 tw-rounded-full tw-p-1 tw-font-medium">
                               <button
                                 type="button"
                                 onClick={() => t.decQty(it.key)}
@@ -282,7 +282,7 @@ export default function TransferPanel({
                                 <FontAwesomeIcon
                                   icon={faMinusCircle}
                                   className="tw-size-6 tw-cursor-pointer"
-                                  color={qty <= 1 ? "#60606C" : "#fff"}
+                                  color={qty <= 1 ? "#aaa" : "#fff"}
                                 />
                               </button>
                               <div className="tw-min-w-[2ch] tw-text-center tw-text-sm tw-tabular-nums tw-select-none">
@@ -297,7 +297,7 @@ export default function TransferPanel({
                                 <FontAwesomeIcon
                                   icon={faPlusCircle}
                                   className="tw-size-6 tw-cursor-pointer"
-                                  color={qty >= max ? "#60606C" : "#fff"}
+                                  color={qty >= max ? "#aaa" : "#fff"}
                                 />
                               </button>
                             </div>

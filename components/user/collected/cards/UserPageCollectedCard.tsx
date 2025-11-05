@@ -128,7 +128,7 @@ export default function UserPageCollectedCard({
               className={[
                 "tw-flex tw-items-center tw-justify-center tw-gap-1.5",
                 "tw-bg-primary-500 tw-backdrop-blur tw-rounded-full tw-p-2",
-                "tw-mt-[2px]",
+                "tw-mt-[2px] tw-font-medium",
               ].join(" ")}>
               <button
                 type="button"

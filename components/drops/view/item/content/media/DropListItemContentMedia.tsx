@@ -5,12 +5,14 @@ import { ImageScale } from "@/helpers/image.helpers";
 
 import DropListItemContentMediaImage from "./DropListItemContentMediaImage";
 import DropListItemContentMediaVideo from "./DropListItemContentMediaVideo";
+import SandboxedExternalIframe from "@/components/common/SandboxedExternalIframe";
 
 enum MediaType {
   IMAGE = "IMAGE",
   VIDEO = "VIDEO",
   AUDIO = "AUDIO",
   GLB = "GLB",
+  HTML = "HTML",
   UNKNOWN = "UNKNOWN",
 }
 
@@ -50,6 +52,9 @@ export default function DropListItemContentMedia({
         media_url.endsWith(".gltf")) {
       return MediaType.GLB;
     }
+    if (media_mime_type === "text/html") {
+      return MediaType.HTML;
+    }
     return MediaType.UNKNOWN;
   };
   
@@ -72,6 +77,8 @@ export default function DropListItemContentMedia({
       return <DropListItemContentMediaAudio src={media_url} />;
     case MediaType.GLB:
       return <DropListItemContentMediaGLB src={media_url} />;
+    case MediaType.HTML:
+      return <SandboxedExternalIframe title="" src={media_url.replace("ipfs://", "https://ipfs.io/ipfs/")}  className="tw-w-full tw-h-full"/>;
     case MediaType.UNKNOWN:
       return <></>;
     default:

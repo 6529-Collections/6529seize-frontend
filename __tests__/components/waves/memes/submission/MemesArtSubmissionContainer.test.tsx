@@ -6,6 +6,7 @@ import { SubmissionStep } from '@/components/waves/memes/submission/types/Steps'
 import { useArtworkSubmissionForm } from '@/components/waves/memes/submission/hooks/useArtworkSubmissionForm';
 import { useArtworkSubmissionMutation } from '@/components/waves/memes/submission/hooks/useArtworkSubmissionMutation';
 import { useSeizeConnectContext } from '@/components/auth/SeizeConnectContext';
+import type { InteractiveMediaMimeType } from '@/components/waves/memes/submission/constants/media';
 
 jest.mock('@/components/waves/memes/submission/hooks/useArtworkSubmissionForm');
 jest.mock('@/components/waves/memes/submission/hooks/useArtworkSubmissionMutation');
@@ -27,7 +28,7 @@ describe('MemesArtSubmissionContainer', () => {
 
   beforeEach(() => {
     artworkProps = undefined;
-    mockForm.mockReturnValue({
+    const formState: any = {
       currentStep: SubmissionStep.ARTWORK,
       agreements: false,
       setAgreements: jest.fn(),
@@ -37,10 +38,88 @@ describe('MemesArtSubmissionContainer', () => {
       updateTraitField: jest.fn(),
       artworkUploaded: false,
       artworkUrl: '',
-      setArtworkUploaded: jest.fn(),
-      handleFileSelect: jest.fn(),
-      getSubmissionData: () => ({ traits: { title: 't' } }),
-    } as any);
+      selectedFile: null,
+      mediaSource: 'upload',
+      externalMediaUrl: '',
+      externalMediaPreviewUrl: '',
+      externalMediaHashInput: '',
+      externalMediaProvider: 'ipfs',
+      externalMediaMimeType: 'text/html',
+      externalMediaError: null,
+      externalMediaValidationStatus: 'idle',
+      isExternalMediaValid: false,
+    };
+
+    formState.setArtworkUploaded = jest.fn((value: boolean) => {
+      formState.artworkUploaded = value;
+      if (!value) {
+        formState.selectedFile = null;
+      }
+    });
+
+    formState.handleFileSelect = jest.fn((file: File) => {
+      formState.selectedFile = file;
+      formState.artworkUploaded = true;
+      formState.artworkUrl = 'object-url';
+    });
+
+    formState.setMediaSource = jest.fn((mode: 'upload' | 'url') => {
+      formState.mediaSource = mode;
+    });
+
+    formState.setExternalMediaHash = jest.fn((hash: string) => {
+      formState.externalMediaHashInput = hash;
+      if (hash) {
+        formState.externalMediaUrl = `${formState.externalMediaProvider === 'arweave' ? 'https://arweave.net/' : 'ipfs://'}${hash}`;
+        formState.externalMediaPreviewUrl =
+          formState.externalMediaProvider === 'arweave'
+            ? `https://arweave.net/${hash}`
+            : `https://ipfs.io/ipfs/${hash}`;
+        formState.isExternalMediaValid = true;
+        formState.externalMediaValidationStatus = 'valid';
+        formState.externalMediaError = null;
+      } else {
+        formState.externalMediaUrl = '';
+        formState.externalMediaPreviewUrl = '';
+        formState.isExternalMediaValid = false;
+        formState.externalMediaValidationStatus = 'idle';
+        formState.externalMediaError = null;
+      }
+    });
+
+    formState.setExternalMediaProvider = jest.fn((provider: 'ipfs' | 'arweave') => {
+      formState.externalMediaProvider = provider;
+      formState.setExternalMediaHash(formState.externalMediaHashInput);
+    });
+
+    formState.setExternalMediaMimeType = jest.fn(
+      (mimeType: InteractiveMediaMimeType) => {
+        formState.externalMediaMimeType = mimeType;
+      }
+    );
+
+    formState.clearExternalMedia = jest.fn(() => {
+      formState.externalMediaHashInput = '';
+      formState.externalMediaUrl = '';
+      formState.externalMediaPreviewUrl = '';
+      formState.isExternalMediaValid = false;
+       formState.externalMediaValidationStatus = 'idle';
+      formState.externalMediaError = null;
+    });
+
+    formState.getSubmissionData = () => ({ traits: { title: 't' } });
+    formState.getMediaSelection = jest.fn(() => ({
+      mediaSource: formState.mediaSource,
+      selectedFile: formState.selectedFile,
+      externalUrl: formState.externalMediaUrl,
+      externalPreviewUrl: formState.externalMediaPreviewUrl,
+      externalProvider: formState.externalMediaProvider,
+      externalHash: formState.externalMediaHashInput,
+      externalMimeType: formState.externalMediaMimeType,
+      isExternalValid: formState.isExternalMediaValid,
+    }));
+
+    mockForm.mockReturnValue(formState);
     mockMutation.mockReturnValue({
       submitArtwork: jest.fn(async () => 'ok'),
       uploadProgress: 0,
