@@ -42,6 +42,15 @@ interface Props {
 }
 
 export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
+  const {
+    address,
+    subdelegation,
+    ens,
+    onHide,
+    new_primary_address_query: newPrimaryAddressQuery,
+    setNewPrimaryAddressQuery,
+    onSetToast,
+  } = props;
   const { connectedProfile } = useContext(AuthContext);
 
   const [selectedToAddress, setSelectedToAddress] = useState<string>("");
@@ -49,13 +58,13 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
 
   const [gasError, setGasError] = useState<string>();
 
-  const contractWriteDelegationConfigParams = props.subdelegation
+  const contractWriteDelegationConfigParams = subdelegation
     ? {
         address: DELEGATION_CONTRACT.contract,
         abi: DELEGATION_ABI,
         chainId: DELEGATION_CONTRACT.chain_id,
         args: [
-          props.subdelegation.originalDelegator,
+          subdelegation.originalDelegator,
           DELEGATION_ALL_ADDRESS,
           selectedToAddress,
           NEVER_DATE,
@@ -105,11 +114,10 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
     if (!selectedToAddress || !isValidEthAddress(selectedToAddress)) {
       newErrors.push("Missing or invalid Address");
     } else if (
-      (props.subdelegation &&
-        selectedToAddress.toUpperCase() ==
-          props.subdelegation.originalDelegator.toUpperCase()) ||
-      (!props.subdelegation &&
-        selectedToAddress.toUpperCase() === props.address.toUpperCase())
+      (subdelegation &&
+        areEqualAddresses(selectedToAddress, subdelegation.originalDelegator)) ||
+      (!subdelegation &&
+        areEqualAddresses(selectedToAddress, address))
     ) {
       newErrors.push("Invalid Address - cannot delegate to your own wallet");
     }
@@ -121,12 +129,11 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
     queryKey: [
       "primary-address",
       connectedProfile?.primary_wallet,
-      props.subdelegation?.originalDelegator,
+      subdelegation?.originalDelegator,
     ],
     queryFn: async () => {
       const addressPath =
-        props.subdelegation?.originalDelegator ??
-        connectedProfile?.primary_wallet;
+        subdelegation?.originalDelegator ?? connectedProfile?.primary_wallet;
       return await commonApiFetch<{
         consolidation_key: string;
         address: string;
@@ -143,41 +150,41 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
       const addresses = tdhAddress.consolidation_key.split("-");
       setAddressOptions(addresses);
       if (
-        props.new_primary_address_query &&
-        addresses.some((f) =>
-          areEqualAddresses(f, props.new_primary_address_query)
+        newPrimaryAddressQuery &&
+        addresses.some((candidate) =>
+          areEqualAddresses(candidate, newPrimaryAddressQuery)
         )
       ) {
-        setSelectedToAddress(props.new_primary_address_query);
+        setSelectedToAddress(newPrimaryAddressQuery);
       } else {
         const newTo = addresses.length === 1 ? addresses[0] : "";
         setSelectedToAddress(newTo);
-        props.setNewPrimaryAddressQuery?.(newTo);
+        setNewPrimaryAddressQuery?.(newTo);
       }
     }
-  }, [tdhAddress]);
+  }, [tdhAddress, newPrimaryAddressQuery, setNewPrimaryAddressQuery]);
 
   function printForm() {
     return (
       <Row className="pt-4">
         <Col>
           <Form>
-            {props.subdelegation && (
+            {subdelegation && (
               <DelegationFormOriginalDelegatorFormGroup
-                subdelegation={props.subdelegation}
+                subdelegation={subdelegation}
               />
             )}
             <Form.Group as={Row} className="pb-4">
               <DelegationFormLabel
-                title={props.subdelegation ? `Delegation Manager` : `Delegator`}
+                title={subdelegation ? `Delegation Manager` : `Delegator`}
                 tooltip={`Address ${
-                  props.subdelegation ? `executing` : `registering`
+                  subdelegation ? `executing` : `registering`
                 } the Primary Address assignment`}
               />
               <Col sm={9}>
                 <DelegationAddressDisabledInput
-                  address={props.address}
-                  ens={props.ens}
+                  address={address}
+                  ens={ens}
                 />
               </Col>
             </Form.Group>
@@ -194,8 +201,8 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
               showCancel={true}
               gasError={gasError}
               validate={validate}
-              onHide={props.onHide}
-              onSetToast={props.onSetToast}
+              onHide={onHide}
+              onSetToast={onSetToast}
             />
           </Form>
         </Col>
@@ -232,13 +239,13 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
         <Col xs={10} className="pt-3 pb-1">
           <h4>
             Assign Primary Address{" "}
-            {props.subdelegation && `as Delegation Manager`}
+            {subdelegation && `as Delegation Manager`}
           </h4>
         </Col>
         <Col
           xs={2}
           className="pt-3 pb-1 d-flex align-items-center justify-content-end">
-          <DelegationCloseButton onHide={props.onHide} title="Consolidation" />
+          <DelegationCloseButton onHide={onHide} title="Consolidation" />
         </Col>
       </Row>
       {!connectedProfile && (
@@ -251,21 +258,4 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
       {printContent()}
     </Container>
   );
-}
-
-function getAssignPrimartAddressConfig(toAddress: string) {
-  return {
-    address: DELEGATION_CONTRACT.contract,
-    abi: DELEGATION_ABI,
-    chainId: DELEGATION_CONTRACT.chain_id,
-    args: [
-      DELEGATION_ALL_ADDRESS,
-      toAddress,
-      NEVER_DATE,
-      PRIMARY_ADDRESS_USE_CASE.use_case,
-      true,
-      0,
-    ],
-    functionName: "registerDelegationAddress",
-  };
 }

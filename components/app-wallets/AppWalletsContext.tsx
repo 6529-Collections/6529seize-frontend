@@ -1,6 +1,7 @@
 "use client";
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -53,7 +54,7 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
   const capacitor = useCapacitor();
   const { isCapacitor } = capacitor;
 
-  const fetchAppWallets = async () => {
+  const fetchAppWallets = useCallback(async () => {
     if (!appWalletsSupported) {
       setFetchingAppWallets(false);
       setAppWallets([]);
@@ -66,7 +67,7 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
 
     setAppWallets(wallets);
     setFetchingAppWallets(false);
-  };
+  }, [appWalletsSupported]);
 
   useEffect(() => {
     let cancelled = false;
@@ -112,97 +113,107 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, [isCapacitor]);
 
-  const createAppWallet = async (
-    name: string,
-    pass: string
-  ): Promise<boolean> => {
-    if (!appWalletsSupported) return false;
+  const createAppWallet = useCallback(
+    async (name: string, pass: string): Promise<boolean> => {
+      if (!appWalletsSupported) return false;
 
-    const wallet = ethers.Wallet.createRandom();
-    const encryptedAddress = await encryptData(
-      wallet.address,
-      wallet.address,
-      pass
-    );
-    const encryptedMnemonic = await encryptData(
-      wallet.address,
-      wallet.mnemonic?.phrase ?? "",
-      pass
-    );
-    const encryptedPrivateKey = await encryptData(
-      wallet.address,
-      wallet.privateKey,
-      pass
-    );
+      const wallet = ethers.Wallet.createRandom();
+      const encryptedAddress = await encryptData(
+        wallet.address,
+        wallet.address,
+        pass
+      );
+      const encryptedMnemonic = await encryptData(
+        wallet.address,
+        wallet.mnemonic?.phrase ?? "",
+        pass
+      );
+      const encryptedPrivateKey = await encryptData(
+        wallet.address,
+        wallet.privateKey,
+        pass
+      );
 
-    const appWallet: AppWallet = {
-      name,
-      created_at: Time.now().toSeconds(),
-      address: wallet.address,
-      address_hashed: encryptedAddress,
-      mnemonic: encryptedMnemonic,
-      private_key: encryptedPrivateKey,
-      imported: false,
-    };
+      const appWallet: AppWallet = {
+        name,
+        created_at: Time.now().toSeconds(),
+        address: wallet.address,
+        address_hashed: encryptedAddress,
+        mnemonic: encryptedMnemonic,
+        private_key: encryptedPrivateKey,
+        imported: false,
+      };
 
-    const result = await SecureStoragePlugin.set({
-      key: `${WALLET_KEY_PREFIX}${wallet.address}`,
-      value: JSON.stringify(appWallet),
-    });
+      const result = await SecureStoragePlugin.set({
+        key: `${WALLET_KEY_PREFIX}${wallet.address}`,
+        value: JSON.stringify(appWallet),
+      });
 
-    await fetchAppWallets();
+      await fetchAppWallets();
 
-    return result.value;
-  };
+      return result.value;
+    },
+    [appWalletsSupported, fetchAppWallets]
+  );
 
-  const importAppWallet = async (
-    walletName: string,
-    walletPass: string,
-    address: string,
-    mnemonic: string,
-    privateKey: string
-  ): Promise<boolean> => {
-    if (!appWalletsSupported) return false;
+  const importAppWallet = useCallback(
+    async (
+      walletName: string,
+      walletPass: string,
+      address: string,
+      mnemonic: string,
+      privateKey: string
+    ): Promise<boolean> => {
+      if (!appWalletsSupported) return false;
 
-    const encryptedAddress = await encryptData(address, address, walletPass);
-    const encryptedMnemonic = await encryptData(address, mnemonic, walletPass);
-    const encryptedPrivateKey = await encryptData(
-      address,
-      privateKey,
-      walletPass
-    );
+      const encryptedAddress = await encryptData(address, address, walletPass);
+      const encryptedMnemonic = await encryptData(
+        address,
+        mnemonic,
+        walletPass
+      );
+      const encryptedPrivateKey = await encryptData(
+        address,
+        privateKey,
+        walletPass
+      );
 
-    const wallet: AppWallet = {
-      name: walletName,
-      created_at: Time.now().toSeconds(),
-      address,
-      address_hashed: encryptedAddress,
-      mnemonic: encryptedMnemonic,
-      private_key: encryptedPrivateKey,
-      imported: true,
-    };
+      const wallet: AppWallet = {
+        name: walletName,
+        created_at: Time.now().toSeconds(),
+        address,
+        address_hashed: encryptedAddress,
+        mnemonic: encryptedMnemonic,
+        private_key: encryptedPrivateKey,
+        imported: true,
+      };
 
-    const result = await SecureStoragePlugin.set({
-      key: `${WALLET_KEY_PREFIX}${address}`,
-      value: JSON.stringify(wallet),
-    });
+      const result = await SecureStoragePlugin.set({
+        key: `${WALLET_KEY_PREFIX}${address}`,
+        value: JSON.stringify(wallet),
+      });
 
-    await fetchAppWallets();
+      await fetchAppWallets();
 
-    return result.value;
-  };
+      return result.value;
+    },
+    [appWalletsSupported, fetchAppWallets]
+  );
 
-  const deleteAppWallet = async (address: string): Promise<boolean> => {
-    if (!appWalletsSupported) return false;
+  const deleteAppWallet = useCallback(
+    async (address: string): Promise<boolean> => {
+      if (!appWalletsSupported) return false;
 
-    const result = await SecureStoragePlugin.remove({
-      key: `${WALLET_KEY_PREFIX}${address}`,
-    });
+      const result = await SecureStoragePlugin.remove({
+        key: `${WALLET_KEY_PREFIX}${address}`,
+      });
 
-    await fetchAppWallets();
+      await fetchAppWallets();
 
-    return result.value;
-  };
+      return result.value;
+    },
+    [appWalletsSupported, fetchAppWallets]
+  );
 
   const value = useMemo(
     () => ({

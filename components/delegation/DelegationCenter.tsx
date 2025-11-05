@@ -15,7 +15,7 @@ import { DelegationCenterSection } from "@/enums";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
 interface Props {
   setSection(section: DelegationCenterSection): any;
@@ -23,29 +23,39 @@ interface Props {
 
 export default function DelegationCenterComponent(props: Readonly<Props>) {
   const [redirect, setRedirect] = useState<DelegationCenterSection>();
-  const accountResolution = useSeizeConnectContext();
-  const { seizeConnect, seizeConnectOpen } = useSeizeConnectContext();
+  const { isConnected, seizeConnect, seizeConnectOpen } = useSeizeConnectContext();
   const [openConnect, setOpenConnect] = useState(false);
+  const { setSection } = props;
+
+  const handleRedirect = useEffectEvent((target: DelegationCenterSection) => {
+    if (!isConnected) {
+      setOpenConnect(true);
+      seizeConnect();
+      return;
+    }
+
+    setSection(target);
+  });
+
+  const handleSeizeConnectClosed = useEffectEvent(() => {
+    if (openConnect && redirect && isConnected) {
+      setSection(redirect);
+    }
+
+    setRedirect(undefined);
+  });
 
   useEffect(() => {
-    if (redirect) {
-      if (!accountResolution.isConnected) {
-        setOpenConnect(true);
-        seizeConnect();
-      } else {
-        props.setSection(redirect);
-      }
+    if (!redirect) {
+      return;
     }
+
+    handleRedirect(redirect);
   }, [redirect]);
 
   useEffect(() => {
     if (!seizeConnectOpen) {
-      if (openConnect) {
-        if (accountResolution.isConnected && redirect) {
-          props.setSection(redirect);
-        }
-      }
-      setRedirect(undefined);
+      handleSeizeConnectClosed();
     }
   }, [seizeConnectOpen]);
 

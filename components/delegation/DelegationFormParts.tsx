@@ -1,15 +1,15 @@
 "use client";
 
+import { useEnsResolution } from "@/hooks/useEnsResolution";
 import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "@/constants";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { areEqualAddresses, getTransactionLink } from "@/helpers/Helpers";
 import { faInfoCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import { Col, Container, Form, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import {
-  useEnsAddress,
   useEnsName,
   useWaitForTransactionReceipt,
   useWriteContract,
@@ -24,52 +24,23 @@ import styles from "./Delegation.module.scss";
 function DelegationAddressInput(
   props: Readonly<{ setAddress: (address: string) => void }>
 ) {
-  const [newDelegationInput, setNewDelegationInput] = useState("");
-  const [newDelegationAddress, setNewDelegationAddress] = useState("");
-
-  const newDelegationAddressEns = useEnsName({
-    address: newDelegationInput?.startsWith("0x")
-      ? (newDelegationInput as `0x${string}`)
-      : undefined,
+  const { setAddress } = props;
+  const { inputValue, address, handleInputChange } = useEnsResolution({
     chainId: 1,
   });
 
   useEffect(() => {
-    if (newDelegationAddressEns.data) {
-      setNewDelegationAddress(newDelegationInput);
-      setNewDelegationInput(
-        `${newDelegationAddressEns.data} - ${newDelegationInput}`
-      );
-    }
-  }, [newDelegationAddressEns.data]);
-
-  const newDelegationToAddressFromEns = useEnsAddress({
-    name: newDelegationInput?.endsWith(".eth") ? newDelegationInput : undefined,
-    chainId: 1,
-  });
-
-  useEffect(() => {
-    if (newDelegationToAddressFromEns.data) {
-      setNewDelegationAddress(newDelegationToAddressFromEns.data);
-      setNewDelegationInput(
-        `${newDelegationInput} - ${newDelegationToAddressFromEns.data}`
-      );
-    }
-  }, [newDelegationToAddressFromEns.data]);
-
-  useEffect(() => {
-    props.setAddress(newDelegationAddress);
-  }, [newDelegationAddress]);
+    setAddress(address);
+  }, [setAddress, address]);
 
   return (
     <Form.Control
       placeholder={"0x... or ENS"}
       className={`${styles.formInput}`}
       type="text"
-      value={newDelegationInput}
+      value={inputValue}
       onChange={(e) => {
-        setNewDelegationInput(e.target.value);
-        setNewDelegationAddress(e.target.value);
+        handleInputChange(e.target.value);
       }}
     />
   );
@@ -263,43 +234,6 @@ export function DelegationFormDelegateAddressFormGroup(
   );
 }
 
-function DelegationButtons(
-  props: Readonly<{
-    showCancel: boolean;
-    onSubmit: () => void;
-    onHide: () => void;
-    isLoading: boolean;
-  }>
-) {
-  return (
-    <>
-      {props.showCancel && (
-        <button
-          className={styles.newDelegationCancelBtn}
-          onClick={() => props.onHide()}>
-          Cancel
-        </button>
-      )}
-      <button
-        className={`${styles.newDelegationSubmitBtn} ${
-          props.isLoading ? `${styles.newDelegationSubmitBtnDisabled}` : ``
-        }`}
-        onClick={() => {
-          props.onSubmit();
-        }}>
-        Submit{" "}
-        {props.isLoading && (
-          <div className="d-inline">
-            <output className={`spinner-border ${styles.loader}`}>
-              <span className="sr-only"></span>
-            </output>
-          </div>
-        )}
-      </button>
-    </>
-  );
-}
-
 export function DelegationSubmitGroups(
   props: Readonly<{
     title: string;
@@ -312,22 +246,37 @@ export function DelegationSubmitGroups(
     submitBtnLabel?: string;
   }>
 ) {
+  const {
+    title,
+    writeParams,
+    showCancel,
+    gasError,
+    validate,
+    onHide,
+    onSetToast,
+    submitBtnLabel,
+  } = props;
   const writeDelegation = useWriteContract();
   const waitWriteDelegation = useWaitForTransactionReceipt({
     confirmations: 1,
     hash: writeDelegation.data,
   });
   const [errors, setErrors] = useState<string[]>([]);
+  const emitToast = useEffectEvent(
+    (toast: { title: string; message: string }) => {
+      onSetToast(toast);
+    }
+  );
 
   function submitDelegation() {
-    const newErrors = props.validate();
-    if (newErrors.length > 0 || props.gasError) {
+    const newErrors = validate();
+    if (newErrors.length > 0 || gasError) {
       setErrors(newErrors);
       window.scrollBy(0, 100);
     } else {
-      writeDelegation.writeContract(props.writeParams);
-      props.onSetToast({
-        title: props.title,
+      writeDelegation.writeContract(writeParams);
+      onSetToast({
+        title,
         message: "Confirm in your wallet...",
       });
     }
@@ -344,22 +293,22 @@ export function DelegationSubmitGroups(
 
   useEffect(() => {
     if (writeDelegation.error) {
-      props.onSetToast({
-        title: props.title,
+      emitToast({
+        title,
         message: writeDelegation.error.message.split("Request Arguments")[0],
       });
     }
     if (writeDelegation.data) {
       if (waitWriteDelegation.isLoading) {
-        props.onSetToast({
-          title: props.title,
+        emitToast({
+          title,
           message: `Transaction submitted...
                     ${getTransactionAnchor(writeDelegation.data)}
                     <br />Waiting for confirmation...`,
         });
       } else {
-        props.onSetToast({
-          title: props.title,
+        emitToast({
+          title,
           message: `Transaction Successful!
                     ${getTransactionAnchor(writeDelegation.data)}`,
         });
@@ -369,6 +318,7 @@ export function DelegationSubmitGroups(
     writeDelegation.error,
     writeDelegation.data,
     waitWriteDelegation.isLoading,
+    title,
   ]);
 
   function isLoading() {
@@ -385,10 +335,10 @@ export function DelegationSubmitGroups(
         <Col
           sm={8}
           className="d-flex align-items-center justify-content-center">
-          {props.showCancel && (
+          {showCancel && (
             <button
               className={styles.newDelegationCancelBtn}
-              onClick={() => props.onHide()}>
+              onClick={() => onHide()}>
               Cancel
             </button>
           )}
@@ -400,7 +350,7 @@ export function DelegationSubmitGroups(
               e.preventDefault();
               submitDelegation();
             }}>
-            {props.submitBtnLabel ?? "Submit"}{" "}
+            {submitBtnLabel ?? "Submit"}{" "}
             {isLoading() && (
               <div className="d-inline">
                 <output className={`spinner-border ${styles.loader}`}>
@@ -411,7 +361,7 @@ export function DelegationSubmitGroups(
           </button>
         </Col>
       </Form.Group>
-      {(errors.length > 0 || props.gasError) && (
+      {(errors.length > 0 || gasError) && (
         <Form.Group
           as={Row}
           className={`pt-2 pb-2 ${styles.newDelegationError}`}>
@@ -420,10 +370,10 @@ export function DelegationSubmitGroups(
           </Form.Label>
           <Col sm={8} className="d-flex align-items-center">
             <ul className="mb-0">
-              {errors.map((e, index) => (
+              {errors.map((e) => (
                 <li key={getRandomObjectId()}>{e}</li>
               ))}
-              {props.gasError && <li>{props.gasError}</li>}
+              {gasError && <li>{gasError}</li>}
             </ul>
           </Col>
         </Form.Group>

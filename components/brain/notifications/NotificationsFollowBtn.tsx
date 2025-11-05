@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState, useContext, useEffect } from "react";
+import { FC, useState, useContext } from "react";
 import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import {
   FOLLOW_BTN_BUTTON_CLASSES,
@@ -32,15 +32,8 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
   const { setToast, requestAuth } = useContext(AuthContext);
   const [mutating, setMutating] = useState<boolean>(false);
 
-  const getFollowing = () => !!profile.subscribed_actions.length;
-  const getLabel = () => (getFollowing() ? "Following" : "Follow");
-
-  const [following, setFollowing] = useState<boolean>(getFollowing());
-  const [label, setLabel] = useState<string>(getLabel());
-  useEffect(() => {
-    setFollowing(getFollowing());
-    setLabel(getLabel());
-  }, [profile.subscribed_actions]);
+  const following = profile.subscribed_actions.length > 0;
+  const label = following ? "Following" : "Follow";
 
   const followMutation = useMutation({
     mutationFn: async () => {
