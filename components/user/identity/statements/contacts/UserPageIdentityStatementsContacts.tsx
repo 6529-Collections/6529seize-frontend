@@ -14,10 +14,10 @@ export default function UserPageIdentityStatementsContacts({
   return (
     <div>
       <div className="tw-flex tw-items-center tw-space-x-4">
-        <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-700">
-          <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
+        <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800">
+          <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-100">
             <svg
-              className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50"
+              className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-100"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"
@@ -33,7 +33,7 @@ export default function UserPageIdentityStatementsContacts({
             </svg>
           </div>
         </div>
-        <span className="tw-text-base tw-font-semibold tw-text-iron-50">
+        <span className="tw-text-base tw-font-semibold tw-text-iron-100">
           Contact
         </span>
       </div>

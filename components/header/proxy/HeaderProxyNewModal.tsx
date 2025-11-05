@@ -282,7 +282,7 @@ export default function HeaderProxyNewModal({
                     id="dontShowAgain"
                     checked={dontShowAgain}
                     onChange={() => setDontShowAgain(!dontShowAgain)}
-                    className="tw-cursor-pointer tw-form-checkbox tw-h-4 tw-w-4 tw-bg-neutral-800 tw-rounded tw-border-solid tw-border-gray-600 tw-text-primary-500 focus:tw-ring-primary-500"
+                    className="tw-cursor-pointer tw-form-checkbox tw-h-4 tw-w-4 tw-bg-iron-800 tw-rounded tw-border-solid tw-border-gray-600 tw-text-primary-500 focus:tw-ring-primary-500"
                   />
                 </div>
                 <div className="tw-ml-3 tw-text-sm tw-leading-6">

@@ -26,7 +26,7 @@ describe('DistributionPlanStepWrapper', () => {
     expect(div.className).toContain('tw-pt-8');
     expect(div.className).toContain('tw-border-t');
     expect(div.className).toContain('tw-border-solid');
-    expect(div.className).toContain('tw-border-t-neutral-700/60');
+    expect(div.className).toContain('tw-border-t-iron-700/60');
     expect(div.className).toContain('tw-mx-auto');
   });
 });

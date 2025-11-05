@@ -1,4 +1,4 @@
-import { render, act } from '@testing-library/react';
+import { render, act, fireEvent } from '@testing-library/react';
 import UserPageHeaderEditClassification from '@/components/user/user-page-header/name/classification/UserPageHeaderEditClassification';
 import { ApiIdentity } from '@/generated/models/ApiIdentity';
 import { ApiProfileClassification } from '@/generated/models/ApiProfileClassification';
@@ -17,6 +17,11 @@ jest.mock('@/components/user/settings/UserSettingsClassification', () => (props:
   capturedClassificationProps = props;
   return <div data-testid="classification" onClick={() => props.onSelect(ApiProfileClassification.Bot)} />;
 });
+
+jest.mock('react-dom', () => ({
+  ...jest.requireActual('react-dom'),
+  createPortal: (node: any) => node,
+}));
 
 jest.mock('@tanstack/react-query', () => ({
   useMutation: () => ({ mutateAsync: jest.fn() }),
@@ -46,15 +51,20 @@ describe('UserPageHeaderEditClassification', () => {
     const requestAuth = jest.fn().mockResolvedValue({ success: true });
     const setToast = jest.fn();
     jest.spyOn(require('@tanstack/react-query'), 'useMutation').mockReturnValue({ mutateAsync: mutate } as any);
-    const { container } = render(
+    render(
       <AuthContext.Provider value={{ setToast, requestAuth } as any}>
         <ReactQueryWrapperContext.Provider value={{ onProfileEdit: jest.fn() } as any}>
           <UserPageHeaderEditClassification profile={profile} onClose={jest.fn()} />
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>
     );
+    const form = document.querySelector('form');
+    expect(form).not.toBeNull();
+    if (!form) {
+      throw new Error('Form not found');
+    }
     await act(async () => {
-      container.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true }));
+      fireEvent.submit(form);
     });
     expect(requestAuth).toHaveBeenCalled();
     expect(mutate).toHaveBeenCalledWith({ handle: 'alice', classification: ApiProfileClassification.Pseudonym });
@@ -65,15 +75,20 @@ describe('UserPageHeaderEditClassification', () => {
     const requestAuth = jest.fn().mockResolvedValue({ success: false });
     const setToast = jest.fn();
     jest.spyOn(require('@tanstack/react-query'), 'useMutation').mockReturnValue({ mutateAsync: mutate } as any);
-    const { container } = render(
+    render(
       <AuthContext.Provider value={{ setToast, requestAuth } as any}>
         <ReactQueryWrapperContext.Provider value={{ onProfileEdit: jest.fn() } as any}>
           <UserPageHeaderEditClassification profile={profile} onClose={jest.fn()} />
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>
     );
+    const form = document.querySelector('form');
+    expect(form).not.toBeNull();
+    if (!form) {
+      throw new Error('Form not found');
+    }
     await act(async () => {
-      container.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true }));
+      fireEvent.submit(form);
     });
     expect(setToast).toHaveBeenCalled();
     expect(mutate).not.toHaveBeenCalled();

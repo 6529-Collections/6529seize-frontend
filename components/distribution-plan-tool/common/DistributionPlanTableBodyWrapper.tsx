@@ -6,7 +6,7 @@ export default function DistributionPlanTableBodyWrapper({
   children: React.ReactNode;
 }) {
   return (
-    <tbody className="tw-bg-neutral-900 tw-divide-y tw-divide-neutral-700/40">
+    <tbody className="tw-bg-iron-900 tw-divide-y tw-divide-iron-700/40">
       <AllowlistToolAnimationWrapper mode="sync"  initial={false}>
         {children}
       </AllowlistToolAnimationWrapper>

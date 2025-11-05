@@ -1,10 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
-import { useState } from "react";
 import AllowlistToolLoader from "@/components/allowlist-tool/common/AllowlistToolLoader";
 import { distributionPlanApiDelete } from "@/services/distribution-plan-api";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function DistributionPlanToolPlansTableItem({
   plan,
@@ -42,17 +42,17 @@ export default function DistributionPlanToolPlansTableItem({
   return (
     <tr
       onClick={() => goToDistributionPlan(plan.id)}
-      className="tw-cursor-pointer hover:tw-bg-neutral-800/60 tw-transition tw-duration-300 tw-ease-out">
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-neutral-300 sm:tw-pl-6">
+      className="tw-cursor-pointer hover:tw-bg-iron-800/60 tw-transition tw-duration-300 tw-ease-out">
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-iron-300 sm:tw-pl-6">
         {plan.name}
       </td>
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-neutral-300">
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-iron-300">
         {plan.description}
       </td>
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-neutral-300">
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-iron-300">
         {date}
       </td>
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-text-right tw-font-normal tw-text-neutral-300 sm:tw-pr-6">
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-text-right tw-font-normal tw-text-iron-300 sm:tw-pr-6">
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -61,7 +61,7 @@ export default function DistributionPlanToolPlansTableItem({
           disabled={loadingDelete}
           type="button"
           title="Delete"
-          className="tw-rounded-full tw-group tw-p-2 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-neutral-400 tw-bg-neutral-400/10 tw-ring-neutral-400/20">
+          className="tw-rounded-full tw-group tw-p-2 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-400 tw-bg-iron-400/10 tw-ring-iron-400/20">
           {loadingDelete ? (
             <AllowlistToolLoader />
           ) : (

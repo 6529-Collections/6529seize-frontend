@@ -2,13 +2,13 @@
 
 import { useContext, useEffect, useState } from "react";
 import {
-  DISTRIBUTION_PLAN_STEPS,
-  DistributionPlanStepDescription,
-} from "./DistributionPlanToolSidebar";
-import {
-  DistributionPlanToolContext,
-  DistributionPlanToolStep,
+    DistributionPlanToolContext,
+    DistributionPlanToolStep,
 } from "../DistributionPlanToolContext";
+import {
+    DISTRIBUTION_PLAN_STEPS,
+    DistributionPlanStepDescription,
+} from "./DistributionPlanToolSidebar";
 
 export default function DistributionPlanStepDone({
   step,
@@ -36,7 +36,7 @@ export default function DistributionPlanStepDone({
     <li className="tw-relative tw-pb-10">
       {!isLastStep && (
         <div
-          className="tw-absolute tw-left-[13.25px] tw-top-4 -ml-tw-px tw-mt-0.5 tw-h-full tw-w-0.5 tw-bg-neutral-100"
+          className="tw-absolute tw-left-[13.25px] tw-top-4 -ml-tw-px tw-mt-0.5 tw-h-full tw-w-0.5 tw-bg-iron-100"
           aria-hidden="true"></div>
       )}
 
@@ -46,7 +46,7 @@ export default function DistributionPlanStepDone({
           isNotCreatePlanStep ? "tw-cursor-pointer" : ""
         }`}>
         <span className="tw-flex tw-h-8 tw-items-center">
-          <span className="tw-relative tw-z-0 tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-bg-neutral-100">
+          <span className="tw-relative tw-z-0 tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-100">
             <svg
               className="tw-h-3 tw-w-auto tw-text-primary-500"
               viewBox="0 0 21 19"
@@ -63,7 +63,7 @@ export default function DistributionPlanStepDone({
         </span>
         <span className="tw-ml-4 tw-flex tw-min-w-0 tw-flex-col">
           <span className="tw-text-sm tw-font-medium">{step.label}</span>
-          <span className="tw-text-sm tw-text-neutral-500">
+          <span className="tw-text-sm tw-text-iron-500">
             {step.description}
           </span>
         </span>

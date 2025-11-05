@@ -1,22 +1,22 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
-import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
 import {
-  PhaseGroupSnapshotConfig,
-  TopHolderType,
-} from "../BuildPhaseFormConfigModal";
-import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
-import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
-import {
-  AllowlistOperationCode,
-  Pool,
+    AllowlistOperationCode,
+    Pool,
 } from "@/components/allowlist-tool/allowlist-tool.types";
-import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
+import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
+import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+import { useContext, useEffect, useState } from "react";
+import {
+    PhaseGroupSnapshotConfig,
+    TopHolderType,
+} from "../BuildPhaseFormConfigModal";
 import BuildPhaseFormConfigModalSidebar, {
-  BuildPhaseFormConfigModalSidebarOption,
+    BuildPhaseFormConfigModalSidebarOption,
 } from "./BuildPhaseFormConfigModalSidebar";
+import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import ComponentConfigMeta from "./ComponentConfigMeta";
+import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 
 export default function SnapshotSelectTopHolders({
   onSelectTopHoldersSkip,
@@ -256,7 +256,7 @@ export default function SnapshotSelectTopHolders({
                   tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset focus-within:tw-ring-1 focus-within:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
                     isFromError
                       ? "tw-ring-error focus-within:tw-ring-error"
-                      : "tw-ring-neutral-700/40 focus-within:tw-ring-primary-400"
+                      : "tw-ring-iron-700/40 focus-within:tw-ring-primary-400"
                   }`}>
                   <input
                     type="number"
@@ -268,7 +268,7 @@ export default function SnapshotSelectTopHolders({
                         ? setFrom(Number(event.target.value))
                         : setFrom("")
                     }
-                    className="tw-form-input tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6 "
+                    className="tw-form-input tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-iron-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6 "
                     placeholder={`From (1 - ${
                       config.uniqueWalletsCount ?? "∞"
                     })`}
@@ -286,7 +286,7 @@ export default function SnapshotSelectTopHolders({
                   tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset focus-within:tw-ring-1 focus-within:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
                     isToError
                       ? "tw-ring-error focus-within:tw-ring-error"
-                      : "tw-ring-neutral-700/40 focus-within:tw-ring-primary-400"
+                      : "tw-ring-iron-700/40 focus-within:tw-ring-primary-400"
                   }`}>
                   <input
                     type="number"
@@ -298,7 +298,7 @@ export default function SnapshotSelectTopHolders({
                         ? setTo(Number(event.target.value))
                         : setTo("")
                     }
-                    className="tw-form-input tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
+                    className="tw-form-input tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-iron-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
                     placeholder={`To (1 - ${config.uniqueWalletsCount ?? "∞"})`}
                   />
                 </div>

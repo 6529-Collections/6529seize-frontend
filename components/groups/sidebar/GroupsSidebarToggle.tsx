@@ -1,6 +1,6 @@
+import { selectActiveGroupId } from "@/store/groupSlice";
 import { forwardRef } from "react";
 import { useSelector } from "react-redux";
-import { selectActiveGroupId } from "@/store/groupSlice";
 
 type Props = {
   readonly open: boolean;
@@ -17,7 +17,7 @@ const GroupsSidebarToggle = forwardRef<HTMLButtonElement, Props>(
     return (
       <button
         ref={ref}
-        className={`${color} tw-fixed tw-top-0 tw-mt-2 tw-z-50 tw-bg-iron-950 tw-border tw-border-l-0 tw-border-solid tw-border-neutral-600 tw-p-2 tw-rounded-r-lg  focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
+        className={`${color} tw-fixed tw-top-0 tw-mt-2 tw-z-50 tw-bg-iron-950 tw-border tw-border-l-0 tw-border-solid tw-border-iron-600 tw-p-2 tw-rounded-r-lg  focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
         onClick={() => setOpen(!open)}
       >
         {open ? (
