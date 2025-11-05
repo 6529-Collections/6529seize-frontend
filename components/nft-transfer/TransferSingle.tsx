@@ -127,7 +127,7 @@ function TransferSingleImpl(props: TransferSingleProps) {
           <FontAwesomeIcon icon={faRightLeft} />
         </div>
         {max > 1 && (
-          <div className="tw-flex tw-items-center tw-gap-1">
+          <div className="tw-flex tw-items-center tw-justify-center tw-gap-1.5 tw-bg-primary-500 tw-rounded-full tw-p-1 tw-font-medium">
             <button
               type="button"
               onClick={() => t.decQty(key)}
