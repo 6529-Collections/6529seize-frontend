@@ -20,9 +20,9 @@ const mockReload = jest.fn();
 describe("NewVersionToast", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    Object.defineProperty(window, "location", {
+    Object.defineProperty(globalThis, "location", {
       value: {
-        ...window.location,
+        ...globalThis.location,
         reload: mockReload,
       },
       writable: true,

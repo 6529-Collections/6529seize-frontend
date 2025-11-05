@@ -33,7 +33,7 @@ const NewVersionToast = (): JSX.Element | null => {
         </span>
 
         <button
-          onClick={() => window.location.reload()}
+          onClick={() => globalThis.location.reload()}
           aria-label="Refresh page"
           title="Refresh page"
           className="tw-flex tw-items-center tw-justify-center tw-gap-x-2
