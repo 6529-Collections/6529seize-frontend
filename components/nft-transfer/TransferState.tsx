@@ -52,10 +52,12 @@ export function TransferProvider({
 }: {
   readonly children: React.ReactNode;
 }) {
-  const [enabled, setEnabled] = useState(false);
+  const [enabled, setEnabledRaw] = useState(false);
   const [selected, setSelected] = useState<Map<string, TransferItem>>(
     () => new Map()
   );
+
+  const setEnabledStable = useCallback((v: boolean) => setEnabledRaw(v), []);
 
   const isSelected = useCallback(
     (key: string) => selected.has(key),
@@ -146,8 +148,8 @@ export function TransferProvider({
   }, []);
 
   const toggle = useCallback(() => {
-    setEnabled((v) => !v);
-  }, []);
+    setEnabledStable((v) => !v);
+  }, [setEnabledStable]);
 
   const count = selected.size;
   const totalQty = Array.from(selected.values()).reduce(
@@ -158,7 +160,7 @@ export function TransferProvider({
   const api = useMemo<TransferContextShape>(
     () => ({
       enabled,
-      setEnabled,
+      setEnabled: setEnabledStable,
       toggle,
 
       selected,
@@ -177,7 +179,7 @@ export function TransferProvider({
     }),
     [
       enabled,
-      setEnabled,
+      setEnabledStable,
       toggle,
       selected,
       isSelected,
