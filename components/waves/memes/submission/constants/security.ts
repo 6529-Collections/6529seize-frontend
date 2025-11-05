@@ -114,10 +114,22 @@ export const isInteractiveMediaContentPathAllowed = (
   if (provider === "arweave") {
     const subdomainIdentifier = getArweaveTransactionIdFromSubdomain(hostname);
     if (subdomainIdentifier) {
-      return (
-        pathname === "/" &&
-        isInteractiveMediaContentIdentifier(provider, subdomainIdentifier)
-      );
+      if (
+        !isInteractiveMediaContentIdentifier(provider, subdomainIdentifier)
+      ) {
+        return false;
+      }
+
+      if (pathname === "/") {
+        return true;
+      }
+
+      const subdomainMatch = ARWEAVE_PATH_PATTERN.exec(pathname);
+      if (!subdomainMatch) {
+        return false;
+      }
+
+      return isInteractiveMediaContentIdentifier(provider, subdomainMatch[1]);
     }
 
     const match = ARWEAVE_PATH_PATTERN.exec(pathname);
