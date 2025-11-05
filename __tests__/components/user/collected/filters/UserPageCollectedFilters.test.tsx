@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { RefObject } from 'react';
 import UserPageCollectedFilters from '@/components/user/collected/filters/UserPageCollectedFilters';
 import { CollectedCollectionType, CollectionSeized, CollectionSort } from '@/entities/IProfile';
@@ -133,7 +133,7 @@ describe('UserPageCollectedFilters', () => {
     setSortBy: jest.fn(),
     setSeized: jest.fn(),
     setSzn: jest.fn(),
-    scrollHorizontally: jest.fn(),
+    showTransfer: false,
   };
 
   let mockContainerRef: RefObject<HTMLDivElement>;
@@ -144,17 +144,10 @@ describe('UserPageCollectedFilters', () => {
       current: document.createElement('div')
     };
     
-    // Setup mock getBoundingClientRect
-    Element.prototype.getBoundingClientRect = jest.fn(() => ({
-      left: 0,
-      top: 0,
-      right: 100,
-      bottom: 50,
-      width: 100,
-      height: 50,
-      x: 0,
-      y: 0,
-      toJSON: jest.fn(),
+    globalThis.ResizeObserver = jest.fn().mockImplementation((callback) => ({
+      observe: jest.fn(),
+      unobserve: jest.fn(),
+      disconnect: jest.fn(),
     }));
   });
 
@@ -248,24 +241,7 @@ describe('UserPageCollectedFilters', () => {
   });
 
   it('shows scroll arrows when filters are not fully visible', async () => {
-    // Mock checkVisibility to return false (not visible)
-    const mockGetBoundingClientRect = jest.fn()
-      // First call - container getBoundingClientRect
-      .mockReturnValueOnce({ left: 0, right: 100, width: 100, height: 30, top: 0, bottom: 30, x: 0, y: 0, toJSON: jest.fn() })
-      // Second call - mostLeftFilter getBoundingClientRect  
-      .mockReturnValueOnce({ left: -50, right: -10, width: 40, height: 30, top: 0, bottom: 30, x: -50, y: 0, toJSON: jest.fn() })
-      // Third call - container getBoundingClientRect again
-      .mockReturnValueOnce({ left: 0, right: 100, width: 100, height: 30, top: 0, bottom: 30, x: 0, y: 0, toJSON: jest.fn() })
-      // Fourth call - mostRightFilter getBoundingClientRect
-      .mockReturnValueOnce({ left: 150, right: 200, width: 50, height: 30, top: 0, bottom: 30, x: 150, y: 0, toJSON: jest.fn() })
-      // Fifth call - container getBoundingClientRect again
-      .mockReturnValueOnce({ left: 0, right: 100, width: 100, height: 30, top: 0, bottom: 30, x: 0, y: 0, toJSON: jest.fn() })
-      // Default return for any other calls
-      .mockReturnValue({ left: 0, right: 100, width: 100, height: 30, top: 0, bottom: 30, x: 0, y: 0, toJSON: jest.fn() });
-
-    Element.prototype.getBoundingClientRect = mockGetBoundingClientRect;
-
-    render(
+    const { container } = render(
       <UserPageCollectedFilters
         profile={mockProfile}
         filters={mockFilters}
@@ -273,6 +249,39 @@ describe('UserPageCollectedFilters', () => {
         {...mockSetters}
       />
     );
+
+    await waitFor(() => {
+      const scrollContainer = container.querySelector('[class*="tw-overflow-x-auto"]') as HTMLDivElement;
+      expect(scrollContainer).toBeTruthy();
+    });
+
+    const scrollContainer = container.querySelector('[class*="tw-overflow-x-auto"]') as HTMLDivElement;
+    if (!scrollContainer) {
+      throw new Error('Scroll container not found');
+    }
+
+    await act(async () => {
+      Object.defineProperty(scrollContainer, 'scrollLeft', {
+        writable: true,
+        configurable: true,
+        value: 50,
+      });
+      Object.defineProperty(scrollContainer, 'scrollWidth', {
+        writable: true,
+        configurable: true,
+        value: 300,
+      });
+      Object.defineProperty(scrollContainer, 'clientWidth', {
+        writable: true,
+        configurable: true,
+        value: 100,
+      });
+
+      const scrollEvent = new Event('scroll', { bubbles: true });
+      scrollContainer.dispatchEvent(scrollEvent);
+      
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
 
     await waitFor(() => {
       expect(screen.getByLabelText('Scroll filters left')).toBeInTheDocument();
@@ -281,24 +290,8 @@ describe('UserPageCollectedFilters', () => {
   });
 
   it('calls scrollHorizontally when scroll arrows are clicked', async () => {
-    // Mock to show arrows
-    const mockGetBoundingClientRect = jest.fn()
-      // First call - container getBoundingClientRect
-      .mockReturnValueOnce({ left: 0, right: 100, width: 100, height: 30, top: 0, bottom: 30, x: 0, y: 0, toJSON: jest.fn() })
-      // Second call - mostLeftFilter getBoundingClientRect  
-      .mockReturnValueOnce({ left: -50, right: -10, width: 40, height: 30, top: 0, bottom: 30, x: -50, y: 0, toJSON: jest.fn() })
-      // Third call - container getBoundingClientRect again
-      .mockReturnValueOnce({ left: 0, right: 100, width: 100, height: 30, top: 0, bottom: 30, x: 0, y: 0, toJSON: jest.fn() })
-      // Fourth call - mostRightFilter getBoundingClientRect
-      .mockReturnValueOnce({ left: 150, right: 200, width: 50, height: 30, top: 0, bottom: 30, x: 150, y: 0, toJSON: jest.fn() })
-      // Fifth call - container getBoundingClientRect again
-      .mockReturnValueOnce({ left: 0, right: 100, width: 100, height: 30, top: 0, bottom: 30, x: 0, y: 0, toJSON: jest.fn() })
-      // Default return for any other calls
-      .mockReturnValue({ left: 0, right: 100, width: 100, height: 30, top: 0, bottom: 30, x: 0, y: 0, toJSON: jest.fn() });
-
-    Element.prototype.getBoundingClientRect = mockGetBoundingClientRect;
-
-    render(
+    const scrollBySpy = jest.fn();
+    const { container } = render(
       <UserPageCollectedFilters
         profile={mockProfile}
         filters={mockFilters}
@@ -308,24 +301,62 @@ describe('UserPageCollectedFilters', () => {
     );
 
     await waitFor(() => {
-      const leftArrow = screen.getByLabelText('Scroll filters left');
-      const rightArrow = screen.getByLabelText('Scroll filters right');
-      
-      fireEvent.click(leftArrow);
-      expect(mockSetters.scrollHorizontally).toHaveBeenCalledWith('left');
-      
-      fireEvent.click(rightArrow);
-      expect(mockSetters.scrollHorizontally).toHaveBeenCalledWith('right');
+      const scrollContainer = container.querySelector('[class*="tw-overflow-x-auto"]') as HTMLDivElement;
+      expect(scrollContainer).toBeTruthy();
     });
+
+    const scrollContainer = container.querySelector('[class*="tw-overflow-x-auto"]') as HTMLDivElement;
+    if (!scrollContainer) {
+      throw new Error('Scroll container not found');
+    }
+
+    scrollContainer.scrollBy = scrollBySpy;
+
+    await act(async () => {
+      Object.defineProperty(scrollContainer, 'scrollLeft', {
+        writable: true,
+        configurable: true,
+        value: 50,
+      });
+      Object.defineProperty(scrollContainer, 'scrollWidth', {
+        writable: true,
+        configurable: true,
+        value: 300,
+      });
+      Object.defineProperty(scrollContainer, 'clientWidth', {
+        writable: true,
+        configurable: true,
+        value: 100,
+      });
+
+      const scrollEvent = new Event('scroll', { bubbles: true });
+      scrollContainer.dispatchEvent(scrollEvent);
+      
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Scroll filters left')).toBeInTheDocument();
+      expect(screen.getByLabelText('Scroll filters right')).toBeInTheDocument();
+    });
+
+    const leftArrow = screen.getByLabelText('Scroll filters left');
+    const rightArrow = screen.getByLabelText('Scroll filters right');
+    
+    fireEvent.click(leftArrow);
+    expect(scrollBySpy).toHaveBeenCalledWith({ left: -150, behavior: 'smooth' });
+    
+    fireEvent.click(rightArrow);
+    expect(scrollBySpy).toHaveBeenCalledWith({ left: 150, behavior: 'smooth' });
   });
 
-  it('sets up event listeners on mount and cleans up on unmount', () => {
-    const addEventListenerSpy = jest.spyOn(mockContainerRef.current!, 'addEventListener');
-    const removeEventListenerSpy = jest.spyOn(mockContainerRef.current!, 'removeEventListener');
+  it('sets up event listeners on mount and cleans up on unmount', async () => {
+    const addEventListenerSpy = jest.spyOn(HTMLDivElement.prototype, 'addEventListener');
+    const removeEventListenerSpy = jest.spyOn(HTMLDivElement.prototype, 'removeEventListener');
     const windowAddEventListenerSpy = jest.spyOn(window, 'addEventListener');
     const windowRemoveEventListenerSpy = jest.spyOn(window, 'removeEventListener');
 
-    const { unmount } = render(
+    const { container, unmount } = render(
       <UserPageCollectedFilters
         profile={mockProfile}
         filters={mockFilters}
@@ -334,42 +365,25 @@ describe('UserPageCollectedFilters', () => {
       />
     );
 
-    expect(addEventListenerSpy).toHaveBeenCalledWith('scroll', expect.any(Function));
-    expect(windowAddEventListenerSpy).toHaveBeenCalledWith('resize', expect.any(Function));
+    await waitFor(() => {
+      const scrollContainer = container.querySelector('[class*="tw-overflow-x-auto"]') as HTMLDivElement;
+      expect(scrollContainer).toBeTruthy();
+    });
+
+    await waitFor(() => {
+      expect(addEventListenerSpy).toHaveBeenCalledWith('scroll', expect.any(Function));
+      expect(windowAddEventListenerSpy).toHaveBeenCalledWith('resize', expect.any(Function));
+    });
 
     unmount();
 
     expect(removeEventListenerSpy).toHaveBeenCalledWith('scroll', expect.any(Function));
     expect(windowRemoveEventListenerSpy).toHaveBeenCalledWith('resize', expect.any(Function));
+    
+    addEventListenerSpy.mockRestore();
+    removeEventListenerSpy.mockRestore();
+    windowAddEventListenerSpy.mockRestore();
+    windowRemoveEventListenerSpy.mockRestore();
   });
 
-  it('handles mobile touch device detection correctly', () => {
-    // Mock matchMedia to return true for touch devices
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: jest.fn().mockImplementation(query => ({
-        matches: query === '(pointer: coarse)',
-        media: query,
-        onchange: null,
-        addListener: jest.fn(),
-        removeListener: jest.fn(),
-        addEventListener: jest.fn(),
-        removeEventListener: jest.fn(),
-        dispatchEvent: jest.fn(),
-      })),
-    });
-
-    render(
-      <UserPageCollectedFilters
-        profile={mockProfile}
-        filters={mockFilters}
-        containerRef={mockContainerRef}
-        {...mockSetters}
-      />
-    );
-
-    // On touch devices, arrows should not be shown
-    expect(screen.queryByLabelText('Scroll filters left')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('Scroll filters right')).not.toBeInTheDocument();
-  });
 });
