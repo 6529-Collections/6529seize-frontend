@@ -26,11 +26,11 @@ export default function GroupCardHeader({
     ? getTimeAgo(new Date(group.created_at ?? "").getTime())
     : "";
 
-  const profileHref =
-    group && group.created_by.handle
-      ? `/${group.created_by.handle}`
-      : userPlaceholder ?? "";
-  const creatorHandle = group?.created_by.handle ?? userPlaceholder ?? "";
+  const rawCreatorHandle = group?.created_by?.handle;
+  const fallbackHandle = userPlaceholder ?? "";
+  const hasCreatorHandle = Boolean(rawCreatorHandle);
+  const creatorHandle = hasCreatorHandle ? rawCreatorHandle! : fallbackHandle;
+  const profileHref = hasCreatorHandle ? `/${rawCreatorHandle}` : fallbackHandle;
   const shouldTruncateHandle =
     creatorHandle !== userPlaceholder &&
     (isEthereumAddress(creatorHandle) ||
