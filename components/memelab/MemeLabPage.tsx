@@ -663,61 +663,64 @@ export default function MemeLabPageComponent({
                       />
                     </Col>
                   </Row>
-                  <Row className="pt-2 pb-2">
-                    <Col>
-                      <h3>Overview</h3>
-                    </Col>
-                  </Row>
-                  <Row className={`pb-2 ${styles.overviewColumn}`}>
-                    <Col>
-                      First acquired{" "}
-                      {printMintDate(new Date(firstAcquired.transaction_date))}
-                    </Col>
-                  </Row>
-                  {airdropped.length > 0 && (
-                    <Row className={`pt-1 ${styles.overviewColumn}`}>
-                      <Col>
-                        {getTokenCount(airdropped)} card
-                        {getTokenCount(airdropped) > 1 && "s"} airdropped
-                      </Col>
-                    </Row>
-                  )}
-                  {bought.length > 0 && (
-                    <Row className={`pt-1 ${styles.overviewColumn}`}>
-                      <Col>
-                        {getTokenCount(bought)} card
-                        {getTokenCount(bought) > 1 && "s"} bought for{" "}
-                        {boughtSum} ETH
-                      </Col>
-                    </Row>
-                  )}
-                  {transferredIn.length > 0 && (
-                    <Row className={`pt-1 ${styles.overviewColumn}`}>
-                      <Col>
-                        {getTokenCount(transferredIn)} card
-                        {getTokenCount(transferredIn) > 1 && "s"} transferred in
-                      </Col>
-                    </Row>
-                  )}
-                  {sold.length > 0 && (
-                    <Row className={`pt-1 ${styles.overviewColumn}`}>
-                      <Col>
-                        {getTokenCount(sold)} card
-                        {getTokenCount(sold) > 1 && "s"} sold for {soldSum} ETH
-                      </Col>
-                    </Row>
-                  )}
-                  {transferredOut.length > 0 && (
-                    <Row className={`pt-1 ${styles.overviewColumn}`}>
-                      <Col>
-                        {getTokenCount(transferredOut)} card
-                        {getTokenCount(transferredOut) > 1 && "s"} transferred
-                        out
-                      </Col>
-                    </Row>
-                  )}
                 </>
               )}
+            {transactions.length > 0 && (
+              <>
+                <Row className="pt-2 pb-2">
+                  <Col>
+                    <h3>Overview</h3>
+                  </Col>
+                </Row>
+                <Row className={`pb-2 ${styles.overviewColumn}`}>
+                  <Col>
+                    First acquired{" "}
+                    {printMintDate(new Date(firstAcquired.transaction_date))}
+                  </Col>
+                </Row>
+                {airdropped.length > 0 && (
+                  <Row className={`pt-1 ${styles.overviewColumn}`}>
+                    <Col>
+                      {getTokenCount(airdropped)} card
+                      {getTokenCount(airdropped) > 1 && "s"} airdropped
+                    </Col>
+                  </Row>
+                )}
+                {bought.length > 0 && (
+                  <Row className={`pt-1 ${styles.overviewColumn}`}>
+                    <Col>
+                      {getTokenCount(bought)} card
+                      {getTokenCount(bought) > 1 && "s"} bought for {boughtSum}{" "}
+                      ETH
+                    </Col>
+                  </Row>
+                )}
+                {transferredIn.length > 0 && (
+                  <Row className={`pt-1 ${styles.overviewColumn}`}>
+                    <Col>
+                      {getTokenCount(transferredIn)} card
+                      {getTokenCount(transferredIn) > 1 && "s"} transferred in
+                    </Col>
+                  </Row>
+                )}
+                {sold.length > 0 && (
+                  <Row className={`pt-1 ${styles.overviewColumn}`}>
+                    <Col>
+                      {getTokenCount(sold)} card
+                      {getTokenCount(sold) > 1 && "s"} sold for {soldSum} ETH
+                    </Col>
+                  </Row>
+                )}
+                {transferredOut.length > 0 && (
+                  <Row className={`pt-1 ${styles.overviewColumn}`}>
+                    <Col>
+                      {getTokenCount(transferredOut)} card
+                      {getTokenCount(transferredOut) > 1 && "s"} transferred out
+                    </Col>
+                  </Row>
+                )}
+              </>
+            )}
           </Row>
         </Container>
       </Col>
