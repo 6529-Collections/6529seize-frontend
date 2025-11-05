@@ -7,7 +7,7 @@ import { Col, Container, Row } from "react-bootstrap";
 
 function DetailsCard(props: Readonly<{ title: string; children: ReactNode }>) {
   return (
-    <details className="tw-rounded-lg tw-bg-[#0c0c0d] tw-border-1 tw-border-solid tw-border-[#222]">
+    <details className="tw-rounded-lg tw-bg-[#0c0c0d] tw-border-2 tw-border-solid tw-border-[#222]">
       <summary className="tw-cursor-pointer tw-select-none tw-list-none tw-px-5 tw-py-3 tw-font-medium">
         <h5 className="tw-m-0">{props.title}</h5>
       </summary>

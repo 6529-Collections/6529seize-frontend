@@ -470,7 +470,7 @@ export default function MemeLabComponent() {
 
   useEffect(() => {
     const nftsUrl = `${publicEnv.API_ENDPOINT}/api/lab_extended_data`;
-    fetchAllPages(nftsUrl).then((responseNftMetas: LabExtendedData[]) => {
+    fetchAllPages<LabExtendedData>(nftsUrl).then((responseNftMetas) => {
       setNftMetas(responseNftMetas);
       const myCollections: string[] = [];
       [...responseNftMetas].map((nftMeta) => {
@@ -480,10 +480,10 @@ export default function MemeLabComponent() {
       });
       setLabCollections(myCollections.sort());
       if (responseNftMetas.length > 0) {
-        const tokenIds = responseNftMetas.map((n: LabExtendedData) => n.id);
-        fetchAllPages(
+        const tokenIds = responseNftMetas.map((n) => n.id);
+        fetchAllPages<LabNFT>(
           `${publicEnv.API_ENDPOINT}/api/nfts_memelab?id=${tokenIds.join(",")}`
-        ).then((responseNfts: any[]) => {
+        ).then((responseNfts) => {
           setNfts(responseNfts);
         });
       } else {
@@ -535,8 +535,7 @@ export default function MemeLabComponent() {
         lg={{ span: 3 }}>
         <Link
           href={`/meme-lab/${nft.id}`}
-          className="decoration-none scale-hover"
-        >
+          className="decoration-none scale-hover">
           <Container fluid>
             <Row className={isConnected ? styles.nftImagePadding : ""}>
               <NFTImage
@@ -655,9 +654,7 @@ export default function MemeLabComponent() {
               <Row>
                 <Col className="d-flex align-items-center justify-content-between mb-3">
                   <span className="d-flex align-items-center gap-3 flex-wrap">
-                    <h1 className="mb-0">
-                      Meme Lab
-                    </h1>
+                    <h1 className="mb-0">Meme Lab</h1>
                     <LFGButton contract={MEMELAB_CONTRACT} />
                   </span>
                 </Col>

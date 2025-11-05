@@ -27,7 +27,7 @@ export default function UserAddressesSelectDropdown({
     () => [
       { label: "All Addresses", value: null, key: "all", childrenProps: null },
       ...wallets.map((wallet) => ({
-        label: wallet.display ?? formatAddress(wallet.wallet),
+        label: formatAddress(wallet.display ?? wallet.wallet),
         value: wallet.wallet.toLowerCase(),
         key: wallet.wallet.toLowerCase(),
         childrenProps: wallet,

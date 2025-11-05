@@ -5,14 +5,14 @@ import {
   SUPPORTED_COLLECTIONS,
 } from "@/components/delegation/delegation-constants";
 import { publicEnv } from "@/config/env";
-import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useRef, useState } from "react";
-import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { DELEGATION_ALL_ADDRESS, MEMES_CONTRACT } from "@/constants";
 import { Delegation } from "@/entities/IDelegation";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { fetchAllPages } from "@/services/6529api";
+import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useEffect, useRef, useState } from "react";
+import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import styles from "./MappingTool.module.scss";
 
 const csvParser = require("csv-parser");
@@ -83,7 +83,7 @@ export default function DelegationMappingTool() {
 
   useEffect(() => {
     async function fetchDelegations(url: string) {
-      fetchAllPages(url).then((delegations: Delegation[]) => {
+      fetchAllPages<Delegation>(url).then((delegations) => {
         setDelegations(delegations);
         const reader = new FileReader();
 
@@ -220,7 +220,7 @@ export default function DelegationMappingTool() {
             className={`${styles.formInput}`}
             value={useCase}
             onChange={(e) => {
-              const newCase = parseInt(e.target.value);
+              const newCase = Number.parseInt(e.target.value);
               setUseCase(newCase);
             }}>
             <option value={0} disabled>

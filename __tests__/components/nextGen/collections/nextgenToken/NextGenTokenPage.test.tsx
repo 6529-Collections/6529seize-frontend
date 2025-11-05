@@ -1,56 +1,26 @@
-// Mock all dependencies before importing anything
 const mockIsNullAddress = jest.fn(() => false);
 
-jest.mock("@/helpers/Helpers", () => ({
-  isNullAddress: mockIsNullAddress,
-}));
-
-jest.mock("@/enums", () => ({
-  NextgenCollectionView: {
-    ABOUT: "About",
-    PROVENANCE: "Provenance",
-    DISPLAY_CENTER: "Display Center",
-    RARITY: "Rarity",
-    OVERVIEW: "Overview",
-    TOP_TRAIT_SETS: "Trait Sets",
-  },
-  ProfileActivityLogType: {
-    RATING_EDIT: "RATING_EDIT",
-    HANDLE_EDIT: "HANDLE_EDIT",
-    CLASSIFICATION_EDIT: "CLASSIFICATION_EDIT",
-    SOCIALS_EDIT: "SOCIALS_EDIT",
-    NFT_ACCOUNTS_EDIT: "NFT_ACCOUNTS_EDIT",
-    CONTACTS_EDIT: "CONTACTS_EDIT",
-    SOCIAL_VERIFICATION_POST_EDIT: "SOCIAL_VERIFICATION_POST_EDIT",
-    BANNER_1_EDIT: "BANNER_1_EDIT",
-    BANNER_2_EDIT: "BANNER_2_EDIT",
-    PFP_EDIT: "PFP_EDIT",
-    PROFILE_ARCHIVED: "PROFILE_ARCHIVED",
-    GENERAL_CIC_STATEMENT_EDIT: "GENERAL_CIC_STATEMENT_EDIT",
-    PROXY_CREATED: "PROXY_CREATED",
-    PROXY_ACTION_CREATED: "PROXY_ACTION_CREATED",
-    PROXY_ACTION_STATE_CHANGED: "PROXY_ACTION_STATE_CHANGED",
-    PROXY_ACTION_CHANGED: "PROXY_ACTION_CHANGED",
-    DROP_COMMENT: "DROP_COMMENT",
-    DROP_RATING_EDIT: "DROP_RATING_EDIT",
-    DROP_CREATED: "DROP_CREATED",
-    PROXY_DROP_RATING_EDIT: "PROXY_DROP_RATING_EDIT",
-  },
-}));
-
-// Mock entities that cause circular dependencies
-jest.mock("@/entities/IProfile", () => ({
-  PROFILE_ACTIVITY_TYPE_TO_TEXT: {},
-}));
+jest.mock("@/helpers/Helpers", () => {
+  const actual = jest.requireActual("@/helpers/Helpers");
+  return {
+    ...actual,
+    isNullAddress: mockIsNullAddress,
+  };
+});
 
 // Mock user components that cause dependency issues
 jest.mock("@/components/user/utils/UserCICAndLevel", () => ({
   UserCICAndLevel: () => <div data-testid="user-cic-level" />,
 }));
 
-jest.mock("@/components/user/utils/raters-table/ProfileRatersTableItem", () => ({
-  ProfileRatersTableItem: () => <div data-testid="profile-raters-table-item" />,
-}));
+jest.mock(
+  "@/components/user/utils/raters-table/ProfileRatersTableItem",
+  () => ({
+    ProfileRatersTableItem: () => (
+      <div data-testid="profile-raters-table-item" />
+    ),
+  })
+);
 
 jest.mock("next/navigation", () => {
   return {
@@ -69,7 +39,20 @@ jest.mock("next/navigation", () => {
   };
 });
 
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: jest.fn(() => ({
+    isAuthenticated: false,
+    seizeConnect: jest.fn(),
+    seizeAcceptConnection: jest.fn(),
+    address: undefined,
+    hasInitializationError: false,
+    initializationError: null,
+  })),
+  SeizeConnectProvider: ({ children }: { children: any }) => <>{children}</>,
+}));
+
 import NextGenTokenPage from "@/components/nextGen/collections/nextgenToken/NextGenToken";
+import { NextgenCollectionView } from "@/enums";
 import { render, screen } from "@testing-library/react";
 
 jest.mock("react-bootstrap", () => {
@@ -115,11 +98,16 @@ jest.mock(
   })
 );
 // Mock the printViewButton function from collectionParts
-jest.mock("@/components/nextGen/collections/collectionParts/NextGenCollection", () => ({
-  printViewButton: (cur: any, v: any, setView: any) => (
-    <button onClick={() => setView(v)} data-testid={`view-button-${v}`}>{v}</button>
-  ),
-}));
+jest.mock(
+  "@/components/nextGen/collections/collectionParts/NextGenCollection",
+  () => ({
+    printViewButton: (cur: any, v: any, setView: any) => (
+      <button onClick={() => setView(v)} data-testid={`view-button-${v}`}>
+        {v}
+      </button>
+    ),
+  })
+);
 
 jest.mock("@fortawesome/react-fontawesome", () => ({
   FontAwesomeIcon: (props: any) => (
@@ -138,7 +126,6 @@ jest.mock("react-tooltip", () => ({
   ),
 }));
 
-
 const baseProps = {
   collection: { id: 1, name: "COL" } as any,
   token: {
@@ -150,7 +137,7 @@ const baseProps = {
   } as any,
   traits: [] as any[],
   tokenCount: 2,
-  view: "About" as any, // Updated to match actual enum values
+  view: NextgenCollectionView.ABOUT,
   setView: jest.fn(),
 };
 
@@ -169,7 +156,9 @@ describe("NextGenTokenPage", () => {
       renderComponent();
       expect(screen.getByTestId("view-button-About")).toBeInTheDocument();
       expect(screen.getByTestId("view-button-Provenance")).toBeInTheDocument();
-      expect(screen.getByTestId("view-button-Display Center")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("view-button-Display Center")
+      ).toBeInTheDocument();
       expect(screen.getByTestId("view-button-Rarity")).toBeInTheDocument();
     });
 
@@ -186,7 +175,7 @@ describe("NextGenTokenPage", () => {
 
   describe("view switching", () => {
     it("renders About view components by default", () => {
-      renderComponent({ view: "About" });
+      renderComponent({ view: NextgenCollectionView.ABOUT });
       expect(screen.getByTestId("about")).toBeInTheDocument();
       expect(screen.getByTestId("traits")).toBeInTheDocument();
       expect(screen.queryByTestId("provenance")).not.toBeInTheDocument();
@@ -195,7 +184,7 @@ describe("NextGenTokenPage", () => {
     });
 
     it("renders Provenance view when selected", () => {
-      renderComponent({ view: "Provenance" });
+      renderComponent({ view: NextgenCollectionView.PROVENANCE });
       expect(screen.getByTestId("provenance")).toBeInTheDocument();
       expect(screen.queryByTestId("about")).not.toBeInTheDocument();
       expect(screen.queryByTestId("traits")).not.toBeInTheDocument();
@@ -204,7 +193,7 @@ describe("NextGenTokenPage", () => {
     });
 
     it("renders Display Center view when selected", () => {
-      renderComponent({ view: "Display Center" });
+      renderComponent({ view: NextgenCollectionView.DISPLAY_CENTER });
       expect(screen.getByTestId("render")).toBeInTheDocument();
       expect(screen.queryByTestId("about")).not.toBeInTheDocument();
       expect(screen.queryByTestId("traits")).not.toBeInTheDocument();
@@ -213,7 +202,7 @@ describe("NextGenTokenPage", () => {
     });
 
     it("renders Rarity view when selected", () => {
-      renderComponent({ view: "Rarity" });
+      renderComponent({ view: NextgenCollectionView.RARITY });
       expect(screen.getByTestId("rarity")).toBeInTheDocument();
       expect(screen.queryByTestId("about")).not.toBeInTheDocument();
       expect(screen.queryByTestId("traits")).not.toBeInTheDocument();
@@ -233,7 +222,9 @@ describe("NextGenTokenPage", () => {
     });
 
     it("enables previous button when not first token", () => {
-      renderComponent({ token: { ...baseProps.token, normalised_id: 1, id: 2 } });
+      renderComponent({
+        token: { ...baseProps.token, normalised_id: 1, id: 2 },
+      });
       const prev = screen.getByTestId("circle-chevron-left");
       expect(prev.getAttribute("style")).toContain("color: rgb(255, 255, 255)");
       expect(prev.getAttribute("style")).toContain("cursor: pointer");
@@ -244,9 +235,9 @@ describe("NextGenTokenPage", () => {
     });
 
     it("disables next button on last token", () => {
-      renderComponent({ 
-        token: { ...baseProps.token, normalised_id: 1 }, 
-        tokenCount: 2 
+      renderComponent({
+        token: { ...baseProps.token, normalised_id: 1 },
+        tokenCount: 2,
       });
       const next = screen.getByTestId("circle-chevron-right");
       expect(next.getAttribute("style")).toContain("color: rgb(154, 154, 154)");
@@ -255,9 +246,9 @@ describe("NextGenTokenPage", () => {
     });
 
     it("enables next button when not last token", () => {
-      renderComponent({ 
+      renderComponent({
         token: { ...baseProps.token, normalised_id: 0, id: 1 },
-        tokenCount: 3 
+        tokenCount: 3,
       });
       const next = screen.getByTestId("circle-chevron-right");
       expect(next.getAttribute("style")).toContain("color: rgb(255, 255, 255)");
@@ -272,24 +263,33 @@ describe("NextGenTokenPage", () => {
       renderComponent({ token: { ...baseProps.token, burnt: true } });
       const fireIcon = screen.getByTestId("fire");
       expect(fireIcon).toBeInTheDocument();
-      expect(fireIcon.getAttribute("style")).toContain("color: rgb(197, 29, 52)");
+      expect(fireIcon.getAttribute("style")).toContain(
+        "color: rgb(197, 29, 52)"
+      );
       expect(screen.getByTestId("tooltip-burnt-token-1")).toBeInTheDocument();
     });
 
     it("shows burnt icon when token owner is null address", () => {
       mockIsNullAddress.mockReturnValue(true);
-      
-      renderComponent({ token: { ...baseProps.token, owner: "0x0000000000000000000000000000000000000000" } });
+
+      renderComponent({
+        token: {
+          ...baseProps.token,
+          owner: "0x0000000000000000000000000000000000000000",
+        },
+      });
       const fireIcon = screen.getByTestId("fire");
       expect(fireIcon).toBeInTheDocument();
       expect(screen.getByTestId("tooltip-burnt-token-1")).toBeInTheDocument();
-      
+
       // Reset mock for other tests
       mockIsNullAddress.mockReturnValue(false);
     });
 
     it("does not show burnt icon for normal tokens", () => {
-      renderComponent({ token: { ...baseProps.token, burnt: false, owner: "0x123" } });
+      renderComponent({
+        token: { ...baseProps.token, burnt: false, owner: "0x123" },
+      });
       expect(screen.queryByTestId("fire")).not.toBeInTheDocument();
     });
   });
@@ -297,15 +297,18 @@ describe("NextGenTokenPage", () => {
   describe("props handling", () => {
     it("passes correct props to child components", () => {
       const mockSetView = jest.fn();
-      const mockTraits = [{ trait: "Color", value: "Blue" }, { trait: "Collection Name", value: "Test" }];
-      
+      const mockTraits = [
+        { trait: "Color", value: "Blue" },
+        { trait: "Collection Name", value: "Test" },
+      ];
+
       renderComponent({
         setView: mockSetView,
         traits: mockTraits,
         tokenCount: 5,
-        view: "About"
+        view: NextgenCollectionView.ABOUT,
       });
-      
+
       // About view should render with traits filtered (Collection Name should be filtered out)
       expect(screen.getByTestId("about")).toBeInTheDocument();
       expect(screen.getByTestId("traits")).toBeInTheDocument();
@@ -314,7 +317,7 @@ describe("NextGenTokenPage", () => {
     it("calls setView when view buttons are clicked", () => {
       const mockSetView = jest.fn();
       renderComponent({ setView: mockSetView });
-      
+
       const aboutButton = screen.getByTestId("view-button-About");
       aboutButton.click();
       expect(mockSetView).toHaveBeenCalledWith("About");

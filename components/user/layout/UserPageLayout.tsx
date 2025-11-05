@@ -1,8 +1,8 @@
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ReactNode } from "react";
 import UserPageHeader from "../user-page-header/UserPageHeader";
-import UserPageTabs from "./UserPageTabs";
 import UserPageClientHydrator from "./UserPageClientHydrator";
+import UserPageTabs from "./UserPageTabs";
 
 export default function UserPageLayout({
   profile: initialProfile,
