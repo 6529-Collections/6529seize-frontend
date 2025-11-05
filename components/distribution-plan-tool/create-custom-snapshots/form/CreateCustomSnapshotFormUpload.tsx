@@ -1,11 +1,11 @@
 "use client";
 
+import {
+    CustomTokenPoolParamsToken,
+    Mutable,
+} from "@/components/allowlist-tool/allowlist-tool.types";
 import AllowlistToolAnimationHeightOpacity from "@/components/allowlist-tool/common/animation/AllowlistToolAnimationHeightOpacity";
 import AllowlistToolAnimationWrapper from "@/components/allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
-import {
-  CustomTokenPoolParamsToken,
-  Mutable,
-} from "@/components/allowlist-tool/allowlist-tool.types";
 import { isEthereumAddress } from "@/helpers/AllowlistToolHelpers";
 
 export default function CreateCustomSnapshotFormUpload({
@@ -58,7 +58,7 @@ export default function CreateCustomSnapshotFormUpload({
           <AllowlistToolAnimationHeightOpacity key="allowlist-tool-builder-custom-token-pool-pool-add-file-title">
             {fileName && (
               <div className="tw-px-3 tw-flex tw-items-center tw-gap-x-3">
-                <div className="tw-h-4 tw-w-4 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-neutral-700 tw-ring-4 tw-ring-neutral-800">
+                <div className="tw-h-4 tw-w-4 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-700 tw-ring-4 tw-ring-iron-800">
                   <svg
                     className="tw-h-2.5 tw-w-2.5 tw-text-primary-400"
                     viewBox="0 0 24 24"

@@ -13,8 +13,8 @@ export default function CreateCustomSnapshotFormTable({
       <div className="-tw-mx-4 -tw-my-2 tw-overflow-x-auto sm:-tw-mx-6 lg:-tw-mx-8">
         <div className="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-6 lg:tw-px-8">
           <div className="tw-overflow-hidden tw-shadow tw-ring-1 tw-ring-black tw-ring-opacity-5 sm:tw-rounded-lg">
-            <table className="tw-min-w-full tw-divide-y tw-divide-solid tw-divide-neutral-700">
-              <tbody className="tw-divide-y tw-divide-solid tw-divide-neutral-700/40 tw-bg-neutral-800">
+            <table className="tw-min-w-full tw-divide-y tw-divide-solid tw-divide-iron-700">
+              <tbody className="tw-divide-y tw-divide-solid tw-divide-iron-700/40 tw-bg-iron-800">
                 {tokens.map((token, i) => (
                   <CreateCustomSnapshotFormTableItem
                     key={`create-custom-snapshot-form-table-token-${i}`}

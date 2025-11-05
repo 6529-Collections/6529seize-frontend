@@ -1,21 +1,21 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
 import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
-import {
-  PhaseConfigStep,
-  RandomHoldersType,
-} from "../BuildPhaseFormConfigModal";
-import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
-import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
-import BuildPhaseFormConfigModalSidebar, {
-  BuildPhaseFormConfigModalSidebarOption,
-} from "./BuildPhaseFormConfigModalSidebar";
-import ComponentConfigMeta from "./ComponentConfigMeta";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { useContext, useEffect, useState } from "react";
+import {
+    PhaseConfigStep,
+    RandomHoldersType,
+} from "../BuildPhaseFormConfigModal";
+import BuildPhaseFormConfigModalSidebar, {
+    BuildPhaseFormConfigModalSidebarOption,
+} from "./BuildPhaseFormConfigModalSidebar";
+import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
+import ComponentConfigMeta from "./ComponentConfigMeta";
+import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 import ComponentRandomHoldersWeight, {
-  ComponentRandomHoldersWeightType,
+    ComponentRandomHoldersWeightType,
 } from "./utils/ComponentRandomHoldersWeight";
 
 export default function ComponentSelectRandomHolders({
@@ -230,7 +230,7 @@ export default function ComponentSelectRandomHolders({
                 tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset focus-within:tw-ring-1 focus-within:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
                   isError
                     ? "tw-ring-error focus-within:tw-ring-error"
-                    : "tw-ring-neutral-700/40 focus-within:tw-ring-primary-400 hover:tw-ring-neutral-700"
+                    : "tw-ring-iron-700/40 focus-within:tw-ring-primary-400 hover:tw-ring-iron-700"
                 }`}>
                   <input
                     type="number"
@@ -240,7 +240,7 @@ export default function ComponentSelectRandomHolders({
                         ? setValue(Number(event.target.value))
                         : setValue("")
                     }
-                    className="tw-form-input tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
+                    className="tw-form-input tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-iron-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
                     placeholder={inputPlaceholders[randomHoldersType]}
                   />
                 </div>
@@ -256,14 +256,14 @@ export default function ComponentSelectRandomHolders({
                 tw-flex tw-rounded-md tw-bg-white/5 tw-ring-1 tw-ring-inset focus-within:tw-ring-1 focus-within:tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
                   !seed.length
                     ? "tw-ring-error focus-within:tw-ring-error"
-                    : "tw-ring-neutral-700/40 focus-within:tw-ring-primary-400 hover:tw-ring-neutral-700"
+                    : "tw-ring-iron-700/40 focus-within:tw-ring-primary-400 hover:tw-ring-iron-700"
                 }`}>
                   <input
                     type="text"
                     value={seed}
                     onChange={(event) => setSeed(event.target.value)}
                     placeholder="Random seed"
-                    className="tw-form-input tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-neutral-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
+                    className="tw-form-input tw-flex-1 tw-border-0 tw-bg-transparent placeholder:tw-text-iron-500 tw-py-3 tw-px-3 tw-text-white focus:tw-ring-0 sm:tw-text-sm sm:tw-leading-6"
                   />
                 </div>
               </div>

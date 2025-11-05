@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
@@ -45,13 +45,6 @@ const MemesArtSubmissionContainer: React.FC<
     isSubmitting,
   } = useArtworkSubmissionMutation();
 
-  // Keep track of the selected file
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [fileInfo, setFileInfo] = useState<{
-    name: string;
-    size: number;
-  } | null>(null);
-
   // Auto-close on successful submission after a short delay
   useEffect(() => {
     if (submissionPhase === "success") {
@@ -65,14 +58,6 @@ const MemesArtSubmissionContainer: React.FC<
 
   // Handle file selection
   const handleFileSelect = (file: File) => {
-    // Store the file for later submission
-    setSelectedFile(file);
-    setFileInfo({
-      name: file.name,
-      size: file.size,
-    });
-
-    // Also pass to the form hook for preview
     form.handleFileSelect(file);
   };
 
@@ -84,17 +69,40 @@ const MemesArtSubmissionContainer: React.FC<
 
   // Handle final submission
   const handleSubmit = async () => {
-    if (!selectedFile) {
+    // Get submission data including all traits
+    const { traits } = form.getSubmissionData();
+    const media = form.getMediaSelection();
+
+    if (media.mediaSource === "upload") {
+      if (!media.selectedFile) {
+        return null;
+      }
+
+      return submitArtwork(
+        {
+          imageFile: media.selectedFile,
+          traits,
+          waveId: wave.id,
+          termsOfService: wave.participation.terms,
+        },
+        address ?? "",
+        isSafeWallet,
+        {
+          onPhaseChange: handlePhaseChange,
+        }
+      );
+    }
+
+    if (!media.isExternalValid) {
       return null;
     }
 
-    // Get submission data including all traits
-    const { traits } = form.getSubmissionData();
-
-    // Submit the artwork with the wave ID and selected file
-    const result = await submitArtwork(
+    return submitArtwork(
       {
-        imageFile: selectedFile,
+        externalMedia: {
+          url: media.externalUrl,
+          mimeType: media.externalMimeType,
+        },
         traits,
         waveId: wave.id,
         termsOfService: wave.participation.terms,
@@ -105,9 +113,14 @@ const MemesArtSubmissionContainer: React.FC<
         onPhaseChange: handlePhaseChange,
       }
     );
-
-    return result;
   };
+
+  const fileInfo = form.selectedFile
+    ? {
+        name: form.selectedFile.name,
+        size: form.selectedFile.size,
+      }
+    : null;
 
   // Map of steps to their corresponding components
   const stepComponents = {
@@ -126,6 +139,20 @@ const MemesArtSubmissionContainer: React.FC<
         artworkUrl={form.artworkUrl}
         setArtworkUploaded={form.setArtworkUploaded}
         handleFileSelect={handleFileSelect}
+        mediaSource={form.mediaSource}
+        setMediaSource={form.setMediaSource}
+        externalHash={form.externalMediaHashInput}
+        externalProvider={form.externalMediaProvider}
+        externalConstructedUrl={form.externalMediaUrl}
+        externalPreviewUrl={form.externalMediaPreviewUrl}
+        externalMimeType={form.externalMediaMimeType}
+        externalError={form.externalMediaError}
+        externalValidationStatus={form.externalMediaValidationStatus}
+        isExternalMediaValid={form.isExternalMediaValid}
+        onExternalHashChange={form.setExternalMediaHash}
+        onExternalProviderChange={form.setExternalMediaProvider}
+        onExternalMimeTypeChange={form.setExternalMediaMimeType}
+        onClearExternalMedia={form.clearExternalMedia}
         onSubmit={handleSubmit}
         onCancel={onClose}
         updateTraitField={form.updateTraitField}

@@ -114,7 +114,7 @@ export default function UserPageIdentityStatementsStatement({
         </div>
 
         <div className="tw-ml-7">
-          <span className="tw-text-sm tw-text-iron-300 tw-break-all tw-tracking-wide group-hover:tw-text-iron-200 tw-cursor-text tw-select-all tw-transition-colors tw-duration-150 tw-ease-out">
+          <span className="tw-text-sm tw-text-iron-200 tw-break-all tw-tracking-wide group-hover:tw-text-iron-100 tw-cursor-text tw-select-all tw-transition-colors tw-duration-150 tw-ease-out">
             {title === "Copied!" ? (
               <span className="tw-text-primary-400">{title}</span>
             ) : (

@@ -2,8 +2,8 @@
 
 import { useContext } from "react";
 import {
-  DistributionPlanToolContext,
-  DistributionPlanToolStep,
+    DistributionPlanToolContext,
+    DistributionPlanToolStep,
 } from "../DistributionPlanToolContext";
 import DistributionPlanStep from "./DistributionPlanStep";
 
@@ -67,7 +67,7 @@ export default function DistributionPlanToolSidebar() {
   return (
     <nav
       aria-label="Progress"
-      className="tw-w-80 2xl:tw-w-96 tw-px-8 tw-pt-12 tw-min-h-screen tw-border-l tw-border-solid tw-border-r-0 tw-border-t-0 tw-border-b-0 tw-border-neutral-600">
+      className="tw-w-80 2xl:tw-w-96 tw-px-8 tw-pt-12 tw-min-h-screen tw-border-l tw-border-solid tw-border-r-0 tw-border-t-0 tw-border-b-0 tw-border-iron-600">
       <ol role="list" className="tw-list-none tw-pl-0 tw-overflow-hidden">
         {Object.values(DISTRIBUTION_PLAN_STEPS).map((stepItem) => (
           <DistributionPlanStep

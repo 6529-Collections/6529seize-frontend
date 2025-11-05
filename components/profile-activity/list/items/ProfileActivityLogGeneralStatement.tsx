@@ -12,7 +12,7 @@ export default function ProfileActivityLogGeneralStatement({
       <span className="tw-whitespace-nowrap tw-text-base tw-text-iron-300 tw-font-medium">
         About
       </span>
-      <span className="tw-truncate tw-overflow-hidden tw-text-base tw-font-medium tw-text-iron-100">
+      <span className="tw-truncate tw-overflow-hidden tw-text-base tw-font-medium tw-text-iron-200">
         {log.contents.statement.statement_value}
       </span>
     </div>

@@ -1,11 +1,10 @@
-import React from "react";
-import DistributionPlanTableRowWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper";
-import { FinalizeSnapshotRow } from "./FinalizeSnapshotsTable";
-import { Tooltip } from "react-tooltip";
-import FinalizeSnapshotsTableSnapshotTooltip from "./FinalizeSnapshotsTableSnapshotTooltip";
-import FinalizeSnapshotsTableExcludedSnapshotsTooltip from "./FinalizeSnapshotsTableExcludedSnapshotsTooltip";
-import FinalizeSnapshotsTableExcludedComponentsTooltip from "./FinalizeSnapshotsTableExcludedComponentsTooltip";
 import { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
+import DistributionPlanTableRowWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper";
+import { Tooltip } from "react-tooltip";
+import { FinalizeSnapshotRow } from "./FinalizeSnapshotsTable";
+import FinalizeSnapshotsTableExcludedComponentsTooltip from "./FinalizeSnapshotsTableExcludedComponentsTooltip";
+import FinalizeSnapshotsTableExcludedSnapshotsTooltip from "./FinalizeSnapshotsTableExcludedSnapshotsTooltip";
+import FinalizeSnapshotsTableSnapshotTooltip from "./FinalizeSnapshotsTableSnapshotTooltip";
 
 export default function FinalizeSnapshotsTableRow({
   row,
@@ -22,7 +21,7 @@ export default function FinalizeSnapshotsTableRow({
         {row.snapshot?.name}
         <>
           <svg
-            className="tw-ml-2 tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-500 tw-cursor-pointer"
+            className="tw-ml-2 tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-iron-500 tw-cursor-pointer"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -53,15 +52,15 @@ export default function FinalizeSnapshotsTableRow({
           </Tooltip>
         </>
       </td>
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-neutral-300">
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-iron-300">
         {row.uniqueWalletsCount}
       </td>
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-neutral-300">
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-iron-300">
         {row.excludeSnapshotsText}
         {!!row.excludeSnapshots.length && (
           <>
             <svg
-              className="tw-ml-2 tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-500 tw-cursor-pointer"
+              className="tw-ml-2 tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-iron-500 tw-cursor-pointer"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -92,12 +91,12 @@ export default function FinalizeSnapshotsTableRow({
           </>
         )}
       </td>
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-neutral-300">
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-iron-300">
         {row.excludeComponentWinnersText}
         {!!row.excludeComponentWinners.length && (
           <>
             <svg
-              className="tw-ml-2 tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-500 tw-cursor-pointer"
+              className="tw-ml-2 tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-iron-500 tw-cursor-pointer"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -129,14 +128,14 @@ export default function FinalizeSnapshotsTableRow({
           </>
         )}
       </td>
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-neutral-300">
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-iron-300">
         {row.requiredTokens}
       </td>
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-neutral-300">
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-iron-300">
         {row.topHoldersFilter}
       </td>
 
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-neutral-300">
+      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-xs tw-font-normal tw-text-iron-300">
         <button
           type="button"
           title="Delete"
@@ -144,7 +143,7 @@ export default function FinalizeSnapshotsTableRow({
             e.preventDefault();
             onRemoveGroupSnapshot(row.groupSnapshotId);
           }}
-          className="tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-p-2 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-neutral-400 tw-bg-neutral-400/10 tw-ring-neutral-400/20"
+          className="tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-p-2 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-400 tw-bg-iron-400/10 tw-ring-iron-400/20"
         >
           <svg
             className="tw-h-4 tw-w-4 group-hover:tw-text-error tw-transition tw-duration-300 tw-ease-out"
