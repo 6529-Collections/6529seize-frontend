@@ -10,6 +10,19 @@ describe("TabToggleWithOverflow", () => {
     { key: "d", label: "D" },
   ];
 
+  const delay = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
+
+  const ensureButtonFocused = async (button: HTMLElement) => {
+    await act(async () => {
+      button.focus();
+      await delay(50);
+      if (document.activeElement !== button) {
+        button.focus();
+      }
+    });
+  };
+
   it("shows overflow items and handles selection", async () => {
     const onSelect = jest.fn();
     const user = userEvent.setup();
@@ -94,20 +107,7 @@ describe("TabToggleWithOverflow", () => {
       expect(activeTab).toHaveFocus();
     });
 
-    await act(async () => {
-      moreButton.focus();
-    });
-
-    await act(async () => {
-      await new Promise((resolve) => {
-        setTimeout(() => {
-          if (document.activeElement !== moreButton) {
-            moreButton.focus();
-          }
-          resolve(undefined);
-        }, 50);
-      });
-    });
+    await ensureButtonFocused(moreButton);
 
     await waitFor(() => expect(moreButton).toHaveFocus(), { timeout: 2000 });
 
@@ -128,17 +128,7 @@ describe("TabToggleWithOverflow", () => {
       ).not.toBeInTheDocument();
     });
 
-    await act(async () => {
-      moreButton.focus();
-      await new Promise((resolve) => {
-        setTimeout(() => {
-          if (document.activeElement !== moreButton) {
-            moreButton.focus();
-          }
-          resolve(undefined);
-        }, 50);
-      });
-    });
+    await ensureButtonFocused(moreButton);
 
     await waitFor(() => expect(moreButton).toHaveFocus(), { timeout: 2000 });
     await user.keyboard(" ");
