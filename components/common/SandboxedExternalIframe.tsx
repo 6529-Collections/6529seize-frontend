@@ -75,15 +75,11 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
     };
   }, [canonicalSrc, isVisible]);
 
-  if (!canonicalSrc) {
-    return fallback ? <>{fallback}</> : null;
-  }
-
-  const placeholder = (
-    <div className={className} aria-hidden="true" role="presentation" />
-  );
-
   const parsedCanonicalUrl = useMemo(() => {
+    if (!canonicalSrc) {
+      return null;
+    }
+
     try {
       return new URL(canonicalSrc);
     } catch {
@@ -92,6 +88,10 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
   }, [canonicalSrc]);
 
   const iframeProps = useMemo(() => {
+    if (!canonicalSrc) {
+      return null;
+    }
+
     const baseProps = {
       src: canonicalSrc,
       title,
@@ -111,6 +111,14 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
 
     return baseProps;
   }, [canonicalSrc, className, title]);
+
+  if (!canonicalSrc || !iframeProps) {
+    return fallback ? <>{fallback}</> : null;
+  }
+
+  const placeholder = (
+    <div className={className} aria-hidden="true" role="presentation" />
+  );
 
   const banner = (
     <div
