@@ -6,25 +6,42 @@ const ARWEAVE_TX_ID = 'QW_ArkGRZa0uSmLkH2ZAzU9xOQFfGqVsRyCrND3eOo8';
 
 const originalFetch = global.fetch;
 
-const setResponseUrl = (response: Response, url: string) => {
-  Object.defineProperty(response, 'url', {
-    value: url,
-    configurable: true,
-    writable: false,
-  });
-  return response;
+type MockResponse = {
+  status: number;
+  ok: boolean;
+  url: string;
+  headers: {
+    get: (name: string) => string | null;
+  };
+  body: {
+    cancel: () => Promise<void>;
+  } | null;
 };
 
 const createResponse = (
   status: number,
   headers: Record<string, string>,
   url = `https://ipfs.io/ipfs/${CID_V1}`
-) => {
-  const response = new Response(null, {
+): MockResponse => {
+  const headerStore = new Map(
+    Object.entries(headers).map(([key, value]) => [key.toLowerCase(), value])
+  );
+
+  const includeBody = status === 206;
+
+  return {
     status,
-    headers,
-  });
-  return setResponseUrl(response, url);
+    ok: status >= 200 && status < 300,
+    headers: {
+      get: (name: string) => headerStore.get(name.toLowerCase()) ?? null,
+    },
+    url,
+    body: includeBody
+      ? {
+          cancel: async () => {},
+        }
+      : null,
+  };
 };
 
 describe('validateInteractivePreview', () => {
@@ -182,9 +199,7 @@ describe('validateInteractivePreview', () => {
     });
 
     expect(result.ok).toBe(false);
-    expect(result.reason).toBe(
-      'Invalid path: resolved target is not permitted under allowed gateway hosts.'
-    );
+    expect(result.reason).toBe('Gateway redirected to an unapproved host.');
   });
 
   it('rejects responses that use a non-default https port', async () => {
@@ -202,9 +217,7 @@ describe('validateInteractivePreview', () => {
     });
 
     expect(result.ok).toBe(false);
-    expect(result.reason).toBe(
-      'Invalid path: resolved target is not permitted under allowed gateway hosts.'
-    );
+    expect(result.reason).toBe('Gateway redirected to an unapproved host.');
   });
 
   it('rejects identifiers containing path separators before requesting the gateway', async () => {

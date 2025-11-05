@@ -64,7 +64,10 @@ jest.mock('@/components/waves/memes/file-upload/components/FilePreview', () => {
     </div>
   ));
   FilePreviewMock.displayName = 'FilePreviewMock';
-  return FilePreviewMock;
+  return {
+    __esModule: true,
+    default: FilePreviewMock,
+  };
 });
 
 jest.mock('@/components/waves/memes/file-upload/components/UploadArea', () => {
@@ -75,7 +78,10 @@ jest.mock('@/components/waves/memes/file-upload/components/UploadArea', () => {
     </div>
   ));
   UploadAreaMock.displayName = 'UploadAreaMock';
-  return UploadAreaMock;
+  return {
+    __esModule: true,
+    default: UploadAreaMock,
+  };
 });
 
 jest.mock('@/components/waves/memes/file-upload/components/BrowserWarning', () => {
@@ -86,7 +92,10 @@ jest.mock('@/components/waves/memes/file-upload/components/BrowserWarning', () =
     return <div ref={ref} data-testid="warning">{reason}</div>;
   });
   BrowserWarningMock.displayName = 'BrowserWarningMock';
-  return BrowserWarningMock;
+  return {
+    __esModule: true,
+    default: BrowserWarningMock,
+  };
 });
 
 // Mock useFileUploader hook with more realistic state management
@@ -157,9 +166,13 @@ describe('MemesArtSubmissionFile', () => {
   const mockSetMediaSource = jest.fn();
   const mockOnExternalHashChange = jest.fn();
   const mockOnExternalProviderChange = jest.fn();
-  const mockOnExternalMimeTypeChange =
-    jest.fn<(value: InteractiveMediaMimeType) => void>();
-  const mockOnClearExternalMedia = jest.fn();
+const mockOnExternalMimeTypeChange =
+  jest.fn<(value: InteractiveMediaMimeType) => void>();
+const mockOnClearExternalMedia = jest.fn();
+
+const VALID_IPFS_CID = 'bafybeigdyrztobg3tv6zj5n6xvztf4k5p3xf7r6xkqfq5jz3o5quftdjum';
+const VALID_ARWEAVE_TX_ID = 'QW_ArkGRZa0uSmLkH2ZAzU9xOQFfGqVsRyCrND3eOo8';
+const VALID_ARWEAVE_SUBDOMAIN = 'ifx4blsbsfs22lskmlsb6zsazvhxcoibl4nkk3checvtipo6hkhq';
 
   const baseProps: MemesArtSubmissionFileProps = {
     artworkUploaded: false,
@@ -264,12 +277,7 @@ describe('MemesArtSubmissionFile', () => {
       
       render(
         <AuthContext.Provider value={{ setToast: mockSetToast } as any}>
-          <MemesArtSubmissionFile
-            artworkUploaded={false}
-            artworkUrl="url"
-            setArtworkUploaded={mockSetArtworkUploaded}
-            handleFileSelect={mockHandleFileSelect}
-          />
+          <MemesArtSubmissionFile {...baseProps} />
         </AuthContext.Provider>
       );
       
@@ -283,12 +291,7 @@ describe('MemesArtSubmissionFile', () => {
     it('renders upload area when artwork not uploaded', () => {
       render(
         <AuthContext.Provider value={{ setToast: mockSetToast } as any}>
-          <MemesArtSubmissionFile
-            artworkUploaded={false}
-            artworkUrl="url"
-            setArtworkUploaded={mockSetArtworkUploaded}
-            handleFileSelect={mockHandleFileSelect}
-          />
+          <MemesArtSubmissionFile {...baseProps} />
         </AuthContext.Provider>
       );
       
@@ -300,10 +303,9 @@ describe('MemesArtSubmissionFile', () => {
       render(
         <AuthContext.Provider value={{ setToast: mockSetToast } as any}>
           <MemesArtSubmissionFile
+            {...baseProps}
             artworkUploaded={true}
             artworkUrl="the-url"
-            setArtworkUploaded={mockSetArtworkUploaded}
-            handleFileSelect={mockHandleFileSelect}
           />
         </AuthContext.Provider>
       );
@@ -316,10 +318,9 @@ describe('MemesArtSubmissionFile', () => {
       const { rerender } = render(
         <AuthContext.Provider value={{ setToast: mockSetToast } as any}>
           <MemesArtSubmissionFile
+            {...baseProps}
             artworkUploaded={false}
             artworkUrl=""
-            setArtworkUploaded={mockSetArtworkUploaded}
-            handleFileSelect={mockHandleFileSelect}
           />
         </AuthContext.Provider>
       );
@@ -331,10 +332,9 @@ describe('MemesArtSubmissionFile', () => {
       rerender(
         <AuthContext.Provider value={{ setToast: mockSetToast } as any}>
           <MemesArtSubmissionFile
+            {...baseProps}
             artworkUploaded={true}
             artworkUrl="uploaded-url"
-            setArtworkUploaded={mockSetArtworkUploaded}
-            handleFileSelect={mockHandleFileSelect}
           />
         </AuthContext.Provider>
       );
@@ -349,12 +349,7 @@ describe('MemesArtSubmissionFile', () => {
     it('renders file input with correct attributes', () => {
       render(
         <AuthContext.Provider value={{ setToast: mockSetToast } as any}>
-          <MemesArtSubmissionFile
-            artworkUploaded={false}
-            artworkUrl="url"
-            setArtworkUploaded={mockSetArtworkUploaded}
-            handleFileSelect={mockHandleFileSelect}
-          />
+          <MemesArtSubmissionFile {...baseProps} />
         </AuthContext.Provider>
       );
       
@@ -368,12 +363,7 @@ describe('MemesArtSubmissionFile', () => {
     it('has proper accessibility attributes on upload area', () => {
       render(
         <AuthContext.Provider value={{ setToast: mockSetToast } as any}>
-          <MemesArtSubmissionFile
-            artworkUploaded={false}
-            artworkUrl="url"
-            setArtworkUploaded={mockSetArtworkUploaded}
-            handleFileSelect={mockHandleFileSelect}
-          />
+          <MemesArtSubmissionFile {...baseProps} />
         </AuthContext.Provider>
       );
       
@@ -387,10 +377,9 @@ describe('MemesArtSubmissionFile', () => {
       render(
         <AuthContext.Provider value={{ setToast: mockSetToast } as any}>
           <MemesArtSubmissionFile
+            {...baseProps}
             artworkUploaded={true}
             artworkUrl="the-url"
-            setArtworkUploaded={mockSetArtworkUploaded}
-            handleFileSelect={mockHandleFileSelect}
           />
         </AuthContext.Provider>
       );
@@ -408,10 +397,8 @@ describe('MemesArtSubmissionFile', () => {
       render(
         <AuthContext.Provider value={{ setToast: mockSetToast } as any}>
           <MemesArtSubmissionFile
-            artworkUploaded={false}
+            {...baseProps}
             artworkUrl="original-url"
-            setArtworkUploaded={mockSetArtworkUploaded}
-            handleFileSelect={mockHandleFileSelect}
           />
         </AuthContext.Provider>
       );
@@ -423,12 +410,7 @@ describe('MemesArtSubmissionFile', () => {
     it('revokes object URLs on cleanup', () => {
       const { unmount } = render(
         <AuthContext.Provider value={{ setToast: mockSetToast } as any}>
-          <MemesArtSubmissionFile
-            artworkUploaded={false}
-            artworkUrl="url"
-            setArtworkUploaded={mockSetArtworkUploaded}
-            handleFileSelect={mockHandleFileSelect}
-          />
+          <MemesArtSubmissionFile {...baseProps} />
         </AuthContext.Provider>
       );
       
@@ -448,10 +430,10 @@ describe('MemesArtSubmissionFile', () => {
           <MemesArtSubmissionFile
             {...baseProps}
             mediaSource="url"
-            externalHash="bafyHash"
-            externalConstructedUrl="https://ipfs.io/ipfs/bafyHash"
+            externalHash={VALID_IPFS_CID}
+            externalConstructedUrl={`https://ipfs.io/ipfs/${VALID_IPFS_CID}`}
             isExternalMediaValid={true}
-            externalPreviewUrl="https://ipfs.io/ipfs/bafyHash"
+            externalPreviewUrl={`https://ipfs.io/ipfs/${VALID_IPFS_CID}`}
             externalValidationStatus="valid"
             {...overrideProps}
           />
@@ -463,7 +445,7 @@ describe('MemesArtSubmissionFile', () => {
 
       const iframe = screen.getByTitle('Interactive artwork preview');
       expect(iframe).toBeInTheDocument();
-      expect(iframe).toHaveAttribute('src', 'https://ipfs.io/ipfs/bafyHash');
+      expect(iframe).toHaveAttribute('src', `https://ipfs.io/ipfs/${VALID_IPFS_CID}`);
       expect(iframe).toHaveAttribute('sandbox');
       expect(iframe.getAttribute('sandbox')).toContain('allow-scripts');
     });
@@ -471,21 +453,23 @@ describe('MemesArtSubmissionFile', () => {
     it('renders sandboxed iframe for approved arweave.net URLs', () => {
       renderInteractivePreview({
         externalProvider: 'arweave',
-        externalPreviewUrl: 'https://arweave.net/abcdef',
-        externalConstructedUrl: 'https://arweave.net/abcdef',
+        externalHash: VALID_ARWEAVE_TX_ID,
+        externalPreviewUrl: `https://arweave.net/${VALID_ARWEAVE_TX_ID}`,
+        externalConstructedUrl: `https://arweave.net/${VALID_ARWEAVE_TX_ID}`,
         externalValidationStatus: 'valid',
       });
 
       const iframe = screen.getByTitle('Interactive artwork preview');
       expect(iframe).toBeInTheDocument();
-      expect(iframe).toHaveAttribute('src', 'https://arweave.net/abcdef');
+      expect(iframe).toHaveAttribute('src', `https://arweave.net/${VALID_ARWEAVE_TX_ID}`);
     });
 
     it('renders sandboxed iframe for approved arweave subdomains', () => {
       renderInteractivePreview({
         externalProvider: 'arweave',
-        externalPreviewUrl: 'https://ifx4blsbsfs22lskmlsb6zsazvhxcoibl4nkk3checvtipo6hkhq.arweave.net/index.html',
-        externalConstructedUrl: 'https://arweave.net/QW_ArkGRZa0uSmLkH2ZAzU9xOQFfGqVsRyCrND3eOo8/index.html',
+        externalHash: VALID_ARWEAVE_TX_ID,
+        externalPreviewUrl: `https://${VALID_ARWEAVE_SUBDOMAIN}.arweave.net/`,
+        externalConstructedUrl: `https://arweave.net/${VALID_ARWEAVE_TX_ID}`,
         externalValidationStatus: 'valid',
       });
 
@@ -493,7 +477,7 @@ describe('MemesArtSubmissionFile', () => {
       expect(iframe).toBeInTheDocument();
       expect(iframe).toHaveAttribute(
         'src',
-        'https://ifx4blsbsfs22lskmlsb6zsazvhxcoibl4nkk3checvtipo6hkhq.arweave.net/index.html'
+        `https://${VALID_ARWEAVE_SUBDOMAIN}.arweave.net/`
       );
     });
 
