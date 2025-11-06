@@ -144,23 +144,32 @@ const CreateDropWrapper = forwardRef<
     },
     ref
   ) => {
-    const { isSafeWallet, address, isAuthenticated } = useSeizeConnectContext();
+    const {
+      isSafeWallet,
+      address,
+      isAuthenticated,
+      connectionState,
+    } = useSeizeConnectContext();
     const breakpoint = useBreakpoint();
     
     // SECURITY: Fail-fast if wallet is not properly authenticated
     useEffect(() => {
+      if (connectionState === "initializing" || connectionState === "connecting") {
+        return; // wait for auth bootstrap before validating
+      }
+
       if (!isAuthenticated) {
         throw new WalletValidationError(
           'Authentication required for drop creation. Please connect and authenticate your wallet.'
         );
       }
-      
+
       if (!address) {
         throw new WalletValidationError(
           'Authenticated wallet address is missing. Please reconnect your wallet.'
         );
       }
-    }, [isAuthenticated, address]);
+    }, [connectionState, isAuthenticated, address]);
     const [screenType, setScreenType] = useState<CreateDropScreenType>(
       CreateDropScreenType.DESKTOP
     );
