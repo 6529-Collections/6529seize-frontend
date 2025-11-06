@@ -1,6 +1,8 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import WaveDropActionsAddReaction from "@/components/waves/drops/WaveDropActionsAddReaction";
+import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ApiDropType } from "@/generated/models/ApiDropType";
 
 const applyOptimisticDropUpdateMock = jest.fn(() => ({ rollback: jest.fn() }));
 const setToastMock = jest.fn();
@@ -64,16 +66,38 @@ jest.mock("@/contexts/EmojiContext", () => ({
 }));
 
 // Mock drop object
-const mockDrop = {
+const baseDrop = {
   id: "12345",
   wave: { id: "wave-1" },
   context_profile_context: { reaction: null },
-} as any;
+  author: { handle: "author-handle" },
+  parts: [],
+  metadata: [],
+  drop_type: ApiDropType.Standard,
+  serial_no: 1,
+  created_at: new Date().toISOString(),
+  reply_to: null,
+  wave_messages: [],
+  reactions: [],
+  type: DropSize.FULL,
+  stableKey: "12345",
+  stableHash: "hash-12345",
+} as unknown as ExtendedDrop;
+
+const mockDrop = baseDrop;
 const tempDrop = {
+  ...baseDrop,
   id: "temp-001",
-  wave: { id: "wave-1" },
-  context_profile_context: { reaction: null },
-} as any;
+  stableKey: "temp-001",
+  stableHash: "hash-temp-001",
+} as ExtendedDrop;
+const lightDrop = {
+  ...baseDrop,
+  id: "light-001",
+  type: DropSize.LIGHT,
+  stableKey: "light-001",
+  stableHash: "hash-light-001",
+} as unknown as ExtendedDrop;
 
 describe("WaveDropActionsAddReaction", () => {
   beforeEach(() => {
@@ -96,6 +120,12 @@ describe("WaveDropActionsAddReaction", () => {
 
   it("disables button when drop is temporary", () => {
     render(<WaveDropActionsAddReaction drop={tempDrop} />);
+    const button = screen.getByRole("button", { name: /add reaction/i });
+    expect(button).toBeDisabled();
+  });
+
+  it("disables button when drop is light", () => {
+    render(<WaveDropActionsAddReaction drop={lightDrop} />);
     const button = screen.getByRole("button", { name: /add reaction/i });
     expect(button).toBeDisabled();
   });
