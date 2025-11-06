@@ -208,7 +208,7 @@ export default function UserPageStatsActivityWalletTableRow({
   } else if (isMemeLabContract(transaction.contract)) {
     nftLite = memeLab.find((m) => m.id === transaction.token_id);
   }
-    
+
   const showAnotherSide = [
     TransactionType.PURCHASE,
     TransactionType.SALE,
