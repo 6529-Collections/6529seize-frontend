@@ -202,11 +202,13 @@ export default function UserPageStatsActivityWalletTableRow({
 
   const type = getType();
 
-  const nftLite = isMemesContract(transaction.contract)
-    ? memes.find((m) => m.id === transaction.token_id)
-    : isMemeLabContract(transaction.contract)
-    ? memeLab.find((m) => m.id === transaction.token_id)
-    : null;
+  let nftLite: NFTLite | undefined | null = null;
+  if (isMemesContract(transaction.contract)) {
+    nftLite = memes.find((m) => m.id === transaction.token_id);
+  } else if (isMemeLabContract(transaction.contract)) {
+    nftLite = memeLab.find((m) => m.id === transaction.token_id);
+  }
+    
   const showAnotherSide = [
     TransactionType.PURCHASE,
     TransactionType.SALE,
