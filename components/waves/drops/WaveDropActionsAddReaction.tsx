@@ -21,8 +21,8 @@ import {
 } from "./reaction-utils";
 
 const WaveDropActionsAddReaction: React.FC<{
-  drop: ApiDrop;
-  isMobile?: boolean;
+  readonly drop: ApiDrop;
+  readonly isMobile?: boolean;
   readonly onAddReaction?: () => void;
 }> = ({ drop, isMobile = false, onAddReaction }) => {
   const isTemporaryDrop = drop.id.startsWith("temp-");
@@ -217,9 +217,7 @@ const WaveDropActionsAddReaction: React.FC<{
         disabled={!canReact}
         aria-label="Add reaction to drop"
         data-tooltip-id={
-          !isTemporaryDrop && !isLightDrop
-            ? `add-reaction-${drop.id}`
-            : undefined
+          canReact ? `add-reaction-${drop.id}` : undefined
         }
       >
         <svg
@@ -236,7 +234,7 @@ const WaveDropActionsAddReaction: React.FC<{
           </g>
         </svg>
       </button>
-      {!isTemporaryDrop && !isLightDrop && (
+      {canReact && (
         <Tooltip
           id={`add-reaction-${drop.id}`}
           place="top"
