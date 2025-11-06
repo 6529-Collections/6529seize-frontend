@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { FetchResultsType } from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTable";
 import {
@@ -16,18 +16,11 @@ export default function CreateSnapshotTableRowDownload({
 }: {
   tokenPoolId: string;
 }) {
-  const { distributionPlan, setToasts } = useContext(
-    DistributionPlanToolContext
-  );
+  const { distributionPlan } = useContext(DistributionPlanToolContext);
 
   const [loadingType, setLoadingType] = useState<FetchResultsType | null>(null);
-  const [isLoadingJson, setIsLoadingJson] = useState(false);
-  const [isLoadingCsv, setIsLoadingCsv] = useState(false);
-
-  useEffect(() => {
-    setIsLoadingJson(loadingType === FetchResultsType.JSON);
-    setIsLoadingCsv(loadingType === FetchResultsType.CSV);
-  }, [loadingType]);
+  const isLoadingJson = loadingType === FetchResultsType.JSON;
+  const isLoadingCsv = loadingType === FetchResultsType.CSV;
 
   const downloadJson = (results: DistributionPlanSnapshotToken[]) => {
     const data = JSON.stringify(results);
@@ -58,25 +51,28 @@ export default function CreateSnapshotTableRowDownload({
     if (loadingType) return;
     setLoadingType(fetchType);
     const endpoint = `/allowlists/${distributionPlan.id}/token-pool-downloads/token-pool/${tokenPoolId}/tokens`;
-    const { success, data } = await distributionPlanApiFetch<
-      DistributionPlanSnapshotToken[]
-    >(endpoint);
-    if (!success || !data) {
-      return;
+    try {
+      const { success, data } = await distributionPlanApiFetch<
+        DistributionPlanSnapshotToken[]
+      >(endpoint);
+      if (!success || !data) {
+        return;
+      }
+      switch (fetchType) {
+        case FetchResultsType.JSON:
+          downloadJson(data);
+          break;
+        case FetchResultsType.CSV:
+          downloadCsv(data);
+          break;
+        case FetchResultsType.MANIFOLD:
+          break;
+        default:
+          assertUnreachable(fetchType);
+      }
+    } finally {
+      setLoadingType(null);
     }
-    switch (fetchType) {
-      case FetchResultsType.JSON:
-        downloadJson(data);
-        break;
-      case FetchResultsType.CSV:
-        downloadCsv(data);
-        break;
-      case FetchResultsType.MANIFOLD:
-        break;
-      default:
-        assertUnreachable(fetchType);
-    }
-    setLoadingType(null);
   };
   return (
     <div className="tw-flex tw-justify-end tw-gap-x-3">

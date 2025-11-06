@@ -10,7 +10,7 @@ import {
   COMMAND_PRIORITY_HIGH,
   KEY_ENTER_COMMAND,
 } from "lexical";
-import { useEffect } from "react";
+import { useEffect, useEffectEvent } from "react";
 import { $isListItemNode, $isListNode } from "@lexical/list";
 import { $isHeadingNode } from "@lexical/rich-text";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
@@ -29,6 +29,18 @@ export default function EnterKeyPlugin({
   const { isCapacitor } = useCapacitor();
 
   const [editor] = useLexicalComposerContext();
+
+  const shouldHandleEnter = useEffectEvent(() => {
+    if (disabled) {
+      return false;
+    }
+
+    return canSubmitWithEnter();
+  });
+
+  const submit = useEffectEvent(() => {
+    handleSubmit();
+  });
 
   useEffect(() => {
     const insertParagraph = ({ forceParagraph = false } = {}) => {
@@ -68,7 +80,7 @@ export default function EnterKeyPlugin({
     return editor.registerCommand(
       KEY_ENTER_COMMAND,
       (event) => {
-        if (disabled || !canSubmitWithEnter()) {
+        if (!shouldHandleEnter()) {
           // Let the mention plugin handle the Enter key
           return false; // Allows the mention plugin to process the Enter key
         }
@@ -103,13 +115,13 @@ export default function EnterKeyPlugin({
         } else {
           // Handle Enter (Submit)
           event?.preventDefault();
-          handleSubmit(); // Your submit function
+          submit(); // Your submit function
           return true; // Prevents the default behavior
         }
       },
       COMMAND_PRIORITY_HIGH
     );
-  }, [editor, isMobile, isCapacitor]);
+  }, [editor, isMobile, isCapacitor, shouldHandleEnter, submit]);
 
   return null;
 }

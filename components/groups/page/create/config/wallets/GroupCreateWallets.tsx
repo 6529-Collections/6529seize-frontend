@@ -13,7 +13,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import GroupCreateIdentitiesSelect from "../identities/select/GroupCreateIdentitiesSelect";
 import CreateGroupWalletsEmma from "./CreateGroupWalletsEmma";
 import CreateGroupWalletsUpload from "./CreateGroupWalletsUpload";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 
 export enum GroupCreateWalletsType {
   INCLUDE = "INCLUDE",
@@ -50,10 +50,9 @@ export default function GroupCreateWallets({
     CommunityMemberMinimal[]
   >([]);
 
-  const getSelectedWallets = () =>
-    selectedIdentities.map((i) => i.wallet ?? i.primary_wallet);
-  const [selectedWallets, setSelectedWallets] = useState<string[]>(
-    getSelectedWallets()
+  const selectedWallets = useMemo(
+    () => selectedIdentities.map((i) => i.wallet ?? i.primary_wallet),
+    [selectedIdentities]
   );
   const walletsRef = useRef(wallets);
 
@@ -76,11 +75,6 @@ export default function GroupCreateWallets({
     }
     setUploadedWallets(dedupedWallets);
   }, [wallets]);
-
-  useEffect(
-    () => setSelectedWallets(getSelectedWallets()),
-    [selectedIdentities]
-  );
 
   useEffect(() => {
     if (type === GroupCreateWalletsType.EXCLUDE || iAmIncluded) {

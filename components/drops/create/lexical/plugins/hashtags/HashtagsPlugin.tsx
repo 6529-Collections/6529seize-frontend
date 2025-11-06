@@ -144,7 +144,7 @@ const NewHashtagsPlugin = forwardRef<
         closeMenu();
       });
     },
-    [editor]
+    [editor, onSelect]
   );
 
   const checkForHashtagMatch = useCallback(

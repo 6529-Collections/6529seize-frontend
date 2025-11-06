@@ -224,7 +224,7 @@ export default function GroupCardConfigs({
           className="tw-flex tw-items-center tw-gap-x-3 tw-overflow-x-auto horizontal-menu-hide-scrollbar"
           ref={containerRef}
           onScroll={checkForHiddenContent}>
-          {configs.map((config, i) => (
+          {configs.map((config) => (
             <GroupCardConfig config={config} key={config.key} />
           ))}
         </div>

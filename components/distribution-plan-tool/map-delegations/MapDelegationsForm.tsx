@@ -10,7 +10,7 @@ import DistributionPlanAddOperationBtn from "../common/DistributionPlanAddOperat
 import { DistributionPlanToolContext } from "../DistributionPlanToolContext";
 
 export default function MapDelegationsForm() {
-  const { setToasts, distributionPlan, fetchOperations } = useContext(
+  const { distributionPlan, fetchOperations } = useContext(
     DistributionPlanToolContext
   );
 

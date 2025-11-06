@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState, type JSX } from "react";
+import { useCallback, useContext, useEffect, useState, type JSX } from "react";
 import GroupCreate from "./create/GroupCreate";
 import { AuthContext } from "@/components/auth/Auth";
 import GroupsPageListWrapper from "./GroupsPageListWrapper";
@@ -28,28 +28,33 @@ export default function Groups() {
 
   const [viewMode, setViewMode] = useState(GroupsViewMode.VIEW);
 
-  const onViewModeChange = async (mode: GroupsViewMode): Promise<void> => {
-    if (mode === GroupsViewMode.CREATE) {
-      const { success } = await requestAuth();
-      if (!success) return;
-    } else if (pathname) {
-      router.replace(pathname);
-    }
+  const onViewModeChange = useCallback(
+    async (mode: GroupsViewMode): Promise<void> => {
+      if (mode === GroupsViewMode.CREATE) {
+        const { success } = await requestAuth();
+        if (!success) return;
+      } else if (pathname) {
+        router.replace(pathname);
+      }
 
-    setViewMode(mode);
-  };
+      setViewMode(mode);
+    },
+    [pathname, requestAuth, router],
+  );
+
+  const connectedHandle = connectedProfile?.handle;
 
   useEffect(() => {
-    if (edit && !!connectedProfile?.handle && !activeProfileProxy) {
-      onViewModeChange(GroupsViewMode.CREATE);
+    if (edit && !!connectedHandle && !activeProfileProxy) {
+      void onViewModeChange(GroupsViewMode.CREATE);
     }
-  }, [edit]);
+  }, [activeProfileProxy, connectedHandle, edit, onViewModeChange]);
 
   useEffect(() => {
-    if (!connectedProfile?.handle || activeProfileProxy) {
-      onViewModeChange(GroupsViewMode.VIEW);
+    if (!connectedHandle || activeProfileProxy) {
+      void onViewModeChange(GroupsViewMode.VIEW);
     }
-  }, [connectedProfile, activeProfileProxy]);
+  }, [activeProfileProxy, connectedHandle, onViewModeChange]);
 
   const components: Record<GroupsViewMode, JSX.Element> = {
     [GroupsViewMode.VIEW]: (

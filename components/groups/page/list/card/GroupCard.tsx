@@ -64,15 +64,20 @@ export default function GroupCard({
     if (!isActiveGroupVoteAll) {
       setState(GroupCardState.IDLE);
     }
-  });
+  }, [isActiveGroupVoteAll]);
 
   const onActionCancel = () => onGroupStateChange(GroupCardState.IDLE);
 
   useEffect(() => {
-    if (!connectedProfile?.handle) {
-      onGroupStateChange(GroupCardState.IDLE);
+    if (connectedProfile?.handle) {
+      return;
     }
-  }, [connectedProfile?.handle]);
+    if (!setActiveGroupIdVoteAll || !group) {
+      return;
+    }
+    setActiveGroupIdVoteAll(null);
+    setState(GroupCardState.IDLE);
+  }, [connectedProfile?.handle, group, setActiveGroupIdVoteAll]);
 
   const onEditClick = (group: ApiGroupFull) => {
     router.push(`/network/groups?edit=${group.id}`);

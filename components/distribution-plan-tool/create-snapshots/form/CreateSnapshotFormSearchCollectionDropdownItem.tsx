@@ -31,7 +31,7 @@ export default function CreateSnapshotFormSearchCollectionDropdownItem({
     tokenIds: string | null;
   }) => void;
 }) {
-  const { setToasts } = useContext(DistributionPlanToolContext);
+  const { setToasts: _setToasts } = useContext(DistributionPlanToolContext);
   const collectionMeta: CollectionMeta = {
     imgUrl: collection.imageUrl ?? "",
     openseaVerified: collection.openseaVerified,
@@ -47,7 +47,7 @@ export default function CreateSnapshotFormSearchCollectionDropdownItem({
         : "N/A",
   };
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [_isLoading, setIsLoading] = useState<boolean>(false);
 
   const getTokenIdsString = async (
     collectionId: string

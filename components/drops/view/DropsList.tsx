@@ -168,7 +168,7 @@ const DropsList = memo(function DropsList({
           </HighlightDropWrapper>
         );
       }),
-    [orderedDrops, getItemData] // Only depends on orderedDrops array and the memoized item data
+    [orderedDrops, getItemData, location] // Only depends on orderedDrops array, memoized item data, and drop location
   );
 
   return memoizedDrops;

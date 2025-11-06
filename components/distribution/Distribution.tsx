@@ -21,7 +21,7 @@ import {
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Carousel, Col, Container, Row, Table } from "react-bootstrap";
 import styles from "./Distribution.module.scss";
 
@@ -53,31 +53,55 @@ export default function DistributionPage(props: Readonly<Props>) {
 
   const [fetching, setFetching] = useState(true);
 
-  function updateDistributionPhases(mydistributions: Distribution[]) {
-    const phasesSet = new Set<string>();
-    mydistributions.forEach((d) => {
-      d.phases.forEach((p) => {
-        phasesSet.add(p);
+  const updateDistributionPhases = useCallback(
+    (mydistributions: Distribution[]) => {
+      const phasesSet = new Set<string>();
+      mydistributions.forEach((d) => {
+        d.phases.forEach((p) => {
+          phasesSet.add(p);
+        });
       });
-    });
-    const phases = Array.from(phasesSet);
-    phases.sort((a, b) => a.localeCompare(b));
-    setDistributionsPhases(phases);
-  }
+      const phases = Array.from(phasesSet);
+      phases.sort((a, b) => a.localeCompare(b));
+      setDistributionsPhases(phases);
+    },
+    []
+  );
 
-  function fetchDistribution() {
+  useEffect(() => {
+    if (!nftId) {
+      return;
+    }
+
+    let isCurrent = true;
+
     setFetching(true);
     const walletFilter =
       searchWallets.length === 0 ? "" : `&search=${searchWallets.join(",")}`;
     const distributionUrl = `${publicEnv.API_ENDPOINT}/api/distributions?card_id=${nftId}&contract=${props.contract}&page=${pageProps.page}${walletFilter}`;
-    fetchUrl(distributionUrl).then((r: DBResponse) => {
-      setTotalResults(r.count);
-      const mydistributions: Distribution[] = r.data;
-      setDistributions(mydistributions);
-      updateDistributionPhases(mydistributions);
-      setFetching(false);
-    });
-  }
+
+    fetchUrl(distributionUrl)
+      .then((r: DBResponse) => {
+        if (!isCurrent) {
+          return;
+        }
+
+        setTotalResults(r.count);
+        const mydistributions: Distribution[] = r.data;
+        setDistributions(mydistributions);
+        updateDistributionPhases(mydistributions);
+        setFetching(false);
+      })
+      .catch(() => {
+        if (isCurrent) {
+          setFetching(false);
+        }
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [nftId, pageProps.page, props.contract, searchWallets, updateDistributionPhases]);
 
   useEffect(() => {
     const id = params?.id as string;
@@ -87,29 +111,41 @@ export default function DistributionPage(props: Readonly<Props>) {
   }, [params]);
 
   useEffect(() => {
-    if (nftId) {
-      const distributionPhotosUrl = `${publicEnv.API_ENDPOINT}/api/distribution_photos/${props.contract}/${nftId}`;
+    if (!nftId) {
+      return;
+    }
 
-      fetchAllPages<DistributionPhoto>(distributionPhotosUrl).then(
-        (distributionPhotos) => {
-          setDistributionPhotos(distributionPhotos);
-          fetchDistribution();
+    const distributionPhotosUrl = `${publicEnv.API_ENDPOINT}/api/distribution_photos/${props.contract}/${nftId}`;
+    let isCurrent = true;
+
+    fetchAllPages<DistributionPhoto>(distributionPhotosUrl).then(
+      (distributionPhotos) => {
+        if (!isCurrent) {
+          return;
         }
-      );
-    }
-  }, [nftId]);
+
+        setDistributionPhotos(distributionPhotos);
+      }
+    );
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [nftId, props.contract]);
 
   useEffect(() => {
-    if (nftId) {
-      setPageProps({ ...pageProps, page: 1 });
+    if (!nftId) {
+      return;
     }
-  }, [searchWallets]);
 
-  useEffect(() => {
-    if (nftId && pageProps) {
-      fetchDistribution();
-    }
-  }, [pageProps]);
+    setPageProps((prev) => {
+      if (prev.page === 1) {
+        return prev;
+      }
+
+      return { ...prev, page: 1 };
+    });
+  }, [nftId, searchWallets]);
 
   function printDistributionPhotos() {
     if (distributionPhotos.length > 0) {
@@ -322,8 +358,14 @@ export default function DistributionPage(props: Readonly<Props>) {
               page={pageProps.page}
               pageSize={pageProps.pageSize}
               totalResults={totalResults}
-              setPage={function (newPage: number) {
-                setPageProps({ ...pageProps, page: newPage });
+              setPage={(newPage: number) => {
+                setPageProps((prev) => {
+                  if (prev.page === newPage) {
+                    return prev;
+                  }
+
+                  return { ...prev, page: newPage };
+                });
               }}
             />
           </Row>

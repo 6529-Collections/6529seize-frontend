@@ -117,23 +117,24 @@ export default function Drops() {
     observerRef.current = observer;
 
     return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
+      observer.disconnect();
     };
   }, [onBottomIntersection]);
 
   useEffect(() => {
-    if (bottomRef.current && observerRef.current) {
-      observerRef.current.observe(bottomRef.current);
+    const observer = observerRef.current;
+    const bottomElement = bottomRef.current;
+
+    if (!observer || !bottomElement) {
+      return;
     }
 
+    observer.observe(bottomElement);
+
     return () => {
-      if (bottomRef.current && observerRef.current) {
-        observerRef.current.unobserve(bottomRef.current);
-      }
+      observer.unobserve(bottomElement);
     };
-  }, [drops]);
+  }, [drops.length]);
 
   const navigateToDropWave = (drop: Pick<ApiDrop, "wave" | "serial_no">) => {
     const waveInfo = drop.wave as any;

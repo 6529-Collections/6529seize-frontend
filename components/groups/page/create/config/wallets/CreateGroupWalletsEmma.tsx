@@ -41,7 +41,7 @@ export default function CreateGroupWalletsEmma({
   useEffect(
     () =>
       setWallets(emmaList?.map((item) => item.wallet.toLowerCase()) ?? null),
-    [emmaList]
+    [emmaList, setWallets]
   );
 
   const onWalletsRemove = () => {

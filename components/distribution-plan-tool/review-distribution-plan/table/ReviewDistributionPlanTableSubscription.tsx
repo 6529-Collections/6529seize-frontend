@@ -9,10 +9,7 @@ import {
 } from "@/constants";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { areEqualAddresses, formatAddress } from "@/helpers/Helpers";
-import {
-    commonApiFetch,
-    commonApiPost,
-} from "@/services/api/common-api";
+import { commonApiFetch } from "@/services/api/common-api";
 import { useContext, useState } from "react";
 import { Button, Col, Container, Modal, Row } from "react-bootstrap";
 import {
@@ -181,17 +178,6 @@ const mergeResults = (results: WalletResult[]): WalletResult[] => {
     wallet,
     amount,
   }));
-};
-
-const resetSubscriptions = async (
-  contract: string,
-  tokenId: string,
-  planId: string
-) => {
-  await commonApiPost({
-    endpoint: `subscriptions/allowlists/${contract}/${tokenId}/${planId}/reset`,
-    body: {},
-  });
 };
 
 export const isSubscriptionsAdmin = (connectedProfile: ApiIdentity | null) => {

@@ -62,7 +62,7 @@ export default function DropListItemRateGiveSubmit({
           category: param.category,
         },
       }),
-    onSuccess: (response: ApiDrop) => {
+    onSuccess: () => {
       onSuccessfulRateChange();
       optimisticRollbackRef.current = null;
     },

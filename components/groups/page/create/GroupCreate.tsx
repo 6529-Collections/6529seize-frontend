@@ -152,19 +152,15 @@ export default function GroupCreate({
     });
   }, [originalGroup, originalGroupWallets, originalGroupExcludedWallets]);
 
-  const getMyAddresses = () => {
-    if (!connectedProfile) {
-      return [];
-    }
-    return connectedProfile.wallets?.map((w) => w.wallet.toLowerCase()) ?? [];
-  };
-
   useEffect(() => {
     if (!connectedProfile) {
       return;
     }
 
-    const myAddresses = getMyAddresses();
+    const myAddresses =
+      connectedProfile.wallets?.map((wallet) =>
+        wallet.wallet.toLowerCase()
+      ) ?? [];
 
     setIAmIncluded(
       groupConfig.group.identity_addresses?.some((address) =>

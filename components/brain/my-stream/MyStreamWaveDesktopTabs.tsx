@@ -28,6 +28,15 @@ const getContentTabPanelId = (tab: MyStreamWaveTab): string =>
 
 const AUTO_EXPAND_LIMIT = 5;
 
+const TAB_LABELS: Record<MyStreamWaveTab, string> = {
+  [MyStreamWaveTab.CHAT]: "Chat",
+  [MyStreamWaveTab.LEADERBOARD]: "Leaderboard",
+  [MyStreamWaveTab.WINNERS]: "Winners",
+  [MyStreamWaveTab.OUTCOME]: "Outcome",
+  [MyStreamWaveTab.MY_VOTES]: "My Votes",
+  [MyStreamWaveTab.FAQ]: "FAQ",
+};
+
 const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   activeTab,
   wave,
@@ -156,15 +165,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   }, [wave?.wave?.type, setActiveContentTab]);
 
   // Map enum values to label names
-  const tabLabels: Record<MyStreamWaveTab, string> = {
-    [MyStreamWaveTab.CHAT]: "Chat",
-    [MyStreamWaveTab.LEADERBOARD]: "Leaderboard",
-    [MyStreamWaveTab.WINNERS]: "Winners",
-    [MyStreamWaveTab.OUTCOME]: "Outcome",
-    [MyStreamWaveTab.MY_VOTES]: "My Votes",
-    [MyStreamWaveTab.FAQ]: "FAQ",
-  };
-
   const options: TabOption[] = React.useMemo(
     () =>
       availableTabs
@@ -175,7 +175,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
         )
         .map((tab) => ({
           key: tab,
-          label: tabLabels[tab],
+          label: TAB_LABELS[tab],
           panelId: getContentTabPanelId(tab),
         })),
     [availableTabs, isMemesWave]

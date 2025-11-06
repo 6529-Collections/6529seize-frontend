@@ -111,7 +111,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
                   type: downloadResponse.success ? "success" : "error",
                   message: downloadResponse.message,
                 });
-              } catch (error: any) {
+              } catch (_error: unknown) {
                 setToast({
                   type: "error",
                   message: "Something went wrong.",

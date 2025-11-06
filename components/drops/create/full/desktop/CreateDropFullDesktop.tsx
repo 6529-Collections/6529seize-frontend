@@ -68,7 +68,7 @@ const CreateDropFullDesktop = forwardRef<
 >(
   (
     {
-      profile,
+      profile: _profile,
       title,
       editorState,
       metadata,

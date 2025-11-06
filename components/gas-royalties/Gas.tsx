@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import styles from "./GasRoyalties.module.scss";
 import { Gas } from "@/entities/IGas";
@@ -20,25 +20,6 @@ export default function GasComponent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { setTitle } = useTitle();
-
-  useEffect(() => {
-    const routerFocus = searchParams?.get("focus") as string;
-    const resolvedFocus = Object.values(GasRoyaltiesCollectionFocus).find(
-      (sd) => sd === routerFocus
-    );
-    if (resolvedFocus) {
-      setCollectionFocus(resolvedFocus);
-      const title = `Meme Gas - ${capitalizeEveryWord(
-        resolvedFocus.replace("-", " ")
-      )}`;
-      setTitle(title);
-    } else {
-      router.push(`${pathname}?focus=${GasRoyaltiesCollectionFocus.MEMES}`);
-    }
-  }, [searchParams]);
-
-  const [gas, setGas] = useState<Gas[]>([]);
-  const [sumGas, setSumGas] = useState(0);
 
   const {
     dateSelection,
@@ -60,43 +41,81 @@ export default function GasComponent() {
     toBlock,
   } = useSharedState();
 
-  function getUrlWithParams() {
-    return getUrl("gas");
-  }
-
-  function fetchGas() {
-    setFetching(true);
-    fetchUrl(getUrlWithParams()).then((res: Gas[]) => {
-      res.forEach((r) => {
-        r.gas = Math.round(r.gas * 100000) / 100000;
-      });
-      setGas(res);
-      setSumGas(res.map((g) => g.gas).reduce((a, b) => a + b, 0));
-      setFetching(false);
-    });
-  }
-
   useEffect(() => {
-    if (collectionFocus) {
-      fetchGas();
+    const routerFocus = searchParams?.get("focus") as string;
+    const resolvedFocus = Object.values(GasRoyaltiesCollectionFocus).find(
+      (sd) => sd === routerFocus
+    );
+    if (resolvedFocus) {
+      if (resolvedFocus !== collectionFocus) {
+        setCollectionFocus(resolvedFocus);
+      }
+      const title = `Meme Gas - ${capitalizeEveryWord(
+        resolvedFocus.replace("-", " ")
+      )}`;
+      setTitle(title);
+    } else {
+      router.push(`${pathname}?focus=${GasRoyaltiesCollectionFocus.MEMES}`);
     }
   }, [
-    dateSelection,
-    fromDate,
-    toDate,
-    fromBlock,
-    toBlock,
-    selectedArtist,
-    isPrimary,
-    isCustomBlocks,
+    collectionFocus,
+    pathname,
+    router,
+    searchParams,
+    setCollectionFocus,
+    setTitle,
   ]);
 
-  useEffect(() => {
-    if (collectionFocus) {
-      setGas([]);
-      fetchGas();
+  const [gas, setGas] = useState<Gas[]>([]);
+  const [sumGas, setSumGas] = useState(0);
+
+  const getUrlWithParams = useCallback(() => getUrl("gas"), [getUrl]);
+
+  const fetchGas = useCallback(async () => {
+    setFetching(true);
+    try {
+      const res = await fetchUrl(getUrlWithParams());
+      const gasResponse = res as Gas[];
+      const normalized = gasResponse.map((item) => ({
+        ...item,
+        gas: Math.round(item.gas * 100000) / 100000,
+      }));
+      setGas(normalized);
+      setSumGas(normalized.reduce((total, item) => total + item.gas, 0));
+    } finally {
+      setFetching(false);
     }
-  }, [collectionFocus]);
+  }, [getUrlWithParams, setFetching, setGas, setSumGas]);
+
+  const previousCollectionFocusRef = useRef(collectionFocus);
+
+  useEffect(() => {
+    if (!collectionFocus) {
+      previousCollectionFocusRef.current = collectionFocus;
+      return;
+    }
+
+    const isNewCollectionFocus =
+      previousCollectionFocusRef.current !== collectionFocus;
+    previousCollectionFocusRef.current = collectionFocus;
+
+    if (isNewCollectionFocus) {
+      setGas([]);
+    }
+
+    fetchGas();
+  }, [
+    collectionFocus,
+    dateSelection,
+    fromBlock,
+    fromDate,
+    isCustomBlocks,
+    isPrimary,
+    selectedArtist,
+    toBlock,
+    toDate,
+    fetchGas,
+  ]);
 
   if (!collectionFocus) {
     return <></>;
