@@ -560,9 +560,11 @@ export const getTimeAgo = (milliseconds: number): string => {
   }
 };
 
-export const getTimeAgoShort = (milliseconds: number): string => {
-  const currentTime = new Date().getTime();
-  const timeDifference = currentTime - milliseconds;
+export const getTimeAgoShort = (
+  milliseconds: number,
+  referenceTime: number = Date.now()
+): string => {
+  const timeDifference = referenceTime - milliseconds;
 
   const seconds = Math.floor(timeDifference / 1000);
   const minutes = Math.floor(seconds / 60);

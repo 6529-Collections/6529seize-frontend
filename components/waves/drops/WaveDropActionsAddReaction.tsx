@@ -12,7 +12,7 @@ import { commonApiPost } from "@/services/api/common-api";
 import { useAuth } from "@/components/auth/Auth";
 import { ApiAddReactionToDropRequest } from "@/generated/models/ApiAddReactionToDropRequest";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
-import { DropSize } from "@/helpers/waves/drop.helpers";
+import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
   findReactionIndex,
   cloneReactionEntries,
@@ -21,12 +21,12 @@ import {
 } from "./reaction-utils";
 
 const WaveDropActionsAddReaction: React.FC<{
-  drop: ApiDrop;
-  isMobile?: boolean;
+  readonly drop: ExtendedDrop;
+  readonly isMobile?: boolean;
   readonly onAddReaction?: () => void;
 }> = ({ drop, isMobile = false, onAddReaction }) => {
   const isTemporaryDrop = drop.id.startsWith("temp-");
-  const canReact = !isTemporaryDrop;
+  const canReact = drop.type === DropSize.FULL && !isTemporaryDrop;
   const [showPicker, setShowPicker] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const pickerContainerRef = useRef<HTMLDivElement | null>(null); // Ref for container
@@ -37,7 +37,11 @@ const WaveDropActionsAddReaction: React.FC<{
 
   const applyOptimisticReaction = useCallback(
     (reactionCode: string) => {
-      if (!applyOptimisticDropUpdate || !drop.wave?.id) {
+      if (
+        !applyOptimisticDropUpdate ||
+        drop.type !== DropSize.FULL ||
+        !drop.wave?.id
+      ) {
         return null;
       }
 
@@ -215,7 +219,7 @@ const WaveDropActionsAddReaction: React.FC<{
         disabled={!canReact}
         aria-label="Add reaction to drop"
         data-tooltip-id={
-          !isTemporaryDrop ? `add-reaction-${drop.id}` : undefined
+          canReact ? `add-reaction-${drop.id}` : undefined
         }
       >
         <svg
@@ -232,7 +236,7 @@ const WaveDropActionsAddReaction: React.FC<{
           </g>
         </svg>
       </button>
-      {!isTemporaryDrop && (
+      {canReact && (
         <Tooltip
           id={`add-reaction-${drop.id}`}
           place="top"
