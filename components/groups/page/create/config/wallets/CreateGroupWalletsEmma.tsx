@@ -24,7 +24,6 @@ export default function CreateGroupWalletsEmma({
   const { data: emmaList, isFetching } = useQuery<AllowlistResult[]>({
     queryKey: [QueryKey.EMMA_ALLOWLIST_RESULT, { allowlistId: selected?.id }],
     queryFn: async () => {
-      await requestAuth();
       const { success } = await requestAuth();
       if (!success) {
         return [];

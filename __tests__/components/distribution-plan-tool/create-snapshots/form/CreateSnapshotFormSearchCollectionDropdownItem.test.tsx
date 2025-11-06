@@ -1,9 +1,11 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { QueryClientProvider } from '@tanstack/react-query';
 import CreateSnapshotFormSearchCollectionDropdownItem from '@/components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormSearchCollectionDropdownItem';
 import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
 import { distributionPlanApiFetch } from '@/services/distribution-plan-api';
+import { createTestQueryClient } from '../../../../utils/reactQuery';
 
 jest.mock('next/image', () => ({ __esModule: true, default: (props: any) => <img {...props} /> }));
 
@@ -32,14 +34,18 @@ function renderItem(overrides: Partial<any> = {}) {
     ...overrides
   };
   const onCollection = jest.fn();
+  const setToasts = jest.fn();
+  const queryClient = createTestQueryClient();
   render(
-    <DistributionPlanToolContext.Provider value={{ setToasts: jest.fn() } as any}>
-      <table><tbody>
-        <CreateSnapshotFormSearchCollectionDropdownItem collection={collection} onCollection={onCollection} />
-      </tbody></table>
-    </DistributionPlanToolContext.Provider>
+    <QueryClientProvider client={queryClient}>
+      <DistributionPlanToolContext.Provider value={{ setToasts } as any}>
+        <table><tbody>
+          <CreateSnapshotFormSearchCollectionDropdownItem collection={collection} onCollection={onCollection} />
+        </tbody></table>
+      </DistributionPlanToolContext.Provider>
+    </QueryClientProvider>
   );
-  return { collection, onCollection };
+  return { collection, onCollection, setToasts };
 }
 
 describe('CreateSnapshotFormSearchCollectionDropdownItem', () => {
@@ -73,5 +79,17 @@ describe('CreateSnapshotFormSearchCollectionDropdownItem', () => {
     );
     expect(onCollection).toHaveBeenCalledWith({ name: collection.name, address: collection.address, tokenIds: '1,2' });
   });
-});
 
+  it('does not trigger an extra toast when token id fetch fails', async () => {
+    fetchMock.mockResolvedValueOnce({ success: false, data: null });
+    const subId = `0x${'a'.repeat(40)}:sub`;
+    const { setToasts } = renderItem({ id: subId });
+    await userEvent.click(screen.getByRole('row'));
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        `/other/contract-token-ids-as-string/${subId}`
+      )
+    );
+    expect(setToasts).not.toHaveBeenCalled();
+  });
+});

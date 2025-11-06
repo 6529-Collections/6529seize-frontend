@@ -14,7 +14,7 @@ import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 export default function CreateSnapshotTableRowDownload({
   tokenPoolId,
 }: {
-  tokenPoolId: string;
+  readonly tokenPoolId: string;
 }) {
   const { distributionPlan } = useContext(DistributionPlanToolContext);
 
@@ -30,9 +30,11 @@ export default function CreateSnapshotTableRowDownload({
     link.href = url;
     link.download = "results.json";
     link.click();
+    window.URL.revokeObjectURL(url);
   };
 
   const downloadCsv = (results: DistributionPlanSnapshotToken[]) => {
+    if (results.length === 0) return;
     const csv = [
       Object.keys(results[0]).join(","),
       ...results.map((item) => Object.values(item).join(",")),

@@ -8,8 +8,9 @@ import {
     truncateTextMiddle,
 } from "@/helpers/AllowlistToolHelpers";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
+import { useMutation } from "@tanstack/react-query";
 import Image from "next/image";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 
 interface CollectionMeta {
   readonly imgUrl: string;
@@ -20,18 +21,22 @@ interface CollectionMeta {
   readonly floorPrice: string;
 }
 
+interface CollectionSelectionParams {
+  readonly address: string;
+  readonly name: string;
+  readonly tokenIds: string | null;
+}
+
+interface CreateSnapshotFormSearchCollectionDropdownItemProps {
+  readonly collection: DistributionPlanSearchContractMetadataResult;
+  readonly onCollection: (param: CollectionSelectionParams) => void;
+}
+
 export default function CreateSnapshotFormSearchCollectionDropdownItem({
   collection,
   onCollection,
-}: {
-  collection: DistributionPlanSearchContractMetadataResult;
-  onCollection: (param: {
-    address: string;
-    name: string;
-    tokenIds: string | null;
-  }) => void;
-}) {
-  const { setToasts: _setToasts } = useContext(DistributionPlanToolContext);
+}: CreateSnapshotFormSearchCollectionDropdownItemProps) {
+  const { setToasts } = useContext(DistributionPlanToolContext);
   const collectionMeta: CollectionMeta = {
     imgUrl: collection.imageUrl ?? "",
     openseaVerified: collection.openseaVerified,
@@ -47,30 +52,36 @@ export default function CreateSnapshotFormSearchCollectionDropdownItem({
         : "N/A",
   };
 
-  const [_isLoading, setIsLoading] = useState<boolean>(false);
-
-  const getTokenIdsString = async (
-    collectionId: string
-  ): Promise<string | null> => {
-    setIsLoading(true);
-    const endpoint = `/other/contract-token-ids-as-string/${collectionId}`;
-    const { data } = await distributionPlanApiFetch<{
-      tokenIds: string;
-    }>(endpoint);
-    setIsLoading(false);
-    return data?.tokenIds ?? null;
-  };
+  const fetchTokenIdsMutation = useMutation<string | null, Error, string>({
+    mutationFn: async (collectionId) => {
+      const endpoint = `/other/contract-token-ids-as-string/${collectionId}`;
+      const { success, data } = await distributionPlanApiFetch<{
+        readonly tokenIds: string;
+      }>(endpoint);
+      if (!success) {
+        throw new Error("Failed to fetch token IDs");
+      }
+      return data?.tokenIds?.length ? data.tokenIds : null;
+    },
+  });
 
   const onCollectionClick = async () => {
     const regex = /^0x[0-9a-fA-F]{40}:.+$/;
     const isSubCollection = regex.test(collection.id);
     if (isSubCollection) {
-      const tokenIdsString = await getTokenIdsString(collection.id);
-      onCollection({
-        name: collection.name,
-        address: collection.address,
-        tokenIds: tokenIdsString?.length ? tokenIdsString : null,
-      });
+      try {
+        const tokenIdsString = await fetchTokenIdsMutation.mutateAsync(
+          collection.id
+        );
+        onCollection({
+          name: collection.name,
+          address: collection.address,
+          tokenIds: tokenIdsString,
+        });
+      } catch (error) {
+        // distributionPlanApiFetch already surfaces toast notifications on failure
+        return;
+      }
       return;
     }
     onCollection({
