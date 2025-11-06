@@ -46,27 +46,30 @@ export default function GroupCardActionWrapper({
     setProgress(getProgress());
   }, [membersCount, doneMembersCount]);
   return (
-    <div className="tw-pt-4 tw-pb-3 tw-flex tw-flex-col tw-h-full tw-gap-y-4 tw-divide-y tw-divide-solid tw-divide-x-0 tw-divide-iron-700 tw-relative">
-      <div className="tw-px-4">
+    <div className="tw-flex tw-h-full tw-flex-col tw-gap-y-5 tw-px-4 tw-py-5 sm:tw-px-5 sm:tw-py-6">
+      <div className="tw-flex-1">
         {addingRates ? (
-          <div>
-            <p className="tw-mb-0 tw-text-base tw-text-iron-100 tw-font-semibold">
-              {MATTER_LABEL[matter]} Progress
-            </p>
-            <p className="tw-mt-1 tw-text-iron-400 tw-text-sm">
-              Please do not leave the page or close this window until the
-              process is complete.
-            </p>
-            <p className="tw-mt-4 tw-mb-0 tw-text-xl tw-text-primary-400 tw-font-bold">
+          <div className="tw-space-y-4">
+            <div>
+              <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50">
+                {MATTER_LABEL[matter]} Progress
+              </p>
+              <p className="tw-mt-1 tw-text-sm tw-text-iron-300">
+                Keep this window open while we distribute credits across the
+                group.
+              </p>
+            </div>
+            <p className="tw-mb-0 tw-text-xl tw-font-bold tw-text-primary-400">
               {doneMembersCount}/{membersCount}
             </p>
-            <div className="tw-mt-2 tw-w-full tw-bg-iron-700 tw-rounded-full tw-h-3">
+            <div className="tw-h-3 tw-w-full tw-overflow-hidden tw-rounded-full tw-bg-white/5">
               <div
-                className="tw-bg-primary-400 tw-h-3 tw-rounded-full"
+                className="tw-h-3 tw-rounded-full tw-bg-primary-400"
                 style={{
                   width: progress,
                   transition: "width 0.5s ease-out",
-                }}></div>
+                }}
+              ></div>
             </div>
           </div>
         ) : (
