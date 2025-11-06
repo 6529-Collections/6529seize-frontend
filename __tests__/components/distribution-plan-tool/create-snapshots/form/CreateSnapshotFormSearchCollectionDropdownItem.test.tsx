@@ -80,6 +80,36 @@ describe('CreateSnapshotFormSearchCollectionDropdownItem', () => {
     expect(onCollection).toHaveBeenCalledWith({ name: collection.name, address: collection.address, tokenIds: '1,2' });
   });
 
+  it('disables the row and shows a spinner while fetching sub collection ids', async () => {
+    let resolveFetch: ((value: { success: boolean; data: { tokenIds: string } }) => void) | null = null;
+    fetchMock.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveFetch = resolve;
+        })
+    );
+    const subId = `0x${'a'.repeat(40)}:sub`;
+    const { onCollection, collection } = renderItem({ id: subId });
+    const row = screen.getByRole('row');
+    await userEvent.click(row);
+
+    await waitFor(() => expect(row).toHaveAttribute('aria-disabled', 'true'));
+    await screen.findByTestId('collection-loading');
+
+    resolveFetch?.({ success: true, data: { tokenIds: '3,4' } });
+
+    await waitFor(() =>
+      expect(screen.queryByTestId('collection-loading')).not.toBeInTheDocument()
+    );
+    await waitFor(() =>
+      expect(onCollection).toHaveBeenCalledWith({
+        name: collection.name,
+        address: collection.address,
+        tokenIds: '3,4',
+      })
+    );
+  });
+
   it('does not trigger an extra toast when token id fetch fails', async () => {
     fetchMock.mockResolvedValueOnce({ success: false, data: null });
     const subId = `0x${'a'.repeat(40)}:sub`;
