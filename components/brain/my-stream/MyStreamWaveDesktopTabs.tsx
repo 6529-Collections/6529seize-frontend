@@ -42,7 +42,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   wave,
   setActiveTab,
 }) => {
-  // Use the available tabs from context instead of recalculating
   const { availableTabs, updateAvailableTabs, setActiveContentTab } =
     useContentTab();
 
@@ -52,11 +51,10 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     pauses: { filterDecisionsDuringPauses },
   } = useWave(wave);
   const {
-    voting: { isUpcoming, isCompleted, isInProgress },
+    voting: { isUpcoming, isCompleted },
     decisions: { firstDecisionDone },
   } = useWaveTimers(wave);
 
-  // For next decision countdown
   const { allDecisions, hasMoreFuture, loadMoreFuture } = useDecisionPoints(
     wave,
     {
@@ -65,9 +63,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     }
   );
 
-  // Filter out decisions that occur during pause periods using the helper from useWave
   const filteredDecisions = React.useMemo(() => {
-    // Convert DecisionPoint[] to ApiWaveDecision[] format for the filter function
     const decisionsAsApiFormat = allDecisions.map(
       (decision) =>
         ({
@@ -75,16 +71,13 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
         } as any)
     );
 
-    // Apply the filter
     const filtered = filterDecisionsDuringPauses(decisionsAsApiFormat);
 
-    // Convert back to DecisionPoint[] format
     return allDecisions.filter((decision) =>
       filtered.some((f) => f.decision_time === decision.timestamp)
     );
   }, [allDecisions, filterDecisionsDuringPauses]);
 
-  // Get the next valid decision time (excluding paused decisions)
   const nextDecisionTime =
     filteredDecisions.find(
       (decision) => decision.timestamp > Time.currentMillis()
@@ -128,8 +121,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     autoExpandFutureAttempts,
   ]);
 
-  // Calculate time left for next decision
-  // Update available tabs when wave changes
   useEffect(() => {
     const votingState = isUpcoming
       ? WaveVotingState.NOT_STARTED
@@ -152,19 +143,16 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     isChatWave,
     isUpcoming,
     isCompleted,
-    isInProgress,
     firstDecisionDone,
     updateAvailableTabs,
   ]);
 
-  // Always switch to Chat for Chat-type waves
   useEffect(() => {
     if (wave?.wave?.type === ApiWaveType.Chat) {
       setActiveContentTab(MyStreamWaveTab.CHAT);
     }
   }, [wave?.wave?.type, setActiveContentTab]);
 
-  // Map enum values to label names
   const options: TabOption[] = React.useMemo(
     () =>
       availableTabs
@@ -191,7 +179,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     }
   }, [isMemesWave, activeTab, options, setActiveTab]);
 
-  // For simple waves, don't render any tabs
   if (isChatWave) {
     return null;
   }
