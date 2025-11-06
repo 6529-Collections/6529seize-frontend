@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { getTimeAgoShort } from "@/helpers/Helpers";
 
 interface BrainLeftSidebarWaveDropTimeProps {
@@ -10,19 +10,21 @@ interface BrainLeftSidebarWaveDropTimeProps {
 const BrainLeftSidebarWaveDropTime: React.FC<
   BrainLeftSidebarWaveDropTimeProps
 > = ({ time }) => {
-  const [_, setTick] = useState(0);
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      setTick((prev) => prev + 1);
+    const intervalId = window.setInterval(() => {
+      setNow(Date.now());
     }, 60000); // Update every minute (60000ms)
 
     return () => {
-      clearInterval(intervalId);
+      window.clearInterval(intervalId);
     };
   }, []);
 
-  return <span className="tw-text-iron-300">{getTimeAgoShort(time)}</span>;
+  const label = getTimeAgoShort(time, now);
+
+  return <span className="tw-text-iron-300">{label}</span>;
 };
 
 export default BrainLeftSidebarWaveDropTime;
