@@ -96,7 +96,7 @@ const WebBrainLeftSidebarWave = ({
       tooltipPlacement={TOOLTIP_PLACEMENT}
       wave={wave}
       waveId={wave.id}
-      isPinned={!!wave.isPinned}
+      isPinned={wave.isPinned}
     />
   );
 };

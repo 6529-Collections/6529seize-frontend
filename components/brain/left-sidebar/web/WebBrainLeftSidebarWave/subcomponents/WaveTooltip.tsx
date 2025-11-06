@@ -1,5 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
-import type { ComponentProps } from 'react';
+import type { CSSProperties, ReactNode, ComponentProps } from 'react';
 import { Tooltip } from 'react-tooltip';
 
 const TOOLTIP_STYLE: CSSProperties = {
