@@ -1,12 +1,9 @@
 "use client";
 
-import { useContext, useState } from "react";
+import { useContext } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
-import { FetchResultsType } from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTable";
-import {
-  DistributionPlanSnapshotToken,
-} from "@/components/allowlist-tool/allowlist-tool.types";
-import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { DistributionPlanSnapshotToken } from "@/components/allowlist-tool/allowlist-tool.types";
 import RoundedJsonIconButton from "@/components/distribution-plan-tool/common/RoundedJsonIconButton";
 import RoundedCsvIconButton from "@/components/distribution-plan-tool/common/RoundedCsvIconButton";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
@@ -17,10 +14,6 @@ export default function CreateSnapshotTableRowDownload({
   readonly tokenPoolId: string;
 }) {
   const { distributionPlan } = useContext(DistributionPlanToolContext);
-
-  const [loadingType, setLoadingType] = useState<FetchResultsType | null>(null);
-  const isLoadingJson = loadingType === FetchResultsType.JSON;
-  const isLoadingCsv = loadingType === FetchResultsType.CSV;
 
   const downloadJson = (results: DistributionPlanSnapshotToken[]) => {
     const data = JSON.stringify(results);
@@ -48,43 +41,61 @@ export default function CreateSnapshotTableRowDownload({
     document.body.removeChild(link);
   };
 
-  const fetchResults = async (fetchType: FetchResultsType) => {
-    if (!distributionPlan) return;
-    if (loadingType) return;
-    setLoadingType(fetchType);
-    const endpoint = `/allowlists/${distributionPlan.id}/token-pool-downloads/token-pool/${tokenPoolId}/tokens`;
-    try {
-      const { success, data } = await distributionPlanApiFetch<
-        DistributionPlanSnapshotToken[]
-      >(endpoint);
-      if (!success || !data) {
-        return;
-      }
-      switch (fetchType) {
-        case FetchResultsType.JSON:
-          downloadJson(data);
-          break;
-        case FetchResultsType.CSV:
-          downloadCsv(data);
-          break;
-        case FetchResultsType.MANIFOLD:
-          break;
-        default:
-          assertUnreachable(fetchType);
-      }
-    } finally {
-      setLoadingType(null);
+  const requestSnapshotTokens = async (): Promise<
+    DistributionPlanSnapshotToken[]
+  > => {
+    if (!distributionPlan) {
+      throw new Error("No distribution plan");
     }
+    const endpoint = `/allowlists/${distributionPlan.id}/token-pool-downloads/token-pool/${tokenPoolId}/tokens`;
+    const { success, data } = await distributionPlanApiFetch<
+      DistributionPlanSnapshotToken[]
+    >(endpoint);
+    if (!success || !data) {
+      throw new Error("Fetch failed");
+    }
+    return data;
   };
+
+  const {
+    mutate: fetchJson,
+    isPending: isLoadingJson,
+  } = useMutation({
+    mutationFn: requestSnapshotTokens,
+    onSuccess: (data) => downloadJson(data),
+  });
+
+  const {
+    mutate: fetchCsv,
+    isPending: isLoadingCsv,
+  } = useMutation({
+    mutationFn: requestSnapshotTokens,
+    onSuccess: (data) => downloadCsv(data),
+  });
+
+  const handleJsonDownload = () => {
+    if (!distributionPlan || isLoadingJson) {
+      return;
+    }
+    fetchJson();
+  };
+
+  const handleCsvDownload = () => {
+    if (!distributionPlan || isLoadingCsv) {
+      return;
+    }
+    fetchCsv();
+  };
+
   return (
     <div className="tw-flex tw-justify-end tw-gap-x-3">
       <RoundedJsonIconButton
-        onClick={() => fetchResults(FetchResultsType.JSON)}
+        onClick={handleJsonDownload}
         loading={isLoadingJson}
       />
 
       <RoundedCsvIconButton
-        onClick={() => fetchResults(FetchResultsType.CSV)}
+        onClick={handleCsvDownload}
         loading={isLoadingCsv}
       />
     </div>
