@@ -1,20 +1,37 @@
+jest.mock("react", () => {
+  const actual = jest.requireActual<typeof import("react")>("react");
+  return {
+    ...actual,
+    useEffectEvent: (fn: (...args: unknown[]) => unknown) =>
+      actual.useCallback(fn, []),
+  };
+});
+
 import CollectionDelegationComponent from "@/components/delegation/CollectionDelegation";
 import { DelegationCenterSection } from "@/enums";
 import { fireEvent, render, screen } from "@testing-library/react";
 
-jest.mock("wagmi", () => ({
-  useReadContract: jest.fn(() => ({})),
-  useReadContracts: jest.fn(() => ({ data: undefined, refetch: jest.fn() })),
-  useWriteContract: jest.fn(() => ({
+jest.mock("wagmi", () => {
+  const readContractResult = {};
+  const readContractsResult = { data: undefined, refetch: jest.fn() };
+  const writeContractResult = {
     writeContract: jest.fn(),
     reset: jest.fn(),
     data: undefined,
     error: undefined,
-  })),
-  useEnsName: jest.fn(() => ({ data: undefined })),
-  useWaitForTransactionReceipt: jest.fn(() => ({ isLoading: false })),
-  useChainId: jest.fn(() => 1),
-}));
+  };
+  const ensNameResult = { data: undefined };
+  const waitReceiptResult = { isLoading: false };
+
+  return {
+    useReadContract: jest.fn().mockReturnValue(readContractResult),
+    useReadContracts: jest.fn().mockReturnValue(readContractsResult),
+    useWriteContract: jest.fn().mockReturnValue(writeContractResult),
+    useEnsName: jest.fn().mockReturnValue(ensNameResult),
+    useWaitForTransactionReceipt: jest.fn().mockReturnValue(waitReceiptResult),
+    useChainId: jest.fn().mockReturnValue(1),
+  };
+});
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({ address: "0x0", isConnected: true }),
