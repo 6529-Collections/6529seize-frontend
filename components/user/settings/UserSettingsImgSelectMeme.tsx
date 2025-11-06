@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { useClickAway } from "react-use";
 
-export interface MemeLite {
-  animation: any;
+export interface NFTLite {
+  animation: string | null;
   contract: string;
   icon: string | null;
   id: 1;
@@ -20,12 +20,12 @@ export default function UserSettingsImgSelectMeme({
   memes,
   onMeme,
 }: {
-  readonly memes: MemeLite[];
-  readonly onMeme: (meme: MemeLite) => void;
+  readonly memes: NFTLite[];
+  readonly onMeme: (meme: NFTLite) => void;
 }) {
   const [input, setInput] = useState<string>("");
 
-  const [filteredMemes, setFilteredMemes] = useState<MemeLite[]>(memes);
+  const [filteredMemes, setFilteredMemes] = useState<NFTLite[]>(memes);
 
   useEffect(() => {
     if (!input) {
@@ -43,7 +43,7 @@ export default function UserSettingsImgSelectMeme({
   const listRef = useRef<HTMLDivElement>(null);
   useClickAway(listRef, () => setIsOpen(false));
 
-  const setMemeAndCloseDropdown = (meme: MemeLite) => {
+  const setMemeAndCloseDropdown = (meme: NFTLite) => {
     onMeme(meme);
     setIsOpen(false);
   };

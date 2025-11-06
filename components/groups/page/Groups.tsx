@@ -67,7 +67,7 @@ export default function Groups() {
 
   return (
     <div>
-      <div className="tailwind-scope tw-mb-4">
+      <div className="tailwind-scope">
         {viewMode === GroupsViewMode.CREATE && (
           <button
             onClick={() => onViewModeChange(GroupsViewMode.VIEW)}

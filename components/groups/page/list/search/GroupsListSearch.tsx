@@ -30,9 +30,10 @@ export default function GroupsListSearch({
   };
 
   return (
-    <div className="tw-mt-4 tw-flex tw-flex-col md:tw-flex-row tw-w-full md:tw-items-center tw-justify-between tw-gap-4">
-      <div className="tw-flex tw-flex-col tw-w-full sm:tw-flex-row sm:tw-items-center tw-gap-4 md:tw-max-w-xs xl:tw-pr-3">
-        {showIdentitySearch && (
+    <div className="tw-mt-4 md:tw-mt-6 tw-flex tw-flex-col lg:tw-flex-row tw-w-full lg:tw-items-center tw-justify-between tw-gap-4">
+      <div className="tw-flex tw-flex-col tw-w-full sm:tw-flex-row sm:tw-items-center tw-gap-4 xl:tw-w-1/2 xl:tw-pr-3">
+       <div className="tw-flex-1">
+         {showIdentitySearch && (
           <IdentitySearch
             size={IdentitySearchSize.SM}
             identity={identity}
@@ -40,7 +41,8 @@ export default function GroupsListSearch({
             label="By Identity"
           />
         )}
-        <div className="tw-group tw-w-full tw-relative">
+       </div>
+        <div className="tw-group tw-w-full tw-relative tw-flex-1">
           <input
             type="text"
             value={groupName ?? ""}
@@ -89,7 +91,7 @@ export default function GroupsListSearch({
           </label>
         </div>
       </div>
-      <div className="tw-flex tw-gap-x-3">
+      <div className="tw-flex tw-gap-3 tw-items-center">
         {showMyGroupsButton && (
           <button
             onClick={onMyGroups}

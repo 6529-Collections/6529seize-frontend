@@ -1,6 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import WalletChecker from "@/components/delegation/walletChecker/WalletChecker";
 import { fetchUrl } from "@/services/6529api";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import React from "react";
 
 jest.mock("react-bootstrap", () => ({
   __esModule: true,
@@ -33,11 +35,26 @@ jest.mock("@/services/6529api");
 
 const mockFetchUrl = fetchUrl as jest.Mock;
 
+const TestWrapper = ({ children }: { children: React.ReactNode }) => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+  return (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+};
+
 describe("WalletChecker", () => {
   it("does not fetch when address invalid", () => {
     const setAddressQuery = jest.fn();
     render(
-      <WalletChecker address_query="" setAddressQuery={setAddressQuery} />
+      <TestWrapper>
+        <WalletChecker address_query="" setAddressQuery={setAddressQuery} />
+      </TestWrapper>
     );
     fireEvent.change(screen.getByPlaceholderText("0x... or ENS"), {
       target: { value: "bad" },
@@ -51,7 +68,9 @@ describe("WalletChecker", () => {
     mockFetchUrl.mockResolvedValue({ data: [] });
     const setAddressQuery = jest.fn();
     render(
-      <WalletChecker address_query="" setAddressQuery={setAddressQuery} />
+      <TestWrapper>
+        <WalletChecker address_query="" setAddressQuery={setAddressQuery} />
+      </TestWrapper>
     );
     fireEvent.change(screen.getByPlaceholderText("0x... or ENS"), {
       target: { value: "0x1111111111111111111111111111111111111111" },
@@ -73,7 +92,9 @@ describe("WalletChecker extras", () => {
   it("clears input after clicking clear", async () => {
     const setAddressQuery = jest.fn();
     render(
-      <WalletChecker address_query="" setAddressQuery={setAddressQuery} />
+      <TestWrapper>
+        <WalletChecker address_query="" setAddressQuery={setAddressQuery} />
+      </TestWrapper>
     );
     const input = screen.getByPlaceholderText("0x... or ENS");
     fireEvent.change(input, { target: { value: "bad" } });

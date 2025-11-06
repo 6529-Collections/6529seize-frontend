@@ -2,7 +2,7 @@
 
 import { getNextGenIconUrl } from "@/components/nextGen/collections/nextgenToken/NextGenTokenImage";
 import { normalizeNextgenTokenID } from "@/components/nextGen/nextgen_helpers";
-import { MemeLite } from "@/components/user/settings/UserSettingsImgSelectMeme";
+import { NFTLite } from "@/components/user/settings/UserSettingsImgSelectMeme";
 import EtherscanIcon from "@/components/user/utils/icons/EtherscanIcon";
 import CommonTimeAgo from "@/components/utils/CommonTimeAgo";
 import {
@@ -19,6 +19,7 @@ import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
   areEqualAddresses,
   isGradientsContract,
+  isMemeLabContract,
   isMemesContract,
   isNextgenContract,
 } from "@/helpers/Helpers";
@@ -65,11 +66,13 @@ export default function UserPageStatsActivityWalletTableRow({
   transaction,
   profile,
   memes,
+  memeLab,
   nextgenCollections,
 }: {
   readonly transaction: Transaction;
   readonly profile: ApiIdentity;
-  readonly memes: MemeLite[];
+  readonly memes: NFTLite[];
+  readonly memeLab: NFTLite[];
   readonly nextgenCollections: NextGenCollection[];
 }) {
   const getShowRoyalties = (): boolean => {
@@ -199,9 +202,13 @@ export default function UserPageStatsActivityWalletTableRow({
 
   const type = getType();
 
-  const meme = isMemesContract(transaction.contract)
-    ? memes.find((m) => m.id === transaction.token_id)
-    : null;
+  let nftLite: NFTLite | undefined | null = null;
+  if (isMemesContract(transaction.contract)) {
+    nftLite = memes.find((m) => m.id === transaction.token_id);
+  } else if (isMemeLabContract(transaction.contract)) {
+    nftLite = memeLab.find((m) => m.id === transaction.token_id);
+  }
+
   const showAnotherSide = [
     TransactionType.PURCHASE,
     TransactionType.SALE,
@@ -231,7 +238,13 @@ export default function UserPageStatsActivityWalletTableRow({
   };
 
   const getLinkContent = () => {
-    let name = meme?.name ?? "";
+    let name;
+    if (isMemesContract(transaction.contract)) {
+      name = `${nftLite?.name} (The Memes #${transaction.token_id})`;
+    }
+    if (isMemeLabContract(transaction.contract)) {
+      name = `${nftLite?.name} (MemeLab #${transaction.token_id})`;
+    }
     if (isNextgenContract(transaction.contract)) {
       const normalizedToken = normalizeNextgenTokenID(transaction.token_id);
       const collectionName =
@@ -247,9 +260,14 @@ export default function UserPageStatsActivityWalletTableRow({
   };
 
   const getImageSrc = () => {
-    let src = meme?.icon ?? "";
+    let src = nftLite?.icon ?? "";
     if (isNextgenContract(transaction.contract)) {
       src = getNextGenIconUrl(transaction.token_id);
+    }
+    if (isGradientsContract(transaction.contract)) {
+      src = `https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x60/${GRADIENT_CONTRACT.toLowerCase()}/${
+        transaction.token_id
+      }.WEBP`;
     }
     return src;
   };
@@ -305,7 +323,7 @@ export default function UserPageStatsActivityWalletTableRow({
           <img
             className="tw-mx-0.5 tw-flex-shrink-0 tw-object-contain tw-max-h-10 tw-min-w-10 tw-w-auto tw-h-auto tw-rounded-sm tw-ring-1 tw-ring-white/30 tw-bg-iron-800"
             src={getImageSrc()}
-            alt={meme?.name ?? ""}
+            alt={nftLite?.name ?? ""}
           />
           <span className="tw-whitespace-nowrap tw-text-sm sm:tw-text-base tw-text-iron-100 tw-font-medium">
             {showAnotherSide && (
