@@ -134,10 +134,19 @@ describe("misc pages render", () => {
   });
 
   it("renders consolidated metrics page", () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    });
     render(
-      <TestProvider>
-        <ConsolidatedMetrics />
-      </TestProvider>
+      <QueryClientProvider client={queryClient}>
+        <TestProvider>
+          <ConsolidatedMetrics />
+        </TestProvider>
+      </QueryClientProvider>
     );
     expect(
       screen.getByText(/Consolidated Network Metrics/i)

@@ -1,4 +1,4 @@
-import { MemeLite } from "@/components/user/settings/UserSettingsImgSelectMeme";
+import { NFTLite } from "@/components/user/settings/UserSettingsImgSelectMeme";
 import { NextGenCollection } from "@/entities/INextgen";
 import { Transaction } from "@/entities/ITransaction";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -8,11 +8,13 @@ export default function UserPageStatsActivityWalletTable({
   transactions,
   profile,
   memes,
+  memeLab,
   nextgenCollections,
 }: {
   readonly transactions: Transaction[];
   readonly profile: ApiIdentity;
-  readonly memes: MemeLite[];
+  readonly memes: NFTLite[];
+  readonly memeLab: NFTLite[];
   readonly nextgenCollections: NextGenCollection[];
 }) {
   return (
@@ -25,6 +27,7 @@ export default function UserPageStatsActivityWalletTable({
               transaction={transaction}
               profile={profile}
               memes={memes}
+              memeLab={memeLab}
               nextgenCollections={nextgenCollections}
             />
           ))}

@@ -1,22 +1,15 @@
+import { NextGenTokenRarityType } from "@/components/nextGen/nextgen_helpers";
+import UserCICAndLevel from "@/components/user/utils/UserCICAndLevel";
+import { ETHEREUM_ICON_TEXT, NEXTGEN_MEDIA_BASE_URL } from "@/constants";
+import { NextGenToken } from "@/entities/INextgen";
+import { cicToType, formatAddress, getRoyaltyImage } from "@/helpers/Helpers";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
-import {
-  ETHEREUM_ICON_TEXT,
-  NEXTGEN_MEDIA_BASE_URL,
-} from "@/constants";
-import { NextGenToken } from "@/entities/INextgen";
-import {
-  cicToType,
-  formatAddress,
-  getRoyaltyImage,
-} from "@/helpers/Helpers";
-import useIsMobileScreen from "@/hooks/isMobileScreen";
-import UserCICAndLevel from "@/components/user/utils/UserCICAndLevel";
-import { NextGenTokenRarityType } from "@/components/nextGen/nextgen_helpers";
 import { TraitScore } from "./NextGenTokenAbout";
 
 export function NextGenTokenImage(
@@ -319,10 +312,6 @@ export function NextGenTokenImage(
 
 export function getNextGenImageUrl(tokenId: number) {
   return `${NEXTGEN_MEDIA_BASE_URL}/png/${tokenId}`;
-}
-
-function getNextGenThumbnailUrl(tokenId: number) {
-  return `${NEXTGEN_MEDIA_BASE_URL}/png0.5k/${tokenId}`;
 }
 
 export function getNextGenIconUrl(tokenId: number) {
