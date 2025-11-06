@@ -3,12 +3,12 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { useIpfsService } from "@/components/ipfs/IPFSContext";
 import {
-    QueryKey,
-    ReactQueryWrapperContext,
+  QueryKey,
+  ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import UserSettingsImgSelectFile from "@/components/user/settings/UserSettingsImgSelectFile";
 import UserSettingsImgSelectMeme, {
-    MemeLite,
+  NFTLite,
 } from "@/components/user/settings/UserSettingsImgSelectMeme";
 import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
@@ -16,9 +16,9 @@ import { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import {
-    commonApiFetch,
-    commonApiPost,
-    commonApiPostForm,
+  commonApiFetch,
+  commonApiPost,
+  commonApiPostForm,
 } from "@/services/api/common-api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { FormEvent, useContext, useEffect, useRef, useState } from "react";
@@ -45,7 +45,7 @@ export default function UserPageHeaderEditPfp({
     queryFn: async () => {
       const memesResponse = await commonApiFetch<{
         count: number;
-        data: MemeLite[];
+        data: NFTLite[];
         next: string | null;
         page: number;
       }>({
@@ -59,11 +59,11 @@ export default function UserPageHeaderEditPfp({
     profile.pfp ? getScaledImageUri(profile.pfp, ImageScale.W_200_H_200) : null
   );
 
-  const [selectedMeme, setSelectedMeme] = useState<MemeLite | null>(null);
+  const [selectedMeme, setSelectedMeme] = useState<NFTLite | null>(null);
   const [file, setFile] = useState<File | null>();
   const [error, setError] = useState<string | null>(null);
 
-  const setSelectedMemeAndRemoveFile = (meme: MemeLite) => {
+  const setSelectedMemeAndRemoveFile = (meme: NFTLite) => {
     setSelectedMeme(meme);
     setFile(null);
     setError(null);
@@ -220,9 +220,7 @@ export default function UserPageHeaderEditPfp({
               imageToShow={imageToShow}
               setFile={setFileAndRemoveMeme}
             />
-            {error && (
-              <p className="tw-mt-3 tw-text-sm tw-text-red">{error}</p>
-            )}
+            {error && <p className="tw-mt-3 tw-text-sm tw-text-red">{error}</p>}
             <div className="tw-pt-6">
               <div className="sm:tw-flex sm:tw-flex-row-reverse tw-gap-x-3">
                 <UserSettingsSave
