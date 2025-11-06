@@ -6,12 +6,23 @@ import React from "react";
 import { TitleProvider } from "@/contexts/TitleContext";
 
 const searchParams = new Map<string, string | null>();
+const mockReplace = jest.fn((url: string) => {
+  if (!url.includes("?")) {
+    searchParams.delete("edit");
+    return;
+  }
+  const parsed = new URL(url, "http://localhost");
+  searchParams.clear();
+  parsed.searchParams.forEach((value, key) => {
+    searchParams.set(key, value);
+  });
+});
 jest.mock("next/navigation", () => ({
   useSearchParams: () => ({
     get: (key: string) => searchParams.get(key) ?? null,
   }),
   usePathname: () => "/groups",
-  useRouter: () => ({ replace: jest.fn() }),
+  useRouter: () => ({ replace: mockReplace }),
 }));
 
 jest.mock("@/components/groups/page/create/GroupCreate", () => (props: any) => (
@@ -40,6 +51,11 @@ describe("Groups page", () => {
     requestAuth: jest.fn().mockResolvedValue({ success: true }),
   } as any;
 
+  beforeEach(() => {
+    searchParams.clear();
+    mockReplace.mockClear();
+  });
+
   it("opens create mode when edit param is present", async () => {
     searchParams.set("edit", "123");
     renderGroups(baseContext);
@@ -52,7 +68,7 @@ describe("Groups page", () => {
     renderGroups(baseContext);
     await screen.findByTestId("group-create");
     await user.click(screen.getByRole("button", { name: /back/i }));
-    expect(screen.getByTestId("list-wrapper")).toBeInTheDocument();
+    expect(await screen.findByTestId("list-wrapper")).toBeInTheDocument();
   });
 
   it("shows list when not authenticated", () => {

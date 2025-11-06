@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import CreateSnapshotTableRowDownload from '@/components/distribution-plan-tool/create-snapshots/table/CreateSnapshotTableRowDownload';
 import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
 import { distributionPlanApiFetch } from '@/services/distribution-plan-api';
@@ -8,11 +9,17 @@ jest.mock('@/services/distribution-plan-api');
 
 const distPlan = { id: '1' } as any;
 
-const Wrapper: React.FC<{children: React.ReactNode}> = ({ children }) => (
-  <DistributionPlanToolContext.Provider value={{ distributionPlan: distPlan, setToasts: jest.fn() } as any}>
-    {children}
-  </DistributionPlanToolContext.Provider>
-);
+const Wrapper: React.FC<{children: React.ReactNode}> = ({ children }) => {
+  const [queryClient] = React.useState(() => new QueryClient());
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <DistributionPlanToolContext.Provider value={{ distributionPlan: distPlan, setToasts: jest.fn() } as any}>
+        {children}
+      </DistributionPlanToolContext.Provider>
+    </QueryClientProvider>
+  );
+};
 
 describe('CreateSnapshotTableRowDownload', () => {
   beforeEach(() => {
