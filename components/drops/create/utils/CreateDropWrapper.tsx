@@ -436,13 +436,9 @@ const CreateDropWrapper = forwardRef<
       [CreateDropViewType.COMPACT]: (
         <CreateDropCompact
           ref={createDropContendCompactRef}
-          profile={profile}
-          showProfile={showProfile}
           screenType={screenType}
           editorState={editorState}
           files={files}
-          title={title}
-          metadata={metadata}
           canSubmit={canSubmit}
           waveId={waveId}
           canAddPart={canAddPart}
@@ -454,7 +450,6 @@ const CreateDropWrapper = forwardRef<
           missingMedia={missingMedia}
           missingMetadata={missingMetadata}
           onViewChange={setViewType}
-          onMetadataRemove={onMetadataRemove}
           onEditorState={setEditorState}
           onMentionedUser={onMentionedUser}
           onReferencedNft={onReferencedNft}

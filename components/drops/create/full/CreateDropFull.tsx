@@ -138,7 +138,6 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
       [CreateDropScreenType.MOBILE]: (
         <CreateDropFullMobile
           ref={mobileEditorRef}
-          profile={profile}
           title={title}
           files={files}
           editorState={editorState}

@@ -7,7 +7,6 @@ import CreateDropContent, {
 import { EditorState } from "lexical";
 import {
   CreateDropConfig,
-  DropMetadata,
   MentionedUser,
   ReferencedNft,
 } from "@/entities/IDrop";
@@ -19,20 +18,15 @@ import CreateDropSelectedFilePreview from "../utils/file/CreateDropSelectedFileP
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
 import { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
-import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 
 export interface CreateDropCompactHandles {
   clearEditorState: () => void;
 }
 interface CreateDropCompactProps {
   readonly waveId: string | null;
-  readonly profile: ProfileMinWithoutSubs;
-  readonly showProfile?: boolean;
   readonly screenType: CreateDropScreenType;
   readonly editorState: EditorState | null;
-  readonly title: string | null;
   readonly files: File[];
-  readonly metadata: DropMetadata[];
   readonly canSubmit: boolean;
   readonly canAddPart: boolean;
   readonly loading: boolean;
@@ -44,7 +38,6 @@ interface CreateDropCompactProps {
   readonly missingMetadata: ApiWaveRequiredMetadata[];
   readonly children: React.ReactNode;
   readonly onViewChange: (newV: CreateDropViewType) => void;
-  readonly onMetadataRemove: (key: string) => void;
   readonly onEditorState: (editorState: EditorState | null) => void;
   readonly onMentionedUser: (
     newUser: Omit<MentionedUser, "current_handle">
@@ -63,13 +56,9 @@ const CreateDropCompact = forwardRef<
   (
     {
       waveId,
-      profile: _profile,
-      showProfile: _showProfile = true,
       editorState,
       screenType,
       files,
-      title: _title,
-      metadata: _metadata,
       canSubmit,
       canAddPart,
       loading,
@@ -81,7 +70,6 @@ const CreateDropCompact = forwardRef<
       missingMetadata,
       children,
       onViewChange,
-      onMetadataRemove: _onMetadataRemove,
       onEditorState,
       onMentionedUser,
       onReferencedNft,

@@ -19,12 +19,9 @@ describe("CreateDropCompact", () => {
     render(
       <CreateDropCompact
         waveId="1"
-        profile={{} as any}
         screenType={"MOBILE" as any}
         editorState={null}
-        title={null}
         files={[]}
-        metadata={[]}
         canSubmit={true}
         canAddPart={true}
         loading={false}
@@ -34,7 +31,6 @@ describe("CreateDropCompact", () => {
         missingMedia={[] as any}
         missingMetadata={[] as any}
         onViewChange={jest.fn()}
-        onMetadataRemove={jest.fn()}
         onEditorState={jest.fn()}
         onMentionedUser={jest.fn()}
         onReferencedNft={jest.fn()}
