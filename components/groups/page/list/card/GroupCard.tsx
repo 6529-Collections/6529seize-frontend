@@ -1,13 +1,13 @@
 "use client";
 
-import { useContext, useEffect, useState, type JSX } from "react";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import { getRandomColorWithSeed } from "@/helpers/Helpers";
-import GroupCardView from "./GroupCardView";
 import { AuthContext } from "@/components/auth/Auth";
-import { useRouter } from "next/navigation";
-import GroupCardVoteAll from "./vote-all/GroupCardVoteAll";
+import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
+import { getRandomColorWithSeed } from "@/helpers/Helpers";
+import { useRouter } from "next/navigation";
+import { useContext, useEffect, useState, type JSX } from "react";
+import GroupCardView from "./GroupCardView";
+import GroupCardVoteAll from "./vote-all/GroupCardVoteAll";
 
 export enum GroupCardState {
   IDLE = "IDLE",
@@ -108,28 +108,36 @@ export default function GroupCard({
   const isIdle = state === GroupCardState.IDLE;
   const cardLabel =
     group?.name ?? titlePlaceholder ?? "View community group details";
+  const cardHref = group ? `/network?page=1&group=${group.id}` : undefined;
+  const gradientStyle = {
+    background: `linear-gradient(135deg, ${banner1} 0%, ${banner2} 100%)`,
+  };
 
   return (
     <div className="tw-col-span-1 tw-relative">
-      {isIdle && (
+      {isIdle && cardHref && (
         <button
           type="button"
-          onClick={() => router.push(`/network?page=1&group=${group?.id}`)}
-          className="tw-absolute tw-inset-0 tw-z-10 tw-rounded-2xl tw-border-0 tw-bg-transparent tw-p-0 tw-cursor-pointer focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500"
-          aria-label={`Open ${cardLabel}`}></button>
+          onClick={() => router.push(cardHref)}
+          className="tw-absolute tw-inset-0 tw-z-0 tw-rounded-xl tw-border-0 tw-bg-transparent tw-p-0 tw-cursor-pointer focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500"
+          aria-label={`Open ${cardLabel}`}
+        ></button>
       )}
-      <div className={isIdle ? "tw-group" : ""}>
-        <div
-          className="tw-relative tw-w-full tw-h-9 tw-rounded-t-2xl"
-          style={{
-            background: `linear-gradient(45deg, ${banner1} 0%, ${banner2} 100%)`,
-          }}>
-          <div className="tw-absolute tw-inset-0 tw-rounded-t-2xl tw-ring-[1.5px] tw-ring-white/20 group-hover:tw-ring-white/40 tw-ring-inset tw-pointer-events-none tw-transition tw-duration-500 tw-ease-out"></div>
+      <div
+        className={`tw-relative tw-overflow-hidden tw-group tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-backdrop-blur-sm tw-shadow-sm tw-shadow-black/20 tw-transition-all tw-duration-300 tw-ease-out tw-cursor-pointer desktop-hover:hover:tw-shadow-lg desktop-hover:hover:tw-shadow-black/40 desktop-hover:hover:tw-translate-y-[-1px] focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 focus-visible:tw-outline-none tw-no-underline ${
+          isIdle
+            ? "tw-group desktop-hover:hover:tw-shadow-lg desktop-hover:hover:tw-shadow-black/40 desktop-hover:hover:tw-translate-y-[-1px]"
+            : ""
+        }`}
+      >
+        <div className="tw-absolute tw-inset-0 tw-rounded-t-xl tw-h-1">
+          <div
+            className="tw-absolute tw-inset-0 tw-opacity-80 tw-transition-opacity tw-duration-300 tw-ease-out desktop-hover:group-hover:tw-opacity-95"
+            style={gradientStyle}
+          ></div>
+          <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-b from-black/25 via-black/10 to-transparent"></div>
         </div>
-        <div
-          className={`${
-            connectedProfile?.handle ? "tw-min-h-[134px]" : "tw-h-[123.5px]"
-          } -tw-mt-1 tw-bg-iron-900 tw-flex tw-flex-col tw-rounded-b-2xl tw-relative tw-border-[1.5px] tw-border-solid tw-border-t-0 tw-border-iron-700 group-hover:tw-border-iron-600 tw-transition tw-duration-500 tw-ease-out`}>
+        <div className="tw-flex tw-flex-1 tw-flex-col tw-rounded-b-xl tw-bg-iron-950">
           {components[state]}
         </div>
       </div>

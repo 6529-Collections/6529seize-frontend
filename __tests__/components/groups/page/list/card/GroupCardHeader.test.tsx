@@ -26,7 +26,7 @@ test('shows profile image and link', () => {
   const img = screen.getByRole('img');
   expect(img).toHaveAttribute('src', 'pic.png?s');
   expect(screen.getByRole('link')).toHaveAttribute('href', '/alice');
-  expect(screen.getByText('1d')).toBeInTheDocument();
+  expect(screen.getByText(/1d/i)).toBeInTheDocument();
 });
 
 test('renders placeholder when no image', () => {

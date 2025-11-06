@@ -194,8 +194,8 @@ export default function GroupCardConfigs({
   }, [configs]);
 
   return (
-    <div className="tw-mt-2 tw-pb-4 tw-relative">
-      <div className="tw-overflow-x-hidden">
+    <div className="tw-relative tw-flex tw-items-start tw-text-xs sm:tw-text-sm tw-text-iron-200">
+      <div className="tw-overflow-x-hidden tw-w-full">
         {isLeftHidden && (
           <button
             onClick={(e) => {
@@ -203,13 +203,15 @@ export default function GroupCardConfigs({
               scrollContainer("left");
             }}
             aria-label="Scroll left"
-            className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-top-0.5 tw-z-[20] tw-p-0 tw-h-7 tw-w-7 tw-left-0 tw-bg-iron-900 hover:tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-650 tw-rounded-md tw-border-none tw-transition tw-duration-300 tw-ease-out">
+            className="tw-absolute tw-left-0 tw-top-1/2 tw-z-30 tw-inline-flex tw-border tw-border-solid tw-border-white/ tw-h-7 tw-w-7 tw-translate-y-[-50%] -tw-translate-x-3 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-text-white tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500 desktop-hover:hover:tw-bg-white/10"
+          >
             <svg
-              className="tw-h-5 tw-w-5 tw-text-iron-300 group-hover:tw-text-iron-50 tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-h-4 tw-w-4 tw-text-iron-200 desktop-hover:hover:tw-text-white tw-rotate-90 tw-transition tw-duration-200 tw-ease-out"
               viewBox="0 0 24 24"
               aria-hidden="true"
               fill="none"
-              xmlns="http://www.w3.org/2000/svg">
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <path
                 d="M6 9L12 15L18 9"
                 stroke="currentColor"
@@ -221,10 +223,11 @@ export default function GroupCardConfigs({
           </button>
         )}
         <div
-          className="tw-flex tw-items-center tw-gap-x-3 tw-overflow-x-auto horizontal-menu-hide-scrollbar"
+          className="tw-flex tw-items-center tw-gap-x-4 tw-gap-y-2 tw-overflow-x-auto tw-py-0.5 horizontal-menu-hide-scrollbar"
           ref={containerRef}
-          onScroll={checkForHiddenContent}>
-          {configs.map((config, i) => (
+          onScroll={checkForHiddenContent}
+        >
+          {configs.map((config) => (
             <GroupCardConfig config={config} key={config.key} />
           ))}
         </div>
@@ -235,13 +238,15 @@ export default function GroupCardConfigs({
               scrollContainer("right");
             }}
             aria-label="Scroll right"
-            className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-top-0.5 tw-z-[20] tw-p-0 tw-h-7 tw-w-7 tw-right-0 tw-bg-iron-900 hover:tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-650 tw-rounded-md tw-border-none tw-transition tw-duration-300 tw-ease-out">
+            className="tw-absolute tw-right-0 tw-border tw-border-solid tw-border-white/5 tw-top-1/2 tw-z-30 tw-inline-flex tw-h-7 tw-w-7 tw-translate-y-[-50%] tw-translate-x-3 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-text-white tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500 desktop-hover:hover:tw-bg-white/10"
+          >
             <svg
-              className="tw-h-5 tw-w-5 tw-text-iron-300 group-hover:tw-text-iron-50 -tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-h-4 tw-w-4 tw-text-iron-200 desktop-hover:hover:tw-text-white -tw-rotate-90 tw-transition tw-duration-200 tw-ease-out"
               viewBox="0 0 24 24"
               aria-hidden="true"
               fill="none"
-              xmlns="http://www.w3.org/2000/svg">
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <path
                 d="M6 9L12 15L18 9"
                 stroke="currentColor"
