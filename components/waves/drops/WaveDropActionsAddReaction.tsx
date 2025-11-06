@@ -26,7 +26,9 @@ const WaveDropActionsAddReaction: React.FC<{
   readonly onAddReaction?: () => void;
 }> = ({ drop, isMobile = false, onAddReaction }) => {
   const isTemporaryDrop = drop.id.startsWith("temp-");
-  const canReact = !isTemporaryDrop;
+  const isLightDrop =
+    (drop as { type?: DropSize }).type === DropSize.LIGHT;
+  const canReact = !isTemporaryDrop && !isLightDrop;
   const [showPicker, setShowPicker] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const pickerContainerRef = useRef<HTMLDivElement | null>(null); // Ref for container
@@ -215,7 +217,9 @@ const WaveDropActionsAddReaction: React.FC<{
         disabled={!canReact}
         aria-label="Add reaction to drop"
         data-tooltip-id={
-          !isTemporaryDrop ? `add-reaction-${drop.id}` : undefined
+          !isTemporaryDrop && !isLightDrop
+            ? `add-reaction-${drop.id}`
+            : undefined
         }
       >
         <svg
@@ -232,7 +236,7 @@ const WaveDropActionsAddReaction: React.FC<{
           </g>
         </svg>
       </button>
-      {!isTemporaryDrop && (
+      {!isTemporaryDrop && !isLightDrop && (
         <Tooltip
           id={`add-reaction-${drop.id}`}
           place="top"

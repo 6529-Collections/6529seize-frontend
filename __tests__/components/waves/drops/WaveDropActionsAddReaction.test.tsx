@@ -1,6 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import WaveDropActionsAddReaction from "@/components/waves/drops/WaveDropActionsAddReaction";
+import { DropSize } from "@/helpers/waves/drop.helpers";
 
 const applyOptimisticDropUpdateMock = jest.fn(() => ({ rollback: jest.fn() }));
 const setToastMock = jest.fn();
@@ -74,6 +75,12 @@ const tempDrop = {
   wave: { id: "wave-1" },
   context_profile_context: { reaction: null },
 } as any;
+const lightDrop = {
+  id: "light-001",
+  wave: { id: "wave-1" },
+  type: DropSize.LIGHT,
+  context_profile_context: { reaction: null },
+} as any;
 
 describe("WaveDropActionsAddReaction", () => {
   beforeEach(() => {
@@ -96,6 +103,12 @@ describe("WaveDropActionsAddReaction", () => {
 
   it("disables button when drop is temporary", () => {
     render(<WaveDropActionsAddReaction drop={tempDrop} />);
+    const button = screen.getByRole("button", { name: /add reaction/i });
+    expect(button).toBeDisabled();
+  });
+
+  it("disables button when drop is light", () => {
+    render(<WaveDropActionsAddReaction drop={lightDrop} />);
     const button = screen.getByRole("button", { name: /add reaction/i });
     expect(button).toBeDisabled();
   });
