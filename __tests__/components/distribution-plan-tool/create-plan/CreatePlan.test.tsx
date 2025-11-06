@@ -1,8 +1,10 @@
+import React from "react";
 import CreatePlan from "@/components/distribution-plan-tool/create-plan/CreatePlan";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
-import { render, waitFor } from "@testing-library/react";
+import { waitFor } from "@testing-library/react";
 import { useRouter } from "next/navigation";
+import { renderWithQueryClient } from "../../../utils/reactQuery";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -31,14 +33,15 @@ describe("CreatePlan", () => {
     const setState = jest.fn();
     const router = { push: jest.fn() };
     mockedUseRouter.mockReturnValue(router);
+    const Wrapper = ({ children }: { children: React.ReactNode }) => (
+      <DistributionPlanToolContext.Provider value={{ setState } as any}>
+        {children}
+      </DistributionPlanToolContext.Provider>
+    );
     return {
       setState,
       push: router.push,
-      ...render(
-        <DistributionPlanToolContext.Provider value={{ setState } as any}>
-          <CreatePlan id="1" />
-        </DistributionPlanToolContext.Provider>
-      ),
+      ...renderWithQueryClient(<CreatePlan id="1" />, { wrapper: Wrapper }),
     };
   }
 
@@ -49,7 +52,7 @@ describe("CreatePlan", () => {
     await waitFor(() =>
       expect(mockedFetch).toHaveBeenCalledWith("/allowlists/1")
     );
-    expect(setState).toHaveBeenCalledWith(data);
+    await waitFor(() => expect(setState).toHaveBeenCalledWith(data));
   });
 
   it("redirects when fetch fails", async () => {

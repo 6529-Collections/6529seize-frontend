@@ -1,8 +1,9 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import RoyaltiesDownloads, {
   generateMetadata,
 } from "@/app/open-data/royalties/page";
+import { renderWithQueryClient } from "../../utils/reactQuery";
 
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
@@ -21,6 +22,11 @@ jest.mock("@/contexts/TitleContext", () => ({
   TitleProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
+jest.mock("@/services/6529api", () => ({
+  fetchUrl: jest.fn().mockResolvedValue({ count: 0, data: [] }),
+  fetchAllPages: jest.fn(),
+}));
+
 jest.mock("@/components/providers/metadata", () => ({
   getAppMetadata: jest.fn().mockReturnValue({
     title: "Royalties",
@@ -30,7 +36,7 @@ jest.mock("@/components/providers/metadata", () => ({
 
 describe("Open Data royalties page", () => {
   it("renders royalties component and sets title", () => {
-    render(<RoyaltiesDownloads />);
+    renderWithQueryClient(<RoyaltiesDownloads />);
     expect(
       screen.getByRole("heading", { name: "Royalties Downloads" })
     ).toBeInTheDocument();
