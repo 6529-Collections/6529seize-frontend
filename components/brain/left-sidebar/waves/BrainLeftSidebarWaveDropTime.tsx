@@ -15,12 +15,19 @@ const BrainLeftSidebarWaveDropTime: React.FC<
   useEffect(() => {
     const intervalId = window.setInterval(() => {
       setNow(Date.now());
-    }, 60000); // Update every minute (60000ms)
+    }, 60000);
 
     return () => {
       window.clearInterval(intervalId);
     };
   }, []);
+
+  useEffect(() => {
+    setNow((previousNow) => {
+      const currentNow = Date.now();
+      return previousNow === currentNow ? previousNow : currentNow;
+    });
+  }, [time]);
 
   const label = getTimeAgoShort(time, now);
 
