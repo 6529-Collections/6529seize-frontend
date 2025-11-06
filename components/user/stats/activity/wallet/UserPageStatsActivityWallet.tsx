@@ -1,7 +1,7 @@
 "use client";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { MemeLite } from "@/components/user/settings/UserSettingsImgSelectMeme";
+import { NFTLite } from "@/components/user/settings/UserSettingsImgSelectMeme";
 import { NextGenCollection } from "@/entities/INextgen";
 import { Transaction } from "@/entities/ITransaction";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -192,13 +192,28 @@ export default function UserPageStatsActivityWallet({
     queryFn: async () => {
       const memesResponse = await commonApiFetch<{
         count: number;
-        data: MemeLite[];
+        data: NFTLite[];
         next: string | null;
         page: number;
       }>({
         endpoint: "memes_lite",
       });
       return memesResponse.data;
+    },
+  });
+
+  const { isFetching: isFirstLoadingMemeLab, data: memeLab } = useQuery({
+    queryKey: [QueryKey.MEMELAB_LITE],
+    queryFn: async () => {
+      const memeLabResponse = await commonApiFetch<{
+        count: number;
+        data: NFTLite[];
+        next: string | null;
+        page: number;
+      }>({
+        endpoint: "memelab_lite",
+      });
+      return memeLabResponse.data;
     },
   });
 
@@ -229,10 +244,13 @@ export default function UserPageStatsActivityWallet({
         profile={profile}
         transactions={data?.data ?? []}
         memes={memes ?? []}
+        memeLab={memeLab ?? []}
         nextgenCollections={nextgenCollections ?? []}
         totalPages={totalPages}
         page={pageFilter}
-        isFirstLoading={isFirstLoading || isFirstLoadingMemes}
+        isFirstLoading={
+          isFirstLoading || isFirstLoadingMemes || isFirstLoadingMemeLab
+        }
         loading={isFetching}
         setPage={onPageFilter}
         onActiveFilter={onActiveFilter}

@@ -1,5 +1,5 @@
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
-import { MemeLite } from "@/components/user/settings/UserSettingsImgSelectMeme";
+import { NFTLite } from "@/components/user/settings/UserSettingsImgSelectMeme";
 import CommonCardSkeleton from "@/components/utils/animation/CommonCardSkeleton";
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
 import { NextGenCollection } from "@/entities/INextgen";
@@ -13,6 +13,7 @@ export default function UserPageStatsActivityWalletTableWrapper({
   profile,
   transactions,
   memes,
+  memeLab,
   nextgenCollections,
   totalPages,
   page,
@@ -24,7 +25,8 @@ export default function UserPageStatsActivityWalletTableWrapper({
   readonly filter: UserPageStatsActivityWalletFilterType;
   readonly profile: ApiIdentity;
   readonly transactions: Transaction[];
-  readonly memes: MemeLite[];
+  readonly memes: NFTLite[];
+  readonly memeLab: NFTLite[];
   readonly nextgenCollections: NextGenCollection[];
   readonly totalPages: number;
   readonly page: number;
@@ -66,12 +68,13 @@ export default function UserPageStatsActivityWalletTableWrapper({
         {loading && <CircleLoader />}
       </div>
       <div>
-        {transactions.length && memes?.length ? (
+        {transactions.length ? (
           <div className="tw-flow-root tw-scroll-py-3 tw-overflow-auto">
             <UserPageStatsActivityWalletTable
               transactions={transactions}
               profile={profile}
               memes={memes}
+              memeLab={memeLab}
               nextgenCollections={nextgenCollections}
             />
             {totalPages > 1 && (
