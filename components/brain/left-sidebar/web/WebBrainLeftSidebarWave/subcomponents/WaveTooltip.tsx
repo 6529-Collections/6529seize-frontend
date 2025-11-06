@@ -1,16 +1,5 @@
-import type { CSSProperties, ReactNode, ComponentProps } from 'react';
+import type { ReactNode, ComponentProps } from 'react';
 import { Tooltip } from 'react-tooltip';
-
-const TOOLTIP_STYLE: CSSProperties = {
-  background: '#37373E',
-  color: 'white',
-  padding: '6px 10px',
-  fontSize: '12px',
-  fontWeight: 500,
-  borderRadius: '6px',
-  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-  zIndex: 10000,
-};
 
 export type WaveTooltipPlacement = ComponentProps<typeof Tooltip>['place'];
 
@@ -21,7 +10,12 @@ interface WaveTooltipProps {
 }
 
 export const WaveTooltip = ({ id, place, children }: WaveTooltipProps) => (
-  <Tooltip id={id} place={place} positionStrategy="fixed" style={TOOLTIP_STYLE}>
+  <Tooltip
+    id={id}
+    place={place}
+    positionStrategy="fixed"
+    className="tw-bg-[#37373E] tw-text-white tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-medium tw-rounded-md tw-shadow-[0_4px_12px_rgba(0,0,0,0.3)] tw-z-[10000]"
+  >
     <span className="tw-text-xs">{children}</span>
   </Tooltip>
 );
