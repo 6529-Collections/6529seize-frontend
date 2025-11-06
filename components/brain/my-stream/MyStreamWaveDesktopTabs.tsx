@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { TabToggle } from "@/components/common/TabToggle";
 import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import { useContentTab, WaveVotingState } from "../ContentTabContext";
 import { useWave } from "@/hooks/useWave";
@@ -64,12 +65,10 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   );
 
   const filteredDecisions = React.useMemo(() => {
-    const decisionsAsApiFormat = allDecisions.map(
-      (decision) =>
-        ({
-          decision_time: decision.timestamp,
-        } as any)
-    );
+    const decisionsAsApiFormat: Array<Pick<ApiWaveDecision, "decision_time">> =
+      allDecisions.map((decision) => ({
+        decision_time: decision.timestamp,
+      }));
 
     const filtered = filterDecisionsDuringPauses(decisionsAsApiFormat);
 
