@@ -2227,27 +2227,6 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiIncomingIdentitySubscriptionsPage"
-  /tdh-stats/{identity}:
-    get:
-      tags:
-        - TDH stats
-      summary: Get identities TDH stats
-      operationId: getIdentitiesTdhStats
-      parameters:
-        - name: identity
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiTdhStats"
-        "404":
-          description: Not found
   /tdh-editions/wallet/{wallet}:
     get:
       tags:
@@ -2468,6 +2447,27 @@ paths:
                 $ref: "#/components/schemas/ApiTdhEditionsPage"
         "404":
           description: Identity not found
+  /tdh-stats/{identity}:
+    get:
+      tags:
+        - TDH stats
+      summary: Get identities TDH stats
+      operationId: getIdentitiesTdhStats
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiTdhStats"
+        "404":
+          description: Not found
   /tdh-grants:
     get:
       tags:
@@ -3320,6 +3320,103 @@ paths:
                 $ref: "#/components/schemas/ApiWaveSubscriptionActions"
         "404":
           description: Wave not found
+  /xtdh:
+    get:
+      tags:
+        - xTDH
+      summary: Get info about xTDH of tokens
+      operationId: getXTokenXTdhStats
+      parameters:
+        - name: grantee
+          in: query
+          description: If set then you"ll get token stats for ownings of a specific grantee
+          required: false
+          schema:
+            type: string
+        - name: contract
+          in: query
+          description: If set then you"ll get token stats for a specific contract
+          required: false
+          schema:
+            type: string
+        - name: token
+          in: query
+          description: >-
+            If set then you"ll get token stats for a specific token. Only works
+            if paired with contract.
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 0
+        - name: page_size
+          in: query
+          description: Default is 20
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 100
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiXTdhTokensPage"
+  /xtdh/identity/{identity}/contracts/:
+    get:
+      tags:
+        - xTDH
+      summary: Get info about xTDH contracts of identity
+      operationId: getXTdhContracts
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiContract"
+  /xtdh/contract/{contract}/token/{token}/contributors:
+    get:
+      tags:
+        - xTDH
+      summary: Get info about xTDH contributors to token
+      operationId: getXTdhTokenContributors
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiXTdhTokenGrantor"
 components:
   securitySchemes:
     bearerAuth:
@@ -3951,6 +4048,13 @@ components:
         - media_url
       properties:
         media_url:
+          type: string
+    ApiContract:
+      type: object
+      required:
+        - contract
+      properties:
+        contract:
           type: string
     ApiCreateDropPart:
       type: object
@@ -5816,6 +5920,17 @@ components:
           format: int64
         next:
           type: boolean
+    ApiPageWithoutCount:
+      type: object
+      required:
+        - page
+        - next
+      properties:
+        page:
+          type: number
+          format: int64
+        next:
+          type: boolean
     ApiPageSortDirection:
       type: string
       enum:
@@ -6309,6 +6424,7 @@ components:
         - PENDING
         - FAILED
         - GRANTED
+        - DISABLED
     ApiTdhGrantTargetChain:
       type: string
       enum:
@@ -7268,5 +7384,49 @@ components:
           type: boolean
         forbid_negative_votes:
           type: boolean
+    ApiXTdhToken:
+      required:
+        - contract
+        - token
+        - xtdh_rate
+        - xtdh
+      properties:
+        contract:
+          type: string
+        token:
+          type: string
+        xtdh_rate:
+          type: number
+          format: double
+        xtdh:
+          type: number
+          format: double
+        grantor:
+          $ref: "#/components/schemas/ApiProfileMin"
+    ApiXTdhTokenGrantor:
+      required:
+        - xtdh_rate
+        - xtdh
+        - grantor
+      properties:
+        xtdh_rate:
+          type: number
+          format: double
+        xtdh:
+          type: number
+          format: double
+        grantor:
+          $ref: "#/components/schemas/ApiProfileMin"
+    ApiXTdhTokensPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithoutCount"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiXTdhToken"
 security:
   - bearerAuth: []

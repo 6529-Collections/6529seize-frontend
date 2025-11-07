@@ -151,6 +151,7 @@ function sharedConfig(publicEnv, assetPrefix) {
         "d3lqz0a4bldqgf.cloudfront.net",
         "i.seadn.io",
         "i2.seadn.io",
+        "i2c.seadn.io",
         "res.cloudinary.com",
         "ipfs.6529.io",
       ],

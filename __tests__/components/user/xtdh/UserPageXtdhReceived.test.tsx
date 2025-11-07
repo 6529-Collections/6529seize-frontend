@@ -1,154 +1,52 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { render, screen, waitFor } from "@testing-library/react";
 import UserPageXtdhReceived from "@/components/xtdh/user/received";
 
-const mockUseReceivedCollections = jest.fn();
-const mockUseReceivedNfts = jest.fn();
-const mockUseSearchParams = jest.fn();
-const mockPush = jest.fn();
+const mockFetchXtdhTokens = jest.fn();
 
-jest.mock("@/hooks/useXtdhReceived", () => ({
-  useReceivedCollections: (...args: unknown[]) => mockUseReceivedCollections(...args),
-  useReceivedNfts: (...args: unknown[]) => mockUseReceivedNfts(...args),
-}));
-
-jest.mock("next/navigation", () => ({
-  useSearchParams: () => mockUseSearchParams(),
-  useRouter: () => ({ push: mockPush }),
-  usePathname: () => "/profiles/simo/xtdh",
+jest.mock("@/services/api/xtdh", () => ({
+  fetchXtdhTokens: (...args: unknown[]) => mockFetchXtdhTokens(...args),
+  fetchXtdhTokenContributors: jest.fn().mockResolvedValue([]),
 }));
 
 describe("UserPageXtdhReceived", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-
-    const baseToken = {
-      tokenId: "memes-1",
-      tokenName: "Token One",
-      tokenImage: "https://example.com/token-1.png",
-      xtdhRate: 50,
-      totalXtdhReceived: 1000,
-      granters: [
-        {
-          profileId: "alice",
-          displayName: "Alice",
-          profileImage: "https://example.com/alice.png",
-          xtdhRateGranted: 50,
-        },
-      ],
-    };
-
-    mockUseReceivedCollections.mockReturnValue({
-      data: {
-        collections: [
-          {
-            collectionId: "memes",
-            collectionName: "The Memes of Production",
-            collectionImage: "https://example.com/memes.png",
-            tokenCount: 1,
-            totalXtdhRate: 50,
-            totalXtdhReceived: 1000,
-            granters: baseToken.granters,
-            tokens: [baseToken],
-          },
-        ],
-        totalCount: 1,
-        page: 1,
-        pageSize: 20,
-        availableCollections: [
-          {
-            collectionId: "memes",
-            collectionName: "The Memes of Production",
-            tokenCount: 1,
-          },
-        ],
-      },
-      isLoading: false,
-      isFetching: false,
-      isError: false,
-      error: undefined,
-      refetch: jest.fn(),
-    });
-
-    mockUseReceivedNfts.mockReturnValue({
-      data: {
-        nfts: [
-          {
-            ...baseToken,
-            collectionId: "memes",
-            collectionName: "The Memes of Production",
-            collectionImage: "https://example.com/memes.png",
-          },
-        ],
-        totalCount: 1,
-        page: 1,
-        pageSize: 20,
-        availableCollections: [
-          {
-            collectionId: "memes",
-            collectionName: "The Memes of Production",
-            tokenCount: 1,
-          },
-        ],
-      },
-      isLoading: false,
-      isFetching: false,
-      isError: false,
-      error: undefined,
-      refetch: jest.fn(),
-    });
-
-    mockUseSearchParams.mockReturnValue(new URLSearchParams());
-    mockPush.mockReset();
-  });
-
-  it("requests collections data with default parameters", () => {
-    render(<UserPageXtdhReceived profileId="simo" />);
-
-    expect(mockUseReceivedCollections).toHaveBeenCalled();
-    const args = mockUseReceivedCollections.mock.calls[0]?.[0];
-    expect(args).toMatchObject({
-      profile: "simo",
-      sort: "total_rate",
-      dir: "desc",
+    mockFetchXtdhTokens.mockResolvedValue({
+      tokens: [],
       page: 1,
-    });
-    expect(args.filters).toEqual({ collections: [], minRate: undefined, minGrantors: undefined });
-  });
-
-  it("enables the NFTs query only after switching the view", async () => {
-    const user = userEvent.setup();
-    render(<UserPageXtdhReceived profileId="simo" />);
-
-    const initialCalls = mockUseReceivedNfts.mock.calls.length;
-    expect(initialCalls).toBeGreaterThan(0);
-    for (let index = 0; index < initialCalls; index += 1) {
-      expect(mockUseReceivedNfts.mock.calls[index]?.[0]).toMatchObject({
-        enabled: false,
-      });
-    }
-
-    const nftToggles = screen.getAllByRole("button", { name: /NFTs view/i });
-    await user.click(nftToggles[0]);
-
-    expect(mockUseReceivedNfts.mock.calls.length).toBeGreaterThan(initialCalls);
-    const latestCall =
-      mockUseReceivedNfts.mock.calls[mockUseReceivedNfts.mock.calls.length - 1];
-    expect(latestCall?.[0]).toMatchObject({
-      enabled: true,
+      hasNextPage: false,
     });
   });
 
-  it("indicates active filters in the controls when a collection filter is active", () => {
-    mockUseSearchParams.mockReturnValue(new URLSearchParams("collection=memes"));
+  it("passes the profile identifier to the API", async () => {
+    const client = new QueryClient();
 
-    render(<UserPageXtdhReceived profileId="simo" />);
+    render(
+      <QueryClientProvider client={client}>
+        <UserPageXtdhReceived profileId="simo" />
+      </QueryClientProvider>,
+    );
 
-    const filtersButton = screen.getByRole("button", { name: /Filters/i });
-    expect(filtersButton.querySelector('[aria-hidden="true"]')).not.toBeNull();
+    await waitFor(() => {
+      expect(mockFetchXtdhTokens).toHaveBeenCalled();
+    });
+
+    expect(mockFetchXtdhTokens).toHaveBeenCalledWith(
+      expect.objectContaining({ grantee: "simo" }),
+    );
+  });
+
+  it("renders a placeholder when the profile is unknown", () => {
+    const client = new QueryClient();
+
+    render(
+      <QueryClientProvider client={client}>
+        <UserPageXtdhReceived profileId={null} />
+      </QueryClientProvider>,
+    );
 
     expect(
-      screen.queryByText(/Collections: The Memes of Production/i)
-    ).not.toBeInTheDocument();
+      screen.getByText(/Connect a profile to view NFTs/i),
+    ).toBeInTheDocument();
   });
 });
