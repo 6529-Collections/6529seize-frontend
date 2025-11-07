@@ -62,7 +62,9 @@ export default function DistributionPage(props: Readonly<Props>) {
         });
       });
       const phases = Array.from(phasesSet);
-      phases.sort((a, b) => a.localeCompare(b));
+      phases.sort((a, b) =>
+        a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" })
+      );
       setDistributionsPhases(phases);
     },
     []

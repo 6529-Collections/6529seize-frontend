@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useCallback } from "react";
 import EmmaListSearch from "@/components/utils/input/emma/EmmaListSearch";
 import {
   AllowlistDescription,
@@ -37,16 +37,14 @@ export default function CreateGroupWalletsEmma({
     enabled: !!connectedProfile?.handle && !!selected,
   });
 
-  useEffect(
-    () =>
-      setWallets(emmaList?.map((item) => item.wallet.toLowerCase()) ?? null),
-    [emmaList, setWallets]
-  );
+  useEffect(() => {
+    setWallets(emmaList?.map((item) => item.wallet.toLowerCase()) ?? null);
+  }, [emmaList, setWallets]);
 
-  const onWalletsRemove = () => {
+  const onWalletsRemove = useCallback(() => {
     setWallets(null);
     setSelected(null);
-  };
+  }, [setWallets]);
 
   return (
     <div className="tw-p-3 sm:tw-p-5 tw-bg-iron-950 tw-rounded-xl tw-shadow tw-border tw-border-solid tw-border-iron-800">

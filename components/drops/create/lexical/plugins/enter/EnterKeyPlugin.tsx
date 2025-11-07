@@ -77,51 +77,43 @@ export default function EnterKeyPlugin({
       });
     };
 
-    return editor.registerCommand(
-      KEY_ENTER_COMMAND,
-      (event) => {
-        if (!shouldHandleEnter()) {
-          // Let the mention plugin handle the Enter key
-          return false; // Allows the mention plugin to process the Enter key
+    return editor.registerCommand(KEY_ENTER_COMMAND, (event) => {
+      if (!shouldHandleEnter()) {
+        return false;
+      }
+
+      if (isMobile || isCapacitor) {
+        return true;
+      }
+      const selection = $getSelection();
+      if ($isRangeSelection(selection)) {
+        const anchorNode = selection.anchor.getNode();
+        let parentNode = anchorNode.getParent();
+        if (parentNode === null) {
+          parentNode = anchorNode.getTopLevelElement();
         }
 
-        if (isMobile || isCapacitor) {
-          return true;
+        if ($isListItemNode(parentNode) || $isListNode(parentNode)) {
+          return false;
         }
-        const selection = $getSelection();
-        if ($isRangeSelection(selection)) {
-          const anchorNode = selection.anchor.getNode();
-          let parentNode = anchorNode.getParent();
-          if (parentNode === null) {
-            parentNode = anchorNode.getTopLevelElement();
-          }
-
-          // Check if the cursor is inside a list item
-          if ($isListItemNode(parentNode) || $isListNode(parentNode)) {
-            // Inside a list item: Let Lexical handle the 'Enter' key as usual
-            return false; // Returning false allows default Lexical behavior
-          }
-          if ($isHeadingNode(parentNode) && event?.shiftKey) {
-            event.preventDefault();
-            insertParagraph({ forceParagraph: true });
-            return true;
-          }
-        }
-
-        if (event?.shiftKey) {
+        if ($isHeadingNode(parentNode) && event?.shiftKey) {
           event.preventDefault();
-          insertParagraph();
+          insertParagraph({ forceParagraph: true });
           return true;
-        } else {
-          // Handle Enter (Submit)
-          event?.preventDefault();
-          submit(); // Your submit function
-          return true; // Prevents the default behavior
         }
-      },
-      COMMAND_PRIORITY_HIGH
-    );
-  }, [editor, isMobile, isCapacitor, shouldHandleEnter, submit]);
+      }
+
+      if (event?.shiftKey) {
+        event.preventDefault();
+        insertParagraph();
+        return true;
+      } else {
+        event?.preventDefault();
+        submit();
+        return true;
+      }
+    }, COMMAND_PRIORITY_HIGH);
+  }, [editor, isMobile, isCapacitor]);
 
   return null;
 }

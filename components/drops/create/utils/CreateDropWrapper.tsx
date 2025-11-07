@@ -53,7 +53,7 @@ const getRequirementFromFileType = (
   if (file.type.startsWith("video/")) {
     return ApiWaveParticipationRequirement.Video;
   }
-  return null; // Unknown or unsupported file type
+  return null;
 };
 
 export enum CreateDropScreenType {
@@ -268,7 +268,7 @@ const CreateDropWrapper = forwardRef<
           return false;
         });
       },
-      [waveProps, wave, drop, metadata]
+      [waveProps, wave, metadata]
     );
 
     const missingMedia = useMemo(

@@ -74,14 +74,17 @@ export default function GasComponent() {
   const fetchGas = useCallback(async () => {
     setFetching(true);
     try {
-      const res = await fetchUrl(getUrlWithParams());
-      const gasResponse = res as Gas[];
-      const normalized = gasResponse.map((item) => ({
+      const res = (await fetchUrl(getUrlWithParams())) as Gas[];
+      const normalized = res.map((item) => ({
         ...item,
         gas: Math.round(item.gas * 100000) / 100000,
       }));
       setGas(normalized);
       setSumGas(normalized.reduce((total, item) => total + item.gas, 0));
+    } catch (error) {
+      console.error("Failed to fetch gas", error);
+      setGas([]);
+      setSumGas(0);
     } finally {
       setFetching(false);
     }
@@ -104,18 +107,7 @@ export default function GasComponent() {
     }
 
     fetchGas();
-  }, [
-    collectionFocus,
-    dateSelection,
-    fromBlock,
-    fromDate,
-    isCustomBlocks,
-    isPrimary,
-    selectedArtist,
-    toBlock,
-    toDate,
-    fetchGas,
-  ]);
+  }, [collectionFocus, fetchGas]);
 
   if (!collectionFocus) {
     return <></>;

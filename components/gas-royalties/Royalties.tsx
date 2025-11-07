@@ -76,41 +76,40 @@ export default function RoyaltiesComponent() {
 
   const getUrlWithParams = useCallback(() => getUrl("royalties"), [getUrl]);
 
-  const fetchRoyalties = useEffectEvent(() => {
+  const fetchRoyalties = useEffectEvent(async () => {
     setFetching(true);
-    fetchUrl(getUrlWithParams())
-      .then((res: Royalty[]) => {
-        const normalizedRoyalties = res.map((royalty) => ({
-          ...royalty,
-          volume: Math.round(royalty.volume * 100000) / 100000,
-          proceeds: Math.round(royalty.proceeds * 100000) / 100000,
-          artist_split: Math.round(royalty.artist_split * 100000) / 100000,
-          artist_take: Math.round(royalty.artist_take * 100000) / 100000,
-        }));
+    try {
+      const res = (await fetchUrl(getUrlWithParams())) as Royalty[];
+      const normalizedRoyalties = res.map((royalty) => ({
+        ...royalty,
+        volume: Math.round(royalty.volume * 100000) / 100000,
+        proceeds: Math.round(royalty.proceeds * 100000) / 100000,
+        artist_split: Math.round(royalty.artist_split * 100000) / 100000,
+        artist_take: Math.round(royalty.artist_take * 100000) / 100000,
+      }));
 
-        setRoyalties(normalizedRoyalties);
-        setSumVolume(
-          normalizedRoyalties.reduce(
-            (prev, current) => prev + current.volume,
-            0
-          )
-        );
-        setSumProceeds(
-          normalizedRoyalties.reduce(
-            (prev, current) => prev + current.proceeds,
-            0
-          )
-        );
-        setSumArtistTake(
-          normalizedRoyalties.reduce(
-            (prev, current) => prev + current.artist_take,
-            0
-          )
-        );
-      })
-      .finally(() => {
-        setFetching(false);
-      });
+      setRoyalties(normalizedRoyalties);
+      setSumVolume(
+        normalizedRoyalties.reduce((prev, current) => prev + current.volume, 0)
+      );
+      setSumProceeds(
+        normalizedRoyalties.reduce((prev, current) => prev + current.proceeds, 0)
+      );
+      setSumArtistTake(
+        normalizedRoyalties.reduce(
+          (prev, current) => prev + current.artist_take,
+          0
+        )
+      );
+    } catch (error) {
+      console.error("Failed to fetch royalties", error);
+      setRoyalties([]);
+      setSumVolume(0);
+      setSumProceeds(0);
+      setSumArtistTake(0);
+    } finally {
+      setFetching(false);
+    }
   });
 
   useEffect(() => {

@@ -13,7 +13,14 @@ import { AuthContext } from "@/components/auth/Auth";
 import GroupCreateIdentitiesSelect from "../identities/select/GroupCreateIdentitiesSelect";
 import CreateGroupWalletsEmma from "./CreateGroupWalletsEmma";
 import CreateGroupWalletsUpload from "./CreateGroupWalletsUpload";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 export enum GroupCreateWalletsType {
   INCLUDE = "INCLUDE",
@@ -106,11 +113,17 @@ export default function GroupCreateWallets({
     });
   };
 
-  const onUploadedWalletsChange = (newV: string[] | null) =>
-    setUploadedWallets(newV ? dedupeWallets(newV) : null);
+  const onUploadedWalletsChange = useCallback(
+    (newV: string[] | null) =>
+      setUploadedWallets(newV ? dedupeWallets(newV) : null),
+    []
+  );
 
-  const onEmmaWalletsChange = (newV: string[] | null) =>
-    setEmmaWallets(newV ? dedupeWallets(newV) : null);
+  const onEmmaWalletsChange = useCallback(
+    (newV: string[] | null) =>
+      setEmmaWallets(newV ? dedupeWallets(newV) : null),
+    []
+  );
 
   useEffect(() => {
     const uploaded = uploadedWallets ?? [];
