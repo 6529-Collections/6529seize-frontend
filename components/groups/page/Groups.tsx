@@ -1,5 +1,7 @@
 "use client";
 
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useCallback, useContext, useEffect, useState, type JSX } from "react";
 import GroupCreate from "./create/GroupCreate";
 import { AuthContext } from "@/components/auth/Auth";
@@ -68,12 +70,12 @@ export default function Groups() {
   const components: Record<GroupsViewMode, JSX.Element> = {
     [GroupsViewMode.VIEW]: (
       <GroupsPageListWrapper
-        onCreateNewGroup={() => onViewModeChange(GroupsViewMode.CREATE)}
+        onCreateNewGroup={() => triggerViewModeChange(GroupsViewMode.CREATE)}
       />
     ),
     [GroupsViewMode.CREATE]: (
       <GroupCreate
-        onCompleted={() => onViewModeChange(GroupsViewMode.VIEW)}
+        onCompleted={() => triggerViewModeChange(GroupsViewMode.VIEW)}
         edit={edit ?? "new"}
       />
     ),
@@ -84,22 +86,13 @@ export default function Groups() {
       <div className="tailwind-scope">
         {viewMode === GroupsViewMode.CREATE && (
           <button
-            onClick={() => onViewModeChange(GroupsViewMode.VIEW)}
+            onClick={() => triggerViewModeChange(GroupsViewMode.VIEW)}
             type="button"
             className="tw-py-2 tw-px-2 -tw-ml-2 tw-flex tw-items-center tw-gap-x-2 tw-justify-center tw-text-sm tw-font-semibold tw-border-0 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-text-iron-400 tw-bg-transparent hover:tw-text-iron-50">
-            <svg
+            <FontAwesomeIcon
+              icon={faArrowLeft}
               className="tw-flex-shrink-0 tw-w-5 tw-h-5"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M20 12H4M4 12L10 18M4 12L10 6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"></path>
-            </svg>
+            />
             <span>Back</span>
           </button>
         )}

@@ -32,6 +32,18 @@ interface Props {
   readonly link: string;
 }
 
+function getCountForPhase(distribution: Distribution, phase: string) {
+  if (phase.toUpperCase() === "AIRDROP") {
+    const count = distribution.airdrops;
+    return count ? numberWithCommas(count) : "-";
+  }
+
+  const allowlistEntry = distribution.allowlist.find((entry) => entry.phase === phase);
+  const count = allowlistEntry?.spots ?? 0;
+
+  return count ? numberWithCommas(count) : "-";
+}
+
 export default function DistributionPage(props: Readonly<Props>) {
   const params = useParams();
   const [pageProps, setPageProps] = useState<{
@@ -59,11 +71,11 @@ export default function DistributionPage(props: Readonly<Props>) {
 
   const distributionPhases = useMemo(() => {
     const phasesSet = new Set<string>();
-    distributions.forEach((d) => {
-      d.phases.forEach((p) => {
-        phasesSet.add(p);
-      });
-    });
+    for (const distribution of distributions) {
+      for (const phase of distribution.phases) {
+        phasesSet.add(phase);
+      }
+    }
     return Array.from(phasesSet).sort((a, b) =>
       a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" })
     );
@@ -133,19 +145,6 @@ export default function DistributionPage(props: Readonly<Props>) {
         </Carousel>
       );
     }
-  }
-
-  function getCountForPhase(d: Distribution, phase: string) {
-    let count = 0;
-
-    if (phase.toUpperCase() === "AIRDROP") {
-      count = d.airdrops;
-    } else {
-      const p = d.allowlist.find((a) => a.phase === phase);
-      count = p?.spots ?? 0;
-    }
-
-    return count ? numberWithCommas(count) : "-";
   }
 
   function printDistribution() {
@@ -303,9 +302,7 @@ export default function DistributionPage(props: Readonly<Props>) {
 
               <Row>
                 <Col>
-                  {nftId &&
-                    (distributions.length > 0 || searchWallets.length > 0) &&
-                    printDistribution()}
+                  {nftId && printDistribution()}
                 </Col>
               </Row>
               {!fetching && distributions.length === 0 && (

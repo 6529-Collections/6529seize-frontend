@@ -32,7 +32,9 @@ export function useDistributionData({
       const walletFilter =
         searchWallets.length === 0
           ? ""
-          : `&search=${searchWallets.join(",")}`;
+          : `&search=${searchWallets
+              .map((wallet) => encodeURIComponent(wallet))
+              .join(",")}`;
 
       const url = `${publicEnv.API_ENDPOINT}/api/distributions?card_id=${nftId}&contract=${contract}&page=${page}${walletFilter}`;
       const response = (await fetchUrl(url)) as DistributionDBResponse;

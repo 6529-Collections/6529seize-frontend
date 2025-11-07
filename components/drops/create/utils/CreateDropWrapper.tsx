@@ -150,7 +150,7 @@ const CreateDropWrapper = forwardRef<
     
     useEffect(() => {
       if (connectionState === "initializing" || connectionState === "connecting") {
-        return; // wait for auth bootstrap before validating
+        return;
       }
 
       if (!isAuthenticated) {

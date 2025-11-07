@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import styles from "./GasRoyalties.module.scss";
 import { Gas } from "@/entities/IGas";
@@ -14,6 +14,7 @@ import {
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTitle } from "@/contexts/TitleContext";
 import { GasRoyaltiesCollectionFocus } from "@/enums";
+import { useQuery } from "@tanstack/react-query";
 
 export default function GasComponent() {
   const router = useRouter();
@@ -58,48 +59,45 @@ export default function GasComponent() {
     setTitle,
   ]);
 
-  const [gas, setGas] = useState<Gas[]>([]);
-  const [sumGas, setSumGas] = useState(0);
-
   const getUrlWithParams = useCallback(() => getUrl("gas"), [getUrl]);
+  const gasUrl = useMemo(() => getUrlWithParams(), [getUrlWithParams]);
 
-  const fetchGas = useCallback(async () => {
-    setFetching(true);
-    try {
-      const res = (await fetchUrl(getUrlWithParams())) as Gas[];
-      const normalized = res.map((item) => ({
-        ...item,
-        gas: Math.round(item.gas * 100000) / 100000,
-      }));
-      setGas(normalized);
-      setSumGas(normalized.reduce((total, item) => total + item.gas, 0));
-    } catch (error) {
-      console.error("Failed to fetch gas", error);
-      setGas([]);
-      setSumGas(0);
-    } finally {
-      setFetching(false);
-    }
-  }, [getUrlWithParams]);
+  const {
+    data: gas = [],
+    isFetching,
+  } = useQuery<Gas[]>({
+    queryKey: ["gas-royalties", gasUrl],
+    enabled: Boolean(collectionFocus && gasUrl),
+    placeholderData: [],
+    queryFn: async () => {
+      if (!gasUrl) {
+        return [];
+      }
 
-  const previousCollectionFocusRef = useRef(collectionFocus);
+      try {
+        const res = (await fetchUrl(gasUrl)) as Gas[];
+        return res.map((item) => ({
+          ...item,
+          gas: Math.round(item.gas * 100000) / 100000,
+        }));
+      } catch (error) {
+        console.error("Failed to fetch gas", error);
+        return [];
+      }
+    },
+  });
+
+  const sumGas = useMemo(
+    () => gas.reduce((total, item) => total + item.gas, 0),
+    [gas]
+  );
 
   useEffect(() => {
     if (!collectionFocus) {
-      previousCollectionFocusRef.current = collectionFocus;
       return;
     }
-
-    const isNewCollectionFocus =
-      previousCollectionFocusRef.current !== collectionFocus;
-    previousCollectionFocusRef.current = collectionFocus;
-
-    if (isNewCollectionFocus) {
-      setGas([]);
-    }
-
-    fetchGas();
-  }, [collectionFocus, fetchGas]);
+    setFetching(isFetching);
+  }, [collectionFocus, isFetching, setFetching]);
 
   if (!collectionFocus) {
     return <></>;
