@@ -11,7 +11,7 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Col, Container, Dropdown, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import DotLoader from "../dotLoader/DotLoader";
@@ -378,9 +378,21 @@ export function useSharedState() {
     useState<GasRoyaltiesCollectionFocus>();
   const [fetching, setFetching] = useState(true);
 
-  function getUrl(type: string) {
-    return getUrlParams(
-      type,
+  const getUrl = useCallback(
+    (type: string) =>
+      getUrlParams(
+        type,
+        isPrimary,
+        isCustomBlocks,
+        dateSelection,
+        collectionFocus,
+        fromDate,
+        toDate,
+        fromBlock,
+        toBlock,
+        selectedArtist
+      ),
+    [
       isPrimary,
       isCustomBlocks,
       dateSelection,
@@ -389,9 +401,9 @@ export function useSharedState() {
       toDate,
       fromBlock,
       toBlock,
-      selectedArtist
-    );
-  }
+      selectedArtist,
+    ]
+  );
 
   function getSharedProps() {
     return {
