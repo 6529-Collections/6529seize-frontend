@@ -1,8 +1,10 @@
-import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import SnapshotExcludeOtherSnapshots from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/SnapshotExcludeOtherSnapshots';
 import { DistributionPlanToolContext } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
 import { Pool } from '@/components/allowlist-tool/allowlist-tool.types';
+import { renderWithQueryClient } from '../../../utils/reactQuery';
 
 jest.mock('@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple', () => ({
   __esModule: true,
@@ -36,13 +38,22 @@ describe('SnapshotExcludeOtherSnapshots', () => {
     ];
     const config = { snapshotId: '1' } as any;
     const onNext = jest.fn();
-    render(
+    const Wrapper = ({ children }: { children: React.ReactNode }) => (
       <DistributionPlanToolContext.Provider value={{ operations: [], distributionPlan: null, setToasts: jest.fn() } as any}>
-        <SnapshotExcludeOtherSnapshots snapshots={snapshots} config={config} onSkip={() => {}} onSelectExcludeOtherSnapshots={onNext} title="t" onClose={() => {}} />
+        {children}
       </DistributionPlanToolContext.Provider>
+    );
+    renderWithQueryClient(
+      <SnapshotExcludeOtherSnapshots snapshots={snapshots} config={config} onSkip={() => {}} onSelectExcludeOtherSnapshots={onNext} title="t" onClose={() => {}} />,
+      { wrapper: Wrapper }
     );
     await userEvent.click(screen.getByText('B'));
     await userEvent.click(screen.getByText('Next'));
-    expect(onNext).toHaveBeenCalledWith({ snapshotsToExclude: [{ snapshotId: '2', snapshotType: Pool.WALLET_POOL, extraWallets: [] }], uniqueWalletsCount: null });
+    expect(onNext).toHaveBeenCalledWith({
+      snapshotsToExclude: [
+        { snapshotId: '2', snapshotType: Pool.WALLET_POOL, extraWallets: [] },
+      ],
+      uniqueWalletsCount: undefined,
+    });
   });
 });

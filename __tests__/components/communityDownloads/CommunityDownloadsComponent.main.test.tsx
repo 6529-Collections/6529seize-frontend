@@ -1,7 +1,8 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CommunityDownloadsComponent from "@/components/community-downloads/CommunityDownloadsComponent";
 import { fetchUrl } from "@/services/6529api";
+import { renderWithQueryClient } from "../../utils/reactQuery";
 
 jest.mock("@/services/6529api");
 
@@ -37,7 +38,7 @@ describe("CommunityDownloadsComponent", () => {
       count: 1,
       data: [{ date: "20230101", url: "https://testA.6529.io" }],
     });
-    render(
+    renderWithQueryClient(
       <CommunityDownloadsComponent title="T" url="https://test.6529.io/data" />
     );
     expect(mockFetch).toHaveBeenCalledWith(
@@ -50,7 +51,7 @@ describe("CommunityDownloadsComponent", () => {
 
   it("shows no results when empty", async () => {
     mockFetch.mockResolvedValue({ count: 0, data: [] });
-    render(
+    renderWithQueryClient(
       <CommunityDownloadsComponent title="T" url="https://test.6529.io/data" />
     );
     expect(await screen.findByText("NoResults")).toBeInTheDocument();
@@ -61,7 +62,7 @@ describe("CommunityDownloadsComponent", () => {
       count: 60,
       data: [{ date: "20230101", url: "https://a" }],
     });
-    render(
+    renderWithQueryClient(
       <CommunityDownloadsComponent title="T" url="https://test.6529.io/data" />
     );
     await screen.findByText("https://a");
