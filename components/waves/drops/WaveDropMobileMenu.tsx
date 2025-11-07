@@ -2,11 +2,11 @@
 
 import { publicEnv } from "@/config/env";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
-import { FC, useContext, useEffect, useState } from "react";
+import { FC, useContext, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import { DropSize } from "@/helpers/waves/drop.helpers";
+import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { AuthContext } from "@/components/auth/Auth";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
@@ -47,6 +47,16 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
 }) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const isTemporaryDrop = drop.id.startsWith("temp-");
+
+  const extendedDrop = useMemo<ExtendedDrop>(
+    () => ({
+      ...drop,
+      type: DropSize.FULL,
+      stableKey: drop.id,
+      stableHash: drop.id,
+    }),
+    [drop]
+  );
 
   const [copied, setCopied] = useState(false);
 
@@ -121,7 +131,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
           longPressTriggered && "tw-select-none"
         }`}>
         <WaveDropActionsAddReaction
-          drop={drop}
+          drop={extendedDrop}
           isMobile={true}
           onAddReaction={onAddReaction}
         />
