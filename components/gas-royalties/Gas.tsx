@@ -59,8 +59,8 @@ export default function GasComponent() {
     setTitle,
   ]);
 
-  const getUrlWithParams = useCallback(() => getUrl("gas"), [getUrl]);
-  const gasUrl = useMemo(() => getUrlWithParams(), [getUrlWithParams]);
+  const gasUrl = useMemo(() => getUrl("gas"), [getUrl]);
+  const getUrlWithParams = useCallback(() => gasUrl, [gasUrl]);
 
   const {
     data: gas = [],

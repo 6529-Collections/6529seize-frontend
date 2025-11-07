@@ -88,8 +88,6 @@ export default function DistributionPage(props: Readonly<Props>) {
 
   const distributionPhotos = distributionPhotosData ?? [];
 
-  const fetching = isDistributionsFetching;
-
   const handlePageChange = useCallback((newPage: number) => {
     setPageProps((prev) => {
       if (prev.page === newPage) {
@@ -181,7 +179,7 @@ export default function DistributionPage(props: Readonly<Props>) {
                   <tr>
                     <th colSpan={2}>
                       Wallet{" "}
-                      {fetching ? (
+                      {isDistributionsFetching ? (
                         <DotLoader />
                       ) : (
                         <span className="font-larger">
@@ -305,7 +303,7 @@ export default function DistributionPage(props: Readonly<Props>) {
                   {nftId && printDistribution()}
                 </Col>
               </Row>
-              {!fetching && distributions.length === 0 && (
+              {!isDistributionsFetching && distributions.length === 0 && (
                 <>{searchWallets.length > 0 ? printNotFound() : printEmpty()}</>
               )}
             </Container>

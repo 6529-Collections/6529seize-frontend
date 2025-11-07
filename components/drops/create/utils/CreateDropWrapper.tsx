@@ -3,6 +3,7 @@
 import {
   forwardRef,
   useEffect,
+  useEffectEvent,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -335,12 +336,13 @@ const CreateDropWrapper = forwardRef<
       return true;
     }, [drop, files, markdownContent]);
 
+    const emitCanSubmitChange = useEffectEvent((nextCanSubmit: boolean) => {
+      onCanSubmitChange?.(nextCanSubmit);
+    });
+
     useEffect(() => {
-      if (!onCanSubmitChange) {
-        return;
-      }
-      onCanSubmitChange(canSubmit);
-    }, [canSubmit, onCanSubmitChange]);
+      emitCanSubmitChange(canSubmit);
+    }, [canSubmit, emitCanSubmitChange]);
 
     const createDropContentFullRef = useRef<CreateDropFullHandles | null>(null);
     const createDropContendCompactRef = useRef<CreateDropCompactHandles | null>(

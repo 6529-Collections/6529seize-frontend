@@ -28,22 +28,16 @@ export default function RoyaltiesComponent() {
   const { setTitle } = useTitle();
 
   const {
-    dateSelection,
     setDateSelection,
-    fromDate,
-    toDate,
     isPrimary,
     setIsPrimary,
-    isCustomBlocks,
     setIsCustomBlocks,
-    selectedArtist,
     collectionFocus,
     setCollectionFocus,
     fetching,
     setFetching,
     getUrl,
     getSharedProps,
-    fromBlock,
     toBlock,
   } = useSharedState();
 
@@ -74,7 +68,10 @@ export default function RoyaltiesComponent() {
 
   const getUrlWithParams = useCallback(() => getUrl("royalties"), [getUrl]);
 
-  const royaltiesUrl = collectionFocus ? getUrlWithParams() : "";
+  const royaltiesUrl = useMemo(
+    () => (collectionFocus ? getUrlWithParams() : ""),
+    [collectionFocus, getUrlWithParams]
+  );
 
   const { data: royalties = [], isFetching: isRoyaltiesFetching } = useQuery<Royalty[]>({
     queryKey: ["gas-royalties", "royalties", royaltiesUrl],
