@@ -65,7 +65,8 @@ const BrainContent: React.FC<BrainContentProps> = ({
   const shouldShowPinnedWaves = showPinnedWaves && breakpoint === "S" && isApp;
 
   // Only apply Android keyboard adjustments when input is visible
-  const containerStyle = activeDrop ? getContainerStyle({}, keyboardAdjustment) : {};
+  const adjustment = isApp ? 0 : keyboardAdjustment;
+  const containerStyle = activeDrop ? getContainerStyle({}, adjustment) : {};
 
   return (
     <div className="tw-relative tw-flex tw-flex-col tw-h-full" style={containerStyle}>
