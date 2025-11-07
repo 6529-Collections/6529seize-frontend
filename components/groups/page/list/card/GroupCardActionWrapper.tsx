@@ -31,7 +31,8 @@ export default function GroupCardActionWrapper({
   };
   const progress =
     typeof membersCount !== "number" ||
-    typeof doneMembersCount !== "number"
+    typeof doneMembersCount !== "number" ||
+    membersCount === 0
       ? "0%"
       : `${(doneMembersCount / membersCount) * 100}%`;
   return (
