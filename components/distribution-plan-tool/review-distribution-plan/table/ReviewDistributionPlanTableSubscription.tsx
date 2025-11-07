@@ -3,21 +3,15 @@
 import { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
-import {
-    MEMES_CONTRACT,
-    SUBSCRIPTIONS_ADMIN_WALLETS,
-} from "@/constants";
+import { MEMES_CONTRACT, SUBSCRIPTIONS_ADMIN_WALLETS } from "@/constants";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { areEqualAddresses, formatAddress } from "@/helpers/Helpers";
-import {
-    commonApiFetch,
-    commonApiPost,
-} from "@/services/api/common-api";
+import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { useContext, useState } from "react";
 import { Button, Col, Container, Modal, Row } from "react-bootstrap";
 import {
-    ReviewDistributionPlanTableItem,
-    ReviewDistributionPlanTableItemType,
+  ReviewDistributionPlanTableItem,
+  ReviewDistributionPlanTableItemType,
 } from "./ReviewDistributionPlanTable";
 
 interface WalletResult {
@@ -121,7 +115,7 @@ export function SubscriptionConfirm(
 
   const contract = MEMES_CONTRACT;
   const [tokenId, setTokenId] = useState<string>(
-    extractAllNumbers(props.plan.name)[0].toString() ?? ""
+    extractAllNumbers(props.plan.name)?.[0]?.toString() ?? ""
   );
 
   return (

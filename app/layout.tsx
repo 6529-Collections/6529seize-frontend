@@ -10,14 +10,15 @@ import "@/styles/globals.scss";
 
 import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
 import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
+import ErrorHandler from "@/components/providers/ErrorHandler";
 import LayoutWrapper from "@/components/providers/LayoutWrapper";
+import { getAppMetadata } from "@/components/providers/metadata";
 import Providers from "@/components/providers/Providers";
 import StoreSetup from "@/components/providers/StoreSetup";
-import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
 import { Viewport } from "next";
 import { ErrorBoundary } from "react-error-boundary";
-import ErrorPage from "./error-page";
+import ErrorPage from "./error/page";
 
 export const metadata = getAppMetadata();
 export const viewport: Viewport = {
@@ -47,6 +48,7 @@ export default function RootLayout({
         )}
       </head>
       <body>
+        <ErrorHandler />
         <AwsRumProvider>
           <StoreSetup>
             <Providers>
