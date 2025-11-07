@@ -140,7 +140,8 @@ export default function UserPageSubscriptionsTopUp() {
         <Link
           href={window.location.href}
           className="text-center pt-2 pb-2"
-          target="_blank" rel="noopener noreferrer">
+          target="_blank"
+          rel="noopener noreferrer">
           <button className="btn btn-light" style={{ width: "100%" }}>
             Top-up on 6529.io
           </button>
@@ -211,7 +212,6 @@ export default function UserPageSubscriptionsTopUp() {
                     placeholder="count"
                     value={memeCount}
                     style={{ width: "100px", padding: "2px 10px" }}
-                    className="font-smaller"
                     onChange={(e) => {
                       setError("");
                       const value = e.target.value;
