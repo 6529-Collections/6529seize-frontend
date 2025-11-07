@@ -238,19 +238,31 @@ export default function CommunityMembers() {
 
   useEffect(() => {
     if (isLoading) return;
-    if (!members?.count) {
-      setPage(1);
+
+    if (!members) {
       setTotalPages(1);
       return;
     }
+
+    if (!members.count) {
+      if (debouncedParams.page !== 1) {
+        setPage(1);
+      }
+      setTotalPages(1);
+      return;
+    }
+
     const pagesCount = Math.ceil(members.count / debouncedParams.page_size);
-    if (pagesCount < debouncedParams.page) setPage(pagesCount);
+    if (pagesCount < debouncedParams.page) {
+      setPage(pagesCount);
+      return;
+    }
     setTotalPages(pagesCount);
   }, [
     debouncedParams.page,
     debouncedParams.page_size,
     isLoading,
-    members?.count,
+    members,
     setPage,
   ]);
 
