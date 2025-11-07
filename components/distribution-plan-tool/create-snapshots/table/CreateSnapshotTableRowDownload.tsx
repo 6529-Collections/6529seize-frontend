@@ -18,12 +18,12 @@ export default function CreateSnapshotTableRowDownload({
   const downloadJson = (results: DistributionPlanSnapshotToken[]) => {
     const data = JSON.stringify(results);
     const blob = new Blob([data], { type: "application/json" });
-    const url = window.URL.createObjectURL(blob);
+    const url = globalThis.URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
     link.download = "results.json";
     link.click();
-    window.URL.revokeObjectURL(url);
+    globalThis.URL.revokeObjectURL(url);
   };
 
   const downloadCsv = (results: DistributionPlanSnapshotToken[]) => {

@@ -149,7 +149,6 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
           setIsStormMode={setIsStormMode}
           setViewType={setViewType}
           setDrop={setDrop}
-          setMentionedUsers={setMentionedUsers}
           onMentionedUser={onMentionedUser}
           setReferencedNfts={setReferencedNfts}
           setTitle={setTitle}

@@ -94,9 +94,6 @@ interface CreateDropWrapperProps {
   readonly setIsStormMode: (isStormMode: boolean) => void;
   readonly setViewType: (newV: CreateDropViewType) => void;
   readonly setDrop: (newV: CreateDropConfig) => void;
-  readonly setMentionedUsers: (
-    newV: Omit<MentionedUser, "current_handle">[]
-  ) => void;
   readonly onMentionedUser: (
     newUser: Omit<MentionedUser, "current_handle">
   ) => void;
@@ -134,7 +131,6 @@ const CreateDropWrapper = forwardRef<
       setIsStormMode,
       setViewType,
       setDrop,
-      setMentionedUsers: _setMentionedUsers,
       setReferencedNfts,
       onMentionedUser,
       setTitle,
@@ -152,7 +148,6 @@ const CreateDropWrapper = forwardRef<
     } = useSeizeConnectContext();
     const breakpoint = useBreakpoint();
     
-    // SECURITY: Fail-fast if wallet is not properly authenticated
     useEffect(() => {
       if (connectionState === "initializing" || connectionState === "connecting") {
         return; // wait for auth bootstrap before validating
@@ -261,7 +256,7 @@ const CreateDropWrapper = forwardRef<
           }
           if (
             item.type === ApiWaveMetadataType.Number &&
-            isNaN(Number(existing.data_value))
+            Number.isNaN(Number(existing.data_value))
           ) {
             return true;
           }
@@ -366,7 +361,7 @@ const CreateDropWrapper = forwardRef<
           metadata,
           signature: null,
           is_safe_signature: isSafeWallet,
-          signer_address: address, // Already validated via useEffect above
+          signer_address: address,
         };
         setDrop(currentDrop);
         clearInputState();
@@ -408,7 +403,7 @@ const CreateDropWrapper = forwardRef<
         metadata,
         signature: null,
         is_safe_signature: isSafeWallet,
-        signer_address: address, // Already validated via useEffect above
+        signer_address: address,
       };
       currentDrop.parts.push({
         content: markdownContent?.length ? markdownContent : null,
@@ -473,7 +468,6 @@ const CreateDropWrapper = forwardRef<
         <CreateDropFull
           ref={createDropContentFullRef}
           screenType={screenType}
-          profile={profile}
           title={title}
           files={files}
           metadata={metadata}

@@ -42,19 +42,28 @@ export default function Groups() {
     [pathname, requestAuth, router],
   );
 
+  const triggerViewModeChange = useCallback(
+    (mode: GroupsViewMode): void => {
+      onViewModeChange(mode).catch((error) => {
+        console.error("Failed to update groups view mode", error);
+      });
+    },
+    [onViewModeChange],
+  );
+
   const connectedHandle = connectedProfile?.handle;
 
   useEffect(() => {
     if (edit && !!connectedHandle && !activeProfileProxy) {
-      void onViewModeChange(GroupsViewMode.CREATE);
+      triggerViewModeChange(GroupsViewMode.CREATE);
     }
-  }, [activeProfileProxy, connectedHandle, edit, onViewModeChange]);
+  }, [activeProfileProxy, connectedHandle, edit, triggerViewModeChange]);
 
   useEffect(() => {
     if (!connectedHandle || activeProfileProxy) {
-      void onViewModeChange(GroupsViewMode.VIEW);
+      triggerViewModeChange(GroupsViewMode.VIEW);
     }
-  }, [activeProfileProxy, connectedHandle, onViewModeChange]);
+  }, [activeProfileProxy, connectedHandle, triggerViewModeChange]);
 
   const components: Record<GroupsViewMode, JSX.Element> = {
     [GroupsViewMode.VIEW]: (

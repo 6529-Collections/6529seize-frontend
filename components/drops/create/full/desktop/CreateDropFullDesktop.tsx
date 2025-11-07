@@ -16,7 +16,6 @@ import {
 import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
 import { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 import { EditorState } from "lexical";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import CreateDropFullDesktopMetadata from "./CreateDropFullDesktopMetadata";
@@ -31,7 +30,6 @@ export interface CreateDropFullDesktopHandles {
 }
 
 interface CreateDropFullDesktopProps {
-  readonly profile: ProfileMinWithoutSubs;
   readonly title: string | null;
   readonly editorState: EditorState | null;
   readonly metadata: DropMetadata[];
@@ -68,7 +66,6 @@ const CreateDropFullDesktop = forwardRef<
 >(
   (
     {
-      profile: _profile,
       title,
       editorState,
       metadata,

@@ -80,8 +80,11 @@ export default function CreateSnapshotFormSearchCollectionDropdownItem({
           address: collection.address,
           tokenIds: tokenIdsString,
         });
-      } catch (error) {
-        // distributionPlanApiFetch already surfaces toast notifications on failure
+      } catch (error: unknown) {
+        console.error(
+          `Failed to fetch token IDs for collection ${collection.id}`,
+          error
+        );
         return;
       }
       return;

@@ -22,23 +22,15 @@ export default function GasComponent() {
   const { setTitle } = useTitle();
 
   const {
-    dateSelection,
     setDateSelection,
-    fromDate,
-    toDate,
-    isPrimary,
     setIsPrimary,
-    isCustomBlocks,
     setIsCustomBlocks,
-    selectedArtist,
     collectionFocus,
     setCollectionFocus,
     fetching,
     setFetching,
     getUrl,
     getSharedProps,
-    fromBlock,
-    toBlock,
   } = useSharedState();
 
   useEffect(() => {
@@ -88,7 +80,7 @@ export default function GasComponent() {
     } finally {
       setFetching(false);
     }
-  }, [getUrlWithParams, setFetching, setGas, setSumGas]);
+  }, [getUrlWithParams]);
 
   const previousCollectionFocusRef = useRef(collectionFocus);
 

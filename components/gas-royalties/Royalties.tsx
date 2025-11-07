@@ -137,7 +137,6 @@ export default function RoyaltiesComponent() {
     selectedArtist,
     isPrimary,
     isCustomBlocks,
-    fetchRoyalties,
   ]);
 
   if (!collectionFocus) {
