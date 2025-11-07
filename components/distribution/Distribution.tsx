@@ -303,7 +303,7 @@ export default function DistributionPage(props: Readonly<Props>) {
                   {nftId && printDistribution()}
                 </Col>
               </Row>
-              {!isDistributionsFetching && distributions.length === 0 && (
+              {nftId && !isDistributionsFetching && distributions.length === 0 && (
                 <>{searchWallets.length > 0 ? printNotFound() : printEmpty()}</>
               )}
             </Container>

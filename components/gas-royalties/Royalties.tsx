@@ -38,7 +38,6 @@ export default function RoyaltiesComponent() {
     setFetching,
     getUrl,
     getSharedProps,
-    toBlock,
   } = useSharedState();
 
   useEffect(() => {
