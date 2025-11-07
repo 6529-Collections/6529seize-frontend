@@ -6,14 +6,33 @@ const mockReplay = jest.fn();
 const mockAdd = jest.fn();
 const mockStop = jest.fn();
 
+const createMockMojsHtmlInstance = () => {
+  const base = {
+    tune: jest.fn(),
+    stop: jest.fn(),
+  };
+
+  let thenMock!: jest.Mock;
+  const proxy = new Proxy(base, {
+    // Provide a `.then` handler without turning the object into a "thenable" for linting purposes.
+    get(target, property, receiver) {
+      if (property === 'then') {
+        return thenMock;
+      }
+
+      return Reflect.get(target, property, receiver);
+    },
+  });
+
+  thenMock = jest.fn().mockReturnValue(proxy);
+  return proxy;
+};
+
 jest.mock('@mojs/core', () => ({
   __esModule: true,
   default: {
     Burst: jest.fn().mockImplementation(() => ({ tune: jest.fn(), stop: jest.fn() })),
-    Html: jest.fn().mockImplementation(() => {
-      const instance = { then: jest.fn().mockReturnThis(), tune: jest.fn(), stop: jest.fn() };
-      return instance;
-    }),
+    Html: jest.fn().mockImplementation(() => createMockMojsHtmlInstance()),
     Timeline: jest.fn().mockImplementation(() => ({ add: mockAdd, replay: mockReplay, stop: mockStop })),
     easing: { bezier: jest.fn(), out: jest.fn() },
   },
