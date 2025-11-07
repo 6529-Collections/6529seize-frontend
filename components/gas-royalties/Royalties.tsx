@@ -34,6 +34,12 @@ export default function RoyaltiesComponent() {
     setIsCustomBlocks,
     collectionFocus,
     setCollectionFocus,
+    dateSelection,
+    fromDate,
+    toDate,
+    fromBlock,
+    toBlock,
+    selectedArtist,
     fetching,
     setFetching,
     getUrl,
@@ -73,8 +79,18 @@ export default function RoyaltiesComponent() {
   );
 
   const { data: royalties = [], isFetching: isRoyaltiesFetching } = useQuery<Royalty[]>({
-    queryKey: ["gas-royalties", "royalties", royaltiesUrl],
-    placeholderData: [],
+    queryKey: [
+      "gas-royalties",
+      "royalties",
+      collectionFocus,
+      isPrimary,
+      dateSelection,
+      fromDate,
+      toDate,
+      fromBlock,
+      toBlock,
+      selectedArtist,
+    ],
     enabled: Boolean(royaltiesUrl),
     queryFn: async () => {
       if (!royaltiesUrl) {
