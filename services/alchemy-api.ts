@@ -348,6 +348,8 @@ export async function getContractOverview(
   if (!response) {
     return null;
   }
+
+  console.log(response)
   const contract: AlchemyContractResult = {
     ...response.contractMetadata,
     contractMetadata: response.contractMetadata,
