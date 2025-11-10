@@ -1,0 +1,82 @@
+"use client";
+
+import {
+  formatAmount,
+  formatDateTime,
+  formatTargetTokensCount,
+} from "@/components/user/xtdh/utils/xtdhGrantFormatters";
+import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
+import { useContractOverviewQuery } from "@/hooks/useAlchemyNftQueries";
+import type { ContractOverview } from "@/types/nft";
+
+import {
+  formatFloorPrice,
+  formatTotalSupply,
+  getContractAddress,
+  mapGrantChainToSupportedChain,
+} from "./formatters";
+import type { GrantDetails, GrantItemVariant } from "./types";
+
+interface GrantItemViewModel {
+  readonly contract: ContractOverview | null;
+  readonly contractLabel?: string;
+  readonly details: GrantDetails;
+  readonly isLoading: boolean;
+  readonly status: string;
+  readonly variant: GrantItemVariant;
+}
+
+export function useGrantItemViewModel(
+  grant: ApiTdhGrantsPage["data"][number]
+): GrantItemViewModel {
+  const contractAddress = getContractAddress(grant.target_contract);
+  const chain = mapGrantChainToSupportedChain(grant.target_chain);
+  const { data: contract, isError, isLoading } = useContractOverviewQuery({
+    address: contractAddress,
+    chain,
+    enabled: Boolean(contractAddress),
+  });
+
+  const details = buildGrantDetails(grant, contract ?? undefined);
+  const hasContractData = Boolean(contract) && !isError;
+
+  return {
+    contract: contract ?? null,
+    contractLabel: contractAddress ?? grant.target_contract,
+    details,
+    isLoading,
+    status: grant.status,
+    variant: hasContractData ? "contract" : "error",
+  };
+}
+
+function buildGrantDetails(
+  grant: ApiTdhGrantsPage["data"][number],
+  contract?: ContractOverview
+): GrantDetails {
+  const baseDetails = createBaseGrantDetails(grant);
+
+  if (!contract) {
+    return baseDetails;
+  }
+
+  return {
+    ...baseDetails,
+    tokenTypeLabel: contract.tokenType ?? "Unknown",
+    totalSupplyLabel: formatTotalSupply(contract.totalSupply),
+    floorPriceLabel: formatFloorPrice(contract.floorPriceEth),
+  };
+}
+
+function createBaseGrantDetails(
+  grant: ApiTdhGrantsPage["data"][number]
+): GrantDetails {
+  return {
+    tokenTypeLabel: "Unknown",
+    totalSupplyLabel: "Unknown",
+    floorPriceLabel: "Unknown",
+    tokensCountLabel: formatTargetTokensCount(grant.target_tokens),
+    tdhRateLabel: formatAmount(grant.tdh_rate),
+    validUntilLabel: formatDateTime(grant.valid_to ?? null),
+  };
+}

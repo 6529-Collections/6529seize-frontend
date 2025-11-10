@@ -1,93 +1,21 @@
-"use client";
-
 import Image from "next/image";
-import { type ReactNode } from "react";
+import type { ReactNode } from "react";
 
-import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
-import {
-  formatAmount,
-  formatDateTime,
-  formatTargetTokensCount,
-} from "@/components/user/xtdh/utils/xtdhGrantFormatters";
-import { isValidEthAddress } from "@/helpers/Helpers";
-import { useContractOverviewQuery } from "@/hooks/useAlchemyNftQueries";
-import type { ContractOverview, SupportedChain } from "@/types/nft";
+import type { ContractOverview } from "@/types/nft";
 
-export interface UserPageXtdhGrantListItemProps {
-  readonly grant: ApiTdhGrantsPage["data"][number];
-}
-
-export function UserPageXtdhGrantListItem({
-  grant,
-}: Readonly<UserPageXtdhGrantListItemProps>) {
-  const contractAddress = getContractAddress(grant.target_contract);
-  const chain = mapGrantChainToSupportedChain(grant.target_chain);
-  const { data: contract, isLoading, isError } = useContractOverviewQuery({
-    address: contractAddress,
-    chain,
-    enabled: Boolean(contractAddress),
-  });
-  const tokensCountLabel = formatTargetTokensCount(grant.target_tokens);
-  const tdhRateLabel = formatAmount(grant.tdh_rate);
-  const validUntilLabel = formatDateTime(grant.valid_to ?? null);
-
-  const baseDetails = {
-    tokenTypeLabel: "Unknown",
-    totalSupplyLabel: "Unknown",
-    floorPriceLabel: "Unknown",
-    tokensCountLabel,
-    tdhRateLabel,
-    validUntilLabel,
-  };
-
-
-  if (isLoading) {
-    return (
-      <li className="tw-list-none tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4">
-        <GrantItemSkeleton />
-      </li>
-    );
-  }
-
-  const hasContractData = Boolean(contract);
-  const details = hasContractData
-    ? {
-        ...baseDetails,
-        tokenTypeLabel: contract?.tokenType ?? "Unknown",
-        totalSupplyLabel: formatTotalSupply(contract?.totalSupply),
-        floorPriceLabel: formatFloorPrice(contract?.floorPriceEth),
-      }
-    : baseDetails;
-
-  return (
-    <li className="tw-list-none tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4">
-      {hasContractData && !isError ? (
-        <GrantItemContent
-          contract={contract!}
-          status={grant.status}
-          details={details}
-        />
-      ) : (
-        <GrantItemError
-          contractLabel={contractAddress ?? grant.target_contract}
-          status={grant.status}
-          details={details}
-        />
-      )}
-    </li>
-  );
-}
+import { formatContractLabel, shortenAddress } from "./formatters";
+import type { GrantDetails } from "./types";
 
 interface GrantItemContentProps {
   readonly contract: ContractOverview;
-  readonly status: string;
   readonly details: GrantDetails;
+  readonly status: string;
 }
 
-function GrantItemContent({
+export function GrantItemContent({
   contract,
-  status,
   details,
+  status,
 }: Readonly<GrantItemContentProps>) {
   const name = contract.name ?? shortenAddress(contract.address);
 
@@ -128,14 +56,14 @@ function GrantItemContent({
 
 interface GrantItemErrorProps {
   readonly contractLabel?: string;
-  readonly status: string;
   readonly details: GrantDetails;
+  readonly status: string;
 }
 
-function GrantItemError({
+export function GrantItemError({
   contractLabel,
-  status,
   details,
+  status,
 }: Readonly<GrantItemErrorProps>) {
   return (
     <div className="tw-flex tw-flex-col tw-gap-4">
@@ -157,7 +85,7 @@ function GrantItemError({
   );
 }
 
-function GrantItemSkeleton() {
+export function GrantItemSkeleton() {
   return (
     <div className="tw-animate-pulse tw-space-y-4">
       <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-4">
@@ -182,20 +110,9 @@ function GrantItemSkeleton() {
   );
 }
 
-interface GrantDetails {
-  readonly tokenTypeLabel: string;
-  readonly totalSupplyLabel: string;
-  readonly floorPriceLabel: string;
-  readonly tokensCountLabel: string;
-  readonly tdhRateLabel: string;
-  readonly validUntilLabel: string;
-}
-
-interface GrantDetailsGridProps {
-  readonly details: GrantDetails;
-}
-
-function GrantDetailsGrid({ details }: Readonly<GrantDetailsGridProps>) {
+function GrantDetailsGrid({
+  details,
+}: Readonly<{ details: GrantDetails }>) {
   return (
     <dl className="tw-grid tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
       <GrantDetailsRow label="Token type" value={details.tokenTypeLabel} />
@@ -208,15 +125,10 @@ function GrantDetailsGrid({ details }: Readonly<GrantDetailsGridProps>) {
   );
 }
 
-interface GrantDetailsRowProps {
-  readonly label: string;
-  readonly value: ReactNode;
-}
-
 function GrantDetailsRow({
   label,
   value,
-}: Readonly<GrantDetailsRowProps>) {
+}: Readonly<{ label: string; value: ReactNode }>) {
   return (
     <div className="tw-flex tw-flex-col tw-gap-0.5">
       <dt className="tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-500">
@@ -229,71 +141,10 @@ function GrantDetailsRow({
   );
 }
 
-interface StatusBadgeProps {
-  readonly status: string;
-}
-
-function StatusBadge({ status }: Readonly<StatusBadgeProps>) {
+function StatusBadge({ status }: Readonly<{ status: string }>) {
   return (
     <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-800 tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-200">
       {status}
     </span>
   );
-}
-
-function getContractAddress(
-  contract: string
-): `0x${string}` | undefined {
-  if (!contract) {
-    return undefined;
-  }
-  const trimmed = contract.trim();
-  if (!isValidEthAddress(trimmed)) {
-    return undefined;
-  }
-  return trimmed as `0x${string}`;
-}
-
-function shortenAddress(address: `0x${string}`): string {
-  return `${address.slice(0, 6)}…${address.slice(-4)}`;
-}
-
-function formatContractLabel(contract?: string): string {
-  if (!contract) {
-    return "this contract";
-  }
-  if (isValidEthAddress(contract)) {
-    return shortenAddress(contract as `0x${string}`);
-  }
-  return contract;
-}
-
-function formatTotalSupply(value?: string | null): string {
-  if (!value) {
-    return "Unknown";
-  }
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed)) {
-    return value;
-  }
-  return new Intl.NumberFormat().format(parsed);
-}
-
-function formatFloorPrice(value?: number | null): string {
-  if (typeof value !== "number" || Number.isNaN(value)) {
-    return "Unknown";
-  }
-  return `Ξ${new Intl.NumberFormat(undefined, {
-    maximumFractionDigits: value < 1 ? 4 : 2,
-  }).format(value)}`;
-}
-
-function mapGrantChainToSupportedChain(
-  chain: ApiTdhGrantsPage["data"][number]["target_chain"]
-): SupportedChain {
-  switch (chain) {
-    case "ETHEREUM_MAINNET":
-    default:
-      return "ethereum";
-  }
 }
