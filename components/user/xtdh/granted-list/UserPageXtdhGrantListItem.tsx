@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, type ReactNode } from "react";
+import { type ReactNode } from "react";
 
 import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
 import {
@@ -27,8 +27,6 @@ export function UserPageXtdhGrantListItem({
     chain,
     enabled: Boolean(contractAddress),
   });
-
-
   const tokensCountLabel = formatTargetTokensCount(grant.target_tokens);
   const tdhRateLabel = formatAmount(grant.tdh_rate);
   const validUntilLabel = formatDateTime(grant.valid_to ?? null);

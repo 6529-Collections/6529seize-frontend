@@ -74,6 +74,7 @@ export async function getContractOverview(
   if (!response) {
     return null;
   }
+  
   const baseMeta: AlchemyContractMetadata =
     response.contractMetadata ?? response;
   const openSeaMetadata = resolveOpenSeaMetadata(

@@ -1,7 +1,6 @@
 import type {
   Suggestion,
   SupportedChain,
-  TokenMetadata,
 } from "@/types/nft";
 
 export type SearchContractsParams = {
@@ -41,6 +40,7 @@ export type AlchemyContractMetadata = {
   bannerImageUrl?: string | null;
   description?: string | null;
   contractDeployer?: string | null;
+  deployedBlockNumber?: number | null;
   openSeaMetadata?: AlchemyOpenSeaMetadata;
   openseaMetadata?: AlchemyOpenSeaMetadata;
   openSea?: AlchemyOpenSeaMetadata;
@@ -84,24 +84,66 @@ export type AlchemyContractMetadataResponse = AlchemyContractMetadata & {
   isSpam?: boolean;
 };
 
+export type AlchemyNftMedia = {
+  cachedUrl?: string | null;
+  thumbnailUrl?: string | null;
+  originalUrl?: string | null;
+  pngUrl?: string | null;
+  gateway?: string | null;
+  raw?: string | null;
+  contentType?: string | null;
+  size?: number | null;
+};
+
+export type AlchemyNftMetadata = {
+  image?: string | null;
+  name?: string | null;
+  description?: string | null;
+  [key: string]: unknown;
+};
+
+export type AlchemyNftCollection = {
+  name?: string | null;
+  slug?: string | null;
+  externalUrl?: string | null;
+  bannerImageUrl?: string | null;
+};
+
+export type AlchemyNftMint = {
+  mintAddress?: string | null;
+  blockNumber?: string | null;
+  timestamp?: string | null;
+  transactionHash?: string | null;
+};
+
+export type AlchemyOwnedNftAcquiredAt = {
+  blockTimestamp?: string | null;
+  blockNumber?: string | null;
+};
+
 export type AlchemyTokenMetadataEntry = {
+  contract?: (AlchemyContractMetadata & { spamClassifications?: string[] | null }) | null;
   tokenId?: string;
   tokenType?: string | null;
   title?: string | null;
   name?: string | null;
   description?: string | null;
-  image?: {
-    cachedUrl?: string | null;
-    thumbnailUrl?: string | null;
-    originalUrl?: string | null;
+  tokenUri?: string | null;
+  image?: AlchemyNftMedia | null;
+  animation?: AlchemyNftMedia | null;
+  media?: AlchemyNftMedia[] | null;
+  metadata?: AlchemyNftMetadata | null;
+  raw?: {
+    tokenUri?: string | null;
+    metadata?: AlchemyNftMetadata | null;
+    error?: string | null;
   } | null;
-  media?: {
-    gateway?: string | null;
-    thumbnailUrl?: string | null;
-    raw?: string | null;
-  }[] | null;
-  metadata?: { image?: string | null; name?: string | null } | null;
-  raw?: { metadata?: { image?: string | null; name?: string | null } } | null;
+  collection?: AlchemyNftCollection | null;
+  mint?: AlchemyNftMint | null;
+  owners?: string[] | null;
+  timeLastUpdated?: string | null;
+  balance?: string | null;
+  acquiredAt?: AlchemyOwnedNftAcquiredAt | null;
   isSpam?: boolean;
   spamInfo?: { isSpam?: boolean } | null;
 };
@@ -109,4 +151,23 @@ export type AlchemyTokenMetadataEntry = {
 export type AlchemyTokenMetadataResponse = {
   tokens?: AlchemyTokenMetadataEntry[];
   nfts?: AlchemyTokenMetadataEntry[];
+};
+
+export type AlchemyOwnedNft = AlchemyTokenMetadataEntry & {
+  balance?: string | null;
+};
+
+export type AlchemyGetNftsForOwnerResponse = {
+  ownedNfts: AlchemyOwnedNft[];
+  pageKey?: string;
+  totalCount?: number;
+  validAt?: {
+    blockNumber?: number | null;
+    blockHash?: string | null;
+    blockTimestamp?: string | null;
+  };
+  error?: {
+    code?: number;
+    message?: string;
+  };
 };

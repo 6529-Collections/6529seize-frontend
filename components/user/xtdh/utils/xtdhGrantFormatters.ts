@@ -63,9 +63,9 @@ export const formatTargetTokensCount = (tokens: readonly string[]): string => {
     }
 
     const total = ranges.reduce<bigint>((sum, range) => {
-      const rangeSize = range.end - range.start + 1n;
+      const rangeSize = range.end - range.start + BigInt(1);
       return sum + rangeSize;
-    }, 0n);
+    }, BigInt(0));
 
     if (total <= BigInt(Number.MAX_SAFE_INTEGER)) {
       return numberFormatter.format(Number(total));

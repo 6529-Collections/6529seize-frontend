@@ -1,6 +1,11 @@
 import { publicEnv } from "@/config/env";
 import { goerli, sepolia } from "wagmi/chains";
 
+import type {
+  AlchemyGetNftsForOwnerResponse,
+  AlchemyOwnedNft,
+} from "./types";
+
 const MAX_GET_NFTS_RETRIES = 3;
 const legacyOptions = { method: "GET", headers: { accept: "application/json" } };
 
@@ -46,23 +51,20 @@ function delayWithAbort(ms: number, signal?: AbortSignal): Promise<void> {
   });
 }
 
-async function fetchLegacyUrl(url: string, signal?: AbortSignal) {
+async function fetchLegacyUrl<T>(url: string, signal?: AbortSignal): Promise<T> {
   const response = await fetch(url, { ...legacyOptions, signal });
-  return await response.json();
+  return (await response.json()) as T;
 }
 
 export async function getNftsForContractAndOwner(
   chainId: number,
   contract: string,
   owner: string,
-  nfts?: any[],
+  nfts: AlchemyOwnedNft[] = [],
   pageKey?: string,
   retries = 0,
   signal?: AbortSignal
 ) {
-  if (!nfts) {
-    nfts = [];
-  }
   let path = "eth-mainnet";
   if (chainId === sepolia.id) {
     path = "eth-sepolia";
@@ -74,7 +76,10 @@ export async function getNftsForContractAndOwner(
   if (pageKey) {
     url += `&pageKey=${pageKey}`;
   }
-  const response = await fetchLegacyUrl(url, signal);
+  const response = await fetchLegacyUrl<AlchemyGetNftsForOwnerResponse>(
+    url,
+    signal
+  );
   if (response.error) {
     if (retries >= MAX_GET_NFTS_RETRIES) {
       throw new Error("Failed to fetch NFTs for owner after retries");
@@ -90,7 +95,7 @@ export async function getNftsForContractAndOwner(
       signal
     );
   }
-  nfts = [...nfts].concat(response.ownedNfts);
+  nfts = [...nfts, ...(response.ownedNfts ?? [])];
   if (response.pageKey) {
     return getNftsForContractAndOwner(
       chainId,

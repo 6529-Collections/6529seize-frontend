@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import type {
   ContractOverview,
-  Suggestion,
   SupportedChain,
   TokenMetadata,
 } from "@/types/nft";
