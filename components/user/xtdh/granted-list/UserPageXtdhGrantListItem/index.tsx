@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import clsx from "clsx";
+import { useId, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
 import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
@@ -152,32 +154,47 @@ function GrantTokensDisclosure({
   ranges: TokenRange[];
 }>) {
   const [isOpen, setIsOpen] = useState(false);
+  const panelId = useId();
 
   return (
-    <div className="tw-mt-4 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-950">
+    <div className="tw-mt-4 tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-950">
       <button
         type="button"
-        className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-px-4 tw-py-3 tw-text-left"
+        className={clsx(
+          "tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-xl tw-border-none tw-bg-transparent tw-px-4 tw-py-3 tw-text-left tw-text-iron-50 tw-transition-colors tw-duration-200 tw-appearance-none focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950",
+          isOpen
+            ? "tw-bg-iron-900"
+            : "desktop-hover:hover:tw-bg-iron-900/40"
+        )}
         onClick={() => setIsOpen((previous) => !previous)}
         aria-expanded={isOpen}
+        aria-controls={panelId}
       >
         <div className="tw-flex tw-flex-col tw-gap-0.5">
           <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
             {isOpen ? "Hide granted tokens" : "Show granted tokens"}
           </span>
-          <span className="tw-text-xs tw-text-iron-400">
+          <span className="tw-text-xs tw-text-iron-350">
             Expand to inspect the specific token IDs.
           </span>
         </div>
         <span
           aria-hidden="true"
-          className="tw-text-lg tw-text-iron-300"
+          className="tw-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-iron-800 tw-bg-iron-900 tw-text-iron-50 tw-transition-colors tw-duration-200"
         >
-          {isOpen ? "−" : "+"}
+          <ChevronDownIcon
+            className={clsx(
+              "tw-size-5 tw-transition-transform tw-duration-200",
+              isOpen && "tw-rotate-180"
+            )}
+          />
         </span>
       </button>
       {isOpen ? (
-        <div className="tw-border-t tw-border-iron-800 tw-p-3">
+        <div
+          id={panelId}
+          className="tw-border-t tw-border-iron-800 tw-bg-iron-950 tw-p-3"
+        >
           <VirtualizedTokenList
             contractAddress={contractAddress ?? undefined}
             chain={chain}

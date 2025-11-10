@@ -18,7 +18,6 @@ import {
   resolveNetwork,
   resolveOpenSeaMetadata,
 } from "./utils";
-import { fetchUrl } from "../6529api";
 
 export async function searchNftCollections(
   params: SearchContractsParams
@@ -33,11 +32,19 @@ export async function searchNftCollections(
   if (pageKey) {
     url.searchParams.set("pageKey", pageKey);
   }
-  const response = await fetchUrl<AlchemySearchResponse | undefined>(
-    url.toString(),
-    { signal }
-  );
-  const contracts = response?.contracts ?? [];
+  const response = await fetch(url.toString(), {
+    headers: {
+      Accept: "application/json",
+    },
+    signal,
+  });
+  if (!response.ok) {
+    throw new Error("Failed to search NFT collections");
+  }
+  const payload = (await response.json()) as
+    | AlchemySearchResponse
+    | undefined;
+  const contracts = payload?.contracts ?? [];
   const suggestions = contracts
     .map((contract) => extractContract(contract))
     .filter((suggestion): suggestion is Suggestion => suggestion !== null);
@@ -50,7 +57,7 @@ export async function searchNftCollections(
   return {
     items: visibleItems,
     hiddenCount,
-    nextPageKey: response?.pageKey,
+    nextPageKey: payload?.pageKey,
   };
 }
 
@@ -67,19 +74,29 @@ export async function getContractOverview(
   }
   const network = resolveNetwork(chain);
   const url = `https://${network}.g.alchemy.com/nft/v3/${publicEnv.ALCHEMY_API_KEY}/getContractMetadata?contractAddress=${checksum}`;
-  const response = await fetchUrl<AlchemyContractMetadataResponse | undefined>(
-    url,
-    { signal }
-  );
-  if (!response) {
+  const response = await fetch(url, {
+    headers: {
+      Accept: "application/json",
+    },
+    signal,
+  });
+  if (response.status === 404) {
     return null;
   }
-  
+  if (!response.ok) {
+    throw new Error("Failed to fetch contract metadata");
+  }
+  const payload = (await response.json()) as
+    | AlchemyContractMetadataResponse
+    | undefined;
+  if (!payload) {
+    return null;
+  }
   const baseMeta: AlchemyContractMetadata =
-    response.contractMetadata ?? response;
+    payload.contractMetadata ?? payload;
   const openSeaMetadata = resolveOpenSeaMetadata(
-    response,
-    response.contractMetadata,
+    payload,
+    payload.contractMetadata,
     baseMeta
   );
   const contract: AlchemyContractResult = {
@@ -89,9 +106,7 @@ export async function getContractOverview(
     contractAddress: checksum,
     openSeaMetadata,
     isSpam:
-      response.isSpam ??
-      baseMeta.isSpam ??
-      baseMeta.spamInfo?.isSpam,
+      payload.isSpam ?? baseMeta.isSpam ?? baseMeta.spamInfo?.isSpam,
   };
   const suggestion = extractContract(contract);
   if (!suggestion) {

@@ -2,50 +2,60 @@ jest.mock("@/config/env", () => ({
   publicEnv: { ALCHEMY_API_KEY: "test" },
 }));
 
-jest.mock("@/services/6529api", () => ({
-  fetchUrl: jest.fn(),
-  postData: jest.fn(),
-}));
-
 import {
   getContractOverview,
   getTokensMetadata,
   searchNftCollections,
 } from "@/services/alchemy-api";
-import { fetchUrl, postData } from "@/services/6529api";
-
-const mockedFetchUrl = fetchUrl as jest.MockedFunction<typeof fetchUrl>;
-const mockedPostData = postData as jest.MockedFunction<typeof postData>;
+const originalFetch = global.fetch;
+const mockFetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 describe("services/alchemy-api", () => {
   beforeEach(() => {
-    mockedFetchUrl.mockReset();
-    mockedPostData.mockReset();
+    mockFetch.mockReset();
+    global.fetch = mockFetch;
   });
+
+  afterAll(() => {
+    global.fetch = originalFetch;
+  });
+
+  function jsonResponse<T>(body: T, status = 200): Response {
+    return {
+      ok: status >= 200 && status < 300,
+      status,
+      json: async () => body,
+    } as Response;
+  }
 
   describe("searchNftCollections", () => {
     it("returns suggestions and filters spam", async () => {
-      mockedFetchUrl.mockResolvedValue({
-        contracts: [
-          {
-            address: "0x1234567890abcdef1234567890abcdef12345678",
-            name: "Example",
-            tokenType: "ERC721",
-            totalSupply: "1000",
-            openSeaMetadata: { floorPrice: 1.2, safelistRequestStatus: "verified" },
-            isSpam: false,
-          },
-          {
-            address: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
-            name: "Spam",
-            isSpam: true,
-          },
-        ],
-      });
+      mockFetch.mockResolvedValue(
+        jsonResponse({
+          contracts: [
+            {
+              address: "0x1234567890abcdef1234567890abcdef12345678",
+              name: "Example",
+              tokenType: "ERC721",
+              totalSupply: "1000",
+              openSeaMetadata: {
+                floorPrice: 1.2,
+                safelistRequestStatus: "verified",
+              },
+              isSpam: false,
+            },
+            {
+              address: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+              name: "Spam",
+              isSpam: true,
+            },
+          ],
+        })
+      );
 
       const result = await searchNftCollections({ query: "exa" });
 
-      expect(mockedFetchUrl).toHaveBeenCalledTimes(1);
+      expect(mockFetch).toHaveBeenCalledTimes(1);
       expect(result.items).toHaveLength(1);
       expect(result.hiddenCount).toBe(1);
     });
@@ -59,18 +69,20 @@ describe("services/alchemy-api", () => {
     });
 
     it("normalises contract metadata", async () => {
-      mockedFetchUrl.mockResolvedValue({
-        contractMetadata: {
-          name: "Example",
-          tokenType: "ERC1155",
-          totalSupply: "5000",
-        },
-        openSeaMetadata: {
-          floorPrice: 0.5,
-          safelistRequestStatus: "verified",
-        },
-        address: "0x1234567890abcdef1234567890abcdef12345678",
-      });
+      mockFetch.mockResolvedValue(
+        jsonResponse({
+          contractMetadata: {
+            name: "Example",
+            tokenType: "ERC1155",
+            totalSupply: "5000",
+          },
+          openSeaMetadata: {
+            floorPrice: 0.5,
+            safelistRequestStatus: "verified",
+          },
+          address: "0x1234567890abcdef1234567890abcdef12345678",
+        })
+      );
 
       const result = await getContractOverview({
         address: "0x1234567890abcdef1234567890abcdef12345678" as `0x${string}`,
@@ -83,9 +95,8 @@ describe("services/alchemy-api", () => {
 
   describe("getTokensMetadata", () => {
     it("fetches batched token metadata", async () => {
-      mockedPostData.mockResolvedValue({
-        status: 200,
-        response: {
+      mockFetch.mockResolvedValue(
+        jsonResponse({
           tokens: [
             {
               tokenId: "1",
@@ -93,15 +104,15 @@ describe("services/alchemy-api", () => {
               image: { cachedUrl: "https://example.com/1.png" },
             },
           ],
-        },
-      });
+        })
+      );
 
       const result = await getTokensMetadata({
         address: "0x1234567890abcdef1234567890abcdef12345678" as `0x${string}`,
         tokenIds: ["1"],
       });
 
-      expect(mockedPostData).toHaveBeenCalledTimes(1);
+      expect(mockFetch).toHaveBeenCalledTimes(1);
       expect(result).toHaveLength(1);
       expect(result[0].tokenId.toString()).toBe("1");
       expect(result[0].imageUrl).toBe("https://example.com/1.png");

@@ -8,7 +8,6 @@ import type {
   TokenMetadataParams,
 } from "./types";
 import { normaliseAddress, pickThumbnail, resolveNetwork } from "./utils";
-import { postData } from "../6529api";
 
 const MAX_BATCH_SIZE = 100;
 
@@ -76,11 +75,19 @@ export async function getTokensMetadata(
         tokenId,
       })),
     };
-    const { status, response } = await postData(url, body, { signal });
-    if (status >= 400) {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(body),
+      signal,
+    });
+    if (!response.ok) {
       throw new Error("Failed to fetch token metadata");
     }
-    const payload = response as AlchemyTokenMetadataResponse;
+    const payload = (await response.json()) as AlchemyTokenMetadataResponse;
     const tokens = payload.tokens ?? payload.nfts ?? [];
     for (const token of tokens) {
       const normalised = normaliseTokenMetadata(token);
