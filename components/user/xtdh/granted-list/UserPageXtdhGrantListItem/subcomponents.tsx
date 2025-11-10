@@ -118,7 +118,10 @@ function GrantDetailsGrid({
       <GrantDetailsRow label="Token type" value={details.tokenTypeLabel} />
       <GrantDetailsRow label="Total supply" value={details.totalSupplyLabel} />
       <GrantDetailsRow label="Floor price" value={details.floorPriceLabel} />
-      <GrantDetailsRow label="Tokens" value={details.tokensCountLabel} />
+      <GrantDetailsRow
+        label="Tokens granted"
+        value={details.tokensCountLabel}
+      />
       <GrantDetailsRow label="TDH rate" value={details.tdhRateLabel} />
       <GrantDetailsRow label="Valid until" value={details.validUntilLabel} />
     </dl>

@@ -27,12 +27,14 @@ export const formatTargetTokens = (tokens: readonly string[]): string => {
   }
 };
 
-export const formatDateTime = (timestampSeconds: number | null) => {
-  if (!timestampSeconds || timestampSeconds <= 0) {
+export const formatDateTime = (timestamp: number | null) => {
+  if (!timestamp || timestamp <= 0) {
     return "No expiry";
   }
 
-  const date = new Date(timestampSeconds * 1000);
+  const normalizedTimestamp =
+    timestamp > 1_000_000_000_000 ? timestamp : timestamp * 1000;
+  const date = new Date(normalizedTimestamp);
   if (!Number.isFinite(date.getTime())) {
     return "Invalid date";
   }
