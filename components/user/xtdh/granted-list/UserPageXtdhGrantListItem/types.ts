@@ -6,6 +6,7 @@ export interface GrantDetails {
   readonly floorPriceLabel: ReactNode;
   readonly tokensCountLabel: ReactNode;
   readonly tdhRateLabel: ReactNode;
+  readonly validFromLabel: ReactNode;
   readonly validUntilLabel: ReactNode;
 }
 

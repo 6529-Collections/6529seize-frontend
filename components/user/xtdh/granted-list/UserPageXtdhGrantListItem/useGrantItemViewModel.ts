@@ -23,6 +23,7 @@ interface GrantItemViewModel {
   readonly chain: SupportedChain;
   readonly contractLabel?: string;
   readonly details: GrantDetails;
+  readonly errorDetails: string | null;
   readonly isLoading: boolean;
   readonly status: string;
   readonly variant: GrantItemVariant;
@@ -48,6 +49,7 @@ export function useGrantItemViewModel(
     chain,
     contractLabel: contractAddress ?? grant.target_contract,
     details,
+    errorDetails: normalizeErrorDetails(grant.error_details),
     isLoading,
     status: grant.status,
     variant: hasContractData ? "contract" : "error",
@@ -81,6 +83,19 @@ function createBaseGrantDetails(
     floorPriceLabel: "Unknown",
     tokensCountLabel: formatTargetTokensCount(grant.target_tokens),
     tdhRateLabel: formatAmount(grant.tdh_rate),
+    validFromLabel: formatDateTime(grant.valid_from ?? null, {
+      fallbackLabel: "Immediately",
+    }),
     validUntilLabel: formatDateTime(grant.valid_to ?? null),
   };
+}
+
+function normalizeErrorDetails(value: string | null): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+
+  return trimmed.length ? trimmed : null;
 }

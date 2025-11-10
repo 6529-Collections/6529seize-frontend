@@ -11,12 +11,14 @@ import { getStatusVisuals } from "./statusVisuals";
 interface GrantItemContentProps {
   readonly contract: ContractOverview;
   readonly details: GrantDetails;
+  readonly errorDetails?: string | null;
   readonly status: string;
 }
 
 export function GrantItemContent({
   contract,
   details,
+  errorDetails,
   status,
 }: Readonly<GrantItemContentProps>) {
   const name = contract.name ?? shortenAddress(contract.address);
@@ -49,9 +51,13 @@ export function GrantItemContent({
             </p>
           </div>
         </div>
-        <StatusBadge status={status} />
+        <div className="tw-flex tw-items-center tw-gap-3">
+          <GrantExpiryBadge value={details.validUntilLabel} />
+          <StatusBadge status={status} />
+        </div>
       </header>
       <GrantDetailsGrid details={details} />
+      {errorDetails ? <GrantErrorDetails message={errorDetails} /> : null}
     </div>
   );
 }
@@ -59,12 +65,14 @@ export function GrantItemContent({
 interface GrantItemErrorProps {
   readonly contractLabel?: string;
   readonly details: GrantDetails;
+  readonly errorDetails?: string | null;
   readonly status: string;
 }
 
 export function GrantItemError({
   contractLabel,
   details,
+  errorDetails,
   status,
 }: Readonly<GrantItemErrorProps>) {
   return (
@@ -80,9 +88,13 @@ export function GrantItemError({
               : "We couldn't load metadata for this contract."}
           </p>
         </div>
-        <StatusBadge status={status} />
+        <div className="tw-flex tw-items-center tw-gap-3">
+          <GrantExpiryBadge value={details.validUntilLabel} />
+          <StatusBadge status={status} />
+        </div>
       </header>
       <GrantDetailsGrid details={details} />
+      {errorDetails ? <GrantErrorDetails message={errorDetails} /> : null}
     </div>
   );
 }
@@ -125,7 +137,7 @@ function GrantDetailsGrid({
         value={details.tokensCountLabel}
       />
       <GrantDetailsRow label="TDH rate" value={details.tdhRateLabel} />
-      <GrantDetailsRow label="Valid until" value={details.validUntilLabel} />
+      <GrantDetailsRow label="Valid from" value={details.validFromLabel} />
     </dl>
   );
 }
@@ -142,6 +154,21 @@ function GrantDetailsRow({
       <dd className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
         {value}
       </dd>
+    </div>
+  );
+}
+
+function GrantExpiryBadge({
+  value,
+}: Readonly<{ value: ReactNode }>) {
+  return (
+    <div className="tw-min-w-[140px] tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-py-2">
+      <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-50">
+        <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-400">
+          Expires:
+        </span>
+        <span className="tw-ml-2 tw-text-iron-50">{value}</span>
+      </p>
     </div>
   );
 }
@@ -164,5 +191,20 @@ function StatusBadge({ status }: Readonly<{ status: string }>) {
       </span>
       <span>{label}</span>
     </span>
+  );
+}
+
+function GrantErrorDetails({ message }: Readonly<{ message: string }>) {
+  return (
+    <section
+      aria-live="polite"
+      className="tw-rounded-lg tw-border tw-border-red-500/40 tw-bg-red-500/5 tw-p-3 tw-text-red-200">
+      <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-text-red-300">
+        Error details
+      </p>
+      <p className="tw-m-0 tw-mt-1 tw-whitespace-pre-line tw-text-sm">
+        {message}
+      </p>
+    </section>
   );
 }

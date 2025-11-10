@@ -27,9 +27,16 @@ export const formatTargetTokens = (tokens: readonly string[]): string => {
   }
 };
 
-export const formatDateTime = (timestamp: number | null) => {
+interface DateTimeFormatOptions {
+  readonly fallbackLabel?: string;
+}
+
+export const formatDateTime = (
+  timestamp: number | null,
+  options?: DateTimeFormatOptions
+) => {
   if (!timestamp || timestamp <= 0) {
-    return "No expiry";
+    return options?.fallbackLabel ?? "No expiry";
   }
 
   const normalizedTimestamp =

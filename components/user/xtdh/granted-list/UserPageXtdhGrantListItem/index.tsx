@@ -33,6 +33,7 @@ export function UserPageXtdhGrantListItem({
     contractAddress,
     contractLabel,
     details,
+    errorDetails,
     isLoading,
     status,
     variant,
@@ -68,12 +69,18 @@ export function UserPageXtdhGrantListItem({
   return (
     <GrantListItemContainer>
       {variant === "contract" && contract ? (
-        <GrantItemContent contract={contract} status={status} details={details} />
+        <GrantItemContent
+          contract={contract}
+          status={status}
+          details={details}
+          errorDetails={errorDetails}
+        />
       ) : (
         <GrantItemError
           contractLabel={contractLabel}
           status={status}
           details={details}
+          errorDetails={errorDetails}
         />
       )}
       <GrantTokensPanel
