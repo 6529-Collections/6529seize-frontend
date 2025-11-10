@@ -28,9 +28,6 @@ export function UserPageXtdhGrantListItem({
     enabled: Boolean(contractAddress),
   });
 
-  useEffect(() => {
-    console.log(contract)
-  }, [contract]);
 
   const tokensCountLabel = formatTargetTokensCount(grant.target_tokens);
   const tdhRateLabel = formatAmount(grant.tdh_rate);

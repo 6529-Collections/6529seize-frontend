@@ -4,6 +4,7 @@ import type { ContractOverview, Suggestion } from "@/types/nft";
 
 import type {
   AlchemyContractResult,
+  AlchemyContractMetadata,
   AlchemyContractMetadataResponse,
   AlchemySearchResponse,
   ContractOverviewParams,
@@ -73,21 +74,23 @@ export async function getContractOverview(
   if (!response) {
     return null;
   }
-
+  const baseMeta: AlchemyContractMetadata =
+    response.contractMetadata ?? response;
   const openSeaMetadata = resolveOpenSeaMetadata(
     response,
-    response.contractMetadata
+    response.contractMetadata,
+    baseMeta
   );
   const contract: AlchemyContractResult = {
-    ...response.contractMetadata,
-    contractMetadata: response.contractMetadata,
+    ...baseMeta,
+    contractMetadata: baseMeta,
     address: checksum,
     contractAddress: checksum,
     openSeaMetadata,
     isSpam:
       response.isSpam ??
-      response.contractMetadata?.isSpam ??
-      response.contractMetadata?.spamInfo?.isSpam,
+      baseMeta.isSpam ??
+      baseMeta.spamInfo?.isSpam,
   };
   const suggestion = extractContract(contract);
   if (!suggestion) {

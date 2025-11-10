@@ -75,12 +75,12 @@ export type AlchemySearchResponse = {
   pageKey?: string;
 };
 
-export type AlchemyContractMetadataResponse = {
-  contractMetadata?: AlchemyContractMetadata;
-  openSeaMetadata?: AlchemyOpenSeaMetadata;
-  openseaMetadata?: AlchemyOpenSeaMetadata;
-  address?: string;
-  contractAddress?: string;
+export type AlchemyContractMetadataResponse = AlchemyContractMetadata & {
+  contractMetadata?: AlchemyContractMetadata | null;
+  openSeaMetadata?: AlchemyOpenSeaMetadata | null;
+  openseaMetadata?: AlchemyOpenSeaMetadata | null;
+  address?: string | null;
+  contractAddress?: string | null;
   isSpam?: boolean;
 };
 
