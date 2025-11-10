@@ -4,6 +4,55 @@ const numberFormatter = new Intl.NumberFormat(undefined, {
   maximumFractionDigits: 0,
 });
 
+export type TargetTokensCountInfo =
+  | { kind: "all"; label: string; count: null }
+  | { kind: "count"; label: string; count: number | null };
+
+export const getTargetTokensCountInfo = (
+  tokens: readonly string[]
+): TargetTokensCountInfo => {
+  if (!tokens.length) {
+    return { kind: "all", label: "All tokens", count: null };
+  }
+
+  try {
+    const ranges = parseTokenExpressionToRanges(tokens.join(","));
+    if (!ranges.length) {
+      return { kind: "all", label: "All tokens", count: null };
+    }
+
+    const total = ranges.reduce<bigint>((sum, range) => {
+      const rangeSize = range.end - range.start + BigInt(1);
+      return sum + rangeSize;
+    }, BigInt(0));
+
+    if (total <= BigInt(Number.MAX_SAFE_INTEGER)) {
+      const numericTotal = Number(total);
+      return {
+        kind: "count",
+        label: numberFormatter.format(numericTotal),
+        count: numericTotal,
+      };
+    }
+
+    return {
+      kind: "count",
+      label: total.toString(),
+      count: null,
+    };
+  } catch (error) {
+    const fallbackCount = tokens.length;
+    if (!fallbackCount) {
+      return { kind: "all", label: "All tokens", count: null };
+    }
+    return {
+      kind: "count",
+      label: numberFormatter.format(fallbackCount),
+      count: fallbackCount,
+    };
+  }
+};
+
 export const formatTargetTokens = (tokens: readonly string[]): string => {
   if (!tokens.length) {
     return "All tokens";
@@ -63,28 +112,55 @@ export const formatAmount = (value: number) => {
   return numberFormatter.format(Math.floor(value));
 };
 
-export const formatTargetTokensCount = (tokens: readonly string[]): string => {
-  if (!tokens.length) {
-    return "All tokens";
+export const formatTargetTokensCount = (tokens: readonly string[]): string =>
+  getTargetTokensCountInfo(tokens).label;
+
+const createDecimalFormatter = (maximumFractionDigits: number) =>
+  new Intl.NumberFormat(undefined, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits,
+  });
+
+const decimalFormatters = new Map<number, Intl.NumberFormat>();
+
+function formatDecimal(value: number, maximumFractionDigits: number): string {
+  if (!decimalFormatters.has(maximumFractionDigits)) {
+    decimalFormatters.set(
+      maximumFractionDigits,
+      createDecimalFormatter(maximumFractionDigits)
+    );
   }
 
-  try {
-    const ranges = parseTokenExpressionToRanges(tokens.join(","));
-    if (!ranges.length) {
-      return "All tokens";
-    }
+  return decimalFormatters.get(maximumFractionDigits)!.format(value);
+}
 
-    const total = ranges.reduce<bigint>((sum, range) => {
-      const rangeSize = range.end - range.start + BigInt(1);
-      return sum + rangeSize;
-    }, BigInt(0));
-
-    if (total <= BigInt(Number.MAX_SAFE_INTEGER)) {
-      return numberFormatter.format(Number(total));
-    }
-
-    return total.toString();
-  } catch (error) {
-    return numberFormatter.format(tokens.length);
+export const formatTdhRatePerToken = (
+  totalRate: number,
+  tokensCount: number | null
+): string | null => {
+  if (!Number.isFinite(totalRate) || !tokensCount || tokensCount <= 0) {
+    return null;
   }
+
+  const perTokenValue = totalRate / tokensCount;
+  if (!Number.isFinite(perTokenValue)) {
+    return null;
+  }
+
+  const absoluteValue = Math.abs(perTokenValue);
+  let maximumFractionDigits = 0;
+
+  if (absoluteValue === 0) {
+    maximumFractionDigits = 0;
+  } else if (absoluteValue < 0.01) {
+    maximumFractionDigits = 4;
+  } else if (absoluteValue < 1) {
+    maximumFractionDigits = 3;
+  } else if (absoluteValue < 100) {
+    maximumFractionDigits = 2;
+  } else if (absoluteValue < 1000) {
+    maximumFractionDigits = 1;
+  }
+
+  return formatDecimal(perTokenValue, maximumFractionDigits);
 };

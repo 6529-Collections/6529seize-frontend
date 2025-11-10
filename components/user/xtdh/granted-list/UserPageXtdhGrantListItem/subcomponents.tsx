@@ -136,8 +136,24 @@ function GrantDetailsGrid({
         label="Tokens granted"
         value={details.tokensCountLabel}
       />
-      <GrantDetailsRow label="TDH rate" value={details.tdhRateLabel} />
+      <GrantDetailsRow
+        label="TDH rate"
+        value={
+          <div className="tw-flex tw-items-baseline tw-gap-2 tw-text-sm tw-font-medium tw-text-iron-100">
+            <span>{details.tdhRateLabel}</span>
+            {details.tdhRatePerTokenLabel ? (
+              <span
+                className="tw-text-xs tw-font-semibold tw-text-iron-400 tw-whitespace-nowrap"
+                title={details.tdhRatePerTokenHint ?? undefined}
+              >
+                ({details.tdhRatePerTokenLabel}/token)
+              </span>
+            ) : null}
+          </div>
+        }
+      />
       <GrantDetailsRow label="Valid from" value={details.validFromLabel} />
+      <GrantDetailsRow label="Valid until" value={details.validUntilLabel} />
     </dl>
   );
 }

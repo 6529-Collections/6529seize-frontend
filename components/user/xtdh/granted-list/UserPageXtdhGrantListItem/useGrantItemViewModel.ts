@@ -3,7 +3,8 @@
 import {
   formatAmount,
   formatDateTime,
-  formatTargetTokensCount,
+  formatTdhRatePerToken,
+  getTargetTokensCountInfo,
 } from "@/components/user/xtdh/utils/xtdhGrantFormatters";
 import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
 import { useContractOverviewQuery } from "@/hooks/useAlchemyNftQueries";
@@ -77,12 +78,29 @@ function buildGrantDetails(
 function createBaseGrantDetails(
   grant: ApiTdhGrantsPage["data"][number]
 ): GrantDetails {
+  const tokensCountInfo = getTargetTokensCountInfo(grant.target_tokens);
+  const tokensCountValue =
+    typeof tokensCountInfo.count === "number" ? tokensCountInfo.count : null;
+  const tdhRateLabel = formatAmount(grant.tdh_rate);
+  const perTokenLabel = formatTdhRatePerToken(
+    grant.tdh_rate,
+    tokensCountValue
+  );
+  const tokensDescription =
+    tokensCountInfo.kind === "all"
+      ? "all tokens in this collection"
+      : `${tokensCountInfo.label} tokens granted`;
+
   return {
     tokenTypeLabel: "Unknown",
     totalSupplyLabel: "Unknown",
     floorPriceLabel: "Unknown",
-    tokensCountLabel: formatTargetTokensCount(grant.target_tokens),
-    tdhRateLabel: formatAmount(grant.tdh_rate),
+    tokensCountLabel: tokensCountInfo.label,
+    tdhRateLabel,
+    tdhRatePerTokenLabel: perTokenLabel,
+    tdhRatePerTokenHint: perTokenLabel
+      ? `${tdhRateLabel} total TDH ÷ ${tokensDescription}`
+      : null,
     validFromLabel: formatDateTime(grant.valid_from ?? null, {
       fallbackLabel: "Immediately",
     }),
