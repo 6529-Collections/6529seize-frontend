@@ -1,9 +1,7 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { UserPageXtdhGrantedListContent } from "@/components/user/xtdh/granted-list/UserPageXtdhGrantedListContent";
 import { UserPageXtdhGrantedListControls } from "@/components/user/xtdh/user-page-xtdh-granted-list/components/UserPageXtdhGrantedListControls";
 import {
@@ -12,8 +10,7 @@ import {
 import { getUserPageXtdhGrantedListResultSummary } from "@/components/user/xtdh/user-page-xtdh-granted-list/helpers";
 import { useUserPageXtdhGrantedListFilters } from "@/components/user/xtdh/user-page-xtdh-granted-list/hooks/useUserPageXtdhGrantedListFilters";
 import { useUserPageXtdhGrantedListStatusCounts } from "@/components/user/xtdh/user-page-xtdh-granted-list/hooks/useUserPageXtdhGrantedListStatusCounts";
-import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
-import { commonApiFetch } from "@/services/api/common-api";
+import { useXtdhGrantsQuery } from "@/hooks/useXtdhGrantsQuery";
 
 export type {
   GrantedFilterStatus,
@@ -22,14 +19,12 @@ export type {
 
 export interface UserPageXtdhGrantedListProps {
   readonly grantor: string;
-  readonly page?: number;
   readonly pageSize?: number;
   readonly isSelf?: boolean;
 }
 
 export default function UserPageXtdhGrantedList({
   grantor,
-  page = 1,
   pageSize = 25,
   isSelf = false,
 }: Readonly<UserPageXtdhGrantedListProps>) {
@@ -44,52 +39,31 @@ export default function UserPageXtdhGrantedList({
   } = useUserPageXtdhGrantedListFilters();
 
   const {
-    data,
+    grants,
+    totalCount,
     isLoading,
     isError,
-    error,
-    refetch,
     isFetching,
-  } = useQuery({
-    queryKey: [
-      QueryKey.TDH_GRANTS,
-      grantor,
-      page.toString(),
-      pageSize.toString(),
-      activeStatus,
-      activeSortField,
-      apiSortDirection,
-    ],
-    queryFn: async () =>
-      await commonApiFetch<ApiTdhGrantsPage>({
-        endpoint: "tdh-grants",
-        params: {
-          grantor,
-          page: page.toString(),
-          page_size: pageSize.toString(),
-          ...(activeStatus !== "ALL" ? { status: activeStatus } : {}),
-          sort: activeSortField,
-          sort_direction: apiSortDirection,
-        },
-      }),
+    errorMessage,
+    refetch,
+    firstPage,
+  } = useXtdhGrantsQuery({
+    grantor,
+    pageSize,
+    status: activeStatus,
+    sortField: activeSortField,
+    sortDirection: apiSortDirection,
     enabled,
-    staleTime: 30_000,
-    placeholderData: keepPreviousData,
   });
-
-  const grants = useMemo(() => data?.data ?? [], [data]);
-  const totalCount = data?.count ?? 0;
   const statusCounts = useUserPageXtdhGrantedListStatusCounts({
     activeStatus,
-    data,
+    data: firstPage,
     grantor,
   });
 
   const handleRetry = useCallback(() => {
     void refetch();
   }, [refetch]);
-
-  const errorMessage = error instanceof Error ? error.message : undefined;
 
   const showControls = enabled && !isError;
 

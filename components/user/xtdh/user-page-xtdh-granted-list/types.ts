@@ -1,6 +1,11 @@
 import type { SortDirection } from "@/entities/ISort";
 
-export type GrantedFilterStatus = "ALL" | "PENDING" | "FAILED" | "GRANTED";
+export type GrantedFilterStatus =
+  | "ALL"
+  | "PENDING"
+  | "FAILED"
+  | "DISABLED"
+  | "GRANTED";
 
 export type GrantedSortField =
   | "created_at"
@@ -18,4 +23,3 @@ export interface UserPageXtdhGrantedListFilters {
   readonly handleStatusChange: (status: GrantedFilterStatus) => void;
   readonly handleSortFieldChange: (sort: GrantedSortField) => void;
 }
-

@@ -153,7 +153,7 @@ export function VirtualizedTokenList({
 
 function usePersistentScrollOffset(
   scrollKey: string,
-  scrollContainerRef: RefObject<HTMLDivElement>
+  scrollContainerRef: RefObject<HTMLDivElement | null>
 ): number {
   const { getPosition, setPosition } = useScrollPositionContext();
   const initialOffsetRef = useRef<number | null>(null);

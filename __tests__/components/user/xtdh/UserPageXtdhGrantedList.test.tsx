@@ -1,19 +1,13 @@
 import { render } from "@testing-library/react";
 import { SortDirection } from "@/entities/ISort";
 import UserPageXtdhGrantedList from "@/components/user/xtdh/UserPageXtdhGrantedList";
-import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
 
-jest.mock("@/services/api/common-api", () => ({
-  commonApiFetch: jest.fn(),
-}));
-
-const mockUseQuery = jest.fn();
 const mockUseSearchParams = jest.fn();
 const mockRouterPush = jest.fn();
+const mockUseXtdhGrantsQuery = jest.fn();
 
-jest.mock("@tanstack/react-query", () => ({
-  keepPreviousData: Symbol("keepPreviousData"),
-  useQuery: (...args: unknown[]) => mockUseQuery(...args),
+jest.mock("@/hooks/useXtdhGrantsQuery", () => ({
+  useXtdhGrantsQuery: (...args: unknown[]) => mockUseXtdhGrantsQuery(...args),
 }));
 
 jest.mock("next/navigation", () => ({
@@ -22,67 +16,59 @@ jest.mock("next/navigation", () => ({
   useSearchParams: () => mockUseSearchParams(),
 }));
 
-const commonApiFetch =
-  require("@/services/api/common-api").commonApiFetch as jest.Mock;
-
-type MockedApiResponse = Pick<ApiTdhGrantsPage, "data" | "count" | "page" | "next">;
-
-const baseData: MockedApiResponse = {
-  data: [],
-  count: 0,
-  page: 1,
-  next: false,
-};
-
-const baseQueryResult = {
-  data: baseData,
-  isLoading: false,
-  isError: false,
-  error: undefined,
-  refetch: jest.fn(),
-  isFetching: false,
-};
-
 describe("UserPageXtdhGrantedList", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseQuery.mockReturnValue(baseQueryResult);
+    mockUseXtdhGrantsQuery.mockReturnValue({
+      grants: [],
+      totalCount: 0,
+      isLoading: false,
+      isError: false,
+      isFetching: false,
+      errorMessage: undefined,
+      refetch: jest.fn(),
+      firstPage: undefined,
+      data: undefined,
+      error: undefined,
+      failureCount: 0,
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      isInitialLoading: false,
+      isPaused: false,
+      isPending: false,
+      isPlaceholderData: false,
+      isRefetchError: false,
+      isRefetching: false,
+      isSuccess: true,
+      isStale: false,
+      status: "success",
+      dataUpdatedAt: 0,
+      errorUpdatedAt: 0,
+      fetchStatus: "idle",
+      remove: jest.fn(),
+    });
     mockUseSearchParams.mockReturnValue(new URLSearchParams());
-    commonApiFetch.mockResolvedValue(baseData);
   });
 
-  it("requests TDH grants using an uppercase sort direction by default", async () => {
+  it("passes the default uppercase sort direction to the query hook", () => {
     render(<UserPageXtdhGrantedList grantor="0xabc" />);
 
-    const queryArgs = mockUseQuery.mock.calls[0]?.[0];
-    expect(queryArgs).toBeTruthy();
-
-    await queryArgs.queryFn();
-
-    expect(commonApiFetch).toHaveBeenCalledWith(
+    expect(mockUseXtdhGrantsQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        params: expect.objectContaining({
-          sort_direction: SortDirection.DESC,
-        }),
+        sortDirection: SortDirection.DESC,
       })
     );
   });
 
-  it("normalizes lowercase query params before hitting the API", async () => {
+  it("normalizes lowercase query params before delegating to the hook", () => {
     mockUseSearchParams.mockReturnValue(new URLSearchParams("dir=asc"));
 
     render(<UserPageXtdhGrantedList grantor="0xabc" />);
 
-    const queryArgs = mockUseQuery.mock.calls[0]?.[0];
-    expect(queryArgs).toBeTruthy();
-
-    await queryArgs.queryFn();
-
-    expect(commonApiFetch).toHaveBeenCalledWith(
+    expect(mockUseXtdhGrantsQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        params: expect.objectContaining({
-          sort_direction: SortDirection.ASC,
-        }),
+        sortDirection: SortDirection.ASC,
       })
     );
   });

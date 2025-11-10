@@ -15,6 +15,7 @@ export const STATUS_LABELS: Record<GrantedFilterStatus, string> = {
   ALL: "All statuses",
   PENDING: "Pending",
   FAILED: "Failed",
+  DISABLED: "Disabled",
   GRANTED: "Granted",
 };
 
@@ -22,6 +23,7 @@ export const BASE_STATUS_ITEMS: CommonSelectItem<GrantedFilterStatus>[] = [
   { key: "ALL", label: STATUS_LABELS.ALL, value: "ALL" },
   { key: "PENDING", label: STATUS_LABELS.PENDING, value: "PENDING" },
   { key: "FAILED", label: STATUS_LABELS.FAILED, value: "FAILED" },
+  { key: "DISABLED", label: STATUS_LABELS.DISABLED, value: "DISABLED" },
   { key: "GRANTED", label: STATUS_LABELS.GRANTED, value: "GRANTED" },
 ];
 
@@ -92,4 +94,3 @@ export function getUserPageXtdhGrantedListStatusItems(
     ),
   }));
 }
-

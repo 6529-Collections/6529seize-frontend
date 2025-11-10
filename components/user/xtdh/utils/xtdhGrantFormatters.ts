@@ -48,10 +48,13 @@ export const formatDateTime = (timestamp: number | null) => {
   }).format(date);
 };
 
-export const formatAmount = (value: number) =>
-  new Intl.NumberFormat(undefined, {
-    maximumFractionDigits: 6,
-  }).format(value);
+export const formatAmount = (value: number) => {
+  if (!Number.isFinite(value)) {
+    return "0";
+  }
+
+  return numberFormatter.format(Math.floor(value));
+};
 
 export const formatTargetTokensCount = (tokens: readonly string[]): string => {
   if (!tokens.length) {
