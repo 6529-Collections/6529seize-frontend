@@ -13,7 +13,7 @@ import {
   expandRangesWindow,
   formatCanonical,
 } from "./NftPicker.utils";
-import { useTokenMetadataQuery } from "./useAlchemyClient";
+import { useTokenMetadataQuery } from "@/hooks/useAlchemyNftQueries";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useScrollPositionContext } from "@/contexts/ScrollPositionContext";
 import Spinner from "@/components/utils/Spinner";

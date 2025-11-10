@@ -1,29 +1,29 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import {
   keepPreviousData,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 
-import type {
-  ContractOverview,
-  Suggestion,
-  SupportedChain,
-  TokenMetadata,
-} from "./NftPicker.types";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import {
   getContractOverview,
   getTokensMetadata,
   searchNftCollections,
 } from "@/services/alchemy-api";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-
 import type {
   SearchContractsResult,
   TokenMetadataParams,
 } from "@/services/alchemy-api";
+import type {
+  ContractOverview,
+  Suggestion,
+  SupportedChain,
+  TokenMetadata,
+} from "@/types/nft";
 
 const SUGGESTION_TTL = 60_000;
 const CONTRACT_TTL = 5 * 60_000;
@@ -74,15 +74,6 @@ function getTokenCacheKey(params: TokenMetadataParams): string {
   return `${params.chain ?? "ethereum"}:${params.address.toLowerCase()}:${ids.join("|")}`;
 }
 
-function useDebouncedValue<T>(value: T, delay: number): T {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const handle = globalThis.setTimeout(() => setDebounced(value), delay);
-    return () => globalThis.clearTimeout(handle);
-  }, [value, delay]);
-  return debounced;
-}
-
 type UseCollectionSearchParams = {
   readonly query: string;
   readonly chain?: SupportedChain;
@@ -114,7 +105,7 @@ export function useCollectionSearch({
   const debouncedQuery = useDebouncedValue(query, debounceMs);
   const queryClient = useQueryClient();
   const result = useQuery({
-    queryKey: [QueryKey.NFT_PICKER_SEARCH, chain, debouncedQuery, hideSpam],
+    queryKey: [QueryKey.NFT_COLLECTION_SEARCH, chain, debouncedQuery, hideSpam],
     enabled: enabled && Boolean(debouncedQuery),
     staleTime: SUGGESTION_TTL,
     gcTime: SUGGESTION_TTL,
@@ -149,7 +140,7 @@ export function useCollectionSearch({
     const cached = suggestionCache.get(cacheKey);
     if (cached) {
       queryClient.setQueryData(
-        [QueryKey.NFT_PICKER_SEARCH, chain, debouncedQuery, hideSpam],
+        [QueryKey.NFT_COLLECTION_SEARCH, chain, debouncedQuery, hideSpam],
         cached.data
       );
     }
@@ -174,7 +165,7 @@ export function useContractOverviewQuery({
   }, [address]);
 
   return useQuery({
-    queryKey: [QueryKey.NFT_PICKER_CONTRACT, chain, normalizedAddress],
+    queryKey: [QueryKey.NFT_CONTRACT_OVERVIEW, chain, normalizedAddress],
     enabled: enabled && Boolean(normalizedAddress),
     staleTime: CONTRACT_TTL,
     gcTime: CONTRACT_TTL,
@@ -231,7 +222,7 @@ export function useTokenMetadataQuery({
 
   return useQuery({
     queryKey: [
-      QueryKey.NFT_PICKER_TOKENS,
+      QueryKey.NFT_TOKEN_METADATA,
       chain,
       address?.toLowerCase(),
       uniqueIds,

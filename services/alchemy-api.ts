@@ -5,7 +5,7 @@ import type {
   Suggestion,
   SupportedChain,
   TokenMetadata,
-} from "@/components/nft-picker/NftPicker.types";
+} from "@/types/nft";
 import { getAddress } from "viem";
 import { goerli, sepolia } from "wagmi/chains";
 

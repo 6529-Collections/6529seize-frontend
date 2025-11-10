@@ -1,38 +1,23 @@
 import type { ReactNode } from "react";
+import type {
+  ContractOverview,
+  Suggestion,
+  SupportedChain,
+  TokenMetadata,
+} from "@/types/nft";
 
-export type SupportedChain = "ethereum";
+export type {
+  ContractOverview,
+  Suggestion,
+  SupportedChain,
+  TokenMetadata,
+} from "@/types/nft";
 
 export type OutputMode = "number" | "bigint";
 
 export type TokenRange = { start: bigint; end: bigint };
 
 export type TokenSelection = bigint[];
-
-export type Suggestion = {
-  address: `0x${string}`;
-  name?: string;
-  symbol?: string;
-  tokenType?: "ERC721" | "ERC1155";
-  totalSupply?: string;
-  floorPriceEth?: number | null;
-  imageUrl?: string | null;
-  isSpam?: boolean;
-  safelist?: "verified" | "approved" | "requested" | "not_requested";
-  deployer?: `0x${string}` | null;
-};
-
-export type ContractOverview = Suggestion & {
-  description?: string | null;
-  bannerImageUrl?: string | null;
-};
-
-export type TokenMetadata = {
-  tokenId: bigint;
-  tokenIdRaw: string;
-  name?: string | null;
-  imageUrl?: string | null;
-  isSpam?: boolean;
-};
 
 type BaseSelection = {
   contractAddress: `0x${string}`;

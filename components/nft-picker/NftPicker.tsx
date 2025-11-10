@@ -37,7 +37,7 @@ import {
   useCollectionSearch,
   useContractOverviewQuery,
   primeContractCache,
-} from "./useAlchemyClient";
+} from "@/hooks/useAlchemyNftQueries";
 import { AllTokensSelectedCard } from "./AllTokensSelectedCard";
 
 const DEFAULT_CHAIN: SupportedChain = "ethereum";

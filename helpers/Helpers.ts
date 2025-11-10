@@ -752,6 +752,7 @@ export const getRandomColorWithSeed = (seedString: string) => {
   return `#${r}${g}${b}`;
 };
 
+
 export function parseNftDescriptionToHtml(description: string) {
   let d = description.replaceAll("\n", "<br />");
   d = d.replace(
