@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import clsx from "clsx";
-import type { ReactNode } from "react";
-import { useEffect, useMemo, useRef } from "react";
+import type { CSSProperties, ReactNode, RefObject } from "react";
+import { useEffect, useEffectEvent, useMemo, useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 import Spinner from "@/components/utils/Spinner";
@@ -22,11 +22,17 @@ const BIGINT_ZERO = BigInt(0);
 const BIGINT_ONE = BigInt(1);
 const MAX_VIRTUAL_ITEM_COUNT = 100_000;
 const MAX_VIRTUAL_ITEM_COUNT_BIGINT = BigInt(MAX_VIRTUAL_ITEM_COUNT);
+const EMPTY_METADATA_MAP = new Map<string, TokenMetadata>();
 
 type TokenListAction = {
   label: string;
   onClick: (tokenId: bigint, metadata?: TokenMetadata) => void;
   getAriaLabel?: (tokenLabel: string) => string;
+};
+
+type TokenWindowEntry = {
+  tokenId: bigint;
+  decimalId: string;
 };
 
 export interface VirtualizedTokenListProps {
@@ -80,67 +86,26 @@ export function VirtualizedTokenList({
     return emptyState;
   }
 
-  const totalCount = getTotalCount(ranges);
+  const totalCount = useMemo(() => getTotalCount(ranges), [ranges]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const { getPosition, setPosition } = useScrollPositionContext();
-  const initialOffsetRef = useRef<number | null>(null);
-  if (initialOffsetRef.current === null) {
-    initialOffsetRef.current = getPosition(scrollKey);
-  }
+  const initialOffset = usePersistentScrollOffset(scrollKey, scrollContainerRef);
 
   const virtualizer = useVirtualizer({
     count: totalCount,
     getScrollElement: () => scrollContainerRef.current,
     estimateSize: () => ROW_HEIGHT,
     overscan,
-    initialOffset: initialOffsetRef.current ?? 0,
+    initialOffset,
   });
-
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) {
-      return;
-    }
-    const handleScroll = () => {
-      setPosition(scrollKey, container.scrollTop);
-    };
-    container.addEventListener("scroll", handleScroll);
-    return () => {
-      setPosition(scrollKey, container.scrollTop);
-      container.removeEventListener("scroll", handleScroll);
-    };
-  }, [scrollKey, setPosition]);
 
   const virtualItems = virtualizer.getVirtualItems();
-  const firstVisibleIndex = virtualItems.length > 0 ? virtualItems[0].index : 0;
-  const lastVisibleIndex = virtualItems.at(-1)?.index ?? -1;
-
-  const windowTokenIds = useMemo(() => {
-    if (lastVisibleIndex < firstVisibleIndex) {
-      return [] as bigint[];
-    }
-    return expandRangesWindow(
-      ranges,
-      firstVisibleIndex,
-      lastVisibleIndex - firstVisibleIndex + 1
-    );
-  }, [ranges, firstVisibleIndex, lastVisibleIndex]);
-
-  const metadataQuery = useTokenMetadataQuery({
-    address: contractAddress,
+  const { firstVisibleIndex, lastVisibleIndex } = getVisibleWindowBounds(virtualItems);
+  const windowTokens = useVisibleTokenWindow(ranges, firstVisibleIndex, lastVisibleIndex);
+  const { metadataMap, metadataQuery } = useTokenMetadataWindow({
+    contractAddress,
     chain,
-    tokenIds: windowTokenIds.map(toDecimalString),
-    enabled: Boolean(contractAddress) && windowTokenIds.length > 0,
+    windowTokens,
   });
-
-  const metadataMap = useMemo(() => {
-    const map = new Map<string, TokenMetadata>();
-    for (const entry of metadataQuery.data ?? []) {
-      map.set(entry.tokenIdRaw, entry);
-      map.set(entry.tokenId.toString(10), entry);
-    }
-    return map;
-  }, [metadataQuery.data]);
 
   return (
     <div className={className}>
@@ -152,81 +117,29 @@ export function VirtualizedTokenList({
         >
           {virtualItems.map((virtualItem) => {
             const windowIndex = virtualItem.index - firstVisibleIndex;
-            const tokenId = windowTokenIds[windowIndex] ?? null;
-            if (tokenId === null) {
+            const token = windowTokens[windowIndex];
+            if (!token) {
               return null;
             }
-            const decimalId = toDecimalString(tokenId);
-            const metadata = metadataMap.get(decimalId);
+
+            const metadata = metadataMap.get(token.decimalId);
             const isLoadingMetadata = metadataQuery.isFetching && !metadata;
-            let thumbnailContent: ReactNode;
-            if (metadata?.imageUrl) {
-              thumbnailContent = (
-                <Image
-                  src={metadata.imageUrl}
-                  alt={metadata.name ?? decimalId}
-                  fill
-                  sizes="40px"
-                  className="tw-h-full tw-w-full tw-object-cover"
-                />
-              );
-            } else if (isLoadingMetadata) {
-              thumbnailContent = (
-                <div
-                  aria-label="Loading thumbnail"
-                  aria-live="polite"
-                  className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center"
-                >
-                  <Spinner />
-                </div>
-              );
-            } else {
-              thumbnailContent = (
-                <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-text-iron-400">
-                  #{decimalId}
-                </div>
-              );
-            }
 
             return (
-              <li
-                key={decimalId}
-                className={clsx(
-                  "tw-absolute tw-flex tw-w-full tw-items-center tw-gap-3 tw-px-3 tw-py-2",
-                  rowClassName
-                )}
-                style={{
+              <TokenRow
+                key={token.decimalId}
+                token={token}
+                metadata={metadata}
+                rowClassName={rowClassName}
+                renderTokenExtra={renderTokenExtra}
+                action={action}
+                isMetadataLoading={isLoadingMetadata}
+                positionStyle={{
                   transform: `translateY(${virtualItem.start}px)`,
                   height: virtualItem.size,
                   width: "100%",
                 }}
-              >
-                <div
-                  className="tw-relative tw-h-10 tw-w-10 tw-overflow-hidden tw-rounded-md tw-bg-iron-800"
-                  aria-hidden="true"
-                >
-                  {thumbnailContent}
-                </div>
-                <div className="tw-flex tw-flex-1 tw-items-center tw-justify-between tw-gap-4">
-                  <div className="tw-flex tw-flex-col tw-gap-0.5">
-                    <span className="tw-text-sm tw-font-medium tw-text-white">#{decimalId}</span>
-                    {metadata?.name && (
-                      <span className="tw-text-xs tw-text-iron-400">{metadata.name}</span>
-                    )}
-                  </div>
-                  {renderTokenExtra?.(tokenId, metadata)}
-                  {action ? (
-                    <button
-                      type="button"
-                      className="tw-rounded tw-border tw-border-iron-700 tw-bg-transparent tw-px-2 tw-py-1 tw-text-xs tw-text-iron-200 hover:tw-border-primary-500 hover:tw-text-white"
-                      onClick={() => action.onClick(tokenId, metadata)}
-                      aria-label={action.getAriaLabel?.(`#${decimalId}`) ?? action.label}
-                    >
-                      {action.label}
-                    </button>
-                  ) : null}
-                </div>
-              </li>
+              />
             );
           })}
         </ul>
@@ -234,6 +147,210 @@ export function VirtualizedTokenList({
       {footerContent ? (
         <div className={footerClassName}>{footerContent}</div>
       ) : null}
+    </div>
+  );
+}
+
+function usePersistentScrollOffset(
+  scrollKey: string,
+  scrollContainerRef: RefObject<HTMLDivElement>
+): number {
+  const { getPosition, setPosition } = useScrollPositionContext();
+  const initialOffsetRef = useRef<number | null>(null);
+
+  if (initialOffsetRef.current === null) {
+    initialOffsetRef.current = getPosition(scrollKey);
+  }
+
+  const persistScrollPosition = useEffectEvent(() => {
+    const container = scrollContainerRef.current;
+    if (!container) {
+      return;
+    }
+    setPosition(scrollKey, container.scrollTop);
+  });
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) {
+      return;
+    }
+
+    const handleScroll = () => {
+      persistScrollPosition();
+    };
+
+    container.addEventListener("scroll", handleScroll);
+    return () => {
+      persistScrollPosition();
+      container.removeEventListener("scroll", handleScroll);
+    };
+  }, [persistScrollPosition, scrollKey]);
+
+  return initialOffsetRef.current ?? 0;
+}
+
+function getVisibleWindowBounds(virtualItems: Array<{ index: number }>) {
+  if (virtualItems.length === 0) {
+    return { firstVisibleIndex: 0, lastVisibleIndex: -1 };
+  }
+
+  const firstVisibleIndex = virtualItems[0].index;
+  const lastVisibleIndex = virtualItems[virtualItems.length - 1].index;
+
+  return { firstVisibleIndex, lastVisibleIndex };
+}
+
+function useVisibleTokenWindow(
+  ranges: TokenRange[],
+  firstVisibleIndex: number,
+  lastVisibleIndex: number
+): TokenWindowEntry[] {
+  return useMemo(() => {
+    if (lastVisibleIndex < firstVisibleIndex) {
+      return [];
+    }
+
+    const windowSize = lastVisibleIndex - firstVisibleIndex + 1;
+    return expandRangesWindow(ranges, firstVisibleIndex, windowSize).map((tokenId) => ({
+      tokenId,
+      decimalId: toDecimalString(tokenId),
+    }));
+  }, [ranges, firstVisibleIndex, lastVisibleIndex]);
+}
+
+type TokenMetadataWindowParams = {
+  contractAddress?: `0x${string}`;
+  chain: SupportedChain;
+  windowTokens: TokenWindowEntry[];
+};
+
+function useTokenMetadataWindow({
+  contractAddress,
+  chain,
+  windowTokens,
+}: TokenMetadataWindowParams) {
+  const decimalTokenIds = useMemo(
+    () => windowTokens.map((token) => token.decimalId),
+    [windowTokens]
+  );
+
+  const metadataQuery = useTokenMetadataQuery({
+    address: contractAddress,
+    chain,
+    tokenIds: decimalTokenIds,
+    enabled: Boolean(contractAddress) && decimalTokenIds.length > 0,
+  });
+
+  const metadataMap = useMemo(() => {
+    const entries = metadataQuery.data ?? [];
+    if (!entries.length) {
+      return EMPTY_METADATA_MAP;
+    }
+
+    const map = new Map<string, TokenMetadata>();
+    for (const entry of entries) {
+      map.set(entry.tokenIdRaw, entry);
+      map.set(entry.tokenId.toString(10), entry);
+    }
+    return map;
+  }, [metadataQuery.data]);
+
+  return { metadataQuery, metadataMap };
+}
+
+type TokenRowProps = {
+  token: TokenWindowEntry;
+  metadata?: TokenMetadata;
+  rowClassName?: string;
+  renderTokenExtra?: (tokenId: bigint, metadata?: TokenMetadata) => ReactNode;
+  action?: TokenListAction;
+  isMetadataLoading: boolean;
+  positionStyle: CSSProperties;
+};
+
+function TokenRow({
+  token,
+  metadata,
+  rowClassName,
+  renderTokenExtra,
+  action,
+  isMetadataLoading,
+  positionStyle,
+}: TokenRowProps) {
+  return (
+    <li
+      className={clsx(
+        "tw-absolute tw-flex tw-w-full tw-items-center tw-gap-3 tw-px-3 tw-py-2",
+        rowClassName
+      )}
+      style={positionStyle}
+    >
+      <TokenThumbnail metadata={metadata} decimalId={token.decimalId} isLoading={isMetadataLoading} />
+      <div className="tw-flex tw-flex-1 tw-items-center tw-justify-between tw-gap-4">
+        <div className="tw-flex tw-flex-col tw-gap-0.5">
+          <span className="tw-text-sm tw-font-medium tw-text-white">#{token.decimalId}</span>
+          {metadata?.name && <span className="tw-text-xs tw-text-iron-400">{metadata.name}</span>}
+        </div>
+        {renderTokenExtra?.(token.tokenId, metadata)}
+        {action ? (
+          <button
+            type="button"
+            className="tw-rounded tw-border tw-border-iron-700 tw-bg-transparent tw-px-2 tw-py-1 tw-text-xs tw-text-iron-200 hover:tw-border-primary-500 hover:tw-text-white"
+            onClick={() => action.onClick(token.tokenId, metadata)}
+            aria-label={action.getAriaLabel?.(`#${token.decimalId}`) ?? action.label}
+          >
+            {action.label}
+          </button>
+        ) : null}
+      </div>
+    </li>
+  );
+}
+
+type TokenThumbnailProps = {
+  metadata?: TokenMetadata;
+  decimalId: string;
+  isLoading: boolean;
+};
+
+function TokenThumbnail({ metadata, decimalId, isLoading }: TokenThumbnailProps) {
+  let content: ReactNode;
+
+  if (metadata?.imageUrl) {
+    content = (
+      <Image
+        src={metadata.imageUrl}
+        alt={metadata.name ?? decimalId}
+        fill
+        sizes="40px"
+        className="tw-h-full tw-w-full tw-object-cover"
+      />
+    );
+  } else if (isLoading) {
+    content = (
+      <div
+        aria-label="Loading thumbnail"
+        aria-live="polite"
+        className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center"
+      >
+        <Spinner />
+      </div>
+    );
+  } else {
+    content = (
+      <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-text-iron-400">
+        #{decimalId}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="tw-relative tw-h-10 tw-w-10 tw-overflow-hidden tw-rounded-md tw-bg-iron-800"
+      aria-hidden="true"
+    >
+      {content}
     </div>
   );
 }
