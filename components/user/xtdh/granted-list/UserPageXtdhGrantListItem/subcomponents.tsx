@@ -1,10 +1,12 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
+import clsx from "clsx";
 
 import type { ContractOverview } from "@/types/nft";
 
 import { formatContractLabel, shortenAddress } from "./formatters";
 import type { GrantDetails } from "./types";
+import { getStatusVisuals } from "./statusVisuals";
 
 interface GrantItemContentProps {
   readonly contract: ContractOverview;
@@ -145,9 +147,22 @@ function GrantDetailsRow({
 }
 
 function StatusBadge({ status }: Readonly<{ status: string }>) {
+  const { badgeClassName, glyph, label } = getStatusVisuals(status);
+
   return (
-    <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-800 tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-200">
-      {status}
+    <span
+      role="status"
+      aria-label={`${label} grant status`}
+      className={clsx(
+        "tw-inline-flex tw-items-center tw-gap-2 tw-rounded-full tw-border tw-px-3 tw-py-1 tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wide tw-transition-colors tw-duration-200",
+        badgeClassName
+      )}>
+      <span
+        aria-hidden="true"
+        className="tw-text-base tw-leading-none tw-drop-shadow-sm">
+        {glyph}
+      </span>
+      <span>{label}</span>
     </span>
   );
 }
