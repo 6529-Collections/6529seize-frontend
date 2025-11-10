@@ -7,7 +7,7 @@ import {
 } from "@/components/user/xtdh/utils/xtdhGrantFormatters";
 import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
 import { useContractOverviewQuery } from "@/hooks/useAlchemyNftQueries";
-import type { ContractOverview } from "@/types/nft";
+import type { ContractOverview, SupportedChain } from "@/types/nft";
 
 import {
   formatFloorPrice,
@@ -19,6 +19,8 @@ import type { GrantDetails, GrantItemVariant } from "./types";
 
 interface GrantItemViewModel {
   readonly contract: ContractOverview | null;
+  readonly contractAddress: `0x${string}` | null;
+  readonly chain: SupportedChain;
   readonly contractLabel?: string;
   readonly details: GrantDetails;
   readonly isLoading: boolean;
@@ -42,6 +44,8 @@ export function useGrantItemViewModel(
 
   return {
     contract: contract ?? null,
+    contractAddress: contractAddress ?? null,
+    chain,
     contractLabel: contractAddress ?? grant.target_contract,
     details,
     isLoading,
