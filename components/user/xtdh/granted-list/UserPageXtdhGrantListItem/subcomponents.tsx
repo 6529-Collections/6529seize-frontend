@@ -153,7 +153,6 @@ function GrantDetailsGrid({
         }
       />
       <GrantDetailsRow label="Valid from" value={details.validFromLabel} />
-      <GrantDetailsRow label="Valid until" value={details.validUntilLabel} />
     </dl>
   );
 }
