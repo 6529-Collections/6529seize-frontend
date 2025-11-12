@@ -1,6 +1,5 @@
-import { render, screen } from "@testing-library/react";
-import React from "react";
 import NotificationPriorityAlert from "@/components/brain/notifications/priority-alert/NotificationPriorityAlert";
+import { render, screen } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 
 jest.mock("next/navigation", () => ({
@@ -88,6 +87,7 @@ describe("NotificationPriorityAlert", () => {
         onQuote={jest.fn()}
       />
     );
+    expect(DropMock).toHaveBeenCalled();
     const props = DropMock.mock.calls[0][0];
     props.onReplyClick(5);
     props.onQuoteClick({ wave: { id: "w" }, serial_no: 6 } as any);
@@ -96,4 +96,3 @@ describe("NotificationPriorityAlert", () => {
     expect(router.push).toHaveBeenCalledWith("/waves?wave=w&serialNo=6/");
   });
 });
-

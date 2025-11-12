@@ -111,28 +111,26 @@ export default function NotificationPriorityAlert({
       <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
         {headerSection}
 
-        {notification.related_drops[0] && (
-          <Drop
-            drop={{
-              type: DropSize.FULL,
-              ...notification.related_drops[0],
-              stableKey: "",
-              stableHash: "",
-            }}
-            previousDrop={null}
-            nextDrop={null}
-            showWaveInfo={true}
-            showReplyAndQuote={true}
-            activeDrop={activeDrop}
-            location={DropLocation.MY_STREAM}
-            dropViewDropId={null}
-            onReply={onReply}
-            onQuote={onQuote}
-            onReplyClick={onReplyClick}
-            onQuoteClick={onQuoteClick}
-            onDropContentClick={onDropContentClick}
-          />
-        )}
+        <Drop
+          drop={{
+            type: DropSize.FULL,
+            ...notification.related_drops[0],
+            stableKey: "",
+            stableHash: "",
+          }}
+          previousDrop={null}
+          nextDrop={null}
+          showWaveInfo={true}
+          showReplyAndQuote={true}
+          activeDrop={activeDrop}
+          location={DropLocation.MY_STREAM}
+          dropViewDropId={null}
+          onReply={onReply}
+          onQuote={onQuote}
+          onReplyClick={onReplyClick}
+          onQuoteClick={onQuoteClick}
+          onDropContentClick={onDropContentClick}
+        />
       </div>
     </div>
   );
