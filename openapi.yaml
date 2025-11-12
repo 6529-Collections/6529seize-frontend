@@ -5563,6 +5563,7 @@ components:
         - DROP_REACTED
         - WAVE_CREATED
         - ALL_DROPS
+        - PRIORITY_ALERT
     ApiNotificationsResponse:
       type: object
       required:
