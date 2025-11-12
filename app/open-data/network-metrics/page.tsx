@@ -1,14 +1,14 @@
-import styles from "@/styles/Home.module.scss";
 import CommunityDownloadsTDH, {
   VIEW,
 } from "@/components/community-downloads/CommunityDownloadsTDH";
 import { getAppMetadata } from "@/components/providers/metadata";
+import styles from "@/styles/Home.module.scss";
 import { Metadata } from "next";
 
-export default function CommunityMetricsDownloads() {
+export default function ConsolidatedCommunityMetricsDownloads() {
   return (
     <main className={styles.main}>
-      <CommunityDownloadsTDH view={VIEW.WALLET} />
+      <CommunityDownloadsTDH view={VIEW.CONSOLIDATION} />
     </main>
   );
 }
