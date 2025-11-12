@@ -1,16 +1,17 @@
-import { memo } from "react";
+import { DropInteractionParams } from "@/components/waves/drops/Drop";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { TypedNotification } from "@/types/feed.types";
 import { ActiveDropState } from "@/types/dropInteractionTypes";
-import { DropInteractionParams } from "@/components/waves/drops/Drop";
+import { TypedNotification } from "@/types/feed.types";
+import { memo } from "react";
+import NotificationAllDrops from "./all-drops/NotificationAllDrops";
 import NotificationDropQuoted from "./drop-quoted/NotificationDropQuoted";
 import NotificationDropReplied from "./drop-replied/NotificationDropReplied";
 import NotificationIdentityMentioned from "./identity-mentioned/NotificationIdentityMentioned";
 import NotificationIdentitySubscribed from "./identity-subscribed/NotificationIdentitySubscribed";
+import NotificationPriorityAlert from "./priority-alert/NotificationPriorityAlert";
 import NotificationWaveCreated from "./wave-created/NotificationWaveCreated";
-import NotificationAllDrops from "./all-drops/NotificationAllDrops";
 
 import type { JSX } from "react";
 import NotificationDropReacted from "./drop-reacted/NotificationDropReacted";
@@ -78,6 +79,16 @@ function NotificationItemComponent({
       case ApiNotificationCause.AllDrops:
         return (
           <NotificationAllDrops
+            notification={notification}
+            activeDrop={activeDrop}
+            onReply={onReply}
+            onQuote={onQuote}
+            onDropContentClick={onDropContentClick}
+          />
+        );
+      case ApiNotificationCause.PriorityAlert:
+        return (
+          <NotificationPriorityAlert
             notification={notification}
             activeDrop={activeDrop}
             onReply={onReply}

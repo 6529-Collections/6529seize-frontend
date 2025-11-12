@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import { useMemo } from "react";
 import NotificationsCauseFilter from "./NotificationsCauseFilter";
 import { useNotificationsController } from "./hooks/useNotificationsController";
 import { useNotificationsScroll } from "./hooks/useNotificationsScroll";
@@ -22,11 +22,12 @@ const NOTIFICATION_CAUSE_PRIORITY: Record<ApiNotificationCause, number> = {
   [ApiNotificationCause.DropReacted]: 5,
   [ApiNotificationCause.WaveCreated]: 6,
   [ApiNotificationCause.AllDrops]: 7,
+  [ApiNotificationCause.PriorityAlert]: 8,
 };
 
 const compareNotificationCause = (
   firstCause: ApiNotificationCause,
-  secondCause: ApiNotificationCause,
+  secondCause: ApiNotificationCause
 ): number =>
   NOTIFICATION_CAUSE_PRIORITY[firstCause] -
   NOTIFICATION_CAUSE_PRIORITY[secondCause];
@@ -52,7 +53,7 @@ export default function Notifications({
       activeFilter?.cause
         ? [...activeFilter.cause].sort(compareNotificationCause).join("|")
         : "notifications-filter-all",
-    [activeFilter],
+    [activeFilter]
   );
 
   const { scrollContainerRef, handleScroll } = useNotificationsScroll({
