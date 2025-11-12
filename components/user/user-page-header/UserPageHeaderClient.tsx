@@ -91,7 +91,7 @@ export default function UserPageHeaderClient({
     [profile.handle, isMyProfile, activeProfileProxy]
   );
 
-  const { isFetched, data: statements } = useQuery<CicStatement[]>({
+  const { data: statements } = useQuery<CicStatement[]>({
     queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, normalizedHandleOrWallet],
     queryFn: async () =>
       await commonApiFetch<CicStatement[]>({
@@ -116,12 +116,10 @@ export default function UserPageHeaderClient({
     [statements]
   );
 
-  const showAbout = useMemo(() => {
-    if (!isFetched) {
-      return false;
-    }
-    return !!(aboutStatement || canEdit);
-  }, [aboutStatement, canEdit, isFetched]);
+  const showAbout = useMemo(
+    () => !!(aboutStatement || canEdit),
+    [aboutStatement, canEdit]
+  );
 
   const handleCreateDirectMessage = async (
     primaryWallet: string | undefined
@@ -180,7 +178,7 @@ export default function UserPageHeaderClient({
                     onDirectMessage={
                       profile.primary_wallet
                         ? () =>
-                            handleCreateDirectMessage(profile.primary_wallet)
+                          handleCreateDirectMessage(profile.primary_wallet)
                         : undefined
                     }
                     directMessageLoading={directMessageLoading}

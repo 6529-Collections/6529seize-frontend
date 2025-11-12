@@ -278,7 +278,9 @@ export function mergeDrops(currentDrops: Drop[], newDrops: Drop[]): Drop[] {
   // Then add all new drops, overwriting any duplicates
   // This ensures we keep the newest version of each drop
   for (const drop of newDropsWithStableKey) {
-    dropsMapStableKey.set(drop.stableKey, drop);
+    const existingDrop = dropsMapStableKey.get(drop.stableKey);
+    const resolvedDrop = resolveReplacement(existingDrop, drop);
+    dropsMapStableKey.set(resolvedDrop.stableKey, resolvedDrop);
   }
 
   // Convert the map back to an array
@@ -310,6 +312,13 @@ export function mergeDrops(currentDrops: Drop[], newDrops: Drop[]): Drop[] {
   });
 
   return finalDrops;
+}
+
+function resolveReplacement(
+  existingDrop: Drop | undefined,
+  incomingDrop: Drop
+): Drop {
+  return incomingDrop;
 }
 
 // Helper function to get the highest serial number from an array of drops

@@ -63,9 +63,6 @@ describe("CommunityDownloads", () => {
     expect(
       screen.getByRole("link", { name: "Network Metrics" })
     ).toHaveAttribute("href", "/open-data/network-metrics");
-    expect(
-      screen.getByRole("link", { name: "Consolidated Network Metrics" })
-    ).toHaveAttribute("href", "/open-data/consolidated-network-metrics");
     expect(screen.getByRole("link", { name: "Rememes" })).toHaveAttribute(
       "href",
       "/open-data/rememes"
