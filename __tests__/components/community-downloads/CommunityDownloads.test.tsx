@@ -69,7 +69,6 @@ describe("CommunityDownloads", () => {
     renderComponent();
     [
       "Network Metrics",
-      "Consolidated Network Metrics",
       "Rememes",
       "Team",
       "Royalties",
