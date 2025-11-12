@@ -38,7 +38,7 @@ describe("Open Data network metrics page", () => {
   it("renders metrics component and sets title", () => {
     renderWithQueryClient(<NetworkMetrics />);
     expect(
-      screen.getByRole("heading", { name: "Network Metrics Downloads" })
+      screen.getByRole("heading", { name: "Consolidated Network Metrics Downloads" })
     ).toBeInTheDocument();
   });
 
