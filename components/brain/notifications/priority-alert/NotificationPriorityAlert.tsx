@@ -31,40 +31,44 @@ export default function NotificationPriorityAlert({
   const router = useRouter();
   const { isApp } = useDeviceInfo();
 
+  const headerSection = (
+    <div className="tw-flex tw-gap-x-2 tw-items-center">
+      <div className="tw-h-7 tw-w-7">
+        {notification.related_identity.pfp ? (
+          <img
+            src={getScaledImageUri(
+              notification.related_identity.pfp,
+              ImageScale.W_AUTO_H_50
+            )}
+            alt="#"
+            className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
+          />
+        ) : (
+          <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
+        )}
+      </div>
+      <span className="tw-text-sm tw-font-normal tw-text-iron-50">
+        <Link
+          href={`/${notification.related_identity.handle}`}
+          className="tw-no-underline tw-font-semibold">
+          {notification.related_identity.handle}
+        </Link>{" "}
+        <span className="tw-text-iron-400">sent a priority alert 🚨</span>{" "}
+        <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
+          <span className="tw-font-bold tw-mr-1 tw-text-xs tw-text-iron-400">
+            &#8226;
+          </span>{" "}
+          {getTimeAgoShort(notification.created_at)}
+        </span>
+      </span>
+    </div>
+  );
+
   if (!notification.related_drops || notification.related_drops.length === 0) {
     return (
       <div className="tw-w-full tw-flex tw-gap-x-3">
         <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
-          <div className="tw-flex tw-gap-x-2 tw-items-center">
-            <div className="tw-h-7 tw-w-7">
-              {notification.related_identity.pfp ? (
-                <img
-                  src={getScaledImageUri(
-                    notification.related_identity.pfp,
-                    ImageScale.W_AUTO_H_50
-                  )}
-                  alt="#"
-                  className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
-                />
-              ) : (
-                <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
-              )}
-            </div>
-            <span className="tw-text-sm tw-font-normal tw-text-iron-50">
-              <Link
-                href={`/${notification.related_identity.handle}`}
-                className="tw-no-underline tw-font-semibold">
-                {notification.related_identity.handle}
-              </Link>{" "}
-              <span className="tw-text-iron-400">sent a priority alert 🚨</span>{" "}
-              <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
-                <span className="tw-font-bold tw-mr-1 tw-text-xs tw-text-iron-400">
-                  &#8226;
-                </span>{" "}
-                {getTimeAgoShort(notification.created_at)}
-              </span>
-            </span>
-          </div>
+          {headerSection}
         </div>
       </div>
     );
@@ -105,36 +109,7 @@ export default function NotificationPriorityAlert({
   return (
     <div className="tw-w-full tw-flex tw-gap-x-3">
       <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
-        <div className="tw-flex tw-gap-x-2 tw-items-center">
-          <div className="tw-h-7 tw-w-7">
-            {notification.related_identity.pfp ? (
-              <img
-                src={getScaledImageUri(
-                  notification.related_identity.pfp,
-                  ImageScale.W_AUTO_H_50
-                )}
-                alt="#"
-                className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
-              />
-            ) : (
-              <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
-            )}
-          </div>
-          <span className="tw-text-sm tw-font-normal tw-text-iron-50">
-            <Link
-              href={`/${notification.related_identity.handle}`}
-              className="tw-no-underline tw-font-semibold">
-              {notification.related_identity.handle}
-            </Link>{" "}
-            <span className="tw-text-iron-400">sent a priority alert 🚨</span>{" "}
-            <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
-              <span className="tw-font-bold tw-mr-1 tw-text-xs tw-text-iron-400">
-                &#8226;
-              </span>{" "}
-              {getTimeAgoShort(notification.created_at)}
-            </span>
-          </span>
-        </div>
+        {headerSection}
 
         {notification.related_drops[0] && (
           <Drop
