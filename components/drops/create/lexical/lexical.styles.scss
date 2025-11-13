@@ -30,6 +30,23 @@
   margin-bottom: 0;
 }
 
+.editor-quote {
+  position: relative;
+  margin: 0 0 8px;
+  padding-left: 16px;
+  border-left: 4px solid #848490;
+  color: #e5e7eb;
+}
+
+.editor-quote::before {
+  content: ">";
+  position: absolute;
+  left: 4px;
+  top: 0;
+  color: #93939f;
+  font-weight: 600;
+}
+
 .editor-input-one-liner {
   overflow-x: auto;
   min-height: 45px;
