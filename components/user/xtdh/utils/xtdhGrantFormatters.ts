@@ -9,48 +9,24 @@ export type TargetTokensCountInfo =
   | { kind: "count"; label: string; count: number | null };
 
 export const getTargetTokensCountInfo = (
-  tokens: readonly string[]
+  tokensCount: number | null | undefined
 ): TargetTokensCountInfo => {
-  if (!tokens.length) {
+  if (
+    tokensCount === null ||
+    tokensCount === undefined ||
+    !Number.isFinite(tokensCount) ||
+    tokensCount <= 0
+  ) {
     return { kind: "all", label: "All tokens", count: null };
   }
 
-  try {
-    const ranges = parseTokenExpressionToRanges(tokens.join(","));
-    if (!ranges.length) {
-      return { kind: "all", label: "All tokens", count: null };
-    }
+  const normalizedCount = Math.max(0, Math.floor(tokensCount));
 
-    const total = ranges.reduce<bigint>((sum, range) => {
-      const rangeSize = range.end - range.start + BigInt(1);
-      return sum + rangeSize;
-    }, BigInt(0));
-
-    if (total <= BigInt(Number.MAX_SAFE_INTEGER)) {
-      const numericTotal = Number(total);
-      return {
-        kind: "count",
-        label: numberFormatter.format(numericTotal),
-        count: numericTotal,
-      };
-    }
-
-    return {
-      kind: "count",
-      label: total.toString(),
-      count: null,
-    };
-  } catch (error) {
-    const fallbackCount = tokens.length;
-    if (!fallbackCount) {
-      return { kind: "all", label: "All tokens", count: null };
-    }
-    return {
-      kind: "count",
-      label: numberFormatter.format(fallbackCount),
-      count: fallbackCount,
-    };
-  }
+  return {
+    kind: "count",
+    label: numberFormatter.format(normalizedCount),
+    count: normalizedCount,
+  };
 };
 
 export const formatTargetTokens = (tokens: readonly string[]): string => {
@@ -112,8 +88,9 @@ export const formatAmount = (value: number) => {
   return numberFormatter.format(Math.floor(value));
 };
 
-export const formatTargetTokensCount = (tokens: readonly string[]): string =>
-  getTargetTokensCountInfo(tokens).label;
+export const formatTargetTokensCount = (
+  tokensCount: number | null | undefined
+): string => getTargetTokensCountInfo(tokensCount).label;
 
 const createDecimalFormatter = (maximumFractionDigits: number) =>
   new Intl.NumberFormat(undefined, {

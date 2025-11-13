@@ -2493,8 +2493,9 @@ paths:
         - name: status
           in: query
           required: false
+          description: One or more (comma separated) statuses you are interested in
           schema:
-            $ref: "#/components/schemas/ApiTdhGrantStatus"
+            type: string
         - name: sort_direction
           in: query
           required: false
@@ -2529,7 +2530,7 @@ paths:
             maximum: 2000
             default: 100
       responses:
-        "201":
+        "200":
           description: successful operation
           content:
             application/json:
@@ -2555,6 +2556,57 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiTdhGrant"
+        "400":
+          description: Invalid request
+  /tdh-grants/{grant}/tokens:
+    get:
+      tags:
+        - TdhGrants
+      summary: Get TDH grant tokens
+      operationId: getTdhGrantTokens
+      parameters:
+        - name: grant
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiPageSortDirection"
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - token
+            default: token
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 2000
+            default: 100
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiTdhGrantTokensPage"
         "400":
           description: Invalid request
   /transactions:
@@ -5921,17 +5973,6 @@ components:
           format: int64
         next:
           type: boolean
-    ApiPageWithoutCount:
-      type: object
-      required:
-        - page
-        - next
-      properties:
-        page:
-          type: number
-          format: int64
-        next:
-          type: boolean
     ApiPageSortDirection:
       type: string
       enum:
@@ -5953,6 +5994,17 @@ components:
         next:
           type: string
           nullable: true
+    ApiPageWithoutCount:
+      type: object
+      required:
+        - page
+        - next
+      properties:
+        page:
+          type: number
+          format: int64
+        next:
+          type: boolean
     ApiProfileClassification:
       type: string
       enum:
@@ -6362,7 +6414,7 @@ components:
         - grantor
         - target_chain
         - target_contract
-        - target_tokens
+        - target_tokens_count
         - created_at
         - valid_from
         - valid_to
@@ -6379,13 +6431,9 @@ components:
           $ref: "#/components/schemas/ApiTdhGrantTargetChain"
         target_contract:
           type: string
-        target_tokens:
-          type: array
-          items:
-            type: string
-          description: >-
-            List of token numbers. Each element can also be a span in form of
-            start-end. All tokens if empty.
+        target_tokens_count:
+          type: number
+          format: int64
         created_at:
           type: number
           format: int64
@@ -6430,6 +6478,24 @@ components:
       type: string
       enum:
         - ETHEREUM_MAINNET
+    ApiTdhGrantToken:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+    ApiTdhGrantTokensPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiTdhGrantToken"
     ApiTdhStats:
       type: object
       required:

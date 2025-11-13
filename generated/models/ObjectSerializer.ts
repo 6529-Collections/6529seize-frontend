@@ -133,6 +133,8 @@ export * from '../models/ApiTdhEditionsPage';
 export * from '../models/ApiTdhGrant';
 export * from '../models/ApiTdhGrantStatus';
 export * from '../models/ApiTdhGrantTargetChain';
+export * from '../models/ApiTdhGrantToken';
+export * from '../models/ApiTdhGrantTokensPage';
 export * from '../models/ApiTdhGrantsPage';
 export * from '../models/ApiTdhStats';
 export * from '../models/ApiTransaction';
@@ -322,6 +324,8 @@ import { ApiTdhEditionsPage } from '../models/ApiTdhEditionsPage';
 import { ApiTdhGrant             } from '../models/ApiTdhGrant';
 import { ApiTdhGrantStatus } from '../models/ApiTdhGrantStatus';
 import { ApiTdhGrantTargetChain } from '../models/ApiTdhGrantTargetChain';
+import { ApiTdhGrantToken } from '../models/ApiTdhGrantToken';
+import { ApiTdhGrantTokensPage } from '../models/ApiTdhGrantTokensPage';
 import { ApiTdhGrantsPage } from '../models/ApiTdhGrantsPage';
 import { ApiTdhStats } from '../models/ApiTdhStats';
 import { ApiTransaction } from '../models/ApiTransaction';
@@ -541,6 +545,8 @@ let typeMap: {[index: string]: any} = {
     "ApiTdhEdition": ApiTdhEdition,
     "ApiTdhEditionsPage": ApiTdhEditionsPage,
     "ApiTdhGrant": ApiTdhGrant,
+    "ApiTdhGrantToken": ApiTdhGrantToken,
+    "ApiTdhGrantTokensPage": ApiTdhGrantTokensPage,
     "ApiTdhGrantsPage": ApiTdhGrantsPage,
     "ApiTdhStats": ApiTdhStats,
     "ApiTransaction": ApiTransaction,

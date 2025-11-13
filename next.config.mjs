@@ -154,6 +154,7 @@ function sharedConfig(publicEnv, assetPrefix) {
         "i2c.seadn.io",
         "res.cloudinary.com",
         "ipfs.6529.io",
+        "ipfs.io",
       ],
       minimumCacheTTL: 86400,
       formats: ["image/avif", "image/webp"],

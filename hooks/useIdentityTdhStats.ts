@@ -26,6 +26,8 @@ async function fetchIdentityTdhStats(identity: string): Promise<IdentityTdhStats
     endpoint: `tdh-stats/${encodedIdentity}`,
   });
 
+  console.log("TDH Stats response:", response);
+
   const xtdhRate = sanitizeNonNegativeNumber(response.xtdh_rate);
   const baseTdhRate =
     typeof response.tdh_rate === "number" &&

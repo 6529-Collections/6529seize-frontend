@@ -4,11 +4,16 @@ import { UserPageXtdhGrantListItem } from "@/components/user/xtdh/granted-list/U
 import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
 import { ApiTdhGrantStatus } from "@/generated/models/ApiTdhGrantStatus";
 import { ApiTdhGrantTargetChain } from "@/generated/models/ApiTdhGrantTargetChain";
-import type { ContractOverview } from "@/types/nft";
 import { useContractOverviewQuery } from "@/hooks/useAlchemyNftQueries";
+import { useTdhGrantTokensQuery } from "@/hooks/useTdhGrantTokensQuery";
+import type { ContractOverview } from "@/types/nft";
 
 jest.mock("@/hooks/useAlchemyNftQueries", () => ({
   useContractOverviewQuery: jest.fn(),
+}));
+
+jest.mock("@/hooks/useTdhGrantTokensQuery", () => ({
+  useTdhGrantTokensQuery: jest.fn(),
 }));
 
 type Grant = ApiTdhGrantsPage["data"][number];
@@ -23,6 +28,10 @@ const mockedUseContractOverviewQuery =
   useContractOverviewQuery as jest.MockedFunction<
     typeof useContractOverviewQuery
   >;
+const mockedUseTdhGrantTokensQuery =
+  useTdhGrantTokensQuery as jest.MockedFunction<
+    typeof useTdhGrantTokensQuery
+  >;
 
 describe("UserPageXtdhGrantListItem", () => {
   beforeEach(() => {
@@ -31,6 +40,19 @@ describe("UserPageXtdhGrantListItem", () => {
       isError: false,
       isLoading: false,
     } as unknown as ReturnType<typeof useContractOverviewQuery>);
+    mockedUseTdhGrantTokensQuery.mockReturnValue({
+      data: undefined,
+      error: null,
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isError: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+      isLoading: false,
+      refetch: jest.fn(),
+      tokens: [],
+      totalCount: 0,
+    } as unknown as ReturnType<typeof useTdhGrantTokensQuery>);
   });
 
   afterEach(() => {
@@ -83,7 +105,7 @@ function createGrant(overrides: Partial<Grant> = {}): Grant {
     grantor: createGrantor(),
     target_chain: ApiTdhGrantTargetChain.EthereumMainnet,
     target_contract: "0x1234567890abcdef1234567890abcdef12345678",
-    target_tokens: [],
+    target_tokens_count: 0,
     created_at: Date.now(),
     valid_from: null,
     valid_to: null,

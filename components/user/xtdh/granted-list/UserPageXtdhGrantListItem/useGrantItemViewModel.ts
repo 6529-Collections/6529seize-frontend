@@ -78,7 +78,9 @@ function buildGrantDetails(
 function createBaseGrantDetails(
   grant: ApiTdhGrantsPage["data"][number]
 ): GrantDetails {
-  const tokensCountInfo = getTargetTokensCountInfo(grant.target_tokens);
+  const tokensCountInfo = getTargetTokensCountInfo(
+    grant.target_tokens_count ?? null
+  );
   const tokensCountValue =
     typeof tokensCountInfo.count === "number" ? tokensCountInfo.count : null;
   const tdhRateLabel = formatAmount(grant.tdh_rate);

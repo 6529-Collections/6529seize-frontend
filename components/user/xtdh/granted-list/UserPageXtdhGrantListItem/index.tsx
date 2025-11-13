@@ -2,16 +2,19 @@
 
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import { useId, useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import { useId, useMemo, useState } from "react";
 
 import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
 import type {
   SupportedChain,
   TokenRange,
 } from "@/components/nft-picker/NftPicker.types";
-import { parseTokenExpressionToRanges } from "@/components/nft-picker/NftPicker.utils";
+import { toCanonicalRanges } from "@/components/nft-picker/NftPicker.utils";
 import { VirtualizedTokenList } from "@/components/token-list/VirtualizedTokenList";
+import Spinner from "@/components/utils/Spinner";
+import { getTargetTokensCountInfo } from "@/components/user/xtdh/utils/xtdhGrantFormatters";
+import { useTdhGrantTokensQuery } from "@/hooks/useTdhGrantTokensQuery";
 
 import {
   GrantItemContent,
@@ -40,23 +43,12 @@ export function UserPageXtdhGrantListItem({
   } = useGrantItemViewModel(grant);
 
   const tokenState = useMemo<TokenPanelState>(() => {
-    if (!grant.target_tokens.length) {
+    const info = getTargetTokensCountInfo(grant.target_tokens_count ?? null);
+    if (info.kind === "all") {
       return { type: "all" };
     }
-    try {
-      const ranges = parseTokenExpressionToRanges(grant.target_tokens.join(","));
-      if (!ranges.length) {
-        return { type: "all" };
-      }
-      return { type: "list", ranges };
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Unable to parse granted tokens.";
-      return { type: "error", message };
-    }
-  }, [grant.target_tokens]);
+    return { type: "count", label: info.label, count: info.count ?? null };
+  }, [grant.target_tokens_count]);
 
   if (isLoading) {
     return (
@@ -105,8 +97,7 @@ function GrantListItemContainer({
 
 type TokenPanelState =
   | { type: "all" }
-  | { type: "list"; ranges: TokenRange[] }
-  | { type: "error"; message: string };
+  | { type: "count"; label: string; count: number | null };
 
 function GrantTokensPanel({
   chain,
@@ -119,16 +110,6 @@ function GrantTokensPanel({
   grantId: string;
   state: TokenPanelState;
 }>) {
-  if (state.type === "error") {
-    return (
-      <div className="tw-mt-4 tw-rounded-lg tw-border tw-border-red-500/40 tw-bg-red-500/5 tw-p-3">
-        <p className="tw-m-0 tw-text-sm tw-text-red-300">
-          Unable to display granted tokens: {state.message}
-        </p>
-      </div>
-    );
-  }
-
   if (state.type === "all") {
     return (
       <div className="tw-mt-4 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-3">
@@ -144,24 +125,99 @@ function GrantTokensPanel({
       chain={chain}
       contractAddress={contractAddress}
       grantId={grantId}
-      ranges={state.ranges}
+      tokensCount={state.count}
+      tokensCountLabel={state.label}
     />
   );
 }
+
+const TOKEN_PAGE_SIZE = 500;
 
 function GrantTokensDisclosure({
   chain,
   contractAddress,
   grantId,
-  ranges,
+  tokensCount,
+  tokensCountLabel,
 }: Readonly<{
   chain: SupportedChain;
   contractAddress: `0x${string}` | null;
   grantId: string;
-  ranges: TokenRange[];
+  tokensCount: number | null;
+  tokensCountLabel: string;
 }>) {
   const [isOpen, setIsOpen] = useState(false);
   const panelId = useId();
+  const {
+    tokens,
+    totalCount,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useTdhGrantTokensQuery({
+    grantId,
+    pageSize: TOKEN_PAGE_SIZE,
+    enabled: isOpen,
+  });
+
+  const tokenRanges = useMemo(() => mapTokensToRanges(tokens), [tokens]);
+  const loadedTokenCount = countTokensInRanges(tokenRanges);
+  const expectedTotalCount =
+    typeof tokensCount === "number" && tokensCount > 0
+      ? tokensCount
+      : totalCount || null;
+
+  const showInitialLoading = isOpen && tokenRanges.length === 0 && isLoading;
+  const showInitialError = isOpen && tokenRanges.length === 0 && isError;
+  const shouldShowFooter =
+    loadedTokenCount > 0 || hasNextPage || Boolean(expectedTotalCount);
+  const footerContent = shouldShowFooter ? (
+    <GrantTokensFooter
+      loadedCount={loadedTokenCount}
+      totalCount={expectedTotalCount}
+      hasNextPage={hasNextPage}
+      isFetchingNextPage={isFetchingNextPage}
+      onLoadMore={() => {
+        void fetchNextPage();
+      }}
+    />
+  ) : null;
+
+  let body: ReactNode = null;
+
+  if (showInitialLoading) {
+    body = <GrantTokensLoadingState />;
+  } else if (showInitialError) {
+    body = (
+      <GrantTokensErrorState
+        message={
+          error instanceof Error
+            ? error.message
+            : "Unable to load granted tokens."
+        }
+        onRetry={() => {
+          void refetch();
+        }}
+      />
+    );
+  } else if (tokenRanges.length === 0) {
+    body = <GrantTokensEmptyState />;
+  } else {
+    body = (
+      <VirtualizedTokenList
+        contractAddress={contractAddress ?? undefined}
+        chain={chain}
+        ranges={tokenRanges}
+        scrollKey={`grant-token-list-${grantId}`}
+        className="tw-rounded-md tw-border tw-border-iron-800 tw-bg-iron-900"
+        footerContent={footerContent}
+      />
+    );
+  }
 
   return (
     <div className="tw-mt-4 tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-950">
@@ -182,7 +238,8 @@ function GrantTokensDisclosure({
             {isOpen ? "Hide granted tokens" : "Show granted tokens"}
           </span>
           <span className="tw-text-xs tw-text-iron-350">
-            Expand to inspect the specific token IDs.
+            Expand to inspect {tokensCountLabel} token
+            {tokensCount === 1 ? "" : "s"} granted to this wallet.
           </span>
         </div>
         <span
@@ -202,16 +259,119 @@ function GrantTokensDisclosure({
           id={panelId}
           className="tw-border-t tw-border-iron-800 tw-bg-iron-950 tw-p-3"
         >
-          <VirtualizedTokenList
-            contractAddress={contractAddress ?? undefined}
-            chain={chain}
-            ranges={ranges}
-            scrollKey={`grant-token-list-${grantId}`}
-            className="tw-rounded-md tw-border tw-border-iron-800 tw-bg-iron-900"
-            footerContent={null}
-          />
+          {body}
         </div>
       ) : null}
     </div>
   );
+}
+
+function GrantTokensLoadingState() {
+  return (
+    <div className="tw-flex tw-min-h-24 tw-items-center tw-justify-center">
+      <Spinner />
+    </div>
+  );
+}
+
+function GrantTokensErrorState({
+  message,
+  onRetry,
+}: Readonly<{ message: string; onRetry: () => void }>) {
+  return (
+    <div className="tw-rounded-lg tw-border tw-border-red-500/40 tw-bg-red-500/5 tw-p-4">
+      <p className="tw-m-0 tw-text-sm tw-text-red-300">{message}</p>
+      <button
+        type="button"
+        className="tw-mt-3 tw-rounded-md tw-border tw-border-red-500/60 tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-red-200 desktop-hover:hover:tw-bg-red-500/10"
+        onClick={() => onRetry()}
+      >
+        Retry
+      </button>
+    </div>
+  );
+}
+
+function GrantTokensEmptyState() {
+  return (
+    <div className="tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-925 tw-p-4">
+      <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+        No specific token IDs were returned for this grant.
+      </p>
+    </div>
+  );
+}
+
+function GrantTokensFooter({
+  loadedCount,
+  totalCount,
+  hasNextPage,
+  isFetchingNextPage,
+  onLoadMore,
+}: Readonly<{
+  loadedCount: number;
+  totalCount: number | null;
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+  onLoadMore: () => void;
+}>) {
+  if (!hasNextPage) {
+    if (!loadedCount) {
+      return null;
+    }
+    return (
+      <div className="tw-flex tw-items-center tw-justify-between tw-gap-2 tw-text-xs tw-text-iron-300">
+        <span>
+          Showing {loadedCount.toLocaleString()}
+          {totalCount ? ` / ${totalCount.toLocaleString()}` : ""} tokens.
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
+      <span className="tw-text-xs tw-text-iron-300">
+        Loaded {loadedCount.toLocaleString()}
+        {totalCount ? ` / ${totalCount.toLocaleString()}` : ""} tokens
+      </span>
+      <button
+        type="button"
+        className="tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-850 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-100 desktop-hover:hover:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+        onClick={() => onLoadMore()}
+        disabled={isFetchingNextPage}
+      >
+        {isFetchingNextPage ? "Loading…" : "Load more"}
+      </button>
+    </div>
+  );
+}
+
+function mapTokensToRanges(tokens: readonly string[]): TokenRange[] {
+  if (!tokens.length) {
+    return [];
+  }
+  const ids: bigint[] = [];
+  for (const token of tokens) {
+    try {
+      ids.push(BigInt(token));
+    } catch {
+      // Ignore malformed token identifiers.
+    }
+  }
+  return toCanonicalRanges(ids);
+}
+
+function countTokensInRanges(ranges: TokenRange[]): number {
+  return ranges.reduce((total, range) => {
+    const sizeBigInt = range.end - range.start + BigInt(1);
+    const clampedSize =
+      sizeBigInt > BigInt(Number.MAX_SAFE_INTEGER)
+        ? Number.MAX_SAFE_INTEGER
+        : Number(sizeBigInt);
+    const nextTotal = total + clampedSize;
+    return nextTotal > Number.MAX_SAFE_INTEGER
+      ? Number.MAX_SAFE_INTEGER
+      : nextTotal;
+  }, 0);
 }
