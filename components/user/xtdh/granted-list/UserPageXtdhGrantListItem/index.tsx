@@ -3,7 +3,7 @@
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import type { ReactNode } from "react";
-import { useId, useMemo, useState } from "react";
+import { useCallback, useId, useMemo, useState } from "react";
 
 import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
 import type {
@@ -132,6 +132,7 @@ function GrantTokensPanel({
 }
 
 const TOKEN_PAGE_SIZE = 500;
+const END_REACHED_OFFSET = 48;
 
 function GrantTokensDisclosure({
   chain,
@@ -150,7 +151,6 @@ function GrantTokensDisclosure({
   const panelId = useId();
   const {
     tokens,
-    totalCount,
     isLoading,
     isError,
     error,
@@ -165,27 +165,14 @@ function GrantTokensDisclosure({
   });
 
   const tokenRanges = useMemo(() => mapTokensToRanges(tokens), [tokens]);
-  const loadedTokenCount = countTokensInRanges(tokenRanges);
-  const expectedTotalCount =
-    typeof tokensCount === "number" && tokensCount > 0
-      ? tokensCount
-      : totalCount || null;
-
   const showInitialLoading = isOpen && tokenRanges.length === 0 && isLoading;
   const showInitialError = isOpen && tokenRanges.length === 0 && isError;
-  const shouldShowFooter =
-    loadedTokenCount > 0 || hasNextPage || Boolean(expectedTotalCount);
-  const footerContent = shouldShowFooter ? (
-    <GrantTokensFooter
-      loadedCount={loadedTokenCount}
-      totalCount={expectedTotalCount}
-      hasNextPage={hasNextPage}
-      isFetchingNextPage={isFetchingNextPage}
-      onLoadMore={() => {
-        void fetchNextPage();
-      }}
-    />
-  ) : null;
+  const handleEndReached = useCallback(() => {
+    if (!hasNextPage || isFetchingNextPage) {
+      return;
+    }
+    void fetchNextPage();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   let body: ReactNode = null;
 
@@ -208,14 +195,18 @@ function GrantTokensDisclosure({
     body = <GrantTokensEmptyState />;
   } else {
     body = (
-      <VirtualizedTokenList
-        contractAddress={contractAddress ?? undefined}
-        chain={chain}
-        ranges={tokenRanges}
-        scrollKey={`grant-token-list-${grantId}`}
-        className="tw-rounded-md tw-border tw-border-iron-800 tw-bg-iron-900"
-        footerContent={footerContent}
-      />
+      <>
+        <VirtualizedTokenList
+          contractAddress={contractAddress ?? undefined}
+          chain={chain}
+          ranges={tokenRanges}
+          scrollKey={`grant-token-list-${grantId}`}
+          className="tw-rounded-md tw-border tw-border-iron-800 tw-bg-iron-900"
+          onEndReached={hasNextPage ? handleEndReached : undefined}
+          endReachedOffset={END_REACHED_OFFSET}
+        />
+        {isFetchingNextPage ? <GrantTokensLoadingMore /> : null}
+      </>
     );
   }
 
@@ -302,51 +293,6 @@ function GrantTokensEmptyState() {
   );
 }
 
-function GrantTokensFooter({
-  loadedCount,
-  totalCount,
-  hasNextPage,
-  isFetchingNextPage,
-  onLoadMore,
-}: Readonly<{
-  loadedCount: number;
-  totalCount: number | null;
-  hasNextPage: boolean;
-  isFetchingNextPage: boolean;
-  onLoadMore: () => void;
-}>) {
-  if (!hasNextPage) {
-    if (!loadedCount) {
-      return null;
-    }
-    return (
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-2 tw-text-xs tw-text-iron-300">
-        <span>
-          Showing {loadedCount.toLocaleString()}
-          {totalCount ? ` / ${totalCount.toLocaleString()}` : ""} tokens.
-        </span>
-      </div>
-    );
-  }
-
-  return (
-    <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
-      <span className="tw-text-xs tw-text-iron-300">
-        Loaded {loadedCount.toLocaleString()}
-        {totalCount ? ` / ${totalCount.toLocaleString()}` : ""} tokens
-      </span>
-      <button
-        type="button"
-        className="tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-850 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-100 desktop-hover:hover:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
-        onClick={() => onLoadMore()}
-        disabled={isFetchingNextPage}
-      >
-        {isFetchingNextPage ? "Loading…" : "Load more"}
-      </button>
-    </div>
-  );
-}
-
 function mapTokensToRanges(tokens: readonly string[]): TokenRange[] {
   if (!tokens.length) {
     return [];
@@ -362,16 +308,11 @@ function mapTokensToRanges(tokens: readonly string[]): TokenRange[] {
   return toCanonicalRanges(ids);
 }
 
-function countTokensInRanges(ranges: TokenRange[]): number {
-  return ranges.reduce((total, range) => {
-    const sizeBigInt = range.end - range.start + BigInt(1);
-    const clampedSize =
-      sizeBigInt > BigInt(Number.MAX_SAFE_INTEGER)
-        ? Number.MAX_SAFE_INTEGER
-        : Number(sizeBigInt);
-    const nextTotal = total + clampedSize;
-    return nextTotal > Number.MAX_SAFE_INTEGER
-      ? Number.MAX_SAFE_INTEGER
-      : nextTotal;
-  }, 0);
+function GrantTokensLoadingMore() {
+  return (
+    <div className="tw-flex tw-items-center tw-justify-center tw-border-t tw-border-iron-800 tw-bg-iron-900 tw-py-2 tw-text-xs tw-text-iron-300">
+      <Spinner />
+      <span className="tw-ml-2">Loading more tokens…</span>
+    </div>
+  );
 }

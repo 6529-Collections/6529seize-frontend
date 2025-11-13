@@ -49,6 +49,8 @@ export interface VirtualizedTokenListProps {
   readonly footerContent?: ReactNode;
   readonly footerClassName?: string;
   readonly emptyState?: ReactNode;
+  readonly onEndReached?: (info: { lastVisibleIndex: number; totalCount: number }) => void;
+  readonly endReachedOffset?: number;
 }
 
 function getTotalCount(ranges: TokenRange[]): number {
@@ -81,6 +83,8 @@ export function VirtualizedTokenList({
   footerContent,
   footerClassName = "tw-border-t tw-border-iron-700 tw-px-3 tw-py-2 tw-text-xs tw-text-iron-400",
   emptyState = <div className="tw-text-sm tw-text-iron-300">No tokens available.</div>,
+  onEndReached,
+  endReachedOffset,
 }: Readonly<VirtualizedTokenListProps>) {
   if (!ranges.length) {
     return emptyState;
@@ -106,6 +110,25 @@ export function VirtualizedTokenList({
     chain,
     windowTokens,
   });
+  const endReachedTriggerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!onEndReached) {
+      endReachedTriggerRef.current = null;
+      return;
+    }
+    if (totalCount === 0 || lastVisibleIndex < 0) {
+      return;
+    }
+    const threshold = endReachedOffset ?? overscan ?? DEFAULT_OVERSCAN;
+    const distanceFromEnd = totalCount - 1 - lastVisibleIndex;
+    if (distanceFromEnd <= threshold) {
+      if (endReachedTriggerRef.current !== totalCount) {
+        endReachedTriggerRef.current = totalCount;
+        onEndReached({ lastVisibleIndex, totalCount });
+      }
+    }
+  }, [onEndReached, totalCount, lastVisibleIndex, overscan, endReachedOffset]);
 
   return (
     <div className={className}>
