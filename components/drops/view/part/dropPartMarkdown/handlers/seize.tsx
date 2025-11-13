@@ -16,6 +16,7 @@ import { renderSeizeQuote } from "../renderers";
 
 interface CreateSeizeHandlersConfig {
   readonly onQuoteClick: (drop: ApiDrop) => void;
+  readonly currentDropId?: string;
 }
 
 const ensureSeizeQuote = (href: string): SeizeQuoteLinkInfo => {
@@ -109,18 +110,25 @@ const getDropId = (href: string): string | null => {
   }
 };
 
-const createSeizeDropHandler = (): LinkHandler =>
+const createSeizeDropHandler = (currentDropId?: string): LinkHandler =>
   createSeizeQueryHandler(
     getDropId,
     "Invalid seize drop link",
-    (dropId, href) => <DropItemChat href={href} dropId={dropId} />
+    (dropId, href) => {
+      if (currentDropId && dropId === currentDropId) {
+        throw new Error("Seize drop link matches current drop");
+      }
+
+      return <DropItemChat href={href} dropId={dropId} />;
+    }
   );
 
 export const createSeizeHandlers = ({
   onQuoteClick,
+  currentDropId,
 }: CreateSeizeHandlersConfig): LinkHandler[] => [
   createSeizeQuoteHandler(onQuoteClick),
   createSeizeGroupHandler(),
   createSeizeWaveHandler(),
-  createSeizeDropHandler(),
+  createSeizeDropHandler(currentDropId),
 ];
