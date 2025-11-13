@@ -1,8 +1,8 @@
-import { STATUS_LABELS } from "./constants";
-import type { GrantedFilterStatus } from "./types";
+import { STATUS_LABELS, areAllGrantedStatuses } from "./constants";
+import type { GrantedFilterStatuses } from "./types";
 
 interface ResultSummaryParams {
-  readonly activeStatus: GrantedFilterStatus;
+  readonly activeStatuses: GrantedFilterStatuses;
   readonly isError: boolean;
   readonly isLoading: boolean;
   readonly isFetching: boolean;
@@ -13,7 +13,7 @@ interface ResultSummaryParams {
  * Builds the polite status summary while ensuring loading and error states short-circuit.
  */
 export function getUserPageXtdhGrantedListResultSummary({
-  activeStatus,
+  activeStatuses,
   isError,
   isLoading,
   isFetching,
@@ -28,11 +28,18 @@ export function getUserPageXtdhGrantedListResultSummary({
   }
 
   const countText = totalCount.toLocaleString();
-  const statusText =
-    activeStatus === "ALL"
-      ? "grants"
-      : `${STATUS_LABELS[activeStatus].toLowerCase()} grants`;
+  const statusText = (() => {
+    if (!activeStatuses.length || areAllGrantedStatuses(activeStatuses)) {
+      return "grants";
+    }
+
+    if (activeStatuses.length === 1) {
+      const [status] = activeStatuses;
+      return `${STATUS_LABELS[status].toLowerCase()} grants`;
+    }
+
+    return "grants matching selected statuses";
+  })();
 
   return `Showing ${countText} ${statusText}`;
 }
-

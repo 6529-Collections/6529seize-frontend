@@ -14,6 +14,7 @@ import { useXtdhGrantsQuery } from "@/hooks/useXtdhGrantsQuery";
 
 export type {
   GrantedFilterStatus,
+  GrantedFilterStatuses,
   GrantedSortField,
 } from "@/components/user/xtdh/user-page-xtdh-granted-list/types";
 
@@ -30,7 +31,7 @@ export default function UserPageXtdhGrantedList({
 }: Readonly<UserPageXtdhGrantedListProps>) {
   const enabled = Boolean(grantor);
   const {
-    activeStatus,
+    activeStatuses,
     activeSortField,
     activeSortDirection,
     apiSortDirection,
@@ -50,13 +51,13 @@ export default function UserPageXtdhGrantedList({
   } = useXtdhGrantsQuery({
     grantor,
     pageSize,
-    status: activeStatus,
+    statuses: activeStatuses,
     sortField: activeSortField,
     sortDirection: apiSortDirection,
     enabled,
   });
   const statusCounts = useUserPageXtdhGrantedListStatusCounts({
-    activeStatus,
+    activeStatuses,
     data: firstPage,
     grantor,
   });
@@ -75,13 +76,13 @@ export default function UserPageXtdhGrantedList({
   const resultSummary = useMemo(
     () =>
       getUserPageXtdhGrantedListResultSummary({
-        activeStatus,
+        activeStatuses,
         isError,
         isLoading,
         isFetching,
         totalCount,
       }),
-    [activeStatus, isError, isFetching, isLoading, totalCount]
+    [activeStatuses, isError, isFetching, isLoading, totalCount]
   );
 
   const areControlsDisabled = isFetching || isLoading;
@@ -96,7 +97,7 @@ export default function UserPageXtdhGrantedList({
       <UserPageXtdhGrantedListControls
         isVisible={showControls}
         formattedStatusItems={formattedStatusItems}
-        activeStatus={activeStatus}
+        activeStatuses={activeStatuses}
         activeSortField={activeSortField}
         activeSortDirection={activeSortDirection}
         onStatusChange={handleStatusChange}
@@ -112,7 +113,7 @@ export default function UserPageXtdhGrantedList({
         grants={grants}
         isSelf={isSelf}
         onRetry={handleRetry}
-        status={activeStatus}
+        statuses={activeStatuses}
       />
     </div>
   );

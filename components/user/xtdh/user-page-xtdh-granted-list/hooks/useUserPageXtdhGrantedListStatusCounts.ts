@@ -3,12 +3,13 @@ import { useEffect, useState } from "react";
 import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
 
 import type {
-  GrantedFilterStatus,
+  GrantedFilterStatuses,
   GrantedStatusCounts,
 } from "../types";
+import { DEFAULT_STATUS } from "../constants";
 
 interface UseStatusCountsParams {
-  readonly activeStatus: GrantedFilterStatus;
+  readonly activeStatuses: GrantedFilterStatuses;
   readonly data: ApiTdhGrantsPage | undefined;
   readonly grantor: string;
 }
@@ -17,7 +18,7 @@ interface UseStatusCountsParams {
  * Maintains per-status counts driven by the most recent API response.
  */
 export function useUserPageXtdhGrantedListStatusCounts({
-  activeStatus,
+  activeStatuses,
   data,
   grantor,
 }: UseStatusCountsParams): GrantedStatusCounts {
@@ -29,13 +30,18 @@ export function useUserPageXtdhGrantedListStatusCounts({
 
   useEffect(() => {
     if (!data) return;
+    if (activeStatuses.length !== 1) {
+      return;
+    }
+
+    const [status] = activeStatuses;
+
     setStatusCounts((prev) => ({
       ...prev,
-      [activeStatus]: data.count,
-      ...(activeStatus === "ALL" ? { ALL: data.count } : {}),
+      [status]: data.count,
+      ...(status === DEFAULT_STATUS ? { [DEFAULT_STATUS]: data.count } : {}),
     }));
-  }, [activeStatus, data]);
+  }, [activeStatuses, data]);
 
   return statusCounts;
 }
-

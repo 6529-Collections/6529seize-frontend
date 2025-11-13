@@ -7,6 +7,8 @@ export type GrantedFilterStatus =
   | "DISABLED"
   | "GRANTED";
 
+export type GrantedFilterStatuses = readonly GrantedFilterStatus[];
+
 export type GrantedSortField =
   | "created_at"
   | "valid_from"
@@ -16,10 +18,10 @@ export type GrantedSortField =
 export type GrantedStatusCounts = Partial<Record<GrantedFilterStatus, number>>;
 
 export interface UserPageXtdhGrantedListFilters {
-  readonly activeStatus: GrantedFilterStatus;
+  readonly activeStatuses: GrantedFilterStatuses;
   readonly activeSortField: GrantedSortField;
   readonly activeSortDirection: SortDirection;
   readonly apiSortDirection: SortDirection;
-  readonly handleStatusChange: (status: GrantedFilterStatus) => void;
+  readonly handleStatusChange: (statuses: GrantedFilterStatuses) => void;
   readonly handleSortFieldChange: (sort: GrantedSortField) => void;
 }

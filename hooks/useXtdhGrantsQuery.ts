@@ -12,16 +12,21 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
 import { commonApiFetch } from "@/services/api/common-api";
 import type {
-  GrantedFilterStatus,
+  GrantedFilterStatuses,
   GrantedSortField,
 } from "@/components/user/xtdh/user-page-xtdh-granted-list/types";
+import {
+  DEFAULT_STATUSES,
+  normalizeGrantedStatuses,
+  serializeUserPageXtdhGrantedListStatuses,
+} from "@/components/user/xtdh/user-page-xtdh-granted-list/constants";
 import { SortDirection } from "@/entities/ISort";
 
 export interface UseXtdhGrantsQueryParams {
   readonly grantor: string;
   readonly page?: number;
   readonly pageSize?: number;
-  readonly status?: GrantedFilterStatus;
+  readonly statuses?: GrantedFilterStatuses;
   readonly sortField: GrantedSortField;
   readonly sortDirection: SortDirection;
   readonly enabled?: boolean;
@@ -42,20 +47,19 @@ export type UseXtdhGrantsQueryResult = UseInfiniteQueryResult<
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 25;
-const DEFAULT_STATUS: GrantedFilterStatus = "ALL";
-
 export function useXtdhGrantsQuery({
   grantor,
   page = DEFAULT_PAGE,
   pageSize = DEFAULT_PAGE_SIZE,
-  status = DEFAULT_STATUS,
+  statuses = DEFAULT_STATUSES,
   sortField,
   sortDirection,
   enabled = true,
 }: Readonly<UseXtdhGrantsQueryParams>): UseXtdhGrantsQueryResult {
   const normalizedPage = Number.isFinite(page) && page > 0 ? Math.floor(page) : DEFAULT_PAGE;
   const normalizedPageSize = Number.isFinite(pageSize) && pageSize > 0 ? Math.floor(pageSize) : DEFAULT_PAGE_SIZE;
-  const normalizedStatus = status ?? DEFAULT_STATUS;
+  const normalizedStatuses = normalizeGrantedStatuses(statuses ?? DEFAULT_STATUSES);
+  const serializedStatuses = serializeUserPageXtdhGrantedListStatuses(normalizedStatuses);
   const isEnabled = Boolean(grantor) && enabled;
 
   const queryKey = useMemo(
@@ -63,11 +67,11 @@ export function useXtdhGrantsQuery({
       QueryKey.TDH_GRANTS,
       grantor?.toLowerCase() ?? "",
       normalizedPageSize,
-      normalizedStatus,
+      serializedStatuses ?? DEFAULT_STATUSES.join(","),
       sortField,
       sortDirection,
     ],
-    [grantor, normalizedPageSize, normalizedStatus, sortField, sortDirection]
+    [grantor, normalizedPageSize, serializedStatuses, sortField, sortDirection]
   );
 
   const query = useInfiniteQuery({
@@ -81,7 +85,7 @@ export function useXtdhGrantsQuery({
           grantor,
           page: currentPage.toString(),
           page_size: normalizedPageSize.toString(),
-          ...(normalizedStatus !== "ALL" ? { status: normalizedStatus } : {}),
+          ...(serializedStatuses ? { status: serializedStatuses } : {}),
           sort: sortField,
           sort_direction: sortDirection,
         },

@@ -3,11 +3,13 @@ import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 
 import type {
   GrantedFilterStatus,
+  GrantedFilterStatuses,
   GrantedSortField,
   GrantedStatusCounts,
 } from "./types";
 
 export const DEFAULT_STATUS: GrantedFilterStatus = "ALL";
+export const DEFAULT_STATUSES: GrantedFilterStatuses = [DEFAULT_STATUS];
 export const DEFAULT_SORT_FIELD: GrantedSortField = "created_at";
 export const DEFAULT_DIRECTION = SortDirection.DESC;
 
@@ -27,6 +29,12 @@ export const BASE_STATUS_ITEMS: CommonSelectItem<GrantedFilterStatus>[] = [
   { key: "GRANTED", label: STATUS_LABELS.GRANTED, value: "GRANTED" },
 ];
 
+const STATUS_ORDER = BASE_STATUS_ITEMS.map((item) => item.value);
+const STATUS_SET = new Set<string>(STATUS_ORDER);
+
+const isGrantedFilterStatus = (value: string): value is GrantedFilterStatus =>
+  STATUS_SET.has(value);
+
 export const SORT_ITEMS: CommonSelectItem<GrantedSortField>[] = [
   { key: "created_at", label: "Created At", value: "created_at" },
   { key: "valid_from", label: "Valid From", value: "valid_from" },
@@ -34,15 +42,67 @@ export const SORT_ITEMS: CommonSelectItem<GrantedSortField>[] = [
   { key: "tdh_rate", label: "TDH Rate", value: "tdh_rate" },
 ];
 
-export function parseUserPageXtdhGrantedListStatus(
+export function normalizeGrantedStatuses(
+  statuses: GrantedFilterStatuses
+): GrantedFilterStatuses {
+  if (!statuses.length) {
+    return DEFAULT_STATUSES;
+  }
+
+  const orderedStatuses: GrantedFilterStatus[] = [];
+  const seen = new Set<GrantedFilterStatus>();
+
+  for (const status of STATUS_ORDER) {
+    if (statuses.includes(status) && !seen.has(status)) {
+      orderedStatuses.push(status);
+      seen.add(status);
+    }
+  }
+
+  if (orderedStatuses.length === 0) {
+    return DEFAULT_STATUSES;
+  }
+
+  if (
+    orderedStatuses.length === 1 &&
+    orderedStatuses[0] === DEFAULT_STATUS
+  ) {
+    return DEFAULT_STATUSES;
+  }
+
+  return orderedStatuses.filter((status) => status !== DEFAULT_STATUS);
+}
+
+export function parseUserPageXtdhGrantedListStatuses(
   value: string | null
-): GrantedFilterStatus {
-  if (!value) return DEFAULT_STATUS;
-  const normalized = value.toUpperCase();
-  return (
-    BASE_STATUS_ITEMS.find((item) => item.value === normalized)?.value ??
-    DEFAULT_STATUS
-  );
+): GrantedFilterStatuses {
+  if (!value) return DEFAULT_STATUSES;
+  const parsed = value
+    .split(",")
+    .map((item) => item.trim().toUpperCase())
+    .filter(isGrantedFilterStatus);
+
+  return normalizeGrantedStatuses(parsed);
+}
+
+export function serializeUserPageXtdhGrantedListStatuses(
+  statuses: GrantedFilterStatuses
+): string | null {
+  const normalized = normalizeGrantedStatuses(statuses);
+  if (
+    normalized.length === 1 &&
+    normalized[0] === DEFAULT_STATUS
+  ) {
+    return null;
+  }
+  return normalized.join(",");
+}
+
+export function areAllGrantedStatuses(
+  statuses: GrantedFilterStatuses
+): boolean {
+  const normalized = normalizeGrantedStatuses(statuses);
+  return normalized.length === 1 && normalized[0] === DEFAULT_STATUS;
 }
 
 export function parseUserPageXtdhGrantedListSortField(

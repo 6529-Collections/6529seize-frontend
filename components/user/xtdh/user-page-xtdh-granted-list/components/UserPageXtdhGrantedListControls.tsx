@@ -1,4 +1,3 @@
-import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import CommonSelect from "@/components/utils/select/CommonSelect";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import { SortDirection } from "@/entities/ISort";
@@ -6,16 +5,18 @@ import { SortDirection } from "@/entities/ISort";
 import { SORT_ITEMS } from "../constants";
 import type {
   GrantedFilterStatus,
+  GrantedFilterStatuses,
   GrantedSortField,
 } from "../types";
+import { UserPageXtdhGrantedStatusDropdown } from "./UserPageXtdhGrantedStatusDropdown";
 
 interface UserPageXtdhGrantedListControlsProps {
   readonly isVisible: boolean;
   readonly formattedStatusItems: CommonSelectItem<GrantedFilterStatus>[];
-  readonly activeStatus: GrantedFilterStatus;
+  readonly activeStatuses: GrantedFilterStatuses;
   readonly activeSortField: GrantedSortField;
   readonly activeSortDirection: SortDirection;
-  readonly onStatusChange: (status: GrantedFilterStatus) => void;
+  readonly onStatusChange: (statuses: GrantedFilterStatuses) => void;
   readonly onSortFieldChange: (sort: GrantedSortField) => void;
   readonly resultSummary: string | null;
   readonly isDisabled: boolean;
@@ -24,7 +25,7 @@ interface UserPageXtdhGrantedListControlsProps {
 export function UserPageXtdhGrantedListControls({
   isVisible,
   formattedStatusItems,
-  activeStatus,
+  activeStatuses,
   activeSortField,
   activeSortDirection,
   onStatusChange,
@@ -43,11 +44,11 @@ export function UserPageXtdhGrantedListControls({
       aria-label="Filter and sort controls">
       <div className="tw-flex tw-flex-col tw-gap-3 lg:tw-flex-row lg:tw-items-center lg:tw-gap-4">
         <div className="tw-w-full lg:tw-w-56">
-          <CommonDropdown
+          <UserPageXtdhGrantedStatusDropdown
             items={formattedStatusItems}
-            activeItem={activeStatus}
+            selectedStatuses={activeStatuses}
+            onChange={onStatusChange}
             filterLabel="Filter by status"
-            setSelected={onStatusChange}
             disabled={isDisabled}
           />
         </div>
@@ -74,4 +75,3 @@ export function UserPageXtdhGrantedListControls({
     </div>
   );
 }
-

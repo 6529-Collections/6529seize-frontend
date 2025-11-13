@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
-import type { GrantedFilterStatus } from "@/components/user/xtdh/user-page-xtdh-granted-list/types";
+import type { GrantedFilterStatuses } from "@/components/user/xtdh/user-page-xtdh-granted-list/types";
+import { STATUS_LABELS, areAllGrantedStatuses } from "@/components/user/xtdh/user-page-xtdh-granted-list/constants";
 import { UserPageXtdhGrantList } from "./UserPageXtdhGrantList";
 
 export interface UserPageXtdhGrantedListContentProps {
@@ -11,7 +12,7 @@ export interface UserPageXtdhGrantedListContentProps {
   readonly grants: ApiTdhGrantsPage["data"];
   readonly isSelf: boolean;
   readonly onRetry: () => void;
-  readonly status: GrantedFilterStatus;
+  readonly statuses: GrantedFilterStatuses;
 }
 
 export function UserPageXtdhGrantedListContent({
@@ -22,7 +23,7 @@ export function UserPageXtdhGrantedListContent({
   grants,
   isSelf,
   onRetry,
-  status,
+  statuses,
 }: Readonly<UserPageXtdhGrantedListContentProps>) {
   if (!enabled) {
     return (
@@ -45,8 +46,10 @@ export function UserPageXtdhGrantedListContent({
   }
 
   if (!grants.length) {
-    if (status !== "ALL") {
-      const statusLabel = status.toLowerCase();
+    if (!areAllGrantedStatuses(statuses)) {
+      const statusLabel = statuses
+        .map((status) => STATUS_LABELS[status].toLowerCase())
+        .join(", ");
       return (
         <GrantedListMessage>
           No {statusLabel} grants found. Try a different filter.

@@ -6,14 +6,16 @@ import { SortDirection } from "@/entities/ISort";
 import {
   DEFAULT_DIRECTION,
   DEFAULT_SORT_FIELD,
-  DEFAULT_STATUS,
+  DEFAULT_STATUSES,
+  normalizeGrantedStatuses,
   normalizeUserPageXtdhGrantedListSortDirection,
   parseUserPageXtdhGrantedListSortDirection,
   parseUserPageXtdhGrantedListSortField,
-  parseUserPageXtdhGrantedListStatus,
+  parseUserPageXtdhGrantedListStatuses,
+  serializeUserPageXtdhGrantedListStatuses,
 } from "../constants";
 import type {
-  GrantedFilterStatus,
+  GrantedFilterStatuses,
   GrantedSortField,
   UserPageXtdhGrantedListFilters,
 } from "../types";
@@ -26,9 +28,9 @@ export function useUserPageXtdhGrantedListFilters(): UserPageXtdhGrantedListFilt
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  const activeStatus = useMemo(
+  const activeStatuses = useMemo(
     () =>
-      parseUserPageXtdhGrantedListStatus(searchParams?.get("status") ?? null),
+      parseUserPageXtdhGrantedListStatuses(searchParams?.get("status") ?? null),
     [searchParams]
   );
   const activeSortField = useMemo(
@@ -50,18 +52,21 @@ export function useUserPageXtdhGrantedListFilters(): UserPageXtdhGrantedListFilt
 
   const updateQueryParams = useCallback(
     (updates: {
-      readonly status?: GrantedFilterStatus;
+      readonly statuses?: GrantedFilterStatuses;
       readonly sort?: GrantedSortField;
       readonly direction?: SortDirection;
     }) => {
       if (!pathname) return;
       const params = new URLSearchParams(searchParams?.toString() ?? "");
 
-      if (updates.status !== undefined) {
-        if (updates.status === DEFAULT_STATUS) {
+      if (updates.statuses !== undefined) {
+        const serialized = serializeUserPageXtdhGrantedListStatuses(
+          normalizeGrantedStatuses(updates.statuses)
+        );
+        if (!serialized) {
           params.delete("status");
         } else {
-          params.set("status", updates.status);
+          params.set("status", serialized);
         }
       }
 
@@ -90,8 +95,8 @@ export function useUserPageXtdhGrantedListFilters(): UserPageXtdhGrantedListFilt
   );
 
   const handleStatusChange = useCallback(
-    (status: GrantedFilterStatus) => {
-      updateQueryParams({ status });
+    (statuses: GrantedFilterStatuses) => {
+      updateQueryParams({ statuses });
     },
     [updateQueryParams]
   );
@@ -111,7 +116,7 @@ export function useUserPageXtdhGrantedListFilters(): UserPageXtdhGrantedListFilt
   );
 
   return {
-    activeStatus,
+    activeStatuses: activeStatuses.length ? activeStatuses : DEFAULT_STATUSES,
     activeSortField,
     activeSortDirection,
     apiSortDirection,
@@ -119,4 +124,3 @@ export function useUserPageXtdhGrantedListFilters(): UserPageXtdhGrantedListFilt
     handleSortFieldChange,
   };
 }
-
