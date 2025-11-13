@@ -22,6 +22,7 @@ function areEqual(
     "referencedNfts",
     "partContent",
     "textSize",
+    "currentDropId",
   ];
 
   for (const key of propsToCheck) {
