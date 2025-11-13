@@ -16,7 +16,7 @@ import type {
   GrantedSortField,
 } from "@/components/user/xtdh/user-page-xtdh-granted-list/types";
 import {
-  DEFAULT_STATUSES,
+  DEFAULT_FILTER_STATUSES,
   normalizeGrantedStatuses,
   serializeUserPageXtdhGrantedListStatuses,
 } from "@/components/user/xtdh/user-page-xtdh-granted-list/constants";
@@ -51,14 +51,14 @@ export function useXtdhGrantsQuery({
   grantor,
   page = DEFAULT_PAGE,
   pageSize = DEFAULT_PAGE_SIZE,
-  statuses = DEFAULT_STATUSES,
+  statuses = DEFAULT_FILTER_STATUSES,
   sortField,
   sortDirection,
   enabled = true,
 }: Readonly<UseXtdhGrantsQueryParams>): UseXtdhGrantsQueryResult {
   const normalizedPage = Number.isFinite(page) && page > 0 ? Math.floor(page) : DEFAULT_PAGE;
   const normalizedPageSize = Number.isFinite(pageSize) && pageSize > 0 ? Math.floor(pageSize) : DEFAULT_PAGE_SIZE;
-  const normalizedStatuses = normalizeGrantedStatuses(statuses ?? DEFAULT_STATUSES);
+  const normalizedStatuses = normalizeGrantedStatuses(statuses ?? DEFAULT_FILTER_STATUSES);
   const serializedStatuses = serializeUserPageXtdhGrantedListStatuses(normalizedStatuses);
   const isEnabled = Boolean(grantor) && enabled;
 
@@ -67,7 +67,7 @@ export function useXtdhGrantsQuery({
       QueryKey.TDH_GRANTS,
       grantor?.toLowerCase() ?? "",
       normalizedPageSize,
-      serializedStatuses ?? DEFAULT_STATUSES.join(","),
+      serializedStatuses ?? DEFAULT_FILTER_STATUSES.join(","),
       sortField,
       sortDirection,
     ],

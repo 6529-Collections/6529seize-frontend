@@ -7,7 +7,13 @@ import { faCheck } from "@fortawesome/free-solid-svg-icons";
 
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonDropdownItemsWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsWrapper";
-import { DEFAULT_STATUS, DEFAULT_STATUSES, STATUS_LABELS, areAllGrantedStatuses, normalizeGrantedStatuses } from "../constants";
+import {
+  DEFAULT_STATUS,
+  DEFAULT_STATUSES,
+  STATUS_LABELS,
+  areAllGrantedStatuses,
+  normalizeGrantedStatuses,
+} from "../constants";
 import type { GrantedFilterStatus, GrantedFilterStatuses } from "../types";
 
 interface UserPageXtdhGrantedStatusDropdownProps {
@@ -53,6 +59,11 @@ export function UserPageXtdhGrantedStatusDropdown({
     if (normalizedSelection.length === 1) {
       const [status] = normalizedSelection;
       return labelByStatus[status] ?? STATUS_LABELS[status];
+    }
+
+    if (normalizedSelection.length === 2) {
+      const [first, second] = normalizedSelection;
+      return `${STATUS_LABELS[first]} + ${STATUS_LABELS[second]}`;
     }
 
     const [primary, ...rest] = normalizedSelection;

@@ -5,10 +5,11 @@ import { SortDirection } from "@/entities/ISort";
 
 import {
   DEFAULT_DIRECTION,
+  DEFAULT_FILTER_STATUSES,
   DEFAULT_SORT_FIELD,
-  DEFAULT_STATUSES,
   normalizeGrantedStatuses,
   normalizeUserPageXtdhGrantedListSortDirection,
+  areDefaultFilterStatuses,
   parseUserPageXtdhGrantedListSortDirection,
   parseUserPageXtdhGrantedListSortField,
   parseUserPageXtdhGrantedListStatuses,
@@ -60,13 +61,16 @@ export function useUserPageXtdhGrantedListFilters(): UserPageXtdhGrantedListFilt
       const params = new URLSearchParams(searchParams?.toString() ?? "");
 
       if (updates.statuses !== undefined) {
-        const serialized = serializeUserPageXtdhGrantedListStatuses(
-          normalizeGrantedStatuses(updates.statuses)
-        );
-        if (!serialized) {
+        const normalizedStatuses = normalizeGrantedStatuses(updates.statuses);
+        if (areDefaultFilterStatuses(normalizedStatuses)) {
           params.delete("status");
         } else {
-          params.set("status", serialized);
+          const serialized = serializeUserPageXtdhGrantedListStatuses(
+            normalizedStatuses
+          );
+          if (serialized) {
+            params.set("status", serialized);
+          }
         }
       }
 
@@ -116,7 +120,7 @@ export function useUserPageXtdhGrantedListFilters(): UserPageXtdhGrantedListFilt
   );
 
   return {
-    activeStatuses: activeStatuses.length ? activeStatuses : DEFAULT_STATUSES,
+    activeStatuses: activeStatuses.length ? activeStatuses : DEFAULT_FILTER_STATUSES,
     activeSortField,
     activeSortDirection,
     apiSortDirection,

@@ -73,10 +73,31 @@ export function normalizeGrantedStatuses(
   return orderedStatuses.filter((status) => status !== DEFAULT_STATUS);
 }
 
+const DEFAULT_FILTER_STATUSES_PRESET: GrantedFilterStatus[] = [
+  "PENDING",
+  "GRANTED",
+];
+
+export const DEFAULT_FILTER_STATUSES: GrantedFilterStatuses =
+  normalizeGrantedStatuses(DEFAULT_FILTER_STATUSES_PRESET);
+
+export function areDefaultFilterStatuses(
+  statuses: GrantedFilterStatuses
+): boolean {
+  const normalized = normalizeGrantedStatuses(statuses);
+  if (normalized.length !== DEFAULT_FILTER_STATUSES.length) {
+    return false;
+  }
+
+  return normalized.every(
+    (status, index) => status === DEFAULT_FILTER_STATUSES[index]
+  );
+}
+
 export function parseUserPageXtdhGrantedListStatuses(
   value: string | null
 ): GrantedFilterStatuses {
-  if (!value) return DEFAULT_STATUSES;
+  if (!value) return DEFAULT_FILTER_STATUSES;
   const parsed = value
     .split(",")
     .map((item) => item.trim().toUpperCase())
@@ -89,11 +110,8 @@ export function serializeUserPageXtdhGrantedListStatuses(
   statuses: GrantedFilterStatuses
 ): string | null {
   const normalized = normalizeGrantedStatuses(statuses);
-  if (
-    normalized.length === 1 &&
-    normalized[0] === DEFAULT_STATUS
-  ) {
-    return null;
+  if (areAllGrantedStatuses(normalized)) {
+    return DEFAULT_STATUS;
   }
   return normalized.join(",");
 }
