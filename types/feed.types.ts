@@ -132,6 +132,16 @@ export type INotificationAllDrops = {
   };
 };
 
+export type INotificationPriorityAlert = {
+  readonly id: number;
+  readonly cause: ApiNotificationCause.PriorityAlert;
+  readonly created_at: number;
+  readonly read_at: number | null;
+  readonly related_identity: ApiProfileMin;
+  readonly related_drops: Array<ApiDrop>;
+  readonly additional_context: any;
+};
+
 export type TypedNotification =
   | INotificationIdentitySubscribed
   | INotificationIdentityMentioned
@@ -140,7 +150,8 @@ export type TypedNotification =
   | INotificationDropQuoted
   | INotificationDropReplied
   | INotificationWaveCreated
-  | INotificationAllDrops;
+  | INotificationAllDrops
+  | INotificationPriorityAlert;
 
 export interface TypedNotificationsResponse
   extends Omit<ApiNotificationsResponse, "notifications"> {
