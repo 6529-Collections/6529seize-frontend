@@ -5,7 +5,8 @@ import styles from "@/styles/Home.module.scss";
 import { Suspense, useEffect } from "react";
 
 function decodeReactError(message: string): string {
-  const match = message.match(/Minified React error #(\d+)/);
+  const regex = /Minified React error #(\d+)/;
+  const match = regex.exec(message);
   if (match) {
     const code = match[1];
     return `React Error #${code} - Visit https://react.dev/errors/${code} for details. Original: ${message}`;
@@ -15,7 +16,7 @@ function decodeReactError(message: string): string {
 
 export default function GlobalError({
   error,
-  reset,
+  reset: _reset,
 }: {
   readonly error: Error & { digest?: string };
   readonly reset: () => void;
@@ -31,7 +32,7 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <html>
+    <html lang="en">
       <body>
         <main className={styles.main}>
           <Suspense fallback={null}>

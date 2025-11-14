@@ -5,7 +5,8 @@ import styles from "@/styles/Home.module.scss";
 import { Suspense, useEffect } from "react";
 
 function decodeReactError(message: string): string {
-  const match = message.match(/Minified React error #(\d+)/);
+  const regex = /Minified React error #(\d+)/;
+  const match = regex.exec(message);
   if (match) {
     const code = match[1];
     return `React Error #${code} - Visit https://react.dev/errors/${code} for details. Original: ${message}`;
@@ -13,11 +14,10 @@ function decodeReactError(message: string): string {
   return message;
 }
 
-export default function Error({
+export default function AppError({
   error,
 }: {
   readonly error: Error & { digest?: string };
-  readonly reset: () => void;
 }) {
   useEffect(() => {
     const decodedMessage = decodeReactError(error.message);
