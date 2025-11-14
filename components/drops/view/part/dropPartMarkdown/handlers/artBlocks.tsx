@@ -15,8 +15,6 @@ const ART_BLOCKS_FLAG_CANDIDATES = [
   "FEATURE_AB_CARD",
 ] as const;
 
-type ArtBlocksFlagKey = (typeof ART_BLOCKS_FLAG_CANDIDATES)[number];
-
 const parseFeatureFlagValue = (value: string): boolean => {
   const normalized = value.trim().toLowerCase();
 

@@ -14,7 +14,7 @@ export default function CreateSnapshotTableRow({
 }: {
   snapshot: CreateSnapshotSnapshot;
 }) {
-  const [copyState, copyToClipboard] = useCopyToClipboard();
+  const [, copyToClipboard] = useCopyToClipboard();
   const getContractTruncated = () => {
     if (!snapshot.contract) {
       return "";

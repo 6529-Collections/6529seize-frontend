@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./Clap.module.scss";
 import mojs from "@mojs/core";
+import type { MojsTimelineInstance } from "@mojs/core";
 import { formatLargeNumber } from "@/helpers/Helpers";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { Tooltip } from "react-tooltip";
@@ -14,6 +15,10 @@ enum RateStatus {
   NEUTRAL = "NEUTRAL",
   NEGATIVE = "NEGATIVE",
 }
+
+const POSITIVE_RGBA = "rgba(39, 174, 96, 1)";
+const NEGATIVE_RGBA = "rgba(192, 57, 43, 1)";
+const TIMELINE_DURATION = 300;
 
 export default function DropListItemRateGiveClap({
   rate,
@@ -28,94 +33,87 @@ export default function DropListItemRateGiveClap({
   readonly onSubmit: () => void;
   readonly isMobile?: boolean;
 }) {
-  const positiveRgba = "rgba(39, 174, 96, 1)";
-  const negativeRgba = "rgba(192, 57, 43, 1)";
-
-  const tlDuration = 300;
-  const [animationTimeline, setAnimationTimeline] = useState<any>(null);
+  const animationTimelineRef = useRef<MojsTimelineInstance | null>(null);
   const [triangleBurst, setTriangleBurst] = useState<any>(null);
   const [circleBurst, setCircleBurst] = useState<any>(null);
-  const [countAnimation, setCountAnimation] = useState<any>(null);
-  const [scaleButton, setScaleButton] = useState<any>(null);
-  const [init, setInit] = useState(false);
-  const randomID = getRandomObjectId();
-  useEffect(() => {
-    setTriangleBurst(
-      new mojs.Burst({
-        parent: `#clap-${randomID}`,
-        radius: { 50: 95 },
-        count: 5,
-        angle: 30,
-        children: {
-          shape: "polygon",
-          radius: { 6: 0 },
-          scale: 1,
-          stroke: positiveRgba,
-          strokeWidth: 2,
-          angle: 210,
-          delay: 30,
-          speed: 0.2,
-          easing: mojs.easing.bezier(0.1, 1, 0.3, 1),
-          duration: tlDuration,
-        },
-      })
-    );
-    setCircleBurst(
-      new mojs.Burst({
-        parent: `#clap-${randomID}`,
-        radius: { 50: 75 },
-        angle: 25,
-        duration: tlDuration,
-        children: {
-          shape: "circle",
-          fill: positiveRgba,
-          delay: 30,
-          speed: 0.2,
-          radius: { 3: 0 },
-          easing: mojs.easing.bezier(0.1, 1, 0.3, 1),
-        },
-      })
-    );
-    setCountAnimation(
-      new mojs.Html({
-        el: `#clap--count-${randomID}`,
-        isShowStart: false,
-        isShowEnd: true,
-        y: { 0: -30 },
-        opacity: { 0: 1 },
-        duration: tlDuration,
-      }).then({
-        opacity: { 1: 0 },
-        y: -80,
-        delay: tlDuration / 2,
-      })
-    );
+  const [randomID] = useState(() => getRandomObjectId());
 
-    setScaleButton(
-      new mojs.Html({
-        el: `#clap-${randomID}`,
-        duration: tlDuration,
-        scale: { 1.3: 1 },
-        easing: mojs.easing.out,
-      })
-    );
+  useEffect(() => {
+    const triangle = new mojs.Burst({
+      parent: `#clap-${randomID}`,
+      radius: { 50: 95 },
+      count: 5,
+      angle: 30,
+      children: {
+        shape: "polygon",
+        radius: { 6: 0 },
+        scale: 1,
+        stroke: POSITIVE_RGBA,
+        strokeWidth: 2,
+        angle: 210,
+        delay: 30,
+        speed: 0.2,
+        easing: mojs.easing.bezier(0.1, 1, 0.3, 1),
+        duration: TIMELINE_DURATION,
+      },
+    });
+
+    const circle = new mojs.Burst({
+      parent: `#clap-${randomID}`,
+      radius: { 50: 75 },
+      angle: 25,
+      duration: TIMELINE_DURATION,
+      children: {
+        shape: "circle",
+        fill: POSITIVE_RGBA,
+        delay: 30,
+        speed: 0.2,
+        radius: { 3: 0 },
+        easing: mojs.easing.bezier(0.1, 1, 0.3, 1),
+      },
+    });
+
+    const countAnimation = new mojs.Html({
+      el: `#clap--count-${randomID}`,
+      isShowStart: false,
+      isShowEnd: true,
+      y: { 0: -30 },
+      opacity: { 0: 1 },
+      duration: TIMELINE_DURATION,
+    }).then({
+      opacity: { 1: 0 },
+      y: -80,
+      delay: TIMELINE_DURATION / 2,
+    });
+
+    const scaleButton = new mojs.Html({
+      el: `#clap-${randomID}`,
+      duration: TIMELINE_DURATION,
+      scale: { 1.3: 1 },
+      easing: mojs.easing.out,
+    });
+
+    const timeline = new mojs.Timeline();
+    timeline.add([countAnimation, scaleButton, circle, triangle]);
+
+    setTriangleBurst(triangle);
+    setCircleBurst(circle);
+    animationTimelineRef.current = timeline;
 
     const clap = document.getElementById(`clap-${randomID}`);
-    clap!.style.transform = "scale(1, 1)";
-    setInit(true);
-  }, []);
+    if (clap) {
+      clap.style.transform = "scale(1, 1)";
+    }
 
-  useEffect(() => {
-    if (!init) return;
-    const tempAnimationTimeline = new mojs.Timeline();
-    tempAnimationTimeline.add([
-      countAnimation,
-      scaleButton,
-      circleBurst,
-      triangleBurst,
-    ]);
-    setAnimationTimeline(tempAnimationTimeline);
-  }, [init]);
+    return () => {
+      timeline.stop();
+      triangle.stop();
+      circle.stop();
+      scaleButton.stop();
+      const countAnimationInstance = countAnimation as { stop?: () => void };
+      countAnimationInstance.stop?.();
+    };
+  }, [randomID]);
 
   const getRateStatus = (): RateStatus => {
     if (rate > 0) return RateStatus.POSITIVE;
@@ -127,14 +125,12 @@ export default function DropListItemRateGiveClap({
     if (!canVote) return;
     const status = getRateStatus();
     if (status === RateStatus.NEUTRAL) return;
-    animationTimeline.replay();
+    animationTimelineRef.current?.replay();
     onSubmit();
   };
 
   const getCountShort = () =>
     `${rate > 0 ? "+" : ""}${formatLargeNumber(rate)}`;
-
-  const [countShort, setCountShort] = useState(getCountShort());
 
   const CLAP_CLASSES: Record<RateStatus, string> = {
     [RateStatus.POSITIVE]: `${styles.clapPositive}`,
@@ -197,18 +193,8 @@ export default function DropListItemRateGiveClap({
     return `${getClapCountColorClasses()} ${getClapCountSizeAndPositionClasses()}`;
   };
 
-  const [clapClasses, setClapClasses] = useState(getClapClasses());
-  const [textClasses, setTextClasses] = useState(getTextClasses());
-  const [clapCountClasses, setClapCountClasses] = useState(
-    getClapCountClasses()
-  );
-
   useEffect(() => {
-    setCountShort(getCountShort());
-    setClapClasses(getClapClasses());
-    setTextClasses(getTextClasses());
-    setClapCountClasses(getClapCountClasses());
-    const burstColor = rate > 0 ? positiveRgba : negativeRgba;
+    const burstColor = rate > 0 ? POSITIVE_RGBA : NEGATIVE_RGBA;
     triangleBurst?.tune({
       children: {
         stroke: burstColor,
@@ -219,11 +205,16 @@ export default function DropListItemRateGiveClap({
         fill: burstColor,
       },
     });
-  }, [rate]);
+  }, [rate, circleBurst, triangleBurst]);
+
+  const countShort = getCountShort();
+  const clapClasses = getClapClasses();
+  const textClasses = getTextClasses();
+  const clapCountClasses = getClapCountClasses();
 
   const svgSize = isMobile ? "tw-size-7" : "tw-h-[18px] tw-w-[18px]";
   const tooltipId = `clap-tooltip-${randomID}`;
-  
+
   return (
     <>
       <div className="tailwind-scope">

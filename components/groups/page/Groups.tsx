@@ -1,6 +1,8 @@
 "use client";
 
-import { useContext, useEffect, useState, type JSX } from "react";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useCallback, useContext, useEffect, useState, type JSX } from "react";
 import GroupCreate from "./create/GroupCreate";
 import { AuthContext } from "@/components/auth/Auth";
 import GroupsPageListWrapper from "./GroupsPageListWrapper";
@@ -28,38 +30,52 @@ export default function Groups() {
 
   const [viewMode, setViewMode] = useState(GroupsViewMode.VIEW);
 
-  const onViewModeChange = async (mode: GroupsViewMode): Promise<void> => {
-    if (mode === GroupsViewMode.CREATE) {
-      const { success } = await requestAuth();
-      if (!success) return;
-    } else if (pathname) {
-      router.replace(pathname);
-    }
+  const onViewModeChange = useCallback(
+    async (mode: GroupsViewMode): Promise<void> => {
+      if (mode === GroupsViewMode.CREATE) {
+        const { success } = await requestAuth();
+        if (!success) return;
+      } else if (pathname) {
+        router.replace(pathname);
+      }
 
-    setViewMode(mode);
-  };
+      setViewMode(mode);
+    },
+    [pathname, requestAuth, router],
+  );
+
+  const triggerViewModeChange = useCallback(
+    (mode: GroupsViewMode): void => {
+      onViewModeChange(mode).catch((error) => {
+        console.error("Failed to update groups view mode", error);
+      });
+    },
+    [onViewModeChange],
+  );
+
+  const connectedHandle = connectedProfile?.handle;
 
   useEffect(() => {
-    if (edit && !!connectedProfile?.handle && !activeProfileProxy) {
-      onViewModeChange(GroupsViewMode.CREATE);
+    if (edit && !!connectedHandle && !activeProfileProxy) {
+      triggerViewModeChange(GroupsViewMode.CREATE);
     }
-  }, [edit]);
+  }, [activeProfileProxy, connectedHandle, edit, triggerViewModeChange]);
 
   useEffect(() => {
-    if (!connectedProfile?.handle || activeProfileProxy) {
-      onViewModeChange(GroupsViewMode.VIEW);
+    if (!connectedHandle || activeProfileProxy) {
+      triggerViewModeChange(GroupsViewMode.VIEW);
     }
-  }, [connectedProfile, activeProfileProxy]);
+  }, [activeProfileProxy, connectedHandle, triggerViewModeChange]);
 
   const components: Record<GroupsViewMode, JSX.Element> = {
     [GroupsViewMode.VIEW]: (
       <GroupsPageListWrapper
-        onCreateNewGroup={() => onViewModeChange(GroupsViewMode.CREATE)}
+        onCreateNewGroup={() => triggerViewModeChange(GroupsViewMode.CREATE)}
       />
     ),
     [GroupsViewMode.CREATE]: (
       <GroupCreate
-        onCompleted={() => onViewModeChange(GroupsViewMode.VIEW)}
+        onCompleted={() => triggerViewModeChange(GroupsViewMode.VIEW)}
         edit={edit ?? "new"}
       />
     ),
@@ -70,22 +86,13 @@ export default function Groups() {
       <div className="tailwind-scope">
         {viewMode === GroupsViewMode.CREATE && (
           <button
-            onClick={() => onViewModeChange(GroupsViewMode.VIEW)}
+            onClick={() => triggerViewModeChange(GroupsViewMode.VIEW)}
             type="button"
             className="tw-py-2 tw-px-2 -tw-ml-2 tw-flex tw-items-center tw-gap-x-2 tw-justify-center tw-text-sm tw-font-semibold tw-border-0 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-text-iron-400 tw-bg-transparent hover:tw-text-iron-50">
-            <svg
+            <FontAwesomeIcon
+              icon={faArrowLeft}
               className="tw-flex-shrink-0 tw-w-5 tw-h-5"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M20 12H4M4 12L10 18M4 12L10 6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"></path>
-            </svg>
+            />
             <span>Back</span>
           </button>
         )}

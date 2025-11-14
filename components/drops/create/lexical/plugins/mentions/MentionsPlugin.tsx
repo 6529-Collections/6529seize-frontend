@@ -206,7 +206,7 @@ const NewMentionsPlugin = forwardRef<
         closeMenu();
       });
     },
-    [editor]
+    [editor, onSelect]
   );
 
   const checkForMentionMatch = useCallback(

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import GroupCardActionFooter from "./utils/GroupCardActionFooter";
 import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
 
@@ -23,28 +23,18 @@ export default function GroupCardActionWrapper({
   readonly matter: ApiRateMatter;
   readonly onSave: () => void;
   readonly onCancel: () => void;
-
-  readonly children: React.ReactNode;
+  readonly children: ReactNode;
 }) {
   const MATTER_LABEL: Record<ApiRateMatter, string> = {
     [ApiRateMatter.Rep]: "Rep",
     [ApiRateMatter.Cic]: "NIC",
   };
-  const getProgress = (): string => {
-    if (
-      typeof membersCount !== "number" ||
-      typeof doneMembersCount !== "number"
-    ) {
-      return "0%";
-    }
-    return `${(doneMembersCount / membersCount) * 100}%`;
-  };
-
-  const [progress, setProgress] = useState(getProgress());
-
-  useEffect(() => {
-    setProgress(getProgress());
-  }, [membersCount, doneMembersCount]);
+  const progress =
+    typeof membersCount !== "number" ||
+    typeof doneMembersCount !== "number" ||
+    membersCount === 0
+      ? "0%"
+      : `${(doneMembersCount / membersCount) * 100}%`;
   return (
     <div className="tw-flex tw-h-full tw-flex-col tw-gap-y-5 tw-px-4 tw-py-5 sm:tw-px-5 sm:tw-py-6">
       <div className="tw-flex-1">

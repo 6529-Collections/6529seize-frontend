@@ -33,16 +33,16 @@ export default function DropListItemRateGive({
   const minRating = drop.context_profile_context?.min_rating ?? 0;
 
   useEffect(() => {
-    if (!canVote) {
-      setOnProgressRate(0);
-      return;
-    }
-    if (Math.abs(onProgressRate) > maxRating) {
-      setOnProgressRate(onProgressRate > 0 ? maxRating : minRating);
-      return;
-    }
-    setOnProgressRate(1);
-  }, [canVote, drop]);
+    setOnProgressRate((previousRate) => {
+      if (!canVote) {
+        return 0;
+      }
+      if (Math.abs(previousRate) > maxRating) {
+        return previousRate > 0 ? maxRating : minRating;
+      }
+      return 1;
+    });
+  }, [canVote, maxRating, minRating]);
 
   const onSuccessfulRateChange = () => {
     setOnProgressRate(1);

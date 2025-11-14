@@ -4,13 +4,36 @@ import { DropVoteState } from '@/hooks/drops/types';
 
 const mockReplay = jest.fn();
 const mockAdd = jest.fn();
+const mockStop = jest.fn();
+
+const createMockMojsHtmlInstance = () => {
+  const base = {
+    tune: jest.fn(),
+    stop: jest.fn(),
+  };
+
+  let thenMock!: jest.Mock;
+  const proxy = new Proxy(base, {
+    // Provide a `.then` handler without turning the object into a "thenable" for linting purposes.
+    get(target, property, receiver) {
+      if (property === 'then') {
+        return thenMock;
+      }
+
+      return Reflect.get(target, property, receiver);
+    },
+  });
+
+  thenMock = jest.fn().mockReturnValue(proxy);
+  return proxy;
+};
 
 jest.mock('@mojs/core', () => ({
   __esModule: true,
   default: {
-    Burst: jest.fn().mockImplementation(() => ({ tune: jest.fn() })),
-    Html: jest.fn().mockImplementation(() => ({ then: jest.fn().mockReturnThis(), tune: jest.fn() })),
-    Timeline: jest.fn().mockImplementation(() => ({ add: mockAdd, replay: mockReplay })),
+    Burst: jest.fn().mockImplementation(() => ({ tune: jest.fn(), stop: jest.fn() })),
+    Html: jest.fn().mockImplementation(() => createMockMojsHtmlInstance()),
+    Timeline: jest.fn().mockImplementation(() => ({ add: mockAdd, replay: mockReplay, stop: mockStop })),
     easing: { bezier: jest.fn(), out: jest.fn() },
   },
 }));
@@ -56,6 +79,12 @@ jest.mock('react-tooltip', () => ({
 }));
 
 describe('DropListItemRateGiveClap', () => {
+  beforeEach(() => {
+    mockAdd.mockClear();
+    mockReplay.mockClear();
+    mockStop.mockClear();
+  });
+
   it('triggers animation and submit on click when voting positive', async () => {
     const onSubmit = jest.fn();
     render(

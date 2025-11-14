@@ -4,7 +4,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ApiQuotedDrop } from "@/generated/models/ApiQuotedDrop";
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import { commonApiFetch } from "@/services/api/common-api";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { ApiDropPart } from "@/generated/models/ApiDropPart";
 import DropPart, { DropPartSize } from "@/components/drops/view/part/DropPart";
 import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
@@ -44,12 +44,12 @@ export default function CreateDropStormViewPartQuote({
     placeholderData: keepPreviousData,
   });
 
-  const getPartConfig = (): PartConfig | null => {
+  const partConfig = useMemo<PartConfig | null>(() => {
     if (!drop) {
       return null;
     }
     const part = drop.parts.find(
-      (part) => part.part_id === quotedDrop.drop_part_id
+      (candidate) => candidate.part_id === quotedDrop.drop_part_id
     );
     if (!part) {
       return null;
@@ -66,12 +66,7 @@ export default function CreateDropStormViewPartQuote({
         id: drop.wave.id,
       },
     };
-  };
-
-  const [partConfig, setPartConfig] = useState<PartConfig | null>(
-    getPartConfig()
-  );
-  useEffect(() => setPartConfig(getPartConfig()), [drop]);
+  }, [drop, quotedDrop.drop_part_id]);
   return (
     <div className="tw-mt-2 tw-p-2 tw-border-iron-700 tw-rounded-lg tw-border tw-border-solid tw-w-full">
       {!!partConfig && (

@@ -24,7 +24,6 @@ function renderComponent(props: Partial<React.ComponentProps<typeof CreateDropFu
   render(
     <CreateDropFullDesktop
       ref={ref}
-      profile={{} as any}
       title={null}
       metadata={[]}
       editorState={null}

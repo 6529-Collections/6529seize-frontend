@@ -6,7 +6,7 @@ import {
 } from "@/helpers/image.helpers";
 
 export default function DropListItemContentNftDetails({
-  referencedNft: { contract, token, name: tokenName },
+  referencedNft: { name: tokenName },
   nft,
 }: {
   readonly referencedNft: ReferencedNft;

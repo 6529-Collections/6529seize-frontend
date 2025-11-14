@@ -9,26 +9,39 @@ import {
   SearchModalDisplay,
   SearchWalletsDisplay,
 } from "@/components/searchModal/SearchModal";
-import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants";
-import { DBResponse } from "@/entities/IDBResponse";
-import { Distribution, DistributionPhoto } from "@/entities/IDistribution";
+import { Distribution } from "@/entities/IDistribution";
 import {
   areEqualAddresses,
   capitalizeEveryWord,
   numberWithCommas,
 } from "@/helpers/Helpers";
-import { fetchAllPages, fetchUrl } from "@/services/6529api";
+import {
+  useDistributionData,
+  useDistributionPhotos,
+} from "./useDistributionQueries";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Carousel, Col, Container, Row, Table } from "react-bootstrap";
 import styles from "./Distribution.module.scss";
 
 interface Props {
-  header: string;
-  contract: string;
-  link: string;
+  readonly header: string;
+  readonly contract: string;
+  readonly link: string;
+}
+
+function getCountForPhase(distribution: Distribution, phase: string) {
+  if (phase.toUpperCase() === "AIRDROP") {
+    const count = distribution.airdrops;
+    return count ? numberWithCommas(count) : "-";
+  }
+
+  const allowlistEntry = distribution.allowlist.find((entry) => entry.phase === phase);
+  const count = allowlistEntry?.spots ?? 0;
+
+  return count ? numberWithCommas(count) : "-";
 }
 
 export default function DistributionPage(props: Readonly<Props>) {
@@ -40,44 +53,50 @@ export default function DistributionPage(props: Readonly<Props>) {
 
   const [nftId, setNftId] = useState<string>();
 
-  const [distributions, setDistributions] = useState<Distribution[]>([]);
-  const [distributionsPhases, setDistributionsPhases] = useState<string[]>([]);
-  const [distributionPhotos, setDistributionPhotos] = useState<
-    DistributionPhoto[]
-  >([]);
-
-  const [totalResults, setTotalResults] = useState(0);
-
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchWallets, setSearchWallets] = useState<string[]>([]);
 
-  const [fetching, setFetching] = useState(true);
+  const {
+    data: distributionsResponse,
+    isFetching: isDistributionsFetching,
+  } = useDistributionData({
+    nftId,
+    contract: props.contract,
+    page: pageProps.page,
+    searchWallets,
+  });
 
-  function updateDistributionPhases(mydistributions: Distribution[]) {
+  const distributions = distributionsResponse?.data ?? [];
+  const totalResults = distributionsResponse?.count ?? 0;
+
+  const distributionPhases = useMemo(() => {
     const phasesSet = new Set<string>();
-    mydistributions.forEach((d) => {
-      d.phases.forEach((p) => {
-        phasesSet.add(p);
-      });
-    });
-    const phases = Array.from(phasesSet);
-    phases.sort((a, b) => a.localeCompare(b));
-    setDistributionsPhases(phases);
-  }
+    for (const distribution of distributions) {
+      for (const phase of distribution.phases) {
+        phasesSet.add(phase);
+      }
+    }
+    return Array.from(phasesSet).sort((a, b) =>
+      a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" })
+    );
+  }, [distributions]);
 
-  function fetchDistribution() {
-    setFetching(true);
-    const walletFilter =
-      searchWallets.length === 0 ? "" : `&search=${searchWallets.join(",")}`;
-    const distributionUrl = `${publicEnv.API_ENDPOINT}/api/distributions?card_id=${nftId}&contract=${props.contract}&page=${pageProps.page}${walletFilter}`;
-    fetchUrl(distributionUrl).then((r: DBResponse) => {
-      setTotalResults(r.count);
-      const mydistributions: Distribution[] = r.data;
-      setDistributions(mydistributions);
-      updateDistributionPhases(mydistributions);
-      setFetching(false);
+  const { data: distributionPhotosData } = useDistributionPhotos({
+    nftId,
+    contract: props.contract,
+  });
+
+  const distributionPhotos = distributionPhotosData ?? [];
+
+  const handlePageChange = useCallback((newPage: number) => {
+    setPageProps((prev) => {
+      if (prev.page === newPage) {
+        return prev;
+      }
+
+      return { ...prev, page: newPage };
     });
-  }
+  }, []);
 
   useEffect(() => {
     const id = params?.id as string;
@@ -87,29 +106,18 @@ export default function DistributionPage(props: Readonly<Props>) {
   }, [params]);
 
   useEffect(() => {
-    if (nftId) {
-      const distributionPhotosUrl = `${publicEnv.API_ENDPOINT}/api/distribution_photos/${props.contract}/${nftId}`;
-
-      fetchAllPages<DistributionPhoto>(distributionPhotosUrl).then(
-        (distributionPhotos) => {
-          setDistributionPhotos(distributionPhotos);
-          fetchDistribution();
-        }
-      );
+    if (!nftId) {
+      return;
     }
-  }, [nftId]);
 
-  useEffect(() => {
-    if (nftId) {
-      setPageProps({ ...pageProps, page: 1 });
-    }
-  }, [searchWallets]);
+    setPageProps((prev) => {
+      if (prev.page === 1) {
+        return prev;
+      }
 
-  useEffect(() => {
-    if (nftId && pageProps) {
-      fetchDistribution();
-    }
-  }, [pageProps]);
+      return { ...prev, page: 1 };
+    });
+  }, [nftId, searchWallets]);
 
   function printDistributionPhotos() {
     if (distributionPhotos.length > 0) {
@@ -137,19 +145,6 @@ export default function DistributionPage(props: Readonly<Props>) {
     }
   }
 
-  function getCountForPhase(d: Distribution, phase: string) {
-    let count = 0;
-
-    if (phase.toUpperCase() === "AIRDROP") {
-      count = d.airdrops;
-    } else {
-      const p = d.allowlist.find((a) => a.phase === phase);
-      count = p?.spots ?? 0;
-    }
-
-    return count ? numberWithCommas(count) : "-";
-  }
-
   function printDistribution() {
     return (
       <>
@@ -173,7 +168,7 @@ export default function DistributionPage(props: Readonly<Props>) {
                   <tr>
                     <th colSpan={2}></th>
                     <th
-                      colSpan={distributionsPhases.length}
+                      colSpan={distributionPhases.length}
                       className="text-center">
                       ALLOWLIST SPOTS
                     </th>
@@ -184,7 +179,7 @@ export default function DistributionPage(props: Readonly<Props>) {
                   <tr>
                     <th colSpan={2}>
                       Wallet{" "}
-                      {fetching ? (
+                      {isDistributionsFetching ? (
                         <DotLoader />
                       ) : (
                         <span className="font-larger">
@@ -192,7 +187,7 @@ export default function DistributionPage(props: Readonly<Props>) {
                         </span>
                       )}
                     </th>
-                    {distributionsPhases.map((p) => (
+                    {distributionPhases.map((p) => (
                       <th key={`${p}-header`} className="text-center">
                         {capitalizeEveryWord(p.replaceAll("_", " "))}
                       </th>
@@ -212,7 +207,7 @@ export default function DistributionPage(props: Readonly<Props>) {
                           hideCopy={true}
                         />
                       </td>
-                      {distributionsPhases.map((p) => (
+                      {distributionPhases.map((p) => (
                         <td key={`${p}-${d.wallet}`} className="text-center">
                           {getCountForPhase(d, p)}
                         </td>
@@ -305,12 +300,10 @@ export default function DistributionPage(props: Readonly<Props>) {
 
               <Row>
                 <Col>
-                  {nftId &&
-                    (distributions.length > 0 || searchWallets.length > 0) &&
-                    printDistribution()}
+                  {nftId && printDistribution()}
                 </Col>
               </Row>
-              {!fetching && distributions.length === 0 && (
+              {nftId && !isDistributionsFetching && distributions.length === 0 && (
                 <>{searchWallets.length > 0 ? printNotFound() : printEmpty()}</>
               )}
             </Container>
@@ -322,9 +315,7 @@ export default function DistributionPage(props: Readonly<Props>) {
               page={pageProps.page}
               pageSize={pageProps.pageSize}
               totalResults={totalResults}
-              setPage={function (newPage: number) {
-                setPageProps({ ...pageProps, page: newPage });
-              }}
+              setPage={handlePageChange}
             />
           </Row>
         )}

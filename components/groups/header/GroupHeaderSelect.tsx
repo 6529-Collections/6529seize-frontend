@@ -1,14 +1,12 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import PrimaryButtonLink from "@/components/utils/button/PrimaryButtonLink";
 
 export default function GroupHeaderSelect() {
   const { connectedProfile } = useContext(AuthContext);
-  const getHaveProfile = (): boolean => !!connectedProfile?.handle;
-  const [haveProfile, setHaveProfile] = useState(getHaveProfile());
-  useEffect(() => setHaveProfile(getHaveProfile()), [connectedProfile]);
+  const haveProfile = Boolean(connectedProfile?.handle);
 
   const noProfileTitle =
     connectedProfile && !haveProfile

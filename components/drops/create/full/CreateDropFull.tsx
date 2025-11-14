@@ -18,21 +18,13 @@ import { CreateDropType, CreateDropViewType } from "../types";
 import { forwardRef, useImperativeHandle, useRef, type JSX } from "react";
 import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
 import { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
-import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 
 export interface CreateDropFullHandles {
   clearEditorState: () => void;
 }
 
-interface CreateDropFullWaveProps {
-  readonly name: string;
-  readonly image: string | null;
-  readonly id: string | null;
-}
-
 interface CreateDropFullProps {
   readonly screenType: CreateDropScreenType;
-  readonly profile: ProfileMinWithoutSubs;
   readonly title: string | null;
   readonly metadata: DropMetadata[];
   readonly editorState: EditorState | null;
@@ -67,7 +59,6 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
   (
     {
       screenType,
-      profile,
       title,
       editorState,
       metadata,
@@ -112,7 +103,6 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
       [CreateDropScreenType.DESKTOP]: (
         <CreateDropFullDesktop
           ref={desktopEditorRef}
-          profile={profile}
           title={title}
           editorState={editorState}
           metadata={metadata}
@@ -144,7 +134,6 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
       [CreateDropScreenType.MOBILE]: (
         <CreateDropFullMobile
           ref={mobileEditorRef}
-          profile={profile}
           title={title}
           files={files}
           editorState={editorState}

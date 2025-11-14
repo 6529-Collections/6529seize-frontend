@@ -6,7 +6,7 @@ import {
     DistributionPlanTokenPoolDownloadStatus,
 } from "@/components/allowlist-tool/allowlist-tool.types";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { useInterval } from "react-use";
 import DistributionPlanEmptyTablePlaceholder from "../common/DistributionPlanEmptyTablePlaceholder";
 import DistributionPlanNextStepBtn from "../common/DistributionPlanNextStepBtn";
@@ -115,7 +115,7 @@ export default function CreateSnapshots() {
     setHaveSnapshots(!!snapshots.length);
   }, [snapshots]);
 
-  const fetchTokenPoolStatuses = async () => {
+  const fetchTokenPoolStatuses = useCallback(async () => {
     if (!distributionPlan) return;
     const endpoint = `/allowlists/${distributionPlan.id}/token-pool-downloads`;
     const { success, data } = await distributionPlanApiFetch<
@@ -124,11 +124,11 @@ export default function CreateSnapshots() {
     if (success && data) {
       setTokenPoolDownloads(data);
     }
-  };
+  }, [distributionPlan]);
 
   useEffect(() => {
     fetchTokenPoolStatuses();
-  }, []);
+  }, [fetchTokenPoolStatuses]);
 
   useInterval(
     async () => {

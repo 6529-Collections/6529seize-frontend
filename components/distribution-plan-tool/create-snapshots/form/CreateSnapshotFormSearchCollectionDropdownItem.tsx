@@ -2,14 +2,14 @@
 
 import { DistributionPlanSearchContractMetadataResult } from "@/components/allowlist-tool/allowlist-tool.types";
 import DistributionPlanVerifiedIcon from "@/components/distribution-plan-tool/common/DistributionPlanVerifiedIcon";
-import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import {
     formatNumber,
     truncateTextMiddle,
 } from "@/helpers/AllowlistToolHelpers";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
+import { useMutation } from "@tanstack/react-query";
 import Image from "next/image";
-import { useContext, useState } from "react";
+import Spinner from "@/components/utils/Spinner";
 
 interface CollectionMeta {
   readonly imgUrl: string;
@@ -20,18 +20,21 @@ interface CollectionMeta {
   readonly floorPrice: string;
 }
 
+interface CollectionSelectionParams {
+  readonly address: string;
+  readonly name: string;
+  readonly tokenIds: string | null;
+}
+
+interface CreateSnapshotFormSearchCollectionDropdownItemProps {
+  readonly collection: DistributionPlanSearchContractMetadataResult;
+  readonly onCollection: (param: CollectionSelectionParams) => void;
+}
+
 export default function CreateSnapshotFormSearchCollectionDropdownItem({
   collection,
   onCollection,
-}: {
-  collection: DistributionPlanSearchContractMetadataResult;
-  onCollection: (param: {
-    address: string;
-    name: string;
-    tokenIds: string | null;
-  }) => void;
-}) {
-  const { setToasts } = useContext(DistributionPlanToolContext);
+}: CreateSnapshotFormSearchCollectionDropdownItemProps) {
   const collectionMeta: CollectionMeta = {
     imgUrl: collection.imageUrl ?? "",
     openseaVerified: collection.openseaVerified,
@@ -47,30 +50,43 @@ export default function CreateSnapshotFormSearchCollectionDropdownItem({
         : "N/A",
   };
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const getTokenIdsString = async (
-    collectionId: string
-  ): Promise<string | null> => {
-    setIsLoading(true);
-    const endpoint = `/other/contract-token-ids-as-string/${collectionId}`;
-    const { data } = await distributionPlanApiFetch<{
-      tokenIds: string;
-    }>(endpoint);
-    setIsLoading(false);
-    return data?.tokenIds ?? null;
-  };
+  const fetchTokenIdsMutation = useMutation<string | null, Error, string>({
+    mutationFn: async (collectionId) => {
+      const endpoint = `/other/contract-token-ids-as-string/${collectionId}`;
+      const { success, data } = await distributionPlanApiFetch<{
+        readonly tokenIds: string;
+      }>(endpoint);
+      if (!success) {
+        throw new Error("Failed to fetch token IDs");
+      }
+      return data?.tokenIds?.length ? data.tokenIds : null;
+    },
+  });
+  const isFetchingTokenIds = fetchTokenIdsMutation.isPending;
 
   const onCollectionClick = async () => {
+    if (isFetchingTokenIds) {
+      return;
+    }
     const regex = /^0x[0-9a-fA-F]{40}:.+$/;
     const isSubCollection = regex.test(collection.id);
     if (isSubCollection) {
-      const tokenIdsString = await getTokenIdsString(collection.id);
-      onCollection({
-        name: collection.name,
-        address: collection.address,
-        tokenIds: tokenIdsString?.length ? tokenIdsString : null,
-      });
+      try {
+        const tokenIdsString = await fetchTokenIdsMutation.mutateAsync(
+          collection.id
+        );
+        onCollection({
+          name: collection.name,
+          address: collection.address,
+          tokenIds: tokenIdsString,
+        });
+      } catch (error: unknown) {
+        console.error(
+          `Failed to fetch token IDs for collection ${collection.id}`,
+          error
+        );
+        return;
+      }
       return;
     }
     onCollection({
@@ -82,7 +98,11 @@ export default function CreateSnapshotFormSearchCollectionDropdownItem({
 
   return (
     <tr
-      className="tw-cursor-pointer hover:tw-bg-iron-700 tw-duration-300 tw-ease-out"
+      aria-busy={isFetchingTokenIds}
+      aria-disabled={isFetchingTokenIds}
+      className={`tw-cursor-pointer hover:tw-bg-iron-700 tw-duration-300 tw-ease-out${
+        isFetchingTokenIds ? " tw-pointer-events-none tw-opacity-60" : ""
+      }`}
       onClick={onCollectionClick}
     >
       <td className="tw-whitespace-nowrap tw-py-2.5 tw-pl-4 tw-pr-3">
@@ -145,6 +165,11 @@ export default function CreateSnapshotFormSearchCollectionDropdownItem({
       <td className="tw-whitespace-nowrap tw-pl-2 tw-pr-4 tw-py-2.5 tw-text-right tw-text-sm tw-font-medium  tw-text-iron-200">
         <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-1.5">
           <span>{collectionMeta.floorPrice}</span>
+          {isFetchingTokenIds && (
+            <span data-testid="collection-loading">
+              <Spinner />
+            </span>
+          )}
           <svg
             className="tw-h-4 tw-w-auto"
             viewBox="0 0 1080 1760"

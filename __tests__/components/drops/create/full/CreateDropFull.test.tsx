@@ -31,7 +31,6 @@ function renderComponent(screenType: CreateDropScreenType) {
     <CreateDropFull
       ref={ref}
       screenType={screenType}
-      profile={{} as any}
       title={null}
       metadata={[]}
       editorState={null}
@@ -87,4 +86,3 @@ describe('CreateDropFull', () => {
     expect(desktopClearMock).not.toHaveBeenCalled();
   });
 });
-

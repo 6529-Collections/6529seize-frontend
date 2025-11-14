@@ -3,7 +3,9 @@
 import {
   forwardRef,
   useEffect,
+  useEffectEvent,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
   type JSX,
@@ -28,7 +30,6 @@ import CommonAnimationHeight from "@/components/utils/animation/CommonAnimationH
 import { useQuery } from "@tanstack/react-query";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiFetch } from "@/services/api/common-api";
-import { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
 import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
@@ -40,6 +41,21 @@ import { WalletValidationError } from "@/src/errors/wallet";
 import {
   exportDropMarkdown,
 } from "@/components/waves/drops/normalizeDropMarkdown";
+
+const getRequirementFromFileType = (
+  file: File
+): ApiWaveParticipationRequirement | null => {
+  if (file.type.startsWith("image/")) {
+    return ApiWaveParticipationRequirement.Image;
+  }
+  if (file.type.startsWith("audio/")) {
+    return ApiWaveParticipationRequirement.Audio;
+  }
+  if (file.type.startsWith("video/")) {
+    return ApiWaveParticipationRequirement.Video;
+  }
+  return null;
+};
 
 export enum CreateDropScreenType {
   DESKTOP = "DESKTOP",
@@ -79,9 +95,6 @@ interface CreateDropWrapperProps {
   readonly setIsStormMode: (isStormMode: boolean) => void;
   readonly setViewType: (newV: CreateDropViewType) => void;
   readonly setDrop: (newV: CreateDropConfig) => void;
-  readonly setMentionedUsers: (
-    newV: Omit<MentionedUser, "current_handle">[]
-  ) => void;
   readonly onMentionedUser: (
     newUser: Omit<MentionedUser, "current_handle">
   ) => void;
@@ -119,7 +132,6 @@ const CreateDropWrapper = forwardRef<
       setIsStormMode,
       setViewType,
       setDrop,
-      setMentionedUsers,
       setReferencedNfts,
       onMentionedUser,
       setTitle,
@@ -129,23 +141,31 @@ const CreateDropWrapper = forwardRef<
     },
     ref
   ) => {
-    const { isSafeWallet, address, isAuthenticated } = useSeizeConnectContext();
+    const {
+      isSafeWallet,
+      address,
+      isAuthenticated,
+      connectionState,
+    } = useSeizeConnectContext();
     const breakpoint = useBreakpoint();
     
-    // SECURITY: Fail-fast if wallet is not properly authenticated
     useEffect(() => {
+      if (connectionState === "initializing" || connectionState === "connecting") {
+        return;
+      }
+
       if (!isAuthenticated) {
         throw new WalletValidationError(
           'Authentication required for drop creation. Please connect and authenticate your wallet.'
         );
       }
-      
+
       if (!address) {
         throw new WalletValidationError(
           'Authenticated wallet address is missing. Please reconnect your wallet.'
         );
       }
-    }, [isAuthenticated, address]);
+    }, [connectionState, isAuthenticated, address]);
     const [screenType, setScreenType] = useState<CreateDropScreenType>(
       CreateDropScreenType.DESKTOP
     );
@@ -195,150 +215,134 @@ const CreateDropWrapper = forwardRef<
         newNft,
       ]);
     };
-    const getMarkdown = () =>
-      editorState
-        ? exportDropMarkdown(editorState, [
-            ...SAFE_MARKDOWN_TRANSFORMERS,
-            MENTION_TRANSFORMER,
-            HASHTAG_TRANSFORMER,
-            IMAGE_TRANSFORMER,
-          ])
-        : null;
-
-    const getMissingRequiredMetadata = (): ApiWaveRequiredMetadata[] => {
-      if (!waveProps?.id) {
-        return [];
+    const markdownContent = useMemo(
+      () =>
+        editorState
+          ? exportDropMarkdown(editorState, [
+              ...SAFE_MARKDOWN_TRANSFORMERS,
+              MENTION_TRANSFORMER,
+              HASHTAG_TRANSFORMER,
+              IMAGE_TRANSFORMER,
+            ])
+          : null,
+      [editorState]
+    );
+    const combinedMedias = useMemo(() => {
+      if (!drop?.parts.length) {
+        return files;
       }
+      return drop.parts.reduce<File[]>(
+        (acc, part) => [...acc, ...(part.media ?? [])],
+        files
+      );
+    }, [drop, files]);
 
-      if (!wave) {
-        return [];
-      }
-
-      if (!metadata.length) {
-        return wave.participation.required_metadata;
-      }
-      return wave.participation.required_metadata.filter((i) => {
-        const item = metadata.find((j) => j.data_key === i.name);
-        if (!item) {
-          return true;
+    const missingMetadata = useMemo(
+      () => {
+        if (!waveProps?.id || !wave) {
+          return [];
         }
-        if (!item.data_value.length) {
-          return true;
+
+        if (!metadata.length) {
+          return wave.participation.required_metadata;
         }
-        if (
-          i.type === ApiWaveMetadataType.Number &&
-          isNaN(Number(item.data_value))
-        ) {
-          return true;
+
+        return wave.participation.required_metadata.filter((item) => {
+          const existing = metadata.find((entry) => entry.data_key === item.name);
+          if (!existing) {
+            return true;
+          }
+          if (!existing.data_value.length) {
+            return true;
+          }
+          if (
+            item.type === ApiWaveMetadataType.Number &&
+            Number.isNaN(Number(existing.data_value))
+          ) {
+            return true;
+          }
+          return false;
+        });
+      },
+      [waveProps, wave, metadata]
+    );
+
+    const missingMedia = useMemo(
+      () => {
+        if (!waveProps?.id || !wave) {
+          return [];
         }
-        return false;
-      });
-    };
 
-    const getRequirementFromFileType = (
-      file: File
-    ): ApiWaveParticipationRequirement | null => {
-      if (file.type.startsWith("image/"))
-        return ApiWaveParticipationRequirement.Image;
-      if (file.type.startsWith("audio/"))
-        return ApiWaveParticipationRequirement.Audio;
-      if (file.type.startsWith("video/"))
-        return ApiWaveParticipationRequirement.Video;
-      return null; // Unknown or unsupported file type
-    };
-
-    const getMedias = (): File[] => {
-      if (drop?.parts.length) {
-        return drop.parts.reduce<File[]>(
-          (acc, part) => [...acc, ...(part.media ?? [])],
-          files
-        );
-      }
-      return files;
-    };
-
-    const getMissingRequiredMedia = (): ApiWaveParticipationRequirement[] => {
-      if (!waveProps?.id) {
-        return [];
-      }
-
-      if (!wave) {
-        return [];
-      }
-      if (!drop?.parts.length && !files.length) {
-        return wave.participation.required_media;
-      }
-      const medias = getMedias();
-      return wave.participation.required_media.filter((i) => {
-        const file = medias.find((j) => getRequirementFromFileType(j) === i);
-        if (!file) {
-          return true;
+        if (!drop?.parts.length && !files.length) {
+          return wave.participation.required_media;
         }
-        return false;
-      });
-    };
 
-    const [missingMedia, setMissingMedia] = useState<
-      ApiWaveParticipationRequirement[]
-    >(getMissingRequiredMedia());
+        return wave.participation.required_media.filter((requirement) => {
+          const hasFile = combinedMedias.some(
+            (file) => getRequirementFromFileType(file) === requirement
+          );
+          return !hasFile;
+        });
+      },
+      [waveProps, wave, drop, files, combinedMedias]
+    );
 
-    const [missingMetadata, setMissingMetadata] = useState<
-      ApiWaveRequiredMetadata[]
-    >(getMissingRequiredMetadata());
+    const canSubmit = useMemo(() => {
+      const hasExistingParts = Boolean(drop?.parts?.length);
+      const hasAnyContent =
+        Boolean(markdownContent) || files.length > 0 || hasExistingParts;
 
-    useEffect(() => {
-      setMissingMetadata(getMissingRequiredMetadata());
-    }, [waveProps, wave, drop, metadata]);
-
-    useEffect(() => {
-      setMissingMedia(getMissingRequiredMedia());
-    }, [waveProps, wave, drop, files]);
-
-    const getCanSubmitStorm = () => {
-      const markdown = getMarkdown();
-      if (markdown?.length && markdown.length > 240) {
+      if (!hasAnyContent) {
         return false;
       }
+
+      if (missingMedia.length || missingMetadata.length) {
+        return false;
+      }
+
+      if (
+        hasExistingParts &&
+        markdownContent?.length &&
+        markdownContent.length > 240
+      ) {
+        return false;
+      }
+
       return true;
-    };
+    }, [drop, files, missingMedia, missingMetadata, markdownContent]);
 
-    const getCanSubmit = () =>
-      !!(!!getMarkdown() || !!files.length || !!drop?.parts.length) &&
-      !missingMedia.length &&
-      !missingMetadata.length &&
-      !!(drop?.parts.length ? getCanSubmitStorm() : true);
-
-    const [canSubmit, setCanSubmit] = useState(getCanSubmit());
-
-    const getHaveMarkdownOrFile = () => !!getMarkdown() || !!files.length;
-    const getIsDropLimit = () =>
-      (drop?.parts.reduce(
-        (acc, part) => acc + (part.content?.length ?? 0),
-        getMarkdown()?.length ?? 0
-      ) ?? 0) >= 24000;
-
-    const getIsCharsLimit = () => {
-      const markDown = getMarkdown();
-      if (!!markDown?.length && markDown.length > 240) {
-        return true;
+    const canAddPart = useMemo(() => {
+      const hasMarkdownOrFile = Boolean(markdownContent) || files.length > 0;
+      if (!hasMarkdownOrFile) {
+        return false;
       }
-      return false;
-    };
 
-    const getCanAddPart = () =>
-      getHaveMarkdownOrFile() && !getIsDropLimit() && !getIsCharsLimit();
-    const [canAddPart, setCanAddPart] = useState(getCanAddPart());
-    useEffect(() => {
-      setCanSubmit(getCanSubmit());
-      setCanAddPart(getCanAddPart());
-    }, [editorState, files, drop, missingMedia, missingMetadata]);
+      const dropContentLength =
+        drop?.parts?.reduce(
+          (acc, part) => acc + (part.content?.length ?? 0),
+          0
+        ) ?? 0;
+
+      const totalContentLength = dropContentLength + (markdownContent?.length ?? 0);
+
+      if (totalContentLength >= 24000) {
+        return false;
+      }
+
+      if (markdownContent?.length && markdownContent.length > 240) {
+        return false;
+      }
+
+      return true;
+    }, [drop, files, markdownContent]);
+
+    const emitCanSubmitChange = useEffectEvent((nextCanSubmit: boolean) => {
+      onCanSubmitChange?.(nextCanSubmit);
+    });
 
     useEffect(() => {
-      if (!onCanSubmitChange) {
-        return;
-      }
-      onCanSubmitChange(canSubmit);
-    }, [canSubmit]);
+      emitCanSubmitChange(canSubmit);
+    }, [canSubmit, emitCanSubmitChange]);
 
     const createDropContentFullRef = useRef<CreateDropFullHandles | null>(null);
     const createDropContendCompactRef = useRef<CreateDropCompactHandles | null>(
@@ -350,8 +354,7 @@ const CreateDropWrapper = forwardRef<
       setFiles([]);
     };
     const onDropPart = (): CreateDropConfig => {
-      const markdown = getMarkdown();
-      if (!markdown?.length && !files.length) {
+      if (!markdownContent?.length && !files.length) {
         const currentDrop: CreateDropConfig = {
           title,
           parts: drop?.parts.length ? drop.parts : [],
@@ -360,14 +363,14 @@ const CreateDropWrapper = forwardRef<
           metadata,
           signature: null,
           is_safe_signature: isSafeWallet,
-          signer_address: address, // Already validated via useEffect above
+          signer_address: address,
         };
         setDrop(currentDrop);
         clearInputState();
         return currentDrop;
       }
       const mentions = mentionedUsers.filter((user) =>
-        markdown?.includes(`@[${user.handle_in_content}]`)
+        markdownContent?.includes(`@[${user.handle_in_content}]`)
       );
       const partMentions = mentions.map((mention) => ({
         ...mention,
@@ -384,7 +387,7 @@ const CreateDropWrapper = forwardRef<
         ...notAddedMentions,
       ];
       const partNfts = referencedNfts.filter((nft) =>
-        markdown?.includes(`#[${nft.name}]`)
+        markdownContent?.includes(`#[${nft.name}]`)
       );
       const notAddedNfts = partNfts.filter(
         (nft) =>
@@ -402,10 +405,10 @@ const CreateDropWrapper = forwardRef<
         metadata,
         signature: null,
         is_safe_signature: isSafeWallet,
-        signer_address: address, // Already validated via useEffect above
+        signer_address: address,
       };
       currentDrop.parts.push({
-        content: markdown?.length ? markdown : null,
+        content: markdownContent?.length ? markdownContent : null,
         quoted_drop:
           quotedDrop && !currentDrop.parts.length
             ? {
@@ -439,13 +442,9 @@ const CreateDropWrapper = forwardRef<
       [CreateDropViewType.COMPACT]: (
         <CreateDropCompact
           ref={createDropContendCompactRef}
-          profile={profile}
-          showProfile={showProfile}
           screenType={screenType}
           editorState={editorState}
           files={files}
-          title={title}
-          metadata={metadata}
           canSubmit={canSubmit}
           waveId={waveId}
           canAddPart={canAddPart}
@@ -457,7 +456,6 @@ const CreateDropWrapper = forwardRef<
           missingMedia={missingMedia}
           missingMetadata={missingMetadata}
           onViewChange={setViewType}
-          onMetadataRemove={onMetadataRemove}
           onEditorState={setEditorState}
           onMentionedUser={onMentionedUser}
           onReferencedNft={onReferencedNft}
@@ -472,7 +470,6 @@ const CreateDropWrapper = forwardRef<
         <CreateDropFull
           ref={createDropContentFullRef}
           screenType={screenType}
-          profile={profile}
           title={title}
           files={files}
           metadata={metadata}

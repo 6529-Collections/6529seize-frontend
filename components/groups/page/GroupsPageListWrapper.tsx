@@ -26,24 +26,11 @@ export default function GroupsPageListWrapper({
   readonly onCreateNewGroup: () => void;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const getShowCreateNewGroupButton = () => {
-    return !!connectedProfile?.handle && !activeProfileProxy;
-  };
+  const showCreateNewGroupButton =
+    !!connectedProfile?.handle && !activeProfileProxy;
 
-  const [showCreateNewGroupButton, setShowCreateNewGroupButton] = useState(
-    getShowCreateNewGroupButton()
-  );
-
-  const getShowMyGroupsButton = () =>
+  const showMyGroupsButton =
     !!connectedProfile?.handle || !!activeProfileProxy;
-
-  const [showMyGroupsButton, setShowMyGroupsButton] = useState(
-    getShowMyGroupsButton()
-  );
-  useEffect(() => {
-    setShowCreateNewGroupButton(getShowCreateNewGroupButton());
-    setShowMyGroupsButton(getShowMyGroupsButton());
-  }, [connectedProfile, activeProfileProxy]);
 
   const router = useRouter();
   const pathname = usePathname();

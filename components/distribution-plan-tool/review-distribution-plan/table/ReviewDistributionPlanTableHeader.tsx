@@ -22,9 +22,7 @@ export default function ReviewDistributionPlanTableHeader({
 }: {
   rows: ReviewDistributionPlanTablePhase[];
 }) {
-  const { distributionPlan, setToasts } = useContext(
-    DistributionPlanToolContext
-  );
+  const { distributionPlan } = useContext(DistributionPlanToolContext);
   const [loadingType, setLoadingType] = useState<FetchResultsType | null>(null);
   const [isLoadingJson, setIsLoadingJson] = useState(false);
   const [isLoadingCsv, setIsLoadingCsv] = useState(false);

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import styles from "./GasRoyalties.module.scss";
 import { Royalty } from "@/entities/IRoyalty";
@@ -26,13 +27,35 @@ export default function RoyaltiesComponent() {
   const searchParams = useSearchParams();
   const { setTitle } = useTitle();
 
+  const {
+    setDateSelection,
+    isPrimary,
+    setIsPrimary,
+    isCustomBlocks,
+    setIsCustomBlocks,
+    collectionFocus,
+    setCollectionFocus,
+    dateSelection,
+    fromDate,
+    toDate,
+    fromBlock,
+    toBlock,
+    selectedArtist,
+    fetching,
+    setFetching,
+    getUrl,
+    getSharedProps,
+  } = useSharedState();
+
   useEffect(() => {
-    const routerFocus = searchParams?.get("focus") as string;
+    const routerFocus = searchParams?.get("focus");
     const resolvedFocus = Object.values(GasRoyaltiesCollectionFocus).find(
       (sd) => sd === routerFocus
     );
     if (resolvedFocus) {
-      setCollectionFocus(resolvedFocus);
+      if (resolvedFocus !== collectionFocus) {
+        setCollectionFocus(resolvedFocus);
+      }
       const title = `Meme Accounting - ${capitalizeEveryWord(
         resolvedFocus.replace("-", " ")
       )}`;
@@ -40,77 +63,84 @@ export default function RoyaltiesComponent() {
     } else {
       router.push(`${pathname}?focus=${GasRoyaltiesCollectionFocus.MEMES}`);
     }
-  }, [searchParams]);
-
-  const [royalties, setRoyalties] = useState<Royalty[]>([]);
-  const [sumVolume, setSumVolume] = useState(0);
-  const [sumProceeds, setSumProceeds] = useState(0);
-  const [sumArtistTake, setSumArtistTake] = useState(0);
-
-  const {
-    dateSelection,
-    setDateSelection,
-    fromDate,
-    toDate,
-    isPrimary,
-    setIsPrimary,
-    isCustomBlocks,
-    setIsCustomBlocks,
-    selectedArtist,
-    collectionFocus,
-    setCollectionFocus,
-    fetching,
-    setFetching,
-    getUrl,
-    getSharedProps,
-    fromBlock,
-    toBlock,
-  } = useSharedState();
-
-  function getUrlWithParams() {
-    return getUrl("royalties");
-  }
-
-  function fetchRoyalties() {
-    setFetching(true);
-    fetchUrl(getUrlWithParams()).then((res: Royalty[]) => {
-      res.forEach((r) => {
-        r.volume = Math.round(r.volume * 100000) / 100000;
-        r.proceeds = Math.round(r.proceeds * 100000) / 100000;
-        r.artist_split = Math.round(r.artist_split * 100000) / 100000;
-        r.artist_take = Math.round(r.artist_take * 100000) / 100000;
-      });
-      setRoyalties(res);
-      setSumVolume(res.reduce((prev, current) => prev + current.volume, 0));
-      setSumProceeds(res.reduce((prev, current) => prev + current.proceeds, 0));
-      setSumArtistTake(
-        res.reduce((prev, current) => prev + current.artist_take, 0)
-      );
-      setFetching(false);
-    });
-  }
-
-  useEffect(() => {
-    if (collectionFocus) {
-      fetchRoyalties();
-    }
   }, [
-    dateSelection,
-    fromDate,
-    toDate,
-    fromBlock,
-    toBlock,
-    selectedArtist,
-    isPrimary,
-    isCustomBlocks,
+    collectionFocus,
+    pathname,
+    router,
+    searchParams,
+    setCollectionFocus,
+    setTitle,
   ]);
 
+  const getUrlWithParams = useCallback(() => getUrl("royalties"), [getUrl]);
+
+  const royaltiesUrl = useMemo(
+    () => (collectionFocus ? getUrlWithParams() : ""),
+    [collectionFocus, getUrlWithParams]
+  );
+
+  const { data: royalties = [], isFetching: isRoyaltiesFetching } = useQuery<Royalty[]>({
+    queryKey: [
+      "gas-royalties",
+      "royalties",
+      collectionFocus,
+      isPrimary,
+      isCustomBlocks,
+      dateSelection,
+      fromDate,
+      toDate,
+      fromBlock,
+      toBlock,
+      selectedArtist,
+    ],
+    enabled: Boolean(royaltiesUrl),
+    queryFn: async () => {
+      if (!royaltiesUrl) {
+        return [];
+      }
+
+      try {
+        const res = (await fetchUrl(royaltiesUrl)) as Royalty[];
+        return res.map((royalty) => ({
+          ...royalty,
+          volume: Math.round(royalty.volume * 100000) / 100000,
+          proceeds: Math.round(royalty.proceeds * 100000) / 100000,
+          artist_split: Math.round(royalty.artist_split * 100000) / 100000,
+          artist_take: Math.round(royalty.artist_take * 100000) / 100000,
+        }));
+      } catch (error) {
+        console.error("Failed to fetch royalties", error);
+        return [];
+      }
+    },
+  });
+
   useEffect(() => {
-    if (collectionFocus) {
-      setRoyalties([]);
-      fetchRoyalties();
+    if (!collectionFocus) {
+      setFetching(true);
+      return;
     }
-  }, [collectionFocus]);
+
+    setFetching(isRoyaltiesFetching);
+  }, [collectionFocus, isRoyaltiesFetching, setFetching]);
+
+  const { sumVolume, sumProceeds, sumArtistTake } = useMemo(() => {
+    if (!royalties.length) {
+      return { sumVolume: 0, sumProceeds: 0, sumArtistTake: 0 };
+    }
+
+    return {
+      sumVolume: royalties.reduce((total, current) => total + current.volume, 0),
+      sumProceeds: royalties.reduce(
+        (total, current) => total + current.proceeds,
+        0
+      ),
+      sumArtistTake: royalties.reduce(
+        (total, current) => total + current.artist_take,
+        0
+      ),
+    };
+  }, [royalties]);
 
   if (!collectionFocus) {
     return <></>;

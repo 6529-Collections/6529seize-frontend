@@ -98,7 +98,6 @@ describe('CreateDropWrapper Authentication Validation', () => {
     setIsStormMode: jest.fn(),
     setViewType: jest.fn(),
     setDrop: jest.fn(),
-    setMentionedUsers: jest.fn(),
     onMentionedUser: jest.fn(),
     setReferencedNfts: jest.fn(),
     setTitle: jest.fn(),
