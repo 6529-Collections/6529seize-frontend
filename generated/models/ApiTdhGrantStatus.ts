@@ -15,5 +15,6 @@ import { HttpFile } from '../http/http';
 export enum ApiTdhGrantStatus {
     Pending = 'PENDING',
     Failed = 'FAILED',
-    Granted = 'GRANTED'
+    Granted = 'GRANTED',
+    Disabled = 'DISABLED'
 }

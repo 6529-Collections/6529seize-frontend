@@ -79,7 +79,7 @@ export class ApiProfileMin {
             "name": "tdh",
             "baseName": "tdh",
             "type": "number",
-            "format": "int64"
+            "format": "double"
         },
         {
             "name": "tdh_rate",

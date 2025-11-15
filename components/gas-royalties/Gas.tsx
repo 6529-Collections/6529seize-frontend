@@ -66,7 +66,7 @@ export default function GasComponent() {
 
   function fetchGas() {
     setFetching(true);
-    fetchUrl(getUrlWithParams()).then((res: Gas[]) => {
+    fetchUrl<Gas[]>(getUrlWithParams()).then((res: Gas[]) => {
       res.forEach((r) => {
         r.gas = Math.round(r.gas * 100000) / 100000;
       });

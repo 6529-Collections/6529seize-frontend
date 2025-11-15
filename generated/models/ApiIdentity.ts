@@ -85,7 +85,7 @@ export class ApiIdentity {
             "name": "tdh",
             "baseName": "tdh",
             "type": "number",
-            "format": "int65"
+            "format": "double"
         },
         {
             "name": "tdh_rate",

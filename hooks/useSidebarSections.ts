@@ -44,6 +44,7 @@ export function useSidebarSections(
           { name: "NextGen", href: "/nextgen" },
           { name: "Meme Lab", href: "/meme-lab" },
           { name: "ReMemes", href: "/rememes" },
+          { name: "xTDH", href: "/xtdh" },
         ],
         subsections: [],
       },

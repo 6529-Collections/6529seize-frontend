@@ -40,6 +40,6 @@ export const profileAndConsolidationsToProfileMin = ({
         tdh_rate: profile.tdh_rate,
         level: profile.level,
         archived: false,
-        primary_address: profile.primary_wallet ?? null,
+        primary_address: profile.primary_wallet ?? "",
       }
     : null;

@@ -1,4 +1,4 @@
-import { UserPageTabType } from "@/components/user/layout/UserPageTabs";
+import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import CommonProfileLink from "@/components/user/utils/CommonProfileLink";
 import { ProfileActivityLog } from "@/entities/IProfile";
 import { ProfileActivityLogType, RateMatter } from "@/enums";
@@ -30,8 +30,8 @@ export default function ProfileActivityLogItemWrapper({
   const tabTarget =
     log.type === ProfileActivityLogType.RATING_EDIT &&
     log.contents.rating_matter === RateMatter.REP
-      ? UserPageTabType.REP
-      : UserPageTabType.IDENTITY;
+      ? USER_PAGE_TAB_IDS.REP
+      : USER_PAGE_TAB_IDS.IDENTITY;
 
   return (
     <tr className="tw-flex tw-items-center tw-justify-between">
