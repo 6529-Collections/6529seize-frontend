@@ -46,6 +46,7 @@ export function UserPageXtdhGrantListItem({
     const info = getTargetTokensCountInfo(grant.target_tokens_count ?? null);
     if (info.kind === "all") {
       return { type: "all" };
+    
     }
     return { type: "count", label: info.label, count: info.count ?? null };
   }, [grant.target_tokens_count]);
