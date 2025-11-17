@@ -45,6 +45,27 @@ const handleApiError = (res: Response): Promise<never> => {
   });
 };
 
+const executeApiRequest = async <T>(
+  url: string,
+  method: string,
+  headers: Record<string, string>,
+  body?: BodyInit,
+  signal?: AbortSignal
+): Promise<T> => {
+  const res = await fetch(url, {
+    method,
+    headers,
+    body,
+    signal,
+  });
+
+  if (!res.ok) {
+    return handleApiError(res);
+  }
+
+  return res.json();
+};
+
 export const commonApiFetch = async <T, U = Record<string, string>>(param: {
   endpoint: string;
   headers?: Record<string, string>;
@@ -206,18 +227,13 @@ export const commonApiPost = async <T, U, Z = Record<string, string>>(param: {
     param.params as Record<string, string> | undefined
   );
 
-  const res = await fetch(url, {
-    method: "POST",
-    headers: getHeaders(param.headers, true),
-    body: JSON.stringify(param.body),
-    signal: param.signal,
-  });
-
-  if (!res.ok) {
-    return handleApiError(res);
-  }
-
-  return res.json();
+  return executeApiRequest<U>(
+    url,
+    "POST",
+    getHeaders(param.headers, true),
+    JSON.stringify(param.body),
+    param.signal
+  );
 };
 
 export const commonApiPostWithoutBodyAndResponse = async (param: {
@@ -226,15 +242,12 @@ export const commonApiPostWithoutBodyAndResponse = async (param: {
 }): Promise<void> => {
   const { url } = buildUrlAndPath(param.endpoint);
 
-  const res = await fetch(url, {
-    method: "POST",
-    headers: getHeaders(param.headers, true),
-    body: "",
-  });
-
-  if (!res.ok) {
-    return handleApiError(res);
-  }
+  await executeApiRequest<void>(
+    url,
+    "POST",
+    getHeaders(param.headers, true),
+    ""
+  );
 };
 
 export const commonApiDelete = async (param: {
@@ -243,14 +256,11 @@ export const commonApiDelete = async (param: {
 }): Promise<void> => {
   const { url } = buildUrlAndPath(param.endpoint);
 
-  const res = await fetch(url, {
-    method: "DELETE",
-    headers: getHeaders(param.headers, false),
-  });
-
-  if (!res.ok) {
-    return handleApiError(res);
-  }
+  await executeApiRequest<void>(
+    url,
+    "DELETE",
+    getHeaders(param.headers, false)
+  );
 };
 
 export const commonApiDeleteWithBody = async <
@@ -268,17 +278,12 @@ export const commonApiDeleteWithBody = async <
     param.params as Record<string, string> | undefined
   );
 
-  const res = await fetch(url, {
-    method: "DELETE",
-    headers: getHeaders(param.headers, true),
-    body: JSON.stringify(param.body),
-  });
-
-  if (!res.ok) {
-    return handleApiError(res);
-  }
-
-  return res.json();
+  return executeApiRequest<U>(
+    url,
+    "DELETE",
+    getHeaders(param.headers, true),
+    JSON.stringify(param.body)
+  );
 };
 
 export const commonApiPut = async <T, U, Z = Record<string, string>>(param: {
@@ -292,17 +297,12 @@ export const commonApiPut = async <T, U, Z = Record<string, string>>(param: {
     param.params as Record<string, string> | undefined
   );
 
-  const res = await fetch(url, {
-    method: "PUT",
-    headers: getHeaders(param.headers, true),
-    body: JSON.stringify(param.body),
-  });
-
-  if (!res.ok) {
-    return handleApiError(res);
-  }
-
-  return res.json();
+  return executeApiRequest<U>(
+    url,
+    "PUT",
+    getHeaders(param.headers, true),
+    JSON.stringify(param.body)
+  );
 };
 
 export const commonApiPostForm = async <U>(param: {
@@ -312,15 +312,10 @@ export const commonApiPostForm = async <U>(param: {
 }): Promise<U> => {
   const { url } = buildUrlAndPath(param.endpoint);
 
-  const res = await fetch(url, {
-    method: "POST",
-    headers: getHeaders(param.headers, false),
-    body: param.body,
-  });
-
-  if (!res.ok) {
-    return handleApiError(res);
-  }
-
-  return res.json();
+  return executeApiRequest<U>(
+    url,
+    "POST",
+    getHeaders(param.headers, false),
+    param.body
+  );
 };

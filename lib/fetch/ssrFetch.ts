@@ -2,7 +2,19 @@ import { publicEnv } from "@/config/env";
 import { getServerEnvOrThrow } from "@/config/serverEnv";
 import { generateClientSignature } from "@/helpers/server-signature.helpers";
 
-const originalFetch = globalThis.fetch;
+const getOriginalFetch = (): typeof fetch => {
+  if (typeof globalThis.fetch === "undefined") {
+    throw new Error(
+      "fetch not available in current runtime. This module requires a fetch implementation."
+    );
+  }
+  if (typeof globalThis.fetch !== "function") {
+    throw new TypeError(
+      "fetch is not a function in current runtime. Expected a function but got a different type."
+    );
+  }
+  return globalThis.fetch;
+};
 
 const isApiRequest = (url: string | URL): boolean => {
   const urlString = typeof url === "string" ? url : url.toString();
@@ -28,6 +40,8 @@ const enhancedFetch: typeof fetch = async (
   input: RequestInfo | URL,
   init?: RequestInit
 ): Promise<Response> => {
+  const originalFetch = getOriginalFetch();
+
   if (typeof globalThis.window !== "undefined") {
     return originalFetch(input, init);
   }
@@ -54,7 +68,9 @@ const enhancedFetch: typeof fetch = async (
     return originalFetch(input, init);
   }
 
-  const method = init?.method?.toUpperCase() ?? "GET";
+  const method =
+    init?.method?.toUpperCase() ??
+    (input instanceof Request ? input.method.toUpperCase() : "GET");
   const path = extractPathFromUrl(url, publicEnv.API_ENDPOINT);
 
   if (!path) {
@@ -68,7 +84,16 @@ const enhancedFetch: typeof fetch = async (
     path
   );
 
-  const enhancedHeaders = new Headers(init?.headers);
+  const enhancedHeaders =
+    input instanceof Request ? new Headers(input.headers) : new Headers();
+
+  if (init?.headers) {
+    const initHeaders = new Headers(init.headers);
+    initHeaders.forEach((value, key) => {
+      enhancedHeaders.set(key, value);
+    });
+  }
+
   enhancedHeaders.set("x-6529-internal-id", signatureData.clientId);
   enhancedHeaders.set("x-6529-internal-signature", signatureData.signature);
   enhancedHeaders.set(
