@@ -1,4 +1,4 @@
-import { createHmac } from "crypto";
+import { createHmac } from "node:crypto";
 
 export function generateClientSignature(
   clientId: string,
@@ -7,8 +7,8 @@ export function generateClientSignature(
   path: string,
   timestamp?: number
 ): { clientId: string; timestamp: number; signature: string } {
-  if (typeof window !== "undefined") {
-    throw new Error(
+  if (typeof globalThis.window !== "undefined") {
+    throw new TypeError(
       "generateClientSignature can only be used on the server side"
     );
   }
@@ -23,4 +23,3 @@ export function generateClientSignature(
     signature,
   };
 }
-

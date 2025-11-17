@@ -1,5 +1,6 @@
 export const fetchCache = "force-no-store";
 
+import "@/lib/fetch/ssrFetch";
 import "@/components/drops/create/lexical/lexical.styles.scss";
 import "@/styles/Home.module.scss";
 import "@/styles/seize-bootstrap.scss";
