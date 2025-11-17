@@ -1,6 +1,6 @@
 import { serverEnvSchema, type ServerEnv } from "./serverEnv.schema";
 
-if (typeof globalThis.window !== "undefined") {
+if (globalThis.window !== undefined) {
   throw new TypeError("serverEnv can only be accessed on the server side");
 }
 
@@ -33,4 +33,3 @@ export const getServerEnvOrThrow = (): ServerEnv => {
 };
 
 export const serverEnv: ServerEnv | null = getServerEnv();
-

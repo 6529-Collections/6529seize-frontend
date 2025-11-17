@@ -7,7 +7,7 @@ export function generateClientSignature(
   path: string,
   timestamp?: number
 ): { clientId: string; timestamp: number; signature: string } {
-  if (typeof globalThis.window !== "undefined") {
+  if (globalThis.window !== undefined) {
     throw new TypeError(
       "generateClientSignature can only be used on the server side"
     );

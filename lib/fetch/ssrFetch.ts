@@ -3,8 +3,8 @@ import { getServerEnvOrThrow } from "@/config/serverEnv";
 import { generateClientSignature } from "@/helpers/server-signature.helpers";
 
 const getOriginalFetch = (): typeof fetch => {
-  if (typeof globalThis.fetch === "undefined") {
-    throw new Error(
+  if (globalThis.fetch === undefined) {
+    throw new TypeError(
       "fetch not available in current runtime. This module requires a fetch implementation."
     );
   }
@@ -42,16 +42,18 @@ const enhancedFetch: typeof fetch = async (
 ): Promise<Response> => {
   const originalFetch = getOriginalFetch();
 
-  if (typeof globalThis.window !== "undefined") {
+  if (globalThis.window !== undefined) {
     return originalFetch(input, init);
   }
 
-  const url =
-    typeof input === "string"
-      ? input
-      : input instanceof URL
-      ? input.toString()
-      : input.url;
+  let url: string;
+  if (typeof input === "string") {
+    url = input;
+  } else if (input instanceof URL) {
+    url = input.toString();
+  } else {
+    url = input.url;
+  }
 
   if (!isApiRequest(url)) {
     return originalFetch(input, init);
@@ -68,9 +70,11 @@ const enhancedFetch: typeof fetch = async (
     return originalFetch(input, init);
   }
 
-  const method =
-    init?.method?.toUpperCase() ??
-    (input instanceof Request ? input.method.toUpperCase() : "GET");
+  const method = (
+    init?.method ??
+    (input instanceof Request ? input.method : undefined) ??
+    "GET"
+  ).toUpperCase();
   const path = extractPathFromUrl(url, publicEnv.API_ENDPOINT);
 
   if (!path) {
@@ -84,12 +88,10 @@ const enhancedFetch: typeof fetch = async (
     path
   );
 
-  const enhancedHeaders =
-    input instanceof Request ? new Headers(input.headers) : new Headers();
-
+  const baseHeaders = input instanceof Request ? input.headers : undefined;
+  const enhancedHeaders = new Headers(baseHeaders);
   if (init?.headers) {
-    const initHeaders = new Headers(init.headers);
-    initHeaders.forEach((value, key) => {
+    new Headers(init.headers).forEach((value, key) => {
       enhancedHeaders.set(key, value);
     });
   }
@@ -107,7 +109,7 @@ const enhancedFetch: typeof fetch = async (
   });
 };
 
-if (typeof globalThis.window === "undefined") {
+if (globalThis.window === undefined) {
   globalThis.fetch = enhancedFetch;
 }
 
