@@ -19,6 +19,8 @@ const getOriginalFetch = (): typeof fetch => {
   return globalThis.fetch;
 };
 
+const originalFetch = getOriginalFetch();
+
 const isApiRequest = (url: string | URL): boolean => {
   const urlString = typeof url === "string" ? url : url.toString();
   try {
@@ -43,8 +45,6 @@ const enhancedFetch: typeof fetch = async (
   input: RequestInfo | URL,
   init?: RequestInit
 ): Promise<Response> => {
-  const originalFetch = getOriginalFetch();
-
   if (globalThis.window !== undefined) {
     return originalFetch(input, init);
   }
