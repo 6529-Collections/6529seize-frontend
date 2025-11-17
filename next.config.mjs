@@ -252,8 +252,6 @@ const nextConfigFactory = (phase) => {
         PEPE_CACHE_MAX_ITEMS: publicEnv.PEPE_CACHE_MAX_ITEMS,
         FARCASTER_WARPCAST_API_BASE: publicEnv.FARCASTER_WARPCAST_API_BASE,
         FARCASTER_WARPCAST_API_KEY: publicEnv.FARCASTER_WARPCAST_API_KEY,
-        SSR_CLIENT_ID: publicEnv.SSR_CLIENT_ID,
-        SSR_CLIENT_SECRET: publicEnv.SSR_CLIENT_SECRET,
       },
       async generateBuildId() {
         return VERSION;

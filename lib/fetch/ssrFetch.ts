@@ -1,4 +1,5 @@
 import { publicEnv } from "@/config/env";
+import { getServerEnvOrThrow } from "@/config/serverEnv";
 import { generateClientSignature } from "@/helpers/server-signature.helpers";
 
 const originalFetch = globalThis.fetch;
@@ -42,10 +43,14 @@ const enhancedFetch: typeof fetch = async (
     return originalFetch(input, init);
   }
 
-  const clientId = publicEnv.SSR_CLIENT_ID;
-  const clientSecret = publicEnv.SSR_CLIENT_SECRET;
+  let clientId: string;
+  let clientSecret: string;
 
-  if (!clientId || !clientSecret) {
+  try {
+    const env = getServerEnvOrThrow();
+    clientId = env.SSR_CLIENT_ID;
+    clientSecret = env.SSR_CLIENT_SECRET;
+  } catch {
     return originalFetch(input, init);
   }
 
