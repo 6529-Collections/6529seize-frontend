@@ -7,12 +7,7 @@ export interface UserXtdhReceivedSectionProps {
 }
 
 export default function UserPageXtdhReceived({
-  profileId,
+  profileId: _profileId,
 }: UserXtdhReceivedSectionProps) {
-  return (
-    <XtdhReceivedSection
-      scope={{ kind: "identity", identity: profileId }}
-      description="NFTs from this profile that currently receive xTDH."
-    />
-  );
+  return <XtdhReceivedSection />;
 }
