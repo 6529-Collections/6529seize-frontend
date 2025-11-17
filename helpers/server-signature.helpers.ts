@@ -23,3 +23,15 @@ export function generateClientSignature(
     signature,
   };
 }
+
+export function generateWafSignature(clientId: string, secret: string): string {
+  if (globalThis.window !== undefined) {
+    throw new TypeError(
+      "generateWafSignature can only be used on the server side"
+    );
+  }
+
+  const signature = createHmac("sha256", secret).update(clientId).digest("hex");
+
+  return signature;
+}

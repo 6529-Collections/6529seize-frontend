@@ -1,6 +1,9 @@
 import { publicEnv } from "@/config/env";
 import { getServerEnvOrThrow } from "@/config/serverEnv";
-import { generateClientSignature } from "@/helpers/server-signature.helpers";
+import {
+  generateClientSignature,
+  generateWafSignature,
+} from "@/helpers/server-signature.helpers";
 
 const getOriginalFetch = (): typeof fetch => {
   if (globalThis.fetch === undefined) {
@@ -88,6 +91,8 @@ const enhancedFetch: typeof fetch = async (
     path
   );
 
+  const wafSignature = generateWafSignature(clientId, clientSecret);
+
   const baseHeaders = input instanceof Request ? input.headers : undefined;
   const enhancedHeaders = new Headers(baseHeaders);
   if (init?.headers) {
@@ -102,6 +107,7 @@ const enhancedFetch: typeof fetch = async (
     "x-6529-internal-timestamp",
     signatureData.timestamp.toString()
   );
+  enhancedHeaders.set("x-6529-internal-waf-signature", wafSignature);
 
   return originalFetch(input, {
     ...init,
