@@ -29,13 +29,8 @@ export default function UserSettingsPrimaryWallet({
   useClickAway(listRef, () => setIsOpen(false));
   useKeyPressEvent("Escape", () => setIsOpen(false));
 
-  const [title, setTitle] = useState<string>("Select wallet");
-  useEffect(() => {
-    const selectedWallet = wallets.find((w) => w.wallet === selected);
-
-    const displayName = selectedWallet?.display ?? selectedWallet?.wallet;
-    setTitle(displayName ?? "Select wallet");
-  }, [selected]);
+  const selectedWallet = wallets.find((w) => w.wallet === selected);
+  const title = selectedWallet?.display ?? selectedWallet?.wallet ?? "Select wallet";
 
   const selectWallet = (wallet: string) => {
     onSelect(wallet);

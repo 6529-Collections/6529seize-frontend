@@ -1,6 +1,6 @@
 "use client";
 
-import { RefObject, useEffect } from "react";
+import { RefObject, useEffect, useEffectEvent } from "react";
 
 interface UseIntersectionObserverOptions extends IntersectionObserverInit {
   freezeOnceVisible?: boolean;
@@ -12,6 +12,18 @@ export function useIntersectionObserver(
   callback: (entry: IntersectionObserverEntry) => void,
   enabled: boolean = true
 ): void {
+  const { root, rootMargin, threshold, freezeOnceVisible } = options;
+
+  const handleEntry = useEffectEvent(
+    (entry: IntersectionObserverEntry, observer: IntersectionObserver) => {
+      callback(entry);
+
+      if (freezeOnceVisible && entry.isIntersecting) {
+        observer.disconnect();
+      }
+    }
+  );
+
   useEffect(() => {
     const target = targetRef.current;
 
@@ -24,26 +36,23 @@ export function useIntersectionObserver(
     }
 
     const observer = new IntersectionObserver((entries) => {
-      if (entries[0]) {
-        callback(entries[0]);
+      const entry = entries[0];
 
-        if (options.freezeOnceVisible && entries[0].isIntersecting) {
-          observer.disconnect();
-        }
+      if (!entry) {
+        return;
       }
-    }, options);
+
+      handleEntry(entry, observer);
+    }, {
+      root,
+      rootMargin,
+      threshold,
+    });
 
     observer.observe(target);
 
     return () => {
       observer.disconnect();
     };
-  }, [
-    targetRef,
-    options.rootMargin,
-    options.threshold,
-    enabled,
-    callback,
-    options.freezeOnceVisible,
-  ]);
+  }, [targetRef, root, rootMargin, threshold, enabled, handleEntry]);
 }

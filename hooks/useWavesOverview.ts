@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 
 import { WavesOverviewParams } from "@/types/waves.types";
@@ -66,12 +66,7 @@ export const useWavesOverview = ({
     ...getDefaultQueryRetry(() => setLastErrorTimestamp(Date.now())),
   });
 
-  const getWaves = (): ApiWave[] => query.data?.pages.flat() ?? [];
-
-  const [waves, setWaves] = useState<ApiWave[]>(getWaves());
-  useEffect(() => {
-    setWaves(getWaves());
-  }, [query.data]);
+  const waves = useMemo(() => query.data?.pages.flat() ?? [], [query.data]);
 
   const fetchNextPage = useCallback(() => {
     if (lastErrorTimestamp && Date.now() - lastErrorTimestamp < 30000) {

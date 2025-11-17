@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useEffectEvent, useRef, useState } from "react";
 import styles from "./LFGSlideshow.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExpand, faXmarkCircle } from "@fortawesome/free-solid-svg-icons";
@@ -19,10 +19,10 @@ const LFGSlideshow: React.FC<{
   setIsOpen: (isOpen: boolean) => void;
 }> = ({ isOpen, contract, setIsOpen }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [bodyOverflow, setBodyOverflow] = useState<string>();
   const [isMuted, setIsMuted] = useState(false);
 
   const [media, setMedia] = useState<ApiNftMedia[]>([]);
+  const bodyOverflowRef = useRef<string>("");
 
   let slideTimer: NodeJS.Timeout | null = null;
 
@@ -60,6 +60,10 @@ const LFGSlideshow: React.FC<{
     }
   };
 
+  const closeSlideshow = useEffectEvent(() => {
+    setIsOpen(false);
+  });
+
   const nextSlide = () => {
     if (slideTimer) {
       clearTimeout(slideTimer);
@@ -70,7 +74,7 @@ const LFGSlideshow: React.FC<{
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setIsOpen(false);
+        closeSlideshow();
       }
     };
 
@@ -78,18 +82,19 @@ const LFGSlideshow: React.FC<{
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [closeSlideshow]);
 
   useEffect(() => {
-    if (isOpen) {
-      setBodyOverflow(document.body.style.overflow);
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = bodyOverflow ?? "unset";
+    if (!isOpen) {
+      return;
     }
 
+    const { style } = document.body;
+    bodyOverflowRef.current = style.overflow;
+    style.overflow = "hidden";
+
     return () => {
-      document.body.style.overflow = bodyOverflow ?? "unset";
+      style.overflow = bodyOverflowRef.current;
     };
   }, [isOpen]);
 
@@ -126,6 +131,10 @@ const LFGSlideshow: React.FC<{
         videoElement.addEventListener("volumechange", handleVolumeChange);
         return () => {
           videoElement.removeEventListener("ended", handleEnded);
+          videoElement.removeEventListener(
+            "volumechange",
+            handleVolumeChange
+          );
         };
       }
     } else {

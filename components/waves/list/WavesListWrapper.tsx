@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useMemo } from "react";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import WaveItem from "./WaveItem";
@@ -41,26 +41,16 @@ export default function WavesListWrapper({
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const isShowAll = showAllType === overviewType;
 
-  const getUsePublicWaves = () =>
+  const usePublicWaves =
     !connectedProfile?.handle || !!activeProfileProxy;
-  const [usePublicWaves, setUsePublicWaves] = useState(getUsePublicWaves());
 
-  useEffect(
-    () => setUsePublicWaves(getUsePublicWaves()),
-    [connectedProfile, activeProfileProxy]
-  );
-
-  const getParams = (): Omit<WavesOverviewParams, "offset"> => {
-    return {
+  const params = useMemo<Omit<WavesOverviewParams, "offset">>(
+    () => ({
       limit: isShowAll ? SHOW_ALL_REQUEST_SIZE : NORMAL_REQUEST_SIZE,
       type: overviewType,
-    };
-  };
-
-  const [params, setParams] = useState<Omit<WavesOverviewParams, "offset">>(
-    getParams()
+    }),
+    [isShowAll, overviewType]
   );
-  useEffect(() => setParams(getParams()), [overviewType, isShowAll]);
 
   const {
     data: wavesAuth,
@@ -112,17 +102,12 @@ export default function WavesListWrapper({
     enabled: usePublicWaves,
   });
 
-  const getWaves = (): ApiWave[] => {
-    if (usePublicWaves) {
-      return wavesPublic?.pages.flat() ?? [];
-    }
-    return wavesAuth?.pages.flat() ?? [];
-  };
-
-  const [waves, setWaves] = useState<ApiWave[]>(getWaves());
-  useEffect(
-    () => setWaves(getWaves()),
-    [wavesAuth, wavesPublic, usePublicWaves]
+  const waves = useMemo<ApiWave[]>(
+    () =>
+      usePublicWaves
+        ? wavesPublic?.pages.flat() ?? []
+        : wavesAuth?.pages.flat() ?? [],
+    [usePublicWaves, wavesAuth, wavesPublic]
   );
 
   const onShowAll = () => {

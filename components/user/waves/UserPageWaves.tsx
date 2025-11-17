@@ -1,7 +1,7 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useDebounce } from "react-use";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiWave } from "@/generated/models/ApiWave";
@@ -45,13 +45,8 @@ export default function UserPageWaves({
     setShowCreateNewWaveButton(getShowCreateNewWaveButton());
   }, [connectedProfile, profile, activeProfileProxy]);
 
-  const getUsePublicWaves = () =>
+  const usePublicWaves =
     !connectedProfile?.handle || !!activeProfileProxy;
-  const [usePublicWaves, setUsePublicWaves] = useState(getUsePublicWaves());
-  useEffect(
-    () => setUsePublicWaves(getUsePublicWaves()),
-    [connectedProfile, activeProfileProxy]
-  );
 
   const getParams = (): SearchWavesParams => {
     return {
@@ -136,18 +131,12 @@ export default function UserPageWaves({
     enabled: usePublicWaves && !!haveProfile,
   });
 
-  const getWaves = (): ApiWave[] => {
+  const waves = useMemo(() => {
     if (usePublicWaves) {
       return wavesPublic?.pages.flat() ?? [];
     }
     return wavesAuth?.pages.flat() ?? [];
-  };
-
-  const [waves, setWaves] = useState<ApiWave[]>(getWaves());
-  useEffect(
-    () => setWaves(getWaves()),
-    [wavesAuth, wavesPublic, usePublicWaves]
-  );
+  }, [usePublicWaves, wavesAuth, wavesPublic]);
 
   const onBottomIntersection = (state: boolean) => {
     if (!state) {

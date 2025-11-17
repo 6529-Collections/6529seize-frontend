@@ -10,7 +10,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import {
   Accordion,
   Col,
@@ -89,30 +89,33 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
     ].includes(s);
   }
 
-  function setTraitsQuery(q: string) {
-    if (q) {
-      const traitValues = q.split(",");
-      const selectedTraits: TraitValuePair[] = [];
-      traitValues.forEach((tv) => {
-        const [t, v] = tv.split(":");
-        if (
-          traits.some(
-            (tr) =>
-              areEqualAddresses(tr.trait, t) &&
-              tr.values.some((vl) => areEqualAddresses(vl, v))
-          )
-        ) {
-          selectedTraits.push({
-            trait: t,
-            value: v,
-          });
-        }
-      });
-      setSelectedTraitValues(selectedTraits);
-    } else {
-      setSelectedTraitValues([]);
-    }
-  }
+  const setTraitsQuery = useCallback(
+    (q: string) => {
+      if (q) {
+        const traitValues = q.split(",");
+        const selectedTraits: TraitValuePair[] = [];
+        traitValues.forEach((tv) => {
+          const [t, v] = tv.split(":");
+          if (
+            traits.some(
+              (tr) =>
+                areEqualAddresses(tr.trait, t) &&
+                tr.values.some((vl) => areEqualAddresses(vl, v))
+            )
+          ) {
+            selectedTraits.push({
+              trait: t,
+              value: v,
+            });
+          }
+        });
+        setSelectedTraitValues(selectedTraits);
+      } else {
+        setSelectedTraitValues([]);
+      }
+    },
+    [traits]
+  );
 
   useEffect(() => {
     if (traitsLoaded && !routerLoaded) {
@@ -156,7 +159,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
       }
       setRouterLoaded(true);
     }
-  }, [searchParams, traitsLoaded, routerLoaded]);
+  }, [searchParams, traitsLoaded, routerLoaded, setTraitsQuery]);
 
   useEffect(() => {
     commonApiFetch<TraitValues[]>({
@@ -210,9 +213,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
   ]);
 
   useEffect(() => {
-    if (totalResultsSet) {
-      setTotalResultsSet(false);
-    }
+    setTotalResultsSet(false);
   }, [selectedTraitValues]);
 
   function getDefaultActiveKeys() {

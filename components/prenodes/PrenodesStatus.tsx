@@ -1,7 +1,7 @@
 "use client";
 
 import styles from "./Prenodes.module.scss";
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import Pagination from "../pagination/Pagination";
 import { Time } from "@/helpers/time";
@@ -42,19 +42,19 @@ export default function PrenodesStatus() {
   const [prenodes, setPrenodes] = useState<Prenode[]>([]);
   const [totalResults, setTotalResults] = useState(0);
 
-  function fetchResults() {
-    const url = `https://api.6529.io/oracle/prenodes?page=${page}&page_size=${PAGE_SIZE}`;
-    fetch(url).then((response) => {
-      response.json().then((response: { data: Prenode[]; count: number }) => {
-        setPrenodes(response.data);
-        setTotalResults(response.count);
-      });
-    });
-  }
+  const fetchResults = useEffectEvent(async (pageToLoad: number) => {
+    const response = await fetch(
+      `https://api.6529.io/oracle/prenodes?page=${pageToLoad}&page_size=${PAGE_SIZE}`
+    );
+    const { data, count }: { data: Prenode[]; count: number } =
+      await response.json();
+    setPrenodes(data);
+    setTotalResults(count);
+  });
 
   useEffect(() => {
-    fetchResults();
-  }, [page]);
+    fetchResults(page);
+  }, [fetchResults, page]);
 
   function printLocation(prenode: Prenode) {
     let location = "";

@@ -67,12 +67,8 @@ export default function UserSettingsUsername({
   }, [debouncedUsername, originalUsername]);
 
   useEffect(() => {
-    if (availabilityState === AVAILABILITY.AVAILABLE) {
-      setIsAvailable(true);
-    } else {
-      setIsAvailable(false);
-    }
-  }, [availabilityState]);
+    setIsAvailable(availabilityState === AVAILABILITY.AVAILABLE);
+  }, [availabilityState, setIsAvailable]);
 
   return (
     <div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useEffect, useState } from "react";
+import { FC, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
@@ -19,22 +19,14 @@ export const WaveRepOutcome: FC<WaveRepOutcomeProps> = ({ outcome }) => {
     outcome.distribution?.filter((d) => !!d.amount).length ?? 0;
   const totalCount = outcome.distribution?.length ?? 0;
   const [showAll, setShowAll] = useState(false);
+  const amounts = useMemo(() => {
+    const distribution = outcome.distribution ?? [];
+    const visibleEntries = showAll
+      ? distribution
+      : distribution.slice(0, DEFAULT_AMOUNTS_TO_SHOW);
 
-  const getAmounts = (): number[] => {
-    if (showAll) {
-      return outcome.distribution?.map((d) => d.amount ?? 0) ?? [];
-    }
-    return (
-      outcome.distribution
-        ?.slice(0, DEFAULT_AMOUNTS_TO_SHOW)
-        .map((d) => d.amount ?? 0) ?? []
-    );
-  };
-  const [amounts, setAmounts] = useState<number[]>(getAmounts());
-
-  useEffect(() => {
-    setAmounts(getAmounts());
-  }, [showAll]);
+    return visibleEntries.map((d) => d.amount ?? 0);
+  }, [outcome.distribution, showAll]);
 
   return (
     <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-300 desktop-hover:hover:tw-border-iron-700">

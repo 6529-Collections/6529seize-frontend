@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { commonApiFetch } from "@/services/api/common-api";
 import RepCategorySearchDropdown from "./RepCategorySearchDropdown";
@@ -90,31 +90,24 @@ export default function RepCategorySearch({
   useClickAway(wrapperRef, () => setIsOpen(false));
   useKeyPressEvent("Escape", () => setIsOpen(false));
 
-  const [categories, setCategories] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (!debouncedValue) {
-      setCategories([]);
-      return;
-    }
-    if (debouncedValue.length < MIN_SEARCH_LENGTH) {
-      setCategories([]);
-      return;
+  const categories = useMemo(() => {
+    if (!debouncedValue || debouncedValue.length < MIN_SEARCH_LENGTH) {
+      return [];
     }
 
     if (disableInputCategoryAsValue) {
-      setCategories(data ?? []);
-      return;
+      return data ?? [];
     }
+
     if (!data?.length) {
-      setCategories([debouncedValue]);
-      return;
+      return [debouncedValue];
     }
-    setCategories([
+
+    return [
       debouncedValue,
       ...data.filter((i) => i !== debouncedValue),
-    ]);
-  }, [data, debouncedValue]);
+    ];
+  }, [data, debouncedValue, disableInputCategoryAsValue]);
 
   return (
     <div className="tw-relative tw-w-full" ref={wrapperRef}>

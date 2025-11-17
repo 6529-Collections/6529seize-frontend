@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { STATEMENT_META, STATEMENT_TYPE } from "@/helpers/Types";
 import SocialStatementIcon from "@/components/user/utils/icons/SocialStatementIcon";
 
@@ -17,24 +16,15 @@ export default function UserPageIdentityAddStatementsTypeButton({
   readonly isLast: boolean;
   readonly onClick: () => void;
 }) {
-  const getActivityClass = () =>
-    isActive ? "tw-bg-iron-800" : "tw-bg-transparent";
-
-  const getPositionClass = () => {
-    if (isFirst) {
-      return "tw-rounded-l-md";
-    } else if (isLast) {
-      return "tw-rounded-r-md";
-    }
-    return "";
-  };
-
-  const getDynamicClasses = () => `${getActivityClass()} ${getPositionClass()}`;
-  const [dynamicClasses, setDynamicClasses] = useState(getDynamicClasses());
-
-  useEffect(() => {
-    setDynamicClasses(getDynamicClasses());
-  }, [isActive, isFirst, isLast]);
+  const activityClass = isActive ? "tw-bg-iron-800" : "tw-bg-transparent";
+  const positionClass = isFirst
+    ? "tw-rounded-l-md"
+    : isLast
+      ? "tw-rounded-r-md"
+      : "";
+  const dynamicClasses = [activityClass, positionClass]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <button

@@ -72,6 +72,7 @@ export default function MemeLabPageComponent({
   const router = useRouter();
   const searchParams = useSearchParams();
   const capacitor = useCapacitor();
+  const focusParam = searchParams?.get("focus");
 
   const { connectedProfile } = useAuth();
   const { country } = useCookieConsent();
@@ -106,30 +107,27 @@ export default function MemeLabPageComponent({
 
   useEffect(() => {
     setTitle(getMemeTabTitle(`Meme Lab`, nftId, nft, activeTab));
-  }, [nft, nftId, activeTab]);
+  }, [nft, nftId, activeTab, setTitle]);
 
   useEffect(() => {
     setIsFullScreenSupported(fullScreenSupported());
-    let initialFocus = MEME_FOCUS.LIVE;
-
-    const routerFocus = searchParams?.get("focus");
-    if (routerFocus) {
-      const resolvedRouterFocus = Object.values(MEME_FOCUS).find(
-        (sd) => sd === routerFocus
-      );
-      if (resolvedRouterFocus) {
-        initialFocus = resolvedRouterFocus;
-      }
-    }
-    setActiveTab(initialFocus);
   }, []);
+
+  useEffect(() => {
+    const resolvedRouterFocus = focusParam
+      ? Object.values(MEME_FOCUS).find((sd) => sd === focusParam)
+      : undefined;
+    const nextFocus = resolvedRouterFocus ?? MEME_FOCUS.LIVE;
+
+    setActiveTab((current) => (current === nextFocus ? current : nextFocus));
+  }, [focusParam]);
 
   useEffect(() => {
     if (activeTab) {
       let query: any = { focus: activeTab };
       router.replace(`?${new URLSearchParams(query).toString()}`);
     }
-  }, [activeTab]);
+  }, [activeTab, router]);
 
   useEffect(() => {
     if (nftId) {

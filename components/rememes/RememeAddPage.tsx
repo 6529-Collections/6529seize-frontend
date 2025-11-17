@@ -108,9 +108,10 @@ export default function RememeAddPage() {
 
   useEffect(() => {
     if (signMessage.isError) {
-      setSignErrors([`Error: ${signMessage.error?.message.split(".")[0]}`]);
+      const messageStart = signMessage.error?.message?.split(".")[0];
+      setSignErrors([`Error: ${messageStart}`]);
     }
-  }, [signMessage.isError]);
+  }, [signMessage.error?.message, signMessage.isError]);
 
   useEffect(() => {
     fetchUrl(`${publicEnv.API_ENDPOINT}/api/memes_lite`).then(

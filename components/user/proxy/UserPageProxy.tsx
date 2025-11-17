@@ -44,16 +44,13 @@ export default function UserPageProxy({
     [connectedProfile?.id, user, activeProfileProxy?.id, profile?.id]
   );
 
-  const getIsSelf = () =>
-    !!connectedProfile?.id &&
-    !!profile?.id &&
-    connectedProfile.id === profile.id &&
-    !activeProfileProxy;
-
-  const [isSelf, setIsSelf] = useState(getIsSelf());
-  useEffect(
-    () => setIsSelf(getIsSelf()),
-    [connectedProfile?.id, profile?.id, activeProfileProxy?.id]
+  const isSelf = useMemo(
+    () =>
+      !!connectedProfile?.id &&
+      !!profile?.id &&
+      connectedProfile.id === profile.id &&
+      !activeProfileProxy,
+    [connectedProfile?.id, profile?.id, activeProfileProxy]
   );
 
   const { data: profileProxies, isFetching } = useQuery<ApiProfileProxy[]>({

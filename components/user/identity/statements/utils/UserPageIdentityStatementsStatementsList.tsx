@@ -28,9 +28,7 @@ export default function UserPageIdentityStatementsStatementsList({
     [profile, address]
   );
 
-  const getCanEdit = (): boolean => isMyProfile && !activeProfileProxy;
-  const [canEdit, setCanEdit] = useState<boolean>(getCanEdit());
-  useEffect(() => setCanEdit(getCanEdit()), [isMyProfile, activeProfileProxy]);
+  const canEdit = isMyProfile && !activeProfileProxy;
 
   if (loading) {
     return (

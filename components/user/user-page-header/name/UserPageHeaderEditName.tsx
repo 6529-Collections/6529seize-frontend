@@ -9,7 +9,7 @@ import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { useParams, usePathname, useRouter } from "next/navigation";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
 export default function UserPageHeaderEditName({
@@ -29,13 +29,9 @@ export default function UserPageHeaderEditName({
   const pathname = usePathname() ?? "";
   const params = useParams();
 
-  const [userName, setUserName] = useState<string>(profile.handle ?? "");
-
-  const [haveChanges, setHaveChanges] = useState<boolean>(false);
-
-  useEffect(() => {
-    setHaveChanges(userName !== profile.handle);
-  }, [userName]);
+  const originalUsername = profile.handle ?? "";
+  const [userName, setUserName] = useState<string>(originalUsername);
+  const haveChanges = userName !== originalUsername;
 
   const [mutating, setMutating] = useState<boolean>(false);
 
@@ -130,7 +126,7 @@ export default function UserPageHeaderEditName({
           <form onSubmit={onSubmit} className="tw-flex tw-flex-col">
             <UserSettingsUsername
               userName={userName}
-              originalUsername={profile.handle ?? ""}
+              originalUsername={originalUsername}
               setUserName={setUserName}
               setIsAvailable={setAvailable}
               setIsLoading={setCheckingUsername}

@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
 import { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { motion, AnimatePresence } from "framer-motion";
@@ -20,21 +20,11 @@ export const WaveNICOutcome: FC<WaveNICOutcomeProps> = ({ outcome }) => {
     outcome.distribution?.filter((d) => !!d.amount).length ?? 0;
   const totalCount = outcome.distribution?.length ?? 0;
 
-  const getAmounts = (): number[] => {
-    if (showAll) {
-      return outcome.distribution?.map((d) => d?.amount ?? 0) ?? [];
-    }
-    return (
-      outcome.distribution
-        ?.slice(0, DEFAULT_AMOUNTS_TO_SHOW)
-        .map((d) => d?.amount ?? 0) ?? []
-    );
-  };
-  const [amounts, setAmounts] = useState<number[]>(getAmounts());
-
-  useEffect(() => {
-    setAmounts(getAmounts());
-  }, [showAll]);
+  const amounts = (
+    showAll
+      ? outcome.distribution ?? []
+      : outcome.distribution?.slice(0, DEFAULT_AMOUNTS_TO_SHOW) ?? []
+  ).map((d) => d?.amount ?? 0);
 
   return (
     <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-300 desktop-hover:hover:tw-border-iron-700">

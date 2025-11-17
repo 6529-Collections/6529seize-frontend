@@ -84,12 +84,19 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
     setStatus(burnRead.data as any);
   }, [burnRead.data]);
 
+  const signMessageErrorMessage = signMessage.error?.message;
+
   useEffect(() => {
-    if (signMessage.isError) {
-      setLoading(false);
-      setUploadError(`Error: ${signMessage.error?.message.split(".")[0]}`);
+    if (!signMessage.isError) {
+      return;
     }
-  }, [signMessage.isError]);
+
+    const conciseError =
+      signMessageErrorMessage?.split(".")[0] ?? "Unknown error";
+
+    setLoading(false);
+    setUploadError(`Error: ${conciseError}`);
+  }, [signMessage.isError, signMessageErrorMessage]);
 
   useEffect(() => {
     if (signMessage.isSuccess && signMessage.data) {

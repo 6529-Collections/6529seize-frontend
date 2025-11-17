@@ -34,32 +34,39 @@ interface Props {
 const PAGE_SIZE = 20;
 
 export default function NextGenCollectionProvenance(props: Readonly<Props>) {
+  const { collection } = props;
   const scrollTarget = useRef<HTMLImageElement>(null);
 
   const [logs, setLogs] = useState<NextGenLog[]>([]);
   const [logsLoaded, setLogsLoaded] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
+  const collectionId = collection.id;
 
-  function fetchResults(mypage: number) {
+  useEffect(() => {
+    let cancelled = false;
     setLogsLoaded(false);
+
     commonApiFetch<{
       count: number;
       page: number;
       next: any;
       data: NextGenLog[];
     }>({
-      endpoint: `nextgen/collections/${props.collection.id}/logs?page_size=${PAGE_SIZE}&page=${mypage}`,
+      endpoint: `nextgen/collections/${collectionId}/logs?page_size=${PAGE_SIZE}&page=${page}`,
     }).then((response) => {
+      if (cancelled) {
+        return;
+      }
       setTotalResults(response.count);
       setLogs(response.data);
       setLogsLoaded(true);
     });
-  }
 
-  useEffect(() => {
-    fetchResults(page);
-  }, [page]);
+    return () => {
+      cancelled = true;
+    };
+  }, [collectionId, page]);
 
   return (
     <Container className="no-padding" ref={scrollTarget}>
@@ -67,7 +74,7 @@ export default function NextGenCollectionProvenance(props: Readonly<Props>) {
         <Col>
           {logs.map((log, index) => (
             <NextGenCollectionProvenanceRow
-              collection={props.collection}
+              collection={collection}
               log={log}
               key={`${log.id}`}
               odd={index % 2 !== 0}

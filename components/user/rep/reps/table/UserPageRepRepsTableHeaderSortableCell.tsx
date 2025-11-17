@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { SortDirection } from "@/entities/ISort";
 import { RepsTableSort } from "./UserPageRepRepsTable";
 import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
@@ -22,17 +21,8 @@ export default function UserPageRepRepsTableHeaderSortableCell({
     [RepsTableSort.MY_RATES]: "My Rates",
   };
 
-  const [isActive, setIsActive] = useState<boolean>(type === activeType);
-  useEffect(() => {
-    setIsActive(type === activeType);
-  }, [activeType]);
-
-  const [sor, setSor] = useState<SortDirection>(
-    isActive ? activeDirection : SortDirection.DESC
-  );
-  useEffect(() => {
-    setSor(isActive ? activeDirection : SortDirection.DESC);
-  }, [activeDirection, isActive]);
+  const isActive = type === activeType;
+  const direction = isActive ? activeDirection : SortDirection.DESC;
 
   return (
     <th
@@ -46,7 +36,7 @@ export default function UserPageRepRepsTableHeaderSortableCell({
         {SORT_TYPE_TO_TEXT[type]}
       </span>
       <span className="-tw-mt-0.5 tw-ml-2">
-        <CommonTableSortIcon direction={sor} isActive={isActive} />
+        <CommonTableSortIcon direction={direction} isActive={isActive} />
       </span>
     </th>
   );

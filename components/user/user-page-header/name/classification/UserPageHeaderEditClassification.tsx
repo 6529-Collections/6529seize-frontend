@@ -9,7 +9,7 @@ import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
 export default function UserPageHeaderEditClassification({
@@ -31,11 +31,7 @@ export default function UserPageHeaderEditClassification({
       profile.classification ?? ApiProfileClassification.Pseudonym
     );
 
-  const [haveChanges, setHaveChanges] = useState<boolean>(false);
-
-  useEffect(() => {
-    setHaveChanges(classification !== profile.classification);
-  }, [classification]);
+  const haveChanges = classification !== profile.classification;
 
   const [mutating, setMutating] = useState<boolean>(false);
 

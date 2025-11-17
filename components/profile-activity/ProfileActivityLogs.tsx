@@ -142,12 +142,15 @@ export default function ProfileActivityLogs({
     }
   );
 
+  const isEmptyFirstPage =
+    logs?.page === 1 && (logs?.data?.length ?? 0) === 0;
+
   useEffect(() => {
-    if (isLoading) return;
-    if (logs?.page === 1 && !logs.data.length) {
-      setCurrentPage(1);
+    if (isLoading || !isEmptyFirstPage) {
+      return;
     }
-  }, [logs?.page, isLoading]);
+    setCurrentPage(1);
+  }, [isEmptyFirstPage, isLoading]);
   return (
     <div className={`${initialParams.handleOrWallet ? "" : "tw-mt-2"}  `}>
       <div className="tw-w-full tw-flex tw-flex-col min-[1200px]:tw-flex-row tw-gap-y-4 min-[1200px]:tw-gap-x-16 min-[1200px]:tw-justify-between min-[1200px]:tw-items-center">

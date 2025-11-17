@@ -5,7 +5,7 @@ import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
 import { getRandomColorWithSeed } from "@/helpers/Helpers";
 import { useRouter } from "next/navigation";
-import { useContext, useEffect, useState, type JSX } from "react";
+import { useContext, useEffect, useEffectEvent, useState, type JSX } from "react";
 import GroupCardView from "./GroupCardView";
 import GroupCardVoteAll from "./vote-all/GroupCardVoteAll";
 
@@ -54,6 +54,12 @@ export default function GroupCard({
     setState(state);
   };
 
+  const resetGroupState = useEffectEvent(() => {
+    if (!setActiveGroupIdVoteAll || !group) return;
+    setActiveGroupIdVoteAll(null);
+    setState(GroupCardState.IDLE);
+  });
+
   const getIsActiveGroupVoteAll = () => {
     return activeGroupIdVoteAll === group?.id;
   };
@@ -70,7 +76,7 @@ export default function GroupCard({
 
   useEffect(() => {
     if (!connectedProfile?.handle) {
-      onGroupStateChange(GroupCardState.IDLE);
+      resetGroupState();
     }
   }, [connectedProfile?.handle]);
 

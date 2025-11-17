@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ImageScale,
   getScaledImageUri,
@@ -19,14 +19,7 @@ export default function GroupItem({
   readonly activeGroupId: string | null;
   readonly onActiveGroupId?: (groupId: string | null) => void;
 }) {
-  const getIsActive = (): boolean =>
-    !!activeGroupId && activeGroupId === group.id;
-
-  const [isActive, setIsActive] = useState(getIsActive());
-
-  useEffect(() => {
-    setIsActive(getIsActive());
-  }, [activeGroupId]);
+  const isActive = !!activeGroupId && activeGroupId === group.id;
 
   const deActivate = () => {
     if (!isActive || !onActiveGroupId) return;

@@ -8,7 +8,7 @@ import {
   SubscriptionTopUp,
 } from "@/entities/ISubscription";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 
 import { AuthContext } from "@/components/auth/Auth";
@@ -117,14 +117,14 @@ export default function UserPageSubscriptions(
     );
   }, [
     fetchingDetails,
-    fetchAirdropAddress,
+    fetchingAirdropAddress,
     fetchingTopUpHistory,
     fetchingMemeSubscriptions,
     fetchingSubscriptionLogs,
     fetchingRedeemedHistory,
   ]);
 
-  function fetchDetails() {
+  const fetchDetails = useCallback(() => {
     if (!profileKey) {
       return;
     }
@@ -138,9 +138,9 @@ export default function UserPageSubscriptions(
       .finally(() => {
         setFetchingDetails(false);
       });
-  }
+  }, [profileKey]);
 
-  function fetchAirdropAddress() {
+  const fetchAirdropAddress = useCallback(() => {
     if (!profileKey) {
       return;
     }
@@ -154,51 +154,57 @@ export default function UserPageSubscriptions(
       .finally(() => {
         setFetchingAirdropAddress(false);
       });
-  }
+  }, [profileKey]);
 
-  function fetchTopUpHistory(page: number) {
-    if (!profileKey) {
-      return;
-    }
-    setFetchingTopUpHistory(true);
-    commonApiFetch<{
-      count: number;
-      page: number;
-      next: boolean;
-      data: SubscriptionTopUp[];
-    }>({
-      endpoint: `subscriptions/consolidation/top-up/${profileKey}?page=${page}&page_size=${HISTORY_PAGE_SIZE}`,
-    })
-      .then((data) => {
-        setTopUpHistory(data);
+  const fetchTopUpHistory = useCallback(
+    (page: number) => {
+      if (!profileKey) {
+        return;
+      }
+      setFetchingTopUpHistory(true);
+      commonApiFetch<{
+        count: number;
+        page: number;
+        next: boolean;
+        data: SubscriptionTopUp[];
+      }>({
+        endpoint: `subscriptions/consolidation/top-up/${profileKey}?page=${page}&page_size=${HISTORY_PAGE_SIZE}`,
       })
-      .finally(() => {
-        setFetchingTopUpHistory(false);
-      });
-  }
+        .then((data) => {
+          setTopUpHistory(data);
+        })
+        .finally(() => {
+          setFetchingTopUpHistory(false);
+        });
+    },
+    [profileKey]
+  );
 
-  function fetchRedeemHistory(page: number) {
-    if (!profileKey) {
-      return;
-    }
-    setFetchingRedeemedHistory(true);
-    commonApiFetch<{
-      count: number;
-      page: number;
-      next: boolean;
-      data: RedeemedSubscription[];
-    }>({
-      endpoint: `subscriptions/consolidation/redeemed/${profileKey}?page=${page}&page_size=${HISTORY_PAGE_SIZE}`,
-    })
-      .then((data) => {
-        setRedeemedHistory(data);
+  const fetchRedeemHistory = useCallback(
+    (page: number) => {
+      if (!profileKey) {
+        return;
+      }
+      setFetchingRedeemedHistory(true);
+      commonApiFetch<{
+        count: number;
+        page: number;
+        next: boolean;
+        data: RedeemedSubscription[];
+      }>({
+        endpoint: `subscriptions/consolidation/redeemed/${profileKey}?page=${page}&page_size=${HISTORY_PAGE_SIZE}`,
       })
-      .finally(() => {
-        setFetchingRedeemedHistory(false);
-      });
-  }
+        .then((data) => {
+          setRedeemedHistory(data);
+        })
+        .finally(() => {
+          setFetchingRedeemedHistory(false);
+        });
+    },
+    [profileKey]
+  );
 
-  function fetchMemeSubscriptions() {
+  const fetchMemeSubscriptions = useCallback(() => {
     if (!profileKey) {
       return;
     }
@@ -216,44 +222,54 @@ export default function UserPageSubscriptions(
       .finally(() => {
         setFetchingMemeSubscriptions(false);
       });
-  }
+  }, [profileKey, remainingMintsForSeason]);
 
-  function fetchLogs(page: number) {
-    if (!profileKey) {
-      return;
-    }
-    setFetchingSubscriptionLogs(true);
-    commonApiFetch<{
-      count: number;
-      page: number;
-      next: boolean;
-      data: SubscriptionLog[];
-    }>({
-      endpoint: `subscriptions/consolidation/logs/${profileKey}?page=${page}&page_size=${HISTORY_PAGE_SIZE}`,
-    })
-      .then((data) => {
-        setSubscriptionLogs(data);
+  const fetchLogs = useCallback(
+    (page: number) => {
+      if (!profileKey) {
+        return;
+      }
+      setFetchingSubscriptionLogs(true);
+      commonApiFetch<{
+        count: number;
+        page: number;
+        next: boolean;
+        data: SubscriptionLog[];
+      }>({
+        endpoint: `subscriptions/consolidation/logs/${profileKey}?page=${page}&page_size=${HISTORY_PAGE_SIZE}`,
       })
-      .finally(() => {
-        setFetchingSubscriptionLogs(false);
-      });
-  }
+        .then((data) => {
+          setSubscriptionLogs(data);
+        })
+        .finally(() => {
+          setFetchingSubscriptionLogs(false);
+        });
+    },
+    [profileKey]
+  );
 
-  const refresh = (): void => {
-    if (!profileKey) {
-      return;
-    }
+  const refresh = useCallback((): void => {
     fetchDetails();
     fetchAirdropAddress();
     fetchTopUpHistory(1);
     fetchMemeSubscriptions();
     fetchRedeemHistory(1);
     fetchLogs(1);
-  };
+  }, [
+    fetchDetails,
+    fetchAirdropAddress,
+    fetchTopUpHistory,
+    fetchMemeSubscriptions,
+    fetchRedeemHistory,
+    fetchLogs,
+  ]);
 
   useEffect(() => {
+    if (!profileKey) {
+      return;
+    }
     refresh();
-  }, [profileKey]);
+  }, [profileKey, refresh]);
 
   if (!profileKey) {
     return <></>;

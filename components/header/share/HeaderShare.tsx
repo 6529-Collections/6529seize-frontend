@@ -7,7 +7,7 @@ import { ShareIcon } from "@heroicons/react/24/outline";
 import yaml from "js-yaml";
 import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
@@ -45,6 +45,54 @@ const squareStyle = {
   alignItems: "center",
   justifyContent: "center",
 };
+
+interface OSInfo {
+  name: "windows" | "mac" | "linux";
+  url: string;
+  displayName: string;
+  downloadPath: string;
+  image: string;
+  enabled: boolean;
+  version?: string;
+}
+
+interface FileData {
+  url: string;
+  sha512: string;
+  size: number;
+}
+
+interface LatestYml {
+  version: string;
+  files: FileData[];
+}
+
+const osConfigs: OSInfo[] = [
+  {
+    name: "windows",
+    url: "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/win/latest.yml",
+    displayName: "Windows",
+    downloadPath: "6529-core-app/win/links",
+    image: "/windows.png",
+    enabled: true,
+  },
+  {
+    name: "mac",
+    url: "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/mac/latest-mac.yml",
+    displayName: "macOS",
+    downloadPath: "6529-core-app/mac/links",
+    image: "/macos.png",
+    enabled: true,
+  },
+  {
+    name: "linux",
+    url: "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/linux/latest-linux.yml",
+    displayName: "Linux",
+    downloadPath: "6529-core-app/linux/links",
+    image: "/linux.png",
+    enabled: true,
+  },
+];
 
 export default function HeaderShare({
   isCollapsed = false,
@@ -130,75 +178,75 @@ function HeaderQRModal({
 
   const [urlCopied, setUrlCopied] = useState<boolean>(false);
 
-  function generateSources(
-    refreshToken: string | null,
-    walletAddress: string | null,
-    role: string | null
-  ) {
-    let routerPath = pathname ?? "";
-    if (routerPath.endsWith("/")) {
-      routerPath = routerPath.slice(0, -1);
-    }
+  const searchParamsString = searchParams?.toString() ?? "";
 
-    const searchParamsString = searchParams?.toString() ?? "";
-    if (searchParamsString) {
-      routerPath += `?${searchParamsString}`;
-    }
-
-    const appScheme = publicEnv.MOBILE_APP_SCHEME ?? "mobile6529";
-    const coreScheme = publicEnv.CORE_SCHEME ?? "core6529";
-
-    const browserUrl = `${window.location.origin}${routerPath}`;
-    const appUrl = `${appScheme}://${DeepLinkScope.NAVIGATE}${routerPath}`;
-    const coreUrl = `${coreScheme}://${DeepLinkScope.NAVIGATE}${routerPath}`;
-
-    setNavigateBrowserUrl(browserUrl);
-    setNavigateAppUrl(appUrl);
-    setNavigateCoreUrl(coreUrl);
-
-    let shareConnectionAppUrl = "";
-    let shareConnectionCoreUrl = "";
-
-    if (refreshToken && walletAddress) {
-      shareConnectionAppUrl = `${appScheme}://${DeepLinkScope.SHARE_CONNECTION}?token=${refreshToken}&address=${walletAddress}`;
-      shareConnectionCoreUrl = `${coreScheme}://${DeepLinkScope.NAVIGATE}/accept-connection-sharing?token=${refreshToken}&address=${walletAddress}`;
-
-      if (role) {
-        shareConnectionAppUrl += `&role=${role}`;
-        shareConnectionCoreUrl += `&role=${role}`;
+  const generateSources = useCallback(
+    (refreshToken: string | null, walletAddress: string | null, role: string | null) => {
+      let routerPath = pathname ?? "";
+      if (routerPath.endsWith("/")) {
+        routerPath = routerPath.slice(0, -1);
       }
-      setShareConnectionAppUrl(shareConnectionAppUrl);
-      setShareConnectionCoreUrl(shareConnectionCoreUrl);
-    } else {
-      setShareConnectionSrc("");
-    }
 
-    QRCode.toDataURL(browserUrl, { width: 500, margin: 0 }).then(
-      (dataUrl: string) => {
-        setNavigateBrowserSrc(dataUrl);
+      if (searchParamsString) {
+        routerPath += `?${searchParamsString}`;
       }
-    );
 
-    QRCode.toDataURL(appUrl, { width: 500, margin: 0 }).then(
-      (dataUrl: string) => {
-        setNavigateAppSrc(dataUrl);
+      const appScheme = publicEnv.MOBILE_APP_SCHEME ?? "mobile6529";
+      const coreScheme = publicEnv.CORE_SCHEME ?? "core6529";
+
+      const browserUrl = `${window.location.origin}${routerPath}`;
+      const appUrl = `${appScheme}://${DeepLinkScope.NAVIGATE}${routerPath}`;
+      const coreUrl = `${coreScheme}://${DeepLinkScope.NAVIGATE}${routerPath}`;
+
+      setNavigateBrowserUrl(browserUrl);
+      setNavigateAppUrl(appUrl);
+      setNavigateCoreUrl(coreUrl);
+
+      let shareConnectionAppUrl = "";
+      let shareConnectionCoreUrl = "";
+
+      if (refreshToken && walletAddress) {
+        shareConnectionAppUrl = `${appScheme}://${DeepLinkScope.SHARE_CONNECTION}?token=${refreshToken}&address=${walletAddress}`;
+        shareConnectionCoreUrl = `${coreScheme}://${DeepLinkScope.NAVIGATE}/accept-connection-sharing?token=${refreshToken}&address=${walletAddress}`;
+
+        if (role) {
+          shareConnectionAppUrl += `&role=${role}`;
+          shareConnectionCoreUrl += `&role=${role}`;
+        }
+        setShareConnectionAppUrl(shareConnectionAppUrl);
+        setShareConnectionCoreUrl(shareConnectionCoreUrl);
+      } else {
+        setShareConnectionSrc("");
       }
-    );
 
-    if (shareConnectionAppUrl) {
-      QRCode.toDataURL(shareConnectionAppUrl, { width: 500, margin: 0 }).then(
+      QRCode.toDataURL(browserUrl, { width: 500, margin: 0 }).then(
         (dataUrl: string) => {
-          setShareConnectionSrc(dataUrl);
+          setNavigateBrowserSrc(dataUrl);
         }
       );
-    }
-  }
+
+      QRCode.toDataURL(appUrl, { width: 500, margin: 0 }).then(
+        (dataUrl: string) => {
+          setNavigateAppSrc(dataUrl);
+        }
+      );
+
+      if (shareConnectionAppUrl) {
+        QRCode.toDataURL(shareConnectionAppUrl, { width: 500, margin: 0 }).then(
+          (dataUrl: string) => {
+            setShareConnectionSrc(dataUrl);
+          }
+        );
+      }
+    },
+    [pathname, searchParamsString]
+  );
 
   useEffect(() => {
     if (show) {
       generateSources(getRefreshToken(), getWalletAddress(), getWalletRole());
     }
-  }, [show]);
+  }, [show, generateSources]);
 
   useEffect(() => {
     setActiveTab(isAuthenticated ? Mode.SHARE : Mode.NAVIGATE);
@@ -457,54 +505,6 @@ function ModalMenu({
 }
 
 function CoreAppsDownload() {
-  interface OSInfo {
-    name: "windows" | "mac" | "linux";
-    url: string;
-    displayName: string;
-    downloadPath: string;
-    image: string;
-    enabled: boolean;
-    version?: string;
-  }
-
-  interface FileData {
-    url: string;
-    sha512: string;
-    size: number;
-  }
-
-  interface LatestYml {
-    version: string;
-    files: FileData[];
-  }
-
-  const osConfigs: OSInfo[] = [
-    {
-      name: "windows",
-      url: "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/win/latest.yml",
-      displayName: "Windows",
-      downloadPath: "6529-core-app/win/links",
-      image: "/windows.png",
-      enabled: true,
-    },
-    {
-      name: "mac",
-      url: "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/mac/latest-mac.yml",
-      displayName: "macOS",
-      downloadPath: "6529-core-app/mac/links",
-      image: "/macos.png",
-      enabled: true,
-    },
-    {
-      name: "linux",
-      url: "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/linux/latest-linux.yml",
-      displayName: "Linux",
-      downloadPath: "6529-core-app/linux/links",
-      image: "/linux.png",
-      enabled: true,
-    },
-  ];
-
   const [versions, setVersions] = useState<OSInfo[]>([]);
 
   useEffect(() => {

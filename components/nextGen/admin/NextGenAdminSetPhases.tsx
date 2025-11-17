@@ -99,7 +99,7 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
       );
       setSelectedAllowlist(selected);
     }
-  }, [onChainMerkleRoot, collectionID]);
+  }, [onChainMerkleRoot, collectionID, availableAllowlistCollections]);
 
   function clear() {
     setSelectedAllowlist(undefined);

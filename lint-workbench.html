@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>lint.txt Workbench</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background-color: #0b0d10;
+        --bg: #0b0d10;
+        --panel: #12141b;
+        --panel-border: #1f222b;
+        --muted: #9ba1b5;
+        --accent: #4c8bf5;
+        --accent-strong: #82afff;
+        --warning: #f5a742;
+        --error: #ff6b6b;
+        --radius: 10px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 40px;
+        min-height: 100vh;
+        background: radial-gradient(circle at top, rgba(76, 139, 245, 0.25), transparent 60%),
+          radial-gradient(circle at 10% 30%, rgba(255, 107, 107, 0.18), transparent 45%),
+          var(--bg);
+        color: #e9ecff;
+      }
+
+      main {
+        margin: 0 auto;
+        max-width: 1100px;
+      }
+
+      h1 {
+        font-size: 32px;
+        margin-bottom: 8px;
+      }
+
+      p.subtitle {
+        margin-top: 0;
+        color: var(--muted);
+      }
+
+      .card {
+        border: 1px solid var(--panel-border);
+        background-color: rgba(11, 13, 16, 0.8);
+        border-radius: var(--radius);
+        padding: 20px;
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(12px);
+      }
+
+      .card + .card {
+        margin-top: 20px;
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        padding: 7px 16px;
+        transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+      }
+
+      button.primary {
+        background: linear-gradient(120deg, var(--accent), var(--accent-strong));
+        border-color: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        font-weight: 600;
+      }
+
+      button.secondary {
+        background: transparent;
+        border-color: var(--panel-border);
+        color: #fff;
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      button:not(:disabled):hover {
+        transform: translateY(-1px);
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .status {
+        margin-top: 8px;
+        min-height: 20px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .status.success {
+        color: #7ce38b;
+      }
+
+      .status.error {
+        color: var(--error);
+      }
+
+      .status.warn {
+        color: var(--warning);
+      }
+
+      .search-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .search-row input[type="search"] {
+        flex: 1;
+        min-width: 250px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--panel-border);
+        background-color: rgba(255, 255, 255, 0.05);
+        color: inherit;
+      }
+
+      .invert-toggle {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--muted);
+        font-size: 14px;
+        user-select: none;
+      }
+
+      .invert-toggle input {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--accent);
+      }
+
+      .table-wrapper {
+        margin-top: 18px;
+        border: 1px solid var(--panel-border);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      thead {
+        background-color: rgba(255, 255, 255, 0.02);
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      th,
+      td {
+        padding: 12px 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        vertical-align: top;
+      }
+
+      tbody tr:last-child td {
+        border-bottom: none;
+      }
+
+      tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.03);
+      }
+
+      td.path {
+        font-family: "Fira Code", "JetBrains Mono", monospace;
+        font-size: 14px;
+        color: #d8dcff;
+        white-space: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+      }
+
+      td.path::-webkit-scrollbar {
+        height: 6px;
+      }
+
+      td.path::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 999px;
+      }
+
+      td.message {
+        font-size: 14px;
+      }
+
+      td.severity span {
+        padding: 3px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      td.severity .warning {
+        background-color: rgba(245, 167, 66, 0.18);
+        color: #ffc37a;
+      }
+
+      td.severity .error {
+        background-color: rgba(255, 107, 107, 0.18);
+        color: #ff8f96;
+      }
+
+      td.actions {
+        width: 100px;
+        text-align: right;
+        vertical-align: top;
+      }
+
+      td.actions button {
+        border-radius: var(--radius);
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+
+      tbody tr.path-row td {
+        border-bottom: none;
+        padding-bottom: 8px;
+      }
+
+      tbody tr.detail-row td {
+        border-top: none;
+        padding-top: 4px;
+      }
+
+      tbody tr.detail-row td.message {
+        font-size: 14px;
+      }
+
+      tbody tr.detail-row td.rule {
+        font-family: "Fira Code", "JetBrains Mono", monospace;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 30px 10px;
+        color: var(--muted);
+      }
+
+      form#add-entry {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 14px;
+        margin-top: 18px;
+      }
+
+      form#add-entry label {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+
+      form#add-entry input,
+      form#add-entry select,
+      form#add-entry textarea {
+        border-radius: var(--radius);
+        border: 1px solid var(--panel-border);
+        background-color: rgba(255, 255, 255, 0.05);
+        color: inherit;
+        padding: 8px 10px;
+      }
+
+      form#add-entry textarea {
+        min-height: 80px;
+        resize: vertical;
+      }
+
+      .row-meta {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+
+      .flex-gap {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      @media (max-width: 720px) {
+        body {
+          padding: 20px 14px;
+        }
+
+        .controls,
+        .search-row {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        button,
+        input,
+        select {
+          width: 100%;
+        }
+
+        td.actions {
+          width: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Lint.txt Workbench</h1>
+        <p class="subtitle">
+          Load the existing <code>lint.txt</code>, filter entries, select the ones you want to drop, and save
+          the cleaned file back to disk. All work happens locally in your browser.
+        </p>
+      </header>
+
+      <section class="card">
+        <div class="controls">
+          <button id="open-btn" class="primary">Open lint.txt</button>
+          <button id="reload-btn" class="secondary" disabled>Reload from disk</button>
+          <button id="save-btn" class="primary" disabled>Save changes</button>
+          <button id="undo-btn" class="secondary" disabled>Undo last delete</button>
+          <button id="export-btn" class="secondary">Download copy</button>
+          <button id="export-json-btn" class="secondary" disabled>Export JSON</button>
+        </div>
+        <div id="status" class="status"></div>
+      </section>
+
+      <section class="card">
+        <div class="search-row">
+          <input id="search" type="search" placeholder="Search by path, message, rule, or line…" />
+          <label class="invert-toggle">
+            <input id="invert-search" type="checkbox" />
+            <span>Flip search</span>
+          </label>
+          <button id="select-visible" class="secondary" disabled>Select filtered</button>
+          <button id="clear-selection" class="secondary" disabled>Clear selection</button>
+          <button id="delete-selected" class="secondary" disabled>Delete selected</button>
+        </div>
+        <div class="row-meta" id="counter">No entries loaded yet.</div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th rowspan="2" style="width: 36px"></th>
+                <th colspan="4">File</th>
+                <th rowspan="2">Actions</th>
+              </tr>
+              <tr>
+                <th colspan="2">Message</th>
+                <th>Rule</th>
+                <th>Severity</th>
+              </tr>
+            </thead>
+            <tbody id="entries"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Add manual entry</h2>
+        <form id="add-entry">
+          <label>
+            File path
+            <input type="text" name="path" placeholder="/full/path/File.tsx" required />
+          </label>
+          <label>
+            Line number
+            <input type="number" name="line" min="1" required />
+          </label>
+          <label>
+            Column
+            <input type="number" name="column" min="1" required />
+          </label>
+          <label>
+            Severity
+            <select name="severity" required>
+              <option value="warning">warning</option>
+              <option value="error">error</option>
+            </select>
+          </label>
+          <label>
+            Rule (ex: react-hooks/exhaustive-deps)
+            <input type="text" name="rule" required />
+          </label>
+          <label style="grid-column: 1 / -1">
+            Message
+            <textarea name="message" placeholder="Describe the lint warning" required></textarea>
+          </label>
+          <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end">
+            <button type="submit" class="primary">Add entry</button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <input id="file-input" type="file" accept=".txt" hidden />
+
+    <template id="row-template">
+      <tr>
+        <td>
+          <input type="checkbox" class="row-select" />
+        </td>
+        <td class="path"></td>
+        <td class="message"></td>
+        <td class="rule"></td>
+        <td class="severity"></td>
+        <td class="actions"></td>
+      </tr>
+    </template>
+
+    <script>
+      (function () {
+        const generateId = () =>
+          (window.crypto && crypto.randomUUID && crypto.randomUUID()) ||
+          `entry-${Date.now().toString(36)}-${Math.random().toString(16).slice(2)}`;
+
+        const deriveRelativePath = (inputPath) => {
+          if (!inputPath) return "";
+          const marker = "linting-easy-errors-fix/";
+          const idx = inputPath.lastIndexOf(marker);
+          if (idx >= 0) {
+            return inputPath.slice(idx + marker.length);
+          }
+          return inputPath;
+        };
+
+        const parseLintText = (text) => {
+          const normalized = text.replace(/\r\n/g, "\n");
+          const lines = normalized.split("\n");
+          const headerLines = [];
+          let index = 0;
+          while (index < lines.length && !lines[index].startsWith("/")) {
+            headerLines.push(lines[index]);
+            index += 1;
+          }
+
+          const entries = [];
+          let currentPath = "";
+
+          for (; index < lines.length; index += 1) {
+            const raw = lines[index];
+            if (!raw.trim()) continue;
+            if (raw.startsWith("/")) {
+              currentPath = raw.trim();
+              continue;
+            }
+            if (!currentPath) continue;
+            if (!raw.startsWith("  ")) continue;
+
+            const trimmed = raw.trim();
+            const match = trimmed.match(/^(\d+):(\d+)\s+(warning|error)\s+(.*)$/i);
+            if (!match) {
+            entries.push({
+              id: generateId(),
+              path: currentPath,
+              relativePath: deriveRelativePath(currentPath),
+              rawLine: raw,
+              line: "",
+              column: "",
+              severity: "warning",
+              message: trimmed,
+              rule: "",
+            });
+              continue;
+            }
+
+            const [, line, column, severity, rest] = match;
+            const ruleMatch = rest.match(/(.*)\s{2,}([^\s]+)$/);
+            const message = ruleMatch ? ruleMatch[1].trim() : rest.trim();
+            const rule = ruleMatch ? ruleMatch[2].trim() : "";
+
+            entries.push({
+              id: generateId(),
+              path: currentPath,
+              line,
+              column,
+              severity: severity.toLowerCase(),
+              message,
+              rule,
+              rawLine: raw,
+              relativePath: deriveRelativePath(currentPath),
+            });
+          }
+
+          const header = headerLines.join("\n").trimEnd();
+
+          return { header, entries };
+        };
+
+        const serializeEntries = (header, entries) => {
+          const lines = [];
+          if (header) {
+            lines.push(header);
+            lines.push("");
+          }
+
+          let currentPath = "";
+          entries.forEach((entry, index) => {
+            if (entry.path !== currentPath) {
+              if (currentPath && lines[lines.length - 1] !== "") {
+                lines.push("");
+              }
+              currentPath = entry.path;
+              lines.push(currentPath);
+            }
+
+            const severity = entry.severity || "warning";
+            const line = entry.line || "0";
+            const column = entry.column || "0";
+            const rule = entry.rule || "unknown-rule";
+            const message = entry.message || entry.rawLine || "";
+            lines.push(`  ${line}:${column}  ${severity}  ${message}  ${rule}`);
+            if (index === entries.length - 1) {
+              lines.push("");
+            }
+          });
+
+          return lines.join("\n").trimEnd() + "\n";
+        };
+
+        class LintWorkbench {
+          constructor() {
+            this.entries = [];
+            this.filtered = [];
+            this.selection = new Set();
+            this.searchTerm = "";
+            this.invertSearch = false;
+            this.header = "";
+            this.fileHandle = null;
+            this.dirty = false;
+            this.undoStack = [];
+          }
+
+          init() {
+            this.cacheDom();
+            this.bindEvents();
+            this.tryAutoLoad();
+          }
+
+          cacheDom() {
+            this.elements = {
+              entries: document.getElementById("entries"),
+              search: document.getElementById("search"),
+              counter: document.getElementById("counter"),
+              status: document.getElementById("status"),
+              open: document.getElementById("open-btn"),
+              save: document.getElementById("save-btn"),
+              reload: document.getElementById("reload-btn"),
+              selectVisible: document.getElementById("select-visible"),
+              clearSelection: document.getElementById("clear-selection"),
+              deleteSelected: document.getElementById("delete-selected"),
+              addForm: document.getElementById("add-entry"),
+              fileInput: document.getElementById("file-input"),
+              undo: document.getElementById("undo-btn"),
+              exportBtn: document.getElementById("export-btn"),
+              exportJsonBtn: document.getElementById("export-json-btn"),
+              invertSearch: document.getElementById("invert-search"),
+            };
+          }
+
+          bindEvents() {
+            this.elements.search.addEventListener("input", (evt) => {
+              this.searchTerm = evt.target.value.trim();
+              this.render();
+            });
+
+            this.elements.invertSearch.addEventListener("change", (evt) => {
+              this.invertSearch = evt.target.checked;
+              this.render();
+            });
+
+            this.elements.open.addEventListener("click", () => this.openFile());
+            this.elements.reload.addEventListener("click", () => this.reloadFromHandle());
+            this.elements.save.addEventListener("click", () => this.save());
+            this.elements.selectVisible.addEventListener("click", () => this.toggleSelectVisible());
+            this.elements.clearSelection.addEventListener("click", () => this.clearSelection());
+            this.elements.deleteSelected.addEventListener("click", () => this.deleteSelected());
+            this.elements.undo.addEventListener("click", () => this.undo());
+            this.elements.exportBtn.addEventListener("click", () => this.exportCopy());
+            this.elements.exportJsonBtn.addEventListener("click", () => this.exportJson());
+
+            this.elements.addForm.addEventListener("submit", (evt) => {
+              evt.preventDefault();
+              const formData = new FormData(evt.target);
+              const payload = Object.fromEntries(formData.entries());
+              this.addEntry(payload);
+              evt.target.reset();
+            });
+
+            this.elements.fileInput.addEventListener("change", (evt) => {
+              const [file] = evt.target.files || [];
+              if (file) this.readFileObject(file);
+            });
+
+            this.elements.entries.addEventListener("change", (evt) => {
+              if (!evt.target.classList.contains("row-select")) return;
+              const row = evt.target.closest("tr");
+              const id = row?.dataset.id;
+              if (!id) return;
+              if (evt.target.checked) {
+                this.selection.add(id);
+              } else {
+                this.selection.delete(id);
+              }
+              this.syncSelectionControls();
+            });
+
+            this.elements.entries.addEventListener("click", (evt) => {
+              const btn = evt.target.closest("button[data-action='remove']");
+              if (!btn) return;
+              const id = btn.dataset.id;
+              this.removeEntry(id);
+            });
+          }
+
+          async tryAutoLoad() {
+            try {
+              const response = await fetch("lint.txt", { cache: "no-store" });
+              if (!response.ok) throw new Error("Fetch failed");
+              const text = await response.text();
+              this.loadText(text);
+              this.setStatus("Loaded lint.txt via fetch. Saving requires granting file access.", "success");
+            } catch (error) {
+              this.setStatus(
+                "Automatic load failed (likely due to file://). Use 'Open lint.txt' to pick the file instead.",
+                "warn"
+              );
+            }
+          }
+
+          setStatus(message, tone = "") {
+            const classNames = ["status"];
+            if (tone) classNames.push(tone);
+            this.elements.status.className = classNames.join(" ");
+            this.elements.status.textContent = message;
+          }
+
+          loadText(text) {
+            const { header, entries } = parseLintText(text);
+            this.header = header;
+            this.entries = entries;
+            this.selection.clear();
+            this.undoStack = [];
+            this.dirty = false;
+            this.render();
+          }
+
+          buildText() {
+            return serializeEntries(this.header, this.entries);
+          }
+
+          render() {
+            const term = this.searchTerm.toLowerCase();
+            this.filtered = this.entries.filter((entry) => {
+              const matches =
+                !term ||
+                entry.path.toLowerCase().includes(term) ||
+                entry.message.toLowerCase().includes(term) ||
+                entry.rule.toLowerCase().includes(term) ||
+                `${entry.line}:${entry.column}`.includes(term);
+              return this.invertSearch ? !matches : matches;
+            });
+
+            this.elements.entries.innerHTML = "";
+            if (!this.filtered.length) {
+              const row = document.createElement("tr");
+              const cell = document.createElement("td");
+              cell.colSpan = 6;
+              cell.className = "empty-state";
+              cell.textContent = this.entries.length
+                ? "No entries match your search."
+                : "Load lint.txt to get started.";
+              row.appendChild(cell);
+              this.elements.entries.appendChild(row);
+            } else {
+              const fragment = document.createDocumentFragment();
+              this.filtered.forEach((entry) => {
+                const row = this.buildRow(entry);
+                fragment.appendChild(row);
+              });
+              this.elements.entries.appendChild(fragment);
+            }
+
+            this.elements.counter.textContent = `${this.filtered.length} showing / ${this.entries.length} total`; 
+            this.elements.invertSearch.checked = this.invertSearch;
+            this.elements.invertSearch.disabled = !this.entries.length;
+            this.syncSelectionControls();
+            this.elements.save.disabled = !this.dirty || !this.entries.length || !this.fileHandle;
+            this.elements.reload.disabled = !this.fileHandle;
+            this.elements.exportJsonBtn.disabled = !this.entries.length;
+          }
+
+          buildRow(entry) {
+            const fragment = document.createDocumentFragment();
+
+            const pathRow = document.createElement("tr");
+            pathRow.className = "entry path-row";
+            pathRow.dataset.id = entry.id;
+
+            const selectCell = document.createElement("td");
+            selectCell.rowSpan = 2;
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.className = "row-select";
+            checkbox.checked = this.selection.has(entry.id);
+            selectCell.appendChild(checkbox);
+
+            const pathCell = document.createElement("td");
+            pathCell.className = "path";
+            pathCell.colSpan = 4;
+            pathCell.title = entry.path;
+            pathCell.textContent = entry.relativePath || entry.path;
+
+            const actionsCell = document.createElement("td");
+            actionsCell.className = "actions";
+            actionsCell.rowSpan = 2;
+            const removeBtn = document.createElement("button");
+            removeBtn.dataset.action = "remove";
+            removeBtn.dataset.id = entry.id;
+            removeBtn.className = "secondary";
+            removeBtn.textContent = "Remove";
+            actionsCell.appendChild(removeBtn);
+
+            pathRow.appendChild(selectCell);
+            pathRow.appendChild(pathCell);
+            pathRow.appendChild(actionsCell);
+
+            const detailRow = document.createElement("tr");
+            detailRow.className = "entry detail-row";
+            detailRow.dataset.id = entry.id;
+
+            const messageCell = document.createElement("td");
+            messageCell.className = "message";
+            messageCell.colSpan = 2;
+            messageCell.textContent = entry.message;
+
+            const ruleCell = document.createElement("td");
+            ruleCell.className = "rule";
+            ruleCell.textContent = entry.rule;
+
+            const severityCell = document.createElement("td");
+            severityCell.className = "severity";
+            const badge = document.createElement("span");
+            badge.className = entry.severity;
+            badge.textContent = entry.severity;
+            severityCell.appendChild(badge);
+            const meta = document.createElement("div");
+            meta.className = "row-meta";
+            meta.textContent = `Line ${entry.line || "?"}, Col ${entry.column || "?"}`;
+            severityCell.appendChild(meta);
+
+            detailRow.appendChild(messageCell);
+            detailRow.appendChild(ruleCell);
+            detailRow.appendChild(severityCell);
+
+            fragment.appendChild(pathRow);
+            fragment.appendChild(detailRow);
+            return fragment;
+          }
+
+          toggleSelectVisible() {
+            if (!this.filtered.length) return;
+            const everySelected = this.filtered.every((entry) => this.selection.has(entry.id));
+            if (everySelected) {
+              this.filtered.forEach((entry) => this.selection.delete(entry.id));
+            } else {
+              this.filtered.forEach((entry) => this.selection.add(entry.id));
+            }
+            this.render();
+          }
+
+          clearSelection() {
+            this.selection.clear();
+            this.render();
+          }
+
+          deleteSelected() {
+            if (!this.selection.size) return;
+            const deletedEntries = this.entries.filter((entry) => this.selection.has(entry.id));
+            this.undoStack.push(deletedEntries);
+            this.entries = this.entries.filter((entry) => !this.selection.has(entry.id));
+            this.selection.clear();
+            this.setDirty(true);
+            this.render();
+          }
+
+          removeEntry(id) {
+            const entry = this.entries.find((item) => item.id === id);
+            if (!entry) return;
+            this.undoStack.push([entry]);
+            this.entries = this.entries.filter((item) => item.id !== id);
+            this.selection.delete(id);
+            this.setDirty(true);
+            this.render();
+          }
+
+          undo() {
+            const last = this.undoStack.pop();
+            if (!last) return;
+            this.entries = [...this.entries, ...last];
+            this.setDirty(true);
+            this.render();
+          }
+
+          addEntry(payload) {
+            const entry = {
+              id: generateId(),
+              path: payload.path.trim(),
+              line: payload.line.trim(),
+              column: payload.column.trim(),
+              severity: payload.severity.trim(),
+              message: payload.message.trim(),
+              rule: payload.rule.trim(),
+              relativePath: deriveRelativePath(payload.path.trim()),
+            };
+            this.entries = [...this.entries, entry];
+            this.setDirty(true);
+            this.render();
+          }
+
+          setDirty(flag) {
+            this.dirty = flag;
+            this.elements.undo.disabled = this.undoStack.length === 0;
+            this.elements.save.disabled = !this.dirty || !this.fileHandle;
+          }
+
+          syncSelectionControls() {
+            const hasSelection = this.selection.size > 0;
+            const canSelectVisible = this.filtered.length > 0;
+            this.elements.selectVisible.disabled = !canSelectVisible;
+            this.elements.clearSelection.disabled = !hasSelection;
+            this.elements.deleteSelected.disabled = !hasSelection;
+            this.elements.undo.disabled = this.undoStack.length === 0;
+          }
+
+          async openFile() {
+            if (window.showOpenFilePicker) {
+              try {
+                const [handle] = await window.showOpenFilePicker({
+                  id: "lint-file",
+                  types: [
+                    {
+                      description: "Text files",
+                      accept: { "text/plain": [".txt"] },
+                    },
+                  ],
+                });
+                this.fileHandle = handle;
+                await this.reloadFromHandle();
+                this.setStatus("lint.txt ready. You can edit and save.", "success");
+              } catch (error) {
+                if (error?.name !== "AbortError") {
+                  this.setStatus("Could not open file: " + error.message, "error");
+                }
+              }
+            } else {
+              this.elements.fileInput.click();
+              this.setStatus("Your browser needs a manual file upload; saving will download a copy instead.", "warn");
+            }
+          }
+
+          async reloadFromHandle() {
+            if (!this.fileHandle) return;
+            const permission = await this.fileHandle.queryPermission({ mode: "read" });
+            if (permission === "denied") {
+              const request = await this.fileHandle.requestPermission({ mode: "read" });
+              if (request === "denied") {
+                this.setStatus("Read permission denied.", "error");
+                return;
+              }
+            }
+            const file = await this.fileHandle.getFile();
+            const text = await file.text();
+            this.loadText(text);
+            this.setStatus("Loaded from lint.txt", "success");
+          }
+
+          readFileObject(file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+              this.loadText(reader.result);
+              this.setStatus("Loaded from uploaded file. Saving will download a copy.", "success");
+            };
+            reader.readAsText(file);
+          }
+
+          async save() {
+            if (!this.fileHandle) {
+              this.exportCopy();
+              this.setStatus(
+                "Browser lacks write access. Downloaded a new lint.txt copy instead.",
+                "warn"
+              );
+              return;
+            }
+            try {
+              const writable = await this.fileHandle.createWritable();
+              await writable.write(this.buildText());
+              await writable.close();
+              this.setStatus("Saved changes into lint.txt", "success");
+              this.dirty = false;
+              this.render();
+            } catch (error) {
+              this.setStatus("Failed to save: " + error.message, "error");
+            }
+          }
+
+          exportCopy() {
+            const blob = new Blob([this.buildText()], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+            const anchor = document.createElement("a");
+            anchor.href = url;
+            anchor.download = "lint.txt";
+            anchor.click();
+            URL.revokeObjectURL(url);
+          }
+
+          buildJsonData() {
+            return this.entries.map((entry) => ({
+              key: entry.relativePath || entry.path,
+              item: `${entry.line || "?"}:${entry.column || "?"} ${
+                (entry.severity || "warning").toUpperCase()
+              } ${entry.rule || ""} - ${entry.message}`.trim(),
+              prompt: null,
+            }));
+          }
+
+          exportJson() {
+            if (!this.entries.length) return;
+            const data = this.buildJsonData();
+            const blob = new Blob([JSON.stringify(data, null, 2)], {
+              type: "application/json",
+            });
+            const url = URL.createObjectURL(blob);
+            const anchor = document.createElement("a");
+            anchor.href = url;
+            anchor.download = "lint-warnings.json";
+            anchor.click();
+            URL.revokeObjectURL(url);
+          }
+        }
+
+        const workbench = new LintWorkbench();
+        workbench.init();
+      })();
+    </script>
+  </body>
+</html>

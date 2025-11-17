@@ -5,7 +5,7 @@ import { publicEnv } from "@/config/env";
 import { DBResponse } from "@/entities/IDBResponse";
 import { NextGenCollection } from "@/entities/INextgen";
 import { fetchUrl } from "@/services/6529api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useEffectEvent } from "react";
 import { Col, Container, Dropdown, Row } from "react-bootstrap";
 import styles from "./NextGen.module.scss";
 import NextGenCollectionPreview from "./NextGenCollectionPreview";
@@ -29,7 +29,7 @@ export default function NextGenCollections() {
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
 
-  function fetchResults(mypage: number) {
+  const fetchResults = useEffectEvent((mypage: number) => {
     setCollectionsLoaded(false);
     let statusFilter = "";
     if (selectedStatus !== StatusFilter.ALL) {
@@ -42,7 +42,7 @@ export default function NextGenCollections() {
       setCollections(response.data);
       setCollectionsLoaded(true);
     });
-  }
+  });
 
   useEffect(() => {
     if (page === 1) {

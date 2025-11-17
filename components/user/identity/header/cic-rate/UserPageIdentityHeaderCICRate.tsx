@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useContext, useEffect, useState } from "react";
+import { FormEvent, useContext, useEffect, useMemo, useState } from "react";
 import { ApiProfileRaterCicState } from "@/entities/IProfile";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import { AuthContext } from "@/components/auth/Auth";
@@ -86,7 +86,7 @@ export default function UserPageIdentityHeaderCICRate({
     },
   });
 
-  const getProxyAvailableCredit = (): number | null => {
+  const proxyAvailableCredit = useMemo<number | null>(() => {
     const repProxy = activeProfileProxy?.actions.find(
       (a) => a.action_type === ApiProfileProxyActionType.AllocateCic
     );
@@ -97,62 +97,29 @@ export default function UserPageIdentityHeaderCICRate({
       (repProxy.credit_amount ?? 0) - (repProxy.credit_spent ?? 0),
       0
     );
-  };
+  }, [activeProfileProxy]);
 
-  const [proxyAvailableCredit, setProxyAvailableCredit] = useState<
-    number | null
-  >(getProxyAvailableCredit());
-
-  useEffect(
-    () => setProxyAvailableCredit(getProxyAvailableCredit()),
-    [activeProfileProxy]
-  );
-
-  const getMinValue = (): number => {
+  const minMaxValues = useMemo(() => {
     const currentCic = currentCICState?.cic_rating_by_rater ?? 0;
     const heroAvailableCic =
       currentCICState?.cic_ratings_left_to_give_by_rater ?? 0;
     const minHeroCic = 0 - (Math.abs(currentCic) + heroAvailableCic);
-    if (typeof proxyAvailableCredit !== "number") {
-      return minHeroCic;
-    }
-    const minProxyRep = currentCic - proxyAvailableCredit;
-
-    return Math.abs(minHeroCic) < Math.abs(minProxyRep)
-      ? minHeroCic
-      : minProxyRep;
-  };
-
-  const getMaxValue = (): number => {
-    const currentCic = currentCICState?.cic_rating_by_rater ?? 0;
-    const heroAvailableCic =
-      currentCICState?.cic_ratings_left_to_give_by_rater ?? 0;
     const maxHeroCic = Math.abs(currentCic) + heroAvailableCic;
+
     if (typeof proxyAvailableCredit !== "number") {
-      return maxHeroCic;
+      return { min: minHeroCic, max: maxHeroCic } as const;
     }
+
+    const minProxyRep = currentCic - proxyAvailableCredit;
     const maxProxyRep = currentCic + proxyAvailableCredit;
 
-    return Math.min(maxHeroCic, maxProxyRep);
-  };
-
-  const getMinMaxValues = (): {
-    readonly min: number;
-    readonly max: number;
-  } => ({
-    min: getMinValue(),
-    max: getMaxValue(),
-  });
-
-  const [minMaxValues, setMinMaxValues] = useState<{
-    readonly min: number;
-    readonly max: number;
-  }>(getMinMaxValues());
-
-  useEffect(
-    () => setMinMaxValues(getMinMaxValues()),
-    [currentCICState, proxyAvailableCredit]
-  );
+    return {
+      min: Math.abs(minHeroCic) < Math.abs(minProxyRep)
+        ? minHeroCic
+        : minProxyRep,
+      max: Math.min(maxHeroCic, maxProxyRep),
+    } as const;
+  }, [currentCICState, proxyAvailableCredit]);
 
   const [originalRating, setOriginalRating] = useState<number>(
     currentCICState?.cic_rating_by_rater ?? 0
@@ -184,7 +151,7 @@ export default function UserPageIdentityHeaderCICRate({
   };
 
   const adjustStrValueToMinMax = (): void => {
-    const { min, max } = getMinMaxValues();
+    const { min, max } = minMaxValues;
     const valueAsNumber = getStringAsNumberOrZero(adjustedRatingStr);
     if (valueAsNumber > max) {
       setAdjustedRatingStr(`${max}`);
@@ -196,7 +163,7 @@ export default function UserPageIdentityHeaderCICRate({
     }
   };
 
-  const getIsValidValue = (): boolean => {
+  const isValidValue = useMemo(() => {
     const { min, max } = minMaxValues;
     const valueAsNumber = getStringAsNumberOrZero(adjustedRatingStr);
     if (valueAsNumber > max) {
@@ -207,47 +174,19 @@ export default function UserPageIdentityHeaderCICRate({
       return false;
     }
     return true;
-  };
+  }, [adjustedRatingStr, minMaxValues]);
 
-  const [isValidValue, setIsValidValue] = useState<boolean>(getIsValidValue());
-
-  useEffect(() => setIsValidValue(getIsValidValue()), [adjustedRatingStr]);
-
-  const [newRating, setNewRating] = useState<number>(
-    getStringAsNumberOrZero(adjustedRatingStr)
+  const newRating = useMemo(
+    () => getStringAsNumberOrZero(adjustedRatingStr),
+    [adjustedRatingStr]
   );
 
-  useEffect(() => {
-    setNewRating(getStringAsNumberOrZero(adjustedRatingStr));
-  }, [adjustedRatingStr]);
-
-  const [haveChanged, setHaveChanged] = useState<boolean>(
-    newRating !== originalRating
+  const haveChanged = useMemo(
+    () => newRating !== originalRating,
+    [newRating, originalRating]
   );
 
-  useEffect(() => {
-    setHaveChanged(newRating !== originalRating);
-  }, [newRating, originalRating]);
-
-  const getIsSaveDisabled = (): boolean => {
-    if (!haveChanged) {
-      return true;
-    }
-
-    if (!isValidValue) {
-      return true;
-    }
-
-    return false;
-  };
-
-  const [isSaveDisabled, setIsSaveDisabled] = useState<boolean>(
-    getIsSaveDisabled()
-  );
-
-  useEffect(() => {
-    setIsSaveDisabled(getIsSaveDisabled());
-  }, [haveChanged, isValidValue]);
+  const isSaveDisabled = !haveChanged || !isValidValue;
 
   const onSave = async () => {
     const { success } = await requestAuth();

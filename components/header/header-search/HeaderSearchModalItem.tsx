@@ -20,7 +20,12 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useRef, type ComponentType } from "react";
+import {
+  useEffect,
+  useEffectEvent,
+  useRef,
+  type ComponentType,
+} from "react";
 import { useHoverDirty } from "react-use";
 import HeaderSearchModalItemMedia from "./HeaderSearchModalItemMedia";
 import HeaderSearchModalPfp from "./HeaderSearchModalPfp";
@@ -140,9 +145,13 @@ export default function HeaderSearchModalItem({
     }
   };
 
+  const emitHover = useEffectEvent((state: boolean) => {
+    onHover(state);
+  });
+
   useEffect(() => {
     if (supportsHover) {
-      onHover(isHovering);
+      emitHover(isHovering);
     }
   }, [isHovering, supportsHover]);
 

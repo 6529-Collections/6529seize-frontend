@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 
 import WavesListSearch from "./WavesListSearch";
 import { AuthContext } from "@/components/auth/Auth";
@@ -27,15 +27,8 @@ export default function WavesListHeader({
   readonly setWaveName: (waveName: string | null) => void;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const getShowMyWavesButton = () =>
+  const showMyWavesButton =
     !!connectedProfile?.handle && !activeProfileProxy;
-  const [showMyWavesButton, setShowMyWavesButton] = useState(
-    getShowMyWavesButton()
-  );
-  useEffect(
-    () => setShowMyWavesButton(getShowMyWavesButton()),
-    [connectedProfile, activeProfileProxy]
-  );
   return (
     <div className="tw-mt-4 md:tw-mt-8">
       <h1>{title}</h1>

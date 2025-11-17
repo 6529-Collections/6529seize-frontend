@@ -21,7 +21,7 @@ import { faPlusCircle, faRefresh } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import { Button, Col, Container, Dropdown, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import styles from "./Rememes.module.scss";
@@ -68,6 +68,20 @@ export default function Rememes() {
     RememeSort.RANDOM
   );
 
+  const syncSelectedMemeToQuery = useEffectEvent(
+    (nextSelectedMeme: number) => {
+      const currentId = searchParams?.get("meme_id")
+        ? parseInt(searchParams.get("meme_id")!)
+        : 0;
+      if (!currentId || currentId !== nextSelectedMeme) {
+        const querySuffix = nextSelectedMeme
+          ? `?meme_id=${nextSelectedMeme}`
+          : "";
+        router.push(`${pathname}${querySuffix}`);
+      }
+    }
+  );
+
   useEffect(() => {
     fetchUrl(`${publicEnv.API_ENDPOINT}/api/memes_lite`)
       .then((response: DBResponse) => {
@@ -81,7 +95,7 @@ export default function Rememes() {
       });
   }, []);
 
-  function fetchResults(mypage: number) {
+  const fetchResults = useEffectEvent((mypage: number) => {
     setRememesLoaded(false);
     let memeFilter = "";
     if (selectedMeme) {
@@ -107,18 +121,10 @@ export default function Rememes() {
       .finally(() => {
         setRememesLoaded(true);
       });
-  }
+  });
 
   useEffect(() => {
-    const currentId = searchParams?.get("meme_id")
-      ? parseInt(searchParams.get("meme_id")!)
-      : 0;
-    if (!currentId || currentId != selectedMeme) {
-      const newPath = `${pathname}${
-        selectedMeme ? `?meme_id=${selectedMeme}` : ""
-      }`;
-      router.push(newPath);
-    }
+    syncSelectedMemeToQuery(selectedMeme);
   }, [selectedMeme]);
 
   useEffect(() => {

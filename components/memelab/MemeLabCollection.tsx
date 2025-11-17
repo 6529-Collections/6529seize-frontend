@@ -49,20 +49,22 @@ export default function LabCollection({
   const [nftsLoaded, setNftsLoaded] = useState(false);
   const [nftBalances, setNftBalances] = useState<NftOwner[]>([]);
 
-  const [sortDir, setSortDir] = useState<SortDirection>();
-  const [sort, setSort] = useState<MemeLabSort>(MemeLabSort.AGE);
-
-  const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.HOURS_24);
-
-  useEffect(() => {
-    const { initialSortDir, initialSort } = getInitialRouterValues(
+  const [sortDir, setSortDir] = useState<SortDirection>(() => {
+    const { initialSortDir } = getInitialRouterValues(
       searchParams?.get("sortDir") ?? null,
       searchParams?.get("sort") ?? null
     );
-    setSortDir(initialSortDir);
-    setSort(initialSort);
-    setVolumeType(VolumeType.HOURS_24);
-  }, []);
+    return initialSortDir;
+  });
+  const [sort, setSort] = useState<MemeLabSort>(() => {
+    const { initialSort } = getInitialRouterValues(
+      searchParams?.get("sortDir") ?? null,
+      searchParams?.get("sort") ?? null
+    );
+    return initialSort;
+  });
+
+  const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.HOURS_24);
 
   useEffect(() => {
     if (collectionName) {

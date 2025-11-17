@@ -7,7 +7,7 @@ import {
   NextGenToken,
   TraitValuePair,
 } from "@/entities/INextgen";
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import Pagination from "@/components/pagination/Pagination";
 import { commonApiFetch } from "@/services/api/common-api";
 import DotLoader from "@/components/dotLoader/DotLoader";
@@ -32,42 +32,52 @@ interface Props {
   show_pagination?: boolean;
 }
 
-export default function NextGenTokenList(props: Readonly<Props>) {
-  const pageSize = props.limit ?? 48;
+export default function NextGenTokenList({
+  collection,
+  limit,
+  sort,
+  sort_direction: sortDirection,
+  selected_traits: selectedTraits,
+  show_normalised: showNormalised,
+  show_trait_count: showTraitCount,
+  listed_type: listedType,
+  setTotalResults: notifyTotalResults,
+  show_pagination: showPagination,
+}: Readonly<Props>) {
+  const pageSize = limit ?? 48;
 
   const [tokens, setTokens] = useState<NextGenToken[]>([]);
   const [tokensLoaded, setTokensLoaded] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
   const [rarityType, setRarityType] = useState<NextGenTokenRarityType>();
-
-  function fetchResults(mypage: number) {
+  const fetchResults = useEffectEvent((mypage: number) => {
     setTokensLoaded(false);
-    let endpoint = `nextgen/collections/${props.collection.id}/tokens?page_size=${pageSize}&page=${mypage}`;
-    if (props.selected_traits) {
-      const traitsQ = props.selected_traits
+    let endpoint = `nextgen/collections/${collection.id}/tokens?page_size=${pageSize}&page=${mypage}`;
+    if (selectedTraits) {
+      const traitsQ = selectedTraits
         .map((t) => `${t.trait}:${t.value}`)
         .join(",");
       endpoint += `&traits=${encodeURIComponent(traitsQ)}`;
     }
-    if (props.show_normalised) {
+    if (showNormalised) {
       endpoint += `&show_normalised=true`;
     }
-    if (props.show_trait_count) {
+    if (showTraitCount) {
       endpoint += `&show_trait_count=true`;
     }
-    if (props.listed_type === NextGenTokenListedType.LISTED) {
+    if (listedType === NextGenTokenListedType.LISTED) {
       endpoint += `&listed=true`;
-    } else if (props.listed_type === NextGenTokenListedType.NOT_LISTED) {
+    } else if (listedType === NextGenTokenListedType.NOT_LISTED) {
       endpoint += `&listed=false`;
     }
-    if (props.sort) {
-      endpoint += `&sort=${props.sort.replaceAll(" ", "_").toLowerCase()}`;
+    if (sort) {
+      endpoint += `&sort=${sort.replaceAll(" ", "_").toLowerCase()}`;
     } else {
       endpoint += `&sort=random`;
     }
-    if (props.sort_direction) {
-      endpoint += `&sort_direction=${props.sort_direction.toLowerCase()}`;
+    if (sortDirection) {
+      endpoint += `&sort_direction=${sortDirection.toLowerCase()}`;
     }
     commonApiFetch<{
       count: number;
@@ -78,13 +88,13 @@ export default function NextGenTokenList(props: Readonly<Props>) {
       endpoint: endpoint,
     }).then((response) => {
       setTotalResults(response.count);
-      if (props.setTotalResults) {
-        props.setTotalResults(response.count);
+      if (notifyTotalResults) {
+        notifyTotalResults(response.count);
       }
       setTokens(response.data);
       setTokensLoaded(true);
     });
-  }
+  });
 
   useEffect(() => {
     if (page === 1) {
@@ -93,12 +103,12 @@ export default function NextGenTokenList(props: Readonly<Props>) {
       setPage(1);
     }
   }, [
-    props.selected_traits,
-    props.sort,
-    props.sort_direction,
-    props.show_normalised,
-    props.show_trait_count,
-    props.listed_type,
+    selectedTraits,
+    sort,
+    sortDirection,
+    showNormalised,
+    showTraitCount,
+    listedType,
   ]);
 
   useEffect(() => {
@@ -121,33 +131,32 @@ export default function NextGenTokenList(props: Readonly<Props>) {
   }
 
   useEffect(() => {
-    const { sort, show_normalised, show_trait_count } = props;
     let newRarityType = undefined;
     switch (sort) {
       case NextGenListFilters.RARITY_SCORE:
         newRarityType = getRarityType(
           NextGenTokenRarityType.RARITY_SCORE,
-          show_normalised,
-          show_trait_count
+          showNormalised,
+          showTraitCount
         );
         break;
       case NextGenListFilters.STATISTICAL_SCORE:
         newRarityType = getRarityType(
           NextGenTokenRarityType.STATISTICAL_SCORE,
-          show_normalised,
-          show_trait_count
+          showNormalised,
+          showTraitCount
         );
         break;
       case NextGenListFilters.SINGLE_TRAIT_RARITY:
         newRarityType = getRarityType(
           NextGenTokenRarityType.SINGLE_TRAIT_RARITY_SCORE,
-          show_normalised,
-          show_trait_count
+          showNormalised,
+          showTraitCount
         );
         break;
     }
     setRarityType(newRarityType);
-  }, [props.sort, props.show_normalised, props.show_trait_count]);
+  }, [sort, showNormalised, showTraitCount]);
 
   return (
     <Container className="no-padding">
@@ -166,13 +175,11 @@ export default function NextGenTokenList(props: Readonly<Props>) {
                     token={t}
                     rarity_type={rarityType}
                     show_listing={
-                      props.sort === NextGenListFilters.LISTED_PRICE ||
-                      props.listed_type === NextGenTokenListedType.LISTED
+                      sort === NextGenListFilters.LISTED_PRICE ||
+                      listedType === NextGenTokenListedType.LISTED
                     }
-                    show_max_sale={
-                      props.sort === NextGenListFilters.HIGHEST_SALE
-                    }
-                    show_last_sale={props.sort === NextGenListFilters.LAST_SALE}
+                    show_max_sale={sort === NextGenListFilters.HIGHEST_SALE}
+                    show_last_sale={sort === NextGenListFilters.LAST_SALE}
                     show_owner_info={true}
                   />
                 </Col>
@@ -189,7 +196,7 @@ export default function NextGenTokenList(props: Readonly<Props>) {
           }
         })()}
       </Row>
-      {totalResults > pageSize && tokensLoaded && props.show_pagination && (
+      {totalResults > pageSize && tokensLoaded && showPagination && (
         <Row className="text-center pt-4 pb-4">
           <Pagination
             page={page}

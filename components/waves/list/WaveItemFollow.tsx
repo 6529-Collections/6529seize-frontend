@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -25,31 +25,15 @@ export default function WaveItemFollow({ wave }: { readonly wave: ApiWave }) {
   const { onWaveFollowChange } = useContext(ReactQueryWrapperContext);
   const isSubscribed = !!wave.subscribed_actions.length;
   const label = isSubscribed ? "Following" : "Follow";
-  const getCanSubscribe = () =>
-    !!connectedProfile?.handle && !activeProfileProxy;
-  const [canSubscribe, setCanSubscribe] = useState(getCanSubscribe());
-  useEffect(
-    () => setCanSubscribe(getCanSubscribe()),
-    [connectedProfile, activeProfileProxy]
-  );
+  const canSubscribe = Boolean(connectedProfile?.handle) && !activeProfileProxy;
 
   const [mutating, setMutating] = useState(false);
-  const getIsDisabled = () => mutating || !canSubscribe;
-  const [isDisabled, setIsDisabled] = useState(getIsDisabled());
-  useEffect(() => setIsDisabled(getIsDisabled()), [mutating, canSubscribe]);
-
-  const getState = (): WaveItemFollowState => {
-    if (!canSubscribe) {
-      return WaveItemFollowState.CANT_FOLLOW;
-    }
-    if (isSubscribed) {
-      return WaveItemFollowState.FOLLOWING;
-    }
-    return WaveItemFollowState.FOLLOW;
-  };
-
-  const [state, setState] = useState(getState());
-  useEffect(() => setState(getState()), [isSubscribed, canSubscribe]);
+  const isDisabled = mutating || !canSubscribe;
+  const state: WaveItemFollowState = !canSubscribe
+    ? WaveItemFollowState.CANT_FOLLOW
+    : isSubscribed
+    ? WaveItemFollowState.FOLLOWING
+    : WaveItemFollowState.FOLLOW;
 
   const CLASSES: Record<WaveItemFollowState, string> = {
     [WaveItemFollowState.FOLLOWING]:

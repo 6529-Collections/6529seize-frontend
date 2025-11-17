@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import {
   CollectedCollectionType,
   CollectionSort,
@@ -28,29 +28,20 @@ export default function UserPageCollectedFiltersSortBy({
     [CollectionSort.RANK]: "Rank",
   };
 
-  const getItems = () => {
-    const items: CommonSelectItem<CollectionSort>[] = Object.values(
-      CollectionSort
-    ).map((sort) => ({
+  const items = useMemo<CommonSelectItem<CollectionSort>[]>(() => {
+    const selectItems = Object.values(CollectionSort).map((sort) => ({
       label: labels[sort],
       value: sort,
       key: sort,
     }));
 
-    return items.filter((item) =>
+    return selectItems.filter((item) =>
       collection
         ? COLLECTED_COLLECTIONS_META[collection].filters.sort.includes(
             item.value
           )
         : true
     );
-  };
-  const [items, setItems] = useState<CommonSelectItem<CollectionSort>[]>(
-    getItems()
-  );
-
-  useEffect(() => {
-    setItems(getItems());
   }, [collection]);
 
   return (

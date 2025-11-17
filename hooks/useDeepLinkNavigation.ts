@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { App } from "@capacitor/app";
-import { useCallback, useEffect } from "react";
+import { useEffect, useEffectEvent } from "react";
 import useCapacitor from "./useCapacitor";
 
 export enum DeepLinkScope {
@@ -14,7 +14,7 @@ export const useDeepLinkNavigation = () => {
   const { isCapacitor } = useCapacitor();
   const router = useRouter();
 
-  const doNavigation = useCallback(
+  const doNavigation = useEffectEvent(
     (pathname: string, query: Record<string, string | number>) => {
       const searchParams = new URLSearchParams(
         Object.entries(query).map(([key, value]) => [key, String(value)])
@@ -23,8 +23,7 @@ export const useDeepLinkNavigation = () => {
 
       console.log("Deep Link Navigation", url);
       router.push(url);
-    },
-    [router]
+    }
   );
 
   useEffect(() => {
@@ -64,5 +63,5 @@ export const useDeepLinkNavigation = () => {
     return () => {
       listener.then((handle) => handle.remove());
     };
-  }, [doNavigation]);
+  }, [isCapacitor]);
 };

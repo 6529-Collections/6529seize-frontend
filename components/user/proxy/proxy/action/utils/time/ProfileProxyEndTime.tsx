@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
 import { AuthContext } from "@/components/auth/Auth";
@@ -19,15 +19,9 @@ export default function ProfileProxyEndTime({
   readonly onEndTimeEdit: () => void;
 }) {
   const { connectedProfile } = useContext(AuthContext);
-  const getIsOwner = (): boolean => {
-    if (!connectedProfile) {
-      return false;
-    }
-    return connectedProfile?.id === profileProxy.created_by.id;
-  };
-
-  const [isOwner, setIsOwner] = useState(getIsOwner());
-  useEffect(() => setIsOwner(getIsOwner()), [connectedProfile, profileProxy]);
+  const isOwner =
+    !!connectedProfile &&
+    connectedProfile.id === profileProxy.created_by.id;
 
   return (
     <div className="tw-flex tw-items-center">

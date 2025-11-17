@@ -1,6 +1,12 @@
 "use client";
 
-import { useContext, useEffect, useState, type JSX } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type JSX,
+} from "react";
 import GroupCreate from "./create/GroupCreate";
 import { AuthContext } from "@/components/auth/Auth";
 import GroupsPageListWrapper from "./GroupsPageListWrapper";
@@ -28,28 +34,38 @@ export default function Groups() {
 
   const [viewMode, setViewMode] = useState(GroupsViewMode.VIEW);
 
-  const onViewModeChange = async (mode: GroupsViewMode): Promise<void> => {
-    if (mode === GroupsViewMode.CREATE) {
-      const { success } = await requestAuth();
-      if (!success) return;
-    } else if (pathname) {
-      router.replace(pathname);
-    }
+  const onViewModeChange = useCallback(
+    async (mode: GroupsViewMode): Promise<void> => {
+      if (mode === GroupsViewMode.CREATE) {
+        const { success } = await requestAuth();
+        if (!success) return;
+      } else if (pathname) {
+        router.replace(pathname);
+      }
 
-    setViewMode(mode);
-  };
+      setViewMode(mode);
+    },
+    [pathname, requestAuth, router],
+  );
+
+  const hasConnectedProfile = Boolean(connectedProfile?.handle);
+  const isProxyActive = Boolean(activeProfileProxy);
+  const shouldAutoEnableCreate = Boolean(
+    edit && hasConnectedProfile && !isProxyActive,
+  );
+  const shouldForceViewMode = !hasConnectedProfile || isProxyActive;
 
   useEffect(() => {
-    if (edit && !!connectedProfile?.handle && !activeProfileProxy) {
-      onViewModeChange(GroupsViewMode.CREATE);
+    if (shouldAutoEnableCreate) {
+      void onViewModeChange(GroupsViewMode.CREATE);
     }
-  }, [edit]);
+  }, [shouldAutoEnableCreate, onViewModeChange]);
 
   useEffect(() => {
-    if (!connectedProfile?.handle || activeProfileProxy) {
-      onViewModeChange(GroupsViewMode.VIEW);
+    if (shouldForceViewMode) {
+      void onViewModeChange(GroupsViewMode.VIEW);
     }
-  }, [connectedProfile, activeProfileProxy]);
+  }, [shouldForceViewMode, onViewModeChange]);
 
   const components: Record<GroupsViewMode, JSX.Element> = {
     [GroupsViewMode.VIEW]: (

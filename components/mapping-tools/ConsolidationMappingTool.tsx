@@ -99,7 +99,10 @@ export default function ConsolidationMappingTool() {
   }
 
   useEffect(() => {
-    async function fetchConsolidations(url: string) {
+    if (!processing || !file) {
+      return;
+    }
+    async function fetchConsolidations(url: string, selectedFile: File) {
       fetchAllPages<Consolidation>(url).then((consolidations) => {
         setConsolidations(consolidations);
         const reader = new FileReader();
@@ -133,14 +136,13 @@ export default function ConsolidationMappingTool() {
           parser.end();
         };
 
-        reader.readAsText(file);
+        reader.readAsText(selectedFile);
       });
     }
-    if (processing) {
-      const initialUrl = `${publicEnv.API_ENDPOINT}/api/consolidations`;
-      fetchConsolidations(initialUrl);
-    }
-  }, [processing]);
+
+    const initialUrl = `${publicEnv.API_ENDPOINT}/api/consolidations`;
+    fetchConsolidations(initialUrl, file);
+  }, [file, processing]);
 
   useEffect(() => {
     const out: ConsolidationData[] = [];

@@ -329,41 +329,49 @@ export function NextGenMintCounts(
     setShouldRefetchMintCounts?(shouldRefetchMintCounts: boolean): void;
   }>
 ) {
+  const {
+    collection,
+    setAvailable: notifyAvailable,
+    shouldRefetchMintCounts = false,
+    setShouldRefetchMintCounts,
+  } = props;
+  const { id: collectionId, total_supply: totalSupply } = collection;
   const [enableRefresh, setEnableRefresh] = useState<boolean>(true);
   const [available, setAvailable] = useState<number>(0);
 
   const collectionMintCount = useCollectionMintCount(
-    props.collection.id,
+    collectionId,
     enableRefresh
   );
+  const { data: mintCountData, isFetching, refetch } = collectionMintCount;
   const [mintCount, setMintCount] = useState<number>(0);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if (props.shouldRefetchMintCounts) {
-      collectionMintCount.refetch().then(() => {
-        if (props.setShouldRefetchMintCounts) {
-          props.setShouldRefetchMintCounts(false);
+    if (shouldRefetchMintCounts) {
+      refetch().then(() => {
+        if (setShouldRefetchMintCounts) {
+          setShouldRefetchMintCounts(false);
         }
       });
     }
-  }, [props.shouldRefetchMintCounts]);
+  }, [shouldRefetchMintCounts, refetch, setShouldRefetchMintCounts]);
 
   useEffect(() => {
-    setIsLoading(collectionMintCount.isFetching);
-  }, [collectionMintCount.isFetching]);
+    setIsLoading(isFetching);
+  }, [isFetching]);
 
   useEffect(() => {
-    const mintC = parseInt(collectionMintCount.data as any);
+    const mintC = parseInt(mintCountData as any);
     setMintCount(mintC);
-    const avail = props.collection.total_supply - mintC;
+    const avail = totalSupply - mintC;
     setAvailable(avail);
     setEnableRefresh(avail > 0);
-    if (props.setAvailable) {
-      props.setAvailable(avail);
+    if (notifyAvailable) {
+      notifyAvailable(avail);
     }
-  }, [collectionMintCount.data]);
+  }, [mintCountData, totalSupply, notifyAvailable]);
 
   return (
     <span>

@@ -19,7 +19,7 @@ import {
     commonApiPost,
 } from "@/services/api/common-api";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
@@ -79,7 +79,7 @@ export default function UserPageRepModifyModal({
     enabled: !!connectedProfile?.handle,
   });
 
-  const getProxyAvailableCredit = (): number | null => {
+  const proxyAvailableCredit = useMemo((): number | null => {
     const repProxy = activeProfileProxy?.actions.find(
       (a) => a.action_type === ApiProfileProxyActionType.AllocateRep
     );
@@ -90,18 +90,9 @@ export default function UserPageRepModifyModal({
       (repProxy.credit_amount ?? 0) - (repProxy.credit_spent ?? 0),
       0
     );
-  };
+  }, [activeProfileProxy]);
 
-  const [proxyAvailableCredit, setProxyAvailableCredit] = useState<
-    number | null
-  >(getProxyAvailableCredit());
-
-  useEffect(
-    () => setProxyAvailableCredit(getProxyAvailableCredit()),
-    [activeProfileProxy]
-  );
-
-  const getRepState = (): RatingStats | null => {
+  const getRepState = useCallback((): RatingStats | null => {
     if (activeProfileProxy && proxyGrantorRepRates) {
       const target = proxyGrantorRepRates.rating_stats.find(
         (s) => s.category === category
@@ -135,81 +126,57 @@ export default function UserPageRepModifyModal({
     }
 
     return null;
-  };
+  }, [
+    activeProfileProxy,
+    category,
+    connectedProfileRepRates,
+    proxyGrantorRepRates,
+  ]);
 
   const [repState, setRepState] = useState<RatingStats | null>(getRepState());
   const [adjustedRatingStr, setAdjustedRatingStr] = useState<string>(
     `${getRepState()?.rater_contribution ?? 0}`
   );
 
-  const getHeroAvailableRep = (): number => {
+  const heroAvailableRep = useMemo((): number => {
     if (activeProfileProxy) {
       return proxyGrantorRepRates?.rep_rates_left_for_rater ?? 0;
     }
     return connectedProfileRepRates?.rep_rates_left_for_rater ?? 0;
-  };
+  }, [activeProfileProxy, proxyGrantorRepRates, connectedProfileRepRates]);
 
-  const [heroAvailableRep, setHeroAvailableRep] = useState<number>(
-    getHeroAvailableRep()
+  const minMaxValues = useMemo(
+    (): { readonly min: number; readonly max: number } => {
+      const currentRep = repState?.rater_contribution ?? 0;
+      const minHeroRep = 0 - (Math.abs(currentRep) + heroAvailableRep);
+      let min = minHeroRep;
+
+      if (typeof proxyAvailableCredit === "number") {
+        const minProxyRep = currentRep - proxyAvailableCredit;
+        min =
+          Math.abs(minHeroRep) < Math.abs(minProxyRep)
+            ? minHeroRep
+            : minProxyRep;
+      }
+
+      const maxHeroRep = Math.abs(currentRep) + heroAvailableRep;
+      let max = maxHeroRep;
+
+      if (typeof proxyAvailableCredit === "number") {
+        const maxProxyRep = currentRep + proxyAvailableCredit;
+        max = Math.min(maxHeroRep, maxProxyRep);
+      }
+
+      return { min, max };
+    },
+    [repState, heroAvailableRep, proxyAvailableCredit]
   );
-
-  useEffect(
-    () => setHeroAvailableRep(getHeroAvailableRep()),
-    [activeProfileProxy, proxyGrantorRepRates, connectedProfileRepRates]
-  );
-
-  const getMinValue = (): number => {
-    const currentRep = repState?.rater_contribution ?? 0;
-    const minHeroRep = 0 - (Math.abs(currentRep) + heroAvailableRep);
-    if (typeof proxyAvailableCredit !== "number") {
-      return minHeroRep;
-    }
-    const minProxyRep = currentRep - proxyAvailableCredit;
-
-    return Math.abs(minHeroRep) < Math.abs(minProxyRep)
-      ? minHeroRep
-      : minProxyRep;
-  };
-
-  const getMaxValue = (): number => {
-    const currentRep = repState?.rater_contribution ?? 0;
-    const maxHeroRep = Math.abs(currentRep) + heroAvailableRep;
-    if (typeof proxyAvailableCredit !== "number") {
-      return maxHeroRep;
-    }
-    const maxProxyRep = currentRep + proxyAvailableCredit;
-
-    return Math.min(maxHeroRep, maxProxyRep);
-  };
-
-  const getMinMaxValues = (): {
-    readonly min: number;
-    readonly max: number;
-  } => ({
-    min: getMinValue(),
-    max: getMaxValue(),
-  });
-
-  const [minMaxValues, setMinMaxValues] = useState<{
-    readonly min: number;
-    readonly max: number;
-  }>(getMinMaxValues());
 
   useEffect(() => {
     const newState = getRepState();
     setRepState(newState);
     setAdjustedRatingStr(`${newState?.rater_contribution ?? 0}`);
-  }, [
-    proxyGrantorRepRates,
-    activeProfileProxy,
-    connectedProfileRepRates,
-    heroAvailableRep,
-  ]);
-
-  useEffect(
-    () => setMinMaxValues(getMinMaxValues()),
-    [repState, proxyGrantorRepRates, proxyAvailableCredit]
-  );
+  }, [getRepState]);
 
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -279,61 +246,20 @@ export default function UserPageRepModifyModal({
     }
   };
 
-  const getIsValidValue = (): boolean => {
+  const isValidValue = useMemo(() => {
     const { min, max } = minMaxValues;
     const valueAsNumber = getStringAsNumberOrZero(adjustedRatingStr);
-    if (valueAsNumber > max) {
-      return false;
-    }
+    return valueAsNumber >= min && valueAsNumber <= max;
+  }, [adjustedRatingStr, minMaxValues]);
 
-    if (valueAsNumber < min) {
-      return false;
-    }
-    return true;
-  };
-
-  const [isValidValue, setIsValidValue] = useState<boolean>(getIsValidValue());
-
-  useEffect(() => setIsValidValue(getIsValidValue()), [adjustedRatingStr]);
-
-  const [newRating, setNewRating] = useState<number>(
-    getStringAsNumberOrZero(adjustedRatingStr)
+  const newRating = useMemo(
+    () => getStringAsNumberOrZero(adjustedRatingStr),
+    [adjustedRatingStr]
   );
 
-  useEffect(() => {
-    setNewRating(getStringAsNumberOrZero(adjustedRatingStr));
-  }, [adjustedRatingStr]);
+  const haveChanged = newRating !== repState?.rater_contribution;
 
-  const [haveChanged, setHaveChanged] = useState<boolean>(
-    newRating !== repState?.rater_contribution
-  );
-
-  useEffect(() => {
-    setHaveChanged(newRating !== repState?.rater_contribution);
-  }, [newRating, repState]);
-
-  const getIsSaveDisabled = (): boolean => {
-    if (!repState) {
-      return true;
-    }
-    if (!haveChanged) {
-      return true;
-    }
-
-    if (!isValidValue) {
-      return true;
-    }
-
-    return false;
-  };
-
-  const [isSaveDisabled, setIsSaveDisabled] = useState<boolean>(
-    getIsSaveDisabled()
-  );
-
-  useEffect(() => {
-    setIsSaveDisabled(getIsSaveDisabled());
-  }, [haveChanged, isValidValue, repState]);
+  const isSaveDisabled = !repState || !haveChanged || !isValidValue;
 
   const [mutating, setMutating] = useState<boolean>(false);
 

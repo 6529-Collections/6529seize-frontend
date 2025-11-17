@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState, useEffect } from "react";
+import { FC, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
@@ -19,22 +19,17 @@ export const WaveManualOutcome: FC<WaveManualOutcomeProps> = ({ outcome }) => {
   const totalCount = outcome.distribution?.length ?? 0;
   const [showAll, setShowAll] = useState(false);
 
-  const getAmounts = (): number[] => {
+  const amounts = useMemo(() => {
+    const distribution = outcome.distribution ?? [];
+
     if (showAll) {
-      return outcome.distribution?.map((d) => d.amount ?? 0) ?? [];
+      return distribution.map((d) => d.amount ?? 0);
     }
-    return (
-      outcome.distribution
-        ?.slice(0, DEFAULT_AMOUNTS_TO_SHOW)
-        .map((d) => d.amount ?? 0) ?? []
-    );
-  };
 
-  const [amounts, setAmounts] = useState<number[]>(getAmounts());
-
-  useEffect(() => {
-    setAmounts(getAmounts());
-  }, [showAll]);
+    return distribution
+      .slice(0, DEFAULT_AMOUNTS_TO_SHOW)
+      .map((d) => d.amount ?? 0);
+  }, [outcome.distribution, showAll]);
 
   return (
     <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-300 desktop-hover:hover:tw-border-iron-700">

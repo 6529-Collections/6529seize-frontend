@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { SortDirection } from "@/entities/ISort";
 import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
 import { CommonSelectItemProps } from "../CommonSelect";
@@ -10,30 +10,11 @@ export default function CommonTabsTab<T, U = unknown>(
 ) {
   const { item, activeItem, setSelected, sortDirection } = props;
 
-  const getIsActive = (): boolean => item.value === activeItem;
-  const [isActive, setIsActive] = useState<boolean>(getIsActive());
+  const isActive = item.value === activeItem;
 
-  useEffect(() => {
-    setIsActive(getIsActive());
-  }, [activeItem]);
-
-  const getDynamicClasses = (): string => {
-    let response = "";
-    if (isActive) {
-      response += "tw-bg-iron-800 tw-text-iron-100";
-    } else {
-      response +=
-        " tw-bg-iron-950 hover:tw-bg-iron-900 tw-text-iron-500 hover:tw-text-iron-100";
-    }
-    return response;
-  };
-
-  const [dynamicClasses, setDynamicClasses] = useState<string>(
-    getDynamicClasses()
-  );
-  useEffect(() => {
-    setDynamicClasses(getDynamicClasses());
-  }, [isActive]);
+  const dynamicClasses = isActive
+    ? "tw-bg-iron-800 tw-text-iron-100"
+    : " tw-bg-iron-950 hover:tw-bg-iron-900 tw-text-iron-500 hover:tw-text-iron-100";
 
   const [shouldRotate, setShouldRotate] = useState<boolean>(false);
 

@@ -36,6 +36,7 @@ enum Type {
 export default function NextGenAdminUploadAL(props: Readonly<Props>) {
   const account = useSeizeConnectContext();
   const signMessage = useSignMessage();
+  const signMessageErrorMessage = signMessage.error?.message;
   const uuid = useRef(uuidv4()).current;
 
   const globalAdmin = useGlobalAdmin(account.address as string);
@@ -90,11 +91,16 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
   }
 
   useEffect(() => {
-    if (signMessage.isError) {
-      setUploading(false);
-      setUploadError(`Error: ${signMessage.error?.message.split(".")[0]}`);
+    if (!signMessage.isError) {
+      return;
     }
-  }, [signMessage.isError]);
+
+    const conciseError =
+      signMessageErrorMessage?.split(".")[0] ?? "Unknown error";
+
+    setUploading(false);
+    setUploadError(`Error: ${conciseError}`);
+  }, [signMessage.isError, signMessageErrorMessage]);
 
   useEffect(() => {
     if (signMessage.isSuccess && signMessage.data) {

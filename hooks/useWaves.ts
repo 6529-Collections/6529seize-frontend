@@ -2,7 +2,7 @@
 
 import { useInfiniteQuery } from "@tanstack/react-query";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 
 import { useDebounce } from "react-use";
 import { AuthContext } from "@/components/auth/Auth";
@@ -35,22 +35,19 @@ export function useWaves({
 }: UseWavesParams) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
-  const getUsePublicWaves = () =>
-    !connectedProfile?.handle || !!activeProfileProxy;
-  const [usePublicWaves, setUsePublicWaves] = useState(getUsePublicWaves());
-  useEffect(
-    () => setUsePublicWaves(getUsePublicWaves()),
+  const usePublicWaves = useMemo(
+    () => !connectedProfile?.handle || !!activeProfileProxy,
     [connectedProfile, activeProfileProxy]
   );
 
-  const getParams = (): SearchWavesParams => ({
-    author: identity ?? undefined,
-    name: waveName ?? undefined,
-    limit,
-  });
-
-  const [params, setParams] = useState<SearchWavesParams>(getParams());
-  useEffect(() => setParams(getParams()), [identity, waveName]);
+  const params = useMemo<SearchWavesParams>(
+    () => ({
+      author: identity ?? undefined,
+      name: waveName ?? undefined,
+      limit,
+    }),
+    [identity, waveName, limit]
+  );
 
   const [debouncedParams, setDebouncedParams] =
     useState<SearchWavesParams>(params);
@@ -108,21 +105,15 @@ export function useWaves({
     ...getDefaultQueryRetry(),
   });
 
-  const getWaves = (): ApiWave[] => {
+  const waves = useMemo<ApiWave[]>(() => {
+    if (!enabled) {
+      return [];
+    }
     if (usePublicWaves) {
       return publicQuery.data?.pages.flat() ?? [];
     }
     return authQuery.data?.pages.flat() ?? [];
-  };
-
-  const [waves, setWaves] = useState<ApiWave[]>(getWaves());
-  useEffect(() => {
-    if (!enabled) {
-      setWaves([]);
-      return;
-    }
-    setWaves(getWaves());
-  }, [enabled, authQuery.data, publicQuery.data, usePublicWaves]);
+  }, [enabled, usePublicWaves, publicQuery.data, authQuery.data]);
 
   const activeQuery = usePublicWaves ? publicQuery : authQuery;
 

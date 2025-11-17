@@ -32,8 +32,6 @@ export default function GroupCardActionStats({
     null
   );
 
-  const [creditPerMember, setCreditPerMember] = useState<number>(0);
-
   useEffect(() => {
     if (!connectedProfile?.handle) {
       setRater(null);
@@ -96,20 +94,14 @@ export default function GroupCardActionStats({
     }
   };
 
-  useEffect(() => {
-    const credit = getCreditLeft();
-    if (
-      typeof credit === "number" &&
-      typeof membersCount === "number" &&
-      credit > 0 &&
-      membersCount > 0
-    ) {
-      const creditPerMember = credit / membersCount;
-      setCreditPerMember(creditPerMember);
-    } else {
-      setCreditPerMember(0);
-    }
-  }, [creditLeft, membersCount]);
+  const credit = getCreditLeft();
+  const creditPerMember =
+    typeof credit === "number" &&
+    typeof membersCount === "number" &&
+    credit > 0 &&
+    membersCount > 0
+      ? credit / membersCount
+      : 0;
 
   const count =
     typeof membersCount === "number"

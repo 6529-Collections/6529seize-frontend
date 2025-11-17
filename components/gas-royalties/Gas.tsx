@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import styles from "./GasRoyalties.module.scss";
 import { Gas } from "@/entities/IGas";
@@ -60,11 +60,9 @@ export default function GasComponent() {
     toBlock,
   } = useSharedState();
 
-  function getUrlWithParams() {
-    return getUrl("gas");
-  }
+  const getUrlWithParams = useCallback(() => getUrl("gas"), [getUrl]);
 
-  function fetchGas() {
+  const fetchGas = useCallback(() => {
     setFetching(true);
     fetchUrl(getUrlWithParams()).then((res: Gas[]) => {
       res.forEach((r) => {
@@ -74,7 +72,7 @@ export default function GasComponent() {
       setSumGas(res.map((g) => g.gas).reduce((a, b) => a + b, 0));
       setFetching(false);
     });
-  }
+  }, [getUrlWithParams]);
 
   useEffect(() => {
     if (collectionFocus) {
@@ -89,6 +87,7 @@ export default function GasComponent() {
     selectedArtist,
     isPrimary,
     isCustomBlocks,
+    fetchGas,
   ]);
 
   useEffect(() => {
@@ -96,7 +95,7 @@ export default function GasComponent() {
       setGas([]);
       fetchGas();
     }
-  }, [collectionFocus]);
+  }, [collectionFocus, fetchGas]);
 
   if (!collectionFocus) {
     return <></>;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useEffectEvent } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import styles from "./Leaderboard.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -109,7 +109,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchWallets, setSearchWallets] = useState<string[]>([]);
 
-  async function fetchResults() {
+  const fetchResults = useEffectEvent(async () => {
     setFetchingLeaderboard(true);
     let walletFilter = "";
     if (searchWallets && searchWallets.length > 0) {
@@ -134,7 +134,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
     setLeaderboard(data);
     setScrollPosition();
     setFetchingLeaderboard(false);
-  }
+  });
 
   useEffect(() => {
     if (page === 1) {
@@ -142,11 +142,11 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
     } else {
       setPage(1);
     }
-  }, [sort, searchWallets]);
+  }, [sort, searchWallets, fetchResults]);
 
   useEffect(() => {
     fetchResults();
-  }, [page]);
+  }, [page, fetchResults]);
 
   return (
     <Container className={`no-padding pt-3`} id="nft-leaderboard">

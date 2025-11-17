@@ -40,19 +40,15 @@ export default function SidebarLayout({
     }
   }, [breakpoint]);
 
-  const getAnimateContentMarginLeft = () => {
-    if (["XXL", "S"].includes(breakpoint) || !open) {
-      return false;
-    }
-    return true;
-  };
-
   const [animateContentMarginLeft, setAnimateContentMarginLeft] =
     useState(false);
   const [init, setInit] = useState(false);
 
   useEffect(
-    () => setAnimateContentMarginLeft(getAnimateContentMarginLeft()),
+    () => {
+      const shouldAnimate = !["XXL", "S"].includes(breakpoint) && open;
+      setAnimateContentMarginLeft(shouldAnimate);
+    },
     [breakpoint, open]
   );
 

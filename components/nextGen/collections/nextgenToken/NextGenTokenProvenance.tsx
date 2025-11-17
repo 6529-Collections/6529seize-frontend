@@ -2,7 +2,7 @@
 
 import styles from "../NextGen.module.scss";
 import { Container, Row, Col, Table } from "react-bootstrap";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { commonApiFetch } from "@/services/api/common-api";
 import Pagination from "@/components/pagination/Pagination";
 import { Transaction } from "@/entities/ITransaction";
@@ -18,6 +18,7 @@ interface Props {
 const PAGE_SIZE = 25;
 
 export default function NextGenTokenProvenance(props: Readonly<Props>) {
+  const { collection, token_id } = props;
   const scrollTarget = useRef<HTMLImageElement>(null);
   const logsScrollTarget = useRef<HTMLImageElement>(null);
 
@@ -31,49 +32,62 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
   const [logsTotalResults, setLogsTotalResults] = useState(0);
   const [logsPage, setLogsPage] = useState(1);
 
-  function fetchResults(mypage: number) {
+  const fetchResults = useEffectEvent(async (requestedPage: number) => {
     setTransactionsLoaded(false);
-    commonApiFetch<{
+    const requestedTokenId = token_id;
+
+    const response = await commonApiFetch<{
       count: number;
       page: number;
       next: any;
       data: Transaction[];
     }>({
-      endpoint: `nextgen/tokens/${props.token_id}/transactions?page_size=${PAGE_SIZE}&page=${mypage}`,
-    }).then((response) => {
-      setTotalResults(response.count);
-      setTransactions(response.data);
-      setTransactionsLoaded(true);
+      endpoint: `nextgen/tokens/${requestedTokenId}/transactions?page_size=${PAGE_SIZE}&page=${requestedPage}`,
     });
-  }
+
+    if (requestedTokenId !== token_id || requestedPage !== page) {
+      return;
+    }
+
+    setTotalResults(response.count);
+    setTransactions(response.data);
+    setTransactionsLoaded(true);
+  });
 
   useEffect(() => {
     fetchResults(page);
-  }, [page]);
+  }, [fetchResults, page, token_id]);
 
-  function fetchLogsResults(mypage: number) {
+  const fetchLogsResults = useEffectEvent(async (requestedPage: number) => {
     setLogsLoaded(false);
-    commonApiFetch<{
+    const requestedCollectionId = collection.id;
+    const requestedTokenId = token_id;
+
+    const response = await commonApiFetch<{
       count: number;
       page: number;
       next: any;
       data: NextGenLog[];
     }>({
-      endpoint: `nextgen/collections/${props.collection.id}/logs/${props.token_id}?page_size=${PAGE_SIZE}&page=${mypage}`,
-    }).then((response) => {
-      setLogsTotalResults(response.count);
-      setLogs(response.data);
-      setLogsLoaded(true);
+      endpoint: `nextgen/collections/${requestedCollectionId}/logs/${requestedTokenId}?page_size=${PAGE_SIZE}&page=${requestedPage}`,
     });
-  }
 
-  useEffect(() => {
-    fetchResults(page);
-  }, [page]);
+    if (
+      requestedCollectionId !== collection.id ||
+      requestedTokenId !== token_id ||
+      requestedPage !== logsPage
+    ) {
+      return;
+    }
+
+    setLogsTotalResults(response.count);
+    setLogs(response.data);
+    setLogsLoaded(true);
+  });
 
   useEffect(() => {
     fetchLogsResults(logsPage);
-  }, [logsPage]);
+  }, [collection.id, fetchLogsResults, logsPage, token_id]);
 
   return (
     <>
@@ -126,7 +140,7 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
           <Col>
             {logs.map((log, index) => (
               <NextGenCollectionProvenanceRow
-                collection={props.collection}
+                collection={collection}
                 log={log}
                 key={`${log.block}-${log.id}`}
                 disable_link={true}

@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useMemo } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useEffectEvent,
+  useMemo,
+} from "react";
 import {
   PushNotifications,
   PushNotificationSchema,
@@ -42,19 +48,21 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   const router = useRouter();
 
   useEffect(() => {
-    initializeNotifications(connectedProfile ?? undefined);
-  }, [connectedProfile]);
+    void initializeNotifications(connectedProfile ?? undefined);
+  }, [connectedProfile, isCapacitor]);
 
-  const initializeNotifications = async (profile?: ApiIdentity) => {
-    try {
-      if (isCapacitor) {
-        console.log("Initializing push notifications");
-        await initializePushNotifications(profile);
+  const initializeNotifications = useEffectEvent(
+    async (profile?: ApiIdentity) => {
+      try {
+        if (isCapacitor) {
+          console.log("Initializing push notifications");
+          await initializePushNotifications(profile);
+        }
+      } catch (error) {
+        console.error("Error initializing notifications", error);
       }
-    } catch (error) {
-      console.error("Error initializing notifications", error);
     }
-  };
+  );
 
   const initializePushNotifications = async (profile?: ApiIdentity) => {
     await PushNotifications.removeAllListeners();

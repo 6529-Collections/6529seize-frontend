@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import Link from "next/link";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
@@ -31,14 +31,7 @@ export default function UserPageIdentityHeaderCICRateStats({
     }
     return Math.max(0, (proxy.credit_amount ?? 0) - (proxy.credit_spent ?? 0));
   };
-  const [proxyAvailableCredit, setProxyAvailableCredit] = useState<
-    number | null
-  >(getProxyAvailableCredit());
-
-  useEffect(
-    () => setProxyAvailableCredit(getProxyAvailableCredit()),
-    [activeProfileProxy]
-  );
+  const proxyAvailableCredit = getProxyAvailableCredit();
 
   const getAvailableCredit = (): number => {
     if (!activeProfileProxy) {
@@ -49,11 +42,7 @@ export default function UserPageIdentityHeaderCICRateStats({
       : proxyAvailableCredit ?? 0;
   };
 
-  const [availableCredit, setAvailableCredit] = useState(getAvailableCredit());
-  useEffect(
-    () => setAvailableCredit(getAvailableCredit()),
-    [heroAvailableCredit, proxyAvailableCredit]
-  );
+  const availableCredit = getAvailableCredit();
   return (
     <div
       className={`${

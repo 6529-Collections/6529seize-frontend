@@ -1,9 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef } from "react";
 import { USER_PAGE_TAB_META, UserPageTabType } from "./UserPageTabs";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
+
+const isVisibleInViewportSide = (
+  elementRect: DOMRect,
+  parentRect: DOMRect,
+): boolean =>
+  elementRect.right <= parentRect.right && elementRect.left >= parentRect.left;
 
 export default function UserPageTab({
   tab,
@@ -20,45 +26,46 @@ export default function UserPageTab({
 
   const path = `/${handleOrWallet}/${USER_PAGE_TAB_META[tab].route}`;
 
-  const [isActive, setIsActive] = useState<boolean>(tab === activeTab);
-  useEffect(() => {
-    setIsActive(tab === activeTab);
-  }, [activeTab]);
+  const isActive = tab === activeTab;
 
   const activeClasses =
     "tw-border-primary-400 tw-border-solid tw-border-x-0 tw-border-t-0 tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-font-semibold tw-py-4 tw-px-1";
   const inActiveClasses =
     "tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-4 tw-px-1 tw-transition tw-duration-300 tw-ease-out";
 
-  const [classes, setClasses] = useState<string>(
-    isActive ? activeClasses : inActiveClasses
-  );
-
   const ref = useRef<HTMLAnchorElement>(null);
 
-  const isVisibleInViewportSide = () => {
-    if (!parentRef.current || !ref.current) {
-      return true;
+  const classes = isActive ? activeClasses : inActiveClasses;
+
+  const scrollActiveTabIntoView = useEffectEvent(() => {
+    const parentElement = parentRef.current;
+    const anchorElement = ref.current;
+
+    if (!parentElement || !anchorElement) {
+      return;
     }
-    const parentRect = parentRef.current.getBoundingClientRect();
-    const rect = ref.current.getBoundingClientRect();
-    const parentRight = parentRect.right;
-    const parentLeft = parentRect.left;
-    const elementRight = rect.right;
-    const elementLeft = rect.left;
-    return elementRight <= parentRight && elementLeft >= parentLeft;
-  };
+
+    const parentRect = parentElement.getBoundingClientRect();
+    const anchorRect = anchorElement.getBoundingClientRect();
+
+    if (isVisibleInViewportSide(anchorRect, parentRect)) {
+      return;
+    }
+
+    anchorElement.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  });
 
   useEffect(() => {
-    setClasses(isActive ? activeClasses : inActiveClasses);
-    if (ref.current && isActive && !isVisibleInViewportSide()) {
-      ref.current.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "center",
-      });
+    if (tab !== activeTab) {
+      return;
     }
-  }, [isActive]);
+
+    scrollActiveTabIntoView();
+  }, [activeTab, scrollActiveTabIntoView, tab]);
 
   return (
     <Link

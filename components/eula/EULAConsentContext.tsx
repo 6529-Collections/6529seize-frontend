@@ -6,6 +6,7 @@ import React, {
   useState,
   useEffect,
   useMemo,
+  useCallback,
   ReactNode,
 } from "react";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
@@ -42,11 +43,12 @@ export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
   const [showEULAConsent, setShowEULAConsent] = useState(false);
 
   const capacitor = useCapacitor();
+  const { isIos, platform } = capacitor;
 
-  const getEULAConsent = async () => {
+  const getEULAConsent = useCallback(async () => {
     try {
       const eulaConsent = Cookies.get(CONSENT_EULA_COOKIE) === "true";
-      if (!eulaConsent && capacitor.isIos) {
+      if (!eulaConsent && isIos) {
         const deviceId = await Device.getId();
         const response = await commonApiFetch<{ accepted_at: number }>({
           endpoint: `policies/eula-consent/${deviceId.identifier}`,
@@ -67,16 +69,16 @@ export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
     } catch (error) {
       console.error("Failed to fetch EULA consent status", error);
     }
-  };
+  }, [isIos]);
 
-  const consent = async () => {
+  const consent = useCallback(async () => {
     try {
       const deviceId = await Device.getId();
       await commonApiPost({
         endpoint: `policies/eula-consent`,
         body: {
           device_id: deviceId.identifier,
-          platform: capacitor.platform,
+          platform,
         },
       });
       Cookies.set(CONSENT_EULA_COOKIE, "true", { expires: 365 });
@@ -88,13 +90,13 @@ export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
         message: "Something went wrong...",
       });
     }
-  };
+  }, [getEULAConsent, platform, setToast]);
 
   const value = useMemo(() => ({ consent }), [consent]);
 
   useEffect(() => {
     getEULAConsent();
-  }, []);
+  }, [getEULAConsent]);
 
   return (
     <EULAConsentContext.Provider value={value}>

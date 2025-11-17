@@ -454,7 +454,7 @@ export default function MemeLabComponent() {
     );
     setSortDir(initialSortDir);
     setSort(initialSort);
-  }, []);
+  }, [searchParams]);
 
   const [sortDir, setSortDir] = useState<SortDirection>();
   const [sort, setSort] = useState<MemeLabSort>(MemeLabSort.AGE);

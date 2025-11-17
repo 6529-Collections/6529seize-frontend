@@ -109,7 +109,7 @@ export default function ProfileRatersTableWrapper({
       return;
     }
     setTotalPages(Math.ceil(ratings.count / pageSize));
-  }, [ratings?.count, ratings?.page, isLoading]);
+  }, [ratings?.count, ratings?.page, isLoading, pageSize]);
 
   const getNoRatingsMessage = (): string => {
     switch (type) {

@@ -23,7 +23,7 @@ import { faFire, faRefresh } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Col, Container, Dropdown, Row, Table } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import ArtistProfileHandle from "./ArtistProfileHandle";
@@ -294,26 +294,26 @@ export function MemePageLiveSubMenu(props: {
     }
   }, [props.nft]);
 
-  useEffect(() => {
-    if (props.nft) {
-      fetchRememes(props.nft.id);
-    }
-  }, [props.nft, rememesPage, selectedRememeSorting]);
-
-  function fetchRememes(meme_id: number) {
+  const fetchRememes = useCallback((memeId: number) => {
     let sort = "";
     if (selectedRememeSorting === RememeSort.CREATED_ASC) {
       sort = "&sort=created_at&sort_direction=desc";
     }
     fetchUrl(
-      `${publicEnv.API_ENDPOINT}/api/rememes?meme_id=${meme_id}&page_size=${REMEMES_PAGE_SIZE}&page=${rememesPage}${sort}`
+      `${publicEnv.API_ENDPOINT}/api/rememes?meme_id=${memeId}&page_size=${REMEMES_PAGE_SIZE}&page=${rememesPage}${sort}`
     ).then((response: DBResponse) => {
       setRememesTotalResults(response.count);
       setRememes(response.data);
       setShowRememesSort(response.count > REMEMES_PAGE_SIZE);
       setRememesLoaded(true);
     });
-  }
+  }, [rememesPage, selectedRememeSorting]);
+
+  useEffect(() => {
+    if (props.nft) {
+      fetchRememes(props.nft.id);
+    }
+  }, [props.nft, fetchRememes]);
 
   if (props.show) {
     return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { AuthContext } from "@/components/auth/Auth";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
@@ -27,23 +27,19 @@ export default function WavesList({
     null
   );
 
-  const getWaveOverviewTypes = (): ApiWavesOverviewType[] => {
+  const overviewTypes = useMemo(() => {
     const types = showAllType
       ? Object.values(ApiWavesOverviewType).filter((t) => t === showAllType)
       : Object.values(ApiWavesOverviewType);
+
     if (!connectedProfile?.handle || !!activeProfileProxy) {
       return types.filter(
         (t) => t !== ApiWavesOverviewType.AuthorYouHaveRepped
       );
     }
-    return types;
-  };
 
-  const [overviewTypes, setOverviewTypes] = useState(getWaveOverviewTypes());
-  useEffect(
-    () => setOverviewTypes(getWaveOverviewTypes()),
-    [connectedProfile, activeProfileProxy, showAllType]
-  );
+    return types;
+  }, [connectedProfile, activeProfileProxy, showAllType]);
 
   const [identity, setIdentity] = useState<string | null>(
     searchParams.get("identity") || null

@@ -202,7 +202,7 @@ export function useManifoldClaim(
       setClaim(newClaim);
       setRefetchInterval(status === ManifoldClaimStatus.ACTIVE ? 5000 : 10000);
     }
-  }, [readContract.data, getStatus]);
+  }, [readContract.data, getStatus, getMemePhase]);
 
   useEffect(() => {
     if (readContract.error && onError) {

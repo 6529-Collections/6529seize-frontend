@@ -1,6 +1,4 @@
 "use client";
-
-import { useEffect, useState } from "react";
 import { SortDirection } from "@/entities/ISort";
 
 const rotatedDirections: Record<SortDirection, SortDirection> = {
@@ -43,23 +41,11 @@ export default function CommonTableSortIcon({
     return c;
   };
 
-  const [classes, setClasses] = useState<string>(
-    getClasses({
-      active: isActive,
-      dir: direction,
-      rotate: shouldRotate ?? false,
-    })
-  );
-
-  useEffect(() => {
-    setClasses(
-      getClasses({
-        active: isActive,
-        dir: direction,
-        rotate: shouldRotate ?? false,
-      })
-    );
-  }, [isActive, direction, shouldRotate]);
+  const classes = getClasses({
+    active: isActive,
+    dir: direction,
+    rotate: shouldRotate ?? false,
+  });
 
   return (
     <svg

@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState, type JSX } from "react";
+import { useContext, useMemo, useState, type JSX } from "react";
 import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import ProxyActions from "../proxy/list/ProxyActions";
 import { AuthContext } from "@/components/auth/Auth";
@@ -25,34 +25,31 @@ export default function ProxyListItem({
   readonly profile: ApiIdentity;
 }) {
   const { connectedProfile } = useContext(AuthContext);
-  const getIsGrantor = () =>
-    connectedProfile?.id === profileProxy?.created_by?.id;
+  const connectedProfileId = connectedProfile?.id;
+  const createdById = profileProxy?.created_by?.id;
 
-  const [isGrantor, setIsGrantor] = useState(getIsGrantor());
+  const isGrantor = useMemo(() => {
+    if (!connectedProfileId || !createdById) {
+      return false;
+    }
+
+    return connectedProfileId === createdById;
+  }, [connectedProfileId, createdById]);
 
   const [viewType, setViewType] = useState(VIEW_TYPE.LIST);
-  const getCanAddNewAction = () => {
-    const haveActionsLeftToAdd =
-      PROFILE_PROXY_AVAILABLE_ACTIONS.filter(
-        (action) =>
-          profileProxy.actions.filter((a) => a.action_type === action)
-            .length === 0
-      ).length > 0;
 
-    return (
-      haveActionsLeftToAdd && isGrantor && isSelf && viewType === VIEW_TYPE.LIST
+  const haveActionsLeftToAdd = useMemo(() => {
+    const grantedActionTypes = new Set(
+      profileProxy.actions.map((proxyAction) => proxyAction.action_type)
     );
-  };
 
-  const [canAddNewAction, setCanAddNewAction] = useState(getCanAddNewAction());
+    return PROFILE_PROXY_AVAILABLE_ACTIONS.some(
+      (action) => !grantedActionTypes.has(action)
+    );
+  }, [profileProxy.actions]);
 
-  useEffect(() => {
-    setIsGrantor(getIsGrantor());
-  }, [profileProxy, connectedProfile]);
-
-  useEffect(() => {
-    setCanAddNewAction(getCanAddNewAction());
-  }, [isGrantor, isSelf, viewType, profileProxy]);
+  const canAddNewAction =
+    haveActionsLeftToAdd && isGrantor && isSelf && viewType === VIEW_TYPE.LIST;
 
   const components: Record<VIEW_TYPE, JSX.Element> = {
     [VIEW_TYPE.LIST]: (

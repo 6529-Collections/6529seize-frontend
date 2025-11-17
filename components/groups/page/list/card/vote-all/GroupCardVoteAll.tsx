@@ -119,15 +119,11 @@ export default function GroupCardVoteAll({
     return false;
   };
 
-  const [disabled, setDisabled] = useState<boolean>(getIsDisabled());
+  const disabled = getIsDisabled();
 
   useEffect(
     () => setLoading(isFetching || doingRates),
     [isFetching, doingRates]
-  );
-  useEffect(
-    () => setDisabled(getIsDisabled()),
-    [amountToAdd, membersCount, loading, category]
   );
 
   const bulkRateMutation = useMutation({

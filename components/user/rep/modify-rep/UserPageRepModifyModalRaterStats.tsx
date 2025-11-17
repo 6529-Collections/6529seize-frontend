@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useMemo } from "react";
 import { RatingStats } from "@/entities/IProfile";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { AuthContext } from "@/components/auth/Auth";
@@ -20,7 +20,7 @@ export default function UserPageRepModifyModalRaterStats({
   readonly heroAvailableCredit: number;
 }) {
   const { activeProfileProxy } = useContext(AuthContext);
-  const getProxyAvailableCredit = (): number | null => {
+  const proxyAvailableCredit = useMemo((): number | null => {
     const repProxy = activeProfileProxy?.actions.find(
       (action) => action.action_type === ApiProfileProxyActionType.AllocateRep
     );
@@ -31,30 +31,16 @@ export default function UserPageRepModifyModalRaterStats({
       0,
       (repProxy.credit_amount ?? 0) - (repProxy.credit_spent ?? 0)
     );
-  };
-  const [proxyAvailableCredit, setProxyAvailableCredit] = useState<
-    number | null
-  >(getProxyAvailableCredit());
+  }, [activeProfileProxy]);
 
-  useEffect(
-    () => setProxyAvailableCredit(getProxyAvailableCredit()),
-    [activeProfileProxy]
-  );
-
-  const getAvailableCredit = (): number => {
+  const availableCredit = useMemo((): number => {
     if (!activeProfileProxy) {
       return heroAvailableCredit;
     }
     return Math.abs(heroAvailableCredit) < Math.abs(proxyAvailableCredit ?? 0)
       ? heroAvailableCredit
       : proxyAvailableCredit ?? 0;
-  };
-
-  const [availableCredit, setAvailableCredit] = useState(getAvailableCredit());
-  useEffect(
-    () => setAvailableCredit(getAvailableCredit()),
-    [heroAvailableCredit, proxyAvailableCredit]
-  );
+  }, [activeProfileProxy, heroAvailableCredit, proxyAvailableCredit]);
   return (
     <div className="tw-mt-6 sm:tw-mt-8">
       <div className="tw-flex tw-flex-col tw-space-y-1">

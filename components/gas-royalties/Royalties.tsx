@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useEffectEvent } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import styles from "./GasRoyalties.module.scss";
 import { Royalty } from "@/entities/IRoyalty";
@@ -71,7 +71,7 @@ export default function RoyaltiesComponent() {
     return getUrl("royalties");
   }
 
-  function fetchRoyalties() {
+  const fetchRoyalties = useEffectEvent(() => {
     setFetching(true);
     fetchUrl(getUrlWithParams()).then((res: Royalty[]) => {
       res.forEach((r) => {
@@ -88,7 +88,7 @@ export default function RoyaltiesComponent() {
       );
       setFetching(false);
     });
-  }
+  });
 
   useEffect(() => {
     if (collectionFocus) {

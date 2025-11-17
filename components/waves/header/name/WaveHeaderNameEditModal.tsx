@@ -7,7 +7,7 @@ import { ApiWave } from "@/generated/models/ApiWave";
 import { convertWaveToUpdateWave } from "@/helpers/waves/waves.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import WaveHeaderNameEditInput from "./WaveHeaderNameEditInput";
@@ -28,9 +28,7 @@ export default function WaveHeaderNameEditModal({
   const [mutating, setMutating] = useState(false);
 
   const [name, setName] = useState(wave.name);
-  const getIsDisabled = () => mutating || wave.name === name;
-  const [isDisabled, setIsDisabled] = useState(getIsDisabled());
-  useEffect(() => setIsDisabled(getIsDisabled()), [wave, mutating, name]);
+  const isDisabled = mutating || wave.name === name;
 
   const editNameMutation = useMutation({
     mutationFn: async (body: ApiUpdateWaveRequest) =>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { WalletConsolidationState } from "@/entities/IProfile";
 import EthereumIcon from "@/components/user/utils/icons/EthereumIcon";
 import UserPageIdentityStatementsConsolidatedAddressesItem from "./UserPageIdentityStatementsConsolidatedAddressesItem";
@@ -29,9 +29,7 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
     [profile, address]
   );
 
-  const getCanEdit = (): boolean => isMyProfile && !activeProfileProxy;
-  const [canEdit, setCanEdit] = useState<boolean>(getCanEdit());
-  useEffect(() => setCanEdit(getCanEdit()), [isMyProfile, activeProfileProxy]);
+  const canEdit = isMyProfile && !activeProfileProxy;
 
   const getPrimaryAddress = (p: ApiIdentity) => {
     if (p.primary_wallet) {
@@ -49,13 +47,7 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
     return highestTdhWallet?.wallet.toLowerCase() ?? null;
   };
 
-  const [primaryAddress, setPrimaryAddress] = useState<string | null>(
-    getPrimaryAddress(profile)
-  );
-
-  useEffect(() => {
-    setPrimaryAddress(getPrimaryAddress(profile));
-  }, [profile]);
+  const primaryAddress = useMemo(() => getPrimaryAddress(profile), [profile]);
 
   const sortByPrimary = (wallets: ApiWallet[]) => {
     const sorted = [...wallets];
@@ -74,13 +66,10 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
     return sorted;
   };
 
-  const [sortedByPrimary, setSortedByPrimary] = useState<ApiWallet[]>(
-    sortByPrimary(profile.wallets ?? [])
+  const sortedByPrimary = useMemo(
+    () => sortByPrimary(profile.wallets ?? []),
+    [profile.wallets, primaryAddress]
   );
-
-  useEffect(() => {
-    setSortedByPrimary(sortByPrimary(profile.wallets ?? []));
-  }, [profile, primaryAddress]);
 
   const walletConsolidations = useQueries({
     queries: (profile.wallets ?? []).map((wallet) => ({

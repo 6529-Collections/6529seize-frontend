@@ -28,17 +28,21 @@ export default function CommunityDownloadsSubscriptions() {
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
 
-  function fetchResults(mypage: number) {
+  useEffect(() => {
+    let isMounted = true;
+
     commonApiFetch<{ count: number; data: SubscriptionDownload[] }>({
-      endpoint: `subscriptions/uploads?contract=${MEMES_CONTRACT}&page_size=${PAGE_SIZE}&page=${mypage}`,
+      endpoint: `subscriptions/uploads?contract=${MEMES_CONTRACT}&page_size=${PAGE_SIZE}&page=${page}`,
     }).then((response) => {
+      if (!isMounted) return;
+
       setTotalResults(response.count);
       setDownloads(response.data || []);
     });
-  }
 
-  useEffect(() => {
-    fetchResults(page);
+    return () => {
+      isMounted = false;
+    };
   }, [page]);
 
   return (

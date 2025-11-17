@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
 import CommonTimeSelect from "@/components/utils/time/CommonTimeSelect";
@@ -34,7 +34,7 @@ export default function ProfileProxyEndTimeEdit({
     profileProxyAction.end_time
   );
 
-  const getIsChangedAndValid = () => {
+  const isChangedAndValid = useMemo(() => {
     if (profileProxyAction.end_time === endTime) {
       return false;
     }
@@ -42,15 +42,7 @@ export default function ProfileProxyEndTimeEdit({
       return false;
     }
     return true;
-  };
-
-  const [isChangedAndValid, setIsChangedAndValid] = useState(
-    getIsChangedAndValid()
-  );
-  useEffect(
-    () => setIsChangedAndValid(getIsChangedAndValid()),
-    [endTime, profileProxyAction.end_time]
-  );
+  }, [endTime, profileProxyAction.end_time]);
 
   const [submitting, setSubmitting] = useState(false);
   const profileProxyActionCreditMutation = useMutation({

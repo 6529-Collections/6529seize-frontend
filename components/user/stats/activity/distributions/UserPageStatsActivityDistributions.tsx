@@ -7,7 +7,7 @@ import { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { WALLET_DISTRIBUTION_PAGE_PARAM } from "../UserPageActivityWrapper";
 import UserPageStatsActivityDistributionsTableWrapper from "./UserPageStatsActivityDistributionsTableWrapper";
 
@@ -56,16 +56,14 @@ export default function UserPageStatsActivityDistributions({
 
   const [totalPages, setTotalPages] = useState<number>(1);
 
-  const getWalletsParam = () =>
-    [
-      activeAddress?.toLowerCase() ??
-        profile.wallets?.map((w) => w.wallet.toLowerCase()),
-    ].join(",");
-
-  const [walletsParam, setWalletsParam] = useState<string>(getWalletsParam());
-  useEffect(() => {
-    setWalletsParam(getWalletsParam());
-  }, [activeAddress, profile]);
+  const walletsParam = useMemo(
+    () =>
+      [
+        activeAddress?.toLowerCase() ??
+          profile.wallets?.map((wallet) => wallet.wallet.toLowerCase()),
+      ].join(","),
+    [activeAddress, profile]
+  );
 
   const {
     isFetching,

@@ -436,16 +436,9 @@ export default function UserPageCollected({
     setTotalPages(pagesCount);
   }, [data?.count, data?.page, isFetching]);
 
-  const getShowDataRow = (): boolean =>
-    filters.collection
-      ? COLLECTED_COLLECTIONS_META[filters.collection].showCardDataRow
-      : true;
-
-  const [showDataRow, setShowDataRow] = useState<boolean>(getShowDataRow());
-
-  useEffect(() => {
-    setShowDataRow(getShowDataRow());
-  }, [filters.collection]);
+  const showDataRow = filters.collection
+    ? COLLECTED_COLLECTIONS_META[filters.collection].showCardDataRow
+    : true;
 
   const scrollContainer = useRef<HTMLDivElement>(null);
 

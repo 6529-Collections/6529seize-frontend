@@ -19,21 +19,31 @@ interface Props {
 export default function NextGenCollectionArtist(props: Readonly<Props>) {
   const [bio, setBio] = useState<string>("");
 
+  const artistAddress = props.collection.artist_address;
+
   const { profile } = useIdentity({
-    handleOrWallet: props.collection.artist_address,
+    handleOrWallet: artistAddress,
     initialProfile: null,
   });
 
   useEffect(() => {
+    let isMounted = true;
     commonApiFetch<CicStatement[]>({
-      endpoint: `profiles/${props.collection.artist_address}/cic/statements`,
+      endpoint: `profiles/${artistAddress}/cic/statements`,
     }).then((statements) => {
+      if (!isMounted) {
+        return;
+      }
       const bioStatement = statements.find(
         (s) => s.statement_type === STATEMENT_TYPE.BIO
       );
       setBio(bioStatement?.statement_value ?? "");
     });
-  }, []);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [artistAddress]);
 
   return (
     <Container className="no-padding">

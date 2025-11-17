@@ -2,7 +2,6 @@
 
 import { PROFILE_ACTIVITY_TYPE_TO_TEXT } from "@/entities/IProfile";
 import { ProfileActivityLogType } from "@/enums";
-import { useEffect, useState } from "react";
 import ProfileActivityLogsIcon from "../icons/ProfileActivityLogsIcon";
 
 export default function ProfileActivityLogsFilterListItem({
@@ -16,13 +15,7 @@ export default function ProfileActivityLogsFilterListItem({
   readonly setSelected: (selected: ProfileActivityLogType) => void;
   readonly user: string | null;
 }) {
-  const [isSelected, setIsSelected] = useState(
-    selectedItems.includes(itemType)
-  );
-
-  useEffect(() => {
-    setIsSelected(selectedItems.includes(itemType));
-  }, [selectedItems]);
+  const isSelected = selectedItems.includes(itemType);
 
   return (
     <li>

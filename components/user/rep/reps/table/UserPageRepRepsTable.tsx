@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { RatingStats } from "@/entities/IProfile";
 import UserPageRepRepsTableBody from "./UserPageRepRepsTableBody";
 import UserPageRepRepsTableHeader from "./UserPageRepRepsTableHeader";
@@ -88,13 +88,10 @@ export default function UserPageRepRepsTable({
     }
   };
 
-  const [sortedReps, setSortedReps] = useState<RatingStats[]>(
-    sortReps(reps, sortType, sortDirection)
+  const sortedReps = useMemo(
+    () => sortReps([...reps], sortType, sortDirection),
+    [reps, sortType, sortDirection]
   );
-
-  useEffect(() => {
-    setSortedReps(sortReps(reps, sortType, sortDirection));
-  }, [reps, sortType, sortDirection]);
 
   useEffect(() => {
     if (!canEditRep && sortType === RepsTableSort.MY_RATES) {

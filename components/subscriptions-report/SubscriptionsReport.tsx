@@ -38,6 +38,7 @@ export default function SubscriptionsReportComponent() {
   const { connectedProfile } = useAuth();
   const pastDropsTarget = useRef<HTMLDivElement>(null);
   const upcomingToggleRef = useRef<HTMLDivElement>(null);
+  const hasLoadedInitialRedeemedPage = useRef(false);
 
   const [upcomingLoading, setUpcomingLoading] = useState(true);
   const [upcomingCounts, setUpcomingCounts] = useState<SubscriptionCounts[]>(
@@ -115,6 +116,7 @@ export default function SubscriptionsReportComponent() {
         setTotalRedeemed(redeemed.count);
         setUpcomingCounts(upcoming);
       } finally {
+        hasLoadedInitialRedeemedPage.current = true;
         setRedeemedLoading(false);
         setUpcomingLoading(false);
       }
@@ -123,18 +125,26 @@ export default function SubscriptionsReportComponent() {
   }, []);
 
   useEffect(() => {
-    if (redeemedLoading) return;
+    if (!hasLoadedInitialRedeemedPage.current) return;
+    let isCancelled = false;
     const fetchData = async () => {
       setRedeemedLoading(true);
       try {
         const redeemed = await fetchRedeemedCounts(redeemedPage);
-        setRedeemedCounts(redeemed.data);
-        setTotalRedeemed(redeemed.count);
+        if (!isCancelled) {
+          setRedeemedCounts(redeemed.data);
+          setTotalRedeemed(redeemed.count);
+        }
       } finally {
-        setRedeemedLoading(false);
+        if (!isCancelled) {
+          setRedeemedLoading(false);
+        }
       }
     };
     fetchData();
+    return () => {
+      isCancelled = true;
+    };
   }, [redeemedPage]);
 
   function renderEmptyState(loading: boolean, type: string) {

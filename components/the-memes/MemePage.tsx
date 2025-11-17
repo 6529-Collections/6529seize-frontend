@@ -5,7 +5,7 @@ import styles from "./TheMemes.module.scss";
 import { MEMES_CONTRACT } from "@/constants";
 import { DBResponse } from "@/entities/IDBResponse";
 import dynamic from "next/dynamic";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useEffectEvent, useMemo, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 
 import { AuthContext } from "@/components/auth/Auth";
@@ -59,6 +59,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   const pathname = usePathname();
   const { setTitle } = useTitle();
   const { connectedProfile } = useContext(AuthContext);
+  const consolidationKey = connectedProfile?.consolidation_key;
   const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
 
   const focusParam = searchParams?.get("focus");
@@ -191,19 +192,27 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     };
   }, [nftId]);
 
-  function updateNftBalances(data: Transaction[]) {
+  const updateNftBalances = useEffectEvent((data: Transaction[]) => {
     let countIn = 0;
     let countOut = 0;
-    data.map((d: Transaction) => {
-      if (connectedWallets.some((w) => areEqualAddresses(w, d.from_address))) {
-        countOut += d.token_count;
+    data.forEach((transaction) => {
+      if (
+        connectedWallets.some((wallet) =>
+          areEqualAddresses(wallet, transaction.from_address)
+        )
+      ) {
+        countOut += transaction.token_count;
       }
-      if (connectedWallets.some((w) => areEqualAddresses(w, d.to_address))) {
-        countIn += d.token_count;
+      if (
+        connectedWallets.some((wallet) =>
+          areEqualAddresses(wallet, transaction.to_address)
+        )
+      ) {
+        countIn += transaction.token_count;
       }
     });
     setNftBalance(countIn - countOut);
-  }
+  });
 
   useEffect(() => {
     if (connectedWallets.length && nftId) {
@@ -228,14 +237,14 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   useEffect(() => {
     if (connectedWallets.length > 0 && nftId) {
       commonApiFetch<ConsolidatedTDH>({
-        endpoint: `tdh/consolidation/${connectedProfile?.consolidation_key}`,
+        endpoint: `tdh/consolidation/${consolidationKey}`,
       }).then((response) => {
         setMyOwner(response);
         setMyTDH(response.memes.find((m) => m.id === parseInt(nftId)));
         setMyRank(response.memes_ranks.find((m) => m.id === parseInt(nftId)));
       });
     }
-  }, [nftId, connectedWallets]);
+  }, [nftId, connectedWallets, consolidationKey]);
 
   function printContent() {
     return (

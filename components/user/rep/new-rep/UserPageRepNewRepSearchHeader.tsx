@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useMemo } from "react";
 import { ApiProfileRepRatesState } from "@/entities/IProfile";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { AuthContext } from "@/components/auth/Auth";
@@ -38,68 +38,57 @@ export default function UserPageRepNewRepSearchHeader({
     enabled: !!activeProfileProxy?.created_by.handle,
   });
 
-  const getActiveRepRates = (): {
+  const activeRepRates = useMemo<{
     available: number;
     rated: number;
     proxyCreditLeft: number | null;
-  } => {
-    const repProxy = activeProfileProxy?.actions.find(
-      (a) => a.action_type === ApiProfileProxyActionType.AllocateRep
-    );
-    if (!repProxy) {
-      return {
-        available: repRates?.rep_rates_left_for_rater ?? 0,
-        rated: repRates?.total_rep_rating_by_rater ?? 0,
-        proxyCreditLeft: null,
-      };
-    }
-    if (!proxyGrantorRepRates) {
-      return {
-        available: 0,
-        rated: 0,
-        proxyCreditLeft: null,
-      };
-    }
-    const proxyGrantorAvailableRep =
-      proxyGrantorRepRates.rep_rates_left_for_rater ?? 0;
-    const proxyGrantorTotalRep =
-      proxyGrantorRepRates.total_rep_rating_by_rater ?? 0;
-    return {
-      available: proxyGrantorAvailableRep,
-      rated: proxyGrantorTotalRep,
-      proxyCreditLeft: Math.max(
+  }>(
+    () => {
+      const repProxy = activeProfileProxy?.actions.find(
+        (action) => action.action_type === ApiProfileProxyActionType.AllocateRep
+      );
+      if (!repProxy) {
+        return {
+          available: repRates?.rep_rates_left_for_rater ?? 0,
+          rated: repRates?.total_rep_rating_by_rater ?? 0,
+          proxyCreditLeft: null,
+        };
+      }
+      if (!proxyGrantorRepRates) {
+        return {
+          available: 0,
+          rated: 0,
+          proxyCreditLeft: null,
+        };
+      }
+
+      const proxyGrantorAvailableRep =
+        proxyGrantorRepRates.rep_rates_left_for_rater ?? 0;
+      const proxyGrantorTotalRep =
+        proxyGrantorRepRates.total_rep_rating_by_rater ?? 0;
+      const proxyCreditLeft = Math.max(
         0,
         (repProxy.credit_amount ?? 0) - (repProxy.credit_spent ?? 0)
-      ),
-    };
-  };
+      );
 
-  const [activeRepRates, setActiveRepRates] = useState<{
-    available: number;
-    rated: number;
-    proxyCreditLeft: number | null;
-  }>(getActiveRepRates());
-
-  useEffect(
-    () => setActiveRepRates(getActiveRepRates()),
+      return {
+        available: proxyGrantorAvailableRep,
+        rated: proxyGrantorTotalRep,
+        proxyCreditLeft,
+      };
+    },
     [activeProfileProxy, proxyGrantorRepRates, repRates]
   );
 
-  const getAvailableCredit = (): number => {
+  const { available, rated, proxyCreditLeft } = activeRepRates;
+  const availableCredit = useMemo(() => {
     if (!activeProfileProxy) {
-      return activeRepRates.available;
+      return available;
     }
-    return Math.abs(activeRepRates.available) <
-      Math.abs(activeRepRates.proxyCreditLeft ?? 0)
-      ? activeRepRates.available
-      : activeRepRates.proxyCreditLeft ?? 0;
-  };
-
-  const [availableCredit, setAvailableCredit] = useState(getAvailableCredit());
-  useEffect(
-    () => setAvailableCredit(getAvailableCredit()),
-    [activeRepRates, activeRepRates.proxyCreditLeft]
-  );
+    return Math.abs(available) < Math.abs(proxyCreditLeft ?? 0)
+      ? available
+      : proxyCreditLeft ?? 0;
+  }, [activeProfileProxy, available, proxyCreditLeft]);
   return (
     <div className="tw-flex tw-flex-col tw-space-y-1">
       {!!activeProfileProxy && (
@@ -112,7 +101,7 @@ export default function UserPageRepNewRepSearchHeader({
           </span>
         </span>
       )}
-      {!!activeProfileProxy && !activeRepRates.available ? (
+      {!!activeProfileProxy && !available ? (
         <div className="tw-py-4">
           <CommonInfoBox message="You don't have any rep left to rate" />
         </div>
@@ -132,7 +121,7 @@ export default function UserPageRepNewRepSearchHeader({
           {profile.query ?? profile.handle ?? profile.display}:
         </span>
         <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
-          {repRates ? formatNumberWithCommas(activeRepRates.rated) : ""}
+          {repRates ? formatNumberWithCommas(rated) : ""}
         </span>
       </span>
     </div>
