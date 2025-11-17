@@ -44,6 +44,8 @@ jobs:
           BASE_ENDPOINT: ${{ env.BASE_ENDPOINT }}
           VERSION: ${{ env.COMMIT_SHA }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          SSR_CLIENT_ID: ${{ secrets.SSR_CLIENT_ID }}
+          SSR_CLIENT_SECRET: ${{ secrets.SSR_CLIENT_SECRET }}
           NEXTGEN_CHAIN_ID: ${{ env.NEXTGEN_CHAIN_ID }}
           TENOR_API_KEY: ${{ secrets.TENOR_API_KEY }}
           AWS_RUM_APP_ID: ${{ secrets.AWS_RUM_APP_ID }}

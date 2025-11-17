@@ -1,18 +1,41 @@
 import { publicEnv } from "@/config/env";
+import { generateClientSignature } from "@/helpers/server-signature.helpers";
 import { getAuthJwt, getStagingAuth } from "../auth/auth.utils";
 
 const getHeaders = (
   headers?: Record<string, string>,
-  contentType: boolean = true
+  contentType: boolean = true,
+  method: string = "GET",
+  path: string = ""
 ) => {
   const apiAuth = getStagingAuth();
   const walletAuth = getAuthJwt();
-  return {
+  const baseHeaders: Record<string, string> = {
     ...(contentType ? { "Content-Type": "application/json" } : {}),
     ...(apiAuth ? { "x-6529-auth": apiAuth } : {}),
     ...(walletAuth ? { Authorization: `Bearer ${walletAuth}` } : {}),
     ...(headers ?? {}),
   };
+
+  if (typeof window === "undefined") {
+    const clientId = publicEnv.SSR_CLIENT_ID;
+    const clientSecret = publicEnv.SSR_CLIENT_SECRET;
+
+    if (clientId && clientSecret && path) {
+      const signatureData = generateClientSignature(
+        clientId,
+        clientSecret,
+        method,
+        path
+      );
+      baseHeaders["x-6529-internal-id"] = signatureData.clientId;
+      baseHeaders["x-6529-internal-signature"] = signatureData.signature;
+      baseHeaders["x-6529-internal-timestamp"] =
+        signatureData.timestamp.toString();
+    }
+  }
+
+  return baseHeaders;
 };
 
 export const commonApiFetch = async <T, U = Record<string, string>>(param: {
@@ -21,7 +44,8 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
   params?: U;
   signal?: AbortSignal;
 }): Promise<T> => {
-  let url = `${publicEnv.API_ENDPOINT}/api/${param.endpoint}`;
+  let path = `/api/${param.endpoint}`;
+  let url = `${publicEnv.API_ENDPOINT}${path}`;
   if (param.params) {
     const queryParams = new URLSearchParams();
     // Override NIC with CIC
@@ -29,10 +53,12 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
       const newValue = value === "nic" ? "cic" : value;
       queryParams.set(key, newValue);
     });
-    url += `?${queryParams.toString()}`;
+    const queryString = queryParams.toString();
+    url += `?${queryString}`;
+    path += `?${queryString}`;
   }
   const res = await fetch(url, {
-    headers: getHeaders(param.headers, false),
+    headers: getHeaders(param.headers, false, "GET", path),
     signal: param.signal,
   });
   if (!res.ok) {
@@ -170,14 +196,17 @@ export const commonApiPost = async <T, U, Z = Record<string, string>>(param: {
   params?: Z;
   signal?: AbortSignal;
 }): Promise<U> => {
-  let url = `${publicEnv.API_ENDPOINT}/api/${param.endpoint}`;
+  let path = `/api/${param.endpoint}`;
+  let url = `${publicEnv.API_ENDPOINT}${path}`;
   if (param.params) {
     const queryParams = new URLSearchParams(param.params);
-    url += `?${queryParams.toString()}`;
+    const queryString = queryParams.toString();
+    url += `?${queryString}`;
+    path += `?${queryString}`;
   }
   const res = await fetch(url, {
     method: "POST",
-    headers: getHeaders(param.headers),
+    headers: getHeaders(param.headers, true, "POST", path),
     body: JSON.stringify(param.body),
     signal: param.signal,
   });
@@ -194,10 +223,11 @@ export const commonApiPostWithoutBodyAndResponse = async (param: {
   endpoint: string;
   headers?: Record<string, string>;
 }): Promise<void> => {
-  let url = `${publicEnv.API_ENDPOINT}/api/${param.endpoint}`;
+  const path = `/api/${param.endpoint}`;
+  const url = `${publicEnv.API_ENDPOINT}${path}`;
   const res = await fetch(url, {
     method: "POST",
-    headers: getHeaders(param.headers),
+    headers: getHeaders(param.headers, true, "POST", path),
     body: "",
   });
   if (!res.ok) {
@@ -212,9 +242,10 @@ export const commonApiDelete = async (param: {
   endpoint: string;
   headers?: Record<string, string>;
 }): Promise<void> => {
-  const res = await fetch(`${publicEnv.API_ENDPOINT}/api/${param.endpoint}`, {
+  const path = `/api/${param.endpoint}`;
+  const res = await fetch(`${publicEnv.API_ENDPOINT}${path}`, {
     method: "DELETE",
-    headers: getHeaders(param.headers),
+    headers: getHeaders(param.headers, false, "DELETE", path),
   });
   if (!res.ok) {
     const body: any = await res.json();
@@ -234,14 +265,17 @@ export const commonApiDeleteWithBody = async <
   headers?: Record<string, string>;
   params?: Z;
 }): Promise<U> => {
-  let url = `${publicEnv.API_ENDPOINT}/api/${param.endpoint}`;
+  let path = `/api/${param.endpoint}`;
+  let url = `${publicEnv.API_ENDPOINT}${path}`;
   if (param.params) {
     const queryParams = new URLSearchParams(param.params);
-    url += `?${queryParams.toString()}`;
+    const queryString = queryParams.toString();
+    url += `?${queryString}`;
+    path += `?${queryString}`;
   }
   const res = await fetch(url, {
     method: "DELETE",
-    headers: getHeaders(param.headers),
+    headers: getHeaders(param.headers, true, "DELETE", path),
     body: JSON.stringify(param.body),
   });
   if (!res.ok) {
@@ -259,14 +293,17 @@ export const commonApiPut = async <T, U, Z = Record<string, string>>(param: {
   headers?: Record<string, string>;
   params?: Z;
 }): Promise<U> => {
-  let url = `${publicEnv.API_ENDPOINT}/api/${param.endpoint}`;
+  let path = `/api/${param.endpoint}`;
+  let url = `${publicEnv.API_ENDPOINT}${path}`;
   if (param.params) {
     const queryParams = new URLSearchParams(param.params);
-    url += `?${queryParams.toString()}`;
+    const queryString = queryParams.toString();
+    url += `?${queryString}`;
+    path += `?${queryString}`;
   }
   const res = await fetch(url, {
     method: "PUT",
-    headers: getHeaders(param.headers),
+    headers: getHeaders(param.headers, true, "PUT", path),
     body: JSON.stringify(param.body),
   });
   if (!res.ok) {
@@ -283,9 +320,10 @@ export const commonApiPostForm = async <U>(param: {
   body: FormData;
   headers?: Record<string, string>;
 }): Promise<U> => {
-  const res = await fetch(`${publicEnv.API_ENDPOINT}/api/${param.endpoint}`, {
+  const path = `/api/${param.endpoint}`;
+  const res = await fetch(`${publicEnv.API_ENDPOINT}${path}`, {
     method: "POST",
-    headers: getHeaders(param.headers, false),
+    headers: getHeaders(param.headers, false, "POST", path),
     body: param.body,
   });
   if (!res.ok) {
