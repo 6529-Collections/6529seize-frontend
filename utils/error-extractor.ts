@@ -26,10 +26,22 @@ export function extractErrorDetails(
   }
 
   if (err.cause) {
-    const causeString =
-      typeof err.cause === "object"
-        ? JSON.stringify(err.cause, null, 2)
-        : String(err.cause);
+    let causeString: string;
+    if (err.cause !== null && typeof err.cause === "object") {
+      causeString = JSON.stringify(err.cause, null, 2);
+    } else if (
+      typeof err.cause === "string" ||
+      typeof err.cause === "number" ||
+      typeof err.cause === "boolean" ||
+      typeof err.cause === "bigint" ||
+      typeof err.cause === "symbol" ||
+      err.cause === null ||
+      err.cause === undefined
+    ) {
+      causeString = String(err.cause);
+    } else {
+      causeString = JSON.stringify(err.cause, null, 2);
+    }
     parts.push(`\n\nCause: ${causeString}`);
   }
 
@@ -52,8 +64,16 @@ export function extractErrorDetails(
           valueString = String(value);
         } else if (typeof value === "object") {
           valueString = JSON.stringify(value, null, 2);
-        } else {
+        } else if (
+          typeof value === "string" ||
+          typeof value === "number" ||
+          typeof value === "boolean" ||
+          typeof value === "bigint" ||
+          typeof value === "symbol"
+        ) {
           valueString = String(value);
+        } else {
+          valueString = JSON.stringify(value, null, 2);
         }
         parts.push(`  ${prop}: ${valueString}`);
       } catch {
