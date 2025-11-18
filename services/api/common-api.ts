@@ -63,7 +63,20 @@ const executeApiRequest = async <T>(
     return handleApiError(res);
   }
 
-  return res.json();
+  if (res.status === 204) {
+    return undefined as T;
+  }
+
+  const contentType = res.headers.get("content-type");
+  if (contentType && !contentType.includes("application/json")) {
+    return undefined as T;
+  }
+
+  if (typeof res.json === "function") {
+    return res.json();
+  }
+
+  return undefined as T;
 };
 
 export const commonApiFetch = async <T, U = Record<string, string>>(param: {

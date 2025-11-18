@@ -83,6 +83,18 @@ export function generateWafSignature(clientId: string, secret: string): string {
     );
   }
 
+  if (typeof clientId !== "string" || clientId.trim().length === 0) {
+    throw new TypeError(
+      "generateWafSignature: clientId must be a non-empty string"
+    );
+  }
+
+  if (typeof secret !== "string" || secret.trim().length === 0) {
+    throw new TypeError(
+      "generateWafSignature: secret must be a non-empty string"
+    );
+  }
+
   const signature = createHmac("sha256", secret).update(clientId).digest("hex");
 
   return signature;
