@@ -1,9 +1,7 @@
-import { publicEnv } from "@/config/env";
 import { DBResponse } from "@/entities/IDBResponse";
 import { NFT } from "@/entities/INFT";
 import { NextGenCollection } from "@/entities/INextgen";
 import { Transaction } from "@/entities/ITransaction";
-import { fetchAllPages, fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
 
 export interface InitialActivityData {
@@ -18,38 +16,43 @@ export async function fetchInitialActivityData(
   pageSize: number = 50
 ): Promise<InitialActivityData> {
   try {
-    // Build activity API URL with default filters (All/All)
-    const activityUrl = `${publicEnv.API_ENDPOINT}/api/transactions?page_size=${pageSize}&page=${page}`;
-
     // Fetch all data in parallel
-    const [activityResponse, memesResponse, gradientsData, nextgenResponse] =
-      await Promise.all([
-        // Activity data
-        fetchUrl(activityUrl) as Promise<DBResponse>,
+    const [
+      activityResponse,
+      memesResponse,
+      gradientsResponse,
+      nextgenResponse,
+    ] = await Promise.all([
+      // Activity data
+      commonApiFetch<DBResponse>({
+        endpoint: "transactions",
+        params: {
+          page_size: String(pageSize),
+          page: String(page),
+        },
+      }),
 
-        // Memes data
-        fetchUrl(
-          `${publicEnv.API_ENDPOINT}/api/memes_lite`
-        ) as Promise<DBResponse>,
+      // Memes data
+      commonApiFetch<DBResponse<NFT>>({
+        endpoint: "memes_lite",
+      }),
 
-        // Gradients data
-        fetchAllPages<NFT>(
-          `${publicEnv.API_ENDPOINT}/api/nfts/gradients?&page_size=101`
-        ),
+      // Gradients data (first page only, page_size 101)
+      commonApiFetch<DBResponse<NFT>>({
+        endpoint: "nfts/gradients",
+        params: {
+          page_size: "101",
+        },
+      }),
 
-        // NextGen collections
-        commonApiFetch<{
-          count: number;
-          page: number;
-          next: any;
-          data: NextGenCollection[];
-        }>({
-          endpoint: `nextgen/collections`,
-        }),
-      ]);
+      // NextGen collections
+      commonApiFetch<DBResponse<NextGenCollection>>({
+        endpoint: `nextgen/collections`,
+      }),
+    ]);
 
     // Combine memes and gradients
-    const nfts = [...memesResponse.data, ...gradientsData];
+    const nfts = [...memesResponse.data, ...gradientsResponse.data];
 
     return {
       activity: activityResponse.data,
