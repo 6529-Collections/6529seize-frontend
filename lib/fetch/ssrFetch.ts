@@ -72,7 +72,7 @@ const enhancedFetch: typeof fetch = async (
     clientSecret = env.SSR_CLIENT_SECRET;
   } catch {
     console.warn(
-      "[SSR Fetch] SSR credentials unavailable, falling back to unauthenticated fetch. Internal rate limits will not be bypassed."
+      "[SSR Fetch] [PATH: ${path}] SSR credentials unavailable, falling back to unauthenticated fetch. Internal rate limits will not be bypassed."
     );
     return originalFetch(input, init);
   }
@@ -120,13 +120,15 @@ const enhancedFetch: typeof fetch = async (
     });
   } catch (error) {
     console.warn(
-      "[SSR Fetch] Failed to get app common headers:",
+      "[SSR Fetch] [PATH: ${path}] Failed to get app common headers:",
       error instanceof Error ? error.message : error
     );
   }
 
   const headerKeys = Array.from(enhancedHeaders.keys());
-  console.log(`[SSR Fetch] Request headers: ${headerKeys.join(", ")}`);
+  console.log(
+    `[SSR Fetch] [PATH: ${path}] Request headers: ${headerKeys.join(", ")}`
+  );
 
   return originalFetch(input, {
     ...init,
