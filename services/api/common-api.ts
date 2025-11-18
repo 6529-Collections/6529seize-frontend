@@ -67,9 +67,11 @@ const executeApiRequest = async <T>(
     return undefined as T;
   }
 
-  const contentType = res.headers.get("content-type");
-  if (contentType && !contentType.includes("application/json")) {
-    return undefined as T;
+  if (res.headers && typeof res.headers.get === "function") {
+    const contentType = res.headers.get("content-type");
+    if (contentType && !contentType.includes("application/json")) {
+      return undefined as T;
+    }
   }
 
   if (typeof res.json === "function") {

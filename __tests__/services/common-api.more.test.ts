@@ -21,6 +21,7 @@ describe("commonApi utility methods", () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       json: async () => ({ ok: 1 }),
+      headers: new Headers({ "content-type": "application/json" }),
     });
     const res = await commonApiPut({ endpoint: "e", body: { a: 1 } });
     expect(res).toEqual({ ok: 1 });
@@ -42,6 +43,7 @@ describe("commonApi utility methods", () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       json: async () => ({ r: 2 }),
+      headers: new Headers({ "content-type": "application/json" }),
     });
     const res = await commonApiDeleteWithBody({
       endpoint: "del",
@@ -86,6 +88,7 @@ describe("commonApi utility methods", () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       json: async () => ({ res: 3 }),
+      headers: new Headers({ "content-type": "application/json" }),
     });
     const { commonApiPostForm } = await import("@/services/api/common-api");
     const result = await commonApiPostForm({ endpoint: "f", body: form });
