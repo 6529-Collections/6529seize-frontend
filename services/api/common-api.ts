@@ -37,12 +37,11 @@ const buildUrlAndPath = (
   return { url, path };
 };
 
-const handleApiError = (res: Response): Promise<never> => {
-  return res.json().then((body: any) => {
-    return Promise.reject(
-      body?.error ?? res.statusText ?? "Something went wrong"
-    );
-  });
+const handleApiError = async (res: Response): Promise<never> => {
+  const body: any = await res.json();
+  return Promise.reject(
+    body?.error ?? res.statusText ?? "Something went wrong"
+  );
 };
 
 const executeApiRequest = async <T>(
@@ -63,22 +62,7 @@ const executeApiRequest = async <T>(
     return handleApiError(res);
   }
 
-  if (res.status === 204) {
-    return undefined as T;
-  }
-
-  if (res.headers && typeof res.headers.get === "function") {
-    const contentType = res.headers.get("content-type");
-    if (contentType && !contentType.includes("application/json")) {
-      return undefined as T;
-    }
-  }
-
-  if (typeof res.json === "function") {
-    return res.json();
-  }
-
-  return undefined as T;
+  return res.json();
 };
 
 export const commonApiFetch = async <T, U = Record<string, string>>(param: {
@@ -257,12 +241,15 @@ export const commonApiPostWithoutBodyAndResponse = async (param: {
 }): Promise<void> => {
   const { url } = buildUrlAndPath(param.endpoint);
 
-  await executeApiRequest<void>(
-    url,
-    "POST",
-    getHeaders(param.headers, true),
-    ""
-  );
+  const res = await fetch(url, {
+    method: "POST",
+    headers: getHeaders(param.headers, true),
+    body: "",
+  });
+
+  if (!res.ok) {
+    return handleApiError(res);
+  }
 };
 
 export const commonApiDelete = async (param: {
@@ -271,11 +258,17 @@ export const commonApiDelete = async (param: {
 }): Promise<void> => {
   const { url } = buildUrlAndPath(param.endpoint);
 
-  await executeApiRequest<void>(
-    url,
-    "DELETE",
-    getHeaders(param.headers, false)
-  );
+  const res = await fetch(url, {
+    method: "DELETE",
+    headers: getHeaders(param.headers),
+  });
+
+  if (!res.ok) {
+    const body: any = await res.json();
+    return Promise.reject(
+      new Error(body?.error ?? res.statusText ?? "Something went wrong")
+    );
+  }
 };
 
 export const commonApiDeleteWithBody = async <

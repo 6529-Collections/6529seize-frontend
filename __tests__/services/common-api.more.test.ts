@@ -67,8 +67,6 @@ describe("commonApi utility methods", () => {
   it("commonApiDelete sends DELETE request", async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
-      json: async () => undefined,
-      headers: new Headers(),
     });
     await commonApiDelete({ endpoint: "x" });
     expect(globalThis.fetch).toHaveBeenCalledWith(
@@ -76,6 +74,7 @@ describe("commonApi utility methods", () => {
       {
         method: "DELETE",
         headers: {
+          "Content-Type": "application/json",
           "x-6529-auth": "stage",
           Authorization: "Bearer jwt",
         },
