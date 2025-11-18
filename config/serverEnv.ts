@@ -12,7 +12,6 @@ const getServerEnv = (): ServerEnv | null => {
   const raw = {
     SSR_CLIENT_ID: process.env.SSR_CLIENT_ID,
     SSR_CLIENT_SECRET: process.env.SSR_CLIENT_SECRET,
-    STAGING_API_KEY_SERVER: process.env.STAGING_API_KEY_SERVER,
   };
 
   const parsed = serverEnvSchema.safeParse(raw);

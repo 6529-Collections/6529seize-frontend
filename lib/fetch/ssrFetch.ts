@@ -4,6 +4,7 @@ import {
   generateClientSignature,
   generateWafSignature,
 } from "@/helpers/server-signature.helpers";
+import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 
 const getOriginalFetch = (): typeof fetch => {
   if (globalThis.fetch === undefined) {
@@ -64,14 +65,11 @@ const enhancedFetch: typeof fetch = async (
 
   let clientId: string;
   let clientSecret: string;
-  let stagingApiKey: string | undefined;
 
   try {
     const env = getServerEnvOrThrow();
     clientId = env.SSR_CLIENT_ID;
     clientSecret = env.SSR_CLIENT_SECRET;
-    stagingApiKey = env.STAGING_API_KEY_SERVER;
-    console.log("hi i am env ssrFetch", clientId, stagingApiKey);
   } catch {
     return originalFetch(input, init);
   }
@@ -112,11 +110,12 @@ const enhancedFetch: typeof fetch = async (
   );
   enhancedHeaders.set("x-6529-internal-waf-signature", wafSignature);
 
-  if (stagingApiKey) {
-    enhancedHeaders.set("x-6529-auth", stagingApiKey);
-  }
-
-  console.log("hi i am enhancedHeaders for", path, enhancedHeaders);
+  try {
+    const appHeaders = await getAppCommonHeaders();
+    Object.entries(appHeaders).forEach(([key, value]) => {
+      enhancedHeaders.set(key, value);
+    });
+  } catch {}
 
   return originalFetch(input, {
     ...init,
