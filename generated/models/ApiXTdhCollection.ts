@@ -12,9 +12,12 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiChangeProfileCicRatingResponse {
-    'total_cic_rating': number;
-    'cic_rating_by_user': number;
+export class ApiXTdhCollection {
+    'contract': string;
+    'xtdh': number;
+    'xtdh_rate': number;
+    'token_count': number;
+    'grant_count': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -22,20 +25,38 @@ export class ApiChangeProfileCicRatingResponse {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "total_cic_rating",
-            "baseName": "total_cic_rating",
+            "name": "contract",
+            "baseName": "contract",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "xtdh",
+            "baseName": "xtdh",
+            "type": "number",
+            "format": "float"
+        },
+        {
+            "name": "xtdh_rate",
+            "baseName": "xtdh_rate",
+            "type": "number",
+            "format": "float"
+        },
+        {
+            "name": "token_count",
+            "baseName": "token_count",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "cic_rating_by_user",
-            "baseName": "cic_rating_by_user",
+            "name": "grant_count",
+            "baseName": "grant_count",
             "type": "number",
             "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiChangeProfileCicRatingResponse.attributeTypeMap;
+        return ApiXTdhCollection.attributeTypeMap;
     }
 
     public constructor() {

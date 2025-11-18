@@ -10,10 +10,13 @@
  * Do not edit the class manually.
  */
 
+import { ApiXTdhGrantee } from '../models/ApiXTdhGrantee';
 import { HttpFile } from '../http/http';
 
-export class ApiContract {
-    'contract': string;
+export class ApiXTdhGranteesPage {
+    'data': Array<ApiXTdhGrantee>;
+    'page': number;
+    'next': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -21,14 +24,26 @@ export class ApiContract {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "contract",
-            "baseName": "contract",
-            "type": "string",
+            "name": "data",
+            "baseName": "data",
+            "type": "Array<ApiXTdhGrantee>",
+            "format": ""
+        },
+        {
+            "name": "page",
+            "baseName": "page",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "next",
+            "baseName": "next",
+            "type": "boolean",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiContract.attributeTypeMap;
+        return ApiXTdhGranteesPage.attributeTypeMap;
     }
 
     public constructor() {

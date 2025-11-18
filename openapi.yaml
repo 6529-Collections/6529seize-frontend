@@ -1625,10 +1625,6 @@ paths:
       responses:
         "201":
           description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiChangeProfileCicRatingResponse"
         "400":
           description: Invalid request
   /profiles/{identity}/cic/ratings/by-rater:
@@ -1709,10 +1705,6 @@ paths:
       responses:
         "201":
           description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiChangeProfileRepRatingResponse"
         "400":
           description: Invalid request
     get:
@@ -2494,12 +2486,8 @@ paths:
           in: query
           required: false
           description: One or more (comma separated) statuses you are interested in
-          style: form
-          explode: false
           schema:
-            type: array
-            items:
-              $ref: "#/components/schemas/ApiTdhGrantStatus"
+            type: string
         - name: sort_direction
           in: query
           required: false
@@ -3285,7 +3273,7 @@ paths:
           in: query
           required: false
           schema:
-            type: integer
+            type: number
             format: int64
             minimum: 0
         - name: page_size
@@ -3293,7 +3281,7 @@ paths:
           description: Default is 20
           required: false
           schema:
-            type: integer
+            type: number
             format: int64
             minimum: 1
             maximum: 100
@@ -3376,41 +3364,26 @@ paths:
                 $ref: "#/components/schemas/ApiWaveSubscriptionActions"
         "404":
           description: Wave not found
-  /xtdh:
+  /xtdh/collections:
     get:
       tags:
         - xTDH
-      summary: Get info about xTDH of tokens
-      operationId: getXTokenXTdhStats
+      summary: Get info about xTDH collections
+      operationId: getInfoAboutXTdhCollections
       parameters:
-        - name: grantee
+        - name: identity
           in: query
-          description: If set then you"ll get token stats for ownings of a specific grantee
-          required: false
-          schema:
-            type: string
-        - name: contract
-          in: query
-          description: If set then you"ll get token stats for a specific contract
-          required: false
-          schema:
-            type: string
-        - name: token
-          in: query
-          description: >-
-            If set then you"ll get token stats for a specific token. Only works
-            if paired with contract.
+          description: Filter by receiving identity
           required: false
           schema:
             type: string
         - name: page
           in: query
-          description: Default is 1
           required: false
           schema:
             type: number
             format: int64
-            minimum: 1
+            minimum: 0
         - name: page_size
           in: query
           description: Default is 20
@@ -3420,6 +3393,91 @@ paths:
             format: int64
             minimum: 1
             maximum: 100
+        - name: sort
+          in: query
+          description: xtdh when omitted
+          required: false
+          schema:
+            type: string
+            enum:
+              - xtdh
+              - xtdh_rate
+        - name: order
+          in: query
+          description: desc when omitted
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiXTdhCollectionsPage"
+  /xtdh/tokens:
+    get:
+      tags:
+        - xTDH
+      summary: Get info about xTDH tokens
+      operationId: getInfoAboutXTdhTokens
+      parameters:
+        - name: identity
+          in: query
+          description: Filter by receiving identity
+          required: false
+          schema:
+            type: string
+        - name: contract
+          in: query
+          description: Filter by receiving contract
+          required: false
+          schema:
+            type: string
+        - name: token
+          in: query
+          description: Filter by token. Needs to be paired with contract to work
+          required: false
+          schema:
+            type: number
+            format: int64
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 0
+        - name: page_size
+          in: query
+          description: Default is 20
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 100
+        - name: sort
+          in: query
+          description: xtdh when omitted
+          required: false
+          schema:
+            type: string
+            enum:
+              - xtdh
+              - xtdh_rate
+        - name: order
+          in: query
+          description: desc when omitted
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
       responses:
         "200":
           description: successful operation
@@ -3427,33 +3485,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiXTdhTokensPage"
-  /xtdh/identity/{identity}/contracts:
+  /xtdh/tokens/{contract}/{token}/contributors:
     get:
       tags:
         - xTDH
-      summary: Get info about xTDH contracts of identity
-      operationId: getXTdhContracts
-      parameters:
-        - name: identity
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/ApiContract"
-  /xtdh/contract/{contract}/token/{token}/contributors:
-    get:
-      tags:
-        - xTDH
-      summary: Get info about xTDH contributors to token
-      operationId: getXTdhTokenContributors
+      summary: Get info about xTDH contributors
+      operationId: getInfoAboutXTdhContributors
       parameters:
         - name: contract
           in: path
@@ -3464,16 +3501,111 @@ paths:
           in: path
           required: true
           schema:
+            type: number
+            format: int64
+        - name: group_by
+          in: query
+          description: Group by grant or grantor (grant when omitted)
+          required: false
+          schema:
             type: string
+            enum:
+              - grant
+              - grantor
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 0
+        - name: page_size
+          in: query
+          description: Default is 20
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 100
+        - name: sort
+          in: query
+          description: xtdh when omitted
+          required: false
+          schema:
+            type: string
+            enum:
+              - xtdh
+              - xtdh_rate
+        - name: order
+          in: query
+          description: desc when omitted
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
       responses:
         "200":
           description: successful operation
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/ApiXTdhTokenGrantor"
+                $ref: "#/components/schemas/ApiXTdhContributionsPage"
+  /xtdh/grantees:
+    get:
+      tags:
+        - xTDH
+      summary: Get info about xTDH grantees
+      operationId: getInfoAboutXTdhGrantees
+      parameters:
+        - name: contract
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 0
+        - name: page_size
+          in: query
+          description: Default is 20
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 100
+        - name: sort
+          in: query
+          description: xtdh when omitted
+          required: false
+          schema:
+            type: string
+            enum:
+              - xtdh
+              - xtdh_rate
+        - name: order
+          in: query
+          description: desc when omitted
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiXTdhGranteesPage"
 components:
   securitySchemes:
     bearerAuth:
@@ -3995,18 +4127,6 @@ components:
         amount:
           type: number
           format: int64
-    ApiChangeProfileCicRatingResponse:
-      type: object
-      required:
-        - total_cic_rating
-        - cic_rating_by_user
-      properties:
-        total_cic_rating:
-          type: number
-          format: int64
-        cic_rating_by_user:
-          type: number
-          format: int64
     ApiChangeProfileRepRating:
       type: object
       required:
@@ -4021,18 +4141,6 @@ components:
           maxLength: 100
           minLength: 1
           pattern: ^[a-zA-Z0-9?!,."() ]{1,100}$
-    ApiChangeProfileRepRatingResponse:
-      type: object
-      required:
-        - total_rep_rating_for_category
-        - rep_rating_for_category_by_user
-      properties:
-        total_rep_rating_for_category:
-          type: number
-          format: int64
-        rep_rating_for_category_by_user:
-          type: number
-          format: int64
     ApiCommunityMemberMinimal:
       type: object
       required:
@@ -4105,13 +4213,6 @@ components:
         - media_url
       properties:
         media_url:
-          type: string
-    ApiContract:
-      type: object
-      required:
-        - contract
-      properties:
-        contract:
           type: string
     ApiCreateDropPart:
       type: object
@@ -6006,7 +6107,7 @@ components:
         - next
       properties:
         page:
-          type: integer
+          type: number
           format: int64
         next:
           type: boolean
@@ -7456,41 +7557,130 @@ components:
           type: boolean
         forbid_negative_votes:
           type: boolean
+    ApiXTdhCollection:
+      type: object
+      required:
+        - contract
+        - xtdh
+        - xtdh_rate
+        - token_count
+        - grant_count
+      properties:
+        contract:
+          type: string
+        xtdh:
+          type: number
+          format: float
+        xtdh_rate:
+          type: number
+          format: float
+        token_count:
+          type: number
+          format: int64
+        grant_count:
+          type: number
+          format: int64
+    ApiXTdhCollectionsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithoutCount"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiXTdhCollection"
+    ApiXTdhContribution:
+      type: object
+      required:
+        - xtdh
+        - xtdh_rate
+      properties:
+        grant:
+          $ref: "#/components/schemas/ApiTdhGrant"
+        grantor:
+          $ref: "#/components/schemas/ApiProfileMin"
+        xtdh:
+          type: number
+          format: float
+        xtdh_rate:
+          type: number
+          format: float
+        grant_count:
+          type: number
+          format: int64
+    ApiXTdhContributionsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithoutCount"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiXTdhContribution"
+    ApiXTdhGrantee:
+      type: object
+      required:
+        - grantee
+        - collections_count
+        - tokens_count
+        - xtdh
+        - xtdh_rate
+      properties:
+        grantee:
+          $ref: "#/components/schemas/ApiProfileMin"
+        xtdh:
+          type: number
+          format: float
+        xtdh_rate:
+          type: number
+          format: float
+        collections_count:
+          type: number
+          format: int64
+        tokens_count:
+          type: number
+          format: int64
+    ApiXTdhGranteesPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithoutCount"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiXTdhGrantee"
     ApiXTdhToken:
       type: object
       required:
         - contract
         - token
-        - xtdh_rate
+        - owner
         - xtdh
+        - xtdh_rate
+        - grants_count
       properties:
         contract:
           type: string
         token:
-          type: string
-        xtdh_rate:
           type: number
-          format: double
+          format: int64
+        owner:
+          $ref: "#/components/schemas/ApiProfileMin"
         xtdh:
           type: number
-          format: double
-        grantor:
-          $ref: "#/components/schemas/ApiProfileMin"
-    ApiXTdhTokenGrantor:
-      type: object
-      required:
-        - xtdh_rate
-        - xtdh
-        - grantor
-      properties:
+          format: float
         xtdh_rate:
           type: number
-          format: double
-        xtdh:
+          format: float
+        grant_count:
           type: number
-          format: double
-        grantor:
-          $ref: "#/components/schemas/ApiProfileMin"
+          format: int64
     ApiXTdhTokensPage:
       type: object
       required:

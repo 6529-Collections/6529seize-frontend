@@ -11,12 +11,15 @@
  */
 
 import { ApiProfileMin } from '../models/ApiProfileMin';
+import { ApiTdhGrant } from '../models/ApiTdhGrant';
 import { HttpFile } from '../http/http';
 
-export class ApiXTdhTokenGrantor {
-    'xtdh_rate': number;
+export class ApiXTdhContribution {
+    'grant'?: ApiTdhGrant;
+    'grantor'?: ApiProfileMin;
     'xtdh': number;
-    'grantor': ApiProfileMin;
+    'xtdh_rate': number;
+    'grant_count'?: number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,26 +27,38 @@ export class ApiXTdhTokenGrantor {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "xtdh_rate",
-            "baseName": "xtdh_rate",
-            "type": "number",
-            "format": "double"
-        },
-        {
-            "name": "xtdh",
-            "baseName": "xtdh",
-            "type": "number",
-            "format": "double"
+            "name": "grant",
+            "baseName": "grant",
+            "type": "ApiTdhGrant",
+            "format": ""
         },
         {
             "name": "grantor",
             "baseName": "grantor",
             "type": "ApiProfileMin",
             "format": ""
+        },
+        {
+            "name": "xtdh",
+            "baseName": "xtdh",
+            "type": "number",
+            "format": "float"
+        },
+        {
+            "name": "xtdh_rate",
+            "baseName": "xtdh_rate",
+            "type": "number",
+            "format": "float"
+        },
+        {
+            "name": "grant_count",
+            "baseName": "grant_count",
+            "type": "number",
+            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiXTdhTokenGrantor.attributeTypeMap;
+        return ApiXTdhContribution.attributeTypeMap;
     }
 
     public constructor() {
