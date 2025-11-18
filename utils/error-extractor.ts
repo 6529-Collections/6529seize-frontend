@@ -1,8 +1,10 @@
+import { publicEnv } from "@/config/env";
+
 export function extractErrorDetails(
   err: Error & { digest?: string },
   context?: string
 ): string {
-  if (context) {
+  if (context && publicEnv.NODE_ENV !== "production") {
     console.error(`[${context}] Full error object:`, err);
     console.error(`[${context}] Error stack:`, err.stack);
     console.error(
@@ -13,16 +15,38 @@ export function extractErrorDetails(
 
   const parts: string[] = [];
 
+  if (err.digest) {
+    parts.push(`Digest: ${err.digest}`);
+  }
+
   if (err.message) {
-    parts.push(`Message: ${err.message}`);
+    const isGenericNextError = err.message.includes(
+      "An error occurred in the Server Components render"
+    );
+    const stackIsSameAsMessage =
+      err.stack && err.stack.trim().startsWith(err.message.trim());
+
+    if (isGenericNextError) {
+      parts.push(`\n\nMessage: ${err.message}`);
+      if (err.digest) {
+        parts.push(
+          `\n\nNote: Check server logs for full error details. Search for digest: ${err.digest}`
+        );
+      }
+    } else {
+      parts.push(`\n\nMessage: ${err.message}`);
+    }
+
+    if (err.stack && !stackIsSameAsMessage) {
+      parts.push(`\n\nStack Trace:\n${err.stack}`);
+    }
+  } else if (err.stack) {
+    parts.push(`Stack Trace:\n${err.stack}`);
   }
 
-  if (err.stack) {
-    parts.push(`\n\nStack Trace:\n${err.stack}`);
-  }
-
-  if (err.name) {
-    parts.push(`\n\nError Name: ${err.name}`);
+  const errorName = err.name?.trim();
+  if (errorName && errorName !== "Error") {
+    parts.push(`\n\nError Name: ${errorName}`);
   }
 
   if (err.cause) {
@@ -43,10 +67,6 @@ export function extractErrorDetails(
       causeString = JSON.stringify(err.cause, null, 2);
     }
     parts.push(`\n\nCause: ${causeString}`);
-  }
-
-  if (err.digest) {
-    parts.push(`\n\nDigest: ${err.digest}`);
   }
 
   const allProps = Object.getOwnPropertyNames(err);

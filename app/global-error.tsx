@@ -16,7 +16,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
     <html lang="en">
       <body>
         <main className={styles.main}>
-          <ErrorComponent stackTrace={errorDetails} />
+          <ErrorComponent stackTrace={errorDetails} digest={error.digest} />
         </main>
       </body>
     </html>

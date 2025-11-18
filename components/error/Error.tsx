@@ -9,10 +9,12 @@ import { useEffect, useId, useMemo, useState } from "react";
 
 type ErrorComponentProps = {
   readonly stackTrace?: string | null;
+  readonly digest?: string | null;
 };
 
 export default function ErrorComponent({
   stackTrace,
+  digest,
 }: ErrorComponentProps = {}) {
   const { setTitle } = useTitle();
   const searchParams = useSearchParams();
@@ -62,6 +64,12 @@ export default function ErrorComponent({
           </a>
           .
         </p>
+
+        {digest && (
+          <div className="tw-text-center tw-text-sm tw-text-gray-400 tw-mt-2">
+            Error Digest: <span className="tw-font-mono tw-text-white tw-font-semibold">{digest}</span>
+          </div>
+        )}
 
         {hasStackTrace && (
           <div className="tw-flex tw-flex-col tw-gap-2 tw-items-center tw-justify-center tw-w-full tw-max-w-4xl tw-px-4">
