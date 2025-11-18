@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useCallback } from "react";
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
@@ -13,8 +12,6 @@ interface WaveDropAuthorPfpProps {
 }
 
 const WaveDropAuthorPfp: React.FC<WaveDropAuthorPfpProps> = ({ drop }) => {
-  const router = useRouter();
-
   // Check if this drop author has any main stage winner drop IDs
   const isFirstPlace =
     drop.author.winner_main_stage_drop_ids &&
@@ -46,18 +43,9 @@ const WaveDropAuthorPfp: React.FC<WaveDropAuthorPfpProps> = ({ drop }) => {
     <div className="tw-h-full tw-w-full tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-rounded-lg" />
   );
 
-  const handleNavigation = useCallback(
-    (event: React.MouseEvent) => {
-      if (!profileHref) {
-        return;
-      }
-
-      event.preventDefault();
-      event.stopPropagation();
-      router.push(profileHref);
-    },
-    [profileHref, router]
-  );
+  const handleClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+  };
 
   if (!profileHref) {
     return <div className={containerClasses}>{avatarContent}</div>;
@@ -69,7 +57,7 @@ const WaveDropAuthorPfp: React.FC<WaveDropAuthorPfpProps> = ({ drop }) => {
         href={profileHref}
         prefetch={false}
         aria-label={`View ${tooltipUser}'s profile`}
-        onClick={handleNavigation}
+        onClick={handleClick}
         className={`${containerClasses} tw-block`}
       >
         {avatarContent}
