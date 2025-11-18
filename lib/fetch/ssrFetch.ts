@@ -71,6 +71,7 @@ const enhancedFetch: typeof fetch = async (
     clientId = env.SSR_CLIENT_ID;
     clientSecret = env.SSR_CLIENT_SECRET;
     stagingApiKey = env.STAGING_API_KEY_SERVER;
+    console.log("hi i am env ssrFetch", clientId, stagingApiKey);
   } catch {
     return originalFetch(input, init);
   }
