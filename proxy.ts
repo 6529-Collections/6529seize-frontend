@@ -1,6 +1,3 @@
-import { NextRequest, NextResponse } from "next/server";
-import { publicEnv } from "./config/env";
-import { API_AUTH_COOKIE } from "./constants";
 import {
   getHomeFeedRoute,
   getMessagesBaseRoute,
@@ -8,6 +5,9 @@ import {
   getWaveRoute,
   getWavesBaseRoute,
 } from "@/helpers/navigation.helpers";
+import { NextRequest, NextResponse } from "next/server";
+import { publicEnv } from "./config/env";
+import { API_AUTH_COOKIE } from "./constants";
 
 const redirectMappings = [
   { url: "/6529-dubai/", target: "/" },
@@ -74,7 +74,13 @@ const redirectMappings = [
   { url: "/om/bug/report/", target: "/about/contact-us" },
 ];
 
-const STATIC_PATH_PREFIXES = ["/api", "/_next", "/sitemap", "/robots.txt", "/error"] as const;
+const STATIC_PATH_PREFIXES = [
+  "/api",
+  "/_next",
+  "/sitemap",
+  "/robots.txt",
+  "/error",
+] as const;
 const STATIC_PATH_SUFFIXES = [
   "favicon.ico",
   ".jpeg",
@@ -112,7 +118,9 @@ function isDesktopOSFromUserAgent(userAgent: string): boolean {
     userAgent.includes("x11") ||
     userAgent.includes("cros");
 
-  return !isAndroid && !isIOS && (hasDesktopSignal || isMacDesktop || isLinuxDesktop);
+  return (
+    !isAndroid && !isIOS && (hasDesktopSignal || isMacDesktop || isLinuxDesktop)
+  );
 }
 
 function normalizeDropParam(value: string | null): string | undefined {
@@ -250,7 +258,10 @@ async function enforceAccessControl(
   req: NextRequest,
   normalizedPathname: string
 ): Promise<NextResponse> {
-  if (normalizedPathname === "/access" || normalizedPathname === "/restricted") {
+  if (
+    normalizedPathname === "/access" ||
+    normalizedPathname === "/restricted"
+  ) {
     return NextResponse.next();
   }
 
@@ -302,8 +313,10 @@ export default async function proxy(req: NextRequest) {
     }
 
     if (
-      STATIC_PATH_PREFIXES.some(prefix => normalizedPathname.startsWith(prefix)) ||
-      STATIC_PATH_SUFFIXES.some(suffix => normalizedPathname.endsWith(suffix))
+      STATIC_PATH_PREFIXES.some((prefix) =>
+        normalizedPathname.startsWith(prefix)
+      ) ||
+      STATIC_PATH_SUFFIXES.some((suffix) => normalizedPathname.endsWith(suffix))
     ) {
       return NextResponse.next();
     }

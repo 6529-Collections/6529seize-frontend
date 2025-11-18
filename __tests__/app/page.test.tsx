@@ -24,9 +24,8 @@ jest.mock("@/components/latest-activity/LatestActivity", () =>
 
 
 // Mock API fetch to prevent network calls
-jest.mock("@/services/6529api", () => ({
-  fetchUrl: jest.fn().mockResolvedValue({ data: [] }),
-  fetchAllPages: jest.fn().mockResolvedValue([]),
+jest.mock("@/services/api/common-api", () => ({
+  commonApiFetch: jest.fn().mockResolvedValue({ data: [], count: 0 }),
 }));
 
 
