@@ -115,6 +115,8 @@ const enhancedFetch: typeof fetch = async (
     enhancedHeaders.set("x-6529-auth", stagingApiKey);
   }
 
+  console.log("hi i am enhancedHeaders for", path, enhancedHeaders);
+
   return originalFetch(input, {
     ...init,
     headers: enhancedHeaders,
