@@ -20,6 +20,7 @@ describe("commonApi utility methods", () => {
   it("commonApiPut posts JSON body", async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
+      status: 200,
       json: async () => ({ ok: 1 }),
       headers: new Headers({ "content-type": "application/json" }),
     });
@@ -40,8 +41,9 @@ describe("commonApi utility methods", () => {
   });
 
   it("commonApiDeleteWithBody deletes with body", async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
       ok: true,
+      status: 200,
       json: async () => ({ r: 2 }),
       headers: new Headers({ "content-type": "application/json" }),
     });
@@ -67,6 +69,8 @@ describe("commonApi utility methods", () => {
   it("commonApiDelete sends DELETE request", async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
+      status: 200,
+      headers: new Headers(),
     });
     await commonApiDelete({ endpoint: "x" });
     expect(globalThis.fetch).toHaveBeenCalledWith(
@@ -86,6 +90,7 @@ describe("commonApi utility methods", () => {
     const form = new FormData();
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
+      status: 200,
       json: async () => ({ res: 3 }),
       headers: new Headers({ "content-type": "application/json" }),
     });
