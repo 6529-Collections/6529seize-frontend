@@ -66,17 +66,6 @@ const enhancedFetch: typeof fetch = async (
   let clientId: string;
   let clientSecret: string;
 
-  try {
-    const env = getServerEnvOrThrow();
-    clientId = env.SSR_CLIENT_ID;
-    clientSecret = env.SSR_CLIENT_SECRET;
-  } catch {
-    console.warn(
-      "[SSR Fetch] [PATH: ${path}] SSR credentials unavailable, falling back to unauthenticated fetch. Internal rate limits will not be bypassed."
-    );
-    return originalFetch(input, init);
-  }
-
   const method = (
     init?.method ??
     (input instanceof Request ? input.method : undefined) ??
@@ -85,6 +74,17 @@ const enhancedFetch: typeof fetch = async (
   const path = extractPathFromUrl(url, publicEnv.API_ENDPOINT);
 
   if (!path) {
+    return originalFetch(input, init);
+  }
+
+  try {
+    const env = getServerEnvOrThrow();
+    clientId = env.SSR_CLIENT_ID;
+    clientSecret = env.SSR_CLIENT_SECRET;
+  } catch {
+    console.warn(
+      `[SSR Fetch] [PATH: ${path}] SSR credentials unavailable, falling back to unauthenticated fetch. Internal rate limits will not be bypassed.`
+    );
     return originalFetch(input, init);
   }
 
@@ -120,7 +120,7 @@ const enhancedFetch: typeof fetch = async (
     });
   } catch (error) {
     console.warn(
-      "[SSR Fetch] [PATH: ${path}] Failed to get app common headers:",
+      `[SSR Fetch] [PATH: ${path}] Failed to get app common headers:`,
       error instanceof Error ? error.message : error
     );
   }
