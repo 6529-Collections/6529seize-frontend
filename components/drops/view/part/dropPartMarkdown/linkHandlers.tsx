@@ -24,6 +24,7 @@ import {
 
 interface LinkRendererConfig {
   readonly onQuoteClick: (drop: ApiDrop) => void;
+  readonly currentDropId?: string;
 }
 
 interface LinkRenderer {
@@ -55,8 +56,9 @@ const findMatch = (
 
 export const createLinkRenderer = ({
   onQuoteClick,
+  currentDropId,
 }: LinkRendererConfig): LinkRenderer => {
-  const seizeHandlers = createSeizeHandlers({ onQuoteClick });
+  const seizeHandlers = createSeizeHandlers({ onQuoteClick, currentDropId });
   const handlers = createLinkHandlers();
 
   const renderImage: LinkRenderer["renderImage"] = ({ src }) => {

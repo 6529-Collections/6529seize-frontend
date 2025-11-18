@@ -221,6 +221,22 @@ describe("createLinkRenderer", () => {
     expect(screen.getByTestId("drop-card")).toHaveAttribute("data-drop", "def");
   });
 
+  it("falls back to a simple anchor when link targets the current drop", () => {
+    const { renderAnchor } = createLinkRenderer({
+      onQuoteClick,
+      currentDropId: "def",
+    });
+    const element = renderAnchor({
+      href: "https://6529.io/waves?wave=abc&drop=def",
+    } as any);
+    const { container } = render(<>{element}</>);
+
+    expect(screen.queryByTestId("drop-card")).toBeNull();
+    expect(
+      container.querySelector('a[href="/waves?wave=abc&drop=def"]')
+    ).not.toBeNull();
+  });
+
   it("normalizes root drop links using current location context", () => {
     setEnsureCurrentHref("https://6529.io/messages?wave=current-wave");
 

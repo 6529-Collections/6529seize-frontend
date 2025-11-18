@@ -15,33 +15,100 @@ const getHeaders = (
   };
 };
 
+const buildUrl = (
+  endpoint: string,
+  params?: Record<string, string>,
+  transformParams?: (params: Record<string, string>) => Record<string, string>
+): string => {
+  let path = `/api/${endpoint}`;
+  let url = `${publicEnv.API_ENDPOINT}${path}`;
+
+  if (params) {
+    const queryParams = new URLSearchParams();
+    const processedParams = transformParams ? transformParams(params) : params;
+    Object.entries(processedParams).forEach(([key, value]) => {
+      queryParams.set(key, value);
+    });
+    const queryString = queryParams.toString();
+    url += `?${queryString}`;
+  }
+
+  return url;
+};
+
+const handleApiError = async (res: Response): Promise<never> => {
+  let errorMessage: string;
+  let rawContent: string = "";
+
+  try {
+    const body: any = await res.json();
+    errorMessage = body?.error ?? res.statusText ?? "Something went wrong";
+  } catch {
+    try {
+      rawContent = await res.text();
+      errorMessage = rawContent || res.statusText || "Something went wrong";
+    } catch {
+      errorMessage = res.statusText || "Something went wrong";
+    }
+  }
+
+  const statusPart = res.status ? `HTTP ${res.status}` : "HTTP Error";
+  const statusTextPart = res.statusText ? ` ${res.statusText}` : "";
+  const composedError = `${statusPart}${statusTextPart}: ${errorMessage}`;
+  throw new Error(composedError);
+};
+
+const executeApiRequest = async <T>(
+  url: string,
+  method: string,
+  headers: Record<string, string>,
+  body?: BodyInit,
+  signal?: AbortSignal,
+  parseJson: boolean = true
+): Promise<T> => {
+  const res = await fetch(url, {
+    method,
+    headers,
+    body,
+    signal,
+  });
+
+  if (!res.ok) {
+    return handleApiError(res);
+  }
+
+  if (!parseJson) {
+    return undefined as T;
+  }
+
+  return res.json();
+};
+
 export const commonApiFetch = async <T, U = Record<string, string>>(param: {
   endpoint: string;
   headers?: Record<string, string>;
   params?: U;
   signal?: AbortSignal;
 }): Promise<T> => {
-  let url = `${publicEnv.API_ENDPOINT}/api/${param.endpoint}`;
-  if (param.params) {
-    const queryParams = new URLSearchParams();
-    // Override NIC with CIC
-    Object.entries(param.params).forEach(([key, value]: [string, any]) => {
-      const newValue = value === "nic" ? "cic" : value;
-      queryParams.set(key, newValue);
-    });
-    url += `?${queryParams.toString()}`;
-  }
-  const res = await fetch(url, {
-    headers: getHeaders(param.headers, false),
-    signal: param.signal,
-  });
-  if (!res.ok) {
-    const body: any = await res.json();
-    return new Promise((_, rej) =>
-      rej(body?.error ?? res.statusText ?? "Something went wrong")
-    );
-  }
-  return res.json();
+  const url = buildUrl(
+    param.endpoint,
+    param.params as Record<string, string> | undefined,
+    (params) => {
+      const transformed: Record<string, string> = {};
+      Object.entries(params).forEach(([key, value]) => {
+        transformed[key] = value === "nic" ? "cic" : value;
+      });
+      return transformed;
+    }
+  );
+
+  return executeApiRequest<T>(
+    url,
+    "GET",
+    getHeaders(param.headers, false),
+    undefined,
+    param.signal
+  );
 };
 
 interface RetryOptions {
@@ -170,58 +237,50 @@ export const commonApiPost = async <T, U, Z = Record<string, string>>(param: {
   params?: Z;
   signal?: AbortSignal;
 }): Promise<U> => {
-  let url = `${publicEnv.API_ENDPOINT}/api/${param.endpoint}`;
-  if (param.params) {
-    const queryParams = new URLSearchParams(param.params);
-    url += `?${queryParams.toString()}`;
-  }
-  const res = await fetch(url, {
-    method: "POST",
-    headers: getHeaders(param.headers),
-    body: JSON.stringify(param.body),
-    signal: param.signal,
-  });
-  if (!res.ok) {
-    const body: any = await res.json();
-    return new Promise((_, rej) =>
-      rej(body?.error ?? res.statusText ?? "Something went wrong")
-    );
-  }
-  return res.json();
+  const url = buildUrl(
+    param.endpoint,
+    param.params as Record<string, string> | undefined
+  );
+
+  return executeApiRequest<U>(
+    url,
+    "POST",
+    getHeaders(param.headers, true),
+    JSON.stringify(param.body),
+    param.signal
+  );
 };
 
 export const commonApiPostWithoutBodyAndResponse = async (param: {
   endpoint: string;
   headers?: Record<string, string>;
 }): Promise<void> => {
-  let url = `${publicEnv.API_ENDPOINT}/api/${param.endpoint}`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: getHeaders(param.headers),
-    body: "",
-  });
-  if (!res.ok) {
-    const body: any = await res.json();
-    return new Promise((_, rej) =>
-      rej(body?.error ?? res.statusText ?? "Something went wrong")
-    );
-  }
+  const url = buildUrl(param.endpoint);
+
+  await executeApiRequest<void>(
+    url,
+    "POST",
+    getHeaders(param.headers, true),
+    "",
+    undefined,
+    false
+  );
 };
 
 export const commonApiDelete = async (param: {
   endpoint: string;
   headers?: Record<string, string>;
 }): Promise<void> => {
-  const res = await fetch(`${publicEnv.API_ENDPOINT}/api/${param.endpoint}`, {
-    method: "DELETE",
-    headers: getHeaders(param.headers),
-  });
-  if (!res.ok) {
-    const body: any = await res.json();
-    return Promise.reject(
-      new Error(body?.error ?? res.statusText ?? "Something went wrong")
-    );
-  }
+  const url = buildUrl(param.endpoint);
+
+  await executeApiRequest<void>(
+    url,
+    "DELETE",
+    getHeaders(param.headers),
+    undefined,
+    undefined,
+    false
+  );
 };
 
 export const commonApiDeleteWithBody = async <
@@ -234,23 +293,17 @@ export const commonApiDeleteWithBody = async <
   headers?: Record<string, string>;
   params?: Z;
 }): Promise<U> => {
-  let url = `${publicEnv.API_ENDPOINT}/api/${param.endpoint}`;
-  if (param.params) {
-    const queryParams = new URLSearchParams(param.params);
-    url += `?${queryParams.toString()}`;
-  }
-  const res = await fetch(url, {
-    method: "DELETE",
-    headers: getHeaders(param.headers),
-    body: JSON.stringify(param.body),
-  });
-  if (!res.ok) {
-    const body: any = await res.json();
-    return Promise.reject(
-      body?.error ?? res.statusText ?? "Something went wrong"
-    );
-  }
-  return res.json();
+  const url = buildUrl(
+    param.endpoint,
+    param.params as Record<string, string> | undefined
+  );
+
+  return executeApiRequest<U>(
+    url,
+    "DELETE",
+    getHeaders(param.headers, true),
+    JSON.stringify(param.body)
+  );
 };
 
 export const commonApiPut = async <T, U, Z = Record<string, string>>(param: {
@@ -259,23 +312,17 @@ export const commonApiPut = async <T, U, Z = Record<string, string>>(param: {
   headers?: Record<string, string>;
   params?: Z;
 }): Promise<U> => {
-  let url = `${publicEnv.API_ENDPOINT}/api/${param.endpoint}`;
-  if (param.params) {
-    const queryParams = new URLSearchParams(param.params);
-    url += `?${queryParams.toString()}`;
-  }
-  const res = await fetch(url, {
-    method: "PUT",
-    headers: getHeaders(param.headers),
-    body: JSON.stringify(param.body),
-  });
-  if (!res.ok) {
-    const body: any = await res.json();
-    return Promise.reject(
-      body?.error ?? res.statusText ?? "Something went wrong"
-    );
-  }
-  return res.json();
+  const url = buildUrl(
+    param.endpoint,
+    param.params as Record<string, string> | undefined
+  );
+
+  return executeApiRequest<U>(
+    url,
+    "PUT",
+    getHeaders(param.headers, true),
+    JSON.stringify(param.body)
+  );
 };
 
 export const commonApiPostForm = async <U>(param: {
@@ -283,16 +330,12 @@ export const commonApiPostForm = async <U>(param: {
   body: FormData;
   headers?: Record<string, string>;
 }): Promise<U> => {
-  const res = await fetch(`${publicEnv.API_ENDPOINT}/api/${param.endpoint}`, {
-    method: "POST",
-    headers: getHeaders(param.headers, false),
-    body: param.body,
-  });
-  if (!res.ok) {
-    const body: any = await res.json();
-    return new Promise((_, rej) =>
-      rej(body?.error ?? res.statusText ?? "Something went wrong")
-    );
-  }
-  return res.json();
+  const url = buildUrl(param.endpoint);
+
+  return executeApiRequest<U>(
+    url,
+    "POST",
+    getHeaders(param.headers, false),
+    param.body
+  );
 };

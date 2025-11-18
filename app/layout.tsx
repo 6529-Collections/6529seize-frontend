@@ -1,5 +1,8 @@
 export const fetchCache = "force-no-store";
 
+// Side effect: Overrides globalThis.fetch on server-side to automatically
+// add auth headers (x-6529-internal-*) for rate limiter/WAF bypass
+import "@/lib/fetch/ssrFetch";
 import "@/components/drops/create/lexical/lexical.styles.scss";
 import "@/styles/Home.module.scss";
 import "@/styles/seize-bootstrap.scss";

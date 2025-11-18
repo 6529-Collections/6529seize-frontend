@@ -16,6 +16,7 @@ This document is the single source of truth for how we fix ESLint issues and mak
 
 ## React 19.2: What we use
 
+
 - **Effect Events (`useEffectEvent`)** — Extract event-like logic out of `useEffect` so the effect’s dependencies stay minimal. Lint v6 understands that Effect Events are not dependencies.  
   Docs: <https://react.dev/reference/react/useEffectEvent>  
   Release notes: <https://react.dev/blog/2025/10/01/react-19-2>  ← see sections on `useEffectEvent` and `eslint-plugin-react-hooks v6`.

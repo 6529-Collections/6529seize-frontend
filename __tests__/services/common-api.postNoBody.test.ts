@@ -32,11 +32,12 @@ describe("commonApiPostWithoutBodyAndResponse", () => {
   it("rejects with error body", async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: false,
+      status: 400,
       statusText: "x",
       json: async () => ({ error: "err" }),
     });
     await expect(
       commonApiPostWithoutBodyAndResponse({ endpoint: "e" })
-    ).rejects.toBe("err");
+    ).rejects.toThrow("HTTP 400 x: err");
   });
 });
