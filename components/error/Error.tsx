@@ -64,7 +64,7 @@ export default function ErrorComponent({
         </p>
 
         {hasStackTrace && (
-          <div className="tw-flex tw-flex-col tw-gap-2 tw-items-center tw-justify-center">
+          <div className="tw-flex tw-flex-col tw-gap-2 tw-items-center tw-justify-center tw-w-full tw-max-w-4xl tw-px-4">
             <button
               type="button"
               onClick={() => setIsStacktraceExpanded((prev) => !prev)}
@@ -81,11 +81,11 @@ export default function ErrorComponent({
               )}
             </button>
             {isStacktraceExpanded ? (
-              <pre
+              <div
                 id={stacktraceContentId}
-                className="tw-mt-4 tw-bg-black tw-rounded-lg tw-p-4 tw-text-xs tw-leading-5 tw-overflow-x-auto tw-text-gray-200">
+                className="tw-w-full tw-mt-4 tw-bg-black tw-rounded-lg tw-p-4 tw-text-xs tw-leading-5 tw-overflow-x-auto tw-text-gray-200 tw-font-mono tw-whitespace-pre-wrap">
                 {resolvedStackTrace}
-              </pre>
+              </div>
             ) : null}
           </div>
         )}
