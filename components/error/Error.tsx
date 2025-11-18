@@ -1,61 +1,95 @@
 "use client";
 
 import { useTitle } from "@/contexts/TitleContext";
-import { faArrowLeft, faHome } from "@fortawesome/free-solid-svg-icons";
+import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { Button } from "react-bootstrap";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useId, useMemo, useState } from "react";
 
-export default function ErrorComponent() {
+type ErrorComponentProps = {
+  readonly stackTrace?: string | null;
+};
+
+export default function ErrorComponent({
+  stackTrace,
+}: ErrorComponentProps = {}) {
   const { setTitle } = useTitle();
-  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isStacktraceExpanded, setIsStacktraceExpanded] = useState(true);
+  const stacktraceContentId = useId();
 
   useEffect(() => {
     setTitle("6529 Error");
   }, [setTitle]);
 
-  const handleGoBack = () => {
-    router.back();
-  };
+  const stackTraceFromQuery = useMemo(() => {
+    return searchParams?.get("stack") ?? "";
+  }, [searchParams]);
+
+  const resolvedStackTrace = stackTrace ?? stackTraceFromQuery;
+  const hasStackTrace = Boolean(resolvedStackTrace);
 
   return (
-    <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-screen">
-      <Image
-        unoptimized
-        width="0"
-        height="0"
-        style={{ height: "auto", width: "100px" }}
-        src="/SummerGlasses.svg"
-        alt="SummerGlasses"
-      />
-      <div className="tw-flex tw-flex-wrap tw-gap-1 tw-px-4 tw-items-flex-start tw-justify-center">
-        <h3>Welcome to the 6529 Page of Doom</h3>
-        <img
-          src="/emojis/sgt_grimacing.webp"
-          alt="sgt_grimacing"
-          className="tw-ml-0.5 tw-w-8 tw-h-8"
+    <section className="tw-w-full tw-h-full tw-min-h-screen tw-flex tw-justify-center tw-items-center">
+      <div className="tw-flex tw-flex-col tw-items-center tw-gap-2">
+        <Image
+          unoptimized
+          priority
+          loading="eager"
+          width="0"
+          height="0"
+          style={{ height: "auto", width: "100px" }}
+          src="/SummerGlasses.svg"
+          alt="SummerGlasses"
         />
+        <div className="tw-flex tw-flex-wrap tw-gap-2 tw-items-center tw-justify-center">
+          <h3 className="tw-text-2xl tw-font-semibold">
+            Welcome to the 6529 Page of Doom
+          </h3>
+          <img
+            src="/emojis/sgt_grimacing.webp"
+            alt="sgt_grimacing"
+            className="tw-w-8 tw-h-8"
+          />
+        </div>
+        <p className="tw-text-center tw-text-base md:tw-text-lg tw-text-gray-200">
+          Looks like something went wrong. Try again or reach out to us at{" "}
+          <a
+            className="tw-text-white tw-underline"
+            href="mailto:support@6529.io">
+            support@6529.io
+          </a>
+          .
+        </p>
+
+        {hasStackTrace && (
+          <div className="tw-flex tw-flex-col tw-gap-2 tw-items-center tw-justify-center">
+            <button
+              type="button"
+              onClick={() => setIsStacktraceExpanded((prev) => !prev)}
+              className="tw-flex tw-items-center tw-gap-2 tw-justify-between tw-bg-transparent tw-border-none tw-text-left tw-font-semibold"
+              aria-expanded={isStacktraceExpanded}
+              aria-controls={stacktraceContentId}>
+              <span>
+                {isStacktraceExpanded ? "Hide stacktrace" : "Show stacktrace"}
+              </span>
+              {isStacktraceExpanded ? (
+                <FontAwesomeIcon icon={faChevronDown} />
+              ) : (
+                <FontAwesomeIcon icon={faChevronUp} />
+              )}
+            </button>
+            {isStacktraceExpanded ? (
+              <pre
+                id={stacktraceContentId}
+                className="tw-mt-4 tw-bg-black tw-rounded-lg tw-p-4 tw-text-xs tw-leading-5 tw-overflow-x-auto tw-text-gray-200">
+                {resolvedStackTrace}
+              </pre>
+            ) : null}
+          </div>
+        )}
       </div>
-      <p className="tw-mt-2 tw-text-center tw-text-lg tw-font-semibold tw-px-4">
-        Looks like something went wrong. Try again or reach out to us at{" "}
-        <a href="mailto:support@6529.io">support@6529.io</a>
-      </p>
-      <Button
-        variant="outline-light"
-        onClick={() => handleGoBack()}
-        className="tw-mt-4 tw-flex tw-items-center tw-gap-x-2">
-        <FontAwesomeIcon icon={faArrowLeft} />
-        <span>BACK TO PREVIOUS PAGE</span>
-      </Button>
-      <Link
-        href="/"
-        className="decoration-none tw-mt-5 tw-text-lg tw-font-semibold tw-flex tw-items-center tw-gap-x-2">
-        <FontAwesomeIcon icon={faHome} />
-        <span>6529 HOME</span>
-      </Link>
-    </div>
+    </section>
   );
 }

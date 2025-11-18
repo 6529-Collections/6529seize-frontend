@@ -1,8 +1,9 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 import ErrorComponent from "@/components/error/Error";
 
 const setTitleMock = jest.fn();
+let mockSearchParams: URLSearchParams;
 
 jest.mock("@/contexts/TitleContext", () => ({
   __esModule: true,
@@ -13,18 +14,7 @@ jest.mock("@/contexts/TitleContext", () => ({
 
 jest.mock("next/navigation", () => ({
   __esModule: true,
-  useRouter: () => ({
-    back: jest.fn(),
-  }),
-}));
-
-jest.mock("next/link", () => ({
-  __esModule: true,
-  default: ({ children, href, ...props }: any) => (
-    <a href={typeof href === "string" ? href : href?.toString()} {...props}>
-      {children}
-    </a>
-  ),
+  useSearchParams: () => mockSearchParams,
 }));
 
 jest.mock("next/image", () => ({
@@ -38,6 +28,7 @@ jest.mock("next/image", () => ({
 describe("ErrorComponent", () => {
   beforeEach(() => {
     setTitleMock.mockClear();
+    mockSearchParams = new URLSearchParams();
   });
 
   it("sets the error page title and shows contact email", () => {
@@ -49,11 +40,26 @@ describe("ErrorComponent", () => {
     expect(supportLink).toHaveAttribute("href", "mailto:support@6529.io");
   });
 
-  it("renders a styled link back to the home page", () => {
+  it("reveals a provided stack trace when toggled", () => {
+    render(<ErrorComponent stackTrace="Error: stack" />);
+
+    const toggleButton = screen.getByRole("button", { name: /show stacktrace/i });
+    fireEvent.click(toggleButton);
+
+    expect(
+      screen.getByText("Error: stack", { selector: "pre" })
+    ).toBeInTheDocument();
+  });
+
+  it("uses the stack trace from the URL when no prop is provided", () => {
+    mockSearchParams = new URLSearchParams("stack=FromQuery");
+
     render(<ErrorComponent />);
 
-    const homeLink = screen.getByRole("link", { name: "6529 HOME" });
-    expect(homeLink).toHaveAttribute("href", "/");
-    expect(homeLink).toHaveClass("tw-mt-5", "tw-text-lg", "tw-font-semibold");
+    fireEvent.click(screen.getByRole("button", { name: /show stacktrace/i }));
+
+    expect(
+      screen.getByText("FromQuery", { selector: "pre" })
+    ).toBeInTheDocument();
   });
 });

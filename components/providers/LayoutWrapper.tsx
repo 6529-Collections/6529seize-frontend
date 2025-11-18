@@ -1,6 +1,11 @@
 "use client";
 
-import { useEffect, useState, type ComponentType, type ReactNode } from "react";
+import {
+  useEffect,
+  useState,
+  type ComponentType,
+  type ReactNode,
+} from "react";
 import { usePathname } from "next/navigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import WebLayout from "@/components/layout/WebLayout";
@@ -9,6 +14,17 @@ import SmallScreenLayout from "@/components/layout/SmallScreenLayout";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { SIDEBAR_MOBILE_BREAKPOINT } from "@/constants/sidebar";
 import FooterWrapper from "@/FooterWrapper";
+import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
+import styles from "@/styles/Home.module.scss";
+import ErrorComponent from "@/components/error/Error";
+
+function LayoutErrorFallback({ error }: FallbackProps) {
+  return (
+    <main className={styles.main}>
+      <ErrorComponent stackTrace={error?.stack ?? error?.message ?? null} />
+    </main>
+  );
+}
 
 export default function LayoutWrapper({
   children,
@@ -82,10 +98,10 @@ export default function LayoutWrapper({
 
   return (
     <LayoutComponent>
-      <>
+      <ErrorBoundary FallbackComponent={LayoutErrorFallback} resetKeys={[pathname]}>
         {children}
         <FooterWrapper />
-      </>
+      </ErrorBoundary>
     </LayoutComponent>
   );
 }
