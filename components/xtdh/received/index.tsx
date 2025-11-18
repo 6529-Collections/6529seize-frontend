@@ -28,6 +28,7 @@ export interface XtdhReceivedSectionProps {
 
 const DEFAULT_PAGE_SIZE = 10;
 const ALL_COLLECTIONS_VALUE = "__all";
+const MS_PER_DAY = 86_400_000;
 
 export default function XtdhReceivedSection({
   profileId,
@@ -57,10 +58,10 @@ export default function XtdhReceivedSection({
   });
 
   const { isLoading, isFetching } = query;
-  const totalPages = Math.max(1, Math.ceil(query.totalCount / pageSize));
+  const totalPages = Math.max(1, Math.ceil(query.totalCount / query.pageSize));
   const hasNextPage = page < totalPages;
   const hasPrevPage = page > 1;
-  const isInitialLoading = query.isPending && query.tokens.length === 0;
+  const isInitialLoading = isLoading && query.tokens.length === 0;
   const isRefetching = isFetching && query.tokens.length > 0;
   const isSortingDisabled = isLoading || isFetching;
 
@@ -313,7 +314,7 @@ function ReceivedTokenCard({
   const topGranters = token.granters.slice(0, 3);
   const remainingGranters = Math.max(token.granters.length - topGranters.length, 0);
   const holderCount = token.holderSummaries.reduce(
-    (acc, holder) => acc + (holder.tokenCount ?? 0),
+    (acc, holder) => acc + holder.tokenCount,
     0
   );
 
@@ -399,7 +400,7 @@ function getTokenStatus(lastAllocatedAt: string): { label: string; className: st
     };
   }
 
-  const daysSinceUpdate = (Date.now() - parsed.getTime()) / 86_400_000;
+  const daysSinceUpdate = (Date.now() - parsed.getTime()) / MS_PER_DAY;
   if (daysSinceUpdate > 14) {
     return {
       label: "Cooling",

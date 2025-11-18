@@ -6,6 +6,7 @@ import { MEMELAB_CONTRACT } from "@/constants";
 import { BaseNFT, VolumeType } from "@/entities/INFT";
 import { areEqualAddresses, idStringToDisplay } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
+import { logError } from "@/src/utils/security-logger";
 import { getAppMetadata } from "../providers/metadata";
 
 export enum MEME_FOCUS {
@@ -60,9 +61,13 @@ async function getMetadataProps(
       }
     }
   } catch (error) {
-    console.error(
-      `Failed to fetch shared metadata for ${contract} #${id}`,
-      error
+    const metadataError =
+      error instanceof Error
+        ? error
+        : new Error(`Failed to fetch shared metadata for ${contract} #${id}`);
+    logError(
+      `shared_metadata_fetch:${contract}:${id}`,
+      metadataError
     );
   }
 

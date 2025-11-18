@@ -41,6 +41,7 @@ export default function RememeAddPage() {
   const signMessage = useSignMessage();
   const [memes, setMemes] = useState<NFT[]>([]);
   const [memesLoaded, setMemesLoaded] = useState(false);
+  const [memesLoadError, setMemesLoadError] = useState<string>();
   const [userTDH, setUserTDH] = useState<ConsolidatedTDH>();
 
   const [addRememe, setAddRememe] = useState<ProcessedRememe>();
@@ -116,10 +117,12 @@ export default function RememeAddPage() {
     fetchUrl(`${publicEnv.API_ENDPOINT}/api/memes_lite`)
       .then((response: DBResponse) => {
         setMemes(response.data);
+        setMemesLoadError(undefined);
       })
       .catch((error) => {
         console.error("Failed to fetch memes for rememe submission", error);
         setMemes([]);
+        setMemesLoadError("Failed to load memes list. Please refresh the page.");
       })
       .finally(() => {
         setMemesLoaded(true);
@@ -238,6 +241,15 @@ export default function RememeAddPage() {
                       />
                     </Col>
                   </Row>
+                  {memesLoadError && (
+                    <Row className="pt-2">
+                      <Col>
+                        <div className="alert alert-danger" role="alert">
+                          {memesLoadError}
+                        </div>
+                      </Col>
+                    </Row>
+                  )}
                 </Container>
               </Col>
             </Row>

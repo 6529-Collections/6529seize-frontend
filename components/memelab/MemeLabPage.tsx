@@ -136,68 +136,96 @@ export default function MemeLabPageComponent({
       return;
     }
 
+    setNft(undefined);
+    setNftMeta(undefined);
+    setOriginalMemes([]);
+    setOriginalMemesLoaded(false);
+
     let cancelled = false;
 
-    const loadNft = async () => {
+    const setOriginalMemesState = (memes: NFT[]) => {
+      if (cancelled) {
+        return;
+      }
+      setOriginalMemes(memes);
+      setOriginalMemesLoaded(true);
+    };
+
+    const resetNftState = () => {
+      if (cancelled) {
+        return;
+      }
+      setNftMeta(undefined);
+      setNft(undefined);
+      setOriginalMemesState([]);
+    };
+
+    const getSingleMeta = (response: DBResponse): LabExtendedData | undefined => {
+      const nftMetas = response.data;
+      if (Array.isArray(nftMetas) && nftMetas.length === 1) {
+        return nftMetas[0];
+      }
+      return undefined;
+    };
+
+    const loadOriginalMemes = async (fetchedNft?: LabNFT) => {
+      if (!fetchedNft?.meme_references?.length) {
+        setOriginalMemesState([]);
+        return;
+      }
+
       try {
-        const metaResponse = (await fetchUrl(
-          `${publicEnv.API_ENDPOINT}/api/lab_extended_data?id=${nftId}`
-        )) as DBResponse;
+        const referencesResponse = await fetchUrl(
+          `${
+            publicEnv.API_ENDPOINT
+          }/api/nfts?sort_direction=asc&contract=${MEMES_CONTRACT}&id=${fetchedNft.meme_references.join(
+            ","
+          )}`
+        );
         if (cancelled) {
           return;
         }
-        const nftMetas = metaResponse.data;
-        if (Array.isArray(nftMetas) && nftMetas.length === 1) {
-          setNftMeta(nftMetas[0]);
-          const nftResponse = (await fetchUrl(
-            `${publicEnv.API_ENDPOINT}/api/nfts_memelab?id=${nftId}`
-          )) as DBResponse;
-          if (cancelled) {
-            return;
-          }
-          const fetchedNft: LabNFT | undefined = nftResponse.data?.[0];
-          setNft(fetchedNft);
-
-          if (fetchedNft?.meme_references?.length) {
-            try {
-              const referencesResponse = (await fetchUrl(
-                `${
-                  publicEnv.API_ENDPOINT
-                }/api/nfts?sort_direction=asc&contract=${MEMES_CONTRACT}&id=${fetchedNft.meme_references.join(
-                  ","
-                )}`
-              )) as DBResponse;
-              if (cancelled) {
-                return;
-              }
-              setOriginalMemes(referencesResponse.data);
-            } catch (error) {
-              if (!cancelled) {
-                console.error("Failed to fetch referenced memes", error);
-                setOriginalMemes([]);
-              }
-            } finally {
-              if (!cancelled) {
-                setOriginalMemesLoaded(true);
-              }
-            }
-          } else if (!cancelled) {
-            setOriginalMemes([]);
-            setOriginalMemesLoaded(true);
-          }
-        } else if (!cancelled) {
-          setNftMeta(undefined);
-          setNft(undefined);
-          setOriginalMemes([]);
-          setOriginalMemesLoaded(true);
+        setOriginalMemesState(referencesResponse.data);
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Failed to fetch referenced memes", error);
+          setOriginalMemesState([]);
         }
+      }
+    };
+
+    const loadNft = async () => {
+      try {
+        const metaResponse = await fetchUrl(
+          `${publicEnv.API_ENDPOINT}/api/lab_extended_data?id=${nftId}`
+        );
+        if (cancelled) {
+          return;
+        }
+
+        const meta = getSingleMeta(metaResponse);
+        if (!meta) {
+          resetNftState();
+          return;
+        }
+
+        setNftMeta(meta);
+
+        const nftResponse = await fetchUrl(
+          `${publicEnv.API_ENDPOINT}/api/nfts_memelab?id=${nftId}`
+        );
+        if (cancelled) {
+          return;
+        }
+
+        const fetchedNft: LabNFT | undefined = nftResponse.data?.[0];
+        setNft(fetchedNft);
+
+        await loadOriginalMemes(fetchedNft);
       } catch (error) {
         if (!cancelled) {
           console.error(`Failed to fetch Meme Lab NFT ${nftId}`, error);
-          setNftMeta(undefined);
-          setNft(undefined);
-          setOriginalMemes([]);
-          setOriginalMemesLoaded(true);
+          resetNftState();
         }
       }
     };
@@ -212,6 +240,7 @@ export default function MemeLabPageComponent({
   useEffect(() => {
     const walletObjects = connectedProfile?.wallets ?? [];
     const wallets = walletObjects.map((w) => w.wallet);
+    let cancelled = false;
     if (wallets.length > 0 && nftId) {
       fetchUrl(
         `${
@@ -219,6 +248,9 @@ export default function MemeLabPageComponent({
         }/api/transactions_memelab?wallet=${wallets.join(",")}&id=${nftId}`
       )
         .then((response: DBResponse) => {
+          if (cancelled) {
+            return;
+          }
           setTransactions(response.data);
           let countIn = 0;
           let countOut = 0;
@@ -234,6 +266,9 @@ export default function MemeLabPageComponent({
           setNftBalance(countIn - countOut);
         })
         .catch((error) => {
+          if (cancelled) {
+            return;
+          }
           console.error(
             `Failed to fetch Meme Lab wallet transactions for nft ${nftId}`,
             error
@@ -245,55 +280,86 @@ export default function MemeLabPageComponent({
     } else {
       setNftBalance(0);
     }
+
+    return () => {
+      cancelled = true;
+    };
   }, [nftId, connectedProfile]);
 
   useEffect(() => {
-    if (nftId) {
-      let url = `${publicEnv.API_ENDPOINT}/api/transactions_memelab?id=${nftId}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
-      switch (activityTypeFilter) {
-        case TypeFilter.SALES:
-          url += `&filter=sales`;
-          break;
-        case TypeFilter.TRANSFERS:
-          url += `&filter=transfers`;
-          break;
-        case TypeFilter.AIRDROPS:
-          url += `&filter=airdrops`;
-          break;
-        case TypeFilter.MINTS:
-          url += `&filter=mints`;
-          break;
-        case TypeFilter.BURNS:
-          url += `&filter=burns`;
-          break;
-      }
-      fetchUrl(url)
-        .then((response: DBResponse) => {
-          setActivityTotalResults(response.count);
-          setActivity(response.data);
-        })
-        .catch((error) => {
-          console.error(`Failed to fetch Meme Lab activity for ${nftId}`, error);
-          setActivityTotalResults(0);
-          setActivity([]);
-        });
+    if (!nftId) {
+      return;
     }
+
+    let url = `${publicEnv.API_ENDPOINT}/api/transactions_memelab?id=${nftId}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
+    switch (activityTypeFilter) {
+      case TypeFilter.SALES:
+        url += `&filter=sales`;
+        break;
+      case TypeFilter.TRANSFERS:
+        url += `&filter=transfers`;
+        break;
+      case TypeFilter.AIRDROPS:
+        url += `&filter=airdrops`;
+        break;
+      case TypeFilter.MINTS:
+        url += `&filter=mints`;
+        break;
+      case TypeFilter.BURNS:
+        url += `&filter=burns`;
+        break;
+    }
+
+    let cancelled = false;
+    fetchUrl(url)
+      .then((response: DBResponse) => {
+        if (cancelled) {
+          return;
+        }
+        setActivityTotalResults(response.count);
+        setActivity(response.data);
+      })
+      .catch((error) => {
+        if (cancelled) {
+          return;
+        }
+        console.error(`Failed to fetch Meme Lab activity for ${nftId}`, error);
+        setActivityTotalResults(0);
+        setActivity([]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [nftId, activityPage, activityTypeFilter]);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function fetchHistory(url: string) {
       try {
         const response = await fetchAllPages<NFTHistory>(url);
-        setNftHistory(response);
+        if (!cancelled) {
+          setNftHistory(response);
+        }
       } catch (error) {
-        console.error(`Failed to fetch NFT history for Meme Lab ${nftId}`, error);
-        setNftHistory([]);
+        if (!cancelled) {
+          console.error(`Failed to fetch NFT history for Meme Lab ${nftId}`, error);
+          setNftHistory([]);
+        }
       }
     }
-    if (nftId) {
-      const initialUrlHistory = `${publicEnv.API_ENDPOINT}/api/nft_history/${MEMELAB_CONTRACT}/${nftId}`;
-      fetchHistory(initialUrlHistory);
+
+    if (!nftId) {
+      return;
     }
+
+    const initialUrlHistory = `${publicEnv.API_ENDPOINT}/api/nft_history/${MEMELAB_CONTRACT}/${nftId}`;
+    fetchHistory(initialUrlHistory);
+
+    return () => {
+      cancelled = true;
+    };
   }, [nftId]);
 
   function printContent() {
@@ -316,7 +382,8 @@ export default function MemeLabPageComponent({
     return (
       <Container className="p-0">
         <Row className={connectedProfile ? styles.nftImagePadding : ""}>
-          {[MEME_FOCUS.LIVE, MEME_FOCUS.YOUR_CARDS].includes(activeTab!) &&
+          {(activeTab === MEME_FOCUS.LIVE ||
+            activeTab === MEME_FOCUS.YOUR_CARDS) &&
             nft && (
               <>
                 <Col

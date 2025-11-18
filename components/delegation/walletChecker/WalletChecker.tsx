@@ -97,7 +97,7 @@ export default function WalletCheckerComponent(
     queryFn: async () => {
       try {
         const url = `${publicEnv.API_ENDPOINT}/api/delegations/${walletAddress}`;
-        return (await fetchUrl(url)) as DBResponse;
+        return await fetchUrl(url);
       } catch (error) {
         console.error(`Failed to fetch delegations for ${walletAddress}`, error);
         throw error;
@@ -191,8 +191,8 @@ export default function WalletCheckerComponent(
     queryFn: async () => {
       try {
         const baseUrl = `${publicEnv.API_ENDPOINT}/api/consolidations/${walletAddress}?show_incomplete=true`;
-        const firstResponse = (await fetchUrl(baseUrl)) as DBResponse;
-        const firstData = firstResponse.data as WalletConsolidation[];
+        const firstResponse: DBResponse<WalletConsolidation> = await fetchUrl(baseUrl);
+        const firstData = firstResponse.data;
 
         if (firstData.length > 0) {
           const newWallet = areEqualAddresses(walletAddress, firstData[0].wallet1)
@@ -200,11 +200,8 @@ export default function WalletCheckerComponent(
             : firstData[0].wallet1;
           const nextUrl = `${publicEnv.API_ENDPOINT}/api/consolidations/${newWallet}?show_incomplete=true`;
           try {
-            const secondResponse = (await fetchUrl(nextUrl)) as DBResponse;
-            return [
-              ...firstData,
-              ...(secondResponse.data as WalletConsolidation[]),
-            ];
+            const secondResponse: DBResponse<WalletConsolidation> = await fetchUrl(nextUrl);
+            return [...firstData, ...secondResponse.data];
           } catch {
             console.error(`Failed to fetch consolidations for related wallet: ${newWallet}`);
             return firstData;
@@ -242,8 +239,8 @@ export default function WalletCheckerComponent(
     queryFn: async () => {
       try {
         const url = `${publicEnv.API_ENDPOINT}/api/consolidations/${fetchedAddress}`;
-        const response = (await fetchUrl(url)) as DBResponse;
-        const wallets = response.data as string[];
+        const response: DBResponse<string> = await fetchUrl(url);
+        const wallets = response.data;
 
         const mappedWallets: { address: string; display: string | undefined }[] = [];
 
@@ -309,9 +306,9 @@ export default function WalletCheckerComponent(
     return undefined;
   }, [delegationsLoaded, delegations, walletAddress]);
 
-  const consolidationActions = useMemo(() => {
+  const consolidationActions = useMemo<ConsolidationDisplay[]>(() => {
     if (!consolidationsLoaded) {
-      return [] as ConsolidationDisplay[];
+      return [];
     }
 
     return consolidations.filter(

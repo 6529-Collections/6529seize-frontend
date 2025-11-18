@@ -1,5 +1,4 @@
 import { publicEnv } from "@/config/env";
-import { DBResponse } from "@/entities/IDBResponse";
 import { NFT } from "@/entities/INFT";
 import { NextGenCollection } from "@/entities/INextgen";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
@@ -37,9 +36,9 @@ export function useNFTCollections(initialCollections?: {
 
     const fetchCollections = async () => {
       try {
-        const memeResponse = (await fetchUrl(
+        const memeResponse = await fetchUrl(
           `${publicEnv.API_ENDPOINT}/api/memes_lite`
-        )) as DBResponse;
+        );
         if (cancelled) {
           return;
         }

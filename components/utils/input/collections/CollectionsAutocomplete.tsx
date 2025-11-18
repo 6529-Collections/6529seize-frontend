@@ -8,7 +8,6 @@ import {
   useRef,
   useState,
   type ChangeEvent,
-  type FocusEvent,
   type KeyboardEvent,
 } from "react";
 import { useClickAway } from "react-use";
@@ -283,30 +282,6 @@ export default function CollectionsAutocomplete({
     [handleSelect]
   );
 
-  const handleContainerKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
-      if (disabled || event.target !== event.currentTarget) {
-        return;
-      }
-      if (!ACTIVATION_KEYS.has(event.key)) {
-        return;
-      }
-      event.preventDefault();
-      focusInput();
-    },
-    [disabled, focusInput]
-  );
-
-  const handleContainerFocus = useCallback(
-    (event: FocusEvent<HTMLDivElement>) => {
-      if (event.target !== event.currentTarget) {
-        return;
-      }
-      focusInput();
-    },
-    [focusInput]
-  );
-
   const hasNoResults = filteredOptions.length === 0 && query.trim().length > 0;
   const nativeSelectPlaceholder = hasNoResults
     ? noResultsText
@@ -322,17 +297,7 @@ export default function CollectionsAutocomplete({
               ? "tw-border-iron-800 tw-bg-iron-900/60 tw-text-iron-400 tw-opacity-80"
               : "tw-border-iron-700 tw-bg-iron-900 hover:tw-border-iron-600"
           )}
-          role="button"
-          aria-haspopup="listbox"
-          aria-expanded={open}
-          aria-controls={nativeSelectId}
-          aria-describedby={nativeSelectDescriptionId}
-          aria-label="Collections selection"
-          tabIndex={disabled ? -1 : 0}
-          aria-disabled={disabled || undefined}
           onClick={disabled ? undefined : focusInput}
-          onKeyDown={disabled ? undefined : handleContainerKeyDown}
-          onFocus={disabled ? undefined : handleContainerFocus}
         >
           {selectedOptions.map((option) => (
             <span

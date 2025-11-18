@@ -19,6 +19,8 @@ const numberFormatter = new Intl.NumberFormat(undefined, {
   maximumFractionDigits: 0,
 });
 
+const ALL_TOKENS_LABEL = "All tokens";
+
 export type TargetTokensCountInfo =
   | { kind: "all"; label: string; count: null }
   | { kind: "count"; label: string; count: number | null };
@@ -32,7 +34,11 @@ export const getTargetTokensCountInfo = (
     !Number.isFinite(count) ||
     count <= 0
   ) {
-    return { kind: "all", label: "All tokens", count: null };
+    return { kind: "all", label: ALL_TOKENS_LABEL, count: null };
+  }
+
+  if (count < 1) {
+    return { kind: "all", label: ALL_TOKENS_LABEL, count: null };
   }
 
   const normalizedCount = Math.floor(count);
@@ -46,7 +52,7 @@ export const getTargetTokensCountInfo = (
 
 export const formatTargetTokens = (tokens: readonly string[]): string => {
   if (!tokens.length) {
-    return "All tokens";
+    return ALL_TOKENS_LABEL;
   }
 
   const tokensExpression = tokens.join(",");
@@ -55,7 +61,7 @@ export const formatTargetTokens = (tokens: readonly string[]): string => {
   try {
     const ranges = parseTokenExpressionToRanges(tokensExpression);
     if (!ranges.length) {
-      return "All tokens";
+      return ALL_TOKENS_LABEL;
     }
 
     return ranges

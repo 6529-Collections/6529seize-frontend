@@ -29,7 +29,7 @@ import {
 } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { fetchUrl } from "@/services/6529api";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
 
 interface NftWithOwner extends NFT {
@@ -55,6 +55,30 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
   const [collectionCount, setCollectionCount] = useState(-1);
   const [collectionRank, setCollectionRank] = useState(-1);
 
+  const fetchNfts = useCallback(
+    async function fetchNftsInner(
+      url: string,
+      mynfts: NftWithOwner[]
+    ): Promise<void> {
+      try {
+        const response = await fetchUrl(url);
+        const combined = [...mynfts, ...response.data];
+        if (response.next) {
+          await fetchNftsInner(response.next, combined);
+        } else {
+          const uniqueNfts = combined.filter((value, index, self) => {
+            return self.findIndex((v) => v.id === value.id) === index;
+          });
+          setAllNfts(uniqueNfts);
+        }
+      } catch (error) {
+        console.error("Failed to fetch gradient NFTs", error);
+        setAllNfts([]);
+      }
+    },
+    [setAllNfts]
+  );
+
   useEffect(() => {
     setIsOwner(
       connectedProfile?.wallets?.some((w) =>
@@ -68,26 +92,9 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
   }, [nft, connectedAddress]);
 
   useEffect(() => {
-    async function fetchNfts(url: string, mynfts: NftWithOwner[]): Promise<void> {
-      try {
-        const response = (await fetchUrl(url)) as DBResponse;
-        const combined = [...mynfts, ...response.data];
-        if (response.next) {
-          await fetchNfts(response.next, combined);
-        } else {
-          const newnfts = combined.filter((value, index, self) => {
-            return self.findIndex((v) => v.id === value.id) === index;
-          });
-          setAllNfts(newnfts);
-        }
-      } catch (error) {
-        console.error("Failed to fetch gradient NFTs", error);
-        setAllNfts([]);
-      }
-    }
     const initialUrlNfts = `${publicEnv.API_ENDPOINT}/api/nfts/gradients?&page_size=101`;
     fetchNfts(initialUrlNfts, []);
-  }, []);
+  }, [fetchNfts]);
 
   useEffect(() => {
     const rankedNFTs = allNfts.sort((a, b) =>

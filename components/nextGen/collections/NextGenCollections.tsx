@@ -38,7 +38,7 @@ export default function NextGenCollections() {
 
     let url = `${publicEnv.API_ENDPOINT}/api/nextgen/collections?page_size=${PAGE_SIZE}&page=${mypage}${statusFilter}`;
     try {
-      const response = (await fetchUrl(url)) as DBResponse;
+      const response = await fetchUrl<DBResponse>(url);
       setTotalResults(response.count);
       setCollections(response.data);
     } catch (error) {

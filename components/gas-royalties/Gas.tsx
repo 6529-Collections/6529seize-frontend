@@ -39,6 +39,7 @@ export default function GasComponent() {
 
   const [gas, setGas] = useState<Gas[]>([]);
   const [sumGas, setSumGas] = useState(0);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   const {
     dateSelection,
@@ -66,6 +67,7 @@ export default function GasComponent() {
 
   async function fetchGas() {
     setFetching(true);
+    setFetchError(null);
     try {
       const res = await fetchUrl<Gas[]>(getUrlWithParams());
       res.forEach((r) => {
@@ -77,6 +79,7 @@ export default function GasComponent() {
       console.error("Failed to fetch gas data", error);
       setGas([]);
       setSumGas(0);
+      setFetchError("Failed to load gas data. Please try again.");
     } finally {
       setFetching(false);
     }
@@ -170,7 +173,7 @@ export default function GasComponent() {
         {!fetching && gas.length === 0 && (
           <Row>
             <Col>
-              <h5>No gas info found for selected dates</h5>
+              <h5>{fetchError || "No gas info found for selected dates"}</h5>
             </Col>
           </Row>
         )}

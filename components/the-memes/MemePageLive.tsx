@@ -285,21 +285,31 @@ export function MemePageLiveSubMenu(props: {
 
   useEffect(() => {
     if (props.nft) {
+      const memeId = props.nft.id;
       setMemeLabNftsLoaded(false);
       fetchUrl(
-        `${publicEnv.API_ENDPOINT}/api/nfts_memelab?sort_direction=asc&meme_id=${props.nft.id}`
+        `${publicEnv.API_ENDPOINT}/api/nfts_memelab?sort_direction=asc&meme_id=${memeId}`
       )
         .then((response: DBResponse) => {
+          if (props.nft?.id !== memeId) {
+            return;
+          }
           setMemeLabNfts(response.data);
         })
         .catch((error) => {
+          if (props.nft?.id !== memeId) {
+            return;
+          }
           console.error(
-            `Failed to fetch Meme Lab NFTs for meme ${props.nft?.id}`,
+            `Failed to fetch Meme Lab NFTs for meme ${memeId}`,
             error
           );
           setMemeLabNfts([]);
         })
         .finally(() => {
+          if (props.nft?.id !== memeId) {
+            return;
+          }
           setMemeLabNftsLoaded(true);
         });
     }
@@ -312,6 +322,7 @@ export function MemePageLiveSubMenu(props: {
   }, [props.nft, rememesPage, selectedRememeSorting]);
 
   function fetchRememes(meme_id: number) {
+    setRememesLoaded(false);
     let sort = "";
     if (selectedRememeSorting === RememeSort.CREATED_ASC) {
       sort = "&sort=created_at&sort_direction=desc";

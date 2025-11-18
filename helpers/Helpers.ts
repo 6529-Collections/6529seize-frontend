@@ -74,7 +74,7 @@ export function numberWithCommasFromString(x: any) {
   x = x.toString();
   if (!x || !isNumeric(x) || isNaN(parseFloat(x))) return x;
   if (x.includes(" ") || x.includes(",")) return x;
-  const cleanedInput = x.replace(/[^\d.-]/g, "");
+  const cleanedInput = x.replaceAll(/[^\d.-]/g, "");
   if (!/^-?\d+(\.\d+)?$/.test(cleanedInput)) return x;
   const num = parseFloat(cleanedInput);
   if (isNaN(num)) return x;
@@ -294,7 +294,7 @@ export function containsEmojis(s: string) {
 
 export function parseEmojis(s: string) {
   const regex = /U\+([\dA-Fa-f]{1,6})/g;
-  return s.replace(regex, (_, hexValue) => {
+  return s.replaceAll(regex, (_, hexValue) => {
     return `&#x${hexValue};`;
   });
 }
@@ -335,7 +335,7 @@ export function getRandomColor() {
 export function capitalizeEveryWord(input: string): string {
   return input
     .toLocaleLowerCase()
-    .replace(/^(.)|\s+(.)/g, (match: string) => match.toUpperCase());
+    .replaceAll(/^(.)|\s+(.)/g, (match: string) => match.toUpperCase());
 }
 
 export function getNetworkName(chainId: number) {
@@ -646,7 +646,7 @@ export const getProfileTargetRoute = ({
     return "/404";
   }
   if (pathname.includes("[user]")) {
-    return pathname.replace("[user]", handleOrWallet);
+    return pathname.replaceAll("[user]", handleOrWallet);
   }
   const tab =
     getUserPageTabById(defaultPath) ??
@@ -758,11 +758,11 @@ export const getRandomColorWithSeed = (seedString: string) => {
 
 const escapeHtml = (value: string): string =>
   value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 
 
 export function parseNftDescriptionToHtml(description: string) {
@@ -778,7 +778,7 @@ export function parseNftDescriptionToHtml(description: string) {
     const index = match.index ?? 0;
 
     const preceding = description.slice(lastIndex, index);
-    result += escapeHtml(preceding).replace(/\n/g, "<br />");
+    result += escapeHtml(preceding).replaceAll("\n", "<br />");
 
     const safeUrl = escapeHtml(url);
     result += `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeUrl}</a>`;
@@ -787,7 +787,7 @@ export function parseNftDescriptionToHtml(description: string) {
   }
 
   const remaining = description.slice(lastIndex);
-  result += escapeHtml(remaining).replace(/\n/g, "<br />");
+  result += escapeHtml(remaining).replaceAll("\n", "<br />");
 
   return result;
 }
@@ -823,7 +823,11 @@ export const wait = async (ms: number): Promise<void> => {
 };
 
 export const removeBaseEndpoint = (link: string) => {
-  return link.replace(publicEnv.BASE_ENDPOINT ?? "", "");
+  const baseEndpoint = publicEnv.BASE_ENDPOINT;
+  if (!baseEndpoint) {
+    return link;
+  }
+  return link.replaceAll(baseEndpoint, "");
 };
 
 export const getMetadataForUserPage = (

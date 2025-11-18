@@ -20,6 +20,63 @@ interface ConsolidationData {
   name: string;
 }
 
+function readFileAsText(file: File): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const data = reader.result;
+      if (typeof data === "string") {
+        resolve(data);
+      } else {
+        reject(new Error("Unexpected file format"));
+      }
+    };
+
+    reader.onerror = () => {
+      reject(reader.error ?? new Error("Failed to read file"));
+    };
+
+    reader.readAsText(file);
+  });
+}
+
+function parseCsvText(csvText: string): Promise<ConsolidationData[]> {
+  return new Promise<ConsolidationData[]>((resolve, reject) => {
+    const results: ConsolidationData[] = [];
+    let isFirstRow = true;
+
+    const parser = csvParser({ headers: true })
+      .on("data", (row: any) => {
+        if (isFirstRow) {
+          isFirstRow = false;
+          return;
+        }
+
+        const address = row["_0"];
+        const token_id = Number.parseInt(row["_1"], 10);
+        const balance = Number.parseInt(row["_2"], 10);
+        const contract = row["_3"];
+        const name = row["_4"];
+        results.push({ address, token_id, balance, contract, name });
+      })
+      .on("end", () => {
+        resolve(results);
+      })
+      .on("error", (err: any) => {
+        reject(err);
+      });
+
+    parser.write(csvText);
+    parser.end();
+  });
+}
+
+async function parseCsvFile(file: File): Promise<ConsolidationData[]> {
+  const csvText = await readFileAsText(file);
+  return parseCsvText(csvText);
+}
+
 export default function ConsolidationMappingTool() {
   const inputRef = useRef(null);
   const [dragActive, setDragActive] = useState(false);
@@ -57,10 +114,14 @@ export default function ConsolidationMappingTool() {
   };
 
   function getForAddress(address: string) {
-    const myConsolidations = consolidations.find((c) =>
-      c.wallets.some((w) => areEqualAddresses(address, w))
-    );
-    return myConsolidations;
+    for (const consolidation of consolidations) {
+      for (const wallet of consolidation.wallets) {
+        if (areEqualAddresses(address, wallet)) {
+          return consolidation;
+        }
+      }
+    }
+    return undefined;
   }
 
   function sumForAddresses(
@@ -68,13 +129,24 @@ export default function ConsolidationMappingTool() {
     token_id: number,
     contract: string
   ) {
-    const myConsolidations = csvData.filter(
-      (d) =>
-        addresses.some((a) => areEqualAddresses(a, d.address)) &&
-        areEqualAddresses(contract, d.contract) &&
-        token_id === d.token_id
-    );
-    const balance = myConsolidations.reduce((a, b) => a + b.balance, 0);
+    let balance = 0;
+
+    for (const data of csvData) {
+      const isMatchingToken =
+        areEqualAddresses(contract, data.contract) &&
+        token_id === data.token_id;
+      if (!isMatchingToken) {
+        continue;
+      }
+
+      for (const address of addresses) {
+        if (areEqualAddresses(address, data.address)) {
+          balance += data.balance;
+          break;
+        }
+      }
+    }
+
     return balance;
   }
 
@@ -99,86 +171,72 @@ export default function ConsolidationMappingTool() {
   }
 
   useEffect(() => {
-    async function fetchConsolidations(url: string) {
+    if (!processing || !file) {
+      return;
+    }
+
+    const initialUrl = `${publicEnv.API_ENDPOINT}/api/consolidations`;
+
+    const fetchAndParseConsolidations = async () => {
       try {
-        const fetchedConsolidations = await fetchAllPages<Consolidation>(url);
+        const fetchedConsolidations = await fetchAllPages<Consolidation>(
+          initialUrl
+        );
         setConsolidations(fetchedConsolidations);
-        const reader = new FileReader();
 
-        reader.onload = async () => {
-          const data = reader.result;
-          const results: ConsolidationData[] = [];
-          let isFirstRow = true;
-
-          const parser = csvParser({ headers: true })
-            .on("data", (row: any) => {
-              if (isFirstRow) {
-                isFirstRow = false;
-              } else {
-                const address = row["_0"];
-                const token_id = Number.parseInt(row["_1"], 10);
-                const balance = Number.parseInt(row["_2"], 10);
-                const contract = row["_3"];
-                const name = row["_4"];
-                results.push({ address, token_id, balance, contract, name });
-              }
-            })
-            .on("end", () => {
-              setCsvData(results);
-            })
-            .on("error", (err: any) => {
-              console.error(err);
-            });
-
-          parser.write(data);
-          parser.end();
-        };
-
-        reader.readAsText(file);
+        const parsedCsv = await parseCsvFile(file);
+        setCsvData(parsedCsv);
       } catch (error) {
         console.error("Failed to fetch consolidations for mapping tool", error);
         setConsolidations([]);
         setProcessing(false);
       }
-    }
-    if (processing) {
-      const initialUrl = `${publicEnv.API_ENDPOINT}/api/consolidations`;
-      fetchConsolidations(initialUrl);
-    }
-  }, [processing]);
+    };
+
+    void fetchAndParseConsolidations();
+  }, [processing, file]);
 
   useEffect(() => {
-    const out: ConsolidationData[] = [];
-    if (csvData.length > 0 && consolidations.length > 0) {
-      csvData.map((consolidationData) => {
-        const addressConsolidations = getForAddress(consolidationData.address);
-        if (addressConsolidations) {
-          const sum = sumForAddresses(
-            addressConsolidations.wallets,
-            consolidationData.token_id,
-            consolidationData.contract
-          );
-          if (
-            areEqualAddresses(
-              consolidationData.address,
-              addressConsolidations.primary
-            ) ||
-            sum === consolidationData.balance
-          ) {
-            out.push({
-              ...consolidationData,
-              address: addressConsolidations.primary,
-              balance: sum,
-            });
-          }
-        } else {
-          out.push(consolidationData);
-        }
-      });
-      downloadCsvFile(out);
-      setProcessing(false);
+    const hasData = csvData.length > 0 && consolidations.length > 0;
+    if (!hasData) {
+      return;
     }
-  }, [csvData]);
+
+    const normalizeEntry = (
+      consolidationData: ConsolidationData
+    ): ConsolidationData => {
+      const addressConsolidations = getForAddress(consolidationData.address);
+      if (!addressConsolidations) {
+        return consolidationData;
+      }
+
+      const sum = sumForAddresses(
+        addressConsolidations.wallets,
+        consolidationData.token_id,
+        consolidationData.contract
+      );
+
+      const canMergePrimary =
+        areEqualAddresses(
+          consolidationData.address,
+          addressConsolidations.primary
+        ) || sum === consolidationData.balance;
+
+      if (!canMergePrimary) {
+        return consolidationData;
+      }
+
+      return {
+        ...consolidationData,
+        address: addressConsolidations.primary,
+        balance: sum,
+      };
+    };
+
+    const normalizedOutput = csvData.map(normalizeEntry);
+    downloadCsvFile(normalizedOutput);
+    setProcessing(false);
+  }, [csvData, consolidations]);
 
   return (
     <Container className={styles.toolArea} id="mapping-tool-form">

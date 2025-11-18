@@ -207,6 +207,8 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   }
 
   useEffect(() => {
+    let cancelled = false;
+
     if (connectedWallets.length && nftId) {
       fetchUrl(
         `${
@@ -216,11 +218,13 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
         )}&id=${nftId}`
       )
         .then((response: DBResponse) => {
+          if (cancelled) return;
           setTransactions(response.data);
           updateNftBalances(response.data);
           setUserLoaded(true);
         })
         .catch((error) => {
+          if (cancelled) return;
           console.error(
             `Failed to fetch meme transactions for wallets ${connectedWallets.join(",")}`,
             error
@@ -234,6 +238,10 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
       setUserLoaded(true);
       setTransactions([]);
     }
+
+    return () => {
+      cancelled = true;
+    };
   }, [nftId, connectedWallets]);
 
   useEffect(() => {

@@ -130,6 +130,7 @@ export default function RememePage(props: Readonly<Props>) {
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
   const [rememe, setRememe] = useState<Rememe>();
+  const [rememeError, setRememeError] = useState<string | null>(null);
 
   const [activeTab, setActiveTab] = useState<Tabs>(Tabs.LIVE);
 
@@ -137,6 +138,7 @@ export default function RememePage(props: Readonly<Props>) {
 
   useEffect(() => {
     if (props.contract && props.id) {
+      setRememeError(null);
       fetchUrl(
         `${publicEnv.API_ENDPOINT}/api/rememes?contract=${props.contract}&id=${props.id}`
       )
@@ -147,6 +149,10 @@ export default function RememePage(props: Readonly<Props>) {
               const title = `${response.data[0].metadata.name} | ReMemes | 6529.io`;
               setTitle(title);
             }
+            setRememeError(null);
+          } else {
+            setRememe(undefined);
+            setRememeError("Rememe not found.");
           }
         })
         .catch((error) => {
@@ -155,6 +161,7 @@ export default function RememePage(props: Readonly<Props>) {
             error
           );
           setRememe(undefined);
+          setRememeError("Failed to load rememe. Please try again later.");
         });
     }
   }, [props.contract, props.id]);
@@ -520,7 +527,7 @@ export default function RememePage(props: Readonly<Props>) {
                 />
               </Col>
             </Row>
-            {rememe && (
+            {rememe ? (
               <>
                 <Row className="pt-4">
                   <Col>
@@ -547,6 +554,16 @@ export default function RememePage(props: Readonly<Props>) {
                 </Row>
                 {printContent()}
               </>
+            ) : (
+              rememeError && (
+                <Row className="pt-4">
+                  <Col>
+                    <div className="alert alert-danger" role="alert">
+                      {rememeError}
+                    </div>
+                  </Col>
+                </Row>
+              )
             )}
           </Container>
         </Col>

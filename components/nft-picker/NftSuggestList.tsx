@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import Image from "next/image";
-import { useRef } from "react";
+import { useRef, useId, type ChangeEvent } from "react";
 
 import DistributionPlanVerifiedIcon from "../distribution-plan-tool/common/DistributionPlanVerifiedIcon";
 import type { Suggestion } from "./NftPicker.types";
@@ -21,19 +21,50 @@ interface NftSuggestListProps {
 
 const ROW_HEIGHT = 64;
 const OVERSCAN = 6;
+const ACCESSIBLE_SELECT_PLACEHOLDER_VALUE = "__nft_suggest_placeholder__";
+const ACCESSIBLE_SELECT_MAX_SIZE = 10;
 
-function shortenAddress(address: `0x${string}`): string {
-  return `${address.slice(0, 6)}…${address.slice(-4)}`;
+function shortenAddress(address: `0x${string}` | string): string {
+  const normalized = (address ?? "").trim();
+  if (!normalized.length) {
+    return "";
+  }
+  if (!normalized.startsWith("0x") || normalized.length <= 10) {
+    return normalized;
+  }
+  return `${normalized.slice(0, 6)}…${normalized.slice(-4)}`;
 }
 
 function formatFloor(value: number | null | undefined): string {
   if (typeof value !== "number" || Number.isNaN(value)) {
     return "—";
   }
-  if (value >= 1) {
-    return value.toFixed(2);
+  const normalized = Math.max(value, 0);
+  if (normalized >= 1) {
+    return normalized.toFixed(2);
   }
-  return value.toFixed(3);
+  return normalized.toFixed(3);
+}
+
+function getSuggestionOptionLabel(suggestion: Suggestion): string {
+  const labelParts = [suggestion.name ?? shortenAddress(suggestion.address)];
+  labelParts.push(shortenAddress(suggestion.address));
+  if (suggestion.tokenType) {
+    labelParts.push(suggestion.tokenType);
+  }
+  if (typeof suggestion.floorPriceEth === "number" && !Number.isNaN(suggestion.floorPriceEth)) {
+    labelParts.push(`Floor Ξ${formatFloor(suggestion.floorPriceEth)}`);
+  }
+  if (suggestion.totalSupply) {
+    labelParts.push(`Supply ${suggestion.totalSupply}`);
+  }
+  if (suggestion.safelist === "verified") {
+    labelParts.push("Verified");
+  }
+  if (suggestion.isSpam) {
+    labelParts.push("Suspected spam");
+  }
+  return labelParts.join(" • ");
 }
 
 export function NftSuggestList({
@@ -48,6 +79,8 @@ export function NftSuggestList({
 }: NftSuggestListProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const listContainerRef = useRef<HTMLDivElement>(null);
+  const nativeSelectDescriptionId = useId();
+  const nativeSelectSize = Math.min(Math.max(items.length || 0, 1), ACCESSIBLE_SELECT_MAX_SIZE);
 
   const virtualization = useVirtualizedWaves<Suggestion>(
     items,
@@ -63,19 +96,49 @@ export function NftSuggestList({
     return null;
   }
 
+  const handleNativeSelectChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const selectedValue = event.target.value;
+    if (selectedValue === ACCESSIBLE_SELECT_PLACEHOLDER_VALUE) {
+      return;
+    }
+    const selectedSuggestion = items.find((item) => item.address === selectedValue);
+    if (selectedSuggestion) {
+      onSelect(selectedSuggestion);
+    }
+  };
+
   return (
     <div
       ref={scrollContainerRef}
       className="tw-absolute tw-left-0 tw-right-0 tw-top-full tw-z-20 tw-mt-2 tw-max-h-80 tw-overflow-y-auto tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900"
     >
+      <p id={nativeSelectDescriptionId} className="tw-sr-only">
+        Choose an NFT collection from the following suggestions.
+      </p>
+      <select
+        id="nft-picker-suggest-list"
+        aria-label="NFT collections suggestions"
+        aria-describedby={nativeSelectDescriptionId}
+        className="tw-sr-only"
+        size={nativeSelectSize}
+        defaultValue={ACCESSIBLE_SELECT_PLACEHOLDER_VALUE}
+        onChange={handleNativeSelectChange}
+      >
+        <option value={ACCESSIBLE_SELECT_PLACEHOLDER_VALUE} disabled>
+          {items.length ? "Select a suggestion" : "No suggestions available"}
+        </option>
+        {items.map((suggestion) => (
+          <option key={suggestion.address} value={suggestion.address}>
+            {getSuggestionOptionLabel(suggestion)}
+          </option>
+        ))}
+      </select>
       <div
         ref={listContainerRef}
         style={{ height: virtualization.totalHeight, position: "relative" }}
       >
         <ul
-          id="nft-picker-suggest-list"
-          role="listbox"
-          aria-label="NFT collections suggestions"
+          aria-hidden="true"
           className="tw-relative tw-m-0 tw-list-none tw-p-0"
           style={{ height: "100%" }}
         >
@@ -106,8 +169,6 @@ export function NftSuggestList({
               >
                 <button
                   type="button"
-                  role="option"
-                  aria-selected={isActive}
                   className={clsx(
                     "tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-items-center tw-gap-3 tw-px-3 tw-py-2 tw-text-left",
                     isActive

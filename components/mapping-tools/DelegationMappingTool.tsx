@@ -17,6 +17,34 @@ import styles from "./MappingTool.module.scss";
 
 const csvParser = require("csv-parser");
 
+async function parseCsvFile(file: File): Promise<string[]> {
+  const data = await file.text();
+  if (typeof data !== "string") {
+    throw new Error("Unsupported CSV data format");
+  }
+
+  return parseCsvContent(data);
+}
+
+function parseCsvContent(data: string): Promise<string[]> {
+  return new Promise((resolve, reject) => {
+    const results: string[] = [];
+    const parser = csvParser({ headers: true })
+      .on("data", (row: any) => {
+        results.push(row["_0"]);
+      })
+      .on("end", () => {
+        resolve(results);
+      })
+      .on("error", (err: any) => {
+        reject(err);
+      });
+
+    parser.write(data);
+    parser.end();
+  });
+}
+
 export default function DelegationMappingTool() {
   const inputRef = useRef(null);
   const [dragActive, setDragActive] = useState(false);
@@ -65,6 +93,24 @@ export default function DelegationMappingTool() {
     return myDelegations;
   }
 
+  function resolveDelegatedAddress(address: string): string {
+    const fallbackOrder: Array<{ collection: string; useCase: number }> = [
+      { collection: MEMES_CONTRACT, useCase },
+      { collection: MEMES_CONTRACT, useCase: 1 },
+      { collection: DELEGATION_ALL_ADDRESS, useCase },
+      { collection: DELEGATION_ALL_ADDRESS, useCase: 1 },
+    ];
+
+    for (const option of fallbackOrder) {
+      const match = getForAddress(address, option.collection, option.useCase);
+      if (match) {
+        return match.to_address;
+      }
+    }
+
+    return address;
+  }
+
   function downloadCsvFile(data: string[]) {
     const csvString = data.map((d) => d.toLowerCase()).join("\n");
 
@@ -86,30 +132,14 @@ export default function DelegationMappingTool() {
       try {
         const delegationsResponse = await fetchAllPages<Delegation>(url);
         setDelegations(delegationsResponse);
-        const reader = new FileReader();
+        if (!file) {
+          throw new Error("No file provided");
+        }
 
-        reader.onload = async () => {
-          const data = reader.result;
-          const results: any[] = [];
-
-          const parser = csvParser({ headers: true })
-            .on("data", (row: any) => {
-              results.push(row["_0"]);
-            })
-            .on("end", () => {
-              setCsvData(results);
-            })
-            .on("error", (err: any) => {
-              console.error(err);
-            });
-
-          parser.write(data);
-          parser.end();
-        };
-
-        reader.readAsText(file);
+        const results = await parseCsvFile(file);
+        setCsvData(results);
       } catch (error) {
-        console.error("Failed to fetch delegations for mapping tool", error);
+        console.error("Failed to process delegations for mapping tool", error);
         setDelegations([]);
         setProcessing(false);
       }
@@ -124,35 +154,8 @@ export default function DelegationMappingTool() {
   }, [processing]);
 
   useEffect(() => {
-    const out: string[] = [];
     if (csvData.length > 0 && delegations.length > 0) {
-      csvData.map((address) => {
-        const memesUseCase = getForAddress(address, MEMES_CONTRACT, useCase);
-        if (memesUseCase) {
-          out.push(memesUseCase.to_address);
-        } else {
-          const memesAll = getForAddress(address, MEMES_CONTRACT, 1);
-          if (memesAll) {
-            out.push(memesAll.to_address);
-          } else {
-            const anyUseCase = getForAddress(
-              address,
-              DELEGATION_ALL_ADDRESS,
-              useCase
-            );
-            if (anyUseCase) {
-              out.push(anyUseCase.to_address);
-            } else {
-              const anyAll = getForAddress(address, DELEGATION_ALL_ADDRESS, 1);
-              if (anyAll) {
-                out.push(anyAll.to_address);
-              } else {
-                out.push(address);
-              }
-            }
-          }
-        }
-      });
+      const out = csvData.map((address) => resolveDelegatedAddress(address));
       downloadCsvFile(out);
       setProcessing(false);
     }

@@ -66,6 +66,10 @@ export default function LabCollection({
 
   useEffect(() => {
     if (!collectionName) {
+      setNftMetas([]);
+      setNfts([]);
+      setWebsite(undefined);
+      setNftsLoaded(true);
       return;
     }
 
@@ -78,13 +82,14 @@ export default function LabCollection({
         setNftMetas(responseNftMetas);
         if (responseNftMetas.length > 0) {
           const tokenIds = responseNftMetas.map((n: LabExtendedData) => n.id);
-          let collectionSecondaryLink = "";
-          responseNftMetas.map((nftm) => {
-            if (nftm.website && !collectionSecondaryLink.includes(nftm.website)) {
-              collectionSecondaryLink += nftm.website;
-            }
-          });
-          setWebsite(collectionSecondaryLink);
+          const uniqueWebsites = Array.from(
+            new Set(
+              responseNftMetas
+                .map((nftm) => nftm.website?.trim())
+                .filter((site): site is string => Boolean(site))
+            )
+          );
+          setWebsite(uniqueWebsites.join(" "));
           const responseNfts = await fetchAllPages<LabNFT>(
             `${publicEnv.API_ENDPOINT}/api/nfts_memelab?id=${tokenIds.join(
               ","
@@ -109,20 +114,33 @@ export default function LabCollection({
   }, [collectionName]);
 
   useEffect(() => {
-    if (connectedProfile?.consolidation_key) {
+    let cancelled = false;
+    const consolidationKey = connectedProfile?.consolidation_key;
+
+    if (consolidationKey) {
       fetchAllPages<NftOwner>(
-        `${publicEnv.API_ENDPOINT}/api/nft-owners/consolidation/${connectedProfile?.consolidation_key}?contract=${MEMES_CONTRACT}`
+        `${publicEnv.API_ENDPOINT}/api/nft-owners/consolidation/${consolidationKey}?contract=${MEMES_CONTRACT}`
       )
         .then((owners) => {
+          if (cancelled) {
+            return;
+          }
           setNftBalances(owners);
         })
         .catch((error) => {
+          if (cancelled) {
+            return;
+          }
           console.error("Failed to fetch Meme Lab balances for user", error);
           setNftBalances([]);
         });
     } else {
       setNftBalances([]);
     }
+
+    return () => {
+      cancelled = true;
+    };
   }, [connectedProfile]);
 
   useEffect(() => {
@@ -203,17 +221,21 @@ export default function LabCollection({
               {website && (
                 <Row className="pb-3">
                   <Col>
-                    {website.split(" ").map((w) => (
-                      <>
-                        <a
-                          href={addProtocol(w)}
-                          target="_blank"
-                          rel="noopener noreferrer">
-                          {w}
-                        </a>
-                        &nbsp;&nbsp;
-                      </>
-                    ))}
+                    {website
+                      .split(" ")
+                      .map((w) => w.trim())
+                      .filter((w) => w.length > 0)
+                      .map((w) => (
+                        <span key={w}>
+                          <a
+                            href={addProtocol(w)}
+                            target="_blank"
+                            rel="noopener noreferrer">
+                            {w}
+                          </a>
+                          &nbsp;&nbsp;
+                        </span>
+                      ))}
                   </Col>
                 </Row>
               )}

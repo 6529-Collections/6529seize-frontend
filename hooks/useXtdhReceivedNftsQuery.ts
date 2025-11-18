@@ -38,6 +38,7 @@ export type UseXtdhReceivedNftsQueryResult = UseQueryResult<
   readonly availableCollections: readonly XtdhReceivedCollectionOption[];
   readonly errorMessage?: string;
   readonly isEnabled: boolean;
+  readonly pageSize: number;
 };
 
 const DEFAULT_PAGE = 1;
@@ -115,5 +116,6 @@ export function useXtdhReceivedNftsQuery({
     errorMessage:
       query.error instanceof Error && query.error.message.trim() ? query.error.message : undefined,
     isEnabled,
+    pageSize: normalizedPageSize,
   };
 }

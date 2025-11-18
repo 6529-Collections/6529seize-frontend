@@ -115,11 +115,7 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
             setSubmitting(true);
           } else {
             setUploadError(
-              `Error: ${
-                response.response.error
-                  ? response.response.error
-                  : "Unknown error"
-              }`
+              `Error: ${response.response?.error ?? "Unknown error"}`
             );
             setLoading(false);
           }

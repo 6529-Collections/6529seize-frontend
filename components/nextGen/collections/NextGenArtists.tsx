@@ -1,5 +1,6 @@
 "use client";
 
+import DotLoader from "@/components/dotLoader/DotLoader";
 import { publicEnv } from "@/config/env";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
@@ -13,11 +14,13 @@ export default function NextGenArtists() {
   const [artistCollections, setArtistCollections] = useState<
     { address: string; collections: NextGenCollection[] }[]
   >([]);
+  const [artistCollectionsLoaded, setArtistCollectionsLoaded] = useState(false);
 
   async function fetchResults() {
+    setArtistCollectionsLoaded(false);
     let url = `${publicEnv.API_ENDPOINT}/api/nextgen/collections`;
     try {
-      const response = (await fetchUrl(url)) as DBResponse;
+      const response = await fetchUrl(url);
       setArtistCollections(
         response.data.reduce((acc, collection) => {
           if (
@@ -40,6 +43,8 @@ export default function NextGenArtists() {
     } catch (error) {
       console.error("Failed to fetch NextGen artist collections", error);
       setArtistCollections([]);
+    } finally {
+      setArtistCollectionsLoaded(true);
     }
   }
 
@@ -54,6 +59,20 @@ export default function NextGenArtists() {
           <h1>Artists</h1>
         </Col>
       </Row>
+      {!artistCollectionsLoaded && (
+        <Row className="pt-4 pb-4">
+          <Col className="text-center">
+            <DotLoader />
+          </Col>
+        </Row>
+      )}
+      {artistCollectionsLoaded && artistCollections.length === 0 && (
+        <Row>
+          <Col className="text-center">
+            <h4>No artist collections found</h4>
+          </Col>
+        </Row>
+      )}
       {artistCollections.map(
         (
           ac: {

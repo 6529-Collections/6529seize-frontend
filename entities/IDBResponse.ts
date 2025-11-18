@@ -1,8 +1,8 @@
-export interface DBResponse {
+export interface DBResponse<T = any> {
   count: number;
   page: number;
   next: any;
-  data: any[];
+  data: T[];
 }
 
 interface LeaderboardDBResponse {

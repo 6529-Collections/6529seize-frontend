@@ -77,6 +77,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
   const router = useRouter();
   const pathname = usePathname();
   const [artists, setArtists] = useState<ApiArtistNameItem[]>([]);
+  const [artistLoadError, setArtistLoadError] = useState<string | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showBlockPicker, setShowBlockPicker] = useState(false);
   const [fromDate, setFromDate] = useState<Date>();
@@ -90,10 +91,12 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
     fetchUrl<ApiArtistNameItem[]>(`${publicEnv.API_ENDPOINT}/api/${path}/artists_names`)
       .then((res: ApiArtistNameItem[]) => {
         setArtists(res);
+        setArtistLoadError(null);
       })
       .catch((error) => {
         console.error("Failed to fetch artist names", error);
         setArtists([]);
+        setArtistLoadError("Unable to load artist names. Showing all artists.");
       });
   }, [props.focus]);
 
@@ -212,29 +215,36 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                 />
               )}
             </span>
-            <span className="d-flex align-items-center gap-5">
-              <Dropdown className={styles.filterDropdown} drop={"down"}>
-                <Dropdown.Toggle disabled={props.fetching}>
-                  Artist: {props.selected_artist || "All"}
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  <Dropdown.Item
-                    onClick={() => {
-                      props.setSelectedArtist("");
-                    }}>
-                    All
-                  </Dropdown.Item>
-                  {artists.map((a) => (
+            <span className="d-flex align-items-start gap-5">
+              <span className="d-flex flex-column gap-1">
+                <Dropdown className={styles.filterDropdown} drop={"down"}>
+                  <Dropdown.Toggle disabled={props.fetching}>
+                    Artist: {props.selected_artist || "All"}
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu>
                     <Dropdown.Item
-                      key={`artist-${a.name.replaceAll(" ", "-")}`}
                       onClick={() => {
-                        props.setSelectedArtist(a.name);
+                        props.setSelectedArtist("");
                       }}>
-                      {a.name}
+                      All
                     </Dropdown.Item>
-                  ))}
-                </Dropdown.Menu>
-              </Dropdown>
+                    {artists.map((a) => (
+                      <Dropdown.Item
+                        key={`artist-${a.name.replaceAll(" ", "-")}`}
+                        onClick={() => {
+                          props.setSelectedArtist(a.name);
+                        }}>
+                        {a.name}
+                      </Dropdown.Item>
+                    ))}
+                  </Dropdown.Menu>
+                </Dropdown>
+                {artistLoadError && (
+                  <span className="text-danger small" role="alert">
+                    {artistLoadError}
+                  </span>
+                )}
+              </span>
               <Dropdown className={styles.filterDropdown} drop={"down"}>
                 <Dropdown.Toggle disabled={props.fetching}>
                   {getDateSelectionLabel()}

@@ -122,10 +122,18 @@ const getSelectionSummary = ({
   return `${selectionText} ${getAmountSummaryText(amount, tokenCount)}`;
 };
 
-const getValiditySummary = (validUntil: Date | null): string =>
-  validUntil
-    ? `Grant valid until ${formatDateTime(validUntil.getTime())}.`
-    : "Grant never expires.";
+const getValiditySummary = (validUntil: Date | null): string => {
+  if (!validUntil) {
+    return "Grant never expires.";
+  }
+
+  const timestamp = validUntil.getTime();
+  if (!Number.isFinite(timestamp) || timestamp <= 0) {
+    return "Grant never expires.";
+  }
+
+  return `Grant valid until ${formatDateTime(timestamp)}.`;
+};
 
 export interface UserPageXtdhGrantSummaryProps {
   readonly contract: ContractOverview | null;

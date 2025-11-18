@@ -8,7 +8,12 @@ import {
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { usePathname } from "next/navigation";
+import {
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 import {
   useCallback,
   useContext,
@@ -37,10 +42,14 @@ const getVisibilityContext = ({
   readonly showWaves: boolean;
   readonly capacitorIsIos: boolean;
   readonly country: string | null;
-}): UserPageVisibilityContext => ({
-  showWaves,
-  hideSubscriptions: capacitorIsIos && country !== "US",
-});
+}): UserPageVisibilityContext => {
+  const normalizedCountry = country ? country.toUpperCase() : null;
+
+  return {
+    showWaves,
+    hideSubscriptions: capacitorIsIos && normalizedCountry !== "US",
+  };
+};
 
 const resolveTabFromPath = (pathname: string): UserPageTabKey => {
   const segments = pathname.split("/").filter(Boolean);
@@ -57,6 +66,11 @@ const filterVisibleTabs = (
 
 export default function UserPageTabs() {
   const pathname = usePathname() ?? "";
+  const router = useRouter();
+  const params = useParams();
+  const handleOrWallet = params?.user?.toString() ?? "";
+  const searchParams = useSearchParams();
+  const searchString = searchParams?.toString() ?? "";
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
   const { showWaves } = useContext(AuthContext);
@@ -86,14 +100,48 @@ export default function UserPageTabs() {
     [visibilityContext]
   );
 
+  const resolvedTabIsVisible = useMemo(
+    () => visibleTabs.some((tab) => tab.id === resolvedTabFromPath),
+    [resolvedTabFromPath, visibleTabs]
+  );
+
   const activeTab = useMemo<UserPageTabKey>(() => {
-    if (visibleTabs.some((tab) => tab.id === resolvedTabFromPath)) {
+    if (resolvedTabIsVisible) {
       return resolvedTabFromPath;
     }
 
     const firstVisibleTab = visibleTabs[0]?.id;
     return firstVisibleTab ?? DEFAULT_TAB;
-  }, [resolvedTabFromPath, visibleTabs]);
+  }, [resolvedTabFromPath, resolvedTabIsVisible, visibleTabs]);
+
+  useEffect(() => {
+    if (!visibleTabs.length || resolvedTabIsVisible || !handleOrWallet) {
+      return;
+    }
+
+    const fallbackTab = visibleTabs[0];
+    if (!fallbackTab) {
+      return;
+    }
+
+    const fallbackPath = fallbackTab.route
+      ? `/${handleOrWallet}/${fallbackTab.route}`
+      : `/${handleOrWallet}`;
+
+    if (fallbackPath === pathname) {
+      return;
+    }
+
+    const nextUrl = searchString ? `${fallbackPath}?${searchString}` : fallbackPath;
+    router.replace(nextUrl);
+  }, [
+    handleOrWallet,
+    pathname,
+    resolvedTabIsVisible,
+    router,
+    searchString,
+    visibleTabs,
+  ]);
 
   const checkScroll = useCallback(() => {
     const container = scrollContainerRef.current;

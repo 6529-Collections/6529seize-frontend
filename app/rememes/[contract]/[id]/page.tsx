@@ -4,6 +4,8 @@ import { publicEnv } from "@/config/env";
 import { formatAddress } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
 import styles from "@/styles/Home.module.scss";
+import type { DBResponse } from "@/entities/IDBResponse";
+import type { Rememe } from "@/entities/INFT";
 import type { Metadata } from "next";
 
 export default async function ReMeme({
@@ -29,7 +31,7 @@ export async function generateMetadata({
   let name = `${formatAddress(contract)} #${id}`;
   let image = `${publicEnv.BASE_ENDPOINT}/6529io.png`;
   try {
-    const response = await fetchUrl(
+    const response = await fetchUrl<DBResponse<Rememe>>(
       `${publicEnv.API_ENDPOINT}/api/rememes?contract=${contract}&id=${id}`
     );
 

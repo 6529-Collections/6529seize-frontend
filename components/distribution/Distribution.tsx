@@ -71,13 +71,16 @@ export default function DistributionPage(props: Readonly<Props>) {
       searchWallets.length === 0 ? "" : `&search=${searchWallets.join(",")}`;
     const distributionUrl = `${publicEnv.API_ENDPOINT}/api/distributions?card_id=${nftId}&contract=${props.contract}&page=${pageProps.page}${walletFilter}`;
     try {
-      const r = (await fetchUrl(distributionUrl)) as DBResponse;
+      const r = await fetchUrl<DBResponse>(distributionUrl);
       setTotalResults(r.count);
       const mydistributions: Distribution[] = r.data;
       setDistributions(mydistributions);
       updateDistributionPhases(mydistributions);
     } catch (error) {
-      console.error("Failed to fetch distribution data", error);
+      console.error(
+        `Failed to fetch distribution data for NFT ${nftId} on contract ${props.contract}`,
+        error
+      );
       setTotalResults(0);
       setDistributions([]);
       setDistributionsPhases([]);
