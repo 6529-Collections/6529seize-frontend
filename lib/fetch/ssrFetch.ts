@@ -117,6 +117,9 @@ const enhancedFetch: typeof fetch = async (
     });
   } catch {}
 
+  const headerKeys = Array.from(enhancedHeaders.keys());
+  console.log(`[SSR Fetch] Request headers: ${headerKeys.join(", ")}`);
+
   return originalFetch(input, {
     ...init,
     headers: enhancedHeaders,

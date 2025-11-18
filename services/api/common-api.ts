@@ -55,7 +55,7 @@ const handleApiError = async (res: Response): Promise<never> => {
   const statusPart = res.status ? `HTTP ${res.status}` : "HTTP Error";
   const statusTextPart = res.statusText ? ` ${res.statusText}` : "";
   const composedError = `${statusPart}${statusTextPart}: ${errorMessage}`;
-  return Promise.reject(composedError);
+  throw new Error(composedError);
 };
 
 const executeApiRequest = async <T>(
