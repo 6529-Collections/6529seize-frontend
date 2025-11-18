@@ -63,7 +63,6 @@ export function parseFloorPrice(
   return null;
 }
 
-// Normalizes varying OpenSea metadata keys returned by Alchemy.
 type OpenSeaMetadataSource = {
   openSeaMetadata?: AlchemyOpenSeaMetadata | null;
   openseaMetadata?: AlchemyOpenSeaMetadata | null;

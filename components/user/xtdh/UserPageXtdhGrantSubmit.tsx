@@ -80,7 +80,7 @@ export default function UserPageXtdhGrantSubmit({
         type="button"
         onClick={() => {
           if (!disabled) {
-            void onSubmit();
+            onSubmit();
           }
         }}
         disabled={disabled}
@@ -100,9 +100,9 @@ export default function UserPageXtdhGrantSubmit({
       )}
 
       {!errorMessage && successMessage && (
-        <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-emerald-400" role="status">
+        <output className="tw-block tw-m-0 tw-text-sm tw-font-medium tw-text-emerald-400">
           {successMessage}
-        </p>
+        </output>
       )}
     </div>
   );

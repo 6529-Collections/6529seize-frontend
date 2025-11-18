@@ -61,9 +61,9 @@ export function formatFloorPrice(value?: number | null): string {
 export function mapGrantChainToSupportedChain(
   chain: ApiTdhGrantsPage["data"][number]["target_chain"]
 ): SupportedChain {
-  switch (chain) {
-    case "ETHEREUM_MAINNET":
-    default:
-      return "ethereum";
+  if (chain === "ETHEREUM_MAINNET") {
+    return "ethereum";
   }
+
+  return "ethereum";
 }

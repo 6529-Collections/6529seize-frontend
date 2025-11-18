@@ -71,7 +71,7 @@ export default function UserPageXtdh({
     if (!pathname) return;
     if (searchParams?.has("tab")) return;
 
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(searchParams?.toString());
     params.set("tab", DEFAULT_FILTER);
     const queryString = params.toString();
 
@@ -88,7 +88,7 @@ export default function UserPageXtdh({
         return;
       }
 
-      const params = new URLSearchParams();
+      const params = new URLSearchParams(searchParams?.toString());
       params.set("tab", filter);
 
       const queryString = params.toString();

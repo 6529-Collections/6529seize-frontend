@@ -11,7 +11,6 @@ export function StatCard({
       <span
         className="tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-300"
         title={tooltip}
-        tabIndex={0}
       >
         {label}
       </span>
@@ -22,4 +21,3 @@ export function StatCard({
     </div>
   );
 }
-

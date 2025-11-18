@@ -1,33 +1,44 @@
-type KnownGrantStatus = "GRANTED" | "DISABLED" | "PENDING" | "FAILED";
+import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import {
+  faCircle,
+  faDotCircle,
+  faEllipsisH,
+  faMinus,
+  faTimes,
+} from "@fortawesome/free-solid-svg-icons";
+
+import type { ApiTdhGrantStatus } from "@/generated/models/ApiTdhGrantStatus";
+
+type KnownGrantStatus = ApiTdhGrantStatus;
 
 interface StatusVisuals {
   readonly label: string;
-  readonly glyph: string;
+  readonly icon: IconDefinition;
   readonly badgeClassName: string;
 }
 
 const STATUS_VISUALS: Record<KnownGrantStatus, StatusVisuals> = {
   GRANTED: {
     label: "GRANTED",
-    glyph: "●",
+    icon: faCircle,
     badgeClassName:
       "tw-border-green/50 tw-bg-green/10 tw-text-green tw-shadow-[0_0_20px_rgba(60,203,127,0.15)]",
   },
   DISABLED: {
     label: "DISABLED",
-    glyph: "▬",
+    icon: faMinus,
     badgeClassName:
       "tw-border-amber-400/50 tw-bg-amber-400/10 tw-text-amber-200 tw-shadow-[0_0_20px_rgba(251,191,36,0.1)]",
   },
   PENDING: {
     label: "PENDING",
-    glyph: "⋯",
+    icon: faEllipsisH,
     badgeClassName:
       "tw-border-primary-400/50 tw-bg-primary-400/10 tw-text-primary-200 tw-shadow-[0_0_20px_rgba(82,139,255,0.15)]",
   },
   FAILED: {
     label: "FAILED",
-    glyph: "✕",
+    icon: faTimes,
     badgeClassName:
       "tw-border-red/50 tw-bg-red/10 tw-text-red tw-shadow-[0_0_20px_rgba(249,112,102,0.15)]",
   },
@@ -35,12 +46,12 @@ const STATUS_VISUALS: Record<KnownGrantStatus, StatusVisuals> = {
 
 const DEFAULT_STATUS_VISUALS: StatusVisuals = {
   label: "STATUS",
-  glyph: "•",
+  icon: faDotCircle,
   badgeClassName:
     "tw-border-iron-700 tw-bg-iron-800 tw-text-iron-200 tw-shadow-[0_0_12px_rgba(0,0,0,0.3)]",
 };
 
-export function getStatusVisuals(status?: string | null): StatusVisuals {
+export function getStatusVisuals(status?: ApiTdhGrantStatus | null): StatusVisuals {
   if (!status) {
     return DEFAULT_STATUS_VISUALS;
   }

@@ -49,6 +49,7 @@ export type UseXtdhGrantsQueryResult = UseInfiniteQueryResult<
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 25;
+const DEFAULT_STALE_TIME = 30_000; // 30 seconds
 export function useXtdhGrantsQuery({
   grantor,
   page = DEFAULT_PAGE,
@@ -102,7 +103,7 @@ export function useXtdhGrantsQuery({
     initialPageParam: normalizedPage,
     getNextPageParam: (lastPage) => (lastPage.next ? lastPage.page + 1 : undefined),
     enabled: isEnabled,
-    staleTime: 30_000,
+    staleTime: DEFAULT_STALE_TIME,
     placeholderData: keepPreviousData,
   });
 

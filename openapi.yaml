@@ -3281,7 +3281,7 @@ paths:
           in: query
           required: false
           schema:
-            type: number
+            type: integer
             format: int64
             minimum: 0
         - name: page_size
@@ -3289,7 +3289,7 @@ paths:
           description: Default is 20
           required: false
           schema:
-            type: number
+            type: integer
             format: int64
             minimum: 1
             maximum: 100
@@ -3422,7 +3422,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiXTdhTokensPage"
-  /xtdh/identity/{identity}/contracts/:
+  /xtdh/identity/{identity}/contracts:
     get:
       tags:
         - xTDH
@@ -6001,7 +6001,7 @@ components:
         - next
       properties:
         page:
-          type: number
+          type: integer
           format: int64
         next:
           type: boolean

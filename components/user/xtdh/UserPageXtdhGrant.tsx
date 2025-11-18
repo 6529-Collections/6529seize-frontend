@@ -27,6 +27,7 @@ export default function UserPageXtdhGrant() {
   const { requestAuth, setToast } = useContext(AuthContext);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
+  const [isAuthorizing, setIsAuthorizing] = useState(false);
   const queryClient = useQueryClient();
 
   const createGrantMutation = useMutation({
@@ -43,6 +44,10 @@ export default function UserPageXtdhGrant() {
   }, [contract, selection, amount, validUntil]);
 
   const handleSubmit = useCallback(async () => {
+    if (isAuthorizing) {
+      return;
+    }
+
     setSubmitError(null);
     setSubmitSuccess(null);
 
@@ -81,34 +86,43 @@ export default function UserPageXtdhGrant() {
       return;
     }
 
-    const { success } = await requestAuth();
-    if (!success) {
-      setSubmitError("Authentication failed. Please try again.");
-      return;
-    }
-
-    const payload: ApiCreateTdhGrant = {
-      target_chain: ApiTdhGrantTargetChain.EthereumMainnet,
-      target_contract: contract.address,
-      target_tokens: selection.allSelected
-        ? []
-        : selection.tokenIdsRaw.map((tokenId) => tokenId.toString()),
-      valid_to: validUntil ? Math.floor(validUntil.getTime() / 1000) : null,
-      tdh_rate: amount,
-      is_irrevocable: false,
-    };
-
+    setIsAuthorizing(true);
     try {
-      await createGrantMutation.mutateAsync(payload);
-      await queryClient.invalidateQueries({ queryKey: [QueryKey.TDH_GRANTS] });
-      const message = "Grant submitted. You will see it once processed.";
-      setSubmitSuccess(message);
-      setToast({ type: "success", message });
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to submit the grant.";
-      setSubmitError(message);
-      setToast({ type: "error", message });
+      const { success } = await requestAuth();
+      if (!success) {
+        setSubmitError("Authentication failed. Please try again.");
+        return;
+      }
+
+      const payload: ApiCreateTdhGrant = {
+        target_chain: ApiTdhGrantTargetChain.EthereumMainnet,
+        target_contract: contract.address,
+        target_tokens: selection.allSelected
+          ? []
+          : selection.tokenIdsRaw.map((tokenId) => tokenId.toString()),
+        valid_to: validUntil ? Math.floor(validUntil.getTime() / 1000) : null,
+        tdh_rate: amount,
+        is_irrevocable: false,
+      };
+
+      try {
+        await createGrantMutation.mutateAsync(payload);
+        await queryClient.invalidateQueries({
+          queryKey: [QueryKey.TDH_GRANTS],
+        });
+        const message = "Grant submitted. You will see it once processed.";
+        setSubmitSuccess(message);
+        setToast({ type: "success", message });
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Failed to submit the grant.";
+        setSubmitError(message);
+        setToast({ type: "error", message });
+      }
+    } finally {
+      setIsAuthorizing(false);
     }
   }, [
     contract,
@@ -119,6 +133,7 @@ export default function UserPageXtdhGrant() {
     createGrantMutation,
     queryClient,
     setToast,
+    isAuthorizing,
   ]);
 
   return (
@@ -145,7 +160,7 @@ export default function UserPageXtdhGrant() {
         amount={amount}
         validUntil={validUntil}
         onSubmit={handleSubmit}
-        isSubmitting={createGrantMutation.isPending}
+        isSubmitting={createGrantMutation.isPending || isAuthorizing}
         errorMessage={submitError}
         successMessage={submitSuccess}
       />

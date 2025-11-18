@@ -12,6 +12,8 @@ import {
 } from "react";
 import { useClickAway } from "react-use";
 import { classNames } from "@/helpers/Helpers";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 
 export interface CollectionsAutocompleteOption {
   readonly id: string;
@@ -28,6 +30,15 @@ export interface CollectionsAutocompleteProps {
   readonly noResultsText?: string;
 }
 
+type KeyboardNavigationKey =
+  | "ArrowDown"
+  | "ArrowUp"
+  | "Enter"
+  | "Escape"
+  | "Backspace";
+
+type KeyHandler = (event: KeyboardEvent<HTMLInputElement>) => void;
+
 export default function CollectionsAutocomplete({
   options,
   value,
@@ -42,10 +53,11 @@ export default function CollectionsAutocomplete({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const listboxRef = useRef<HTMLDivElement>(null);
+  const listboxRef = useRef<HTMLUListElement>(null);
 
   const inputId = useId();
-  const listboxId = useId();
+  const nativeSelectId = useId();
+  const nativeSelectDescriptionId = useId();
 
   useClickAway(containerRef, () => setOpen(false));
 
@@ -68,6 +80,9 @@ export default function CollectionsAutocomplete({
       value.map((id) => optionMap.get(id) ?? { id, name: id }),
     [optionMap, value]
   );
+  const selectionPlaceholder = selectedOptions.length
+    ? "Add another collection…"
+    : placeholder;
 
   const selectedSet = useMemo(() => new Set(value), [value]);
 
@@ -135,6 +150,22 @@ export default function CollectionsAutocomplete({
     [disabled, focusInput, onChange, selectedSet, value]
   );
 
+  const handleNativeSelectChange = useCallback(
+    (event: ChangeEvent<HTMLSelectElement>) => {
+      const selectedId = event.currentTarget.value;
+      if (!selectedId) {
+        return;
+      }
+      const option = optionMap.get(selectedId);
+      if (!option) {
+        return;
+      }
+      handleSelect(option);
+      event.currentTarget.value = "";
+    },
+    [handleSelect, optionMap]
+  );
+
   const handleRemove = useCallback(
     (id: string) => {
       if (disabled) {
@@ -147,71 +178,88 @@ export default function CollectionsAutocomplete({
     [disabled, focusInput, onChange, value]
   );
 
-  const handleKeyDown = useCallback(
+  const filteredOptionsCount = filteredOptions.length;
+
+  const handleArrowNavigation = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>, delta: number) => {
+      event.preventDefault();
+      if (!open) {
+        openDropdown();
+        return;
+      }
+      if (filteredOptionsCount === 0) {
+        return;
+      }
+      setHighlightedIndex((prev) =>
+        (prev + delta + filteredOptionsCount) % filteredOptionsCount
+      );
+    },
+    [filteredOptionsCount, open, openDropdown]
+  );
+
+  const handleEnterKey = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === "ArrowDown") {
-        event.preventDefault();
-        if (!open) {
-          openDropdown();
-          return;
-        }
-        setHighlightedIndex((prev) => {
-          if (filteredOptions.length === 0) {
-            return prev;
-          }
-          return (prev + 1) % filteredOptions.length;
-        });
+      if (!open || filteredOptions.length === 0) {
         return;
       }
-
-      if (event.key === "ArrowUp") {
-        event.preventDefault();
-        if (!open) {
-          openDropdown();
-          return;
-        }
-        setHighlightedIndex((prev) => {
-          if (filteredOptions.length === 0) {
-            return prev;
-          }
-          return (prev - 1 + filteredOptions.length) % filteredOptions.length;
-        });
-        return;
-      }
-
-      if (event.key === "Enter") {
-        if (open && filteredOptions.length > 0) {
-          event.preventDefault();
-          const option = filteredOptions[Math.max(0, highlightedIndex)];
-          if (option) {
-            handleSelect(option);
-          }
-        }
-        return;
-      }
-
-      if (event.key === "Escape") {
-        if (open) {
-          event.preventDefault();
-          setOpen(false);
-        }
-        return;
-      }
-
-      if (event.key === "Backspace" && query.length === 0 && value.length > 0) {
-        event.preventDefault();
-        handleRemove(value[value.length - 1]);
+      event.preventDefault();
+      const option = filteredOptions[Math.max(0, highlightedIndex)];
+      if (option) {
+        handleSelect(option);
       }
     },
+    [filteredOptions, handleSelect, highlightedIndex, open]
+  );
+
+  const handleEscapeKey = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      if (!open) {
+        return;
+      }
+      event.preventDefault();
+      setOpen(false);
+    },
+    [open]
+  );
+
+  const handleBackspaceKey = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      if (query.length !== 0 || value.length === 0) {
+        return;
+      }
+      event.preventDefault();
+      const lastSelected = value.at(-1);
+      if (lastSelected) {
+        handleRemove(lastSelected);
+      }
+    },
+    [handleRemove, query.length, value]
+  );
+
+  const keyboardHandlers = useMemo<
+    Partial<Record<KeyboardNavigationKey, KeyHandler>>
+  >(
+    () => ({
+      ArrowDown: (event) => handleArrowNavigation(event, 1),
+      ArrowUp: (event) => handleArrowNavigation(event, -1),
+      Enter: handleEnterKey,
+      Escape: handleEscapeKey,
+      Backspace: handleBackspaceKey,
+    }),
     [
-      filteredOptions,
-      handleRemove,
-      open,
-      openDropdown,
-      query.length,
-      value,
-      highlightedIndex,
+      handleArrowNavigation,
+      handleBackspaceKey,
+      handleEnterKey,
+      handleEscapeKey,
     ]
+  );
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      const handler = keyboardHandlers[event.key as KeyboardNavigationKey];
+      handler?.(event);
+    },
+    [keyboardHandlers]
   );
 
   const handleOptionMouseEnter = useCallback((index: number) => {
@@ -219,6 +267,9 @@ export default function CollectionsAutocomplete({
   }, []);
 
   const hasNoResults = filteredOptions.length === 0 && query.trim().length > 0;
+  const nativeSelectPlaceholder = hasNoResults
+    ? noResultsText
+    : selectionPlaceholder;
 
   return (
     <div ref={containerRef} className="tw-flex tw-flex-col tw-gap-1.5">
@@ -231,7 +282,6 @@ export default function CollectionsAutocomplete({
               : "tw-border-iron-700 tw-bg-iron-900 hover:tw-border-iron-600"
           )}
           onClick={focusInput}
-          role="presentation"
         >
           {selectedOptions.map((option) => (
             <span
@@ -245,7 +295,7 @@ export default function CollectionsAutocomplete({
                 onClick={() => handleRemove(option.id)}
                 aria-label={`Remove ${option.name}`}
               >
-                ×
+                <FontAwesomeIcon icon={faXmark} aria-hidden="true" />
               </button>
             </span>
           ))}
@@ -257,37 +307,64 @@ export default function CollectionsAutocomplete({
             onKeyDown={handleKeyDown}
             onFocus={handleInputFocus}
             disabled={disabled}
-            placeholder={selectedOptions.length ? "Add another collection…" : placeholder}
+            placeholder={selectionPlaceholder}
+            role="combobox"
             aria-autocomplete="list"
             aria-expanded={open}
-            aria-controls={listboxId}
+            aria-controls={nativeSelectId}
             aria-haspopup="listbox"
+            aria-describedby={nativeSelectDescriptionId}
             className={classNames(
               "tw-flex-1 tw-min-w-[140px] tw-border-none tw-bg-transparent tw-text-sm tw-font-medium tw-text-iron-50 focus:tw-outline-none",
               disabled ? "tw-cursor-not-allowed tw-text-iron-400" : "tw-cursor-text"
             )}
           />
+          <p id={nativeSelectDescriptionId} className="tw-sr-only">
+            Type to filter collections, then select a result from the following list.
+          </p>
+          <select
+            id={nativeSelectId}
+            aria-label="Available collections"
+            aria-describedby={nativeSelectDescriptionId}
+            className="tw-sr-only"
+            disabled={!open || disabled || hasNoResults}
+            defaultValue=""
+            onChange={handleNativeSelectChange}
+          >
+            <option value="" disabled>
+              {nativeSelectPlaceholder}
+            </option>
+            {!hasNoResults &&
+              filteredOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {`${option.name} (${option.id})${
+                    typeof option.tokenCount === "number"
+                      ? ` • ${option.tokenCount.toLocaleString()} tokens`
+                      : ""
+                  }`}
+                </option>
+              ))}
+          </select>
         </div>
         {open && (
-          <div
+          <ul
             ref={listboxRef}
-            id={listboxId}
-            role="listbox"
-            className="tw-absolute tw-left-0 tw-right-0 tw-top-full tw-z-20 tw-mt-1 tw-max-h-64 tw-overflow-y-auto tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-shadow-xl"
+            aria-hidden="true"
+            className="tw-absolute tw-left-0 tw-right-0 tw-top-full tw-z-20 tw-mt-1 tw-max-h-64 tw-list-none tw-overflow-y-auto tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-0 tw-shadow-xl"
           >
             {hasNoResults ? (
-              <div className="tw-px-3.5 tw-py-3 tw-text-sm tw-text-iron-300">
+              <li
+                className="tw-px-3.5 tw-py-3 tw-text-sm tw-text-iron-300"
+              >
                 {noResultsText}
-              </div>
+              </li>
             ) : (
               filteredOptions.map((option, index) => {
                 const isHighlighted = index === highlightedIndex;
                 return (
-                  <button
+                  <li
                     key={option.id}
-                    type="button"
-                    role="option"
-                    aria-selected={isHighlighted}
+                    tabIndex={-1}
                     onMouseEnter={() => handleOptionMouseEnter(index)}
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={() => handleSelect(option)}
@@ -307,11 +384,11 @@ export default function CollectionsAutocomplete({
                         {option.tokenCount.toLocaleString()} tokens
                       </span>
                     ) : null}
-                  </button>
+                  </li>
                 );
               })
             )}
-          </div>
+          </ul>
         )}
       </div>
     </div>

@@ -1,7 +1,9 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 import clsx from "clsx";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
+import type { ApiTdhGrantStatus } from "@/generated/models/ApiTdhGrantStatus";
 import type { ContractOverview } from "@/types/nft";
 
 import { formatContractLabel, shortenAddress } from "./formatters";
@@ -12,7 +14,7 @@ interface GrantItemContentProps {
   readonly contract: ContractOverview;
   readonly details: GrantDetails;
   readonly errorDetails?: string | null;
-  readonly status: string;
+  readonly status: ApiTdhGrantStatus;
 }
 
 export function GrantItemContent({
@@ -66,7 +68,7 @@ interface GrantItemErrorProps {
   readonly contractLabel?: string;
   readonly details: GrantDetails;
   readonly errorDetails?: string | null;
-  readonly status: string;
+  readonly status: ApiTdhGrantStatus;
 }
 
 export function GrantItemError({
@@ -99,6 +101,15 @@ export function GrantItemError({
   );
 }
 
+const GRANT_DETAILS_SKELETON_FIELDS = [
+  "token-type",
+  "total-supply",
+  "floor-price",
+  "tokens-granted",
+  "tdh-rate",
+  "valid-from",
+] as const;
+
 export function GrantItemSkeleton() {
   return (
     <div className="tw-animate-pulse tw-space-y-4">
@@ -113,8 +124,8 @@ export function GrantItemSkeleton() {
         <div className="tw-h-5 tw-w-16 tw-rounded-full tw-bg-iron-800" />
       </div>
       <div className="tw-grid tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
-        {Array.from({ length: 6 }).map((_, index) => (
-          <div key={index} className="tw-space-y-2">
+        {GRANT_DETAILS_SKELETON_FIELDS.map((field) => (
+          <div key={field} className="tw-space-y-2">
             <div className="tw-h-3 tw-w-20 tw-rounded tw-bg-iron-800" />
             <div className="tw-h-4 tw-w-24 tw-rounded tw-bg-iron-700" />
           </div>
@@ -188,24 +199,23 @@ function GrantExpiryBadge({
   );
 }
 
-function StatusBadge({ status }: Readonly<{ status: string }>) {
-  const { badgeClassName, glyph, label } = getStatusVisuals(status);
+function StatusBadge({ status }: Readonly<{ status: ApiTdhGrantStatus }>) {
+  const { badgeClassName, icon, label } = getStatusVisuals(status);
 
   return (
-    <span
-      role="status"
+    <output
       aria-label={`${label} grant status`}
       className={clsx(
         "tw-inline-flex tw-items-center tw-gap-2 tw-rounded-full tw-border tw-px-3 tw-py-1 tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wide tw-transition-colors tw-duration-200",
         badgeClassName
       )}>
-      <span
+      <FontAwesomeIcon
+        icon={icon}
         aria-hidden="true"
-        className="tw-text-base tw-leading-none tw-drop-shadow-sm">
-        {glyph}
-      </span>
+        className="tw-text-base tw-leading-none tw-drop-shadow-sm"
+      />
       <span>{label}</span>
-    </span>
+    </output>
   );
 }
 

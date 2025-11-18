@@ -20,6 +20,8 @@ export class ApiXTdhTokenGrantor {
 
     static readonly discriminator: string | undefined = undefined;
 
+    static readonly mapping: {[index: string]: string} | undefined = undefined;
+
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
             "name": "xtdh_rate",
@@ -47,4 +49,3 @@ export class ApiXTdhTokenGrantor {
     public constructor() {
     }
 }
-

@@ -5,6 +5,7 @@ import {
 import {
   type UserPageTabKey,
   getUserPageTabById,
+  DEFAULT_USER_PAGE_TAB,
 } from "@/components/user/layout/userTabs.config";
 import { publicEnv } from "@/config/env";
 import {
@@ -647,8 +648,10 @@ export const getProfileTargetRoute = ({
   if (pathname.includes("[user]")) {
     return pathname.replace("[user]", handleOrWallet);
   }
-  const tab = getUserPageTabById(defaultPath);
-  return `/${handleOrWallet}/${tab?.route ?? ""}`;
+  const tab =
+    getUserPageTabById(defaultPath) ??
+    getUserPageTabById(DEFAULT_USER_PAGE_TAB);
+  return `/${handleOrWallet}/${tab.route}`;
 };
 
 export function isNullAddress(address: string) {

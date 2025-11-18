@@ -12,7 +12,14 @@ function sanitizeString(value: unknown): string | null {
   return trimmed;
 }
 
-export function deriveProfileIdentifier(profile: any | null): string | null {
+interface ProfileIdentifiable {
+  readonly handle?: string | null;
+  readonly query?: string | null;
+  readonly primary_wallet?: string | null;
+  readonly consolidation_key?: string | null;
+}
+
+export function deriveProfileIdentifier(profile: ProfileIdentifiable | null): string | null {
   if (!profile) return null;
 
   const candidates: Array<string | null> = [

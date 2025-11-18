@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import clsx from "clsx";
 import type { ReactNode } from "react";
 import { useCallback, useId, useMemo, useState } from "react";
@@ -168,48 +169,33 @@ function GrantTokensDisclosure({
   const tokenRanges = useMemo(() => mapTokensToRanges(tokens), [tokens]);
   const showInitialLoading = isOpen && tokenRanges.length === 0 && isLoading;
   const showInitialError = isOpen && tokenRanges.length === 0 && isError;
+  const errorMessage =
+    error instanceof Error ? error.message : "Unable to load granted tokens.";
   const handleEndReached = useCallback(() => {
     if (!hasNextPage || isFetchingNextPage) {
       return;
     }
-    void fetchNextPage();
+    fetchNextPage().catch(() => {
+      // Errors are surfaced through the query state rendered below.
+    });
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  let body: ReactNode = null;
-
-  if (showInitialLoading) {
-    body = <GrantTokensLoadingState />;
-  } else if (showInitialError) {
-    body = (
-      <GrantTokensErrorState
-        message={
-          error instanceof Error
-            ? error.message
-            : "Unable to load granted tokens."
-        }
-        onRetry={() => {
-          void refetch();
-        }}
-      />
-    );
-  } else if (tokenRanges.length === 0) {
-    body = <GrantTokensEmptyState />;
-  } else {
-    body = (
-      <>
-        <VirtualizedTokenList
-          contractAddress={contractAddress ?? undefined}
-          chain={chain}
-          ranges={tokenRanges}
-          scrollKey={`grant-token-list-${grantId}`}
-          className="tw-rounded-md tw-border tw-border-iron-800 tw-bg-iron-900"
-          onEndReached={hasNextPage ? handleEndReached : undefined}
-          endReachedOffset={END_REACHED_OFFSET}
-        />
-        {isFetchingNextPage ? <GrantTokensLoadingMore /> : null}
-      </>
-    );
-  }
+  const handleRetry = useCallback(() => {
+    refetch().catch(() => {
+      // Errors will re-render the existing error state.
+    });
+  }, [refetch]);
+  const body = renderGrantTokensDisclosureBody({
+    showInitialLoading,
+    showInitialError,
+    tokenRanges,
+    errorMessage,
+    onRetry: handleRetry,
+    contractAddress,
+    chain,
+    grantId,
+    onEndReached: hasNextPage ? handleEndReached : undefined,
+    isFetchingNextPage,
+  });
 
   return (
     <div className="tw-mt-4 tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-950">
@@ -238,7 +224,8 @@ function GrantTokensDisclosure({
           aria-hidden="true"
           className="tw-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-iron-800 tw-bg-iron-900 tw-text-iron-50 tw-transition-colors tw-duration-200"
         >
-          <ChevronDownIcon
+          <FontAwesomeIcon
+            icon={faChevronDown}
             className={clsx(
               "tw-size-5 tw-transition-transform tw-duration-200",
               isOpen && "tw-rotate-180"
@@ -255,6 +242,61 @@ function GrantTokensDisclosure({
         </div>
       ) : null}
     </div>
+  );
+}
+
+type GrantTokensDisclosureBodyProps = {
+  showInitialLoading: boolean;
+  showInitialError: boolean;
+  tokenRanges: TokenRange[];
+  errorMessage: string;
+  onRetry: () => void;
+  contractAddress: `0x${string}` | null;
+  chain: SupportedChain;
+  grantId: string;
+  onEndReached?: () => void;
+  isFetchingNextPage: boolean;
+};
+
+function renderGrantTokensDisclosureBody({
+  showInitialLoading,
+  showInitialError,
+  tokenRanges,
+  errorMessage,
+  onRetry,
+  contractAddress,
+  chain,
+  grantId,
+  onEndReached,
+  isFetchingNextPage,
+}: GrantTokensDisclosureBodyProps): ReactNode {
+  if (showInitialLoading) {
+    return <GrantTokensLoadingState />;
+  }
+
+  if (showInitialError) {
+    return (
+      <GrantTokensErrorState message={errorMessage} onRetry={onRetry} />
+    );
+  }
+
+  if (tokenRanges.length === 0) {
+    return <GrantTokensEmptyState />;
+  }
+
+  return (
+    <>
+      <VirtualizedTokenList
+        contractAddress={contractAddress ?? undefined}
+        chain={chain}
+        ranges={tokenRanges}
+        scrollKey={`grant-token-list-${grantId}`}
+        className="tw-rounded-md tw-border tw-border-iron-800 tw-bg-iron-900"
+        onEndReached={onEndReached}
+        endReachedOffset={END_REACHED_OFFSET}
+      />
+      {isFetchingNextPage ? <GrantTokensLoadingMore /> : null}
+    </>
   );
 }
 
@@ -276,7 +318,7 @@ function GrantTokensErrorState({
       <button
         type="button"
         className="tw-mt-3 tw-rounded-md tw-border tw-border-red-500/60 tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-red-200 desktop-hover:hover:tw-bg-red-500/10"
-        onClick={() => onRetry()}
+        onClick={onRetry}
       >
         Retry
       </button>

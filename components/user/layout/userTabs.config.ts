@@ -3,57 +3,50 @@ export type UserPageVisibilityContext = {
   readonly hideSubscriptions: boolean;
 };
 
-export type UserPageTabConfig = {
+type UserPageTabDefinition = {
   readonly id: string;
   readonly title: string;
   readonly route: string;
-  readonly metaLabel: string;
+  readonly metaLabel?: string;
   readonly isVisible?: (context: UserPageVisibilityContext) => boolean;
 };
 
-const TABS = [
+const TAB_DEFINITIONS = [
   {
     id: "brain",
     title: "Brain",
     route: "",
-    metaLabel: "Brain",
     isVisible: ({ showWaves }: UserPageVisibilityContext) => showWaves,
   },
   {
     id: "rep",
     title: "Rep",
     route: "rep",
-    metaLabel: "Rep",
   },
   {
     id: "identity",
     title: "Identity",
     route: "identity",
-    metaLabel: "Identity",
   },
   {
     id: "collected",
     title: "Collected",
     route: "collected",
-    metaLabel: "Collected",
   },
   {
     id: "xtdh",
     title: "xTDH",
     route: "xtdh",
-    metaLabel: "xTDH",
   },
   {
     id: "stats",
     title: "Stats",
     route: "stats",
-    metaLabel: "Stats",
   },
   {
     id: "subscriptions",
     title: "Subscriptions",
     route: "subscriptions",
-    metaLabel: "Subscriptions",
     isVisible: ({ hideSubscriptions }: UserPageVisibilityContext) =>
       !hideSubscriptions,
   },
@@ -61,31 +54,38 @@ const TABS = [
     id: "proxy",
     title: "Proxy",
     route: "proxy",
-    metaLabel: "Proxy",
   },
   {
     id: "groups",
     title: "Groups",
     route: "groups",
-    metaLabel: "Groups",
   },
   {
     id: "waves",
     title: "Waves",
     route: "waves",
-    metaLabel: "Waves",
     isVisible: ({ showWaves }: UserPageVisibilityContext) => showWaves,
   },
   {
     id: "followers",
     title: "Followers",
     route: "followers",
-    metaLabel: "Followers",
   },
-] as const satisfies readonly UserPageTabConfig[];
+] as const satisfies readonly UserPageTabDefinition[];
 
-export type UserPageTabKey = (typeof TABS)[number]["id"];
-export const USER_PAGE_TABS = TABS;
+const USER_PAGE_TAB_DEFINITIONS: readonly UserPageTabDefinition[] = TAB_DEFINITIONS;
+
+export type UserPageTabKey = (typeof TAB_DEFINITIONS)[number]["id"];
+
+export type UserPageTabConfig = Omit<UserPageTabDefinition, "id" | "metaLabel"> & {
+  readonly id: UserPageTabKey;
+  readonly metaLabel: string;
+};
+
+export const USER_PAGE_TABS = USER_PAGE_TAB_DEFINITIONS.map((tab) => ({
+  ...tab,
+  metaLabel: tab.metaLabel ?? tab.title,
+})) as readonly UserPageTabConfig[];
 
 export const USER_PAGE_TAB_MAP: Record<UserPageTabKey, UserPageTabConfig> =
   USER_PAGE_TABS.reduce(

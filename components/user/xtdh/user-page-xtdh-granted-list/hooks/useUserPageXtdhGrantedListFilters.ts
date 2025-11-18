@@ -21,14 +21,59 @@ import type {
   UserPageXtdhGrantedListFilters,
 } from "../types";
 
-/**
- * Synchronises the granted list filter state with the URL search params.
- */
-export function useUserPageXtdhGrantedListFilters(): UserPageXtdhGrantedListFilters {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
+const STATUS_PARAM = "status";
+const SORT_PARAM = "sort";
+const DIRECTION_PARAM = "dir";
 
+const applyStatusesUpdate = (
+  params: URLSearchParams,
+  statuses?: GrantedFilterStatuses
+) => {
+  if (statuses === undefined) return;
+
+  const normalizedStatuses = normalizeGrantedStatuses(statuses);
+  if (areDefaultFilterStatuses(normalizedStatuses)) {
+    params.delete(STATUS_PARAM);
+    return;
+  }
+
+  const serialized = serializeUserPageXtdhGrantedListStatuses(normalizedStatuses);
+  if (serialized) {
+    params.set(STATUS_PARAM, serialized);
+  }
+};
+
+const applySortFieldUpdate = (
+  params: URLSearchParams,
+  sort?: GrantedSortField
+) => {
+  if (sort === undefined) return;
+
+  if (sort === DEFAULT_SORT_FIELD) {
+    params.delete(SORT_PARAM);
+    return;
+  }
+
+  params.set(SORT_PARAM, sort);
+};
+
+const applyDirectionUpdate = (
+  params: URLSearchParams,
+  direction?: SortDirection
+) => {
+  if (direction === undefined) return;
+
+  if (direction === DEFAULT_DIRECTION) {
+    params.delete(DIRECTION_PARAM);
+    return;
+  }
+
+  params.set(DIRECTION_PARAM, direction.toLowerCase());
+};
+
+type SearchParams = ReturnType<typeof useSearchParams>;
+
+const useGrantedListFiltersFromSearchParams = (searchParams: SearchParams) => {
   const activeStatuses = useMemo(
     () =>
       parseUserPageXtdhGrantedListStatuses(searchParams?.get("status") ?? null),
@@ -51,6 +96,28 @@ export function useUserPageXtdhGrantedListFilters(): UserPageXtdhGrantedListFilt
     [activeSortDirection]
   );
 
+  return {
+    activeStatuses,
+    activeSortField,
+    activeSortDirection,
+    apiSortDirection,
+  } as const;
+};
+
+/**
+ * Synchronises the granted list filter state with the URL search params.
+ */
+export function useUserPageXtdhGrantedListFilters(): UserPageXtdhGrantedListFilters {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const {
+    activeStatuses,
+    activeSortField,
+    activeSortDirection,
+    apiSortDirection,
+  } = useGrantedListFiltersFromSearchParams(searchParams);
+
   const updateQueryParams = useCallback(
     (updates: {
       readonly statuses?: GrantedFilterStatuses;
@@ -60,35 +127,9 @@ export function useUserPageXtdhGrantedListFilters(): UserPageXtdhGrantedListFilt
       if (!pathname) return;
       const params = new URLSearchParams(searchParams?.toString() ?? "");
 
-      if (updates.statuses !== undefined) {
-        const normalizedStatuses = normalizeGrantedStatuses(updates.statuses);
-        if (areDefaultFilterStatuses(normalizedStatuses)) {
-          params.delete("status");
-        } else {
-          const serialized = serializeUserPageXtdhGrantedListStatuses(
-            normalizedStatuses
-          );
-          if (serialized) {
-            params.set("status", serialized);
-          }
-        }
-      }
-
-      if (updates.sort !== undefined) {
-        if (updates.sort === DEFAULT_SORT_FIELD) {
-          params.delete("sort");
-        } else {
-          params.set("sort", updates.sort);
-        }
-      }
-
-      if (updates.direction !== undefined) {
-        if (updates.direction === DEFAULT_DIRECTION) {
-          params.delete("dir");
-        } else {
-          params.set("dir", updates.direction.toLowerCase());
-        }
-      }
+      applyStatusesUpdate(params, updates.statuses);
+      applySortFieldUpdate(params, updates.sort);
+      applyDirectionUpdate(params, updates.direction);
 
       const query = params.toString();
       router.push(query ? `${pathname}?${query}` : pathname, {
@@ -107,12 +148,12 @@ export function useUserPageXtdhGrantedListFilters(): UserPageXtdhGrantedListFilt
 
   const handleSortFieldChange = useCallback(
     (sort: GrantedSortField) => {
+      const toggledDirection =
+        apiSortDirection === SortDirection.ASC
+          ? SortDirection.DESC
+          : SortDirection.ASC;
       const nextDirection =
-        sort === activeSortField
-          ? apiSortDirection === SortDirection.ASC
-            ? SortDirection.DESC
-            : SortDirection.ASC
-          : DEFAULT_DIRECTION;
+        sort === activeSortField ? toggledDirection : DEFAULT_DIRECTION;
 
       updateQueryParams({ sort, direction: nextDirection });
     },

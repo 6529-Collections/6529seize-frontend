@@ -18,6 +18,8 @@ export class ApiChangeProfileRepRatingResponse {
 
     static readonly discriminator: string | undefined = undefined;
 
+    static readonly mapping: {[index: string]: string} | undefined = undefined;
+
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
             "name": "total_rep_rating_for_category",
@@ -39,4 +41,3 @@ export class ApiChangeProfileRepRatingResponse {
     public constructor() {
     }
 }
-

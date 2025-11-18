@@ -71,13 +71,10 @@ export default function UserPageTabs() {
     [capacitor.isIos, country, showWaves]
   );
 
-  const [activeTab, setActiveTab] = useState<UserPageTabKey>(
-    resolveTabFromPath(pathname)
+  const activeTab = useMemo<UserPageTabKey>(
+    () => resolveTabFromPath(pathname),
+    [pathname]
   );
-
-  useEffect(() => {
-    setActiveTab(resolveTabFromPath(pathname));
-  }, [pathname]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const contentContainerRef = useRef<HTMLDivElement>(null);

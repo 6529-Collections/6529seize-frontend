@@ -21,13 +21,13 @@ export const STATUS_LABELS: Record<GrantedFilterStatus, string> = {
   GRANTED: "Granted",
 };
 
-export const BASE_STATUS_ITEMS: CommonSelectItem<GrantedFilterStatus>[] = [
+export const BASE_STATUS_ITEMS = [
   { key: "ALL", label: STATUS_LABELS.ALL, value: "ALL" },
   { key: "PENDING", label: STATUS_LABELS.PENDING, value: "PENDING" },
   { key: "FAILED", label: STATUS_LABELS.FAILED, value: "FAILED" },
   { key: "DISABLED", label: STATUS_LABELS.DISABLED, value: "DISABLED" },
   { key: "GRANTED", label: STATUS_LABELS.GRANTED, value: "GRANTED" },
-];
+] as const satisfies ReadonlyArray<CommonSelectItem<GrantedFilterStatus>>;
 
 const STATUS_ORDER = BASE_STATUS_ITEMS.map((item) => item.value);
 const STATUS_SET = new Set<string>(STATUS_ORDER);
@@ -35,12 +35,12 @@ const STATUS_SET = new Set<string>(STATUS_ORDER);
 const isGrantedFilterStatus = (value: string): value is GrantedFilterStatus =>
   STATUS_SET.has(value);
 
-export const SORT_ITEMS: CommonSelectItem<GrantedSortField>[] = [
+export const SORT_ITEMS = [
   { key: "created_at", label: "Created At", value: "created_at" },
   { key: "valid_from", label: "Valid From", value: "valid_from" },
   { key: "valid_to", label: "Valid To", value: "valid_to" },
   { key: "tdh_rate", label: "TDH Rate", value: "tdh_rate" },
-];
+] as const satisfies ReadonlyArray<CommonSelectItem<GrantedSortField>>;
 
 export function normalizeGrantedStatuses(
   statuses: GrantedFilterStatuses
@@ -127,7 +127,7 @@ export function parseUserPageXtdhGrantedListSortField(
   value: string | null
 ): GrantedSortField {
   if (!value) return DEFAULT_SORT_FIELD;
-  const normalized = value.toLowerCase() as GrantedSortField;
+  const normalized = value.toLowerCase();
   return (
     SORT_ITEMS.find((item) => item.value === normalized)?.value ??
     DEFAULT_SORT_FIELD

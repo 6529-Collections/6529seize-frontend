@@ -1,4 +1,5 @@
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import type { XtdhStatsResponse } from "@/types/xtdh";
 
 import { UNAVAILABLE_LABEL } from "./constants";
 import type {
@@ -6,17 +7,32 @@ import type {
   StatsContent,
 } from "./types";
 
+type StatsResponseSubset = Pick<
+  XtdhStatsResponse,
+  "dailyCapacity" | "xtdhRateGranted" | "xtdhRateAutoAccruing"
+>;
+
 export function buildStatsContent(data: IdentityTdhStatsData): StatsContent {
-  const xtdhRate = data.xtdhRate;
+  const statsData = data as IdentityTdhStatsData & Partial<StatsResponseSubset>;
+  const xtdhRate =
+    typeof statsData.dailyCapacity === "number"
+      ? statsData.dailyCapacity
+      : data.xtdhRate;
   const baseTdhRate = data.baseTdhRate;
   const multiplier = data.xtdhMultiplier;
-  const xtdhRateGranted = data.grantedXtdhPerDay;
-  const xtdhRateAvailable =
-    typeof xtdhRate === "number" && typeof xtdhRateGranted === "number"
-      ? Math.max(xtdhRate - xtdhRateGranted, 0)
-      : null;
+  const xtdhRateGranted =
+    typeof statsData.xtdhRateGranted === "number"
+      ? statsData.xtdhRateGranted
+      : data.grantedXtdhPerDay;
+  const xtdhRateAutoAccruing =
+    typeof statsData.xtdhRateAutoAccruing === "number"
+      ? statsData.xtdhRateAutoAccruing
+      : 0;
   const hasAllocationMetrics =
     typeof xtdhRate === "number" && typeof xtdhRateGranted === "number";
+  const xtdhRateAvailable = hasAllocationMetrics
+    ? Math.max(xtdhRate - xtdhRateGranted - xtdhRateAutoAccruing, 0)
+    : null;
   const grantingPercentage =
     hasAllocationMetrics && xtdhRate > 0 ? (xtdhRateGranted / xtdhRate) * 100 : 0;
   const clampedPercentage = Math.min(Math.max(grantingPercentage, 0), 100);
@@ -77,8 +93,7 @@ function formatDisplay(value: number | null | undefined, decimals = 0) {
     return UNAVAILABLE_LABEL;
   }
 
-  const factor = Math.pow(10, decimals);
+  const factor = 10 ** decimals;
   const flooredValue = Math.floor(value * factor) / factor;
   return formatNumberWithCommas(flooredValue);
 }
-

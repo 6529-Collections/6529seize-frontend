@@ -137,8 +137,10 @@ export function useCollectionSearch({
       return;
     }
     const cacheKey = getSuggestionCacheKey(debouncedQuery, chain, hideSpam);
+    const now = Date.now();
+    gcExpired(suggestionCache, now);
     const cached = suggestionCache.get(cacheKey);
-    if (cached) {
+    if (cached && cached.expires > now) {
       queryClient.setQueryData(
         [QueryKey.NFT_COLLECTION_SEARCH, chain, debouncedQuery, hideSpam],
         cached.data

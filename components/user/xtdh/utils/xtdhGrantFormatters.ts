@@ -1,5 +1,16 @@
 import { parseTokenExpressionToRanges } from "@/components/nft-picker/NftPicker.utils";
 
+const PARSE_ERROR_ARRAY_NAME = "ParseErrorArray";
+
+const isParseErrorArray = (error: unknown): error is Error & { name: string } => {
+  if (!Array.isArray(error)) {
+    return false;
+  }
+
+  const { name } = error as { name?: unknown };
+  return typeof name === "string" && name === PARSE_ERROR_ARRAY_NAME;
+};
+
 const numberFormatter = new Intl.NumberFormat(undefined, {
   maximumFractionDigits: 0,
 });
@@ -9,18 +20,18 @@ export type TargetTokensCountInfo =
   | { kind: "count"; label: string; count: number | null };
 
 export const getTargetTokensCountInfo = (
-  tokensCount: number | null | undefined
+  count: number | null | undefined
 ): TargetTokensCountInfo => {
   if (
-    tokensCount === null ||
-    tokensCount === undefined ||
-    !Number.isFinite(tokensCount) ||
-    tokensCount <= 0
+    count === null ||
+    count === undefined ||
+    !Number.isFinite(count) ||
+    count <= 0
   ) {
     return { kind: "all", label: "All tokens", count: null };
   }
 
-  const normalizedCount = Math.max(0, Math.floor(tokensCount));
+  const normalizedCount = Math.max(0, Math.floor(count));
 
   return {
     kind: "count",
@@ -34,8 +45,11 @@ export const formatTargetTokens = (tokens: readonly string[]): string => {
     return "All tokens";
   }
 
+  const tokensExpression = tokens.join(",");
+  const fallbackLabel = tokens.join(", ");
+
   try {
-    const ranges = parseTokenExpressionToRanges(tokens.join(","));
+    const ranges = parseTokenExpressionToRanges(tokensExpression);
     if (!ranges.length) {
       return "All tokens";
     }
@@ -47,8 +61,15 @@ export const formatTargetTokens = (tokens: readonly string[]): string => {
         return range.start === range.end ? start : `${start}-${end}`;
       })
       .join(", ");
-  } catch (error) {
-    return tokens.join(", ");
+  } catch (error: unknown) {
+    if (isParseErrorArray(error)) {
+      console.error(
+        "[formatTargetTokens] Failed to parse target tokens expression:",
+        error
+      );
+      return fallbackLabel;
+    }
+    throw error;
   }
 };
 
@@ -64,6 +85,8 @@ export const formatDateTime = (
     return options?.fallbackLabel ?? "No expiry";
   }
 
+  // Normalize timestamp: values > 1 trillion are assumed milliseconds,
+  // otherwise treat as seconds
   const normalizedTimestamp =
     timestamp > 1_000_000_000_000 ? timestamp : timestamp * 1000;
   const date = new Date(normalizedTimestamp);
@@ -85,7 +108,7 @@ export const formatAmount = (value: number) => {
     return "0";
   }
 
-  return numberFormatter.format(Math.floor(value));
+  return numberFormatter.format(Math.trunc(value));
 };
 
 export const formatTargetTokensCount = (
@@ -99,6 +122,13 @@ const createDecimalFormatter = (maximumFractionDigits: number) =>
   });
 
 const decimalFormatters = new Map<number, Intl.NumberFormat>();
+
+const PRECISION_THRESHOLDS = {
+  VERY_SMALL: 0.01,
+  SMALL: 1,
+  MEDIUM: 100,
+  LARGE: 1000,
+} as const;
 
 function formatDecimal(value: number, maximumFractionDigits: number): string {
   if (!decimalFormatters.has(maximumFractionDigits)) {
@@ -125,19 +155,22 @@ export const formatTdhRatePerToken = (
   }
 
   const absoluteValue = Math.abs(perTokenValue);
-  let maximumFractionDigits = 0;
 
-  if (absoluteValue === 0) {
-    maximumFractionDigits = 0;
-  } else if (absoluteValue < 0.01) {
-    maximumFractionDigits = 4;
-  } else if (absoluteValue < 1) {
-    maximumFractionDigits = 3;
-  } else if (absoluteValue < 100) {
-    maximumFractionDigits = 2;
-  } else if (absoluteValue < 1000) {
-    maximumFractionDigits = 1;
+  if (absoluteValue < PRECISION_THRESHOLDS.VERY_SMALL) {
+    return formatDecimal(perTokenValue, 4);
   }
 
-  return formatDecimal(perTokenValue, maximumFractionDigits);
+  if (absoluteValue < PRECISION_THRESHOLDS.SMALL) {
+    return formatDecimal(perTokenValue, 3);
+  }
+
+  if (absoluteValue < PRECISION_THRESHOLDS.MEDIUM) {
+    return formatDecimal(perTokenValue, 2);
+  }
+
+  if (absoluteValue < PRECISION_THRESHOLDS.LARGE) {
+    return formatDecimal(perTokenValue, 1);
+  }
+
+  return formatDecimal(perTokenValue, 0);
 };

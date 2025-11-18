@@ -6,6 +6,7 @@ import {
   formatTdhRatePerToken,
   getTargetTokensCountInfo,
 } from "@/components/user/xtdh/utils/xtdhGrantFormatters";
+import type { ApiTdhGrantStatus } from "@/generated/models/ApiTdhGrantStatus";
 import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
 import { useContractOverviewQuery } from "@/hooks/useAlchemyNftQueries";
 import type { ContractOverview, SupportedChain } from "@/types/nft";
@@ -18,6 +19,8 @@ import {
 } from "./formatters";
 import type { GrantDetails, GrantItemVariant } from "./types";
 
+type ApiTdhGrant = ApiTdhGrantsPage["data"][number];
+
 interface GrantItemViewModel {
   readonly contract: ContractOverview | null;
   readonly contractAddress: `0x${string}` | null;
@@ -26,13 +29,11 @@ interface GrantItemViewModel {
   readonly details: GrantDetails;
   readonly errorDetails: string | null;
   readonly isLoading: boolean;
-  readonly status: string;
+  readonly status: ApiTdhGrantStatus;
   readonly variant: GrantItemVariant;
 }
 
-export function useGrantItemViewModel(
-  grant: ApiTdhGrantsPage["data"][number]
-): GrantItemViewModel {
+export function useGrantItemViewModel(grant: ApiTdhGrant): GrantItemViewModel {
   const contractAddress = getContractAddress(grant.target_contract);
   const chain = mapGrantChainToSupportedChain(grant.target_chain);
   const { data: contract, isError, isLoading } = useContractOverviewQuery({
@@ -58,7 +59,7 @@ export function useGrantItemViewModel(
 }
 
 function buildGrantDetails(
-  grant: ApiTdhGrantsPage["data"][number],
+  grant: ApiTdhGrant,
   contract?: ContractOverview
 ): GrantDetails {
   const baseDetails = createBaseGrantDetails(grant);
@@ -75,9 +76,7 @@ function buildGrantDetails(
   };
 }
 
-function createBaseGrantDetails(
-  grant: ApiTdhGrantsPage["data"][number]
-): GrantDetails {
+function createBaseGrantDetails(grant: ApiTdhGrant): GrantDetails {
   const tokensCountInfo = getTargetTokensCountInfo(
     grant.target_tokens_count ?? null
   );

@@ -10,18 +10,21 @@ import { normalizeProfileIdentifier } from "./user-page-xtdh-stats-header/normal
 import { UserPageXtdhStatsHeaderError } from "./user-page-xtdh-stats-header/UserPageXtdhStatsHeaderError";
 import { UserPageXtdhStatsHeaderSkeleton } from "./user-page-xtdh-stats-header/UserPageXtdhStatsHeaderSkeleton";
 import type { UserPageXtdhStatsHeaderProps } from "./user-page-xtdh-stats-header/types";
-import { useEffect } from "react";
 
 export default function UserPageXtdhStatsHeader({
   profileId,
 }: Readonly<UserPageXtdhStatsHeaderProps>) {
   const normalizedProfileId = normalizeProfileIdentifier(profileId);
+  const hasIdentity = Boolean(normalizedProfileId);
+
   const statsQuery = useIdentityTdhStats({
     identity: normalizedProfileId,
-    enabled: Boolean(normalizedProfileId),
+    enabled: hasIdentity,
   });
 
-  useEffect(() => console.log(statsQuery.data), [statsQuery.data]);
+  if (!hasIdentity) {
+    return null;
+  }
 
   if (statsQuery.isLoading) {
     return <UserPageXtdhStatsHeaderSkeleton />;
@@ -30,7 +33,7 @@ export default function UserPageXtdhStatsHeader({
   if (statsQuery.isError || !statsQuery.data) {
     const message = statsQuery.error?.message ?? "Failed to load xTDH stats.";
     const handleRetry = () => {
-      void statsQuery.refetch();
+      statsQuery.refetch().catch(() => undefined);
     };
     return (
       <UserPageXtdhStatsHeaderError
@@ -45,7 +48,6 @@ export default function UserPageXtdhStatsHeader({
   return (
     <section
       className="tw-rounded-2xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-5 tw-text-iron-100 tw-shadow-md tw-shadow-black/30"
-      role="region"
       aria-label="xTDH Statistics"
     >
       <BaseMetricsSection cards={statsContent.baseMetricCards} />
@@ -54,4 +56,3 @@ export default function UserPageXtdhStatsHeader({
     </section>
   );
 }
-

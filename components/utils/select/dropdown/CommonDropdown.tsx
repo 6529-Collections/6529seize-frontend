@@ -51,22 +51,10 @@ export default function CommonDropdown<T, U = unknown>(
     );
   }, [activeItemMatch, noneLabel]);
 
-  const [label, setLabel] = useState<string>(computedLabel);
-
-  useEffect(() => {
-    setLabel(computedLabel);
-  }, [computedLabel]);
-
   const getSortDirection = (): SortDirection | undefined =>
     "sortDirection" in props ? props.sortDirection : undefined;
 
-  const [sortDirection, setSortDirection] = useState<SortDirection | undefined>(
-    getSortDirection()
-  );
-
-  useEffect(() => {
-    setSortDirection(getSortDirection());
-  }, [props]);
+  const sortDirection = getSortDirection();
 
   const onSelect = (item: T) => {
     setSelected(item);
@@ -101,12 +89,10 @@ export default function CommonDropdown<T, U = unknown>(
     if (!isOpen) return;
     const container = containerRef?.current;
     if (container) {
-      // Listen for scroll events on the parent container
       container.addEventListener("scroll", onButtonPositionChange);
       window.addEventListener("resize", onButtonPositionChange);
-      onButtonPositionChange(); // Initial check
+      onButtonPositionChange();
 
-      // Cleanup
       return () => {
         container.removeEventListener("scroll", onButtonPositionChange);
         window.removeEventListener("resize", onButtonPositionChange);
@@ -125,7 +111,8 @@ export default function CommonDropdown<T, U = unknown>(
           ref={buttonRef}
           type="button"
           aria-haspopup="true"
-          aria-label={`${filterLabel}: ${label}`}
+          aria-label={`${filterLabel}: ${computedLabel}`}
+          aria-expanded={isOpen}
           onClick={() => setIsOpen(!isOpen)}
           disabled={disabled}
           className={`${
@@ -140,7 +127,7 @@ export default function CommonDropdown<T, U = unknown>(
             size === "md" ? "tw-py-3" : "tw-py-2.5"
           } tw-w-full tw-truncate tw-text-left tw-relative tw-block tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-pl-3.5 tw-pr-10 tw-font-semibold tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 
           focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-sm hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out tw-justify-between`}>
-          {label}
+          {computedLabel}
           {sortDirection && (
             <span className="-tw-mt-0.5 tw-ml-2">
               <CommonTableSortIcon direction={sortDirection} isActive={true} />
@@ -173,7 +160,7 @@ export default function CommonDropdown<T, U = unknown>(
         filterLabel={filterLabel}
         dynamicPosition={dynamicPosition}
         onIsMobile={setIsMobile}>
-        {Object.values(items).map((item, i) => (
+        {items.map((item, i) => (
           <CommonDropdownItem
             key={item.key}
             item={item}

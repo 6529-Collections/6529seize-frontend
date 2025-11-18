@@ -74,15 +74,18 @@ export function UserPageXtdhGrantedStatusDropdown({
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const getButtonPosition = () => {
-    if (buttonRef.current) {
-      try {
-        const { right } = buttonRef.current.getBoundingClientRect();
-        return { right };
-      } catch (error) {
-        return { right: 0 };
-      }
+    const currentButton = buttonRef.current;
+    if (!currentButton) {
+      return { right: 0 };
     }
-    return { right: 0 };
+
+    try {
+      const { right } = currentButton.getBoundingClientRect();
+      return { right };
+    } catch (error) {
+      console.error("Failed to read dropdown trigger position", error);
+      return { right: 0 };
+    }
   };
 
   const [buttonPosition, setButtonPosition] = useState(getButtonPosition());
@@ -176,7 +179,7 @@ export function UserPageXtdhGrantedStatusDropdown({
         buttonPosition={buttonPosition}
         filterLabel={filterLabel}
         dynamicPosition={true}
-        onIsMobile={() => {}}
+        onIsMobile={() => {}} // Mobile state unused: dropdown layout identical across breakpoints
       >
         {items.map((item) => (
           <StatusDropdownItem

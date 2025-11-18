@@ -28,7 +28,7 @@ export function UserPageXtdhGrantedListContent({
   if (!enabled) {
     return (
       <GrantedListMessage>
-        Unable to load TDH grants for this profile.
+        Unable to load xTDH grants for this profile.
       </GrantedListMessage>
     );
   }
@@ -48,7 +48,7 @@ export function UserPageXtdhGrantedListContent({
   if (!grants.length) {
     if (!areAllGrantedStatuses(statuses)) {
       const statusLabel = statuses
-        .map((status) => STATUS_LABELS[status].toLowerCase())
+        .map((status) => STATUS_LABELS[status])
         .join(", ");
       return (
         <GrantedListMessage>

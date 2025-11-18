@@ -26,15 +26,13 @@ async function fetchIdentityTdhStats(identity: string): Promise<IdentityTdhStats
     endpoint: `tdh-stats/${encodedIdentity}`,
   });
 
-  console.log("TDH Stats response:", response);
-
   const xtdhRate = sanitizeNonNegativeNumber(response.xtdh_rate);
   const baseTdhRate =
     typeof response.tdh_rate === "number" &&
     Number.isFinite(response.tdh_rate) &&
     typeof response.xtdh_rate === "number" &&
     Number.isFinite(response.xtdh_rate)
-      ? Math.max(response.tdh_rate - response.xtdh_rate, 0)
+      ? sanitizeNullableNonNegativeNumber(response.tdh_rate - response.xtdh_rate)
       : null;
 
   return {
@@ -44,10 +42,7 @@ async function fetchIdentityTdhStats(identity: string): Promise<IdentityTdhStats
     grantedTokensCount: sanitizeCount(response.granted_target_tokens_count),
     totalReceivedXtdh: sanitizeNonNegativeNumber(response.received_xtdh),
     totalGrantedXtdh: sanitizeNonNegativeNumber(response.granted_xtdh),
-    xtdhMultiplier:
-      typeof response.xtdh_multiplier === "number" && Number.isFinite(response.xtdh_multiplier)
-        ? Math.max(response.xtdh_multiplier, 0)
-        : null,
+    xtdhMultiplier: sanitizeNullableNonNegativeNumber(response.xtdh_multiplier),
     baseTdhRate,
   };
 }
@@ -75,6 +70,13 @@ export function useIdentityTdhStats({
   });
 }
 
+function sanitizeNullableNonNegativeNumber(value: unknown): number | null {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return null;
+  }
+  return Math.max(value, 0);
+}
+
 function sanitizeNonNegativeNumber(value: unknown): number {
   if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
     return 0;
@@ -83,8 +85,5 @@ function sanitizeNonNegativeNumber(value: unknown): number {
 }
 
 function sanitizeCount(value: unknown): number {
-  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
-    return 0;
-  }
-  return Math.trunc(value);
+  return Math.trunc(sanitizeNonNegativeNumber(value));
 }

@@ -12,6 +12,96 @@ const formatDateTime = (date: Date) =>
     minute: "2-digit",
   }).format(date);
 
+type SelectionDescription = {
+  readonly text: string;
+  readonly tokenCount: number | null;
+};
+
+const describeCollectionSelection = (collectionLabel: string | null): string =>
+  collectionLabel
+    ? `Collection selected: ${collectionLabel}. Choose token IDs to grant.`
+    : "Choose token IDs to grant.";
+
+const describeAllTokensGrantText = (collectionLabel: string | null): string =>
+  collectionLabel
+    ? `All tokens from ${collectionLabel} will receive a grant.`
+    : "All tokens from the selected collection will receive a grant.";
+
+const describeTokenSelectionText = (
+  tokenLabel: string,
+  collectionLabel: string | null,
+): string =>
+  collectionLabel
+    ? `${tokenLabel} selected from ${collectionLabel}.`
+    : `${tokenLabel} selected.`;
+
+const getTokenLabel = (tokenCount: number): string =>
+  `${tokenCount} token${tokenCount === 1 ? "" : "s"}`;
+
+const describeSelection = (
+  selection: NftPickerSelection,
+  collectionLabel: string | null,
+): SelectionDescription => {
+  if (selection.allSelected) {
+    return {
+      text: describeAllTokensGrantText(collectionLabel),
+      tokenCount: null,
+    };
+  }
+
+  const tokenCount = selection.tokenIdsRaw.length;
+
+  return {
+    text: describeTokenSelectionText(getTokenLabel(tokenCount), collectionLabel),
+    tokenCount,
+  };
+};
+
+const isValidGrantAmount = (amount: number | null): amount is number =>
+  amount !== null && Number.isFinite(amount) && amount > 0;
+
+const getPerTokenText = (amount: number, tokenCount: number | null): string => {
+  if (!tokenCount || tokenCount <= 0) {
+    return "";
+  }
+
+  const perToken = amount / tokenCount;
+
+  if (!Number.isFinite(perToken)) {
+    return "";
+  }
+
+  return ` (~${perToken.toLocaleString(undefined, {
+    maximumFractionDigits: 6,
+  })} xTDH per token)`;
+};
+
+const getAmountSummaryText = (amount: number, tokenCount: number | null): string => {
+  const formattedTotal = amount.toLocaleString(undefined, {
+    maximumFractionDigits: 6,
+  });
+
+  const perTokenText = getPerTokenText(amount, tokenCount);
+
+  return `Total grant: ${formattedTotal} xTDH${perTokenText}.`;
+};
+
+const getCollectionLabel = (contract: ContractOverview | null): string | null => {
+  if (!contract) {
+    return null;
+  }
+
+  if (typeof contract.name === "string") {
+    return contract.name;
+  }
+
+  if (typeof contract.symbol === "string") {
+    return contract.symbol;
+  }
+
+  return contract.address ?? null;
+};
+
 const getSelectionSummary = ({
   contract,
   selection,
@@ -25,53 +115,19 @@ const getSelectionSummary = ({
     return "Search for a collection to begin granting xTDH.";
   }
 
-  const collectionLabel = contract?.name ?? contract?.symbol ?? contract?.address;
+  const collectionLabel = getCollectionLabel(contract);
 
   if (!selection) {
-    return collectionLabel
-      ? `Collection selected: ${collectionLabel}. Choose token IDs to grant.`
-      : "Choose token IDs to grant.";
+    return describeCollectionSelection(collectionLabel);
   }
 
-  let selectionText: string;
-  let tokenCount: number | null = null;
+  const { text: selectionText, tokenCount } = describeSelection(selection, collectionLabel);
 
-  if (selection.allSelected) {
-    selectionText = collectionLabel
-      ? `All tokens from ${collectionLabel} will receive a grant.`
-      : "All tokens from the selected collection will receive a grant.";
-  } else {
-    tokenCount = selection.tokenIdsRaw.length;
-    selectionText = collectionLabel
-      ? `${tokenCount} token${tokenCount === 1 ? "" : "s"} selected from ${collectionLabel}.`
-      : `${tokenCount} token${tokenCount === 1 ? "" : "s"} selected.`;
-  }
-
-  if (amount === null) {
+  if (!isValidGrantAmount(amount)) {
     return selectionText;
   }
 
-  if (!Number.isFinite(amount) || amount <= 0) {
-    return selectionText;
-  }
-
-  const formattedTotal = amount.toLocaleString(undefined, {
-    maximumFractionDigits: 6,
-  });
-
-  const perTokenText =
-    tokenCount && tokenCount > 0
-      ? (() => {
-          const perToken = amount / tokenCount;
-          return Number.isFinite(perToken)
-            ? ` (~${perToken.toLocaleString(undefined, {
-                maximumFractionDigits: 6,
-              })} xTDH per token)`
-            : "";
-        })()
-      : "";
-
-  return `${selectionText} Total grant: ${formattedTotal} xTDH${perTokenText}.`;
+  return `${selectionText} ${getAmountSummaryText(amount, tokenCount)}`;
 };
 
 const getValiditySummary = (validUntil: Date | null): string =>

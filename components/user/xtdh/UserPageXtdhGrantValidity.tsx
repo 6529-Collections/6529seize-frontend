@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import CommonCalendar from "@/components/utils/calendar/CommonCalendar";
 import TimePicker from "@/components/common/TimePicker";
 
@@ -25,13 +25,14 @@ export default function UserPageXtdhGrantValidity({
     value ? new Date(value) : createDefaultExpiry()
   );
 
-  const minTimestamp = useMemo(() => {
+  const getMinTimestamp = () => {
     const now = new Date();
     now.setSeconds(0, 0);
     return now.getTime();
-  }, []);
+  };
 
   const clampToMin = (date: Date): Date => {
+    const minTimestamp = getMinTimestamp();
     if (date.getTime() < minTimestamp) {
       const minDate = new Date(minTimestamp);
       return minDate;
@@ -49,7 +50,7 @@ export default function UserPageXtdhGrantValidity({
       const next = clampToMin(new Date(value));
       return prev.getTime() === next.getTime() ? prev : next;
     });
-  }, [value, minTimestamp]);
+  }, [value]);
 
   const handleNeverExpiresChange = (checked: boolean) => {
     setNeverExpires(checked);
@@ -78,12 +79,12 @@ export default function UserPageXtdhGrantValidity({
     onChange(clamped);
   };
 
-  const timePickerMin = useMemo(() => {
-    const minDate = new Date(minTimestamp);
+  const timePickerMin = (() => {
+    const minDate = new Date(getMinTimestamp());
     return selectedDate.toDateString() === minDate.toDateString()
       ? { hours: minDate.getHours(), minutes: minDate.getMinutes() }
       : null;
-  }, [minTimestamp, selectedDate]);
+  })();
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-4">
@@ -96,7 +97,8 @@ export default function UserPageXtdhGrantValidity({
             checked={neverExpires}
             onChange={(event) => handleNeverExpiresChange(event.target.checked)}
           />
-          Never expires
+          {" "}
+          <span>Never expires</span>
         </label>
       </div>
 
@@ -106,7 +108,7 @@ export default function UserPageXtdhGrantValidity({
             initialMonth={selectedDate.getMonth()}
             initialYear={selectedDate.getFullYear()}
             selectedTimestamp={selectedDate.getTime()}
-            minTimestamp={minTimestamp}
+            minTimestamp={getMinTimestamp()}
             maxTimestamp={null}
             setSelectedTimestamp={handleCalendarSelect}
           />

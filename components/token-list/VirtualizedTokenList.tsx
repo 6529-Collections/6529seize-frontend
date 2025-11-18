@@ -3,7 +3,7 @@
 import Image from "next/image";
 import clsx from "clsx";
 import type { CSSProperties, ReactNode, RefObject } from "react";
-import { useEffect, useEffectEvent, useMemo, useRef } from "react";
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 import Spinner from "@/components/utils/Spinner";
@@ -74,6 +74,52 @@ export function VirtualizedTokenList({
   chain,
   ranges,
   scrollKey,
+  overscan,
+  renderTokenExtra,
+  action,
+  className,
+  scrollContainerClassName,
+  rowClassName,
+  footerContent,
+  footerClassName,
+  emptyState = <div className="tw-text-sm tw-text-iron-300">No tokens available.</div>,
+  onEndReached,
+  endReachedOffset,
+}: Readonly<VirtualizedTokenListProps>) {
+  const totalCount = useMemo(() => getTotalCount(ranges), [ranges]);
+
+  return (
+    <VirtualizedTokenListContent
+      contractAddress={contractAddress}
+      chain={chain}
+      ranges={ranges}
+      scrollKey={scrollKey}
+      totalCount={totalCount}
+      overscan={overscan}
+      renderTokenExtra={renderTokenExtra}
+      action={action}
+      className={className}
+      scrollContainerClassName={scrollContainerClassName}
+      rowClassName={rowClassName}
+      footerContent={footerContent}
+      footerClassName={footerClassName}
+      onEndReached={onEndReached}
+      endReachedOffset={endReachedOffset}
+      emptyState={emptyState}
+    />
+  );
+}
+
+type VirtualizedTokenListContentProps = Readonly<
+  Omit<VirtualizedTokenListProps, "emptyState"> & { totalCount: number; emptyState: ReactNode }
+>;
+
+function VirtualizedTokenListContent({
+  contractAddress,
+  chain,
+  ranges,
+  scrollKey,
+  totalCount,
   overscan = DEFAULT_OVERSCAN,
   renderTokenExtra,
   action,
@@ -82,15 +128,10 @@ export function VirtualizedTokenList({
   rowClassName,
   footerContent,
   footerClassName = "tw-border-t tw-border-iron-700 tw-px-3 tw-py-2 tw-text-xs tw-text-iron-400",
-  emptyState = <div className="tw-text-sm tw-text-iron-300">No tokens available.</div>,
   onEndReached,
   endReachedOffset,
-}: Readonly<VirtualizedTokenListProps>) {
-  if (!ranges.length) {
-    return emptyState;
-  }
-
-  const totalCount = useMemo(() => getTotalCount(ranges), [ranges]);
+  emptyState,
+}: VirtualizedTokenListContentProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const initialOffset = usePersistentScrollOffset(scrollKey, scrollContainerRef);
 
@@ -129,6 +170,15 @@ export function VirtualizedTokenList({
       }
     }
   }, [onEndReached, totalCount, lastVisibleIndex, overscan, endReachedOffset]);
+
+  if (totalCount === 0) {
+    return (
+      <>
+        <div ref={scrollContainerRef} aria-hidden="true" className="tw-hidden" />
+        {emptyState}
+      </>
+    );
+  }
 
   return (
     <div className={className}>
@@ -179,11 +229,7 @@ function usePersistentScrollOffset(
   scrollContainerRef: RefObject<HTMLDivElement | null>
 ): number {
   const { getPosition, setPosition } = useScrollPositionContext();
-  const initialOffsetRef = useRef<number | null>(null);
-
-  if (initialOffsetRef.current === null) {
-    initialOffsetRef.current = getPosition(scrollKey);
-  }
+  const [initialOffset] = useState(() => getPosition(scrollKey));
 
   const persistScrollPosition = useEffectEvent(() => {
     const container = scrollContainerRef.current;
@@ -210,7 +256,7 @@ function usePersistentScrollOffset(
     };
   }, [persistScrollPosition, scrollKey]);
 
-  return initialOffsetRef.current ?? 0;
+  return initialOffset;
 }
 
 function getVisibleWindowBounds(virtualItems: Array<{ index: number }>) {
@@ -219,7 +265,7 @@ function getVisibleWindowBounds(virtualItems: Array<{ index: number }>) {
   }
 
   const firstVisibleIndex = virtualItems[0].index;
-  const lastVisibleIndex = virtualItems[virtualItems.length - 1].index;
+  const lastVisibleIndex = virtualItems.at(-1)!.index;
 
   return { firstVisibleIndex, lastVisibleIndex };
 }
@@ -242,11 +288,11 @@ function useVisibleTokenWindow(
   }, [ranges, firstVisibleIndex, lastVisibleIndex]);
 }
 
-type TokenMetadataWindowParams = {
+type TokenMetadataWindowParams = Readonly<{
   contractAddress?: `0x${string}`;
   chain: SupportedChain;
   windowTokens: TokenWindowEntry[];
-};
+}>;
 
 function useTokenMetadataWindow({
   contractAddress,
@@ -282,7 +328,7 @@ function useTokenMetadataWindow({
   return { metadataQuery, metadataMap };
 }
 
-type TokenRowProps = {
+type TokenRowProps = Readonly<{
   token: TokenWindowEntry;
   metadata?: TokenMetadata;
   rowClassName?: string;
@@ -290,7 +336,7 @@ type TokenRowProps = {
   action?: TokenListAction;
   isMetadataLoading: boolean;
   positionStyle: CSSProperties;
-};
+}>;
 
 function TokenRow({
   token,
@@ -300,7 +346,7 @@ function TokenRow({
   action,
   isMetadataLoading,
   positionStyle,
-}: TokenRowProps) {
+}: Readonly<TokenRowProps>) {
   return (
     <li
       className={clsx(
@@ -331,13 +377,13 @@ function TokenRow({
   );
 }
 
-type TokenThumbnailProps = {
+type TokenThumbnailProps = Readonly<{
   metadata?: TokenMetadata;
   decimalId: string;
   isLoading: boolean;
-};
+}>;
 
-function TokenThumbnail({ metadata, decimalId, isLoading }: TokenThumbnailProps) {
+function TokenThumbnail({ metadata, decimalId, isLoading }: Readonly<TokenThumbnailProps>) {
   let content: ReactNode;
 
   if (metadata?.imageUrl) {

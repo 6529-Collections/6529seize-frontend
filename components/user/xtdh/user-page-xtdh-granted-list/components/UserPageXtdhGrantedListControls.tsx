@@ -38,9 +38,8 @@ export function UserPageXtdhGrantedListControls({
   }
 
   return (
-    <div
+    <section
       className="tw-flex tw-flex-col tw-gap-3 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between"
-      role="region"
       aria-label="Filter and sort controls">
       <div className="tw-flex tw-flex-col tw-gap-3 lg:tw-flex-row lg:tw-items-center lg:tw-gap-4">
         <div className="tw-w-full lg:tw-w-56">
@@ -64,14 +63,13 @@ export function UserPageXtdhGrantedListControls({
         </div>
       </div>
       {resultSummary && (
-        <div
-          role="status"
+        <output
           aria-live="polite"
           aria-atomic="true"
           className="tw-text-sm tw-text-iron-300">
           {resultSummary}
-        </div>
+        </output>
       )}
-    </div>
+    </section>
   );
 }

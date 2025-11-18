@@ -48,6 +48,9 @@ export default function UserPageXtdhGrantedList({
     errorMessage,
     refetch,
     firstPage,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
   } = useXtdhGrantsQuery({
     grantor,
     pageSize,
@@ -63,7 +66,9 @@ export default function UserPageXtdhGrantedList({
   });
 
   const handleRetry = useCallback(() => {
-    void refetch();
+    refetch().catch(() => {
+      // Errors propagate through the query state that's already rendered.
+    });
   }, [refetch]);
 
   const showControls = enabled && !isError;
@@ -86,6 +91,7 @@ export default function UserPageXtdhGrantedList({
   );
 
   const areControlsDisabled = isFetching || isLoading;
+  const showLoadMore = hasNextPage && !isError;
 
   return (
     <div className="tw-bg-iron-950 tw-border tw-border-iron-800 tw-rounded-2xl tw-p-4 tw-space-y-4">
@@ -115,6 +121,17 @@ export default function UserPageXtdhGrantedList({
         onRetry={handleRetry}
         statuses={activeStatuses}
       />
+      {showLoadMore && (
+        <div className="tw-flex tw-justify-center">
+          <button
+            type="button"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+            className="tw-px-4 tw-py-2 tw-rounded-lg tw-text-sm tw-transition tw-bg-iron-900 tw-text-iron-400 tw-border tw-border-solid tw-border-iron-800 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300">
+            {isFetchingNextPage ? "Loading..." : "Load More"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

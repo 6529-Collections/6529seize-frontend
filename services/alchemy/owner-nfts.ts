@@ -65,6 +65,10 @@ export async function getNftsForContractAndOwner(
   retries = 0,
   signal?: AbortSignal
 ) {
+  if (!contract || !owner) {
+    throw new Error("Contract and owner are required");
+  }
+
   let path = "eth-mainnet";
   if (chainId === sepolia.id) {
     path = "eth-sepolia";
@@ -72,43 +76,41 @@ export async function getNftsForContractAndOwner(
     path = "eth-goerli";
   }
 
-  let url = `https://${path}.g.alchemy.com/nft/v3/${publicEnv.ALCHEMY_API_KEY}/getNFTsForOwner?owner=${owner}&contractAddresses[]=${contract}`;
-  if (pageKey) {
-    url += `&pageKey=${pageKey}`;
-  }
-  const response = await fetchLegacyUrl<AlchemyGetNftsForOwnerResponse>(
-    url,
-    signal
-  );
-  if (response.error) {
-    if (retries >= MAX_GET_NFTS_RETRIES) {
-      throw new Error("Failed to fetch NFTs for owner after retries");
+  const baseUrl = `https://${path}.g.alchemy.com/nft/v3/${publicEnv.ALCHEMY_API_KEY}/getNFTsForOwner?owner=${owner}&contractAddresses[]=${contract}`;
+  const ownedNfts: AlchemyOwnedNft[] = [...nfts];
+  let nextPageKey = pageKey;
+  let attempts = retries;
+
+  while (true) {
+    let url = baseUrl;
+    if (nextPageKey) {
+      url += `&pageKey=${nextPageKey}`;
     }
-    await delayWithAbort(250 * (retries + 1), signal);
-    return getNftsForContractAndOwner(
-      chainId,
-      contract,
-      owner,
-      nfts,
-      pageKey,
-      retries + 1,
+
+    const response = await fetchLegacyUrl<AlchemyGetNftsForOwnerResponse>(
+      url,
       signal
     );
-  }
-  nfts = [...nfts, ...(response.ownedNfts ?? [])];
-  if (response.pageKey) {
-    return getNftsForContractAndOwner(
-      chainId,
-      contract,
-      owner,
-      nfts,
-      response.pageKey,
-      retries,
-      signal
-    );
+
+    if (response.error) {
+      if (attempts >= MAX_GET_NFTS_RETRIES) {
+        throw new Error("Failed to fetch NFTs for owner after retries");
+      }
+      attempts += 1;
+      await delayWithAbort(250 * attempts, signal);
+      continue;
+    }
+
+    ownedNfts.push(...(response.ownedNfts ?? []));
+
+    if (!response.pageKey) {
+      break;
+    }
+
+    nextPageKey = response.pageKey;
   }
 
-  const allNfts = nfts.map((nft) => {
+  const allNfts = ownedNfts.map((nft) => {
     return {
       tokenId: nft.tokenId,
       tokenType: nft.tokenType,

@@ -4,7 +4,7 @@ import { CommonSelectProps } from "../CommonSelect";
 import CommonTabsTab from "./CommonTabsTab";
 
 export default function CommonTabs<T, U = unknown>(
-  props: CommonSelectProps<T, U>
+  props: Readonly<CommonSelectProps<T, U>>
 ) {
   const {
     items,
@@ -50,14 +50,17 @@ export default function CommonTabs<T, U = unknown>(
     updateFadeIndicators();
 
     node.addEventListener("scroll", updateFadeIndicators);
-    if (typeof window !== "undefined") {
-      window.addEventListener("resize", updateFadeIndicators);
+    const canListenToGlobalResize =
+      typeof globalThis.addEventListener === "function" &&
+      typeof globalThis.removeEventListener === "function";
+    if (canListenToGlobalResize) {
+      globalThis.addEventListener("resize", updateFadeIndicators);
     }
 
     return () => {
       node.removeEventListener("scroll", updateFadeIndicators);
-      if (typeof window !== "undefined") {
-        window.removeEventListener("resize", updateFadeIndicators);
+      if (canListenToGlobalResize) {
+        globalThis.removeEventListener("resize", updateFadeIndicators);
       }
     };
   }, [updateFadeIndicators]);
@@ -114,6 +117,7 @@ export default function CommonTabs<T, U = unknown>(
         ref={scrollContainerRef}
         role="tablist"
         aria-label={filterLabel}
+        aria-orientation="horizontal"
         className="tw-overflow-x-auto tw-scroll-smooth tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60"
       >
         <div className="tw-flex tw-min-w-full tw-flex-nowrap tw-gap-x-1 tw-rounded-lg tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-iron-700">

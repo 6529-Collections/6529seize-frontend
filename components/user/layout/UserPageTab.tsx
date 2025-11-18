@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import type {
   UserPageTabConfig,
   UserPageTabKey,
@@ -25,19 +25,14 @@ export default function UserPageTab({
 
   const path = `/${handleOrWallet}/${tab.route}`;
 
-  const [isActive, setIsActive] = useState<boolean>(tab.id === activeTabId);
-  useEffect(() => {
-    setIsActive(tab.id === activeTabId);
-  }, [activeTabId, tab.id]);
+  const isActive = tab.id === activeTabId;
 
   const activeClasses =
     "tw-border-primary-400 tw-border-solid tw-border-x-0 tw-border-t-0 tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-font-semibold tw-py-4 tw-px-1";
   const inActiveClasses =
     "tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-4 tw-px-1 tw-transition tw-duration-300 tw-ease-out";
 
-  const [classes, setClasses] = useState<string>(
-    isActive ? activeClasses : inActiveClasses
-  );
+  const classes = isActive ? activeClasses : inActiveClasses;
 
   const ref = useRef<HTMLAnchorElement>(null);
 
@@ -55,7 +50,6 @@ export default function UserPageTab({
   };
 
   useEffect(() => {
-    setClasses(isActive ? activeClasses : inActiveClasses);
     if (ref.current && isActive && !isVisibleInViewportSide()) {
       ref.current.scrollIntoView({
         behavior: "smooth",
