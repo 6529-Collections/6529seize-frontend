@@ -3,6 +3,8 @@ import styles from "@/styles/Home.module.scss";
 import { Suspense } from "react";
 
 export default function UserNotFoundPage() {
+  throw new Error("Test error");
+
   return (
     <main className={styles.main}>
       <Suspense fallback={null}>

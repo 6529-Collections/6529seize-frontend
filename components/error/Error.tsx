@@ -75,9 +75,9 @@ export default function ErrorComponent({
                 {isStacktraceExpanded ? "Hide stacktrace" : "Show stacktrace"}
               </span>
               {isStacktraceExpanded ? (
-                <FontAwesomeIcon icon={faChevronDown} />
-              ) : (
                 <FontAwesomeIcon icon={faChevronUp} />
+              ) : (
+                <FontAwesomeIcon icon={faChevronDown} />
               )}
             </button>
             {isStacktraceExpanded ? (
