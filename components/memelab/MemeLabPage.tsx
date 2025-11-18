@@ -218,7 +218,21 @@ export default function MemeLabPageComponent({
           return;
         }
 
-        const fetchedNft: LabNFT | undefined = nftResponse.data?.[0];
+        const fetchedNft: LabNFT | undefined =
+          Array.isArray(nftResponse.data) && nftResponse.data.length === 1
+            ? nftResponse.data[0]
+            : undefined;
+
+        if (!fetchedNft) {
+          console.warn(
+            `Expected exactly 1 NFT for id ${nftId}, got ${
+              nftResponse.data?.length ?? 0
+            }`
+          );
+          resetNftState();
+          return;
+        }
+
         setNft(fetchedNft);
 
         await loadOriginalMemes(fetchedNft);

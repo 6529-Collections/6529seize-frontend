@@ -114,6 +114,11 @@ export default function UserPageTabs() {
     return firstVisibleTab ?? DEFAULT_TAB;
   }, [resolvedTabFromPath, resolvedTabIsVisible, visibleTabs]);
 
+  // Redirect to the first visible tab whenever the resolved tab becomes
+  // hidden because the visibility context changed (country, feature flags,
+  // etc.). The early returns combined with `resolvedTabIsVisible` and the
+  // pathname comparison ensure we only navigate when needed, preventing
+  // redirect loops even if the context flaps quickly.
   useEffect(() => {
     if (!visibleTabs.length || resolvedTabIsVisible || !handleOrWallet) {
       return;

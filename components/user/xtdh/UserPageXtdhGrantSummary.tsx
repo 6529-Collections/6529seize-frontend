@@ -2,7 +2,10 @@ import type {
   ContractOverview,
   NftPickerSelection,
 } from "@/components/nft-picker/NftPicker.types";
-import { formatDateTime } from "@/components/user/xtdh/utils/xtdhGrantFormatters";
+import {
+  formatDateTime,
+  formatTdhRatePerToken,
+} from "@/components/user/xtdh/utils/xtdhGrantFormatters";
 
 type SelectionDescription = {
   readonly text: string;
@@ -57,15 +60,12 @@ const getPerTokenText = (amount: number, tokenCount: number | null): string => {
     return "";
   }
 
-  const perToken = amount / tokenCount;
-
-  if (!Number.isFinite(perToken)) {
+  const perTokenText = formatTdhRatePerToken(amount, tokenCount);
+  if (!perTokenText) {
     return "";
   }
 
-  return ` (~${perToken.toLocaleString(undefined, {
-    maximumFractionDigits: 6,
-  })} xTDH per token)`;
+  return ` (~${perTokenText} xTDH per token)`;
 };
 
 const getAmountSummaryText = (amount: number, tokenCount: number | null): string => {

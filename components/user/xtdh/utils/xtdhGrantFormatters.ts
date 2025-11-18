@@ -1,10 +1,8 @@
-import { parseTokenExpressionToRanges } from "@/components/nft-picker/NftPicker.utils";
-import type { ParseError } from "@/components/nft-picker/NftPicker.types";
-
-const PARSE_ERROR_ARRAY_NAME = "ParseErrorArray";
-
-type ParseErrorArray = ParseError[] &
-  Error & { name: typeof PARSE_ERROR_ARRAY_NAME };
+import {
+  PARSE_ERROR_ARRAY_NAME,
+  parseTokenExpressionToRanges,
+} from "@/components/nft-picker/NftPicker.utils";
+import type { ParseErrorArray } from "@/components/nft-picker/NftPicker.utils";
 
 const isParseErrorArray = (error: unknown): error is ParseErrorArray => {
   if (!Array.isArray(error)) {
@@ -20,23 +18,37 @@ const numberFormatter = new Intl.NumberFormat(undefined, {
 });
 
 const ALL_TOKENS_LABEL = "All tokens";
+const UNKNOWN_TOKENS_LABEL = "an unknown number of tokens";
 
 export type TargetTokensCountInfo =
   | { kind: "all"; label: string; count: null }
-  | { kind: "count"; label: string; count: number };
+  | { kind: "count"; label: string; count: number }
+  | { kind: "unknown"; label: string; count: null };
 
 export const getTargetTokensCountInfo = (
   count: number | null | undefined
 ): TargetTokensCountInfo => {
-  if (
-    count == null ||
-    !Number.isFinite(count) ||
-    count < 1
-  ) {
+  if (count == null) {
     return { kind: "all", label: ALL_TOKENS_LABEL, count: null };
   }
 
+  if (!Number.isFinite(count) || count < 1) {
+    return {
+      kind: "unknown",
+      label: UNKNOWN_TOKENS_LABEL,
+      count: null,
+    };
+  }
+
   const normalizedCount = Math.floor(count);
+
+  if (normalizedCount < 1) {
+    return {
+      kind: "unknown",
+      label: UNKNOWN_TOKENS_LABEL,
+      count: null,
+    };
+  }
 
   return {
     kind: "count",
@@ -150,15 +162,17 @@ export const formatTdhRatePerToken = (
   totalRate: number,
   tokensCount: number | null
 ): string | null => {
-  if (
-    !Number.isFinite(totalRate) ||
-    tokensCount == null ||
-    tokensCount <= 0
-  ) {
+  if (!Number.isFinite(totalRate) || tokensCount == null) {
     return null;
   }
 
-  const perTokenValue = totalRate / tokensCount;
+  const normalizedTokensCount = Math.floor(tokensCount);
+
+  if (!Number.isFinite(normalizedTokensCount) || normalizedTokensCount <= 0) {
+    return null;
+  }
+
+  const perTokenValue = totalRate / normalizedTokensCount;
   if (!Number.isFinite(perTokenValue)) {
     return null;
   }

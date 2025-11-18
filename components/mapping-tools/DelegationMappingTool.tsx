@@ -19,10 +19,6 @@ const csvParser = require("csv-parser");
 
 async function parseCsvFile(file: File): Promise<string[]> {
   const data = await file.text();
-  if (typeof data !== "string") {
-    throw new TypeError("Unsupported CSV data format");
-  }
-
   return parseCsvContent(data);
 }
 

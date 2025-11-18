@@ -47,9 +47,11 @@ export function UserPageXtdhGrantListItem({
     const info = getTargetTokensCountInfo(grant.target_tokens_count ?? null);
     if (info.kind === "all") {
       return { type: "all" };
-    
     }
-    return { type: "count", label: info.label, count: info.count ?? null };
+    if (info.kind === "count") {
+      return { type: "count", label: info.label, count: info.count };
+    }
+    return { type: "unknown", label: info.label };
   }, [grant.target_tokens_count]);
 
   if (isLoading) {
@@ -99,7 +101,8 @@ function GrantListItemContainer({
 
 type TokenPanelState =
   | { type: "all" }
-  | { type: "count"; label: string; count: number | null };
+  | { type: "count"; label: string; count: number }
+  | { type: "unknown"; label: string };
 
 function GrantTokensPanel({
   chain,
@@ -122,12 +125,14 @@ function GrantTokensPanel({
     );
   }
 
+  const tokensCount = state.type === "count" ? state.count : null;
+
   return (
     <GrantTokensDisclosure
       chain={chain}
       contractAddress={contractAddress}
       grantId={grantId}
-      tokensCount={state.count}
+      tokensCount={tokensCount}
       tokensCountLabel={state.label}
     />
   );
@@ -216,8 +221,13 @@ function GrantTokensDisclosure({
             {isOpen ? "Hide granted tokens" : "Show granted tokens"}
           </span>
           <span className="tw-text-xs tw-text-iron-350">
-            Expand to inspect {tokensCountLabel} token
-            {tokensCount === 1 ? "" : "s"} granted to this wallet.
+            Expand to inspect
+            {" "}
+            {tokensCount == null
+              ? tokensCountLabel
+              : `${tokensCountLabel} token${tokensCount === 1 ? "" : "s"}`}
+            {" "}
+            granted to this wallet.
           </span>
         </div>
         <span

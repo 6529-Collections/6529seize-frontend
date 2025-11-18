@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback } from "react";
 
 import type { ContractOverview } from "./NftPicker.types";
 import { shortenAddress } from "@/helpers/address.helpers";
@@ -17,13 +16,6 @@ export function NftContractHeader({
   onChange,
   onClear,
 }: NftContractHeaderProps) {
-  const handleChangeClick = useCallback(() => {
-    onChange();
-  }, [onChange]);
-
-  const handleClearClick = useCallback(() => {
-    onClear();
-  }, [onClear]);
 
   if (!contract) {
     return null;
@@ -70,7 +62,8 @@ export function NftContractHeader({
                 Supply {contract.totalSupply}
               </span>
             )}
-            {typeof contract.floorPriceEth === "number" && (
+            {typeof contract.floorPriceEth === "number" &&
+              Number.isFinite(contract.floorPriceEth) && (
               <span className="tw-rounded tw-bg-iron-800 tw-px-2 tw-py-0.5">
                 Floor Ξ{contract.floorPriceEth.toFixed(3)}
               </span>
@@ -82,14 +75,14 @@ export function NftContractHeader({
         <button
           type="button"
           className="tw-rounded tw-border tw-border-iron-700 tw-bg-transparent tw-px-3 tw-py-1 tw-text-sm tw-text-iron-200 hover:tw-border-primary-500 hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
-          onClick={handleChangeClick}
+          onClick={onChange}
         >
           Change
         </button>
         <button
           type="button"
           className="tw-rounded tw-bg-primary-500 tw-px-3 tw-py-1 tw-text-sm tw-font-semibold tw-text-black hover:tw-bg-primary-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
-          onClick={handleClearClick}
+          onClick={onClear}
         >
           Clear
         </button>

@@ -247,17 +247,15 @@ export default function LabCollection({
               </Row>
               {websites.length > 0 && (
                 <Row className="pb-3">
-                  <Col>
-                    {websites.map((w) => (
-                      <span key={w}>
-                        <a
-                          href={addProtocol(w)}
-                          target="_blank"
-                          rel="noopener noreferrer">
-                          {w}
-                        </a>
-                        &nbsp;&nbsp;
-                      </span>
+                  <Col className="tw-flex tw-gap-3 tw-flex-wrap tw-items-center">
+                    {websites.map((website) => (
+                      <a
+                        key={website}
+                        href={addProtocol(website)}
+                        target="_blank"
+                        rel="noopener noreferrer">
+                        {website}
+                      </a>
                     ))}
                   </Col>
                 </Row>

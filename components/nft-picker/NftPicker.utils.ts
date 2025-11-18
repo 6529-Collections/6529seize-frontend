@@ -15,13 +15,17 @@ export type RangeTooLargeError = Error & {
   size: bigint;
 };
 
-type ParseErrorArray = ParseError[] & Error;
+export const PARSE_ERROR_ARRAY_NAME = "ParseErrorArray";
+
+export type ParseErrorArray = ParseError[] & Error & {
+  name: typeof PARSE_ERROR_ARRAY_NAME;
+};
 
 function createParseErrorArray(errors: ParseError[], message?: string): ParseErrorArray {
   const issues = [...errors];
   const primaryMessage = message ?? issues[0]?.message ?? "Invalid token expression";
   const errorArray = Object.assign(issues, new Error(primaryMessage)) as ParseErrorArray;
-  errorArray.name = "ParseErrorArray";
+  errorArray.name = PARSE_ERROR_ARRAY_NAME;
   return errorArray;
 }
 

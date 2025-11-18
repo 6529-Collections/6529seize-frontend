@@ -8,6 +8,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { ApiSeizeSettings } from "@/generated/models/ApiSeizeSettings";
@@ -19,6 +20,7 @@ type SeizeSettingsContextType = {
   // True only after the latest fetch succeeds; failed loads leave this false.
   isLoaded: boolean;
   loadError: Error | null;
+  loadSeizeSettings: (options?: { reset?: boolean }) => Promise<void>;
 };
 
 const SeizeSettingsContext = createContext<
@@ -37,13 +39,21 @@ export const SeizeSettingsProvider = ({
   });
   const [isLoaded, setIsLoaded] = useState(false);
   const [loadError, setLoadError] = useState<Error | null>(null);
+  const isMountedRef = useRef(true);
 
-  useEffect(() => {
-    let isMounted = true;
+  const loadSeizeSettings = useCallback(
+    async ({ reset = false }: { reset?: boolean } = {}) => {
+      if (reset && isMountedRef.current) {
+        setIsLoaded(false);
+      }
 
-    fetchUrl<ApiSeizeSettings>(`${publicEnv.API_ENDPOINT}/api/settings`)
-      .then((settings) => {
-        if (!isMounted) return;
+      try {
+        const settings = await fetchUrl<ApiSeizeSettings>(
+          `${publicEnv.API_ENDPOINT}/api/settings`
+        );
+
+        if (!isMountedRef.current) return;
+
         setSeizeSettings({
           ...settings,
           memes_wave_id:
@@ -51,18 +61,24 @@ export const SeizeSettingsProvider = ({
         });
         setLoadError(null);
         setIsLoaded(true);
-      })
-      .catch((error) => {
-        if (!isMounted) return;
+      } catch (error) {
+        if (!isMountedRef.current) return;
         console.error("Failed to fetch seize settings", error);
         setLoadError(error instanceof Error ? error : new Error(String(error)));
         setIsLoaded(false);
-      });
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    void loadSeizeSettings();
 
     return () => {
-      isMounted = false;
+      isMountedRef.current = false;
     };
-  }, []);
+  }, [loadSeizeSettings]);
 
   const isMemesWave = useCallback(
     (waveId: string | undefined | null): boolean => {
@@ -78,8 +94,9 @@ export const SeizeSettingsProvider = ({
       isMemesWave,
       isLoaded,
       loadError,
+      loadSeizeSettings,
     }),
-    [seizeSettings, isMemesWave, isLoaded, loadError]
+    [seizeSettings, isMemesWave, isLoaded, loadError, loadSeizeSettings]
   );
 
   return (

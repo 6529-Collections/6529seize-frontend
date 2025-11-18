@@ -58,19 +58,29 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
   const fetchNfts = useCallback(
     async function fetchNftsInner(
       url: string,
-      mynfts: NftWithOwner[]
+      mynfts: NftWithOwner[],
+      signal?: AbortSignal
     ): Promise<void> {
+      if (signal?.aborted) {
+        return;
+      }
       try {
-        const response = await fetchUrl(url);
+        const response = await fetchUrl(url, { signal });
         const combined = [...mynfts, ...response.data];
         if (response.next) {
-          await fetchNftsInner(response.next, combined);
+          await fetchNftsInner(response.next, combined, signal);
         } else {
+          if (signal?.aborted) {
+            return;
+          }
           const uniqueById = new Map<number, NftWithOwner>();
           combined.forEach((nftItem) => uniqueById.set(nftItem.id, nftItem));
           setAllNfts(Array.from(uniqueById.values()));
         }
       } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") {
+          return;
+        }
         console.error("Failed to fetch gradient NFTs", error);
         setAllNfts([]);
       }
@@ -91,8 +101,10 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
   }, [nft, connectedAddress]);
 
   useEffect(() => {
+    const abortController = new AbortController();
     const initialUrlNfts = `${publicEnv.API_ENDPOINT}/api/nfts/gradients?&page_size=101`;
-    fetchNfts(initialUrlNfts, []);
+    fetchNfts(initialUrlNfts, [], abortController.signal);
+    return () => abortController.abort();
   }, [fetchNfts]);
 
   useEffect(() => {
@@ -100,7 +112,7 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
       a.tdh_rank > b.tdh_rank ? 1 : -1
     );
     setCollectionCount(allNfts.length);
-    const parsedId = Number.parseInt(id);
+    const parsedId = Number.parseInt(id, 10);
     setNft(rankedNFTs.find((n) => n.id === parsedId));
     const rankIndex = rankedNFTs.findIndex((r) => r.id === parsedId);
     setCollectionRank(rankIndex > -1 ? rankIndex + 1 : -1);
@@ -112,17 +124,26 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
       return;
     }
 
+    const abortController = new AbortController();
     setTransactions([]);
     fetchUrl(
-      `${publicEnv.API_ENDPOINT}/api/transactions?contract=${GRADIENT_CONTRACT}&id=${id}`
+      `${publicEnv.API_ENDPOINT}/api/transactions?contract=${GRADIENT_CONTRACT}&id=${id}`,
+      { signal: abortController.signal }
     )
       .then((response: DBResponse) => {
+        if (abortController.signal.aborted) {
+          return;
+        }
         setTransactions(response.data);
       })
       .catch((error) => {
+        if (error instanceof Error && error.name === "AbortError") {
+          return;
+        }
         console.error(`Failed to fetch gradient transactions for id ${id}`, error);
         setTransactions([]);
       });
+    return () => abortController.abort();
   }, [id]);
 
   function printLive() {

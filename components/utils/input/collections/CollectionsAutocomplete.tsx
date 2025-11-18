@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
   type ChangeEvent,
+  type FocusEvent,
   type KeyboardEvent,
 } from "react";
 import { useClickAway } from "react-use";
@@ -123,6 +124,30 @@ export default function CollectionsAutocomplete({
     inputRef.current?.focus();
   }, []);
 
+  const handleContainerFocus = useCallback(
+    (event: FocusEvent<HTMLDivElement>) => {
+      if (disabled || event.target !== event.currentTarget) {
+        return;
+      }
+      focusInput();
+    },
+    [disabled, focusInput]
+  );
+
+  const handleContainerKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (disabled || event.target !== event.currentTarget) {
+        return;
+      }
+      if (!ACTIVATION_KEYS.has(event.key)) {
+        return;
+      }
+      event.preventDefault();
+      focusInput();
+    },
+    [disabled, focusInput]
+  );
+
   const handleInputFocus = useCallback(() => {
     openDropdown();
   }, [openDropdown]);
@@ -173,7 +198,14 @@ export default function CollectionsAutocomplete({
       if (disabled) {
         return;
       }
-      const next = value.filter((item) => item !== id);
+      const indexToRemove = value.indexOf(id);
+      if (indexToRemove === -1) {
+        return;
+      }
+      const next = [
+        ...value.slice(0, indexToRemove),
+        ...value.slice(indexToRemove + 1),
+      ];
       onChange(next);
       requestAnimationFrame(focusInput);
     },
@@ -230,7 +262,7 @@ export default function CollectionsAutocomplete({
         return;
       }
       event.preventDefault();
-      const lastSelected = value.at(-1);
+      const lastSelected = value.length > 0 ? value[value.length - 1] : undefined;
       if (lastSelected) {
         handleRemove(lastSelected);
       }
@@ -282,10 +314,18 @@ export default function CollectionsAutocomplete({
     [handleSelect]
   );
 
-  const hasNoResults = filteredOptions.length === 0 && query.trim().length > 0;
+  const trimmedQuery = query.trim();
+  const hasNoResults = filteredOptions.length === 0 && trimmedQuery.length > 0;
   const nativeSelectPlaceholder = hasNoResults
     ? noResultsText
     : selectionPlaceholder;
+  const liveRegionMessage = hasNoResults
+    ? noResultsText
+    : open && trimmedQuery
+      ? `${filteredOptions.length} ${
+          filteredOptions.length === 1 ? "result" : "results"
+        } available`
+      : "";
 
   return (
     <div ref={containerRef} className="tw-flex tw-flex-col tw-gap-1.5">
@@ -297,7 +337,10 @@ export default function CollectionsAutocomplete({
               ? "tw-border-iron-800 tw-bg-iron-900/60 tw-text-iron-400 tw-opacity-80"
               : "tw-border-iron-700 tw-bg-iron-900 hover:tw-border-iron-600"
           )}
+          tabIndex={disabled ? -1 : 0}
           onClick={disabled ? undefined : focusInput}
+          onFocus={handleContainerFocus}
+          onKeyDown={handleContainerKeyDown}
         >
           {selectedOptions.map((option) => (
             <span
@@ -373,7 +416,7 @@ export default function CollectionsAutocomplete({
             aria-live="polite"
             aria-atomic="true"
           >
-            {hasNoResults ? noResultsText : ""}
+            {liveRegionMessage}
           </output>
         </div>
         {open && (

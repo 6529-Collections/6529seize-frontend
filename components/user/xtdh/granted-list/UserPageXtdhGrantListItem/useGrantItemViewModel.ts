@@ -87,10 +87,15 @@ function createBaseGrantDetails(grant: ApiTdhGrant): GrantDetails {
     grant.tdh_rate,
     tokensCountValue
   );
-  const tokensDescription =
-    tokensCountInfo.kind === "all"
-      ? "all tokens in this collection"
-      : `${tokensCountInfo.label} tokens granted`;
+  const tokensDescription = (() => {
+    if (tokensCountInfo.kind === "all") {
+      return "all tokens in this collection";
+    }
+    if (tokensCountInfo.kind === "count") {
+      return `${tokensCountInfo.label} tokens granted`;
+    }
+    return "an unknown number of tokens";
+  })();
 
   return {
     tokenTypeLabel: "Unknown",

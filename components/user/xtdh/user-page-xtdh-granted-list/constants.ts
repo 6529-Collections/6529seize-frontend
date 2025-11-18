@@ -106,7 +106,7 @@ export function areDefaultFilterStatuses(
 export function parseUserPageXtdhGrantedListStatuses(
   value: string | null
 ): GrantedFilterStatuses {
-  if (!value) return DEFAULT_FILTER_STATUSES;
+  if (!value || !value.trim()) return DEFAULT_FILTER_STATUSES;
   const parsed = value
     .split(",")
     .map((item) => item.trim().toUpperCase())
@@ -152,7 +152,7 @@ export function parseUserPageXtdhGrantedListSortField(
   value: string | null
 ): GrantedSortField {
   if (!value) return DEFAULT_SORT_FIELD;
-  const normalized = value.toLowerCase();
+  const normalized = value.trim().toLowerCase();
   return (
     SORT_ITEMS.find((item) => item.value === normalized)?.value ??
     DEFAULT_SORT_FIELD
@@ -170,9 +170,9 @@ export function parseUserPageXtdhGrantedListSortDirection(
 export function normalizeUserPageXtdhGrantedListSortDirection(
   value: SortDirection | string
 ): SortDirection {
-  return value === SortDirection.ASC || value === "ASC"
-    ? SortDirection.ASC
-    : SortDirection.DESC;
+  const normalized =
+    typeof value === "string" ? value.trim().toUpperCase() : value;
+  return normalized === SortDirection.ASC ? SortDirection.ASC : SortDirection.DESC;
 }
 
 export function formatUserPageXtdhGrantedListStatusLabel(

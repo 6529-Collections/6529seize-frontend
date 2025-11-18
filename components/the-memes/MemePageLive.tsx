@@ -278,6 +278,7 @@ export function MemePageLiveSubMenu(props: {
   const [rememesLoaded, setRememesLoaded] = useState(false);
 
   const rememesTarget = useRef<HTMLImageElement>(null);
+  const rememesRequestIdRef = useRef(0);
 
   const rememeSorting = [RememeSort.RANDOM, RememeSort.CREATED_ASC];
   const [selectedRememeSorting, setSelectedRememeSorting] =
@@ -323,6 +324,7 @@ export function MemePageLiveSubMenu(props: {
 
   function fetchRememes(meme_id: number) {
     setRememesLoaded(false);
+    const requestId = ++rememesRequestIdRef.current;
     let sort = "";
     if (selectedRememeSorting === RememeSort.CREATED_ASC) {
       sort = "&sort=created_at&sort_direction=desc";
@@ -331,7 +333,10 @@ export function MemePageLiveSubMenu(props: {
       `${publicEnv.API_ENDPOINT}/api/rememes?meme_id=${meme_id}&page_size=${REMEMES_PAGE_SIZE}&page=${rememesPage}${sort}`
     )
       .then((response: DBResponse) => {
-        if (props.nft?.id !== meme_id) {
+        if (
+          props.nft?.id !== meme_id ||
+          requestId !== rememesRequestIdRef.current
+        ) {
           return;
         }
         setRememesTotalResults(response.count);
@@ -339,7 +344,10 @@ export function MemePageLiveSubMenu(props: {
         setShowRememesSort(response.count > REMEMES_PAGE_SIZE);
       })
       .catch((error) => {
-        if (props.nft?.id !== meme_id) {
+        if (
+          props.nft?.id !== meme_id ||
+          requestId !== rememesRequestIdRef.current
+        ) {
           return;
         }
         console.error(`Failed to fetch rememes for meme ${meme_id}`, error);
@@ -348,7 +356,10 @@ export function MemePageLiveSubMenu(props: {
         setShowRememesSort(false);
       })
       .finally(() => {
-        if (props.nft?.id !== meme_id) {
+        if (
+          props.nft?.id !== meme_id ||
+          requestId !== rememesRequestIdRef.current
+        ) {
           return;
         }
         setRememesLoaded(true);

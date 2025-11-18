@@ -192,7 +192,7 @@ export function NftSuggestList({
                       {suggestion.imageUrl ? (
                         <Image
                           src={suggestion.imageUrl}
-                          alt={suggestion.name ?? suggestion.address}
+                          alt=""
                           fill
                           sizes="40px"
                           className="tw-h-full tw-w-full tw-object-cover"

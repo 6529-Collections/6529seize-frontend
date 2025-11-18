@@ -44,14 +44,28 @@ function readFileAsText(file: File): Promise<string> {
 function parseCsvText(csvText: string): Promise<ConsolidationData[]> {
   return new Promise<ConsolidationData[]>((resolve, reject) => {
     const results: ConsolidationData[] = [];
+    let isFirstRow = true;
 
     const parser = csvParser({ headers: false })
       .on("data", (row: any) => {
+        // Skip header row
+        if (isFirstRow) {
+          isFirstRow = false;
+          return;
+        }
+
         const address = row[0];
         const token_id = Number.parseInt(row[1], 10);
         const balance = Number.parseInt(row[2], 10);
         const contract = row[3];
         const name = row[4];
+
+        // Validate numeric fields
+        if (Number.isNaN(token_id) || Number.isNaN(balance)) {
+          console.warn("Skipping invalid CSV row:", row);
+          return;
+        }
+
         results.push({ address, token_id, balance, contract, name });
       })
       .on("end", () => {

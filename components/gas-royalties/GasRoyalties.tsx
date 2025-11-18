@@ -86,20 +86,27 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
   const [toBlock, setToBlock] = useState<number>();
 
   useEffect(() => {
+    const controller = new AbortController();
     const path =
       props.focus === GasRoyaltiesCollectionFocus.MEMES ? "memes" : "memelab";
-    fetchUrl<ApiArtistNameItem[]>(`${publicEnv.API_ENDPOINT}/api/${path}/artists_names`)
+    fetchUrl<ApiArtistNameItem[]>(
+      `${publicEnv.API_ENDPOINT}/api/${path}/artists_names`,
+      { signal: controller.signal }
+    )
       .then((res: ApiArtistNameItem[]) => {
         setArtists(res);
         setArtistLoadError(null);
       })
       .catch((error) => {
-        console.error("Failed to fetch artist names", error);
-        setArtists([]);
-        setArtistLoadError(
-          "Unable to load artist names. Artist filter options may be limited."
-        );
+        if (error.name !== "AbortError") {
+          console.error("Failed to fetch artist names", error);
+          setArtists([]);
+          setArtistLoadError(
+            "Unable to load artist names. Artist filter options may be limited."
+          );
+        }
       });
+    return () => controller.abort();
   }, [props.focus]);
 
   function getDateSelectionLabel() {
