@@ -70,25 +70,10 @@ const enhancedFetch: typeof fetch = async (
     const env = getServerEnvOrThrow();
     clientId = env.SSR_CLIENT_ID;
     clientSecret = env.SSR_CLIENT_SECRET;
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    const missingVars: string[] = [];
-    
-    if (errorMessage.includes("SSR_CLIENT_ID")) {
-      missingVars.push("SSR_CLIENT_ID");
-    }
-    if (errorMessage.includes("SSR_CLIENT_SECRET")) {
-      missingVars.push("SSR_CLIENT_SECRET");
-    }
-    
-    const missingVarsList = missingVars.length > 0 
-      ? ` Missing env vars: ${missingVars.join(", ")}`
-      : "";
-    
-    console.error(
-      `[SSR Fetch] Failed to get SSR credentials.${missingVarsList} Error: ${errorMessage}. Falling back to original fetch (requests will bypass rate limits).`
+  } catch {
+    console.warn(
+      "[SSR Fetch] SSR credentials unavailable, falling back to unauthenticated fetch. Internal rate limits will not be bypassed."
     );
-    
     return originalFetch(input, init);
   }
 
