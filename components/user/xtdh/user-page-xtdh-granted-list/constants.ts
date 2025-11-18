@@ -8,6 +8,8 @@ import type {
   GrantedStatusCounts,
 } from "./types";
 
+// DEFAULT_STATUSES represents the canonical "all statuses" sentinel ("ALL" only).
+// It is distinct from DEFAULT_FILTER_STATUSES, which reflects the actual UI default.
 export const DEFAULT_STATUS: GrantedFilterStatus = "ALL";
 export const DEFAULT_STATUSES: GrantedFilterStatuses = [DEFAULT_STATUS];
 export const DEFAULT_SORT_FIELD: GrantedSortField = "created_at";
@@ -42,6 +44,12 @@ export const SORT_ITEMS = [
   { key: "tdh_rate", label: "TDH Rate", value: "tdh_rate" },
 ] as const satisfies ReadonlyArray<CommonSelectItem<GrantedSortField>>;
 
+/**
+ * Normalizes user-provided statuses.
+ * - "ALL" alone represents the full set of statuses and is preserved
+ * - When combined with specific statuses, "ALL" is removed since specifics win
+ * - Empty input falls back to DEFAULT_STATUSES (the "ALL" sentinel)
+ */
 export function normalizeGrantedStatuses(
   statuses: GrantedFilterStatuses
 ): GrantedFilterStatuses {
@@ -73,6 +81,7 @@ export function normalizeGrantedStatuses(
   return orderedStatuses.filter((status) => status !== DEFAULT_STATUS);
 }
 
+// DEFAULT_FILTER_STATUSES expresses the default filter chips (Pending + Granted).
 const DEFAULT_FILTER_STATUSES_PRESET: GrantedFilterStatus[] = [
   "PENDING",
   "GRANTED",

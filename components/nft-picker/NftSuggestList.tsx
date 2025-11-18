@@ -7,6 +7,7 @@ import { useRef, useId, type ChangeEvent } from "react";
 import DistributionPlanVerifiedIcon from "../distribution-plan-tool/common/DistributionPlanVerifiedIcon";
 import type { Suggestion } from "./NftPicker.types";
 import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
+import { shortenAddress } from "@/helpers/address.helpers";
 
 interface NftSuggestListProps {
   readonly items: Suggestion[];
@@ -24,16 +25,13 @@ const OVERSCAN = 6;
 const ACCESSIBLE_SELECT_PLACEHOLDER_VALUE = "__nft_suggest_placeholder__";
 const ACCESSIBLE_SELECT_MAX_SIZE = 10;
 
-function shortenAddress(address: `0x${string}` | string): string {
-  const normalized = (address ?? "").trim();
-  if (!normalized.length) {
-    return "";
-  }
-  if (!normalized.startsWith("0x") || normalized.length <= 10) {
-    return normalized;
-  }
-  return `${normalized.slice(0, 6)}…${normalized.slice(-4)}`;
-}
+type SuggestionOptionValue =
+  | typeof ACCESSIBLE_SELECT_PLACEHOLDER_VALUE
+  | Suggestion["address"];
+
+const isSuggestionAddress = (
+  value: SuggestionOptionValue
+): value is Suggestion["address"] => value !== ACCESSIBLE_SELECT_PLACEHOLDER_VALUE;
 
 function formatFloor(value: number | null | undefined): string {
   if (typeof value !== "number" || Number.isNaN(value)) {
@@ -47,8 +45,12 @@ function formatFloor(value: number | null | undefined): string {
 }
 
 function getSuggestionOptionLabel(suggestion: Suggestion): string {
-  const labelParts = [suggestion.name ?? shortenAddress(suggestion.address)];
-  labelParts.push(shortenAddress(suggestion.address));
+  const mainLabel = suggestion.name ?? shortenAddress(suggestion.address);
+  const labelParts = [mainLabel];
+  const shortAddress = shortenAddress(suggestion.address);
+  if (shortAddress && shortAddress !== mainLabel) {
+    labelParts.push(shortAddress);
+  }
   if (suggestion.tokenType) {
     labelParts.push(suggestion.tokenType);
   }
@@ -81,6 +83,7 @@ export function NftSuggestList({
   const listContainerRef = useRef<HTMLDivElement>(null);
   const nativeSelectDescriptionId = useId();
   const nativeSelectSize = Math.min(Math.max(items.length || 0, 1), ACCESSIBLE_SELECT_MAX_SIZE);
+  const hasSuggestions = items.length > 0;
 
   const virtualization = useVirtualizedWaves<Suggestion>(
     items,
@@ -97,8 +100,8 @@ export function NftSuggestList({
   }
 
   const handleNativeSelectChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    const selectedValue = event.target.value;
-    if (selectedValue === ACCESSIBLE_SELECT_PLACEHOLDER_VALUE) {
+    const selectedValue = event.target.value as SuggestionOptionValue;
+    if (!isSuggestionAddress(selectedValue)) {
       return;
     }
     const selectedSuggestion = items.find((item) => item.address === selectedValue);
@@ -125,7 +128,7 @@ export function NftSuggestList({
         onChange={handleNativeSelectChange}
       >
         <option value={ACCESSIBLE_SELECT_PLACEHOLDER_VALUE} disabled>
-          {items.length ? "Select a suggestion" : "No suggestions available"}
+          {hasSuggestions ? "Select a suggestion" : "No suggestions available"}
         </option>
         {items.map((suggestion) => (
           <option key={suggestion.address} value={suggestion.address}>
@@ -155,6 +158,11 @@ export function NftSuggestList({
                     ref={virtualization.sentinelRef}
                     style={{ height: "100%", width: "100%" }}
                   />
+                  {!hasSuggestions && (
+                    <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-px-3 tw-text-sm tw-text-iron-400">
+                      No suggestions available
+                    </div>
+                  )}
                 </li>
               );
             }

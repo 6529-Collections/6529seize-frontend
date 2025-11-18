@@ -23,21 +23,16 @@ const ALL_TOKENS_LABEL = "All tokens";
 
 export type TargetTokensCountInfo =
   | { kind: "all"; label: string; count: null }
-  | { kind: "count"; label: string; count: number | null };
+  | { kind: "count"; label: string; count: number };
 
 export const getTargetTokensCountInfo = (
   count: number | null | undefined
 ): TargetTokensCountInfo => {
   if (
-    count === null ||
-    count === undefined ||
+    count == null ||
     !Number.isFinite(count) ||
-    count <= 0
+    count < 1
   ) {
-    return { kind: "all", label: ALL_TOKENS_LABEL, count: null };
-  }
-
-  if (count < 1) {
     return { kind: "all", label: ALL_TOKENS_LABEL, count: null };
   }
 
@@ -91,7 +86,7 @@ export const formatDateTime = (
   timestamp: number | null,
   options?: DateTimeFormatOptions
 ) => {
-  if (!timestamp || timestamp <= 0) {
+  if (timestamp == null || timestamp <= 0) {
     return options?.fallbackLabel ?? "No expiry";
   }
 
@@ -155,7 +150,11 @@ export const formatTdhRatePerToken = (
   totalRate: number,
   tokensCount: number | null
 ): string | null => {
-  if (!Number.isFinite(totalRate) || !tokensCount || tokensCount <= 0) {
+  if (
+    !Number.isFinite(totalRate) ||
+    tokensCount == null ||
+    tokensCount <= 0
+  ) {
     return null;
   }
 

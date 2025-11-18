@@ -4,15 +4,12 @@ import Image from "next/image";
 import { useCallback } from "react";
 
 import type { ContractOverview } from "./NftPicker.types";
+import { shortenAddress } from "@/helpers/address.helpers";
 
 interface NftContractHeaderProps {
   readonly contract: ContractOverview | null;
   readonly onChange: () => void;
   readonly onClear: () => void;
-}
-
-function shortenAddress(address: `0x${string}`): string {
-  return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }
 
 export function NftContractHeader({

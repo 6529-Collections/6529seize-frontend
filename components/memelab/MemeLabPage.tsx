@@ -254,7 +254,7 @@ export default function MemeLabPageComponent({
           setTransactions(response.data);
           let countIn = 0;
           let countOut = 0;
-          response.data.map((d: Transaction) => {
+          response.data.forEach((d: Transaction) => {
             if (wallets.some((w) => areEqualAddresses(w, d.from_address))) {
               countOut += d.token_count;
             }
@@ -641,11 +641,7 @@ export default function MemeLabPageComponent({
   }
 
   function getTokenCount(transactions: Transaction[]) {
-    let count = 0;
-    [...transactions].map((e) => {
-      count += e.token_count;
-    });
-    return count;
+    return transactions.reduce((count, e) => count + e.token_count, 0);
   }
 
   function printYourCardsSub() {
@@ -717,10 +713,7 @@ export default function MemeLabPageComponent({
               t.value > 0
           );
 
-    let boughtSum = 0;
-    bought.map((b) => {
-      boughtSum += b.value;
-    });
+    const boughtSum = bought.reduce((sum, b) => sum + b.value, 0);
 
     const sold =
       wallets.length === 0
@@ -731,10 +724,7 @@ export default function MemeLabPageComponent({
               t.value > 0
           );
 
-    let soldSum = 0;
-    sold.map((b) => {
-      soldSum += b.value;
-    });
+    const soldSum = sold.reduce((sum, b) => sum + b.value, 0);
 
     return (
       <Col

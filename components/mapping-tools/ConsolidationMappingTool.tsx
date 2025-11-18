@@ -44,20 +44,14 @@ function readFileAsText(file: File): Promise<string> {
 function parseCsvText(csvText: string): Promise<ConsolidationData[]> {
   return new Promise<ConsolidationData[]>((resolve, reject) => {
     const results: ConsolidationData[] = [];
-    let isFirstRow = true;
 
-    const parser = csvParser({ headers: true })
+    const parser = csvParser({ headers: false })
       .on("data", (row: any) => {
-        if (isFirstRow) {
-          isFirstRow = false;
-          return;
-        }
-
-        const address = row["_0"];
-        const token_id = Number.parseInt(row["_1"], 10);
-        const balance = Number.parseInt(row["_2"], 10);
-        const contract = row["_3"];
-        const name = row["_4"];
+        const address = row[0];
+        const token_id = Number.parseInt(row[1], 10);
+        const balance = Number.parseInt(row[2], 10);
+        const contract = row[3];
+        const name = row[4];
         results.push({ address, token_id, balance, contract, name });
       })
       .on("end", () => {
@@ -189,6 +183,7 @@ export default function ConsolidationMappingTool() {
       } catch (error) {
         console.error("Failed to fetch consolidations for mapping tool", error);
         setConsolidations([]);
+        setCsvData([]);
         setProcessing(false);
       }
     };
@@ -233,9 +228,14 @@ export default function ConsolidationMappingTool() {
       };
     };
 
-    const normalizedOutput = csvData.map(normalizeEntry);
-    downloadCsvFile(normalizedOutput);
-    setProcessing(false);
+    try {
+      const normalizedOutput = csvData.map(normalizeEntry);
+      downloadCsvFile(normalizedOutput);
+    } catch (error) {
+      console.error("Failed to generate CSV output", error);
+    } finally {
+      setProcessing(false);
+    }
   }, [csvData, consolidations]);
 
   return (

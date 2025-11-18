@@ -139,7 +139,7 @@ export default function CommonTabs<T, U = unknown>(
       <div
         ref={scrollContainerRef}
         role="tablist"
-        aria-label={filterLabel ?? "Tabs"}
+        aria-label={filterLabel ?? "Filter options"}
         aria-orientation="horizontal"
         className="tw-overflow-x-auto tw-scroll-smooth tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60"
       >

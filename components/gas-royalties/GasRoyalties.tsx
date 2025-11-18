@@ -96,7 +96,9 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
       .catch((error) => {
         console.error("Failed to fetch artist names", error);
         setArtists([]);
-        setArtistLoadError("Unable to load artist names. Showing all artists.");
+        setArtistLoadError(
+          "Unable to load artist names. Artist filter options may be limited."
+        );
       });
   }, [props.focus]);
 
@@ -222,6 +224,14 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                     Artist: {props.selected_artist || "All"}
                   </Dropdown.Toggle>
                   <Dropdown.Menu>
+                    {artistLoadError && (
+                      <>
+                        <Dropdown.Item disabled>
+                          Artist filter unavailable
+                        </Dropdown.Item>
+                        <Dropdown.Divider />
+                      </>
+                    )}
                     <Dropdown.Item
                       onClick={() => {
                         props.setSelectedArtist("");

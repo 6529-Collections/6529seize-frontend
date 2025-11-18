@@ -331,17 +331,26 @@ export function MemePageLiveSubMenu(props: {
       `${publicEnv.API_ENDPOINT}/api/rememes?meme_id=${meme_id}&page_size=${REMEMES_PAGE_SIZE}&page=${rememesPage}${sort}`
     )
       .then((response: DBResponse) => {
+        if (props.nft?.id !== meme_id) {
+          return;
+        }
         setRememesTotalResults(response.count);
         setRememes(response.data);
         setShowRememesSort(response.count > REMEMES_PAGE_SIZE);
       })
       .catch((error) => {
+        if (props.nft?.id !== meme_id) {
+          return;
+        }
         console.error(`Failed to fetch rememes for meme ${meme_id}`, error);
         setRememesTotalResults(0);
         setRememes([]);
         setShowRememesSort(false);
       })
       .finally(() => {
+        if (props.nft?.id !== meme_id) {
+          return;
+        }
         setRememesLoaded(true);
       });
   }

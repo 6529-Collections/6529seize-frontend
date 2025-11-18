@@ -41,7 +41,7 @@ const describeSelection = (
     };
   }
 
-  const tokenCount = selection.tokenIdsRaw.length;
+  const tokenCount = selection.tokenIds.length;
 
   return {
     text: describeTokenSelectionText(getTokenLabel(tokenCount), collectionLabel),

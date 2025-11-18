@@ -42,7 +42,7 @@ export default function LabCollection({
   const searchParams = useSearchParams();
   const { connectedProfile } = useContext(AuthContext);
 
-  const [website, setWebsite] = useState<string>();
+  const [websites, setWebsites] = useState<string[]>([]);
 
   const [nfts, setNfts] = useState<LabNFT[]>([]);
   const [nftMetas, setNftMetas] = useState<LabExtendedData[]>([]);
@@ -68,10 +68,13 @@ export default function LabCollection({
     if (!collectionName) {
       setNftMetas([]);
       setNfts([]);
-      setWebsite(undefined);
+      setWebsites([]);
       setNftsLoaded(true);
       return;
     }
+
+    let cancelled = false;
+    setNftsLoaded(false);
 
     const loadCollection = async () => {
       try {
@@ -79,6 +82,9 @@ export default function LabCollection({
           publicEnv.API_ENDPOINT
         }/api/lab_extended_data?collection=${encodeURIComponent(collectionName)}`;
         const responseNftMetas = await fetchAllPages<LabExtendedData>(nftsUrl);
+        if (cancelled) {
+          return;
+        }
         setNftMetas(responseNftMetas);
         if (responseNftMetas.length > 0) {
           const tokenIds = responseNftMetas.map((n: LabExtendedData) => n.id);
@@ -86,31 +92,52 @@ export default function LabCollection({
             new Set(
               responseNftMetas
                 .map((nftm) => nftm.website?.trim())
-                .filter((site): site is string => Boolean(site))
+                .filter(
+                  (site): site is string =>
+                    typeof site === "string" && site.length > 0
+                )
             )
           );
-          setWebsite(uniqueWebsites.join(" "));
+          if (cancelled) {
+            return;
+          }
+          setWebsites(uniqueWebsites);
           const responseNfts = await fetchAllPages<LabNFT>(
             `${publicEnv.API_ENDPOINT}/api/nfts_memelab?id=${tokenIds.join(
               ","
             )}`
           );
+          if (cancelled) {
+            return;
+          }
           setNfts(responseNfts);
         } else {
+          if (cancelled) {
+            return;
+          }
           setNfts([]);
-          setWebsite(undefined);
+          setWebsites([]);
         }
       } catch (error) {
+        if (cancelled) {
+          return;
+        }
         console.error(`Failed to fetch Meme Lab collection ${collectionName}`, error);
         setNftMetas([]);
         setNfts([]);
-        setWebsite(undefined);
+        setWebsites([]);
       } finally {
-        setNftsLoaded(true);
+        if (!cancelled) {
+          setNftsLoaded(true);
+        }
       }
     };
 
     loadCollection();
+
+    return () => {
+      cancelled = true;
+    };
   }, [collectionName]);
 
   useEffect(() => {
@@ -218,24 +245,20 @@ export default function LabCollection({
                   <h2 className="font-color">{collectionName}</h2>
                 </Col>
               </Row>
-              {website && (
+              {websites.length > 0 && (
                 <Row className="pb-3">
                   <Col>
-                    {website
-                      .split(" ")
-                      .map((w) => w.trim())
-                      .filter((w) => w.length > 0)
-                      .map((w) => (
-                        <span key={w}>
-                          <a
-                            href={addProtocol(w)}
-                            target="_blank"
-                            rel="noopener noreferrer">
-                            {w}
-                          </a>
-                          &nbsp;&nbsp;
-                        </span>
-                      ))}
+                    {websites.map((w) => (
+                      <span key={w}>
+                        <a
+                          href={addProtocol(w)}
+                          target="_blank"
+                          rel="noopener noreferrer">
+                          {w}
+                        </a>
+                        &nbsp;&nbsp;
+                      </span>
+                    ))}
                   </Col>
                 </Row>
               )}

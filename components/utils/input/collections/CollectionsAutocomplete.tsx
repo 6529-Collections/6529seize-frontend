@@ -268,6 +268,20 @@ export default function CollectionsAutocomplete({
     setHighlightedIndex(index);
   }, []);
 
+  const handleWrapperKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (disabled) {
+        return;
+      }
+      if (!ACTIVATION_KEYS.has(event.key)) {
+        return;
+      }
+      event.preventDefault();
+      focusInput();
+    },
+    [disabled, focusInput]
+  );
+
   const handleOptionKeyDown = useCallback(
     (
       event: KeyboardEvent<HTMLButtonElement>,
@@ -298,6 +312,10 @@ export default function CollectionsAutocomplete({
               : "tw-border-iron-700 tw-bg-iron-900 hover:tw-border-iron-600"
           )}
           onClick={disabled ? undefined : focusInput}
+          onKeyDown={handleWrapperKeyDown}
+          role="button"
+          tabIndex={disabled ? -1 : 0}
+          aria-disabled={disabled || undefined}
         >
           {selectedOptions.map((option) => (
             <span
@@ -350,7 +368,7 @@ export default function CollectionsAutocomplete({
             aria-label="Available collections"
             aria-describedby={nativeSelectDescriptionId}
             className="tw-sr-only"
-            disabled={!open || disabled || hasNoResults}
+            disabled={!open || disabled}
             defaultValue=""
             onChange={handleNativeSelectChange}
           >
@@ -368,6 +386,14 @@ export default function CollectionsAutocomplete({
                 </option>
               ))}
           </select>
+          <p
+            className="tw-sr-only"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {hasNoResults ? noResultsText : ""}
+          </p>
         </div>
         {open && (
           <ul

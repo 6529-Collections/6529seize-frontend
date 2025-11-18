@@ -180,11 +180,11 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
         }
       })
       .catch((error) => {
-        if (!cancelled) {
-          console.error(`Failed to fetch meme page data for ${nftId}`, error);
-          setNftMeta(undefined);
-          setNft(undefined);
-        }
+        if (cancelled) return;
+        console.error(`Failed to fetch meme page data for ${nftId}`, error);
+        setNftMeta(undefined);
+        setNft(undefined);
+        setNftNotFound(false);
       });
 
     return () => {
@@ -210,6 +210,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     let cancelled = false;
 
     if (connectedWallets.length && nftId) {
+      setUserLoaded(false);
       fetchUrl(
         `${
           publicEnv.API_ENDPOINT

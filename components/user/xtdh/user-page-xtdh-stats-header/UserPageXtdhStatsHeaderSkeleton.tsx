@@ -1,10 +1,9 @@
 export function UserPageXtdhStatsHeaderSkeleton() {
   return (
-    <div
-      role="status"
+    <output
       aria-live="polite"
       aria-busy="true"
-      className="tw-rounded-2xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-5 tw-shadow-md tw-shadow-black/30"
+      className="tw-block tw-rounded-2xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-5 tw-shadow-md tw-shadow-black/30"
     >
       <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-3">
         {[0, 1, 2].map((key) => (
@@ -23,6 +22,6 @@ export function UserPageXtdhStatsHeaderSkeleton() {
         <div className="tw-h-3 tw-w-36 tw-rounded tw-bg-iron-700" />
         <div className="tw-h-4 tw-w-48 tw-rounded tw-bg-iron-700" />
       </div>
-    </div>
+    </output>
   );
 }

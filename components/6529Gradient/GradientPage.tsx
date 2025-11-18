@@ -66,10 +66,9 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
         if (response.next) {
           await fetchNftsInner(response.next, combined);
         } else {
-          const uniqueNfts = combined.filter((value, index, self) => {
-            return self.findIndex((v) => v.id === value.id) === index;
-          });
-          setAllNfts(uniqueNfts);
+          const uniqueById = new Map<number, NftWithOwner>();
+          combined.forEach((nftItem) => uniqueById.set(nftItem.id, nftItem));
+          setAllNfts(Array.from(uniqueById.values()));
         }
       } catch (error) {
         console.error("Failed to fetch gradient NFTs", error);
@@ -97,29 +96,33 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
   }, [fetchNfts]);
 
   useEffect(() => {
-    const rankedNFTs = allNfts.sort((a, b) =>
+    const rankedNFTs = [...allNfts].sort((a, b) =>
       a.tdh_rank > b.tdh_rank ? 1 : -1
     );
     setCollectionCount(allNfts.length);
-    setNft(rankedNFTs.find((n) => n.id === Number.parseInt(id)));
-    setCollectionRank(
-      rankedNFTs.map((r) => r.id).indexOf(Number.parseInt(id)) + 1
-    );
+    const parsedId = Number.parseInt(id);
+    setNft(rankedNFTs.find((n) => n.id === parsedId));
+    const rankIndex = rankedNFTs.findIndex((r) => r.id === parsedId);
+    setCollectionRank(rankIndex > -1 ? rankIndex + 1 : -1);
   }, [allNfts, id]);
 
   useEffect(() => {
-    if (id) {
-      fetchUrl(
-        `${publicEnv.API_ENDPOINT}/api/transactions?contract=${GRADIENT_CONTRACT}&id=${id}`
-      )
-        .then((response: DBResponse) => {
-          setTransactions(response.data);
-        })
-        .catch((error) => {
-          console.error(`Failed to fetch gradient transactions for id ${id}`, error);
-          setTransactions([]);
-        });
+    if (!id) {
+      setTransactions([]);
+      return;
     }
+
+    setTransactions([]);
+    fetchUrl(
+      `${publicEnv.API_ENDPOINT}/api/transactions?contract=${GRADIENT_CONTRACT}&id=${id}`
+    )
+      .then((response: DBResponse) => {
+        setTransactions(response.data);
+      })
+      .catch((error) => {
+        console.error(`Failed to fetch gradient transactions for id ${id}`, error);
+        setTransactions([]);
+      });
   }, [id]);
 
   function printLive() {

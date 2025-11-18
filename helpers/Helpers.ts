@@ -335,7 +335,7 @@ export function getRandomColor() {
 export function capitalizeEveryWord(input: string): string {
   return input
     .toLocaleLowerCase()
-    .replaceAll(/^(.)|\s+(.)/g, (match: string) => match.toUpperCase());
+    .replaceAll(/(?:^|\s+)(.)/g, (match: string) => match.toUpperCase());
 }
 
 export function getNetworkName(chainId: number) {

@@ -65,6 +65,10 @@ export default function XtdhReceivedSection({
   const isRefetching = isFetching && query.tokens.length > 0;
   const isSortingDisabled = isLoading || isFetching;
 
+  useEffect(() => {
+    setPage((previous) => Math.min(previous, Math.max(1, totalPages || 1)));
+  }, [totalPages]);
+
   const numberFormatter = useMemo(
     () =>
       new Intl.NumberFormat("en-US", {

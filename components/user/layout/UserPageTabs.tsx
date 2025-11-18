@@ -161,19 +161,22 @@ export default function UserPageTabs() {
     container.addEventListener("scroll", checkScroll);
     window.addEventListener("resize", checkScroll);
 
-    const resizeObserver = new ResizeObserver(() => {
-      checkScroll();
-    });
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(() => {
+        checkScroll();
+      });
 
-    resizeObserver.observe(container);
-    if (contentContainer) {
-      resizeObserver.observe(contentContainer);
+      resizeObserver.observe(container);
+      if (contentContainer) {
+        resizeObserver.observe(contentContainer);
+      }
     }
 
     return () => {
       container.removeEventListener("scroll", checkScroll);
       window.removeEventListener("resize", checkScroll);
-      resizeObserver.disconnect();
+      resizeObserver?.disconnect();
     };
   }, [checkScroll]);
 

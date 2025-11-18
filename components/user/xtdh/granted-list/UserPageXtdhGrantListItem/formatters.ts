@@ -2,6 +2,7 @@ import { ApiTdhGrantTargetChain } from "@/generated/models/ApiTdhGrantTargetChai
 import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
 import type { SupportedChain } from "@/types/nft";
 import { isValidEthAddress } from "@/helpers/Helpers";
+import { shortenAddress as shortenGenericAddress } from "@/helpers/address.helpers";
 
 type ApiGrantTargetChain = ApiTdhGrantsPage["data"][number]["target_chain"];
 
@@ -29,7 +30,7 @@ export function getContractAddress(
 }
 
 export function shortenAddress(address: `0x${string}`): string {
-  return `${address.slice(0, 6)}…${address.slice(-4)}`;
+  return shortenGenericAddress(address);
 }
 
 export function formatContractLabel(contract?: string): string {

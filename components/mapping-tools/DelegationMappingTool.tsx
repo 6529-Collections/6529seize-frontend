@@ -20,7 +20,7 @@ const csvParser = require("csv-parser");
 async function parseCsvFile(file: File): Promise<string[]> {
   const data = await file.text();
   if (typeof data !== "string") {
-    throw new Error("Unsupported CSV data format");
+    throw new TypeError("Unsupported CSV data format");
   }
 
   return parseCsvContent(data);
@@ -30,8 +30,14 @@ function parseCsvContent(data: string): Promise<string[]> {
   return new Promise((resolve, reject) => {
     const results: string[] = [];
     const parser = csvParser({ headers: true })
-      .on("data", (row: any) => {
-        results.push(row["_0"]);
+      .on("data", (row: Record<string, unknown>) => {
+        const value = row["_0"];
+        if (typeof value === "string") {
+          const trimmed = value.trim();
+          if (trimmed.length > 0) {
+            results.push(trimmed);
+          }
+        }
       })
       .on("end", () => {
         resolve(results);
@@ -55,7 +61,7 @@ export default function DelegationMappingTool() {
   const [processing, setProcessing] = useState(false);
   const [delegations, setDelegations] = useState<Delegation[]>([]);
 
-  const [csvData, setCsvData] = useState<any[]>([]);
+  const [csvData, setCsvData] = useState<string[]>([]);
   function submit() {
     setProcessing(true);
   }
@@ -95,6 +101,8 @@ export default function DelegationMappingTool() {
 
   function resolveDelegatedAddress(address: string): string {
     const fallbackOrder: Array<{ collection: string; useCase: number }> = [
+      { collection, useCase },
+      { collection, useCase: 1 },
       { collection: MEMES_CONTRACT, useCase },
       { collection: MEMES_CONTRACT, useCase: 1 },
       { collection: DELEGATION_ALL_ADDRESS, useCase },
@@ -154,12 +162,22 @@ export default function DelegationMappingTool() {
   }, [processing]);
 
   useEffect(() => {
-    if (csvData.length > 0 && delegations.length > 0) {
+    if (!processing) {
+      return;
+    }
+
+    if (delegations.length === 0) {
+      return;
+    }
+
+    if (csvData.length > 0) {
       const out = csvData.map((address) => resolveDelegatedAddress(address));
       downloadCsvFile(out);
-      setProcessing(false);
     }
-  }, [csvData]);
+
+    // Clear processing even if the CSV file contained no rows.
+    setProcessing(false);
+  }, [csvData, delegations, processing]);
 
   return (
     <Container className={styles.toolArea} id="mapping-tool-form">

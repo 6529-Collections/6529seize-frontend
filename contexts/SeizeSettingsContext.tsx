@@ -16,6 +16,7 @@ import { fetchUrl } from "@/services/6529api";
 type SeizeSettingsContextType = {
   seizeSettings: ApiSeizeSettings;
   isMemesWave: (waveId: string | undefined | null) => boolean;
+  // True only after the latest fetch succeeds; failed loads leave this false.
   isLoaded: boolean;
   loadError: Error | null;
 };
@@ -38,8 +39,11 @@ export const SeizeSettingsProvider = ({
   const [loadError, setLoadError] = useState<Error | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     fetchUrl<ApiSeizeSettings>(`${publicEnv.API_ENDPOINT}/api/settings`)
       .then((settings) => {
+        if (!isMounted) return;
         setSeizeSettings({
           ...settings,
           memes_wave_id:
@@ -49,18 +53,23 @@ export const SeizeSettingsProvider = ({
         setIsLoaded(true);
       })
       .catch((error) => {
+        if (!isMounted) return;
         console.error("Failed to fetch seize settings", error);
         setLoadError(error instanceof Error ? error : new Error(String(error)));
         setIsLoaded(false);
       });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const isMemesWave = useCallback(
     (waveId: string | undefined | null): boolean => {
       if (!waveId) return false;
-      return seizeSettings?.memes_wave_id === waveId;
+      return seizeSettings.memes_wave_id === waveId;
     },
-    [seizeSettings]
+    [seizeSettings.memes_wave_id]
   );
 
   const value: SeizeSettingsContextType = useMemo(
