@@ -16,7 +16,7 @@ export default function ErrorComponent({
 }: ErrorComponentProps = {}) {
   const { setTitle } = useTitle();
   const searchParams = useSearchParams();
-  const [isStacktraceExpanded, setIsStacktraceExpanded] = useState(true);
+  const [isStacktraceExpanded, setIsStacktraceExpanded] = useState(false);
   const stacktraceContentId = useId();
 
   useEffect(() => {
