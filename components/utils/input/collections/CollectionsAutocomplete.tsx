@@ -262,7 +262,7 @@ export default function CollectionsAutocomplete({
         return;
       }
       event.preventDefault();
-      const lastSelected = value.length > 0 ? value[value.length - 1] : undefined;
+      const lastSelected = value.at(-1);
       if (lastSelected) {
         handleRemove(lastSelected);
       }
@@ -319,13 +319,17 @@ export default function CollectionsAutocomplete({
   const nativeSelectPlaceholder = hasNoResults
     ? noResultsText
     : selectionPlaceholder;
-  const liveRegionMessage = hasNoResults
-    ? noResultsText
-    : open && trimmedQuery
-      ? `${filteredOptions.length} ${
-          filteredOptions.length === 1 ? "result" : "results"
-        } available`
-      : "";
+  let liveRegionMessage = "";
+  if (hasNoResults) {
+    liveRegionMessage = noResultsText;
+  } else if (open && trimmedQuery) {
+    const resultCount = filteredOptions.length;
+    let resultLabel = "results";
+    if (resultCount === 1) {
+      resultLabel = "result";
+    }
+    liveRegionMessage = `${resultCount} ${resultLabel} available`;
+  }
 
   return (
     <div ref={containerRef} className="tw-flex tw-flex-col tw-gap-1.5">
@@ -337,6 +341,12 @@ export default function CollectionsAutocomplete({
               ? "tw-border-iron-800 tw-bg-iron-900/60 tw-text-iron-400 tw-opacity-80"
               : "tw-border-iron-700 tw-bg-iron-900 hover:tw-border-iron-600"
           )}
+          role="button"
+          aria-label="Collections search input"
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-controls={inputId}
+          aria-disabled={disabled || undefined}
           tabIndex={disabled ? -1 : 0}
           onClick={disabled ? undefined : focusInput}
           onFocus={handleContainerFocus}

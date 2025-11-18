@@ -134,11 +134,12 @@ export default function DelegationMappingTool() {
   useEffect(() => {
     async function fetchDelegations(url: string) {
       try {
-        const delegationsResponse = await fetchAllPages<Delegation>(url);
-        setDelegations(delegationsResponse);
         if (!file) {
           throw new Error("No file provided");
         }
+
+        const delegationsResponse = await fetchAllPages<Delegation>(url);
+        setDelegations(delegationsResponse);
 
         const results = await parseCsvFile(file);
         setCsvData(results);
@@ -155,7 +156,7 @@ export default function DelegationMappingTool() {
       const initialUrl = `${publicEnv.API_ENDPOINT}/api/delegations?${useCaseFilter}${collectionFilter}`;
       fetchDelegations(initialUrl);
     }
-  }, [processing]);
+  }, [processing, file, useCase, collection]);
 
   useEffect(() => {
     if (!processing) {

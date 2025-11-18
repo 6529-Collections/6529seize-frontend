@@ -73,7 +73,7 @@ export const SeizeSettingsProvider = ({
 
   useEffect(() => {
     isMountedRef.current = true;
-    void loadSeizeSettings();
+    loadSeizeSettings();
 
     return () => {
       isMountedRef.current = false;

@@ -201,6 +201,11 @@ function GrantTokensDisclosure({
     onEndReached: hasNextPage ? handleEndReached : undefined,
     isFetchingNextPage,
   });
+  const tokensCountWord = tokensCount === 1 ? "token" : "tokens";
+  const tokensCountDescription =
+    tokensCount == null
+      ? tokensCountLabel
+      : `${tokensCountLabel} ${tokensCountWord}`;
 
   return (
     <div className="tw-mt-4 tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-950">
@@ -223,9 +228,7 @@ function GrantTokensDisclosure({
           <span className="tw-text-xs tw-text-iron-350">
             Expand to inspect
             {" "}
-            {tokensCount == null
-              ? tokensCountLabel
-              : `${tokensCountLabel} token${tokensCount === 1 ? "" : "s"}`}
+            {tokensCountDescription}
             {" "}
             granted to this wallet.
           </span>

@@ -106,7 +106,7 @@ export function areDefaultFilterStatuses(
 export function parseUserPageXtdhGrantedListStatuses(
   value: string | null
 ): GrantedFilterStatuses {
-  if (!value || !value.trim()) return DEFAULT_FILTER_STATUSES;
+  if (!value?.trim()) return DEFAULT_FILTER_STATUSES;
   const parsed = value
     .split(",")
     .map((item) => item.trim().toUpperCase())

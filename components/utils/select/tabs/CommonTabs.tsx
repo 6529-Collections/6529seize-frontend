@@ -59,16 +59,16 @@ export default function CommonTabs<T, U = unknown>(
     updateFadeIndicators();
 
     node.addEventListener("scroll", updateFadeIndicators);
-    if (typeof window !== "undefined") {
-      globalThis.addEventListener("resize", updateFadeIndicators);
+    if (typeof globalThis.window !== "undefined") {
+      globalThis.window.addEventListener("resize", updateFadeIndicators);
     }
 
     return () => {
       if (node) {
         node.removeEventListener("scroll", updateFadeIndicators);
       }
-      if (typeof window !== "undefined") {
-        globalThis.removeEventListener("resize", updateFadeIndicators);
+      if (typeof globalThis.window !== "undefined") {
+        globalThis.window.removeEventListener("resize", updateFadeIndicators);
       }
     };
   }, [updateFadeIndicators]);
