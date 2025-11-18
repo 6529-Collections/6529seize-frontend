@@ -31,6 +31,7 @@
     "type-check": "tsc --noEmit -p tsconfig.json",
     "lint:quiet": "eslint . --quiet",
     "lint": "eslint .",
+    "lint:changed": "bash -lc '{ git diff --name-only -z main...HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; } | xargs -0 npx eslint --no-warn-ignored --max-warnings=0'",
     "lint:fix": "npx eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "relative-to-alias-imports": "tsx scripts/relative-to-alias-imports.ts",
     "deadcode:knip": "knip",
