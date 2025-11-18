@@ -118,7 +118,12 @@ const enhancedFetch: typeof fetch = async (
     Object.entries(appHeaders).forEach(([key, value]) => {
       enhancedHeaders.set(key, value);
     });
-  } catch {}
+  } catch (error) {
+    console.warn(
+      "[SSR Fetch] Failed to get app common headers:",
+      error instanceof Error ? error.message : error
+    );
+  }
 
   const headerKeys = Array.from(enhancedHeaders.keys());
   console.log(`[SSR Fetch] Request headers: ${headerKeys.join(", ")}`);
