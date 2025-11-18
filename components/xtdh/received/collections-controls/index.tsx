@@ -24,7 +24,7 @@ export function XtdhCollectionsControls({
 }: Readonly<XtdhCollectionsControlsProps>) {
   return (
     <section className="tw-flex tw-flex-col tw-gap-3 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between" aria-label="Sort received collections">
-      <div className="tw-w-full lg:tw-w-auto">
+      <div className="tw-w-full lg:tw-w-auto tw-overflow-x-auto horizontal-menu-hide-scrollbar">
         <CommonSelect
           items={COLLECTION_SORT_ITEMS}
           activeItem={activeSortField}
