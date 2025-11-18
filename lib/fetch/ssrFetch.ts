@@ -64,11 +64,13 @@ const enhancedFetch: typeof fetch = async (
 
   let clientId: string;
   let clientSecret: string;
+  let stagingApiKey: string | undefined;
 
   try {
     const env = getServerEnvOrThrow();
     clientId = env.SSR_CLIENT_ID;
     clientSecret = env.SSR_CLIENT_SECRET;
+    stagingApiKey = env.STAGING_API_KEY_SERVER;
   } catch {
     return originalFetch(input, init);
   }
@@ -108,6 +110,12 @@ const enhancedFetch: typeof fetch = async (
     signatureData.timestamp.toString()
   );
   enhancedHeaders.set("x-6529-internal-waf-signature", wafSignature);
+
+  if (stagingApiKey) {
+    enhancedHeaders.set("x-6529-auth", stagingApiKey);
+  }
+
+  console.log("hi i am enhancedHeaders for", path, enhancedHeaders);
 
   return originalFetch(input, {
     ...init,
