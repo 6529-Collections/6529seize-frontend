@@ -45,11 +45,12 @@ describe("commonApiFetch", () => {
     (getAuthJwt as jest.Mock).mockReturnValue(null);
     fetchMock.mockResolvedValue({
       ok: false,
+      status: 400,
       statusText: "Bad",
       json: async () => ({ error: "err" }),
     });
 
-    await expect(commonApiFetch({ endpoint: "bad" })).rejects.toBe("err");
+    await expect(commonApiFetch({ endpoint: "bad" })).rejects.toBe("HTTP 400 Bad: err");
     expect(fetchMock).toHaveBeenCalledWith(
       "https://api.test.6529.io/api/bad",
       expect.objectContaining({
@@ -97,12 +98,13 @@ describe("commonApiPost", () => {
     (getAuthJwt as jest.Mock).mockReturnValue(null);
     fetchMock.mockResolvedValue({
       ok: false,
+      status: 400,
       statusText: "B",
       json: async () => ({ error: "err" }),
     });
 
     await expect(commonApiPost({ endpoint: "e", body: {} })).rejects.toBe(
-      "err",
+      "HTTP 400 B: err",
     );
     expect(fetchMock).toHaveBeenCalledWith(
       "https://api.test.6529.io/api/e",

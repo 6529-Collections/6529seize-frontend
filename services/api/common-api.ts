@@ -15,11 +15,11 @@ const getHeaders = (
   };
 };
 
-const buildUrlAndPath = (
+const buildUrl = (
   endpoint: string,
   params?: Record<string, string>,
   transformParams?: (params: Record<string, string>) => Record<string, string>
-): { url: string; path: string } => {
+): string => {
   let path = `/api/${endpoint}`;
   let url = `${publicEnv.API_ENDPOINT}${path}`;
 
@@ -31,17 +31,31 @@ const buildUrlAndPath = (
     });
     const queryString = queryParams.toString();
     url += `?${queryString}`;
-    path += `?${queryString}`;
   }
 
-  return { url, path };
+  return url;
 };
 
 const handleApiError = async (res: Response): Promise<never> => {
-  const body: any = await res.json();
-  return Promise.reject(
-    body?.error ?? res.statusText ?? "Something went wrong"
-  );
+  let errorMessage: string;
+  let rawContent: string = "";
+
+  try {
+    const body: any = await res.json();
+    errorMessage = body?.error ?? res.statusText ?? "Something went wrong";
+  } catch {
+    try {
+      rawContent = await res.text();
+      errorMessage = rawContent || res.statusText || "Something went wrong";
+    } catch {
+      errorMessage = res.statusText || "Something went wrong";
+    }
+  }
+
+  const statusPart = res.status ? `HTTP ${res.status}` : "HTTP Error";
+  const statusTextPart = res.statusText ? ` ${res.statusText}` : "";
+  const composedError = `${statusPart}${statusTextPart}: ${errorMessage}`;
+  return Promise.reject(composedError);
 };
 
 const executeApiRequest = async <T>(
@@ -49,7 +63,8 @@ const executeApiRequest = async <T>(
   method: string,
   headers: Record<string, string>,
   body?: BodyInit,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  parseJson: boolean = true
 ): Promise<T> => {
   const res = await fetch(url, {
     method,
@@ -62,6 +77,10 @@ const executeApiRequest = async <T>(
     return handleApiError(res);
   }
 
+  if (!parseJson) {
+    return undefined as T;
+  }
+
   return res.json();
 };
 
@@ -71,7 +90,7 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
   params?: U;
   signal?: AbortSignal;
 }): Promise<T> => {
-  const { url } = buildUrlAndPath(
+  const url = buildUrl(
     param.endpoint,
     param.params as Record<string, string> | undefined,
     (params) => {
@@ -83,16 +102,13 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
     }
   );
 
-  const res = await fetch(url, {
-    headers: getHeaders(param.headers, false),
-    signal: param.signal,
-  });
-
-  if (!res.ok) {
-    return handleApiError(res);
-  }
-
-  return res.json();
+  return executeApiRequest<T>(
+    url,
+    "GET",
+    getHeaders(param.headers, false),
+    undefined,
+    param.signal
+  );
 };
 
 interface RetryOptions {
@@ -221,7 +237,7 @@ export const commonApiPost = async <T, U, Z = Record<string, string>>(param: {
   params?: Z;
   signal?: AbortSignal;
 }): Promise<U> => {
-  const { url } = buildUrlAndPath(
+  const url = buildUrl(
     param.endpoint,
     param.params as Record<string, string> | undefined
   );
@@ -239,36 +255,32 @@ export const commonApiPostWithoutBodyAndResponse = async (param: {
   endpoint: string;
   headers?: Record<string, string>;
 }): Promise<void> => {
-  const { url } = buildUrlAndPath(param.endpoint);
+  const url = buildUrl(param.endpoint);
 
-  const res = await fetch(url, {
-    method: "POST",
-    headers: getHeaders(param.headers, true),
-    body: "",
-  });
-
-  if (!res.ok) {
-    return handleApiError(res);
-  }
+  await executeApiRequest<void>(
+    url,
+    "POST",
+    getHeaders(param.headers, true),
+    "",
+    undefined,
+    false
+  );
 };
 
 export const commonApiDelete = async (param: {
   endpoint: string;
   headers?: Record<string, string>;
 }): Promise<void> => {
-  const { url } = buildUrlAndPath(param.endpoint);
+  const url = buildUrl(param.endpoint);
 
-  const res = await fetch(url, {
-    method: "DELETE",
-    headers: getHeaders(param.headers),
-  });
-
-  if (!res.ok) {
-    const body: any = await res.json();
-    return Promise.reject(
-      new Error(body?.error ?? res.statusText ?? "Something went wrong")
-    );
-  }
+  await executeApiRequest<void>(
+    url,
+    "DELETE",
+    getHeaders(param.headers),
+    undefined,
+    undefined,
+    false
+  );
 };
 
 export const commonApiDeleteWithBody = async <
@@ -281,7 +293,7 @@ export const commonApiDeleteWithBody = async <
   headers?: Record<string, string>;
   params?: Z;
 }): Promise<U> => {
-  const { url } = buildUrlAndPath(
+  const url = buildUrl(
     param.endpoint,
     param.params as Record<string, string> | undefined
   );
@@ -300,7 +312,7 @@ export const commonApiPut = async <T, U, Z = Record<string, string>>(param: {
   headers?: Record<string, string>;
   params?: Z;
 }): Promise<U> => {
-  const { url } = buildUrlAndPath(
+  const url = buildUrl(
     param.endpoint,
     param.params as Record<string, string> | undefined
   );
@@ -318,7 +330,7 @@ export const commonApiPostForm = async <U>(param: {
   body: FormData;
   headers?: Record<string, string>;
 }): Promise<U> => {
-  const { url } = buildUrlAndPath(param.endpoint);
+  const url = buildUrl(param.endpoint);
 
   return executeApiRequest<U>(
     url,
