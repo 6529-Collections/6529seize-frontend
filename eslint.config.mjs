@@ -85,6 +85,7 @@ export default defineConfig([globalIgnores([
         "scripts/**",
         "**/next.config.*",
         "config/env.ts",
+        "config/serverEnv.ts",
         "__tests__/config/env.base-endpoint.test.ts",
         "**/playwright.config.ts",
         "tests/**",

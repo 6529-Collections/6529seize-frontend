@@ -80,12 +80,18 @@ jobs:
           --version-label "${{ env.COMMIT_SHA }}" \
           --description "${{ env.COMMIT_MESSAGE }}"
 
-      - name: Deploy new Version to ElasticBeanstalk
+      - name: Deploy new Version to ElasticBeanstalk with Runtime Environment Variables
+        env:
+          SSR_CLIENT_ID: ${{ secrets.SSR_CLIENT_ID }}
+          SSR_CLIENT_SECRET: ${{ secrets.SSR_CLIENT_SECRET }}
         run: |
           aws elasticbeanstalk update-environment \
-          --application-name "${{ env.BEANSTALK_APP_NAME }}" \
-          --environment-name "${{ env.BEANSTALK_ENV_NAME }}" \
-          --version-label "${{ env.COMMIT_SHA }}"
+            --application-name "${{ env.BEANSTALK_APP_NAME }}" \
+            --environment-name "${{ env.BEANSTALK_ENV_NAME }}" \
+            --version-label "${{ env.COMMIT_SHA }}" \
+            --option-settings \
+              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=SSR_CLIENT_ID,Value=${SSR_CLIENT_ID}" \
+              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=SSR_CLIENT_SECRET,Value=${SSR_CLIENT_SECRET}"
 
       - name: Check Elastic Beanstalk health and readiness (120s warmup then 20 retries with 60s delay)
         run: |
