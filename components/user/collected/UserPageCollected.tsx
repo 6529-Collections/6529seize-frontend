@@ -411,9 +411,16 @@ export default function UserPageCollected({
   >({
     queryKey: [QueryKey.PROFILE_COLLECTED_TRANSFER, filters, connectedAddress],
     queryFn: async () => {
-      const allPagesUrl = `${publicEnv.API_ENDPOINT}/api/profiles/${connectedAddress}/collected?&page_size=200&seized=${CollectionSeized.SEIZED}`;
-      const data = await fetchAllPages<CollectedCard>(allPagesUrl);
-      return data;
+      try {
+        const allPagesUrl = `${publicEnv.API_ENDPOINT}/api/profiles/${connectedAddress}/collected?&page_size=200&seized=${CollectionSeized.SEIZED}`;
+        return await fetchAllPages<CollectedCard>(allPagesUrl);
+      } catch (error) {
+        console.error(
+          `Failed to fetch transfer data for profile ${connectedAddress}`,
+          error
+        );
+        throw error;
+      }
     },
     enabled: showTransfer && transferEnabled,
     placeholderData: keepPreviousData,

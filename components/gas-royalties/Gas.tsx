@@ -64,16 +64,22 @@ export default function GasComponent() {
     return getUrl("gas");
   }
 
-  function fetchGas() {
+  async function fetchGas() {
     setFetching(true);
-    fetchUrl<Gas[]>(getUrlWithParams()).then((res: Gas[]) => {
+    try {
+      const res = await fetchUrl<Gas[]>(getUrlWithParams());
       res.forEach((r) => {
         r.gas = Math.round(r.gas * 100000) / 100000;
       });
       setGas(res);
       setSumGas(res.map((g) => g.gas).reduce((a, b) => a + b, 0));
+    } catch (error) {
+      console.error("Failed to fetch gas data", error);
+      setGas([]);
+      setSumGas(0);
+    } finally {
       setFetching(false);
-    });
+    }
   }
 
   useEffect(() => {

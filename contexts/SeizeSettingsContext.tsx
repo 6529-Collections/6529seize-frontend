@@ -33,15 +33,17 @@ export const SeizeSettingsProvider = ({
   });
 
   useEffect(() => {
-    fetchUrl<ApiSeizeSettings>(`${publicEnv.API_ENDPOINT}/api/settings`).then(
-      (settings: ApiSeizeSettings) => {
+    fetchUrl<ApiSeizeSettings>(`${publicEnv.API_ENDPOINT}/api/settings`)
+      .then((settings: ApiSeizeSettings) => {
         setSeizeSettings({
           ...settings,
           memes_wave_id:
             publicEnv.DEV_MODE_MEMES_WAVE_ID ?? settings.memes_wave_id,
         });
-      }
-    );
+      })
+      .catch((error) => {
+        console.error("Failed to fetch seize settings", error);
+      });
   }, []);
 
   const isMemesWave = (waveId: string | undefined | null): boolean => {

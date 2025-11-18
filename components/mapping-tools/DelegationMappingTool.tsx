@@ -83,8 +83,9 @@ export default function DelegationMappingTool() {
 
   useEffect(() => {
     async function fetchDelegations(url: string) {
-      fetchAllPages<Delegation>(url).then((delegations) => {
-        setDelegations(delegations);
+      try {
+        const delegationsResponse = await fetchAllPages<Delegation>(url);
+        setDelegations(delegationsResponse);
         const reader = new FileReader();
 
         reader.onload = async () => {
@@ -107,7 +108,11 @@ export default function DelegationMappingTool() {
         };
 
         reader.readAsText(file);
-      });
+      } catch (error) {
+        console.error("Failed to fetch delegations for mapping tool", error);
+        setDelegations([]);
+        setProcessing(false);
+      }
     }
     if (processing) {
       const useCaseFilter = `&use_case=1,${useCase}`;

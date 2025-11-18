@@ -756,13 +756,40 @@ export const getRandomColorWithSeed = (seedString: string) => {
 };
 
 
+const escapeHtml = (value: string): string =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+
 export function parseNftDescriptionToHtml(description: string) {
-  let d = description.replaceAll("\n", "<br />");
-  d = d.replace(
-    /(https?:\/\/(www\.)?[-a-z0-9@:%._+~#=]{1,256}\.[a-z0-9]{1,6}\b([-a-z0-9@:%_+.~#?&=/]*))/gi,
-    '<a href=\'$1\' target="blank" rel="noopener noreferrer">$1</a>'
-  );
-  return d;
+  const urlRegex =
+    /(https?:\/\/(www\.)?[-a-z0-9@:%._+~#=]{1,256}\.[a-z0-9]{1,6}\b([-a-z0-9@:%_+.~#?&=/]*))/gi;
+
+  let result = "";
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = urlRegex.exec(description)) !== null) {
+    const url = match[0];
+    const index = match.index ?? 0;
+
+    const preceding = description.slice(lastIndex, index);
+    result += escapeHtml(preceding).replace(/\n/g, "<br />");
+
+    const safeUrl = escapeHtml(url);
+    result += `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeUrl}</a>`;
+
+    lastIndex = index + url.length;
+  }
+
+  const remaining = description.slice(lastIndex);
+  result += escapeHtml(remaining).replace(/\n/g, "<br />");
+
+  return result;
 }
 
 export function getPathForContract(contract: string) {

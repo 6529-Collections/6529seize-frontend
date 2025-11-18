@@ -1,6 +1,16 @@
-import { isValidEthAddress } from "@/helpers/Helpers";
+import { ApiTdhGrantTargetChain } from "@/generated/models/ApiTdhGrantTargetChain";
 import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
 import type { SupportedChain } from "@/types/nft";
+import { isValidEthAddress } from "@/helpers/Helpers";
+
+type ApiGrantTargetChain = ApiTdhGrantsPage["data"][number]["target_chain"];
+
+const GRANT_CHAIN_TO_SUPPORTED_CHAIN: Record<
+  ApiGrantTargetChain,
+  SupportedChain
+> = {
+  [ApiTdhGrantTargetChain.EthereumMainnet]: "ethereum",
+};
 
 export function getContractAddress(
   contract: string
@@ -49,7 +59,7 @@ export function formatTotalSupply(value?: string | null): string {
 }
 
 export function formatFloorPrice(value?: number | null): string {
-  if (typeof value !== "number" || Number.isNaN(value)) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
     return "Unknown";
   }
 
@@ -59,11 +69,13 @@ export function formatFloorPrice(value?: number | null): string {
 }
 
 export function mapGrantChainToSupportedChain(
-  chain: ApiTdhGrantsPage["data"][number]["target_chain"]
+  chain: ApiGrantTargetChain
 ): SupportedChain {
-  if (chain === "ETHEREUM_MAINNET") {
-    return "ethereum";
+  const supportedChain = GRANT_CHAIN_TO_SUPPORTED_CHAIN[chain];
+
+  if (!supportedChain) {
+    throw new Error(`Unsupported TDH grant target chain: ${chain}`);
   }
 
-  return "ethereum";
+  return supportedChain;
 }

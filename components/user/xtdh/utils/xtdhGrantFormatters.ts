@@ -1,8 +1,12 @@
 import { parseTokenExpressionToRanges } from "@/components/nft-picker/NftPicker.utils";
+import type { ParseError } from "@/components/nft-picker/NftPicker.types";
 
 const PARSE_ERROR_ARRAY_NAME = "ParseErrorArray";
 
-const isParseErrorArray = (error: unknown): error is Error & { name: string } => {
+type ParseErrorArray = ParseError[] &
+  Error & { name: typeof PARSE_ERROR_ARRAY_NAME };
+
+const isParseErrorArray = (error: unknown): error is ParseErrorArray => {
   if (!Array.isArray(error)) {
     return false;
   }
@@ -31,7 +35,7 @@ export const getTargetTokensCountInfo = (
     return { kind: "all", label: "All tokens", count: null };
   }
 
-  const normalizedCount = Math.max(0, Math.floor(count));
+  const normalizedCount = Math.floor(count);
 
   return {
     kind: "count",

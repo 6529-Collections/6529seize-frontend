@@ -55,7 +55,8 @@ export function NftSuggestList({
     scrollContainerRef,
     listContainerRef,
     ROW_HEIGHT,
-    OVERSCAN
+    OVERSCAN,
+    isOpen
   );
 
   if (!isOpen) {
@@ -73,6 +74,7 @@ export function NftSuggestList({
       >
         <ul
           id="nft-picker-suggest-list"
+          role="listbox"
           aria-label="NFT collections suggestions"
           className="tw-relative tw-m-0 tw-list-none tw-p-0"
           style={{ height: "100%" }}
@@ -104,7 +106,8 @@ export function NftSuggestList({
               >
                 <button
                   type="button"
-                  aria-current={isActive ? "true" : undefined}
+                  role="option"
+                  aria-selected={isActive}
                   className={clsx(
                     "tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-items-center tw-gap-3 tw-px-3 tw-py-2 tw-text-left",
                     isActive

@@ -109,18 +109,34 @@ export function parseUserPageXtdhGrantedListStatuses(
 export function serializeUserPageXtdhGrantedListStatuses(
   statuses: GrantedFilterStatuses
 ): string | null {
-  const normalized = normalizeGrantedStatuses(statuses);
-  if (areAllGrantedStatuses(normalized)) {
+  return serializeNormalizedUserPageXtdhGrantedListStatuses(
+    normalizeGrantedStatuses(statuses)
+  );
+}
+
+export function serializeNormalizedUserPageXtdhGrantedListStatuses(
+  normalizedStatuses: GrantedFilterStatuses
+): string | null {
+  if (areAllGrantedStatusesNormalized(normalizedStatuses)) {
     return DEFAULT_STATUS;
   }
-  return normalized.join(",");
+  return normalizedStatuses.join(",");
 }
 
 export function areAllGrantedStatuses(
   statuses: GrantedFilterStatuses
 ): boolean {
-  const normalized = normalizeGrantedStatuses(statuses);
-  return normalized.length === 1 && normalized[0] === DEFAULT_STATUS;
+  return areAllGrantedStatusesNormalized(
+    normalizeGrantedStatuses(statuses)
+  );
+}
+
+export function areAllGrantedStatusesNormalized(
+  normalizedStatuses: GrantedFilterStatuses
+): boolean {
+  return (
+    normalizedStatuses.length === 1 && normalizedStatuses[0] === DEFAULT_STATUS
+  );
 }
 
 export function parseUserPageXtdhGrantedListSortField(

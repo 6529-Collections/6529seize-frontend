@@ -138,10 +138,20 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
     if (tokenId) {
       setFetchingProofs(true);
       const url = `${publicEnv.API_ENDPOINT}/api/nextgen/burn_proofs/${props.collection_merkle.merkle_root}/${tokenId}`;
-      fetchUrl<ProofResponse>(url).then((response: ProofResponse) => {
-        setBurnProofResponse(response);
-        setFetchingProofs(false);
-      });
+      fetchUrl<ProofResponse>(url)
+        .then((response: ProofResponse) => {
+          setBurnProofResponse(response);
+        })
+        .catch((error) => {
+          console.error(
+            `Failed to fetch burn proof for token ${tokenId}`,
+            error
+          );
+          setBurnProofResponse(undefined);
+        })
+        .finally(() => {
+          setFetchingProofs(false);
+        });
     }
   }, [tokenId]);
 

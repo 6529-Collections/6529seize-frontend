@@ -142,6 +142,7 @@ export function UserPageXtdhGrantedStatusDropdown({
           ref={buttonRef}
           type="button"
           aria-haspopup="true"
+          aria-expanded={isOpen}
           aria-label={`${filterLabel}: ${triggerLabel}`}
           onClick={() => setIsOpen(!isOpen)}
           disabled={disabled}

@@ -227,12 +227,22 @@ export default function NextGenMint(props: Readonly<Props>) {
     if (props.collection.merkle_root) {
       const merkleRoot = props.collection.merkle_root;
       const url = `${publicEnv.API_ENDPOINT}/api/nextgen/merkle_roots/${merkleRoot}`;
-      fetchUrl<CollectionWithMerkle>(url).then((response: CollectionWithMerkle) => {
-        if (response) {
-          setCollection(response);
-        }
-        setCollectionLoaded(true);
-      });
+      fetchUrl<CollectionWithMerkle>(url)
+        .then((response: CollectionWithMerkle) => {
+          if (response) {
+            setCollection(response);
+          }
+        })
+        .catch((error) => {
+          console.error(
+            `Failed to fetch mint merkle data for root ${merkleRoot}`,
+            error
+          );
+          setCollection(undefined);
+        })
+        .finally(() => {
+          setCollectionLoaded(true);
+        });
     }
   }, [props.collection.merkle_root]);
 

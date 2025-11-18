@@ -13,7 +13,7 @@ export function BaseMetricsSection({
         Base xTDH Metrics
       </h2>
       {cards.map((card) => (
-        <StatCard key={card.label} {...card} />
+        <StatCard key={card.id} {...card} />
       ))}
     </section>
   );

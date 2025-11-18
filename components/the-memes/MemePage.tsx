@@ -179,8 +179,9 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
           setNftNotFound(true);
         }
       })
-      .catch(() => {
+      .catch((error) => {
         if (!cancelled) {
+          console.error(`Failed to fetch meme page data for ${nftId}`, error);
           setNftMeta(undefined);
           setNft(undefined);
         }
@@ -213,11 +214,21 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
         }/api/transactions?contract=${MEMES_CONTRACT}&wallet=${connectedWallets.join(
           ","
         )}&id=${nftId}`
-      ).then((response: DBResponse) => {
-        setTransactions(response.data);
-        updateNftBalances(response.data);
-        setUserLoaded(true);
-      });
+      )
+        .then((response: DBResponse) => {
+          setTransactions(response.data);
+          updateNftBalances(response.data);
+          setUserLoaded(true);
+        })
+        .catch((error) => {
+          console.error(
+            `Failed to fetch meme transactions for wallets ${connectedWallets.join(",")}`,
+            error
+          );
+          setTransactions([]);
+          setNftBalance(0);
+          setUserLoaded(true);
+        });
     } else {
       setNftBalance(0);
       setUserLoaded(true);

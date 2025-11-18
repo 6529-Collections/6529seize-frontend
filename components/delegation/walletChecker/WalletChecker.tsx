@@ -95,8 +95,13 @@ export default function WalletCheckerComponent(
   } = useQuery<DBResponse>({
     queryKey: ["delegations", walletAddress],
     queryFn: async () => {
-      const url = `${publicEnv.API_ENDPOINT}/api/delegations/${walletAddress}`;
-      return (await fetchUrl(url)) as DBResponse;
+      try {
+        const url = `${publicEnv.API_ENDPOINT}/api/delegations/${walletAddress}`;
+        return (await fetchUrl(url)) as DBResponse;
+      } catch (error) {
+        console.error(`Failed to fetch delegations for ${walletAddress}`, error);
+        throw error;
+      }
     },
     enabled: shouldFetchDelegations,
     refetchOnWindowFocus: false,
@@ -184,28 +189,33 @@ export default function WalletCheckerComponent(
   } = useQuery<WalletConsolidation[]>({
     queryKey: ["consolidations", walletAddress],
     queryFn: async () => {
-      const baseUrl = `${publicEnv.API_ENDPOINT}/api/consolidations/${walletAddress}?show_incomplete=true`;
-      const firstResponse = (await fetchUrl(baseUrl)) as DBResponse;
-      const firstData = firstResponse.data as WalletConsolidation[];
+      try {
+        const baseUrl = `${publicEnv.API_ENDPOINT}/api/consolidations/${walletAddress}?show_incomplete=true`;
+        const firstResponse = (await fetchUrl(baseUrl)) as DBResponse;
+        const firstData = firstResponse.data as WalletConsolidation[];
 
-      if (firstData.length > 0) {
-        const newWallet = areEqualAddresses(walletAddress, firstData[0].wallet1)
-          ? firstData[0].wallet2
-          : firstData[0].wallet1;
-        const nextUrl = `${publicEnv.API_ENDPOINT}/api/consolidations/${newWallet}?show_incomplete=true`;
-        try {
-          const secondResponse = (await fetchUrl(nextUrl)) as DBResponse;
-          return [
-            ...firstData,
-            ...(secondResponse.data as WalletConsolidation[]),
-          ];
-        } catch {
-          console.error(`Failed to fetch consolidations for related wallet: ${newWallet}`);
-          return firstData;
+        if (firstData.length > 0) {
+          const newWallet = areEqualAddresses(walletAddress, firstData[0].wallet1)
+            ? firstData[0].wallet2
+            : firstData[0].wallet1;
+          const nextUrl = `${publicEnv.API_ENDPOINT}/api/consolidations/${newWallet}?show_incomplete=true`;
+          try {
+            const secondResponse = (await fetchUrl(nextUrl)) as DBResponse;
+            return [
+              ...firstData,
+              ...(secondResponse.data as WalletConsolidation[]),
+            ];
+          } catch {
+            console.error(`Failed to fetch consolidations for related wallet: ${newWallet}`);
+            return firstData;
+          }
         }
-      }
 
-      return firstData;
+        return firstData;
+      } catch (error) {
+        console.error(`Failed to fetch consolidations for ${walletAddress}`, error);
+        throw error;
+      }
     },
     enabled: shouldFetchDelegations,
     refetchOnWindowFocus: false,
@@ -230,20 +240,25 @@ export default function WalletCheckerComponent(
   } = useQuery<{ address: string; display: string | undefined }[]>({
     queryKey: ["consolidated-wallets", fetchedAddress],
     queryFn: async () => {
-      const url = `${publicEnv.API_ENDPOINT}/api/consolidations/${fetchedAddress}`;
-      const response = (await fetchUrl(url)) as DBResponse;
-      const wallets = response.data as string[];
+      try {
+        const url = `${publicEnv.API_ENDPOINT}/api/consolidations/${fetchedAddress}`;
+        const response = (await fetchUrl(url)) as DBResponse;
+        const wallets = response.data as string[];
 
-      const mappedWallets: { address: string; display: string | undefined }[] = [];
+        const mappedWallets: { address: string; display: string | undefined }[] = [];
 
-      for (const wallet of wallets) {
-        mappedWallets.push({
-          address: wallet,
-          display: resolveConsolidationDisplay(wallet, consolidations),
-        });
+        for (const wallet of wallets) {
+          mappedWallets.push({
+            address: wallet,
+            display: resolveConsolidationDisplay(wallet, consolidations),
+          });
+        }
+
+        return mappedWallets;
+      } catch (error) {
+        console.error(`Failed to fetch consolidated wallets for ${fetchedAddress}`, error);
+        throw error;
       }
-
-      return mappedWallets;
     },
     enabled: false,
     refetchOnWindowFocus: false,
@@ -319,7 +334,9 @@ export default function WalletCheckerComponent(
       return;
     }
 
-    refetchConsolidatedWallets().catch(() => {});
+    refetchConsolidatedWallets().catch((error) => {
+      console.error("Failed to refetch consolidated wallets", error);
+    });
   }, [
     consolidationsLoaded,
     consolidations,

@@ -65,47 +65,61 @@ export default function LabCollection({
   }, []);
 
   useEffect(() => {
-    if (collectionName) {
-      const nftsUrl = `${
-        publicEnv.API_ENDPOINT
-      }/api/lab_extended_data?collection=${encodeURIComponent(collectionName)}`;
-      fetchAllPages<LabExtendedData>(nftsUrl).then((responseNftMetas) => {
+    if (!collectionName) {
+      return;
+    }
+
+    const loadCollection = async () => {
+      try {
+        const nftsUrl = `${
+          publicEnv.API_ENDPOINT
+        }/api/lab_extended_data?collection=${encodeURIComponent(collectionName)}`;
+        const responseNftMetas = await fetchAllPages<LabExtendedData>(nftsUrl);
         setNftMetas(responseNftMetas);
         if (responseNftMetas.length > 0) {
           const tokenIds = responseNftMetas.map((n: LabExtendedData) => n.id);
-          fetchAllPages<LabNFT>(
-            `${publicEnv.API_ENDPOINT}/api/nfts_memelab?id=${tokenIds.join(
-              ","
-            )}`
-          ).then((responseNfts) => {
-            setNfts(responseNfts);
-            setNftsLoaded(true);
-          });
-          let collectionSecondaryLink: string = "";
+          let collectionSecondaryLink = "";
           responseNftMetas.map((nftm) => {
-            if (
-              nftm.website &&
-              !collectionSecondaryLink.includes(nftm.website)
-            ) {
+            if (nftm.website && !collectionSecondaryLink.includes(nftm.website)) {
               collectionSecondaryLink += nftm.website;
             }
           });
           setWebsite(collectionSecondaryLink);
+          const responseNfts = await fetchAllPages<LabNFT>(
+            `${publicEnv.API_ENDPOINT}/api/nfts_memelab?id=${tokenIds.join(
+              ","
+            )}`
+          );
+          setNfts(responseNfts);
         } else {
           setNfts([]);
-          setNftsLoaded(true);
+          setWebsite(undefined);
         }
-      });
-    }
+      } catch (error) {
+        console.error(`Failed to fetch Meme Lab collection ${collectionName}`, error);
+        setNftMetas([]);
+        setNfts([]);
+        setWebsite(undefined);
+      } finally {
+        setNftsLoaded(true);
+      }
+    };
+
+    loadCollection();
   }, [collectionName]);
 
   useEffect(() => {
     if (connectedProfile?.consolidation_key) {
       fetchAllPages<NftOwner>(
         `${publicEnv.API_ENDPOINT}/api/nft-owners/consolidation/${connectedProfile?.consolidation_key}?contract=${MEMES_CONTRACT}`
-      ).then((owners) => {
-        setNftBalances(owners);
-      });
+      )
+        .then((owners) => {
+          setNftBalances(owners);
+        })
+        .catch((error) => {
+          console.error("Failed to fetch Meme Lab balances for user", error);
+          setNftBalances([]);
+        });
     } else {
       setNftBalances([]);
     }

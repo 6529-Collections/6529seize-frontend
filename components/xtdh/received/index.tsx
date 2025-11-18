@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState, type ChangeEvent, type ReactElement } from "react";
+import { useEffect, useId, useMemo, useState, type ChangeEvent, type ReactElement } from "react";
 
 import { getDateDisplay } from "@/helpers/Helpers";
 import type { XtdhReceivedNft } from "@/types/xtdh";
@@ -37,10 +37,12 @@ export default function XtdhReceivedSection({
   const [sortField, setSortField] = useState<XtdhReceivedSortField>("xtdh_rate");
   const [sortDirection, setSortDirection] = useState<XtdhReceivedSortDirection>("desc");
   const [page, setPage] = useState(1);
+  const collectionSelectId = useId();
+  const sortSelectId = useId();
 
   useEffect(() => {
     setPage(1);
-  }, [collectionFilter, sortField, sortDirection, profileId]);
+  }, [collectionFilter, sortField, sortDirection, profileId, pageSize]);
 
   const collections = collectionFilter === ALL_COLLECTIONS_VALUE ? undefined : [collectionFilter];
 
@@ -103,8 +105,12 @@ export default function XtdhReceivedSection({
     setSortDirection((current) => (current === "desc" ? "asc" : "desc"));
   };
 
-  const handleRetry = () => {
-    void query.refetch();
+  const handleRetry = async (): Promise<void> => {
+    try {
+      await query.refetch();
+    } catch {
+      /* query state already communicates errors */
+    }
   };
 
   if (!profileId) {
@@ -138,9 +144,9 @@ export default function XtdhReceivedSection({
     );
   } else if (isInitialLoading) {
     content = (
-      <div role="status" aria-live="polite" className="tw-text-sm tw-text-iron-300">
+      <output aria-live="polite" className="tw-block tw-text-sm tw-text-iron-300">
         Loading received xTDH…
-      </div>
+      </output>
     );
   } else if (query.isError) {
     content = (
@@ -156,7 +162,7 @@ export default function XtdhReceivedSection({
         </button>
       </div>
     );
-  } else if (!query.tokens.length) {
+  } else if (query.tokens.length === 0) {
     content = (
       <p className="tw-text-sm tw-text-iron-300 tw-m-0">
         {hasFilterApplied
@@ -201,10 +207,13 @@ export default function XtdhReceivedSection({
       </div>
 
       <div className="tw-flex tw-flex-wrap tw-gap-4 tw-items-end">
-        <label className="tw-flex tw-flex-col tw-gap-2 tw-text-sm tw-text-iron-100">
-          Collection filter
+        <div className="tw-flex tw-flex-col tw-gap-2">
+          <label className="tw-text-sm tw-text-iron-100" htmlFor={collectionSelectId}>
+            Collection filter
+          </label>
           <select
-            className="tw-w-56 tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm focus:tw-border-primary-500 focus:tw-outline-none"
+            id={collectionSelectId}
+            className="tw-w-56 tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 focus:tw-border-primary-500 focus:tw-outline-none"
             value={collectionFilter}
             onChange={handleCollectionChange}
           >
@@ -215,12 +224,15 @@ export default function XtdhReceivedSection({
               </option>
             ))}
           </select>
-        </label>
+        </div>
 
-        <label className="tw-flex tw-flex-col tw-gap-2 tw-text-sm tw-text-iron-100">
-          Sort by
+        <div className="tw-flex tw-flex-col tw-gap-2">
+          <label className="tw-text-sm tw-text-iron-100" htmlFor={sortSelectId}>
+            Sort by
+          </label>
           <select
-            className="tw-w-48 tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm focus:tw-border-primary-500 focus:tw-outline-none"
+            id={sortSelectId}
+            className="tw-w-48 tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 focus:tw-border-primary-500 focus:tw-outline-none"
             value={sortField}
             onChange={handleSortChange}
             disabled={isSortingDisabled}
@@ -231,7 +243,7 @@ export default function XtdhReceivedSection({
               </option>
             ))}
           </select>
-        </label>
+        </div>
 
         <button
           type="button"

@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
   type ChangeEvent,
+  type FocusEvent,
   type KeyboardEvent,
 } from "react";
 import { useClickAway } from "react-use";
@@ -38,6 +39,8 @@ type KeyboardNavigationKey =
   | "Backspace";
 
 type KeyHandler = (event: KeyboardEvent<HTMLInputElement>) => void;
+
+const ACTIVATION_KEYS = new Set(["Enter", " ", "Spacebar"]);
 
 export default function CollectionsAutocomplete({
   options,
@@ -266,6 +269,44 @@ export default function CollectionsAutocomplete({
     setHighlightedIndex(index);
   }, []);
 
+  const handleOptionKeyDown = useCallback(
+    (
+      event: KeyboardEvent<HTMLButtonElement>,
+      option: CollectionsAutocompleteOption
+    ) => {
+      if (!ACTIVATION_KEYS.has(event.key)) {
+        return;
+      }
+      event.preventDefault();
+      handleSelect(option);
+    },
+    [handleSelect]
+  );
+
+  const handleContainerKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (disabled || event.target !== event.currentTarget) {
+        return;
+      }
+      if (!ACTIVATION_KEYS.has(event.key)) {
+        return;
+      }
+      event.preventDefault();
+      focusInput();
+    },
+    [disabled, focusInput]
+  );
+
+  const handleContainerFocus = useCallback(
+    (event: FocusEvent<HTMLDivElement>) => {
+      if (event.target !== event.currentTarget) {
+        return;
+      }
+      focusInput();
+    },
+    [focusInput]
+  );
+
   const hasNoResults = filteredOptions.length === 0 && query.trim().length > 0;
   const nativeSelectPlaceholder = hasNoResults
     ? noResultsText
@@ -281,7 +322,17 @@ export default function CollectionsAutocomplete({
               ? "tw-border-iron-800 tw-bg-iron-900/60 tw-text-iron-400 tw-opacity-80"
               : "tw-border-iron-700 tw-bg-iron-900 hover:tw-border-iron-600"
           )}
-          onClick={focusInput}
+          role="button"
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-controls={nativeSelectId}
+          aria-describedby={nativeSelectDescriptionId}
+          aria-label="Collections selection"
+          tabIndex={disabled ? -1 : 0}
+          aria-disabled={disabled || undefined}
+          onClick={disabled ? undefined : focusInput}
+          onKeyDown={disabled ? undefined : handleContainerKeyDown}
+          onFocus={disabled ? undefined : handleContainerFocus}
         >
           {selectedOptions.map((option) => (
             <span
@@ -291,9 +342,16 @@ export default function CollectionsAutocomplete({
               <span>{option.name}</span>
               <button
                 type="button"
-                className="tw-inline-flex tw-h-4 tw-w-4 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-transparent tw-bg-transparent tw-text-iron-400 hover:tw-text-error tw-transition tw-duration-200 tw-ease-out"
+                className={classNames(
+                  "tw-inline-flex tw-h-4 tw-w-4 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-transparent tw-bg-transparent tw-transition tw-duration-200 tw-ease-out",
+                  disabled
+                    ? "tw-cursor-not-allowed tw-text-iron-500/70 tw-opacity-60"
+                    : "tw-cursor-pointer tw-text-iron-400 hover:tw-text-error"
+                )}
                 onClick={() => handleRemove(option.id)}
                 aria-label={`Remove ${option.name}`}
+                disabled={disabled}
+                aria-disabled={disabled || undefined}
               >
                 <FontAwesomeIcon icon={faXmark} aria-hidden="true" />
               </button>
@@ -362,28 +420,31 @@ export default function CollectionsAutocomplete({
               filteredOptions.map((option, index) => {
                 const isHighlighted = index === highlightedIndex;
                 return (
-                  <li
-                    key={option.id}
-                    tabIndex={-1}
-                    onMouseEnter={() => handleOptionMouseEnter(index)}
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => handleSelect(option)}
-                    className={classNames(
-                      "tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-3.5 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-transition tw-duration-200 tw-ease-out",
-                      isHighlighted
-                        ? "tw-bg-primary-500/20 tw-text-primary-200"
-                        : "hover:tw-bg-iron-900 tw-text-iron-100"
-                    )}
-                  >
-                    <span className="tw-flex tw-flex-col">
-                      <span>{option.name}</span>
-                      <span className="tw-text-xs tw-text-iron-400">{option.id}</span>
-                    </span>
-                    {typeof option.tokenCount === "number" ? (
-                      <span className="tw-text-xs tw-text-iron-400">
-                        {option.tokenCount.toLocaleString()} tokens
+                  <li key={option.id} className="tw-list-none">
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      onMouseEnter={() => handleOptionMouseEnter(index)}
+                      onMouseDown={(event) => event.preventDefault()}
+                      onKeyDown={(event) => handleOptionKeyDown(event, option)}
+                      onClick={() => handleSelect(option)}
+                      className={classNames(
+                        "tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-3.5 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-transition tw-duration-200 tw-ease-out",
+                        isHighlighted
+                          ? "tw-bg-primary-500/20 tw-text-primary-200"
+                          : "hover:tw-bg-iron-900 tw-text-iron-100"
+                      )}
+                    >
+                      <span className="tw-flex tw-flex-col">
+                        <span>{option.name}</span>
+                        <span className="tw-text-xs tw-text-iron-400">{option.id}</span>
                       </span>
-                    ) : null}
+                      {typeof option.tokenCount === "number" ? (
+                        <span className="tw-text-xs tw-text-iron-400">
+                          {option.tokenCount.toLocaleString()} tokens
+                        </span>
+                      ) : null}
+                    </button>
                   </li>
                 );
               })

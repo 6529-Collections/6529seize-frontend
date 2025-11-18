@@ -14,9 +14,10 @@ export default function NextGenArtists() {
     { address: string; collections: NextGenCollection[] }[]
   >([]);
 
-  function fetchResults() {
+  async function fetchResults() {
     let url = `${publicEnv.API_ENDPOINT}/api/nextgen/collections`;
-    fetchUrl(url).then((response: DBResponse) => {
+    try {
+      const response = (await fetchUrl(url)) as DBResponse;
       setArtistCollections(
         response.data.reduce((acc, collection) => {
           if (
@@ -36,7 +37,10 @@ export default function NextGenArtists() {
           return acc;
         }, [])
       );
-    });
+    } catch (error) {
+      console.error("Failed to fetch NextGen artist collections", error);
+      setArtistCollections([]);
+    }
   }
 
   useEffect(() => {

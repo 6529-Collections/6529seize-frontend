@@ -12,21 +12,22 @@ type StatsResponseSubset = Pick<
   "dailyCapacity" | "xtdhRateGranted" | "xtdhRateAutoAccruing"
 >;
 
-export function buildStatsContent(data: IdentityTdhStatsData): StatsContent {
-  const statsData = data as IdentityTdhStatsData & Partial<StatsResponseSubset>;
+export function buildStatsContent(
+  data: IdentityTdhStatsData & Partial<StatsResponseSubset>,
+): StatsContent {
   const xtdhRate =
-    typeof statsData.dailyCapacity === "number"
-      ? statsData.dailyCapacity
+    typeof data.dailyCapacity === "number"
+      ? data.dailyCapacity
       : data.xtdhRate;
   const baseTdhRate = data.baseTdhRate;
   const multiplier = data.xtdhMultiplier;
   const xtdhRateGranted =
-    typeof statsData.xtdhRateGranted === "number"
-      ? statsData.xtdhRateGranted
+    typeof data.xtdhRateGranted === "number"
+      ? data.xtdhRateGranted
       : data.grantedXtdhPerDay;
   const xtdhRateAutoAccruing =
-    typeof statsData.xtdhRateAutoAccruing === "number"
-      ? statsData.xtdhRateAutoAccruing
+    typeof data.xtdhRateAutoAccruing === "number"
+      ? data.xtdhRateAutoAccruing
       : 0;
   const hasAllocationMetrics =
     typeof xtdhRate === "number" && typeof xtdhRateGranted === "number";
@@ -55,18 +56,21 @@ export function buildStatsContent(data: IdentityTdhStatsData): StatsContent {
   return {
     baseMetricCards: [
       {
+        id: "base-tdh-rate",
         label: "Base TDH Rate",
         tooltip: "Daily TDH generation from Memes cards and Gradients",
         value: baseRateDisplay,
         suffix: "/day",
       },
       {
+        id: "xtdh-multiplier",
         label: "Multiplier",
         tooltip: "Current xTDH multiplier applied to your Base TDH Rate",
         value: multiplierDisplay,
         suffix: "x",
       },
       {
+        id: "xtdh-rate",
         label: "xTDH Rate",
         tooltip: "Total xTDH you can generate per day (Base TDH Rate × Multiplier)",
         value: xtdhRateDisplay,
@@ -94,6 +98,6 @@ function formatDisplay(value: number | null | undefined, decimals = 0) {
   }
 
   const factor = 10 ** decimals;
-  const flooredValue = Math.floor(value * factor) / factor;
-  return formatNumberWithCommas(flooredValue);
+  const roundedValue = Math.round(value * factor) / factor;
+  return formatNumberWithCommas(roundedValue);
 }

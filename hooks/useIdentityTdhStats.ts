@@ -27,13 +27,9 @@ async function fetchIdentityTdhStats(identity: string): Promise<IdentityTdhStats
   });
 
   const xtdhRate = sanitizeNonNegativeNumber(response.xtdh_rate);
-  const baseTdhRate =
-    typeof response.tdh_rate === "number" &&
-    Number.isFinite(response.tdh_rate) &&
-    typeof response.xtdh_rate === "number" &&
-    Number.isFinite(response.xtdh_rate)
-      ? sanitizeNullableNonNegativeNumber(response.tdh_rate - response.xtdh_rate)
-      : null;
+  const baseTdhRate = sanitizeNullableNonNegativeNumber(
+    (response.tdh_rate ?? Number.NaN) - (response.xtdh_rate ?? Number.NaN),
+  );
 
   return {
     xtdhRate,

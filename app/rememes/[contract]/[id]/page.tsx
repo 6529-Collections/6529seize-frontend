@@ -28,17 +28,24 @@ export async function generateMetadata({
   const { contract, id } = await params;
   let name = `${formatAddress(contract)} #${id}`;
   let image = `${publicEnv.BASE_ENDPOINT}/6529io.png`;
-  const response = await fetchUrl(
-    `${publicEnv.API_ENDPOINT}/api/rememes?contract=${contract}&id=${id}`
-  );
+  try {
+    const response = await fetchUrl(
+      `${publicEnv.API_ENDPOINT}/api/rememes?contract=${contract}&id=${id}`
+    );
 
-  if (response?.data?.length > 0) {
-    if (response.data[0].metadata?.name) {
-      name = response.data[0].metadata.name;
+    if (response?.data?.length > 0) {
+      if (response.data[0].metadata?.name) {
+        name = response.data[0].metadata.name;
+      }
+      if (response.data[0].image) {
+        image = response.data[0].image;
+      }
     }
-    if (response.data[0].image) {
-      image = response.data[0].image;
-    }
+  } catch (error) {
+    console.error(
+      `Failed to load ReMeme metadata for ${contract} #${id}`,
+      error
+    );
   }
 
   return getAppMetadata({

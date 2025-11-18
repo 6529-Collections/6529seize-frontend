@@ -45,18 +45,25 @@ async function getMetadataProps(
     urlPath = "nfts_memelab";
     name = `Meme Lab #${idDisplay}`;
   }
-  const response = await fetchUrl(
-    `${publicEnv.API_ENDPOINT}/api/${urlPath}?contract=${contract}&id=${id}`
-  );
   let image = `${publicEnv.BASE_ENDPOINT}/6529io.png`;
-  if (response?.data?.length > 0) {
-    description = `${name} | ${description}`;
-    name = `${response.data[0].name}`;
-    if (response.data[0].thumbnail) {
-      image = response.data[0].thumbnail;
-    } else if (response.data[0].image) {
-      image = response.data[0].image;
+  try {
+    const response = await fetchUrl(
+      `${publicEnv.API_ENDPOINT}/api/${urlPath}?contract=${contract}&id=${id}`
+    );
+    if (response?.data?.length > 0) {
+      description = `${name} | ${description}`;
+      name = `${response.data[0].name}`;
+      if (response.data[0].thumbnail) {
+        image = response.data[0].thumbnail;
+      } else if (response.data[0].image) {
+        image = response.data[0].image;
+      }
     }
+  } catch (error) {
+    console.error(
+      `Failed to fetch shared metadata for ${contract} #${id}`,
+      error
+    );
   }
 
   if (focus && focus !== MEME_FOCUS.LIVE) {

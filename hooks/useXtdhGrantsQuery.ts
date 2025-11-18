@@ -19,8 +19,8 @@ import {
   DEFAULT_STATUS,
   DEFAULT_FILTER_STATUSES,
   normalizeGrantedStatuses,
-  serializeUserPageXtdhGrantedListStatuses,
-  areAllGrantedStatuses,
+  serializeNormalizedUserPageXtdhGrantedListStatuses,
+  areAllGrantedStatusesNormalized,
 } from "@/components/user/xtdh/user-page-xtdh-granted-list/constants";
 import { SortDirection } from "@/entities/ISort";
 
@@ -62,10 +62,10 @@ export function useXtdhGrantsQuery({
   const normalizedPage = Number.isFinite(page) && page > 0 ? Math.floor(page) : DEFAULT_PAGE;
   const normalizedPageSize = Number.isFinite(pageSize) && pageSize > 0 ? Math.floor(pageSize) : DEFAULT_PAGE_SIZE;
   const normalizedStatuses = normalizeGrantedStatuses(statuses ?? DEFAULT_FILTER_STATUSES);
-  const isAllStatuses = areAllGrantedStatuses(normalizedStatuses);
+  const isAllStatuses = areAllGrantedStatusesNormalized(normalizedStatuses);
   const serializedStatuses = isAllStatuses
     ? null
-    : serializeUserPageXtdhGrantedListStatuses(normalizedStatuses);
+    : serializeNormalizedUserPageXtdhGrantedListStatuses(normalizedStatuses);
   const isEnabled = Boolean(grantor) && enabled;
   const statusKey = isAllStatuses
     ? DEFAULT_STATUS

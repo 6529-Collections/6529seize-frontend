@@ -274,8 +274,8 @@ export default function TheMemesComponent() {
         setNfts((prev) => [...prev, ...(responseNfts.data ?? [])]);
         setNftsNextPage(responseNfts.next);
       })
-      .catch(() => {
-        // optionally surface a toast/log here
+      .catch((error) => {
+        console.error("Failed to fetch The Memes cards", error);
       })
       .finally(() => setFetching(false));
   }

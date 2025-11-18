@@ -100,8 +100,9 @@ export default function ConsolidationMappingTool() {
 
   useEffect(() => {
     async function fetchConsolidations(url: string) {
-      fetchAllPages<Consolidation>(url).then((consolidations) => {
-        setConsolidations(consolidations);
+      try {
+        const fetchedConsolidations = await fetchAllPages<Consolidation>(url);
+        setConsolidations(fetchedConsolidations);
         const reader = new FileReader();
 
         reader.onload = async () => {
@@ -134,7 +135,11 @@ export default function ConsolidationMappingTool() {
         };
 
         reader.readAsText(file);
-      });
+      } catch (error) {
+        console.error("Failed to fetch consolidations for mapping tool", error);
+        setConsolidations([]);
+        setProcessing(false);
+      }
     }
     if (processing) {
       const initialUrl = `${publicEnv.API_ENDPOINT}/api/consolidations`;

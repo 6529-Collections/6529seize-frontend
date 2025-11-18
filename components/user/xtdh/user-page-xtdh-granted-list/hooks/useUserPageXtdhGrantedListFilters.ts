@@ -13,7 +13,7 @@ import {
   parseUserPageXtdhGrantedListSortDirection,
   parseUserPageXtdhGrantedListSortField,
   parseUserPageXtdhGrantedListStatuses,
-  serializeUserPageXtdhGrantedListStatuses,
+  serializeNormalizedUserPageXtdhGrantedListStatuses,
 } from "../constants";
 import type {
   GrantedFilterStatuses,
@@ -37,7 +37,7 @@ const applyStatusesUpdate = (
     return;
   }
 
-  const serialized = serializeUserPageXtdhGrantedListStatuses(normalizedStatuses);
+  const serialized = serializeNormalizedUserPageXtdhGrantedListStatuses(normalizedStatuses);
   if (serialized) {
     params.set(STATUS_PARAM, serialized);
   }

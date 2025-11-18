@@ -1,3 +1,24 @@
+const NETWORK_STAT_CARD_KEYS = [
+  "network-card-1",
+  "network-card-2",
+  "network-card-3",
+  "network-card-4",
+  "network-card-5",
+  "network-card-6",
+] as const;
+
+const USER_STATUS_METRIC_KEYS = [
+  "user-status-metric-1",
+  "user-status-metric-2",
+  "user-status-metric-3",
+  "user-status-metric-4",
+] as const;
+
+const USER_STATUS_ACTIVITY_KEYS = [
+  "user-status-activity-1",
+  "user-status-activity-2",
+] as const;
+
 export function XtdhStatsOverviewSkeleton() {
   return (
     <section
@@ -35,9 +56,9 @@ export function NetworkStatsSkeleton() {
         <div className="tw-h-6 tw-w-full tw-rounded tw-bg-iron-800" />
       </div>
       <div className="tw-grid tw-gap-3 sm:tw-grid-cols-2">
-        {Array.from({ length: 6 }).map((_, index) => (
+        {NETWORK_STAT_CARD_KEYS.map((key) => (
           <div
-            key={index}
+            key={key}
             className="tw-space-y-2 tw-rounded-lg tw-bg-iron-950 tw-p-4"
           >
             <div className="tw-h-3 tw-w-20 tw-rounded tw-bg-iron-800" />
@@ -61,13 +82,13 @@ export function UserStatusSkeleton() {
       </div>
       <div className="tw-h-20 tw-rounded-xl tw-bg-iron-800" />
       <div className="tw-grid tw-gap-3 sm:tw-grid-cols-2">
-        {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="tw-h-16 tw-rounded-lg tw-bg-iron-800" />
+        {USER_STATUS_METRIC_KEYS.map((key) => (
+          <div key={key} className="tw-h-16 tw-rounded-lg tw-bg-iron-800" />
         ))}
       </div>
       <div className="tw-grid tw-gap-3 sm:tw-grid-cols-2">
-        {Array.from({ length: 2 }).map((_, index) => (
-          <div key={index} className="tw-h-16 tw-rounded-lg tw-bg-iron-800" />
+        {USER_STATUS_ACTIVITY_KEYS.map((key) => (
+          <div key={key} className="tw-h-16 tw-rounded-lg tw-bg-iron-800" />
         ))}
       </div>
     </div>

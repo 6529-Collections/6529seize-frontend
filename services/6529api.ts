@@ -4,25 +4,34 @@ import { DBResponse } from "@/entities/IDBResponse";
 import Cookies from "js-cookie";
 import { getStagingAuth } from "./auth/auth.utils";
 
-export async function fetchUrl<T = DBResponse>(
-  url: string,
-  init?: RequestInit
-): Promise<T> {
-  const baseHeaders = new Headers(init?.headers);
+function buildAuthHeaders(init?: HeadersInit): Headers {
+  const headers = new Headers(init);
   const apiAuth = getStagingAuth();
   if (apiAuth) {
-    baseHeaders.set("x-6529-auth", apiAuth);
+    headers.set("x-6529-auth", apiAuth);
   }
-  const res = await fetch(url, {
-    ...init,
-    headers: baseHeaders,
-  });
+  return headers;
+}
+
+function handleResponseError(res: Response): void {
   if (res.status === 401) {
     Cookies.remove(API_AUTH_COOKIE);
   }
   if (!res.ok) {
     throw new Error(`HTTP error! status: ${res.status}`);
   }
+}
+
+export async function fetchUrl<T = DBResponse>(
+  url: string,
+  init?: RequestInit
+): Promise<T> {
+  const headers = buildAuthHeaders(init?.headers);
+  const res = await fetch(url, {
+    ...init,
+    headers,
+  });
+  handleResponseError(res);
   return await res.json();
 }
 
@@ -68,26 +77,17 @@ function getNextUrl(currentUrl: string, next?: string | boolean): string {
 }
 
 export async function postData(url: string, body: any, init?: RequestInit) {
-  const baseHeaders = new Headers(init?.headers);
-  if (!baseHeaders.has("Content-Type")) {
-    baseHeaders.set("Content-Type", "application/json");
-  }
-  const apiAuth = getStagingAuth();
-  if (apiAuth) {
-    baseHeaders.set("x-6529-auth", apiAuth);
+  const headers = buildAuthHeaders(init?.headers);
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
   }
   const res = await fetch(url, {
     ...init,
     method: "POST",
     body: JSON.stringify(body),
-    headers: baseHeaders,
+    headers,
   });
-  if (res.status === 401) {
-    Cookies.remove(API_AUTH_COOKIE);
-  }
-  if (!res.ok) {
-    throw new Error(`HTTP error! status: ${res.status}`);
-  }
+  handleResponseError(res);
   const json = await res.json();
   return {
     status: res.status,
@@ -96,22 +96,13 @@ export async function postData(url: string, body: any, init?: RequestInit) {
 }
 
 export async function postFormData(url: string, formData: FormData) {
-  const headers = new Headers();
-  const apiAuth = getStagingAuth();
-  if (apiAuth) {
-    headers.set("x-6529-auth", apiAuth);
-  }
+  const headers = buildAuthHeaders();
   const res = await fetch(url, {
     method: "POST",
     body: formData,
     headers,
   });
-  if (res.status === 401) {
-    Cookies.remove(API_AUTH_COOKIE);
-  }
-  if (!res.ok) {
-    throw new Error(`HTTP error! status: ${res.status}`);
-  }
+  handleResponseError(res);
   const json = await res.json();
   return {
     status: res.status,

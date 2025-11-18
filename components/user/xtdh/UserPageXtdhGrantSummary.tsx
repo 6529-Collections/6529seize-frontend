@@ -2,15 +2,7 @@ import type {
   ContractOverview,
   NftPickerSelection,
 } from "@/components/nft-picker/NftPicker.types";
-
-const formatDateTime = (date: Date) =>
-  new Intl.DateTimeFormat(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(date);
+import { formatDateTime } from "@/components/user/xtdh/utils/xtdhGrantFormatters";
 
 type SelectionDescription = {
   readonly text: string;
@@ -131,7 +123,9 @@ const getSelectionSummary = ({
 };
 
 const getValiditySummary = (validUntil: Date | null): string =>
-  validUntil ? `Grant valid until ${formatDateTime(validUntil)}.` : "Grant never expires.";
+  validUntil
+    ? `Grant valid until ${formatDateTime(validUntil.getTime())}.`
+    : "Grant never expires.";
 
 export interface UserPageXtdhGrantSummaryProps {
   readonly contract: ContractOverview | null;

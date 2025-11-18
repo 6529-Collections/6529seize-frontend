@@ -139,15 +139,23 @@ export default function RememePage(props: Readonly<Props>) {
     if (props.contract && props.id) {
       fetchUrl(
         `${publicEnv.API_ENDPOINT}/api/rememes?contract=${props.contract}&id=${props.id}`
-      ).then((response: DBResponse) => {
-        if (response.data.length === 1) {
-          setRememe(response.data[0]);
-          if (response.data[0].metadata?.name) {
-            const title = `${response.data[0].metadata.name} | ReMemes | 6529.io`;
-            setTitle(title);
+      )
+        .then((response: DBResponse) => {
+          if (response.data.length === 1) {
+            setRememe(response.data[0]);
+            if (response.data[0].metadata?.name) {
+              const title = `${response.data[0].metadata.name} | ReMemes | 6529.io`;
+              setTitle(title);
+            }
           }
-        }
-      });
+        })
+        .catch((error) => {
+          console.error(
+            `Failed to fetch Rememe ${props.contract} #${props.id}`,
+            error
+          );
+          setRememe(undefined);
+        });
     }
   }, [props.contract, props.id]);
 
@@ -159,9 +167,17 @@ export default function RememePage(props: Readonly<Props>) {
         }/api/nfts?contract=${MEMES_CONTRACT}&id=${rememe.meme_references.join(
           ","
         )}`
-      ).then((responseNfts) => {
-        setMemes(responseNfts.sort((a, b) => a.id - b.id));
-      });
+      )
+        .then((responseNfts) => {
+          setMemes(responseNfts.sort((a, b) => a.id - b.id));
+        })
+        .catch((error) => {
+          console.error(
+            `Failed to fetch referenced memes for rememe ${rememe.id}`,
+            error
+          );
+          setMemes([]);
+        });
     }
   }, [rememe]);
 

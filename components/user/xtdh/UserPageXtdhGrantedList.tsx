@@ -71,7 +71,7 @@ export default function UserPageXtdhGrantedList({
     });
   }, [refetch]);
 
-  const showControls = enabled && !isError;
+  const showControls = enabled;
 
   const formattedStatusItems = useMemo(
     () => getUserPageXtdhGrantedListStatusItems(statusCounts),

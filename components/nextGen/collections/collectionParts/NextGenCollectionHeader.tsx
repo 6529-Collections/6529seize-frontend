@@ -91,12 +91,22 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
 
   useEffect(() => {
     const url = `${publicEnv.API_ENDPOINT}/api/nextgen/merkle_roots/${props.collection.merkle_root}`;
-    fetchUrl<CollectionWithMerkle>(url).then((response: CollectionWithMerkle) => {
-      if (response) {
-        setCollection(response);
-      }
-      setCollectionLoaded(true);
-    });
+    fetchUrl<CollectionWithMerkle>(url)
+      .then((response: CollectionWithMerkle) => {
+        if (response) {
+          setCollection(response);
+        }
+      })
+      .catch((error) => {
+        console.error(
+          `Failed to fetch merkle root ${props.collection.merkle_root}`,
+          error
+        );
+        setCollection(undefined);
+      })
+      .finally(() => {
+        setCollectionLoaded(true);
+      });
   }, [props.collection]);
 
   function getButtonLabel() {

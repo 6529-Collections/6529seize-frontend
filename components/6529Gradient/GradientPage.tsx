@@ -68,19 +68,22 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
   }, [nft, connectedAddress]);
 
   useEffect(() => {
-    async function fetchNfts(url: string, mynfts: NftWithOwner[]) {
-      return fetchUrl(url).then((response: DBResponse) => {
+    async function fetchNfts(url: string, mynfts: NftWithOwner[]): Promise<void> {
+      try {
+        const response = (await fetchUrl(url)) as DBResponse;
+        const combined = [...mynfts, ...response.data];
         if (response.next) {
-          fetchNfts(response.next, [...mynfts].concat(response.data));
+          await fetchNfts(response.next, combined);
         } else {
-          const newnfts = [...mynfts]
-            .concat(response.data)
-            .filter((value, index, self) => {
-              return self.findIndex((v) => v.id === value.id) === index;
-            });
+          const newnfts = combined.filter((value, index, self) => {
+            return self.findIndex((v) => v.id === value.id) === index;
+          });
           setAllNfts(newnfts);
         }
-      });
+      } catch (error) {
+        console.error("Failed to fetch gradient NFTs", error);
+        setAllNfts([]);
+      }
     }
     const initialUrlNfts = `${publicEnv.API_ENDPOINT}/api/nfts/gradients?&page_size=101`;
     fetchNfts(initialUrlNfts, []);
@@ -101,9 +104,14 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
     if (id) {
       fetchUrl(
         `${publicEnv.API_ENDPOINT}/api/transactions?contract=${GRADIENT_CONTRACT}&id=${id}`
-      ).then((response: DBResponse) => {
-        setTransactions(response.data);
-      });
+      )
+        .then((response: DBResponse) => {
+          setTransactions(response.data);
+        })
+        .catch((error) => {
+          console.error(`Failed to fetch gradient transactions for id ${id}`, error);
+          setTransactions([]);
+        });
     }
   }, [id]);
 

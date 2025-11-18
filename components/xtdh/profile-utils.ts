@@ -12,7 +12,7 @@ function sanitizeString(value: unknown): string | null {
   return trimmed;
 }
 
-interface ProfileIdentifiable {
+export interface ProfileIdentifiable {
   readonly handle?: string | null;
   readonly query?: string | null;
   readonly primary_wallet?: string | null;

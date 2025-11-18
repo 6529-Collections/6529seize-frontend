@@ -19,6 +19,81 @@ import { ApiTdhGrant } from "@/generated/models/ApiTdhGrant";
 import { ApiTdhGrantTargetChain } from "@/generated/models/ApiTdhGrantTargetChain";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
+type GrantValidationParams = {
+  contract: ContractOverview | null;
+  selection: NftPickerSelection | null;
+  amount: number | null;
+  validUntil: Date | null;
+};
+
+type GrantValidationResult =
+  | { success: false; message: string }
+  | {
+      success: true;
+      contract: ContractOverview;
+      selection: NftPickerSelection;
+      amount: number;
+      validUntil: Date | null;
+    };
+
+const validateGrantForm = ({
+  contract,
+  selection,
+  amount,
+  validUntil,
+}: GrantValidationParams): GrantValidationResult => {
+  if (!contract) {
+    return {
+      success: false,
+      message: "Select a collection before submitting.",
+    };
+  }
+
+  if (!isAddress(contract.address)) {
+    return {
+      success: false,
+      message: "The selected collection address is invalid.",
+    };
+  }
+
+  if (!selection) {
+    return {
+      success: false,
+      message: "Select the tokens that should receive the grant.",
+    };
+  }
+
+  if (selection.contractAddress !== contract.address) {
+    return {
+      success: false,
+      message: "Token selection does not match the selected collection.",
+    };
+  }
+
+  if (!selection.allSelected && selection.tokenIdsRaw.length === 0) {
+    return {
+      success: false,
+      message: "Select at least one token or grant to all tokens.",
+    };
+  }
+
+  if (amount === null || !Number.isFinite(amount) || amount <= 0) {
+    return {
+      success: false,
+      message: "Enter a valid amount greater than zero.",
+    };
+  }
+
+  if (validUntil !== null && validUntil.getTime() <= Date.now()) {
+    return {
+      success: false,
+      message: "Expiration must be in the future.",
+    };
+  }
+
+  return { success: true, contract, selection, amount, validUntil };
+};
+
 export default function UserPageXtdhGrant() {
   const [contract, setContract] = useState<ContractOverview | null>(null);
   const [selection, setSelection] = useState<NftPickerSelection | null>(null);
@@ -51,40 +126,24 @@ export default function UserPageXtdhGrant() {
     setSubmitError(null);
     setSubmitSuccess(null);
 
-    if (!contract) {
-      setSubmitError("Select a collection before submitting.");
+    const validationResult = validateGrantForm({
+      contract,
+      selection,
+      amount,
+      validUntil,
+    });
+
+    if (!validationResult.success) {
+      setSubmitError(validationResult.message);
       return;
     }
 
-    if (!isAddress(contract.address)) {
-      setSubmitError("The selected collection address is invalid.");
-      return;
-    }
-
-    if (!selection) {
-      setSubmitError("Select the tokens that should receive the grant.");
-      return;
-    }
-
-    if (selection.contractAddress !== contract.address) {
-      setSubmitError("Token selection does not match the selected collection.");
-      return;
-    }
-
-    if (!selection.allSelected && selection.tokenIdsRaw.length === 0) {
-      setSubmitError("Select at least one token or grant to all tokens.");
-      return;
-    }
-
-    if (amount === null || !Number.isFinite(amount) || amount <= 0) {
-      setSubmitError("Enter a valid amount greater than zero.");
-      return;
-    }
-
-    if (validUntil !== null && validUntil.getTime() <= Date.now()) {
-      setSubmitError("Expiration must be in the future.");
-      return;
-    }
+    const {
+      contract: validatedContract,
+      selection: validatedSelection,
+      amount: validatedAmount,
+      validUntil: validatedValidUntil,
+    } = validationResult;
 
     setIsAuthorizing(true);
     try {
@@ -96,12 +155,14 @@ export default function UserPageXtdhGrant() {
 
       const payload: ApiCreateTdhGrant = {
         target_chain: ApiTdhGrantTargetChain.EthereumMainnet,
-        target_contract: contract.address,
-        target_tokens: selection.allSelected
+        target_contract: validatedContract.address,
+        target_tokens: validatedSelection.allSelected
           ? []
-          : selection.tokenIdsRaw.map((tokenId) => tokenId.toString()),
-        valid_to: validUntil ? Math.floor(validUntil.getTime() / 1000) : null,
-        tdh_rate: amount,
+          : validatedSelection.tokenIdsRaw.map((tokenId) => tokenId.toString()),
+        valid_to: validatedValidUntil
+          ? Math.floor(validatedValidUntil.getTime() / 1000)
+          : null,
+        tdh_rate: validatedAmount,
         is_irrevocable: false,
       };
 

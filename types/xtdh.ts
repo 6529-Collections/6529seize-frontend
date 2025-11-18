@@ -3,7 +3,7 @@ export const XTDH_NETWORKS = ["ethereum", "polygon"] as const;
 export type XtdhNetwork = (typeof XTDH_NETWORKS)[number];
 
 export function isXtdhNetwork(value: string): value is XtdhNetwork {
-  return XTDH_NETWORKS.some((network) => network === value);
+  return XTDH_NETWORKS.includes(value as XtdhNetwork);
 }
 
 export interface XtdhStatsResponse {

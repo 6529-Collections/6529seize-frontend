@@ -1,6 +1,7 @@
 import type { useIdentityTdhStats } from "@/hooks/useIdentityTdhStats";
 
 export interface StatCardProps {
+  readonly id: string;
   readonly label: string;
   readonly tooltip: string;
   readonly value: string;
@@ -46,4 +47,3 @@ export type IdentityTdhStatsData = NonNullable<
 export interface UserPageXtdhStatsHeaderProps {
   readonly profileId: string | null;
 }
-

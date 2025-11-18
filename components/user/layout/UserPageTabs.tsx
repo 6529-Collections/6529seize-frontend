@@ -71,20 +71,29 @@ export default function UserPageTabs() {
     [capacitor.isIos, country, showWaves]
   );
 
-  const activeTab = useMemo<UserPageTabKey>(
-    () => resolveTabFromPath(pathname),
-    [pathname]
-  );
-
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const contentContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
+  const resolvedTabFromPath = useMemo<UserPageTabKey>(
+    () => resolveTabFromPath(pathname),
+    [pathname]
+  );
+
   const visibleTabs = useMemo(
     () => filterVisibleTabs(USER_PAGE_TABS, visibilityContext),
     [visibilityContext]
   );
+
+  const activeTab = useMemo<UserPageTabKey>(() => {
+    if (visibleTabs.some((tab) => tab.id === resolvedTabFromPath)) {
+      return resolvedTabFromPath;
+    }
+
+    const firstVisibleTab = visibleTabs[0]?.id;
+    return firstVisibleTab ?? DEFAULT_TAB;
+  }, [resolvedTabFromPath, visibleTabs]);
 
   const checkScroll = useCallback(() => {
     const container = scrollContainerRef.current;

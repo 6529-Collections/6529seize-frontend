@@ -87,11 +87,14 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
   useEffect(() => {
     const path =
       props.focus === GasRoyaltiesCollectionFocus.MEMES ? "memes" : "memelab";
-    fetchUrl<ApiArtistNameItem[]>(`${publicEnv.API_ENDPOINT}/api/${path}/artists_names`).then(
-      (res: ApiArtistNameItem[]) => {
+    fetchUrl<ApiArtistNameItem[]>(`${publicEnv.API_ENDPOINT}/api/${path}/artists_names`)
+      .then((res: ApiArtistNameItem[]) => {
         setArtists(res);
-      }
-    );
+      })
+      .catch((error) => {
+        console.error("Failed to fetch artist names", error);
+        setArtists([]);
+      });
   }, [props.focus]);
 
   function getDateSelectionLabel() {

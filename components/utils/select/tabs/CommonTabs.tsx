@@ -17,13 +17,22 @@ export default function CommonTabs<T, U = unknown>(
   const disabled = "disabled" in props ? props.disabled ?? false : false;
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const tabRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
   const [showStartFade, setShowStartFade] = useState(false);
   const [showEndFade, setShowEndFade] = useState(false);
 
   useEffect(() => {
-    tabRefs.current = tabRefs.current.slice(0, items.length);
-  }, [items.length]);
+    const keysToKeep = new Set(items.map((item) => item.key));
+    const staleKeys: string[] = [];
+
+    tabRefs.current.forEach((_, key) => {
+      if (!keysToKeep.has(key)) {
+        staleKeys.push(key);
+      }
+    });
+
+    staleKeys.forEach((key) => tabRefs.current.delete(key));
+  }, [items]);
 
   const updateFadeIndicators = useCallback(() => {
     const node = scrollContainerRef.current;
@@ -58,7 +67,9 @@ export default function CommonTabs<T, U = unknown>(
     }
 
     return () => {
-      node.removeEventListener("scroll", updateFadeIndicators);
+      if (node) {
+        node.removeEventListener("scroll", updateFadeIndicators);
+      }
       if (canListenToGlobalResize) {
         globalThis.removeEventListener("resize", updateFadeIndicators);
       }
@@ -73,10 +84,15 @@ export default function CommonTabs<T, U = unknown>(
       }
 
       const normalizedIndex = ((index % total) + total) % total;
-      const tab = tabRefs.current[normalizedIndex];
+      const targetItem = items[normalizedIndex];
+      if (!targetItem) {
+        return;
+      }
+
+      const tab = tabRefs.current.get(targetItem.key);
       tab?.focus();
     },
-    [items.length],
+    [items],
   );
 
   const handleKeyDown = useCallback(
@@ -102,6 +118,13 @@ export default function CommonTabs<T, U = unknown>(
         case "End": {
           event.preventDefault();
           focusTab(items.length - 1);
+          break;
+        }
+        case "Enter":
+        case " ":
+        case "Spacebar": {
+          event.preventDefault();
+          event.currentTarget?.click();
           break;
         }
         default:
@@ -133,7 +156,12 @@ export default function CommonTabs<T, U = unknown>(
               isMobile={false}
               onKeyDown={(event) => handleKeyDown(event, i)}
               buttonRef={(node) => {
-                tabRefs.current[i] = node;
+                if (!node) {
+                  tabRefs.current.delete(item.key);
+                  return;
+                }
+
+                tabRefs.current.set(item.key, node);
               }}
               disabled={disabled}
             />

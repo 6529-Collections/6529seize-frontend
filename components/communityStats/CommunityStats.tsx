@@ -104,12 +104,19 @@ export default function CommunityStats() {
 
   useEffect(() => {
     let url = `${publicEnv.API_ENDPOINT}/api/tdh_global_history?page_size=${pageSize}&page=${page}`;
-    fetchUrl(url).then((response: DBResponse) => {
-      const tdhH = response.data.reverse();
-      setTdhHistory(tdhH);
-      setTdhLabels(tdhH.map((t) => t.date));
-      setLatestHistory(tdhH[tdhH.length - 1]);
-    });
+    fetchUrl(url)
+      .then((response: DBResponse) => {
+        const tdhH = response.data.reverse();
+        setTdhHistory(tdhH);
+        setTdhLabels(tdhH.map((t) => t.date));
+        setLatestHistory(tdhH[tdhH.length - 1]);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch TDH history", error);
+        setTdhHistory([]);
+        setTdhLabels([]);
+        setLatestHistory(undefined);
+      });
   }, [pageSize]);
 
   function printTotalTDH() {
