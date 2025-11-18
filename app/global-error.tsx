@@ -13,7 +13,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
   const errorDetails = extractErrorDetails(error, "GLOBAL_ERROR");
 
   return (
-    <html>
+    <html lang="en">
       <body>
         <main className={styles.main}>
           <ErrorComponent stackTrace={errorDetails} />
@@ -22,4 +22,3 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
     </html>
   );
 }
-
