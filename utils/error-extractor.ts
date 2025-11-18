@@ -35,23 +35,23 @@ export function extractErrorDetails(
     (prop) => !["message", "stack", "name", "cause", "digest"].includes(prop)
   );
 
-  if (additionalProps.length > 0) {
-    parts.push(`\n\nAdditional Properties:`);
-    additionalProps.forEach((prop) => {
-      try {
-        const value = (err as Record<string, unknown>)[prop];
-        parts.push(
-          `  ${prop}: ${
-            typeof value === "object"
-              ? JSON.stringify(value, null, 2)
-              : String(value)
-          }`
-        );
-      } catch {
-        parts.push(`  ${prop}: [unable to stringify]`);
-      }
-    });
-  }
+    if (additionalProps.length > 0) {
+      parts.push(`\n\nAdditional Properties:`);
+      additionalProps.forEach((prop) => {
+        try {
+          const value = (err as unknown as Record<string, unknown>)[prop];
+          parts.push(
+            `  ${prop}: ${
+              typeof value === "object"
+                ? JSON.stringify(value, null, 2)
+                : String(value)
+            }`
+          );
+        } catch {
+          parts.push(`  ${prop}: [unable to stringify]`);
+        }
+      });
+    }
 
   const errorString = parts.join("");
   if (errorString) {
