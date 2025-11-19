@@ -6,11 +6,11 @@ import { useXtdhTokensQuery } from "@/hooks/useXtdhTokensQuery";
 
 import { useXtdhTokensFilters } from "../hooks/useXtdhTokensFilters";
 import { XtdhTokensControls, buildTokensResultSummary } from "../tokens-controls";
+import { XtdhReceivedCollectionCard } from "../collection-card-content";
 import { useCollectionContractDetails } from "./hooks/useCollectionContractDetails";
 import { useXtdhTokenSelection } from "./hooks/useXtdhTokenSelection";
 import { XtdhTokensList } from "./XtdhTokensList";
 import { CollectionBreadcrumbs } from "./subcomponents/CollectionBreadcrumbs";
-import { CollectionHeader } from "./subcomponents/CollectionHeader";
 import { CollectionLoadMore } from "./subcomponents/CollectionLoadMore";
 import { TokenHeader } from "./subcomponents/TokenHeader";
 import { XtdhTokenContributorsPanel } from "./token-contributors";
@@ -41,13 +41,9 @@ export function XtdhCollectionTokensPanel({
     contractParam,
     normalizedAddress,
     contractDisplayName,
-    subtitleLabel,
-    headerMetrics,
-    contractImageUrl,
   } = useCollectionContractDetails({
     contract,
     normalizedContract,
-    collection,
   });
 
   const {
@@ -134,12 +130,16 @@ export function XtdhCollectionTokensPanel({
         onNavigateToCollections={onBack}
         onNavigateToTokens={showTokenContributors ? handleBackToTokens : undefined}
       />
-      <CollectionHeader
-        contractDisplayName={contractDisplayName}
-        subtitleLabel={subtitleLabel}
-        contractImageUrl={contractImageUrl}
-        headerMetrics={headerMetrics}
-      />
+      {collection ? (
+        <XtdhReceivedCollectionCard
+          collection={collection}
+          interactionMode="static"
+        />
+      ) : (
+        <div className="tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4 tw-text-sm tw-text-iron-300">
+          Collection summary unavailable.
+        </div>
+      )}
 
       {showTokenContributors && selectedToken ? (
         <>

@@ -6,11 +6,6 @@ export type ApiXtdhCollection = ApiXTdhCollectionsPage["data"][number];
 
 export type ApiXtdhToken = ApiXTdhTokensPage["data"][number];
 
-export interface CollectionMetricDatum {
-  readonly label: string;
-  readonly value: string;
-}
-
 export interface XtdhCollectionTokensPanelProps {
   readonly identity: string | null;
   readonly contract: string | null;

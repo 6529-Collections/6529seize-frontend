@@ -3,40 +3,20 @@ import { useMemo } from "react";
 import { shortenAddress } from "@/helpers/address.helpers";
 import { isValidEthAddress } from "@/helpers/Helpers";
 import { useContractOverviewQuery } from "@/hooks/useAlchemyNftQueries";
-import {
-  formatCount,
-  formatXtdhRate,
-  formatXtdhValue,
-} from "../../utils/formatters";
-import {
-  formatFloorPrice,
-  formatTotalSupply,
-} from "@/components/user/xtdh/granted-list/UserPageXtdhGrantListItem/formatters";
-
-import type {
-  ApiXtdhCollection,
-  CollectionMetricDatum,
-} from "../types";
-
 interface UseCollectionContractDetailsArgs {
   readonly contract: string | null;
   readonly normalizedContract: string | null;
-  readonly collection?: ApiXtdhCollection;
 }
 
 interface UseCollectionContractDetailsResult {
   readonly contractParam: string;
   readonly normalizedAddress: `0x${string}` | null;
   readonly contractDisplayName: string;
-  readonly subtitleLabel: string;
-  readonly headerMetrics: CollectionMetricDatum[];
-  readonly contractImageUrl?: string;
 }
 
 export function useCollectionContractDetails({
   contract,
   normalizedContract,
-  collection,
 }: Readonly<UseCollectionContractDetailsArgs>): UseCollectionContractDetailsResult {
   const contractParam = useMemo(() => {
     return normalizedContract?.trim() ?? contract?.trim() ?? "";
@@ -69,57 +49,9 @@ export function useCollectionContractDetails({
     return "Selected collection";
   }, [contractOverview?.name, normalizedAddress, contract]);
 
-  const subtitleLabel = useMemo(() => {
-    if (normalizedAddress) {
-      return normalizedAddress;
-    }
-    return contract ?? normalizedContract ?? "";
-  }, [normalizedAddress, contract, normalizedContract]);
-
-  const headerMetrics = useMemo<CollectionMetricDatum[]>(() => {
-    return [
-      { label: "Token type", value: contractOverview?.tokenType ?? "Unknown" },
-      {
-        label: "Total supply",
-        value: formatTotalSupply(contractOverview?.totalSupply),
-      },
-      {
-        label: "Floor price",
-        value: formatFloorPrice(contractOverview?.floorPriceEth),
-      },
-      {
-        label: "Tokens granted",
-        value: collection ? formatCount(collection.total_token_count) : "—",
-      },
-      {
-        label: "Active tokens",
-        value: collection ? formatCount(collection.active_token_count) : "—",
-      },
-      {
-        label: "Contributors",
-        value: collection ? formatCount(collection.total_contributor_count) : "—",
-      },
-      {
-        label: "Active contributors",
-        value: collection ? formatCount(collection.active_contributor_count) : "—",
-      },
-      {
-        label: "xTDH",
-        value: collection ? formatXtdhValue(collection.xtdh) : "—",
-      },
-      {
-        label: "xTDH rate",
-        value: collection ? formatXtdhRate(collection.xtdh_rate) : "—",
-      },
-    ];
-  }, [collection, contractOverview]);
-
   return {
     contractParam,
     normalizedAddress,
     contractDisplayName,
-    subtitleLabel,
-    headerMetrics,
-    contractImageUrl: contractOverview?.imageUrl ?? undefined,
   };
 }
