@@ -92,41 +92,53 @@ export function XtdhReceivedCollectionCard({
         !isSelectable && interactionMode === "button" && "tw-cursor-not-allowed tw-opacity-70"
       )}
     >
-      <header className="tw-flex tw-items-center tw-gap-3">
-        <div className="tw-relative tw-h-14 tw-w-14 tw-overflow-hidden tw-rounded-xl tw-bg-iron-800 tw-flex-shrink-0">
-          {imageUrl ? (
-            <Image
-              src={imageUrl}
-              alt={displayName}
-              fill
-              sizes="56px"
-              className="tw-h-full tw-w-full tw-object-cover"
-            />
-          ) : (
-            <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-font-semibold tw-text-iron-400">
-              NFT
+      <header className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-3">
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-3">
+          <div className="tw-relative tw-h-14 tw-w-14 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-xl tw-bg-iron-800">
+            {imageUrl ? (
+              <Image
+                src={imageUrl}
+                alt={displayName}
+                fill
+                sizes="56px"
+                className="tw-h-full tw-w-full tw-object-cover"
+              />
+            ) : (
+              <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-font-semibold tw-text-iron-400">
+                NFT
+              </div>
+            )}
+          </div>
+          <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
+            <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+              {displayName}
+            </p>
+            <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-2">
+              <p className="tw-m-0 tw-flex-1 tw-text-xs tw-text-iron-400 tw-break-all">
+                {secondaryLabel}
+              </p>
+              <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-semibold tw-uppercase tw-text-iron-200">
+                {tokenTypeLabel}
+              </span>
             </div>
-          )}
+          </div>
         </div>
-        <div className="tw-flex tw-flex-col">
-          <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
-            {displayName}
-          </p>
-          <p className="tw-m-0 tw-text-xs tw-text-iron-400 tw-break-all">
-            {secondaryLabel}
-          </p>
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2">
+          <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-primary-500/40 tw-bg-primary-500/10 tw-px-3 tw-py-1 tw-text-sm tw-font-semibold tw-text-primary-100">
+            {`${xtdhRateLabel} / day`}
+          </span>
+          <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
+            Total {xtdhValueLabel} xTDH
+          </span>
         </div>
       </header>
-      <dl className="tw-mt-4 tw-grid tw-gap-3 sm:tw-grid-cols-2 xl:tw-grid-cols-4">
-        <CollectionMetric label="Token type" value={tokenTypeLabel} />
+      <dl className="tw-mt-3 tw-grid tw-gap-3 sm:tw-grid-cols-3">
         <CollectionMetric label="Total supply" value={totalSupplyLabel} />
-        <CollectionMetric label="Floor price" value={floorPriceLabel} />
-        <CollectionMetric label="Tokens granted" value={totalTokensGrantedLabel} />
         <CollectionMetric label="Active tokens" value={activeTokensGrantedLabel} />
-        <CollectionMetric label="Contributors" value={totalContributorsLabel} />
+        <CollectionMetric label="Tokens granted" value={totalTokensGrantedLabel} />
+        <CollectionMetric label="Floor price" value={floorPriceLabel} />
         <CollectionMetric label="Active contributors" value={activeContributorsLabel} />
-        <CollectionMetric label="xTDH" value={xtdhValueLabel} />
-        <CollectionMetric label="xTDH rate" value={xtdhRateLabel} />
+        <CollectionMetric label="Contributors" value={totalContributorsLabel} />
       </dl>
     </div>
   );
@@ -160,13 +172,16 @@ export function XtdhReceivedCollectionCard({
 function CollectionMetric({
   label,
   value,
-}: Readonly<{ label: string; value: string }>) {
+  className,
+}: Readonly<{ label: string; value: string; className?: string }>) {
   return (
-    <div className="tw-flex tw-flex-col tw-gap-0.5">
+    <div
+      className={clsx("tw-flex tw-flex-col tw-gap-0.5 tw-text-left", className)}
+    >
       <dt className="tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-500">
         {label}
       </dt>
-      <dd className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
+      <dd className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
         {value}
       </dd>
     </div>
