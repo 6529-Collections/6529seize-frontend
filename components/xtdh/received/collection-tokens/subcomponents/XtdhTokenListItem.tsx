@@ -12,6 +12,7 @@ interface XtdhTokenListItemProps {
   readonly metadata?: TokenMetadata;
   readonly isMetadataLoading: boolean;
   readonly hasMetadataError: boolean;
+  readonly onSelect?: () => void;
 }
 
 export function XtdhTokenListItem({
@@ -19,6 +20,7 @@ export function XtdhTokenListItem({
   metadata,
   isMetadataLoading,
   hasMetadataError,
+  onSelect,
 }: Readonly<XtdhTokenListItemProps>) {
   const tokenLabel = getTokenLabel(token.token);
   const xtdhValue = formatXtdhValue(token.xtdh);
@@ -28,8 +30,8 @@ export function XtdhTokenListItem({
     { label: "xTDH rate", value: xtdhRateValue },
   ];
 
-  return (
-    <li className="tw-list-none tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-3">
+  const content = (
+    <>
       <div className="tw-flex tw-items-center tw-gap-3">
         <XtdhTokenListItemThumbnail
           tokenLabel={tokenLabel}
@@ -45,6 +47,22 @@ export function XtdhTokenListItem({
         </div>
       </div>
       <XtdhTokenListItemMetrics metrics={metrics} />
+    </>
+  );
+
+  return (
+    <li className="tw-list-none tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-3">
+      {onSelect ? (
+        <button
+          type="button"
+          onClick={onSelect}
+          className="tw-flex tw-w-full tw-flex-col tw-gap-3 tw-rounded-xl tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-inherit"
+        >
+          {content}
+        </button>
+      ) : (
+        content
+      )}
     </li>
   );
 }

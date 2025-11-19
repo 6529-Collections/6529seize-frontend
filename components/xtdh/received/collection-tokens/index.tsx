@@ -7,10 +7,18 @@ import { useXtdhTokensQuery } from "@/hooks/useXtdhTokensQuery";
 import { useXtdhTokensFilters } from "../hooks/useXtdhTokensFilters";
 import { XtdhTokensControls, buildTokensResultSummary } from "../tokens-controls";
 import { useCollectionContractDetails } from "./hooks/useCollectionContractDetails";
+import { useXtdhTokenSelection } from "./hooks/useXtdhTokenSelection";
 import { XtdhTokensList } from "./XtdhTokensList";
+import { CollectionBreadcrumbs } from "./subcomponents/CollectionBreadcrumbs";
 import { CollectionHeader } from "./subcomponents/CollectionHeader";
 import { CollectionLoadMore } from "./subcomponents/CollectionLoadMore";
-import type { XtdhCollectionTokensPanelProps } from "./types";
+import { TokenHeader } from "./subcomponents/TokenHeader";
+import { XtdhTokenContributorsPanel } from "./token-contributors";
+import type {
+  XtdhCollectionTokensPanelProps,
+  XtdhSelectedTokenDescriptor,
+} from "./types";
+import { getTokenLabel } from "./utils/getTokenLabel";
 
 const TOKENS_PAGE_SIZE = 25;
 
@@ -23,6 +31,11 @@ export function XtdhCollectionTokensPanel({
 }: Readonly<XtdhCollectionTokensPanelProps>) {
   const { activeSortField, activeSortDirection, apiOrder, handleSortChange } =
     useXtdhTokensFilters();
+  const {
+    selectedToken,
+    selectToken,
+    clearSelectedToken,
+  } = useXtdhTokenSelection();
 
   const {
     contractParam,
@@ -85,40 +98,90 @@ export function XtdhCollectionTokensPanel({
 
   const controlsDisabled = isLoading || isFetching;
   const showLoadMore = hasNextPage && isEnabled;
+  const showTokenContributors = Boolean(selectedToken);
+  const selectedTokenLabel = useMemo(() => {
+    if (!selectedToken) {
+      return undefined;
+    }
+    return selectedToken.metadata?.name ?? getTokenLabel(selectedToken.token.token);
+  }, [selectedToken]);
+
+  const handleTokenSelect = useCallback(
+    (descriptor: XtdhSelectedTokenDescriptor) => {
+      selectToken(descriptor);
+    },
+    [selectToken]
+  );
+
+  const handleBackToTokens = useCallback(() => {
+    clearSelectedToken();
+  }, [clearSelectedToken]);
+
+  const selectedTokenId = useMemo(() => {
+    if (!selectedToken) {
+      return null;
+    }
+    return Number.isFinite(selectedToken.token.token)
+      ? Math.trunc(Number(selectedToken.token.token))
+      : null;
+  }, [selectedToken]);
 
   return (
     <section className="tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-4 tw-space-y-4">
+      <CollectionBreadcrumbs
+        collectionLabel={contractDisplayName}
+        tokenLabel={selectedTokenLabel}
+        onNavigateToCollections={onBack}
+        onNavigateToTokens={showTokenContributors ? handleBackToTokens : undefined}
+      />
       <CollectionHeader
-        onBack={onBack}
         contractDisplayName={contractDisplayName}
         subtitleLabel={subtitleLabel}
         contractImageUrl={contractImageUrl}
         headerMetrics={headerMetrics}
       />
 
-      <XtdhTokensControls
-        activeSortField={activeSortField}
-        activeSortDirection={activeSortDirection}
-        onSortChange={handleSortChange}
-        resultSummary={resultSummary}
-        isDisabled={controlsDisabled}
-      />
+      {showTokenContributors && selectedToken ? (
+        <>
+          <TokenHeader
+            token={selectedToken.token}
+            metadata={selectedToken.metadata}
+            isMetadataLoading={selectedToken.isMetadataLoading}
+            hasMetadataError={selectedToken.hasMetadataError}
+          />
+          <XtdhTokenContributorsPanel
+            contract={contractParam}
+            tokenId={selectedTokenId}
+          />
+        </>
+      ) : (
+        <>
+          <XtdhTokensControls
+            activeSortField={activeSortField}
+            activeSortDirection={activeSortDirection}
+            onSortChange={handleSortChange}
+            resultSummary={resultSummary}
+            isDisabled={controlsDisabled}
+          />
 
-      <XtdhTokensList
-        tokens={tokens}
-        contractAddress={normalizedAddress}
-        isEnabled={isEnabled}
-        isLoading={isLoading}
-        isError={isError}
-        errorMessage={errorMessage}
-        onRetry={handleRetry}
-      />
+          <XtdhTokensList
+            tokens={tokens}
+            contractAddress={normalizedAddress}
+            isEnabled={isEnabled}
+            isLoading={isLoading}
+            isError={isError}
+            errorMessage={errorMessage}
+            onRetry={handleRetry}
+            onTokenSelect={handleTokenSelect}
+          />
 
-      <CollectionLoadMore
-        isVisible={showLoadMore}
-        isFetching={isFetchingNextPage}
-        onLoadMore={handleLoadMore}
-      />
+          <CollectionLoadMore
+            isVisible={showLoadMore}
+            isFetching={isFetchingNextPage}
+            onLoadMore={handleLoadMore}
+          />
+        </>
+      )}
     </section>
   );
 }

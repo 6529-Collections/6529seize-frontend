@@ -14,6 +14,7 @@ export function XtdhTokensList({
   isError,
   errorMessage,
   onRetry,
+  onTokenSelect,
 }: Readonly<XtdhTokensListProps>) {
   const {
     metadataMap,
@@ -61,6 +62,14 @@ export function XtdhTokensList({
           const metadata = decimalId ? metadataMap.get(decimalId) : undefined;
           const isMetadataLoading = !!decimalId && !metadata && isFetchingMetadata;
           const metadataError = !!decimalId && !metadata && hasMetadataError;
+          const handleSelect = () => {
+            onTokenSelect?.({
+              token,
+              metadata,
+              isMetadataLoading,
+              hasMetadataError: metadataError,
+            });
+          };
           return (
             <XtdhTokenListItem
               key={getTokenKey(token)}
@@ -68,6 +77,7 @@ export function XtdhTokensList({
               metadata={metadata}
               isMetadataLoading={isMetadataLoading}
               hasMetadataError={metadataError}
+              onSelect={handleSelect}
             />
           );
         })}

@@ -4,7 +4,6 @@ import type { CollectionMetricDatum } from "../types";
 import { CollectionMetric } from "./CollectionMetric";
 
 interface CollectionHeaderProps {
-  readonly onBack: () => void;
   readonly contractDisplayName: string;
   readonly subtitleLabel: string;
   readonly contractImageUrl?: string;
@@ -12,7 +11,6 @@ interface CollectionHeaderProps {
 }
 
 export function CollectionHeader({
-  onBack,
   contractDisplayName,
   subtitleLabel,
   contractImageUrl,
@@ -20,13 +18,6 @@ export function CollectionHeader({
 }: Readonly<CollectionHeaderProps>) {
   return (
     <header className="tw-flex tw-flex-col tw-gap-3">
-      <button
-        type="button"
-        onClick={onBack}
-        className="tw-inline-flex tw-items-center tw-gap-2 tw-self-start tw-rounded-lg tw-border tw-border-iron-800 tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-50 desktop-hover:hover:tw-bg-iron-900"
-      >
-        Back to received collections
-      </button>
       <div className="tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4 tw-shadow-inner tw-shadow-black/20">
         <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
           <div className="tw-flex tw-items-center tw-gap-3">

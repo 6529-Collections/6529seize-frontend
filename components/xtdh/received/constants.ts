@@ -86,3 +86,47 @@ export function parseTokensSortDirection(value: string | null): SortDirection {
     ? SortDirection.ASC
     : SortDirection.DESC;
 }
+
+export type XtdhTokenContributorsGroupBy = "grant" | "grantor";
+
+export const TOKEN_CONTRIBUTORS_GROUP_BY_LABELS: Record<
+  XtdhTokenContributorsGroupBy,
+  string
+> = {
+  grant: "Grant",
+  grantor: "Grantor",
+};
+
+export const TOKEN_CONTRIBUTORS_GROUP_BY_ITEMS = [
+  {
+    key: "grant",
+    label: TOKEN_CONTRIBUTORS_GROUP_BY_LABELS.grant,
+    value: "grant",
+  },
+  {
+    key: "grantor",
+    label: TOKEN_CONTRIBUTORS_GROUP_BY_LABELS.grantor,
+    value: "grantor",
+  },
+] as const satisfies ReadonlyArray<
+  CommonSelectItem<XtdhTokenContributorsGroupBy>
+>;
+
+export const DEFAULT_TOKEN_CONTRIBUTORS_GROUP_BY: XtdhTokenContributorsGroupBy =
+  "grant";
+export const DEFAULT_TOKEN_CONTRIBUTORS_SORT_FIELD: XtdhTokensSortField = "xtdh";
+export const DEFAULT_TOKEN_CONTRIBUTORS_SORT_DIRECTION = SortDirection.DESC;
+
+export function parseTokenContributorsGroupBy(
+  value: string | null
+): XtdhTokenContributorsGroupBy {
+  if (!value) {
+    return DEFAULT_TOKEN_CONTRIBUTORS_GROUP_BY;
+  }
+  const normalized = value.trim().toLowerCase();
+  return (
+    TOKEN_CONTRIBUTORS_GROUP_BY_ITEMS.find(
+      (item) => item.value === normalized
+    )?.value ?? DEFAULT_TOKEN_CONTRIBUTORS_GROUP_BY
+  );
+}

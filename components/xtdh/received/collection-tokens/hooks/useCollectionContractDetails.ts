@@ -112,6 +112,6 @@ export function useCollectionContractDetails({
     contractDisplayName,
     subtitleLabel,
     headerMetrics,
-    contractImageUrl: contractOverview?.imageUrl,
+    contractImageUrl: contractOverview?.imageUrl ?? undefined,
   };
 }
