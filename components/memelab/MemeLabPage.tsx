@@ -132,14 +132,14 @@ export default function MemeLabPageComponent({
   }, [activeTab]);
 
   useEffect(() => {
-    if (!nftId) {
-      return;
-    }
-
     setNft(undefined);
     setNftMeta(undefined);
     setOriginalMemes([]);
     setOriginalMemesLoaded(false);
+
+    if (!nftId) {
+      return;
+    }
 
     let cancelled = false;
 
@@ -295,7 +295,7 @@ export default function MemeLabPageComponent({
             error
           );
           setTransactions([]);
-          setUserLoaded(true);
+          setUserLoaded(false);
           setNftBalance(0);
         });
     } else {
@@ -310,6 +310,9 @@ export default function MemeLabPageComponent({
   }, [nftId, connectedProfile]);
 
   useEffect(() => {
+    setActivity([]);
+    setActivityTotalResults(0);
+
     if (!nftId) {
       return;
     }
@@ -357,6 +360,8 @@ export default function MemeLabPageComponent({
   }, [nftId, activityPage, activityTypeFilter]);
 
   useEffect(() => {
+    setNftHistory([]);
+
     let cancelled = false;
 
     async function fetchHistory(url: string) {
@@ -700,9 +705,11 @@ export default function MemeLabPageComponent({
   function printYourCards() {
     const firstAcquired =
       transactions.length > 0
-        ? [...transactions].sort((a, b) =>
-            a.transaction_date > b.transaction_date ? 1 : -1
-          )[0]
+        ? transactions.reduce((earliest, tx) =>
+            new Date(tx.transaction_date) < new Date(earliest.transaction_date)
+              ? tx
+              : earliest
+          )
         : undefined;
 
     const airdropped = transactions.filter(

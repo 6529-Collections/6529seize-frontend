@@ -51,7 +51,7 @@ export default function DelegationMappingTool() {
   const inputRef = useRef(null);
   const [dragActive, setDragActive] = useState(false);
 
-  const [file, setFile] = useState<any>();
+  const [file, setFile] = useState<File | undefined>();
   const [collection, setCollection] = useState<string>("0");
   const [useCase, setUseCase] = useState<number>(0);
   const [processing, setProcessing] = useState(false);
@@ -297,7 +297,7 @@ export default function DelegationMappingTool() {
         className={`${styles.formInputHidden}`}
         type="file"
         accept=".csv"
-        value={file?.fileName}
+        value={file?.name}
         onChange={(e: any) => {
           if (e.target.files) {
             const f = e.target.files[0];

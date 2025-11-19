@@ -19,6 +19,14 @@ const numberFormatter = new Intl.NumberFormat(undefined, {
   maximumFractionDigits: 0,
 });
 
+const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+});
+
 const ALL_TOKENS_LABEL = "All tokens";
 const UNKNOWN_TOKENS_LABEL = "an unknown number of tokens";
 
@@ -34,7 +42,7 @@ export const getTargetTokensCountInfo = (
     return { kind: "all", label: ALL_TOKENS_LABEL, count: null };
   }
 
-  if (!Number.isFinite(count) || count < 1) {
+  if (!Number.isFinite(count) || count < 0) {
     return {
       kind: "unknown",
       label: UNKNOWN_TOKENS_LABEL,
@@ -42,7 +50,7 @@ export const getTargetTokensCountInfo = (
     };
   }
 
-  const normalizedCount = Math.floor(count);
+  const normalizedCount = Math.trunc(count);
 
   return {
     kind: "count",
@@ -105,13 +113,7 @@ export const formatDateTime = (
     return "Invalid date";
   }
 
-  return new Intl.DateTimeFormat(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(date);
+  return dateTimeFormatter.format(date);
 };
 
 export const formatAmount = (value: number) => {
@@ -160,7 +162,7 @@ export const formatTdhRatePerToken = (
     return null;
   }
 
-  const normalizedTokensCount = Math.floor(tokensCount);
+  const normalizedTokensCount = Math.trunc(tokensCount);
 
   if (!Number.isFinite(normalizedTokensCount) || normalizedTokensCount <= 0) {
     return null;

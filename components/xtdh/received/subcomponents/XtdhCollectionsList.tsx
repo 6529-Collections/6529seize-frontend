@@ -135,8 +135,8 @@ function CollectionsSkeleton() {
             </div>
           </div>
           <div className="tw-mt-4 tw-grid tw-gap-3 sm:tw-grid-cols-2 xl:tw-grid-cols-4">
-            {Array.from({ length: 7 }).map((_, metricIndex) => (
-              <div key={`metric-${metricIndex}`} className="tw-space-y-2">
+            {SKELETON_METRIC_KEYS.map((metricKey) => (
+              <div key={metricKey} className="tw-space-y-2">
                 <div className="tw-h-3 tw-w-20 tw-rounded tw-bg-iron-800" />
                 <div className="tw-h-4 tw-w-24 tw-rounded tw-bg-iron-850" />
               </div>
@@ -149,6 +149,7 @@ function CollectionsSkeleton() {
 }
 
 const SKELETON_INDICES = [0, 1, 2];
+const SKELETON_METRIC_KEYS = Array.from({ length: 7 }, (_, index) => `metric-${index}`);
 
 function getCollectionKey(collection: ApiXtdhCollection) {
   const normalizedContract = collection.contract?.trim().toLowerCase();

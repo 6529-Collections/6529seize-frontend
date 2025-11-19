@@ -33,6 +33,30 @@ interface GrantItemViewModel {
   readonly variant: GrantItemVariant;
 }
 
+function deriveErrorDetails(
+  normalizedError: string | null,
+  isUnsupportedChain: boolean,
+  chainName: string,
+  isContractError: boolean,
+  hasContractData: boolean
+): string | null {
+  if (normalizedError) {
+    return normalizedError;
+  }
+
+  if (isUnsupportedChain) {
+    return `Target chain "${chainName}" is not supported yet.`;
+  }
+
+  if (isContractError) {
+    return hasContractData
+      ? "Unable to refresh contract metadata. Showing the most recent cached data."
+      : "Unable to load contract metadata.";
+  }
+
+  return null;
+}
+
 export function useGrantItemViewModel(grant: ApiTdhGrant): GrantItemViewModel {
   const contractAddress = getContractAddress(grant.target_contract);
   const contractLabel =
@@ -57,21 +81,23 @@ export function useGrantItemViewModel(grant: ApiTdhGrant): GrantItemViewModel {
     chain,
     enabled: shouldLoadContract,
   });
-  const contract = isUnsupportedChain ? null : fetchedContract ?? null;
+  let contract: ContractOverview | null = null;
+
+  if (!isUnsupportedChain) {
+    contract = fetchedContract ?? null;
+  }
   const isLoading = shouldLoadContract && isContractQueryLoading;
 
   const details = buildGrantDetails(grant, contract ?? undefined);
   const hasContractData = Boolean(contract);
   const normalizedErrorDetails = normalizeErrorDetails(grant.error_details);
-  const derivedErrorDetails =
-    normalizedErrorDetails ??
-    (isUnsupportedChain
-      ? `Target chain "${grant.target_chain}" is not supported yet.`
-      : isContractError
-        ? hasContractData
-          ? "Unable to refresh contract metadata. Showing the most recent cached data."
-          : "Unable to load contract metadata."
-        : null);
+  const derivedErrorDetails = deriveErrorDetails(
+    normalizedErrorDetails,
+    isUnsupportedChain,
+    grant.target_chain,
+    isContractError,
+    hasContractData
+  );
 
   return {
     contract: contract ?? null,

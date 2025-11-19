@@ -65,6 +65,9 @@ function isDelimiter(char: string): boolean {
 }
 
 function tokenize(input: string): Segment[] {
+  // First pass: break the raw input into basic parts by stripping commas and
+  // whitespace. This preserves standalone "-" tokens so we can interpret them
+  // relative to neighbors in the next pass.
   const parts: Segment[] = [];
   let i = 0;
   while (i < input.length) {
@@ -84,6 +87,8 @@ function tokenize(input: string): Segment[] {
   if (!parts.length) {
     return [];
   }
+  // Second pass: merge standalone "-" tokens with their neighbors so
+  // expressions like "1 - 5" and "1-5" normalize to the same segment.
   const segments: Segment[] = [];
   let skipNext = false;
   for (let index = 0; index < parts.length; index += 1) {
@@ -92,6 +97,8 @@ function tokenize(input: string): Segment[] {
       continue;
     }
     const part = parts[index];
+    // Merge only when the dash is bounded by real values (never another dash).
+    // Inputs like "1 - -5" therefore remain two segments and are validated later.
     if (
       part.value === "-" &&
       segments.length > 0 &&
@@ -465,6 +472,12 @@ export function tryToNumberArray(ids: TokenSelection): {
   return { numbers, unsafeCount };
 }
 
+/**
+ * Returns a window of token ids taken from canonical, deduped ranges.
+ * @param ranges Canonical ranges to page through (sorted + non-overlapping)
+ * @param startIndex Zero-based index of the first token to return
+ * @param count Maximum number of tokens to return from the window
+ */
 export function expandRangesWindow(
   ranges: TokenRange[],
   startIndex: number,
@@ -476,6 +489,8 @@ export function expandRangesWindow(
   const start = BigInt(startIndex);
   const limit = BigInt(count);
   const result: TokenSelection = [];
+  // `consumed` accumulates tokens we've already passed so we know how the global
+  // window intersects with each local range.
   let consumed = BIGINT_ZERO;
   for (const range of ranges) {
     const rangeLength = range.end - range.start + BIGINT_ONE;

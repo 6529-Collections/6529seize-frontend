@@ -6,8 +6,15 @@ import { areEqualAddresses } from "@/helpers/Helpers";
 import { fetchAllPages } from "@/services/6529api";
 import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useRef, useState } from "react";
+import {
+  ChangeEvent,
+  DragEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import { toast } from "react-toastify";
 import styles from "./MappingTool.module.scss";
 
 const csvParser = require("csv-parser");
@@ -86,10 +93,10 @@ async function parseCsvFile(file: File): Promise<ConsolidationData[]> {
 }
 
 export default function ConsolidationMappingTool() {
-  const inputRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const [dragActive, setDragActive] = useState(false);
 
-  const [file, setFile] = useState<any>();
+  const [file, setFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
   const [consolidations, setConsolidations] = useState<Consolidation[]>([]);
 
@@ -99,25 +106,26 @@ export default function ConsolidationMappingTool() {
   }
 
   const handleUpload = () => {
-    (inputRef.current as any).click();
+    inputRef.current?.click();
   };
 
-  const handleDrag = function (e: any) {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
+  const handleDrag = function (event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "dragenter" || event.type === "dragover") {
       setDragActive(true);
-    } else if (e.type === "dragleave") {
+    } else if (event.type === "dragleave") {
       setDragActive(false);
     }
   };
 
-  const handleDrop = function (e: any) {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleDrop = function (event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    event.stopPropagation();
     setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFile(e.dataTransfer.files[0]);
+    const droppedFiles = event.dataTransfer?.files;
+    if (droppedFiles && droppedFiles[0]) {
+      setFile(droppedFiles[0]);
     }
   };
 
@@ -200,6 +208,9 @@ export default function ConsolidationMappingTool() {
         }
       } catch (error) {
         console.error("Failed to fetch consolidations for mapping tool", error);
+        toast.error(
+          "Unable to process the CSV. Please verify the file and try again."
+        );
         setConsolidations([]);
         setCsvData([]);
         setProcessing(false);
@@ -255,6 +266,9 @@ export default function ConsolidationMappingTool() {
       downloadCsvFile(normalizedOutput);
     } catch (error) {
       console.error("Failed to generate CSV output", error);
+      toast.error(
+        "Unable to generate the consolidated CSV. Please try again later."
+      );
     } finally {
       setProcessing(false);
     }
@@ -324,10 +338,9 @@ export default function ConsolidationMappingTool() {
         className={`${styles.formInputHidden}`}
         type="file"
         accept=".csv"
-        value={file?.fileName}
-        onChange={(e: any) => {
-          if (e.target.files) {
-            const f = e.target.files[0];
+        onChange={(event: ChangeEvent<HTMLInputElement>) => {
+          if (event.target.files) {
+            const f = event.target.files[0];
             setFile(f);
           }
         }}

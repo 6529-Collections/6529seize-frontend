@@ -117,13 +117,6 @@ export default function CommonTabs<T, U = unknown>(
           focusTab(items.length - 1);
           break;
         }
-        case "Enter":
-        case " ":
-        case "Spacebar": {
-          event.preventDefault();
-          event.currentTarget?.click();
-          break;
-        }
         default:
           break;
       }

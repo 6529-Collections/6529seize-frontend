@@ -79,7 +79,10 @@ export default function CollectionsAutocomplete({
 
   const selectedOptions = useMemo(
     () =>
-      value.map((id) => optionMap.get(id) ?? { id, name: id }),
+      value.map((id) => {
+        const option = optionMap.get(id);
+        return option ?? { id, name: id };
+      }),
     [optionMap, value]
   );
   const selectionPlaceholder = selectedOptions.length
@@ -122,6 +125,17 @@ export default function CollectionsAutocomplete({
   const focusInput = useCallback(() => {
     inputRef.current?.focus();
   }, []);
+
+  const handleContainerKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (disabled || !ACTIVATION_KEYS.has(event.key)) {
+        return;
+      }
+      event.preventDefault();
+      focusInput();
+    },
+    [disabled, focusInput]
+  );
 
   const handleInputFocus = useCallback(() => {
     openDropdown();
@@ -237,7 +251,7 @@ export default function CollectionsAutocomplete({
         return;
       }
       event.preventDefault();
-      const lastSelected = value.length ? value[value.length - 1] : undefined;
+      const lastSelected = value.at(-1);
       if (lastSelected) {
         handleRemove(lastSelected);
       }
@@ -316,7 +330,12 @@ export default function CollectionsAutocomplete({
               ? "tw-border-iron-800 tw-bg-iron-900/60 tw-text-iron-400 tw-opacity-80"
               : "tw-border-iron-700 tw-bg-iron-900 hover:tw-border-iron-600"
           )}
+          role="group"
+          aria-disabled={disabled || undefined}
+          aria-label="Collections selection area"
+          tabIndex={disabled ? -1 : 0}
           onClick={disabled ? undefined : focusInput}
+          onKeyDown={disabled ? undefined : handleContainerKeyDown}
         >
           {selectedOptions.map((option) => (
             <span
@@ -380,11 +399,10 @@ export default function CollectionsAutocomplete({
             {!hasNoResults &&
               filteredOptions.map((option) => (
                 <option key={option.id} value={option.id}>
-                  {`${option.name} (${option.id})${
-                    typeof option.tokenCount === "number"
+                  {`${option.name} (${option.id})${typeof option.tokenCount === "number"
                       ? ` • ${option.tokenCount.toLocaleString()} tokens`
                       : ""
-                  }`}
+                    }`}
                 </option>
               ))}
           </select>
