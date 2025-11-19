@@ -18,7 +18,6 @@ export default function NotFound({ label }: { readonly label?: string }) {
 
   useEffect(() => {
     setTitle(titleLabel);
-    throw new Error("test");
   }, [titleLabel, setTitle]);
 
   return (
