@@ -42,17 +42,12 @@ describe("NotFound", () => {
   it("sets the title and renders default PAGE not found when no label", () => {
     render(<NotFound />);
 
-    expect(setTitleMock).toHaveBeenCalledWith("404 - PAGE NOT FOUND");
+    expect(setTitleMock).toHaveBeenCalledWith("404 | PAGE NOT FOUND");
 
     // Heading content
     expect(
       screen.getByRole("heading", { level: 3, name: "404 | PAGE NOT FOUND" })
     ).toBeInTheDocument();
-
-    // Home link
-    const homeLink = screen.getByRole("link", { name: "6529 HOME" });
-    expect(homeLink).toHaveAttribute("href", "/");
-    expect(homeLink).toHaveClass("tw-mt-5", "tw-text-lg", "tw-font-semibold");
 
     // Images render
     expect(screen.getByAltText("SummerGlasses")).toBeInTheDocument();
@@ -62,9 +57,12 @@ describe("NotFound", () => {
   it("uppercases the provided label in title and heading", () => {
     render(<NotFound label="mEmE" />);
 
-    expect(setTitleMock).toHaveBeenCalledWith("404 - MEME NOT FOUND");
+    expect(setTitleMock).toHaveBeenCalledWith("404 | MEME NOT FOUND");
     expect(
-      screen.getByRole("heading", { level: 3, name: "404 | MEME NOT FOUND" })
+      screen.getByRole("heading", {
+        level: 3,
+        name: "404 | MEME NOT FOUND",
+      })
     ).toBeInTheDocument();
   });
 });

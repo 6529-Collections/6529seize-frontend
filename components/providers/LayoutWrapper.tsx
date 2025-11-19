@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useState, type ComponentType, type ReactNode } from "react";
-import { usePathname } from "next/navigation";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import WebLayout from "@/components/layout/WebLayout";
 import MobileLayout from "@/components/layout/MobileLayout";
 import SmallScreenLayout from "@/components/layout/SmallScreenLayout";
-import useIsMobileScreen from "@/hooks/isMobileScreen";
+import WebLayout from "@/components/layout/WebLayout";
+import LayoutErrorFallback from "@/components/providers/LayoutErrorFallback";
 import { SIDEBAR_MOBILE_BREAKPOINT } from "@/constants/sidebar";
 import FooterWrapper from "@/FooterWrapper";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { usePathname } from "next/navigation";
+import { useEffect, useState, type ComponentType, type ReactNode } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 
 export default function LayoutWrapper({
   children,
@@ -65,7 +67,8 @@ export default function LayoutWrapper({
   const isAccessOrRestricted =
     pathname?.startsWith("/access") || pathname?.startsWith("/restricted");
 
-  let LayoutComponent: ComponentType<{ readonly children: ReactNode }> = WebLayout;
+  let LayoutComponent: ComponentType<{ readonly children: ReactNode }> =
+    WebLayout;
 
   const isSmallLayout =
     hasTouchScreen && (isSmallScreen || isTouchTabletViewport);
@@ -82,10 +85,12 @@ export default function LayoutWrapper({
 
   return (
     <LayoutComponent>
-      <>
+      <ErrorBoundary
+        FallbackComponent={LayoutErrorFallback}
+        resetKeys={[pathname]}>
         {children}
         <FooterWrapper />
-      </>
+      </ErrorBoundary>
     </LayoutComponent>
   );
 }
