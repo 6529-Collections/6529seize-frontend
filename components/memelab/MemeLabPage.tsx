@@ -79,14 +79,17 @@ export default function MemeLabPageComponent({
 
   const [isFullScreenSupported, setIsFullScreenSupported] = useState(false);
 
-  const [fullscreenElementId, setFullscreenElementId] = useState<string>(
-    "the-art-fullscreen-img"
-  );
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const [activeTab, setActiveTab] = useState<MEME_FOCUS>();
 
   const [nft, setNft] = useState<LabNFT>();
+
+  const hasAnimation = nft?.animation || nft?.metadata?.animation;
+  const fullscreenElementId =
+    hasAnimation && currentSlide === 0
+      ? "the-art-fullscreen-animation"
+      : "the-art-fullscreen-img";
   const [originalMemes, setOriginalMemes] = useState<NFT[]>([]);
   const [nftMeta, setNftMeta] = useState<LabExtendedData>();
   const [nftBalance, setNftBalance] = useState<number>(0);
@@ -108,6 +111,10 @@ export default function MemeLabPageComponent({
   useEffect(() => {
     setTitle(getMemeTabTitle(`Meme Lab`, nftId, nft, activeTab));
   }, [nft, nftId, activeTab]);
+
+  useEffect(() => {
+    setCurrentSlide(0);
+  }, [nft]);
 
   useEffect(() => {
     setIsFullScreenSupported(fullScreenSupported());
@@ -730,11 +737,6 @@ export default function MemeLabPageComponent({
 
   function carouselHandlerSlide(event: any) {
     setCurrentSlide(event);
-    if (event === 0) {
-      setFullscreenElementId("the-art-fullscreen-animation");
-    } else {
-      setFullscreenElementId("the-art-fullscreen-img");
-    }
   }
 
   let currentFormat: string | undefined;
