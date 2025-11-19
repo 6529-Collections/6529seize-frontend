@@ -14,7 +14,7 @@ type ErrorComponentProps = {
 
 export default function ErrorComponent({
   stackTrace,
-  digest = "lala",
+  digest,
 }: ErrorComponentProps = {}) {
   const { setTitle } = useTitle();
   const searchParams = useSearchParams();
