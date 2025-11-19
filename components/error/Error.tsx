@@ -53,7 +53,7 @@ export default function ErrorComponent({
             className="tw-w-8 tw-h-8"
           />
         </div>
-        <p className="tw-text-center tw-text-base md:tw-text-lg tw-text-gray-200">
+        <p className="tw-text-center tw-font-medium md:tw-text-lg tw-text-gray-200">
           Looks like something went wrong. Try again or reach out to us at{" "}
           <a
             className="tw-text-white tw-underline"

@@ -5,12 +5,14 @@ import Image from "next/image";
 import { useEffect } from "react";
 
 export default function NotFound({ label }: { readonly label?: string }) {
-  let titleLabel = "PAGE NOT FOUND";
+  let titleLabel;
   if (label) {
-    titleLabel = `${label} OR ${titleLabel}`;
+    titleLabel = label.toUpperCase();
+  } else {
+    titleLabel = "PAGE";
   }
 
-  titleLabel = `404 | ${titleLabel}`;
+  titleLabel = `404 | ${titleLabel} NOT FOUND`;
 
   const { setTitle } = useTitle();
 
@@ -39,7 +41,7 @@ export default function NotFound({ label }: { readonly label?: string }) {
             className="tw-w-8 tw-h-8"
           />
         </div>
-        <p className="tw-text-center tw-text-base md:tw-text-lg tw-text-gray-200">
+        <p className="tw-text-center tw-font-medium md:tw-text-lg tw-text-gray-200">
           The {label ? `${label.toLowerCase()} or ` : ""}page you're looking for
           doesn't exist or has been moved.
         </p>

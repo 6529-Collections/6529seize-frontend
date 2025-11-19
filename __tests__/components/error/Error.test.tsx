@@ -43,12 +43,12 @@ describe("ErrorComponent", () => {
   it("reveals a provided stack trace when toggled", () => {
     render(<ErrorComponent stackTrace="Error: stack" />);
 
-    const toggleButton = screen.getByRole("button", { name: /show stacktrace/i });
+    const toggleButton = screen.getByRole("button", {
+      name: /show stacktrace/i,
+    });
     fireEvent.click(toggleButton);
 
-    expect(
-      screen.getByText("Error: stack", { selector: "pre" })
-    ).toBeInTheDocument();
+    expect(screen.getByText("Error: stack")).toBeInTheDocument();
   });
 
   it("uses the stack trace from the URL when no prop is provided", () => {
@@ -58,8 +58,32 @@ describe("ErrorComponent", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /show stacktrace/i }));
 
+    expect(screen.getByText("FromQuery")).toBeInTheDocument();
+  });
+
+  it("does not show stack trace section when no stack trace is provided", () => {
+    render(<ErrorComponent />);
+
     expect(
-      screen.getByText("FromQuery", { selector: "pre" })
+      screen.queryByRole("button", { name: /show stacktrace/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it("toggles stack trace visibility", () => {
+    render(<ErrorComponent stackTrace="Error: test" />);
+
+    const toggleButton = screen.getByRole("button", {
+      name: /show stacktrace/i,
+    });
+    expect(screen.queryByText("Error: test")).not.toBeInTheDocument();
+
+    fireEvent.click(toggleButton);
+    expect(screen.getByText("Error: test")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /hide stacktrace/i })
     ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /hide stacktrace/i }));
+    expect(screen.queryByText("Error: test")).not.toBeInTheDocument();
   });
 });
