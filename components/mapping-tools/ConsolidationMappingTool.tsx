@@ -224,6 +224,11 @@ export default function ConsolidationMappingTool() {
         setCsvData(parsedCsv);
 
         if (parsedCsv.length === 0 || fetchedConsolidations.length === 0) {
+          const message =
+            parsedCsv.length === 0
+              ? "The CSV file contains no valid data rows."
+              : "No consolidations found to process.";
+          toast.warning(message);
           setProcessing(false);
         }
       } catch (error) {

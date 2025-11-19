@@ -140,6 +140,8 @@ function GrantTokensPanel({
 
 const TOKEN_PAGE_SIZE = 500;
 const END_REACHED_OFFSET = 48;
+const DEFAULT_GRANT_TOKENS_ERROR_MESSAGE =
+  "We couldn't load the granted tokens right now. Please try again.";
 
 function GrantTokensDisclosure({
   chain,
@@ -174,8 +176,7 @@ function GrantTokensDisclosure({
   const tokenRanges = useMemo(() => mapTokensToRanges(tokens), [tokens]);
   const showInitialLoading = isOpen && tokenRanges.length === 0 && isLoading;
   const showInitialError = isOpen && tokenRanges.length === 0 && isError;
-  const errorMessage =
-    error instanceof Error ? error.message : "Unable to load granted tokens.";
+  const errorMessage = getGrantTokensErrorMessage(error);
   const handleEndReached = useCallback(() => {
     if (!hasNextPage || isFetchingNextPage) {
       return;
@@ -313,6 +314,13 @@ function renderGrantTokensDisclosureBody({
   );
 }
 
+function getGrantTokensErrorMessage(error: unknown): string {
+  if (error instanceof Error && error.name === "AbortError") {
+    return "Loading granted tokens took too long. Please try again.";
+  }
+  return DEFAULT_GRANT_TOKENS_ERROR_MESSAGE;
+}
+
 function GrantTokensLoadingState() {
   return (
     <div className="tw-flex tw-min-h-24 tw-items-center tw-justify-center">
@@ -360,6 +368,13 @@ function mapTokensToRanges(tokens: readonly string[]): TokenRange[] {
     } catch {
       // Ignore malformed token identifiers.
     }
+  }
+  if (ids.length === 0) {
+    console.warn(
+      "Grant tokens API returned only malformed token identifiers.",
+      { tokensCount: tokens.length }
+    );
+    return [];
   }
   return toCanonicalRanges(ids);
 }

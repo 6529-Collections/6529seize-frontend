@@ -197,6 +197,7 @@ function VirtualizedTokenListContent({
 
             const metadata = metadataMap.get(token.decimalId);
             const isLoadingMetadata = metadataQuery.isFetching && !metadata;
+            const hasMetadataError = metadataQuery.isError && !metadata;
 
             return (
               <TokenRow
@@ -207,6 +208,7 @@ function VirtualizedTokenListContent({
                 renderTokenExtra={renderTokenExtra}
                 action={action}
                 isMetadataLoading={isLoadingMetadata}
+                hasMetadataError={hasMetadataError}
                 positionStyle={{
                   transform: `translateY(${virtualItem.start}px)`,
                   height: virtualItem.size,
@@ -265,7 +267,8 @@ function getVisibleWindowBounds(virtualItems: Array<{ index: number }>) {
   }
 
   const firstVisibleIndex = virtualItems[0].index;
-  const lastVisibleIndex = virtualItems.at(-1)!.index;
+  const lastItem = virtualItems[virtualItems.length - 1];
+  const lastVisibleIndex = lastItem.index;
 
   return { firstVisibleIndex, lastVisibleIndex };
 }
@@ -305,8 +308,8 @@ function useTokenMetadataWindow({
   );
   const canLoadMetadata = Boolean(
     contractAddress &&
-      chain &&
-      decimalTokenIds.length > 0
+    chain &&
+    decimalTokenIds.length > 0
   );
 
   const metadataQuery = useTokenMetadataQuery({
@@ -344,6 +347,7 @@ type TokenRowProps = Readonly<{
   renderTokenExtra?: (tokenId: bigint, metadata?: TokenMetadata) => ReactNode;
   action?: TokenListAction;
   isMetadataLoading: boolean;
+  hasMetadataError: boolean;
   positionStyle: CSSProperties;
 }>;
 
@@ -354,6 +358,7 @@ function TokenRow({
   renderTokenExtra,
   action,
   isMetadataLoading,
+  hasMetadataError,
   positionStyle,
 }: Readonly<TokenRowProps>) {
   return (
@@ -364,7 +369,12 @@ function TokenRow({
       )}
       style={positionStyle}
     >
-      <TokenThumbnail metadata={metadata} decimalId={token.decimalId} isLoading={isMetadataLoading} />
+      <TokenThumbnail
+        metadata={metadata}
+        decimalId={token.decimalId}
+        isLoading={isMetadataLoading}
+        hasError={hasMetadataError}
+      />
       <div className="tw-flex tw-flex-1 tw-items-center tw-justify-between tw-gap-4">
         <div className="tw-flex tw-flex-col tw-gap-0.5">
           <span className="tw-text-sm tw-font-medium tw-text-white">#{token.decimalId}</span>
@@ -390,9 +400,10 @@ type TokenThumbnailProps = Readonly<{
   metadata?: TokenMetadata;
   decimalId: string;
   isLoading: boolean;
+  hasError: boolean;
 }>;
 
-function TokenThumbnail({ metadata, decimalId, isLoading }: Readonly<TokenThumbnailProps>) {
+function TokenThumbnail({ metadata, decimalId, isLoading, hasError }: Readonly<TokenThumbnailProps>) {
   let content: ReactNode;
 
   if (metadata?.imageUrl) {
@@ -413,6 +424,13 @@ function TokenThumbnail({ metadata, decimalId, isLoading }: Readonly<TokenThumbn
         className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center"
       >
         <Spinner />
+      </div>
+    );
+  } else if (hasError) {
+    content = (
+      <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-text-[10px] tw-font-medium tw-leading-tight tw-text-red-300">
+        <span>Load</span>
+        <span>Error</span>
       </div>
     );
   } else {

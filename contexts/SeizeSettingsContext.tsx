@@ -69,7 +69,10 @@ export const SeizeSettingsProvider = ({
         const normalizedError =
           error instanceof Error ? error : new Error(String(error));
         setLoadError(normalizedError);
-        setIsLoaded(false);
+        // Keep isLoaded true during background refreshes unless reset was requested
+        if (reset) {
+          setIsLoaded(false);
+        }
         throw normalizedError;
       }
     },
