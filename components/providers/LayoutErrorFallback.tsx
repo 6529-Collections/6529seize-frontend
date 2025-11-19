@@ -7,10 +7,13 @@ import { type FallbackProps } from "react-error-boundary";
 
 export default function LayoutErrorFallback({ error }: FallbackProps) {
   const errorDetails = error ? extractErrorDetails(error) : null;
+  const digest = error && typeof error === "object" && "digest" in error 
+    ? (error as { digest?: string }).digest 
+    : undefined;
 
   return (
     <main className={styles.main}>
-      <ErrorComponent stackTrace={errorDetails} />
+      <ErrorComponent stackTrace={errorDetails} digest={digest} />
     </main>
   );
 }

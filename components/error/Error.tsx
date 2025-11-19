@@ -9,10 +9,12 @@ import { useEffect, useId, useMemo, useState } from "react";
 
 type ErrorComponentProps = {
   readonly stackTrace?: string | null;
+  readonly digest?: string | null;
 };
 
 export default function ErrorComponent({
   stackTrace,
+  digest = "lala",
 }: ErrorComponentProps = {}) {
   const { setTitle } = useTitle();
   const searchParams = useSearchParams();
@@ -63,7 +65,7 @@ export default function ErrorComponent({
           .
         </p>
 
-        {hasStackTrace && (
+        {(hasStackTrace || digest) && (
           <div className="tw-flex tw-flex-col tw-gap-2 tw-items-center tw-justify-center tw-w-full tw-max-w-4xl tw-px-4">
             <button
               type="button"
@@ -84,6 +86,7 @@ export default function ErrorComponent({
               <div
                 id={stacktraceContentId}
                 className="tw-w-full tw-mt-4 tw-bg-black tw-rounded-lg tw-p-4 tw-text-xs tw-leading-5 tw-overflow-auto tw-text-gray-200 tw-font-mono tw-whitespace-pre-wrap tw-max-h-[16rem]">
+                {digest && <div className="tw-mb-2">Digest: {digest}</div>}
                 {resolvedStackTrace}
               </div>
             ) : null}
