@@ -33,10 +33,17 @@ export function XtdhTokenContributorsListItem({
     { label: "xTDH", value: formatXtdhValue(contribution.xtdh) },
     { label: "xTDH rate", value: formatXtdhRate(contribution.xtdh_rate) },
     {
-      label: "Grants",
+      label: "Total grants",
       value:
-        typeof contribution.grant_count === "number"
-          ? formatNumberWithCommas(contribution.grant_count)
+        typeof contribution.total_grant_count === "number"
+          ? formatNumberWithCommas(contribution.total_grant_count)
+          : "—",
+    },
+    {
+      label: "Active grants",
+      value:
+        typeof contribution.active_grant_count === "number"
+          ? formatNumberWithCommas(contribution.active_grant_count)
           : "—",
     },
   ];

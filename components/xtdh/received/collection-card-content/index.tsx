@@ -74,8 +74,10 @@ export function XtdhReceivedCollectionCard({
   const tokenTypeLabel = contract?.tokenType ?? "Unknown";
   const totalSupplyLabel = formatTotalSupply(contract?.totalSupply);
   const floorPriceLabel = formatFloorPrice(contract?.floorPriceEth);
-  const tokensGrantedLabel = formatCount(collection.token_count);
-  const grantsCountLabel = formatCount(collection.grant_count);
+  const totalTokensGrantedLabel = formatCount(collection.total_token_count);
+  const activeTokensGrantedLabel = formatCount(collection.active_token_count);
+  const totalContributorsLabel = formatCount(collection.total_contributor_count);
+  const activeContributorsLabel = formatCount(collection.active_contributor_count);
   const xtdhValueLabel = formatXtdhValue(collection.xtdh);
   const xtdhRateLabel = formatXtdhRate(collection.xtdh_rate);
 
@@ -119,8 +121,10 @@ export function XtdhReceivedCollectionCard({
         <CollectionMetric label="Token type" value={tokenTypeLabel} />
         <CollectionMetric label="Total supply" value={totalSupplyLabel} />
         <CollectionMetric label="Floor price" value={floorPriceLabel} />
-        <CollectionMetric label="Tokens granted" value={tokensGrantedLabel} />
-        <CollectionMetric label="Grants count" value={grantsCountLabel} />
+        <CollectionMetric label="Tokens granted" value={totalTokensGrantedLabel} />
+        <CollectionMetric label="Active tokens" value={activeTokensGrantedLabel} />
+        <CollectionMetric label="Contributors" value={totalContributorsLabel} />
+        <CollectionMetric label="Active contributors" value={activeContributorsLabel} />
         <CollectionMetric label="xTDH" value={xtdhValueLabel} />
         <CollectionMetric label="xTDH rate" value={xtdhRateLabel} />
       </dl>

@@ -27,11 +27,12 @@ export function TokenHeader({
     { label: "xTDH", value: formatXtdhValue(token.xtdh) },
     { label: "xTDH rate", value: formatXtdhRate(token.xtdh_rate) },
     {
-      label: "Grants",
-      value:
-        typeof token.grant_count === "number"
-          ? formatNumberWithCommas(token.grant_count)
-          : "—",
+      label: "Contributors",
+      value: formatNumberWithCommas(token.total_contributor_count),
+    },
+    {
+      label: "Active contributors",
+      value: formatNumberWithCommas(token.active_contributor_count),
     },
   ];
 

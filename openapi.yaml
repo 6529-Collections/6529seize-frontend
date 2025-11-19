@@ -7563,8 +7563,10 @@ components:
         - contract
         - xtdh
         - xtdh_rate
-        - token_count
-        - grant_count
+        - total_token_count
+        - active_token_count
+        - total_contributor_count
+        - active_contributor_count
       properties:
         contract:
           type: string
@@ -7574,10 +7576,16 @@ components:
         xtdh_rate:
           type: number
           format: float
-        token_count:
+        total_token_count:
           type: number
           format: int64
-        grant_count:
+        active_token_count:
+          type: number
+          format: int64
+        total_contributor_count:
+          type: number
+          format: int64
+        active_contributor_count:
           type: number
           format: int64
     ApiXTdhCollectionsPage:
@@ -7607,7 +7615,10 @@ components:
         xtdh_rate:
           type: number
           format: float
-        grant_count:
+        total_grant_count:
+          type: number
+          format: int64
+        active_grant_count:
           type: number
           format: int64
     ApiXTdhContributionsPage:
@@ -7663,7 +7674,8 @@ components:
         - owner
         - xtdh
         - xtdh_rate
-        - grants_count
+        - total_contributor_count
+        - active_contributor_count
       properties:
         contract:
           type: string
@@ -7678,7 +7690,10 @@ components:
         xtdh_rate:
           type: number
           format: float
-        grant_count:
+        total_contributor_count:
+          type: number
+          format: int64
+        active_contributor_count:
           type: number
           format: int64
     ApiXTdhTokensPage:

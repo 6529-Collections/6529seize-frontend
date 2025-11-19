@@ -19,7 +19,8 @@ export class ApiXTdhContribution {
     'grantor'?: ApiProfileMin;
     'xtdh': number;
     'xtdh_rate': number;
-    'grant_count'?: number;
+    'total_grant_count'?: number;
+    'active_grant_count'?: number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -51,8 +52,14 @@ export class ApiXTdhContribution {
             "format": "float"
         },
         {
-            "name": "grant_count",
-            "baseName": "grant_count",
+            "name": "total_grant_count",
+            "baseName": "total_grant_count",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "active_grant_count",
+            "baseName": "active_grant_count",
             "type": "number",
             "format": "int64"
         }    ];

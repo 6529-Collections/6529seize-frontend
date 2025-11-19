@@ -19,7 +19,8 @@ export class ApiXTdhToken {
     'owner': ApiProfileMin;
     'xtdh': number;
     'xtdh_rate': number;
-    'grant_count'?: number;
+    'total_contributor_count': number;
+    'active_contributor_count': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -57,8 +58,14 @@ export class ApiXTdhToken {
             "format": "float"
         },
         {
-            "name": "grant_count",
-            "baseName": "grant_count",
+            "name": "total_contributor_count",
+            "baseName": "total_contributor_count",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "active_contributor_count",
+            "baseName": "active_contributor_count",
             "type": "number",
             "format": "int64"
         }    ];

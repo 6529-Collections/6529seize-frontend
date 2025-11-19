@@ -16,8 +16,10 @@ export class ApiXTdhCollection {
     'contract': string;
     'xtdh': number;
     'xtdh_rate': number;
-    'token_count': number;
-    'grant_count': number;
+    'total_token_count': number;
+    'active_token_count': number;
+    'total_contributor_count': number;
+    'active_contributor_count': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -43,14 +45,26 @@ export class ApiXTdhCollection {
             "format": "float"
         },
         {
-            "name": "token_count",
-            "baseName": "token_count",
+            "name": "total_token_count",
+            "baseName": "total_token_count",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "grant_count",
-            "baseName": "grant_count",
+            "name": "active_token_count",
+            "baseName": "active_token_count",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "total_contributor_count",
+            "baseName": "total_contributor_count",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "active_contributor_count",
+            "baseName": "active_contributor_count",
             "type": "number",
             "format": "int64"
         }    ];

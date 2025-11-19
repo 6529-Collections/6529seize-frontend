@@ -89,11 +89,19 @@ export function useCollectionContractDetails({
       },
       {
         label: "Tokens granted",
-        value: collection ? formatCount(collection.token_count) : "—",
+        value: collection ? formatCount(collection.total_token_count) : "—",
       },
       {
-        label: "Grants count",
-        value: collection ? formatCount(collection.grant_count) : "—",
+        label: "Active tokens",
+        value: collection ? formatCount(collection.active_token_count) : "—",
+      },
+      {
+        label: "Contributors",
+        value: collection ? formatCount(collection.total_contributor_count) : "—",
+      },
+      {
+        label: "Active contributors",
+        value: collection ? formatCount(collection.active_contributor_count) : "—",
       },
       {
         label: "xTDH",

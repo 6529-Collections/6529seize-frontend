@@ -165,7 +165,7 @@ function CollectionsSkeleton() {
 }
 
 const SKELETON_INDICES = [0, 1, 2];
-const SKELETON_METRIC_KEYS = Array.from({ length: 7 }, (_, index) => `metric-${index}`);
+const SKELETON_METRIC_KEYS = Array.from({ length: 9 }, (_, index) => `metric-${index}`);
 
 function getCollectionKey(collection: ApiXtdhCollection, fallbackIndex: number) {
   const normalizedContract = collection.contract?.trim().toLowerCase();
@@ -178,7 +178,9 @@ function getCollectionKey(collection: ApiXtdhCollection, fallbackIndex: number) 
     fallbackIndex,
     collection.xtdh,
     collection.xtdh_rate,
-    collection.token_count,
-    collection.grant_count,
+    collection.total_token_count,
+    collection.active_token_count,
+    collection.total_contributor_count,
+    collection.active_contributor_count,
   ].join("-");
 }
