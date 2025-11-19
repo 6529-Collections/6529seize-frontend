@@ -134,6 +134,7 @@ function sharedConfig(publicEnv, assetPrefix) {
     reactCompiler: true,
     reactStrictMode: false,
     compress: true,
+    swcMinify: false,
     productionBrowserSourceMaps: true,
     sassOptions: { quietDeps: true },
     experimental: {
