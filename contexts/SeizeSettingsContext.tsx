@@ -17,7 +17,8 @@ import { fetchUrl } from "@/services/6529api";
 type SeizeSettingsContextType = {
   seizeSettings: ApiSeizeSettings;
   isMemesWave: (waveId: string | undefined | null) => boolean;
-  // True only after the latest fetch succeeds; failed loads leave this false.
+  // True once at least one fetch succeeds; stays true during background refreshes
+  // unless callers opt into reset=true before reloading.
   isLoaded: boolean;
   loadError: Error | null;
   loadSeizeSettings: (options?: { reset?: boolean }) => Promise<void>;
@@ -65,8 +66,11 @@ export const SeizeSettingsProvider = ({
       } catch (error) {
         if (!isMountedRef.current) return;
         console.error("Failed to fetch seize settings", error);
-        setLoadError(error instanceof Error ? error : new Error(String(error)));
+        const normalizedError =
+          error instanceof Error ? error : new Error(String(error));
+        setLoadError(normalizedError);
         setIsLoaded(false);
+        throw normalizedError;
       }
     },
     []
@@ -80,12 +84,14 @@ export const SeizeSettingsProvider = ({
     };
   }, [loadSeizeSettings]);
 
+  const { memes_wave_id } = seizeSettings;
+
   const isMemesWave = useCallback(
     (waveId: string | undefined | null): boolean => {
       if (!waveId) return false;
-      return seizeSettings.memes_wave_id === waveId;
+      return memes_wave_id === waveId;
     },
-    [seizeSettings.memes_wave_id]
+    [memes_wave_id]
   );
 
   const value: SeizeSettingsContextType = useMemo(

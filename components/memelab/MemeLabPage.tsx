@@ -64,6 +64,13 @@ import {
 
 const ACTIVITY_PAGE_SIZE = 25;
 
+const isAbortError = (error: unknown): boolean => {
+  if (error instanceof DOMException) {
+    return error.name === "AbortError";
+  }
+  return error instanceof Error && error.name === "AbortError";
+};
+
 export default function MemeLabPageComponent({
   nftId,
 }: {
@@ -142,6 +149,8 @@ export default function MemeLabPageComponent({
     }
 
     let cancelled = false;
+    const abortController = new AbortController();
+    const { signal } = abortController;
 
     const setOriginalMemesState = (memes: NFT[]) => {
       if (cancelled) {
@@ -187,24 +196,27 @@ export default function MemeLabPageComponent({
             publicEnv.API_ENDPOINT
           }/api/nfts?sort_direction=asc&contract=${MEMES_CONTRACT}&id=${fetchedNft.meme_references.join(
             ","
-          )}`
+          )}`,
+          { signal }
         );
         if (cancelled) {
           return;
         }
         setOriginalMemesState(referencesResponse.data);
       } catch (error) {
-        if (!cancelled) {
-          console.error("Failed to fetch referenced memes", error);
-          setOriginalMemesState([]);
+        if (cancelled || isAbortError(error)) {
+          return;
         }
+        console.error("Failed to fetch referenced memes", error);
+        setOriginalMemesState([]);
       }
     };
 
     const loadNft = async () => {
       try {
         const metaResponse = await fetchUrl<DBResponse<LabExtendedData>>(
-          `${publicEnv.API_ENDPOINT}/api/lab_extended_data?id=${nftId}`
+          `${publicEnv.API_ENDPOINT}/api/lab_extended_data?id=${nftId}`,
+          { signal }
         );
         if (cancelled) {
           return;
@@ -219,7 +231,8 @@ export default function MemeLabPageComponent({
         setNftMeta(meta);
 
         const nftResponse = await fetchUrl<DBResponse<LabNFT>>(
-          `${publicEnv.API_ENDPOINT}/api/nfts_memelab?id=${nftId}`
+          `${publicEnv.API_ENDPOINT}/api/nfts_memelab?id=${nftId}`,
+          { signal }
         );
         if (cancelled) {
           return;
@@ -244,10 +257,11 @@ export default function MemeLabPageComponent({
 
         await loadOriginalMemes(fetchedNft);
       } catch (error) {
-        if (!cancelled) {
-          console.error(`Failed to fetch Meme Lab NFT ${nftId}`, error);
-          resetNftState();
+        if (cancelled || isAbortError(error)) {
+          return;
         }
+        console.error(`Failed to fetch Meme Lab NFT ${nftId}`, error);
+        resetNftState();
       }
     };
 
@@ -255,6 +269,7 @@ export default function MemeLabPageComponent({
 
     return () => {
       cancelled = true;
+      abortController.abort();
     };
   }, [nftId]);
 

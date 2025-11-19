@@ -185,8 +185,19 @@ function parseRangeSegment(
   if (startValue === null || endValue === null) {
     return null;
   }
-  const [rangeStart, rangeEnd] =
-    startValue <= endValue ? [startValue, endValue] : [endValue, startValue];
+  const reversedRange = startValue > endValue;
+  const [rangeStart, rangeEnd] = reversedRange
+    ? [endValue, startValue]
+    : [startValue, endValue];
+  if (reversedRange) {
+    errors.push(
+      makeError(
+        segment,
+        `Range bounds reversed: ${startValue.toString()} > ${endValue.toString()}.`,
+        "range-reversed"
+      )
+    );
+  }
   const rangeSize = rangeEnd - rangeStart + BIGINT_ONE;
   if (rangeSize > MAX_ENUMERATION) {
     const limit = MAX_ENUMERATION.toString();
@@ -436,12 +447,13 @@ export function formatCanonical(ranges: TokenRange[]): string {
 }
 
 export function formatBigIntWithSeparators(value: bigint): string {
-  const raw = value.toString();
-  const isNegative = raw.startsWith("-");
-  const digits = isNegative ? raw.slice(1) : raw;
+  if (value < BIGINT_ZERO) {
+    throw new Error("formatBigIntWithSeparators expects non-negative values");
+  }
+  const digits = value.toString();
 
   if (digits.length <= 3) {
-    return isNegative ? `-${digits}` : digits;
+    return digits;
   }
 
   let formatted = "";
@@ -453,7 +465,7 @@ export function formatBigIntWithSeparators(value: bigint): string {
     formatted = `${char}${formatted}`;
   }
 
-  return isNegative ? `-${formatted}` : formatted;
+  return formatted;
 }
 
 export function tryToNumberArray(ids: TokenSelection): {

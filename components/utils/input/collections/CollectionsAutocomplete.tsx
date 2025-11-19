@@ -127,7 +127,7 @@ export default function CollectionsAutocomplete({
   }, []);
 
   const handleContainerKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
+    (event: KeyboardEvent<HTMLFieldSetElement>) => {
       if (disabled || !ACTIVATION_KEYS.has(event.key)) {
         return;
       }
@@ -323,20 +323,19 @@ export default function CollectionsAutocomplete({
   return (
     <div ref={containerRef} className="tw-flex tw-flex-col tw-gap-1.5">
       <div className="tw-relative">
-        <div
+        <fieldset
           className={classNames(
             "tw-flex tw-min-h-[46px] tw-w-full tw-cursor-text tw-flex-wrap tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-transition tw-duration-300 tw-ease-out",
             disabled
               ? "tw-border-iron-800 tw-bg-iron-900/60 tw-text-iron-400 tw-opacity-80"
               : "tw-border-iron-700 tw-bg-iron-900 hover:tw-border-iron-600"
           )}
-          role="group"
           aria-disabled={disabled || undefined}
-          aria-label="Collections selection area"
           tabIndex={disabled ? -1 : 0}
           onClick={disabled ? undefined : focusInput}
           onKeyDown={disabled ? undefined : handleContainerKeyDown}
         >
+          <legend className="tw-sr-only">Collections selection area</legend>
           {selectedOptions.map((option) => (
             <span
               key={option.id}
@@ -413,7 +412,7 @@ export default function CollectionsAutocomplete({
           >
             {liveRegionMessage}
           </output>
-        </div>
+        </fieldset>
         {open && (
           <ul
             ref={listboxRef}

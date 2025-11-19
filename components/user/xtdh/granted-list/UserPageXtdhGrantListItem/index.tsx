@@ -110,7 +110,7 @@ function GrantTokensPanel({
   grantId,
   state,
 }: Readonly<{
-  chain: SupportedChain;
+  chain: SupportedChain | null;
   contractAddress: `0x${string}` | null;
   grantId: string;
   state: TokenPanelState;
@@ -148,7 +148,7 @@ function GrantTokensDisclosure({
   tokensCount,
   tokensCountLabel,
 }: Readonly<{
-  chain: SupportedChain;
+  chain: SupportedChain | null;
   contractAddress: `0x${string}` | null;
   grantId: string;
   tokensCount: number | null;
@@ -265,7 +265,7 @@ type GrantTokensDisclosureBodyProps = {
   errorMessage: string;
   onRetry: () => void;
   contractAddress: `0x${string}` | null;
-  chain: SupportedChain;
+  chain: SupportedChain | null;
   grantId: string;
   onEndReached?: () => void;
   isFetchingNextPage: boolean;

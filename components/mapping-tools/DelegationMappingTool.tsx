@@ -146,6 +146,7 @@ export default function DelegationMappingTool() {
       } catch (error) {
         console.error("Failed to process delegations for mapping tool", error);
         setDelegations([]);
+        setCsvData([]);
         setProcessing(false);
       }
     }
@@ -297,7 +298,6 @@ export default function DelegationMappingTool() {
         className={`${styles.formInputHidden}`}
         type="file"
         accept=".csv"
-        value={file?.name}
         onChange={(e: any) => {
           if (e.target.files) {
             const f = e.target.files[0];

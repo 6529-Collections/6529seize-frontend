@@ -37,7 +37,7 @@ type TokenWindowEntry = {
 
 export interface VirtualizedTokenListProps {
   readonly contractAddress?: `0x${string}`;
-  readonly chain: SupportedChain;
+  readonly chain: SupportedChain | null;
   readonly ranges: TokenRange[];
   readonly scrollKey: string;
   readonly overscan?: number;
@@ -290,7 +290,7 @@ function useVisibleTokenWindow(
 
 type TokenMetadataWindowParams = Readonly<{
   contractAddress?: `0x${string}`;
-  chain: SupportedChain;
+  chain: SupportedChain | null;
   windowTokens: TokenWindowEntry[];
 }>;
 
@@ -303,15 +303,24 @@ function useTokenMetadataWindow({
     () => windowTokens.map((token) => token.decimalId),
     [windowTokens]
   );
+  const canLoadMetadata = Boolean(
+    contractAddress &&
+      chain &&
+      decimalTokenIds.length > 0
+  );
 
   const metadataQuery = useTokenMetadataQuery({
     address: contractAddress,
-    chain,
+    chain: chain ?? undefined,
     tokenIds: decimalTokenIds,
-    enabled: Boolean(contractAddress) && decimalTokenIds.length > 0,
+    enabled: canLoadMetadata,
   });
 
   const metadataMap = useMemo(() => {
+    if (!canLoadMetadata) {
+      return EMPTY_METADATA_MAP;
+    }
+
     const entries = metadataQuery.data ?? [];
     if (!entries.length) {
       return EMPTY_METADATA_MAP;
@@ -323,7 +332,7 @@ function useTokenMetadataWindow({
       map.set(entry.tokenId.toString(10), entry);
     }
     return map;
-  }, [metadataQuery.data]);
+  }, [metadataQuery.data, canLoadMetadata]);
 
   return { metadataQuery, metadataMap };
 }

@@ -24,7 +24,7 @@ type ApiTdhGrant = ApiTdhGrantsPage["data"][number];
 interface GrantItemViewModel {
   readonly contract: ContractOverview | null;
   readonly contractAddress: `0x${string}` | null;
-  readonly chain: SupportedChain;
+  readonly chain: SupportedChain | null;
   readonly contractLabel: string;
   readonly details: GrantDetails;
   readonly errorDetails: string | null;
@@ -59,10 +59,11 @@ function deriveErrorDetails(
 
 export function useGrantItemViewModel(grant: ApiTdhGrant): GrantItemViewModel {
   const contractAddress = getContractAddress(grant.target_contract);
+  const rawContractLabel = grant.target_contract?.trim();
   const contractLabel =
-    contractAddress ?? grant.target_contract?.trim() ?? "this contract";
+    contractAddress ?? (rawContractLabel || "this contract");
 
-  let chain: SupportedChain = "ethereum";
+  let chain: SupportedChain | null = null;
   let isUnsupportedChain = false;
 
   try {
@@ -78,7 +79,7 @@ export function useGrantItemViewModel(grant: ApiTdhGrant): GrantItemViewModel {
     isLoading: isContractQueryLoading,
   } = useContractOverviewQuery({
     address: contractAddress,
-    chain,
+    chain: chain ?? undefined,
     enabled: shouldLoadContract,
   });
   let contract: ContractOverview | null = null;

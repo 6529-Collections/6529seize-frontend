@@ -10,6 +10,7 @@ import {
   ChangeEvent,
   DragEvent,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -26,6 +27,12 @@ interface ConsolidationData {
   contract: string;
   name: string;
 }
+
+const buildBalanceKey = (
+  contract: string,
+  tokenId: number,
+  address: string
+) => `${contract}-${tokenId}-${address}`.toUpperCase();
 
 function readFileAsText(file: File): Promise<string> {
   return new Promise<string>((resolve, reject) => {
@@ -61,15 +68,30 @@ function parseCsvText(csvText: string): Promise<ConsolidationData[]> {
           return;
         }
 
-        const address = row[0];
+        const requiredColumns = [0, 1, 2, 3, 4];
+        const hasAllColumns = requiredColumns.every(
+          (index) => row[index] !== undefined && row[index] !== null
+        );
+        if (!hasAllColumns) {
+          console.warn("Skipping CSV row with insufficient columns:", row);
+          return;
+        }
+
+        const address = String(row[0]).trim();
         const token_id = Number.parseInt(row[1], 10);
         const balance = Number.parseInt(row[2], 10);
-        const contract = row[3];
-        const name = row[4];
+        const contract = String(row[3]).trim();
+        const name = String(row[4]).trim();
 
         // Validate numeric fields
         if (Number.isNaN(token_id) || Number.isNaN(balance)) {
           console.warn("Skipping invalid CSV row:", row);
+          return;
+        }
+
+        // Validate required string fields
+        if (!address || !contract || !name) {
+          console.warn("Skipping CSV row with missing required fields:", row);
           return;
         }
 
@@ -101,6 +123,15 @@ export default function ConsolidationMappingTool() {
   const [consolidations, setConsolidations] = useState<Consolidation[]>([]);
 
   const [csvData, setCsvData] = useState<ConsolidationData[]>([]);
+
+  const balanceMap = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const data of csvData) {
+      const key = buildBalanceKey(data.contract, data.token_id, data.address);
+      map.set(key, (map.get(key) ?? 0) + data.balance);
+    }
+    return map;
+  }, [csvData]);
   function submit() {
     setProcessing(true);
   }
@@ -123,9 +154,9 @@ export default function ConsolidationMappingTool() {
     event.preventDefault();
     event.stopPropagation();
     setDragActive(false);
-    const droppedFiles = event.dataTransfer?.files;
-    if (droppedFiles && droppedFiles[0]) {
-      setFile(droppedFiles[0]);
+    const droppedFile = event.dataTransfer?.files?.[0];
+    if (droppedFile) {
+      setFile(droppedFile);
     }
   };
 
@@ -147,20 +178,9 @@ export default function ConsolidationMappingTool() {
   ) {
     let balance = 0;
 
-    for (const data of csvData) {
-      const isMatchingToken =
-        areEqualAddresses(contract, data.contract) &&
-        token_id === data.token_id;
-      if (!isMatchingToken) {
-        continue;
-      }
-
-      for (const address of addresses) {
-        if (areEqualAddresses(address, data.address)) {
-          balance += data.balance;
-          break;
-        }
-      }
+    for (const address of addresses) {
+      const key = buildBalanceKey(contract, token_id, address);
+      balance += balanceMap.get(key) ?? 0;
     }
 
     return balance;
@@ -339,9 +359,9 @@ export default function ConsolidationMappingTool() {
         type="file"
         accept=".csv"
         onChange={(event: ChangeEvent<HTMLInputElement>) => {
-          if (event.target.files) {
-            const f = event.target.files[0];
-            setFile(f);
+          const selectedFile = event.target.files?.[0];
+          if (selectedFile) {
+            setFile(selectedFile);
           }
         }}
       />

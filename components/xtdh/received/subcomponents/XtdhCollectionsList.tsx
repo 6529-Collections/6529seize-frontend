@@ -4,7 +4,12 @@ import type { ApiXTdhCollectionsPage } from "@/generated/models/ApiXTdhCollectio
 
 import { XtdhReceivedCollectionCard } from "../collection-card-content";
 
-type ApiXtdhCollection = ApiXTdhCollectionsPage["data"][number];
+type ApiXtdhCollection = Omit<
+  ApiXTdhCollectionsPage["data"][number],
+  "contract"
+> & {
+  readonly contract?: string | null;
+};
 
 interface XtdhCollectionsListProps {
   readonly isEnabled: boolean;
@@ -57,9 +62,9 @@ export function XtdhCollectionsList({
   return (
     <div className="tw-space-y-3">
       <ul className="tw-m-0 tw-flex tw-flex-col tw-gap-3 tw-p-0">
-        {collections.map((collection) => (
+        {collections.map((collection, index) => (
           <XtdhReceivedCollectionCard
-            key={getCollectionKey(collection)}
+            key={getCollectionKey(collection, index)}
             collection={collection}
           />
         ))}
@@ -151,13 +156,15 @@ function CollectionsSkeleton() {
 const SKELETON_INDICES = [0, 1, 2];
 const SKELETON_METRIC_KEYS = Array.from({ length: 7 }, (_, index) => `metric-${index}`);
 
-function getCollectionKey(collection: ApiXtdhCollection) {
+function getCollectionKey(collection: ApiXtdhCollection, fallbackIndex: number) {
   const normalizedContract = collection.contract?.trim().toLowerCase();
   if (normalizedContract) {
     return normalizedContract;
   }
 
   return [
+    "fallback",
+    fallbackIndex,
     collection.xtdh,
     collection.xtdh_rate,
     collection.token_count,
