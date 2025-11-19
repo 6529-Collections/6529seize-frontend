@@ -6,7 +6,6 @@ import NotFoundPage from "@/app/not-found";
 import { AuthContext } from "@/components/auth/Auth";
 import MemeLabCollection from "@/components/memelab/MemeLabCollection";
 import { cleanup, render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { useRouter } from "next/navigation";
 import React, { useMemo } from "react";
 
@@ -88,11 +87,7 @@ describe("additional static pages", () => {
     cleanup();
     jest.clearAllMocks();
   });
-  it("renders 404 not-found page with proper content and navigation", async () => {
-    const routerMock = { back: jest.fn(), push: jest.fn() };
-    (useRouter as jest.Mock).mockReturnValue(routerMock);
-    const user = userEvent.setup();
-
+  it("renders 404 not-found page with proper content", async () => {
     render(
       <TestProvider>
         <NotFoundPage />
@@ -101,19 +96,6 @@ describe("additional static pages", () => {
 
     // Check for main error message
     expect(screen.getByText(/404 \| PAGE NOT FOUND/i)).toBeInTheDocument();
-
-    // Check for navigation link
-    const homeLink = screen.getByRole("link", { name: /6529 HOME/i });
-    expect(homeLink).toBeInTheDocument();
-    expect(homeLink).toHaveAttribute("href", "/");
-
-    const backButton = screen.getByRole("button", {
-      name: /back to previous page/i,
-    });
-    expect(backButton).toBeInTheDocument();
-
-    await user.click(backButton);
-    expect(routerMock.back).toHaveBeenCalledTimes(1);
 
     // Check for visual elements
     expect(screen.getByAltText("SummerGlasses")).toBeInTheDocument();

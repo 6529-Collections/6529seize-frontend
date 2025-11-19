@@ -64,13 +64,33 @@
   }
 }
 
+.artHeader {
+  position: relative;
+  padding: 1rem 0;
+  z-index: 1;
+}
+
+.artHeaderContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 1rem;
+  position: relative;
+}
+
+.artFormatLabel {
+  flex: 1;
+  text-align: center;
+  color: variables.$font-color;
+}
+
 .fullScreen {
-  position: absolute;
-  top: 3.1rem;
-  right: 0;
+  position: static;
   cursor: pointer;
   z-index: 100;
   width: 20px !important;
+  flex-shrink: 0;
 }
 
 .memePageTab {
@@ -127,16 +147,33 @@
 }
 
 .memesCarousel {
-  a {
-    height: fit-content;
-    top: 22px;
-    width: 80%;
-  }
+  position: relative;
+  z-index: 2;
+}
 
-  a span {
-    width: 1.2rem;
-    height: 1.2rem;
-  }
+.memesCarousel :global(.carousel-control-prev),
+.memesCarousel :global(.carousel-control-next) {
+  position: absolute !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: auto !important;
+  height: fit-content !important;
+  opacity: 1 !important;
+  z-index: 10 !important;
+}
+
+.memesCarousel :global(.carousel-control-prev) {
+  left: 0 !important;
+}
+
+.memesCarousel :global(.carousel-control-next) {
+  right: 0 !important;
+}
+
+.memesCarousel :global(.carousel-control-prev-icon),
+.memesCarousel :global(.carousel-control-next-icon) {
+  width: 1.2rem !important;
+  height: 1.2rem !important;
 }
 
 .rankSubheading {
