@@ -9,7 +9,7 @@ type ErrorProps = {
   readonly reset: () => void;
 };
 
-export default function Error({ error, reset }: ErrorProps) {
+export default function ErrorPage({ error, reset }: ErrorProps) {
   const errorDetails = extractErrorDetails(error, "ROUTE_ERROR");
 
   return (
@@ -22,4 +22,3 @@ export default function Error({ error, reset }: ErrorProps) {
     </main>
   );
 }
-

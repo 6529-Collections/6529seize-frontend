@@ -57,11 +57,16 @@ export function MemePageArt(props: {
     }
   }
 
-  const currentFormat = props.nft?.animation || props.nft?.metadata.animation
-    ? currentSlide === 0
-      ? props.nft.metadata.animation_details.format
-      : props.nft.metadata.image_details.format
-    : props.nft?.metadata.image_details.format;
+  let currentFormat: string | undefined;
+  if (props.nft?.animation || props.nft?.metadata.animation) {
+    if (currentSlide === 0) {
+      currentFormat = props.nft.metadata.animation_details.format;
+    } else {
+      currentFormat = props.nft.metadata.image_details.format;
+    }
+  } else {
+    currentFormat = props.nft?.metadata.image_details.format;
+  }
 
   if (props.show && props.nft && props.nftMeta) {
     return (
@@ -78,7 +83,8 @@ export function MemePageArt(props: {
                         icon={faExpandAlt}
                         className={styles.fullScreen}
                         onClick={() =>
-                          fullscreenElementId && enterArtFullScreen(fullscreenElementId)
+                          fullscreenElementId &&
+                          enterArtFullScreen(fullscreenElementId)
                         }
                       />
                     )}
@@ -90,29 +96,29 @@ export function MemePageArt(props: {
                   indicators={false}
                   wrap={false}
                   onSlide={carouselHandlerSlide}>
-                <Carousel.Item className="text-center">
-                  <NFTImage
-                    nft={props.nft}
-                    animation={true}
-                    height={650}
-                    transparentBG={true}
-                    showOriginal={true}
-                    showBalance={false}
-                    id="the-art-fullscreen-animation"
-                  />
-                </Carousel.Item>
-                <Carousel.Item className="text-center">
-                  <NFTImage
-                    nft={props.nft}
-                    animation={false}
-                    height={650}
-                    showBalance={false}
-                    transparentBG={true}
-                    showOriginal={true}
-                    id="the-art-fullscreen-img"
-                  />
-                </Carousel.Item>
-              </Carousel>
+                  <Carousel.Item className="text-center">
+                    <NFTImage
+                      nft={props.nft}
+                      animation={true}
+                      height={650}
+                      transparentBG={true}
+                      showOriginal={true}
+                      showBalance={false}
+                      id="the-art-fullscreen-animation"
+                    />
+                  </Carousel.Item>
+                  <Carousel.Item className="text-center">
+                    <NFTImage
+                      nft={props.nft}
+                      animation={false}
+                      height={650}
+                      showBalance={false}
+                      transparentBG={true}
+                      showOriginal={true}
+                      id="the-art-fullscreen-img"
+                    />
+                  </Carousel.Item>
+                </Carousel>
               </>
             ) : (
               <>
@@ -124,21 +130,22 @@ export function MemePageArt(props: {
                         icon={faExpandAlt}
                         className={styles.fullScreen}
                         onClick={() =>
-                          fullscreenElementId && enterArtFullScreen(fullscreenElementId)
+                          fullscreenElementId &&
+                          enterArtFullScreen(fullscreenElementId)
                         }
                       />
                     )}
                   </div>
                 </Col>
                 <NFTImage
-                nft={props.nft}
-                animation={false}
-                height={650}
-                transparentBG={true}
-                showOriginal={true}
-                showBalance={false}
-                id="the-art-fullscreen-img"
-              />
+                  nft={props.nft}
+                  animation={false}
+                  height={650}
+                  transparentBG={true}
+                  showOriginal={true}
+                  showBalance={false}
+                  id="the-art-fullscreen-img"
+                />
               </>
             )}
           </Row>

@@ -737,11 +737,16 @@ export default function MemeLabPageComponent({
     }
   }
 
-  const currentFormat = nft?.animation
-    ? currentSlide === 0
-      ? nft.metadata.animation_details.format
-      : nft.metadata.image_details.format
-    : nft?.metadata.image_details.format;
+  let currentFormat: string | undefined;
+  if (nft?.animation) {
+    if (currentSlide === 0) {
+      currentFormat = nft.metadata.animation_details.format;
+    } else {
+      currentFormat = nft.metadata.image_details.format;
+    }
+  } else {
+    currentFormat = nft?.metadata.image_details.format;
+  }
 
   function printTheArt() {
     if (nft && nftMeta) {
@@ -753,7 +758,9 @@ export default function MemeLabPageComponent({
                 <>
                   <Col xs={12} className={styles.artHeader}>
                     <div className={styles.artHeaderContent}>
-                      <div className={styles.artFormatLabel}>{currentFormat}</div>
+                      <div className={styles.artFormatLabel}>
+                        {currentFormat}
+                      </div>
                       {isFullScreenSupported && (
                         <FontAwesomeIcon
                           icon={faExpandAlt}
@@ -772,35 +779,37 @@ export default function MemeLabPageComponent({
                     indicators={false}
                     wrap={false}
                     onSlide={carouselHandlerSlide}>
-                  <Carousel.Item className="text-center">
-                    <NFTImage
-                      nft={nft}
-                      animation={true}
-                      height={650}
-                      transparentBG={true}
-                      showOriginal={true}
-                      showBalance={false}
-                      id="the-art-fullscreen-animation"
-                    />
-                  </Carousel.Item>
-                  <Carousel.Item className="text-center">
-                    <NFTImage
-                      nft={nft}
-                      animation={false}
-                      height={650}
-                      transparentBG={true}
-                      showOriginal={true}
-                      showBalance={false}
-                      id="the-art-fullscreen-img"
-                    />
-                  </Carousel.Item>
-                </Carousel>
+                    <Carousel.Item className="text-center">
+                      <NFTImage
+                        nft={nft}
+                        animation={true}
+                        height={650}
+                        transparentBG={true}
+                        showOriginal={true}
+                        showBalance={false}
+                        id="the-art-fullscreen-animation"
+                      />
+                    </Carousel.Item>
+                    <Carousel.Item className="text-center">
+                      <NFTImage
+                        nft={nft}
+                        animation={false}
+                        height={650}
+                        transparentBG={true}
+                        showOriginal={true}
+                        showBalance={false}
+                        id="the-art-fullscreen-img"
+                      />
+                    </Carousel.Item>
+                  </Carousel>
                 </>
               ) : (
                 <>
                   <Col xs={12} className={styles.artHeader}>
                     <div className={styles.artHeaderContent}>
-                      <div className={styles.artFormatLabel}>{currentFormat}</div>
+                      <div className={styles.artFormatLabel}>
+                        {currentFormat}
+                      </div>
                       {isFullScreenSupported && (
                         <FontAwesomeIcon
                           icon={faExpandAlt}

@@ -134,7 +134,6 @@ function sharedConfig(publicEnv, assetPrefix) {
     reactCompiler: true,
     reactStrictMode: false,
     compress: true,
-    swcMinify: false,
     productionBrowserSourceMaps: true,
     sassOptions: { quietDeps: true },
     experimental: {
@@ -172,6 +171,7 @@ function sharedConfig(publicEnv, assetPrefix) {
       config.resolve.alias["@react-native-async-storage/async-storage"] = false;
       config.resolve.alias["react-native"] = false;
       if (!dev && !isServer) config.devtool = "source-map";
+      config.optimization.minimize = false;
       return config;
     },
     turbopack: {
