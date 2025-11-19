@@ -9,14 +9,18 @@ type GlobalErrorProps = {
   readonly reset: () => void;
 };
 
-export default function GlobalError({ error }: GlobalErrorProps) {
+export default function GlobalError({ error, reset }: GlobalErrorProps) {
   const errorDetails = extractErrorDetails(error, "GLOBAL_ERROR");
 
   return (
     <html lang="en">
       <body>
         <main className={styles.main}>
-          <ErrorComponent stackTrace={errorDetails} digest={error.digest} />
+          <ErrorComponent
+            stackTrace={errorDetails}
+            digest={error.digest}
+            onReset={reset}
+          />
         </main>
       </body>
     </html>
