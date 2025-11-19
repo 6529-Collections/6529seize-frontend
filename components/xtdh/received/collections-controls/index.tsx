@@ -54,5 +54,6 @@ export function buildCollectionsResultSummary(
 ): string {
   const label = COLLECTION_SORT_LABELS[sortField];
   const dirLabel = direction === SortDirection.ASC ? "ascending" : "descending";
-  return `${collectionsCount.toLocaleString()} collections · Sorted by ${label} (${dirLabel})`;
+  const collectionLabel = collectionsCount === 1 ? "collection" : "collections";
+  return `${collectionsCount.toLocaleString()} ${collectionLabel} · Sorted by ${label} (${dirLabel})`;
 }

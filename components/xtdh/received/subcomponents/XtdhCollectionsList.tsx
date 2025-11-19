@@ -57,9 +57,9 @@ export function XtdhCollectionsList({
   return (
     <div className="tw-space-y-3">
       <ul className="tw-m-0 tw-flex tw-flex-col tw-gap-3 tw-p-0">
-        {collections.map((collection, index) => (
+        {collections.map((collection) => (
           <XtdhReceivedCollectionCard
-            key={collection.contract || `collection-${index}`}
+            key={getCollectionKey(collection)}
             collection={collection}
           />
         ))}
@@ -97,7 +97,9 @@ function InlineRetry({
   const displayMessage = message ?? "Unable to load more collections.";
   return (
     <div className="tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-3">
-      <p className="tw-m-0 tw-text-sm tw-text-iron-100">{displayMessage}</p>
+      <p className="tw-m-0 tw-text-sm tw-text-iron-100" role="alert">
+        {displayMessage}
+      </p>
       <div className="tw-mt-2">
         <RetryButton onRetry={onRetry} />
       </div>
@@ -147,3 +149,17 @@ function CollectionsSkeleton() {
 }
 
 const SKELETON_INDICES = [0, 1, 2];
+
+function getCollectionKey(collection: ApiXtdhCollection) {
+  const normalizedContract = collection.contract?.trim().toLowerCase();
+  if (normalizedContract) {
+    return normalizedContract;
+  }
+
+  return [
+    collection.xtdh,
+    collection.xtdh_rate,
+    collection.token_count,
+    collection.grant_count,
+  ].join("-");
+}

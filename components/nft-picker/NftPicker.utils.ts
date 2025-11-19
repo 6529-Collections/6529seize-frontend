@@ -17,15 +17,17 @@ export type RangeTooLargeError = Error & {
 
 export const PARSE_ERROR_ARRAY_NAME = "ParseErrorArray";
 
-export type ParseErrorArray = ParseError[] & Error & {
+export type ParseErrorArray = Error & {
   name: typeof PARSE_ERROR_ARRAY_NAME;
+  errors: readonly ParseError[];
 };
 
 function createParseErrorArray(errors: ParseError[], message?: string): ParseErrorArray {
   const issues = [...errors];
   const primaryMessage = message ?? issues[0]?.message ?? "Invalid token expression";
-  const errorArray = Object.assign(issues, new Error(primaryMessage)) as ParseErrorArray;
+  const errorArray = new Error(primaryMessage) as ParseErrorArray;
   errorArray.name = PARSE_ERROR_ARRAY_NAME;
+  errorArray.errors = issues;
   return errorArray;
 }
 
@@ -197,6 +199,14 @@ function parseRangeSegment(
 function parseSegmentToRanges(segment: Segment, errors: ParseError[]): TokenRange[] {
   if (!segment.value) {
     return [];
+  }
+  // Treat simple signed values as single tokens so parseTokenValue emits the
+  // specific signed-value error instead of falling through to range splitting.
+  if (
+    /^[+-]?\d+$/.test(segment.value) ||
+    /^[+-]?0[xX][0-9a-fA-F]+$/.test(segment.value)
+  ) {
+    return parseSingleTokenSegment(segment.value, segment, errors);
   }
   const parts = segment.value.split("-");
   if (parts.length === 1) {

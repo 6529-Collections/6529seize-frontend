@@ -65,7 +65,7 @@ export function GrantItemContent({
 }
 
 interface GrantItemErrorProps {
-  readonly contractLabel?: string;
+  readonly contractLabel: string;
   readonly details: GrantDetails;
   readonly errorDetails?: string | null;
   readonly status: ApiTdhGrantStatus;
@@ -85,9 +85,7 @@ export function GrantItemError({
             Contract details unavailable
           </p>
           <p className="tw-m-0 tw-text-xs tw-text-iron-400">
-            {contractLabel
-              ? `We couldn't load metadata for ${formatContractLabel(contractLabel)}.`
-              : "We couldn't load metadata for this contract."}
+            {`We couldn't load metadata for ${formatContractLabel(contractLabel)}.`}
           </p>
         </div>
         <div className="tw-flex tw-items-center tw-gap-3">

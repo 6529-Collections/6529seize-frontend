@@ -160,11 +160,18 @@ export default function MemeLabPageComponent({
       setOriginalMemesState([]);
     };
 
-    const getSingleMeta = (response: DBResponse): LabExtendedData | undefined => {
+    const getSingleMeta = (
+      response: DBResponse<LabExtendedData>
+    ): LabExtendedData | undefined => {
       const nftMetas = response.data;
       if (Array.isArray(nftMetas) && nftMetas.length === 1) {
         return nftMetas[0];
       }
+      console.warn(
+        `Expected exactly 1 meta for id ${nftId}, got ${
+          Array.isArray(nftMetas) ? nftMetas.length : 0
+        }`
+      );
       return undefined;
     };
 
@@ -175,7 +182,7 @@ export default function MemeLabPageComponent({
       }
 
       try {
-        const referencesResponse = await fetchUrl(
+        const referencesResponse = await fetchUrl<DBResponse<NFT>>(
           `${
             publicEnv.API_ENDPOINT
           }/api/nfts?sort_direction=asc&contract=${MEMES_CONTRACT}&id=${fetchedNft.meme_references.join(
@@ -196,7 +203,7 @@ export default function MemeLabPageComponent({
 
     const loadNft = async () => {
       try {
-        const metaResponse = await fetchUrl(
+        const metaResponse = await fetchUrl<DBResponse<LabExtendedData>>(
           `${publicEnv.API_ENDPOINT}/api/lab_extended_data?id=${nftId}`
         );
         if (cancelled) {
@@ -211,7 +218,7 @@ export default function MemeLabPageComponent({
 
         setNftMeta(meta);
 
-        const nftResponse = await fetchUrl(
+        const nftResponse = await fetchUrl<DBResponse<LabNFT>>(
           `${publicEnv.API_ENDPOINT}/api/nfts_memelab?id=${nftId}`
         );
         if (cancelled) {
@@ -292,6 +299,8 @@ export default function MemeLabPageComponent({
           setNftBalance(0);
         });
     } else {
+      setTransactions([]);
+      setUserLoaded(false);
       setNftBalance(0);
     }
 
@@ -689,9 +698,12 @@ export default function MemeLabPageComponent({
   }
 
   function printYourCards() {
-    const firstAcquired = [...transactions].sort((a, b) =>
-      a.transaction_date > b.transaction_date ? 1 : -1
-    )[0];
+    const firstAcquired =
+      transactions.length > 0
+        ? [...transactions].sort((a, b) =>
+            a.transaction_date > b.transaction_date ? 1 : -1
+          )[0]
+        : undefined;
 
     const airdropped = transactions.filter(
       (t) => t.value === 0 && areEqualAddresses(t.from_address, NULL_ADDRESS)
@@ -805,12 +817,14 @@ export default function MemeLabPageComponent({
                     <h3>Overview</h3>
                   </Col>
                 </Row>
-                <Row className={`pb-2 ${styles.overviewColumn}`}>
-                  <Col>
-                    First acquired{" "}
-                    {printMintDate(new Date(firstAcquired.transaction_date))}
-                  </Col>
-                </Row>
+                {firstAcquired && (
+                  <Row className={`pb-2 ${styles.overviewColumn}`}>
+                    <Col>
+                      First acquired{" "}
+                      {printMintDate(new Date(firstAcquired.transaction_date))}
+                    </Col>
+                  </Row>
+                )}
                 {airdropped.length > 0 && (
                   <Row className={`pt-1 ${styles.overviewColumn}`}>
                     <Col>

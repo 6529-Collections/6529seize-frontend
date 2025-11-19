@@ -25,7 +25,7 @@ interface GrantItemViewModel {
   readonly contract: ContractOverview | null;
   readonly contractAddress: `0x${string}` | null;
   readonly chain: SupportedChain;
-  readonly contractLabel?: string;
+  readonly contractLabel: string;
   readonly details: GrantDetails;
   readonly errorDetails: string | null;
   readonly isLoading: boolean;
@@ -35,23 +35,51 @@ interface GrantItemViewModel {
 
 export function useGrantItemViewModel(grant: ApiTdhGrant): GrantItemViewModel {
   const contractAddress = getContractAddress(grant.target_contract);
-  const chain = mapGrantChainToSupportedChain(grant.target_chain);
-  const { data: contract, isError, isLoading } = useContractOverviewQuery({
+  const contractLabel =
+    contractAddress ?? grant.target_contract?.trim() ?? "this contract";
+
+  let chain: SupportedChain = "ethereum";
+  let isUnsupportedChain = false;
+
+  try {
+    chain = mapGrantChainToSupportedChain(grant.target_chain);
+  } catch {
+    isUnsupportedChain = true;
+  }
+
+  const shouldLoadContract = Boolean(contractAddress) && !isUnsupportedChain;
+  const {
+    data: fetchedContract,
+    isError: isContractError,
+    isLoading: isContractQueryLoading,
+  } = useContractOverviewQuery({
     address: contractAddress,
     chain,
-    enabled: Boolean(contractAddress),
+    enabled: shouldLoadContract,
   });
+  const contract = isUnsupportedChain ? null : fetchedContract ?? null;
+  const isLoading = shouldLoadContract && isContractQueryLoading;
 
   const details = buildGrantDetails(grant, contract ?? undefined);
-  const hasContractData = Boolean(contract) && !isError;
+  const hasContractData = Boolean(contract);
+  const normalizedErrorDetails = normalizeErrorDetails(grant.error_details);
+  const derivedErrorDetails =
+    normalizedErrorDetails ??
+    (isUnsupportedChain
+      ? `Target chain "${grant.target_chain}" is not supported yet.`
+      : isContractError
+        ? hasContractData
+          ? "Unable to refresh contract metadata. Showing the most recent cached data."
+          : "Unable to load contract metadata."
+        : null);
 
   return {
     contract: contract ?? null,
     contractAddress: contractAddress ?? null,
     chain,
-    contractLabel: contractAddress ?? grant.target_contract,
+    contractLabel,
     details,
-    errorDetails: normalizeErrorDetails(grant.error_details),
+    errorDetails: derivedErrorDetails,
     isLoading,
     status: grant.status,
     variant: hasContractData ? "contract" : "error",

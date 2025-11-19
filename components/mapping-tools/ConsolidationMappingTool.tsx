@@ -194,6 +194,10 @@ export default function ConsolidationMappingTool() {
 
         const parsedCsv = await parseCsvFile(file);
         setCsvData(parsedCsv);
+
+        if (parsedCsv.length === 0 || fetchedConsolidations.length === 0) {
+          setProcessing(false);
+        }
       } catch (error) {
         console.error("Failed to fetch consolidations for mapping tool", error);
         setConsolidations([]);
@@ -206,8 +210,12 @@ export default function ConsolidationMappingTool() {
   }, [processing, file]);
 
   useEffect(() => {
-    const hasData = csvData.length > 0 && consolidations.length > 0;
-    if (!hasData) {
+    if (!processing) {
+      return;
+    }
+
+    if (csvData.length === 0 || consolidations.length === 0) {
+      setProcessing(false);
       return;
     }
 
@@ -250,7 +258,7 @@ export default function ConsolidationMappingTool() {
     } finally {
       setProcessing(false);
     }
-  }, [csvData, consolidations]);
+  }, [csvData, consolidations, processing]);
 
   return (
     <Container className={styles.toolArea} id="mapping-tool-form">

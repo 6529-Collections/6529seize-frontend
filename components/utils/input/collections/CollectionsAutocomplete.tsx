@@ -8,7 +8,6 @@ import {
   useRef,
   useState,
   type ChangeEvent,
-  type FocusEvent,
   type KeyboardEvent,
 } from "react";
 import { useClickAway } from "react-use";
@@ -124,30 +123,6 @@ export default function CollectionsAutocomplete({
     inputRef.current?.focus();
   }, []);
 
-  const handleContainerFocus = useCallback(
-    (event: FocusEvent<HTMLDivElement>) => {
-      if (disabled || event.target !== event.currentTarget) {
-        return;
-      }
-      focusInput();
-    },
-    [disabled, focusInput]
-  );
-
-  const handleContainerKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
-      if (disabled || event.target !== event.currentTarget) {
-        return;
-      }
-      if (!ACTIVATION_KEYS.has(event.key)) {
-        return;
-      }
-      event.preventDefault();
-      focusInput();
-    },
-    [disabled, focusInput]
-  );
-
   const handleInputFocus = useCallback(() => {
     openDropdown();
   }, [openDropdown]);
@@ -262,7 +237,7 @@ export default function CollectionsAutocomplete({
         return;
       }
       event.preventDefault();
-      const lastSelected = value.at(-1);
+      const lastSelected = value.length ? value[value.length - 1] : undefined;
       if (lastSelected) {
         handleRemove(lastSelected);
       }
@@ -341,16 +316,7 @@ export default function CollectionsAutocomplete({
               ? "tw-border-iron-800 tw-bg-iron-900/60 tw-text-iron-400 tw-opacity-80"
               : "tw-border-iron-700 tw-bg-iron-900 hover:tw-border-iron-600"
           )}
-          role="button"
-          aria-label="Collections search input"
-          aria-haspopup="listbox"
-          aria-expanded={open}
-          aria-controls={inputId}
-          aria-disabled={disabled || undefined}
-          tabIndex={disabled ? -1 : 0}
           onClick={disabled ? undefined : focusInput}
-          onFocus={handleContainerFocus}
-          onKeyDown={handleContainerKeyDown}
         >
           {selectedOptions.map((option) => (
             <span
@@ -390,6 +356,7 @@ export default function CollectionsAutocomplete({
             aria-controls={nativeSelectId}
             aria-haspopup="listbox"
             aria-describedby={nativeSelectDescriptionId}
+            aria-label="Collections search input"
             className={classNames(
               "tw-flex-1 tw-min-w-[140px] tw-border-none tw-bg-transparent tw-text-sm tw-font-medium tw-text-iron-50 focus:tw-outline-none",
               disabled ? "tw-cursor-not-allowed tw-text-iron-400" : "tw-cursor-text"

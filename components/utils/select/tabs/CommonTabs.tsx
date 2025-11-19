@@ -59,7 +59,7 @@ export default function CommonTabs<T, U = unknown>(
     updateFadeIndicators();
 
     node.addEventListener("scroll", updateFadeIndicators);
-    if (typeof globalThis.window !== "undefined") {
+    if (globalThis.window !== undefined) {
       globalThis.window.addEventListener("resize", updateFadeIndicators);
     }
 
@@ -67,7 +67,7 @@ export default function CommonTabs<T, U = unknown>(
       if (node) {
         node.removeEventListener("scroll", updateFadeIndicators);
       }
-      if (typeof globalThis.window !== "undefined") {
+      if (globalThis.window !== undefined) {
         globalThis.window.removeEventListener("resize", updateFadeIndicators);
       }
     };

@@ -45,6 +45,7 @@ export const SeizeSettingsProvider = ({
     async ({ reset = false }: { reset?: boolean } = {}) => {
       if (reset && isMountedRef.current) {
         setIsLoaded(false);
+        setLoadError(null);
       }
 
       try {
@@ -68,7 +69,7 @@ export const SeizeSettingsProvider = ({
         setIsLoaded(false);
       }
     },
-    []
+    [isMountedRef]
   );
 
   useEffect(() => {

@@ -163,17 +163,19 @@ export default function DelegationMappingTool() {
       return;
     }
 
-    if (delegations.length === 0) {
+    if (csvData.length === 0) {
+      setProcessing(false);
       return;
     }
 
-    if (csvData.length > 0) {
+    try {
       const out = csvData.map((address) => resolveDelegatedAddress(address));
       downloadCsvFile(out);
+    } catch (error) {
+      console.error("Failed to generate CSV output", error);
+    } finally {
+      setProcessing(false);
     }
-
-    // Clear processing even if the CSV file contained no rows.
-    setProcessing(false);
   }, [csvData, delegations, processing]);
 
   return (

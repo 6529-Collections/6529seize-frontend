@@ -5,12 +5,14 @@ import {
 import type { ParseErrorArray } from "@/components/nft-picker/NftPicker.utils";
 
 const isParseErrorArray = (error: unknown): error is ParseErrorArray => {
-  if (!Array.isArray(error)) {
+  if (!(error instanceof Error)) {
     return false;
   }
 
-  const { name } = error as { name?: unknown };
-  return typeof name === "string" && name === PARSE_ERROR_ARRAY_NAME;
+  const candidate = error as Partial<ParseErrorArray>;
+  return (
+    candidate.name === PARSE_ERROR_ARRAY_NAME && Array.isArray(candidate.errors)
+  );
 };
 
 const numberFormatter = new Intl.NumberFormat(undefined, {
@@ -41,14 +43,6 @@ export const getTargetTokensCountInfo = (
   }
 
   const normalizedCount = Math.floor(count);
-
-  if (normalizedCount < 1) {
-    return {
-      kind: "unknown",
-      label: UNKNOWN_TOKENS_LABEL,
-      count: null,
-    };
-  }
 
   return {
     kind: "count",

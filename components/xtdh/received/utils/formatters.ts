@@ -24,9 +24,5 @@ export function formatXtdhValue(value: number | null | undefined): string {
 }
 
 export function formatXtdhRate(value: number | null | undefined): string {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    return "0";
-  }
-
-  return decimalFormatter.format(value);
+  return formatXtdhValue(value);
 }

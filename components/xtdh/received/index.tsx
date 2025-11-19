@@ -63,7 +63,7 @@ export default function XtdhReceivedSection({
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const resultSummary = useMemo(() => {
-    if (!collections.length) {
+    if (!isEnabled || !collections.length) {
       return null;
     }
     return buildCollectionsResultSummary(
@@ -71,7 +71,7 @@ export default function XtdhReceivedSection({
       activeSortField,
       activeSortDirection
     );
-  }, [collections.length, activeSortField, activeSortDirection]);
+  }, [isEnabled, collections.length, activeSortField, activeSortDirection]);
 
   const showLoadMore = hasNextPage && isEnabled;
   const controlsDisabled = isLoading || isFetching;
