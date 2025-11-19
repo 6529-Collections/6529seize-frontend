@@ -18,6 +18,7 @@ import {
   formatXtdhRate,
   formatXtdhValue,
 } from "../utils/formatters";
+import { XtdhRatePill } from "./subcomponents/XtdhRatePill";
 
 type ApiXtdhCollection = ApiXTdhCollectionsPage["data"][number];
 
@@ -123,14 +124,7 @@ export function XtdhReceivedCollectionCard({
             </div>
           </div>
         </div>
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2">
-          <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-primary-500/40 tw-bg-primary-500/10 tw-px-3 tw-py-1 tw-text-sm tw-font-semibold tw-text-primary-100">
-            {`${xtdhRateLabel} / day`}
-          </span>
-          <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
-            Total {xtdhValueLabel} xTDH
-          </span>
-        </div>
+        <XtdhRatePill rateLabel={xtdhRateLabel} totalLabel={xtdhValueLabel} />
       </header>
       <dl className="tw-mt-3 tw-grid tw-gap-3 sm:tw-grid-cols-3">
         <CollectionMetric label="Total supply" value={totalSupplyLabel} />
@@ -169,7 +163,7 @@ export function XtdhReceivedCollectionCard({
   );
 }
 
-function CollectionMetric({
+export function CollectionMetric({
   label,
   value,
   className,
