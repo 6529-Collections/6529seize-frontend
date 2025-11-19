@@ -211,6 +211,7 @@ export default function ConsolidationMappingTool() {
       return;
     }
 
+    let isMounted = true;
     const initialUrl = `${publicEnv.API_ENDPOINT}/api/consolidations`;
 
     const fetchAndParseConsolidations = async () => {
@@ -218,12 +219,21 @@ export default function ConsolidationMappingTool() {
         const fetchedConsolidations = await fetchAllPages<Consolidation>(
           initialUrl
         );
+        if (!isMounted) {
+          return;
+        }
         setConsolidations(fetchedConsolidations);
 
         const parsedCsv = await parseCsvFile(file);
+        if (!isMounted) {
+          return;
+        }
         setCsvData(parsedCsv);
 
         if (parsedCsv.length === 0 || fetchedConsolidations.length === 0) {
+          if (!isMounted) {
+            return;
+          }
           const message =
             parsedCsv.length === 0
               ? "The CSV file contains no valid data rows."
@@ -233,6 +243,9 @@ export default function ConsolidationMappingTool() {
         }
       } catch (error) {
         console.error("Failed to fetch consolidations for mapping tool", error);
+        if (!isMounted) {
+          return;
+        }
         toast.error(
           "Unable to process the CSV. Please verify the file and try again."
         );
@@ -243,6 +256,10 @@ export default function ConsolidationMappingTool() {
     };
 
     void fetchAndParseConsolidations();
+
+    return () => {
+      isMounted = false;
+    };
   }, [processing, file]);
 
   useEffect(() => {

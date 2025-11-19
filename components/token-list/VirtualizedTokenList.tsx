@@ -90,6 +90,7 @@ export function VirtualizedTokenList({
 
   return (
     <VirtualizedTokenListContent
+      key={scrollKey}
       contractAddress={contractAddress}
       chain={chain}
       ranges={ranges}
@@ -267,7 +268,7 @@ function getVisibleWindowBounds(virtualItems: Array<{ index: number }>) {
   }
 
   const firstVisibleIndex = virtualItems[0].index;
-  const lastItem = virtualItems[virtualItems.length - 1];
+  const lastItem = virtualItems.at(-1)!;
   const lastVisibleIndex = lastItem.index;
 
   return { firstVisibleIndex, lastVisibleIndex };
@@ -442,10 +443,7 @@ function TokenThumbnail({ metadata, decimalId, isLoading, hasError }: Readonly<T
   }
 
   return (
-    <div
-      className="tw-relative tw-h-10 tw-w-10 tw-overflow-hidden tw-rounded-md tw-bg-iron-800"
-      aria-hidden="true"
-    >
+    <div className="tw-relative tw-h-10 tw-w-10 tw-overflow-hidden tw-rounded-md tw-bg-iron-800">
       {content}
     </div>
   );

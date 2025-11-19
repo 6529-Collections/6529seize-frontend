@@ -1,0 +1,35 @@
+import type { TokenRange } from "@/components/nft-picker/NftPicker.types";
+import { toCanonicalRanges } from "@/components/nft-picker/NftPicker.utils";
+
+export const DEFAULT_GRANT_TOKENS_ERROR_MESSAGE =
+  "We couldn't load the granted tokens right now. Please try again.";
+
+export function mapTokensToRanges(tokens: readonly string[]): TokenRange[] {
+  if (!tokens.length) {
+    return [];
+  }
+
+  const ids: bigint[] = [];
+
+  for (const token of tokens) {
+    try {
+      ids.push(BigInt(token));
+    } catch {
+      // Ignore malformed token identifiers.
+    }
+  }
+
+  if (!ids.length) {
+    return [];
+  }
+
+  return toCanonicalRanges(ids);
+}
+
+export function getGrantTokensErrorMessage(error: unknown): string {
+  if (error instanceof Error && error.name === "AbortError") {
+    return "Loading granted tokens took too long. Please try again.";
+  }
+
+  return DEFAULT_GRANT_TOKENS_ERROR_MESSAGE;
+}

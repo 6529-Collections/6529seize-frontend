@@ -6,9 +6,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { ApiTdhGrantStatus } from "@/generated/models/ApiTdhGrantStatus";
 import type { ContractOverview } from "@/types/nft";
 
-import { formatContractLabel, shortenAddress } from "./formatters";
-import type { GrantDetails } from "./types";
-import { getStatusVisuals } from "./statusVisuals";
+import { formatContractLabel, shortenAddress } from "../formatters";
+import type { GrantDetails } from "../types";
+import { getStatusVisuals } from "../statusVisuals";
 
 interface GrantItemContentProps {
   readonly contract: ContractOverview;
@@ -206,7 +206,8 @@ function StatusBadge({ status }: Readonly<{ status: ApiTdhGrantStatus }>) {
       className={clsx(
         "tw-inline-flex tw-items-center tw-gap-2 tw-rounded-full tw-border tw-px-3 tw-py-1 tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wide tw-transition-colors tw-duration-200",
         badgeClassName
-      )}>
+      )}
+    >
       <FontAwesomeIcon
         icon={icon}
         aria-hidden="true"
@@ -221,7 +222,8 @@ function GrantErrorDetails({ message }: Readonly<{ message: string }>) {
   return (
     <section
       aria-live="polite"
-      className="tw-rounded-lg tw-border tw-border-red-500/40 tw-bg-red-500/5 tw-p-3 tw-text-red-200">
+      className="tw-rounded-lg tw-border tw-border-red-500/40 tw-bg-red-500/5 tw-p-3 tw-text-red-200"
+    >
       <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-text-red-300">
         Error details
       </p>

@@ -1,5 +1,13 @@
 import type { ReactNode } from "react";
 
+import type { TokenRange } from "@/components/nft-picker/NftPicker.types";
+import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
+import type { SupportedChain } from "@/types/nft";
+
+export interface UserPageXtdhGrantListItemProps {
+  readonly grant: ApiTdhGrantsPage["data"][number];
+}
+
 export interface GrantDetails {
   readonly tokenTypeLabel: ReactNode;
   readonly totalSupplyLabel: ReactNode;
@@ -13,3 +21,21 @@ export interface GrantDetails {
 }
 
 export type GrantItemVariant = "contract" | "error";
+
+export type TokenPanelState =
+  | { type: "all" }
+  | { type: "count"; label: string; count: number }
+  | { type: "unknown"; label: string };
+
+export interface GrantTokensDisclosureState {
+  readonly showInitialLoading: boolean;
+  readonly showInitialError: boolean;
+  readonly tokenRanges: TokenRange[];
+  readonly errorMessage: string;
+  readonly onRetry: () => void;
+  readonly contractAddress: `0x${string}` | null;
+  readonly chain: SupportedChain | null;
+  readonly grantId: string;
+  readonly onEndReached?: () => void;
+  readonly isFetchingNextPage: boolean;
+}
