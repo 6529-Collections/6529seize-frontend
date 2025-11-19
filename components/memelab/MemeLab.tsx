@@ -440,6 +440,7 @@ export function sortChanged(
 }
 
 export default function MemeLabComponent() {
+  throw new Error("test");
   const router = useRouter();
   const searchParams = useSearchParams();
   const { connectedProfile } = useContext(AuthContext);

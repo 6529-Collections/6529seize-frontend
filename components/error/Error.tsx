@@ -102,7 +102,7 @@ export default function ErrorComponent({
         )}
 
         {(hasStackTrace || digest) && (
-          <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-2 tw-items-center tw-justify-center tw-w-full tw-max-w-4xl">
+          <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-2 tw-items-center tw-justify-center tw-w-full tw-max-w-4xl tw-px-4">
             <div
               className={`tw-flex tw-gap-2 tw-items-center tw-w-full ${
                 isStacktraceExpanded
@@ -144,7 +144,7 @@ export default function ErrorComponent({
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.2, ease: "easeInOut" }}
                   className="tw-w-full tw-overflow-hidden">
-                  <div className="tw-bg-black tw-rounded-lg tw-p-4 tw-text-xs tw-leading-5 tw-overflow-auto tw-text-gray-200 tw-font-mono tw-whitespace-pre-wrap tw-max-h-[16rem]">
+                  <div className="tw-bg-black tw-rounded-lg tw-p-4 tw-text-xs tw-leading-5 tw-overflow-auto tw-text-gray-200 tw-font-mono tw-whitespace-pre-wrap tw-max-h-[16rem] tw-break-all tw-w-full tw-max-w-full">
                     {digest && <div className="tw-mb-2">Digest: {digest}</div>}
                     {resolvedStackTrace}
                   </div>
