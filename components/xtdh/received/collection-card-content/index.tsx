@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useMemo } from "react";
+import clsx from "clsx";
 
 import type { ApiXTdhCollectionsPage } from "@/generated/models/ApiXTdhCollectionsPage";
 import { useContractOverviewQuery } from "@/hooks/useAlchemyNftQueries";
@@ -20,12 +21,20 @@ import {
 
 type ApiXtdhCollection = ApiXTdhCollectionsPage["data"][number];
 
+type InteractionMode = "button" | "static";
+
 interface XtdhReceivedCollectionCardProps {
   readonly collection: ApiXtdhCollection;
+  readonly isSelected?: boolean;
+  readonly onSelect?: (contract: string | null) => void;
+  readonly interactionMode?: InteractionMode;
 }
 
 export function XtdhReceivedCollectionCard({
   collection,
+  isSelected = false,
+  onSelect,
+  interactionMode = "button",
 }: Readonly<XtdhReceivedCollectionCardProps>) {
   const contractAddress = useMemo(() => {
     const trimmed = collection.contract?.trim() ?? "";
@@ -70,8 +79,17 @@ export function XtdhReceivedCollectionCard({
   const xtdhValueLabel = formatXtdhValue(collection.xtdh);
   const xtdhRateLabel = formatXtdhRate(collection.xtdh_rate);
 
-  return (
-    <li className="tw-list-none tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4 tw-shadow-inner tw-shadow-black/20">
+  const isSelectable = interactionMode === "button" && Boolean(onSelect && collection.contract);
+
+  const content = (
+    <div
+      className={clsx(
+        "tw-flex tw-w-full tw-flex-col tw-items-stretch tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4 tw-text-left tw-shadow-inner tw-shadow-black/20 tw-transition-colors",
+        interactionMode === "button" && "desktop-hover:hover:tw-bg-iron-900/80",
+        isSelected && "tw-border-primary-500",
+        !isSelectable && interactionMode === "button" && "tw-cursor-not-allowed tw-opacity-70"
+      )}
+    >
       <header className="tw-flex tw-items-center tw-gap-3">
         <div className="tw-relative tw-h-14 tw-w-14 tw-overflow-hidden tw-rounded-xl tw-bg-iron-800 tw-flex-shrink-0">
           {imageUrl ? (
@@ -106,6 +124,31 @@ export function XtdhReceivedCollectionCard({
         <CollectionMetric label="xTDH" value={xtdhValueLabel} />
         <CollectionMetric label="xTDH rate" value={xtdhRateLabel} />
       </dl>
+    </div>
+  );
+
+  if (interactionMode === "static") {
+    return <li className="tw-list-none">{content}</li>;
+  }
+
+  const handleSelect = () => {
+    if (!onSelect || !collection.contract) {
+      return;
+    }
+    onSelect(collection.contract);
+  };
+
+  return (
+    <li className="tw-list-none">
+      <button
+        type="button"
+        onClick={handleSelect}
+        disabled={!isSelectable}
+        aria-pressed={isSelected}
+        className="tw-w-full tw-bg-transparent tw-p-0 tw-text-left tw-border-none"
+      >
+        {content}
+      </button>
     </li>
   );
 }

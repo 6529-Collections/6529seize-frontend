@@ -1,6 +1,7 @@
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import { SortDirection } from "@/entities/ISort";
 import type { XtdhCollectionsSortField } from "@/hooks/useXtdhCollectionsQuery";
+import type { XtdhTokensSortField } from "@/hooks/useXtdhTokensQuery";
 
 export const COLLECTION_SORT_LABELS: Record<XtdhCollectionsSortField, string> = {
   xtdh: "xTDH",
@@ -39,6 +40,46 @@ export function parseCollectionSortDirection(
 ): SortDirection {
   if (!value) {
     return DEFAULT_COLLECTION_SORT_DIRECTION;
+  }
+  const normalized = value.trim().toUpperCase();
+  return normalized === SortDirection.ASC
+    ? SortDirection.ASC
+    : SortDirection.DESC;
+}
+
+export const TOKENS_SORT_LABELS: Record<XtdhTokensSortField, string> = {
+  xtdh: "xTDH",
+  xtdh_rate: "xTDH Rate",
+};
+
+export const TOKENS_SORT_ITEMS = [
+  { key: "xtdh", label: TOKENS_SORT_LABELS.xtdh, value: "xtdh" },
+  {
+    key: "xtdh_rate",
+    label: TOKENS_SORT_LABELS.xtdh_rate,
+    value: "xtdh_rate",
+  },
+] as const satisfies ReadonlyArray<CommonSelectItem<XtdhTokensSortField>>;
+
+export const DEFAULT_TOKENS_SORT_FIELD: XtdhTokensSortField = "xtdh";
+export const DEFAULT_TOKENS_SORT_DIRECTION = SortDirection.DESC;
+
+export function parseTokensSortField(
+  value: string | null
+): XtdhTokensSortField {
+  if (!value) {
+    return DEFAULT_TOKENS_SORT_FIELD;
+  }
+  const normalized = value.trim().toLowerCase();
+  return (
+    TOKENS_SORT_ITEMS.find((item) => item.value === normalized)?.value ??
+    DEFAULT_TOKENS_SORT_FIELD
+  );
+}
+
+export function parseTokensSortDirection(value: string | null): SortDirection {
+  if (!value) {
+    return DEFAULT_TOKENS_SORT_DIRECTION;
   }
   const normalized = value.trim().toUpperCase();
   return normalized === SortDirection.ASC

@@ -18,6 +18,8 @@ interface XtdhCollectionsListProps {
   readonly collections: ApiXTdhCollectionsPage["data"];
   readonly errorMessage?: string;
   readonly onRetry: () => void;
+  readonly selectedContract?: string | null;
+  readonly onSelectCollection?: (contract: string | null) => void;
 }
 
 export function XtdhCollectionsList({
@@ -27,6 +29,8 @@ export function XtdhCollectionsList({
   collections,
   errorMessage,
   onRetry,
+  selectedContract,
+  onSelectCollection,
 }: Readonly<XtdhCollectionsListProps>) {
   if (!isEnabled) {
     return (
@@ -59,6 +63,8 @@ export function XtdhCollectionsList({
     );
   }
 
+  const normalizedSelected = selectedContract?.trim().toLowerCase() ?? null;
+
   return (
     <div className="tw-space-y-3">
       <ul className="tw-m-0 tw-flex tw-flex-col tw-gap-3 tw-p-0">
@@ -66,6 +72,11 @@ export function XtdhCollectionsList({
           <XtdhReceivedCollectionCard
             key={getCollectionKey(collection, index)}
             collection={collection}
+            onSelect={onSelectCollection}
+            isSelected={
+              normalizedSelected !== null &&
+              (collection.contract?.trim().toLowerCase() ?? null) === normalizedSelected
+            }
           />
         ))}
       </ul>
