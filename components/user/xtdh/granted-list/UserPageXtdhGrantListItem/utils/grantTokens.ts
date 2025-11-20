@@ -1,3 +1,4 @@
+import { getNodeEnv } from "@/config/env";
 import type { TokenRange } from "@/components/nft-picker/NftPicker.types";
 import { toCanonicalRanges } from "@/components/nft-picker/NftPicker.utils";
 
@@ -10,12 +11,16 @@ export function mapTokensToRanges(tokens: readonly string[]): TokenRange[] {
   }
 
   const ids: bigint[] = [];
+  const isDevelopment = getNodeEnv() === "development";
 
   for (const token of tokens) {
     try {
       ids.push(BigInt(token));
     } catch {
       // Ignore malformed token identifiers.
+      if (isDevelopment) {
+        console.warn(`Ignoring malformed token identifier: ${token}`);
+      }
     }
   }
 

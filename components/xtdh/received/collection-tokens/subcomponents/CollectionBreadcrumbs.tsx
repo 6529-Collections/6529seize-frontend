@@ -25,7 +25,7 @@ export function CollectionBreadcrumbs({
           label: tokenLabel,
         }
       : null,
-  ].filter((crumb): crumb is { label: string; onClick?: () => void } => Boolean(crumb));
+  ].filter(Boolean) as { label: string; onClick?: () => void }[];
 
   if (!crumbs.length) {
     return null;
@@ -49,7 +49,7 @@ export function CollectionBreadcrumbs({
               ) : (
                 <span className="tw-text-iron-100">{crumb.label}</span>
               )}
-              {!isLast ? <span className="tw-text-iron-500">/</span> : null}
+              {isLast ? null : <span className="tw-text-iron-500">/</span>}
             </li>
           );
         })}

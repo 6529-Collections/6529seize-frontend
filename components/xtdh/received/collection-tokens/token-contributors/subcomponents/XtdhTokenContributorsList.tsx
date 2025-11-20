@@ -54,7 +54,12 @@ export function XtdhTokenContributorsList({
   }
 
   if (showInitialError) {
-    return <ListError message={errorMessage} onRetry={onRetry} />;
+    return (
+      <ListError
+        message={errorMessage ?? "Failed to load contributors."}
+        onRetry={onRetry}
+      />
+    );
   }
 
   if (showEmptyState) {
@@ -70,20 +75,21 @@ export function XtdhTokenContributorsList({
     <div className="tw-space-y-3">
       <ul className="tw-m-0 tw-flex tw-flex-col tw-gap-3 tw-p-0">
         {contributors.map((contribution, index) => {
-          const contributionKey =
-            contribution.grant?.id ??
-              contribution.grantor?.id ??
-              `contribution-${index}`;
+          const key =
+            contribution.grant?.id ?? contribution.grantor?.id ?? index;
           return (
             <XtdhTokenContributorsListItem
-              key={`${contributionKey}-${index}`}
+              key={key}
               contribution={contribution}
             />
           );
         })}
       </ul>
       {isError && hasContributors ? (
-        <InlineRetry message={errorMessage} onRetry={onRetry} />
+        <InlineRetry
+          message={errorMessage ?? "Unable to load more contributors."}
+          onRetry={onRetry}
+        />
       ) : null}
     </div>
   );

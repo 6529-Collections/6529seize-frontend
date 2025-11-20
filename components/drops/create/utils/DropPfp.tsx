@@ -9,15 +9,16 @@ const AVATAR_SIZE_MAP: Record<DropPartSize, ProfileBadgeSize> = {
 
 export default function DropPfp({
   pfpUrl,
-  size = DropPartSize.MEDIUM,
+  size,
 }: {
   readonly pfpUrl: string | null | undefined;
   readonly size?: DropPartSize;
 }) {
+  const effectiveSize = size ?? DropPartSize.MEDIUM;
   return (
     <ProfileAvatar
       pfpUrl={pfpUrl}
-      size={AVATAR_SIZE_MAP[size]}
+      size={AVATAR_SIZE_MAP[effectiveSize]}
       alt="Create Drop Profile"
     />
   );

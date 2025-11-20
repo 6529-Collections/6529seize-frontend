@@ -8,13 +8,6 @@ export enum ProfileLevelSize {
   XLARGE = "XLARGE",
 }
 
-interface ProfileLevelProps {
-  readonly level: number;
-  readonly cicType: CICType;
-  readonly color?: string;
-  readonly size?: ProfileLevelSize;
-}
-
 const LEVEL_SIZE_CLASSES: Record<ProfileLevelSize, string> = {
   [ProfileLevelSize.SMALL]: "tw-h-4 tw-w-4 tw-text-[9px]",
   [ProfileLevelSize.MEDIUM]: "tw-h-5 tw-w-5 tw-text-[0.625rem]",
@@ -29,18 +22,34 @@ const CIC_SIZE_CLASSES: Record<ProfileLevelSize, string> = {
   [ProfileLevelSize.XLARGE]: "-tw-top-2 tw-h-4 tw-w-4",
 };
 
+const TEXT_COLOR_CLASSES = {
+  "iron-50": "tw-text-iron-50",
+  "iron-300": "tw-text-iron-300",
+  black: "tw-text-black",
+} as const;
+
+type LevelTextColor = keyof typeof TEXT_COLOR_CLASSES;
+
+interface ProfileLevelProps {
+  readonly level: number;
+  readonly cicType: CICType;
+  readonly color?: LevelTextColor;
+  readonly size?: ProfileLevelSize;
+}
+
 export default function ProfileLevel({
   level,
   cicType,
   color,
   size = ProfileLevelSize.MEDIUM,
 }: ProfileLevelProps) {
-  const mainColor = color ?? "iron-300";
+  const mainColorClass =
+    TEXT_COLOR_CLASSES[color ?? "iron-300"] ?? TEXT_COLOR_CLASSES["iron-300"];
 
   return (
     <div className="tw-relative">
       <div
-        className={`${LEVEL_SIZE_CLASSES[size]} tw-flex tw-items-center tw-justify-center tw-leading-3 tw-font-bold tw-rounded-full tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-900 tw-ring-1 tw-ring-iron-700 tw-ring-inset tw-text-${mainColor}`}>
+        className={`${LEVEL_SIZE_CLASSES[size]} tw-flex tw-items-center tw-justify-center tw-leading-3 tw-font-bold tw-rounded-full tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-900 tw-ring-1 tw-ring-iron-700 tw-ring-inset ${mainColorClass}`}>
         {level}
       </div>
       <span

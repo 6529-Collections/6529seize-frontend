@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-
 import { ProfileBadgeSize } from "./ProfileAvatar";
 
 interface ProfileHandleProps {
@@ -31,41 +29,23 @@ export default function ProfileHandle({
   const searchParams = useSearchParams();
   const paramValue = (searchParams?.get(highlightSearchParam) ?? "").toLowerCase();
   const amISubject = (handle ?? "").toLowerCase() === paramValue;
+  const textClasses = TEXT_SIZE_CLASSES[size];
+  const isLinkEnabled = !!(asLink && href && !amISubject);
 
-  const getTextClasses = (): string => {
-    switch (size) {
-      case ProfileBadgeSize.SMALL:
-        return TEXT_SIZE_CLASSES[ProfileBadgeSize.SMALL];
-      case ProfileBadgeSize.MEDIUM:
-        return TEXT_SIZE_CLASSES[ProfileBadgeSize.MEDIUM];
-      case ProfileBadgeSize.LARGE:
-        return TEXT_SIZE_CLASSES[ProfileBadgeSize.LARGE];
-      default:
-        assertUnreachable(size);
-        return TEXT_SIZE_CLASSES[ProfileBadgeSize.MEDIUM];
-    }
-  };
-
-  const textClasses = getTextClasses();
-  const isLinkEnabled = Boolean(asLink && href && !amISubject);
-
-  if (isLinkEnabled) {
-    return (
-      <p
-        className={`${textClasses} tw-mb-0 tw-leading-none tw-font-semibold ${amISubject ? "tw-text-iron-50" : "tw-text-iron-50"}`}>
-        <Link
-          onClick={(e) => e.stopPropagation()}
-          href={href as string}
-          className="tw-no-underline hover:tw-underline hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out">
-          {handle}
-        </Link>
-      </p>
-    );
-  }
+  const content = isLinkEnabled ? (
+    <Link
+      onClick={(e) => e.stopPropagation()}
+      href={href}
+      className="tw-no-underline hover:tw-underline hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out">
+      {handle}
+    </Link>
+  ) : (
+    handle
+  );
 
   return (
     <p className={`${textClasses} tw-font-semibold tw-mb-0 tw-leading-none tw-text-iron-50`}>
-      {handle}
+      {content}
     </p>
   );
 }

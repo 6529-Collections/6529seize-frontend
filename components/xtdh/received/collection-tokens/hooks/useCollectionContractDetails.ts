@@ -19,7 +19,9 @@ export function useCollectionContractDetails({
   normalizedContract,
 }: Readonly<UseCollectionContractDetailsArgs>): UseCollectionContractDetailsResult {
   const contractParam = useMemo(() => {
-    return normalizedContract?.trim() ?? contract?.trim() ?? "";
+    const normalized = normalizedContract?.trim();
+    const raw = contract?.trim();
+    return normalized || raw || "";
   }, [normalizedContract, contract]);
 
   const normalizedAddress = useMemo(() => {
@@ -40,11 +42,12 @@ export function useCollectionContractDetails({
     if (contractOverview?.name) {
       return contractOverview.name;
     }
+    const trimmed = contract?.trim();
     if (normalizedAddress) {
       return shortenAddress(normalizedAddress);
     }
-    if (contract?.trim()) {
-      return contract;
+    if (trimmed) {
+      return trimmed;
     }
     return "Selected collection";
   }, [contractOverview?.name, normalizedAddress, contract]);

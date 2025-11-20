@@ -3,6 +3,9 @@ import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
 import type { SupportedChain } from "@/types/nft";
 import { isValidEthAddress } from "@/helpers/Helpers";
 import { shortenAddress as shortenGenericAddress } from "@/helpers/address.helpers";
+import { getTargetTokensCountInfo } from "@/components/user/xtdh/utils/xtdhGrantFormatters";
+
+import type { TokenPanelState } from "./types";
 
 type ApiGrantTargetChain = ApiTdhGrantsPage["data"][number]["target_chain"];
 
@@ -79,4 +82,20 @@ export function mapGrantChainToSupportedChain(
   }
 
   return supportedChain;
+}
+
+export function mapTokenCountToState(
+  count: number | null | undefined
+): TokenPanelState {
+  const info = getTargetTokensCountInfo(count);
+
+  if (info.kind === "all") {
+    return { type: "all" };
+  }
+
+  if (info.kind === "count") {
+    return { type: "count", label: info.label, count: info.count };
+  }
+
+  return { type: "unknown", label: info.label };
 }

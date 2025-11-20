@@ -2,7 +2,11 @@ const SKELETON_INDICES = [0, 1, 2];
 
 export function XtdhTokensSkeleton() {
   return (
-    <ul className="tw-m-0 tw-flex tw-flex-col tw-gap-3 tw-p-0">
+    <ul
+      className="tw-m-0 tw-flex tw-flex-col tw-gap-3 tw-p-0"
+      aria-busy="true"
+      aria-label="Loading tokens"
+    >
       {SKELETON_INDICES.map((index) => (
         <li
           key={`token-skeleton-${index}`}

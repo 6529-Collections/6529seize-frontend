@@ -18,8 +18,6 @@ import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { toast } from "react-toastify";
 import styles from "./MappingTool.module.scss";
 
-const csvParser = require("csv-parser");
-
 interface ConsolidationData {
   address: string;
   token_id: number;
@@ -55,58 +53,84 @@ function readFileAsText(file: File): Promise<string> {
   });
 }
 
-function parseCsvText(csvText: string): Promise<ConsolidationData[]> {
-  return new Promise<ConsolidationData[]>((resolve, reject) => {
-    const results: ConsolidationData[] = [];
-    let isFirstRow = true;
+function parseCsvLine(line: string): string[] {
+  const values: string[] = [];
+  let current = "";
+  let inQuotes = false;
 
-    const parser = csvParser({ headers: false })
-      .on("data", (row: any) => {
-        // Skip header row
-        if (isFirstRow) {
-          isFirstRow = false;
-          return;
-        }
+  for (let i = 0; i < line.length; i += 1) {
+    const char = line[i];
 
-        const requiredColumns = [0, 1, 2, 3, 4];
-        const hasAllColumns = requiredColumns.every(
-          (index) => row[index] !== undefined && row[index] !== null
-        );
-        if (!hasAllColumns) {
-          console.warn("Skipping CSV row with insufficient columns:", row);
-          return;
-        }
+    if (char === '"') {
+      const nextChar = line[i + 1];
+      if (inQuotes && nextChar === '"') {
+        current += '"';
+        i += 1;
+        continue;
+      }
+      inQuotes = !inQuotes;
+      continue;
+    }
 
-        const address = String(row[0]).trim();
-        const token_id = Number.parseInt(row[1], 10);
-        const balance = Number.parseInt(row[2], 10);
-        const contract = String(row[3]).trim();
-        const name = String(row[4]).trim();
+    if (char === "," && !inQuotes) {
+      values.push(current.trim());
+      current = "";
+      continue;
+    }
 
-        // Validate numeric fields
-        if (Number.isNaN(token_id) || Number.isNaN(balance)) {
-          console.warn("Skipping invalid CSV row:", row);
-          return;
-        }
+    current += char;
+  }
 
-        // Validate required string fields
-        if (!address || !contract || !name) {
-          console.warn("Skipping CSV row with missing required fields:", row);
-          return;
-        }
+  values.push(current.trim());
+  return values;
+}
 
-        results.push({ address, token_id, balance, contract, name });
-      })
-      .on("end", () => {
-        resolve(results);
-      })
-      .on("error", (err: any) => {
-        reject(err);
-      });
+async function parseCsvText(csvText: string): Promise<ConsolidationData[]> {
+  const lines = csvText
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
 
-    parser.write(csvText);
-    parser.end();
-  });
+  const results: ConsolidationData[] = [];
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    if (index === 0) {
+      continue; // header row
+    }
+
+    const columns = parseCsvLine(line);
+    const requiredColumns = [0, 1, 2, 3, 4];
+
+    const hasAllColumns = requiredColumns.every(
+      (columnIndex) => columns[columnIndex] !== undefined
+    );
+
+    if (!hasAllColumns) {
+      console.warn("Skipping CSV row with insufficient columns:", line);
+      continue;
+    }
+
+    const address = columns[0];
+    const token_id = Number.parseInt(columns[1] ?? "", 10);
+    const balance = Number.parseInt(columns[2] ?? "", 10);
+    const contract = columns[3] ?? "";
+    const name = columns[4] ?? "";
+
+    if (Number.isNaN(token_id) || Number.isNaN(balance)) {
+      console.warn("Skipping invalid CSV row:", line);
+      continue;
+    }
+
+    if (!address || !contract || !name) {
+      console.warn("Skipping CSV row with missing required fields:", line);
+      continue;
+    }
+
+    results.push({ address, token_id, balance, contract, name });
+  }
+
+  return results;
 }
 
 async function parseCsvFile(file: File): Promise<ConsolidationData[]> {
@@ -133,6 +157,10 @@ export default function ConsolidationMappingTool() {
     return map;
   }, [csvData]);
   function submit() {
+    if (!file) {
+      toast.warning("Please upload a CSV file before submitting.");
+      return;
+    }
     setProcessing(true);
   }
 
@@ -268,43 +296,83 @@ export default function ConsolidationMappingTool() {
     }
 
     if (csvData.length === 0 || consolidations.length === 0) {
-      setProcessing(false);
+      // Waiting for data to finish loading; the fetch/parse effect will handle
+      // empty results and clear processing state.
       return;
     }
 
-    const normalizeEntry = (
-      consolidationData: ConsolidationData
-    ): ConsolidationData => {
-      const addressConsolidations = getForAddress(consolidationData.address);
-      if (!addressConsolidations) {
-        return consolidationData;
-      }
-
-      const sum = sumForAddresses(
-        addressConsolidations.wallets,
-        consolidationData.token_id,
-        consolidationData.contract
-      );
-
-      const canMergePrimary =
-        areEqualAddresses(
-          consolidationData.address,
-          addressConsolidations.primary
-        ) || sum === consolidationData.balance;
-
-      if (!canMergePrimary) {
-        return consolidationData;
-      }
-
-      return {
-        ...consolidationData,
-        address: addressConsolidations.primary,
-        balance: sum,
-      };
-    };
-
     try {
-      const normalizedOutput = csvData.map(normalizeEntry);
+      const primaryKeyFor = (
+        contract: string,
+        tokenId: number,
+        primary: string
+      ) => buildBalanceKey(contract, tokenId, primary);
+
+      const mergeTargets = new Map<string, ConsolidationData>();
+
+      for (const entry of csvData) {
+        const addressConsolidations = getForAddress(entry.address);
+        if (!addressConsolidations) {
+          continue;
+        }
+
+        const sum = sumForAddresses(
+          addressConsolidations.wallets,
+          entry.token_id,
+          entry.contract
+        );
+
+        const canMergePrimary =
+          areEqualAddresses(entry.address, addressConsolidations.primary) ||
+          sum === entry.balance;
+
+        if (!canMergePrimary) {
+          continue;
+        }
+
+        const primaryKey = primaryKeyFor(
+          entry.contract,
+          entry.token_id,
+          addressConsolidations.primary
+        );
+
+        if (!mergeTargets.has(primaryKey)) {
+          mergeTargets.set(primaryKey, {
+            ...entry,
+            address: addressConsolidations.primary,
+            balance: sum,
+          });
+        }
+      }
+
+      const emittedPrimaryKeys = new Set<string>();
+      const normalizedOutput: ConsolidationData[] = [];
+
+      for (const entry of csvData) {
+        const addressConsolidations = getForAddress(entry.address);
+        if (!addressConsolidations) {
+          normalizedOutput.push(entry);
+          continue;
+        }
+
+        const primaryKey = primaryKeyFor(
+          entry.contract,
+          entry.token_id,
+          addressConsolidations.primary
+        );
+
+        const mergedEntry = mergeTargets.get(primaryKey);
+        if (mergedEntry) {
+          if (!emittedPrimaryKeys.has(primaryKey)) {
+            normalizedOutput.push(mergedEntry);
+            emittedPrimaryKeys.add(primaryKey);
+          }
+          continue;
+        }
+
+        normalizedOutput.push(entry);
+      }
+
       downloadCsvFile(normalizedOutput);
     } catch (error) {
       console.error("Failed to generate CSV output", error);

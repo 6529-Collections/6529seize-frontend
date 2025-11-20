@@ -1,11 +1,13 @@
 import CommonSelect from "@/components/utils/select/CommonSelect";
 import type { XtdhCollectionsSortField } from "@/hooks/useXtdhCollectionsQuery";
 import { SortDirection } from "@/entities/ISort";
+import { RECEIVED_COLLECTIONS_SUMMARY_NOUNS } from "@/i18n/messages";
 
 import {
   COLLECTION_SORT_ITEMS,
   COLLECTION_SORT_LABELS,
 } from "../constants";
+import { buildResultSummary } from "../utils/resultSummary";
 
 interface XtdhCollectionsControlsProps {
   readonly activeSortField: XtdhCollectionsSortField;
@@ -52,8 +54,12 @@ export function buildCollectionsResultSummary(
   sortField: XtdhCollectionsSortField,
   direction: SortDirection
 ): string {
-  const label = COLLECTION_SORT_LABELS[sortField];
-  const dirLabel = direction === SortDirection.ASC ? "ascending" : "descending";
-  const collectionLabel = collectionsCount === 1 ? "collection" : "collections";
-  return `${collectionsCount.toLocaleString()} ${collectionLabel} · Sorted by ${label} (${dirLabel})`;
+  return buildResultSummary({
+    count: collectionsCount,
+    labels: COLLECTION_SORT_LABELS,
+    sortField,
+    direction,
+    singularLabel: RECEIVED_COLLECTIONS_SUMMARY_NOUNS.singular,
+    pluralLabel: RECEIVED_COLLECTIONS_SUMMARY_NOUNS.plural,
+  });
 }

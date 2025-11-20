@@ -16,7 +16,6 @@ import { XtdhTokenListItem } from "./subcomponents/XtdhTokenListItem";
 import { XtdhTokenContributorsPanel } from "./token-contributors";
 import type {
   XtdhCollectionTokensPanelProps,
-  XtdhSelectedTokenDescriptor,
 } from "./types";
 import { getTokenLabel } from "./utils/getTokenLabel";
 
@@ -94,20 +93,12 @@ export function XtdhCollectionTokensPanel({
 
   const controlsDisabled = isLoading || isFetching;
   const showLoadMore = hasNextPage && isEnabled;
-  const showTokenContributors = Boolean(selectedToken);
   const selectedTokenLabel = useMemo(() => {
     if (!selectedToken) {
       return undefined;
     }
     return selectedToken.metadata?.name ?? getTokenLabel(selectedToken.token.token);
   }, [selectedToken]);
-
-  const handleTokenSelect = useCallback(
-    (descriptor: XtdhSelectedTokenDescriptor) => {
-      selectToken(descriptor);
-    },
-    [selectToken]
-  );
 
   const handleBackToTokens = useCallback(() => {
     clearSelectedToken();
@@ -128,7 +119,7 @@ export function XtdhCollectionTokensPanel({
         collectionLabel={contractDisplayName}
         tokenLabel={selectedTokenLabel}
         onNavigateToCollections={onBack}
-        onNavigateToTokens={showTokenContributors ? handleBackToTokens : undefined}
+        onNavigateToTokens={selectedToken ? handleBackToTokens : undefined}
       />
       {collection ? (
         <XtdhReceivedCollectionCard
@@ -141,7 +132,7 @@ export function XtdhCollectionTokensPanel({
         </div>
       )}
 
-      {showTokenContributors && selectedToken ? (
+      {selectedToken ? (
         <div className="tw-space-y-4">
           <XtdhTokenListItem
             as="div"
@@ -177,7 +168,7 @@ export function XtdhCollectionTokensPanel({
             isError={isError}
             errorMessage={errorMessage}
             onRetry={handleRetry}
-            onTokenSelect={handleTokenSelect}
+            onTokenSelect={selectToken}
           />
 
           <CollectionLoadMore

@@ -1,8 +1,10 @@
 import CommonSelect from "@/components/utils/select/CommonSelect";
 import { SortDirection } from "@/entities/ISort";
 import type { XtdhTokensSortField } from "@/hooks/useXtdhTokensQuery";
+import { RECEIVED_TOKENS_SUMMARY_NOUNS } from "@/i18n/messages";
 
 import { TOKENS_SORT_ITEMS, TOKENS_SORT_LABELS } from "../constants";
+import { buildResultSummary } from "../utils/resultSummary";
 
 interface XtdhTokensControlsProps {
   readonly activeSortField: XtdhTokensSortField;
@@ -52,8 +54,12 @@ export function buildTokensResultSummary(
   sortField: XtdhTokensSortField,
   direction: SortDirection
 ): string {
-  const label = TOKENS_SORT_LABELS[sortField];
-  const dirLabel = direction === SortDirection.ASC ? "ascending" : "descending";
-  const tokenWord = tokenCount === 1 ? "token" : "tokens";
-  return `${tokenCount.toLocaleString()} ${tokenWord} · Sorted by ${label} (${dirLabel})`;
+  return buildResultSummary({
+    count: tokenCount,
+    labels: TOKENS_SORT_LABELS,
+    sortField,
+    direction,
+    singularLabel: RECEIVED_TOKENS_SUMMARY_NOUNS.singular,
+    pluralLabel: RECEIVED_TOKENS_SUMMARY_NOUNS.plural,
+  });
 }

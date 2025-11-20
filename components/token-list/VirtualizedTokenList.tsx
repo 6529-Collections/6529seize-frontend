@@ -429,7 +429,10 @@ function TokenThumbnail({ metadata, decimalId, isLoading, hasError }: Readonly<T
     );
   } else if (hasError) {
     content = (
-      <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-text-[10px] tw-font-medium tw-leading-tight tw-text-red-300">
+      <div
+        aria-label="Failed to load thumbnail"
+        className="tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-text-[10px] tw-font-medium tw-leading-tight tw-text-red-300"
+      >
         <span>Load</span>
         <span>Error</span>
       </div>

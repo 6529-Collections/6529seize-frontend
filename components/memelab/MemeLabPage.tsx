@@ -1380,22 +1380,6 @@ export default function MemeLabPageComponent({
               <Col>
                 <h1>Meme Lab</h1>
               </Col>
-              {/* {nft && (
-                  <Col className="d-flex align-items-center justify-content-end">
-                    <TwitterShareButton
-                      className="twitter-share-button"
-                      url={window.location.href.split("?")[0]}
-                      title={`Meme Lab Card #${nft.id} \n${nft.name}\nby ${nft.artist}\n\n#6529SEIZE\n\n`}>
-                      <TwitterIcon
-                        size={30}
-                        round
-                        iconFillColor="white"
-                        bgStyle={{ fill: "transparent" }}
-                      />
-                      Tweet
-                    </TwitterShareButton>
-                  </Col>
-                )} */}
             </Row>
             {nftMeta && nft && (
               <>

@@ -45,7 +45,6 @@ export function XtdhTokenContributorsPanel({
     sortField: activeSortField,
     order: apiOrder,
     groupBy: activeGroupBy,
-    enabled: Boolean(contract) && Number.isFinite(tokenId),
   });
 
   const handleRetry = useCallback(() => {

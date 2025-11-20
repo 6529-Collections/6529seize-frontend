@@ -2,13 +2,12 @@
 
 import { useMemo } from "react";
 
-import { getTargetTokensCountInfo } from "@/components/user/xtdh/utils/xtdhGrantFormatters";
-
 import {
   GrantItemContent,
   GrantItemError,
   GrantItemSkeleton,
 } from "./subcomponents";
+import { mapTokenCountToState } from "./formatters";
 import { GrantListItemContainer } from "./subcomponents/GrantListItemContainer";
 import { GrantTokensPanel } from "./subcomponents/GrantTokensPanel";
 import type {
@@ -34,19 +33,10 @@ export function UserPageXtdhGrantListItem({
     variant,
   } = useGrantItemViewModel(grant);
 
-  const tokenState = useMemo<TokenPanelState>(() => {
-    const info = getTargetTokensCountInfo(grant.target_tokens_count ?? null);
-
-    if (info.kind === "all") {
-      return { type: "all" };
-    }
-
-    if (info.kind === "count") {
-      return { type: "count", label: info.label, count: info.count };
-    }
-
-    return { type: "unknown", label: info.label };
-  }, [grant.target_tokens_count]);
+  const tokenState = useMemo<TokenPanelState>(
+    () => mapTokenCountToState(grant.target_tokens_count ?? null),
+    [grant.target_tokens_count]
+  );
 
   if (isLoading) {
     return (
