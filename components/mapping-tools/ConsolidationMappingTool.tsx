@@ -257,6 +257,17 @@ export default function ConsolidationMappingTool() {
     }
     return map;
   }, [csvData]);
+
+  const consolidationMap = useMemo(() => {
+    const map = new Map<string, Consolidation>();
+    for (const consolidation of consolidations) {
+      for (const wallet of consolidation.wallets) {
+        map.set(wallet.toUpperCase(), consolidation);
+      }
+    }
+    return map;
+  }, [consolidations]);
+
   function submit() {
     if (!file) {
       toast.warning("Please upload a CSV file before submitting.");
@@ -290,14 +301,7 @@ export default function ConsolidationMappingTool() {
   };
 
   function getForAddress(address: string) {
-    for (const consolidation of consolidations) {
-      for (const wallet of consolidation.wallets) {
-        if (areEqualAddresses(address, wallet)) {
-          return consolidation;
-        }
-      }
-    }
-    return undefined;
+    return consolidationMap.get(address.toUpperCase());
   }
 
   function sumForAddresses(
