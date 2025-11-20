@@ -1,17 +1,17 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { DropPartSize } from "@/components/drops/view/part/DropPart";
 import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 import ProfileHandle, {
   ProfileHandleProps,
 } from "@/components/common/profile/ProfileHandle";
 import { ProfileBadgeSize } from "@/components/common/profile/ProfileAvatar";
+import type { DropPartSize } from "@/components/drops/view/part/DropPart";
 
 const PROFILE_SIZE_MAP: Record<DropPartSize, ProfileBadgeSize> = {
-  [DropPartSize.SMALL]: ProfileBadgeSize.SMALL,
-  [DropPartSize.MEDIUM]: ProfileBadgeSize.MEDIUM,
-  [DropPartSize.LARGE]: ProfileBadgeSize.LARGE,
+  SMALL: ProfileBadgeSize.SMALL,
+  MEDIUM: ProfileBadgeSize.MEDIUM,
+  LARGE: ProfileBadgeSize.LARGE,
 };
 
 export default function DropAuthorHandle({

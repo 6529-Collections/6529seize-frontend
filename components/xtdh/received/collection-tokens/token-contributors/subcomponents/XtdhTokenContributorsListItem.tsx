@@ -1,12 +1,11 @@
 import ProfileBadge from "@/components/common/profile/ProfileBadge";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { cicToType, formatNumberWithCommas } from "@/helpers/Helpers";
+import { cicToType } from "@/helpers/Helpers";
 import { shortenAddress } from "@/helpers/address.helpers";
 import type { ApiXTdhContribution } from "@/generated/models/ApiXTdhContribution";
 
 import { formatXtdhRate, formatXtdhValue } from "../../../utils/formatters";
-import type { XtdhTokenListItemMetricItem } from "../../subcomponents/XtdhTokenListItemMetrics";
-import { XtdhTokenListItemMetrics } from "../../subcomponents/XtdhTokenListItemMetrics";
+import { XtdhRatePill } from "../../../collection-card-content/subcomponents/XtdhRatePill";
 
 interface XtdhTokenContributorsListItemProps {
   /**
@@ -19,43 +18,14 @@ interface XtdhTokenContributorsListItemProps {
 export function XtdhTokenContributorsListItem({
   contribution,
 }: Readonly<XtdhTokenContributorsListItemProps>) {
+  const xtdhValue = formatXtdhValue(contribution.xtdh);
+  const xtdhRateValue = formatXtdhRate(contribution.xtdh_rate);
   const grantor = contribution.grant?.grantor ?? contribution.grantor ?? null;
   const grantorHandle = grantor?.handle ?? null;
   const tooltipIdentity = grantorHandle ?? grantor?.id ?? "";
   const displayHandle =
     grantorHandle ?? shortenAddress(grantor?.primary_address) ?? "Unknown grantor";
   const profileHref = grantorHandle ? `/${grantorHandle}` : undefined;
-
-  const metrics: ReadonlyArray<XtdhTokenListItemMetricItem> = [
-    { label: "xTDH", value: formatXtdhValue(contribution.xtdh) },
-    { label: "xTDH rate", value: formatXtdhRate(contribution.xtdh_rate) },
-    {
-      label: "Total grants",
-      value:
-        typeof contribution.total_grant_count === "number"
-          ? formatNumberWithCommas(contribution.total_grant_count)
-          : "—",
-    },
-    {
-      label: "Active grants",
-      value:
-        typeof contribution.active_grant_count === "number"
-          ? formatNumberWithCommas(contribution.active_grant_count)
-          : "—",
-    },
-  ];
-
-  const grantId = contribution.grant?.id ?? null;
-  const grantTokenCount = contribution.grant?.target_tokens_count ?? null;
-  const grantSectionTitle = grantId ? "Grant" : "Grantor";
-  const grantSectionPrimaryLabel = grantId ?? displayHandle ?? grantor?.id ?? "Unknown grant";
-  const grantSectionDescription = grantId
-    ? typeof grantTokenCount === "number"
-      ? `Targets ${formatNumberWithCommas(grantTokenCount)} tokens`
-      : null
-    : grantor?.id
-      ? `ID ${grantor.id}`
-      : null;
 
   const avatarFallback = (
     <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-font-semibold tw-text-iron-400">
@@ -92,21 +62,12 @@ export function XtdhTokenContributorsListItem({
             {grantorSummary}
           </div>
         </div>
-        <div className="tw-flex tw-flex-col tw-items-start tw-gap-1">
-          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
-            {grantSectionTitle}
-          </p>
-          <p className="tw-m-0 tw-text-sm tw-text-iron-100 tw-break-all">
-            {grantSectionPrimaryLabel}
-          </p>
-          {grantSectionDescription ? (
-            <p className="tw-m-0 tw-text-xs tw-text-iron-400">
-              {grantSectionDescription}
-            </p>
-          ) : null}
-        </div>
+        <XtdhRatePill
+          rateLabel={xtdhRateValue}
+          totalLabel={xtdhValue}
+          className="tw-justify-start lg:tw-justify-end lg:tw-w-[280px]"
+        />
       </div>
-      <XtdhTokenListItemMetrics metrics={metrics} />
     </li>
   );
 }
