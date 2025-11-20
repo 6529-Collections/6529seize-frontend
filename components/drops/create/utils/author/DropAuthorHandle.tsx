@@ -5,7 +5,7 @@ import ProfileHandle, {
   ProfileHandleProps,
 } from "@/components/common/profile/ProfileHandle";
 import { ProfileBadgeSize } from "@/components/common/profile/ProfileAvatar";
-import { DropPartSize } from "@/components/drops/view/part/DropPart";
+import { DropPartSize } from "@/components/drops/view/part/DropPart.types";
 
 const PROFILE_SIZE_MAP: Record<DropPartSize, ProfileBadgeSize> = {
   [DropPartSize.SMALL]: ProfileBadgeSize.SMALL,

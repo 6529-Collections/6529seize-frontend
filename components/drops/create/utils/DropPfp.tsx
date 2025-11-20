@@ -1,5 +1,5 @@
 import ProfileAvatar, { ProfileBadgeSize } from "@/components/common/profile/ProfileAvatar";
-import { DropPartSize } from "@/components/drops/view/part/DropPart";
+import { DropPartSize } from "@/components/drops/view/part/DropPart.types";
 
 const AVATAR_SIZE_MAP: Record<DropPartSize, ProfileBadgeSize> = {
   [DropPartSize.SMALL]: ProfileBadgeSize.SMALL,

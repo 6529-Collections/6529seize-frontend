@@ -34,6 +34,30 @@ import {
 
 const DEFAULT_TAB = DEFAULT_USER_PAGE_TAB;
 
+// Defensive: consent country can arrive in multiple shapes; normalize to a country code when possible.
+type CountryValue = string | null | undefined | string[] | { country?: string };
+
+const normalizeCountry = (country: CountryValue): string | null => {
+  if (typeof country === "string") {
+    const trimmed = country.trim();
+    return trimmed ? trimmed.toUpperCase() : null;
+  }
+
+  if (Array.isArray(country)) {
+    const firstCode = country.find(
+      (entry): entry is string => typeof entry === "string" && !!entry.trim()
+    );
+    return firstCode ? firstCode.trim().toUpperCase() : null;
+  }
+
+  if (country && typeof (country as { country?: unknown }).country === "string") {
+    const code = (country as { country: string }).country.trim();
+    return code ? code.toUpperCase() : null;
+  }
+
+  return null;
+};
+
 const getVisibilityContext = ({
   showWaves,
   capacitorIsIos,
@@ -41,9 +65,9 @@ const getVisibilityContext = ({
 }: {
   readonly showWaves: boolean;
   readonly capacitorIsIos: boolean;
-  readonly country: string | null;
+  readonly country: CountryValue;
 }): UserPageVisibilityContext => {
-  const normalizedCountry = country ? country.toUpperCase() : null;
+  const normalizedCountry = normalizeCountry(country);
 
   return {
     showWaves,
