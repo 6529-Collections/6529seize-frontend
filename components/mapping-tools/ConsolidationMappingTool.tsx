@@ -317,18 +317,18 @@ export default function ConsolidationMappingTool() {
 
   function downloadCsvFile(data: ConsolidationData[]) {
     const csvHeader = "address,token_id,balance,contract,name";
-    const escape = (value: string | number) => {
+    const escapeValue = (value: string | number) => {
       const str = String(value);
-      return `"${str.replace(/"/g, '""')}"`;
+      return `"${str.replaceAll('"', '""')}"`;
     };
 
     const csvData = data.map((d) => {
       return [
-        escape(d.address),
-        escape(d.token_id),
-        escape(d.balance),
-        escape(d.contract),
-        escape(d.name),
+        escapeValue(d.address),
+        escapeValue(d.token_id),
+        escapeValue(d.balance),
+        escapeValue(d.contract),
+        escapeValue(d.name),
       ].join(",");
     });
     const csvString = `${csvHeader}\n${csvData.join("\n")}`;

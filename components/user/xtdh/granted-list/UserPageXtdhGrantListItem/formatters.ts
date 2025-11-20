@@ -41,8 +41,9 @@ export function formatContractLabel(contract?: string): string {
     return "this contract";
   }
 
-  if (isValidEthAddress(contract)) {
-    return shortenAddress(contract as `0x${string}`);
+  const address = getContractAddress(contract);
+  if (address) {
+    return shortenAddress(address);
   }
 
   return contract;

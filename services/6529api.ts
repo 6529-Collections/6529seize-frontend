@@ -35,12 +35,15 @@ export async function fetchUrl<T = DBResponse>(
   return await res.json();
 }
 
-export async function fetchAllPages<T>(startUrl: string): Promise<T[]> {
+export async function fetchAllPages<T>(
+  startUrl: string,
+  init?: RequestInit
+): Promise<T[]> {
   const all: T[] = [];
   let url = startUrl;
 
   while (url) {
-    const response = await fetchUrl<Paginated<T>>(url);
+    const response = await fetchUrl<Paginated<T>>(url, init);
 
     if (Array.isArray(response.data)) {
       all.push(...response.data);

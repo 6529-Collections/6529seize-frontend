@@ -295,7 +295,7 @@ export default function MemeLabPageComponent({
         }/api/transactions_memelab?wallet=${wallets.join(",")}&id=${nftId}`,
         { signal }
       )
-        .then((response: DBResponse) => {
+        .then((response: DBResponse<Transaction>) => {
           if (cancelled) {
             return;
           }
@@ -369,7 +369,7 @@ export default function MemeLabPageComponent({
     const { signal } = abortController;
 
     fetchUrl(url, { signal })
-      .then((response: DBResponse) => {
+      .then((response: DBResponse<Transaction>) => {
         if (cancelled) {
           return;
         }
@@ -395,18 +395,21 @@ export default function MemeLabPageComponent({
     setNftHistory([]);
 
     let cancelled = false;
+    const abortController = new AbortController();
+    const { signal } = abortController;
 
     async function fetchHistory(url: string) {
       try {
-        const response = await fetchAllPages<NFTHistory>(url);
+        const response = await fetchAllPages<NFTHistory>(url, { signal });
         if (!cancelled) {
           setNftHistory(response);
         }
       } catch (error) {
-        if (!cancelled) {
-          console.error(`Failed to fetch NFT history for Meme Lab ${nftId}`, error);
-          setNftHistory([]);
+        if (cancelled || isAbortError(error)) {
+          return;
         }
+        console.error(`Failed to fetch NFT history for Meme Lab ${nftId}`, error);
+        setNftHistory([]);
       }
     }
 
@@ -419,6 +422,7 @@ export default function MemeLabPageComponent({
 
     return () => {
       cancelled = true;
+      abortController.abort();
     };
   }, [nftId]);
 
