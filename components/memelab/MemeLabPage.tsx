@@ -285,11 +285,15 @@ export default function MemeLabPageComponent({
     const walletObjects = connectedProfile?.wallets ?? [];
     const wallets = walletObjects.map((w) => w.wallet);
     let cancelled = false;
+    const abortController = new AbortController();
+    const { signal } = abortController;
+
     if (wallets.length > 0 && nftId) {
       fetchUrl(
         `${
           publicEnv.API_ENDPOINT
-        }/api/transactions_memelab?wallet=${wallets.join(",")}&id=${nftId}`
+        }/api/transactions_memelab?wallet=${wallets.join(",")}&id=${nftId}`,
+        { signal }
       )
         .then((response: DBResponse) => {
           if (cancelled) {
@@ -310,7 +314,7 @@ export default function MemeLabPageComponent({
           setNftBalance(countIn - countOut);
         })
         .catch((error) => {
-          if (cancelled) {
+          if (cancelled || isAbortError(error)) {
             return;
           }
           console.error(
@@ -329,6 +333,7 @@ export default function MemeLabPageComponent({
 
     return () => {
       cancelled = true;
+      abortController.abort();
     };
   }, [nftId, connectedProfile]);
 
@@ -360,7 +365,10 @@ export default function MemeLabPageComponent({
     }
 
     let cancelled = false;
-    fetchUrl(url)
+    const abortController = new AbortController();
+    const { signal } = abortController;
+
+    fetchUrl(url, { signal })
       .then((response: DBResponse) => {
         if (cancelled) {
           return;
@@ -369,7 +377,7 @@ export default function MemeLabPageComponent({
         setActivity(response.data);
       })
       .catch((error) => {
-        if (cancelled) {
+        if (cancelled || isAbortError(error)) {
           return;
         }
         console.error(`Failed to fetch Meme Lab activity for ${nftId}`, error);
@@ -379,6 +387,7 @@ export default function MemeLabPageComponent({
 
     return () => {
       cancelled = true;
+      abortController.abort();
     };
   }, [nftId, activityPage, activityTypeFilter]);
 

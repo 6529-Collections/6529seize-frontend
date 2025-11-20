@@ -332,6 +332,7 @@ function useTokenMetadataWindow({
 
     const map = new Map<string, TokenMetadata>();
     for (const entry of entries) {
+      // Store by raw and decimal string IDs to support either lookup format
       map.set(entry.tokenIdRaw, entry);
       map.set(entry.tokenId.toString(10), entry);
     }

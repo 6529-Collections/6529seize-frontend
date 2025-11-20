@@ -50,7 +50,7 @@ export function useCollectionContractDetails({
       return trimmed;
     }
     return "Selected collection";
-  }, [contractOverview?.name, normalizedAddress, contract]);
+  }, [contractOverview, normalizedAddress, contract]);
 
   return {
     contractParam,

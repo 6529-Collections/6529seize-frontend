@@ -132,7 +132,7 @@ export function XtdhCollectionTokensPanel({
         </div>
       )}
 
-      {selectedToken ? (
+      {selectedToken && selectedTokenId !== null ? (
         <div className="tw-space-y-4">
           <XtdhTokenListItem
             as="div"

@@ -6,7 +6,10 @@ export function XtdhTokensSkeleton() {
       className="tw-m-0 tw-flex tw-flex-col tw-gap-3 tw-p-0"
       aria-busy="true"
       aria-label="Loading tokens"
+      aria-live="polite"
+      role="status"
     >
+      <li className="tw-sr-only">Loading tokens...</li>
       {SKELETON_INDICES.map((index) => (
         <li
           key={`token-skeleton-${index}`}

@@ -32,6 +32,18 @@ const buildBalanceKey = (
   address: string
 ) => `${contract}-${tokenId}-${address}`.toUpperCase();
 
+type ConsolidationLookup = (address: string) => Consolidation | undefined;
+type SumForAddresses = (
+  addresses: string[],
+  token_id: number,
+  contract: string
+) => number;
+type PrimaryKeyBuilder = (
+  contract: string,
+  tokenId: number,
+  primary: string
+) => string;
+
 function readFileAsText(file: File): Promise<string> {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -57,15 +69,21 @@ function parseCsvLine(line: string): string[] {
   const values: string[] = [];
   let current = "";
   let inQuotes = false;
+  let skipNext = false; // skip the second quote in an escaped pair
 
   for (let i = 0; i < line.length; i += 1) {
+    if (skipNext) {
+      skipNext = false;
+      continue;
+    }
+
     const char = line[i];
 
     if (char === '"') {
       const nextChar = line[i + 1];
       if (inQuotes && nextChar === '"') {
         current += '"';
-        i += 1;
+        skipNext = true;
         continue;
       }
       inQuotes = !inQuotes;
@@ -136,6 +154,89 @@ async function parseCsvText(csvText: string): Promise<ConsolidationData[]> {
 async function parseCsvFile(file: File): Promise<ConsolidationData[]> {
   const csvText = await readFileAsText(file);
   return parseCsvText(csvText);
+}
+
+function buildMergeTargets(
+  entries: ConsolidationData[],
+  getConsolidationForAddress: ConsolidationLookup,
+  sumAddresses: SumForAddresses,
+  primaryKeyFor: PrimaryKeyBuilder
+) {
+  const mergeTargets = new Map<string, ConsolidationData>();
+
+  for (const entry of entries) {
+    const addressConsolidations = getConsolidationForAddress(entry.address);
+    if (!addressConsolidations) {
+      continue;
+    }
+
+    const sum = sumAddresses(
+      addressConsolidations.wallets,
+      entry.token_id,
+      entry.contract
+    );
+
+    const canMergePrimary =
+      areEqualAddresses(entry.address, addressConsolidations.primary) ||
+      sum === entry.balance;
+
+    if (!canMergePrimary) {
+      continue;
+    }
+
+    const primaryKey = primaryKeyFor(
+      entry.contract,
+      entry.token_id,
+      addressConsolidations.primary
+    );
+
+    if (!mergeTargets.has(primaryKey)) {
+      mergeTargets.set(primaryKey, {
+        ...entry,
+        address: addressConsolidations.primary,
+        balance: sum,
+      });
+    }
+  }
+
+  return mergeTargets;
+}
+
+function buildNormalizedOutput(
+  entries: ConsolidationData[],
+  getConsolidationForAddress: ConsolidationLookup,
+  primaryKeyFor: PrimaryKeyBuilder,
+  mergeTargets: Map<string, ConsolidationData>
+) {
+  const emittedPrimaryKeys = new Set<string>();
+  const normalizedOutput: ConsolidationData[] = [];
+
+  for (const entry of entries) {
+    const addressConsolidations = getConsolidationForAddress(entry.address);
+    if (!addressConsolidations) {
+      normalizedOutput.push(entry);
+      continue;
+    }
+
+    const primaryKey = primaryKeyFor(
+      entry.contract,
+      entry.token_id,
+      addressConsolidations.primary
+    );
+
+    const mergedEntry = mergeTargets.get(primaryKey);
+    if (mergedEntry) {
+      if (!emittedPrimaryKeys.has(primaryKey)) {
+        normalizedOutput.push(mergedEntry);
+        emittedPrimaryKeys.add(primaryKey);
+      }
+      continue;
+    }
+
+    normalizedOutput.push(entry);
+  }
+
+  return normalizedOutput;
 }
 
 export default function ConsolidationMappingTool() {
@@ -216,8 +317,19 @@ export default function ConsolidationMappingTool() {
 
   function downloadCsvFile(data: ConsolidationData[]) {
     const csvHeader = "address,token_id,balance,contract,name";
+    const escape = (value: string | number) => {
+      const str = String(value);
+      return `"${str.replace(/"/g, '""')}"`;
+    };
+
     const csvData = data.map((d) => {
-      return `${d.address},${d.token_id},${d.balance},${d.contract},${d.name}`;
+      return [
+        escape(d.address),
+        escape(d.token_id),
+        escape(d.balance),
+        escape(d.contract),
+        escape(d.name),
+      ].join(",");
     });
     const csvString = `${csvHeader}\n${csvData.join("\n")}`;
 
@@ -232,6 +344,7 @@ export default function ConsolidationMappingTool() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }
 
   useEffect(() => {
@@ -308,71 +421,18 @@ export default function ConsolidationMappingTool() {
         primary: string
       ) => buildBalanceKey(contract, tokenId, primary);
 
-      const mergeTargets = new Map<string, ConsolidationData>();
-
-      for (const entry of csvData) {
-        const addressConsolidations = getForAddress(entry.address);
-        if (!addressConsolidations) {
-          continue;
-        }
-
-        const sum = sumForAddresses(
-          addressConsolidations.wallets,
-          entry.token_id,
-          entry.contract
-        );
-
-        const canMergePrimary =
-          areEqualAddresses(entry.address, addressConsolidations.primary) ||
-          sum === entry.balance;
-
-        if (!canMergePrimary) {
-          continue;
-        }
-
-        const primaryKey = primaryKeyFor(
-          entry.contract,
-          entry.token_id,
-          addressConsolidations.primary
-        );
-
-        if (!mergeTargets.has(primaryKey)) {
-          mergeTargets.set(primaryKey, {
-            ...entry,
-            address: addressConsolidations.primary,
-            balance: sum,
-          });
-        }
-      }
-
-      const emittedPrimaryKeys = new Set<string>();
-      const normalizedOutput: ConsolidationData[] = [];
-
-      for (const entry of csvData) {
-        const addressConsolidations = getForAddress(entry.address);
-        if (!addressConsolidations) {
-          normalizedOutput.push(entry);
-          continue;
-        }
-
-        const primaryKey = primaryKeyFor(
-          entry.contract,
-          entry.token_id,
-          addressConsolidations.primary
-        );
-
-        const mergedEntry = mergeTargets.get(primaryKey);
-        if (mergedEntry) {
-          if (!emittedPrimaryKeys.has(primaryKey)) {
-            normalizedOutput.push(mergedEntry);
-            emittedPrimaryKeys.add(primaryKey);
-          }
-          continue;
-        }
-
-        normalizedOutput.push(entry);
-      }
-
+      const mergeTargets = buildMergeTargets(
+        csvData,
+        getForAddress,
+        sumForAddresses,
+        primaryKeyFor
+      );
+      const normalizedOutput = buildNormalizedOutput(
+        csvData,
+        getForAddress,
+        primaryKeyFor,
+        mergeTargets
+      );
       downloadCsvFile(normalizedOutput);
     } catch (error) {
       console.error("Failed to generate CSV output", error);

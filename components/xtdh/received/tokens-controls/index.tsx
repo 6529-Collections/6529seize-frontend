@@ -36,7 +36,7 @@ export function XtdhTokensControls({
           disabled={isDisabled}
         />
       </div>
-      {resultSummary ? (
+      {resultSummary && (
         <output
           aria-live="polite"
           aria-atomic="true"
@@ -44,7 +44,7 @@ export function XtdhTokensControls({
         >
           {resultSummary}
         </output>
-      ) : null}
+      )}
     </section>
   );
 }

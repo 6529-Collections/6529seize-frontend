@@ -56,7 +56,7 @@ export function formatTotalSupply(value?: string | null): string {
   const parsed = Number(value);
 
   if (!Number.isFinite(parsed)) {
-    return value;
+    return "Unknown";
   }
 
   return new Intl.NumberFormat().format(parsed);
