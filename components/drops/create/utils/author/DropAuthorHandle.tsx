@@ -1,10 +1,18 @@
 "use client";
 
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { DropPartSize } from "@/components/drops/view/part/DropPart";
 import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
+import ProfileHandle, {
+  ProfileHandleProps,
+} from "@/components/common/profile/ProfileHandle";
+import { ProfileBadgeSize } from "@/components/common/profile/ProfileAvatar";
+
+const PROFILE_SIZE_MAP: Record<DropPartSize, ProfileBadgeSize> = {
+  [DropPartSize.SMALL]: ProfileBadgeSize.SMALL,
+  [DropPartSize.MEDIUM]: ProfileBadgeSize.MEDIUM,
+  [DropPartSize.LARGE]: ProfileBadgeSize.LARGE,
+};
 
 export default function DropAuthorHandle({
   profile: { handle },
@@ -17,39 +25,13 @@ export default function DropAuthorHandle({
   const handleOrWallet = (searchParams?.get('user') ?? '').toLowerCase();
   const amIAuthor = handle?.toLowerCase() === handleOrWallet;
 
-  const getTextClasses = (): string => {
-    switch (size) {
-      case DropPartSize.SMALL:
-        return "tw-text-sm";
-      case DropPartSize.MEDIUM:
-      case DropPartSize.LARGE:
-        return "tw-text-md";
-      default:
-        assertUnreachable(size);
-        return "";
-    }
+  const profileHandleProps: ProfileHandleProps = {
+    handle,
+    size: PROFILE_SIZE_MAP[size],
+    href: handle ? `/${handle}` : undefined,
+    asLink: !amIAuthor,
+    highlightSearchParam: "user",
   };
 
-  const textClasses = getTextClasses();
-
-  if (amIAuthor) {
-    return (
-      <p
-        className={`${textClasses} tw-font-semibold tw-mb-0 tw-leading-none tw-text-iron-50`}>
-        {handle}
-      </p>
-    );
-  }
-
-  return (
-    <p
-      className={`${textClasses} tw-mb-0 tw-leading-none tw-font-semibold tw-text-iron-50`}>
-      <Link
-        onClick={(e) => e.stopPropagation()}
-        href={`/${handle}`}
-        className="tw-no-underline hover:tw-underline hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out">
-        {handle}
-      </Link>
-    </p>
-  );
+  return <ProfileHandle {...profileHandleProps} />;
 }

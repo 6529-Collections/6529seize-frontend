@@ -1,9 +1,6 @@
-import Image from "next/image";
-import Link from "next/link";
-
-import UserCICTypeIcon from "@/components/user/utils/user-cic-type/UserCICTypeIcon";
+import ProfileBadge from "@/components/common/profile/ProfileBadge";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { cicToType, formatNumberWithCommas } from "@/helpers/Helpers";
 import { shortenAddress } from "@/helpers/address.helpers";
 import type { ApiXTdhContribution } from "@/generated/models/ApiXTdhContribution";
 
@@ -60,52 +57,39 @@ export function XtdhTokenContributorsListItem({
       ? `ID ${grantor.id}`
       : null;
 
+  const avatarFallback = (
+    <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-font-semibold tw-text-iron-400">
+      ?
+    </div>
+  );
+
+  const grantorBadge = (
+    <ProfileBadge
+      handle={displayHandle}
+      href={profileHref}
+      pfpUrl={grantor?.pfp}
+      level={grantor?.level ?? 0}
+      cicType={cicToType(grantor?.cic ?? 0)}
+      avatarFallback={avatarFallback}
+      asLink={Boolean(profileHref)}
+      avatarAlt={grantorHandle ?? "Grantor profile"}
+    />
+  );
+
+  const grantorSummary = tooltipIdentity ? (
+    <UserProfileTooltipWrapper user={tooltipIdentity}>
+      {grantorBadge}
+    </UserProfileTooltipWrapper>
+  ) : (
+    grantorBadge
+  );
+
   return (
     <li className="tw-list-none tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4">
       <div className="tw-flex tw-flex-col tw-gap-3 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between">
         <div className="tw-flex tw-items-center tw-gap-3">
-          <div className="tw-relative tw-h-12 tw-w-12 tw-overflow-hidden tw-rounded-full tw-bg-iron-800">
-            {grantor?.pfp ? (
-              <Image
-                src={grantor.pfp}
-                alt=""
-                fill
-                sizes="48px"
-                className="tw-h-full tw-w-full tw-object-cover"
-              />
-            ) : (
-              <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-font-semibold tw-text-iron-400">
-                ?
-              </div>
-            )}
-          </div>
           <div className="tw-flex tw-flex-col tw-gap-1">
-            {tooltipIdentity ? (
-              <UserProfileTooltipWrapper user={tooltipIdentity}>
-                {profileHref ? (
-                  <Link
-                    href={profileHref}
-                    className="tw-text-sm tw-font-semibold tw-text-iron-50 tw-no-underline desktop-hover:hover:tw-text-iron-300"
-                  >
-                    {displayHandle}
-                  </Link>
-                ) : (
-                  <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
-                    {displayHandle}
-                  </span>
-                )}
-              </UserProfileTooltipWrapper>
-            ) : (
-              <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
-                {displayHandle}
-              </span>
-            )}
-            <div className="tw-flex tw-items-center tw-gap-2">
-              <span className="tw-text-xs tw-text-iron-400">Grantor</span>
-              {typeof grantor?.cic === "number" ? (
-                <UserCICTypeIcon cic={grantor.cic} />
-              ) : null}
-            </div>
+            {grantorSummary}
           </div>
         </div>
         <div className="tw-flex tw-flex-col tw-items-start tw-gap-1">
