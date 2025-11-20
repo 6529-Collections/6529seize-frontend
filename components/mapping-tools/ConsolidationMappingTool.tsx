@@ -66,13 +66,19 @@ function readFileAsText(file: File): Promise<string> {
   });
 }
 
-const csvHeaders = ["address", "token_id", "balance", "contract", "name"];
+const csvHeaders = new Set([
+  "address",
+  "token_id",
+  "balance",
+  "contract",
+  "name",
+]);
 
 function normalizeHeader(header: string) {
   const normalized = header
     .trim()
     .toLowerCase()
-    .replace(/[\s-]+/g, "_");
+    .replaceAll(/[\s-]+/g, "_");
 
   if (normalized === "tokenid") {
     return "token_id";
@@ -84,12 +90,21 @@ function normalizeHeader(header: string) {
 async function parseCsvText(csvText: string): Promise<ConsolidationData[]> {
   return new Promise((resolve, reject) => {
     const results: ConsolidationData[] = [];
+    const parseIntegerValue = (value: unknown) => {
+      if (typeof value === "string") {
+        return Number.parseInt(value.trim(), 10);
+      }
+      if (typeof value === "number") {
+        return Number.isFinite(value) ? Math.trunc(value) : Number.NaN;
+      }
+      return Number.NaN;
+    };
 
     const parser = csvParser({
       headers: true,
       mapHeaders: ({ header }: { header: string }) => {
         const normalized = normalizeHeader(header);
-        return csvHeaders.includes(normalized) ? normalized : null;
+        return csvHeaders.has(normalized) ? normalized : null;
       },
     })
       .on("data", (row: Record<string, unknown>) => {
@@ -102,18 +117,8 @@ async function parseCsvText(csvText: string): Promise<ConsolidationData[]> {
         const tokenValue = row.token_id;
         const balanceValue = row.balance;
 
-        const token_id = Number.parseInt(
-          typeof tokenValue === "string"
-            ? tokenValue.trim()
-            : String(tokenValue ?? ""),
-          10
-        );
-        const balance = Number.parseInt(
-          typeof balanceValue === "string"
-            ? balanceValue.trim()
-            : String(balanceValue ?? ""),
-          10
-        );
+        const token_id = parseIntegerValue(tokenValue);
+        const balance = parseIntegerValue(balanceValue);
 
         if (
           !address ||
