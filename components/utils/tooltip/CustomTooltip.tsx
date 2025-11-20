@@ -19,6 +19,7 @@ interface CustomTooltipProps {
   readonly delayHide?: number;
   readonly disabled?: boolean;
   readonly offset?: number;
+  readonly hoverTransitionDelay?: number;
 }
 
 type TooltipChildHandlers = {
@@ -40,6 +41,7 @@ export default function CustomTooltip({
   delayHide = 0,
   disabled = false,
   offset = 8,
+  hoverTransitionDelay = 150,
 }: CustomTooltipProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -54,6 +56,7 @@ export default function CustomTooltip({
   const hideTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const childObserverRef: MutableRefObject<ResizeObserver | null> = useRef(null);
   const tooltipObserverRef: MutableRefObject<ResizeObserver | null> = useRef(null);
+  const isPointerOverTooltipRef = useRef(false);
   const childElement = React.Children.only(children) as React.ReactElement<TooltipChildHandlers>;
   const originalRef = (childElement as React.ReactElement & {
     ref?: React.Ref<HTMLElement>;
@@ -226,22 +229,45 @@ export default function CustomTooltip({
     setActualPlacement(adjustedPosition.finalPlacement as "top" | "bottom" | "left" | "right");
   }, [getOptimalPlacement, calculateInitialPosition, adjustPositionForViewport, calculateArrowPosition]);
 
-  const show = useCallback(() => {
-    if (disabled) return;
+  const cancelShowTimer = useCallback(() => {
+    if (showTimer.current !== undefined) {
+      clearTimeout(showTimer.current);
+      showTimer.current = undefined;
+    }
+  }, []);
+
+  const cancelHideTimer = useCallback(() => {
     if (hideTimer.current !== undefined) {
       clearTimeout(hideTimer.current);
+      hideTimer.current = undefined;
     }
+  }, []);
+
+  const show = useCallback(() => {
+    if (disabled) return;
+    cancelHideTimer();
     showTimer.current = setTimeout(() => {
       setIsVisible(true);
     }, delayShow);
-  }, [disabled, delayShow]);
+  }, [disabled, delayShow, cancelHideTimer]);
 
   const hide = useCallback(() => {
-    if (showTimer.current !== undefined) {
-      clearTimeout(showTimer.current);
+    cancelShowTimer();
+    if (isPointerOverTooltipRef.current) {
+      return;
     }
-    hideTimer.current = setTimeout(() => setIsVisible(false), delayHide);
-  }, [delayHide]);
+    hideTimer.current = setTimeout(() => setIsVisible(false), delayHide + hoverTransitionDelay);
+  }, [delayHide, hoverTransitionDelay, cancelShowTimer]);
+
+  const handleTooltipMouseEnter = useCallback(() => {
+    isPointerOverTooltipRef.current = true;
+    cancelHideTimer();
+  }, [cancelHideTimer]);
+
+  const handleTooltipMouseLeave = useCallback(() => {
+    isPointerOverTooltipRef.current = false;
+    hide();
+  }, [hide]);
 
   useLayoutEffect(() => {
     if (!isVisible) return;
@@ -326,16 +352,12 @@ export default function CustomTooltip({
 
   useEffect(() => {
     return () => {
-      if (showTimer.current !== undefined) {
-        clearTimeout(showTimer.current);
-      }
-      if (hideTimer.current !== undefined) {
-        clearTimeout(hideTimer.current);
-      }
+      cancelShowTimer();
+      cancelHideTimer();
       childObserverRef.current?.disconnect();
       tooltipObserverRef.current?.disconnect();
     };
-  }, []);
+  }, [cancelShowTimer, cancelHideTimer]);
 
   const clonedChild = React.cloneElement(
     childElement,
@@ -381,8 +403,10 @@ export default function CustomTooltip({
             left: `${position.x}px`,
             top: `${position.y}px`,
             zIndex: 999999,
-            pointerEvents: 'none',
+            pointerEvents: 'auto',
           }}
+          onMouseEnter={handleTooltipMouseEnter}
+          onMouseLeave={handleTooltipMouseLeave}
         >
           <div className={styles.tooltipContent}>
             {content}

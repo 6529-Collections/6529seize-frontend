@@ -12,8 +12,6 @@ export default function AwsRumProvider({
   children,
 }: Readonly<AwsRumProviderProps>) {
   useEffect(() => {
-    // Only initialize AWS RUM on the client side
-    if (typeof window === "undefined") return;
 
     // Skip initialization in development mode to avoid noise
     if (publicEnv.NODE_ENV === "development") {

@@ -6,7 +6,7 @@ export default function UserNotFoundPage() {
   return (
     <main className={styles.main}>
       <Suspense fallback={null}>
-        <NotFound label="USER" />
+        <NotFound label="USER OR PAGE" />
       </Suspense>
     </main>
   );
