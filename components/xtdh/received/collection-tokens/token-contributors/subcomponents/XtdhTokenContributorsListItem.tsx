@@ -7,26 +7,26 @@ import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { shortenAddress } from "@/helpers/address.helpers";
 import type { ApiXTdhContribution } from "@/generated/models/ApiXTdhContribution";
 
-import type { XtdhTokenContributorsGroupBy } from "@/components/xtdh/received/constants";
 import { formatXtdhRate, formatXtdhValue } from "../../../utils/formatters";
 import type { XtdhTokenListItemMetricItem } from "../../subcomponents/XtdhTokenListItemMetrics";
 import { XtdhTokenListItemMetrics } from "../../subcomponents/XtdhTokenListItemMetrics";
 
 interface XtdhTokenContributorsListItemProps {
+  /**
+   * Contribution row which either references a specific grant (flat view)
+   * or represents a group of grants for a given grantor.
+   */
   readonly contribution: ApiXTdhContribution;
-  readonly groupBy: XtdhTokenContributorsGroupBy;
 }
 
 export function XtdhTokenContributorsListItem({
   contribution,
-  groupBy,
 }: Readonly<XtdhTokenContributorsListItemProps>) {
-  const grantorHandle = contribution.grantor?.handle ?? null;
-  const tooltipIdentity = grantorHandle ?? contribution.grantor?.id ?? "";
+  const grantor = contribution.grant?.grantor ?? contribution.grantor ?? null;
+  const grantorHandle = grantor?.handle ?? null;
+  const tooltipIdentity = grantorHandle ?? grantor?.id ?? "";
   const displayHandle =
-    grantorHandle ??
-    shortenAddress(contribution.grantor?.primary_address) ??
-    "Unknown grantor";
+    grantorHandle ?? shortenAddress(grantor?.primary_address) ?? "Unknown grantor";
   const profileHref = grantorHandle ? `/${grantorHandle}` : undefined;
 
   const metrics: ReadonlyArray<XtdhTokenListItemMetricItem> = [
@@ -50,15 +50,24 @@ export function XtdhTokenContributorsListItem({
 
   const grantId = contribution.grant?.id ?? null;
   const grantTokenCount = contribution.grant?.target_tokens_count ?? null;
+  const grantSectionTitle = grantId ? "Grant" : "Grantor";
+  const grantSectionPrimaryLabel = grantId ?? displayHandle ?? grantor?.id ?? "Unknown grant";
+  const grantSectionDescription = grantId
+    ? typeof grantTokenCount === "number"
+      ? `Targets ${formatNumberWithCommas(grantTokenCount)} tokens`
+      : null
+    : grantor?.id
+      ? `ID ${grantor.id}`
+      : null;
 
   return (
     <li className="tw-list-none tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4">
       <div className="tw-flex tw-flex-col tw-gap-3 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between">
         <div className="tw-flex tw-items-center tw-gap-3">
           <div className="tw-relative tw-h-12 tw-w-12 tw-overflow-hidden tw-rounded-full tw-bg-iron-800">
-            {contribution.grantor?.pfp ? (
+            {grantor?.pfp ? (
               <Image
-                src={contribution.grantor.pfp}
+                src={grantor.pfp}
                 alt=""
                 fill
                 sizes="48px"
@@ -93,27 +102,25 @@ export function XtdhTokenContributorsListItem({
             )}
             <div className="tw-flex tw-items-center tw-gap-2">
               <span className="tw-text-xs tw-text-iron-400">Grantor</span>
-              {typeof contribution.grantor?.cic === "number" ? (
-                <UserCICTypeIcon cic={contribution.grantor.cic} />
+              {typeof grantor?.cic === "number" ? (
+                <UserCICTypeIcon cic={grantor.cic} />
               ) : null}
             </div>
           </div>
         </div>
-        {groupBy === "grant" && grantId ? (
-          <div className="tw-flex tw-flex-col tw-items-start tw-gap-1">
-            <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
-              Grant
+        <div className="tw-flex tw-flex-col tw-items-start tw-gap-1">
+          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
+            {grantSectionTitle}
+          </p>
+          <p className="tw-m-0 tw-text-sm tw-text-iron-100 tw-break-all">
+            {grantSectionPrimaryLabel}
+          </p>
+          {grantSectionDescription ? (
+            <p className="tw-m-0 tw-text-xs tw-text-iron-400">
+              {grantSectionDescription}
             </p>
-            <p className="tw-m-0 tw-text-sm tw-text-iron-100 tw-break-all">
-              {grantId}
-            </p>
-            {typeof grantTokenCount === "number" ? (
-              <p className="tw-m-0 tw-text-xs tw-text-iron-400">
-                Targets {formatNumberWithCommas(grantTokenCount)} tokens
-              </p>
-            ) : null}
-          </div>
-        ) : null}
+          ) : null}
+        </div>
       </div>
       <XtdhTokenListItemMetrics metrics={metrics} />
     </li>

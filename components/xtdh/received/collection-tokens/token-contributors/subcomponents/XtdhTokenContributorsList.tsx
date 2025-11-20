@@ -72,13 +72,12 @@ export function XtdhTokenContributorsList({
         {contributors.map((contribution, index) => {
           const contributionKey =
             contribution.grant?.id ??
-            contribution.grantor?.id ??
-            `contribution-${index}`;
+              contribution.grantor?.id ??
+              `contribution-${index}`;
           return (
             <XtdhTokenContributorsListItem
               key={`${contributionKey}-${index}`}
               contribution={contribution}
-              groupBy={groupBy}
             />
           );
         })}
