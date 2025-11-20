@@ -167,9 +167,7 @@ function buildMergeTargets(
     );
 
     const canMergePrimary =
-      areEqualAddresses(entry.address, addressConsolidations.primary) ||
-      // Some rows may already contain the consolidated total; allow those to merge directly.
-      sum === entry.balance;
+      areEqualAddresses(entry.address, addressConsolidations.primary);
 
     if (!canMergePrimary) {
       continue;
