@@ -15,6 +15,7 @@ import {
   useState,
 } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import csvParser from "csv-parser";
 import { toast } from "react-toastify";
 import styles from "./MappingTool.module.scss";
 
@@ -65,90 +66,74 @@ function readFileAsText(file: File): Promise<string> {
   });
 }
 
-function parseCsvLine(line: string): string[] {
-  const values: string[] = [];
-  let current = "";
-  let inQuotes = false;
-  let skipNext = false; // skip the second quote in an escaped pair
+const csvHeaders = ["address", "token_id", "balance", "contract", "name"];
 
-  for (let i = 0; i < line.length; i += 1) {
-    if (skipNext) {
-      skipNext = false;
-      continue;
-    }
+function normalizeHeader(header: string) {
+  const normalized = header
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
 
-    const char = line[i];
-
-    if (char === '"') {
-      const nextChar = line[i + 1];
-      if (inQuotes && nextChar === '"') {
-        current += '"';
-        skipNext = true;
-        continue;
-      }
-      inQuotes = !inQuotes;
-      continue;
-    }
-
-    if (char === "," && !inQuotes) {
-      values.push(current.trim());
-      current = "";
-      continue;
-    }
-
-    current += char;
+  if (normalized === "tokenid") {
+    return "token_id";
   }
 
-  values.push(current.trim());
-  return values;
+  return normalized;
 }
 
 async function parseCsvText(csvText: string): Promise<ConsolidationData[]> {
-  const lines = csvText
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0);
+  return new Promise((resolve, reject) => {
+    const results: ConsolidationData[] = [];
 
-  const results: ConsolidationData[] = [];
+    const parser = csvParser({
+      headers: true,
+      mapHeaders: ({ header }: { header: string }) => {
+        const normalized = normalizeHeader(header);
+        return csvHeaders.includes(normalized) ? normalized : null;
+      },
+    })
+      .on("data", (row: Record<string, unknown>) => {
+        const address =
+          typeof row.address === "string" ? row.address.trim() : "";
+        const contract =
+          typeof row.contract === "string" ? row.contract.trim() : "";
+        const name = typeof row.name === "string" ? row.name.trim() : "";
 
-  for (let index = 0; index < lines.length; index += 1) {
-    const line = lines[index];
-    if (index === 0) {
-      continue; // header row
-    }
+        const tokenValue = row.token_id;
+        const balanceValue = row.balance;
 
-    const columns = parseCsvLine(line);
-    const requiredColumns = [0, 1, 2, 3, 4];
+        const token_id = Number.parseInt(
+          typeof tokenValue === "string"
+            ? tokenValue.trim()
+            : String(tokenValue ?? ""),
+          10
+        );
+        const balance = Number.parseInt(
+          typeof balanceValue === "string"
+            ? balanceValue.trim()
+            : String(balanceValue ?? ""),
+          10
+        );
 
-    const hasAllColumns = requiredColumns.every(
-      (columnIndex) => columns[columnIndex] !== undefined
-    );
+        if (
+          !address ||
+          !contract ||
+          !name ||
+          Number.isNaN(token_id) ||
+          Number.isNaN(balance)
+        ) {
+          console.warn("Skipping CSV row with missing or invalid fields:", row);
+          return;
+        }
 
-    if (!hasAllColumns) {
-      console.warn("Skipping CSV row with insufficient columns:", line);
-      continue;
-    }
+        results.push({ address, token_id, balance, contract, name });
+      })
+      .on("end", () => resolve(results))
+      .on("error", (error: unknown) => reject(error));
 
-    const address = columns[0];
-    const token_id = Number.parseInt(columns[1] ?? "", 10);
-    const balance = Number.parseInt(columns[2] ?? "", 10);
-    const contract = columns[3] ?? "";
-    const name = columns[4] ?? "";
-
-    if (Number.isNaN(token_id) || Number.isNaN(balance)) {
-      console.warn("Skipping invalid CSV row:", line);
-      continue;
-    }
-
-    if (!address || !contract || !name) {
-      console.warn("Skipping CSV row with missing required fields:", line);
-      continue;
-    }
-
-    results.push({ address, token_id, balance, contract, name });
-  }
-
-  return results;
+    parser.write(csvText);
+    parser.end();
+  });
 }
 
 async function parseCsvFile(file: File): Promise<ConsolidationData[]> {
@@ -178,6 +163,7 @@ function buildMergeTargets(
 
     const canMergePrimary =
       areEqualAddresses(entry.address, addressConsolidations.primary) ||
+      // Some rows may already contain the consolidated total; allow those to merge directly.
       sum === entry.balance;
 
     if (!canMergePrimary) {
@@ -300,25 +286,6 @@ export default function ConsolidationMappingTool() {
     }
   };
 
-  function getForAddress(address: string) {
-    return consolidationMap.get(address.toUpperCase());
-  }
-
-  function sumForAddresses(
-    addresses: string[],
-    token_id: number,
-    contract: string
-  ) {
-    let balance = 0;
-
-    for (const address of addresses) {
-      const key = buildBalanceKey(contract, token_id, address);
-      balance += balanceMap.get(key) ?? 0;
-    }
-
-    return balance;
-  }
-
   function downloadCsvFile(data: ConsolidationData[]) {
     const csvHeader = "address,token_id,balance,contract,name";
     const escapeValue = (value: string | number) => {
@@ -418,6 +385,25 @@ export default function ConsolidationMappingTool() {
       return;
     }
 
+    const getForAddress: ConsolidationLookup = (address: string) => {
+      return consolidationMap.get(address.toUpperCase());
+    };
+
+    const sumForAddresses: SumForAddresses = (
+      addresses: string[],
+      token_id: number,
+      contract: string
+    ) => {
+      let balance = 0;
+
+      for (const address of addresses) {
+        const key = buildBalanceKey(contract, token_id, address);
+        balance += balanceMap.get(key) ?? 0;
+      }
+
+      return balance;
+    };
+
     try {
       const primaryKeyFor = (
         contract: string,
@@ -500,7 +486,7 @@ export default function ConsolidationMappingTool() {
                 <div
                   className={`spinner-border ${styles.loader}`}
                   role="status">
-                  <span className="sr-only"></span>
+                  <span className="sr-only">Processing CSV file...</span>
                 </div>
               </div>
             )}
