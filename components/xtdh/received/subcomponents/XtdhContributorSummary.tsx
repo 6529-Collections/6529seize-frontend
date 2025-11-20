@@ -14,23 +14,23 @@ export function XtdhContributorSummary({
   return (
     <div
       className={clsx(
-        "tw-flex tw-flex-wrap tw-items-start tw-gap-4",
+        "tw-grid tw-gap-y-1 tw-text-left sm:tw-self-center",
         className
       )}
     >
-      <div className="tw-flex tw-flex-col tw-gap-0.5">
+      <div className="tw-grid tw-grid-cols-2 tw-gap-x-6">
         <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-500">
           Active contributors
         </span>
-        <span className="tw-text-base tw-font-semibold tw-text-white">
-          {activeCount}
-        </span>
-      </div>
-      <div className="tw-flex tw-flex-col tw-gap-0.5">
         <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-500">
           Contributors
         </span>
-        <span className="tw-text-sm tw-font-medium tw-text-iron-200">
+      </div>
+      <div className="tw-grid tw-grid-cols-2 tw-gap-x-6">
+        <span className="tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-100">
+          {activeCount}
+        </span>
+        <span className="tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-100">
           {totalCount}
         </span>
       </div>

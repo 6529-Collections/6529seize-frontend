@@ -58,17 +58,31 @@ export function XtdhReceivedCollectionCard({
     return "Unknown collection";
   }, [contract?.name, contractAddress]);
 
-  const secondaryLabel = useMemo(() => {
+  const { secondaryLabel, secondaryLabelTitle } = useMemo(() => {
     if (isLoading) {
-      return "Loading metadata...";
+      return {
+        secondaryLabel: "Loading metadata...",
+        secondaryLabelTitle: undefined,
+      };
     }
     if (isError) {
-      return "Metadata unavailable";
+      return {
+        secondaryLabel: "Metadata unavailable",
+        secondaryLabelTitle: undefined,
+      };
     }
     if (contractAddress) {
-      return contractAddress.toLowerCase();
+      const normalized = contractAddress.toLowerCase();
+      return {
+        secondaryLabel: shortenAddress(normalized),
+        secondaryLabelTitle: normalized,
+      };
     }
-    return collection.contract ?? "Unknown contract";
+    const fallback = collection.contract ?? "Unknown contract";
+    return {
+      secondaryLabel: fallback,
+      secondaryLabelTitle: fallback,
+    };
   }, [collection.contract, contractAddress, isError, isLoading]);
 
   const imageUrl = contract?.imageUrl ?? null;
@@ -115,7 +129,10 @@ export function XtdhReceivedCollectionCard({
               {displayName}
             </p>
             <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-2">
-              <p className="tw-m-0 tw-flex-1 tw-text-xs tw-text-iron-400 tw-break-all">
+              <p
+                className="tw-m-0 tw-flex-1 tw-text-xs tw-text-iron-400 tw-break-all"
+                title={secondaryLabelTitle}
+              >
                 {secondaryLabel}
               </p>
               <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-semibold tw-uppercase tw-text-iron-200">
