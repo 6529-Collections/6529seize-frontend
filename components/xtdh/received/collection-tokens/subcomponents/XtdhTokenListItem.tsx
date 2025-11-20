@@ -1,3 +1,5 @@
+import clsx from "clsx";
+
 import type { TokenMetadata } from "@/types/nft";
 
 import { formatCount, formatXtdhRate, formatXtdhValue } from "../../utils/formatters";
@@ -13,6 +15,8 @@ interface XtdhTokenListItemProps {
   readonly isMetadataLoading: boolean;
   readonly hasMetadataError: boolean;
   readonly onSelect?: () => void;
+  readonly as?: "li" | "div";
+  readonly className?: string;
 }
 
 export function XtdhTokenListItem({
@@ -21,6 +25,8 @@ export function XtdhTokenListItem({
   isMetadataLoading,
   hasMetadataError,
   onSelect,
+  as = "li",
+  className,
 }: Readonly<XtdhTokenListItemProps>) {
   const tokenLabel = getTokenLabel(token.token);
   const xtdhValue = formatXtdhValue(token.xtdh);
@@ -57,8 +63,15 @@ export function XtdhTokenListItem({
     </div>
   );
 
+  const Wrapper = as === "div" ? "div" : "li";
+  const wrapperClassName = clsx(
+    "tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-3",
+    as === "li" && "tw-list-none",
+    className
+  );
+
   return (
-    <li className="tw-list-none tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-3">
+    <Wrapper className={wrapperClassName}>
       {onSelect ? (
         <button
           type="button"
@@ -70,6 +83,6 @@ export function XtdhTokenListItem({
       ) : (
         content
       )}
-    </li>
+    </Wrapper>
   );
 }

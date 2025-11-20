@@ -12,7 +12,7 @@ import { useXtdhTokenSelection } from "./hooks/useXtdhTokenSelection";
 import { XtdhTokensList } from "./XtdhTokensList";
 import { CollectionBreadcrumbs } from "./subcomponents/CollectionBreadcrumbs";
 import { CollectionLoadMore } from "./subcomponents/CollectionLoadMore";
-import { TokenHeader } from "./subcomponents/TokenHeader";
+import { XtdhTokenListItem } from "./subcomponents/XtdhTokenListItem";
 import { XtdhTokenContributorsPanel } from "./token-contributors";
 import type {
   XtdhCollectionTokensPanelProps,
@@ -142,18 +142,23 @@ export function XtdhCollectionTokensPanel({
       )}
 
       {showTokenContributors && selectedToken ? (
-        <>
-          <TokenHeader
+        <div className="tw-space-y-4">
+          <XtdhTokenListItem
+            as="div"
+            className="tw-p-4"
             token={selectedToken.token}
             metadata={selectedToken.metadata}
             isMetadataLoading={selectedToken.isMetadataLoading}
             hasMetadataError={selectedToken.hasMetadataError}
           />
+          <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+            Explore the grants and grantors powering this token&apos;s xTDH.
+          </p>
           <XtdhTokenContributorsPanel
             contract={contractParam}
             tokenId={selectedTokenId}
           />
-        </>
+        </div>
       ) : (
         <>
           <XtdhTokensControls
