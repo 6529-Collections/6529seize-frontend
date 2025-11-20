@@ -12,6 +12,7 @@ export interface XtdhCollectionTokensPanelProps {
   readonly normalizedContract: string | null;
   readonly collection?: ApiXtdhCollection;
   readonly onBack: () => void;
+  readonly requireIdentity?: boolean;
 }
 
 export interface XtdhSelectedTokenDescriptor {

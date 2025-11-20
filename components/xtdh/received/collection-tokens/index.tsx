@@ -27,6 +27,7 @@ export function XtdhCollectionTokensPanel({
   normalizedContract,
   collection,
   onBack,
+  requireIdentity = true,
 }: Readonly<XtdhCollectionTokensPanelProps>) {
   const { activeSortField, activeSortDirection, apiOrder, handleSortChange } =
     useXtdhTokensFilters();
@@ -62,7 +63,8 @@ export function XtdhCollectionTokensPanel({
     pageSize: TOKENS_PAGE_SIZE,
     sortField: activeSortField,
     order: apiOrder,
-    enabled: Boolean(identity && contractParam),
+    enabled: requireIdentity ? Boolean(identity && contractParam) : Boolean(contractParam),
+    requireIdentity,
   });
 
   const handleRetry = useCallback(() => {

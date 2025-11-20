@@ -16,6 +16,7 @@ import { XtdhCollectionTokensPanel } from "./collection-tokens";
 export interface XtdhReceivedSectionProps {
   readonly profileId: string | null;
   readonly pageSize?: number;
+  readonly requireIdentity?: boolean;
 }
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -23,6 +24,7 @@ const DEFAULT_PAGE_SIZE = 10;
 export default function XtdhReceivedSection({
   profileId,
   pageSize = DEFAULT_PAGE_SIZE,
+  requireIdentity = true,
 }: Readonly<XtdhReceivedSectionProps>): ReactElement {
   const {
     activeSortField,
@@ -38,17 +40,18 @@ export default function XtdhReceivedSection({
     isFetching,
     isFetchingNextPage,
     hasNextPage,
-    refetch,
-    fetchNextPage,
-    errorMessage,
-    isEnabled,
-  } = useXtdhCollectionsQuery({
-    identity: profileId,
-    pageSize,
-    sortField: activeSortField,
-    order: apiOrder,
-    enabled: Boolean(profileId),
-  });
+      refetch,
+      fetchNextPage,
+      errorMessage,
+      isEnabled,
+    } = useXtdhCollectionsQuery({
+      identity: profileId,
+      pageSize,
+      sortField: activeSortField,
+      order: apiOrder,
+      enabled: requireIdentity ? Boolean(profileId) : true,
+      requireIdentity,
+    });
 
   const {
     selectedContract,
@@ -98,6 +101,7 @@ export default function XtdhReceivedSection({
   const controlsDisabled = isLoading || isFetching;
 
   const isViewingTokens = Boolean(selectedContract);
+  const isIdentityScoped = requireIdentity;
 
   return (
     <section className="tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-4 tw-space-y-4">
@@ -108,7 +112,9 @@ export default function XtdhReceivedSection({
         <p className="tw-mt-1 tw-text-sm tw-text-iron-400">
           {isViewingTokens
             ? "Review tokens in the selected collection and how much xTDH each accrues."
-            : "Collections where this identity accrues xTDH through grants it has received."}
+            : isIdentityScoped
+              ? "Collections where this identity accrues xTDH through grants it has received."
+              : "Collections across the ecosystem that are accruing xTDH from grants."}
         </p>
       </header>
       {selectedContract ? (
@@ -118,6 +124,7 @@ export default function XtdhReceivedSection({
           normalizedContract={selectedContract}
           collection={selectedCollection ?? undefined}
           onBack={clearSelection}
+          requireIdentity={requireIdentity}
         />
       ) : (
         <>
@@ -137,6 +144,7 @@ export default function XtdhReceivedSection({
             onRetry={handleRetry}
             selectedContract={selectedContract}
             onSelectCollection={handleCollectionSelect}
+            isIdentityScoped={isIdentityScoped}
           />
           {showLoadMore ? (
             <div className="tw-flex tw-justify-center">

@@ -22,6 +22,7 @@ export interface UseXtdhTokensQueryParams {
   readonly sortField?: XtdhTokensSortField;
   readonly order?: XtdhTokensOrder;
   readonly enabled?: boolean;
+  readonly requireIdentity?: boolean;
 }
 
 type XtdhTokensInfiniteData = InfiniteData<ApiXTdhTokensPage>;
@@ -48,10 +49,13 @@ export function useXtdhTokensQuery({
   sortField = DEFAULT_SORT_FIELD,
   order = DEFAULT_ORDER,
   enabled = true,
+  requireIdentity = true,
 }: Readonly<UseXtdhTokensQueryParams>): UseXtdhTokensQueryResult {
   const normalizedIdentity = identity?.trim() ?? "";
   const normalizedContract = contract?.trim() ?? "";
-  const hasRequiredFilters = Boolean(normalizedIdentity) && Boolean(normalizedContract);
+  const hasIdentity = Boolean(normalizedIdentity);
+  const identityRequirementMet = requireIdentity ? hasIdentity : true;
+  const hasRequiredFilters = identityRequirementMet && Boolean(normalizedContract);
   const isEnabled = hasRequiredFilters && enabled;
   const normalizedPageSize = Number.isFinite(pageSize) && pageSize > 0
     ? Math.floor(pageSize)
@@ -66,6 +70,7 @@ export function useXtdhTokensQuery({
       normalizedPageSize,
       sortField,
       normalizedOrder,
+      requireIdentity,
     ],
     [
       normalizedIdentity,
@@ -73,6 +78,7 @@ export function useXtdhTokensQuery({
       normalizedPageSize,
       sortField,
       normalizedOrder,
+      requireIdentity,
     ]
   );
 
@@ -85,9 +91,11 @@ export function useXtdhTokensQuery({
         page_size: normalizedPageSize.toString(),
         sort: sortField,
         order: normalizedOrder,
-        identity: normalizedIdentity,
         contract: normalizedContract,
       };
+      if (hasIdentity) {
+        params.identity = normalizedIdentity;
+      }
 
       return commonApiFetch<ApiXTdhTokensPage>({
         endpoint: "xtdh/tokens",

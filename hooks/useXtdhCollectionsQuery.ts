@@ -21,6 +21,7 @@ export interface UseXtdhCollectionsQueryParams {
   readonly sortField?: XtdhCollectionsSortField;
   readonly order?: XtdhCollectionsOrder;
   readonly enabled?: boolean;
+  readonly requireIdentity?: boolean;
 }
 
 type XtdhCollectionsInfiniteData = InfiniteData<ApiXTdhCollectionsPage>;
@@ -46,9 +47,12 @@ export function useXtdhCollectionsQuery({
   sortField = DEFAULT_SORT_FIELD,
   order = DEFAULT_ORDER,
   enabled = true,
+  requireIdentity = true,
 }: Readonly<UseXtdhCollectionsQueryParams>): UseXtdhCollectionsQueryResult {
   const normalizedIdentity = identity?.trim() ?? "";
-  const isEnabled = Boolean(normalizedIdentity) && enabled;
+  const hasIdentity = Boolean(normalizedIdentity);
+  const identityRequirementMet = requireIdentity ? hasIdentity : true;
+  const isEnabled = identityRequirementMet && enabled;
   const normalizedPageSize = Number.isFinite(pageSize) && pageSize > 0
     ? Math.floor(pageSize)
     : DEFAULT_PAGE_SIZE;
@@ -61,8 +65,9 @@ export function useXtdhCollectionsQuery({
       normalizedPageSize,
       sortField,
       normalizedOrder,
+      requireIdentity,
     ],
-    [normalizedIdentity, normalizedPageSize, sortField, normalizedOrder]
+    [normalizedIdentity, normalizedPageSize, sortField, normalizedOrder, requireIdentity]
   );
 
   const query = useInfiniteQuery({
@@ -75,7 +80,7 @@ export function useXtdhCollectionsQuery({
         sort: sortField,
         order: normalizedOrder,
       };
-      if (normalizedIdentity) {
+      if (hasIdentity) {
         params.identity = normalizedIdentity;
       }
 

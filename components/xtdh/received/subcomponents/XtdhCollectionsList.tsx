@@ -20,6 +20,7 @@ interface XtdhCollectionsListProps {
   readonly onRetry: () => void;
   readonly selectedContract?: string | null;
   readonly onSelectCollection?: (contract: string | null) => void;
+  readonly isIdentityScoped?: boolean;
 }
 
 export function XtdhCollectionsList({
@@ -31,11 +32,13 @@ export function XtdhCollectionsList({
   onRetry,
   selectedContract,
   onSelectCollection,
+  isIdentityScoped = true,
 }: Readonly<XtdhCollectionsListProps>) {
+  const targetLabel = isIdentityScoped ? "this identity" : "the ecosystem";
   if (!isEnabled) {
     return (
       <ListMessage>
-        Unable to load xTDH received collections for this identity.
+        Unable to load xTDH collections for {targetLabel}.
       </ListMessage>
     );
   }
@@ -55,10 +58,9 @@ export function XtdhCollectionsList({
   if (!collections.length) {
     return (
       <ListMessage>
-        This identity hasn't received any xTDH yet. When grants send xTDH to NFT
-        collections, collectors start accruing TDH automatically once they hold
-        eligible tokens. Grants received here will appear as soon as the identity
-        is included in a collection.
+        {isIdentityScoped
+          ? "This identity hasn't received any xTDH yet. When grants send xTDH to NFT collections, collectors start accruing TDH automatically once they hold eligible tokens. Grants received here will appear as soon as the identity is included in a collection."
+          : "No xTDH collections to show yet. When grants are issued, collections receiving xTDH will appear here."}
       </ListMessage>
     );
   }
