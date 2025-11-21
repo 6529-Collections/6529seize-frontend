@@ -5,6 +5,7 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { SubscriptionDetails } from "@/entities/ISubscription";
+import { commonApiPost } from "@/services/api/common-api";
 import { useContext, useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import Toggle from "react-toggle";
@@ -35,50 +36,47 @@ export default function UserPageSubscriptionsMode(
       return;
     }
     setIsUpdating(true);
-    setIsAuto(!isAuto);
-    setIsUpdating(false);
-    // TODO: Implement API call to toggle mode
-    // const { success } = await requestAuth();
-    // if (!success) {
-    //   setIsUpdating(false);
-    //   return;
-    // }
-    // const auto = !isAuto;
-    // interface SubscribeModeBody {
-    //   automatic: boolean;
-    // }
-    // try {
-    //   const response = await commonApiPost<
-    //     SubscribeModeBody,
-    //     SubscribeModeBody
-    //   >({
-    //     endpoint: `subscriptions/${props.profileKey}/subscription-mode`,
-    //     body: {
-    //       automatic: auto,
-    //     },
-    //   });
-    //   const responseAuto = response.automatic;
-    //   setIsAuto(responseAuto);
-    //   const message = `Subscription Mode set to ${
-    //     responseAuto ? `Automatic` : `Manual`
-    //   }. ${
-    //     responseAuto ? `Subscribed for` : `Unsubscribed from`
-    //   } all upcoming drops`;
-    //   setToast({
-    //     message: message,
-    //     type: "success",
-    //   });
-    //   props.refresh();
-    // } catch (e: any) {
-    //   setIsUpdating(false);
-    //   setToast({
-    //     message: e ?? "Failed to set subscription mode",
-    //     type: "error",
-    //   });
-    //   return;
-    // } finally {
-    //   setIsUpdating(false);
-    // }
+    const { success } = await requestAuth();
+    if (!success) {
+      setIsUpdating(false);
+      return;
+    }
+    const auto = !isAuto;
+    interface SubscribeModeBody {
+      automatic: boolean;
+    }
+    try {
+      const response = await commonApiPost<
+        SubscribeModeBody,
+        SubscribeModeBody
+      >({
+        endpoint: `subscriptions/${props.profileKey}/subscription-mode`,
+        body: {
+          automatic: auto,
+        },
+      });
+      const responseAuto = response.automatic;
+      setIsAuto(responseAuto);
+      const message = `Subscription Mode set to ${
+        responseAuto ? `Automatic` : `Manual`
+      }. ${
+        responseAuto ? `Subscribed for` : `Unsubscribed from`
+      } all upcoming drops`;
+      setToast({
+        message: message,
+        type: "success",
+      });
+      props.refresh();
+    } catch (e: any) {
+      setIsUpdating(false);
+      setToast({
+        message: e?.message ?? "Failed to set subscription mode",
+        type: "error",
+      });
+      return;
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const toggleAllEditions = async (): Promise<void> => {

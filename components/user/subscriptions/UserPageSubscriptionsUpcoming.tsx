@@ -180,7 +180,7 @@ function SubscriptionRow(
     } catch (e: any) {
       setIsSubmitting(false);
       setToast({
-        message: e ?? "Failed to change token subscription.",
+        message: e?.message ?? "Failed to change token subscription.",
         type: "error",
       });
       return;
