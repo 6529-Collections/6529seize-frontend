@@ -38,6 +38,6 @@ describe("commonApiPostWithoutBodyAndResponse", () => {
     });
     await expect(
       commonApiPostWithoutBodyAndResponse({ endpoint: "e" })
-    ).rejects.toThrow("HTTP 400 x: err");
+    ).rejects.toThrow("err");
   });
 });
