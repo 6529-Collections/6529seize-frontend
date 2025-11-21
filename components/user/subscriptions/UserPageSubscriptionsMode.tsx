@@ -70,7 +70,7 @@ export default function UserPageSubscriptionsMode(
     } catch (e: any) {
       setIsUpdating(false);
       setToast({
-        message: e?.message ?? "Failed to set subscription mode",
+        message: e ?? "Failed to set subscription mode",
         type: "error",
       });
       return;
