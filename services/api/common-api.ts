@@ -52,9 +52,7 @@ const handleApiError = async (res: Response): Promise<never> => {
     }
   }
 
-  return new Promise((_, rej) => {
-    rej(errorMessage);
-  });
+  return Promise.reject(errorMessage);
 };
 
 const executeApiRequest = async <T>(
