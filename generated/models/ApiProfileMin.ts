@@ -32,6 +32,8 @@ export class ApiProfileMin {
 
     static readonly discriminator: string | undefined = undefined;
 
+    static readonly mapping: {[index: string]: string} | undefined = undefined;
+
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
             "name": "id",
@@ -79,7 +81,7 @@ export class ApiProfileMin {
             "name": "tdh",
             "baseName": "tdh",
             "type": "number",
-            "format": "int64"
+            "format": "double"
         },
         {
             "name": "tdh_rate",
@@ -131,4 +133,3 @@ export class ApiProfileMin {
     public constructor() {
     }
 }
-

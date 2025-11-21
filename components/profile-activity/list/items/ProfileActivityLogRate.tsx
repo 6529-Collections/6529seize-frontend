@@ -1,7 +1,7 @@
 "use client";
 
 import { SystemAdjustmentPill } from "@/components/common/SystemAdjustmentPill";
-import { UserPageTabType } from "@/components/user/layout/UserPageTabs";
+import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import CommonProfileLink from "@/components/user/utils/CommonProfileLink";
 import {
   ProfileActivityLogRatingEdit,
@@ -81,8 +81,8 @@ export default function ProfileActivityLogRate({
 
   const tabTarget =
     log.contents.rating_matter === RateMatter.REP
-      ? UserPageTabType.REP
-      : UserPageTabType.IDENTITY;
+      ? USER_PAGE_TAB_IDS.REP
+      : USER_PAGE_TAB_IDS.IDENTITY;
 
   const getProxyHandle = (): string | null => {
     if (!log.proxy_handle) return null;

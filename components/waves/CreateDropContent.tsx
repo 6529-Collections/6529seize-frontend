@@ -381,7 +381,7 @@ const getOptimisticDrop = (
       level: connectedProfile.level,
       subscribed_actions: [],
       archived: false,
-      primary_address: connectedProfile.primary_wallet ?? null,
+      primary_address: connectedProfile.primary_wallet ?? "",
     },
     created_at: Date.now(),
     updated_at: null,

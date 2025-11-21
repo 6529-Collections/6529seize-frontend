@@ -4,7 +4,7 @@ import DropAuthorHandle from "./DropAuthorHandle";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
-import { DropPartSize } from "@/components/drops/view/part/DropPart";
+import { DropPartSize } from "@/components/drops/view/part/DropPart.types";
 import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 
 interface DropAuthorProps {

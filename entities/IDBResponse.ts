@@ -5,10 +5,6 @@ export interface DBResponse<T = any> {
   data: T[];
 }
 
-interface LeaderboardDBResponse {
-  count: number;
-  page: number;
-  next: any;
-  data: any[];
+interface LeaderboardDBResponse<T = any> extends DBResponse<T> {
   memes_collection_count: number;
 }

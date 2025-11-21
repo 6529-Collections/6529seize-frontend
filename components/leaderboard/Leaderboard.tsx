@@ -73,16 +73,19 @@ export default function Leaderboard(
   }, [content, collector]);
 
   useEffect(() => {
-    fetchUrl(`${publicEnv.API_ENDPOINT}/api/blocks?page_size=${1}`).then(
-      (response: ApiBlocksPage) => {
+    fetchUrl(`${publicEnv.API_ENDPOINT}/api/blocks?page_size=${1}`)
+      .then((response: ApiBlocksPage) => {
         if (response.data.length > 0) {
           setLastTDH({
             block: response.data[0].block_number,
             date: new Date(response.data[0].timestamp),
           });
         }
-      }
-    );
+      })
+      .catch((error) => {
+        console.error("Failed to fetch latest TDH block", error);
+        setLastTDH(undefined);
+      });
 
     commonApiFetch<MemeSeason[]>({
       endpoint: "new_memes_seasons",
@@ -93,12 +96,18 @@ export default function Leaderboard(
 
   useEffect(() => {
     let url = `${publicEnv.API_ENDPOINT}/api/tdh_global_history?page_size=${1}`;
-    fetchUrl(url).then((response: DBResponse) => {
-      const tdhH = response.data[0];
-      setGlobalTdhHistory(tdhH);
-      const change = (tdhH.net_boosted_tdh / tdhH.total_boosted_tdh) * 100;
-      setGlobalTdhRateChange(change);
-    });
+    fetchUrl(url)
+      .then((response: DBResponse) => {
+        const tdhH = response.data[0];
+        setGlobalTdhHistory(tdhH);
+        const change = (tdhH.net_boosted_tdh / tdhH.total_boosted_tdh) * 100;
+        setGlobalTdhRateChange(change);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch global TDH history", error);
+        setGlobalTdhHistory(undefined);
+        setGlobalTdhRateChange(undefined);
+      });
   }, []);
 
   function printCollectorsDropdown() {

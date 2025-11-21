@@ -118,20 +118,26 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
       postFormData(
         `${publicEnv.API_ENDPOINT}/api/nextgen/create_allowlist`,
         formData
-      ).then((response) => {
-        setUploading(false);
-        if (response.status === 200 && response.response.merkle_root) {
-          setUploadSuccess(true);
-        } else {
-          setUploadError(
-            `Error: ${
-              response.response.error
-                ? response.response.error
-                : "Unknown error"
-            }`
-          );
-        }
-      });
+      )
+        .then((response) => {
+          setUploading(false);
+          if (response.status === 200 && response.response.merkle_root) {
+            setUploadSuccess(true);
+          } else {
+            setUploadError(
+              `Error: ${
+                response.response.error
+                  ? response.response.error
+                  : "Unknown error"
+              }`
+            );
+          }
+        })
+        .catch((error: Error) => {
+          console.error("Failed to upload allowlist", error);
+          setUploading(false);
+          setUploadError(`Error: ${error.message}`);
+        });
     }
   }, [signMessage.data]);
 
