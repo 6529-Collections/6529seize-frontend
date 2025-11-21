@@ -1260,7 +1260,9 @@ export default function TransferModal({
                 ? {
                     ...te,
                     state: "error",
-                    error: String(e?.shortMessage || e?.message || e),
+                    error: String(
+                      e?.details ?? (e?.shortMessage || e?.message || e)
+                    ),
                   }
                 : te
             )
