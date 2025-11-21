@@ -38,6 +38,6 @@ describe("commonApiPostWithoutBodyAndResponse", () => {
     });
     await expect(
       commonApiPostWithoutBodyAndResponse({ endpoint: "e" })
-    ).rejects.toThrow("err");
+    ).rejects.toBe("err");
   });
 });
