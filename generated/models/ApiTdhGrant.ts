@@ -20,10 +20,7 @@ export class ApiTdhGrant {
     'grantor': ApiProfileMin;
     'target_chain': ApiTdhGrantTargetChain;
     'target_contract': string;
-    /**
-    * List of token numbers. Each element can also be a span in form of start-end. All tokens if empty.
-    */
-    'target_tokens': Array<string>;
+    'target_tokens_count': number;
     'created_at': number;
     'valid_from': number | null;
     'valid_to': number | null;
@@ -36,6 +33,8 @@ export class ApiTdhGrant {
     'is_irrevocable': boolean;
 
     static readonly discriminator: string | undefined = undefined;
+
+    static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
@@ -63,10 +62,10 @@ export class ApiTdhGrant {
             "format": ""
         },
         {
-            "name": "target_tokens",
-            "baseName": "target_tokens",
-            "type": "Array<string>",
-            "format": ""
+            "name": "target_tokens_count",
+            "baseName": "target_tokens_count",
+            "type": "number",
+            "format": "int64"
         },
         {
             "name": "created_at",
@@ -118,6 +117,5 @@ export class ApiTdhGrant {
     public constructor() {
     }
 }
-
 
 

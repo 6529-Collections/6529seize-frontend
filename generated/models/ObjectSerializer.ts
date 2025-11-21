@@ -19,9 +19,7 @@ export * from '../models/ApiBulkRepRequest';
 export * from '../models/ApiBulkRepTarget';
 export * from '../models/ApiChangeGroupVisibility';
 export * from '../models/ApiChangeProfileCicRating';
-export * from '../models/ApiChangeProfileCicRatingResponse';
 export * from '../models/ApiChangeProfileRepRating';
-export * from '../models/ApiChangeProfileRepRatingResponse';
 export * from '../models/ApiCommunityMemberMinimal';
 export * from '../models/ApiCompleteMultipartUploadRequest';
 export * from '../models/ApiCompleteMultipartUploadRequestPart';
@@ -107,6 +105,7 @@ export * from '../models/ApiOwnerBalancePage';
 export * from '../models/ApiPageBase';
 export * from '../models/ApiPageSortDirection';
 export * from '../models/ApiPageWithNextUriBase';
+export * from '../models/ApiPageWithoutCount';
 export * from '../models/ApiProfileClassification';
 export * from '../models/ApiProfileMin';
 export * from '../models/ApiProfileProxy';
@@ -131,7 +130,10 @@ export * from '../models/ApiTdhEditionsPage';
 export * from '../models/ApiTdhGrant';
 export * from '../models/ApiTdhGrantStatus';
 export * from '../models/ApiTdhGrantTargetChain';
+export * from '../models/ApiTdhGrantToken';
+export * from '../models/ApiTdhGrantTokensPage';
 export * from '../models/ApiTdhGrantsPage';
+export * from '../models/ApiTdhStats';
 export * from '../models/ApiTransaction';
 export * from '../models/ApiTransactionPage';
 export * from '../models/ApiUpdateDropRequest';
@@ -178,6 +180,14 @@ export * from '../models/ApiWaveVotersPage';
 export * from '../models/ApiWaveVotingConfig';
 export * from '../models/ApiWavesOverviewType';
 export * from '../models/ApiWavesPinFilter';
+export * from '../models/ApiXTdhCollection';
+export * from '../models/ApiXTdhCollectionsPage';
+export * from '../models/ApiXTdhContribution';
+export * from '../models/ApiXTdhContributionsPage';
+export * from '../models/ApiXTdhGrantee';
+export * from '../models/ApiXTdhGranteesPage';
+export * from '../models/ApiXTdhToken';
+export * from '../models/ApiXTdhTokensPage';
 export * from '../models/CreateDirectMessageWaveRequest';
 export * from '../models/GetWaveSubscription200Response';
 
@@ -202,9 +212,7 @@ import { ApiBulkRepRequest } from '../models/ApiBulkRepRequest';
 import { ApiBulkRepTarget } from '../models/ApiBulkRepTarget';
 import { ApiChangeGroupVisibility } from '../models/ApiChangeGroupVisibility';
 import { ApiChangeProfileCicRating } from '../models/ApiChangeProfileCicRating';
-import { ApiChangeProfileCicRatingResponse } from '../models/ApiChangeProfileCicRatingResponse';
 import { ApiChangeProfileRepRating } from '../models/ApiChangeProfileRepRating';
-import { ApiChangeProfileRepRatingResponse } from '../models/ApiChangeProfileRepRatingResponse';
 import { ApiCommunityMemberMinimal } from '../models/ApiCommunityMemberMinimal';
 import { ApiCompleteMultipartUploadRequest } from '../models/ApiCompleteMultipartUploadRequest';
 import { ApiCompleteMultipartUploadRequestPart } from '../models/ApiCompleteMultipartUploadRequestPart';
@@ -290,6 +298,7 @@ import { ApiOwnerBalancePage } from '../models/ApiOwnerBalancePage';
 import { ApiPageBase } from '../models/ApiPageBase';
 import { ApiPageSortDirection } from '../models/ApiPageSortDirection';
 import { ApiPageWithNextUriBase } from '../models/ApiPageWithNextUriBase';
+import { ApiPageWithoutCount } from '../models/ApiPageWithoutCount';
 import { ApiProfileClassification } from '../models/ApiProfileClassification';
 import { ApiProfileMin } from '../models/ApiProfileMin';
 import { ApiProfileProxy } from '../models/ApiProfileProxy';
@@ -314,7 +323,10 @@ import { ApiTdhEditionsPage } from '../models/ApiTdhEditionsPage';
 import { ApiTdhGrant             } from '../models/ApiTdhGrant';
 import { ApiTdhGrantStatus } from '../models/ApiTdhGrantStatus';
 import { ApiTdhGrantTargetChain } from '../models/ApiTdhGrantTargetChain';
+import { ApiTdhGrantToken } from '../models/ApiTdhGrantToken';
+import { ApiTdhGrantTokensPage } from '../models/ApiTdhGrantTokensPage';
 import { ApiTdhGrantsPage } from '../models/ApiTdhGrantsPage';
+import { ApiTdhStats } from '../models/ApiTdhStats';
 import { ApiTransaction } from '../models/ApiTransaction';
 import { ApiTransactionPage } from '../models/ApiTransactionPage';
 import { ApiUpdateDropRequest } from '../models/ApiUpdateDropRequest';
@@ -361,6 +373,14 @@ import { ApiWaveVotersPage } from '../models/ApiWaveVotersPage';
 import { ApiWaveVotingConfig         } from '../models/ApiWaveVotingConfig';
 import { ApiWavesOverviewType } from '../models/ApiWavesOverviewType';
 import { ApiWavesPinFilter } from '../models/ApiWavesPinFilter';
+import { ApiXTdhCollection } from '../models/ApiXTdhCollection';
+import { ApiXTdhCollectionsPage } from '../models/ApiXTdhCollectionsPage';
+import { ApiXTdhContribution } from '../models/ApiXTdhContribution';
+import { ApiXTdhContributionsPage } from '../models/ApiXTdhContributionsPage';
+import { ApiXTdhGrantee } from '../models/ApiXTdhGrantee';
+import { ApiXTdhGranteesPage } from '../models/ApiXTdhGranteesPage';
+import { ApiXTdhToken } from '../models/ApiXTdhToken';
+import { ApiXTdhTokensPage } from '../models/ApiXTdhTokensPage';
 import { CreateDirectMessageWaveRequest } from '../models/CreateDirectMessageWaveRequest';
 import { GetWaveSubscription200Response } from '../models/GetWaveSubscription200Response';
 
@@ -429,9 +449,7 @@ let typeMap: {[index: string]: any} = {
     "ApiBulkRepTarget": ApiBulkRepTarget,
     "ApiChangeGroupVisibility": ApiChangeGroupVisibility,
     "ApiChangeProfileCicRating": ApiChangeProfileCicRating,
-    "ApiChangeProfileCicRatingResponse": ApiChangeProfileCicRatingResponse,
     "ApiChangeProfileRepRating": ApiChangeProfileRepRating,
-    "ApiChangeProfileRepRatingResponse": ApiChangeProfileRepRatingResponse,
     "ApiCommunityMemberMinimal": ApiCommunityMemberMinimal,
     "ApiCompleteMultipartUploadRequest": ApiCompleteMultipartUploadRequest,
     "ApiCompleteMultipartUploadRequestPart": ApiCompleteMultipartUploadRequestPart,
@@ -508,6 +526,7 @@ let typeMap: {[index: string]: any} = {
     "ApiOwnerBalancePage": ApiOwnerBalancePage,
     "ApiPageBase": ApiPageBase,
     "ApiPageWithNextUriBase": ApiPageWithNextUriBase,
+    "ApiPageWithoutCount": ApiPageWithoutCount,
     "ApiProfileMin": ApiProfileMin,
     "ApiProfileProxy": ApiProfileProxy,
     "ApiProfileProxyAction": ApiProfileProxyAction,
@@ -527,7 +546,10 @@ let typeMap: {[index: string]: any} = {
     "ApiTdhEdition": ApiTdhEdition,
     "ApiTdhEditionsPage": ApiTdhEditionsPage,
     "ApiTdhGrant": ApiTdhGrant,
+    "ApiTdhGrantToken": ApiTdhGrantToken,
+    "ApiTdhGrantTokensPage": ApiTdhGrantTokensPage,
     "ApiTdhGrantsPage": ApiTdhGrantsPage,
+    "ApiTdhStats": ApiTdhStats,
     "ApiTransaction": ApiTransaction,
     "ApiTransactionPage": ApiTransactionPage,
     "ApiUpdateDropRequest": ApiUpdateDropRequest,
@@ -563,6 +585,14 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveVoter": ApiWaveVoter,
     "ApiWaveVotersPage": ApiWaveVotersPage,
     "ApiWaveVotingConfig": ApiWaveVotingConfig,
+    "ApiXTdhCollection": ApiXTdhCollection,
+    "ApiXTdhCollectionsPage": ApiXTdhCollectionsPage,
+    "ApiXTdhContribution": ApiXTdhContribution,
+    "ApiXTdhContributionsPage": ApiXTdhContributionsPage,
+    "ApiXTdhGrantee": ApiXTdhGrantee,
+    "ApiXTdhGranteesPage": ApiXTdhGranteesPage,
+    "ApiXTdhToken": ApiXTdhToken,
+    "ApiXTdhTokensPage": ApiXTdhTokensPage,
     "CreateDirectMessageWaveRequest": CreateDirectMessageWaveRequest,
     "GetWaveSubscription200Response": GetWaveSubscription200Response,
 }
@@ -583,7 +613,7 @@ type MimeTypeDescriptor = {
  * the payload.
  */
 const parseMimeType = (mimeType: string): MimeTypeDescriptor => {
-    const [type, subtype] = mimeType.split('/');
+    const [type = '', subtype = ''] = mimeType.split('/');
     return {
         type,
         subtype,
@@ -619,6 +649,13 @@ const supportedMimeTypePredicatesWithPriority: MimeTypePredicate[] = [
     isFormUrlencodedMimeType,
 ];
 
+const nullableSuffix = " | null";
+const optionalSuffix = " | undefined";
+const arrayPrefix = "Array<";
+const arraySuffix = ">";
+const mapPrefix = "{ [key: string]: ";
+const mapSuffix = "; }";
+
 export class ObjectSerializer {
     public static findCorrectType(data: any, expectedType: string) {
         if (data == undefined) {
@@ -643,8 +680,11 @@ export class ObjectSerializer {
             } else {
                 if (data[discriminatorProperty]) {
                     var discriminatorType = data[discriminatorProperty];
-                    if(typeMap[discriminatorType]){
-                        return discriminatorType; // use the type given in the discriminator
+                    let mapping = typeMap[expectedType].mapping;
+                    if (mapping != undefined && mapping[discriminatorType]) {
+                        return mapping[discriminatorType]; // use the type given in the discriminator
+                    } else if(typeMap[discriminatorType]) {
+                        return discriminatorType;
                     } else {
                         return expectedType; // discriminator did not map to a type
                     }
@@ -655,17 +695,33 @@ export class ObjectSerializer {
         }
     }
 
-    public static serialize(data: any, type: string, format: string) {
+    public static serialize(data: any, type: string, format: string): any {
         if (data == undefined) {
             return data;
         } else if (primitives.indexOf(type.toLowerCase()) !== -1) {
             return data;
-        } else if (type.lastIndexOf("Array<", 0) === 0) { // string.startsWith pre es6
-            let subType: string = type.replace("Array<", ""); // Array<Type> => Type>
-            subType = subType.substring(0, subType.length - 1); // Type> => Type
+        } else if (type.endsWith(nullableSuffix)) {
+            let subType: string = type.slice(0, -nullableSuffix.length); // Type | null => Type
+            return ObjectSerializer.serialize(data, subType, format);
+        } else if (type.endsWith(optionalSuffix)) {
+            let subType: string = type.slice(0, -optionalSuffix.length); // Type | undefined => Type
+            return ObjectSerializer.serialize(data, subType, format);
+        } else if (type.startsWith(arrayPrefix)) {
+            let subType: string = type.slice(arrayPrefix.length, -arraySuffix.length); // Array<Type> => Type
             let transformedData: any[] = [];
             for (let date of data) {
                 transformedData.push(ObjectSerializer.serialize(date, subType, format));
+            }
+            return transformedData;
+        } else if (type.startsWith(mapPrefix)) {
+            let subType: string = type.slice(mapPrefix.length, -mapSuffix.length); // { [key: string]: Type; } => Type
+            let transformedData: { [key: string]: any } = {};
+            for (let key in data) {
+                transformedData[key] = ObjectSerializer.serialize(
+                    data[key],
+                    subType,
+                    format,
+                );
             }
             return transformedData;
         } else if (type === "Date") {
@@ -700,19 +756,35 @@ export class ObjectSerializer {
         }
     }
 
-    public static deserialize(data: any, type: string, format: string) {
+    public static deserialize(data: any, type: string, format: string): any {
         // polymorphism may change the actual type.
         type = ObjectSerializer.findCorrectType(data, type);
         if (data == undefined) {
             return data;
         } else if (primitives.indexOf(type.toLowerCase()) !== -1) {
             return data;
-        } else if (type.lastIndexOf("Array<", 0) === 0) { // string.startsWith pre es6
-            let subType: string = type.replace("Array<", ""); // Array<Type> => Type>
-            subType = subType.substring(0, subType.length - 1); // Type> => Type
+        } else if (type.endsWith(nullableSuffix)) {
+            let subType: string = type.slice(0, -nullableSuffix.length); // Type | null => Type
+            return ObjectSerializer.deserialize(data, subType, format);
+        } else if (type.endsWith(optionalSuffix)) {
+            let subType: string = type.slice(0, -optionalSuffix.length); // Type | undefined => Type
+            return ObjectSerializer.deserialize(data, subType, format);
+        } else if (type.startsWith(arrayPrefix)) {
+            let subType: string = type.slice(arrayPrefix.length, -arraySuffix.length); // Array<Type> => Type
             let transformedData: any[] = [];
             for (let date of data) {
                 transformedData.push(ObjectSerializer.deserialize(date, subType, format));
+            }
+            return transformedData;
+        } else if (type.startsWith(mapPrefix)) {
+            let subType: string = type.slice(mapPrefix.length, -mapSuffix.length); // { [key: string]: Type; } => Type
+            let transformedData: { [key: string]: any } = {};
+            for (let key in data) {
+                transformedData[key] = ObjectSerializer.deserialize(
+                    data[key],
+                    subType,
+                    format,
+                );
             }
             return transformedData;
         } else if (type === "Date") {
@@ -748,7 +820,7 @@ export class ObjectSerializer {
         if (mediaType === undefined) {
             return undefined;
         }
-        return mediaType.split(";")[0].trim().toLowerCase();
+        return (mediaType.split(";")[0] ?? '').trim().toLowerCase();
     }
 
     /**

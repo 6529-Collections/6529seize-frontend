@@ -28,15 +28,19 @@ export async function generateMetadata({
 
   let title = `6529 Gradient #${id}`;
   let ogImage = `${publicEnv.BASE_ENDPOINT}/6529io.png`;
-  const response = await fetchUrl(
-    `${publicEnv.API_ENDPOINT}/api/nfts?contract=${GRADIENT_CONTRACT}&id=${id}`
-  );
-  if (response?.data?.length > 0) {
-    if (response.data[0].thumbnail) {
-      ogImage = response.data[0].thumbnail;
-    } else if (response.data[0].image) {
-      ogImage = response.data[0].image;
+  try {
+    const response = await fetchUrl(
+      `${publicEnv.API_ENDPOINT}/api/nfts?contract=${GRADIENT_CONTRACT}&id=${id}`
+    );
+    if (response?.data?.length > 0) {
+      if (response.data[0].thumbnail) {
+        ogImage = response.data[0].thumbnail;
+      } else if (response.data[0].image) {
+        ogImage = response.data[0].image;
+      }
     }
+  } catch (error) {
+    console.error(`Failed to load gradient metadata for id ${id}`, error);
   }
   return getAppMetadata({
     title,

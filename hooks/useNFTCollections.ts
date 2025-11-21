@@ -1,5 +1,4 @@
 import { publicEnv } from "@/config/env";
-import { DBResponse } from "@/entities/IDBResponse";
 import { NFT } from "@/entities/INFT";
 import { NextGenCollection } from "@/entities/INextgen";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
@@ -32,17 +31,41 @@ export function useNFTCollections(initialCollections?: {
       return;
     }
 
-    fetchUrl(`${publicEnv.API_ENDPOINT}/api/memes_lite`).then(
-      (memeResponse: DBResponse) => {
-        setNfts(memeResponse.data);
-        fetchAllPages<NFT>(
+    let cancelled = false;
+    setLoading(true);
+
+    const fetchCollections = async () => {
+      try {
+        const memeResponse = await fetchUrl(
+          `${publicEnv.API_ENDPOINT}/api/memes_lite`
+        );
+        if (cancelled) {
+          return;
+        }
+        const gradients = await fetchAllPages<NFT>(
           `${publicEnv.API_ENDPOINT}/api/nfts/gradients?&page_size=101`
-        ).then((gradients) => {
-          setNfts([...memeResponse.data, ...gradients]);
+        );
+        if (cancelled) {
+          return;
+        }
+        setNfts([...memeResponse.data, ...gradients]);
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Failed to fetch NFT collections", error);
+          setNfts([]);
+        }
+      } finally {
+        if (!cancelled) {
           setLoading(false);
-        });
+        }
       }
-    );
+    };
+
+    fetchCollections();
+
+    return () => {
+      cancelled = true;
+    };
   }, [initialCollections]);
 
   // Fetch NextGen collections
@@ -62,9 +85,14 @@ export function useNFTCollections(initialCollections?: {
       data: NextGenCollection[];
     }>({
       endpoint: `nextgen/collections`,
-    }).then((response) => {
-      setNextgenCollections(response.data);
-    });
+    })
+      .then((response) => {
+        setNextgenCollections(response.data);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch NextGen collections list", error);
+        setNextgenCollections([]);
+      });
   }, [initialCollections]);
 
   return {

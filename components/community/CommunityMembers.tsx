@@ -170,13 +170,15 @@ export default function CommunityMembers() {
 
   const updateFields = useCallback(
     (updateItems: QueryUpdateInput[], lowerCase: boolean = true): void => {
+      const currentQueryString = searchParams?.toString() ?? "";
       const queryString = createQueryString(updateItems, lowerCase);
+      if (queryString === currentQueryString) return;
       const path = queryString ? `${pathname}?${queryString}` : pathname;
       if (path) {
         router.replace(path);
       }
     },
-    [createQueryString, pathname, router]
+    [createQueryString, pathname, router, searchParams]
   );
 
   const setSortBy = async (
@@ -236,19 +238,31 @@ export default function CommunityMembers() {
 
   useEffect(() => {
     if (isLoading) return;
-    if (!members?.count) {
-      setPage(1);
+
+    if (!members) {
       setTotalPages(1);
       return;
     }
+
+    if (!members.count) {
+      if (debouncedParams.page !== 1) {
+        setPage(1);
+      }
+      setTotalPages(1);
+      return;
+    }
+
     const pagesCount = Math.ceil(members.count / debouncedParams.page_size);
-    if (pagesCount < debouncedParams.page) setPage(pagesCount);
+    if (pagesCount < debouncedParams.page) {
+      setPage(pagesCount);
+      return;
+    }
     setTotalPages(pagesCount);
   }, [
     debouncedParams.page,
     debouncedParams.page_size,
     isLoading,
-    members?.count,
+    members,
     setPage,
   ]);
 

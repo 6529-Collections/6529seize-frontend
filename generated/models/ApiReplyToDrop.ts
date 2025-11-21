@@ -18,6 +18,8 @@ export class ApiReplyToDrop {
 
     static readonly discriminator: string | undefined = undefined;
 
+    static readonly mapping: {[index: string]: string} | undefined = undefined;
+
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
             "name": "drop_id",
@@ -39,4 +41,3 @@ export class ApiReplyToDrop {
     public constructor() {
     }
 }
-

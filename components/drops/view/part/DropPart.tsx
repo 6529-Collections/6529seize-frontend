@@ -10,12 +10,7 @@ import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import { useRouter } from "next/navigation";
 import DropPartContent from "./DropPartContent";
-
-export enum DropPartSize {
-  SMALL = "SMALL",
-  MEDIUM = "MEDIUM",
-  LARGE = "LARGE",
-}
+import { DropPartSize } from "./DropPart.types";
 
 interface DropPartPropsMedia {
   readonly mimeType: string;
@@ -231,4 +226,5 @@ const DropPart = memo(
 );
 
 DropPart.displayName = "DropPart";
+export { DropPartSize } from "./DropPart.types";
 export default DropPart;

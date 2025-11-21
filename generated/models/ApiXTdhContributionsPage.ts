@@ -10,33 +10,42 @@
  * Do not edit the class manually.
  */
 
+import { ApiXTdhContribution } from '../models/ApiXTdhContribution';
 import { HttpFile } from '../http/http';
 
-export class ApiChangeProfileCicRatingResponse {
-    'total_cic_rating': number;
-    'cic_rating_by_user': number;
+export class ApiXTdhContributionsPage {
+    'data': Array<ApiXTdhContribution>;
+    'page': number;
+    'next': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
+    static readonly mapping: {[index: string]: string} | undefined = undefined;
+
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "total_cic_rating",
-            "baseName": "total_cic_rating",
+            "name": "data",
+            "baseName": "data",
+            "type": "Array<ApiXTdhContribution>",
+            "format": ""
+        },
+        {
+            "name": "page",
+            "baseName": "page",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "cic_rating_by_user",
-            "baseName": "cic_rating_by_user",
-            "type": "number",
-            "format": "int64"
+            "name": "next",
+            "baseName": "next",
+            "type": "boolean",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiChangeProfileCicRatingResponse.attributeTypeMap;
+        return ApiXTdhContributionsPage.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
-

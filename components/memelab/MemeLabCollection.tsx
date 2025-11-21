@@ -42,7 +42,7 @@ export default function LabCollection({
   const searchParams = useSearchParams();
   const { connectedProfile } = useContext(AuthContext);
 
-  const [website, setWebsite] = useState<string>();
+  const [websites, setWebsites] = useState<string[]>([]);
 
   const [nfts, setNfts] = useState<LabNFT[]>([]);
   const [nftMetas, setNftMetas] = useState<LabExtendedData[]>([]);
@@ -65,50 +65,109 @@ export default function LabCollection({
   }, []);
 
   useEffect(() => {
-    if (collectionName) {
-      const nftsUrl = `${
-        publicEnv.API_ENDPOINT
-      }/api/lab_extended_data?collection=${encodeURIComponent(collectionName)}`;
-      fetchAllPages<LabExtendedData>(nftsUrl).then((responseNftMetas) => {
+    if (!collectionName) {
+      setNftMetas([]);
+      setNfts([]);
+      setWebsites([]);
+      setNftsLoaded(true);
+      return;
+    }
+
+    let cancelled = false;
+    setNftsLoaded(false);
+
+    const loadCollection = async () => {
+      try {
+        const nftsUrl = `${
+          publicEnv.API_ENDPOINT
+        }/api/lab_extended_data?collection=${encodeURIComponent(collectionName)}`;
+        const responseNftMetas = await fetchAllPages<LabExtendedData>(nftsUrl);
+        if (cancelled) {
+          return;
+        }
         setNftMetas(responseNftMetas);
         if (responseNftMetas.length > 0) {
           const tokenIds = responseNftMetas.map((n: LabExtendedData) => n.id);
-          fetchAllPages<LabNFT>(
+          const uniqueWebsites = Array.from(
+            new Set(
+              responseNftMetas
+                .map((nftm) => nftm.website?.trim())
+                .filter(
+                  (site): site is string =>
+                    typeof site === "string" && site.length > 0
+                )
+            )
+          );
+          if (cancelled) {
+            return;
+          }
+          setWebsites(uniqueWebsites);
+          const responseNfts = await fetchAllPages<LabNFT>(
             `${publicEnv.API_ENDPOINT}/api/nfts_memelab?id=${tokenIds.join(
               ","
             )}`
-          ).then((responseNfts) => {
-            setNfts(responseNfts);
-            setNftsLoaded(true);
-          });
-          let collectionSecondaryLink: string = "";
-          responseNftMetas.map((nftm) => {
-            if (
-              nftm.website &&
-              !collectionSecondaryLink.includes(nftm.website)
-            ) {
-              collectionSecondaryLink += nftm.website;
-            }
-          });
-          setWebsite(collectionSecondaryLink);
+          );
+          if (cancelled) {
+            return;
+          }
+          setNfts(responseNfts);
         } else {
+          if (cancelled) {
+            return;
+          }
           setNfts([]);
+          setWebsites([]);
+        }
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+        console.error(`Failed to fetch Meme Lab collection ${collectionName}`, error);
+        setNftMetas([]);
+        setNfts([]);
+        setWebsites([]);
+      } finally {
+        if (!cancelled) {
           setNftsLoaded(true);
         }
-      });
-    }
+      }
+    };
+
+    loadCollection();
+
+    return () => {
+      cancelled = true;
+    };
   }, [collectionName]);
 
   useEffect(() => {
-    if (connectedProfile?.consolidation_key) {
+    let cancelled = false;
+    const consolidationKey = connectedProfile?.consolidation_key;
+
+    if (consolidationKey) {
       fetchAllPages<NftOwner>(
-        `${publicEnv.API_ENDPOINT}/api/nft-owners/consolidation/${connectedProfile?.consolidation_key}?contract=${MEMES_CONTRACT}`
-      ).then((owners) => {
-        setNftBalances(owners);
-      });
+        `${publicEnv.API_ENDPOINT}/api/nft-owners/consolidation/${consolidationKey}?contract=${MEMES_CONTRACT}`
+      )
+        .then((owners) => {
+          if (cancelled) {
+            return;
+          }
+          setNftBalances(owners);
+        })
+        .catch((error) => {
+          if (cancelled) {
+            return;
+          }
+          console.error("Failed to fetch Meme Lab balances for user", error);
+          setNftBalances([]);
+        });
     } else {
       setNftBalances([]);
     }
+
+    return () => {
+      cancelled = true;
+    };
   }, [connectedProfile]);
 
   useEffect(() => {
@@ -186,19 +245,17 @@ export default function LabCollection({
                   <h2 className="font-color">{collectionName}</h2>
                 </Col>
               </Row>
-              {website && (
+              {websites.length > 0 && (
                 <Row className="pb-3">
-                  <Col>
-                    {website.split(" ").map((w) => (
-                      <>
-                        <a
-                          href={addProtocol(w)}
-                          target="_blank"
-                          rel="noopener noreferrer">
-                          {w}
-                        </a>
-                        &nbsp;&nbsp;
-                      </>
+                  <Col className="tw-flex tw-gap-3 tw-flex-wrap tw-items-center">
+                    {websites.map((website) => (
+                      <a
+                        key={website}
+                        href={addProtocol(website)}
+                        target="_blank"
+                        rel="noopener noreferrer">
+                        {website}
+                      </a>
                     ))}
                   </Col>
                 </Row>
