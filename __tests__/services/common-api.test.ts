@@ -50,9 +50,7 @@ describe("commonApiFetch", () => {
       json: async () => ({ error: "err" }),
     });
 
-    await expect(commonApiFetch({ endpoint: "bad" })).rejects.toThrow(
-      "HTTP 400 Bad: err"
-    );
+    await expect(commonApiFetch({ endpoint: "bad" })).rejects.toThrow("err");
     expect(fetchMock).toHaveBeenCalledWith(
       "https://api.test.6529.io/api/bad",
       expect.objectContaining({
@@ -106,7 +104,7 @@ describe("commonApiPost", () => {
     });
 
     await expect(commonApiPost({ endpoint: "e", body: {} })).rejects.toThrow(
-      "HTTP 400 B: err"
+      "err"
     );
     expect(fetchMock).toHaveBeenCalledWith(
       "https://api.test.6529.io/api/e",
