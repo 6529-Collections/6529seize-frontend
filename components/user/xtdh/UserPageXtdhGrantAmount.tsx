@@ -47,6 +47,7 @@ export default function UserPageXtdhGrantAmount({
       </label>
       <input
         id="xtdh-grant-amount"
+        aria-describedby="xtdh-grant-status"
         type="number"
         min="0"
         max={maxGrantRate ?? undefined}
@@ -71,7 +72,7 @@ export default function UserPageXtdhGrantAmount({
         }}
         className="tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-font-medium tw-text-iron-100 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
       />
-      <p className="tw-text-xs tw-font-medium tw-text-iron-300">
+      <p id="xtdh-grant-status" className="tw-text-xs tw-font-medium tw-text-iron-300">
         {maxGrantMessage}
       </p>
     </div>

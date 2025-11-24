@@ -35,14 +35,30 @@ const describeTokenSelectionText = (
 const getTokenLabel = (tokenCount: number): string =>
   `${tokenCount} token${tokenCount === 1 ? "" : "s"}`;
 
+const getTotalSupplyCount = (contract: ContractOverview | null): number | null => {
+  if (!contract?.totalSupply) {
+    return null;
+  }
+
+  const parsedSupply = Number(contract.totalSupply);
+  const normalizedSupply = Math.trunc(parsedSupply);
+
+  if (!Number.isSafeInteger(normalizedSupply) || normalizedSupply <= 0) {
+    return null;
+  }
+
+  return normalizedSupply;
+};
+
 const describeSelection = (
   selection: NftPickerSelection,
   collectionLabel: string | null,
+  totalSupplyCount: number | null,
 ): SelectionDescription => {
   if (selection.allSelected) {
     return {
       text: describeAllTokensGrantText(collectionLabel),
-      tokenCount: null,
+      tokenCount: totalSupplyCount,
     };
   }
 
@@ -124,7 +140,12 @@ const getSelectionSummary = ({
     return selection.error;
   }
 
-  const { text: selectionText, tokenCount } = describeSelection(selection, collectionLabel);
+  const totalSupplyCount = getTotalSupplyCount(contract);
+  const { text: selectionText, tokenCount } = describeSelection(
+    selection,
+    collectionLabel,
+    totalSupplyCount
+  );
 
   if (!isValidGrantAmount(amount)) {
     return selectionText;
