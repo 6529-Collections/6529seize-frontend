@@ -2439,6 +2439,21 @@ paths:
                 $ref: "#/components/schemas/ApiTdhEditionsPage"
         "404":
           description: Identity not found
+  /tdh-stats:
+    get:
+      tags:
+        - TDH stats
+      summary: Get global TDH stats
+      operationId: getGlobalTdhStats
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiTdhGlobalStats"
+        "404":
+          description: Not found
   /tdh-stats/{identity}:
     get:
       tags:
@@ -5902,8 +5917,6 @@ components:
         - memelab_balance_rank
         - unique_memelab_rank
         - boosted_tdh_rank
-        - total_tdh
-        - total_tdh_rank
         - xtdh
         - xtdh_rank
         - boosted_memes_tdh_rank
@@ -6000,12 +6013,6 @@ components:
           type: integer
           format: int64
         boosted_nextgen_tdh_rank:
-          type: integer
-          format: int64
-        total_tdh:
-          type: number
-          format: double
-        total_tdh_rank:
           type: integer
           format: int64
         xtdh:
@@ -6513,6 +6520,46 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiTdhEdition"
+    ApiTdhGlobalStats:
+      type: object
+      required:
+        - tdh
+        - tdh_rate
+        - xtdh
+        - xtdh_rate
+        - xtdh_multiplier
+        - granted_xtdh_rate
+        - granted_xtdh
+        - granted_target_collections_count
+        - granted_target_tokens_count
+      properties:
+        tdh:
+          type: number
+          format: int64
+        tdh_rate:
+          type: number
+          format: int64
+        xtdh:
+          type: number
+          format: double
+        xtdh_rate:
+          type: number
+          format: double
+        xtdh_multiplier:
+          type: number
+          format: double
+        granted_xtdh_rate:
+          type: number
+          format: double
+        granted_xtdh:
+          type: number
+          format: double
+        granted_target_collections_count:
+          type: number
+          format: int64
+        granted_target_tokens_count:
+          type: number
+          format: int64
     ApiTdhGrant:
       type: object
       required:
@@ -6606,25 +6653,22 @@ components:
       type: object
       required:
         - identity
-        - total_tdh
-        - base_tdh
+        - tdh
         - tdh_rate
         - xtdh
         - xtdh_rate
         - xtdh_multiplier
-        - granted_xtdh_per_day
+        - granted_xtdh_rate
         - granted_xtdh
         - received_xtdh
         - granted_target_collections_count
         - granted_target_tokens_count
         - available_grant_rate
+        - received_xtdh_rate
       properties:
         identity:
           $ref: "#/components/schemas/ApiIdentity"
-        total_tdh:
-          type: number
-          format: double
-        base_tdh:
+        tdh:
           type: number
           format: int64
         tdh_rate:
@@ -6639,13 +6683,16 @@ components:
         xtdh_multiplier:
           type: number
           format: double
-        granted_xtdh_per_day:
+        granted_xtdh_rate:
           type: number
           format: double
         granted_xtdh:
           type: number
           format: double
         received_xtdh:
+          type: number
+          format: double
+        received_xtdh_rate:
           type: number
           format: double
         granted_target_collections_count:

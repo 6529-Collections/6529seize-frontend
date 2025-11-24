@@ -1,7 +1,7 @@
 
 
 export interface XtdhStatsResponse {
-  readonly baseTdhRate: number;
+  readonly tdhRate: number;
   readonly multiplier: number;
   readonly dailyCapacity: number;
   readonly xtdhRateGranted: number;

@@ -10,11 +10,9 @@
  * Do not edit the class manually.
  */
 
-import { ApiIdentity } from '../models/ApiIdentity';
 import { HttpFile } from '../http/http';
 
-export class ApiTdhStats {
-    'identity': ApiIdentity;
+export class ApiTdhGlobalStats {
     'tdh': number;
     'tdh_rate': number;
     'xtdh': number;
@@ -22,23 +20,14 @@ export class ApiTdhStats {
     'xtdh_multiplier': number;
     'granted_xtdh_rate': number;
     'granted_xtdh': number;
-    'received_xtdh': number;
-    'received_xtdh_rate': number;
     'granted_target_collections_count': number;
     'granted_target_tokens_count': number;
-    'available_grant_rate': number;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
-        {
-            "name": "identity",
-            "baseName": "identity",
-            "type": "ApiIdentity",
-            "format": ""
-        },
         {
             "name": "tdh",
             "baseName": "tdh",
@@ -82,18 +71,6 @@ export class ApiTdhStats {
             "format": "double"
         },
         {
-            "name": "received_xtdh",
-            "baseName": "received_xtdh",
-            "type": "number",
-            "format": "double"
-        },
-        {
-            "name": "received_xtdh_rate",
-            "baseName": "received_xtdh_rate",
-            "type": "number",
-            "format": "double"
-        },
-        {
             "name": "granted_target_collections_count",
             "baseName": "granted_target_collections_count",
             "type": "number",
@@ -104,16 +81,10 @@ export class ApiTdhStats {
             "baseName": "granted_target_tokens_count",
             "type": "number",
             "format": "int64"
-        },
-        {
-            "name": "available_grant_rate",
-            "baseName": "available_grant_rate",
-            "type": "number",
-            "format": "double"
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiTdhStats.attributeTypeMap;
+        return ApiTdhGlobalStats.attributeTypeMap;
     }
 
     public constructor() {

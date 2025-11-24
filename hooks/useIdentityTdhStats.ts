@@ -15,9 +15,10 @@ export interface IdentityTdhStats {
   readonly grantedCollectionsCount: number;
   readonly grantedTokensCount: number;
   readonly totalReceivedXtdh: number;
+  readonly receivedXtdhRate: number | null;
   readonly totalGrantedXtdh: number;
   readonly xtdhMultiplier: number | null;
-  readonly baseTdhRate: number | null;
+  readonly tdhRate: number | null;
 }
 
 async function fetchIdentityTdhStats(identity: string): Promise<IdentityTdhStats> {
@@ -27,19 +28,22 @@ async function fetchIdentityTdhStats(identity: string): Promise<IdentityTdhStats
   });
 
   const xtdhRate = sanitizeNonNegativeNumber(response.xtdh_rate);
-  const baseTdhRate = sanitizeNullableNonNegativeNumber(
-    (response.tdh_rate ?? Number.NaN) - (response.xtdh_rate ?? Number.NaN),
+  const tdhRate = sanitizeNullableNonNegativeNumber(
+    (response.tdh_rate ?? Number.NaN),
   );
 
   return {
     xtdhRate,
-    grantedXtdhPerDay: sanitizeNonNegativeNumber(response.granted_xtdh_per_day),
+    grantedXtdhPerDay: sanitizeNonNegativeNumber(response.granted_xtdh_rate),
     grantedCollectionsCount: sanitizeCount(response.granted_target_collections_count),
     grantedTokensCount: sanitizeCount(response.granted_target_tokens_count),
     totalReceivedXtdh: sanitizeNonNegativeNumber(response.received_xtdh),
+    receivedXtdhRate: sanitizeNullableNonNegativeNumber(
+      response.received_xtdh_rate ?? Number.NaN,
+    ),
     totalGrantedXtdh: sanitizeNonNegativeNumber(response.granted_xtdh),
     xtdhMultiplier: sanitizeNullableNonNegativeNumber(response.xtdh_multiplier),
-    baseTdhRate,
+    tdhRate,
   };
 }
 

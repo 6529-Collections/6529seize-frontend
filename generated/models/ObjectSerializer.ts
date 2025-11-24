@@ -127,6 +127,7 @@ export * from '../models/ApiStartMultipartMediaUploadResponse';
 export * from '../models/ApiTargetAndSubscriptionActions';
 export * from '../models/ApiTdhEdition';
 export * from '../models/ApiTdhEditionsPage';
+export * from '../models/ApiTdhGlobalStats';
 export * from '../models/ApiTdhGrant';
 export * from '../models/ApiTdhGrantStatus';
 export * from '../models/ApiTdhGrantTargetChain';
@@ -320,6 +321,7 @@ import { ApiStartMultipartMediaUploadResponse } from '../models/ApiStartMultipar
 import { ApiTargetAndSubscriptionActions } from '../models/ApiTargetAndSubscriptionActions';
 import { ApiTdhEdition } from '../models/ApiTdhEdition';
 import { ApiTdhEditionsPage } from '../models/ApiTdhEditionsPage';
+import { ApiTdhGlobalStats } from '../models/ApiTdhGlobalStats';
 import { ApiTdhGrant             } from '../models/ApiTdhGrant';
 import { ApiTdhGrantStatus } from '../models/ApiTdhGrantStatus';
 import { ApiTdhGrantTargetChain } from '../models/ApiTdhGrantTargetChain';
@@ -545,6 +547,7 @@ let typeMap: {[index: string]: any} = {
     "ApiTargetAndSubscriptionActions": ApiTargetAndSubscriptionActions,
     "ApiTdhEdition": ApiTdhEdition,
     "ApiTdhEditionsPage": ApiTdhEditionsPage,
+    "ApiTdhGlobalStats": ApiTdhGlobalStats,
     "ApiTdhGrant": ApiTdhGrant,
     "ApiTdhGrantToken": ApiTdhGrantToken,
     "ApiTdhGrantTokensPage": ApiTdhGrantTokensPage,
