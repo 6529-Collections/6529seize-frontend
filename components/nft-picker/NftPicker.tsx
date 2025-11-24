@@ -11,6 +11,7 @@ import type {
   ContractOverview,
   NftPickerProps,
   NftPickerSelection,
+  NftPickerSelectionError,
   ParseError,
   Suggestion,
   TokenRange,
@@ -107,6 +108,15 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
   const hasHydratedInitialValueRef = useRef(false);
   const pendingPropEmitRef = useRef<string | null>(null);
   const isControlled = value !== undefined;
+  const onContractChangeRef = useRef<NftPickerProps["onContractChange"]>(onContractChange);
+
+  useEffect(() => {
+    onContractChangeRef.current = onContractChange;
+  }, [onContractChange]);
+
+  const emitContractChange = useCallback((contract: ContractOverview | null) => {
+    onContractChangeRef.current?.(contract);
+  }, []);
 
   useEffect(() => {
     setHideSpam(hideSpamProp);
@@ -129,8 +139,8 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
       }
       return presetContractQuery.data ?? null;
     });
-    onContractChange?.(presetContractQuery.data ?? null);
-  }, [presetContractAddress, presetContractQuery.data, onContractChange]);
+    emitContractChange(presetContractQuery.data ?? null);
+  }, [presetContractAddress, presetContractQuery.data, emitContractChange]);
 
   const isAddressQuery = useMemo(() => isValidEthAddress(query.trim()), [query]);
   const contractQueryAddress = useMemo(() => {
@@ -180,11 +190,9 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     }
     hasHydratedInitialValueRef.current = true;
     if (value.contractAddress) {
-      if (!selectedContract || selectedContract.address !== value.contractAddress) {
-        setSelectedContract((prev) =>
-          prev && prev.address === value.contractAddress ? prev : null
-        );
-      }
+      setSelectedContract((prev) =>
+        prev && prev.address === value.contractAddress ? prev : null
+      );
     } else {
       setSelectedContract(null);
     }
@@ -197,7 +205,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
       setAllSelected(false);
       previousRangesRef.current = null;
     }
-  }, [value, selectedContract]);
+  }, [value]);
 
   useEffect(() => {
     if (isControlled) {
@@ -234,7 +242,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     primeContractCache(suggestion, chain);
     const overview = mapSuggestionToOverview(suggestion);
     setSelectedContract(overview);
-    onContractChange?.(overview);
+    emitContractChange(overview);
     setIsOpen(false);
     setQuery("");
     setActiveIndex(0);
@@ -497,7 +505,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     setSelectedContract(null);
     setRanges([]);
     setAllSelected(false);
-    onContractChange?.(null);
+    emitContractChange(null);
     onChange(null);
     setQuery("");
     setUnsafeCount(0);
@@ -583,93 +591,115 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     }
   };
 
-  const getSelectionFromRanges = (
-    canonicalRanges: TokenRange[],
-    isAll: boolean
-  ): TokenSelection | null => {
-    if (isAll) {
-      return [];
-    }
-    try {
-      return fromCanonicalRanges(canonicalRanges);
-    } catch (error) {
-      if (!isRangeTooLargeError(error)) {
-        throw error;
+  const getSelectionFromRanges = useCallback(
+    (
+      canonicalRanges: TokenRange[],
+      isAll: boolean
+    ): { selection: TokenSelection | null; error?: ParseError } => {
+      if (isAll) {
+        return { selection: [] };
       }
-      const canonical = formatCanonical(canonicalRanges);
-      const displayValue = canonical || "selection";
-      setParseErrors([
-        {
-          code: error.code,
-          input: displayValue,
-          index: 0,
-          length: Math.max(displayValue.length, 1),
-          message: error.message,
-        },
-      ]);
-      console.warn(
-        "NftPicker: selection exceeds enumeration limit; change event skipped",
-        error
-      );
-      return null;
-    }
-  };
+      try {
+        return { selection: fromCanonicalRanges(canonicalRanges) };
+      } catch (error) {
+        if (!isRangeTooLargeError(error)) {
+          throw error;
+        }
+        const canonical = formatCanonical(canonicalRanges);
+        const displayValue = canonical || "selection";
+        return {
+          selection: null,
+          error: {
+            code: error.code,
+            input: displayValue,
+            index: 0,
+            length: Math.max(displayValue.length, 1),
+            message: error.message,
+          },
+        };
+      }
+    },
+    []
+  );
 
-  const emitChange = (
-    contract: ContractOverview,
-    canonicalRanges: TokenRange[],
-    isAll: boolean
-  ) => {
-    pendingPropEmitRef.current = null;
-    if (!contract) {
-      return;
-    }
-    const selectionIds = getSelectionFromRanges(canonicalRanges, isAll);
-    if (selectionIds === null) {
-      return;
-    }
-    if (!selectionIds.length && !isAll) {
-      const payload: NftPickerSelection = {
-        contractAddress: contract.address,
-        allSelected: isAll,
-        outputMode,
-        tokenIds: [],
-        tokenIdsRaw: [],
-      } as NftPickerSelection;
-      onChange(payload);
-      return;
-    }
-    if (outputMode === "number") {
-      const { numbers, unsafeCount: unsafe } = tryToNumberArray(selectionIds);
-      setUnsafeCount(unsafe);
-      if (unsafe > 0) {
+  const emitChange = useCallback(
+    (contract: ContractOverview, canonicalRanges: TokenRange[], isAll: boolean) => {
+      pendingPropEmitRef.current = null;
+      if (!contract) {
         return;
       }
-      const payload: NftPickerSelection = {
-        contractAddress: contract.address,
-        allSelected: isAll,
-        outputMode: "number",
-        tokenIds: numbers,
-        tokenIdsRaw: selectionIds,
-      };
-      onChange(payload);
-    } else {
-      const decimalIds = selectionIds.map((id) => id.toString(10));
-      const payload: NftPickerSelection = {
-        contractAddress: contract.address,
-        allSelected: isAll,
-        outputMode: "bigint",
-        tokenIds: decimalIds,
-        tokenIdsRaw: selectionIds,
-      };
-      if (selectionIds.some((id) => id > MAX_SAFE)) {
+      const { selection: selectionIds, error } = getSelectionFromRanges(
+        canonicalRanges,
+        isAll
+      );
+      if (error) {
+        setParseErrors([error]);
         console.warn(
-          "NftPicker: emitting bigint payload because some token IDs exceed MAX_SAFE_INTEGER"
+          "NftPicker: selection exceeds enumeration limit; change event skipped",
+          error
         );
+        return;
       }
-      onChange(payload);
-    }
-  };
+      if (selectionIds === null) {
+        return;
+      }
+      if (!selectionIds.length && !isAll) {
+        const payload: NftPickerSelection = {
+          contractAddress: contract.address,
+          allSelected: isAll,
+          outputMode,
+          tokenIds: [],
+          tokenIdsRaw: [],
+        } as NftPickerSelection;
+        onChange(payload);
+        return;
+      }
+      if (outputMode === "number") {
+        const { numbers, unsafeCount: unsafe } = tryToNumberArray(selectionIds);
+        setUnsafeCount(unsafe);
+        if (unsafe > 0) {
+          const errorPayload: NftPickerSelectionError = {
+            type: "error",
+            error:
+              "Token IDs exceed Number.MAX_SAFE_INTEGER. Switch to bigint output or remove those IDs.",
+            unsafeCount: unsafe,
+            contractAddress: contract.address,
+            outputMode: "number",
+          };
+          console.warn(
+            "NftPicker: selection includes token IDs above Number.MAX_SAFE_INTEGER; emitting error payload",
+            { unsafeCount: unsafe, contractAddress: contract.address }
+          );
+          onChange(errorPayload);
+          return;
+        }
+        const payload: NftPickerSelection = {
+          contractAddress: contract.address,
+          allSelected: isAll,
+          outputMode: "number",
+          tokenIds: numbers,
+          tokenIdsRaw: selectionIds,
+        };
+        onChange(payload);
+      } else {
+        const decimalIds = selectionIds.map((id) => id.toString(10));
+        const payload: NftPickerSelection = {
+          contractAddress: contract.address,
+          allSelected: isAll,
+          outputMode: "bigint",
+          tokenIds: decimalIds,
+          tokenIdsRaw: selectionIds,
+        };
+        if (selectionIds.some((id) => id > MAX_SAFE)) {
+          console.warn(
+            "NftPicker: emitting bigint payload because some token IDs exceed MAX_SAFE_INTEGER"
+          );
+        }
+        onChange(payload);
+      }
+    },
+    [getSelectionFromRanges, onChange, outputMode]
+  );
 
   useEffect(() => {
     const pendingContractAddress = pendingPropEmitRef.current;
@@ -681,7 +711,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     }
     pendingPropEmitRef.current = null;
     emitChange(selectedContract, ranges, allSelected);
-  }, [selectedContract, ranges, allSelected]);
+  }, [selectedContract, ranges, allSelected, emitChange]);
   const activeSuggestionId = isOpen && suggestionList[activeIndex]
     ? `nft-suggestion-${activeIndex}`
     : undefined;

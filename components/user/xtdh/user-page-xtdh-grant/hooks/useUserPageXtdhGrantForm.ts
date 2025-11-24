@@ -98,9 +98,19 @@ export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
 
     setIsAuthorizing(true);
     try {
-      const { success } = await requestAuth();
-      if (!success) {
-        setSubmitError("Authentication failed. Please try again.");
+      try {
+        const { success } = await requestAuth();
+        if (!success) {
+          setSubmitError("Authentication failed. Please try again.");
+          return;
+        }
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Authentication failed. Please try again.";
+        setSubmitError(message);
+        setToast({ type: "error", message });
         return;
       }
 

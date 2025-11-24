@@ -1,8 +1,8 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
-import type { MutableRefObject, RefObject } from "react";
+import type { RefObject } from "react";
 
-type ButtonRef = RefObject<HTMLButtonElement | null> | MutableRefObject<HTMLButtonElement | null>;
+type ButtonRef = RefObject<HTMLButtonElement | null>;
 
 interface AllTokensSelectedCardProps {
   readonly onDeselect: () => void;

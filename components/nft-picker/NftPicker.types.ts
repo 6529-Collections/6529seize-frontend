@@ -34,6 +34,22 @@ export type NftPickerSelection =
       tokenIds: readonly string[];
     });
 
+// Emitted when the picker cannot safely emit number output because token IDs exceed Number.MAX_SAFE_INTEGER.
+export type NftPickerSelectionError = {
+  type: "error";
+  error: string;
+  unsafeCount: number;
+  contractAddress?: `0x${string}`;
+  outputMode: "number";
+};
+
+export type NftPickerChange = NftPickerSelection | NftPickerSelectionError | null;
+
+export type NftPickerOnChange = {
+  // Bivariant to accept handlers that only handle the successful selection shape.
+  bivarianceHack(output: NftPickerChange): void;
+}["bivarianceHack"];
+
 export type NftPickerValue = {
   chain: SupportedChain;
   contractAddress?: `0x${string}`;
@@ -44,7 +60,7 @@ export type NftPickerValue = {
 export type NftPickerProps = {
   readonly value?: NftPickerValue;
   readonly defaultValue?: Partial<NftPickerValue>;
-  readonly onChange: (output: NftPickerSelection | null) => void;
+  readonly onChange: NftPickerOnChange;
   readonly onContractChange?: (meta: ContractOverview | null) => void;
   readonly chain?: SupportedChain;
   readonly outputMode?: OutputMode;

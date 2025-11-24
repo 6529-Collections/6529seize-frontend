@@ -1,6 +1,11 @@
 import { isAddress } from "viem";
 import type { GrantValidationParams, GrantValidationResult } from "../types";
 
+const isSelectionError = (
+  selection: GrantValidationParams["selection"]
+): selection is Extract<NonNullable<GrantValidationParams["selection"]>, { type: "error" }> =>
+  Boolean(selection && "type" in selection && selection.type === "error");
+
 export const validateGrantForm = ({
   contract,
   selection,
@@ -29,7 +34,17 @@ export const validateGrantForm = ({
     };
   }
 
-  if (selection.contractAddress !== contract.address) {
+  if (isSelectionError(selection)) {
+    return {
+      success: false,
+      message: selection.error,
+    };
+  }
+
+  if (
+    selection.contractAddress.toLowerCase() !==
+    contract.address.toLowerCase()
+  ) {
     return {
       success: false,
       message: "Token selection does not match the selected collection.",

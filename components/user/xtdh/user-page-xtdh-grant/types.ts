@@ -1,11 +1,12 @@
 import type {
   ContractOverview,
+  NftPickerChange,
   NftPickerSelection,
 } from "@/components/nft-picker/NftPicker.types";
 
 export interface UserPageXtdhGrantFormState {
   contract: ContractOverview | null;
-  selection: NftPickerSelection | null;
+  selection: NftPickerChange;
   amount: number | null;
   validUntil: Date | null;
 }
@@ -24,7 +25,7 @@ export interface UserPageXtdhGrantLimitsState {
 
 export interface UserPageXtdhGrantFormControls {
   setContract: (contract: ContractOverview | null) => void;
-  setSelection: (selection: NftPickerSelection | null) => void;
+  setSelection: (selection: NftPickerChange) => void;
   setAmount: (amount: number | null) => void;
   setValidUntil: (validUntil: Date | null) => void;
   handleSubmit: () => Promise<void>;

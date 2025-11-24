@@ -18,6 +18,26 @@ export default function UserPageXtdhGrantAmount({
       ? formatNumberWithCommas(Math.floor(maxGrantRate))
       : null;
 
+  let maxGrantMessage;
+  if (isMaxGrantLoading) {
+    maxGrantMessage = (
+      <span className="tw-inline-flex tw-items-center tw-gap-1 tw-animate-pulse">
+        <span className="tw-h-2 tw-w-2 tw-rounded-full tw-bg-iron-500" aria-hidden />
+        {" "}Fetching max available…
+      </span>
+    );
+  } else if (isMaxGrantError || maxGrantRate === null) {
+    maxGrantMessage = (
+      <span className="tw-text-iron-400">Unable to load your max available grant amount.</span>
+    );
+  } else {
+    maxGrantMessage = (
+      <span className="tw-text-iron-200">
+        Max available: {formattedMax} xTDH/day
+      </span>
+    );
+  }
+
   return (
     <div className="tw-flex tw-flex-col tw-gap-2">
       <label
@@ -42,23 +62,17 @@ export default function UserPageXtdhGrantAmount({
           }
 
           const parsedValue = Number(value);
-          onAmountChange(Number.isNaN(parsedValue) ? null : parsedValue);
+          if (!Number.isFinite(parsedValue) || parsedValue < 0) {
+            onAmountChange(null);
+            return;
+          }
+
+          onAmountChange(parsedValue);
         }}
         className="tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-font-medium tw-text-iron-100 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
       />
       <p className="tw-text-xs tw-font-medium tw-text-iron-300">
-        {isMaxGrantLoading ? (
-          <span className="tw-inline-flex tw-items-center tw-gap-1 tw-animate-pulse">
-            <span className="tw-h-2 tw-w-2 tw-rounded-full tw-bg-iron-500" aria-hidden />
-            Fetching max available…
-          </span>
-        ) : isMaxGrantError || maxGrantRate === null ? (
-          <span className="tw-text-iron-400">Unable to load your max available grant amount.</span>
-        ) : (
-          <span className="tw-text-iron-200">
-            Max available: {formattedMax} xTDH/day
-          </span>
-        )}
+        {maxGrantMessage}
       </p>
     </div>
   );

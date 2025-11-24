@@ -1,6 +1,8 @@
 import type {
   ContractOverview,
+  NftPickerChange,
   NftPickerSelection,
+  NftPickerSelectionError,
 } from "@/components/nft-picker/NftPicker.types";
 import {
   formatDateTime,
@@ -55,6 +57,11 @@ const describeSelection = (
 const isValidGrantAmount = (amount: number | null): amount is number =>
   amount !== null && Number.isFinite(amount) && amount > 0;
 
+const isSelectionError = (
+  selection: NftPickerChange
+): selection is NftPickerSelectionError =>
+  Boolean(selection && "type" in selection && selection.type === "error");
+
 const getPerTokenText = (amount: number, tokenCount: number | null): string => {
   if (!tokenCount || tokenCount <= 0) {
     return "";
@@ -100,7 +107,7 @@ const getSelectionSummary = ({
   amount,
 }: {
   readonly contract: ContractOverview | null;
-  readonly selection: NftPickerSelection | null;
+  readonly selection: NftPickerChange;
   readonly amount: number | null;
 }): string => {
   if (!contract && !selection) {
@@ -111,6 +118,10 @@ const getSelectionSummary = ({
 
   if (!selection) {
     return describeCollectionSelection(collectionLabel);
+  }
+
+  if (isSelectionError(selection)) {
+    return selection.error;
   }
 
   const { text: selectionText, tokenCount } = describeSelection(selection, collectionLabel);
@@ -137,7 +148,7 @@ const getValiditySummary = (validUntil: Date | null): string => {
 
 export interface UserPageXtdhGrantSummaryProps {
   readonly contract: ContractOverview | null;
-  readonly selection: NftPickerSelection | null;
+  readonly selection: NftPickerChange;
   readonly amount: number | null;
   readonly validUntil: Date | null;
 }
