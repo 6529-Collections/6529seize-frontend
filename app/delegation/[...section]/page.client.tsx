@@ -60,7 +60,6 @@ export default function DelegationPageClient(props: {
 
   const updatePath = (s: DelegationCenterSection) => {
     if (s) {
-      // Clear query params when switching to sections that don't need them
       if (
         ![
           DelegationCenterSection.CHECKER,
