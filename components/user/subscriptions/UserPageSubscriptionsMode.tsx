@@ -29,6 +29,7 @@ export default function UserPageSubscriptionsMode(
 
   useEffect(() => {
     setIsAuto(props.details?.automatic ?? false);
+    setIsAllEditions(props.details?.subscribe_all_editions ?? false);
   }, [props.details]);
 
   const toggleMode = async (): Promise<void> => {
@@ -84,9 +85,45 @@ export default function UserPageSubscriptionsMode(
       return;
     }
     setIsUpdatingAllEditions(true);
-    setIsAllEditions(!isAllEditions);
-    setIsUpdatingAllEditions(false);
-    // TODO: Implement API call to toggle all editions
+    const { success } = await requestAuth();
+    if (!success) {
+      setIsUpdatingAllEditions(false);
+      return;
+    }
+    const allEditions = !isAllEditions;
+    interface SubscribeAllEditionsBody {
+      subscribe_all_editions: boolean;
+    }
+    try {
+      const response = await commonApiPost<
+        SubscribeAllEditionsBody,
+        SubscribeAllEditionsBody
+      >({
+        endpoint: `subscriptions/${props.profileKey}/subscription-mode`,
+        body: {
+          subscribe_all_editions: allEditions,
+        },
+      });
+      const responseAllEditions = response.subscribe_all_editions;
+      setIsAllEditions(responseAllEditions);
+      const message = `Edition Preference set to ${
+        responseAllEditions ? `All editions` : `One edition`
+      }`;
+      setToast({
+        message: message,
+        type: "success",
+      });
+      props.refresh();
+    } catch (e: any) {
+      setIsUpdating(false);
+      setToast({
+        message: e ?? "Failed to set edition preference",
+        type: "error",
+      });
+      return;
+    } finally {
+      setIsUpdatingAllEditions(false);
+    }
   };
 
   return (
@@ -138,10 +175,10 @@ export default function UserPageSubscriptionsMode(
               <label
                 htmlFor={"subscription-all-editions-mode"}
                 className={"font-color"}>
-                <b>Only one</b>
+                <b>One edition</b>
               </label>
               <Toggle
-                disabled={props.readonly || isUpdating}
+                disabled={props.readonly || isUpdatingAllEditions}
                 id={"subscription-all-editions-mode"}
                 checked={isAllEditions}
                 icons={false}
@@ -150,7 +187,10 @@ export default function UserPageSubscriptionsMode(
               <label
                 htmlFor={"subscription-all-editions-mode"}
                 className={"font-color"}>
-                <b>All editions</b>
+                <b>
+                  All editions (x{props.details?.subscription_eligibility_count}
+                  )
+                </b>
               </label>
               {isUpdatingAllEditions && (
                 <CircleLoader size={CircleLoaderSize.MEDIUM} />

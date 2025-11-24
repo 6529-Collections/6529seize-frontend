@@ -3,6 +3,8 @@ export interface SubscriptionDetails {
   last_update: number;
   balance: number;
   automatic: boolean;
+  subscribe_all_editions: boolean;
+  subscription_eligibility_count: number;
 }
 
 export interface SubscriptionTopUp {
