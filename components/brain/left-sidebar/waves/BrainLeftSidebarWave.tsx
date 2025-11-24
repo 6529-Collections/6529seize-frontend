@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
@@ -75,10 +75,13 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
 
   const isActive = wave.id === (searchParams?.get("wave") ?? undefined);
 
-  const onLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleWaveClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    router.push(getHref(wave.id));
-  };
+    const newUrl = getHref(wave.id);
+    // Use router.replace for shallow client-side navigation
+    router.replace(newUrl, { scroll: false });
+    onWaveHover(wave.id);
+  }, [wave.id, router]);
 
   const getAvatarRingClasses = () => {
     if (isActive) return "tw-ring-1 tw-ring-offset-2 tw-ring-offset-iron-900 tw-ring-primary-400";
@@ -95,7 +98,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       <Link
         href={getHref(wave.id)}
         onMouseEnter={() => onWaveHover(wave.id)}
-        onClick={onLinkClick}
+        onClick={handleWaveClick}
         className={`tw-flex tw-flex-1 tw-space-x-3 tw-no-underline tw-py-1 tw-transition-all tw-duration-200 tw-ease-out ${
           isActive
             ? "tw-text-white desktop-hover:group-hover:tw-text-white"

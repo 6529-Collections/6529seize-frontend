@@ -33,7 +33,7 @@ const WebBrainLeftSidebarWave = ({
   const prefetchWaveData = usePrefetchWaveData();
   const { hasTouchScreen } = useDeviceInfo();
 
-  const { href, isActive, onMouseEnter } = useWaveNavigation({
+  const { href, isActive, onMouseEnter, onClick } = useWaveNavigation({
     basePath,
     onHover,
     prefetchWaveData,
@@ -71,6 +71,7 @@ const WebBrainLeftSidebarWave = ({
         isActive={isActive}
         isDropWave={isDropWave}
         onMouseEnter={onMouseEnter}
+        onClick={onClick}
         showTooltip={showCollapsedTooltip}
         tooltipId={tooltipId}
         tooltipPlacement={TOOLTIP_PLACEMENT}
@@ -89,6 +90,7 @@ const WebBrainLeftSidebarWave = ({
       latestDropTimestamp={wave.newDropsCount.latestDropTimestamp}
       nameRef={nameRef}
       onMouseEnter={onMouseEnter}
+      onClick={onClick}
       showExpandedTooltip={showExpandedTooltip}
       showPin={showPin}
       tooltipContent={formattedWaveName}
