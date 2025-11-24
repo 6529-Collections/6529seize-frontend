@@ -14,8 +14,7 @@ export function AllTokensSelectedCard({
   buttonRef,
 }: AllTokensSelectedCardProps) {
   return (
-    <div
-      role="status"
+    <output
       aria-label="All tokens selected status"
       className="tw-flex tw-w-full tw-flex-col tw-gap-3 tw-rounded-lg tw-border-2 tw-border-green-500/60 tw-bg-green-950/30 tw-p-4 tw-transition-all tw-duration-200 tw-ease-in-out @md:tw-flex-row @md:tw-items-center"
     >
@@ -40,6 +39,6 @@ export function AllTokensSelectedCard({
         <FontAwesomeIcon icon={faCheckCircle} className="tw-h-5 tw-w-5 tw-text-white" aria-hidden="true" />
         Deselect All
       </button>
-    </div>
+    </output>
   );
 }
