@@ -27,6 +27,8 @@ export class ApiTdhStats {
     'granted_target_collections_count': number;
     'granted_target_tokens_count': number;
     'available_grant_rate': number;
+    'produced_xtdh': number;
+    'produced_xtdh_rate': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -108,6 +110,18 @@ export class ApiTdhStats {
         {
             "name": "available_grant_rate",
             "baseName": "available_grant_rate",
+            "type": "number",
+            "format": "double"
+        },
+        {
+            "name": "produced_xtdh",
+            "baseName": "produced_xtdh",
+            "type": "number",
+            "format": "double"
+        },
+        {
+            "name": "produced_xtdh_rate",
+            "baseName": "produced_xtdh_rate",
             "type": "number",
             "format": "double"
         }    ];

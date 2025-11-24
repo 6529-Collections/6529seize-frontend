@@ -29,7 +29,7 @@ export function buildGlobalXtdhStatsContent(data: GlobalTdhStats): XtdhStatsProp
     metrics: {
       tdhRate: formatDisplay(tdhRate),
       multiplier: formatDisplay(xtdhMultiplier, 2),
-      xtdhRate: totalDisplay,
+      producedXtdhRate: totalDisplay,
     },
     allocation: {
       total: totalDisplay,

@@ -5,7 +5,7 @@ import { XtdhStatCard } from "./XtdhStatCard";
 export function XtdhMetricsSection({
   tdhRate,
   multiplier,
-  xtdhRate,
+  producedXtdhRate,
 }: Readonly<XtdhMetricsProps>) {
   return (
     <section
@@ -30,7 +30,7 @@ export function XtdhMetricsSection({
       <XtdhStatCard
         label="xTDH Rate"
         tooltip="Total xTDH you can generate per day (TDH Rate × Multiplier)"
-        value={xtdhRate}
+        value={producedXtdhRate}
         suffix="/day"
       />
     </section>

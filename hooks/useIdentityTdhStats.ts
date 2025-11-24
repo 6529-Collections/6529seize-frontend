@@ -10,7 +10,7 @@ interface UseIdentityTdhStatsOptions {
 }
 
 export interface IdentityTdhStats {
-  readonly xtdhRate: number;
+  readonly producedXtdhRate: number;
   readonly grantedXtdhPerDay: number;
   readonly grantedCollectionsCount: number;
   readonly grantedTokensCount: number;
@@ -27,13 +27,13 @@ async function fetchIdentityTdhStats(identity: string): Promise<IdentityTdhStats
     endpoint: `tdh-stats/${encodedIdentity}`,
   });
 
-  const xtdhRate = sanitizeNonNegativeNumber(response.xtdh_rate);
+  const producedXtdhRate = sanitizeNonNegativeNumber(response.produced_xtdh_rate);
   const tdhRate = sanitizeNullableNonNegativeNumber(
     (response.tdh_rate ?? Number.NaN),
   );
 
   return {
-    xtdhRate,
+    producedXtdhRate,
     grantedXtdhPerDay: sanitizeNonNegativeNumber(response.granted_xtdh_rate),
     grantedCollectionsCount: sanitizeCount(response.granted_target_collections_count),
     grantedTokensCount: sanitizeCount(response.granted_target_tokens_count),

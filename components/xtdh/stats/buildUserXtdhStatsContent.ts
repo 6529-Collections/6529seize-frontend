@@ -7,7 +7,7 @@ export function buildUserXtdhStatsContent(data: IdentityTdhStats): XtdhStatsProp
   const {
     tdhRate,
     xtdhMultiplier,
-    xtdhRate,
+    producedXtdhRate,
     grantedXtdhPerDay,
     receivedXtdhRate,
     totalReceivedXtdh,
@@ -15,16 +15,16 @@ export function buildUserXtdhStatsContent(data: IdentityTdhStats): XtdhStatsProp
   } = data;
 
   const hasAllocationMetrics =
-    typeof xtdhRate === "number" && typeof grantedXtdhPerDay === "number";
+    typeof producedXtdhRate === "number" && typeof grantedXtdhPerDay === "number";
   const availableValue = hasAllocationMetrics
-    ? Math.max(xtdhRate - grantedXtdhPerDay, 0)
+    ? Math.max(producedXtdhRate - grantedXtdhPerDay, 0)
     : null;
-  const rawPercentage = hasAllocationMetrics && xtdhRate > 0
-    ? (grantedXtdhPerDay / xtdhRate) * 100
+  const rawPercentage = hasAllocationMetrics && producedXtdhRate > 0
+    ? (grantedXtdhPerDay / producedXtdhRate) * 100
     : 0;
   const percentage = Math.min(Math.max(rawPercentage, 0), 100);
 
-  const totalDisplay = formatDisplay(xtdhRate);
+  const totalDisplay = formatDisplay(producedXtdhRate);
   const grantedDisplay = formatDisplay(grantedXtdhPerDay);
   const availableDisplay = formatDisplay(availableValue);
 
@@ -32,7 +32,7 @@ export function buildUserXtdhStatsContent(data: IdentityTdhStats): XtdhStatsProp
     metrics: {
       tdhRate: formatDisplay(tdhRate),
       multiplier: formatDisplay(xtdhMultiplier, 2),
-      xtdhRate: formatDisplay(xtdhRate),
+      producedXtdhRate: formatDisplay(producedXtdhRate),
     },
     allocation: {
       total: totalDisplay,
