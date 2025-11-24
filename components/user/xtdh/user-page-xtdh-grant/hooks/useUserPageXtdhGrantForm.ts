@@ -1,0 +1,142 @@
+import { useCallback, useContext, useEffect, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AuthContext } from "@/components/auth/Auth";
+import { commonApiPost } from "@/services/api/common-api";
+import { ApiCreateTdhGrant } from "@/generated/models/ApiCreateTdhGrant";
+import { ApiTdhGrant } from "@/generated/models/ApiTdhGrant";
+import { ApiTdhGrantTargetChain } from "@/generated/models/ApiTdhGrantTargetChain";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { validateGrantForm } from "../utils/validateGrantForm";
+import type {
+  GrantValidationResult,
+  UserPageXtdhGrantForm,
+} from "../types";
+
+export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
+  const [contract, setContract] = useState<UserPageXtdhGrantForm["contract"]>(
+    null
+  );
+  const [selection, setSelection] =
+    useState<UserPageXtdhGrantForm["selection"]>(null);
+  const [amount, setAmount] = useState<UserPageXtdhGrantForm["amount"]>(null);
+  const [validUntil, setValidUntil] =
+    useState<UserPageXtdhGrantForm["validUntil"]>(null);
+  const [submitError, setSubmitError] =
+    useState<UserPageXtdhGrantForm["submitError"]>(null);
+  const [submitSuccess, setSubmitSuccess] =
+    useState<UserPageXtdhGrantForm["submitSuccess"]>(null);
+  const [isAuthorizing, setIsAuthorizing] = useState(false);
+  const { requestAuth, setToast } = useContext(AuthContext);
+  const queryClient = useQueryClient();
+
+  const createGrantMutation = useMutation({
+    mutationFn: async (payload: ApiCreateTdhGrant) =>
+      await commonApiPost<ApiCreateTdhGrant, ApiTdhGrant>({
+        endpoint: "tdh-grants",
+        body: payload,
+      }),
+  });
+
+  const resetSubmissionFeedback = useCallback(() => {
+    setSubmitError(null);
+    setSubmitSuccess(null);
+  }, []);
+
+  useEffect(() => {
+    resetSubmissionFeedback();
+  }, [amount, contract, resetSubmissionFeedback, selection, validUntil]);
+
+  const handleSubmit = useCallback(async () => {
+    if (isAuthorizing) {
+      return;
+    }
+
+    resetSubmissionFeedback();
+
+    const validationResult: GrantValidationResult = validateGrantForm({
+      contract,
+      selection,
+      amount,
+      validUntil,
+    });
+
+    if (!validationResult.success) {
+      setSubmitError(validationResult.message);
+      return;
+    }
+
+    const {
+      contract: validatedContract,
+      selection: validatedSelection,
+      amount: validatedAmount,
+      validUntil: validatedValidUntil,
+    } = validationResult;
+
+    setIsAuthorizing(true);
+    try {
+      const { success } = await requestAuth();
+      if (!success) {
+        setSubmitError("Authentication failed. Please try again.");
+        return;
+      }
+
+      const payload: ApiCreateTdhGrant = {
+        target_chain: ApiTdhGrantTargetChain.EthereumMainnet,
+        target_contract: validatedContract.address,
+        target_tokens: validatedSelection.allSelected
+          ? []
+          : validatedSelection.tokenIdsRaw.map((tokenId) => tokenId.toString()),
+        valid_to: validatedValidUntil
+          ? Math.floor(validatedValidUntil.getTime() / 1000)
+          : null,
+        tdh_rate: validatedAmount,
+        is_irrevocable: false,
+      };
+
+      try {
+        await createGrantMutation.mutateAsync(payload);
+        await queryClient.invalidateQueries({
+          queryKey: [QueryKey.TDH_GRANTS],
+        });
+        const message = "Grant submitted. You will see it once processed.";
+        setSubmitSuccess(message);
+        setToast({ type: "success", message });
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Failed to submit the grant.";
+        setSubmitError(message);
+        setToast({ type: "error", message });
+      }
+    } finally {
+      setIsAuthorizing(false);
+    }
+  }, [
+    amount,
+    contract,
+    createGrantMutation,
+    isAuthorizing,
+    queryClient,
+    requestAuth,
+    resetSubmissionFeedback,
+    selection,
+    setToast,
+    validUntil,
+  ]);
+
+  return {
+    contract,
+    selection,
+    amount,
+    validUntil,
+    submitError,
+    submitSuccess,
+    isSubmitting: createGrantMutation.isPending || isAuthorizing,
+    setContract,
+    setSelection,
+    setAmount,
+    setValidUntil,
+    handleSubmit,
+  };
+}
