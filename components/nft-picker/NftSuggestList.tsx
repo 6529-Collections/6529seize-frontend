@@ -178,7 +178,7 @@ export function NftSuggestList({
                 <button
                   type="button"
                   className={clsx(
-                    "tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-items-center tw-gap-3 tw-px-3 tw-py-2 tw-text-left",
+                    "tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-items-center tw-gap-3 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-left tw-transition-colors",
                     isActive
                       ? "tw-bg-primary-500/20 tw-text-white"
                       : "tw-text-iron-200 hover:tw-bg-iron-800"
