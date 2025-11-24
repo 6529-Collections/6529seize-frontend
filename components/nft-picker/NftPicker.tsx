@@ -437,7 +437,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     : "Select All";
 
   const selectAllButtonClassName =
-    "tw-flex tw-w-full tw-shrink-0 tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-800 tw-px-4 tw-py-2.5 tw-font-medium tw-text-iron-300 tw-transition-colors hover:tw-bg-iron-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-ring-offset-2 focus:tw-ring-offset-iron-900 disabled:tw-cursor-not-allowed disabled:tw-bg-iron-800 disabled:tw-text-iron-500 sm:tw-w-auto";
+    "tw-flex tw-w-full tw-shrink-0 tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-800 tw-px-4 tw-py-2.5 tw-font-medium tw-text-iron-300 tw-transition-colors hover:tw-bg-iron-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-ring-offset-2 focus:tw-ring-offset-iron-900 disabled:tw-cursor-not-allowed disabled:tw-border-iron-700 disabled:tw-bg-iron-900 disabled:tw-text-iron-600 sm:tw-w-auto";
 
   const handleTokenInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     setTokenInput(event.target.value);
