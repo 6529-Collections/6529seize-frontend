@@ -16,6 +16,12 @@ export interface UserPageXtdhGrantSubmissionState {
   isSubmitting: boolean;
 }
 
+export interface UserPageXtdhGrantLimitsState {
+  maxGrantRate: number | null;
+  isMaxGrantLoading: boolean;
+  isMaxGrantError: boolean;
+}
+
 export interface UserPageXtdhGrantFormControls {
   setContract: (contract: ContractOverview | null) => void;
   setSelection: (selection: NftPickerSelection | null) => void;
@@ -26,9 +32,12 @@ export interface UserPageXtdhGrantFormControls {
 
 export type UserPageXtdhGrantForm = UserPageXtdhGrantFormState &
   UserPageXtdhGrantSubmissionState &
+  UserPageXtdhGrantLimitsState &
   UserPageXtdhGrantFormControls;
 
-export type GrantValidationParams = UserPageXtdhGrantFormState;
+export type GrantValidationParams = UserPageXtdhGrantFormState & {
+  maxGrantRate?: number | null;
+};
 
 export type GrantValidationResult =
   | { success: false; message: string }

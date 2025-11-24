@@ -1,10 +1,23 @@
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+
 export default function UserPageXtdhGrantAmount({
   amount,
   onAmountChange,
+  maxGrantRate,
+  isMaxGrantLoading,
+  isMaxGrantError,
 }: {
   readonly amount: number | null;
   readonly onAmountChange: (value: number | null) => void;
+  readonly maxGrantRate: number | null;
+  readonly isMaxGrantLoading: boolean;
+  readonly isMaxGrantError: boolean;
 }) {
+  const formattedMax =
+    maxGrantRate !== null && Number.isFinite(maxGrantRate)
+      ? formatNumberWithCommas(Math.floor(maxGrantRate))
+      : null;
+
   return (
     <div className="tw-flex tw-flex-col tw-gap-2">
       <label
@@ -16,6 +29,7 @@ export default function UserPageXtdhGrantAmount({
         id="xtdh-grant-amount"
         type="number"
         min="0"
+        max={maxGrantRate ?? undefined}
         step="any"
         inputMode="decimal"
         placeholder="Enter total xTDH amount"
@@ -32,6 +46,20 @@ export default function UserPageXtdhGrantAmount({
         }}
         className="tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-font-medium tw-text-iron-100 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
       />
+      <p className="tw-text-xs tw-font-medium tw-text-iron-300">
+        {isMaxGrantLoading ? (
+          <span className="tw-inline-flex tw-items-center tw-gap-1 tw-animate-pulse">
+            <span className="tw-h-2 tw-w-2 tw-rounded-full tw-bg-iron-500" aria-hidden />
+            Fetching max available…
+          </span>
+        ) : isMaxGrantError || maxGrantRate === null ? (
+          <span className="tw-text-iron-400">Unable to load your max available grant amount.</span>
+        ) : (
+          <span className="tw-text-iron-200">
+            Max available: {formattedMax} xTDH/day
+          </span>
+        )}
+      </p>
     </div>
   );
 }

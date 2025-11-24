@@ -6,6 +6,7 @@ export const validateGrantForm = ({
   selection,
   amount,
   validUntil,
+  maxGrantRate,
 }: GrantValidationParams): GrantValidationResult => {
   if (!contract) {
     return {
@@ -46,6 +47,18 @@ export const validateGrantForm = ({
     return {
       success: false,
       message: "Enter a valid amount greater than zero.",
+    };
+  }
+
+  if (
+    maxGrantRate !== null &&
+    maxGrantRate !== undefined &&
+    Number.isFinite(maxGrantRate) &&
+    amount > maxGrantRate
+  ) {
+    return {
+      success: false,
+      message: `Amount exceeds your available grant rate (${maxGrantRate}).`,
     };
   }
 

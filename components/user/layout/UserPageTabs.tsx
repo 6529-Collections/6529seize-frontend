@@ -34,8 +34,11 @@ import {
 
 const DEFAULT_TAB = DEFAULT_USER_PAGE_TAB;
 
-// Normalize consent country to uppercase code; empty strings become null.
-const normalizeCountry = (country: string): string | null => {
+// Normalize consent country to uppercase code; empty or non-strings become null.
+const normalizeCountry = (country: string | null | undefined): string | null => {
+  if (typeof country !== "string") {
+    return null;
+  }
   const trimmed = country.trim();
   return trimmed ? trimmed.toUpperCase() : null;
 };
@@ -47,7 +50,7 @@ const getVisibilityContext = ({
 }: {
   readonly showWaves: boolean;
   readonly capacitorIsIos: boolean;
-  readonly country: string;
+  readonly country: string | null | undefined;
 }): UserPageVisibilityContext => {
   const normalizedCountry = normalizeCountry(country);
 

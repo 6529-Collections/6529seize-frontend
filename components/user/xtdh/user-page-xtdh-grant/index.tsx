@@ -21,6 +21,9 @@ export default function UserPageXtdhGrant() {
     submitSuccess,
     isSubmitting,
     handleSubmit,
+    maxGrantRate,
+    isMaxGrantLoading,
+    isMaxGrantError,
   } = useUserPageXtdhGrantForm();
 
   return (
@@ -37,7 +40,13 @@ export default function UserPageXtdhGrant() {
         onContractChange={setContract}
       />
 
-      <UserPageXtdhGrantAmount amount={amount} onAmountChange={setAmount} />
+      <UserPageXtdhGrantAmount
+        amount={amount}
+        onAmountChange={setAmount}
+        maxGrantRate={maxGrantRate}
+        isMaxGrantLoading={isMaxGrantLoading}
+        isMaxGrantError={isMaxGrantError}
+      />
 
       <UserPageXtdhGrantValidity value={validUntil} onChange={setValidUntil} />
 

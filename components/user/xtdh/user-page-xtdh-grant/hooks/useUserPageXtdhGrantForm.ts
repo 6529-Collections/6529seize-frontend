@@ -11,6 +11,7 @@ import type {
   GrantValidationResult,
   UserPageXtdhGrantForm,
 } from "../types";
+import { useIdentityTdhStats } from "@/hooks/useIdentityTdhStats";
 
 export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
   const [contract, setContract] = useState<UserPageXtdhGrantForm["contract"]>(
@@ -26,8 +27,30 @@ export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
   const [submitSuccess, setSubmitSuccess] =
     useState<UserPageXtdhGrantForm["submitSuccess"]>(null);
   const [isAuthorizing, setIsAuthorizing] = useState(false);
-  const { requestAuth, setToast } = useContext(AuthContext);
+  const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const queryClient = useQueryClient();
+
+  const identity =
+    connectedProfile?.query ??
+    connectedProfile?.handle ??
+    connectedProfile?.primary_wallet ??
+    connectedProfile?.consolidation_key ??
+    null;
+
+  const {
+    data: tdhStats,
+    isLoading: isMaxGrantLoading,
+    isError: isMaxGrantError,
+  } = useIdentityTdhStats({
+    identity,
+    enabled: Boolean(identity),
+  });
+
+  const maxGrantRateRaw = tdhStats?.availableGrantRate ?? null;
+  const maxGrantRate =
+    Number.isFinite(maxGrantRateRaw) && maxGrantRateRaw !== null
+      ? Math.floor(maxGrantRateRaw)
+      : null;
 
   const createGrantMutation = useMutation({
     mutationFn: async (payload: ApiCreateTdhGrant) =>
@@ -58,6 +81,7 @@ export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
       selection,
       amount,
       validUntil,
+      maxGrantRate,
     });
 
     if (!validationResult.success) {
@@ -117,6 +141,7 @@ export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
     contract,
     createGrantMutation,
     isAuthorizing,
+    maxGrantRate,
     queryClient,
     requestAuth,
     resetSubmissionFeedback,
@@ -133,6 +158,9 @@ export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
     submitError,
     submitSuccess,
     isSubmitting: createGrantMutation.isPending || isAuthorizing,
+    maxGrantRate,
+    isMaxGrantLoading,
+    isMaxGrantError,
     setContract,
     setSelection,
     setAmount,
