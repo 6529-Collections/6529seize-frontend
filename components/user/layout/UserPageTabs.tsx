@@ -50,8 +50,13 @@ const normalizeCountry = (country: CountryValue): string | null => {
     return firstCode ? firstCode.trim().toUpperCase() : null;
   }
 
-  if (country && typeof (country as { country?: unknown }).country === "string") {
-    const code = (country as { country: string }).country.trim();
+  if (
+    country &&
+    typeof country === "object" &&
+    "country" in country &&
+    typeof country.country === "string"
+  ) {
+    const code = country.country.trim();
     return code ? code.toUpperCase() : null;
   }
 

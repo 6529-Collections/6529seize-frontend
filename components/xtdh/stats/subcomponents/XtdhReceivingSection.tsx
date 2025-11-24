@@ -7,9 +7,12 @@ export function XtdhReceivingSection({
 }: Readonly<XtdhReceivingProps>) {
   return (
     <section
-      aria-label="Receiving Metrics"
+      aria-labelledby="xtdh-receiving-heading"
       className="tw-mt-5"
     >
+      <h2 id="xtdh-receiving-heading" className="tw-sr-only">
+        Receiving Metrics
+      </h2>
       <p
         className="tw-mb-2 tw-text-xs tw-font-medium tw-uppercase tw-text-iron-300"
         title="Your current incoming xTDH rate from other holders"

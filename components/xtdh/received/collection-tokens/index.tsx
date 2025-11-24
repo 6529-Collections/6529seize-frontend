@@ -63,7 +63,6 @@ export function XtdhCollectionTokensPanel({
     pageSize: TOKENS_PAGE_SIZE,
     sortField: activeSortField,
     order: apiOrder,
-    enabled: requireIdentity ? Boolean(identity && contractParam) : Boolean(contractParam),
     requireIdentity,
   });
 

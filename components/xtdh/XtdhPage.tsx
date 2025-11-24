@@ -18,6 +18,23 @@ export default function XtdhPage(): ReactElement {
     return buildGlobalXtdhStatsContent(globalStatsQuery.data);
   }, [globalStatsQuery.data]);
 
+  let statsSection: ReactElement;
+
+  if (globalStatsQuery.isLoading) {
+    statsSection = <XtdhStatsSkeleton />;
+  } else if (globalStatsQuery.isError || !statsContent) {
+    statsSection = (
+      <XtdhStatsError
+        message={globalStatsQuery.error?.message ?? "Failed to load xTDH stats."}
+        onRetry={() => {
+          globalStatsQuery.refetch().catch(() => undefined);
+        }}
+      />
+    );
+  } else {
+    statsSection = <XtdhStats {...statsContent} />;
+  }
+
   return (
     <div className="tailwind-scope tw-space-y-6">
       <section className="tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-5 tw-space-y-3">
@@ -30,21 +47,7 @@ export default function XtdhPage(): ReactElement {
           </p>
         </header>
         <div className="tw-mt-2">
-          {globalStatsQuery.isLoading ? (
-            <XtdhStatsSkeleton />
-          ) : globalStatsQuery.isError || !statsContent ? (
-            <XtdhStatsError
-              message={
-                globalStatsQuery.error?.message ??
-                "Failed to load xTDH stats."
-              }
-              onRetry={() => {
-                globalStatsQuery.refetch().catch(() => undefined);
-              }}
-            />
-          ) : (
-            <XtdhStats {...statsContent} />
-          )}
+          {statsSection}
         </div>
       </section>
       <XtdhReceivedSection profileId={null} requireIdentity={false} />
@@ -54,10 +57,10 @@ export default function XtdhPage(): ReactElement {
 
 function XtdhStatsSkeleton(): ReactElement {
   return (
-    <div
-      role="status"
+    <output
+      aria-live="polite"
       aria-busy="true"
-      className="tw-animate-pulse tw-space-y-4"
+      className="tw-block tw-animate-pulse tw-space-y-4"
     >
       <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-3">
         {[0, 1, 2].map((key) => (
@@ -75,7 +78,7 @@ function XtdhStatsSkeleton(): ReactElement {
         <div className="tw-h-2 tw-w-full tw-rounded-full tw-bg-iron-800" />
         <div className="tw-h-4 tw-w-48 tw-rounded tw-bg-iron-800" />
       </div>
-    </div>
+    </output>
   );
 }
 

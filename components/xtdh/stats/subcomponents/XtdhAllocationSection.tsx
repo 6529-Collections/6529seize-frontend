@@ -24,6 +24,7 @@ export function XtdhAllocationSection({
           className="tw-block tw-h-2.5 tw-w-full tw-rounded-full tw-border tw-border-iron-700 tw-bg-iron-900 tw-text-primary-500 tw-transition-all tw-duration-300 tw-appearance-none [&::-webkit-progress-bar]:tw-rounded-full [&::-webkit-progress-bar]:tw-bg-transparent [&::-webkit-progress-value]:tw-rounded-full [&::-webkit-progress-value]:tw-bg-primary-500 [&::-moz-progress-bar]:tw-rounded-full [&::-moz-progress-bar]:tw-bg-primary-500"
           value={percentage}
           max={100}
+          aria-valuenow={percentage}
           aria-valuetext={ariaValueText}
           aria-labelledby="xtdh-allocation-section"
         />
