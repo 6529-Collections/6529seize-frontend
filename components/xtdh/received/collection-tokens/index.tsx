@@ -110,7 +110,7 @@ export function XtdhCollectionTokensPanel({
       return null;
     }
     return Number.isFinite(selectedToken.token.token)
-      ? Math.trunc(Number(selectedToken.token.token))
+      ? Math.trunc(selectedToken.token.token)
       : null;
   }, [selectedToken]);
 

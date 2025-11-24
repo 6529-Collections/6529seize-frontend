@@ -16,7 +16,6 @@ export function XtdhStatCard({
   const labelWithTooltip = (
     <span
       className="tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-300"
-      tabIndex={0}
       aria-describedby={tooltipDescriptionId}
     >
       {label}
