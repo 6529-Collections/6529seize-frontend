@@ -35,8 +35,6 @@ export default function DelegationPageClient(props: {
       ].includes(s)
     ) {
       queryParams = { address: addressQuery };
-    } else {
-      setAddressQuery("");
     }
     if (s === DelegationCenterSection.REGISTER_DELEGATION) {
       if (collectionQuery) {
@@ -45,9 +43,6 @@ export default function DelegationPageClient(props: {
       if (useCaseQuery) {
         queryParams = { ...queryParams, use_case: useCaseQuery };
       }
-    } else {
-      setCollectionQuery("");
-      setUseCaseQuery(0);
     }
     return queryParams;
   }
@@ -65,6 +60,19 @@ export default function DelegationPageClient(props: {
 
   const updatePath = (s: DelegationCenterSection) => {
     if (s) {
+      if (
+        ![
+          DelegationCenterSection.CHECKER,
+          DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS,
+        ].includes(s)
+      ) {
+        setAddressQuery("");
+      }
+      if (s !== DelegationCenterSection.REGISTER_DELEGATION) {
+        setCollectionQuery("");
+        setUseCaseQuery(0);
+      }
+
       if (s === DelegationCenterSection.HTML && props.path) {
         router.push(`/delegation/${props.path.join("/")}`);
       } else {
