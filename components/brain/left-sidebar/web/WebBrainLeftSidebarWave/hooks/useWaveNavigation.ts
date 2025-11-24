@@ -1,8 +1,13 @@
-import { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { ReadonlyURLSearchParams } from 'next/navigation';
 
 interface UseWaveNavigationOptions {
   readonly basePath: string;
+  readonly activeWaveId: string | null;
+  readonly setActiveWave: (
+    waveId: string | null,
+    options?: { isDirectMessage?: boolean }
+  ) => void;
   readonly onHover: (waveId: string) => void;
   readonly prefetchWaveData: (waveId: string) => void;
   readonly searchParams: ReadonlyURLSearchParams | null;
@@ -13,17 +18,19 @@ interface UseWaveNavigationResult {
   readonly href: string;
   readonly isActive: boolean;
   readonly onMouseEnter: () => void;
-  readonly onClick: () => void;
+  readonly onClick: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
 export const useWaveNavigation = ({
   basePath,
+  activeWaveId,
+  setActiveWave,
   onHover,
   prefetchWaveData,
   searchParams,
   waveId,
 }: UseWaveNavigationOptions): UseWaveNavigationResult => {
-  const currentWaveId = searchParams?.get('wave') ?? undefined;
+  const currentWaveId = activeWaveId ?? searchParams?.get('wave') ?? undefined;
 
   const href = useMemo(() => {
     if (currentWaveId === waveId) {
@@ -46,9 +53,19 @@ export const useWaveNavigation = ({
     prefetchWaveData(waveId);
   }, [currentWaveId, onHover, prefetchWaveData, waveId]);
 
-  const onClick = useCallback(() => {
-    onMouseEnter();
-  }, [onMouseEnter]);
+  const onClick = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
+      if (event.defaultPrevented) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button === 1) {
+        return; // allow new-tab behavior
+      }
+      event.preventDefault();
+      onMouseEnter();
+      const nextWaveId = waveId === currentWaveId ? null : waveId;
+      setActiveWave(nextWaveId);
+    },
+    [currentWaveId, onMouseEnter, setActiveWave, waveId]
+  );
 
   return {
     href,

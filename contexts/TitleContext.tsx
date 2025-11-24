@@ -2,6 +2,7 @@
 
 import { publicEnv } from "@/config/env";
 import { usePathname, useSearchParams } from "next/navigation";
+import { useMyStreamOptional } from "./wave/MyStreamContext";
 import React, {
   createContext,
   useContext,
@@ -70,6 +71,7 @@ const getDefaultTitleForRoute = (pathname: string | null): string => {
 export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const myStream = useMyStreamOptional();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [title, setTitle] = useState<string>(DEFAULT_TITLE);
@@ -82,7 +84,8 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   const routeRef = useRef(pathname);
   const queryRef = useRef(searchParams);
   const tabParam = searchParams?.get("tab");
-  const waveParam = searchParams?.get("wave");
+  const waveParam =
+    myStream?.activeWave.id ?? searchParams?.get("wave") ?? null;
   const isHomeFeedTab = pathname === "/" && tabParam === "feed";
 
   useEffect(() => {

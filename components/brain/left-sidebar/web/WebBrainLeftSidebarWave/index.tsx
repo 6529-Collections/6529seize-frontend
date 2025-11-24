@@ -11,6 +11,7 @@ import { ExpandedWave } from './subcomponents/ExpandedWave';
 import { useWaveNavigation } from './hooks/useWaveNavigation';
 import { useWaveNameTruncation } from './hooks/useWaveNameTruncation';
 import { formatWaveName } from './utils/formatWaveName';
+import { useMyStream } from '@/contexts/wave/MyStreamContext';
 
 interface WebBrainLeftSidebarWaveProps {
   readonly wave: MinimalWave;
@@ -29,12 +30,15 @@ const WebBrainLeftSidebarWave = ({
   basePath = '/waves',
   collapsed = false,
 }: WebBrainLeftSidebarWaveProps) => {
+  const { activeWave } = useMyStream();
   const searchParams = useSearchParams();
   const prefetchWaveData = usePrefetchWaveData();
   const { hasTouchScreen } = useDeviceInfo();
 
   const { href, isActive, onMouseEnter, onClick } = useWaveNavigation({
     basePath,
+    activeWaveId: activeWave.id,
+    setActiveWave: activeWave.set,
     onHover,
     prefetchWaveData,
     searchParams,

@@ -2,7 +2,6 @@
 
 import React, { useMemo, useCallback } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import WavePicture from "@/components/waves/WavePicture";
@@ -11,6 +10,7 @@ import { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesList";
 import BrainLeftSidebarWavePin from "./BrainLeftSidebarWavePin";
 import { formatAddress, isValidEthAddress } from "../../../../helpers/Helpers";
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import {
   getWaveHomeRoute,
   getWaveRoute,
@@ -29,7 +29,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   showPin = true,
   isDirectMessage = false,
 }) => {
-  const searchParams = useSearchParams();
+  const { activeWave } = useMyStream();
   const prefetchWaveData = usePrefetchWaveData();
   const { isApp } = useDeviceInfo();
   const isDropWave = wave.type !== ApiWaveType.Chat;
@@ -54,25 +54,40 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     return wave.name;
   }, [wave.name, wave.type]);
 
-  const currentWaveId = searchParams?.get("wave") ?? undefined;
+  const activeWaveId = activeWave.id ?? undefined;
 
   const href = useMemo(() => {
-    if (currentWaveId === wave.id) {
+    if (activeWaveId === wave.id) {
       return getWaveHomeRoute({ isDirectMessage, isApp });
     }
     return getWaveRoute({ waveId: wave.id, isDirectMessage, isApp });
-  }, [currentWaveId, isApp, isDirectMessage, wave.id]);
+  }, [activeWaveId, isApp, isDirectMessage, wave.id]);
 
   const haveNewDrops = wave.newDropsCount.count > 0;
 
   const onWaveHover = useCallback(() => {
-    if (wave.id !== currentWaveId) {
+    if (wave.id !== activeWaveId) {
       onHover(wave.id);
       prefetchWaveData(wave.id);
     }
-  }, [currentWaveId, onHover, prefetchWaveData, wave.id]);
+  }, [activeWaveId, onHover, prefetchWaveData, wave.id]);
 
-  const isActive = wave.id === currentWaveId;
+  const isActive = wave.id === activeWaveId;
+
+  const handleWaveClick = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
+      if (event.defaultPrevented) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button === 1) {
+        // let browser handle new tab/window
+        return;
+      }
+      event.preventDefault();
+      onWaveHover();
+      const nextWaveId = wave.id === activeWaveId ? null : wave.id;
+      activeWave.set(nextWaveId);
+    },
+    [activeWave.set, activeWaveId, onWaveHover, wave.id]
+  );
 
   const getAvatarRingClasses = () => {
     if (isActive) return "tw-ring-1 tw-ring-offset-2 tw-ring-offset-iron-900 tw-ring-primary-400";
@@ -88,10 +103,8 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       }`}>
       <Link
         href={href}
-        replace
-        scroll={false}
         onMouseEnter={onWaveHover}
-        onClick={onWaveHover}
+        onClick={handleWaveClick}
         className={`tw-flex tw-flex-1 tw-space-x-3 tw-no-underline tw-py-1 tw-transition-all tw-duration-200 tw-ease-out ${
           isActive
             ? "tw-text-white desktop-hover:group-hover:tw-text-white"

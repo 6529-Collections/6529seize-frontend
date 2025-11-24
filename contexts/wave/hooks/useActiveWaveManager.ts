@@ -1,41 +1,58 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
   getWaveHomeRoute,
   getWaveRoute,
 } from "@/helpers/navigation.helpers";
 
+const getWaveFromUrl = (): string | null => {
+  if (typeof window === "undefined") return null;
+  const url = new URL(window.location.href);
+  const wave = url.searchParams.get("wave");
+  return typeof wave === "string" ? wave : null;
+};
+
 /**
- * Hook to manage the active wave ID state and synchronize it with the URL.
- * We rely on the `wave` query param as the single source of truth.
+ * Client-side active wave state that keeps the URL in sync without
+ * triggering a Next.js router navigation (avoids per-click server trips).
  */
 export function useActiveWaveManager() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const { isApp } = useDeviceInfo();
+  const [activeWaveId, setActiveWaveId] = useState<string | null>(() =>
+    getWaveFromUrl()
+  );
 
-  const activeWaveId = useMemo(() => {
-    const waveId = searchParams?.get("wave");
-    return typeof waveId === "string" ? waveId : null;
-  }, [searchParams]);
+  // Sync with back/forward navigation
+  useEffect(() => {
+    const onPopState = () => {
+      setActiveWaveId(getWaveFromUrl());
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
 
   const setActiveWave = useCallback(
     (
       waveId: string | null,
-      options?: { isDirectMessage?: boolean }
+      options?: { isDirectMessage?: boolean; replace?: boolean; event?: MouseEvent }
     ) => {
-      const isDirectMessage = options?.isDirectMessage ?? false;
+      if (typeof window === "undefined") return;
 
+      const isDirectMessage = options?.isDirectMessage ?? false;
       const target = waveId
         ? getWaveRoute({ waveId, isDirectMessage, isApp })
         : getWaveHomeRoute({ isDirectMessage, isApp });
 
-      router.push(target);
+      const method = options?.replace ? "replaceState" : "pushState";
+      // Only update history if the URL actually changes
+      if (window.location.pathname + window.location.search !== target) {
+        window.history[method](null, "", target);
+      }
+      setActiveWaveId(waveId);
     },
-    [router, isApp]
+    [isApp]
   );
 
   return {
