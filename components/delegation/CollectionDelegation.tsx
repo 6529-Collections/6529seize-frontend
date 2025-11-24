@@ -727,7 +727,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
 
   useEffect(() => {
     reset();
-  }, [accountResolution.address, reset]);
+  }, [accountResolution.address]); // Note: useEffectEvent functions should NOT be in the dependency array
 
   useEffect(() => {
     const outDelegations = [...outgoingDelegations].filter(
