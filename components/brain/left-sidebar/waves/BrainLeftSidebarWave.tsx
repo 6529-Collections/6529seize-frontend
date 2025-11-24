@@ -2,7 +2,7 @@
 
 import React, { useMemo, useCallback } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import WavePicture from "@/components/waves/WavePicture";
@@ -29,7 +29,6 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   showPin = true,
   isDirectMessage = false,
 }) => {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const prefetchWaveData = usePrefetchWaveData();
   const { isApp } = useDeviceInfo();
@@ -55,33 +54,25 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     return wave.name;
   }, [wave.name, wave.type]);
 
-  const getHref = (waveId: string) => {
-    const currentWaveId = searchParams?.get("wave") ?? undefined;
-    if (currentWaveId === waveId) {
+  const currentWaveId = searchParams?.get("wave") ?? undefined;
+
+  const href = useMemo(() => {
+    if (currentWaveId === wave.id) {
       return getWaveHomeRoute({ isDirectMessage, isApp });
     }
-    return getWaveRoute({ waveId, isDirectMessage, isApp });
-  };
+    return getWaveRoute({ waveId: wave.id, isDirectMessage, isApp });
+  }, [currentWaveId, isApp, isDirectMessage, wave.id]);
 
   const haveNewDrops = wave.newDropsCount.count > 0;
 
-  const onWaveHover = (waveId: string) => {
-    const currentWaveId = searchParams?.get("wave") ?? undefined;
-    if (waveId !== currentWaveId) {
-      onHover(waveId);
-      prefetchWaveData(waveId);
+  const onWaveHover = useCallback(() => {
+    if (wave.id !== currentWaveId) {
+      onHover(wave.id);
+      prefetchWaveData(wave.id);
     }
-  };
+  }, [currentWaveId, onHover, prefetchWaveData, wave.id]);
 
-  const isActive = wave.id === (searchParams?.get("wave") ?? undefined);
-
-  const handleWaveClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    const newUrl = getHref(wave.id);
-    // Use router.replace for shallow client-side navigation
-    router.replace(newUrl, { scroll: false });
-    onWaveHover(wave.id);
-  }, [wave.id, router]);
+  const isActive = wave.id === currentWaveId;
 
   const getAvatarRingClasses = () => {
     if (isActive) return "tw-ring-1 tw-ring-offset-2 tw-ring-offset-iron-900 tw-ring-primary-400";
@@ -96,9 +87,11 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           : "desktop-hover:hover:tw-bg-iron-800/80"
       }`}>
       <Link
-        href={getHref(wave.id)}
-        onMouseEnter={() => onWaveHover(wave.id)}
-        onClick={handleWaveClick}
+        href={href}
+        replace
+        scroll={false}
+        onMouseEnter={onWaveHover}
+        onClick={onWaveHover}
         className={`tw-flex tw-flex-1 tw-space-x-3 tw-no-underline tw-py-1 tw-transition-all tw-duration-200 tw-ease-out ${
           isActive
             ? "tw-text-white desktop-hover:group-hover:tw-text-white"

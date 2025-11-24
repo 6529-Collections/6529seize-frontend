@@ -1,5 +1,4 @@
 import { useCallback, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
 import type { ReadonlyURLSearchParams } from 'next/navigation';
 
 interface UseWaveNavigationOptions {
@@ -14,7 +13,7 @@ interface UseWaveNavigationResult {
   readonly href: string;
   readonly isActive: boolean;
   readonly onMouseEnter: () => void;
-  readonly onClick: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  readonly onClick: () => void;
 }
 
 export const useWaveNavigation = ({
@@ -24,7 +23,6 @@ export const useWaveNavigation = ({
   searchParams,
   waveId,
 }: UseWaveNavigationOptions): UseWaveNavigationResult => {
-  const router = useRouter();
   const currentWaveId = searchParams?.get('wave') ?? undefined;
 
   const href = useMemo(() => {
@@ -48,12 +46,9 @@ export const useWaveNavigation = ({
     prefetchWaveData(waveId);
   }, [currentWaveId, onHover, prefetchWaveData, waveId]);
 
-  const onClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    // Use router.replace for shallow client-side navigation
-    router.replace(href, { scroll: false });
+  const onClick = useCallback(() => {
     onMouseEnter();
-  }, [href, router, onMouseEnter]);
+  }, [onMouseEnter]);
 
   return {
     href,
