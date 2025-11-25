@@ -56,7 +56,14 @@ export const useWaveNavigation = ({
   const onClick = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement>) => {
       if (event.defaultPrevented) return;
-      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button === 1) {
+      if (
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey ||
+        event.button === 1 ||
+        event.button === 2
+      ) {
         return; // allow new-tab behavior
       }
       event.preventDefault();
