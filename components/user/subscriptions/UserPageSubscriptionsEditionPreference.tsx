@@ -6,7 +6,7 @@ import CircleLoader, {
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { SubscriptionDetails } from "@/entities/ISubscription";
 import { commonApiPost } from "@/services/api/common-api";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import Toggle from "react-toggle";
 
@@ -24,14 +24,12 @@ export default function UserPageSubscriptionsEditionPreference(
   const [isUpdatingAllEditions, setIsUpdatingAllEditions] =
     useState<boolean>(false);
 
-  const subscriptionEligibilityCount = useMemo<number>(
-    () => props.details?.subscription_eligibility_count ?? 1,
-    [props.details?.subscription_eligibility_count]
-  );
+  const subscriptionEligibilityCount =
+    props.details?.subscription_eligibility_count ?? 1;
 
   useEffect(() => {
     setIsAllEditions(props.details?.subscribe_all_editions ?? false);
-  }, [props.details]);
+  }, [props.details?.subscribe_all_editions]);
 
   const toggleAllEditions = async (): Promise<void> => {
     if (isUpdatingAllEditions) {
@@ -126,4 +124,3 @@ export default function UserPageSubscriptionsEditionPreference(
     </Container>
   );
 }
-
