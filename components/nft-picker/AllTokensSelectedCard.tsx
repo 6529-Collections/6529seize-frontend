@@ -1,8 +1,8 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
-import type { MutableRefObject, RefObject } from "react";
+import type React from "react";
 
-type ButtonRef = RefObject<HTMLButtonElement | null> | MutableRefObject<HTMLButtonElement | null>;
+type ButtonRef = React.Ref<HTMLButtonElement>;
 
 interface AllTokensSelectedCardProps {
   readonly onDeselect: () => void;
@@ -34,7 +34,7 @@ export function AllTokensSelectedCard({
         type="button"
         onClick={onDeselect}
         aria-label="Deselect all tokens and return to manual selection"
-        className="tw-flex tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-bg-green-600 tw-px-4 tw-py-2.5 tw-font-medium tw-text-white tw-transition-all hover:tw-bg-green-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-green-500 focus:tw-ring-offset-2 focus:tw-ring-offset-iron-900 active:tw-scale-95 @md:tw-w-auto @md:tw-shrink-0"
+        className="tw-flex tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-iron-700 tw-bg-primary-600 tw-px-4 tw-py-2.5 tw-font-medium tw-text-white tw-transition-all hover:tw-bg-primary-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-ring-offset-2 focus:tw-ring-offset-iron-900 active:tw-scale-95 disabled:tw-cursor-not-allowed disabled:tw-bg-iron-800 disabled:tw-text-iron-500 @md:tw-w-auto @md:tw-shrink-0"
       >
         <FontAwesomeIcon icon={faCheckCircle} className="tw-h-5 tw-w-5 tw-text-white" aria-hidden="true" />
         Deselect All

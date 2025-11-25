@@ -34,28 +34,13 @@ import {
 
 const DEFAULT_TAB = DEFAULT_USER_PAGE_TAB;
 
-// Defensive: consent country can arrive in multiple shapes; normalize to a country code when possible.
-type CountryValue = string | null | undefined | string[] | { country?: string };
-
-const normalizeCountry = (country: CountryValue): string | null => {
-  if (typeof country === "string") {
-    const trimmed = country.trim();
-    return trimmed ? trimmed.toUpperCase() : null;
+// Normalize consent country to uppercase code; empty or non-strings become null.
+const normalizeCountry = (country: string | null | undefined): string | null => {
+  if (typeof country !== "string") {
+    return null;
   }
-
-  if (Array.isArray(country)) {
-    const firstCode = country.find(
-      (entry): entry is string => typeof entry === "string" && !!entry.trim()
-    );
-    return firstCode ? firstCode.trim().toUpperCase() : null;
-  }
-
-  if (country && typeof (country as { country?: unknown }).country === "string") {
-    const code = (country as { country: string }).country.trim();
-    return code ? code.toUpperCase() : null;
-  }
-
-  return null;
+  const trimmed = country.trim();
+  return trimmed ? trimmed.toUpperCase() : null;
 };
 
 const getVisibilityContext = ({
@@ -65,7 +50,7 @@ const getVisibilityContext = ({
 }: {
   readonly showWaves: boolean;
   readonly capacitorIsIos: boolean;
-  readonly country: CountryValue;
+  readonly country: string | null | undefined;
 }): UserPageVisibilityContext => {
   const normalizedCountry = normalizeCountry(country);
 
@@ -104,7 +89,7 @@ export default function UserPageTabs() {
       getVisibilityContext({
         showWaves,
         capacitorIsIos: capacitor.isIos,
-        country: country ?? null,
+        country,
       }),
     [capacitor.isIos, country, showWaves]
   );
@@ -135,6 +120,8 @@ export default function UserPageTabs() {
     }
 
     const firstVisibleTab = visibleTabs[0]?.id;
+    // Note: If no tabs are visible, defaults to DEFAULT_TAB.
+    // This is safe since rendering iterates visibleTabs (which would be empty).
     return firstVisibleTab ?? DEFAULT_TAB;
   }, [resolvedTabFromPath, resolvedTabIsVisible, visibleTabs]);
 

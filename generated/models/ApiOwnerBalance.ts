@@ -44,8 +44,6 @@ export class ApiOwnerBalance {
     'boosted_memes_tdh_rank': number;
     'boosted_gradients_tdh_rank': number;
     'boosted_nextgen_tdh_rank': number;
-    'total_tdh': number;
-    'total_tdh_rank': number;
     'xtdh': number;
     'xtdh_rank': number;
 
@@ -237,18 +235,6 @@ export class ApiOwnerBalance {
         {
             "name": "boosted_nextgen_tdh_rank",
             "baseName": "boosted_nextgen_tdh_rank",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "total_tdh",
-            "baseName": "total_tdh",
-            "type": "number",
-            "format": "double"
-        },
-        {
-            "name": "total_tdh_rank",
-            "baseName": "total_tdh_rank",
             "type": "number",
             "format": "int64"
         },

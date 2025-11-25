@@ -3,7 +3,7 @@
 import { NftPicker } from "@/components/nft-picker/NftPicker";
 import type {
   ContractOverview,
-  NftPickerSelection,
+  NftPickerChange,
 } from "@/components/nft-picker/NftPicker.types";
 
 export default function UserPageXtdhGrantSelection({
@@ -11,7 +11,7 @@ export default function UserPageXtdhGrantSelection({
   onSelectionChange,
 }: {
   readonly onContractChange: (contract: ContractOverview | null) => void;
-  readonly onSelectionChange: (selection: NftPickerSelection | null) => void;
+  readonly onSelectionChange: (selection: NftPickerChange) => void;
 }) {
   return (
     <NftPicker

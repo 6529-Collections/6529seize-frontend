@@ -1,7 +1,6 @@
-import type { ReactNode } from "react";
-
 import type { ApiXTdhCollectionsPage } from "@/generated/models/ApiXTdhCollectionsPage";
 
+import { InlineRetry, ListError, ListMessage } from "../collection-tokens/subcomponents/XtdhTokensFallbacks";
 import { XtdhReceivedCollectionCard } from "../collection-card-content";
 
 type ApiXtdhCollection = Omit<
@@ -51,7 +50,10 @@ export function XtdhCollectionsList({
   const showInitialError = isError && collections.length === 0;
   if (showInitialError) {
     return (
-      <ListError message={errorMessage} onRetry={onRetry} />
+      <ListError
+        message={errorMessage ?? "Failed to load received collections."}
+        onRetry={onRetry}
+      />
     );
   }
 
@@ -83,57 +85,12 @@ export function XtdhCollectionsList({
         ))}
       </ul>
       {isError ? (
-        <InlineRetry message={errorMessage} onRetry={onRetry} />
+        <InlineRetry
+          message={errorMessage ?? "Unable to load more collections."}
+          onRetry={onRetry}
+        />
       ) : null}
     </div>
-  );
-}
-
-function ListMessage({ children }: Readonly<{ children: ReactNode }>) {
-  return <p className="tw-m-0 tw-text-sm tw-text-iron-300">{children}</p>;
-}
-
-function ListError({
-  message,
-  onRetry,
-}: Readonly<{ message?: string; onRetry: () => void }>) {
-  const displayMessage = message ?? "Failed to load received collections.";
-  return (
-    <div className="tw-flex tw-flex-col tw-gap-2">
-      <p className="tw-m-0 tw-text-sm tw-text-red-400" role="alert">
-        {displayMessage}
-      </p>
-      <RetryButton onRetry={onRetry} />
-    </div>
-  );
-}
-
-function InlineRetry({
-  message,
-  onRetry,
-}: Readonly<{ message?: string; onRetry: () => void }>) {
-  const displayMessage = message ?? "Unable to load more collections.";
-  return (
-    <div className="tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-3">
-      <p className="tw-m-0 tw-text-sm tw-text-iron-100" role="alert">
-        {displayMessage}
-      </p>
-      <div className="tw-mt-2">
-        <RetryButton onRetry={onRetry} />
-      </div>
-    </div>
-  );
-}
-
-function RetryButton({ onRetry }: Readonly<{ onRetry: () => void }>) {
-  return (
-    <button
-      type="button"
-      onClick={onRetry}
-      className="tw-rounded tw-bg-primary-500 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-black desktop-hover:hover:tw-bg-primary-400"
-    >
-      Retry
-    </button>
   );
 }
 

@@ -101,7 +101,17 @@ export default function XtdhReceivedSection({
   const controlsDisabled = isLoading || isFetching;
 
   const isViewingTokens = Boolean(selectedContract);
-  const isIdentityScoped = requireIdentity;
+  const isIdentityScoped = Boolean(profileId);
+  let description =
+    "Collections across the ecosystem that are accruing xTDH from grants.";
+
+  if (isViewingTokens) {
+    description =
+      "Review tokens in the selected collection and how much xTDH each accrues.";
+  } else if (isIdentityScoped) {
+    description =
+      "Collections where this identity accrues xTDH through grants it has received.";
+  }
 
   return (
     <section className="tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-4 tw-space-y-4">
@@ -110,11 +120,7 @@ export default function XtdhReceivedSection({
           {isViewingTokens ? "Received xTDH Tokens" : "Received xTDH Collections"}
         </h2>
         <p className="tw-mt-1 tw-text-sm tw-text-iron-400">
-          {isViewingTokens
-            ? "Review tokens in the selected collection and how much xTDH each accrues."
-            : isIdentityScoped
-              ? "Collections where this identity accrues xTDH through grants it has received."
-              : "Collections across the ecosystem that are accruing xTDH from grants."}
+          {description}
         </p>
       </header>
       {selectedContract ? (

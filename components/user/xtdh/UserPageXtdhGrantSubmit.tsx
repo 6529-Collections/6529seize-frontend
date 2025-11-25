@@ -4,12 +4,13 @@ import clsx from "clsx";
 import { isAddress } from "viem";
 import type {
   ContractOverview,
-  NftPickerSelection,
+  NftPickerChange,
+  NftPickerSelectionError,
 } from "@/components/nft-picker/NftPicker.types";
 
 export interface UserPageXtdhGrantSubmitProps {
   readonly contract: ContractOverview | null;
-  readonly selection: NftPickerSelection | null;
+  readonly selection: NftPickerChange;
   readonly amount: number | null;
   readonly validUntil: Date | null;
   readonly onSubmit: () => void | Promise<void>;
@@ -23,6 +24,11 @@ const hasFutureExpiry = (value: Date): boolean => {
   return Number.isFinite(timestamp) && timestamp > Date.now();
 };
 
+const isSelectionError = (
+  selection: NftPickerChange
+): selection is NftPickerSelectionError =>
+  Boolean(selection && "type" in selection && selection.type === "error");
+
 const canSubmit = ({
   contract,
   selection,
@@ -30,7 +36,7 @@ const canSubmit = ({
   validUntil,
 }: {
   readonly contract: ContractOverview | null;
-  readonly selection: NftPickerSelection | null;
+  readonly selection: NftPickerChange;
   readonly amount: number | null;
   readonly validUntil: Date | null;
 }): boolean => {
@@ -38,7 +44,7 @@ const canSubmit = ({
     return false;
   }
 
-  if (!selection) {
+  if (!selection || isSelectionError(selection)) {
     return false;
   }
 

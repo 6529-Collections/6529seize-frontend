@@ -1,15 +1,16 @@
 "use client";
 
+import { XtdhStats } from "@/components/xtdh/stats/XtdhStats";
+import { buildUserXtdhStatsContent } from "@/components/xtdh/stats/buildUserXtdhStatsContent";
 import { useIdentityTdhStats } from "@/hooks/useIdentityTdhStats";
 
-import { AllocationSection } from "./user-page-xtdh-stats-header/AllocationSection";
-import { BaseMetricsSection } from "./user-page-xtdh-stats-header/BaseMetricsSection";
-import { ReceivingSection } from "./user-page-xtdh-stats-header/ReceivingSection";
-import { buildStatsContent } from "./user-page-xtdh-stats-header/content";
 import { normalizeProfileIdentifier } from "./user-page-xtdh-stats-header/normalizeProfileIdentifier";
 import { UserPageXtdhStatsHeaderError } from "./user-page-xtdh-stats-header/UserPageXtdhStatsHeaderError";
 import { UserPageXtdhStatsHeaderSkeleton } from "./user-page-xtdh-stats-header/UserPageXtdhStatsHeaderSkeleton";
-import type { UserPageXtdhStatsHeaderProps } from "./user-page-xtdh-stats-header/types";
+
+interface UserPageXtdhStatsHeaderProps {
+  readonly profileId: string | null;
+}
 
 export default function UserPageXtdhStatsHeader({
   profileId,
@@ -43,16 +44,7 @@ export default function UserPageXtdhStatsHeader({
     );
   }
 
-  const statsContent = buildStatsContent(statsQuery.data);
+  const statsContent = buildUserXtdhStatsContent(statsQuery.data);
 
-  return (
-    <section
-      className="tw-rounded-2xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-5 tw-text-iron-100 tw-shadow-md tw-shadow-black/30"
-      aria-label="xTDH Statistics"
-    >
-      <BaseMetricsSection cards={statsContent.baseMetricCards} />
-      <AllocationSection allocation={statsContent.allocation} />
-      <ReceivingSection receiving={statsContent.receiving} />
-    </section>
-  );
+  return <XtdhStats {...statsContent} />;
 }

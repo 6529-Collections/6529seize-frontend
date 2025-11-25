@@ -1,6 +1,8 @@
 import type {
   ContractOverview,
+  NftPickerChange,
   NftPickerSelection,
+  NftPickerSelectionError,
 } from "@/components/nft-picker/NftPicker.types";
 import {
   formatDateTime,
@@ -33,14 +35,30 @@ const describeTokenSelectionText = (
 const getTokenLabel = (tokenCount: number): string =>
   `${tokenCount} token${tokenCount === 1 ? "" : "s"}`;
 
+const getTotalSupplyCount = (contract: ContractOverview | null): number | null => {
+  if (!contract?.totalSupply) {
+    return null;
+  }
+
+  const parsedSupply = Number(contract.totalSupply);
+  const normalizedSupply = Math.trunc(parsedSupply);
+
+  if (!Number.isSafeInteger(normalizedSupply) || normalizedSupply <= 0) {
+    return null;
+  }
+
+  return normalizedSupply;
+};
+
 const describeSelection = (
   selection: NftPickerSelection,
   collectionLabel: string | null,
+  totalSupplyCount: number | null,
 ): SelectionDescription => {
   if (selection.allSelected) {
     return {
       text: describeAllTokensGrantText(collectionLabel),
-      tokenCount: null,
+      tokenCount: totalSupplyCount,
     };
   }
 
@@ -54,6 +72,11 @@ const describeSelection = (
 
 const isValidGrantAmount = (amount: number | null): amount is number =>
   amount !== null && Number.isFinite(amount) && amount > 0;
+
+const isSelectionError = (
+  selection: NftPickerChange
+): selection is NftPickerSelectionError =>
+  Boolean(selection && "type" in selection && selection.type === "error");
 
 const getPerTokenText = (amount: number, tokenCount: number | null): string => {
   if (!tokenCount || tokenCount <= 0) {
@@ -100,7 +123,7 @@ const getSelectionSummary = ({
   amount,
 }: {
   readonly contract: ContractOverview | null;
-  readonly selection: NftPickerSelection | null;
+  readonly selection: NftPickerChange;
   readonly amount: number | null;
 }): string => {
   if (!contract && !selection) {
@@ -113,7 +136,16 @@ const getSelectionSummary = ({
     return describeCollectionSelection(collectionLabel);
   }
 
-  const { text: selectionText, tokenCount } = describeSelection(selection, collectionLabel);
+  if (isSelectionError(selection)) {
+    return selection.error;
+  }
+
+  const totalSupplyCount = getTotalSupplyCount(contract);
+  const { text: selectionText, tokenCount } = describeSelection(
+    selection,
+    collectionLabel,
+    totalSupplyCount
+  );
 
   if (!isValidGrantAmount(amount)) {
     return selectionText;
@@ -137,7 +169,7 @@ const getValiditySummary = (validUntil: Date | null): string => {
 
 export interface UserPageXtdhGrantSummaryProps {
   readonly contract: ContractOverview | null;
-  readonly selection: NftPickerSelection | null;
+  readonly selection: NftPickerChange;
   readonly amount: number | null;
   readonly validUntil: Date | null;
 }
