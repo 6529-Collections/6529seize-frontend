@@ -5413,6 +5413,8 @@ components:
         - level
         - tdh
         - tdh_rate
+        - xtdh
+        - xtdh_rate
         - display
         - consolidation_key
         - classification
@@ -5448,6 +5450,12 @@ components:
           type: number
           format: double
         tdh_rate:
+          type: number
+          format: int64
+        xtdh:
+          type: number
+          format: double
+        xtdh_rate:
           type: number
           format: int64
         consolidation_key:
@@ -6137,6 +6145,8 @@ components:
         - cic
         - rep
         - tdh
+        - xtdh
+        - xtdh_rate
         - level
         - tdh_rate
         - primary_address
@@ -6172,6 +6182,12 @@ components:
           type: number
           format: double
         tdh_rate:
+          type: number
+          format: int64
+        xtdh:
+          type: number
+          format: double
+        xtdh_rate:
           type: number
           format: int64
         level:

@@ -92,6 +92,8 @@ export const toProfileMin = (
     rep: profile.rep ?? 0,
     tdh: profile.tdh ?? 0,
     tdh_rate: profile.tdh_rate ?? 0,
+    xtdh: profile.xtdh ?? 0,
+    xtdh_rate: profile.xtdh_rate ?? 0,
     level: profile.level ?? 0,
     primary_address: profile.primary_wallet ?? "",
     subscribed_actions: [],

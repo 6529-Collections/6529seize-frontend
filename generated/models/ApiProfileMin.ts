@@ -23,6 +23,8 @@ export class ApiProfileMin {
     'rep': number;
     'tdh': number;
     'tdh_rate': number;
+    'xtdh': number;
+    'xtdh_rate': number;
     'level': number;
     'primary_address': string;
     'subscribed_actions': Array<ApiIdentitySubscriptionTargetAction>;
@@ -86,6 +88,18 @@ export class ApiProfileMin {
         {
             "name": "tdh_rate",
             "baseName": "tdh_rate",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "xtdh",
+            "baseName": "xtdh",
+            "type": "number",
+            "format": "double"
+        },
+        {
+            "name": "xtdh_rate",
+            "baseName": "xtdh_rate",
             "type": "number",
             "format": "int64"
         },
