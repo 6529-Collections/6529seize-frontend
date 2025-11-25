@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
   getWaveHomeRoute,
@@ -8,8 +8,9 @@ import {
 } from "@/helpers/navigation.helpers";
 
 const getWaveFromUrl = (): string | null => {
-  if (typeof window === "undefined") return null;
-  const url = new URL(window.location.href);
+  const currentWindow = globalThis.window;
+  if (!currentWindow) return null;
+  const url = new URL(currentWindow.location.href);
   const wave = url.searchParams.get("wave");
   return typeof wave === "string" ? wave : null;
 };
@@ -26,11 +27,14 @@ export function useActiveWaveManager() {
 
   // Sync with back/forward navigation
   useEffect(() => {
+    const currentWindow = globalThis.window;
+    if (!currentWindow) return;
+
     const onPopState = () => {
       setActiveWaveId(getWaveFromUrl());
     };
-    window.addEventListener("popstate", onPopState);
-    return () => window.removeEventListener("popstate", onPopState);
+    currentWindow.addEventListener("popstate", onPopState);
+    return () => currentWindow.removeEventListener("popstate", onPopState);
   }, []);
 
   const setActiveWave = useCallback(
@@ -38,7 +42,8 @@ export function useActiveWaveManager() {
       waveId: string | null,
       options?: { isDirectMessage?: boolean; replace?: boolean; event?: MouseEvent }
     ) => {
-      if (typeof window === "undefined") return;
+      const currentWindow = globalThis.window;
+      if (!currentWindow) return;
 
       const isDirectMessage = options?.isDirectMessage ?? false;
       const target = waveId
@@ -47,8 +52,11 @@ export function useActiveWaveManager() {
 
       const method = options?.replace ? "replaceState" : "pushState";
       // Only update history if the URL actually changes
-      if (window.location.pathname + window.location.search !== target) {
-        window.history[method](null, "", target);
+      if (
+        currentWindow.location.pathname + currentWindow.location.search !==
+        target
+      ) {
+        currentWindow.history[method](null, "", target);
       }
       setActiveWaveId(waveId);
     },

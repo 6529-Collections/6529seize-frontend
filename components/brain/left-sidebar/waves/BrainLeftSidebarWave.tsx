@@ -54,7 +54,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     return wave.name;
   }, [wave.name, wave.type]);
 
-  const activeWaveId = activeWave.id ?? undefined;
+  const activeWaveId = activeWave.id;
 
   const href = useMemo(() => {
     if (activeWaveId === wave.id) {
