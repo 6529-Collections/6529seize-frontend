@@ -21,14 +21,14 @@ const getWaveFromUrl = (): string | null => {
  */
 export function useActiveWaveManager() {
   const { isApp } = useDeviceInfo();
-  const [activeWaveId, setActiveWaveId] = useState<string | null>(() =>
-    getWaveFromUrl()
-  );
+  const [activeWaveId, setActiveWaveId] = useState<string | null>(null);
 
   // Sync with back/forward navigation
   useEffect(() => {
     const currentWindow = globalThis.window;
     if (!currentWindow) return;
+
+    setActiveWaveId(getWaveFromUrl());
 
     const onPopState = () => {
       setActiveWaveId(getWaveFromUrl());
@@ -40,7 +40,7 @@ export function useActiveWaveManager() {
   const setActiveWave = useCallback(
     (
       waveId: string | null,
-      options?: { isDirectMessage?: boolean; replace?: boolean; event?: MouseEvent }
+      options?: { isDirectMessage?: boolean; replace?: boolean }
     ) => {
       const currentWindow = globalThis.window;
       if (!currentWindow) return;
