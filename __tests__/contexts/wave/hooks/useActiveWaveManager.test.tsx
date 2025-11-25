@@ -20,17 +20,17 @@ jest.mock("next/navigation", () => ({
 describe("useActiveWaveManager", () => {
   beforeEach(() => {
     jest.restoreAllMocks();
-    window.history.replaceState(null, "", "http://localhost/");
+    globalThis.history.replaceState(null, "", "http://localhost/");
   });
 
   it("reads wave from query and updates via setActiveWave", async () => {
-    window.history.replaceState(null, "", "http://localhost/waves?wave=abc");
+    globalThis.history.replaceState(null, "", "http://localhost/waves?wave=abc");
     (useSearchParams as jest.Mock).mockReturnValue(
       new URLSearchParams({ wave: "abc" })
     );
 
-    const pushStateSpy = jest.spyOn(window.history, "pushState");
-    const replaceStateSpy = jest.spyOn(window.history, "replaceState");
+    const pushStateSpy = jest.spyOn(globalThis.history, "pushState");
+    const replaceStateSpy = jest.spyOn(globalThis.history, "replaceState");
 
     const { result, rerender } = renderHook(() => useActiveWaveManager());
     await waitFor(() => expect(result.current.activeWaveId).toBe("abc"));
@@ -41,7 +41,7 @@ describe("useActiveWaveManager", () => {
     });
     expect(pushStateSpy).toHaveBeenLastCalledWith(null, "", "/waves?wave=def");
 
-    window.history.replaceState(null, "", "http://localhost/waves?wave=def");
+    globalThis.history.replaceState(null, "", "http://localhost/waves?wave=def");
     rerender();
     await waitFor(() => expect(result.current.activeWaveId).toBe("def"));
 
