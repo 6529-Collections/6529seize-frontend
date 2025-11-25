@@ -253,7 +253,7 @@ export default function UserPageSubscriptionsTopUp() {
         </>
       )}
       <Row className="pt-3 pb-4">
-        <Col>
+        <Col className="tw-text-iron-400">
           <ShowMoreButton
             expanded={showDeep}
             setExpanded={setShowDeep}

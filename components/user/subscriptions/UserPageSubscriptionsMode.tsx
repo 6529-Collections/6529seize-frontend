@@ -23,13 +23,8 @@ export default function UserPageSubscriptionsMode(
   const [isAuto, setIsAuto] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
 
-  const [isAllEditions, setIsAllEditions] = useState<boolean>(false);
-  const [isUpdatingAllEditions, setIsUpdatingAllEditions] =
-    useState<boolean>(false);
-
   useEffect(() => {
     setIsAuto(props.details?.automatic ?? false);
-    setIsAllEditions(props.details?.subscribe_all_editions ?? false);
   }, [props.details]);
 
   const toggleMode = async (): Promise<void> => {
@@ -80,134 +75,56 @@ export default function UserPageSubscriptionsMode(
     }
   };
 
-  const toggleAllEditions = async (): Promise<void> => {
-    if (isUpdatingAllEditions) {
-      return;
-    }
-    setIsUpdatingAllEditions(true);
-    const { success } = await requestAuth();
-    if (!success) {
-      setIsUpdatingAllEditions(false);
-      return;
-    }
-    const allEditions = !isAllEditions;
-    interface SubscribeAllEditionsBody {
-      subscribe_all_editions: boolean;
-    }
-    try {
-      const response = await commonApiPost<
-        SubscribeAllEditionsBody,
-        SubscribeAllEditionsBody
-      >({
-        endpoint: `subscriptions/${props.profileKey}/subscription-mode`,
-        body: {
-          subscribe_all_editions: allEditions,
-        },
-      });
-      const responseAllEditions = response.subscribe_all_editions;
-      setIsAllEditions(responseAllEditions);
-      const message = `Edition Preference set to ${
-        responseAllEditions ? `All editions` : `One edition`
-      }`;
-      setToast({
-        message: message,
-        type: "success",
-      });
-      props.refresh();
-    } catch (e: any) {
-      setIsUpdating(false);
-      setToast({
-        message: e ?? "Failed to set edition preference",
-        type: "error",
-      });
-      return;
-    } finally {
-      setIsUpdatingAllEditions(false);
-    }
-  };
-
   return (
-    <>
-      <Container className="no-padding">
-        <Row className="tw-pb-2">
-          <Col>
-            <h5 className="tw-mb-0">Mode</h5>
-          </Col>
-        </Row>
+    <Container className="no-padding">
+      <Row className="tw-pb-2">
+        <Col>
+          <h5 className="tw-mb-0">
+            Mode{" "}
+            {props.details && props.details.last_update > 0 && (
+              <span className="tw-text-iron-400 tw-text-sm tw-font-semibold">
+                {new Date(props.details.last_update).toLocaleString("en-US", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                  timeZone: "UTC",
+                })}{" "}
+                UTC
+              </span>
+            )}
+          </h5>
+        </Col>
+      </Row>
+      <Row className="tw-pt-1">
+        <Col className="tw-flex tw-items-center tw-gap-2">
+          <label htmlFor={"subscription-mode"} className="font-color">
+            <b>Manual</b>
+          </label>
+          <Toggle
+            disabled={props.readonly || isUpdating}
+            id={"subscription-mode"}
+            checked={isAuto}
+            icons={false}
+            onChange={toggleMode}
+          />
+          <label htmlFor={"subscription-mode"} className="font-color">
+            <b>Automatic</b>
+          </label>
+          {isUpdating && <CircleLoader size={CircleLoaderSize.MEDIUM} />}
+        </Col>
+      </Row>
+      {!props.readonly && (
         <Row className="tw-pt-1">
-          <Col className="tw-flex tw-items-center tw-gap-2">
-            <label htmlFor={"subscription-mode"} className={"font-color"}>
-              <b>Manual</b>
-            </label>
-            <Toggle
-              disabled={props.readonly || isUpdating}
-              id={"subscription-mode"}
-              checked={isAuto}
-              icons={false}
-              onChange={toggleMode}
-            />
-            <label htmlFor={"subscription-mode"} className={"font-color"}>
-              <b>Automatic</b>
-            </label>
-            {isUpdating && <CircleLoader size={CircleLoaderSize.MEDIUM} />}
+          <Col className="tw-whitespace-nowrap">
+            {isAuto
+              ? "Automatic airdrops of all eligible drops unless you opt-out"
+              : "You have to opt-in to each specific drop"}
           </Col>
         </Row>
-        {!props.readonly && (
-          <Row className="tw-pt-1">
-            <Col className="tw-whitespace-nowrap">
-              {isAuto
-                ? "Automatic airdrops of all eligible drops unless you opt-out"
-                : "You have to opt-in to each specific drop"}
-            </Col>
-          </Row>
-        )}
-      </Container>
-
-      {isAuto && (
-        <Container className="no-padding">
-          <Row className="tw-pb-2">
-            <Col>
-              <h5 className="tw-mb-0">Edition Preference</h5>
-            </Col>
-          </Row>
-          <Row className="tw-pt-1">
-            <Col className="tw-flex tw-items-center tw-gap-2">
-              <label
-                htmlFor={"subscription-all-editions-mode"}
-                className={"font-color"}>
-                <b>One edition</b>
-              </label>
-              <Toggle
-                disabled={props.readonly || isUpdatingAllEditions}
-                id={"subscription-all-editions-mode"}
-                checked={isAllEditions}
-                icons={false}
-                onChange={toggleAllEditions}
-              />
-              <label
-                htmlFor={"subscription-all-editions-mode"}
-                className={"font-color"}>
-                <b>
-                  All editions (x{props.details?.subscription_eligibility_count}
-                  )
-                </b>
-              </label>
-              {isUpdatingAllEditions && (
-                <CircleLoader size={CircleLoaderSize.MEDIUM} />
-              )}
-            </Col>
-          </Row>
-          {!props.readonly && (
-            <Row className="tw-pt-1">
-              <Col className="tw-whitespace-nowrap">
-                {isAllEditions
-                  ? "You will receive all editions you are eligible for"
-                  : "You will receive only one edition"}
-              </Col>
-            </Row>
-          )}
-        </Container>
       )}
-    </>
+    </Container>
   );
 }

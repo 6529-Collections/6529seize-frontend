@@ -75,6 +75,9 @@ export default function UserPageSubscriptionsUpcoming(
                       profileKey={props.profileKey}
                       title="The Memes"
                       subscription={subscription}
+                      eligibilityCount={
+                        props.details?.subscription_eligibility_count ?? 1
+                      }
                       readonly={props.readonly}
                       refresh={props.refresh}
                       minting_today={index === 0 && isMintingToday()}
@@ -109,6 +112,7 @@ function SubscriptionRow(
     profileKey: string;
     title: string;
     subscription: NFTSubscription;
+    eligibilityCount: number;
     readonly: boolean;
     minting_today?: boolean;
     first: boolean;
@@ -123,6 +127,17 @@ function SubscriptionRow(
   const [subscribed, setSubscribed] = useState<boolean>(
     !!props.subscription.subscribed
   );
+
+  const subscribedCount = useMemo<number>(
+    () => props.subscription.subscribed_count ?? 1,
+    [props.subscription.subscribed_count]
+  );
+
+  const [selectedCount, setSelectedCount] = useState<number>(subscribedCount);
+
+  useEffect(() => {
+    setSelectedCount(subscribedCount);
+  }, [subscribedCount]);
 
   const { data: final } = useQuery<NFTFinalSubscription>({
     queryKey: [
@@ -178,9 +193,57 @@ function SubscriptionRow(
       });
       props.refresh();
     } catch (e: any) {
-      setIsSubmitting(false);
+      setSubscribed(subscribed);
       setToast({
         message: e?.message ?? "Failed to change token subscription.",
+        type: "error",
+      });
+      return;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleUpdateSubscriptionCount = async (
+    value: number
+  ): Promise<void> => {
+    if (isSubmitting || props.minting_today) {
+      return;
+    }
+    setIsSubmitting(true);
+    const { success } = await requestAuth();
+    if (!success) {
+      setIsSubmitting(false);
+      return;
+    }
+    interface UpdateSubscriptionCountBody {
+      contract: string;
+      token_id: number;
+      count: number;
+    }
+    try {
+      const response = await commonApiPost<
+        UpdateSubscriptionCountBody,
+        UpdateSubscriptionCountBody
+      >({
+        endpoint: `subscriptions/${props.profileKey}/subscription-count`,
+        body: {
+          contract: props.subscription.contract,
+          token_id: props.subscription.token_id,
+          count: value,
+        },
+      });
+      const responseCount = response.count;
+      setSelectedCount(responseCount);
+      setToast({
+        message: `Subscription count updated to ${responseCount} for ${props.title} #${props.subscription.token_id}`,
+        type: "success",
+      });
+      props.refresh();
+    } catch (e: any) {
+      setSelectedCount(subscribedCount);
+      setToast({
+        message: e?.message ?? "Failed to update subscription count.",
         type: "error",
       });
       return;
@@ -219,7 +282,7 @@ function SubscriptionRow(
               </span>
             )}
           </span>
-          <span className="d-flex align-items-center gap-2">
+          <div className="d-flex align-items-center gap-2">
             {isSubmitting && <Spinner />}
             <Toggle
               disabled={props.readonly || isSubmitting || props.minting_today}
@@ -229,7 +292,40 @@ function SubscriptionRow(
               onChange={submit}
               aria-label={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
             />
-          </span>
+            <span className="tw-flex tw-items-center tw-gap-1 tw-min-w-16">
+              {subscribed ? (
+                <>
+                  <select
+                    className="tw-text-iron-400 tw-bg-transparent tw-border tw-border-iron-400 tw-rounded tw-px-1"
+                    value={selectedCount}
+                    disabled={
+                      props.eligibilityCount <= 1 ||
+                      props.readonly ||
+                      isSubmitting ||
+                      props.minting_today
+                    }
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value, 10);
+                      setSelectedCount(value);
+                      handleUpdateSubscriptionCount(value);
+                    }}
+                    style={{ minWidth: "3ch" }}>
+                    {Array.from(
+                      { length: props.eligibilityCount },
+                      (_, i) => i + 1
+                    ).map((num) => (
+                      <option key={num} value={num}>
+                        {num}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="tw-text-iron-400">
+                    / {props.eligibilityCount}
+                  </span>
+                </>
+              ) : null}
+            </span>
+          </div>
         </Col>
       </Row>
       {props.first && final?.phase && final?.phase_position > 0 && (

@@ -23,6 +23,7 @@ import UserPageSubscriptionsAirdropAddress, {
   AirdropAddressResult,
 } from "./UserPageSubscriptionsAirdropAddress";
 import UserPageSubscriptionsBalance from "./UserPageSubscriptionsBalance";
+import UserPageSubscriptionsEditionPreference from "./UserPageSubscriptionsEditionPreference";
 import UserPageSubscriptionsHistory from "./UserPageSubscriptionsHistory";
 import UserPageSubscriptionsMode from "./UserPageSubscriptionsMode";
 import UserPageSubscriptionsTopUp from "./UserPageSubscriptionsTopUp";
@@ -281,7 +282,7 @@ export default function UserPageSubscriptions(
                 className={`pt-2 pb-2 d-flex ${
                   isConnectedAccount
                     ? "flex-column gap-4"
-                    : "flex-wrap flex-md-nowrap gap-4 justify-content-between"
+                    : "flex-wrap flex-md-nowrap gap-1 justify-content-between"
                 }`}>
                 <UserPageSubscriptionsBalance
                   details={details}
@@ -289,15 +290,21 @@ export default function UserPageSubscriptions(
                   refresh={refresh}
                   show_refresh={isConnectedAccount}
                 />
+                <UserPageSubscriptionsAirdropAddress
+                  show_edit={isConnectedAccount}
+                  airdrop={airdropResult}
+                />
                 <UserPageSubscriptionsMode
                   profileKey={profileKey}
                   details={details}
                   readonly={!isConnectedAccount}
                   refresh={refresh}
                 />
-                <UserPageSubscriptionsAirdropAddress
-                  show_edit={isConnectedAccount}
-                  airdrop={airdropResult}
+                <UserPageSubscriptionsEditionPreference
+                  profileKey={profileKey}
+                  details={details}
+                  readonly={!isConnectedAccount}
+                  refresh={refresh}
                 />
               </Col>
             </Row>

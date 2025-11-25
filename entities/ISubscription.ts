@@ -20,6 +20,7 @@ export interface NFTSubscription {
   contract: string;
   token_id: number;
   subscribed: boolean;
+  subscribed_count: number;
 }
 
 export interface SubscriptionCounts {
