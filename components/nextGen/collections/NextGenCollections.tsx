@@ -29,7 +29,7 @@ export default function NextGenCollections() {
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
 
-  async function fetchResults(mypage: number) {
+  function fetchResults(mypage: number) {
     setCollectionsLoaded(false);
     let statusFilter = "";
     if (selectedStatus !== StatusFilter.ALL) {
@@ -37,17 +37,11 @@ export default function NextGenCollections() {
     }
 
     let url = `${publicEnv.API_ENDPOINT}/api/nextgen/collections?page_size=${PAGE_SIZE}&page=${mypage}${statusFilter}`;
-    try {
-      const response = await fetchUrl<DBResponse>(url);
+    fetchUrl(url).then((response: DBResponse) => {
       setTotalResults(response.count);
       setCollections(response.data);
-    } catch (error) {
-      console.error(`Failed to fetch NextGen collections for page ${mypage}`, error);
-      setTotalResults(0);
-      setCollections([]);
-    } finally {
       setCollectionsLoaded(true);
-    }
+    });
   }
 
   useEffect(() => {

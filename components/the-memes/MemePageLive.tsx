@@ -278,7 +278,6 @@ export function MemePageLiveSubMenu(props: {
   const [rememesLoaded, setRememesLoaded] = useState(false);
 
   const rememesTarget = useRef<HTMLImageElement>(null);
-  const rememesRequestIdRef = useRef(0);
 
   const rememeSorting = [RememeSort.RANDOM, RememeSort.CREATED_ASC];
   const [selectedRememeSorting, setSelectedRememeSorting] =
@@ -286,33 +285,12 @@ export function MemePageLiveSubMenu(props: {
 
   useEffect(() => {
     if (props.nft) {
-      const memeId = props.nft.id;
-      setMemeLabNftsLoaded(false);
       fetchUrl(
-        `${publicEnv.API_ENDPOINT}/api/nfts_memelab?sort_direction=asc&meme_id=${memeId}`
-      )
-        .then((response: DBResponse) => {
-          if (props.nft?.id !== memeId) {
-            return;
-          }
-          setMemeLabNfts(response.data);
-        })
-        .catch((error) => {
-          if (props.nft?.id !== memeId) {
-            return;
-          }
-          console.error(
-            `Failed to fetch Meme Lab NFTs for meme ${memeId}`,
-            error
-          );
-          setMemeLabNfts([]);
-        })
-        .finally(() => {
-          if (props.nft?.id !== memeId) {
-            return;
-          }
-          setMemeLabNftsLoaded(true);
-        });
+        `${publicEnv.API_ENDPOINT}/api/nfts_memelab?sort_direction=asc&meme_id=${props.nft.id}`
+      ).then((response: DBResponse) => {
+        setMemeLabNfts(response.data);
+        setMemeLabNftsLoaded(true);
+      });
     }
   }, [props.nft]);
 
@@ -323,47 +301,18 @@ export function MemePageLiveSubMenu(props: {
   }, [props.nft, rememesPage, selectedRememeSorting]);
 
   function fetchRememes(meme_id: number) {
-    setRememesLoaded(false);
-    const requestId = ++rememesRequestIdRef.current;
     let sort = "";
     if (selectedRememeSorting === RememeSort.CREATED_ASC) {
       sort = "&sort=created_at&sort_direction=desc";
     }
     fetchUrl(
       `${publicEnv.API_ENDPOINT}/api/rememes?meme_id=${meme_id}&page_size=${REMEMES_PAGE_SIZE}&page=${rememesPage}${sort}`
-    )
-      .then((response: DBResponse) => {
-        if (
-          props.nft?.id !== meme_id ||
-          requestId !== rememesRequestIdRef.current
-        ) {
-          return;
-        }
-        setRememesTotalResults(response.count);
-        setRememes(response.data);
-        setShowRememesSort(response.count > REMEMES_PAGE_SIZE);
-      })
-      .catch((error) => {
-        if (
-          props.nft?.id !== meme_id ||
-          requestId !== rememesRequestIdRef.current
-        ) {
-          return;
-        }
-        console.error(`Failed to fetch rememes for meme ${meme_id}`, error);
-        setRememesTotalResults(0);
-        setRememes([]);
-        setShowRememesSort(false);
-      })
-      .finally(() => {
-        if (
-          props.nft?.id !== meme_id ||
-          requestId !== rememesRequestIdRef.current
-        ) {
-          return;
-        }
-        setRememesLoaded(true);
-      });
+    ).then((response: DBResponse) => {
+      setRememesTotalResults(response.count);
+      setRememes(response.data);
+      setShowRememesSort(response.count > REMEMES_PAGE_SIZE);
+      setRememesLoaded(true);
+    });
   }
 
   if (props.show) {

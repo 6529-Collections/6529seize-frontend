@@ -15,28 +15,15 @@ export function MemePageTimeline(props: {
   const [nftHistory, setNftHistory] = useState<NFTHistory[]>([]);
 
   useEffect(() => {
-    const abortController = new AbortController();
-
     async function fetchHistory(url: string) {
-      try {
-        const response = await fetchAllPages<NFTHistory>(url);
-        if (!abortController.signal.aborted) {
-          setNftHistory(response);
-        }
-      } catch (error) {
-        if (!abortController.signal.aborted) {
-          console.error(`Failed to fetch NFT timeline for ${props.nft?.id}`, error);
-          setNftHistory([]);
-        }
-      }
+      return fetchAllPages<NFTHistory>(url).then((response) => {
+        setNftHistory(response);
+      });
     }
     if (props.nft) {
       const initialUrlHistory = `${publicEnv.API_ENDPOINT}/api/nft_history/${MEMES_CONTRACT}/${props.nft.id}`;
       fetchHistory(initialUrlHistory);
     }
-    return () => {
-      abortController.abort();
-    };
   }, [props.nft]);
 
   if (props.show && props.nft) {

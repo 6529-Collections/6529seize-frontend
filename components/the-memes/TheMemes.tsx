@@ -178,7 +178,6 @@ export default function TheMemesComponent() {
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.ALL_TIME);
 
   const [fetching, setFetching] = useState(true);
-  const [fetchError, setFetchError] = useState<string | null>(null);
 
   const [nfts, setNfts] = useState<NFTWithMemesExtendedData[]>([]);
   const [nftsNextPage, setNftsNextPage] = useState<string>();
@@ -270,15 +269,13 @@ export default function TheMemesComponent() {
       setFetching(false);
       return;
     }
-    setFetchError(null);
     fetchUrl(nftsNextPage)
       .then((responseNfts: DBResponse) => {
         setNfts((prev) => [...prev, ...(responseNfts.data ?? [])]);
         setNftsNextPage(responseNfts.next);
       })
-      .catch((error) => {
-        console.error("Failed to fetch The Memes cards", error);
-        setFetchError("Failed to load NFTs. Please try again later.");
+      .catch(() => {
+        // optionally surface a toast/log here
       })
       .finally(() => setFetching(false));
   }
@@ -542,11 +539,6 @@ export default function TheMemesComponent() {
               {nfts.length > 0 && sort === MemesSort.MEME
                 ? printMemes()
                 : printNfts()}
-              {fetchError && (
-                <Row>
-                  <Col className="pt-3 text-danger">{fetchError}</Col>
-                </Row>
-              )}
               {fetching && nftsNextPage && (
                 <Row>
                   <Col className="pt-3 pb-5">

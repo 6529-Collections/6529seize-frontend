@@ -78,9 +78,9 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
 
   const [currentProof, setCurrentProof] = useState<
     | {
-        index: number;
-        proof: ProofResponse;
-      }
+      index: number;
+      proof: ProofResponse;
+    }
     | undefined
   >();
   const [originalProofs, setOriginalProofs] = useState<ProofResponse[]>([]);
@@ -147,42 +147,30 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
         setFetchingProofs(true);
         const merkleRoot = props.collection.merkle_root;
         const url = `${publicEnv.API_ENDPOINT}/api/nextgen/proofs/${merkleRoot}/${mintForAddress}`;
-        fetchUrl<ProofResponse[]>(url)
-          .then((response: ProofResponse[]) => {
-            const proofResponses: ProofResponse[] = [];
-            if (response.length > 0) {
+        fetchUrl<ProofResponse[]>(url).then((response: ProofResponse[]) => {
+          const proofResponses: ProofResponse[] = [];
+          if (response.length > 0) {
+            proofResponses.push({
+              keccak: response[0].keccak,
+              spots: response[0].spots,
+              info: response[0].info,
+              proof: response[0].proof,
+            });
+            for (let i = 1; i < response.length; i++) {
+              const spots = response[i].spots - response[i - 1].spots;
               proofResponses.push({
-                keccak: response[0].keccak,
-                spots: response[0].spots,
-                info: response[0].info,
-                proof: response[0].proof,
+                keccak: response[i].keccak,
+                spots: spots,
+                info: response[i].info,
+                proof: response[i].proof,
               });
-              for (let i = 1; i < response.length; i++) {
-                const spots = response[i].spots - response[i - 1].spots;
-                proofResponses.push({
-                  keccak: response[i].keccak,
-                  spots: spots,
-                  info: response[i].info,
-                  proof: response[i].proof,
-                });
-              }
             }
-            setProofResponse(proofResponses);
-            setCurrentProof(findActiveProof(response));
-            setOriginalProofs(response);
-          })
-          .catch((error) => {
-            console.error(
-              `Failed to fetch NextGen proofs for ${mintForAddress}`,
-              error
-            );
-            setProofResponse([]);
-            setOriginalProofs([]);
-            setCurrentProof(undefined);
-          })
-          .finally(() => {
-            setFetchingProofs(false);
-          });
+          }
+          setProofResponse(proofResponses);
+          setCurrentProof(findActiveProof(response));
+          setOriginalProofs(response);
+          setFetchingProofs(false);
+        });
       }
     }
   }, [props.collection, address, mintForAddress]);
@@ -261,8 +249,8 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
           props.collection.id,
           mintCount,
           currentProof &&
-          currentProof.proof.spots > 0 &&
-          alStatus == Status.LIVE
+            currentProof.proof.spots > 0 &&
+            alStatus == Status.LIVE
             ? currentProof.proof.spots
             : 0,
           currentProof ? currentProof.proof.info : "",
@@ -362,9 +350,8 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     if (publicStatus == Status.LIVE) {
       const publicRemaining =
         props.collection.max_purchases > props.mint_counts.public
-          ? ` (${
-              props.collection.max_purchases - props.mint_counts.public
-            } remaining)`
+          ? ` (${props.collection.max_purchases - props.mint_counts.public
+          } remaining)`
           : "";
       return `${props.mint_counts.public} / ${props.collection.max_purchases}${publicRemaining}`;
     }

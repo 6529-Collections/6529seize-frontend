@@ -67,7 +67,6 @@ export default function CommunityStats() {
   const [tdhHistory, setTdhHistory] = useState<GlobalTDHHistory[]>([]);
   const [latestHistory, setLatestHistory] = useState<GlobalTDHHistory>();
   const [tdhLabels, setTdhLabels] = useState<Date[]>([]);
-  const [fetchError, setFetchError] = useState<boolean>(false);
 
   function getEstimatedDaysUntil(history: GlobalTDHHistory, x: number) {
     const diff = x - history.total_boosted_tdh;
@@ -105,21 +104,12 @@ export default function CommunityStats() {
 
   useEffect(() => {
     let url = `${publicEnv.API_ENDPOINT}/api/tdh_global_history?page_size=${pageSize}&page=${page}`;
-    fetchUrl(url)
-      .then((response: DBResponse) => {
-        const tdhH = response.data.reverse();
-        setTdhHistory(tdhH);
-        setTdhLabels(tdhH.map((t) => t.date));
-        setLatestHistory(tdhH[tdhH.length - 1]);
-        setFetchError(false);
-      })
-      .catch((error) => {
-        console.error("Failed to fetch TDH history", error);
-        setTdhHistory([]);
-        setTdhLabels([]);
-        setLatestHistory(undefined);
-        setFetchError(true);
-      });
+    fetchUrl(url).then((response: DBResponse) => {
+      const tdhH = response.data.reverse();
+      setTdhHistory(tdhH);
+      setTdhLabels(tdhH.map((t) => t.date));
+      setLatestHistory(tdhH[tdhH.length - 1]);
+    });
   }, [pageSize]);
 
   function printTotalTDH() {
@@ -285,15 +275,6 @@ export default function CommunityStats() {
           <h1 className="mb-0">Network Stats</h1>
         </Col>
       </Row>
-      {fetchError && (
-        <Row className="pt-4">
-          <Col className="text-center">
-            <p className="text-danger">
-              Failed to load network stats. Please try again later.
-            </p>
-          </Col>
-        </Row>
-      )}
       {tdhHistory.length > 0 && (
         <>
           <Row className="pt-4 pb-4 font-bolder">

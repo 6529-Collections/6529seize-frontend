@@ -6,7 +6,6 @@ import { MEMELAB_CONTRACT } from "@/constants";
 import { BaseNFT, VolumeType } from "@/entities/INFT";
 import { areEqualAddresses, idStringToDisplay } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
-import { logError } from "@/src/utils/security-logger";
 import { getAppMetadata } from "../providers/metadata";
 
 export enum MEME_FOCUS {
@@ -46,29 +45,18 @@ async function getMetadataProps(
     urlPath = "nfts_memelab";
     name = `Meme Lab #${idDisplay}`;
   }
+  const response = await fetchUrl(
+    `${publicEnv.API_ENDPOINT}/api/${urlPath}?contract=${contract}&id=${id}`
+  );
   let image = `${publicEnv.BASE_ENDPOINT}/6529io.png`;
-  try {
-    const response = await fetchUrl(
-      `${publicEnv.API_ENDPOINT}/api/${urlPath}?contract=${contract}&id=${id}`
-    );
-    if (response?.data?.length > 0) {
-      description = `${name} | ${description}`;
-      name = `${response.data[0].name}`;
-      if (response.data[0].thumbnail) {
-        image = response.data[0].thumbnail;
-      } else if (response.data[0].image) {
-        image = response.data[0].image;
-      }
+  if (response?.data?.length > 0) {
+    description = `${name} | ${description}`;
+    name = `${response.data[0].name}`;
+    if (response.data[0].thumbnail) {
+      image = response.data[0].thumbnail;
+    } else if (response.data[0].image) {
+      image = response.data[0].image;
     }
-  } catch (error) {
-    const metadataError =
-      error instanceof Error
-        ? error
-        : new Error(`Failed to fetch shared metadata for ${contract} #${id}`);
-    logError(
-      `shared_metadata_fetch:${contract}:${id}`,
-      metadataError
-    );
   }
 
   if (focus && focus !== MEME_FOCUS.LIVE) {
