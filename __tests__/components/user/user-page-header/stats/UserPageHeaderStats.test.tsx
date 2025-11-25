@@ -19,7 +19,7 @@ describe('UserPageHeaderStats', () => {
   });
 
   it('renders TDH and Rep links with numbers and passes follower props', () => {
-    const profile: any = { tdh: 10, tdh_rate: 3, rep: 20 };
+    const profile: any = { tdh: 10, tdh_rate: 3, xtdh: 5, xtdh_rate: 7, rep: 20 };
     render(
       <UserPageHeaderStats
         profile={profile}
@@ -33,6 +33,8 @@ describe('UserPageHeaderStats', () => {
       'href',
       '/bob/stats?activity=tdh-history'
     );
+    expect(screen.getByRole('link', { name: 'fmt-5 xTDH' })).toHaveAttribute('href', '/xtdh');
+    expect(screen.getByRole('link', { name: 'fmt-7 xTDH Rate' })).toHaveAttribute('href', '/xtdh');
     expect(screen.getByTestId('followers')).toBeInTheDocument();
     expect(capturedProps).toEqual({ handleOrWallet: 'bob', followersCount: 4 });
   });

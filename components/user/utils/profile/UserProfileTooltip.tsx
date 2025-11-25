@@ -44,6 +44,13 @@ export default function UserProfileTooltip({
     null
   );
 
+  const floorStat = (value: number | null | undefined) => {
+    if (value === null || value === undefined || Number.isNaN(value)) {
+      return null;
+    }
+    return Math.floor(value);
+  };
+
   useEffect(() => {
     const about = statements?.find(
       (statement) =>
@@ -125,9 +132,21 @@ export default function UserProfileTooltip({
         </div>
         <div className="tw-flex tw-items-center tw-gap-x-1.5">
           <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
-            {formatNumberWithCommasOrDash(profile?.tdh_rate ?? 0)}
+            {formatNumberWithCommasOrDash(floorStat(profile?.tdh_rate) ?? 0)}
           </span>
           <span className="tw-text-sm tw-text-iron-400">TDH Rate</span>
+        </div>
+        <div className="tw-flex tw-items-center tw-gap-x-1.5">
+          <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
+            {formatNumberWithCommasOrDash(floorStat(profile?.xtdh) ?? 0)}
+          </span>
+          <span className="tw-text-sm tw-text-iron-400">xTDH</span>
+        </div>
+        <div className="tw-flex tw-items-center tw-gap-x-1.5">
+          <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
+            {formatNumberWithCommasOrDash(floorStat(profile?.xtdh_rate) ?? 0)}
+          </span>
+          <span className="tw-text-sm tw-text-iron-400">xTDH Rate</span>
         </div>
         <div className="tw-flex tw-items-center tw-gap-x-1.5">
           <span className="tw-text-sm tw-font-semibold tw-text-iron-50">

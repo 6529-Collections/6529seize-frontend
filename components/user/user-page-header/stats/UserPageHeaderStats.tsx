@@ -71,6 +71,28 @@ export default function UserPageHeaderStats({
           </span>
         </Link>
         <Link
+          href="/xtdh"
+          className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+        >
+          <span className="tw-text-base tw-font-semibold tw-text-iron-50">
+            {formatWholeStat(profile.xtdh)}
+          </span>
+          <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400">
+            xTDH
+          </span>
+        </Link>
+        <Link
+          href="/xtdh"
+          className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+        >
+          <span className="tw-text-base tw-font-semibold tw-text-iron-50">
+            {formatWholeStat(profile.xtdh_rate)}
+          </span>
+          <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400 tw-whitespace-nowrap">
+            xTDH Rate
+          </span>
+        </Link>
+        <Link
           href={`/${routeHandle}/rep`}
           className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
