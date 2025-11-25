@@ -4,6 +4,7 @@ import { publicEnv } from "@/config/env";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { DBResponse } from "@/entities/IDBResponse";
 import { GlobalTDHHistory } from "@/entities/ITDH";
+import { numberWithCommas } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
 import {
   BarElement,
@@ -18,7 +19,6 @@ import {
 import { useEffect, useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { Bar } from "react-chartjs-2";
-import { numberWithCommas } from "@/helpers/Helpers";
 
 ChartJS.register(
   CategoryScale,
@@ -68,9 +68,9 @@ export default function CommunityStats() {
   const [latestHistory, setLatestHistory] = useState<GlobalTDHHistory>();
   const [tdhLabels, setTdhLabels] = useState<Date[]>([]);
 
-  function getEstimatedDaysUntil(x: number) {
-    const diff = x - latestHistory!.total_boosted_tdh;
-    const days = diff / latestHistory!.net_boosted_tdh;
+  function getEstimatedDaysUntil(history: GlobalTDHHistory, x: number) {
+    const diff = x - history.total_boosted_tdh;
+    const days = diff / history.net_boosted_tdh;
     return Math.round(days);
   }
 
@@ -90,13 +90,13 @@ export default function CommunityStats() {
     return Array.from({ length: count }, (_, i) => next + i * step);
   }
 
-  function printEstimatedDaysUntilCheckpoints() {
-    const checkpoints = getNextCheckpoints(latestHistory!.total_boosted_tdh);
+  function printEstimatedDaysUntilCheckpoints(history: GlobalTDHHistory) {
+    const checkpoints = getNextCheckpoints(history.total_boosted_tdh);
     return checkpoints.map((x) => (
       <tr key={x}>
         <td>Estimated days until {formatTdh(x)}</td>
         <td className="text-right">
-          {numberWithCommas(getEstimatedDaysUntil(x))}
+          {numberWithCommas(getEstimatedDaysUntil(history, x))}
         </td>
       </tr>
     ));
@@ -272,29 +272,8 @@ export default function CommunityStats() {
     <Container>
       <Row>
         <Col sm={12} md={8} className="pt-4">
-          <h1 className="mb-0">
-            Network Stats
-          </h1>
+          <h1 className="mb-0">Network Stats</h1>
         </Col>
-        {/* <Col
-          sm={12}
-          md={4}
-          className="d-flex align-items-center justify-content-end gap-2 pt-4">
-          <span
-            className={`${styles.timeSelectionSpan} ${
-              pageSize == 7 ? styles.timeSelectionSpanSelected : ""
-            }`}
-            onClick={() => setPageSize(7)}>
-            7D
-          </span>
-          <span
-            className={`${styles.timeSelectionSpan} ${
-              pageSize == 30 ? styles.timeSelectionSpanSelected : ""
-            }`}
-            onClick={() => setPageSize(30)}>
-            1M
-          </span>
-        </Col> */}
       </Row>
       {tdhHistory.length > 0 && (
         <>
@@ -336,9 +315,13 @@ export default function CommunityStats() {
                     </Table>
                   </Col>
                   <Col sm={12} md={6} lg={{ span: 4, offset: 4 }}>
-                    <Table>
-                      <tbody>{printEstimatedDaysUntilCheckpoints()}</tbody>
-                    </Table>
+                    {latestHistory && (
+                      <Table>
+                        <tbody>
+                          {printEstimatedDaysUntilCheckpoints(latestHistory)}
+                        </tbody>
+                      </Table>
+                    )}
                   </Col>
                 </Row>
               </Container>
