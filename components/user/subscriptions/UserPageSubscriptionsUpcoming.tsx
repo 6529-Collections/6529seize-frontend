@@ -193,7 +193,6 @@ function SubscriptionRow(
       });
       props.refresh();
     } catch (e: any) {
-      setSubscribed(subscribed);
       setToast({
         message: e?.message ?? "Failed to change token subscription.",
         type: "error",
@@ -305,7 +304,7 @@ function SubscriptionRow(
                       props.minting_today
                     }
                     onChange={(e) => {
-                      const value = parseInt(e.target.value, 10);
+                      const value = Number.parseInt(e.target.value, 10);
                       setSelectedCount(value);
                       handleUpdateSubscriptionCount(value);
                     }}

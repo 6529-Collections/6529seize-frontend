@@ -38,16 +38,15 @@ export default function UserPageSubscriptionsEditionPreference(
       return;
     }
     setIsUpdatingAllEditions(true);
-    const { success } = await requestAuth();
-    if (!success) {
-      setIsUpdatingAllEditions(false);
-      return;
-    }
-    const allEditions = !isAllEditions;
-    interface SubscribeAllEditionsBody {
-      subscribe_all_editions: boolean;
-    }
     try {
+      const { success } = await requestAuth();
+      if (!success) {
+        return;
+      }
+      const allEditions = !isAllEditions;
+      interface SubscribeAllEditionsBody {
+        subscribe_all_editions: boolean;
+      }
       const response = await commonApiPost<
         SubscribeAllEditionsBody,
         SubscribeAllEditionsBody
@@ -68,12 +67,12 @@ export default function UserPageSubscriptionsEditionPreference(
       });
       props.refresh();
     } catch (e: any) {
-      setIsUpdatingAllEditions(false);
+      const errorMessage =
+        e?.message || String(e) || "Failed to set edition preference";
       setToast({
-        message: e ?? "Failed to set edition preference",
+        message: errorMessage,
         type: "error",
       });
-      return;
     } finally {
       setIsUpdatingAllEditions(false);
     }
