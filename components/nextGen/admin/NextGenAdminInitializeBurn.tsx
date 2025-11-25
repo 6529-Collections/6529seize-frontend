@@ -109,22 +109,20 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
       postData(
         `${publicEnv.API_ENDPOINT}/api/nextgen/register_burn_collection`,
         data
-      )
-        .then((response) => {
-          if (response.status === 200 && response.response) {
-            setSubmitting(true);
-          } else {
-            setUploadError(
-              `Error: ${response.response?.error ?? "Unknown error"}`
-            );
-            setLoading(false);
-          }
-        })
-        .catch((error: Error) => {
-          console.error("Failed to register burn collection", error);
-          setUploadError(`Error: ${error.message}`);
+      ).then((response) => {
+        if (response.status === 200 && response.response) {
+          setSubmitting(true);
+        } else {
+          setUploadError(
+            `Error: ${
+              response.response.error
+                ? response.response.error
+                : "Unknown error"
+            }`
+          );
           setLoading(false);
-        });
+        }
+      });
     }
   }, [signMessage.data]);
 

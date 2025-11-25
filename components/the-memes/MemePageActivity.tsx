@@ -61,12 +61,8 @@ export function MemePageActivity(
           setActivityTotalResults(response.count ?? 0);
           setActivity(response.data ?? []);
         })
-        .catch((error) => {
+        .catch(() => {
           if (cancelled) return;
-          console.error(
-            `Failed to fetch meme activity for NFT ${props.nft?.id}`,
-            error
-          );
           setActivityTotalResults(0);
           setActivity([]);
         });

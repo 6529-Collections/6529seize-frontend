@@ -170,15 +170,13 @@ export default function CommunityMembers() {
 
   const updateFields = useCallback(
     (updateItems: QueryUpdateInput[], lowerCase: boolean = true): void => {
-      const currentQueryString = searchParams?.toString() ?? "";
       const queryString = createQueryString(updateItems, lowerCase);
-      if (queryString === currentQueryString) return;
       const path = queryString ? `${pathname}?${queryString}` : pathname;
       if (path) {
         router.replace(path);
       }
     },
-    [createQueryString, pathname, router, searchParams]
+    [createQueryString, pathname, router]
   );
 
   const setSortBy = async (
@@ -206,19 +204,22 @@ export default function CommunityMembers() {
   };
 
   useEffect(() => {
-    if (params.group_id !== activeGroupId) {
-      const items: QueryUpdateInput[] = [
-        {
-          name: "group",
-          value: activeGroupId,
-        },
-        {
-          name: "page",
-          value: "1",
-        },
-      ];
-      updateFields(items, false);
-    }
+    const urlGroup = params.group_id ?? null;
+    const stateGroup = activeGroupId ?? null;
+    if (urlGroup === stateGroup) return;
+
+    const items: QueryUpdateInput[] = [
+      {
+        name: "group",
+        value: stateGroup,
+      },
+      {
+        name: "page",
+        value: "1",
+      },
+    ];
+    updateFields(items, false);
+
   }, [activeGroupId, params.group_id, updateFields]);
 
   const setPage = useCallback(
@@ -238,31 +239,19 @@ export default function CommunityMembers() {
 
   useEffect(() => {
     if (isLoading) return;
-
-    if (!members) {
+    if (!members?.count) {
+      setPage(1);
       setTotalPages(1);
       return;
     }
-
-    if (!members.count) {
-      if (debouncedParams.page !== 1) {
-        setPage(1);
-      }
-      setTotalPages(1);
-      return;
-    }
-
     const pagesCount = Math.ceil(members.count / debouncedParams.page_size);
-    if (pagesCount < debouncedParams.page) {
-      setPage(pagesCount);
-      return;
-    }
+    if (pagesCount < debouncedParams.page) setPage(pagesCount);
     setTotalPages(pagesCount);
   }, [
     debouncedParams.page,
     debouncedParams.page_size,
     isLoading,
-    members,
+    members?.count,
     setPage,
   ]);
 

@@ -179,12 +179,11 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
           setNftNotFound(true);
         }
       })
-      .catch((error) => {
-        if (cancelled) return;
-        console.error(`Failed to fetch meme page data for ${nftId}`, error);
-        setNftMeta(undefined);
-        setNft(undefined);
-        setNftNotFound(false);
+      .catch(() => {
+        if (!cancelled) {
+          setNftMeta(undefined);
+          setNft(undefined);
+        }
       });
 
     return () => {
@@ -207,42 +206,23 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   }
 
   useEffect(() => {
-    let cancelled = false;
-
     if (connectedWallets.length && nftId) {
-      setUserLoaded(false);
       fetchUrl(
         `${
           publicEnv.API_ENDPOINT
         }/api/transactions?contract=${MEMES_CONTRACT}&wallet=${connectedWallets.join(
           ","
         )}&id=${nftId}`
-      )
-        .then((response: DBResponse) => {
-          if (cancelled) return;
-          setTransactions(response.data);
-          updateNftBalances(response.data);
-          setUserLoaded(true);
-        })
-        .catch((error) => {
-          if (cancelled) return;
-          console.error(
-            `Failed to fetch meme transactions for wallets ${connectedWallets.join(",")}`,
-            error
-          );
-          setTransactions([]);
-          setNftBalance(0);
-          setUserLoaded(true);
-        });
+      ).then((response: DBResponse) => {
+        setTransactions(response.data);
+        updateNftBalances(response.data);
+        setUserLoaded(true);
+      });
     } else {
       setNftBalance(0);
       setUserLoaded(true);
       setTransactions([]);
     }
-
-    return () => {
-      cancelled = true;
-    };
   }, [nftId, connectedWallets]);
 
   useEffect(() => {

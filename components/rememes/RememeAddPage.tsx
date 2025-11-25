@@ -41,7 +41,6 @@ export default function RememeAddPage() {
   const signMessage = useSignMessage();
   const [memes, setMemes] = useState<NFT[]>([]);
   const [memesLoaded, setMemesLoaded] = useState(false);
-  const [memesLoadError, setMemesLoadError] = useState<string>();
   const [userTDH, setUserTDH] = useState<ConsolidatedTDH>();
 
   const [addRememe, setAddRememe] = useState<ProcessedRememe>();
@@ -114,19 +113,12 @@ export default function RememeAddPage() {
   }, [signMessage.isError]);
 
   useEffect(() => {
-    fetchUrl(`${publicEnv.API_ENDPOINT}/api/memes_lite`)
-      .then((response: DBResponse) => {
+    fetchUrl(`${publicEnv.API_ENDPOINT}/api/memes_lite`).then(
+      (response: DBResponse) => {
         setMemes(response.data);
-        setMemesLoadError(undefined);
-      })
-      .catch((error) => {
-        console.error("Failed to fetch memes for rememe submission", error);
-        setMemes([]);
-        setMemesLoadError("Failed to load memes list. Please refresh the page.");
-      })
-      .finally(() => {
         setMemesLoaded(true);
-      });
+      }
+    );
   }, []);
 
   useEffect(() => {
@@ -151,44 +143,35 @@ export default function RememeAddPage() {
         address: address,
         signature: signMessage.data,
         rememe: buildRememeObject(),
-      })
-        .then((response) => {
-          const success = response.status === 201;
-          const processedRememe: ProcessedRememe = response.response;
-          const contract = processedRememe.contract?.address;
-          const tokens = processedRememe.nfts?.map((n) => {
-            return {
-              id: n.tokenId,
-              name: n.name ? n.name : `#${n.tokenId}`,
-            };
-          });
-
-          const nftError: string[] = processedRememe.nfts
-            ? processedRememe.nfts
-                .filter((n) => n.raw.error)
-                .map((n) => `#${n.tokenId} - ${n.raw.error}`)
-            : [];
-
-          const message = processedRememe.error
-            ? [`Error: ${processedRememe.error}`]
-            : nftError;
-
-          setSubmitting(false);
-          setSubmissionResult({
-            success,
-            errors: message,
-            contract,
-            tokens,
-          });
-        })
-        .catch((error: Error) => {
-          console.error("Failed to submit rememe", error);
-          setSubmitting(false);
-          setSubmissionResult({
-            success: false,
-            errors: [`Error: ${error.message}`],
-          });
+      }).then((response) => {
+        const success = response.status === 201;
+        const processedRememe: ProcessedRememe = response.response;
+        const contract = processedRememe.contract?.address;
+        const tokens = processedRememe.nfts?.map((n) => {
+          return {
+            id: n.tokenId,
+            name: n.name ? n.name : `#${n.tokenId}`,
+          };
         });
+
+        const nftError: string[] = processedRememe.nfts
+          ? processedRememe.nfts
+              .filter((n) => n.raw.error)
+              .map((n) => `#${n.tokenId} - ${n.raw.error}`)
+          : [];
+
+        const message = processedRememe.error
+          ? [`Error: ${processedRememe.error}`]
+          : nftError;
+
+        setSubmitting(false);
+        setSubmissionResult({
+          success,
+          errors: message,
+          contract,
+          tokens,
+        });
+      });
     }
   }, [signMessage.data]);
 
@@ -241,15 +224,6 @@ export default function RememeAddPage() {
                       />
                     </Col>
                   </Row>
-                  {memesLoadError && (
-                    <Row className="pt-2">
-                      <Col>
-                        <div className="alert alert-danger" role="alert">
-                          {memesLoadError}
-                        </div>
-                      </Col>
-                    </Row>
-                  )}
                 </Container>
               </Col>
             </Row>

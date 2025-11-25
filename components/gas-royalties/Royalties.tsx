@@ -71,59 +71,23 @@ export default function RoyaltiesComponent() {
     return getUrl("royalties");
   }
 
-  async function fetchRoyalties() {
+  function fetchRoyalties() {
     setFetching(true);
-    try {
-      const res = await fetchUrl<Royalty[]>(getUrlWithParams());
-      const roundToPrecision = (value?: number | null) =>
-        Math.round(((value ?? 0) * 100000)) / 100000;
-
-      const {
-        normalizedRoyalties,
-        totalVolume,
-        totalProceeds,
-        totalArtistTake,
-      } = res.reduce(
-        (acc, royalty) => {
-          const volume = roundToPrecision(royalty.volume);
-          const proceeds = roundToPrecision(royalty.proceeds);
-          const artist_split = roundToPrecision(royalty.artist_split);
-          const artist_take = roundToPrecision(royalty.artist_take);
-
-          acc.normalizedRoyalties.push({
-            ...royalty,
-            volume,
-            proceeds,
-            artist_split,
-            artist_take,
-          });
-          acc.totalVolume += volume;
-          acc.totalProceeds += proceeds;
-          acc.totalArtistTake += artist_take;
-
-          return acc;
-        },
-        {
-          normalizedRoyalties: [] as Royalty[],
-          totalVolume: 0,
-          totalProceeds: 0,
-          totalArtistTake: 0,
-        }
+    fetchUrl<Royalty[]>(getUrlWithParams()).then((res: Royalty[]) => {
+      res.forEach((r) => {
+        r.volume = Math.round(r.volume * 100000) / 100000;
+        r.proceeds = Math.round(r.proceeds * 100000) / 100000;
+        r.artist_split = Math.round(r.artist_split * 100000) / 100000;
+        r.artist_take = Math.round(r.artist_take * 100000) / 100000;
+      });
+      setRoyalties(res);
+      setSumVolume(res.reduce((prev, current) => prev + current.volume, 0));
+      setSumProceeds(res.reduce((prev, current) => prev + current.proceeds, 0));
+      setSumArtistTake(
+        res.reduce((prev, current) => prev + current.artist_take, 0)
       );
-
-      setRoyalties(normalizedRoyalties);
-      setSumVolume(totalVolume);
-      setSumProceeds(totalProceeds);
-      setSumArtistTake(totalArtistTake);
-    } catch (error) {
-      console.error("Failed to fetch royalties data", error);
-      setRoyalties([]);
-      setSumVolume(0);
-      setSumProceeds(0);
-      setSumArtistTake(0);
-    } finally {
       setFetching(false);
-    }
+    });
   }
 
   useEffect(() => {

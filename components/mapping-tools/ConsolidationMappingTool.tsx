@@ -6,18 +6,11 @@ import { areEqualAddresses } from "@/helpers/Helpers";
 import { fetchAllPages } from "@/services/6529api";
 import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  ChangeEvent,
-  DragEvent,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
-import csvParser from "csv-parser";
-import { toast } from "react-toastify";
 import styles from "./MappingTool.module.scss";
+
+const csvParser = require("csv-parser");
 
 interface ConsolidationData {
   address: string;
@@ -27,283 +20,68 @@ interface ConsolidationData {
   name: string;
 }
 
-const buildBalanceKey = (
-  contract: string,
-  tokenId: number,
-  address: string
-) => `${contract}-${tokenId}-${address}`.toUpperCase();
-
-type ConsolidationLookup = (address: string) => Consolidation | undefined;
-type SumForAddresses = (
-  addresses: string[],
-  token_id: number,
-  contract: string
-) => number;
-type PrimaryKeyBuilder = (
-  contract: string,
-  tokenId: number,
-  primary: string
-) => string;
-
-function readFileAsText(file: File): Promise<string> {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      const data = reader.result;
-      if (typeof data === "string") {
-        resolve(data);
-      } else {
-        reject(new Error("Unexpected file format"));
-      }
-    };
-
-    reader.onerror = () => {
-      reject(reader.error ?? new Error("Failed to read file"));
-    };
-
-    reader.readAsText(file);
-  });
-}
-
-const csvHeaders = new Set([
-  "address",
-  "token_id",
-  "balance",
-  "contract",
-  "name",
-]);
-
-function normalizeHeader(header: string) {
-  const normalized = header
-    .trim()
-    .toLowerCase()
-    .replaceAll(/[\s-]+/g, "_");
-
-  if (normalized === "tokenid") {
-    return "token_id";
-  }
-
-  return normalized;
-}
-
-async function parseCsvText(csvText: string): Promise<ConsolidationData[]> {
-  return new Promise((resolve, reject) => {
-    const results: ConsolidationData[] = [];
-    const parseIntegerValue = (value: unknown) => {
-      if (typeof value === "string") {
-        return Number.parseInt(value.trim(), 10);
-      }
-      if (typeof value === "number") {
-        return Number.isFinite(value) ? Math.trunc(value) : Number.NaN;
-      }
-      return Number.NaN;
-    };
-
-    const parser = csvParser({
-      headers: true,
-      mapHeaders: ({ header }: { header: string }) => {
-        const normalized = normalizeHeader(header);
-        return csvHeaders.has(normalized) ? normalized : null;
-      },
-    })
-      .on("data", (row: Record<string, unknown>) => {
-        const address =
-          typeof row.address === "string" ? row.address.trim() : "";
-        const contract =
-          typeof row.contract === "string" ? row.contract.trim() : "";
-        const name = typeof row.name === "string" ? row.name.trim() : "";
-
-        const tokenValue = row.token_id;
-        const balanceValue = row.balance;
-
-        const token_id = parseIntegerValue(tokenValue);
-        const balance = parseIntegerValue(balanceValue);
-
-        if (
-          !address ||
-          !contract ||
-          !name ||
-          Number.isNaN(token_id) ||
-          Number.isNaN(balance)
-        ) {
-          console.warn("Skipping CSV row with missing or invalid fields:", row);
-          return;
-        }
-
-        results.push({ address, token_id, balance, contract, name });
-      })
-      .on("end", () => resolve(results))
-      .on("error", (error: unknown) => reject(error));
-
-    parser.write(csvText);
-    parser.end();
-  });
-}
-
-async function parseCsvFile(file: File): Promise<ConsolidationData[]> {
-  const csvText = await readFileAsText(file);
-  return parseCsvText(csvText);
-}
-
-function buildMergeTargets(
-  entries: ConsolidationData[],
-  getConsolidationForAddress: ConsolidationLookup,
-  sumAddresses: SumForAddresses,
-  primaryKeyFor: PrimaryKeyBuilder
-) {
-  const mergeTargets = new Map<string, ConsolidationData>();
-
-  for (const entry of entries) {
-    const addressConsolidations = getConsolidationForAddress(entry.address);
-    if (!addressConsolidations) {
-      continue;
-    }
-
-    const sum = sumAddresses(
-      addressConsolidations.wallets,
-      entry.token_id,
-      entry.contract
-    );
-
-    const canMergePrimary =
-      areEqualAddresses(entry.address, addressConsolidations.primary);
-
-    if (!canMergePrimary) {
-      continue;
-    }
-
-    const primaryKey = primaryKeyFor(
-      entry.contract,
-      entry.token_id,
-      addressConsolidations.primary
-    );
-
-    if (!mergeTargets.has(primaryKey)) {
-      mergeTargets.set(primaryKey, {
-        ...entry,
-        address: addressConsolidations.primary,
-        balance: sum,
-      });
-    }
-  }
-
-  return mergeTargets;
-}
-
-function buildNormalizedOutput(
-  entries: ConsolidationData[],
-  getConsolidationForAddress: ConsolidationLookup,
-  primaryKeyFor: PrimaryKeyBuilder,
-  mergeTargets: Map<string, ConsolidationData>
-) {
-  const emittedPrimaryKeys = new Set<string>();
-  const normalizedOutput: ConsolidationData[] = [];
-
-  for (const entry of entries) {
-    const addressConsolidations = getConsolidationForAddress(entry.address);
-    if (!addressConsolidations) {
-      normalizedOutput.push(entry);
-      continue;
-    }
-
-    const primaryKey = primaryKeyFor(
-      entry.contract,
-      entry.token_id,
-      addressConsolidations.primary
-    );
-
-    const mergedEntry = mergeTargets.get(primaryKey);
-    if (mergedEntry) {
-      if (!emittedPrimaryKeys.has(primaryKey)) {
-        normalizedOutput.push(mergedEntry);
-        emittedPrimaryKeys.add(primaryKey);
-      }
-      continue;
-    }
-
-    normalizedOutput.push(entry);
-  }
-
-  return normalizedOutput;
-}
-
 export default function ConsolidationMappingTool() {
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const inputRef = useRef(null);
   const [dragActive, setDragActive] = useState(false);
 
-  const [file, setFile] = useState<File | null>(null);
+  const [file, setFile] = useState<any>();
   const [processing, setProcessing] = useState(false);
   const [consolidations, setConsolidations] = useState<Consolidation[]>([]);
 
   const [csvData, setCsvData] = useState<ConsolidationData[]>([]);
-
-  const balanceMap = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const data of csvData) {
-      const key = buildBalanceKey(data.contract, data.token_id, data.address);
-      map.set(key, (map.get(key) ?? 0) + data.balance);
-    }
-    return map;
-  }, [csvData]);
-
-  const consolidationMap = useMemo(() => {
-    const map = new Map<string, Consolidation>();
-    for (const consolidation of consolidations) {
-      for (const wallet of consolidation.wallets) {
-        map.set(wallet.toUpperCase(), consolidation);
-      }
-    }
-    return map;
-  }, [consolidations]);
-
   function submit() {
-    if (!file) {
-      toast.warning("Please upload a CSV file before submitting.");
-      return;
-    }
     setProcessing(true);
   }
 
   const handleUpload = () => {
-    inputRef.current?.click();
+    (inputRef.current as any).click();
   };
 
-  const handleDrag = function (event: DragEvent<HTMLDivElement>) {
-    event.preventDefault();
-    event.stopPropagation();
-    if (event.type === "dragenter" || event.type === "dragover") {
+  const handleDrag = function (e: any) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
       setDragActive(true);
-    } else if (event.type === "dragleave") {
+    } else if (e.type === "dragleave") {
       setDragActive(false);
     }
   };
 
-  const handleDrop = function (event: DragEvent<HTMLDivElement>) {
-    event.preventDefault();
-    event.stopPropagation();
+  const handleDrop = function (e: any) {
+    e.preventDefault();
+    e.stopPropagation();
     setDragActive(false);
-    const droppedFile = event.dataTransfer?.files?.[0];
-    if (droppedFile) {
-      setFile(droppedFile);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setFile(e.dataTransfer.files[0]);
     }
   };
 
+  function getForAddress(address: string) {
+    const myConsolidations = consolidations.find((c) =>
+      c.wallets.some((w) => areEqualAddresses(address, w))
+    );
+    return myConsolidations;
+  }
+
+  function sumForAddresses(
+    addresses: string[],
+    token_id: number,
+    contract: string
+  ) {
+    const myConsolidations = csvData.filter(
+      (d) =>
+        addresses.some((a) => areEqualAddresses(a, d.address)) &&
+        areEqualAddresses(contract, d.contract) &&
+        token_id === d.token_id
+    );
+    const balance = myConsolidations.reduce((a, b) => a + b.balance, 0);
+    return balance;
+  }
+
   function downloadCsvFile(data: ConsolidationData[]) {
     const csvHeader = "address,token_id,balance,contract,name";
-    const escapeValue = (value: string | number) => {
-      const str = String(value);
-      return `"${str.replaceAll('"', '""')}"`;
-    };
-
     const csvData = data.map((d) => {
-      return [
-        escapeValue(d.address),
-        escapeValue(d.token_id),
-        escapeValue(d.balance),
-        escapeValue(d.contract),
-        escapeValue(d.name),
-      ].join(",");
+      return `${d.address},${d.token_id},${d.balance},${d.contract},${d.name}`;
     });
     const csvString = `${csvHeader}\n${csvData.join("\n")}`;
 
@@ -318,124 +96,84 @@ export default function ConsolidationMappingTool() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    URL.revokeObjectURL(url);
   }
 
   useEffect(() => {
-    if (!processing || !file) {
-      return;
+    async function fetchConsolidations(url: string) {
+      fetchAllPages<Consolidation>(url).then((consolidations) => {
+        setConsolidations(consolidations);
+        const reader = new FileReader();
+
+        reader.onload = async () => {
+          const data = reader.result;
+          const results: ConsolidationData[] = [];
+          let isFirstRow = true;
+
+          const parser = csvParser({ headers: true })
+            .on("data", (row: any) => {
+              if (isFirstRow) {
+                isFirstRow = false;
+              } else {
+                const address = row["_0"];
+                const token_id = Number.parseInt(row["_1"], 10);
+                const balance = Number.parseInt(row["_2"], 10);
+                const contract = row["_3"];
+                const name = row["_4"];
+                results.push({ address, token_id, balance, contract, name });
+              }
+            })
+            .on("end", () => {
+              setCsvData(results);
+            })
+            .on("error", (err: any) => {
+              console.error(err);
+            });
+
+          parser.write(data);
+          parser.end();
+        };
+
+        reader.readAsText(file);
+      });
     }
-
-    let isMounted = true;
-    const initialUrl = `${publicEnv.API_ENDPOINT}/api/consolidations`;
-
-    const fetchAndParseConsolidations = async () => {
-      try {
-        const fetchedConsolidations = await fetchAllPages<Consolidation>(
-          initialUrl
-        );
-        if (!isMounted) {
-          return;
-        }
-        setConsolidations(fetchedConsolidations);
-
-        const parsedCsv = await parseCsvFile(file);
-        if (!isMounted) {
-          return;
-        }
-        setCsvData(parsedCsv);
-
-        if (parsedCsv.length === 0 || fetchedConsolidations.length === 0) {
-          if (!isMounted) {
-            return;
-          }
-          const message =
-            parsedCsv.length === 0
-              ? "The CSV file contains no valid data rows."
-              : "No consolidations found to process.";
-          toast.warning(message);
-          setProcessing(false);
-        }
-      } catch (error) {
-        console.error("Failed to fetch consolidations for mapping tool", error);
-        if (!isMounted) {
-          return;
-        }
-        toast.error(
-          "Unable to process the CSV. Please verify the file and try again."
-        );
-        setConsolidations([]);
-        setCsvData([]);
-        setProcessing(false);
-      }
-    };
-
-    void fetchAndParseConsolidations();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [processing, file]);
+    if (processing) {
+      const initialUrl = `${publicEnv.API_ENDPOINT}/api/consolidations`;
+      fetchConsolidations(initialUrl);
+    }
+  }, [processing]);
 
   useEffect(() => {
-    if (!processing) {
-      return;
-    }
-
-    if (csvData.length === 0 || consolidations.length === 0) {
-      // Waiting for data to finish loading; the fetch/parse effect will handle
-      // empty results and clear processing state.
-      return;
-    }
-
-    const getForAddress: ConsolidationLookup = (address: string) => {
-      return consolidationMap.get(address.toUpperCase());
-    };
-
-    const sumForAddresses: SumForAddresses = (
-      addresses: string[],
-      token_id: number,
-      contract: string
-    ) => {
-      let balance = 0;
-
-      for (const address of addresses) {
-        const key = buildBalanceKey(contract, token_id, address);
-        balance += balanceMap.get(key) ?? 0;
-      }
-
-      return balance;
-    };
-
-    try {
-      const primaryKeyFor = (
-        contract: string,
-        tokenId: number,
-        primary: string
-      ) => buildBalanceKey(contract, tokenId, primary);
-
-      const mergeTargets = buildMergeTargets(
-        csvData,
-        getForAddress,
-        sumForAddresses,
-        primaryKeyFor
-      );
-      const normalizedOutput = buildNormalizedOutput(
-        csvData,
-        getForAddress,
-        primaryKeyFor,
-        mergeTargets
-      );
-      downloadCsvFile(normalizedOutput);
-    } catch (error) {
-      console.error("Failed to generate CSV output", error);
-      toast.error(
-        "Unable to generate the consolidated CSV. Please try again later."
-      );
-    } finally {
+    const out: ConsolidationData[] = [];
+    if (csvData.length > 0 && consolidations.length > 0) {
+      csvData.map((consolidationData) => {
+        const addressConsolidations = getForAddress(consolidationData.address);
+        if (addressConsolidations) {
+          const sum = sumForAddresses(
+            addressConsolidations.wallets,
+            consolidationData.token_id,
+            consolidationData.contract
+          );
+          if (
+            areEqualAddresses(
+              consolidationData.address,
+              addressConsolidations.primary
+            ) ||
+            sum === consolidationData.balance
+          ) {
+            out.push({
+              ...consolidationData,
+              address: addressConsolidations.primary,
+              balance: sum,
+            });
+          }
+        } else {
+          out.push(consolidationData);
+        }
+      });
+      downloadCsvFile(out);
       setProcessing(false);
     }
-  }, [csvData, consolidations, processing]);
+  }, [csvData]);
 
   return (
     <Container className={styles.toolArea} id="mapping-tool-form">
@@ -489,7 +227,7 @@ export default function ConsolidationMappingTool() {
                 <div
                   className={`spinner-border ${styles.loader}`}
                   role="status">
-                  <span className="sr-only">Processing CSV file...</span>
+                  <span className="sr-only"></span>
                 </div>
               </div>
             )}
@@ -501,10 +239,11 @@ export default function ConsolidationMappingTool() {
         className={`${styles.formInputHidden}`}
         type="file"
         accept=".csv"
-        onChange={(event: ChangeEvent<HTMLInputElement>) => {
-          const selectedFile = event.target.files?.[0];
-          if (selectedFile) {
-            setFile(selectedFile);
+        value={file?.fileName}
+        onChange={(e: any) => {
+          if (e.target.files) {
+            const f = e.target.files[0];
+            setFile(f);
           }
         }}
       />
