@@ -44,10 +44,8 @@ export function useActiveWaveManager() {
 
   // Sync state when searchParams change (after router.push navigation)
   useEffect(() => {
-    if (waveFromSearchParams !== activeWaveId) {
-      setActiveWaveId(waveFromSearchParams);
-    }
-  }, [waveFromSearchParams, activeWaveId]);
+    setActiveWaveId(waveFromSearchParams);
+  }, [waveFromSearchParams]);
 
   // Sync with back/forward navigation
   useEffect(() => {
