@@ -1,6 +1,6 @@
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, waitFor } from "@testing-library/react";
 import { useActiveWaveManager } from "@/contexts/wave/hooks/useActiveWaveManager";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
@@ -17,33 +17,41 @@ jest.mock("next/navigation", () => ({
   useSearchParams: jest.fn(),
 }));
 
-const push = jest.fn();
-const router: any = { query: {}, push };
-(useRouter as jest.Mock).mockReturnValue(router);
-
 describe("useActiveWaveManager", () => {
-  it("reads wave from query and updates via setActiveWave", () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+    globalThis.history.replaceState(null, "", "http://localhost/");
+  });
+
+  it("reads wave from query and updates via setActiveWave", async () => {
+    globalThis.history.replaceState(null, "", "http://localhost/waves?wave=abc");
     (useSearchParams as jest.Mock).mockReturnValue(
       new URLSearchParams({ wave: "abc" })
     );
-    const { result, rerender } = renderHook(() => useActiveWaveManager());
-    expect(result.current.activeWaveId).toBe("abc");
 
+    const pushStateSpy = jest.spyOn(globalThis.history, "pushState");
+    const replaceStateSpy = jest.spyOn(globalThis.history, "replaceState");
+
+    const { result, rerender } = renderHook(() => useActiveWaveManager());
+    await waitFor(() => expect(result.current.activeWaveId).toBe("abc"));
+
+    replaceStateSpy.mockClear();
     act(() => {
       result.current.setActiveWave("def");
     });
-    expect(push).toHaveBeenLastCalledWith('/waves?wave=def');
+    expect(pushStateSpy).toHaveBeenLastCalledWith(null, "", "/waves?wave=def");
 
-    // Simulate router query change to trigger state update
+    globalThis.history.replaceState(null, "", "http://localhost/waves?wave=def");
     (useSearchParams as jest.Mock).mockReturnValue(
       new URLSearchParams({ wave: "def" })
     );
     rerender();
-    expect(result.current.activeWaveId).toBe("def");
+    await waitFor(() => expect(result.current.activeWaveId).toBe("def"));
 
+    pushStateSpy.mockClear();
     act(() => {
       result.current.setActiveWave(null);
     });
-    expect(push).toHaveBeenLastCalledWith('/waves');
+    expect(pushStateSpy).toHaveBeenLastCalledWith(null, "", "/waves");
   });
 });

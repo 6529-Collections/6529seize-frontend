@@ -8,7 +8,6 @@ import WavesPageClient from "./page.client";
 import { Time } from "@/helpers/time";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { cookies } from "next/headers";
-import { unstable_noStore as noStore } from "next/cache";
 import type { Metadata } from "next";
 import { formatAddress } from "@/helpers/Helpers";
 import { formatCount } from "@/helpers/format.helpers";
@@ -57,7 +56,6 @@ export default async function WavesPage({
 }: {
   readonly searchParams: Promise<{ wave?: string; drop?: string }>;
 }) {
-  noStore();
   const resolvedParams = await searchParams;
   const cookieStore = await cookies();
   const context = await fetchWaveContext(resolvedParams.wave ?? null, cookieStore);
@@ -97,7 +95,6 @@ export async function generateMetadata({
 }: {
   readonly searchParams: Promise<{ wave?: string }>;
 }): Promise<Metadata> {
-  noStore();
   const resolvedParams = await searchParams;
   const waveId = resolvedParams.wave ?? null;
 
