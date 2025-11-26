@@ -5,7 +5,7 @@ import { capitalizeEveryWord, formatAddress } from "@/helpers/Helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useWaveById } from "@/hooks/useWaveById";
 import { Bars3Icon } from "@heroicons/react/24/outline";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
@@ -15,6 +15,7 @@ import Spinner from "../utils/Spinner";
 import AppSidebar from "./AppSidebar";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import HeaderActionButtons from "./HeaderActionButtons";
+import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 
 interface Props {
   readonly extraClass?: string;
@@ -22,10 +23,10 @@ interface Props {
 
 export default function AppHeader(props: Readonly<Props>) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const myStream = useMyStreamOptional();
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy } = useAuth();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { profile } = useIdentity({
     handleOrWallet: address ?? null,
     initialProfile: null,
@@ -46,10 +47,7 @@ export default function AppHeader(props: Readonly<Props>) {
         .replace(/^./, (c) => c.toUpperCase())
     : "Home";
 
-  const waveId =
-    typeof searchParams?.get("wave") === "string"
-      ? searchParams?.get("wave")
-      : null;
+  const waveId = myStream?.activeWave.id ?? null;
   const { wave, isLoading, isFetching } = useWaveById(waveId);
   const isProfileRoute = pathname?.startsWith("/[user]");
   const isCreateRoute =

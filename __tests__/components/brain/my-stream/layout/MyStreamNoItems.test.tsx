@@ -30,7 +30,7 @@ it("uses app routes when running in app", () => {
   render(<MyStreamNoItems />);
   expect(screen.getByRole("link", { name: /Explore Waves/i })).toHaveAttribute(
     "href",
-    "/?view=waves"
+    "/waves"
   );
   expect(screen.getByRole("link", { name: /Create a Wave/i })).toHaveAttribute(
     "href",

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useMyStreamQuery, usePollingQuery } from "../../hooks/useMyStreamQuery";
 import { ActiveDropAction, ActiveDropState } from "../../types/dropInteractionTypes";
@@ -11,27 +11,32 @@ import MyStream from "../brain/my-stream/MyStream";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import useDeviceInfo from "../../hooks/useDeviceInfo";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 
 export default function HomeFeed() {
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   const { homepageFeedStyle, smallScreenFeedStyle } = useLayout();
   const router = useRouter();
   const { isApp, hasTouchScreen } = useDeviceInfo();
+  const { directMessages } = useMyStream();
 
-  const onDropContentClick = (drop: ExtendedDrop) => {
-    const waveInfo = drop.wave as any;
-    const isDirectMessage =
-      waveInfo?.chat?.scope?.group?.is_direct_message ?? false;
+  const onDropContentClick = useCallback(
+    (drop: ExtendedDrop) => {
+      const isDirectMessage = directMessages.list.some(
+        (dm) => dm.id === drop.wave.id
+      );
 
-    const url = getWaveRoute({
-      waveId: drop.wave.id,
-      serialNo: drop.serial_no,
-      isDirectMessage,
-      isApp,
-    });
+      const url = getWaveRoute({
+        waveId: drop.wave.id,
+        serialNo: drop.serial_no,
+        isDirectMessage,
+        isApp,
+      });
 
-    router.push(url, { scroll: false });
-  };
+      router.push(url, { scroll: false });
+    },
+    [directMessages.list, isApp, router]
+  );
 
   useEffect(() => {
     setActiveDrop(null);
