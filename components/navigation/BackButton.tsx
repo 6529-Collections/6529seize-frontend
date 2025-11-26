@@ -9,6 +9,7 @@ import { useWaveData } from "@/hooks/useWaveData";
 import { useWave } from "@/hooks/useWave";
 import { useViewContext } from "./ViewContext";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import {
   getMessagesBaseRoute,
   getWaveHomeRoute,
@@ -23,8 +24,9 @@ export default function BackButton() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const { isApp } = useDeviceInfo();
+  const myStream = useMyStreamOptional();
 
-  const waveId = searchParams?.get("wave") ?? null;
+  const waveId = myStream?.activeWave.id ?? searchParams?.get("wave") ?? null;
   const dropId = searchParams?.get("drop") ?? null;
 
   const isInMessagesContext =
