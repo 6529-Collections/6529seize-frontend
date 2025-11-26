@@ -36,6 +36,7 @@ export default function BackButton() {
   const { data: wave } = useWaveData({
     waveId: waveId,
     onWaveNotFound: () => {
+      myStream?.activeWave.set(null);
       const params = new URLSearchParams(searchParams?.toString() || "");
       params.delete("wave");
       const basePath =
