@@ -9,7 +9,7 @@ import {
 } from "@/helpers/navigation.helpers";
 
 const getWaveFromWindow = (): string | null => {
-  if (typeof globalThis.window === "undefined") return null;
+  if (globalThis.window === undefined) return null;
 
   const url = new URL(globalThis.window.location.href);
   const wave = url.searchParams.get("wave");
@@ -18,7 +18,7 @@ const getWaveFromWindow = (): string | null => {
 
 
 const getRouteContext = (): { isOnWaves: boolean; isOnMessages: boolean } => {
-  if (typeof globalThis.window === "undefined") {
+  if (globalThis.window === undefined) {
     return { isOnWaves: false, isOnMessages: false };
   }
 
@@ -51,7 +51,7 @@ export function useActiveWaveManager() {
 
   // Sync with back/forward navigation
   useEffect(() => {
-    if (typeof globalThis.window === "undefined") return;
+    if (globalThis.window === undefined) return;
 
     const { window: browserWindow } = globalThis;
     if (!browserWindow) return;
@@ -68,7 +68,7 @@ export function useActiveWaveManager() {
       waveId: string | null,
       options?: { isDirectMessage?: boolean; replace?: boolean }
     ) => {
-      if (typeof globalThis.window === "undefined") return;
+      if (globalThis.window === undefined) return;
 
       const { window: browserWindow } = globalThis;
       if (!browserWindow) return;

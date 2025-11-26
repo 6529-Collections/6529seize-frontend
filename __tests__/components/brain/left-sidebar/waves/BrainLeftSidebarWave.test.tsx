@@ -85,7 +85,7 @@ describe('BrainLeftSidebarWave', () => {
     render(<BrainLeftSidebarWave wave={baseWave} onHover={onHover} />);
     const link = screen.getByRole('link');
     await userEvent.click(link);
-    expect(setActiveWave).toHaveBeenCalledWith('1');
+    expect(setActiveWave).toHaveBeenCalledWith('1', { isDirectMessage: false });
   });
 
   it('shows drop indicators for non-chat waves', () => {

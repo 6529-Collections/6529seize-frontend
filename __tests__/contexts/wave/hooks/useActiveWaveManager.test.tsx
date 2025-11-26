@@ -42,6 +42,9 @@ describe("useActiveWaveManager", () => {
     expect(pushStateSpy).toHaveBeenLastCalledWith(null, "", "/waves?wave=def");
 
     globalThis.history.replaceState(null, "", "http://localhost/waves?wave=def");
+    (useSearchParams as jest.Mock).mockReturnValue(
+      new URLSearchParams({ wave: "def" })
+    );
     rerender();
     await waitFor(() => expect(result.current.activeWaveId).toBe("def"));
 
