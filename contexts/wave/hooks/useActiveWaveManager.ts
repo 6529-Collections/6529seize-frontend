@@ -1,40 +1,60 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
   getWaveHomeRoute,
   getWaveRoute,
 } from "@/helpers/navigation.helpers";
 
-const getWaveFromUrl = (): string | null => {
-  const currentWindow = globalThis.window;
-  if (!currentWindow) return null;
-  const url = new URL(currentWindow.location.href);
+const getWaveFromWindow = (): string | null => {
+  if (typeof window === "undefined") return null;
+  const url = new URL(window.location.href);
   const wave = url.searchParams.get("wave");
   return typeof wave === "string" ? wave : null;
 };
 
-/**
- * Client-side active wave state that keeps the URL in sync without
- * triggering a Next.js router navigation (avoids per-click server trips).
- */
+
+const getRouteContext = (): { isOnWaves: boolean; isOnMessages: boolean } => {
+  if (typeof window === "undefined") return { isOnWaves: false, isOnMessages: false };
+
+  const pathname = window.location.pathname;
+  return {
+    isOnWaves: pathname === "/waves" || pathname.startsWith("/waves/"),
+    isOnMessages: pathname === "/messages" || pathname.startsWith("/messages/"),
+  };
+};
+
 export function useActiveWaveManager() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { isApp } = useDeviceInfo();
-  const [activeWaveId, setActiveWaveId] = useState<string | null>(null);
+
+  const waveFromSearchParams = useMemo(() => {
+    const waveId = searchParams?.get("wave");
+    return typeof waveId === "string" ? waveId : null;
+  }, [searchParams]);
+
+  // Track state for pushState updates
+  const [activeWaveId, setActiveWaveId] = useState<string | null>(waveFromSearchParams);
+
+  // Sync state when searchParams change (after router.push navigation)
+  useEffect(() => {
+    if (waveFromSearchParams !== activeWaveId) {
+      setActiveWaveId(waveFromSearchParams);
+    }
+  }, [waveFromSearchParams, activeWaveId]);
 
   // Sync with back/forward navigation
   useEffect(() => {
-    const currentWindow = globalThis.window;
-    if (!currentWindow) return;
-
-    setActiveWaveId(getWaveFromUrl());
+    if (typeof window === "undefined") return;
 
     const onPopState = () => {
-      setActiveWaveId(getWaveFromUrl());
+      setActiveWaveId(getWaveFromWindow());
     };
-    currentWindow.addEventListener("popstate", onPopState);
-    return () => currentWindow.removeEventListener("popstate", onPopState);
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
   }, []);
 
   const setActiveWave = useCallback(
@@ -42,25 +62,40 @@ export function useActiveWaveManager() {
       waveId: string | null,
       options?: { isDirectMessage?: boolean; replace?: boolean }
     ) => {
-      const currentWindow = globalThis.window;
-      if (!currentWindow) return;
+      if (typeof window === "undefined") return;
 
       const isDirectMessage = options?.isDirectMessage ?? false;
+
       const target = waveId
         ? getWaveRoute({ waveId, isDirectMessage, isApp })
         : getWaveHomeRoute({ isDirectMessage, isApp });
 
-      const method = options?.replace ? "replaceState" : "pushState";
-      // Only update history if the URL actually changes
-      if (
-        currentWindow.location.pathname + currentWindow.location.search !==
-        target
-      ) {
-        currentWindow.history[method](null, "", target);
+      const currentUrl = window.location.pathname + window.location.search;
+      if (currentUrl === target) {
+        setActiveWaveId(waveId);
+        return;
       }
-      setActiveWaveId(waveId);
+
+      // Check if staying on same route type (waves→waves or messages→messages)
+      const { isOnWaves, isOnMessages } = getRouteContext();
+      const canUsePushState =
+        (!isDirectMessage && isOnWaves) || (isDirectMessage && isOnMessages);
+
+      if (canUsePushState) {
+        // Same route - fast pushState
+        const method = options?.replace ? "replaceState" : "pushState";
+        window.history[method](null, "", target);
+        setActiveWaveId(waveId);
+      } else {
+        // Cross-route - proper navigation
+        if (options?.replace) {
+          router.replace(target);
+        } else {
+          router.push(target);
+        }
+      }
     },
-    [isApp]
+    [isApp, router]
   );
 
   return {

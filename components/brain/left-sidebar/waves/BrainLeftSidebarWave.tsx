@@ -78,15 +78,14 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     (event: React.MouseEvent<HTMLAnchorElement>) => {
       if (event.defaultPrevented) return;
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button === 1) {
-        // let browser handle new tab/window
         return;
       }
       event.preventDefault();
       onWaveHover();
       const nextWaveId = wave.id === activeWaveId ? null : wave.id;
-      activeWave.set(nextWaveId);
+      activeWave.set(nextWaveId, { isDirectMessage });
     },
-    [activeWave.set, activeWaveId, onWaveHover, wave.id]
+    [activeWave.set, activeWaveId, isDirectMessage, onWaveHover, wave.id]
   );
 
   const getAvatarRingClasses = () => {
@@ -103,7 +102,8 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       }`}>
       <Link
         href={href}
-        onMouseEnter={onWaveHover}
+        // TODO: onMouseEnter causes two-click issue on mobile - investigate why
+        // onMouseEnter={onWaveHover}
         onClick={handleWaveClick}
         className={`tw-flex tw-flex-1 tw-space-x-3 tw-no-underline tw-py-1 tw-transition-all tw-duration-200 tw-ease-out ${
           isActive

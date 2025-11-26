@@ -31,6 +31,7 @@ export const useWaveNavigation = ({
   waveId,
 }: UseWaveNavigationOptions): UseWaveNavigationResult => {
   const currentWaveId = activeWaveId ?? searchParams?.get('wave') ?? undefined;
+  const isDirectMessage = basePath === '/messages';
 
   const href = useMemo(() => {
     if (currentWaveId === waveId) {
@@ -69,9 +70,9 @@ export const useWaveNavigation = ({
       event.preventDefault();
       onMouseEnter();
       const nextWaveId = waveId === currentWaveId ? null : waveId;
-      setActiveWave(nextWaveId);
+      setActiveWave(nextWaveId, { isDirectMessage });
     },
-    [currentWaveId, onMouseEnter, setActiveWave, waveId]
+    [currentWaveId, isDirectMessage, onMouseEnter, setActiveWave, waveId]
   );
 
   return {
