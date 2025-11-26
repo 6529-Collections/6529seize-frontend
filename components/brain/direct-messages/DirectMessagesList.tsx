@@ -137,6 +137,7 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
           hidePin
           hideHeaders
           scrollContainerRef={scrollContainerRef}
+          isDirectMessage
         />
 
         <UnifiedWavesListLoader

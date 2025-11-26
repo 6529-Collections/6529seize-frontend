@@ -15,7 +15,7 @@ interface ExpandedWaveProps {
   readonly isPinned: boolean;
   readonly latestDropTimestamp?: number | null;
   readonly nameRef: MutableRefObject<HTMLDivElement | null>;
-  readonly onMouseEnter: () => void;
+  readonly onMouseEnter?: () => void;
   readonly onClick: (e: React.MouseEvent<HTMLAnchorElement>) => void;
   readonly showExpandedTooltip: boolean;
   readonly showPin: boolean;

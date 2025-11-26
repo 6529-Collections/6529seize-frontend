@@ -9,17 +9,20 @@ import {
 } from "@/helpers/navigation.helpers";
 
 const getWaveFromWindow = (): string | null => {
-  if (typeof window === "undefined") return null;
-  const url = new URL(window.location.href);
+  if (typeof globalThis.window === "undefined") return null;
+
+  const url = new URL(globalThis.window.location.href);
   const wave = url.searchParams.get("wave");
   return typeof wave === "string" ? wave : null;
 };
 
 
 const getRouteContext = (): { isOnWaves: boolean; isOnMessages: boolean } => {
-  if (typeof window === "undefined") return { isOnWaves: false, isOnMessages: false };
+  if (typeof globalThis.window === "undefined") {
+    return { isOnWaves: false, isOnMessages: false };
+  }
 
-  const pathname = window.location.pathname;
+  const pathname = globalThis.window.location.pathname;
   return {
     isOnWaves: pathname === "/waves" || pathname.startsWith("/waves/"),
     isOnMessages: pathname === "/messages" || pathname.startsWith("/messages/"),
@@ -48,13 +51,16 @@ export function useActiveWaveManager() {
 
   // Sync with back/forward navigation
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof globalThis.window === "undefined") return;
+
+    const { window: browserWindow } = globalThis;
+    if (!browserWindow) return;
 
     const onPopState = () => {
       setActiveWaveId(getWaveFromWindow());
     };
-    window.addEventListener("popstate", onPopState);
-    return () => window.removeEventListener("popstate", onPopState);
+    browserWindow.addEventListener("popstate", onPopState);
+    return () => browserWindow.removeEventListener("popstate", onPopState);
   }, []);
 
   const setActiveWave = useCallback(
@@ -62,15 +68,17 @@ export function useActiveWaveManager() {
       waveId: string | null,
       options?: { isDirectMessage?: boolean; replace?: boolean }
     ) => {
-      if (typeof window === "undefined") return;
+      if (typeof globalThis.window === "undefined") return;
 
+      const { window: browserWindow } = globalThis;
+      if (!browserWindow) return;
       const isDirectMessage = options?.isDirectMessage ?? false;
 
       const target = waveId
         ? getWaveRoute({ waveId, isDirectMessage, isApp })
         : getWaveHomeRoute({ isDirectMessage, isApp });
 
-      const currentUrl = window.location.pathname + window.location.search;
+      const currentUrl = browserWindow.location.pathname + browserWindow.location.search;
       if (currentUrl === target) {
         setActiveWaveId(waveId);
         return;
@@ -84,15 +92,13 @@ export function useActiveWaveManager() {
       if (canUsePushState) {
         // Same route - fast pushState
         const method = options?.replace ? "replaceState" : "pushState";
-        window.history[method](null, "", target);
+        browserWindow.history[method](null, "", target);
         setActiveWaveId(waveId);
+      } else if (options?.replace) {
+        router.replace(target);
       } else {
         // Cross-route - proper navigation
-        if (options?.replace) {
-          router.replace(target);
-        } else {
-          router.push(target);
-        }
+        router.push(target);
       }
     },
     [isApp, router]

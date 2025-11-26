@@ -43,6 +43,7 @@ const WebBrainLeftSidebarWave = ({
     prefetchWaveData,
     searchParams,
     waveId: wave.id,
+    hasTouchScreen,
   });
 
   const formattedWaveName = useMemo(

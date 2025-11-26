@@ -12,12 +12,13 @@ interface UseWaveNavigationOptions {
   readonly prefetchWaveData: (waveId: string) => void;
   readonly searchParams: ReadonlyURLSearchParams | null;
   readonly waveId: string;
+  readonly hasTouchScreen: boolean;
 }
 
 interface UseWaveNavigationResult {
   readonly href: string;
   readonly isActive: boolean;
-  readonly onMouseEnter: () => void;
+  readonly onMouseEnter: (() => void) | undefined;
   readonly onClick: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
@@ -29,6 +30,7 @@ export const useWaveNavigation = ({
   prefetchWaveData,
   searchParams,
   waveId,
+  hasTouchScreen,
 }: UseWaveNavigationOptions): UseWaveNavigationResult => {
   const currentWaveId = activeWaveId ?? searchParams?.get('wave') ?? undefined;
   const isDirectMessage = basePath === '/messages';
@@ -78,7 +80,7 @@ export const useWaveNavigation = ({
   return {
     href,
     isActive,
-    onMouseEnter,
+    onMouseEnter: hasTouchScreen ? undefined : onMouseEnter,
     onClick,
   };
 };
