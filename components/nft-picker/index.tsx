@@ -70,6 +70,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     handleToggleSpam,
     resetSearch,
     primeContractCache,
+    isLoading,
   } = useNftSearch({ chain, debounceMs, hideSpamProp });
 
   const {
@@ -269,6 +270,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
         onToggleSpam={handleToggleSpam}
         onHoverSuggestion={setActiveIndex}
         onSelectSuggestion={handleSelectSuggestion}
+        loading={isLoading}
       />
 
       {selectedContract && (

@@ -5,6 +5,7 @@ import {
   useContractOverviewQuery,
   primeContractCache,
 } from "@/hooks/useAlchemyNftQueries";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import type { Suggestion, SupportedChain } from "../types";
 
 type UseNftSearchProps = {
@@ -31,7 +32,10 @@ export function useNftSearch({ chain, debounceMs, hideSpamProp }: UseNftSearchPr
     return query.trim() as `0x${string}`;
   }, [isAddressQuery, query]);
 
-  const { data: searchResult } = useCollectionSearch({
+  const {
+    data: searchResult,
+    isFetching: isSearchFetching,
+  } = useCollectionSearch({
     query,
     chain,
     hideSpam,
@@ -69,6 +73,13 @@ export function useNftSearch({ chain, debounceMs, hideSpamProp }: UseNftSearchPr
     setActiveIndex(0);
   };
 
+  const debouncedQuery = useDebouncedValue(query, debounceMs);
+  const isDebouncing = query !== debouncedQuery;
+
+  const isLoading =
+    (isAddressQuery && addressOverviewQuery.isFetching) ||
+    (!isAddressQuery && query.length > 1 && (isSearchFetching || isDebouncing));
+
   return {
     query,
     setQuery,
@@ -81,6 +92,7 @@ export function useNftSearch({ chain, debounceMs, hideSpamProp }: UseNftSearchPr
     hiddenCount,
     handleToggleSpam,
     resetSearch,
-    primeContractCache, // Exporting this to be used by parent
+    primeContractCache,
+    isLoading,
   };
 }
