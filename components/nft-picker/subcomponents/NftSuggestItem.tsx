@@ -12,6 +12,7 @@ interface NftSuggestItemProps {
   readonly style: React.CSSProperties;
   readonly onHover: (index: number) => void;
   readonly onSelect: (item: Suggestion) => void;
+  readonly disabled?: boolean;
 }
 
 export function NftSuggestItem({
@@ -21,6 +22,7 @@ export function NftSuggestItem({
   style,
   onHover,
   onSelect,
+  disabled,
 }: NftSuggestItemProps) {
   return (
     <li
@@ -30,15 +32,18 @@ export function NftSuggestItem({
     >
       <button
         type="button"
+        disabled={disabled}
         className={clsx(
-          "tw-flex tw-h-[calc(100%-8px)] tw-w-full tw-cursor-pointer tw-items-center tw-gap-4 tw-rounded-xl tw-border tw-px-4 tw-text-left tw-transition-all",
-          isActive
-            ? "tw-border-primary-500 tw-bg-iron-800"
-            : "tw-border-transparent tw-bg-iron-900 hover:tw-bg-iron-800"
+          "tw-flex tw-h-[calc(100%-8px)] tw-w-full tw-items-center tw-gap-4 tw-rounded-xl tw-border tw-px-4 tw-text-left tw-transition-all",
+          disabled
+            ? "tw-cursor-not-allowed tw-border-transparent tw-bg-iron-900/50 tw-opacity-50"
+            : isActive
+              ? "tw-cursor-pointer tw-border-primary-500 tw-bg-iron-800"
+              : "tw-cursor-pointer tw-border-transparent tw-bg-iron-900 hover:tw-bg-iron-800"
         )}
-        onMouseEnter={() => onHover(index)}
-        onFocus={() => onHover(index)}
-        onClick={() => onSelect(suggestion)}
+        onMouseEnter={() => !disabled && onHover(index)}
+        onFocus={() => !disabled && onHover(index)}
+        onClick={() => !disabled && onSelect(suggestion)}
       >
         <div className="tw-relative tw-h-10 tw-w-10 tw-shrink-0">
           <div className="tw-h-full tw-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/10">

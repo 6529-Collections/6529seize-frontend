@@ -52,7 +52,11 @@ export function NftSuggestHiddenSelect({ items, onSelect }: NftSuggestNativeSele
           {hasSuggestions ? "Select a suggestion" : "No suggestions available"}
         </option>
         {items.map((suggestion) => (
-          <option key={suggestion.address} value={suggestion.address}>
+          <option
+            key={suggestion.address}
+            value={suggestion.address}
+            disabled={suggestion.tokenType !== "ERC721"}
+          >
             {getSuggestionOptionLabel(suggestion)}
           </option>
         ))}
