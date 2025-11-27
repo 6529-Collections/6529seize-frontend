@@ -60,7 +60,7 @@ export default function AppSidebarUserStats({
         className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1"
       >
         <span className="tw-text-sm tw-font-medium tw-text-iron-50">
-          {fmt(rep)}
+          {formatStatFloor(rep)}
         </span>
         <span className="tw-text-sm tw-font-medium tw-text-iron-400">Rep</span>
       </Link>
@@ -69,7 +69,7 @@ export default function AppSidebarUserStats({
         className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1"
       >
         <span className="tw-text-sm tw-font-medium tw-text-iron-50">
-          {fmt(followers)}
+          {formatStatFloor(followers)}
         </span>
         <span className="tw-text-sm tw-font-medium tw-text-iron-400">
           {followers === 1 ? "Follower" : "Followers"}
