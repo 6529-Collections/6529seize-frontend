@@ -10,11 +10,9 @@ export const getHomeLatestRoute = (): string => "/";
 
 export const getHomeFeedRoute = (): string => "/?tab=feed";
 
-export const getWavesBaseRoute = (isApp: boolean): string =>
-  isApp ? "/?view=waves" : "/waves";
+export const getWavesBaseRoute = (_isApp: boolean): string => "/waves";
 
-export const getMessagesBaseRoute = (isApp: boolean): string =>
-  isApp ? "/?view=messages" : "/messages";
+export const getMessagesBaseRoute = (_isApp: boolean): string => "/messages";
 
 export const getNotificationsRoute = (_isApp: boolean): string => "/notifications";
 
@@ -23,7 +21,7 @@ export const getWaveRoute = ({
   serialNo,
   extraParams,
   isDirectMessage,
-  isApp,
+  isApp: _isApp,
 }: {
   waveId: string;
   serialNo?: string | number;
@@ -58,9 +56,10 @@ export const getWaveRoute = ({
   const query = queryEntries
     .map(([key, value]) => {
       const encodedKey = encodeURIComponent(key);
-      const encodedValue = key === "serialNo"
-        ? encodeURIComponent(value).replaceAll("%2F", "/")
-        : encodeURIComponent(value);
+      const encodedValue =
+        key === "serialNo"
+          ? encodeURIComponent(value).replaceAll("%2F", "/")
+          : encodeURIComponent(value);
       return `${encodedKey}=${encodedValue}`;
     })
     .join("&");

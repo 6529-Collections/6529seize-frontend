@@ -1,28 +1,39 @@
-import { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { ReadonlyURLSearchParams } from 'next/navigation';
 
 interface UseWaveNavigationOptions {
   readonly basePath: string;
+  readonly activeWaveId: string | null;
+  readonly setActiveWave: (
+    waveId: string | null,
+    options?: { isDirectMessage?: boolean }
+  ) => void;
   readonly onHover: (waveId: string) => void;
   readonly prefetchWaveData: (waveId: string) => void;
   readonly searchParams: ReadonlyURLSearchParams | null;
   readonly waveId: string;
+  readonly hasTouchScreen: boolean;
 }
 
 interface UseWaveNavigationResult {
   readonly href: string;
   readonly isActive: boolean;
-  readonly onMouseEnter: () => void;
+  readonly onMouseEnter: (() => void) | undefined;
+  readonly onClick: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
 export const useWaveNavigation = ({
   basePath,
+  activeWaveId,
+  setActiveWave,
   onHover,
   prefetchWaveData,
   searchParams,
   waveId,
+  hasTouchScreen,
 }: UseWaveNavigationOptions): UseWaveNavigationResult => {
-  const currentWaveId = searchParams?.get('wave') ?? undefined;
+  const currentWaveId = activeWaveId ?? searchParams?.get('wave') ?? undefined;
+  const isDirectMessage = basePath === '/messages';
 
   const href = useMemo(() => {
     if (currentWaveId === waveId) {
@@ -45,9 +56,31 @@ export const useWaveNavigation = ({
     prefetchWaveData(waveId);
   }, [currentWaveId, onHover, prefetchWaveData, waveId]);
 
+  const onClick = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
+      if (event.defaultPrevented) return;
+      if (
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey ||
+        event.button === 1 ||
+        event.button === 2
+      ) {
+        return; // allow new-tab behavior
+      }
+      event.preventDefault();
+      onMouseEnter();
+      const nextWaveId = waveId === currentWaveId ? null : waveId;
+      setActiveWave(nextWaveId, { isDirectMessage });
+    },
+    [currentWaveId, isDirectMessage, onMouseEnter, setActiveWave, waveId]
+  );
+
   return {
     href,
     isActive,
-    onMouseEnter,
+    onMouseEnter: hasTouchScreen ? undefined : onMouseEnter,
+    onClick,
   };
 };

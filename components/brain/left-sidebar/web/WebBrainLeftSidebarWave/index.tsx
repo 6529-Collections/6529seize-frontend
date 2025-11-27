@@ -11,6 +11,7 @@ import { ExpandedWave } from './subcomponents/ExpandedWave';
 import { useWaveNavigation } from './hooks/useWaveNavigation';
 import { useWaveNameTruncation } from './hooks/useWaveNameTruncation';
 import { formatWaveName } from './utils/formatWaveName';
+import { useMyStream } from '@/contexts/wave/MyStreamContext';
 
 interface WebBrainLeftSidebarWaveProps {
   readonly wave: MinimalWave;
@@ -29,16 +30,20 @@ const WebBrainLeftSidebarWave = ({
   basePath = '/waves',
   collapsed = false,
 }: WebBrainLeftSidebarWaveProps) => {
+  const { activeWave } = useMyStream();
   const searchParams = useSearchParams();
   const prefetchWaveData = usePrefetchWaveData();
   const { hasTouchScreen } = useDeviceInfo();
 
-  const { href, isActive, onMouseEnter } = useWaveNavigation({
+  const { href, isActive, onMouseEnter, onClick } = useWaveNavigation({
     basePath,
+    activeWaveId: activeWave.id,
+    setActiveWave: activeWave.set,
     onHover,
     prefetchWaveData,
     searchParams,
     waveId: wave.id,
+    hasTouchScreen,
   });
 
   const formattedWaveName = useMemo(
@@ -71,6 +76,7 @@ const WebBrainLeftSidebarWave = ({
         isActive={isActive}
         isDropWave={isDropWave}
         onMouseEnter={onMouseEnter}
+        onClick={onClick}
         showTooltip={showCollapsedTooltip}
         tooltipId={tooltipId}
         tooltipPlacement={TOOLTIP_PLACEMENT}
@@ -89,6 +95,7 @@ const WebBrainLeftSidebarWave = ({
       latestDropTimestamp={wave.newDropsCount.latestDropTimestamp}
       nameRef={nameRef}
       onMouseEnter={onMouseEnter}
+      onClick={onClick}
       showExpandedTooltip={showExpandedTooltip}
       showPin={showPin}
       tooltipContent={formattedWaveName}

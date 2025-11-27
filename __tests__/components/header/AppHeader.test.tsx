@@ -23,6 +23,9 @@ jest.mock("next/navigation", () => ({
 jest.mock("@/components/navigation/ViewContext", () => ({
   useViewContext: jest.fn(),
 }));
+jest.mock("@/contexts/wave/MyStreamContext", () => ({
+  useMyStreamOptional: jest.fn(),
+}));
 jest.mock("@/hooks/useWaveById", () => ({ useWaveById: jest.fn() }));
 jest.mock("@/contexts/NavigationHistoryContext", () => ({
   useNavigationHistoryContext: jest.fn(),
@@ -47,6 +50,7 @@ const { useAuth } = require("@/components/auth/Auth");
 const { useIdentity } = require("@/hooks/useIdentity");
 const { useRouter, usePathname, useSearchParams } = require("next/navigation");
 const { useViewContext } = require("@/components/navigation/ViewContext");
+const { useMyStreamOptional } = require("@/contexts/wave/MyStreamContext");
 const { useWaveById } = require("@/hooks/useWaveById");
 const {
   useNavigationHistoryContext,
@@ -62,6 +66,11 @@ function setup(opts: any) {
     activeView: opts.activeView ?? null,
     homeActiveTab: opts.homeActiveTab ?? "latest",
   });
+  (useMyStreamOptional as jest.Mock).mockReturnValue(
+    opts.wave
+      ? { activeWave: { id: opts.wave.id } }
+      : { activeWave: { id: null } }
+  );
   (useNavigationHistoryContext as jest.Mock).mockReturnValue({
     canGoBack: opts.canGoBack ?? false,
   });
