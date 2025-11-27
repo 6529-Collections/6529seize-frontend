@@ -29,9 +29,6 @@ jest.mock('@/components/nextGen/NextGenContractWriteStatus', () => () => <div da
 const mockFetchUrl = jest.fn();
 jest.mock('@/services/6529api', () => ({ fetchUrl: (...args: any[]) => mockFetchUrl(...args) }));
 
-const mockGetNfts = jest.fn();
-jest.mock('@/services/alchemy-api', () => ({ getNftsForContractAndOwner: (...args: any[]) => mockGetNfts(...args) }));
-
 jest.mock('@/components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: jest.fn(),
 }));
@@ -49,6 +46,9 @@ jest.mock('@/components/nextGen/nextgen_helpers', () => ({
 const { useChainId, useWriteContract } = require('wagmi');
 const { useSeizeConnectContext } = require('@/components/auth/SeizeConnectContext');
 const { useMintSharedState, getStatusFromDates } = require('@/components/nextGen/nextgen_helpers');
+
+const originalFetch = global.fetch;
+const mockFetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 function createMintState(overrides: Partial<any> = {}) {
   return {
@@ -107,17 +107,26 @@ function renderWidget(props: Partial<typeof baseProps> = {}, state: any = {}, co
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockFetch.mockReset();
+  global.fetch = mockFetch;
+});
+
+afterAll(() => {
+  global.fetch = originalFetch;
 });
 
 
 describe('NextGenMintBurnWidget', () => {
   it('filters tokens by range and prefix', async () => {
-    mockGetNfts.mockResolvedValue([
-      { tokenId: 90 },
-      { tokenId: 110, name: 'A' },
-      { tokenId: 115 },
-      { tokenId: 201 },
-    ]);
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => [
+        { tokenId: 90 },
+        { tokenId: 110, name: 'A' },
+        { tokenId: 115 },
+        { tokenId: 201 },
+      ],
+    } as unknown as Response);
 
     renderWidget(
       {
@@ -132,7 +141,7 @@ describe('NextGenMintBurnWidget', () => {
     );
 
     await waitFor(() => {
-      expect(mockGetNfts).toHaveBeenCalled();
+      expect(mockFetch).toHaveBeenCalled();
       expect(screen.getAllByRole('option').length).toBeGreaterThan(1);
     });
     const options = screen.getAllByRole('option');
@@ -163,4 +172,3 @@ describe('NextGenMintBurnWidget', () => {
     expect(btn).toHaveTextContent('Burn Not Active');
   });
 });
-

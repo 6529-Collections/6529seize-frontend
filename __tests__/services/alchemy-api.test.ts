@@ -1,5 +1,5 @@
-jest.mock("@/config/env", () => ({
-  publicEnv: { ALCHEMY_API_KEY: "test" },
+jest.mock("@/config/alchemyEnv", () => ({
+  getAlchemyApiKey: () => "test",
 }));
 
 import {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { areEqualAddresses, numberWithCommas } from "@/helpers/Helpers";
+import { areEqualAddresses, formatStatFloor } from "@/helpers/Helpers";
 import { ApiWallet } from "@/generated/models/ApiWallet";
 
 export default function UserSettingsPrimaryWalletItem({
@@ -26,7 +26,7 @@ export default function UserSettingsPrimaryWalletItem({
       className="tw-group tw-text-white tw-justify-between tw-w-full tw-flex tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out">
       <span className="tw-inline-block tw-text-sm tw-font-medium tw-text-white">
         {`${wallet.display ?? wallet.wallet} - ${
-          wallet.tdh > 0 ? numberWithCommas(wallet.tdh) : 0
+          wallet.tdh > 0 ? formatStatFloor(wallet.tdh) : 0
         }TDH`}
       </span>
       {isActive && (

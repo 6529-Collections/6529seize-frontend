@@ -1,7 +1,7 @@
 "use client"
 
 import DropPfp from "@/components/drops/create/utils/DropPfp";
-import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
+import { formatNumberWithCommasOrDash, formatStatFloor } from "@/helpers/Helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useIdentityBalance } from "@/hooks/useIdentityBalance";
 import UserFollowBtn, {
@@ -43,13 +43,6 @@ export default function UserProfileTooltip({
   const [aboutStatement, setAboutStatement] = useState<CicStatement | null>(
     null
   );
-
-  const floorStat = (value: number | null | undefined) => {
-    if (value === null || value === undefined || Number.isNaN(value)) {
-      return null;
-    }
-    return Math.floor(value);
-  };
 
   useEffect(() => {
     const about = statements?.find(
@@ -126,25 +119,25 @@ export default function UserProfileTooltip({
       <div className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-1.5 tw-mt-4">
         <div className="tw-flex tw-items-center tw-gap-x-1.5">
           <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
-            {formatNumberWithCommasOrDash(profile?.tdh ?? 0)}
+            {formatStatFloor(profile?.tdh)}
           </span>
           <span className="tw-text-sm tw-text-iron-400">TDH</span>
         </div>
         <div className="tw-flex tw-items-center tw-gap-x-1.5">
           <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
-            {formatNumberWithCommasOrDash(floorStat(profile?.tdh_rate) ?? 0)}
+            {formatStatFloor(profile?.tdh_rate)}
           </span>
           <span className="tw-text-sm tw-text-iron-400">TDH Rate</span>
         </div>
         <div className="tw-flex tw-items-center tw-gap-x-1.5">
           <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
-            {formatNumberWithCommasOrDash(floorStat(profile?.xtdh) ?? 0)}
+            {formatStatFloor(profile?.xtdh)}
           </span>
           <span className="tw-text-sm tw-text-iron-400">xTDH</span>
         </div>
         <div className="tw-flex tw-items-center tw-gap-x-1.5">
           <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
-            {formatNumberWithCommasOrDash(floorStat(profile?.xtdh_rate) ?? 0)}
+            {formatStatFloor(profile?.xtdh_rate)}
           </span>
           <span className="tw-text-sm tw-text-iron-400">xTDH Rate</span>
         </div>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { formatStatFloor } from "@/helpers/Helpers";
 import UserPageFollowers from "../followers/UserPageFollowers";
 import { Tooltip } from "react-tooltip";
 
@@ -33,12 +33,6 @@ export default function UserPageHeaderStats({
   readonly followersCount: number | null;
 }) {
   const routeHandle = sanitizeRouteSegment(handleOrWallet);
-  const formatWholeStat = (value: number | null | undefined) => {
-    if (value === null || value === undefined || Number.isNaN(value)) {
-      return "-";
-    }
-    return formatNumberWithCommas(Math.floor(value));
-  };
 
   if (!routeHandle) {
     return null;
@@ -52,7 +46,7 @@ export default function UserPageHeaderStats({
           className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
           <span className="tw-text-base tw-font-semibold tw-text-iron-50">
-            {formatWholeStat(profile.tdh)}
+            {formatStatFloor(profile.tdh)}
           </span>
           <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400">
             TDH
@@ -64,7 +58,7 @@ export default function UserPageHeaderStats({
           data-tooltip-id="tdh-rate-tooltip"
         >
           <span className="tw-text-base tw-font-semibold tw-text-iron-50">
-            {formatWholeStat(profile.tdh_rate)}
+            {formatStatFloor(profile.tdh_rate)}
           </span>
           <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400 tw-whitespace-nowrap">
             TDH Rate
@@ -75,7 +69,7 @@ export default function UserPageHeaderStats({
           className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
           <span className="tw-text-base tw-font-semibold tw-text-iron-50">
-            {formatWholeStat(profile.xtdh)}
+            {formatStatFloor(profile.xtdh)}
           </span>
           <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400">
             xTDH
@@ -86,7 +80,7 @@ export default function UserPageHeaderStats({
           className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
           <span className="tw-text-base tw-font-semibold tw-text-iron-50">
-            {formatWholeStat(profile.xtdh_rate)}
+            {formatStatFloor(profile.xtdh_rate)}
           </span>
           <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400 tw-whitespace-nowrap">
             xTDH Rate
@@ -97,7 +91,7 @@ export default function UserPageHeaderStats({
           className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
           <span className="tw-text-base tw-font-semibold tw-text-iron-50">
-            {formatWholeStat(profile.rep)}
+            {formatStatFloor(profile.rep)}
           </span>
           <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400">
             Rep

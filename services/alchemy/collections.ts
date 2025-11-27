@@ -1,4 +1,3 @@
-import { publicEnv } from "@/config/env";
 import { isValidEthAddress } from "@/helpers/Helpers";
 import type { ContractOverview, Suggestion } from "@/types/nft";
 
@@ -18,6 +17,7 @@ import {
   resolveNetwork,
   resolveOpenSeaMetadata,
 } from "./utils";
+import { getAlchemyApiKey } from "@/config/alchemyEnv";
 
 export async function searchNftCollections(
   params: SearchContractsParams
@@ -25,8 +25,9 @@ export async function searchNftCollections(
   const { query, chain = "ethereum", pageKey, hideSpam = true, signal } = params;
   const trimmed = ensureQuery(query);
   const network = resolveNetwork(chain);
+  const apiKey = getAlchemyApiKey();
   const url = new URL(
-    `https://${network}.g.alchemy.com/nft/v3/${publicEnv.ALCHEMY_API_KEY}/searchContractMetadata`
+    `https://${network}.g.alchemy.com/nft/v3/${apiKey}/searchContractMetadata`
   );
   url.searchParams.set("query", trimmed);
   if (pageKey) {
@@ -73,7 +74,8 @@ export async function getContractOverview(
     return null;
   }
   const network = resolveNetwork(chain);
-  const url = `https://${network}.g.alchemy.com/nft/v3/${publicEnv.ALCHEMY_API_KEY}/getContractMetadata?contractAddress=${checksum}`;
+  const apiKey = getAlchemyApiKey();
+  const url = `https://${network}.g.alchemy.com/nft/v3/${apiKey}/getContractMetadata?contractAddress=${checksum}`;
   const response = await fetch(url, {
     headers: {
       Accept: "application/json",

@@ -124,6 +124,13 @@ export function formatNumberWithCommasOrDash(x: number): string {
   return formatNumberWithCommas(x);
 }
 
+export function formatStatFloor(value: number | null | undefined): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return "-";
+  }
+  return formatNumberWithCommas(Math.floor(value));
+}
+
 export function getDateDisplay(date: Date) {
   const secondsAgo = (new Date().getTime() - date.getTime()) / 1000;
   if (60 > secondsAgo) {
