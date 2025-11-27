@@ -26,40 +26,74 @@ export default function UserPageXtdhGrant() {
     isMaxGrantError,
   } = useUserPageXtdhGrantForm();
 
+  const isSelectionValid =
+    selection &&
+    !("error" in selection) &&
+    (selection.allSelected || selection.tokenIds.length > 0);
+
+  const isAmountValid = amount !== null && amount > 0;
+
   return (
-    <div className="tw-flex tw-flex-col tw-gap-6">
-      <UserPageXtdhGrantSummary
-        contract={contract}
-        selection={selection}
-        amount={amount}
-        validUntil={validUntil}
-      />
+    <div className="tw-flex tw-flex-col tw-gap-8">
+      {/* Step 1: Select Collection & Tokens */}
+      <section className="tw-flex tw-flex-col tw-gap-4">
+        <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-300 tw-uppercase tw-tracking-wider">
+          1. Select Collection & Tokens
+        </h3>
+        <UserPageXtdhGrantSelection
+          onSelectionChange={setSelection}
+          onContractChange={setContract}
+        />
+      </section>
 
-      <UserPageXtdhGrantSelection
-        onSelectionChange={setSelection}
-        onContractChange={setContract}
-      />
+      {/* Step 2: Enter Amount */}
+      {isSelectionValid && (
+        <section className="tw-flex tw-flex-col tw-gap-4 tw-animate-in tw-fade-in tw-slide-in-from-top-4 tw-duration-300">
+          <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-300 tw-uppercase tw-tracking-wider">
+            2. Enter Grant Amount
+          </h3>
+          <UserPageXtdhGrantAmount
+            amount={amount}
+            onAmountChange={setAmount}
+            maxGrantRate={maxGrantRate}
+            isMaxGrantLoading={isMaxGrantLoading}
+            isMaxGrantError={isMaxGrantError}
+          />
+        </section>
+      )}
 
-      <UserPageXtdhGrantAmount
-        amount={amount}
-        onAmountChange={setAmount}
-        maxGrantRate={maxGrantRate}
-        isMaxGrantLoading={isMaxGrantLoading}
-        isMaxGrantError={isMaxGrantError}
-      />
+      {/* Step 3: Review & Submit */}
+      {isSelectionValid && isAmountValid && (
+        <section className="tw-flex tw-flex-col tw-gap-6 tw-animate-in tw-fade-in tw-slide-in-from-top-4 tw-duration-300">
+          <div className="tw-flex tw-flex-col tw-gap-4">
+            <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-300 tw-uppercase tw-tracking-wider">
+              3. Review & Submit
+            </h3>
 
-      <UserPageXtdhGrantValidity value={validUntil} onChange={setValidUntil} />
+            <div className="tw-rounded-xl tw-bg-iron-950 tw-p-4 tw-border tw-border-iron-800">
+              <UserPageXtdhGrantSummary
+                contract={contract}
+                selection={selection}
+                amount={amount}
+                validUntil={validUntil}
+              />
+            </div>
 
-      <UserPageXtdhGrantSubmit
-        contract={contract}
-        selection={selection}
-        amount={amount}
-        validUntil={validUntil}
-        onSubmit={handleSubmit}
-        isSubmitting={isSubmitting}
-        errorMessage={submitError}
-        successMessage={submitSuccess}
-      />
+            <UserPageXtdhGrantValidity value={validUntil} onChange={setValidUntil} />
+          </div>
+
+          <UserPageXtdhGrantSubmit
+            contract={contract}
+            selection={selection}
+            amount={amount}
+            validUntil={validUntil}
+            onSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
+            errorMessage={submitError}
+            successMessage={submitSuccess}
+          />
+        </section>
+      )}
     </div>
   );
 }
