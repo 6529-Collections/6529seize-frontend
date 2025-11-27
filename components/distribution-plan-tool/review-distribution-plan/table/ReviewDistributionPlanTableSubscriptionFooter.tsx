@@ -34,6 +34,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
   const [isUploading, setIsUploading] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [overview, setOverview] = useState<DistributionOverview | null>(null);
+  const [isLoadingOverview, setIsLoadingOverview] = useState(false);
 
   useEffect(() => {
     async function fetchOverview() {
@@ -48,6 +49,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
         return;
       }
 
+      setIsLoadingOverview(true);
       try {
         const data = await commonApiFetch<DistributionOverview>({
           endpoint: `distributions/${contract}/${tokenId}/overview`,
@@ -55,6 +57,8 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
         setOverview(data);
       } catch (error) {
         console.error("Failed to fetch distribution overview:", error);
+      } finally {
+        setIsLoadingOverview(false);
       }
     }
 
@@ -78,6 +82,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
         message: "Subscriptions reset successfully.",
       });
 
+      setIsLoadingOverview(true);
       try {
         const data = await commonApiFetch<DistributionOverview>({
           endpoint: `distributions/${contract}/${tokenId}/overview`,
@@ -85,6 +90,8 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
         setOverview(data);
       } catch (error) {
         console.error("Failed to refetch distribution overview:", error);
+      } finally {
+        setIsLoadingOverview(false);
       }
     } catch (error: any) {
       setToast({
@@ -132,8 +139,12 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
           ) : (
             <>
               Upload Distribution Photos
-              {overview && overview.photos_count > 0 && (
-                <span className="tw-ml-2">({overview.photos_count})</span>
+              {isLoadingOverview ? (
+                <span className="tw-ml-2">
+                  <CircleLoader />
+                </span>
+              ) : (
+                <span className="tw-ml-2">({overview?.photos_count ?? 0})</span>
               )}
             </>
           )}
@@ -153,9 +164,13 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
           ) : (
             <>
               Finalize Distribution
-              {overview && (
+              {isLoadingOverview ? (
                 <span className="tw-ml-2">
-                  {overview.is_normalized ? "✅" : "❌"}
+                  <CircleLoader />
+                </span>
+              ) : (
+                <span className="tw-ml-2">
+                  {overview?.is_normalized ? "✅" : "❌"}
                 </span>
               )}
             </>
@@ -196,10 +211,20 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
                     type: "success",
                     message: `Successfully uploaded ${response.photos.length} photo(s)`,
                   });
-                  const data = await commonApiFetch<DistributionOverview>({
-                    endpoint: `distributions/${contract}/${tokenId}/overview`,
-                  });
-                  setOverview(data);
+                  setIsLoadingOverview(true);
+                  try {
+                    const data = await commonApiFetch<DistributionOverview>({
+                      endpoint: `distributions/${contract}/${tokenId}/overview`,
+                    });
+                    setOverview(data);
+                  } catch (error) {
+                    console.error(
+                      "Failed to refetch distribution overview:",
+                      error
+                    );
+                  } finally {
+                    setIsLoadingOverview(false);
+                  }
                 } else {
                   setToast({
                     type: "error",
@@ -258,10 +283,20 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
                       response.message ||
                       "Distribution normalized successfully",
                   });
-                  const data = await commonApiFetch<DistributionOverview>({
-                    endpoint: `distributions/${contract}/${tokenId}/overview`,
-                  });
-                  setOverview(data);
+                  setIsLoadingOverview(true);
+                  try {
+                    const data = await commonApiFetch<DistributionOverview>({
+                      endpoint: `distributions/${contract}/${tokenId}/overview`,
+                    });
+                    setOverview(data);
+                  } catch (error) {
+                    console.error(
+                      "Failed to refetch distribution overview:",
+                      error
+                    );
+                  } finally {
+                    setIsLoadingOverview(false);
+                  }
                 } else {
                   setToast({
                     type: "error",
