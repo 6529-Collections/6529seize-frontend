@@ -25,23 +25,23 @@ export function NftSuggestItem({
   return (
     <li
       id={`nft-suggestion-${index}`}
-      className="tw-absolute tw-w-full"
+      className="tw-absolute tw-w-full tw-px-2"
       style={style}
     >
       <button
         type="button"
         className={clsx(
-          "tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-items-center tw-gap-3 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-left tw-transition-colors",
+          "tw-flex tw-h-[calc(100%-8px)] tw-w-full tw-cursor-pointer tw-items-center tw-gap-4 tw-rounded-xl tw-border tw-px-4 tw-text-left tw-transition-all",
           isActive
-            ? "tw-bg-primary-500/20 tw-text-white"
-            : "tw-text-iron-200 hover:tw-bg-iron-800"
+            ? "tw-border-primary-500 tw-bg-iron-800"
+            : "tw-border-transparent tw-bg-iron-900 hover:tw-bg-iron-800"
         )}
         onMouseEnter={() => onHover(index)}
         onFocus={() => onHover(index)}
         onClick={() => onSelect(suggestion)}
       >
-        <div className="tw-relative tw-h-10 tw-w-10">
-          <div className="tw-h-full tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-800">
+        <div className="tw-relative tw-h-10 tw-w-10 tw-shrink-0">
+          <div className="tw-h-full tw-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/10">
             {suggestion.imageUrl ? (
               <Image
                 src={suggestion.imageUrl}
@@ -51,40 +51,58 @@ export function NftSuggestItem({
                 className="tw-h-full tw-w-full tw-object-cover"
               />
             ) : (
-              <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-text-iron-400">
+              <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-iron-800 tw-text-[10px] tw-font-bold tw-text-iron-500">
                 NFT
               </div>
             )}
           </div>
           {suggestion.safelist === "verified" && (
-            <div className="tw-absolute tw-right-[-6px] tw-top-[-6px]">
+            <div className="tw-absolute -tw-right-1 -tw-top-1 tw-z-10 tw-translate-x-1/2 -tw-translate-y-1/2">
               <DistributionPlanVerifiedIcon />
             </div>
           )}
         </div>
-        <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-1">
-          <span className="tw-text-sm tw-font-medium tw-text-white">
-            {suggestion.name ?? shortenAddress(suggestion.address)}
-          </span>
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-xs tw-text-iron-400">
-            <span>{shortenAddress(suggestion.address)}</span>
-            {suggestion.tokenType && (
-              <span className="tw-rounded tw-bg-iron-800 tw-px-2 tw-py-0.5">
-                {suggestion.tokenType}
-              </span>
-            )}
-            <span>Ξ{formatFloor(suggestion.floorPriceEth)}</span>
-            {suggestion.totalSupply && <span>Supply {suggestion.totalSupply}</span>}
-            {suggestion.safelist === "verified" && (
-              <span className="tw-rounded tw-bg-green-500/20 tw-px-2 tw-py-0.5 tw-text-green-300">
-                Verified
-              </span>
-            )}
-            {suggestion.isSpam && (
-              <span className="tw-rounded tw-bg-amber-500/20 tw-px-2 tw-py-0.5 tw-text-amber-300">
-                Suspected spam
-              </span>
-            )}
+
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-justify-between tw-gap-4">
+          <div className="tw-flex tw-min-w-0 tw-flex-col">
+            <span className="tw-truncate tw-text-sm tw-font-semibold tw-text-white">
+              {suggestion.name ?? shortenAddress(suggestion.address)}
+            </span>
+            <div className="tw-flex tw-items-center tw-gap-2 tw-text-xs tw-text-iron-400">
+              <span className="tw-font-mono">{shortenAddress(suggestion.address)}</span>
+              {suggestion.tokenType && (
+                <>
+                  <span className="tw-h-1 tw-w-1 tw-rounded-full tw-bg-iron-700" />
+                  <span>{suggestion.tokenType}</span>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="tw-flex tw-items-center tw-gap-4 tw-text-xs">
+            <div className="tw-flex tw-w-20 tw-flex-col tw-items-end">
+              {typeof suggestion.floorPriceEth === "number" && !Number.isNaN(suggestion.floorPriceEth) ? (
+                <>
+                  <span className="tw-text-iron-400">Floor</span>
+                  <span className="tw-font-medium tw-text-white">
+                    {formatFloor(suggestion.floorPriceEth)} ETH
+                  </span>
+                </>
+              ) : (
+                <span className="tw-text-iron-600">—</span>
+              )}
+            </div>
+
+            <div className="tw-flex tw-w-16 tw-flex-col tw-items-end">
+              {suggestion.totalSupply ? (
+                <>
+                  <span className="tw-text-iron-400">Supply</span>
+                  <span className="tw-font-medium tw-text-white">{suggestion.totalSupply}</span>
+                </>
+              ) : (
+                <span className="tw-text-iron-600">—</span>
+              )}
+            </div>
           </div>
         </div>
       </button>

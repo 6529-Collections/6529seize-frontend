@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 
 import type { Suggestion } from "../types";
 import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
@@ -43,6 +43,22 @@ export function NftSuggestList({
     isOpen
   );
 
+  useEffect(() => {
+    if (activeIndex >= 0 && scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const itemTop = activeIndex * ROW_HEIGHT;
+      const itemBottom = itemTop + ROW_HEIGHT;
+      const containerTop = container.scrollTop;
+      const containerBottom = containerTop + container.clientHeight;
+
+      if (itemTop < containerTop) {
+        container.scrollTop = itemTop;
+      } else if (itemBottom > containerBottom) {
+        container.scrollTop = itemBottom - container.clientHeight;
+      }
+    }
+  }, [activeIndex]);
+
   if (!isOpen) {
     return null;
   }
@@ -50,7 +66,7 @@ export function NftSuggestList({
   return (
     <div
       ref={scrollContainerRef}
-      className="tw-absolute tw-left-0 tw-right-0 tw-top-full tw-z-20 tw-mt-2 tw-max-h-80 tw-overflow-y-auto tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900"
+      className="tw-absolute tw-left-0 tw-right-0 tw-top-full tw-z-20 tw-mt-2 tw-max-h-80 tw-overflow-y-auto tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-py-2 tw-shadow-2xl tw-ring-1 tw-ring-black/50"
     >
       {/* 
         We render two lists:
