@@ -276,7 +276,6 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
       {selectedContract && (
         <NftContractHeader
           contract={selectedContract}
-          onChange={() => inputRef.current?.focus()}
           onClear={handleClearContract}
         />
       )}
