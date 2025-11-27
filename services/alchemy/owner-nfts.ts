@@ -1,10 +1,10 @@
-import { publicEnv } from "@/config/env";
 import { goerli, sepolia } from "wagmi/chains";
 
 import type {
   AlchemyGetNftsForOwnerResponse,
   AlchemyOwnedNft,
 } from "./types";
+import { getAlchemyApiKey } from "@/config/alchemyEnv";
 
 const MAX_GET_NFTS_RETRIES = 3;
 const legacyOptions = { method: "GET", headers: { accept: "application/json" } };
@@ -76,7 +76,8 @@ export async function getNftsForContractAndOwner(
     path = "eth-goerli";
   }
 
-  const baseUrl = `https://${path}.g.alchemy.com/nft/v3/${publicEnv.ALCHEMY_API_KEY}/getNFTsForOwner?owner=${owner}&contractAddresses[]=${contract}`;
+  const apiKey = getAlchemyApiKey();
+  const baseUrl = `https://${path}.g.alchemy.com/nft/v3/${apiKey}/getNFTsForOwner?owner=${owner}&contractAddresses[]=${contract}`;
   const ownedNfts: AlchemyOwnedNft[] = [...nfts];
   let nextPageKey = pageKey;
   let attempts = retries;

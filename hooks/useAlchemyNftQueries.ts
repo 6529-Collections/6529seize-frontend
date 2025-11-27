@@ -9,15 +9,10 @@ import {
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import {
-  getContractOverview,
-  getTokensMetadata,
-  searchNftCollections,
-} from "@/services/alchemy-api";
 import type {
   SearchContractsResult,
   TokenMetadataParams,
-} from "@/services/alchemy-api";
+} from "@/services/alchemy/types";
 import type {
   ContractOverview,
   Suggestion,
@@ -37,6 +32,73 @@ type CacheEntry<T> = {
 const suggestionCache = new Map<string, CacheEntry<SearchContractsResult>>();
 const contractCache = new Map<string, CacheEntry<ContractOverview | null>>();
 const tokenCache = new Map<string, CacheEntry<TokenMetadata[]>>();
+
+type SerializedTokenMetadata = Omit<TokenMetadata, "tokenId"> & {
+  tokenId: string;
+};
+
+async function fetchJson<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
+  const response = await fetch(input, init);
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+  return (await response.json()) as T;
+}
+
+async function fetchCollectionsFromApi(
+  params: UseCollectionSearchParams & { readonly signal?: AbortSignal }
+): Promise<SearchContractsResult> {
+  const { query, chain = "ethereum", hideSpam = true, signal } = params;
+  const search = new URLSearchParams();
+  search.set("query", query);
+  search.set("chain", chain);
+  search.set("hideSpam", hideSpam ? "1" : "0");
+  return fetchJson<SearchContractsResult>(
+    `/api/alchemy/collections?${search.toString()}`,
+    { signal }
+  );
+}
+
+async function fetchContractOverviewFromApi(
+  params: UseContractOverviewParams & { readonly signal?: AbortSignal }
+): Promise<ContractOverview | null> {
+  const { address, chain = "ethereum", signal } = params;
+  if (!address) {
+    return null;
+  }
+  const search = new URLSearchParams();
+  search.set("address", address);
+  search.set("chain", chain);
+  return fetchJson<ContractOverview | null>(
+    `/api/alchemy/contract?${search.toString()}`,
+    { signal }
+  );
+}
+
+async function fetchTokenMetadataFromApi(
+  params: TokenMetadataParams
+): Promise<TokenMetadata[]> {
+  const response = await fetch("/api/alchemy/token-metadata", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      address: params.address,
+      tokenIds: params.tokenIds,
+      chain: params.chain ?? "ethereum",
+    }),
+    signal: params.signal,
+  });
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+  const payload = (await response.json()) as SerializedTokenMetadata[];
+  return payload.map((entry) => ({
+    ...entry,
+    tokenId: BigInt(entry.tokenId),
+  }));
+}
 
 function gcExpired<T>(map: Map<string, CacheEntry<T>>, now = Date.now()): void {
   map.forEach((entry, key) => {
@@ -121,7 +183,7 @@ export function useCollectionSearch({
       if (cached && cached.expires > now) {
         return cached.data;
       }
-      const data = await searchNftCollections({
+      const data = await fetchCollectionsFromApi({
         query: debouncedQuery,
         chain,
         hideSpam,
@@ -182,7 +244,7 @@ export function useContractOverviewQuery({
       if (cached && cached.expires > now) {
         return cached.data;
       }
-      const data = await getContractOverview({
+      const data = await fetchContractOverviewFromApi({
         address: normalizedAddress,
         chain,
         signal,
@@ -244,7 +306,7 @@ export function useTokenMetadataQuery({
       if (cached && cached.expires > now) {
         return cached.data;
       }
-      const data = await getTokensMetadata({
+      const data = await fetchTokenMetadataFromApi({
         ...params,
         signal,
       });

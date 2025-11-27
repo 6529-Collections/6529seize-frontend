@@ -1,4 +1,3 @@
-import { publicEnv } from "@/config/env";
 import { isValidEthAddress } from "@/helpers/Helpers";
 import type { TokenMetadata } from "@/types/nft";
 
@@ -8,6 +7,7 @@ import type {
   TokenMetadataParams,
 } from "./types";
 import { normaliseAddress, pickThumbnail, resolveNetwork } from "./utils";
+import { getAlchemyApiKey } from "@/config/alchemyEnv";
 
 const MAX_BATCH_SIZE = 100;
 
@@ -65,7 +65,8 @@ export async function getTokensMetadata(
     return [];
   }
   const network = resolveNetwork(chain);
-  const url = `https://${network}.g.alchemy.com/nft/v3/${publicEnv.ALCHEMY_API_KEY}/getNFTMetadataBatch`;
+  const apiKey = getAlchemyApiKey();
+  const url = `https://${network}.g.alchemy.com/nft/v3/${apiKey}/getNFTMetadataBatch`;
   const results: TokenMetadata[] = [];
   for (let i = 0; i < tokenIds.length; i += MAX_BATCH_SIZE) {
     const slice = tokenIds.slice(i, i + MAX_BATCH_SIZE);

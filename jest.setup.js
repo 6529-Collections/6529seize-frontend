@@ -79,7 +79,6 @@ if (!process.env.PUBLIC_RUNTIME) {
     API_ENDPOINT: "https://api.test.6529.io",
     BASE_ENDPOINT: "https://test.6529.io",
     ALLOWLIST_API_ENDPOINT: "https://allowlist-api.test.6529.io",
-    ALCHEMY_API_KEY: "test-alchemy-api-key",
     NEXTGEN_CHAIN_ID: 1,
     MOBILE_APP_SCHEME: "testmobile6529",
     CORE_SCHEME: "testcore6529",
@@ -90,6 +89,10 @@ if (!process.env.PUBLIC_RUNTIME) {
     WS_ENDPOINT: "wss://ws.test.6529.io",
     DEV_MODE_MEMES_WAVE_ID: "test-memes-wave-id",
   });
+}
+
+if (!process.env.ALCHEMY_API_KEY) {
+  process.env.ALCHEMY_API_KEY = "test-alchemy-api-key";
 }
 
 // Mock ResizeObserver for react-tooltip
