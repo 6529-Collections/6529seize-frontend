@@ -1,11 +1,12 @@
 
 "use client";
 
-import { useRef, useId, useMemo } from "react";
+import { useRef, useId, useMemo, useEffect } from "react";
 import clsx from "clsx";
 
 import type { NftPickerProps, Suggestion, SupportedChain } from "./types";
 import { mapSuggestionToOverview } from "./utils/mappers";
+import { formatCanonical, parseTokenExpressionToRanges } from "./utils";
 import { useNftSearch, useNftSelection, useNftTokenInput } from "./hooks";
 import {
   NftContractHeader,
@@ -128,6 +129,11 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     contractTotalSupply,
   });
 
+  // Sync textValue with ranges whenever ranges change
+  useEffect(() => {
+    setTextValue(formatCanonical(ranges));
+  }, [ranges, setTextValue]);
+
   const handleSelectSuggestion = (suggestion: Suggestion) => {
     primeContractCache(suggestion, chain);
     const overview = mapSuggestionToOverview(suggestion);
@@ -141,17 +147,6 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
 
     setTokenInput("");
     setIsEditingText(false);
-
-    // We need to emit the change for the new contract with empty selection
-    // useNftSelection doesn't expose a direct way to do this atomically with state updates 
-    // except via effects or by calling emitChange directly.
-    // But emitChange is internal to useNftSelection.
-    // However, setSelectedContract will trigger the effect in useNftSelection to emit change?
-    // No, useNftSelection has an effect:
-    // useEffect(() => { ... emitChange(selectedContract, ranges, allSelected); }, [selectedContract, ranges, allSelected, emitChange]);
-    // So setting state should trigger it.
-    // But we also need to clear ranges.
-    // The effect will run when selectedContract changes.
   };
 
   const handleClearContract = () => {
@@ -192,14 +187,6 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
 
   const handleApplyText = () => {
     try {
-      // We need parseTokenExpressionToRanges here. 
-      // It's in utils.
-      // But useNftTokenInput doesn't expose it directly, it uses it internally.
-      // We should import it from utils.
-      // Or move this logic to useNftTokenInput?
-      // The original code had handleApplyText in NftPicker.
-      // Let's import it.
-      const { parseTokenExpressionToRanges } = require("./utils");
       const canonical = parseTokenExpressionToRanges(textValue);
       setSelectionFromText(canonical);
       setParseErrors([]);
@@ -343,7 +330,6 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
                 }}
                 onApply={handleApplyText}
                 onCancel={() => {
-                  const { formatCanonical } = require("./utils");
                   setTextValue(formatCanonical(ranges));
                   setParseErrors([]);
                   setIsEditingText(false);
