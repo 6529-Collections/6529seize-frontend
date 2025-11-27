@@ -12,7 +12,7 @@ function extractAllNumbers(str: string): number[] {
   let match;
 
   while ((match = regex.exec(str)) !== null) {
-    numbers.push(parseInt(match[0]));
+    numbers.push(Number.parseInt(match[0], 10));
   }
 
   return numbers;
@@ -97,7 +97,7 @@ export function UploadDistributionPhotosModal(
       return;
     }
 
-    if (!tokenId || isNaN(parseInt(tokenId))) {
+    if (!tokenId || Number.isNaN(Number.parseInt(tokenId, 10))) {
       return;
     }
 
@@ -143,7 +143,7 @@ export function UploadDistributionPhotosModal(
                 }}
                 min={1}
                 type="number"
-                value={parseInt(tokenId)}
+                value={Number.parseInt(tokenId, 10)}
                 onChange={(e) => {
                   setTokenId(e.target.value);
                 }}
@@ -176,8 +176,8 @@ export function UploadDistributionPhotosModal(
               />
               {fileErrors.length > 0 && (
                 <div className="mt-2">
-                  {fileErrors.map((error, index) => (
-                    <div key={index} className="text-danger">
+                  {fileErrors.map((error) => (
+                    <div key={error} className="text-danger">
                       {error}
                     </div>
                   ))}
@@ -192,7 +192,7 @@ export function UploadDistributionPhotosModal(
                 <div className="mt-2">
                   {selectedFiles.map((file, index) => (
                     <div
-                      key={index}
+                      key={`${file.name}-${file.size}-${file.lastModified}`}
                       className="d-flex align-items-center justify-content-between mb-2 p-2 bg-light rounded">
                       <span className="text-truncate flex-grow-1 me-2">
                         {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
@@ -217,7 +217,9 @@ export function UploadDistributionPhotosModal(
         </Button>
         <Button
           disabled={
-            !tokenId || isNaN(parseInt(tokenId)) || selectedFiles.length === 0
+            !tokenId ||
+            Number.isNaN(Number.parseInt(tokenId, 10)) ||
+            selectedFiles.length === 0
           }
           variant="primary"
           onClick={handleUpload}>

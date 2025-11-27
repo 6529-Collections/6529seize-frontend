@@ -117,6 +117,18 @@ export function SubscriptionLinks(
   );
 }
 
+function extractAllNumbers(str: string): number[] {
+  const regex = /\d+/g;
+  const numbers = [];
+  let match;
+
+  while ((match = regex.exec(str)) !== null) {
+    numbers.push(Number.parseInt(match[0], 10));
+  }
+
+  return numbers;
+}
+
 export function SubscriptionConfirm(
   props: Readonly<{
     title: string;
@@ -127,18 +139,6 @@ export function SubscriptionConfirm(
     onConfirm(contract: string, tokenId: string): void;
   }>
 ) {
-  function extractAllNumbers(str: string): number[] {
-    const regex = /\d+/g;
-    const numbers = [];
-    let match;
-
-    while ((match = regex.exec(str)) !== null) {
-      numbers.push(parseInt(match[0]));
-    }
-
-    return numbers;
-  }
-
   const contract = MEMES_CONTRACT;
   const [tokenId, setTokenId] = useState<string>(
     extractAllNumbers(props.plan.name)[0].toString() ?? ""
@@ -169,7 +169,7 @@ export function SubscriptionConfirm(
                 }}
                 min={1}
                 type="number"
-                value={parseInt(tokenId)}
+                value={Number.parseInt(tokenId, 10)}
                 onChange={(e) => {
                   setTokenId(e.target.value);
                 }}
@@ -193,7 +193,7 @@ export function SubscriptionConfirm(
           Close
         </Button>
         <Button
-          disabled={!tokenId || isNaN(parseInt(tokenId))}
+          disabled={!tokenId || Number.isNaN(Number.parseInt(tokenId, 10))}
           variant="primary"
           onClick={() => props.onConfirm(contract, tokenId)}>
           Looks good

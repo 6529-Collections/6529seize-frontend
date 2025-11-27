@@ -21,6 +21,18 @@ interface DistributionOverview {
   is_normalized: boolean;
 }
 
+function extractAllNumbers(str: string): number[] {
+  const regex = /\d+/g;
+  const numbers = [];
+  let match;
+
+  while ((match = regex.exec(str)) !== null) {
+    numbers.push(Number.parseInt(match[0], 10));
+  }
+
+  return numbers;
+}
+
 export function ReviewDistributionPlanTableSubscriptionFooter() {
   const { distributionPlan } = useContext(DistributionPlanToolContext);
   const { connectedProfile, setToast } = useContext(AuthContext);
@@ -33,18 +45,6 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
   const [isUploading, setIsUploading] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [overview, setOverview] = useState<DistributionOverview | null>(null);
-
-  function extractAllNumbers(str: string): number[] {
-    const regex = /\d+/g;
-    const numbers = [];
-    let match;
-
-    while ((match = regex.exec(str)) !== null) {
-      numbers.push(parseInt(match[0]));
-    }
-
-    return numbers;
-  }
 
   useEffect(() => {
     async function fetchOverview() {
