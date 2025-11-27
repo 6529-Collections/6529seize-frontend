@@ -43,9 +43,10 @@ export default function AccessPage() {
         alert("Access Denied!");
       } else {
         alert("gm!");
+        const isSecure = globalThis.location?.protocol === "https:";
         Cookies.set(API_AUTH_COOKIE, pass, {
           expires: 7,
-          secure: true,
+          secure: isSecure,
           sameSite: "strict",
         });
         window.location.href = "/";

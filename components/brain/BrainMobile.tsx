@@ -28,6 +28,7 @@ import { getHomeFeedRoute } from "@/helpers/navigation.helpers";
 import CreateWaveModal from "@/components/waves/create-wave/CreateWaveModal";
 import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectMessageModal";
 import { useAuth } from "@/components/auth/Auth";
+import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 
 export enum BrainView {
   DEFAULT = "DEFAULT",
@@ -53,6 +54,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   const { isApp } = useDeviceInfo();
   const { connectedProfile } = useAuth();
   const [hydrated, setHydrated] = useState(false);
+  const myStream = useMyStreamOptional();
 
   useEffect(() => {
     setHydrated(true);
@@ -70,7 +72,8 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     enabled: !!dropId,
   });
 
-  const waveId = searchParams?.get('wave') ?? null;
+  // Use MyStreamContext for waveId to support client-side navigation via pushState
+  const waveId = myStream?.activeWave.id ?? searchParams?.get('wave') ?? null;
   const { data: wave } = useWaveData({
     waveId: waveId,
     onWaveNotFound: () => {

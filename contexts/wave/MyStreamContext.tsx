@@ -44,7 +44,7 @@ interface WavesContextData {
 
 interface ActiveWaveContextData {
   readonly id: string | null;
-  readonly set: (waveId: string | null) => void;
+  readonly set: (waveId: string | null, options?: { isDirectMessage?: boolean; replace?: boolean }) => void;
 }
 
 // Define the interface for the wave messages store functions
