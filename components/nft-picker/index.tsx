@@ -248,30 +248,32 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
 
   return (
     <div className={wrapperClassName}>
-      <NftPickerSearch
-        query={query}
-        isOpen={isOpen}
-        activeIndex={activeIndex}
-        suggestionList={suggestionList}
-        hiddenCount={hiddenCount}
-        hideSpam={hideSpam}
-        placeholder={placeholder}
-        variant={variant}
-        inputRef={inputRef}
-        collectionInputId={collectionInputId}
-        activeSuggestionId={activeSuggestionId}
-        onInputChange={(e) => {
-          setQuery(e.target.value);
-          setIsOpen(true);
-          setActiveIndex(0);
-        }}
-        onInputKeyDown={handleInputKeyDown}
-        onInputFocus={() => setIsOpen(true)}
-        onToggleSpam={handleToggleSpam}
-        onHoverSuggestion={setActiveIndex}
-        onSelectSuggestion={handleSelectSuggestion}
-        loading={isLoading}
-      />
+      {!selectedContract && (
+        <NftPickerSearch
+          query={query}
+          isOpen={isOpen}
+          activeIndex={activeIndex}
+          suggestionList={suggestionList}
+          hiddenCount={hiddenCount}
+          hideSpam={hideSpam}
+          placeholder={placeholder}
+          variant={variant}
+          inputRef={inputRef}
+          collectionInputId={collectionInputId}
+          activeSuggestionId={activeSuggestionId}
+          onInputChange={(e) => {
+            setQuery(e.target.value);
+            setIsOpen(true);
+            setActiveIndex(0);
+          }}
+          onInputKeyDown={handleInputKeyDown}
+          onInputFocus={() => setIsOpen(true)}
+          onToggleSpam={handleToggleSpam}
+          onHoverSuggestion={setActiveIndex}
+          onSelectSuggestion={handleSelectSuggestion}
+          loading={isLoading}
+        />
+      )}
 
       {selectedContract && (
         <NftContractHeader
