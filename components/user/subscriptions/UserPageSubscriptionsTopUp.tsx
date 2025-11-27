@@ -413,25 +413,18 @@ export default function UserPageSubscriptionsTopUp() {
                   onChange={(e) => {
                     setError("");
                     const value = e.target.value;
-                    try {
-                      const parsed = parseInt(value);
-                      if (!isNaN(parsed) && parsed > 0) {
-                        setMemeCount(value);
-                        setSelectedOption("other");
-                      } else {
-                        setMemeCount(value);
-                        setSelectedOption("other");
-                      }
-                    } catch {
-                      setMemeCount(value);
-                      setSelectedOption("other");
-                    }
+                    setMemeCount(value);
+                    setSelectedOption("other");
                   }}
                 />
                 <span className="no-wrap">
-                  {!isNaN(parseInt(memeCount)) && parseInt(memeCount) > 0 && (
-                    <>({parseInt(memeCount) * MEMES_MINT_PRICE} ETH)</>
-                  )}
+                  {!Number.isNaN(Number.parseInt(memeCount, 10)) &&
+                    Number.parseInt(memeCount, 10) > 0 && (
+                      <>
+                        ({Number.parseInt(memeCount, 10) * MEMES_MINT_PRICE}{" "}
+                        ETH)
+                      </>
+                    )}
                 </span>
               </Col>
             </Row>
@@ -479,7 +472,7 @@ export default function UserPageSubscriptionsTopUp() {
                     color: "white",
                     padding: "4px 8px",
                   }}>
-                  <span className="font-smaller">{SUBSCRIPTIONS_ADDRESS}</span>
+                  SUBSCRIPTIONS_ADDRESS
                 </Tooltip>
               </>
             </span>
@@ -554,9 +547,14 @@ function CardCountOption(
   }>
 ) {
   return (
-    <div
-      className={`tw-border tw-rounded-lg tw-p-3 tw-cursor-pointer tw-transition-colors ${
-        props.selected ? "tw-bg-iron-700" : "hover:tw-bg-iron-900"
+    <button
+      type="button"
+      className={`tw-border tw-rounded-lg tw-p-3 tw-cursor-pointer tw-transition-colors tw-w-full tw-text-left ${
+        styles.cardCountOption
+      } ${
+        props.selected
+          ? "tw-bg-iron-700"
+          : "tw-bg-transparent hover:tw-bg-iron-900"
       }`}
       onClick={props.onSelect}>
       <Row className="d-flex align-items-center">
@@ -579,6 +577,6 @@ function CardCountOption(
           {numberWithCommasFromString(MEMES_MINT_PRICE * props.count)} ETH)
         </Col>
       </Row>
-    </div>
+    </button>
   );
 }

@@ -84,8 +84,8 @@
   padding: 12px 32px !important;
   min-width: 120px;
   width: auto;
-  background-color: #406afe !important;
-  border-color: #406afe !important;
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
   color: white !important;
   font-weight: 600 !important;
   font-size: 16px !important;
@@ -93,10 +93,10 @@
   transition: all 0.2s ease !important;
 
   &:hover:not(:disabled) {
-    background-color: #395fe4 !important;
-    border-color: #395fe4 !important;
+    background-color: #1d4ed8 !important;
+    border-color: #1d4ed8 !important;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(64, 106, 254, 0.3) !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
   }
 
   &:active:not(:disabled) {
@@ -119,4 +119,13 @@
   :global(input[type="radio"]:checked::before) {
     background-color: #406afe !important;
   }
+}
+
+.cardCountOption {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
 }

@@ -40,8 +40,8 @@ export default function DistributionPage(props: Readonly<Props>) {
     pageSize: number;
   }>({ page: 1, pageSize: 150 });
 
-  const nftNan = isNaN(parseInt(params?.id as string));
-  const nftId = !nftNan ? (params?.id as string) : "";
+  const isValidNftId = !Number.isNaN(Number.parseInt(params?.id as string, 10));
+  const nftId = isValidNftId ? (params?.id as string) : "";
 
   const [distributions, setDistributions] = useState<Distribution[]>([]);
   const [distributionsPhases, setDistributionsPhases] = useState<string[]>([]);
@@ -259,8 +259,12 @@ export default function DistributionPage(props: Readonly<Props>) {
   }
 
   function printMintingLink() {
-    if (areEqualAddresses(props.contract, MEMES_CONTRACT) && !nftNan && nftId) {
-      return <MemePageMintCountdown nft_id={parseInt(nftId)} />;
+    if (
+      areEqualAddresses(props.contract, MEMES_CONTRACT) &&
+      isValidNftId &&
+      nftId
+    ) {
+      return <MemePageMintCountdown nft_id={Number.parseInt(nftId, 10)} />;
     }
 
     return <></>;
@@ -306,7 +310,7 @@ export default function DistributionPage(props: Readonly<Props>) {
     );
   }
 
-  if (nftNan) {
+  if (!isValidNftId) {
     return <NotFound label="DISTRIBUTION" />;
   }
 
