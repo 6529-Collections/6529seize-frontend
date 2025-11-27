@@ -2,7 +2,11 @@
 
 import { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import { MEMES_CONTRACT } from "@/constants";
-import { extractAllNumbers, formatAddress } from "@/helpers/Helpers";
+import {
+  extractAllNumbers,
+  formatAddress,
+  isValidPositiveInteger,
+} from "@/helpers/Helpers";
 import { useRef, useState } from "react";
 import { Button, Col, Container, Modal, Row } from "react-bootstrap";
 
@@ -15,8 +19,10 @@ export function UploadDistributionPhotosModal(
     onUpload(contract: string, tokenId: string, files: File[]): void;
   }>
 ) {
+  const numbers = extractAllNumbers(props.plan.name);
+  const initialTokenId = numbers.length > 0 ? numbers[0].toString() : "";
   const [tokenId, setTokenId] = useState<string>(
-    extractAllNumbers(props.plan.name)[0]?.toString() ?? ""
+    isValidPositiveInteger(initialTokenId) ? initialTokenId : ""
   );
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileErrors, setFileErrors] = useState<string[]>([]);
@@ -85,7 +91,7 @@ export function UploadDistributionPhotosModal(
       return;
     }
 
-    if (!tokenId || Number.isNaN(Number.parseInt(tokenId, 10))) {
+    if (!isValidPositiveInteger(tokenId)) {
       return;
     }
 
@@ -130,6 +136,7 @@ export function UploadDistributionPhotosModal(
                   width: "100px",
                 }}
                 min={1}
+                step={1}
                 type="number"
                 value={tokenId}
                 onChange={(e) => {
@@ -205,9 +212,7 @@ export function UploadDistributionPhotosModal(
         </Button>
         <Button
           disabled={
-            !tokenId ||
-            Number.isNaN(Number.parseInt(tokenId, 10)) ||
-            selectedFiles.length === 0
+            !isValidPositiveInteger(tokenId) || selectedFiles.length === 0
           }
           variant="primary"
           onClick={handleUpload}>
