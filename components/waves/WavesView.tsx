@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { useSearchParams } from "next/navigation";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import MyStreamWave from "../brain/my-stream/MyStreamWave";
 import BrainContent from "../brain/content/BrainContent";
@@ -9,14 +8,15 @@ import { useAuth } from "../auth/Auth";
 import useDeviceInfo from "../../hooks/useDeviceInfo";
 import PrimaryButton from "../utils/button/PrimaryButton";
 import useCreateModalState from "@/hooks/useCreateModalState";
+import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 
 const WavesView: React.FC = () => {
-  const searchParams = useSearchParams();
+  const myStream = useMyStreamOptional();
   const { connectedProfile } = useAuth();
   const { isApp } = useDeviceInfo();
   const { openWave } = useCreateModalState();
 
-  const serialisedWaveId = searchParams?.get('wave') || null;
+  const serialisedWaveId = myStream?.activeWave.id ?? null;
 
   const showPlaceholder = !serialisedWaveId && !isApp;
 

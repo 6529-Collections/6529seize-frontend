@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import WavePicture from "@/components/waves/WavePicture";
@@ -11,6 +10,7 @@ import { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesList";
 import BrainLeftSidebarWavePin from "./BrainLeftSidebarWavePin";
 import { formatAddress, isValidEthAddress } from "../../../../helpers/Helpers";
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import {
   getWaveHomeRoute,
   getWaveRoute,
@@ -29,10 +29,9 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   showPin = true,
   isDirectMessage = false,
 }) => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const { activeWave } = useMyStream();
   const prefetchWaveData = usePrefetchWaveData();
-  const { isApp } = useDeviceInfo();
+  const { isApp, hasTouchScreen } = useDeviceInfo();
   const isDropWave = wave.type !== ApiWaveType.Chat;
 
   const formattedWaveName = useMemo(() => {
@@ -55,30 +54,39 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     return wave.name;
   }, [wave.name, wave.type]);
 
-  const getHref = (waveId: string) => {
-    const currentWaveId = searchParams?.get("wave") ?? undefined;
-    if (currentWaveId === waveId) {
+  const activeWaveId = activeWave.id;
+
+  const href = useMemo(() => {
+    if (activeWaveId === wave.id) {
       return getWaveHomeRoute({ isDirectMessage, isApp });
     }
-    return getWaveRoute({ waveId, isDirectMessage, isApp });
-  };
+    return getWaveRoute({ waveId: wave.id, isDirectMessage, isApp });
+  }, [activeWaveId, isApp, isDirectMessage, wave.id]);
 
   const haveNewDrops = wave.newDropsCount.count > 0;
 
-  const onWaveHover = (waveId: string) => {
-    const currentWaveId = searchParams?.get("wave") ?? undefined;
-    if (waveId !== currentWaveId) {
-      onHover(waveId);
-      prefetchWaveData(waveId);
+  const onWaveHover = useCallback(() => {
+    if (wave.id !== activeWaveId) {
+      onHover(wave.id);
+      prefetchWaveData(wave.id);
     }
-  };
+  }, [activeWaveId, onHover, prefetchWaveData, wave.id]);
 
-  const isActive = wave.id === (searchParams?.get("wave") ?? undefined);
+  const isActive = wave.id === activeWaveId;
 
-  const onLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    router.push(getHref(wave.id));
-  };
+  const handleWaveClick = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
+      if (event.defaultPrevented) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button === 1) {
+        return;
+      }
+      event.preventDefault();
+      onWaveHover();
+      const nextWaveId = wave.id === activeWaveId ? null : wave.id;
+      activeWave.set(nextWaveId, { isDirectMessage });
+    },
+    [activeWave.set, activeWaveId, isDirectMessage, onWaveHover, wave.id]
+  );
 
   const getAvatarRingClasses = () => {
     if (isActive) return "tw-ring-1 tw-ring-offset-2 tw-ring-offset-iron-900 tw-ring-primary-400";
@@ -93,9 +101,9 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           : "desktop-hover:hover:tw-bg-iron-800/80"
       }`}>
       <Link
-        href={getHref(wave.id)}
-        onMouseEnter={() => onWaveHover(wave.id)}
-        onClick={onLinkClick}
+        href={href}
+        onMouseEnter={hasTouchScreen ? undefined : onWaveHover}
+        onClick={handleWaveClick}
         className={`tw-flex tw-flex-1 tw-space-x-3 tw-no-underline tw-py-1 tw-transition-all tw-duration-200 tw-ease-out ${
           isActive
             ? "tw-text-white desktop-hover:group-hover:tw-text-white"

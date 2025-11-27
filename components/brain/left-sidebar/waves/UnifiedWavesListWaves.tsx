@@ -80,6 +80,8 @@ interface UnifiedWavesListWavesProps {
   readonly hideHeaders?: boolean;
   /** Reference to the scroll container for virtualization */
   readonly scrollContainerRef: React.RefObject<HTMLElement | null>;
+  /** Whether the waves are direct messages (affects navigation route) */
+  readonly isDirectMessage?: boolean;
 }
 
 /**
@@ -98,7 +100,7 @@ const UnifiedWavesListWaves = forwardRef<
   UnifiedWavesListWavesProps
 >(
   (
-    { waves, onHover, scrollContainerRef, hideToggle, hidePin, hideHeaders },
+    { waves, onHover, scrollContainerRef, hideToggle, hidePin, hideHeaders, isDirectMessage = false },
     ref
   ) => {
     const listContainerRef = useRef<HTMLDivElement>(null);
@@ -162,6 +164,7 @@ const UnifiedWavesListWaves = forwardRef<
                       wave={wave}
                       onHover={onHover}
                       showPin={!hidePin}
+                      isDirectMessage={isDirectMessage}
                     />
                   </div>
                 ))}
@@ -219,6 +222,7 @@ const UnifiedWavesListWaves = forwardRef<
                     wave={wave}
                     onHover={onHover}
                     showPin={!hidePin}
+                    isDirectMessage={isDirectMessage}
                   />
                 </div>
               );
