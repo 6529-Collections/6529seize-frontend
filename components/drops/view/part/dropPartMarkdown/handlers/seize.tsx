@@ -17,7 +17,6 @@ import { renderSeizeQuote } from "../renderers";
 interface CreateSeizeHandlersConfig {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly currentDropId?: string;
-  readonly currentSerialNo?: number;
 }
 
 const ensureSeizeQuote = (href: string): SeizeQuoteLinkInfo => {
@@ -30,19 +29,11 @@ const ensureSeizeQuote = (href: string): SeizeQuoteLinkInfo => {
 };
 
 const createSeizeQuoteHandler = (
-  onQuoteClick: (drop: ApiDrop) => void,
-  currentSerialNo?: number
+  onQuoteClick: (drop: ApiDrop) => void
 ): LinkHandler => ({
   match: (href) => Boolean(parseSeizeQuoteLink(href)),
   render: (href) => {
-    const quoteInfo = ensureSeizeQuote(href);
-
-    // Prevent infinite recursion when a drop references itself by serialNo
-    if (currentSerialNo && quoteInfo.serialNo && Number.parseInt(quoteInfo.serialNo, 10) === currentSerialNo) {
-      throw new Error("Seize quote link matches current drop");
-    }
-
-    const content = renderSeizeQuote(quoteInfo, onQuoteClick, href);
+    const content = renderSeizeQuote(ensureSeizeQuote(href), onQuoteClick, href);
     if (!content) {
       throw new Error("Unable to render seize quote link");
     }
@@ -135,9 +126,8 @@ const createSeizeDropHandler = (currentDropId?: string): LinkHandler =>
 export const createSeizeHandlers = ({
   onQuoteClick,
   currentDropId,
-  currentSerialNo,
 }: CreateSeizeHandlersConfig): LinkHandler[] => [
-  createSeizeQuoteHandler(onQuoteClick, currentSerialNo),
+  createSeizeQuoteHandler(onQuoteClick),
   createSeizeGroupHandler(),
   createSeizeWaveHandler(),
   createSeizeDropHandler(currentDropId),
