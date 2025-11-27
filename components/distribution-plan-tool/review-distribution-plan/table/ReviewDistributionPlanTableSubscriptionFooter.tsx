@@ -4,6 +4,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { MEMES_CONTRACT } from "@/constants";
+import { extractAllNumbers } from "@/helpers/Helpers";
 import {
   commonApiFetch,
   commonApiPost,
@@ -19,18 +20,6 @@ import { UploadDistributionPhotosModal } from "./ReviewDistributionPlanTableSubs
 interface DistributionOverview {
   photos_count: number;
   is_normalized: boolean;
-}
-
-function extractAllNumbers(str: string): number[] {
-  const regex = /\d+/g;
-  const numbers = [];
-  let match;
-
-  while ((match = regex.exec(str)) !== null) {
-    numbers.push(Number.parseInt(match[0], 10));
-  }
-
-  return numbers;
 }
 
 export function ReviewDistributionPlanTableSubscriptionFooter() {

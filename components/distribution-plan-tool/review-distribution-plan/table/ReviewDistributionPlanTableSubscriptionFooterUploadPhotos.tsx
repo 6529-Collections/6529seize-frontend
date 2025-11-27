@@ -2,21 +2,9 @@
 
 import { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import { MEMES_CONTRACT } from "@/constants";
-import { formatAddress } from "@/helpers/Helpers";
+import { extractAllNumbers, formatAddress } from "@/helpers/Helpers";
 import { useRef, useState } from "react";
 import { Button, Col, Container, Modal, Row } from "react-bootstrap";
-
-function extractAllNumbers(str: string): number[] {
-  const regex = /\d+/g;
-  const numbers = [];
-  let match;
-
-  while ((match = regex.exec(str)) !== null) {
-    numbers.push(Number.parseInt(match[0], 10));
-  }
-
-  return numbers;
-}
 
 export function UploadDistributionPhotosModal(
   props: Readonly<{

@@ -33,7 +33,7 @@ import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
@@ -76,6 +76,13 @@ export default function UserPageSubscriptionsTopUp() {
   const [mounted, setMounted] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState<number | null>(null);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const otherInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleSelectOther = useCallback(() => {
+    setSelectedOption("other");
+    setError("");
+    otherInputRef.current?.focus();
+  }, []);
 
   useEffect(() => {
     setMounted(true);
@@ -365,31 +372,13 @@ export default function UserPageSubscriptionsTopUp() {
                 ? "tw-bg-iron-800"
                 : "tw-bg-transparent hover:tw-bg-iron-900"
             }`}
-            onClick={() => {
-              setSelectedOption("other");
-              setError("");
-              setTimeout(() => {
-                const input = document.querySelector(
-                  'input[placeholder="count"]'
-                ) as HTMLInputElement;
-                input?.focus();
-              }, 0);
-            }}>
+            onClick={handleSelectOther}>
             <Row className="d-flex align-items-center">
               <Col xs={1} className="d-flex tw-justify-center">
                 <Form.Check
                   type="radio"
                   checked={selectedOption === "other"}
-                  onChange={() => {
-                    setSelectedOption("other");
-                    setError("");
-                    setTimeout(() => {
-                      const input = document.querySelector(
-                        'input[placeholder="count"]'
-                      ) as HTMLInputElement;
-                      input?.focus();
-                    }, 0);
-                  }}
+                  onChange={handleSelectOther}
                   style={{
                     accentColor: "#406AFE",
                     width: "20px",
@@ -401,6 +390,7 @@ export default function UserPageSubscriptionsTopUp() {
               <Col xs={11} className="d-flex align-items-center gap-2">
                 <span>Other</span>
                 <Form.Control
+                  ref={otherInputRef}
                   type="number"
                   min={1}
                   placeholder="count"

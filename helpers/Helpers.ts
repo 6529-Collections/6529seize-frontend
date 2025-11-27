@@ -80,6 +80,18 @@ export function numberWithCommasFromString(x: any) {
   return numberWithCommas(num);
 }
 
+export function extractAllNumbers(str: string): number[] {
+  const regex = /\d+/g;
+  const numbers: number[] = [];
+  let match;
+
+  while ((match = regex.exec(str)) !== null) {
+    numbers.push(Number.parseInt(match[0], 10));
+  }
+
+  return numbers;
+}
+
 export function numberWithCommas(x: number | undefined) {
   if (!x || x === null || isNaN(x)) return "-";
   if (x === 0) return "-";

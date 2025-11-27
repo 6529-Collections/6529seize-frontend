@@ -5,7 +5,11 @@ import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { MEMES_CONTRACT, SUBSCRIPTIONS_ADMIN_WALLETS } from "@/constants";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { areEqualAddresses, formatAddress } from "@/helpers/Helpers";
+import {
+  areEqualAddresses,
+  extractAllNumbers,
+  formatAddress,
+} from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useContext, useState } from "react";
 import { Button, Col, Container, Modal, Row } from "react-bootstrap";
@@ -117,18 +121,6 @@ export function SubscriptionLinks(
   );
 }
 
-function extractAllNumbers(str: string): number[] {
-  const regex = /\d+/g;
-  const numbers = [];
-  let match;
-
-  while ((match = regex.exec(str)) !== null) {
-    numbers.push(Number.parseInt(match[0], 10));
-  }
-
-  return numbers;
-}
-
 export function SubscriptionConfirm(
   props: Readonly<{
     title: string;
@@ -140,8 +132,9 @@ export function SubscriptionConfirm(
   }>
 ) {
   const contract = MEMES_CONTRACT;
+  const numbers = extractAllNumbers(props.plan.name);
   const [tokenId, setTokenId] = useState<string>(
-    extractAllNumbers(props.plan.name)[0].toString() ?? ""
+    numbers.length > 0 ? numbers[0].toString() : ""
   );
 
   return (
