@@ -157,6 +157,7 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
                 textSize="sm"
                 onQuoteClick={onQuoteClick}
                 currentDropId={drop?.id}
+                currentSerialNo={drop?.serial_no}
               />
             </div>
           </div>
