@@ -321,6 +321,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
                       : "Select All"
                   }
                   onSelectAll={handleSelectAll}
+                  onAdd={handleSubmitTokens}
                 />
               </div>
             )}
