@@ -118,13 +118,13 @@ export default function DistributionPage(props: Readonly<Props>) {
               touch={true}
               fade={true}
               className={styles.distributionCarousel}>
-              {distributionPhotos.map((dp) => (
+              {distributionPhotos.map((dp, index) => (
                 <Carousel.Item key={dp.id}>
                   <Image
                     unoptimized
-                    priority
-                    width="0"
-                    height="0"
+                    priority={index === 0}
+                    width={0}
+                    height={0}
                     src={dp.link}
                     alt={dp.link}
                   />
@@ -285,8 +285,8 @@ export default function DistributionPage(props: Readonly<Props>) {
           <Image
             unoptimized
             loading="eager"
-            width="0"
-            height="0"
+            width={0}
+            height={0}
             style={{ height: "auto", width: "100px" }}
             src="/SummerGlasses.svg"
             alt="SummerGlasses"
