@@ -51,7 +51,7 @@ export const validateGrantForm = ({
     };
   }
 
-  if (!selection.allSelected && selection.tokenIdsRaw.length === 0) {
+  if (!selection.allSelected && selection.tokenIds.length === 0) {
     return {
       success: false,
       message: "Select at least one token or grant to all tokens.",

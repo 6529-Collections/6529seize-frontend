@@ -52,7 +52,7 @@ const canSubmit = ({
     return false;
   }
 
-  if (!selection.allSelected && selection.tokenIdsRaw.length === 0) {
+  if (!selection.allSelected && selection.tokenIds.length === 0) {
     return false;
   }
 
