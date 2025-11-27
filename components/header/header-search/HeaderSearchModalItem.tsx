@@ -14,7 +14,7 @@ import {
 } from "@/constants";
 import { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { getProfileTargetRoute } from "@/helpers/Helpers";
+import { formatStatFloor, getProfileTargetRoute } from "@/helpers/Helpers";
 import { getWaveHomeRoute, getWaveRoute } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
@@ -197,7 +197,7 @@ export default function HeaderSearchModalItem({
   const getSecondaryText = () => {
     if (isProfile()) {
       const profile = getProfile();
-      return `TDH: ${profile.tdh.toLocaleString()} - Level: ${profile.level}`;
+      return `TDH: ${formatStatFloor(profile.tdh)} - Level: ${profile.level}`;
     } else if (isNft()) {
       const nft = getNft();
       const collectionMap = getNftCollectionMap();

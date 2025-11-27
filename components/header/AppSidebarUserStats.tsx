@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { formatStatFloor } from "@/helpers/Helpers";
 import { useQuery } from "@tanstack/react-query";
 import { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -32,7 +32,6 @@ export default function AppSidebarUserStats({
   });
 
   const followers = data?.count ?? 0;
-  const fmt = (n: number) => formatNumberWithCommas(n);
 
   return (
     <div className="tw-flex tw-gap-x-3 tw-flex-wrap tw-gap-y-2">
@@ -41,7 +40,7 @@ export default function AppSidebarUserStats({
         className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1"
       >
         <span className="tw-text-sm tw-font-medium tw-text-iron-50">
-          {fmt(tdh)}
+          {formatStatFloor(tdh)}
         </span>
         <span className="tw-text-sm tw-font-medium tw-text-iron-400">TDH</span>
       </Link>
@@ -50,7 +49,7 @@ export default function AppSidebarUserStats({
         className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1"
       >
         <span className="tw-text-sm tw-font-medium tw-text-iron-50">
-          {fmt(tdh_rate)}
+          {formatStatFloor(tdh_rate)}
         </span>
         <span className="tw-text-sm tw-font-medium tw-text-iron-400 tw-whitespace-nowrap">
           TDH Rate

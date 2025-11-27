@@ -1,4 +1,5 @@
 import type { IdentityTdhStats } from "@/hooks/useIdentityTdhStats";
+import { formatStatFloor } from "@/helpers/Helpers";
 
 import { formatDisplay } from "./formatters";
 import type { XtdhStatsProps } from "./XtdhStats";
@@ -30,9 +31,9 @@ export function buildUserXtdhStatsContent(data: IdentityTdhStats): XtdhStatsProp
 
   return {
     metrics: {
-      tdhRate: formatDisplay(tdhRate),
+      tdhRate: formatStatFloor(tdhRate),
       multiplier: formatDisplay(xtdhMultiplier, 2),
-      producedXtdhRate: formatDisplay(producedXtdhRate),
+      producedXtdhRate: formatStatFloor(producedXtdhRate),
     },
     allocation: {
       total: totalDisplay,
