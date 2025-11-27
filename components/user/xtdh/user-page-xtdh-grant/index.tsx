@@ -91,6 +91,7 @@ export default function UserPageXtdhGrant() {
             isSubmitting={isSubmitting}
             errorMessage={submitError}
             successMessage={submitSuccess}
+            maxGrantRate={maxGrantRate}
           />
         </section>
       )}
