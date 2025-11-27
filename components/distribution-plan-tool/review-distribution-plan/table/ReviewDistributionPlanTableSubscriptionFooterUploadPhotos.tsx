@@ -37,13 +37,13 @@ export function UploadDistributionPhotosModal(
   const contract = MEMES_CONTRACT;
 
   const MAX_FILE_SIZE = 10 * 1024 * 1024;
-  const ACCEPTED_TYPES = [
+  const ACCEPTED_TYPES = new Set([
     "image/jpeg",
     "image/jpg",
     "image/png",
     "image/gif",
     "image/webp",
-  ];
+  ]);
 
   const validateFiles = (files: File[]): string[] => {
     const errors: string[] = [];
@@ -54,7 +54,7 @@ export function UploadDistributionPhotosModal(
     }
 
     files.forEach((file) => {
-      if (!ACCEPTED_TYPES.includes(file.type)) {
+      if (!ACCEPTED_TYPES.has(file.type)) {
         errors.push(
           `${file.name}: Invalid file type. Only images are allowed.`
         );
@@ -143,7 +143,7 @@ export function UploadDistributionPhotosModal(
                 }}
                 min={1}
                 type="number"
-                value={Number.parseInt(tokenId, 10)}
+                value={tokenId}
                 onChange={(e) => {
                   setTokenId(e.target.value);
                 }}

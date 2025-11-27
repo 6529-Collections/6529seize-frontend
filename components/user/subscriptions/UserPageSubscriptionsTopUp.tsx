@@ -101,10 +101,10 @@ export default function UserPageSubscriptionsTopUp() {
       }
     } else if (
       memeCount &&
-      !isNaN(parseInt(memeCount)) &&
-      parseInt(memeCount) > 0
+      !Number.isNaN(Number.parseInt(memeCount, 10)) &&
+      Number.parseInt(memeCount, 10) > 0
     ) {
-      count = parseInt(memeCount);
+      count = Number.parseInt(memeCount, 10);
     } else {
       setError("Select a top-up option");
       return;
@@ -168,9 +168,9 @@ export default function UserPageSubscriptionsTopUp() {
     }
 
     if (showModal) {
-      window.addEventListener("keydown", handleEscape);
+      globalThis.addEventListener("keydown", handleEscape);
       return () => {
-        window.removeEventListener("keydown", handleEscape);
+        globalThis.removeEventListener("keydown", handleEscape);
       };
     }
   }, [showModal, isClosable, closeModal]);
@@ -356,11 +356,14 @@ export default function UserPageSubscriptionsTopUp() {
       )}
       <Row className="pt-2">
         <Col xs={12} sm={6} className="d-flex align-items-center">
-          <div
-            className={`tw-border tw-rounded-lg tw-p-3 tw-cursor-pointer tw-transition-colors tw-w-full ${
+          <button
+            type="button"
+            className={`tw-border tw-rounded-lg tw-p-3 tw-cursor-pointer tw-transition-colors tw-w-full tw-text-left ${
+              styles.cardCountOption
+            } ${
               selectedOption === "other"
                 ? "tw-bg-iron-800"
-                : "hover:tw-bg-iron-900"
+                : "tw-bg-transparent hover:tw-bg-iron-900"
             }`}
             onClick={() => {
               setSelectedOption("other");
@@ -428,7 +431,7 @@ export default function UserPageSubscriptionsTopUp() {
                 </span>
               </Col>
             </Row>
-          </div>
+          </button>
         </Col>
         <Col
           xs={12}
@@ -442,7 +445,7 @@ export default function UserPageSubscriptionsTopUp() {
               waitSendTransaction.isLoading ||
               selectedOption === null ||
               (selectedOption === "other" &&
-                (!memeCount || parseInt(memeCount) < 1))
+                (!memeCount || Number.parseInt(memeCount, 10) < 1))
             }
             aria-label="Send top up">
             Send
@@ -504,11 +507,9 @@ export default function UserPageSubscriptionsTopUp() {
                       </h2>
                       {topUpAmount !== null && (
                         <p className="tw-text-iron-400 tw-text-sm tw-mt-1">
-                          {(topUpAmount / MEMES_MINT_PRICE).toLocaleString()}
+                          {(topUpAmount / MEMES_MINT_PRICE).toLocaleString()}{" "}
                           Cards -{" "}
-                          {numberWithCommasFromString(
-                            topUpAmount.toString()
-                          )}{" "}
+                          {numberWithCommasFromString(topUpAmount.toString())}{" "}
                           ETH
                         </p>
                       )}

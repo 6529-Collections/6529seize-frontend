@@ -110,25 +110,29 @@ export default function DistributionPage(props: Readonly<Props>) {
   function printDistributionPhotos() {
     if (distributionPhotos.length > 0) {
       return (
-        <Carousel
-          interval={null}
-          wrap={false}
-          touch={true}
-          fade={true}
-          className={styles.distributionCarousel}>
-          {distributionPhotos.map((dp) => (
-            <Carousel.Item key={dp.id}>
-              <Image
-                unoptimized
-                priority
-                width="0"
-                height="0"
-                src={dp.link}
-                alt={dp.link}
-              />
-            </Carousel.Item>
-          ))}
-        </Carousel>
+        <Row className="pt-4 pb-5">
+          <Col>
+            <Carousel
+              interval={null}
+              wrap={false}
+              touch={true}
+              fade={true}
+              className={styles.distributionCarousel}>
+              {distributionPhotos.map((dp) => (
+                <Carousel.Item key={dp.id}>
+                  <Image
+                    unoptimized
+                    priority
+                    width="0"
+                    height="0"
+                    src={dp.link}
+                    alt={dp.link}
+                  />
+                </Carousel.Item>
+              ))}
+            </Carousel>
+          </Col>
+        </Row>
       );
     }
     return <></>;
@@ -169,6 +173,7 @@ export default function DistributionPage(props: Readonly<Props>) {
         </span>
       );
     }
+    return null;
   }
 
   function printDistribution() {
@@ -328,9 +333,7 @@ export default function DistributionPage(props: Readonly<Props>) {
                   {printMintingLink()}
                 </Col>
               </Row>
-              <Row className="pt-4 pb-5">
-                <Col>{printDistributionPhotos()}</Col>
-              </Row>
+              {printDistributionPhotos()}
               <Row>
                 <Col>
                   {nftId &&

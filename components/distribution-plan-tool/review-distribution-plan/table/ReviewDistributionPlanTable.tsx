@@ -92,7 +92,7 @@ export default function ReviewDistributionPlanTable() {
         phase: {
           id: PUBLIC_SUBSCRIPTIONS_PHASE_ID,
           phaseId: PUBLIC_SUBSCRIPTIONS_PHASE_ID,
-          componentId: null as null,
+          componentId: null,
           type: ReviewDistributionPlanTableItemType.PHASE,
           name: "Public",
           description: "Auto-generated",
