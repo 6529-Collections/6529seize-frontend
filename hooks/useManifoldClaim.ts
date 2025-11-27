@@ -114,6 +114,7 @@ export interface ManifoldClaim {
   isFetching: boolean;
   isFinalized: boolean;
   isSoldOut: boolean;
+  isError: boolean;
 }
 
 export function useManifoldClaim(
@@ -198,6 +199,7 @@ export function useManifoldClaim(
         isFetching: false,
         isFinalized: remaining === 0 || status === ManifoldClaimStatus.ENDED,
         isSoldOut: remaining <= 0,
+        isError: false,
       };
       setClaim(newClaim);
       setRefetchInterval(status === ManifoldClaimStatus.ACTIVE ? 5000 : 10000);
@@ -205,8 +207,16 @@ export function useManifoldClaim(
   }, [readContract.data, getStatus]);
 
   useEffect(() => {
-    if (readContract.error && onError) {
-      onError();
+    if (readContract.error) {
+      setClaim((prevClaim) => {
+        if (prevClaim) {
+          return {
+            ...prevClaim,
+            isError: true,
+          };
+        }
+      });
+      onError?.();
     }
   }, [readContract.error, onError]);
 

@@ -145,9 +145,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     return (
       <Row className="pb-2">
         <Col className="d-flex align-items-center gap-2 ">
-          <h2 className="mb-0">
-            Mint {props.title}
-          </h2>
+          <h2 className="mb-0">Mint {props.title}</h2>
         </Col>
       </Row>
     );
@@ -513,6 +511,13 @@ function ManifoldMemesMintingPhases(
 
   return (
     <Container className="no-padding">
+      {distribution?.airdrops && (
+        <Row className="tw-pb-2">
+          <Col className="tw-text-lg tw-font-bold">
+            Airdrops: x{distribution?.airdrops}
+          </Col>
+        </Row>
+      )}
       <Row>
         {phases.map((phase) => (
           <ManifoldMemesMintingPhase

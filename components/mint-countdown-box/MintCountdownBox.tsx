@@ -20,10 +20,11 @@ interface Props {
   };
   hideMintBtn?: boolean;
   small?: boolean;
+  isError?: boolean;
 }
 
 export default function MintCountdownBox(props: Readonly<Props>) {
-  const { mintInfo, linkInfo, hideMintBtn, small } = props;
+  const { mintInfo, linkInfo, hideMintBtn, small, isError } = props;
 
   // Derived flags
   const hasMintInfo = Boolean(mintInfo);
@@ -43,6 +44,15 @@ export default function MintCountdownBox(props: Readonly<Props>) {
     styles.countdownContainer,
     small ? styles.countdownContainerShort : "",
   ].join(" ");
+
+  if (isError) {
+    return (
+      <div className={containerClasses}>
+        <h4 className="mb-3">⚠️ Error fetching mint information</h4>
+        <p className="mb-1 tw-font-medium">Please try again later.</p>
+      </div>
+    );
+  }
 
   if (mintInfo?.isSoldOut) {
     return (

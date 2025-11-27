@@ -61,10 +61,11 @@ export default function UserPageSubscriptionsUpcoming(
     <Container className="no-padding">
       <Row>
         <Col>
-          <h5 className="mb-0">Upcoming Drops</h5>
+          <h5 className="mb-0 tw-font-semibold">Upcoming Drops</h5>
         </Col>
       </Row>
-      <Row className="pt-2 pb-2">
+      <hr className="tw-border-white tw-opacity-100 tw-border-2 tw-mt-1 tw-mb-0" />
+      <Row>
         <Col>
           <Table className={styles.nftSubscriptionsTable}>
             <tbody>
@@ -87,20 +88,13 @@ export default function UserPageSubscriptionsUpcoming(
                   </td>
                 </tr>
               ))}
-              {props.memes_subscriptions.length > 3 && (
-                <tr>
-                  <td>
-                    <div className="d-flex align-items-center justify-content-center gap-1">
-                      <ShowMoreButton
-                        expanded={expanded}
-                        setExpanded={setExpanded}
-                      />
-                    </div>
-                  </td>
-                </tr>
-              )}
             </tbody>
           </Table>
+          {props.memes_subscriptions.length > 3 && (
+            <div className="mt-2 text-center">
+              <ShowMoreButton expanded={expanded} setExpanded={setExpanded} />
+            </div>
+          )}
         </Col>
       </Row>
     </Container>
@@ -255,32 +249,42 @@ function SubscriptionRow(
     <Container className="no-padding pt-2 pb-2">
       <Row>
         <Col className="d-flex flex-wrap gap-2 align-items-center justify-content-between">
-          <span className="d-flex align-items-center gap-2">
-            {props.title} #{props.subscription.token_id}{" "}
-            {props.minting_today ? (
-              <>
-                <span
-                  data-tooltip-id={`minting-today-${props.subscription.token_id}`}>
-                  - Minting Today{" "}
-                  <FontAwesomeIcon icon={faInfoCircle} height={"20px"} />
+          <div className="d-flex flex-column gap-2">
+            <span className="d-flex align-items-center gap-2">
+              {props.title} #{props.subscription.token_id}{" "}
+              {props.minting_today ? (
+                <>
+                  <span
+                    data-tooltip-id={`minting-today-${props.subscription.token_id}`}>
+                    - Minting Today{" "}
+                    <FontAwesomeIcon icon={faInfoCircle} height={"20px"} />
+                  </span>
+                  <Tooltip
+                    id={`minting-today-${props.subscription.token_id}`}
+                    place="right"
+                    style={{
+                      backgroundColor: "#f8f9fa",
+                      color: "#212529",
+                      padding: "4px 8px",
+                    }}>
+                    No changes allowed on minting day
+                  </Tooltip>
+                </>
+              ) : (
+                <span className="font-color-silver">
+                  {formatFullDate(props.date.utcDay)}
                 </span>
-                <Tooltip
-                  id={`minting-today-${props.subscription.token_id}`}
-                  place="right"
-                  style={{
-                    backgroundColor: "#f8f9fa",
-                    color: "#212529",
-                    padding: "4px 8px",
-                  }}>
-                  No changes allowed on minting day
-                </Tooltip>
-              </>
-            ) : (
-              <span className="font-color-silver">
-                {formatFullDate(props.date.utcDay)}
+              )}
+            </span>
+            {props.first && final?.phase && final?.phase_position > 0 && (
+              <span className="font-smaller font-color-silver">
+                Phase: {final.phase} - Subscription Position:{" "}
+                {final.phase_position.toLocaleString()} /{" "}
+                {final.phase_subscriptions.toLocaleString()} - Airdrop Address:{" "}
+                {final.airdrop_address}
               </span>
             )}
-          </span>
+          </div>
           <div className="d-flex align-items-center gap-2">
             {isSubmitting && <Spinner />}
             <Toggle
@@ -327,16 +331,6 @@ function SubscriptionRow(
           </div>
         </Col>
       </Row>
-      {props.first && final?.phase && final?.phase_position > 0 && (
-        <Row className="pt-2">
-          <Col className="font-smaller font-color-silver">
-            Phase: {final.phase} - Subscription Position:{" "}
-            {final.phase_position.toLocaleString()} /{" "}
-            {final.phase_subscriptions.toLocaleString()} - Airdrop Address:{" "}
-            {final.airdrop_address}
-          </Col>
-        </Row>
-      )}
     </Container>
   );
 }

@@ -3,12 +3,14 @@
 import Address from "@/components/address/Address";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import MemePageMintCountdown from "@/components/mint-countdown-box/MemePageMintCountdown";
+import NotFound from "@/components/not-found/NotFound";
 import Pagination from "@/components/pagination/Pagination";
 import ScrollToButton from "@/components/scrollTo/ScrollToButton";
 import {
   SearchModalDisplay,
   SearchWalletsDisplay,
 } from "@/components/searchModal/SearchModal";
+import UpcomingMemePage from "@/components/the-memes/UpcomingMemePage";
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants";
 import { DBResponse } from "@/entities/IDBResponse";
@@ -38,7 +40,8 @@ export default function DistributionPage(props: Readonly<Props>) {
     pageSize: number;
   }>({ page: 1, pageSize: 150 });
 
-  const [nftId, setNftId] = useState<string>();
+  const nftNan = isNaN(parseInt(params?.id as string));
+  const nftId = !nftNan ? (params?.id as string) : "";
 
   const [distributions, setDistributions] = useState<Distribution[]>([]);
   const [distributionsPhases, setDistributionsPhases] = useState<string[]>([]);
@@ -78,13 +81,6 @@ export default function DistributionPage(props: Readonly<Props>) {
       setFetching(false);
     });
   }
-
-  useEffect(() => {
-    const id = params?.id as string;
-    if (id) {
-      setNftId(id);
-    }
-  }, [params]);
 
   useEffect(() => {
     if (nftId) {
@@ -135,6 +131,7 @@ export default function DistributionPage(props: Readonly<Props>) {
         </Carousel>
       );
     }
+    return <></>;
   }
 
   function getCountForPhase(d: Distribution, phase: string) {
@@ -148,6 +145,30 @@ export default function DistributionPage(props: Readonly<Props>) {
     }
 
     return count ? numberWithCommas(count) : "-";
+  }
+
+  function getSpotsForPhase(d: Distribution, phase: string) {
+    if (phase.toUpperCase() === "AIRDROP") {
+      return "";
+    }
+    const p = d.allowlist.find((a) => a.phase === phase);
+    const count = p?.spots ?? 0;
+    if (count > 0) {
+      const spotsAirdrop = p?.spots_airdrop ?? 0;
+      const spotsAllowlist = p?.spots_allowlist ?? 0;
+
+      if (!spotsAirdrop && !spotsAllowlist) {
+        return "";
+      }
+
+      return (
+        <span className="tw-text-iron-400 tw-text-sm">
+          {spotsAirdrop > 0 ? numberWithCommas(spotsAirdrop) : "0"}
+          {" | "}
+          {spotsAllowlist > 0 ? numberWithCommas(spotsAllowlist) : "0"}
+        </span>
+      );
+    }
   }
 
   function printDistribution() {
@@ -213,8 +234,11 @@ export default function DistributionPage(props: Readonly<Props>) {
                         />
                       </td>
                       {distributionsPhases.map((p) => (
-                        <td key={`${p}-${d.wallet}`} className="text-center">
-                          {getCountForPhase(d, p)}
+                        <td
+                          key={`${p}-${d.wallet}`}
+                          className="tw-flex tw-justify-center tw-items-center">
+                          {getCountForPhase(d, p)}&nbsp;&nbsp;
+                          {getSpotsForPhase(d, p)}
                         </td>
                       ))}
                       <td className="text-center">
@@ -235,12 +259,8 @@ export default function DistributionPage(props: Readonly<Props>) {
   }
 
   function printMintingLink() {
-    const nftIdNumber = parseInt(nftId ?? "");
-    if (
-      !isNaN(nftIdNumber) &&
-      areEqualAddresses(props.contract, MEMES_CONTRACT)
-    ) {
-      return <MemePageMintCountdown nft_id={nftIdNumber} />;
+    if (areEqualAddresses(props.contract, MEMES_CONTRACT) && !nftNan && nftId) {
+      return <MemePageMintCountdown nft_id={parseInt(nftId)} />;
     }
 
     return <></>;
@@ -249,6 +269,9 @@ export default function DistributionPage(props: Readonly<Props>) {
   function printEmpty() {
     return (
       <Row>
+        <Col xs={12}>
+          <UpcomingMemePage id={nftId} />
+        </Col>
         <Col xs={12}>
           <Image
             unoptimized
@@ -283,12 +306,16 @@ export default function DistributionPage(props: Readonly<Props>) {
     );
   }
 
+  if (nftNan) {
+    return <NotFound label="DISTRIBUTION" />;
+  }
+
   return (
     <>
       <Container fluid className={styles.mainContainer}>
         <Row>
           <Col>
-            <Container className="pt-4 pb-4">
+            <Container className="tw-pt-6 tw-pb-10">
               <Row>
                 <Col className={`${styles.distributionHeader} pb-1`}>
                   <h1 className="text-center mb-0">
@@ -297,12 +324,9 @@ export default function DistributionPage(props: Readonly<Props>) {
                   {printMintingLink()}
                 </Col>
               </Row>
-              {distributionPhotos.length > 0 && (
-                <Row className="pt-4 pb-5">
-                  <Col>{printDistributionPhotos()}</Col>
-                </Row>
-              )}
-
+              <Row className="pt-4 pb-5">
+                <Col>{printDistributionPhotos()}</Col>
+              </Row>
               <Row>
                 <Col>
                   {nftId &&

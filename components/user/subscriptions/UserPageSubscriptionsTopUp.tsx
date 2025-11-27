@@ -2,7 +2,9 @@
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import DotLoader from "@/components/dotLoader/DotLoader";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
 import {
   displayedEonNumberFromIndex,
   displayedEpochNumberFromIndex,
@@ -27,9 +29,13 @@ import {
   numberWithCommasFromString,
 } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import { parseEther } from "viem";
 import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
@@ -67,17 +73,48 @@ export default function UserPageSubscriptionsTopUp() {
 
   const [error, setError] = useState<string>("");
   const [showDeep, setShowDeep] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [topUpAmount, setTopUpAmount] = useState<number | null>(null);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
-  function submit(value: number) {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  function handleSend() {
     setError("");
-    if (isNaN(value)) {
-      setError("Select card count");
+    let count: number;
+    if (selectedOption && selectedOption !== "other") {
+      const optionCountMap: Record<string, number> = {
+        "1": 1,
+        szn: remainingMintsForSeason,
+        year: remainingMintsForYear,
+        epoch: remainingMintsForEpoch,
+        period: remainingMintsForPeriod,
+        era: remainingMintsForEra,
+        eon: remainingMintsForEon,
+      };
+      count = optionCountMap[selectedOption];
+      if (!count || count < 1) {
+        setError("Invalid option selected");
+        return;
+      }
+    } else if (
+      memeCount &&
+      !isNaN(parseInt(memeCount)) &&
+      parseInt(memeCount) > 0
+    ) {
+      count = parseInt(memeCount);
+    } else {
+      setError("Select a top-up option");
       return;
     }
     if (!isConnected) {
       setError("You must have an active wallet connection to top up");
       return;
     }
+    const value = count * MEMES_MINT_PRICE;
+    setTopUpAmount(value);
     sendTransaction.reset();
     sendTransaction.sendTransaction({
       chainId: SUBSCRIPTIONS_CHAIN.id,
@@ -94,40 +131,120 @@ export default function UserPageSubscriptionsTopUp() {
     }
   }, [sendTransaction.error]);
 
-  function getStatusMessage() {
-    if (waitSendTransaction.isLoading) {
-      return "Transaction Submitted";
-    } else if (waitSendTransaction.isSuccess) {
-      return "Top Up Successful!";
-    } else {
-      return `Something went wrong`;
-    }
-  }
+  const showModal =
+    sendTransaction.isPending ||
+    waitSendTransaction.isLoading ||
+    waitSendTransaction.isSuccess ||
+    !!error;
 
-  function getMessage() {
+  const isClosable = waitSendTransaction.isSuccess || !!error;
+
+  useEffect(() => {
+    if (showModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showModal]);
+
+  const closeModal = useCallback(() => {
+    if (isClosable) {
+      sendTransaction.reset();
+      setError("");
+      setTopUpAmount(null);
+      setSelectedOption(null);
+      setMemeCount("");
+    }
+  }, [isClosable, sendTransaction]);
+
+  useEffect(() => {
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === "Escape" && isClosable && showModal) {
+        closeModal();
+      }
+    }
+
+    if (showModal) {
+      window.addEventListener("keydown", handleEscape);
+      return () => {
+        window.removeEventListener("keydown", handleEscape);
+      };
+    }
+  }, [showModal, isClosable, closeModal]);
+
+  function getModalContent() {
     if (error) {
-      return error;
-    }
-    if (sendTransaction.isPending) {
-      return "Confirming Transaction...";
-    }
-    if (sendTransaction.data) {
       return (
-        <>
-          {getStatusMessage()}{" "}
-          <a
-            href={getTransactionLink(
-              SUBSCRIPTIONS_CHAIN.id,
-              sendTransaction.data
-            )}
-            target="_blank"
-            rel="noopener noreferrer">
-            view
-          </a>
-        </>
+        <div className="tw-text-center">
+          <p className="tw-text-red tw-text-lg tw-font-medium tw-mb-4">Error</p>
+          <p className="tw-text-iron-100 tw-mb-0">{error}</p>
+        </div>
       );
     }
-    return <>&nbsp;</>;
+
+    if (sendTransaction.isPending) {
+      return (
+        <div className="tw-flex tw-items-center tw-justify-center tw-gap-2">
+          <p className="tw-text-iron-100 tw-text-lg tw-font-medium tw-mb-0">
+            Confirm in your wallet
+          </p>
+          <CircleLoader size={CircleLoaderSize.LARGE} />
+        </div>
+      );
+    }
+
+    if (waitSendTransaction.isLoading) {
+      return (
+        <div className="tw-text-center">
+          <p className="tw-text-iron-100 tw-text-lg tw-font-medium tw-mb-4 tw-flex tw-items-center tw-justify-center tw-gap-2">
+            Transaction Submitted
+            {sendTransaction.data && (
+              <a
+                className="btn btn-white btn-sm tw-font-medium"
+                href={getTransactionLink(
+                  SUBSCRIPTIONS_CHAIN.id,
+                  sendTransaction.data
+                )}
+                target="_blank"
+                rel="noopener noreferrer">
+                View Tx
+              </a>
+            )}
+          </p>
+          <p className="tw-text-iron-100 tw-text-md tw-font-medium tw-mb-2 tw-flex tw-items-center tw-justify-center tw-gap-2">
+            Waiting for confirmation{" "}
+            <CircleLoader size={CircleLoaderSize.MEDIUM} />
+          </p>
+        </div>
+      );
+    }
+
+    if (waitSendTransaction.isSuccess) {
+      return (
+        <div className="tw-text-center">
+          <p className="tw-text-green tw-text-lg tw-font-medium tw-mb-0 tw-flex tw-items-center tw-justify-center tw-gap-2">
+            Top Up Successful!
+            {sendTransaction.data && (
+              <a
+                className="btn btn-white btn-sm tw-font-medium"
+                href={getTransactionLink(
+                  SUBSCRIPTIONS_CHAIN.id,
+                  sendTransaction.data
+                )}
+                target="_blank"
+                rel="noopener noreferrer">
+                View Tx
+              </a>
+            )}
+          </p>
+        </div>
+      );
+    }
+
+    return null;
   }
 
   if (isIos && country !== "US") {
@@ -150,23 +267,26 @@ export default function UserPageSubscriptionsTopUp() {
     </Row>
   );
 
-  const printRemainingMints = (count: number, label: string, value: number) => {
+  const printRemainingMints = (
+    count: number,
+    label: string,
+    value: number,
+    optionId: string
+  ) => {
     if (count > 0) {
       return (
-        <Row className="pt-3">
-          <Col>
-            <CardCountTopup
-              count={count}
-              display={`Remaining ${label} ${value.toLocaleString()}`}
-              disabled={
-                sendTransaction.isPending || waitSendTransaction.isLoading
-              }
-              submit={(value: number) => {
-                submit(value);
-              }}
-            />
-          </Col>
-        </Row>
+        <Col xs={12} sm={6} className="pt-2">
+          <CardCountOption
+            count={count}
+            display={`Remaining ${label} ${value.toLocaleString()}`}
+            selected={selectedOption === optionId}
+            onSelect={() => {
+              setSelectedOption(optionId);
+              setMemeCount("");
+              setError("");
+            }}
+          />
+        </Col>
       );
     }
     return null;
@@ -174,177 +294,291 @@ export default function UserPageSubscriptionsTopUp() {
 
   const topUpContent = (
     <>
-      <Row className="pt-2">
-        <Col>
-          <CardCountTopup
+      <Row>
+        <Col xs={12} sm={6} className="pt-2">
+          <CardCountOption
             count={1}
-            disabled={
-              sendTransaction.isPending || waitSendTransaction.isLoading
-            }
-            submit={(value: number) => {
-              submit(value);
+            selected={selectedOption === "1"}
+            onSelect={() => {
+              setSelectedOption("1");
+              setMemeCount("");
+              setError("");
             }}
           />
         </Col>
-      </Row>
-      {printRemainingMints(remainingMintsForSeason, "SZN", szn)}
-      {printRemainingMints(remainingMintsForYear, "Year", year)}
-      {printRemainingMints(remainingMintsForEpoch, "Epoch", epoch)}
-      <Row className="pt-3">
-        <Col>
-          <Form
-            onSubmit={(e) => {
-              e.preventDefault();
-              const count = parseInt(memeCount);
-              if (isNaN(count) || count < 1) {
-                setError("Enter a valid count");
-              } else {
-                submit(count * MEMES_MINT_PRICE);
-              }
-            }}>
-            <Form.Group>
-              <Row className="d-flex align-items-center">
-                <Col xs={9} sm={8} className="d-flex align-items-center gap-2">
-                  <span>Other</span>
-                  <Form.Control
-                    type="number"
-                    min={1}
-                    placeholder="count"
-                    value={memeCount}
-                    style={{ width: "100px", padding: "2px 10px" }}
-                    onChange={(e) => {
-                      setError("");
-                      const value = e.target.value;
-                      try {
-                        parseInt(value);
-                        setMemeCount(value);
-                      } catch {
-                        setMemeCount("");
-                      }
-                    }}
-                  />
-                  <span className="no-wrap">
-                    {!isNaN(parseInt(memeCount)) && (
-                      <>({parseInt(memeCount) * MEMES_MINT_PRICE} ETH)</>
-                    )}
-                  </span>
-                </Col>
-                <Col xs={3} sm={4}>
-                  <Button
-                    className={styles.sendBtn}
-                    type="submit"
-                    aria-label="Send custom top up"
-                    disabled={
-                      sendTransaction.isPending || waitSendTransaction.isLoading
-                    }>
-                    Send
-                  </Button>
-                </Col>
-              </Row>
-            </Form.Group>
-          </Form>
-        </Col>
-      </Row>
-      {showDeep && (
-        <>
-          {printRemainingMints(remainingMintsForPeriod, "Period", period)}
-          {printRemainingMints(remainingMintsForEra, "Era", era)}
-          {printRemainingMints(remainingMintsForEon, "Eon", eon)}
-        </>
-      )}
-      <Row className="pt-3 pb-4">
-        <Col className="tw-text-iron-400">
-          <ShowMoreButton
-            expanded={showDeep}
-            setExpanded={setShowDeep}
-            showMoreLabel="Show Deep Time Subscriptions"
-            showLessLabel="Hide Deep Time Subscriptions"
-          />
-        </Col>
+        {printRemainingMints(remainingMintsForSeason, "SZN", szn, "szn")}
       </Row>
       <Row>
-        <Col
-          className={`d-flex align-items-center gap-2 tw-font-medium ${
-            error ? "tw-text-red" : ""
-          }`}>
-          {getMessage()}
-        </Col>
+        {printRemainingMints(remainingMintsForYear, "Year", year, "year")}
+        {printRemainingMints(remainingMintsForEpoch, "Epoch", epoch, "epoch")}
       </Row>
-      {waitSendTransaction.isLoading && (
-        <Row>
-          <Col>
-            Waiting for confirmation <DotLoader />
+      {!showDeep && (
+        <Row className="pt-2">
+          <Col xs={12} sm={6} className="tw-text-iron-400">
+            <div className="tw-pl-[calc(0.75rem+8.33%)]">
+              <ShowMoreButton
+                expanded={showDeep}
+                setExpanded={setShowDeep}
+                showMoreLabel="Show Deep Time Subscriptions"
+                showLessLabel="Hide Deep Time Subscriptions"
+              />
+            </div>
           </Col>
         </Row>
       )}
+      {showDeep && (
+        <>
+          <Row>
+            {printRemainingMints(
+              remainingMintsForPeriod,
+              "Period",
+              period,
+              "period"
+            )}
+            {printRemainingMints(remainingMintsForEra, "Era", era, "era")}
+          </Row>
+          <Row>
+            {printRemainingMints(remainingMintsForEon, "Eon", eon, "eon")}
+          </Row>
+          <Row className="pt-2">
+            <Col xs={12} sm={6} className="tw-text-iron-400">
+              <div className="tw-pl-[calc(0.75rem+8.33%)]">
+                <ShowMoreButton
+                  expanded={showDeep}
+                  setExpanded={setShowDeep}
+                  showMoreLabel="Show Deep Time Subscriptions"
+                  showLessLabel="Hide Deep Time Subscriptions"
+                />
+              </div>
+            </Col>
+          </Row>
+        </>
+      )}
+      <Row className="pt-2">
+        <Col xs={12} sm={6} className="d-flex align-items-center">
+          <div
+            className={`tw-border tw-rounded-lg tw-p-3 tw-cursor-pointer tw-transition-colors tw-w-full ${
+              selectedOption === "other"
+                ? "tw-bg-iron-800"
+                : "hover:tw-bg-iron-900"
+            }`}
+            onClick={() => {
+              setSelectedOption("other");
+              setError("");
+              setTimeout(() => {
+                const input = document.querySelector(
+                  'input[placeholder="count"]'
+                ) as HTMLInputElement;
+                input?.focus();
+              }, 0);
+            }}>
+            <Row className="d-flex align-items-center">
+              <Col xs={1} className="d-flex tw-justify-center">
+                <Form.Check
+                  type="radio"
+                  checked={selectedOption === "other"}
+                  onChange={() => {
+                    setSelectedOption("other");
+                    setError("");
+                    setTimeout(() => {
+                      const input = document.querySelector(
+                        'input[placeholder="count"]'
+                      ) as HTMLInputElement;
+                      input?.focus();
+                    }, 0);
+                  }}
+                  style={{
+                    accentColor: "#406AFE",
+                    width: "20px",
+                    height: "20px",
+                  }}
+                  className={`tw-scale-125 ${styles.radioButton}`}
+                />
+              </Col>
+              <Col xs={11} className="d-flex align-items-center gap-2">
+                <span>Other</span>
+                <Form.Control
+                  type="number"
+                  min={1}
+                  placeholder="count"
+                  value={memeCount}
+                  style={{ width: "100px", padding: "2px 10px" }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedOption("other");
+                  }}
+                  onFocus={() => {
+                    setSelectedOption("other");
+                  }}
+                  onChange={(e) => {
+                    setError("");
+                    const value = e.target.value;
+                    try {
+                      const parsed = parseInt(value);
+                      if (!isNaN(parsed) && parsed > 0) {
+                        setMemeCount(value);
+                        setSelectedOption("other");
+                      } else {
+                        setMemeCount(value);
+                        setSelectedOption("other");
+                      }
+                    } catch {
+                      setMemeCount(value);
+                      setSelectedOption("other");
+                    }
+                  }}
+                />
+                <span className="no-wrap">
+                  {!isNaN(parseInt(memeCount)) && parseInt(memeCount) > 0 && (
+                    <>({parseInt(memeCount) * MEMES_MINT_PRICE} ETH)</>
+                  )}
+                </span>
+              </Col>
+            </Row>
+          </div>
+        </Col>
+        <Col
+          xs={12}
+          sm={6}
+          className="d-flex tw-justify-center tw-items-center pt-2 pt-sm-0">
+          <Button
+            className={`${styles.sendBtn} tw-w-full sm:tw-w-auto`}
+            onClick={handleSend}
+            disabled={
+              sendTransaction.isPending ||
+              waitSendTransaction.isLoading ||
+              selectedOption === null ||
+              (selectedOption === "other" &&
+                (!memeCount || parseInt(memeCount) < 1))
+            }
+            aria-label="Send top up">
+            Send
+          </Button>
+        </Col>
+      </Row>
     </>
   );
 
   return (
-    <Container className="no-padding">
-      <Row className="pb-2">
-        <Col className="d-flex align-items-end gap-2 no-wrap">
-          <h4 className="mb-0">Top Up</h4>
-          <span className="d-flex align-items-center gap-1 font-color-h font-smaller">
-            Sending to{" "}
-            <>
-              <span data-tooltip-id="subscription-address">
-                {SUBSCRIPTIONS_ADDRESS_ENS}{" "}
-                {formatAddress(SUBSCRIPTIONS_ADDRESS)}
-              </span>
-              <Tooltip
-                id="subscription-address"
-                style={{
-                  backgroundColor: "#1F2937",
-                  color: "white",
-                  padding: "4px 8px",
-                }}>
-                <span className="font-smaller">{SUBSCRIPTIONS_ADDRESS}</span>
-              </Tooltip>
-            </>
-          </span>
-        </Col>
-      </Row>
-      {isIos ? iOsContent : topUpContent}
-    </Container>
+    <>
+      <Container className="no-padding">
+        <Row className="pb-2">
+          <Col className="d-flex align-items-end gap-2 no-wrap">
+            <h4 className="mb-0 tw-font-semibold">Top Up</h4>
+            <span className="d-flex align-items-center gap-1 font-color-h font-smaller">
+              Sending to{" "}
+              <>
+                <span data-tooltip-id="subscription-address">
+                  {SUBSCRIPTIONS_ADDRESS_ENS}{" "}
+                  {formatAddress(SUBSCRIPTIONS_ADDRESS)}
+                </span>
+                <Tooltip
+                  id="subscription-address"
+                  style={{
+                    backgroundColor: "#1F2937",
+                    color: "white",
+                    padding: "4px 8px",
+                  }}>
+                  <span className="font-smaller">{SUBSCRIPTIONS_ADDRESS}</span>
+                </Tooltip>
+              </>
+            </span>
+          </Col>
+        </Row>
+        <hr className="tw-border-white tw-opacity-100 tw-border-2 tw-mt-1" />
+        {isIos ? iOsContent : topUpContent}
+      </Container>
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {showModal && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px] tw-flex tw-items-center tw-justify-center tw-z-[9999] tw-px-4"
+                onClick={isClosable ? closeModal : undefined}>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                  className="tw-p-6 tw-bg-iron-950 tw-rounded-xl tw-w-full tw-max-w-md tw-shadow-2xl tw-relative"
+                  onClick={(e) => e.stopPropagation()}>
+                  <div className="tw-flex tw-items-start tw-justify-between tw-border-b tw-border-iron-800">
+                    <div>
+                      <h2 className="tw-text-xl tw-font-semibold tw-text-white">
+                        Top up
+                      </h2>
+                      {topUpAmount !== null && (
+                        <p className="tw-text-iron-400 tw-text-sm tw-mt-1">
+                          {(topUpAmount / MEMES_MINT_PRICE).toLocaleString()}
+                          Cards -{" "}
+                          {numberWithCommasFromString(
+                            topUpAmount.toString()
+                          )}{" "}
+                          ETH
+                        </p>
+                      )}
+                    </div>
+                    {isClosable && (
+                      <button
+                        onClick={closeModal}
+                        className="tw-size-9 tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
+                        aria-label="Close modal">
+                        <FontAwesomeIcon
+                          icon={faXmark}
+                          className="tw-size-5 tw-flex-shrink-0"
+                        />
+                      </button>
+                    )}
+                  </div>
+                  <div className="tw-bg-iron-800 tw-rounded-xl tw-min-h-[120px] tw-flex tw-items-center tw-justify-center">
+                    {getModalContent()}
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
+    </>
   );
 }
 
-function CardCountTopup(
+function CardCountOption(
   props: Readonly<{
     count: number;
     display?: string;
-    disabled: boolean;
-    submit: (value: number) => void;
+    selected: boolean;
+    onSelect: () => void;
   }>
 ) {
   return (
-    <Form
-      onSubmit={(e) => {
-        e.preventDefault();
-        props.submit(props.count * MEMES_MINT_PRICE);
-      }}>
-      <Form.Group>
-        <Row className="d-flex align-items-center no-wrap">
-          <Col xs={9} sm={8} className="d-flex">
-            {props.display && <span>{props.display}&nbsp;-&nbsp;</span>}
-            {props.count.toLocaleString()} Card{props.count > 1 && "s"} (
-            {numberWithCommasFromString(MEMES_MINT_PRICE * props.count)} ETH)
-          </Col>
-          <Col xs={3} sm={4}>
-            <Button
-              className={styles.sendBtn}
-              type="submit"
-              disabled={props.disabled}
-              aria-label={`Send top up for ${
-                props.display ??
-                `${props.count} Card${props.count > 1 ? "s" : ""}`
-              }`}>
-              Send
-            </Button>
-          </Col>
-        </Row>
-      </Form.Group>
-    </Form>
+    <div
+      className={`tw-border tw-rounded-lg tw-p-3 tw-cursor-pointer tw-transition-colors ${
+        props.selected ? "tw-bg-iron-700" : "hover:tw-bg-iron-900"
+      }`}
+      onClick={props.onSelect}>
+      <Row className="d-flex align-items-center">
+        <Col xs={1} className="d-flex tw-justify-center">
+          <Form.Check
+            type="radio"
+            checked={props.selected}
+            onChange={props.onSelect}
+            style={{
+              accentColor: "#406AFE",
+              width: "20px",
+              height: "20px",
+            }}
+            className={`tw-scale-125 ${styles.radioButton}`}
+          />
+        </Col>
+        <Col xs={11} className="d-flex">
+          {props.display && <span>{props.display}&nbsp;-&nbsp;</span>}
+          {props.count.toLocaleString()} Card{props.count > 1 && "s"} (
+          {numberWithCommasFromString(MEMES_MINT_PRICE * props.count)} ETH)
+        </Col>
+      </Row>
+    </div>
   );
 }

@@ -25,12 +25,23 @@
 }
 
 .nftSubscriptionsTable {
+  margin-bottom: 0 !important;
+
   td {
     color: #ddd !important;
+    background-color: #1c1c21 !important;
     border-top: 1px solid rgb(55, 55, 61) !important;
     border-bottom: 1px solid rgb(55, 55, 61) !important;
     padding: 10px 20px;
     white-space: nowrap;
+  }
+
+  tr:nth-child(even) td {
+    background-color: #242428 !important;
+  }
+
+  tr:nth-child(odd) td {
+    background-color: #1c1c21 !important;
   }
 
   tr:last-child td {
@@ -70,7 +81,42 @@
 }
 
 .sendBtn {
-  padding-top: 2px !important;
-  padding-bottom: 2px !important;
-  width: 100%;
+  padding: 12px 32px !important;
+  min-width: 120px;
+  width: auto;
+  background-color: #406afe !important;
+  border-color: #406afe !important;
+  color: white !important;
+  font-weight: 600 !important;
+  font-size: 16px !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+
+  &:hover:not(:disabled) {
+    background-color: #395fe4 !important;
+    border-color: #395fe4 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(64, 106, 254, 0.3) !important;
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.radioButton {
+  :global(input[type="radio"]:checked) {
+    background-color: #406afe !important;
+    border-color: #406afe !important;
+    accent-color: #406afe !important;
+  }
+
+  :global(input[type="radio"]:checked::before) {
+    background-color: #406afe !important;
+  }
 }

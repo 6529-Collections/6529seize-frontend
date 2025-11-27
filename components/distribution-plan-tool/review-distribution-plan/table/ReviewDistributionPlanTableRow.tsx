@@ -9,12 +9,13 @@ import { DistributionPlanToolContext } from "@/components/distribution-plan-tool
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 import { useContext, useEffect, useState } from "react";
+import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "./constants";
 import {
-    FetchResultsType,
-    FullResultWallet,
-    ReviewDistributionPlanTableItem,
-    ReviewDistributionPlanTableItemType,
-    ReviewDistributionPlanTablePhase,
+  FetchResultsType,
+  FullResultWallet,
+  ReviewDistributionPlanTableItem,
+  ReviewDistributionPlanTableItemType,
+  ReviewDistributionPlanTablePhase,
 } from "./ReviewDistributionPlanTable";
 import { SubscriptionLinks } from "./ReviewDistributionPlanTableSubscription";
 
@@ -188,24 +189,29 @@ export default function ReviewDistributionPlanTableRow({
     }
   }, [item.type]);
 
+  const isPublic = item.phaseId === PUBLIC_SUBSCRIPTIONS_PHASE_ID;
+
   return (
     <DistributionPlanTableRowWrapper>
       <td className={nameClasses}>{item.name}</td>
       <td className={commonClasses}>{item.description}</td>
-      <td className={commonClasses}>{item.walletsCount}</td>
-      <td className={commonClasses}>{item.spotsCount}</td>
+      <td className={commonClasses}>{isPublic ? "-" : item.walletsCount}</td>
+      <td className={commonClasses}>{isPublic ? "-" : item.spotsCount}</td>
       <td className={`${commonClasses} tw-flex tw-justify-start tw-gap-x-3`}>
         <RoundedJsonIconButton
           onClick={() => fetchResults(FetchResultsType.JSON)}
           loading={isLoadingJson}
+          disabled={isPublic}
         />
         <RoundedCsvIconButton
           onClick={() => fetchResults(FetchResultsType.CSV)}
           loading={isLoadingCsv}
+          disabled={isPublic}
         />
         <RoundedManifoldIconButton
           onClick={() => fetchResults(FetchResultsType.MANIFOLD)}
           loading={isLoadingManifold}
+          disabled={isPublic}
         />
         {distributionPlan && (
           <SubscriptionLinks plan={distributionPlan} phase={item} />
