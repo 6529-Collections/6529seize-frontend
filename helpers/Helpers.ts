@@ -83,7 +83,7 @@ export function numberWithCommasFromString(x: any) {
 export function extractAllNumbers(str: string): number[] {
   const regex = /\d+/g;
   const numbers: number[] = [];
-  let match;
+  let match: RegExpExecArray | null;
 
   while ((match = regex.exec(str)) !== null) {
     numbers.push(Number.parseInt(match[0], 10));

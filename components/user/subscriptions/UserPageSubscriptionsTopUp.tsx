@@ -465,7 +465,7 @@ export default function UserPageSubscriptionsTopUp() {
                     color: "white",
                     padding: "4px 8px",
                   }}>
-                  SUBSCRIPTIONS_ADDRESS
+                  {SUBSCRIPTIONS_ADDRESS}
                 </Tooltip>
               </>
             </span>
