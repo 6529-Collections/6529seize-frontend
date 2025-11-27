@@ -23,6 +23,7 @@ function areEqual(
     "partContent",
     "textSize",
     "currentDropId",
+    "currentSerialNo",
   ];
 
   for (const key of propsToCheck) {
