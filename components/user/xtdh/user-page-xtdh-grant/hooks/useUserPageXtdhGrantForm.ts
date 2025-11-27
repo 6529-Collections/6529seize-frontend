@@ -119,7 +119,7 @@ export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
         target_contract: validatedContract.address,
         target_tokens: validatedSelection.allSelected
           ? []
-          : validatedSelection.tokenIdsRaw.map((tokenId) => tokenId.toString()),
+          : validatedSelection.tokenIds.map((tokenId) => tokenId.toString()),
         valid_to: validatedValidUntil
           ? Math.floor(validatedValidUntil.getTime() / 1000)
           : null,
