@@ -36,6 +36,24 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
   const [overview, setOverview] = useState<DistributionOverview | null>(null);
   const [isLoadingOverview, setIsLoadingOverview] = useState(false);
 
+  const refreshOverview = async (contract: string, tokenId: string) => {
+    if (!tokenId) {
+      return;
+    }
+
+    setIsLoadingOverview(true);
+    try {
+      const data = await commonApiFetch<DistributionOverview>({
+        endpoint: `distributions/${contract}/${tokenId}/overview`,
+      });
+      setOverview(data);
+    } catch (error) {
+      console.error("Failed to fetch distribution overview:", error);
+    } finally {
+      setIsLoadingOverview(false);
+    }
+  };
+
   useEffect(() => {
     async function fetchOverview() {
       if (!distributionPlan || !isSubscriptionsAdmin(connectedProfile)) {
@@ -45,21 +63,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
       const contract = MEMES_CONTRACT;
       const tokenId = extractAllNumbers(distributionPlan.name)[0]?.toString();
 
-      if (!tokenId) {
-        return;
-      }
-
-      setIsLoadingOverview(true);
-      try {
-        const data = await commonApiFetch<DistributionOverview>({
-          endpoint: `distributions/${contract}/${tokenId}/overview`,
-        });
-        setOverview(data);
-      } catch (error) {
-        console.error("Failed to fetch distribution overview:", error);
-      } finally {
-        setIsLoadingOverview(false);
-      }
+      await refreshOverview(contract, tokenId);
     }
 
     fetchOverview();
@@ -82,17 +86,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
         message: "Subscriptions reset successfully.",
       });
 
-      setIsLoadingOverview(true);
-      try {
-        const data = await commonApiFetch<DistributionOverview>({
-          endpoint: `distributions/${contract}/${tokenId}/overview`,
-        });
-        setOverview(data);
-      } catch (error) {
-        console.error("Failed to refetch distribution overview:", error);
-      } finally {
-        setIsLoadingOverview(false);
-      }
+      await refreshOverview(contract, tokenId);
     } catch (error: any) {
       setToast({
         type: "error",
@@ -211,20 +205,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
                     type: "success",
                     message: `Successfully uploaded ${response.photos.length} photo(s)`,
                   });
-                  setIsLoadingOverview(true);
-                  try {
-                    const data = await commonApiFetch<DistributionOverview>({
-                      endpoint: `distributions/${contract}/${tokenId}/overview`,
-                    });
-                    setOverview(data);
-                  } catch (error) {
-                    console.error(
-                      "Failed to refetch distribution overview:",
-                      error
-                    );
-                  } finally {
-                    setIsLoadingOverview(false);
-                  }
+                  await refreshOverview(contract, tokenId);
                 } else {
                   setToast({
                     type: "error",
@@ -283,20 +264,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
                       response.message ||
                       "Distribution normalized successfully",
                   });
-                  setIsLoadingOverview(true);
-                  try {
-                    const data = await commonApiFetch<DistributionOverview>({
-                      endpoint: `distributions/${contract}/${tokenId}/overview`,
-                    });
-                    setOverview(data);
-                  } catch (error) {
-                    console.error(
-                      "Failed to refetch distribution overview:",
-                      error
-                    );
-                  } finally {
-                    setIsLoadingOverview(false);
-                  }
+                  await refreshOverview(contract, tokenId);
                 } else {
                   setToast({
                     type: "error",
