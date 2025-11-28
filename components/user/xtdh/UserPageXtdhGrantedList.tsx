@@ -66,10 +66,10 @@ export default function UserPageXtdhGrantedList({
     enabled,
   });
 
-  const { getTabCount, getActiveSubFilterCount } =
-    useUserPageXtdhGrantedListCounts({
-      grantor,
-    });
+  const {
+    getTabCount,
+    getActiveSubFilterCount,
+  } = useUserPageXtdhGrantedListCounts({ grantor, pageSize });
 
   const handleRetry = useCallback(() => {
     refetch().catch(() => {
