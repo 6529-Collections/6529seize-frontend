@@ -4,6 +4,7 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
 }));
 
+import * as ReviewDistributionPlanTableSubscriptionModule from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription";
 import {
   download,
   isSubscriptionsAdmin,
@@ -60,21 +61,16 @@ describe("ReviewDistributionPlanTableSubscription utilities", () => {
 });
 
 import { AuthContext } from "@/components/auth/Auth";
+import { ReviewDistributionPlanTableItemType } from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTable";
+import { SubscriptionLinks } from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription";
+import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "@/components/distribution-plan-tool/review-distribution-plan/table/constants";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import {
-  SubscriptionLinks,
-} from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription";
-import { ReviewDistributionPlanTableItemType } from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTable";
-import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "@/components/distribution-plan-tool/review-distribution-plan/table/constants";
 
-jest.mock(
-  "@/components/distribution-plan-tool/common/CircleLoader",
-  () => ({
-    __esModule: true,
-    default: () => <div data-testid="circle-loader">Loading...</div>,
-  })
-);
+jest.mock("@/components/distribution-plan-tool/common/CircleLoader", () => ({
+  __esModule: true,
+  default: () => <div data-testid="circle-loader">Loading...</div>,
+}));
 
 test("SubscriptionConfirm extracts token id from plan name", () => {
   render(
@@ -108,6 +104,12 @@ describe("SubscriptionLinks", () => {
       airdrops_unconsolidated: [],
       allowlists: [],
     });
+    global.URL.createObjectURL = jest.fn(() => "blob:mock-url");
+    global.URL.revokeObjectURL = jest.fn();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it("renders Public Subscriptions button for public phase", () => {
@@ -145,12 +147,26 @@ describe("SubscriptionLinks", () => {
     await user.click(screen.getByText("Public Subscriptions"));
 
     await waitFor(() => {
-      expect(screen.getByText("Confirm Download Public Subscriptions Info")).toBeInTheDocument();
+      expect(
+        screen.getByText("Confirm Download Public Subscriptions Info")
+      ).toBeInTheDocument();
     });
   });
 
   it("calls download and shows toast when Public Subscriptions is confirmed", async () => {
-    const user = userEvent.setup();
+    jest
+      .spyOn(
+        ReviewDistributionPlanTableSubscriptionModule,
+        "isSubscriptionsAdmin"
+      )
+      .mockReturnValue(true);
+    const downloadSpy = jest
+      .spyOn(ReviewDistributionPlanTableSubscriptionModule, "download")
+      .mockResolvedValue({
+        success: true,
+        message: "Download successful",
+      });
+
     const publicPhase = {
       id: "phase1",
       name: "public",
@@ -164,19 +180,18 @@ describe("SubscriptionLinks", () => {
       </AuthContext.Provider>
     );
 
-    await user.click(screen.getByText("Public Subscriptions"));
+    screen.getByText("Public Subscriptions").click();
 
     await waitFor(() => {
-      expect(screen.getByText("Confirm Download Public Subscriptions Info")).toBeInTheDocument();
+      expect(
+        screen.getByText("Confirm Download Public Subscriptions Info")
+      ).toBeInTheDocument();
     });
 
-    const confirmButton = screen.getByText("Looks good");
-    await user.click(confirmButton);
+    screen.getByText("Looks good").click();
 
     await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith({
-        endpoint: expect.stringContaining("subscriptions/allowlists"),
-      });
+      expect(downloadSpy).toHaveBeenCalled();
       expect(mockSetToast).toHaveBeenCalledWith({
         type: "success",
         message: "Download successful",

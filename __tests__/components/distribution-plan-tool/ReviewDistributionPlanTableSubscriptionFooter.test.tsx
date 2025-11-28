@@ -90,6 +90,7 @@ test("shows confirm modals when buttons clicked", async () => {
 });
 
 test("resetSubscriptions posts data and shows toast", async () => {
+  const user = userEvent.setup();
   (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
   const {
     SubscriptionConfirm,
@@ -108,10 +109,13 @@ test("resetSubscriptions posts data and shows toast", async () => {
     </DistributionPlanToolContext.Provider>
   );
 
-  // open modal and confirm
-  screen.getByText("Reset Subscriptions").click();
-  screen.getByTestId("Reset Subscriptions").click();
-  await Promise.resolve();
-  expect(commonApiPost).toHaveBeenCalled();
-  expect(authCtx.setToast).toHaveBeenCalled();
+  await user.click(screen.getByText("Reset Subscriptions"));
+  await waitFor(() => {
+    expect(screen.getByTestId("Reset Subscriptions")).toBeInTheDocument();
+  });
+  await user.click(screen.getByTestId("Reset Subscriptions"));
+  await waitFor(() => {
+    expect(commonApiPost).toHaveBeenCalled();
+    expect(authCtx.setToast).toHaveBeenCalled();
+  });
 });
