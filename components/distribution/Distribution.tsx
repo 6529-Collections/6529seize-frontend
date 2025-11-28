@@ -40,8 +40,8 @@ export default function DistributionPage(props: Readonly<Props>) {
     pageSize: number;
   }>({ page: 1, pageSize: 150 });
 
-  const isValidNftId = !Number.isNaN(Number.parseInt(params?.id as string, 10));
-  const nftId = isValidNftId ? (params?.id as string) : "";
+  const [nftId, setNftId] = useState<string>();
+  const [isValidNftId, setIsValidNftId] = useState(false);
 
   const [distributions, setDistributions] = useState<Distribution[]>([]);
   const [distributionsPhases, setDistributionsPhases] = useState<string[]>([]);
@@ -81,6 +81,13 @@ export default function DistributionPage(props: Readonly<Props>) {
       setFetching(false);
     });
   }
+
+  useEffect(() => {
+    const isValid = !Number.isNaN(Number.parseInt(params?.id as string, 10));
+    const id = isValid ? (params?.id as string) : "";
+    setIsValidNftId(isValid);
+    setNftId(id);
+  }, [params]);
 
   useEffect(() => {
     if (nftId) {
@@ -278,9 +285,11 @@ export default function DistributionPage(props: Readonly<Props>) {
   function printEmpty() {
     return (
       <Row>
-        <Col xs={12}>
-          <UpcomingMemePage id={nftId} />
-        </Col>
+        {nftId && (
+          <Col xs={12}>
+            <UpcomingMemePage id={nftId} />
+          </Col>
+        )}
         <Col xs={12}>
           <Image
             unoptimized

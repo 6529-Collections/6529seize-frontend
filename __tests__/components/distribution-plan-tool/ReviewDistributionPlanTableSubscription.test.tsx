@@ -59,7 +59,22 @@ describe("ReviewDistributionPlanTableSubscription utilities", () => {
   });
 });
 
-import { render, screen } from "@testing-library/react";
+import { AuthContext } from "@/components/auth/Auth";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import {
+  SubscriptionLinks,
+} from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription";
+import { ReviewDistributionPlanTableItemType } from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTable";
+import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "@/components/distribution-plan-tool/review-distribution-plan/table/constants";
+
+jest.mock(
+  "@/components/distribution-plan-tool/common/CircleLoader",
+  () => ({
+    __esModule: true,
+    default: () => <div data-testid="circle-loader">Loading...</div>,
+  })
+);
 
 test("SubscriptionConfirm extracts token id from plan name", () => {
   render(
@@ -73,4 +88,123 @@ test("SubscriptionConfirm extracts token id from plan name", () => {
   );
   const input = screen.getByRole("spinbutton") as HTMLInputElement;
   expect(input.value).toBe("123");
+});
+
+describe("SubscriptionLinks", () => {
+  const mockSetToast = jest.fn();
+  const mockAuthCtx = {
+    connectedProfile: {
+      wallets: [{ wallet: "0x0187C9a182736ba18b44eE8134eE438374cf87DC" }],
+    },
+    setToast: mockSetToast,
+  };
+
+  const mockPlan = { id: "plan1", name: "Meme 123 drop" } as any;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockFetch.mockResolvedValue({
+      airdrops: [],
+      airdrops_unconsolidated: [],
+      allowlists: [],
+    });
+  });
+
+  it("renders Public Subscriptions button for public phase", () => {
+    const publicPhase = {
+      id: "phase1",
+      name: "public",
+      type: ReviewDistributionPlanTableItemType.PHASE,
+      phaseId: PUBLIC_SUBSCRIPTIONS_PHASE_ID,
+    } as any;
+
+    render(
+      <AuthContext.Provider value={mockAuthCtx as any}>
+        <SubscriptionLinks plan={mockPlan} phase={publicPhase} />
+      </AuthContext.Provider>
+    );
+
+    expect(screen.getByText("Public Subscriptions")).toBeInTheDocument();
+  });
+
+  it("shows confirm modal when Public Subscriptions button is clicked", async () => {
+    const user = userEvent.setup();
+    const publicPhase = {
+      id: "phase1",
+      name: "public",
+      type: ReviewDistributionPlanTableItemType.PHASE,
+      phaseId: PUBLIC_SUBSCRIPTIONS_PHASE_ID,
+    } as any;
+
+    render(
+      <AuthContext.Provider value={mockAuthCtx as any}>
+        <SubscriptionLinks plan={mockPlan} phase={publicPhase} />
+      </AuthContext.Provider>
+    );
+
+    await user.click(screen.getByText("Public Subscriptions"));
+
+    await waitFor(() => {
+      expect(screen.getByText("Confirm Download Public Subscriptions Info")).toBeInTheDocument();
+    });
+  });
+
+  it("calls download and shows toast when Public Subscriptions is confirmed", async () => {
+    const user = userEvent.setup();
+    const publicPhase = {
+      id: "phase1",
+      name: "public",
+      type: ReviewDistributionPlanTableItemType.PHASE,
+      phaseId: PUBLIC_SUBSCRIPTIONS_PHASE_ID,
+    } as any;
+
+    render(
+      <AuthContext.Provider value={mockAuthCtx as any}>
+        <SubscriptionLinks plan={mockPlan} phase={publicPhase} />
+      </AuthContext.Provider>
+    );
+
+    await user.click(screen.getByText("Public Subscriptions"));
+
+    await waitFor(() => {
+      expect(screen.getByText("Confirm Download Public Subscriptions Info")).toBeInTheDocument();
+    });
+
+    const confirmButton = screen.getByText("Looks good");
+    await user.click(confirmButton);
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith({
+        endpoint: expect.stringContaining("subscriptions/allowlists"),
+      });
+      expect(mockSetToast).toHaveBeenCalledWith({
+        type: "success",
+        message: "Download successful",
+      });
+    });
+  });
+
+  it("does not render for non-admin users", () => {
+    const nonAdminCtx = {
+      connectedProfile: {
+        wallets: [{ wallet: "0x123" }],
+      },
+      setToast: jest.fn(),
+    };
+
+    const publicPhase = {
+      id: "phase1",
+      name: "public",
+      type: ReviewDistributionPlanTableItemType.PHASE,
+      phaseId: PUBLIC_SUBSCRIPTIONS_PHASE_ID,
+    } as any;
+
+    const { container } = render(
+      <AuthContext.Provider value={nonAdminCtx as any}>
+        <SubscriptionLinks plan={mockPlan} phase={publicPhase} />
+      </AuthContext.Provider>
+    );
+
+    expect(container.innerHTML).toBe("");
+  });
 });
