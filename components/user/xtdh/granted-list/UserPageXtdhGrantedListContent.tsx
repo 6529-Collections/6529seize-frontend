@@ -65,7 +65,7 @@ export function UserPageXtdhGrantedListContent({
     );
   }
 
-  return <UserPageXtdhGrantList grants={grants} />;
+  return <UserPageXtdhGrantList grants={grants} isSelf={isSelf} />;
 }
 
 interface GrantedListMessageProps {

@@ -15,6 +15,7 @@ interface GrantItemContentProps {
   readonly details: GrantDetails;
   readonly errorDetails?: string | null;
   readonly status: ApiTdhGrantStatus;
+  readonly actions?: ReactNode;
 }
 
 export function GrantItemContent({
@@ -22,6 +23,7 @@ export function GrantItemContent({
   details,
   errorDetails,
   status,
+  actions,
 }: Readonly<GrantItemContentProps>) {
   const name = contract.name ?? shortenAddress(contract.address);
 
@@ -56,6 +58,7 @@ export function GrantItemContent({
         <div className="tw-flex tw-items-center tw-gap-3">
           <GrantExpiryBadge value={details.validUntilLabel} />
           <StatusBadge status={status} />
+          {actions}
         </div>
       </header>
       <GrantDetailsGrid details={details} />
