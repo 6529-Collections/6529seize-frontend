@@ -6,7 +6,6 @@ import { UserPageXtdhGrantedListContent } from "@/components/user/xtdh/granted-l
 import { UserPageXtdhGrantedListTabs } from "@/components/user/xtdh/user-page-xtdh-granted-list/components/UserPageXtdhGrantedListTabs";
 import { UserPageXtdhGrantedListSubFilters } from "@/components/user/xtdh/user-page-xtdh-granted-list/components/UserPageXtdhGrantedListSubFilters";
 import { getApiParamsFromFilters } from "@/components/user/xtdh/user-page-xtdh-granted-list/constants";
-import { useUserPageXtdhGrantedListCounts } from "@/components/user/xtdh/user-page-xtdh-granted-list/hooks/useUserPageXtdhGrantedListCounts";
 import { useUserPageXtdhGrantedListFilters } from "@/components/user/xtdh/user-page-xtdh-granted-list/hooks/useUserPageXtdhGrantedListFilters";
 import { useXtdhGrantsQuery } from "@/hooks/useXtdhGrantsQuery";
 
@@ -66,10 +65,6 @@ export default function UserPageXtdhGrantedList({
     enabled,
   });
 
-  const {
-    getTabCount,
-    getActiveSubFilterCount,
-  } = useUserPageXtdhGrantedListCounts({ grantor, pageSize });
 
   const handleRetry = useCallback(() => {
     refetch().catch(() => {
@@ -91,13 +86,11 @@ export default function UserPageXtdhGrantedList({
         <UserPageXtdhGrantedListTabs
           activeTab={activeTab}
           onTabChange={handleTabChange}
-          getCount={getTabCount}
         />
         {activeTab === "ACTIVE" && (
           <UserPageXtdhGrantedListSubFilters
             activeSubFilter={activeSubFilter}
             onSubFilterChange={handleSubFilterChange}
-            getCount={getActiveSubFilterCount}
           />
         )}
       </div>

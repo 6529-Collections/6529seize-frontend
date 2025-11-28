@@ -5,21 +5,16 @@ import type { GrantedTab } from "../types";
 interface UserPageXtdhGrantedListTabsProps {
   readonly activeTab: GrantedTab;
   readonly onTabChange: (tab: GrantedTab) => void;
-  readonly getCount: (tab: GrantedTab) => number;
 }
 
 export function UserPageXtdhGrantedListTabs({
   activeTab,
   onTabChange,
-  getCount,
 }: UserPageXtdhGrantedListTabsProps) {
-  const items: import("@/components/utils/select/CommonSelect").CommonSelectItem<GrantedTab>[] = GRANTED_TABS.map((tab) => {
-    const count = getCount(tab.value);
-    return {
-      ...tab,
-      label: count > 0 ? `${tab.label} ${count}` : tab.label,
-    };
-  });
+  const items: import("@/components/utils/select/CommonSelect").CommonSelectItem<GrantedTab>[] = GRANTED_TABS.map((tab) => ({
+    ...tab,
+    label: tab.label,
+  }));
 
   return (
     <div className="tw-border-b tw-border-iron-800 tw-pb-4">
