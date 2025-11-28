@@ -92,3 +92,6 @@ test.html
 /config/env.schema.runtime.cjs
 .githooks/
 scripts/lint-to-json.js
+
+# Sentry Config File
+.env.sentry-build-plugin
