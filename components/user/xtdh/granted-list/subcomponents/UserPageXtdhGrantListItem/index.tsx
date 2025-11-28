@@ -39,7 +39,8 @@ export function UserPageXtdhGrantListItem({
     isLoading,
     status,
     variant,
-
+    validFrom,
+    validTo,
   } = useGrantItemViewModel(grant);
 
   const queryClient = useQueryClient();
@@ -150,7 +151,8 @@ export function UserPageXtdhGrantListItem({
           details={details}
           errorDetails={errorDetails}
           actions={actions}
-
+          validFrom={validFrom}
+          validTo={validTo}
         />
       ) : (
         <GrantItemError
@@ -158,7 +160,8 @@ export function UserPageXtdhGrantListItem({
           status={status}
           details={details}
           errorDetails={errorDetails}
-
+          validFrom={validFrom}
+          validTo={validTo}
         />
       )}
       <GrantTokensPanel

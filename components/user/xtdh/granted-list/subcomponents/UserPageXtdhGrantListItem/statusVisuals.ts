@@ -50,12 +50,46 @@ const DEFAULT_STATUS_VISUALS: StatusVisuals = {
     "tw-border-iron-700 tw-bg-iron-800 tw-text-iron-200 tw-shadow-[0_0_12px_rgba(0,0,0,0.3)]",
 };
 
-export function getStatusVisuals(status?: ApiTdhGrantStatus | null): StatusVisuals {
+export function getStatusVisuals(
+  status?: ApiTdhGrantStatus | null,
+  validFrom?: number | string | null,
+  validTo?: number | string | null
+): StatusVisuals {
   if (!status) {
     return DEFAULT_STATUS_VISUALS;
   }
 
   const normalizedStatus = status.toUpperCase() as KnownGrantStatus;
+  const visuals = STATUS_VISUALS[normalizedStatus] ?? DEFAULT_STATUS_VISUALS;
 
-  return STATUS_VISUALS[normalizedStatus] ?? DEFAULT_STATUS_VISUALS;
+  if (normalizedStatus === "GRANTED") {
+    const now = Date.now();
+    const from = validFrom ? new Date(validFrom).getTime() : 0;
+    const to = validTo ? new Date(validTo).getTime() : null;
+
+    if (to && to < now) {
+      return {
+        ...visuals,
+        label: "ENDED",
+        badgeClassName:
+          "tw-border-iron-600/50 tw-bg-iron-600/10 tw-text-iron-400 tw-shadow-[0_0_20px_rgba(100,100,100,0.15)]",
+      };
+    }
+
+    if (from > now) {
+      return {
+        ...visuals,
+        label: "SCHEDULED",
+        badgeClassName:
+          "tw-border-blue-400/50 tw-bg-blue-400/10 tw-text-blue-200 tw-shadow-[0_0_20px_rgba(82,139,255,0.15)]",
+      };
+    }
+
+    return {
+      ...visuals,
+      label: "ACTIVE",
+    };
+  }
+
+  return visuals;
 }

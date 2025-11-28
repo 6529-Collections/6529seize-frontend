@@ -14,6 +14,7 @@ import { HttpFile } from '../http/http';
 
 export class ApiXTdhCollection {
     'contract': string;
+    'collection_name': string | null;
     'xtdh': number;
     'xtdh_rate': number;
     'total_token_count': number;
@@ -29,6 +30,12 @@ export class ApiXTdhCollection {
         {
             "name": "contract",
             "baseName": "contract",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "collection_name",
+            "baseName": "collection_name",
             "type": "string",
             "format": ""
         },
