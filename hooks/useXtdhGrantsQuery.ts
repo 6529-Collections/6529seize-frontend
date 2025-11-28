@@ -29,6 +29,10 @@ export interface UseXtdhGrantsQueryParams {
   readonly page?: number;
   readonly pageSize?: number;
   readonly statuses?: GrantedFilterStatuses;
+  readonly validFromGt?: number;
+  readonly validFromLt?: number;
+  readonly validToGt?: number;
+  readonly validToLt?: number;
   readonly sortField: GrantedSortField;
   readonly sortDirection: SortDirection;
   readonly enabled?: boolean;
@@ -55,6 +59,10 @@ export function useXtdhGrantsQuery({
   page = DEFAULT_PAGE,
   pageSize = DEFAULT_PAGE_SIZE,
   statuses = DEFAULT_FILTER_STATUSES,
+  validFromGt,
+  validFromLt,
+  validToGt,
+  validToLt,
   sortField,
   sortDirection,
   enabled = true,
@@ -77,10 +85,24 @@ export function useXtdhGrantsQuery({
       grantor?.toLowerCase() ?? "",
       normalizedPageSize,
       statusKey,
+      validFromGt,
+      validFromLt,
+      validToGt,
+      validToLt,
       sortField,
       sortDirection,
     ],
-    [grantor, normalizedPageSize, statusKey, sortField, sortDirection]
+    [
+      grantor,
+      normalizedPageSize,
+      statusKey,
+      validFromGt,
+      validFromLt,
+      validToGt,
+      validToLt,
+      sortField,
+      sortDirection,
+    ]
   );
 
   const query = useInfiniteQuery({
@@ -95,6 +117,10 @@ export function useXtdhGrantsQuery({
           page: currentPage.toString(),
           page_size: normalizedPageSize.toString(),
           ...(serializedStatuses ? { status: serializedStatuses } : {}),
+          ...(validFromGt ? { valid_from_gt: validFromGt.toString() } : {}),
+          ...(validFromLt ? { valid_from_lt: validFromLt.toString() } : {}),
+          ...(validToGt ? { valid_to_gt: validToGt.toString() } : {}),
+          ...(validToLt ? { valid_to_lt: validToLt.toString() } : {}),
           sort: sortField,
           sort_direction: sortDirection,
         },

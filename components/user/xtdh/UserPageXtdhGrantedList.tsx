@@ -3,12 +3,10 @@
 import { useCallback, useMemo } from "react";
 
 import { UserPageXtdhGrantedListContent } from "@/components/user/xtdh/granted-list/UserPageXtdhGrantedListContent";
-import { UserPageXtdhGrantedListControls } from "@/components/user/xtdh/user-page-xtdh-granted-list/components/UserPageXtdhGrantedListControls";
-import {
-  getUserPageXtdhGrantedListStatusItems,
-} from "@/components/user/xtdh/user-page-xtdh-granted-list/constants";
+import { UserPageXtdhGrantedListTabs } from "@/components/user/xtdh/user-page-xtdh-granted-list/components/UserPageXtdhGrantedListTabs";
+import { UserPageXtdhGrantedListSubFilters } from "@/components/user/xtdh/user-page-xtdh-granted-list/components/UserPageXtdhGrantedListSubFilters";
+import { getApiParamsFromFilters } from "@/components/user/xtdh/user-page-xtdh-granted-list/constants";
 import { useUserPageXtdhGrantedListFilters } from "@/components/user/xtdh/user-page-xtdh-granted-list/hooks/useUserPageXtdhGrantedListFilters";
-import { useUserPageXtdhGrantedListStatusCounts } from "@/components/user/xtdh/user-page-xtdh-granted-list/hooks/useUserPageXtdhGrantedListStatusCounts";
 import { useXtdhGrantsQuery } from "@/hooks/useXtdhGrantsQuery";
 
 export type {
@@ -30,39 +28,43 @@ export default function UserPageXtdhGrantedList({
 }: Readonly<UserPageXtdhGrantedListProps>) {
   const enabled = Boolean(grantor);
   const {
-    activeStatuses,
+    activeTab,
+    activeSubFilter,
     activeSortField,
     activeSortDirection,
     apiSortDirection,
-    handleStatusChange,
-    handleSortFieldChange,
+    handleTabChange,
+    handleSubFilterChange,
   } = useUserPageXtdhGrantedListFilters();
+
+  const apiParams = useMemo(
+    () => getApiParamsFromFilters(activeTab, activeSubFilter),
+    [activeTab, activeSubFilter]
+  );
 
   const {
     grants,
-    totalCount,
     isLoading,
     isError,
     isFetching,
     errorMessage,
     refetch,
-    firstPage,
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
   } = useXtdhGrantsQuery({
     grantor,
     pageSize,
-    statuses: activeStatuses,
+    statuses: apiParams.statuses,
+    validFromGt: apiParams.validFromGt,
+    validFromLt: apiParams.validFromLt,
+    validToGt: apiParams.validToGt,
+    validToLt: apiParams.validToLt,
     sortField: activeSortField,
     sortDirection: apiSortDirection,
     enabled,
   });
-  const statusCounts = useUserPageXtdhGrantedListStatusCounts({
-    activeStatuses,
-    data: firstPage,
-    grantor,
-  });
+
 
   const handleRetry = useCallback(() => {
     refetch().catch(() => {
@@ -70,16 +72,6 @@ export default function UserPageXtdhGrantedList({
     });
   }, [refetch]);
 
-  const showControls = enabled;
-
-  const formattedStatusItems = useMemo(
-    () => getUserPageXtdhGrantedListStatusItems(statusCounts),
-    [statusCounts]
-  );
-
-
-
-  const areControlsDisabled = isFetching || isLoading;
   const showLoadMore = hasNextPage && !isError;
 
   return (
@@ -89,16 +81,20 @@ export default function UserPageXtdhGrantedList({
           Granted xTDH
         </h2>
       </div>
-      <UserPageXtdhGrantedListControls
-        isVisible={showControls}
-        formattedStatusItems={formattedStatusItems}
-        activeStatuses={activeStatuses}
-        activeSortField={activeSortField}
-        activeSortDirection={activeSortDirection}
-        onStatusChange={handleStatusChange}
-        onSortFieldChange={handleSortFieldChange}
-        isDisabled={areControlsDisabled}
-      />
+
+      <div>
+        <UserPageXtdhGrantedListTabs
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+        />
+        {activeTab === "ACTIVE" && (
+          <UserPageXtdhGrantedListSubFilters
+            activeSubFilter={activeSubFilter}
+            onSubFilterChange={handleSubFilterChange}
+          />
+        )}
+      </div>
+
       <UserPageXtdhGrantedListContent
         enabled={enabled}
         isLoading={isLoading}
@@ -107,7 +103,7 @@ export default function UserPageXtdhGrantedList({
         grants={grants}
         isSelf={isSelf}
         onRetry={handleRetry}
-        statuses={activeStatuses}
+        statuses={apiParams.statuses}
       />
       {showLoadMore && (
         <div className="tw-flex tw-justify-center">

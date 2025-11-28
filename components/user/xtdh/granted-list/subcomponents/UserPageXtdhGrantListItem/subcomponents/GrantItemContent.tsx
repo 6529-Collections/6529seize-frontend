@@ -11,6 +11,8 @@ export function GrantItemContent({
   details,
   errorDetails,
   status,
+  validFrom,
+  validTo,
   actions,
 }: Readonly<GrantItemContentProps>) {
   const name = contract.name ?? shortenAddress(contract.address);
@@ -47,6 +49,8 @@ export function GrantItemContent({
           <GrantExpiryBadge value={details.validUntilLabel} />
           <StatusBadge
             status={status}
+            validFrom={validFrom}
+            validTo={validTo}
           />
           {actions}
         </div>

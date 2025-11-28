@@ -17,11 +17,17 @@ export type GrantedSortField =
 
 export type GrantedStatusCounts = Partial<Record<GrantedFilterStatus, number>>;
 
+export type GrantedTab = "PENDING" | "ACTIVE" | "REVOKED" | "FAILED";
+
+export type GrantedActiveFilter = "ALL" | "ENDED" | "ACTIVE" | "NOT_STARTED";
+
 export interface UserPageXtdhGrantedListFilters {
-  readonly activeStatuses: GrantedFilterStatuses;
+  readonly activeTab: GrantedTab;
+  readonly activeSubFilter: GrantedActiveFilter;
   readonly activeSortField: GrantedSortField;
   readonly activeSortDirection: SortDirection;
   readonly apiSortDirection: SortDirection;
-  readonly handleStatusChange: (statuses: GrantedFilterStatuses) => void;
+  readonly handleTabChange: (tab: GrantedTab) => void;
+  readonly handleSubFilterChange: (filter: GrantedActiveFilter) => void;
   readonly handleSortFieldChange: (sort: GrantedSortField) => void;
 }

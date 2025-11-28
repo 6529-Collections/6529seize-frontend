@@ -5,42 +5,52 @@ import { SortDirection } from "@/entities/ISort";
 
 import {
   DEFAULT_DIRECTION,
-  DEFAULT_FILTER_STATUSES,
   DEFAULT_SORT_FIELD,
-  normalizeGrantedStatuses,
+  GRANTED_ACTIVE_FILTERS,
+  GRANTED_TABS,
   normalizeUserPageXtdhGrantedListSortDirection,
-  areDefaultFilterStatuses,
-  parseUserPageXtdhGrantedListSortDirection,
   parseUserPageXtdhGrantedListSortField,
-  parseUserPageXtdhGrantedListStatuses,
-  serializeNormalizedUserPageXtdhGrantedListStatuses,
+  parseUserPageXtdhGrantedListSortDirection,
 } from "../constants";
 import type {
-  GrantedFilterStatuses,
+  GrantedActiveFilter,
   GrantedSortField,
+  GrantedTab,
   UserPageXtdhGrantedListFilters,
 } from "../types";
 
-const STATUS_PARAM = "status";
+const TAB_PARAM = "tab";
+const SUB_FILTER_PARAM = "sub";
 const SORT_PARAM = "sort";
 const DIRECTION_PARAM = "dir";
 
-const applyStatusesUpdate = (
-  params: URLSearchParams,
-  statuses?: GrantedFilterStatuses
-) => {
-  if (statuses === undefined) return;
+const DEFAULT_TAB: GrantedTab = "ACTIVE";
+const DEFAULT_SUB_FILTER: GrantedActiveFilter = "ALL";
 
-  const normalizedStatuses = normalizeGrantedStatuses(statuses);
-  if (areDefaultFilterStatuses(normalizedStatuses)) {
-    params.delete(STATUS_PARAM);
+const applyTabUpdate = (params: URLSearchParams, tab?: GrantedTab) => {
+  if (!tab) return;
+  if (tab === DEFAULT_TAB) {
+    params.delete(TAB_PARAM);
+    // Reset sub filter when switching to default tab (though only Active has sub filters)
+    params.delete(SUB_FILTER_PARAM);
     return;
   }
+  params.set(TAB_PARAM, tab.toLowerCase());
+  // Reset sub filter when switching tabs, unless we want to persist it?
+  // Usually better to reset to ALL for the new tab (if it supports it)
+  params.delete(SUB_FILTER_PARAM);
+};
 
-  const serialized = serializeNormalizedUserPageXtdhGrantedListStatuses(normalizedStatuses);
-  if (serialized) {
-    params.set(STATUS_PARAM, serialized);
+const applySubFilterUpdate = (
+  params: URLSearchParams,
+  filter?: GrantedActiveFilter
+) => {
+  if (!filter) return;
+  if (filter === DEFAULT_SUB_FILTER) {
+    params.delete(SUB_FILTER_PARAM);
+    return;
   }
+  params.set(SUB_FILTER_PARAM, filter.toLowerCase());
 };
 
 const applySortFieldUpdate = (
@@ -74,20 +84,30 @@ const applyDirectionUpdate = (
 type SearchParams = ReturnType<typeof useSearchParams>;
 
 const useGrantedListFiltersFromSearchParams = (searchParams: SearchParams) => {
-  const activeStatuses = useMemo(
-    () =>
-      parseUserPageXtdhGrantedListStatuses(searchParams?.get("status") ?? null),
-    [searchParams]
-  );
+  const activeTab = useMemo<GrantedTab>(() => {
+    const param = searchParams?.get(TAB_PARAM)?.toUpperCase();
+    return (
+      GRANTED_TABS.find((t) => t.value === param)?.value ?? DEFAULT_TAB
+    );
+  }, [searchParams]);
+
+  const activeSubFilter = useMemo<GrantedActiveFilter>(() => {
+    const param = searchParams?.get(SUB_FILTER_PARAM)?.toUpperCase();
+    return (
+      GRANTED_ACTIVE_FILTERS.find((f) => f.value === param)?.value ??
+      DEFAULT_SUB_FILTER
+    );
+  }, [searchParams]);
+
   const activeSortField = useMemo(
     () =>
-      parseUserPageXtdhGrantedListSortField(searchParams?.get("sort") ?? null),
+      parseUserPageXtdhGrantedListSortField(searchParams?.get(SORT_PARAM) ?? null),
     [searchParams]
   );
   const activeSortDirection = useMemo(
     () =>
       parseUserPageXtdhGrantedListSortDirection(
-        searchParams?.get("dir") ?? null
+        searchParams?.get(DIRECTION_PARAM) ?? null
       ),
     [searchParams]
   );
@@ -97,7 +117,8 @@ const useGrantedListFiltersFromSearchParams = (searchParams: SearchParams) => {
   );
 
   return {
-    activeStatuses,
+    activeTab,
+    activeSubFilter,
     activeSortField,
     activeSortDirection,
     apiSortDirection,
@@ -112,7 +133,8 @@ export function useUserPageXtdhGrantedListFilters(): UserPageXtdhGrantedListFilt
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const {
-    activeStatuses,
+    activeTab,
+    activeSubFilter,
     activeSortField,
     activeSortDirection,
     apiSortDirection,
@@ -120,14 +142,16 @@ export function useUserPageXtdhGrantedListFilters(): UserPageXtdhGrantedListFilt
 
   const updateQueryParams = useCallback(
     (updates: {
-      readonly statuses?: GrantedFilterStatuses;
+      readonly tab?: GrantedTab;
+      readonly subFilter?: GrantedActiveFilter;
       readonly sort?: GrantedSortField;
       readonly direction?: SortDirection;
     }) => {
       if (!pathname) return;
       const params = new URLSearchParams(searchParams?.toString() ?? "");
 
-      applyStatusesUpdate(params, updates.statuses);
+      if (updates.tab) applyTabUpdate(params, updates.tab);
+      if (updates.subFilter) applySubFilterUpdate(params, updates.subFilter);
       applySortFieldUpdate(params, updates.sort);
       applyDirectionUpdate(params, updates.direction);
 
@@ -139,9 +163,16 @@ export function useUserPageXtdhGrantedListFilters(): UserPageXtdhGrantedListFilt
     [pathname, router, searchParams]
   );
 
-  const handleStatusChange = useCallback(
-    (statuses: GrantedFilterStatuses) => {
-      updateQueryParams({ statuses });
+  const handleTabChange = useCallback(
+    (tab: GrantedTab) => {
+      updateQueryParams({ tab });
+    },
+    [updateQueryParams]
+  );
+
+  const handleSubFilterChange = useCallback(
+    (subFilter: GrantedActiveFilter) => {
+      updateQueryParams({ subFilter });
     },
     [updateQueryParams]
   );
@@ -161,11 +192,13 @@ export function useUserPageXtdhGrantedListFilters(): UserPageXtdhGrantedListFilt
   );
 
   return {
-    activeStatuses: activeStatuses.length ? activeStatuses : DEFAULT_FILTER_STATUSES,
+    activeTab,
+    activeSubFilter,
     activeSortField,
     activeSortDirection,
     apiSortDirection,
-    handleStatusChange,
+    handleTabChange,
+    handleSubFilterChange,
     handleSortFieldChange,
   };
 }
