@@ -31,8 +31,7 @@ interface GrantItemViewModel {
   readonly isLoading: boolean;
   readonly status: ApiTdhGrantStatus;
   readonly variant: GrantItemVariant;
-  readonly validFrom: number | null;
-  readonly validUntil: number | null;
+
 }
 
 function deriveErrorDetails(
@@ -112,8 +111,7 @@ export function useGrantItemViewModel(grant: ApiTdhGrant): GrantItemViewModel {
     isLoading,
     status: grant.status,
     variant: hasContractData ? "contract" : "error",
-    validFrom: grant.valid_from ?? null,
-    validUntil: grant.valid_to ?? null,
+
   };
 }
 
