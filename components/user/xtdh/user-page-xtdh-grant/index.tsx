@@ -24,6 +24,7 @@ export default function UserPageXtdhGrant() {
     maxGrantRate,
     isMaxGrantLoading,
     isMaxGrantError,
+    formKey,
   } = useUserPageXtdhGrantForm();
 
   const isSelectionValid =
@@ -41,6 +42,7 @@ export default function UserPageXtdhGrant() {
           1. Select Collection & Tokens
         </h3>
         <UserPageXtdhGrantSelection
+          key={formKey}
           onSelectionChange={setSelection}
           onContractChange={setContract}
         />

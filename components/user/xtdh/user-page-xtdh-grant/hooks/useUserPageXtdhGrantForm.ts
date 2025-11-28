@@ -22,6 +22,7 @@ export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
   const [amount, setAmount] = useState<UserPageXtdhGrantForm["amount"]>(null);
   const [validUntil, setValidUntil] =
     useState<UserPageXtdhGrantForm["validUntil"]>(null);
+  const [formKey, setFormKey] = useState<number>(0);
   const [submitError, setSubmitError] =
     useState<UserPageXtdhGrantForm["submitError"]>(null);
   const [submitSuccess, setSubmitSuccess] =
@@ -82,6 +83,7 @@ export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
       amount,
       validUntil,
       maxGrantRate,
+      formKey,
     });
 
     if (!validationResult.success) {
@@ -135,6 +137,11 @@ export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
         const message = "Grant submitted. You will see it once processed.";
         setSubmitSuccess(message);
         setToast({ type: "success", message });
+        setContract(null);
+        setSelection(null);
+        setAmount(null);
+        setValidUntil(null);
+        setFormKey((prev) => prev + 1);
       } catch (error) {
         const message =
           error instanceof Error
@@ -165,6 +172,7 @@ export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
     selection,
     amount,
     validUntil,
+    formKey,
     submitError,
     submitSuccess,
     isSubmitting: createGrantMutation.isPending || isAuthorizing,
