@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import type { GrantDetails } from "../types";
 import { GrantDetailsRow } from "./GrantDetailsRow";
 

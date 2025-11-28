@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import type { TokenRange } from "@/components/nft-picker/NftPicker.types";
 import type { ApiTdhGrant } from "@/generated/models/ApiTdhGrant";
-import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
+
 import type { SupportedChain } from "@/types/nft";
 
 export interface UserPageXtdhGrantListItemProps {
