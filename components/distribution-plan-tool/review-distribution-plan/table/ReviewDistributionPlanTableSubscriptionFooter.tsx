@@ -10,7 +10,7 @@ import {
   commonApiPost,
   commonApiPostForm,
 } from "@/services/api/common-api";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import {
   SubscriptionConfirm,
   isSubscriptionsAdmin,
@@ -36,23 +36,26 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
   const [overview, setOverview] = useState<DistributionOverview | null>(null);
   const [isLoadingOverview, setIsLoadingOverview] = useState(false);
 
-  const refreshOverview = async (contract: string, tokenId: string) => {
-    if (!tokenId) {
-      return;
-    }
+  const refreshOverview = useCallback(
+    async (contract: string, tokenId?: string) => {
+      if (!tokenId) {
+        return;
+      }
 
-    setIsLoadingOverview(true);
-    try {
-      const data = await commonApiFetch<DistributionOverview>({
-        endpoint: `distributions/${contract}/${tokenId}/overview`,
-      });
-      setOverview(data);
-    } catch (error) {
-      console.error("Failed to fetch distribution overview:", error);
-    } finally {
-      setIsLoadingOverview(false);
-    }
-  };
+      setIsLoadingOverview(true);
+      try {
+        const data = await commonApiFetch<DistributionOverview>({
+          endpoint: `distributions/${contract}/${tokenId}/overview`,
+        });
+        setOverview(data);
+      } catch (error) {
+        console.error("Failed to fetch distribution overview:", error);
+      } finally {
+        setIsLoadingOverview(false);
+      }
+    },
+    [commonApiFetch, setOverview, setIsLoadingOverview]
+  );
 
   useEffect(() => {
     async function fetchOverview() {
@@ -67,7 +70,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     }
 
     fetchOverview();
-  }, [distributionPlan, connectedProfile]);
+  }, [distributionPlan, connectedProfile, refreshOverview]);
 
   const resetSubscriptions = async (
     contract: string,

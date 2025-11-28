@@ -24,27 +24,22 @@
   padding: 10px;
 }
 
-.nftSubscriptionsTable {
-  margin-bottom: 0 !important;
+.nftSubscriptionsListItem {
+  color: #ddd !important;
+  background-color: #1c1c21 !important;
+  border-top: 1px solid rgb(55, 55, 61) !important;
+  border-bottom: 1px solid rgb(55, 55, 61) !important;
+  padding: 10px 20px !important;
 
-  td {
-    color: #ddd !important;
+  &.odd {
     background-color: #1c1c21 !important;
-    border-top: 1px solid rgb(55, 55, 61) !important;
-    border-bottom: 1px solid rgb(55, 55, 61) !important;
-    padding: 10px 20px !important;
-    white-space: nowrap;
   }
 
-  tr:nth-child(even) td {
+  &.even {
     background-color: #242428 !important;
   }
 
-  tr:nth-child(odd) td {
-    background-color: #1c1c21 !important;
-  }
-
-  tr:last-child td {
+  &.last {
     border-bottom: none !important;
     padding: 5px 20px;
   }

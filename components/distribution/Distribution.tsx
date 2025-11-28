@@ -40,8 +40,8 @@ export default function DistributionPage(props: Readonly<Props>) {
     pageSize: number;
   }>({ page: 1, pageSize: 150 });
 
-  const isValidNftId = !Number.isNaN(Number.parseInt(params?.id as string, 10));
-  const nftId = isValidNftId ? (params?.id as string) : "";
+  const [nftId, setNftId] = useState<string>();
+  const [isValidNftId, setIsValidNftId] = useState(false);
 
   const [distributions, setDistributions] = useState<Distribution[]>([]);
   const [distributionsPhases, setDistributionsPhases] = useState<string[]>([]);
@@ -81,6 +81,13 @@ export default function DistributionPage(props: Readonly<Props>) {
       setFetching(false);
     });
   }
+
+  useEffect(() => {
+    const isValid = !Number.isNaN(Number.parseInt(params?.id as string, 10));
+    const id = isValid ? (params?.id as string) : "";
+    setIsValidNftId(isValid);
+    setNftId(id);
+  }, [params]);
 
   useEffect(() => {
     if (nftId) {
@@ -278,9 +285,11 @@ export default function DistributionPage(props: Readonly<Props>) {
   function printEmpty() {
     return (
       <Row>
-        <Col xs={12}>
-          <UpcomingMemePage id={nftId} />
-        </Col>
+        {nftId && (
+          <Col xs={12}>
+            <UpcomingMemePage id={nftId} />
+          </Col>
+        )}
         <Col xs={12}>
           <Image
             unoptimized
@@ -321,10 +330,10 @@ export default function DistributionPage(props: Readonly<Props>) {
 
   return (
     <>
-      <Container fluid className={styles.mainContainer}>
+      <Container fluid className={`${styles.mainContainer} tw-pt-6 tw-pb-10`}>
         <Row>
           <Col>
-            <Container className="tw-pt-6 tw-pb-10">
+            <Container>
               <Row>
                 <Col className={`${styles.distributionHeader} pb-1`}>
                   <h1 className="text-center mb-0">
@@ -344,21 +353,32 @@ export default function DistributionPage(props: Readonly<Props>) {
               {!fetching && distributions.length === 0 && (
                 <>{searchWallets.length > 0 ? printNotFound() : printEmpty()}</>
               )}
+              <Row>
+                <Col>
+                  <span className="tw-text-iron-400 tw-text-sm">
+                    * Note: Each column shows the total allowlist spots for that
+                    phase. The breakdown next to it displays: airdrops from
+                    subscriptions | allowlist spots for mint.
+                  </span>
+                </Col>
+              </Row>
+              {totalResults > pageProps.pageSize && (
+                <Row className="text-center pt-4">
+                  <Col>
+                    <Pagination
+                      page={pageProps.page}
+                      pageSize={pageProps.pageSize}
+                      totalResults={totalResults}
+                      setPage={function (newPage: number) {
+                        setPageProps({ ...pageProps, page: newPage });
+                      }}
+                    />
+                  </Col>
+                </Row>
+              )}
             </Container>
           </Col>
         </Row>
-        {totalResults > pageProps.pageSize && (
-          <Row className="text-center pt-2 pb-3">
-            <Pagination
-              page={pageProps.page}
-              pageSize={pageProps.pageSize}
-              totalResults={totalResults}
-              setPage={function (newPage: number) {
-                setPageProps({ ...pageProps, page: newPage });
-              }}
-            />
-          </Row>
-        )}
       </Container>
       <SearchModalDisplay
         show={showSearchModal}

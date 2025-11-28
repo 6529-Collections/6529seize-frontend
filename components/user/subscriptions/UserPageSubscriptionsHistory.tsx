@@ -251,11 +251,12 @@ function RedeemedEntry(
       <div className="d-flex align-items-center justify-content-between gap-2">
         <div className="d-flex flex-column gap-1">
           <div>
-            Redeemed Subscription for {contractName} #{props.redeem.token_id}
+            Redeemed Subscription for {contractName} #{props.redeem.token_id} x
+            {props.redeem.count}
           </div>
           <div className="font-smaller font-color-silver">
-            Airdrop Address: {props.redeem.address} - Balance after redemption:{" "}
-            {props.redeem.balance_after} ETH
+            Airdrop Address: {formatAddress(props.redeem.address)} - Balance
+            after redemption: {props.redeem.balance_after} ETH
           </div>
         </div>
         <div className="d-flex align-items-center gap-3">
