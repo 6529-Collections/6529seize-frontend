@@ -15,12 +15,13 @@ import {
   NFTSubscription,
   SubscriptionDetails,
 } from "@/entities/ISubscription";
+import { formatAddress } from "@/helpers/Helpers";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery } from "@tanstack/react-query";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { Col, Container, Row, Table } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 import Toggle from "react-toggle";
 import { Tooltip } from "react-tooltip";
 import styles from "./UserPageSubscriptions.module.scss";
@@ -61,43 +62,40 @@ export default function UserPageSubscriptionsUpcoming(
     <Container className="no-padding">
       <Row>
         <Col>
-          <h5 className="mb-0">Upcoming Drops</h5>
+          <h5 className="mb-0 tw-font-semibold">Upcoming Drops</h5>
         </Col>
       </Row>
-      <Row className="pt-2 pb-2">
+      <hr className="tw-border-white tw-opacity-100 tw-border-2 tw-mt-1 tw-mb-0" />
+      <Row>
         <Col>
-          <Table className={styles.nftSubscriptionsTable}>
-            <tbody>
-              {subscriptions.map((subscription, index) => (
-                <tr key={subscription.token_id}>
-                  <td>
-                    <SubscriptionRow
-                      profileKey={props.profileKey}
-                      title="The Memes"
-                      subscription={subscription}
-                      readonly={props.readonly}
-                      refresh={props.refresh}
-                      minting_today={index === 0 && isMintingToday()}
-                      first={index === 0}
-                      date={rows[index]}
-                    />
-                  </td>
-                </tr>
-              ))}
-              {props.memes_subscriptions.length > 3 && (
-                <tr>
-                  <td>
-                    <div className="d-flex align-items-center justify-content-center gap-1">
-                      <ShowMoreButton
-                        expanded={expanded}
-                        setExpanded={setExpanded}
-                      />
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
+          <div>
+            {subscriptions.map((subscription, index) => (
+              <div
+                key={subscription.token_id}
+                className={`${styles.nftSubscriptionsListItem} ${
+                  index % 2 === 0 ? styles.odd : styles.even
+                } ${index === subscriptions.length - 1 ? styles.last : ""}`}>
+                <SubscriptionRow
+                  profileKey={props.profileKey}
+                  title="The Memes"
+                  subscription={subscription}
+                  eligibilityCount={
+                    props.details?.subscription_eligibility_count ?? 1
+                  }
+                  readonly={props.readonly}
+                  refresh={props.refresh}
+                  minting_today={index === 0 && isMintingToday()}
+                  first={index === 0}
+                  date={rows[index] ?? null}
+                />
+              </div>
+            ))}
+          </div>
+          {props.memes_subscriptions.length > 3 && (
+            <div className="mt-2 text-center">
+              <ShowMoreButton expanded={expanded} setExpanded={setExpanded} />
+            </div>
+          )}
         </Col>
       </Row>
     </Container>
@@ -109,10 +107,11 @@ function SubscriptionRow(
     profileKey: string;
     title: string;
     subscription: NFTSubscription;
+    eligibilityCount: number;
     readonly: boolean;
     minting_today?: boolean;
     first: boolean;
-    date: SeasonMintRow;
+    date: SeasonMintRow | null;
     refresh: () => void;
   }>
 ) {
@@ -123,6 +122,23 @@ function SubscriptionRow(
   const [subscribed, setSubscribed] = useState<boolean>(
     !!props.subscription.subscribed
   );
+
+  const subscribedCount = useMemo<number>(
+    () => props.subscription.subscribed_count ?? 1,
+    [props.subscription.subscribed_count]
+  );
+
+  const [selectedCount, setSelectedCount] = useState<number>(subscribedCount);
+
+  useEffect(() => {
+    setSelectedCount(subscribedCount);
+  }, [subscribedCount]);
+
+  useEffect(() => {
+    if (selectedCount > props.eligibilityCount) {
+      setSelectedCount(Math.max(1, props.eligibilityCount));
+    }
+  }, [props.eligibilityCount, selectedCount]);
 
   const { data: final } = useQuery<NFTFinalSubscription>({
     queryKey: [
@@ -178,9 +194,8 @@ function SubscriptionRow(
       });
       props.refresh();
     } catch (e: any) {
-      setIsSubmitting(false);
       setToast({
-        message: e ?? "Failed to change token subscription.",
+        message: e?.message ?? "Failed to change token subscription.",
         type: "error",
       });
       return;
@@ -189,37 +204,98 @@ function SubscriptionRow(
     }
   };
 
+  const handleUpdateSubscriptionCount = async (
+    value: number
+  ): Promise<void> => {
+    if (isSubmitting || props.minting_today) {
+      return;
+    }
+    setIsSubmitting(true);
+    const { success } = await requestAuth();
+    if (!success) {
+      setIsSubmitting(false);
+      return;
+    }
+    interface UpdateSubscriptionCountBody {
+      contract: string;
+      token_id: number;
+      count: number;
+    }
+    try {
+      const response = await commonApiPost<
+        UpdateSubscriptionCountBody,
+        UpdateSubscriptionCountBody
+      >({
+        endpoint: `subscriptions/${props.profileKey}/subscription-count`,
+        body: {
+          contract: props.subscription.contract,
+          token_id: props.subscription.token_id,
+          count: value,
+        },
+      });
+      const responseCount = response.count;
+      setSelectedCount(responseCount);
+      setToast({
+        message: `Subscription count updated to ${responseCount} for ${props.title} #${props.subscription.token_id}`,
+        type: "success",
+      });
+      props.refresh();
+    } catch (e: any) {
+      setSelectedCount(subscribedCount);
+      setToast({
+        message: e?.message ?? "Failed to update subscription count.",
+        type: "error",
+      });
+      return;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const dateDisplay = props.date ? (
+    <span className="font-color-silver">
+      {formatFullDate(props.date.utcDay)}
+    </span>
+  ) : null;
+
   return (
     <Container className="no-padding pt-2 pb-2">
       <Row>
-        <Col className="d-flex flex-wrap gap-2 align-items-center justify-content-between">
-          <span className="d-flex align-items-center gap-2">
-            {props.title} #{props.subscription.token_id}{" "}
-            {props.minting_today ? (
-              <>
-                <span
-                  data-tooltip-id={`minting-today-${props.subscription.token_id}`}>
-                  - Minting Today{" "}
-                  <FontAwesomeIcon icon={faInfoCircle} height={"20px"} />
-                </span>
-                <Tooltip
-                  id={`minting-today-${props.subscription.token_id}`}
-                  place="right"
-                  style={{
-                    backgroundColor: "#f8f9fa",
-                    color: "#212529",
-                    padding: "4px 8px",
-                  }}>
-                  No changes allowed on minting day
-                </Tooltip>
-              </>
-            ) : (
-              <span className="font-color-silver">
-                {formatFullDate(props.date.utcDay)}
+        <Col className="d-flex gap-2 align-items-center justify-content-between">
+          <div className="d-flex flex-column gap-2 tw-flex-1 tw-min-w-0">
+            <span className="d-flex align-items-center gap-2">
+              {props.title} #{props.subscription.token_id}{" "}
+              {props.minting_today ? (
+                <>
+                  <span
+                    data-tooltip-id={`minting-today-${props.subscription.token_id}`}>
+                    - Minting Today{" "}
+                    <FontAwesomeIcon icon={faInfoCircle} height={"20px"} />
+                  </span>
+                  <Tooltip
+                    id={`minting-today-${props.subscription.token_id}`}
+                    place="right"
+                    style={{
+                      backgroundColor: "#f8f9fa",
+                      color: "#212529",
+                      padding: "4px 8px",
+                    }}>
+                    No changes allowed on minting day
+                  </Tooltip>
+                </>
+              ) : dateDisplay}
+            </span>
+            {props.first && final?.phase && final?.phase_position > 0 && (
+              <span className="font-smaller font-color-silver">
+                Phase: {final.phase} - Subscription Position:{" "}
+                {final.phase_position.toLocaleString()} /{" "}
+                {final.phase_subscriptions.toLocaleString()} - Airdrop Address:{" "}
+                {formatAddress(final.airdrop_address)} - Subscription Count: x
+                {final.subscribed_count}
               </span>
             )}
-          </span>
-          <span className="d-flex align-items-center gap-2">
+          </div>
+          <div className="d-flex align-items-center gap-2">
             {isSubmitting && <Spinner />}
             <Toggle
               disabled={props.readonly || isSubmitting || props.minting_today}
@@ -229,19 +305,42 @@ function SubscriptionRow(
               onChange={submit}
               aria-label={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
             />
-          </span>
+            <span className="tw-flex tw-items-center tw-gap-1 tw-min-w-16">
+              {subscribed ? (
+                <>
+                  <select
+                    className="tw-text-iron-400 tw-bg-transparent tw-border tw-border-iron-400 tw-rounded tw-px-1"
+                    value={selectedCount}
+                    disabled={
+                      props.eligibilityCount <= 1 ||
+                      props.readonly ||
+                      isSubmitting ||
+                      props.minting_today
+                    }
+                    onChange={(e) => {
+                      const value = Number.parseInt(e.target.value, 10);
+                      setSelectedCount(value);
+                      handleUpdateSubscriptionCount(value);
+                    }}
+                    style={{ minWidth: "3ch" }}>
+                    {Array.from(
+                      { length: props.eligibilityCount },
+                      (_, i) => i + 1
+                    ).map((num) => (
+                      <option key={num} value={num}>
+                        {num}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="tw-text-iron-400">
+                    / {props.eligibilityCount}
+                  </span>
+                </>
+              ) : null}
+            </span>
+          </div>
         </Col>
       </Row>
-      {props.first && final?.phase && final?.phase_position > 0 && (
-        <Row className="pt-2">
-          <Col className="font-smaller font-color-silver">
-            Phase: {final.phase} - Subscription Position:{" "}
-            {final.phase_position.toLocaleString()} /{" "}
-            {final.phase_subscriptions.toLocaleString()} - Airdrop Address:{" "}
-            {final.airdrop_address}
-          </Col>
-        </Row>
-      )}
     </Container>
   );
 }
