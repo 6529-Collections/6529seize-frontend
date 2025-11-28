@@ -38,11 +38,7 @@ export default function ChatItemHrefButtons({
   };
 
   return (
-    <div
-      className="tw-mt-1 tw-h-full tw-flex tw-flex-col tw-gap-y-2 tw-justify-start"
-      onPointerDown={stopPropagation}
-      onMouseDown={stopPropagation}
-      onTouchStart={stopPropagation}>
+    <div className="tw-mt-1 tw-h-full tw-flex tw-flex-col tw-gap-y-2 tw-justify-start">
       <button
         type="button"
         className={`tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-p-2 tw-bg-iron-900 tw-rounded-xl hover:tw-text-iron-400`}
