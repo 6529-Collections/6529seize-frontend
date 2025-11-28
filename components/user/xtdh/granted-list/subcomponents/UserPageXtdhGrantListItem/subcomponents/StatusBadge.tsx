@@ -5,18 +5,10 @@ import { getStatusVisuals } from "../statusVisuals";
 
 export function StatusBadge({
   status,
-  validFrom,
-  validUntil,
 }: Readonly<{
   status: ApiTdhGrantStatus;
-  validFrom?: number | null;
-  validUntil?: number | null;
 }>) {
-  const { badgeClassName, icon, label } = getStatusVisuals(
-    status,
-    validFrom,
-    validUntil
-  );
+  const { badgeClassName, icon, label } = getStatusVisuals(status);
 
   return (
     <output
