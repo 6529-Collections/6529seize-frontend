@@ -11,6 +11,8 @@ export function GrantItemContent({
   details,
   errorDetails,
   status,
+  validFrom,
+  validUntil,
   actions,
 }: Readonly<GrantItemContentProps>) {
   const name = contract.name ?? shortenAddress(contract.address);
@@ -45,7 +47,11 @@ export function GrantItemContent({
         </div>
         <div className="tw-flex tw-items-center tw-gap-3">
           <GrantExpiryBadge value={details.validUntilLabel} />
-          <StatusBadge status={status} />
+          <StatusBadge
+            status={status}
+            validFrom={validFrom}
+            validUntil={validUntil}
+          />
           {actions}
         </div>
       </header>

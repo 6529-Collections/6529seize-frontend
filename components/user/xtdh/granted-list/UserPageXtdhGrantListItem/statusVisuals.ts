@@ -25,10 +25,10 @@ const STATUS_VISUALS: Record<KnownGrantStatus, StatusVisuals> = {
       "tw-border-green/50 tw-bg-green/10 tw-text-green tw-shadow-[0_0_20px_rgba(60,203,127,0.15)]",
   },
   DISABLED: {
-    label: "DISABLED",
-    icon: faMinus,
+    label: "REVOKED",
+    icon: faTimes,
     badgeClassName:
-      "tw-border-amber-400/50 tw-bg-amber-400/10 tw-text-amber-200 tw-shadow-[0_0_20px_rgba(251,191,36,0.1)]",
+      "tw-border-red/50 tw-bg-red/10 tw-text-red tw-shadow-[0_0_20px_rgba(249,112,102,0.15)]",
   },
   PENDING: {
     label: "PENDING",

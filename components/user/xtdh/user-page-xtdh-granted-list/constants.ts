@@ -19,7 +19,7 @@ export const STATUS_LABELS: Record<GrantedFilterStatus, string> = {
   ALL: "All statuses",
   PENDING: "Pending",
   FAILED: "Failed",
-  DISABLED: "Disabled",
+  DISABLED: "Revoked",
   GRANTED: "Granted",
 };
 

@@ -10,6 +10,8 @@ export function GrantItemError({
   details,
   errorDetails,
   status,
+  validFrom,
+  validUntil,
 }: Readonly<GrantItemErrorProps>) {
   return (
     <div className="tw-flex tw-flex-col tw-gap-4">
@@ -24,7 +26,11 @@ export function GrantItemError({
         </div>
         <div className="tw-flex tw-items-center tw-gap-3">
           <GrantExpiryBadge value={details.validUntilLabel} />
-          <StatusBadge status={status} />
+          <StatusBadge
+            status={status}
+            validFrom={validFrom}
+            validUntil={validUntil}
+          />
         </div>
       </header>
       <GrantDetailsGrid details={details} />

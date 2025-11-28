@@ -3,8 +3,20 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { ApiTdhGrantStatus } from "@/generated/models/ApiTdhGrantStatus";
 import { getStatusVisuals } from "../statusVisuals";
 
-export function StatusBadge({ status }: Readonly<{ status: ApiTdhGrantStatus }>) {
-  const { badgeClassName, icon, label } = getStatusVisuals(status);
+export function StatusBadge({
+  status,
+  validFrom,
+  validUntil,
+}: Readonly<{
+  status: ApiTdhGrantStatus;
+  validFrom?: number | null;
+  validUntil?: number | null;
+}>) {
+  const { badgeClassName, icon, label } = getStatusVisuals(
+    status,
+    validFrom,
+    validUntil
+  );
 
   return (
     <output

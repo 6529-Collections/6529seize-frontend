@@ -47,6 +47,8 @@ export interface GrantItemContentProps {
   readonly details: GrantDetails;
   readonly errorDetails?: string | null;
   readonly status: import("@/generated/models/ApiTdhGrantStatus").ApiTdhGrantStatus;
+  readonly validFrom?: number | null;
+  readonly validUntil?: number | null;
   readonly actions?: ReactNode;
 }
 
@@ -55,4 +57,6 @@ export interface GrantItemErrorProps {
   readonly details: GrantDetails;
   readonly errorDetails?: string | null;
   readonly status: import("@/generated/models/ApiTdhGrantStatus").ApiTdhGrantStatus;
+  readonly validFrom?: number | null;
+  readonly validUntil?: number | null;
 }

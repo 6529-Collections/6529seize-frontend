@@ -39,6 +39,8 @@ export function UserPageXtdhGrantListItem({
     isLoading,
     status,
     variant,
+    validFrom,
+    validUntil,
   } = useGrantItemViewModel(grant);
 
   const queryClient = useQueryClient();
@@ -49,7 +51,7 @@ export function UserPageXtdhGrantListItem({
       await commonApiPost({
         endpoint: `tdh-grants/${grant.id}`,
         body: {
-          valid_to: Math.floor(Date.now() / 1000),
+          valid_to: Date.now(),
         },
       });
     },
@@ -149,6 +151,8 @@ export function UserPageXtdhGrantListItem({
           details={details}
           errorDetails={errorDetails}
           actions={actions}
+          validFrom={validFrom}
+          validUntil={validUntil}
         />
       ) : (
         <GrantItemError
@@ -156,6 +160,8 @@ export function UserPageXtdhGrantListItem({
           status={status}
           details={details}
           errorDetails={errorDetails}
+          validFrom={validFrom}
+          validUntil={validUntil}
         />
       )}
       <GrantTokensPanel
