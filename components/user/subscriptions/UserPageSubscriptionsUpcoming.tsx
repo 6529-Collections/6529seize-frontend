@@ -86,7 +86,7 @@ export default function UserPageSubscriptionsUpcoming(
                   refresh={props.refresh}
                   minting_today={index === 0 && isMintingToday()}
                   first={index === 0}
-                  date={rows[index]}
+                  date={rows[index] ?? null}
                 />
               </div>
             ))}
@@ -111,7 +111,7 @@ function SubscriptionRow(
     readonly: boolean;
     minting_today?: boolean;
     first: boolean;
-    date: SeasonMintRow;
+    date: SeasonMintRow | null;
     refresh: () => void;
   }>
 ) {
@@ -277,11 +277,11 @@ function SubscriptionRow(
                     No changes allowed on minting day
                   </Tooltip>
                 </>
-              ) : (
+              ) : props.date ? (
                 <span className="font-color-silver">
                   {formatFullDate(props.date.utcDay)}
                 </span>
-              )}
+              ) : null}
             </span>
             {props.first && final?.phase && final?.phase_position > 0 && (
               <span className="font-smaller font-color-silver">
