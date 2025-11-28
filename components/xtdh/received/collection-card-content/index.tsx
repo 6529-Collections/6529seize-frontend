@@ -12,7 +12,7 @@ import { shortenAddress } from "@/helpers/address.helpers";
 import {
   formatFloorPrice,
   formatTotalSupply,
-} from "@/components/user/xtdh/granted-list/UserPageXtdhGrantListItem/formatters";
+} from "@/components/user/xtdh/granted-list/subcomponents/UserPageXtdhGrantListItem/formatters";
 import {
   formatCount,
   formatXtdhRate,

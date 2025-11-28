@@ -75,6 +75,13 @@ export function parseSeizeQuoteLink(href: string): SeizeQuoteLinkInfo | null {
     return null;
   }
 
+  // If the URL has a drop parameter, it should be handled by the drop handler
+  // instead of the quote handler to prevent recursion when ensureStableSeizeLink
+  // combines the current page's serialNo with a drop preview link
+  if (url.searchParams.has("drop")) {
+    return null;
+  }
+
   const waveId = sanitizeQueryValue(url.searchParams.get("wave"));
 
   if (

@@ -18,7 +18,6 @@ interface UserPageXtdhGrantedListControlsProps {
   readonly activeSortDirection: SortDirection;
   readonly onStatusChange: (statuses: GrantedFilterStatuses) => void;
   readonly onSortFieldChange: (sort: GrantedSortField) => void;
-  readonly resultSummary: string | null;
   readonly isDisabled: boolean;
 }
 
@@ -30,7 +29,6 @@ export function UserPageXtdhGrantedListControls({
   activeSortDirection,
   onStatusChange,
   onSortFieldChange,
-  resultSummary,
   isDisabled,
 }: UserPageXtdhGrantedListControlsProps) {
   if (!isVisible) {
@@ -62,14 +60,6 @@ export function UserPageXtdhGrantedListControls({
           />
         </div>
       </div>
-      {resultSummary && (
-        <output
-          aria-live="polite"
-          aria-atomic="true"
-          className="tw-text-sm tw-text-iron-300">
-          {resultSummary}
-        </output>
-      )}
     </section>
   );
 }

@@ -7,7 +7,7 @@ import type { ReactElement } from "react";
 import type { ApiXTdhCollectionsPage } from "@/generated/models/ApiXTdhCollectionsPage";
 import { useXtdhCollectionsQuery } from "@/hooks/useXtdhCollectionsQuery";
 
-import { XtdhCollectionsControls, buildCollectionsResultSummary } from "./collections-controls";
+import { XtdhCollectionsControls } from "./collections-controls";
 import { useXtdhCollectionsFilters } from "./hooks/useXtdhCollectionsFilters";
 import { useXtdhCollectionSelection } from "./hooks/useXtdhCollectionSelection";
 import { XtdhCollectionsList } from "./subcomponents/XtdhCollectionsList";
@@ -40,18 +40,18 @@ export default function XtdhReceivedSection({
     isFetching,
     isFetchingNextPage,
     hasNextPage,
-      refetch,
-      fetchNextPage,
-      errorMessage,
-      isEnabled,
-    } = useXtdhCollectionsQuery({
-      identity: profileId,
-      pageSize,
-      sortField: activeSortField,
-      order: apiOrder,
-      enabled: requireIdentity ? Boolean(profileId) : true,
-      requireIdentity,
-    });
+    refetch,
+    fetchNextPage,
+    errorMessage,
+    isEnabled,
+  } = useXtdhCollectionsQuery({
+    identity: profileId,
+    pageSize,
+    sortField: activeSortField,
+    order: apiOrder,
+    enabled: requireIdentity ? Boolean(profileId) : true,
+    requireIdentity,
+  });
 
   const {
     selectedContract,
@@ -86,16 +86,7 @@ export default function XtdhReceivedSection({
     });
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-  const resultSummary = useMemo(() => {
-    if (!isEnabled || !collections.length) {
-      return null;
-    }
-    return buildCollectionsResultSummary(
-      collections.length,
-      activeSortField,
-      activeSortDirection
-    );
-  }, [isEnabled, collections.length, activeSortField, activeSortDirection]);
+
 
   const showLoadMore = hasNextPage && isEnabled;
   const controlsDisabled = isLoading || isFetching;
@@ -138,7 +129,6 @@ export default function XtdhReceivedSection({
             activeSortField={activeSortField}
             activeSortDirection={activeSortDirection}
             onSortChange={handleSortChange}
-            resultSummary={resultSummary}
             isDisabled={controlsDisabled}
           />
           <XtdhCollectionsList

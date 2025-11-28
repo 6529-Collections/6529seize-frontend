@@ -1,7 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import {
+  useState,
+  type MouseEvent,
+  type PointerEvent,
+  type TouchEvent,
+} from "react";
+
+type StopEvent =
+  | MouseEvent<HTMLElement>
+  | PointerEvent<HTMLElement>
+  | TouchEvent<HTMLElement>;
+
+const stopPropagation = (event: StopEvent) => {
+  event.stopPropagation();
+  event.nativeEvent.stopImmediatePropagation?.();
+};
 
 export default function ChatItemHrefButtons({
   href,
@@ -14,7 +29,8 @@ export default function ChatItemHrefButtons({
 }) {
   const [copied, setCopied] = useState(false);
 
-  const copyToClipboard = () => {
+  const copyToClipboard = (event: MouseEvent<HTMLButtonElement>) => {
+    stopPropagation(event);
     navigator.clipboard.writeText(href).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 500);
@@ -24,8 +40,12 @@ export default function ChatItemHrefButtons({
   return (
     <div className="tw-mt-1 tw-h-full tw-flex tw-flex-col tw-gap-y-2 tw-justify-start">
       <button
+        type="button"
         className={`tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-p-2 tw-bg-iron-900 tw-rounded-xl hover:tw-text-iron-400`}
-        onClick={copyToClipboard}>
+        onClick={copyToClipboard}
+        onPointerDown={stopPropagation}
+        onMouseDown={stopPropagation}
+        onTouchStart={stopPropagation}>
         <svg
           className={`tw-flex-shrink-0 tw-w-4 tw-h-4 tw-transition tw-ease-out tw-duration-300`}
           xmlns="http://www.w3.org/2000/svg"
@@ -44,7 +64,11 @@ export default function ChatItemHrefButtons({
         <Link
           href={relativeHref ?? href}
           target={relativeHref ? undefined : "_blank"}
-          className={`tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-p-2 tw-bg-iron-900 tw-rounded-xl`}>
+          className={`tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-p-2 tw-bg-iron-900 tw-rounded-xl`}
+          onClick={stopPropagation}
+          onPointerDown={stopPropagation}
+          onMouseDown={stopPropagation}
+          onTouchStart={stopPropagation}>
           <svg
             className={`tw-flex-shrink-0 tw-w-4 tw-h-4 tw-transition tw-ease-out tw-duration-300`}
             viewBox="0 0 64 64"

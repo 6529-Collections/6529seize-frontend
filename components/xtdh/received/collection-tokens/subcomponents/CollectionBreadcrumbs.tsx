@@ -22,8 +22,8 @@ export function CollectionBreadcrumbs({
     },
     tokenLabel
       ? {
-          label: tokenLabel,
-        }
+        label: tokenLabel,
+      }
       : null,
   ].filter(Boolean) as { label: string; onClick?: () => void }[];
 
@@ -42,14 +42,14 @@ export function CollectionBreadcrumbs({
                 <button
                   type="button"
                   onClick={crumb.onClick}
-                  className="tw-inline-flex tw-items-center tw-gap-1 tw-rounded-full tw-border tw-border-iron-800 tw-bg-transparent tw-px-3 tw-py-1 tw-text-xs tw-font-semibold tw-text-iron-200 desktop-hover:hover:tw-bg-iron-900"
+                  className="tw-inline-flex tw-items-center tw-gap-1 tw-bg-transparent tw-p-0 tw-border-none tw-outline-none tw-text-xs tw-font-semibold tw-text-iron-400 tw-transition-colors desktop-hover:hover:tw-text-iron-200 focus:tw-outline-none focus:tw-ring-0"
                 >
                   {crumb.label}
                 </button>
               ) : (
                 <span className="tw-text-iron-100">{crumb.label}</span>
               )}
-              {isLast ? null : <span className="tw-text-iron-500">/</span>}
+              {isLast ? null : <span className="tw-text-iron-600">/</span>}
             </li>
           );
         })}

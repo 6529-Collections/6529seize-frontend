@@ -5,7 +5,7 @@ import { useCallback, useMemo } from "react";
 import { useXtdhTokensQuery } from "@/hooks/useXtdhTokensQuery";
 
 import { useXtdhTokensFilters } from "../hooks/useXtdhTokensFilters";
-import { XtdhTokensControls, buildTokensResultSummary } from "../tokens-controls";
+import { XtdhTokensControls } from "../tokens-controls";
 import { XtdhReceivedCollectionCard } from "../collection-card-content";
 import { useCollectionContractDetails } from "./hooks/useCollectionContractDetails";
 import { useXtdhTokenSelection } from "./hooks/useXtdhTokenSelection";
@@ -81,16 +81,7 @@ export function XtdhCollectionTokensPanel({
     });
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-  const resultSummary = useMemo(() => {
-    if (!isEnabled || tokens.length === 0) {
-      return null;
-    }
-    return buildTokensResultSummary(
-      tokens.length,
-      activeSortField,
-      activeSortDirection
-    );
-  }, [isEnabled, tokens.length, activeSortField, activeSortDirection]);
+
 
   const controlsDisabled = isLoading || isFetching;
   const showLoadMore = hasNextPage && isEnabled;
@@ -157,7 +148,6 @@ export function XtdhCollectionTokensPanel({
             activeSortField={activeSortField}
             activeSortDirection={activeSortDirection}
             onSortChange={handleSortChange}
-            resultSummary={resultSummary}
             isDisabled={controlsDisabled}
           />
 

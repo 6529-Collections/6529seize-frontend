@@ -9,6 +9,7 @@ export interface UserPageXtdhGrantFormState {
   selection: NftPickerChange;
   amount: number | null;
   validUntil: Date | null;
+  formKey: number;
 }
 
 export interface UserPageXtdhGrantSubmissionState {
@@ -43,9 +44,9 @@ export type GrantValidationParams = UserPageXtdhGrantFormState & {
 export type GrantValidationResult =
   | { success: false; message: string }
   | {
-      success: true;
-      contract: ContractOverview;
-      selection: NftPickerSelection;
-      amount: number;
-      validUntil: Date | null;
-    };
+    success: true;
+    contract: ContractOverview;
+    selection: NftPickerSelection;
+    amount: number;
+    validUntil: Date | null;
+  };

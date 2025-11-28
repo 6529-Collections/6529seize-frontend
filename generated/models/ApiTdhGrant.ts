@@ -21,7 +21,9 @@ export class ApiTdhGrant {
     'target_chain': ApiTdhGrantTargetChain;
     'target_contract': string;
     'target_tokens_count': number;
+    'target_collection_name': string | null;
     'created_at': number;
+    'updated_at': number;
     'valid_from': number | null;
     'valid_to': number | null;
     'tdh_rate': number;
@@ -68,8 +70,20 @@ export class ApiTdhGrant {
             "format": "int64"
         },
         {
+            "name": "target_collection_name",
+            "baseName": "target_collection_name",
+            "type": "string",
+            "format": ""
+        },
+        {
             "name": "created_at",
             "baseName": "created_at",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "updated_at",
+            "baseName": "updated_at",
             "type": "number",
             "format": "int64"
         },

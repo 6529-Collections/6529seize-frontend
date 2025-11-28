@@ -93,8 +93,8 @@ export const TOKEN_CONTRIBUTORS_GROUP_BY_LABELS: Record<
   XtdhTokenContributorsGroupBy,
   string
 > = {
-  grant: "Grant",
-  grantor: "Grantor",
+  grant: "By Grant",
+  grantor: "By Grantor",
 };
 
 export const TOKEN_CONTRIBUTORS_GROUP_BY_ITEMS = [

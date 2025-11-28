@@ -4,7 +4,7 @@ import { useXtdhTokenContributorsQuery } from "@/hooks/useXtdhTokenContributorsQ
 
 import { CollectionLoadMore } from "../subcomponents/CollectionLoadMore";
 import { useXtdhTokenContributorsFilters } from "./hooks/useXtdhTokenContributorsFilters";
-import { XtdhTokenContributorsControls, buildTokenContributorsResultSummary } from "./subcomponents/XtdhTokenContributorsControls";
+import { XtdhTokenContributorsControls } from "./subcomponents/XtdhTokenContributorsControls";
 import { XtdhTokenContributorsList } from "./subcomponents/XtdhTokenContributorsList";
 
 interface XtdhTokenContributorsPanelProps {
@@ -62,23 +62,7 @@ export function XtdhTokenContributorsPanel({
     });
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-  const resultSummary = useMemo(() => {
-    if (!isEnabled || contributors.length === 0) {
-      return null;
-    }
-    return buildTokenContributorsResultSummary(
-      contributors.length,
-      activeSortField,
-      activeSortDirection,
-      activeGroupBy
-    );
-  }, [
-    contributors.length,
-    activeSortField,
-    activeSortDirection,
-    activeGroupBy,
-    isEnabled,
-  ]);
+
 
   const controlsDisabled = isLoading || isFetching;
   const showLoadMore = hasNextPage && isEnabled;
@@ -91,7 +75,7 @@ export function XtdhTokenContributorsPanel({
         activeGroupBy={activeGroupBy}
         onSortChange={handleSortChange}
         onGroupByChange={handleGroupByChange}
-        resultSummary={resultSummary}
+
         isDisabled={controlsDisabled}
       />
 
