@@ -252,6 +252,12 @@ function SubscriptionRow(
     }
   };
 
+  const dateDisplay = props.date ? (
+    <span className="font-color-silver">
+      {formatFullDate(props.date.utcDay)}
+    </span>
+  ) : null;
+
   return (
     <Container className="no-padding pt-2 pb-2">
       <Row>
@@ -277,11 +283,7 @@ function SubscriptionRow(
                     No changes allowed on minting day
                   </Tooltip>
                 </>
-              ) : props.date ? (
-                <span className="font-color-silver">
-                  {formatFullDate(props.date.utcDay)}
-                </span>
-              ) : null}
+              ) : dateDisplay}
             </span>
             {props.first && final?.phase && final?.phase_position > 0 && (
               <span className="font-smaller font-color-silver">
