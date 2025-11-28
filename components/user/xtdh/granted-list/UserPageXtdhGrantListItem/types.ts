@@ -41,3 +41,18 @@ export interface GrantTokensDisclosureState {
   readonly onEndReached?: () => void;
   readonly isFetchingNextPage: boolean;
 }
+
+export interface GrantItemContentProps {
+  readonly contract: import("@/types/nft").ContractOverview;
+  readonly details: GrantDetails;
+  readonly errorDetails?: string | null;
+  readonly status: import("@/generated/models/ApiTdhGrantStatus").ApiTdhGrantStatus;
+  readonly actions?: ReactNode;
+}
+
+export interface GrantItemErrorProps {
+  readonly contractLabel: string;
+  readonly details: GrantDetails;
+  readonly errorDetails?: string | null;
+  readonly status: import("@/generated/models/ApiTdhGrantStatus").ApiTdhGrantStatus;
+}
