@@ -2492,6 +2492,11 @@ paths:
           required: false
           schema:
             type: string
+        - name: target_collection_name
+          in: query
+          required: false
+          schema:
+            type: string
         - name: target_chain
           in: query
           required: false
@@ -2565,14 +2570,63 @@ paths:
                 $ref: "#/components/schemas/ApiTdhGrant"
         "400":
           description: Invalid request
-  /tdh-grants/{grant}/tokens:
+  /tdh-grants/{id}:
+    get:
+      tags:
+        - TdhGrants
+      summary: Get TDH grant
+      operationId: getTdhGrant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiTdhGrant"
+        "404":
+          description: Not Found
+    post:
+      tags:
+        - TdhGrants
+      summary: Update TDH grant
+      operationId: updateTdhGrant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiTdhGrantUpdateRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiTdhGrant"
+        "403":
+          description: Invalid input
+        "404":
+          description: Not Found
+  /tdh-grants/{id}/tokens:
     get:
       tags:
         - TdhGrants
       summary: Get TDH grant tokens
       operationId: getTdhGrantTokens
       parameters:
-        - name: grant
+        - name: id
           in: path
           required: true
           schema:
@@ -6584,7 +6638,9 @@ components:
         - target_chain
         - target_contract
         - target_tokens_count
+        - target_collection_name
         - created_at
+        - updated_at
         - valid_from
         - valid_to
         - tdh_rate
@@ -6603,7 +6659,13 @@ components:
         target_tokens_count:
           type: number
           format: int64
+        target_collection_name:
+          type: string
+          nullable: true
         created_at:
+          type: number
+          format: int64
+        updated_at:
           type: number
           format: int64
         valid_from:
@@ -6665,6 +6727,17 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiTdhGrantToken"
+    ApiTdhGrantUpdateRequest:
+      type: object
+      required:
+        - valid_to
+      properties:
+        valid_to:
+          type: number
+          format: int64
+          description: >-
+            If valid_to-valid_from does not allow for at least one xTDH
+            increment then old grant is disabled and substitute wont be created
     ApiTdhStats:
       type: object
       required:
