@@ -3,7 +3,6 @@ import {
   faCircle,
   faDotCircle,
   faEllipsisH,
-  faMinus,
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 

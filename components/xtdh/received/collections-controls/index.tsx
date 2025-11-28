@@ -1,7 +1,6 @@
 import CommonSelect from "@/components/utils/select/CommonSelect";
 import type { XtdhCollectionsSortField } from "@/hooks/useXtdhCollectionsQuery";
 import { SortDirection } from "@/entities/ISort";
-import { RECEIVED_COLLECTIONS_SUMMARY_NOUNS } from "@/i18n/messages";
 
 import {
   COLLECTION_SORT_ITEMS,

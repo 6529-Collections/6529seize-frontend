@@ -1,7 +1,6 @@
 import CommonSelect from "@/components/utils/select/CommonSelect";
 import { SortDirection } from "@/entities/ISort";
 import type { XtdhTokensSortField } from "@/hooks/useXtdhTokensQuery";
-import { RECEIVED_TOKENS_SUMMARY_NOUNS } from "@/i18n/messages";
 
 import { TOKENS_SORT_ITEMS } from "../constants";
 
