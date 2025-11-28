@@ -82,9 +82,8 @@ describe("UserPageSubscriptionsTopUp", () => {
     const user = userEvent.setup();
     render(<UserPageSubscriptionsTopUp />);
 
-    const oneCardButton = screen.getByText(/1 Card/i).closest("button");
-    expect(oneCardButton).toBeInTheDocument();
-    await user.click(oneCardButton!);
+    const oneCardButton = screen.getByRole("button", { name: /1 Card/i });
+    await user.click(oneCardButton);
 
     const sendButton = screen.getByRole("button", { name: "Send top up" });
     expect(sendButton).not.toBeDisabled();
@@ -112,9 +111,8 @@ describe("UserPageSubscriptionsTopUp", () => {
     const user = userEvent.setup();
     render(<UserPageSubscriptionsTopUp />);
 
-    const otherButton = screen.getByText("Other").closest("button");
-    expect(otherButton).toBeInTheDocument();
-    await user.click(otherButton!);
+    const otherButton = screen.getByRole("button", { name: /Other/i });
+    await user.click(otherButton);
 
     const countInput = screen.getByPlaceholderText("count");
     await user.type(countInput, "2");

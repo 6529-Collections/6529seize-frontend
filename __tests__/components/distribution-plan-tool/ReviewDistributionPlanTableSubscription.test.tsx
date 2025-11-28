@@ -106,7 +106,7 @@ describe("SubscriptionLinks", () => {
       revokeObjectURL: jest.fn(),
     };
     globalThis.URL = mockURL as any;
-    (global as any).URL = mockURL;
+    (globalThis as any).URL = mockURL;
   });
 
   afterEach(() => {

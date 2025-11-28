@@ -9,17 +9,9 @@ jest.mock(
   () => ({
     SubscriptionConfirm: (props: any) =>
       props.show ? (
-        <div
+        <button
           data-testid={props.title}
-          role="button"
-          tabIndex={0}
           onClick={() => props.onConfirm?.("c", "t")}
-          onKeyDown={(e: React.KeyboardEvent) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              props.onConfirm?.("c", "t");
-            }
-          }}
         />
       ) : null,
     download: jest.fn(async () => ({ success: true, message: "ok" })),
