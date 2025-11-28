@@ -63,13 +63,9 @@ describe("ChatItemHrefButtons", () => {
   it("does not bubble clicks to parent containers", () => {
     const parentClick = jest.fn();
     render(
-      <div
-        onClick={parentClick}
-        onKeyDown={parentClick}
-        role="button"
-        tabIndex={0}>
+      <button type="button" onClick={parentClick} onKeyDown={parentClick}>
         <ChatItemHrefButtons href="https://a" />
-      </div>
+      </button>
     );
 
     fireEvent.click(screen.getByRole("button"));
