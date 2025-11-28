@@ -14,6 +14,7 @@ export const publicEnvSchema = z.object({
    * ────────────────
    */
   NODE_ENV: z.enum(["development", "production", "test", "local"]).optional(),
+  NEXT_RUNTIME: z.string().optional(),
   VERSION: z.string().optional(),
   ASSETS_FROM_S3: z.enum(["true", "false"]).optional(),
 
@@ -114,8 +115,9 @@ export const publicEnvSchema = z.object({
   AWS_RUM_APP_ID: z.string().optional(),
   AWS_RUM_REGION: z.string().optional(),
   AWS_RUM_SAMPLE_RATE: z.string().optional(),
+  SENTRY_DSN: z.string().optional(),
 
-  /**
+    /**
    * ────────────────
    * PORTS / RUNTIME (all optional)
    * ────────────────
