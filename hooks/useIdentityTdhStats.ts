@@ -7,6 +7,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 interface UseIdentityTdhStatsOptions {
   readonly identity: string | null | undefined;
   readonly enabled?: boolean;
+  readonly staleTime?: number;
 }
 
 export interface IdentityTdhStats {
@@ -52,6 +53,7 @@ async function fetchIdentityTdhStats(identity: string): Promise<IdentityTdhStats
 export function useIdentityTdhStats({
   identity,
   enabled = true,
+  staleTime = 60_000,
 }: Readonly<UseIdentityTdhStatsOptions>) {
   return useQuery<IdentityTdhStats, Error>({
     queryKey: [QueryKey.IDENTITY_TDH_STATS, identity?.toLowerCase()],
@@ -63,7 +65,7 @@ export function useIdentityTdhStats({
       return await fetchIdentityTdhStats(identity);
     },
     enabled: Boolean(identity) && enabled,
-    staleTime: 60_000,
+    staleTime,
     gcTime: 300_000,
     retry: 3,
     retryDelay: (attempt) => Math.min(1_000 * 2 ** attempt, 30_000),

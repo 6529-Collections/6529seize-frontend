@@ -45,6 +45,7 @@ export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
   } = useIdentityTdhStats({
     identity,
     enabled: Boolean(identity),
+    staleTime: 0,
   });
 
   const maxGrantRateRaw = tdhStats?.availableGrantRate ?? null;
