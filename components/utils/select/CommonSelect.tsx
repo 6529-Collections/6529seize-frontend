@@ -17,7 +17,7 @@ export interface CommonSelectItem<T, U = unknown> {
 }
 
 interface CommonSelectDefaultProps<T, U> {
-  readonly items: CommonSelectItem<T, U>[];
+  readonly items: readonly CommonSelectItem<T, U>[];
   readonly activeItem: T;
   readonly filterLabel: string;
   readonly noneLabel?: string;
@@ -30,6 +30,8 @@ interface CommonSelectDefaultProps<T, U> {
   readonly renderItemChildren?: (
     item: CommonSelectItem<T, U>
   ) => React.ReactElement<ChildComponentProps>;
+  readonly closeOnSelect?: boolean;
+  readonly fill?: boolean;
 }
 
 interface CommonSelectsWithSortProps<T, U>

@@ -34,7 +34,6 @@ const defaultInput = {
   IPFS_API_ENDPOINT: "https://api-ipfs.6529.io",
   IPFS_GATEWAY_ENDPOINT: "https://ipfs.6529.io",
   WS_ENDPOINT: "wss://ws.6529.io",
-  ALCHEMY_API_KEY: "test-alchemy-api-key",
 };
 
 /** Helper: build a minimal valid input and override fields as needed */

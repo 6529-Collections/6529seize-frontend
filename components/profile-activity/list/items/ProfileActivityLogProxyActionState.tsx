@@ -5,7 +5,7 @@ import { ProfileActivityLogProxyActionStateChanged } from "@/entities/IProfile";
 import { PROFILE_PROXY_ACTION_LABELS } from "@/entities/IProxy";
 import { AcceptActionRequestActionEnum } from "@/generated/models/AcceptActionRequest";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
-import { UserPageTabType } from "@/components/user/layout/UserPageTabs";
+import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import CommonProfileLink from "@/components/user/utils/CommonProfileLink";
 
 const ACTION: Record<AcceptActionRequestActionEnum, string> = {
@@ -27,7 +27,7 @@ export default function ProfileActivityLogProxyActionState({
     (searchParams?.get("user") as string)?.toLowerCase() ===
     handleOrWallet.toLowerCase();
 
-  const tabTarget = UserPageTabType.PROXY;
+  const tabTarget = USER_PAGE_TAB_IDS.PROXY;
   return (
     <>
       <ProfileActivityLogItemAction action="changed" />

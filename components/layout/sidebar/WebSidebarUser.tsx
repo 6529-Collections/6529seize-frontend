@@ -9,7 +9,7 @@ import {
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
 import DropPfp from "@/components/drops/create/utils/DropPfp";
-import { DropPartSize } from "@/components/drops/view/part/DropPart";
+import { DropPartSize } from "@/components/drops/view/part/DropPart.types";
 import UserLevel from "@/components/user/utils/level/UserLevel";
 import HeaderUserConnect from "@/components/header/user/HeaderUserConnect";
 import HeaderUserProxyDropdown from "@/components/header/user/proxy/HeaderUserProxyDropdown";

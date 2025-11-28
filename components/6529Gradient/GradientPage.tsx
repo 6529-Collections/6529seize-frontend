@@ -29,7 +29,7 @@ import {
 } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { fetchUrl } from "@/services/6529api";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
 
 interface NftWithOwner extends NFT {
@@ -55,6 +55,39 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
   const [collectionCount, setCollectionCount] = useState(-1);
   const [collectionRank, setCollectionRank] = useState(-1);
 
+  const fetchNfts = useCallback(
+    async function fetchNftsInner(
+      url: string,
+      mynfts: NftWithOwner[],
+      signal?: AbortSignal
+    ): Promise<void> {
+      if (signal?.aborted) {
+        return;
+      }
+      try {
+        const response = await fetchUrl(url, { signal });
+        const combined = [...mynfts, ...response.data];
+        if (response.next) {
+          await fetchNftsInner(response.next, combined, signal);
+        } else {
+          if (signal?.aborted) {
+            return;
+          }
+          const uniqueById = new Map<number, NftWithOwner>();
+          combined.forEach((nftItem) => uniqueById.set(nftItem.id, nftItem));
+          setAllNfts(Array.from(uniqueById.values()));
+        }
+      } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") {
+          return;
+        }
+        console.error("Failed to fetch gradient NFTs", error);
+        setAllNfts([]);
+      }
+    },
+    [setAllNfts]
+  );
+
   useEffect(() => {
     setIsOwner(
       connectedProfile?.wallets?.some((w) =>
@@ -68,43 +101,49 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
   }, [nft, connectedAddress]);
 
   useEffect(() => {
-    async function fetchNfts(url: string, mynfts: NftWithOwner[]) {
-      return fetchUrl(url).then((response: DBResponse) => {
-        if (response.next) {
-          fetchNfts(response.next, [...mynfts].concat(response.data));
-        } else {
-          const newnfts = [...mynfts]
-            .concat(response.data)
-            .filter((value, index, self) => {
-              return self.findIndex((v) => v.id === value.id) === index;
-            });
-          setAllNfts(newnfts);
-        }
-      });
-    }
+    const abortController = new AbortController();
     const initialUrlNfts = `${publicEnv.API_ENDPOINT}/api/nfts/gradients?&page_size=101`;
-    fetchNfts(initialUrlNfts, []);
-  }, []);
+    fetchNfts(initialUrlNfts, [], abortController.signal);
+    return () => abortController.abort();
+  }, [fetchNfts]);
 
   useEffect(() => {
-    const rankedNFTs = allNfts.sort((a, b) =>
+    const rankedNFTs = [...allNfts].sort((a, b) =>
       a.tdh_rank > b.tdh_rank ? 1 : -1
     );
     setCollectionCount(allNfts.length);
-    setNft(rankedNFTs.find((n) => n.id === Number.parseInt(id)));
-    setCollectionRank(
-      rankedNFTs.map((r) => r.id).indexOf(Number.parseInt(id)) + 1
-    );
+    const parsedId = Number.parseInt(id, 10);
+    setNft(rankedNFTs.find((n) => n.id === parsedId));
+    const rankIndex = rankedNFTs.findIndex((r) => r.id === parsedId);
+    setCollectionRank(rankIndex > -1 ? rankIndex + 1 : -1);
   }, [allNfts, id]);
 
   useEffect(() => {
-    if (id) {
-      fetchUrl(
-        `${publicEnv.API_ENDPOINT}/api/transactions?contract=${GRADIENT_CONTRACT}&id=${id}`
-      ).then((response: DBResponse) => {
-        setTransactions(response.data);
-      });
+    if (!id) {
+      setTransactions([]);
+      return;
     }
+
+    const abortController = new AbortController();
+    setTransactions([]);
+    fetchUrl(
+      `${publicEnv.API_ENDPOINT}/api/transactions?contract=${GRADIENT_CONTRACT}&id=${id}`,
+      { signal: abortController.signal }
+    )
+      .then((response: DBResponse) => {
+        if (abortController.signal.aborted) {
+          return;
+        }
+        setTransactions(response.data);
+      })
+      .catch((error) => {
+        if (error instanceof Error && error.name === "AbortError") {
+          return;
+        }
+        console.error(`Failed to fetch gradient transactions for id ${id}`, error);
+        setTransactions([]);
+      });
+    return () => abortController.abort();
   }, [id]);
 
   function printLive() {

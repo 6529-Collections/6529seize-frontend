@@ -13,7 +13,6 @@ import {
   getNetworkName,
 } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
-import { getNftsForContractAndOwner } from "@/services/alchemy-api";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import NextGenContractWriteStatus from "@/components/nextGen/NextGenContractWriteStatus";
 import {
@@ -110,17 +109,38 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
 
   useEffect(() => {
     const burnAddress = mintForAddress;
-    if (burnAddress) {
-      getNftsForContractAndOwner(
-        NEXTGEN_CHAIN_ID,
-        NEXTGEN_CORE[NEXTGEN_CHAIN_ID],
-        burnAddress
-      ).then((r) => {
+    if (!burnAddress) {
+      return;
+    }
+    const controller = new AbortController();
+    const searchParams = new URLSearchParams({
+      chainId: String(NEXTGEN_CHAIN_ID),
+      contract: NEXTGEN_CORE[NEXTGEN_CHAIN_ID],
+      owner: burnAddress,
+    });
+
+    fetch(`/api/alchemy/owner-nfts?${searchParams.toString()}`, {
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch NFTs for owner");
+        }
+        return (await response.json()) as any[];
+      })
+      .then((r) => {
         setTokensOwnedForBurnAddressLoaded(true);
         const filteredTokens = filterTokensOwnedForBurnAddress(r);
         setTokensOwnedForBurnAddress(filteredTokens);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) {
+          setTokensOwnedForBurnAddressLoaded(true);
+          setTokensOwnedForBurnAddress([]);
+        }
       });
-    }
+
+    return () => controller.abort();
   }, [account.address, mintForAddress]);
 
   useEffect(() => {
@@ -138,7 +158,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
     if (tokenId) {
       setFetchingProofs(true);
       const url = `${publicEnv.API_ENDPOINT}/api/nextgen/burn_proofs/${props.collection_merkle.merkle_root}/${tokenId}`;
-      fetchUrl(url).then((response: ProofResponse) => {
+      fetchUrl<ProofResponse>(url).then((response: ProofResponse) => {
         setBurnProofResponse(response);
         setFetchingProofs(false);
       });

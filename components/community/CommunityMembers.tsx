@@ -204,19 +204,22 @@ export default function CommunityMembers() {
   };
 
   useEffect(() => {
-    if (params.group_id !== activeGroupId) {
-      const items: QueryUpdateInput[] = [
-        {
-          name: "group",
-          value: activeGroupId,
-        },
-        {
-          name: "page",
-          value: "1",
-        },
-      ];
-      updateFields(items, false);
-    }
+    const urlGroup = params.group_id ?? null;
+    const stateGroup = activeGroupId ?? null;
+    if (urlGroup === stateGroup) return;
+
+    const items: QueryUpdateInput[] = [
+      {
+        name: "group",
+        value: stateGroup,
+      },
+      {
+        name: "page",
+        value: "1",
+      },
+    ];
+    updateFields(items, false);
+
   }, [activeGroupId, params.group_id, updateFields]);
 
   const setPage = useCallback(

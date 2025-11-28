@@ -10,33 +10,49 @@
  * Do not edit the class manually.
  */
 
+import { ApiTdhGrantToken } from '../models/ApiTdhGrantToken';
 import { HttpFile } from '../http/http';
 
-export class ApiChangeProfileRepRatingResponse {
-    'total_rep_rating_for_category': number;
-    'rep_rating_for_category_by_user': number;
+export class ApiTdhGrantTokensPage {
+    'data': Array<ApiTdhGrantToken>;
+    'count': number;
+    'page': number;
+    'next': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
+    static readonly mapping: {[index: string]: string} | undefined = undefined;
+
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "total_rep_rating_for_category",
-            "baseName": "total_rep_rating_for_category",
+            "name": "data",
+            "baseName": "data",
+            "type": "Array<ApiTdhGrantToken>",
+            "format": ""
+        },
+        {
+            "name": "count",
+            "baseName": "count",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "rep_rating_for_category_by_user",
-            "baseName": "rep_rating_for_category_by_user",
+            "name": "page",
+            "baseName": "page",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "next",
+            "baseName": "next",
+            "type": "boolean",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiChangeProfileRepRatingResponse.attributeTypeMap;
+        return ApiTdhGrantTokensPage.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
-

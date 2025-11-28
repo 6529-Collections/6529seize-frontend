@@ -17,7 +17,8 @@ export function useVirtualizedWaves<T>(
   scrollContainerRef: React.RefObject<HTMLElement | null>,
   listContainerRef: React.RefObject<HTMLDivElement | null>,
   rowHeight = 72,
-  overscan = 5
+  overscan = 5,
+  isActive = true
 ) {
   const { getPosition, setPosition } = useScrollPositionContext();
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -25,6 +26,9 @@ export function useVirtualizedWaves<T>(
 
   // Restore scroll position on mount
   useEffect(() => {
+    if (!isActive) {
+      return;
+    }
     const el = scrollContainerRef.current;
     if (el) {
       el.scrollTop = getPosition(key);
@@ -38,7 +42,7 @@ export function useVirtualizedWaves<T>(
         el.removeEventListener("scroll", onScroll);
       };
     }
-  }, [getPosition, setPosition, key, scrollContainerRef]);
+  }, [getPosition, setPosition, key, scrollContainerRef, isActive]);
 
   const viewportHeight = scrollContainerRef.current?.clientHeight ?? 0;
   const listOffset = listContainerRef.current?.offsetTop ?? 0;

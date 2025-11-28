@@ -6,7 +6,7 @@ import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
 } from "@/components/nextGen/nextgen_contracts";
-import { UserPageTabType } from "@/components/user/layout/UserPageTabs";
+import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
@@ -14,7 +14,7 @@ import {
 } from "@/constants";
 import { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { getProfileTargetRoute } from "@/helpers/Helpers";
+import { formatStatFloor, getProfileTargetRoute } from "@/helpers/Helpers";
 import { getWaveHomeRoute, getWaveRoute } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
@@ -71,7 +71,7 @@ export const getNftCollectionMap = () => {
 
 export default function HeaderSearchModalItem({
   content,
-  searchValue,
+  searchValue: _searchValue,
   isSelected,
   onHover,
   onClose,
@@ -152,7 +152,7 @@ export default function HeaderSearchModalItem({
       return getProfileTargetRoute({
         handleOrWallet: profile.handle ?? profile.wallet.toLowerCase(),
         pathname: pathname ?? "",
-        defaultPath: UserPageTabType.IDENTITY,
+        defaultPath: USER_PAGE_TAB_IDS.IDENTITY,
       });
     } else if (isNft()) {
       const nft = getNft();
@@ -197,7 +197,7 @@ export default function HeaderSearchModalItem({
   const getSecondaryText = () => {
     if (isProfile()) {
       const profile = getProfile();
-      return `TDH: ${profile.tdh.toLocaleString()} - Level: ${profile.level}`;
+      return `TDH: ${formatStatFloor(profile.tdh)} - Level: ${profile.level}`;
     } else if (isNft()) {
       const nft = getNft();
       const collectionMap = getNftCollectionMap();

@@ -41,13 +41,9 @@ export const publicEnvSchema = z.object({
   /**
    * ────────────────
    * API KEYS / CREDENTIALS
-   *   • REQUIRED
    *   • OPTIONAL
    * ────────────────
    */
-  // REQUIRED
-  ALCHEMY_API_KEY: z.string().min(1, "ALCHEMY_API_KEY is required"),
-  // OPTIONAL
   STAGING_API_KEY: z.string().optional(),
   TENOR_API_KEY: z.string().optional(),
 

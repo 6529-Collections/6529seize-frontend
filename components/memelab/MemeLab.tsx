@@ -469,28 +469,38 @@ export default function MemeLabComponent() {
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.HOURS_24);
 
   useEffect(() => {
-    const nftsUrl = `${publicEnv.API_ENDPOINT}/api/lab_extended_data`;
-    fetchAllPages<LabExtendedData>(nftsUrl).then((responseNftMetas) => {
-      setNftMetas(responseNftMetas);
-      const myCollections: string[] = [];
-      [...responseNftMetas].map((nftMeta) => {
-        if (!myCollections.includes(nftMeta.metadata_collection)) {
-          myCollections.push(nftMeta.metadata_collection);
-        }
-      });
-      setLabCollections(myCollections.sort());
-      if (responseNftMetas.length > 0) {
-        const tokenIds = responseNftMetas.map((n) => n.id);
-        fetchAllPages<LabNFT>(
-          `${publicEnv.API_ENDPOINT}/api/nfts_memelab?id=${tokenIds.join(",")}`
-        ).then((responseNfts) => {
-          setNfts(responseNfts);
+    const loadMemeLabData = async () => {
+      try {
+        const nftsUrl = `${publicEnv.API_ENDPOINT}/api/lab_extended_data`;
+        const responseNftMetas = await fetchAllPages<LabExtendedData>(nftsUrl);
+        setNftMetas(responseNftMetas);
+        const myCollections: string[] = [];
+        [...responseNftMetas].map((nftMeta) => {
+          if (!myCollections.includes(nftMeta.metadata_collection)) {
+            myCollections.push(nftMeta.metadata_collection);
+          }
         });
-      } else {
+        setLabCollections(myCollections.sort());
+        if (responseNftMetas.length > 0) {
+          const tokenIds = responseNftMetas.map((n) => n.id);
+          const responseNfts = await fetchAllPages<LabNFT>(
+            `${publicEnv.API_ENDPOINT}/api/nfts_memelab?id=${tokenIds.join(",")}`
+          );
+          setNfts(responseNfts);
+        } else {
+          setNfts([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch Meme Lab collections", error);
+        setNftMetas([]);
+        setLabCollections([]);
         setNfts([]);
+      } finally {
         setNftsLoaded(true);
       }
-    });
+    };
+
+    loadMemeLabData();
   }, []);
 
   useEffect(() => {

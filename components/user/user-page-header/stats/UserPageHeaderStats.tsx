@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { formatStatFloor } from "@/helpers/Helpers";
 import UserPageFollowers from "../followers/UserPageFollowers";
 import { Tooltip } from "react-tooltip";
 
@@ -46,7 +46,7 @@ export default function UserPageHeaderStats({
           className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
           <span className="tw-text-base tw-font-semibold tw-text-iron-50">
-            {formatNumberWithCommas(profile.tdh)}
+            {formatStatFloor(profile.tdh)}
           </span>
           <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400">
             TDH
@@ -58,10 +58,32 @@ export default function UserPageHeaderStats({
           data-tooltip-id="tdh-rate-tooltip"
         >
           <span className="tw-text-base tw-font-semibold tw-text-iron-50">
-            {formatNumberWithCommas(profile.tdh_rate)}
+            {formatStatFloor(profile.tdh_rate)}
           </span>
           <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400 tw-whitespace-nowrap">
             TDH Rate
+          </span>
+        </Link>
+        <Link
+          href="/xtdh"
+          className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+        >
+          <span className="tw-text-base tw-font-semibold tw-text-iron-50">
+            {formatStatFloor(profile.xtdh)}
+          </span>
+          <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400">
+            xTDH
+          </span>
+        </Link>
+        <Link
+          href="/xtdh"
+          className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+        >
+          <span className="tw-text-base tw-font-semibold tw-text-iron-50">
+            {formatStatFloor(profile.xtdh_rate)}
+          </span>
+          <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400 tw-whitespace-nowrap">
+            xTDH Rate
           </span>
         </Link>
         <Link
@@ -69,7 +91,7 @@ export default function UserPageHeaderStats({
           className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
           <span className="tw-text-base tw-font-semibold tw-text-iron-50">
-            {formatNumberWithCommas(profile.rep)}
+            {formatStatFloor(profile.rep)}
           </span>
           <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400">
             Rep

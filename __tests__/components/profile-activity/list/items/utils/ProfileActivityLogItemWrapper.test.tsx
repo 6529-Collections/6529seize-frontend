@@ -1,5 +1,5 @@
 import ProfileActivityLogItemWrapper from "@/components/profile-activity/list/items/utils/ProfileActivityLogItemWrapper";
-import { UserPageTabType } from "@/components/user/layout/UserPageTabs";
+import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import { ProfileActivityLogType, RateMatter } from "@/enums";
 import { render } from "@testing-library/react";
 
@@ -36,7 +36,7 @@ describe("ProfileActivityLogItemWrapper", () => {
     expect((CommonProfileLink as jest.Mock).mock.calls[0][0]).toMatchObject({
       handleOrWallet: "alice",
       isCurrentUser: true,
-      tabTarget: UserPageTabType.REP,
+      tabTarget: USER_PAGE_TAB_IDS.REP,
     });
   });
 
