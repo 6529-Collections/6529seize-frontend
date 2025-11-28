@@ -15,12 +15,13 @@ import {
   NFTSubscription,
   SubscriptionDetails,
 } from "@/entities/ISubscription";
+import { formatAddress } from "@/helpers/Helpers";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery } from "@tanstack/react-query";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { Col, Container, Row, Table } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 import Toggle from "react-toggle";
 import { Tooltip } from "react-tooltip";
 import styles from "./UserPageSubscriptions.module.scss";
@@ -67,29 +68,29 @@ export default function UserPageSubscriptionsUpcoming(
       <hr className="tw-border-white tw-opacity-100 tw-border-2 tw-mt-1 tw-mb-0" />
       <Row>
         <Col>
-          <Table className={styles.nftSubscriptionsTable}>
-            <tbody>
-              {subscriptions.map((subscription, index) => (
-                <tr key={subscription.token_id}>
-                  <td>
-                    <SubscriptionRow
-                      profileKey={props.profileKey}
-                      title="The Memes"
-                      subscription={subscription}
-                      eligibilityCount={
-                        props.details?.subscription_eligibility_count ?? 1
-                      }
-                      readonly={props.readonly}
-                      refresh={props.refresh}
-                      minting_today={index === 0 && isMintingToday()}
-                      first={index === 0}
-                      date={rows[index]}
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+          <div>
+            {subscriptions.map((subscription, index) => (
+              <div
+                key={subscription.token_id}
+                className={`${styles.nftSubscriptionsListItem} ${
+                  index % 2 === 0 ? styles.odd : styles.even
+                } ${index === subscriptions.length - 1 ? styles.last : ""}`}>
+                <SubscriptionRow
+                  profileKey={props.profileKey}
+                  title="The Memes"
+                  subscription={subscription}
+                  eligibilityCount={
+                    props.details?.subscription_eligibility_count ?? 1
+                  }
+                  readonly={props.readonly}
+                  refresh={props.refresh}
+                  minting_today={index === 0 && isMintingToday()}
+                  first={index === 0}
+                  date={rows[index]}
+                />
+              </div>
+            ))}
+          </div>
           {props.memes_subscriptions.length > 3 && (
             <div className="mt-2 text-center">
               <ShowMoreButton expanded={expanded} setExpanded={setExpanded} />
@@ -248,8 +249,8 @@ function SubscriptionRow(
   return (
     <Container className="no-padding pt-2 pb-2">
       <Row>
-        <Col className="d-flex flex-wrap gap-2 align-items-center justify-content-between">
-          <div className="d-flex flex-column gap-2">
+        <Col className="d-flex gap-2 align-items-center justify-content-between">
+          <div className="d-flex flex-column gap-2 tw-flex-1 tw-min-w-0">
             <span className="d-flex align-items-center gap-2">
               {props.title} #{props.subscription.token_id}{" "}
               {props.minting_today ? (
@@ -281,7 +282,8 @@ function SubscriptionRow(
                 Phase: {final.phase} - Subscription Position:{" "}
                 {final.phase_position.toLocaleString()} /{" "}
                 {final.phase_subscriptions.toLocaleString()} - Airdrop Address:{" "}
-                {final.airdrop_address}
+                {formatAddress(final.airdrop_address)} - Subscription Count: x
+                {final.subscribed_count}
               </span>
             )}
           </div>
