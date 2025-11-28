@@ -1,4 +1,4 @@
-import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
+import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import { GRANTED_ACTIVE_FILTERS } from "../constants";
 import type { GrantedActiveFilter } from "../types";
 
@@ -17,12 +17,12 @@ export function UserPageXtdhGrantedListSubFilters({
   }));
 
   return (
-    <div className="tw-border-b tw-border-iron-800 tw-pb-4">
-      <CommonTabs<GrantedActiveFilter>
+    <div className="tw-w-full sm:tw-w-64">
+      <CommonDropdown<GrantedActiveFilter>
         items={items}
         activeItem={activeSubFilter}
         setSelected={onSubFilterChange}
-        filterLabel="Select filter"
+        filterLabel="Status"
       />
     </div>
   );
