@@ -1,20 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type MouseEvent, type PointerEvent, type TouchEvent } from "react";
-
-import { removeBaseEndpoint } from "@/helpers/Helpers";
-import { ensureStableSeizeLink } from "@/helpers/SeizeLinkParser";
-
-const stopPropagation = (
-  event:
-    | MouseEvent<HTMLElement>
-    | PointerEvent<HTMLElement>
-    | TouchEvent<HTMLElement>
-) => {
-  event.stopPropagation();
-  event.nativeEvent.stopImmediatePropagation?.();
-};
+import { useState } from "react";
 
 export default function ChatItemHrefButtons({
   href,
@@ -27,56 +14,18 @@ export default function ChatItemHrefButtons({
 }) {
   const [copied, setCopied] = useState(false);
 
-  const stableHref = ensureStableSeizeLink(href);
-  const derivedRelativeHref =
-    relativeHref ??
-    (() => {
-      const internal = removeBaseEndpoint(stableHref);
-      return typeof internal === "string" && internal.startsWith("/")
-        ? internal
-        : undefined;
-    })();
-  const linkHref = derivedRelativeHref ?? stableHref;
-  const isExternalLink = !derivedRelativeHref;
-
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(stableHref).then(() => {
+    navigator.clipboard.writeText(href).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 500);
     });
   };
 
-  const handleCopyClick = (event: MouseEvent<HTMLButtonElement>) => {
-    stopPropagation(event);
-    copyToClipboard();
-  };
-
-  const handleLinkClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    stopPropagation(event);
-  };
-
-  const handlePointerDown = (
-    event:
-      | PointerEvent<HTMLDivElement>
-      | MouseEvent<HTMLDivElement>
-      | TouchEvent<HTMLDivElement>
-  ) => {
-    stopPropagation(event);
-  };
-
   return (
-    <div
-      className="tw-mt-1 tw-h-full tw-flex tw-flex-col tw-gap-y-2 tw-justify-start"
-      onPointerDown={handlePointerDown}
-      onMouseDown={handlePointerDown}
-      onTouchStart={handlePointerDown}>
+    <div className="tw-mt-1 tw-h-full tw-flex tw-flex-col tw-gap-y-2 tw-justify-start">
       <button
-        type="button"
         className={`tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-p-2 tw-bg-iron-900 tw-rounded-xl hover:tw-text-iron-400`}
-        onClick={handleCopyClick}
-        onPointerDown={stopPropagation}
-        onMouseDown={stopPropagation}
-        onTouchStart={stopPropagation}>
+        onClick={copyToClipboard}>
         <svg
           className={`tw-flex-shrink-0 tw-w-4 tw-h-4 tw-transition tw-ease-out tw-duration-300`}
           xmlns="http://www.w3.org/2000/svg"
@@ -93,14 +42,9 @@ export default function ChatItemHrefButtons({
       </button>
       {!hideLink && (
         <Link
-          href={linkHref}
-          target={isExternalLink ? "_blank" : undefined}
-          rel={isExternalLink ? "noopener noreferrer" : undefined}
-          className={`tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-p-2 tw-bg-iron-900 tw-rounded-xl`}
-          onClick={handleLinkClick}
-          onPointerDown={stopPropagation}
-          onMouseDown={stopPropagation}
-          onTouchStart={stopPropagation}>
+          href={relativeHref ?? href}
+          target={relativeHref ? undefined : "_blank"}
+          className={`tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-p-2 tw-bg-iron-900 tw-rounded-xl`}>
           <svg
             className={`tw-flex-shrink-0 tw-w-4 tw-h-4 tw-transition tw-ease-out tw-duration-300`}
             viewBox="0 0 64 64"
