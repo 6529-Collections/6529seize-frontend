@@ -5,12 +5,9 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 
 import * as ReviewDistributionPlanTableSubscriptionModule from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription";
-import {
-  download,
-  isSubscriptionsAdmin,
-  SubscriptionConfirm,
-} from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
+const { download, isSubscriptionsAdmin, SubscriptionConfirm } =
+  ReviewDistributionPlanTableSubscriptionModule;
 
 jest.mock("react-bootstrap", () => ({
   __esModule: true,
@@ -62,10 +59,10 @@ describe("ReviewDistributionPlanTableSubscription utilities", () => {
 
 import { AuthContext } from "@/components/auth/Auth";
 import { ReviewDistributionPlanTableItemType } from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTable";
-import { SubscriptionLinks } from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription";
 import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "@/components/distribution-plan-tool/review-distribution-plan/table/constants";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+const { SubscriptionLinks } = ReviewDistributionPlanTableSubscriptionModule;
 
 jest.mock("@/components/distribution-plan-tool/common/CircleLoader", () => ({
   __esModule: true,
@@ -104,8 +101,12 @@ describe("SubscriptionLinks", () => {
       airdrops_unconsolidated: [],
       allowlists: [],
     });
-    global.URL.createObjectURL = jest.fn(() => "blob:mock-url");
-    global.URL.revokeObjectURL = jest.fn();
+    const mockURL = {
+      createObjectURL: jest.fn(() => "blob:mock-url"),
+      revokeObjectURL: jest.fn(),
+    };
+    globalThis.URL = mockURL as any;
+    (global as any).URL = mockURL;
   });
 
   afterEach(() => {

@@ -134,6 +134,12 @@ function SubscriptionRow(
     setSelectedCount(subscribedCount);
   }, [subscribedCount]);
 
+  useEffect(() => {
+    if (selectedCount > props.eligibilityCount) {
+      setSelectedCount(Math.max(1, props.eligibilityCount));
+    }
+  }, [props.eligibilityCount, selectedCount]);
+
   const { data: final } = useQuery<NFTFinalSubscription>({
     queryKey: [
       "consolidation-final-subscription",

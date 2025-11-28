@@ -11,7 +11,15 @@ jest.mock(
       props.show ? (
         <div
           data-testid={props.title}
+          role="button"
+          tabIndex={0}
           onClick={() => props.onConfirm?.("c", "t")}
+          onKeyDown={(e: React.KeyboardEvent) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              props.onConfirm?.("c", "t");
+            }
+          }}
         />
       ) : null,
     download: jest.fn(async () => ({ success: true, message: "ok" })),
@@ -92,10 +100,6 @@ test("shows confirm modals when buttons clicked", async () => {
 test("resetSubscriptions posts data and shows toast", async () => {
   const user = userEvent.setup();
   (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
-  const {
-    SubscriptionConfirm,
-    download,
-  } = require("@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription");
   const commonApiPost = jest.fn().mockResolvedValue({});
   jest
     .spyOn(require("@/services/api/common-api"), "commonApiPost")
