@@ -50,6 +50,8 @@ jobs:
           AWS_RUM_REGION: ${{ secrets.AWS_RUM_REGION }}
           AWS_RUM_SAMPLE_RATE: ${{ secrets.AWS_RUM_SAMPLE_RATE }}
           ASSETS_FROM_S3: ${{ env.ASSETS_FROM_S3 }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: npm run build
 
       - name: Build Target
