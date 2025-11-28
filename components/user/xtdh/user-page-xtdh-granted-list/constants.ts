@@ -222,7 +222,7 @@ export function getApiParamsFromFilters(
   readonly validToGt?: number;
   readonly validToLt?: number;
 } {
-  const now = Math.floor(Date.now() / 1000);
+  const now = Date.now();
 
   switch (tab) {
     case "PENDING":
