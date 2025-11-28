@@ -1,6 +1,5 @@
 import { STATUS_LABELS, areAllGrantedStatuses } from "@/components/user/xtdh/user-page-xtdh-granted-list/constants";
 import type { GrantedFilterStatuses } from "@/components/user/xtdh/user-page-xtdh-granted-list/types";
-import { GrantedListMessage } from "./GrantedListMessage";
 
 interface GrantedListEmptyStateProps {
   readonly isSelf: boolean;
