@@ -4,9 +4,7 @@ import type { XtdhTokensSortField } from "@/hooks/useXtdhTokensQuery";
 
 import {
   TOKEN_CONTRIBUTORS_GROUP_BY_ITEMS,
-  TOKEN_CONTRIBUTORS_GROUP_BY_LABELS,
   TOKENS_SORT_ITEMS,
-  TOKENS_SORT_LABELS,
   type XtdhTokenContributorsGroupBy,
 } from "@/components/xtdh/received/constants";
 
@@ -16,7 +14,7 @@ interface XtdhTokenContributorsControlsProps {
   readonly activeGroupBy: XtdhTokenContributorsGroupBy;
   readonly onSortChange: (sort: XtdhTokensSortField) => void;
   readonly onGroupByChange: (groupBy: XtdhTokenContributorsGroupBy) => void;
-  readonly resultSummary: string | null;
+
   readonly isDisabled?: boolean;
 }
 
@@ -26,7 +24,7 @@ export function XtdhTokenContributorsControls({
   activeGroupBy,
   onSortChange,
   onGroupByChange,
-  resultSummary,
+
   isDisabled = false,
 }: Readonly<XtdhTokenContributorsControlsProps>) {
   return (
@@ -49,29 +47,10 @@ export function XtdhTokenContributorsControls({
             disabled={isDisabled}
           />
         </div>
-        {resultSummary ? (
-          <output
-            aria-live="polite"
-            aria-atomic="true"
-            className="tw-text-sm tw-text-iron-300"
-          >
-            {resultSummary}
-          </output>
-        ) : null}
+
       </div>
     </section>
   );
 }
 
-export function buildTokenContributorsResultSummary(
-  contributorCount: number,
-  sortField: XtdhTokensSortField,
-  direction: SortDirection,
-  groupBy: XtdhTokenContributorsGroupBy
-): string {
-  const label = TOKENS_SORT_LABELS[sortField];
-  const dirLabel = direction === SortDirection.ASC ? "ascending" : "descending";
-  const groupLabel = TOKEN_CONTRIBUTORS_GROUP_BY_LABELS[groupBy];
-  const entityWord = contributorCount === 1 ? groupLabel : `${groupLabel}s`;
-  return `${contributorCount.toLocaleString()} ${entityWord} · Sorted by ${label} (${dirLabel}) · Grouped by ${groupLabel}`;
-}
+

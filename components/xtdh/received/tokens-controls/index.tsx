@@ -3,14 +3,13 @@ import { SortDirection } from "@/entities/ISort";
 import type { XtdhTokensSortField } from "@/hooks/useXtdhTokensQuery";
 import { RECEIVED_TOKENS_SUMMARY_NOUNS } from "@/i18n/messages";
 
-import { TOKENS_SORT_ITEMS, TOKENS_SORT_LABELS } from "../constants";
-import { buildResultSummary } from "../utils/resultSummary";
+import { TOKENS_SORT_ITEMS } from "../constants";
 
 interface XtdhTokensControlsProps {
   readonly activeSortField: XtdhTokensSortField;
   readonly activeSortDirection: SortDirection;
   readonly onSortChange: (sort: XtdhTokensSortField) => void;
-  readonly resultSummary: string | null;
+
   readonly isDisabled?: boolean;
 }
 
@@ -18,7 +17,7 @@ export function XtdhTokensControls({
   activeSortField,
   activeSortDirection,
   onSortChange,
-  resultSummary,
+
   isDisabled = false,
 }: Readonly<XtdhTokensControlsProps>) {
   return (
@@ -36,30 +35,9 @@ export function XtdhTokensControls({
           disabled={isDisabled}
         />
       </div>
-      {resultSummary && (
-        <output
-          aria-live="polite"
-          aria-atomic="true"
-          className="tw-text-sm tw-text-iron-300"
-        >
-          {resultSummary}
-        </output>
-      )}
+
     </section>
   );
 }
 
-export function buildTokensResultSummary(
-  tokenCount: number,
-  sortField: XtdhTokensSortField,
-  direction: SortDirection
-): string {
-  return buildResultSummary({
-    count: tokenCount,
-    labels: TOKENS_SORT_LABELS,
-    sortField,
-    direction,
-    singularLabel: RECEIVED_TOKENS_SUMMARY_NOUNS.singular,
-    pluralLabel: RECEIVED_TOKENS_SUMMARY_NOUNS.plural,
-  });
-}
+

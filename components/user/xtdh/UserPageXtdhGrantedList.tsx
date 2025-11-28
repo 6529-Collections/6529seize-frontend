@@ -7,7 +7,6 @@ import { UserPageXtdhGrantedListControls } from "@/components/user/xtdh/user-pag
 import {
   getUserPageXtdhGrantedListStatusItems,
 } from "@/components/user/xtdh/user-page-xtdh-granted-list/constants";
-import { getUserPageXtdhGrantedListResultSummary } from "@/components/user/xtdh/user-page-xtdh-granted-list/helpers";
 import { useUserPageXtdhGrantedListFilters } from "@/components/user/xtdh/user-page-xtdh-granted-list/hooks/useUserPageXtdhGrantedListFilters";
 import { useUserPageXtdhGrantedListStatusCounts } from "@/components/user/xtdh/user-page-xtdh-granted-list/hooks/useUserPageXtdhGrantedListStatusCounts";
 import { useXtdhGrantsQuery } from "@/hooks/useXtdhGrantsQuery";
@@ -78,17 +77,7 @@ export default function UserPageXtdhGrantedList({
     [statusCounts]
   );
 
-  const resultSummary = useMemo(
-    () =>
-      getUserPageXtdhGrantedListResultSummary({
-        activeStatuses,
-        isError,
-        isLoading,
-        isFetching,
-        totalCount,
-      }),
-    [activeStatuses, isError, isFetching, isLoading, totalCount]
-  );
+
 
   const areControlsDisabled = isFetching || isLoading;
   const showLoadMore = hasNextPage && !isError;
@@ -108,7 +97,6 @@ export default function UserPageXtdhGrantedList({
         activeSortDirection={activeSortDirection}
         onStatusChange={handleStatusChange}
         onSortFieldChange={handleSortFieldChange}
-        resultSummary={resultSummary}
         isDisabled={areControlsDisabled}
       />
       <UserPageXtdhGrantedListContent
