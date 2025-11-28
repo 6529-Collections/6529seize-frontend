@@ -15,6 +15,7 @@ export default function CommonTabsTab<T, U = unknown>(
       ) => void;
       readonly buttonRef?: (element: HTMLButtonElement | null) => void;
       readonly disabled?: boolean;
+      readonly fill?: boolean;
     }
   >
 ) {
@@ -26,6 +27,7 @@ export default function CommonTabsTab<T, U = unknown>(
     onKeyDown,
     buttonRef,
     disabled = false,
+    fill = true,
   } = props;
 
   const getIsActive = (): boolean => item.value === activeItem;
@@ -71,7 +73,8 @@ export default function CommonTabsTab<T, U = unknown>(
   return (
     <div
       className={clsx(
-        "tw-flex-1 tw-min-w-0 tw-p-[1px] tw-flex tw-rounded-lg",
+        "tw-p-[1px] tw-flex tw-rounded-lg",
+        fill ? "tw-flex-1 tw-min-w-0" : undefined,
         isActive
           ? "tw-bg-gradient-to-b tw-from-iron-700 tw-to-iron-800"
           : undefined,
@@ -88,9 +91,9 @@ export default function CommonTabsTab<T, U = unknown>(
         onKeyDown={onKeyDown}
         onMouseEnter={() => !disabled && setShouldRotate(true)}
         onMouseLeave={() => !disabled && setShouldRotate(false)}
-        className={`${dynamicClasses} ${
-          disabled ? "tw-cursor-not-allowed tw-opacity-60" : ""
-        } tw-flex-1 tw-min-w-0 tw-whitespace-nowrap tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-out`}>
+        className={`${dynamicClasses} ${disabled ? "tw-cursor-not-allowed tw-opacity-60" : ""
+          } ${fill ? "tw-flex-1 tw-min-w-0" : ""
+          } tw-whitespace-nowrap tw-px-3 tw-py-1.5 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-out`}>
         {item.label}
         {sortDirection && (
           <span className="-tw-mt-0.5 tw-ml-2">

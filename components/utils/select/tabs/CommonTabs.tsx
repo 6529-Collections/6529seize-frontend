@@ -154,6 +154,7 @@ export default function CommonTabs<T, U = unknown>(
                 tabRefs.current.set(item.key, node);
               }}
               disabled={disabled}
+              fill={props.fill ?? true}
             />
           ))}
         </div>

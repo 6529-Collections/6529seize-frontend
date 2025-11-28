@@ -25,7 +25,7 @@ export function XtdhTokensControls({
       className="tw-flex tw-flex-col tw-gap-3 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between"
       aria-label="Sort received tokens"
     >
-      <div className="tw-w-full lg:tw-flex-1 lg:tw-min-w-[16rem] tw-overflow-x-auto horizontal-menu-hide-scrollbar">
+      <div className="tw-w-full md:tw-w-auto tw-overflow-x-auto horizontal-menu-hide-scrollbar">
         <CommonSelect
           items={TOKENS_SORT_ITEMS}
           activeItem={activeSortField}
@@ -33,6 +33,7 @@ export function XtdhTokensControls({
           setSelected={onSortChange}
           sortDirection={activeSortDirection}
           disabled={isDisabled}
+          fill={false}
         />
       </div>
 

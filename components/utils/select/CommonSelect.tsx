@@ -31,6 +31,7 @@ interface CommonSelectDefaultProps<T, U> {
     item: CommonSelectItem<T, U>
   ) => React.ReactElement<ChildComponentProps>;
   readonly closeOnSelect?: boolean;
+  readonly fill?: boolean;
 }
 
 interface CommonSelectsWithSortProps<T, U>
