@@ -117,7 +117,7 @@ export default function UserPageSubscriptions(
     );
   }, [
     fetchingDetails,
-    fetchAirdropAddress,
+    fetchingAirdropAddress,
     fetchingTopUpHistory,
     fetchingMemeSubscriptions,
     fetchingSubscriptionLogs,
@@ -135,6 +135,9 @@ export default function UserPageSubscriptions(
       .then((data) => {
         setDetails(data);
       })
+      .catch(() => {
+        setDetails(undefined);
+      })
       .finally(() => {
         setFetchingDetails(false);
       });
@@ -150,6 +153,9 @@ export default function UserPageSubscriptions(
     })
       .then((data) => {
         setAirdropResult(data);
+      })
+      .catch(() => {
+        setAirdropResult(undefined);
       })
       .finally(() => {
         setFetchingAirdropAddress(false);

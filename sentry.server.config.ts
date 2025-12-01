@@ -2,17 +2,18 @@
 // The config you add here will be used whenever the server handles a request.
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
+import { publicEnv } from "@/config/env";
+import { tagSecurityProbes } from "@/config/sentryProbes";
 import * as Sentry from "@sentry/nextjs";
-import {publicEnv} from "@/config/env";
 
-const dsn =
-  publicEnv.SENTRY_DSN;
+const dsn = publicEnv.SENTRY_DSN;
 
 Sentry.init({
   dsn,
-  enabled: !!dsn,
+  // Only enable Sentry if a DSN is actually set
+  enabled: Boolean(dsn),
 
-  // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
+  // Define how likely traces are sampled.
   tracesSampleRate: 0.1,
 
   // Enable logs to be sent to Sentry
@@ -21,4 +22,11 @@ Sentry.init({
   // Enable sending user PII (Personally Identifiable Information)
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
   sendDefaultPii: true,
+
+  // ------------------------------------------------------------
+  // Handle obvious bot / exploit probes more gently
+  // ------------------------------------------------------------
+  beforeSend(event) {
+    return tagSecurityProbes(event);
+  },
 });

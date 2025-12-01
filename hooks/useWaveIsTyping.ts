@@ -104,8 +104,13 @@ export function useWaveIsTyping(
       });
     };
 
-    socket.addEventListener("message", onMessage);
-    return () => socket.removeEventListener("message", onMessage);
+    const currentSocket = socket;
+    currentSocket.addEventListener("message", onMessage);
+    return () => {
+      if (currentSocket) {
+        currentSocket.removeEventListener("message", onMessage);
+      }
+    };
   }, [socket, waveId, myHandle]);
 
   /* ----- 3. Periodic cleanup + state update ------------------------ */
