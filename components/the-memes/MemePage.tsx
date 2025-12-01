@@ -226,9 +226,9 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   }, [nftId, connectedWallets]);
 
   useEffect(() => {
-    if (connectedWallets.length > 0 && nftId) {
+    if (connectedWallets.length > 0 && nftId && connectedProfile?.consolidation_key) {
       commonApiFetch<ConsolidatedTDH>({
-        endpoint: `tdh/consolidation/${connectedProfile?.consolidation_key}`,
+        endpoint: `tdh/consolidation/${connectedProfile.consolidation_key}`,
       })
         .then((response) => {
           setMyOwner(response);

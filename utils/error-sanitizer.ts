@@ -63,27 +63,39 @@ const containsSensitiveData = (text: string): boolean => {
  */
 export const isIndexedDBError = (error: unknown): boolean => {
   if (!error) return false;
-  
-  const errorMessage = error instanceof Error 
-    ? error.message 
-    : String(error);
-  
-  const errorName = error instanceof Error 
-    ? error.name 
-    : (error as any)?.constructor?.name || "";
-  
+
+  let errorMessage: string;
+  if (error instanceof Error) {
+    errorMessage = error.message;
+  } else if (typeof error === "string") {
+    errorMessage = error;
+  } else if (typeof error === "object") {
+    try {
+      errorMessage = JSON.stringify(error);
+    } catch {
+      errorMessage = (error as any)?.message || (error as any)?.error || "";
+    }
+  } else {
+    errorMessage = String(error);
+  }
+
+  const errorName =
+    error instanceof Error
+      ? error.name
+      : (error as any)?.constructor?.name || "";
+
   const indexedDBPatterns = [
     /indexed\s*database/i,
     /indexeddb/i,
-    /idb/i,
-    /connection.*lost/i,
-    /database.*server.*lost/i,
+    /\bIDB\b/,
+    /IndexedDB.*connection.*lost/i,
+    /Internal error opening backing store/i,
     /DOMException.*QuotaExceeded/i,
     /DOMException.*UnknownError/i,
   ];
-  
-  return indexedDBPatterns.some(pattern => 
-    pattern.test(errorMessage) || pattern.test(errorName)
+
+  return indexedDBPatterns.some(
+    (pattern) => pattern.test(errorMessage) || pattern.test(errorName)
   );
 };
 
@@ -186,7 +198,8 @@ const ERROR_PATTERNS = [
   },
   {
     pattern: /indexed\s*database|indexeddb|connection.*lost/i,
-    message: "Browser storage connection lost. Please refresh the page to try again.",
+    message:
+      "Browser storage connection lost. Please refresh the page to try again.",
   },
 ];
 

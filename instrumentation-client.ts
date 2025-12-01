@@ -2,9 +2,9 @@
 // The added config here will be used whenever a users loads a page in their browser.
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
-import * as Sentry from "@sentry/nextjs";
-import {publicEnv} from "@/config/env";
+import { publicEnv } from "@/config/env";
 import { isIndexedDBError } from "@/utils/error-sanitizer";
+import * as Sentry from "@sentry/nextjs";
 
 const sentryEnabled = !!publicEnv.SENTRY_DSN;
 const isProduction = publicEnv.NODE_ENV === "production";
@@ -15,9 +15,7 @@ Sentry.init({
   enabled: sentryEnabled,
 
   // Add optional integrations for additional features
-  integrations: [
-    Sentry.replayIntegration(),
-  ],
+  integrations: [Sentry.replayIntegration()],
 
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
   tracesSampleRate: 1,
@@ -38,7 +36,7 @@ Sentry.init({
 
   beforeSend(event, hint) {
     const error = hint.originalException || hint.syntheticException;
-    
+
     if (error && isIndexedDBError(error)) {
       event.level = "warning";
       event.tags = {
@@ -48,13 +46,13 @@ Sentry.init({
       };
       event.fingerprint = ["indexeddb-connection-lost"];
     }
-    
+
     return event;
   },
 });
 
-if (typeof window !== "undefined") {
-  window.addEventListener("error", (event) => {
+if (typeof globalThis.window !== "undefined") {
+  globalThis.window.addEventListener("error", (event) => {
     if (isIndexedDBError(event.error)) {
       event.preventDefault();
       console.warn(
@@ -64,7 +62,7 @@ if (typeof window !== "undefined") {
     }
   });
 
-  window.addEventListener("unhandledrejection", (event) => {
+  globalThis.window.addEventListener("unhandledrejection", (event) => {
     if (isIndexedDBError(event.reason)) {
       event.preventDefault();
       console.warn(

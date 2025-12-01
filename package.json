@@ -160,7 +160,6 @@
     "autoprefixer": "^10.4.22",
     "babel-jest": "^29.7.0",
     "babel-plugin-react-compiler": "^1.0.0",
-    "baseline-browser-mapping": "^2.8.32",
     "depcheck": "^1.4.7",
     "dotenv": "^16.0.3",
     "esbuild": "^0.25.10",
