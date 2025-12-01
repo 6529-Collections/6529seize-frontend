@@ -15,8 +15,10 @@ Sentry.init({
   // Browser performance tracing
   tracesSampleRate: 1,
 
-  // Keep consistent with your server/edge configs
+  // Enable logs to be sent to Sentry
   enableLogs: true,
+
+  // Enable sending user PII (Personally Identifiable Information)
   sendDefaultPii: true,
 
   // ------------------------------------------------------------
