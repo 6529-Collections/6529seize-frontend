@@ -17,7 +17,7 @@ export function tagSecurityProbes(event: any) {
   if (PROBE_PATTERNS.some((p) => url.includes(p))) {
     event.level = "info";
     event.tags = {
-      ...(event.tags || {}),
+      ...(event.tags ?? {}),
       security_probe: "true",
       probe_type: "generic-exploit-scan",
     };

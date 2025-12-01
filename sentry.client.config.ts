@@ -25,13 +25,14 @@ Sentry.init({
   beforeSend(event, hint) {
     const value = event.exception?.values?.[0];
 
-    const message =
-      value?.value ??
-      (typeof hint?.originalException === "string"
-        ? hint.originalException
-        : hint?.originalException instanceof Error
-        ? hint.originalException.message
-        : "");
+    let fallbackMessage = "";
+    if (typeof hint?.originalException === "string") {
+      fallbackMessage = hint.originalException;
+    } else if (hint?.originalException instanceof Error) {
+      fallbackMessage = hint.originalException.message;
+    }
+
+    const message = value?.value ?? fallbackMessage;
 
     if (typeof message === "string") {
       const noisyPatterns = [
