@@ -14,7 +14,7 @@ Sentry.init({
   enabled: Boolean(dsn),
 
   // Define how likely traces are sampled.
-  tracesSampleRate: 1,
+  tracesSampleRate: 0.1,
 
   // Enable logs to be sent to Sentry
   enableLogs: true,
