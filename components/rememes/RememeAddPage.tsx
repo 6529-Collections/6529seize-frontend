@@ -125,9 +125,13 @@ export default function RememeAddPage() {
     async function fetchTdh() {
       commonApiFetch<ConsolidatedTDH>({
         endpoint: `tdh/consolidation/${connectedProfile?.consolidation_key}`,
-      }).then((response) => {
-        setUserTDH(response);
-      });
+      })
+        .then((response) => {
+          setUserTDH(response);
+        })
+        .catch(() => {
+          setUserTDH(undefined);
+        });
     }
     if (connectedProfile?.consolidation_key) {
       fetchTdh();

@@ -5,6 +5,9 @@
 
 import { publicEnv } from "@/config/env";
 
+export const INDEXEDDB_ERROR_MESSAGE =
+  "Browser storage connection lost. Please refresh the page to try again.";
+
 // Patterns that indicate sensitive data in error messages
 const SENSITIVE_PATTERNS = [
   /jwt[_-]?token/i,
@@ -56,6 +59,54 @@ const containsSensitiveData = (text: string): boolean => {
   }
 
   return false;
+};
+
+/**
+ * Checks if an error is related to IndexedDB
+ */
+export const isIndexedDBError = (error: unknown): boolean => {
+  if (!error) return false;
+
+  let errorMessage: string;
+
+  if (error instanceof Error) {
+    errorMessage = error.message;
+  } else if (typeof error === "string") {
+    errorMessage = error;
+  } else if (typeof error === "object") {
+    const msg = (error as any)?.message ?? (error as any)?.error;
+
+    if (msg) {
+      errorMessage = String(msg);
+    } else {
+      try {
+        errorMessage = JSON.stringify(error);
+      } catch {
+        errorMessage = "[unstringifiable object]";
+      }
+    }
+  } else {
+    errorMessage = `[non-string error: ${typeof error}]`;
+  }
+
+  const errorName =
+    error instanceof Error
+      ? error.name
+      : (error as any)?.constructor?.name || "";
+
+  const indexedDBPatterns = [
+    /indexed\s*database/i,
+    /indexeddb/i,
+    /\bIDB\b/,
+    /IndexedDB.*connection.*lost/i,
+    /Internal error opening backing store/i,
+    /DOMException.*QuotaExceeded/i,
+    /DOMException.*UnknownError/i,
+  ];
+
+  return indexedDBPatterns.some(
+    (pattern) => pattern.test(errorMessage) || pattern.test(errorName)
+  );
 };
 
 /**
@@ -155,6 +206,10 @@ const ERROR_PATTERNS = [
     pattern: /balance|insufficient/i,
     message: "Insufficient balance for this operation.",
   },
+  {
+    pattern: /indexed\s*database|indexeddb|connection.*lost/i,
+    message: INDEXEDDB_ERROR_MESSAGE,
+  },
 ];
 
 /**
@@ -166,7 +221,12 @@ export const sanitizeErrorForUser = (error: unknown): string => {
     return "An unexpected error occurred. Please try again.";
   }
 
-  // Handle adapter-specific errors first
+  // Handle IndexedDB errors first
+  if (isIndexedDBError(error)) {
+    return INDEXEDDB_ERROR_MESSAGE;
+  }
+
+  // Handle adapter-specific errors
   if (error instanceof Error) {
     const adapterMessage = getAdapterErrorMessage(error);
     if (adapterMessage) {
