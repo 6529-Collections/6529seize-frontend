@@ -11,16 +11,19 @@ const PROBE_PATTERNS = [
   "/admin/login.jsp", // common Java probe
 ];
 
+const probeTags = {
+  security_probe: "true",
+  probe_type: "generic-exploit-scan",
+};
+
 export function tagSecurityProbes(event: any) {
   const url = (event?.request?.url || "").toLowerCase();
 
   if (PROBE_PATTERNS.some((p) => url.includes(p))) {
     event.level = "info";
-    event.tags = {
-      ...(event.tags ?? {}),
-      security_probe: "true",
-      probe_type: "generic-exploit-scan",
-    };
+    event.tags = event.tags
+      ? { ...event.tags, ...probeTags }
+      : { ...probeTags };
   }
 
   return event;
