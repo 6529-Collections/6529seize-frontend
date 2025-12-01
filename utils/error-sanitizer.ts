@@ -5,6 +5,9 @@
 
 import { publicEnv } from "@/config/env";
 
+export const INDEXEDDB_ERROR_MESSAGE =
+  "Browser storage connection lost. Please refresh the page to try again.";
+
 // Patterns that indicate sensitive data in error messages
 const SENSITIVE_PATTERNS = [
   /jwt[_-]?token/i,
@@ -198,8 +201,7 @@ const ERROR_PATTERNS = [
   },
   {
     pattern: /indexed\s*database|indexeddb|connection.*lost/i,
-    message:
-      "Browser storage connection lost. Please refresh the page to try again.",
+    message: INDEXEDDB_ERROR_MESSAGE,
   },
 ];
 
@@ -214,7 +216,7 @@ export const sanitizeErrorForUser = (error: unknown): string => {
 
   // Handle IndexedDB errors first
   if (isIndexedDBError(error)) {
-    return "Browser storage connection lost. Please refresh the page to try again.";
+    return INDEXEDDB_ERROR_MESSAGE;
   }
 
   // Handle adapter-specific errors

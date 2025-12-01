@@ -3,7 +3,10 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import { publicEnv } from "@/config/env";
-import { isIndexedDBError } from "@/utils/error-sanitizer";
+import {
+  INDEXEDDB_ERROR_MESSAGE,
+  isIndexedDBError,
+} from "@/utils/error-sanitizer";
 import * as Sentry from "@sentry/nextjs";
 
 const sentryEnabled = !!publicEnv.SENTRY_DSN;
@@ -51,14 +54,11 @@ Sentry.init({
   },
 });
 
-if (typeof globalThis.window !== "undefined") {
+if (globalThis.window !== undefined) {
   globalThis.window.addEventListener("error", (event) => {
     if (isIndexedDBError(event.error)) {
       event.preventDefault();
-      console.warn(
-        "[IndexedDB] Connection lost. This is usually recoverable by refreshing the page.",
-        event.error
-      );
+      console.warn(`[IndexedDB] ${INDEXEDDB_ERROR_MESSAGE}`, event.error);
     }
   });
 
@@ -66,7 +66,7 @@ if (typeof globalThis.window !== "undefined") {
     if (isIndexedDBError(event.reason)) {
       event.preventDefault();
       console.warn(
-        "[IndexedDB] Unhandled promise rejection due to IndexedDB connection loss. This is usually recoverable by refreshing the page.",
+        `[IndexedDB] Unhandled promise rejection: ${INDEXEDDB_ERROR_MESSAGE}`,
         event.reason
       );
     }
