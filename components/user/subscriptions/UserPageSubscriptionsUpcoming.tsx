@@ -283,7 +283,9 @@ function SubscriptionRow(
                     No changes allowed on minting day
                   </Tooltip>
                 </>
-              ) : dateDisplay}
+              ) : (
+                dateDisplay
+              )}
             </span>
             {props.first && final?.phase && final?.phase_position > 0 && (
               <span className="font-smaller font-color-silver">
