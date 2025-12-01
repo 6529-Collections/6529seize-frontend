@@ -229,13 +229,19 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     if (connectedWallets.length > 0 && nftId) {
       commonApiFetch<ConsolidatedTDH>({
         endpoint: `tdh/consolidation/${connectedProfile?.consolidation_key}`,
-      }).then((response) => {
-        setMyOwner(response);
-        setMyTDH(response.memes.find((m) => m.id === parseInt(nftId)));
-        setMyRank(response.memes_ranks.find((m) => m.id === parseInt(nftId)));
-      });
+      })
+        .then((response) => {
+          setMyOwner(response);
+          setMyTDH(response.memes.find((m) => m.id === parseInt(nftId)));
+          setMyRank(response.memes_ranks.find((m) => m.id === parseInt(nftId)));
+        })
+        .catch(() => {
+          setMyOwner(undefined);
+          setMyTDH(undefined);
+          setMyRank(undefined);
+        });
     }
-  }, [nftId, connectedWallets]);
+  }, [nftId, connectedWallets, connectedProfile?.consolidation_key]);
 
   function printContent() {
     return (

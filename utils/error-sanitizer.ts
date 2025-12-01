@@ -59,6 +59,35 @@ const containsSensitiveData = (text: string): boolean => {
 };
 
 /**
+ * Checks if an error is related to IndexedDB
+ */
+export const isIndexedDBError = (error: unknown): boolean => {
+  if (!error) return false;
+  
+  const errorMessage = error instanceof Error 
+    ? error.message 
+    : String(error);
+  
+  const errorName = error instanceof Error 
+    ? error.name 
+    : (error as any)?.constructor?.name || "";
+  
+  const indexedDBPatterns = [
+    /indexed\s*database/i,
+    /indexeddb/i,
+    /idb/i,
+    /connection.*lost/i,
+    /database.*server.*lost/i,
+    /DOMException.*QuotaExceeded/i,
+    /DOMException.*UnknownError/i,
+  ];
+  
+  return indexedDBPatterns.some(pattern => 
+    pattern.test(errorMessage) || pattern.test(errorName)
+  );
+};
+
+/**
  * Handles adapter-specific error messages
  */
 const getAdapterErrorMessage = (error: Error): string | null => {
@@ -155,6 +184,10 @@ const ERROR_PATTERNS = [
     pattern: /balance|insufficient/i,
     message: "Insufficient balance for this operation.",
   },
+  {
+    pattern: /indexed\s*database|indexeddb|connection.*lost/i,
+    message: "Browser storage connection lost. Please refresh the page to try again.",
+  },
 ];
 
 /**
@@ -166,7 +199,12 @@ export const sanitizeErrorForUser = (error: unknown): string => {
     return "An unexpected error occurred. Please try again.";
   }
 
-  // Handle adapter-specific errors first
+  // Handle IndexedDB errors first
+  if (isIndexedDBError(error)) {
+    return "Browser storage connection lost. Please refresh the page to try again.";
+  }
+
+  // Handle adapter-specific errors
   if (error instanceof Error) {
     const adapterMessage = getAdapterErrorMessage(error);
     if (adapterMessage) {

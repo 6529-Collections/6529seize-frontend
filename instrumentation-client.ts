@@ -4,6 +4,7 @@
 
 import * as Sentry from "@sentry/nextjs";
 import {publicEnv} from "@/config/env";
+import { isIndexedDBError } from "@/utils/error-sanitizer";
 
 const sentryEnabled = !!publicEnv.SENTRY_DSN;
 const isProduction = publicEnv.NODE_ENV === "production";
@@ -34,6 +35,44 @@ Sentry.init({
   // Enable sending user PII (Personally Identifiable Information)
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
   sendDefaultPii: true,
+
+  beforeSend(event, hint) {
+    const error = hint.originalException || hint.syntheticException;
+    
+    if (error && isIndexedDBError(error)) {
+      event.level = "warning";
+      event.tags = {
+        ...event.tags,
+        errorType: "indexeddb",
+        handled: true,
+      };
+      event.fingerprint = ["indexeddb-connection-lost"];
+    }
+    
+    return event;
+  },
 });
+
+if (typeof window !== "undefined") {
+  window.addEventListener("error", (event) => {
+    if (isIndexedDBError(event.error)) {
+      event.preventDefault();
+      console.warn(
+        "[IndexedDB] Connection lost. This is usually recoverable by refreshing the page.",
+        event.error
+      );
+    }
+  });
+
+  window.addEventListener("unhandledrejection", (event) => {
+    if (isIndexedDBError(event.reason)) {
+      event.preventDefault();
+      console.warn(
+        "[IndexedDB] Unhandled promise rejection due to IndexedDB connection loss. This is usually recoverable by refreshing the page.",
+        event.reason
+      );
+    }
+  });
+}
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
