@@ -17,14 +17,19 @@ const probeTags = {
 };
 
 export function tagSecurityProbes(event: any) {
-  const url = (event?.request?.url || "").toLowerCase();
+  try {
+    const url = (event?.request?.url || "").toLowerCase();
 
-  if (PROBE_PATTERNS.some((p) => url.includes(p))) {
-    event.level = "info";
-    event.tags = event.tags
-      ? { ...event.tags, ...probeTags }
-      : { ...probeTags };
+    if (PROBE_PATTERNS.some((p) => url.includes(p))) {
+      event.level = "info";
+      event.tags = event.tags
+        ? { ...event.tags, ...probeTags }
+        : { ...probeTags };
+    }
+
+    return event;
+  } catch (error) {
+    console.error("Error in tagSecurityProbes:", error);
+    return event;
   }
-
-  return event;
 }
