@@ -117,7 +117,7 @@ export default function UserPageSubscriptions(
     );
   }, [
     fetchingDetails,
-    fetchAirdropAddress,
+    fetchingAirdropAddress,
     fetchingTopUpHistory,
     fetchingMemeSubscriptions,
     fetchingSubscriptionLogs,
