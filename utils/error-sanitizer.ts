@@ -68,18 +68,25 @@ export const isIndexedDBError = (error: unknown): boolean => {
   if (!error) return false;
 
   let errorMessage: string;
+
   if (error instanceof Error) {
     errorMessage = error.message;
   } else if (typeof error === "string") {
     errorMessage = error;
   } else if (typeof error === "object") {
-    try {
-      errorMessage = JSON.stringify(error);
-    } catch {
-      errorMessage = (error as any)?.message || (error as any)?.error || "";
+    const msg = (error as any)?.message ?? (error as any)?.error;
+
+    if (msg) {
+      errorMessage = String(msg);
+    } else {
+      try {
+        errorMessage = JSON.stringify(error);
+      } catch {
+        errorMessage = "[unstringifiable object]";
+      }
     }
   } else {
-    errorMessage = String(error);
+    errorMessage = `[non-string error: ${typeof error}]`;
   }
 
   const errorName =
