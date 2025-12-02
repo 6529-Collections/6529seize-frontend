@@ -43,7 +43,7 @@ export function AutomaticAirdropsModal(
   const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
   const isValidAddress = (address: string): boolean => {
-    return /^0x[a-fA-F0-9]{40}$/i.test(address.trim());
+    return /^0x[a-f0-9]{40}$/i.test(address.trim());
   };
 
   const parseCsv = (csvContent: string): CsvRow[] => {
@@ -109,34 +109,33 @@ export function AutomaticAirdropsModal(
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const csvContent = event.target?.result as string;
-        const rows = parseCsv(csvContent);
-        setSelectedFile(file);
-        setParsedRows(rows);
-        setFileError(null);
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : "Failed to parse CSV file";
-        setFileError(errorMessage);
+    file
+      .text()
+      .then((csvContent) => {
+        try {
+          const rows = parseCsv(csvContent);
+          setSelectedFile(file);
+          setParsedRows(rows);
+          setFileError(null);
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : "Failed to parse CSV file";
+          setFileError(errorMessage);
+          setSelectedFile(null);
+          setParsedRows([]);
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
+        }
+      })
+      .catch(() => {
+        setFileError("Failed to read file");
         setSelectedFile(null);
         setParsedRows([]);
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
         }
-      }
-    };
-    reader.onerror = () => {
-      setFileError("Failed to read file");
-      setSelectedFile(null);
-      setParsedRows([]);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    };
-    reader.readAsText(file);
+      });
   };
 
   const handleUpload = () => {
@@ -149,13 +148,10 @@ export function AutomaticAirdropsModal(
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const csvContent = event.target?.result as string;
+    selectedFile.text().then((csvContent) => {
       props.onUpload(contract, displayTokenId, csvContent);
       handleClose();
-    };
-    reader.readAsText(selectedFile);
+    });
   };
 
   const handleClose = () => {
