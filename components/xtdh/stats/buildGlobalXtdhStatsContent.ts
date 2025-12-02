@@ -27,7 +27,6 @@ export function buildGlobalXtdhStatsContent(data: GlobalTdhStats): XtdhStatsProp
 
   return {
     metrics: {
-      tdhRate: formatDisplay(tdhRate),
       multiplier: formatDisplay(xtdhMultiplier, 2),
       producedXtdhRate: totalDisplay,
     },

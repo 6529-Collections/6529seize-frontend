@@ -37,7 +37,7 @@ export default function UserPageXtdhGrant() {
   return (
     <div className="tw-flex tw-flex-col tw-gap-8">
       {/* Step 1: Select Collection & Tokens */}
-      <section className="tw-flex tw-flex-col tw-gap-4">
+      <section id="create-grant-section" className="tw-flex tw-flex-col tw-gap-4">
         <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-300 tw-uppercase tw-tracking-wider">
           1. Select Collection & Tokens
         </h3>

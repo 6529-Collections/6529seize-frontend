@@ -57,14 +57,11 @@ export function GrantTokensDisclosure({
         aria-expanded={isOpen}
         aria-controls={panelId}
       >
-        <div className="tw-flex tw-flex-col tw-gap-0.5">
-          <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
-            {isOpen ? "Hide granted tokens" : "Show granted tokens"}
-          </span>
-          <span className="tw-text-xs tw-text-iron-350">
-            {`Expand to inspect ${tokensCountDescription} granted to this wallet.`}
-          </span>
-        </div>
+        <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
+          {isOpen
+            ? `Hide ${tokensCountDescription}`
+            : `Show ${tokensCountDescription}`}
+        </span>
         <span
           aria-hidden="true"
           className="tw-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-iron-800 tw-bg-iron-900 tw-text-iron-50 tw-transition-colors tw-duration-200"

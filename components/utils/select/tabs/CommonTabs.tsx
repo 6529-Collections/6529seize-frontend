@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import clsx from "clsx";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { CommonSelectProps } from "../CommonSelect";
 import CommonTabsTab from "./CommonTabsTab";
@@ -133,7 +134,10 @@ export default function CommonTabs<T, U = unknown>(
         aria-orientation="horizontal"
         className="tw-overflow-x-auto tw-scroll-smooth tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60 horizontal-menu-hide-scrollbar"
       >
-        <div className="tw-flex tw-min-w-full tw-flex-nowrap tw-gap-x-1 tw-rounded-lg tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-iron-700">
+        <div className={clsx(
+          "tw-flex tw-flex-nowrap tw-gap-x-1 tw-rounded-lg tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-iron-700",
+          props.fill ?? true ? "tw-min-w-full" : "tw-w-fit"
+        )}>
           {items.map((item, i) => (
             <CommonTabsTab
               key={item.key}

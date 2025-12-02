@@ -93,15 +93,12 @@ export default function XtdhReceivedSection({
 
   const isViewingTokens = Boolean(selectedContract);
   const isIdentityScoped = Boolean(profileId);
-  let description =
-    "Collections across the ecosystem that are accruing xTDH from grants.";
+  let description = "Collections accruing xTDH from grants.";
 
   if (isViewingTokens) {
-    description =
-      "Review tokens in the selected collection and how much xTDH each accrues.";
+    description = "Review tokens and their xTDH accrual.";
   } else if (isIdentityScoped) {
-    description =
-      "Collections where this identity accrues xTDH through grants it has received.";
+    description = "Collections where this identity accrues xTDH.";
   }
 
   return (
@@ -125,12 +122,14 @@ export default function XtdhReceivedSection({
         />
       ) : (
         <>
-          <XtdhCollectionsControls
-            activeSortField={activeSortField}
-            activeSortDirection={activeSortDirection}
-            onSortChange={handleSortChange}
-            isDisabled={controlsDisabled}
-          />
+          {collections.length > 0 && (
+            <XtdhCollectionsControls
+              activeSortField={activeSortField}
+              activeSortDirection={activeSortDirection}
+              onSortChange={handleSortChange}
+              isDisabled={controlsDisabled}
+            />
+          )}
           <XtdhCollectionsList
             isEnabled={isEnabled}
             isLoading={isLoading}

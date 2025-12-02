@@ -15,7 +15,7 @@ export default function UserPageXtdhGrantAmount({
 }) {
   const formattedMax =
     maxGrantRate !== null && Number.isFinite(maxGrantRate)
-      ? formatNumberWithCommas(Math.floor(maxGrantRate))
+      ? formatNumberWithCommas(Number(maxGrantRate.toFixed(1)))
       : null;
 
   let maxGrantMessage;

@@ -51,7 +51,7 @@ export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
   const maxGrantRateRaw = tdhStats?.availableGrantRate ?? null;
   const maxGrantRate =
     Number.isFinite(maxGrantRateRaw) && maxGrantRateRaw !== null
-      ? Math.floor(maxGrantRateRaw)
+      ? maxGrantRateRaw
       : null;
 
   const createGrantMutation = useMutation({
@@ -134,6 +134,9 @@ export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
         await createGrantMutation.mutateAsync(payload);
         await queryClient.invalidateQueries({
           queryKey: [QueryKey.TDH_GRANTS],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: [QueryKey.TDH_GRANTS, "pending-count"],
         });
         const message = "Grant submitted. You will see it once processed.";
         setSubmitSuccess(message);

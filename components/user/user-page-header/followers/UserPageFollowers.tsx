@@ -21,12 +21,12 @@ export default function UserPageFollowers({
   return (
     <Link
       href={`/${safeHandleOrWallet}/followers`}
-      className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+      className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
     >
       <span className="tw-text-base tw-font-semibold tw-text-iron-50">
         {formatNumberWithCommas(count)}
-      </span>
-      <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400">
+      </span>{" "}
+      <span className="tw-text-base tw-font-medium tw-text-iron-400">
         {label}
       </span>
     </Link>

@@ -74,8 +74,11 @@ describe("UserPageXtdh", () => {
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "Received" }));
 
-    expect(mockReplace).toHaveBeenCalledWith("/profile/xtdh?tab=received", {
-      scroll: false,
-    });
+    expect(mockReplace).toHaveBeenCalledWith(
+      "/profile/xtdh?tab=received&status=PENDING&sort=created_at",
+      {
+        scroll: false,
+      }
+    );
   });
 });

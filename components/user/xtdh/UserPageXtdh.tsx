@@ -49,7 +49,7 @@ export default function UserPageXtdh({
     profile.primary_wallet ??
     profile.consolidation_key ??
     null,
-  [profile.consolidation_key, profile.handle, profile.primary_wallet, profile.query]);
+    [profile.consolidation_key, profile.handle, profile.primary_wallet, profile.query]);
 
   const activeFilter = useMemo(
     () => parseFilter(searchParams?.get("tab") ?? null),
@@ -95,13 +95,40 @@ export default function UserPageXtdh({
       router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
         scroll: false,
       });
+      router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
+        scroll: false,
+      });
     },
     [activeFilter, pathname, router]
   );
 
+  const handleOutboundClick = useCallback(() => {
+    const scrollToGrant = () => {
+      const section = document.getElementById("create-grant-section");
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
+        const input = section.querySelector("input");
+        if (input) {
+          input.focus();
+        }
+      }
+    };
+
+    if (activeFilter !== "granted") {
+      handleFilterChange("granted");
+      // Wait for the tab change to render the grant form
+      setTimeout(scrollToGrant, 100);
+    } else {
+      scrollToGrant();
+    }
+  }, [activeFilter, handleFilterChange]);
+
   return (
     <div className="tailwind-scope tw-flex tw-flex-col tw-gap-6">
-      <UserPageXtdhStatsHeader profileId={statsProfileId} />
+      <UserPageXtdhStatsHeader
+        profileId={statsProfileId}
+        onOutboundClick={canGrant ? handleOutboundClick : undefined}
+      />
 
       <div className="tw-w-full tw-overflow-x-auto horizontal-menu-hide-scrollbar">
         <CommonSelect
@@ -109,6 +136,7 @@ export default function UserPageXtdh({
           activeItem={activeFilter}
           filterLabel="xTDH View"
           setSelected={handleFilterChange}
+          fill={false}
         />
       </div>
 

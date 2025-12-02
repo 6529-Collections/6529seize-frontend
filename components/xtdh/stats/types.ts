@@ -1,5 +1,4 @@
 export interface XtdhMetricsProps {
-  readonly tdhRate: string;
   readonly multiplier: string;
   readonly producedXtdhRate: string;
 }

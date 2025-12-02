@@ -73,7 +73,8 @@ export const validateGrantForm = ({
   ) {
     return {
       success: false,
-      message: `Amount exceeds your available grant rate (${maxGrantRate}).`,
+      message: `Amount exceeds your available grant rate (${Math.floor(maxGrantRate * 10) / 10
+        }).`,
     };
   }
 
