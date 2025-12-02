@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useMemo } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 import {
   PushNotifications,
   PushNotificationSchema,
@@ -40,10 +46,18 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   const { isCapacitor, isIos } = useCapacitor();
   const { connectedProfile } = useAuth();
   const router = useRouter();
+  const initializationRef = useRef<string | null>(null);
 
   useEffect(() => {
-    initializeNotifications(connectedProfile ?? undefined);
-  }, [connectedProfile]);
+    const profileId = connectedProfile?.id ?? null;
+    if (
+      isCapacitor &&
+      initializationRef.current !== profileId
+    ) {
+      initializationRef.current = profileId;
+      initializeNotifications(connectedProfile ?? undefined);
+    }
+  }, [connectedProfile, isCapacitor]);
 
   const initializeNotifications = async (profile?: ApiIdentity) => {
     try {
@@ -57,50 +71,74 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const initializePushNotifications = async (profile?: ApiIdentity) => {
-    await PushNotifications.removeAllListeners();
+    try {
+      await PushNotifications.removeAllListeners();
 
-    const stableDeviceId = await getStableDeviceId();
+      const stableDeviceId = await getStableDeviceId();
 
-    const deviceInfo = await Device.getInfo();
+      const deviceInfo = await Device.getInfo();
 
-    await PushNotifications.addListener("registration", async (token) => {
-      registerPushNotification(
-        stableDeviceId,
-        deviceInfo,
-        token.value,
-        profile
-      );
-    });
-
-    await PushNotifications.addListener("registrationError", (error) => {
-      console.error("Push registration error: ", error);
-    });
-
-    await PushNotifications.addListener(
-      "pushNotificationReceived",
-      (notification) => {
-        console.log("Push notification received: ", notification);
-      }
-    );
-
-    await PushNotifications.addListener(
-      "pushNotificationActionPerformed",
-      async (action) => {
-        await handlePushNotificationAction(
-          router,
-          action.notification,
+      await PushNotifications.addListener("registration", async (token) => {
+        registerPushNotification(
+          stableDeviceId,
+          deviceInfo,
+          token.value,
           profile
         );
+      });
+
+      await PushNotifications.addListener("registrationError", (error) => {
+        console.error("Push registration error: ", error);
+      });
+
+      await PushNotifications.addListener(
+        "pushNotificationReceived",
+        (notification) => {
+          console.log("Push notification received: ", notification);
+        }
+      );
+
+      await PushNotifications.addListener(
+        "pushNotificationActionPerformed",
+        async (action) => {
+          await handlePushNotificationAction(
+            router,
+            action.notification,
+            profile
+          );
+        }
+      );
+
+      const permStatus = await PushNotifications.requestPermissions();
+      console.log("Push permission status", permStatus);
+
+      if (permStatus.receive === "granted") {
+        if (isIos) {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+        try {
+          await PushNotifications.register();
+        } catch (registerError: any) {
+          const errorMessage = registerError?.message || String(registerError);
+          if (
+            errorMessage.includes(
+              "capacitorDidRegisterForRemoteNotifications"
+            ) ||
+            errorMessage.includes("didRegisterForRemoteNotifications")
+          ) {
+            console.warn(
+              "iOS push notification registration callback issue. This may occur if the native delegate is not properly configured.",
+              registerError
+            );
+          } else {
+            throw registerError;
+          }
+        }
+      } else {
+        console.warn("Push notifications permission not granted");
       }
-    );
-
-    const permStatus = await PushNotifications.requestPermissions();
-    console.log("Push permission status", permStatus);
-
-    if (permStatus.receive === "granted") {
-      await PushNotifications.register();
-    } else {
-      console.warn("Push notifications permission not granted");
+    } catch (error) {
+      console.error("Error in initializePushNotifications", error);
     }
   };
 

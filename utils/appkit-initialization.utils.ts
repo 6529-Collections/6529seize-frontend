@@ -3,7 +3,7 @@ import { AppKitAdapterManager } from "@/components/providers/AppKitAdapterManage
 import { publicEnv } from "@/config/env";
 import { CW_PROJECT_ID } from "@/constants";
 import { AdapterCacheError, AdapterError } from "@/src/errors/adapter";
-import { logErrorSecurely } from "@/utils/error-sanitizer";
+import { isIndexedDBError, logErrorSecurely } from "@/utils/error-sanitizer";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import type { AppKitNetwork } from "@reown/appkit-common";
 import { createAppKit } from "@reown/appkit/react";
@@ -47,6 +47,16 @@ function createAdapter(
   try {
     return adapterManager.createAdapterWithCache(wallets, isCapacitor);
   } catch (error) {
+    if (isIndexedDBError(error)) {
+      logErrorSecurely(
+        "[AppKitInitialization] IndexedDB connection lost during adapter creation",
+        error
+      );
+      throw new Error(
+        "Browser storage connection lost. Please refresh the page to try again."
+      );
+    }
+
     if (error instanceof AdapterError || error instanceof AdapterCacheError) {
       logErrorSecurely("[AppKitInitialization] Adapter creation failed", error);
       throw new Error(
