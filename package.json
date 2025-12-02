@@ -63,7 +63,7 @@
     "@lexical/link": "^0.14.5",
     "@lexical/list": "^0.14.5",
     "@lexical/markdown": "^0.14.5",
-    "@lexical/react": "^0.14.2",
+    "@lexical/react": "^0.14.5",
     "@lexical/rich-text": "^0.14.5",
     "@lexical/selection": "^0.14.5",
     "@lexical/table": "^0.14.5",
@@ -74,6 +74,7 @@
     "@reown/appkit": "^1.8.8",
     "@reown/appkit-adapter-wagmi": "^1.8.8",
     "@reown/appkit-common": "^1.8.11",
+    "@sentry/nextjs": "^10.27.0",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.7",
     "@tanstack/query-core": "^5.45.0",
@@ -104,7 +105,7 @@
     "js-sha256": "^0.11.0",
     "js-yaml": "^4.1.0",
     "jwt-decode": "^4.0.0",
-    "lexical": "^0.14.2",
+    "lexical": "^0.14.5",
     "lodash": "^4.17.21",
     "next": "16.0.0",
     "next-redux-wrapper": "^8.1.0",
@@ -156,7 +157,7 @@
     "@types/react-scroll": "^1.8.10",
     "@types/react-toggle": "^4.0.5",
     "@types/uuid": "^9.0.8",
-    "autoprefixer": "^10.4.19",
+    "autoprefixer": "^10.4.22",
     "babel-jest": "^29.7.0",
     "babel-plugin-react-compiler": "^1.0.0",
     "depcheck": "^1.4.7",
@@ -195,7 +196,6 @@
       "react": "$react",
       "react-dom": "$react-dom"
     },
-    "@types/react": "19.2.2",
-    "@types/react-dom": "19.2.2"
+    "zod-validation-error": "^4.0.0"
   }
 }
