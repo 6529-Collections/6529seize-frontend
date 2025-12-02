@@ -21,13 +21,13 @@ export default function NotificationHeader({
         {author.pfp ? (
           <Image
             src={getScaledImageUri(author.pfp, ImageScale.W_AUTO_H_50)}
-            alt={author.handle ?? ""}
+            alt={author.handle ?? "User profile"}
             fill
             sizes="28px"
             className="tw-flex-shrink-0 tw-object-contain tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
           />
         ) : (
-          <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
+          <div className="tw-flex-shrink-0 tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
         )}
       </div>
       <div className="tw-flex tw-flex-1 tw-flex-col tw-items-start min-[390px]:tw-flex-row min-[390px]:tw-justify-between min-[390px]:tw-items-center tw-gap-y-2 min-[390px]:tw-gap-x-2 tw-min-w-0">
