@@ -93,14 +93,14 @@ describe("push notification action handling", () => {
       }
     );
 
-    jest
+    const useAuthSpy = jest
       .spyOn(require("@/components/auth/Auth"), "useAuth")
       .mockReturnValue({ connectedProfile: { id: "test-id" } } as any);
 
     const { result } = renderHook(() => useNotificationsContext(), { wrapper });
 
     await act(async () => {
-      await new Promise((r) => setTimeout(r, 200));
+      await Promise.resolve();
     });
 
     expect(actionCallback).not.toBeNull();
@@ -123,5 +123,6 @@ describe("push notification action handling", () => {
     expect(PushNotifications.removeDeliveredNotifications).toHaveBeenCalled();
 
     useRouterSpy.mockRestore();
+    useAuthSpy.mockRestore();
   });
 });
