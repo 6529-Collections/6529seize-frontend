@@ -135,6 +135,9 @@ export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
         await queryClient.invalidateQueries({
           queryKey: [QueryKey.TDH_GRANTS],
         });
+        await queryClient.invalidateQueries({
+          queryKey: [QueryKey.TDH_GRANTS, "pending-count"],
+        });
         const message = "Grant submitted. You will see it once processed.";
         setSubmitSuccess(message);
         setToast({ type: "success", message });
