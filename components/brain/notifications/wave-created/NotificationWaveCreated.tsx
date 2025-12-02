@@ -16,6 +16,7 @@ import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 
 export default function NotificationWaveCreated({
   notification,
@@ -42,32 +43,36 @@ export default function NotificationWaveCreated({
   });
 
   return (
-    <div className="tw-w-full tw-inline-flex tw-justify-between gap-2">
-      <div className="tw-flex tw-gap-x-2 tw-items-center">
-        <div className="tw-h-7 tw-w-7">
-          {notification.related_identity.pfp ? (
-            <img
-              src={getScaledImageUri(
-                notification.related_identity.pfp,
-                ImageScale.W_AUTO_H_50
-              )}
-              alt="#"
-              className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
-            />
-          ) : (
-            <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
-          )}
-        </div>
-        <span className="tw-text-sm tw-font-normal tw-text-iron-50">
-          <Link
-            href={`/${notification.related_identity.handle}`}
-            className="tw-no-underline tw-font-semibold">
-            {notification.related_identity.handle}
-          </Link>{" "}
-          <span className="tw-text-iron-400"> invited you to a wave:</span>{" "}
+    <div className="tw-w-full tw-flex tw-items-start tw-gap-x-3">
+      <div className="tw-h-7 tw-w-7 tw-flex-shrink-0">
+        {notification.related_identity.pfp ? (
+          <img
+            src={getScaledImageUri(
+              notification.related_identity.pfp,
+              ImageScale.W_AUTO_H_50
+            )}
+            alt="#"
+            className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
+          />
+        ) : (
+          <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
+        )}
+      </div>
+      <div className="tw-flex tw-flex-1 tw-flex-col tw-items-start min-[390px]:tw-flex-row min-[390px]:tw-justify-between min-[390px]:tw-items-center tw-gap-y-2 min-[390px]:tw-gap-x-2 tw-min-w-0">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1">
+          <UserProfileTooltipWrapper user={notification.related_identity.handle ?? ""}>
+            <Link
+              href={`/${notification.related_identity.handle}`}
+              className="tw-no-underline tw-font-semibold tw-text-sm tw-text-iron-50">
+              {notification.related_identity.handle}
+            </Link>
+          </UserProfileTooltipWrapper>{" "}
+          <span className="tw-text-iron-400 tw-font-normal tw-text-sm">
+            invited you to a wave:
+          </span>{" "}
           <Link
             href={invitationHref}
-            className="tw-text-md tw-font-medium tw-no-underline tw-text-primary-400 hover:tw-text-primary-300">
+            className="tw-text-sm tw-font-medium tw-no-underline tw-text-primary-400 hover:tw-text-primary-300">
             {wave?.name}
           </Link>{" "}
           <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
@@ -76,20 +81,20 @@ export default function NotificationWaveCreated({
             </span>{" "}
             {getTimeAgoShort(notification.created_at)}
           </span>
-        </span>
-      </div>
-      <div className="tw-flex tw-gap-x-2 tw-items-center">
-        {wave && (
-          <WaveHeaderFollow
-            wave={wave}
-            subscribeToAllDrops={true}
-            size={WaveFollowBtnSize.SMALL}
+        </div>
+        <div className="tw-flex tw-gap-x-2 tw-items-center tw-flex-shrink-0">
+          {wave && (
+            <WaveHeaderFollow
+              wave={wave}
+              subscribeToAllDrops={true}
+              size={WaveFollowBtnSize.SMALL}
+            />
+          )}
+          <NotificationsFollowBtn
+            profile={notification.related_identity}
+            size={UserFollowBtnSize.SMALL}
           />
-        )}
-        <NotificationsFollowBtn
-          profile={notification.related_identity}
-          size={UserFollowBtnSize.SMALL}
-        />
+        </div>
       </div>
     </div>
   );

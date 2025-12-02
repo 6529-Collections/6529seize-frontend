@@ -27,7 +27,7 @@ export enum UserFollowBtnSize {
 }
 
 export const FOLLOW_BTN_BUTTON_CLASSES: Record<UserFollowBtnSize, string> = {
-  [UserFollowBtnSize.SMALL]: "tw-gap-x-1 tw-px-2.5 tw-py-1.5 tw-text-xs",
+  [UserFollowBtnSize.SMALL]: "tw-gap-x-1 tw-px-3 tw-py-2 tw-text-xs",
   [UserFollowBtnSize.MEDIUM]: "tw-gap-x-2 tw-px-3.5 tw-py-2.5 tw-text-sm",
 };
 
