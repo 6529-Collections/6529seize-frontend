@@ -15,12 +15,14 @@ import {
   SubscriptionConfirm,
   isSubscriptionsAdmin,
 } from "./ReviewDistributionPlanTableSubscription";
+import { AutomaticAirdropsModal } from "./ReviewDistributionPlanTableSubscriptionFooterAutomaticAirdrops";
 import { ConfirmTokenIdModal } from "./ReviewDistributionPlanTableSubscriptionFooterConfirmTokenId";
 import { UploadDistributionPhotosModal } from "./ReviewDistributionPlanTableSubscriptionFooterUploadPhotos";
 
 interface DistributionOverview {
   photos_count: number;
   is_normalized: boolean;
+  automatic_airdrops: number;
 }
 
 export function ReviewDistributionPlanTableSubscriptionFooter() {
@@ -30,11 +32,13 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
 
   const [showSubscriptionsReset, setShowSubscriptionsReset] = useState(false);
   const [showUploadPhotos, setShowUploadPhotos] = useState(false);
+  const [showAutomaticAirdrops, setShowAutomaticAirdrops] = useState(false);
   const [showFinalizeDistribution, setShowFinalizeDistribution] =
     useState(false);
   const [showConfirmTokenId, setShowConfirmTokenId] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isUploadingAirdrops, setIsUploadingAirdrops] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [overview, setOverview] = useState<DistributionOverview | null>(null);
   const [isLoadingOverview, setIsLoadingOverview] = useState(false);
@@ -163,6 +167,31 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
       </div>
       <div className="mt-5 d-flex align-items-center justify-content-end gap-2">
         <button
+          onClick={() => setShowAutomaticAirdrops(true)}
+          disabled={isUploadingAirdrops}
+          type="button"
+          className="tw-px-3 tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-sm tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-900 tw-bg-white tw-ring-iron-400/20 hover:tw-bg-iron-400/20 hover:tw-text-iron-100 tw-ease-out tw-transition tw-duration-300">
+          {isUploadingAirdrops ? (
+            <span className="d-flex gap-2 align-items-center">
+              <CircleLoader />
+              <span>Uploading</span>
+            </span>
+          ) : (
+            <>
+              Upload Automatic Airdrops
+              {isLoadingOverview ? (
+                <span className="tw-ml-2">
+                  <CircleLoader />
+                </span>
+              ) : (
+                <span className="tw-ml-2">
+                  ({overview?.automatic_airdrops ?? 0})
+                </span>
+              )}
+            </>
+          )}
+        </button>
+        <button
           onClick={() => setShowUploadPhotos(true)}
           disabled={isUploading}
           type="button"
@@ -271,6 +300,59 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
                 });
               } finally {
                 setIsUploading(false);
+              }
+            }}
+          />
+          <AutomaticAirdropsModal
+            plan={distributionPlan}
+            show={showAutomaticAirdrops}
+            handleClose={() => setShowAutomaticAirdrops(false)}
+            confirmedTokenId={confirmedTokenId}
+            onUpload={async (
+              contract: string,
+              tokenId: string,
+              csvContent: string
+            ) => {
+              setShowAutomaticAirdrops(false);
+              setIsUploadingAirdrops(true);
+              try {
+                const response = await commonApiPost<
+                  { csv: string },
+                  {
+                    success: boolean;
+                    message?: string;
+                    error?: string;
+                  }
+                >({
+                  endpoint: `distributions/${contract}/${tokenId}/automatic_airdrops`,
+                  body: { csv: csvContent },
+                });
+
+                if (response.success) {
+                  setToast({
+                    type: "success",
+                    message:
+                      response.message ||
+                      "Successfully uploaded automatic airdrops",
+                  });
+                  await refreshOverview(contract, tokenId);
+                } else {
+                  setToast({
+                    type: "error",
+                    message: response.error || "Upload failed",
+                  });
+                }
+              } catch (error: any) {
+                const errorMessage =
+                  typeof error === "string"
+                    ? error
+                    : error?.message || "Something went wrong.";
+                setToast({
+                  type: "error",
+                  message: errorMessage,
+                });
+              } finally {
+                setIsUploadingAirdrops(false);
               }
             }}
           />

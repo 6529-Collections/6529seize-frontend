@@ -29,6 +29,24 @@ jest.mock(
 );
 
 jest.mock(
+  "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscriptionFooterAutomaticAirdrops",
+  () => ({
+    AutomaticAirdropsModal: (props: any) =>
+      props.show ? (
+        <div data-testid="Automatic Airdrops">
+          <button
+            data-testid="upload-airdrops-button"
+            onClick={() =>
+              props.onUpload("contract", "123", "0x123,5\n0x456,10")
+            }>
+            Upload
+          </button>
+        </div>
+      ) : null,
+  })
+);
+
+jest.mock(
   "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscriptionFooterConfirmTokenId",
   () => ({
     ConfirmTokenIdModal: (props: any) =>
@@ -102,6 +120,7 @@ test("renders admin buttons after token id is confirmed", async () => {
     expect(screen.getByText("Change Token ID")).toBeInTheDocument();
     expect(screen.getByText("Reset Subscriptions")).toBeInTheDocument();
     expect(screen.getByText("Upload Distribution Photos")).toBeInTheDocument();
+    expect(screen.getByText("Upload Automatic Airdrops")).toBeInTheDocument();
     expect(screen.getByText("Finalize Distribution")).toBeInTheDocument();
   });
 });
@@ -143,6 +162,10 @@ test("shows confirm modals when buttons clicked", async () => {
   await user.click(screen.getByText("Finalize Distribution"));
   await waitFor(() => {
     expect(screen.getByTestId("Finalize Distribution")).toBeInTheDocument();
+  });
+  await user.click(screen.getByText("Upload Automatic Airdrops"));
+  await waitFor(() => {
+    expect(screen.getByTestId("Automatic Airdrops")).toBeInTheDocument();
   });
 });
 
@@ -192,5 +215,111 @@ test("resetSubscriptions posts data and shows toast", async () => {
   await waitFor(() => {
     expect(commonApiPost).toHaveBeenCalled();
     expect(authCtx.setToast).toHaveBeenCalled();
+  });
+});
+
+test("uploadAutomaticAirdrops posts CSV data and shows success toast", async () => {
+  const user = userEvent.setup();
+  (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
+  const commonApiPost = jest
+    .fn()
+    .mockResolvedValue({ success: true, message: "Airdrops uploaded" });
+  jest
+    .spyOn(require("@/services/api/common-api"), "commonApiPost")
+    .mockImplementation(commonApiPost);
+
+  const commonApiFetch = jest
+    .spyOn(require("@/services/api/common-api"), "commonApiFetch")
+    .mockResolvedValue({
+      photos_count: 0,
+      is_normalized: false,
+      automatic_airdrops: 5,
+    });
+
+  render(<TestWrapper initialTokenId="123" />);
+
+  await waitFor(() => {
+    expect(screen.getByText("Upload Automatic Airdrops")).toBeInTheDocument();
+  });
+
+  await user.click(screen.getByText("Upload Automatic Airdrops"));
+  await waitFor(() => {
+    expect(screen.getByTestId("Automatic Airdrops")).toBeInTheDocument();
+  });
+
+  await user.click(screen.getByTestId("upload-airdrops-button"));
+
+  await waitFor(() => {
+    expect(commonApiPost).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: expect.stringContaining("/automatic_airdrops"),
+        body: { csv: "0x123,5\n0x456,10" },
+      })
+    );
+    expect(authCtx.setToast).toHaveBeenCalledWith({
+      type: "success",
+      message: "Airdrops uploaded",
+    });
+    expect(commonApiFetch).toHaveBeenCalled();
+  });
+});
+
+test("uploadAutomaticAirdrops shows error toast on failure", async () => {
+  const user = userEvent.setup();
+  (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
+  const commonApiPost = jest
+    .fn()
+    .mockResolvedValue({ success: false, error: "Upload failed" });
+  jest
+    .spyOn(require("@/services/api/common-api"), "commonApiPost")
+    .mockImplementation(commonApiPost);
+
+  render(<TestWrapper initialTokenId="123" />);
+
+  await waitFor(() => {
+    expect(screen.getByText("Upload Automatic Airdrops")).toBeInTheDocument();
+  });
+
+  await user.click(screen.getByText("Upload Automatic Airdrops"));
+  await waitFor(() => {
+    expect(screen.getByTestId("Automatic Airdrops")).toBeInTheDocument();
+  });
+
+  await user.click(screen.getByTestId("upload-airdrops-button"));
+
+  await waitFor(() => {
+    expect(authCtx.setToast).toHaveBeenCalledWith({
+      type: "error",
+      message: "Upload failed",
+    });
+  });
+});
+
+test("uploadAutomaticAirdrops handles exceptions", async () => {
+  const user = userEvent.setup();
+  (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
+  const commonApiPost = jest.fn().mockRejectedValue(new Error("Network error"));
+  jest
+    .spyOn(require("@/services/api/common-api"), "commonApiPost")
+    .mockImplementation(commonApiPost);
+
+  render(<TestWrapper initialTokenId="123" />);
+
+  await waitFor(() => {
+    expect(screen.getByText("Upload Automatic Airdrops")).toBeInTheDocument();
+  });
+
+  await user.click(screen.getByText("Upload Automatic Airdrops"));
+  await waitFor(() => {
+    expect(screen.getByTestId("Automatic Airdrops")).toBeInTheDocument();
+  });
+
+  await user.click(screen.getByTestId("upload-airdrops-button"));
+
+  await waitFor(() => {
+    expect(authCtx.setToast).toHaveBeenCalledWith({
+      type: "error",
+      message: "Network error",
+    });
   });
 });
