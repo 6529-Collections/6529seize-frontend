@@ -1,3 +1,4 @@
+import {withSentryConfig} from "@sentry/nextjs";
 import dotenv from "dotenv";
 import {
   PHASE_DEVELOPMENT_SERVER,
@@ -8,6 +9,7 @@ import { execSync } from "node:child_process";
 import fs from "node:fs";
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
+const sentryEnabled = Boolean(process.env.SENTRY_DSN);
 
 function logOnce(label, message) {
   if (!process.env[`__LOG_${label}_ONCE__`]) {
@@ -285,4 +287,42 @@ const nextConfigFactory = (phase) => {
   return { reactStrictMode: false, compress: true, poweredByHeader: false };
 };
 
-export default nextConfigFactory;
+const sentryWrappedConfig = withSentryConfig(nextConfigFactory, {
+  // For all available options, see:
+  // https://www.npmjs.com/package/@sentry/webpack-plugin#options
+
+  org: "seize-ff",
+
+  project: "6529-frontend",
+
+  // Only print logs for uploading source maps in CI
+  silent: !process.env.CI,
+
+  // For all available options, see:
+  // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
+
+  // Upload a larger set of source maps for prettier stack traces (increases build time)
+  widenClientFileUpload: true,
+
+  // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
+  // This can increase your server load as well as your hosting bill.
+  // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
+  // side errors will fail.
+  tunnelRoute: "/monitoring",
+
+  // Automatically tree-shake Sentry logger statements to reduce bundle size
+  disableLogger: true,
+
+  // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)
+  // See the following for more information:
+  // https://docs.sentry.io/product/crons/
+  // https://vercel.com/docs/cron-jobs
+  automaticVercelMonitors: true,
+});
+
+export default (phase, ...rest) => {
+  if (!sentryEnabled) {
+    return nextConfigFactory(phase);
+  }
+  return sentryWrappedConfig(phase, ...rest);
+};
