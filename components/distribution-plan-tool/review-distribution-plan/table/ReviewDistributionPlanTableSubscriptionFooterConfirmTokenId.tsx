@@ -65,6 +65,11 @@ export function ConfirmTokenIdModal(
                 onChange={(e) => {
                   setTokenId(e.target.value);
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && isValid) {
+                    handleConfirm();
+                  }
+                }}
               />
             </Col>
           </Row>
