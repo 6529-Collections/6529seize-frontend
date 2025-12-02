@@ -48,7 +48,11 @@ const {
   isSubscriptionsAdmin,
 } = require("@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription");
 
-const distCtx = { distributionPlan: { id: "1", name: "Plan" } } as any;
+const distCtx = {
+  distributionPlan: { id: "1", name: "Plan" },
+  confirmedTokenId: null,
+  setConfirmedTokenId: jest.fn(),
+} as any;
 const authCtx = {
   connectedProfile: { wallets: [{ wallet: "0x1" }] },
   setToast: jest.fn(),

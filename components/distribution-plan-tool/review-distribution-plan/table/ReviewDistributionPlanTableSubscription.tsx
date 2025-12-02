@@ -3,6 +3,7 @@
 import { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { MEMES_CONTRACT, SUBSCRIPTIONS_ADMIN_WALLETS } from "@/constants";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
@@ -37,6 +38,7 @@ export function SubscriptionLinks(
   }>
 ) {
   const { connectedProfile, setToast } = useContext(AuthContext);
+  const { confirmedTokenId } = useContext(DistributionPlanToolContext);
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -73,6 +75,7 @@ export function SubscriptionLinks(
         plan={props.plan}
         show={showConfirm}
         handleClose={() => setShowConfirm(false)}
+        confirmedTokenId={confirmedTokenId}
         onConfirm={async (contract: string, tokenId: string) => {
           setShowConfirm(false);
           setDownloading(true);
