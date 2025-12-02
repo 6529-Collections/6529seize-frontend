@@ -23,6 +23,7 @@ import UserPageSubscriptionsAirdropAddress, {
   AirdropAddressResult,
 } from "./UserPageSubscriptionsAirdropAddress";
 import UserPageSubscriptionsBalance from "./UserPageSubscriptionsBalance";
+import UserPageSubscriptionsEditionPreference from "./UserPageSubscriptionsEditionPreference";
 import UserPageSubscriptionsHistory from "./UserPageSubscriptionsHistory";
 import UserPageSubscriptionsMode from "./UserPageSubscriptionsMode";
 import UserPageSubscriptionsTopUp from "./UserPageSubscriptionsTopUp";
@@ -265,14 +266,20 @@ export default function UserPageSubscriptions(
     return <></>;
   }
 
+  const colConfig = {
+    className: "pb-4",
+    xs: 12,
+    md: 6,
+  };
+
   return (
     <Container className="no-padding pb-5">
       <Row className="pt-2 pb-2">
-        <Col sm={12} md={isConnectedAccount ? 6 : 12}>
+        <Col>
           <Container className="no-padding">
-            <Row className="pb-2">
+            <Row>
               <Col className="d-flex align-items-center gap-2">
-                <h4 className="mb-0">Subscribe</h4>
+                <h4 className="mb-0 tw-font-semibold">Subscribe</h4>
                 <span>
                   <Link
                     href="/about/subscriptions"
@@ -282,39 +289,49 @@ export default function UserPageSubscriptions(
                 </span>
               </Col>
             </Row>
+            <hr className="tw-border-white tw-opacity-100 tw-border-2 tw-mt-1" />
             <Row>
-              <Col
-                className={`pt-2 pb-2 d-flex ${
-                  isConnectedAccount
-                    ? "flex-column gap-4"
-                    : "flex-wrap flex-md-nowrap gap-4 justify-content-between"
-                }`}>
+              <Col {...colConfig}>
                 <UserPageSubscriptionsBalance
                   details={details}
                   fetching={isFetching}
                   refresh={refresh}
                   show_refresh={isConnectedAccount}
                 />
+              </Col>
+              <Col {...colConfig}>
+                <UserPageSubscriptionsAirdropAddress
+                  show_edit={isConnectedAccount}
+                  airdrop={airdropResult}
+                />
+              </Col>
+              <Col {...colConfig}>
                 <UserPageSubscriptionsMode
                   profileKey={profileKey}
                   details={details}
                   readonly={!isConnectedAccount}
                   refresh={refresh}
                 />
-                <UserPageSubscriptionsAirdropAddress
-                  show_edit={isConnectedAccount}
-                  airdrop={airdropResult}
+              </Col>
+              <Col {...colConfig}>
+                <UserPageSubscriptionsEditionPreference
+                  profileKey={profileKey}
+                  details={details}
+                  readonly={!isConnectedAccount}
+                  refresh={refresh}
                 />
               </Col>
             </Row>
           </Container>
         </Col>
-        {isConnectedAccount && (
-          <Col sm={12} md={6}>
+      </Row>
+      {isConnectedAccount && (
+        <Row className="pt-4 pb-2">
+          <Col>
             <UserPageSubscriptionsTopUp />
           </Col>
-        )}
-      </Row>
+        </Row>
+      )}
       <Row className="pt-4 pb-2">
         <Col>
           <UserPageSubscriptionsUpcoming
@@ -326,7 +343,7 @@ export default function UserPageSubscriptions(
           />
         </Col>
       </Row>
-      <Row className="pt-2 pb-2">
+      <Row className="pt-4 pb-2">
         <Col>
           <UserPageSubscriptionsHistory
             topups={topUpHistory}
