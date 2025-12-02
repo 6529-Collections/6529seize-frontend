@@ -1,15 +1,19 @@
 interface CollectionBreadcrumbsProps {
   readonly collectionLabel: string;
   readonly tokenLabel?: string;
+  readonly grantLabel?: string;
   readonly onNavigateToCollections: () => void;
   readonly onNavigateToTokens?: () => void;
+  readonly onNavigateToContributors?: () => void;
 }
 
 export function CollectionBreadcrumbs({
   collectionLabel,
   tokenLabel,
+  grantLabel,
   onNavigateToCollections,
   onNavigateToTokens,
+  onNavigateToContributors,
 }: Readonly<CollectionBreadcrumbsProps>) {
   const crumbs = [
     {
@@ -23,6 +27,12 @@ export function CollectionBreadcrumbs({
     tokenLabel
       ? {
         label: tokenLabel,
+        onClick: grantLabel ? onNavigateToContributors : undefined,
+      }
+      : null,
+    grantLabel
+      ? {
+        label: grantLabel,
       }
       : null,
   ].filter(Boolean) as { label: string; onClick?: () => void }[];

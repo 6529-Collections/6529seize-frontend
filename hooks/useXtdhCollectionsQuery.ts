@@ -22,6 +22,7 @@ export interface UseXtdhCollectionsQueryParams {
   readonly order?: XtdhCollectionsOrder;
   readonly enabled?: boolean;
   readonly requireIdentity?: boolean;
+  readonly collectionName?: string;
 }
 
 type XtdhCollectionsInfiniteData = InfiniteData<ApiXTdhCollectionsPage>;
@@ -48,6 +49,7 @@ export function useXtdhCollectionsQuery({
   order = DEFAULT_ORDER,
   enabled = true,
   requireIdentity = true,
+  collectionName,
 }: Readonly<UseXtdhCollectionsQueryParams>): UseXtdhCollectionsQueryResult {
   const normalizedIdentity = identity?.trim() ?? "";
   const hasIdentity = Boolean(normalizedIdentity);
@@ -66,8 +68,9 @@ export function useXtdhCollectionsQuery({
       sortField,
       normalizedOrder,
       requireIdentity,
+      collectionName,
     ],
-    [normalizedIdentity, normalizedPageSize, sortField, normalizedOrder, requireIdentity]
+    [normalizedIdentity, normalizedPageSize, sortField, normalizedOrder, requireIdentity, collectionName]
   );
 
   const query = useInfiniteQuery({
@@ -82,6 +85,9 @@ export function useXtdhCollectionsQuery({
       };
       if (hasIdentity) {
         params.identity = normalizedIdentity;
+      }
+      if (collectionName) {
+        params.collection_name = collectionName;
       }
 
       return commonApiFetch<ApiXTdhCollectionsPage>({

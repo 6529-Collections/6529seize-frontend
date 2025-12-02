@@ -1,10 +1,13 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useContext } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { commonApiPost } from "@/services/api/common-api";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
+  QueryKey,
+  ReactQueryWrapperContext,
+} from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ApiTdhGrantStatus } from "@/generated/models/ApiTdhGrantStatus";
 import { useAuth } from "@/components/auth/Auth";
 import CommonConfirmationModal from "@/components/utils/modal/CommonConfirmationModal";
@@ -45,6 +48,7 @@ export function UserPageXtdhGrantListItem({
   } = useGrantItemViewModel(grant);
 
   const queryClient = useQueryClient();
+  const { invalidateIdentityTdhStats } = useContext(ReactQueryWrapperContext);
   const { setToast } = useAuth();
 
   const [activeModal, setActiveModal] = useState<"STOP" | "REVOKE" | null>(
@@ -66,6 +70,10 @@ export function UserPageXtdhGrantListItem({
         message: "Grant stopped successfully.",
       });
       queryClient.invalidateQueries({ queryKey: [QueryKey.TDH_GRANTS] });
+      const identity = grant.grantor.handle ?? grant.grantor.primary_address;
+      if (identity) {
+        invalidateIdentityTdhStats({ identity });
+      }
       setActiveModal(null);
     },
     onError: () => {
@@ -91,6 +99,10 @@ export function UserPageXtdhGrantListItem({
         message: "Grant revoked successfully.",
       });
       queryClient.invalidateQueries({ queryKey: [QueryKey.TDH_GRANTS] });
+      const identity = grant.grantor.handle ?? grant.grantor.primary_address;
+      if (identity) {
+        invalidateIdentityTdhStats({ identity });
+      }
       setActiveModal(null);
     },
     onError: () => {

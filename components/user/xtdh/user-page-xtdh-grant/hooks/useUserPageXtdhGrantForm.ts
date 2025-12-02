@@ -5,7 +5,10 @@ import { commonApiPost } from "@/services/api/common-api";
 import { ApiCreateTdhGrant } from "@/generated/models/ApiCreateTdhGrant";
 import { ApiTdhGrant } from "@/generated/models/ApiTdhGrant";
 import { ApiTdhGrantTargetChain } from "@/generated/models/ApiTdhGrantTargetChain";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
+  QueryKey,
+  ReactQueryWrapperContext,
+} from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { validateGrantForm } from "../utils/validateGrantForm";
 import type {
   GrantValidationResult,
@@ -29,6 +32,7 @@ export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
     useState<UserPageXtdhGrantForm["submitSuccess"]>(null);
   const [isAuthorizing, setIsAuthorizing] = useState(false);
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
+  const { invalidateIdentityTdhStats } = useContext(ReactQueryWrapperContext);
   const queryClient = useQueryClient();
 
   const identity =
@@ -138,6 +142,9 @@ export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
         await queryClient.invalidateQueries({
           queryKey: [QueryKey.TDH_GRANTS, "pending-count"],
         });
+        if (identity) {
+          invalidateIdentityTdhStats({ identity });
+        }
         const message = "Grant submitted. You will see it once processed.";
         setSubmitSuccess(message);
         setToast({ type: "success", message });
@@ -169,6 +176,8 @@ export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
     selection,
     setToast,
     validUntil,
+    identity,
+    invalidateIdentityTdhStats,
   ]);
 
   return {
