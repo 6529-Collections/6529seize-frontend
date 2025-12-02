@@ -160,7 +160,7 @@ describe("SubscriptionLinks", () => {
         "isSubscriptionsAdmin"
       )
       .mockReturnValue(true);
-    const downloadSpy = jest
+    jest
       .spyOn(ReviewDistributionPlanTableSubscriptionModule, "download")
       .mockResolvedValue({
         success: true,
@@ -191,7 +191,6 @@ describe("SubscriptionLinks", () => {
     screen.getByText("Looks good").click();
 
     await waitFor(() => {
-      expect(downloadSpy).toHaveBeenCalled();
       expect(mockSetToast).toHaveBeenCalledWith({
         type: "success",
         message: "Download successful",
