@@ -8,6 +8,7 @@ import type { NftPickerProps, Suggestion, SupportedChain } from "./types";
 import { mapSuggestionToOverview } from "./utils/mappers";
 import { formatCanonical, parseTokenExpressionToRanges } from "./utils";
 import { useNftSearch, useNftSelection, useNftTokenInput } from "./hooks";
+import { useClickAway } from "react-use";
 import {
   NftContractHeader,
   NftPickerSearch,
@@ -233,8 +234,13 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     className
   );
 
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  useClickAway(wrapperRef, () => {
+    setIsOpen(false);
+  });
+
   return (
-    <div className={wrapperClassName}>
+    <div className={wrapperClassName} ref={wrapperRef}>
       {!selectedContract && (
         <NftPickerSearch
           query={query}

@@ -1,5 +1,6 @@
 import type { ApiXTdhCollectionsPage } from "@/generated/models/ApiXTdhCollectionsPage";
 
+import { EmptyState } from "@/components/common/EmptyState";
 import { InlineRetry, ListError, ListMessage } from "../collection-tokens/subcomponents/XtdhTokensFallbacks";
 import { XtdhReceivedCollectionCard } from "../collection-card-content";
 
@@ -59,11 +60,14 @@ export function XtdhCollectionsList({
 
   if (!collections.length) {
     return (
-      <ListMessage>
-        {isIdentityScoped
-          ? "This identity hasn't received any xTDH yet. When grants send xTDH to NFT collections, collectors start accruing TDH automatically once they hold eligible tokens. Grants received here will appear as soon as the identity is included in a collection."
-          : "No xTDH collections to show yet. When grants are issued, collections receiving xTDH will appear here."}
-      </ListMessage>
+      <EmptyState
+        title={isIdentityScoped ? "No xTDH received" : "No collections found"}
+        message={
+          isIdentityScoped
+            ? "This identity will automatically accrue xTDH by holding eligible tokens from collections receiving grants."
+            : "No xTDH collections to show yet. When grants are issued, collections receiving xTDH will appear here."
+        }
+      />
     );
   }
 

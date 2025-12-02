@@ -26,7 +26,7 @@ export function XtdhStatCard({
   );
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-1 tw-rounded-xl tw-bg-iron-900 tw-p-3">
+    <div className="tw-flex tw-flex-col tw-gap-1 tw-rounded-xl tw-bg-iron-900 tw-p-4">
       <CustomTooltip content={<span aria-hidden="true">{tooltip}</span>} placement="top">
         {labelWithTooltip}
       </CustomTooltip>

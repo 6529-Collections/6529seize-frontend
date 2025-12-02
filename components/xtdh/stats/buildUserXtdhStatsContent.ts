@@ -31,7 +31,6 @@ export function buildUserXtdhStatsContent(data: IdentityTdhStats): XtdhStatsProp
 
   return {
     metrics: {
-      tdhRate: formatStatFloor(tdhRate),
       multiplier: formatDisplay(xtdhMultiplier, 2),
       producedXtdhRate: formatStatFloor(producedXtdhRate),
     },

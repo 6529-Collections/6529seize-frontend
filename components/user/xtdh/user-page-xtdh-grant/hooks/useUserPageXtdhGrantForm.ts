@@ -51,7 +51,7 @@ export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
   const maxGrantRateRaw = tdhStats?.availableGrantRate ?? null;
   const maxGrantRate =
     Number.isFinite(maxGrantRateRaw) && maxGrantRateRaw !== null
-      ? Math.floor(maxGrantRateRaw)
+      ? maxGrantRateRaw
       : null;
 
   const createGrantMutation = useMutation({
