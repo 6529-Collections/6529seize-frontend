@@ -3,7 +3,7 @@ import { DistributionPlanToolContext } from "@/components/distribution-plan-tool
 import { ReviewDistributionPlanTableSubscriptionFooter } from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscriptionFooter";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 jest.mock(
   "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription",
@@ -56,16 +56,19 @@ const authCtx = {
 function TestWrapper({
   initialTokenId = null,
 }: {
-  initialTokenId?: string | null;
+  readonly initialTokenId?: string | null;
 }) {
   const [confirmedTokenId, setConfirmedTokenId] = useState<string | null>(
     initialTokenId
   );
-  const distCtx = {
-    distributionPlan: { id: "1", name: "Plan" },
-    confirmedTokenId,
-    setConfirmedTokenId,
-  } as any;
+  const distCtx = useMemo(
+    () => ({
+      distributionPlan: { id: "1", name: "Plan" },
+      confirmedTokenId,
+      setConfirmedTokenId,
+    }),
+    [confirmedTokenId]
+  ) as any;
 
   return (
     <DistributionPlanToolContext.Provider value={distCtx}>
