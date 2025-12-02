@@ -14,11 +14,11 @@ import {
 import { commonApiFetch } from "@/services/api/common-api";
 import { useContext, useState } from "react";
 import { Button, Col, Container, Modal, Row } from "react-bootstrap";
+import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "./constants";
 import {
   ReviewDistributionPlanTableItem,
   ReviewDistributionPlanTableItemType,
 } from "./ReviewDistributionPlanTable";
-import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "./constants";
 
 interface WalletResult {
   wallet: string;
@@ -84,8 +84,8 @@ export function SubscriptionLinks(
               contract,
               tokenId,
               props.plan.id,
-              props.phase.id,
-              props.phase.name
+              isPublic ? "public" : props.phase.id,
+              isPublic ? "public" : props.phase.name
             );
             setToast({
               type: downloadResponse.success ? "success" : "error",
@@ -123,7 +123,7 @@ export function SubscriptionConfirm(
   const [tokenId, setTokenId] = useState<string>(
     props.confirmedTokenId ?? defaultTokenId
   );
-  
+
   const displayTokenId = props.confirmedTokenId ?? tokenId;
 
   return (
@@ -181,7 +181,9 @@ export function SubscriptionConfirm(
           Close
         </Button>
         <Button
-          disabled={!displayTokenId || Number.isNaN(Number.parseInt(displayTokenId, 10))}
+          disabled={
+            !displayTokenId || Number.isNaN(Number.parseInt(displayTokenId, 10))
+          }
           variant="primary"
           onClick={() => props.onConfirm(contract, displayTokenId)}>
           Looks good
