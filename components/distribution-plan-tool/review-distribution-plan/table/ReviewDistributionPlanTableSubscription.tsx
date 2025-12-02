@@ -128,14 +128,18 @@ export function SubscriptionConfirm(
     show: boolean;
     handleClose(): void;
     isNormalized?: boolean;
+    confirmedTokenId?: string | null;
     onConfirm(contract: string, tokenId: string): void;
   }>
 ) {
   const contract = MEMES_CONTRACT;
   const numbers = extractAllNumbers(props.plan.name);
+  const defaultTokenId = numbers.length > 0 ? numbers[0].toString() : "";
   const [tokenId, setTokenId] = useState<string>(
-    numbers.length > 0 ? numbers[0].toString() : ""
+    props.confirmedTokenId ?? defaultTokenId
   );
+  
+  const displayTokenId = props.confirmedTokenId ?? tokenId;
 
   return (
     <Modal show={props.show} onHide={props.handleClose}>
@@ -155,18 +159,23 @@ export function SubscriptionConfirm(
           <Row className="pt-2 pb-2">
             <Col>
               Token ID:{" "}
-              <input
-                style={{
-                  color: "black",
-                  width: "100px",
-                }}
-                min={1}
-                type="number"
-                value={Number.parseInt(tokenId, 10)}
-                onChange={(e) => {
-                  setTokenId(e.target.value);
-                }}
-              />
+              {props.confirmedTokenId !== undefined &&
+              props.confirmedTokenId !== null ? (
+                <span>{displayTokenId}</span>
+              ) : (
+                <input
+                  style={{
+                    color: "black",
+                    width: "100px",
+                  }}
+                  min={1}
+                  type="number"
+                  value={tokenId ? Number.parseInt(tokenId, 10) : ""}
+                  onChange={(e) => {
+                    setTokenId(e.target.value);
+                  }}
+                />
+              )}
             </Col>
           </Row>
           {props.isNormalized !== undefined && props.isNormalized && (
@@ -186,9 +195,9 @@ export function SubscriptionConfirm(
           Close
         </Button>
         <Button
-          disabled={!tokenId || Number.isNaN(Number.parseInt(tokenId, 10))}
+          disabled={!displayTokenId || Number.isNaN(Number.parseInt(displayTokenId, 10))}
           variant="primary"
-          onClick={() => props.onConfirm(contract, tokenId)}>
+          onClick={() => props.onConfirm(contract, displayTokenId)}>
           Looks good
         </Button>
       </Modal.Footer>

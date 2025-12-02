@@ -4,7 +4,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { MEMES_CONTRACT } from "@/constants";
-import { extractAllNumbers } from "@/helpers/Helpers";
+import { formatAddress } from "@/helpers/Helpers";
 import {
   commonApiFetch,
   commonApiPost,
@@ -15,6 +15,7 @@ import {
   SubscriptionConfirm,
   isSubscriptionsAdmin,
 } from "./ReviewDistributionPlanTableSubscription";
+import { ConfirmTokenIdModal } from "./ReviewDistributionPlanTableSubscriptionFooterConfirmTokenId";
 import { UploadDistributionPhotosModal } from "./ReviewDistributionPlanTableSubscriptionFooterUploadPhotos";
 
 interface DistributionOverview {
@@ -30,11 +31,13 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
   const [showUploadPhotos, setShowUploadPhotos] = useState(false);
   const [showFinalizeDistribution, setShowFinalizeDistribution] =
     useState(false);
+  const [showConfirmTokenId, setShowConfirmTokenId] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [overview, setOverview] = useState<DistributionOverview | null>(null);
   const [isLoadingOverview, setIsLoadingOverview] = useState(false);
+  const [confirmedTokenId, setConfirmedTokenId] = useState<string | null>(null);
 
   const refreshOverview = useCallback(
     async (contract: string, tokenId?: string) => {
@@ -54,23 +57,31 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
         setIsLoadingOverview(false);
       }
     },
-    [commonApiFetch, setOverview, setIsLoadingOverview]
+    []
   );
 
   useEffect(() => {
-    async function fetchOverview() {
-      if (!distributionPlan || !isSubscriptionsAdmin(connectedProfile)) {
-        return;
-      }
-
-      const contract = MEMES_CONTRACT;
-      const tokenId = extractAllNumbers(distributionPlan.name)[0]?.toString();
-
-      await refreshOverview(contract, tokenId);
+    if (!distributionPlan || !isSubscriptionsAdmin(connectedProfile)) {
+      return;
     }
 
-    fetchOverview();
-  }, [distributionPlan, connectedProfile, refreshOverview]);
+    if (!confirmedTokenId) {
+      setShowConfirmTokenId(true);
+      return;
+    }
+
+    const contract = MEMES_CONTRACT;
+    refreshOverview(contract, confirmedTokenId);
+  }, [distributionPlan, connectedProfile, confirmedTokenId, refreshOverview]);
+
+  const handleConfirmTokenId = (contract: string, tokenId: string) => {
+    setConfirmedTokenId(tokenId);
+    setShowConfirmTokenId(false);
+  };
+
+  const handleChangeTokenId = () => {
+    setShowConfirmTokenId(true);
+  };
 
   const resetSubscriptions = async (
     contract: string,
@@ -104,23 +115,51 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     return <></>;
   }
 
+  if (!confirmedTokenId) {
+    return (
+      <>
+        {distributionPlan && (
+          <ConfirmTokenIdModal
+            plan={distributionPlan}
+            show={showConfirmTokenId}
+            onConfirm={handleConfirmTokenId}
+          />
+        )}
+      </>
+    );
+  }
+
+  const contract = MEMES_CONTRACT;
+
   return (
     <div className="pt-3 pb-3 d-flex flex-column align-items-end gap-2">
-      <div className="d-flex align-items-center justify-content-end gap-2">
-        <button
-          onClick={() => setShowSubscriptionsReset(true)}
-          disabled={isResetting}
-          type="button"
-          className="tw-px-3 tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-sm tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-900 tw-bg-[#f87171] tw-ring-[#f87171]/20 hover:tw-bg-[#7f1d1d] hover:tw-text-iron-100 tw-ease-out tw-transition tw-duration-300">
-          {isResetting ? (
-            <span className="d-flex gap-2 align-items-center">
-              <CircleLoader />
-              <span>Resetting</span>
-            </span>
-          ) : (
-            <>Reset Subscriptions</>
-          )}
-        </button>
+      <div className="w-100 d-flex align-items-center justify-content-between gap-2 flex-wrap">
+        <span className="tw-text-sm tw-text-iron-400">
+          Contract: The Memes - {formatAddress(contract)} | Token ID:{" "}
+          {confirmedTokenId}
+        </span>
+        <div className="d-flex align-items-center gap-2">
+          <button
+            onClick={handleChangeTokenId}
+            type="button"
+            className="tw-px-3 tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-sm tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-900 tw-bg-white tw-ring-iron-400/20 hover:tw-bg-iron-400/20 hover:tw-text-iron-100 tw-ease-out tw-transition tw-duration-300">
+            Change Token ID
+          </button>
+          <button
+            onClick={() => setShowSubscriptionsReset(true)}
+            disabled={isResetting}
+            type="button"
+            className="tw-px-3 tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-sm tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-900 tw-bg-[#f87171] tw-ring-[#f87171]/20 hover:tw-bg-[#7f1d1d] hover:tw-text-iron-100 tw-ease-out tw-transition tw-duration-300">
+            {isResetting ? (
+              <span className="d-flex gap-2 align-items-center">
+                <CircleLoader />
+                <span>Resetting</span>
+              </span>
+            ) : (
+              <>Reset Subscriptions</>
+            )}
+          </button>
+        </div>
       </div>
       <div className="mt-5 d-flex align-items-center justify-content-end gap-2">
         <button
@@ -176,11 +215,17 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
       </div>
       {distributionPlan && (
         <>
+          <ConfirmTokenIdModal
+            plan={distributionPlan}
+            show={showConfirmTokenId}
+            onConfirm={handleConfirmTokenId}
+          />
           <UploadDistributionPhotosModal
             plan={distributionPlan}
             show={showUploadPhotos}
             handleClose={() => setShowUploadPhotos(false)}
             existingPhotosCount={overview?.photos_count ?? 0}
+            confirmedTokenId={confirmedTokenId}
             onUpload={async (
               contract: string,
               tokenId: string,
@@ -234,6 +279,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
             plan={distributionPlan}
             show={showSubscriptionsReset}
             handleClose={() => setShowSubscriptionsReset(false)}
+            confirmedTokenId={confirmedTokenId}
             onConfirm={(contract: string, tokenId: string) =>
               resetSubscriptions(contract, tokenId, distributionPlan.id)
             }
@@ -244,6 +290,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
             show={showFinalizeDistribution}
             handleClose={() => setShowFinalizeDistribution(false)}
             isNormalized={overview?.is_normalized ?? false}
+            confirmedTokenId={confirmedTokenId}
             onConfirm={async (contract: string, tokenId: string) => {
               setShowFinalizeDistribution(false);
               setIsFinalizing(true);
