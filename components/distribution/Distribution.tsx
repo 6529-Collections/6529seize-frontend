@@ -246,9 +246,7 @@ export default function DistributionPage(props: Readonly<Props>) {
                         />
                       </td>
                       {distributionsPhases.map((p) => (
-                        <td
-                          key={`${p}-${d.wallet}`}
-                          className="tw-flex tw-justify-center tw-items-center">
+                        <td key={`${p}-${d.wallet}`} className="text-center">
                           {getCountForPhase(d, p)}&nbsp;&nbsp;
                           {getSpotsForPhase(d, p)}
                         </td>
