@@ -930,7 +930,7 @@ export default function HeaderSearchModal({
                   type="button"
                   onClick={onClose}
                   aria-label="Close search"
-                  className="tw-hidden sm:tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-iron-700 tw-bg-iron-900 tw-text-iron-300 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white tw-transition tw-duration-150">
+                  className="tw-hidden sm:tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-iron-700 tw-bg-iron-900 tw-text-iron-300 tw-border-solid hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white tw-transition tw-duration-150">
                   <XMarkIcon className="tw-size-5" />
                 </button>
               </div>

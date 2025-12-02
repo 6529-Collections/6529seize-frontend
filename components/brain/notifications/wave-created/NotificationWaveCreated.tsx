@@ -1,9 +1,5 @@
 import Link from "next/link";
 import { INotificationWaveCreated } from "@/types/feed.types";
-import {
-  getScaledImageUri,
-  ImageScale,
-} from "@/helpers/image.helpers";
 import { getTimeAgoShort } from "@/helpers/Helpers";
 import WaveHeaderFollow, {
   WaveFollowBtnSize,
@@ -16,6 +12,7 @@ import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import NotificationHeader from "../subcomponents/NotificationHeader";
 
 export default function NotificationWaveCreated({
   notification,
@@ -42,55 +39,40 @@ export default function NotificationWaveCreated({
   });
 
   return (
-    <div className="tw-w-full tw-inline-flex tw-justify-between gap-2">
-      <div className="tw-flex tw-gap-x-2 tw-items-center">
-        <div className="tw-h-7 tw-w-7">
-          {notification.related_identity.pfp ? (
-            <img
-              src={getScaledImageUri(
-                notification.related_identity.pfp,
-                ImageScale.W_AUTO_H_50
-              )}
-              alt="#"
-              className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
+    <div className="tw-w-full">
+      <NotificationHeader
+        author={notification.related_identity}
+        actions={
+          <div className="tw-flex tw-gap-x-2 tw-items-center">
+            {wave && (
+              <WaveHeaderFollow
+                wave={wave}
+                subscribeToAllDrops={true}
+                size={WaveFollowBtnSize.SMALL}
+              />
+            )}
+            <NotificationsFollowBtn
+              profile={notification.related_identity}
+              size={UserFollowBtnSize.SMALL}
             />
-          ) : (
-            <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
-          )}
-        </div>
-        <span className="tw-text-sm tw-font-normal tw-text-iron-50">
-          <Link
-            href={`/${notification.related_identity.handle}`}
-            className="tw-no-underline tw-font-semibold">
-            {notification.related_identity.handle}
-          </Link>{" "}
-          <span className="tw-text-iron-400"> invited you to a wave:</span>{" "}
-          <Link
-            href={invitationHref}
-            className="tw-text-md tw-font-medium tw-no-underline tw-text-primary-400 hover:tw-text-primary-300">
-            {wave?.name}
-          </Link>{" "}
-          <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
-            <span className="tw-font-bold tw-mr-1 tw-text-xs tw-text-iron-400">
-              &#8226;
-            </span>{" "}
-            {getTimeAgoShort(notification.created_at)}
-          </span>
+          </div>
+        }
+      >
+        <span className="tw-text-iron-400 tw-font-normal tw-text-sm">
+          invited you to a wave:
         </span>
-      </div>
-      <div className="tw-flex tw-gap-x-2 tw-items-center">
-        {wave && (
-          <WaveHeaderFollow
-            wave={wave}
-            subscribeToAllDrops={true}
-            size={WaveFollowBtnSize.SMALL}
-          />
-        )}
-        <NotificationsFollowBtn
-          profile={notification.related_identity}
-          size={UserFollowBtnSize.SMALL}
-        />
-      </div>
+        <Link
+          href={invitationHref}
+          className="tw-text-sm tw-font-medium tw-no-underline tw-text-primary-400 hover:tw-text-primary-300">
+          {wave?.name}
+        </Link>
+        <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
+          <span className="tw-font-bold tw-mr-1 tw-text-xs tw-text-iron-400">
+            &#8226;
+          </span>
+          {getTimeAgoShort(notification.created_at)}
+        </span>
+      </NotificationHeader>
     </div>
   );
 }
