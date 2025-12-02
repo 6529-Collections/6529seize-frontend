@@ -1,9 +1,9 @@
-import React from "react";
-import { renderHook, act } from "@testing-library/react";
 import {
   NotificationsProvider,
   useNotificationsContext,
 } from "@/components/notifications/NotificationsContext";
+import { act, renderHook } from "@testing-library/react";
+import React from "react";
 
 jest.mock("@/hooks/useCapacitor", () => () => ({
   isCapacitor: true,
@@ -77,36 +77,51 @@ it("removes notifications when functions called", async () => {
 describe("push notification action handling", () => {
   it("redirects based on notification data", async () => {
     const push = jest.fn();
-    jest
+    const useRouterSpy = jest
       .spyOn(require("next/navigation"), "useRouter")
       .mockReturnValue({ push } as any);
 
-    const addListenerMock = jest.fn((evt, cb) => {
-      if (evt === "pushNotificationActionPerformed") {
-        setTimeout(
-          () =>
-            cb({
-              notification: {
-                data: {
-                  redirect: "profile",
-                  handle: "abc",
-                  notification_id: "1",
-                },
-              },
-            }),
-          0
-        );
+    let actionCallback: ((action: any) => Promise<void>) | null = null;
+
+    const { PushNotifications } = require("@capacitor/push-notifications");
+    PushNotifications.addListener.mockImplementation(
+      (event: string, callback: any) => {
+        if (event === "pushNotificationActionPerformed") {
+          actionCallback = callback;
+        }
+        return Promise.resolve();
+      }
+    );
+
+    jest
+      .spyOn(require("@/components/auth/Auth"), "useAuth")
+      .mockReturnValue({ connectedProfile: { id: "test-id" } } as any);
+
+    const { result } = renderHook(() => useNotificationsContext(), { wrapper });
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 200));
+    });
+
+    expect(actionCallback).not.toBeNull();
+
+    await act(async () => {
+      if (actionCallback) {
+        await actionCallback({
+          notification: {
+            data: {
+              redirect: "profile",
+              handle: "abc",
+              notification_id: "1",
+            },
+          },
+        });
       }
     });
 
-    const { PushNotifications } = require("@capacitor/push-notifications");
-    PushNotifications.addListener = addListenerMock;
-
-    const { result } = renderHook(() => useNotificationsContext(), { wrapper });
-    await act(async () => {
-      await new Promise((r) => setTimeout(r, 100));
-    });
     expect(push).toHaveBeenCalledWith("/abc");
     expect(PushNotifications.removeDeliveredNotifications).toHaveBeenCalled();
+
+    useRouterSpy.mockRestore();
   });
 });
