@@ -516,7 +516,7 @@ export default function UserPageSubscriptionsTopUp() {
                       </button>
                     )}
                   </div>
-                  <div className="tw-bg-iron-800 tw-rounded-xl tw-min-h-[120px] tw-flex tw-items-center tw-justify-center">
+                  <div className="tw-bg-iron-800 tw-rounded-xl tw-min-h-[120px] tw-flex tw-items-center tw-justify-center tw-p-2">
                     {getModalContent()}
                   </div>
                 </motion.div>
