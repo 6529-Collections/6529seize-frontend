@@ -1,7 +1,6 @@
 "use client";
 
-import { XtdhStats } from "@/components/xtdh/stats/XtdhStats";
-import { buildUserXtdhStatsContent } from "@/components/xtdh/stats/buildUserXtdhStatsContent";
+import { UserXtdhStats } from "./UserXtdhStats";
 import { useIdentityTdhStats } from "@/hooks/useIdentityTdhStats";
 
 import { normalizeProfileIdentifier } from "./user-page-xtdh-stats-header/normalizeProfileIdentifier";
@@ -10,10 +9,12 @@ import { UserPageXtdhStatsHeaderSkeleton } from "./user-page-xtdh-stats-header/U
 
 interface UserPageXtdhStatsHeaderProps {
   readonly profileId: string | null;
+  readonly onOutboundClick?: () => void;
 }
 
 export default function UserPageXtdhStatsHeader({
   profileId,
+  onOutboundClick,
 }: Readonly<UserPageXtdhStatsHeaderProps>) {
   const normalizedProfileId = normalizeProfileIdentifier(profileId);
   const hasIdentity = Boolean(normalizedProfileId);
@@ -44,7 +45,13 @@ export default function UserPageXtdhStatsHeader({
     );
   }
 
-  const statsContent = buildUserXtdhStatsContent(statsQuery.data);
-
-  return <XtdhStats {...statsContent} />;
+  return (
+    <UserXtdhStats
+      producedXtdhRate={statsQuery.data.producedXtdhRate}
+      receivedXtdhRate={statsQuery.data.receivedXtdhRate}
+      availableGrantRate={statsQuery.data.availableGrantRate}
+      xtdhRate={statsQuery.data.xtdhRate}
+      onOutboundClick={onOutboundClick}
+    />
+  );
 }

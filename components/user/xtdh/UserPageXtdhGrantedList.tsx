@@ -8,6 +8,7 @@ import { UserPageXtdhGrantedListSubFilters } from "@/components/user/xtdh/user-p
 import { getApiParamsFromFilters } from "@/components/user/xtdh/user-page-xtdh-granted-list/constants";
 import { useUserPageXtdhGrantedListFilters } from "@/components/user/xtdh/user-page-xtdh-granted-list/hooks/useUserPageXtdhGrantedListFilters";
 import { useXtdhGrantsQuery } from "@/hooks/useXtdhGrantsQuery";
+import { usePendingGrantsCount } from "@/hooks/usePendingGrantsCount";
 
 export type {
   GrantedFilterStatus,
@@ -65,6 +66,11 @@ export default function UserPageXtdhGrantedList({
     enabled,
   });
 
+  const { count: pendingCount } = usePendingGrantsCount({
+    grantor,
+    enabled,
+  });
+
 
   const handleRetry = useCallback(() => {
     refetch().catch(() => {
@@ -82,16 +88,22 @@ export default function UserPageXtdhGrantedList({
         </h2>
       </div>
 
-      <div>
-        <UserPageXtdhGrantedListTabs
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-        />
-        {activeTab === "ACTIVE" && (
-          <UserPageXtdhGrantedListSubFilters
-            activeSubFilter={activeSubFilter}
-            onSubFilterChange={handleSubFilterChange}
+      <div className="tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center tw-justify-between tw-gap-4 tw-border-b tw-border-iron-800 tw-pb-4">
+        <div className="tw-flex-1 tw-min-w-0">
+          <UserPageXtdhGrantedListTabs
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+            fill={false}
+            pendingCount={pendingCount}
           />
+        </div>
+        {activeTab === "ACTIVE" && (
+          <div className="tw-w-full sm:tw-w-auto">
+            <UserPageXtdhGrantedListSubFilters
+              activeSubFilter={activeSubFilter}
+              onSubFilterChange={handleSubFilterChange}
+            />
+          </div>
         )}
       </div>
 

@@ -14,6 +14,7 @@ export interface CommonSelectItem<T, U = unknown> {
   readonly value: T;
   readonly key: string;
   readonly childrenProps?: U;
+  readonly badge?: number;
 }
 
 interface CommonSelectDefaultProps<T, U> {
@@ -24,7 +25,7 @@ interface CommonSelectDefaultProps<T, U> {
   readonly dynamicPosition?: boolean;
   readonly disabled?: boolean;
   readonly theme?: "dark" | "light";
-  readonly size?: "sm" | "md";
+  readonly size?: "sm" | "md" | "tabs";
   readonly containerRef?: RefObject<HTMLDivElement | null>; // this is useful if you have horizontal scrolling and want to keep the dropdown in attached to its trigger
   readonly setSelected: (item: T) => void;
   readonly renderItemChildren?: (

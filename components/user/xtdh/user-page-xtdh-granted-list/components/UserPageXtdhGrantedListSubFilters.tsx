@@ -23,6 +23,7 @@ export function UserPageXtdhGrantedListSubFilters({
         activeItem={activeSubFilter}
         setSelected={onSubFilterChange}
         filterLabel="Status"
+        size="tabs"
       />
     </div>
   );

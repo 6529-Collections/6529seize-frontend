@@ -21,6 +21,7 @@ export interface IdentityTdhStats {
   readonly xtdhMultiplier: number | null;
   readonly tdhRate: number | null;
   readonly availableGrantRate: number | null;
+  readonly xtdhRate: number | null;
 }
 
 async function fetchIdentityTdhStats(identity: string): Promise<IdentityTdhStats> {
@@ -47,6 +48,7 @@ async function fetchIdentityTdhStats(identity: string): Promise<IdentityTdhStats
     xtdhMultiplier: sanitizeNullableNonNegativeNumber(response.xtdh_multiplier),
     tdhRate,
     availableGrantRate: sanitizeNullableNonNegativeNumber(response.available_grant_rate),
+    xtdhRate: sanitizeNullableNonNegativeNumber(response.xtdh_rate),
   };
 }
 

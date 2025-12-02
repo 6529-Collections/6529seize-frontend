@@ -126,7 +126,7 @@ export default function UserPageXtdhGrantSubmit({
 
       {isAmountExceeded && (
         <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-red-400" role="alert">
-          Amount exceeds your available grant rate ({formatNumberWithCommas(maxGrantRate!)}).
+          Amount exceeds your available grant rate ({formatNumberWithCommas(Math.floor(maxGrantRate! * 10) / 10)}).
         </p>
       )}
 

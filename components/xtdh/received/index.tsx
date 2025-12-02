@@ -122,12 +122,14 @@ export default function XtdhReceivedSection({
         />
       ) : (
         <>
-          <XtdhCollectionsControls
-            activeSortField={activeSortField}
-            activeSortDirection={activeSortDirection}
-            onSortChange={handleSortChange}
-            isDisabled={controlsDisabled}
-          />
+          {collections.length > 0 && (
+            <XtdhCollectionsControls
+              activeSortField={activeSortField}
+              activeSortDirection={activeSortDirection}
+              onSortChange={handleSortChange}
+              isDisabled={controlsDisabled}
+            />
+          )}
           <XtdhCollectionsList
             isEnabled={isEnabled}
             isLoading={isLoading}
