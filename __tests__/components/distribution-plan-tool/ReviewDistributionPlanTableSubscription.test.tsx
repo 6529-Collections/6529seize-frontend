@@ -58,6 +58,7 @@ describe("ReviewDistributionPlanTableSubscription utilities", () => {
 });
 
 import { AuthContext } from "@/components/auth/Auth";
+import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { ReviewDistributionPlanTableItemType } from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTable";
 import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "@/components/distribution-plan-tool/review-distribution-plan/table/constants";
 import { render, screen, waitFor } from "@testing-library/react";
@@ -123,6 +124,9 @@ describe("SubscriptionLinks", () => {
   };
 
   const mockPlan = { id: "plan1", name: "Meme 123 drop" } as any;
+  const mockDistCtx = {
+    confirmedTokenId: null,
+  } as any;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -151,9 +155,11 @@ describe("SubscriptionLinks", () => {
     } as any;
 
     render(
-      <AuthContext.Provider value={mockAuthCtx as any}>
-        <SubscriptionLinks plan={mockPlan} phase={publicPhase} />
-      </AuthContext.Provider>
+      <DistributionPlanToolContext.Provider value={mockDistCtx}>
+        <AuthContext.Provider value={mockAuthCtx as any}>
+          <SubscriptionLinks plan={mockPlan} phase={publicPhase} />
+        </AuthContext.Provider>
+      </DistributionPlanToolContext.Provider>
     );
 
     expect(screen.getByText("Public Subscriptions")).toBeInTheDocument();
@@ -169,9 +175,11 @@ describe("SubscriptionLinks", () => {
     } as any;
 
     render(
-      <AuthContext.Provider value={mockAuthCtx as any}>
-        <SubscriptionLinks plan={mockPlan} phase={publicPhase} />
-      </AuthContext.Provider>
+      <DistributionPlanToolContext.Provider value={mockDistCtx}>
+        <AuthContext.Provider value={mockAuthCtx as any}>
+          <SubscriptionLinks plan={mockPlan} phase={publicPhase} />
+        </AuthContext.Provider>
+      </DistributionPlanToolContext.Provider>
     );
 
     await user.click(screen.getByText("Public Subscriptions"));
@@ -207,9 +215,11 @@ describe("SubscriptionLinks", () => {
     } as any;
 
     render(
-      <AuthContext.Provider value={mockAuthCtx as any}>
-        <SubscriptionLinks plan={mockPlan} phase={publicPhase} />
-      </AuthContext.Provider>
+      <DistributionPlanToolContext.Provider value={mockDistCtx}>
+        <AuthContext.Provider value={mockAuthCtx as any}>
+          <SubscriptionLinks plan={mockPlan} phase={publicPhase} />
+        </AuthContext.Provider>
+      </DistributionPlanToolContext.Provider>
     );
 
     await user.click(screen.getByText("Public Subscriptions"));
@@ -246,11 +256,45 @@ describe("SubscriptionLinks", () => {
     } as any;
 
     const { container } = render(
-      <AuthContext.Provider value={nonAdminCtx as any}>
-        <SubscriptionLinks plan={mockPlan} phase={publicPhase} />
-      </AuthContext.Provider>
+      <DistributionPlanToolContext.Provider value={mockDistCtx}>
+        <AuthContext.Provider value={nonAdminCtx as any}>
+          <SubscriptionLinks plan={mockPlan} phase={publicPhase} />
+        </AuthContext.Provider>
+      </DistributionPlanToolContext.Provider>
     );
 
     expect(container.innerHTML).toBe("");
+  });
+
+  it("displays token id as text when confirmedTokenId is provided in context", async () => {
+    const user = userEvent.setup();
+    const distCtxWithTokenId = {
+      confirmedTokenId: "789",
+    } as any;
+    const publicPhase = {
+      id: "phase1",
+      name: "public",
+      type: ReviewDistributionPlanTableItemType.PHASE,
+      phaseId: PUBLIC_SUBSCRIPTIONS_PHASE_ID,
+    } as any;
+
+    render(
+      <DistributionPlanToolContext.Provider value={distCtxWithTokenId}>
+        <AuthContext.Provider value={mockAuthCtx as any}>
+          <SubscriptionLinks plan={mockPlan} phase={publicPhase} />
+        </AuthContext.Provider>
+      </DistributionPlanToolContext.Provider>
+    );
+
+    await user.click(screen.getByText("Public Subscriptions"));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Confirm Download Public Subscriptions Info")
+      ).toBeInTheDocument();
+    });
+
+    expect(screen.queryByRole("spinbutton")).not.toBeInTheDocument();
+    expect(screen.getByText("789")).toBeInTheDocument();
   });
 });

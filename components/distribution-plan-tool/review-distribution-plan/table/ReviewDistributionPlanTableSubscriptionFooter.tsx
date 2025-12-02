@@ -24,7 +24,8 @@ interface DistributionOverview {
 }
 
 export function ReviewDistributionPlanTableSubscriptionFooter() {
-  const { distributionPlan } = useContext(DistributionPlanToolContext);
+  const { distributionPlan, confirmedTokenId, setConfirmedTokenId } =
+    useContext(DistributionPlanToolContext);
   const { connectedProfile, setToast } = useContext(AuthContext);
 
   const [showSubscriptionsReset, setShowSubscriptionsReset] = useState(false);
@@ -37,7 +38,6 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [overview, setOverview] = useState<DistributionOverview | null>(null);
   const [isLoadingOverview, setIsLoadingOverview] = useState(false);
-  const [confirmedTokenId, setConfirmedTokenId] = useState<string | null>(null);
 
   const refreshOverview = useCallback(
     async (contract: string, tokenId?: string) => {

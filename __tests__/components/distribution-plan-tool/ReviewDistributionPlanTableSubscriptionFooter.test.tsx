@@ -3,6 +3,7 @@ import { DistributionPlanToolContext } from "@/components/distribution-plan-tool
 import { ReviewDistributionPlanTableSubscriptionFooter } from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscriptionFooter";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useMemo, useState } from "react";
 
 jest.mock(
   "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription",
@@ -35,8 +36,7 @@ jest.mock(
         <div data-testid="Confirm Token ID">
           <button
             data-testid="confirm-token-id-button"
-            onClick={() => props.onConfirm("contract", "123")}
-          >
+            onClick={() => props.onConfirm("contract", "123")}>
             Confirm
           </button>
         </div>
@@ -48,49 +48,56 @@ const {
   isSubscriptionsAdmin,
 } = require("@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription");
 
-const distCtx = { distributionPlan: { id: "1", name: "Plan" } } as any;
 const authCtx = {
   connectedProfile: { wallets: [{ wallet: "0x1" }] },
   setToast: jest.fn(),
 } as any;
 
-test("returns empty when not admin", () => {
-  (isSubscriptionsAdmin as jest.Mock).mockReturnValue(false);
-  const { container } = render(
+function TestWrapper({
+  initialTokenId = null,
+}: {
+  readonly initialTokenId?: string | null;
+}) {
+  const [confirmedTokenId, setConfirmedTokenId] = useState<string | null>(
+    initialTokenId
+  );
+  const distCtx = useMemo(
+    () => ({
+      distributionPlan: { id: "1", name: "Plan" },
+      confirmedTokenId,
+      setConfirmedTokenId,
+    }),
+    [confirmedTokenId]
+  ) as any;
+
+  return (
     <DistributionPlanToolContext.Provider value={distCtx}>
       <AuthContext.Provider value={authCtx}>
         <ReviewDistributionPlanTableSubscriptionFooter />
       </AuthContext.Provider>
     </DistributionPlanToolContext.Provider>
   );
+}
+
+test("returns empty when not admin", () => {
+  (isSubscriptionsAdmin as jest.Mock).mockReturnValue(false);
+  const { container } = render(<TestWrapper />);
   expect(container.innerHTML).toBe("");
 });
 
 test("shows confirm token id modal on mount for admin", () => {
   (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
-  render(
-    <DistributionPlanToolContext.Provider value={distCtx}>
-      <AuthContext.Provider value={authCtx}>
-        <ReviewDistributionPlanTableSubscriptionFooter />
-      </AuthContext.Provider>
-    </DistributionPlanToolContext.Provider>
-  );
+  render(<TestWrapper />);
   expect(screen.getByTestId("Confirm Token ID")).toBeInTheDocument();
 });
 
 test("renders admin buttons after token id is confirmed", async () => {
   const user = userEvent.setup();
   (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
-  render(
-    <DistributionPlanToolContext.Provider value={distCtx}>
-      <AuthContext.Provider value={authCtx}>
-        <ReviewDistributionPlanTableSubscriptionFooter />
-      </AuthContext.Provider>
-    </DistributionPlanToolContext.Provider>
-  );
-  
+  render(<TestWrapper />);
+
   await user.click(screen.getByTestId("confirm-token-id-button"));
-  
+
   await waitFor(() => {
     expect(screen.getByText("Change Token ID")).toBeInTheDocument();
     expect(screen.getByText("Reset Subscriptions")).toBeInTheDocument();
@@ -102,16 +109,10 @@ test("renders admin buttons after token id is confirmed", async () => {
 test("displays contract and token id after confirmation", async () => {
   const user = userEvent.setup();
   (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
-  render(
-    <DistributionPlanToolContext.Provider value={distCtx}>
-      <AuthContext.Provider value={authCtx}>
-        <ReviewDistributionPlanTableSubscriptionFooter />
-      </AuthContext.Provider>
-    </DistributionPlanToolContext.Provider>
-  );
-  
+  render(<TestWrapper />);
+
   await user.click(screen.getByTestId("confirm-token-id-button"));
-  
+
   await waitFor(() => {
     expect(screen.getByText(/Contract: The Memes/)).toBeInTheDocument();
     expect(screen.getByText(/Token ID: 123/)).toBeInTheDocument();
@@ -121,20 +122,14 @@ test("displays contract and token id after confirmation", async () => {
 test("shows confirm modals when buttons clicked", async () => {
   const user = userEvent.setup();
   (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
-  render(
-    <DistributionPlanToolContext.Provider value={distCtx}>
-      <AuthContext.Provider value={authCtx}>
-        <ReviewDistributionPlanTableSubscriptionFooter />
-      </AuthContext.Provider>
-    </DistributionPlanToolContext.Provider>
-  );
-  
+  render(<TestWrapper />);
+
   await user.click(screen.getByTestId("confirm-token-id-button"));
-  
+
   await waitFor(() => {
     expect(screen.getByText("Upload Distribution Photos")).toBeInTheDocument();
   });
-  
+
   await user.click(screen.getByText("Upload Distribution Photos"));
   await waitFor(() => {
     expect(
@@ -154,22 +149,16 @@ test("shows confirm modals when buttons clicked", async () => {
 test("change token id button opens confirm modal", async () => {
   const user = userEvent.setup();
   (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
-  render(
-    <DistributionPlanToolContext.Provider value={distCtx}>
-      <AuthContext.Provider value={authCtx}>
-        <ReviewDistributionPlanTableSubscriptionFooter />
-      </AuthContext.Provider>
-    </DistributionPlanToolContext.Provider>
-  );
-  
+  render(<TestWrapper />);
+
   await user.click(screen.getByTestId("confirm-token-id-button"));
-  
+
   await waitFor(() => {
     expect(screen.getByText("Change Token ID")).toBeInTheDocument();
   });
-  
+
   await user.click(screen.getByText("Change Token ID"));
-  
+
   await waitFor(() => {
     expect(screen.getByTestId("Confirm Token ID")).toBeInTheDocument();
   });
@@ -183,16 +172,14 @@ test("resetSubscriptions posts data and shows toast", async () => {
     .spyOn(require("@/services/api/common-api"), "commonApiPost")
     .mockImplementation(commonApiPost);
 
-  render(
-    <DistributionPlanToolContext.Provider value={distCtx}>
-      <AuthContext.Provider value={authCtx}>
-        <ReviewDistributionPlanTableSubscriptionFooter />
-      </AuthContext.Provider>
-    </DistributionPlanToolContext.Provider>
-  );
+  jest
+    .spyOn(require("@/services/api/common-api"), "commonApiFetch")
+    .mockResolvedValue({ photos_count: 0, is_normalized: false });
+
+  render(<TestWrapper />);
 
   await user.click(screen.getByTestId("confirm-token-id-button"));
-  
+
   await waitFor(() => {
     expect(screen.getByText("Reset Subscriptions")).toBeInTheDocument();
   });
