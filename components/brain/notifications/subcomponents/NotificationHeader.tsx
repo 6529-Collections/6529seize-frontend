@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
@@ -16,12 +17,14 @@ export default function NotificationHeader({
 }: NotificationHeaderProps) {
   return (
     <div className="tw-flex tw-items-start tw-gap-x-3">
-      <div className="tw-h-7 tw-w-7 tw-flex-shrink-0">
+      <div className="tw-h-7 tw-w-7 tw-flex-shrink-0 tw-relative">
         {author.pfp ? (
-          <img
+          <Image
             src={getScaledImageUri(author.pfp, ImageScale.W_AUTO_H_50)}
             alt={author.handle ?? ""}
-            className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
+            fill
+            sizes="28px"
+            className="tw-flex-shrink-0 tw-object-contain tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
           />
         ) : (
           <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />

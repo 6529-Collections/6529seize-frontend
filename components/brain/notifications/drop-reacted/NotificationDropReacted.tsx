@@ -1,7 +1,6 @@
 "use client";
 
 import { getTimeAgoShort, numberWithCommas } from "@/helpers/Helpers";
-import Link from "next/link";
 import Drop, {
   DropInteractionParams,
   DropLocation,
