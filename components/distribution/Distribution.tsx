@@ -353,15 +353,17 @@ export default function DistributionPage(props: Readonly<Props>) {
               {!fetching && distributions.length === 0 && (
                 <>{searchWallets.length > 0 ? printNotFound() : printEmpty()}</>
               )}
-              <Row>
-                <Col>
-                  <span className="tw-text-iron-400 tw-text-sm">
-                    * Note: Each column shows the total allowlist spots for that
-                    phase. The breakdown next to it displays: airdrops from
-                    subscriptions | allowlist spots for mint.
-                  </span>
-                </Col>
-              </Row>
+              {distributions.length > 0 && (
+                <Row>
+                  <Col>
+                    <span className="tw-text-iron-400 tw-text-sm">
+                      * Note: Each column shows the total allowlist spots for
+                      that phase. The breakdown next to it displays: airdrops
+                      from subscriptions | allowlist spots for mint.
+                    </span>
+                  </Col>
+                </Row>
+              )}
               {totalResults > pageProps.pageSize && (
                 <Row className="text-center pt-4">
                   <Col>
