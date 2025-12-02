@@ -83,6 +83,36 @@ test("SubscriptionConfirm extracts token id from plan name", () => {
   expect(input.value).toBe("123");
 });
 
+test("SubscriptionConfirm displays token id as text when confirmedTokenId is provided", () => {
+  render(
+    <SubscriptionConfirm
+      title="t"
+      plan={{ id: "1", name: "Meme 123 drop" } as any}
+      show={true}
+      handleClose={jest.fn()}
+      confirmedTokenId="456"
+      onConfirm={jest.fn()}
+    />
+  );
+  expect(screen.queryByRole("spinbutton")).not.toBeInTheDocument();
+  expect(screen.getByText("456")).toBeInTheDocument();
+});
+
+test("SubscriptionConfirm shows input when confirmedTokenId is not provided", () => {
+  render(
+    <SubscriptionConfirm
+      title="t"
+      plan={{ id: "1", name: "Meme 123 drop" } as any}
+      show={true}
+      handleClose={jest.fn()}
+      onConfirm={jest.fn()}
+    />
+  );
+  const input = screen.getByRole("spinbutton") as HTMLInputElement;
+  expect(input).toBeInTheDocument();
+  expect(input.value).toBe("123");
+});
+
 describe("SubscriptionLinks", () => {
   const mockSetToast = jest.fn();
   const mockAuthCtx = {
@@ -154,6 +184,8 @@ describe("SubscriptionLinks", () => {
   });
 
   it("calls download and shows toast when Public Subscriptions is confirmed", async () => {
+    const user = userEvent.setup();
+
     jest
       .spyOn(
         ReviewDistributionPlanTableSubscriptionModule,
@@ -180,7 +212,7 @@ describe("SubscriptionLinks", () => {
       </AuthContext.Provider>
     );
 
-    screen.getByText("Public Subscriptions").click();
+    await user.click(screen.getByText("Public Subscriptions"));
 
     await waitFor(() => {
       expect(
@@ -188,7 +220,7 @@ describe("SubscriptionLinks", () => {
       ).toBeInTheDocument();
     });
 
-    screen.getByText("Looks good").click();
+    await user.click(screen.getByText("Looks good"));
 
     await waitFor(() => {
       expect(mockSetToast).toHaveBeenCalledWith({

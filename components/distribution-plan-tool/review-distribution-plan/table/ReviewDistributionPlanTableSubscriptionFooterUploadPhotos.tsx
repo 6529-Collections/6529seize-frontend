@@ -16,14 +16,19 @@ export function UploadDistributionPhotosModal(
     show: boolean;
     handleClose(): void;
     existingPhotosCount?: number;
+    confirmedTokenId?: string | null;
     onUpload(contract: string, tokenId: string, files: File[]): void;
   }>
 ) {
   const numbers = extractAllNumbers(props.plan.name);
   const initialTokenId = numbers.length > 0 ? numbers[0].toString() : "";
+  const defaultTokenId = isValidPositiveInteger(initialTokenId)
+    ? initialTokenId
+    : "";
   const [tokenId, setTokenId] = useState<string>(
-    isValidPositiveInteger(initialTokenId) ? initialTokenId : ""
+    props.confirmedTokenId ?? defaultTokenId
   );
+  const displayTokenId = props.confirmedTokenId ?? tokenId;
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileErrors, setFileErrors] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -91,11 +96,11 @@ export function UploadDistributionPhotosModal(
       return;
     }
 
-    if (!isValidPositiveInteger(tokenId)) {
+    if (!isValidPositiveInteger(displayTokenId)) {
       return;
     }
 
-    props.onUpload(contract, tokenId, selectedFiles);
+    props.onUpload(contract, displayTokenId, selectedFiles);
     setSelectedFiles([]);
     setFileErrors([]);
     if (fileInputRef.current) {
@@ -130,19 +135,24 @@ export function UploadDistributionPhotosModal(
           <Row className="pt-2 pb-2">
             <Col>
               Token ID:{" "}
-              <input
-                style={{
-                  color: "black",
-                  width: "100px",
-                }}
-                min={1}
-                step={1}
-                type="number"
-                value={tokenId}
-                onChange={(e) => {
-                  setTokenId(e.target.value);
-                }}
-              />
+              {props.confirmedTokenId !== undefined &&
+              props.confirmedTokenId !== null ? (
+                <span>{displayTokenId}</span>
+              ) : (
+                <input
+                  style={{
+                    color: "black",
+                    width: "100px",
+                  }}
+                  min={1}
+                  step={1}
+                  type="number"
+                  value={tokenId}
+                  onChange={(e) => {
+                    setTokenId(e.target.value);
+                  }}
+                />
+              )}
             </Col>
           </Row>
           {props.existingPhotosCount !== undefined &&
@@ -212,7 +222,7 @@ export function UploadDistributionPhotosModal(
         </Button>
         <Button
           disabled={
-            !isValidPositiveInteger(tokenId) || selectedFiles.length === 0
+            !isValidPositiveInteger(displayTokenId) || selectedFiles.length === 0
           }
           variant="primary"
           onClick={handleUpload}>
