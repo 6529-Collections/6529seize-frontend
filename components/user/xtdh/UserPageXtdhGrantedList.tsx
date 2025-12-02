@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 import { UserPageXtdhGrantedListContent } from "@/components/user/xtdh/granted-list/UserPageXtdhGrantedListContent";
 import { UserPageXtdhGrantedListTabs } from "@/components/user/xtdh/user-page-xtdh-granted-list/components/UserPageXtdhGrantedListTabs";
@@ -70,6 +72,18 @@ export default function UserPageXtdhGrantedList({
     grantor,
     enabled,
   });
+
+  const queryClient = useQueryClient();
+  const prevPendingCount = useRef(pendingCount);
+
+  useEffect(() => {
+    if (prevPendingCount.current !== pendingCount) {
+      queryClient.invalidateQueries({
+        queryKey: [QueryKey.TDH_GRANTS, grantor],
+      });
+      prevPendingCount.current = pendingCount;
+    }
+  }, [pendingCount, queryClient, grantor]);
 
 
   const handleRetry = useCallback(() => {
