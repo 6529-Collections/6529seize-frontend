@@ -52,38 +52,20 @@ export function SubscriptionLinks(
 
   return (
     <>
-      {!isPublic && (
-        <button
-          onClick={() => setShowConfirm(true)}
-          disabled={downloading}
-          type="button"
-          className="tw-px-3 tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-white tw-bg-blue-500 tw-ring-iron-500/50 hover:tw-bg-blue-500/50 tw-ease-out tw-transition tw-duration-300">
-          {downloading ? (
-            <span className="d-flex gap-2 align-items-center">
-              <CircleLoader />
-              <span>Downloading</span>
-            </span>
-          ) : (
-            <>Subscription Lists</>
-          )}
-        </button>
-      )}
-      {isPublic && (
-        <button
-          onClick={() => setShowConfirm(true)}
-          disabled={downloading}
-          type="button"
-          className="tw-px-3 tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-white tw-bg-blue-500 tw-ring-iron-500/50 hover:tw-bg-blue-500/50 tw-ease-out tw-transition tw-duration-300">
-          {downloading ? (
-            <span className="d-flex gap-2 align-items-center">
-              <CircleLoader />
-              <span>Downloading</span>
-            </span>
-          ) : (
-            <>Public Subscriptions</>
-          )}
-        </button>
-      )}
+      <button
+        onClick={() => setShowConfirm(true)}
+        disabled={downloading}
+        type="button"
+        className="tw-px-3 tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-white tw-bg-blue-500 tw-ring-iron-500/50 hover:tw-bg-blue-500/50 tw-ease-out tw-transition tw-duration-300">
+        {downloading ? (
+          <span className="d-flex gap-2 align-items-center">
+            <CircleLoader />
+            <span>Downloading</span>
+          </span>
+        ) : (
+          <>{isPublic ? "Public Subscriptions" : "Subscription Lists"}</>
+        )}
+      </button>
       <SubscriptionConfirm
         title={
           isPublic ? "Download Public Subscriptions" : "Download Subscriptions"
@@ -169,8 +151,9 @@ export function SubscriptionConfirm(
                     width: "100px",
                   }}
                   min={1}
+                  step={1}
                   type="number"
-                  value={tokenId ? Number.parseInt(tokenId, 10) : ""}
+                  value={tokenId}
                   onChange={(e) => {
                     setTokenId(e.target.value);
                   }}
@@ -270,7 +253,8 @@ function downloadCSV(
   const csv = convertToCSV(results);
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
+  const url = URL.createObjectURL(blob);
+  link.href = url;
   link.setAttribute(
     "download",
     `${phaseName.replaceAll(" ", "_").toLowerCase()}_${filename}.csv`
@@ -278,4 +262,5 @@ function downloadCSV(
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }

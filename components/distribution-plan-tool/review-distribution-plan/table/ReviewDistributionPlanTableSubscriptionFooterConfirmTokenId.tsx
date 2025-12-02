@@ -60,8 +60,9 @@ export function ConfirmTokenIdModal(
                   width: "100px",
                 }}
                 min={1}
+                step={1}
                 type="number"
-                value={tokenId ? Number.parseInt(tokenId, 10) : ""}
+                value={tokenId}
                 onChange={(e) => {
                   setTokenId(e.target.value);
                 }}

@@ -184,6 +184,8 @@ describe("SubscriptionLinks", () => {
   });
 
   it("calls download and shows toast when Public Subscriptions is confirmed", async () => {
+    const user = userEvent.setup();
+
     jest
       .spyOn(
         ReviewDistributionPlanTableSubscriptionModule,
@@ -210,7 +212,7 @@ describe("SubscriptionLinks", () => {
       </AuthContext.Provider>
     );
 
-    screen.getByText("Public Subscriptions").click();
+    await user.click(screen.getByText("Public Subscriptions"));
 
     await waitFor(() => {
       expect(
@@ -218,7 +220,7 @@ describe("SubscriptionLinks", () => {
       ).toBeInTheDocument();
     });
 
-    screen.getByText("Looks good").click();
+    await user.click(screen.getByText("Looks good"));
 
     await waitFor(() => {
       expect(mockSetToast).toHaveBeenCalledWith({
