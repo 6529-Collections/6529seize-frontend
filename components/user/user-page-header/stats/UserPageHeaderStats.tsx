@@ -1,8 +1,6 @@
 "use client";
 
-import Link from "next/link";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { formatStatFloor } from "@/helpers/Helpers";
 import UserStatsRow from "../../utils/stats/UserStatsRow";
 
 
