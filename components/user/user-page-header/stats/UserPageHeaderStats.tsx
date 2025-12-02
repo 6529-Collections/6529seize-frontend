@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatStatFloor } from "@/helpers/Helpers";
-import UserPageFollowers from "../followers/UserPageFollowers";
+import UserStatsRow from "../../utils/stats/UserStatsRow";
 
 
 const SAFE_ROUTE_SEGMENT_PATTERN = /^[a-zA-Z0-9._-]+$/;
@@ -40,90 +40,16 @@ export default function UserPageHeaderStats({
 
   return (
     <div className="tw-mt-3">
-      <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-y-2">
-        <Link
-          href={`/${routeHandle}/collected`}
-          className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
-        >
-          <span className="tw-text-base tw-font-semibold tw-text-iron-50">
-            {formatStatFloor(profile.tdh)}
-          </span>{" "}
-          <span className="tw-text-base tw-font-medium tw-text-iron-400">
-            TDH
-          </span>
-          {profile.tdh_rate > 0 && (
-            <>
-              {" "}
-              <span className="tw-text-sm tw-font-medium tw-text-iron-400">
-                +
-                <span className="tw-text-iron-50">
-                  {formatStatFloor(profile.tdh_rate)}
-                </span>
-              </span>
-            </>
-          )}
-        </Link>
-
-        <div className="tw-text-iron-600 tw-mx-3">|</div>
-
-        <Link
-          href="/xtdh"
-          className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
-        >
-          <span className="tw-text-base tw-font-semibold tw-text-iron-50">
-            {formatStatFloor(profile.xtdh)}
-          </span>{" "}
-          <span className="tw-text-base tw-font-medium tw-text-iron-400">
-            xTDH
-          </span>
-          {profile.xtdh_rate > 0 && (
-            <>
-              {" "}
-              <span className="tw-text-sm tw-font-medium tw-text-iron-400">
-                +
-                <span className="tw-text-iron-50">
-                  {formatStatFloor(profile.xtdh_rate)}
-                </span>
-              </span>
-            </>
-          )}
-        </Link>
-
-        <div className="tw-text-iron-600 tw-mx-3">|</div>
-
-        <Link
-          href={`/${routeHandle}/identity`}
-          className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
-        >
-          <span className="tw-text-base tw-font-semibold tw-text-iron-50">
-            {formatStatFloor(profile.cic)}
-          </span>{" "}
-          <span className="tw-text-base tw-font-medium tw-text-iron-400">
-            NIC
-          </span>
-        </Link>
-
-        <div className="tw-text-iron-600 tw-mx-3">|</div>
-
-        <Link
-          href={`/${routeHandle}/rep`}
-          className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
-        >
-          <span className="tw-text-base tw-font-semibold tw-text-iron-50">
-            {formatStatFloor(profile.rep)}
-          </span>{" "}
-          <span className="tw-text-base tw-font-medium tw-text-iron-400">
-            Rep
-          </span>
-        </Link>
-
-        <div className="tw-text-iron-600 tw-mx-3">|</div>
-
-        <UserPageFollowers
-          handleOrWallet={routeHandle}
-          followersCount={followersCount}
-        />
-      </div>
+      <UserStatsRow
+        handle={routeHandle}
+        tdh={profile.tdh}
+        tdh_rate={profile.tdh_rate}
+        xtdh={profile.xtdh}
+        xtdh_rate={profile.xtdh_rate}
+        rep={profile.rep}
+        cic={profile.cic}
+        followersCount={followersCount}
+      />
     </div>
   );
 }
