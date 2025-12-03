@@ -18,11 +18,7 @@ const probeTags = {
   probe_type: "generic-exploit-scan",
 };
 
-const CONNECTION_ERROR_PATTERNS = [
-  "aborted",
-  "ECONNRESET",
-  "socket hang up",
-];
+const CONNECTION_ERROR_PATTERNS = ["aborted", "ECONNRESET", "socket hang up"];
 
 const HTTP_SERVER_STACK_PATTERNS = [
   "_http_server",
@@ -31,8 +27,9 @@ const HTTP_SERVER_STACK_PATTERNS = [
 ];
 
 function isConnectionError(message: string): boolean {
+  const normalized = message.toLowerCase();
   return CONNECTION_ERROR_PATTERNS.some((pattern) =>
-    message.includes(pattern)
+    normalized.includes(pattern.toLowerCase())
   );
 }
 
@@ -62,9 +59,7 @@ function isMonitoringRoute(url: string, stacktrace: unknown[]): boolean {
 }
 
 function hasHttpServerStack(stack: string): boolean {
-  return HTTP_SERVER_STACK_PATTERNS.some((pattern) =>
-    stack.includes(pattern)
-  );
+  return HTTP_SERVER_STACK_PATTERNS.some((pattern) => stack.includes(pattern));
 }
 
 function checkFirstErrorPath(
@@ -104,10 +99,10 @@ function checkSecondErrorPath(
   return url.includes("/monitoring");
 }
 
-export function filterTunnelRouteErrors(
-  event: Event,
+export function filterTunnelRouteErrors<T extends Event>(
+  event: T,
   hint?: EventHint
-): Event | null {
+): T | null {
   const value = event.exception?.values?.[0];
   const message = value?.value || "";
   const errorType = value?.type || "";
@@ -127,7 +122,7 @@ export function filterTunnelRouteErrors(
   return event;
 }
 
-export function tagSecurityProbes(event: Event): Event {
+export function tagSecurityProbes<T extends Event>(event: T): T {
   try {
     const url = (event?.request?.url || "").toLowerCase();
 

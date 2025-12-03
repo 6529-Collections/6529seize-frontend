@@ -58,8 +58,7 @@ function shouldFilterFilenameExceptions(
   return frames.some((frame) =>
     filenameExceptions.some(
       (pattern) =>
-        frame?.filename?.includes(pattern) ||
-        frame?.abs_path?.includes(pattern)
+        frame?.filename?.includes(pattern) || frame?.abs_path?.includes(pattern)
     )
   );
 }
@@ -114,10 +113,14 @@ function extractUrlFromError(error: TypeError, event: Sentry.Event): string {
 }
 
 function isNetworkError(errorMessage: string): boolean {
+  const normalized = errorMessage.toLowerCase();
   return (
-    errorMessage.includes("load failed") ||
-    errorMessage.includes("failed to fetch") ||
-    errorMessage.includes("network")
+    normalized.includes("failed to fetch") ||
+    normalized.includes("load failed") ||
+    normalized.includes("networkerror") ||
+    normalized.includes("network error") ||
+    normalized.includes("network request failed") ||
+    /\bnetwork\b/.test(normalized)
   );
 }
 
@@ -126,13 +129,13 @@ function handleNetworkError(
   error: TypeError,
   value: Sentry.Exception | undefined
 ): void {
-  const errorMessage = error.message.toLowerCase();
-  if (!isNetworkError(errorMessage)) {
+  if (!isNetworkError(error.message)) {
     return;
   }
 
   const url = extractUrlFromError(error, event);
-  const transformedMessage = errorMessage.includes("network")
+  const normalized = error.message.toLowerCase();
+  const transformedMessage = normalized.includes("network")
     ? `Network error: ${error.message} (${url})`
     : `Network request failed. Please check your connection and try again. (${url})`;
 
@@ -173,7 +176,7 @@ Sentry.init({
       return null;
     }
 
-    const error = hint.originalException || hint.syntheticException;
+    const error = hint?.originalException ?? hint?.syntheticException;
     const value = event.exception?.values?.[0];
 
     if (error && isIndexedDBError(error)) {
