@@ -609,23 +609,27 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     allMentions: ApiDropMentionedUser[],
     allNfts: ReferencedNft[]
   ): CreateDropConfig => {
-    const parts = ensurePartsWithFallback(
-      [
-        ...(drop?.parts ?? []),
-        {
-          content: markdown?.length ? markdown : null,
-          quoted_drop:
-            activeDrop?.action === ActiveDropAction.QUOTE
-              ? {
-                drop_id: activeDrop.drop.id,
-                drop_part_id: activeDrop.partId,
-              }
-              : null,
-          media: files,
-        },
-      ],
-      hasMetadata
-    );
+    const isStormMode = (drop?.parts.length ?? 0) > 0;
+    const hasCurrentContent = !!(markdown?.trim().length || files.length);
+    
+    const newParts = isStormMode && !hasCurrentContent
+      ? drop?.parts ?? []
+      : [
+          ...(drop?.parts ?? []),
+          {
+            content: markdown?.length ? markdown : null,
+            quoted_drop:
+              activeDrop?.action === ActiveDropAction.QUOTE
+                ? {
+                    drop_id: activeDrop.drop.id,
+                    drop_part_id: activeDrop.partId,
+                  }
+                : null,
+            media: files,
+          },
+        ];
+    
+    const parts = ensurePartsWithFallback(newParts, hasMetadata);
 
     return {
       title: null,
@@ -869,6 +873,15 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     ) {
       return;
     }
+    
+    const isStormMode = (drop?.parts.length ?? 0) > 0;
+    const hasCurrentContent = !!(getMarkdown?.trim().length || files.length);
+    
+    if (isStormMode && hasCurrentContent) {
+      finalizeAndAddDropPart();
+      return;
+    }
+    
     await prepareAndSubmitDrop(getUpdatedDrop());
   };
 
