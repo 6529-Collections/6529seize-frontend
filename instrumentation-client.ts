@@ -90,6 +90,49 @@ Sentry.init({
       event.fingerprint = ["indexeddb-connection-lost"];
     }
 
+    if (error instanceof TypeError) {
+      const errorMessage = error.message.toLowerCase();
+      if (
+        errorMessage.includes("load failed") ||
+        errorMessage.includes("failed to fetch") ||
+        errorMessage.includes("network")
+      ) {
+        let url = "unknown";
+        const urlMatch = error.message.match(/\(([^)]+)\)/);
+        if (urlMatch) {
+          url = urlMatch[1];
+        } else {
+          const fetchBreadcrumb = event.breadcrumbs?.find(
+            (crumb: any) => crumb.category === "fetch" || crumb.type === "http"
+          );
+          if (fetchBreadcrumb?.data?.url) {
+            url = fetchBreadcrumb.data.url;
+          } else if (event.request?.url) {
+            url = event.request.url;
+          }
+        }
+
+        const transformedMessage = errorMessage.includes("network")
+          ? `Network error: ${error.message} (${url})`
+          : `Network request failed. Please check your connection and try again. (${url})`;
+
+        if (value) {
+          value.value = transformedMessage;
+        }
+        if (event.message) {
+          event.message = transformedMessage;
+        }
+
+        event.level = "warning";
+        event.tags = {
+          ...event.tags,
+          errorType: "network",
+          handled: true,
+        };
+        event.fingerprint = ["network-error"];
+      }
+    }
+
     return event;
   },
 });
