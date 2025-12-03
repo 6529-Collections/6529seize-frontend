@@ -33,6 +33,7 @@ interface ViewContextType {
   hardBack: (v: ViewKey) => void;
   handleNavClick: (item: NavItem) => void;
   homeActiveTab: HomeTab;
+  clearLastVisited: (type: "wave" | "dm") => void;
 }
 
 const ViewContext = createContext<ViewContextType | undefined>(undefined);
@@ -181,9 +182,17 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
     [router, setLastVisitedDm, setLastVisitedWave, isApp]
   );
 
+  const clearLastVisited = useCallback((type: "wave" | "dm") => {
+    if (type === "wave") {
+      setLastVisitedWave(null);
+    } else {
+      setLastVisitedDm(null);
+    }
+  }, []);
+
   const providerValue = useMemo(
-    () => ({ activeView, handleNavClick, hardBack, homeActiveTab }),
-    [activeView, handleNavClick, hardBack, homeActiveTab]
+    () => ({ activeView, handleNavClick, hardBack, homeActiveTab, clearLastVisited }),
+    [activeView, handleNavClick, hardBack, homeActiveTab, clearLastVisited]
   );
 
   return (

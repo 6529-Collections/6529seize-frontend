@@ -20,16 +20,10 @@ jest.mock("next/navigation", () => ({
   usePathname: jest.fn(),
   useSearchParams: jest.fn(),
 }));
-jest.mock("@/components/navigation/ViewContext", () => ({
-  useViewContext: jest.fn(),
-}));
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStreamOptional: jest.fn(),
 }));
 jest.mock("@/hooks/useWaveById", () => ({ useWaveById: jest.fn() }));
-jest.mock("@/contexts/NavigationHistoryContext", () => ({
-  useNavigationHistoryContext: jest.fn(),
-}));
 jest.mock("@/components/navigation/BackButton", () => ({
   __esModule: true,
   default: () => <div data-testid="back" />,
@@ -49,12 +43,8 @@ const {
 const { useAuth } = require("@/components/auth/Auth");
 const { useIdentity } = require("@/hooks/useIdentity");
 const { useRouter, usePathname, useSearchParams } = require("next/navigation");
-const { useViewContext } = require("@/components/navigation/ViewContext");
 const { useMyStreamOptional } = require("@/contexts/wave/MyStreamContext");
 const { useWaveById } = require("@/hooks/useWaveById");
-const {
-  useNavigationHistoryContext,
-} = require("@/contexts/NavigationHistoryContext");
 
 function setup(opts: any) {
   (useSeizeConnectContext as jest.Mock).mockReturnValue({
@@ -62,18 +52,11 @@ function setup(opts: any) {
   });
   (useAuth as jest.Mock).mockReturnValue({ activeProfileProxy: opts.proxy });
   (useIdentity as jest.Mock).mockReturnValue({ profile: opts.profile });
-  (useViewContext as jest.Mock).mockReturnValue({
-    activeView: opts.activeView ?? null,
-    homeActiveTab: opts.homeActiveTab ?? "latest",
-  });
   (useMyStreamOptional as jest.Mock).mockReturnValue(
     opts.wave
       ? { activeWave: { id: opts.wave.id } }
       : { activeWave: { id: null } }
   );
-  (useNavigationHistoryContext as jest.Mock).mockReturnValue({
-    canGoBack: opts.canGoBack ?? false,
-  });
   (useWaveById as jest.Mock).mockReturnValue({
     wave: opts.wave,
     isLoading: false,
@@ -93,10 +76,15 @@ describe("AppHeader", () => {
   afterEach(() => jest.clearAllMocks());
 
   it("shows menu icon when not connected", () => {
-    setup({ address: null, asPath: "/home" });
+    setup({ address: null, asPath: "/notifications" });
     expect(
       screen.getByRole("button", { name: "Open menu" }).querySelector("svg")
     ).toBeInTheDocument();
+  });
+
+  it("shows back button on profile page", () => {
+    setup({ address: "0xabc", asPath: "/johndoe" });
+    expect(screen.getByTestId("back")).toBeInTheDocument();
   });
 
   it("shows back button and wave title when wave id is present", () => {
@@ -111,12 +99,11 @@ describe("AppHeader", () => {
     expect(screen.getByText("WaveOne")).toBeInTheDocument();
   });
 
-  it("shows profile image when connected without back button", () => {
+  it("shows profile image when connected and on waves list (no wave selected)", () => {
     setup({
       address: "0xabc",
       profile: { pfp: "pfp.png" },
-      asPath: "/home",
-      activeView: "messages",
+      asPath: "/waves",
     });
     const img = screen.getByRole("img", { name: "pfp" });
     expect(img).toHaveAttribute("src", "pfp.png");
@@ -127,8 +114,13 @@ describe("AppHeader", () => {
     expect(screen.getByText("The Memes #123")).toBeInTheDocument();
   });
 
-  it("shows My Stream title on home feed tab", () => {
-    setup({ asPath: "/", homeActiveTab: "feed" });
-    expect(screen.getByText("My Stream")).toBeInTheDocument();
+  it("shows Waves title on waves route without wave selected", () => {
+    setup({ asPath: "/waves" });
+    expect(screen.getByText("Waves")).toBeInTheDocument();
+  });
+
+  it("shows Messages title on messages route without wave selected", () => {
+    setup({ asPath: "/messages" });
+    expect(screen.getByText("Messages")).toBeInTheDocument();
   });
 });

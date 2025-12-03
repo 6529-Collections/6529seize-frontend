@@ -1,6 +1,5 @@
 "use client";
 
-import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
 import { capitalizeEveryWord, formatAddress } from "@/helpers/Helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useWaveById } from "@/hooks/useWaveById";
@@ -10,7 +9,6 @@ import { useState } from "react";
 import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import BackButton from "../navigation/BackButton";
-import { useViewContext } from "../navigation/ViewContext";
 import Spinner from "../utils/Spinner";
 import AppSidebar from "./AppSidebar";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
@@ -21,7 +19,7 @@ interface Props {
   readonly extraClass?: string;
 }
 
-export default function AppHeader(props: Readonly<Props>) {
+export default function AppHeader(_props: Readonly<Props>) {
   const [menuOpen, setMenuOpen] = useState(false);
   const myStream = useMyStreamOptional();
   const { address } = useSeizeConnectContext();
@@ -31,8 +29,6 @@ export default function AppHeader(props: Readonly<Props>) {
     handleOrWallet: address ?? null,
     initialProfile: null,
   });
-  const { activeView, homeActiveTab } = useViewContext();
-  const { canGoBack } = useNavigationHistoryContext();
 
   const pfp = (() => {
     if (activeProfileProxy) return activeProfileProxy.created_by.pfp;
@@ -49,20 +45,72 @@ export default function AppHeader(props: Readonly<Props>) {
 
   const waveId = myStream?.activeWave.id ?? null;
   const { wave, isLoading, isFetching } = useWaveById(waveId);
-  const isProfileRoute = pathname?.startsWith("/[user]");
+
   const isCreateRoute =
     pathname === "/waves/create" || pathname === "/messages/create";
+  const isWavesRoute = pathname === "/waves";
+  const isMessagesRoute = pathname === "/messages";
 
-  const showBackButton =
-    isCreateRoute ||
-    (!!waveId && activeView === null) ||
-    (isProfileRoute && canGoBack);
+  // Profile pages are /{handle} - single segment paths that aren't known routes
+  const knownRoutes = new Set([
+    "6529-gradient",
+    "about",
+    "accept-connection-sharing",
+    "access",
+    "api",
+    "author",
+    "blog",
+    "buidl",
+    "capital",
+    "casabatllo",
+    "category",
+    "cdn-cgi",
+    "city",
+    "consolidation-mapping-tool",
+    "delegation",
+    "delegation-mapping-tool",
+    "discover",
+    "dispute-resolution",
+    "education",
+    "element_category",
+    "email-signatures",
+    "emma",
+    "error",
+    "feed",
+    "meme-accounting",
+    "meme-calendar",
+    "meme-gas",
+    "meme-lab",
+    "messages",
+    "museum",
+    "network",
+    "news",
+    "nextgen",
+    "nft-activity",
+    "notifications",
+    "om",
+    "open-data",
+    "open-mobile",
+    "rememes",
+    "restricted",
+    "sets",
+    "the-memes",
+    "tools",
+    "waves",
+  ]);
+  const isProfileRoute = basePath && !knownRoutes.has(basePath);
+
+  // Show back button when:
+  // - On create routes (waves/create, messages/create)
+  // - Inside a wave (waveId is set)
+  // - On a profile page
+  const showBackButton = isCreateRoute || !!waveId || isProfileRoute;
 
   const finalTitle: React.ReactNode = (() => {
-    if (activeView === "waves" || pathname === "/waves/create") return "Waves";
-    if (activeView === "messages" || pathname === "/messages/create")
-      return "Messages";
-    if (pathname === "/" && homeActiveTab === "feed") return "My Stream";
+    if (pathname === "/waves/create") return "Waves";
+    if (pathname === "/messages/create") return "Messages";
+    if (isWavesRoute && !waveId) return "Waves";
+    if (isMessagesRoute && !waveId) return "Messages";
     if (waveId) {
       if (isLoading || isFetching || wave?.id !== waveId) return <Spinner />;
       return wave?.name ?? "Wave";
