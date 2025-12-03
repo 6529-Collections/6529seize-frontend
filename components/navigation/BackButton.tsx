@@ -1,36 +1,35 @@
 "use client";
 
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
-import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import Spinner from "../utils/Spinner";
-import { useWaveData } from "@/hooks/useWaveData";
 import { useWave } from "@/hooks/useWave";
-import { useViewContext } from "./ViewContext";
+import { useWaveData } from "@/hooks/useWaveData";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import {
   getMessagesBaseRoute,
-  getWaveHomeRoute,
   getWavesBaseRoute,
+  getWaveHomeRoute,
 } from "@/helpers/navigation.helpers";
+import { useViewContext } from "./ViewContext";
+import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
 
 export default function BackButton() {
-  const { canGoBack, goBack } = useNavigationHistoryContext();
-  const { hardBack } = useViewContext();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const { isApp } = useDeviceInfo();
   const myStream = useMyStreamOptional();
+  const { clearLastVisited } = useViewContext();
+  const { goBack } = useNavigationHistoryContext();
 
   const waveId = myStream?.activeWave.id ?? searchParams?.get("wave") ?? null;
   const dropId = searchParams?.get("drop") ?? null;
 
-  const isInMessagesContext =
-    pathname === "/messages" || searchParams?.get("view") === "messages";
+  const isInMessagesContext = pathname === "/messages";
 
   // Fetch wave to determine if it is DM
   const { data: wave } = useWaveData({
@@ -62,16 +61,18 @@ export default function BackButton() {
   const handleClick = () => {
     if (loading) return;
 
+    // Create routes → go to base route
     if (pathname === "/waves/create") {
-      router.replace(getWavesBaseRoute(true));
+      router.replace(getWavesBaseRoute(isApp));
       return;
     }
 
     if (pathname === "/messages/create") {
-      router.replace(getMessagesBaseRoute(true));
+      router.replace(getMessagesBaseRoute(isApp));
       return;
     }
 
+    // Drop open → close drop (remove ?drop param)
     if (dropId) {
       setLoading(true);
       const params = new URLSearchParams(searchParams?.toString() || "");
@@ -89,17 +90,16 @@ export default function BackButton() {
       return;
     }
 
+    // Inside a wave → go back to wave list
     if (waveId) {
-      // In-app view switch, not a router nav — no spinner
-      const targetView = isDm ? "messages" : "waves";
-      hardBack(targetView);
+      clearLastVisited(isDm ? "dm" : "wave");
+      myStream?.activeWave.set(null, { isDirectMessage: isDm });
       return;
     }
 
-    if (canGoBack) {
-      setLoading(true);
-      goBack();
-    }
+    // Fallback: use navigation history
+    setLoading(true);
+    goBack();
   };
 
   return (
