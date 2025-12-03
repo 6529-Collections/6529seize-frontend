@@ -141,9 +141,8 @@ export default function ManifoldMinting(props: Readonly<Props>) {
           setNeedsClamping(needsClamp);
         }
       };
-      checkClamping();
-      const timeoutId = setTimeout(checkClamping, 0);
-      return () => clearTimeout(timeoutId);
+      const frameId = requestAnimationFrame(checkClamping);
+      return () => cancelAnimationFrame(frameId);
     }
   }, [instance, descriptionClamped]);
 
