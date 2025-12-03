@@ -78,7 +78,9 @@ export default function UserPageSetUpProfile({
         }
         return `/` + (updatedProfile?.handle ?? "").toLowerCase();
       })();
-      router.replace(newPath, { scroll: false });
+      router.replace(newPath, { scroll: false }).catch((error) => {
+        console.error("Navigation error after profile update:", error);
+      });
       onProfileEdit({
         profile: updatedProfile,
         previousProfile: null,

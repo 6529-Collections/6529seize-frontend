@@ -35,6 +35,7 @@ Sentry.init({
     }
 
     const message = value?.value ?? fallbackMessage;
+    const errorType = value?.type;
 
     if (typeof message === "string") {
       const noisyPatterns = [
@@ -44,7 +45,16 @@ Sentry.init({
       ];
 
       if (noisyPatterns.some((p) => message.includes(p))) {
-        return null; // drop the event
+        return null;
+      }
+
+      const referenceErrors = ["__firefox__"];
+
+      if (
+        (errorType === "ReferenceError" || errorType === "TypeError") &&
+        referenceErrors.some((p) => message.includes(p))
+      ) {
+        return null;
       }
     }
 
