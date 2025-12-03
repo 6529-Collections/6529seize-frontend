@@ -14,6 +14,7 @@ import {
   getWaveHomeRoute,
 } from "@/helpers/navigation.helpers";
 import { useViewContext } from "./ViewContext";
+import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
 
 export default function BackButton() {
   const router = useRouter();
@@ -23,6 +24,7 @@ export default function BackButton() {
   const { isApp } = useDeviceInfo();
   const myStream = useMyStreamOptional();
   const { clearLastVisited } = useViewContext();
+  const { goBack } = useNavigationHistoryContext();
 
   const waveId = myStream?.activeWave.id ?? searchParams?.get("wave") ?? null;
   const dropId = searchParams?.get("drop") ?? null;
@@ -95,9 +97,9 @@ export default function BackButton() {
       return;
     }
 
-    // Fallback: browser back
+    // Fallback: use navigation history
     setLoading(true);
-    router.back();
+    goBack();
   };
 
   return (

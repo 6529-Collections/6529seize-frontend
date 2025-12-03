@@ -37,6 +37,13 @@ jest.mock("@/components/navigation/ViewContext", () => ({
   }),
 }));
 
+const mockGoBack = jest.fn();
+jest.mock("@/contexts/NavigationHistoryContext", () => ({
+  useNavigationHistoryContext: () => ({
+    goBack: mockGoBack,
+  }),
+}));
+
 const { useRouter, useSearchParams, usePathname } = require("next/navigation");
 const { useWaveData } = require("@/hooks/useWaveData");
 const { useWave } = require("@/hooks/useWave");
@@ -102,9 +109,9 @@ describe("BackButton", () => {
     expect(replace).not.toHaveBeenCalled();
   });
 
-  it("calls router.back when no wave and no drop", async () => {
-    const { back } = setup({});
+  it("calls goBack when no wave and no drop", async () => {
+    setup({});
     await userEvent.click(screen.getByRole("button", { name: "Back" }));
-    expect(back).toHaveBeenCalled();
+    expect(mockGoBack).toHaveBeenCalled();
   });
 });

@@ -14,6 +14,7 @@ import AppSidebar from "./AppSidebar";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import HeaderActionButtons from "./HeaderActionButtons";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
 
 interface Props {
   readonly extraClass?: string;
@@ -25,6 +26,7 @@ export default function AppHeader(_props: Readonly<Props>) {
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy } = useAuth();
   const pathname = usePathname();
+  const { canGoBack } = useNavigationHistoryContext();
   const { profile } = useIdentity({
     handleOrWallet: address ?? null,
     initialProfile: null,
@@ -46,65 +48,11 @@ export default function AppHeader(_props: Readonly<Props>) {
   const waveId = myStream?.activeWave.id ?? null;
   const { wave, isLoading, isFetching } = useWaveById(waveId);
 
-  const isCreateRoute =
-    pathname === "/waves/create" || pathname === "/messages/create";
   const isWavesRoute = pathname === "/waves";
   const isMessagesRoute = pathname === "/messages";
 
-  // Profile pages are /{handle} - single segment paths that aren't known routes
-  const knownRoutes = new Set([
-    "6529-gradient",
-    "about",
-    "accept-connection-sharing",
-    "access",
-    "api",
-    "author",
-    "blog",
-    "buidl",
-    "capital",
-    "casabatllo",
-    "category",
-    "cdn-cgi",
-    "city",
-    "consolidation-mapping-tool",
-    "delegation",
-    "delegation-mapping-tool",
-    "discover",
-    "dispute-resolution",
-    "education",
-    "element_category",
-    "email-signatures",
-    "emma",
-    "error",
-    "feed",
-    "meme-accounting",
-    "meme-calendar",
-    "meme-gas",
-    "meme-lab",
-    "messages",
-    "museum",
-    "network",
-    "news",
-    "nextgen",
-    "nft-activity",
-    "notifications",
-    "om",
-    "open-data",
-    "open-mobile",
-    "rememes",
-    "restricted",
-    "sets",
-    "the-memes",
-    "tools",
-    "waves",
-  ]);
-  const isProfileRoute = basePath && !knownRoutes.has(basePath);
-
-  // Show back button when:
-  // - On create routes (waves/create, messages/create)
-  // - Inside a wave (waveId is set)
-  // - On a profile page
-  const showBackButton = isCreateRoute || !!waveId || isProfileRoute;
+  // Show back button when we have navigation history to go back to
+  const showBackButton = canGoBack;
 
   const finalTitle: React.ReactNode = (() => {
     if (pathname === "/waves/create") return "Waves";

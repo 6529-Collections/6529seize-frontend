@@ -90,10 +90,14 @@ export function useClientNavigation<T, TOptions = undefined>({
         const method = options?.replace ? "replaceState" : "pushState";
         browserWindow.history[method](null, "", target);
         setState(newState);
-      } else if (options?.replace) {
-        router.replace(target);
       } else {
-        router.push(target);
+        // Set state immediately to avoid flash, then navigate
+        setState(newState);
+        if (options?.replace) {
+          router.replace(target);
+        } else {
+          router.push(target);
+        }
       }
     },
     [buildUrl, canUsePushState, router]

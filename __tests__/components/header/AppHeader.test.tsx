@@ -36,10 +36,16 @@ jest.mock("@/components/header/HeaderActionButtons", () => ({
   __esModule: true,
   default: () => <div data-testid="actions" />,
 }));
+jest.mock("@/contexts/NavigationHistoryContext", () => ({
+  useNavigationHistoryContext: jest.fn(),
+}));
 
 const {
   useSeizeConnectContext,
 } = require("@/components/auth/SeizeConnectContext");
+const {
+  useNavigationHistoryContext,
+} = require("@/contexts/NavigationHistoryContext");
 const { useAuth } = require("@/components/auth/Auth");
 const { useIdentity } = require("@/hooks/useIdentity");
 const { useRouter, usePathname, useSearchParams } = require("next/navigation");
@@ -69,21 +75,24 @@ function setup(opts: any) {
   (useSearchParams as jest.Mock).mockReturnValue({
     get: (param: string) => opts.query?.[param],
   });
+  (useNavigationHistoryContext as jest.Mock).mockReturnValue({
+    canGoBack: opts.canGoBack ?? false,
+  });
   return render(<AppHeader />);
 }
 
 describe("AppHeader", () => {
   afterEach(() => jest.clearAllMocks());
 
-  it("shows menu icon when not connected", () => {
-    setup({ address: null, asPath: "/notifications" });
+  it("shows menu icon when canGoBack is false", () => {
+    setup({ address: null, asPath: "/notifications", canGoBack: false });
     expect(
       screen.getByRole("button", { name: "Open menu" }).querySelector("svg")
     ).toBeInTheDocument();
   });
 
-  it("shows back button on profile page", () => {
-    setup({ address: "0xabc", asPath: "/johndoe" });
+  it("shows back button when canGoBack is true", () => {
+    setup({ address: "0xabc", asPath: "/johndoe", canGoBack: true });
     expect(screen.getByTestId("back")).toBeInTheDocument();
   });
 
@@ -94,16 +103,18 @@ describe("AppHeader", () => {
       wave,
       query: { wave: "w1" },
       asPath: "/waves?wave=w1",
+      canGoBack: true,
     });
     expect(screen.getByTestId("back")).toBeInTheDocument();
     expect(screen.getByText("WaveOne")).toBeInTheDocument();
   });
 
-  it("shows profile image when connected and on waves list (no wave selected)", () => {
+  it("shows profile image when connected and canGoBack is false", () => {
     setup({
       address: "0xabc",
       profile: { pfp: "pfp.png" },
       asPath: "/waves",
+      canGoBack: false,
     });
     const img = screen.getByRole("img", { name: "pfp" });
     expect(img).toHaveAttribute("src", "pfp.png");
