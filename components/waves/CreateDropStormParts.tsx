@@ -38,14 +38,12 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
       if (part.quoted_drop) {
         const quotedKey = `quoted-${part.quoted_drop.drop_id}-${part.quoted_drop.drop_part_id}`;
         keys.push(quotedKey);
+      } else if (index < partIdsRef.current.length) {
+        keys.push(partIdsRef.current[index]);
       } else {
-        if (index < partIdsRef.current.length) {
-          keys.push(partIdsRef.current[index]);
-        } else {
-          const newId = `part-${partIdCounterRef.current++}`;
-          partIdsRef.current[index] = newId;
-          keys.push(newId);
-        }
+        const newId = `part-${partIdCounterRef.current++}`;
+        partIdsRef.current[index] = newId;
+        keys.push(newId);
       }
     });
 
