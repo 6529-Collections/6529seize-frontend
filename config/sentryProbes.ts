@@ -104,10 +104,10 @@ function checkSecondErrorPath(
   return url.includes("/monitoring");
 }
 
-export function filterTunnelRouteErrors(
-  event: Event,
+export function filterTunnelRouteErrors<T extends Event>(
+  event: T,
   hint?: EventHint
-): Event | null {
+): T | null {
   const value = event.exception?.values?.[0];
   const message = value?.value || "";
   const errorType = value?.type || "";
@@ -127,7 +127,7 @@ export function filterTunnelRouteErrors(
   return event;
 }
 
-export function tagSecurityProbes(event: Event): Event {
+export function tagSecurityProbes<T extends Event>(event: T): T {
   try {
     const url = (event?.request?.url || "").toLowerCase();
 

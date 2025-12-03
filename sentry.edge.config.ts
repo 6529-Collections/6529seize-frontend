@@ -29,7 +29,7 @@ Sentry.init({
   // ------------------------------------------------------------
   // Handle obvious bot / exploit probes more gently (edge)
   // ------------------------------------------------------------
-  beforeSend(event, hint) {
+  beforeSend(event: Sentry.ErrorEvent, hint) {
     const filtered = filterTunnelRouteErrors(event, hint);
     if (filtered === null) {
       return null;
