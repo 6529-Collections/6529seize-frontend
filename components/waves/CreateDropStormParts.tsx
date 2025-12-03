@@ -5,7 +5,7 @@ import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import { cicToType } from "@/helpers/Helpers";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import React from "react";
+import { FC, memo, useContext, useMemo, useRef } from "react";
 import { AuthContext } from "../auth/Auth";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
@@ -19,19 +19,19 @@ interface CreateDropStormPartsProps {
   onRemovePart: (partIndex: number) => void;
 }
 
-const CreateDropStormParts: React.FC<CreateDropStormPartsProps> = ({
+const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
   parts,
   mentionedUsers,
   referencedNfts,
   onRemovePart,
 }) => {
-  const { connectedProfile } = React.useContext(AuthContext);
+  const { connectedProfile } = useContext(AuthContext);
   const cicType = cicToType(connectedProfile?.cic ?? 0);
 
-  const partIdCounterRef = React.useRef(0);
-  const partIdsRef = React.useRef<string[]>([]);
+  const partIdCounterRef = useRef(0);
+  const partIdsRef = useRef<string[]>([]);
 
-  const partKeys = React.useMemo(() => {
+  const partKeys = useMemo(() => {
     const keys: string[] = [];
 
     parts.forEach((part, index) => {
@@ -114,4 +114,4 @@ const CreateDropStormParts: React.FC<CreateDropStormPartsProps> = ({
   );
 };
 
-export default React.memo(CreateDropStormParts);
+export default memo(CreateDropStormParts);

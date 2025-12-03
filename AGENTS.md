@@ -226,6 +226,7 @@ If you add or modify `proxy.ts`, keep it at the root (or `src/`) alongside `app/
 * Tests live in `__tests__/` or `ComponentName.test.tsx`.
 * Mock external dependencies and APIs in tests.
 * When parsing Seize URLs (or similar), **do not** fall back to placeholder origins; fail fast if base origin is unavailable.
+* **React imports:** Prefer direct named imports (`useMemo`, `useRef`, `FC`, etc.) over `React.` namespace usage (`React.useMemo`, `React.useRef`, `React.FC`, etc.). Import hooks and types directly: `import { useMemo, useRef, FC, memo } from "react"` rather than `import React from "react"` and using `React.useMemo`.
 
 ---
 
