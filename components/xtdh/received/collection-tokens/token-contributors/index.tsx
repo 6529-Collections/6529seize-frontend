@@ -6,10 +6,13 @@ import { CollectionLoadMore } from "../subcomponents/CollectionLoadMore";
 import { useXtdhTokenContributorsFilters } from "./hooks/useXtdhTokenContributorsFilters";
 import { XtdhTokenContributorsControls } from "./subcomponents/XtdhTokenContributorsControls";
 import { XtdhTokenContributorsList } from "./subcomponents/XtdhTokenContributorsList";
+import { XtdhGrantDetailsPanel } from "./subcomponents/XtdhGrantDetailsPanel";
 
 interface XtdhTokenContributorsPanelProps {
   readonly contract: string;
   readonly tokenId: number | null;
+  readonly selectedGrantId: string | null;
+  readonly onSelectGrant: (grantId: string, label: string) => void;
 }
 
 const CONTRIBUTORS_PAGE_SIZE = 25;
@@ -17,6 +20,8 @@ const CONTRIBUTORS_PAGE_SIZE = 25;
 export function XtdhTokenContributorsPanel({
   contract,
   tokenId,
+  selectedGrantId,
+  onSelectGrant,
 }: Readonly<XtdhTokenContributorsPanelProps>) {
   const {
     activeSortField,
@@ -62,10 +67,16 @@ export function XtdhTokenContributorsPanel({
     });
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-
-
   const controlsDisabled = isLoading || isFetching;
   const showLoadMore = hasNextPage && isEnabled;
+
+  if (selectedGrantId) {
+    return (
+      <XtdhGrantDetailsPanel
+        grantId={selectedGrantId}
+      />
+    );
+  }
 
   return (
     <section className="tw-space-y-4">
@@ -87,6 +98,7 @@ export function XtdhTokenContributorsPanel({
         isError={isError}
         errorMessage={errorMessage}
         onRetry={handleRetry}
+        onSelectGrant={onSelectGrant}
       />
 
       <CollectionLoadMore

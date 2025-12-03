@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import type { ReactElement } from "react";
 
 import type { ApiXTdhCollectionsPage } from "@/generated/models/ApiXTdhCollectionsPage";
 import { useXtdhCollectionsQuery } from "@/hooks/useXtdhCollectionsQuery";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 
 import { XtdhCollectionsControls } from "./collections-controls";
 import { useXtdhCollectionsFilters } from "./hooks/useXtdhCollectionsFilters";
@@ -20,12 +21,16 @@ export interface XtdhReceivedSectionProps {
 }
 
 const DEFAULT_PAGE_SIZE = 10;
+const DEBOUNCE_DELAY = 300;
 
 export default function XtdhReceivedSection({
   profileId,
   pageSize = DEFAULT_PAGE_SIZE,
   requireIdentity = true,
 }: Readonly<XtdhReceivedSectionProps>): ReactElement {
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebouncedValue(searchTerm, DEBOUNCE_DELAY);
+
   const {
     activeSortField,
     activeSortDirection,
@@ -51,6 +56,7 @@ export default function XtdhReceivedSection({
     order: apiOrder,
     enabled: requireIdentity ? Boolean(profileId) : true,
     requireIdentity,
+    collectionName: debouncedSearchTerm || undefined,
   });
 
   const {
@@ -122,11 +128,13 @@ export default function XtdhReceivedSection({
         />
       ) : (
         <>
-          {collections.length > 0 && (
+          {(collections.length > 0 || searchTerm) && (
             <XtdhCollectionsControls
               activeSortField={activeSortField}
               activeSortDirection={activeSortDirection}
               onSortChange={handleSortChange}
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
               isDisabled={controlsDisabled}
             />
           )}

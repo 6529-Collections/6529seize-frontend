@@ -185,36 +185,38 @@ type ReactQueryWrapperContextType = {
   }) => void;
   invalidateAll: () => void;
   invalidateNotifications: () => void;
+  invalidateIdentityTdhStats: (params: { identity: string }) => void;
 };
 
 export const ReactQueryWrapperContext =
   createContext<ReactQueryWrapperContextType>({
-    setProfile: () => {},
-    setWavesOverviewPage: () => {},
-    setProfileProxy: () => {},
-    setWave: () => {},
-    setWaveDrops: () => {},
-    onProfileProxyModify: () => {},
-    onProfileCICModify: () => {},
-    onProfileRepModify: () => {},
-    onProfileEdit: () => {},
-    onProfileStatementAdd: () => {},
-    onProfileStatementRemove: () => {},
-    onIdentityFollowChange: () => {},
-    initProfileRepPage: () => {},
-    initProfileIdentityPage: () => {},
-    initCommunityActivityPage: () => {},
-    waitAndInvalidateDrops: () => {},
-    addOptimisticDrop: () => {},
-    invalidateDrops: () => {},
-    onGroupRemoved: () => {},
-    onGroupChanged: () => {},
-    onGroupCreate: () => {},
-    onIdentityBulkRate: () => {},
-    onWaveCreated: () => {},
-    onWaveFollowChange: () => {},
-    invalidateAll: () => {},
-    invalidateNotifications: () => {},
+    setProfile: () => { },
+    setWavesOverviewPage: () => { },
+    setProfileProxy: () => { },
+    setWave: () => { },
+    setWaveDrops: () => { },
+    onProfileProxyModify: () => { },
+    onProfileCICModify: () => { },
+    onProfileRepModify: () => { },
+    onProfileEdit: () => { },
+    onProfileStatementAdd: () => { },
+    onProfileStatementRemove: () => { },
+    onIdentityFollowChange: () => { },
+    initProfileRepPage: () => { },
+    initProfileIdentityPage: () => { },
+    initCommunityActivityPage: () => { },
+    waitAndInvalidateDrops: () => { },
+    addOptimisticDrop: () => { },
+    invalidateDrops: () => { },
+    onGroupRemoved: () => { },
+    onGroupChanged: () => { },
+    onGroupCreate: () => { },
+    onIdentityBulkRate: () => { },
+    onWaveCreated: () => { },
+    onWaveFollowChange: () => { },
+    invalidateAll: () => { },
+    invalidateNotifications: () => { },
+    invalidateIdentityTdhStats: () => { },
   });
 
 export default function ReactQueryWrapper({
@@ -809,8 +811,8 @@ export default function ReactQueryWrapper({
       (
         oldData:
           | {
-              pages: TypedFeedItem[][];
-            }
+            pages: TypedFeedItem[][];
+          }
           | undefined
       ) => {
         if (!oldData?.pages.length) {
@@ -901,8 +903,8 @@ export default function ReactQueryWrapper({
       (
         oldData:
           | {
-              pages: ApiDrop[][];
-            }
+            pages: ApiDrop[][];
+          }
           | undefined
       ) => {
         if (!oldData?.pages.length) {
@@ -999,8 +1001,8 @@ export default function ReactQueryWrapper({
       (
         oldData:
           | {
-              pages: TypedFeedItem[][];
-            }
+            pages: TypedFeedItem[][];
+          }
           | undefined
       ) => {
         if (!oldData?.pages.length) {
@@ -1196,6 +1198,12 @@ export default function ReactQueryWrapper({
     });
   };
 
+  const invalidateIdentityTdhStats = ({ identity }: { identity: string }) => {
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.IDENTITY_TDH_STATS, identity.toLowerCase()],
+    });
+  };
+
   useQueryKeyListener([QueryKey.FEED_ITEMS], () => {
     Cookies.set([QueryKey.FEED_ITEMS].toString(), `${Time.now().toMillis()}`);
   });
@@ -1235,6 +1243,7 @@ export default function ReactQueryWrapper({
       onIdentityFollowChange,
       invalidateDrops,
       invalidateNotifications,
+      invalidateIdentityTdhStats,
     }),
     [
       setProfile,
@@ -1263,6 +1272,7 @@ export default function ReactQueryWrapper({
       onIdentityFollowChange,
       invalidateDrops,
       invalidateNotifications,
+      invalidateIdentityTdhStats,
     ]
   );
 

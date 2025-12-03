@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { useXtdhTokensQuery } from "@/hooks/useXtdhTokensQuery";
 
@@ -36,6 +36,11 @@ export function XtdhCollectionTokensPanel({
     selectToken,
     clearSelectedToken,
   } = useXtdhTokenSelection();
+
+  const [selectedGrant, setSelectedGrant] = useState<{
+    id: string;
+    label: string;
+  } | null>(null);
 
   const {
     contractParam,
@@ -94,7 +99,12 @@ export function XtdhCollectionTokensPanel({
 
   const handleBackToTokens = useCallback(() => {
     clearSelectedToken();
+    setSelectedGrant(null);
   }, [clearSelectedToken]);
+
+  const handleBackToContributors = useCallback(() => {
+    setSelectedGrant(null);
+  }, []);
 
   const selectedTokenId = useMemo(() => {
     if (!selectedToken) {
@@ -110,13 +120,16 @@ export function XtdhCollectionTokensPanel({
       <CollectionBreadcrumbs
         collectionLabel={contractDisplayName}
         tokenLabel={selectedTokenLabel}
+        grantLabel={selectedGrant?.label}
         onNavigateToCollections={onBack}
         onNavigateToTokens={selectedToken ? handleBackToTokens : undefined}
+        onNavigateToContributors={selectedGrant ? handleBackToContributors : undefined}
       />
       {collection ? (
         <XtdhReceivedCollectionCard
           collection={collection}
-          interactionMode="static"
+          interactionMode="button"
+          onSelect={() => onBack()}
         />
       ) : (
         <div className="tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4 tw-text-sm tw-text-iron-300">
@@ -128,18 +141,23 @@ export function XtdhCollectionTokensPanel({
         <div className="tw-space-y-4">
           <XtdhTokenListItem
             as="div"
-            className="tw-p-4"
+            className="tw-p-4 tw-cursor-pointer tw-transition-colors desktop-hover:hover:tw-bg-iron-900"
             token={selectedToken.token}
             metadata={selectedToken.metadata}
             isMetadataLoading={selectedToken.isMetadataLoading}
             hasMetadataError={selectedToken.hasMetadataError}
+            onSelect={handleBackToTokens}
           />
-          <p className="tw-m-0 tw-text-sm tw-text-iron-300">
-            Explore the grants and grantors powering this token&apos;s xTDH.
-          </p>
+          {!selectedGrant && (
+            <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+              Explore the grants and grantors powering this token&apos;s xTDH.
+            </p>
+          )}
           <XtdhTokenContributorsPanel
             contract={contractParam}
             tokenId={selectedTokenId}
+            selectedGrantId={selectedGrant?.id ?? null}
+            onSelectGrant={(id, label) => setSelectedGrant({ id, label })}
           />
         </div>
       ) : (

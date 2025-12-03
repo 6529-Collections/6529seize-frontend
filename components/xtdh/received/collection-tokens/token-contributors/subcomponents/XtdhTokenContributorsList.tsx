@@ -17,6 +17,7 @@ interface XtdhTokenContributorsListProps {
   readonly isError: boolean;
   readonly errorMessage?: string;
   readonly onRetry: () => void;
+  readonly onSelectGrant: (grantId: string, label: string) => void;
 }
 
 export function XtdhTokenContributorsList({
@@ -27,6 +28,7 @@ export function XtdhTokenContributorsList({
   isError,
   errorMessage,
   onRetry,
+  onSelectGrant,
 }: Readonly<XtdhTokenContributorsListProps>) {
   const {
     isDisabled,
@@ -81,6 +83,7 @@ export function XtdhTokenContributorsList({
             <XtdhTokenContributorsListItem
               key={key}
               contribution={contribution}
+              onSelectGrant={onSelectGrant}
             />
           );
         })}

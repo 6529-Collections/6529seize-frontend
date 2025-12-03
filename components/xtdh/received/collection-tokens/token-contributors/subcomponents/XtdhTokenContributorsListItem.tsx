@@ -13,10 +13,12 @@ interface XtdhTokenContributorsListItemProps {
    * or represents a group of grants for a given grantor.
    */
   readonly contribution: ApiXTdhContribution;
+  readonly onSelectGrant: (grantId: string, label: string) => void;
 }
 
 export function XtdhTokenContributorsListItem({
   contribution,
+  onSelectGrant,
 }: Readonly<XtdhTokenContributorsListItemProps>) {
   const xtdhValue = formatXtdhValue(contribution.xtdh);
   const xtdhRateValue = formatXtdhRate(contribution.xtdh_rate);
@@ -54,8 +56,21 @@ export function XtdhTokenContributorsListItem({
     grantorBadge
   );
 
+  const grantId = contribution.grant?.id;
+  const isClickable = Boolean(grantId);
+
   return (
-    <li className="tw-list-none tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4">
+    <li
+      className={`tw-list-none tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4 tw-transition-colors ${isClickable
+        ? "tw-cursor-pointer hover:tw-bg-iron-800 hover:tw-border-iron-700"
+        : ""
+        }`}
+      onClick={() => {
+        if (grantId) {
+          onSelectGrant(grantId, displayHandle);
+        }
+      }}
+    >
       <div className="tw-flex tw-flex-col tw-gap-3 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between">
         <div className="tw-flex tw-items-center tw-gap-3">
           <div className="tw-flex tw-flex-col tw-gap-1">
