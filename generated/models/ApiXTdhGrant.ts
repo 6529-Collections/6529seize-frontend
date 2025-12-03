@@ -11,14 +11,14 @@
  */
 
 import { ApiProfileMin } from '../models/ApiProfileMin';
-import { ApiTdhGrantStatus } from '../models/ApiTdhGrantStatus';
-import { ApiTdhGrantTargetChain } from '../models/ApiTdhGrantTargetChain';
+import { ApiXTdhGrantStatus } from '../models/ApiXTdhGrantStatus';
+import { ApiXTdhGrantTargetChain } from '../models/ApiXTdhGrantTargetChain';
 import { HttpFile } from '../http/http';
 
-export class ApiTdhGrant {
+export class ApiXTdhGrant {
     'id': string;
     'grantor': ApiProfileMin;
-    'target_chain': ApiTdhGrantTargetChain;
+    'target_chain': ApiXTdhGrantTargetChain;
     'target_contract': string;
     'target_tokens_count': number;
     'target_collection_name': string | null;
@@ -26,13 +26,14 @@ export class ApiTdhGrant {
     'updated_at': number;
     'valid_from': number | null;
     'valid_to': number | null;
-    'tdh_rate': number;
+    'rate': number;
     'error_details': string | null;
-    'status': ApiTdhGrantStatus;
+    'status': ApiXTdhGrantStatus;
     /**
     * If true then the grant must be covered with lock contracts
     */
     'is_irrevocable': boolean;
+    'total_granted': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -54,7 +55,7 @@ export class ApiTdhGrant {
         {
             "name": "target_chain",
             "baseName": "target_chain",
-            "type": "ApiTdhGrantTargetChain",
+            "type": "ApiXTdhGrantTargetChain",
             "format": ""
         },
         {
@@ -100,8 +101,8 @@ export class ApiTdhGrant {
             "format": "int64"
         },
         {
-            "name": "tdh_rate",
-            "baseName": "tdh_rate",
+            "name": "rate",
+            "baseName": "rate",
             "type": "number",
             "format": "int64"
         },
@@ -114,7 +115,7 @@ export class ApiTdhGrant {
         {
             "name": "status",
             "baseName": "status",
-            "type": "ApiTdhGrantStatus",
+            "type": "ApiXTdhGrantStatus",
             "format": ""
         },
         {
@@ -122,10 +123,16 @@ export class ApiTdhGrant {
             "baseName": "is_irrevocable",
             "type": "boolean",
             "format": ""
+        },
+        {
+            "name": "total_granted",
+            "baseName": "total_granted",
+            "type": "number",
+            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiTdhGrant.attributeTypeMap;
+        return ApiXTdhGrant.attributeTypeMap;
     }
 
     public constructor() {

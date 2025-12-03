@@ -10,7 +10,7 @@ import {
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { SortDirection } from "@/entities/ISort";
-import type { ApiTdhGrantTokensPage } from "@/generated/models/ApiTdhGrantTokensPage";
+import type { ApiXTdhGrantTokensPage } from "@/generated/models/ApiXTdhGrantTokensPage";
 import { commonApiFetch } from "@/services/api/common-api";
 
 const DEFAULT_PAGE_SIZE = 500;
@@ -23,7 +23,7 @@ export interface UseTdhGrantTokensQueryParams {
 }
 
 export type UseTdhGrantTokensQueryResult =
-  UseInfiniteQueryResult<InfiniteData<ApiTdhGrantTokensPage>, Error> & {
+  UseInfiniteQueryResult<InfiniteData<ApiXTdhGrantTokensPage>, Error> & {
     readonly tokens: readonly string[];
     readonly totalCount: number;
   };
@@ -43,8 +43,8 @@ export function useTdhGrantTokensQuery({
     staleTime: 30_000,
     placeholderData: keepPreviousData,
     queryFn: async ({ pageParam = 1 }) =>
-      await commonApiFetch<ApiTdhGrantTokensPage>({
-        endpoint: `tdh-grants/${grantId}/tokens`,
+      await commonApiFetch<ApiXTdhGrantTokensPage>({
+        endpoint: `xtdh/grants/${grantId}/tokens`,
         params: {
           page: pageParam.toString(),
           page_size: normalizedPageSize.toString(),

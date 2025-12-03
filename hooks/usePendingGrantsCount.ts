@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "@/services/api/common-api";
-import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
+import type { ApiXTdhGrantsPage } from "@/generated/models/ApiXTdhGrantsPage";
 
 export function usePendingGrantsCount({
   grantor,
@@ -15,8 +15,8 @@ export function usePendingGrantsCount({
   const { data, isLoading, isError } = useQuery({
     queryKey,
     queryFn: async () => {
-      return await commonApiFetch<ApiTdhGrantsPage>({
-        endpoint: "tdh-grants",
+      return await commonApiFetch<ApiXTdhGrantsPage>({
+        endpoint: "xtdh/grants",
         params: {
           grantor,
           page: "1",

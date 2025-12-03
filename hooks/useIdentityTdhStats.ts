@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { ApiTdhStats } from "@/generated/models/ApiTdhStats";
+import { ApiXTdhStats } from "@/generated/models/ApiXTdhStats";
 import { commonApiFetch } from "@/services/api/common-api";
 
 interface UseIdentityTdhStatsOptions {
@@ -11,42 +11,36 @@ interface UseIdentityTdhStatsOptions {
 }
 
 export interface IdentityTdhStats {
-  readonly producedXtdhRate: number;
-  readonly grantedCollectionsCount: number;
-  readonly grantedTokensCount: number;
-  readonly totalReceivedXtdh: number;
-  readonly receivedXtdhRate: number | null;
-  readonly totalGrantedXtdh: number;
-  readonly xtdhMultiplier: number | null;
-  readonly tdhRate: number | null;
-  readonly availableGrantRate: number | null;
-  readonly xtdhRate: number | null;
+  readonly generationRate: number;
+  readonly outgoingRate: number;
+  readonly outgoingTotal: number;
+  readonly outgoingCollectionsCount: number;
+  readonly outgoingTokensCount: number;
+  readonly incomingTotal: number;
+  readonly incomingRate: number;
+  readonly multiplier: number;
+  readonly unusedRate: number;
 }
 
 async function fetchIdentityTdhStats(identity: string): Promise<IdentityTdhStats> {
   const encodedIdentity = encodeURIComponent(identity);
-  const response = await commonApiFetch<ApiTdhStats>({
-    endpoint: `tdh-stats/${encodedIdentity}`,
+  const response = await commonApiFetch<ApiXTdhStats>({
+    endpoint: `xtdh/stats/${encodedIdentity}`,
   });
 
-  const producedXtdhRate = sanitizeNonNegativeNumber(response.produced_xtdh_rate);
-  const tdhRate = sanitizeNullableNonNegativeNumber(
-    (response.tdh_rate ?? Number.NaN),
-  );
+
+
 
   return {
-    producedXtdhRate,
-    grantedCollectionsCount: sanitizeCount(response.granted_target_collections_count),
-    grantedTokensCount: sanitizeCount(response.granted_target_tokens_count),
-    totalReceivedXtdh: sanitizeNonNegativeNumber(response.received_xtdh),
-    receivedXtdhRate: sanitizeNullableNonNegativeNumber(
-      response.received_xtdh_rate ?? Number.NaN,
-    ),
-    totalGrantedXtdh: sanitizeNonNegativeNumber(response.granted_xtdh),
-    xtdhMultiplier: sanitizeNullableNonNegativeNumber(response.xtdh_multiplier),
-    tdhRate,
-    availableGrantRate: sanitizeNullableNonNegativeNumber(response.available_grant_rate),
-    xtdhRate: sanitizeNullableNonNegativeNumber(response.xtdh_rate),
+    generationRate: response.generation_rate,
+    outgoingRate: response.outgoing_rate,
+    outgoingCollectionsCount: response.outgoing_collections_count,
+    outgoingTokensCount: response.outgoing_tokens_count,
+    incomingTotal: response.incoming_total,
+    incomingRate: response.incoming_rate,
+    outgoingTotal: response.outgoing_total,
+    multiplier: response.multiplier,
+    unusedRate: response.unused_rate,
   };
 }
 
@@ -74,20 +68,5 @@ export function useIdentityTdhStats({
   });
 }
 
-function sanitizeNullableNonNegativeNumber(value: unknown): number | null {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    return null;
-  }
-  return Math.max(value, 0);
-}
 
-function sanitizeNonNegativeNumber(value: unknown): number {
-  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
-    return 0;
-  }
-  return value;
-}
 
-function sanitizeCount(value: unknown): number {
-  return Math.trunc(sanitizeNonNegativeNumber(value));
-}

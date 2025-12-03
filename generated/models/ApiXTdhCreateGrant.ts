@@ -10,18 +10,18 @@
  * Do not edit the class manually.
  */
 
-import { ApiTdhGrantTargetChain } from '../models/ApiTdhGrantTargetChain';
+import { ApiXTdhGrantTargetChain } from '../models/ApiXTdhGrantTargetChain';
 import { HttpFile } from '../http/http';
 
-export class ApiCreateTdhGrant {
-    'target_chain': ApiTdhGrantTargetChain;
+export class ApiXTdhCreateGrant {
+    'target_chain': ApiXTdhGrantTargetChain;
     'target_contract': string;
     /**
     * List of token numbers. Each element can also be a span in form of start-end. Leave empty if all tokens are targets.
     */
     'target_tokens': Array<string>;
     'valid_to': number | null;
-    'tdh_rate': number;
+    'rate': number;
     /**
     * If true then the grant must be covered with lock contracts
     */
@@ -35,7 +35,7 @@ export class ApiCreateTdhGrant {
         {
             "name": "target_chain",
             "baseName": "target_chain",
-            "type": "ApiTdhGrantTargetChain",
+            "type": "ApiXTdhGrantTargetChain",
             "format": ""
         },
         {
@@ -57,8 +57,8 @@ export class ApiCreateTdhGrant {
             "format": "int64"
         },
         {
-            "name": "tdh_rate",
-            "baseName": "tdh_rate",
+            "name": "rate",
+            "baseName": "rate",
             "type": "number",
             "format": "int64"
         },
@@ -70,7 +70,7 @@ export class ApiCreateTdhGrant {
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiCreateTdhGrant.attributeTypeMap;
+        return ApiXTdhCreateGrant.attributeTypeMap;
     }
 
     public constructor() {

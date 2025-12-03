@@ -1,4 +1,4 @@
-import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
+import type { ApiXTdhGrantsPage } from "@/generated/models/ApiXTdhGrantsPage";
 import type { GrantedFilterStatuses } from "@/components/user/xtdh/user-page-xtdh-granted-list/types";
 
 export interface UserPageXtdhGrantedListContentProps {
@@ -6,7 +6,7 @@ export interface UserPageXtdhGrantedListContentProps {
   readonly isLoading: boolean;
   readonly isError: boolean;
   readonly errorMessage?: string;
-  readonly grants: ApiTdhGrantsPage["data"];
+  readonly grants: ApiXTdhGrantsPage["data"];
   readonly isSelf: boolean;
   readonly onRetry: () => void;
   readonly statuses: GrantedFilterStatuses;

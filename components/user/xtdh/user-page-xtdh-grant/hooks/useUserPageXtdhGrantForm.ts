@@ -2,9 +2,7 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AuthContext } from "@/components/auth/Auth";
 import { commonApiPost } from "@/services/api/common-api";
-import { ApiCreateTdhGrant } from "@/generated/models/ApiCreateTdhGrant";
-import { ApiTdhGrant } from "@/generated/models/ApiTdhGrant";
-import { ApiTdhGrantTargetChain } from "@/generated/models/ApiTdhGrantTargetChain";
+
 import {
   QueryKey,
   ReactQueryWrapperContext,
@@ -15,6 +13,9 @@ import type {
   UserPageXtdhGrantForm,
 } from "../types";
 import { useIdentityTdhStats } from "@/hooks/useIdentityTdhStats";
+import { ApiXTdhCreateGrant } from "@/generated/models/ApiXTdhCreateGrant";
+import { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
+import { ApiXTdhGrantTargetChain } from "@/generated/models/ApiXTdhGrantTargetChain";
 
 export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
   const [contract, setContract] = useState<UserPageXtdhGrantForm["contract"]>(
@@ -52,16 +53,16 @@ export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
     staleTime: 0,
   });
 
-  const maxGrantRateRaw = tdhStats?.availableGrantRate ?? null;
+  const maxGrantRateRaw = tdhStats?.unusedRate ?? null;
   const maxGrantRate =
     Number.isFinite(maxGrantRateRaw) && maxGrantRateRaw !== null
       ? maxGrantRateRaw
       : null;
 
   const createGrantMutation = useMutation({
-    mutationFn: async (payload: ApiCreateTdhGrant) =>
-      await commonApiPost<ApiCreateTdhGrant, ApiTdhGrant>({
-        endpoint: "tdh-grants",
+    mutationFn: async (payload: ApiXTdhCreateGrant) =>
+      await commonApiPost<ApiXTdhCreateGrant, ApiXTdhGrant>({
+        endpoint: "xtdh/grants",
         body: payload,
       }),
   });
@@ -121,8 +122,8 @@ export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
         return;
       }
 
-      const payload: ApiCreateTdhGrant = {
-        target_chain: ApiTdhGrantTargetChain.EthereumMainnet,
+      const payload: ApiXTdhCreateGrant = {
+        target_chain: ApiXTdhGrantTargetChain.EthereumMainnet,
         target_contract: validatedContract.address,
         target_tokens: validatedSelection.allSelected
           ? []
@@ -130,7 +131,7 @@ export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
         valid_to: validatedValidUntil
           ? Math.floor(validatedValidUntil.getTime() / 1000)
           : null,
-        tdh_rate: validatedAmount,
+        rate: validatedAmount,
         is_irrevocable: false,
       };
 

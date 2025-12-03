@@ -12,6 +12,6 @@
 
 import { HttpFile } from '../http/http';
 
-export enum ApiTdhGrantTargetChain {
+export enum ApiXTdhGrantTargetChain {
     EthereumMainnet = 'ETHEREUM_MAINNET'
 }

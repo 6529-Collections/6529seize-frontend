@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
 
 import type { TokenRange } from "@/components/nft-picker/NftPicker.types";
-import type { ApiTdhGrant } from "@/generated/models/ApiTdhGrant";
+import type { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
 
 import type { SupportedChain } from "@/types/nft";
 
 export interface UserPageXtdhGrantListItemProps {
-  readonly grant: ApiTdhGrant;
+  readonly grant: ApiXTdhGrant;
   readonly isSelf: boolean;
 }
 
@@ -18,6 +18,7 @@ export interface GrantDetails {
   readonly tdhRateLabel: ReactNode;
   readonly tdhRatePerTokenLabel?: ReactNode;
   readonly tdhRatePerTokenHint?: string | null;
+  readonly totalGrantedLabel: ReactNode;
   readonly validFromLabel: ReactNode;
   readonly validUntilLabel: ReactNode;
 }
@@ -46,7 +47,7 @@ export interface GrantItemContentProps {
   readonly contract: import("@/types/nft").ContractOverview;
   readonly details: GrantDetails;
   readonly errorDetails?: string | null;
-  readonly status: import("@/generated/models/ApiTdhGrantStatus").ApiTdhGrantStatus;
+  readonly status: import("@/generated/models/ApiXTdhGrantStatus").ApiXTdhGrantStatus;
   readonly validFrom?: number | string | null;
   readonly validTo?: number | string | null;
 
@@ -57,7 +58,7 @@ export interface GrantItemErrorProps {
   readonly contractLabel: string;
   readonly details: GrantDetails;
   readonly errorDetails?: string | null;
-  readonly status: import("@/generated/models/ApiTdhGrantStatus").ApiTdhGrantStatus;
+  readonly status: import("@/generated/models/ApiXTdhGrantStatus").ApiXTdhGrantStatus;
   readonly validFrom?: number | string | null;
   readonly validTo?: number | string | null;
 }

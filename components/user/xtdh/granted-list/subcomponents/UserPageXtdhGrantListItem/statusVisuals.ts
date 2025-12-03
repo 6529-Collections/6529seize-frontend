@@ -6,9 +6,9 @@ import {
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 
-import type { ApiTdhGrantStatus } from "@/generated/models/ApiTdhGrantStatus";
+import type { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
 
-type KnownGrantStatus = ApiTdhGrantStatus;
+type KnownGrantStatus = ApiXTdhGrantStatus;
 
 interface StatusVisuals {
   readonly label: string;
@@ -51,7 +51,7 @@ const DEFAULT_STATUS_VISUALS: StatusVisuals = {
 };
 
 export function getStatusVisuals(
-  status?: ApiTdhGrantStatus | null,
+  status?: ApiXTdhGrantStatus | null,
   validFrom?: number | string | null,
   validTo?: number | string | null
 ): StatusVisuals {

@@ -12,34 +12,20 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiTdhGlobalStats {
-    'tdh': number;
-    'tdh_rate': number;
+export class ApiXTdhGlobalStats {
     'xtdh': number;
     'xtdh_rate': number;
-    'xtdh_multiplier': number;
-    'granted_xtdh_rate': number;
-    'granted_xtdh': number;
-    'granted_target_collections_count': number;
-    'granted_target_tokens_count': number;
+    'multiplier': number;
+    'outgoing_rate': number;
+    'outgoing_total': number;
+    'outgoing_collections_count': number;
+    'outgoing_tokens_count': number;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
-        {
-            "name": "tdh",
-            "baseName": "tdh",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "tdh_rate",
-            "baseName": "tdh_rate",
-            "type": "number",
-            "format": "int64"
-        },
         {
             "name": "xtdh",
             "baseName": "xtdh",
@@ -53,38 +39,38 @@ export class ApiTdhGlobalStats {
             "format": "double"
         },
         {
-            "name": "xtdh_multiplier",
-            "baseName": "xtdh_multiplier",
+            "name": "multiplier",
+            "baseName": "multiplier",
             "type": "number",
             "format": "double"
         },
         {
-            "name": "granted_xtdh_rate",
-            "baseName": "granted_xtdh_rate",
+            "name": "outgoing_rate",
+            "baseName": "outgoing_rate",
             "type": "number",
             "format": "double"
         },
         {
-            "name": "granted_xtdh",
-            "baseName": "granted_xtdh",
+            "name": "outgoing_total",
+            "baseName": "outgoing_total",
             "type": "number",
             "format": "double"
         },
         {
-            "name": "granted_target_collections_count",
-            "baseName": "granted_target_collections_count",
+            "name": "outgoing_collections_count",
+            "baseName": "outgoing_collections_count",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "granted_target_tokens_count",
-            "baseName": "granted_target_tokens_count",
+            "name": "outgoing_tokens_count",
+            "baseName": "outgoing_tokens_count",
             "type": "number",
             "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiTdhGlobalStats.attributeTypeMap;
+        return ApiXTdhGlobalStats.attributeTypeMap;
     }
 
     public constructor() {

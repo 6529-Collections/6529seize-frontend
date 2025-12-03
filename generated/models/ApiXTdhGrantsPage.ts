@@ -10,10 +10,14 @@
  * Do not edit the class manually.
  */
 
+import { ApiXTdhGrant } from '../models/ApiXTdhGrant';
 import { HttpFile } from '../http/http';
 
-export class ApiTdhGrantToken {
-    'token': string;
+export class ApiXTdhGrantsPage {
+    'data': Array<ApiXTdhGrant>;
+    'count': number;
+    'page': number;
+    'next': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -21,14 +25,32 @@ export class ApiTdhGrantToken {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "token",
-            "baseName": "token",
-            "type": "string",
+            "name": "data",
+            "baseName": "data",
+            "type": "Array<ApiXTdhGrant>",
+            "format": ""
+        },
+        {
+            "name": "count",
+            "baseName": "count",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "page",
+            "baseName": "page",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "next",
+            "baseName": "next",
+            "type": "boolean",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiTdhGrantToken.attributeTypeMap;
+        return ApiXTdhGrantsPage.attributeTypeMap;
     }
 
     public constructor() {

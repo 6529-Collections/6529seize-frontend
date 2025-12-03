@@ -11,11 +11,11 @@
  */
 
 import { ApiProfileMin } from '../models/ApiProfileMin';
-import { ApiTdhGrant } from '../models/ApiTdhGrant';
+import { ApiXTdhGrant } from '../models/ApiXTdhGrant';
 import { HttpFile } from '../http/http';
 
 export class ApiXTdhContribution {
-    'grant'?: ApiTdhGrant;
+    'grant'?: ApiXTdhGrant;
     'grantor'?: ApiProfileMin;
     'xtdh': number;
     'xtdh_rate': number;
@@ -30,7 +30,7 @@ export class ApiXTdhContribution {
         {
             "name": "grant",
             "baseName": "grant",
-            "type": "ApiTdhGrant",
+            "type": "ApiXTdhGrant",
             "format": ""
         },
         {

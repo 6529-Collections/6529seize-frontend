@@ -9,7 +9,7 @@ import {
 } from "@tanstack/react-query";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
+import type { ApiXTdhGrantsPage } from "@/generated/models/ApiXTdhGrantsPage";
 import { commonApiFetch } from "@/services/api/common-api";
 import type {
   GrantedFilterStatuses,
@@ -38,17 +38,17 @@ export interface UseXtdhGrantsQueryParams {
   readonly enabled?: boolean;
 }
 
-type XtdhGrantsInfiniteData = InfiniteData<ApiTdhGrantsPage>;
+type XtdhGrantsInfiniteData = InfiniteData<ApiXTdhGrantsPage>;
 
 export type UseXtdhGrantsQueryResult = UseInfiniteQueryResult<
   XtdhGrantsInfiniteData,
   Error
 > & {
-  readonly grants: ApiTdhGrantsPage["data"];
+  readonly grants: ApiXTdhGrantsPage["data"];
   readonly totalCount: number;
   readonly errorMessage?: string;
   readonly isEnabled: boolean;
-  readonly firstPage?: ApiTdhGrantsPage;
+  readonly firstPage?: ApiXTdhGrantsPage;
 };
 
 const DEFAULT_PAGE = 1;
@@ -110,8 +110,8 @@ export function useXtdhGrantsQuery({
     queryFn: async ({ pageParam }: { pageParam?: number }) => {
       const currentPage = pageParam ?? normalizedPage;
 
-      return await commonApiFetch<ApiTdhGrantsPage>({
-        endpoint: "tdh-grants",
+      return await commonApiFetch<ApiXTdhGrantsPage>({
+        endpoint: "xtdh/grants",
         params: {
           grantor,
           page: currentPage.toString(),

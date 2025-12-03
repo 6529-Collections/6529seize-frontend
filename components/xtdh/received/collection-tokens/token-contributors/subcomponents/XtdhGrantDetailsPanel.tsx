@@ -52,8 +52,8 @@ export function XtdhGrantDetailsPanel({
 
     const tokensCountInfo = getTargetTokensCountInfo(grant.target_tokens_count ?? null);
     const tokensCountValue = typeof tokensCountInfo.count === "number" ? tokensCountInfo.count : null;
-    const tdhRateLabel = formatAmount(grant.tdh_rate);
-    const tdhRatePerTokenLabel = formatTdhRatePerToken(grant.tdh_rate, tokensCountValue);
+    const rateLabel = formatAmount(grant.rate);
+    const ratePerTokenLabel = formatTdhRatePerToken(grant.rate, tokensCountValue);
 
     const tokensDescription = (() => {
       if (tokensCountInfo.kind === "all") {
@@ -65,8 +65,8 @@ export function XtdhGrantDetailsPanel({
       return "an unknown number of tokens";
     })();
 
-    const tdhRatePerTokenHint = tdhRatePerTokenLabel
-      ? `${tdhRateLabel} total TDH ÷ ${tokensDescription}`
+    const ratePerTokenHint = ratePerTokenLabel
+      ? `${rateLabel} total TDH ÷ ${tokensDescription}`
       : null;
 
     return {
@@ -78,9 +78,9 @@ export function XtdhGrantDetailsPanel({
       }),
       validUntilLabel: formatDateTime(grant.valid_to ?? null),
       tokensCountLabel: tokensCountInfo.label,
-      tdhRateLabel,
-      tdhRatePerTokenLabel,
-      tdhRatePerTokenHint,
+      rateLabel,
+      ratePerTokenLabel,
+      ratePerTokenHint,
     };
   }, [grant]);
 
@@ -156,13 +156,13 @@ export function XtdhGrantDetailsPanel({
             label="TDH rate"
             value={
               <div className="tw-flex tw-items-baseline tw-gap-2 tw-text-sm tw-font-medium tw-text-iron-100">
-                <span>{viewModel.tdhRateLabel}</span>
-                {viewModel.tdhRatePerTokenLabel ? (
+                <span>{viewModel.rateLabel}</span>
+                {viewModel.ratePerTokenLabel ? (
                   <span
                     className="tw-text-xs tw-font-semibold tw-text-iron-400 tw-whitespace-nowrap"
-                    title={viewModel.tdhRatePerTokenHint ?? undefined}
+                    title={viewModel.ratePerTokenHint ?? undefined}
                   >
-                    ({viewModel.tdhRatePerTokenLabel}/token)
+                    ({viewModel.ratePerTokenLabel}/token)
                   </span>
                 ) : null}
               </div>

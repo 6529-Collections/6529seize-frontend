@@ -1,5 +1,4 @@
-import { ApiTdhGrantTargetChain } from "@/generated/models/ApiTdhGrantTargetChain";
-import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
+import { ApiXTdhGrantTargetChain } from "@/generated/models/ApiXTdhGrantTargetChain";
 import type { SupportedChain } from "@/types/nft";
 import { isValidEthAddress } from "@/helpers/Helpers";
 import { shortenAddress as shortenGenericAddress } from "@/helpers/address.helpers";
@@ -7,13 +6,11 @@ import { getTargetTokensCountInfo } from "@/components/user/xtdh/utils/xtdhGrant
 
 import type { TokenPanelState } from "./types";
 
-type ApiGrantTargetChain = ApiTdhGrantsPage["data"][number]["target_chain"];
-
 const GRANT_CHAIN_TO_SUPPORTED_CHAIN: Record<
-  ApiGrantTargetChain,
+  ApiXTdhGrantTargetChain,
   SupportedChain
 > = {
-  [ApiTdhGrantTargetChain.EthereumMainnet]: "ethereum",
+  [ApiXTdhGrantTargetChain.EthereumMainnet]: "ethereum",
 };
 
 export function getContractAddress(
@@ -74,7 +71,7 @@ export function formatFloorPrice(value?: number | null): string {
 }
 
 export function mapGrantChainToSupportedChain(
-  chain: ApiGrantTargetChain
+  chain: ApiXTdhGrantTargetChain
 ): SupportedChain {
   const supportedChain = GRANT_CHAIN_TO_SUPPORTED_CHAIN[chain];
 

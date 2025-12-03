@@ -44,7 +44,6 @@ export * from '../models/ApiCreateNewWaveScope';
 export * from '../models/ApiCreateNewWaveVisibilityConfig';
 export * from '../models/ApiCreateNewWaveVotingConfig';
 export * from '../models/ApiCreateOrUpdateProfileRequest';
-export * from '../models/ApiCreateTdhGrant';
 export * from '../models/ApiCreateWaveConfig';
 export * from '../models/ApiCreateWaveDropRequest';
 export * from '../models/ApiDrop';
@@ -127,15 +126,6 @@ export * from '../models/ApiStartMultipartMediaUploadResponse';
 export * from '../models/ApiTargetAndSubscriptionActions';
 export * from '../models/ApiTdhEdition';
 export * from '../models/ApiTdhEditionsPage';
-export * from '../models/ApiTdhGlobalStats';
-export * from '../models/ApiTdhGrant';
-export * from '../models/ApiTdhGrantStatus';
-export * from '../models/ApiTdhGrantTargetChain';
-export * from '../models/ApiTdhGrantToken';
-export * from '../models/ApiTdhGrantTokensPage';
-export * from '../models/ApiTdhGrantUpdateRequest';
-export * from '../models/ApiTdhGrantsPage';
-export * from '../models/ApiTdhStats';
 export * from '../models/ApiTransaction';
 export * from '../models/ApiTransactionPage';
 export * from '../models/ApiUpdateDropRequest';
@@ -186,8 +176,18 @@ export * from '../models/ApiXTdhCollection';
 export * from '../models/ApiXTdhCollectionsPage';
 export * from '../models/ApiXTdhContribution';
 export * from '../models/ApiXTdhContributionsPage';
+export * from '../models/ApiXTdhCreateGrant';
+export * from '../models/ApiXTdhGlobalStats';
+export * from '../models/ApiXTdhGrant';
+export * from '../models/ApiXTdhGrantStatus';
+export * from '../models/ApiXTdhGrantTargetChain';
+export * from '../models/ApiXTdhGrantToken';
+export * from '../models/ApiXTdhGrantTokensPage';
+export * from '../models/ApiXTdhGrantUpdateRequest';
 export * from '../models/ApiXTdhGrantee';
 export * from '../models/ApiXTdhGranteesPage';
+export * from '../models/ApiXTdhGrantsPage';
+export * from '../models/ApiXTdhStats';
 export * from '../models/ApiXTdhToken';
 export * from '../models/ApiXTdhTokensPage';
 export * from '../models/CreateDirectMessageWaveRequest';
@@ -239,7 +239,6 @@ import { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
 import { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisibilityConfig';
 import { ApiCreateNewWaveVotingConfig         } from '../models/ApiCreateNewWaveVotingConfig';
 import { ApiCreateOrUpdateProfileRequest        } from '../models/ApiCreateOrUpdateProfileRequest';
-import { ApiCreateTdhGrant       } from '../models/ApiCreateTdhGrant';
 import { ApiCreateWaveConfig        } from '../models/ApiCreateWaveConfig';
 import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
 import { ApiDrop                          } from '../models/ApiDrop';
@@ -322,15 +321,6 @@ import { ApiStartMultipartMediaUploadResponse } from '../models/ApiStartMultipar
 import { ApiTargetAndSubscriptionActions } from '../models/ApiTargetAndSubscriptionActions';
 import { ApiTdhEdition } from '../models/ApiTdhEdition';
 import { ApiTdhEditionsPage } from '../models/ApiTdhEditionsPage';
-import { ApiTdhGlobalStats } from '../models/ApiTdhGlobalStats';
-import { ApiTdhGrant               } from '../models/ApiTdhGrant';
-import { ApiTdhGrantStatus } from '../models/ApiTdhGrantStatus';
-import { ApiTdhGrantTargetChain } from '../models/ApiTdhGrantTargetChain';
-import { ApiTdhGrantToken } from '../models/ApiTdhGrantToken';
-import { ApiTdhGrantTokensPage } from '../models/ApiTdhGrantTokensPage';
-import { ApiTdhGrantUpdateRequest } from '../models/ApiTdhGrantUpdateRequest';
-import { ApiTdhGrantsPage } from '../models/ApiTdhGrantsPage';
-import { ApiTdhStats } from '../models/ApiTdhStats';
 import { ApiTransaction } from '../models/ApiTransaction';
 import { ApiTransactionPage } from '../models/ApiTransactionPage';
 import { ApiUpdateDropRequest } from '../models/ApiUpdateDropRequest';
@@ -381,8 +371,18 @@ import { ApiXTdhCollection } from '../models/ApiXTdhCollection';
 import { ApiXTdhCollectionsPage } from '../models/ApiXTdhCollectionsPage';
 import { ApiXTdhContribution } from '../models/ApiXTdhContribution';
 import { ApiXTdhContributionsPage } from '../models/ApiXTdhContributionsPage';
+import { ApiXTdhCreateGrant       } from '../models/ApiXTdhCreateGrant';
+import { ApiXTdhGlobalStats } from '../models/ApiXTdhGlobalStats';
+import { ApiXTdhGrant                } from '../models/ApiXTdhGrant';
+import { ApiXTdhGrantStatus } from '../models/ApiXTdhGrantStatus';
+import { ApiXTdhGrantTargetChain } from '../models/ApiXTdhGrantTargetChain';
+import { ApiXTdhGrantToken } from '../models/ApiXTdhGrantToken';
+import { ApiXTdhGrantTokensPage } from '../models/ApiXTdhGrantTokensPage';
+import { ApiXTdhGrantUpdateRequest } from '../models/ApiXTdhGrantUpdateRequest';
 import { ApiXTdhGrantee } from '../models/ApiXTdhGrantee';
 import { ApiXTdhGranteesPage } from '../models/ApiXTdhGranteesPage';
+import { ApiXTdhGrantsPage } from '../models/ApiXTdhGrantsPage';
+import { ApiXTdhStats } from '../models/ApiXTdhStats';
 import { ApiXTdhToken } from '../models/ApiXTdhToken';
 import { ApiXTdhTokensPage } from '../models/ApiXTdhTokensPage';
 import { CreateDirectMessageWaveRequest } from '../models/CreateDirectMessageWaveRequest';
@@ -416,8 +416,6 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiProfileClassification",
     "ApiProfileProxyActionType",
     "ApiRateMatter",
-    "ApiTdhGrantStatus",
-    "ApiTdhGrantTargetChain",
     "ApiWaveCreditScope",
     "ApiWaveCreditType",
     "ApiWaveMetadataType",
@@ -429,6 +427,8 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiWaveType",
     "ApiWavesOverviewType",
     "ApiWavesPinFilter",
+    "ApiXTdhGrantStatus",
+    "ApiXTdhGrantTargetChain",
 ]);
 
 let typeMap: {[index: string]: any} = {
@@ -478,7 +478,6 @@ let typeMap: {[index: string]: any} = {
     "ApiCreateNewWaveVisibilityConfig": ApiCreateNewWaveVisibilityConfig,
     "ApiCreateNewWaveVotingConfig": ApiCreateNewWaveVotingConfig,
     "ApiCreateOrUpdateProfileRequest": ApiCreateOrUpdateProfileRequest,
-    "ApiCreateTdhGrant": ApiCreateTdhGrant,
     "ApiCreateWaveConfig": ApiCreateWaveConfig,
     "ApiCreateWaveDropRequest": ApiCreateWaveDropRequest,
     "ApiDrop": ApiDrop,
@@ -549,13 +548,6 @@ let typeMap: {[index: string]: any} = {
     "ApiTargetAndSubscriptionActions": ApiTargetAndSubscriptionActions,
     "ApiTdhEdition": ApiTdhEdition,
     "ApiTdhEditionsPage": ApiTdhEditionsPage,
-    "ApiTdhGlobalStats": ApiTdhGlobalStats,
-    "ApiTdhGrant": ApiTdhGrant,
-    "ApiTdhGrantToken": ApiTdhGrantToken,
-    "ApiTdhGrantTokensPage": ApiTdhGrantTokensPage,
-    "ApiTdhGrantUpdateRequest": ApiTdhGrantUpdateRequest,
-    "ApiTdhGrantsPage": ApiTdhGrantsPage,
-    "ApiTdhStats": ApiTdhStats,
     "ApiTransaction": ApiTransaction,
     "ApiTransactionPage": ApiTransactionPage,
     "ApiUpdateDropRequest": ApiUpdateDropRequest,
@@ -595,8 +587,16 @@ let typeMap: {[index: string]: any} = {
     "ApiXTdhCollectionsPage": ApiXTdhCollectionsPage,
     "ApiXTdhContribution": ApiXTdhContribution,
     "ApiXTdhContributionsPage": ApiXTdhContributionsPage,
+    "ApiXTdhCreateGrant": ApiXTdhCreateGrant,
+    "ApiXTdhGlobalStats": ApiXTdhGlobalStats,
+    "ApiXTdhGrant": ApiXTdhGrant,
+    "ApiXTdhGrantToken": ApiXTdhGrantToken,
+    "ApiXTdhGrantTokensPage": ApiXTdhGrantTokensPage,
+    "ApiXTdhGrantUpdateRequest": ApiXTdhGrantUpdateRequest,
     "ApiXTdhGrantee": ApiXTdhGrantee,
     "ApiXTdhGranteesPage": ApiXTdhGranteesPage,
+    "ApiXTdhGrantsPage": ApiXTdhGrantsPage,
+    "ApiXTdhStats": ApiXTdhStats,
     "ApiXTdhToken": ApiXTdhToken,
     "ApiXTdhTokensPage": ApiXTdhTokensPage,
     "CreateDirectMessageWaveRequest": CreateDirectMessageWaveRequest,

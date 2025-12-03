@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { ApiTdhGrantStatus } from "@/generated/models/ApiTdhGrantStatus";
+import type { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
 import { getStatusVisuals } from "../statusVisuals";
 
 export function StatusBadge({
@@ -8,7 +8,7 @@ export function StatusBadge({
   validFrom,
   validTo,
 }: Readonly<{
-  status: ApiTdhGrantStatus;
+  status: ApiXTdhGrantStatus;
   validFrom?: number | string | null;
   validTo?: number | string | null;
 }>) {

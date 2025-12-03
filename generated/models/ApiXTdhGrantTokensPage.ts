@@ -10,11 +10,11 @@
  * Do not edit the class manually.
  */
 
-import { ApiTdhGrantToken } from '../models/ApiTdhGrantToken';
+import { ApiXTdhGrantToken } from '../models/ApiXTdhGrantToken';
 import { HttpFile } from '../http/http';
 
-export class ApiTdhGrantTokensPage {
-    'data': Array<ApiTdhGrantToken>;
+export class ApiXTdhGrantTokensPage {
+    'data': Array<ApiXTdhGrantToken>;
     'count': number;
     'page': number;
     'next': boolean;
@@ -27,7 +27,7 @@ export class ApiTdhGrantTokensPage {
         {
             "name": "data",
             "baseName": "data",
-            "type": "Array<ApiTdhGrantToken>",
+            "type": "Array<ApiXTdhGrantToken>",
             "format": ""
         },
         {
@@ -50,7 +50,7 @@ export class ApiTdhGrantTokensPage {
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiTdhGrantTokensPage.attributeTypeMap;
+        return ApiXTdhGrantTokensPage.attributeTypeMap;
     }
 
     public constructor() {

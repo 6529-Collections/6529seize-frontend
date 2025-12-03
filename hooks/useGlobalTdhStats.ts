@@ -1,38 +1,36 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type { ApiTdhGlobalStats } from "@/generated/models/ApiTdhGlobalStats";
+import type { ApiXTdhGlobalStats } from "@/generated/models/ApiXTdhGlobalStats";
 import { commonApiFetch } from "@/services/api/common-api";
 
 export interface GlobalTdhStats {
-  readonly tdh: number;
-  readonly tdhRate: number | null;
+
   readonly xtdh: number;
   readonly xtdhRate: number;
-  readonly xtdhMultiplier: number | null;
-  readonly grantedXtdhRate: number;
-  readonly grantedXtdh: number;
-  readonly grantedCollectionsCount: number;
-  readonly grantedTokensCount: number;
+  readonly multiplier: number | null;
+  readonly outgoingRate: number;
+  readonly outgoingTotal: number;
+  readonly outgoingCollectionsCount: number;
+  readonly outgoingTokensCount: number;
 }
 
 async function fetchGlobalTdhStats(): Promise<GlobalTdhStats> {
-  const response = await commonApiFetch<ApiTdhGlobalStats>({
-    endpoint: "tdh-stats",
+  const response = await commonApiFetch<ApiXTdhGlobalStats>({
+    endpoint: "xtdh/stats",
   });
 
   return {
-    tdh: sanitizeNonNegativeNumber(response.tdh),
-    tdhRate: sanitizeNullableNonNegativeNumber(response.tdh_rate),
+
     xtdh: sanitizeNonNegativeNumber(response.xtdh),
     xtdhRate: sanitizeNonNegativeNumber(response.xtdh_rate),
-    xtdhMultiplier: sanitizeNullableNonNegativeNumber(response.xtdh_multiplier),
-    grantedXtdhRate: sanitizeNonNegativeNumber(response.granted_xtdh_rate),
-    grantedXtdh: sanitizeNonNegativeNumber(response.granted_xtdh),
-    grantedCollectionsCount: sanitizeCount(
-      response.granted_target_collections_count
+    multiplier: sanitizeNullableNonNegativeNumber(response.multiplier),
+    outgoingRate: sanitizeNonNegativeNumber(response.outgoing_rate),
+    outgoingTotal: sanitizeNonNegativeNumber(response.outgoing_total),
+    outgoingCollectionsCount: sanitizeCount(
+      response.outgoing_collections_count
     ),
-    grantedTokensCount: sanitizeCount(response.granted_target_tokens_count),
+    outgoingTokensCount: sanitizeCount(response.outgoing_tokens_count),
   };
 }
 

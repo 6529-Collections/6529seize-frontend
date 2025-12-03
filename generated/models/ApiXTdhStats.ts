@@ -13,22 +13,20 @@
 import { ApiIdentity } from '../models/ApiIdentity';
 import { HttpFile } from '../http/http';
 
-export class ApiTdhStats {
+export class ApiXTdhStats {
     'identity': ApiIdentity;
-    'tdh': number;
-    'tdh_rate': number;
     'xtdh': number;
     'xtdh_rate': number;
-    'xtdh_multiplier': number;
-    'granted_xtdh_rate': number;
-    'granted_xtdh': number;
-    'received_xtdh': number;
-    'received_xtdh_rate': number;
-    'granted_target_collections_count': number;
-    'granted_target_tokens_count': number;
-    'available_grant_rate': number;
-    'produced_xtdh': number;
-    'produced_xtdh_rate': number;
+    'multiplier': number;
+    'outgoing_rate': number;
+    'outgoing_total': number;
+    'outgoing_collections_count': number;
+    'outgoing_tokens_count': number;
+    'incoming_rate': number;
+    'incoming_total': number;
+    'generated_total': number;
+    'generation_rate': number;
+    'unused_rate': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -40,18 +38,6 @@ export class ApiTdhStats {
             "baseName": "identity",
             "type": "ApiIdentity",
             "format": ""
-        },
-        {
-            "name": "tdh",
-            "baseName": "tdh",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "tdh_rate",
-            "baseName": "tdh_rate",
-            "type": "number",
-            "format": "int64"
         },
         {
             "name": "xtdh",
@@ -66,68 +52,68 @@ export class ApiTdhStats {
             "format": "double"
         },
         {
-            "name": "xtdh_multiplier",
-            "baseName": "xtdh_multiplier",
+            "name": "multiplier",
+            "baseName": "multiplier",
             "type": "number",
             "format": "double"
         },
         {
-            "name": "granted_xtdh_rate",
-            "baseName": "granted_xtdh_rate",
+            "name": "outgoing_rate",
+            "baseName": "outgoing_rate",
             "type": "number",
             "format": "double"
         },
         {
-            "name": "granted_xtdh",
-            "baseName": "granted_xtdh",
+            "name": "outgoing_total",
+            "baseName": "outgoing_total",
             "type": "number",
             "format": "double"
         },
         {
-            "name": "received_xtdh",
-            "baseName": "received_xtdh",
-            "type": "number",
-            "format": "double"
-        },
-        {
-            "name": "received_xtdh_rate",
-            "baseName": "received_xtdh_rate",
-            "type": "number",
-            "format": "double"
-        },
-        {
-            "name": "granted_target_collections_count",
-            "baseName": "granted_target_collections_count",
+            "name": "outgoing_collections_count",
+            "baseName": "outgoing_collections_count",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "granted_target_tokens_count",
-            "baseName": "granted_target_tokens_count",
+            "name": "outgoing_tokens_count",
+            "baseName": "outgoing_tokens_count",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "available_grant_rate",
-            "baseName": "available_grant_rate",
+            "name": "incoming_rate",
+            "baseName": "incoming_rate",
             "type": "number",
             "format": "double"
         },
         {
-            "name": "produced_xtdh",
-            "baseName": "produced_xtdh",
+            "name": "incoming_total",
+            "baseName": "incoming_total",
             "type": "number",
             "format": "double"
         },
         {
-            "name": "produced_xtdh_rate",
-            "baseName": "produced_xtdh_rate",
+            "name": "generated_total",
+            "baseName": "generated_total",
+            "type": "number",
+            "format": "double"
+        },
+        {
+            "name": "generation_rate",
+            "baseName": "generation_rate",
+            "type": "number",
+            "format": "double"
+        },
+        {
+            "name": "unused_rate",
+            "baseName": "unused_rate",
             "type": "number",
             "format": "double"
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiTdhStats.attributeTypeMap;
+        return ApiXTdhStats.attributeTypeMap;
     }
 
     public constructor() {

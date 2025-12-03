@@ -1,8 +1,8 @@
-import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
+import type { ApiXTdhGrantsPage } from "@/generated/models/ApiXTdhGrantsPage";
 import { UserPageXtdhGrantListItem } from "./UserPageXtdhGrantListItem";
 
 export interface UserPageXtdhGrantListProps {
-  readonly grants: ApiTdhGrantsPage["data"];
+  readonly grants: ApiXTdhGrantsPage["data"];
   readonly isSelf: boolean;
 }
 
