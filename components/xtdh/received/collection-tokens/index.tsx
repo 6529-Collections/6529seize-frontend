@@ -128,7 +128,8 @@ export function XtdhCollectionTokensPanel({
       {collection ? (
         <XtdhReceivedCollectionCard
           collection={collection}
-          interactionMode="static"
+          interactionMode="button"
+          onSelect={() => onBack()}
         />
       ) : (
         <div className="tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4 tw-text-sm tw-text-iron-300">
@@ -140,11 +141,12 @@ export function XtdhCollectionTokensPanel({
         <div className="tw-space-y-4">
           <XtdhTokenListItem
             as="div"
-            className="tw-p-4"
+            className="tw-p-4 tw-cursor-pointer tw-transition-colors desktop-hover:hover:tw-bg-iron-900"
             token={selectedToken.token}
             metadata={selectedToken.metadata}
             isMetadataLoading={selectedToken.isMetadataLoading}
             hasMetadataError={selectedToken.hasMetadataError}
+            onSelect={handleBackToTokens}
           />
           {!selectedGrant && (
             <p className="tw-m-0 tw-text-sm tw-text-iron-300">
