@@ -13,7 +13,10 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
 }));
 
 jest.mock("next/navigation", () => ({
-  useRouter: jest.fn(),
+  useRouter: jest.fn(() => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+  })),
   useSearchParams: jest.fn(),
 }));
 

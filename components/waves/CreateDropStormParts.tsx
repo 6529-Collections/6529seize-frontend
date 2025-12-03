@@ -1,16 +1,24 @@
 "use client";
 
-import React from "react";
 import { CreateDropPart, ReferencedNft } from "@/entities/IDrop";
 import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
-import { AuthContext } from "../auth/Auth";
 import { cicToType } from "@/helpers/Helpers";
-import Link from "next/link";
-import CreateDropStormPart from "./CreateDropStormPart";
 import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
+import {
+  FC,
+  memo,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { AuthContext } from "../auth/Auth";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../user/utils/UserCICAndLevel";
+import CreateDropStormPart from "./CreateDropStormPart";
 
 interface CreateDropStormPartsProps {
   parts: CreateDropPart[];
@@ -19,14 +27,52 @@ interface CreateDropStormPartsProps {
   onRemovePart: (partIndex: number) => void;
 }
 
-const CreateDropStormParts: React.FC<CreateDropStormPartsProps> = ({
+const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
   parts,
   mentionedUsers,
   referencedNfts,
   onRemovePart,
 }) => {
-  const { connectedProfile } = React.useContext(AuthContext);
+  const { connectedProfile } = useContext(AuthContext);
   const cicType = cicToType(connectedProfile?.cic ?? 0);
+
+  const partIdCounterRef = useRef(0);
+  const [partIdsMap, setPartIdsMap] = useState<Map<number, string>>(new Map());
+
+  useEffect(() => {
+    setPartIdsMap((prevMap) => {
+      const newMap = new Map(prevMap);
+      let changed = false;
+
+      parts.forEach((part, index) => {
+        if (!part.quoted_drop) {
+          if (!newMap.has(index)) {
+            newMap.set(index, `part-${partIdCounterRef.current++}`);
+            changed = true;
+          }
+        }
+      });
+
+      const maxIndex = parts.length - 1;
+      Array.from(newMap.keys()).forEach((key) => {
+        if (key > maxIndex) {
+          newMap.delete(key);
+          changed = true;
+        }
+      });
+
+      return changed ? newMap : prevMap;
+    });
+  }, [parts]);
+
+  const partKeys = useMemo(() => {
+    return parts.map((part, index) => {
+      if (part.quoted_drop) {
+        return `quoted-${part.quoted_drop.drop_id}-${part.quoted_drop.drop_part_id}`;
+      }
+      return partIdsMap.get(index) ?? `part-fallback-${index}`;
+    });
+  }, [parts, partIdsMap]);
 
   return (
     <div className="tw-space-y-4 tw-pb-3">
@@ -61,11 +107,11 @@ const CreateDropStormParts: React.FC<CreateDropStormPartsProps> = ({
               </div>
             </div>
 
-            <AnimatePresence mode="popLayout">
-              <motion.div className="tw-mt-4 tw-space-y-4">
+            <div className="tw-mt-4 tw-space-y-4">
+              <AnimatePresence mode="popLayout">
                 {parts.map((part, partIndex) => (
                   <motion.div
-                    key={`storm-part-${part.content}-${partIndex}`}
+                    key={partKeys[partIndex]}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -79,8 +125,8 @@ const CreateDropStormParts: React.FC<CreateDropStormPartsProps> = ({
                     />
                   </motion.div>
                 ))}
-              </motion.div>
-            </AnimatePresence>
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </div>
@@ -88,4 +134,4 @@ const CreateDropStormParts: React.FC<CreateDropStormPartsProps> = ({
   );
 };
 
-export default React.memo(CreateDropStormParts);
+export default memo(CreateDropStormParts);

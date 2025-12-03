@@ -2,8 +2,11 @@ import {
   NotificationsProvider,
   useNotificationsContext,
 } from "@/components/notifications/NotificationsContext";
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import React from "react";
+
+const push = jest.fn();
+const mockUseRouter = jest.fn(() => ({ push }));
 
 jest.mock("@/hooks/useCapacitor", () => () => ({
   isCapacitor: true,
@@ -11,13 +14,34 @@ jest.mock("@/hooks/useCapacitor", () => () => ({
 }));
 jest.mock("next/navigation", () => ({
   __esModule: true,
-  useRouter: jest.fn(() => ({ push: jest.fn() })),
+  useRouter: () => mockUseRouter(),
 }));
 jest.mock("@/components/auth/Auth", () => ({
-  useAuth: () => ({ connectedProfile: null }),
+  useAuth: () => ({ connectedProfile: { id: "test-profile-id" } }),
 }));
 jest.mock("@/services/api/common-api", () => ({
+  commonApiPost: jest.fn().mockResolvedValue({}),
   commonApiPostWithoutBodyAndResponse: jest.fn().mockResolvedValue({}),
+}));
+
+jest.mock("@capacitor/push-notifications", () => {
+  return {
+    PushNotifications: {
+      removeAllListeners: jest.fn().mockResolvedValue(undefined),
+      addListener: jest.fn(),
+      requestPermissions: jest.fn().mockResolvedValue({ receive: "granted" }),
+      register: jest.fn().mockResolvedValue(undefined),
+      getDeliveredNotifications: jest
+        .fn()
+        .mockResolvedValue({ notifications: [{ data: { wave_id: "w1" } }] }),
+      removeDeliveredNotifications: jest.fn().mockResolvedValue(undefined),
+      removeAllDeliveredNotifications: jest.fn().mockResolvedValue(undefined),
+    },
+    PushNotificationSchema: {},
+  };
+});
+jest.mock("@capacitor/device", () => ({
+  Device: { getInfo: jest.fn().mockResolvedValue({ platform: "ios" }) },
 }));
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -44,70 +68,50 @@ describe("NotificationsContext", () => {
   });
 });
 
-jest.mock("@capacitor/push-notifications", () => ({
-  PushNotifications: {
-    removeAllListeners: jest.fn(),
-    addListener: jest.fn(),
-    requestPermissions: jest.fn().mockResolvedValue({ receive: "granted" }),
-    register: jest.fn(),
-    getDeliveredNotifications: jest
-      .fn()
-      .mockResolvedValue({ notifications: [{ data: { wave_id: "w1" } }] }),
-    removeDeliveredNotifications: jest.fn(),
-    removeAllDeliveredNotifications: jest.fn(),
-  },
-}));
-
-jest.mock("@capacitor/device", () => ({
-  Device: { getInfo: jest.fn().mockResolvedValue({ platform: "ios" }) },
-}));
-
 it("removes notifications when functions called", async () => {
+  const { PushNotifications } = require("@capacitor/push-notifications");
   const { result } = renderHook(() => useNotificationsContext(), { wrapper });
+
+  await waitFor(() => {
+    expect(PushNotifications.removeAllListeners).toHaveBeenCalled();
+  });
+
   await act(async () => {
     await result.current.removeWaveDeliveredNotifications("w1");
     await result.current.removeAllDeliveredNotifications();
   });
-  const { PushNotifications } = require("@capacitor/push-notifications");
   expect(PushNotifications.getDeliveredNotifications).toHaveBeenCalled();
   expect(PushNotifications.removeDeliveredNotifications).toHaveBeenCalled();
   expect(PushNotifications.removeAllDeliveredNotifications).toHaveBeenCalled();
 });
 
 describe("push notification action handling", () => {
-  it("redirects based on notification data", async () => {
-    const push = jest.fn();
-    const useRouterSpy = jest
-      .spyOn(require("next/navigation"), "useRouter")
-      .mockReturnValue({ push } as any);
-
-    let actionCallback: ((action: any) => Promise<void>) | null = null;
-
+  beforeEach(() => {
+    push.mockClear();
     const { PushNotifications } = require("@capacitor/push-notifications");
-    PushNotifications.addListener.mockImplementation(
-      (event: string, callback: any) => {
-        if (event === "pushNotificationActionPerformed") {
-          actionCallback = callback;
-        }
-        return Promise.resolve();
-      }
-    );
+    PushNotifications.addListener.mockClear();
+    PushNotifications.removeDeliveredNotifications.mockClear();
+  });
 
-    const useAuthSpy = jest
-      .spyOn(require("@/components/auth/Auth"), "useAuth")
-      .mockReturnValue({ connectedProfile: { id: "test-id" } } as any);
-
+  it("redirects based on notification data", async () => {
+    const { PushNotifications } = require("@capacitor/push-notifications");
     const { result } = renderHook(() => useNotificationsContext(), { wrapper });
 
-    await act(async () => {
-      await Promise.resolve();
+    await waitFor(() => {
+      expect(PushNotifications.addListener).toHaveBeenCalled();
     });
 
-    expect(actionCallback).not.toBeNull();
+    const addListenerCalls = PushNotifications.addListener.mock.calls;
+    const actionPerformedCall = addListenerCalls.find(
+      (call: any[]) => call[0] === "pushNotificationActionPerformed"
+    );
+    const callback = actionPerformedCall?.[1];
+
+    expect(callback).toBeDefined();
 
     await act(async () => {
-      if (actionCallback) {
-        await actionCallback({
+      if (callback) {
+        await callback({
           notification: {
             data: {
               redirect: "profile",
@@ -117,12 +121,13 @@ describe("push notification action handling", () => {
           },
         });
       }
+      await new Promise((r) => setTimeout(r, 100));
     });
 
-    expect(push).toHaveBeenCalledWith("/abc");
-    expect(PushNotifications.removeDeliveredNotifications).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(push).toHaveBeenCalledWith("/abc");
+    });
 
-    useRouterSpy.mockRestore();
-    useAuthSpy.mockRestore();
+    expect(PushNotifications.removeDeliveredNotifications).toHaveBeenCalled();
   });
 });
