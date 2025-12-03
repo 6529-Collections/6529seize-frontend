@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useWaveById } from "@/hooks/useWaveById";
 import { Bars3Icon } from "@heroicons/react/24/outline";
-import { usePathname } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
@@ -21,15 +21,6 @@ interface Props {
   readonly extraClass?: string;
 }
 
-const ROOT_PAGES = new Set([
-  "/",
-  "/waves",
-  "/messages",
-  "/notifications",
-  "/network",
-  "/the-memes",
-  "/discover",
-]);
 
 const COLLECTION_TITLES: Record<string, string> = {
   "the-memes": "The Memes",
@@ -68,6 +59,7 @@ export default function AppHeader(_props: Readonly<Props>) {
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy } = useAuth();
   const pathname = usePathname();
+  const params = useParams();
   const { canGoBack } = useNavigationHistoryContext();
   const { profile } = useIdentity({
     handleOrWallet: address ?? null,
@@ -97,8 +89,7 @@ export default function AppHeader(_props: Readonly<Props>) {
     pathname === "/waves/create" || pathname === "/messages/create";
   const isInsideWave = !!waveId;
 
-  const isProfilePage =
-    pathSegments.length === 1 && !ROOT_PAGES.has(pathname ?? "");
+  const isProfilePage = !!params?.user;
 
   const showBackButton =
     isInsideWave || isCreateRoute || (isProfilePage && canGoBack);
