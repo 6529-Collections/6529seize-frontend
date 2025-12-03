@@ -1122,7 +1122,7 @@ export const useWaveDropsClipboard = ({
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key.toLowerCase() !== "c") {
+      if (typeof event.key !== "string" || event.key.toLowerCase() !== "c") {
         return;
       }
 

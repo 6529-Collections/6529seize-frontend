@@ -93,6 +93,50 @@ Enable the **Next DevTools MCP server** so agents can query live routes, errors,
 
 ---
 
+## Sentry Error Handling
+
+When addressing issues reported by Sentry, **always attempt to fix the root cause first**. Silencing errors should only be considered as a last resort when fixing is genuinely not possible.
+
+### Default Workflow
+
+1. **Fix the code to prevent the issue** (primary action)
+   * Analyze the error stack trace and identify the root cause
+   * Implement a proper fix that addresses the underlying problem
+   * Add appropriate error handling, validation, or defensive checks
+   * Update tests to cover the fix
+
+2. **Ask about silencing only if fixing is not possible** (fallback)
+   * Only proceed to silencing if the error is genuinely unfixable, such as:
+     * Third-party library errors that cannot be patched
+     * Browser extension noise (e.g., injected scripts)
+     * Known browser bugs that cannot be worked around
+     * Expected errors that are already handled gracefully in the UI
+
+### Where Silencing Happens
+
+If silencing is necessary, errors are filtered in the `beforeSend` callback of Sentry initialization:
+
+* **Client-side**: [`instrumentation-client.ts`](instrumentation-client.ts) — contains `noisyPatterns`, `referenceErrors`, and `filenameExceptions` arrays
+* **Server-side**: [`sentry.server.config.ts`](sentry.server.config.ts) — server runtime configuration
+* **Edge runtime**: [`sentry.edge.config.ts`](sentry.edge.config.ts) — edge runtime configuration
+
+### Examples
+
+**Fixable (default action):**
+* Null reference errors → add null checks or optional chaining
+* Type errors → fix type definitions or add runtime validation
+* Network errors → implement retry logic or better error handling
+* Missing dependencies → add proper dependency arrays or fix imports
+
+**Non-fixable (ask about silencing):**
+* Browser extension injecting scripts (`inpage.js` errors)
+* Known browser bugs (e.g., `ResizeObserver loop limit exceeded` in some browsers)
+* Third-party library errors that cannot be patched without forking
+
+This aligns with the "Fix with modernization" principle: prioritize meaningful fixes over suppressing symptoms.
+
+---
+
 ## Next.js 16: What this means for agents
 
 * **Proxy instead of Middleware:** `middleware.ts` is **renamed to** `proxy.ts` (Node runtime). If you touch request‑boundary logic, ensure the file and exported function are named `proxy`. Legacy `middleware.ts` still exists for edge‑only cases but our default is `proxy.ts`. ([Next.js][6])
@@ -182,6 +226,7 @@ If you add or modify `proxy.ts`, keep it at the root (or `src/`) alongside `app/
 * Tests live in `__tests__/` or `ComponentName.test.tsx`.
 * Mock external dependencies and APIs in tests.
 * When parsing Seize URLs (or similar), **do not** fall back to placeholder origins; fail fast if base origin is unavailable.
+* **React imports:** Prefer direct named imports (`useMemo`, `useRef`, `FC`, etc.) over `React.` namespace usage (`React.useMemo`, `React.useRef`, `React.FC`, etc.). Import hooks and types directly: `import { useMemo, useRef, FC, memo } from "react"` rather than `import React from "react"` and using `React.useMemo`.
 
 ---
 
