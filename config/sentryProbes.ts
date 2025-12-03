@@ -18,11 +18,7 @@ const probeTags = {
   probe_type: "generic-exploit-scan",
 };
 
-const CONNECTION_ERROR_PATTERNS = [
-  "aborted",
-  "ECONNRESET",
-  "socket hang up",
-];
+const CONNECTION_ERROR_PATTERNS = ["aborted", "ECONNRESET", "socket hang up"];
 
 const HTTP_SERVER_STACK_PATTERNS = [
   "_http_server",
@@ -31,8 +27,9 @@ const HTTP_SERVER_STACK_PATTERNS = [
 ];
 
 function isConnectionError(message: string): boolean {
+  const normalized = message.toLowerCase();
   return CONNECTION_ERROR_PATTERNS.some((pattern) =>
-    message.includes(pattern)
+    normalized.includes(pattern.toLowerCase())
   );
 }
 
@@ -62,9 +59,7 @@ function isMonitoringRoute(url: string, stacktrace: unknown[]): boolean {
 }
 
 function hasHttpServerStack(stack: string): boolean {
-  return HTTP_SERVER_STACK_PATTERNS.some((pattern) =>
-    stack.includes(pattern)
-  );
+  return HTTP_SERVER_STACK_PATTERNS.some((pattern) => stack.includes(pattern));
 }
 
 function checkFirstErrorPath(
