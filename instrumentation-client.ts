@@ -1,6 +1,7 @@
-// This file configures the initialization of Sentry on the client.
-// The added config here will be used whenever a users loads a page in their browser.
-// https://docs.sentry.io/platforms/javascript/guides/nextjs/
+// instrumentation-client.ts
+// This file configures client-side instrumentation in Next.js 15.3+
+// It is auto-discovered by Next.js and runs before your application's frontend code starts executing.
+// https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation-client
 
 import { publicEnv } from "@/config/env";
 import {
@@ -17,27 +18,42 @@ Sentry.init({
   dsn: sentryEnabled ? dsn : undefined,
   enabled: sentryEnabled,
 
-  // Add optional integrations for additional features
   integrations: [Sentry.replayIntegration()],
 
-  // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
   tracesSampleRate: 0.1,
-  // Enable logs to be sent to Sentry
+
   enableLogs: true,
 
-  // Define how likely Replay events are sampled.
-  // This sets the sample rate to be 10%. You may want this to be 100% while
-  // in development and sample at a lower rate in production
   replaysSessionSampleRate: sentryEnabled && isProduction ? 0.1 : 0,
 
-  // Define how likely Replay events are sampled when an error occurs.
   replaysOnErrorSampleRate: sentryEnabled && isProduction ? 1.0 : 0,
 
-  // Enable sending user PII (Personally Identifiable Information)
-  // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
   sendDefaultPii: true,
 
   beforeSend(event, hint) {
+    const value = event.exception?.values?.[0];
+
+    let fallbackMessage = "";
+    if (typeof hint?.originalException === "string") {
+      fallbackMessage = hint.originalException;
+    } else if (hint?.originalException instanceof Error) {
+      fallbackMessage = hint.originalException.message;
+    }
+
+    const message = value?.value ?? fallbackMessage;
+
+    if (typeof message === "string") {
+      const noisyPatterns = [
+        "EmptyRanges",
+        "ResizeObserver loop limit exceeded",
+        "Non-Error promise rejection captured",
+      ];
+
+      if (noisyPatterns.some((p) => message.includes(p))) {
+        return null;
+      }
+    }
+
     const error = hint.originalException || hint.syntheticException;
 
     if (error && isIndexedDBError(error)) {
