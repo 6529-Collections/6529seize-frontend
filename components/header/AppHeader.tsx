@@ -1,6 +1,7 @@
 "use client";
 
 import { capitalizeEveryWord, formatAddress } from "@/helpers/Helpers";
+import Image from "next/image";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useWaveById } from "@/hooks/useWaveById";
 import { Bars3Icon } from "@heroicons/react/24/outline";
@@ -90,9 +91,6 @@ export default function AppHeader(_props: Readonly<Props>) {
 
   const isRootPage = ROOT_PAGES.has(pathname ?? "");
 
-  // Show back button when:
-  // - Inside a wave or on create page (detail pages with known parent)
-  // - On any other page with navigation history (e.g., profile from wave chat)
   const showBackButton = isInsideWave || isCreateRoute || (canGoBack && !isRootPage);
 
   const finalTitle: React.ReactNode = (() => {
@@ -130,9 +128,11 @@ export default function AppHeader(_props: Readonly<Props>) {
             }`}>
             {address ? (
               pfp ? (
-                <img
+                <Image
                   src={pfp}
                   alt="pfp"
+                  width={40}
+                  height={40}
                   className="tw-h-10 tw-w-10 tw-rounded-full tw-object-contain tw-flex-shrink-0"
                 />
               ) : (
