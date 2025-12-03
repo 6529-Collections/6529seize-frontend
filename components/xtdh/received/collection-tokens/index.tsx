@@ -138,20 +138,18 @@ export function XtdhCollectionTokensPanel({
 
       {selectedToken && selectedTokenId !== null ? (
         <div className="tw-space-y-4">
+          <XtdhTokenListItem
+            as="div"
+            className="tw-p-4"
+            token={selectedToken.token}
+            metadata={selectedToken.metadata}
+            isMetadataLoading={selectedToken.isMetadataLoading}
+            hasMetadataError={selectedToken.hasMetadataError}
+          />
           {!selectedGrant && (
-            <>
-              <XtdhTokenListItem
-                as="div"
-                className="tw-p-4"
-                token={selectedToken.token}
-                metadata={selectedToken.metadata}
-                isMetadataLoading={selectedToken.isMetadataLoading}
-                hasMetadataError={selectedToken.hasMetadataError}
-              />
-              <p className="tw-m-0 tw-text-sm tw-text-iron-300">
-                Explore the grants and grantors powering this token&apos;s xTDH.
-              </p>
-            </>
+            <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+              Explore the grants and grantors powering this token&apos;s xTDH.
+            </p>
           )}
           <XtdhTokenContributorsPanel
             contract={contractParam}

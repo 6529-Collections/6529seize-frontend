@@ -12,7 +12,6 @@ interface UseIdentityTdhStatsOptions {
 
 export interface IdentityTdhStats {
   readonly producedXtdhRate: number;
-  readonly grantedXtdhPerDay: number;
   readonly grantedCollectionsCount: number;
   readonly grantedTokensCount: number;
   readonly totalReceivedXtdh: number;
@@ -37,7 +36,6 @@ async function fetchIdentityTdhStats(identity: string): Promise<IdentityTdhStats
 
   return {
     producedXtdhRate,
-    grantedXtdhPerDay: sanitizeNonNegativeNumber(response.granted_xtdh_rate),
     grantedCollectionsCount: sanitizeCount(response.granted_target_collections_count),
     grantedTokensCount: sanitizeCount(response.granted_target_tokens_count),
     totalReceivedXtdh: sanitizeNonNegativeNumber(response.received_xtdh),

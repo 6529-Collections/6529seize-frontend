@@ -1,26 +1,31 @@
+import { useMemo } from "react";
+import Image from "next/image";
+
 import { useXtdhGrantQuery } from "@/hooks/useXtdhGrantQuery";
 import { GrantedListSkeleton } from "@/components/user/xtdh/granted-list/subcomponents/GrantedListSkeleton";
 import { GrantedListError } from "@/components/user/xtdh/granted-list/subcomponents/GrantedListError";
-import ProfileBadge from "@/components/common/profile/ProfileBadge";
-import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { cicToType, formatNumberWithCommas as formatNumber } from "@/helpers/Helpers";
+import {
+  GrantListItemContainer,
+  StatusBadge,
+  GrantExpiryBadge,
+  GrantDetailsRow,
+  GrantTokensPanel,
+} from "@/components/user/xtdh/granted-list/subcomponents/UserPageXtdhGrantListItem/subcomponents";
+import {
+  mapTokenCountToState,
+  getContractAddress,
+  mapGrantChainToSupportedChain,
+} from "@/components/user/xtdh/granted-list/subcomponents/UserPageXtdhGrantListItem/formatters";
+import {
+  formatAmount,
+  formatDateTime,
+  formatTdhRatePerToken,
+  getTargetTokensCountInfo,
+} from "@/components/user/xtdh/utils/xtdhGrantFormatters";
 import { shortenAddress } from "@/helpers/address.helpers";
-import { formatXtdhRate } from "@/components/xtdh/received/utils/formatters";
-import { StatusBadge } from "@/components/user/xtdh/granted-list/subcomponents/UserPageXtdhGrantListItem/subcomponents/StatusBadge";
 
 interface XtdhGrantDetailsPanelProps {
   readonly grantId: string;
-}
-
-function formatDate(timestamp: number | null): string {
-  if (!timestamp) {
-    return "N/A";
-  }
-  return new Date(timestamp).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
 }
 
 export function XtdhGrantDetailsPanel({
@@ -30,11 +35,60 @@ export function XtdhGrantDetailsPanel({
     grantId,
   });
 
+  const viewModel = useMemo(() => {
+    if (!grant) {
+      return null;
+    }
+
+    const contractAddress = getContractAddress(grant.target_contract);
+    let chain = null;
+    try {
+      chain = mapGrantChainToSupportedChain(grant.target_chain);
+    } catch {
+      // Ignore unsupported chain error for display purposes
+    }
+
+    const tokenState = mapTokenCountToState(grant.target_tokens_count);
+
+    const tokensCountInfo = getTargetTokensCountInfo(grant.target_tokens_count ?? null);
+    const tokensCountValue = typeof tokensCountInfo.count === "number" ? tokensCountInfo.count : null;
+    const tdhRateLabel = formatAmount(grant.tdh_rate);
+    const tdhRatePerTokenLabel = formatTdhRatePerToken(grant.tdh_rate, tokensCountValue);
+
+    const tokensDescription = (() => {
+      if (tokensCountInfo.kind === "all") {
+        return "all tokens in this collection";
+      }
+      if (tokensCountInfo.kind === "count") {
+        return `${tokensCountInfo.label} tokens granted`;
+      }
+      return "an unknown number of tokens";
+    })();
+
+    const tdhRatePerTokenHint = tdhRatePerTokenLabel
+      ? `${tdhRateLabel} total TDH ÷ ${tokensDescription}`
+      : null;
+
+    return {
+      chain,
+      contractAddress,
+      tokenState,
+      validFromLabel: formatDateTime(grant.valid_from ?? null, {
+        fallbackLabel: "Immediately",
+      }),
+      validUntilLabel: formatDateTime(grant.valid_to ?? null),
+      tokensCountLabel: tokensCountInfo.label,
+      tdhRateLabel,
+      tdhRatePerTokenLabel,
+      tdhRatePerTokenHint,
+    };
+  }, [grant]);
+
   if (isLoading) {
     return <GrantedListSkeleton />;
   }
 
-  if (isError || !grant) {
+  if (isError || !grant || !viewModel) {
     return (
       <GrantedListError
         message={errorMessage ?? "Failed to load grant details."}
@@ -47,98 +101,83 @@ export function XtdhGrantDetailsPanel({
   const grantorHandle = grantor.handle;
   const displayHandle =
     grantorHandle ?? shortenAddress(grantor.primary_address) ?? "Unknown grantor";
-  const profileHref = grantorHandle ? `/${grantorHandle}` : undefined;
-  const tooltipIdentity = grantorHandle ?? grantor.primary_address ?? "";
-
-  const avatarFallback = (
-    <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-font-semibold tw-text-iron-400">
-      ?
-    </div>
-  );
-
-  const grantorBadge = (
-    <ProfileBadge
-      handle={displayHandle}
-      href={profileHref}
-      pfpUrl={grantor.pfp}
-      level={grantor.level ?? 0}
-      cicType={cicToType(grantor.cic ?? 0)}
-      avatarFallback={avatarFallback}
-      asLink={Boolean(profileHref)}
-      avatarAlt={grantorHandle ?? "Grantor profile"}
-    />
-  );
+  const displayAddress = shortenAddress(grantor.primary_address);
 
   return (
-    <div className="tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-6 tw-space-y-6">
-      <div className="tw-flex tw-flex-col tw-gap-6 md:tw-flex-row md:tw-items-start md:tw-justify-between">
-        <div className="tw-flex tw-items-center tw-gap-4">
-          <div className="tw-h-12 tw-w-12 tw-overflow-hidden tw-rounded-xl tw-bg-iron-900">
-            {tooltipIdentity ? (
-              <UserProfileTooltipWrapper user={tooltipIdentity}>
-                {grantorBadge}
-              </UserProfileTooltipWrapper>
-            ) : (
-              grantorBadge
-            )}
-          </div>
-          <div>
-            <div className="tw-text-sm tw-font-medium tw-text-iron-400">
-              Grantor
+    <GrantListItemContainer>
+      <div className="tw-flex tw-flex-col tw-gap-4">
+        <header className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-4">
+          <div className="tw-flex tw-items-start tw-gap-3">
+            <div className="tw-relative tw-h-14 tw-w-14 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800">
+              {grantor.pfp ? (
+                <Image
+                  src={grantor.pfp}
+                  alt={displayHandle}
+                  fill
+                  sizes="56px"
+                  className="tw-h-full tw-w-full tw-object-cover"
+                />
+              ) : (
+                <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-font-semibold tw-text-iron-400">
+                  ?
+                </div>
+              )}
             </div>
-            <div className="tw-text-lg tw-font-semibold tw-text-iron-100">
-              {displayHandle}
+            <div className="tw-flex tw-flex-col tw-gap-1">
+              <div className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
+                Grantor
+              </div>
+              <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+                {displayHandle}
+              </p>
+              {grantorHandle && (
+                <p className="tw-m-0 tw-text-xs tw-text-iron-400">
+                  {displayAddress}
+                </p>
+              )}
             </div>
           </div>
-        </div>
+          <div className="tw-flex tw-items-center tw-gap-3">
+            <GrantExpiryBadge value={viewModel.validUntilLabel} />
+            <StatusBadge
+              status={grant.status}
+              validFrom={grant.valid_from}
+              validTo={grant.valid_to}
+            />
+          </div>
+        </header>
 
-        <div className="tw-flex tw-flex-wrap tw-gap-3">
-          <StatusBadge
-            status={grant.status}
-            validFrom={grant.valid_from}
-            validTo={grant.valid_to}
+        <dl className="tw-grid tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
+          <GrantDetailsRow
+            label="Tokens granted"
+            value={viewModel.tokensCountLabel}
           />
-        </div>
+          <GrantDetailsRow
+            label="TDH rate"
+            value={
+              <div className="tw-flex tw-items-baseline tw-gap-2 tw-text-sm tw-font-medium tw-text-iron-100">
+                <span>{viewModel.tdhRateLabel}</span>
+                {viewModel.tdhRatePerTokenLabel ? (
+                  <span
+                    className="tw-text-xs tw-font-semibold tw-text-iron-400 tw-whitespace-nowrap"
+                    title={viewModel.tdhRatePerTokenHint ?? undefined}
+                  >
+                    ({viewModel.tdhRatePerTokenLabel}/token)
+                  </span>
+                ) : null}
+              </div>
+            }
+          />
+          <GrantDetailsRow label="Valid from" value={viewModel.validFromLabel} />
+        </dl>
       </div>
 
-      <div className="tw-grid tw-grid-cols-1 tw-gap-6 sm:tw-grid-cols-2 lg:tw-grid-cols-4 tw-border-t tw-border-iron-800 tw-pt-6">
-        <div>
-          <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500 tw-mb-1">
-            Target Tokens
-          </div>
-          <div className="tw-text-lg tw-font-medium tw-text-iron-100">
-            {formatNumber(grant.target_tokens_count)}
-          </div>
-        </div>
-
-        <div>
-          <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500 tw-mb-1">
-            xTDH Rate
-          </div>
-          <div className="tw-text-lg tw-font-medium tw-text-iron-100">
-            {formatXtdhRate(grant.tdh_rate)}
-            <span className="tw-text-sm tw-text-iron-500 tw-ml-1">/ day</span>
-          </div>
-        </div>
-
-        <div>
-          <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500 tw-mb-1">
-            Valid From
-          </div>
-          <div className="tw-text-lg tw-font-medium tw-text-iron-100">
-            {formatDate(grant.valid_from)}
-          </div>
-        </div>
-
-        <div>
-          <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500 tw-mb-1">
-            Valid To
-          </div>
-          <div className="tw-text-lg tw-font-medium tw-text-iron-100">
-            {grant.valid_to ? formatDate(grant.valid_to) : "Indefinite"}
-          </div>
-        </div>
-      </div>
-    </div>
+      <GrantTokensPanel
+        chain={viewModel.chain}
+        contractAddress={viewModel.contractAddress ?? null}
+        grantId={grant.id}
+        state={viewModel.tokenState}
+      />
+    </GrantListItemContainer>
   );
 }
