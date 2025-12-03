@@ -21,7 +21,15 @@ interface Props {
   readonly extraClass?: string;
 }
 
-const ROOT_PAGES = new Set(["/waves", "/messages", "/notifications", "/"]);
+const ROOT_PAGES = new Set([
+  "/",
+  "/waves",
+  "/messages",
+  "/notifications",
+  "/network",
+  "/the-memes",
+  "/discover",
+]);
 
 const COLLECTION_TITLES: Record<string, string> = {
   "the-memes": "The Memes",
@@ -89,9 +97,11 @@ export default function AppHeader(_props: Readonly<Props>) {
     pathname === "/waves/create" || pathname === "/messages/create";
   const isInsideWave = !!waveId;
 
-  const isRootPage = ROOT_PAGES.has(pathname ?? "");
+  const isProfilePage =
+    pathSegments.length === 1 && !ROOT_PAGES.has(pathname ?? "");
 
-  const showBackButton = isInsideWave || isCreateRoute || (canGoBack && !isRootPage);
+  const showBackButton =
+    isInsideWave || isCreateRoute || (isProfilePage && canGoBack);
 
   const finalTitle: React.ReactNode = (() => {
     if (pathname === "/waves/create") return "Waves";
