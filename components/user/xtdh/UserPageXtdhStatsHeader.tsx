@@ -47,9 +47,9 @@ export default function UserPageXtdhStatsHeader({
 
   return (
     <UserXtdhStats
-      producedXtdhRate={statsQuery.data.producedXtdhRate}
-      receivedXtdhRate={statsQuery.data.receivedXtdhRate}
-      availableGrantRate={statsQuery.data.availableGrantRate}
+      generationRate={statsQuery.data.generationRate}
+      incomingRate={statsQuery.data.incomingRate}
+      unusedRate={statsQuery.data.unusedRate}
       onOutboundClick={onOutboundClick}
     />
   );

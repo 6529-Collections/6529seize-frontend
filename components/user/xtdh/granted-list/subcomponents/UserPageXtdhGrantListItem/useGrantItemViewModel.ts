@@ -6,8 +6,8 @@ import {
   formatTdhRatePerToken,
   getTargetTokensCountInfo,
 } from "@/components/user/xtdh/utils/xtdhGrantFormatters";
-import type { ApiTdhGrantStatus } from "@/generated/models/ApiTdhGrantStatus";
-import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
+import type { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
+import type { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
 import { useContractOverviewQuery } from "@/hooks/useAlchemyNftQueries";
 import type { ContractOverview, SupportedChain } from "@/types/nft";
 
@@ -19,7 +19,7 @@ import {
 } from "./formatters";
 import type { GrantDetails, GrantItemVariant } from "./types";
 
-type ApiTdhGrant = ApiTdhGrantsPage["data"][number];
+
 
 interface GrantItemViewModel {
   readonly contract: ContractOverview | null;
@@ -29,7 +29,7 @@ interface GrantItemViewModel {
   readonly details: GrantDetails;
   readonly errorDetails: string | null;
   readonly isLoading: boolean;
-  readonly status: ApiTdhGrantStatus;
+  readonly status: ApiXTdhGrantStatus;
   readonly variant: GrantItemVariant;
   readonly validFrom: number | null;
   readonly validTo: number | null;
@@ -59,7 +59,7 @@ function deriveErrorDetails(
   return null;
 }
 
-export function useGrantItemViewModel(grant: ApiTdhGrant): GrantItemViewModel {
+export function useGrantItemViewModel(grant: ApiXTdhGrant): GrantItemViewModel {
   const contractAddress = getContractAddress(grant.target_contract);
   const rawContractLabel = grant.target_contract?.trim();
   const contractLabel =
@@ -118,7 +118,7 @@ export function useGrantItemViewModel(grant: ApiTdhGrant): GrantItemViewModel {
 }
 
 function buildGrantDetails(
-  grant: ApiTdhGrant,
+  grant: ApiXTdhGrant,
   contract?: ContractOverview
 ): GrantDetails {
   const baseDetails = createBaseGrantDetails(grant);
@@ -135,15 +135,15 @@ function buildGrantDetails(
   };
 }
 
-function createBaseGrantDetails(grant: ApiTdhGrant): GrantDetails {
+function createBaseGrantDetails(grant: ApiXTdhGrant): GrantDetails {
   const tokensCountInfo = getTargetTokensCountInfo(
     grant.target_tokens_count ?? null
   );
   const tokensCountValue =
     typeof tokensCountInfo.count === "number" ? tokensCountInfo.count : null;
-  const tdhRateLabel = formatAmount(grant.tdh_rate);
+  const tdhRateLabel = formatAmount(grant.rate);
   const perTokenLabel = formatTdhRatePerToken(
-    grant.tdh_rate,
+    grant.rate,
     tokensCountValue
   );
   const tokensDescription = (() => {

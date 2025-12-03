@@ -12,7 +12,7 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiTdhGrantUpdateRequest {
+export class ApiXTdhGrantUpdateRequest {
     /**
     * If valid_to-valid_from does not allow for at least one xTDH increment then old grant is disabled and substitute wont be created
     */
@@ -31,7 +31,7 @@ export class ApiTdhGrantUpdateRequest {
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiTdhGrantUpdateRequest.attributeTypeMap;
+        return ApiXTdhGrantUpdateRequest.attributeTypeMap;
     }
 
     public constructor() {

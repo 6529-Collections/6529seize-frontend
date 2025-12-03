@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { ApiTdhStats } from "@/generated/models/ApiTdhStats";
+import { ApiXTdhStats } from "@/generated/models/ApiXTdhStats";
 import { commonApiFetch } from "@/services/api/common-api";
 
 interface UseIdentityTdhStatsOptions {
@@ -11,34 +11,36 @@ interface UseIdentityTdhStatsOptions {
 }
 
 export interface IdentityTdhStats {
-  readonly producedXtdhRate: number;
-  readonly grantedCollectionsCount: number;
-  readonly grantedTokensCount: number;
-  readonly totalReceivedXtdh: number;
-  readonly receivedXtdhRate: number;
-  readonly totalGrantedXtdh: number;
-  readonly xtdhMultiplier: number;
-  readonly availableGrantRate: number;
+  readonly generationRate: number;
+  readonly outgoingRate: number;
+  readonly outgoingTotal: number;
+  readonly outgoingCollectionsCount: number;
+  readonly outgoingTokensCount: number;
+  readonly incomingTotal: number;
+  readonly incomingRate: number;
+  readonly multiplier: number;
+  readonly unusedRate: number;
 }
 
 async function fetchIdentityTdhStats(identity: string): Promise<IdentityTdhStats> {
   const encodedIdentity = encodeURIComponent(identity);
-  const response = await commonApiFetch<ApiTdhStats>({
-    endpoint: `tdh-stats/${encodedIdentity}`,
+  const response = await commonApiFetch<ApiXTdhStats>({
+    endpoint: `xtdh/stats/${encodedIdentity}`,
   });
 
 
 
 
   return {
-    producedXtdhRate: response.produced_xtdh_rate,
-    grantedCollectionsCount: response.granted_target_collections_count,
-    grantedTokensCount: response.granted_target_tokens_count,
-    totalReceivedXtdh: response.received_xtdh,
-    receivedXtdhRate: response.received_xtdh_rate,
-    totalGrantedXtdh: response.granted_xtdh,
-    xtdhMultiplier: response.xtdh_multiplier,
-    availableGrantRate: response.available_grant_rate,
+    generationRate: response.generation_rate,
+    outgoingRate: response.outgoing_rate,
+    outgoingCollectionsCount: response.outgoing_collections_count,
+    outgoingTokensCount: response.outgoing_tokens_count,
+    incomingTotal: response.incoming_total,
+    incomingRate: response.incoming_rate,
+    outgoingTotal: response.outgoing_total,
+    multiplier: response.multiplier,
+    unusedRate: response.unused_rate,
   };
 }
 

@@ -8,7 +8,7 @@ import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { ApiTdhGrantStatus } from "@/generated/models/ApiTdhGrantStatus";
+import { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
 import { useAuth } from "@/components/auth/Auth";
 import CommonConfirmationModal from "@/components/utils/modal/CommonConfirmationModal";
 import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
@@ -58,7 +58,7 @@ export function UserPageXtdhGrantListItem({
   const stopGrant = useMutation({
     mutationFn: async () => {
       await commonApiPost({
-        endpoint: `tdh-grants/${grant.id}`,
+        endpoint: `xtdh/grants/${grant.id}`,
         body: {
           valid_to: Date.now(),
         },
@@ -87,7 +87,7 @@ export function UserPageXtdhGrantListItem({
   const revokeGrant = useMutation({
     mutationFn: async () => {
       await commonApiPost({
-        endpoint: `tdh-grants/${grant.id}`,
+        endpoint: `xtdh/grants/${grant.id}`,
         body: {
           valid_to: grant.valid_from,
         },
@@ -123,8 +123,8 @@ export function UserPageXtdhGrantListItem({
       return null;
     }
 
-    const isPending = status === ApiTdhGrantStatus.Pending;
-    const isActive = status === ApiTdhGrantStatus.Granted;
+    const isPending = status === ApiXTdhGrantStatus.Pending;
+    const isActive = status === ApiXTdhGrantStatus.Granted;
 
     if (!isPending && !isActive) {
       return null;

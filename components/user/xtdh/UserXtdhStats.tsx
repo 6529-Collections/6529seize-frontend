@@ -2,32 +2,32 @@ import { formatStatFloor } from "@/helpers/Helpers";
 
 
 interface UserXtdhStatsProps {
-  readonly producedXtdhRate: number;
-  readonly receivedXtdhRate: number;
-  readonly availableGrantRate: number;
+  readonly generationRate: number;
+  readonly incomingRate: number;
+  readonly unusedRate: number;
   readonly onOutboundClick?: () => void;
 }
 
 export function UserXtdhStats({
-  producedXtdhRate,
-  receivedXtdhRate,
-  availableGrantRate,
+  generationRate,
+  incomingRate,
+  unusedRate,
   onOutboundClick,
 }: Readonly<UserXtdhStatsProps>) {
-  const outbound = Math.max(producedXtdhRate - availableGrantRate, 0);
-  const net = +producedXtdhRate.toFixed(0) + +receivedXtdhRate.toFixed(0) - +outbound.toFixed(0);
+  const outbound = Math.max(generationRate - unusedRate, 0);
+  const net = +generationRate.toFixed(0) + +incomingRate.toFixed(0) - +outbound.toFixed(0);
 
 
 
   const stats = [
     {
       label: "Generating",
-      value: formatStatFloor(producedXtdhRate),
+      value: formatStatFloor(generationRate),
       subtext: "/day",
     },
     {
       label: "Inbound",
-      value: formatStatFloor(receivedXtdhRate),
+      value: formatStatFloor(incomingRate),
       subtext: "/day",
     },
     {
@@ -93,7 +93,7 @@ export function UserXtdhStats({
         <div className="tw-flex tw-justify-between tw-text-xs tw-font-medium tw-text-iron-400">
           <span>Granted Grant Rate</span>
           <span>
-            {formatStatFloor(outbound)} / {formatStatFloor(producedXtdhRate)} xTDH
+            {formatStatFloor(outbound)} / {formatStatFloor(generationRate)} xTDH
           </span>
         </div>
         <div className="tw-h-2 tw-w-full tw-overflow-hidden tw-rounded-full tw-bg-iron-800">
@@ -102,7 +102,7 @@ export function UserXtdhStats({
             style={{
               width: `${Math.min(
                 Math.max(
-                  (Math.floor(outbound) / Math.floor(producedXtdhRate)) * 100,
+                  (Math.floor(outbound) / Math.floor(generationRate)) * 100,
                   0
                 ),
                 100

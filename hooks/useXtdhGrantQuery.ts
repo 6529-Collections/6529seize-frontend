@@ -1,6 +1,6 @@
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type { ApiTdhGrant } from "@/generated/models/ApiTdhGrant";
+import type { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
 import { commonApiFetch } from "@/services/api/common-api";
 
 export interface UseXtdhGrantQueryParams {
@@ -8,8 +8,8 @@ export interface UseXtdhGrantQueryParams {
   readonly enabled?: boolean;
 }
 
-export type UseXtdhGrantQueryResult = UseQueryResult<ApiTdhGrant, Error> & {
-  readonly grant: ApiTdhGrant | undefined;
+export type UseXtdhGrantQueryResult = UseQueryResult<ApiXTdhGrant, Error> & {
+  readonly grant: ApiXTdhGrant | undefined;
   readonly errorMessage?: string;
   readonly isEnabled: boolean;
 };
@@ -28,8 +28,8 @@ export function useXtdhGrantQuery({
       if (!grantId) {
         throw new Error("Grant ID is required");
       }
-      return await commonApiFetch<ApiTdhGrant>({
-        endpoint: `tdh-grants/${grantId}`,
+      return await commonApiFetch<ApiXTdhGrant>({
+        endpoint: `xtdh/grants/${grantId}`,
       });
     },
     enabled: isEnabled,

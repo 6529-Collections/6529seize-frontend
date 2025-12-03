@@ -12,7 +12,7 @@
 
 import { HttpFile } from '../http/http';
 
-export enum ApiTdhGrantStatus {
+export enum ApiXTdhGrantStatus {
     Pending = 'PENDING',
     Failed = 'FAILED',
     Granted = 'GRANTED',
