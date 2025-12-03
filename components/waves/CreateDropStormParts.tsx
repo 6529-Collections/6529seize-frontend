@@ -28,13 +28,30 @@ const CreateDropStormParts: React.FC<CreateDropStormPartsProps> = ({
   const { connectedProfile } = React.useContext(AuthContext);
   const cicType = cicToType(connectedProfile?.cic ?? 0);
 
+  const partIdCounterRef = React.useRef(0);
+  const partIdsRef = React.useRef<string[]>([]);
+
   const partKeys = React.useMemo(() => {
-    return parts.map((part, index) => {
-      const stableId = part.quoted_drop
-        ? `quoted-${part.quoted_drop.drop_id}-${part.quoted_drop.drop_part_id}`
-        : `content-${index}-${part.media.length}`;
-      return stableId;
+    const keys: string[] = [];
+
+    parts.forEach((part, index) => {
+      if (part.quoted_drop) {
+        const quotedKey = `quoted-${part.quoted_drop.drop_id}-${part.quoted_drop.drop_part_id}`;
+        keys.push(quotedKey);
+      } else {
+        if (index < partIdsRef.current.length) {
+          keys.push(partIdsRef.current[index]);
+        } else {
+          const newId = `part-${partIdCounterRef.current++}`;
+          partIdsRef.current[index] = newId;
+          keys.push(newId);
+        }
+      }
     });
+
+    partIdsRef.current = partIdsRef.current.slice(0, keys.length);
+
+    return keys;
   }, [parts]);
 
   return (
