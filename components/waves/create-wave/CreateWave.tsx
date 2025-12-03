@@ -84,20 +84,26 @@ export default function CreateWave({
   );
 
   const addWaveMutation = useAddWaveMutation({
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
       waitAndInvalidateDrops();
       onWaveCreated();
       onSuccess?.();
       if (isApp) {
-        router.replace(
-          getWaveRoute({
-            waveId: response.id,
-            isDirectMessage: false,
-            isApp: true,
-          })
-        );
+        router
+          .replace(
+            getWaveRoute({
+              waveId: response.id,
+              isDirectMessage: false,
+              isApp: true,
+            })
+          )
+          .catch((error) => {
+            console.error("Navigation error after wave creation:", error);
+          });
       } else {
-        router.push(`/waves?wave=${response.id}`);
+        router.push(`/waves?wave=${response.id}`).catch((error) => {
+          console.error("Navigation error after wave creation:", error);
+        });
       }
     },
     onError: (error) => {

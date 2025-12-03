@@ -56,7 +56,9 @@ export default function UserPageHeaderEditName({
         params?.user?.toString() ?? "",
         updatedProfile.handle!?.toLowerCase()
       );
-      await router.replace(newPath);
+      router.replace(newPath).catch((error) => {
+        console.error("Navigation error after profile update:", error);
+      });
       onProfileEdit({ profile: updatedProfile, previousProfile: profile });
       onClose();
     },
