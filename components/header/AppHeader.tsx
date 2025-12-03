@@ -20,7 +20,7 @@ interface Props {
   readonly extraClass?: string;
 }
 
-const ROOT_PAGES = ["/waves", "/messages", "/notifications", "/"];
+const ROOT_PAGES = new Set(["/waves", "/messages", "/notifications", "/"]);
 
 const COLLECTION_TITLES: Record<string, string> = {
   "the-memes": "The Memes",
@@ -37,7 +37,7 @@ const sliceString = (str: string, length: number): string => {
 
 const getCollectionTitle = (basePath: string, pageTitle: string): string | null => {
   const prefix = COLLECTION_TITLES[basePath];
-  if (prefix && !isNaN(Number(pageTitle))) {
+  if (prefix && !Number.isNaN(Number(pageTitle))) {
     return `${prefix} #${pageTitle}`;
   }
   return null;
@@ -88,7 +88,7 @@ export default function AppHeader(_props: Readonly<Props>) {
     pathname === "/waves/create" || pathname === "/messages/create";
   const isInsideWave = !!waveId;
 
-  const isRootPage = ROOT_PAGES.includes(pathname ?? "");
+  const isRootPage = ROOT_PAGES.has(pathname ?? "");
 
   // Show back button when:
   // - Inside a wave or on create page (detail pages with known parent)
