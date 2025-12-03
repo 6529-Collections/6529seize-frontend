@@ -88,7 +88,6 @@ describe("AppHeader", () => {
 
   it("shows menu icon on root page even with history", () => {
     setup({ address: null, asPath: "/notifications", canGoBack: true });
-    // Root pages should show menu, not back button, even with history
     expect(screen.queryByTestId("back")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Open menu" })).toBeInTheDocument();
   });
@@ -110,7 +109,6 @@ describe("AppHeader", () => {
       params: { user: "johndoe" },
       canGoBack: false,
     });
-    // Should show menu button (not back button) when no history
     expect(screen.queryByTestId("back")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Open menu" })).toBeInTheDocument();
   });

@@ -17,9 +17,6 @@ import HeaderActionButtons from "./HeaderActionButtons";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
 
-interface Props {
-  readonly extraClass?: string;
-}
 
 
 const COLLECTION_TITLES: Record<string, string> = {
@@ -48,12 +45,12 @@ const getRememesTitle = (pathSegments: string[]): string | null => {
   const contract = pathSegments[1];
   const tokenId = pathSegments[2];
   if (contract && tokenId) {
-    return `Rememes ${formatAddress(contract)} #${sliceString(formatAddress(tokenId), 10)}`;
+    return `Rememes ${formatAddress(contract)} #${sliceString(tokenId, 10)}`;
   }
   return null;
 };
 
-export default function AppHeader(_props: Readonly<Props>) {
+export default function AppHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const myStream = useMyStreamOptional();
   const { address } = useSeizeConnectContext();
@@ -89,7 +86,7 @@ export default function AppHeader(_props: Readonly<Props>) {
     pathname === "/waves/create" || pathname === "/messages/create";
   const isInsideWave = !!waveId;
 
-  const isProfilePage = !!params?.user;
+  const isProfilePage = typeof params?.user === "string";
 
   const showBackButton =
     isInsideWave || isCreateRoute || (isProfilePage && canGoBack);
