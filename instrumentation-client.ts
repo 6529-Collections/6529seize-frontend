@@ -117,6 +117,9 @@ function isNetworkError(errorMessage: string): boolean {
   return (
     normalized.includes("failed to fetch") ||
     normalized.includes("load failed") ||
+    normalized.includes("networkerror") ||
+    normalized.includes("network error") ||
+    normalized.includes("network request failed") ||
     /\bnetwork\b/.test(normalized)
   );
 }
