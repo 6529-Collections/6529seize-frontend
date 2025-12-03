@@ -98,8 +98,8 @@ Sentry.init({
         errorMessage.includes("network")
       ) {
         let url = "unknown";
-        const urlMatch = error.message.match(/\(([^)]+)\)/);
-        if (urlMatch) {
+        const urlMatch = error.message.match(/\(([^)]+?)\)/);
+        if (urlMatch && urlMatch[1].length < 2048) {
           url = urlMatch[1];
         } else {
           const fetchBreadcrumb = event.breadcrumbs?.find(
