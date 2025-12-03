@@ -50,7 +50,6 @@ export default function UserPageXtdhStatsHeader({
       producedXtdhRate={statsQuery.data.producedXtdhRate}
       receivedXtdhRate={statsQuery.data.receivedXtdhRate}
       availableGrantRate={statsQuery.data.availableGrantRate}
-      xtdhRate={statsQuery.data.xtdhRate}
       onOutboundClick={onOutboundClick}
     />
   );

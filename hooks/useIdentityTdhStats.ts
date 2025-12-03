@@ -15,12 +15,10 @@ export interface IdentityTdhStats {
   readonly grantedCollectionsCount: number;
   readonly grantedTokensCount: number;
   readonly totalReceivedXtdh: number;
-  readonly receivedXtdhRate: number | null;
+  readonly receivedXtdhRate: number;
   readonly totalGrantedXtdh: number;
-  readonly xtdhMultiplier: number | null;
-  readonly tdhRate: number | null;
-  readonly availableGrantRate: number | null;
-  readonly xtdhRate: number | null;
+  readonly xtdhMultiplier: number;
+  readonly availableGrantRate: number;
 }
 
 async function fetchIdentityTdhStats(identity: string): Promise<IdentityTdhStats> {
@@ -29,24 +27,18 @@ async function fetchIdentityTdhStats(identity: string): Promise<IdentityTdhStats
     endpoint: `tdh-stats/${encodedIdentity}`,
   });
 
-  const producedXtdhRate = sanitizeNonNegativeNumber(response.produced_xtdh_rate);
-  const tdhRate = sanitizeNullableNonNegativeNumber(
-    (response.tdh_rate ?? Number.NaN),
-  );
+
+
 
   return {
-    producedXtdhRate,
-    grantedCollectionsCount: sanitizeCount(response.granted_target_collections_count),
-    grantedTokensCount: sanitizeCount(response.granted_target_tokens_count),
-    totalReceivedXtdh: sanitizeNonNegativeNumber(response.received_xtdh),
-    receivedXtdhRate: sanitizeNullableNonNegativeNumber(
-      response.received_xtdh_rate ?? Number.NaN,
-    ),
-    totalGrantedXtdh: sanitizeNonNegativeNumber(response.granted_xtdh),
-    xtdhMultiplier: sanitizeNullableNonNegativeNumber(response.xtdh_multiplier),
-    tdhRate,
-    availableGrantRate: sanitizeNullableNonNegativeNumber(response.available_grant_rate),
-    xtdhRate: sanitizeNullableNonNegativeNumber(response.xtdh_rate),
+    producedXtdhRate: response.produced_xtdh_rate,
+    grantedCollectionsCount: response.granted_target_collections_count,
+    grantedTokensCount: response.granted_target_tokens_count,
+    totalReceivedXtdh: response.received_xtdh,
+    receivedXtdhRate: response.received_xtdh_rate,
+    totalGrantedXtdh: response.granted_xtdh,
+    xtdhMultiplier: response.xtdh_multiplier,
+    availableGrantRate: response.available_grant_rate,
   };
 }
 
@@ -74,20 +66,5 @@ export function useIdentityTdhStats({
   });
 }
 
-function sanitizeNullableNonNegativeNumber(value: unknown): number | null {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    return null;
-  }
-  return Math.max(value, 0);
-}
 
-function sanitizeNonNegativeNumber(value: unknown): number {
-  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
-    return 0;
-  }
-  return value;
-}
 
-function sanitizeCount(value: unknown): number {
-  return Math.trunc(sanitizeNonNegativeNumber(value));
-}

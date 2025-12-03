@@ -3,9 +3,8 @@ import { formatStatFloor } from "@/helpers/Helpers";
 
 interface UserXtdhStatsProps {
   readonly producedXtdhRate: number;
-  readonly receivedXtdhRate: number | null;
-  readonly availableGrantRate: number | null;
-  readonly xtdhRate: number | null;
+  readonly receivedXtdhRate: number;
+  readonly availableGrantRate: number;
   readonly onOutboundClick?: () => void;
 }
 
@@ -13,10 +12,12 @@ export function UserXtdhStats({
   producedXtdhRate,
   receivedXtdhRate,
   availableGrantRate,
-  xtdhRate,
   onOutboundClick,
 }: Readonly<UserXtdhStatsProps>) {
-  const outbound = Math.max(producedXtdhRate - (availableGrantRate ?? 0), 0);
+  const outbound = Math.max(producedXtdhRate - availableGrantRate, 0);
+  const net = +producedXtdhRate.toFixed(0) + +receivedXtdhRate.toFixed(0) - +outbound.toFixed(0);
+
+
 
   const stats = [
     {
@@ -37,7 +38,7 @@ export function UserXtdhStats({
     },
     {
       label: "Net",
-      value: formatStatFloor(xtdhRate),
+      value: formatStatFloor(net),
       subtext: "/day",
     },
   ];
