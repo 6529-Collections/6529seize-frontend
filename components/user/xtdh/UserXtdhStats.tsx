@@ -1,5 +1,5 @@
 import { formatStatFloor } from "@/helpers/Helpers";
-import { formatDisplay } from "@/components/xtdh/stats/formatters";
+
 
 interface UserXtdhStatsProps {
   readonly producedXtdhRate: number;
@@ -26,18 +26,18 @@ export function UserXtdhStats({
     },
     {
       label: "Inbound",
-      value: formatDisplay(receivedXtdhRate),
+      value: formatStatFloor(receivedXtdhRate),
       subtext: "/day",
     },
     {
       label: "Outbound",
-      value: formatDisplay(outbound),
+      value: formatStatFloor(outbound),
       subtext: "/day",
       onClick: onOutboundClick,
     },
     {
       label: "Net",
-      value: formatDisplay(xtdhRate),
+      value: formatStatFloor(xtdhRate),
       subtext: "/day",
     },
   ];

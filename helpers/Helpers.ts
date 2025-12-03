@@ -124,11 +124,16 @@ export function formatNumberWithCommasOrDash(x: number): string {
   return formatNumberWithCommas(x);
 }
 
-export function formatStatFloor(value: number | null | undefined): string {
+export function formatStatFloor(
+  value: number | null | undefined,
+  decimals = 0
+): string {
   if (value === null || value === undefined || !Number.isFinite(value)) {
     return "-";
   }
-  return formatNumberWithCommas(Math.floor(value));
+  const factor = 10 ** decimals;
+  const flooredValue = Math.floor(value * factor) / factor;
+  return formatNumberWithCommas(flooredValue);
 }
 
 export function getDateDisplay(date: Date) {
@@ -143,9 +148,8 @@ export function getDateDisplay(date: Date) {
   if (60 * 60 * 24 > secondsAgo) {
     const hours = Math.floor(secondsAgo / (60 * 60));
     const minutes = secondsAgo % (60 * 60);
-    return `${hours} hr${hours > 1 ? "s" : ""} ${
-      minutes > 0 ? `${Math.floor(minutes / 60)} mins` : ""
-    } ago`;
+    return `${hours} hr${hours > 1 ? "s" : ""} ${minutes > 0 ? `${Math.floor(minutes / 60)} mins` : ""
+      } ago`;
   }
   const days = Math.round(secondsAgo / (60 * 60 * 24));
   if (2 > days) {
@@ -317,10 +321,10 @@ export function printMintDate(date?: Date) {
   const mintDate = new Date(date);
   return `
       ${mintDate.toLocaleString("default", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      })} 
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  })} 
       (${getDateDisplay(mintDate)})
     `;
 }
@@ -612,25 +616,20 @@ export const getTimeUntil = (milliseconds: number): string => {
   const years = Math.floor(months / 12);
 
   if (years > 0) {
-    return `${isFuture ? "in" : ""} ${years} year${years > 1 ? "s" : ""} ${
-      isFuture ? "" : "ago"
-    }`;
+    return `${isFuture ? "in" : ""} ${years} year${years > 1 ? "s" : ""} ${isFuture ? "" : "ago"
+      }`;
   } else if (months > 0) {
-    return `${isFuture ? "in" : ""} ${months} month${months > 1 ? "s" : ""} ${
-      isFuture ? "" : "ago"
-    }`;
+    return `${isFuture ? "in" : ""} ${months} month${months > 1 ? "s" : ""} ${isFuture ? "" : "ago"
+      }`;
   } else if (days > 0) {
-    return `${isFuture ? "in" : ""} ${days} day${days > 1 ? "s" : ""} ${
-      isFuture ? "" : "ago"
-    }`;
+    return `${isFuture ? "in" : ""} ${days} day${days > 1 ? "s" : ""} ${isFuture ? "" : "ago"
+      }`;
   } else if (hours > 0) {
-    return `${isFuture ? "in" : ""} ${hours} hour${hours > 1 ? "s" : ""} ${
-      isFuture ? "" : "ago"
-    }`;
+    return `${isFuture ? "in" : ""} ${hours} hour${hours > 1 ? "s" : ""} ${isFuture ? "" : "ago"
+      }`;
   } else if (minutes > 0) {
-    return `${isFuture ? "in" : ""} ${minutes} minute${
-      minutes > 1 ? "s" : ""
-    } ${isFuture ? "" : "ago"}`;
+    return `${isFuture ? "in" : ""} ${minutes} minute${minutes > 1 ? "s" : ""
+      } ${isFuture ? "" : "ago"}`;
   } else {
     return `Just now`;
   }
@@ -845,9 +844,8 @@ export const getMetadataForUserPage = (
   return {
     title: display + (path ? ` | ${path}` : ""),
     ogImage: profile.pfp ?? "",
-    description: `Level ${
-      profile.level
-    } / TDH: ${profile.tdh.toLocaleString()} / Rep: ${profile.rep.toLocaleString()}`,
+    description: `Level ${profile.level
+      } / TDH: ${profile.tdh.toLocaleString()} / Rep: ${profile.rep.toLocaleString()}`,
     twitterCard: "summary_large_image",
   };
 };
