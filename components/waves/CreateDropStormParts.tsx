@@ -1,16 +1,16 @@
 "use client";
 
-import React from "react";
 import { CreateDropPart, ReferencedNft } from "@/entities/IDrop";
 import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
-import { AuthContext } from "../auth/Auth";
 import { cicToType } from "@/helpers/Helpers";
-import Link from "next/link";
-import CreateDropStormPart from "./CreateDropStormPart";
 import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
+import React from "react";
+import { AuthContext } from "../auth/Auth";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../user/utils/UserCICAndLevel";
+import CreateDropStormPart from "./CreateDropStormPart";
 
 interface CreateDropStormPartsProps {
   parts: CreateDropPart[];
@@ -27,6 +27,15 @@ const CreateDropStormParts: React.FC<CreateDropStormPartsProps> = ({
 }) => {
   const { connectedProfile } = React.useContext(AuthContext);
   const cicType = cicToType(connectedProfile?.cic ?? 0);
+
+  const partKeys = React.useMemo(() => {
+    return parts.map((part, index) => {
+      const stableId = part.quoted_drop
+        ? `quoted-${part.quoted_drop.drop_id}-${part.quoted_drop.drop_part_id}`
+        : `content-${index}-${part.media.length}`;
+      return stableId;
+    });
+  }, [parts]);
 
   return (
     <div className="tw-space-y-4 tw-pb-3">
@@ -61,11 +70,11 @@ const CreateDropStormParts: React.FC<CreateDropStormPartsProps> = ({
               </div>
             </div>
 
-            <AnimatePresence mode="popLayout">
-              <motion.div className="tw-mt-4 tw-space-y-4">
+            <div className="tw-mt-4 tw-space-y-4">
+              <AnimatePresence mode="popLayout">
                 {parts.map((part, partIndex) => (
                   <motion.div
-                    key={`storm-part-${part.content}-${partIndex}`}
+                    key={partKeys[partIndex]}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -79,8 +88,8 @@ const CreateDropStormParts: React.FC<CreateDropStormPartsProps> = ({
                     />
                   </motion.div>
                 ))}
-              </motion.div>
-            </AnimatePresence>
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </div>

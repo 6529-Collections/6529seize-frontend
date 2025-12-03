@@ -13,6 +13,16 @@ const sentryEnabled = !!publicEnv.SENTRY_DSN;
 const isProduction = publicEnv.NODE_ENV === "production";
 const dsn = publicEnv.SENTRY_DSN;
 
+const noisyPatterns = [
+  "EmptyRanges",
+  "ResizeObserver loop limit exceeded",
+  "Non-Error promise rejection captured",
+];
+
+const referenceErrors = ["__firefox__"];
+
+const filenameExceptions = ["inpage.js"];
+
 Sentry.init({
   dsn: sentryEnabled ? dsn : undefined,
   enabled: sentryEnabled,
@@ -40,17 +50,32 @@ Sentry.init({
     }
 
     const message = value?.value ?? fallbackMessage;
+    const errorType = value?.type;
 
     if (typeof message === "string") {
-      const noisyPatterns = [
-        "EmptyRanges",
-        "ResizeObserver loop limit exceeded",
-        "Non-Error promise rejection captured",
-      ];
-
       if (noisyPatterns.some((p) => message.includes(p))) {
         return null;
       }
+
+      if (
+        (errorType === "ReferenceError" || errorType === "TypeError") &&
+        referenceErrors.some((p) => message.includes(p))
+      ) {
+        return null;
+      }
+    }
+
+    const frames = event.exception?.values?.[0]?.stacktrace?.frames;
+    if (
+      frames?.some((frame: any) =>
+        filenameExceptions.some(
+          (pattern) =>
+            frame?.filename?.includes(pattern) ||
+            frame?.abs_path?.includes(pattern)
+        )
+      )
+    ) {
+      return null;
     }
 
     const error = hint.originalException || hint.syntheticException;
