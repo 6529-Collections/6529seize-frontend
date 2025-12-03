@@ -1,3 +1,5 @@
+import type { Event, EventHint } from "@sentry/nextjs";
+
 const PROBE_PATTERNS = [
   ".jsp",
   ".php",
@@ -7,8 +9,8 @@ const PROBE_PATTERNS = [
   "/wp-admin",
   "/wp-login",
   "/cgi-bin/",
-  "/manager/html", // Tomcat
-  "/admin/login.jsp", // common Java probe
+  "/manager/html",
+  "/admin/login.jsp",
 ];
 
 const probeTags = {
@@ -16,57 +18,116 @@ const probeTags = {
   probe_type: "generic-exploit-scan",
 };
 
-export function filterTunnelRouteErrors(event: any, hint?: any): any | null {
+const CONNECTION_ERROR_PATTERNS = [
+  "aborted",
+  "ECONNRESET",
+  "socket hang up",
+];
+
+const HTTP_SERVER_STACK_PATTERNS = [
+  "_http_server",
+  "abortIncoming",
+  "socketOnClose",
+];
+
+function isConnectionError(message: string): boolean {
+  return CONNECTION_ERROR_PATTERNS.some((pattern) =>
+    message.includes(pattern)
+  );
+}
+
+function isFrameWithPaths(
+  frame: unknown
+): frame is { filename?: string; abs_path?: string } {
+  return (
+    typeof frame === "object" &&
+    frame !== null &&
+    ("filename" in frame || "abs_path" in frame)
+  );
+}
+
+function isMonitoringRoute(url: string, stacktrace: unknown[]): boolean {
+  if (url.includes("/monitoring")) {
+    return true;
+  }
+  return stacktrace.some((frame) => {
+    if (!isFrameWithPaths(frame)) {
+      return false;
+    }
+    return (
+      frame.filename?.includes("monitoring") ||
+      frame.abs_path?.includes("monitoring")
+    );
+  });
+}
+
+function hasHttpServerStack(stack: string): boolean {
+  return HTTP_SERVER_STACK_PATTERNS.some((pattern) =>
+    stack.includes(pattern)
+  );
+}
+
+function checkFirstErrorPath(
+  event: Event,
+  message: string,
+  value: { stacktrace?: { frames?: unknown[] } }
+): boolean {
+  if (!isConnectionError(message)) {
+    return false;
+  }
+
+  const url = event.request?.url || "";
+  const stacktrace = value?.stacktrace?.frames || [];
+
+  return isMonitoringRoute(url, stacktrace);
+}
+
+function checkSecondErrorPath(
+  event: Event,
+  message: string,
+  hint?: EventHint
+): boolean {
+  if (message !== "aborted" || !hint?.originalException) {
+    return false;
+  }
+
+  if (!(hint.originalException instanceof Error)) {
+    return false;
+  }
+
+  const stack = hint.originalException.stack || "";
+  if (!hasHttpServerStack(stack)) {
+    return false;
+  }
+
+  const url = event.request?.url || "";
+  return url.includes("/monitoring");
+}
+
+export function filterTunnelRouteErrors(
+  event: Event,
+  hint?: EventHint
+): Event | null {
   const value = event.exception?.values?.[0];
   const message = value?.value || "";
   const errorType = value?.type || "";
 
   if (typeof message === "string") {
-    if (
-      message.includes("aborted") ||
-      message.includes("ECONNRESET") ||
-      message.includes("socket hang up")
-    ) {
-      const url = event.request?.url || "";
-      const stacktrace = value?.stacktrace?.frames || [];
-
-      const isMonitoringRoute =
-        url.includes("/monitoring") ||
-        stacktrace.some(
-          (frame: any) =>
-            frame?.filename?.includes("monitoring") ||
-            frame?.abs_path?.includes("monitoring")
-        );
-
-      if (isMonitoringRoute) {
-        return null;
-      }
+    if (checkFirstErrorPath(event, message, value || {})) {
+      return null;
     }
   }
 
   if (errorType === "Error" && typeof message === "string") {
-    if (
-      message.includes("aborted") &&
-      hint?.originalException instanceof Error
-    ) {
-      const stack = hint.originalException.stack || "";
-      if (
-        stack.includes("_http_server") ||
-        stack.includes("abortIncoming") ||
-        stack.includes("socketOnClose")
-      ) {
-        const url = event.request?.url || "";
-        if (url.includes("/monitoring")) {
-          return null;
-        }
-      }
+    if (checkSecondErrorPath(event, message, hint)) {
+      return null;
     }
   }
 
   return event;
 }
 
-export function tagSecurityProbes(event: any) {
+export function tagSecurityProbes(event: Event): Event {
   try {
     const url = (event?.request?.url || "").toLowerCase();
 
