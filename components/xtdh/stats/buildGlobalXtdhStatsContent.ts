@@ -1,6 +1,6 @@
 import type { GlobalTdhStats } from "@/hooks/useGlobalTdhStats";
 
-import { formatDisplay } from "./formatters";
+import { formatStatFloor } from "@/helpers/Helpers";
 import type { XtdhStatsProps } from "./XtdhStats";
 
 export function buildGlobalXtdhStatsContent(data: GlobalTdhStats): XtdhStatsProps {
@@ -21,13 +21,13 @@ export function buildGlobalXtdhStatsContent(data: GlobalTdhStats): XtdhStatsProp
     : 0;
   const percentage = Math.min(Math.max(rawPercentage, 0), 100);
 
-  const totalDisplay = formatDisplay(xtdhRate);
-  const grantedDisplay = formatDisplay(grantedXtdhRate);
-  const availableDisplay = formatDisplay(availableValue);
+  const totalDisplay = formatStatFloor(xtdhRate);
+  const grantedDisplay = formatStatFloor(grantedXtdhRate);
+  const availableDisplay = formatStatFloor(availableValue);
 
   return {
     metrics: {
-      multiplier: formatDisplay(xtdhMultiplier, 2),
+      multiplier: formatStatFloor(xtdhMultiplier, 2),
       producedXtdhRate: totalDisplay,
     },
     allocation: {
