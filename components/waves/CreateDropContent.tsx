@@ -609,10 +609,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     allMentions: ApiDropMentionedUser[],
     allNfts: ReferencedNft[]
   ): CreateDropConfig => {
-    const isStormMode = (drop?.parts.length ?? 0) > 0;
+    const hasPartsInDrop = (drop?.parts.length ?? 0) > 0;
     const hasCurrentContent = !!(markdown?.trim().length || files.length);
     
-    const newParts = isStormMode && !hasCurrentContent
+    const newParts = hasPartsInDrop && !hasCurrentContent
       ? drop?.parts ?? []
       : [
           ...(drop?.parts ?? []),
@@ -874,10 +874,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       return;
     }
     
-    const isStormMode = (drop?.parts.length ?? 0) > 0;
+    const hasPartsInDrop = (drop?.parts.length ?? 0) > 0;
     const hasCurrentContent = !!(getMarkdown?.trim().length || files.length);
     
-    if (isStormMode && hasCurrentContent) {
+    if (hasPartsInDrop && hasCurrentContent) {
       finalizeAndAddDropPart();
       return;
     }

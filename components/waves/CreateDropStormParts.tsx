@@ -5,7 +5,15 @@ import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import { cicToType } from "@/helpers/Helpers";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import { FC, memo, useContext, useMemo, useRef } from "react";
+import {
+  FC,
+  memo,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { AuthContext } from "../auth/Auth";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
@@ -29,28 +37,42 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
   const cicType = cicToType(connectedProfile?.cic ?? 0);
 
   const partIdCounterRef = useRef(0);
-  const partIdsRef = useRef<string[]>([]);
+  const [partIdsMap, setPartIdsMap] = useState<Map<number, string>>(new Map());
+
+  useEffect(() => {
+    setPartIdsMap((prevMap) => {
+      const newMap = new Map(prevMap);
+      let changed = false;
+
+      parts.forEach((part, index) => {
+        if (!part.quoted_drop) {
+          if (!newMap.has(index)) {
+            newMap.set(index, `part-${partIdCounterRef.current++}`);
+            changed = true;
+          }
+        }
+      });
+
+      const maxIndex = parts.length - 1;
+      Array.from(newMap.keys()).forEach((key) => {
+        if (key > maxIndex) {
+          newMap.delete(key);
+          changed = true;
+        }
+      });
+
+      return changed ? newMap : prevMap;
+    });
+  }, [parts]);
 
   const partKeys = useMemo(() => {
-    const keys: string[] = [];
-
-    parts.forEach((part, index) => {
+    return parts.map((part, index) => {
       if (part.quoted_drop) {
-        const quotedKey = `quoted-${part.quoted_drop.drop_id}-${part.quoted_drop.drop_part_id}`;
-        keys.push(quotedKey);
-      } else if (index < partIdsRef.current.length) {
-        keys.push(partIdsRef.current[index]);
-      } else {
-        const newId = `part-${partIdCounterRef.current++}`;
-        partIdsRef.current[index] = newId;
-        keys.push(newId);
+        return `quoted-${part.quoted_drop.drop_id}-${part.quoted_drop.drop_part_id}`;
       }
+      return partIdsMap.get(index) ?? `part-fallback-${index}`;
     });
-
-    partIdsRef.current = partIdsRef.current.slice(0, keys.length);
-
-    return keys;
-  }, [parts]);
+  }, [parts, partIdsMap]);
 
   return (
     <div className="tw-space-y-4 tw-pb-3">
