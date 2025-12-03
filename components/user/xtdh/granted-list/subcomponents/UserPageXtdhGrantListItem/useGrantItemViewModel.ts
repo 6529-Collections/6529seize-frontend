@@ -166,6 +166,7 @@ function createBaseGrantDetails(grant: ApiXTdhGrant): GrantDetails {
     tdhRatePerTokenHint: perTokenLabel
       ? `${tdhRateLabel} total TDH ÷ ${tokensDescription}`
       : null,
+    totalGrantedLabel: formatAmount(grant.total_granted),
     validFromLabel: formatDateTime(grant.valid_from ?? null, {
       fallbackLabel: "Immediately",
     }),

@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { UserPageXtdhGrantedListContent } from "@/components/user/xtdh/granted-list/UserPageXtdhGrantedListContent";
-import type { ApiTdhGrant } from "@/generated/models/ApiTdhGrant";
+import type { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
 
 describe("UserPageXtdhGrantedListContent", () => {
   const baseProps = {
@@ -8,7 +8,7 @@ describe("UserPageXtdhGrantedListContent", () => {
     isLoading: false,
     isError: false,
     errorMessage: undefined,
-    grants: [] as ApiTdhGrant[],
+    grants: [] as ApiXTdhGrant[],
     isSelf: false,
     onRetry: jest.fn(),
   };
@@ -17,7 +17,7 @@ describe("UserPageXtdhGrantedListContent", () => {
     render(
       <UserPageXtdhGrantedListContent
         {...baseProps}
-        status="PENDING"
+        statuses={["PENDING"]}
       />
     );
 
@@ -30,7 +30,7 @@ describe("UserPageXtdhGrantedListContent", () => {
     render(
       <UserPageXtdhGrantedListContent
         {...baseProps}
-        status="ALL"
+        statuses={["ALL"]}
       />
     );
 

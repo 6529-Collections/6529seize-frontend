@@ -29,6 +29,10 @@ export function GrantDetailsGrid({
           </div>
         }
       />
+      <GrantDetailsRow
+        label="Total granted"
+        value={details.totalGrantedLabel}
+      />
       <GrantDetailsRow label="Valid from" value={details.validFromLabel} />
     </dl>
   );

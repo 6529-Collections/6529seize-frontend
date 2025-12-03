@@ -1,22 +1,28 @@
 import { render, screen } from "@testing-library/react";
 
-import { UserPageXtdhGrantListItem } from "@/components/user/xtdh/granted-list/UserPageXtdhGrantListItem";
-import type { ApiTdhGrantsPage } from "@/generated/models/ApiTdhGrantsPage";
-import { ApiTdhGrantStatus } from "@/generated/models/ApiTdhGrantStatus";
-import { ApiTdhGrantTargetChain } from "@/generated/models/ApiTdhGrantTargetChain";
+import { UserPageXtdhGrantListItem } from "@/components/user/xtdh/granted-list/subcomponents/UserPageXtdhGrantListItem";
+import type { ApiXTdhGrantsPage } from "@/generated/models/ApiXTdhGrantsPage";
+import { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
+import { ApiXTdhGrantTargetChain } from "@/generated/models/ApiXTdhGrantTargetChain";
 import { useContractOverviewQuery } from "@/hooks/useAlchemyNftQueries";
-import { useTdhGrantTokensQuery } from "@/hooks/useTdhGrantTokensQuery";
 import type { ContractOverview } from "@/types/nft";
 
 jest.mock("@/hooks/useAlchemyNftQueries", () => ({
   useContractOverviewQuery: jest.fn(),
 }));
 
-jest.mock("@/hooks/useTdhGrantTokensQuery", () => ({
-  useTdhGrantTokensQuery: jest.fn(),
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: jest.fn().mockReturnValue({ setToast: jest.fn() }),
 }));
 
-type Grant = ApiTdhGrantsPage["data"][number];
+jest.mock("@/components/react-query-wrapper/ReactQueryWrapper", () => ({
+  ReactQueryWrapperContext: {
+    Consumer: (props: any) => props.children({ invalidateIdentityTdhStats: jest.fn() }),
+  },
+  useReactQueryWrapper: () => ({ invalidateIdentityTdhStats: jest.fn() }),
+}));
+
+type Grant = ApiXTdhGrantsPage["data"][number];
 
 const mockContract: ContractOverview = {
   address: "0x1234567890abcdef1234567890abcdef12345678",
@@ -28,10 +34,6 @@ const mockedUseContractOverviewQuery =
   useContractOverviewQuery as jest.MockedFunction<
     typeof useContractOverviewQuery
   >;
-const mockedUseTdhGrantTokensQuery =
-  useTdhGrantTokensQuery as jest.MockedFunction<
-    typeof useTdhGrantTokensQuery
-  >;
 
 describe("UserPageXtdhGrantListItem", () => {
   beforeEach(() => {
@@ -40,19 +42,6 @@ describe("UserPageXtdhGrantListItem", () => {
       isError: false,
       isLoading: false,
     } as unknown as ReturnType<typeof useContractOverviewQuery>);
-    mockedUseTdhGrantTokensQuery.mockReturnValue({
-      data: undefined,
-      error: null,
-      fetchNextPage: jest.fn(),
-      hasNextPage: false,
-      isError: false,
-      isFetching: false,
-      isFetchingNextPage: false,
-      isLoading: false,
-      refetch: jest.fn(),
-      tokens: [],
-      totalCount: 0,
-    } as unknown as ReturnType<typeof useTdhGrantTokensQuery>);
   });
 
   afterEach(() => {
@@ -64,7 +53,7 @@ describe("UserPageXtdhGrantListItem", () => {
       error_details: "Token grant failed because the snapshot already expired.",
     });
 
-    render(<UserPageXtdhGrantListItem grant={grant} />);
+    render(<UserPageXtdhGrantListItem grant={grant} isSelf={true} />);
 
     expect(screen.getByText("Error details")).toBeInTheDocument();
     expect(
@@ -79,7 +68,7 @@ describe("UserPageXtdhGrantListItem", () => {
       error_details: "   ",
     });
 
-    render(<UserPageXtdhGrantListItem grant={grant} />);
+    render(<UserPageXtdhGrantListItem grant={grant} isSelf={true} />);
 
     expect(screen.queryByText("Error details")).not.toBeInTheDocument();
   });
@@ -90,7 +79,7 @@ describe("UserPageXtdhGrantListItem", () => {
       valid_to: null,
     });
 
-    render(<UserPageXtdhGrantListItem grant={grant} />);
+    render(<UserPageXtdhGrantListItem grant={grant} isSelf={true} />);
 
     expect(screen.getByText("Valid from")).toBeInTheDocument();
     expect(screen.getByText("Immediately")).toBeInTheDocument();
@@ -103,16 +92,19 @@ function createGrant(overrides: Partial<Grant> = {}): Grant {
   return {
     id: "grant-1",
     grantor: createGrantor(),
-    target_chain: ApiTdhGrantTargetChain.EthereumMainnet,
+    target_chain: ApiXTdhGrantTargetChain.EthereumMainnet,
     target_contract: "0x1234567890abcdef1234567890abcdef12345678",
     target_tokens_count: 0,
+    target_collection_name: null,
     created_at: Date.now(),
+    updated_at: Date.now(),
     valid_from: null,
     valid_to: null,
-    tdh_rate: 123,
+    rate: 123,
     error_details: null,
-    status: ApiTdhGrantStatus.Failed,
+    status: ApiXTdhGrantStatus.Failed,
     is_irrevocable: false,
+    total_granted: 1000,
     ...overrides,
   };
 }
@@ -134,5 +126,7 @@ function createGrantor(): Grant["grantor"] {
     archived: false,
     active_main_stage_submission_ids: [],
     winner_main_stage_drop_ids: [],
+    xtdh: 0,
+    xtdh_rate: 0,
   };
 }
