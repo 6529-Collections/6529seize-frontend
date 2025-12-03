@@ -20,6 +20,39 @@ interface Props {
   readonly extraClass?: string;
 }
 
+const ROOT_PAGES = ["/waves", "/messages", "/notifications", "/"];
+
+const COLLECTION_TITLES: Record<string, string> = {
+  "the-memes": "The Memes",
+  "6529-gradient": "6529 Gradient",
+  "meme-lab": "Meme Lab",
+  "nextgen": "NextGen",
+};
+
+const sliceString = (str: string, length: number): string => {
+  if (str.length <= length) return str;
+  const half = Math.floor(length / 2);
+  return `${str.slice(0, half)}...${str.slice(-half)}`;
+};
+
+const getCollectionTitle = (basePath: string, pageTitle: string): string | null => {
+  const prefix = COLLECTION_TITLES[basePath];
+  if (prefix && !isNaN(Number(pageTitle))) {
+    return `${prefix} #${pageTitle}`;
+  }
+  return null;
+};
+
+const getRememesTitle = (pathSegments: string[]): string | null => {
+  if (pathSegments[0] !== "rememes") return null;
+  const contract = pathSegments[1];
+  const tokenId = pathSegments[2];
+  if (contract && tokenId) {
+    return `Rememes ${formatAddress(contract)} #${sliceString(formatAddress(tokenId), 10)}`;
+  }
+  return null;
+};
+
 export default function AppHeader(_props: Readonly<Props>) {
   const [menuOpen, setMenuOpen] = useState(false);
   const myStream = useMyStreamOptional();
@@ -51,8 +84,16 @@ export default function AppHeader(_props: Readonly<Props>) {
   const isWavesRoute = pathname === "/waves";
   const isMessagesRoute = pathname === "/messages";
 
-  // Show back button when we have navigation history to go back to
-  const showBackButton = canGoBack;
+  const isCreateRoute =
+    pathname === "/waves/create" || pathname === "/messages/create";
+  const isInsideWave = !!waveId;
+
+  const isRootPage = ROOT_PAGES.includes(pathname ?? "");
+
+  // Show back button when:
+  // - Inside a wave or on create page (detail pages with known parent)
+  // - On any other page with navigation history (e.g., profile from wave chat)
+  const showBackButton = isInsideWave || isCreateRoute || (canGoBack && !isRootPage);
 
   const finalTitle: React.ReactNode = (() => {
     if (pathname === "/waves/create") return "Waves";
@@ -64,39 +105,13 @@ export default function AppHeader(_props: Readonly<Props>) {
       return wave?.name ?? "Wave";
     }
 
-    if (basePath && !isNaN(Number(pageTitle))) {
-      switch (basePath) {
-        case "the-memes":
-          return `The Memes #${pageTitle}`;
-        case "6529-gradient":
-          return `6529 Gradient #${pageTitle}`;
-        case "meme-lab":
-          return `Meme Lab #${pageTitle}`;
-        case "nextgen":
-          return `NextGen #${pageTitle}`;
-      }
-    }
+    const collectionTitle = getCollectionTitle(basePath, pageTitle);
+    if (collectionTitle) return collectionTitle;
 
-    const slice = (str: string, length: number) => {
-      if (str.length <= length) return str;
+    const rememesTitle = getRememesTitle(pathSegments);
+    if (rememesTitle) return rememesTitle;
 
-      const half = Math.floor(length / 2);
-      const firstPart = str.slice(0, half);
-      const lastPart = str.slice(-half);
-      return `${firstPart}...${lastPart}`;
-    };
-
-    if (basePath === "rememes") {
-      const contract = pathSegments[1];
-      const tokenId = pathSegments[2];
-      if (contract && tokenId) {
-        const formattedContract = formatAddress(contract);
-        const formattedTokenId = formatAddress(tokenId);
-        return `Rememes ${formattedContract} #${slice(formattedTokenId, 10)}`;
-      }
-    }
-
-    return slice(capitalizeEveryWord(pageTitle), 20);
+    return sliceString(capitalizeEveryWord(pageTitle), 20);
   })();
 
   return (

@@ -84,37 +84,44 @@ function setup(opts: any) {
 describe("AppHeader", () => {
   afterEach(() => jest.clearAllMocks());
 
-  it("shows menu icon when canGoBack is false", () => {
-    setup({ address: null, asPath: "/notifications", canGoBack: false });
-    expect(
-      screen.getByRole("button", { name: "Open menu" }).querySelector("svg")
-    ).toBeInTheDocument();
+  it("shows menu icon on root page even with history", () => {
+    setup({ address: null, asPath: "/notifications", canGoBack: true });
+    // Root pages should show menu, not back button, even with history
+    expect(screen.queryByTestId("back")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Open menu" })).toBeInTheDocument();
   });
 
-  it("shows back button when canGoBack is true", () => {
+  it("shows back button on profile page when canGoBack is true", () => {
     setup({ address: "0xabc", asPath: "/johndoe", canGoBack: true });
     expect(screen.getByTestId("back")).toBeInTheDocument();
   });
 
-  it("shows back button and wave title when wave id is present", () => {
+  it("shows menu icon on profile page when canGoBack is false", () => {
+    setup({ address: "0xabc", asPath: "/johndoe", canGoBack: false });
+    // Should show menu button (not back button) when no history
+    expect(screen.queryByTestId("back")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Open menu" })).toBeInTheDocument();
+  });
+
+  it("shows back button inside wave regardless of canGoBack", () => {
     const wave = { id: "w1", name: "WaveOne" };
     setup({
       address: "0xabc",
       wave,
       query: { wave: "w1" },
       asPath: "/waves?wave=w1",
-      canGoBack: true,
+      canGoBack: false,
     });
     expect(screen.getByTestId("back")).toBeInTheDocument();
     expect(screen.getByText("WaveOne")).toBeInTheDocument();
   });
 
-  it("shows profile image when connected and canGoBack is false", () => {
+  it("shows profile image on waves root page", () => {
     setup({
       address: "0xabc",
       profile: { pfp: "pfp.png" },
       asPath: "/waves",
-      canGoBack: false,
+      canGoBack: true,
     });
     const img = screen.getByRole("img", { name: "pfp" });
     expect(img).toHaveAttribute("src", "pfp.png");
