@@ -1,4 +1,3 @@
-// instrumentation-client.ts
 // This file configures client-side instrumentation in Next.js 15.3+
 // It is auto-discovered by Next.js and runs before your application's frontend code starts executing.
 // https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation-client
