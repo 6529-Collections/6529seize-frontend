@@ -62,7 +62,9 @@ export function GridRow({
                 </div>
                 <div className="tw-flex tw-gap-1 tw-text-xs tw-shrink-0">
                   <span className="tw-text-iron-400">xTDH</span>
-                  <span className="tw-text-white">{token.xtdh ?? 0}</span>
+                  <span className="tw-text-white">
+                    {Math.floor((token.xtdh ?? 0) * 10) / 10}
+                  </span>
                 </div>
               </div>
             </div>
