@@ -265,7 +265,7 @@ const useWavesList = () => {
 
 const waveIsDm = (w: ApiWave) =>
   w.wave.type === ApiWaveType.Chat &&
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+   
   (w.chat as any)?.scope?.group?.is_direct_message === true;
 
 export default useWavesList;

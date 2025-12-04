@@ -1,8 +1,8 @@
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
 import { ApiXTdhToken } from "@/generated/models/ApiXTdhToken";
-import { formatNumberWithCommas, formatStatFloor } from "@/helpers/Helpers";
+import { formatStatFloor } from "@/helpers/Helpers";
 import { useTokenMetadataQuery } from "@/hooks/useAlchemyNftQueries";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 
 export default function UserPageCollectedNetworkCards({
   cards,

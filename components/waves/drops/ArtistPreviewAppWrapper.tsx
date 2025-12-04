@@ -47,7 +47,7 @@ export default function ArtistPreviewAppWrapper({
           <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px] tw-transition-opacity" />
         </TransitionChild>
 
-        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+        { }
         <div
           className="tw-fixed tw-inset-0 tw-flex tw-items-end"
           onClick={(e) => e.stopPropagation()}
