@@ -10,6 +10,7 @@ interface UseXtdhTokensQueryProps {
   readonly pageSize: number;
   readonly sort: string;
   readonly order: string;
+  readonly contract?: string | null;
 }
 
 export const useXtdhTokensQuery = ({
@@ -18,6 +19,7 @@ export const useXtdhTokensQuery = ({
   pageSize,
   sort,
   order,
+  contract,
 }: UseXtdhTokensQueryProps) => {
   return useQuery<ApiXTdhTokensPage>({
     queryKey: [
@@ -27,6 +29,7 @@ export const useXtdhTokensQuery = ({
       pageSize,
       sort,
       order,
+      contract,
     ],
     queryFn: async () => {
       let apiSort = sort;
@@ -36,15 +39,21 @@ export const useXtdhTokensQuery = ({
         apiSort = "xtdh_rate";
       }
 
+      const params: Record<string, string> = {
+        identity,
+        page: page.toString(),
+        page_size: pageSize.toString(),
+        sort: apiSort,
+        order,
+      };
+
+      if (contract) {
+        params.contract = contract;
+      }
+
       return await commonApiFetch<ApiXTdhTokensPage>({
         endpoint: "xtdh/tokens",
-        params: {
-          identity,
-          page: page.toString(),
-          page_size: pageSize.toString(),
-          sort: apiSort,
-          order,
-        },
+        params,
       });
     },
     placeholderData: keepPreviousData,

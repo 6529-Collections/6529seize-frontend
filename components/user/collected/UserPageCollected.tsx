@@ -40,6 +40,7 @@ export interface ProfileCollectedFilters {
   readonly handleOrWallet: string;
   readonly accountForConsolidations: boolean;
   readonly collection: CollectedCollectionType | null;
+  readonly subcollection: string | null;
   readonly seized: CollectionSeized | null;
   readonly szn: MEMES_SEASON | null;
   readonly page: number;
@@ -56,6 +57,7 @@ interface QueryUpdateInput {
 const SEARCH_PARAMS_FIELDS = {
   address: "address",
   collection: "collection",
+  subcollection: "subcollection",
   seized: "seized",
   szn: "szn",
   page: "page",
@@ -176,6 +178,7 @@ export default function UserPageCollected({
   const getFilters = useCallback((): ProfileCollectedFilters => {
     const address = searchParams?.get(SEARCH_PARAMS_FIELDS.address);
     const collection = searchParams?.get(SEARCH_PARAMS_FIELDS.collection);
+    const subcollection = searchParams?.get(SEARCH_PARAMS_FIELDS.subcollection);
     const seized = searchParams?.get(SEARCH_PARAMS_FIELDS.seized);
     const szn = searchParams?.get(SEARCH_PARAMS_FIELDS.szn);
     const page = searchParams?.get(SEARCH_PARAMS_FIELDS.page);
@@ -188,6 +191,7 @@ export default function UserPageCollected({
       handleOrWallet: convertedAddress ?? profile.handle ?? user,
       accountForConsolidations: !convertedAddress,
       collection: convertedCollection,
+      subcollection: subcollection ?? null,
       seized: convertSeized({
         seized: seized ?? null,
         collection: convertedCollection,
@@ -257,7 +261,14 @@ export default function UserPageCollected({
         name: "szn",
         value: null,
       },
+      {
+        name: "subcollection",
+        value: null,
+      },
     ];
+
+    const isSwitchingFromNetwork =
+      filters.collection === CollectedCollectionType.NETWORK;
 
     if (
       collection &&
@@ -278,6 +289,15 @@ export default function UserPageCollected({
       items.push({
         name: "sortBy",
         value: CollectionSort.XTDH,
+      });
+      items.push({
+        name: "sortDirection",
+        value: SortDirection.DESC,
+      });
+    } else if (isSwitchingFromNetwork) {
+      items.push({
+        name: "sortBy",
+        value: CollectionSort.TOKEN_ID,
       });
       items.push({
         name: "sortDirection",
@@ -356,6 +376,22 @@ export default function UserPageCollected({
     await updateFields(items);
   };
 
+  const setSubcollection = async (
+    subcollection: string | null
+  ): Promise<void> => {
+    const items: QueryUpdateInput[] = [
+      {
+        name: "subcollection",
+        value: subcollection,
+      },
+      {
+        name: "page",
+        value: "1",
+      },
+    ];
+    await updateFields(items);
+  };
+
   const setPage = async (page: number): Promise<void> => {
     const items: QueryUpdateInput[] = [
       {
@@ -420,6 +456,7 @@ export default function UserPageCollected({
     pageSize: filters.pageSize,
     sort: filters.sortBy,
     order: filters.sortDirection,
+    contract: filters.subcollection,
   });
 
   const isNetwork = filters.collection === CollectedCollectionType.NETWORK;
@@ -516,6 +553,7 @@ export default function UserPageCollected({
               setSortBy={setSortBy}
               setSeized={setSeized}
               setSzn={setSzn}
+              setSubcollection={setSubcollection}
               showTransfer={showTransfer}
             />
           </div>

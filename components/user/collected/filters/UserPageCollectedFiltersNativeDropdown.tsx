@@ -1,12 +1,11 @@
+import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
+import { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import { CollectedCollectionType } from "@/entities/IProfile";
-import CommonSelect, {
-  CommonSelectItem,
-} from "@/components/utils/select/CommonSelect";
 import { COLLECTED_COLLECTIONS_META } from "./user-page-collected-filters.helpers";
 
 type SelectedType = CollectedCollectionType | null;
 
-export default function UserPageCollectedFiltersCollection({
+export default function UserPageCollectedFiltersNativeDropdown({
   selected,
   setSelected,
 }: {
@@ -30,7 +29,7 @@ export default function UserPageCollectedFiltersCollection({
   ];
 
   return (
-    <CommonSelect
+    <CommonDropdown
       items={items}
       activeItem={selected}
       filterLabel="Collection"
