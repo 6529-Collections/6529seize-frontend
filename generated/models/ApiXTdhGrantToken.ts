@@ -18,9 +18,9 @@ export class ApiXTdhGrantToken {
 
     static readonly discriminator: string | undefined = undefined;
 
-    static readonly mapping: { [index: string]: string } | undefined = undefined;
+    static readonly mapping: {[index: string]: string} | undefined = undefined;
 
-    static readonly attributeTypeMap: Array<{ name: string, baseName: string, type: string, format: string }> = [
+    static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
             "name": "token",
             "baseName": "token",
@@ -31,8 +31,8 @@ export class ApiXTdhGrantToken {
             "name": "xtdh",
             "baseName": "xtdh",
             "type": "number",
-            "format": "int64"
-        }];
+            "format": "float"
+        }    ];
 
     static getAttributeTypeMap() {
         return ApiXTdhGrantToken.attributeTypeMap;
