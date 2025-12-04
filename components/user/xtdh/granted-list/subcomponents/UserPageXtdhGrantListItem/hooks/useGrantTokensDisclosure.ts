@@ -80,6 +80,7 @@ export function useGrantTokensDisclosure({
       showInitialLoading,
       showInitialError,
       tokenRanges,
+      tokens,
       errorMessage,
       onRetry: handleRetry,
       contractAddress,

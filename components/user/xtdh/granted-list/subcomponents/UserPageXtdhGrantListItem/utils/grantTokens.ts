@@ -5,7 +5,7 @@ import { toCanonicalRanges } from "@/components/nft-picker/NftPicker.utils";
 export const DEFAULT_GRANT_TOKENS_ERROR_MESSAGE =
   "We couldn't load the granted tokens right now. Please try again.";
 
-export function mapTokensToRanges(tokens: readonly string[]): TokenRange[] {
+export function mapTokensToRanges(tokens: readonly { token: string }[]): TokenRange[] {
   if (!tokens.length) {
     return [];
   }
@@ -13,13 +13,13 @@ export function mapTokensToRanges(tokens: readonly string[]): TokenRange[] {
   const ids: bigint[] = [];
   const isDevelopment = getNodeEnv() === "development";
 
-  for (const token of tokens) {
+  for (const item of tokens) {
     try {
-      ids.push(BigInt(token));
+      ids.push(BigInt(item.token));
     } catch {
       // Ignore malformed token identifiers.
       if (isDevelopment) {
-        console.warn(`Ignoring malformed token identifier: ${token}`);
+        console.warn(`Ignoring malformed token identifier: ${item.token}`);
       }
     }
   }

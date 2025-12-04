@@ -34,6 +34,7 @@ export interface GrantTokensDisclosureState {
   readonly showInitialLoading: boolean;
   readonly showInitialError: boolean;
   readonly tokenRanges: TokenRange[];
+  readonly tokens: readonly import("@/generated/models/ApiXTdhGrantToken").ApiXTdhGrantToken[];
   readonly errorMessage: string;
   readonly onRetry: () => void;
   readonly contractAddress: `0x${string}` | null;

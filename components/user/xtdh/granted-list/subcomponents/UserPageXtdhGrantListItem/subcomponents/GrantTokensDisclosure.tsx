@@ -94,6 +94,7 @@ function renderGrantTokensDisclosureBody(
     showInitialLoading,
     showInitialError,
     tokenRanges,
+    tokens,
     errorMessage,
     onRetry,
     contractAddress,
@@ -118,6 +119,11 @@ function renderGrantTokensDisclosureBody(
     return <GrantTokensEmptyState />;
   }
 
+  const mappedTokens = tokens.map((t) => ({
+    tokenId: BigInt(t.token),
+    xtdh: t.xtdh,
+  }));
+
   return (
     <>
       <VirtualizedTokenList
@@ -132,6 +138,7 @@ function renderGrantTokensDisclosureBody(
         layout="grid"
         columns={3}
         collectionName={collectionName}
+        tokens={mappedTokens}
       />
       {isFetchingNextPage ? <GrantTokensLoadingMore /> : null}
     </>

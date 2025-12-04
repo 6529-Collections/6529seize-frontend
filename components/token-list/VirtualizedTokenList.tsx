@@ -34,6 +34,7 @@ type TokenListAction = {
 type TokenWindowEntry = {
   tokenId: bigint;
   decimalId: string;
+  xtdh?: number;
 };
 
 export interface VirtualizedTokenListProps {
@@ -55,9 +56,13 @@ export interface VirtualizedTokenListProps {
   readonly layout?: "list" | "grid";
   readonly columns?: number;
   readonly collectionName?: string;
+  readonly tokens?: readonly { tokenId: bigint; xtdh: number }[];
 }
 
-function getTotalCount(ranges: TokenRange[]): number {
+function getTotalCount(ranges: TokenRange[], tokens?: readonly { tokenId: bigint }[]): number {
+  if (tokens) {
+    return tokens.length;
+  }
   let total = BIGINT_ZERO;
   for (const range of ranges) {
     const size = range.end - range.start + BIGINT_ONE;
@@ -92,8 +97,9 @@ export function VirtualizedTokenList({
   layout = "list",
   columns = 3,
   collectionName,
+  tokens,
 }: Readonly<VirtualizedTokenListProps>) {
-  const totalCount = useMemo(() => getTotalCount(ranges), [ranges]);
+  const totalCount = useMemo(() => getTotalCount(ranges, tokens), [ranges, tokens]);
 
   return (
     <VirtualizedTokenListContent
@@ -117,12 +123,13 @@ export function VirtualizedTokenList({
       layout={layout}
       columns={columns}
       collectionName={collectionName}
+      tokens={tokens}
     />
   );
 }
 
 type VirtualizedTokenListContentProps = Readonly<
-  Omit<VirtualizedTokenListProps, "emptyState"> & { totalCount: number; emptyState: ReactNode; collectionName?: string }
+  Omit<VirtualizedTokenListProps, "emptyState"> & { totalCount: number; emptyState: ReactNode }
 >;
 
 function VirtualizedTokenListContent({
@@ -145,6 +152,7 @@ function VirtualizedTokenListContent({
   layout = "list",
   columns = 3,
   collectionName,
+  tokens,
 }: VirtualizedTokenListContentProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const initialOffset = usePersistentScrollOffset(scrollKey, scrollContainerRef);
@@ -170,7 +178,7 @@ function VirtualizedTokenListContent({
     ? Math.min((lastVisibleIndex + 1) * columns - 1, totalCount - 1)
     : lastVisibleIndex;
 
-  const windowTokens = useVisibleTokenWindow(ranges, firstTokenIndex, lastTokenIndex);
+  const windowTokens = useVisibleTokenWindow(ranges, firstTokenIndex, lastTokenIndex, tokens);
 
   const { metadataMap, metadataQuery } = useTokenMetadataWindow({
     contractAddress,
@@ -341,19 +349,29 @@ function getVisibleWindowBounds(virtualItems: Array<{ index: number }>) {
 function useVisibleTokenWindow(
   ranges: TokenRange[],
   firstTokenIndex: number,
-  lastTokenIndex: number
+  lastTokenIndex: number,
+  tokens?: readonly { tokenId: bigint; xtdh: number }[]
 ): TokenWindowEntry[] {
   return useMemo(() => {
     if (lastTokenIndex < firstTokenIndex) {
       return [];
     }
 
+    if (tokens) {
+      return tokens.slice(firstTokenIndex, lastTokenIndex + 1).map((token) => ({
+        tokenId: token.tokenId,
+        decimalId: toDecimalString(token.tokenId),
+        xtdh: token.xtdh,
+      }));
+    }
+
     const windowSize = lastTokenIndex - firstTokenIndex + 1;
     return expandRangesWindow(ranges, firstTokenIndex, windowSize).map((tokenId) => ({
       tokenId,
       decimalId: toDecimalString(tokenId),
+      xtdh: 0, // Default to 0 for ranges
     }));
-  }, [ranges, firstTokenIndex, lastTokenIndex]);
+  }, [ranges, firstTokenIndex, lastTokenIndex, tokens]);
 }
 
 type TokenMetadataWindowParams = Readonly<{
@@ -522,8 +540,8 @@ function GridRow({
                   {metadata?.name ?? `Token #${token.decimalId}`}
                 </div>
                 <div className="tw-flex tw-gap-1 tw-text-xs tw-shrink-0">
-                  <span className="tw-text-iron-400">TDH</span>
-                  <span className="tw-text-white">4,756</span>
+                  <span className="tw-text-iron-400">xTDH</span>
+                  <span className="tw-text-white">{token.xtdh ?? 0}</span>
                 </div>
               </div>
             </div>

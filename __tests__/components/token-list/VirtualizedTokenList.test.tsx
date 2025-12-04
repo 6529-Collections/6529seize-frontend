@@ -50,6 +50,22 @@ describe("VirtualizedTokenList", () => {
     expect(screen.getAllByText("Test Collection")[0]).toBeInTheDocument();
   });
 
+  it("renders tokens from tokens prop with xtdh", () => {
+    const tokens = [
+      { tokenId: BigInt(1), xtdh: 100 },
+      { tokenId: BigInt(2), xtdh: 200 },
+    ];
+    render(
+      <VirtualizedTokenList
+        {...defaultProps}
+        layout="grid"
+        tokens={tokens}
+      />
+    );
+    expect(screen.getByText("100")).toBeInTheDocument();
+    expect(screen.getByText("200")).toBeInTheDocument();
+  });
+
   it("calculates total count correctly", () => {
     const ranges = [{ start: BigInt(1), end: BigInt(5) }]; // 5 items
     render(
