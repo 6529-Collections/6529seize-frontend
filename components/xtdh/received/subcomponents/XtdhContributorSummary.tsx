@@ -18,21 +18,21 @@ export function XtdhContributorSummary({
         className
       )}
     >
-      <div className="tw-flex tw-flex-col tw-gap-0.5">
+      <div className="tw-flex tw-flex-col">
+        <dt className="tw-m-0 tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500 tw-mb-1">
+          Active contributors
+        </dt>
         <dd className="tw-m-0 tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-50">
           {activeCount}
         </dd>
-        <dt className="tw-m-0 tw-text-xs tw-font-normal tw-text-iron-500">
-          Active contributors
-        </dt>
       </div>
-      <div className="tw-flex tw-flex-col tw-gap-0.5">
+      <div className="tw-flex tw-flex-col">
+        <dt className="tw-m-0 tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500 tw-mb-1">
+          Contributors
+        </dt>
         <dd className="tw-m-0 tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-50">
           {totalCount}
         </dd>
-        <dt className="tw-m-0 tw-text-xs tw-font-normal tw-text-iron-500">
-          Contributors
-        </dt>
       </div>
     </dl>
   );

@@ -187,14 +187,14 @@ export function CollectionMetric({
 }: Readonly<{ label: string; value: string; className?: string }>) {
   return (
     <div
-      className={clsx("tw-flex tw-flex-col tw-gap-0.5 tw-text-left", className)}
+      className={clsx("tw-flex tw-flex-col tw-text-left", className)}
     >
+      <dt className="tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500 tw-mb-1">
+        {label}
+      </dt>
       <dd className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
         {value}
       </dd>
-      <dt className="tw-text-xs tw-font-normal tw-text-iron-500">
-        {label}
-      </dt>
     </div>
   );
 }

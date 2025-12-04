@@ -49,7 +49,7 @@ export function UserXtdhStats({
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="tw-relative tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4"
+            className="tw-relative tw-rounded-xl tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-p-4"
           >
             {stat.onClick && (
               <button
@@ -73,7 +73,10 @@ export function UserXtdhStats({
                 </svg>
               </button>
             )}
-            <div className="tw-flex tw-flex-col tw-gap-0.5">
+            <div className="tw-flex tw-flex-col">
+              <div className="tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-400 tw-mb-1">
+                {stat.label}
+              </div>
               <div className="tw-flex tw-items-baseline tw-gap-1">
                 <span className="tw-text-xl tw-font-semibold tw-text-iron-50 tw-tabular-nums">
                   {stat.value}
@@ -82,15 +85,12 @@ export function UserXtdhStats({
                   {stat.subtext}
                 </span>
               </div>
-              <div className="tw-text-xs tw-font-normal tw-text-iron-500">
-                {stat.label}
-              </div>
             </div>
           </div>
         ))}
       </section>
       <div className="tw-space-y-2">
-        <div className="tw-flex tw-justify-between tw-text-xs tw-text-iron-500">
+        <div className="tw-flex tw-justify-between tw-text-xs tw-font-semibold tw-uppercase tw-tracking-widest tw-text-iron-500">
           <span>Granted rate</span>
           <span className="tw-tabular-nums">
             {formatStatFloor(outbound)} / {formatStatFloor(generationRate)} xTDH

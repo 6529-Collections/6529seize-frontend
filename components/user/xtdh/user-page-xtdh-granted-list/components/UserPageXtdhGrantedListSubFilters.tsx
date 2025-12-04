@@ -17,14 +17,12 @@ export function UserPageXtdhGrantedListSubFilters({
   }));
 
   return (
-    <div className="tw-w-full sm:tw-w-64">
-      <CommonDropdown<GrantedActiveFilter>
-        items={items}
-        activeItem={activeSubFilter}
-        setSelected={onSubFilterChange}
-        filterLabel="Status"
-        size="tabs"
-      />
-    </div>
+    <CommonDropdown<GrantedActiveFilter>
+      items={items}
+      activeItem={activeSubFilter}
+      setSelected={onSubFilterChange}
+      filterLabel="Status"
+      size="tabs"
+    />
   );
 }

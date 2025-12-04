@@ -19,8 +19,8 @@ export function GrantItemContent({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-4">
-      <header className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-4">
-        <div className="tw-flex tw-items-start tw-gap-3">
+      <header className="tw-flex tw-flex-col md:tw-flex-row tw-items-start tw-justify-between tw-gap-4">
+        <div className="tw-flex tw-items-center tw-gap-3">
           <div className="tw-relative tw-h-16 tw-w-16 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-xl tw-bg-iron-800">
             {contract.imageUrl ? (
               <Image

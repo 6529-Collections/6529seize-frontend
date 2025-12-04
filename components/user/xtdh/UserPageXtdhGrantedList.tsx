@@ -101,13 +101,13 @@ export default function UserPageXtdhGrantedList({
 
   return (
     <div className="tw-bg-iron-950 tw-border tw-border-iron-800 tw-rounded-2xl tw-p-4 tw-space-y-4">
-      <div className="tw-flex tw-items-center">
+      <div className="tw-flex tw-items-center tw-flex-wrap tw-justify-between tw-gap-4">
         <h2 className="tw-text-base tw-font-semibold tw-text-iron-100 tw-m-0">
           Granted xTDH
         </h2>
-      </div>
+     
 
-      <div className="tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center tw-justify-between tw-gap-4 tw-border-b tw-border-iron-800 tw-pb-4">
+      <div className="tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center tw-justify-between tw-gap-4 tw-border-b tw-border-iron-800">
         <div className="tw-flex-1 tw-min-w-0">
           <UserPageXtdhGrantedListTabs
             activeTab={activeTab}
@@ -125,7 +125,7 @@ export default function UserPageXtdhGrantedList({
           </div>
         )}
       </div>
-
+ </div>
       <UserPageXtdhGrantedListContent
         enabled={enabled}
         isLoading={isLoading}
