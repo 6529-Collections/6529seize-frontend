@@ -15,30 +15,30 @@ export function UserXtdhStats({
   onOutboundClick,
 }: Readonly<UserXtdhStatsProps>) {
   const outbound = Math.max(generationRate - unusedRate, 0);
-  const net = +generationRate.toFixed(0) + +incomingRate.toFixed(0) - +outbound.toFixed(0);
+  const net = generationRate + incomingRate - outbound;
 
 
 
   const stats = [
     {
       label: "Generating",
-      value: formatStatFloor(generationRate),
+      value: formatStatFloor(generationRate, 1),
       subtext: "/day",
     },
     {
       label: "Inbound",
-      value: formatStatFloor(incomingRate),
+      value: formatStatFloor(incomingRate, 1),
       subtext: "/day",
     },
     {
       label: "Outbound",
-      value: formatStatFloor(outbound),
+      value: formatStatFloor(outbound, 1),
       subtext: "/day",
       onClick: onOutboundClick,
     },
     {
       label: "Net",
-      value: formatStatFloor(net),
+      value: formatStatFloor(net, 1),
       subtext: "/day",
     },
   ];
@@ -93,7 +93,8 @@ export function UserXtdhStats({
         <div className="tw-flex tw-justify-between tw-text-xs tw-font-semibold tw-uppercase tw-tracking-widest tw-text-iron-500">
           <span>Granted rate</span>
           <span className="tw-tabular-nums">
-            {formatStatFloor(outbound)} / {formatStatFloor(generationRate)} xTDH
+            {formatStatFloor(outbound, 1)} / {formatStatFloor(generationRate, 1)}{" "}
+            xTDH
           </span>
         </div>
         <div className="tw-h-1.5 tw-w-full tw-overflow-hidden tw-rounded-full tw-bg-iron-800">
@@ -102,7 +103,9 @@ export function UserXtdhStats({
             style={{
               width: `${Math.min(
                 Math.max(
-                  (Math.floor(outbound) / Math.floor(generationRate)) * 100,
+                  ((Math.floor(outbound * 10) / 10) /
+                    (Math.floor(generationRate * 10) / 10)) *
+                  100,
                   0
                 ),
                 100

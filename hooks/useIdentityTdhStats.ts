@@ -28,6 +28,8 @@ async function fetchIdentityTdhStats(identity: string): Promise<IdentityTdhStats
     endpoint: `xtdh/stats/${encodedIdentity}`,
   });
 
+  console.log(response)
+
 
 
 
