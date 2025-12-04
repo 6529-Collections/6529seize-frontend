@@ -1,5 +1,14 @@
 "use client";
 
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import useCapacitor from "@/hooks/useCapacitor";
+import { commonApiPost } from "@/services/api/common-api";
+import { Device, DeviceInfo } from "@capacitor/device";
+import {
+  PushNotifications,
+  PushNotificationSchema,
+} from "@capacitor/push-notifications";
+import { useRouter } from "next/navigation";
 import React, {
   createContext,
   useContext,
@@ -7,17 +16,8 @@ import React, {
   useMemo,
   useRef,
 } from "react";
-import {
-  PushNotifications,
-  PushNotificationSchema,
-} from "@capacitor/push-notifications";
-import { Device, DeviceInfo } from "@capacitor/device";
-import { useRouter } from "next/navigation";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useAuth } from "../auth/Auth";
-import { commonApiPost } from "@/services/api/common-api";
 import { getStableDeviceId } from "./stable-device-id";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 type NotificationsContextType = {
   removeWaveDeliveredNotifications: (waveId: string) => Promise<void>;
@@ -43,21 +43,20 @@ const redirectConfig = {
 export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { isCapacitor, isIos } = useCapacitor();
+  const { isCapacitor, isIos, isActive } = useCapacitor();
   const { connectedProfile } = useAuth();
   const router = useRouter();
   const initializationRef = useRef<string | null>(null);
+  const registrationAttemptRef = useRef<number>(0);
 
   useEffect(() => {
     const profileId = connectedProfile?.id ?? null;
-    if (
-      isCapacitor &&
-      initializationRef.current !== profileId
-    ) {
+    if (isCapacitor && isActive && initializationRef.current !== profileId) {
       initializationRef.current = profileId;
+      registrationAttemptRef.current = 0;
       initializeNotifications(connectedProfile ?? undefined);
     }
-  }, [connectedProfile, isCapacitor]);
+  }, [connectedProfile, isCapacitor, isActive]);
 
   const initializeNotifications = async (profile?: ApiIdentity) => {
     try {
@@ -67,6 +66,36 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     } catch (error) {
       console.error("Error initializing notifications", error);
+      throw error;
+    }
+  };
+
+  const registerWithRetry = async (maxRetries = 3): Promise<void> => {
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        await PushNotifications.register();
+        registrationAttemptRef.current = 0;
+        return;
+      } catch (registerError: any) {
+        const errorMessage = registerError?.message || String(registerError);
+        const isDelegateError =
+          errorMessage.includes("capacitorDidRegisterForRemoteNotifications") ||
+          errorMessage.includes("didRegisterForRemoteNotifications");
+
+        if (isDelegateError && attempt < maxRetries - 1) {
+          const delay = Math.min(1000 * Math.pow(2, attempt), 5000);
+          console.warn(
+            `iOS push notification registration attempt ${
+              attempt + 1
+            } failed. Retrying in ${delay}ms...`,
+            registerError
+          );
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          continue;
+        }
+
+        throw registerError;
+      }
     }
   };
 
@@ -116,29 +145,13 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         if (isIos) {
           await new Promise((resolve) => setTimeout(resolve, 500));
         }
-        try {
-          await PushNotifications.register();
-        } catch (registerError: any) {
-          const errorMessage = registerError?.message || String(registerError);
-          if (
-            errorMessage.includes(
-              "capacitorDidRegisterForRemoteNotifications"
-            ) ||
-            errorMessage.includes("didRegisterForRemoteNotifications")
-          ) {
-            console.warn(
-              "iOS push notification registration callback issue. This may occur if the native delegate is not properly configured.",
-              registerError
-            );
-          } else {
-            throw registerError;
-          }
-        }
+        await registerWithRetry();
       } else {
         console.warn("Push notifications permission not granted");
       }
     } catch (error) {
       console.error("Error in initializePushNotifications", error);
+      throw error;
     }
   };
 
