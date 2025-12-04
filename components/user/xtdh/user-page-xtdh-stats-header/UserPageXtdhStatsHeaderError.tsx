@@ -15,7 +15,7 @@ export function UserPageXtdhStatsHeaderError({
       <button
         type="button"
         onClick={onRetry}
-        className="tw-mt-3 tw-inline-flex tw-items-center tw-justify-center tw-rounded tw-bg-primary-500 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-black hover:tw-bg-primary-400"
+        className="tw-mt-3 tw-inline-flex tw-items-center tw-justify-center tw-rounded tw-bg-primary-500 tw-border tw-border-solid tw-border-primary-400 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-white hover:tw-bg-primary-400"
       >
         Retry
       </button>

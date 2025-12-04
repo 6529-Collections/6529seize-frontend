@@ -44,7 +44,7 @@ function RetryButton({ onRetry }: Readonly<{ onRetry: () => void }>) {
     <button
       type="button"
       onClick={onRetry}
-      className="tw-rounded tw-bg-primary-500 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-black desktop-hover:hover:tw-bg-primary-400"
+      className="tw-inline-flex tw-items-center tw-justify-center tw-rounded tw-bg-primary-500 tw-border tw-border-solid tw-border-primary-400 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-white hover:tw-bg-primary-400"
     >
       Retry
     </button>
