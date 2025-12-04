@@ -52,7 +52,7 @@ export const ArtistWinningArtworksContent: React.FC<
 
           return (
             <div key={drop.id} className="tw-flex tw-flex-col tw-h-full">
-              {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+              { }
               <div
                 className="tw-group tw-relative tw-cursor-pointer tw-flex tw-flex-col tw-flex-1 tw-bg-gradient-to-br tw-from-iron-900 tw-to-white/5 tw-rounded-lg tw-overflow-hidden tw-ring-1 tw-px-0.5 tw-pt-0.5 tw-ring-inset tw-ring-iron-900 desktop-hover:hover:tw-ring-iron-700 tw-transition-all tw-duration-500 tw-ease-out tw-mb-3"
                 onClick={() => onDropClick(extendedDrop)}
