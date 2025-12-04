@@ -11,7 +11,7 @@ type GridRowProps = Readonly<{
   action?: TokenListAction;
   positionStyle: CSSProperties;
   columns: number;
-  collectionName?: string;
+
 }>;
 
 export function GridRow({
@@ -22,7 +22,7 @@ export function GridRow({
   action,
   positionStyle,
   columns,
-  collectionName,
+
 }: GridRowProps) {
   return (
     <li
@@ -52,7 +52,7 @@ export function GridRow({
             </div>
             <div className="tw-flex tw-flex-col tw-p-3 tw-gap-3">
               <div className="tw-flex tw-items-center tw-justify-between tw-text-xs tw-text-iron-400">
-                <span className="tw-truncate">{collectionName ?? "Collection"}</span>
+                <span className="tw-truncate">{metadata?.collectionName ?? "Collection"}</span>
                 <span className="tw-font-mono">#{token.decimalId}</span>
               </div>
 

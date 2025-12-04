@@ -26,7 +26,7 @@ export function VirtualizedTokenList({
   endReachedOffset,
   layout = "list",
   columns = 3,
-  collectionName,
+
   tokens,
 }: Readonly<VirtualizedTokenListProps>) {
   const totalCount = useMemo(() => getTotalCount(ranges, tokens), [ranges, tokens]);
@@ -52,7 +52,7 @@ export function VirtualizedTokenList({
       emptyState={emptyState}
       layout={layout}
       columns={columns}
-      collectionName={collectionName}
+
       tokens={tokens}
     />
   );

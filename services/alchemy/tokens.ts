@@ -42,6 +42,11 @@ function normaliseTokenMetadata(
         token.raw?.metadata?.name ??
         null,
       imageUrl,
+      collectionName:
+        token.collection?.name ??
+        token.contract?.openSeaMetadata?.collectionName ??
+        token.contract?.name ??
+        null,
       isSpam: token.isSpam ?? token.spamInfo?.isSpam ?? false,
     };
   } catch (error) {
@@ -85,7 +90,7 @@ export async function getTokensMetadata(
       body: JSON.stringify(body),
       signal,
     });
- 
+
     if (!response.ok) {
       throw new Error("Failed to fetch token metadata");
     }

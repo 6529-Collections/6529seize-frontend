@@ -19,8 +19,11 @@ jest.mock("@/hooks/useAlchemyNftQueries", () => ({
 }));
 jest.mock("@tanstack/react-virtual", () => ({
   useVirtualizer: jest.fn().mockReturnValue({
-    getVirtualItems: () => [],
-    getTotalSize: () => 0,
+    getVirtualItems: () => [
+      { index: 0, start: 0, size: 50, measureElement: jest.fn() },
+      { index: 1, start: 50, size: 50, measureElement: jest.fn() },
+    ],
+    getTotalSize: () => 100,
   }),
 }));
 
@@ -42,12 +45,10 @@ describe("VirtualizedTokenList", () => {
       <VirtualizedTokenList
         {...defaultProps}
         layout="grid"
-        collectionName="Test Collection"
       />
     );
     // In grid mode, we still use ul but the items inside are different
     expect(container.querySelector("ul")).toBeInTheDocument();
-    expect(screen.getAllByText("Test Collection")[0]).toBeInTheDocument();
   });
 
   it("renders tokens from tokens prop with xtdh", () => {

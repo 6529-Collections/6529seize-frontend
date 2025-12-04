@@ -28,7 +28,7 @@ export function VirtualizedTokenListContent({
   emptyState,
   layout = "list",
   columns = 3,
-  collectionName,
+
   tokens,
 }: VirtualizedTokenListContentProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -133,7 +133,7 @@ export function VirtualizedTokenListContent({
                     width: "100%",
                   }}
                   columns={columns}
-                  collectionName={collectionName}
+
                 />
               );
             }

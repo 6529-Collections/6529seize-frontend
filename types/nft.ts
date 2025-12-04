@@ -23,5 +23,6 @@ export type TokenMetadata = {
   tokenIdRaw: string;
   name?: string | null;
   imageUrl?: string | null;
+  collectionName?: string | null;
   isSpam?: boolean;
 };

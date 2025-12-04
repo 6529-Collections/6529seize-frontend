@@ -35,7 +35,7 @@ export interface VirtualizedTokenListProps {
   readonly endReachedOffset?: number;
   readonly layout?: "list" | "grid";
   readonly columns?: number;
-  readonly collectionName?: string;
+
   readonly tokens?: readonly { tokenId: bigint; xtdh: number }[];
 }
 

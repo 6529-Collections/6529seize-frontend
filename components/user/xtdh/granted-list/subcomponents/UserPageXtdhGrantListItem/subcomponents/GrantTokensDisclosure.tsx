@@ -20,7 +20,7 @@ interface GrantTokensDisclosureProps {
   readonly grantId: string;
   readonly tokensCount: number | null;
   readonly tokensCountLabel: string;
-  readonly collectionName?: string;
+
 }
 
 export function GrantTokensDisclosure({
@@ -29,7 +29,7 @@ export function GrantTokensDisclosure({
   grantId,
   tokensCount,
   tokensCountLabel,
-  collectionName,
+
 }: Readonly<GrantTokensDisclosureProps>) {
   const { isOpen, panelId, toggleOpen, disclosureState } =
     useGrantTokensDisclosure({
@@ -43,7 +43,7 @@ export function GrantTokensDisclosure({
     tokensCount == null
       ? tokensCountLabel
       : `${tokensCountLabel} ${tokensCountWord}`;
-  const body = renderGrantTokensDisclosureBody(disclosureState, collectionName);
+  const body = renderGrantTokensDisclosureBody(disclosureState);
 
   return (
     <div className="tw-mt-4 tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-950">
@@ -103,7 +103,6 @@ function renderGrantTokensDisclosureBody(
     onEndReached,
     isFetchingNextPage,
   }: GrantTokensDisclosureState,
-  collectionName?: string
 ): ReactNode {
   if (showInitialLoading) {
     return <GrantTokensLoadingState />;
@@ -137,7 +136,7 @@ function renderGrantTokensDisclosureBody(
         endReachedOffset={END_REACHED_OFFSET}
         layout="grid"
         columns={3}
-        collectionName={collectionName}
+
         tokens={mappedTokens}
       />
       {isFetchingNextPage ? <GrantTokensLoadingMore /> : null}
