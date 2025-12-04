@@ -28,8 +28,8 @@ export function XtdhCollectionsControls({
   isDisabled = false,
 }: Readonly<XtdhCollectionsControlsProps>) {
   return (
-    <section className="tw-flex tw-flex-col tw-gap-3 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between" aria-label="Sort and search received collections">
-      <div className="tw-relative tw-w-full lg:tw-max-w-sm">
+    <section className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between tw-px-6" aria-label="Sort and search received collections">
+      <div className="tw-relative tw-w-full sm:tw-max-w-xs md:tw-max-w-sm">
         <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-0 tw-flex tw-items-center tw-pl-3">
           <MagnifyingGlassIcon className="tw-h-5 tw-w-5 tw-text-iron-400" aria-hidden="true" />
         </div>
@@ -42,7 +42,7 @@ export function XtdhCollectionsControls({
           className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-2.5 tw-pl-10 tw-pr-3 tw-text-iron-100 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 hover:tw-ring-iron-600 focus:tw-bg-transparent focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-text-sm sm:tw-leading-6 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 tw-transition tw-duration-300 tw-ease-out"
         />
       </div>
-      <div className="tw-w-full lg:tw-w-auto tw-overflow-x-auto horizontal-menu-hide-scrollbar">
+      <div className="tw-w-full sm:tw-w-auto tw-overflow-x-auto horizontal-menu-hide-scrollbar">
         <CommonSelect
           items={COLLECTION_SORT_ITEMS}
           activeItem={activeSortField}

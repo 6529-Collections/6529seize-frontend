@@ -5,7 +5,7 @@ export function GrantDetailsGrid({
   details,
 }: Readonly<{ details: GrantDetails }>) {
   return (
-    <dl className="tw-grid tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
+    <dl className="tw-grid tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-3 md:tw-ml-20">
       <GrantDetailsRow label="Token type" value={details.tokenTypeLabel} />
       <GrantDetailsRow label="Total supply" value={details.totalSupplyLabel} />
       <GrantDetailsRow label="Floor price" value={details.floorPriceLabel} />
