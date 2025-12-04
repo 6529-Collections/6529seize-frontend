@@ -28,11 +28,13 @@ import {
 } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import UserPageCollectedCards from "./cards/UserPageCollectedCards";
+import UserPageCollectedNetworkCards from "./cards/UserPageCollectedNetworkCards";
 import {
   COLLECTED_COLLECTIONS_META,
   convertAddressToLowerCase,
 } from "./filters/user-page-collected-filters.helpers";
 import UserPageCollectedFilters from "./filters/UserPageCollectedFilters";
+import { useXtdhTokensQuery } from "./hooks/useXtdhTokensQuery";
 import UserPageCollectedFirstLoading from "./UserPageCollectedFirstLoading";
 export interface ProfileCollectedFilters {
   readonly handleOrWallet: string;
@@ -149,6 +151,7 @@ export default function UserPageCollected({
     if (!sortBy) return defaultSortBy;
     if (
       collection &&
+      collection !== CollectedCollectionType.NETWORK &&
       !COLLECTED_COLLECTIONS_META[collection].filters.sort.includes(
         sortBy.toUpperCase() as CollectionSort
       )
@@ -258,6 +261,7 @@ export default function UserPageCollected({
 
     if (
       collection &&
+      collection !== CollectedCollectionType.NETWORK &&
       !COLLECTED_COLLECTIONS_META[collection].filters.sort.includes(
         filters.sortBy
       )
@@ -396,6 +400,22 @@ export default function UserPageCollected({
     placeholderData: keepPreviousData,
   });
 
+  const {
+    data: dataNetwork,
+    isLoading: isNetworkLoading,
+    isFetching: isNetworkFetching,
+  } = useXtdhTokensQuery({
+    identity: filters.handleOrWallet,
+    page: filters.page,
+    pageSize: filters.pageSize,
+    sort: filters.sortBy,
+    order: filters.sortDirection,
+  });
+
+  const isNetwork = filters.collection === CollectedCollectionType.NETWORK;
+  const isFetchingData = isFetching || isNetworkFetching;
+  const isLoading = isInitialLoading || isNetworkLoading;
+
   const showTransfer =
     !isMobile &&
     !!(
@@ -429,7 +449,11 @@ export default function UserPageCollected({
   const [totalPages, setTotalPages] = useState<number>(1);
 
   useEffect(() => {
-    if (isFetching) return;
+    if (isFetchingData) return;
+    if (isNetwork) {
+      // Network tab handles pagination via 'next' property, no total pages count
+      return;
+    }
     if (!data?.count) {
       setPage(1);
       setTotalPages(1);
@@ -441,7 +465,14 @@ export default function UserPageCollected({
       return;
     }
     setTotalPages(pagesCount);
-  }, [data?.count, data?.page, isFetching]);
+  }, [
+    data?.count,
+    data?.page,
+    isFetchingData,
+    isNetwork,
+    filters.pageSize,
+    filters.page,
+  ]);
 
   const getShowDataRow = (): boolean =>
     filters.collection
@@ -451,14 +482,18 @@ export default function UserPageCollected({
   const [showDataRow, setShowDataRow] = useState<boolean>(getShowDataRow());
 
   useEffect(() => {
-    setShowDataRow(getShowDataRow());
-  }, [filters.collection]);
+    if (isNetwork) {
+      setShowDataRow(false);
+    } else {
+      setShowDataRow(getShowDataRow());
+    }
+  }, [filters.collection, isNetwork]);
 
   const scrollContainer = useRef<HTMLDivElement>(null);
 
   return (
     <div className="tailwind-scope">
-      {isInitialLoading ? (
+      {isLoading ? (
         <UserPageCollectedFirstLoading />
       ) : (
         <>
@@ -476,16 +511,25 @@ export default function UserPageCollected({
           </div>
 
           <div className="tw-mt-6 tw-flex tw-gap-6">
-            <UserPageCollectedCards
-              cards={data?.data ?? []}
-              totalPages={totalPages}
-              page={filters.page}
-              showDataRow={showDataRow}
-              filters={filters}
-              setPage={setPage}
-              dataTransfer={dataTransfer ?? []}
-              isTransferLoading={isFetchingTransfer}
-            />
+            {isNetwork ? (
+              <UserPageCollectedNetworkCards
+                cards={dataNetwork?.data ?? []}
+                page={filters.page}
+                setPage={setPage}
+                next={dataNetwork?.next ?? false}
+              />
+            ) : (
+              <UserPageCollectedCards
+                cards={data?.data ?? []}
+                totalPages={totalPages}
+                page={filters.page}
+                showDataRow={showDataRow}
+                filters={filters}
+                setPage={setPage}
+                dataTransfer={dataTransfer ?? []}
+                isTransferLoading={isFetchingTransfer}
+              />
+            )}
           </div>
           {showTransfer && transferEnabled && (
             <TransferPanel isLoading={isFetchingTransfer} />

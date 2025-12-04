@@ -18,6 +18,7 @@ import { RefObject, useEffect, useRef, useState } from "react";
 import { ProfileCollectedFilters } from "../UserPageCollected";
 import { COLLECTED_COLLECTIONS_META } from "./user-page-collected-filters.helpers";
 import UserPageCollectedFiltersCollection from "./UserPageCollectedFiltersCollection";
+import UserPageCollectedFiltersNetwork from "./UserPageCollectedFiltersNetwork";
 import UserPageCollectedFiltersSeized from "./UserPageCollectedFiltersSeized";
 import UserPageCollectedFiltersSortBy from "./UserPageCollectedFiltersSortBy";
 import UserPageCollectedFiltersSzn from "./UserPageCollectedFiltersSzn";
@@ -120,7 +121,21 @@ export default function UserPageCollectedFilters({
             {showTransfer && <TransferToggle />}
             <UserPageCollectedFiltersCollection
               selected={filters.collection}
-              setSelected={setCollection}
+              setSelected={(collection) => {
+                setCollection(collection);
+                if (collection === CollectedCollectionType.NETWORK) {
+                  setSortBy(CollectionSort.XTDH);
+                }
+              }}
+            />
+            <UserPageCollectedFiltersNetwork
+              selected={filters.collection}
+              setSelected={(collection) => {
+                setCollection(collection);
+                if (collection === CollectedCollectionType.NETWORK) {
+                  setSortBy(CollectionSort.XTDH);
+                }
+              }}
             />
             <UserPageCollectedFiltersSortBy
               selected={filters.sortBy}
@@ -144,11 +159,13 @@ export default function UserPageCollectedFilters({
             )}
           </div>
           <div className="tw-flex-shrink-0">
-            <UserAddressesSelectDropdown
-              wallets={profile.wallets ?? []}
-              containerRef={containerRef}
-              onActiveAddress={() => undefined}
-            />
+            {filters.collection !== CollectedCollectionType.NETWORK && (
+              <UserAddressesSelectDropdown
+                wallets={profile.wallets ?? []}
+                containerRef={containerRef}
+                onActiveAddress={() => undefined}
+              />
+            )}
           </div>
         </div>
       </div>

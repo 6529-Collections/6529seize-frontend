@@ -26,6 +26,8 @@ export default function UserPageCollectedFiltersSortBy({
     [CollectionSort.TOKEN_ID]: "Token ID",
     [CollectionSort.TDH]: "TDH",
     [CollectionSort.RANK]: "Rank",
+    [CollectionSort.XTDH]: "xTDH",
+    [CollectionSort.XTDH_DAY]: "xTDH/day",
   };
 
   const getItems = () => {
@@ -40,8 +42,8 @@ export default function UserPageCollectedFiltersSortBy({
     return items.filter((item) =>
       collection
         ? COLLECTED_COLLECTIONS_META[collection].filters.sort.includes(
-            item.value
-          )
+          item.value
+        )
         : true
     );
   };

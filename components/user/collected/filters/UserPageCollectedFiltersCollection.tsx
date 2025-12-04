@@ -20,11 +20,13 @@ export default function UserPageCollectedFiltersCollection({
       value: null,
       key: "all",
     },
-    ...Object.values(CollectedCollectionType).map((collection) => ({
-      label: COLLECTED_COLLECTIONS_META[collection].label,
-      value: collection,
-      key: collection,
-    })),
+    ...Object.values(CollectedCollectionType)
+      .filter((collection) => collection !== CollectedCollectionType.NETWORK)
+      .map((collection) => ({
+        label: COLLECTED_COLLECTIONS_META[collection].label,
+        value: collection,
+        key: collection,
+      })),
   ];
 
   return (

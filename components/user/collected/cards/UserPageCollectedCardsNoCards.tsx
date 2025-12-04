@@ -49,6 +49,8 @@ export default function UserPageCollectedCardsNoCards({
         return "Congratulations, Meme Lab full setter!";
       case CollectedCollectionType.NEXTGEN:
         return "Congratulations, Next Gen full setter!";
+      case CollectedCollectionType.NETWORK:
+        return "No network tokens found";
       default:
         assertUnreachable(filters.collection);
         return "";
