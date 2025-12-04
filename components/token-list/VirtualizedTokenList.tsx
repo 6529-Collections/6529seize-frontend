@@ -17,6 +17,7 @@ import type {
 import { expandRangesWindow } from "@/components/nft-picker/NftPicker.utils";
 
 const ROW_HEIGHT = 72;
+const GRID_ROW_HEIGHT = 380; // Taller rows for grid items
 const DEFAULT_OVERSCAN = 8;
 const BIGINT_ZERO = BigInt(0);
 const BIGINT_ONE = BigInt(1);
@@ -51,6 +52,8 @@ export interface VirtualizedTokenListProps {
   readonly emptyState?: ReactNode;
   readonly onEndReached?: (info: { lastVisibleIndex: number; totalCount: number }) => void;
   readonly endReachedOffset?: number;
+  readonly layout?: "list" | "grid";
+  readonly columns?: number;
 }
 
 function getTotalCount(ranges: TokenRange[]): number {
@@ -85,6 +88,8 @@ export function VirtualizedTokenList({
   emptyState = <div className="tw-text-sm tw-text-iron-300">No tokens available.</div>,
   onEndReached,
   endReachedOffset,
+  layout = "list",
+  columns = 3,
 }: Readonly<VirtualizedTokenListProps>) {
   const totalCount = useMemo(() => getTotalCount(ranges), [ranges]);
 
@@ -107,6 +112,8 @@ export function VirtualizedTokenList({
       onEndReached={onEndReached}
       endReachedOffset={endReachedOffset}
       emptyState={emptyState}
+      layout={layout}
+      columns={columns}
     />
   );
 }
@@ -132,21 +139,35 @@ function VirtualizedTokenListContent({
   onEndReached,
   endReachedOffset,
   emptyState,
+  layout = "list",
+  columns = 3,
 }: VirtualizedTokenListContentProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const initialOffset = usePersistentScrollOffset(scrollKey, scrollContainerRef);
 
+  const isGrid = layout === "grid";
+  const rowCount = isGrid ? Math.ceil(totalCount / columns) : totalCount;
+  const rowHeight = isGrid ? GRID_ROW_HEIGHT : ROW_HEIGHT;
+
   const virtualizer = useVirtualizer({
-    count: totalCount,
+    count: rowCount,
     getScrollElement: () => scrollContainerRef.current,
-    estimateSize: () => ROW_HEIGHT,
+    estimateSize: () => rowHeight,
     overscan,
     initialOffset,
   });
 
   const virtualItems = virtualizer.getVirtualItems();
   const { firstVisibleIndex, lastVisibleIndex } = getVisibleWindowBounds(virtualItems);
-  const windowTokens = useVisibleTokenWindow(ranges, firstVisibleIndex, lastVisibleIndex);
+
+  // Calculate token indices based on row indices
+  const firstTokenIndex = isGrid ? firstVisibleIndex * columns : firstVisibleIndex;
+  const lastTokenIndex = isGrid
+    ? Math.min((lastVisibleIndex + 1) * columns - 1, totalCount - 1)
+    : lastVisibleIndex;
+
+  const windowTokens = useVisibleTokenWindow(ranges, firstTokenIndex, lastTokenIndex);
+
   const { metadataMap, metadataQuery } = useTokenMetadataWindow({
     contractAddress,
     chain,
@@ -163,14 +184,14 @@ function VirtualizedTokenListContent({
       return;
     }
     const threshold = endReachedOffset ?? overscan ?? DEFAULT_OVERSCAN;
-    const distanceFromEnd = totalCount - 1 - lastVisibleIndex;
+    const distanceFromEnd = rowCount - 1 - lastVisibleIndex;
     if (distanceFromEnd <= threshold) {
       if (endReachedTriggerRef.current !== totalCount) {
         endReachedTriggerRef.current = totalCount;
-        onEndReached({ lastVisibleIndex, totalCount });
+        onEndReached({ lastVisibleIndex: lastTokenIndex, totalCount });
       }
     }
-  }, [onEndReached, totalCount, lastVisibleIndex, overscan, endReachedOffset]);
+  }, [onEndReached, totalCount, lastVisibleIndex, overscan, endReachedOffset, rowCount, lastTokenIndex]);
 
   if (totalCount === 0) {
     return (
@@ -190,7 +211,45 @@ function VirtualizedTokenListContent({
           style={{ height: virtualizer.getTotalSize(), position: "relative" }}
         >
           {virtualItems.map((virtualItem) => {
-            const windowIndex = virtualItem.index - firstVisibleIndex;
+            const rowIndex = virtualItem.index;
+
+            if (isGrid) {
+              const rowStartTokenIndex = rowIndex * columns;
+              const rowTokens = [];
+
+              for (let i = 0; i < columns; i++) {
+                const tokenIndex = rowStartTokenIndex + i;
+                if (tokenIndex >= totalCount) break;
+
+                // Find the token in our window based on its absolute index
+                // windowTokens starts from firstTokenIndex
+                const windowIndex = tokenIndex - firstTokenIndex;
+                const token = windowTokens[windowIndex];
+                if (token) {
+                  rowTokens.push(token);
+                }
+              }
+
+              return (
+                <GridRow
+                  key={rowIndex}
+                  tokens={rowTokens}
+                  metadataMap={metadataMap}
+                  metadataQuery={metadataQuery}
+                  renderTokenExtra={renderTokenExtra}
+                  action={action}
+                  positionStyle={{
+                    transform: `translateY(${virtualItem.start}px)`,
+                    height: virtualItem.size,
+                    width: "100%",
+                  }}
+                  columns={columns}
+                />
+              );
+            }
+
+            // List layout
+            const windowIndex = rowIndex - firstVisibleIndex;
             const token = windowTokens[windowIndex];
             if (!token) {
               return null;
@@ -276,20 +335,20 @@ function getVisibleWindowBounds(virtualItems: Array<{ index: number }>) {
 
 function useVisibleTokenWindow(
   ranges: TokenRange[],
-  firstVisibleIndex: number,
-  lastVisibleIndex: number
+  firstTokenIndex: number,
+  lastTokenIndex: number
 ): TokenWindowEntry[] {
   return useMemo(() => {
-    if (lastVisibleIndex < firstVisibleIndex) {
+    if (lastTokenIndex < firstTokenIndex) {
       return [];
     }
 
-    const windowSize = lastVisibleIndex - firstVisibleIndex + 1;
-    return expandRangesWindow(ranges, firstVisibleIndex, windowSize).map((tokenId) => ({
+    const windowSize = lastTokenIndex - firstTokenIndex + 1;
+    return expandRangesWindow(ranges, firstTokenIndex, windowSize).map((tokenId) => ({
       tokenId,
       decimalId: toDecimalString(tokenId),
     }));
-  }, [ranges, firstVisibleIndex, lastVisibleIndex]);
+  }, [ranges, firstTokenIndex, lastTokenIndex]);
 }
 
 type TokenMetadataWindowParams = Readonly<{
@@ -371,12 +430,14 @@ function TokenRow({
       )}
       style={positionStyle}
     >
-      <TokenThumbnail
-        metadata={metadata}
-        decimalId={token.decimalId}
-        isLoading={isMetadataLoading}
-        hasError={hasMetadataError}
-      />
+      <div className="tw-h-10 tw-w-10">
+        <TokenThumbnail
+          metadata={metadata}
+          decimalId={token.decimalId}
+          isLoading={isMetadataLoading}
+          hasError={hasMetadataError}
+        />
+      </div>
       <div className="tw-flex tw-flex-1 tw-items-center tw-justify-between tw-gap-4">
         <div className="tw-flex tw-flex-col tw-gap-0.5">
           <span className="tw-text-sm tw-font-medium tw-text-white">#{token.decimalId}</span>
@@ -398,6 +459,79 @@ function TokenRow({
   );
 }
 
+type GridRowProps = Readonly<{
+  tokens: TokenWindowEntry[];
+  metadataMap: Map<string, TokenMetadata>;
+  metadataQuery: any;
+  renderTokenExtra?: (tokenId: bigint, metadata?: TokenMetadata) => ReactNode;
+  action?: TokenListAction;
+  positionStyle: CSSProperties;
+  columns: number;
+}>;
+
+function GridRow({
+  tokens,
+  metadataMap,
+  metadataQuery,
+  renderTokenExtra,
+  action,
+  positionStyle,
+  columns,
+}: GridRowProps) {
+  return (
+    <li
+      className="tw-absolute tw-grid tw-w-full tw-gap-3 tw-px-3 tw-py-2"
+      style={{
+        ...positionStyle,
+        gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+      }}
+    >
+      {tokens.map((token) => {
+        const metadata = metadataMap.get(token.decimalId);
+        const isLoadingMetadata = metadataQuery.isFetching && !metadata;
+        const hasMetadataError = metadataQuery.isError && !metadata;
+
+        return (
+          <div
+            key={token.decimalId}
+            className="tw-flex tw-flex-col tw-gap-2 tw-rounded-lg tw-bg-iron-800/50 tw-p-3"
+          >
+            <div className="tw-aspect-square tw-w-full tw-overflow-hidden tw-rounded-md">
+              <TokenThumbnail
+                metadata={metadata}
+                decimalId={token.decimalId}
+                isLoading={isLoadingMetadata}
+                hasError={hasMetadataError}
+              />
+            </div>
+            <div className="tw-flex tw-flex-col tw-gap-1">
+              <span className="tw-truncate tw-text-sm tw-font-medium tw-text-white">
+                #{token.decimalId}
+              </span>
+              {metadata?.name && (
+                <span className="tw-truncate tw-text-xs tw-text-iron-400">
+                  {metadata.name}
+                </span>
+              )}
+            </div>
+            {renderTokenExtra?.(token.tokenId, metadata)}
+            {action ? (
+              <button
+                type="button"
+                className="tw-mt-auto tw-w-full tw-rounded tw-border tw-border-iron-700 tw-bg-transparent tw-px-2 tw-py-1.5 tw-text-xs tw-text-iron-200 hover:tw-border-primary-500 hover:tw-text-white"
+                onClick={() => action.onClick(token.tokenId, metadata)}
+                aria-label={action.getAriaLabel?.(`#${token.decimalId}`) ?? action.label}
+              >
+                {action.label}
+              </button>
+            ) : null}
+          </div>
+        );
+      })}
+    </li>
+  );
+}
+
 type TokenThumbnailProps = Readonly<{
   metadata?: TokenMetadata;
   decimalId: string;
@@ -414,7 +548,7 @@ function TokenThumbnail({ metadata, decimalId, isLoading, hasError }: Readonly<T
         src={metadata.imageUrl}
         alt={metadata.name ?? decimalId}
         fill
-        sizes="40px"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         className="tw-h-full tw-w-full tw-object-cover"
       />
     );
@@ -447,7 +581,7 @@ function TokenThumbnail({ metadata, decimalId, isLoading, hasError }: Readonly<T
   }
 
   return (
-    <div className="tw-relative tw-h-10 tw-w-10 tw-overflow-hidden tw-rounded-md tw-bg-iron-800">
+    <div className="tw-relative tw-h-full tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-800">
       {content}
     </div>
   );

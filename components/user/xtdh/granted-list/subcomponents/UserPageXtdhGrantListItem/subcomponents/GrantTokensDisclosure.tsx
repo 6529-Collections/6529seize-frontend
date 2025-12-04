@@ -121,8 +121,11 @@ function renderGrantTokensDisclosureBody({
         ranges={tokenRanges}
         scrollKey={`grant-token-list-${grantId}`}
         className="tw-rounded-md tw-border tw-border-iron-800 tw-bg-iron-900"
+        scrollContainerClassName="tw-max-h-[480px] tw-overflow-y-auto"
         onEndReached={onEndReached}
         endReachedOffset={END_REACHED_OFFSET}
+        layout="grid"
+        columns={3}
       />
       {isFetchingNextPage ? <GrantTokensLoadingMore /> : null}
     </>
