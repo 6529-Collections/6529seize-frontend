@@ -58,6 +58,7 @@ const registerWithRetry = async (
           registerError
         );
         await new Promise((resolve) => setTimeout(resolve, delay));
+        continue;
       }
 
       throw registerError;
@@ -343,7 +344,7 @@ const resolveRedirectUrl = (notificationData: NotificationData) => {
     return null;
   }
 
-  const resolveFn = redirectConfig[redirect as keyof typeof redirectConfig];
+  const resolveFn = redirectConfig[redirect];
 
   if (!resolveFn) {
     console.error("Unknown redirect type", redirect);
