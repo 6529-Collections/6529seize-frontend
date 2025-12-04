@@ -372,6 +372,7 @@ export enum CollectedCollectionType {
   NEXTGEN = "NEXTGEN",
   GRADIENTS = "GRADIENTS",
   MEMELAB = "MEMELAB",
+  NETWORK = "NETWORK",
 }
 
 export const COLLECTED_COLLECTION_TYPE_TO_CONTRACT: Record<
@@ -382,6 +383,7 @@ export const COLLECTED_COLLECTION_TYPE_TO_CONTRACT: Record<
   [CollectedCollectionType.NEXTGEN]: NEXTGEN_CONTRACT,
   [CollectedCollectionType.GRADIENTS]: GRADIENT_CONTRACT,
   [CollectedCollectionType.MEMELAB]: MEMELAB_CONTRACT,
+  [CollectedCollectionType.NETWORK]: "",
 };
 
 export const COLLECTED_COLLECTION_TYPE_TO_CONTRACT_TYPE: Record<
@@ -392,6 +394,7 @@ export const COLLECTED_COLLECTION_TYPE_TO_CONTRACT_TYPE: Record<
   [CollectedCollectionType.NEXTGEN]: ContractType.ERC721,
   [CollectedCollectionType.GRADIENTS]: ContractType.ERC721,
   [CollectedCollectionType.MEMELAB]: ContractType.ERC1155,
+  [CollectedCollectionType.NETWORK]: "",
 };
 
 export enum CollectionSeized {
@@ -403,6 +406,8 @@ export enum CollectionSort {
   TOKEN_ID = "TOKEN_ID",
   TDH = "TDH",
   RANK = "RANK",
+  XTDH = "XTDH",
+  XTDH_DAY = "XTDH_DAY",
 }
 
 export interface CollectedCard {
