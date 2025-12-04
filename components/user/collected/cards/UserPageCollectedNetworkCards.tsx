@@ -1,8 +1,6 @@
-import NFTImage from "@/components/nft-image/NFTImage";
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
-import { NFTLite } from "@/entities/INFT";
 import { ApiXTdhToken } from "@/generated/models/ApiXTdhToken";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { formatNumberWithCommas, formatStatFloor } from "@/helpers/Helpers";
 import { useTokenMetadataQuery } from "@/hooks/useAlchemyNftQueries";
 import { useEffect, useMemo } from "react";
 
@@ -48,48 +46,54 @@ export default function UserPageCollectedNetworkCards({
             m.contract?.toLowerCase() === card.contract.toLowerCase()
         );
 
-        const nftLite: NFTLite = {
-          id: card.token,
-          contract: card.contract,
-          name: tokenMetadata?.name ?? `Token #${card.token}`,
-          icon: tokenMetadata?.imageUrl ?? "",
-          thumbnail: tokenMetadata?.imageUrl ?? "",
-          scaled: tokenMetadata?.imageUrl ?? "",
-          image: tokenMetadata?.imageUrl ?? "",
-          animation: "",
-        };
 
         return (
           <div
             key={`${card.contract}-${card.token}`}
-            className="tw-bg-iron-900 tw-rounded-xl tw-p-4 tw-flex tw-flex-col tw-gap-y-4 tw-border tw-border-iron-800">
-            <div className="tw-aspect-square tw-w-full tw-rounded-lg tw-overflow-hidden tw-bg-iron-800">
-              <NFTImage
-                nft={nftLite}
-                animation={false}
-                height={300}
-                showBalance={false}
-                showThumbnail={true}
-              />
+            className="tw-group tw-relative tw-flex tw-flex-col tw-bg-gradient-to-br tw-from-iron-900 tw-to-white/5 tw-rounded-lg tw-overflow-hidden tw-px-0.5 tw-pt-0.5 tw-transition tw-duration-300 tw-ease-out tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600/60 hover:tw-to-white/10">
+            <div className="tw-flex tw-flex-wrap">
+              <div className="tw-w-full tw-max-w-full">
+                <div className="tw-h-[200px] min-[800px]:tw-h-[250px] min-[1200px]:tw-h-[18.75rem] tw-text-center tw-flex tw-items-center tw-justify-center">
+                  <img
+                    src={tokenMetadata?.imageUrl ?? ""}
+                    alt={tokenMetadata?.collectionName ?? "Network Token"}
+                    className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
+                  />
+                </div>
+              </div>
+
+              <div className="tw-pt-3 tw-px-2 tw-flex tw-justify-between tw-items-center tw-w-full">
+                <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium tw-text-iron-400">
+                  {tokenMetadata?.collectionName ?? "Network"}
+                </span>
+                <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium tw-text-iron-500">
+                  #{card.token}
+                </span>
+              </div>
             </div>
-            <div className="tw-flex tw-flex-col tw-gap-y-2">
-              <div className="tw-flex tw-justify-between tw-items-center">
-                <span className="tw-text-iron-400 tw-text-xs">Token ID</span>
-                <span className="tw-text-white tw-font-medium tw-truncate tw-max-w-[100px]" title={card.token.toString()}>
-                  {card.token}
-                </span>
-              </div>
-              <div className="tw-flex tw-justify-between tw-items-center">
-                <span className="tw-text-iron-400 tw-text-xs">xTDH</span>
-                <span className="tw-text-white tw-font-medium">
-                  {formatNumberWithCommas(card.xtdh)}
-                </span>
-              </div>
-              <div className="tw-flex tw-justify-between tw-items-center">
-                <span className="tw-text-iron-400 tw-text-xs">xTDH/day</span>
-                <span className="tw-text-white tw-font-medium">
-                  {formatNumberWithCommas(card.xtdh_rate)}
-                </span>
+
+            <div className="tw-pt-2 tw-pb-4 tw-px-2 tw-self-end tw-w-full tw-h-full">
+              <div className="tw-flex tw-flex-col tw-h-full tw-justify-between tw-gap-y-2.5 tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0">
+                <div className="tw-flex tw-justify-between tw-gap-x-2">
+                  <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium tw-text-iron-50 tw-truncate tw-block tw-w-full">
+                    {tokenMetadata?.name ?? `Token #${card.token}`}
+                  </span>
+                </div>
+
+                <div className="tw-pt-2 tw-flex tw-items-center tw-justify-between">
+                  <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium">
+                    <span className="tw-text-iron-400">xTDH</span>
+                    <span className="tw-ml-1 tw-text-iron-50">
+                      {formatStatFloor(card.xtdh, 1)}
+                    </span>
+                  </span>
+                  <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium">
+                    <span className="tw-text-iron-400">xTDH/day</span>
+                    <span className="tw-ml-1 tw-text-iron-50">
+                      {formatStatFloor(card.xtdh_rate, 1)}
+                    </span>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
