@@ -19,6 +19,7 @@ import { ProfileCollectedFilters } from "../UserPageCollected";
 import { COLLECTED_COLLECTIONS_META } from "./user-page-collected-filters.helpers";
 import UserPageCollectedFiltersCollection from "./UserPageCollectedFiltersCollection";
 import UserPageCollectedFiltersNetwork from "./UserPageCollectedFiltersNetwork";
+import UserPageCollectedFiltersNetworkCollection from "./UserPageCollectedFiltersNetworkCollection";
 import UserPageCollectedFiltersSeized from "./UserPageCollectedFiltersSeized";
 import UserPageCollectedFiltersSortBy from "./UserPageCollectedFiltersSortBy";
 import UserPageCollectedFiltersSzn from "./UserPageCollectedFiltersSzn";
@@ -31,6 +32,7 @@ export default function UserPageCollectedFilters({
   setSortBy,
   setSeized,
   setSzn,
+  setSubcollection,
   showTransfer,
 }: {
   readonly profile: ApiIdentity;
@@ -40,6 +42,7 @@ export default function UserPageCollectedFilters({
   readonly setSortBy: (sortBy: CollectionSort) => void;
   readonly setSeized: (seized: CollectionSeized | null) => void;
   readonly setSzn: (szn: MEMES_SEASON | null) => void;
+  readonly setSubcollection: (subcollection: string | null) => void;
   readonly showTransfer: boolean;
 }) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -131,6 +134,13 @@ export default function UserPageCollectedFilters({
                 setCollection(collection);
               }}
             />
+            {filters.collection === CollectedCollectionType.NETWORK && (
+              <UserPageCollectedFiltersNetworkCollection
+                identity={filters.handleOrWallet}
+                selected={filters.subcollection}
+                setSelected={setSubcollection}
+              />
+            )}
             <UserPageCollectedFiltersSortBy
               selected={filters.sortBy}
               direction={filters.sortDirection}
