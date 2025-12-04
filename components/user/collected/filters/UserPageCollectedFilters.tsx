@@ -123,18 +123,12 @@ export default function UserPageCollectedFilters({
               selected={filters.collection}
               setSelected={(collection) => {
                 setCollection(collection);
-                if (collection === CollectedCollectionType.NETWORK) {
-                  setSortBy(CollectionSort.XTDH);
-                }
               }}
             />
             <UserPageCollectedFiltersNetwork
               selected={filters.collection}
               setSelected={(collection) => {
                 setCollection(collection);
-                if (collection === CollectedCollectionType.NETWORK) {
-                  setSortBy(CollectionSort.XTDH);
-                }
               }}
             />
             <UserPageCollectedFiltersSortBy

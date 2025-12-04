@@ -124,7 +124,24 @@ function getContractCacheKey(
 }
 
 function getTokenCacheKey(params: TokenMetadataParams): string {
-  const ids = [...params.tokenIds].sort((a, b) => {
+  if (params.tokens) {
+    const sortedTokens = [...params.tokens].sort((a, b) => {
+      const contractCompare = a.contract.localeCompare(b.contract);
+      if (contractCompare !== 0) {
+        return contractCompare;
+      }
+      return a.tokenId.localeCompare(b.tokenId);
+    });
+    const key = sortedTokens
+      .map((t) => `${t.contract.toLowerCase()}:${t.tokenId}`)
+      .join("|");
+    return `${params.chain ?? "ethereum"}:${key}`;
+  }
+
+  const address = params.address ?? "0x";
+  const tokenIds = params.tokenIds ?? [];
+
+  const ids = [...tokenIds].sort((a, b) => {
     if (a < b) {
       return -1;
     }
@@ -133,7 +150,7 @@ function getTokenCacheKey(params: TokenMetadataParams): string {
     }
     return 0;
   });
-  return `${params.chain ?? "ethereum"}:${params.address.toLowerCase()}:${ids.join("|")}`;
+  return `${params.chain ?? "ethereum"}:${address.toLowerCase()}:${ids.join("|")}`;
 }
 
 type UseCollectionSearchParams = {
@@ -152,7 +169,8 @@ type UseContractOverviewParams = {
 
 type UseTokenMetadataParams = {
   readonly address?: `0x${string}`;
-  readonly tokenIds: readonly string[];
+  readonly tokenIds?: readonly string[];
+  readonly tokens?: readonly { contract: string; tokenId: string }[];
   readonly chain?: SupportedChain;
   readonly enabled?: boolean;
 };
@@ -258,10 +276,12 @@ export function useContractOverviewQuery({
 export function useTokenMetadataQuery({
   address,
   tokenIds,
+  tokens,
   chain = "ethereum",
   enabled = true,
 }: UseTokenMetadataParams) {
   const uniqueIds = useMemo(() => {
+    if (!tokenIds) return [];
     const seen = new Set<string>();
     const deduped: string[] = [];
     for (const id of tokenIds) {
@@ -274,6 +294,12 @@ export function useTokenMetadataQuery({
   }, [tokenIds]);
 
   const params = useMemo(() => {
+    if (tokens && tokens.length > 0) {
+      return {
+        tokens,
+        chain,
+      } satisfies TokenMetadataParams;
+    }
     if (!address || uniqueIds.length === 0) {
       return undefined;
     }
@@ -282,14 +308,18 @@ export function useTokenMetadataQuery({
       tokenIds: uniqueIds,
       chain,
     } satisfies TokenMetadataParams;
-  }, [address, uniqueIds, chain]);
+  }, [address, uniqueIds, tokens, chain]);
 
   return useQuery({
     queryKey: [
       QueryKey.NFT_TOKEN_METADATA,
       chain,
       address?.toLowerCase(),
+      QueryKey.NFT_TOKEN_METADATA,
+      chain,
+      address?.toLowerCase(),
       uniqueIds,
+      tokens,
     ],
     enabled: enabled && Boolean(params),
     placeholderData: keepPreviousData,

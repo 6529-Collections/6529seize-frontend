@@ -274,6 +274,15 @@ export default function UserPageCollected({
         name: "sortDirection",
         value: SortDirection.DESC,
       });
+    } else if (collection === CollectedCollectionType.NETWORK) {
+      items.push({
+        name: "sortBy",
+        value: CollectionSort.XTDH,
+      });
+      items.push({
+        name: "sortDirection",
+        value: SortDirection.DESC,
+      });
     }
 
     await updateFields(items);
