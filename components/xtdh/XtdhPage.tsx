@@ -89,18 +89,18 @@ function XtdhStatsError({
   return (
     <div
       role="alert"
-      className="tw-flex tw-items-start tw-justify-between tw-gap-3 tw-rounded-xl tw-border tw-border-red-900 tw-bg-red-950/40 tw-p-4"
+      className="tw-flex tw-items-start tw-justify-between tw-gap-3 tw-rounded-xl tw-border tw-border-rose-900 tw-bg-rose-950/40 tw-p-4"
     >
       <div>
-        <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-red-200">
+        <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-rose-200">
           Unable to load xTDH stats
         </p>
-        <p className="tw-mt-1 tw-text-sm tw-text-red-200/80">{message}</p>
+        <p className="tw-mt-1 tw-text-sm tw-text-rose-200/80">{message}</p>
       </div>
       <button
         type="button"
         onClick={onRetry}
-        className="tw-rounded-lg tw-border tw-border-red-800 tw-bg-red-900 tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-red-100 desktop-hover:hover:tw-bg-red-800"
+        className="tw-rounded-lg tw-border tw-border-solid tw-border-rose-800 tw-bg-rose-900 tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-rose-100 desktop-hover:hover:tw-bg-rose-800"
       >
         Retry
       </button>

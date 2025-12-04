@@ -8,6 +8,7 @@ type UserPageTabDefinition = {
   readonly title: string;
   readonly route: string;
   readonly metaLabel?: string;
+  readonly badge?: string;
   readonly isVisible?: (context: UserPageVisibilityContext) => boolean;
 };
 
@@ -37,6 +38,7 @@ const TAB_DEFINITIONS = [
     id: "xtdh",
     title: "xTDH",
     route: "xtdh",
+    badge: "Beta",
   },
   {
     id: "stats",

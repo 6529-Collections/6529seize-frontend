@@ -24,8 +24,9 @@ export type ContractOverviewParams = {
 };
 
 export type TokenMetadataParams = {
-  address: `0x${string}`;
-  tokenIds: readonly string[];
+  address?: `0x${string}`;
+  tokenIds?: readonly string[];
+  tokens?: readonly { contract: string; tokenId: string }[];
   chain?: SupportedChain;
   signal?: AbortSignal;
 };

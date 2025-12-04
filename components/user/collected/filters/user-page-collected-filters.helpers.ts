@@ -73,6 +73,19 @@ export const COLLECTED_COLLECTIONS_META: Record<
     },
     cardPath: "/meme-lab",
   },
+  [CollectedCollectionType.NETWORK]: {
+    label: "Network",
+    dataRows: {
+      seizedCount: false,
+    },
+    showCardDataRow: true,
+    filters: {
+      seized: false,
+      szn: false,
+      sort: [CollectionSort.XTDH, CollectionSort.XTDH_DAY],
+    },
+    cardPath: "/network",
+  },
 };
 
 export const convertAddressToLowerCase = (address: any) =>

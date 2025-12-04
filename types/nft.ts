@@ -21,8 +21,9 @@ export type ContractOverview = Suggestion & {
 export type TokenMetadata = {
   tokenId: bigint;
   tokenIdRaw: string;
-  name?: string | null;
-  imageUrl?: string | null;
-  collectionName?: string | null;
-  isSpam?: boolean;
+  contract?: string;
+  name: string | null;
+  imageUrl: string | null;
+  collectionName: string | null;
+  isSpam: boolean;
 };

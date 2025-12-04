@@ -35,6 +35,7 @@ function normaliseTokenMetadata(
     return {
       tokenId,
       tokenIdRaw,
+      contract: token.contract?.address ?? undefined,
       name:
         token.title ??
         token.name ??
@@ -58,27 +59,47 @@ function normaliseTokenMetadata(
 export async function getTokensMetadata(
   params: TokenMetadataParams
 ): Promise<TokenMetadata[]> {
-  const { address, tokenIds, chain = "ethereum", signal } = params;
-  if (!tokenIds.length) {
+  const {
+    address,
+    tokenIds,
+    tokens: tokensParam,
+    chain = "ethereum",
+    signal,
+  } = params;
+
+  let tokensToFetch: { contract: string; tokenId: string }[] = [];
+
+  if (tokensParam && tokensParam.length > 0) {
+    tokensToFetch = [...tokensParam];
+  } else if (address && tokenIds && tokenIds.length > 0) {
+    if (!isValidEthAddress(address)) {
+      throw new Error("Invalid contract address");
+    }
+    const checksum = normaliseAddress(address);
+    if (!checksum) {
+      return [];
+    }
+    tokensToFetch = tokenIds.map((tokenId) => ({
+      contract: checksum,
+      tokenId,
+    }));
+  }
+
+  if (tokensToFetch.length === 0) {
     return [];
   }
-  if (!isValidEthAddress(address)) {
-    throw new Error("Invalid contract address");
-  }
-  const checksum = normaliseAddress(address);
-  if (!checksum) {
-    return [];
-  }
+
   const network = resolveNetwork(chain);
   const apiKey = getAlchemyApiKey();
   const url = `https://${network}.g.alchemy.com/nft/v3/${apiKey}/getNFTMetadataBatch`;
   const results: TokenMetadata[] = [];
-  for (let i = 0; i < tokenIds.length; i += MAX_BATCH_SIZE) {
-    const slice = tokenIds.slice(i, i + MAX_BATCH_SIZE);
+
+  for (let i = 0; i < tokensToFetch.length; i += MAX_BATCH_SIZE) {
+    const slice = tokensToFetch.slice(i, i + MAX_BATCH_SIZE);
     const body = {
-      tokens: slice.map((tokenId) => ({
-        contractAddress: checksum,
-        tokenId,
+      tokens: slice.map((t) => ({
+        contractAddress: t.contract,
+        tokenId: t.tokenId,
       })),
     };
     const response = await fetch(url, {

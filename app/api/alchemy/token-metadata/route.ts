@@ -8,6 +8,7 @@ const NO_STORE_HEADERS = { "Cache-Control": "no-store" };
 type TokenMetadataRequestBody = {
   readonly address?: `0x${string}`;
   readonly tokenIds?: string[];
+  readonly tokens?: { contract: string; tokenId: string }[];
   readonly chain?: SupportedChain;
 };
 
@@ -26,11 +27,14 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { address, tokenIds, chain = "ethereum" } = body ?? {};
+  const { address, tokenIds, tokens, chain = "ethereum" } = body ?? {};
 
-  if (!address || !Array.isArray(tokenIds) || tokenIds.length === 0) {
+  if (
+    (!tokens || tokens.length === 0) &&
+    (!address || !Array.isArray(tokenIds) || tokenIds.length === 0)
+  ) {
     return NextResponse.json(
-      { error: "address and tokenIds are required" },
+      { error: "Either tokens OR (address and tokenIds) are required" },
       { status: 400, headers: NO_STORE_HEADERS }
     );
   }
@@ -39,6 +43,7 @@ export async function POST(request: NextRequest) {
     const metadata = await getTokensMetadata({
       address,
       tokenIds,
+      tokens,
       chain,
       signal: request.signal,
     });
