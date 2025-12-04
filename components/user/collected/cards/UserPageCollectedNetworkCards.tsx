@@ -4,7 +4,7 @@ import { NFTLite } from "@/entities/INFT";
 import { ApiXTdhToken } from "@/generated/models/ApiXTdhToken";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { useTokenMetadataQuery } from "@/hooks/useAlchemyNftQueries";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 export default function UserPageCollectedNetworkCards({
   cards,

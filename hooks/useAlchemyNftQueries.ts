@@ -86,6 +86,7 @@ async function fetchTokenMetadataFromApi(
     body: JSON.stringify({
       address: params.address,
       tokenIds: params.tokenIds,
+      tokens: params.tokens,
       chain: params.chain ?? "ethereum",
     }),
     signal: params.signal,
