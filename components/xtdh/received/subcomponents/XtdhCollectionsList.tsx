@@ -1,7 +1,11 @@
 import type { ApiXTdhCollectionsPage } from "@/generated/models/ApiXTdhCollectionsPage";
 
 import { EmptyState } from "@/components/common/EmptyState";
-import { InlineRetry, ListError, ListMessage } from "../collection-tokens/subcomponents/XtdhTokensFallbacks";
+import {
+  InlineRetry,
+  ListError,
+  ListMessage,
+} from "../collection-tokens/subcomponents/XtdhTokensFallbacks";
 import { XtdhReceivedCollectionCard } from "../collection-card-content";
 
 type ApiXtdhCollection = Omit<
@@ -74,8 +78,8 @@ export function XtdhCollectionsList({
   const normalizedSelected = selectedContract?.trim().toLowerCase() ?? null;
 
   return (
-    <div className="tw-space-y-3">
-      <ul className="tw-m-0 tw-flex tw-flex-col tw-gap-3 tw-p-0">
+    <div className="tw-border-t tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-b-0">
+      <ul className="tw-m-0 tw-p-0 tw-flex tw-flex-col tw-divide-y tw-divide-iron-800 tw-divide-x-0 tw-divide-solid">
         {collections.map((collection, index) => (
           <XtdhReceivedCollectionCard
             key={getCollectionKey(collection, index)}
@@ -83,7 +87,8 @@ export function XtdhCollectionsList({
             onSelect={onSelectCollection}
             isSelected={
               normalizedSelected !== null &&
-              (collection.contract?.trim().toLowerCase() ?? null) === normalizedSelected
+              (collection.contract?.trim().toLowerCase() ?? null) ===
+                normalizedSelected
             }
           />
         ))}
@@ -100,37 +105,45 @@ export function XtdhCollectionsList({
 
 function CollectionsSkeleton() {
   return (
-    <ul className="tw-m-0 tw-flex tw-flex-col tw-gap-3 tw-p-0">
-      {SKELETON_INDICES.map((index) => (
-        <li
-          key={`skeleton-${index}`}
-          className="tw-list-none tw-animate-pulse tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4"
-        >
-          <div className="tw-flex tw-items-center tw-gap-3">
-            <div className="tw-h-14 tw-w-14 tw-rounded-xl tw-bg-iron-800" />
-            <div className="tw-flex-1 tw-space-y-2">
-              <div className="tw-h-4 tw-w-32 tw-rounded tw-bg-iron-800" />
-              <div className="tw-h-3 tw-w-48 tw-rounded tw-bg-iron-850" />
-            </div>
-          </div>
-          <div className="tw-mt-4 tw-grid tw-gap-3 sm:tw-grid-cols-2 xl:tw-grid-cols-4">
-            {SKELETON_METRIC_KEYS.map((metricKey) => (
-              <div key={metricKey} className="tw-space-y-2">
-                <div className="tw-h-3 tw-w-20 tw-rounded tw-bg-iron-800" />
-                <div className="tw-h-4 tw-w-24 tw-rounded tw-bg-iron-850" />
+    <div className="tw-px-6 tw-pb-6">
+      <ul className="tw-m-0 tw-flex tw-flex-col tw-gap-3 tw-p-0">
+        {SKELETON_INDICES.map((index) => (
+          <li
+            key={`skeleton-${index}`}
+            className="tw-list-none tw-animate-pulse tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4"
+          >
+            <div className="tw-flex tw-items-center tw-gap-3">
+              <div className="tw-h-14 tw-w-14 tw-rounded-lg tw-bg-iron-800" />
+              <div className="tw-flex-1 tw-space-y-2">
+                <div className="tw-h-4 tw-w-32 tw-rounded tw-bg-iron-800" />
+                <div className="tw-h-3 tw-w-48 tw-rounded tw-bg-iron-850" />
               </div>
-            ))}
-          </div>
-        </li>
-      ))}
-    </ul>
+            </div>
+            <div className="tw-mt-4 tw-grid tw-gap-3 sm:tw-grid-cols-2 xl:tw-grid-cols-4">
+              {SKELETON_METRIC_KEYS.map((metricKey) => (
+                <div key={metricKey} className="tw-space-y-2">
+                  <div className="tw-h-3 tw-w-20 tw-rounded tw-bg-iron-800" />
+                  <div className="tw-h-4 tw-w-24 tw-rounded tw-bg-iron-850" />
+                </div>
+              ))}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
 const SKELETON_INDICES = [0, 1, 2];
-const SKELETON_METRIC_KEYS = Array.from({ length: 9 }, (_, index) => `metric-${index}`);
+const SKELETON_METRIC_KEYS = Array.from(
+  { length: 9 },
+  (_, index) => `metric-${index}`
+);
 
-function getCollectionKey(collection: ApiXtdhCollection, fallbackIndex: number) {
+function getCollectionKey(
+  collection: ApiXtdhCollection,
+  fallbackIndex: number
+) {
   const normalizedContract = collection.contract?.trim().toLowerCase();
   if (normalizedContract) {
     return normalizedContract;

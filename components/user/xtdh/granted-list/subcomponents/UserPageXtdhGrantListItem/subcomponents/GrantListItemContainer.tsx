@@ -4,7 +4,7 @@ export function GrantListItemContainer({
   children,
 }: Readonly<{ children: ReactNode }>) {
   return (
-    <li className="tw-list-none tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4">
+    <li className="tw-list-none tw-py-6 tw-px-6">
       {children}
     </li>
   );

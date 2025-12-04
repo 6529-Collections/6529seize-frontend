@@ -13,7 +13,7 @@ export function XtdhTokensSkeleton() {
             className="tw-list-none tw-animate-pulse tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-4"
           >
             <div className="tw-flex tw-items-center tw-gap-3">
-              <div className="tw-h-12 tw-w-12 tw-rounded-xl tw-bg-iron-800" />
+              <div className="tw-h-12 tw-w-12 tw-rounded-lg tw-bg-iron-800" />
               <div className="tw-flex-1 tw-space-y-2">
                 <div className="tw-h-4 tw-w-32 tw-rounded tw-bg-iron-800" />
                 <div className="tw-h-3 tw-w-24 tw-rounded tw-bg-iron-850" />

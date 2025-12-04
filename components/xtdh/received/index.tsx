@@ -108,12 +108,12 @@ export default function XtdhReceivedSection({
   }
 
   return (
-    <section className="tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-6 tw-space-y-6">
-      <header>
+    <section className="tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-space-y-6">
+      <header className="tw-px-6 tw-pt-6">
         <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
           {isViewingTokens ? "Received xTDH Tokens" : "Received xTDH Collections"}
         </h2>
-        <p className="tw-mt-1 tw-text-sm tw-text-iron-400">
+        <p className="tw-mt-1 tw-text-sm tw-text-iron-400 tw-mb-0">
           {description}
         </p>
       </header>
@@ -150,7 +150,7 @@ export default function XtdhReceivedSection({
             isIdentityScoped={isIdentityScoped}
           />
           {showLoadMore ? (
-            <div className="tw-flex tw-justify-center">
+            <div className="tw-flex tw-justify-center tw-px-6 tw-pb-6">
               <button
                 type="button"
                 onClick={handleLoadMore}

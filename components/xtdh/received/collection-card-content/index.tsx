@@ -101,15 +101,17 @@ export function XtdhReceivedCollectionCard({
   const content = (
     <div
       className={clsx(
-        "tw-flex tw-w-full tw-flex-col tw-items-stretch tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-4 tw-text-left tw-shadow-inner tw-shadow-black/20 tw-transition-colors",
-        interactionMode === "button" && "desktop-hover:hover:tw-bg-iron-900/80",
-        isSelected && "tw-border-primary-500",
+        "tw-flex tw-w-full tw-flex-col tw-items-stretch tw-text-left tw-transition-colors",
+        interactionMode === "static"
+          ? "tw-rounded-xl tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-800 tw-p-4"
+          : "tw-py-6 tw-px-6 desktop-hover:hover:tw-bg-iron-900",
+        isSelected && "tw-bg-iron-900/50",
         !isSelectable && interactionMode === "button" && "tw-cursor-not-allowed tw-opacity-70"
       )}
     >
       <header className="tw-flex tw-flex-col md:tw-flex-row tw-items-start tw-justify-between tw-gap-x-3 tw-gap-y-6">
         <div className="tw-flex tw-flex-col sm:tw-flex-row tw-min-w-0 tw-flex-1 sm:tw-items-center tw-gap-3">
-          <div className="tw-relative tw-h-16 tw-w-16 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-xl tw-bg-iron-800">
+          <div className="tw-relative tw-h-16 tw-w-16 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800">
             {imageUrl ? (
               <Image
                 src={imageUrl}
@@ -135,7 +137,7 @@ export function XtdhReceivedCollectionCard({
               >
                 {secondaryLabel}
               </p>
-              <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-semibold tw-uppercase tw-text-iron-200">
+              <span className="tw-inline-flex tw-items-center tw-rounded tw-bg-white/5 tw-border tw-border-solid tw-border-white/10 tw-px-2 tw-py-1 tw-text-[10px] tw-font-bold tw-uppercase tw-text-iron-400">
                 {tokenTypeLabel}
               </span>
             </div>
@@ -143,7 +145,7 @@ export function XtdhReceivedCollectionCard({
         </div>
         <XtdhRatePill rateLabel={xtdhRateLabel} totalLabel={xtdhValueLabel} />
       </header>
-      <dl className="tw-mt-6 md:tw-mt-4 tw-grid tw-gap-4 sm:tw-grid-cols-3">
+      <dl className="tw-mt-6 md:tw-mt-4 md:tw-ml-20 tw-grid tw-gap-x-6 tw-gap-y-4 sm:tw-grid-cols-2 md:tw-grid-cols-3 tw-mb-0">
         <CollectionMetric label="Total supply" value={totalSupplyLabel} />
         <CollectionMetric label="Active tokens" value={activeTokensGrantedLabel} />
         <CollectionMetric label="Tokens granted" value={totalTokensGrantedLabel} />
@@ -189,7 +191,7 @@ export function CollectionMetric({
     <div
       className={clsx("tw-flex tw-flex-col tw-text-left", className)}
     >
-      <dt className="tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500 tw-mb-1">
+      <dt className="tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500 tw-mb-1.5">
         {label}
       </dt>
       <dd className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
