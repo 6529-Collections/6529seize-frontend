@@ -267,6 +267,9 @@ export default function UserPageCollected({
       },
     ];
 
+    const isSwitchingFromNetwork =
+      filters.collection === CollectedCollectionType.NETWORK;
+
     if (
       collection &&
       collection !== CollectedCollectionType.NETWORK &&
@@ -286,6 +289,15 @@ export default function UserPageCollected({
       items.push({
         name: "sortBy",
         value: CollectionSort.XTDH,
+      });
+      items.push({
+        name: "sortDirection",
+        value: SortDirection.DESC,
+      });
+    } else if (isSwitchingFromNetwork) {
+      items.push({
+        name: "sortBy",
+        value: CollectionSort.TOKEN_ID,
       });
       items.push({
         name: "sortDirection",
