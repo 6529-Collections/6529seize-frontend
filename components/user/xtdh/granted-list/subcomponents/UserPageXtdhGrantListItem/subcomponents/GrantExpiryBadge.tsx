@@ -1,12 +1,20 @@
-import type { ReactNode } from "react";
+import { formatDateTime } from "@/components/user/xtdh/utils/xtdhGrantFormatters";
 
 export function GrantExpiryBadge({
-  value,
-}: Readonly<{ value: ReactNode }>) {
+  validUntil,
+}: Readonly<{ validUntil: number | string | null | undefined }>) {
+  if (!validUntil) {
+    return null;
+  }
+
+  const date = new Date(validUntil);
+  date.setDate(date.getDate() - 1);
+  const label = formatDateTime(date.getTime());
+
   return (
     <div className="tw-flex tw-items-center tw-gap-1.5 tw-text-xs">
-      <span className="tw-text-iron-500">Expires</span>
-      <span className="tw-font-medium tw-text-iron-300">{value}</span>
+      <span className="tw-text-iron-500">Last grant</span>
+      <span className="tw-font-medium tw-text-iron-300">{label}</span>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { formatStatFloor } from "@/helpers/Helpers";
 
 
+
 interface UserXtdhStatsProps {
   readonly generationRate: number;
   readonly incomingRate: number;

@@ -36,7 +36,7 @@ export function useXtdhCollectionsFilters(): XtdhCollectionsFiltersResult {
     [searchParams]
   );
   const apiOrder: XtdhCollectionsOrder =
-    activeSortDirection === SortDirection.ASC ? "asc" : "desc";
+    activeSortDirection === SortDirection.ASC ? "ASC" : "DESC";
 
   const updateQueryParams = useCallback(
     (sort: XtdhCollectionsSortField, direction: SortDirection) => {

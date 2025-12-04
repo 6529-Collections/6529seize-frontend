@@ -19,7 +19,7 @@ export default function UserPageXtdhGranted({
       {canGrant && (
         <section className="tw-flex tw-flex-col tw-gap-4 tw-mt-6 tw-pt-6 tw-border-t tw-border-iron-700">
           <header className="tw-pl-4 tw-pr-4 lg:tw-pl-6 lg:tw-pr-6">
-            <h2 className="tw-text-base tw-font-semibold tw-text-iron-100 tw-m-0">
+            <h2 className="tw-text-xl tw-font-bold tw-text-iron-100 tw-m-0">
               Create New Grant
             </h2>
           </header>

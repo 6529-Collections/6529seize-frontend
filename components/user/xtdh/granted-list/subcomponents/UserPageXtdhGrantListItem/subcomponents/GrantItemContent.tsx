@@ -46,7 +46,7 @@ export function GrantItemContent({
           </div>
         </div>
         <div className="tw-flex tw-items-center tw-gap-3">
-          <GrantExpiryBadge value={details.validUntilLabel} />
+          <GrantExpiryBadge validUntil={typeof validTo === "number" ? validTo : null} />
           <StatusBadge
             status={status}
             validFrom={validFrom}

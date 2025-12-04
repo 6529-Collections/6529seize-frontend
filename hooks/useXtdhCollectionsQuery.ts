@@ -13,7 +13,7 @@ import type { ApiXTdhCollectionsPage } from "@/generated/models/ApiXTdhCollectio
 import { commonApiFetch } from "@/services/api/common-api";
 
 export type XtdhCollectionsSortField = "xtdh" | "xtdh_rate";
-export type XtdhCollectionsOrder = "asc" | "desc";
+export type XtdhCollectionsOrder = "ASC" | "DESC";
 
 export interface UseXtdhCollectionsQueryParams {
   readonly identity?: string | null;
@@ -39,7 +39,7 @@ export type UseXtdhCollectionsQueryResult = UseInfiniteQueryResult<
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD: XtdhCollectionsSortField = "xtdh";
-const DEFAULT_ORDER: XtdhCollectionsOrder = "desc";
+const DEFAULT_ORDER: XtdhCollectionsOrder = "DESC";
 const DEFAULT_STALE_TIME = 30_000;
 
 export function useXtdhCollectionsQuery({
@@ -58,7 +58,7 @@ export function useXtdhCollectionsQuery({
   const normalizedPageSize = Number.isFinite(pageSize) && pageSize > 0
     ? Math.floor(pageSize)
     : DEFAULT_PAGE_SIZE;
-  const normalizedOrder: XtdhCollectionsOrder = order === "asc" ? "asc" : "desc";
+  const normalizedOrder: XtdhCollectionsOrder = order === "ASC" ? "ASC" : "DESC";
 
   const queryKey = useMemo(
     () => [

@@ -25,7 +25,7 @@ export function GrantItemError({
           </p>
         </div>
         <div className="tw-flex tw-items-center tw-gap-3">
-          <GrantExpiryBadge value={details.validUntilLabel} />
+          <GrantExpiryBadge validUntil={validTo} />
           <StatusBadge
             status={status}
             validFrom={validFrom}

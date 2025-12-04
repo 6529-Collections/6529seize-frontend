@@ -37,7 +37,7 @@ export function useXtdhTokensFilters(): XtdhTokensFiltersResult {
     [searchParams]
   );
   const apiOrder: XtdhTokensOrder =
-    activeSortDirection === SortDirection.ASC ? "asc" : "desc";
+    activeSortDirection === SortDirection.ASC ? "ASC" : "DESC";
 
   const updateQueryParams = useCallback(
     (sort: XtdhTokensSortField, direction: SortDirection) => {
