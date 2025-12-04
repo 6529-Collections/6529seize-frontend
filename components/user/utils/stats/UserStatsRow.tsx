@@ -59,7 +59,7 @@ export default function UserStatsRow({
         <div className="tw-text-iron-600 tw-mx-3">|</div>
 
         <Link
-          href="/xtdh"
+          href={`/${routeHandle}/xtdh`}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
           <span className="tw-text-base tw-font-semibold tw-text-iron-50">

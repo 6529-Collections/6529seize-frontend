@@ -108,7 +108,7 @@ export default function XtdhReceivedSection({
   }
 
   return (
-    <section className="tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-4 tw-space-y-4">
+    <section className="tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-6 tw-space-y-6">
       <header>
         <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
           {isViewingTokens ? "Received xTDH Tokens" : "Received xTDH Collections"}

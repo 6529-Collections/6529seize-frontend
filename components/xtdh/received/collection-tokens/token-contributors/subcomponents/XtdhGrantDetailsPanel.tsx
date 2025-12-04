@@ -138,7 +138,7 @@ export function XtdhGrantDetailsPanel({
             </div>
           </div>
           <div className="tw-flex tw-items-center tw-gap-3">
-            <GrantExpiryBadge value={viewModel.validUntilLabel} />
+            <GrantExpiryBadge validUntil={grant.valid_to} />
             <StatusBadge
               status={grant.status}
               validFrom={grant.valid_from}

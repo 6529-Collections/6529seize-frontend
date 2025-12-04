@@ -18,11 +18,11 @@ export function XtdhRatePill({
         className
       )}
     >
-      <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-primary-500/40 tw-bg-primary-500/10 tw-px-3 tw-py-1 tw-text-sm tw-font-semibold tw-text-primary-100">
-        {`${rateLabel} / day`}
+      <span className="tw-text-sm tw-font-medium tw-text-iron-500">
+        <span className="tw-tabular-nums">{rateLabel}</span> / day
       </span>
-      <span className="tw-text-sm tw-font-semibold tw-text-iron-100 tw-tabular-nums tw-min-w-[120px]">
-        Total {totalLabel} xTDH
+      <span className="tw-text-sm tw-font-semibold tw-text-iron-100 tw-min-w-[120px]">
+        Total <span className="tw-tabular-nums">{totalLabel}</span> xTDH
       </span>
     </div>
   );

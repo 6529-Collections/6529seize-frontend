@@ -10,6 +10,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import UserPageXtdhGranted from "./UserPageXtdhGranted";
 import UserPageXtdhStatsHeader from "./UserPageXtdhStatsHeader";
 import UserPageXtdhReceived from "@/components/xtdh/user/received";
+import { UserXtdhTestModeBanner } from "./UserXtdhTestModeBanner";
 
 type XtdhViewFilter = "granted" | "received";
 
@@ -125,6 +126,7 @@ export default function UserPageXtdh({
 
   return (
     <div className="tailwind-scope tw-flex tw-flex-col tw-gap-6">
+      <UserXtdhTestModeBanner />
       <UserPageXtdhStatsHeader
         profileId={statsProfileId}
         onOutboundClick={canGrant ? handleOutboundClick : undefined}

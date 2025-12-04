@@ -45,8 +45,8 @@ const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 25;
 const DEFAULT_STALE_TIME = 30_000;
 const SORT_MAP: Record<SortDirection, XtdhTokensOrder> = {
-  [SortDirection.ASC]: "asc",
-  [SortDirection.DESC]: "desc",
+  [SortDirection.ASC]: "ASC",
+  [SortDirection.DESC]: "DESC",
 };
 
 export function useXtdhTokenContributorsQuery({
@@ -69,7 +69,7 @@ export function useXtdhTokenContributorsQuery({
     Number.isFinite(pageSize) && pageSize > 0
       ? Math.floor(pageSize)
       : DEFAULT_PAGE_SIZE;
-  const normalizedOrder: XtdhTokensOrder = order === "asc" ? "asc" : "desc";
+  const normalizedOrder: XtdhTokensOrder = order === "ASC" ? "ASC" : "DESC";
 
   const queryKey = useMemo(
     () => [

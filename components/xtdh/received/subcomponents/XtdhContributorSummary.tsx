@@ -14,23 +14,23 @@ export function XtdhContributorSummary({
   return (
     <dl
       className={clsx(
-        "tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-1 tw-text-left sm:tw-self-center",
+        "tw-grid sm:tw-grid-cols-3 lg:tw-grid-cols-2 tw-gap-4 tw-text-left lg:tw-self-center tw-mb-0 tw-mt-2 lg:tw-mt-0",
         className
       )}
     >
-      <div className="tw-flex tw-flex-col tw-gap-1">
-        <dt className="tw-m-0 tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-500">
+      <div className="tw-flex tw-flex-col">
+        <dt className="tw-m-0 tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500 tw-mb-1">
           Active contributors
         </dt>
-        <dd className="tw-m-0 tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-100">
+        <dd className="tw-m-0 tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-50">
           {activeCount}
         </dd>
       </div>
-      <div className="tw-flex tw-flex-col tw-gap-1">
-        <dt className="tw-m-0 tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-500">
+      <div className="tw-flex tw-flex-col">
+        <dt className="tw-m-0 tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500 tw-mb-1">
           Contributors
         </dt>
-        <dd className="tw-m-0 tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-100">
+        <dd className="tw-m-0 tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-50">
           {totalCount}
         </dd>
       </div>

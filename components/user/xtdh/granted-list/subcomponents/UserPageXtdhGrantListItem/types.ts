@@ -20,7 +20,7 @@ export interface GrantDetails {
   readonly tdhRatePerTokenHint?: string | null;
   readonly totalGrantedLabel: ReactNode;
   readonly validFromLabel: ReactNode;
-  readonly validUntilLabel: ReactNode;
+
 }
 
 export type GrantItemVariant = "contract" | "error";

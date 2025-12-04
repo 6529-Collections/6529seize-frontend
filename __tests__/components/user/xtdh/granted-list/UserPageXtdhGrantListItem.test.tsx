@@ -7,6 +7,9 @@ import { ApiXTdhGrantTargetChain } from "@/generated/models/ApiXTdhGrantTargetCh
 import { useContractOverviewQuery } from "@/hooks/useAlchemyNftQueries";
 import type { ContractOverview } from "@/types/nft";
 
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+
 jest.mock("@/hooks/useAlchemyNftQueries", () => ({
   useContractOverviewQuery: jest.fn(),
 }));
@@ -15,12 +18,7 @@ jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn().mockReturnValue({ setToast: jest.fn() }),
 }));
 
-jest.mock("@/components/react-query-wrapper/ReactQueryWrapper", () => ({
-  ReactQueryWrapperContext: {
-    Consumer: (props: any) => props.children({ invalidateIdentityTdhStats: jest.fn() }),
-  },
-  useReactQueryWrapper: () => ({ invalidateIdentityTdhStats: jest.fn() }),
-}));
+// Removed mock for ReactQueryWrapper
 
 type Grant = ApiXTdhGrantsPage["data"][number];
 
@@ -34,6 +32,29 @@ const mockedUseContractOverviewQuery =
   useContractOverviewQuery as jest.MockedFunction<
     typeof useContractOverviewQuery
   >;
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
+
+const mockReactQueryWrapperContext = {
+  invalidateIdentityTdhStats: jest.fn(),
+  // Add other required properties if needed, or cast to any if strict type checking allows
+} as unknown as React.ContextType<typeof ReactQueryWrapperContext>;
+
+const renderWithProviders = (ui: React.ReactNode) => {
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <ReactQueryWrapperContext.Provider value={mockReactQueryWrapperContext}>
+        {ui}
+      </ReactQueryWrapperContext.Provider>
+    </QueryClientProvider>
+  );
+};
 
 describe("UserPageXtdhGrantListItem", () => {
   beforeEach(() => {
@@ -53,7 +74,7 @@ describe("UserPageXtdhGrantListItem", () => {
       error_details: "Token grant failed because the snapshot already expired.",
     });
 
-    render(<UserPageXtdhGrantListItem grant={grant} isSelf={true} />);
+    renderWithProviders(<UserPageXtdhGrantListItem grant={grant} isSelf={true} />);
 
     expect(screen.getByText("Error details")).toBeInTheDocument();
     expect(
@@ -68,7 +89,7 @@ describe("UserPageXtdhGrantListItem", () => {
       error_details: "   ",
     });
 
-    render(<UserPageXtdhGrantListItem grant={grant} isSelf={true} />);
+    renderWithProviders(<UserPageXtdhGrantListItem grant={grant} isSelf={true} />);
 
     expect(screen.queryByText("Error details")).not.toBeInTheDocument();
   });
@@ -79,12 +100,25 @@ describe("UserPageXtdhGrantListItem", () => {
       valid_to: null,
     });
 
-    render(<UserPageXtdhGrantListItem grant={grant} isSelf={true} />);
+    renderWithProviders(<UserPageXtdhGrantListItem grant={grant} isSelf={true} />);
 
     expect(screen.getByText("Valid from")).toBeInTheDocument();
     expect(screen.getByText("Immediately")).toBeInTheDocument();
-    expect(screen.getByText("Expires")).toBeInTheDocument();
-    expect(screen.getByText("No expiry")).toBeInTheDocument();
+    expect(screen.queryByText("Expires")).not.toBeInTheDocument();
+    expect(screen.queryByText("Last grant")).not.toBeInTheDocument();
+  });
+
+  it("shows 'Last grant' and adjusted date when valid_to is present", () => {
+    const validTo = new Date("2025-12-04T12:00:00Z").getTime();
+    const grant = createGrant({
+      valid_from: Date.now(),
+      valid_to: validTo,
+    });
+
+    renderWithProviders(<UserPageXtdhGrantListItem grant={grant} isSelf={true} />);
+
+    // Should show "Last grant"
+    expect(screen.getByText("Last grant")).toBeInTheDocument();
   });
 });
 

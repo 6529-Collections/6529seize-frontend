@@ -16,7 +16,7 @@ export default function UserPageCollectedFiltersNetworkCollection({
     identity,
     pageSize: 100, // Fetch enough collections
     sortField: "xtdh",
-    order: "desc",
+    order: "DESC",
   });
 
   const items: CommonSelectItem<string | null>[] = useMemo(() => {

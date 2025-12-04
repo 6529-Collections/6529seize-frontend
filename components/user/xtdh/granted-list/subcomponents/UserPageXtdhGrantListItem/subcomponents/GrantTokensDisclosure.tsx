@@ -130,13 +130,11 @@ function renderGrantTokensDisclosureBody(
         chain={chain}
         ranges={tokenRanges}
         scrollKey={`grant-token-list-${grantId}`}
-        className="tw-rounded-md tw-border tw-border-iron-800 tw-bg-iron-900"
-        scrollContainerClassName="tw-max-h-[480px] tw-overflow-y-auto"
+        className=""
+        scrollContainerClassName="tw-max-h-[480px] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
         onEndReached={onEndReached}
         endReachedOffset={END_REACHED_OFFSET}
         layout="grid"
-        columns={3}
-
         tokens={mappedTokens}
       />
       {isFetchingNextPage ? <GrantTokensLoadingMore /> : null}

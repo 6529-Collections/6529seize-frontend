@@ -5,11 +5,11 @@ export function GrantDetailsRow({
   value,
 }: Readonly<{ label: string; value: ReactNode }>) {
   return (
-    <div className="tw-flex tw-flex-col tw-gap-0.5">
-      <dt className="tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-500">
+    <div className="tw-flex tw-flex-col">
+      <dt className="tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500 tw-mb-1">
         {label}
       </dt>
-      <dd className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
+      <dd className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
         {value}
       </dd>
     </div>

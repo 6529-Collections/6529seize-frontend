@@ -40,7 +40,7 @@ export function GridRow({
         return (
           <div
             key={token.decimalId}
-            className="tw-flex tw-flex-col tw-rounded-lg tw-bg-iron-950 tw-border tw-border-iron-800 tw-overflow-hidden"
+            className="tw-flex tw-flex-col tw-rounded-lg tw-overflow-hidden"
           >
             <div className="tw-aspect-square tw-w-full tw-overflow-hidden tw-bg-iron-900">
               <TokenThumbnail
