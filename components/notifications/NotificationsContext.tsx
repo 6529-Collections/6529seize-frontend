@@ -1,23 +1,73 @@
 "use client";
 
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import useCapacitor from "@/hooks/useCapacitor";
+import { commonApiPost } from "@/services/api/common-api";
+import { Device, DeviceInfo } from "@capacitor/device";
+import {
+  PushNotifications,
+  PushNotificationSchema,
+} from "@capacitor/push-notifications";
+import * as Sentry from "@sentry/nextjs";
+import { useRouter } from "next/navigation";
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
   useRef,
 } from "react";
-import {
-  PushNotifications,
-  PushNotificationSchema,
-} from "@capacitor/push-notifications";
-import { Device, DeviceInfo } from "@capacitor/device";
-import { useRouter } from "next/navigation";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useAuth } from "../auth/Auth";
-import { commonApiPost } from "@/services/api/common-api";
 import { getStableDeviceId } from "./stable-device-id";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+
+const MAX_REGISTRATION_RETRIES = 3;
+const INITIAL_RETRY_DELAY_MS = 1000;
+const MAX_RETRY_DELAY_MS = 5000;
+const IOS_INITIALIZATION_DELAY_MS = 500;
+
+const DELEGATE_ERROR_PATTERNS = [
+  "capacitorDidRegisterForRemoteNotifications",
+  "didRegisterForRemoteNotifications",
+];
+
+const isDelegateError = (error: unknown): boolean => {
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  return DELEGATE_ERROR_PATTERNS.some((pattern) =>
+    errorMessage.includes(pattern)
+  );
+};
+
+const registerWithRetry = async (
+  maxRetries = MAX_REGISTRATION_RETRIES
+): Promise<void> => {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      await PushNotifications.register();
+      return;
+    } catch (registerError: unknown) {
+      const isDelegate = isDelegateError(registerError);
+      const hasRetriesLeft = attempt < maxRetries - 1;
+
+      if (isDelegate && hasRetriesLeft) {
+        const delay = Math.min(
+          INITIAL_RETRY_DELAY_MS * Math.pow(2, attempt),
+          MAX_RETRY_DELAY_MS
+        );
+        console.warn(
+          `iOS push notification registration attempt ${
+            attempt + 1
+          } failed. Retrying in ${delay}ms...`,
+          registerError
+        );
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        continue;
+      }
+
+      throw registerError;
+    }
+  }
+};
 
 type NotificationsContextType = {
   removeWaveDeliveredNotifications: (waveId: string) => Promise<void>;
@@ -40,179 +90,215 @@ const redirectConfig = {
   },
 };
 
+interface NotificationData {
+  redirect?: keyof typeof redirectConfig;
+  profile_id?: string;
+  path?: string;
+  handle?: string;
+  id?: string;
+  wave_id?: string;
+  drop_id?: string;
+  [key: string]: unknown;
+}
+
 export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { isCapacitor, isIos } = useCapacitor();
+  const { isCapacitor, isIos, isActive } = useCapacitor();
   const { connectedProfile } = useAuth();
   const router = useRouter();
   const initializationRef = useRef<string | null>(null);
 
-  useEffect(() => {
-    const profileId = connectedProfile?.id ?? null;
-    if (
-      isCapacitor &&
-      initializationRef.current !== profileId
-    ) {
-      initializationRef.current = profileId;
-      initializeNotifications(connectedProfile ?? undefined);
-    }
-  }, [connectedProfile, isCapacitor]);
+  const removeDeliveredNotifications = useCallback(
+    async (notifications: PushNotificationSchema[]) => {
+      if (isIos) {
+        try {
+          await PushNotifications.removeDeliveredNotifications({
+            notifications,
+          });
+        } catch (error) {
+          console.error("Error removing delivered notifications", error);
+        }
+      }
+    },
+    [isIos]
+  );
 
-  const initializeNotifications = async (profile?: ApiIdentity) => {
-    try {
+  const handlePushNotificationAction = useCallback(
+    async (
+      routerInstance: ReturnType<typeof useRouter>,
+      notification: PushNotificationSchema,
+      profileInstance?: ApiIdentity
+    ) => {
+      console.log("Push notification action performed", notification);
+      const notificationData = notification.data ?? {};
+      const notificationProfileId = notificationData.profile_id;
+
+      if (
+        profileInstance &&
+        notificationProfileId &&
+        notificationProfileId !== profileInstance.id
+      ) {
+        console.log("Notification profile id does not match connected profile");
+        return;
+      }
+
+      await removeDeliveredNotifications([notification]);
+
+      const redirectUrl = resolveRedirectUrl(notificationData);
+      if (redirectUrl) {
+        console.log("Redirecting to", redirectUrl);
+        routerInstance.push(redirectUrl);
+      } else {
+        console.log(
+          "No redirect url found in notification data",
+          notificationData
+        );
+      }
+    },
+    [removeDeliveredNotifications]
+  );
+
+  const initializePushNotifications = useCallback(
+    async (profile?: ApiIdentity) => {
+      try {
+        await PushNotifications.removeAllListeners();
+
+        const stableDeviceId = await getStableDeviceId();
+
+        const deviceInfo = await Device.getInfo();
+
+        await PushNotifications.addListener("registration", async (token) => {
+          await registerPushNotification(
+            stableDeviceId,
+            deviceInfo,
+            token.value,
+            profile
+          );
+        });
+
+        await PushNotifications.addListener("registrationError", (error) => {
+          console.error("Push registration error: ", error);
+          Sentry.captureException(error, {
+            tags: {
+              component: "NotificationsProvider",
+              operation: "pushRegistrationError",
+            },
+          });
+        });
+
+        await PushNotifications.addListener(
+          "pushNotificationReceived",
+          (notification) => {
+            console.log("Push notification received: ", notification);
+          }
+        );
+
+        await PushNotifications.addListener(
+          "pushNotificationActionPerformed",
+          async (action) => {
+            await handlePushNotificationAction(
+              router,
+              action.notification,
+              profile
+            );
+          }
+        );
+
+        const permStatus = await PushNotifications.requestPermissions();
+        console.log("Push permission status", permStatus);
+
+        if (permStatus.receive === "granted") {
+          if (isIos) {
+            await new Promise((resolve) =>
+              setTimeout(resolve, IOS_INITIALIZATION_DELAY_MS)
+            );
+          }
+          await registerWithRetry();
+        } else {
+          console.warn("Push notifications permission not granted");
+        }
+      } catch (error) {
+        console.error("Error in initializePushNotifications", error);
+        throw error;
+      }
+    },
+    [isIos, router, handlePushNotificationAction]
+  );
+
+  const initializeNotifications = useCallback(
+    async (profile?: ApiIdentity) => {
       if (isCapacitor) {
         console.log("Initializing push notifications");
         await initializePushNotifications(profile);
       }
-    } catch (error) {
-      console.error("Error initializing notifications", error);
+    },
+    [isCapacitor, initializePushNotifications]
+  );
+
+  useEffect(() => {
+    const profileId = connectedProfile?.id ?? null;
+    if (isCapacitor && isActive && initializationRef.current !== profileId) {
+      initializationRef.current = profileId;
+      initializeNotifications(connectedProfile ?? undefined).catch((error) => {
+        console.error("Failed to initialize push notifications", error);
+        Sentry.captureException(error, {
+          tags: {
+            component: "NotificationsProvider",
+            operation: "initializeNotifications",
+          },
+        });
+        initializationRef.current = null;
+      });
     }
-  };
+  }, [connectedProfile, isCapacitor, isActive, initializeNotifications]);
 
-  const initializePushNotifications = async (profile?: ApiIdentity) => {
-    try {
-      await PushNotifications.removeAllListeners();
-
-      const stableDeviceId = await getStableDeviceId();
-
-      const deviceInfo = await Device.getInfo();
-
-      await PushNotifications.addListener("registration", async (token) => {
-        registerPushNotification(
-          stableDeviceId,
-          deviceInfo,
-          token.value,
-          profile
-        );
-      });
-
-      await PushNotifications.addListener("registrationError", (error) => {
-        console.error("Push registration error: ", error);
-      });
-
-      await PushNotifications.addListener(
-        "pushNotificationReceived",
-        (notification) => {
-          console.log("Push notification received: ", notification);
-        }
-      );
-
-      await PushNotifications.addListener(
-        "pushNotificationActionPerformed",
-        async (action) => {
-          await handlePushNotificationAction(
-            router,
-            action.notification,
-            profile
-          );
-        }
-      );
-
-      const permStatus = await PushNotifications.requestPermissions();
-      console.log("Push permission status", permStatus);
-
-      if (permStatus.receive === "granted") {
-        if (isIos) {
-          await new Promise((resolve) => setTimeout(resolve, 500));
-        }
+  const removeWaveDeliveredNotifications = useCallback(
+    async (waveId: string) => {
+      if (isIos) {
         try {
-          await PushNotifications.register();
-        } catch (registerError: any) {
-          const errorMessage = registerError?.message || String(registerError);
-          if (
-            errorMessage.includes(
-              "capacitorDidRegisterForRemoteNotifications"
-            ) ||
-            errorMessage.includes("didRegisterForRemoteNotifications")
-          ) {
-            console.warn(
-              "iOS push notification registration callback issue. This may occur if the native delegate is not properly configured.",
-              registerError
-            );
-          } else {
-            throw registerError;
-          }
+          const deliveredNotifications =
+            await PushNotifications.getDeliveredNotifications();
+          const waveNotifications = deliveredNotifications.notifications.filter(
+            (notification) => notification.data?.wave_id === waveId
+          );
+          await removeDeliveredNotifications(waveNotifications);
+        } catch (error) {
+          console.error("Error removing wave delivered notifications", error);
+          Sentry.captureException(error, {
+            tags: {
+              component: "NotificationsProvider",
+              operation: "removeWaveDeliveredNotifications",
+            },
+          });
         }
-      } else {
-        console.warn("Push notifications permission not granted");
       }
-    } catch (error) {
-      console.error("Error in initializePushNotifications", error);
-    }
-  };
+    },
+    [isIos, removeDeliveredNotifications]
+  );
 
-  const handlePushNotificationAction = async (
-    router: ReturnType<typeof useRouter>,
-    notification: PushNotificationSchema,
-    profile?: ApiIdentity
-  ) => {
-    console.log("Push notification action performed", notification);
-    const notificationData = notification.data;
-    const notificationProfileId = notificationData.profile_id;
-
-    if (
-      profile &&
-      notificationProfileId &&
-      notificationProfileId !== profile.id
-    ) {
-      console.log("Notification profile id does not match connected profile");
-      return;
-    }
-
-    void removeDeliveredNotifications([notification]);
-
-    const redirectUrl = resolveRedirectUrl(notificationData);
-    if (redirectUrl) {
-      console.log("Redirecting to", redirectUrl);
-      router.push(redirectUrl);
-    } else {
-      console.log(
-        "No redirect url found in notification data",
-        notificationData
-      );
-    }
-  };
-
-  const removeDeliveredNotifications = async (
-    notifications: PushNotificationSchema[]
-  ) => {
-    if (isIos) {
-      try {
-        await PushNotifications.removeDeliveredNotifications({ notifications });
-      } catch (error) {
-        console.error("Error removing delivered notifications", error);
-      }
-    }
-  };
-
-  const removeWaveDeliveredNotifications = async (waveId: string) => {
-    if (isIos) {
-      const deliveredNotifications =
-        await PushNotifications.getDeliveredNotifications();
-      const waveNotifications = deliveredNotifications.notifications.filter(
-        (notification) => notification.data.wave_id === waveId
-      );
-      await removeDeliveredNotifications(waveNotifications);
-    }
-  };
-
-  const removeAllDeliveredNotifications = async () => {
+  const removeAllDeliveredNotifications = useCallback(async () => {
     if (isIos) {
       try {
         await PushNotifications.removeAllDeliveredNotifications();
       } catch (error) {
         console.error("Error removing all delivered notifications", error);
+        Sentry.captureException(error, {
+          tags: {
+            component: "NotificationsProvider",
+            operation: "removeAllDeliveredNotifications",
+          },
+        });
       }
     }
-  };
+  }, [isIos]);
 
   const value = useMemo(
     () => ({
       removeWaveDeliveredNotifications,
       removeAllDeliveredNotifications,
     }),
-    []
+    [removeWaveDeliveredNotifications, removeAllDeliveredNotifications]
   );
 
   return (
@@ -241,10 +327,16 @@ const registerPushNotification = async (
     console.log("Push registration success", response);
   } catch (error) {
     console.error("Push registration error", error);
+    Sentry.captureException(error, {
+      tags: {
+        component: "NotificationsProvider",
+        operation: "registerPushNotification",
+      },
+    });
   }
 };
 
-const resolveRedirectUrl = (notificationData: any) => {
+const resolveRedirectUrl = (notificationData: NotificationData) => {
   const { redirect, ...params } = notificationData;
 
   if (!redirect) {
@@ -255,7 +347,7 @@ const resolveRedirectUrl = (notificationData: any) => {
     return null;
   }
 
-  const resolveFn = redirectConfig[redirect as keyof typeof redirectConfig];
+  const resolveFn = redirectConfig[redirect];
 
   if (!resolveFn) {
     console.error("Unknown redirect type", redirect);
@@ -263,7 +355,7 @@ const resolveRedirectUrl = (notificationData: any) => {
   }
 
   try {
-    return resolveFn(params);
+    return (resolveFn as (params: Record<string, unknown>) => string)(params);
   } catch (error) {
     console.error("Error resolving redirect URL", error);
     return null;
