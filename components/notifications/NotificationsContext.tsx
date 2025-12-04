@@ -58,7 +58,6 @@ const registerWithRetry = async (
           registerError
         );
         await new Promise((resolve) => setTimeout(resolve, delay));
-        continue;
       }
 
       throw registerError;
@@ -86,6 +85,17 @@ const redirectConfig = {
     return drop_id ? `${base}&serialNo=${drop_id}` : base;
   },
 };
+
+interface NotificationData {
+  redirect?: keyof typeof redirectConfig;
+  profile_id?: string;
+  path?: string;
+  handle?: string;
+  id?: string;
+  wave_id?: string;
+  drop_id?: string;
+  [key: string]: unknown;
+}
 
 export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -322,7 +332,7 @@ const registerPushNotification = async (
   }
 };
 
-const resolveRedirectUrl = (notificationData: any) => {
+const resolveRedirectUrl = (notificationData: NotificationData) => {
   const { redirect, ...params } = notificationData;
 
   if (!redirect) {
@@ -341,7 +351,7 @@ const resolveRedirectUrl = (notificationData: any) => {
   }
 
   try {
-    return resolveFn(params);
+    return (resolveFn as (params: Record<string, unknown>) => string)(params);
   } catch (error) {
     console.error("Error resolving redirect URL", error);
     return null;
