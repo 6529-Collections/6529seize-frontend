@@ -11,6 +11,7 @@ interface GrantTokensPanelProps {
   readonly contractAddress: `0x${string}` | null;
   readonly grantId: string;
   readonly state: TokenPanelState;
+  readonly collectionName?: string;
 }
 
 export function GrantTokensPanel({
@@ -18,6 +19,7 @@ export function GrantTokensPanel({
   contractAddress,
   grantId,
   state,
+  collectionName,
 }: Readonly<GrantTokensPanelProps>) {
   if (state.type === "all") {
     return (
@@ -38,6 +40,7 @@ export function GrantTokensPanel({
       grantId={grantId}
       tokensCount={tokensCount}
       tokensCountLabel={state.label}
+      collectionName={collectionName}
     />
   );
 }

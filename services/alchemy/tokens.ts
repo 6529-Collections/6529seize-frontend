@@ -85,6 +85,7 @@ export async function getTokensMetadata(
       body: JSON.stringify(body),
       signal,
     });
+ 
     if (!response.ok) {
       throw new Error("Failed to fetch token metadata");
     }

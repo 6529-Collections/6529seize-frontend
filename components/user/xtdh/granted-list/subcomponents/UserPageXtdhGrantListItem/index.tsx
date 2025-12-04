@@ -258,6 +258,7 @@ export function UserPageXtdhGrantListItem({
         contractAddress={contractAddress}
         grantId={grant.id}
         state={tokenState}
+        collectionName={grant.target_collection_name ?? undefined}
       />
       <CommonConfirmationModal
         isOpen={activeModal === "STOP"}

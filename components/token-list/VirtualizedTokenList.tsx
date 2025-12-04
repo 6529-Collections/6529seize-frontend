@@ -54,6 +54,7 @@ export interface VirtualizedTokenListProps {
   readonly endReachedOffset?: number;
   readonly layout?: "list" | "grid";
   readonly columns?: number;
+  readonly collectionName?: string;
 }
 
 function getTotalCount(ranges: TokenRange[]): number {
@@ -90,6 +91,7 @@ export function VirtualizedTokenList({
   endReachedOffset,
   layout = "list",
   columns = 3,
+  collectionName,
 }: Readonly<VirtualizedTokenListProps>) {
   const totalCount = useMemo(() => getTotalCount(ranges), [ranges]);
 
@@ -114,12 +116,13 @@ export function VirtualizedTokenList({
       emptyState={emptyState}
       layout={layout}
       columns={columns}
+      collectionName={collectionName}
     />
   );
 }
 
 type VirtualizedTokenListContentProps = Readonly<
-  Omit<VirtualizedTokenListProps, "emptyState"> & { totalCount: number; emptyState: ReactNode }
+  Omit<VirtualizedTokenListProps, "emptyState"> & { totalCount: number; emptyState: ReactNode; collectionName?: string }
 >;
 
 function VirtualizedTokenListContent({
@@ -141,6 +144,7 @@ function VirtualizedTokenListContent({
   emptyState,
   layout = "list",
   columns = 3,
+  collectionName,
 }: VirtualizedTokenListContentProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const initialOffset = usePersistentScrollOffset(scrollKey, scrollContainerRef);
@@ -244,6 +248,7 @@ function VirtualizedTokenListContent({
                     width: "100%",
                   }}
                   columns={columns}
+                  collectionName={collectionName}
                 />
               );
             }
@@ -447,7 +452,7 @@ function TokenRow({
         {action ? (
           <button
             type="button"
-            className="tw-rounded tw-border tw-border-iron-700 tw-bg-transparent tw-px-2 tw-py-1 tw-text-xs tw-text-iron-200 hover:tw-border-primary-500 hover:tw-text-white"
+            className="tw-rounded tw-border tw-border-iron-700 tw-bg-transparent tw-px-2 tw-py-1.5 tw-text-xs tw-text-iron-200 hover:tw-border-primary-500 hover:tw-text-white"
             onClick={() => action.onClick(token.tokenId, metadata)}
             aria-label={action.getAriaLabel?.(`#${token.decimalId}`) ?? action.label}
           >
@@ -467,6 +472,7 @@ type GridRowProps = Readonly<{
   action?: TokenListAction;
   positionStyle: CSSProperties;
   columns: number;
+  collectionName?: string;
 }>;
 
 function GridRow({
@@ -477,6 +483,7 @@ function GridRow({
   action,
   positionStyle,
   columns,
+  collectionName,
 }: GridRowProps) {
   return (
     <li
@@ -494,9 +501,9 @@ function GridRow({
         return (
           <div
             key={token.decimalId}
-            className="tw-flex tw-flex-col tw-gap-2 tw-rounded-lg tw-bg-iron-800/50 tw-p-3"
+            className="tw-flex tw-flex-col tw-rounded-lg tw-bg-iron-950 tw-border tw-border-iron-800 tw-overflow-hidden"
           >
-            <div className="tw-aspect-square tw-w-full tw-overflow-hidden tw-rounded-md">
+            <div className="tw-aspect-square tw-w-full tw-overflow-hidden tw-bg-iron-900">
               <TokenThumbnail
                 metadata={metadata}
                 decimalId={token.decimalId}
@@ -504,26 +511,35 @@ function GridRow({
                 hasError={hasMetadataError}
               />
             </div>
-            <div className="tw-flex tw-flex-col tw-gap-1">
-              <span className="tw-truncate tw-text-sm tw-font-medium tw-text-white">
-                #{token.decimalId}
-              </span>
-              {metadata?.name && (
-                <span className="tw-truncate tw-text-xs tw-text-iron-400">
-                  {metadata.name}
-                </span>
-              )}
+            <div className="tw-flex tw-flex-col tw-p-3 tw-gap-3">
+              <div className="tw-flex tw-items-center tw-justify-between tw-text-xs tw-text-iron-400">
+                <span className="tw-truncate">{collectionName ?? "Collection"}</span>
+                <span className="tw-font-mono">#{token.decimalId}</span>
+              </div>
+
+              <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
+                <div className="tw-font-medium tw-text-white tw-truncate">
+                  {metadata?.name ?? `Token #${token.decimalId}`}
+                </div>
+                <div className="tw-flex tw-gap-1 tw-text-xs tw-shrink-0">
+                  <span className="tw-text-iron-400">TDH</span>
+                  <span className="tw-text-white">4,756</span>
+                </div>
+              </div>
             </div>
+
             {renderTokenExtra?.(token.tokenId, metadata)}
             {action ? (
-              <button
-                type="button"
-                className="tw-mt-auto tw-w-full tw-rounded tw-border tw-border-iron-700 tw-bg-transparent tw-px-2 tw-py-1.5 tw-text-xs tw-text-iron-200 hover:tw-border-primary-500 hover:tw-text-white"
-                onClick={() => action.onClick(token.tokenId, metadata)}
-                aria-label={action.getAriaLabel?.(`#${token.decimalId}`) ?? action.label}
-              >
-                {action.label}
-              </button>
+              <div className="tw-p-3 tw-pt-0">
+                <button
+                  type="button"
+                  className="tw-w-full tw-rounded tw-border tw-border-iron-700 tw-bg-transparent tw-px-2 tw-py-1.5 tw-text-xs tw-text-iron-200 hover:tw-border-primary-500 hover:tw-text-white"
+                  onClick={() => action.onClick(token.tokenId, metadata)}
+                  aria-label={action.getAriaLabel?.(`#${token.decimalId}`) ?? action.label}
+                >
+                  {action.label}
+                </button>
+              </div>
             ) : null}
           </div>
         );

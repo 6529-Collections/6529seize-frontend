@@ -38,9 +38,16 @@ describe("VirtualizedTokenList", () => {
   });
 
   it("renders grid layout when layout prop is 'grid'", () => {
-    const { container } = render(<VirtualizedTokenList {...defaultProps} layout="grid" />);
+    const { container } = render(
+      <VirtualizedTokenList
+        {...defaultProps}
+        layout="grid"
+        collectionName="Test Collection"
+      />
+    );
     // In grid mode, we still use ul but the items inside are different
     expect(container.querySelector("ul")).toBeInTheDocument();
+    expect(screen.getAllByText("Test Collection")[0]).toBeInTheDocument();
   });
 
   it("calculates total count correctly", () => {
