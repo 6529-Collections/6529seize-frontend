@@ -74,7 +74,7 @@ export default function CommonTabsTab<T, U = unknown>(
     <div
       className={clsx(
         "tw-p-[1px] tw-flex tw-rounded-lg",
-        fill ? "tw-flex-1 tw-min-w-0" : undefined,
+        fill ? "tw-flex-1" : undefined,
         isActive
           ? "tw-bg-gradient-to-b tw-from-iron-700 tw-to-iron-800"
           : undefined,
@@ -92,8 +92,8 @@ export default function CommonTabsTab<T, U = unknown>(
         onMouseEnter={() => !disabled && setShouldRotate(true)}
         onMouseLeave={() => !disabled && setShouldRotate(false)}
         className={`${dynamicClasses} ${disabled ? "tw-cursor-not-allowed tw-opacity-60" : ""
-          } ${fill ? "tw-flex-1 tw-min-w-0" : ""
-          } tw-whitespace-nowrap tw-px-3 tw-py-1.5 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center tw-gap-2`}>
+          } ${fill ? "tw-flex-1" : ""
+          } tw-whitespace-nowrap tw-px-3 tw-py-1.5 tw-text-sm tw-leading-5 tw-font-medium tw-border-0 tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center tw-gap-2`}>
         {item.label}
         {!!item.badge && item.badge > 0 && (
           <span className="tw-bg-primary-500 tw-text-white tw-text-[10px] tw-font-bold tw-px-1.5 tw-py-0.5 tw-rounded-full tw-min-w-[18px] tw-h-[18px] tw-flex tw-items-center tw-justify-center">
@@ -101,7 +101,7 @@ export default function CommonTabsTab<T, U = unknown>(
           </span>
         )}
         {sortDirection && (
-          <span className="-tw-mt-0.5 tw-ml-2">
+          <span className="-tw-mt-1">
             <CommonTableSortIcon
               direction={isActive ? sortDirection : SortDirection.DESC}
               isActive={isActive}
