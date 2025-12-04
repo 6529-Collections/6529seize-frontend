@@ -34,9 +34,9 @@ export default function WaveLeaderboardGalleryItemVotes({
       >
         {formatNumberWithCommas(current)}
       </span>
-      <DropVoteProgressing 
-        current={current} 
-        projected={drop.rating_prediction} 
+      <DropVoteProgressing
+        current={current}
+        projected={drop.rating_prediction}
         subtle={variant === 'subtle'}
       />
     </div>

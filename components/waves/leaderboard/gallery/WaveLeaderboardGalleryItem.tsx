@@ -148,98 +148,76 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
             />
           </div>
         </button>
-        <div className="tw-flex tw-flex-col tw-mt-2 tw-gap-y-2">
-          <div className="tw-flex tw-items-center tw-justify-between">
-            {/* Rank badge aligned to the left */}
-            <div>
-              {drop.rank !== undefined ? (
-                <WinnerDropBadge
-                  rank={drop.rank}
-                  decisionTime={drop.winning_context?.decision_time || null}
-                />
-              ) : (
-                <div className="tw-w-4"></div>
-              )}{" "}
-              {/* Empty space if no rank */}
-            </div>
-
-            {/* Author name aligned to the right */}
-            <div className="tw-flex tw-items-center">
-              {drop.author?.handle ? (
-                <UserProfileTooltipWrapper
-                  user={drop.author.handle ?? drop.author.id}
-                >
-                  <Link
-                    onClick={(e) => e.stopPropagation()}
-                    href={`/${drop.author?.handle}`}
-                    className="tw-text-sm tw-truncate tw-no-underline tw-font-medium tw-text-iron-200 desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline"
-                  >
-                    {drop.author?.handle}
-                  </Link>
-                </UserProfileTooltipWrapper>
-              ) : (
-                <span className="tw-text-sm tw-truncate tw-font-medium tw-text-iron-200">
-                  {" "}
-                </span>
-              )}
-            </div>
-          </div>
-          <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4">
+        <div className="tw-flex tw-flex-col tw-mt-2.5 tw-gap-y-1.5">
+          {/* Rank + Projected votes */}
+          <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-2">
+            {drop.rank !== undefined && (
+              <WinnerDropBadge
+                rank={drop.rank}
+                decisionTime={drop.winning_context?.decision_time || null}
+              />
+            )}
             <WaveLeaderboardGalleryItemVotes
               drop={drop}
               variant={artFocused ? "subtle" : "default"}
             />
-
-            <div className="tw-flex tw-items-center tw-gap-x-1.5">
+          </div>
+          {/* Art title */}
+          {drop.title && (
+            <p className="tw-mb-0 tw-text-[13px] tw-font-medium tw-text-iron-50 tw-truncate tw-leading-snug">
+              {drop.title}
+            </p>
+          )}
+          {/* Author */}
+          {drop.author?.handle && (
+            <UserProfileTooltipWrapper
+              user={drop.author.handle ?? drop.author.id}
+            >
+              <Link
+                onClick={(e) => e.stopPropagation()}
+                href={`/${drop.author?.handle}`}
+                className="tw-text-xs tw-truncate tw-no-underline tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-underline tw-transition-colors tw-duration-150"
+              >
+                {drop.author?.handle}
+              </Link>
+            </UserProfileTooltipWrapper>
+          )}
+          {/* Voters count + Your vote + Vote button */}
+          <div className="tw-flex tw-items-center tw-justify-between tw-pt-1">
+            <div className="tw-flex tw-items-center tw-gap-x-1">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
-                strokeWidth="2.25"
+                strokeWidth="1.5"
                 stroke="currentColor"
                 aria-hidden="true"
-                className="tw-size-4 tw-flex-shrink-0 tw-text-iron-500"
+                className="tw-size-3.5 tw-flex-shrink-0 tw-text-iron-600"
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"
+                  d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
                 />
               </svg>
-              <span className="tw-text-sm tw-font-medium tw-text-iron-500">
+              <span className="tw-text-xs tw-font-medium tw-text-iron-600">
                 {formatNumberWithCommas(drop.raters_count)}
               </span>
             </div>
-          </div>
-
-          <div className="tw-flex tw-items-center tw-justify-between">
-            <div>
+            <div className="tw-flex tw-items-center tw-gap-x-2.5">
               {hasUserVoted && (
-                <div className="tw-flex tw-items-center tw-gap-x-1.5 tw-rounded">
-                  <div className="tw-flex tw-items-baseline tw-gap-x-1">
-                    <span className="tw-text-xs tw-font-medium tw-text-iron-500">
-                      Your vote:
-                    </span>
-                    <span
-                      className={`tw-text-xs tw-font-semibold ${voteStyle}`}
-                    >
-                      {isNegativeVote && "-"}
-                      {formatNumberWithCommas(Math.abs(userVote))}{" "}
-                      <span className="tw-text-iron-500">
-                        {drop.wave.voting_credit_type}
-                      </span>
-                    </span>
-                  </div>
-                </div>
+                <span className={`tw-text-xs ${voteStyle}`}>
+                  You: {isNegativeVote && "-"}{formatNumberWithCommas(Math.abs(userVote))} {drop.wave.voting_credit_type}
+                </span>
+              )}
+              {canShowVote && (
+                <VotingModalButton
+                  drop={drop}
+                  onClick={handleVoteButtonClick}
+                  variant={artFocused ? "subtle" : "default"}
+                />
               )}
             </div>
-            {canShowVote && (
-              <VotingModalButton
-                drop={drop}
-                onClick={handleVoteButtonClick}
-                variant={artFocused ? "subtle" : "default"}
-              />
-            )}
           </div>
         </div>
 
