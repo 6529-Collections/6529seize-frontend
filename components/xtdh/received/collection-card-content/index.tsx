@@ -108,7 +108,7 @@ export function XtdhReceivedCollectionCard({
       )}
     >
       <header className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-3">
-        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-3">
+        <div className="tw-flex tw-flex-col md:tw-flex-row tw-min-w-0 tw-flex-1 tw-items-center tw-gap-3">
           <div className="tw-relative tw-h-14 tw-w-14 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-xl tw-bg-iron-800">
             {imageUrl ? (
               <Image

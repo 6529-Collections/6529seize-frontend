@@ -1,10 +1,14 @@
 "use client";
 
 import { useMemo } from "react";
+import { createBreakpoint } from "react-use";
 
 import type { VirtualizedTokenListProps } from "./types";
+
 import { getTotalCount } from "./utils";
 import { VirtualizedTokenListContent } from "./VirtualizedTokenListContent";
+
+const useBreakpoint = createBreakpoint({ LG: 1024, MD: 768, S: 0 });
 
 export type { VirtualizedTokenListProps } from "./types";
 
@@ -25,10 +29,14 @@ export function VirtualizedTokenList({
   onEndReached,
   endReachedOffset,
   layout = "list",
-  columns = 3,
+  columns: columnsProp,
 
   tokens,
 }: Readonly<VirtualizedTokenListProps>) {
+  const breakpoint = useBreakpoint();
+  const responsiveColumns = breakpoint === "LG" ? 3 : breakpoint === "MD" ? 2 : 1;
+  const columns = columnsProp ?? responsiveColumns;
+
   const totalCount = useMemo(() => getTotalCount(ranges, tokens), [ranges, tokens]);
 
   return (
