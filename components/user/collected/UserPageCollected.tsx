@@ -407,6 +407,7 @@ export default function UserPageCollected({
       });
     },
     placeholderData: keepPreviousData,
+    enabled: filters.collection !== CollectedCollectionType.NETWORK,
   });
 
   const {
