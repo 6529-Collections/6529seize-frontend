@@ -103,7 +103,7 @@ describe("NotificationsContext initialization", () => {
   it("initializes when isActive is true", async () => {
     mockIsActive = true;
     const { PushNotifications } = require("@capacitor/push-notifications");
-    const { result } = renderHook(() => useNotificationsContext(), { wrapper });
+    renderHook(() => useNotificationsContext(), { wrapper });
 
     await waitFor(() => {
       expect(PushNotifications.removeAllListeners).toHaveBeenCalled();

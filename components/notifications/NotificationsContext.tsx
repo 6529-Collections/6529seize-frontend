@@ -129,7 +129,15 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
-      void removeDeliveredNotifications([notification]);
+      removeDeliveredNotifications([notification]).catch((error) => {
+        console.error("Failed to remove delivered notification", error);
+        Sentry.captureException(error, {
+          tags: {
+            component: "NotificationsProvider",
+            operation: "removeDeliveredNotification",
+          },
+        });
+      });
 
       const redirectUrl = resolveRedirectUrl(notificationData);
       if (redirectUrl) {
