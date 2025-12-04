@@ -46,7 +46,10 @@ const registerWithRetry = async (
       await PushNotifications.register();
       return;
     } catch (registerError: unknown) {
-      if (isDelegateError(registerError) && attempt < maxRetries - 1) {
+      const isDelegate = isDelegateError(registerError);
+      const hasRetriesLeft = attempt < maxRetries - 1;
+
+      if (isDelegate && hasRetriesLeft) {
         const delay = Math.min(
           INITIAL_RETRY_DELAY_MS * Math.pow(2, attempt),
           MAX_RETRY_DELAY_MS
@@ -257,7 +260,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           const deliveredNotifications =
             await PushNotifications.getDeliveredNotifications();
           const waveNotifications = deliveredNotifications.notifications.filter(
-            (notification) => notification.data.wave_id === waveId
+            (notification) => notification.data?.wave_id === waveId
           );
           await removeDeliveredNotifications(waveNotifications);
         } catch (error) {
