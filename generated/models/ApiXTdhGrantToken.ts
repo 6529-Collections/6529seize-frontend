@@ -14,6 +14,7 @@ import { HttpFile } from '../http/http';
 
 export class ApiXTdhGrantToken {
     'token': string;
+    'xtdh': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -25,6 +26,12 @@ export class ApiXTdhGrantToken {
             "baseName": "token",
             "type": "string",
             "format": ""
+        },
+        {
+            "name": "xtdh",
+            "baseName": "xtdh",
+            "type": "number",
+            "format": "float"
         }    ];
 
     static getAttributeTypeMap() {

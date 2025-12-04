@@ -7751,9 +7751,13 @@ components:
       type: object
       required:
         - token
+        - xtdh
       properties:
         token:
           type: string
+        xtdh:
+          type: number
+          format: float
     ApiXTdhGrantTokensPage:
       type: object
       required:

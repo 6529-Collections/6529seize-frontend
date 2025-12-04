@@ -10,6 +10,7 @@ import {
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { SortDirection } from "@/entities/ISort";
+import type { ApiXTdhGrantToken } from "@/generated/models/ApiXTdhGrantToken";
 import type { ApiXTdhGrantTokensPage } from "@/generated/models/ApiXTdhGrantTokensPage";
 import { commonApiFetch } from "@/services/api/common-api";
 
@@ -24,7 +25,7 @@ export interface UseTdhGrantTokensQueryParams {
 
 export type UseTdhGrantTokensQueryResult =
   UseInfiniteQueryResult<InfiniteData<ApiXTdhGrantTokensPage>, Error> & {
-    readonly tokens: readonly string[];
+    readonly tokens: readonly ApiXTdhGrantToken[];
     readonly totalCount: number;
   };
 
@@ -58,8 +59,7 @@ export function useTdhGrantTokensQuery({
 
   const tokens = useMemo(
     () =>
-      query.data?.pages.flatMap((page) => page.data.map((item) => item.token)) ??
-      [],
+      query.data?.pages.flatMap((page) => page.data) ?? [],
     [query.data]
   );
   const totalCount = query.data?.pages?.[0]?.count ?? 0;

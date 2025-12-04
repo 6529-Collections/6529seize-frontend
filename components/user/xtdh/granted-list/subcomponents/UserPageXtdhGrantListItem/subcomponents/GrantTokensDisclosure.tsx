@@ -20,6 +20,7 @@ interface GrantTokensDisclosureProps {
   readonly grantId: string;
   readonly tokensCount: number | null;
   readonly tokensCountLabel: string;
+
 }
 
 export function GrantTokensDisclosure({
@@ -28,6 +29,7 @@ export function GrantTokensDisclosure({
   grantId,
   tokensCount,
   tokensCountLabel,
+
 }: Readonly<GrantTokensDisclosureProps>) {
   const { isOpen, panelId, toggleOpen, disclosureState } =
     useGrantTokensDisclosure({
@@ -87,18 +89,21 @@ export function GrantTokensDisclosure({
   );
 }
 
-function renderGrantTokensDisclosureBody({
-  showInitialLoading,
-  showInitialError,
-  tokenRanges,
-  errorMessage,
-  onRetry,
-  contractAddress,
-  chain,
-  grantId,
-  onEndReached,
-  isFetchingNextPage,
-}: GrantTokensDisclosureState): ReactNode {
+function renderGrantTokensDisclosureBody(
+  {
+    showInitialLoading,
+    showInitialError,
+    tokenRanges,
+    tokens,
+    errorMessage,
+    onRetry,
+    contractAddress,
+    chain,
+    grantId,
+    onEndReached,
+    isFetchingNextPage,
+  }: GrantTokensDisclosureState,
+): ReactNode {
   if (showInitialLoading) {
     return <GrantTokensLoadingState />;
   }
@@ -113,6 +118,11 @@ function renderGrantTokensDisclosureBody({
     return <GrantTokensEmptyState />;
   }
 
+  const mappedTokens = tokens.map((t) => ({
+    tokenId: BigInt(t.token),
+    xtdh: t.xtdh,
+  }));
+
   return (
     <>
       <VirtualizedTokenList
@@ -121,8 +131,13 @@ function renderGrantTokensDisclosureBody({
         ranges={tokenRanges}
         scrollKey={`grant-token-list-${grantId}`}
         className="tw-rounded-md tw-border tw-border-iron-800 tw-bg-iron-900"
+        scrollContainerClassName="tw-max-h-[480px] tw-overflow-y-auto"
         onEndReached={onEndReached}
         endReachedOffset={END_REACHED_OFFSET}
+        layout="grid"
+        columns={3}
+
+        tokens={mappedTokens}
       />
       {isFetchingNextPage ? <GrantTokensLoadingMore /> : null}
     </>
