@@ -44,10 +44,10 @@ export function XtdhTokenListItem({
           hasError={hasMetadataError}
         />
         <div className="tw-flex tw-flex-col tw-gap-0.5">
-          <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-50">
+          <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
             {metadata?.name ?? tokenLabel}
           </p>
-          <p className="tw-m-0 tw-text-xs tw-text-iron-400">{tokenLabel}</p>
+          <p className="tw-m-0 tw-text-xs tw-text-iron-500">{tokenLabel}</p>
         </div>
       </div>
       <XtdhContributorSummary
@@ -58,14 +58,14 @@ export function XtdhTokenListItem({
       <XtdhRatePill
         rateLabel={xtdhRateValue}
         totalLabel={xtdhValue}
-        className="tw-justify-start lg:tw-justify-self-start lg:tw-w-[280px]"
+        className="tw-justify-start lg:tw-justify-end lg:tw-w-[280px]"
       />
     </div>
   );
 
   const Wrapper = as === "div" ? "div" : "li";
   const wrapperClassName = clsx(
-    "tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-3",
+    "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-4",
     as === "li" && "tw-list-none",
     className
   );

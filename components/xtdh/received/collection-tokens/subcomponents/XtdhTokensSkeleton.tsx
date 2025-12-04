@@ -10,7 +10,7 @@ export function XtdhTokensSkeleton() {
         {SKELETON_INDICES.map((index) => (
           <li
             key={`token-skeleton-${index}`}
-            className="tw-list-none tw-animate-pulse tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-3"
+            className="tw-list-none tw-animate-pulse tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-4"
           >
             <div className="tw-flex tw-items-center tw-gap-3">
               <div className="tw-h-12 tw-w-12 tw-rounded-xl tw-bg-iron-800" />

@@ -20,34 +20,29 @@ const STATUS_VISUALS: Record<KnownGrantStatus, StatusVisuals> = {
   GRANTED: {
     label: "GRANTED",
     icon: faCircle,
-    badgeClassName:
-      "tw-border-green/50 tw-bg-green/10 tw-text-green tw-shadow-[0_0_20px_rgba(60,203,127,0.15)]",
+    badgeClassName: "tw-bg-green/15 tw-text-green",
   },
   DISABLED: {
     label: "REVOKED",
     icon: faTimes,
-    badgeClassName:
-      "tw-border-red/50 tw-bg-red/10 tw-text-red tw-shadow-[0_0_20px_rgba(249,112,102,0.15)]",
+    badgeClassName: "tw-bg-red/15 tw-text-red",
   },
   PENDING: {
     label: "PENDING",
     icon: faEllipsisH,
-    badgeClassName:
-      "tw-border-primary-400/50 tw-bg-primary-400/10 tw-text-primary-200 tw-shadow-[0_0_20px_rgba(82,139,255,0.15)]",
+    badgeClassName: "tw-bg-primary-400/15 tw-text-primary-300",
   },
   FAILED: {
     label: "FAILED",
     icon: faTimes,
-    badgeClassName:
-      "tw-border-red/50 tw-bg-red/10 tw-text-red tw-shadow-[0_0_20px_rgba(249,112,102,0.15)]",
+    badgeClassName: "tw-bg-red/15 tw-text-red",
   },
 };
 
 const DEFAULT_STATUS_VISUALS: StatusVisuals = {
   label: "STATUS",
   icon: faDotCircle,
-  badgeClassName:
-    "tw-border-iron-700 tw-bg-iron-800 tw-text-iron-200 tw-shadow-[0_0_12px_rgba(0,0,0,0.3)]",
+  badgeClassName: "tw-bg-iron-700/50 tw-text-iron-300",
 };
 
 export function getStatusVisuals(

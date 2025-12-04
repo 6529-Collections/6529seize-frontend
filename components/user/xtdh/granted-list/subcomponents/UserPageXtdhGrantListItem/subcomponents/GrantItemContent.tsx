@@ -21,13 +21,13 @@ export function GrantItemContent({
     <div className="tw-flex tw-flex-col tw-gap-4">
       <header className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-4">
         <div className="tw-flex tw-items-start tw-gap-3">
-          <div className="tw-relative tw-h-14 tw-w-14 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800">
+          <div className="tw-relative tw-h-16 tw-w-16 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-xl tw-bg-iron-800">
             {contract.imageUrl ? (
               <Image
                 src={contract.imageUrl}
                 alt={name}
                 fill
-                sizes="56px"
+                sizes="64px"
                 className="tw-h-full tw-w-full tw-object-cover"
               />
             ) : (
@@ -36,11 +36,11 @@ export function GrantItemContent({
               </div>
             )}
           </div>
-          <div className="tw-flex tw-flex-col tw-gap-1">
-            <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+          <div className="tw-flex tw-flex-col tw-gap-0.5">
+            <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
               {name}
             </p>
-            <p className="tw-m-0 tw-text-xs tw-text-iron-400">
+            <p className="tw-m-0 tw-text-xs tw-text-iron-500">
               {shortenAddress(contract.address)}
             </p>
           </div>

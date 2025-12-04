@@ -116,7 +116,7 @@ export function XtdhCollectionTokensPanel({
   }, [selectedToken]);
 
   return (
-    <section className="tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-4 tw-space-y-4">
+    <section className="tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-space-y-4">
       <CollectionBreadcrumbs
         collectionLabel={contractDisplayName}
         tokenLabel={selectedTokenLabel}

@@ -101,7 +101,7 @@ export function XtdhReceivedCollectionCard({
   const content = (
     <div
       className={clsx(
-        "tw-flex tw-w-full tw-flex-col tw-items-stretch tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4 tw-text-left tw-shadow-inner tw-shadow-black/20 tw-transition-colors",
+        "tw-flex tw-w-full tw-flex-col tw-items-stretch tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-4 tw-text-left tw-shadow-inner tw-shadow-black/20 tw-transition-colors",
         interactionMode === "button" && "desktop-hover:hover:tw-bg-iron-900/80",
         isSelected && "tw-border-primary-500",
         !isSelectable && interactionMode === "button" && "tw-cursor-not-allowed tw-opacity-70"
@@ -109,28 +109,28 @@ export function XtdhReceivedCollectionCard({
     >
       <header className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-3">
         <div className="tw-flex tw-flex-col md:tw-flex-row tw-min-w-0 tw-flex-1 tw-items-center tw-gap-3">
-          <div className="tw-relative tw-h-14 tw-w-14 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-xl tw-bg-iron-800">
+          <div className="tw-relative tw-h-16 tw-w-16 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-xl tw-bg-iron-800">
             {imageUrl ? (
               <Image
                 src={imageUrl}
                 alt={displayName}
                 fill
-                sizes="56px"
+                sizes="64px"
                 className="tw-h-full tw-w-full tw-object-cover"
               />
             ) : (
-              <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-font-semibold tw-text-iron-400">
+              <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
                 NFT
               </div>
             )}
           </div>
-          <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
-            <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+          <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0.5">
+            <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
               {displayName}
             </p>
             <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-2">
               <p
-                className="tw-m-0 tw-flex-1 tw-text-xs tw-text-iron-400 tw-break-all"
+                className="tw-m-0 tw-flex-1 tw-text-xs tw-text-iron-500 tw-break-all"
                 title={secondaryLabelTitle}
               >
                 {secondaryLabel}
@@ -189,12 +189,12 @@ export function CollectionMetric({
     <div
       className={clsx("tw-flex tw-flex-col tw-gap-0.5 tw-text-left", className)}
     >
-      <dt className="tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-500">
-        {label}
-      </dt>
-      <dd className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
+      <dd className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
         {value}
       </dd>
+      <dt className="tw-text-xs tw-font-normal tw-text-iron-500">
+        {label}
+      </dt>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircle } from "@fortawesome/free-solid-svg-icons";
 import type { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
 import { getStatusVisuals } from "../statusVisuals";
 
@@ -18,14 +19,14 @@ export function StatusBadge({
     <output
       aria-label={`${label} grant status`}
       className={clsx(
-        "tw-inline-flex tw-items-center tw-gap-2 tw-rounded-full tw-border tw-px-3 tw-py-1 tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wide tw-transition-colors tw-duration-200",
+        "tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-px-2.5 tw-py-1 tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wide",
         badgeClassName
       )}
     >
       <FontAwesomeIcon
         icon={icon}
         aria-hidden="true"
-        className="tw-text-base tw-leading-none tw-drop-shadow-sm"
+        className={clsx("tw-leading-none", icon === faCircle ? "tw-size-2" : "tw-size-3")}
       />
       <span>{label}</span>
     </output>
