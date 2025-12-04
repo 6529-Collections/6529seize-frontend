@@ -117,7 +117,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       profileInstance?: ApiIdentity
     ) => {
       console.log("Push notification action performed", notification);
-      const notificationData = notification.data;
+      const notificationData = notification.data ?? {};
       const notificationProfileId = notificationData.profile_id;
 
       if (
@@ -129,15 +129,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
-      removeDeliveredNotifications([notification]).catch((error) => {
-        console.error("Failed to remove delivered notification", error);
-        Sentry.captureException(error, {
-          tags: {
-            component: "NotificationsProvider",
-            operation: "removeDeliveredNotification",
-          },
-        });
-      });
+      await removeDeliveredNotifications([notification]);
 
       const redirectUrl = resolveRedirectUrl(notificationData);
       if (redirectUrl) {
@@ -163,7 +155,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         const deviceInfo = await Device.getInfo();
 
         await PushNotifications.addListener("registration", async (token) => {
-          registerPushNotification(
+          await registerPushNotification(
             stableDeviceId,
             deviceInfo,
             token.value,
@@ -242,6 +234,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
             operation: "initializeNotifications",
           },
         });
+        initializationRef.current = null;
       });
     }
   }, [connectedProfile, isCapacitor, isActive, initializeNotifications]);
@@ -249,12 +242,22 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   const removeWaveDeliveredNotifications = useCallback(
     async (waveId: string) => {
       if (isIos) {
-        const deliveredNotifications =
-          await PushNotifications.getDeliveredNotifications();
-        const waveNotifications = deliveredNotifications.notifications.filter(
-          (notification) => notification.data.wave_id === waveId
-        );
-        await removeDeliveredNotifications(waveNotifications);
+        try {
+          const deliveredNotifications =
+            await PushNotifications.getDeliveredNotifications();
+          const waveNotifications = deliveredNotifications.notifications.filter(
+            (notification) => notification.data.wave_id === waveId
+          );
+          await removeDeliveredNotifications(waveNotifications);
+        } catch (error) {
+          console.error("Error removing wave delivered notifications", error);
+          Sentry.captureException(error, {
+            tags: {
+              component: "NotificationsProvider",
+              operation: "removeWaveDeliveredNotifications",
+            },
+          });
+        }
       }
     },
     [isIos, removeDeliveredNotifications]
@@ -266,6 +269,12 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         await PushNotifications.removeAllDeliveredNotifications();
       } catch (error) {
         console.error("Error removing all delivered notifications", error);
+        Sentry.captureException(error, {
+          tags: {
+            component: "NotificationsProvider",
+            operation: "removeAllDeliveredNotifications",
+          },
+        });
       }
     }
   }, [isIos]);
