@@ -35,7 +35,7 @@ export function XtdhTokenListItem({
   const totalContributors = formatCount(token.total_contributor_count);
 
   const content = (
-    <div className="tw-flex tw-w-full tw-flex-col tw-gap-4 lg:tw-grid lg:tw-grid-cols-[minmax(0,1fr)_300px_280px] lg:tw-items-center lg:tw-gap-6">
+    <div className="tw-flex tw-w-full tw-flex-col tw-gap-4 sm:tw-grid lg:tw-grid-cols-3 lg:tw-gap-4">
       <div className="tw-flex tw-flex-1 tw-items-center tw-gap-3">
         <XtdhTokenListItemThumbnail
           tokenLabel={tokenLabel}
@@ -53,12 +53,12 @@ export function XtdhTokenListItem({
       <XtdhContributorSummary
         activeCount={activeContributors}
         totalCount={totalContributors}
-        className="sm:tw-text-left lg:tw-justify-self-start lg:tw-w-[300px]"
+        className="tw-text-left tw-order-3 lg:tw-order-2"
       />
       <XtdhRatePill
         rateLabel={xtdhRateValue}
         totalLabel={xtdhValue}
-        className="tw-justify-start lg:tw-justify-end lg:tw-w-[280px]"
+        className="tw-justify-start lg:tw-justify-end tw-mt-4 lg:tw-mt-0 tw-order-2 lg:tw-order-3"
       />
     </div>
   );

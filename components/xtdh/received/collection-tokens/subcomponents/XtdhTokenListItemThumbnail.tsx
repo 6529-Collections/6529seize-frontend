@@ -26,7 +26,7 @@ export function XtdhTokenListItemThumbnail({
         alt={metadata.name ?? tokenLabel}
         fill
         sizes="48px"
-        className="tw-h-full tw-w-full tw-object-cover"
+        className="tw-h-full tw-w-full tw-object-cover tw-flex-shrink-0"
       />
     );
   } else if (isLoading) {
@@ -50,7 +50,7 @@ export function XtdhTokenListItemThumbnail({
   }
 
   return (
-    <div className="tw-relative tw-h-12 tw-w-12 tw-overflow-hidden tw-rounded-xl tw-bg-iron-800">
+    <div className="tw-relative tw-h-12 tw-w-12 tw-overflow-hidden tw-rounded-xl tw-bg-iron-800 tw-flex-shrink-0">
       {content}
     </div>
   );

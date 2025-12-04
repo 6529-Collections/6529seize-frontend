@@ -14,7 +14,7 @@ export function XtdhContributorSummary({
   return (
     <dl
       className={clsx(
-        "tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-1 tw-text-left sm:tw-self-center tw-mb-0",
+        "tw-grid sm:tw-grid-cols-3 lg:tw-grid-cols-2 tw-gap-4 tw-text-left lg:tw-self-center tw-mb-0 tw-mt-2 lg:tw-mt-0",
         className
       )}
     >

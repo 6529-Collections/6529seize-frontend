@@ -38,7 +38,7 @@ export default function UserPageCollectedNetworkCards({
   });
 
   return (
-    <div className="tw-grid tw-grid-cols-2 md:tw-grid-cols-3 lg:tw-grid-cols-4 xl:tw-grid-cols-5 tw-gap-4 tw-w-full">
+    <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 md:tw-grid-cols-4 tw-gap-4 lg:tw-gap-6 tw-pb-2">
       {cards.map((card) => {
         const tokenMetadata = metadata?.find(
           (m) =>

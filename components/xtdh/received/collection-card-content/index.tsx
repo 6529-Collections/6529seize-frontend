@@ -107,8 +107,8 @@ export function XtdhReceivedCollectionCard({
         !isSelectable && interactionMode === "button" && "tw-cursor-not-allowed tw-opacity-70"
       )}
     >
-      <header className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-3">
-        <div className="tw-flex tw-flex-col md:tw-flex-row tw-min-w-0 tw-flex-1 tw-items-center tw-gap-3">
+      <header className="tw-flex tw-flex-col md:tw-flex-row tw-items-start tw-justify-between tw-gap-x-3 tw-gap-y-6">
+        <div className="tw-flex tw-flex-col sm:tw-flex-row tw-min-w-0 tw-flex-1 sm:tw-items-center tw-gap-3">
           <div className="tw-relative tw-h-16 tw-w-16 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-xl tw-bg-iron-800">
             {imageUrl ? (
               <Image
@@ -128,9 +128,9 @@ export function XtdhReceivedCollectionCard({
             <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
               {displayName}
             </p>
-            <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-2">
+            <div className="tw-flex tw-w-full tw-items-center tw-gap-2">
               <p
-                className="tw-m-0 tw-flex-1 tw-text-xs tw-text-iron-500 tw-break-all"
+                className="tw-m-0 tw-text-xs tw-text-iron-500 tw-mb-0"
                 title={secondaryLabelTitle}
               >
                 {secondaryLabel}
@@ -143,7 +143,7 @@ export function XtdhReceivedCollectionCard({
         </div>
         <XtdhRatePill rateLabel={xtdhRateLabel} totalLabel={xtdhValueLabel} />
       </header>
-      <dl className="tw-mt-3 tw-grid tw-gap-3 sm:tw-grid-cols-3">
+      <dl className="tw-mt-6 md:tw-mt-4 tw-grid tw-gap-4 sm:tw-grid-cols-3">
         <CollectionMetric label="Total supply" value={totalSupplyLabel} />
         <CollectionMetric label="Active tokens" value={activeTokensGrantedLabel} />
         <CollectionMetric label="Tokens granted" value={totalTokensGrantedLabel} />
