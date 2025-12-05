@@ -1,9 +1,6 @@
 "use client";
 
 import { useCallback, useContext, useEffect, useMemo } from "react";
-import CommonSelect, {
-  type CommonSelectItem,
-} from "@/components/utils/select/CommonSelect";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { AuthContext } from "@/components/auth/Auth";
@@ -11,21 +8,29 @@ import UserPageXtdhGranted from "./UserPageXtdhGranted";
 import UserPageXtdhStatsHeader from "./UserPageXtdhStatsHeader";
 import UserPageXtdhReceived from "@/components/xtdh/user/received";
 import { UserXtdhTestModeBanner } from "./UserXtdhTestModeBanner";
+import {
+  ArrowUpRightIcon,
+  ArrowDownLeftIcon,
+} from "@heroicons/react/24/outline";
 
 type XtdhViewFilter = "granted" | "received";
 
 const DEFAULT_FILTER: XtdhViewFilter = "granted";
 
-const XTDH_FILTER_ITEMS: CommonSelectItem<XtdhViewFilter>[] = [
+const XTDH_TAB_CONFIG: {
+  key: XtdhViewFilter;
+  label: string;
+  icon: typeof ArrowUpRightIcon;
+}[] = [
   {
     key: "granted",
     label: "Granted",
-    value: "granted",
+    icon: ArrowUpRightIcon,
   },
   {
     key: "received",
     label: "Received",
-    value: "received",
+    icon: ArrowDownLeftIcon,
   },
 ];
 
@@ -132,30 +137,45 @@ export default function UserPageXtdh({
         onOutboundClick={canGrant ? handleOutboundClick : undefined}
       />
 
-      <div className="tw-w-full tw-overflow-x-auto horizontal-menu-hide-scrollbar">
-        <CommonSelect
-          items={XTDH_FILTER_ITEMS}
-          activeItem={activeFilter}
-          filterLabel="xTDH View"
-          setSelected={handleFilterChange}
-          fill={false}
-        />
-      </div>
+      <div className="tw-mt-4">
+        <div className="tw-border-b-0 tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-between tw-rounded-t-lg tw-overflow-hidden">
+          <div className="tw-flex tw-w-full md:tw-w-auto">
+            {XTDH_TAB_CONFIG.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeFilter === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => handleFilterChange(tab.key)}
+                  className={`tw-relative tw-border-t-0 tw-border-x-0 tw-px-8 tw-py-5 tw-text-sm tw-font-medium tw-transition-all tw-duration-300 tw-flex tw-items-center tw-gap-2 tw-border-b-2 ${
+                    isActive
+                      ? "tw-text-white tw-bg-iron-900 tw-border-b-primary-400"
+                      : "tw-text-iron-400 hover:tw-text-white hover:tw-bg-iron-800/50 tw-border-b-transparent tw-bg-transparent"
+                  }`}
+                >
+                  <Icon className="tw-size-4" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-      {activeFilter === "granted" ? (
-        <UserPageXtdhGranted
-          canGrant={canGrant}
-          grantor={
-            profile.query ??
-            profile.handle ??
-            profile.primary_wallet ??
-            profile.consolidation_key
-          }
-          isSelf={canGrant}
-        />
-      ) : (
-        <UserPageXtdhReceived profileId={statsProfileId} />
-      )}
+        {activeFilter === "granted" ? (
+          <UserPageXtdhGranted
+            canGrant={canGrant}
+            grantor={
+              profile.query ??
+              profile.handle ??
+              profile.primary_wallet ??
+              profile.consolidation_key
+            }
+            isSelf={canGrant}
+          />
+        ) : (
+          <UserPageXtdhReceived profileId={statsProfileId} />
+        )}
+      </div>
     </div>
   );
 }

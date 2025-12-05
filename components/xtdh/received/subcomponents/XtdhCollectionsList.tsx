@@ -78,7 +78,7 @@ export function XtdhCollectionsList({
   const normalizedSelected = selectedContract?.trim().toLowerCase() ?? null;
 
   return (
-    <div className="tw-border-t tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-b-0">
+    <div>
       <ul className="tw-m-0 tw-p-0 tw-flex tw-flex-col tw-divide-y tw-divide-iron-800 tw-divide-x-0 tw-divide-solid">
         {collections.map((collection, index) => (
           <XtdhReceivedCollectionCard
