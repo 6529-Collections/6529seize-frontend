@@ -28,9 +28,9 @@ export default function WaveLeaderboardGalleryItemVotes({
   };
 
   return (
-    <div className="tw-flex tw-items-center tw-gap-x-1.5">
+    <div className="tw-flex tw-items-center tw-gap-2">
       <span
-        className={`tw-text-sm tw-font-medium ${getColorClass()}`}
+        className={`tw-text-sm tw-font-mono tw-font-bold ${variant === 'subtle' ? 'tw-text-iron-100' : getColorClass()}`}
       >
         {formatNumberWithCommas(current)}
       </span>

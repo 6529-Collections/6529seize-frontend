@@ -18,7 +18,7 @@ import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 interface WaveLeaderboardGalleryItemProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
-  readonly artFocused?: boolean; // New prop to activate art-focused mode
+  readonly artFocused?: boolean;
   readonly activeSort?: WaveDropsLeaderboardSort;
   readonly animationKey?: number;
 }
@@ -28,27 +28,23 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
     const [isHighlighting, setIsHighlighting] = useState(false);
     const isMobileScreen = useIsMobileScreen();
-    const { hasTouchScreen } = useDeviceInfo(); // Detect touch devices
+    const { hasTouchScreen } = useDeviceInfo();
     const { canShowVote } = useDropInteractionRules(drop);
 
-    // Animation state and useEffect - ONLY for desktop (non-touch) devices
     const [isFirstRender, setIsFirstRender] = useState(true);
     const [previousSort, setPreviousSort] = useState(activeSort);
 
     useEffect(() => {
-      // Skip all animations on touch devices for performance
       if (hasTouchScreen) {
         return;
       }
 
       let timer: NodeJS.Timeout | null = null;
 
-      // Skip animation on first render unless animationKey is set
       if (isFirstRender) {
         setIsFirstRender(false);
         setPreviousSort(activeSort);
 
-        // Animate on mount if animationKey is set (indicating a sort change)
         if (animationKey > 0) {
           setIsHighlighting(true);
           timer = setTimeout(() => {
@@ -56,7 +52,6 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
           }, 700);
         }
       } else if (previousSort !== activeSort) {
-        // Only animate if sort actually changed
         setPreviousSort(activeSort);
         setIsHighlighting(true);
         timer = setTimeout(() => {
@@ -71,7 +66,6 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
       };
     }, [activeSort, animationKey, isFirstRender, previousSort, hasTouchScreen]);
 
-    // Consider the user has voted even if the rating is 0
     const hasUserVoted = drop.context_profile_context?.rating !== undefined;
 
     const userVote = drop.context_profile_context?.rating ?? 0;
@@ -83,11 +77,9 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
       artFocused: boolean
     ) => {
       if (artFocused) {
-        // Subtle styling for art-focused mode
         if (isZero) return "tw-text-iron-400";
         return isNegative ? "tw-text-iron-400" : "tw-text-iron-300";
       }
-      // Original styling
       if (isZero) return "tw-text-iron-400";
       return isNegative ? "tw-text-rose-500" : "tw-text-emerald-500";
     };
@@ -109,38 +101,30 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
       setIsVotingModalOpen(true);
     };
 
-    // Determine container class based on art-focused mode and highlighting state
     const transitionClasses = !hasTouchScreen ? "tw-transition-all tw-duration-300 tw-ease-out" : "";
-    const groupClasses = artFocused ? `group ${transitionClasses}` : "";
-    const containerClass = `${groupClasses} tw-relative tw-rounded-lg`;
+    const groupClasses = artFocused ? `tw-group ${transitionClasses}` : "";
+    const containerClass = `${groupClasses} tw-relative tw-bg-iron-950/50 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg desktop-hover:hover:tw-border-iron-700 tw-shadow-lg desktop-hover:hover:tw-shadow-xl`;
 
-    // Apply image effects with animation when highlighting - ONLY on desktop
     const highlightAnimation =
       isHighlighting && !hasTouchScreen ? "tw-animate-gallery-reveal" : "";
 
-    const baseImageClasses = "tw-aspect-square tw-border tw-border-iron-800 tw-relative tw-cursor-pointer touch-none";
-    
-    const artFocusedHoverClasses = !hasTouchScreen 
-      ? `desktop-hover:hover:tw-border-iron-700 tw-transform tw-duration-300 tw-ease-out tw-ring-0 desktop-hover:hover:tw-ring-1 desktop-hover:hover:tw-ring-iron-600 ${highlightAnimation}`
-      : "";
-    
-    const defaultHoverClasses = !hasTouchScreen
-      ? `desktop-hover:hover:-tw-translate-y-0.5 desktop-hover:hover:tw-scale-[1.02] tw-transform tw-duration-300 tw-ease-out ${highlightAnimation}`
+    const baseImageClasses = "tw-aspect-square tw-relative tw-cursor-pointer touch-none tw-overflow-hidden tw-bg-iron-900 tw-group/image";
+
+    const imageScaleClasses = !hasTouchScreen
+      ? `tw-transform tw-duration-700 tw-ease-out group-hover/image:tw-scale-105 ${highlightAnimation}`
       : "";
 
-    const imageContainerClass = artFocused
-      ? `tw-ml-0.5 ${baseImageClasses} tw-bg-iron-900 ${artFocusedHoverClasses}`
-      : `${baseImageClasses} tw-bg-iron-800 ${defaultHoverClasses}`;
+    const imageContainerClass = baseImageClasses;
 
     return (
       <div className={containerClass}>
         <button
-          className={`${imageContainerClass} tw-border-none tw-m-0 tw-p-0 tw-w-full tw-text-left tw-bg-transparent`}
+          className={`${imageContainerClass} tw-border-none tw-m-0 tw-p-0 tw-overflow-hidden tw-rounded-lg tw-w-full tw-text-left tw-bg-transparent`}
           onClick={handleImageClick}
           onKeyDown={handleKeyDown}
           type="button"
         >
-          <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
+          <div className={`tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center ${imageScaleClasses}`}>
             <MediaDisplay
               media_mime_type={drop.parts[0].media[0].mime_type || "image/jpeg"}
               media_url={drop.parts[0].media[0].url}
@@ -148,43 +132,41 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
             />
           </div>
         </button>
-        <div className="tw-flex tw-flex-col tw-mt-2.5 tw-gap-y-1.5">
-          {/* Rank + Projected votes */}
-          <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-2">
+        <div className="tw-p-3 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800 tw-bg-iron-950/50 tw-rounded-b-lg">
+          <div className="tw-flex tw-justify-between tw-items-start tw-mb-3">
+            <div className="tw-min-w-0 tw-flex-1 tw-mr-2">
+              {drop.title && (
+                <h3 className="tw-mb-0 tw-text-sm tw-font-bold tw-text-iron-100 tw-truncate tw-leading-tight">
+                  {drop.title}
+                </h3>
+              )}
+              {drop.author?.handle && (
+                <UserProfileTooltipWrapper
+                  user={drop.author.handle ?? drop.author.id}
+                >
+                  <Link
+                    onClick={(e) => e.stopPropagation()}
+                    href={`/${drop.author?.handle}`}
+                    className="tw-text-xs tw-text-iron-400 tw-mt-0.5 tw-no-underline desktop-hover:hover:tw-underline desktop-hover:hover:tw-text-iron-300 tw-transition-colors tw-duration-150"
+                  >
+                    {drop.author?.handle}
+                  </Link>
+                </UserProfileTooltipWrapper>
+              )}
+            </div>
             {drop.rank !== undefined && (
               <WinnerDropBadge
                 rank={drop.rank}
                 decisionTime={drop.winning_context?.decision_time || null}
               />
             )}
+          </div>
+          <div className="tw-flex tw-items-center tw-justify-between tw-text-xs tw-mb-3">
             <WaveLeaderboardGalleryItemVotes
               drop={drop}
               variant={artFocused ? "subtle" : "default"}
             />
-          </div>
-          {/* Art title */}
-          {drop.title && (
-            <p className="tw-mb-0 tw-text-[13px] tw-font-medium tw-text-iron-50 tw-truncate tw-leading-snug">
-              {drop.title}
-            </p>
-          )}
-          {/* Author */}
-          {drop.author?.handle && (
-            <UserProfileTooltipWrapper
-              user={drop.author.handle ?? drop.author.id}
-            >
-              <Link
-                onClick={(e) => e.stopPropagation()}
-                href={`/${drop.author?.handle}`}
-                className="tw-text-xs tw-truncate tw-no-underline tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-underline tw-transition-colors tw-duration-150"
-              >
-                {drop.author?.handle}
-              </Link>
-            </UserProfileTooltipWrapper>
-          )}
-          {/* Voters count + Your vote + Vote button */}
-          <div className="tw-flex tw-items-center tw-justify-between tw-pt-1">
-            <div className="tw-flex tw-items-center tw-gap-x-1">
+            <div className="tw-flex tw-items-center tw-text-iron-500 tw-gap-1 tw-ml-4">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -192,36 +174,37 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
                 strokeWidth="1.5"
                 stroke="currentColor"
                 aria-hidden="true"
-                className="tw-size-3.5 tw-flex-shrink-0 tw-text-iron-600"
+                className="tw-size-3 tw-flex-shrink-0"
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+                  d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"
                 />
               </svg>
-              <span className="tw-text-xs tw-font-medium tw-text-iron-600">
+              <span className="tw-font-medium">
                 {formatNumberWithCommas(drop.raters_count)}
               </span>
             </div>
-            <div className="tw-flex tw-items-center tw-gap-x-2.5">
-              {hasUserVoted && (
-                <span className={`tw-text-xs ${voteStyle}`}>
-                  You: {isNegativeVote && "-"}{formatNumberWithCommas(Math.abs(userVote))} {drop.wave.voting_credit_type}
-                </span>
-              )}
-              {canShowVote && (
+          </div>
+          <div className="tw-flex tw-gap-3 tw-items-center tw-pt-2 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800/50">
+            {hasUserVoted && (
+              <span className="tw-text-[11px] tw-text-iron-500 tw-font-mono">
+                Your vote: <span className={voteStyle}>{isNegativeVote && "-"}{formatNumberWithCommas(Math.abs(userVote))} {drop.wave.voting_credit_type}</span>
+              </span>
+            )}
+            {canShowVote && (
+              <div className="tw-flex-1 tw-flex tw-justify-end">
                 <VotingModalButton
                   drop={drop}
                   onClick={handleVoteButtonClick}
                   variant={artFocused ? "subtle" : "default"}
                 />
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Voting modal */}
         {isMobileScreen ? (
           <MobileVotingModal
             drop={drop}
@@ -239,7 +222,6 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     );
   },
   (prevProps, nextProps) => {
-    // Force re-render when activeSort or animationKey changes
     if (
       prevProps.activeSort !== nextProps.activeSort ||
       prevProps.animationKey !== nextProps.animationKey
@@ -247,7 +229,6 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
       return false;
     }
 
-    // Otherwise, use shallow comparison for other props
     return (
       prevProps.drop.id === nextProps.drop.id &&
       prevProps.onDropClick === nextProps.onDropClick &&

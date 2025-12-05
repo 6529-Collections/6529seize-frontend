@@ -24,10 +24,10 @@ const VotingModalButton: React.FC<VotingModalButtonProps> = ({
     onClick();
   };
 
-  const baseClasses = "tw-flex tw-items-center tw-justify-center tw-gap-x-1 tw-px-3 tw-py-1.5 tw-rounded-lg tw-border tw-border-solid tw-text-xs tw-font-medium tw-whitespace-nowrap tw-transition-all tw-duration-200 tw-ease-out";
+  const baseClasses = "tw-flex tw-items-center tw-justify-center tw-gap-x-1 tw-px-3 tw-py-1.5 tw-rounded-lg tw-border tw-border-solid tw-text-xs tw-font-medium tw-whitespace-nowrap tw-transition-all tw-duration-300 tw-ease-out";
 
   const variantClasses = variant === "subtle"
-    ? "tw-bg-transparent tw-border-iron-700 tw-text-iron-400 desktop-hover:hover:tw-text-white desktop-hover:hover:tw-bg-primary-600 desktop-hover:hover:tw-border-primary-600"
+    ? "tw-bg-white tw-border-white tw-text-black tw-font-bold desktop-hover:hover:tw-bg-iron-300 tw-shadow-[0_0_15px_rgba(255,255,255,0.1)]"
     : "tw-bg-primary-500 tw-border-primary-500 tw-text-white desktop-hover:hover:tw-bg-primary-600";
 
   const buttonClasses = `${baseClasses} ${variantClasses}`;
