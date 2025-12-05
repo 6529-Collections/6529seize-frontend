@@ -37,7 +37,7 @@ export default function XtdhPage(): ReactElement {
 
   return (
     <div className="tailwind-scope tw-space-y-6">
-      <section className="tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-5 tw-space-y-3">
+      <section className="tw-space-y-4">
         <header>
           <h1 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">
             xTDH Network Overview

@@ -1,6 +1,6 @@
 import { formatStatFloor } from "@/helpers/Helpers";
 import { XtdhStatCard } from "@/components/xtdh/stats/subcomponents/XtdhStatCard";
-import { XtdhProgressBar } from "@/components/xtdh/stats/subcomponents/XtdhProgressBar";
+import { XtdhLabeledProgressBar } from "@/components/xtdh/stats/subcomponents/XtdhLabeledProgressBar";
 
 interface UserXtdhStatsProps {
   readonly generationRate: number;
@@ -62,23 +62,19 @@ export function UserXtdhStats({
           />
         ))}
       </section>
-      <div className="tw-space-y-2">
-        <div className="tw-flex tw-justify-between tw-text-xs tw-font-semibold tw-uppercase tw-tracking-widest tw-text-iron-500">
-          <span>Granted rate</span>
-          <span className="tw-tabular-nums">
-            {formatStatFloor(outbound, 1)} / {formatStatFloor(generationRate, 1)}{" "}
-            xTDH
-          </span>
-        </div>
-        <XtdhProgressBar
-          percentage={percentage}
-          ariaLabel="Granted Rate"
-          ariaValueText={`${formatStatFloor(outbound, 1)} / ${formatStatFloor(
-            generationRate,
-            1
-          )} xTDH`}
-        />
-      </div>
+      <XtdhLabeledProgressBar
+        label="Granted rate"
+        value={`${formatStatFloor(outbound, 1)} / ${formatStatFloor(
+          generationRate,
+          1
+        )} xTDH`}
+        percentage={percentage}
+        ariaLabel="Granted Rate"
+        ariaValueText={`${formatStatFloor(outbound, 1)} / ${formatStatFloor(
+          generationRate,
+          1
+        )} xTDH`}
+      />
     </div>
   );
 }
