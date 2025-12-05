@@ -37,8 +37,8 @@ export default function UserPageXtdhGrant() {
   return (
     <div className="tw-flex tw-flex-col tw-gap-8">
       {/* Step 1: Select Collection & Tokens */}
-      <section id="create-grant-section" className="tw-flex tw-flex-col tw-gap-4">
-        <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-300 tw-uppercase tw-tracking-wider">
+      <section id="create-grant-section" className="tw-bg-[#111] tw-border tw-border-solid tw-border-white/10 tw-rounded-xl tw-p-6">
+        <h3 className="tw-m-0 tw-text-xs tw-font-bold tw-text-iron-400 tw-uppercase tw-tracking-wider tw-mb-3">
           1. Select Collection & Tokens
         </h3>
         <UserPageXtdhGrantSelection
@@ -51,7 +51,7 @@ export default function UserPageXtdhGrant() {
       {/* Step 2: Enter Amount */}
       {isSelectionValid && (
         <section className="tw-flex tw-flex-col tw-gap-4 tw-animate-in tw-fade-in tw-slide-in-from-top-4 tw-duration-300">
-          <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-300 tw-uppercase tw-tracking-wider">
+          <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-400 tw-uppercase tw-tracking-wider">
             2. Enter Grant Amount
           </h3>
           <UserPageXtdhGrantAmount
@@ -68,7 +68,7 @@ export default function UserPageXtdhGrant() {
       {isSelectionValid && isAmountValid && (
         <section className="tw-flex tw-flex-col tw-gap-6 tw-animate-in tw-fade-in tw-slide-in-from-top-4 tw-duration-300">
           <div className="tw-flex tw-flex-col tw-gap-4">
-            <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-300 tw-uppercase tw-tracking-wider">
+            <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-400 tw-uppercase tw-tracking-wider">
               3. Review & Submit
             </h3>
 

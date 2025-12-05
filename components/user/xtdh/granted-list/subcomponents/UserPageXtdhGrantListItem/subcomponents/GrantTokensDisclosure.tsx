@@ -46,36 +46,30 @@ export function GrantTokensDisclosure({
   const body = renderGrantTokensDisclosureBody(disclosureState);
 
   return (
-    <div className="tw-mt-4 tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-950">
+    <div className="tw-mt-4 tw-rounded-lg tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-950">
       <button
         type="button"
         className={clsx(
-          "tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-xl tw-border-none tw-bg-transparent tw-px-4 tw-py-3 tw-text-left tw-text-iron-50 tw-transition-colors tw-duration-200 tw-appearance-none focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950",
-          isOpen
-            ? "tw-bg-iron-900"
-            : "desktop-hover:hover:tw-bg-iron-900/40"
+          "tw-group tw-flex tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-none tw-px-4 tw-py-3 tw-transition-colors tw-duration-200 tw-appearance-none focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-bg-iron-900",
+          isOpen ? "tw-bg-iron-900" : "tw-bg-iron-900/30"
         )}
         onClick={toggleOpen}
         aria-expanded={isOpen}
         aria-controls={panelId}
       >
-        <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
+        <span className="tw-text-sm tw-font-semibold tw-text-iron-400 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-iron-200">
           {isOpen
             ? `Hide ${tokensCountDescription}`
             : `Show ${tokensCountDescription}`}
         </span>
-        <span
+        <FontAwesomeIcon
+          icon={faChevronDown}
           aria-hidden="true"
-          className="tw-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-iron-800 tw-bg-iron-900 tw-text-iron-50 tw-transition-colors tw-duration-200"
-        >
-          <FontAwesomeIcon
-            icon={faChevronDown}
-            className={clsx(
-              "tw-size-5 tw-transition-transform tw-duration-200",
-              isOpen && "tw-rotate-180"
-            )}
-          />
-        </span>
+          className={clsx(
+            "tw-size-4 tw-text-iron-400 tw-transition-all tw-duration-200 desktop-hover:group-hover:tw-text-iron-200",
+            isOpen && "tw-rotate-180"
+          )}
+        />
       </button>
       {isOpen ? (
         <div

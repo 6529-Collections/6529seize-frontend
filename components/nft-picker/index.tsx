@@ -229,7 +229,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
 
   const wrapperClassName = clsx(
     variant === "card"
-      ? "tw-@container tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4"
+      ? "tw-@container tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-4"
       : "tw-@container tw-flex tw-flex-col tw-gap-4",
     className
   );

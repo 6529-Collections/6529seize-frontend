@@ -50,7 +50,7 @@ export function XtdhTokenListItemThumbnail({
   }
 
   return (
-    <div className="tw-relative tw-h-12 tw-w-12 tw-overflow-hidden tw-rounded-xl tw-bg-iron-800 tw-flex-shrink-0">
+    <div className="tw-relative tw-h-12 tw-w-12 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800 tw-flex-shrink-0">
       {content}
     </div>
   );

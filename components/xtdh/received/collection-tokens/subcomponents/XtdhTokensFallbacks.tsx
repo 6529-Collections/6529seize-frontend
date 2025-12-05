@@ -16,7 +16,7 @@ export function ListMessage({ children }: Readonly<ListMessageProps>) {
 export function ListError({ message, onRetry }: Readonly<RetryableMessageProps>) {
   const displayMessage = message ?? "Failed to load received tokens.";
   return (
-    <div className="tw-flex tw-flex-col tw-gap-2">
+    <div className="tw-flex tw-flex-col tw-gap-2 tw-px-6 tw-pb-6">
       <p className="tw-m-0 tw-text-sm tw-text-red-400" role="alert">
         {displayMessage}
       </p>

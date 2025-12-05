@@ -100,8 +100,8 @@ export default function UserPageXtdhGrantedList({
   const showLoadMore = hasNextPage && !isError;
 
   return (
-    <div className="tw-bg-iron-950 tw-border tw-border-iron-800 tw-rounded-2xl tw-p-4 tw-space-y-4">
-      <div className="tw-flex tw-items-center tw-flex-wrap tw-justify-between tw-gap-4">
+    <div className="tw-bg-iron-950 tw-border tw-border-iron-800 tw-rounded-xl">
+      <div className="tw-flex md:tw-items-center tw-flex-col md:tw-flex-row tw-justify-between tw-gap-4 tw-px-6 tw-pt-6 tw-pb-4 tw-border-b tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-iron-800">
         <h2 className="tw-text-base tw-font-semibold tw-text-iron-100 tw-m-0">
           Granted xTDH
         </h2>
@@ -137,7 +137,7 @@ export default function UserPageXtdhGrantedList({
         statuses={apiParams.statuses}
       />
       {showLoadMore && (
-        <div className="tw-flex tw-justify-center">
+        <div className="tw-flex tw-justify-center tw-px-6 tw-pb-6">
           <button
             type="button"
             onClick={() => fetchNextPage()}

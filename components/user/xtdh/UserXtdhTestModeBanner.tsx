@@ -18,7 +18,7 @@ export function UserXtdhTestModeBanner() {
             />
           </svg>
         </div>
-        <div className="tw-text-sm tw-text-primary-100">
+        <div className="tw-text-sm tw-text-blue-100/80">
           <span className="tw-font-semibold">xTDH Beta:</span> This feature is
           currently in test/demo mode. All data will be reset after the test
           period. Please test it out and give us feedback!

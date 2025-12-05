@@ -17,15 +17,12 @@ export default function UserPageXtdhGranted({
       <UserPageXtdhGrantedList grantor={grantor} isSelf={isSelf} />
 
       {canGrant && (
-        <section className="tw-flex tw-flex-col tw-gap-4 tw-mt-6 tw-pt-6 tw-border-t tw-border-iron-700">
-          <header className="tw-pl-4 tw-pr-4 lg:tw-pl-6 lg:tw-pr-6">
-            <h2 className="tw-text-xl tw-font-bold tw-text-iron-100 tw-m-0">
-              Create New Grant
-            </h2>
-          </header>
-          <div className="tw-rounded-2xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 lg:tw-p-6 tw-shadow-inner tw-shadow-black/30">
-            <UserPageXtdhGrant />
-          </div>
+        <section className="tw-bg-iron-950/60 tw-border tw-border-solid tw-border-white/5 tw-rounded-xl tw-p-6 tw-relative">
+          <div className="tw-absolute tw-top-0 tw-right-0 tw-w-64 tw-h-64 tw-bg-primary-600/5 tw-rounded-full tw-blur-3xl tw-pointer-events-none" />
+          <h3 className="tw-text-white tw-text-lg tw-font-semibold tw-mb-6 tw-flex tw-items-center tw-gap-2 tw-m-0">
+            Create New Grant
+          </h3>
+          <UserPageXtdhGrant />
         </section>
       )}
     </div>
