@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, memo } from "react";
+import React, { useState, useEffect, useRef, memo } from "react";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import WaveLeaderboardGalleryItemVotes from "./WaveLeaderboardGalleryItemVotes";
@@ -31,40 +31,42 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     const { hasTouchScreen } = useDeviceInfo();
     const { canShowVote } = useDropInteractionRules(drop);
 
-    const [isFirstRender, setIsFirstRender] = useState(true);
-    const [previousSort, setPreviousSort] = useState(activeSort);
+    const isFirstRenderRef = useRef(true);
+    const previousSortRef = useRef(activeSort);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
       if (hasTouchScreen) {
         return;
       }
 
-      let timer: NodeJS.Timeout | null = null;
+      const sortChanged = previousSortRef.current !== activeSort;
+      const shouldAnimate =
+        (isFirstRenderRef.current && animationKey > 0) ||
+        (!isFirstRenderRef.current && sortChanged);
 
-      if (isFirstRender) {
-        setIsFirstRender(false);
-        setPreviousSort(activeSort);
+      isFirstRenderRef.current = false;
+      previousSortRef.current = activeSort;
 
-        if (animationKey > 0) {
-          setIsHighlighting(true);
-          timer = setTimeout(() => {
-            setIsHighlighting(false);
-          }, 700);
-        }
-      } else if (previousSort !== activeSort) {
-        setPreviousSort(activeSort);
-        setIsHighlighting(true);
-        timer = setTimeout(() => {
-          setIsHighlighting(false);
-        }, 700);
+      if (!shouldAnimate) {
+        return;
       }
 
+      setIsHighlighting(true);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+      timerRef.current = setTimeout(() => {
+        setIsHighlighting(false);
+      }, 700);
+
       return () => {
-        if (timer) {
-          clearTimeout(timer);
+        if (timerRef.current) {
+          clearTimeout(timerRef.current);
+          timerRef.current = null;
         }
       };
-    }, [activeSort, animationKey, isFirstRender, previousSort, hasTouchScreen]);
+    }, [activeSort, animationKey, hasTouchScreen]);
 
     const hasUserVoted = drop.context_profile_context?.rating !== undefined;
 
@@ -91,12 +93,6 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
       onDropClick(drop);
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" || e.key === " ") {
-        onDropClick(drop);
-      }
-    };
-
     const handleVoteButtonClick = () => {
       setIsVotingModalOpen(true);
     };
@@ -121,7 +117,6 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
         <button
           className={`${imageContainerClass} tw-border-none tw-m-0 tw-p-0 tw-overflow-hidden tw-rounded-lg tw-w-full tw-text-left tw-bg-transparent`}
           onClick={handleImageClick}
-          onKeyDown={handleKeyDown}
           type="button"
         >
           <div className={`tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center ${imageScaleClasses}`}>
@@ -219,20 +214,6 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
           />
         )}
       </div>
-    );
-  },
-  (prevProps, nextProps) => {
-    if (
-      prevProps.activeSort !== nextProps.activeSort ||
-      prevProps.animationKey !== nextProps.animationKey
-    ) {
-      return false;
-    }
-
-    return (
-      prevProps.drop.id === nextProps.drop.id &&
-      prevProps.onDropClick === nextProps.onDropClick &&
-      prevProps.artFocused === nextProps.artFocused
     );
   }
 );
