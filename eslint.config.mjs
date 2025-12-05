@@ -86,6 +86,7 @@ export default defineConfig([globalIgnores([
         "**/next.config.*",
         "config/env.ts",
         "config/serverEnv.ts",
+        "config/alchemyEnv.ts",
         "__tests__/config/env.base-endpoint.test.ts",
         "**/playwright.config.ts",
         "tests/**",

@@ -65,18 +65,28 @@ export default function DistributionPage(props: Readonly<Props>) {
     setDistributionsPhases(phases);
   }
 
-  function fetchDistribution() {
+  async function fetchDistribution() {
     setFetching(true);
     const walletFilter =
       searchWallets.length === 0 ? "" : `&search=${searchWallets.join(",")}`;
     const distributionUrl = `${publicEnv.API_ENDPOINT}/api/distributions?card_id=${nftId}&contract=${props.contract}&page=${pageProps.page}${walletFilter}`;
-    fetchUrl(distributionUrl).then((r: DBResponse) => {
+    try {
+      const r = await fetchUrl<DBResponse>(distributionUrl);
       setTotalResults(r.count);
       const mydistributions: Distribution[] = r.data;
       setDistributions(mydistributions);
       updateDistributionPhases(mydistributions);
+    } catch (error) {
+      console.error(
+        `Failed to fetch distribution data for NFT ${nftId} on contract ${props.contract}`,
+        error
+      );
+      setTotalResults(0);
+      setDistributions([]);
+      setDistributionsPhases([]);
+    } finally {
       setFetching(false);
-    });
+    }
   }
 
   useEffect(() => {
@@ -90,12 +100,24 @@ export default function DistributionPage(props: Readonly<Props>) {
     if (nftId) {
       const distributionPhotosUrl = `${publicEnv.API_ENDPOINT}/api/distribution_photos/${props.contract}/${nftId}`;
 
-      fetchAllPages<DistributionPhoto>(distributionPhotosUrl).then(
-        (distributionPhotos) => {
-          setDistributionPhotos(distributionPhotos);
+      const loadPhotosAndDistribution = async () => {
+        try {
+          const photos = await fetchAllPages<DistributionPhoto>(
+            distributionPhotosUrl
+          );
+          setDistributionPhotos(photos);
+        } catch (error) {
+          console.error(
+            `Failed to fetch distribution photos for NFT ${nftId}`,
+            error
+          );
+          setDistributionPhotos([]);
+        } finally {
           fetchDistribution();
         }
-      );
+      };
+
+      loadPhotosAndDistribution();
     }
   }, [nftId]);
 

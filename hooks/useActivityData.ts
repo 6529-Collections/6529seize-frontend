@@ -101,11 +101,19 @@ export function useActivityData(
         break;
     }
 
-    fetchUrl(url).then((response: DBResponse) => {
-      setTotalResults(response.count);
-      setActivity(response.data);
-      setFetching(false);
-    });
+    fetchUrl(url)
+      .then((response: DBResponse) => {
+        setTotalResults(response.count);
+        setActivity(response.data);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch activity data", error);
+        setTotalResults(0);
+        setActivity([]);
+      })
+      .finally(() => {
+        setFetching(false);
+      });
   }, [page, typeFilter, selectedContract, pageSize, initialData, initialPage]);
 
   return {

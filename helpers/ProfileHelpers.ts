@@ -37,9 +37,11 @@ export const profileAndConsolidationsToProfileMin = ({
         cic: profile.cic,
         rep: profile.rep,
         tdh: profile.tdh,
+        xtdh: profile.xtdh,
         tdh_rate: profile.tdh_rate,
+        xtdh_rate: profile.xtdh_rate,
         level: profile.level,
         archived: false,
-        primary_address: profile.primary_wallet ?? null,
+        primary_address: profile.primary_wallet ?? "",
       }
     : null;

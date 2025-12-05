@@ -27,7 +27,7 @@ function checkPort(port) {
 async function findAvailablePort() {
   for (let offset = 0; offset <= MAX_OFFSET; offset += 1) {
     const port = DEFAULT_START_PORT + offset;
-    // eslint-disable-next-line no-await-in-loop
+     
     const isFree = await checkPort(port);
     if (isFree) {
       return port;
