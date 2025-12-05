@@ -189,6 +189,7 @@ function sharedConfig(publicEnv, assetPrefix) {
         "react-native": "./stubs/empty.js",
       },
     },
+    serverExternalPackages: ["@reown/appkit", "@reown/appkit-adapter-wagmi"],
   };
 }
 
