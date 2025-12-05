@@ -104,11 +104,11 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     const highlightAnimation =
       isHighlighting && !hasTouchScreen ? "tw-animate-gallery-reveal" : "";
 
-    const baseImageClasses = "tw-aspect-square tw-relative tw-cursor-pointer touch-none tw-overflow-hidden tw-bg-iron-900 tw-group/image";
+    const baseImageClasses = "tw-aspect-square tw-relative tw-cursor-pointer tw-touch-none tw-overflow-hidden tw-bg-iron-900 tw-group/image";
 
-    const imageScaleClasses = !hasTouchScreen
-      ? `tw-transform tw-duration-700 tw-ease-out group-hover/image:tw-scale-105 ${highlightAnimation}`
-      : "";
+    const imageScaleClasses = hasTouchScreen
+      ? ""
+      : `tw-transform tw-duration-700 tw-ease-out group-hover/image:tw-scale-105 ${highlightAnimation}`;
 
     const imageContainerClass = baseImageClasses;
 

@@ -27,9 +27,8 @@ export default function DropVoteProgressing({
 
   const isPositiveProgressing = current < projected;
 
-  // Define styles based on subtle mode
-  let color;
-  let arrowColor;
+  let color: string;
+  let arrowColor: string;
   if (subtle) {
     color = isPositiveProgressing ? "tw-text-iron-400 tw-font-mono" : "tw-text-iron-600 tw-font-mono";
     arrowColor = "tw-text-iron-600";
