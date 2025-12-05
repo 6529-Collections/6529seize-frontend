@@ -101,17 +101,17 @@ export function XtdhReceivedCollectionCard({
   const content = (
     <div
       className={clsx(
-        "tw-flex tw-w-full tw-flex-col tw-items-stretch tw-text-left tw-transition-colors",
+        "tw-flex tw-group tw-w-full tw-flex-col tw-items-stretch tw-text-left tw-transition-colors tw-duration-300 tw-overflow-hidden",
         interactionMode === "static"
           ? "tw-rounded-xl tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-800 tw-p-4"
-          : "tw-py-6 tw-px-6 desktop-hover:hover:tw-bg-iron-900",
+          : "tw-py-6 tw-px-6 desktop-hover:hover:tw-bg-iron-900 tw-rounded-b-xl",
         isSelected && "tw-bg-iron-900/50",
         !isSelectable && interactionMode === "button" && "tw-cursor-not-allowed tw-opacity-70"
       )}
     >
       <header className="tw-flex tw-flex-col md:tw-flex-row tw-items-start tw-justify-between tw-gap-x-3 tw-gap-y-6">
         <div className="tw-flex tw-flex-col sm:tw-flex-row tw-min-w-0 tw-flex-1 sm:tw-items-center tw-gap-3">
-          <div className="tw-relative tw-h-16 tw-w-16 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800">
+          <div className="tw-relative tw-h-16 tw-w-16 tw-bg-iron-800 tw-overflow-hidden tw-rounded-lg group-hover:tw-scale-105 tw-transition-transform tw-duration-300 tw-shadow-inner">
             {imageUrl ? (
               <Image
                 src={imageUrl}

@@ -63,8 +63,8 @@ export function XtdhTokenContributorsListItem({
 
   return (
     <li
-      className={`tw-list-none tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4 tw-transition-colors ${isClickable
-        ? "tw-cursor-pointer hover:tw-bg-iron-800 hover:tw-border-iron-700"
+      className={`tw-list-none tw-rounded-xl tw-border tw-border-solid tw-border-white/5  tw-bg-iron-900 desktop-hover:hover:tw-bg-iron-900/60 tw-p-4 tw-cursor-pointer tw-transition-all tw-duration-300  ${isClickable
+        ? "tw-cursor-pointer desktop-hover:hover:tw-bg-iron-950 desktop-hover:hover:tw-border-white/10"
         : ""
         }`}
       onClick={() => {

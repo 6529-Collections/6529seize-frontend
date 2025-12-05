@@ -131,7 +131,7 @@ export function XtdhCollectionTokensPanel({
           interactionMode="static"
         />
       ) : (
-        <div className="tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4 tw-text-sm tw-text-iron-300">
+        <div className="tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4 tw-text-sm tw-text-iron-300">
           Collection summary unavailable.
         </div>
       )}
@@ -140,7 +140,7 @@ export function XtdhCollectionTokensPanel({
         <div className="tw-space-y-4">
           <XtdhTokenListItem
             as="div"
-            className="tw-p-4 tw-cursor-pointer tw-transition-colors desktop-hover:hover:tw-bg-iron-900"
+            className="tw-p-4 tw-cursor-pointer tw-transition-all tw-duration-300 desktop-hover:hover:tw-bg-iron-950"
             token={selectedToken.token}
             metadata={selectedToken.metadata}
             isMetadataLoading={selectedToken.isMetadataLoading}

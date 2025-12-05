@@ -65,7 +65,7 @@ export function XtdhTokenListItem({
 
   const Wrapper = as === "div" ? "div" : "li";
   const wrapperClassName = clsx(
-    "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-4",
+    "tw-rounded-xl tw-border tw-border-solid tw-border-white/5 desktop-hover:hover:tw-border-white/10 tw-bg-iron-900 tw-transition-all tw-duration-300 desktop-hover:hover:tw-bg-iron-900/60 tw-p-4",
     as === "li" && "tw-list-none",
     className
   );
