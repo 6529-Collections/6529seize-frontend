@@ -4,27 +4,46 @@ import { DBResponse } from "@/entities/IDBResponse";
 import Cookies from "js-cookie";
 import { getStagingAuth } from "./auth/auth.utils";
 
-export async function fetchUrl(url: string): Promise<DBResponse | any> {
-  let headers = {};
+function buildAuthHeaders(init?: HeadersInit): Headers {
+  const headers = new Headers(init);
   const apiAuth = getStagingAuth();
   if (apiAuth) {
-    headers = { "x-6529-auth": apiAuth };
+    headers.set("x-6529-auth", apiAuth);
   }
-  const res = await fetch(url, {
-    headers: headers,
-  });
+  return headers;
+}
+
+function handleResponseError(res: Response): void {
   if (res.status === 401) {
     Cookies.remove(API_AUTH_COOKIE);
   }
+  if (!res.ok) {
+    throw new Error(`HTTP error! status: ${res.status}`);
+  }
+}
+
+export async function fetchUrl<T = DBResponse>(
+  url: string,
+  init?: RequestInit
+): Promise<T> {
+  const headers = buildAuthHeaders(init?.headers);
+  const res = await fetch(url, {
+    ...init,
+    headers,
+  });
+  handleResponseError(res);
   return await res.json();
 }
 
-export async function fetchAllPages<T>(startUrl: string): Promise<T[]> {
+export async function fetchAllPages<T>(
+  startUrl: string,
+  init?: RequestInit
+): Promise<T[]> {
   const all: T[] = [];
   let url = startUrl;
 
   while (url) {
-    const response = (await fetchUrl(url)) as Paginated<T>;
+    const response = await fetchUrl<Paginated<T>>(url, init);
 
     if (Array.isArray(response.data)) {
       all.push(...response.data);
@@ -60,19 +79,18 @@ function getNextUrl(currentUrl: string, next?: string | boolean): string {
   }
 }
 
-export async function postData(url: string, body: any) {
-  let headers: any = {
-    "Content-Type": "application/json",
-  };
-  const apiAuth = getStagingAuth();
-  if (apiAuth) {
-    headers = { "x-6529-auth": apiAuth, "Content-Type": "application/json" };
+export async function postData(url: string, body: any, init?: RequestInit) {
+  const headers = buildAuthHeaders(init?.headers);
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
   }
   const res = await fetch(url, {
+    ...init,
     method: "POST",
     body: JSON.stringify(body),
-    headers: headers,
+    headers,
   });
+  handleResponseError(res);
   const json = await res.json();
   return {
     status: res.status,
@@ -81,16 +99,13 @@ export async function postData(url: string, body: any) {
 }
 
 export async function postFormData(url: string, formData: FormData) {
-  let headers: any = {};
-  const apiAuth = getStagingAuth();
-  if (apiAuth) {
-    headers = { "x-6529-auth": apiAuth };
-  }
+  const headers = buildAuthHeaders();
   const res = await fetch(url, {
     method: "POST",
     body: formData,
-    headers: headers,
+    headers,
   });
+  handleResponseError(res);
   const json = await res.json();
   return {
     status: res.status,

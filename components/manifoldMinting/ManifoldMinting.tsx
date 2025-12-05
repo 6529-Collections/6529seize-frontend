@@ -24,7 +24,7 @@ import {
   useManifoldClaim,
 } from "@/hooks/useManifoldClaim";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { getTraitValue, ManifoldInstance } from "./manifold-types";
 import styles from "./ManifoldMinting.module.scss";
@@ -56,6 +56,8 @@ export default function ManifoldMinting(props: Readonly<Props>) {
   const [isLocalTimezone, setIsLocalTimezone] = useState<boolean>(true);
 
   const [descriptionClamped, setDescriptionClamped] = useState<boolean>(true);
+  const [needsClamping, setNeedsClamping] = useState<boolean>(false);
+  const descriptionRef = useRef<HTMLSpanElement>(null);
 
   const manifoldClaim = useManifoldClaim(
     props.contract,
@@ -123,6 +125,27 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     }
   }, [manifoldClaim?.instanceId]);
 
+  useEffect(() => {
+    if (instance) {
+      setNeedsClamping(false);
+      setDescriptionClamped(true);
+    }
+  }, [instance]);
+
+  useEffect(() => {
+    if (descriptionRef.current && descriptionClamped && instance) {
+      const checkClamping = () => {
+        const element = descriptionRef.current;
+        if (element) {
+          const needsClamp = element.scrollHeight > element.clientHeight;
+          setNeedsClamping(needsClamp);
+        }
+      };
+      const frameId = requestAnimationFrame(checkClamping);
+      return () => cancelAnimationFrame(frameId);
+    }
+  }, [instance, descriptionClamped]);
+
   function printMint() {
     if (!manifoldClaim) {
       return <></>;
@@ -145,9 +168,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     return (
       <Row className="pb-2">
         <Col className="d-flex align-items-center gap-2 ">
-          <h2 className="mb-0">
-            Mint {props.title}
-          </h2>
+          <h2 className="mb-0">Mint {props.title}</h2>
         </Col>
       </Row>
     );
@@ -168,6 +189,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
         <Row>
           <Col>
             <span
+              ref={descriptionRef}
               className={descriptionClamped ? styles.descriptionClamped : ""}
               dangerouslySetInnerHTML={{
                 __html: parseNftDescriptionToHtml(
@@ -177,17 +199,19 @@ export default function ManifoldMinting(props: Readonly<Props>) {
             />
           </Col>
         </Row>
-        <Row>
-          <Col>
-            <button
-              className="btn btn-link decoration-none"
-              onClick={() => setDescriptionClamped(!descriptionClamped)}>
-              <span className="font-smaller font-color-silver font-color-hover">
-                {descriptionClamped ? "+ SHOW MORE" : "- SHOW LESS"}
-              </span>
-            </button>
-          </Col>
-        </Row>
+        {needsClamping && (
+          <Row>
+            <Col>
+              <button
+                className="btn btn-link decoration-none"
+                onClick={() => setDescriptionClamped(!descriptionClamped)}>
+                <span className="font-smaller font-color-silver font-color-hover">
+                  {descriptionClamped ? "+ SHOW MORE" : "- SHOW LESS"}
+                </span>
+              </button>
+            </Col>
+          </Row>
+        )}
       </Container>
     );
   }

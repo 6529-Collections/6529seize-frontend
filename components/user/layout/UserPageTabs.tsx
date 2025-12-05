@@ -8,130 +8,165 @@ import {
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { usePathname } from "next/navigation";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import {
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import UserPageTab from "./UserPageTab";
+import {
+  DEFAULT_USER_PAGE_TAB,
+  USER_PAGE_TABS,
+  type UserPageTabConfig,
+  type UserPageTabKey,
+  type UserPageVisibilityContext,
+  getUserPageTabByRoute,
+} from "./userTabs.config";
 
-export enum UserPageTabType {
-  BRAIN = "BRAIN",
-  REP = "REP",
-  IDENTITY = "IDENTITY",
-  COLLECTED = "COLLECTED",
-  STATS = "STATS",
-  SUBSCRIPTIONS = "SUBSCRIPTIONS",
-  PROXY = "PROXY",
-  GROUPS = "GROUPS",
-  WAVES = "WAVES",
-  FOLLOWERS = "FOLLOWERS",
-}
+const DEFAULT_TAB = DEFAULT_USER_PAGE_TAB;
 
-export const USER_PAGE_TAB_META: Record<
-  UserPageTabType,
-  { tab: UserPageTabType; title: string; route: string }
-> = {
-  [UserPageTabType.BRAIN]: {
-    tab: UserPageTabType.BRAIN,
-    title: "Brain",
-    route: "",
-  },
-  [UserPageTabType.REP]: {
-    tab: UserPageTabType.REP,
-    title: "Rep",
-    route: "rep",
-  },
-
-  [UserPageTabType.IDENTITY]: {
-    tab: UserPageTabType.IDENTITY,
-    title: "Identity",
-    route: "identity",
-  },
-  [UserPageTabType.COLLECTED]: {
-    tab: UserPageTabType.COLLECTED,
-    title: "Collected",
-    route: "collected",
-  },
-  [UserPageTabType.STATS]: {
-    tab: UserPageTabType.STATS,
-    title: "Stats",
-    route: "stats",
-  },
-  [UserPageTabType.SUBSCRIPTIONS]: {
-    tab: UserPageTabType.SUBSCRIPTIONS,
-    title: "Subscriptions",
-    route: "subscriptions",
-  },
-  [UserPageTabType.PROXY]: {
-    tab: UserPageTabType.PROXY,
-    title: "Proxy",
-    route: "proxy",
-  },
-  [UserPageTabType.GROUPS]: {
-    tab: UserPageTabType.GROUPS,
-    title: "Groups",
-    route: "groups",
-  },
-  [UserPageTabType.WAVES]: {
-    tab: UserPageTabType.WAVES,
-    title: "Waves",
-    route: "waves",
-  },
-  [UserPageTabType.FOLLOWERS]: {
-    tab: UserPageTabType.FOLLOWERS,
-    title: "Followers",
-    route: "followers",
-  },
+// Normalize consent country to uppercase code; empty or non-strings become null.
+const normalizeCountry = (country: string | null | undefined): string | null => {
+  if (typeof country !== "string") {
+    return null;
+  }
+  const trimmed = country.trim();
+  return trimmed ? trimmed.toUpperCase() : null;
 };
+
+const getVisibilityContext = ({
+  showWaves,
+  capacitorIsIos,
+  country,
+}: {
+  readonly showWaves: boolean;
+  readonly capacitorIsIos: boolean;
+  readonly country: string | null | undefined;
+}): UserPageVisibilityContext => {
+  const normalizedCountry = normalizeCountry(country);
+
+  return {
+    showWaves,
+    hideSubscriptions: capacitorIsIos && normalizedCountry !== "US",
+  };
+};
+
+const resolveTabFromPath = (pathname: string): UserPageTabKey => {
+  const segments = pathname.split("/").filter(Boolean);
+  const routeSegment = segments[1] ?? "";
+  const match = getUserPageTabByRoute(routeSegment);
+  return match?.id ?? DEFAULT_TAB;
+};
+
+const filterVisibleTabs = (
+  tabs: readonly UserPageTabConfig[],
+  context: UserPageVisibilityContext
+) =>
+  tabs.filter((tab) => (tab.isVisible ? tab.isVisible(context) : true));
 
 export default function UserPageTabs() {
   const pathname = usePathname() ?? "";
+  const router = useRouter();
+  const params = useParams();
+  const handleOrWallet = params?.user?.toString() ?? "";
+  const searchParams = useSearchParams();
+  const searchString = searchParams?.toString() ?? "";
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
   const { showWaves } = useContext(AuthContext);
-  const pathnameToTab = (pathname: string): UserPageTabType => {
-    const segments = pathname.split("/").filter(Boolean);
-    const name = segments[1] ?? "";
-    const tab = Object.values(UserPageTabType).find(
-      (tab) =>
-        USER_PAGE_TAB_META[tab].route.toLowerCase() === name?.toLowerCase()
-    );
-    return tab ?? UserPageTabType.COLLECTED;
-  };
 
-  const [tab, setTab] = useState<UserPageTabType>(pathnameToTab(pathname));
+  const visibilityContext = useMemo(
+    () =>
+      getVisibilityContext({
+        showWaves,
+        capacitorIsIos: capacitor.isIos,
+        country,
+      }),
+    [capacitor.isIos, country, showWaves]
+  );
 
-  useEffect(() => {
-    setTab(pathnameToTab(pathname));
-  }, [pathname]);
-
-  const wrapperRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const contentContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  const getTabsToShow = useCallback(() => {
-    let allTabs = Object.values(UserPageTabType);
-    if (capacitor.isIos && country !== "US") {
-      allTabs = allTabs.filter((tab) => tab !== UserPageTabType.SUBSCRIPTIONS);
-    }
-    if (showWaves) return allTabs;
-    return allTabs.filter(
-      (tab) => ![UserPageTabType.BRAIN, UserPageTabType.WAVES].includes(tab)
-    );
-  }, [capacitor.isIos, country, showWaves]);
-  const [tabsToShow, setTabsToShow] = useState<UserPageTabType[]>(
-    getTabsToShow()
+  const resolvedTabFromPath = useMemo<UserPageTabKey>(
+    () => resolveTabFromPath(pathname),
+    [pathname]
   );
-  useEffect(() => setTabsToShow(getTabsToShow()), [getTabsToShow]);
 
-  const checkScroll = () => {
+  const visibleTabs = useMemo(
+    () => filterVisibleTabs(USER_PAGE_TABS, visibilityContext),
+    [visibilityContext]
+  );
+
+  const resolvedTabIsVisible = useMemo(
+    () => visibleTabs.some((tab) => tab.id === resolvedTabFromPath),
+    [resolvedTabFromPath, visibleTabs]
+  );
+
+  const activeTab = useMemo<UserPageTabKey>(() => {
+    if (resolvedTabIsVisible) {
+      return resolvedTabFromPath;
+    }
+
+    const firstVisibleTab = visibleTabs[0]?.id;
+    // Note: If no tabs are visible, defaults to DEFAULT_TAB.
+    // This is safe since rendering iterates visibleTabs (which would be empty).
+    return firstVisibleTab ?? DEFAULT_TAB;
+  }, [resolvedTabFromPath, resolvedTabIsVisible, visibleTabs]);
+
+  // Redirect to the first visible tab whenever the resolved tab becomes
+  // hidden because the visibility context changed (country, feature flags,
+  // etc.). The early returns combined with `resolvedTabIsVisible` and the
+  // pathname comparison ensure we only navigate when needed, preventing
+  // redirect loops even if the context flaps quickly.
+  useEffect(() => {
+    if (!visibleTabs.length || resolvedTabIsVisible || !handleOrWallet) {
+      return;
+    }
+
+    const fallbackTab = visibleTabs[0];
+    if (!fallbackTab) {
+      return;
+    }
+
+    const fallbackPath = fallbackTab.route
+      ? `/${handleOrWallet}/${fallbackTab.route}`
+      : `/${handleOrWallet}`;
+
+    if (fallbackPath === pathname) {
+      return;
+    }
+
+    const nextUrl = searchString ? `${fallbackPath}?${searchString}` : fallbackPath;
+    router.replace(nextUrl);
+  }, [
+    handleOrWallet,
+    pathname,
+    resolvedTabIsVisible,
+    router,
+    searchString,
+    visibleTabs,
+  ]);
+
+  const checkScroll = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
     const { scrollLeft, scrollWidth, clientWidth } = container;
     setCanScrollLeft(scrollLeft > 0);
     setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
-  };
+  }, []);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -142,31 +177,34 @@ export default function UserPageTabs() {
     container.addEventListener("scroll", checkScroll);
     window.addEventListener("resize", checkScroll);
 
-    const resizeObserver = new ResizeObserver(() => {
-      checkScroll();
-    });
-    resizeObserver.observe(container);
-    if (contentContainer) {
-      resizeObserver.observe(contentContainer);
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(() => {
+        checkScroll();
+      });
+
+      resizeObserver.observe(container);
+      if (contentContainer) {
+        resizeObserver.observe(contentContainer);
+      }
     }
 
     return () => {
       container.removeEventListener("scroll", checkScroll);
       window.removeEventListener("resize", checkScroll);
-      resizeObserver.disconnect();
+      resizeObserver?.disconnect();
     };
-  }, []);
+  }, [checkScroll]);
 
   useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
+    if (!visibleTabs.length) return;
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         checkScroll();
       });
     });
-  }, [tabsToShow]);
+  }, [checkScroll, visibleTabs]);
 
   const scrollLeft = () => {
     const container = scrollContainerRef.current;
@@ -190,12 +228,12 @@ export default function UserPageTabs() {
           ref={contentContainerRef}
           className="-tw-mb-px tw-flex tw-gap-x-3 lg:tw-gap-x-4 tw-min-w-max"
           aria-label="Tabs">
-          {tabsToShow.map((tabType) => (
+          {visibleTabs.map((tabConfig) => (
             <UserPageTab
-              key={tabType}
-              tab={tabType}
-              activeTab={tab}
-              parentRef={wrapperRef}
+              key={tabConfig.id}
+              tab={tabConfig}
+              activeTabId={activeTab}
+              parentRef={scrollContainerRef}
             />
           ))}
         </div>

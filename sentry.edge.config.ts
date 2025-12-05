@@ -5,7 +5,10 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import { publicEnv } from "@/config/env";
-import { tagSecurityProbes } from "@/config/sentryProbes";
+import {
+  filterTunnelRouteErrors,
+  tagSecurityProbes,
+} from "@/config/sentryProbes";
 import * as Sentry from "@sentry/nextjs";
 
 const dsn = publicEnv.SENTRY_DSN;
@@ -26,7 +29,11 @@ Sentry.init({
   // ------------------------------------------------------------
   // Handle obvious bot / exploit probes more gently (edge)
   // ------------------------------------------------------------
-  beforeSend(event) {
-    return tagSecurityProbes(event);
+  beforeSend(event: Sentry.ErrorEvent, hint: Sentry.EventHint) {
+    const filtered = filterTunnelRouteErrors(event, hint);
+    if (filtered === null) {
+      return null;
+    }
+    return tagSecurityProbes(filtered);
   },
 });

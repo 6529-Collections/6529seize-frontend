@@ -56,7 +56,10 @@ export default function AppLayout({ children }: Props) {
   );
 
   return (
-    <div className="tw-pb-[env(safe-area-inset-bottom,0px)]">
+    <div
+      className={`tw-pb-[env(safe-area-inset-bottom,0px)] ${
+        isHomeFeedView ? "tw-overflow-hidden" : "tw-overflow-auto"
+      }`}>
       <div ref={headerWrapperRef}>
         <TouchDeviceHeader />
       </div>
@@ -65,12 +68,7 @@ export default function AppLayout({ children }: Props) {
       ) : activeView === "waves" ? (
         <BrainMobileWaves />
       ) : (
-        <main
-          className={
-            isHomeFeedView ? "tw-h-full tw-overflow-hidden" : undefined
-          }>
-          {children}
-        </main>
+        <main>{children}</main>
       )}
       {!isSingleDropOpen && !isStreamRoute && !isHomeFeedView && (
         <div className="tw-h-16 tw-w-full" />

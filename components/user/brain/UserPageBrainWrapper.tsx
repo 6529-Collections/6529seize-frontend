@@ -1,5 +1,5 @@
-"use client";
 
+"use client";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";

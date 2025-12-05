@@ -1,9 +1,5 @@
-"use client"
-
 import DropPfp from "@/components/drops/create/utils/DropPfp";
-import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
 import { useIdentity } from "@/hooks/useIdentity";
-import { useIdentityBalance } from "@/hooks/useIdentityBalance";
 import UserFollowBtn, {
   UserFollowBtnSize,
 } from "@/components/user/utils/UserFollowBtn";
@@ -16,6 +12,8 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
+import UserStatsRow from "../stats/UserStatsRow";
+import { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
 
 export default function UserProfileTooltip({
   user,
@@ -27,10 +25,6 @@ export default function UserProfileTooltip({
     initialProfile: null,
   });
 
-  const { data: balance } = useIdentityBalance({
-    consolidationKey: profile?.consolidation_key ?? null,
-  });
-
   const { data: statements } = useQuery<CicStatement[]>({
     queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, user.toLowerCase()],
     queryFn: async () =>
@@ -39,6 +33,21 @@ export default function UserProfileTooltip({
       }),
     enabled: !!user && !!profile?.handle,
   });
+
+  const { data: followersData } = useQuery<ApiIncomingIdentitySubscriptionsPage>({
+    queryKey: [
+      QueryKey.IDENTITY_FOLLOWERS,
+      { profile_id: profile?.id, page_size: 1 },
+    ],
+    queryFn: async () =>
+      await commonApiFetch<ApiIncomingIdentitySubscriptionsPage>({
+        endpoint: `identity-subscriptions/incoming/IDENTITY/${profile?.id}`,
+        params: { page_size: "1" },
+      }),
+    enabled: !!profile?.id,
+  });
+
+  const followersCount = followersData?.count ?? 0;
 
   const [aboutStatement, setAboutStatement] = useState<CicStatement | null>(
     null
@@ -69,7 +78,7 @@ export default function UserProfileTooltip({
   );
   const showFollowButton = Boolean(
     normalizedProfileHandle &&
-      normalizedProfileHandle !== normalizedConnectedHandle
+    normalizedProfileHandle !== normalizedConnectedHandle
   );
 
   return (
@@ -116,37 +125,17 @@ export default function UserProfileTooltip({
           {aboutStatement.statement_value}
         </p>
       )}
-      <div className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-1.5 tw-mt-4">
-        <div className="tw-flex tw-items-center tw-gap-x-1.5">
-          <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
-            {formatNumberWithCommasOrDash(profile?.tdh ?? 0)}
-          </span>
-          <span className="tw-text-sm tw-text-iron-400">TDH</span>
-        </div>
-        <div className="tw-flex tw-items-center tw-gap-x-1.5">
-          <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
-            {formatNumberWithCommasOrDash(profile?.tdh_rate ?? 0)}
-          </span>
-          <span className="tw-text-sm tw-text-iron-400">TDH Rate</span>
-        </div>
-        <div className="tw-flex tw-items-center tw-gap-x-1.5">
-          <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
-            {formatNumberWithCommasOrDash(profile?.rep ?? 0)}
-          </span>
-          <span className="tw-text-sm tw-text-iron-400">REP</span>
-        </div>
-        <div className="tw-flex tw-items-center tw-gap-x-1.5">
-          <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
-            {formatNumberWithCommasOrDash(profile?.cic ?? 0)}
-          </span>
-          <span className="tw-text-sm tw-text-iron-400">NIC</span>
-        </div>
-        <div className="tw-flex tw-items-center tw-gap-x-1.5">
-          <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
-            {formatNumberWithCommasOrDash(balance?.total_balance ?? 0)}
-          </span>
-          <span className="tw-text-sm tw-text-iron-400">Balance</span>
-        </div>
+      <div className="tw-mt-4">
+        <UserStatsRow
+          handle={profile?.handle ?? user}
+          tdh={profile?.tdh ?? 0}
+          tdh_rate={profile?.tdh_rate ?? 0}
+          xtdh={profile?.xtdh ?? 0}
+          xtdh_rate={profile?.xtdh_rate ?? 0}
+          rep={profile?.rep ?? 0}
+          cic={profile?.cic ?? 0}
+          followersCount={followersCount}
+        />
       </div>
     </div>
   );

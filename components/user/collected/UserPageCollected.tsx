@@ -28,16 +28,19 @@ import {
 } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import UserPageCollectedCards from "./cards/UserPageCollectedCards";
+import UserPageCollectedNetworkCards from "./cards/UserPageCollectedNetworkCards";
 import {
   COLLECTED_COLLECTIONS_META,
   convertAddressToLowerCase,
 } from "./filters/user-page-collected-filters.helpers";
 import UserPageCollectedFilters from "./filters/UserPageCollectedFilters";
+import { useXtdhTokensQuery } from "./hooks/useXtdhTokensQuery";
 import UserPageCollectedFirstLoading from "./UserPageCollectedFirstLoading";
 export interface ProfileCollectedFilters {
   readonly handleOrWallet: string;
   readonly accountForConsolidations: boolean;
   readonly collection: CollectedCollectionType | null;
+  readonly subcollection: string | null;
   readonly seized: CollectionSeized | null;
   readonly szn: MEMES_SEASON | null;
   readonly page: number;
@@ -54,6 +57,7 @@ interface QueryUpdateInput {
 const SEARCH_PARAMS_FIELDS = {
   address: "address",
   collection: "collection",
+  subcollection: "subcollection",
   seized: "seized",
   szn: "szn",
   page: "page",
@@ -149,6 +153,7 @@ export default function UserPageCollected({
     if (!sortBy) return defaultSortBy;
     if (
       collection &&
+      collection !== CollectedCollectionType.NETWORK &&
       !COLLECTED_COLLECTIONS_META[collection].filters.sort.includes(
         sortBy.toUpperCase() as CollectionSort
       )
@@ -173,6 +178,7 @@ export default function UserPageCollected({
   const getFilters = useCallback((): ProfileCollectedFilters => {
     const address = searchParams?.get(SEARCH_PARAMS_FIELDS.address);
     const collection = searchParams?.get(SEARCH_PARAMS_FIELDS.collection);
+    const subcollection = searchParams?.get(SEARCH_PARAMS_FIELDS.subcollection);
     const seized = searchParams?.get(SEARCH_PARAMS_FIELDS.seized);
     const szn = searchParams?.get(SEARCH_PARAMS_FIELDS.szn);
     const page = searchParams?.get(SEARCH_PARAMS_FIELDS.page);
@@ -185,6 +191,7 @@ export default function UserPageCollected({
       handleOrWallet: convertedAddress ?? profile.handle ?? user,
       accountForConsolidations: !convertedAddress,
       collection: convertedCollection,
+      subcollection: subcollection ?? null,
       seized: convertSeized({
         seized: seized ?? null,
         collection: convertedCollection,
@@ -254,14 +261,40 @@ export default function UserPageCollected({
         name: "szn",
         value: null,
       },
+      {
+        name: "subcollection",
+        value: null,
+      },
     ];
+
+    const isSwitchingFromNetwork =
+      filters.collection === CollectedCollectionType.NETWORK;
 
     if (
       collection &&
+      collection !== CollectedCollectionType.NETWORK &&
       !COLLECTED_COLLECTIONS_META[collection].filters.sort.includes(
         filters.sortBy
       )
     ) {
+      items.push({
+        name: "sortBy",
+        value: CollectionSort.TOKEN_ID,
+      });
+      items.push({
+        name: "sortDirection",
+        value: SortDirection.DESC,
+      });
+    } else if (collection === CollectedCollectionType.NETWORK) {
+      items.push({
+        name: "sortBy",
+        value: CollectionSort.XTDH,
+      });
+      items.push({
+        name: "sortDirection",
+        value: SortDirection.DESC,
+      });
+    } else if (isSwitchingFromNetwork) {
       items.push({
         name: "sortBy",
         value: CollectionSort.TOKEN_ID,
@@ -343,6 +376,22 @@ export default function UserPageCollected({
     await updateFields(items);
   };
 
+  const setSubcollection = async (
+    subcollection: string | null
+  ): Promise<void> => {
+    const items: QueryUpdateInput[] = [
+      {
+        name: "subcollection",
+        value: subcollection,
+      },
+      {
+        name: "page",
+        value: "1",
+      },
+    ];
+    await updateFields(items);
+  };
+
   const setPage = async (page: number): Promise<void> => {
     const items: QueryUpdateInput[] = [
       {
@@ -394,7 +443,25 @@ export default function UserPageCollected({
       });
     },
     placeholderData: keepPreviousData,
+    enabled: filters.collection !== CollectedCollectionType.NETWORK,
   });
+
+  const {
+    data: dataNetwork,
+    isLoading: isNetworkLoading,
+    isFetching: isNetworkFetching,
+  } = useXtdhTokensQuery({
+    identity: filters.handleOrWallet,
+    page: filters.page,
+    pageSize: filters.pageSize,
+    sort: filters.sortBy,
+    order: filters.sortDirection,
+    contract: filters.subcollection,
+  });
+
+  const isNetwork = filters.collection === CollectedCollectionType.NETWORK;
+  const isFetchingData = isFetching || isNetworkFetching;
+  const isLoading = isInitialLoading || isNetworkLoading;
 
   const showTransfer =
     !isMobile &&
@@ -411,9 +478,16 @@ export default function UserPageCollected({
   >({
     queryKey: [QueryKey.PROFILE_COLLECTED_TRANSFER, filters, connectedAddress],
     queryFn: async () => {
-      const allPagesUrl = `${publicEnv.API_ENDPOINT}/api/profiles/${connectedAddress}/collected?&page_size=200&seized=${CollectionSeized.SEIZED}`;
-      const data = await fetchAllPages<CollectedCard>(allPagesUrl);
-      return data;
+      try {
+        const allPagesUrl = `${publicEnv.API_ENDPOINT}/api/profiles/${connectedAddress}/collected?page_size=200&seized=${CollectionSeized.SEIZED}`;
+        return await fetchAllPages<CollectedCard>(allPagesUrl);
+      } catch (error) {
+        console.error(
+          `Failed to fetch transfer data for profile ${connectedAddress}`,
+          error
+        );
+        throw error;
+      }
     },
     enabled: showTransfer && transferEnabled,
     placeholderData: keepPreviousData,
@@ -422,7 +496,11 @@ export default function UserPageCollected({
   const [totalPages, setTotalPages] = useState<number>(1);
 
   useEffect(() => {
-    if (isFetching) return;
+    if (isFetchingData) return;
+    if (isNetwork) {
+      // Network tab handles pagination via 'next' property, no total pages count
+      return;
+    }
     if (!data?.count) {
       setPage(1);
       setTotalPages(1);
@@ -434,7 +512,14 @@ export default function UserPageCollected({
       return;
     }
     setTotalPages(pagesCount);
-  }, [data?.count, data?.page, isFetching]);
+  }, [
+    data?.count,
+    data?.page,
+    isFetchingData,
+    isNetwork,
+    filters.pageSize,
+    filters.page,
+  ]);
 
   const getShowDataRow = (): boolean =>
     filters.collection
@@ -444,14 +529,18 @@ export default function UserPageCollected({
   const [showDataRow, setShowDataRow] = useState<boolean>(getShowDataRow());
 
   useEffect(() => {
-    setShowDataRow(getShowDataRow());
-  }, [filters.collection]);
+    if (isNetwork) {
+      setShowDataRow(false);
+    } else {
+      setShowDataRow(getShowDataRow());
+    }
+  }, [filters.collection, isNetwork]);
 
   const scrollContainer = useRef<HTMLDivElement>(null);
 
   return (
     <div className="tailwind-scope">
-      {isInitialLoading ? (
+      {isLoading ? (
         <UserPageCollectedFirstLoading />
       ) : (
         <>
@@ -464,21 +553,31 @@ export default function UserPageCollected({
               setSortBy={setSortBy}
               setSeized={setSeized}
               setSzn={setSzn}
+              setSubcollection={setSubcollection}
               showTransfer={showTransfer}
             />
           </div>
 
           <div className="tw-mt-6 tw-flex tw-gap-6">
-            <UserPageCollectedCards
-              cards={data?.data ?? []}
-              totalPages={totalPages}
-              page={filters.page}
-              showDataRow={showDataRow}
-              filters={filters}
-              setPage={setPage}
-              dataTransfer={dataTransfer ?? []}
-              isTransferLoading={isFetchingTransfer}
-            />
+            {isNetwork ? (
+              <UserPageCollectedNetworkCards
+                cards={dataNetwork?.data ?? []}
+                page={filters.page}
+                setPage={setPage}
+                next={dataNetwork?.next ?? false}
+              />
+            ) : (
+              <UserPageCollectedCards
+                cards={data?.data ?? []}
+                totalPages={totalPages}
+                page={filters.page}
+                showDataRow={showDataRow}
+                filters={filters}
+                setPage={setPage}
+                dataTransfer={dataTransfer ?? []}
+                isTransferLoading={isFetchingTransfer}
+              />
+            )}
           </div>
           {showTransfer && transferEnabled && (
             <TransferPanel isLoading={isFetchingTransfer} />
