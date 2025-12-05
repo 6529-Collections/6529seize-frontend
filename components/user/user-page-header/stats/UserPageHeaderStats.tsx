@@ -1,10 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
-import UserPageFollowers from "../followers/UserPageFollowers";
-import { Tooltip } from "react-tooltip";
+import UserStatsRow from "../../utils/stats/UserStatsRow";
+
 
 const SAFE_ROUTE_SEGMENT_PATTERN = /^[a-zA-Z0-9._-]+$/;
 
@@ -40,57 +38,16 @@ export default function UserPageHeaderStats({
 
   return (
     <div className="tw-mt-3">
-      <div className="tw-flex tw-gap-x-4 sm:tw-gap-x-6 tw-flex-wrap tw-gap-y-2">
-        <Link
-          href={`/${routeHandle}/collected`}
-          className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
-        >
-          <span className="tw-text-base tw-font-semibold tw-text-iron-50">
-            {formatNumberWithCommas(profile.tdh)}
-          </span>
-          <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400">
-            TDH
-          </span>
-        </Link>
-        <Link
-          href={`/${routeHandle}/stats?activity=tdh-history`}
-          className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
-          data-tooltip-id="tdh-rate-tooltip"
-        >
-          <span className="tw-text-base tw-font-semibold tw-text-iron-50">
-            {formatNumberWithCommas(profile.tdh_rate)}
-          </span>
-          <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400 tw-whitespace-nowrap">
-            TDH Rate
-          </span>
-        </Link>
-        <Link
-          href={`/${routeHandle}/rep`}
-          className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
-        >
-          <span className="tw-text-base tw-font-semibold tw-text-iron-50">
-            {formatNumberWithCommas(profile.rep)}
-          </span>
-          <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400">
-            Rep
-          </span>
-        </Link>
-        <UserPageFollowers
-          handleOrWallet={routeHandle}
-          followersCount={followersCount}
-        />
-      </div>
-      <Tooltip
-        id="tdh-rate-tooltip"
-        place="top"
-        style={{
-          backgroundColor: "#1F2937",
-          color: "white",
-          padding: "4px 8px",
-        }}
-      >
-        <span className="tw-text-xs">How much TDH you earn each day</span>
-      </Tooltip>
+      <UserStatsRow
+        handle={routeHandle}
+        tdh={profile.tdh}
+        tdh_rate={profile.tdh_rate}
+        xtdh={profile.xtdh}
+        xtdh_rate={profile.xtdh_rate}
+        rep={profile.rep}
+        cic={profile.cic}
+        followersCount={followersCount}
+      />
     </div>
   );
 }

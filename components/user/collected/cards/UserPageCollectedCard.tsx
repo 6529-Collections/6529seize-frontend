@@ -12,7 +12,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import { useId } from "react";
+import { useId, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { COLLECTED_COLLECTIONS_META } from "../filters/user-page-collected-filters.helpers";
 
@@ -52,6 +52,8 @@ export default function UserPageCollectedCard({
   const isSelectedAndCanSelect = canSelect && selected;
   const hasBalanceMismatch =
     isSelectMode && copiesMax !== (card.seized_count ?? 0);
+
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
 
   const showSeizedCount =
     COLLECTED_COLLECTIONS_META[card.collection].dataRows.seizedCount &&
@@ -236,12 +238,12 @@ export default function UserPageCollectedCard({
     <div
       {...(isSelectModeAndCanSelect && !selected
         ? {
-            role: "button",
-            tabIndex: 0,
-            "aria-label": "Select NFT for transfer",
-            onClick: handleCardClick,
-            onKeyDown: handleCardKeyDown,
-          }
+          role: "button",
+          tabIndex: 0,
+          "aria-label": "Select NFT for transfer",
+          onClick: handleCardClick,
+          onKeyDown: handleCardKeyDown,
+        }
         : {})}
       className={[
         "tw-group tw-relative",
@@ -255,11 +257,16 @@ export default function UserPageCollectedCard({
 
       <div className="tw-flex tw-flex-wrap">
         <div className="tw-w-full tw-max-w-full">
-          <div className="tw-h-[200px] min-[800px]:tw-h-[250px] min-[1200px]:tw-h-[18.75rem] tw-text-center tw-flex tw-items-center tw-justify-center">
+          <div className="tw-h-[200px] min-[800px]:tw-h-[250px] min-[1200px]:tw-h-[18.75rem] tw-text-center tw-flex tw-items-center tw-justify-center tw-relative tw-w-full">
+            {!isImageLoaded && (
+              <div className="tw-absolute tw-inset-0 tw-bg-iron-800 tw-animate-pulse tw-rounded-lg" />
+            )}
             <img
               src={card.img}
               alt={card.collection}
-              className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
+              onLoad={() => setIsImageLoaded(true)}
+              className={`tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain ${!isImageLoaded ? "tw-opacity-0" : "tw-opacity-100"
+                } tw-transition-opacity tw-duration-300`}
             />
           </div>
         </div>

@@ -44,8 +44,12 @@ export class ApiOwnerBalance {
     'boosted_memes_tdh_rank': number;
     'boosted_gradients_tdh_rank': number;
     'boosted_nextgen_tdh_rank': number;
+    'xtdh': number;
+    'xtdh_rank': number;
 
     static readonly discriminator: string | undefined = undefined;
+
+    static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
@@ -233,6 +237,18 @@ export class ApiOwnerBalance {
             "baseName": "boosted_nextgen_tdh_rank",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "xtdh",
+            "baseName": "xtdh",
+            "type": "number",
+            "format": "double"
+        },
+        {
+            "name": "xtdh_rank",
+            "baseName": "xtdh_rank",
+            "type": "number",
+            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
@@ -242,4 +258,3 @@ export class ApiOwnerBalance {
     public constructor() {
     }
 }
-

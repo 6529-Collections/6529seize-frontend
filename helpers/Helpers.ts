@@ -3,9 +3,10 @@ import {
   NEXTGEN_CORE,
 } from "@/components/nextGen/nextgen_contracts";
 import {
-  USER_PAGE_TAB_META,
-  UserPageTabType,
-} from "@/components/user/layout/UserPageTabs";
+  type UserPageTabKey,
+  getUserPageTabById,
+  DEFAULT_USER_PAGE_TAB,
+} from "@/components/user/layout/userTabs.config";
 import { publicEnv } from "@/config/env";
 import {
   GRADIENT_CONTRACT,
@@ -73,7 +74,7 @@ export function numberWithCommasFromString(x: any) {
   x = x.toString();
   if (!x || !isNumeric(x) || isNaN(parseFloat(x))) return x;
   if (x.includes(" ") || x.includes(",")) return x;
-  const cleanedInput = x.replace(/[^\d.-]/g, "");
+  const cleanedInput = x.replaceAll(/[^\d.-]/g, "");
   if (!/^-?\d+(\.\d+)?$/.test(cleanedInput)) return x;
   const num = parseFloat(cleanedInput);
   if (isNaN(num)) return x;
@@ -123,6 +124,18 @@ export function formatNumberWithCommasOrDash(x: number): string {
   return formatNumberWithCommas(x);
 }
 
+export function formatStatFloor(
+  value: number | null | undefined,
+  decimals = 0
+): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return "-";
+  }
+  const factor = 10 ** decimals;
+  const flooredValue = Math.floor(value * factor) / factor;
+  return formatNumberWithCommas(flooredValue);
+}
+
 export function getDateDisplay(date: Date) {
   const secondsAgo = (new Date().getTime() - date.getTime()) / 1000;
   if (60 > secondsAgo) {
@@ -135,9 +148,8 @@ export function getDateDisplay(date: Date) {
   if (60 * 60 * 24 > secondsAgo) {
     const hours = Math.floor(secondsAgo / (60 * 60));
     const minutes = secondsAgo % (60 * 60);
-    return `${hours} hr${hours > 1 ? "s" : ""} ${
-      minutes > 0 ? `${Math.floor(minutes / 60)} mins` : ""
-    } ago`;
+    return `${hours} hr${hours > 1 ? "s" : ""} ${minutes > 0 ? `${Math.floor(minutes / 60)} mins` : ""
+      } ago`;
   }
   const days = Math.round(secondsAgo / (60 * 60 * 24));
   if (2 > days) {
@@ -293,7 +305,7 @@ export function containsEmojis(s: string) {
 
 export function parseEmojis(s: string) {
   const regex = /U\+([\dA-Fa-f]{1,6})/g;
-  return s.replace(regex, (_, hexValue) => {
+  return s.replaceAll(regex, (_, hexValue) => {
     return `&#x${hexValue};`;
   });
 }
@@ -309,10 +321,10 @@ export function printMintDate(date?: Date) {
   const mintDate = new Date(date);
   return `
       ${mintDate.toLocaleString("default", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      })} 
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  })} 
       (${getDateDisplay(mintDate)})
     `;
 }
@@ -334,7 +346,7 @@ export function getRandomColor() {
 export function capitalizeEveryWord(input: string): string {
   return input
     .toLocaleLowerCase()
-    .replace(/^(.)|\s+(.)/g, (match: string) => match.toUpperCase());
+    .replaceAll(/(?:^|\s+)(.)/g, (match: string) => match.toUpperCase());
 }
 
 export function getNetworkName(chainId: number) {
@@ -604,25 +616,20 @@ export const getTimeUntil = (milliseconds: number): string => {
   const years = Math.floor(months / 12);
 
   if (years > 0) {
-    return `${isFuture ? "in" : ""} ${years} year${years > 1 ? "s" : ""} ${
-      isFuture ? "" : "ago"
-    }`;
+    return `${isFuture ? "in" : ""} ${years} year${years > 1 ? "s" : ""} ${isFuture ? "" : "ago"
+      }`;
   } else if (months > 0) {
-    return `${isFuture ? "in" : ""} ${months} month${months > 1 ? "s" : ""} ${
-      isFuture ? "" : "ago"
-    }`;
+    return `${isFuture ? "in" : ""} ${months} month${months > 1 ? "s" : ""} ${isFuture ? "" : "ago"
+      }`;
   } else if (days > 0) {
-    return `${isFuture ? "in" : ""} ${days} day${days > 1 ? "s" : ""} ${
-      isFuture ? "" : "ago"
-    }`;
+    return `${isFuture ? "in" : ""} ${days} day${days > 1 ? "s" : ""} ${isFuture ? "" : "ago"
+      }`;
   } else if (hours > 0) {
-    return `${isFuture ? "in" : ""} ${hours} hour${hours > 1 ? "s" : ""} ${
-      isFuture ? "" : "ago"
-    }`;
+    return `${isFuture ? "in" : ""} ${hours} hour${hours > 1 ? "s" : ""} ${isFuture ? "" : "ago"
+      }`;
   } else if (minutes > 0) {
-    return `${isFuture ? "in" : ""} ${minutes} minute${
-      minutes > 1 ? "s" : ""
-    } ${isFuture ? "" : "ago"}`;
+    return `${isFuture ? "in" : ""} ${minutes} minute${minutes > 1 ? "s" : ""
+      } ${isFuture ? "" : "ago"}`;
   } else {
     return `Just now`;
   }
@@ -639,15 +646,18 @@ export const getProfileTargetRoute = ({
 }: {
   readonly handleOrWallet: string;
   readonly pathname: string;
-  readonly defaultPath: UserPageTabType;
+  readonly defaultPath: UserPageTabKey;
 }): string => {
   if (!handleOrWallet.length) {
     return "/404";
   }
   if (pathname.includes("[user]")) {
-    return pathname.replace("[user]", handleOrWallet);
+    return pathname.replaceAll("[user]", handleOrWallet);
   }
-  return `/${handleOrWallet}/${USER_PAGE_TAB_META[defaultPath].route}`;
+  const tab =
+    getUserPageTabById(defaultPath) ??
+    getUserPageTabById(DEFAULT_USER_PAGE_TAB);
+  return `/${handleOrWallet}/${tab.route}`;
 };
 
 export function isNullAddress(address: string) {
@@ -751,13 +761,41 @@ export const getRandomColorWithSeed = (seedString: string) => {
   return `#${r}${g}${b}`;
 };
 
+
+const escapeHtml = (value: string): string =>
+  value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+
+
 export function parseNftDescriptionToHtml(description: string) {
-  let d = description.replaceAll("\n", "<br />");
-  d = d.replace(
-    /(https?:\/\/(www\.)?[-a-z0-9@:%._+~#=]{1,256}\.[a-z0-9]{1,6}\b([-a-z0-9@:%_+.~#?&=/]*))/gi,
-    '<a href=\'$1\' target="blank" rel="noopener noreferrer">$1</a>'
-  );
-  return d;
+  const urlRegex =
+    /(https?:\/\/(www\.)?[-a-z0-9@:%._+~#=]{1,256}\.[a-z0-9]{1,6}\b([-a-z0-9@:%_+.~#?&=/]*))/gi;
+
+  let result = "";
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = urlRegex.exec(description)) !== null) {
+    const url = match[0];
+    const index = match.index ?? 0;
+
+    const preceding = description.slice(lastIndex, index);
+    result += escapeHtml(preceding).replaceAll("\n", "<br />");
+
+    const safeUrl = escapeHtml(url);
+    result += `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeUrl}</a>`;
+
+    lastIndex = index + url.length;
+  }
+
+  const remaining = description.slice(lastIndex);
+  result += escapeHtml(remaining).replaceAll("\n", "<br />");
+
+  return result;
 }
 
 export function getPathForContract(contract: string) {
@@ -791,7 +829,11 @@ export const wait = async (ms: number): Promise<void> => {
 };
 
 export const removeBaseEndpoint = (link: string) => {
-  return link.replace(publicEnv.BASE_ENDPOINT ?? "", "");
+  const baseEndpoint = publicEnv.BASE_ENDPOINT;
+  if (!baseEndpoint) {
+    return link;
+  }
+  return link.replaceAll(baseEndpoint, "");
 };
 
 export const getMetadataForUserPage = (
@@ -802,9 +844,8 @@ export const getMetadataForUserPage = (
   return {
     title: display + (path ? ` | ${path}` : ""),
     ogImage: profile.pfp ?? "",
-    description: `Level ${
-      profile.level
-    } / TDH: ${profile.tdh.toLocaleString()} / Rep: ${profile.rep.toLocaleString()}`,
+    description: `Level ${profile.level
+      } / TDH: ${profile.tdh.toLocaleString()} / Rep: ${profile.rep.toLocaleString()}`,
     twitterCard: "summary_large_image",
   };
 };

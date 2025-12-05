@@ -79,7 +79,6 @@ if (!process.env.PUBLIC_RUNTIME) {
     API_ENDPOINT: "https://api.test.6529.io",
     BASE_ENDPOINT: "https://test.6529.io",
     ALLOWLIST_API_ENDPOINT: "https://allowlist-api.test.6529.io",
-    ALCHEMY_API_KEY: "test-alchemy-api-key",
     NEXTGEN_CHAIN_ID: 1,
     MOBILE_APP_SCHEME: "testmobile6529",
     CORE_SCHEME: "testcore6529",
@@ -92,16 +91,20 @@ if (!process.env.PUBLIC_RUNTIME) {
   });
 }
 
+if (!process.env.ALCHEMY_API_KEY) {
+  process.env.ALCHEMY_API_KEY = "test-alchemy-api-key";
+}
+
 // Mock ResizeObserver for react-tooltip
 globalThis.ResizeObserver = class ResizeObserver {
   constructor(callback) {
     this.callback = callback;
   }
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
+   
   observe() {} // Intentionally empty - no actual observation needed in tests
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
+   
   unobserve() {} // Intentionally empty - no actual observation needed in tests
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
+   
   disconnect() {} // Intentionally empty - no actual observation needed in tests
 };
 

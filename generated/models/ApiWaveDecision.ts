@@ -19,6 +19,8 @@ export class ApiWaveDecision {
 
     static readonly discriminator: string | undefined = undefined;
 
+    static readonly mapping: {[index: string]: string} | undefined = undefined;
+
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
             "name": "decision_time",
@@ -40,4 +42,3 @@ export class ApiWaveDecision {
     public constructor() {
     }
 }
-

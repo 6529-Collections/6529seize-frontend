@@ -232,7 +232,6 @@ const nextConfigFactory = (phase) => {
         API_ENDPOINT: publicEnv.API_ENDPOINT,
         ALLOWLIST_API_ENDPOINT: publicEnv.ALLOWLIST_API_ENDPOINT,
         BASE_ENDPOINT: publicEnv.BASE_ENDPOINT,
-        ALCHEMY_API_KEY: publicEnv.ALCHEMY_API_KEY,
         VERSION,
         ASSETS_FROM_S3: String(ASSETS_FROM_S3),
         NEXTGEN_CHAIN_ID:

@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { ProfileActivityLogProxyCreated } from "@/entities/IProfile";
 import CommonProfileLink from "@/components/user/utils/CommonProfileLink";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
-import { UserPageTabType } from "@/components/user/layout/UserPageTabs";
+import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 
 export default function ProfileActivityLogProxy({
   log,
@@ -17,7 +17,7 @@ export default function ProfileActivityLogProxy({
     (searchParams?.get("user") as string)?.toLowerCase() ===
     handleOrWallet.toLowerCase();
 
-  const tabTarget = UserPageTabType.PROXY;
+  const tabTarget = USER_PAGE_TAB_IDS.PROXY;
   return (
     <>
       <ProfileActivityLogItemAction action="created proxy for" />
