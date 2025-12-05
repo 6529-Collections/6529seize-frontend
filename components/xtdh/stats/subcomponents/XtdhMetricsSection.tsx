@@ -19,13 +19,13 @@ export function XtdhMetricsSection({
         label="Multiplier"
         tooltip="Current xTDH multiplier applied to your TDH Rate"
         value={multiplier}
-        suffix="x"
+        subtext="x"
       />
       <XtdhStatCard
         label="xTDH Rate"
         tooltip="Total xTDH you can generate per day (TDH Rate × Multiplier)"
         value={producedXtdhRate}
-        suffix="/day"
+        subtext="/day"
       />
     </section>
   );

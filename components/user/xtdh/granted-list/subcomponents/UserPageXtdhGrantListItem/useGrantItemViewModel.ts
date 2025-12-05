@@ -169,6 +169,7 @@ function createBaseGrantDetails(grant: ApiXTdhGrant): GrantDetails {
     totalGrantedLabel: formatAmount(grant.total_granted),
     validFromLabel: formatDateTime(grant.valid_from ?? null, {
       fallbackLabel: "Immediately",
+      includeTime: false,
     }),
 
   };

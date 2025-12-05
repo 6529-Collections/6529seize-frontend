@@ -27,6 +27,12 @@ const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
   minute: "2-digit",
 });
 
+const dateFormatter = new Intl.DateTimeFormat(undefined, {
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+});
+
 const ALL_TOKENS_LABEL = "All tokens";
 const UNKNOWN_TOKENS_LABEL = "an unknown number of tokens";
 
@@ -94,6 +100,7 @@ export const formatTargetTokens = (tokens: readonly string[]): string => {
 
 interface DateTimeFormatOptions {
   readonly fallbackLabel?: string;
+  readonly includeTime?: boolean;
 }
 
 export const formatDateTime = (
@@ -111,6 +118,10 @@ export const formatDateTime = (
   const date = new Date(normalizedTimestamp);
   if (!Number.isFinite(date.getTime())) {
     return "Invalid date";
+  }
+
+  if (options?.includeTime === false) {
+    return dateFormatter.format(date);
   }
 
   return dateTimeFormatter.format(date);

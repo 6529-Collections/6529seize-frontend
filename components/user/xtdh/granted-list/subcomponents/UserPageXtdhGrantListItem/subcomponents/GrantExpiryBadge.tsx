@@ -9,7 +9,7 @@ export function GrantExpiryBadge({
 
   const date = new Date(validUntil);
   date.setDate(date.getDate() - 1);
-  const label = formatDateTime(date.getTime());
+  const label = formatDateTime(date.getTime(), { includeTime: false });
 
   return (
     <div className="tw-flex tw-items-center tw-gap-1.5 tw-text-xs">
