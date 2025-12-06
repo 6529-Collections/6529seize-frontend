@@ -19,48 +19,53 @@ const VotingModal: React.FC<VotingModalProps> = ({
   onClose,
 }) => {
   const titleId = useId();
-  const dialogRef = useRef<HTMLDialogElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
+    if (!isOpen) return;
 
-    if (isOpen) {
-      previousActiveElement.current = document.activeElement as HTMLElement;
-      dialog.showModal();
-    } else {
-      dialog.close();
-      previousActiveElement.current?.focus();
-    }
-  }, [isOpen]);
+    previousActiveElement.current = document.activeElement as HTMLElement;
+    modalRef.current?.focus();
 
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
 
-    const handleCancel = (e: Event) => {
-      e.preventDefault();
-      onClose();
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
     };
+    document.addEventListener("keydown", handleKeyDown);
 
-    dialog.addEventListener("cancel", handleCancel);
-    return () => dialog.removeEventListener("cancel", handleCancel);
-  }, [onClose]);
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.removeEventListener("keydown", handleKeyDown);
+      previousActiveElement.current?.focus();
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) {
+    return null;
+  }
 
   const modalContent = (
-    <dialog
-      ref={dialogRef}
+    <div
+      ref={modalRef}
+      role="dialog"
+      aria-modal="true"
       aria-labelledby={titleId}
-      onClick={(e) => {
-        if (e.target === dialogRef.current) {
-          onClose();
-        }
-      }}
-      className="tw-fixed tw-inset-0 tw-m-0 tw-h-full tw-w-full tw-max-h-full tw-max-w-full tw-bg-gray-600/50 tw-backdrop-blur-[1px] tw-flex tw-items-center tw-justify-center tw-border-none tw-outline-none tw-p-0"
+      tabIndex={-1}
+      className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px] tw-z-50 tw-flex tw-items-center tw-justify-center tw-outline-none"
     >
       <div
-        className="tw-w-full tw-max-w-2xl tw-px-4"
+        className="tw-fixed tw-inset-0"
+        onClick={onClose}
+        aria-hidden="true"
+      ></div>
+
+      <div
+        className="tw-w-full tw-max-w-2xl tw-z-10 tw-px-4"
         onClick={(e) => e.stopPropagation()}
       >
         <ModalLayout title="Vote for this artwork" onCancel={onClose} titleId={titleId}>
@@ -73,7 +78,7 @@ const VotingModal: React.FC<VotingModalProps> = ({
           </div>
         </ModalLayout>
       </div>
-    </dialog>
+    </div>
   );
 
   return createPortal(modalContent, document.body);
