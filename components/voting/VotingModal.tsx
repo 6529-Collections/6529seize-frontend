@@ -22,7 +22,7 @@ const VotingModal: React.FC<VotingModalProps> = ({
 
   const modalContent = (
     <div
-      className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px] tw-z-[1000] tw-flex tw-items-center tw-justify-center"
+      className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px] tw-z-50 tw-flex tw-items-center tw-justify-center"
       onClick={(e) => e.stopPropagation()}
     >
       <div
