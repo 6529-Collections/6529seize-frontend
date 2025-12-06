@@ -168,8 +168,16 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
         activeView !== BrainView.WAVES &&
         activeView !== BrainView.MESSAGES &&
         activeView !== BrainView.NOTIFICATIONS
-      )
-        setActiveView(BrainView.DEFAULT);
+      ) {
+        // Reset to appropriate view based on current route
+        if (pathname === "/waves") {
+          setActiveView(BrainView.WAVES);
+        } else if (pathname === "/messages") {
+          setActiveView(BrainView.MESSAGES);
+        } else {
+          setActiveView(BrainView.DEFAULT);
+        }
+      }
       return;
     }
 
