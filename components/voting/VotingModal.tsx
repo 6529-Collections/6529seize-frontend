@@ -57,6 +57,7 @@ const VotingModal: React.FC<VotingModalProps> = ({
       aria-labelledby={titleId}
       tabIndex={-1}
       className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px] tw-z-50 tw-flex tw-items-center tw-justify-center tw-outline-none"
+      onClick={(e) => e.stopPropagation()}
     >
       <div
         className="tw-fixed tw-inset-0"
