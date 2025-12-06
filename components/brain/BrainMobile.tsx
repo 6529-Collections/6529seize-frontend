@@ -172,6 +172,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     const routeToView: Record<string, BrainView> = {
       "/waves": BrainView.WAVES,
       "/messages": BrainView.MESSAGES,
+      "/notifications": BrainView.NOTIFICATIONS,
     };
 
     if (!hasWave) {
