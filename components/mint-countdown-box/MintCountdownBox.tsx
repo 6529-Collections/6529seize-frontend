@@ -1,4 +1,7 @@
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import {
+  faExclamationTriangle,
+  faInfoCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { Tooltip } from "react-tooltip";
@@ -20,10 +23,11 @@ interface Props {
   };
   hideMintBtn?: boolean;
   small?: boolean;
+  isError?: boolean;
 }
 
 export default function MintCountdownBox(props: Readonly<Props>) {
-  const { mintInfo, linkInfo, hideMintBtn, small } = props;
+  const { mintInfo, linkInfo, hideMintBtn, small, isError } = props;
 
   // Derived flags
   const hasMintInfo = Boolean(mintInfo);
@@ -43,6 +47,22 @@ export default function MintCountdownBox(props: Readonly<Props>) {
     styles.countdownContainer,
     small ? styles.countdownContainerShort : "",
   ].join(" ");
+
+  if (isError) {
+    return (
+      <div className={containerClasses}>
+        <h4 className="mb-3 tw-flex tw-items-center tw-gap-2">
+          <FontAwesomeIcon
+            icon={faExclamationTriangle}
+            color="#FFD60A"
+            className="tw-h-6 tw-w-6"
+          />
+          Error fetching mint information
+        </h4>
+        <p className="mb-1 tw-font-medium">Please try again later.</p>
+      </div>
+    );
+  }
 
   if (mintInfo?.isSoldOut) {
     return (
