@@ -7,6 +7,7 @@ interface ModalLayoutProps {
   readonly title: string;
   readonly onCancel: () => void;
   readonly children: React.ReactNode;
+  readonly titleId?: string;
 }
 
 /**
@@ -16,6 +17,7 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
   title,
   onCancel,
   children,
+  titleId,
 }) => {
   return (
     <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
@@ -44,6 +46,7 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
             {/* Header Section with bottom border */}
             <div className="tw-mb-6">
               <motion.h3
+                id={titleId}
                 className="tw-text-2xl sm:tw-text-3xl tw-font-semibold tw-text-iron-100"
               >
                 {title}
