@@ -1,18 +1,23 @@
 import DropPfp from "@/components/drops/create/utils/DropPfp";
+import { cicToType } from "@/helpers/Helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import UserFollowBtn, {
   UserFollowBtnSize,
 } from "@/components/user/utils/UserFollowBtn";
-import UserCICTypeIcon from "../user-cic-type/UserCICTypeIcon";
-import UserLevel from "../level/UserLevel";
-import { CLASSIFICATIONS, CicStatement } from "@/entities/IProfile";
+import UserCICAndLevel, { UserCICAndLevelSize } from "../UserCICAndLevel";
+import UserProfileTooltipTopRep from "./UserProfileTooltipTopRep";
+import {
+  ApiProfileRepRatesState,
+  CLASSIFICATIONS,
+  CicStatement,
+} from "@/entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "@/services/api/common-api";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
-import UserStatsRow from "../stats/UserStatsRow";
+import UserStatsRow, { UserStatsRowSize } from "../stats/UserStatsRow";
 import { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
 
 export default function UserProfileTooltip({
@@ -23,6 +28,18 @@ export default function UserProfileTooltip({
   const { profile } = useIdentity({
     handleOrWallet: user,
     initialProfile: null,
+  });
+
+  const { data: repRates } = useQuery<ApiProfileRepRatesState>({
+    queryKey: [
+      QueryKey.PROFILE_REP_RATINGS,
+      { handleOrWallet: user.toLowerCase() },
+    ],
+    queryFn: async () =>
+      await commonApiFetch<ApiProfileRepRatesState>({
+        endpoint: `profiles/${user}/rep/ratings/received`,
+      }),
+    enabled: !!user && !!profile?.handle,
   });
 
   const { data: statements } = useQuery<CicStatement[]>({
@@ -83,45 +100,40 @@ export default function UserProfileTooltip({
 
   return (
     <div className="tailwind-scope tw-bg-iron-950 tw-min-w-[280px] tw-max-w-[320px]">
-      <div className="tw-flex tw-flex-col tw-gap-y-2">
-        <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-4">
-          <div className="tw-flex tw-gap-x-3 tw-flex-1 tw-min-w-0">
-            <div className="tw-flex-shrink-0">
-              <DropPfp pfpUrl={profile?.pfp} />
-            </div>
-            <div className="tw-flex tw-flex-col tw-min-w-0">
-              <div className="tw-flex tw-items-center tw-gap-x-2">
-                <span className="tw-text-base tw-font-bold tw-text-iron-50 tw-truncate tw-max-w-[180px]">
-                  {profile?.handle ?? profile?.display}
-                </span>
-                {profile && (
-                  <div className="tw-h-5 tw-w-5">
-                    <UserCICTypeIcon cic={profile.cic} />
-                  </div>
-                )}
-              </div>
-              {description && (
-                <p className="tw-text-xs tw-text-iron-400 tw-mb-0">{description}</p>
-              )}
-              {profile && (
-                <div className="tw-mt-1.5">
-                  <UserLevel level={profile.level} size="xs" />
-                </div>
-              )}
-            </div>
+      <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-3">
+        <div className="tw-flex tw-flex-col tw-gap-2 tw-flex-1 tw-min-w-0">
+          <div className="tw-flex-shrink-0">
+            <DropPfp pfpUrl={profile?.pfp} />
           </div>
-          {showFollowButton && profileHandle && (
-            <div className="tw-flex-shrink-0">
-              <UserFollowBtn
-                handle={profileHandle}
-                size={UserFollowBtnSize.SMALL}
-              />
+          <div className="tw-flex tw-flex-col tw-min-w-0">
+            <div className="tw-flex tw-items-center tw-gap-x-2">
+              <span className="tw-text-base tw-font-bold tw-text-iron-50 tw-truncate tw-max-w-[180px]">
+                {profile?.handle ?? profile?.display}
+              </span>
+              {profile && (
+                <UserCICAndLevel
+                  level={profile.level}
+                  cicType={cicToType(profile.cic)}
+                  size={UserCICAndLevelSize.MEDIUM}
+                />
+              )}
             </div>
-          )}
+            {description && (
+              <p className="tw-text-xs tw-text-iron-400 tw-mb-0">{description}</p>
+            )}
+          </div>
         </div>
+        {showFollowButton && profileHandle && (
+          <div className="tw-flex-shrink-0">
+            <UserFollowBtn
+              handle={profileHandle}
+              size={UserFollowBtnSize.SMALL}
+            />
+          </div>
+        )}
       </div>
       {aboutStatement && (
-        <p className="tw-text-sm tw-text-iron-200 tw-line-clamp-6 tw-mb-0 tw-mt-4">
+        <p className="tw-text-sm tw-text-iron-200 tw-line-clamp-2 tw-mb-0 tw-mt-4">
           {aboutStatement.statement_value}
         </p>
       )}
@@ -135,8 +147,10 @@ export default function UserProfileTooltip({
           rep={profile?.rep ?? 0}
           cic={profile?.cic ?? 0}
           followersCount={followersCount}
+          size={UserStatsRowSize.SMALL}
         />
       </div>
+      <UserProfileTooltipTopRep repRates={repRates} />
     </div>
   );
 }
