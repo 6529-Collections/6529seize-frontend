@@ -9,6 +9,21 @@ jest.mock('next/navigation', () => ({
   usePathname: jest.fn(),
 }));
 
+jest.mock('@/hooks/useDeviceInfo', () => ({
+  __esModule: true,
+  default: () => ({ isApp: false }),
+}));
+
+jest.mock('@/components/brain/notifications/subcomponents/NotificationHeader', () => ({
+  __esModule: true,
+  default: ({ children }: any) => <div data-testid="notification-header">{children}</div>,
+}));
+
+jest.mock('@/components/brain/notifications/NotificationsFollowBtn', () => ({
+  __esModule: true,
+  default: () => <div data-testid="follow-btn" />,
+}));
+
 jest.mock('@/components/waves/drops/Drop', () => ({
   __esModule: true,
   default: (props: any) => (

@@ -10,6 +10,11 @@ jest.mock('next/navigation', () => ({
   usePathname: jest.fn(),
 }));
 
+jest.mock('@/hooks/useDeviceInfo', () => ({
+  __esModule: true,
+  default: () => ({ isApp: false }),
+}));
+
 jest.mock('@/components/waves/drops/Drop', () => ({
   __esModule: true,
   DropLocation: { MY_STREAM: 'MY_STREAM' },
