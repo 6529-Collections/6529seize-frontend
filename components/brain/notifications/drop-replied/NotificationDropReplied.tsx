@@ -8,6 +8,7 @@ import Drop, {
   DropLocation,
 } from "@/components/waves/drops/Drop";
 import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
 import NotificationHeader from "../subcomponents/NotificationHeader";
