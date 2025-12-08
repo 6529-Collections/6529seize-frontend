@@ -10,11 +10,9 @@ import Drop, {
   DropInteractionParams,
   DropLocation,
 } from "@/components/waves/drops/Drop";
-import { useRouter } from "next/navigation";
 import { ApiDrop } from "@/generated/models/ApiDrop";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
 import NotificationHeader from "../subcomponents/NotificationHeader";
+import { useWaveNavigation } from "../utils/navigationUtils";
 
 export default function NotificationDropQuoted({
   notification,
@@ -29,18 +27,7 @@ export default function NotificationDropQuoted({
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }) {
-  const router = useRouter();
-  const { isApp } = useDeviceInfo();
-
-  const navigateToWave = (
-    waveId: string,
-    serialNo: number,
-    isDirectMessage: boolean
-  ) => {
-    router.push(
-      getWaveRoute({ waveId, serialNo, isDirectMessage, isApp })
-    );
-  };
+  const { navigateToWave } = useWaveNavigation();
 
   const onReplyClick = (serialNo: number) => {
     const baseWave = notification.related_drops[0].wave as any;

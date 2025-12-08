@@ -6,7 +6,6 @@ import Drop, {
   DropLocation,
 } from "@/components/waves/drops/Drop";
 import { ActiveDropState } from "@/types/dropInteractionTypes";
-import { useRouter } from "next/navigation";
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
@@ -16,9 +15,8 @@ import type {
   INotificationDropVoted,
   INotificationDropReacted,
 } from "@/types/feed.types";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
 import NotificationHeader from "../subcomponents/NotificationHeader";
+import { useWaveNavigation } from "../utils/navigationUtils";
 
 export const getNotificationVoteColor = (vote: number) => {
   if (vote > 0) return "tw-text-green";
@@ -43,9 +41,8 @@ export default function NotificationDropReacted({
   onQuote,
   onDropContentClick,
 }: Props) {
-  const router = useRouter();
+  const { navigateToWave } = useWaveNavigation();
   const { findCustomEmoji, findNativeEmoji } = useEmoji();
-  const { isApp } = useDeviceInfo();
 
   // Determine if this notification is a "vote" or a "reaction"
   const isVoted =
@@ -136,28 +133,14 @@ export default function NotificationDropReacted({
   const baseIsDm = baseWave?.chat?.scope?.group?.is_direct_message ?? false;
 
   const onReplyClick = (serialNo: number) => {
-    router.push(
-      getWaveRoute({
-        waveId: baseWave.id,
-        serialNo,
-        isDirectMessage: baseIsDm,
-        isApp,
-      })
-    );
+    navigateToWave(baseWave.id, serialNo, baseIsDm);
   };
+
   const onQuoteClick = (quote: ApiDrop) => {
     const quoteWave = quote.wave as any;
     const isDirectMessage =
       quoteWave?.chat?.scope?.group?.is_direct_message ?? baseIsDm;
-
-    router.push(
-      getWaveRoute({
-        waveId: quote.wave.id,
-        serialNo: quote.serial_no,
-        isDirectMessage,
-        isApp,
-      })
-    );
+    navigateToWave(quote.wave.id, quote.serial_no, isDirectMessage);
   };
 
   return (
