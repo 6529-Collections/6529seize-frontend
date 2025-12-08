@@ -8,11 +8,13 @@ import Drop, {
   DropLocation,
 } from "@/components/waves/drops/Drop";
 import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { ApiDrop } from "@/generated/models/ApiDrop";
 import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import NotificationHeader from "../subcomponents/NotificationHeader";
-import { useWaveNavigation } from "../utils/navigationUtils";
+import {
+  useWaveNavigation,
+  getIsDirectMessage,
+} from "../utils/navigationUtils";
 
 export default function NotificationIdentityMentioned({
   notification,
@@ -27,20 +29,15 @@ export default function NotificationIdentityMentioned({
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }) {
-  const { navigateToWave } = useWaveNavigation();
-  const baseWave = notification.related_drops[0].wave as any;
-  const baseIsDm = baseWave.chat?.scope?.group?.is_direct_message ?? false;
+  const { navigateToWave, createQuoteClickHandler } = useWaveNavigation();
+  const baseWave = notification.related_drops[0].wave;
+  const baseIsDm = getIsDirectMessage(baseWave);
 
   const onReplyClick = (serialNo: number) => {
     navigateToWave(baseWave.id, serialNo, baseIsDm);
   };
 
-  const onQuoteClick = (quote: ApiDrop) => {
-    const quoteWave = quote.wave as any;
-    const quoteIsDm =
-      quoteWave?.chat?.scope?.group?.is_direct_message ?? baseIsDm;
-    navigateToWave(quote.wave.id, quote.serial_no, quoteIsDm);
-  };
+  const onQuoteClick = createQuoteClickHandler(baseIsDm);
 
   return (
     <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
