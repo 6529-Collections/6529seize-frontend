@@ -25,8 +25,8 @@ export default function UserProfileTooltipTopRep({
 
   return (
     <div className="tw-mt-4">
-      <span className="tw-text-sm tw-text-iron-400">
-        Top REP
+      <span className="tw-font-medium tw-text-iron-400">
+        Top Rep
       </span>
       <div className="tw-flex tw-flex-wrap tw-gap-2 tw-mt-2">
         {topRepCategories.map((rep) => (

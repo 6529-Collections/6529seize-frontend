@@ -1,5 +1,5 @@
 import DropPfp from "@/components/drops/create/utils/DropPfp";
-import { cicToType, formatNumberWithCommasOrDash } from "@/helpers/Helpers";
+import { cicToType } from "@/helpers/Helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import UserFollowBtn, {
   UserFollowBtnSize,
@@ -17,7 +17,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
-import UserStatsRow from "../stats/UserStatsRow";
+import UserStatsRow, { UserStatsRowSize } from "../stats/UserStatsRow";
 import { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
 
 export default function UserProfileTooltip({
@@ -147,6 +147,7 @@ export default function UserProfileTooltip({
           rep={profile?.rep ?? 0}
           cic={profile?.cic ?? 0}
           followersCount={followersCount}
+          size={UserStatsRowSize.SMALL}
         />
       </div>
       <UserProfileTooltipTopRep repRates={repRates} />

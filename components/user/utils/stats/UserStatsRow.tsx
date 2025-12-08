@@ -3,6 +3,25 @@
 import Link from "next/link";
 import { formatNumberWithCommas, formatStatFloor } from "@/helpers/Helpers";
 
+export enum UserStatsRowSize {
+  SMALL = "SMALL",
+  MEDIUM = "MEDIUM",
+}
+
+const SIZE_CLASSES: Record<
+  UserStatsRowSize,
+  { text: string; rate: string }
+> = {
+  [UserStatsRowSize.SMALL]: {
+    text: "tw-text-sm",
+    rate: "tw-text-xs",
+  },
+  [UserStatsRowSize.MEDIUM]: {
+    text: "tw-text-base",
+    rate: "tw-text-sm",
+  },
+};
+
 interface UserStatsRowProps {
   readonly handle: string;
   readonly tdh: number;
@@ -13,6 +32,7 @@ interface UserStatsRowProps {
   readonly cic: number;
   readonly followersCount: number | null;
   readonly className?: string;
+  readonly size?: UserStatsRowSize;
 }
 
 export default function UserStatsRow({
@@ -25,10 +45,12 @@ export default function UserStatsRow({
   cic,
   followersCount,
   className = "",
+  size = UserStatsRowSize.MEDIUM,
 }: UserStatsRowProps) {
   const routeHandle = encodeURIComponent(handle.toLowerCase());
   const count = followersCount ?? 0;
   const followerLabel = count === 1 ? "Follower" : "Followers";
+  const classes = SIZE_CLASSES[size];
 
   return (
     <div className={`@container ${className}`}>
@@ -37,16 +59,16 @@ export default function UserStatsRow({
           href={`/${routeHandle}/collected`}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
-          <span className="tw-text-base tw-font-semibold tw-text-iron-50">
+          <span className={`${classes.text} tw-font-semibold tw-text-iron-50`}>
             {formatStatFloor(tdh)}
           </span>{" "}
-          <span className="tw-text-base tw-font-medium tw-text-iron-400">
+          <span className={`${classes.text} tw-font-medium tw-text-iron-400`}>
             TDH
           </span>
           {tdh_rate > 0 && (
             <>
               {" "}
-              <span className="tw-text-sm tw-font-medium tw-text-iron-400">
+              <span className={`${classes.rate} tw-font-medium tw-text-iron-400`}>
                 +
                 <span className="tw-text-iron-50">
                   {formatStatFloor(tdh_rate)}
@@ -62,16 +84,16 @@ export default function UserStatsRow({
           href={`/${routeHandle}/xtdh`}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
-          <span className="tw-text-base tw-font-semibold tw-text-iron-50">
+          <span className={`${classes.text} tw-font-semibold tw-text-iron-50`}>
             {formatStatFloor(xtdh)}
           </span>{" "}
-          <span className="tw-text-base tw-font-medium tw-text-iron-400">
+          <span className={`${classes.text} tw-font-medium tw-text-iron-400`}>
             xTDH
           </span>
           {xtdh_rate > 0 && (
             <>
               {" "}
-              <span className="tw-text-sm tw-font-medium tw-text-iron-400">
+              <span className={`${classes.rate} tw-font-medium tw-text-iron-400`}>
                 +
                 <span className="tw-text-iron-50">
                   {formatStatFloor(xtdh_rate)}
@@ -87,10 +109,10 @@ export default function UserStatsRow({
           href={`/${routeHandle}/identity`}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
-          <span className="tw-text-base tw-font-semibold tw-text-iron-50">
+          <span className={`${classes.text} tw-font-semibold tw-text-iron-50`}>
             {formatStatFloor(cic)}
           </span>{" "}
-          <span className="tw-text-base tw-font-medium tw-text-iron-400">
+          <span className={`${classes.text} tw-font-medium tw-text-iron-400`}>
             NIC
           </span>
         </Link>
@@ -101,10 +123,10 @@ export default function UserStatsRow({
           href={`/${routeHandle}/rep`}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
-          <span className="tw-text-base tw-font-semibold tw-text-iron-50">
+          <span className={`${classes.text} tw-font-semibold tw-text-iron-50`}>
             {formatStatFloor(rep)}
           </span>{" "}
-          <span className="tw-text-base tw-font-medium tw-text-iron-400">
+          <span className={`${classes.text} tw-font-medium tw-text-iron-400`}>
             Rep
           </span>
         </Link>
@@ -115,10 +137,10 @@ export default function UserStatsRow({
           href={`/${routeHandle}/followers`}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
-          <span className="tw-text-base tw-font-semibold tw-text-iron-50">
+          <span className={`${classes.text} tw-font-semibold tw-text-iron-50`}>
             {formatNumberWithCommas(count)}
           </span>{" "}
-          <span className="tw-text-base tw-font-medium tw-text-iron-400">
+          <span className={`${classes.text} tw-font-medium tw-text-iron-400`}>
             {followerLabel}
           </span>
         </Link>
