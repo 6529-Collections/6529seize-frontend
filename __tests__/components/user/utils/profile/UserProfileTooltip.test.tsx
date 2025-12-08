@@ -3,7 +3,22 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import UserProfileTooltip from '@/components/user/utils/profile/UserProfileTooltip';
 
 jest.mock('@/components/drops/create/utils/DropPfp', () => ({ __esModule: true, default: () => <div data-testid="pfp" /> }));
-jest.mock('@/hooks/useIdentity', () => ({ useIdentity: () => ({ profile: { handle: 'alice', pfp: 'a', tdh: 1, level: 2, cic: 3, rep: 4, consolidation_key: 'key' } }) }));
+jest.mock('@/hooks/useIdentity', () => ({
+  useIdentity: () => ({
+    profile: {
+      handle: 'alice',
+      pfp: 'a',
+      tdh: 1,
+      tdh_rate: 2.9,
+      xtdh: 7.4,
+      xtdh_rate: 9.2,
+      level: 2,
+      cic: 3,
+      rep: 4,
+      consolidation_key: 'key'
+    }
+  })
+}));
 jest.mock('@/hooks/useIdentityBalance', () => ({ useIdentityBalance: () => ({ data: { total_balance: 5 } }) }));
 
 describe('UserProfileTooltip', () => {
@@ -29,6 +44,15 @@ describe('UserProfileTooltip', () => {
     expect(screen.getByText('TDH')).toBeInTheDocument();
     expect(screen.getByText('3')).toBeInTheDocument();
     expect(screen.getByText('NIC')).toBeInTheDocument();
+    const tdhRateLabel = screen.getByText('TDH Rate');
+    expect(tdhRateLabel).toBeInTheDocument();
+    expect(tdhRateLabel.previousElementSibling?.textContent).toBe('2');
+    expect(screen.queryByText('2.9')).not.toBeInTheDocument();
+    const xtdhRateLabel = screen.getByText('xTDH Rate');
+    expect(xtdhRateLabel.previousElementSibling?.textContent).toBe('9');
+    expect(screen.queryByText('9.2')).not.toBeInTheDocument();
+    const xtdhLabel = screen.getByText('xTDH');
+    expect(xtdhLabel.previousElementSibling?.textContent).toBe('7');
     expect(screen.getByText('4')).toBeInTheDocument();
     expect(screen.getByText('REP')).toBeInTheDocument();
     expect(screen.getByText('5')).toBeInTheDocument();

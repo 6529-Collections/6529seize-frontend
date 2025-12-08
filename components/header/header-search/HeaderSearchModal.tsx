@@ -8,10 +8,10 @@ import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { UserPageTabType } from "@/components/user/layout/UserPageTabs";
 import { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getProfileTargetRoute } from "@/helpers/Helpers";
+import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import { getWaveHomeRoute, getWaveRoute } from "@/helpers/navigation.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -601,7 +601,7 @@ export default function HeaderSearchModal({
     const path = getProfileTargetRoute({
       handleOrWallet,
       pathname: pathname ?? "",
-      defaultPath: UserPageTabType.IDENTITY,
+      defaultPath: USER_PAGE_TAB_IDS.IDENTITY,
     });
     router.push(path);
     onClose();

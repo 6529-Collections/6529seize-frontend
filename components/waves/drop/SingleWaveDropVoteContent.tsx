@@ -42,7 +42,7 @@ export const SingleWaveDropVoteContent: React.FC<
   // MINI layout uses single horizontal row, others use existing responsive layout
   if (size === SingleWaveDropVoteSize.MINI) {
     return (
-      /* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
+       
       <div
         className="tw-bg-iron-800 tw-border tw-border-iron-700 tw-border-solid tw-rounded-lg tw-px-2 tw-py-1.5"
         onClick={(e) => e.stopPropagation()}

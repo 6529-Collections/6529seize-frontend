@@ -18,6 +18,8 @@ export class ApiUpdateProxyActionRequest {
 
     static readonly discriminator: string | undefined = undefined;
 
+    static readonly mapping: {[index: string]: string} | undefined = undefined;
+
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
             "name": "credit_amount",
@@ -39,4 +41,3 @@ export class ApiUpdateProxyActionRequest {
     public constructor() {
     }
 }
-

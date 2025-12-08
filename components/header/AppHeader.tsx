@@ -1,38 +1,67 @@
 "use client";
 
-import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
 import { capitalizeEveryWord, formatAddress } from "@/helpers/Helpers";
+import Image from "next/image";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useWaveById } from "@/hooks/useWaveById";
 import { Bars3Icon } from "@heroicons/react/24/outline";
-import { usePathname } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import BackButton from "../navigation/BackButton";
-import { useViewContext } from "../navigation/ViewContext";
 import Spinner from "../utils/Spinner";
 import AppSidebar from "./AppSidebar";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import HeaderActionButtons from "./HeaderActionButtons";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
 
-interface Props {
-  readonly extraClass?: string;
-}
 
-export default function AppHeader(props: Readonly<Props>) {
+
+const COLLECTION_TITLES: Record<string, string> = {
+  "the-memes": "The Memes",
+  "6529-gradient": "6529 Gradient",
+  "meme-lab": "Meme Lab",
+  "nextgen": "NextGen",
+};
+
+const sliceString = (str: string, length: number): string => {
+  if (str.length <= length) return str;
+  const half = Math.floor(length / 2);
+  return `${str.slice(0, half)}...${str.slice(-half)}`;
+};
+
+const getCollectionTitle = (basePath: string, pageTitle: string): string | null => {
+  const prefix = COLLECTION_TITLES[basePath];
+  if (prefix && !Number.isNaN(Number(pageTitle))) {
+    return `${prefix} #${pageTitle}`;
+  }
+  return null;
+};
+
+const getRememesTitle = (pathSegments: string[]): string | null => {
+  if (pathSegments[0] !== "rememes") return null;
+  const contract = pathSegments[1];
+  const tokenId = pathSegments[2];
+  if (contract && tokenId) {
+    return `Rememes ${formatAddress(contract)} #${sliceString(tokenId, 10)}`;
+  }
+  return null;
+};
+
+export default function AppHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const myStream = useMyStreamOptional();
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy } = useAuth();
   const pathname = usePathname();
+  const params = useParams();
+  const { canGoBack } = useNavigationHistoryContext();
   const { profile } = useIdentity({
     handleOrWallet: address ?? null,
     initialProfile: null,
   });
-  const { activeView, homeActiveTab } = useViewContext();
-  const { canGoBack } = useNavigationHistoryContext();
 
   const pfp = (() => {
     if (activeProfileProxy) return activeProfileProxy.created_by.pfp;
@@ -49,58 +78,36 @@ export default function AppHeader(props: Readonly<Props>) {
 
   const waveId = myStream?.activeWave.id ?? null;
   const { wave, isLoading, isFetching } = useWaveById(waveId);
-  const isProfileRoute = pathname?.startsWith("/[user]");
+
+  const isWavesRoute = pathname === "/waves";
+  const isMessagesRoute = pathname === "/messages";
+
   const isCreateRoute =
     pathname === "/waves/create" || pathname === "/messages/create";
+  const isInsideWave = !!waveId;
+
+  const isProfilePage = typeof params?.user === "string";
 
   const showBackButton =
-    isCreateRoute ||
-    (!!waveId && activeView === null) ||
-    (isProfileRoute && canGoBack);
+    isInsideWave || isCreateRoute || (isProfilePage && canGoBack);
 
   const finalTitle: React.ReactNode = (() => {
-    if (activeView === "waves" || pathname === "/waves/create") return "Waves";
-    if (activeView === "messages" || pathname === "/messages/create")
-      return "Messages";
-    if (pathname === "/" && homeActiveTab === "feed") return "My Stream";
+    if (pathname === "/waves/create") return "Waves";
+    if (pathname === "/messages/create") return "Messages";
+    if (isWavesRoute && !waveId) return "Waves";
+    if (isMessagesRoute && !waveId) return "Messages";
     if (waveId) {
       if (isLoading || isFetching || wave?.id !== waveId) return <Spinner />;
       return wave?.name ?? "Wave";
     }
 
-    if (basePath && !isNaN(Number(pageTitle))) {
-      switch (basePath) {
-        case "the-memes":
-          return `The Memes #${pageTitle}`;
-        case "6529-gradient":
-          return `6529 Gradient #${pageTitle}`;
-        case "meme-lab":
-          return `Meme Lab #${pageTitle}`;
-        case "nextgen":
-          return `NextGen #${pageTitle}`;
-      }
-    }
+    const collectionTitle = getCollectionTitle(basePath, pageTitle);
+    if (collectionTitle) return collectionTitle;
 
-    const slice = (str: string, length: number) => {
-      if (str.length <= length) return str;
+    const rememesTitle = getRememesTitle(pathSegments);
+    if (rememesTitle) return rememesTitle;
 
-      const half = Math.floor(length / 2);
-      const firstPart = str.slice(0, half);
-      const lastPart = str.slice(-half);
-      return `${firstPart}...${lastPart}`;
-    };
-
-    if (basePath === "rememes") {
-      const contract = pathSegments[1];
-      const tokenId = pathSegments[2];
-      if (contract && tokenId) {
-        const formattedContract = formatAddress(contract);
-        const formattedTokenId = formatAddress(tokenId);
-        return `Rememes ${formattedContract} #${slice(formattedTokenId, 10)}`;
-      }
-    }
-
-    return slice(capitalizeEveryWord(pageTitle), 20);
+    return sliceString(capitalizeEveryWord(pageTitle), 20);
   })();
 
   return (
@@ -119,9 +126,11 @@ export default function AppHeader(props: Readonly<Props>) {
             }`}>
             {address ? (
               pfp ? (
-                <img
+                <Image
                   src={pfp}
                   alt="pfp"
+                  width={40}
+                  height={40}
                   className="tw-h-10 tw-w-10 tw-rounded-full tw-object-contain tw-flex-shrink-0"
                 />
               ) : (

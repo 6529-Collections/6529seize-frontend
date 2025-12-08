@@ -6,6 +6,10 @@ import { ProfileActivityFilterTargetType, RateMatter } from "@/enums";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getProfileLogTypes } from "@/helpers/profile-logs.helpers";
 import { getInitialRatersParams } from "@/helpers/server.helpers";
+import {
+  USER_PAGE_TAB_IDS,
+  USER_PAGE_TAB_MAP,
+} from "@/components/user/layout/userTabs.config";
 
 export interface UserPageRepPropsRepRates {
   readonly ratings: ApiProfileRepRatesState;
@@ -60,9 +64,11 @@ function RepTab({ profile }: { readonly profile: ApiIdentity }) {
   );
 }
 
+const TAB_CONFIG = USER_PAGE_TAB_MAP[USER_PAGE_TAB_IDS.REP];
+
 const { Page, generateMetadata } = createUserTabPage({
-  subroute: "rep",
-  metaLabel: "Rep",
+  subroute: TAB_CONFIG.route,
+  metaLabel: TAB_CONFIG.metaLabel,
   Tab: RepTab,
 });
 

@@ -63,22 +63,53 @@ const executeApiRequest = async <T>(
   signal?: AbortSignal,
   parseJson: boolean = true
 ): Promise<T> => {
-  const res = await fetch(url, {
-    method,
-    headers,
-    body,
-    signal,
-  });
+  try {
+    const res = await fetch(url, {
+      method,
+      headers,
+      body,
+      signal,
+    });
 
-  if (!res.ok) {
-    return handleApiError(res);
+    if (!res.ok) {
+      return handleApiError(res);
+    }
+
+    if (!parseJson) {
+      return undefined as T;
+    }
+
+    try {
+      return await res.json();
+    } catch (jsonError) {
+      throw new Error(
+        `Failed to parse response as JSON from ${url}: ${
+          jsonError instanceof Error ? jsonError.message : String(jsonError)
+        }`
+      );
+    }
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw error;
+    }
+
+    if (error instanceof TypeError) {
+      const errorMessage = error.message.toLowerCase();
+      if (
+        errorMessage.includes("load failed") ||
+        errorMessage.includes("failed to fetch")
+      ) {
+        throw new Error(
+          `Network request failed. Please check your connection and try again. (${url})`
+        );
+      }
+      if (errorMessage.includes("network")) {
+        throw new Error(`Network error: ${error.message} (${url})`);
+      }
+    }
+
+    throw error;
   }
-
-  if (!parseJson) {
-    return undefined as T;
-  }
-
-  return res.json();
 };
 
 export const commonApiFetch = async <T, U = Record<string, string>>(param: {
@@ -156,7 +187,7 @@ export const commonApiFetchWithRetry = async <
   let attempts = 0;
   let currentDelayMs = initialDelayMs;
 
-  // eslint-disable-next-line no-constant-condition
+   
   while (true) {
     try {
       if (fetchParams.signal?.aborted) {

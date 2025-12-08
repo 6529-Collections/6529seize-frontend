@@ -4,7 +4,6 @@ import { ReactElement, RefObject, useEffect, useState } from "react";
 import CommonDropdownItemsMobileWrapper from "./CommonDropdownItemsMobileWrapper";
 import { createBreakpoint } from "react-use";
 import CommonDropdownItemsDefaultWrapper from "./CommonDropdownItemsDefaultWrapper";
-import CommonDropdownItem from "./CommonDropdownItem";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 export default function CommonDropdownItemsWrapper({
@@ -24,9 +23,7 @@ export default function CommonDropdownItemsWrapper({
   readonly dynamicPosition?: boolean;
   readonly setOpen: (isOpen: boolean) => void;
   readonly onIsMobile: (isMobile: boolean) => void;
-  readonly children:
-    | ReactElement<typeof CommonDropdownItem>
-    | ReactElement<typeof CommonDropdownItem>[];
+  readonly children: ReactElement | ReactElement[];
 }) {
   const breakpoint = useBreakpoint();
 
