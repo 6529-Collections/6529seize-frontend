@@ -22,6 +22,7 @@ export function useSidebarSections(
           { name: "NFT Activity", href: "/nft-activity" },
           { name: "Memes Calendar", href: "/meme-calendar" },
           { name: "TDH", href: "/network/tdh" },
+          { name: "xTDH", href: `/network/xtdh` },
         ],
         subsections: [
           {
