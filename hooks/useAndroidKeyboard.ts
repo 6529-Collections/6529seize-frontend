@@ -21,6 +21,7 @@ export function useAndroidKeyboard(): AndroidKeyboardHookReturn {
   useEffect(() => {
     if (isSSR || !isAndroid) return;
 
+    let mounted = true;
     let showCleanup: (() => void) | undefined;
     let hideCleanup: (() => void) | undefined;
 
@@ -41,6 +42,13 @@ export function useAndroidKeyboard(): AndroidKeyboardHookReturn {
           document.documentElement.style.setProperty('--android-keyboard-height', '0px');
         });
 
+        // If unmounted during async setup, remove listeners immediately
+        if (!mounted) {
+          showListener.remove();
+          hideListener.remove();
+          return;
+        }
+
         showCleanup = () => showListener.remove();
         hideCleanup = () => hideListener.remove();
       } catch (error) {
@@ -51,6 +59,7 @@ export function useAndroidKeyboard(): AndroidKeyboardHookReturn {
     setupKeyboardListeners();
 
     return () => {
+      mounted = false;
       showCleanup?.();
       hideCleanup?.();
       document.documentElement.style.setProperty('--android-keyboard-height', '0px');
