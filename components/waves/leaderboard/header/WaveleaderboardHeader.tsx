@@ -40,14 +40,14 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
             <div className="tw-flex tw-items-center tw-gap-x-2">
               {/* Hide view toggle buttons on mobile (S breakpoint), show only on desktop (MD breakpoint) */}
               {breakpoint === "MD" && (
-                <div className="tw-flex tw-items-center tw-whitespace-nowrap tw-h-9 tw-px-1 tw-text-xs tw-border tw-border-iron-700 tw-border-solid tw-rounded-lg tw-overflow-hidden tw-bg-iron-950">
+                <div className="tw-flex tw-items-center tw-gap-2">
                     <>
                       <button
-                        className={`tw-w-8 tw-h-7 ${
+                        className={`tw-h-9 tw-w-9 tw-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-rounded-lg tw-transition-colors ${
                           viewMode === "list"
-                            ? "tw-bg-iron-800 tw-text-iron-300 tw-font-medium"
-                            : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300 tw-bg-iron-950"
-                        } tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center`}
+                            ? "tw-bg-primary-600/20 tw-border-primary-500/50 tw-text-primary-400"
+                            : "tw-bg-iron-950 tw-border-white/10 tw-text-iron-300 desktop-hover:hover:tw-bg-white/10"
+                        }`}
                         onClick={() => onViewModeChange("list")}
                         data-tooltip-id={`list-view-${wave.id}`}
                       >
@@ -82,11 +82,11 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                     </>
                     <>
                       <button
-                        className={`tw-w-8 tw-h-7 ${
+                        className={`tw-h-9 tw-w-9 tw-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-rounded-lg tw-transition-colors ${
                           viewMode === "grid"
-                            ? "tw-bg-iron-800 tw-text-iron-300 tw-font-medium"
-                            : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300 tw-bg-iron-950"
-                        } tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center`}
+                            ? "tw-bg-primary-600/20 tw-border-primary-500/50 tw-text-primary-400"
+                            : "tw-bg-iron-950 tw-border-white/10 tw-text-iron-300 desktop-hover:hover:tw-bg-white/10"
+                        }`}
                         onClick={() => onViewModeChange("grid")}
                         data-tooltip-id={`grid-view-${wave.id}`}
                       >

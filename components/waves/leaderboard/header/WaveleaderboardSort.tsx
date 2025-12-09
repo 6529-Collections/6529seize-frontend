@@ -99,19 +99,19 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
   
   const getButtonClassName = (buttonSort: WaveDropsLeaderboardSort) => {
     const baseClass =
-      "tw-px-2.5 tw-py-1.5 tw-border-0 tw-rounded-md tw-transition tw-duration-300 tw-ease-out";
+      "tw-px-4 tw-py-1.5 tw-text-xs tw-font-medium tw-border-0 tw-rounded-md tw-transition-colors";
 
     if (sort === buttonSort) {
-      return `${baseClass} tw-bg-iron-800 tw-text-iron-50 tw-font-medium`;
+      return `${baseClass} tw-bg-white/10 tw-text-white tw-shadow-sm`;
     }
 
-    return `${baseClass} tw-text-iron-400 desktop-hover:hover:tw-text-iron-300 tw-bg-iron-950`;
+    return `${baseClass} tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-text-iron-300`;
   };
 
   return (
     <div
       id="tabsId"
-      className="tw-flex tw-items-center tw-whitespace-nowrap tw-h-9 tw-px-1 tw-text-xs tw-border tw-border-iron-700 tw-border-solid tw-rounded-lg tw-overflow-hidden tw-bg-iron-950"
+      className="tw-flex tw-bg-iron-950 tw-p-1 tw-rounded-lg tw-border tw-border-solid tw-border-white/10"
     >
       <button
         className={getButtonClassName(WaveDropsLeaderboardSort.RANK)}
