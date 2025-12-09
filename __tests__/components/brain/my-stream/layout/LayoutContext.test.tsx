@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { LayoutProvider, useLayout } from '@/components/brain/my-stream/layout/LayoutContext';
 
 // Mock useCapacitor hook with configurable values
@@ -56,7 +56,7 @@ function TestComponent() {
 
 describe('LayoutProvider', () => {
   it('calculates spaces and styles', () => {
-    Object.defineProperty(window, 'innerHeight', { value: 1000, configurable: true });
+    Object.defineProperty(globalThis, 'innerHeight', { value: 1000, configurable: true });
     render(
       <LayoutProvider>
         <TestComponent />
@@ -71,7 +71,7 @@ describe('LayoutProvider', () => {
     mockCapacitorValues = { isCapacitor: true, isAndroid: true, isIos: false };
     mockKeyboardValues = { isVisible: false, keyboardHeight: 0, isAndroid: true, getContainerStyle: jest.fn() };
 
-    Object.defineProperty(window, 'innerHeight', { value: 1000, configurable: true });
+    Object.defineProperty(globalThis, 'innerHeight', { value: 1000, configurable: true });
     render(
       <LayoutProvider>
         <TestComponent />
@@ -86,7 +86,7 @@ describe('LayoutProvider', () => {
     mockCapacitorValues = { isCapacitor: true, isAndroid: true, isIos: false };
     mockKeyboardValues = { isVisible: true, keyboardHeight: 350, isAndroid: true, getContainerStyle: jest.fn() };
 
-    Object.defineProperty(window, 'innerHeight', { value: 1000, configurable: true });
+    Object.defineProperty(globalThis, 'innerHeight', { value: 1000, configurable: true });
     render(
       <LayoutProvider>
         <TestComponent />
@@ -102,7 +102,7 @@ describe('LayoutProvider', () => {
     mockCapacitorValues = { isCapacitor: true, isAndroid: false, isIos: true };
     mockKeyboardValues = { isVisible: false, keyboardHeight: 0, isAndroid: false, getContainerStyle: jest.fn() };
 
-    Object.defineProperty(window, 'innerHeight', { value: 1000, configurable: true });
+    Object.defineProperty(globalThis, 'innerHeight', { value: 1000, configurable: true });
     render(
       <LayoutProvider>
         <TestComponent />
@@ -117,7 +117,7 @@ describe('LayoutProvider', () => {
     mockCapacitorValues = { isCapacitor: false, isAndroid: false, isIos: false };
     mockKeyboardValues = { isVisible: false, keyboardHeight: 0, isAndroid: false, getContainerStyle: jest.fn() };
 
-    Object.defineProperty(window, 'innerHeight', { value: 1000, configurable: true });
+    Object.defineProperty(globalThis, 'innerHeight', { value: 1000, configurable: true });
     render(
       <LayoutProvider>
         <TestComponent />

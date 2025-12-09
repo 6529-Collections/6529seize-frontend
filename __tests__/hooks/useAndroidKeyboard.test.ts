@@ -174,7 +174,7 @@ describe('useAndroidKeyboard', () => {
       });
     });
 
-    const { result, unmount } = renderHook(() => useAndroidKeyboard());
+    const { unmount } = renderHook(() => useAndroidKeyboard());
 
     // Unmount before listener setup completes
     unmount();
@@ -192,12 +192,7 @@ describe('useAndroidKeyboard', () => {
   });
 
   it('does not update state when keyboard events fire after unmount', async () => {
-    const { result, unmount } = renderHook(() => useAndroidKeyboard());
-
-    const initialState = {
-      isVisible: result.current.isVisible,
-      keyboardHeight: result.current.keyboardHeight,
-    };
+    const { unmount } = renderHook(() => useAndroidKeyboard());
 
     unmount();
 
