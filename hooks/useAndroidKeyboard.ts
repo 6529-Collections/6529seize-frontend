@@ -30,7 +30,7 @@ export function useAndroidKeyboard(): AndroidKeyboardHookReturn {
 
       try {
         const showListener = await Keyboard.addListener('keyboardWillShow', (info) => {
-          const height = info.keyboardHeight || 300;
+          const height = info.keyboardHeight ?? 300;
           setKeyboardHeight(height);
           setIsVisible(true);
           document.documentElement.style.setProperty('--android-keyboard-height', `${height}px`);
