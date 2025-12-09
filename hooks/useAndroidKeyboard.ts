@@ -30,6 +30,7 @@ export function useAndroidKeyboard(): AndroidKeyboardHookReturn {
 
       try {
         const showListener = await Keyboard.addListener('keyboardWillShow', (info) => {
+          if (!mounted) return;
           const height = info.keyboardHeight ?? 300;
           setKeyboardHeight(height);
           setIsVisible(true);
@@ -37,12 +38,13 @@ export function useAndroidKeyboard(): AndroidKeyboardHookReturn {
         });
 
         const hideListener = await Keyboard.addListener('keyboardWillHide', () => {
+          if (!mounted) return;
           setKeyboardHeight(0);
           setIsVisible(false);
           document.documentElement.style.setProperty('--android-keyboard-height', '0px');
         });
 
-        // If unmounted during async setup, remove listeners immediately
+
         if (!mounted) {
           showListener.remove();
           hideListener.remove();
