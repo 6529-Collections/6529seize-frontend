@@ -24,7 +24,7 @@ jest.mock('@/components/waves/drops/wave-drops-all', () => ({ __esModule: true, 
 
 jest.mock('@/components/waves/CreateDropWaveWrapper', () => ({ CreateDropWaveWrapper: ({ children }: any) => <div data-testid="wrapper">{children}</div>, CreateDropWaveWrapperContext: { SINGLE_DROP: 'SINGLE_DROP' } }));
 
-jest.mock('@/components/waves/PrivilegedDropCreator', () => ({ __esModule: true, default: (props: any) => { capturedCreatorProps = props; return <div data-testid="creator" role="button" tabIndex={0} onClick={props.onCancelReplyQuote} onKeyDown={(e: any) => { if (e.key === 'Enter' || e.key === ' ') props.onCancelReplyQuote(); }} data-part={props.activeDrop?.partId} data-action={props.activeDrop?.action} />; }, DropMode: { BOTH: 'BOTH' } }));
+jest.mock('@/components/waves/PrivilegedDropCreator', () => ({ __esModule: true, default: (props: any) => { capturedCreatorProps = props; return <button data-testid="creator" type="button" onClick={props.onCancelReplyQuote} data-part={props.activeDrop?.partId} data-action={props.activeDrop?.action} />; }, DropMode: { BOTH: 'BOTH' } }));
 
 // Mock window.matchMedia for useDeviceInfo hook
 Object.defineProperty(window, 'matchMedia', {

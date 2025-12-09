@@ -162,6 +162,7 @@ describe('useAndroidKeyboard', () => {
     });
 
     expect(setPropertySpy).toHaveBeenCalledWith('--android-keyboard-height', '0px');
+    setPropertySpy.mockRestore();
   });
 
   it('does not update state if unmounted before listener setup completes', async () => {
