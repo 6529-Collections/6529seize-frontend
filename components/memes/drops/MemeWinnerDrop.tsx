@@ -76,12 +76,10 @@ export default function MemeWinnerDrop({
             onQuote={handleOnQuote}
           >
             <>
-              {/* Header section with border-b */}
               <div className="tw-p-4 tw-pb-3 tw-border-b tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-white/5 tw-bg-iron-900/30">
                 <MemeWinnerArtistInfo drop={drop} />
               </div>
 
-              {/* Title and Description - no left margin */}
               <div className="tw-px-4 tw-pt-4 tw-pb-4">
                 <div className="tw-space-y-1">
                   <MemeWinnerHeader title={title} />
@@ -99,13 +97,11 @@ export default function MemeWinnerDrop({
                 </div>
               )}
 
-              {/* Footer section with border-t and background */}
               <div className="tw-hidden lg:tw-block tw-p-4 tw-mt-4 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-white/5 tw-bg-iron-900/30">
                 <MemeDropTraits drop={drop} />
               </div>
             </>
           </DropMobileMenuHandler>
-          {/* Actions for desktop */}
           {!isMobile && showReplyAndQuote && (
             <div className="tw-absolute tw-right-4 tw-top-2">
               <WaveDropActions

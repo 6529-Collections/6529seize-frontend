@@ -10,7 +10,6 @@ import { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import WaveWinnersDropHeaderAuthorPfp from "./header/WaveWinnersDropHeaderAuthorPfp";
 import Link from "next/link";
-import Image from "next/image";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
@@ -195,12 +194,10 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                         data-tooltip-id={`voter-${voter.profile.handle}-${voter.rating}`}
                       >
                         {voter.profile.pfp ? (
-                          <Image
+                          <img
                             className="tw-w-6 tw-h-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
                             src={voter.profile.pfp}
                             alt="Recent voter"
-                            width={24}
-                            height={24}
                           />
                         ) : (
                           <div className="tw-w-6 tw-h-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
