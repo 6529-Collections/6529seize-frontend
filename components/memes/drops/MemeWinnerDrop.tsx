@@ -50,7 +50,7 @@ export default function MemeWinnerDrop({
 
   // First place shadow class from DefaultWaveWinnerDrop
   const firstPlaceShadow =
-    "tw-shadow-[inset_1px_0_0_#fbbf24,inset_0_1px_0_rgba(251,191,36,0.2),inset_-1px_0_0_rgba(251,191,36,0.2),inset_0_-1px_0_rgba(251,191,36,0.2)]";
+    "tw-shadow-[inset_1px_0_0_rgba(251,191,36,0.5),inset_0_1px_0_rgba(251,191,36,0.2),inset_-1px_0_0_rgba(251,191,36,0.2),inset_0_-1px_0_rgba(251,191,36,0.2)]";
 
   return (
     <div className="tw-w-full">

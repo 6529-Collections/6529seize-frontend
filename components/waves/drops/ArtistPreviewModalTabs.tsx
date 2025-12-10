@@ -23,7 +23,7 @@ export const ArtistPreviewModalTabs: React.FC<ArtistPreviewModalTabsProps> = ({
           onClick={() => onTabChange("active")}
           className={`tw-px-2.5 tw-py-1.5 tw-border-0 tw-rounded-md tw-transition tw-duration-300 tw-flex-1 ${
             activeTab === "active"
-              ? "tw-bg-iron-700 tw-text-iron-50 tw-font-medium tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.06),inset_0_0_6px_rgba(0,0,0,0.15)]"
+              ? "tw-bg-iron-800 tw-text-iron-50 tw-font-medium tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.06),inset_0_0_6px_rgba(0,0,0,0.15)]"
               : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300 tw-bg-transparent"
           }`}
         >

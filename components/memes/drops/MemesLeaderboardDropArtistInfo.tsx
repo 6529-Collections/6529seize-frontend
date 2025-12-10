@@ -37,9 +37,9 @@ const MemesLeaderboardDropArtistInfo: React.FC<
   return (
     <div className="tw-flex tw-gap-x-3">
       <WaveDropAuthorPfp drop={drop} />
-      <div>
+      <div className="tw-flex tw-flex-col tw-justify-between tw-h-12">
         {/* Top row: Handle + Artist badge + Timestamp */}
-        <div className="tw-flex tw-items-center tw-gap-x-2 tw-flex-wrap">
+        <div className="tw-flex tw-items-center tw-gap-x-2 tw-flex-wrap -tw-mt-0.5">
           {drop.author?.level && (
             <UserCICAndLevel
               level={drop.author.level}
@@ -87,7 +87,7 @@ const MemesLeaderboardDropArtistInfo: React.FC<
         </div>
 
         {/* Bottom row: Winner badge */}
-        <div className="tw-flex tw-items-center tw-gap-x-2 tw-mt-0.5">
+        <div className="tw-flex tw-items-center tw-gap-x-2">
           <WinnerDropBadge
             rank={drop.rank}
             decisionTime={drop.winning_context?.decision_time || null}

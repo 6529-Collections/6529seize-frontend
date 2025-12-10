@@ -7,10 +7,11 @@ import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
 import { SingleWaveDropPosition } from "@/components/waves/drop/SingleWaveDropPosition";
-import { cicToType } from "@/helpers/Helpers";
+import { cicToType, formatNumberWithCommas } from "@/helpers/Helpers";
 import Link from "next/link";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { ImageScale } from "@/helpers/image.helpers";
+import { Tooltip } from "react-tooltip";
 
 interface MyStreamWaveMyVoteProps {
   readonly drop: ExtendedDrop;
@@ -100,13 +101,11 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
         </div>
 
         <div className="tw-flex tw-flex-col tw-flex-1 tw-min-w-0">
-          <div className="tw-flex tw-flex-col @md:tw-flex-row @sm:tw-flex-col tw-gap-y-2 tw-gap-x-3">
-            <div>
-              {drop.rank && <SingleWaveDropPosition rank={drop.rank} />}
-            </div>
+          <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
             <h3 className="tw-text-base tw-font-semibold tw-text-iron-50 tw-mb-0">
               {drop.title}
             </h3>
+            {drop.rank && <SingleWaveDropPosition rank={drop.rank} />}
           </div>
           <div className="tw-flex tw-items-center tw-gap-2 tw-mt-4">
             <div className="tw-size-6 tw-relative tw-flex-shrink-0 tw-rounded-md tw-overflow-hidden tw-ring-1 tw-ring-white/10 tw-bg-iron-800">
@@ -144,24 +143,52 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
               <div onClick={(e) => e.stopPropagation()}>
                 <MyStreamWaveMyVoteVotes drop={drop} />
               </div>
-              <div className="tw-flex tw-items-center tw-gap-1.5">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  strokeWidth="2"
-                  stroke="currentColor"
-                  className="tw-size-4 tw-text-iron-400 tw-flex-shrink-0"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"
-                  />
-                </svg>
-                <span className="tw-text-sm tw-font-medium tw-text-iron-200">
-                  {drop.raters_count}
+              <div className="tw-flex tw-items-center tw-gap-2">
+                <div className="tw-flex tw-items-center -tw-space-x-2">
+                  {drop.top_raters?.slice(0, 3).map((voter) => (
+                    <React.Fragment key={voter.profile.handle}>
+                      <Link
+                        href={`/${voter.profile.handle}`}
+                        onClick={(e) => e.stopPropagation()}
+                        data-tooltip-id={`my-vote-voter-${drop.id}-${voter.profile.handle}`}
+                      >
+                        {voter.profile.pfp ? (
+                          <img
+                            className="tw-w-6 tw-h-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
+                            src={voter.profile.pfp}
+                            alt="Recent voter"
+                          />
+                        ) : (
+                          <div className="tw-w-6 tw-h-6 tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
+                        )}
+                      </Link>
+                      <Tooltip
+                        id={`my-vote-voter-${drop.id}-${voter.profile.handle}`}
+                        place="top"
+                        offset={8}
+                        opacity={1}
+                        style={{
+                          padding: "4px 8px",
+                          background: "#37373E",
+                          color: "white",
+                          fontSize: "13px",
+                          fontWeight: 500,
+                          borderRadius: "6px",
+                          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                          zIndex: 99999,
+                          pointerEvents: "none",
+                        }}
+                      >
+                        {voter.profile.handle} - {formatNumberWithCommas(voter.rating)}
+                      </Tooltip>
+                    </React.Fragment>
+                  ))}
+                </div>
+                <span className="tw-text-white tw-font-bold tw-text-sm">
+                  {formatNumberWithCommas(drop.raters_count)}{" "}
+                  <span className="tw-text-iron-500 tw-font-normal">
+                    {drop.raters_count === 1 ? "voter" : "voters"}
+                  </span>
                 </span>
               </div>
             </div>

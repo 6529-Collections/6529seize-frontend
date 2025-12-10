@@ -34,24 +34,34 @@ const MemesLeaderboardDropVoteSummary: React.FC<
   const isUserVoteNegative = userVote < 0;
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-3">
-      {/* Vote stats row */}
-      <div className="tw-flex tw-items-center tw-justify-between tw-flex-wrap tw-gap-x-4 tw-gap-y-2">
-        <div className="tw-flex tw-items-center tw-gap-2 tw-text-sm">
-          <span
-            className={`tw-font-bold tw-font-mono tw-tracking-tight ${
-              isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
-            }`}
-          >
-            {formatNumberWithCommas(current)}
+    <div className="tw-flex @[700px]:tw-flex-1 tw-items-center tw-gap-4 @[700px]:tw-justify-between">
+      {/* Left side: Vote counts + User vote (on large) */}
+      <div className="tw-flex tw-items-center tw-gap-2 tw-text-sm">
+        <span
+          className={`tw-font-bold tw-font-mono tw-tracking-tight tw-text-sm ${
+            isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
+          }`}
+        >
+          {formatNumberWithCommas(current)}
+        </span>
+        <DropVoteProgressing current={current} projected={projected} />
+        <span className="tw-text-iron-500 tw-text-sm tw-ml-1">
+          {creditType} total
+        </span>
+        {/* User vote badge - hidden on small containers */}
+        {hasUserVoted && (
+          <span className="tw-hidden @[500px]:tw-inline tw-text-xs tw-text-iron-500 tw-font-mono tw-ml-3 tw-border-l tw-border-solid tw-border-white/10 tw-pl-3 tw-border-t-0 tw-border-r-0 tw-border-b-0">
+            Your vote:{" "}
+            <span className="tw-text-white tw-font-bold">
+              {isUserVoteNegative && "-"}
+              {formatNumberWithCommas(Math.abs(userVote))}
+            </span>
           </span>
-          <DropVoteProgressing current={current} projected={projected} />
-          <span className="tw-text-iron-500 tw-text-xs">
-            {creditType} total
-          </span>
-        </div>
+        )}
+      </div>
 
-        <div className="tw-flex tw-items-center tw-gap-3">
+      {/* Right side: Voters - hidden on small containers (shown next to button) */}
+      <div className="tw-hidden @[700px]:tw-flex tw-items-center tw-gap-2">
           <div className="tw-flex tw-items-center -tw-space-x-2">
             {topVoters.map((voter) => (
               <React.Fragment key={voter.profile.handle}>
@@ -98,25 +108,7 @@ const MemesLeaderboardDropVoteSummary: React.FC<
               {ratersCount === 1 ? "voter" : "voters"}
             </span>
           </span>
-        </div>
       </div>
-
-      {/* User vote badge */}
-      {hasUserVoted && (
-        <div className="tw-px-2.5 tw-py-1 tw-bg-iron-900/50 tw-rounded-md tw-border tw-border-iron-800/50 tw-self-start">
-          <span className="tw-text-xs tw-text-iron-500">
-            Your vote:{" "}
-            <span
-              className={`tw-font-semibold ${
-                isUserVoteNegative ? "tw-text-rose-400" : "tw-text-emerald-400"
-              }`}
-            >
-              {isUserVoteNegative && "-"}
-              {formatNumberWithCommas(Math.abs(userVote))}
-            </span>
-          </span>
-        </div>
-      )}
     </div>
   );
 };

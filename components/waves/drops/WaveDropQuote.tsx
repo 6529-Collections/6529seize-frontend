@@ -144,7 +144,7 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
               {drop && waveHref && (
                 <Link
                   href={waveHref}
-                  className="tw-text-[11px] tw-leading-0 -tw-mt-1 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw_DURATION-300 tw-ease-out tw-no-underline">
+                  className="tw-text-[11px] tw-leading-0 -tw-mt-1 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline">
                   {drop.wave.name}
                 </Link>
               )}

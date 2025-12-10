@@ -22,6 +22,8 @@ import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMenuDelete";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
+import Link from "next/link";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 
 interface MemesLeaderboardDropProps {
   readonly drop: ExtendedDrop;
@@ -114,7 +116,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
               <div className="tw-p-4 tw-mt-4 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-white/5 tw-bg-iron-900/30 tw-space-y-4">
                 <MemeDropTraits drop={drop} />
 
-                <div className="tw-flex tw-flex-col @[700px]:tw-flex-row tw-justify-between @[700px]:tw-items-center tw-gap-4">
+                <div className="tw-flex tw-flex-col @[700px]:tw-flex-row @[700px]:tw-items-center tw-justify-between tw-gap-4">
                   <MemesLeaderboardDropVoteSummary
                     current={drop.rating}
                     projected={drop.rating_prediction}
@@ -125,8 +127,36 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                   />
 
                   <div
-                    className="tw-flex tw-justify-center @[700px]:tw-justify-end"
+                    className="tw-flex tw-w-full @[700px]:tw-w-auto tw-items-center tw-justify-between @[700px]:tw-justify-end tw-gap-4 tw-flex-shrink-0"
                     onClick={(e) => e.stopPropagation()}>
+                    {/* Voters - only on small containers */}
+                    <div className="tw-flex @[700px]:tw-hidden tw-items-center tw-gap-2">
+                      <div className="tw-flex tw-items-center -tw-space-x-2">
+                        {firstThreeVoters.map((voter) => (
+                          <Link
+                            key={voter.profile.handle}
+                            href={`/${voter.profile.handle}`}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {voter.profile.pfp ? (
+                              <img
+                                className="tw-w-6 tw-h-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
+                                src={voter.profile.pfp}
+                                alt="Recent voter"
+                              />
+                            ) : (
+                              <div className="tw-w-6 tw-h-6 tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
+                            )}
+                          </Link>
+                        ))}
+                      </div>
+                      <span className="tw-text-white tw-font-bold tw-text-xs">
+                        {formatNumberWithCommas(drop.raters_count)}{" "}
+                        <span className="tw-text-iron-500 tw-font-normal">
+                          {drop.raters_count === 1 ? "voter" : "voters"}
+                        </span>
+                      </span>
+                    </div>
                     <VotingModalButton
                       drop={drop}
                       onClick={() => setIsVotingModalOpen(true)}

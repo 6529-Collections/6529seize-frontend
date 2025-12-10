@@ -57,59 +57,38 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
     : null;
 
   // Colors for each rank
-  let accentColor = "";
-  let bgColor = "";
+  let colorClasses = "";
   let rankText = "";
 
   switch (rankNumber) {
     case 1:
-      accentColor = "#fbbf24"; // amber-400 - Gold from ParticipationDrop
-      bgColor = "rgba(251,191,36,0.1)";
+      colorClasses = "tw-bg-yellow-500/10 tw-text-yellow-400 tw-border-yellow-500/20";
       rankText = "1st";
       break;
     case 2:
-      accentColor = "#CAD5E3"; // slate-400 - Silver from ParticipationDrop
-      bgColor = "rgba(202, 213, 227,0.1)";
+      colorClasses = "tw-bg-iron-400/10 tw-text-iron-300 tw-border-iron-400/20";
       rankText = "2nd";
       break;
     case 3:
-      accentColor = "#CD7F32"; // Bronze
-      bgColor = "rgba(205,127,50,0.1)";
+      colorClasses = "tw-bg-amber-600/10 tw-text-amber-500 tw-border-amber-600/20";
       rankText = "3rd";
       break;
     default:
-      accentColor = "#848490"; // iron-600 from Tailwind config
-      bgColor = "rgba(96,96,108,0.2)";
+      colorClasses = "tw-bg-iron-600/20 tw-text-iron-400 tw-border-iron-600/20";
       rankText = `${rankNumber}${getOrdinalSuffix(rankNumber)}`;
   }
 
   return (
     <div
-      className="tw-flex tw-items-center tw-rounded-md tw-font-medium tw-whitespace-nowrap"
-      style={{
-        backgroundColor: bgColor,
-        color: accentColor,
-        border: `1px solid ${accentColor}40`,
-      }}>
-      {/* Rank part */}
-      <span className="tw-px-2 tw-py-0.5 tw-text-xs tw-flex tw-items-center">
-        <FontAwesomeIcon icon={faTrophy} className="tw-mr-1.5 tw-size-2.5" />
-        {rankText}
-        {position > 1 && <span className="tw-ml-1">#{position}</span>}
-      </span>
+      className={`tw-flex tw-items-center tw-gap-1 tw-px-2 tw-py-0.5 tw-rounded tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-border tw-border-solid tw-whitespace-nowrap ${colorClasses}`}>
+      <FontAwesomeIcon icon={faTrophy} className="tw-size-2.5" />
+      {rankText}
+      {position > 1 && <span>#{position}</span>}
 
       {dateString && (
         <span className="tw-hidden md:tw-flex tw-items-center">
-          <div
-            style={{
-              backgroundColor: `${accentColor}70`,
-            }}
-            className="tw-size-[3px] tw-rounded-full"></div>
-          <span
-            className="tw-border-l tw-px-2 tw-py-0.5 tw-flex tw-items-center tw-text-xs"
-            style={{
-              borderColor: `${accentColor}40`,
-            }}>
+          <div className="tw-size-[3px] tw-rounded-full tw-bg-current tw-opacity-70"></div>
+          <span className="tw-border-l tw-border-current/40 tw-px-2 tw-flex tw-items-center">
             <FontAwesomeIcon icon={faClock} className="tw-mr-1.5 tw-size-2.5" />
             {dateString}
             {timeString && (

@@ -271,7 +271,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
             className={`${styles.buttonText} ${
               isTextExiting ? styles.exit : styles.enter
             }`}>
-            {showSuccess ? "Voted!" : "Vote!"}
+            {showSuccess ? "Voted" : "Vote"}
           </span>
         )}
         {loading && (

@@ -32,12 +32,12 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
   const shouldShowUserVote = (isVotingEnded || isWinner) && hasUserVoted;
 
   return (
-    <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-y-2 tw-gap-x-6">
-      <div className="tw-flex tw-items-baseline tw-gap-x-1">
+    <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-y-2 tw-gap-x-6 tw-mt-0.5">
+      <div className="tw-flex tw-items-baseline tw-gap-x-2">
         <span
-          className={`tw-text-sm tw-font-semibold ${
+          className={`tw-text-sm tw-font-bold tw-font-mono tw-tracking-tight ${
             isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
-          } `}
+          }`}
         >
           {formatNumberWithCommas(drop.rating)}
         </span>
@@ -45,19 +45,19 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
           current={drop.rating}
           projected={drop.rating_prediction}
         />
-        <span className="tw-text-sm tw-text-iron-400 text-nowrap">
+        <span className="tw-text-sm tw-text-iron-500 tw-font-normal">
           {drop.wave.voting_credit_type} total
         </span>
       </div>
-      <div className="tw-flex tw-items-center tw-gap-x-3">
-        <div className="tw-flex tw-items-center -tw-space-x-1.5">
+      <div className="tw-flex tw-items-center tw-gap-2">
+        <div className="tw-flex tw-items-center -tw-space-x-2">
           {firstThreeVoters.map((voter) => (
             <div key={voter.profile.handle}>
               <Link href={`/${voter.profile.handle}`}>
                 {voter.profile.pfp ? (
-                  <div className="tw-relative tw-size-6">
+                  <div className="tw-relative tw-w-6 tw-h-6">
                     <Image
-                      className="tw-rounded-md tw-ring-2 tw-ring-iron-950 tw-object-cover"
+                      className="tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
                       src={resolveIpfsUrlSync(voter.profile.pfp)}
                       alt="Recent voter"
                       fill
@@ -66,8 +66,8 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
                     />
                   </div>
                 ) : (
-                  <div 
-                    className="tw-size-6 tw-rounded-md tw-ring-2 tw-ring-iron-950 tw-bg-iron-800" 
+                  <div
+                    className="tw-w-6 tw-h-6 tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800"
                     data-tooltip-id={`wave-voter-${voter.profile.handle}`}
                   />
                 )}
@@ -85,14 +85,12 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
             </div>
           ))}
         </div>
-        <div className="tw-flex tw-items-baseline tw-gap-x-1">
-          <span className="tw-text-sm tw-font-medium tw-text-iron-100">
-            {formatNumberWithCommas(drop.raters_count)}
-          </span>
-          <span className="tw-text-sm tw-text-iron-400 text-nowrap">
+        <span className="tw-text-white tw-font-bold tw-text-sm">
+          {formatNumberWithCommas(drop.raters_count)}{" "}
+          <span className="tw-text-iron-500 tw-font-normal">
             {drop.raters_count === 1 ? "voter" : "voters"}
           </span>
-        </div>
+        </span>
       </div>
 
       {/* User's vote - only show when voting is ended or it's a winner drop */}

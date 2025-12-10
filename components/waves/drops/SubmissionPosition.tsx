@@ -23,45 +23,33 @@ export const SubmissionPosition: React.FC<SubmissionPositionProps> = ({ drop }) 
     return "th";
   }
 
-  // Colors for each rank (matching SingleWaveDropPosition)
-  let accentColor = "";
-  let bgColor = "";
+  // Colors for each rank
+  let colorClasses = "";
   let rankText = "";
 
   switch (rank) {
     case 1:
-      accentColor = "#fbbf24"; // Gold
-      bgColor = "rgba(251,191,36,0.1)";
+      colorClasses = "tw-bg-yellow-500/10 tw-text-yellow-400 tw-border-yellow-500/20";
       rankText = "1st";
       break;
     case 2:
-      accentColor = "#CAD5E3"; // Silver
-      bgColor = "rgba(202, 213, 227,0.1)";
+      colorClasses = "tw-bg-iron-400/10 tw-text-iron-300 tw-border-iron-400/20";
       rankText = "2nd";
       break;
     case 3:
-      accentColor = "#CD7F32"; // Bronze
-      bgColor = "rgba(205,127,50,0.1)";
+      colorClasses = "tw-bg-amber-600/10 tw-text-amber-500 tw-border-amber-600/20";
       rankText = "3rd";
       break;
     default:
-      accentColor = "#93939F"; // iron-400
-      bgColor = "rgba(147,147,159,0.15)";
+      colorClasses = "tw-bg-iron-600/20 tw-text-iron-400 tw-border-iron-600/20";
       rankText = `${rank}${getOrdinalSuffix(rank)}`;
   }
 
   return (
     <div
-      className="tw-flex tw-items-center tw-rounded-md tw-font-medium tw-whitespace-nowrap tw-w-fit"
-      style={{
-        backgroundColor: bgColor,
-        color: accentColor,
-        border: `1px solid ${accentColor}40`,
-      }}>
-      <span className="tw-px-2 tw-py-0.5 tw-text-xs tw-flex tw-items-center">
-        <FontAwesomeIcon icon={faTrophy} className="tw-mr-1.5 tw-size-2.5" />
-        {rankText}
-      </span>
+      className={`tw-flex tw-items-center tw-gap-1 tw-px-2 tw-py-0.5 tw-rounded tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-border tw-border-solid tw-whitespace-nowrap tw-w-fit ${colorClasses}`}>
+      <FontAwesomeIcon icon={faTrophy} className="tw-size-2.5" />
+      {rankText}
     </div>
   );
 };
