@@ -21,7 +21,7 @@ describe('WaveleaderboardSort', () => {
     );
 
     const current = screen.getByText('Current Vote');
-    expect(current.className).toContain('tw-bg-iron-800');
+    expect(current.className).toContain('tw-bg-white/10');
 
     await user.click(screen.getByText('Projected Vote'));
     expect(onSortChange).toHaveBeenCalledWith(

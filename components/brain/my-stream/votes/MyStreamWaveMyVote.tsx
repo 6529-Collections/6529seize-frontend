@@ -12,6 +12,7 @@ import Link from "next/link";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { ImageScale } from "@/helpers/image.helpers";
 import { Tooltip } from "react-tooltip";
+import Image from "next/image";
 
 interface MyStreamWaveMyVoteProps {
   readonly drop: ExtendedDrop;
@@ -153,13 +154,15 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                         data-tooltip-id={`my-vote-voter-${drop.id}-${voter.profile.handle}`}
                       >
                         {voter.profile.pfp ? (
-                          <img
+                          <Image
                             className="tw-w-6 tw-h-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
                             src={voter.profile.pfp}
                             alt="Recent voter"
+                            width={24}
+                            height={24}
                           />
                         ) : (
-                          <div className="tw-w-6 tw-h-6 tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
+                          <div className="tw-w-6 tw-h-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
                         )}
                       </Link>
                       <Tooltip

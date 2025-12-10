@@ -101,7 +101,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                 <div
                   className={`tw-flex tw-justify-center tw-h-96 ${
                     location === DropLocation.WAVE
-                      ? "bg-iron-950"
+                      ? "tw-bg-iron-950"
                       : "tw-bg-iron-900/40"
                   }`}>
                   <DropListItemContentMedia

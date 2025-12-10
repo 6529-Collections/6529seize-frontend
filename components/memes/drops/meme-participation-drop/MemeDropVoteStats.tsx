@@ -1,6 +1,7 @@
 import React from "react";
 import { Tooltip } from "react-tooltip";
 import Link from "next/link";
+import Image from "next/image";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ApiDropRater } from "@/generated/models/ApiDropRater";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
@@ -61,13 +62,15 @@ export default function MemeDropVoteStats({
                 data-tooltip-id={`vote-stats-${voter.profile.handle}`}
               >
                 {voter.profile.pfp ? (
-                  <img
+                  <Image
                     className="tw-w-6 tw-h-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
                     src={voter.profile.pfp}
                     alt="Recent voter"
+                    width={24}
+                    height={24}
                   />
                 ) : (
-                  <div className="tw-w-6 tw-h-6 tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
+                  <div className="tw-w-6 tw-h-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
                 )}
               </Link>
               <Tooltip

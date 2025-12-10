@@ -12,6 +12,7 @@ import { CalendarDaysIcon } from "@heroicons/react/24/outline";
 import { Time } from "@/helpers/time";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import Link from "next/link";
+import Image from "next/image";
 import { Tooltip } from "react-tooltip";
 
 interface ArtistWinningArtworksContentProps {
@@ -118,15 +119,17 @@ export const ArtistWinningArtworksContent: React.FC<
                         <div key={voter.profile.handle}>
                           <Link href={`/${voter.profile.handle}`}>
                             {voter.profile.pfp ? (
-                              <img
+                              <Image
                                 className="tw-w-6 tw-h-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
                                 src={voter.profile.pfp}
-                                alt=""
+                                alt="Voter avatar"
                                 data-tooltip-id={`winning-voter-${drop.id}-${voter.profile.handle}`}
+                                width={24}
+                                height={24}
                               />
                             ) : (
                               <div
-                                className="tw-w-6 tw-h-6 tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800"
+                                className="tw-w-6 tw-h-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800"
                                 data-tooltip-id={`winning-voter-${drop.id}-${voter.profile.handle}`}
                               />
                             )}

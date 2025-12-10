@@ -108,7 +108,6 @@ export const ArtistActiveSubmissionContent: React.FC<
                   key={submission.id}
                   className="tw-flex tw-flex-col tw-h-full"
                 >
-                  { }
                   <div
                     className="tw-group tw-relative tw-cursor-pointer tw-flex tw-flex-col tw-flex-1 tw-bg-iron-950/50 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg tw-overflow-hidden desktop-hover:hover:tw-border-iron-700 tw-shadow-lg desktop-hover:hover:tw-shadow-xl tw-transition-all tw-duration-300 tw-ease-out tw-mb-3"
                     onClick={() => handleDropClick(submission.id)}

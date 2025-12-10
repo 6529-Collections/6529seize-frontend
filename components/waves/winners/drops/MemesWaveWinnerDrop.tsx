@@ -10,6 +10,7 @@ import { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import WaveWinnersDropHeaderAuthorPfp from "./header/WaveWinnersDropHeaderAuthorPfp";
 import Link from "next/link";
+import Image from "next/image";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
@@ -157,7 +158,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
           </div>
 
           {artworkMedia && (
-            <div className="tw-flex tw-justify-center tw-bg-iron-9050 tw-h-96">
+            <div className="tw-flex tw-justify-center tw-bg-iron-950 tw-h-96">
               <DropListItemContentMedia
                 media_mime_type={artworkMedia.mime_type}
                 media_url={artworkMedia.url}
@@ -194,13 +195,15 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                         data-tooltip-id={`voter-${voter.profile.handle}-${voter.rating}`}
                       >
                         {voter.profile.pfp ? (
-                          <img
+                          <Image
                             className="tw-w-6 tw-h-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
                             src={voter.profile.pfp}
                             alt="Recent voter"
+                            width={24}
+                            height={24}
                           />
                         ) : (
-                          <div className="tw-w-6 tw-h-6 tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
+                          <div className="tw-w-6 tw-h-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
                         )}
                       </Link>
                       <Tooltip
