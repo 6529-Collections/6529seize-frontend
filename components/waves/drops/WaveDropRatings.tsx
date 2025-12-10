@@ -35,12 +35,12 @@ const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({ drop }) => {
                     ImageScale.W_AUTO_H_50
                   )}
                   alt={`${rater.profile.handle}'s avatar`}
-                  className="tw-max-h-5 tw-max-w-5 tw-rounded-md tw-ring-black/50 tw-ring-1 tw-bg-iron-700"
+                  className="tw-w-6 tw-h-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
                   data-tooltip-id={`rater-${rater.profile.id}`}
                 />
               ) : (
-                <div 
-                  className="tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-black/50 tw-bg-iron-700" 
+                <div
+                  className="tw-w-6 tw-h-6 tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800"
                   data-tooltip-id={`rater-${rater.profile.id}`}
                 />
               )}
@@ -57,9 +57,11 @@ const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({ drop }) => {
             </div>
           ))}
         </div>
-        <span className="tw-text-iron-500 tw-text-xs tw-font-normal">
+        <span className="tw-text-white tw-font-bold tw-text-sm">
           {formatNumberWithCommas(drop.raters_count)}{" "}
-          {drop.raters_count === 1 ? "voter" : "voters"}
+          <span className="tw-text-iron-500 tw-font-normal">
+            {drop.raters_count === 1 ? "voter" : "voters"}
+          </span>
         </span>
       </div>
       <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-text-iron-500 tw-text-xs tw-font-normal">

@@ -82,7 +82,7 @@ const WaveDropTime: React.FC<WaveDropTimeProps> = ({ timestamp }) => {
   };
 
   return (
-    <p className="tw-text-xs tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
+    <p className="tw-text-xs tw-mb-0 tw-whitespace-nowrap tw-leading-none tw-text-iron-500">
       {formatTime()}
     </p>
   );

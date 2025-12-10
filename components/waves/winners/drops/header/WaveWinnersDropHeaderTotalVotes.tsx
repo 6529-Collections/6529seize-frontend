@@ -29,11 +29,11 @@ export default function WaveWinnersDropHeaderTotalVotes({
   const style = getVoteStyle(winner.place, winner.drop.rating);
 
   return (
-    <div className="tw-flex tw-items-baseline tw-gap-x-1">
-      <span className={`tw-font-semibold tw-text-sm ${style}`}>
+    <div className="tw-flex tw-items-baseline tw-gap-x-2">
+      <span className={`tw-font-bold tw-text-sm ${style}`}>
         {formatNumberWithCommas(winner.drop.rating)}
       </span>
-      <span className="tw-text-iron-400 tw-text-sm">
+      <span className="tw-text-sm tw-text-iron-500 tw-whitespace-nowrap">
         {winner.drop.wave.voting_credit_type} total
       </span>
     </div>

@@ -108,7 +108,7 @@ export default function EndedParticipationDrop({
           <WaveDropAuthorPfp drop={drop} />
 
           <div className="tw-flex tw-flex-col tw-w-full tw-gap-y-2">
-            <div className="tw-flex tw-items-center tw-gap-x-4">
+            <div className="tw-flex tw-flex-col tw-gap-y-2">
               <div className="tw-flex tw-items-center tw-gap-x-2">
                 <UserCICAndLevel
                   level={drop.author.level}
@@ -129,11 +129,11 @@ export default function EndedParticipationDrop({
 
                 <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
 
-                <p className="tw-text-md tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
+                <p className="tw-text-xs tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
                   {getTimeAgoShort(drop.created_at)}
                 </p>
               </div>
-              <div className="tw-flex tw-items-center tw-rounded-md tw-font-medium tw-whitespace-nowrap -tw-mt-0.5 tw-px-2 tw-py-0.5 tw-bg-iron-600/10 tw-text-iron-500 tw-border tw-border-solid tw-border-iron-500/25">
+              <div className="tw-flex tw-items-center tw-rounded-md tw-font-medium tw-whitespace-nowrap tw-px-2 tw-py-0.5 tw-bg-iron-600/10 tw-text-iron-500 tw-border tw-border-solid tw-border-iron-500/25 tw-w-fit">
                 <span className="tw-text-xs">Participant</span>
               </div>
             </div>

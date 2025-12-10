@@ -182,7 +182,7 @@ export const SingleWaveDropVoteInput: React.FC<
             type="text"
             pattern="-?[0-9]*"
             inputMode="numeric"
-            className="tw-w-full tw-px-3 tw-pr-12 tw-h-8 tw-bg-iron-900 tw-rounded-lg tw-text-iron-50 tw-placeholder-iron-400 tw-text-base tw-font-medium tw-outline-none tw-border tw-border-solid tw-border-iron-700 desktop-hover:hover:tw-border-primary-400 focus:tw-border-primary-400 tw-transition-all focus:tw-bg-iron-950 tw-duration-300 tw-ease-out"
+            className="tw-w-full tw-px-3 tw-pr-12 tw-h-8 tw-bg-iron-950 tw-rounded-md tw-text-iron-50 tw-placeholder-iron-400 tw-text-base tw-font-medium tw-outline-none tw-border tw-border-solid tw-border-iron-700 desktop-hover:hover:tw-border-primary-400 focus:tw-border-primary-400 tw-transition-all focus:tw-bg-iron-950 tw-duration-300 tw-ease-out"
             value={voteValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}

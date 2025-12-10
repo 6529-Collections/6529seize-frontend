@@ -24,7 +24,7 @@ const VotingModalButton: React.FC<VotingModalButtonProps> = ({
     onClick();
   };
 
-  const baseClasses = "tw-flex tw-items-center tw-justify-center tw-gap-x-1 tw-px-3 tw-py-1.5 tw-rounded-lg tw-border tw-border-solid tw-text-xs tw-whitespace-nowrap tw-transition-all tw-duration-300 tw-ease-out";
+  const baseClasses = "tw-flex tw-items-center tw-justify-center tw-gap-x-1 tw-px-3 tw-py-1.5 tw-rounded-md tw-border tw-border-solid tw-text-xs tw-whitespace-nowrap tw-transition-all tw-duration-300 tw-ease-out";
 
   const variantClasses = variant === "subtle"
     ? "tw-bg-white tw-border-white tw-text-black tw-font-semibold desktop-hover:hover:tw-bg-iron-300 tw-shadow-[0_0_15px_rgba(255,255,255,0.1)]"

@@ -38,7 +38,7 @@ const MemeDropTraits: React.FC<MemeDropTraitsProps> = ({ drop }) => {
   };
 
   return (
-    <div className="lg:tw-flex tw-flex-col tw-gap-2 tw-hidden tw-p-4">
+    <div className="lg:tw-flex tw-flex-col tw-gap-2 tw-hidden">
       <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-4 tw-gap-2">
         {traits.slice(0, 2).map((trait) => (
           <MemeDropTrait
@@ -49,6 +49,7 @@ const MemeDropTraits: React.FC<MemeDropTraitsProps> = ({ drop }) => {
               ]
             }
             value={trait.data_value ?? ""}
+            dropId={drop.id}
           />
         ))}
 
@@ -63,18 +64,19 @@ const MemeDropTraits: React.FC<MemeDropTraitsProps> = ({ drop }) => {
                   ]
                 }
                 value={trait.data_value ?? ""}
+                dropId={drop.id}
               />
             ))}
             <button
               onClick={handleShowLess}
-              className="tw-text-xs tw-text-primary-400 desktop-hover:hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left">
+              className="tw-text-primary-400 tw-text-xs tw-text-left tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors tw-whitespace-nowrap tw-self-end tw-pb-1.5 tw-bg-transparent tw-border-0">
               Show less
             </button>
           </>
         ) : (
           <button
             onClick={handleShowAll}
-            className="tw-text-xs tw-text-primary-400 desktop-hover:hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left">
+            className="tw-text-primary-400 tw-text-xs tw-text-left tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors tw-whitespace-nowrap tw-self-end tw-pb-1.5 tw-bg-transparent tw-border-0">
             Show all
           </button>
         )}

@@ -38,22 +38,24 @@ export default function WaveWinnersDropHeaderVoters({
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-3">
-      <div className="tw-flex -tw-space-x-1.5 tw-items-center">
-        {winner.drop.top_raters.map((voter, index) => (
-          <WaveWinnersDropHeaderVoter
-            voter={voter}
-            winner={winner}
-            index={index}
-            key={voter.profile.handle}
-          />
-        ))}
-      </div>
-      <span className="tw-text-sm tw-text-iron-400">
-        <span className="tw-font-semibold">
+      <div className="tw-flex tw-items-center tw-gap-2">
+        <div className="tw-flex tw-items-center -tw-space-x-2">
+          {winner.drop.top_raters.map((voter, index) => (
+            <WaveWinnersDropHeaderVoter
+              voter={voter}
+              winner={winner}
+              index={index}
+              key={voter.profile.handle}
+            />
+          ))}
+        </div>
+        <span className="tw-text-white tw-font-bold tw-text-sm">
           {formatNumberWithCommas(winner.drop.raters_count)}{" "}
+          <span className="tw-text-iron-500 tw-font-normal">
+            {winner.drop.raters_count === 1 ? "voter" : "voters"}
+          </span>
         </span>
-        {winner.drop.raters_count === 1 ? "voter" : "voters"}
-      </span>
+      </div>
 
       {hasUserVoted && (
         <div className="tw-flex tw-items-center tw-gap-1">

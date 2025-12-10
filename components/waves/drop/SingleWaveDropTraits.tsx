@@ -28,13 +28,13 @@ const MetadataItem: React.FC<{
     typeof value === "boolean" ? (value ? "Yes" : "No") : String(value);
 
   return (
-    <div className="tw-px-2 tw-py-1 tw-rounded-md tw-bg-iron-800 tw-flex tw-flex-col tw-gap-y-1.5">
-      <span className="tw-text-iron-400 tw-text-xs tw-mr-1.5 tw-font-normal">
+    <div className="tw-bg-iron-900 tw-border tw-border-solid tw-border-white/10 tw-rounded-md tw-px-3 tw-py-1.5 tw-flex tw-flex-col">
+      <span className="tw-block tw-text-[9px] tw-uppercase tw-tracking-wider tw-text-iron-600 tw-font-bold tw-mb-0.5">
         {label}
       </span>
       <>
-        <span 
-          className="tw-text-iron-50 tw-text-sm tw-font-medium tw-truncate"
+        <span
+          className="tw-text-xs tw-text-iron-400 tw-truncate"
           data-tooltip-id={`trait-${label}-${displayValue}`}
         >
           {displayValue}

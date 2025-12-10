@@ -15,8 +15,6 @@ import UserCICAndLevel, {
 } from "@/components/user/utils/UserCICAndLevel";
 import { cicToType, formatNumberWithCommas } from "@/helpers/Helpers";
 import { Tooltip } from "react-tooltip";
-import { faTrophy } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import MemeDropTraits from "@/components/memes/drops/MemeDropTraits";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -26,6 +24,7 @@ import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 
 interface MemesWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -45,8 +44,6 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
   const { isActive, setIsActive, touchHandlers } = useLongPressInteraction({
     hasTouchScreen,
   });
-
-  // Mobile detection is now handled by the WaveDropTime component
 
   const title =
     winner.drop.metadata?.find((m) => m.data_key === "title")?.data_value ||
@@ -78,88 +75,89 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
       onClick={() => onDropClick(extendedDrop)}
       className="touch-select-none tw-cursor-pointer tw-rounded-xl tw-transition-all tw-duration-300 tw-ease-out tw-w-full"
     >
-      <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 desktop-hover:hover:tw-border-[#fbbf24]/40 tw-shadow-[0_0_15px_rgba(251,191,36,0.15)] tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden tw-bg-iron-950">
+      <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 desktop-hover:hover:tw-border-[#fbbf24]/20 tw-shadow-[0_0_15px_rgba(251,191,36,0.08)] tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden tw-bg-iron-950">
         <div className="tw-flex tw-flex-col" {...touchHandlers}>
-          <div className="tw-p-4">
-            <div className="tw-flex tw-flex-col tw-gap-y-1.5">
-              <div className="tw-flex tw-items-center tw-justify-between">
-                <div className="tw-flex tw-items-center tw-gap-x-3">
-                  <Link
-                    href={`/${winner.drop.author?.handle ?? winner.drop.author?.id}`}
-                    onClick={(e) => e.stopPropagation()}
-                    scroll={false}
-                    className="tw-flex tw-items-center tw-gap-x-2 tw-no-underline group"
-                  >
-                    <WaveWinnersDropHeaderAuthorPfp winner={winner} />
-                  </Link>
-                  <div className="tw-flex tw-items-center tw-gap-x-4">
-                    <div className="tw-flex tw-items-center tw-gap-x-2">
-                      {winner.drop.author?.level && (
-                        <UserCICAndLevel
-                          level={winner.drop.author.level}
-                          cicType={cicToType(winner.drop.author.cic || 0)}
-                          size={UserCICAndLevelSize.SMALL}
-                        />
-                      )}
-                      {winner.drop.author?.handle ? (
-                        <UserProfileTooltipWrapper user={winner.drop.author.handle ?? winner.drop.author.id}>
-                          <Link
-                            href={`/${winner.drop.author?.handle ?? winner.drop.author?.id}`}
-                            onClick={(e) => e.stopPropagation()}
-                            scroll={false}
-                            className="tw-no-underline desktop-hover:hover:tw-underline desktop-hover:hover:tw-opacity-80 tw-transition-opacity"
-                          >
-                            <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold tw-text-iron-100">
-                              {winner.drop.author?.handle}
-                            </span>
-                          </Link>
-                        </UserProfileTooltipWrapper>
-                      ) : (
+          {/* Header section with border */}
+          <div className="tw-p-4 tw-pb-3 tw-border-b tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-white/5 tw-bg-iron-900/30">
+            <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
+              <div className="tw-flex tw-gap-x-3">
+                <WaveWinnersDropHeaderAuthorPfp winner={winner} />
+                <div className="tw-flex tw-flex-col tw-justify-between tw-h-12">
+                  {/* Top row: Handle + Timestamp */}
+                  <div className="tw-flex tw-items-center tw-gap-x-2 tw-flex-wrap -tw-mt-0.5">
+                    {winner.drop.author?.level && (
+                      <UserCICAndLevel
+                        level={winner.drop.author.level}
+                        cicType={cicToType(winner.drop.author.cic || 0)}
+                        size={UserCICAndLevelSize.SMALL}
+                      />
+                    )}
+                    {winner.drop.author?.handle ? (
+                      <UserProfileTooltipWrapper user={winner.drop.author.handle ?? winner.drop.author.id}>
                         <Link
                           href={`/${winner.drop.author?.handle ?? winner.drop.author?.id}`}
                           onClick={(e) => e.stopPropagation()}
                           scroll={false}
-                          className="tw-no-underline desktop-hover:hover:tw-underline desktop-hover:hover:tw-opacity-80 tw-transition-opacity"
+                          className="tw-no-underline desktop-hover:hover:tw-underline"
                         >
-                          <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold tw-text-iron-100">
+                          <span className="tw-text-sm tw-font-bold tw-text-white">
                             {winner.drop.author?.handle}
                           </span>
                         </Link>
-                      )}
+                      </UserProfileTooltipWrapper>
+                    ) : (
+                      <Link
+                        href={`/${winner.drop.author?.handle ?? winner.drop.author?.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        scroll={false}
+                        className="tw-no-underline desktop-hover:hover:tw-underline"
+                      >
+                        <span className="tw-text-sm tw-font-bold tw-text-white">
+                          {winner.drop.author?.handle ?? winner.drop.author?.id}
+                        </span>
+                      </Link>
+                    )}
 
-                      <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
-                      
-                      <WaveDropTime timestamp={winner.drop.created_at} />
-                    </div>
+                    <span className="tw-text-sm tw-text-iron-500">•</span>
+
+                    <WaveDropTime timestamp={winner.drop.created_at} />
                   </div>
-                  <div className="tw-flex tw-items-center tw-rounded-md tw-font-medium tw-whitespace-nowrap tw-bg-[rgba(251,191,36,0.1)] tw-px-2 tw-py-1 tw-border tw-border-solid tw-border-[#fbbf24]/20">
-                    <FontAwesomeIcon
-                      icon={faTrophy}
-                      className="tw-flex-shrink-0 tw-size-3 tw-text-[#fbbf24]"
+
+                  {/* Bottom row: Winner badge */}
+                  <div className="tw-flex tw-items-center tw-gap-x-2">
+                    <WinnerDropBadge
+                      rank={winner.place}
+                      decisionTime={null}
                     />
                   </div>
                 </div>
+              </div>
 
-                {/* Show open icon when not a touch device */}
-                {!hasTouchScreen && (
-                  <div className="tw-flex tw-items-center">
-                    <div className="tw-h-8">
-                      <WaveDropActionsOpen drop={extendedDrop} />
-                    </div>
+              {/* Show open icon when not a touch device */}
+              {!hasTouchScreen && (
+                <div className="tw-flex tw-items-start tw-flex-shrink-0">
+                  <div className="tw-h-8">
+                    <WaveDropActionsOpen drop={extendedDrop} />
                   </div>
-                )}
-              </div>
-              <div className="tw-mt-1 sm:tw-mt-0 sm:tw-ml-[3.25rem]">
-                <h3 className="tw-text-base sm:tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-0">
-                  {title}
-                </h3>
-                <div className="tw-text-sm tw-text-iron-400">{description}</div>
-              </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Title and Description */}
+          <div className="tw-px-4 tw-pt-4 tw-pb-4">
+            <div className="tw-space-y-1">
+              <h3 className="tw-text-base tw-font-semibold tw-text-iron-100 tw-mb-0">
+                {title}
+              </h3>
+              <p className="tw-text-sm tw-text-iron-400 tw-mb-0 tw-line-clamp-2">
+                {description}
+              </p>
             </div>
           </div>
 
           {artworkMedia && (
-            <div className="tw-flex tw-justify-center tw-bg-iron-900/40 tw-h-96">
+            <div className="tw-flex tw-justify-center tw-bg-iron-950 tw-h-96">
               <DropListItemContentMedia
                 media_mime_type={artworkMedia.mime_type}
                 media_url={artworkMedia.url}
@@ -168,87 +166,88 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
             </div>
           )}
 
-          <MemeDropTraits drop={winner.drop} />
+          {/* Footer Section: Traits + Vote Summary */}
+          <div className="tw-p-4 tw-mt-4 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-white/5 tw-bg-iron-900/30 tw-space-y-4">
+            <MemeDropTraits drop={winner.drop} />
 
-          <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-6 tw-gap-y-2 tw-px-4 tw-pt-4 lg:tw-pt-0 tw-pb-4">
-            <div className="tw-flex tw-items-center tw-gap-x-1.5">
-              <span
-                className={`tw-text-sm tw-font-semibold ${
-                  isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
-                } `}
-              >
-                {formatNumberWithCommas(rating)}
-              </span>
-              <span className="tw-text-sm tw-text-iron-400">{creditType}</span>
-            </div>
-
-            <div className="tw-flex tw-items-center tw-gap-x-2">
-              <div className="tw-flex tw-items-center -tw-space-x-1.5">
-                {topVoters.map((voter) => (
-                  <React.Fragment key={voter.profile.handle}>
-                    <Link
-                      href={`/${voter.profile.handle ?? voter.profile.id}`}
-                      onClick={(e) => e.stopPropagation()}
-                      scroll={false}
-                      className="tw-transition-transform desktop-hover:hover:tw-translate-y-[-2px]"
-                      data-tooltip-id={`voter-${voter.profile.handle}-${voter.rating}`}
-                    >
-                      {voter.profile.pfp ? (
-                        <img
-                          className="tw-size-6 tw-rounded-md tw-ring-2 tw-ring-black tw-object-contain tw-bg-iron-800"
-                          src={voter.profile.pfp}
-                          alt="Recent voter"
-                        />
-                      ) : (
-                        <div className="tw-size-6 tw-rounded-md tw-ring-2 tw-ring-black tw-object-contain tw-bg-iron-800" />
-                      )}
-                    </Link>
-                    <Tooltip
-                      id={`voter-${voter.profile.handle}-${voter.rating}`}
-                      style={{
-                        backgroundColor: "#1F2937",
-                        color: "white",
-                        padding: "4px 8px",
-                      }}
-                    >
-                      {voter.profile.handle} - {formatNumberWithCommas(voter.rating)}
-                    </Tooltip>
-                  </React.Fragment>
-                ))}
-              </div>
-              <div className="tw-flex tw-items-baseline tw-gap-x-1">
-                <span className="tw-text-sm tw-font-medium tw-text-iron-50">
-                  {formatNumberWithCommas(ratersCount)}
-                </span>
-                <span className="tw-text-sm tw-text-iron-400">
-                  {ratersCount === 1 ? "voter" : "voters"}
-                </span>
-              </div>
-            </div>
-
-            {/* User's vote */}
-            {hasUserVoted && (
+            <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-4 tw-gap-y-2">
               <div className="tw-flex tw-items-center tw-gap-x-1.5">
-                <div className="tw-flex tw-items-baseline tw-gap-x-1">
-                  <span className="tw-text-sm tw-font-normal tw-text-iron-400">
-                    Your vote:
-                  </span>
-                  <span
-                    className={`tw-text-sm tw-font-semibold ${
-                      isUserVoteNegative
-                        ? "tw-text-rose-500"
-                        : "tw-text-emerald-500"
-                    }`}
-                  >
-                    {isUserVoteNegative && "-"}
-                    {formatNumberWithCommas(Math.abs(userVote))}{" "}
-                    <span className="tw-text-iron-400 tw-font-normal">
-                      {creditType}
-                    </span>
-                  </span>
-                </div>
+                <span
+                  className={`tw-text-sm tw-font-bold ${
+                    isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
+                  }`}
+                >
+                  {formatNumberWithCommas(rating)}
+                </span>
+                <span className="tw-text-sm tw-text-iron-500">{creditType} total</span>
               </div>
-            )}
+
+              <div className="tw-flex tw-items-center tw-gap-2">
+                <div className="tw-flex tw-items-center -tw-space-x-2">
+                  {topVoters.map((voter) => (
+                    <React.Fragment key={voter.profile.handle}>
+                      <Link
+                        href={`/${voter.profile.handle ?? voter.profile.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        scroll={false}
+                        className="tw-transition-transform desktop-hover:hover:tw-translate-y-[-2px]"
+                        data-tooltip-id={`voter-${voter.profile.handle}-${voter.rating}`}
+                      >
+                        {voter.profile.pfp ? (
+                          <img
+                            className="tw-w-6 tw-h-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
+                            src={voter.profile.pfp}
+                            alt="Recent voter"
+                          />
+                        ) : (
+                          <div className="tw-w-6 tw-h-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
+                        )}
+                      </Link>
+                      <Tooltip
+                        id={`voter-${voter.profile.handle}-${voter.rating}`}
+                        style={{
+                          backgroundColor: "#1F2937",
+                          color: "white",
+                          padding: "4px 8px",
+                        }}
+                      >
+                        {voter.profile.handle} - {formatNumberWithCommas(voter.rating)}
+                      </Tooltip>
+                    </React.Fragment>
+                  ))}
+                </div>
+                <span className="tw-text-white tw-font-bold tw-text-sm">
+                  {formatNumberWithCommas(ratersCount)}{" "}
+                  <span className="tw-text-iron-500 tw-font-normal">
+                    {ratersCount === 1 ? "voter" : "voters"}
+                  </span>
+                </span>
+              </div>
+
+              {/* User's vote */}
+              {hasUserVoted && (
+                <div className="tw-flex tw-items-center tw-gap-x-1.5">
+                  <div className="tw-flex tw-items-baseline tw-gap-x-1">
+                    <span className="tw-text-sm tw-font-normal tw-text-iron-400">
+                      Your vote:
+                    </span>
+                    <span
+                      className={`tw-text-sm tw-font-semibold ${
+                        isUserVoteNegative
+                          ? "tw-text-rose-500"
+                          : "tw-text-emerald-500"
+                      }`}
+                    >
+                      {isUserVoteNegative && "-"}
+                      {formatNumberWithCommas(Math.abs(userVote))}{" "}
+                      <span className="tw-text-iron-400 tw-font-normal">
+                        {creditType}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Touch slide-up menu */}
