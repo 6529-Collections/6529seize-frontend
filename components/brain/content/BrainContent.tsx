@@ -6,7 +6,6 @@ import BrainContentPinnedWaves from "./BrainContentPinnedWaves";
 import BrainContentInput from "./input/BrainContentInput";
 import { ActiveDropState } from "@/types/dropInteractionTypes";
 import { useLayout } from "../my-stream/layout/LayoutContext";
-import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 // Create breakpoint hook with the same values as tailwind classes
@@ -17,7 +16,6 @@ interface BrainContentProps {
   readonly children: React.ReactNode;
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
-  readonly keyboardAdjustment?: number;
   readonly showPinnedWaves?: boolean;
 }
 
@@ -25,14 +23,10 @@ const BrainContent: React.FC<BrainContentProps> = ({
   children,
   activeDrop,
   onCancelReplyQuote,
-  keyboardAdjustment = 40,
   showPinnedWaves = true,
 }) => {
-  // Get layout context registration function for measuring
+  // Get layout context registration function
   const { registerRef } = useLayout();
-  
-  // Android keyboard handling - only apply when input is visible
-  const { getContainerStyle } = useAndroidKeyboard();
 
   // Get current breakpoint and device info
   const breakpoint = useBreakpoint();
@@ -64,11 +58,8 @@ const BrainContent: React.FC<BrainContentProps> = ({
   // Only show pinned waves in the app on small screens (not mobile web)
   const shouldShowPinnedWaves = showPinnedWaves && breakpoint === "S" && isApp;
 
-  // Only apply Android keyboard adjustments when input is visible
-  const containerStyle = activeDrop ? getContainerStyle({}, keyboardAdjustment) : {};
-
   return (
-    <div className="tw-relative tw-flex tw-flex-col tw-h-full" style={containerStyle}>
+    <div className="tw-relative tw-flex tw-flex-col tw-h-full">
       {showPinnedWaves && (
         <div
           ref={setPinnedRef}
