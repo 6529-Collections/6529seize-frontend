@@ -114,7 +114,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                         className="tw-no-underline desktop-hover:hover:tw-underline"
                       >
                         <span className="tw-text-sm tw-font-bold tw-text-white">
-                          {winner.drop.author?.handle}
+                          {winner.drop.author?.handle ?? winner.drop.author?.id}
                         </span>
                       </Link>
                     )}

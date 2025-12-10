@@ -30,7 +30,7 @@ export default function UserCICAndLevel({
 
   const CIC_SIZE_CLASSES: Record<UserCICAndLevelSize, string> = {
     [UserCICAndLevelSize.SMALL]: "-tw-top-0.5 -tw-right-0.5 tw-h-2 tw-w-2",
-    [UserCICAndLevelSize.MEDIUM]: "-tw-top-0.5 -tw-right-0.5 tw-h-3 tw-w-3",
+    [UserCICAndLevelSize.MEDIUM]: "-tw-top-1 -tw-right-0.5 tw-h-2.5 tw-w-2.5",
     [UserCICAndLevelSize.LARGE]: "-tw-top-0.5 -tw-right-0.5 tw-h-3.5 tw-w-3.5",
     [UserCICAndLevelSize.XLARGE]: "-tw-top-0.5 -tw-right-0.5 tw-h-4 tw-w-4",
   };

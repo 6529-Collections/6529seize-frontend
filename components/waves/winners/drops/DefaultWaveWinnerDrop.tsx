@@ -88,7 +88,7 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
             </div>
           )}
         </div>
-        <div className="tw-mt-3 tw-ml-[3.25rem]">
+        <div className="tw-mt-3 tw-ml-[3.75rem]">
           <div className="tw-flex tw-flex-col tw-gap-y-2">
             <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-4 tw-gap-y-2">
               <div className="tw-flex tw-flex-whitespace-nowrap tw-gap-x-4 tw-items-center">

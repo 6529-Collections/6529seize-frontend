@@ -114,7 +114,7 @@ export default function UserProfileTooltip({
                 <UserCICAndLevel
                   level={profile.level}
                   cicType={cicToType(profile.cic)}
-                  size={UserCICAndLevelSize.MEDIUM}
+                  size={UserCICAndLevelSize.SMALL}
                 />
               )}
             </div>
