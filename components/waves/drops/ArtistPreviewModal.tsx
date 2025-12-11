@@ -7,13 +7,15 @@ import { Fragment, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import ArtistPreviewAppWrapper from "./ArtistPreviewAppWrapper";
 import { ArtistPreviewModalContent } from "./ArtistPreviewModalContent";
-export type { ArtistPreviewTab as ModalTab } from "@/hooks/useArtistPreviewModal";
+import { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
+
+export type { ArtistPreviewTab as ModalTab };
 
 interface ArtistPreviewModalProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly user: ApiProfileMin;
-  readonly initialTab?: ModalTab;
+  readonly initialTab?: ArtistPreviewTab;
 }
 
 export const ArtistPreviewModal = ({
@@ -23,7 +25,7 @@ export const ArtistPreviewModal = ({
   initialTab = "active"
 }: ArtistPreviewModalProps) => {
   const { isApp } = useDeviceInfo();
-  const [activeTab, setActiveTab] = useState<ModalTab>(initialTab);
+  const [activeTab, setActiveTab] = useState<ArtistPreviewTab>(initialTab);
 
   // Check if user has winning artworks
   const hasWinningArtworks = user.winner_main_stage_drop_ids &&
