@@ -35,10 +35,16 @@ export default function GroupCreateTDH({
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4">
           <div>
             <p className="tw-mb-0 tw-text-base sm:tw-text-lg tw-font-semibold tw-text-iron-50">
-              TDH
+              {tdh.inclusion_strategy === ApiGroupTdhInclusionStrategy.Both
+                ? "TDH + xTDH"
+                : tdh.inclusion_strategy}
             </p>
             <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-font-normal tw-text-iron-300">
-              Set the group&apos;s minimum TDH requirement.
+              Set the group&apos;s minimum{" "}
+              {tdh.inclusion_strategy === ApiGroupTdhInclusionStrategy.Both
+                ? "TDH + xTDH"
+                : tdh.inclusion_strategy}{" "}
+              requirement.
             </p>
           </div>
           <div>
@@ -56,7 +62,10 @@ export default function GroupCreateTDH({
       </div>
       <GroupCreateNumericValue
         value={tdh.min}
-        label={`${tdh.inclusion_strategy} at least`}
+        label={`${tdh.inclusion_strategy === ApiGroupTdhInclusionStrategy.Both
+          ? "TDH + xTDH"
+          : tdh.inclusion_strategy
+          } at least`}
         labelId="floating_tdh"
         setValue={(value) => setTDH({ ...tdh, min: value })}
       />
