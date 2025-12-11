@@ -484,13 +484,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     return throttle(() => {
       send(WsMessageType.USER_IS_TYPING, { wave_id: wave.id });
     }, 4000);
-  }, []);
+  }, [send, wave.id]);
 
   useEffect(() => {
     if (getMarkdown?.length) {
       throttleHandle();
     }
-  }, [getMarkdown]);
+  }, [getMarkdown, throttleHandle]);
 
   const getCanSubmitStorm = () => {
     const markdown = getMarkdown;
@@ -522,8 +522,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     ) ?? 0) >= 24000;
 
   const getCanAddPart = () => getHaveMarkdownOrFile() && !getIsDropLimit();
-  const canSubmit = useMemo(() => getCanSubmit(), [getMarkdown, files, drop, hasMetadata]);
-  const canAddPart = useMemo(() => getCanAddPart(), [getMarkdown, files, drop]);
+  const canSubmit = getCanSubmit();
+  const canAddPart = getCanAddPart();
 
   const [referencedNfts, setReferencedNfts] = useState<ReferencedNft[]>([]);
 
@@ -980,7 +980,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     if (!drop.parts.length) {
       setIsStormMode(false);
     }
-  }, [drop?.parts]);
+  }, [drop, setIsStormMode]);
 
   const [isMetadataOpen, setIsMetadataOpen] = useState(false);
 
