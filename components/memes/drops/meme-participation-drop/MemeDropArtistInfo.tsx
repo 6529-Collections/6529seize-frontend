@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { cicToType } from "@/helpers/Helpers";
 import UserCICAndLevel, {
@@ -14,30 +14,21 @@ import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileToo
 import { ArtistSubmissionBadge } from "@/components/waves/drops/ArtistSubmissionBadge";
 import { ArtistPreviewModal } from "@/components/waves/drops/ArtistPreviewModal";
 import { ProfileWinnerBadge } from "@/components/waves/drops/ProfileWinnerBadge";
+import { useArtistPreviewModal } from "@/hooks/useArtistPreviewModal";
 
 interface MemeDropArtistInfoProps {
   readonly drop: ExtendedDrop;
 }
 
 export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalInitialTab, setModalInitialTab] = useState<"active" | "winners">("active");
+  const { isModalOpen, modalInitialTab, handleBadgeClick, handleModalClose } =
+    useArtistPreviewModal();
 
   const submissionCount = drop.author.active_main_stage_submission_ids?.length || 0;
   const hasSubmissions = submissionCount > 0;
 
-  // Check if this drop author has any main stage winner drop IDs
   const winnerCount = drop.author.winner_main_stage_drop_ids?.length || 0;
   const isWinner = winnerCount > 0;
-
-  const handleBadgeClick = (tab: "active" | "winners") => {
-    setModalInitialTab(tab);
-    setIsModalOpen(true);
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-  };
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-3">

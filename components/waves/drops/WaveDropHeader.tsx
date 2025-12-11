@@ -13,7 +13,8 @@ import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileToo
 import { ArtistSubmissionBadge } from "./ArtistSubmissionBadge";
 import { ArtistPreviewModal } from "./ArtistPreviewModal";
 import { ProfileWinnerBadge } from "./ProfileWinnerBadge";
-import { useState, useCallback, useMemo } from "react";
+import { useMemo, useCallback } from "react";
+import { useArtistPreviewModal } from "@/hooks/useArtistPreviewModal";
 
 interface WaveDropHeaderProps {
   readonly drop: ApiDrop;
@@ -33,17 +34,17 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
   badge,
 }) => {
   const router = useRouter();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalInitialTab, setModalInitialTab] = useState<"active" | "winners">("active");
+  const { isModalOpen, modalInitialTab, handleBadgeClick, handleModalClose } =
+    useArtistPreviewModal();
 
   // Memoize expensive computations
   const cicType = useMemo(() => cicToType(drop.author.cic), [drop.author.cic]);
-  
-  const submissionCount = useMemo(() => 
+
+  const submissionCount = useMemo(() =>
     drop.author.active_main_stage_submission_ids?.length || 0,
     [drop.author.active_main_stage_submission_ids]
   );
-  
+
   const hasSubmissions = submissionCount > 0;
 
   // Check if this drop author has any main stage winner drop IDs
@@ -59,15 +60,6 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
     e.stopPropagation();
     router.push(path);
   }, [router]);
-
-  const handleBadgeClick = useCallback((tab: "active" | "winners") => {
-    setModalInitialTab(tab);
-    setIsModalOpen(true);
-  }, []);
-
-  const handleModalClose = useCallback(() => {
-    setIsModalOpen(false);
-  }, []);
 
   return (
     <>
