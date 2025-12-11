@@ -7,7 +7,6 @@ import React, {
   memo,
   useContext,
   useEffect,
-  useEffectEvent,
   useMemo,
   useRef,
   useState,
@@ -481,13 +480,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     [editorState]
   );
 
-  const onType = useEffectEvent(() => {
+  const sendTyping = React.useCallback(() => {
     send(WsMessageType.USER_IS_TYPING, { wave_id: wave.id });
-  });
+  }, [send, wave.id]);
 
   const throttleHandle = useMemo(() => {
-    return throttle(onType, 4000);
-  }, []);
+    return throttle(sendTyping, 4000);
+  }, [sendTyping]);
 
   useEffect(() => {
     if (getMarkdown?.length) {
