@@ -48,11 +48,12 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
   const hasSubmissions = submissionCount > 0;
 
   // Check if this drop author has any main stage winner drop IDs
-  const isWinner = useMemo(() =>
-    drop.author.winner_main_stage_drop_ids &&
-    drop.author.winner_main_stage_drop_ids.length > 0,
+  const winnerCount = useMemo(() =>
+    drop.author.winner_main_stage_drop_ids?.length || 0,
     [drop.author.winner_main_stage_drop_ids]
   );
+
+  const isWinner = winnerCount > 0;
 
   // Memoize event handlers to prevent unnecessary re-renders
   const handleNavigation = useCallback((e: React.MouseEvent, path: string) => {
@@ -94,7 +95,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
             )}
             {isWinner && (
               <ProfileWinnerBadge
-                winCount={1}
+                winCount={winnerCount}
                 onBadgeClick={() => handleBadgeClick("winners")}
                 tooltipId={`winner-badge-${drop.id}`}
               />

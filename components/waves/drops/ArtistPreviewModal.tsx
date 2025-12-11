@@ -3,12 +3,13 @@
 import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { Dialog, Transition } from "@headlessui/react";
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import ArtistPreviewAppWrapper from "./ArtistPreviewAppWrapper";
 import { ArtistPreviewModalContent } from "./ArtistPreviewModalContent";
+import { ArtistPreviewTab as ModalTab } from "@/hooks/useArtistPreviewModal";
 
-export type ModalTab = "active" | "winners";
+export type { ModalTab };
 
 interface ArtistPreviewModalProps {
   readonly isOpen: boolean;
@@ -17,18 +18,19 @@ interface ArtistPreviewModalProps {
   readonly initialTab?: ModalTab;
 }
 
-export const ArtistPreviewModal: React.FC<
-  ArtistPreviewModalProps
-> = ({ isOpen, onClose, user, initialTab = "active" }) => {
+export const ArtistPreviewModal = ({
+  isOpen,
+  onClose,
+  user,
+  initialTab = "active"
+}: ArtistPreviewModalProps) => {
   const { isApp } = useDeviceInfo();
-  const modalRef = useRef<HTMLDialogElement>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
   const [activeTab, setActiveTab] = useState<ModalTab>(initialTab);
-  
+
   // Check if user has winning artworks
-  const hasWinningArtworks = user.winner_main_stage_drop_ids && 
+  const hasWinningArtworks = user.winner_main_stage_drop_ids &&
                              user.winner_main_stage_drop_ids.length > 0;
-  
+
   // Reset tab when modal opens with different initial tab
   useEffect(() => {
     if (isOpen) {
@@ -36,24 +38,13 @@ export const ArtistPreviewModal: React.FC<
     }
   }, [isOpen, initialTab]);
 
-  // Cleanup body overflow and manage focus
+  // Cleanup body overflow
   useEffect(() => {
     if (isOpen && !isApp) {
-      // Store current focus
-      previousFocusRef.current = document.activeElement as HTMLElement;
-      
-      // Set body overflow
       document.body.style.overflow = 'hidden';
-      
-      // Focus the modal after animation
-      setTimeout(() => {
-        modalRef.current?.focus();
-      }, 100);
-      
+
       return () => {
         document.body.style.overflow = 'unset';
-        // Restore previous focus
-        previousFocusRef.current?.focus();
       };
     }
   }, [isOpen, isApp]);

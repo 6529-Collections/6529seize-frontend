@@ -1,6 +1,5 @@
 "use client"
 
-import React from "react";
 import Link from "next/link";
 import { cicToType } from "@/helpers/Helpers";
 import UserCICAndLevel, {
@@ -20,9 +19,9 @@ interface MemesLeaderboardDropArtistInfoProps {
   readonly drop: ExtendedDrop;
 }
 
-const MemesLeaderboardDropArtistInfo: React.FC<
-  MemesLeaderboardDropArtistInfoProps
-> = ({ drop }) => {
+const MemesLeaderboardDropArtistInfo = ({
+  drop
+}: MemesLeaderboardDropArtistInfoProps) => {
   const { isModalOpen, modalInitialTab, handleBadgeClick, handleModalClose } =
     useArtistPreviewModal();
 
