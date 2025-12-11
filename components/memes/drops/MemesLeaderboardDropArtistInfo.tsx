@@ -1,6 +1,5 @@
 "use client"
 
-import React, { useState } from "react";
 import Link from "next/link";
 import { cicToType } from "@/helpers/Helpers";
 import UserCICAndLevel, {
@@ -13,26 +12,24 @@ import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { ArtistSubmissionBadge } from "@/components/waves/drops/ArtistSubmissionBadge";
 import { ArtistPreviewModal } from "@/components/waves/drops/ArtistPreviewModal";
+import { ProfileWinnerBadge } from "@/components/waves/drops/ProfileWinnerBadge";
+import { useArtistPreviewModal } from "@/hooks/useArtistPreviewModal";
 
 interface MemesLeaderboardDropArtistInfoProps {
   readonly drop: ExtendedDrop;
 }
 
-const MemesLeaderboardDropArtistInfo: React.FC<
-  MemesLeaderboardDropArtistInfoProps
-> = ({ drop }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  
+const MemesLeaderboardDropArtistInfo = ({
+  drop
+}: MemesLeaderboardDropArtistInfoProps) => {
+  const { isModalOpen, modalInitialTab, handleBadgeClick, handleModalClose } =
+    useArtistPreviewModal();
+
   const submissionCount = drop.author.active_main_stage_submission_ids?.length || 0;
   const hasSubmissions = submissionCount > 0;
 
-  const handleSubmissionBadgeClick = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-  };
+  const winnerCount = drop.author.winner_main_stage_drop_ids?.length || 0;
+  const isWinner = winnerCount > 0;
 
   return (
     <div className="tw-flex tw-gap-x-3">
@@ -40,7 +37,7 @@ const MemesLeaderboardDropArtistInfo: React.FC<
       <div className="tw-flex tw-flex-col tw-justify-between tw-h-12">
         {/* Top row: Handle + Artist badge + Timestamp */}
         <div className="tw-flex tw-items-center tw-gap-x-2 tw-flex-wrap -tw-mt-0.5">
-          {drop.author?.level && (
+          {!!drop.author?.level && (
             <UserCICAndLevel
               level={drop.author.level}
               cicType={cicToType(drop.author.cic)}
@@ -71,10 +68,17 @@ const MemesLeaderboardDropArtistInfo: React.FC<
             </Link>
           )}
 
+          {isWinner && (
+            <ProfileWinnerBadge
+              winCount={winnerCount}
+              onBadgeClick={() => handleBadgeClick("winners")}
+              tooltipId={`leaderboard-winner-badge-${drop.id}`}
+            />
+          )}
           {hasSubmissions && (
             <ArtistSubmissionBadge
               submissionCount={submissionCount}
-              onBadgeClick={handleSubmissionBadgeClick}
+              onBadgeClick={() => handleBadgeClick("active")}
               tooltipId={`leaderboard-badge-${drop.id}`}
             />
           )}
@@ -95,11 +99,12 @@ const MemesLeaderboardDropArtistInfo: React.FC<
         </div>
       </div>
 
-      {/* Artist Submission Preview Modal */}
+      {/* Artist Preview Modal */}
       <ArtistPreviewModal
         isOpen={isModalOpen}
         onClose={handleModalClose}
         user={drop.author}
+        initialTab={modalInitialTab}
       />
     </div>
   );

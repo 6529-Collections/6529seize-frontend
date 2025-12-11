@@ -31,7 +31,7 @@ export default function DropItemChat({
       <div className="tw-flex-1 tw-min-w-0">
         <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-p-4">
           <div className="tw-flex tw-flex-row tw-items-center tw-gap-x-3">
-            <h3 className="tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-0">
+            <h3 className="tw-text-base sm:tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-0">
               <Link className="tw-no-underline" href={relativeLink}>
                 {title}
               </Link>
