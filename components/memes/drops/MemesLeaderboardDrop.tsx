@@ -113,7 +113,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
               )}
 
               {/* Footer Section: Traits + Vote Summary + Vote Button */}
-              <div className="tw-p-4 tw-mt-4 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-white/5 tw-bg-iron-900/30 tw-space-y-4">
+              <div className="tw-p-4 tw-mt-4 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-white/5 tw-bg-iron-900/30 tw-flex tw-flex-col tw-gap-y-4">
                 <MemeDropTraits drop={drop} />
 
                 <div className="tw-flex tw-flex-col @[700px]:tw-flex-row @[700px]:tw-items-center tw-justify-between tw-gap-4">
