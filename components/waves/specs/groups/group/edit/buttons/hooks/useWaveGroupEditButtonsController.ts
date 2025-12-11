@@ -15,6 +15,7 @@ import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveReque
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
+import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
@@ -118,7 +119,7 @@ const cloneGroupPayload = (group: ApiGroupFull): ApiCreateGroup => ({
 const createEmptyGroupPayload = (name: string): ApiCreateGroup => ({
   name,
   group: {
-    tdh: { min: null, max: null },
+    tdh: { min: null, max: null, inclusion_strategy: ApiGroupTdhInclusionStrategy.Tdh },
     rep: {
       min: null,
       max: null,

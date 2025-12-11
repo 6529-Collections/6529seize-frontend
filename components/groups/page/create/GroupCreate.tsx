@@ -8,6 +8,7 @@ import GroupCreateName from "./GroupCreateName";
 import GroupCreateWrapper from "./GroupCreateWrapper";
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
+import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -74,14 +75,14 @@ export default function GroupCreate({
 
   const [isFetching, setIsFetching] = useState(
     loadingOriginalGroup ||
-      loadingOriginalGroupWallets ||
-      loadingOriginalGroupExcludedWallets
+    loadingOriginalGroupWallets ||
+    loadingOriginalGroupExcludedWallets
   );
   useEffect(() => {
     setIsFetching(
       loadingOriginalGroup ||
-        loadingOriginalGroupWallets ||
-        loadingOriginalGroupExcludedWallets
+      loadingOriginalGroupWallets ||
+      loadingOriginalGroupExcludedWallets
     );
   }, [
     loadingOriginalGroup,
@@ -92,7 +93,11 @@ export default function GroupCreate({
   const [groupConfig, setGroupConfig] = useState<ApiCreateGroup>({
     name: "",
     group: {
-      tdh: { min: null, max: null },
+      tdh: {
+        min: null,
+        max: null,
+        inclusion_strategy: ApiGroupTdhInclusionStrategy.Tdh,
+      },
       rep: {
         min: null,
         max: null,
@@ -126,6 +131,9 @@ export default function GroupCreate({
         tdh: {
           min: originalGroup.group.tdh?.min,
           max: originalGroup.group.tdh?.max,
+          inclusion_strategy:
+            originalGroup.group.tdh?.inclusion_strategy ??
+            ApiGroupTdhInclusionStrategy.Tdh,
         },
         rep: {
           min: originalGroup.group.rep?.min,

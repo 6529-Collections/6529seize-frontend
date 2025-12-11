@@ -3,13 +3,14 @@ import {
   validateGroupPayload,
 } from '@/services/groups/groupMutations';
 import { ApiCreateGroup } from '@/generated/models/ApiCreateGroup';
+import { ApiGroupTdhInclusionStrategy } from '@/generated/models/ApiGroupTdhInclusionStrategy';
 
 const createPayload = (overrides: Partial<ApiCreateGroup> = {}): ApiCreateGroup => {
   const { group: groupOverrides, ...rest } = overrides;
   return {
     name: 'Test',
     group: {
-      tdh: { min: null, max: null },
+      tdh: { min: null, max: null, inclusion_strategy: ApiGroupTdhInclusionStrategy.Tdh },
       rep: { min: null, max: null, direction: null, user_identity: null, category: null },
       cic: { min: null, max: null, direction: null, user_identity: null },
       level: { min: null, max: null },
@@ -35,7 +36,7 @@ describe('validateGroupPayload', () => {
       createPayload({
         group: {
           identity_addresses: ['0x1'],
-        },
+        } as any,
       })
     );
 
@@ -54,7 +55,7 @@ describe('validateGroupPayload', () => {
       createPayload({
         group: {
           excluded_identity_addresses: ['0xdead'],
-        },
+        } as any,
       })
     );
 
@@ -68,7 +69,7 @@ describe('validateGroupPayload', () => {
       createPayload({
         group: {
           identity_addresses: include,
-        },
+        } as any,
       })
     );
     expect(result.valid).toBe(false);
@@ -82,7 +83,7 @@ describe('validateGroupPayload', () => {
         group: {
           identity_addresses: ['0x1'],
           excluded_identity_addresses: exclude,
-        },
+        } as any,
       })
     );
     expect(result.valid).toBe(false);

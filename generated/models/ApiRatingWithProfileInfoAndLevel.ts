@@ -17,6 +17,7 @@ export class ApiRatingWithProfileInfoAndLevel {
     'handle': string;
     'wallets': Array<string>;
     'tdh': number;
+    'xtdh': number;
     'rating': number;
     'cic': number;
     'last_modified': string;
@@ -49,6 +50,12 @@ export class ApiRatingWithProfileInfoAndLevel {
             "baseName": "tdh",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "xtdh",
+            "baseName": "xtdh",
+            "type": "number",
+            "format": "float"
         },
         {
             "name": "rating",

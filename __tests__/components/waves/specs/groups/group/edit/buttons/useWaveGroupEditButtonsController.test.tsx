@@ -1,5 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { ApiGroupFilterDirection } from '@/generated/models/ApiGroupFilterDirection';
+import { ApiGroupTdhInclusionStrategy } from '@/generated/models/ApiGroupTdhInclusionStrategy';
 import {
   useWaveGroupEditButtonsController,
   WaveGroupIdentitiesModal,
@@ -60,7 +61,7 @@ const baseGroupFull = {
   id: 'group-1',
   name: 'Existing Group',
   group: {
-    tdh: { min: null, max: null },
+    tdh: { min: null, max: null, inclusion_strategy: ApiGroupTdhInclusionStrategy.Tdh },
     rep: {
       min: null,
       max: null,
