@@ -1,6 +1,8 @@
 "use client";
 
-import React from "react";
+import { FC } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { ApiWaveDecisionPause } from "@/generated/models/ApiWaveDecisionPause";
 import { useWave } from "@/hooks/useWave";
 import { ApiWave } from "@/generated/models/ApiWave";
@@ -17,7 +19,7 @@ interface TimelineToggleHeaderProps {
 /**
  * Renders the header for the timeline with toggle functionality
  */
-export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
+export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
   isOpen,
   setIsOpen,
   nextDecisionTime,
@@ -83,14 +85,14 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
       className="tw-@container tw-px-3 tw-py-1.5 tw-bg-iron-800/95 tw-rounded-t-lg tw-border tw-border-solid tw-border-iron-700/50 tw-cursor-pointer desktop-hover:hover:tw-bg-iron-700/80 tw-transition-all tw-duration-300 tw-ease-out tw-group tw-shadow-sm"
       onClick={() => setIsOpen(!isOpen)}>
       <div className="tw-flex tw-items-center tw-gap-2 tw-w-full">
-        {/* Title */}
+
         <span
           className={`tw-text-xs tw-font-semibold tw-whitespace-nowrap tw-flex-shrink-0 ${hasNextDecision ? "tw-text-iron-100" : "tw-text-iron-400"
             }`}>
           {hasNextDecision ? "Decision Timeline" : "Announcement history"}
         </span>
 
-        {/* Status display - takes remaining space */}
+
         <div className="tw-flex-1 tw-text-xs tw-font-medium tw-flex tw-justify-end tw-items-center">
           {getStatusDisplay()}
         </div>
@@ -98,18 +100,11 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
         <button
           className="tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center tw-bg-iron-700/50 tw-rounded-md tw-border tw-border-solid tw-border-iron-600/40 desktop-hover:hover:tw-bg-iron-600/60 desktop-hover:hover:tw-border-iron-500/50 tw-transition-all tw-duration-300 tw-ease-out tw-flex-shrink-0"
           aria-label={isOpen ? "Collapse" : "Expand"}>
-          <svg
+          <FontAwesomeIcon
+            icon={faChevronDown}
             className={`tw-w-4 tw-h-4 tw-text-iron-200 desktop-hover:group-hover:tw-text-iron-100 tw-flex-shrink-0 ${isOpen ? "tw-rotate-180" : ""
               } tw-transition-all tw-duration-300 tw-ease-in-out`}
-            viewBox="0 0 20 20"
-            aria-hidden="true"
-            fill="currentColor">
-            <path
-              fillRule="evenodd"
-              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
+          />
         </button>
       </div>
     </div>
