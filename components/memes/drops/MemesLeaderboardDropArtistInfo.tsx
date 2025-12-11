@@ -37,7 +37,7 @@ const MemesLeaderboardDropArtistInfo = ({
       <div className="tw-flex tw-flex-col tw-justify-between tw-h-12">
         {/* Top row: Handle + Artist badge + Timestamp */}
         <div className="tw-flex tw-items-center tw-gap-x-2 tw-flex-wrap -tw-mt-0.5">
-          {drop.author?.level && (
+          {!!drop.author?.level && (
             <UserCICAndLevel
               level={drop.author.level}
               cicType={cicToType(drop.author.cic)}

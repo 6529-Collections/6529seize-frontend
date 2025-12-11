@@ -7,9 +7,7 @@ import { Fragment, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import ArtistPreviewAppWrapper from "./ArtistPreviewAppWrapper";
 import { ArtistPreviewModalContent } from "./ArtistPreviewModalContent";
-import { ArtistPreviewTab as ModalTab } from "@/hooks/useArtistPreviewModal";
-
-export type { ModalTab };
+export type { ArtistPreviewTab as ModalTab } from "@/hooks/useArtistPreviewModal";
 
 interface ArtistPreviewModalProps {
   readonly isOpen: boolean;
@@ -41,10 +39,11 @@ export const ArtistPreviewModal = ({
   // Cleanup body overflow
   useEffect(() => {
     if (isOpen && !isApp) {
+      const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
 
       return () => {
-        document.body.style.overflow = 'unset';
+        document.body.style.overflow = originalOverflow;
       };
     }
   }, [isOpen, isApp]);
