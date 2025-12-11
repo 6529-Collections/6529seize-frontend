@@ -470,12 +470,12 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     () =>
       editorState
         ? exportDropMarkdown(editorState, [
-            ...SAFE_MARKDOWN_TRANSFORMERS,
-            MENTION_TRANSFORMER,
-            HASHTAG_TRANSFORMER,
-            IMAGE_TRANSFORMER,
-            EMOJI_TRANSFORMER,
-          ])
+          ...SAFE_MARKDOWN_TRANSFORMERS,
+          MENTION_TRANSFORMER,
+          HASHTAG_TRANSFORMER,
+          IMAGE_TRANSFORMER,
+          EMOJI_TRANSFORMER,
+        ])
         : null,
     [editorState]
   );
@@ -613,24 +613,24 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   ): CreateDropConfig => {
     const hasPartsInDrop = (drop?.parts.length ?? 0) > 0;
     const hasCurrentContent = !!(markdown?.trim().length || files.length);
-    
+
     const newParts = hasPartsInDrop && !hasCurrentContent
       ? drop?.parts ?? []
       : [
-          ...(drop?.parts ?? []),
-          {
-            content: markdown?.length ? markdown : null,
-            quoted_drop:
-              activeDrop?.action === ActiveDropAction.QUOTE
-                ? {
-                    drop_id: activeDrop.drop.id,
-                    drop_part_id: activeDrop.partId,
-                  }
-                : null,
-            media: files,
-          },
-        ];
-    
+        ...(drop?.parts ?? []),
+        {
+          content: markdown?.length ? markdown : null,
+          quoted_drop:
+            activeDrop?.action === ActiveDropAction.QUOTE
+              ? {
+                drop_id: activeDrop.drop.id,
+                drop_part_id: activeDrop.partId,
+              }
+              : null,
+          media: files,
+        },
+      ];
+
     const parts = ensurePartsWithFallback(newParts, hasMetadata);
 
     return {
@@ -805,7 +805,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         activeDrop,
         isDropMode ? ApiDropType.Participatory : ApiDropType.Chat
       );
-      
+
       if (optimisticDrop) {
         addOptimisticDrop({ drop: optimisticDrop });
         setTimeout(
@@ -830,7 +830,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       }
       setFiles([]);
       refreshState();
-      
+
       submitDrop({
         drop: updatedDropRequest,
         dropId: optimisticDrop?.id ?? null,
@@ -875,15 +875,15 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     ) {
       return;
     }
-    
+
     const hasPartsInDrop = (drop?.parts.length ?? 0) > 0;
     const hasCurrentContent = !!(getMarkdown?.trim().length || files.length);
-    
+
     if (hasPartsInDrop && hasCurrentContent) {
       finalizeAndAddDropPart();
       return;
     }
-    
+
     await prepareAndSubmitDrop(getUpdatedDrop());
   };
 
@@ -1043,6 +1043,16 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       onCancelReplyQuote();
     }
   }, [isApp, editingDropId, activeDrop, onCancelReplyQuote]);
+
+  const isChatClosed = wave.wave.type === ApiWaveType.Chat && !wave.chat.enabled;
+
+  if (isChatClosed) {
+    return (
+      <div className="tw-flex-grow tw-w-full tw-bg-iron-900 tw-text-iron-500 tw-rounded-lg tw-p-4 tw-text-center tw-text-sm tw-font-medium">
+        Wave is closed
+      </div>
+    );
+  }
 
   return (
     <div className="tw-flex-grow">
