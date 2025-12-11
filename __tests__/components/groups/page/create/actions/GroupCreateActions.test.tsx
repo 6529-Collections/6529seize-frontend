@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import { ApiGroupTdhInclusionStrategy } from '@/generated/models/ApiGroupTdhInclusionStrategy';
 import userEvent from '@testing-library/user-event';
 import GroupCreateActions from '@/components/groups/page/create/actions/GroupCreateActions';
 import { AuthContext } from '@/components/auth/Auth';
@@ -25,7 +26,7 @@ jest.mock('@/hooks/groups/useGroupMutations', () => ({
 const defaultGroup = {
   name: '',
   group: {
-    tdh: { min: null, max: null },
+    tdh: { min: null, max: null, inclusion_strategy: ApiGroupTdhInclusionStrategy.Tdh },
     rep: { min: null, max: null, user_identity: null, category: null, direction: null },
     cic: { min: null, max: null, user_identity: null, direction: null },
     level: { min: null, max: null },

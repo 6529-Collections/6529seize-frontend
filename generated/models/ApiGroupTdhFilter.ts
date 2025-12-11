@@ -10,11 +10,13 @@
  * Do not edit the class manually.
  */
 
+import { ApiGroupTdhInclusionStrategy } from '../models/ApiGroupTdhInclusionStrategy';
 import { HttpFile } from '../http/http';
 
 export class ApiGroupTdhFilter {
     'min': number | null;
     'max': number | null;
+    'inclusion_strategy': ApiGroupTdhInclusionStrategy;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -32,6 +34,12 @@ export class ApiGroupTdhFilter {
             "baseName": "max",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "inclusion_strategy",
+            "baseName": "inclusion_strategy",
+            "type": "ApiGroupTdhInclusionStrategy",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
@@ -41,3 +49,5 @@ export class ApiGroupTdhFilter {
     public constructor() {
     }
 }
+
+

@@ -5442,6 +5442,7 @@ components:
       required:
         - min
         - max
+        - inclusion_strategy
       properties:
         min:
           type: number
@@ -5453,6 +5454,14 @@ components:
           minimum: 0
           format: int64
           nullable: true
+        inclusion_strategy:
+          $ref: "#/components/schemas/ApiGroupTdhInclusionStrategy"
+    ApiGroupTdhInclusionStrategy:
+      type: string
+      enum:
+        - TDH
+        - XTDH
+        - BOTH
     ApiIdentity:
       type: object
       required:
@@ -6395,6 +6404,7 @@ components:
         - handle
         - wallets
         - tdh
+        - xtdh
         - rating
         - cic
         - last_modified
@@ -6411,6 +6421,9 @@ components:
         tdh:
           type: number
           format: int64
+        xtdh:
+          type: number
+          format: float
         rating:
           type: number
           format: int64
