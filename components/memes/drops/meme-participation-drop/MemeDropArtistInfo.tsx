@@ -21,15 +21,17 @@ interface MemeDropArtistInfoProps {
 
 export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+  const [modalInitialTab, setModalInitialTab] = useState<"active" | "winners">("active");
+
   const submissionCount = drop.author.active_main_stage_submission_ids?.length || 0;
   const hasSubmissions = submissionCount > 0;
 
   // Check if this drop author has any main stage winner drop IDs
-  const isWinner = drop.author.winner_main_stage_drop_ids && 
-                   drop.author.winner_main_stage_drop_ids.length > 0;
+  const winnerCount = drop.author.winner_main_stage_drop_ids?.length || 0;
+  const isWinner = winnerCount > 0;
 
-  const handleSubmissionBadgeClick = () => {
+  const handleBadgeClick = (tab: "active" | "winners") => {
+    setModalInitialTab(tab);
     setIsModalOpen(true);
   };
 
@@ -67,14 +69,16 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
             )}
           </Link>
           {isWinner && (
-            <ProfileWinnerBadge 
-              winCount={1}
+            <ProfileWinnerBadge
+              winCount={winnerCount}
+              onBadgeClick={() => handleBadgeClick("winners")}
+              tooltipId={`meme-winner-badge-${drop.id}`}
             />
           )}
           {hasSubmissions && (
             <ArtistSubmissionBadge
               submissionCount={submissionCount}
-              onBadgeClick={handleSubmissionBadgeClick}
+              onBadgeClick={() => handleBadgeClick("active")}
               tooltipId={`meme-badge-${drop.id}`}
             />
           )}
@@ -98,11 +102,12 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
         )}
       </div>
       
-      {/* Artist Submission Preview Modal */}
+      {/* Artist Preview Modal */}
       <ArtistPreviewModal
         isOpen={isModalOpen}
         onClose={handleModalClose}
         user={drop.author}
+        initialTab={modalInitialTab}
       />
     </div>
   );

@@ -91,13 +91,11 @@ export const ArtistPreviewModal: React.FC<
           leaveFrom="tw-opacity-100"
           leaveTo="tw-opacity-0"
         >
-          { }
-          <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px]" onClick={onClose} />
+          <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px]" onClick={(e) => { e.stopPropagation(); onClose(); }} />
         </Transition.Child>
 
         {/* Desktop modal */}
-        { }
-        <div className="tw-fixed tw-inset-0 tw-z-[100] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-hidden sm:tw-block" onClick={onClose}>
+        <div className="tw-fixed tw-inset-0 tw-z-[100] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-hidden sm:tw-block" onClick={(e) => { e.stopPropagation(); onClose(); }}>
           <div className="tw-flex tw-min-h-full tw-items-center tw-justify-center tw-p-4">
             <Transition.Child
               as={Fragment}

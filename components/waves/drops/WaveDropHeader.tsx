@@ -34,7 +34,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
 }) => {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isWinnerModalOpen, setIsWinnerModalOpen] = useState(false);
+  const [modalInitialTab, setModalInitialTab] = useState<"active" | "winners">("active");
 
   // Memoize expensive computations
   const cicType = useMemo(() => cicToType(drop.author.cic), [drop.author.cic]);
@@ -60,20 +60,13 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
     router.push(path);
   }, [router]);
 
-  const handleSubmissionBadgeClick = useCallback(() => {
+  const handleBadgeClick = useCallback((tab: "active" | "winners") => {
+    setModalInitialTab(tab);
     setIsModalOpen(true);
   }, []);
 
   const handleModalClose = useCallback(() => {
     setIsModalOpen(false);
-  }, []);
-
-  const handleWinnerBadgeClick = useCallback(() => {
-    setIsWinnerModalOpen(true);
-  }, []);
-
-  const handleWinnerModalClose = useCallback(() => {
-    setIsWinnerModalOpen(false);
   }, []);
 
   return (
@@ -103,14 +96,14 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
             {hasSubmissions && (
               <ArtistSubmissionBadge
                 submissionCount={submissionCount}
-                onBadgeClick={handleSubmissionBadgeClick}
+                onBadgeClick={() => handleBadgeClick("active")}
                 tooltipId={`header-badge-${drop.id}`}
               />
             )}
             {isWinner && (
-              <ProfileWinnerBadge 
-                winCount={1} 
-                onBadgeClick={handleWinnerBadgeClick}
+              <ProfileWinnerBadge
+                winCount={1}
+                onBadgeClick={() => handleBadgeClick("winners")}
                 tooltipId={`winner-badge-${drop.id}`}
               />
             )}
@@ -153,19 +146,12 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
         </div>
       )}
 
-      {/* Artist Submission Preview Modal */}
+      {/* Artist Preview Modal */}
       <ArtistPreviewModal
         isOpen={isModalOpen}
         onClose={handleModalClose}
         user={drop.author}
-      />
-
-      {/* Winner Artworks Modal */}
-      <ArtistPreviewModal
-        isOpen={isWinnerModalOpen}
-        onClose={handleWinnerModalClose}
-        user={drop.author}
-        initialTab="winners"
+        initialTab={modalInitialTab}
       />
     </>
   );

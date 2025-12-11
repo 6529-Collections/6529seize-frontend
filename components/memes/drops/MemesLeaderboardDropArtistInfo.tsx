@@ -13,6 +13,7 @@ import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { ArtistSubmissionBadge } from "@/components/waves/drops/ArtistSubmissionBadge";
 import { ArtistPreviewModal } from "@/components/waves/drops/ArtistPreviewModal";
+import { ProfileWinnerBadge } from "@/components/waves/drops/ProfileWinnerBadge";
 
 interface MemesLeaderboardDropArtistInfoProps {
   readonly drop: ExtendedDrop;
@@ -22,11 +23,17 @@ const MemesLeaderboardDropArtistInfo: React.FC<
   MemesLeaderboardDropArtistInfoProps
 > = ({ drop }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+  const [modalInitialTab, setModalInitialTab] = useState<"active" | "winners">("active");
+
   const submissionCount = drop.author.active_main_stage_submission_ids?.length || 0;
   const hasSubmissions = submissionCount > 0;
 
-  const handleSubmissionBadgeClick = () => {
+  // Check if this drop author has any main stage winner drop IDs
+  const winnerCount = drop.author.winner_main_stage_drop_ids?.length || 0;
+  const isWinner = winnerCount > 0;
+
+  const handleBadgeClick = (tab: "active" | "winners") => {
+    setModalInitialTab(tab);
     setIsModalOpen(true);
   };
 
@@ -71,10 +78,17 @@ const MemesLeaderboardDropArtistInfo: React.FC<
             </Link>
           )}
 
+          {isWinner && (
+            <ProfileWinnerBadge
+              winCount={winnerCount}
+              onBadgeClick={() => handleBadgeClick("winners")}
+              tooltipId={`leaderboard-winner-badge-${drop.id}`}
+            />
+          )}
           {hasSubmissions && (
             <ArtistSubmissionBadge
               submissionCount={submissionCount}
-              onBadgeClick={handleSubmissionBadgeClick}
+              onBadgeClick={() => handleBadgeClick("active")}
               tooltipId={`leaderboard-badge-${drop.id}`}
             />
           )}
@@ -95,11 +109,12 @@ const MemesLeaderboardDropArtistInfo: React.FC<
         </div>
       </div>
 
-      {/* Artist Submission Preview Modal */}
+      {/* Artist Preview Modal */}
       <ArtistPreviewModal
         isOpen={isModalOpen}
         onClose={handleModalClose}
         user={drop.author}
+        initialTab={modalInitialTab}
       />
     </div>
   );

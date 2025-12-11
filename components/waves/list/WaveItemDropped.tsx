@@ -100,10 +100,10 @@ export default function WaveItemDropped({ wave }: { readonly wave: ApiWave }) {
         })}
       </div>
       <div className="tw-flex tw-items-center tw-gap-x-1 tw-text-sm tw-min-w-0">
-        <span className="tw-text-iron-200 tw-font-medium tw-flex-shrink-0">
+        <span className="tw-text-white tw-font-medium tw-text-sm tw-flex-shrink-0">
           {numberWithCommas(wave.metrics.drops_count)}
         </span>
-        <span className="tw-text-iron-400 tw-truncate tw-min-w-0">
+        <span className="tw-text-iron-500 tw-font-normal tw-truncate tw-min-w-0">
           {wave.metrics.drops_count === 1 ? "Drop" : "Drops"}
         </span>
       </div>
