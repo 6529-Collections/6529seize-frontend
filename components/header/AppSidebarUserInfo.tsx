@@ -43,6 +43,15 @@ export default function AppSidebarUserInfo() {
   const rep = activeProfileProxy
     ? activeProfileProxy.created_by.rep
     : profile?.rep ?? 0;
+  const xtdh = activeProfileProxy
+    ? activeProfileProxy.created_by.xtdh
+    : profile?.xtdh ?? 0;
+  const xtdh_rate = activeProfileProxy
+    ? activeProfileProxy.created_by.xtdh_rate
+    : profile?.xtdh_rate ?? 0;
+  const cic = activeProfileProxy
+    ? activeProfileProxy.created_by.cic
+    : profile?.cic ?? 0;
 
   return (
     <div className="tailwind-scope tw-flex tw-flex-col tw-gap-3 tw-py-2">
@@ -65,7 +74,10 @@ export default function AppSidebarUserInfo() {
         handle={handleOrWallet ?? ""}
         tdh={tdh}
         tdh_rate={tdh_rate}
+        xtdh={xtdh}
+        xtdh_rate={xtdh_rate}
         rep={rep}
+        cic={cic}
         profileId={profile?.id ?? null}
       />
     </div>

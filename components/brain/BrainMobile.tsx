@@ -162,47 +162,50 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
 
   // Handle tab visibility and reset on wave changes
   useEffect(() => {
+    const globalViews = new Set([
+      BrainView.DEFAULT,
+      BrainView.WAVES,
+      BrainView.MESSAGES,
+      BrainView.NOTIFICATIONS,
+    ]);
+
+    const routeToView: Record<string, BrainView> = {
+      "/waves": BrainView.WAVES,
+      "/messages": BrainView.MESSAGES,
+      "/notifications": BrainView.NOTIFICATIONS,
+    };
+
     if (!hasWave) {
-      if (
-        activeView !== BrainView.DEFAULT &&
-        activeView !== BrainView.WAVES &&
-        activeView !== BrainView.MESSAGES &&
-        activeView !== BrainView.NOTIFICATIONS
-      )
-        setActiveView(BrainView.DEFAULT);
+      const isWaveSpecificView = !globalViews.has(activeView);
+      if (isWaveSpecificView) {
+        setActiveView(routeToView[pathname ?? ""] ?? BrainView.DEFAULT);
+      }
       return;
     }
 
     if (!wave) return;
 
-    const isInLeaderboardAndVotingHasEnded =
-      activeView === BrainView.LEADERBOARD && isCompleted;
-    const isInWinnersAndFirstDecisionHasntPassed =
-      activeView === BrainView.WINNERS && !firstDecisionDone;
-    const isInMyVotesAndIsNotMemeWave =
-      activeView === BrainView.MY_VOTES && !isMemesWave;
-    const isInFAQAndIsNotMemeWave =
-      activeView === BrainView.FAQ && !isMemesWave;
+    const shouldResetToDefault =
+      (activeView === BrainView.LEADERBOARD && isCompleted) ||
+      (activeView === BrainView.WINNERS && !firstDecisionDone) ||
+      (activeView === BrainView.MY_VOTES && !isMemesWave) ||
+      (activeView === BrainView.FAQ && !isMemesWave);
 
-    if (
-      isInLeaderboardAndVotingHasEnded ||
-      isInWinnersAndFirstDecisionHasntPassed ||
-      isInMyVotesAndIsNotMemeWave ||
-      isInFAQAndIsNotMemeWave
-    ) {
+    if (shouldResetToDefault) {
+      setActiveView(BrainView.DEFAULT);
+      return;
+    }
+
+    const nonWaveViews = new Set([
+      BrainView.NOTIFICATIONS,
+      BrainView.MESSAGES,
+      BrainView.WAVES,
+    ]);
+
+    if (waveId && nonWaveViews.has(activeView)) {
       setActiveView(BrainView.DEFAULT);
     }
-
-    if (hasWave && waveId) {
-      if (
-        activeView === BrainView.NOTIFICATIONS ||
-        activeView === BrainView.MESSAGES ||
-        activeView === BrainView.WAVES
-      ) {
-        setActiveView(BrainView.DEFAULT);
-      }
-    }
-  }, [hasWave, wave, isCompleted, firstDecisionDone, activeView, isMemesWave, waveId]);
+  }, [hasWave, wave, isCompleted, firstDecisionDone, activeView, isMemesWave, waveId, pathname]);
 
   const closeCreateOverlay = useCallback(() => {
     const params = new URLSearchParams(searchParams?.toString() || "");

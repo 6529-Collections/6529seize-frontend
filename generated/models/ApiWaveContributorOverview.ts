@@ -18,6 +18,8 @@ export class ApiWaveContributorOverview {
 
     static readonly discriminator: string | undefined = undefined;
 
+    static readonly mapping: {[index: string]: string} | undefined = undefined;
+
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
             "name": "contributor_identity",
@@ -39,4 +41,3 @@ export class ApiWaveContributorOverview {
     public constructor() {
     }
 }
-

@@ -22,6 +22,8 @@ import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMenuDelete";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
+import Link from "next/link";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 
 interface MemesLeaderboardDropProps {
   readonly drop: ExtendedDrop;
@@ -68,31 +70,30 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
         <div {...touchHandlers}>
           <MemesLeaderboardDropCard drop={drop}>
             <div>
-              <div className="tw-p-4">
-                <div className="tw-flex tw-flex-col tw-gap-y-1">
-                  <div className="tw-flex tw-items-center tw-justify-between">
-                    <MemesLeaderboardDropArtistInfo drop={drop} />
-                    <div className="tw-flex tw-items-center">
-                      {!hasTouchScreen && (
-                        <>
-                          <div className="tw-h-8">
-                            <WaveDropActionsOpen drop={drop} />
-                          </div>
-                          <div className="tw-h-8">
-                            {canDelete && (
-                              <WaveDropActionsOptions drop={drop} />
-                            )}
-                          </div>
-                        </>
-                      )}
-                    </div>
+              {/* Artist info section with border */}
+              <div className="tw-p-4 tw-pb-3 tw-border-b tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-white/5 tw-bg-iron-900/30">
+                <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
+                  <MemesLeaderboardDropArtistInfo drop={drop} />
+                  <div className="tw-flex tw-gap-2 tw-text-iron-400">
+                    {!hasTouchScreen && (
+                      <>
+                        <WaveDropActionsOpen drop={drop} />
+                        {canDelete && (
+                          <WaveDropActionsOptions drop={drop} />
+                        )}
+                      </>
+                    )}
                   </div>
-                  <div className="tw-mt-1 sm:tw-mt-0 sm:tw-ml-[3.25rem]">
-                    <MemesLeaderboardDropHeader title={title} />
-                    <MemesLeaderboardDropDescription
-                      description={description}
-                    />
-                  </div>
+                </div>
+              </div>
+
+              {/* Title and Description */}
+              <div className="tw-px-4 tw-pt-4 tw-pb-4">
+                <div className="tw-space-y-1">
+                  <MemesLeaderboardDropHeader title={title} />
+                  <MemesLeaderboardDropDescription
+                    description={description}
+                  />
                 </div>
               </div>
 
@@ -100,7 +101,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                 <div
                   className={`tw-flex tw-justify-center tw-h-96 ${
                     location === DropLocation.WAVE
-                      ? "tw-bg-iron-800/30"
+                      ? "tw-bg-iron-950"
                       : "tw-bg-iron-900/40"
                   }`}>
                   <DropListItemContentMedia
@@ -110,9 +111,12 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                   />
                 </div>
               )}
-              <MemeDropTraits drop={drop} />
-              <div className="tw-mt-4 lg:tw-mt-0 tw-flex tw-flex-col tw-gap-y-2 @[700px]:tw-flex-row tw-justify-between @[700px]:tw-pb-4 @[700px]:tw-px-4 @[700px]:tw-items-center">
-                <div className="tw-px-6 @[700px]:tw-px-0">
+
+              {/* Footer Section: Traits + Vote Summary + Vote Button */}
+              <div className="tw-p-4 tw-mt-4 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-white/5 tw-bg-iron-900/30 tw-flex tw-flex-col tw-gap-y-4">
+                <MemeDropTraits drop={drop} />
+
+                <div className="tw-flex tw-flex-col @[700px]:tw-flex-row @[700px]:tw-items-center tw-justify-between tw-gap-4">
                   <MemesLeaderboardDropVoteSummary
                     current={drop.rating}
                     projected={drop.rating_prediction}
@@ -121,15 +125,43 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                     topVoters={firstThreeVoters}
                     userContext={drop.context_profile_context}
                   />
-                </div>
 
-                <div
-                  className="tw-pt-4 tw-pb-4 tw-px-6 tw-flex tw-justify-center @[700px]:tw-pt-0 @[700px]:tw-pb-0 @[700px]:tw-px-0 tw-w-full @[700px]:tw-w-auto tw-border-t tw-border-solid tw-border-iron-800 @[700px]:tw-border-none tw-border-x-0 tw-border-b-0"
-                  onClick={(e) => e.stopPropagation()}>
-                  <VotingModalButton
-                    drop={drop}
-                    onClick={() => setIsVotingModalOpen(true)}
-                  />
+                  <div
+                    className="tw-flex tw-w-full @[700px]:tw-w-auto tw-items-center tw-justify-between @[700px]:tw-justify-end tw-gap-4 tw-flex-shrink-0"
+                    onClick={(e) => e.stopPropagation()}>
+                    {/* Voters - only on small containers */}
+                    <div className="tw-flex @[700px]:tw-hidden tw-items-center tw-gap-2">
+                      <div className="tw-flex tw-items-center -tw-space-x-2">
+                        {firstThreeVoters.map((voter) => (
+                          <Link
+                            key={voter.profile.handle}
+                            href={`/${voter.profile.handle}`}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {voter.profile.pfp ? (
+                              <img
+                                className="tw-w-6 tw-h-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
+                                src={voter.profile.pfp}
+                                alt="Recent voter"
+                              />
+                            ) : (
+                              <div className="tw-w-6 tw-h-6 tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
+                            )}
+                          </Link>
+                        ))}
+                      </div>
+                      <span className="tw-text-white tw-font-bold tw-text-xs">
+                        {formatNumberWithCommas(drop.raters_count)}{" "}
+                        <span className="tw-text-iron-500 tw-font-normal">
+                          {drop.raters_count === 1 ? "voter" : "voters"}
+                        </span>
+                      </span>
+                    </div>
+                    <VotingModalButton
+                      drop={drop}
+                      onClick={() => setIsVotingModalOpen(true)}
+                    />
+                  </div>
                 </div>
               </div>
             </div>

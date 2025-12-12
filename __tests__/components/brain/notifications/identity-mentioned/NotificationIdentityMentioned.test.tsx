@@ -17,6 +17,10 @@ jest.mock('next/navigation', () => ({
   useSearchParams: jest.fn(),
   usePathname: jest.fn(),
 }));
+jest.mock('@/hooks/useDeviceInfo', () => ({
+  __esModule: true,
+  default: () => ({ isApp: false }),
+}));
 
 import NotificationIdentityMentioned from '@/components/brain/notifications/identity-mentioned/NotificationIdentityMentioned';
 

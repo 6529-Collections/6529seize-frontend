@@ -1625,10 +1625,6 @@ paths:
       responses:
         "201":
           description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiChangeProfileCicRatingResponse"
         "400":
           description: Invalid request
   /profiles/{identity}/cic/ratings/by-rater:
@@ -1709,10 +1705,6 @@ paths:
       responses:
         "201":
           description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiChangeProfileRepRatingResponse"
         "400":
           description: Invalid request
     get:
@@ -2447,95 +2439,6 @@ paths:
                 $ref: "#/components/schemas/ApiTdhEditionsPage"
         "404":
           description: Identity not found
-  /tdh-grants:
-    get:
-      tags:
-        - TdhGrants
-      summary: Get TDH grants
-      operationId: getTdhGrants
-      parameters:
-        - name: grantor
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: target_contract
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: target_chain
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: status
-          in: query
-          required: false
-          schema:
-            $ref: "#/components/schemas/ApiTdhGrantStatus"
-        - name: sort_direction
-          in: query
-          required: false
-          schema:
-            $ref: "#/components/schemas/ApiPageSortDirection"
-        - name: sort
-          in: query
-          required: false
-          schema:
-            type: string
-            enum:
-              - created_at
-              - valid_from
-              - valid_to
-              - tdh_rate
-            default: created_at
-        - name: page
-          in: query
-          required: false
-          schema:
-            type: integer
-            format: int64
-            minimum: 1
-            default: 1
-        - name: page_size
-          in: query
-          required: false
-          schema:
-            type: integer
-            format: int64
-            minimum: 1
-            maximum: 2000
-            default: 100
-      responses:
-        "201":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiTdhGrantsPage"
-        "400":
-          description: Invalid request
-    post:
-      tags:
-        - TdhGrants
-      summary: Create a TDH grant
-      operationId: grantTdh
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ApiCreateTdhGrant"
-      responses:
-        "201":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiTdhGrant"
-        "400":
-          description: Invalid request
   /transactions:
     get:
       tags:
@@ -3299,6 +3202,508 @@ paths:
                 $ref: "#/components/schemas/ApiWaveSubscriptionActions"
         "404":
           description: Wave not found
+  /xtdh/stats:
+    get:
+      tags:
+        - xTDH
+      summary: Get global xTDH stats
+      operationId: getGlobalXTdhStats
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiXTdhGlobalStats"
+        "404":
+          description: Not found
+  /xtdh/stats/{identity}:
+    get:
+      tags:
+        - xTDH
+      summary: Get identities xTDH stats
+      operationId: getIdentitiesXTdhStats
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiXTdhStats"
+        "404":
+          description: Not found
+  /xtdh/grants:
+    get:
+      tags:
+        - xTDH
+      summary: Get xTDH grants
+      operationId: getXTdhGrants
+      parameters:
+        - name: grantor
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: target_contract
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: target_collection_name
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: target_chain
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: valid_from_gt
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+        - name: valid_from_lt
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+        - name: valid_to_gt
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+        - name: valid_to_lt
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+        - name: status
+          in: query
+          required: false
+          description: One or more (comma separated) statuses you are interested in
+          schema:
+            type: string
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiPageSortDirection"
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - created_at
+              - valid_from
+              - valid_to
+              - rate
+            default: created_at
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 2000
+            default: 100
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiXTdhGrantsPage"
+        "400":
+          description: Invalid request
+    post:
+      tags:
+        - xTDH
+      summary: Create xTDH grant
+      operationId: grantXTdh
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiXTdhCreateGrant"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiXTdhGrant"
+        "400":
+          description: Invalid request
+  /xtdh/grants/{id}:
+    get:
+      tags:
+        - xTDH
+      summary: Get xTDH grant
+      operationId: getXTdhGrant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiXTdhGrant"
+        "404":
+          description: Not Found
+    post:
+      tags:
+        - xTDH
+      summary: Update xTDH grant
+      operationId: updateXTdhGrant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiXTdhGrantUpdateRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiXTdhGrant"
+        "403":
+          description: Invalid input
+        "404":
+          description: Not Found
+  /xtdh/grants/{id}/tokens:
+    get:
+      tags:
+        - xTDH
+      summary: Get xTDH grant tokens
+      operationId: getXTdhGrantTokens
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiPageSortDirection"
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - token
+            default: token
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 2000
+            default: 100
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiXTdhGrantTokensPage"
+        "400":
+          description: Invalid request
+  /xtdh/collections:
+    get:
+      tags:
+        - xTDH
+      summary: Get info about xTDH collections
+      operationId: getInfoAboutXTdhCollections
+      parameters:
+        - name: identity
+          in: query
+          description: Filter by receiving identity
+          required: false
+          schema:
+            type: string
+        - name: collection_name
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 0
+        - name: page_size
+          in: query
+          description: Default is 20
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 100
+        - name: sort
+          in: query
+          description: xtdh when omitted
+          required: false
+          schema:
+            type: string
+            enum:
+              - xtdh
+              - xtdh_rate
+        - name: order
+          in: query
+          description: desc when omitted
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiXTdhCollectionsPage"
+  /xtdh/tokens:
+    get:
+      tags:
+        - xTDH
+      summary: Get info about xTDH tokens
+      operationId: getInfoAboutXTdhTokens
+      parameters:
+        - name: identity
+          in: query
+          description: Filter by receiving identity
+          required: false
+          schema:
+            type: string
+        - name: contract
+          in: query
+          description: Filter by receiving contract
+          required: false
+          schema:
+            type: string
+        - name: token
+          in: query
+          description: Filter by token. Needs to be paired with contract to work
+          required: false
+          schema:
+            type: number
+            format: int64
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 0
+        - name: page_size
+          in: query
+          description: Default is 20
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 100
+        - name: sort
+          in: query
+          description: xtdh when omitted
+          required: false
+          schema:
+            type: string
+            enum:
+              - xtdh
+              - xtdh_rate
+        - name: order
+          in: query
+          description: desc when omitted
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiXTdhTokensPage"
+  /xtdh/tokens/{contract}/{token}/contributors:
+    get:
+      tags:
+        - xTDH
+      summary: Get info about xTDH contributors
+      operationId: getInfoAboutXTdhContributors
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: number
+            format: int64
+        - name: group_by
+          in: query
+          description: Group by grant or grantor (grant when omitted)
+          required: false
+          schema:
+            type: string
+            enum:
+              - grant
+              - grantor
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 0
+        - name: page_size
+          in: query
+          description: Default is 20
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 100
+        - name: sort
+          in: query
+          description: xtdh when omitted
+          required: false
+          schema:
+            type: string
+            enum:
+              - xtdh
+              - xtdh_rate
+        - name: order
+          in: query
+          description: desc when omitted
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiXTdhContributionsPage"
+  /xtdh/grantees:
+    get:
+      tags:
+        - xTDH
+      summary: Get info about xTDH grantees
+      operationId: getInfoAboutXTdhGrantees
+      parameters:
+        - name: contract
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 0
+        - name: page_size
+          in: query
+          description: Default is 20
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 100
+        - name: sort
+          in: query
+          description: xtdh when omitted
+          required: false
+          schema:
+            type: string
+            enum:
+              - xtdh
+              - xtdh_rate
+        - name: order
+          in: query
+          description: desc when omitted
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiXTdhGranteesPage"
 components:
   securitySchemes:
     bearerAuth:
@@ -3820,18 +4225,6 @@ components:
         amount:
           type: number
           format: int64
-    ApiChangeProfileCicRatingResponse:
-      type: object
-      required:
-        - total_cic_rating
-        - cic_rating_by_user
-      properties:
-        total_cic_rating:
-          type: number
-          format: int64
-        cic_rating_by_user:
-          type: number
-          format: int64
     ApiChangeProfileRepRating:
       type: object
       required:
@@ -3846,18 +4239,6 @@ components:
           maxLength: 100
           minLength: 1
           pattern: ^[a-zA-Z0-9?!,."() ]{1,100}$
-    ApiChangeProfileRepRatingResponse:
-      type: object
-      required:
-        - total_rep_rating_for_category
-        - rep_rating_for_category_by_user
-      properties:
-        total_rep_rating_for_category:
-          type: number
-          format: int64
-        rep_rating_for_category_by_user:
-          type: number
-          format: int64
     ApiCommunityMemberMinimal:
       type: object
       required:
@@ -4305,37 +4686,6 @@ components:
         pfp_url:
           type: string
           nullable: true
-    ApiCreateTdhGrant:
-      type: object
-      required:
-        - target_chain
-        - target_contract
-        - target_tokens
-        - valid_to
-        - tdh_rate
-        - is_irrevocable
-      properties:
-        target_chain:
-          $ref: "#/components/schemas/ApiTdhGrantTargetChain"
-        target_contract:
-          type: string
-        target_tokens:
-          type: array
-          items:
-            type: string
-          description: >-
-            List of token numbers. Each element can also be a span in form of
-            start-end. Leave empty if all tokens are targets.
-        valid_to:
-          type: number
-          format: int64
-          nullable: true
-        tdh_rate:
-          type: number
-          format: int64
-        is_irrevocable:
-          type: boolean
-          description: If true then the grant must be covered with lock contracts
     ApiCreateWaveConfig:
       type: object
       required:
@@ -5092,6 +5442,7 @@ components:
       required:
         - min
         - max
+        - inclusion_strategy
       properties:
         min:
           type: number
@@ -5103,6 +5454,14 @@ components:
           minimum: 0
           format: int64
           nullable: true
+        inclusion_strategy:
+          $ref: "#/components/schemas/ApiGroupTdhInclusionStrategy"
+    ApiGroupTdhInclusionStrategy:
+      type: string
+      enum:
+        - TDH
+        - XTDH
+        - BOTH
     ApiIdentity:
       type: object
       required:
@@ -5115,6 +5474,8 @@ components:
         - level
         - tdh
         - tdh_rate
+        - xtdh
+        - xtdh_rate
         - display
         - consolidation_key
         - classification
@@ -5147,9 +5508,15 @@ components:
           type: integer
           format: int65
         tdh:
-          type: integer
-          format: int65
+          type: number
+          format: double
         tdh_rate:
+          type: number
+          format: int64
+        xtdh:
+          type: number
+          format: double
+        xtdh_rate:
           type: number
           format: int64
         consolidation_key:
@@ -5619,6 +5986,8 @@ components:
         - memelab_balance_rank
         - unique_memelab_rank
         - boosted_tdh_rank
+        - xtdh
+        - xtdh_rank
         - boosted_memes_tdh_rank
         - boosted_gradients_tdh_rank
         - boosted_nextgen_tdh_rank
@@ -5715,6 +6084,12 @@ components:
         boosted_nextgen_tdh_rank:
           type: integer
           format: int64
+        xtdh:
+          type: number
+          format: double
+        xtdh_rank:
+          type: integer
+          format: int64
     ApiOwnerBalanceMemes:
       type: object
       required:
@@ -5801,6 +6176,17 @@ components:
         next:
           type: string
           nullable: true
+    ApiPageWithoutCount:
+      type: object
+      required:
+        - page
+        - next
+      properties:
+        page:
+          type: number
+          format: int64
+        next:
+          type: boolean
     ApiProfileClassification:
       type: string
       enum:
@@ -5820,6 +6206,8 @@ components:
         - cic
         - rep
         - tdh
+        - xtdh
+        - xtdh_rate
         - level
         - tdh_rate
         - primary_address
@@ -5853,8 +6241,14 @@ components:
           format: int64
         tdh:
           type: number
-          format: int64
+          format: double
         tdh_rate:
+          type: number
+          format: int64
+        xtdh:
+          type: number
+          format: double
+        xtdh_rate:
           type: number
           format: int64
         level:
@@ -6010,6 +6404,7 @@ components:
         - handle
         - wallets
         - tdh
+        - xtdh
         - rating
         - cic
         - last_modified
@@ -6026,6 +6421,9 @@ components:
         tdh:
           type: number
           format: int64
+        xtdh:
+          type: number
+          format: float
         rating:
           type: number
           format: int64
@@ -6203,80 +6601,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiTdhEdition"
-    ApiTdhGrant:
-      type: object
-      required:
-        - id
-        - grantor
-        - target_chain
-        - target_contract
-        - target_tokens
-        - created_at
-        - valid_from
-        - valid_to
-        - tdh_rate
-        - error_details
-        - status
-        - is_irrevocable
-      properties:
-        id:
-          type: string
-        grantor:
-          $ref: "#/components/schemas/ApiProfileMin"
-        target_chain:
-          $ref: "#/components/schemas/ApiTdhGrantTargetChain"
-        target_contract:
-          type: string
-        target_tokens:
-          type: array
-          items:
-            type: string
-          description: >-
-            List of token numbers. Each element can also be a span in form of
-            start-end. All tokens if empty.
-        created_at:
-          type: number
-          format: int64
-        valid_from:
-          type: number
-          format: int64
-          nullable: true
-        valid_to:
-          type: number
-          format: int64
-          nullable: true
-        tdh_rate:
-          type: number
-          format: int64
-        error_details:
-          type: string
-          nullable: true
-        status:
-          $ref: "#/components/schemas/ApiTdhGrantStatus"
-        is_irrevocable:
-          type: boolean
-          description: If true then the grant must be covered with lock contracts
-    ApiTdhGrantsPage:
-      type: object
-      required:
-        - data
-      allOf:
-        - $ref: "#/components/schemas/ApiPageBase"
-      properties:
-        data:
-          type: array
-          items:
-            $ref: "#/components/schemas/ApiTdhGrant"
-    ApiTdhGrantStatus:
-      type: string
-      enum:
-        - PENDING
-        - FAILED
-        - GRANTED
-    ApiTdhGrantTargetChain:
-      type: string
-      enum:
-        - ETHEREUM_MAINNET
     ApiTransaction:
       type: object
       required:
@@ -7177,5 +7501,393 @@ components:
           type: boolean
         forbid_negative_votes:
           type: boolean
+    ApiXTdhCollection:
+      type: object
+      required:
+        - contract
+        - collection_name
+        - xtdh
+        - xtdh_rate
+        - total_token_count
+        - active_token_count
+        - total_contributor_count
+        - active_contributor_count
+      properties:
+        contract:
+          type: string
+        collection_name:
+          type: string
+          nullable: true
+        xtdh:
+          type: number
+          format: float
+        xtdh_rate:
+          type: number
+          format: float
+        total_token_count:
+          type: number
+          format: int64
+        active_token_count:
+          type: number
+          format: int64
+        total_contributor_count:
+          type: number
+          format: int64
+        active_contributor_count:
+          type: number
+          format: int64
+    ApiXTdhCollectionsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithoutCount"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiXTdhCollection"
+    ApiXTdhContribution:
+      type: object
+      required:
+        - xtdh
+        - xtdh_rate
+      properties:
+        grant:
+          $ref: "#/components/schemas/ApiXTdhGrant"
+        grantor:
+          $ref: "#/components/schemas/ApiProfileMin"
+        xtdh:
+          type: number
+          format: float
+        xtdh_rate:
+          type: number
+          format: float
+        total_grant_count:
+          type: number
+          format: int64
+        active_grant_count:
+          type: number
+          format: int64
+    ApiXTdhContributionsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithoutCount"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiXTdhContribution"
+    ApiXTdhCreateGrant:
+      type: object
+      required:
+        - target_chain
+        - target_contract
+        - target_tokens
+        - valid_to
+        - rate
+        - is_irrevocable
+      properties:
+        target_chain:
+          $ref: "#/components/schemas/ApiXTdhGrantTargetChain"
+        target_contract:
+          type: string
+        target_tokens:
+          type: array
+          items:
+            type: string
+          description: >-
+            List of token numbers. Each element can also be a span in form of
+            start-end. Leave empty if all tokens are targets.
+        valid_to:
+          type: number
+          format: int64
+          nullable: true
+        rate:
+          type: number
+          format: int64
+        is_irrevocable:
+          type: boolean
+          description: If true then the grant must be covered with lock contracts
+    ApiXTdhGlobalStats:
+      type: object
+      required:
+        - xtdh
+        - xtdh_rate
+        - multiplier
+        - outgoing_rate
+        - outgoing_total
+        - outgoing_collections_count
+        - outgoing_tokens_count
+      properties:
+        xtdh:
+          type: number
+          format: double
+        xtdh_rate:
+          type: number
+          format: double
+        multiplier:
+          type: number
+          format: double
+        outgoing_rate:
+          type: number
+          format: double
+        outgoing_total:
+          type: number
+          format: double
+        outgoing_collections_count:
+          type: number
+          format: int64
+        outgoing_tokens_count:
+          type: number
+          format: int64
+    ApiXTdhGrant:
+      type: object
+      required:
+        - id
+        - grantor
+        - target_chain
+        - target_contract
+        - target_tokens_count
+        - target_collection_name
+        - created_at
+        - updated_at
+        - valid_from
+        - valid_to
+        - rate
+        - error_details
+        - status
+        - is_irrevocable
+        - total_granted
+      properties:
+        id:
+          type: string
+        grantor:
+          $ref: "#/components/schemas/ApiProfileMin"
+        target_chain:
+          $ref: "#/components/schemas/ApiXTdhGrantTargetChain"
+        target_contract:
+          type: string
+        target_tokens_count:
+          type: number
+          format: int64
+        target_collection_name:
+          type: string
+          nullable: true
+        created_at:
+          type: number
+          format: int64
+        updated_at:
+          type: number
+          format: int64
+        valid_from:
+          type: number
+          format: int64
+          nullable: true
+        valid_to:
+          type: number
+          format: int64
+          nullable: true
+        rate:
+          type: number
+          format: int64
+        error_details:
+          type: string
+          nullable: true
+        status:
+          $ref: "#/components/schemas/ApiXTdhGrantStatus"
+        is_irrevocable:
+          type: boolean
+          description: If true then the grant must be covered with lock contracts
+        total_granted:
+          type: number
+          format: int64
+    ApiXTdhGrantee:
+      type: object
+      required:
+        - grantee
+        - collections_count
+        - tokens_count
+        - xtdh
+        - xtdh_rate
+      properties:
+        grantee:
+          $ref: "#/components/schemas/ApiProfileMin"
+        xtdh:
+          type: number
+          format: float
+        xtdh_rate:
+          type: number
+          format: float
+        collections_count:
+          type: number
+          format: int64
+        tokens_count:
+          type: number
+          format: int64
+    ApiXTdhGranteesPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithoutCount"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiXTdhGrantee"
+    ApiXTdhGrantsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiXTdhGrant"
+    ApiXTdhGrantStatus:
+      type: string
+      enum:
+        - PENDING
+        - FAILED
+        - GRANTED
+        - DISABLED
+    ApiXTdhGrantTargetChain:
+      type: string
+      enum:
+        - ETHEREUM_MAINNET
+    ApiXTdhGrantToken:
+      type: object
+      required:
+        - token
+        - xtdh
+      properties:
+        token:
+          type: string
+        xtdh:
+          type: number
+          format: float
+    ApiXTdhGrantTokensPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiXTdhGrantToken"
+    ApiXTdhGrantUpdateRequest:
+      type: object
+      required:
+        - valid_to
+      properties:
+        valid_to:
+          type: number
+          format: int64
+          description: >-
+            If valid_to-valid_from does not allow for at least one xTDH
+            increment then old grant is disabled and substitute wont be created
+    ApiXTdhStats:
+      type: object
+      required:
+        - identity
+        - xtdh
+        - xtdh_rate
+        - multiplier
+        - outgoing_rate
+        - outgoing_total
+        - outgoing_collections_count
+        - outgoing_tokens_count
+        - incoming_rate
+        - incoming_total
+        - generation_rate
+        - generated_total
+        - unused_rate
+      properties:
+        identity:
+          $ref: "#/components/schemas/ApiIdentity"
+        xtdh:
+          type: number
+          format: double
+        xtdh_rate:
+          type: number
+          format: double
+        multiplier:
+          type: number
+          format: double
+        outgoing_rate:
+          type: number
+          format: double
+        outgoing_total:
+          type: number
+          format: double
+        outgoing_collections_count:
+          type: number
+          format: int64
+        outgoing_tokens_count:
+          type: number
+          format: int64
+        incoming_rate:
+          type: number
+          format: double
+        incoming_total:
+          type: number
+          format: double
+        generated_total:
+          type: number
+          format: double
+        generation_rate:
+          type: number
+          format: double
+        unused_rate:
+          type: number
+          format: double
+    ApiXTdhToken:
+      type: object
+      required:
+        - contract
+        - token
+        - owner
+        - xtdh
+        - xtdh_rate
+        - total_contributor_count
+        - active_contributor_count
+      properties:
+        contract:
+          type: string
+        token:
+          type: number
+          format: int64
+        owner:
+          $ref: "#/components/schemas/ApiProfileMin"
+        xtdh:
+          type: number
+          format: float
+        xtdh_rate:
+          type: number
+          format: float
+        total_contributor_count:
+          type: number
+          format: int64
+        active_contributor_count:
+          type: number
+          format: int64
+    ApiXTdhTokensPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithoutCount"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiXTdhToken"
 security:
   - bearerAuth: []

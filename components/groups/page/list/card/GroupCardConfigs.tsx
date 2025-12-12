@@ -5,11 +5,13 @@ import { GroupDescriptionType } from "@/entities/IGroup";
 import { ApiGroupDescription } from "@/generated/models/ApiGroupDescription";
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 import GroupCardConfig from "./GroupCardConfig";
 
 export interface GroupCardConfigProps {
   readonly key: GroupDescriptionType;
   readonly value: string;
+  readonly label?: string;
 }
 
 export default function GroupCardConfigs({
@@ -51,9 +53,8 @@ export default function GroupCardConfigs({
     if (!identity) {
       return null;
     }
-    return `${
-      direction ? directionLabels[direction] : ""
-    } identity: ${identity}`;
+    return `${direction ? directionLabels[direction] : ""
+      } identity: ${identity}`;
   };
 
   const getTdhConfig = (
@@ -63,9 +64,17 @@ export default function GroupCardConfigs({
     if (!value) {
       return null;
     }
+    let label = "Tdh";
+    if (tdh.inclusion_strategy === ApiGroupTdhInclusionStrategy.Xtdh) {
+      label = "xTDH";
+    } else if (tdh.inclusion_strategy === ApiGroupTdhInclusionStrategy.Both) {
+      label = "TDH + xTDH";
+    }
+
     return {
       key: GroupDescriptionType.TDH,
       value,
+      label,
     };
   };
 

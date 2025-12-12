@@ -62,9 +62,9 @@ const getDropStyles = (
   }
 
   return {
-    boxShadow: `inset 1.5px 0 0 ${colors.borderColor}, 
-                inset 0 1px 0 ${colors.borderColor}20, 
-                inset -1.5px 0 0 ${colors.borderColor}20, 
+    boxShadow: `inset 1.5px 0 0 ${colors.borderColor}80,
+                inset 0 1px 0 ${colors.borderColor}20,
+                inset -1.5px 0 0 ${colors.borderColor}20,
                 inset 0 -1.5px 0 ${colors.borderColor}20`,
   };
 };
@@ -172,19 +172,17 @@ const DefaultWinnerDrop = ({
         <div className="tw-flex tw-gap-x-3 tw-w-full tw-text-left tw-bg-transparent tw-border-0 tw-relative tw-z-10">
           <WaveDropAuthorPfp drop={drop} />
           <div className="tw-flex tw-flex-col tw-w-full tw-gap-y-2">
-            <div className="tw-flex tw-flex-col tw-gap-1">
+            <div className="tw-flex tw-flex-col tw-items-start tw-gap-y-1">
               <WaveDropHeader
                 drop={drop}
                 showWaveInfo={false}
                 isStorm={isStorm}
                 currentPartIndex={activePartIndex}
                 partsCount={drop.parts.length}
-                badge={
-                  <WinnerDropBadge
-                    rank={effectiveRank}
-                    decisionTime={decisionTime ?? null}
-                  />
-                }
+              />
+              <WinnerDropBadge
+                rank={effectiveRank}
+                decisionTime={decisionTime ?? null}
               />
               {showWaveInfo && (() => {
                 const waveDetails =

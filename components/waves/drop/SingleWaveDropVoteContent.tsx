@@ -42,9 +42,9 @@ export const SingleWaveDropVoteContent: React.FC<
   // MINI layout uses single horizontal row, others use existing responsive layout
   if (size === SingleWaveDropVoteSize.MINI) {
     return (
-      /* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
+       
       <div
-        className="tw-bg-iron-800 tw-border tw-border-iron-700 tw-border-solid tw-rounded-lg tw-px-2 tw-py-1.5"
+        className="tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-lg tw-px-2 tw-py-1.5"
         onClick={(e) => e.stopPropagation()}
       >
         {/* MINI: Horizontal single-row layout */}
@@ -52,7 +52,7 @@ export const SingleWaveDropVoteContent: React.FC<
           {/* Toggle button - icon only */}
           <button
             onClick={() => setIsSliderMode(!isSliderMode)}
-            className="tw-h-8 tw-w-8 tw-rounded-md tw-bg-iron-700 tw-border tw-border-solid tw-border-iron-650
+            className="tw-h-8 tw-w-8 tw-rounded-md tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700
                     tw-flex tw-items-center tw-justify-center tw-transition-all tw-flex-shrink-0
                     desktop-hover:hover:tw-bg-iron-600"
             title={isSliderMode ? "Switch to numeric" : "Switch to slider"}

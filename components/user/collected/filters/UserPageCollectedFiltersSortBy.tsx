@@ -26,6 +26,8 @@ export default function UserPageCollectedFiltersSortBy({
     [CollectionSort.TOKEN_ID]: "Token ID",
     [CollectionSort.TDH]: "TDH",
     [CollectionSort.RANK]: "Rank",
+    [CollectionSort.XTDH]: "xTDH",
+    [CollectionSort.XTDH_DAY]: "xTDH/day",
   };
 
   const getItems = () => {
@@ -37,13 +39,18 @@ export default function UserPageCollectedFiltersSortBy({
       key: sort,
     }));
 
-    return items.filter((item) =>
-      collection
-        ? COLLECTED_COLLECTIONS_META[collection].filters.sort.includes(
-            item.value
-          )
-        : true
-    );
+    return items.filter((item) => {
+      if (collection) {
+        return COLLECTED_COLLECTIONS_META[collection].filters.sort.includes(
+          item.value
+        );
+      }
+      // If no collection is selected (All), exclude XTDH options
+      return (
+        item.value !== CollectionSort.XTDH &&
+        item.value !== CollectionSort.XTDH_DAY
+      );
+    });
   };
   const [items, setItems] = useState<CommonSelectItem<CollectionSort>[]>(
     getItems()

@@ -1,5 +1,6 @@
 import { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
+import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 import {
   createGroup,
   publishGroup,
@@ -24,7 +25,11 @@ const createOnlyMeGroup = async ({
     const groupConfig: ApiCreateGroup = {
       name: `Only ${handle ?? "Me"}`,
       group: {
-        tdh: { min: null, max: null },
+        tdh: {
+          min: null,
+          max: null,
+          inclusion_strategy: ApiGroupTdhInclusionStrategy.Tdh,
+        },
         rep: {
           min: null,
           max: null,

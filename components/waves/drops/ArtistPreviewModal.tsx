@@ -3,32 +3,34 @@
 import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { Dialog, Transition } from "@headlessui/react";
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import ArtistPreviewAppWrapper from "./ArtistPreviewAppWrapper";
 import { ArtistPreviewModalContent } from "./ArtistPreviewModalContent";
+import { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
 
-export type ModalTab = "active" | "winners";
+export type { ArtistPreviewTab as ModalTab };
 
 interface ArtistPreviewModalProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly user: ApiProfileMin;
-  readonly initialTab?: ModalTab;
+  readonly initialTab?: ArtistPreviewTab;
 }
 
-export const ArtistPreviewModal: React.FC<
-  ArtistPreviewModalProps
-> = ({ isOpen, onClose, user, initialTab = "active" }) => {
+export const ArtistPreviewModal = ({
+  isOpen,
+  onClose,
+  user,
+  initialTab = "active"
+}: ArtistPreviewModalProps) => {
   const { isApp } = useDeviceInfo();
-  const modalRef = useRef<HTMLDialogElement>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
-  const [activeTab, setActiveTab] = useState<ModalTab>(initialTab);
-  
+  const [activeTab, setActiveTab] = useState<ArtistPreviewTab>(initialTab);
+
   // Check if user has winning artworks
-  const hasWinningArtworks = user.winner_main_stage_drop_ids && 
+  const hasWinningArtworks = user.winner_main_stage_drop_ids &&
                              user.winner_main_stage_drop_ids.length > 0;
-  
+
   // Reset tab when modal opens with different initial tab
   useEffect(() => {
     if (isOpen) {
@@ -36,24 +38,14 @@ export const ArtistPreviewModal: React.FC<
     }
   }, [isOpen, initialTab]);
 
-  // Cleanup body overflow and manage focus
+  // Cleanup body overflow
   useEffect(() => {
     if (isOpen && !isApp) {
-      // Store current focus
-      previousFocusRef.current = document.activeElement as HTMLElement;
-      
-      // Set body overflow
+      const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
-      
-      // Focus the modal after animation
-      setTimeout(() => {
-        modalRef.current?.focus();
-      }, 100);
-      
+
       return () => {
-        document.body.style.overflow = 'unset';
-        // Restore previous focus
-        previousFocusRef.current?.focus();
+        document.body.style.overflow = originalOverflow;
       };
     }
   }, [isOpen, isApp]);
@@ -91,13 +83,11 @@ export const ArtistPreviewModal: React.FC<
           leaveFrom="tw-opacity-100"
           leaveTo="tw-opacity-0"
         >
-          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-          <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px]" onClick={onClose} />
+          <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px]" onClick={(e) => { e.stopPropagation(); onClose(); }} />
         </Transition.Child>
 
         {/* Desktop modal */}
-        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-        <div className="tw-fixed tw-inset-0 tw-z-[100] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-hidden sm:tw-block" onClick={onClose}>
+        <div className="tw-fixed tw-inset-0 tw-z-[100] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-hidden sm:tw-block" onClick={(e) => { e.stopPropagation(); onClose(); }}>
           <div className="tw-flex tw-min-h-full tw-items-center tw-justify-center tw-p-4">
             <Transition.Child
               as={Fragment}

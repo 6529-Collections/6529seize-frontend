@@ -187,7 +187,7 @@ export const commonApiFetchWithRetry = async <
   let attempts = 0;
   let currentDelayMs = initialDelayMs;
 
-  // eslint-disable-next-line no-constant-condition
+   
   while (true) {
     try {
       if (fetchParams.signal?.aborted) {

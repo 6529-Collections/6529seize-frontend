@@ -17,7 +17,7 @@ export default function GroupCardConfig({
 
   return (
     <div className="tw-inline-flex tw-cursor-default tw-items-center tw-gap-x-1 tw-text-xs tw-font-medium tw-text-iron-200 sm:tw-text-sm">
-      <span className="tw-text-iron-400">{configLabel[config.key]}:</span>
+      <span className="tw-text-iron-400">{config.label ?? configLabel[config.key]}:</span>
       <span className="tw-font-semibold tw-text-iron-50 tw-whitespace-nowrap">{config.value}</span>
     </div>
   );

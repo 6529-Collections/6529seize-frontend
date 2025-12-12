@@ -9,7 +9,6 @@ import PrivilegedDropCreator, {
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { getHomeFeedRoute } from "@/helpers/navigation.helpers";
-import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWave } from "@/hooks/useWave";
 import { selectEditingDropId } from "@/store/editSlice";
@@ -36,7 +35,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   const { isMemesWave } = useWave(wave);
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
-  const { getContainerStyle } = useAndroidKeyboard();
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
 
   // Handle URL parameters
@@ -69,10 +67,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
     return `${baseStyles} ${heightClass}`;
   }, []);
 
-  // Android keyboard adjustment style using centralized hook
-  const containerStyle = useMemo<React.CSSProperties>(() => {
-    return getContainerStyle(waveViewStyle || {}, 128);
-  }, [waveViewStyle, getContainerStyle]);
+  const containerStyle = waveViewStyle || {};
 
   useEffect(() => setActiveDrop(null), [wave]);
 

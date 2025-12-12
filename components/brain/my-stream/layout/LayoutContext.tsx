@@ -11,6 +11,7 @@ import React, {
   useMemo,
 } from "react";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
 
 // Define the different spaces that need to be measured
 interface LayoutSpaces {
@@ -64,10 +65,12 @@ const spacesAreEqual = (a: LayoutSpaces, b: LayoutSpaces) =>
 const calculateHeightStyle = (
   view: View,
   spaces: LayoutSpaces,
-  capacitorSpace: number // Accept specific space value
+  capacitorSpace: number, // Accept specific space value
+  keyboardHeight: number = 0 // Keyboard height when visible
 ): React.CSSProperties => {
   // Use dynamic viewport height to avoid extra space on mobile browsers
-  const heightCalc = `calc(100dvh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${spaces.mobileNavSpace}px - ${capacitorSpace}px)`;
+  // Subtract keyboard height when keyboard is open to shrink container to visible area
+  const heightCalc = `calc(100dvh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${spaces.mobileNavSpace}px - ${capacitorSpace}px - ${keyboardHeight}px)`;
   return {
     height: heightCalc,
     maxHeight: heightCalc,
@@ -167,6 +170,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const { isCapacitor, isAndroid, isIos } = useCapacitor();
+  const { isVisible: isAndroidKeyboardVisible, keyboardHeight } = useAndroidKeyboard();
 
   // Internal ref storage (source of truth)
   const refMap = useRef<Record<LayoutRefType, HTMLDivElement | null>>({
@@ -377,16 +381,22 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   const waveViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
 
+    // Reserve space for input area + bottom nav (only when keyboard closed)
     let capSpace = 0;
+    let kbHeight = 0;
+
     if (isAndroid) {
-      capSpace = 128;
+      // When keyboard open: no capSpace needed, subtract keyboard height instead
+      // When keyboard closed: use 128px capSpace for input + bottom nav
+      capSpace = isAndroidKeyboardVisible ? 0 : 128;
+      kbHeight = isAndroidKeyboardVisible ? keyboardHeight : 0;
     } else if (isIos || isCapacitor) {
       capSpace = 20;
     }
 
     const adjustedSpaces = { ...spaces, mobileNavSpace: 0 };
-    return calculateHeightStyle("wave", adjustedSpaces, capSpace);
-  }, [spaces, isAndroid, isIos, isCapacitor]);
+    return calculateHeightStyle("wave", adjustedSpaces, capSpace, kbHeight);
+  }, [spaces, isAndroid, isAndroidKeyboardVisible, keyboardHeight, isIos, isCapacitor]);
 
   const leaderboardViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
