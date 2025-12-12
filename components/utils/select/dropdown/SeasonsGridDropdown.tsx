@@ -3,14 +3,13 @@
 import { MemeSeason } from "@/entities/ISeason";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useAnimate } from "framer-motion";
-import { RefObject, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SeasonsGridDropdownItemsWrapper from "./SeasonsGridDropdownItemsWrapper";
 
 interface SeasonsGridDropdownProps {
   readonly selected: MemeSeason | null;
   readonly setSelected: (season: MemeSeason | null) => void;
   readonly initialSeasonId?: number | null;
-  readonly containerRef?: RefObject<HTMLDivElement | null>;
   readonly disabled?: boolean;
 }
 
@@ -18,7 +17,6 @@ export default function SeasonsGridDropdown({
   selected,
   setSelected,
   initialSeasonId,
-  containerRef,
   disabled = false,
 }: SeasonsGridDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -78,42 +76,6 @@ export default function SeasonsGridDropdown({
     setIsOpen(false);
   };
 
-  const getButtonPosition = () => {
-    if (buttonRef.current) {
-      try {
-        const { right } = buttonRef.current.getBoundingClientRect();
-        return { right };
-      } catch {
-        return { right: 0 };
-      }
-    }
-    return { right: 0 };
-  };
-
-  const [buttonPosition, setButtonPosition] = useState(getButtonPosition());
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const onButtonPositionChange = () => {
-      if (buttonRef.current) {
-        setButtonPosition(getButtonPosition());
-      }
-    };
-    const container = containerRef?.current;
-    if (container) {
-      container.addEventListener("scroll", onButtonPositionChange);
-      window.addEventListener("resize", onButtonPositionChange);
-      onButtonPositionChange();
-
-      return () => {
-        container.removeEventListener("scroll", onButtonPositionChange);
-        window.removeEventListener("resize", onButtonPositionChange);
-      };
-    } else {
-      onButtonPositionChange();
-    }
-  }, [isOpen, containerRef]);
-
   return (
     <div className="tailwind-scope tw-w-full tw-h-full">
       <div className="tw-relative tw-w-full">
@@ -155,7 +117,6 @@ export default function SeasonsGridDropdown({
         isOpen={isOpen}
         setOpen={setIsOpen}
         buttonRef={buttonRef}
-        buttonPosition={buttonPosition}
         filterLabel="Season">
         <button
           type="button"

@@ -197,7 +197,6 @@ export default function UserPageCollectedFilters({
               <UserPageCollectedFiltersSzn
                 selected={filters.szn}
                 initialSeasonId={filters.initialSznId}
-                containerRef={containerRef}
                 setSelected={setSzn}
               />
             )}
