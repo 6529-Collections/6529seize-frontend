@@ -17,10 +17,35 @@ import {
 } from "@testing-library/react";
 import { RefObject } from "react";
 
+jest.mock("@/components/nft-transfer/TransferToggle", () => {
+  return function MockTransferToggle() {
+    return <div data-testid="transfer-toggle">Transfer Toggle</div>;
+  };
+});
+
+jest.mock("@/components/utils/select/CommonSelect", () => {
+  return {
+    __esModule: true,
+    default: function MockCommonSelect({
+      activeItem,
+      setSelected,
+      filterLabel,
+    }: any) {
+      return (
+        <div data-testid="common-select">
+          <button onClick={() => setSelected("NETWORK")}>
+            {filterLabel}: {activeItem}
+          </button>
+        </div>
+      );
+    },
+  };
+});
+
 jest.mock(
-  "@/components/user/collected/filters/UserPageCollectedFiltersCollection",
+  "@/components/user/collected/filters/UserPageCollectedFiltersNativeDropdown",
   () => {
-    return function MockUserPageCollectedFiltersCollection({
+    return function MockUserPageCollectedFiltersNativeDropdown({
       selected,
       setSelected,
     }: any) {
@@ -28,6 +53,25 @@ jest.mock(
         <div data-testid="collection-filter">
           <button onClick={() => setSelected(CollectedCollectionType.MEMES)}>
             Collection Filter
+          </button>
+          Current: {selected || "none"}
+        </div>
+      );
+    };
+  }
+);
+
+jest.mock(
+  "@/components/user/collected/filters/UserPageCollectedFiltersNetworkCollection",
+  () => {
+    return function MockUserPageCollectedFiltersNetworkCollection({
+      selected,
+      setSelected,
+    }: any) {
+      return (
+        <div data-testid="network-collection">
+          <button onClick={() => setSelected("some-collection")}>
+            Network Collection
           </button>
           Current: {selected || "none"}
         </div>
@@ -112,28 +156,33 @@ jest.mock(
 
 jest.mock(
   "@/components/user/collected/filters/user-page-collected-filters.helpers",
-  () => ({
-    COLLECTED_COLLECTIONS_META: {
-      [CollectedCollectionType.MEMES]: {
-        filters: {
-          seized: true,
-          szn: true,
+  () => {
+    const { CollectedCollectionType } = jest.requireActual(
+      "@/entities/IProfile"
+    );
+    return {
+      COLLECTED_COLLECTIONS_META: {
+        [CollectedCollectionType.MEMES]: {
+          filters: {
+            seized: true,
+            szn: true,
+          },
+        },
+        [CollectedCollectionType.GRADIENTS]: {
+          filters: {
+            seized: false,
+            szn: false,
+          },
+        },
+        [CollectedCollectionType.NETWORK]: {
+          filters: {
+            seized: false,
+            szn: false,
+          },
         },
       },
-      [CollectedCollectionType.GRADIENTS]: {
-        filters: {
-          seized: false,
-          szn: false,
-        },
-      },
-      [CollectedCollectionType.NETWORK]: {
-        filters: {
-          seized: false,
-          szn: false,
-        },
-      },
-    },
-  })
+    };
+  }
 );
 
 Object.defineProperty(globalThis, "matchMedia", {
