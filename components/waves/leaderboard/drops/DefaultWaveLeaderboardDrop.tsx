@@ -1,24 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
-import { createPortal } from "react-dom";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { WaveLeaderboardDropHeader } from "./header/WaveLeaderboardDropHeader";
-import { WaveLeaderboardDropContent } from "../content/WaveLeaderboardDropContent";
-import { WaveLeaderboardDropFooter } from "./footer/WaveLeaderboardDropFooter";
-import { ApiWave } from "@/generated/models/ObjectSerializer";
-import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
-import { WaveLeaderboardDropRaters } from "./header/WaveleaderboardDropRaters";
-import WaveDropActionsOptions from "@/components/waves/drops/WaveDropActionsOptions";
-import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
-import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
-import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMenuDelete";
-import { VotingModal, MobileVotingModal } from "@/components/voting";
+import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
+import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
+import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
+import WaveDropActionsOptions from "@/components/waves/drops/WaveDropActionsOptions";
+import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMenuDelete";
+import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
+import { ApiWave } from "@/generated/models/ObjectSerializer";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
+import React, { useState } from "react";
+import { createPortal } from "react-dom";
+import { WaveLeaderboardDropContent } from "../content/WaveLeaderboardDropContent";
+import { WaveLeaderboardDropFooter } from "./footer/WaveLeaderboardDropFooter";
+import { WaveLeaderboardDropHeader } from "./header/WaveLeaderboardDropHeader";
+import { WaveLeaderboardDropRaters } from "./header/WaveleaderboardDropRaters";
 
 interface DefaultWaveLeaderboardDropProps {
   readonly drop: ExtendedDrop;
@@ -64,7 +64,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
       onClick={() => onDropClick(drop)}
       className="tw-@container tw-group tw-cursor-pointer tw-rounded-xl tw-transition tw-duration-300 tw-ease-out tw-w-full tw-relative">
       <div className={getBorderClasses()} {...touchHandlers}>
-        <div className="tw-flex tw-flex-col">
+        <div className="tw-flex tw-flex-col tw-gap-3">
           <div className="tw-flex tw-flex-col tw-gap-3">
             <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
               <WaveLeaderboardDropHeader drop={drop} />
@@ -84,7 +84,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
               <WaveLeaderboardDropContent drop={drop} isCompetitionDrop={true} />
             </div>
           </div>
-          <div className="tw-mt-3 tw-inline-flex tw-flex-col @[700px]:tw-flex-row tw-justify-between @[700px]:tw-items-center sm:tw-ml-[3.25rem] tw-space-y-3 @[700px]:tw-space-y-0 tw-gap-x-2">
+          <div className="tw-mt-3 tw-inline-flex tw-flex-col @[700px]:tw-flex-row tw-justify-between @[700px]:tw-items-center sm:tw-ml-[3.5rem] tw-space-y-3 @[700px]:tw-space-y-0 tw-gap-x-2">
             <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-y-2 tw-gap-x-4">
               <WaveLeaderboardDropRaters drop={drop} />
               <WaveLeaderboardDropFooter drop={drop} wave={wave} />
