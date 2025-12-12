@@ -170,12 +170,6 @@ describe("UserPageSubscriptionsUpcoming", () => {
     renderComponent();
 
     const toggles = screen.getAllByRole("button");
-    const subscriptionToggles = toggles.filter((toggle) =>
-      toggle.getAttribute("aria-label")?.includes("Toggle subscription")
-    );
-
-    // Since the component may not render subscription toggles in this test setup,
-    // we'll just verify that buttons exist on the page (Show More, etc.)
     expect(toggles.length).toBeGreaterThan(0);
   });
 

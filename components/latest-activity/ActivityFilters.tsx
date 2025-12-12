@@ -2,6 +2,7 @@
 
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import { ContractFilter, TypeFilter } from "@/hooks/useActivityData";
+import { useMemo } from "react";
 import { Col } from "react-bootstrap";
 
 interface ActivityFiltersProps {
@@ -19,6 +20,26 @@ export default function ActivityFilters({
   onContractFilterChange,
   isMobile,
 }: ActivityFiltersProps) {
+  const contractItems = useMemo(
+    () =>
+      Object.values(ContractFilter).map((contract) => ({
+        key: contract,
+        label: contract,
+        value: contract,
+      })),
+    []
+  );
+
+  const typeItems = useMemo(
+    () =>
+      Object.values(TypeFilter).map((type) => ({
+        key: type,
+        label: type,
+        value: type,
+      })),
+    []
+  );
+
   return (
     <Col
       sm={12}
@@ -27,21 +48,13 @@ export default function ActivityFilters({
         isMobile ? "justify-content-center" : "justify-content-end"
       }`}>
       <CommonDropdown
-        items={Object.values(ContractFilter).map((contract) => ({
-          key: contract,
-          label: contract,
-          value: contract,
-        }))}
+        items={contractItems}
         activeItem={selectedContract}
         filterLabel="Collection"
         setSelected={onContractFilterChange}
       />
       <CommonDropdown
-        items={Object.values(TypeFilter).map((type) => ({
-          key: type,
-          label: type,
-          value: type,
-        }))}
+        items={typeItems}
         activeItem={typeFilter}
         filterLabel="Filter"
         setSelected={onTypeFilterChange}

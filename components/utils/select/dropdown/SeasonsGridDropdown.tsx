@@ -28,23 +28,36 @@ export default function SeasonsGridDropdown({
   const [initialApplied, setInitialApplied] = useState(false);
 
   useEffect(() => {
+    const abortController = new AbortController();
     commonApiFetch<MemeSeason[]>({
       endpoint: "new_memes_seasons",
-    }).then((response) => {
-      setSeasons(response);
-    });
+      signal: abortController.signal,
+    })
+      .then((response) => {
+        setSeasons(response);
+      })
+      .catch((error) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        console.error("Failed to fetch meme seasons:", error);
+      });
+    return () => {
+      abortController.abort();
+    };
   }, []);
 
   useEffect(() => {
-    if (initialApplied || seasons.length === 0) return;
-    if (initialSeasonId) {
-      const matchedSeason = seasons.find((s) => s.id === initialSeasonId);
-      if (matchedSeason) {
-        setSelected(matchedSeason);
-      }
+    if (seasons.length === 0) return;
+    if (initialApplied) return;
+    if (selected !== null) return;
+    if (!initialSeasonId) return;
+    const matchedSeason = seasons.find((s) => s.id === initialSeasonId);
+    if (matchedSeason) {
+      setSelected(matchedSeason);
+      setInitialApplied(true);
     }
-    setInitialApplied(true);
-  }, [initialSeasonId, seasons, initialApplied, setSelected]);
+  }, [initialSeasonId, seasons, initialApplied, setSelected, selected]);
 
   useEffect(() => {
     if (!iconScope.current) return;

@@ -136,7 +136,7 @@ jest.mock(
   })
 );
 
-Object.defineProperty(window, "matchMedia", {
+Object.defineProperty(globalThis, "matchMedia", {
   writable: true,
   value: jest.fn().mockImplementation((query) => ({
     matches: false,
@@ -431,9 +431,12 @@ describe("UserPageCollectedFilters", () => {
       HTMLDivElement.prototype,
       "removeEventListener"
     );
-    const windowAddEventListenerSpy = jest.spyOn(window, "addEventListener");
+    const windowAddEventListenerSpy = jest.spyOn(
+      globalThis,
+      "addEventListener"
+    );
     const windowRemoveEventListenerSpy = jest.spyOn(
-      window,
+      globalThis,
       "removeEventListener"
     );
 

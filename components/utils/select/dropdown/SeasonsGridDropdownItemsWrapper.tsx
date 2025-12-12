@@ -11,14 +11,12 @@ export default function SeasonsGridDropdownItemsWrapper({
   isOpen,
   filterLabel,
   buttonRef,
-  buttonPosition,
   setOpen,
   children,
 }: {
   readonly isOpen: boolean;
   readonly filterLabel: string;
   readonly buttonRef: RefObject<HTMLButtonElement | null>;
-  readonly buttonPosition?: { readonly right: number };
   readonly setOpen: (isOpen: boolean) => void;
   readonly children: ReactNode;
 }) {
@@ -44,8 +42,7 @@ export default function SeasonsGridDropdownItemsWrapper({
         <SeasonsGridDropdownDesktopWrapper
           isOpen={isOpen}
           setOpen={setOpen}
-          buttonRef={buttonRef}
-          buttonPosition={buttonPosition}>
+          buttonRef={buttonRef}>
           {children}
         </SeasonsGridDropdownDesktopWrapper>
       )}

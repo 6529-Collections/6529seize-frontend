@@ -22,7 +22,6 @@ export default function SeasonsGridDropdownDesktopWrapper({
   readonly isOpen: boolean;
   readonly setOpen: (isOpen: boolean) => void;
   readonly buttonRef: RefObject<HTMLButtonElement | null>;
-  readonly buttonPosition?: { readonly right: number };
   readonly children: ReactNode;
 }) {
   const listRef = useRef<HTMLDivElement>(null);
