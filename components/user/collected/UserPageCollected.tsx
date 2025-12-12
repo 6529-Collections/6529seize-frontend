@@ -112,7 +112,7 @@ export default function UserPageCollected({
     if (!COLLECTED_COLLECTIONS_META[collection].filters.szn) return null;
     if (!szn) return null;
     const parsed = Number.parseInt(szn, 10);
-    return isNaN(parsed) ? null : parsed;
+    return Number.isNaN(parsed) ? null : parsed;
   };
 
   const convertCollection = (
@@ -184,7 +184,7 @@ export default function UserPageCollected({
         szn: szn ?? null,
         collection: convertedCollection,
       }),
-      page: page ? Number.parseInt(page) : 1,
+      page: page ? Number.parseInt(page, 10) : 1,
       pageSize: PAGE_SIZE,
       sortBy: convertSortedBy({
         sortBy: sortBy ?? null,
