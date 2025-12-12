@@ -10,22 +10,6 @@ export enum DateIntervalsSelection {
   CUSTOM_DATES = "Custom Dates",
 }
 
-export enum MEMES_SEASON {
-  SZN1 = "SZN1",
-  SZN2 = "SZN2",
-  SZN3 = "SZN3",
-  SZN4 = "SZN4",
-  SZN5 = "SZN5",
-  SZN6 = "SZN6",
-  SZN7 = "SZN7",
-  SZN8 = "SZN8",
-  SZN9 = "SZN9",
-  SZN10 = "SZN10",
-  SZN11 = "SZN11",
-  SZN12 = "SZN12",
-  SZN13 = "SZN13",
-}
-
 export enum MemesSort {
   AGE = "Age",
   EDITION_SIZE = "Edition Size",
