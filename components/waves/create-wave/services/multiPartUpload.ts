@@ -75,6 +75,9 @@ export async function multiPartUpload({
     if (fileName.endsWith('.mp4')) {
       return 'video/mp4';
     }
+    if (fileName.endsWith('.mov')) {
+      return 'video/quicktime';
+    }
     if (fileName.endsWith('.png')) {
       return 'image/png';
     }
