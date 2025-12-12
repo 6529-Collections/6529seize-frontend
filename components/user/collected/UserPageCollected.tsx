@@ -12,7 +12,6 @@ import {
   CollectionSort,
 } from "@/entities/IProfile";
 import { SortDirection } from "@/entities/ISort";
-import { MEMES_SEASON } from "@/enums";
 import { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { Page } from "@/helpers/Types";
@@ -39,7 +38,7 @@ export interface ProfileCollectedFilters {
   readonly accountForConsolidations: boolean;
   readonly collection: CollectedCollectionType | null;
   readonly seized: CollectionSeized | null;
-  readonly szn: MEMES_SEASON | null;
+  readonly szn: number;
   readonly page: number;
   readonly pageSize: number;
   readonly sortBy: CollectionSort;
@@ -60,22 +59,6 @@ const SEARCH_PARAMS_FIELDS = {
   sortBy: "sort-by",
   sortDirection: "sort-direction",
 } as const;
-
-const SZN_TO_SEARCH_PARAMS: Record<MEMES_SEASON, string> = {
-  [MEMES_SEASON.SZN1]: "1",
-  [MEMES_SEASON.SZN2]: "2",
-  [MEMES_SEASON.SZN3]: "3",
-  [MEMES_SEASON.SZN4]: "4",
-  [MEMES_SEASON.SZN5]: "5",
-  [MEMES_SEASON.SZN6]: "6",
-  [MEMES_SEASON.SZN7]: "7",
-  [MEMES_SEASON.SZN8]: "8",
-  [MEMES_SEASON.SZN9]: "9",
-  [MEMES_SEASON.SZN10]: "10",
-  [MEMES_SEASON.SZN11]: "11",
-  [MEMES_SEASON.SZN12]: "12",
-  [MEMES_SEASON.SZN13]: "13",
-};
 
 export default function UserPageCollected({
   profile,
@@ -110,22 +93,6 @@ export default function UserPageCollected({
       Object.values(CollectionSeized).find((c) => c === seized.toUpperCase()) ??
       null
     );
-  };
-
-  const convertSzn = ({
-    szn,
-    collection,
-  }: {
-    readonly szn: string | null;
-    readonly collection: CollectedCollectionType | null;
-  }): MEMES_SEASON | null => {
-    if (!collection) return null;
-    if (!COLLECTED_COLLECTIONS_META[collection].filters.szn) return null;
-    if (!szn) return null;
-    const entry = Object.entries(SZN_TO_SEARCH_PARAMS).find(
-      ([k, v]) => v === szn
-    );
-    return entry ? (entry[0] as MEMES_SEASON) : null;
   };
 
   const convertCollection = (
@@ -189,7 +156,7 @@ export default function UserPageCollected({
         seized: seized ?? null,
         collection: convertedCollection,
       }),
-      szn: convertSzn({ szn: szn ?? null, collection: convertedCollection }),
+      szn: szn ? parseInt(szn) : 0,
       page: page ? parseInt(page) : 1,
       pageSize: PAGE_SIZE,
       sortBy: convertSortedBy({
@@ -329,11 +296,11 @@ export default function UserPageCollected({
     await updateFields(items);
   };
 
-  const setSzn = async (szn: MEMES_SEASON | null): Promise<void> => {
+  const setSzn = async (szn: number): Promise<void> => {
     const items: QueryUpdateInput[] = [
       {
         name: "szn",
-        value: szn ? SZN_TO_SEARCH_PARAMS[szn] : null,
+        value: szn ? szn.toString() : null,
       },
       {
         name: "page",
@@ -385,7 +352,7 @@ export default function UserPageCollected({
       }
 
       if (filters.szn) {
-        params.szn = SZN_TO_SEARCH_PARAMS[filters.szn];
+        params.szn = filters.szn.toString();
       }
 
       return await commonApiFetch<Page<CollectedCard>>({

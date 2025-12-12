@@ -1,13 +1,13 @@
 "use client";
 
 import TransferToggle from "@/components/nft-transfer/TransferToggle";
+import SeasonsDropdown from "@/components/seasons-dropdown/SeasonsDropdown";
 import UserAddressesSelectDropdown from "@/components/user/utils/addresses-select/UserAddressesSelectDropdown";
 import {
   CollectedCollectionType,
   CollectionSeized,
   CollectionSort,
 } from "@/entities/IProfile";
-import { MEMES_SEASON } from "@/enums";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
   faChevronLeft,
@@ -20,7 +20,6 @@ import { COLLECTED_COLLECTIONS_META } from "./user-page-collected-filters.helper
 import UserPageCollectedFiltersCollection from "./UserPageCollectedFiltersCollection";
 import UserPageCollectedFiltersSeized from "./UserPageCollectedFiltersSeized";
 import UserPageCollectedFiltersSortBy from "./UserPageCollectedFiltersSortBy";
-import UserPageCollectedFiltersSzn from "./UserPageCollectedFiltersSzn";
 
 export default function UserPageCollectedFilters({
   profile,
@@ -38,7 +37,7 @@ export default function UserPageCollectedFilters({
   readonly setCollection: (collection: CollectedCollectionType | null) => void;
   readonly setSortBy: (sortBy: CollectionSort) => void;
   readonly setSeized: (seized: CollectionSeized | null) => void;
-  readonly setSzn: (szn: MEMES_SEASON | null) => void;
+  readonly setSzn: (szn: number) => void;
   readonly showTransfer: boolean;
 }) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -136,10 +135,14 @@ export default function UserPageCollectedFilters({
               />
             )}
             {getShowSzn(filters.collection) && (
-              <UserPageCollectedFiltersSzn
-                selected={filters.szn}
-                containerRef={containerRef}
-                setSelected={setSzn}
+              // <UserPageCollectedFiltersSzn
+              //   selected={filters.szn}
+              //   containerRef={containerRef}
+              //   setSelected={setSzn}
+              // />
+              <SeasonsDropdown
+                selectedSeason={filters.szn}
+                setSelectedSeason={setSzn}
               />
             )}
           </div>

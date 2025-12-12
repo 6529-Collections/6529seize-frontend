@@ -1,59 +1,79 @@
 @use "../../styles/variables.scss";
 
-.seasonDropdown {
-  text-align: left;
+.dropdownWrapper {
+  position: fixed;
+}
+
+.seasonsGrid {
+  position: relative;
+  margin-top: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(80px, 1fr));
+  gap: 0.5rem;
+  min-width: 400px;
+  width: max-content;
+  max-width: min(calc(100vw - 2rem), 600px);
+  max-height: calc(100vh - 150px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: rgba(0, 0, 0, 0.95);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.seasonButton {
+  padding: 0.5rem 0.75rem;
   background-color: transparent;
-  border: none;
-  padding-right: 25px;
-  a {
-    line-height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 4px;
+  text-align: center;
+  white-space: nowrap;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+    background-color: rgba(255, 255, 255, 0.05);
   }
-  button {
-    font-size: larger !important;
-    font-weight: bolder !important;
-    cursor: copy;
-    padding: 0;
-    text-align: left;
-    background-color: transparent !important;
-    border-color: transparent !important;
-    position: relative;
-    &::after {
-      position: absolute;
-      margin-top: 0;
-      top: 50%;
-      margin-left: 0.5rem;
-      transform: translateY(-50%);
-      font-size: 1.2em; /* Make the arrow bigger */
-    }
-  }
-  div {
-    width: 60%;
+
+  &.selected {
+    background-color: #3471eb;
+    border-color: #3168d7;
+    color: white;
+    font-weight: 600;
   }
 }
 
-@media only screen and (max-width: 800px) {
-  .seasonDropdown {
-    width: auto; /* Changed from 100% to auto to prevent full width */
-    display: inline-block; /* Keeps it to the size of its content */
-    
-    button {
-      text-align: left;
-      width: auto; /* Changed from 100% to auto */
-      position: relative;
-      padding-right: 1.75rem; /* Make space for the arrow */
-      
-      &::after {
-        position: absolute;
-        right: 0; /* Position at the right edge of button */
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 1.2em; /* Make the arrow bigger */
-      }
-    }
-    
-    div {
-      width: auto;
-      min-width: 120px; /* Ensure dropdown menu has reasonable width */
-    }
+.allButton {
+  grid-column: 1 / -1;
+}
+
+@media only screen and (max-width: 992px) {
+  .seasonsGrid {
+    grid-template-columns: repeat(3, minmax(80px, 1fr));
+    min-width: 320px;
+  }
+}
+
+@media only screen and (max-width: 576px) {
+  .seasonsGrid {
+    grid-template-columns: repeat(3, minmax(80px, 1fr));
+    min-width: 300px;
+    max-width: calc(100vw - 4rem);
+    padding: 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .seasonButton {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
   }
 }
