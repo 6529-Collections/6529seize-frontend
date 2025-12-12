@@ -5,12 +5,10 @@ import { MEMES_CONTRACT } from "@/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { DBResponse } from "@/entities/IDBResponse";
 import { NFTWithMemesExtendedData, VolumeType } from "@/entities/INFT";
-import { MemeSeason } from "@/entities/ISeason";
 import { SortDirection } from "@/entities/ISort";
 import { MemeLabSort, MEMES_EXTENDED_SORT, MemesSort } from "@/enums";
 import { numberWithCommas, printMintDate } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
-import { commonApiFetch } from "@/services/api/common-api";
 import {
   faChevronCircleDown,
   faChevronCircleUp,
@@ -103,7 +101,6 @@ export default function TheMemesComponent() {
   const { connectedProfile } = useContext(AuthContext);
 
   const [selectedSeason, setSelectedSeason] = useState(0);
-  const [seasons, setSeasons] = useState<MemeSeason[]>([]);
 
   const [routerLoaded, setRouterLoaded] = useState(false);
 
@@ -186,14 +183,6 @@ export default function TheMemesComponent() {
   const [nftsByMeme, setNftsByMeme] = useState<
     Map<number, NFTWithMemesExtendedData[]>
   >(new Map());
-
-  useEffect(() => {
-    commonApiFetch<MemeSeason[]>({
-      endpoint: "new_memes_seasons",
-    }).then((response) => {
-      setSeasons(response);
-    });
-  }, []);
 
   useEffect(() => {
     let sortParam: string;
@@ -461,14 +450,11 @@ export default function TheMemesComponent() {
               <Row>
                 <Col className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                   <span className="d-flex align-items-center gap-3 flex-wrap">
-                    <h1 className="no-wrap mb-0">
-                      The Memes
-                    </h1>
+                    <h1 className="no-wrap mb-0">The Memes</h1>
                     <LFGButton contract={MEMES_CONTRACT} />
                   </span>
                   <div className="d-none d-sm-block">
                     <SeasonsDropdown
-                      seasons={seasons.map((s) => s.id)}
                       selectedSeason={selectedSeason}
                       setSelectedSeason={setSelectedSeason}
                     />
@@ -488,7 +474,6 @@ export default function TheMemesComponent() {
                 <Col xs={12} className="mb-3 d-flex d-sm-none">
                   <div className="text-start">
                     <SeasonsDropdown
-                      seasons={seasons.map((s) => s.id)}
                       selectedSeason={selectedSeason}
                       setSelectedSeason={setSelectedSeason}
                     />
