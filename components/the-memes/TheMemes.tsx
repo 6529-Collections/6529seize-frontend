@@ -150,7 +150,7 @@ export default function TheMemesComponent() {
     const routerSzn = searchParams?.get("szn");
     if (routerSzn) {
       const parsed = Number.parseInt(routerSzn);
-      if (!isNaN(parsed) && parsed > 0) {
+      if (!Number.isNaN(parsed) && parsed > 0) {
         initialSznId = parsed;
       }
     }
