@@ -1,26 +1,26 @@
 "use client";
 
-import { memo, useCallback, useEffect, useState, useRef } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
-import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
-import { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropRequest";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropRequest";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
+import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { DropInteractionParams, DropLocation } from "./Drop";
 import WaveDropActions from "./WaveDropActions";
-import WaveDropReply from "./WaveDropReply";
+import WaveDropAuthorPfp from "./WaveDropAuthorPfp";
 import WaveDropContent from "./WaveDropContent";
 import WaveDropHeader from "./WaveDropHeader";
-import WaveDropAuthorPfp from "./WaveDropAuthorPfp";
-import WaveDropRatings from "./WaveDropRatings";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import WaveDropMetadata from "./WaveDropMetadata";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
 import WaveDropMobileMenu from "./WaveDropMobileMenu";
-import { ApiDropType } from "@/generated/models/ApiDropType";
-import { ActiveDropState } from "@/types/dropInteractionTypes";
-import { DropInteractionParams, DropLocation } from "./Drop";
+import WaveDropRatings from "./WaveDropRatings";
 import WaveDropReactions from "./WaveDropReactions";
+import WaveDropReply from "./WaveDropReply";
 
 enum GroupingThreshold {
   TIME_DIFFERENCE = 60000,
@@ -347,7 +347,7 @@ const WaveDrop = ({
           <div
             className="tw-flex tw-flex-col tw-w-full tw-gap-y-1"
             style={{
-              maxWidth: showAuthorInfo ? "calc(100% - 3.25rem)" : "100%",
+              maxWidth: showAuthorInfo ? "calc(100% - 3.5rem)" : "100%",
             }}>
             {showAuthorInfo && (
               <WaveDropHeader
@@ -361,7 +361,7 @@ const WaveDrop = ({
             <div
               className={
                 shouldGroupWithPreviousDrop && !isProfileView
-                  ? "tw-ml-[3.25rem]"
+                  ? "tw-ml-[3.5rem]"
                   : ""
               }>
               <WaveDropContent
@@ -391,7 +391,7 @@ const WaveDrop = ({
           />
         )}
         <div
-          className={`tw-mx-2 tw-flex tw-w-[calc(100%-3.25rem)] tw-ml-[3.25rem] tw-items-center tw-gap-x-2 tw-gap-y-1 tw-flex-wrap`}>
+          className={`tw-mx-2 tw-flex tw-w-[calc(100%-3.25rem)] tw-ml-[3.5rem] tw-items-center tw-gap-x-2 tw-gap-y-1 tw-flex-wrap`}>
           {drop.metadata.length > 0 && (
             <WaveDropMetadata metadata={drop.metadata} />
           )}

@@ -21,30 +21,29 @@ export default function ParticipationDropHeader({
 
   return (
     <>
-      <div className="tw-flex tw-items-center tw-gap-x-4 tw-w-full">
+      <div className="tw-flex tw-items-center tw-gap-x-2">
         <div className="tw-flex tw-items-center tw-gap-x-2">
-          <div className="tw-flex tw-items-center tw-gap-x-2">
-            <UserCICAndLevel
-              level={drop.author.level}
-              cicType={cicType}
-              size={UserCICAndLevelSize.SMALL}
-            />
+          <UserCICAndLevel
+            level={drop.author.level}
+            cicType={cicType}
+            size={UserCICAndLevelSize.SMALL}
+          />
 
-            <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
-              <Link
-                onClick={(e) => e.stopPropagation()}
-                href={`/${drop.author.handle}`}
-                className="tw-no-underline tw-text-iron-200 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
-              >
-                {drop.author.handle}
-              </Link>
-            </p>
-          </div>
-
-          <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
-          <WaveDropTime timestamp={drop.created_at} />
+          <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
+            <Link
+              onClick={(e) => e.stopPropagation()}
+              href={`/${drop.author.handle}`}
+              className="tw-no-underline tw-text-iron-200 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
+            >
+              {drop.author.handle}
+            </Link>
+          </p>
         </div>
 
+        <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
+        <WaveDropTime timestamp={drop.created_at} />
+      </div>
+      <div className="tw-flex tw-items-center tw-gap-x-2">
         {drop.rank && (
           <WinnerDropBadge
             rank={drop.rank}
