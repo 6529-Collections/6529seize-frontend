@@ -1,8 +1,9 @@
 "use client";
 
-import { Col, Dropdown } from "react-bootstrap";
-import styles from "./LatestActivity.module.scss";
-import { TypeFilter, ContractFilter } from "@/hooks/useActivityData";
+import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
+import { ContractFilter, TypeFilter } from "@/hooks/useActivityData";
+import { useMemo } from "react";
+import { Col } from "react-bootstrap";
 
 interface ActivityFiltersProps {
   readonly typeFilter: TypeFilter;
@@ -19,40 +20,45 @@ export default function ActivityFilters({
   onContractFilterChange,
   isMobile,
 }: ActivityFiltersProps) {
+  const contractItems = useMemo(
+    () =>
+      Object.values(ContractFilter).map((contract) => ({
+        key: contract,
+        label: contract,
+        value: contract,
+      })),
+    []
+  );
+
+  const typeItems = useMemo(
+    () =>
+      Object.values(TypeFilter).map((type) => ({
+        key: type,
+        label: type,
+        value: type,
+      })),
+    []
+  );
+
   return (
     <Col
       sm={12}
       md={6}
-      className={`d-flex align-items-center gap-4 ${
+      className={`tailwind-scope tw-py-2 d-flex align-items-center gap-4 ${
         isMobile ? "justify-content-center" : "justify-content-end"
-      }`}
-    >
-      <Dropdown className={styles.filterDropdown} drop={"down-centered"}>
-        <Dropdown.Toggle>Collection: {selectedContract}</Dropdown.Toggle>
-        <Dropdown.Menu>
-          {Object.values(ContractFilter).map((contract) => (
-            <Dropdown.Item
-              key={contract}
-              onClick={() => onContractFilterChange(contract)}
-            >
-              {contract}
-            </Dropdown.Item>
-          ))}
-        </Dropdown.Menu>
-      </Dropdown>
-      <Dropdown className={styles.filterDropdown} drop={"down-centered"}>
-        <Dropdown.Toggle>Filter: {typeFilter}</Dropdown.Toggle>
-        <Dropdown.Menu>
-          {Object.values(TypeFilter).map((filter) => (
-            <Dropdown.Item
-              key={filter}
-              onClick={() => onTypeFilterChange(filter)}
-            >
-              {filter}
-            </Dropdown.Item>
-          ))}
-        </Dropdown.Menu>
-      </Dropdown>
+      }`}>
+      <CommonDropdown
+        items={contractItems}
+        activeItem={selectedContract}
+        filterLabel="Collection"
+        setSelected={onContractFilterChange}
+      />
+      <CommonDropdown
+        items={typeItems}
+        activeItem={typeFilter}
+        filterLabel="Filter"
+        setSelected={onTypeFilterChange}
+      />
     </Col>
   );
 }

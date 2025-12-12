@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { Col } from "react-bootstrap";
-import homeStyles from "@/styles/Home.module.scss";
 import DotLoader from "../dotLoader/DotLoader";
 
 interface ActivityHeaderProps {
@@ -18,13 +17,14 @@ export default function ActivityHeader({
     <Col
       sm={12}
       md={6}
-      className="d-flex align-items-center justify-content-between"
-    >
+      className="tw-py-2 d-flex align-items-center justify-content-between">
       <span className="d-flex flex-wrap align-items-center gap-3">
-        <h1>NFT Activity</h1>
+        <h1 className="tw-mb-0">NFT Activity</h1>
         {showViewAll ? (
-          <Link href="/nft-activity" className={homeStyles.viewAllLink}>
-            <span>View All</span>
+          <Link href="/nft-activity">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold hover:tw-text-[#bbb] max-[800px]:tw-text-[12px]">
+              View All
+            </span>
           </Link>
         ) : (
           fetching && <DotLoader />

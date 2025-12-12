@@ -3,11 +3,11 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import {
+  displayedSeasonNumberFromIndex,
   formatFullDate,
-  getUpcomingMintsForCurrentOrNextSeason,
+  getUpcomingMintsAcrossSeasons,
   isMintingToday,
   SeasonMintRow,
-  SeasonMintScanResult,
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import ShowMoreButton from "@/components/show-more-button/ShowMoreButton";
 import {
@@ -52,9 +52,9 @@ export default function UserPageSubscriptionsUpcoming(
     d.setUTCHours(0, 0, 0, 0);
     return d;
   });
-  const { rows } = useMemo<SeasonMintScanResult>(
-    () => getUpcomingMintsForCurrentOrNextSeason(now),
-    [now]
+  const rows = useMemo<SeasonMintRow[]>(
+    () => getUpcomingMintsAcrossSeasons(props.memes_subscriptions.length, now),
+    [now, props.memes_subscriptions.length]
   );
 
   return (
@@ -194,12 +194,19 @@ function SubscriptionRow(
       <Row>
         <Col className="d-flex flex-wrap gap-2 align-items-center justify-content-between">
           <span className="d-flex align-items-center gap-2">
-            {props.title} #{props.subscription.token_id}{" "}
+            <span className="tw-font-medium">
+              {props.title} #{props.subscription.token_id}{" "}
+            </span>
+            <span>
+              - SZN{displayedSeasonNumberFromIndex(props.date.seasonIndex)}
+            </span>
+            {" / "}
             {props.minting_today ? (
               <>
                 <span
+                  className="tw-flex tw-items-center tw-gap-1"
                   data-tooltip-id={`minting-today-${props.subscription.token_id}`}>
-                  - Minting Today{" "}
+                  <span>Minting Today</span>
                   <FontAwesomeIcon icon={faInfoCircle} height={"20px"} />
                 </span>
                 <Tooltip
@@ -214,9 +221,7 @@ function SubscriptionRow(
                 </Tooltip>
               </>
             ) : (
-              <span className="font-color-silver">
-                {formatFullDate(props.date.utcDay)}
-              </span>
+              <span>{formatFullDate(props.date.utcDay)}</span>
             )}
           </span>
           <span className="d-flex align-items-center gap-2">

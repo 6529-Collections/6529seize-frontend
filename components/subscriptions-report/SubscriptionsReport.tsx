@@ -9,12 +9,9 @@ import {
   displayedSeasonNumberFromIndex,
   formatFullDate,
   getCardsRemainingUntilEndOf,
-  getSeasonIndexForDate,
-  getUpcomingMintsForCurrentOrNextSeason,
+  getUpcomingMintsAcrossSeasons,
   isMintingToday,
-  nextMintDateOnOrAfter,
   SeasonMintRow,
-  SeasonMintScanResult,
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import Pagination, { Paginated } from "@/components/pagination/Pagination";
 import ShowMoreButton from "@/components/show-more-button/ShowMoreButton";
@@ -69,14 +66,10 @@ export default function SubscriptionsReportComponent() {
     prevUpcomingExpandedRef.current = upcomingExpanded;
   }, [upcomingExpanded, upcomingCounts.length]);
 
-  const nextMintDate = nextMintDateOnOrAfter();
-  const idx = getSeasonIndexForDate(nextMintDate);
-  const szn = displayedSeasonNumberFromIndex(idx);
-
   const [now] = useState(new Date());
-  const { rows } = useMemo<SeasonMintScanResult>(
-    () => getUpcomingMintsForCurrentOrNextSeason(now),
-    [now]
+  const rows = useMemo<SeasonMintRow[]>(
+    () => getUpcomingMintsAcrossSeasons(upcomingCounts.length || 50, now),
+    [now, upcomingCounts.length]
   );
 
   async function fetchUpcomingCounts(count: number) {
@@ -149,12 +142,10 @@ export default function SubscriptionsReportComponent() {
   }
 
   return (
-    <Container className="pt-4">
+    <Container className="tw-py-5 tw-px-2 lg:tw-px-6 xl:tw-px-8 tw-mx-auto">
       <Row>
         <Col className="d-flex flex-wrap align-items-center justify-content-between">
-          <h1>
-            Subscriptions Report
-          </h1>
+          <h1>Subscriptions Report</h1>
           <div className="tw-flex tw-items-center tw-gap-3">
             {connectedProfile && (!capacitor.isIos || country === "US") && (
               <Link
@@ -178,7 +169,7 @@ export default function SubscriptionsReportComponent() {
       <Row className="pt-3">
         <Col className="tw-flex tw-items-center tw-gap-3">
           <span className="font-larger font-bolder decoration-none">
-            Upcoming Drops for SZN{szn}
+            Upcoming Drops
           </span>
           {upcomingLoading && <CircleLoader size={CircleLoaderSize.MEDIUM} />}
         </Col>
@@ -284,7 +275,7 @@ export default function SubscriptionsReportComponent() {
       </Row>
       {totalRedeemed > PAGE_SIZE && redeemedPage !== null && (
         <div
-          className="tw-text-center tw-pt-2 tw-pb-3"
+          className="tw-text-center tw-py-4"
           aria-live="polite"
           aria-atomic="true">
           <Pagination
@@ -316,6 +307,8 @@ function SubscriptionDayDetails(
         <div className="tw-flex tw-flex-col">
           <span>The Memes #{props.count.token_id}</span>
           <span className="tw-text-gray-400 tw-text-sm">
+            SZN {displayedSeasonNumberFromIndex(props.date.seasonIndex)}
+            {" / "}
             {formatFullDate(props.date.utcDay)}
           </span>
         </div>
@@ -355,8 +348,9 @@ function RedeemedSubscriptionDetails(
               #{props.count.token_id} - {props.count.name}
             </Link>
             <span className="tw-text-gray-400 tw-text-sm">
-              {dateTime.toIsoDateString()} / {dateTime.toDayName()} / SZN
-              {props.count.szn}
+              SZN {props.count.szn}
+              {" / "}
+              {formatFullDate(dateTime.toDate())}
             </span>
           </div>
         </div>

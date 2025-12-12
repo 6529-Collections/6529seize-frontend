@@ -1,29 +1,58 @@
-import React from 'react';
-import { render } from '@testing-library/react';
-import UserPageCollectedFiltersSzn from '@/components/user/collected/filters/UserPageCollectedFiltersSzn';
-import { MEMES_SEASON } from '@/enums';
+import UserPageCollectedFiltersSzn from "@/components/user/collected/filters/UserPageCollectedFiltersSzn";
+import { MemeSeason } from "@/entities/ISeason";
+import { render } from "@testing-library/react";
 
 let capturedProps: any = null;
 
-jest.mock('@/components/utils/select/dropdown/CommonDropdown', () => (props: any) => {
-  capturedProps = props;
-  return <div data-testid="dropdown" />;
-});
+jest.mock(
+  "@/components/utils/select/dropdown/SeasonsGridDropdown",
+  () => (props: any) => {
+    capturedProps = props;
+    return <div data-testid="seasons-grid-dropdown" />;
+  }
+);
 
-describe('UserPageCollectedFiltersSzn', () => {
+describe("UserPageCollectedFiltersSzn", () => {
   beforeEach(() => {
     capturedProps = null;
   });
 
-  it('passes items and active selection to dropdown', () => {
-    const ref = { current: null } as React.RefObject<HTMLDivElement | null>;
+  it("passes props to SeasonsGridDropdown", () => {
+    const mockSeason: MemeSeason = {
+      id: 1,
+      start_index: 1,
+      end_index: 100,
+      count: 100,
+      name: "SZN1",
+      display: "SZN 1",
+    };
+    const setSelected = jest.fn();
+
     render(
-      <UserPageCollectedFiltersSzn selected={MEMES_SEASON.SZN1} containerRef={ref} setSelected={jest.fn()} />
+      <UserPageCollectedFiltersSzn
+        selected={mockSeason}
+        initialSeasonId={1}
+        setSelected={setSelected}
+      />
     );
-    const values = capturedProps.items.map((i: any) => i.value);
-    expect(values).toEqual([null, ...Object.values(MEMES_SEASON)]);
-    expect(capturedProps.activeItem).toBe(MEMES_SEASON.SZN1);
-    expect(capturedProps.filterLabel).toBe('Season');
-    expect(capturedProps.containerRef).toBe(ref);
+
+    expect(capturedProps.selected).toBe(mockSeason);
+    expect(capturedProps.initialSeasonId).toBe(1);
+    expect(capturedProps.setSelected).toBe(setSelected);
+  });
+
+  it("passes null when no season selected", () => {
+    const setSelected = jest.fn();
+
+    render(
+      <UserPageCollectedFiltersSzn
+        selected={null}
+        initialSeasonId={null}
+        setSelected={setSelected}
+      />
+    );
+
+    expect(capturedProps.selected).toBeNull();
+    expect(capturedProps.initialSeasonId).toBeNull();
   });
 });

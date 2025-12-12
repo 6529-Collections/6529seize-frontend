@@ -1,5 +1,13 @@
 "use client";
 
+import { AuthContext } from "@/components/auth/Auth";
+import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
+import DotLoader from "@/components/dotLoader/DotLoader";
+import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
+import NFTImage from "@/components/nft-image/NFTImage";
+import { VolumeTypeDropdown } from "@/components/the-memes/MemeShared";
+import styles from "@/components/the-memes/TheMemes.module.scss";
+import SeasonsGridDropdown from "@/components/utils/select/dropdown/SeasonsGridDropdown";
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
@@ -10,7 +18,6 @@ import { SortDirection } from "@/entities/ISort";
 import { MemeLabSort, MEMES_EXTENDED_SORT, MemesSort } from "@/enums";
 import { numberWithCommas, printMintDate } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
-import { commonApiFetch } from "@/services/api/common-api";
 import {
   faChevronCircleDown,
   faChevronCircleUp,
@@ -20,14 +27,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import { AuthContext } from "../auth/Auth";
-import CollectionsDropdown from "../collections-dropdown/CollectionsDropdown";
-import DotLoader from "../dotLoader/DotLoader";
-import { LFGButton } from "../lfg-slideshow/LFGSlideshow";
-import NFTImage from "../nft-image/NFTImage";
-import SeasonsDropdown from "../seasons-dropdown/SeasonsDropdown";
-import { VolumeTypeDropdown } from "./MemeShared";
-import styles from "./TheMemes.module.scss";
 
 interface Meme {
   meme: number;
@@ -102,8 +101,8 @@ export default function TheMemesComponent() {
 
   const { connectedProfile } = useContext(AuthContext);
 
-  const [selectedSeason, setSelectedSeason] = useState(0);
-  const [seasons, setSeasons] = useState<MemeSeason[]>([]);
+  const [selectedSeason, setSelectedSeason] = useState<MemeSeason | null>(null);
+  const [initialSeasonId, setInitialSeasonId] = useState<number | null>(null);
 
   const [routerLoaded, setRouterLoaded] = useState(false);
 
@@ -113,7 +112,7 @@ export default function TheMemesComponent() {
     let initialSortDir = SortDirection.ASC;
     let initialSort = MemesSort.AGE;
     let initialVolume = VolumeType.ALL_TIME;
-    let initialSzn = 0;
+    let initialSznId: number | null = null;
 
     const routerSortDir = searchParams?.get("sort_dir");
     if (routerSortDir) {
@@ -150,16 +149,15 @@ export default function TheMemesComponent() {
 
     const routerSzn = searchParams?.get("szn");
     if (routerSzn) {
-      if (Array.isArray(routerSzn)) {
-        initialSzn = parseInt(routerSzn[0]);
-      } else {
-        initialSzn = parseInt(routerSzn);
+      const parsed = Number.parseInt(routerSzn);
+      if (!Number.isNaN(parsed) && parsed > 0) {
+        initialSznId = parsed;
       }
     }
 
     setSort(initialSort);
     setSortDir(initialSortDir);
-    setSelectedSeason(initialSzn);
+    setInitialSeasonId(initialSznId);
     setVolumeType(initialVolume);
     setRouterLoaded(true);
   }, [searchParams]);
@@ -167,8 +165,8 @@ export default function TheMemesComponent() {
   const getNftsNextPage = () => {
     const mySort = getApiSort(sort, volumeType);
     let seasonFilter = "";
-    if (selectedSeason > 0) {
-      seasonFilter = `&season=${selectedSeason}`;
+    if (selectedSeason) {
+      seasonFilter = `&season=${selectedSeason.id}`;
     }
     return `${publicEnv.API_ENDPOINT}/api/memes_extended_data?page_size=48&sort_direction=${sortDir}&sort=${mySort}${seasonFilter}`;
   };
@@ -186,14 +184,6 @@ export default function TheMemesComponent() {
   const [nftsByMeme, setNftsByMeme] = useState<
     Map<number, NFTWithMemesExtendedData[]>
   >(new Map());
-
-  useEffect(() => {
-    commonApiFetch<MemeSeason[]>({
-      endpoint: "new_memes_seasons",
-    }).then((response) => {
-      setSeasons(response);
-    });
-  }, []);
 
   useEffect(() => {
     let sortParam: string;
@@ -216,11 +206,11 @@ export default function TheMemesComponent() {
     }
 
     let queryString = `sort=${sortParam}&sort_dir=${sortDir.toLowerCase()}`;
-    if (selectedSeason > 0) {
-      queryString += `&szn=${selectedSeason}`;
+    if (selectedSeason) {
+      queryString += `&szn=${selectedSeason.id}`;
     }
     router.push(`the-memes?${queryString}`);
-  }, [sort, sortDir, selectedSeason, volumeType]);
+  }, [sort, sortDir, selectedSeason, volumeType, router]);
 
   useEffect(() => {
     const memesMap = new Map<
@@ -461,16 +451,14 @@ export default function TheMemesComponent() {
               <Row>
                 <Col className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                   <span className="d-flex align-items-center gap-3 flex-wrap">
-                    <h1 className="no-wrap mb-0">
-                      The Memes
-                    </h1>
+                    <h1 className="no-wrap mb-0">The Memes</h1>
                     <LFGButton contract={MEMES_CONTRACT} />
                   </span>
-                  <div className="d-none d-sm-block">
-                    <SeasonsDropdown
-                      seasons={seasons.map((s) => s.id)}
-                      selectedSeason={selectedSeason}
-                      setSelectedSeason={setSelectedSeason}
+                  <div className="d-none d-sm-block tw-w-40">
+                    <SeasonsGridDropdown
+                      selected={selectedSeason}
+                      setSelected={setSelectedSeason}
+                      initialSeasonId={initialSeasonId}
                     />
                   </div>
                 </Col>
@@ -486,11 +474,11 @@ export default function TheMemesComponent() {
                   </Row>
                 </Col>
                 <Col xs={12} className="mb-3 d-flex d-sm-none">
-                  <div className="text-start">
-                    <SeasonsDropdown
-                      seasons={seasons.map((s) => s.id)}
-                      selectedSeason={selectedSeason}
-                      setSelectedSeason={setSelectedSeason}
+                  <div className="text-start tw-w-40">
+                    <SeasonsGridDropdown
+                      selected={selectedSeason}
+                      setSelected={setSelectedSeason}
+                      initialSeasonId={initialSeasonId}
                     />
                   </div>
                 </Col>
