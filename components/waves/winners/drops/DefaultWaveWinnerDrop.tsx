@@ -1,22 +1,22 @@
+import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
+import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
+import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
+import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import {
+    ExtendedDrop,
+    convertApiDropToExtendedDrop,
+} from "@/helpers/waves/drop.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 import React from "react";
 import { createPortal } from "react-dom";
-import {
-  ExtendedDrop,
-  convertApiDropToExtendedDrop,
-} from "@/helpers/waves/drop.helpers";
 import { WaveWinnersDropHeader } from "./header/WaveWinnersDropHeader";
-import { WaveWinnersDropContent } from "./WaveWinnersDropContent";
-import WaveWinnersDropOutcome from "./header/WaveWinnersDropOutcome";
-import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import WaveWinnersDropHeaderAuthorPfp from "./header/WaveWinnersDropHeaderAuthorPfp";
 import WaveWinnersDropHeaderTotalVotes from "./header/WaveWinnersDropHeaderTotalVotes";
 import WaveWinnersDropHeaderVoters from "./header/WaveWinnersDropHeaderVoters";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import useLongPressInteraction from "@/hooks/useLongPressInteraction";
-import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
-import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
-import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import WaveWinnersDropOutcome from "./header/WaveWinnersDropOutcome";
+import { WaveWinnersDropContent } from "./WaveWinnersDropContent";
 
 interface DefaultWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -88,7 +88,7 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
             </div>
           )}
         </div>
-        <div className="tw-mt-3 tw-ml-[3.75rem]">
+        <div className="tw-mt-3 tw-ml-[3.5rem]">
           <div className="tw-flex tw-flex-col tw-gap-y-2">
             <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-4 tw-gap-y-2">
               <div className="tw-flex tw-flex-whitespace-nowrap tw-gap-x-4 tw-items-center">

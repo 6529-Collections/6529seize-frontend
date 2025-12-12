@@ -24,7 +24,7 @@ export const WaveLeaderboardDropAuthor: React.FC<
         onClick={(e) => e.stopPropagation()}
         className="tw-flex tw-items-center tw-gap-x-2 tw-no-underline group"
       >
-        <div className="tw-h-10 tw-w-10 tw-bg-iron-900 tw-relative tw-flex-shrink-0 tw-rounded-lg">
+        <div className="tw-h-11 tw-w-11 tw-bg-iron-900 tw-relative tw-flex-shrink-0 tw-rounded-lg">
           {drop.author.pfp ? (
             <div className="tw-rounded-lg tw-h-full tw-w-full">
               <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-lg tw-overflow-hidden tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
@@ -42,7 +42,7 @@ export const WaveLeaderboardDropAuthor: React.FC<
           )}
         </div>
       </Link>
-      <div className="tw-flex tw-items-center tw-gap-x-4">
+      <div className="tw-flex tw-flex-col tw-gap-y-1.5">
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <UserCICAndLevel
             level={drop.author.level}
@@ -65,10 +65,12 @@ export const WaveLeaderboardDropAuthor: React.FC<
 
           <WaveDropTime timestamp={drop.created_at} />
         </div>
-        <WinnerDropBadge
-          rank={drop.rank}
-          decisionTime={drop.winning_context?.decision_time || null}
-        />
+        <div className="tw-flex tw-items-center tw-gap-x-2">
+          <WinnerDropBadge
+            rank={drop.rank}
+            decisionTime={drop.winning_context?.decision_time || null}
+          />
+        </div>
       </div>
     </div>
   );

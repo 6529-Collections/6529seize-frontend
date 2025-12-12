@@ -43,11 +43,7 @@ export const ArtistPreviewModalHeader: React.FC<
       <div className="tw-flex tw-gap-x-3 tw-justify-between">
         <div className="tw-flex sm:tw-flex-row tw-flex-col sm:tw-items-center sm:tw-gap-4 tw-gap-3">
           <div
-            className={`tw-h-12 tw-w-12 tw-flex-shrink-0 tw-rounded-lg tw-overflow-hidden tw-bg-iron-900 tw-border tw-border-solid ${
-              currentContentType === "winners"
-                ? "tw-shadow-[0_1px_4px_rgba(251,191,36,0.15)] tw-border-[#E4CFA1]/5"
-                : "tw-border-white/10"
-            }`}
+            className="tw-h-11 tw-w-11 tw-flex-shrink-0 tw-rounded-lg tw-overflow-hidden tw-bg-iron-900 tw-border tw-border-solid tw-border-white/10"
           >
             {user.pfp && (
               <img
