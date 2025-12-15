@@ -2,6 +2,7 @@ import React from "react";
 import { ApiWaveVoter } from "@/generated/models/ApiWaveVoter";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import Link from "next/link";
+import Image from "next/image";
 import { Tooltip } from "react-tooltip";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
@@ -28,9 +29,11 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
           className="tw-flex tw-items-center tw-gap-2 tw-no-underline desktop-hover:hover:tw-underline tw-group desktop-hover:hover:tw-opacity-80 tw-transition-all tw-duration-300 tw-max-w-full tw-min-w-0"
         >
           {voter.voter.pfp ? (
-            <img
+            <Image
               src={voter.voter.pfp}
-              alt=""
+              alt={voter.voter.handle ?? "Voter"}
+              width={20}
+              height={20}
               className="tw-size-5 tw-rounded-md tw-ring-1 tw-ring-inset tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0 tw-object-contain"
             />
           ) : (

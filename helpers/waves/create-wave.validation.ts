@@ -175,15 +175,7 @@ const getVotingValidationErrors = ({
     return errors;
   }
 
-  if (voting.type !== ApiWaveCreditType.Rep) {
-    // TDH voting cannot have category or profileId
-    if (voting.category !== null) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.TDH_VOTING_CANNOT_HAVE_CATEGORY);
-    }
-    if (voting.profileId !== null) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.TDH_VOTING_CANNOT_HAVE_PROFILE_ID);
-    }
-  } else {
+  if (voting.type === ApiWaveCreditType.Rep) {
     // REP voting requires non-empty category and profileId
     if (!voting.category) {
       errors.push(CREATE_WAVE_VALIDATION_ERROR.REP_VOTING_REQUIRES_CATEGORY);
@@ -195,6 +187,14 @@ const getVotingValidationErrors = ({
       errors.push(CREATE_WAVE_VALIDATION_ERROR.REP_VOTING_REQUIRES_PROFILE_ID);
     } else if (voting.profileId.trim() === "") {
       errors.push(CREATE_WAVE_VALIDATION_ERROR.REP_VOTING_REQUIRES_PROFILE_ID);
+    }
+  } else {
+    // TDH voting cannot have category or profileId
+    if (voting.category !== null) {
+      errors.push(CREATE_WAVE_VALIDATION_ERROR.TDH_VOTING_CANNOT_HAVE_CATEGORY);
+    }
+    if (voting.profileId !== null) {
+      errors.push(CREATE_WAVE_VALIDATION_ERROR.TDH_VOTING_CANNOT_HAVE_PROFILE_ID);
     }
   }
 

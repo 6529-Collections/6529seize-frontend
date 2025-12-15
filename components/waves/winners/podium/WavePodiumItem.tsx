@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
@@ -9,7 +10,6 @@ import { motion } from "framer-motion";
 import { WaveWinnersPodiumPlaceholder } from "./WaveWinnersPodiumPlaceholder";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
-import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
 interface WavePodiumItemProps {
   readonly winner?: ApiWaveDecisionWinner;
@@ -26,6 +26,7 @@ const positionStyles = {
     pfpSize: "tw-size-12 md:tw-size-14",
     marginBottom: "-tw-mb-6",
     textColor: "tw-text-[#fbbf24]",
+    hoverTextColor: "desktop-hover:hover:tw-text-[#fbbf24]",
     ring: "tw-ring-[#fbbf24]",
     shadow: "tw-shadow-[0_0_20px_rgba(251,191,36,0.3)]",
     autorFontSize: "tw-text-sm sm:tw-text-base md:tw-text-xl",
@@ -48,6 +49,7 @@ const positionStyles = {
     pfpSize: "tw-size-9 md:tw-size-11",
     marginBottom: "-tw-mb-2",
     textColor: "tw-text-[#94a3b8]",
+    hoverTextColor: "desktop-hover:hover:tw-text-[#94a3b8]",
     ring: "tw-ring-[#94a3b8]",
     shadow: "tw-shadow-[0_0_20px_rgba(148,163,184,0.3)]",
     autorFontSize: "tw-text-sm sm:tw-text-base",
@@ -70,6 +72,7 @@ const positionStyles = {
     pfpSize: "tw-size-9 md:tw-size-11",
     marginBottom: "-tw-mb-2",
     textColor: "tw-text-[#CD7F32]",
+    hoverTextColor: "desktop-hover:hover:tw-text-[#CD7F32]",
     ring: "tw-ring-[#CD7F32]",
     shadow: "tw-shadow-[0_0_20px_rgba(205,127,50,0.3)]",
     autorFontSize: "tw-text-sm sm:tw-text-base",
@@ -158,9 +161,11 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
               className="tw-transform hover:tw-scale-105 tw-transition-all tw-duration-300"
             >
               {drop.author.pfp ? (
-                <img
+                <Image
                   src={getScaledImageUri(drop.author.pfp, ImageScale.W_AUTO_H_50)}
                   alt=""
+                  width={56}
+                  height={56}
                   className={`${styles.pfpSize} tw-rounded-xl tw-ring-2 ${styles.ring} tw-object-cover ${styles.shadow}`}
                 />
               ) : (
@@ -202,9 +207,9 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                 <Link
                   href={`/${drop.author.handle}`}
                   onClick={(e) => e.stopPropagation()}
-                  className={`tw-transition-all tw-no-underline tw-mb-2 tw-mt-2 sm:tw-mt-4 tw-relative tw-text-center desktop-hover:hover:${styles.textColor} tw-group/link`}
+                  className={`tw-transition-all tw-no-underline tw-mb-2 tw-mt-2 sm:tw-mt-4 tw-relative tw-text-center ${styles.hoverTextColor} tw-group/link`}
                 >
-                  <span className={`${styles.autorFontSize} tw-font-semibold tw-text-iron-200 desktop-hover:hover:${styles.textColor} tw-transition-colors tw-inline-flex tw-items-center`}>
+                  <span className={`${styles.autorFontSize} tw-font-semibold tw-text-iron-200 ${styles.hoverTextColor} tw-transition-colors tw-inline-flex tw-items-center`}>
                     {drop.author.handle}
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -234,7 +239,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                     {formatNumberWithCommas(drop.rating)}
                   </span>
                   <span className="tw-text-iron-400 tw-text-xs sm:tw-text-sm">
-                    {WAVE_VOTING_LABELS[drop.wave.voting_credit_type as ApiWaveCreditType]}
+                    {WAVE_VOTING_LABELS[drop.wave.voting_credit_type]}
                   </span>
                 </div>
 

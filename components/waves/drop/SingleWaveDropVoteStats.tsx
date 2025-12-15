@@ -1,20 +1,18 @@
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import {
   WAVE_VOTE_STATS_LABELS,
-  WAVE_VOTING_LABELS,
 } from "@/helpers/waves/waves.constants";
 
 interface SingleWaveDropVoteStatsProps {
   readonly currentRating: number;
   readonly maxRating: number;
-  readonly creditType: ApiWaveCreditType;
+  readonly label: string;
 }
 
 export const SingleWaveDropVoteStats: React.FC<SingleWaveDropVoteStatsProps> = ({
   currentRating,
   maxRating,
-  creditType,
+  label,
 }) => {
   return (
     <div className="tw-mt-0.5 tw-flex tw-items-center tw-flex-wrap tw-gap-x-3 tw-gap-y-0.5 tw-text-xs tw-text-iron-400">
@@ -22,7 +20,7 @@ export const SingleWaveDropVoteStats: React.FC<SingleWaveDropVoteStatsProps> = (
         <span>
           {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:{" "}
           <span className="tw-text-iron-200">
-            {formatNumberWithCommas(currentRating)} {WAVE_VOTING_LABELS[creditType]}
+            {formatNumberWithCommas(currentRating)} {label}
           </span>
         </span>
       </div>
@@ -34,7 +32,7 @@ export const SingleWaveDropVoteStats: React.FC<SingleWaveDropVoteStatsProps> = (
             <span className="tw-text-xs tw-font-medium tw-text-rose-400">−</span>
           </div>
           <span className="tw-text-iron-200">
-            {formatNumberWithCommas(maxRating)} {WAVE_VOTING_LABELS[creditType]}
+            {formatNumberWithCommas(maxRating)} {label}
           </span>
         </div>
       </div>

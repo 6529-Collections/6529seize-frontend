@@ -1,15 +1,13 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import { ApiWaveCreditType } from "@/generated/models/ObjectSerializer";
+import React, { useEffect, useRef } from "react";
 import { SingleWaveDropVoteSize } from "./SingleWaveDropVote";
-import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 
 interface SingleWaveDropVoteInputProps {
   readonly voteValue: number | string;
   readonly minValue: number;
   readonly maxValue: number;
-  readonly creditType: ApiWaveCreditType;
+  readonly label: string;
   readonly setVoteValue: React.Dispatch<React.SetStateAction<string | number>>;
   readonly onSubmit: () => void;
   readonly size?: SingleWaveDropVoteSize;
@@ -22,7 +20,7 @@ export const SingleWaveDropVoteInput: React.FC<
   setVoteValue,
   minValue,
   maxValue,
-  creditType,
+  label,
   onSubmit,
   size = SingleWaveDropVoteSize.NORMAL,
 }) => {
@@ -47,7 +45,7 @@ export const SingleWaveDropVoteInput: React.FC<
       const inputValue = e.target.value;
 
       if (inputValue === "" || inputValue === "-") {
-        setVoteValue(inputValue as any);
+        setVoteValue(inputValue);
         return;
       }
 
@@ -56,15 +54,25 @@ export const SingleWaveDropVoteInput: React.FC<
       setVoteValue(Math.min(Math.max(value, minValue), maxValue));
     };
 
-    const [isPaused, setIsPaused] = useState(false);
 
-    const pressTimer = useRef<NodeJS.Timeout>(undefined);
-    const pressStartTime = useRef<number>(undefined);
+
+    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const pauseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const pressStartTime = useRef<number | null>(null);
     const isPressed = useRef<boolean>(false);
 
-    const updateValue = (increment: boolean) => {
-      if (isPaused) return;
+    const clearTimers = () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      if (pauseTimeoutRef.current) {
+        clearTimeout(pauseTimeoutRef.current);
+        pauseTimeoutRef.current = null;
+      }
+    };
 
+    const updateValue = (increment: boolean) => {
       setVoteValue((prev) => {
         const currentValue = typeof prev === "string" ? 0 : prev;
         const now = Date.now();
@@ -102,18 +110,17 @@ export const SingleWaveDropVoteInput: React.FC<
         }
 
         if (crossingMemeticValue !== null) {
-          setIsPaused(true);
-          if (pressTimer.current) clearInterval(pressTimer.current);
-          const pauseTimeout = setTimeout(() => {
-            setIsPaused(false);
+
+          clearTimers();
+
+          pauseTimeoutRef.current = setTimeout(() => {
+
             if (isPressed.current) {
-              pressTimer.current = setInterval(() => {
+              intervalRef.current = setInterval(() => {
                 updateValue(increment);
               }, 100);
             }
           }, 1000);
-          // Store timeout for cleanup
-          pressTimer.current = pauseTimeout as any;
           return crossingMemeticValue;
         }
 
@@ -124,24 +131,27 @@ export const SingleWaveDropVoteInput: React.FC<
     };
 
     const startPress = (increment: boolean) => {
+      clearTimers();
       isPressed.current = true;
       pressStartTime.current = Date.now();
+
       updateValue(increment);
 
-      pressTimer.current = setInterval(() => {
+      intervalRef.current = setInterval(() => {
         updateValue(increment);
       }, 100);
     };
 
     const stopPress = () => {
       isPressed.current = false;
-      if (pressTimer.current) clearInterval(pressTimer.current);
-      pressStartTime.current = undefined;
+      clearTimers();
+      pressStartTime.current = null;
+
     };
 
     useEffect(() => {
       return () => {
-        if (pressTimer.current) clearInterval(pressTimer.current);
+        clearTimers();
       };
     }, []);
 
@@ -189,7 +199,7 @@ export const SingleWaveDropVoteInput: React.FC<
               onKeyDown={handleKeyDown}
             />
             <div className="tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-[11px] tw-text-iron-400 tw-pointer-events-none">
-              {WAVE_VOTING_LABELS[creditType]}
+              {label}
             </div>
           </div>
         </div>
@@ -198,20 +208,20 @@ export const SingleWaveDropVoteInput: React.FC<
 
     return (
       <div className="tw-flex tw-flex-col">
-        {/* Input and buttons on one row */}
+
         <div className="tw-flex tw-items-center tw-gap-2">
           <div className="tw-relative tw-w-full xl:tw-max-w-xs">
             <input
               type="text"
               pattern="-?[0-9]*"
               inputMode="numeric"
-              className="tw-w-full tw-px-3 tw-h-9 tw-bg-iron-900 tw-rounded-lg tw-text-iron-50 tw-placeholder-iron-400 tw-text-base tw-font-medium tw-border-0 tw-ring-1 tw-ring-iron-700 focus:tw-ring-primary-400/50 desktop-hover:hover:tw-ring-primary-400/30 tw-outline-none tw-transition-all desktop-hover:hover:tw-bg-iron-950/60 focus:tw-bg-iron-950/80"
+              className="tw-w-full tw-px-3 tw-pr-24 tw-h-9 tw-bg-iron-900 tw-rounded-lg tw-text-iron-50 tw-placeholder-iron-400 tw-text-base tw-font-medium tw-border-0 tw-ring-1 tw-ring-iron-700 focus:tw-ring-primary-400/50 desktop-hover:hover:tw-ring-primary-400/30 tw-outline-none tw-transition-all desktop-hover:hover:tw-bg-iron-950/60 focus:tw-bg-iron-950/80"
               value={voteValue}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
             />
             <div className="tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-xs tw-text-iron-400 tw-pointer-events-none">
-              {WAVE_VOTING_LABELS[creditType]}
+              {label}
             </div>
           </div>
 
@@ -265,9 +275,9 @@ export const SingleWaveDropVoteInput: React.FC<
           </div>
         </div>
 
-        {/* Quick percentage buttons below */}
+
         <div className="tw-mt-1.5 tw-flex tw-gap-1 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
-          {/* Mobile percentages */}
+
           <div className="sm:tw-hidden tw-flex tw-gap-1">
             {mobileQuickPercentages.map((percentage) => (
               <button
@@ -284,7 +294,7 @@ export const SingleWaveDropVoteInput: React.FC<
             ))}
           </div>
 
-          {/* Full percentages for sm and above */}
+
           <div className="tw-hidden sm:tw-flex tw-gap-1">
             {quickPercentages.map((percentage) => (
               <button

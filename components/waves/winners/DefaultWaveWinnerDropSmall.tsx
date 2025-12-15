@@ -26,6 +26,9 @@ export const DefaultWaveWinnerDropSmall = memo<DefaultWaveWinnerDropSmallProps>(
     // Use provided rank or fall back to drop.rank
     const effectiveRank = rank ?? drop.rank;
 
+    const votingLabel =
+      WAVE_VOTING_LABELS[drop.wave.voting_credit_type as ApiWaveCreditType];
+
     const hasUserVoted =
       drop.context_profile_context?.rating !== undefined &&
       drop.context_profile_context?.rating !== 0;
@@ -85,7 +88,7 @@ export const DefaultWaveWinnerDropSmall = memo<DefaultWaveWinnerDropSmallProps>(
                     {formatNumberWithCommas(drop.rating)}
                   </span>
                   <span className="tw-text-sm tw-font-medium tw-text-iron-400">
-                    {WAVE_VOTING_LABELS[drop.wave.voting_credit_type as ApiWaveCreditType]}
+                    {votingLabel}
                   </span>
                 </div>
                 <div className="tw-flex tw-items-center tw-gap-x-1.5">
@@ -104,7 +107,7 @@ export const DefaultWaveWinnerDropSmall = memo<DefaultWaveWinnerDropSmallProps>(
                       className={`tw-text-sm tw-font-medium ${userVoteStyle}`}
                     >
                       {formatNumberWithCommas(userVote)}{" "}
-                      {WAVE_VOTING_LABELS[drop.wave.voting_credit_type as ApiWaveCreditType]}
+                      {votingLabel}
                     </span>
                   </div>
                 )}

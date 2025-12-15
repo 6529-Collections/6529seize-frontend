@@ -17,7 +17,7 @@ import WaveWinnersDropHeaderTotalVotes from "./header/WaveWinnersDropHeaderTotal
 import WaveWinnersDropHeaderVoters from "./header/WaveWinnersDropHeaderVoters";
 import WaveWinnersDropOutcome from "./header/WaveWinnersDropOutcome";
 import { WaveWinnersDropContent } from "./WaveWinnersDropContent";
-import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+import { WAVE_VOTING_LABELS, WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
 interface DefaultWaveWinnersDropProps {
@@ -107,12 +107,12 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
               <div className="tw-flex tw-items-center tw-gap-x-1.5">
                 <div className="tw-flex tw-items-baseline tw-gap-x-1">
                   <span className="tw-text-sm tw-font-normal tw-text-iron-400">
-                    Your vote:
+                    {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:
                   </span>
                   <span
                     className={`tw-text-sm tw-font-semibold ${isUserVoteNegative
-                        ? "tw-text-rose-500"
-                        : "tw-text-emerald-500"
+                      ? "tw-text-rose-500"
+                      : "tw-text-emerald-500"
                       }`}
                   >
                     {isUserVoteNegative && "-"}

@@ -1,4 +1,5 @@
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import Image from "next/image";
 import {
   getScaledImageUri,
   ImageScale,
@@ -80,9 +81,11 @@ export default function VoteBreakdownTooltip({
           <div className="tw-flex tw-items-center tw-justify-between">
             <div className="tw-flex tw-items-center tw-gap-2">
               {pfp ? (
-                <img
+                <Image
                   src={pfp}
-                  alt="pfp"
+                  alt="Profile picture"
+                  width={16}
+                  height={16}
                   className="tw-h-4 tw-w-4 tw-rounded-md tw-ring-1 tw-ring-white/10"
                 />
               ) : (

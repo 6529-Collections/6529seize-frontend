@@ -8,7 +8,6 @@ import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner"
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import Link from "next/link";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
-import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
 interface WaveWinnersDropHeaderVoterProps {
   readonly voter: ApiDropRater;
@@ -49,7 +48,7 @@ export default function WaveWinnersDropHeaderVoter({
         }}
       >
         {voter.profile.handle} • {formatNumberWithCommas(voter.rating)}{" "}
-        {WAVE_VOTING_LABELS[winner.drop.wave.voting_credit_type as ApiWaveCreditType]}
+        {WAVE_VOTING_LABELS[winner.drop.wave.voting_credit_type]}
       </Tooltip>
     </>
   );

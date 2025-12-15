@@ -60,7 +60,7 @@ const DropsList = memo(function DropsList({
   dropViewDropId,
   location = DropLocation.WAVE,
 }: DropsListProps) {
-  console.log(drops)
+
   const handleReply = useCallback<DropActionHandler>(
     ({ drop, partId }) => onReply({ drop, partId }),
     [onReply]
@@ -171,7 +171,7 @@ const DropsList = memo(function DropsList({
           </HighlightDropWrapper>
         );
       }),
-    [orderedDrops, getItemData] // Only depends on orderedDrops array and the memoized item data
+    [orderedDrops, getItemData, location]
   );
 
   return memoizedDrops;

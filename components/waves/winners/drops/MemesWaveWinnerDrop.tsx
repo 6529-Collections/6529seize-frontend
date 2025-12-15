@@ -25,6 +25,7 @@ import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuO
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
+import { WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
 
 interface MemesWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -173,13 +174,12 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
             <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-4 tw-gap-y-2">
               <div className="tw-flex tw-items-center tw-gap-x-1.5">
                 <span
-                  className={`tw-text-sm tw-font-bold ${
-                    isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
-                  }`}
+                  className={`tw-text-sm tw-font-bold ${isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
+                    }`}
                 >
                   {formatNumberWithCommas(rating)}
                 </span>
-                <span className="tw-text-sm tw-text-iron-500">{creditType} total</span>
+                <span className="tw-text-sm tw-text-iron-500">{creditType} {WAVE_VOTE_STATS_LABELS.TOTAL}</span>
               </div>
 
               <div className="tw-flex tw-items-center tw-gap-2">
@@ -229,14 +229,13 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                 <div className="tw-flex tw-items-center tw-gap-x-1.5">
                   <div className="tw-flex tw-items-baseline tw-gap-x-1">
                     <span className="tw-text-sm tw-font-normal tw-text-iron-400">
-                      Your vote:
+                      {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:
                     </span>
                     <span
-                      className={`tw-text-sm tw-font-semibold ${
-                        isUserVoteNegative
+                      className={`tw-text-sm tw-font-semibold ${isUserVoteNegative
                           ? "tw-text-rose-500"
                           : "tw-text-emerald-500"
-                      }`}
+                        }`}
                     >
                       {isUserVoteNegative && "-"}
                       {formatNumberWithCommas(Math.abs(userVote))}{" "}

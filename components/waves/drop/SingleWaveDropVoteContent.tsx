@@ -11,6 +11,8 @@ import { SingleWaveDropVoteInput } from "./SingleWaveDropVoteInput";
 import { SingleWaveDropVoteStats } from "./SingleWaveDropVoteStats";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExchange } from "@fortawesome/free-solid-svg-icons";
+import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
 interface SingleWaveDropVoteContentProps {
   readonly drop: ApiDrop;
@@ -21,16 +23,20 @@ interface SingleWaveDropVoteContentProps {
 export const SingleWaveDropVoteContent: React.FC<
   SingleWaveDropVoteContentProps
 > = ({ drop, size, onVoteSuccess }) => {
-  console.log(drop)
+
   const currentVoteValue = drop.context_profile_context?.rating ?? 0;
   const minRating = drop.context_profile_context?.min_rating ?? 0;
   const maxRating = drop.context_profile_context?.max_rating ?? 0;
   const [voteValue, setVoteValue] = useState<number | string>(currentVoteValue);
   const [isSliderMode, setIsSliderMode] = useState(size !== SingleWaveDropVoteSize.MINI);
 
+  const voteLabel =
+    WAVE_VOTING_LABELS[drop.wave.voting_credit_type as ApiWaveCreditType] ||
+    "votes";
+
   useEffect(() => {
     setVoteValue(currentVoteValue);
-  }, [drop.context_profile_context?.rating]);
+  }, [currentVoteValue]);
 
   const submitRef = useRef<SingleWaveDropVoteSubmitHandles | null>(null);
 
@@ -72,7 +78,7 @@ export const SingleWaveDropVoteContent: React.FC<
                 voteValue={voteValue}
                 minValue={minRating}
                 maxValue={maxRating}
-                creditType={drop.wave.voting_credit_type}
+                label={voteLabel}
                 setVoteValue={setVoteValue}
                 rank={drop.rank}
                 size={size}
@@ -84,7 +90,7 @@ export const SingleWaveDropVoteContent: React.FC<
                 maxValue={maxRating}
                 setVoteValue={setVoteValue}
                 onSubmit={handleSubmit}
-                creditType={drop.wave.voting_credit_type}
+                label={voteLabel}
                 size={size}
               />
             )}
@@ -107,7 +113,7 @@ export const SingleWaveDropVoteContent: React.FC<
           <SingleWaveDropVoteStats
             currentRating={drop.context_profile_context?.rating ?? 0}
             maxRating={maxRating}
-            creditType={drop.wave.voting_credit_type}
+            label={voteLabel}
           />
         </div>
       </div>
@@ -147,7 +153,7 @@ export const SingleWaveDropVoteContent: React.FC<
           <SingleWaveDropVoteStats
             currentRating={drop.context_profile_context?.rating ?? 0}
             maxRating={maxRating}
-            creditType={drop.wave.voting_credit_type}
+            label={voteLabel}
           />
         </div>
 
@@ -158,9 +164,9 @@ export const SingleWaveDropVoteContent: React.FC<
               voteValue={voteValue}
               minValue={minRating}
               maxValue={maxRating}
-              creditType={drop.wave.voting_credit_type}
               setVoteValue={setVoteValue}
               rank={drop.rank}
+              label={voteLabel}
             />
           ) : (
             <SingleWaveDropVoteInput
@@ -169,7 +175,7 @@ export const SingleWaveDropVoteContent: React.FC<
               maxValue={maxRating}
               setVoteValue={setVoteValue}
               onSubmit={handleSubmit}
-              creditType={drop.wave.voting_credit_type}
+              label={voteLabel}
             />
           )}
         </div>
