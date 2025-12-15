@@ -390,10 +390,15 @@ export default function UserPageCollected({
     await updateFields(items);
   };
 
-  useEffect(
-    () => setFilters(getFilters()),
-    [searchParams, profile, user, connectedAddress, getFilters]
-  );
+  useEffect(() => {
+    setFilters((prev) => {
+      const newFilters = getFilters();
+      if (prev.szn && newFilters.initialSznId === prev.szn.id) {
+        return { ...newFilters, szn: prev.szn };
+      }
+      return newFilters;
+    });
+  }, [searchParams, profile, user, connectedAddress, getFilters]);
 
   const {
     isFetching,
