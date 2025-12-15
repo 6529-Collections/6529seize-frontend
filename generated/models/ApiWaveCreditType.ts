@@ -17,5 +17,7 @@ import { HttpFile } from '../http/http';
 */
 export enum ApiWaveCreditType {
     Tdh = 'TDH',
-    Rep = 'REP'
+    Rep = 'REP',
+    Xtdh = 'XTDH',
+    TdhPlusXtdh = 'TDH_PLUS_XTDH'
 }

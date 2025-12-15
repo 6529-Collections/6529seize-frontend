@@ -6,6 +6,7 @@ import {
 } from "@/helpers/Helpers";
 import Link from "next/link";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import { SystemAdjustmentPill } from "@/components/common/SystemAdjustmentPill";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import Image from "next/image";
@@ -41,9 +42,8 @@ export const SingleWaveDropLog: React.FC<SingleWaveDropLogProps> = ({
     />
   ) : (
     <div
-      className={`tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0 ${
-        isMobile ? "tw-size-7" : "tw-size-6"
-      }`}
+      className={`tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0 ${isMobile ? "tw-size-7" : "tw-size-6"
+        }`}
     />
   );
 
@@ -54,9 +54,8 @@ export const SingleWaveDropLog: React.FC<SingleWaveDropLogProps> = ({
         className="tw-no-underline tw-group desktop-hover:hover:tw-opacity-80 tw-transition-all tw-duration-300"
       >
         <span
-          className={`tw-inline-block${
-            shouldLimit ? " tw-truncate tw-max-w-[8rem]" : ""
-          }`}
+          className={`tw-inline-block${shouldLimit ? " tw-truncate tw-max-w-[8rem]" : ""
+            }`}
         >
           <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-iron-300">
             {log.invoker.handle}
@@ -110,11 +109,10 @@ export const SingleWaveDropLog: React.FC<SingleWaveDropLogProps> = ({
                 </span>
               )}
               <span
-                className={`tw-text-sm tw-font-semibold tw-whitespace-nowrap ${
-                  log.contents.newVote > 0 ? "tw-text-green" : "tw-text-red"
-                }`}
+                className={`tw-text-sm tw-font-semibold tw-whitespace-nowrap ${log.contents.newVote > 0 ? "tw-text-green" : "tw-text-red"
+                  }`}
               >
-                {formatNumberWithCommas(log.contents.newVote)} {creditType}
+                {formatNumberWithCommas(log.contents.newVote)} {WAVE_VOTING_LABELS[creditType]}
               </span>
               {log.contents?.reason === "CREDIT_OVERSPENT" && (
                 <SystemAdjustmentPill />
@@ -138,11 +136,10 @@ export const SingleWaveDropLog: React.FC<SingleWaveDropLogProps> = ({
                 </span>
               )}
               <span
-                className={`tw-text-sm tw-font-semibold tw-whitespace-nowrap ${
-                  log.contents.newVote > 0 ? "tw-text-green" : "tw-text-red"
-                }`}
+                className={`tw-text-sm tw-font-semibold tw-whitespace-nowrap ${log.contents.newVote > 0 ? "tw-text-green" : "tw-text-red"
+                  }`}
               >
-                {formatNumberWithCommas(log.contents.newVote)} {creditType}
+                {formatNumberWithCommas(log.contents.newVote)} {WAVE_VOTING_LABELS[creditType]}
               </span>
               {log.contents?.reason === "CREDIT_OVERSPENT" && (
                 <SystemAdjustmentPill />

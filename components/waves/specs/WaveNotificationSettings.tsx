@@ -2,7 +2,6 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { ApiWave } from "@/generated/models/ApiWave";
-import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAt } from "@fortawesome/free-solid-svg-icons";
 import { useWaveNotificationSubscription } from "@/hooks/useWaveNotificationSubscription";
@@ -14,11 +13,6 @@ import { useAuth } from "@/components/auth/Auth";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
-
-const CREDIT_TYPE_LABELS: Record<ApiWaveCreditType, string> = {
-  [ApiWaveCreditType.Tdh]: "TDH",
-  [ApiWaveCreditType.Rep]: "REP",
-};
 
 interface WaveRatingProps {
   readonly wave: ApiWave;

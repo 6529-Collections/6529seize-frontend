@@ -1,7 +1,13 @@
 "use client";
 
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
+import { ActivityTypeItems } from "@/components/latest-activity/ActivityFilters";
 import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
+import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import Pagination from "@/components/pagination/Pagination";
+import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants";
 import { DBResponse } from "@/entities/IDBResponse";
@@ -10,8 +16,8 @@ import { Transaction } from "@/entities/ITransaction";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { TypeFilter } from "@/hooks/useActivityData";
 import { fetchUrl } from "@/services/6529api";
-import { useEffect, useState } from "react";
-import { Col, Container, Dropdown, Row, Table } from "react-bootstrap";
+import { useEffect, useMemo, useState } from "react";
+import { Col, Container, Row, Table } from "react-bootstrap";
 import styles from "./TheMemes.module.scss";
 
 export function MemePageActivity(
@@ -27,6 +33,7 @@ export function MemePageActivity(
   const [activityTypeFilter, setActivityTypeFilter] = useState<TypeFilter>(
     TypeFilter.ALL
   );
+  const [activityLoading, setActivityLoading] = useState(false);
 
   useEffect(() => {
     if (!props.show || !props.nft?.id) {
@@ -37,6 +44,7 @@ export function MemePageActivity(
     let cancelled = false;
 
     if (props.nft?.id) {
+      setActivityLoading(true);
       let url = `${publicEnv.API_ENDPOINT}/api/transactions?contract=${MEMES_CONTRACT}&id=${props.nft.id}&page_size=${props.pageSize}&page=${activityPage}`;
       switch (activityTypeFilter) {
         case TypeFilter.SALES:
@@ -65,6 +73,9 @@ export function MemePageActivity(
           if (cancelled) return;
           setActivityTotalResults(0);
           setActivity([]);
+        })
+        .finally(() => {
+          setActivityLoading(false);
         });
     }
     return () => {
@@ -77,6 +88,40 @@ export function MemePageActivity(
     activityPage,
     activityTypeFilter,
   ]);
+
+  const activityContent = useMemo(() => {
+    if (activity.length > 0) {
+      return (
+        <Table bordered={false} className={styles.transactionsTable}>
+          <tbody>
+            {activity.map((tr) => (
+              <LatestActivityRow
+                tr={tr}
+                nft={props.nft}
+                key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
+              />
+            ))}
+          </tbody>
+        </Table>
+      );
+    }
+
+    if (activityLoading) {
+      return (
+        <div className="tw-flex tw-justify-center tw-items-center tw-py-4">
+          <CircleLoader size={CircleLoaderSize.LARGE} />
+        </div>
+      );
+    }
+
+    if (activity.length === 0) {
+      return (
+        <div className="tw-flex tw-justify-center tw-items-center tw-h-full tw-py-2">
+          <NothingHereYetSummer />
+        </div>
+      );
+    }
+  }, [activity, activityLoading, props.nft]);
 
   if (props.show && props.nft) {
     return (
@@ -142,55 +187,30 @@ export function MemePageActivity(
             </Row>
           </>
         )}
-        <Row className="pt-3">
-          <Col
-            className="d-flex align-items-center"
-            xs={{ span: 7 }}
-            sm={{ span: 7 }}
-            md={{ span: 9 }}
-            lg={{ span: 10 }}>
-            <h3>Card Activity</h3>
-          </Col>
-          <Col
-            xs={{ span: 5 }}
-            sm={{ span: 5 }}
-            md={{ span: 3 }}
-            lg={{ span: 2 }}>
-            <Dropdown
-              className={styles.activityFilterDropdown}
-              drop={"down-centered"}>
-              <Dropdown.Toggle>Filter: {activityTypeFilter}</Dropdown.Toggle>
-              <Dropdown.Menu>
-                {Object.values(TypeFilter).map((filter) => (
-                  <Dropdown.Item
-                    key={`nft-activity-${filter}`}
-                    onClick={() => {
-                      setActivityPage(1);
-                      setActivityTypeFilter(filter);
-                    }}>
-                    {filter}
-                  </Dropdown.Item>
-                ))}
-              </Dropdown.Menu>
-            </Dropdown>
+        <Row className="tw-py-3">
+          <Col>
+            <div className="tw-flex tw-flex-col md:tw-flex-row tw-justify-between tw-items-stretch md:tw-items-center tw-gap-3">
+              <h3 className="tw-mb-0 tw-whitespace-nowrap tw-shrink-0">
+                Card Activity
+              </h3>
+              <div className="tw-w-full md:tw-w-72 tw-shrink-0">
+                <CommonDropdown
+                  items={ActivityTypeItems}
+                  activeItem={activityTypeFilter}
+                  filterLabel="Transaction Type"
+                  setSelected={(filter) => {
+                    setActivityPage(1);
+                    setActivityTypeFilter(filter);
+                  }}
+                />
+              </div>
+            </div>
           </Col>
         </Row>
         <Row className={`pt-2 ${styles.transactionsScrollContainer}`}>
-          <Col>
-            <Table bordered={false} className={styles.transactionsTable}>
-              <tbody>
-                {activity.map((tr) => (
-                  <LatestActivityRow
-                    tr={tr}
-                    nft={props.nft}
-                    key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
-                  />
-                ))}
-              </tbody>
-            </Table>
-          </Col>
+          <Col>{activityContent}</Col>
         </Row>
-        {activity.length > 0 && (
+        {activity.length > 0 && !activityLoading && (
           <Row className="text-center pt-2 pb-3">
             <Pagination
               page={activityPage}
