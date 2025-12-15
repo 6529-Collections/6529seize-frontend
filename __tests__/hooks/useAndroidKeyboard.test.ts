@@ -382,26 +382,22 @@ describe('useAndroidKeyboard', () => {
       expect(setPropertySpy).toHaveBeenCalledWith('--android-keyboard-height', '0px');
     });
 
-    it('clears pending timeouts on unmount', async () => {
-      const { result, unmount } = renderHook(() => useAndroidKeyboard());
+    it('safely clears pending timeouts on unmount without throwing', async () => {
+      const { unmount } = renderHook(() => useAndroidKeyboard());
 
       await act(async () => {
         await Promise.resolve();
       });
 
-      // Start a show that hasn't completed
       act(() => {
         showCallback({ keyboardHeight: 350 });
-        // Don't advance time - timeout is pending
       });
 
-      unmount();
+      expect(() => unmount()).not.toThrow();
 
       act(() => {
         jest.advanceTimersByTime(DEBOUNCE_MS * 2);
       });
-
-      expect(true).toBe(true);
     });
   });
 });
