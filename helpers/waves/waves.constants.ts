@@ -1,5 +1,4 @@
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
-import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import {
   CreateWaveGroupConfigType,
@@ -154,12 +153,4 @@ export const CREATE_WAVE_START_DATE_LABELS: Record<ApiWaveType, string> = {
   [ApiWaveType.Chat]: "Drops Submission Opens",
   [ApiWaveType.Rank]: "Drops Submission Opens",
   [ApiWaveType.Approve]: "Drops Submission Opens",
-};
-
-const CREATE_WAVE_DROPS_REQUIRED_METADATA_TYPES_LABELS: Record<
-  ApiWaveMetadataType,
-  string
-> = {
-  [ApiWaveMetadataType.String]: "Text",
-  [ApiWaveMetadataType.Number]: "Number",
 };
