@@ -4,6 +4,7 @@ import {
   getTimeAgoShort,
 } from "@/helpers/Helpers";
 import Link from "next/link";
+import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import { WaveLeaderboardRightSidebarActivityLogDrop } from "./WaveLeaderboardRightSidebarActivityLogDrop";
 
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
@@ -81,11 +82,10 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
               </span>
             )}
             <span
-              className={`tw-text-sm tw-font-semibold tw-whitespace-nowrap ${
-                log.contents.newVote > 0 ? "tw-text-green" : "tw-text-red"
-              }`}
+              className={`tw-text-sm tw-font-semibold tw-whitespace-nowrap ${log.contents.newVote > 0 ? "tw-text-green" : "tw-text-red"
+                }`}
             >
-              {formatNumberWithCommas(log.contents.newVote)} {creditType}
+              {formatNumberWithCommas(log.contents.newVote)} {WAVE_VOTING_LABELS[creditType]}
             </span>
             {log.contents?.reason === "CREDIT_OVERSPENT" && <SystemAdjustmentPill />}
           </div>
