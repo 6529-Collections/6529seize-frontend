@@ -70,7 +70,7 @@ export const SingleWaveDropVoteInput: React.FC<
     if (possibleValues.length === 0) return null;
     return increment
       ? possibleValues[0]
-      : possibleValues[possibleValues.length - 1];
+      : possibleValues.at(-1) ?? null;
   };
 
   const computeNextVoteValue = (
