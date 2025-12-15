@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback, type CSSProperties } from 'react';
+import { useEffect, useState, useCallback, useRef, type CSSProperties } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { Keyboard } from '@capacitor/keyboard';
 
@@ -11,12 +11,18 @@ interface AndroidKeyboardHookReturn {
   getContainerStyle: (baseStyle?: CSSProperties, adjustment?: number) => CSSProperties;
 }
 
+const DEBOUNCE_MS = 50;
+
 export function useAndroidKeyboard(): AndroidKeyboardHookReturn {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
   const isSSR = typeof window === 'undefined';
   const isAndroid = !isSSR && Capacitor.getPlatform() === 'android';
+
+  // Refs for debounce timeouts
+  const showTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (isSSR || !isAndroid) return;
@@ -25,25 +31,50 @@ export function useAndroidKeyboard(): AndroidKeyboardHookReturn {
     let showCleanup: (() => void) | undefined;
     let hideCleanup: (() => void) | undefined;
 
+    // Debounced show handler - prevents rapid state updates from aggressive keyboards (e.g., SwiftKey)
+    const debouncedShow = (height: number) => {
+      // Cancel any pending hide to prevent race conditions
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+        hideTimeoutRef.current = null;
+      }
+      if (showTimeoutRef.current) clearTimeout(showTimeoutRef.current);
+      showTimeoutRef.current = setTimeout(() => {
+        if (!mounted) return;
+        setKeyboardHeight(height);
+        setIsVisible(true);
+        document.documentElement.style.setProperty('--android-keyboard-height', `${height}px`);
+      }, DEBOUNCE_MS);
+    };
+
+    // Debounced hide handler
+    const debouncedHide = () => {
+      // Cancel any pending show to prevent race conditions
+      if (showTimeoutRef.current) {
+        clearTimeout(showTimeoutRef.current);
+        showTimeoutRef.current = null;
+      }
+      if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = setTimeout(() => {
+        if (!mounted) return;
+        setKeyboardHeight(0);
+        setIsVisible(false);
+        document.documentElement.style.setProperty('--android-keyboard-height', '0px');
+      }, DEBOUNCE_MS);
+    };
+
     const setupKeyboardListeners = async () => {
       if (!Capacitor.isPluginAvailable('Keyboard')) return;
 
       try {
         const showListener = await Keyboard.addListener('keyboardWillShow', (info) => {
-          if (!mounted) return;
           const height = info.keyboardHeight ?? 300;
-          setKeyboardHeight(height);
-          setIsVisible(true);
-          document.documentElement.style.setProperty('--android-keyboard-height', `${height}px`);
+          debouncedShow(height);
         });
 
         const hideListener = await Keyboard.addListener('keyboardWillHide', () => {
-          if (!mounted) return;
-          setKeyboardHeight(0);
-          setIsVisible(false);
-          document.documentElement.style.setProperty('--android-keyboard-height', '0px');
+          debouncedHide();
         });
-
 
         if (!mounted) {
           showListener.remove();
@@ -64,6 +95,8 @@ export function useAndroidKeyboard(): AndroidKeyboardHookReturn {
       mounted = false;
       showCleanup?.();
       hideCleanup?.();
+      if (showTimeoutRef.current) clearTimeout(showTimeoutRef.current);
+      if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
       document.documentElement.style.setProperty('--android-keyboard-height', '0px');
     };
   }, [isSSR, isAndroid]);
