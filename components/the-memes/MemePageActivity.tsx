@@ -90,6 +90,22 @@ export function MemePageActivity(
   ]);
 
   const activityContent = useMemo(() => {
+    if (activity.length > 0) {
+      return (
+        <Table bordered={false} className={styles.transactionsTable}>
+          <tbody>
+            {activity.map((tr) => (
+              <LatestActivityRow
+                tr={tr}
+                nft={props.nft}
+                key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
+              />
+            ))}
+          </tbody>
+        </Table>
+      );
+    }
+
     if (activityLoading) {
       return (
         <div className="tw-flex tw-justify-center tw-items-center tw-py-4">
@@ -97,6 +113,7 @@ export function MemePageActivity(
         </div>
       );
     }
+
     if (activity.length === 0) {
       return (
         <div className="tw-flex tw-justify-center tw-items-center tw-h-full tw-py-2">
@@ -104,20 +121,6 @@ export function MemePageActivity(
         </div>
       );
     }
-
-    return (
-      <Table bordered={false} className={styles.transactionsTable}>
-        <tbody>
-          {activity.map((tr) => (
-            <LatestActivityRow
-              tr={tr}
-              nft={props.nft}
-              key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
-            />
-          ))}
-        </tbody>
-      </Table>
-    );
   }, [activity, activityLoading, props.nft]);
 
   if (props.show && props.nft) {
