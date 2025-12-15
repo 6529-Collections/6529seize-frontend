@@ -44,7 +44,7 @@ describe("ActivityFilters", () => {
         screen.getByRole("button", { name: /Collection:/i })
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("button", { name: /Filter:/i })
+        screen.getByRole("button", { name: /Transaction Type:/i })
       ).toBeInTheDocument();
     });
 
@@ -56,7 +56,7 @@ describe("ActivityFilters", () => {
         })
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("button", { name: `Filter: ${TypeFilter.ALL}` })
+        screen.getByRole("button", { name: `Transaction Type: ${TypeFilter.ALL}` })
       ).toBeInTheDocument();
     });
 
@@ -73,7 +73,7 @@ describe("ActivityFilters", () => {
         })
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("button", { name: `Filter: ${TypeFilter.SALES}` })
+        screen.getByRole("button", { name: `Transaction Type: ${TypeFilter.SALES}` })
       ).toBeInTheDocument();
     });
   });
@@ -118,7 +118,7 @@ describe("ActivityFilters", () => {
         const props = { ...mockProps, typeFilter };
         const { unmount } = render(<ActivityFilters {...props} />);
         expect(
-          screen.getByRole("button", { name: `Filter: ${typeFilter}` })
+          screen.getByRole("button", { name: `Transaction Type: ${typeFilter}` })
         ).toBeInTheDocument();
         unmount();
       }
@@ -157,7 +157,7 @@ describe("ActivityFilters", () => {
       render(<ActivityFilters {...mockProps} />);
 
       const typeButton = screen.getByRole("button", {
-        name: `Filter: ${TypeFilter.ALL}`,
+        name: `Transaction Type: ${TypeFilter.ALL}`,
       });
       await user.click(typeButton);
 
@@ -199,7 +199,7 @@ describe("ActivityFilters", () => {
       );
 
       const typeButton = screen.getByRole("button", {
-        name: `Filter: ${TypeFilter.ALL}`,
+        name: `Transaction Type: ${TypeFilter.ALL}`,
       });
       await user.click(typeButton);
 
@@ -232,7 +232,7 @@ describe("ActivityFilters", () => {
       render(<ActivityFilters {...mockProps} />);
 
       const typeButton = screen.getByRole("button", {
-        name: `Filter: ${TypeFilter.ALL}`,
+        name: `Transaction Type: ${TypeFilter.ALL}`,
       });
       await user.click(typeButton);
 
@@ -252,7 +252,7 @@ describe("ActivityFilters", () => {
       expect(col).toBeInTheDocument();
 
       const buttons = within(col as HTMLElement).getAllByRole("button", {
-        name: /Collection:|Filter:/i,
+        name: /Collection:|Transaction Type:/i,
       });
       expect(buttons).toHaveLength(2);
     });
@@ -273,7 +273,7 @@ describe("ActivityFilters", () => {
       render(<ActivityFilters {...mockProps} />);
 
       const buttons = screen.getAllByRole("button", {
-        name: /Collection:|Filter:/i,
+        name: /Collection:|Transaction Type:/i,
       });
       for (const button of buttons) {
         expect(button).toHaveAttribute("aria-haspopup", "true");
