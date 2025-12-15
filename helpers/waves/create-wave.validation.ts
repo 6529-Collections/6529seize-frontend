@@ -175,7 +175,7 @@ const getVotingValidationErrors = ({
     return errors;
   }
 
-  if (voting.type === ApiWaveCreditType.Tdh) {
+  if (voting.type !== ApiWaveCreditType.Rep) {
     // TDH voting cannot have category or profileId
     if (voting.category !== null) {
       errors.push(CREATE_WAVE_VALIDATION_ERROR.TDH_VOTING_CANNOT_HAVE_CATEGORY);
@@ -204,17 +204,17 @@ const getVotingValidationErrors = ({
     const MIN_MINUTES = 5;
     const MAX_HOURS = 24;
     const MAX_MINUTES = MAX_HOURS * 60;
-    
+
     // Calculate the interval in minutes for validation
-    const intervalInMinutes = voting.timeWeighted.averagingIntervalUnit === "minutes" 
-      ? voting.timeWeighted.averagingInterval 
+    const intervalInMinutes = voting.timeWeighted.averagingIntervalUnit === "minutes"
+      ? voting.timeWeighted.averagingInterval
       : voting.timeWeighted.averagingInterval * 60;
-    
+
     // Validate minimum
     if (intervalInMinutes < MIN_MINUTES) {
       errors.push(CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_TOO_SMALL);
     }
-    
+
     // Validate maximum
     if (intervalInMinutes > MAX_MINUTES) {
       errors.push(CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_TOO_LARGE);

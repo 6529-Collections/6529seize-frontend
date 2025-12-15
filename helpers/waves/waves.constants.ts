@@ -14,6 +14,8 @@ export const WAVE_LABELS: Record<ApiWaveType, string> = {
 
 export const WAVE_VOTING_LABELS: Record<ApiWaveCreditType, string> = {
   [ApiWaveCreditType.Tdh]: "By TDH",
+  [ApiWaveCreditType.Xtdh]: "By XTDH",
+  [ApiWaveCreditType.TdhPlusXtdh]: "By TDH + XTDH",
   [ApiWaveCreditType.Rep]: "By Rep",
 };
 
