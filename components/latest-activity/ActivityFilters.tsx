@@ -12,19 +12,21 @@ interface ActivityFiltersProps {
   readonly isMobile: boolean;
 }
 
-export const ActivityContractItems = Object.values(ContractFilter).map(
-  (contract) => ({
+export const ActivityContractItems = Object.freeze(
+  Object.values(ContractFilter).map((contract) => ({
     key: contract,
     label: contract,
     value: contract,
-  })
+  }))
 );
 
-export const ActivityTypeItems = Object.values(TypeFilter).map((type) => ({
-  key: type,
-  label: type,
-  value: type,
-}));
+export const ActivityTypeItems = Object.freeze(
+  Object.values(TypeFilter).map((type) => ({
+    key: type,
+    label: type,
+    value: type,
+  }))
+);
 
 export default function ActivityFilters({
   typeFilter,
