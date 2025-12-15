@@ -11,11 +11,11 @@ import NegativeVotingToggle from "./NegativeVotingToggle";
 import TimeWeightedVoting from "./TimeWeightedVoting";
 import { TimeWeightedVotingConfig } from "./types";
 
-const VOTING_TYPES_ORDER: Record<ApiWaveCreditType, number> = {
-  [ApiWaveCreditType.Tdh]: 0,
-  [ApiWaveCreditType.Xtdh]: 1,
-  [ApiWaveCreditType.TdhPlusXtdh]: 2,
-  [ApiWaveCreditType.Rep]: 3,
+const VOTING_TYPES_ORDER: Record<ApiWaveCreditType, number | undefined> = {
+  [ApiWaveCreditType.TdhPlusXtdh]: 0,
+  [ApiWaveCreditType.Tdh]: 1,
+  [ApiWaveCreditType.Rep]: 2,
+  [ApiWaveCreditType.Xtdh]: undefined,
 };
 
 export default function CreateWaveVoting({
@@ -64,7 +64,7 @@ export default function CreateWaveVoting({
       <div className="tw-mt-3 tw-grid lg:tw-grid-cols-3 tw-gap-x-4 tw-gap-y-4">
         {(
           Object.keys(VOTING_TYPES_ORDER) as ApiWaveCreditType[]
-        ).map((votingType) => (
+        ).filter((votingType) => VOTING_TYPES_ORDER[votingType] !== undefined).map((votingType) => (
           <CommonBorderedRadioButton
             key={votingType}
             type={votingType}
