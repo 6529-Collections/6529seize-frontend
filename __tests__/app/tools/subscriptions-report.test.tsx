@@ -6,13 +6,9 @@ import React from "react";
 
 jest.mock("@/components/meme-calendar/meme-calendar.helpers", () => ({
   __esModule: true,
-  displayedSeasonNumberFromIndex: jest.fn(() => 1),
-  formatFullDate: jest.fn((date: Date) => date.toISOString()),
   getCardsRemainingUntilEndOf: jest.fn(() => 2),
-  getSeasonIndexForDate: jest.fn(() => 0),
-  getUpcomingMintsForCurrentOrNextSeason: jest.fn(() => ({ rows: [] })),
+  getUpcomingMintsAcrossSeasons: jest.fn(() => []),
   isMintingToday: jest.fn(() => false),
-  nextMintDateOnOrAfter: jest.fn(() => new Date("2024-01-01T00:00:00Z")),
 }));
 
 jest.mock("@/services/api/common-api", () => ({
@@ -53,11 +49,10 @@ jest.mock("@/contexts/TitleContext", () => ({
 
 describe("Subscriptions report page", () => {
   it("sets title and renders component", async () => {
-    const props = { szn: 1, upcoming: [], redeemed: [] } as any;
     const { container } = render(
       <AuthContext.Provider value={{} as any}>
         <CookieConsentProvider>
-          <Page {...props} />
+          <Page />
         </CookieConsentProvider>
       </AuthContext.Provider>
     );

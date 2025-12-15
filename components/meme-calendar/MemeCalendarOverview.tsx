@@ -25,6 +25,7 @@ import {
   getMintTimelineDetails,
   getNextMintStart,
   getUpcomingMintsForCurrentOrNextSeason,
+  getUpcomingMintsForSeasonIndex,
   printCalendarInvites,
   ymd,
 } from "./meme-calendar.helpers";
@@ -44,12 +45,10 @@ export default function MemeCalendarOverview({
   return (
     <div className="tw-flex tw-flex-col tw-gap-3">
       <div className="tw-h-full tw-flex tw-items-center tw-gap-3">
-        <h1>
-          The Memes Minting Calendar
-        </h1>
+        <h1 className="tw-mb-0">The Memes Minting Calendar</h1>
         {showViewAll && (
-          <Link href={`/meme-calendar`} className="tw-no-underline">
-            <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-border-b-[3px] tw-border-current hover:tw-text-[#bbb] max-[800px]:tw-text-[12px]">
+          <Link href="/meme-calendar">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium hover:tw-text-[#bbb] max-[800px]:tw-text-[12px]">
               View Full Calendar
             </span>
           </Link>
@@ -414,38 +413,61 @@ function MemeCalendarOverviewUpcomingMints({
 }: MemeCalendarOverviewUpcomingMintsProps) {
   const [now] = useState(new Date());
 
-  const { seasonStart, seasonEndInclusive, seasonIndex, rows } =
-    useMemo<SeasonMintScanResult>(
-      () => getUpcomingMintsForCurrentOrNextSeason(now),
-      [now]
-    );
+  const currentSeason = useMemo<SeasonMintScanResult>(
+    () => getUpcomingMintsForCurrentOrNextSeason(now),
+    [now]
+  );
 
   const canonicalNextMintNumber = useMemo(
     () => getCanonicalNextMintNumber(now),
     [now]
   );
 
-  const { filteredRows, hasCanonicalNext } = useMemo(() => {
-    const containsCanonical = rows.some(
+  const {
+    seasonStart,
+    seasonEndInclusive,
+    seasonIndex,
+    filteredRows,
+    isNextSeason,
+  } = useMemo(() => {
+    const containsCanonical = currentSeason.rows.some(
       (row) => row.meme === canonicalNextMintNumber
     );
-    return {
-      filteredRows: containsCanonical
-        ? rows.filter((row) => row.meme !== canonicalNextMintNumber)
-        : rows,
-      hasCanonicalNext: containsCanonical,
-    } as const;
-  }, [rows, canonicalNextMintNumber]);
+    const filtered = containsCanonical
+      ? currentSeason.rows.filter((row) => row.meme !== canonicalNextMintNumber)
+      : currentSeason.rows;
 
-  const emptyStateCopy = hasCanonicalNext
-    ? "No additional mints scheduled in this season."
-    : "No upcoming mints in this season.";
+    if (filtered.length === 0 && containsCanonical) {
+      const nextSeason = getUpcomingMintsForSeasonIndex(
+        currentSeason.seasonIndex + 1,
+        now
+      );
+      return {
+        seasonStart: nextSeason.seasonStart,
+        seasonEndInclusive: nextSeason.seasonEndInclusive,
+        seasonIndex: nextSeason.seasonIndex,
+        filteredRows: nextSeason.rows,
+        isNextSeason: true,
+      };
+    }
+
+    return {
+      seasonStart: currentSeason.seasonStart,
+      seasonEndInclusive: currentSeason.seasonEndInclusive,
+      seasonIndex: currentSeason.seasonIndex,
+      filteredRows: filtered,
+      isNextSeason: false,
+    };
+  }, [currentSeason, canonicalNextMintNumber, now]);
+
+  const emptyStateCopy = "No upcoming mints in this season.";
 
   return (
     <div className="tw-h-full tw-p-4 tw-flex tw-flex-col tw-bg-[#0c0c0d] tw-rounded-md tw-border tw-border-solid tw-border-[#222222]">
       <div className="tw-flex tw-items-center tw-justify-between tw-mb-3">
         <div className="tw-font-semibold">
-          Upcoming Mints for SZN {displayedSeasonNumberFromIndex(seasonIndex)}
+          {isNextSeason ? "Upcoming SZN" : "Upcoming Mints for SZN"}{" "}
+          {displayedSeasonNumberFromIndex(seasonIndex)}
         </div>
         <div className="tw-text-sm tw-text-gray-400">
           {formatFullDate(seasonStart, displayTz)} -{" "}

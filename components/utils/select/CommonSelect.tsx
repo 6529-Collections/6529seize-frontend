@@ -1,8 +1,8 @@
-import { createBreakpoint } from "react-use";
 import { SortDirection } from "@/entities/ISort";
-import CommonTabs from "./tabs/CommonTabs";
-import CommonDropdown from "./dropdown/CommonDropdown";
 import { RefObject } from "react";
+import { createBreakpoint } from "react-use";
+import CommonDropdown from "./dropdown/CommonDropdown";
+import CommonTabs from "./tabs/CommonTabs";
 
 interface ChildComponentProps {
   onCopy?: () => void;
@@ -33,6 +33,7 @@ interface CommonSelectDefaultProps<T, U> {
   ) => React.ReactElement<ChildComponentProps>;
   readonly closeOnSelect?: boolean;
   readonly fill?: boolean;
+  readonly showFilterLabel?: boolean;
 }
 
 interface CommonSelectsWithSortProps<T, U>

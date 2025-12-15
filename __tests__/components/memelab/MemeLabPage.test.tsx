@@ -149,6 +149,10 @@ require("@/components/cookies/CookieConsentContext").useCookieConsent =
   mockUseCookieConsent;
 require("@/hooks/useCapacitor").default = mockUseCapacitor;
 
+const expectAbortSignalOptions = expect.objectContaining({
+  signal: expect.objectContaining({ aborted: false }),
+});
+
 beforeEach(() => {
   jest.clearAllMocks();
 
@@ -335,7 +339,8 @@ describe("MemeLabPageComponent", () => {
 
     await waitFor(() => {
       expect(mockFetchUrl).toHaveBeenCalledWith(
-        "https://api.test.6529.io/api/lab_extended_data?id=1"
+        "https://api.test.6529.io/api/lab_extended_data?id=1",
+        expect.objectContaining({ signal: expect.anything() })
       );
     });
   });
@@ -349,7 +354,8 @@ describe("MemeLabPageComponent", () => {
 
     await waitFor(() => {
       expect(mockFetchUrl).toHaveBeenCalledWith(
-        "https://api.test.6529.io/api/nfts_memelab?id=1"
+        "https://api.test.6529.io/api/nfts_memelab?id=1",
+        expect.objectContaining({ signal: expect.anything() })
       );
     });
   });
@@ -363,7 +369,8 @@ describe("MemeLabPageComponent", () => {
 
     await waitFor(() => {
       expect(mockFetchUrl).toHaveBeenCalledWith(
-        expect.stringContaining("transactions_memelab?wallet=0xabc&id=1")
+        expect.stringContaining("transactions_memelab?wallet=0xabc&id=1"),
+        expectAbortSignalOptions
       );
     });
   });
@@ -398,7 +405,8 @@ describe("MemeLabPageComponent", () => {
     await waitFor(
       () => {
         expect(mockFetchUrl).toHaveBeenCalledWith(
-          expect.stringContaining("transactions_memelab?wallet=0xabc")
+          expect.stringContaining("transactions_memelab?wallet=0xabc"),
+          expectAbortSignalOptions
         );
       },
       { timeout: 5000 }
@@ -416,7 +424,8 @@ describe("MemeLabPageComponent", () => {
       expect(mockFetchUrl).toHaveBeenCalledWith(
         expect.stringMatching(
           /transactions_memelab.*id=1.*page_size=25.*page=1/
-        )
+        ),
+        expectAbortSignalOptions
       );
     });
   });
@@ -432,7 +441,8 @@ describe("MemeLabPageComponent", () => {
       expect(mockFetchAllPages).toHaveBeenCalledWith(
         expect.stringContaining(
           "nft_history/0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb/1"
-        )
+        ),
+        expectAbortSignalOptions
       );
     });
   });
@@ -535,7 +545,8 @@ describe("MemeLabPageComponent", () => {
 
     await waitFor(() => {
       expect(mockFetchUrl).toHaveBeenCalledWith(
-        expect.stringContaining("transactions_memelab?wallet=0xabc&id=1")
+        expect.stringContaining("transactions_memelab?wallet=0xabc&id=1"),
+        expectAbortSignalOptions
       );
     });
   });
