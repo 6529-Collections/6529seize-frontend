@@ -21,6 +21,7 @@ interface SingleWaveDropVoteContentProps {
 export const SingleWaveDropVoteContent: React.FC<
   SingleWaveDropVoteContentProps
 > = ({ drop, size, onVoteSuccess }) => {
+  console.log(drop)
   const currentVoteValue = drop.context_profile_context?.rating ?? 0;
   const minRating = drop.context_profile_context?.min_rating ?? 0;
   const maxRating = drop.context_profile_context?.max_rating ?? 0;
@@ -42,7 +43,7 @@ export const SingleWaveDropVoteContent: React.FC<
   // MINI layout uses single horizontal row, others use existing responsive layout
   if (size === SingleWaveDropVoteSize.MINI) {
     return (
-       
+
       <div
         className="tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-lg tw-px-2 tw-py-1.5"
         onClick={(e) => e.stopPropagation()}
@@ -100,7 +101,7 @@ export const SingleWaveDropVoteContent: React.FC<
             />
           </div>
         </div>
-        
+
         {/* Stats below the controls */}
         <div className="tw-mt-3">
           <SingleWaveDropVoteStats

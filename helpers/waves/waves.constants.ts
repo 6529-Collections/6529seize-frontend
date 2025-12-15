@@ -12,11 +12,16 @@ export const WAVE_LABELS: Record<ApiWaveType, string> = {
   [ApiWaveType.Approve]: "Approve",
 };
 
+export const WAVE_VOTE_STATS_LABELS = {
+  YOUR_VOTES: "Your votes",
+  TOTAL: "Total",
+};
+
 export const WAVE_VOTING_LABELS: Record<ApiWaveCreditType, string> = {
-  [ApiWaveCreditType.Tdh]: "By TDH",
-  [ApiWaveCreditType.Xtdh]: "By XTDH",
-  [ApiWaveCreditType.TdhPlusXtdh]: "By TDH + XTDH",
-  [ApiWaveCreditType.Rep]: "By Rep",
+  [ApiWaveCreditType.Tdh]: "TDH",
+  [ApiWaveCreditType.Xtdh]: "XTDH",
+  [ApiWaveCreditType.TdhPlusXtdh]: "TDH + XTDH",
+  [ApiWaveCreditType.Rep]: "Rep",
 };
 
 export const CREATE_WAVE_MAIN_STEPS: Record<ApiWaveType, CreateWaveStep[]> = {

@@ -7,6 +7,8 @@ import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { SingleWaveDropVoteSize } from "./SingleWaveDropVote";
 
+import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+
 interface WaveDropVoteSliderProps {
   readonly voteValue: number | string;
   readonly minValue: number;
@@ -16,6 +18,10 @@ interface WaveDropVoteSliderProps {
   readonly creditType: ApiWaveCreditType;
   readonly size?: SingleWaveDropVoteSize;
 }
+
+// ... existing code ...
+
+
 
 interface PresetMark {
   percentage: number;
@@ -186,15 +192,13 @@ export default function WaveDropVoteSlider({
 
   return (
     <div
-      className={`tw-flex tw-items-center [touch-action:none] ${
-        isMini ? "tw-h-6" : "tw-h-9"
-      }`}
+      className={`tw-flex tw-items-center [touch-action:none] ${isMini ? "tw-h-6" : "tw-h-9"
+        }`}
       onClick={(e) => e.stopPropagation()}>
       <div className="tw-relative tw-flex-1 tw-overflow-visible">
         <div
-          className={`tw-relative tw-h-[6px] tw-group ${
-            isMini ? "tw-mt-3" : "tw-mt-6 sm:tw-mt-0"
-          }`}>
+          className={`tw-relative tw-h-[6px] tw-group ${isMini ? "tw-mt-3" : "tw-mt-6 sm:tw-mt-0"
+            }`}>
           {/* Base range input for track clicks */}
           <input
             type="range"
@@ -288,15 +292,14 @@ export default function WaveDropVoteSlider({
                   tw-shadow-lg tw-border tw-border-gray-600/20 ${theme.tooltip.text}
                   tw-transition-transform tw-duration-200 tw-ease-out`}
                 style={{
-                  transform: `translateX(calc(-50% + ${
-                    currentPercentage <= 10 ? 50 : 0
-                  }%))`,
+                  transform: `translateX(calc(-50% + ${currentPercentage <= 10 ? 50 : 0
+                    }%))`,
                 }}>
                 <span className="tw-block">
                   {formatNumberWithCommas(
                     typeof voteValue === "string" ? 0 : voteValue
                   )}{" "}
-                  {creditType}
+                  {WAVE_VOTING_LABELS[creditType]}
                 </span>
                 <div
                   className={`tw-absolute tw-w-2 tw-h-2 tw-bottom-[-4px] tw-left-1/2 -tw-translate-x-1/2

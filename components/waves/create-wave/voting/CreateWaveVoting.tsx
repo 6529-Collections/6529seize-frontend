@@ -70,7 +70,7 @@ export default function CreateWaveVoting({
             type={votingType}
             selected={selectedType}
             disabled={false}
-            label={WAVE_VOTING_LABELS[votingType]}
+            label={`By ${WAVE_VOTING_LABELS[votingType]}`}
             onChange={onTypeChange}
           />
         ))}
