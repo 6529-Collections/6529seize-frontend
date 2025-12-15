@@ -1,19 +1,19 @@
 "use client";
 
-import React, { useCallback, useMemo, useRef } from "react";
-import NavItem from "./NavItem";
-import type { NavItem as NavItemData } from "./navTypes";
-import HomeIcon from "../common/icons/HomeIcon";
-import WavesIcon from "../common/icons/WavesIcon";
-import ChatBubbleIcon from "../common/icons/ChatBubbleIcon";
-import Squares2X2Icon from "../common/icons/Squares2X2Icon";
-import BellIcon from "../common/icons/BellIcon";
-import UsersIcon from "../common/icons/UsersIcon";
-import LogoIcon from "../common/icons/LogoIcon";
-import { useLayout } from "../brain/my-stream/layout/LayoutContext";
+import { getNotificationsRoute } from "@/helpers/navigation.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { getNotificationsRoute } from "@/helpers/navigation.helpers";
+import React, { useCallback, useMemo, useRef } from "react";
+import { useLayout } from "../brain/my-stream/layout/LayoutContext";
+import BellIcon from "../common/icons/BellIcon";
+import ChatBubbleIcon from "../common/icons/ChatBubbleIcon";
+import HomeIcon from "../common/icons/HomeIcon";
+import LogoIcon from "../common/icons/LogoIcon";
+import Squares2X2Icon from "../common/icons/Squares2X2Icon";
+import UsersIcon from "../common/icons/UsersIcon";
+import WavesIcon from "../common/icons/WavesIcon";
+import NavItem from "./NavItem";
+import type { NavItem as NavItemData } from "./navTypes";
 
 const items: NavItemData[] = [
   {
@@ -69,7 +69,11 @@ const items: NavItemData[] = [
   },
 ];
 
-const BottomNavigation: React.FC = () => {
+interface BottomNavigationProps {
+  readonly hidden?: boolean;
+}
+
+const BottomNavigation: React.FC<BottomNavigationProps> = ({ hidden = false }) => {
   const { registerRef } = useLayout();
   const { isAndroid } = useCapacitor();
   const { isApp } = useDeviceInfo();
@@ -96,14 +100,17 @@ const BottomNavigation: React.FC = () => {
       ),
     [isApp]
   );
-  
-  // Only add safe area padding on Android
+
   const paddingClass = isAndroid ? "tw-pb-[env(safe-area-inset-bottom,0px)]" : "";
-  
+
+  const hiddenStyle = hidden
+    ? "tw-opacity-0 tw-translate-y-full tw-pointer-events-none"
+    : "tw-opacity-100 tw-translate-y-0";
+
   return (
     <nav
       ref={setMobileNavRef}
-      className={`${paddingClass} tw-fixed tw-left-0 tw-w-full tw-bottom-0 tw-bg-black tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-900 tw-shadow-inner tw-z-50`}>
+      className={`${paddingClass} ${hiddenStyle} tw-fixed tw-left-0 tw-w-full tw-bottom-0 tw-bg-black tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-900 tw-shadow-inner tw-z-50 tw-transition-[opacity,transform] tw-duration-75`}>
       <div className="tw-h-full">
         <ul
           className="tw-flex tw-h-full tw-pl-[env(safe-area-inset-left,0px)]
