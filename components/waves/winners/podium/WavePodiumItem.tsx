@@ -26,7 +26,6 @@ const positionStyles = {
     pfpSize: "tw-size-12 md:tw-size-14",
     marginBottom: "-tw-mb-6",
     textColor: "tw-text-[#fbbf24]",
-    hoverTextColor: "desktop-hover:hover:tw-text-[#fbbf24]",
     ring: "tw-ring-[#fbbf24]",
     shadow: "tw-shadow-[0_0_20px_rgba(251,191,36,0.3)]",
     autorFontSize: "tw-text-sm sm:tw-text-base md:tw-text-xl",
@@ -49,7 +48,6 @@ const positionStyles = {
     pfpSize: "tw-size-9 md:tw-size-11",
     marginBottom: "-tw-mb-2",
     textColor: "tw-text-[#94a3b8]",
-    hoverTextColor: "desktop-hover:hover:tw-text-[#94a3b8]",
     ring: "tw-ring-[#94a3b8]",
     shadow: "tw-shadow-[0_0_20px_rgba(148,163,184,0.3)]",
     autorFontSize: "tw-text-sm sm:tw-text-base",
@@ -72,7 +70,6 @@ const positionStyles = {
     pfpSize: "tw-size-9 md:tw-size-11",
     marginBottom: "-tw-mb-2",
     textColor: "tw-text-[#CD7F32]",
-    hoverTextColor: "desktop-hover:hover:tw-text-[#CD7F32]",
     ring: "tw-ring-[#CD7F32]",
     shadow: "tw-shadow-[0_0_20px_rgba(205,127,50,0.3)]",
     autorFontSize: "tw-text-sm sm:tw-text-base",
@@ -118,6 +115,18 @@ const heightMap = {
   third: "tw-h-[170px]",
 };
 
+const getHoverTextColorClass = (
+  position: WavePodiumItemProps["position"],
+) => {
+  const colorMap = {
+    first: "desktop-hover:hover:tw-text-[#fbbf24]",
+    second: "desktop-hover:hover:tw-text-[#94a3b8]",
+    third: "desktop-hover:hover:tw-text-[#CD7F32]",
+  } as const;
+
+  return colorMap[position];
+};
+
 export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
   winner,
   onDropClick,
@@ -125,6 +134,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
   customAnimationIndex
 }) => {
   const styles = positionStyles[position];
+  const hoverTextColorClass = getHoverTextColorClass(position);
 
   // If no winner provided, render placeholder
   if (!winner) {
@@ -207,9 +217,9 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                 <Link
                   href={`/${drop.author.handle}`}
                   onClick={(e) => e.stopPropagation()}
-                  className={`tw-transition-all tw-no-underline tw-mb-2 tw-mt-2 sm:tw-mt-4 tw-relative tw-text-center ${styles.hoverTextColor} tw-group/link`}
+                  className={`tw-transition-all tw-no-underline tw-mb-2 tw-mt-2 sm:tw-mt-4 tw-relative tw-text-center ${hoverTextColorClass} tw-group/link`}
                 >
-                  <span className={`${styles.autorFontSize} tw-font-semibold tw-text-iron-200 ${styles.hoverTextColor} tw-transition-colors tw-inline-flex tw-items-center`}>
+                  <span className={`${styles.autorFontSize} tw-font-semibold tw-text-iron-200 ${hoverTextColorClass} tw-transition-colors tw-inline-flex tw-items-center`}>
                     {drop.author.handle}
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

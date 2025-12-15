@@ -25,7 +25,11 @@ import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuO
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
-import { WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
+import {
+  WAVE_VOTING_LABELS,
+  WAVE_VOTE_STATS_LABELS,
+} from "@/helpers/waves/waves.constants";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
 interface MemesWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -59,7 +63,10 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
   const isPositive = rating >= 0;
   const ratersCount = winner.drop.raters_count || 0;
   const topVoters = winner.drop.top_raters?.slice(0, 3) || [];
-  const creditType = wave.voting?.credit_type || "votes";
+  const creditType =
+    WAVE_VOTING_LABELS[wave.voting?.credit_type as ApiWaveCreditType] ||
+    wave.voting?.credit_type ||
+    "votes";
 
   // Check if user has voted
   const hasUserVoted =

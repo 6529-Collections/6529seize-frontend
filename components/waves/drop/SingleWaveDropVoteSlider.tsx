@@ -16,16 +16,6 @@ interface WaveDropVoteSliderProps {
   readonly size?: SingleWaveDropVoteSize;
 }
 
-// ... existing code ...
-
-
-
-interface PresetMark {
-  percentage: number;
-  label: string;
-  position: number;
-}
-
 type ProgressBarStyle = {
   left: string;
   width: string;
@@ -133,7 +123,7 @@ export default function WaveDropVoteSlider({
 
   useEffect(() => {
     x.set(currentPercentage);
-  }, [currentPercentage]);
+  }, [currentPercentage, x]);
 
   const progressBarStyle = getProgressBarStyle(
     numericVoteValue,

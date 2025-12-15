@@ -1,6 +1,7 @@
 import React from "react";
 import { ApiWaveVoter } from "@/generated/models/ApiWaveVoter";
 import Link from "next/link";
+import Image from "next/image";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { Tooltip } from "react-tooltip";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
@@ -43,7 +44,7 @@ export const SingleWaveDropVoter: React.FC<SingleWaveDropVoterProps> = ({
           className="tw-flex tw-items-center tw-gap-2 tw-no-underline tw-group hover:tw-opacity-80 tw-transition-all tw-duration-300 tw-whitespace-nowrap"
         >
           {voter.voter.pfp ? (
-            <img src={voter.voter.pfp} alt="" className={pfpClasses} />
+            <Image src={voter.voter.pfp} alt="" width={24} height={24} className={pfpClasses} />
           ) : (
             <div className={pfpClasses} />
           )}

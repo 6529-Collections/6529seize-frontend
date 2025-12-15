@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Tooltip } from "react-tooltip";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
-import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+import { WAVE_VOTE_STATS_LABELS, WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 
 interface WaveLeaderboardRightSidebarVoterProps {
@@ -81,7 +81,7 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
         </>
         <span className="tw-text-xs tw-text-iron-400 tw-whitespace-nowrap">
           {formatNumberWithCommas(voter.absolute_votes_summed)} {WAVE_VOTING_LABELS[creditType]}{" "}
-          total
+          {WAVE_VOTE_STATS_LABELS.TOTAL}
         </span>
       </div>
     </div>

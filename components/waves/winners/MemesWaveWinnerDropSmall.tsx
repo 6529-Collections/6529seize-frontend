@@ -55,7 +55,10 @@ export const MemesWaveWinnerDropSmall = memo<MemesWaveWinnerDropSmallProps>(
 
     const userVoteStyle = getUserVoteStyle();
 
-    const votingLabel = WAVE_VOTING_LABELS[drop.wave.voting_credit_type as ApiWaveCreditType];
+    const votingLabel =
+      WAVE_VOTING_LABELS[drop.wave.voting_credit_type as ApiWaveCreditType] ??
+      drop.wave.voting_credit_type ??
+      "";
 
     const handleDropClick = useCallback(() => {
       onDropClick(drop);

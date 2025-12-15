@@ -22,6 +22,7 @@ export default function VoteBreakdownTooltip({
 }: VoteBreakdownTooltipProps) {
   const { hasRaters, userRating } = ratingsData;
   const votingPower = drop.context_profile_context?.max_rating ?? 0;
+  const votingLabel = WAVE_VOTING_LABELS[drop.wave.voting_credit_type];
 
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy } = useAuth();
@@ -49,12 +50,14 @@ export default function VoteBreakdownTooltip({
               >
                 <div className="tw-flex tw-items-center tw-gap-2">
                   {rater.profile.pfp && (
-                    <img
+                    <Image
                       src={getScaledImageUri(
                         rater.profile.pfp,
                         ImageScale.W_AUTO_H_50
                       )}
-                      alt=""
+                      alt={`${rater.profile.handle}'s profile picture`}
+                      width={16}
+                      height={16}
                       className="tw-h-4 tw-w-4 tw-rounded-md tw-ring-1 tw-ring-white/10"
                     />
                   )}
@@ -104,14 +107,14 @@ export default function VoteBreakdownTooltip({
                 <span className="tw-text-xs tw-font-medium tw-text-rose-400">−</span>
               </div>
               <span className="tw-text-xs tw-font-medium tw-text-iron-300">
-                {formatNumberWithCommas(votingPower)} {WAVE_VOTING_LABELS[drop.wave.voting_credit_type]}
+                {formatNumberWithCommas(votingPower)} {votingLabel}
               </span>
             </div>
           </div>
           <div className="tw-flex tw-items-center tw-justify-between tw-pl-6">
             <span className="tw-text-xs tw-text-iron-300">Voted</span>
             <span className="tw-text-xs tw-font-medium tw-text-iron-300">
-              {formatNumberWithCommas(Math.abs(userRating))} {WAVE_VOTING_LABELS[drop.wave.voting_credit_type]}
+              {formatNumberWithCommas(Math.abs(userRating))} {votingLabel}
             </span>
           </div>
         </div>
