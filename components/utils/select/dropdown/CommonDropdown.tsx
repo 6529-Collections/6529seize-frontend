@@ -106,7 +106,7 @@ export default function CommonDropdown<T, U = unknown>(
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
   return (
-    <div className="tw-w-full tw-h-full">
+    <div className="tailwind-scope tw-w-full tw-h-full">
       <div className="tw-relative tw-w-full">
         <button
           ref={buttonRef}
