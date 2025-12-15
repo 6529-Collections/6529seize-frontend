@@ -8,6 +8,8 @@ import {
   ImageScale,
 } from "@/helpers/image.helpers";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
+import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
 interface WaveLeaderboardDropRatersProps {
   readonly drop: ExtendedDrop;
@@ -56,7 +58,7 @@ export const WaveLeaderboardDropRaters: React.FC<
           />
         </div>
         <span className="tw-text-iron-400 tw-text-sm tw-whitespace-nowrap">
-          {drop.wave.voting_credit_type} total
+          {WAVE_VOTING_LABELS[drop.wave.voting_credit_type as ApiWaveCreditType]} total
         </span>
       </div>
 
@@ -97,7 +99,7 @@ export const WaveLeaderboardDropRaters: React.FC<
                 <span className="tw-text-sm tw-font-medium">
                   {voter.profile.handle} •{" "}
                   {formatNumberWithCommas(voter.rating)}{" "}
-                  {drop.wave.voting_credit_type}
+                  {WAVE_VOTING_LABELS[drop.wave.voting_credit_type as ApiWaveCreditType]}
                 </span>
               </Tooltip>
             </React.Fragment>
@@ -113,7 +115,7 @@ export const WaveLeaderboardDropRaters: React.FC<
           <span className="tw-text-sm tw-whitespace-nowrap">
             <span className="tw-text-iron-400">Your vote: </span>
             <span className={`tw-font-semibold ${rankStyle}`}>
-              {formatNumberWithCommas(userVote)} {drop.wave.voting_credit_type}
+              {formatNumberWithCommas(userVote)} {WAVE_VOTING_LABELS[drop.wave.voting_credit_type as ApiWaveCreditType]}
             </span>
           </span>
         </div>

@@ -13,6 +13,8 @@ import { WaveWinnersSmallOutcome } from "./WaveWinnersSmallOutcome";
 import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
 import WaveDropTime from "../drops/time/WaveDropTime";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
 interface MemesWaveWinnerDropSmallProps {
   readonly drop: ExtendedDrop;
@@ -85,7 +87,7 @@ export const MemesWaveWinnerDropSmall = memo<MemesWaveWinnerDropSmallProps>(
                     {formatNumberWithCommas(drop.rating)}
                   </span>
                   <span className="tw-text-sm tw-font-medium tw-text-iron-400">
-                    {drop.wave.voting_credit_type}
+                    {WAVE_VOTING_LABELS[drop.wave.voting_credit_type as ApiWaveCreditType]}
                   </span>
                 </div>
                 <div className="tw-flex tw-items-center tw-gap-x-1.5">
@@ -104,7 +106,7 @@ export const MemesWaveWinnerDropSmall = memo<MemesWaveWinnerDropSmallProps>(
                       className={`tw-text-sm tw-font-medium ${userVoteStyle}`}
                     >
                       {formatNumberWithCommas(userVote)}{" "}
-                      {drop.wave.voting_credit_type}
+                      {WAVE_VOTING_LABELS[drop.wave.voting_credit_type as ApiWaveCreditType]}
                     </span>
                   </div>
                 )}
