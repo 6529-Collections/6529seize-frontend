@@ -48,8 +48,6 @@ export default function AppLayout({ children }: Props) {
   const { isApp } = useDeviceInfo();
   const { isVisible: isKeyboardVisible, isAndroid } = useAndroidKeyboard();
   const isEditingOnMobile = isApp && editingDropId !== null;
-
-  // Hide bottom nav when Android keyboard is open to prevent it sliding up with viewport
   const shouldHideBottomNav = isAndroid && isKeyboardVisible;
 
   const headerWrapperRef = useCallback(
@@ -60,8 +58,9 @@ export default function AppLayout({ children }: Props) {
     [registerRef, setHeaderRef]
   );
 
-  // Remove safe-area padding when keyboard is open on Android (to avoid gap)
-  const safeAreaClass = shouldHideBottomNav ? "" : "tw-pb-[env(safe-area-inset-bottom,0px)]";
+  const safeAreaClass = shouldHideBottomNav
+    ? ""
+    : "tw-pb-[env(safe-area-inset-bottom,0px)]";
 
   return (
     <div

@@ -379,12 +379,9 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   const waveViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
 
-    // Reserve space for input area + bottom nav
-    // When keyboard is open on Android, bottom nav is hidden so we need less space
     let capSpace = 0;
 
     if (isAndroid) {
-      // 128px when keyboard closed (input visible), 0 when open (no gap)
       capSpace = isKeyboardVisible ? 0 : 128;
     } else if (isIos || isCapacitor) {
       capSpace = 20;

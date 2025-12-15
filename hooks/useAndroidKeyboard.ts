@@ -20,7 +20,6 @@ export function useAndroidKeyboard(): AndroidKeyboardHookReturn {
   const isSSR = typeof window === 'undefined';
   const isAndroid = !isSSR && Capacitor.getPlatform() === 'android';
 
-  // Refs for debounce timeouts
   const showTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -31,9 +30,7 @@ export function useAndroidKeyboard(): AndroidKeyboardHookReturn {
     let showCleanup: (() => void) | undefined;
     let hideCleanup: (() => void) | undefined;
 
-    // Debounced show handler - prevents rapid state updates from aggressive keyboards (e.g., SwiftKey)
     const debouncedShow = (height: number) => {
-      // Cancel any pending hide to prevent race conditions
       if (hideTimeoutRef.current) {
         clearTimeout(hideTimeoutRef.current);
         hideTimeoutRef.current = null;
@@ -47,9 +44,7 @@ export function useAndroidKeyboard(): AndroidKeyboardHookReturn {
       }, DEBOUNCE_MS);
     };
 
-    // Debounced hide handler
     const debouncedHide = () => {
-      // Cancel any pending show to prevent race conditions
       if (showTimeoutRef.current) {
         clearTimeout(showTimeoutRef.current);
         showTimeoutRef.current = null;
