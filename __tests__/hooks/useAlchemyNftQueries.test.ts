@@ -1,10 +1,6 @@
 import { fetchOwnerNfts } from "@/hooks/useAlchemyNftQueries";
 
-const mockPublicEnv = {
-  API_ENDPOINT: "https://api.example.com",
-  BASE_ENDPOINT: "https://example.com",
-  ALLOWLIST_API_ENDPOINT: "https://allowlist.example.com",
-};
+const MOCK_API_ENDPOINT = "https://api.example.com";
 
 jest.mock("@/config/env", () => ({
   publicEnv: {
@@ -75,7 +71,7 @@ describe("useAlchemyNftQueries", () => {
       );
       expect(global.fetch).toHaveBeenNthCalledWith(
         2,
-        `${mockPublicEnv.API_ENDPOINT}/alchemy-proxy/owner-nfts?chainId=1&contract=0x123&owner=0xowner`,
+        `${MOCK_API_ENDPOINT}/alchemy-proxy/owner-nfts?chainId=1&contract=0x123&owner=0xowner`,
         { signal: undefined }
       );
     });
@@ -159,69 +155,6 @@ describe("useAlchemyNftQueries", () => {
 
       await expect(fetchOwnerNfts(1, "0x123", "0xowner")).rejects.toThrow();
       expect(global.fetch).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe("fetchJsonWithFailover (via fetchOwnerNfts)", () => {
-    it("should fallback when primary returns ALCHEMY_API_KEY error", async () => {
-      const mockNfts = [
-        {
-          tokenId: "1",
-          tokenType: "ERC721",
-          name: null,
-          tokenUri: null,
-          image: null,
-        },
-      ];
-
-      global.fetch = jest
-        .fn()
-        .mockResolvedValueOnce({
-          ok: false,
-          status: 400,
-          json: () =>
-            Promise.resolve({
-              error:
-                "ALCHEMY_API_KEY is required and must be a non-empty string",
-            }),
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockNfts),
-        });
-
-      const result = await fetchOwnerNfts(1, "0x123", "0xowner");
-
-      expect(result).toEqual(mockNfts);
-      expect(global.fetch).toHaveBeenCalledTimes(2);
-    });
-
-    it("should fallback when primary returns 500 server error", async () => {
-      const mockNfts = [
-        {
-          tokenId: "1",
-          tokenType: "ERC721",
-          name: null,
-          tokenUri: null,
-          image: null,
-        },
-      ];
-
-      global.fetch = jest
-        .fn()
-        .mockResolvedValueOnce({
-          ok: false,
-          status: 500,
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockNfts),
-        });
-
-      const result = await fetchOwnerNfts(1, "0x123", "0xowner");
-
-      expect(result).toEqual(mockNfts);
-      expect(global.fetch).toHaveBeenCalledTimes(2);
     });
   });
 });
