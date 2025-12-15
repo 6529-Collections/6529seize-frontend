@@ -12,6 +12,7 @@ import {
   areEqualAddresses,
   getNetworkName,
 } from "@/helpers/Helpers";
+import { fetchOwnerNfts } from "@/hooks/useAlchemyNftQueries";
 import { fetchUrl } from "@/services/6529api";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import NextGenContractWriteStatus from "@/components/nextGen/NextGenContractWriteStatus";
@@ -113,21 +114,13 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
       return;
     }
     const controller = new AbortController();
-    const searchParams = new URLSearchParams({
-      chainId: String(NEXTGEN_CHAIN_ID),
-      contract: NEXTGEN_CORE[NEXTGEN_CHAIN_ID],
-      owner: burnAddress,
-    });
 
-    fetch(`/api/alchemy/owner-nfts?${searchParams.toString()}`, {
-      signal: controller.signal,
-    })
-      .then(async (response) => {
-        if (!response.ok) {
-          throw new Error("Failed to fetch NFTs for owner");
-        }
-        return (await response.json()) as any[];
-      })
+    fetchOwnerNfts(
+      NEXTGEN_CHAIN_ID,
+      NEXTGEN_CORE[NEXTGEN_CHAIN_ID],
+      burnAddress,
+      controller.signal
+    )
       .then((r) => {
         setTokensOwnedForBurnAddressLoaded(true);
         const filteredTokens = filterTokensOwnedForBurnAddress(r);
