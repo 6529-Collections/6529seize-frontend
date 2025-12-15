@@ -53,6 +53,16 @@ async function fetchJson<T>(
   return (await response.json()) as T;
 }
 
+function isAbortError(error: unknown): boolean {
+  if (error instanceof DOMException && error.name === "AbortError") {
+    return true;
+  }
+  if (error instanceof Error && error.name === "AbortError") {
+    return true;
+  }
+  return false;
+}
+
 async function fetchJsonWithFailover<T>(
   primaryUrl: string,
   backendPath: string,
@@ -60,11 +70,11 @@ async function fetchJsonWithFailover<T>(
 ): Promise<T> {
   try {
     return await fetchJson<T>(primaryUrl, init);
-  } catch {
+  } catch (error) {
+    if (isAbortError(error)) {
+      throw error;
+    }
     const backendUrl = getBackendAlchemyProxyUrl(backendPath);
-    console.warn(
-      `Failed to fetch from primary endpoint (${primaryUrl}), falling back to proxy endpoint: (${backendUrl})`
-    );
     return fetchJson<T>(backendUrl, init);
   }
 }

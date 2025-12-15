@@ -122,10 +122,9 @@ describe("useAlchemyNftQueries", () => {
 
       await fetchOwnerNfts(1, "0x123", "0xowner", controller.signal);
 
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.any(String),
-        { signal: controller.signal }
-      );
+      expect(global.fetch).toHaveBeenCalledWith(expect.any(String), {
+        signal: controller.signal,
+      });
     });
 
     it("should handle different chain IDs correctly", async () => {
@@ -141,18 +140,50 @@ describe("useAlchemyNftQueries", () => {
         { signal: undefined }
       );
     });
+
+    it("should NOT fallback when request is aborted via AbortController", async () => {
+      const abortError = new DOMException(
+        "The operation was aborted.",
+        "AbortError"
+      );
+      global.fetch = jest.fn().mockRejectedValueOnce(abortError);
+
+      await expect(fetchOwnerNfts(1, "0x123", "0xowner")).rejects.toThrow();
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it("should NOT fallback when request throws Error with name AbortError", async () => {
+      const abortError = new Error("The operation was aborted.");
+      abortError.name = "AbortError";
+      global.fetch = jest.fn().mockRejectedValueOnce(abortError);
+
+      await expect(fetchOwnerNfts(1, "0x123", "0xowner")).rejects.toThrow();
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe("fetchJsonWithFailover (via fetchOwnerNfts)", () => {
     it("should fallback when primary returns ALCHEMY_API_KEY error", async () => {
-      const mockNfts = [{ tokenId: "1", tokenType: "ERC721", name: null, tokenUri: null, image: null }];
-      
+      const mockNfts = [
+        {
+          tokenId: "1",
+          tokenType: "ERC721",
+          name: null,
+          tokenUri: null,
+          image: null,
+        },
+      ];
+
       global.fetch = jest
         .fn()
         .mockResolvedValueOnce({
           ok: false,
           status: 400,
-          json: () => Promise.resolve({ error: "ALCHEMY_API_KEY is required and must be a non-empty string" }),
+          json: () =>
+            Promise.resolve({
+              error:
+                "ALCHEMY_API_KEY is required and must be a non-empty string",
+            }),
         })
         .mockResolvedValueOnce({
           ok: true,
@@ -166,8 +197,16 @@ describe("useAlchemyNftQueries", () => {
     });
 
     it("should fallback when primary returns 500 server error", async () => {
-      const mockNfts = [{ tokenId: "1", tokenType: "ERC721", name: null, tokenUri: null, image: null }];
-      
+      const mockNfts = [
+        {
+          tokenId: "1",
+          tokenType: "ERC721",
+          name: null,
+          tokenUri: null,
+          image: null,
+        },
+      ];
+
       global.fetch = jest
         .fn()
         .mockResolvedValueOnce({
@@ -186,4 +225,3 @@ describe("useAlchemyNftQueries", () => {
     });
   });
 });
-
