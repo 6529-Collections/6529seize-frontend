@@ -9,17 +9,28 @@ import { useEffect, useMemo } from "react";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { publicEnv } from "@/config/env";
+import {
+  normaliseAddress,
+  processContractMetadataResponse,
+  processOwnerNftsResponse,
+  processSearchResponse,
+  processTokenMetadataResponse,
+  type AlchemyContractMetadataResponse,
+  type AlchemyGetNftsForOwnerResponse,
+  type AlchemySearchResponse,
+  type AlchemyTokenMetadataResponse,
+  type OwnerNft as OwnerNftType,
+  type SearchContractsResult,
+} from "@/helpers/alchemy/response-processing";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import type {
-  SearchContractsResult,
-  TokenMetadataParams,
-} from "@/services/alchemy/types";
 import type {
   ContractOverview,
   Suggestion,
   SupportedChain,
   TokenMetadata,
 } from "@/types/nft";
+
+export type OwnerNft = OwnerNftType;
 
 const SUGGESTION_TTL = 60_000;
 const CONTRACT_TTL = 5 * 60_000;
@@ -34,12 +45,18 @@ const suggestionCache = new Map<string, CacheEntry<SearchContractsResult>>();
 const contractCache = new Map<string, CacheEntry<ContractOverview | null>>();
 const tokenCache = new Map<string, CacheEntry<TokenMetadata[]>>();
 
-type SerializedTokenMetadata = Omit<TokenMetadata, "tokenId"> & {
-  tokenId: string;
-};
-
 function getBackendAlchemyProxyUrl(path: string): string {
   return `${publicEnv.API_ENDPOINT}/alchemy-proxy${path}`;
+}
+
+function isAbortError(error: unknown): boolean {
+  if (error instanceof DOMException && error.name === "AbortError") {
+    return true;
+  }
+  if (error instanceof Error && error.name === "AbortError") {
+    return true;
+  }
+  return false;
 }
 
 async function fetchJson<T>(
@@ -51,16 +68,6 @@ async function fetchJson<T>(
     throw new Error(`Request failed with status ${response.status}`);
   }
   return (await response.json()) as T;
-}
-
-function isAbortError(error: unknown): boolean {
-  if (error instanceof DOMException && error.name === "AbortError") {
-    return true;
-  }
-  if (error instanceof Error && error.name === "AbortError") {
-    return true;
-  }
-  return false;
 }
 
 async function fetchJsonWithFailover<T>(
@@ -82,6 +89,14 @@ async function fetchJsonWithFailover<T>(
   }
 }
 
+type TokenMetadataParams = {
+  readonly address?: `0x${string}`;
+  readonly tokenIds?: readonly string[];
+  readonly tokens?: readonly { contract: string; tokenId: string }[];
+  readonly chain?: SupportedChain;
+  readonly signal?: AbortSignal;
+};
+
 async function fetchCollectionsFromApi(
   params: UseCollectionSearchParams & { readonly signal?: AbortSignal }
 ): Promise<SearchContractsResult> {
@@ -89,13 +104,15 @@ async function fetchCollectionsFromApi(
   const search = new URLSearchParams();
   search.set("query", query);
   search.set("chain", chain);
-  search.set("hideSpam", hideSpam ? "1" : "0");
   const queryString = search.toString();
-  return fetchJsonWithFailover<SearchContractsResult>(
+
+  const payload = await fetchJsonWithFailover<AlchemySearchResponse>(
     `/api/alchemy/collections?${queryString}`,
     `/collections?${queryString}`,
     { signal }
   );
+
+  return processSearchResponse(payload, hideSpam);
 }
 
 async function fetchContractOverviewFromApi(
@@ -105,15 +122,29 @@ async function fetchContractOverviewFromApi(
   if (!address) {
     return null;
   }
+
+  const checksum = normaliseAddress(address);
+  if (!checksum) {
+    return null;
+  }
+
   const search = new URLSearchParams();
   search.set("address", address);
   search.set("chain", chain);
   const queryString = search.toString();
-  return fetchJsonWithFailover<ContractOverview | null>(
-    `/api/alchemy/contract?${queryString}`,
-    `/contract?${queryString}`,
-    { signal }
-  );
+
+  const payload = await fetchJsonWithFailover<
+    (AlchemyContractMetadataResponse & { _checksum?: string }) | null
+  >(`/api/alchemy/contract?${queryString}`, `/contract?${queryString}`, {
+    signal,
+  });
+
+  if (!payload) {
+    return null;
+  }
+
+  const checksumFromResponse = (payload._checksum ?? checksum) as `0x${string}`;
+  return processContractMetadataResponse(payload, checksumFromResponse);
 }
 
 async function fetchTokenMetadataFromApi(
@@ -131,15 +162,14 @@ async function fetchTokenMetadataFromApi(
     body,
     signal: params.signal,
   };
-  const payload = await fetchJsonWithFailover<SerializedTokenMetadata[]>(
+
+  const payload = await fetchJsonWithFailover<AlchemyTokenMetadataResponse>(
     "/api/alchemy/token-metadata",
     "/token-metadata",
     init
   );
-  return payload.map((entry) => ({
-    ...entry,
-    tokenId: BigInt(entry.tokenId),
-  }));
+
+  return processTokenMetadataResponse(payload);
 }
 
 function gcExpired<T>(map: Map<string, CacheEntry<T>>, now = Date.now()): void {
@@ -406,23 +436,18 @@ export async function fetchOwnerNfts(
   contract: string,
   owner: string,
   signal?: AbortSignal
-): Promise<
-  {
-    tokenId: string;
-    tokenType: string;
-    name: string | null;
-    tokenUri: string | null;
-    image: unknown;
-  }[]
-> {
+): Promise<OwnerNftType[]> {
   const search = new URLSearchParams();
   search.set("chainId", String(chainId));
   search.set("contract", contract);
   search.set("owner", owner);
   const queryString = search.toString();
-  return fetchJsonWithFailover(
+
+  const payload = await fetchJsonWithFailover<AlchemyGetNftsForOwnerResponse>(
     `/api/alchemy/owner-nfts?${queryString}`,
     `/owner-nfts?${queryString}`,
     { signal }
   );
+
+  return processOwnerNftsResponse(payload.ownedNfts ?? []);
 }

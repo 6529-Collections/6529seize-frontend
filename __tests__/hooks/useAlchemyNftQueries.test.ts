@@ -22,7 +22,20 @@ describe("useAlchemyNftQueries", () => {
   });
 
   describe("fetchOwnerNfts", () => {
-    const mockNfts = [
+    const mockAlchemyResponse = {
+      ownedNfts: [
+        {
+          tokenId: "1",
+          tokenType: "ERC721",
+          name: "Test NFT",
+          tokenUri: "https://example.com/1",
+          image: null,
+        },
+      ],
+      pageKey: undefined,
+    };
+
+    const expectedProcessedResult = [
       {
         tokenId: "1",
         tokenType: "ERC721",
@@ -32,15 +45,15 @@ describe("useAlchemyNftQueries", () => {
       },
     ];
 
-    it("should return data from primary endpoint when successful", async () => {
+    it("should return processed data from primary endpoint when successful", async () => {
       globalThis.fetch = jest.fn().mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(mockNfts),
+        json: () => Promise.resolve(mockAlchemyResponse),
       });
 
       const result = await fetchOwnerNfts(1, "0x123", "0xowner");
 
-      expect(result).toEqual(mockNfts);
+      expect(result).toEqual(expectedProcessedResult);
       expect(globalThis.fetch).toHaveBeenCalledTimes(1);
       expect(globalThis.fetch).toHaveBeenCalledWith(
         "/api/alchemy/owner-nfts?chainId=1&contract=0x123&owner=0xowner",
@@ -57,12 +70,12 @@ describe("useAlchemyNftQueries", () => {
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: () => Promise.resolve(mockNfts),
+          json: () => Promise.resolve(mockAlchemyResponse),
         });
 
       const result = await fetchOwnerNfts(1, "0x123", "0xowner");
 
-      expect(result).toEqual(mockNfts);
+      expect(result).toEqual(expectedProcessedResult);
       expect(globalThis.fetch).toHaveBeenCalledTimes(2);
       expect(globalThis.fetch).toHaveBeenNthCalledWith(
         1,
@@ -82,12 +95,12 @@ describe("useAlchemyNftQueries", () => {
         .mockRejectedValueOnce(new Error("Network error"))
         .mockResolvedValueOnce({
           ok: true,
-          json: () => Promise.resolve(mockNfts),
+          json: () => Promise.resolve(mockAlchemyResponse),
         });
 
       const result = await fetchOwnerNfts(1, "0x123", "0xowner");
 
-      expect(result).toEqual(mockNfts);
+      expect(result).toEqual(expectedProcessedResult);
       expect(globalThis.fetch).toHaveBeenCalledTimes(2);
     });
 
@@ -113,7 +126,7 @@ describe("useAlchemyNftQueries", () => {
       const controller = new AbortController();
       globalThis.fetch = jest.fn().mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(mockNfts),
+        json: () => Promise.resolve(mockAlchemyResponse),
       });
 
       await fetchOwnerNfts(1, "0x123", "0xowner", controller.signal);
@@ -126,7 +139,7 @@ describe("useAlchemyNftQueries", () => {
     it("should handle different chain IDs correctly", async () => {
       globalThis.fetch = jest.fn().mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(mockNfts),
+        json: () => Promise.resolve(mockAlchemyResponse),
       });
 
       await fetchOwnerNfts(11155111, "0x123", "0xowner");
@@ -155,6 +168,50 @@ describe("useAlchemyNftQueries", () => {
 
       await expect(fetchOwnerNfts(1, "0x123", "0xowner")).rejects.toThrow();
       expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it("should process raw Alchemy response correctly", async () => {
+      const rawAlchemyResponse = {
+        ownedNfts: [
+          {
+            tokenId: "123",
+            tokenType: "ERC1155",
+            name: null,
+            tokenUri: null,
+            image: { thumbnailUrl: "https://img.example.com/123.png" },
+          },
+          {
+            tokenId: "456",
+            tokenType: "ERC721",
+            name: "Cool NFT",
+            tokenUri: "https://metadata.example.com/456",
+            image: null,
+          },
+        ],
+      };
+
+      globalThis.fetch = jest.fn().mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(rawAlchemyResponse),
+      });
+
+      const result = await fetchOwnerNfts(1, "0x123", "0xowner");
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({
+        tokenId: "123",
+        tokenType: "ERC1155",
+        name: null,
+        tokenUri: null,
+        image: { thumbnailUrl: "https://img.example.com/123.png" },
+      });
+      expect(result[1]).toEqual({
+        tokenId: "456",
+        tokenType: "ERC721",
+        name: "Cool NFT",
+        tokenUri: "https://metadata.example.com/456",
+        image: null,
+      });
     });
   });
 });

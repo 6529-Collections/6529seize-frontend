@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getNftsForContractAndOwner } from "@/services/alchemy-api";
+import { getAlchemyApiKey } from "@/config/alchemyEnv";
 
 const NO_STORE_HEADERS = { "Cache-Control": "no-store" };
+
+function resolveNetworkByChainId(chainId: number): string {
+  if (chainId === 11155111) return "eth-sepolia";
+  if (chainId === 5) return "eth-goerli";
+  return "eth-mainnet";
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -27,16 +33,27 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const nfts = await getNftsForContractAndOwner(
-      chainId,
-      contract,
-      owner,
-      [],
-      pageKey,
-      0,
-      request.signal
-    );
-    return NextResponse.json(nfts, { headers: NO_STORE_HEADERS });
+    const apiKey = getAlchemyApiKey();
+    const network = resolveNetworkByChainId(chainId);
+    let url = `https://${network}.g.alchemy.com/nft/v3/${apiKey}/getNFTsForOwner?owner=${owner}&contractAddresses[]=${contract}`;
+    if (pageKey) {
+      url += `&pageKey=${pageKey}`;
+    }
+
+    const response = await fetch(url, {
+      headers: { accept: "application/json" },
+      signal: request.signal,
+    });
+
+    if (!response.ok) {
+      return NextResponse.json(
+        { error: "Failed to fetch NFTs for owner" },
+        { status: response.status, headers: NO_STORE_HEADERS }
+      );
+    }
+
+    const payload = await response.json();
+    return NextResponse.json(payload, { headers: NO_STORE_HEADERS });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to fetch NFTs for owner";
