@@ -1,7 +1,4 @@
-import type {
-  Suggestion,
-  SupportedChain,
-} from "@/types/nft";
+import type { Suggestion, SupportedChain } from "@/types/nft";
 
 export type SearchContractsParams = {
   query: string;
@@ -123,7 +120,9 @@ export type AlchemyOwnedNftAcquiredAt = {
 };
 
 export type AlchemyTokenMetadataEntry = {
-  contract?: (AlchemyContractMetadata & { spamClassifications?: string[] | null }) | null;
+  contract?:
+    | (AlchemyContractMetadata & { spamClassifications?: string[] | null })
+    | null;
   tokenId?: string;
   tokenType?: string | null;
   title?: string | null;
@@ -156,6 +155,14 @@ export type AlchemyTokenMetadataResponse = {
 
 export type AlchemyOwnedNft = AlchemyTokenMetadataEntry & {
   balance?: string | null;
+};
+
+export type OwnerNft = {
+  tokenId: string;
+  tokenType: string | null;
+  name: string | null;
+  tokenUri: string | null;
+  image: AlchemyNftMedia | null;
 };
 
 export type AlchemyGetNftsForOwnerResponse = {

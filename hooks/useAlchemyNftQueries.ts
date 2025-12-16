@@ -9,30 +9,28 @@ import { useEffect, useMemo } from "react";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { publicEnv } from "@/config/env";
-import {
-  normaliseAddress,
-  processContractMetadataResponse,
-  processOwnerNftsResponse,
-  processSearchResponse,
-  processTokenMetadataResponse,
-  type OwnerNft as OwnerNftType,
-  type SearchContractsResult,
-} from "@/helpers/alchemy/response-processing";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import type {
   AlchemyContractMetadataResponse,
   AlchemyGetNftsForOwnerResponse,
   AlchemySearchResponse,
   AlchemyTokenMetadataResponse,
+  OwnerNft,
+  SearchContractsResult,
 } from "@/services/alchemy/types";
+import {
+  normaliseAddress,
+  processContractMetadataResponse,
+  processOwnerNftsResponse,
+  processSearchResponse,
+  processTokenMetadataResponse,
+} from "@/services/alchemy/utils";
 import type {
   ContractOverview,
   Suggestion,
   SupportedChain,
   TokenMetadata,
 } from "@/types/nft";
-
-export type OwnerNft = OwnerNftType;
 
 const SUGGESTION_TTL = 60_000;
 const CONTRACT_TTL = 5 * 60_000;
@@ -438,7 +436,7 @@ export async function fetchOwnerNfts(
   contract: string,
   owner: string,
   signal?: AbortSignal
-): Promise<OwnerNftType[]> {
+): Promise<OwnerNft[]> {
   const search = new URLSearchParams();
   search.set("chainId", String(chainId));
   search.set("contract", contract);
