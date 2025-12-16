@@ -18,10 +18,14 @@ import { useSidebarState } from "../../../../hooks/useSidebarState";
 import {
   ChevronDoubleLeftIcon,
   ArrowLeftIcon,
+  MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import WavePicture from "../../../waves/WavePicture";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { createBreakpoint } from "react-use";
+import WaveDropsSearchModal from "@/components/waves/drops/search/WaveDropsSearchModal";
+import { MyStreamWaveTab } from "@/types/waves.types";
+import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
@@ -41,6 +45,8 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
   const pathname = usePathname();
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "S";
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const waveChatScroll = useWaveChatScrollOptional();
 
   const {
     isMemesWave,
@@ -104,12 +110,24 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
     router.push(newUrl, { scroll: false });
   };
 
+  const handleSearchSelect = (serialNo: number) => {
+    setActiveContentTab(MyStreamWaveTab.CHAT);
+    if (waveChatScroll) {
+      waveChatScroll.requestScrollToSerialNo({ waveId: wave.id, serialNo });
+      return;
+    }
+
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    params.set("serialNo", String(serialNo));
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
   return (
     <>
       {" "}
       <div className="tw-w-full tw-flex tw-flex-col tw-bg-iron-950">
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-px-2 sm:tw-px-4 tw-py-3 tw-overflow-x-hidden">
-          <div className="tw-flex tw-items-center">
+          <div className="tw-flex tw-items-center tw-min-w-0">
             {isMobile && (
               <button
                 onClick={handleMobileBack}
@@ -119,18 +137,50 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
                 <ArrowLeftIcon className="tw-w-6 tw-h-6 tw-flex-shrink-0" />
               </button>
             )}
-            <div className="tw-size-6 lg:tw-size-9 tw-flex-shrink-0 tw-ring-1 tw-ring-offset-1 tw-ring-offset-iron-950 tw-ring-white/30 tw-rounded-full">
-              <WavePicture
-                name={wave.name}
-                picture={wave.picture}
-                contributors={wave.contributors_overview.map((c) => ({
-                  pfp: c.contributor_pfp,
-                }))}
-              />
-            </div>
-            <h1 className="tw-ml-3 tw-text-sm lg:tw-text-xl tw-font-semibold tw-text-white/95 tw-tracking-tight tw-mb-0 tw-truncate">
-              {wave.name}
-            </h1>
+            {isMobile ? (
+              <button
+                type="button"
+                onClick={() => setIsSearchOpen(true)}
+                aria-label="Search messages in this wave"
+                className="tw-flex tw-items-center tw-bg-transparent tw-border-0 tw-p-0 tw-text-left tw-min-w-0"
+              >
+                <div className="tw-size-6 lg:tw-size-9 tw-flex-shrink-0 tw-ring-1 tw-ring-offset-1 tw-ring-offset-iron-950 tw-ring-white/30 tw-rounded-full">
+                  <WavePicture
+                    name={wave.name}
+                    picture={wave.picture}
+                    contributors={wave.contributors_overview.map((c) => ({
+                      pfp: c.contributor_pfp,
+                    }))}
+                  />
+                </div>
+                <h1 className="tw-ml-3 tw-text-sm lg:tw-text-xl tw-font-semibold tw-text-white/95 tw-tracking-tight tw-mb-0 tw-truncate">
+                  {wave.name}
+                </h1>
+              </button>
+            ) : (
+              <>
+                <div className="tw-size-6 lg:tw-size-9 tw-flex-shrink-0 tw-ring-1 tw-ring-offset-1 tw-ring-offset-iron-950 tw-ring-white/30 tw-rounded-full">
+                  <WavePicture
+                    name={wave.name}
+                    picture={wave.picture}
+                    contributors={wave.contributors_overview.map((c) => ({
+                      pfp: c.contributor_pfp,
+                    }))}
+                  />
+                </div>
+                <h1 className="tw-ml-3 tw-text-sm lg:tw-text-xl tw-font-semibold tw-text-white/95 tw-tracking-tight tw-mb-0 tw-truncate">
+                  {wave.name}
+                </h1>
+                <button
+                  type="button"
+                  onClick={() => setIsSearchOpen(true)}
+                  aria-label="Search messages in this wave"
+                  className="tw-ml-2 tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white tw-transition tw-duration-150"
+                >
+                  <MagnifyingGlassIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+                </button>
+              </>
+            )}
           </div>
           <div className="tw-flex tw-items-center tw-gap-x-2 tw-relative tw-pr-10">
             <div className="tw-hidden lg:tw-block">
@@ -174,6 +224,12 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
         isOpen={isMemesModalOpen}
         wave={wave}
         onClose={() => setIsMemesModalOpen(false)}
+      />
+      <WaveDropsSearchModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        wave={wave}
+        onSelectSerialNo={handleSearchSelect}
       />
     </>
   );
