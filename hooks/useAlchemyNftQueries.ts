@@ -15,14 +15,16 @@ import {
   processOwnerNftsResponse,
   processSearchResponse,
   processTokenMetadataResponse,
-  type AlchemyContractMetadataResponse,
-  type AlchemyGetNftsForOwnerResponse,
-  type AlchemySearchResponse,
-  type AlchemyTokenMetadataResponse,
   type OwnerNft as OwnerNftType,
   type SearchContractsResult,
 } from "@/helpers/alchemy/response-processing";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import type {
+  AlchemyContractMetadataResponse,
+  AlchemyGetNftsForOwnerResponse,
+  AlchemySearchResponse,
+  AlchemyTokenMetadataResponse,
+} from "@/services/alchemy/types";
 import type {
   ContractOverview,
   Suggestion,
