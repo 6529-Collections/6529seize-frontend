@@ -13,18 +13,7 @@ interface BaseTDH {
   boost: number;
   boost_breakdown: {
     memes_card_sets: TDHBoostBreakdown;
-    memes_szn1: TDHBoostBreakdown;
-    memes_szn2: TDHBoostBreakdown;
-    memes_szn3: TDHBoostBreakdown;
-    memes_szn4: TDHBoostBreakdown;
-    memes_szn5: TDHBoostBreakdown;
-    memes_szn6: TDHBoostBreakdown;
-    memes_szn7: TDHBoostBreakdown;
-    memes_szn8: TDHBoostBreakdown;
-    memes_szn9: TDHBoostBreakdown;
-    memes_szn10: TDHBoostBreakdown;
-    memes_szn11: TDHBoostBreakdown;
-    memes_szn12: TDHBoostBreakdown;
+    [key: `memes_szn${number}`]: TDHBoostBreakdown;
     memes_genesis: TDHBoostBreakdown;
     memes_nakamoto: TDHBoostBreakdown;
     gradients: TDHBoostBreakdown;
