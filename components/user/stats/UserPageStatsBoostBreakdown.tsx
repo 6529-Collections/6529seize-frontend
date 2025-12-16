@@ -68,22 +68,22 @@ export default function UserPageStatsBoostBreakdown({
     const seasonKeys = Object.keys(bb)
       .filter((key): key is `memes_szn${number}` => /^memes_szn\d+$/.test(key))
       .sort((a, b) => {
-        const numA = parseInt(a.replace("memes_szn", ""), 10);
-        const numB = parseInt(b.replace("memes_szn", ""), 10);
+        const numA = Number.parseInt(a.replace("memes_szn", ""), 10);
+        const numB = Number.parseInt(b.replace("memes_szn", ""), 10);
         return numA - numB;
       });
 
-    const extraRows: React.ReactNode[] = [];
-
-    for (const key of seasonKeys) {
+    const extraRows = seasonKeys.flatMap((key) => {
       const sznNum = key.replace("memes_szn", "");
-      extraRows.push(getMemeRow(`SZN${sznNum}`, bb[key]));
-
+      const rows = [getMemeRow(`SZN${sznNum}`, bb[key])];
       if (key === "memes_szn1" && !bb[key]?.acquired) {
-        extraRows.push(getMemeRow("Genesis Set", bb.memes_genesis));
-        extraRows.push(getMemeRow("Nakamoto", bb.memes_nakamoto));
+        rows.push(
+          getMemeRow("Genesis Set", bb.memes_genesis),
+          getMemeRow("Nakamoto", bb.memes_nakamoto)
+        );
       }
-    }
+      return rows;
+    });
 
     return [...baseRows, ...extraRows];
   }
