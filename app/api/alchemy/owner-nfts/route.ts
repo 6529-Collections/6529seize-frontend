@@ -35,10 +35,13 @@ export async function GET(request: NextRequest) {
   try {
     const apiKey = getAlchemyApiKey();
     const network = resolveNetworkByChainId(chainId);
-    let url = `https://${network}.g.alchemy.com/nft/v3/${apiKey}/getNFTsForOwner?owner=${owner}&contractAddresses[]=${contract}`;
+    const params = new URLSearchParams();
+    params.set("owner", owner);
+    params.append("contractAddresses[]", contract);
     if (pageKey) {
-      url += `&pageKey=${pageKey}`;
+      params.set("pageKey", pageKey);
     }
+    const url = `https://${network}.g.alchemy.com/nft/v3/${apiKey}/getNFTsForOwner?${params.toString()}`;
 
     const response = await fetch(url, {
       headers: { accept: "application/json" },

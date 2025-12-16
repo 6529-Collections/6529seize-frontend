@@ -39,10 +39,18 @@ export async function POST(request: NextRequest) {
   let tokensToFetch: { contractAddress: string; tokenId: string }[] = [];
 
   if (tokens && tokens.length > 0) {
-    tokensToFetch = tokens.map((t) => ({
-      contractAddress: t.contract,
-      tokenId: t.tokenId,
-    }));
+    tokensToFetch = tokens
+      .filter((t) => isValidEthAddress(t.contract))
+      .map((t) => ({
+        contractAddress: normaliseAddress(t.contract) ?? t.contract,
+        tokenId: t.tokenId,
+      }));
+    if (tokensToFetch.length === 0) {
+      return NextResponse.json(
+        { error: "No valid contract addresses provided" },
+        { status: 400, headers: NO_STORE_HEADERS }
+      );
+    }
   } else if (address && Array.isArray(tokenIds) && tokenIds.length > 0) {
     if (!isValidEthAddress(address)) {
       return NextResponse.json(
