@@ -2,127 +2,35 @@ import { getAddress } from "viem";
 
 import { isValidEthAddress } from "@/helpers/Helpers";
 import type {
-  ContractOverview,
-  Suggestion,
-  TokenMetadata,
-} from "@/types/nft";
+  AlchemyContractMetadata,
+  AlchemyContractMetadataResponse,
+  AlchemyContractResult,
+  AlchemyGetNftsForOwnerResponse,
+  AlchemyNftMedia,
+  AlchemyOpenSeaMetadata,
+  AlchemyOwnedNft,
+  AlchemySearchResponse,
+  AlchemyTokenMetadataEntry,
+  AlchemyTokenMetadataResponse,
+} from "@/services/alchemy/types";
+import type { ContractOverview, Suggestion, TokenMetadata } from "@/types/nft";
 
-export type AlchemyOpenSeaMetadata = {
-  imageUrl?: string | null;
-  bannerImageUrl?: string | null;
-  collectionName?: string | null;
-  safelistRequestStatus?: string | null;
-  floorPrice?: number | { eth?: number | string | null } | null;
-  description?: string | null;
+export type {
+  AlchemyContractMetadataResponse,
+  AlchemyGetNftsForOwnerResponse,
+  AlchemySearchResponse,
+  AlchemyTokenMetadataResponse,
 };
 
-export type AlchemyContractMetadata = {
-  address?: string | null;
-  name?: string | null;
-  symbol?: string | null;
-  tokenType?: string | null;
-  totalSupply?: string | null;
-  image?: { cachedUrl?: string | null; thumbnailUrl?: string | null } | null;
-  bannerImageUrl?: string | null;
-  description?: string | null;
-  contractDeployer?: string | null;
-  deployedBlockNumber?: number | null;
-  openSeaMetadata?: AlchemyOpenSeaMetadata;
-  openseaMetadata?: AlchemyOpenSeaMetadata;
-  openSea?: AlchemyOpenSeaMetadata;
-  opensea?: AlchemyOpenSeaMetadata;
-  isSpam?: boolean;
-  spamInfo?: { isSpam?: boolean };
-};
-
-export type AlchemyContractResult = {
-  address?: string;
-  contractAddress?: string;
-  contractDeployer?: string | null;
-  isSpam?: boolean;
-  spamInfo?: { isSpam?: boolean };
-  spamClassifications?: string[] | null;
-  contractMetadata?: AlchemyContractMetadata;
-  openSeaMetadata?: AlchemyOpenSeaMetadata;
-  openseaMetadata?: AlchemyOpenSeaMetadata;
-} & AlchemyContractMetadata;
-
-export type AlchemySearchResponse = {
-  contracts?: AlchemyContractResult[];
-  pageKey?: string;
-};
-
-export type AlchemyContractMetadataResponse = AlchemyContractMetadata & {
-  contractMetadata?: AlchemyContractMetadata | null;
-  openSeaMetadata?: AlchemyOpenSeaMetadata | null;
-  openseaMetadata?: AlchemyOpenSeaMetadata | null;
-  address?: string | null;
-  contractAddress?: string | null;
-  isSpam?: boolean;
-};
-
-export type AlchemyNftMedia = {
-  cachedUrl?: string | null;
-  thumbnailUrl?: string | null;
-  originalUrl?: string | null;
-  pngUrl?: string | null;
-  gateway?: string | null;
-  raw?: string | null;
-  contentType?: string | null;
-  size?: number | null;
-};
-
-export type AlchemyNftMetadata = {
-  image?: string | null;
-  name?: string | null;
-  description?: string | null;
-  [key: string]: unknown;
-};
-
-export type AlchemyTokenMetadataEntry = {
-  contract?: (AlchemyContractMetadata & { spamClassifications?: string[] | null }) | null;
-  tokenId?: string;
-  tokenType?: string | null;
-  title?: string | null;
-  name?: string | null;
-  description?: string | null;
-  tokenUri?: string | null;
-  image?: AlchemyNftMedia | null;
-  animation?: AlchemyNftMedia | null;
-  media?: AlchemyNftMedia[] | null;
-  metadata?: AlchemyNftMetadata | null;
-  raw?: {
-    tokenUri?: string | null;
-    metadata?: AlchemyNftMetadata | null;
-    error?: string | null;
-  } | null;
-  collection?: { name?: string | null } | null;
-  isSpam?: boolean;
-  spamInfo?: { isSpam?: boolean } | null;
-};
-
-export type AlchemyTokenMetadataResponse = {
-  tokens?: AlchemyTokenMetadataEntry[];
-  nfts?: AlchemyTokenMetadataEntry[];
-};
-
-export type AlchemyOwnedNft = AlchemyTokenMetadataEntry & {
-  balance?: string | null;
-};
-
-export type AlchemyGetNftsForOwnerResponse = {
-  ownedNfts: AlchemyOwnedNft[];
-  pageKey?: string;
-  totalCount?: number;
-  error?: { code?: number; message?: string };
-};
-
-type OpenSeaMetadataSource = {
-  openSeaMetadata?: AlchemyOpenSeaMetadata | null;
-  openseaMetadata?: AlchemyOpenSeaMetadata | null;
-  openSea?: AlchemyOpenSeaMetadata | null;
-  opensea?: AlchemyOpenSeaMetadata | null;
-} | null | undefined;
+type OpenSeaMetadataSource =
+  | {
+      openSeaMetadata?: AlchemyOpenSeaMetadata | null;
+      openseaMetadata?: AlchemyOpenSeaMetadata | null;
+      openSea?: AlchemyOpenSeaMetadata | null;
+      opensea?: AlchemyOpenSeaMetadata | null;
+    }
+  | null
+  | undefined;
 
 export function normaliseAddress(
   address?: string | null
@@ -177,8 +85,8 @@ function pickImage(source?: {
     return source.image.thumbnailUrl;
   }
   if (source.media && source.media.length > 0) {
-    const mediaItem = source.media.find((item) => item?.thumbnailUrl) ??
-      source.media[0];
+    const mediaItem =
+      source.media.find((item) => item?.thumbnailUrl) ?? source.media[0];
     if (mediaItem?.thumbnailUrl) {
       return mediaItem.thumbnailUrl;
     }
@@ -203,8 +111,8 @@ function pickThumbnail(source?: {
     return source.image.cachedUrl;
   }
   if (source.media && source.media.length > 0) {
-    const mediaItem = source.media.find((item) => item?.thumbnailUrl) ??
-      source.media[0];
+    const mediaItem =
+      source.media.find((item) => item?.thumbnailUrl) ?? source.media[0];
     if (mediaItem?.thumbnailUrl) {
       return mediaItem.thumbnailUrl;
     }
@@ -212,9 +120,7 @@ function pickThumbnail(source?: {
   return null;
 }
 
-function toSafelist(
-  status: string | null | undefined
-): Suggestion["safelist"] {
+function toSafelist(status: string | null | undefined): Suggestion["safelist"] {
   if (!status) {
     return undefined;
   }
@@ -331,8 +237,7 @@ export function processContractMetadataResponse(
   if (!payload) {
     return null;
   }
-  const baseMeta: AlchemyContractMetadata =
-    payload.contractMetadata ?? payload;
+  const baseMeta: AlchemyContractMetadata = payload.contractMetadata ?? payload;
   const openSeaMetadata = resolveOpenSeaMetadata(
     payload,
     payload.contractMetadata,
@@ -344,8 +249,7 @@ export function processContractMetadataResponse(
     address: checksum,
     contractAddress: checksum,
     openSeaMetadata,
-    isSpam:
-      payload.isSpam ?? baseMeta.isSpam ?? baseMeta.spamInfo?.isSpam,
+    isSpam: payload.isSpam ?? baseMeta.isSpam ?? baseMeta.spamInfo?.isSpam,
   };
   const suggestion = extractContract(contract);
   if (!suggestion) {
@@ -432,4 +336,3 @@ export function processTokenMetadataResponse(
   }
   return results;
 }
-
