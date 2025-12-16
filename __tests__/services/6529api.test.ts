@@ -9,23 +9,23 @@ jest.mock("@/services/auth/auth.utils", () => ({ getStagingAuth: jest.fn() }));
 const { fetchUrl, fetchAllPages, postData, postFormData } = api;
 
 function getHeaders(callIndex = 0): Headers {
-  return (global.fetch as jest.Mock).mock.calls[callIndex][1].headers;
+  return (globalThis.fetch as jest.Mock).mock.calls[callIndex][1].headers;
 }
 
 describe("6529api service", () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    (global as any).fetch = jest.fn();
+    (globalThis as any).fetch = jest.fn();
   });
 
   it("fetchUrl removes cookie on 401 and returns json", async () => {
     (getStagingAuth as jest.Mock).mockReturnValue("token");
     const json = jest.fn().mockResolvedValue({ ok: true });
-    (global.fetch as jest.Mock).mockResolvedValue({ status: 401, json });
+    (globalThis.fetch as jest.Mock).mockResolvedValue({ status: 401, json });
 
     const result = await fetchUrl("/foo");
 
-    expect(global.fetch).toHaveBeenCalledWith("/foo", expect.any(Object));
+    expect(globalThis.fetch).toHaveBeenCalledWith("/foo", expect.any(Object));
     expect(getHeaders().get("x-6529-auth")).toBe("token");
     expect(Cookies.remove).toHaveBeenCalledWith(API_AUTH_COOKIE);
     expect(result).toEqual({ ok: true });
@@ -33,7 +33,7 @@ describe("6529api service", () => {
 
   it("fetchAllPages concatenates pages", async () => {
     (getStagingAuth as jest.Mock).mockReturnValue(null);
-    (global.fetch as jest.Mock)
+    (globalThis.fetch as jest.Mock)
       .mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -47,13 +47,13 @@ describe("6529api service", () => {
 
     const result = await fetchAllPages("http://localhost/start");
 
-    expect(global.fetch).toHaveBeenCalledTimes(2);
-    expect(global.fetch).toHaveBeenNthCalledWith(
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
       1,
       "http://localhost/start",
       expect.any(Object)
     );
-    expect(global.fetch).toHaveBeenNthCalledWith(
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
       2,
       "http://localhost/next",
       expect.any(Object)
@@ -66,7 +66,7 @@ describe("6529api service", () => {
   it("postData sends JSON body and returns status/response", async () => {
     (getStagingAuth as jest.Mock).mockReturnValue(null);
     const json = jest.fn().mockResolvedValue({ done: true });
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       status: 201,
       json,
@@ -74,7 +74,7 @@ describe("6529api service", () => {
 
     const result = await postData("/bar", { foo: "bar" });
 
-    expect(global.fetch).toHaveBeenCalledWith("/bar", expect.any(Object));
+    expect(globalThis.fetch).toHaveBeenCalledWith("/bar", expect.any(Object));
     expect(getHeaders().get("Content-Type")).toBe("application/json");
     expect(getHeaders().get("x-6529-auth")).toBeNull();
     expect(result).toEqual({ status: 201, response: { done: true } });
@@ -84,7 +84,7 @@ describe("6529api service", () => {
     (getStagingAuth as jest.Mock).mockReturnValue("tok");
     const formData = new FormData();
     const json = jest.fn().mockResolvedValue({ ok: true });
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       status: 200,
       json,
@@ -92,7 +92,7 @@ describe("6529api service", () => {
 
     const result = await postFormData("/fd", formData);
 
-    expect(global.fetch).toHaveBeenCalledWith("/fd", expect.any(Object));
+    expect(globalThis.fetch).toHaveBeenCalledWith("/fd", expect.any(Object));
     expect(getHeaders().get("x-6529-auth")).toBe("tok");
     expect(result).toEqual({ status: 200, response: { ok: true } });
   });
