@@ -65,6 +65,7 @@ export * from '../models/ApiDropType';
 export * from '../models/ApiDropVote';
 export * from '../models/ApiDropWinningContext';
 export * from '../models/ApiDropWithoutWave';
+export * from '../models/ApiDropWithoutWavesPageWithoutCount';
 export * from '../models/ApiDropsLeaderboardPage';
 export * from '../models/ApiDropsPage';
 export * from '../models/ApiFeedItem';
@@ -261,6 +262,7 @@ import { ApiDropType } from '../models/ApiDropType';
 import { ApiDropVote } from '../models/ApiDropVote';
 import { ApiDropWinningContext } from '../models/ApiDropWinningContext';
 import { ApiDropWithoutWave                         } from '../models/ApiDropWithoutWave';
+import { ApiDropWithoutWavesPageWithoutCount } from '../models/ApiDropWithoutWavesPageWithoutCount';
 import { ApiDropsLeaderboardPage } from '../models/ApiDropsLeaderboardPage';
 import { ApiDropsPage } from '../models/ApiDropsPage';
 import { ApiFeedItem    } from '../models/ApiFeedItem';
@@ -499,6 +501,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDropVote": ApiDropVote,
     "ApiDropWinningContext": ApiDropWinningContext,
     "ApiDropWithoutWave": ApiDropWithoutWave,
+    "ApiDropWithoutWavesPageWithoutCount": ApiDropWithoutWavesPageWithoutCount,
     "ApiDropsLeaderboardPage": ApiDropsLeaderboardPage,
     "ApiDropsPage": ApiDropsPage,
     "ApiFeedItem": ApiFeedItem,
