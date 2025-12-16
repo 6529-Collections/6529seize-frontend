@@ -11,14 +11,14 @@ jest.mock("@/config/env", () => ({
 }));
 
 describe("useAlchemyNftQueries", () => {
-  const originalFetch = global.fetch;
+  const originalFetch = globalThis.fetch;
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   afterEach(() => {
-    global.fetch = originalFetch;
+    globalThis.fetch = originalFetch;
   });
 
   describe("fetchOwnerNfts", () => {
@@ -33,7 +33,7 @@ describe("useAlchemyNftQueries", () => {
     ];
 
     it("should return data from primary endpoint when successful", async () => {
-      global.fetch = jest.fn().mockResolvedValueOnce({
+      globalThis.fetch = jest.fn().mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockNfts),
       });
@@ -41,15 +41,15 @@ describe("useAlchemyNftQueries", () => {
       const result = await fetchOwnerNfts(1, "0x123", "0xowner");
 
       expect(result).toEqual(mockNfts);
-      expect(global.fetch).toHaveBeenCalledTimes(1);
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         "/api/alchemy/owner-nfts?chainId=1&contract=0x123&owner=0xowner",
         { signal: undefined }
       );
     });
 
     it("should fallback to backend proxy when primary endpoint fails with non-ok response", async () => {
-      global.fetch = jest
+      globalThis.fetch = jest
         .fn()
         .mockResolvedValueOnce({
           ok: false,
@@ -63,13 +63,13 @@ describe("useAlchemyNftQueries", () => {
       const result = await fetchOwnerNfts(1, "0x123", "0xowner");
 
       expect(result).toEqual(mockNfts);
-      expect(global.fetch).toHaveBeenCalledTimes(2);
-      expect(global.fetch).toHaveBeenNthCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+      expect(globalThis.fetch).toHaveBeenNthCalledWith(
         1,
         "/api/alchemy/owner-nfts?chainId=1&contract=0x123&owner=0xowner",
         { signal: undefined }
       );
-      expect(global.fetch).toHaveBeenNthCalledWith(
+      expect(globalThis.fetch).toHaveBeenNthCalledWith(
         2,
         `${MOCK_API_ENDPOINT}/alchemy-proxy/owner-nfts?chainId=1&contract=0x123&owner=0xowner`,
         { signal: undefined }
@@ -77,7 +77,7 @@ describe("useAlchemyNftQueries", () => {
     });
 
     it("should fallback to backend proxy when primary endpoint throws network error", async () => {
-      global.fetch = jest
+      globalThis.fetch = jest
         .fn()
         .mockRejectedValueOnce(new Error("Network error"))
         .mockResolvedValueOnce({
@@ -88,11 +88,11 @@ describe("useAlchemyNftQueries", () => {
       const result = await fetchOwnerNfts(1, "0x123", "0xowner");
 
       expect(result).toEqual(mockNfts);
-      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(globalThis.fetch).toHaveBeenCalledTimes(2);
     });
 
     it("should throw error when both primary and fallback fail", async () => {
-      global.fetch = jest
+      globalThis.fetch = jest
         .fn()
         .mockResolvedValueOnce({
           ok: false,
@@ -106,32 +106,32 @@ describe("useAlchemyNftQueries", () => {
       await expect(fetchOwnerNfts(1, "0x123", "0xowner")).rejects.toThrow(
         "Request failed with status 500"
       );
-      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(globalThis.fetch).toHaveBeenCalledTimes(2);
     });
 
     it("should pass abort signal to fetch calls", async () => {
       const controller = new AbortController();
-      global.fetch = jest.fn().mockResolvedValueOnce({
+      globalThis.fetch = jest.fn().mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockNfts),
       });
 
       await fetchOwnerNfts(1, "0x123", "0xowner", controller.signal);
 
-      expect(global.fetch).toHaveBeenCalledWith(expect.any(String), {
+      expect(globalThis.fetch).toHaveBeenCalledWith(expect.any(String), {
         signal: controller.signal,
       });
     });
 
     it("should handle different chain IDs correctly", async () => {
-      global.fetch = jest.fn().mockResolvedValueOnce({
+      globalThis.fetch = jest.fn().mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockNfts),
       });
 
       await fetchOwnerNfts(11155111, "0x123", "0xowner");
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         "/api/alchemy/owner-nfts?chainId=11155111&contract=0x123&owner=0xowner",
         { signal: undefined }
       );
@@ -142,19 +142,19 @@ describe("useAlchemyNftQueries", () => {
         "The operation was aborted.",
         "AbortError"
       );
-      global.fetch = jest.fn().mockRejectedValueOnce(abortError);
+      globalThis.fetch = jest.fn().mockRejectedValueOnce(abortError);
 
       await expect(fetchOwnerNfts(1, "0x123", "0xowner")).rejects.toThrow();
-      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(globalThis.fetch).toHaveBeenCalledTimes(1);
     });
 
     it("should NOT fallback when request throws Error with name AbortError", async () => {
       const abortError = new Error("The operation was aborted.");
       abortError.name = "AbortError";
-      global.fetch = jest.fn().mockRejectedValueOnce(abortError);
+      globalThis.fetch = jest.fn().mockRejectedValueOnce(abortError);
 
       await expect(fetchOwnerNfts(1, "0x123", "0xowner")).rejects.toThrow();
-      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(globalThis.fetch).toHaveBeenCalledTimes(1);
     });
   });
 });
