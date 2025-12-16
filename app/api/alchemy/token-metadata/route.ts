@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
 import { isValidEthAddress } from "@/helpers/Helpers";
-import { normaliseAddress } from "@/helpers/alchemy/response-processing";
+import { normaliseAddress } from "@/services/alchemy/utils";
 import type { SupportedChain } from "@/types/nft";
 
 const NO_STORE_HEADERS = { "Cache-Control": "no-store" };

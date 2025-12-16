@@ -21,8 +21,9 @@ import {
 import { publicEnv } from "@/config/env";
 import { NextGenCollection } from "@/entities/INextgen";
 import { areEqualAddresses, getNetworkName } from "@/helpers/Helpers";
-import { fetchOwnerNfts, type OwnerNft } from "@/hooks/useAlchemyNftQueries";
+import { fetchOwnerNfts } from "@/hooks/useAlchemyNftQueries";
 import { fetchUrl } from "@/services/6529api";
+import type { OwnerNft } from "@/services/alchemy/types";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
