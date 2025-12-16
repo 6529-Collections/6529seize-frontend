@@ -1,21 +1,19 @@
 import WillowShield from "@/app/museum/genesis/willow-shield/page";
 import JoinOm from "@/app/om/join-om/page";
 import PartnershipRequest from "@/app/om/partnership-request/page";
-import ConsolidatedMetrics from "@/app/open-data/network-metrics/page";
 import MemeSubscriptions from "@/app/open-data/meme-subscriptions/page";
+import ConsolidatedMetrics from "@/app/open-data/network-metrics/page";
 import AddRememes from "@/app/rememes/add/page";
 import SlideInitiatives from "@/app/slide-page/6529-initiatives/page";
 import AppWallets from "@/app/tools/app-wallets/page";
 import { AppWalletsProvider } from "@/components/app-wallets/AppWalletsContext";
 import { AuthContext } from "@/components/auth/Auth";
-import { NextGenCollection } from "@/entities/INextgen";
-import NextgenCollectionMintingPlan from "@/components/nextGen/collections/collectionParts/mint/NextgenCollectionMintingPlan";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
+import { redirect } from "next/navigation";
 import React, { useMemo } from "react";
 import { mainnet } from "viem/chains";
 import { WagmiProvider, createConfig, http } from "wagmi";
-import { redirect } from "next/navigation";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
 jest.mock("@/components/pdfViewer/PdfViewer", () => () => (
@@ -31,7 +29,11 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(() => Promise.resolve({ data: [] })),
 }));
 global.fetch = jest.fn(() =>
-  Promise.resolve({ json: () => Promise.resolve({}) })
+  Promise.resolve({
+    ok: true,
+    status: 200,
+    json: () => Promise.resolve({ data: [], count: 0 }),
+  })
 ) as any;
 
 // Mock TitleContext
@@ -75,7 +77,8 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
     showBanner: false,
     setShowBanner: jest.fn(),
   }),
-  CookieConsentProvider: ({ children }: { children: React.ReactNode }) => children,
+  CookieConsentProvider: ({ children }: { children: React.ReactNode }) =>
+    children,
 }));
 
 const TestProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -104,8 +107,12 @@ describe("misc pages render", () => {
 
   it("renders NextGen distribution plan page", () => {
     // Mock the component itself since it has complex dependencies
-    const MockComponent = () => <div data-testid="nextgen-distribution-plan">NextGen Distribution Plan</div>;
-    
+    const MockComponent = () => (
+      <div data-testid="nextgen-distribution-plan">
+        NextGen Distribution Plan
+      </div>
+    );
+
     render(
       <TestProvider>
         <MockComponent />
@@ -174,13 +181,11 @@ describe("misc pages render", () => {
     const Wrapper = ({ children }: { children: React.ReactNode }) => (
       <WagmiProvider config={mockConfig}>
         <QueryClientProvider client={queryClient}>
-          <TestProvider>
-            {children}
-          </TestProvider>
+          <TestProvider>{children}</TestProvider>
         </QueryClientProvider>
       </WagmiProvider>
     );
-    
+
     render(<AddRememes />, { wrapper: Wrapper });
     expect(screen.getByText(/add ReMemes/i)).toBeInTheDocument();
   });
