@@ -17,10 +17,12 @@ export default function WaveDropsSearchModal({
   isOpen,
   onClose,
   wave,
+  onSelectSerialNo,
 }: {
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly wave: ApiWave;
+  readonly onSelectSerialNo: (serialNo: number) => void;
 }) {
   const modalRef = useRef<HTMLDivElement>(null);
   useClickAway(modalRef, () => {
@@ -210,26 +212,37 @@ export default function WaveDropsSearchModal({
                         {results.map((drop, index) => {
                           const previousDrop = results[index - 1] ?? null;
                           const nextDrop = results[index + 1] ?? null;
+                          const serialNo = drop.serial_no;
+                          const canSelect = typeof serialNo === "number";
                           return (
-                            <div
+                            <button
+                              type="button"
                               key={drop.stableKey}
-                              className="tw-pointer-events-none tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50"
+                              disabled={!canSelect}
+                              onClick={() => {
+                                if (!canSelect) return;
+                                onSelectSerialNo(serialNo);
+                                onClose();
+                              }}
+                              className="tw-w-full tw-text-left tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-900/40 tw-transition tw-duration-150 disabled:tw-opacity-60 disabled:tw-cursor-not-allowed"
                             >
-                              <Drop
-                                drop={drop}
-                                previousDrop={previousDrop}
-                                nextDrop={nextDrop}
-                                showWaveInfo={false}
-                                activeDrop={null}
-                                showReplyAndQuote={false}
-                                location={DropLocation.WAVE}
-                                dropViewDropId={null}
-                                onReply={() => {}}
-                                onQuote={() => {}}
-                                onReplyClick={() => {}}
-                                onQuoteClick={() => {}}
-                              />
-                            </div>
+                              <div className="tw-pointer-events-none">
+                                <Drop
+                                  drop={drop}
+                                  previousDrop={previousDrop}
+                                  nextDrop={nextDrop}
+                                  showWaveInfo={false}
+                                  activeDrop={null}
+                                  showReplyAndQuote={false}
+                                  location={DropLocation.WAVE}
+                                  dropViewDropId={null}
+                                  onReply={() => {}}
+                                  onQuote={() => {}}
+                                  onReplyClick={() => {}}
+                                  onQuoteClick={() => {}}
+                                />
+                              </div>
+                            </button>
                           );
                         })}
                       </div>

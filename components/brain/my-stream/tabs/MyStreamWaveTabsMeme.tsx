@@ -24,6 +24,8 @@ import WavePicture from "../../../waves/WavePicture";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { createBreakpoint } from "react-use";
 import WaveDropsSearchModal from "@/components/waves/drops/search/WaveDropsSearchModal";
+import { MyStreamWaveTab } from "@/types/waves.types";
+import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
@@ -44,6 +46,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "S";
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const waveChatScroll = useWaveChatScrollOptional();
 
   const {
     isMemesWave,
@@ -105,6 +108,18 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
       ? `${pathname}?${params.toString()}`
       : pathname || "/waves";
     router.push(newUrl, { scroll: false });
+  };
+
+  const handleSearchSelect = (serialNo: number) => {
+    setActiveContentTab(MyStreamWaveTab.CHAT);
+    if (waveChatScroll) {
+      waveChatScroll.requestScrollToSerialNo({ waveId: wave.id, serialNo });
+      return;
+    }
+
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    params.set("serialNo", String(serialNo));
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   return (
@@ -214,6 +229,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
         wave={wave}
+        onSelectSerialNo={handleSearchSelect}
       />
     </>
   );
