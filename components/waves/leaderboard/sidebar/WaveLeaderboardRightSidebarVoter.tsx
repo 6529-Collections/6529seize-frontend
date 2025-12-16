@@ -2,8 +2,10 @@ import React from "react";
 import { ApiWaveVoter } from "@/generated/models/ApiWaveVoter";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import Link from "next/link";
+import Image from "next/image";
 import { Tooltip } from "react-tooltip";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { WAVE_VOTE_STATS_LABELS, WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 
 interface WaveLeaderboardRightSidebarVoterProps {
@@ -27,9 +29,11 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
           className="tw-flex tw-items-center tw-gap-2 tw-no-underline desktop-hover:hover:tw-underline tw-group desktop-hover:hover:tw-opacity-80 tw-transition-all tw-duration-300 tw-max-w-full tw-min-w-0"
         >
           {voter.voter.pfp ? (
-            <img
+            <Image
               src={voter.voter.pfp}
-              alt=""
+              alt={voter.voter.handle ?? "Voter"}
+              width={20}
+              height={20}
               className="tw-size-5 tw-rounded-md tw-ring-1 tw-ring-inset tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0 tw-object-contain"
             />
           ) : (
@@ -44,7 +48,7 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
       </div>
       <div className="tw-flex tw-items-center tw-gap-x-3 tw-ml-6">
         <>
-          <div 
+          <div
             className="tw-flex tw-items-center tw-gap-1"
             data-tooltip-id={`voter-votes-${voter.voter.handle}-${position}`}
           >
@@ -76,8 +80,8 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
           </Tooltip>
         </>
         <span className="tw-text-xs tw-text-iron-400 tw-whitespace-nowrap">
-          {formatNumberWithCommas(voter.absolute_votes_summed)} {creditType}{" "}
-          total
+          {formatNumberWithCommas(voter.absolute_votes_summed)} {WAVE_VOTING_LABELS[creditType]}{" "}
+          {WAVE_VOTE_STATS_LABELS.TOTAL}
         </span>
       </div>
     </div>
