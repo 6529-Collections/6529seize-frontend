@@ -6997,6 +6997,8 @@ components:
       enum:
         - TDH
         - REP
+        - XTDH
+        - TDH_PLUS_XTDH
     ApiWaveDecision:
       type: object
       required:

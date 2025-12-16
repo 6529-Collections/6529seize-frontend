@@ -46,10 +46,10 @@ describe('useWaveConfig', () => {
       expect(result.current.config.dates.isRolling).toBe(false);
     });
 
-    it('should initialize voting with TDH configuration', () => {
+    it('should initialize voting with TDH + XTDH configuration', () => {
       const { result } = renderHook(() => useWaveConfig());
 
-      expect(result.current.config.voting.type).toBe(ApiWaveCreditType.Tdh);
+      expect(result.current.config.voting.type).toBe(ApiWaveCreditType.TdhPlusXtdh);
       expect(result.current.config.voting.category).toBeNull();
       expect(result.current.config.voting.profileId).toBeNull();
       expect(result.current.config.voting.timeWeighted).toEqual({

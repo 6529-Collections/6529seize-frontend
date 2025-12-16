@@ -52,6 +52,7 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   initialDrop,
   onDropContentClick,
 }) => {
+
   const router = useRouter();
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
   const { connectedProfile } = useAuth();
