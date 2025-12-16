@@ -3,11 +3,14 @@ import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { Tooltip } from "react-tooltip";
 import Link from "next/link";
+import Image from "next/image";
 import {
   getScaledImageUri,
   ImageScale,
 } from "@/helpers/image.helpers";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
+import { WAVE_VOTING_LABELS, WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
 interface WaveLeaderboardDropRatersProps {
   readonly drop: ExtendedDrop;
@@ -19,6 +22,7 @@ export const WaveLeaderboardDropRaters: React.FC<
   const votersCountLabel = drop.raters_count === 1 ? "voter" : "voters";
   const userVote = drop.context_profile_context?.rating ?? 0;
   const isNegativeVote = userVote < 0;
+  const votingLabel = WAVE_VOTING_LABELS[drop.wave.voting_credit_type as ApiWaveCreditType];
 
   const topThreeRankStyles: { [key: number]: string } = {
     1: "tw-text-[#E8D48A]",
@@ -56,7 +60,7 @@ export const WaveLeaderboardDropRaters: React.FC<
           />
         </div>
         <span className="tw-text-iron-400 tw-text-sm tw-whitespace-nowrap">
-          {drop.wave.voting_credit_type} total
+          {votingLabel} {WAVE_VOTE_STATS_LABELS.TOTAL}
         </span>
       </div>
 
@@ -71,12 +75,14 @@ export const WaveLeaderboardDropRaters: React.FC<
               >
                 <Link href={`/${voter.profile.handle}`}>
                   {voter.profile.pfp ? (
-                    <img
+                    <Image
                       src={getScaledImageUri(
                         voter.profile.pfp,
                         ImageScale.W_AUTO_H_50
                       )}
                       alt={`${voter.profile.handle}'s Profile`}
+                      width={20}
+                      height={20}
                       className="tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-black tw-bg-iron-800 tw-object-contain"
                     />
                   ) : (
@@ -97,7 +103,7 @@ export const WaveLeaderboardDropRaters: React.FC<
                 <span className="tw-text-sm tw-font-medium">
                   {voter.profile.handle} •{" "}
                   {formatNumberWithCommas(voter.rating)}{" "}
-                  {drop.wave.voting_credit_type}
+                  {votingLabel}
                 </span>
               </Tooltip>
             </React.Fragment>
@@ -111,9 +117,9 @@ export const WaveLeaderboardDropRaters: React.FC<
       {hasUserVoted && (
         <div className="tw-flex tw-items-center tw-gap-1.5">
           <span className="tw-text-sm tw-whitespace-nowrap">
-            <span className="tw-text-iron-400">Your vote: </span>
+            <span className="tw-text-iron-400">{WAVE_VOTE_STATS_LABELS.YOUR_VOTES}: </span>
             <span className={`tw-font-semibold ${rankStyle}`}>
-              {formatNumberWithCommas(userVote)} {drop.wave.voting_credit_type}
+              {formatNumberWithCommas(userVote)} {votingLabel}
             </span>
           </span>
         </div>

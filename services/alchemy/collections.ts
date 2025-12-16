@@ -1,9 +1,8 @@
 import { isValidEthAddress } from "@/helpers/Helpers";
-import type { ContractOverview, Suggestion } from "@/types/nft";
 
+import { getAlchemyApiKey } from "@/config/alchemyEnv";
+import type { ContractOverview } from "@/types/nft";
 import type {
-  AlchemyContractResult,
-  AlchemyContractMetadata,
   AlchemyContractMetadataResponse,
   AlchemySearchResponse,
   ContractOverviewParams,
@@ -11,18 +10,23 @@ import type {
   SearchContractsResult,
 } from "./types";
 import {
-  extractContract,
   ensureQuery,
   normaliseAddress,
+  processContractMetadataResponse,
+  processSearchResponse,
   resolveNetwork,
-  resolveOpenSeaMetadata,
 } from "./utils";
-import { getAlchemyApiKey } from "@/config/alchemyEnv";
 
 export async function searchNftCollections(
   params: SearchContractsParams
 ): Promise<SearchContractsResult> {
-  const { query, chain = "ethereum", pageKey, hideSpam = true, signal } = params;
+  const {
+    query,
+    chain = "ethereum",
+    pageKey,
+    hideSpam = true,
+    signal,
+  } = params;
   const trimmed = ensureQuery(query);
   const network = resolveNetwork(chain);
   const apiKey = getAlchemyApiKey();
@@ -42,24 +46,8 @@ export async function searchNftCollections(
   if (!response.ok) {
     throw new Error("Failed to search NFT collections");
   }
-  const payload = (await response.json()) as
-    | AlchemySearchResponse
-    | undefined;
-  const contracts = payload?.contracts ?? [];
-  const suggestions = contracts
-    .map((contract) => extractContract(contract))
-    .filter((suggestion): suggestion is Suggestion => suggestion !== null);
-  const hiddenCount = hideSpam
-    ? suggestions.filter((suggestion) => suggestion.isSpam).length
-    : 0;
-  const visibleItems = hideSpam
-    ? suggestions.filter((suggestion) => !suggestion.isSpam)
-    : suggestions;
-  return {
-    items: visibleItems,
-    hiddenCount,
-    nextPageKey: payload?.pageKey,
-  };
+  const payload = (await response.json()) as AlchemySearchResponse | undefined;
+  return processSearchResponse(payload, hideSpam);
 }
 
 export async function getContractOverview(
@@ -91,33 +79,5 @@ export async function getContractOverview(
   const payload = (await response.json()) as
     | AlchemyContractMetadataResponse
     | undefined;
-  if (!payload) {
-    return null;
-  }
-  const baseMeta: AlchemyContractMetadata =
-    payload.contractMetadata ?? payload;
-  const openSeaMetadata = resolveOpenSeaMetadata(
-    payload,
-    payload.contractMetadata,
-    baseMeta
-  );
-  const contract: AlchemyContractResult = {
-    ...baseMeta,
-    contractMetadata: baseMeta,
-    address: checksum,
-    contractAddress: checksum,
-    openSeaMetadata,
-    isSpam:
-      payload.isSpam ?? baseMeta.isSpam ?? baseMeta.spamInfo?.isSpam,
-  };
-  const suggestion = extractContract(contract);
-  if (!suggestion) {
-    return null;
-  }
-  const openSea = openSeaMetadata;
-  return {
-    ...suggestion,
-    description: openSea?.description ?? null,
-    bannerImageUrl: openSea?.bannerImageUrl ?? null,
-  };
+  return processContractMetadataResponse(payload, checksum);
 }

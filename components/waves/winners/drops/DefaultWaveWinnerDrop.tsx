@@ -4,8 +4,8 @@ import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuO
 import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import {
-    ExtendedDrop,
-    convertApiDropToExtendedDrop,
+  ExtendedDrop,
+  convertApiDropToExtendedDrop,
 } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
@@ -17,6 +17,8 @@ import WaveWinnersDropHeaderTotalVotes from "./header/WaveWinnersDropHeaderTotal
 import WaveWinnersDropHeaderVoters from "./header/WaveWinnersDropHeaderVoters";
 import WaveWinnersDropOutcome from "./header/WaveWinnersDropOutcome";
 import { WaveWinnersDropContent } from "./WaveWinnersDropContent";
+import { WAVE_VOTING_LABELS, WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
 interface DefaultWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -62,7 +64,7 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
     winner.drop.context_profile_context?.rating !== 0;
   const userVote = winner.drop.context_profile_context?.rating ?? 0;
   const isUserVoteNegative = userVote < 0;
-  const creditType = winner.drop.wave.voting_credit_type || "votes";
+  const creditType = WAVE_VOTING_LABELS[winner.drop.wave.voting_credit_type as ApiWaveCreditType] || "votes";
 
   return (
     <div
@@ -105,14 +107,13 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
               <div className="tw-flex tw-items-center tw-gap-x-1.5">
                 <div className="tw-flex tw-items-baseline tw-gap-x-1">
                   <span className="tw-text-sm tw-font-normal tw-text-iron-400">
-                    Your vote:
+                    {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:
                   </span>
                   <span
-                    className={`tw-text-sm tw-font-semibold ${
-                      isUserVoteNegative
-                        ? "tw-text-rose-500"
-                        : "tw-text-emerald-500"
-                    }`}
+                    className={`tw-text-sm tw-font-semibold ${isUserVoteNegative
+                      ? "tw-text-rose-500"
+                      : "tw-text-emerald-500"
+                      }`}
                   >
                     {isUserVoteNegative && "-"}
                     {formatNumberWithCommas(Math.abs(userVote))}{" "}

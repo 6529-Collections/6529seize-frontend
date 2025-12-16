@@ -14,6 +14,8 @@ import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
+import { WAVE_VOTING_LABELS, WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
 interface WaveLeaderboardGalleryItemProps {
   readonly drop: ExtendedDrop;
@@ -88,6 +90,9 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
 
     const isZeroVote = userVote === 0;
     const voteStyle = getVoteStyle(isNegativeVote, isZeroVote, artFocused);
+
+    const votingCreditType = drop.wave.voting_credit_type as ApiWaveCreditType;
+    const votingCreditLabel = WAVE_VOTING_LABELS[votingCreditType] ?? votingCreditType;
 
     const handleImageClick = () => {
       onDropClick(drop);
@@ -185,7 +190,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
           <div className="tw-flex tw-gap-3 tw-items-center tw-pt-2 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800/50">
             {hasUserVoted && (
               <span className="tw-text-[11px] tw-text-iron-500 tw-font-mono">
-                Your vote: <span className={voteStyle}>{isNegativeVote && "-"}{formatNumberWithCommas(Math.abs(userVote))} {drop.wave.voting_credit_type}</span>
+                {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}: <span className={voteStyle}>{isNegativeVote && "-"}{formatNumberWithCommas(Math.abs(userVote))} {votingCreditLabel}</span>
               </span>
             )}
             {canShowVote && (
