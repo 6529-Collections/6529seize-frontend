@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
 import { isValidEthAddress } from "@/helpers/Helpers";
+import { fetchPublicJson, UrlGuardError } from "@/lib/security/urlGuard";
 import { normaliseAddress, resolveNetwork } from "@/services/alchemy/utils";
 import type { SupportedChain } from "@/types/nft";
 
@@ -80,8 +81,8 @@ function parseRequestBody(body: TokenMetadataRequestBody): ParseResult {
       return {
         ok: false,
         response: NextResponse.json(
-          { tokens: [] },
-          { headers: NO_STORE_HEADERS }
+          { error: "Normalization failed for the provided address" },
+          { status: 400, headers: NO_STORE_HEADERS }
         ),
       };
     }
@@ -123,24 +124,19 @@ export async function POST(request: NextRequest) {
 
     for (let i = 0; i < tokensToFetch.length; i += MAX_BATCH_SIZE) {
       const slice = tokensToFetch.slice(i, i + MAX_BATCH_SIZE);
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
+      const payload = await fetchPublicJson<{ tokens?: unknown[]; nfts?: unknown[] }>(
+        url,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({ tokens: slice }),
+          signal: request.signal,
         },
-        body: JSON.stringify({ tokens: slice }),
-        signal: request.signal,
-      });
-
-      if (!response.ok) {
-        return NextResponse.json(
-          { error: "Failed to fetch token metadata" },
-          { status: response.status, headers: NO_STORE_HEADERS }
-        );
-      }
-
-      const payload = await response.json();
+        { timeoutMs: 10000 }
+      );
       allTokens.push(...(payload.tokens ?? payload.nfts ?? []));
     }
 
@@ -149,6 +145,12 @@ export async function POST(request: NextRequest) {
       { headers: NO_STORE_HEADERS }
     );
   } catch (error) {
+    if (error instanceof UrlGuardError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.statusCode, headers: NO_STORE_HEADERS }
+      );
+    }
     const message =
       error instanceof Error ? error.message : "Failed to fetch token metadata";
     return NextResponse.json(
