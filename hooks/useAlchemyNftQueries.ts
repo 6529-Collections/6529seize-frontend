@@ -75,6 +75,9 @@ async function fetchJsonWithFailover<T>(
       throw error;
     }
     const backendUrl = getBackendAlchemyProxyUrl(backendPath);
+    console.warn(
+      `Failed to fetch from primary endpoint (${primaryUrl}), falling back to proxy endpoint: (${backendUrl})`
+    );
     return fetchJson<T>(backendUrl, init);
   }
 }
