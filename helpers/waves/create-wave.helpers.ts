@@ -376,7 +376,7 @@ export const getCreateNewWaveBody = ({
       scope: {
         group_id: config.groups.canVote,
       },
-      credit_type: config.voting.type ?? ApiWaveCreditType.Tdh,
+      credit_type: config.voting.type ?? ApiWaveCreditType.TdhPlusXtdh,
       credit_scope: ApiWaveCreditScope.Wave,
       credit_category: config.voting.category,
       creditor_id: config.voting.profileId,

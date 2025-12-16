@@ -1,10 +1,11 @@
-import React from "react";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import WaveRatingRep from "./WaveRatingRep";
 
 const CREDIT_TYPE_LABELS: Record<ApiWaveCreditType, string> = {
   [ApiWaveCreditType.Tdh]: "TDH",
+  [ApiWaveCreditType.Xtdh]: "XTDH",
+  [ApiWaveCreditType.TdhPlusXtdh]: "TDH + XTDH",
   [ApiWaveCreditType.Rep]: "REP",
 };
 

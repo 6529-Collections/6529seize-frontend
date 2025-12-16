@@ -3,6 +3,10 @@ import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { RatingsSectionProps, RatingsData } from "./types";
 import VoteBreakdownTooltip from "./tooltips/VoteBreakdownTooltip";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
+import {
+  WAVE_VOTE_STATS_LABELS,
+  WAVE_VOTING_LABELS,
+} from "@/helpers/waves/waves.constants";
 
 interface ParticipationDropRatingsTotalSectionProps
   extends RatingsSectionProps {
@@ -28,11 +32,12 @@ export default function ParticipationDropRatingsTotalSection({
             {currentRating < 0 && "-"}
             {formatNumberWithCommas(Math.abs(currentRating))}
           </span>{" "}
-          <span 
+          <span
             className="tw-text-sm tw-font-normal tw-text-iron-400 tw-cursor-help"
             data-tooltip-id={`total-rating-${drop.id}`}
           >
-            Total {drop.wave.voting_credit_type}
+            {WAVE_VOTE_STATS_LABELS.TOTAL}{" "}
+            {WAVE_VOTING_LABELS[drop.wave.voting_credit_type]}
           </span>
           <Tooltip
             id={`total-rating-${drop.id}`}

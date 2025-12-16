@@ -1,5 +1,4 @@
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
-import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import {
   CreateWaveGroupConfigType,
@@ -12,9 +11,16 @@ export const WAVE_LABELS: Record<ApiWaveType, string> = {
   [ApiWaveType.Approve]: "Approve",
 };
 
+export const WAVE_VOTE_STATS_LABELS = {
+  YOUR_VOTES: "Your votes",
+  TOTAL: "Total",
+};
+
 export const WAVE_VOTING_LABELS: Record<ApiWaveCreditType, string> = {
-  [ApiWaveCreditType.Tdh]: "By TDH",
-  [ApiWaveCreditType.Rep]: "By Rep",
+  [ApiWaveCreditType.Tdh]: "TDH",
+  [ApiWaveCreditType.Xtdh]: "XTDH",
+  [ApiWaveCreditType.TdhPlusXtdh]: "TDH + XTDH",
+  [ApiWaveCreditType.Rep]: "Rep",
 };
 
 export const CREATE_WAVE_MAIN_STEPS: Record<ApiWaveType, CreateWaveStep[]> = {
@@ -147,12 +153,4 @@ export const CREATE_WAVE_START_DATE_LABELS: Record<ApiWaveType, string> = {
   [ApiWaveType.Chat]: "Drops Submission Opens",
   [ApiWaveType.Rank]: "Drops Submission Opens",
   [ApiWaveType.Approve]: "Drops Submission Opens",
-};
-
-const CREATE_WAVE_DROPS_REQUIRED_METADATA_TYPES_LABELS: Record<
-  ApiWaveMetadataType,
-  string
-> = {
-  [ApiWaveMetadataType.String]: "Text",
-  [ApiWaveMetadataType.Number]: "Number",
 };
