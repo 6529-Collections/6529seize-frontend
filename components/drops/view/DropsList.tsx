@@ -39,6 +39,8 @@ interface DropsListProps {
   readonly location?: DropLocation;
 }
 
+
+
 const MemoizedDrop = memo(Drop);
 const MemoizedLightDrop = memo(LightDrop);
 const DropsList = memo(function DropsList({
@@ -58,6 +60,7 @@ const DropsList = memo(function DropsList({
   dropViewDropId,
   location = DropLocation.WAVE,
 }: DropsListProps) {
+
   const handleReply = useCallback<DropActionHandler>(
     ({ drop, partId }) => onReply({ drop, partId }),
     [onReply]
@@ -168,7 +171,7 @@ const DropsList = memo(function DropsList({
           </HighlightDropWrapper>
         );
       }),
-    [orderedDrops, getItemData] // Only depends on orderedDrops array and the memoized item data
+    [orderedDrops, getItemData, location]
   );
 
   return memoizedDrops;

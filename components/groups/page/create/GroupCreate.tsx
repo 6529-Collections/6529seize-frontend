@@ -96,7 +96,7 @@ export default function GroupCreate({
       tdh: {
         min: null,
         max: null,
-        inclusion_strategy: ApiGroupTdhInclusionStrategy.Tdh,
+        inclusion_strategy: ApiGroupTdhInclusionStrategy.Both,
       },
       rep: {
         min: null,

@@ -175,15 +175,7 @@ const getVotingValidationErrors = ({
     return errors;
   }
 
-  if (voting.type === ApiWaveCreditType.Tdh) {
-    // TDH voting cannot have category or profileId
-    if (voting.category !== null) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.TDH_VOTING_CANNOT_HAVE_CATEGORY);
-    }
-    if (voting.profileId !== null) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.TDH_VOTING_CANNOT_HAVE_PROFILE_ID);
-    }
-  } else {
+  if (voting.type === ApiWaveCreditType.Rep) {
     // REP voting requires non-empty category and profileId
     if (!voting.category) {
       errors.push(CREATE_WAVE_VALIDATION_ERROR.REP_VOTING_REQUIRES_CATEGORY);
@@ -196,6 +188,14 @@ const getVotingValidationErrors = ({
     } else if (voting.profileId.trim() === "") {
       errors.push(CREATE_WAVE_VALIDATION_ERROR.REP_VOTING_REQUIRES_PROFILE_ID);
     }
+  } else {
+    // TDH voting cannot have category or profileId
+    if (voting.category !== null) {
+      errors.push(CREATE_WAVE_VALIDATION_ERROR.TDH_VOTING_CANNOT_HAVE_CATEGORY);
+    }
+    if (voting.profileId !== null) {
+      errors.push(CREATE_WAVE_VALIDATION_ERROR.TDH_VOTING_CANNOT_HAVE_PROFILE_ID);
+    }
   }
 
   // Validate time-weighted voting settings for Rank waves
@@ -204,17 +204,17 @@ const getVotingValidationErrors = ({
     const MIN_MINUTES = 5;
     const MAX_HOURS = 24;
     const MAX_MINUTES = MAX_HOURS * 60;
-    
+
     // Calculate the interval in minutes for validation
-    const intervalInMinutes = voting.timeWeighted.averagingIntervalUnit === "minutes" 
-      ? voting.timeWeighted.averagingInterval 
+    const intervalInMinutes = voting.timeWeighted.averagingIntervalUnit === "minutes"
+      ? voting.timeWeighted.averagingInterval
       : voting.timeWeighted.averagingInterval * 60;
-    
+
     // Validate minimum
     if (intervalInMinutes < MIN_MINUTES) {
       errors.push(CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_TOO_SMALL);
     }
-    
+
     // Validate maximum
     if (intervalInMinutes > MAX_MINUTES) {
       errors.push(CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_TOO_LARGE);

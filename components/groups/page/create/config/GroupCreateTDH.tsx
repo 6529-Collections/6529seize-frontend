@@ -13,20 +13,17 @@ export default function GroupCreateTDH({
 }) {
   const modes: CommonSelectItem<ApiGroupTdhInclusionStrategy>[] = [
     {
+      label: "TDH + xTDH",
+      value: ApiGroupTdhInclusionStrategy.Both,
+      key: ApiGroupTdhInclusionStrategy.Both,
+    },
+    {
       label: "TDH",
       value: ApiGroupTdhInclusionStrategy.Tdh,
       key: ApiGroupTdhInclusionStrategy.Tdh,
     },
-    {
-      label: "xTDH",
-      value: ApiGroupTdhInclusionStrategy.Xtdh,
-      key: ApiGroupTdhInclusionStrategy.Xtdh,
-    },
-    {
-      label: "Both",
-      value: ApiGroupTdhInclusionStrategy.Both,
-      key: ApiGroupTdhInclusionStrategy.Both,
-    },
+
+
   ];
 
   return (

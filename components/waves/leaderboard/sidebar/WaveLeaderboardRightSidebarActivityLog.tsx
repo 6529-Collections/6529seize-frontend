@@ -4,6 +4,10 @@ import {
   getTimeAgoShort,
 } from "@/helpers/Helpers";
 import Link from "next/link";
+import Image from "next/image";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faClock } from "@fortawesome/free-solid-svg-icons";
+import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import { WaveLeaderboardRightSidebarActivityLogDrop } from "./WaveLeaderboardRightSidebarActivityLogDrop";
 
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
@@ -25,20 +29,10 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
       <div className="tw-p-3 tw-rounded-lg tw-bg-iron-900">
         <div className="tw-flex tw-items-center tw-justify-between">
           <div className="tw-flex tw-items-center tw-gap-1.5">
-            <svg
+            <FontAwesomeIcon
+              icon={faClock}
               className="tw-w-3.5 tw-h-3.5 tw-text-iron-400 tw-flex-shrink-0"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              fill="none"
-            >
-              <path
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            />
             <span className="tw-text-xs tw-font-medium tw-text-iron-400">
               {getTimeAgoShort(new Date(log.created_at).getTime())}
             </span>
@@ -57,9 +51,11 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
             title={`Voter: ${log.invoker.handle}`}
           >
             {log.invoker.pfp ? (
-              <img
+              <Image
                 src={log.invoker.pfp}
                 alt=""
+                width={20}
+                height={20}
                 className="tw-size-5 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800"
               />
             ) : (
@@ -81,11 +77,10 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
               </span>
             )}
             <span
-              className={`tw-text-sm tw-font-semibold tw-whitespace-nowrap ${
-                log.contents.newVote > 0 ? "tw-text-green" : "tw-text-red"
-              }`}
+              className={`tw-text-sm tw-font-semibold tw-whitespace-nowrap ${log.contents.newVote > 0 ? "tw-text-green" : "tw-text-red"
+                }`}
             >
-              {formatNumberWithCommas(log.contents.newVote)} {creditType}
+              {formatNumberWithCommas(log.contents.newVote)} {WAVE_VOTING_LABELS[creditType]}
             </span>
             {log.contents?.reason === "CREDIT_OVERSPENT" && <SystemAdjustmentPill />}
           </div>
@@ -96,9 +91,11 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
             title={`Drop creator: ${log.drop_author?.handle}`}
           >
             {log.drop_author?.pfp ? (
-              <img
+              <Image
                 src={log.drop_author.pfp}
                 alt=""
+                width={20}
+                height={20}
                 className="tw-size-5 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0"
               />
             ) : (

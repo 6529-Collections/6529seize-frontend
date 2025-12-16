@@ -1,6 +1,7 @@
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import WaveWinnersDropHeaderVoter from "./WaveWinnersDropHeaderVoter";
+import { WAVE_VOTING_LABELS, WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
 
 interface WaveWinnersDropHeaderVotersProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -60,10 +61,11 @@ export default function WaveWinnersDropHeaderVoters({
       {hasUserVoted && (
         <div className="tw-flex tw-items-center tw-gap-1">
           <span className="tw-text-sm">
-            <span className="tw-text-iron-400">Your vote: </span>
+            <span className="tw-text-iron-400">{WAVE_VOTE_STATS_LABELS.YOUR_VOTES}: </span>
             <span className={`tw-font-semibold ${rankStyle}`}>
               {formatNumberWithCommas(userVote)}{" "}
-              {winner.drop.wave.voting_credit_type}
+              {WAVE_VOTING_LABELS[winner.drop.wave.voting_credit_type] ??
+                winner.drop.wave.voting_credit_type}
             </span>
           </span>
         </div>
