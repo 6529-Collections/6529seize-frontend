@@ -2,12 +2,18 @@ import { AuthContext } from "@/components/auth/Auth";
 import UserPageTabs from "@/components/user/layout/UserPageTabs";
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import { render, screen } from "@testing-library/react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import {
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
   usePathname: jest.fn(),
   useSearchParams: jest.fn(),
+  useParams: jest.fn(),
 }));
 const capacitorMock = jest.fn();
 jest.mock("@/hooks/useCapacitor", () => ({
@@ -34,6 +40,7 @@ const renderTabs = (
   (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
   (usePathname as jest.Mock).mockReturnValue("/[user]/rep");
   (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
+  (useParams as jest.Mock).mockReturnValue({ user: "testuser" });
   capacitorMock.mockReturnValue({ isIos });
   (useCookieConsent as jest.Mock).mockReturnValue({
     showCookieConsent: false,
