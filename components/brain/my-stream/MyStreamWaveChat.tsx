@@ -31,7 +31,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   const pathname = usePathname();
   const containerRef = useRef<HTMLDivElement>(null);
   const [initialDrop, setInitialDrop] = useState<number | null>(null);
-  const [searchParamsDone, setSearchParamsDone] = useState(false);
   const { isMemesWave } = useWave(wave);
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
@@ -40,18 +39,24 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   // Handle URL parameters
   useEffect(() => {
     const dropParam = searchParams?.get("serialNo");
-    if (dropParam) {
-      setInitialDrop(parseInt(dropParam));
-      const params = new URLSearchParams(searchParams?.toString() || '');
-      params.delete("serialNo");
-      const href = params.toString()
-        ? `${pathname}?${params.toString()}`
-        : (pathname || getHomeFeedRoute());
-      router.replace(href, { scroll: false });
-    } else {
+    if (!dropParam) {
       setInitialDrop(null);
+      return;
     }
-    setSearchParamsDone(true);
+
+    const parsed = Number.parseInt(dropParam, 10);
+    if (!Number.isFinite(parsed)) {
+      return;
+    }
+
+    setInitialDrop(parsed);
+
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    params.delete("serialNo");
+    const href = params.toString()
+      ? `${pathname}?${params.toString()}`
+      : pathname || getHomeFeedRoute();
+    router.replace(href, { scroll: false });
   }, [searchParams, router, pathname]);
 
   const { waveViewStyle } = useLayout();
@@ -99,9 +104,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
     setActiveDrop(null);
   };
 
-  if (!searchParamsDone) {
-    return null;
-  }
   return (
     <div
       ref={containerRef}

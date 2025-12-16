@@ -18,6 +18,7 @@ import { useWaveDropsNotificationRead } from "./hooks/useWaveDropsNotificationRe
 import { useWaveDropsSerialScroll } from "./hooks/useWaveDropsSerialScroll";
 import { useWaveDropsClipboard } from "./hooks/useWaveDropsClipboard";
 import { WaveDropsContent } from "./subcomponents/WaveDropsContent";
+import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 
 const EMPTY_DROPS: Drop[] = [];
 
@@ -182,6 +183,15 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
     shouldPinToBottom,
     scrollToVisualBottom,
   });
+
+  const waveChatScroll = useWaveChatScrollOptional();
+  useEffect(() => {
+    if (!waveChatScroll) return;
+    return waveChatScroll.registerScrollHandler({
+      waveId,
+      handler: queueSerialTarget,
+    });
+  }, [waveChatScroll, waveId, queueSerialTarget]);
 
   const revealPendingDrops = useCallback(() => {
     if (!waveMessages?.drops?.length) {
