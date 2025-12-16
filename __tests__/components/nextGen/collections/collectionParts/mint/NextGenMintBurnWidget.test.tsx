@@ -7,7 +7,6 @@ import { Status } from "@/components/nextGen/nextgen_entities";
 import { render, screen, waitFor } from "@testing-library/react";
 
 jest.mock("react-bootstrap", () => {
-  const React = require("react");
   const Form = (p: any) => <form {...p}>{p.children}</form>;
   Form.Group = (p: any) => <div data-testid="form-group" {...p} />;
   Form.Label = (p: any) => <label {...p} />;

@@ -33,7 +33,7 @@ globalThis.css = (element, property, value) => {
 };
 
 // Only set up window mocks in jsdom environment
-if (typeof window !== "undefined") {
+if (typeof globalThis.window !== "undefined") {
   // Mock CSS parsing for react-bootstrap and other CSS-dependent components
   Object.defineProperty(window, "getComputedStyle", {
     value: () => ({
