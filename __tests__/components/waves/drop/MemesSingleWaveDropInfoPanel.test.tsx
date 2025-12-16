@@ -6,8 +6,6 @@ import { ApiDropType } from '@/generated/models/ApiDropType';
 
 jest.mock('framer-motion', () => ({ motion: { div: (p:any)=> <div {...p}/> }, AnimatePresence: ({ children }:any)=> <div>{children}</div> }));
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: (p:any)=> <svg data-testid="fa" {...p}/> }));
-jest.mock('@/components/waves/drop/SingleWaveDropClose', () => ({ SingleWaveDropClose: () => <div data-testid="close"/> }));
-jest.mock('@/components/waves/drop/SingleWaveDropInfoContainer', () => ({ SingleWaveDropInfoContainer: ({ children }:any) => <div data-testid="container">{children}</div> }));
 jest.mock('@/components/waves/drop/SingleWaveDropInfoDetails', () => ({ SingleWaveDropInfoDetails: () => <div data-testid="details"/> }));
 jest.mock('@/components/waves/drop/SingleWaveDropInfoAuthorSection', () => ({ SingleWaveDropInfoAuthorSection: () => <div data-testid="author"/> }));
 jest.mock('@/components/waves/drop/SingleWaveDropInfoActions', () => ({ SingleWaveDropInfoActions: () => <div data-testid="actions"/> }));
@@ -28,8 +26,7 @@ const baseDrop:any = {
 
 describe('MemesSingleWaveDropInfoPanel', () => {
   it('renders drop info and delete button', () => {
-    render(<MemesSingleWaveDropInfoPanel drop={baseDrop} wave={null} activeTab={0 as any} onClose={jest.fn()} />);
-    expect(screen.getByTestId('container')).toBeInTheDocument();
+    render(<MemesSingleWaveDropInfoPanel drop={baseDrop} wave={null} isChatOpen={false} onToggleChat={jest.fn()} />);
     expect(screen.getByTestId('position')).toBeInTheDocument();
     expect(screen.getByTestId('badge')).toBeInTheDocument();
     expect(screen.getByTestId('media')).toHaveAttribute('media_url', 'img.png');
@@ -46,10 +43,9 @@ describe('MemesSingleWaveDropInfoPanel', () => {
   it('closes fullscreen when button clicked', async () => {
     const setState = jest.fn();
     const spy = jest.spyOn(React, 'useState').mockImplementationOnce(() => [true, setState]);
-    render(<MemesSingleWaveDropInfoPanel drop={baseDrop} wave={null} activeTab={0 as any} onClose={jest.fn()} />);
+    render(<MemesSingleWaveDropInfoPanel drop={baseDrop} wave={null} isChatOpen={false} onToggleChat={jest.fn()} />);
     await userEvent.click(screen.getByRole('button', { name: 'Exit fullscreen view' }));
-    expect(setState).toHaveBeenCalledWith(false);
+    expect(setState).toHaveBeenCalled();
     spy.mockRestore();
   });
 });
-

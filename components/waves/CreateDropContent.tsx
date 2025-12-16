@@ -29,6 +29,7 @@ import { EditorState } from "lexical";
 import dynamic from "next/dynamic";
 import React, {
   memo,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -36,7 +37,6 @@ import React, {
   useState,
 } from "react";
 import { useSelector } from "react-redux";
-import { createBreakpoint } from "react-use";
 import { AuthContext } from "../auth/Auth";
 import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/HastagTransformer";
 import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
@@ -116,7 +116,7 @@ interface CreateDropContentProps {
   readonly privileges: DropPrivileges;
 }
 
-const useBreakpoint = createBreakpoint({ MD: 640, S: 0 });
+const CONTAINER_WIDTH_THRESHOLD = 500;
 
 const isMetadataValuePresent = (value: string | number | null): boolean => {
   if (value === null || value === undefined) {
@@ -442,8 +442,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 }) => {
   const { isSafeWallet, address } = useSeizeConnectContext();
   const { send } = useWebSocket();
-  const breakpoint = useBreakpoint();
   const { isApp } = useDeviceInfo();
+  const actionsContainerRef = useRef<HTMLDivElement>(null);
+  const [isWideContainer, setIsWideContainer] = useState(true);
   const editingDropId = useSelector(selectEditingDropId);
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
@@ -455,8 +456,26 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const [editorState, setEditorState] = useState<EditorState | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
-  const [showOptions, setShowOptions] = useState(breakpoint === "MD");
-  useEffect(() => setShowOptions(breakpoint === "MD"), [breakpoint]);
+  const [showOptions, setShowOptions] = useState(true);
+
+  // ResizeObserver for container-based responsiveness
+  useEffect(() => {
+    const container = actionsContainerRef.current;
+    if (!container) return;
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) {
+        const width = entry.contentRect.width;
+        const isWide = width >= CONTAINER_WIDTH_THRESHOLD;
+        setIsWideContainer(isWide);
+        setShowOptions(isWide);
+      }
+    });
+
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   const isParticipatory = wave.wave.type !== ApiWaveType.Chat;
 
@@ -952,12 +971,12 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     setFiles(updatedFiles);
   };
 
-  const handleEditorStateChange = (newEditorState: EditorState) => {
+  const handleEditorStateChange = useCallback((newEditorState: EditorState) => {
     setEditorState(newEditorState);
-    if (breakpoint === "S") {
+    if (!isWideContainer) {
       setShowOptions(false);
     }
-  };
+  }, [isWideContainer]);
 
   const removeFile = (file: File, partIndex?: number) => {
     if (partIndex !== undefined) {
@@ -1069,7 +1088,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         dropId={dropId}
       />
       <div className="tw-flex tw-items-end tw-w-full">
-        <div className="tw-w-full tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-3">
+        <div
+          ref={actionsContainerRef}
+          className="tw-w-full tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-3">
           <CreateDropActions
             isStormMode={isStormMode}
             canAddPart={canAddPart}

@@ -18,7 +18,7 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
   drop,
 }) => {
   const { isVotingEnded, isWinner } = useDropInteractionRules(drop);
-  const firstThreeVoters = drop.top_raters.slice(0, 3);
+  const topVoters = drop.top_raters.slice(0, 3);
   const isPositive = drop.rating >= 0;
 
   // Check if user has voted
@@ -32,8 +32,9 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
   const shouldShowUserVote = (isVotingEnded || isWinner) && hasUserVoted;
 
   return (
-    <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-y-2 tw-gap-x-6 tw-mt-0.5">
-      <div className="tw-flex tw-items-baseline tw-gap-x-2">
+    <div className="tw-flex tw-flex-col tw-gap-3">
+      {/* Voting Status Row */}
+      <div className="tw-flex tw-items-baseline tw-gap-x-2 tw-mb-4 lg:tw-mb-6">
         <span
           className={`tw-text-sm tw-font-bold tw-font-mono tw-tracking-tight ${
             isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
@@ -49,9 +50,11 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
           {drop.wave.voting_credit_type} total
         </span>
       </div>
-      <div className="tw-flex tw-items-center tw-gap-2">
+
+      {/* Voters Row */}
+      <div className="tw-flex tw-items-center tw-gap-3 tw-pt-4 lg:tw-pt-6 tw-border-t tw-border-solid tw-border-white/10 tw-border-x-0 tw-border-b-0">
         <div className="tw-flex tw-items-center -tw-space-x-2">
-          {firstThreeVoters.map((voter) => (
+          {topVoters.map((voter) => (
             <div key={voter.profile.handle}>
               <Link href={`/${voter.profile.handle}`}>
                 {voter.profile.pfp ? (
