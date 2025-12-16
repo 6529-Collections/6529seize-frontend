@@ -2,19 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
 import { isValidEthAddress } from "@/helpers/Helpers";
-import { normaliseAddress } from "@/services/alchemy/utils";
+import { normaliseAddress, resolveNetwork } from "@/services/alchemy/utils";
 import type { SupportedChain } from "@/types/nft";
 
 const NO_STORE_HEADERS = { "Cache-Control": "no-store" };
 const MAX_BATCH_SIZE = 100;
-
-const NETWORK_MAP: Record<SupportedChain, string> = {
-  ethereum: "eth-mainnet",
-};
-
-function resolveNetwork(chain: SupportedChain = "ethereum"): string {
-  return NETWORK_MAP[chain] ?? NETWORK_MAP.ethereum;
-}
 
 type TokenMetadataRequestBody = {
   readonly address?: string;
@@ -32,12 +24,14 @@ type ParseResult =
 function parseTokensArray(
   tokens: { contract: string; tokenId: string }[]
 ): TokenToFetch[] {
-  return tokens
-    .filter((t) => isValidEthAddress(t.contract))
-    .map((t) => ({
-      contractAddress: normaliseAddress(t.contract) ?? t.contract,
-      tokenId: t.tokenId,
-    }));
+  const results: TokenToFetch[] = [];
+  for (const t of tokens) {
+    const contractAddress = normaliseAddress(t.contract);
+    if (contractAddress) {
+      results.push({ contractAddress, tokenId: t.tokenId });
+    }
+  }
+  return results;
 }
 
 function parseAddressAndIds(
