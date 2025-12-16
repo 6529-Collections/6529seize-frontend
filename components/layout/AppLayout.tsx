@@ -14,6 +14,7 @@ import BrainMobileMessages from "../brain/mobile/BrainMobileMessages";
 import { useSelector } from "react-redux";
 import { selectEditingDropId } from "@/store/editSlice";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
 
 const TouchDeviceHeader = dynamic(() => import("../header/AppHeader"), {
   ssr: false,
@@ -45,7 +46,9 @@ export default function AppLayout({ children }: Props) {
   const isHomeFeedView = pathname === "/" && homeActiveTab === "feed";
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
+  const { isVisible: isKeyboardVisible, isAndroid } = useAndroidKeyboard();
   const isEditingOnMobile = isApp && editingDropId !== null;
+  const shouldHideBottomNav = isAndroid && isKeyboardVisible;
 
   const headerWrapperRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -55,9 +58,13 @@ export default function AppLayout({ children }: Props) {
     [registerRef, setHeaderRef]
   );
 
+  const safeAreaClass = shouldHideBottomNav
+    ? ""
+    : "tw-pb-[env(safe-area-inset-bottom,0px)]";
+
   return (
     <div
-      className={`tw-pb-[env(safe-area-inset-bottom,0px)] ${
+      className={`${safeAreaClass} ${
         isHomeFeedView ? "tw-overflow-hidden" : "tw-overflow-auto"
       }`}>
       <div ref={headerWrapperRef}>
@@ -73,7 +80,9 @@ export default function AppLayout({ children }: Props) {
       {!isSingleDropOpen && !isStreamRoute && !isHomeFeedView && (
         <div className="tw-h-16 tw-w-full" />
       )}
-      {!isSingleDropOpen && !isEditingOnMobile && <BottomNavigation />}
+      {!isSingleDropOpen && !isEditingOnMobile && (
+        <BottomNavigation hidden={shouldHideBottomNav} />
+      )}
     </div>
   );
 }

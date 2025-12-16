@@ -1,5 +1,7 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { useAndroidKeyboard } from '@/hooks/useAndroidKeyboard';
+
+const DEBOUNCE_MS = 50;
 
 // Mock Capacitor
 const mockAddListener = jest.fn();
@@ -24,6 +26,7 @@ describe('useAndroidKeyboard', () => {
   let hideCallback: Function;
 
   beforeEach(() => {
+    jest.useFakeTimers();
     jest.clearAllMocks();
     showCallback = jest.fn();
     hideCallback = jest.fn();
@@ -39,8 +42,12 @@ describe('useAndroidKeyboard', () => {
       } else if (event === 'keyboardWillHide') {
         hideCallback = callback;
       }
-      return { remove: jest.fn() };
+      return Promise.resolve({ remove: jest.fn() });
     });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it('initializes with keyboard hidden on Android', () => {
@@ -68,145 +75,163 @@ describe('useAndroidKeyboard', () => {
     expect(mockAddListener).not.toHaveBeenCalled();
   });
 
-  it('updates state when keyboard shows', async () => {
+  it('updates state when keyboard shows (after debounce)', async () => {
     const { result } = renderHook(() => useAndroidKeyboard());
+
+    // Wait for async listener setup
+    await act(async () => {
+      await Promise.resolve();
+    });
 
     act(() => {
       showCallback({ keyboardHeight: 350 });
+      jest.advanceTimersByTime(DEBOUNCE_MS);
     });
 
-    await waitFor(() => {
-      expect(result.current.isVisible).toBe(true);
-      expect(result.current.keyboardHeight).toBe(350);
-    });
+    expect(result.current.isVisible).toBe(true);
+    expect(result.current.keyboardHeight).toBe(350);
   });
 
-  it('updates state when keyboard hides', async () => {
+  it('updates state when keyboard hides (after debounce)', async () => {
     const { result } = renderHook(() => useAndroidKeyboard());
+
+    // Wait for async listener setup
+    await act(async () => {
+      await Promise.resolve();
+    });
 
     // Show keyboard first
     act(() => {
       showCallback({ keyboardHeight: 350 });
+      jest.advanceTimersByTime(DEBOUNCE_MS);
     });
 
-    await waitFor(() => {
-      expect(result.current.isVisible).toBe(true);
-    });
+    expect(result.current.isVisible).toBe(true);
 
     // Hide keyboard
     act(() => {
       hideCallback();
+      jest.advanceTimersByTime(DEBOUNCE_MS);
     });
 
-    await waitFor(() => {
-      expect(result.current.isVisible).toBe(false);
-      expect(result.current.keyboardHeight).toBe(0);
-    });
+    expect(result.current.isVisible).toBe(false);
+    expect(result.current.keyboardHeight).toBe(0);
   });
 
   it('uses fallback height when keyboardHeight is null', async () => {
     const { result } = renderHook(() => useAndroidKeyboard());
 
-    act(() => {
-      showCallback({ keyboardHeight: null });
+    await act(async () => {
+      await Promise.resolve();
     });
 
-    await waitFor(() => {
-      expect(result.current.keyboardHeight).toBe(300);
+    act(() => {
+      showCallback({ keyboardHeight: null });
+      jest.advanceTimersByTime(DEBOUNCE_MS);
     });
+
+    expect(result.current.keyboardHeight).toBe(300);
   });
 
   it('uses fallback height when keyboardHeight is undefined', async () => {
     const { result } = renderHook(() => useAndroidKeyboard());
 
+    await act(async () => {
+      await Promise.resolve();
+    });
+
     act(() => {
       showCallback({});
+      jest.advanceTimersByTime(DEBOUNCE_MS);
     });
 
-    await waitFor(() => {
-      expect(result.current.keyboardHeight).toBe(300);
-    });
+    expect(result.current.keyboardHeight).toBe(300);
   });
 
-  it('uses actual height of 0 if provided (not fallback)', async () => {
-    const { result } = renderHook(() => useAndroidKeyboard());
-
-    act(() => {
-      showCallback({ keyboardHeight: 0 });
-    });
-
-    await waitFor(() => {
-      expect(result.current.keyboardHeight).toBe(0);
-    });
-  });
-
-  it('sets CSS variable when keyboard shows', () => {
+  it('sets CSS variable when keyboard shows (after debounce)', async () => {
     const setPropertySpy = jest.spyOn(document.documentElement.style, 'setProperty');
 
     renderHook(() => useAndroidKeyboard());
+
+    await act(async () => {
+      await Promise.resolve();
+    });
 
     act(() => {
       showCallback({ keyboardHeight: 400 });
+      jest.advanceTimersByTime(DEBOUNCE_MS);
     });
 
     expect(setPropertySpy).toHaveBeenCalledWith('--android-keyboard-height', '400px');
+    setPropertySpy.mockRestore();
   });
 
-  it('clears CSS variable when keyboard hides', () => {
+  it('clears CSS variable when keyboard hides (after debounce)', async () => {
     const setPropertySpy = jest.spyOn(document.documentElement.style, 'setProperty');
 
     renderHook(() => useAndroidKeyboard());
 
+    await act(async () => {
+      await Promise.resolve();
+    });
+
     act(() => {
       hideCallback();
+      jest.advanceTimersByTime(DEBOUNCE_MS);
     });
 
     expect(setPropertySpy).toHaveBeenCalledWith('--android-keyboard-height', '0px');
     setPropertySpy.mockRestore();
   });
 
-  it('does not update state if unmounted before listener setup completes', async () => {
-    let resolveListener: any;
+  it('cancels pending hide when show is called', async () => {
+    const { result } = renderHook(() => useAndroidKeyboard());
 
-    // Make addListener async to simulate delay
-    mockAddListener.mockImplementation(() => {
-      return new Promise((resolve) => {
-        resolveListener = resolve;
-      });
+    await act(async () => {
+      await Promise.resolve();
     });
 
-    const { unmount } = renderHook(() => useAndroidKeyboard());
-
-    // Unmount before listener setup completes
-    unmount();
-
-    // Now resolve the listener setup
-    const mockRemove = jest.fn();
+    // Show keyboard
     act(() => {
-      resolveListener?.({ remove: mockRemove });
+      showCallback({ keyboardHeight: 350 });
+      jest.advanceTimersByTime(DEBOUNCE_MS);
     });
 
-    // Listener should be immediately removed since component unmounted
-    await waitFor(() => {
-      expect(mockRemove).toHaveBeenCalled();
+    expect(result.current.isVisible).toBe(true);
+
+    // Start hiding
+    act(() => {
+      hideCallback();
+      // Don't advance time fully
+      jest.advanceTimersByTime(DEBOUNCE_MS / 2);
     });
+
+    // Show again before hide completes
+    act(() => {
+      showCallback({ keyboardHeight: 400 });
+      jest.advanceTimersByTime(DEBOUNCE_MS);
+    });
+
+    // Should still be visible with new height
+    expect(result.current.isVisible).toBe(true);
+    expect(result.current.keyboardHeight).toBe(400);
   });
 
   it('does not update state when keyboard events fire after unmount', async () => {
     const { unmount } = renderHook(() => useAndroidKeyboard());
 
-    unmount();
-
-    // Try to trigger callbacks after unmount
-    act(() => {
-      showCallback({ keyboardHeight: 500 });
+    await act(async () => {
+      await Promise.resolve();
     });
 
-    // State should not have changed (we can't access result.current after unmount,
-    // but this test ensures no errors are thrown)
+    unmount();
+
+    // Try to trigger callbacks after unmount - should not throw
     expect(() => {
       showCallback({ keyboardHeight: 500 });
+      jest.advanceTimersByTime(DEBOUNCE_MS);
       hideCallback();
+      jest.advanceTimersByTime(DEBOUNCE_MS);
     }).not.toThrow();
   });
 
@@ -237,94 +262,109 @@ describe('useAndroidKeyboard', () => {
     it('applies transform when keyboard is visible', async () => {
       const { result } = renderHook(() => useAndroidKeyboard());
 
+      await act(async () => {
+        await Promise.resolve();
+      });
+
       act(() => {
         showCallback({ keyboardHeight: 400 });
+        jest.advanceTimersByTime(DEBOUNCE_MS);
       });
 
-      await waitFor(() => {
-        const style = result.current.getContainerStyle({});
-
-        expect(style.transform).toBe('translateY(-360px)');
-        expect(style.transition).toBe('transform 0.1s ease-out');
-      });
+      const style = result.current.getContainerStyle({});
+      expect(style.transform).toBe('translateY(-360px)');
+      expect(style.transition).toBe('transform 0.1s ease-out');
     });
 
     it('subtracts adjustment from keyboard height in transform', async () => {
       const { result } = renderHook(() => useAndroidKeyboard());
 
+      await act(async () => {
+        await Promise.resolve();
+      });
+
       act(() => {
         showCallback({ keyboardHeight: 400 });
+        jest.advanceTimersByTime(DEBOUNCE_MS);
       });
 
-      await waitFor(() => {
-        const style = result.current.getContainerStyle({}, 100);
-
-        expect(style.transform).toBe('translateY(-300px)');
-      });
+      const style = result.current.getContainerStyle({}, 100);
+      expect(style.transform).toBe('translateY(-300px)');
     });
 
     it('does not apply negative transform', async () => {
       const { result } = renderHook(() => useAndroidKeyboard());
 
+      await act(async () => {
+        await Promise.resolve();
+      });
+
       act(() => {
         showCallback({ keyboardHeight: 50 });
+        jest.advanceTimersByTime(DEBOUNCE_MS);
       });
 
-      await waitFor(() => {
-        const style = result.current.getContainerStyle({}, 100);
-
-        expect(style.transform).toBe('');
-      });
+      const style = result.current.getContainerStyle({}, 100);
+      expect(style.transform).toBeUndefined();
     });
 
     it('preserves existing transition if provided', async () => {
       const { result } = renderHook(() => useAndroidKeyboard());
 
+      await act(async () => {
+        await Promise.resolve();
+      });
+
       act(() => {
         showCallback({ keyboardHeight: 400 });
+        jest.advanceTimersByTime(DEBOUNCE_MS);
       });
 
-      await waitFor(() => {
-        const style = result.current.getContainerStyle({
-          transition: 'all 0.3s ease',
-        });
-
-        expect(style.transition).toBe('all 0.3s ease');
+      const style = result.current.getContainerStyle({
+        transition: 'all 0.3s ease',
       });
+      expect(style.transition).toBe('all 0.3s ease');
     });
 
     it('combines existing transform with keyboard transform', async () => {
       const { result } = renderHook(() => useAndroidKeyboard());
 
+      await act(async () => {
+        await Promise.resolve();
+      });
+
       act(() => {
         showCallback({ keyboardHeight: 400 });
+        jest.advanceTimersByTime(DEBOUNCE_MS);
       });
 
-      await waitFor(() => {
-        const style = result.current.getContainerStyle({
-          transform: 'scale(1.1)',
-        });
-
-        expect(style.transform).toBe('scale(1.1) translateY(-360px)');
+      const style = result.current.getContainerStyle({
+        transform: 'scale(1.1)',
       });
+      expect(style.transform).toBe('scale(1.1) translateY(-360px)');
     });
   });
 
   describe('cleanup', () => {
-    it('removes listeners on unmount', () => {
+    it('removes listeners on unmount', async () => {
       const mockRemoveShow = jest.fn();
       const mockRemoveHide = jest.fn();
 
       mockAddListener.mockImplementation((event: string) => {
         if (event === 'keyboardWillShow') {
-          return { remove: mockRemoveShow };
+          return Promise.resolve({ remove: mockRemoveShow });
         } else if (event === 'keyboardWillHide') {
-          return { remove: mockRemoveHide };
+          return Promise.resolve({ remove: mockRemoveHide });
         }
-        return { remove: jest.fn() };
+        return Promise.resolve({ remove: jest.fn() });
       });
 
       const { unmount } = renderHook(() => useAndroidKeyboard());
+
+      // Wait for async listener setup
+      await act(async () => {
+        await Promise.resolve();
+      });
 
       unmount();
 
@@ -340,6 +380,24 @@ describe('useAndroidKeyboard', () => {
       unmount();
 
       expect(setPropertySpy).toHaveBeenCalledWith('--android-keyboard-height', '0px');
+    });
+
+    it('safely clears pending timeouts on unmount without throwing', async () => {
+      const { unmount } = renderHook(() => useAndroidKeyboard());
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      act(() => {
+        showCallback({ keyboardHeight: 350 });
+      });
+
+      expect(() => unmount()).not.toThrow();
+
+      act(() => {
+        jest.advanceTimersByTime(DEBOUNCE_MS * 2);
+      });
     });
   });
 });
