@@ -82,7 +82,7 @@ describe('LayoutProvider', () => {
     expect(content.style.height).toContain('- 128px');
   });
 
-  it('removes capSpace and subtracts keyboard height on Android when keyboard is open', () => {
+  it('removes capSpace on Android when keyboard is open', () => {
     mockCapacitorValues = { isCapacitor: true, isAndroid: true, isIos: false };
     mockKeyboardValues = { isVisible: true, keyboardHeight: 350, isAndroid: true, getContainerStyle: jest.fn() };
 
@@ -93,9 +93,10 @@ describe('LayoutProvider', () => {
       </LayoutProvider>
     );
     const content = screen.getByTestId('content');
-    // Should subtract keyboard height (350px) but not capSpace
-    expect(content.style.height).toContain('- 350px');
+    // Should NOT include 128px capSpace when keyboard is open (capSpace = 0)
     expect(content.style.height).not.toContain('- 128px');
+    // Should end with - 0px (the capSpace when keyboard is visible)
+    expect(content.style.height).toContain('- 0px)');
   });
 
   it('applies 20px capSpace on iOS', () => {

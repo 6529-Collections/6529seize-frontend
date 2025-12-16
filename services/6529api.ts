@@ -16,6 +16,7 @@ function buildAuthHeaders(init?: HeadersInit): Headers {
 function handleResponseError(res: Response): void {
   if (res.status === 401) {
     Cookies.remove(API_AUTH_COOKIE);
+    return;
   }
   if (!res.ok) {
     throw new Error(`HTTP error! status: ${res.status}`);

@@ -1,13 +1,18 @@
 import { goerli, sepolia } from "wagmi/chains";
 
+import { getAlchemyApiKey } from "@/config/alchemyEnv";
 import type {
   AlchemyGetNftsForOwnerResponse,
   AlchemyOwnedNft,
+  OwnerNft,
 } from "./types";
-import { getAlchemyApiKey } from "@/config/alchemyEnv";
+import { processOwnerNftsResponse } from "./utils";
 
 const MAX_GET_NFTS_RETRIES = 3;
-const legacyOptions = { method: "GET", headers: { accept: "application/json" } };
+const legacyOptions = {
+  method: "GET",
+  headers: { accept: "application/json" },
+};
 
 function createAbortError(signal: AbortSignal): Error {
   if (signal.reason instanceof Error) {
@@ -51,7 +56,10 @@ function delayWithAbort(ms: number, signal?: AbortSignal): Promise<void> {
   });
 }
 
-async function fetchLegacyUrl<T>(url: string, signal?: AbortSignal): Promise<T> {
+async function fetchLegacyUrl<T>(
+  url: string,
+  signal?: AbortSignal
+): Promise<T> {
   const response = await fetch(url, { ...legacyOptions, signal });
   return (await response.json()) as T;
 }
@@ -64,7 +72,7 @@ export async function getNftsForContractAndOwner(
   pageKey?: string,
   retries = 0,
   signal?: AbortSignal
-) {
+): Promise<OwnerNft[]> {
   if (!contract || !owner) {
     throw new Error("Contract and owner are required");
   }
@@ -111,14 +119,5 @@ export async function getNftsForContractAndOwner(
     nextPageKey = response.pageKey;
   }
 
-  const allNfts = ownedNfts.map((nft) => {
-    return {
-      tokenId: nft.tokenId,
-      tokenType: nft.tokenType,
-      name: nft.name,
-      tokenUri: nft.tokenUri,
-      image: nft.image,
-    };
-  });
-  return allNfts;
+  return processOwnerNftsResponse(ownedNfts);
 }

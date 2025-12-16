@@ -42,6 +42,7 @@ const getProfileTargetRouteMock = jest.fn(() => "/profile-route");
 jest.mock("@/helpers/Helpers", () => ({
   cicToType: (n: number) => `type${n}`,
   formatNumberWithCommas: (n: number) => `formatted-${n}`,
+  formatStatFloor: (n: number) => n,
   getProfileTargetRoute: () => getProfileTargetRouteMock(),
 }));
 

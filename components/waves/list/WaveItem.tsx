@@ -256,7 +256,7 @@ export default function WaveItem({
         data-wave-item-interactive="true"
         onClick={handleAuthorClick}
         onAuxClick={handleAuthorAuxClick}
-        className={`${authorWrapperClass} tw-cursor-pointer tw-bg-transparent tw-border-none tw-p-0 tw-text-left tw-relative tw-z-10 tw-min-w-0`}
+        className={`${authorWrapperClass} tw-cursor-pointer tw-bg-transparent tw-border-none tw-p-0 tw-text-left tw-relative tw-z-10 tw-min-w-0 tw-w-fit`}
         aria-label={
           author?.handle ? `View @${author.handle}` : "View author profile"
         }
@@ -343,7 +343,7 @@ export default function WaveItem({
         <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-flex tw-items-end tw-justify-between tw-gap-3">
           <div className="tw-flex tw-min-w-0 tw-items-end tw-px-4 tw-pb-5">
             <div className="tw-min-w-0">
-              <span className="tw-text-lg tw-font-bold tw-text-white tw-leading-tight tw-drop-shadow-lg tw-line-clamp-2">
+              <span className="tw-text-base sm:tw-text-lg tw-font-bold tw-text-white tw-leading-tight tw-drop-shadow-lg tw-line-clamp-2">
                 {wave?.name ?? titlePlaceholder}
               </span>
             </div>
@@ -388,6 +388,7 @@ export default function WaveItem({
                 backgroundColor: "#1F2937",
                 color: "white",
                 padding: "4px 8px",
+                zIndex: 50,
               }}
             >
               <span className="tw-text-xs">Joined</span>

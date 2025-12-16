@@ -1,21 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import CommonBorderedRadioButton from "@/components/utils/radio/CommonBorderedRadioButton";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
-import CommonBorderedRadioButton from "@/components/utils/radio/CommonBorderedRadioButton";
+import { useState } from "react";
 import CreateWaveVotingRep from "./CreateWaveVotingRep";
 import NegativeVotingToggle from "./NegativeVotingToggle";
 import TimeWeightedVoting from "./TimeWeightedVoting";
 import { TimeWeightedVotingConfig } from "./types";
 
-const VOTING_TYPES_ORDER: Record<ApiWaveCreditType, number> = {
-  [ApiWaveCreditType.Tdh]: 0,
-  [ApiWaveCreditType.Xtdh]: 1,
-  [ApiWaveCreditType.TdhPlusXtdh]: 2,
-  [ApiWaveCreditType.Rep]: 3,
+const VOTING_TYPES_ORDER: Record<ApiWaveCreditType, number | undefined> = {
+  [ApiWaveCreditType.TdhPlusXtdh]: 0,
+  [ApiWaveCreditType.Tdh]: 1,
+  [ApiWaveCreditType.Rep]: 2,
+  [ApiWaveCreditType.Xtdh]: undefined,
 };
 
 export default function CreateWaveVoting({
@@ -62,18 +62,18 @@ export default function CreateWaveVoting({
         {TITLES[waveType]}
       </p>
       <div className="tw-mt-3 tw-grid lg:tw-grid-cols-3 tw-gap-x-4 tw-gap-y-4">
-        {(
-          Object.keys(VOTING_TYPES_ORDER) as ApiWaveCreditType[]
-        ).map((votingType) => (
-          <CommonBorderedRadioButton
-            key={votingType}
-            type={votingType}
-            selected={selectedType}
-            disabled={false}
-            label={`By ${WAVE_VOTING_LABELS[votingType]}`}
-            onChange={onTypeChange}
-          />
-        ))}
+        {(Object.keys(VOTING_TYPES_ORDER) as ApiWaveCreditType[])
+          .filter((votingType) => VOTING_TYPES_ORDER[votingType] !== undefined)
+          .map((votingType) => (
+            <CommonBorderedRadioButton
+              key={votingType}
+              type={votingType}
+              selected={selectedType}
+              disabled={false}
+              label={`By ${WAVE_VOTING_LABELS[votingType]}`}
+              onChange={onTypeChange}
+            />
+          ))}
         {selectedType === ApiWaveCreditType.Rep && (
           <div className="tw-col-span-full">
             <CreateWaveVotingRep
