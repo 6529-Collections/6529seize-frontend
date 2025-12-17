@@ -1,20 +1,18 @@
 "use client";
 
 import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
-import Drop, {
-  DropInteractionParams,
-  DropLocation,
-} from "@/components/waves/drops/Drop";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import { getTimeAgoShort } from "@/helpers/Helpers";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
-import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { DropInteractionParams } from "@/components/waves/drops/Drop";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ActiveDropState } from "@/types/dropInteractionTypes";
 import { INotificationPriorityAlert } from "@/types/feed.types";
-import { useRouter } from "next/navigation";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
+import NotificationDrop from "../subcomponents/NotificationDrop";
 import NotificationHeader from "../subcomponents/NotificationHeader";
+import NotificationTimestamp from "../subcomponents/NotificationTimestamp";
+import {
+  getIsDirectMessage,
+  useWaveNavigation,
+} from "../utils/navigationUtils";
 
 export default function NotificationPriorityAlert({
   notification,
@@ -29,30 +27,23 @@ export default function NotificationPriorityAlert({
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }) {
-  const router = useRouter();
-  const { isApp } = useDeviceInfo();
+  const { createReplyClickHandler, createQuoteClickHandler } =
+    useWaveNavigation();
 
   const headerSection = (
-    <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
-      <NotificationHeader
-        author={notification.related_identity}
-        actions={
-          <NotificationsFollowBtn
-            profile={notification.related_identity}
-            size={UserFollowBtnSize.SMALL}
-          />
-        }>
-        <span className="tw-text-sm tw-font-normal tw-text-iron-50">
-          <span className="tw-text-iron-400">sent a priority alert 🚨</span>{" "}
-          <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
-            <span className="tw-font-bold tw-mr-1 tw-text-xs tw-text-iron-400">
-              &#8226;
-            </span>{" "}
-            {getTimeAgoShort(notification.created_at)}
-          </span>
-        </span>
-      </NotificationHeader>
-    </div>
+    <NotificationHeader
+      author={notification.related_identity}
+      actions={
+        <NotificationsFollowBtn
+          profile={notification.related_identity}
+          size={UserFollowBtnSize.SMALL}
+        />
+      }>
+      <span className="tw-text-sm tw-font-normal tw-text-iron-50">
+        <span className="tw-text-iron-400">sent a priority alert 🚨</span>{" "}
+        <NotificationTimestamp createdAt={notification.created_at} />
+      </span>
+    </NotificationHeader>
   );
 
   if (!notification.related_drops || notification.related_drops.length === 0) {
@@ -65,61 +56,21 @@ export default function NotificationPriorityAlert({
     );
   }
 
-  const baseWave = notification.related_drops[0]?.wave as any;
-  const isDirectMessage =
-    baseWave?.chat?.scope?.group?.is_direct_message ?? false;
-
-  const onReplyClick = (serialNo: number) => {
-    const firstDrop = notification.related_drops[0];
-    if (!firstDrop?.wave?.id) return;
-    router.push(
-      getWaveRoute({
-        waveId: firstDrop.wave.id,
-        serialNo,
-        isDirectMessage,
-        isApp,
-      })
-    );
-  };
-
-  const onQuoteClick = (quote: ApiDrop) => {
-    const quoteWave = quote.wave as any;
-    const quoteIsDm =
-      quoteWave?.chat?.scope?.group?.is_direct_message ?? isDirectMessage;
-
-    router.push(
-      getWaveRoute({
-        waveId: quote.wave.id,
-        serialNo: quote.serial_no,
-        isDirectMessage: quoteIsDm,
-        isApp,
-      })
-    );
-  };
+  const drop = notification.related_drops[0];
+  const isDirectMessage = getIsDirectMessage(drop.wave);
 
   return (
     <div className="tw-w-full tw-flex tw-gap-x-3">
       <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
         {headerSection}
 
-        <Drop
-          drop={{
-            type: DropSize.FULL,
-            ...notification.related_drops[0],
-            stableKey: "",
-            stableHash: "",
-          }}
-          previousDrop={null}
-          nextDrop={null}
-          showWaveInfo={true}
-          showReplyAndQuote={true}
+        <NotificationDrop
+          drop={drop}
           activeDrop={activeDrop}
-          location={DropLocation.MY_STREAM}
-          dropViewDropId={null}
           onReply={onReply}
           onQuote={onQuote}
-          onReplyClick={onReplyClick}
-          onQuoteClick={onQuoteClick}
+          onReplyClick={createReplyClickHandler(drop.wave.id, isDirectMessage)}
+          onQuoteClick={createQuoteClickHandler(isDirectMessage)}
           onDropContentClick={onDropContentClick}
         />
       </div>

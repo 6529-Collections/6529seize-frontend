@@ -1,10 +1,10 @@
 import NotificationAllDrops from "@/components/brain/notifications/all-drops/NotificationAllDrops";
 import { render, screen } from "@testing-library/react";
-import { useRouter } from "next/navigation";
 import React from "react";
 
+const mockRouter = { push: jest.fn() };
 jest.mock("next/navigation", () => ({
-  useRouter: jest.fn(() => ({ push: jest.fn() })),
+  useRouter: jest.fn(() => mockRouter),
   useSearchParams: jest.fn(),
   usePathname: jest.fn(),
 }));
@@ -14,10 +14,10 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
   default: jest.fn(() => ({ isApp: false })),
 }));
 
-const DropMock = jest.fn(() => <div data-testid="drop" />);
+const DropMock = jest.fn((_props: unknown) => <div data-testid="drop" />);
 jest.mock("@/components/waves/drops/Drop", () => ({
   __esModule: true,
-  default: (props: any) => {
+  default: (props: unknown) => {
     DropMock(props);
     return <div data-testid="drop" />;
   },
@@ -82,6 +82,7 @@ describe("NotificationAllDrops", () => {
   });
 
   it("uses router in reply and quote handlers", () => {
+    mockRouter.push.mockClear();
     render(
       <NotificationAllDrops
         notification={baseNotification}
@@ -90,11 +91,18 @@ describe("NotificationAllDrops", () => {
         onQuote={jest.fn()}
       />
     );
-    const props = DropMock.mock.calls[0][0];
-    props.onReplyClick(5);
-    props.onQuoteClick({ wave: { id: "w" }, serial_no: 6 } as any);
-    const router = (useRouter as jest.Mock).mock.results[0].value;
-    expect(router.push).toHaveBeenCalledWith("/waves?wave=w&serialNo=5/");
-    expect(router.push).toHaveBeenCalledWith("/waves?wave=w&serialNo=6/");
+    const lastCall = DropMock.mock.calls.at(-1);
+    const props = lastCall?.[0] as Record<string, unknown> | undefined;
+    if (props?.onReplyClick) {
+      (props.onReplyClick as (n: number) => void)(5);
+    }
+    if (props?.onQuoteClick) {
+      (props.onQuoteClick as (q: unknown) => void)({
+        wave: { id: "w" },
+        serial_no: 6,
+      });
+    }
+    expect(mockRouter.push).toHaveBeenCalledWith("/waves?wave=w&serialNo=5/");
+    expect(mockRouter.push).toHaveBeenCalledWith("/waves?wave=w&serialNo=6/");
   });
 });
