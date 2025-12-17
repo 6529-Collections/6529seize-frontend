@@ -148,7 +148,7 @@ describe("push notification action handling", () => {
 
   it("redirects based on notification data", async () => {
     const { PushNotifications } = require("@capacitor/push-notifications");
-    const { result } = renderHook(() => useNotificationsContext(), { wrapper });
+    renderHook(() => useNotificationsContext(), { wrapper });
 
     await waitFor(() => {
       expect(PushNotifications.addListener).toHaveBeenCalled();
