@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import NotificationDropQuoted from '@/components/brain/notifications/drop-quoted/NotificationDropQuoted';
-import { useRouter } from 'next/navigation';
 
+const push = jest.fn();
 jest.mock('next/navigation', () => ({
-  useRouter: jest.fn(),
+  useRouter: () => ({ push }),
   useSearchParams: jest.fn(),
   usePathname: jest.fn(),
 }));
@@ -16,7 +16,7 @@ jest.mock('@/hooks/useDeviceInfo', () => ({
 
 jest.mock('@/components/brain/notifications/subcomponents/NotificationHeader', () => ({
   __esModule: true,
-  default: ({ children }: any) => <div data-testid="notification-header">{children}</div>,
+  default: ({ children }: { children: React.ReactNode }) => <div data-testid="notification-header">{children}</div>,
 }));
 
 jest.mock('@/components/brain/notifications/NotificationsFollowBtn', () => ({
@@ -26,10 +26,10 @@ jest.mock('@/components/brain/notifications/NotificationsFollowBtn', () => ({
 
 jest.mock('@/components/waves/drops/Drop', () => ({
   __esModule: true,
-  default: (props: any) => (
+  default: (props: { onReplyClick: (n: number) => void; onQuoteClick: (q: unknown) => void }) => (
     <div>
       <button onClick={() => props.onReplyClick(11)}>reply</button>
-      <button onClick={() => props.onQuoteClick({ wave: { id: 'q' }, serial_no: 22 } as any)}>quote</button>
+      <button onClick={() => props.onQuoteClick({ wave: { id: 'q' }, serial_no: 22 })}>quote</button>
     </div>
   ),
   DropLocation: {
@@ -38,11 +38,20 @@ jest.mock('@/components/waves/drops/Drop', () => ({
   }
 }));
 
-describe('NotificationDropQuoted', () => {
-  const push = jest.fn();
-  (useRouter as jest.Mock).mockReturnValue({ push });
+jest.mock('@/helpers/waves/drop.helpers', () => ({
+  convertApiDropToExtendedDrop: (drop: unknown) => ({ ...drop as object, type: 'FULL', stableKey: 'k', stableHash: 'h' }),
+  DropSize: { FULL: 'FULL' },
+}));
 
-  const notification: any = { related_drops: [{ wave: { id: 'w' }, serial_no: 5 }] };
+describe('NotificationDropQuoted', () => {
+  beforeEach(() => {
+    push.mockClear();
+  });
+
+  const notification = { 
+    related_drops: [{ wave: { id: 'w' }, serial_no: 5, author: { handle: 'alice' } }],
+    created_at: Date.now()
+  } as never;
 
   it('navigates on reply click', async () => {
     const user = userEvent.setup();
@@ -50,7 +59,7 @@ describe('NotificationDropQuoted', () => {
       <NotificationDropQuoted notification={notification} activeDrop={null} onReply={jest.fn()} onQuote={jest.fn()} />
     );
     await user.click(screen.getByText('reply'));
-    expect(push).toHaveBeenCalledWith('/waves?wave=w&serialNo=11/');
+    expect(push).toHaveBeenCalledWith('/waves?wave=w&serialNo=11');
   });
 
   it('navigates on quote click', async () => {
@@ -59,6 +68,6 @@ describe('NotificationDropQuoted', () => {
       <NotificationDropQuoted notification={notification} activeDrop={null} onReply={jest.fn()} onQuote={jest.fn()} />
     );
     await user.click(screen.getByText('quote'));
-    expect(push).toHaveBeenCalledWith('/waves?wave=q&serialNo=22/');
+    expect(push).toHaveBeenCalledWith('/waves?wave=q&serialNo=22');
   });
 });

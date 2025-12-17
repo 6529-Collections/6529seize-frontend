@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { INotificationWaveCreated } from "@/types/feed.types";
-import { getTimeAgoShort } from "@/helpers/Helpers";
 import WaveHeaderFollow, {
   WaveFollowBtnSize,
 } from "@/components/waves/header/WaveHeaderFollow";
@@ -13,6 +12,7 @@ import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import NotificationHeader from "../subcomponents/NotificationHeader";
+import NotificationTimestamp from "../subcomponents/NotificationTimestamp";
 
 export default function NotificationWaveCreated({
   notification,
@@ -33,8 +33,7 @@ export default function NotificationWaveCreated({
   const { isApp } = useDeviceInfo();
   const invitationHref = getWaveRoute({
     waveId: notification.additional_context.wave_id,
-    isDirectMessage:
-      wave?.chat.scope.group?.is_direct_message ?? false,
+    isDirectMessage: wave?.chat.scope.group?.is_direct_message ?? false,
     isApp,
   });
 
@@ -63,15 +62,11 @@ export default function NotificationWaveCreated({
         </span>
         <Link
           href={invitationHref}
-          className="tw-text-sm tw-font-medium tw-no-underline tw-text-primary-400 hover:tw-text-primary-300">
+          className="tw-text-sm tw-font-medium tw-no-underline tw-text-primary-400 hover:tw-text-primary-300"
+        >
           {wave?.name}
         </Link>
-        <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
-          <span className="tw-font-bold tw-mr-1 tw-text-xs tw-text-iron-400">
-            &#8226;
-          </span>
-          {getTimeAgoShort(notification.created_at)}
-        </span>
+        <NotificationTimestamp createdAt={notification.created_at} />
       </NotificationHeader>
     </div>
   );

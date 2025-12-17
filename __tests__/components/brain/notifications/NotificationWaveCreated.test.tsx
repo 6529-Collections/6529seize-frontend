@@ -7,7 +7,7 @@ jest.mock('next/link', () => ({ __esModule: true, default: (p:any) => <a {...p}>
 jest.mock('@/components/waves/header/WaveHeaderFollow', () => ({ __esModule: true, default: () => <div data-testid="wave-follow" />, WaveFollowBtnSize:{} }));
 jest.mock('@/components/brain/notifications/NotificationsFollowBtn', () => ({ __esModule: true, default: () => <div data-testid="follow-btn" /> }));
 jest.mock('@/helpers/image.helpers', () => ({ getScaledImageUri: () => '/scaled.jpg', ImageScale:{} }));
-jest.mock('@/helpers/Helpers', () => ({ getTimeAgoShort: () => '1m' }));
+jest.mock('@/helpers/Helpers', () => ({ getTimeAgoShort: () => '1m', parseIpfsUrl: (url: string) => url }));
 
 const notification = {
   related_identity: { handle: 'alice', pfp: 'pfp.png' },
