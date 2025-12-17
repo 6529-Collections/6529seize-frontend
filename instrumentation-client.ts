@@ -21,7 +21,7 @@ const noisyPatterns = [
 
 const referenceErrors = ["__firefox__"];
 
-const filenameExceptions = ["inpage.js"];
+const filenameExceptions = ["inpage.js", "injectLeap.js", "inject.chrome"];
 
 const URL_REGEX = /\(([^)]+?)\)/;
 
