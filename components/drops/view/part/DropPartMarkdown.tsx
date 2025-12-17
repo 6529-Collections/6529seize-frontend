@@ -114,7 +114,7 @@ const CodeBlockRenderer = ({
     highlightCodeElement(element, language).catch((error) => {
       console.error("[DropPartMarkdown] Failed to highlight code", error);
     });
-  });
+  }, [codeText, language]);
 
   return (
     <code

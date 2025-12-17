@@ -236,7 +236,7 @@ export function useWaveRealtimeUpdater({
       }
 
       if (activeWaveId === waveId) {
-        removeWaveDeliveredNotifications(waveId).catch(() => undefined);
+        removeWaveDeliveredNotifications(waveId).catch((error) => console.error("Failed to remove wave delivered notifications:", error));
         markWaveAsRead(waveId);
       }
     },
@@ -247,6 +247,7 @@ export function useWaveRealtimeUpdater({
       registerWave,
       initiateFetchNewestCycle,
       removeWaveDeliveredNotifications,
+      refreshEligibility
     ]
   );
 
