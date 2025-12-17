@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-const NotificationItem = jest.fn(() => <div data-testid="item" />);
+const NotificationItem = jest.fn((_props: unknown) => <div data-testid="item" />);
 
 jest.mock('@/components/brain/notifications/NotificationItem', () => ({ __esModule: true, default: NotificationItem }));
 
@@ -8,16 +8,16 @@ import React from 'react';
 
 describe('NotificationItems', () => {
   it('renders all notifications with props', () => {
-    const items = [{ id: '1', cause: 'DROP_REPLIED' }, { id: '2', cause: 'DROP_VOTED' }] as any;
-    const active = { id: 'active' } as any;
+    const items = [{ id: '1', cause: 'DROP_REPLIED' }, { id: '2', cause: 'DROP_VOTED' }] as unknown[];
+    const active = { id: 'active' } as unknown;
     const onReply = jest.fn();
     const onQuote = jest.fn();
     const onClick = jest.fn();
 
     render(
       <NotificationItems
-        items={items}
-        activeDrop={active}
+        items={items as never[]}
+        activeDrop={active as never}
         onReply={onReply}
         onQuote={onQuote}
         onDropContentClick={onClick}
@@ -25,7 +25,8 @@ describe('NotificationItems', () => {
     );
 
     expect(NotificationItem).toHaveBeenCalledTimes(2);
-    expect(NotificationItem.mock.calls[0][0]).toEqual(
+    const firstCall = NotificationItem.mock.calls.at(0);
+    expect(firstCall?.[0]).toEqual(
       expect.objectContaining({
         notification: items[0],
         activeDrop: active,

@@ -1,17 +1,18 @@
 import NotificationPriorityAlert from "@/components/brain/notifications/priority-alert/NotificationPriorityAlert";
 import { render, screen } from "@testing-library/react";
-import { useRouter } from "next/navigation";
+import React from "react";
 
+const mockRouter = { push: jest.fn() };
 jest.mock("next/navigation", () => ({
-  useRouter: jest.fn(() => ({ push: jest.fn() })),
+  useRouter: jest.fn(() => mockRouter),
   useSearchParams: jest.fn(),
   usePathname: jest.fn(),
 }));
 
-const DropMock = jest.fn(() => <div data-testid="drop" />);
+const DropMock = jest.fn((_props: unknown) => <div data-testid="drop" />);
 jest.mock("@/components/waves/drops/Drop", () => ({
   __esModule: true,
-  default: (props: any) => {
+  default: (props: unknown) => {
     DropMock(props);
     return <div data-testid="drop" />;
   },
@@ -25,6 +26,30 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
   default: jest.fn(() => ({ isApp: false })),
 }));
+
+jest.mock("@/components/brain/notifications/NotificationsFollowBtn", () => ({
+  __esModule: true,
+  default: () => <button data-testid="follow-btn">Follow</button>,
+}));
+
+jest.mock(
+  "@/components/brain/notifications/subcomponents/NotificationHeader",
+  () => ({
+    __esModule: true,
+    default: ({
+      author,
+      children,
+    }: {
+      author: { handle: string };
+      children: React.ReactNode;
+    }) => (
+      <div data-testid="notification-header">
+        <span>{author.handle}</span>
+        {children}
+      </div>
+    ),
+  })
+);
 
 const baseNotification: any = {
   id: 1,
@@ -79,6 +104,7 @@ describe("NotificationPriorityAlert", () => {
   });
 
   it("uses router in reply and quote handlers", () => {
+    mockRouter.push.mockClear();
     render(
       <NotificationPriorityAlert
         notification={baseNotification}
@@ -88,11 +114,18 @@ describe("NotificationPriorityAlert", () => {
       />
     );
     expect(DropMock).toHaveBeenCalled();
-    const props = DropMock.mock.calls[0][0];
-    props.onReplyClick(5);
-    props.onQuoteClick({ wave: { id: "w" }, serial_no: 6 } as any);
-    const router = (useRouter as jest.Mock).mock.results[0].value;
-    expect(router.push).toHaveBeenCalledWith("/waves?wave=w&serialNo=5/");
-    expect(router.push).toHaveBeenCalledWith("/waves?wave=w&serialNo=6/");
+    const lastCall = DropMock.mock.calls.at(-1);
+    const props = lastCall?.[0] as Record<string, unknown> | undefined;
+    if (props?.onReplyClick) {
+      (props.onReplyClick as (n: number) => void)(5);
+    }
+    if (props?.onQuoteClick) {
+      (props.onQuoteClick as (q: unknown) => void)({
+        wave: { id: "w" },
+        serial_no: 6,
+      });
+    }
+    expect(mockRouter.push).toHaveBeenCalledWith("/waves?wave=w&serialNo=5");
+    expect(mockRouter.push).toHaveBeenCalledWith("/waves?wave=w&serialNo=6");
   });
 });

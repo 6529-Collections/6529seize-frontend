@@ -1190,7 +1190,7 @@ export const useWaveDropsClipboard = ({
       }
 
       if (navigator?.clipboard?.writeText) {
-        void navigator.clipboard.writeText(payload).catch(() => {});
+        navigator.clipboard.writeText(payload).catch(() => undefined);
       }
 
       formatRef.current = "plain";

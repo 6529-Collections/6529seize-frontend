@@ -128,7 +128,7 @@ describe('WaveGroupEditButtons', () => {
     (useMutation as jest.Mock).mockReturnValue({ mutateAsync });
     (useQuery as jest.Mock).mockImplementation(({ enabled, queryFn }) => {
       if (enabled && typeof queryFn === 'function') {
-        void queryFn({ signal: undefined });
+        queryFn({ signal: undefined });
       }
       return { data: undefined };
     });
