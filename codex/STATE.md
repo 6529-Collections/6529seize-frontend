@@ -40,6 +40,7 @@ This table is the single source of truth for active and historical tickets. Keep
 | TKT-0034 | Remove unused findLightDropBySerialNoWithPagination helper | Review | P2 | openai-assistant | — | 2025-10-28 |
 | TKT-0035 | Add Discover link to app sidebar navigation | In-Progress | P1 | openai-assistant | — | 2025-10-29 |
 | TKT-0036 | Improve wave media image optimisation | In-Progress | P1 | openai-assistant | — | 2025-10-29 |
+| TKT-0037 | Filter extensionServiceWorker Sentry noise on /waves | Review | P1 | openai-assistant | — | 2025-12-17 |
 
 ## Usage Guidelines
 
