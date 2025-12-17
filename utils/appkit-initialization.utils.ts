@@ -85,7 +85,10 @@ export function initializeAppKit(
 
   const newAdapter = createAdapter(wallets, adapterManager, isCapacitor);
   const appKitConfig = buildAppKitConfig(newAdapter);
-  createAppKit(appKitConfig);
+  const appKit = createAppKit(appKitConfig);
+  void appKit.ready().catch((error) => {
+    logErrorSecurely("[AppKitInitialization] AppKit ready() failed", error);
+  });
 
   return {
     adapter: newAdapter,

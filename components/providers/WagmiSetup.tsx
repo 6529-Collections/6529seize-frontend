@@ -22,6 +22,45 @@ import { AppWallet, useAppWallets } from "../app-wallets/AppWalletsContext";
 import { useAuth } from "../auth/Auth";
 import { AppKitAdapterManager } from "./AppKitAdapterManager";
 
+function installSafeEthereumProxy(): void {
+  if (typeof window === "undefined") return;
+
+  const w = window as unknown as {
+    ethereum?: unknown;
+    __6529_safeEthereumProxyInstalled?: boolean;
+  };
+
+  if (w.__6529_safeEthereumProxyInstalled) return;
+
+  const ethereum = (w as any).ethereum;
+  if (!ethereum || (typeof ethereum !== "object" && typeof ethereum !== "function")) {
+    w.__6529_safeEthereumProxyInstalled = true;
+    return;
+  }
+
+  try {
+    const proxy = new Proxy(ethereum as object, {
+      get(target, prop) {
+        try {
+          const value = Reflect.get(target, prop);
+          if (typeof value === "function") {
+            return value.bind(target);
+          }
+          return value;
+        } catch {
+          return undefined;
+        }
+      },
+    });
+
+    (w as any).ethereum = proxy;
+    w.__6529_safeEthereumProxyInstalled = true;
+  } catch (error) {
+    logErrorSecurely("[WagmiSetup] Failed to install safe ethereum proxy", error);
+    w.__6529_safeEthereumProxyInstalled = true;
+  }
+}
+
 export default function WagmiSetup({
   children,
 }: {
@@ -107,7 +146,13 @@ export default function WagmiSetup({
   // Initialize adapter eagerly on mount with empty wallets
   useEffect(() => {
     if (isMounted && !currentAdapter && !isInitializing) {
-      setupAppKitAdapter([]);
+      installSafeEthereumProxy();
+      try {
+        setupAppKitAdapter([]);
+      } catch {
+        // Prevent unhandled errors during eager initialization.
+        // Fail-fast behavior is preserved by leaving `currentAdapter` unset.
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMounted, currentAdapter, isInitializing]); // setupAppKitAdapter intentionally excluded to prevent loops
