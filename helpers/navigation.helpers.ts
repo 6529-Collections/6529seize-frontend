@@ -42,9 +42,7 @@ export const getWaveRoute = ({
   queryEntries.push(["wave", waveId]);
 
   if (serialNo !== undefined) {
-    const serialString = `${serialNo}`;
-    const normalizedSerial = serialString === "0" ? serialString : `${serialString}/`;
-    queryEntries.push(["serialNo", normalizedSerial]);
+    queryEntries.push(["serialNo", `${serialNo}`]);
   }
 
   const base = isDirectMessage ? "/messages" : "/waves";
@@ -54,14 +52,7 @@ export const getWaveRoute = ({
   }
 
   const query = queryEntries
-    .map(([key, value]) => {
-      const encodedKey = encodeURIComponent(key);
-      const encodedValue =
-        key === "serialNo"
-          ? encodeURIComponent(value).replaceAll("%2F", "/")
-          : encodeURIComponent(value);
-      return `${encodedKey}=${encodedValue}`;
-    })
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
     .join("&");
 
   return `${base}?${query}`;

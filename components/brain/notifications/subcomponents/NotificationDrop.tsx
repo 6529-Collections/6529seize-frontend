@@ -5,7 +5,7 @@ import Drop, {
   DropLocation,
 } from "@/components/waves/drops/Drop";
 import { ApiDrop } from "@/generated/models/ApiDrop";
-import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { convertApiDropToExtendedDrop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ActiveDropState } from "@/types/dropInteractionTypes";
 
 interface NotificationDropProps {
@@ -27,14 +27,11 @@ export default function NotificationDrop({
   onQuoteClick,
   onDropContentClick,
 }: NotificationDropProps) {
+  const extendedDrop = convertApiDropToExtendedDrop(drop);
+
   return (
     <Drop
-      drop={{
-        type: DropSize.FULL,
-        ...drop,
-        stableKey: "",
-        stableHash: "",
-      }}
+      drop={extendedDrop}
       previousDrop={null}
       nextDrop={null}
       showWaveInfo={true}
@@ -50,4 +47,3 @@ export default function NotificationDrop({
     />
   );
 }
-
