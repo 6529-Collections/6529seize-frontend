@@ -27,16 +27,16 @@
 .nftSubscriptionsListItem {
   color: #ddd !important;
   background-color: #1c1c21 !important;
-  border-top: 1px solid rgb(55, 55, 61) !important;
-  border-bottom: 1px solid rgb(55, 55, 61) !important;
+  border-top: none !important;
+  border-bottom: none !important;
   padding: 10px 20px !important;
 
   &.odd {
-    background-color: #1c1c21 !important;
+    background-color: #131316 !important;
   }
 
   &.even {
-    background-color: #242428 !important;
+    background-color: #0c0c0d !important;
   }
 
   &.last {

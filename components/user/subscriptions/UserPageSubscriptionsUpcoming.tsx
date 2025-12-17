@@ -3,6 +3,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import {
+  displayedSeasonNumberFromIndex,
   formatFullDate,
   getUpcomingMintsAcrossSeasons,
   isMintingToday,
@@ -110,7 +111,7 @@ function SubscriptionRow(
     readonly: boolean;
     minting_today?: boolean;
     first: boolean;
-    date: SeasonMintRow | null;
+    date: SeasonMintRow;
     refresh: () => void;
   }>
 ) {
@@ -251,19 +252,19 @@ function SubscriptionRow(
     }
   };
 
-  const dateDisplay = props.date ? (
-    <span className="font-color-silver">
-      {formatFullDate(props.date.utcDay)}
-    </span>
-  ) : null;
-
   return (
     <Container className="no-padding pt-2 pb-2">
       <Row>
         <Col className="d-flex gap-2 align-items-center justify-content-between">
           <div className="d-flex flex-column gap-2 tw-flex-1 tw-min-w-0">
             <span className="d-flex align-items-center gap-2">
-              {props.title} #{props.subscription.token_id}{" "}
+              <span className="tw-font-medium">
+                {props.title} #{props.subscription.token_id}{" "}
+              </span>
+              <span>
+                - SZN{displayedSeasonNumberFromIndex(props.date.seasonIndex)}
+              </span>
+              {" / "}
               {props.minting_today ? (
                 <>
                   <span
@@ -283,7 +284,7 @@ function SubscriptionRow(
                   </Tooltip>
                 </>
               ) : (
-                dateDisplay
+                <span>{formatFullDate(props.date.utcDay)}</span>
               )}
             </span>
             {props.first && final?.phase && final?.phase_position > 0 && (
