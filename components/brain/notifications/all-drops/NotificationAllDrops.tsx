@@ -31,7 +31,12 @@ export default function NotificationAllDrops({
 }) {
   const { createReplyClickHandler, createQuoteClickHandler } =
     useWaveNavigation();
-  const drop = notification.related_drops[0];
+  const drop = notification.related_drops?.[0];
+
+  if (!drop) {
+    return null;
+  }
+
   const isDirectMessage = getIsDirectMessage(drop.wave);
 
   const getContent = () => {
