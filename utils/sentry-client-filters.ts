@@ -4,7 +4,7 @@ export type SentryEventHint = {
   syntheticException?: unknown;
 };
 
-const filenameExceptions = ["inpage.js", "extensionServiceWorker.js"];
+const filenameExceptions = ["inpage.js", "extensionServiceWorker.js", "injectLeap.js", "inject.chrome"];
 
 function shouldFilterFilenameExceptions(
   frames: SentryStackFrame[] | undefined

@@ -8,9 +8,13 @@ import React from "react";
 const push = jest.fn();
 const mockUseRouter = jest.fn(() => ({ push }));
 
+let mockIsActive = true;
 jest.mock("@/hooks/useCapacitor", () => () => ({
   isCapacitor: true,
   isIos: true,
+  get isActive() {
+    return mockIsActive;
+  },
 }));
 jest.mock("next/navigation", () => ({
   __esModule: true,
@@ -43,6 +47,9 @@ jest.mock("@capacitor/push-notifications", () => {
 jest.mock("@capacitor/device", () => ({
   Device: { getInfo: jest.fn().mockResolvedValue({ platform: "ios" }) },
 }));
+jest.mock("@/components/notifications/stable-device-id", () => ({
+  getStableDeviceId: jest.fn().mockResolvedValue("test-device-id"),
+}));
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <NotificationsProvider>{children}</NotificationsProvider>
@@ -65,6 +72,52 @@ describe("NotificationsContext", () => {
       }
     });
     expect(result.current).toBeInstanceOf(Error);
+  });
+});
+
+describe("NotificationsContext initialization", () => {
+  beforeEach(() => {
+    mockIsActive = true;
+    const { PushNotifications } = require("@capacitor/push-notifications");
+    jest.clearAllMocks();
+    PushNotifications.removeAllListeners.mockClear();
+    PushNotifications.addListener.mockClear();
+    PushNotifications.register.mockClear();
+  });
+
+  it("does not initialize when isActive is false", async () => {
+    mockIsActive = false;
+    const { PushNotifications } = require("@capacitor/push-notifications");
+
+    renderHook(() => useNotificationsContext(), { wrapper });
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    });
+
+    expect(PushNotifications.removeAllListeners).not.toHaveBeenCalled();
+    expect(PushNotifications.addListener).not.toHaveBeenCalled();
+    expect(PushNotifications.register).not.toHaveBeenCalled();
+  });
+
+  it("initializes when isActive is true", async () => {
+    mockIsActive = true;
+    const { PushNotifications } = require("@capacitor/push-notifications");
+    renderHook(() => useNotificationsContext(), { wrapper });
+
+    await waitFor(() => {
+      expect(PushNotifications.removeAllListeners).toHaveBeenCalled();
+    });
+
+    expect(PushNotifications.addListener).toHaveBeenCalled();
+    expect(PushNotifications.requestPermissions).toHaveBeenCalled();
+
+    await waitFor(
+      () => {
+        expect(PushNotifications.register).toHaveBeenCalled();
+      },
+      { timeout: 2000 }
+    );
   });
 });
 
@@ -95,7 +148,7 @@ describe("push notification action handling", () => {
 
   it("redirects based on notification data", async () => {
     const { PushNotifications } = require("@capacitor/push-notifications");
-    const { result } = renderHook(() => useNotificationsContext(), { wrapper });
+    renderHook(() => useNotificationsContext(), { wrapper });
 
     await waitFor(() => {
       expect(PushNotifications.addListener).toHaveBeenCalled();
