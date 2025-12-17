@@ -1,23 +1,22 @@
 "use client";
 
-import Link from "next/link";
-import {
-  getScaledImageUri,
-  ImageScale,
-} from "@/helpers/image.helpers";
-import { INotificationAllDrops } from "@/types/feed.types";
-import { getTimeAgoShort, numberWithCommas } from "@/helpers/Helpers";
-import { ActiveDropState } from "@/types/dropInteractionTypes";
+import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
 import Drop, {
   DropInteractionParams,
   DropLocation,
 } from "@/components/waves/drops/Drop";
-import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useRouter } from "next/navigation";
 import { ApiDrop } from "@/generated/models/ApiDrop";
-import { getNotificationVoteColor } from "../drop-reacted/NotificationDropReacted";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getTimeAgoShort, numberWithCommas } from "@/helpers/Helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
+import { INotificationAllDrops } from "@/types/feed.types";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { getNotificationVoteColor } from "../drop-reacted/NotificationDropReacted";
+import NotificationsFollowBtn from "../NotificationsFollowBtn";
+import NotificationHeader from "../subcomponents/NotificationHeader";
 
 export default function NotificationAllDrops({
   notification,
@@ -111,55 +110,46 @@ export default function NotificationAllDrops({
   };
 
   return (
-    <div className="tw-w-full tw-flex tw-gap-x-3">
-      <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
-        <div className="tw-flex tw-gap-x-2 tw-items-center">
-          <div className="tw-h-7 tw-w-7">
-            {notification.related_identity.pfp ? (
-              <img
-                src={getScaledImageUri(
-                  notification.related_identity.pfp,
-                  ImageScale.W_AUTO_H_50
-                )}
-                alt="#"
-                className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
-              />
-            ) : (
-              <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
-            )}
-          </div>
-          <span className="tw-text-sm tw-font-normal tw-text-iron-50">
-            {getContent()}{" "}
-            <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
-              <span className="tw-font-bold tw-mr-1 tw-text-xs tw-text-iron-400">
-                &#8226;
-              </span>{" "}
-              {getTimeAgoShort(notification.created_at)}
-            </span>
+    <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
+      <NotificationHeader
+        author={notification.related_identity}
+        actions={
+          <NotificationsFollowBtn
+            profile={notification.related_identity}
+            size={UserFollowBtnSize.SMALL}
+          />
+        }>
+        <span className="tw-text-sm tw-font-normal tw-text-iron-50">
+          {getContent()}{" "}
+          <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
+            <span className="tw-font-bold tw-mr-1 tw-text-xs tw-text-iron-400">
+              &#8226;
+            </span>{" "}
+            {getTimeAgoShort(notification.created_at)}
           </span>
-        </div>
+        </span>
+      </NotificationHeader>
 
-        <Drop
-          drop={{
-            type: DropSize.FULL,
-            ...notification.related_drops[0],
-            stableKey: "",
-            stableHash: "",
-          }}
-          previousDrop={null}
-          nextDrop={null}
-          showWaveInfo={true}
-          showReplyAndQuote={true}
-          activeDrop={activeDrop}
-          location={DropLocation.MY_STREAM}
-          dropViewDropId={null}
-          onReply={onReply}
-          onQuote={onQuote}
-          onReplyClick={onReplyClick}
-          onQuoteClick={onQuoteClick}
-          onDropContentClick={onDropContentClick}
-        />
-      </div>
+      <Drop
+        drop={{
+          type: DropSize.FULL,
+          ...notification.related_drops[0],
+          stableKey: "",
+          stableHash: "",
+        }}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={true}
+        showReplyAndQuote={true}
+        activeDrop={activeDrop}
+        location={DropLocation.MY_STREAM}
+        dropViewDropId={null}
+        onReply={onReply}
+        onQuote={onQuote}
+        onReplyClick={onReplyClick}
+        onQuoteClick={onQuoteClick}
+        onDropContentClick={onDropContentClick}
+      />
     </div>
   );
 }

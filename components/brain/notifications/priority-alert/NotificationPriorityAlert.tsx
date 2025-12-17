@@ -1,12 +1,12 @@
 "use client";
 
+import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
 import Drop, {
   DropInteractionParams,
   DropLocation,
 } from "@/components/waves/drops/Drop";
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import { getTimeAgoShort } from "@/helpers/Helpers";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -14,6 +14,8 @@ import { ActiveDropState } from "@/types/dropInteractionTypes";
 import { INotificationPriorityAlert } from "@/types/feed.types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import NotificationsFollowBtn from "../NotificationsFollowBtn";
+import NotificationHeader from "../subcomponents/NotificationHeader";
 
 export default function NotificationPriorityAlert({
   notification,
@@ -32,35 +34,30 @@ export default function NotificationPriorityAlert({
   const { isApp } = useDeviceInfo();
 
   const headerSection = (
-    <div className="tw-flex tw-gap-x-2 tw-items-center">
-      <div className="tw-h-7 tw-w-7">
-        {notification.related_identity.pfp ? (
-          <img
-            src={getScaledImageUri(
-              notification.related_identity.pfp,
-              ImageScale.W_AUTO_H_50
-            )}
-            alt="#"
-            className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
+    <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
+      <NotificationHeader
+        author={notification.related_identity}
+        actions={
+          <NotificationsFollowBtn
+            profile={notification.related_identity}
+            size={UserFollowBtnSize.SMALL}
           />
-        ) : (
-          <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
-        )}
-      </div>
-      <span className="tw-text-sm tw-font-normal tw-text-iron-50">
-        <Link
-          href={`/${notification.related_identity.handle}`}
-          className="tw-no-underline tw-font-semibold">
-          {notification.related_identity.handle}
-        </Link>{" "}
-        <span className="tw-text-iron-400">sent a priority alert 🚨</span>{" "}
-        <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
-          <span className="tw-font-bold tw-mr-1 tw-text-xs tw-text-iron-400">
-            &#8226;
-          </span>{" "}
-          {getTimeAgoShort(notification.created_at)}
+        }>
+        <span className="tw-text-sm tw-font-normal tw-text-iron-50">
+          <Link
+            href={`/${notification.related_identity.handle}`}
+            className="tw-no-underline tw-font-semibold">
+            {notification.related_identity.handle}
+          </Link>{" "}
+          <span className="tw-text-iron-400">sent a priority alert 🚨</span>{" "}
+          <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
+            <span className="tw-font-bold tw-mr-1 tw-text-xs tw-text-iron-400">
+              &#8226;
+            </span>{" "}
+            {getTimeAgoShort(notification.created_at)}
+          </span>
         </span>
-      </span>
+      </NotificationHeader>
     </div>
   );
 
