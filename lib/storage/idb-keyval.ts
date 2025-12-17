@@ -13,7 +13,7 @@ type RequestLike<T = unknown> = {
 };
 
 function extractErrorMessage(error: unknown): string {
-  if (!error) return "";
+  if (error == null) return "";
   if (typeof error === "string") return error;
   if (error instanceof Error) return error.message;
   if (typeof error === "object") {
@@ -25,11 +25,18 @@ function extractErrorMessage(error: unknown): string {
       return "[unstringifiable object]";
     }
   }
-  return String(error);
+  if (typeof error === "number") return error.toString();
+  if (typeof error === "boolean") return error.toString();
+  if (typeof error === "bigint") return error.toString();
+  if (typeof error === "symbol") return error.description ?? error.toString();
+  if (typeof error === "function") {
+    return error.name ? `[function ${error.name}]` : "[function]";
+  }
+  return "[unknown error]";
 }
 
 function extractErrorName(error: unknown): string {
-  if (!error) return "";
+  if (error == null) return "";
   if (error instanceof Error) return error.name;
   return (error as any)?.name ?? (error as any)?.constructor?.name ?? "";
 }
@@ -147,9 +154,7 @@ export function createStore(dbName: string, storeName: string): StoreFn {
 let defaultGetStoreFunc: StoreFn | undefined;
 
 function defaultGetStore(): StoreFn {
-  if (!defaultGetStoreFunc) {
-    defaultGetStoreFunc = createStore("keyval-store", "keyval");
-  }
+  defaultGetStoreFunc ??= createStore("keyval-store", "keyval");
   return defaultGetStoreFunc;
 }
 
@@ -342,10 +347,8 @@ export function entries<T = unknown>(
     }
 
     const items: Array<[IDBValidKey, T]> = [];
-    return useStore("readonly", (innerStore) =>
-      eachCursor(innerStore, (cursor) =>
-        items.push([cursor.key, cursor.value as T])
-      ).then(() => items)
-    );
+    return eachCursor(store, (cursor) =>
+      items.push([cursor.key, cursor.value as T])
+    ).then(() => items);
   });
 }
