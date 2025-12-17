@@ -127,11 +127,9 @@ export function useWaveRealtimeUpdater({
   const processIncomingDrop: ProcessIncomingDropFn = useCallback(
     async (drop: ApiDrop, type: ProcessIncomingDropType) => {
       const markWaveAsRead = (waveId: string) => {
-        commonApiPostWithoutBodyAndResponse({
+        return commonApiPostWithoutBodyAndResponse({
           endpoint: `notifications/wave/${waveId}/read`,
-        }).catch((error) =>
-          console.error("Failed to mark wave as read:", error)
-        );
+        });
       };
 
       if (!drop?.wave?.id) {
@@ -237,7 +235,9 @@ export function useWaveRealtimeUpdater({
 
       if (activeWaveId === waveId) {
         removeWaveDeliveredNotifications(waveId).catch((error) => console.error("Failed to remove wave delivered notifications:", error));
-        markWaveAsRead(waveId);
+        markWaveAsRead(waveId).catch((error) =>
+          console.error("Failed to mark wave as read:", error)
+        );
       }
     },
     [

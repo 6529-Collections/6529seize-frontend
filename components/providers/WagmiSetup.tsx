@@ -39,7 +39,7 @@ import { AppKitAdapterManager } from "./AppKitAdapterManager";
  * This runs once per page load and only touches `window.ethereum`.
  */
 function installSafeEthereumProxy(): void {
-  if (typeof globalThis.window === "undefined") return;
+  if (globalThis.window === undefined) return;
 
   const w = globalThis as unknown as {
     ethereum?: unknown;
@@ -59,7 +59,7 @@ function installSafeEthereumProxy(): void {
 
   try {
     let hasLoggedProxyGetError = false;
-    const proxy = new Proxy(ethereum as object, {
+    const proxy = new Proxy(ethereum, {
       get(target, prop) {
         try {
           const value = Reflect.get(target, prop);
