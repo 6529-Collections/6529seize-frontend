@@ -65,26 +65,25 @@ export default function UserPageStatsBoostBreakdown({
       return baseRows;
     }
 
-    const extraRows = [
-      getMemeRow("SZN1", bb.memes_szn1),
-      ...(bb.memes_szn1?.acquired
-        ? []
-        : [
-            getMemeRow("Genesis Set", bb.memes_genesis),
-            getMemeRow("Nakamoto", bb.memes_nakamoto),
-          ]),
-      getMemeRow("SZN2", bb.memes_szn2),
-      getMemeRow("SZN3", bb.memes_szn3),
-      getMemeRow("SZN4", bb.memes_szn4),
-      getMemeRow("SZN5", bb.memes_szn5),
-      getMemeRow("SZN6", bb.memes_szn6),
-      getMemeRow("SZN7", bb.memes_szn7),
-      getMemeRow("SZN8", bb.memes_szn8),
-      getMemeRow("SZN9", bb.memes_szn9),
-      getMemeRow("SZN10", bb.memes_szn10),
-      getMemeRow("SZN11", bb.memes_szn11),
-      getMemeRow("SZN12", bb.memes_szn12),
-    ];
+    const seasonKeys = Object.keys(bb)
+      .filter((key): key is `memes_szn${number}` => /^memes_szn\d+$/.test(key))
+      .sort((a, b) => {
+        const numA = Number.parseInt(a.replace("memes_szn", ""), 10);
+        const numB = Number.parseInt(b.replace("memes_szn", ""), 10);
+        return numA - numB;
+      });
+
+    const extraRows = seasonKeys.flatMap((key) => {
+      const sznNum = key.replace("memes_szn", "");
+      const rows = [getMemeRow(`SZN${sznNum}`, bb[key])];
+      if (key === "memes_szn1" && !bb[key]?.acquired) {
+        rows.push(
+          getMemeRow("Genesis Set", bb.memes_genesis),
+          getMemeRow("Nakamoto", bb.memes_nakamoto)
+        );
+      }
+      return rows;
+    });
 
     return [...baseRows, ...extraRows];
   }
