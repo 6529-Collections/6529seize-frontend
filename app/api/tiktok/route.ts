@@ -391,7 +391,7 @@ function scheduleRevalidation(canonicalUrl: string): void {
   }
 
   revalidating.add(canonicalUrl);
-  void fetchTikTokPreview(canonicalUrl)
+  fetchTikTokPreview(canonicalUrl)
     .then(({ data, status }) => {
       cache.set(canonicalUrl, {
         data,
