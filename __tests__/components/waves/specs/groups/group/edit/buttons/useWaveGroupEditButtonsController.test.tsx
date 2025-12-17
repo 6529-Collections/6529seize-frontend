@@ -127,7 +127,7 @@ beforeEach(() => {
   (useQueryClient as jest.Mock).mockReturnValue(queryClientMock);
   (useQuery as jest.Mock).mockImplementation(({ enabled, queryFn }) => {
     if (enabled && typeof queryFn === 'function') {
-      void queryFn({ signal: undefined });
+      queryFn({ signal: undefined });
     }
     return { data: undefined };
   });

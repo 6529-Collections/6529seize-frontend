@@ -414,7 +414,7 @@ export function useWavePagination({
         state.isFetching = false;
         cleanupController(abortKey, controller);
         // Trigger processing again in case a new request came in during the fetch
-        void _processAroundSerialNoQueue(waveId);
+        _processAroundSerialNoQueue(waveId).catch(() => undefined);
       }
     },
     [createController, cleanupController, updateData, determineSerialToFetch]
@@ -443,7 +443,7 @@ export function useWavePagination({
       }
 
       // Trigger the processing queue
-      void _processAroundSerialNoQueue(waveId);
+      _processAroundSerialNoQueue(waveId).catch(() => undefined);
     },
     [cancelAbort, _processAroundSerialNoQueue] // Dependency: the internal processing function
   );

@@ -19,6 +19,11 @@ export interface AppKitInitializationConfig {
 // Result interface
 interface AppKitInitializationResult {
   adapter: WagmiAdapter;
+  /**
+   * Optional to preserve backwards compatibility with mocks.
+   * When provided, callers can await it to ensure AppKit is ready before using the adapter.
+   */
+  ready?: Promise<void>;
 }
 
 /**
@@ -85,10 +90,16 @@ export function initializeAppKit(
 
   const newAdapter = createAdapter(wallets, adapterManager, isCapacitor);
   const appKitConfig = buildAppKitConfig(newAdapter);
-  createAppKit(appKitConfig);
+  const appKit = createAppKit(appKitConfig);
+  const ready = appKit.ready();
+  // Prevent unhandled rejections if a caller chooses not to await `ready`.
+  ready.catch((error) => {
+    logErrorSecurely("[AppKitInitialization] AppKit ready() failed", error);
+  });
 
   return {
     adapter: newAdapter,
+    ready,
   };
 }
 
