@@ -1,5 +1,6 @@
 import NotificationPriorityAlert from "@/components/brain/notifications/priority-alert/NotificationPriorityAlert";
 import { render, screen } from "@testing-library/react";
+import React from "react";
 import { useRouter } from "next/navigation";
 
 jest.mock("next/navigation", () => ({
@@ -24,6 +25,21 @@ jest.mock("@/components/waves/drops/Drop", () => ({
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
   default: jest.fn(() => ({ isApp: false })),
+}));
+
+jest.mock("@/components/brain/notifications/NotificationsFollowBtn", () => ({
+  __esModule: true,
+  default: () => <button data-testid="follow-btn">Follow</button>,
+}));
+
+jest.mock("@/components/brain/notifications/subcomponents/NotificationHeader", () => ({
+  __esModule: true,
+  default: ({ author, children }: { author: { handle: string }; children: React.ReactNode }) => (
+    <div data-testid="notification-header">
+      <span>{author.handle}</span>
+      {children}
+    </div>
+  ),
 }));
 
 const baseNotification: any = {
