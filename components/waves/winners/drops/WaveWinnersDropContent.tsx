@@ -29,7 +29,7 @@ export const WaveWinnersDropContent: React.FC<WaveWinnersDropContentProps> = ({
       isDirectMessage: waveMeta?.scope?.group?.is_direct_message ?? false,
       isApp: false,
     });
-    router.push(`${href}/`);
+    router.push(href);
   };
 
   return (

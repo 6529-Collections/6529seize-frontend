@@ -53,7 +53,7 @@ describe('NotificationIdentityMentioned', () => {
     render(
       <NotificationIdentityMentioned notification={notification as any} activeDrop={null} onReply={jest.fn()} onQuote={jest.fn()} />
     );
-    expect(push).toHaveBeenCalledWith('/waves?wave=wave&serialNo=1/');
-    expect(push).toHaveBeenCalledWith('/waves?wave=w&serialNo=2/');
+    expect(push).toHaveBeenCalledWith('/waves?wave=wave&serialNo=1');
+    expect(push).toHaveBeenCalledWith('/waves?wave=w&serialNo=2');
   });
 });
