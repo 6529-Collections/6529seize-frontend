@@ -160,7 +160,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
-    void removeDeliveredNotifications([notification]);
+    await removeDeliveredNotifications([notification]);
 
     const redirectUrl = resolveRedirectUrl(notificationData);
     if (redirectUrl) {
