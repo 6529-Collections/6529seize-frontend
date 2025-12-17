@@ -182,7 +182,7 @@ export default function DistributionPage(props: Readonly<Props>) {
 
   function getSpotsForPhase(d: Distribution, phase: string) {
     if (phase.toUpperCase() === "AIRDROP") {
-      return "";
+      return null;
     }
     const p = d.allowlist.find((a) => a.phase === phase);
     const count = p?.spots ?? 0;
@@ -191,7 +191,7 @@ export default function DistributionPage(props: Readonly<Props>) {
       const spotsAllowlist = p?.spots_allowlist ?? 0;
 
       if (!spotsAirdrop && !spotsAllowlist) {
-        return "";
+        return null;
       }
 
       return (
