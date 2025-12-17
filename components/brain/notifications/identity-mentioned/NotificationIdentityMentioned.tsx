@@ -1,19 +1,17 @@
 "use client";
 
-import { INotificationIdentityMentioned } from "@/types/feed.types";
-import { getTimeAgoShort } from "@/helpers/Helpers";
-import { ActiveDropState } from "@/types/dropInteractionTypes";
-import Drop, {
-  DropInteractionParams,
-  DropLocation,
-} from "@/components/waves/drops/Drop";
-import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
+import { DropInteractionParams } from "@/components/waves/drops/Drop";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
+import { INotificationIdentityMentioned } from "@/types/feed.types";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
+import NotificationDrop from "../subcomponents/NotificationDrop";
 import NotificationHeader from "../subcomponents/NotificationHeader";
+import NotificationTimestamp from "../subcomponents/NotificationTimestamp";
 import {
-  useWaveNavigation,
   getIsDirectMessage,
+  useWaveNavigation,
 } from "../utils/navigationUtils";
 
 export default function NotificationIdentityMentioned({
@@ -29,56 +27,34 @@ export default function NotificationIdentityMentioned({
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }) {
-  const { navigateToWave, createQuoteClickHandler } = useWaveNavigation();
-  const baseWave = notification.related_drops[0].wave;
-  const baseIsDm = getIsDirectMessage(baseWave);
-
-  const onReplyClick = (serialNo: number) => {
-    navigateToWave(baseWave.id, serialNo, baseIsDm);
-  };
-
-  const onQuoteClick = createQuoteClickHandler(baseIsDm);
+  const { createReplyClickHandler, createQuoteClickHandler } =
+    useWaveNavigation();
+  const drop = notification.related_drops[0];
+  const isDirectMessage = getIsDirectMessage(drop.wave);
 
   return (
     <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
       <NotificationHeader
-        author={notification.related_drops[0].author}
+        author={drop.author}
         actions={
           <NotificationsFollowBtn
-            profile={notification.related_drops[0].author}
+            profile={drop.author}
             size={UserFollowBtnSize.SMALL}
           />
-        }
-      >
+        }>
         <span className="tw-text-iron-400 tw-font-normal tw-text-sm">
           mentioned you
         </span>
-        <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
-          <span className="tw-font-bold tw-mr-1 tw-text-xs tw-text-iron-400">
-            &#8226;
-          </span>
-          {getTimeAgoShort(notification.created_at)}
-        </span>
+        <NotificationTimestamp createdAt={notification.created_at} />
       </NotificationHeader>
 
-      <Drop
-        drop={{
-          type: DropSize.FULL,
-          ...notification.related_drops[0],
-          stableKey: "",
-          stableHash: "",
-        }}
-        previousDrop={null}
-        nextDrop={null}
-        showWaveInfo={true}
-        showReplyAndQuote={true}
+      <NotificationDrop
+        drop={drop}
         activeDrop={activeDrop}
-        location={DropLocation.MY_STREAM}
-        dropViewDropId={null}
         onReply={onReply}
         onQuote={onQuote}
-        onReplyClick={onReplyClick}
-        onQuoteClick={onQuoteClick}
+        onReplyClick={createReplyClickHandler(drop.wave.id, isDirectMessage)}
+        onQuoteClick={createQuoteClickHandler(isDirectMessage)}
         onDropContentClick={onDropContentClick}
       />
     </div>
