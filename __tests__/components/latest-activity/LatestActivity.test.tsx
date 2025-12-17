@@ -113,8 +113,8 @@ describe("LatestActivity", () => {
     expect(fetchUrl).toHaveBeenCalledWith(
       "https://api.test.6529.io/api/transactions?page_size=10&page=1"
     );
-    await userEvent.click(screen.getByText("Collection: All"));
-    await userEvent.click(screen.getByText("Memes"));
+    await userEvent.click(screen.getByText("All Collections"));
+    await userEvent.click(screen.getByText("The Memes"));
     await waitFor(() =>
       expect(fetchUrl).toHaveBeenLastCalledWith(
         "https://api.test.6529.io/api/transactions?page_size=10&page=1&contract=0x33FD426905F149f8376e227d0C9D3340AaD17aF1"
@@ -170,7 +170,7 @@ describe("LatestActivity", () => {
       );
 
       // Change filter - this should trigger a fetch
-      await userEvent.click(screen.getByText("Filter: All"));
+      await userEvent.click(screen.getByText("All Transactions"));
       await userEvent.click(screen.getByText("Sales"));
 
       await waitFor(() => {
@@ -406,7 +406,7 @@ describe("LatestActivity", () => {
       });
 
       // Change type filter
-      await userEvent.click(screen.getByText("Filter: All"));
+      await userEvent.click(screen.getByText("All Transactions"));
       await userEvent.click(screen.getByText("Sales"));
 
       await waitFor(() => {
@@ -426,8 +426,8 @@ describe("LatestActivity", () => {
       });
 
       // Change contract filter
-      await userEvent.click(screen.getByText("Collection: All"));
-      await userEvent.click(screen.getByText("Memes"));
+      await userEvent.click(screen.getByText("All Collections"));
+      await userEvent.click(screen.getByText("The Memes"));
 
       await waitFor(() => {
         expect(fetchUrl).toHaveBeenCalledWith(
@@ -452,8 +452,8 @@ describe("LatestActivity", () => {
       expect(
         screen.getByRole("heading", { name: "NFT Activity" })
       ).toBeInTheDocument();
-      expect(screen.getByText("Collection: All")).toBeInTheDocument();
-      expect(screen.getByText("Filter: All")).toBeInTheDocument();
+      expect(screen.getByText("All Collections")).toBeInTheDocument();
+      expect(screen.getByText("All Transactions")).toBeInTheDocument();
     });
 
     it("starts with empty activity array when no data provided", async () => {

@@ -1,7 +1,6 @@
 "use client";
 
 import TransferToggle from "@/components/nft-transfer/TransferToggle";
-import SeasonsDropdown from "@/components/seasons-dropdown/SeasonsDropdown";
 import UserAddressesSelectDropdown from "@/components/user/utils/addresses-select/UserAddressesSelectDropdown";
 import CommonSelect, {
   CommonSelectItem,
@@ -11,6 +10,7 @@ import {
   CollectionSeized,
   CollectionSort,
 } from "@/entities/IProfile";
+import { MemeSeason } from "@/entities/ISeason";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
   faChevronLeft,
@@ -24,6 +24,7 @@ import UserPageCollectedFiltersNativeDropdown from "./UserPageCollectedFiltersNa
 import UserPageCollectedFiltersNetworkCollection from "./UserPageCollectedFiltersNetworkCollection";
 import UserPageCollectedFiltersSeized from "./UserPageCollectedFiltersSeized";
 import UserPageCollectedFiltersSortBy from "./UserPageCollectedFiltersSortBy";
+import UserPageCollectedFiltersSzn from "./UserPageCollectedFiltersSzn";
 
 enum MainTab {
   NATIVE = "NATIVE",
@@ -47,7 +48,7 @@ export default function UserPageCollectedFilters({
   readonly setCollection: (collection: CollectedCollectionType | null) => void;
   readonly setSortBy: (sortBy: CollectionSort) => void;
   readonly setSeized: (seized: CollectionSeized | null) => void;
-  readonly setSzn: (szn: number) => void;
+  readonly setSzn: (szn: MemeSeason | null) => void;
   readonly setSubcollection: (subcollection: string | null) => void;
   readonly showTransfer: boolean;
 }) {
@@ -193,14 +194,10 @@ export default function UserPageCollectedFilters({
               />
             )}
             {getShowSzn(filters.collection) && (
-              // <UserPageCollectedFiltersSzn
-              //   selected={filters.szn}
-              //   containerRef={containerRef}
-              //   setSelected={setSzn}
-              // />
-              <SeasonsDropdown
-                selectedSeason={filters.szn}
-                setSelectedSeason={setSzn}
+              <UserPageCollectedFiltersSzn
+                selected={filters.szn}
+                initialSeasonId={filters.initialSznId}
+                setSelected={setSzn}
               />
             )}
           </div>

@@ -1,5 +1,6 @@
 import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { WAVE_VOTING_LABELS, WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
 
 interface WaveWinnersDropHeaderTotalVotesProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -34,7 +35,7 @@ export default function WaveWinnersDropHeaderTotalVotes({
         {formatNumberWithCommas(winner.drop.rating)}
       </span>
       <span className="tw-text-sm tw-text-iron-500 tw-whitespace-nowrap">
-        {winner.drop.wave.voting_credit_type} total
+        {WAVE_VOTING_LABELS[winner.drop.wave.voting_credit_type]} {WAVE_VOTE_STATS_LABELS.TOTAL}
       </span>
     </div>
   );

@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getSliderTheme } from "./types/slider.types";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { SingleWaveDropVoteSize } from "./SingleWaveDropVote";
 
 interface WaveDropVoteSliderProps {
@@ -13,14 +12,8 @@ interface WaveDropVoteSliderProps {
   readonly maxValue: number;
   readonly setVoteValue: React.Dispatch<React.SetStateAction<string | number>>;
   readonly rank?: number | null;
-  readonly creditType: ApiWaveCreditType;
+  readonly label: string;
   readonly size?: SingleWaveDropVoteSize;
-}
-
-interface PresetMark {
-  percentage: number;
-  label: string;
-  position: number;
 }
 
 type ProgressBarStyle = {
@@ -87,53 +80,7 @@ const transformFromLog = (
   return Math.round(result);
 };
 
-const calculatePresetMarks = (minValue: number, maxValue: number) => {
-  const zeroPoint =
-    ((transformToLog(0, minValue, maxValue) - minValue) /
-      (maxValue - minValue)) *
-    100;
-  const marks: PresetMark[] = [];
 
-  // Add 0% mark
-  marks.push({
-    percentage: 0,
-    label: "0%",
-    position: zeroPoint,
-  });
-
-  // Negative presets
-  if (minValue < 0) {
-    const negativeValues = [-75, -50, -25];
-    negativeValues.forEach((percentage) => {
-      const value = -(Math.abs(minValue) * Math.abs(percentage)) / 100;
-      const logValue = transformToLog(value, minValue, maxValue);
-      const position = ((logValue - minValue) / (maxValue - minValue)) * 100;
-      marks.push({
-        percentage,
-        label: `${percentage}%`,
-        position,
-      });
-    });
-  }
-
-  // Positive presets
-  if (maxValue > 0) {
-    const positiveValues = [25, 50, 75];
-    positiveValues.forEach((percentage) => {
-      const value = (maxValue * percentage) / 100;
-      const logValue = transformToLog(value, minValue, maxValue);
-      const position = ((logValue - minValue) / (maxValue - minValue)) * 100;
-      marks.push({
-        percentage,
-        label: `${percentage}%`,
-        position,
-      });
-    });
-  }
-
-  // Sort marks by position to ensure proper rendering order
-  return marks.sort((a, b) => a.position - b.position);
-};
 
 export default function WaveDropVoteSlider({
   voteValue,
@@ -141,7 +88,7 @@ export default function WaveDropVoteSlider({
   minValue,
   maxValue,
   rank = null,
-  creditType,
+  label,
   size = SingleWaveDropVoteSize.NORMAL,
 }: WaveDropVoteSliderProps) {
   const thumbRef = useRef<HTMLDivElement>(null);
@@ -176,7 +123,7 @@ export default function WaveDropVoteSlider({
 
   useEffect(() => {
     x.set(currentPercentage);
-  }, [currentPercentage]);
+  }, [currentPercentage, x]);
 
   const progressBarStyle = getProgressBarStyle(
     numericVoteValue,
@@ -186,16 +133,14 @@ export default function WaveDropVoteSlider({
 
   return (
     <div
-      className={`tw-flex tw-items-center [touch-action:none] ${
-        isMini ? "tw-h-6" : "tw-h-9"
-      }`}
+      className={`tw-flex tw-items-center [touch-action:none] ${isMini ? "tw-h-6" : "tw-h-9"
+        }`}
       onClick={(e) => e.stopPropagation()}>
       <div className="tw-relative tw-flex-1 tw-overflow-visible">
         <div
-          className={`tw-relative tw-h-[6px] tw-group ${
-            isMini ? "tw-mt-3" : "tw-mt-6 sm:tw-mt-0"
-          }`}>
-          {/* Base range input for track clicks */}
+          className={`tw-relative tw-h-[6px] tw-group ${isMini ? "tw-mt-3" : "tw-mt-6 sm:tw-mt-0"
+            }`}>
+
           <input
             type="range"
             min={minValue}
@@ -214,7 +159,7 @@ export default function WaveDropVoteSlider({
             }}
           />
 
-          {/* Track and progress */}
+
           <motion.div
             className={`tw-absolute tw-inset-0 tw-rounded-full tw-z-0 tw-shadow-inner tw-pointer-events-none ${theme.track.background} ${theme.track.hover}`}
             initial={{ opacity: 0, scale: 0.98 }}
@@ -230,7 +175,7 @@ export default function WaveDropVoteSlider({
             transition={{ duration: 0.4, ease: "easeOut" }}
           />
 
-          {/* Thumb hit area */}
+
           <div
             className="tw-absolute tw-left-0 tw-right-0 tw-z-30"
             style={{
@@ -266,7 +211,7 @@ export default function WaveDropVoteSlider({
             />
           </div>
 
-          {/* Thumb visual - Compact */}
+
           <motion.div
             ref={thumbRef}
             style={{
@@ -288,15 +233,14 @@ export default function WaveDropVoteSlider({
                   tw-shadow-lg tw-border tw-border-gray-600/20 ${theme.tooltip.text}
                   tw-transition-transform tw-duration-200 tw-ease-out`}
                 style={{
-                  transform: `translateX(calc(-50% + ${
-                    currentPercentage <= 10 ? 50 : 0
-                  }%))`,
+                  transform: `translateX(calc(-50% + ${currentPercentage <= 10 ? 50 : 0
+                    }%))`,
                 }}>
                 <span className="tw-block">
                   {formatNumberWithCommas(
                     typeof voteValue === "string" ? 0 : voteValue
                   )}{" "}
-                  {creditType}
+                  {label}
                 </span>
                 <div
                   className={`tw-absolute tw-w-2 tw-h-2 tw-bottom-[-4px] tw-left-1/2 -tw-translate-x-1/2

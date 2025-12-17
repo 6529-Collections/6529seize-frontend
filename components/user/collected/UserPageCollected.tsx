@@ -11,6 +11,7 @@ import {
   CollectionSeized,
   CollectionSort,
 } from "@/entities/IProfile";
+import { MemeSeason } from "@/entities/ISeason";
 import { SortDirection } from "@/entities/ISort";
 import { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import { areEqualAddresses } from "@/helpers/Helpers";
@@ -41,7 +42,8 @@ export interface ProfileCollectedFilters {
   readonly collection: CollectedCollectionType | null;
   readonly subcollection: string | null;
   readonly seized: CollectionSeized | null;
-  readonly szn: number;
+  readonly szn: MemeSeason | null;
+  readonly initialSznId: number | null;
   readonly page: number;
   readonly pageSize: number;
   readonly sortBy: CollectionSort;
@@ -97,6 +99,20 @@ export default function UserPageCollected({
       Object.values(CollectionSeized).find((c) => c === seized.toUpperCase()) ??
       null
     );
+  };
+
+  const convertSznId = ({
+    szn,
+    collection,
+  }: {
+    readonly szn: string | null;
+    readonly collection: CollectedCollectionType | null;
+  }): number | null => {
+    if (!collection) return null;
+    if (!COLLECTED_COLLECTIONS_META[collection].filters.szn) return null;
+    if (!szn) return null;
+    const parsed = Number.parseInt(szn, 10);
+    return Number.isNaN(parsed) ? null : parsed;
   };
 
   const convertCollection = (
@@ -163,8 +179,12 @@ export default function UserPageCollected({
         seized: seized ?? null,
         collection: convertedCollection,
       }),
-      szn: szn ? parseInt(szn) : 0,
-      page: page ? parseInt(page) : 1,
+      szn: null,
+      initialSznId: convertSznId({
+        szn: szn ?? null,
+        collection: convertedCollection,
+      }),
+      page: page ? Number.parseInt(page, 10) : 1,
       pageSize: PAGE_SIZE,
       sortBy: convertSortedBy({
         sortBy: sortBy ?? null,
@@ -329,11 +349,12 @@ export default function UserPageCollected({
     await updateFields(items);
   };
 
-  const setSzn = async (szn: number): Promise<void> => {
+  const setSzn = async (szn: MemeSeason | null): Promise<void> => {
+    setFilters((prev) => ({ ...prev, szn }));
     const items: QueryUpdateInput[] = [
       {
         name: "szn",
-        value: szn ? szn.toString() : null,
+        value: szn ? szn.id.toString() : null,
       },
       {
         name: "page",
@@ -369,10 +390,15 @@ export default function UserPageCollected({
     await updateFields(items);
   };
 
-  useEffect(
-    () => setFilters(getFilters()),
-    [searchParams, profile, user, connectedAddress, getFilters]
-  );
+  useEffect(() => {
+    setFilters((prev) => {
+      const newFilters = getFilters();
+      if (prev.szn && newFilters.initialSznId === prev.szn.id) {
+        return { ...newFilters, szn: prev.szn };
+      }
+      return newFilters;
+    });
+  }, [searchParams, profile, user, connectedAddress, getFilters]);
 
   const {
     isFetching,
@@ -401,7 +427,7 @@ export default function UserPageCollected({
       }
 
       if (filters.szn) {
-        params.szn = filters.szn.toString();
+        params.szn = filters.szn.id.toString();
       }
 
       return await commonApiFetch<Page<CollectedCard>>({

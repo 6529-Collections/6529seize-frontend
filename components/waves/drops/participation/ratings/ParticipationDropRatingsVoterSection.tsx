@@ -7,6 +7,7 @@ import {
   ImageScale,
 } from "@/helpers/image.helpers";
 import { RatingsSectionProps, RatingsData } from "./types";
+import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 
 interface ParticipationDropRatingsVoterSectionProps
   extends RatingsSectionProps {
@@ -54,7 +55,7 @@ export default function ParticipationDropRatingsVoterSection({
               >
                 {rater.profile.handle} •{" "}
                 {formatNumberWithCommas(rater.rating)}{" "}
-                {drop.wave.voting_credit_type}
+                {WAVE_VOTING_LABELS[drop.wave.voting_credit_type]}
               </Tooltip>
             </div>
           ))}

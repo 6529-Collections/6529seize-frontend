@@ -39,16 +39,17 @@ export default function Home({
       {featuredNextgen && !isEmptyObject(featuredNextgen) && (
         <Container className="pt-3 pb-5">
           <Row>
-            <Col className="d-flex align-items-center gap-3">
-              <h1>
-                Discover NextGen -{" "}
-                {featuredNextgen.name}{" "}
+            <Col className="d-flex align-items-center gap-3 mb-2">
+              <h1 className="tw-mb-0">
+                Discover NextGen - {featuredNextgen.name}{" "}
               </h1>
               <Link
                 href={`/nextgen/collection/${formatNameForUrl(
                   featuredNextgen.name
                 )}`}>
-                View Collection
+                <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold hover:tw-text-[#bbb] max-[800px]:tw-text-[12px]">
+                  View Collection
+                </span>
               </Link>
             </Col>
           </Row>

@@ -847,6 +847,7 @@ export interface SeasonMintRow {
   utcDay: Date;
   instantUtc: Date;
   meme: number;
+  seasonIndex: number;
 }
 
 export interface SeasonMintScanResult {
@@ -886,6 +887,7 @@ function getUpcomingMintsBetween(
     Math.max(todayUtcDay.getTime(), seasonStart.getTime())
   );
 
+  const seasonIndex = getSeasonIndexForDate(seasonStart);
   const out: SeasonMintRow[] = [];
   const cursor = new Date(scanStart);
   while (+cursor <= +seasonEndInclusive) {
@@ -895,13 +897,13 @@ function getUpcomingMintsBetween(
         utcDay: new Date(cursor),
         instantUtc: mintInstant,
         meme: getMintNumberForMintDate(cursor),
+        seasonIndex,
       });
     }
     cursor.setUTCDate(cursor.getUTCDate() + 1);
   }
 
   const rows = out.filter((x) => x.instantUtc.getTime() > now.getTime());
-  const seasonIndex = getSeasonIndexForDate(seasonStart);
 
   return { seasonStart, seasonEndInclusive, seasonIndex, rows };
 }
@@ -932,6 +934,32 @@ export function getUpcomingMintsForCurrentOrNextSeason(
     ...next,
     seasonIndex: nextIdx,
   };
+}
+
+export function getUpcomingMintsForSeasonIndex(
+  seasonIndex: number,
+  now: Date = new Date()
+): SeasonMintScanResult {
+  const start = getSeasonStartDate(seasonIndex);
+  const end = addMonths(start, 2);
+  return getUpcomingMintsBetween(start, end, now);
+}
+
+export function getUpcomingMintsAcrossSeasons(
+  minCount: number,
+  now: Date = new Date()
+): SeasonMintRow[] {
+  const result: SeasonMintRow[] = [];
+  let idx = getSeasonIndexForDate(now);
+
+  while (result.length < minCount) {
+    const season = getUpcomingMintsForSeasonIndex(idx, now);
+    result.push(...season.rows);
+    idx++;
+    if (idx > getSeasonIndexForDate(now) + 4) break;
+  }
+
+  return result.slice(0, minCount);
 }
 
 export function getCanonicalNextMintNumber(now: Date = new Date()): number {

@@ -18,10 +18,10 @@ export default function UserPageCollectedCardsNoCards({
       case null:
         return "Congratulations, full setter!";
       case CollectedCollectionType.MEMES:
-        if (filters.szn === 0) {
+        if (filters.szn === null) {
           return "Congratulations, The Memes full setter!";
         }
-        return `Congratulations, ${filters.szn} full setter!`;
+        return `Congratulations, ${filters.szn.display} full setter!`;
       case CollectedCollectionType.GRADIENTS:
         return "Congratulations, Gradient full setter!";
       case CollectedCollectionType.MEMELAB:

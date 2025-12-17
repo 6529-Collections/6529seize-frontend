@@ -1,60 +1,18 @@
 import { isValidEthAddress } from "@/helpers/Helpers";
 import type { TokenMetadata } from "@/types/nft";
 
+import { getAlchemyApiKey } from "@/config/alchemyEnv";
 import type {
-  AlchemyTokenMetadataEntry,
   AlchemyTokenMetadataResponse,
   TokenMetadataParams,
 } from "./types";
-import { normaliseAddress, pickThumbnail, resolveNetwork } from "./utils";
-import { getAlchemyApiKey } from "@/config/alchemyEnv";
+import {
+  normaliseAddress,
+  processTokenMetadataResponse,
+  resolveNetwork,
+} from "./utils";
 
 const MAX_BATCH_SIZE = 100;
-
-function parseTokenIdToBigint(tokenId: string): bigint {
-  if (!tokenId) {
-    throw new Error("Token ID missing");
-  }
-  const trimmed = tokenId.trim();
-  if (trimmed.startsWith("0x") || trimmed.startsWith("0X")) {
-    return BigInt(trimmed);
-  }
-  return BigInt(trimmed);
-}
-
-function normaliseTokenMetadata(
-  token: AlchemyTokenMetadataEntry
-): TokenMetadata | null {
-  const tokenIdRaw = token.tokenId ?? "";
-  try {
-    const tokenId = parseTokenIdToBigint(tokenIdRaw);
-    const imageUrl = pickThumbnail({
-      image: token.image ?? undefined,
-      media: token.media ?? undefined,
-    });
-    return {
-      tokenId,
-      tokenIdRaw,
-      contract: token.contract?.address ?? undefined,
-      name:
-        token.title ??
-        token.name ??
-        token.metadata?.name ??
-        token.raw?.metadata?.name ??
-        null,
-      imageUrl,
-      collectionName:
-        token.collection?.name ??
-        token.contract?.openSeaMetadata?.collectionName ??
-        token.contract?.name ??
-        null,
-      isSpam: token.isSpam ?? token.spamInfo?.isSpam ?? false,
-    };
-  } catch (error) {
-    console.warn("Failed to parse token metadata", tokenIdRaw, error);
-    return null;
-  }
-}
 
 export async function getTokensMetadata(
   params: TokenMetadataParams
@@ -116,13 +74,8 @@ export async function getTokensMetadata(
       throw new Error("Failed to fetch token metadata");
     }
     const payload = (await response.json()) as AlchemyTokenMetadataResponse;
-    const tokens = payload.tokens ?? payload.nfts ?? [];
-    for (const token of tokens) {
-      const normalised = normaliseTokenMetadata(token);
-      if (normalised) {
-        results.push(normalised);
-      }
-    }
+    const batchResults = processTokenMetadataResponse(payload);
+    results.push(...batchResults);
   }
   return results;
 }

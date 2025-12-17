@@ -4,7 +4,11 @@ import styles from "./MemeLab.module.scss";
 
 import { useAuth } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
 import Download from "@/components/download/Download";
+import { ActivityTypeItems } from "@/components/latest-activity/ActivityFilters";
 import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
 import MemeLabLeaderboard from "@/components/leaderboard/MemeLabLeaderboard";
 import NFTAttributes from "@/components/nft-attributes/NFTAttributes";
@@ -24,6 +28,7 @@ import {
   TabButton,
 } from "@/components/the-memes/MemeShared";
 import Timeline from "@/components/timeline/Timeline";
+import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import { publicEnv } from "@/config/env";
 import { MEMELAB_CONTRACT, MEMES_CONTRACT, NULL_ADDRESS } from "@/constants";
 import { useTitle } from "@/contexts/TitleContext";
@@ -52,15 +57,8 @@ import { faExpandAlt, faFire } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Fragment, useEffect, useState } from "react";
-import {
-  Carousel,
-  Col,
-  Container,
-  Dropdown,
-  Row,
-  Table,
-} from "react-bootstrap";
+import { Fragment, useEffect, useMemo, useState } from "react";
+import { Carousel, Col, Container, Row, Table } from "react-bootstrap";
 
 const ACTIVITY_PAGE_SIZE = 25;
 
@@ -114,6 +112,7 @@ export default function MemeLabPageComponent({
   const [activityTypeFilter, setActivityTypeFilter] = useState<TypeFilter>(
     TypeFilter.ALL
   );
+  const [activityLoading, setActivityLoading] = useState(false);
 
   useEffect(() => {
     setTitle(getMemeTabTitle(`Meme Lab`, nftId, nft, activeTab));
@@ -345,6 +344,7 @@ export default function MemeLabPageComponent({
       return;
     }
 
+    setActivityLoading(true);
     let url = `${publicEnv.API_ENDPOINT}/api/transactions_memelab?id=${nftId}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
     switch (activityTypeFilter) {
       case TypeFilter.SALES:
@@ -383,6 +383,9 @@ export default function MemeLabPageComponent({
         console.error(`Failed to fetch Meme Lab activity for ${nftId}`, error);
         setActivityTotalResults(0);
         setActivity([]);
+      })
+      .finally(() => {
+        setActivityLoading(false);
       });
 
     return () => {
@@ -408,7 +411,10 @@ export default function MemeLabPageComponent({
         if (cancelled || isAbortError(error)) {
           return;
         }
-        console.error(`Failed to fetch NFT history for Meme Lab ${nftId}`, error);
+        console.error(
+          `Failed to fetch NFT history for Meme Lab ${nftId}`,
+          error
+        );
         setNftHistory([]);
       }
     }
@@ -425,6 +431,40 @@ export default function MemeLabPageComponent({
       abortController.abort();
     };
   }, [nftId]);
+
+  const activityContent = useMemo(() => {
+    if (activity.length > 0) {
+      return (
+        <Table bordered={false} className={styles.transactionsTable}>
+          <tbody>
+            {activity.map((tr) => (
+              <LatestActivityRow
+                tr={tr}
+                nft={nft}
+                key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
+              />
+            ))}
+          </tbody>
+        </Table>
+      );
+    }
+
+    if (activityLoading) {
+      return (
+        <div className="tw-flex tw-justify-center tw-items-center tw-py-4">
+          <CircleLoader size={CircleLoaderSize.LARGE} />
+        </div>
+      );
+    }
+
+    if (activity.length === 0) {
+      return (
+        <div className="tw-flex tw-justify-center tw-items-center tw-h-full tw-py-2">
+          <NothingHereYetSummer />
+        </div>
+      );
+    }
+  }, [activity, activityLoading, nft]);
 
   function printContent() {
     if (activeTab === MEME_FOCUS.ACTIVITY) {
@@ -1311,63 +1351,30 @@ export default function MemeLabPageComponent({
             </Row>
           </>
         )}
-        <Row className="pt-3">
-          <Col
-            className="d-flex align-items-center"
-            xs={{ span: 7 }}
-            sm={{ span: 7 }}
-            md={{ span: 9 }}
-            lg={{ span: 10 }}>
-            <h3>Card Activity</h3>
-          </Col>
-          <Col
-            xs={{ span: 5 }}
-            sm={{ span: 5 }}
-            md={{ span: 3 }}
-            lg={{ span: 2 }}>
-            <Dropdown
-              className={styles.activityFilterDropdown}
-              drop={"down-centered"}>
-              <Dropdown.Toggle>Filter: {activityTypeFilter}</Dropdown.Toggle>
-              <Dropdown.Menu>
-                {Object.values(TypeFilter).map((filter) => (
-                  <Dropdown.Item
-                    key={`nft-activity-${filter}`}
-                    onClick={() => {
-                      setActivityPage(1);
-                      setActivityTypeFilter(filter);
-                    }}>
-                    {filter}
-                  </Dropdown.Item>
-                ))}
-              </Dropdown.Menu>
-            </Dropdown>
+        <Row className="tw-py-3">
+          <Col>
+            <div className="tw-flex tw-flex-col md:tw-flex-row tw-justify-between tw-items-stretch md:tw-items-center tw-gap-3">
+              <h3 className="tw-mb-0 tw-whitespace-nowrap tw-shrink-0">
+                Card Activity
+              </h3>
+              <div className="tw-w-full md:tw-w-72 tw-shrink-0">
+                <CommonDropdown
+                  items={ActivityTypeItems}
+                  activeItem={activityTypeFilter}
+                  filterLabel="Transaction Type"
+                  setSelected={(filter) => {
+                    setActivityPage(1);
+                    setActivityTypeFilter(filter);
+                  }}
+                />
+              </div>
+            </div>
           </Col>
         </Row>
-        {activity.length > 0 ? (
-          <Row className={`pt-2 ${styles.transactionsScrollContainer}`}>
-            <Col>
-              <Table bordered={false} className={styles.transactionsTable}>
-                <tbody>
-                  {activity.map((tr) => (
-                    <LatestActivityRow
-                      tr={tr}
-                      nft={nft}
-                      key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
-                    />
-                  ))}
-                </tbody>
-              </Table>
-            </Col>
-          </Row>
-        ) : (
-          <Row>
-            <Col>
-              <NothingHereYetSummer />
-            </Col>
-          </Row>
-        )}
-        {activity.length > 0 && (
+        <Row className={`pt-2 ${styles.transactionsScrollContainer}`}>
+          <Col>{activityContent}</Col>
+        </Row>
+        {activity.length > 0 && !activityLoading && (
           <Row className="text-center pt-2 pb-3">
             <Pagination
               page={activityPage}

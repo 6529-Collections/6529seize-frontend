@@ -1,4 +1,4 @@
- "use client";
+"use client";
 
 import React from "react";
 import { ApiDrop } from "@/generated/models/ObjectSerializer";
@@ -9,6 +9,8 @@ import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressi
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import Image from "next/image";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { WAVE_VOTING_LABELS, WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
+
 
 interface SingleWaveDropVotesProps {
   readonly drop: ApiDrop;
@@ -35,9 +37,8 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
     <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-y-2 tw-gap-x-6 tw-mt-0.5">
       <div className="tw-flex tw-items-baseline tw-gap-x-2">
         <span
-          className={`tw-text-sm tw-font-bold tw-font-mono tw-tracking-tight ${
-            isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
-          }`}
+          className={`tw-text-sm tw-font-bold tw-font-mono tw-tracking-tight ${isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
+            }`}
         >
           {formatNumberWithCommas(drop.rating)}
         </span>
@@ -46,7 +47,8 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
           projected={drop.rating_prediction}
         />
         <span className="tw-text-sm tw-text-iron-500 tw-font-normal">
-          {drop.wave.voting_credit_type} total
+          {WAVE_VOTING_LABELS[drop.wave.voting_credit_type]}{" "}
+          {WAVE_VOTE_STATS_LABELS.TOTAL}
         </span>
       </div>
       <div className="tw-flex tw-items-center tw-gap-2">
@@ -98,17 +100,16 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
         <div className="tw-flex tw-items-center tw-gap-x-1.5">
           <div className="tw-flex tw-items-baseline tw-gap-x-1">
             <span className="tw-text-sm tw-font-normal tw-text-iron-400">
-              Your vote:
+              {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:
             </span>
             <span
-              className={`tw-text-sm tw-font-semibold ${
-                isUserVoteNegative ? "tw-text-rose-500" : "tw-text-emerald-500"
-              }`}
+              className={`tw-text-sm tw-font-semibold ${isUserVoteNegative ? "tw-text-rose-500" : "tw-text-emerald-500"
+                }`}
             >
               {isUserVoteNegative && "-"}
               {formatNumberWithCommas(Math.abs(userVote))}{" "}
               <span className="tw-text-iron-400 tw-font-normal">
-                {drop.wave.voting_credit_type}
+                {WAVE_VOTING_LABELS[drop.wave.voting_credit_type]}
               </span>
             </span>
           </div>
