@@ -163,8 +163,12 @@ Sentry.init({
 
     const error = hint?.originalException ?? hint?.syntheticException;
     const value = event.exception?.values?.[0];
+    const message =
+      (typeof value?.value === "string" && value.value) ||
+      getFallbackMessage(hint) ||
+      (typeof event.message === "string" ? event.message : "");
 
-    if (error && isIndexedDBError(error)) {
+    if ((error && isIndexedDBError(error)) || (message && isIndexedDBError(message))) {
       handleIndexedDBError(event);
     }
 
