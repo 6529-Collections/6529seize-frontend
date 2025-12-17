@@ -1,4 +1,5 @@
 import React from 'react';
+import { ApiGroupTdhInclusionStrategy } from '@/generated/models/ApiGroupTdhInclusionStrategy';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import GroupCreateTest from '@/components/groups/page/create/actions/GroupCreateTest';
 import { AuthContext } from '@/components/auth/Auth';
@@ -18,7 +19,7 @@ jest.mock('@/hooks/groups/useGroupMutations', () => ({
 
 const useQueryMock = jest.fn().mockReturnValue({ isFetching: false, data: undefined });
 jest.mock('@tanstack/react-query', () => ({
-  // @ts-expect-error - partial mock for tests
+
   useQuery: (...args: any[]) => useQueryMock(...args),
   keepPreviousData: {},
 }));
@@ -34,7 +35,7 @@ const defaultGroupConfig = {
     identity_addresses: [],
     excluded_identity_addresses: [],
     owns_nfts: [],
-    tdh: { min: null, max: null },
+    tdh: { min: null, max: null, inclusion_strategy: ApiGroupTdhInclusionStrategy.Tdh },
     rep: { min: null, max: null, user_identity: null, category: null, direction: null },
     cic: { min: null, max: null, user_identity: null, direction: null },
     level: { min: null, max: null },

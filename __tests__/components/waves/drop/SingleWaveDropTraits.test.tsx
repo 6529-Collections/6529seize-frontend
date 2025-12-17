@@ -519,7 +519,7 @@ describe("SingleWaveDropTraits", () => {
       // Find the metadata item container by looking for the specific class pattern
       const { container } = render(<SingleWaveDropTraits drop={drop} />);
       const metadataItems = container.querySelectorAll(
-        ".tw-px-2.tw-py-1.tw-rounded-md.tw-bg-iron-800"
+        String.raw`.tw-px-3.tw-py-1\.5.tw-rounded-md.tw-bg-iron-900`
       );
       expect(metadataItems.length).toBeGreaterThan(0);
 

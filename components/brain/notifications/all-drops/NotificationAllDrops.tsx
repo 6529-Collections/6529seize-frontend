@@ -1,23 +1,20 @@
 "use client";
 
-import Link from "next/link";
-import {
-  getScaledImageUri,
-  ImageScale,
-} from "@/helpers/image.helpers";
-import { INotificationAllDrops } from "@/types/feed.types";
-import { getTimeAgoShort, numberWithCommas } from "@/helpers/Helpers";
+import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
+import { DropInteractionParams } from "@/components/waves/drops/Drop";
+import { numberWithCommas } from "@/helpers/Helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ActiveDropState } from "@/types/dropInteractionTypes";
-import Drop, {
-  DropInteractionParams,
-  DropLocation,
-} from "@/components/waves/drops/Drop";
-import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useRouter } from "next/navigation";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import { INotificationAllDrops } from "@/types/feed.types";
 import { getNotificationVoteColor } from "../drop-reacted/NotificationDropReacted";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
+import NotificationsFollowBtn from "../NotificationsFollowBtn";
+import NotificationDrop from "../subcomponents/NotificationDrop";
+import NotificationHeader from "../subcomponents/NotificationHeader";
+import NotificationTimestamp from "../subcomponents/NotificationTimestamp";
+import {
+  getIsDirectMessage,
+  useWaveNavigation,
+} from "../utils/navigationUtils";
 
 export default function NotificationAllDrops({
   notification,
@@ -32,55 +29,27 @@ export default function NotificationAllDrops({
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }) {
-  const router = useRouter();
-  const { isApp } = useDeviceInfo();
-  const baseWave = notification.related_drops[0].wave as any;
-  const isDirectMessage =
-    baseWave?.chat?.scope?.group?.is_direct_message ?? false;
+  const { createReplyClickHandler, createQuoteClickHandler } =
+    useWaveNavigation();
+  const drop = notification.related_drops?.[0];
 
-  const onReplyClick = (serialNo: number) => {
-    router.push(
-      getWaveRoute({
-        waveId: notification.related_drops[0].wave.id,
-        serialNo,
-        isDirectMessage,
-        isApp,
-      })
-    );
-  };
+  if (!drop) {
+    return null;
+  }
 
-  const onQuoteClick = (quote: ApiDrop) => {
-    const quoteWave = quote.wave as any;
-    const quoteIsDm =
-      quoteWave?.chat?.scope?.group?.is_direct_message ?? isDirectMessage;
-
-    router.push(
-      getWaveRoute({
-        waveId: quote.wave.id,
-        serialNo: quote.serial_no,
-        isDirectMessage: quoteIsDm,
-        isApp,
-      })
-    );
-  };
+  const isDirectMessage = getIsDirectMessage(drop.wave);
 
   const getContent = () => {
-    const userLink = (
-      <Link
-        href={`/${notification.related_identity.handle}`}
-        className="tw-no-underline tw-font-semibold">
-        {notification.related_identity.handle}
-      </Link>
-    );
-
     if (typeof notification.additional_context.vote === "number") {
       const isReset = notification.additional_context.vote === 0;
 
-      const voteText = isReset ? (
-        "reset rating to 0"
-      ) : (
+      if (isReset) {
+        return <span className="tw-text-iron-400">reset rating to 0</span>;
+      }
+
+      return (
         <>
-          rated{" "}
+          <span className="tw-text-iron-400">rated</span>
           <span
             className={`${getNotificationVoteColor(
               notification.additional_context.vote
@@ -90,76 +59,36 @@ export default function NotificationAllDrops({
           </span>
         </>
       );
-
-      return (
-        <>
-          {userLink} {voteText}
-        </>
-      );
     }
 
-    return (
-      <>
-        <span className="tw-text-iron-400"> new post from </span>
-        <Link
-          href={`/${notification.related_drops[0].author.handle}`}
-          className="tw-no-underline tw-font-semibold">
-          {notification.related_drops[0].author.handle}
-        </Link>
-      </>
-    );
+    return <span className="tw-text-iron-400">posted</span>;
   };
 
   return (
-    <div className="tw-w-full tw-flex tw-gap-x-3">
-      <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
-        <div className="tw-flex tw-gap-x-2 tw-items-center">
-          <div className="tw-h-7 tw-w-7">
-            {notification.related_identity.pfp ? (
-              <img
-                src={getScaledImageUri(
-                  notification.related_identity.pfp,
-                  ImageScale.W_AUTO_H_50
-                )}
-                alt="#"
-                className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
-              />
-            ) : (
-              <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
-            )}
-          </div>
-          <span className="tw-text-sm tw-font-normal tw-text-iron-50">
-            {getContent()}{" "}
-            <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
-              <span className="tw-font-bold tw-mr-1 tw-text-xs tw-text-iron-400">
-                &#8226;
-              </span>{" "}
-              {getTimeAgoShort(notification.created_at)}
-            </span>
-          </span>
-        </div>
+    <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
+      <NotificationHeader
+        author={notification.related_identity}
+        actions={
+          <NotificationsFollowBtn
+            profile={notification.related_identity}
+            size={UserFollowBtnSize.SMALL}
+          />
+        }>
+        <span className="tw-text-sm tw-font-normal tw-text-iron-50">
+          {getContent()}{" "}
+          <NotificationTimestamp createdAt={notification.created_at} />
+        </span>
+      </NotificationHeader>
 
-        <Drop
-          drop={{
-            type: DropSize.FULL,
-            ...notification.related_drops[0],
-            stableKey: "",
-            stableHash: "",
-          }}
-          previousDrop={null}
-          nextDrop={null}
-          showWaveInfo={true}
-          showReplyAndQuote={true}
-          activeDrop={activeDrop}
-          location={DropLocation.MY_STREAM}
-          dropViewDropId={null}
-          onReply={onReply}
-          onQuote={onQuote}
-          onReplyClick={onReplyClick}
-          onQuoteClick={onQuoteClick}
-          onDropContentClick={onDropContentClick}
-        />
-      </div>
+      <NotificationDrop
+        drop={drop}
+        activeDrop={activeDrop}
+        onReply={onReply}
+        onQuote={onQuote}
+        onReplyClick={createReplyClickHandler(drop.wave.id, isDirectMessage)}
+        onQuoteClick={createQuoteClickHandler(isDirectMessage)}
+        onDropContentClick={onDropContentClick}
+      />
     </div>
   );
 }

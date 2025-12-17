@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import UserPageTab from '@/components/user/layout/UserPageTab';
-import { UserPageTabType } from '@/components/user/layout/UserPageTabs';
+import { USER_PAGE_TAB_IDS, USER_PAGE_TAB_MAP } from '@/components/user/layout/userTabs.config';
 import { useParams, useSearchParams } from 'next/navigation';
 
 jest.mock('next/navigation', () => ({
@@ -21,11 +21,24 @@ describe('UserPageTab', () => {
   it('renders active and inactive states', () => {
     (useParams as jest.Mock).mockReturnValue({ user: 'bob' });
     (useSearchParams as jest.Mock).mockReturnValue({ get: (k: string) => (k === 'address' ? '0x1' : null) });
-    const { rerender } = render(<UserPageTab tab={UserPageTabType.REP} parentRef={{ current: null }} activeTab={UserPageTabType.REP} />);
+    const repTab = USER_PAGE_TAB_MAP[USER_PAGE_TAB_IDS.REP];
+    const { rerender } = render(
+      <UserPageTab
+        tab={repTab}
+        parentRef={{ current: null }}
+        activeTabId={USER_PAGE_TAB_IDS.REP}
+      />
+    );
     const link = screen.getByTestId('link');
     expect(link).toHaveAttribute('href', '/bob/rep?address=0x1');
     expect(link).toHaveClass('tw-pointer-events-none');
-    rerender(<UserPageTab tab={UserPageTabType.REP} parentRef={{ current: null }} activeTab={UserPageTabType.BRAIN} />);
+    rerender(
+      <UserPageTab
+        tab={repTab}
+        parentRef={{ current: null }}
+        activeTabId={USER_PAGE_TAB_IDS.BRAIN}
+      />
+    );
     expect(link).not.toHaveClass('tw-pointer-events-none');
   });
 });

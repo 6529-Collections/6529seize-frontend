@@ -2,12 +2,15 @@
 
 import TransferToggle from "@/components/nft-transfer/TransferToggle";
 import UserAddressesSelectDropdown from "@/components/user/utils/addresses-select/UserAddressesSelectDropdown";
+import CommonSelect, {
+  CommonSelectItem,
+} from "@/components/utils/select/CommonSelect";
 import {
   CollectedCollectionType,
   CollectionSeized,
   CollectionSort,
 } from "@/entities/IProfile";
-import { MEMES_SEASON } from "@/enums";
+import { MemeSeason } from "@/entities/ISeason";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
   faChevronLeft,
@@ -17,10 +20,16 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { RefObject, useEffect, useRef, useState } from "react";
 import { ProfileCollectedFilters } from "../UserPageCollected";
 import { COLLECTED_COLLECTIONS_META } from "./user-page-collected-filters.helpers";
-import UserPageCollectedFiltersCollection from "./UserPageCollectedFiltersCollection";
+import UserPageCollectedFiltersNativeDropdown from "./UserPageCollectedFiltersNativeDropdown";
+import UserPageCollectedFiltersNetworkCollection from "./UserPageCollectedFiltersNetworkCollection";
 import UserPageCollectedFiltersSeized from "./UserPageCollectedFiltersSeized";
 import UserPageCollectedFiltersSortBy from "./UserPageCollectedFiltersSortBy";
 import UserPageCollectedFiltersSzn from "./UserPageCollectedFiltersSzn";
+
+enum MainTab {
+  NATIVE = "NATIVE",
+  NETWORK = "NETWORK",
+}
 
 export default function UserPageCollectedFilters({
   profile,
@@ -30,6 +39,7 @@ export default function UserPageCollectedFilters({
   setSortBy,
   setSeized,
   setSzn,
+  setSubcollection,
   showTransfer,
 }: {
   readonly profile: ApiIdentity;
@@ -38,7 +48,8 @@ export default function UserPageCollectedFilters({
   readonly setCollection: (collection: CollectedCollectionType | null) => void;
   readonly setSortBy: (sortBy: CollectionSort) => void;
   readonly setSeized: (seized: CollectionSeized | null) => void;
-  readonly setSzn: (szn: MEMES_SEASON | null) => void;
+  readonly setSzn: (szn: MemeSeason | null) => void;
+  readonly setSubcollection: (subcollection: string | null) => void;
   readonly showTransfer: boolean;
 }) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -108,6 +119,34 @@ export default function UserPageCollectedFilters({
   const getShowSzn = (collection: CollectedCollectionType | null): boolean =>
     collection ? COLLECTED_COLLECTIONS_META[collection].filters.szn : false;
 
+  const activeMainTab =
+    filters.collection === CollectedCollectionType.NETWORK
+      ? MainTab.NETWORK
+      : MainTab.NATIVE;
+
+  const mainTabItems: CommonSelectItem<MainTab>[] = [
+    {
+      label: "Native",
+      value: MainTab.NATIVE,
+      key: MainTab.NATIVE,
+    },
+    {
+      label: "Network",
+      value: MainTab.NETWORK,
+      key: MainTab.NETWORK,
+    },
+  ];
+
+  const handleMainTabChange = (tab: MainTab) => {
+    if (tab === MainTab.NATIVE) {
+      if (activeMainTab !== MainTab.NATIVE) {
+        setCollection(null); // Default to All when switching to Native
+      }
+    } else {
+      setCollection(CollectedCollectionType.NETWORK);
+    }
+  };
+
   return (
     <div className="tw-relative tw-w-full">
       <div
@@ -118,10 +157,29 @@ export default function UserPageCollectedFilters({
           className="tw-flex tw-nowrap tw-justify-between tw-gap-x-3 lg:tw-gap-x-4 tw-items-center tw-w-full tw-min-w-max">
           <div className="tw-flex tw-nowrap tw-gap-x-3 lg:tw-gap-x-4 tw-items-center tw-flex-shrink-0">
             {showTransfer && <TransferToggle />}
-            <UserPageCollectedFiltersCollection
-              selected={filters.collection}
-              setSelected={setCollection}
+
+            <CommonSelect
+              items={mainTabItems}
+              activeItem={activeMainTab}
+              setSelected={handleMainTabChange}
+              filterLabel="View"
             />
+
+            {activeMainTab === MainTab.NATIVE && (
+              <UserPageCollectedFiltersNativeDropdown
+                selected={filters.collection}
+                setSelected={setCollection}
+              />
+            )}
+
+            {activeMainTab === MainTab.NETWORK && (
+              <UserPageCollectedFiltersNetworkCollection
+                identity={filters.handleOrWallet}
+                selected={filters.subcollection}
+                setSelected={setSubcollection}
+              />
+            )}
+
             <UserPageCollectedFiltersSortBy
               selected={filters.sortBy}
               direction={filters.sortDirection}
@@ -138,17 +196,19 @@ export default function UserPageCollectedFilters({
             {getShowSzn(filters.collection) && (
               <UserPageCollectedFiltersSzn
                 selected={filters.szn}
-                containerRef={containerRef}
+                initialSeasonId={filters.initialSznId}
                 setSelected={setSzn}
               />
             )}
           </div>
           <div className="tw-flex-shrink-0">
-            <UserAddressesSelectDropdown
-              wallets={profile.wallets ?? []}
-              containerRef={containerRef}
-              onActiveAddress={() => undefined}
-            />
+            {filters.collection !== CollectedCollectionType.NETWORK && (
+              <UserAddressesSelectDropdown
+                wallets={profile.wallets ?? []}
+                containerRef={containerRef}
+                onActiveAddress={() => undefined}
+              />
+            )}
           </div>
         </div>
       </div>

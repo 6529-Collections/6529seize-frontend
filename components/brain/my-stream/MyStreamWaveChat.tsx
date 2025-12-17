@@ -9,7 +9,6 @@ import PrivilegedDropCreator, {
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { getHomeFeedRoute } from "@/helpers/navigation.helpers";
-import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWave } from "@/hooks/useWave";
 import { selectEditingDropId } from "@/store/editSlice";
@@ -32,28 +31,32 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   const pathname = usePathname();
   const containerRef = useRef<HTMLDivElement>(null);
   const [initialDrop, setInitialDrop] = useState<number | null>(null);
-  const [searchParamsDone, setSearchParamsDone] = useState(false);
   const { isMemesWave } = useWave(wave);
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
-  const { getContainerStyle } = useAndroidKeyboard();
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
 
   // Handle URL parameters
   useEffect(() => {
     const dropParam = searchParams?.get("serialNo");
-    if (dropParam) {
-      setInitialDrop(parseInt(dropParam));
-      const params = new URLSearchParams(searchParams?.toString() || '');
-      params.delete("serialNo");
-      const href = params.toString()
-        ? `${pathname}?${params.toString()}`
-        : (pathname || getHomeFeedRoute());
-      router.replace(href, { scroll: false });
-    } else {
+    if (!dropParam) {
       setInitialDrop(null);
+      return;
     }
-    setSearchParamsDone(true);
+
+    const parsed = Number.parseInt(dropParam, 10);
+    if (!Number.isFinite(parsed)) {
+      return;
+    }
+
+    setInitialDrop(parsed);
+
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    params.delete("serialNo");
+    const href = params.toString()
+      ? `${pathname}?${params.toString()}`
+      : pathname || getHomeFeedRoute();
+    router.replace(href, { scroll: false });
   }, [searchParams, router, pathname]);
 
   const { waveViewStyle } = useLayout();
@@ -69,10 +72,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
     return `${baseStyles} ${heightClass}`;
   }, []);
 
-  // Android keyboard adjustment style using centralized hook
-  const containerStyle = useMemo<React.CSSProperties>(() => {
-    return getContainerStyle(waveViewStyle || {}, 128);
-  }, [waveViewStyle, getContainerStyle]);
+  const containerStyle = waveViewStyle || {};
 
   useEffect(() => setActiveDrop(null), [wave]);
 
@@ -104,9 +104,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
     setActiveDrop(null);
   };
 
-  if (!searchParamsDone) {
-    return null;
-  }
   return (
     <div
       ref={containerRef}

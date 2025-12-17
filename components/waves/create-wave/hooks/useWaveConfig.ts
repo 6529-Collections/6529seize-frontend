@@ -68,7 +68,7 @@ export function useWaveConfig() {
         adminCanDeleteDrops: false,
       },
       voting: {
-        type: ApiWaveCreditType.Tdh,
+        type: ApiWaveCreditType.TdhPlusXtdh,
         category: null,
         profileId: null,
         timeWeighted: {

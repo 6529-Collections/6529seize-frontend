@@ -1,6 +1,5 @@
 "use client"
 
-import React, { useState } from "react";
 import Link from "next/link";
 import { cicToType } from "@/helpers/Helpers";
 import UserCICAndLevel, {
@@ -13,33 +12,32 @@ import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { ArtistSubmissionBadge } from "@/components/waves/drops/ArtistSubmissionBadge";
 import { ArtistPreviewModal } from "@/components/waves/drops/ArtistPreviewModal";
+import { ProfileWinnerBadge } from "@/components/waves/drops/ProfileWinnerBadge";
+import { useArtistPreviewModal } from "@/hooks/useArtistPreviewModal";
 
 interface MemesLeaderboardDropArtistInfoProps {
   readonly drop: ExtendedDrop;
 }
 
-const MemesLeaderboardDropArtistInfo: React.FC<
-  MemesLeaderboardDropArtistInfoProps
-> = ({ drop }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  
+const MemesLeaderboardDropArtistInfo = ({
+  drop
+}: MemesLeaderboardDropArtistInfoProps) => {
+  const { isModalOpen, modalInitialTab, handleBadgeClick, handleModalClose } =
+    useArtistPreviewModal();
+
   const submissionCount = drop.author.active_main_stage_submission_ids?.length || 0;
   const hasSubmissions = submissionCount > 0;
 
-  const handleSubmissionBadgeClick = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-  };
+  const winnerCount = drop.author.winner_main_stage_drop_ids?.length || 0;
+  const isWinner = winnerCount > 0;
 
   return (
-    <div className="tw-flex tw-items-center tw-gap-x-3">
+    <div className="tw-flex tw-gap-x-3">
       <WaveDropAuthorPfp drop={drop} />
-      <div className="tw-flex tw-items-center tw-gap-x-3">
-        <div className="tw-flex tw-items-center tw-gap-x-2">
-          {drop.author?.level && (
+      <div className="tw-flex tw-flex-col tw-justify-between tw-h-12">
+        {/* Top row: Handle + Artist badge + Timestamp */}
+        <div className="tw-flex tw-items-center tw-gap-x-2 tw-flex-wrap -tw-mt-0.5">
+          {!!drop.author?.level && (
             <UserCICAndLevel
               level={drop.author.level}
               cicType={cicToType(drop.author.cic)}
@@ -53,7 +51,7 @@ const MemesLeaderboardDropArtistInfo: React.FC<
                 onClick={(e) => e.stopPropagation()}
                 className="tw-no-underline desktop-hover:hover:tw-underline"
               >
-                <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
+                <span className="tw-text-sm tw-font-bold tw-text-white">
                   {drop.author?.handle}
                 </span>
               </Link>
@@ -64,36 +62,49 @@ const MemesLeaderboardDropArtistInfo: React.FC<
               onClick={(e) => e.stopPropagation()}
               className="tw-no-underline desktop-hover:hover:tw-underline"
             >
-              <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
+              <span className="tw-text-sm tw-font-bold tw-text-white">
                 {drop.author?.handle}
               </span>
             </Link>
           )}
+
+          {isWinner && (
+            <ProfileWinnerBadge
+              winCount={winnerCount}
+              onBadgeClick={() => handleBadgeClick("winners")}
+              tooltipId={`leaderboard-winner-badge-${drop.id}`}
+            />
+          )}
           {hasSubmissions && (
             <ArtistSubmissionBadge
               submissionCount={submissionCount}
-              onBadgeClick={handleSubmissionBadgeClick}
+              onBadgeClick={() => handleBadgeClick("active")}
               tooltipId={`leaderboard-badge-${drop.id}`}
             />
           )}
 
-          {/* Divider followed by WaveDropTime component */}
-          <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
-          <WaveDropTime 
+          <span className="tw-text-sm tw-text-iron-500">•</span>
+
+          <WaveDropTime
             timestamp={drop.created_at}
           />
         </div>
-        <WinnerDropBadge
-          rank={drop.rank}
-          decisionTime={drop.winning_context?.decision_time || null}
-        />
+
+        {/* Bottom row: Winner badge */}
+        <div className="tw-flex tw-items-center tw-gap-x-2">
+          <WinnerDropBadge
+            rank={drop.rank}
+            decisionTime={drop.winning_context?.decision_time || null}
+          />
+        </div>
       </div>
-      
-      {/* Artist Submission Preview Modal */}
+
+      {/* Artist Preview Modal */}
       <ArtistPreviewModal
         isOpen={isModalOpen}
         onClose={handleModalClose}
         user={drop.author}
+        initialTab={modalInitialTab}
       />
     </div>
   );

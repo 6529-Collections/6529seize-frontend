@@ -7,6 +7,7 @@ import { ApiDropRater } from "@/generated/models/ApiDropRater";
 import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import Link from "next/link";
+import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 
 interface WaveWinnersDropHeaderVoterProps {
   readonly voter: ApiDropRater;
@@ -31,10 +32,10 @@ export default function WaveWinnersDropHeaderVoter({
             <img
               src={getScaledImageUri(voter.profile.pfp, ImageScale.W_AUTO_H_50)}
               alt={`${voter.profile.handle}'s Profile`}
-              className={`tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-black tw-bg-iron-800 tw-object-contain`}
+              className="tw-w-6 tw-h-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
             />
           ) : (
-            <div className="tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-black tw-bg-iron-800 tw-object-contain"></div>
+            <div className="tw-w-6 tw-h-6 tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800"></div>
           )}
         </Link>
       </div>
@@ -47,7 +48,7 @@ export default function WaveWinnersDropHeaderVoter({
         }}
       >
         {voter.profile.handle} • {formatNumberWithCommas(voter.rating)}{" "}
-        {winner.drop.wave.voting_credit_type}
+        {WAVE_VOTING_LABELS[winner.drop.wave.voting_credit_type]}
       </Tooltip>
     </>
   );

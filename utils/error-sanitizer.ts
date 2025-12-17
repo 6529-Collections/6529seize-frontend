@@ -99,6 +99,7 @@ export const isIndexedDBError = (error: unknown): boolean => {
     /indexeddb/i,
     /\bIDB\b/,
     /IndexedDB.*connection.*lost/i,
+    /database\s+connection\s+is\s+closing/i,
     /Internal error opening backing store/i,
     /DOMException.*QuotaExceeded/i,
     /DOMException.*UnknownError/i,

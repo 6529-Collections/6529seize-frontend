@@ -20,19 +20,17 @@ export const WaveWinnersDropHeader: React.FC<WaveWinnersDropHeaderProps> = ({
       onClick={(e) => e.stopPropagation()}
       className="tw-flex tw-flex-wrap xl:tw-flex-nowrap tw-gap-y-2 tw-justify-between tw-w-full"
     >
-      <div className="tw-flex tw-items-center tw-gap-x-2 tw-w-full xl:tw-w-auto">
+      <div className="tw-flex tw-flex-col tw-items-start tw-gap-y-2.5 tw-w-full xl:tw-w-auto">
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <WaveWinnersDropHeaderAuthorHandle winner={winner} />
           <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
           <WaveDropTime timestamp={winner.drop.created_at} />
         </div>
 
-        <div className="tw-ml-2">
-          <WinnerDropBadge
-            rank={winner.place}
-            decisionTime={winner.drop.winning_context?.decision_time || null}
-          />
-        </div>
+        <WinnerDropBadge
+          rank={winner.place}
+          decisionTime={winner.drop.winning_context?.decision_time || null}
+        />
       </div>
 
       {showVotingInfo && (

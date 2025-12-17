@@ -9,7 +9,7 @@
  */
 const ACCEPTED_FORMATS: readonly string[] = [
   'image/png',
-  'image/jpeg', 
+  'image/jpeg',
   'image/jpg',
   'video/mp4',
   'video/webm',
@@ -32,7 +32,7 @@ export const FILE_SIZE_LIMIT: number = 200 * 1024 * 1024;
 /**
  * Accept string for file input element
  */
-export const FILE_INPUT_ACCEPT: string = 'image/png,image/jpeg,image/jpg,image/gif,video/mp4,video/quicktime,model/gltf-binary,model/gltf+json,application/octet-stream,.glb,.gltf';
+export const FILE_INPUT_ACCEPT: string = 'image/png,image/jpeg,image/jpg,image/gif,video/mp4,video/quicktime,.mov,model/gltf-binary,model/gltf+json,application/octet-stream,.glb,.gltf';
 
 /**
  * Maximum number of processing attempts before giving up

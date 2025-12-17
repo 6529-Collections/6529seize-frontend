@@ -1,8 +1,32 @@
 "use client";
 
+import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
+import {
+  CreateDropConfig,
+  CreateDropPart,
+  CreateDropRequestPart,
+  MentionedUser,
+  ReferencedNft,
+} from "@/entities/IDrop";
+import { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { ApiReplyToDropResponse } from "@/generated/models/ApiReplyToDropResponse";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { getOptimisticDropId } from "@/helpers/waves/drop.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { DropPrivileges } from "@/hooks/useDropPriviledges";
+import { selectEditingDropId } from "@/store/editSlice";
+import {
+  ActiveDropAction,
+  ActiveDropState,
+} from "@/types/dropInteractionTypes";
+import { AnimatePresence, motion } from "framer-motion";
+import { EditorState } from "lexical";
 import dynamic from "next/dynamic";
-import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
-import CreateDropInput, { CreateDropInputHandles } from "./CreateDropInput";
 import React, {
   memo,
   useContext,
@@ -11,67 +35,43 @@ import React, {
   useRef,
   useState,
 } from "react";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useSelector } from "react-redux";
-import { selectEditingDropId } from "@/store/editSlice";
-import { EditorState } from "lexical";
-import {
-  CreateDropConfig,
-  CreateDropPart,
-  CreateDropRequestPart,
-  MentionedUser,
-  ReferencedNft,
-} from "@/entities/IDrop";
-import { MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/MentionTransformer";
+import { createBreakpoint } from "react-use";
+import { AuthContext } from "../auth/Auth";
 import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/HastagTransformer";
 import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
-import { AuthContext } from "../auth/Auth";
-import { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
-import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import { getOptimisticDropId } from "@/helpers/waves/drop.helpers";
+import { MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/MentionTransformer";
 import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
-import { AnimatePresence, motion } from "framer-motion";
-import CreateDropMetadata from "./CreateDropMetadata";
-import { ApiWave } from "@/generated/models/ApiWave";
-import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
-import CreateDropContentRequirements from "./CreateDropContentRequirements";
-import { CreateDropContentFiles } from "./CreateDropContentFiles";
 import CreateDropActions from "./CreateDropActions";
-import { createBreakpoint } from "react-use";
-import { ApiDropType } from "@/generated/models/ApiDropType";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import {
-  ActiveDropAction,
-  ActiveDropState,
-} from "@/types/dropInteractionTypes";
-import { ApiReplyToDropResponse } from "@/generated/models/ApiReplyToDropResponse";
+import { CreateDropContentFiles } from "./CreateDropContentFiles";
+import CreateDropContentRequirements from "./CreateDropContentRequirements";
 import { CreateDropDropModeToggle } from "./CreateDropDropModeToggle";
+import CreateDropInput, { CreateDropInputHandles } from "./CreateDropInput";
+import CreateDropMetadata from "./CreateDropMetadata";
+import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import { CreateDropSubmit } from "./CreateDropSubmit";
-import { DropPrivileges } from "@/hooks/useDropPriviledges";
-import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 
+import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
+import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
-import { useDropMetadata, generateMetadataId } from "./hooks/useDropMetadata";
+import { ApiIdentity } from "@/generated/models/ObjectSerializer";
+import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
+import { WsMessageType } from "@/helpers/Types";
+import { useDropSignature } from "@/hooks/drops/useDropSignature";
+import { useWave } from "@/hooks/useWave";
+import { useWebSocket } from "@/services/websocket";
+import throttle from "lodash/throttle";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import { EMOJI_TRANSFORMER } from "../drops/create/lexical/transformers/EmojiTransformer";
+import { multiPartUpload } from "./create-wave/services/multiPartUpload";
+import { DropMutationBody } from "./CreateDrop";
+import { generateMetadataId, useDropMetadata } from "./hooks/useDropMetadata";
+import { convertMetadataToDropMetadata } from "./utils/convertMetadataToDropMetadata";
 import {
   getMissingRequirements,
   MissingRequirements,
 } from "./utils/getMissingRequirements";
-import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
-import { EMOJI_TRANSFORMER } from "../drops/create/lexical/transformers/EmojiTransformer";
-import { useDropSignature } from "@/hooks/drops/useDropSignature";
-import { useWave } from "@/hooks/useWave";
-import { multiPartUpload } from "./create-wave/services/multiPartUpload";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
-import { DropMutationBody } from "./CreateDrop";
-import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
-import throttle from "lodash/throttle";
-import { useWebSocket } from "@/services/websocket";
-import { WsMessageType } from "@/helpers/Types";
-import { ApiIdentity } from "@/generated/models/ObjectSerializer";
-import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
-import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import { convertMetadataToDropMetadata } from "./utils/convertMetadataToDropMetadata";
 
 // Use next/dynamic for lazy loading with SSR support
 const TermsSignatureFlow = dynamic(() => import("../terms/TermsSignatureFlow"));
@@ -297,7 +297,11 @@ const generateParts = async (
       parts.map((part) => generatePart(part, setUploadingFiles))
     );
   } catch (error) {
-    throw new Error(`Error generating parts: ${(error as Error).message}`);
+    const message = error instanceof Error ? error.message : String(error);
+    if (message?.includes("content_type")) {
+      throw new Error("File type not supported. Please use MP4 for videos.");
+    }
+    throw new Error("Error uploading file. Please try again.");
   }
 };
 
@@ -378,10 +382,12 @@ const getOptimisticDrop = (
       rep: connectedProfile.rep,
       tdh: connectedProfile.tdh,
       tdh_rate: connectedProfile.tdh_rate,
+      xtdh: connectedProfile.xtdh,
+      xtdh_rate: connectedProfile.xtdh_rate,
       level: connectedProfile.level,
       subscribed_actions: [],
       archived: false,
-      primary_address: connectedProfile.primary_wallet ?? null,
+      primary_address: connectedProfile.primary_wallet ?? "",
     },
     created_at: Date.now(),
     updated_at: null,
@@ -468,27 +474,29 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     () =>
       editorState
         ? exportDropMarkdown(editorState, [
-            ...SAFE_MARKDOWN_TRANSFORMERS,
-            MENTION_TRANSFORMER,
-            HASHTAG_TRANSFORMER,
-            IMAGE_TRANSFORMER,
-            EMOJI_TRANSFORMER,
-          ])
+          ...SAFE_MARKDOWN_TRANSFORMERS,
+          MENTION_TRANSFORMER,
+          HASHTAG_TRANSFORMER,
+          IMAGE_TRANSFORMER,
+          EMOJI_TRANSFORMER,
+        ])
         : null,
     [editorState]
   );
 
+  const sendTyping = React.useCallback(() => {
+    send(WsMessageType.USER_IS_TYPING, { wave_id: wave.id });
+  }, [send, wave.id]);
+
   const throttleHandle = useMemo(() => {
-    return throttle(() => {
-      send(WsMessageType.USER_IS_TYPING, { wave_id: wave.id });
-    }, 4000);
-  }, []);
+    return throttle(sendTyping, 4000);
+  }, [sendTyping]);
 
   useEffect(() => {
     if (getMarkdown?.length) {
       throttleHandle();
     }
-  }, [getMarkdown]);
+  }, [getMarkdown, throttleHandle]);
 
   const getCanSubmitStorm = () => {
     const markdown = getMarkdown;
@@ -520,8 +528,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     ) ?? 0) >= 24000;
 
   const getCanAddPart = () => getHaveMarkdownOrFile() && !getIsDropLimit();
-  const canSubmit = useMemo(() => getCanSubmit(), [getMarkdown, files, drop, hasMetadata]);
-  const canAddPart = useMemo(() => getCanAddPart(), [getMarkdown, files, drop]);
+  const canSubmit = getCanSubmit();
+  const canAddPart = getCanAddPart();
 
   const [referencedNfts, setReferencedNfts] = useState<ReferencedNft[]>([]);
 
@@ -611,24 +619,24 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   ): CreateDropConfig => {
     const hasPartsInDrop = (drop?.parts.length ?? 0) > 0;
     const hasCurrentContent = !!(markdown?.trim().length || files.length);
-    
+
     const newParts = hasPartsInDrop && !hasCurrentContent
       ? drop?.parts ?? []
       : [
-          ...(drop?.parts ?? []),
-          {
-            content: markdown?.length ? markdown : null,
-            quoted_drop:
-              activeDrop?.action === ActiveDropAction.QUOTE
-                ? {
-                    drop_id: activeDrop.drop.id,
-                    drop_part_id: activeDrop.partId,
-                  }
-                : null,
-            media: files,
-          },
-        ];
-    
+        ...(drop?.parts ?? []),
+        {
+          content: markdown?.length ? markdown : null,
+          quoted_drop:
+            activeDrop?.action === ActiveDropAction.QUOTE
+              ? {
+                drop_id: activeDrop.drop.id,
+                drop_part_id: activeDrop.partId,
+              }
+              : null,
+          media: files,
+        },
+      ];
+
     const parts = ensurePartsWithFallback(newParts, hasMetadata);
 
     return {
@@ -803,7 +811,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         activeDrop,
         isDropMode ? ApiDropType.Participatory : ApiDropType.Chat
       );
-      
+
       if (optimisticDrop) {
         addOptimisticDrop({ drop: optimisticDrop });
         setTimeout(
@@ -828,7 +836,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       }
       setFiles([]);
       refreshState();
-      
+
       submitDrop({
         drop: updatedDropRequest,
         dropId: optimisticDrop?.id ?? null,
@@ -873,15 +881,15 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     ) {
       return;
     }
-    
+
     const hasPartsInDrop = (drop?.parts.length ?? 0) > 0;
     const hasCurrentContent = !!(getMarkdown?.trim().length || files.length);
-    
+
     if (hasPartsInDrop && hasCurrentContent) {
       finalizeAndAddDropPart();
       return;
     }
-    
+
     await prepareAndSubmitDrop(getUpdatedDrop());
   };
 
@@ -978,7 +986,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     if (!drop.parts.length) {
       setIsStormMode(false);
     }
-  }, [drop?.parts]);
+  }, [drop, setIsStormMode]);
 
   const [isMetadataOpen, setIsMetadataOpen] = useState(false);
 
@@ -1041,6 +1049,16 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       onCancelReplyQuote();
     }
   }, [isApp, editingDropId, activeDrop, onCancelReplyQuote]);
+
+  const isChatClosed = wave.wave.type === ApiWaveType.Chat && !wave.chat.enabled;
+
+  if (isChatClosed) {
+    return (
+      <div className="tw-flex-grow tw-w-full tw-bg-iron-900 tw-text-iron-500 tw-rounded-lg tw-p-4 tw-text-center tw-text-sm tw-font-medium">
+        Wave is closed
+      </div>
+    );
+  }
 
   return (
     <div className="tw-flex-grow">

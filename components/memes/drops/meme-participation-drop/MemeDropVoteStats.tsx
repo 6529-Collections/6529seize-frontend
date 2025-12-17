@@ -44,15 +44,15 @@ export default function MemeDropVoteStats({
         </span>
 
         <div className="tw-flex tw-items-baseline tw-gap-x-1.5">
-          <span className="tw-text-sm tw-text-iron-400 text-nowrap">
-            {votingCreditType} total
+          <span className="tw-text-sm tw-text-iron-500 tw-whitespace-nowrap">
+            <span className="tw-font-medium">{votingCreditType} total</span>
           </span>
 
           <DropVoteProgressing current={current} projected={projected} />
         </div>
       </div>
-      <div className="tw-flex tw-items-center tw-gap-x-2">
-        <div className="tw-flex tw-items-center -tw-space-x-1.5 -tw-mt-0.5">
+      <div className="tw-flex tw-items-center tw-gap-2">
+        <div className="tw-flex tw-items-center -tw-space-x-2">
           {firstThreeVoters.map((voter) => (
             <div key={voter.profile.handle}>
               <Link
@@ -62,12 +62,12 @@ export default function MemeDropVoteStats({
               >
                 {voter.profile.pfp ? (
                   <img
-                    className="tw-size-6 tw-rounded-md tw-ring-2 tw-ring-iron-950"
+                    className="tw-w-6 tw-h-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
                     src={voter.profile.pfp}
                     alt="Recent voter"
                   />
                 ) : (
-                  <div className="tw-size-6 tw-rounded-md tw-ring-2 tw-ring-iron-950 tw-bg-iron-800" />
+                  <div className="tw-w-6 tw-h-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
                 )}
               </Link>
               <Tooltip
@@ -85,14 +85,12 @@ export default function MemeDropVoteStats({
             </div>
           ))}
         </div>
-        <div className="tw-flex tw-items-baseline tw-gap-x-1">
-          <span className="tw-text-sm tw-font-medium tw-text-iron-100">
-            {formatNumberWithCommas(ratersCount ?? 0)}
-          </span>
-          <span className="tw-text-sm tw-text-iron-400 text-nowrap">
+        <span className="tw-text-white tw-font-bold tw-text-xs">
+          {formatNumberWithCommas(ratersCount ?? 0)}{" "}
+          <span className="tw-text-iron-500 tw-font-normal">
             {ratersCount === 1 ? "voter" : "voters"}
           </span>
-        </div>
+        </span>
       </div>
 
       {/* User's vote */}

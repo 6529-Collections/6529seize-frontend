@@ -1,5 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { ApiGroupFilterDirection } from '@/generated/models/ApiGroupFilterDirection';
+import { ApiGroupTdhInclusionStrategy } from '@/generated/models/ApiGroupTdhInclusionStrategy';
 import {
   useWaveGroupEditButtonsController,
   WaveGroupIdentitiesModal,
@@ -60,7 +61,7 @@ const baseGroupFull = {
   id: 'group-1',
   name: 'Existing Group',
   group: {
-    tdh: { min: null, max: null },
+    tdh: { min: null, max: null, inclusion_strategy: ApiGroupTdhInclusionStrategy.Tdh },
     rep: {
       min: null,
       max: null,
@@ -126,7 +127,7 @@ beforeEach(() => {
   (useQueryClient as jest.Mock).mockReturnValue(queryClientMock);
   (useQuery as jest.Mock).mockImplementation(({ enabled, queryFn }) => {
     if (enabled && typeof queryFn === 'function') {
-      void queryFn({ signal: undefined });
+      queryFn({ signal: undefined });
     }
     return { data: undefined };
   });

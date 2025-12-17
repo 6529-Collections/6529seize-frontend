@@ -17,11 +17,14 @@ export class ApiRatingWithProfileInfoAndLevel {
     'handle': string;
     'wallets': Array<string>;
     'tdh': number;
+    'xtdh': number;
     'rating': number;
     'cic': number;
     'last_modified': string;
 
     static readonly discriminator: string | undefined = undefined;
+
+    static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
@@ -49,6 +52,12 @@ export class ApiRatingWithProfileInfoAndLevel {
             "format": "int64"
         },
         {
+            "name": "xtdh",
+            "baseName": "xtdh",
+            "type": "number",
+            "format": "float"
+        },
+        {
             "name": "rating",
             "baseName": "rating",
             "type": "number",
@@ -74,4 +83,3 @@ export class ApiRatingWithProfileInfoAndLevel {
     public constructor() {
     }
 }
-

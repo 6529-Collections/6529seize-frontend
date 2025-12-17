@@ -39,8 +39,8 @@ describe('FeedItemDropCreated', () => {
       />
     );
     fireEvent.click(screen.getByText('reply'));
-    expect(push).toHaveBeenCalledWith('/waves?wave=wave1&serialNo=5/');
+    expect(push).toHaveBeenCalledWith('/waves?wave=wave1&serialNo=5');
     fireEvent.click(screen.getByText('quote'));
-    expect(push).toHaveBeenCalledWith('/waves?wave=wave1&serialNo=3/');
+    expect(push).toHaveBeenCalledWith('/waves?wave=wave1&serialNo=3');
   });
 });

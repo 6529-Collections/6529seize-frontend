@@ -1,21 +1,8 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useState } from "react";
-import { Button, Col, Container, Form, Row, Table } from "react-bootstrap";
-import { Tooltip } from "react-tooltip";
-import { useChainId, useWriteContract } from "wagmi";
-import { NextGenCollection } from "@/entities/INextgen";
-import {
-  areEqualAddresses,
-  getNetworkName,
-} from "@/helpers/Helpers";
-import { fetchUrl } from "@/services/6529api";
-import { getNftsForContractAndOwner } from "@/services/alchemy-api";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import NextGenContractWriteStatus from "@/components/nextGen/NextGenContractWriteStatus";
+import styles from "@/components/nextGen/collections/NextGen.module.scss";
 import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
@@ -31,7 +18,18 @@ import {
   getStatusFromDates,
   useMintSharedState,
 } from "@/components/nextGen/nextgen_helpers";
-import styles from "@/components/nextGen/collections/NextGen.module.scss";
+import { publicEnv } from "@/config/env";
+import { NextGenCollection } from "@/entities/INextgen";
+import { areEqualAddresses, getNetworkName } from "@/helpers/Helpers";
+import { fetchOwnerNfts } from "@/hooks/useAlchemyNftQueries";
+import { fetchUrl } from "@/services/6529api";
+import type { OwnerNft } from "@/services/alchemy/types";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useEffect, useState } from "react";
+import { Button, Col, Container, Form, Row, Table } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
+import { useChainId, useWriteContract } from "wagmi";
 import { Spinner } from "./NextGenMint";
 import { NextGenMintingFor } from "./NextGenMintShared";
 
@@ -81,15 +79,16 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
   const [tokensOwnedForBurnAddressLoaded, setTokensOwnedForBurnAddressLoaded] =
     useState(false);
   const [tokensOwnedForBurnAddress, setTokensOwnedForBurnAddress] = useState<
-    any[]
+    OwnerNft[]
   >([]);
 
-  function filterTokensOwnedForBurnAddress(r: any[]) {
+  function filterTokensOwnedForBurnAddress(r: OwnerNft[]) {
     if (props.collection_merkle.max_token_index > 0) {
       r = r.filter((t) => {
+        const tokenIdNum = Number(t.tokenId);
         return (
-          t.tokenId >= props.collection_merkle.min_token_index &&
-          t.tokenId <= props.collection_merkle.max_token_index
+          tokenIdNum >= props.collection_merkle.min_token_index &&
+          tokenIdNum <= props.collection_merkle.max_token_index
         );
       });
     }
@@ -100,9 +99,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
       )
     ) {
       r = r.filter((t) =>
-        t.tokenId
-          .toString()
-          .startsWith(props.collection_merkle.burn_collection_id)
+        t.tokenId.startsWith(String(props.collection_merkle.burn_collection_id))
       );
     }
     return r;
@@ -110,17 +107,30 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
 
   useEffect(() => {
     const burnAddress = mintForAddress;
-    if (burnAddress) {
-      getNftsForContractAndOwner(
-        NEXTGEN_CHAIN_ID,
-        NEXTGEN_CORE[NEXTGEN_CHAIN_ID],
-        burnAddress
-      ).then((r) => {
+    if (!burnAddress) {
+      return;
+    }
+    const controller = new AbortController();
+
+    fetchOwnerNfts(
+      NEXTGEN_CHAIN_ID,
+      NEXTGEN_CORE[NEXTGEN_CHAIN_ID],
+      burnAddress,
+      controller.signal
+    )
+      .then((r) => {
         setTokensOwnedForBurnAddressLoaded(true);
         const filteredTokens = filterTokensOwnedForBurnAddress(r);
         setTokensOwnedForBurnAddress(filteredTokens);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) {
+          setTokensOwnedForBurnAddressLoaded(true);
+          setTokensOwnedForBurnAddress([]);
+        }
       });
-    }
+
+    return () => controller.abort();
   }, [account.address, mintForAddress]);
 
   useEffect(() => {
@@ -138,7 +148,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
     if (tokenId) {
       setFetchingProofs(true);
       const url = `${publicEnv.API_ENDPOINT}/api/nextgen/burn_proofs/${props.collection_merkle.merkle_root}/${tokenId}`;
-      fetchUrl(url).then((response: ProofResponse) => {
+      fetchUrl<ProofResponse>(url).then((response: ProofResponse) => {
         setBurnProofResponse(response);
         setFetchingProofs(false);
       });

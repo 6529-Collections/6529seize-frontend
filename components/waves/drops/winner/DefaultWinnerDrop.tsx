@@ -1,23 +1,23 @@
 "use client";
 
-import { memo, useCallback, useState } from "react";
-import Link from "next/link";
-import { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { ActiveDropState } from "@/types/dropInteractionTypes";
-import { DropInteractionParams, DropLocation } from "../Drop";
 import { ApiDrop } from "@/generated/models/ApiDrop";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
+import Link from "next/link";
+import { memo, useCallback, useState } from "react";
+import { DropInteractionParams, DropLocation } from "../Drop";
 import WaveDropActions from "../WaveDropActions";
-import WaveDropReply from "../WaveDropReply";
+import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
 import WaveDropContent from "../WaveDropContent";
 import WaveDropHeader from "../WaveDropHeader";
-import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
-import WaveDropRatings from "../WaveDropRatings";
 import WaveDropMetadata from "../WaveDropMetadata";
 import WaveDropMobileMenu from "../WaveDropMobileMenu";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
-import WinnerDropBadge from "./WinnerDropBadge";
+import WaveDropRatings from "../WaveDropRatings";
 import WaveDropReactions from "../WaveDropReactions";
+import WaveDropReply from "../WaveDropReply";
+import WinnerDropBadge from "./WinnerDropBadge";
 
 const getRankColorsByRank = (
   rank: number | null
@@ -62,9 +62,9 @@ const getDropStyles = (
   }
 
   return {
-    boxShadow: `inset 1.5px 0 0 ${colors.borderColor}, 
-                inset 0 1px 0 ${colors.borderColor}20, 
-                inset -1.5px 0 0 ${colors.borderColor}20, 
+    boxShadow: `inset 1.5px 0 0 ${colors.borderColor}80,
+                inset 0 1px 0 ${colors.borderColor}20,
+                inset -1.5px 0 0 ${colors.borderColor}20,
                 inset 0 -1.5px 0 ${colors.borderColor}20`,
   };
 };
@@ -172,19 +172,17 @@ const DefaultWinnerDrop = ({
         <div className="tw-flex tw-gap-x-3 tw-w-full tw-text-left tw-bg-transparent tw-border-0 tw-relative tw-z-10">
           <WaveDropAuthorPfp drop={drop} />
           <div className="tw-flex tw-flex-col tw-w-full tw-gap-y-2">
-            <div className="tw-flex tw-flex-col tw-gap-1">
+            <div className="tw-flex tw-flex-col tw-items-start tw-gap-y-1">
               <WaveDropHeader
                 drop={drop}
                 showWaveInfo={false}
                 isStorm={isStorm}
                 currentPartIndex={activePartIndex}
                 partsCount={drop.parts.length}
-                badge={
-                  <WinnerDropBadge
-                    rank={effectiveRank}
-                    decisionTime={decisionTime ?? null}
-                  />
-                }
+              />
+              <WinnerDropBadge
+                rank={effectiveRank}
+                decisionTime={decisionTime ?? null}
               />
               {showWaveInfo && (() => {
                 const waveDetails =
@@ -233,7 +231,7 @@ const DefaultWinnerDrop = ({
             />
           </div>
         )}
-        <div className="tw-flex tw-flex-col tw-gap-2 tw-ml-[3.25rem] tw-mt-1.5">
+        <div className="tw-flex tw-flex-col tw-gap-2 tw-ml-[3.5rem] tw-mt-1.5">
           {drop.metadata.length > 0 && (
             <WaveDropMetadata metadata={drop.metadata} />
           )}

@@ -5,4 +5,5 @@ export interface MemeSeason {
   count: number;
   name: string;
   display: string;
+  boost: number;
 }

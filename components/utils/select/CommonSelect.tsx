@@ -1,8 +1,8 @@
-import { createBreakpoint } from "react-use";
 import { SortDirection } from "@/entities/ISort";
-import CommonTabs from "./tabs/CommonTabs";
-import CommonDropdown from "./dropdown/CommonDropdown";
 import { RefObject } from "react";
+import { createBreakpoint } from "react-use";
+import CommonDropdown from "./dropdown/CommonDropdown";
+import CommonTabs from "./tabs/CommonTabs";
 
 interface ChildComponentProps {
   onCopy?: () => void;
@@ -14,22 +14,26 @@ export interface CommonSelectItem<T, U = unknown> {
   readonly value: T;
   readonly key: string;
   readonly childrenProps?: U;
+  readonly badge?: number;
 }
 
 interface CommonSelectDefaultProps<T, U> {
-  readonly items: CommonSelectItem<T, U>[];
+  readonly items: readonly CommonSelectItem<T, U>[];
   readonly activeItem: T;
   readonly filterLabel: string;
   readonly noneLabel?: string;
   readonly dynamicPosition?: boolean;
   readonly disabled?: boolean;
   readonly theme?: "dark" | "light";
-  readonly size?: "sm" | "md";
+  readonly size?: "sm" | "md" | "tabs";
   readonly containerRef?: RefObject<HTMLDivElement | null>; // this is useful if you have horizontal scrolling and want to keep the dropdown in attached to its trigger
   readonly setSelected: (item: T) => void;
   readonly renderItemChildren?: (
     item: CommonSelectItem<T, U>
   ) => React.ReactElement<ChildComponentProps>;
+  readonly closeOnSelect?: boolean;
+  readonly fill?: boolean;
+  readonly showFilterLabel?: boolean;
 }
 
 interface CommonSelectsWithSortProps<T, U>

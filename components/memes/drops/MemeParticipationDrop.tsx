@@ -1,23 +1,23 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { ActiveDropState } from "@/types/dropInteractionTypes";
+import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
+import { MobileVotingModal, VotingModal } from "@/components/voting";
+import VotingModalButton from "@/components/voting/VotingModalButton";
 import { DropInteractionParams, DropLocation } from "@/components/waves/drops/Drop";
+import DropMobileMenuHandler from "@/components/waves/drops/DropMobileMenuHandler";
+import WaveDropReactions from "@/components/waves/drops/WaveDropReactions";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
-import MemeDropHeader from "./meme-participation-drop/MemeDropHeader";
-import MemeDropDescription from "./meme-participation-drop/MemeDropDescription";
-import MemeDropVoteStats from "./meme-participation-drop/MemeDropVoteStats";
-import MemeDropArtistInfo from "./meme-participation-drop/MemeDropArtistInfo";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
+import { useCallback, useState } from "react";
 import MemeDropActions from "./meme-participation-drop/MemeDropActions";
+import MemeDropArtistInfo from "./meme-participation-drop/MemeDropArtistInfo";
+import MemeDropDescription from "./meme-participation-drop/MemeDropDescription";
+import MemeDropHeader from "./meme-participation-drop/MemeDropHeader";
+import MemeDropVoteStats from "./meme-participation-drop/MemeDropVoteStats";
 import MemeDropTraits from "./MemeDropTraits";
-import DropMobileMenuHandler from "@/components/waves/drops/DropMobileMenuHandler";
-import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
-import { VotingModal, MobileVotingModal } from "@/components/voting";
-import VotingModalButton from "@/components/voting/VotingModalButton";
-import WaveDropReactions from "@/components/waves/drops/WaveDropReactions";
 
 interface MemeParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -103,7 +103,7 @@ export default function MemeParticipationDrop({
             <>
               <div className="tw-p-4">
                 <MemeDropArtistInfo drop={drop} />
-                <div className="tw-flex tw-flex-col tw-mt-2 sm:tw-mt-1.5 sm:tw-ml-[3.25rem]">
+                <div className="tw-flex tw-flex-col tw-mt-2 sm:tw-mt-1.5 sm:tw-ml-[3.5rem]">
                   <MemeDropHeader title={title} />
                   <MemeDropDescription description={description} />
                 </div>

@@ -1,14 +1,19 @@
 import { AuthContext } from "@/components/auth/Auth";
-import UserPageTabs, {
-  UserPageTabType,
-} from "@/components/user/layout/UserPageTabs";
+import UserPageTabs from "@/components/user/layout/UserPageTabs";
+import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import { render, screen } from "@testing-library/react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import {
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
   usePathname: jest.fn(),
   useSearchParams: jest.fn(),
+  useParams: jest.fn(),
 }));
 const capacitorMock = jest.fn();
 jest.mock("@/hooks/useCapacitor", () => ({
@@ -17,7 +22,7 @@ jest.mock("@/hooks/useCapacitor", () => ({
 }));
 jest.mock("@/components/user/layout/UserPageTab", () => ({
   __esModule: true,
-  default: (p: any) => <div data-testid="tab">{p.tab}</div>,
+  default: (p: any) => <div data-testid="tab">{p.tab.id}</div>,
 }));
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
   useCookieConsent: jest.fn(),
@@ -35,6 +40,7 @@ const renderTabs = (
   (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
   (usePathname as jest.Mock).mockReturnValue("/[user]/rep");
   (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
+  (useParams as jest.Mock).mockReturnValue({ user: "testuser" });
   capacitorMock.mockReturnValue({ isIos });
   (useCookieConsent as jest.Mock).mockReturnValue({
     showCookieConsent: false,
@@ -53,15 +59,15 @@ describe("UserPageTabs", () => {
   it("filters tabs based on context and platform", () => {
     renderTabs(false, false);
     const tabs = screen.getAllByTestId("tab").map((t) => t.textContent);
-    expect(tabs).not.toContain(UserPageTabType.BRAIN);
-    expect(tabs).not.toContain(UserPageTabType.WAVES);
-    expect(tabs).toContain(UserPageTabType.SUBSCRIPTIONS);
+    expect(tabs).not.toContain(USER_PAGE_TAB_IDS.BRAIN);
+    expect(tabs).not.toContain(USER_PAGE_TAB_IDS.WAVES);
+    expect(tabs).toContain(USER_PAGE_TAB_IDS.SUBSCRIPTIONS);
   });
 
   it("hides subscriptions tab on iOS and shows waves when enabled", () => {
     renderTabs(true, true, "CA"); // Non-US country to trigger subscription hiding
     const tabs = screen.getAllByTestId("tab").map((t) => t.textContent);
-    expect(tabs).not.toContain(UserPageTabType.SUBSCRIPTIONS);
-    expect(tabs).toContain(UserPageTabType.WAVES);
+    expect(tabs).not.toContain(USER_PAGE_TAB_IDS.SUBSCRIPTIONS);
+    expect(tabs).toContain(USER_PAGE_TAB_IDS.WAVES);
   });
 });

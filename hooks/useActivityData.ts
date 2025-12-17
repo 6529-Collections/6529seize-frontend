@@ -1,16 +1,16 @@
-import { publicEnv } from "@/config/env";
-import { useEffect, useState } from "react";
 import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
 } from "@/components/nextGen/nextgen_contracts";
+import { publicEnv } from "@/config/env";
 import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "@/constants";
 import { DBResponse } from "@/entities/IDBResponse";
 import { Transaction } from "@/entities/ITransaction";
 import { fetchUrl } from "@/services/6529api";
+import { useEffect, useState } from "react";
 
 export enum TypeFilter {
-  ALL = "All",
+  ALL = "All Transactions",
   AIRDROPS = "Airdrops",
   MINTS = "Mints",
   SALES = "Sales",
@@ -19,8 +19,8 @@ export enum TypeFilter {
 }
 
 enum ContractFilter {
-  ALL = "All",
-  MEMES = "Memes",
+  ALL = "All Collections",
+  MEMES = "The Memes",
   NEXTGEN = "NextGen",
   GRADIENTS = "Gradients",
 }
@@ -101,11 +101,19 @@ export function useActivityData(
         break;
     }
 
-    fetchUrl(url).then((response: DBResponse) => {
-      setTotalResults(response.count);
-      setActivity(response.data);
-      setFetching(false);
-    });
+    fetchUrl(url)
+      .then((response: DBResponse) => {
+        setTotalResults(response.count);
+        setActivity(response.data);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch activity data", error);
+        setTotalResults(0);
+        setActivity([]);
+      })
+      .finally(() => {
+        setFetching(false);
+      });
   }, [page, typeFilter, selectedContract, pageSize, initialData, initialPage]);
 
   return {

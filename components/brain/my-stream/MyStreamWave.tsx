@@ -17,6 +17,7 @@ import MyStreamWaveFAQ from "./MyStreamWaveFAQ";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { createBreakpoint } from "react-use";
 import { getHomeFeedRoute } from "@/helpers/navigation.helpers";
+import { WaveChatScrollProvider } from "@/contexts/wave/WaveChatScrollContext";
 
 interface MyStreamWaveProps {
   readonly waveId: string;
@@ -95,20 +96,22 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   };
 
   return (
-    <div
-      className="tailwind-scope tw-relative tw-flex tw-flex-col tw-h-full"
-      key={stableWaveKey}>
-      {/* Always render tab container (hidden on app inside MyStreamWaveTabs) */}
-      <MyStreamWaveTabs wave={wave} />
-
+    <WaveChatScrollProvider>
       <div
-        className="tw-flex-grow tw-overflow-hidden tw-relative"
-        role="tabpanel"
-        id={getContentTabPanelId(activeContentTab)}
-      >
-        {components[activeContentTab]}
+        className="tailwind-scope tw-relative tw-flex tw-flex-col tw-h-full"
+        key={stableWaveKey}>
+        {/* Always render tab container (hidden on app inside MyStreamWaveTabs) */}
+        <MyStreamWaveTabs wave={wave} />
+
+        <div
+          className="tw-flex-grow tw-overflow-hidden tw-relative"
+          role="tabpanel"
+          id={getContentTabPanelId(activeContentTab)}
+        >
+          {components[activeContentTab]}
+        </div>
       </div>
-    </div>
+    </WaveChatScrollProvider>
   );
 };
 

@@ -61,7 +61,7 @@ export default function WaveWinnersDropOutcome({
 
   return (
     <div className="tw-flex tw-items-start tw-gap-2">
-      <span className="tw-text-iron-400 tw-text-sm tw-font-normal">
+      <span className="tw-text-iron-500 tw-text-sm tw-font-medium">
         Outcome:
       </span>
       <div className="tw-flex tw-flex-wrap tw-gap-1.5">

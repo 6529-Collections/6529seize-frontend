@@ -11,6 +11,7 @@ import React, {
   useMemo,
 } from "react";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
 
 // Define the different spaces that need to be measured
 interface LayoutSpaces {
@@ -167,6 +168,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const { isCapacitor, isAndroid, isIos } = useCapacitor();
+  const { isVisible: isKeyboardVisible } = useAndroidKeyboard();
 
   // Internal ref storage (source of truth)
   const refMap = useRef<Record<LayoutRefType, HTMLDivElement | null>>({
@@ -378,15 +380,24 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     if (!spaces.measurementsComplete) return {};
 
     let capSpace = 0;
+
     if (isAndroid) {
-      capSpace = 128;
+      capSpace = isKeyboardVisible ? 0 : 128;
     } else if (isIos || isCapacitor) {
       capSpace = 20;
     }
 
     const adjustedSpaces = { ...spaces, mobileNavSpace: 0 };
-    return calculateHeightStyle("wave", adjustedSpaces, capSpace);
-  }, [spaces, isAndroid, isIos, isCapacitor]);
+    const style = calculateHeightStyle("wave", adjustedSpaces, capSpace);
+
+    if (isAndroid) {
+      return {
+        ...style,
+        transition: "height 75ms ease-out, max-height 75ms ease-out",
+      };
+    }
+    return style;
+  }, [spaces, isAndroid, isKeyboardVisible, isIos, isCapacitor]);
 
   const leaderboardViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};

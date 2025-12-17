@@ -27,22 +27,22 @@ export default function DropVoteProgressing({
 
   const isPositiveProgressing = current < projected;
 
-  // Define styles based on subtle mode
-  let color;
+  let color: string;
+  let arrowColor: string;
   if (subtle) {
-    color = isPositiveProgressing
-      ? "tw-text-iron-300 tw-bg-iron-700 tw-transition-colors tw-duration-200"
-      : "tw-text-iron-400 tw-bg-iron-700 tw-transition-colors tw-duration-200";
+    color = isPositiveProgressing ? "tw-text-iron-400 tw-font-mono" : "tw-text-iron-600 tw-font-mono";
+    arrowColor = "tw-text-iron-600";
   } else {
     color = isPositiveProgressing
-      ? "tw-text-emerald-400 tw-bg-emerald-900/40"
-      : "tw-text-rose-400 tw-bg-rose-900/40";
+      ? "tw-text-emerald-400 tw-bg-emerald-500/10 tw-px-2 tw-py-0.5 tw-rounded tw-border tw-border-solid tw-border-emerald-500/20 tw-font-mono"
+      : "tw-text-rose-400 tw-bg-rose-500/10 tw-px-2 tw-py-0.5 tw-rounded tw-border tw-border-solid tw-border-rose-500/20 tw-font-mono";
+    arrowColor = "tw-text-iron-600";
   }
 
   return (
     <>
       <span
-        className={`${color} tw-text-sm tw-font-medium tw-ml-0.5 tw-px-1.5 tw-py-0.5 tw-rounded-md tw-flex tw-items-center tw-gap-x-1`}
+        className={`tw-flex tw-items-center tw-gap-2 ${subtle ? '' : 'tw-ml-0.5'}`}
         style={{
           animationDuration: "2s",
         }}
@@ -50,28 +50,29 @@ export default function DropVoteProgressing({
       >
         <FontAwesomeIcon
           icon={faArrowRight}
-          className="tw-flex-shrink-0 tw-size-3"
+          className={`tw-flex-shrink-0 tw-size-2.5 ${arrowColor}`}
         />
-        <span>{formatNumberWithCommas(projected)}</span>
+        <span className={`${subtle ? 'tw-text-xs' : 'tw-text-sm'} tw-font-medium tw-tracking-tight ${color}`}>{formatNumberWithCommas(projected)}</span>
       </span>
       <Tooltip
         id={`drop-vote-progress-${current}-${projected}`}
         place="top"
-        positionStrategy="absolute"
+        offset={8}
         opacity={1}
         style={{
-          backgroundColor: "#1F2937",
-          color: "white",
           padding: "4px 8px",
-          zIndex: 50,
-          boxShadow:
-            "0 4px 16px 0 rgba(0,0,0,0.30), 0 2px 8px 0 rgba(55,55,62,0.25)",
+          background: "#37373E",
+          color: "white",
+          fontSize: "13px",
+          fontWeight: 500,
+          borderRadius: "6px",
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+          zIndex: 99999,
+          pointerEvents: "none",
         }}
       >
-        <span className="tw-text-xs">
-          Projected vote count at decision time:{" "}
-          {formatNumberWithCommas(projected)}
-        </span>
+        Projected vote count at decision time:{" "}
+        {formatNumberWithCommas(projected)}
       </Tooltip>
     </>
   );

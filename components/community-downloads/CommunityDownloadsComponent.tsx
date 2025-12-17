@@ -25,8 +25,19 @@ export default function CommunityDownloadsComponent(props: Readonly<Props>) {
 
   const { data, isError, isLoading } = useQuery<ApiUploadsPage>({
     queryKey: ["community-downloads", props.url, page],
-    queryFn: () =>
-      fetchUrl(`${props.url}?page_size=${PAGE_SIZE}&page=${page}`),
+    queryFn: async () => {
+      try {
+        return await fetchUrl(
+          `${props.url}?page_size=${PAGE_SIZE}&page=${page}`
+        );
+      } catch (error) {
+        console.error(
+          `Failed to fetch community downloads for page ${page}`,
+          error
+        );
+        throw error;
+      }
+    },
     placeholderData: keepPreviousData,
   });
 

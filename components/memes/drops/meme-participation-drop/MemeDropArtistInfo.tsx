@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { cicToType } from "@/helpers/Helpers";
 import UserCICAndLevel, {
@@ -14,28 +14,21 @@ import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileToo
 import { ArtistSubmissionBadge } from "@/components/waves/drops/ArtistSubmissionBadge";
 import { ArtistPreviewModal } from "@/components/waves/drops/ArtistPreviewModal";
 import { ProfileWinnerBadge } from "@/components/waves/drops/ProfileWinnerBadge";
+import { useArtistPreviewModal } from "@/hooks/useArtistPreviewModal";
 
 interface MemeDropArtistInfoProps {
   readonly drop: ExtendedDrop;
 }
 
 export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  
+  const { isModalOpen, modalInitialTab, handleBadgeClick, handleModalClose } =
+    useArtistPreviewModal();
+
   const submissionCount = drop.author.active_main_stage_submission_ids?.length || 0;
   const hasSubmissions = submissionCount > 0;
 
-  // Check if this drop author has any main stage winner drop IDs
-  const isWinner = drop.author.winner_main_stage_drop_ids && 
-                   drop.author.winner_main_stage_drop_ids.length > 0;
-
-  const handleSubmissionBadgeClick = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-  };
+  const winnerCount = drop.author.winner_main_stage_drop_ids?.length || 0;
+  const isWinner = winnerCount > 0;
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-3">
@@ -67,14 +60,16 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
             )}
           </Link>
           {isWinner && (
-            <ProfileWinnerBadge 
-              winCount={1}
+            <ProfileWinnerBadge
+              winCount={winnerCount}
+              onBadgeClick={() => handleBadgeClick("winners")}
+              tooltipId={`meme-winner-badge-${drop.id}`}
             />
           )}
           {hasSubmissions && (
             <ArtistSubmissionBadge
               submissionCount={submissionCount}
-              onBadgeClick={handleSubmissionBadgeClick}
+              onBadgeClick={() => handleBadgeClick("active")}
               tooltipId={`meme-badge-${drop.id}`}
             />
           )}
@@ -98,11 +93,12 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
         )}
       </div>
       
-      {/* Artist Submission Preview Modal */}
+      {/* Artist Preview Modal */}
       <ArtistPreviewModal
         isOpen={isModalOpen}
         onClose={handleModalClose}
         user={drop.author}
+        initialTab={modalInitialTab}
       />
     </div>
   );

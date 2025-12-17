@@ -12,15 +12,6 @@ interface WaveDropAuthorPfpProps {
 }
 
 const WaveDropAuthorPfp: React.FC<WaveDropAuthorPfpProps> = ({ drop }) => {
-  // Check if this drop author has any main stage winner drop IDs
-  const isFirstPlace =
-    drop.author.winner_main_stage_drop_ids &&
-    drop.author.winner_main_stage_drop_ids.length > 0;
-
-  const shadowClass = isFirstPlace
-    ? "tw-shadow-[0_1px_4px_rgba(251,191,36,0.15)]"
-    : "";
-
   const resolvedPfp = drop.author.pfp
     ? resolveIpfsUrlSync(drop.author.pfp)
     : null;
@@ -29,14 +20,14 @@ const WaveDropAuthorPfp: React.FC<WaveDropAuthorPfpProps> = ({ drop }) => {
   const profileHref = authorHandle ? `/${authorHandle}` : null;
   const tooltipUser = authorHandle ?? drop.author.id;
 
-  const containerClasses = `tw-relative tw-flex-shrink-0 tw-h-10 tw-w-10 tw-rounded-lg tw-bg-iron-900 tw-overflow-hidden ${shadowClass}`;
+  const containerClasses = "tw-relative tw-flex-shrink-0 tw-h-11 tw-w-11 tw-rounded-lg tw-bg-iron-900 tw-overflow-hidden";
 
   const avatarContent = resolvedPfp ? (
     <Image
       src={resolvedPfp}
       alt={authorHandle ? `${authorHandle}'s profile picture` : "Profile picture"}
       fill
-      sizes="40px"
+      sizes="44px"
       className="tw-object-contain tw-rounded-lg tw-bg-transparent"
     />
   ) : (

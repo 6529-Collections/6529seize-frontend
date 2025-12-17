@@ -13,11 +13,11 @@ const getBorderClasses = (drop: ExtendedDrop) => {
     "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden";
 
   if (rank === 1) {
-    return `${baseClasses} desktop-hover:hover:tw-border-[#fbbf24]/40`;
+    return `${baseClasses} desktop-hover:hover:tw-border-yellow-500/20`;
   } else if (rank === 2) {
-    return `${baseClasses} desktop-hover:hover:tw-border-[#94a3b8]/40`;
+    return `${baseClasses} desktop-hover:hover:tw-border-iron-400/25`;
   } else if (rank === 3) {
-    return `${baseClasses} desktop-hover:hover:tw-border-[#CD7F32]/40`;
+    return `${baseClasses} desktop-hover:hover:tw-border-amber-600/20`;
   } else {
     // More subtle hover effect for ranks 4+
     return `${baseClasses} desktop-hover:hover:tw-border-iron-700`;

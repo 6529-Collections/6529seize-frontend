@@ -1,22 +1,24 @@
-import React from "react";
-import { createPortal } from "react-dom";
+import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
+import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
+import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
+import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import {
   ExtendedDrop,
   convertApiDropToExtendedDrop,
 } from "@/helpers/waves/drop.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useLongPressInteraction from "@/hooks/useLongPressInteraction";
+import React from "react";
+import { createPortal } from "react-dom";
 import { WaveWinnersDropHeader } from "./header/WaveWinnersDropHeader";
-import { WaveWinnersDropContent } from "./WaveWinnersDropContent";
-import WaveWinnersDropOutcome from "./header/WaveWinnersDropOutcome";
-import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import WaveWinnersDropHeaderAuthorPfp from "./header/WaveWinnersDropHeaderAuthorPfp";
 import WaveWinnersDropHeaderTotalVotes from "./header/WaveWinnersDropHeaderTotalVotes";
 import WaveWinnersDropHeaderVoters from "./header/WaveWinnersDropHeaderVoters";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import useLongPressInteraction from "@/hooks/useLongPressInteraction";
-import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
-import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
-import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import WaveWinnersDropOutcome from "./header/WaveWinnersDropOutcome";
+import { WaveWinnersDropContent } from "./WaveWinnersDropContent";
+import { WAVE_VOTING_LABELS, WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
 interface DefaultWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -25,17 +27,17 @@ interface DefaultWaveWinnersDropProps {
 
 const getRankShadowClass = (place: number | null): string => {
   if (!place)
-    return "tw-shadow-[inset_1px_0_0_#60606C,inset_0_1px_0_rgba(96,96,108,0.2),inset_-1px_0_0_rgba(96,96,108,0.2),inset_0_-1px_0_rgba(96,96,108,0.2)]";
+    return "tw-shadow-[inset_1px_0_0_rgba(96,96,108,0.5),inset_0_1px_0_rgba(96,96,108,0.2),inset_-1px_0_0_rgba(96,96,108,0.2),inset_0_-1px_0_rgba(96,96,108,0.2)]";
 
   switch (place) {
     case 1:
-      return "tw-shadow-[inset_1px_0_0_#fbbf24,inset_0_1px_0_rgba(251,191,36,0.2),inset_-1px_0_0_rgba(251,191,36,0.2),inset_0_-1px_0_rgba(251,191,36,0.2)]";
+      return "tw-shadow-[inset_1px_0_0_rgba(251,191,36,0.5),inset_0_1px_0_rgba(251,191,36,0.2),inset_-1px_0_0_rgba(251,191,36,0.2),inset_0_-1px_0_rgba(251,191,36,0.2)]";
     case 2:
-      return "tw-shadow-[inset_1px_0_0_#94a3b8,inset_0_1px_0_rgba(148,163,184,0.2),inset_-1px_0_0_rgba(148,163,184,0.2),inset_0_-1px_0_rgba(148,163,184,0.2)]";
+      return "tw-shadow-[inset_1px_0_0_rgba(148,163,184,0.5),inset_0_1px_0_rgba(148,163,184,0.2),inset_-1px_0_0_rgba(148,163,184,0.2),inset_0_-1px_0_rgba(148,163,184,0.2)]";
     case 3:
-      return "tw-shadow-[inset_1px_0_0_#CD7F32,inset_0_1px_0_rgba(205,127,50,0.2),inset_-1px_0_0_rgba(205,127,50,0.2),inset_0_-1px_0_rgba(205,127,50,0.2)]";
+      return "tw-shadow-[inset_1px_0_0_rgba(205,127,50,0.5),inset_0_1px_0_rgba(205,127,50,0.2),inset_-1px_0_0_rgba(205,127,50,0.2),inset_0_-1px_0_rgba(205,127,50,0.2)]";
     default:
-      return "tw-shadow-[inset_1px_0_0_#60606C,inset_0_1px_0_rgba(96,96,108,0.2),inset_-1px_0_0_rgba(96,96,108,0.2),inset_0_-1px_0_rgba(96,96,108,0.2)]";
+      return "tw-shadow-[inset_1px_0_0_rgba(96,96,108,0.5),inset_0_1px_0_rgba(96,96,108,0.2),inset_-1px_0_0_rgba(96,96,108,0.2),inset_0_-1px_0_rgba(96,96,108,0.2)]";
   }
 };
 
@@ -62,7 +64,7 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
     winner.drop.context_profile_context?.rating !== 0;
   const userVote = winner.drop.context_profile_context?.rating ?? 0;
   const isUserVoteNegative = userVote < 0;
-  const creditType = winner.drop.wave.voting_credit_type || "votes";
+  const creditType = WAVE_VOTING_LABELS[winner.drop.wave.voting_credit_type as ApiWaveCreditType] || "votes";
 
   return (
     <div
@@ -88,7 +90,7 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
             </div>
           )}
         </div>
-        <div className="tw-mt-3 tw-ml-[3.25rem]">
+        <div className="tw-mt-3 tw-ml-[3.5rem]">
           <div className="tw-flex tw-flex-col tw-gap-y-2">
             <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-4 tw-gap-y-2">
               <div className="tw-flex tw-flex-whitespace-nowrap tw-gap-x-4 tw-items-center">
@@ -105,14 +107,13 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
               <div className="tw-flex tw-items-center tw-gap-x-1.5">
                 <div className="tw-flex tw-items-baseline tw-gap-x-1">
                   <span className="tw-text-sm tw-font-normal tw-text-iron-400">
-                    Your vote:
+                    {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:
                   </span>
                   <span
-                    className={`tw-text-sm tw-font-semibold ${
-                      isUserVoteNegative
-                        ? "tw-text-rose-500"
-                        : "tw-text-emerald-500"
-                    }`}
+                    className={`tw-text-sm tw-font-semibold ${isUserVoteNegative
+                      ? "tw-text-rose-500"
+                      : "tw-text-emerald-500"
+                      }`}
                   >
                     {isUserVoteNegative && "-"}
                     {formatNumberWithCommas(Math.abs(userVote))}{" "}

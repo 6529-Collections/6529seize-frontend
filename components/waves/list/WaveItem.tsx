@@ -34,7 +34,7 @@ const LEVEL_CLASSES: ReadonlyArray<{
 
 const DEFAULT_LEVEL_CLASS = LEVEL_CLASSES.at(-1)?.classes ?? "";
 const CARD_BASE_CLASSES =
-  "tw-@container/wave tw-group tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-backdrop-blur-sm tw-p-2.5 tw-shadow-sm tw-shadow-black/20 tw-transition-all tw-duration-300 tw-ease-out";
+  "tw-@container/wave tw-group tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-white/10 tw-bg-iron-950 tw-backdrop-blur-sm tw-shadow-sm tw-shadow-black/20 tw-transition-all tw-duration-300 tw-ease-out";
 const CARD_INTERACTIVE_CLASSES =
   "tw-cursor-pointer desktop-hover:hover:tw-shadow-lg desktop-hover:hover:tw-shadow-black/40 desktop-hover:hover:tw-translate-y-[-1px] focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 focus-visible:tw-outline-none";
 
@@ -124,9 +124,8 @@ function getCardLabel(href?: string, label?: string | null) {
 
 function resolveLevelClasses(level?: number | null) {
   return (
-    LEVEL_CLASSES.find(
-      (levelClass) => levelClass.minLevel <= (level ?? 0)
-    )?.classes ?? DEFAULT_LEVEL_CLASS
+    LEVEL_CLASSES.find((levelClass) => levelClass.minLevel <= (level ?? 0))
+      ?.classes ?? DEFAULT_LEVEL_CLASS
   );
 }
 
@@ -172,7 +171,7 @@ export default function WaveItem({
     <>
       <UserGroupIcon
         aria-hidden="true"
-        className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-400"
+        className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-400"
       />
       <span className="tw-font-medium">
         {numberWithCommas(wave?.metrics.subscribers_count ?? 0)}
@@ -184,10 +183,8 @@ export default function WaveItem({
   const authorAvatar = author?.pfp ? (
     <img
       className="tw-h-full tw-w-full tw-rounded-md tw-object-cover tw-bg-iron-800 tw-ring-1 tw-ring-white/10 desktop-hover:group-hover/author:tw-ring-white/30 desktop-hover:group-hover/author:tw-ring-offset-1 desktop-hover:group-hover/author:tw-ring-offset-iron-950 tw-transition tw-duration-300 tw-ease-out"
-      src={getScaledImageUri(author.pfp, ImageScale.W_AUTO_H_50)}
-      alt={
-        author?.handle ? `${author.handle} avatar` : "Author avatar"
-      }
+      src={getScaledImageUri(author.pfp, ImageScale.W_200_H_200)}
+      alt={author?.handle ? `${author.handle} avatar` : "Author avatar"}
       loading="lazy"
       decoding="async"
     />
@@ -199,17 +196,18 @@ export default function WaveItem({
     <div
       className={`${resolveLevelClasses(
         author?.level
-      )} tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset tw-text-[0.625rem] tw-leading-3`}
+      )} tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset tw-text-[0.625rem] tw-leading-3 tw-whitespace-nowrap`}
     >
       Level {authorLevel}
     </div>
   );
 
   const authorWrapperClass =
-    "tw-mt-1 tw-group/author tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1";
+    "tw-group/author tw-flex tw-items-center tw-transition-opacity hover:tw-opacity-80";
   const linkedAuthorNameClass =
-    "tw-text-sm tw-font-semibold tw-text-white desktop-hover:group-hover/author:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out";
-  const staticAuthorNameClass = "tw-text-sm tw-font-semibold tw-text-white";
+    "tw-text-sm tw-font-bold tw-text-white tw-truncate tw-min-w-0";
+  const staticAuthorNameClass =
+    "tw-text-sm tw-font-bold tw-text-white tw-truncate tw-min-w-0";
 
   const handleAuthorClick = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
@@ -244,9 +242,9 @@ export default function WaveItem({
   let authorSection: ReactNode;
   if (!wave) {
     authorSection = (
-      <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-        <div className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
-        <span className="tw-text-sm tw-font-semibold tw-text-white">
+      <span className="tw-group/author tw-flex tw-items-center tw-transition-opacity hover:tw-opacity-80">
+        <div className="tw-h-8 tw-w-8 tw-relative tw-flex-shrink-0 tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700 tw-mr-3" />
+        <span className="tw-text-sm tw-font-bold tw-text-white tw-truncate tw-max-w-[120px]">
           {userPlaceholder}
         </span>
       </span>
@@ -258,28 +256,26 @@ export default function WaveItem({
         data-wave-item-interactive="true"
         onClick={handleAuthorClick}
         onAuxClick={handleAuthorAuxClick}
-        className={`${authorWrapperClass} tw-cursor-pointer tw-no-underline tw-bg-transparent tw-border-none tw-p-0 tw-text-left`}
+        className={`${authorWrapperClass} tw-cursor-pointer tw-bg-transparent tw-border-none tw-p-0 tw-text-left tw-relative tw-z-10 tw-min-w-0 tw-w-fit`}
         aria-label={
-          author?.handle
-            ? `View @${author.handle}`
-            : "View author profile"
+          author?.handle ? `View @${author.handle}` : "View author profile"
         }
       >
-        <div className="tw-h-6 tw-w-6 tw-flex-shrink-0">{authorAvatar}</div>
+        <div className="tw-h-8 tw-w-8 tw-relative tw-flex-shrink-0 tw-mr-3">{authorAvatar}</div>
         <span className={linkedAuthorNameClass}>
           {author?.handle ?? userPlaceholder}
         </span>
-        {authorLevelBadge}
+        <div className="tw-ml-1.5 tw-flex tw-items-center">{authorLevelBadge}</div>
       </button>
     );
   } else {
     authorSection = (
-      <div className={authorWrapperClass}>
-        <div className="tw-h-6 tw-w-6 tw-flex-shrink-0">{authorAvatar}</div>
+      <div className={`${authorWrapperClass} tw-min-w-0`}>
+        <div className="tw-h-8 tw-w-8 tw-relative tw-flex-shrink-0 tw-mr-3">{authorAvatar}</div>
         <span className={staticAuthorNameClass}>
           {author?.handle ?? userPlaceholder}
         </span>
-        {authorLevelBadge}
+        <div className="tw-ml-1.5 tw-flex tw-items-center">{authorLevelBadge}</div>
       </div>
     );
   }
@@ -326,7 +322,7 @@ export default function WaveItem({
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
     >
-      <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-aspect-[16/8.5] sm:tw-aspect-[16/9]">
+      <div className="tw-relative tw-overflow-hidden tw-rounded-t-xl tw-aspect-[16/8.5] sm:tw-aspect-[16/9] tw-border tw-border-solid tw-border-b-0 tw-border-white/[0.003]">
         <div
           className="tw-absolute tw-inset-0 tw-rounded-xl"
           style={{
@@ -343,17 +339,11 @@ export default function WaveItem({
             className="tw-absolute tw-inset-0 tw-h-full tw-w-full tw-object-cover tw-transition-transform tw-duration-500 tw-will-change-transform desktop-hover:group-hover:tw-scale-[1.015]"
           />
         )}
-        <div
-          className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-36 sm:tw-h-44 md:tw-h-48"
-          style={{
-            background:
-              "linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.64) 32%, rgba(0,0,0,0.30) 64%, rgba(0,0,0,0.00) 100%)",
-          }}
-        />
+         <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-black/90 tw-via-black/40 tw-to-transparent" />
         <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-flex tw-items-end tw-justify-between tw-gap-3">
-          <div className="tw-flex tw-min-w-0 tw-items-end tw-px-3 tw-pb-3">
+          <div className="tw-flex tw-min-w-0 tw-items-end tw-px-4 tw-pb-5">
             <div className="tw-min-w-0">
-              <span className="tw-text-lg tw-font-semibold tw-text-white desktop-hover:group-hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out tw-line-clamp-1">
+              <span className="tw-text-base sm:tw-text-lg tw-font-bold tw-text-white tw-leading-tight tw-drop-shadow-lg tw-line-clamp-2">
                 {wave?.name ?? titlePlaceholder}
               </span>
             </div>
@@ -362,68 +352,71 @@ export default function WaveItem({
         </div>
       </div>
 
-      <div className="tw-px-3 tw-pt-3">
-        {authorSection}
-      </div>
+      <div className="tw-p-4 tw-gap-3 tw-flex tw-flex-col">
+        <div className="tw-flex tw-flex-col tw-gap-y-4 @[380px]/wave:tw-flex-row @[380px]/wave:tw-items-center @[380px]/wave:tw-justify-between @[380px]/wave:tw-gap-2">
+          {authorSection}
 
-      <div className="tw-mt-2 tw-flex tw-items-center tw-justify-between tw-px-3 tw-pt-3">
-        <div className="tw-flex tw-items-center tw-gap-4">
-          <div className="tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-200">
-            <ChatBubbleLeftRightIcon
-              aria-hidden="true"
-              className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-400"
-            />
-            <span className="tw-font-medium">Chat</span>
+          <div className="tw-flex tw-items-center tw-gap-4 tw-flex-shrink-0">
+            <div className="tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-medium tw-text-iron-400">
+              <ChatBubbleLeftRightIcon
+                aria-hidden="true"
+                className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-400"
+              />
+              <span className="tw-font-medium">Chat</span>
+            </div>
+
+            {waveHref && followersTooltipId ? (
+              <span
+                className="tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-no-underline tw-relative tw-z-20 tw-pointer-events-auto"
+                data-tooltip-id={followersTooltipId}
+              >
+                {followersContent}
+              </span>
+            ) : (
+              <div className="tw-flex tw-items-center tw-gap-1.5 tw-text-xs">
+                {followersContent}
+              </div>
+            )}
           </div>
 
-          {waveHref && followersTooltipId ? (
-            <span
-              className="tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-200 tw-no-underline tw-relative tw-z-20 tw-pointer-events-auto"
-              data-tooltip-id={followersTooltipId}
+          {wave && followersTooltipId && (
+            <Tooltip
+              id={followersTooltipId}
+              place="top"
+              positionStrategy="fixed"
+              style={{
+                backgroundColor: "#1F2937",
+                color: "white",
+                padding: "4px 8px",
+                zIndex: 50,
+              }}
             >
-              {followersContent}
-            </span>
-          ) : (
-            <div className="tw-text-sm tw-flex tw-items-center tw-gap-x-2 tw-text-iron-200">
-              {followersContent}
-            </div>
+              <span className="tw-text-xs">Joined</span>
+            </Tooltip>
           )}
         </div>
 
-        {wave && followersTooltipId && (
-          <Tooltip
-            id={followersTooltipId}
-            place="top"
-            positionStrategy="fixed"
-            style={{
-              backgroundColor: "#1F2937",
-              color: "white",
-              padding: "4px 8px",
-            }}
-          >
-            <span className="tw-text-xs">Joined</span>
-          </Tooltip>
-        )}
-      </div>
+        <div className="tw-w-full tw-h-px tw-bg-white/5 tw-my-1"></div>
 
-      <div className="tw-mt-3 tw-flex tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-pb-1">
-        <div className="tw-min-w-0 tw-flex-1">
-          {wave && (
-            <div className="tw-overflow-hidden tw-min-w-0">
-              <WaveItemDropped wave={wave} />
-            </div>
-          )}
-        </div>
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
+          <div className="tw-min-w-0 tw-flex-1">
+            {wave && (
+              <div className="tw-overflow-hidden tw-min-w-0">
+                <WaveItemDropped wave={wave} />
+              </div>
+            )}
+          </div>
 
-        <div className="tw-flex tw-items-center">
-          {wave && (
-            <div
-              data-wave-item-interactive="true"
-              className="tw-relative tw-z-20 tw-pointer-events-auto"
-            >
-              <WaveItemFollow wave={wave} />
-            </div>
-          )}
+          <div className="tw-flex tw-items-center">
+            {wave && (
+              <div
+                data-wave-item-interactive="true"
+                className="tw-relative tw-z-20 tw-pointer-events-auto"
+              >
+                <WaveItemFollow wave={wave} />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </CardContainer>

@@ -1,6 +1,7 @@
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import WaveWinnersDropHeaderVoter from "./WaveWinnersDropHeaderVoter";
+import { WAVE_VOTING_LABELS, WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
 
 interface WaveWinnersDropHeaderVotersProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -38,30 +39,33 @@ export default function WaveWinnersDropHeaderVoters({
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-3">
-      <div className="tw-flex -tw-space-x-1.5 tw-items-center">
-        {winner.drop.top_raters.map((voter, index) => (
-          <WaveWinnersDropHeaderVoter
-            voter={voter}
-            winner={winner}
-            index={index}
-            key={voter.profile.handle}
-          />
-        ))}
-      </div>
-      <span className="tw-text-sm tw-text-iron-400">
-        <span className="tw-font-semibold">
+      <div className="tw-flex tw-items-center tw-gap-2">
+        <div className="tw-flex tw-items-center -tw-space-x-2">
+          {winner.drop.top_raters.map((voter, index) => (
+            <WaveWinnersDropHeaderVoter
+              voter={voter}
+              winner={winner}
+              index={index}
+              key={voter.profile.handle}
+            />
+          ))}
+        </div>
+        <span className="tw-text-white tw-font-bold tw-text-sm">
           {formatNumberWithCommas(winner.drop.raters_count)}{" "}
+          <span className="tw-text-iron-500 tw-font-normal">
+            {winner.drop.raters_count === 1 ? "voter" : "voters"}
+          </span>
         </span>
-        {winner.drop.raters_count === 1 ? "voter" : "voters"}
-      </span>
+      </div>
 
       {hasUserVoted && (
         <div className="tw-flex tw-items-center tw-gap-1">
           <span className="tw-text-sm">
-            <span className="tw-text-iron-400">Your vote: </span>
+            <span className="tw-text-iron-400">{WAVE_VOTE_STATS_LABELS.YOUR_VOTES}: </span>
             <span className={`tw-font-semibold ${rankStyle}`}>
               {formatNumberWithCommas(userVote)}{" "}
-              {winner.drop.wave.voting_credit_type}
+              {WAVE_VOTING_LABELS[winner.drop.wave.voting_credit_type] ??
+                winner.drop.wave.voting_credit_type}
             </span>
           </span>
         </div>

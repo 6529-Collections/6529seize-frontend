@@ -4,10 +4,9 @@ import { AuthContext } from "@/components/auth/Auth";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import {
   formatFullDate,
-  getUpcomingMintsForCurrentOrNextSeason,
+  getUpcomingMintsAcrossSeasons,
   isMintingToday,
   SeasonMintRow,
-  SeasonMintScanResult,
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import ShowMoreButton from "@/components/show-more-button/ShowMoreButton";
 import {
@@ -53,9 +52,9 @@ export default function UserPageSubscriptionsUpcoming(
     d.setUTCHours(0, 0, 0, 0);
     return d;
   });
-  const { rows } = useMemo<SeasonMintScanResult>(
-    () => getUpcomingMintsForCurrentOrNextSeason(now),
-    [now]
+  const rows = useMemo<SeasonMintRow[]>(
+    () => getUpcomingMintsAcrossSeasons(props.memes_subscriptions.length, now),
+    [now, props.memes_subscriptions.length]
   );
 
   return (

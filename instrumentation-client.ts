@@ -7,6 +7,7 @@ import {
   INDEXEDDB_ERROR_MESSAGE,
   isIndexedDBError,
 } from "@/utils/error-sanitizer";
+import { shouldFilterByFilenameExceptions } from "@/utils/sentry-client-filters";
 import * as Sentry from "@sentry/nextjs";
 
 const sentryEnabled = !!publicEnv.SENTRY_DSN;
@@ -20,8 +21,6 @@ const noisyPatterns = [
 ];
 
 const referenceErrors = ["__firefox__"];
-
-const filenameExceptions = ["inpage.js"];
 
 const URL_REGEX = /\(([^)]+?)\)/;
 
@@ -49,20 +48,6 @@ function shouldFilterReferenceErrors(
   return referenceErrors.some((p) => message.includes(p));
 }
 
-function shouldFilterFilenameExceptions(
-  frames: Sentry.StackFrame[] | undefined
-): boolean {
-  if (!frames) {
-    return false;
-  }
-  return frames.some((frame) =>
-    filenameExceptions.some(
-      (pattern) =>
-        frame?.filename?.includes(pattern) || frame?.abs_path?.includes(pattern)
-    )
-  );
-}
-
 function shouldFilterEvent(
   event: Sentry.Event,
   hint?: Sentry.EventHint
@@ -81,7 +66,7 @@ function shouldFilterEvent(
   }
 
   const frames = event.exception?.values?.[0]?.stacktrace?.frames;
-  return shouldFilterFilenameExceptions(frames);
+  return shouldFilterByFilenameExceptions(frames, hint);
 }
 
 function handleIndexedDBError(event: Sentry.Event): void {
@@ -178,8 +163,12 @@ Sentry.init({
 
     const error = hint?.originalException ?? hint?.syntheticException;
     const value = event.exception?.values?.[0];
+    const message =
+      (typeof value?.value === "string" && value.value) ||
+      getFallbackMessage(hint) ||
+      (typeof event.message === "string" ? event.message : "");
 
-    if (error && isIndexedDBError(error)) {
+    if ((error && isIndexedDBError(error)) || (message && isIndexedDBError(message))) {
       handleIndexedDBError(event);
     }
 

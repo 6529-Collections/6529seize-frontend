@@ -1,5 +1,6 @@
 import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { WAVE_VOTING_LABELS, WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
 
 interface WaveWinnersDropHeaderTotalVotesProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -29,12 +30,12 @@ export default function WaveWinnersDropHeaderTotalVotes({
   const style = getVoteStyle(winner.place, winner.drop.rating);
 
   return (
-    <div className="tw-flex tw-items-baseline tw-gap-x-1">
-      <span className={`tw-font-semibold tw-text-sm ${style}`}>
+    <div className="tw-flex tw-items-baseline tw-gap-x-2">
+      <span className={`tw-font-bold tw-text-sm ${style}`}>
         {formatNumberWithCommas(winner.drop.rating)}
       </span>
-      <span className="tw-text-iron-400 tw-text-sm">
-        {winner.drop.wave.voting_credit_type} total
+      <span className="tw-text-sm tw-text-iron-500 tw-whitespace-nowrap">
+        {WAVE_VOTING_LABELS[winner.drop.wave.voting_credit_type]} {WAVE_VOTE_STATS_LABELS.TOTAL}
       </span>
     </div>
   );

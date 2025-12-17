@@ -42,9 +42,17 @@ export enum QueryKey {
   PROFILE_REP_RATINGS = "PROFILE_REP_RATINGS",
   PROFILE_TRANSACTIONS = "PROFILE_TRANSACTIONS",
   PROFILE_DISTRIBUTIONS = "PROFILE_DISTRIBUTIONS",
+  TDH_GRANTS = "TDH_GRANTS",
+  TDH_GRANT_TOKENS = "TDH_GRANT_TOKENS",
+  PROFILE_CONSOLIDATED_TDH = "PROFILE_CONSOLIDATED_TDH",
   PROFILE_COLLECTED = "PROFILE_COLLECTED",
   PROFILE_COLLECTED_TRANSFER = "PROFILE_COLLECTED_TRANSFER",
   PROFILE_DROPS = "PROFILE_DROPS",
+  XTDH_TOKENS = "XTDH_TOKENS",
+  XTDH_TOKEN_CONTRIBUTORS = "XTDH_TOKEN_CONTRIBUTORS",
+  XTDH_RECEIVED_NFTS = "XTDH_RECEIVED_NFTS",
+  IDENTITY_TDH_STATS = "IDENTITY_TDH_STATS",
+  GLOBAL_TDH_STATS = "GLOBAL_TDH_STATS",
   IDENTITY_AVAILABLE_CREDIT = "IDENTITY_AVAILABLE_CREDIT",
   IDENTITY_FOLLOWING_ACTIONS = "IDENTITY_FOLLOWING_ACTIONS",
   IDENTITY_FOLLOWERS = "IDENTITY_FOLLOWERS",
@@ -68,6 +76,9 @@ export enum QueryKey {
   GROUP_WALLET_GROUP_WALLETS = "GROUP_WALLET_GROUP_WALLETS",
   NFTS_SEARCH = "NFTS_SEARCH",
   NFTS = "NFTS",
+  NFT_COLLECTION_SEARCH = "NFT_COLLECTION_SEARCH",
+  NFT_CONTRACT_OVERVIEW = "NFT_CONTRACT_OVERVIEW",
+  NFT_TOKEN_METADATA = "NFT_TOKEN_METADATA",
   PROFILE_PROXY = "PROFILE_PROXY",
   PROFILE_PROFILE_PROXIES = "PROFILE_PROFILE_PROXIES",
   EMMA_IDENTITY_ALLOWLISTS = "EMMA_IDENTITY_ALLOWLISTS",
@@ -174,36 +185,38 @@ type ReactQueryWrapperContextType = {
   }) => void;
   invalidateAll: () => void;
   invalidateNotifications: () => void;
+  invalidateIdentityTdhStats: (params: { identity: string }) => void;
 };
 
 export const ReactQueryWrapperContext =
   createContext<ReactQueryWrapperContextType>({
-    setProfile: () => {},
-    setWavesOverviewPage: () => {},
-    setProfileProxy: () => {},
-    setWave: () => {},
-    setWaveDrops: () => {},
-    onProfileProxyModify: () => {},
-    onProfileCICModify: () => {},
-    onProfileRepModify: () => {},
-    onProfileEdit: () => {},
-    onProfileStatementAdd: () => {},
-    onProfileStatementRemove: () => {},
-    onIdentityFollowChange: () => {},
-    initProfileRepPage: () => {},
-    initProfileIdentityPage: () => {},
-    initCommunityActivityPage: () => {},
-    waitAndInvalidateDrops: () => {},
-    addOptimisticDrop: () => {},
-    invalidateDrops: () => {},
-    onGroupRemoved: () => {},
-    onGroupChanged: () => {},
-    onGroupCreate: () => {},
-    onIdentityBulkRate: () => {},
-    onWaveCreated: () => {},
-    onWaveFollowChange: () => {},
-    invalidateAll: () => {},
-    invalidateNotifications: () => {},
+    setProfile: () => { },
+    setWavesOverviewPage: () => { },
+    setProfileProxy: () => { },
+    setWave: () => { },
+    setWaveDrops: () => { },
+    onProfileProxyModify: () => { },
+    onProfileCICModify: () => { },
+    onProfileRepModify: () => { },
+    onProfileEdit: () => { },
+    onProfileStatementAdd: () => { },
+    onProfileStatementRemove: () => { },
+    onIdentityFollowChange: () => { },
+    initProfileRepPage: () => { },
+    initProfileIdentityPage: () => { },
+    initCommunityActivityPage: () => { },
+    waitAndInvalidateDrops: () => { },
+    addOptimisticDrop: () => { },
+    invalidateDrops: () => { },
+    onGroupRemoved: () => { },
+    onGroupChanged: () => { },
+    onGroupCreate: () => { },
+    onIdentityBulkRate: () => { },
+    onWaveCreated: () => { },
+    onWaveFollowChange: () => { },
+    invalidateAll: () => { },
+    invalidateNotifications: () => { },
+    invalidateIdentityTdhStats: () => { },
   });
 
 export default function ReactQueryWrapper({
@@ -798,8 +811,8 @@ export default function ReactQueryWrapper({
       (
         oldData:
           | {
-              pages: TypedFeedItem[][];
-            }
+            pages: TypedFeedItem[][];
+          }
           | undefined
       ) => {
         if (!oldData?.pages.length) {
@@ -890,8 +903,8 @@ export default function ReactQueryWrapper({
       (
         oldData:
           | {
-              pages: ApiDrop[][];
-            }
+            pages: ApiDrop[][];
+          }
           | undefined
       ) => {
         if (!oldData?.pages.length) {
@@ -988,8 +1001,8 @@ export default function ReactQueryWrapper({
       (
         oldData:
           | {
-              pages: TypedFeedItem[][];
-            }
+            pages: TypedFeedItem[][];
+          }
           | undefined
       ) => {
         if (!oldData?.pages.length) {
@@ -1185,6 +1198,12 @@ export default function ReactQueryWrapper({
     });
   };
 
+  const invalidateIdentityTdhStats = ({ identity }: { identity: string }) => {
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.IDENTITY_TDH_STATS, identity.toLowerCase()],
+    });
+  };
+
   useQueryKeyListener([QueryKey.FEED_ITEMS], () => {
     Cookies.set([QueryKey.FEED_ITEMS].toString(), `${Time.now().toMillis()}`);
   });
@@ -1224,6 +1243,7 @@ export default function ReactQueryWrapper({
       onIdentityFollowChange,
       invalidateDrops,
       invalidateNotifications,
+      invalidateIdentityTdhStats,
     }),
     [
       setProfile,
@@ -1252,6 +1272,7 @@ export default function ReactQueryWrapper({
       onIdentityFollowChange,
       invalidateDrops,
       invalidateNotifications,
+      invalidateIdentityTdhStats,
     ]
   );
 

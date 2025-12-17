@@ -1,10 +1,10 @@
 "use client";
 
 import { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
-import { Tooltip } from "react-tooltip";
+import { buildTooltipId } from "@/helpers/tooltip.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import { useState } from "react";
-import { buildTooltipId } from "@/helpers/tooltip.helpers";
+import { Tooltip } from "react-tooltip";
 
 interface ParticipationDropMetadataProps {
   readonly metadata: ApiDropMetadata[];
@@ -69,7 +69,7 @@ export default function ParticipationDropMetadata({
   };
 
   return (
-    <div className="tw-px-4 sm:tw-ml-[3.25rem] tw-pt-4 tw-hidden lg:tw-block tw-border-t tw-border-iron-800/30">
+    <div className="tw-px-4 sm:tw-ml-[3.5rem] tw-pt-4 tw-hidden lg:tw-block tw-border-t tw-border-iron-800/30">
       <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-4 tw-gap-2">
         {/* Always show first 2 items */}
         {metadata.slice(0, 2).map((meta) => (

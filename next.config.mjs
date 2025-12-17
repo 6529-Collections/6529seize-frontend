@@ -7,6 +7,7 @@ import {
 } from "next/constants.js";
 import { execSync } from "node:child_process";
 import fs from "node:fs";
+import path from "node:path";
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 const sentryEnabled = Boolean(process.env.SENTRY_DSN);
@@ -177,6 +178,10 @@ function sharedConfig(publicEnv, assetPrefix) {
       config.resolve.alias.encoding = false;
       config.resolve.alias["@react-native-async-storage/async-storage"] = false;
       config.resolve.alias["react-native"] = false;
+      config.resolve.alias["idb-keyval"] = path.resolve(
+        process.cwd(),
+        "lib/storage/idb-keyval.ts"
+      );
       if (!dev && !isServer) config.devtool = "source-map";
       config.optimization.minimize = false;
       return config;
@@ -187,8 +192,10 @@ function sharedConfig(publicEnv, assetPrefix) {
         encoding: "./stubs/empty.js",
         "@react-native-async-storage/async-storage": "./stubs/empty.js",
         "react-native": "./stubs/empty.js",
+        "idb-keyval": "./lib/storage/idb-keyval.ts",
       },
     },
+    serverExternalPackages: ["@reown/appkit", "@reown/appkit-adapter-wagmi"],
   };
 }
 
@@ -231,7 +238,6 @@ const nextConfigFactory = (phase) => {
         API_ENDPOINT: publicEnv.API_ENDPOINT,
         ALLOWLIST_API_ENDPOINT: publicEnv.ALLOWLIST_API_ENDPOINT,
         BASE_ENDPOINT: publicEnv.BASE_ENDPOINT,
-        ALCHEMY_API_KEY: publicEnv.ALCHEMY_API_KEY,
         VERSION,
         ASSETS_FROM_S3: String(ASSETS_FROM_S3),
         NEXTGEN_CHAIN_ID:
