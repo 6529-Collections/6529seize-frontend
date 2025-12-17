@@ -19,9 +19,15 @@ export default function NotificationDropReplied({
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }) {
+  const replyDrop = notification.related_drops?.[1];
+
+  if (!replyDrop) {
+    return null;
+  }
+
   return (
     <NotificationWithDrop
-      drop={notification.related_drops[1]}
+      drop={replyDrop}
       actionText="replied"
       createdAt={notification.created_at}
       activeDrop={activeDrop}

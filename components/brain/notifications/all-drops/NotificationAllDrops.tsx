@@ -6,7 +6,6 @@ import { numberWithCommas } from "@/helpers/Helpers";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ActiveDropState } from "@/types/dropInteractionTypes";
 import { INotificationAllDrops } from "@/types/feed.types";
-import Link from "next/link";
 import { getNotificationVoteColor } from "../drop-reacted/NotificationDropReacted";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import NotificationDrop from "../subcomponents/NotificationDrop";
@@ -36,22 +35,16 @@ export default function NotificationAllDrops({
   const isDirectMessage = getIsDirectMessage(drop.wave);
 
   const getContent = () => {
-    const userLink = (
-      <Link
-        href={`/${notification.related_identity.handle}`}
-        className="tw-no-underline tw-font-semibold">
-        {notification.related_identity.handle}
-      </Link>
-    );
-
     if (typeof notification.additional_context.vote === "number") {
       const isReset = notification.additional_context.vote === 0;
 
-      const voteText = isReset ? (
-        "reset rating to 0"
-      ) : (
+      if (isReset) {
+        return <span className="tw-text-iron-400">reset rating to 0</span>;
+      }
+
+      return (
         <>
-          rated{" "}
+          <span className="tw-text-iron-400">rated</span>
           <span
             className={`${getNotificationVoteColor(
               notification.additional_context.vote
@@ -61,24 +54,9 @@ export default function NotificationAllDrops({
           </span>
         </>
       );
-
-      return (
-        <>
-          {userLink} {voteText}
-        </>
-      );
     }
 
-    return (
-      <>
-        <span className="tw-text-iron-400"> new post from </span>
-        <Link
-          href={`/${drop.author.handle}`}
-          className="tw-no-underline tw-font-semibold">
-          {drop.author.handle}
-        </Link>
-      </>
-    );
+    return <span className="tw-text-iron-400">posted</span>;
   };
 
   return (

@@ -6,6 +6,7 @@ import WaveDropContent from "@/components/waves/drops/WaveDropContent";
 import WaveDropMetadata from "@/components/waves/drops/WaveDropMetadata";
 import { useRouter } from "next/navigation";
 import WaveDropReactions from "@/components/waves/drops/WaveDropReactions";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 
 interface WaveLeaderboardDropContentProps {
   readonly drop: ExtendedDrop;
@@ -19,7 +20,13 @@ export const WaveLeaderboardDropContent: React.FC<
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
 
   const onDropContentClick = (clickedDrop: ExtendedDrop) => {
-    router.push(`/waves?wave=${clickedDrop.wave.id}&serialNo=${clickedDrop.serial_no}`);
+    const href = getWaveRoute({
+      waveId: clickedDrop.wave.id,
+      serialNo: clickedDrop.serial_no,
+      isDirectMessage: false,
+      isApp: false,
+    });
+    router.push(href);
   };
 
   return (
