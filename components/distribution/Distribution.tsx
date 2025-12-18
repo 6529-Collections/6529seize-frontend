@@ -18,6 +18,7 @@ import { Distribution, DistributionPhoto } from "@/entities/IDistribution";
 import {
   areEqualAddresses,
   capitalizeEveryWord,
+  isValidPositiveInteger,
   numberWithCommas,
 } from "@/helpers/Helpers";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
@@ -93,7 +94,7 @@ export default function DistributionPage(props: Readonly<Props>) {
   }
 
   useEffect(() => {
-    const isValid = !Number.isNaN(Number.parseInt(params?.id as string, 10));
+    const isValid = isValidPositiveInteger(params?.id as string);
     const id = isValid ? (params?.id as string) : "";
     setIsValidNftId(isValid);
     setNftId(id);
