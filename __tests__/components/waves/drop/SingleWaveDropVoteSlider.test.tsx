@@ -1,6 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import SingleWaveDropVoteSlider from '@/components/waves/drop/SingleWaveDropVoteSlider';
-import { ApiWaveCreditType } from '@/generated/models/ApiWaveCreditType';
 
 // Mock framer-motion
 jest.mock('framer-motion', () => ({
