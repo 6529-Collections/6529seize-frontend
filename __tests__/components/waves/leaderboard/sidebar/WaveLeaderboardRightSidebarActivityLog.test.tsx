@@ -119,6 +119,7 @@ describe('WaveLeaderboardRightSidebarActivityLog', () => {
 
     const voterPfp = voterLink.querySelector('img');
     expect(voterPfp).toBeInTheDocument();
+    expect(voterPfp).toHaveAttribute('src', expect.stringContaining('voter.jpg'));
     expect(voterPfp).toHaveClass('tw-size-5', 'tw-rounded-md');
   });
 
@@ -145,6 +146,7 @@ describe('WaveLeaderboardRightSidebarActivityLog', () => {
 
     const authorPfp = authorLink.querySelector('img');
     expect(authorPfp).toBeInTheDocument();
+    expect(authorPfp).toHaveAttribute('src', expect.stringContaining('author.jpg'));
   });
 
   it('displays drop author information without profile picture', () => {
