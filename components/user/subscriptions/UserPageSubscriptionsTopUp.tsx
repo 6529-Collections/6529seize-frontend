@@ -41,6 +41,10 @@ import { parseEther } from "viem";
 import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
 import styles from "./UserPageSubscriptions.module.scss";
 
+function getEthForCards(count: number): number {
+  return Math.round(count * MEMES_MINT_PRICE * 1e10) / 1e10;
+}
+
 export default function UserPageSubscriptionsTopUp() {
   const { isIos } = useCapacitor();
   const { country } = useCookieConsent();
@@ -120,7 +124,7 @@ export default function UserPageSubscriptionsTopUp() {
       setError("You must have an active wallet connection to top up");
       return;
     }
-    const value = count * MEMES_MINT_PRICE;
+    const value = getEthForCards(count);
     setTopUpAmount(value);
     sendTransaction.reset();
     sendTransaction.sendTransaction({
@@ -414,8 +418,7 @@ export default function UserPageSubscriptionsTopUp() {
                   {!Number.isNaN(Number.parseInt(memeCount, 10)) &&
                     Number.parseInt(memeCount, 10) > 0 && (
                       <>
-                        ({Number.parseInt(memeCount, 10) * MEMES_MINT_PRICE}{" "}
-                        ETH)
+                        ({getEthForCards(Number.parseInt(memeCount, 10))} ETH)
                       </>
                     )}
                 </span>
@@ -565,7 +568,7 @@ function CardCountOption(
         <Col xs={11} className="d-flex">
           {props.display && <span>{props.display}&nbsp;-&nbsp;</span>}
           {props.count.toLocaleString()} Card{props.count > 1 && "s"} (
-          {numberWithCommasFromString(MEMES_MINT_PRICE * props.count)} ETH)
+          {numberWithCommasFromString(getEthForCards(props.count))} ETH)
         </Col>
       </Row>
     </button>
