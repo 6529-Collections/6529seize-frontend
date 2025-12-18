@@ -17,9 +17,9 @@ export default function WaveLeaderboardGalleryItemVotes({
   
   const getColorClass = () => {
     if (variant === "subtle") {
-      return "tw-text-iron-100";
+      return "tw-text-iron-200";
     }
-    return isPositive ? "tw-text-emerald-500" : "tw-text-rose-500";
+    return isPositive ? "tw-text-emerald-600" : "tw-text-rose-600";
   };
 
   return (

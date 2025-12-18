@@ -28,13 +28,13 @@ const MetadataItem: React.FC<{
     typeof value === "boolean" ? (value ? "Yes" : "No") : String(value);
 
   return (
-    <div className="tw-bg-iron-900 tw-border tw-border-solid tw-border-white/10 tw-rounded-md tw-px-3 tw-py-1.5 tw-flex tw-flex-col">
+    <div className="tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-rounded-md tw-px-3 tw-py-1.5 tw-flex tw-flex-col">
       <span className="tw-block tw-text-[9px] tw-uppercase tw-tracking-wider tw-text-iron-600 tw-font-bold tw-mb-0.5">
         {label}
       </span>
       <>
         <span
-          className="tw-text-xs tw-text-iron-400 tw-truncate"
+          className="tw-text-xs tw-text-iron-300 tw-truncate"
           data-tooltip-id={`trait-${label}-${displayValue}`}
         >
           {displayValue}
@@ -43,13 +43,21 @@ const MetadataItem: React.FC<{
           <Tooltip
             id={`trait-${label}-${displayValue}`}
             place="top"
+            offset={8}
+            opacity={1}
             style={{
-              backgroundColor: "#1F2937",
-              color: "white",
               padding: "4px 8px",
+              background: "#37373E",
+              color: "white",
+              fontSize: "13px",
+              fontWeight: 500,
+              borderRadius: "6px",
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+              zIndex: 99999,
+              pointerEvents: "none",
             }}
           >
-            {displayValue}
+            <span className="tw-text-xs">{displayValue}</span>
           </Tooltip>
         )}
       </>
@@ -518,14 +526,14 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
               ))}
               <button
                 onClick={handleShowLess}
-                className="tw-text-xs tw-text-primary-400 desktop-hover:hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left">
+                className="tw-text-iron-400 tw-text-xs tw-text-left tw-font-medium desktop-hover:hover:tw-text-iron-300 tw-transition-colors tw-whitespace-nowrap tw-self-end tw-pb-1.5 tw-bg-transparent tw-border-0 tw-cursor-pointer">
                 Show less
               </button>
             </>
           ) : (
             <button
               onClick={handleShowMore}
-              className="tw-text-xs tw-text-primary-400 desktop-hover:hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left">
+              className="tw-text-iron-400 tw-text-xs tw-text-left tw-font-medium desktop-hover:hover:tw-text-iron-300 tw-transition-colors tw-whitespace-nowrap tw-self-end tw-pb-1.5 tw-bg-transparent tw-border-0 tw-cursor-pointer">
               Show all
             </button>
           ))}

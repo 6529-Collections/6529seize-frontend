@@ -130,7 +130,7 @@ export const ArtistActiveSubmissionContent: React.FC<
                       </div>
                     </div>
                     <div className="tw-p-3 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800 tw-bg-iron-950/50 tw-flex tw-flex-col tw-flex-1 tw-justify-between">
-                      <div className="tw-flex tw-justify-between tw-items-start tw-mb-3">
+                      <div className="tw-flex tw-justify-between tw-items-center tw-mb-3">
                         <div className="tw-min-w-0 tw-flex-1 tw-mr-2">
                           {submission.title && (
                             <p className="tw-mb-0 tw-text-sm tw-font-bold tw-text-iron-100 tw-truncate tw-leading-tight">
@@ -147,7 +147,7 @@ export const ArtistActiveSubmissionContent: React.FC<
                           <div className="tw-flex tw-items-center tw-gap-x-1.5 tw-flex-wrap">
                             <div className="tw-flex tw-items-center tw-gap-x-1.5 tw-text-sm">
                               <span
-                                className={`tw-font-medium ${
+                                className={`tw-font-medium tw-font-mono ${
                                   submission.drop.rating >= 0
                                     ? "tw-text-iron-300"
                                     : "tw-text-iron-400"
@@ -162,7 +162,7 @@ export const ArtistActiveSubmissionContent: React.FC<
                               />
                             </div>
                             <div className="tw-text-sm tw-text-iron-500 tw-whitespace-nowrap">
-                              <span className="tw-font-medium">TDH total</span>
+                              <span className="tw-font-normal">TDH total</span>
                             </div>
                           </div>
                         </div>

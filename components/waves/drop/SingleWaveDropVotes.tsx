@@ -36,11 +36,8 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
   return (
     <div className="tw-flex tw-flex-col tw-gap-3">
       {/* Voting Status Row */}
-      <div className="tw-flex tw-items-baseline tw-gap-x-2 tw-mb-4 lg:tw-mb-6">
-        <span
-          className={`tw-text-sm tw-font-bold tw-font-mono tw-tracking-tight ${isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
-            }`}
-        >
+      <div className="tw-flex tw-items-baseline tw-gap-x-2 tw-mb-3 lg:tw-mb-4">
+        <span className={`tw-text-sm tw-font-bold tw-font-mono tw-tracking-tight ${isPositive ? "tw-text-emerald-600" : "tw-text-rose-600"}`}>
           {formatNumberWithCommas(drop.rating)}
         </span>
         <DropVoteProgressing
@@ -53,14 +50,13 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
         </span>
       </div>
 
-      {/* Voters Row */}
       <div className="tw-flex tw-items-center tw-gap-3 tw-pt-4 lg:tw-pt-6 tw-border-t tw-border-solid tw-border-white/10 tw-border-x-0 tw-border-b-0">
         <div className="tw-flex tw-items-center -tw-space-x-2">
           {topVoters.map((voter) => (
             <div key={voter.profile.handle}>
               <Link href={`/${voter.profile.handle}`}>
                 {voter.profile.pfp ? (
-                  <div className="tw-relative tw-w-6 tw-h-6">
+                  <div className="tw-relative tw-w-6 tw-h-6 lg:tw-w-7 lg:tw-h-7">
                     <Image
                       className="tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
                       src={resolveIpfsUrlSync(voter.profile.pfp)}
@@ -72,7 +68,7 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
                   </div>
                 ) : (
                   <div
-                    className="tw-w-6 tw-h-6 tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800"
+                    className="tw-w-6 tw-h-6 lg:tw-w-7 lg:tw-h-7 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800"
                     data-tooltip-id={`wave-voter-${voter.profile.handle}`}
                   />
                 )}
@@ -90,7 +86,7 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
             </div>
           ))}
         </div>
-        <span className="tw-text-white tw-font-bold tw-text-sm">
+        <span className="tw-text-iron-500 tw-font-normal tw-text-sm">
           {formatNumberWithCommas(drop.raters_count)}{" "}
           <span className="tw-text-iron-500 tw-font-normal">
             {drop.raters_count === 1 ? "voter" : "voters"}
@@ -106,7 +102,7 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
               {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:
             </span>
             <span
-              className={`tw-text-sm tw-font-semibold ${isUserVoteNegative ? "tw-text-rose-500" : "tw-text-emerald-500"
+              className={`tw-text-sm tw-font-semibold ${isUserVoteNegative ? "tw-text-rose-600" : "tw-text-emerald-600"
                 }`}
             >
               {isUserVoteNegative && "-"}

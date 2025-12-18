@@ -11,7 +11,7 @@ export const SingleWaveDropInfoDetails: React.FC<
   SingleWaveDropInfoDetailsProps
 > = ({ drop }) => {
   return (
-    <div className="tw-space-y-4 tw-pb-6 tw-pt-4">
+    <div>
       {drop && <SingleWaveDropVoters drop={drop} />}
       {drop && <SingleWaveDropLogs drop={drop} />}
     </div>

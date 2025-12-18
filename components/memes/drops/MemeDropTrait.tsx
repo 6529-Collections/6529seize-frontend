@@ -41,7 +41,7 @@ const MemeDropTrait: React.FC<MemeDropTraitProps> = ({ label, value, dropId }) =
       </span>
       <>
         <span
-          className="tw-text-xs tw-text-iron-400 tw-truncate"
+          className="tw-text-xs tw-text-iron-300 tw-truncate"
           data-tooltip-id={tooltipId}>
           {convertedValue}
         </span>

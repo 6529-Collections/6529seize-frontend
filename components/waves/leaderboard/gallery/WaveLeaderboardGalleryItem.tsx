@@ -136,7 +136,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
           <div className="tw-flex tw-justify-between tw-items-start tw-mb-3">
             <div className="tw-min-w-0 tw-flex-1 tw-mr-2">
               {drop.title && (
-                <h3 className="tw-mb-0 tw-text-sm tw-font-bold tw-text-iron-100 tw-truncate tw-leading-tight">
+                <h3 className="tw-mb-0 tw-text-sm tw-font-bold tw-text-iron-200 tw-truncate tw-leading-tight">
                   {drop.title}
                 </h3>
               )}

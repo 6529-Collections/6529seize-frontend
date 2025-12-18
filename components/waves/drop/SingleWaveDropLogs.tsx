@@ -7,6 +7,7 @@ import { useWaveActivityLogs } from "@/hooks/useWaveActivityLogs";
 import { useAuth } from "@/components/auth/Auth";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { SingleWaveDropLog } from "./SingleWaveDropLog";
+import { ChevronRightIcon } from "@heroicons/react/24/solid";
 
 interface SingleWaveDropLogsProps {
   readonly drop: ApiDrop;
@@ -37,35 +38,17 @@ export const SingleWaveDropLogs: React.FC<SingleWaveDropLogsProps> = ({
     <div>
       <button
         onClick={() => setIsActivityOpen(!isActivityOpen)}
-        className={`tw-text-sm tw-w-full tw-group tw-ring-1 tw-ring-iron-700 desktop-hover:hover:tw-ring-primary-400/30 tw-flex tw-justify-between tw-items-center tw-font-medium tw-py-2.5 md:tw-py-3 tw-px-5 tw-bg-iron-900 tw-transition-all tw-duration-300 tw-border-0 ${
-          isActivityOpen ? "tw-rounded-t-lg" : "tw-rounded-lg"
-        }`}>
-        <span
-          className={
-            isActivityOpen
-              ? "tw-text-primary-300"
-              : "tw-text-iron-300 desktop-hover:group-hover:tw-text-primary-300 tw-transition-all tw-duration-300"
-          }>
-          Activity Logs
+        className="tw-w-full tw-py-5 lg:tw-py-6 tw-flex tw-items-center tw-justify-between tw-text-left hover:tw-bg-iron-950 tw-transition-colors tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-bg-transparent"
+      >
+        <span className="tw-text-sm tw-text-white/60 tw-font-semibold">
+          Activity Log
         </span>
-        <motion.svg
-          animate={{ rotate: isActivityOpen ? 0 : -90 }}
-          className={`tw-w-4 tw-h-4 ${
-            isActivityOpen
-              ? "tw-text-primary-300"
-              : "tw-text-iron-400 desktop-hover:group-hover:tw-text-primary-300 tw-transition-all tw-duration-300"
-          }`}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          aria-hidden="true">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M19 9l-7 7-7-7"
-          />
-        </motion.svg>
+        <motion.div
+          animate={{ rotate: isActivityOpen ? 90 : 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <ChevronRightIcon className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0 tw-text-white/30" />
+        </motion.div>
       </button>
 
       <AnimatePresence>
@@ -75,10 +58,10 @@ export const SingleWaveDropLogs: React.FC<SingleWaveDropLogsProps> = ({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="tw-overflow-hidden tw-ring-1 tw-ring-iron-700 tw-rounded-b-xl tw-bg-iron-900">
+            className="tw-overflow-hidden tw-border-b tw-border-solid tw-border-white/10 tw-border-x-0 tw-border-t-0">
             <div className="tw-max-h-[19.75rem] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
               {logs.length > 0 || isLoading ? (
-                <div className="tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0">
+                <div className="tw-divide-y tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
                   {logs.map((log) => (
                     <SingleWaveDropLog
                       key={log.id}

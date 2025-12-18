@@ -39,7 +39,7 @@ const MemesLeaderboardDropVoteSummary: React.FC<
       <div className="tw-flex tw-items-center tw-gap-2 tw-text-sm">
         <span
           className={`tw-font-bold tw-font-mono tw-tracking-tight tw-text-sm ${
-            isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
+            isPositive ? "tw-text-emerald-600" : "tw-text-rose-600"
           }`}
         >
           {formatNumberWithCommas(current)}
@@ -102,7 +102,7 @@ const MemesLeaderboardDropVoteSummary: React.FC<
               </React.Fragment>
             ))}
           </div>
-          <span className="tw-text-white tw-font-bold tw-text-sm">
+          <span className="tw-text-iron-200 tw-font-semibold tw-text-sm">
             {formatNumberWithCommas(ratersCount)}{" "}
             <span className="tw-text-iron-500 tw-font-normal">
               {ratersCount === 1 ? "voter" : "voters"}

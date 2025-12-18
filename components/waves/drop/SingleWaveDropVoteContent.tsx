@@ -123,42 +123,12 @@ export const SingleWaveDropVoteContent: React.FC<
   // Clean, sleek design with flexbox ordering for responsive layout
   return (
     <div
-      className="tw-bg-iron-800 tw-backdrop-blur-sm tw-border tw-border-iron-700 tw-border-solid tw-rounded-lg tw-px-2 tw-py-3 sm:tw-p-4"
+      className="tw-bg-iron-950 tw-backdrop-blur-sm tw-border tw-border-iron-800 tw-border-solid tw-rounded-lg tw-px-2 tw-py-3 sm:tw-p-4"
       onClick={(e) => e.stopPropagation()}
     >
-      {/* Main container using flexbox and wrapping */}
-      <div className="tw-flex tw-flex-wrap tw-gap-3 sm:tw-gap-2.5">
-        {/* Toggle button - first item in both layouts */}
-        <div className="tw-order-1 sm:tw-order-1 tw-flex-shrink-0">
-          <button
-            onClick={() => setIsSliderMode(!isSliderMode)}
-            className="tw-h-8 tw-px-2.5 tw-rounded-lg tw-bg-iron-700 tw-border tw-border-solid tw-border-iron-650
-                    tw-flex tw-items-center tw-justify-center tw-gap-1.5 tw-transition-all
-                    desktop-hover:hover:tw-bg-iron-600"
-            title="Switch mode"
-          >
-            <FontAwesomeIcon
-              icon={faExchange}
-              className="tw-text-white tw-size-3 tw-flex-shrink-0"
-              flip={isSliderMode ? "horizontal" : "vertical"}
-            />
-            <span className="tw-text-xs tw-font-medium tw-text-white">
-              {isSliderMode ? "Numeric" : "Slider"}
-            </span>
-          </button>
-        </div>
-
-        {/* Stats - second item in mobile (first row), fourth in desktop (second row) */}
-        <div className="tw-order-2 sm:tw-order-4 tw-ml-auto sm:tw-ml-0 sm:tw-w-full sm:tw-mt-2">
-          <SingleWaveDropVoteStats
-            currentRating={drop.context_profile_context?.rating ?? 0}
-            maxRating={maxRating}
-            label={voteLabel}
-          />
-        </div>
-
-        {/* Input controls - third item in mobile (second row), second in desktop (first row) */}
-        <div className="tw-order-3 sm:tw-order-2 tw-w-full sm:tw-w-auto sm:tw-flex-1 sm:tw-min-w-0 tw-h-14">
+      {/* Top row: Input + Submit */}
+      <div className="tw-flex tw-gap-2.5">
+        <div className="tw-flex-1 tw-min-w-0 tw-h-14">
           {isSliderMode ? (
             <SingleWaveDropVoteSlider
               voteValue={voteValue}
@@ -179,9 +149,7 @@ export const SingleWaveDropVoteContent: React.FC<
             />
           )}
         </div>
-
-        {/* Submit button - fourth item in mobile (third row), third in desktop (first row) */}
-        <div className="tw-order-4 sm:tw-order-3 tw-ml-auto sm:tw-ml-0 tw-flex-shrink-0">
+        <div className="tw-flex-shrink-0">
           <SingleWaveDropVoteSubmit
             drop={drop}
             newRating={Number(voteValue)}
@@ -189,6 +157,31 @@ export const SingleWaveDropVoteContent: React.FC<
             onVoteSuccess={onVoteSuccess}
           />
         </div>
+      </div>
+
+      {/* Bottom row: Stats + Toggle button */}
+      <div className="tw-flex tw-items-center tw-justify-between tw-mt-3">
+        <SingleWaveDropVoteStats
+          currentRating={drop.context_profile_context?.rating ?? 0}
+          maxRating={maxRating}
+          label={voteLabel}
+        />
+        <button
+          onClick={() => setIsSliderMode(!isSliderMode)}
+          className="tw-h-8 tw-px-2.5 tw-rounded-lg tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700
+                  tw-flex tw-items-center tw-justify-center tw-gap-1.5 tw-transition-all
+                  desktop-hover:hover:tw-bg-iron-700"
+          title="Switch mode"
+        >
+          <FontAwesomeIcon
+            icon={faExchange}
+            className="tw-text-iron-400 tw-size-3 tw-flex-shrink-0"
+            flip={isSliderMode ? "horizontal" : "vertical"}
+          />
+          <span className="tw-text-xs tw-font-medium tw-text-iron-400">
+            {isSliderMode ? "Numeric" : "Slider"}
+          </span>
+        </button>
       </div>
     </div>
   );

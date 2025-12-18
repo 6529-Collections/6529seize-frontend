@@ -458,7 +458,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [showOptions, setShowOptions] = useState(true);
 
-  // ResizeObserver for container-based responsiveness
   useEffect(() => {
     const container = actionsContainerRef.current;
     if (!container) return;
@@ -468,8 +467,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       if (entry) {
         const width = entry.contentRect.width;
         const isWide = width >= CONTAINER_WIDTH_THRESHOLD;
-        setIsWideContainer(isWide);
-        setShowOptions(isWide);
+        setIsWideContainer((prev) => (prev === isWide ? prev : isWide));
+        if (!isWide) {
+          setShowOptions(false);
+        }
       }
     });
 
@@ -925,29 +926,28 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }, delay);
   };
 
+  const focusMobileInput = () => {
+    if (!createDropInputRef.current) return;
+    requestAnimationFrame(() => {
+      focusInputWithDelay(300);
+    });
+  };
+
+  const focusDesktopInput = () => {
+    createDropInputRef.current?.focus();
+  };
+
   useEffect(() => {
     if (!activeDrop) {
       return;
     }
 
     if (isApp) {
-      // Mobile app: Complex focus handling to prevent keyboard issues
-      const focusInput = () => {
-        if (!createDropInputRef.current) return;
-
-        // Use requestAnimationFrame to wait for next paint
-        requestAnimationFrame(() => {
-          // Then focus after a delay for mobile stability
-          focusInputWithDelay(300);
-        });
-      };
-
-      const timer = setTimeout(focusInput, 200);
+      const timer = setTimeout(focusMobileInput, 200);
       return () => clearTimeout(timer);
     } else {
-      // Desktop/web: Keep original simple behavior
       const timer = setTimeout(() => {
-        createDropInputRef.current?.focus();
+        focusDesktopInput();
       }, 100);
       return () => clearTimeout(timer);
     }
@@ -1180,7 +1180,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         disabled={submitting}
       />
 
-      {/* Terms of Service Flow - Modal will render when needed */}
       <React.Suspense fallback={<div>Loading Terms...</div>}>
         <TermsSignatureFlow />
       </React.Suspense>
