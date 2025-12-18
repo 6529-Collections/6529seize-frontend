@@ -1,22 +1,23 @@
 "use client";
 
-import { getTimeAgoShort, numberWithCommas } from "@/helpers/Helpers";
-import Drop, {
-  DropInteractionParams,
-  DropLocation,
-} from "@/components/waves/drops/Drop";
-import { ActiveDropState } from "@/types/dropInteractionTypes";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
+import { DropInteractionParams } from "@/components/waves/drops/Drop";
 import { useEmoji } from "@/contexts/EmojiContext";
+import { numberWithCommas } from "@/helpers/Helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ActiveDropState } from "@/types/dropInteractionTypes";
 import type {
-  INotificationDropVoted,
   INotificationDropReacted,
+  INotificationDropVoted,
 } from "@/types/feed.types";
+import NotificationsFollowBtn from "../NotificationsFollowBtn";
+import NotificationDrop from "../subcomponents/NotificationDrop";
 import NotificationHeader from "../subcomponents/NotificationHeader";
-import { useWaveNavigation } from "../utils/navigationUtils";
+import NotificationTimestamp from "../subcomponents/NotificationTimestamp";
+import {
+  getIsDirectMessage,
+  useWaveNavigation,
+} from "../utils/navigationUtils";
 
 export const getNotificationVoteColor = (vote: number) => {
   if (vote > 0) return "tw-text-green";
@@ -41,10 +42,10 @@ export default function NotificationDropReacted({
   onQuote,
   onDropContentClick,
 }: Props) {
-  const { navigateToWave } = useWaveNavigation();
+  const { createReplyClickHandler, createQuoteClickHandler } =
+    useWaveNavigation();
   const { findCustomEmoji, findNativeEmoji } = useEmoji();
 
-  // Determine if this notification is a "vote" or a "reaction"
   const isVoted =
     (notification as INotificationDropVoted).additional_context.vote !==
     undefined;
@@ -57,7 +58,6 @@ export default function NotificationDropReacted({
   if (isVoted) {
     const voteValue = (notification as INotificationDropVoted)
       .additional_context.vote;
-    const timeAgo = getTimeAgoShort(notification.created_at);
 
     actionElement = (
       <>
@@ -71,12 +71,7 @@ export default function NotificationDropReacted({
           {voteValue > 0 && "+"}
           {numberWithCommas(voteValue)}
         </span>
-        <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
-          <span className="tw-font-bold tw-mr-1 tw-text-xs tw-text-iron-400">
-            &#8226;
-          </span>
-          {timeAgo}
-        </span>
+        <NotificationTimestamp createdAt={notification.created_at} />
       </>
     );
   } else if (isReacted) {
@@ -109,39 +104,21 @@ export default function NotificationDropReacted({
       return null;
     }
 
-    const timeAgo = getTimeAgoShort(notification.created_at);
-
     actionElement = (
       <>
         <span className="tw-text-iron-400 tw-font-normal tw-text-sm">
           reacted
         </span>
         {emojiNode}
-        <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
-          <span className="tw-font-bold tw-mr-1 tw-text-xs tw-text-iron-400">
-            &#8226;
-          </span>
-          {timeAgo}
-        </span>
+        <NotificationTimestamp createdAt={notification.created_at} />
       </>
     );
   } else {
     return null;
   }
 
-  const baseWave = notification.related_drops[0].wave as any;
-  const baseIsDm = baseWave?.chat?.scope?.group?.is_direct_message ?? false;
-
-  const onReplyClick = (serialNo: number) => {
-    navigateToWave(baseWave.id, serialNo, baseIsDm);
-  };
-
-  const onQuoteClick = (quote: ApiDrop) => {
-    const quoteWave = quote.wave as any;
-    const isDirectMessage =
-      quoteWave?.chat?.scope?.group?.is_direct_message ?? baseIsDm;
-    navigateToWave(quote.wave.id, quote.serial_no, isDirectMessage);
-  };
+  const drop = notification.related_drops[0];
+  const isDirectMessage = getIsDirectMessage(drop.wave);
 
   return (
     <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
@@ -152,29 +129,17 @@ export default function NotificationDropReacted({
             profile={notification.related_identity}
             size={UserFollowBtnSize.SMALL}
           />
-        }
-      >
+        }>
         {actionElement}
       </NotificationHeader>
 
-      <Drop
-        drop={{
-          type: DropSize.FULL,
-          ...notification.related_drops[0],
-          stableKey: "",
-          stableHash: "",
-        }}
-        previousDrop={null}
-        nextDrop={null}
-        showWaveInfo={true}
-        showReplyAndQuote={true}
+      <NotificationDrop
+        drop={drop}
         activeDrop={activeDrop}
-        location={DropLocation.MY_STREAM}
-        dropViewDropId={null}
         onReply={onReply}
         onQuote={onQuote}
-        onReplyClick={onReplyClick}
-        onQuoteClick={onQuoteClick}
+        onReplyClick={createReplyClickHandler(drop.wave.id, isDirectMessage)}
+        onQuoteClick={createQuoteClickHandler(isDirectMessage)}
         onDropContentClick={onDropContentClick}
       />
     </div>
