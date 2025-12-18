@@ -13,7 +13,7 @@ export const WAVE_LABELS: Record<ApiWaveType, string> = {
 
 export const WAVE_VOTE_STATS_LABELS = {
   YOUR_VOTES: "Your votes",
-  TOTAL: "Total available",
+  TOTAL: "Total",
 };
 
 export const WAVE_VOTING_LABELS: Record<ApiWaveCreditType, string> = {
