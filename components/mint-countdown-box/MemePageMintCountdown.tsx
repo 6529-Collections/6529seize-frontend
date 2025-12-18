@@ -7,6 +7,7 @@ import {
   ManifoldPhase,
   useMemesManifoldClaim,
 } from "@/hooks/useManifoldClaim";
+import { useEffect, useState } from "react";
 import MintCountdownBox from "./MintCountdownBox";
 
 export default function MemePageMintCountdown(
@@ -15,7 +16,16 @@ export default function MemePageMintCountdown(
     hide_mint_btn?: boolean;
   }>
 ) {
-  const manifoldClaim = useMemesManifoldClaim(props.nft_id);
+  const [isError, setIsError] = useState(false);
+  const manifoldClaim = useMemesManifoldClaim(props.nft_id, () => {
+    setIsError(true);
+  });
+
+  useEffect(() => {
+    if (manifoldClaim && !manifoldClaim.isError) {
+      setIsError(false);
+    }
+  }, [manifoldClaim]);
 
   const { isIos } = useCapacitor();
   const { country } = useCookieConsent();
@@ -66,6 +76,7 @@ export default function MemePageMintCountdown(
       }}
       hideMintBtn={hideMintBtn}
       small={props.hide_mint_btn}
+      isError={isError}
     />
   );
 }

@@ -3,6 +3,8 @@ export interface SubscriptionDetails {
   last_update: number;
   balance: number;
   automatic: boolean;
+  subscribe_all_editions: boolean;
+  subscription_eligibility_count: number;
 }
 
 export interface SubscriptionTopUp {
@@ -14,10 +16,12 @@ export interface SubscriptionTopUp {
 }
 
 export interface NFTSubscription {
+  id: number;
   consolidation_key: string;
   contract: string;
   token_id: number;
   subscribed: boolean;
+  subscribed_count: number;
 }
 
 export interface SubscriptionCounts {
@@ -46,11 +50,12 @@ export interface RedeemedSubscription {
   contract: string;
   token_id: number;
   address: string;
+  transaction: string;
+  transaction_date: string;
   consolidation_key: string;
   value: number;
   balance_after: number;
-  transaction: string;
-  transaction_date: string;
+  count: number;
 }
 
 export interface NFTFinalSubscription {
@@ -61,8 +66,9 @@ export interface NFTFinalSubscription {
   airdrop_address: string;
   balance: number;
   subscribed_at: string;
-  phase: string;
-  redeemed: number;
+  phase: string | null;
   phase_subscriptions: number;
   phase_position: number;
+  redeemed_count: number;
+  subscribed_count: number;
 }
