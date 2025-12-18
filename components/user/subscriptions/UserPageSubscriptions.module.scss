@@ -123,4 +123,13 @@
   appearance: none !important;
   -webkit-appearance: none !important;
   -moz-appearance: none !important;
+
+  &:focus-visible {
+    outline: 2px solid #406afe !important;
+    outline-offset: 2px !important;
+  }
+
+  &:focus:not(:focus-visible) {
+    outline: none !important;
+  }
 }
