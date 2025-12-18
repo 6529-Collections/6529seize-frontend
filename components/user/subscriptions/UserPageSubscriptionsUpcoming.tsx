@@ -111,7 +111,7 @@ function SubscriptionRow(
     readonly: boolean;
     minting_today?: boolean;
     first: boolean;
-    date: SeasonMintRow;
+    date: SeasonMintRow | null;
     refresh: () => void;
   }>
 ) {
@@ -263,30 +263,35 @@ function SubscriptionRow(
               <span className="tw-font-medium">
                 {props.title} #{props.subscription.token_id}{" "}
               </span>
-              <span>
-                - SZN{displayedSeasonNumberFromIndex(props.date.seasonIndex)}
-              </span>
-              {" / "}
-              {props.minting_today ? (
+              {props.date && (
                 <>
-                  <span
-                    data-tooltip-id={`minting-today-${props.subscription.token_id}`}>
-                    - Minting Today{" "}
-                    <FontAwesomeIcon icon={faInfoCircle} height={"20px"} />
+                  <span>
+                    - SZN
+                    {displayedSeasonNumberFromIndex(props.date.seasonIndex)}
                   </span>
-                  <Tooltip
-                    id={`minting-today-${props.subscription.token_id}`}
-                    place="right"
-                    style={{
-                      backgroundColor: "#f8f9fa",
-                      color: "#212529",
-                      padding: "4px 8px",
-                    }}>
-                    No changes allowed on minting day
-                  </Tooltip>
+                  {" / "}
+                  {props.minting_today ? (
+                    <>
+                      <span
+                        data-tooltip-id={`minting-today-${props.subscription.token_id}`}>
+                        - Minting Today{" "}
+                        <FontAwesomeIcon icon={faInfoCircle} height={"20px"} />
+                      </span>
+                      <Tooltip
+                        id={`minting-today-${props.subscription.token_id}`}
+                        place="right"
+                        style={{
+                          backgroundColor: "#f8f9fa",
+                          color: "#212529",
+                          padding: "4px 8px",
+                        }}>
+                        No changes allowed on minting day
+                      </Tooltip>
+                    </>
+                  ) : (
+                    <span>{formatFullDate(props.date.utcDay)}</span>
+                  )}
                 </>
-              ) : (
-                <span>{formatFullDate(props.date.utcDay)}</span>
               )}
             </span>
             {props.first && final?.phase && final?.phase_position > 0 && (

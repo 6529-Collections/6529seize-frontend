@@ -206,7 +206,7 @@ describe("UserPageSubscriptionsUpcoming", () => {
 
     renderComponent();
 
-    expect(screen.getByText("Minting Today")).toBeInTheDocument();
+    expect(screen.getByText(/Minting Today/)).toBeInTheDocument();
   });
 
   it("disables toggles in readonly mode", () => {

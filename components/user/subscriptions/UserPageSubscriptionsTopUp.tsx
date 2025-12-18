@@ -537,9 +537,10 @@ function CardCountOption(
     onSelect: () => void;
   }>
 ) {
+  const cardLabel = props.count > 1 ? "Cards" : "Card";
   const labelText = props.display
     ? `${props.display} - ${props.count.toLocaleString()} Cards`
-    : `${props.count.toLocaleString()} Card${props.count > 1 ? "s" : ""}`;
+    : `${props.count.toLocaleString()} ${cardLabel}`;
 
   return (
     <button
