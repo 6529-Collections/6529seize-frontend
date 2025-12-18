@@ -83,12 +83,9 @@ function useWaveMessagesStore() {
   }, [waveMessages]);
 
   // Stable function to get data for a key
-  const getData = useCallback(
-    (key: string): WaveMessages | undefined => {
-      return waveMessages[key];
-    },
-    [waveMessages]
-  ); // Dependency on store is fine here
+  const getData = useCallback((key: string): WaveMessages | undefined => {
+    return waveMessagesRef.current[key];
+  }, []);
 
   // Stable function to subscribe a listener for a specific key
   const subscribe = useCallback(
