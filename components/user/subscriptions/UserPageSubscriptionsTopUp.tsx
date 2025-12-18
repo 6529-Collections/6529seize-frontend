@@ -378,20 +378,16 @@ export default function UserPageSubscriptionsTopUp() {
             }`}
             onClick={handleSelectOther}>
             <Row className="d-flex align-items-center">
-              <Col xs={1} className="d-flex tw-justify-center">
-                <Form.Check
+              <Col xs={1} className="d-flex tw-justify-center tw-items-center">
+                <input
                   type="radio"
                   checked={selectedOption === "other"}
                   onChange={handleSelectOther}
-                  style={{
-                    accentColor: "#406AFE",
-                    width: "20px",
-                    height: "20px",
-                  }}
-                  className={`tw-scale-125 ${styles.radioButton}`}
+                  aria-label="Other card count"
+                  className={styles.radioInput}
                 />
               </Col>
-              <Col xs={11} className="d-flex align-items-center gap-2">
+              <Col xs={11} className="d-flex tw-items-center gap-2">
                 <span>Other</span>
                 <Form.Control
                   ref={otherInputRef}
@@ -399,6 +395,7 @@ export default function UserPageSubscriptionsTopUp() {
                   min={1}
                   placeholder="count"
                   value={memeCount}
+                  className={styles.countInput}
                   style={{ width: "100px", padding: "2px 10px" }}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -540,6 +537,10 @@ function CardCountOption(
     onSelect: () => void;
   }>
 ) {
+  const labelText = props.display
+    ? `${props.display} - ${props.count.toLocaleString()} Cards`
+    : `${props.count.toLocaleString()} Card${props.count > 1 ? "s" : ""}`;
+
   return (
     <button
       type="button"
@@ -552,20 +553,16 @@ function CardCountOption(
       }`}
       onClick={props.onSelect}>
       <Row className="d-flex align-items-center">
-        <Col xs={1} className="d-flex tw-justify-center">
-          <Form.Check
+        <Col xs={1} className="d-flex tw-justify-center tw-items-center">
+          <input
             type="radio"
             checked={props.selected}
             onChange={props.onSelect}
-            style={{
-              accentColor: "#406AFE",
-              width: "20px",
-              height: "20px",
-            }}
-            className={`tw-scale-125 ${styles.radioButton}`}
+            aria-label={labelText}
+            className={styles.radioInput}
           />
         </Col>
-        <Col xs={11} className="d-flex">
+        <Col xs={11} className="d-flex tw-items-center">
           {props.display && <span>{props.display}&nbsp;-&nbsp;</span>}
           {props.count.toLocaleString()} Card{props.count > 1 && "s"} (
           {numberWithCommasFromString(getEthForCards(props.count))} ETH)
