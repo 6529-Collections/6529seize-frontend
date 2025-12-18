@@ -193,9 +193,10 @@ function SubscriptionRow(
         type: "success",
       });
       props.refresh();
-    } catch (e: any) {
+    } catch (e: unknown) {
       setToast({
-        message: e?.message ?? "Failed to change token subscription.",
+        message:
+          typeof e === "string" ? e : "Failed to change token subscription.",
         type: "error",
       });
       return;
@@ -240,10 +241,11 @@ function SubscriptionRow(
         type: "success",
       });
       props.refresh();
-    } catch (e: any) {
+    } catch (e: unknown) {
       setSelectedCount(subscribedCount);
       setToast({
-        message: e?.message ?? "Failed to update subscription count.",
+        message:
+          typeof e === "string" ? e : "Failed to update subscription count.",
         type: "error",
       });
       return;
