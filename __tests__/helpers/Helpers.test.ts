@@ -74,7 +74,7 @@ describe("additional helper functions", () => {
   test("parseNftDescriptionToHtml replaces newlines and links", () => {
     const input = "line1\nhttps://example.com";
     expect(parseNftDescriptionToHtml(input)).toBe(
-      'line1<br /><a href=\'https://example.com\' target="blank" rel="noopener noreferrer">https://example.com</a>'
+      'line1<br /><a href="https://example.com" target="_blank" rel="noopener noreferrer">https://example.com</a>'
     );
   });
 
