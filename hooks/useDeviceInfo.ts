@@ -71,7 +71,19 @@ export default function useDeviceInfo(): DeviceInfo {
 
   useEffect(() => {
     const mq = window.matchMedia("(pointer: coarse)");
-    const update = () => setInfo(getInfo());
+    const update = () =>
+      setInfo((prev) => {
+        const next = getInfo();
+        if (
+          prev.isMobileDevice === next.isMobileDevice &&
+          prev.hasTouchScreen === next.hasTouchScreen &&
+          prev.isApp === next.isApp &&
+          prev.isAppleMobile === next.isAppleMobile
+        ) {
+          return prev;
+        }
+        return next;
+      });
 
     mq.addEventListener("change", update);
     window.addEventListener("resize", update);
