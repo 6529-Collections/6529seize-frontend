@@ -12,7 +12,7 @@ describe('SingleWaveDropVoteInput', () => {
     voteValue: 0,
     minValue: -1000,
     maxValue: 1000,
-    creditType: ApiWaveCreditType.Rep,
+    label: "Rep",
     setVoteValue: jest.fn(),
     onSubmit: jest.fn(),
   };
@@ -37,8 +37,8 @@ describe('SingleWaveDropVoteInput', () => {
   });
 
   it('displays credit type in input field', () => {
-    render(<SingleWaveDropVoteInput {...defaultProps} creditType={ApiWaveCreditType.Tdh} />);
-    
+    render(<SingleWaveDropVoteInput {...defaultProps} label="TDH" />);
+
     expect(screen.getByText('TDH')).toBeInTheDocument();
   });
 
