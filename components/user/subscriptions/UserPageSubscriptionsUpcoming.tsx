@@ -326,7 +326,8 @@ function SubscriptionRow(
                       setSelectedCount(value);
                       handleUpdateSubscriptionCount(value);
                     }}
-                    style={{ minWidth: "3ch" }}>
+                    style={{ minWidth: "3ch" }}
+                    aria-label={`Select subscription quantity for ${props.title}`}>
                     {Array.from(
                       { length: props.eligibilityCount },
                       (_, i) => i + 1
