@@ -29,6 +29,6 @@ describe('WaveManualOutcome', () => {
     expect(screen.getByText('View more')).toBeInTheDocument();
     await user.click(screen.getByText('View more'));
     expect(screen.queryByText('View more')).toBeNull();
-    expect(screen.getByText('350')).toBeInTheDocument();
+    expect(screen.getByText('D')).toBeInTheDocument();
   });
 });

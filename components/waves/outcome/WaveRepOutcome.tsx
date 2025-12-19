@@ -21,8 +21,16 @@ export const WaveRepOutcome: FC<WaveRepOutcomeProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showAll, setShowAll] = useState(false);
-  const { items, totalCount, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    distribution;
+  const {
+    items,
+    totalCount,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    isLoading,
+    isError,
+    errorMessage,
+  } = distribution;
   const winnersCount = totalCount;
   const visibleItems = showAll
     ? items
@@ -67,8 +75,14 @@ export const WaveRepOutcome: FC<WaveRepOutcomeProps> = ({
                 Rep
               </div>
               <div className="tw-text-sm tw-text-[#C3B5D9]/80">
-                {formatNumberWithCommas(winnersCount)}{" "}
-                {winnersCount === 1 ? "Winner" : "Winners"}
+                {isLoading ? (
+                  <span className="tw-animate-pulse tw-bg-white/20 tw-h-4 tw-w-12 tw-rounded tw-inline-block" />
+                ) : (
+                  <>
+                    {formatNumberWithCommas(winnersCount)}{" "}
+                    {winnersCount === 1 ? "Winner" : "Winners"}
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -133,11 +147,30 @@ export const WaveRepOutcome: FC<WaveRepOutcomeProps> = ({
                 </div>
               ))}
 
+              {isLoading && (
+                <div className="tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-text-iron-500">
+                  Loading winners...
+                </div>
+              )}
+
+              {isError && (
+                <div className="tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-text-red-400">
+                  {errorMessage || "Failed to load winners"}
+                </div>
+              )}
+
+              {!isLoading && !isError && items.length === 0 && (
+                <div className="tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-text-iron-500">
+                  No winners yet
+                </div>
+              )}
+
               {shouldShowMore && (
                 <button
                   className="tw-border-0 tw-w-full tw-px-4 tw-py-3 tw-text-left tw-bg-iron-900 tw-text-[#C3B5D9]/80 tw-text-sm hover:tw-text-[#C3B5D9] tw-transition-all tw-duration-300"
-                  onClick={onViewMore}>
-                  <span>View more</span>
+                  onClick={onViewMore}
+                  disabled={isFetchingNextPage}>
+                  <span>{isFetchingNextPage ? "Loading..." : "View more"}</span>
                   <span className="tw-ml-1 tw-text-iron-400">•</span>
                   <span className="tw-ml-1 tw-text-iron-400">
                     {remainingCount} more

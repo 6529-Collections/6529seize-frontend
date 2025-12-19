@@ -21,8 +21,16 @@ export const WaveManualOutcome: FC<WaveManualOutcomeProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showAll, setShowAll] = useState(false);
-  const { items, totalCount, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    distribution;
+  const {
+    items,
+    totalCount,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    isLoading,
+    isError,
+    errorMessage,
+  } = distribution;
   const winnersCount = totalCount;
   const visibleItems = showAll
     ? items
@@ -59,8 +67,14 @@ export const WaveManualOutcome: FC<WaveManualOutcomeProps> = ({
                 Manual
               </div>
               <div className="tw-text-sm tw-text-amber-300/80">
-                {formatNumberWithCommas(winnersCount)}{" "}
-                {winnersCount === 1 ? "Winner" : "Winners"}
+                {isLoading ? (
+                  <span className="tw-animate-pulse tw-bg-white/20 tw-h-4 tw-w-12 tw-rounded tw-inline-block" />
+                ) : (
+                  <>
+                    {formatNumberWithCommas(winnersCount)}{" "}
+                    {winnersCount === 1 ? "Winner" : "Winners"}
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -104,11 +118,7 @@ export const WaveManualOutcome: FC<WaveManualOutcomeProps> = ({
             <div className="tw-divide-y tw-divide-iron-800/30 tw-divide-solid tw-divide-x-0">
               {visibleItems.map((item, i) => {
                 const itemLabel =
-                  item.amount === 0
-                    ? "-"
-                    : item.amount != null
-                      ? formatNumberWithCommas(item.amount)
-                      : item.description ?? "";
+                  item.amount === 0 ? "-" : item.description ?? "";
 
                 return (
                   <div
@@ -125,6 +135,24 @@ export const WaveManualOutcome: FC<WaveManualOutcomeProps> = ({
                   </div>
                 );
               })}
+
+              {isLoading && (
+                <div className="tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-text-iron-500">
+                  Loading winners...
+                </div>
+              )}
+
+              {isError && (
+                <div className="tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-text-red-400">
+                  {errorMessage || "Failed to load winners"}
+                </div>
+              )}
+
+              {!isLoading && !isError && items.length === 0 && (
+                <div className="tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-text-iron-500">
+                  No winners yet
+                </div>
+              )}
 
               {shouldShowMore && (
                 <button

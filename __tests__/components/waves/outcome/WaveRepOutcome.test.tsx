@@ -42,4 +42,20 @@ describe('WaveRepOutcome', () => {
     fireEvent.click(screen.getByText(/View more/i));
     expect(screen.getByText('40 Rep')).toBeInTheDocument();
   });
+
+  it('shows loading state when fetching next page', () => {
+    const loadingDistribution = {
+      ...distribution,
+      hasNextPage: true,
+      isFetchingNextPage: true,
+    };
+    render(<WaveRepOutcome outcome={outcome} distribution={loadingDistribution} />);
+
+    fireEvent.click(screen.getByRole('button')); // Expand accordion
+
+    const viewMoreBtn = screen.getByRole('button', { name: /loading\.\.\./i });
+    expect(viewMoreBtn).toBeInTheDocument();
+    expect(viewMoreBtn).toBeDisabled();
+    expect(screen.getByText(/1 more/i)).toBeInTheDocument();
+  });
 });

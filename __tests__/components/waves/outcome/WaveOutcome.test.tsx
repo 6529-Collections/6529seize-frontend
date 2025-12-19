@@ -21,6 +21,9 @@ jest.mock("@/hooks/waves/useWaveOutcomeDistributionQuery", () => ({
     hasNextPage: false,
     isFetchingNextPage: false,
     fetchNextPage: jest.fn(),
+    isLoading: false,
+    isError: false,
+    errorMessage: undefined,
   }),
 }));
 

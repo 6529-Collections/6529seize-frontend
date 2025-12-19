@@ -123,6 +123,9 @@ export interface WaveOutcomeDistributionState {
   readonly hasNextPage: boolean;
   readonly isFetchingNextPage: boolean;
   readonly fetchNextPage: () => void;
+  readonly isLoading: boolean;
+  readonly isError: boolean;
+  readonly errorMessage?: string;
 }
 
 export interface CreateWaveConfig {
@@ -144,11 +147,6 @@ export enum CreateWaveStepStatus {
   PENDING = "PENDING",
 }
 
-interface SearchWavesParams {
-  readonly limit: number;
-  readonly serial_no_less_than?: number;
-  readonly group_id?: string;
-}
 export interface WavesOverviewParams {
   limit: number;
   offset: number;

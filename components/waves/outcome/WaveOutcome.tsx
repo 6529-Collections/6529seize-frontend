@@ -27,6 +27,9 @@ export const WaveOutcome: FC<WaveOutcomeProps> = ({ waveId, outcome }) => {
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
+    isLoading,
+    isError,
+    errorMessage,
   } = useWaveOutcomeDistributionQuery({
     waveId,
     outcomeIndex: outcome.index,
@@ -38,8 +41,20 @@ export const WaveOutcome: FC<WaveOutcomeProps> = ({ waveId, outcome }) => {
       hasNextPage: Boolean(hasNextPage),
       isFetchingNextPage,
       fetchNextPage,
+      isLoading,
+      isError,
+      errorMessage,
     }),
-    [items, totalCount, hasNextPage, isFetchingNextPage, fetchNextPage]
+    [
+      items,
+      totalCount,
+      hasNextPage,
+      isFetchingNextPage,
+      fetchNextPage,
+      isLoading,
+      isError,
+      errorMessage,
+    ]
   );
 
   const getOutcomeType = (): OutcomeType => {
