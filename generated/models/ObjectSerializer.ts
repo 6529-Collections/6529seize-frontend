@@ -46,6 +46,8 @@ export * from '../models/ApiCreateNewWaveVotingConfig';
 export * from '../models/ApiCreateOrUpdateProfileRequest';
 export * from '../models/ApiCreateWaveConfig';
 export * from '../models/ApiCreateWaveDropRequest';
+export * from '../models/ApiCreateWaveOutcome';
+export * from '../models/ApiCreateWaveOutcomeDistributionItem';
 export * from '../models/ApiDrop';
 export * from '../models/ApiDropAndDropVote';
 export * from '../models/ApiDropContextProfileContext';
@@ -159,8 +161,11 @@ export * from '../models/ApiWaveMin';
 export * from '../models/ApiWaveOutcome';
 export * from '../models/ApiWaveOutcomeCredit';
 export * from '../models/ApiWaveOutcomeDistributionItem';
+export * from '../models/ApiWaveOutcomeDistributionItemsPage';
+export * from '../models/ApiWaveOutcomeOld';
 export * from '../models/ApiWaveOutcomeSubType';
 export * from '../models/ApiWaveOutcomeType';
+export * from '../models/ApiWaveOutcomesPage';
 export * from '../models/ApiWaveParticipationConfig';
 export * from '../models/ApiWaveParticipationRequirement';
 export * from '../models/ApiWaveRequiredMetadata';
@@ -243,6 +248,8 @@ import { ApiCreateNewWaveVotingConfig         } from '../models/ApiCreateNewWave
 import { ApiCreateOrUpdateProfileRequest        } from '../models/ApiCreateOrUpdateProfileRequest';
 import { ApiCreateWaveConfig        } from '../models/ApiCreateWaveConfig';
 import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
+import { ApiCreateWaveOutcome        } from '../models/ApiCreateWaveOutcome';
+import { ApiCreateWaveOutcomeDistributionItem } from '../models/ApiCreateWaveOutcomeDistributionItem';
 import { ApiDrop                          } from '../models/ApiDrop';
 import { ApiDropAndDropVote } from '../models/ApiDropAndDropVote';
 import { ApiDropContextProfileContext } from '../models/ApiDropContextProfileContext';
@@ -356,8 +363,11 @@ import { ApiWaveMin                    } from '../models/ApiWaveMin';
 import { ApiWaveOutcome        } from '../models/ApiWaveOutcome';
 import { ApiWaveOutcomeCredit } from '../models/ApiWaveOutcomeCredit';
 import { ApiWaveOutcomeDistributionItem } from '../models/ApiWaveOutcomeDistributionItem';
+import { ApiWaveOutcomeDistributionItemsPage } from '../models/ApiWaveOutcomeDistributionItemsPage';
+import { ApiWaveOutcomeOld         } from '../models/ApiWaveOutcomeOld';
 import { ApiWaveOutcomeSubType } from '../models/ApiWaveOutcomeSubType';
 import { ApiWaveOutcomeType } from '../models/ApiWaveOutcomeType';
+import { ApiWaveOutcomesPage } from '../models/ApiWaveOutcomesPage';
 import { ApiWaveParticipationConfig } from '../models/ApiWaveParticipationConfig';
 import { ApiWaveParticipationRequirement } from '../models/ApiWaveParticipationRequirement';
 import { ApiWaveRequiredMetadata   } from '../models/ApiWaveRequiredMetadata';
@@ -485,6 +495,8 @@ let typeMap: {[index: string]: any} = {
     "ApiCreateOrUpdateProfileRequest": ApiCreateOrUpdateProfileRequest,
     "ApiCreateWaveConfig": ApiCreateWaveConfig,
     "ApiCreateWaveDropRequest": ApiCreateWaveDropRequest,
+    "ApiCreateWaveOutcome": ApiCreateWaveOutcome,
+    "ApiCreateWaveOutcomeDistributionItem": ApiCreateWaveOutcomeDistributionItem,
     "ApiDrop": ApiDrop,
     "ApiDropAndDropVote": ApiDropAndDropVote,
     "ApiDropContextProfileContext": ApiDropContextProfileContext,
@@ -581,6 +593,9 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveMin": ApiWaveMin,
     "ApiWaveOutcome": ApiWaveOutcome,
     "ApiWaveOutcomeDistributionItem": ApiWaveOutcomeDistributionItem,
+    "ApiWaveOutcomeDistributionItemsPage": ApiWaveOutcomeDistributionItemsPage,
+    "ApiWaveOutcomeOld": ApiWaveOutcomeOld,
+    "ApiWaveOutcomesPage": ApiWaveOutcomesPage,
     "ApiWaveParticipationConfig": ApiWaveParticipationConfig,
     "ApiWaveRequiredMetadata": ApiWaveRequiredMetadata,
     "ApiWaveScope": ApiWaveScope,

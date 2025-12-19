@@ -3,7 +3,7 @@ import { ApiCreateWaveDropRequest } from "@/generated/models/ApiCreateWaveDropRe
 import { ApiIntRange } from "@/generated/models/ApiIntRange";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
-import { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
+import { ApiWaveOutcomeOld } from "@/generated/models/ApiWaveOutcomeOld";
 import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeSubType } from "@/generated/models/ApiWaveOutcomeSubType";
 import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
@@ -148,8 +148,9 @@ const getRankOutcomes = ({
   config,
 }: {
   readonly config: CreateWaveConfig;
-}): ApiWaveOutcome[] => {
-  const outcomes: ApiWaveOutcome[] = [];
+}): ApiWaveOutcomeOld[] => {
+  // TODO: add proper typing
+  const outcomes: any[] = [];
   for (const outcome of config.outcomes) {
     if (
       outcome.type === CreateWaveOutcomeType.MANUAL &&
@@ -205,8 +206,9 @@ const getApproveOutcomes = ({
   config,
 }: {
   readonly config: CreateWaveConfig;
-}): ApiWaveOutcome[] => {
-  const outcomes: ApiWaveOutcome[] = [];
+}): ApiWaveOutcomeOld[] => {
+  // TODO: add proper typing
+  const outcomes: any[] = [];
   for (const outcome of config.outcomes) {
     if (
       outcome.type === CreateWaveOutcomeType.MANUAL &&
@@ -247,7 +249,7 @@ const getOutcomes = ({
   config,
 }: {
   readonly config: CreateWaveConfig;
-}): ApiWaveOutcome[] => {
+}): ApiWaveOutcomeOld[] => {
   const waveType = config.overview.type;
   switch (waveType) {
     case ApiWaveType.Chat:
