@@ -24,16 +24,22 @@
   padding: 10px;
 }
 
-.nftSubscriptionsTable {
-  td {
-    color: #fff !important;
-    border-top: 1px solid rgb(55, 55, 61) !important;
-    border-bottom: 1px solid rgb(55, 55, 61) !important;
-    padding: 10px 20px;
-    white-space: nowrap;
+.nftSubscriptionsListItem {
+  color: #ddd !important;
+  background-color: #1c1c21 !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  padding: 10px 20px !important;
+
+  &.odd {
+    background-color: #131316 !important;
   }
 
-  tr:last-child td {
+  &.even {
+    background-color: #0c0c0d !important;
+  }
+
+  &.last {
     border-bottom: none !important;
     padding: 5px 20px;
   }
@@ -70,7 +76,93 @@
 }
 
 .sendBtn {
-  padding-top: 2px !important;
-  padding-bottom: 2px !important;
-  width: 100%;
+  padding: 12px 32px !important;
+  min-width: 120px;
+  width: auto;
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
+  color: white !important;
+  font-weight: 600 !important;
+  font-size: 16px !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+
+  &:hover:not(:disabled) {
+    background-color: #1d4ed8 !important;
+    border-color: #1d4ed8 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.countInput {
+  &:focus {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25) !important;
+    outline: none !important;
+  }
+}
+
+.radioInput {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  cursor: pointer;
+  border: 2px solid #6b7280;
+  border-radius: 50%;
+  background-color: transparent;
+  position: relative;
+  transition: border-color 0.15s ease;
+
+  &:checked {
+    border-color: #2563eb;
+    border-width: 2px;
+    background-color: #2563eb;
+  }
+
+  &:checked::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: white;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+  }
+}
+
+.cardCountOption {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+
+  &:focus-visible {
+    outline: 2px solid #2563eb !important;
+    outline-offset: 2px !important;
+  }
+
+  &:focus:not(:focus-visible) {
+    outline: none !important;
+  }
 }

@@ -36,7 +36,7 @@ export default function UserPageBrainWrapper({
   });
 
   if (!showWaves) {
-    return null;
+    return <div className="tw-min-h-screen" />;
   }
 
   return <UserPageDrops profile={profile} />;
