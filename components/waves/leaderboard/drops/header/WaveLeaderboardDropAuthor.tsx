@@ -9,6 +9,7 @@ import UserCICAndLevel, {
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 
 interface WaveLeaderboardDropAuthorProps {
   readonly drop: ExtendedDrop;
@@ -30,7 +31,7 @@ export const WaveLeaderboardDropAuthor: React.FC<
               <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-lg tw-overflow-hidden tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
                 <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-overflow-hidden">
                   <img
-                    src={drop.author.pfp}
+                    src={resolveIpfsUrlSync(drop.author.pfp)}
                     alt="Profile picture"
                     className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
                   />
