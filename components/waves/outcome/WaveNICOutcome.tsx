@@ -1,40 +1,51 @@
 "use client";
 
-import { FC, useEffect, useState } from "react";
-import { ApiWaveOutcomeOld } from "@/generated/models/ApiWaveOutcomeOld";
+import { FC, useState } from "react";
+import type { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
+import type { ApiWaveOutcomeDistributionItem } from "@/generated/models/ApiWaveOutcomeDistributionItem";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { motion, AnimatePresence } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAddressCard } from "@fortawesome/free-regular-svg-icons";
 
 interface WaveNICOutcomeProps {
-  readonly outcome: ApiWaveOutcomeOld;
+  readonly outcome: ApiWaveOutcome;
+  readonly distribution: {
+    readonly items: ApiWaveOutcomeDistributionItem[];
+    readonly totalCount: number;
+    readonly hasNextPage: boolean;
+    readonly isFetchingNextPage: boolean;
+    readonly fetchNextPage: () => void;
+  };
 }
 
 const DEFAULT_AMOUNTS_TO_SHOW = 3;
 
-export const WaveNICOutcome: FC<WaveNICOutcomeProps> = ({ outcome }) => {
+export const WaveNICOutcome: FC<WaveNICOutcomeProps> = ({
+  outcome,
+  distribution,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showAll, setShowAll] = useState(false);
-  const winnersCount =
-    outcome.distribution?.filter((d) => !!d.amount).length ?? 0;
-  const totalCount = outcome.distribution?.length ?? 0;
+  const { items, totalCount, hasNextPage, isFetchingNextPage, fetchNextPage } =
+    distribution;
+  const winnersCount = totalCount;
+  const visibleItems = showAll
+    ? items
+    : items.slice(0, DEFAULT_AMOUNTS_TO_SHOW);
+  const amounts = visibleItems.map((item) => item.amount ?? 0);
+  const remainingCount = Math.max(totalCount - items.length, 0);
+  const shouldShowMore =
+    hasNextPage || (!showAll && items.length > DEFAULT_AMOUNTS_TO_SHOW);
 
-  const getAmounts = (): number[] => {
-    if (showAll) {
-      return outcome.distribution?.map((d) => d?.amount ?? 0) ?? [];
+  const onViewMore = () => {
+    if (!showAll) {
+      setShowAll(true);
     }
-    return (
-      outcome.distribution
-        ?.slice(0, DEFAULT_AMOUNTS_TO_SHOW)
-        .map((d) => d?.amount ?? 0) ?? []
-    );
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
   };
-  const [amounts, setAmounts] = useState<number[]>(getAmounts());
-
-  useEffect(() => {
-    setAmounts(getAmounts());
-  }, [showAll]);
 
   return (
     <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-300 desktop-hover:hover:tw-border-iron-700">
@@ -111,14 +122,14 @@ export const WaveNICOutcome: FC<WaveNICOutcomeProps> = ({ outcome }) => {
                 </div>
               ))}
 
-              {!showAll && totalCount > DEFAULT_AMOUNTS_TO_SHOW && (
+              {shouldShowMore && (
                 <button
-                  onClick={() => setShowAll(true)}
+                  onClick={onViewMore}
                   className="tw-border-0 tw-w-full tw-px-4 tw-py-3 tw-text-left tw-bg-iron-900 tw-text-[#A4C2DB]/80 tw-text-sm hover:tw-text-[#A4C2DB] tw-transition-all tw-duration-300">
                   <span>View more</span>
                   <span className="tw-ml-1 tw-text-iron-400">•</span>
                   <span className="tw-ml-1 tw-text-iron-400">
-                    {totalCount - DEFAULT_AMOUNTS_TO_SHOW} more
+                    {remainingCount} more
                   </span>
                 </button>
               )}
