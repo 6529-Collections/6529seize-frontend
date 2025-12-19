@@ -16,7 +16,7 @@ import { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisi
 import { ApiCreateNewWaveVotingConfig } from '../models/ApiCreateNewWaveVotingConfig';
 import { ApiCreateWaveConfig } from '../models/ApiCreateWaveConfig';
 import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
-import { ApiWaveOutcome } from '../models/ApiWaveOutcome';
+import { ApiCreateWaveOutcome } from '../models/ApiCreateWaveOutcome';
 import { HttpFile } from '../http/http';
 
 export class ApiCreateNewWave {
@@ -34,7 +34,7 @@ export class ApiCreateNewWave {
     'participation': ApiCreateNewWaveParticipationConfig;
     'chat': ApiCreateNewWaveChatConfig;
     'wave': ApiCreateWaveConfig;
-    'outcomes': Array<ApiWaveOutcome>;
+    'outcomes': Array<ApiCreateWaveOutcome>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -92,7 +92,7 @@ export class ApiCreateNewWave {
         {
             "name": "outcomes",
             "baseName": "outcomes",
-            "type": "Array<ApiWaveOutcome>",
+            "type": "Array<ApiCreateWaveOutcome>",
             "format": ""
         }    ];
 

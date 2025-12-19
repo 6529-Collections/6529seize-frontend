@@ -1,6 +1,6 @@
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
+// import { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiPost } from "@/services/api/common-api";
 import { CreateWaveStepStatus } from "@/types/waves.types";
@@ -23,7 +23,8 @@ export const getCreateWaveStepStatus = ({
 
 export const convertWaveToUpdateWave = (
   wave: ApiWave
-): ApiUpdateWaveRequest => ({
+  // TODO: add proper typing
+): any => ({
   name: wave.name,
   picture: wave.picture,
   voting: {

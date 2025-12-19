@@ -10,19 +10,20 @@
  * Do not edit the class manually.
  */
 
+import { ApiCreateWaveOutcomeDistributionItem } from '../models/ApiCreateWaveOutcomeDistributionItem';
 import { ApiWaveOutcomeCredit } from '../models/ApiWaveOutcomeCredit';
 import { ApiWaveOutcomeSubType } from '../models/ApiWaveOutcomeSubType';
 import { ApiWaveOutcomeType } from '../models/ApiWaveOutcomeType';
 import { HttpFile } from '../http/http';
 
-export class ApiWaveOutcome {
+export class ApiCreateWaveOutcome {
     'type': ApiWaveOutcomeType;
     'subtype'?: ApiWaveOutcomeSubType;
     'description': string;
     'credit'?: ApiWaveOutcomeCredit;
     'rep_category'?: string;
     'amount'?: number;
-    'index': number;
+    'distribution'?: Array<ApiCreateWaveOutcomeDistributionItem>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -66,14 +67,14 @@ export class ApiWaveOutcome {
             "format": "int64"
         },
         {
-            "name": "index",
-            "baseName": "index",
-            "type": "number",
-            "format": "int64"
+            "name": "distribution",
+            "baseName": "distribution",
+            "type": "Array<ApiCreateWaveOutcomeDistributionItem>",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiWaveOutcome.attributeTypeMap;
+        return ApiCreateWaveOutcome.attributeTypeMap;
     }
 
     public constructor() {

@@ -12,8 +12,7 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiWaveOutcomeDistributionItem {
-    'index': number;
+export class ApiCreateWaveOutcomeDistributionItem {
     'amount'?: number | null;
     'description'?: string | null;
 
@@ -22,12 +21,6 @@ export class ApiWaveOutcomeDistributionItem {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
-        {
-            "name": "index",
-            "baseName": "index",
-            "type": "number",
-            "format": "int64"
-        },
         {
             "name": "amount",
             "baseName": "amount",
@@ -42,7 +35,7 @@ export class ApiWaveOutcomeDistributionItem {
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiWaveOutcomeDistributionItem.attributeTypeMap;
+        return ApiCreateWaveOutcomeDistributionItem.attributeTypeMap;
     }
 
     public constructor() {
