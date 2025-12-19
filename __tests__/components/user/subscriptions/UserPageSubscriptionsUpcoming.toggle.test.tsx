@@ -9,7 +9,10 @@ jest.mock("react-toggle", () => (props: any) => (
   <input data-testid="toggle" type="checkbox" onChange={props.onChange} />
 ));
 
-jest.mock("@tanstack/react-query", () => ({ useQuery: jest.fn() }));
+jest.mock("@tanstack/react-query", () => ({
+  useQuery: jest.fn(),
+  useQueryClient: () => ({ invalidateQueries: jest.fn() }),
+}));
 
 const mockUpcomingRows = [
   {

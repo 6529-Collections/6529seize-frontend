@@ -6,8 +6,13 @@ import { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { useQuery } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 
+const mockInvalidateQueries = jest.fn();
+
 jest.mock("@tanstack/react-query", () => ({
   useQuery: jest.fn(),
+  useQueryClient: () => ({
+    invalidateQueries: mockInvalidateQueries,
+  }),
 }));
 
 const mockUpcomingRows = [
