@@ -5,7 +5,6 @@ import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { SingleWaveDropInfoDetails } from "./SingleWaveDropInfoDetails";
 import { SingleWaveDropInfoAuthorSection } from "./SingleWaveDropInfoAuthorSection";
-import { SingleWaveDropInfoActions } from "./SingleWaveDropInfoActions";
 import WaveDropTime from "../drops/time/WaveDropTime";
 import { SingleWaveDropPosition } from "./SingleWaveDropPosition";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -13,7 +12,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { SingleWaveDropVotes } from "./SingleWaveDropVotes";
 import { faCompress, faTrophy } from "@fortawesome/free-solid-svg-icons";
 import { faAddressCard, faStar } from "@fortawesome/free-regular-svg-icons";
-import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { WinnerBadge } from "./WinnerBadge";
@@ -25,12 +23,14 @@ import Download from "@/components/download/Download";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
+import VotingModal from "@/components/voting/VotingModal";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
 
 interface MemesSingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
   readonly wave: ApiWave | null;
-  readonly isChatOpen: boolean;
-  readonly onToggleChat: () => void;
 }
 
 const calculateOutcomes = (drop: ExtendedDrop, wave: ApiWave | null) => {
@@ -61,15 +61,15 @@ const calculateOutcomes = (drop: ExtendedDrop, wave: ApiWave | null) => {
 
 export const MemesSingleWaveDropInfoPanel: React.FC<
   MemesSingleWaveDropInfoPanelProps
-> = ({ drop, wave, isChatOpen, onToggleChat }) => {
+> = ({ drop, wave }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const { isWinner, canDelete } = useDropInteractionRules(drop);
+  const [isVotingOpen, setIsVotingOpen] = useState(false);
+  const { isWinner, canDelete, canShowVote } = useDropInteractionRules(drop);
 
   const { nicTotal, repTotal, manualOutcomes } = useMemo(
     () => calculateOutcomes(drop, wave),
     [drop, wave]
   );
-  const hasOutcomes = nicTotal > 0 || repTotal > 0 || manualOutcomes.length > 0;
 
   const title = useMemo(
     () =>
@@ -115,148 +115,173 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
 
   return (
     <>
-      <div className="tw-w-full tw-h-full tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
-        <div className="tw-w-full tw-pt-20 lg:tw-pt-24 tw-px-10 tw-pb-8">
-          <div className="tw-flex tw-flex-col tw-gap-3 tw-mb-6">
-            <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
-              <h1 className="tw-text-xl lg:tw-text-3xl tw-font-semibold tw-text-iron-200 tw-mb-0 tw-tracking-tight">
-                {title}
-              </h1>
-              <button
-                onClick={onToggleChat}
-                className="tw-hidden lg:tw-flex tw-items-center tw-gap-2 tw-text-white/50 hover:tw-text-white tw-transition-colors tw-bg-transparent tw-border-0 tw-flex-shrink-0"
-              >
-                <ChatBubbleLeftRightIcon className="tw-w-5 tw-h-5" />
-                <span className="tw-text-sm tw-font-medium">
-                  {isChatOpen ? "Hide" : "Show"} Chat
-                </span>
-              </button>
-            </div>
-            <div className="tw-flex tw-items-center tw-gap-6 tw-mt-3 tw-mb-8">
-              <SingleWaveDropInfoAuthorSection drop={drop} />
-              <div className="tw-w-px tw-h-8 tw-bg-iron-700 tw-flex-shrink-0"></div>
-              <div className="tw-flex tw-items-center tw-gap-x-3">
-                <WaveDropTime timestamp={drop.created_at} />
-                {drop?.drop_type === ApiDropType.Participatory && (
-                  <SingleWaveDropPosition rank={drop.rank} />
+      <div className="tw-w-full tw-h-full tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-scroll-smooth">
+        <div className="tw-w-full tw-min-h-screen tw-flex tw-flex-col tw-pt-16">
+          <div className="tw-flex-1 tw-flex tw-items-center tw-justify-center tw-px-6 lg:tw-px-20 tw-py-8">
+            {artworkMedia && (
+              <div className="tw-w-full tw-max-w-4xl tw-mx-auto tw-h-full tw-flex tw-items-center tw-justify-center">
+                <div className="tw-relative tw-w-full tw-aspect-[4/5] tw-max-h-[90vh]">
+                  <DropListItemContentMedia
+                    media_mime_type={artworkMedia.mime_type}
+                    media_url={artworkMedia.url}
+                    isCompetitionDrop={true}
+                    imageScale={ImageScale.AUTOx1080}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="tw-px-6 lg:tw-px-20 tw-mt-6">
+            <div className="tw-max-w-3xl tw-mx-auto tw-w-full">
+              <div className="tw-flex tw-justify-center tw-mb-8">
+                <div className="tw-flex tw-items-center tw-gap-3 tw-p-1.5 tw-bg-iron-950 tw-border tw-border-solid tw-border-white/10 tw-rounded-lg tw-shadow-2xl tw-transition-transform hover:tw-scale-[1.01]">
+                  <div className="tw-px-4 tw-flex tw-flex-col tw-justify-center tw-cursor-default tw-border-r tw-border-solid tw-border-white/5 tw-border-y-0 tw-border-l-0">
+                    <span className="tw-text-xs tw-text-white/40 tw-font-normal tw-mb-0.5">
+                      Current
+                    </span>
+                    <div className="tw-flex tw-items-baseline tw-gap-1.5">
+                      <span className="tw-text-base tw-font-bold tw-text-white tw-tabular-nums">
+                        {formatNumberWithCommas(drop.rating)}
+                      </span>
+                      <span className="tw-text-[10px] tw-text-white/30 tw-font-medium">
+                        {WAVE_VOTING_LABELS[drop.wave.voting_credit_type]}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="tw-px-4 tw-flex tw-flex-col tw-justify-center tw-cursor-default">
+                    <span className="tw-text-xs tw-text-white/40 tw-font-normal tw-mb-0.5">
+                      Projected
+                    </span>
+                    <div className="tw-flex tw-items-baseline tw-gap-1.5">
+                      <span className="tw-text-base tw-font-bold tw-text-emerald-400 tw-tabular-nums">
+                        {formatNumberWithCommas(drop.rating_prediction)}
+                      </span>
+                      <span className="tw-text-[10px] tw-text-white/30 tw-font-medium">
+                        {WAVE_VOTING_LABELS[drop.wave.voting_credit_type]}
+                      </span>
+                    </div>
+                  </div>
+
+                  {canShowVote && (
+                    <PrimaryButton
+                      loading={false}
+                      disabled={false}
+                      onClicked={() => setIsVotingOpen(true)}
+                      padding="tw-px-6 tw-py-3"
+                    >
+                      Vote
+                    </PrimaryButton>
+                  )}
+                </div>
+              </div>
+
+              <div className="tw-mb-6">
+                <h1 className="tw-text-2xl tw-font-bold tw-text-white tw-mb-4 tw-tracking-tight">
+                  {title}
+                </h1>
+                {description && (
+                  <p className="tw-text-sm lg:tw-text-md tw-text-white/60 tw-mb-0">
+                    {description}
+                  </p>
                 )}
-                {isWinner && <WinnerBadge drop={drop} showBadge={true} />}
+              </div>
+
+              <div className="tw-flex tw-items-center tw-gap-3">
+                <SingleWaveDropInfoAuthorSection drop={drop} />
+                <span className="tw-text-white/40">·</span>
+                <WaveDropTime timestamp={drop.created_at} size="sm" />
+                {drop?.drop_type === ApiDropType.Participatory && (
+                  <>
+                    <span className="tw-text-white/40">·</span>
+                    <SingleWaveDropPosition rank={drop.rank} variant="simple" />
+                  </>
+                )}
+                {manualOutcomes.length > 0 && (
+                  <>
+                    <span className="tw-text-white/40">·</span>
+                    <FontAwesomeIcon
+                      icon={faTrophy}
+                      className="tw-w-3 tw-h-3 tw-text-white/40"
+                    />
+                    {manualOutcomes.map((outcome) => (
+                      <span
+                        key={outcome}
+                        className="tw-text-sm tw-text-white/60"
+                      >
+                        {outcome}
+                      </span>
+                    ))}
+                  </>
+                )}
+                {!!nicTotal && (
+                  <>
+                    <span className="tw-text-white/40">·</span>
+                    <FontAwesomeIcon
+                      icon={faAddressCard}
+                      className="tw-w-4 tw-h-4 tw-text-white/40"
+                    />
+                    <span className="tw-text-sm tw-text-white/60">
+                      {nicTotal} NIC
+                    </span>
+                  </>
+                )}
+                {!!repTotal && (
+                  <>
+                    <span className="tw-text-white/40">·</span>
+                    <FontAwesomeIcon
+                      icon={faStar}
+                      className="tw-w-4 tw-h-4 tw-text-white/40"
+                    />
+                    <span className="tw-text-sm tw-text-white/60">
+                      {repTotal} Rep
+                    </span>
+                  </>
+                )}
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="tw-@container tw-w-full">
-            <div className="tw-grid tw-grid-cols-1 @[800px]:tw-grid-cols-12 tw-gap-6 lg:tw-gap-10">
-              <div className="@[800px]:tw-col-span-7">
-                {artworkMedia && (
-                  <div className="tw-relative tw-w-full tw-aspect-[4/5] tw-bg-iron-950">
-                    <DropListItemContentMedia
-                      media_mime_type={artworkMedia.mime_type}
-                      media_url={artworkMedia.url}
-                      isCompetitionDrop={true}
-                      imageScale={ImageScale.AUTOx1080}
-                    />
-                  </div>
-                )}
-                {artworkMedia && fileInfo && (
-                  <div className="tw-flex tw-gap-x-3 tw-items-center tw-mt-4">
-                    <span className="tw-text-xs tw-font-medium tw-text-iron-600">
-                      Media Type:{" "}
-                      <span className="tw-text-iron-400">
-                        {fileInfo.extension.toUpperCase()}
-                      </span>
-                    </span>
-                    <Download
-                      href={artworkMedia.url}
-                      name={fileName ?? fileInfo.name}
-                      extension={fileInfo.extension}
-                      variant="text"
-                    />
-                  </div>
-                )}
-                <div className="tw-mt-6">
-                  <SingleWaveDropTraits drop={drop} />
-                </div>
+        <div className="tw-px-6 lg:tw-px-20">
+          <div className="tw-max-w-3xl tw-mx-auto tw-space-y-8">
+            {isWinner && (
+              <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-6">
+                <WinnerBadge drop={drop} showBadge={true} />
               </div>
+            )}
+          </div>
+        </div>
 
-              <div className="@[800px]:tw-col-span-5 tw-flex tw-flex-col tw-gap-6 lg:tw-gap-8">
-                {description && (
-                  <div>
-                    <div className="tw-text-xs tw-text-white/40 tw-mb-3 lg:tw-mb-4 tw-uppercase tw-tracking-widest">
-                      About
-                    </div>
-                    <p className="tw-text-sm lg:tw-text-base tw-leading-relaxed tw-text-white/70 tw-mb-0">
-                      {description}
-                    </p>
-                  </div>
-                )}
+        <div className="tw-w-full tw-h-px tw-bg-white/10 tw-my-10"></div>
 
-                <div>
-                  <div className="tw-text-xs tw-text-white/40 tw-mb-3 lg:tw-mb-4 tw-uppercase tw-tracking-widest">
-                    Voting Status
-                  </div>
-                  <SingleWaveDropVotes drop={drop} />
-                </div>
+        <div className="tw-px-6 lg:tw-px-20 tw-pb-10">
+          <div className="tw-max-w-3xl tw-mx-auto tw-space-y-8">
+            <SingleWaveDropTraits drop={drop} />
 
-                {wave && drop.rank === 1 && hasOutcomes && (
-                  <div className="tw-pt-6 tw-border-t tw-border-solid tw-border-white/10 tw-border-x-0 tw-border-b-0">
-                    <div className="tw-text-xs tw-text-white/40 tw-mb-3 lg:tw-mb-4 tw-uppercase tw-tracking-widest">
-                      Outcome
-                    </div>
-                    <div className="tw-space-y-2">
-                      {!!nicTotal && (
-                        <div className="tw-flex tw-items-center tw-gap-2">
-                          <FontAwesomeIcon
-                            icon={faAddressCard}
-                            className="tw-size-3.5 tw-text-blue-400"
-                          />
-                          <span className="tw-text-sm tw-text-white/50">
-                            {nicTotal} NIC
-                          </span>
-                        </div>
-                      )}
-                      {!!repTotal && (
-                        <div className="tw-flex tw-items-center tw-gap-2">
-                          <FontAwesomeIcon
-                            icon={faStar}
-                            className="tw-size-3.5 tw-text-purple-400"
-                          />
-                          <span className="tw-text-sm tw-text-white/50">
-                            {repTotal} Rep
-                          </span>
-                        </div>
-                      )}
-                      {manualOutcomes.map((outcome) => (
-                        <div
-                          key={outcome}
-                          className="tw-flex tw-items-center tw-gap-2"
-                        >
-                          <FontAwesomeIcon
-                            icon={faTrophy}
-                            className="tw-size-3.5 tw-text-yellow-400"
-                          />
-                          <span className="tw-text-sm tw-text-white/50">
-                            {outcome}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+            <SingleWaveDropInfoDetails drop={drop} />
 
-                <div className="tw-pt-6 tw-border-t tw-border-solid tw-border-white/10 tw-border-x-0 tw-border-b-0">
-                  <SingleWaveDropInfoActions drop={drop} />
-                </div>
-
-                <SingleWaveDropInfoDetails drop={drop} />
-
-                {canDelete && drop.drop_type !== ApiDropType.Winner && (
-                  <div>
-                    <WaveDropDeleteButton drop={drop} />
-                  </div>
-                )}
+            {artworkMedia && fileInfo && (
+              <div className="tw-flex tw-gap-x-3 tw-items-center">
+                <span className="tw-text-xs tw-font-medium tw-text-iron-600">
+                  Media Type:{" "}
+                  <span className="tw-text-iron-400">
+                    {fileInfo.extension.toUpperCase()}
+                  </span>
+                </span>
+                <Download
+                  href={artworkMedia.url}
+                  name={fileName ?? fileInfo.name}
+                  extension={fileInfo.extension}
+                  variant="text"
+                />
               </div>
-            </div>
+            )}
+
+            {canDelete && drop.drop_type !== ApiDropType.Winner && (
+              <WaveDropDeleteButton drop={drop} />
+            )}
           </div>
         </div>
       </div>
@@ -310,6 +335,12 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
           </motion.div>
         )}
       </AnimatePresence>
+
+      <VotingModal
+        drop={drop}
+        isOpen={isVotingOpen}
+        onClose={() => setIsVotingOpen(false)}
+      />
     </>
   );
 };

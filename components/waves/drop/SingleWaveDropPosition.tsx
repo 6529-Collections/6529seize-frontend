@@ -1,13 +1,14 @@
-import React from "react";
-import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { faTrophy } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import React from "react";
+import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
 
 interface SingleWaveDropPositionProps {
   readonly rank: number | null;
   readonly drop?: ExtendedDrop;
   readonly isFinalWinner?: boolean;
+  readonly variant?: "default" | "simple";
 }
 
 // Trophy-only badge component for completed Memes waves
@@ -53,12 +54,57 @@ const TrophyOnlyBadge: React.FC<{ rank: number }> = ({ rank }) => {
   );
 };
 
+// Simple variant - just trophy icon + number, no box
+const SimpleRankDisplay: React.FC<{ rank: number }> = ({ rank }) => {
+  let color = "";
+  switch (rank) {
+    case 1:
+      color = "tw-text-amber-400";
+      break;
+    case 2:
+      color = "tw-text-iron-300";
+      break;
+    case 3:
+      color = "tw-text-amber-600";
+      break;
+    default:
+      color = "tw-text-iron-500";
+  }
+
+  // Format rank as ordinal for top 3, otherwise use #N
+  const formatRank = (r: number) => {
+    switch (r) {
+      case 1:
+        return "1st";
+      case 2:
+        return "2nd";
+      case 3:
+        return "3rd";
+      default:
+        return `#${r}`;
+    }
+  };
+
+  return (
+    <div className={`tw-flex tw-items-center tw-gap-1.5 ${color}`}>
+      <FontAwesomeIcon icon={faTrophy} className="tw-w-3.5 tw-h-3.5" />
+      <span className="tw-text-sm tw-font-semibold">{formatRank(rank)}</span>
+    </div>
+  );
+};
+
 export const SingleWaveDropPosition: React.FC<SingleWaveDropPositionProps> = ({
   rank,
   drop,
   isFinalWinner = false,
+  variant = "default",
 }) => {
   if (!rank) return null;
+
+  // Simple variant - just trophy + number
+  if (variant === "simple") {
+    return <SimpleRankDisplay rank={rank} />;
+  }
 
   // Check if the drop has winning_context or manual override with isFinalWinner prop
   const isWinner = isFinalWinner || drop?.winning_context;

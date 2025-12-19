@@ -1,13 +1,17 @@
 "use client";
 
-import React, { useCallback, useMemo, useState } from "react";
-import { SingleWaveDropChat } from "./SingleWaveDropChat";
+import { CompactModeProvider } from "@/contexts/CompactModeContext";
 import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDrop } from "@/hooks/useDrop";
 import { useWaveData } from "@/hooks/useWaveData";
+import {
+  ArrowLeftIcon,
+  ChatBubbleLeftRightIcon,
+} from "@heroicons/react/24/outline";
+import { usePathname, useRouter } from "next/navigation";
+import React, { useCallback, useMemo, useState } from "react";
 import { MemesSingleWaveDropInfoPanel } from "./MemesSingleWaveDropInfoPanel";
-import { useRouter, usePathname } from "next/navigation";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { SingleWaveDropChat } from "./SingleWaveDropChat";
 
 interface MemesSingleWaveDropProps {
   readonly drop: ExtendedDrop;
@@ -51,47 +55,103 @@ export const MemesSingleWaveDrop: React.FC<MemesSingleWaveDropProps> = ({
   );
 
   return (
-    <div className="tw-w-full tw-h-full tw-bg-black tw-flex tw-flex-col lg:tw-flex-row">
-      <div className="tw-flex-1 tw-relative tw-h-full lg:tw-h-screen">
+    <div className="tw-w-full tw-h-full tw-bg-iron-950 tw-flex tw-flex-col lg:tw-flex-row tw-overflow-hidden">
+      <div className="tw-flex-1 tw-relative tw-h-full lg:tw-h-screen tw-overflow-hidden">
         <header className="tw-absolute tw-top-0 tw-left-0 tw-right-3 tw-py-4 lg:tw-pb-8 tw-flex tw-justify-center tw-z-20 tw-pointer-events-none tw-bg-gradient-to-b tw-from-black tw-via-black/80 tw-to-transparent">
           <div className="tw-w-full tw-px-8 tw-flex tw-items-center tw-justify-between tw-pointer-events-auto">
-            <span className="tw-text-xs tw-text-white/30 tw-font-medium tw-uppercase tw-tracking-widest">
-              {wave?.name ?? "The Memes"}
-            </span>
+            <div className="tw-flex tw-items-center tw-gap-6">
+              <button
+                type="button"
+                aria-label="Close panel"
+                onClick={onClose}
+                className="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-rounded-lg tw-text-white/70 hover:tw-text-white tw-transition-all tw-bg-transparent tw-border-0"
+              >
+                <ArrowLeftIcon className="tw-w-4 tw-h-4 tw-flex-shrink-0" />
+                <span className="tw-text-sm tw-font-semibold">Close</span>
+              </button>
+            </div>
+
             <button
-              type="button"
-              aria-label="Close panel"
-              onClick={onClose}
-              className="tw-flex tw-items-center tw-justify-center tw-h-10 tw-w-10 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-950 tw-text-white tw-transition tw-duration-200 tw-border tw-border-solid tw-border-iron-800/70 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-iron-600/70 active:tw-scale-95"
+              onClick={toggleChat}
+              className={`tw-hidden lg:tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-backdrop-blur-md tw-rounded-lg tw-transition-all tw-text-sm tw-border tw-border-solid ${
+                isChatOpen
+                  ? "tw-bg-white/10 tw-border-white/20 tw-text-white"
+                  : "tw-bg-black/10 tw-border-white/10 tw-text-white/50 hover:tw-bg-black/40 hover:tw-border-white/20 hover:tw-text-white"
+              }`}
             >
-              <XMarkIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0" />
+              <ChatBubbleLeftRightIcon className="tw-w-4 tw-h-4" />
+              <span>{isChatOpen ? "Hide" : "Show"} Chat</span>
+            </button>
+
+            <button
+              onClick={toggleChat}
+              className={`lg:tw-hidden tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-backdrop-blur-md tw-rounded-lg tw-transition-all tw-text-sm tw-border tw-border-solid ${
+                isChatOpen
+                  ? "tw-bg-white/10 tw-border-white/20 tw-text-white"
+                  : "tw-bg-black/10 tw-border-white/10 tw-text-white/50 hover:tw-bg-black/40 hover:tw-border-white/20 hover:tw-text-white"
+              }`}
+            >
+              <ChatBubbleLeftRightIcon className="tw-w-4 tw-h-4" />
+              <span>Chat</span>
             </button>
           </div>
         </header>
 
         <div className="tw-h-full tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
           {extendedDrop && wave && (
-            <MemesSingleWaveDropInfoPanel
-              drop={extendedDrop}
-              wave={wave}
-              isChatOpen={isChatOpen}
-              onToggleChat={toggleChat}
-            />
+            <MemesSingleWaveDropInfoPanel drop={extendedDrop} wave={wave} />
           )}
         </div>
       </div>
 
       <div
-        className={`tw-hidden lg:tw-flex tw-flex-col tw-h-full tw-bg-black tw-transition-all tw-duration-300 tw-ease-in-out ${
+        className={`lg:tw-hidden tw-fixed tw-inset-0 tw-z-[999] tw-bg-black/60 tw-transition-opacity tw-duration-300 ${
           isChatOpen
-            ? "tw-w-[400px] tw-border-l tw-border-solid tw-border-white/10 tw-border-y-0 tw-border-r-0"
-            : "tw-w-0 tw-overflow-hidden tw-border-none"
+            ? "tw-visible tw-opacity-100"
+            : "tw-invisible tw-opacity-0 tw-pointer-events-none"
         }`}
-      >
-        {wave && drop && (
-          <SingleWaveDropChat key={drop.id} wave={wave} drop={drop} />
-        )}
-      </div>
+        onClick={toggleChat}
+      />
+
+      <CompactModeProvider compact={true}>
+        <div
+          className={`
+            tw-flex tw-flex-col tw-h-full tw-bg-iron-950 tw-transition-all tw-duration-300 tw-ease-in-out
+            lg:tw-relative lg:tw-bg-black
+            ${
+              isChatOpen
+                ? "lg:tw-w-[400px] lg:tw-border-l lg:tw-border-solid lg:tw-border-white/10 lg:tw-border-y-0 lg:tw-border-r-0"
+                : "lg:tw-w-0 lg:tw-overflow-hidden lg:tw-border-none"
+            }
+            tw-fixed tw-inset-0 tw-z-[1000] lg:tw-static lg:tw-inset-auto lg:tw-z-auto
+            ${
+              isChatOpen
+                ? "tw-translate-x-0"
+                : "tw-translate-x-full lg:tw-translate-x-0"
+            }
+          `}
+        >
+          <div className="lg:tw-hidden tw-flex tw-items-center tw-justify-between tw-px-4 tw-py-3 tw-border-b tw-border-solid tw-border-white/10 tw-border-x-0 tw-border-t-0">
+            <button
+              onClick={toggleChat}
+              className="tw-flex tw-items-center tw-gap-2 tw-text-white/70 hover:tw-text-white tw-transition-colors tw-bg-transparent tw-border-0"
+            >
+              <ArrowLeftIcon className="tw-w-4 tw-h-4 tw-flex-shrink-0" />
+              <span className="tw-text-sm tw-font-semibold">Back</span>
+            </button>
+            <span className="tw-text-sm tw-font-semibold tw-text-white">
+              Chat
+            </span>
+          </div>
+
+          <div className="tw-flex-1 tw-overflow-hidden tw-relative">
+            <div className="tw-absolute tw-top-0 tw-left-0 tw-right-0 tw-h-12 tw-bg-gradient-to-b tw-from-black tw-to-transparent tw-z-50 tw-pointer-events-none lg:tw-block tw-hidden" />
+            {wave && drop && (
+              <SingleWaveDropChat key={drop.id} wave={wave} drop={drop} />
+            )}
+          </div>
+        </div>
+      </CompactModeProvider>
     </div>
   );
 };

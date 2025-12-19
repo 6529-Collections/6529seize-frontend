@@ -131,7 +131,6 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                     <WaveDropTime timestamp={winner.drop.created_at} />
                   </div>
 
-                  {/* Bottom row: Winner badge */}
                   <div className="tw-flex tw-items-center tw-gap-x-2">
                     <WinnerDropBadge
                       rank={winner.place}
@@ -141,7 +140,6 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                 </div>
               </div>
 
-              {/* Show open icon when not a touch device */}
               {!hasTouchScreen && (
                 <div className="tw-flex tw-items-start tw-flex-shrink-0">
                   <div className="tw-h-8">

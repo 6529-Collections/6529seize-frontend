@@ -231,7 +231,7 @@ const DefaultWinnerDrop = ({
             />
           </div>
         )}
-        <div className="tw-flex tw-flex-col tw-gap-2 tw-ml-[3.5rem] tw-mt-1.5">
+        <div className="tw-flex tw-flex-col tw-gap-2 tw-ml-[3.25rem] tw-mt-1.5">
           {drop.metadata.length > 0 && (
             <WaveDropMetadata metadata={drop.metadata} />
           )}

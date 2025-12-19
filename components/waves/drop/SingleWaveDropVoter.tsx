@@ -91,8 +91,8 @@ export const SingleWaveDropVoter: React.FC<SingleWaveDropVoterProps> = ({
             </div>
           </Tooltip>
         </>
-        <span className="tw-text-xs tw-text-iron-600 tw-font-mono tw-tabular-nums">
-          {formatNumberWithCommas(voter.absolute_votes_summed)} {WAVE_VOTING_LABELS[creditType]} {WAVE_VOTE_STATS_LABELS.TOTAL}
+        <span className="tw-text-xs tw-text-iron-600">
+          <span className="tw-tabular-nums">{formatNumberWithCommas(voter.absolute_votes_summed)}</span> {WAVE_VOTING_LABELS[creditType]} {WAVE_VOTE_STATS_LABELS.TOTAL}
         </span>
       </div>
     </div>

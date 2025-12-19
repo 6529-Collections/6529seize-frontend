@@ -102,15 +102,15 @@ export const SingleWaveDropLog: React.FC<SingleWaveDropLogProps> = ({
                 {log.contents.oldVote === 0 ? "voted" : "changed from"}
               </span>
               {log.contents.oldVote !== 0 && (
-                <span className="tw-text-sm tw-text-iron-500 tw-whitespace-nowrap tw-font-mono tw-tabular-nums">
-                  {formatNumberWithCommas(log.contents.oldVote)} →
+                <span className="tw-text-sm tw-text-iron-500 tw-whitespace-nowrap">
+                  <span className="tw-tabular-nums">{formatNumberWithCommas(log.contents.oldVote)}</span> →
                 </span>
               )}
               <span
-                className={`tw-text-sm tw-font-semibold tw-whitespace-nowrap tw-font-mono tw-tabular-nums ${log.contents.newVote > 0 ? "tw-text-emerald-600" : "tw-text-rose-500"
+                className={`tw-text-sm tw-font-semibold tw-whitespace-nowrap ${log.contents.newVote > 0 ? "tw-text-emerald-600" : "tw-text-rose-500"
                   }`}
               >
-                {formatNumberWithCommas(log.contents.newVote)} {WAVE_VOTING_LABELS[creditType]}
+                <span className="tw-tabular-nums">{formatNumberWithCommas(log.contents.newVote)}</span> {WAVE_VOTING_LABELS[creditType]}
               </span>
               {log.contents?.reason === "CREDIT_OVERSPENT" && (
                 <SystemAdjustmentPill />
@@ -129,15 +129,15 @@ export const SingleWaveDropLog: React.FC<SingleWaveDropLogProps> = ({
                 {log.contents.oldVote === 0 ? "voted" : "changed from"}
               </span>
               {log.contents.oldVote !== 0 && (
-                <span className="tw-text-sm tw-text-iron-500 tw-whitespace-nowrap tw-font-mono tw-tabular-nums">
-                  {formatNumberWithCommas(log.contents.oldVote)} →
+                <span className="tw-text-sm tw-text-iron-500 tw-whitespace-nowrap">
+                  <span className="tw-tabular-nums">{formatNumberWithCommas(log.contents.oldVote)}</span> →
                 </span>
               )}
               <span
-                className={`tw-text-sm tw-font-semibold tw-whitespace-nowrap tw-font-mono tw-tabular-nums ${log.contents.newVote > 0 ? "tw-text-emerald-600" : "tw-text-rose-500"
+                className={`tw-text-sm tw-font-semibold tw-whitespace-nowrap ${log.contents.newVote > 0 ? "tw-text-emerald-600" : "tw-text-rose-500"
                   }`}
               >
-                {formatNumberWithCommas(log.contents.newVote)} {WAVE_VOTING_LABELS[creditType]}
+                <span className="tw-tabular-nums">{formatNumberWithCommas(log.contents.newVote)}</span> {WAVE_VOTING_LABELS[creditType]}
               </span>
               {log.contents?.reason === "CREDIT_OVERSPENT" && (
                 <SystemAdjustmentPill />

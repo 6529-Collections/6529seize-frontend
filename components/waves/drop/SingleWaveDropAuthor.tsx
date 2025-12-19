@@ -41,13 +41,13 @@ export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({
 
   return (
     <>
-      <div className="tw-flex tw-items-start tw-gap-x-3">
+      <div className="tw-flex tw-items-start tw-gap-x-2.5">
         <Link
           href={`/${drop.author.handle}`}
-          className="tw-flex tw-items-center tw-gap-x-3 tw-no-underline"
+          className="tw-flex tw-items-center tw-gap-x-2.5 tw-no-underline"
         >
           {drop.author.pfp ? (
-            <div className="tw-size-10 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-950 tw-overflow-hidden">
+            <div className="tw-w-10 tw-h-10 tw-rounded tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-overflow-hidden">
               <img
                 className="tw-size-full tw-object-contain tw-opacity-90"
                 src={drop.author.pfp}
@@ -55,21 +55,21 @@ export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({
               />
             </div>
           ) : (
-            <div className="tw-size-10 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-900" />
+            <div className="tw-w-10 tw-h-10 tw-rounded tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900" />
           )}
           <div className="tw-inline-flex tw-items-center tw-gap-x-2">
             <div className="tw-inline-flex tw-items-center tw-gap-x-1">
+              <UserProfileTooltipWrapper
+                user={drop.author.handle ?? drop.author.id}
+              >
+                <span className="tw-text-md tw-font-semibold tw-text-white desktop-hover:hover:tw-text-opacity-80">
+                  {drop.author.handle}
+                </span>
+              </UserProfileTooltipWrapper>
               <UserCICAndLevel
                 level={drop.author.level}
                 size={UserCICAndLevelSize.SMALL}
               />
-              <UserProfileTooltipWrapper
-                user={drop.author.handle ?? drop.author.id}
-              >
-                <span className="tw-text-md tw-font-semibold tw-text-iron-200 desktop-hover:hover:tw-text-opacity-80">
-                  {drop.author.handle}
-                </span>
-              </UserProfileTooltipWrapper>
             </div>
             <div className="tw-inline-flex tw-items-center tw-gap-x-1">
               {isWinner && (

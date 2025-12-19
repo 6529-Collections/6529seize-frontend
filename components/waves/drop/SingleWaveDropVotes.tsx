@@ -9,15 +9,19 @@ import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressi
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import Image from "next/image";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
-import { WAVE_VOTING_LABELS, WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
-
+import {
+  WAVE_VOTING_LABELS,
+  WAVE_VOTE_STATS_LABELS,
+} from "@/helpers/waves/waves.constants";
 
 interface SingleWaveDropVotesProps {
   readonly drop: ApiDrop;
+  readonly showVotersBorder?: boolean;
 }
 
 export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
   drop,
+  showVotersBorder = false,
 }) => {
   const { isVotingEnded, isWinner } = useDropInteractionRules(drop);
   const topVoters = drop.top_raters.slice(0, 3);
@@ -34,10 +38,13 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
   const shouldShowUserVote = (isVotingEnded || isWinner) && hasUserVoted;
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-3">
-      {/* Voting Status Row */}
-      <div className="tw-flex tw-items-baseline tw-gap-x-2 tw-mb-3 lg:tw-mb-4">
-        <span className={`tw-text-sm tw-font-bold tw-font-mono tw-tracking-tight ${isPositive ? "tw-text-emerald-600" : "tw-text-rose-600"}`}>
+    <div className="tw-flex tw-flex-col tw-gap-3 tw-mt-1">
+      <div className="tw-flex tw-items-baseline tw-gap-x-2">
+        <span
+          className={`tw-text-sm tw-font-bold tw-font-mono tw-tracking-tight ${
+            isPositive ? "tw-text-emerald-600" : "tw-text-rose-600"
+          }`}
+        >
           {formatNumberWithCommas(drop.rating)}
         </span>
         <DropVoteProgressing
@@ -50,7 +57,13 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
         </span>
       </div>
 
-      <div className="tw-flex tw-items-center tw-gap-3 tw-pt-4 lg:tw-pt-6 tw-border-t tw-border-solid tw-border-white/10 tw-border-x-0 tw-border-b-0">
+      <div
+        className={`tw-flex tw-items-center tw-gap-3 ${
+          showVotersBorder
+            ? "tw-pt-4 lg:tw-pt-6 tw-mt-3 lg:mt-4 tw-border-t tw-border-solid tw-border-white/10 tw-border-x-0 tw-border-b-0"
+            : ""
+        }`}
+      >
         <div className="tw-flex tw-items-center -tw-space-x-2">
           {topVoters.map((voter) => (
             <div key={voter.profile.handle}>
@@ -102,8 +115,9 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
               {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:
             </span>
             <span
-              className={`tw-text-sm tw-font-semibold ${isUserVoteNegative ? "tw-text-rose-600" : "tw-text-emerald-600"
-                }`}
+              className={`tw-text-sm tw-font-semibold ${
+                isUserVoteNegative ? "tw-text-rose-600" : "tw-text-emerald-600"
+              }`}
             >
               {isUserVoteNegative && "-"}
               {formatNumberWithCommas(Math.abs(userVote))}{" "}

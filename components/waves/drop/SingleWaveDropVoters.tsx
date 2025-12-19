@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import { AnimatePresence, motion } from "framer-motion";
-import { useWaveTopVoters } from "@/hooks/useWaveTopVoters";
 import { useAuth } from "@/components/auth/Auth";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
+import { useWaveTopVoters } from "@/hooks/useWaveTopVoters";
+import { ChevronDownIcon } from "@heroicons/react/24/solid";
+import { AnimatePresence, motion } from "framer-motion";
+import React, { useState } from "react";
 import { SingleWaveDropVoter } from "./SingleWaveDropVoter";
-import { ChevronRightIcon } from "@heroicons/react/24/solid";
 
 interface SingleWaveDropVotersProps {
   readonly drop: ApiDrop;
@@ -38,16 +38,16 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({
     <div>
       <button
         onClick={() => setIsVotersOpen(!isVotersOpen)}
-        className="tw-w-full tw-py-5 lg:tw-py-6 tw-flex tw-items-center tw-justify-between tw-text-left hover:tw-bg-iron-950 tw-transition-colors tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-bg-transparent"
+        className="tw-w-full tw-px-4 tw-py-4 tw-flex tw-items-center tw-justify-between tw-text-left tw-bg-iron-950 desktop-hover:hover:tw-bg-iron-900 tw-transition-colors tw-duration-300 tw-ease-out tw-border-0"
       >
-        <span className="tw-text-sm tw-text-white/60 tw-font-semibold">
-          Top Voters
+        <span className="tw-text-sm tw-text-iron-400 tw-font-medium">
+          Top voters
         </span>
         <motion.div
-          animate={{ rotate: isVotersOpen ? 90 : 0 }}
+          animate={{ rotate: isVotersOpen ? 180 : 0 }}
           transition={{ duration: 0.3 }}
         >
-          <ChevronRightIcon className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0 tw-text-white/30" />
+          <ChevronDownIcon className="tw-w-4 tw-h-4 tw-flex-shrink-0 tw-text-iron-600" />
         </motion.div>
       </button>
 
@@ -58,7 +58,7 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="tw-overflow-hidden tw-border-b tw-border-solid tw-border-white/10 tw-border-x-0 tw-border-t-0">
+            className="tw-overflow-hidden">
             <div className="tw-max-h-[19.75rem] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
               {voters.length > 0 || isLoading ? (
                 <>

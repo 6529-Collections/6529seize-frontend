@@ -23,7 +23,7 @@ const WaveDropDeleteButton: React.FC<WaveDropDeleteButtonProps> = ({
   };
 
   const defaultButtonClasses =
-    "tw-w-full tw-py-3 tw-px-4 tw-bg-red/5 hover:tw-bg-red/10 tw-border tw-border-solid tw-border-red/20 hover:tw-border-red/30 tw-rounded-lg tw-text-red/70 hover:tw-text-red tw-transition-all tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-xs";
+    "tw-py-3 tw-px-4 tw-bg-red/5 hover:tw-bg-red/10 tw-border tw-border-solid tw-border-red/20 hover:tw-border-red/30 tw-rounded-lg tw-text-red/70 hover:tw-text-red tw-transition-all tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-xs";
 
   return (
     <>
