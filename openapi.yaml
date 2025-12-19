@@ -8892,8 +8892,6 @@ components:
         phase_position:
           type: integer
           format: int64
-        redeemed:
-          type: boolean
         redeemed_count:
           type: integer
           format: int64

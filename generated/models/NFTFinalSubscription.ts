@@ -24,7 +24,6 @@ export class NFTFinalSubscription {
     'phase'?: string | null;
     'phase_subscriptions'?: number;
     'phase_position'?: number;
-    'redeemed'?: boolean;
     'redeemed_count'?: number;
     'created_at'?: Date;
     'updated_at'?: Date;
@@ -99,12 +98,6 @@ export class NFTFinalSubscription {
             "baseName": "phase_position",
             "type": "number",
             "format": "int64"
-        },
-        {
-            "name": "redeemed",
-            "baseName": "redeemed",
-            "type": "boolean",
-            "format": ""
         },
         {
             "name": "redeemed_count",
