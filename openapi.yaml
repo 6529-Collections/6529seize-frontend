@@ -2502,6 +2502,105 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiTransactionPage"
+  /waves/{waveId}/outcomes:
+    get:
+      tags:
+        - Waves
+      summary: Get wave outcomes
+      operationId: getWaveOutcomes
+      parameters:
+        - name: waveId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+            default: DESC
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 2000
+            default: 100
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveOutcomesPage"
+        "404":
+          description: Wave not found
+  /waves/{waveId}/outcomes/{outcomeIndex}/distribution:
+    get:
+      tags:
+        - Waves
+      summary: Get wave outcome distribution
+      operationId: getWaveOutcomeDistribution
+      parameters:
+        - name: waveId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: outcomeIndex
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+            default: DESC
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 2000
+            default: 100
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveOutcomeDistributionItemsPage"
+        "404":
+          description: Wave not found
   /waves/{id}/decisions:
     get:
       tags:
@@ -4599,7 +4698,7 @@ components:
         outcomes:
           type: array
           items:
-            $ref: "#/components/schemas/ApiWaveOutcome"
+            $ref: "#/components/schemas/ApiCreateWaveOutcome"
     ApiCreateNewWaveChatConfig:
       type: object
       required:
@@ -4818,6 +4917,39 @@ components:
           type: boolean
         signer_address:
           type: string
+    ApiCreateWaveOutcome:
+      type: object
+      required:
+        - type
+        - description
+      properties:
+        type:
+          $ref: "#/components/schemas/ApiWaveOutcomeType"
+        subtype:
+          $ref: "#/components/schemas/ApiWaveOutcomeSubType"
+        description:
+          type: string
+        credit:
+          $ref: "#/components/schemas/ApiWaveOutcomeCredit"
+        rep_category:
+          type: string
+        amount:
+          type: number
+          format: int64
+        distribution:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCreateWaveOutcomeDistributionItem"
+    ApiCreateWaveOutcomeDistributionItem:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: int64
+          nullable: true
+        description:
+          type: string
+          nullable: true
     ApiDrop:
       type: object
       required:
@@ -6805,7 +6937,6 @@ components:
         - participation
         - chat
         - wave
-        - outcomes
       properties:
         name:
           description: The name of the wave
@@ -6826,10 +6957,6 @@ components:
           $ref: "#/components/schemas/ApiCreateNewWaveChatConfig"
         wave:
           $ref: "#/components/schemas/ApiCreateWaveConfig"
-        outcomes:
-          type: array
-          items:
-            $ref: "#/components/schemas/ApiWaveOutcome"
     ApiUploadItem:
       type: object
       required:
@@ -6946,7 +7073,7 @@ components:
         outcomes:
           type: array
           items:
-            $ref: "#/components/schemas/ApiWaveOutcome"
+            $ref: "#/components/schemas/ApiWaveOutcomeOld"
         contributors_overview:
           type: array
           items:
@@ -7317,6 +7444,61 @@ components:
       required:
         - type
         - description
+        - index
+      properties:
+        type:
+          $ref: "#/components/schemas/ApiWaveOutcomeType"
+        subtype:
+          $ref: "#/components/schemas/ApiWaveOutcomeSubType"
+        description:
+          type: string
+        credit:
+          $ref: "#/components/schemas/ApiWaveOutcomeCredit"
+        rep_category:
+          type: string
+        amount:
+          type: number
+          format: int64
+        index:
+          type: number
+          format: int64
+    ApiWaveOutcomeCredit:
+      type: string
+      enum:
+        - REP
+        - CIC
+    ApiWaveOutcomeDistributionItem:
+      type: object
+      required:
+        - index
+      properties:
+        index:
+          type: number
+          format: int64
+        amount:
+          type: number
+          format: int64
+          nullable: true
+        description:
+          type: string
+          nullable: true
+    ApiWaveOutcomeDistributionItemsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveOutcomeDistributionItem"
+    ApiWaveOutcomeOld:
+      type: object
+      required:
+        - type
+        - description
+        - index
       properties:
         type:
           $ref: "#/components/schemas/ApiWaveOutcomeType"
@@ -7335,21 +7517,20 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiWaveOutcomeDistributionItem"
-    ApiWaveOutcomeCredit:
-      type: string
-      enum:
-        - REP
-        - CIC
-    ApiWaveOutcomeDistributionItem:
-      type: object
-      properties:
-        amount:
+        index:
           type: number
           format: int64
-          nullable: true
-        description:
-          type: string
-          nullable: true
+    ApiWaveOutcomesPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveOutcome"
     ApiWaveOutcomeSubType:
       type: string
       enum:

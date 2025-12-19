@@ -10,12 +10,14 @@
  * Do not edit the class manually.
  */
 
+import { ApiWaveOutcome } from '../models/ApiWaveOutcome';
 import { HttpFile } from '../http/http';
 
-export class ApiWaveOutcomeDistributionItem {
-    'index': number;
-    'amount'?: number | null;
-    'description'?: string | null;
+export class ApiWaveOutcomesPage {
+    'data': Array<ApiWaveOutcome>;
+    'count': number;
+    'page': number;
+    'next': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -23,26 +25,32 @@ export class ApiWaveOutcomeDistributionItem {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "index",
-            "baseName": "index",
+            "name": "data",
+            "baseName": "data",
+            "type": "Array<ApiWaveOutcome>",
+            "format": ""
+        },
+        {
+            "name": "count",
+            "baseName": "count",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "amount",
-            "baseName": "amount",
+            "name": "page",
+            "baseName": "page",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "description",
-            "baseName": "description",
-            "type": "string",
+            "name": "next",
+            "baseName": "next",
+            "type": "boolean",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiWaveOutcomeDistributionItem.attributeTypeMap;
+        return ApiWaveOutcomesPage.attributeTypeMap;
     }
 
     public constructor() {

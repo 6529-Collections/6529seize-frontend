@@ -1,14 +1,14 @@
 "use client";
 
 import { FC, useEffect, useState } from "react";
-import { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
+import { ApiWaveOutcomeOld } from "@/generated/models/ApiWaveOutcomeOld";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { motion, AnimatePresence } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAddressCard } from "@fortawesome/free-regular-svg-icons";
 
 interface WaveNICOutcomeProps {
-  readonly outcome: ApiWaveOutcome;
+  readonly outcome: ApiWaveOutcomeOld;
 }
 
 const DEFAULT_AMOUNTS_TO_SHOW = 3;
