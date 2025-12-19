@@ -15,10 +15,8 @@ import {
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import Pagination, { Paginated } from "@/components/pagination/Pagination";
 import ShowMoreButton from "@/components/show-more-button/ShowMoreButton";
-import {
-  RedeemedSubscriptionCounts,
-  SubscriptionCounts,
-} from "@/entities/ISubscription";
+import { RedeemedSubscriptionCounts } from "@/generated/models/RedeemedSubscriptionCounts";
+import { SubscriptionCounts } from "@/generated/models/SubscriptionCounts";
 import { Time } from "@/helpers/time";
 import useCapacitor from "@/hooks/useCapacitor";
 import { commonApiFetch } from "@/services/api/common-api";

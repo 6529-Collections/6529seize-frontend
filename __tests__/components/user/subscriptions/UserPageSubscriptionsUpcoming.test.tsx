@@ -1,7 +1,8 @@
 import { createMockAuthContext } from "@/__tests__/utils/testContexts";
 import { AuthContext } from "@/components/auth/Auth";
 import UserPageSubscriptionsUpcoming from "@/components/user/subscriptions/UserPageSubscriptionsUpcoming";
-import { NFTSubscription, SubscriptionDetails } from "@/entities/ISubscription";
+import { NFTSubscription } from "@/generated/models/NFTSubscription";
+import { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { useQuery } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 
@@ -80,8 +81,13 @@ const mockSubscriptions: NFTSubscription[] = [
 ];
 
 const mockDetails: SubscriptionDetails = {
-  profile: "testuser",
-} as SubscriptionDetails;
+  consolidation_key: "testuser",
+  last_update: Date.now(),
+  balance: 1.0,
+  automatic: true,
+  subscribe_all_editions: false,
+  subscription_eligibility_count: 1,
+};
 
 describe("UserPageSubscriptionsUpcoming", () => {
   const useQueryMock = useQuery as jest.Mock;

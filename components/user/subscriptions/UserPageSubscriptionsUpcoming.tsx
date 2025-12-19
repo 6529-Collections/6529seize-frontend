@@ -10,11 +10,9 @@ import {
   SeasonMintRow,
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import ShowMoreButton from "@/components/show-more-button/ShowMoreButton";
-import {
-  NFTFinalSubscription,
-  NFTSubscription,
-  SubscriptionDetails,
-} from "@/entities/ISubscription";
+import { NFTFinalSubscription } from "@/generated/models/NFTFinalSubscription";
+import { NFTSubscription } from "@/generated/models/NFTSubscription";
+import { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { formatAddress } from "@/helpers/Helpers";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
@@ -294,15 +292,18 @@ function SubscriptionRow(
                 </>
               )}
             </span>
-            {props.first && final?.phase && final?.phase_position > 0 && (
-              <span className="font-smaller font-color-silver">
-                Phase: {final.phase} - Subscription Position:{" "}
-                {final.phase_position.toLocaleString()} /{" "}
-                {final.phase_subscriptions.toLocaleString()} - Airdrop Address:{" "}
-                {formatAddress(final.airdrop_address)} - Subscription Count: x
-                {final.subscribed_count}
-              </span>
-            )}
+            {props.first &&
+              final?.phase &&
+              final.phase_position !== undefined &&
+              final.phase_position > 0 && (
+                <span className="font-smaller font-color-silver">
+                  Phase: {final.phase} - Subscription Position:{" "}
+                  {final.phase_position.toLocaleString()} /{" "}
+                  {(final.phase_subscriptions ?? 0).toLocaleString()} - Airdrop
+                  Address: {formatAddress(final.airdrop_address)} - Subscription
+                  Count: x{final.subscribed_count}
+                </span>
+              )}
           </div>
           <div className="d-flex align-items-center gap-2">
             {isSubmitting && <Spinner />}

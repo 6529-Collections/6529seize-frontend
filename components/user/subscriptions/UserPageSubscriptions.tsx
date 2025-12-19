@@ -1,13 +1,11 @@
 "use client";
 
-import {
-  NFTSubscription,
-  RedeemedSubscription,
-  SubscriptionDetails,
-  SubscriptionLog,
-  SubscriptionTopUp,
-} from "@/entities/ISubscription";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { NFTSubscription } from "@/generated/models/NFTSubscription";
+import { RedeemedSubscription } from "@/generated/models/RedeemedSubscription";
+import { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
+import { SubscriptionLog } from "@/generated/models/SubscriptionLog";
+import { SubscriptionTopUp } from "@/generated/models/SubscriptionTopUp";
 import { useContext, useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 

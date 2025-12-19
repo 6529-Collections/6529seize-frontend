@@ -24,6 +24,8 @@ describe('UserPageSubscriptionsMode', () => {
             consolidation_key: '',
             last_update: 0,
             balance: 0,
+            subscribe_all_editions: false,
+            subscription_eligibility_count: 1,
           }}
           readonly={false}
           refresh={refresh}
