@@ -34,7 +34,7 @@ export const WaveNICOutcome: FC<WaveNICOutcomeProps> = ({
     ? items
     : items.slice(0, DEFAULT_AMOUNTS_TO_SHOW);
   const amounts = visibleItems.map((item) => item.amount ?? 0);
-  const remainingCount = Math.max(totalCount - items.length, 0);
+  const remainingCount = Math.max(totalCount - visibleItems.length, 0);
   const shouldShowMore =
     hasNextPage || (!showAll && items.length > DEFAULT_AMOUNTS_TO_SHOW);
 

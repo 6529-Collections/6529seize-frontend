@@ -17,6 +17,7 @@ import { ApiWaveConfig } from '../models/ApiWaveConfig';
 import { ApiWaveContributorOverview } from '../models/ApiWaveContributorOverview';
 import { ApiWaveDecisionPause } from '../models/ApiWaveDecisionPause';
 import { ApiWaveMetrics } from '../models/ApiWaveMetrics';
+import { ApiWaveOutcomeOld } from '../models/ApiWaveOutcomeOld';
 import { ApiWaveParticipationConfig } from '../models/ApiWaveParticipationConfig';
 import { ApiWaveSubscriptionTargetAction } from '../models/ApiWaveSubscriptionTargetAction';
 import { ApiWaveVisibilityConfig } from '../models/ApiWaveVisibilityConfig';
@@ -48,6 +49,7 @@ export class ApiWave {
     'participation': ApiWaveParticipationConfig;
     'chat': ApiWaveChatConfig;
     'wave': ApiWaveConfig;
+    'outcomes': Array<ApiWaveOutcomeOld>;
     'contributors_overview': Array<ApiWaveContributorOverview>;
     'subscribed_actions': Array<ApiWaveSubscriptionTargetAction>;
     'metrics': ApiWaveMetrics;
@@ -129,6 +131,12 @@ export class ApiWave {
             "name": "wave",
             "baseName": "wave",
             "type": "ApiWaveConfig",
+            "format": ""
+        },
+        {
+            "name": "outcomes",
+            "baseName": "outcomes",
+            "type": "Array<ApiWaveOutcomeOld>",
             "format": ""
         },
         {

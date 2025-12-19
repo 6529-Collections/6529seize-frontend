@@ -33,7 +33,7 @@ export const WaveManualOutcome: FC<WaveManualOutcomeProps> = ({
   const visibleItems = showAll
     ? items
     : items.slice(0, DEFAULT_AMOUNTS_TO_SHOW);
-  const remainingCount = Math.max(totalCount - items.length, 0);
+  const remainingCount = Math.max(totalCount - visibleItems.length, 0);
   const shouldShowMore =
     hasNextPage || (!showAll && items.length > DEFAULT_AMOUNTS_TO_SHOW);
 
