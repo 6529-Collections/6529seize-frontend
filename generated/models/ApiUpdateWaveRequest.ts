@@ -15,7 +15,6 @@ import { ApiCreateNewWaveParticipationConfig } from '../models/ApiCreateNewWaveP
 import { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisibilityConfig';
 import { ApiCreateNewWaveVotingConfig } from '../models/ApiCreateNewWaveVotingConfig';
 import { ApiCreateWaveConfig } from '../models/ApiCreateWaveConfig';
-import { ApiWaveOutcome } from '../models/ApiWaveOutcome';
 import { HttpFile } from '../http/http';
 
 export class ApiUpdateWaveRequest {
@@ -32,7 +31,6 @@ export class ApiUpdateWaveRequest {
     'participation': ApiCreateNewWaveParticipationConfig;
     'chat': ApiCreateNewWaveChatConfig;
     'wave': ApiCreateWaveConfig;
-    'outcomes': Array<ApiWaveOutcome>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -79,12 +77,6 @@ export class ApiUpdateWaveRequest {
             "name": "wave",
             "baseName": "wave",
             "type": "ApiCreateWaveConfig",
-            "format": ""
-        },
-        {
-            "name": "outcomes",
-            "baseName": "outcomes",
-            "type": "Array<ApiWaveOutcome>",
             "format": ""
         }    ];
 

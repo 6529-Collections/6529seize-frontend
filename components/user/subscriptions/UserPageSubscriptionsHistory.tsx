@@ -1,10 +1,8 @@
 import Pagination from "@/components/pagination/Pagination";
 import { MEMES_CONTRACT } from "@/constants";
-import {
-  RedeemedSubscription,
-  SubscriptionLog,
-  SubscriptionTopUp,
-} from "@/entities/ISubscription";
+import { RedeemedSubscription } from "@/generated/models/RedeemedSubscription";
+import { SubscriptionLog } from "@/generated/models/SubscriptionLog";
+import { SubscriptionTopUp } from "@/generated/models/SubscriptionTopUp";
 import {
   areEqualAddresses,
   formatAddress,
@@ -229,7 +227,8 @@ function LogEntry(
         </div>
         <div className="d-flex align-items-center gap-3">
           <div className="font-color-silver no-wrap">
-            {getDateDisplay(new Date(props.log.created_at))}
+            {props.log.created_at &&
+              getDateDisplay(new Date(props.log.created_at))}
           </div>
         </div>
       </div>
@@ -261,9 +260,13 @@ function RedeemedEntry(
         </div>
         <div className="d-flex align-items-center gap-3">
           <div className="font-color-silver no-wrap">
-            {getDateDisplay(
-              new Date(props.redeem.transaction_date ?? props.redeem.created_at)
-            )}
+            {(props.redeem.transaction_date ?? props.redeem.created_at) &&
+              getDateDisplay(
+                new Date(
+                  (props.redeem.transaction_date ??
+                    props.redeem.created_at) as Date
+                )
+              )}
           </div>
           <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5">
             <a

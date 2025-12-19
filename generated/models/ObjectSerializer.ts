@@ -1,5 +1,8 @@
 export * from '../models/AcceptActionRequest';
 export * from '../models/AddActionToProxyRequest';
+export * from '../models/AirdropAddressResponse';
+export * from '../models/AirdropAddressResponseTdhWallet';
+export * from '../models/AllowlistNormalizedEntry';
 export * from '../models/ApiAddReactionToDropRequest';
 export * from '../models/ApiAggregatedActivity';
 export * from '../models/ApiAggregatedActivityMemes';
@@ -193,10 +196,41 @@ export * from '../models/ApiXTdhStats';
 export * from '../models/ApiXTdhToken';
 export * from '../models/ApiXTdhTokensPage';
 export * from '../models/CreateDirectMessageWaveRequest';
+export * from '../models/DistributionNormalized';
+export * from '../models/DistributionNormalizedPage';
+export * from '../models/DistributionPhasesPage';
+export * from '../models/DistributionPhoto';
+export * from '../models/DistributionPhotosPage';
+export * from '../models/GetRedeemedMemeSubscriptionCounts200Response';
 export * from '../models/GetWaveSubscription200Response';
+export * from '../models/NFTFinalSubscription';
+export * from '../models/NFTFinalSubscriptionUpload';
+export * from '../models/NFTFinalSubscriptionUploadPage';
+export * from '../models/NFTSubscription';
+export * from '../models/RedeemedSubscription';
+export * from '../models/RedeemedSubscriptionCounts';
+export * from '../models/RedeemedSubscriptionCountsPage';
+export * from '../models/RedeemedSubscriptionPage';
+export * from '../models/SubscribeAllEditionsResponse';
+export * from '../models/SubscriptionCountResponse';
+export * from '../models/SubscriptionCounts';
+export * from '../models/SubscriptionDetails';
+export * from '../models/SubscriptionLog';
+export * from '../models/SubscriptionLogPage';
+export * from '../models/SubscriptionModeResponse';
+export * from '../models/SubscriptionResponse';
+export * from '../models/SubscriptionTopUp';
+export * from '../models/SubscriptionTopUpPage';
+export * from '../models/UpdateSubscribeAllEditionsRequest';
+export * from '../models/UpdateSubscriptionCountRequest';
+export * from '../models/UpdateSubscriptionModeRequest';
+export * from '../models/UpdateSubscriptionRequest';
 
 import { AcceptActionRequest, AcceptActionRequestActionEnum   } from '../models/AcceptActionRequest';
 import { AddActionToProxyRequest    } from '../models/AddActionToProxyRequest';
+import { AirdropAddressResponse } from '../models/AirdropAddressResponse';
+import { AirdropAddressResponseTdhWallet } from '../models/AirdropAddressResponseTdhWallet';
+import { AllowlistNormalizedEntry } from '../models/AllowlistNormalizedEntry';
 import { ApiAddReactionToDropRequest } from '../models/ApiAddReactionToDropRequest';
 import { ApiAggregatedActivity } from '../models/ApiAggregatedActivity';
 import { ApiAggregatedActivityMemes } from '../models/ApiAggregatedActivityMemes';
@@ -390,7 +424,35 @@ import { ApiXTdhStats } from '../models/ApiXTdhStats';
 import { ApiXTdhToken } from '../models/ApiXTdhToken';
 import { ApiXTdhTokensPage } from '../models/ApiXTdhTokensPage';
 import { CreateDirectMessageWaveRequest } from '../models/CreateDirectMessageWaveRequest';
+import { DistributionNormalized } from '../models/DistributionNormalized';
+import { DistributionNormalizedPage } from '../models/DistributionNormalizedPage';
+import { DistributionPhasesPage } from '../models/DistributionPhasesPage';
+import { DistributionPhoto } from '../models/DistributionPhoto';
+import { DistributionPhotosPage } from '../models/DistributionPhotosPage';
+import { GetRedeemedMemeSubscriptionCounts200ResponseClass } from '../models/GetRedeemedMemeSubscriptionCounts200Response';
 import { GetWaveSubscription200Response } from '../models/GetWaveSubscription200Response';
+import { NFTFinalSubscription } from '../models/NFTFinalSubscription';
+import { NFTFinalSubscriptionUpload } from '../models/NFTFinalSubscriptionUpload';
+import { NFTFinalSubscriptionUploadPage } from '../models/NFTFinalSubscriptionUploadPage';
+import { NFTSubscription } from '../models/NFTSubscription';
+import { RedeemedSubscription } from '../models/RedeemedSubscription';
+import { RedeemedSubscriptionCounts } from '../models/RedeemedSubscriptionCounts';
+import { RedeemedSubscriptionCountsPage } from '../models/RedeemedSubscriptionCountsPage';
+import { RedeemedSubscriptionPage } from '../models/RedeemedSubscriptionPage';
+import { SubscribeAllEditionsResponse } from '../models/SubscribeAllEditionsResponse';
+import { SubscriptionCountResponse } from '../models/SubscriptionCountResponse';
+import { SubscriptionCounts } from '../models/SubscriptionCounts';
+import { SubscriptionDetails } from '../models/SubscriptionDetails';
+import { SubscriptionLog } from '../models/SubscriptionLog';
+import { SubscriptionLogPage } from '../models/SubscriptionLogPage';
+import { SubscriptionModeResponse } from '../models/SubscriptionModeResponse';
+import { SubscriptionResponse } from '../models/SubscriptionResponse';
+import { SubscriptionTopUp } from '../models/SubscriptionTopUp';
+import { SubscriptionTopUpPage } from '../models/SubscriptionTopUpPage';
+import { UpdateSubscribeAllEditionsRequest } from '../models/UpdateSubscribeAllEditionsRequest';
+import { UpdateSubscriptionCountRequest } from '../models/UpdateSubscriptionCountRequest';
+import { UpdateSubscriptionModeRequest } from '../models/UpdateSubscriptionModeRequest';
+import { UpdateSubscriptionRequest } from '../models/UpdateSubscriptionRequest';
 
 /* tslint:disable:no-unused-variable */
 let primitives = [
@@ -439,6 +501,9 @@ let enumsMap: Set<string> = new Set<string>([
 let typeMap: {[index: string]: any} = {
     "AcceptActionRequest": AcceptActionRequest,
     "AddActionToProxyRequest": AddActionToProxyRequest,
+    "AirdropAddressResponse": AirdropAddressResponse,
+    "AirdropAddressResponseTdhWallet": AirdropAddressResponseTdhWallet,
+    "AllowlistNormalizedEntry": AllowlistNormalizedEntry,
     "ApiAddReactionToDropRequest": ApiAddReactionToDropRequest,
     "ApiAggregatedActivity": ApiAggregatedActivity,
     "ApiAggregatedActivityMemes": ApiAggregatedActivityMemes,
@@ -606,7 +671,35 @@ let typeMap: {[index: string]: any} = {
     "ApiXTdhToken": ApiXTdhToken,
     "ApiXTdhTokensPage": ApiXTdhTokensPage,
     "CreateDirectMessageWaveRequest": CreateDirectMessageWaveRequest,
+    "DistributionNormalized": DistributionNormalized,
+    "DistributionNormalizedPage": DistributionNormalizedPage,
+    "DistributionPhasesPage": DistributionPhasesPage,
+    "DistributionPhoto": DistributionPhoto,
+    "DistributionPhotosPage": DistributionPhotosPage,
+    "GetRedeemedMemeSubscriptionCounts200Response": GetRedeemedMemeSubscriptionCounts200ResponseClass,
     "GetWaveSubscription200Response": GetWaveSubscription200Response,
+    "NFTFinalSubscription": NFTFinalSubscription,
+    "NFTFinalSubscriptionUpload": NFTFinalSubscriptionUpload,
+    "NFTFinalSubscriptionUploadPage": NFTFinalSubscriptionUploadPage,
+    "NFTSubscription": NFTSubscription,
+    "RedeemedSubscription": RedeemedSubscription,
+    "RedeemedSubscriptionCounts": RedeemedSubscriptionCounts,
+    "RedeemedSubscriptionCountsPage": RedeemedSubscriptionCountsPage,
+    "RedeemedSubscriptionPage": RedeemedSubscriptionPage,
+    "SubscribeAllEditionsResponse": SubscribeAllEditionsResponse,
+    "SubscriptionCountResponse": SubscriptionCountResponse,
+    "SubscriptionCounts": SubscriptionCounts,
+    "SubscriptionDetails": SubscriptionDetails,
+    "SubscriptionLog": SubscriptionLog,
+    "SubscriptionLogPage": SubscriptionLogPage,
+    "SubscriptionModeResponse": SubscriptionModeResponse,
+    "SubscriptionResponse": SubscriptionResponse,
+    "SubscriptionTopUp": SubscriptionTopUp,
+    "SubscriptionTopUpPage": SubscriptionTopUpPage,
+    "UpdateSubscribeAllEditionsRequest": UpdateSubscribeAllEditionsRequest,
+    "UpdateSubscriptionCountRequest": UpdateSubscriptionCountRequest,
+    "UpdateSubscriptionModeRequest": UpdateSubscriptionModeRequest,
+    "UpdateSubscriptionRequest": UpdateSubscriptionRequest,
 }
 
 type MimeTypeDescriptor = {
