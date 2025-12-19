@@ -108,10 +108,11 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   const { connectedProfile } = useAuth();
   const router = useRouter();
   const initializationRef = useRef<string | null>(null);
+  const isRegisteredRef = useRef(false);
 
   const removeDeliveredNotifications = useCallback(
     async (notifications: PushNotificationSchema[]) => {
-      if (isIos) {
+      if (isIos && isRegisteredRef.current) {
         try {
           await PushNotifications.removeDeliveredNotifications({
             notifications,
@@ -162,6 +163,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   const initializePushNotifications = useCallback(
     async (profile?: ApiIdentity) => {
       try {
+        isRegisteredRef.current = false;
         await PushNotifications.removeAllListeners();
 
         const stableDeviceId = await getStableDeviceId();
@@ -169,6 +171,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         const deviceInfo = await Device.getInfo();
 
         await PushNotifications.addListener("registration", async (token) => {
+          isRegisteredRef.current = true;
           await registerPushNotification(
             stableDeviceId,
             deviceInfo,
@@ -178,6 +181,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         });
 
         await PushNotifications.addListener("registrationError", (error) => {
+          isRegisteredRef.current = false;
           console.error("Push registration error: ", error);
           Sentry.captureException(error, {
             tags: {
@@ -255,7 +259,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const removeWaveDeliveredNotifications = useCallback(
     async (waveId: string) => {
-      if (isIos) {
+      if (isIos && isRegisteredRef.current) {
         try {
           const deliveredNotifications =
             await PushNotifications.getDeliveredNotifications();
@@ -278,7 +282,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const removeAllDeliveredNotifications = useCallback(async () => {
-    if (isIos) {
+    if (isIos && isRegisteredRef.current) {
       try {
         await PushNotifications.removeAllDeliveredNotifications();
       } catch (error) {

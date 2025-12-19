@@ -21,7 +21,7 @@ describe("WaveDropActionsCopyLink", () => {
     const { getByRole } = render(<WaveDropActionsCopyLink drop={drop} />);
     fireEvent.click(getByRole("button"));
     expect(writeText).toHaveBeenCalledWith(
-      'https://base/waves?wave=w1&serialNo=5/'
+      'https://base/waves?wave=w1&serialNo=5'
     );
   });
 
