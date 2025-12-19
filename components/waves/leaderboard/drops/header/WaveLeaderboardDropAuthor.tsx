@@ -30,13 +30,13 @@ export const WaveLeaderboardDropAuthor: React.FC<
           {drop.author.pfp ? (
             <div className="tw-rounded-lg tw-h-full tw-w-full">
               <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-lg tw-overflow-hidden tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
-                <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-overflow-hidden tw-relative">
+                <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-overflow-hidden">
                   <Image
                     src={resolveIpfsUrlSync(drop.author.pfp)}
                     alt="Profile picture"
-                    fill
-                    sizes="44px"
-                    className="tw-bg-transparent tw-object-contain"
+                    width={44}
+                    height={44}
+                    className="tw-rounded-lg tw-object-contain"
                   />
                 </div>
               </div>

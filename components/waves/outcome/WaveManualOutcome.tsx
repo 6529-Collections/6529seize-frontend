@@ -102,26 +102,36 @@ export const WaveManualOutcome: FC<WaveManualOutcomeProps> = ({
             transition={{ duration: 0.2 }}
             className="tw-overflow-hidden tw-bg-gradient-to-b tw-from-iron-900/50 tw-to-iron-950/50">
             <div className="tw-divide-y tw-divide-iron-800/30 tw-divide-solid tw-divide-x-0">
-              {visibleItems.map((item, i) => (
-                <div
-                  key={`wave-manual-outcome-${item.amount ?? "na"}-${item.description ?? "na"}-${item.index}`}
-                  className="tw-px-4 tw-py-3 tw-bg-gradient-to-r hover:tw-from-amber-500/5 hover:tw-to-transparent tw-transition-colors tw-duration-300">
-                  <div className="tw-flex tw-items-center tw-gap-4">
-                    <span className="tw-flex tw-items-center tw-justify-center tw-size-8 tw-rounded-lg tw-bg-gradient-to-br tw-from-amber-400/10 tw-to-amber-600/5 tw-text-amber-200 tw-text-sm tw-font-semibold">
-                      {i + 1}
-                    </span>
-                    <span className="tw-whitespace-nowrap tw-text-amber-100 tw-text-base tw-font-medium">
-                      {item.description ?? ""}
-                    </span>
+              {visibleItems.map((item, i) => {
+                const itemLabel =
+                  item.amount === 0
+                    ? "-"
+                    : item.amount != null
+                      ? formatNumberWithCommas(item.amount)
+                      : item.description ?? "";
+
+                return (
+                  <div
+                    key={`wave-manual-outcome-${item.index}`}
+                    className="tw-px-4 tw-py-3 tw-bg-gradient-to-r hover:tw-from-amber-500/5 hover:tw-to-transparent tw-transition-colors tw-duration-300">
+                    <div className="tw-flex tw-items-center tw-gap-4">
+                      <span className="tw-flex tw-items-center tw-justify-center tw-size-8 tw-rounded-lg tw-bg-gradient-to-br tw-from-amber-400/10 tw-to-amber-600/5 tw-text-amber-200 tw-text-sm tw-font-semibold">
+                        {i + 1}
+                      </span>
+                      <span className="tw-whitespace-nowrap tw-text-amber-100 tw-text-base tw-font-medium">
+                        {itemLabel}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
 
               {shouldShowMore && (
                 <button
                   className="tw-border-0 tw-w-full tw-px-4 tw-py-3 tw-text-left tw-bg-iron-900 tw-text-amber-300/80 tw-text-sm hover:tw-text-amber-300 tw-transition-all tw-duration-300"
-                  onClick={onViewMore}>
-                  <span>View more</span>
+                  onClick={onViewMore}
+                  disabled={isFetchingNextPage}>
+                  <span>{isFetchingNextPage ? "Loading..." : "View more"}</span>
                   <span className="tw-ml-1 tw-text-iron-400">•</span>
                   <span className="tw-ml-1 tw-text-iron-400">
                     {remainingCount} more

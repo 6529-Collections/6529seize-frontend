@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, type JSX } from "react";
+import { FC, type JSX, useMemo } from "react";
 import { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
 import type { WaveOutcomeDistributionState } from "@/types/waves.types";
 import { useWaveOutcomeDistributionQuery } from "@/hooks/waves/useWaveOutcomeDistributionQuery";
@@ -31,13 +31,16 @@ export const WaveOutcome: FC<WaveOutcomeProps> = ({ waveId, outcome }) => {
     waveId,
     outcomeIndex: outcome.index,
   });
-  const distributionState: WaveOutcomeDistributionState = {
-    items,
-    totalCount,
-    hasNextPage: Boolean(hasNextPage),
-    isFetchingNextPage,
-    fetchNextPage,
-  };
+  const distributionState: WaveOutcomeDistributionState = useMemo(
+    () => ({
+      items,
+      totalCount,
+      hasNextPage: Boolean(hasNextPage),
+      isFetchingNextPage,
+      fetchNextPage,
+    }),
+    [items, totalCount, hasNextPage, isFetchingNextPage, fetchNextPage]
+  );
 
   const getOutcomeType = (): OutcomeType => {
     if (outcome.credit === ApiWaveOutcomeCredit.Rep) {

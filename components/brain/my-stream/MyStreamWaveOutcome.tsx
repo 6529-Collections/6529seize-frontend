@@ -1,6 +1,6 @@
 "use client";
 
-import React, { FC, useMemo, useRef } from "react";
+import { FC, useMemo, useRef } from "react";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { WaveOutcome } from "@/components/waves/outcome/WaveOutcome";
 import { useLayout } from "./layout/LayoutContext";

@@ -38,7 +38,7 @@ export type UseWaveOutcomeDistributionQueryResult = UseInfiniteQueryResult<
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 100;
-const DEFAULT_SORT_DIRECTION: WaveOutcomeDistributionSortDirection = "DESC";
+const DEFAULT_SORT_DIRECTION: WaveOutcomeDistributionSortDirection = "ASC";
 const DEFAULT_STALE_TIME = 30_000;
 
 export function useWaveOutcomeDistributionQuery({
@@ -59,7 +59,7 @@ export function useWaveOutcomeDistributionQuery({
       ? Math.floor(pageSize)
       : DEFAULT_PAGE_SIZE;
   const normalizedSortDirection: WaveOutcomeDistributionSortDirection =
-    sortDirection === "ASC" ? "ASC" : "DESC";
+    sortDirection === "DESC" ? "DESC" : "ASC";
 
   const queryKey = useMemo(
     () => [

@@ -14,6 +14,16 @@ jest.mock("@/components/waves/outcome/WaveManualOutcome", () => ({
   WaveManualOutcome: (props: any) => <div data-testid="manual" />,
 }));
 
+jest.mock("@/hooks/waves/useWaveOutcomeDistributionQuery", () => ({
+  useWaveOutcomeDistributionQuery: jest.fn().mockReturnValue({
+    items: [],
+    totalCount: 0,
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    fetchNextPage: jest.fn(),
+  }),
+}));
+
 import { WaveOutcome } from "@/components/waves/outcome/WaveOutcome";
 import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
 

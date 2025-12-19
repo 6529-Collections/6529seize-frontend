@@ -27,7 +27,7 @@ export const WaveRepOutcome: FC<WaveRepOutcomeProps> = ({
   const visibleItems = showAll
     ? items
     : items.slice(0, DEFAULT_AMOUNTS_TO_SHOW);
-  const amounts = visibleItems.map((item) => item.amount ?? 0);
+
   const hiddenLocalCount = Math.max(
     items.length - DEFAULT_AMOUNTS_TO_SHOW,
     0
@@ -118,16 +118,16 @@ export const WaveRepOutcome: FC<WaveRepOutcomeProps> = ({
             transition={{ duration: 0.2 }}
             className="tw-overflow-hidden tw-bg-gradient-to-b tw-from-iron-900/50 tw-to-iron-950/50">
             <div className="tw-divide-y tw-divide-iron-800/30 tw-divide-solid tw-divide-x-0">
-              {amounts.map((amount, i) => (
+              {visibleItems.map((item, i) => (
                 <div
-                  key={`wave-rep-outcome-${amount}-${i}`}
+                  key={`wave-rep-outcome-${item.index}`}
                   className="tw-px-4 tw-py-3 tw-bg-gradient-to-r hover:tw-from-[#C3B5D9]/5 hover:tw-to-transparent tw-transition-colors tw-duration-300">
                   <div className="tw-flex tw-items-center tw-gap-4">
                     <span className="tw-flex tw-items-center tw-justify-center tw-size-8 tw-rounded-lg tw-bg-gradient-to-br tw-from-[#C3B5D9]/10 tw-to-[#C3B5D9]/5 tw-text-[#C3B5D9] tw-text-sm tw-font-semibold">
                       {i + 1}
                     </span>
                     <span className="tw-whitespace-nowrap tw-text-[#C3B5D9] tw-text-base tw-font-medium">
-                      {formatNumberWithCommas(amount)} Rep
+                      {formatNumberWithCommas(item.amount ?? 0)} Rep
                     </span>
                   </div>
                 </div>
