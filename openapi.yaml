@@ -2382,7 +2382,7 @@ paths:
       parameters:
         - name: page_size
           in: query
-          description: Page size for pagination (optional)
+          description: Default is 20
           required: false
           schema:
             type: integer
@@ -2390,7 +2390,7 @@ paths:
             minimum: 1
         - name: page
           in: query
-          description: Page number for pagination (optional)
+          description: Default is 1
           required: false
           schema:
             type: integer
@@ -2402,11 +2402,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - type: array
-                    items:
-                      $ref: "#/components/schemas/RedeemedSubscriptionCounts"
-                  - $ref: "#/components/schemas/RedeemedSubscriptionCountsPage"
+                $ref: "#/components/schemas/RedeemedSubscriptionCountsPage"
   /subscriptions/consolidation/logs/{consolidation_key}:
     get:
       tags:

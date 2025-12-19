@@ -83,7 +83,7 @@ const mockSubscriptions: NFTSubscription[] = [
 const mockDetails: SubscriptionDetails = {
   consolidation_key: "testuser",
   last_update: Date.now(),
-  balance: 1.0,
+  balance: 1,
   automatic: true,
   subscribe_all_editions: false,
   subscription_eligibility_count: 1,

@@ -17,7 +17,7 @@ import { formatAddress } from "@/helpers/Helpers";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import Toggle from "react-toggle";
@@ -115,6 +115,7 @@ function SubscriptionRow(
 ) {
   const id = `subscription-${props.subscription.token_id}`;
 
+  const queryClient = useQueryClient();
   const { requestAuth, setToast } = useContext(AuthContext);
 
   const [subscribed, setSubscribed] = useState<boolean>(
@@ -191,6 +192,12 @@ function SubscriptionRow(
         type: "success",
       });
       props.refresh();
+      queryClient.invalidateQueries({
+        queryKey: [
+          "consolidation-final-subscription",
+          `${props.profileKey}-${props.subscription.contract}-${props.subscription.token_id}`,
+        ],
+      });
     } catch (e: unknown) {
       setToast({
         message:
@@ -239,6 +246,12 @@ function SubscriptionRow(
         type: "success",
       });
       props.refresh();
+      queryClient.invalidateQueries({
+        queryKey: [
+          "consolidation-final-subscription",
+          `${props.profileKey}-${props.subscription.contract}-${props.subscription.token_id}`,
+        ],
+      });
     } catch (e: unknown) {
       setSelectedCount(subscribedCount);
       setToast({

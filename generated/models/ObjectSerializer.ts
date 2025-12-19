@@ -201,7 +201,6 @@ export * from '../models/DistributionNormalizedPage';
 export * from '../models/DistributionPhasesPage';
 export * from '../models/DistributionPhoto';
 export * from '../models/DistributionPhotosPage';
-export * from '../models/GetRedeemedMemeSubscriptionCounts200Response';
 export * from '../models/GetWaveSubscription200Response';
 export * from '../models/NFTFinalSubscription';
 export * from '../models/NFTFinalSubscriptionUpload';
@@ -429,7 +428,6 @@ import { DistributionNormalizedPage } from '../models/DistributionNormalizedPage
 import { DistributionPhasesPage } from '../models/DistributionPhasesPage';
 import { DistributionPhoto } from '../models/DistributionPhoto';
 import { DistributionPhotosPage } from '../models/DistributionPhotosPage';
-import { GetRedeemedMemeSubscriptionCounts200ResponseClass } from '../models/GetRedeemedMemeSubscriptionCounts200Response';
 import { GetWaveSubscription200Response } from '../models/GetWaveSubscription200Response';
 import { NFTFinalSubscription } from '../models/NFTFinalSubscription';
 import { NFTFinalSubscriptionUpload } from '../models/NFTFinalSubscriptionUpload';
@@ -676,7 +674,6 @@ let typeMap: {[index: string]: any} = {
     "DistributionPhasesPage": DistributionPhasesPage,
     "DistributionPhoto": DistributionPhoto,
     "DistributionPhotosPage": DistributionPhotosPage,
-    "GetRedeemedMemeSubscriptionCounts200Response": GetRedeemedMemeSubscriptionCounts200ResponseClass,
     "GetWaveSubscription200Response": GetWaveSubscription200Response,
     "NFTFinalSubscription": NFTFinalSubscription,
     "NFTFinalSubscriptionUpload": NFTFinalSubscriptionUpload,
