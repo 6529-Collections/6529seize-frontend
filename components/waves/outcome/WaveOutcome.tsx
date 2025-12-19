@@ -1,5 +1,5 @@
 import { FC, type JSX } from "react";
-import { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
+import { ApiWaveOutcomeOld } from "@/generated/models/ApiWaveOutcomeOld";
 import { WaveRepOutcome } from "./WaveRepOutcome";
 import { WaveNICOutcome } from "./WaveNICOutcome";
 import { WaveManualOutcome } from "./WaveManualOutcome";
@@ -12,7 +12,7 @@ enum OutcomeType {
 }
 
 interface WaveOutcomeProps {
-  readonly outcome: ApiWaveOutcome;
+  readonly outcome: ApiWaveOutcomeOld;
 }
 
 export const WaveOutcome: FC<WaveOutcomeProps> = ({
