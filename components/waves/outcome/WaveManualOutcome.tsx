@@ -2,13 +2,13 @@
 
 import { FC, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAward } from "@fortawesome/free-solid-svg-icons";
+import { ApiWaveOutcomeOld } from "@/generated/models/ApiWaveOutcomeOld";
 
 interface WaveManualOutcomeProps {
-  readonly outcome: ApiWaveOutcome;
+  readonly outcome: ApiWaveOutcomeOld;
 }
 
 const DEFAULT_AMOUNTS_TO_SHOW = 3;

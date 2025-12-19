@@ -1,12 +1,14 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
-import { Container, Row, Col } from "react-bootstrap";
-import Toggle from "react-toggle";
 import { AuthContext } from "@/components/auth/Auth";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
+import { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { commonApiPost } from "@/services/api/common-api";
-import { SubscriptionDetails } from "@/entities/ISubscription";
-import { Spinner } from "@/components/dotLoader/DotLoader";
+import { useContext, useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+import Toggle from "react-toggle";
 
 export default function UserPageSubscriptionsMode(
   props: Readonly<{
@@ -75,14 +77,30 @@ export default function UserPageSubscriptionsMode(
 
   return (
     <Container className="no-padding">
-      <Row className="pb-2">
+      <Row className="tw-pb-2">
         <Col>
-          <h5 className="mb-0">Mode</h5>
+          <h5 className="tw-mb-0">
+            Mode{" "}
+            {props.details && props.details.last_update > 0 && (
+              <span className="tw-text-iron-400 tw-text-sm tw-font-semibold">
+                {new Date(props.details.last_update).toLocaleString("en-US", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                  timeZone: "UTC",
+                })}{" "}
+                UTC
+              </span>
+            )}
+          </h5>
         </Col>
       </Row>
-      <Row className="pt-1">
-        <Col className="d-flex align-items-center gap-2">
-          <label htmlFor={"subscription-mode"} className={"font-color"}>
+      <Row className="tw-pt-1">
+        <Col className="tw-flex tw-items-center tw-gap-2">
+          <label htmlFor={"subscription-mode"} className="font-color">
             <b>Manual</b>
           </label>
           <Toggle
@@ -92,18 +110,18 @@ export default function UserPageSubscriptionsMode(
             icons={false}
             onChange={toggleMode}
           />
-          <label htmlFor={"subscription-mode"} className={"font-color"}>
+          <label htmlFor={"subscription-mode"} className="font-color">
             <b>Automatic</b>
           </label>
-          {isUpdating && <Spinner />}
+          {isUpdating && <CircleLoader size={CircleLoaderSize.MEDIUM} />}
         </Col>
       </Row>
       {!props.readonly && (
-        <Row className="pt-1">
-          <Col className="no-wrap">
+        <Row className="tw-pt-1">
+          <Col className="tw-whitespace-nowrap">
             {isAuto
-              ? "Automatic airdrops of all eligible cards unless you opt-out"
-              : "You have to opt-in to each specific card"}
+              ? "Automatic airdrops of all eligible drops unless you opt-out"
+              : "You have to opt-in to each specific drop"}
           </Col>
         </Row>
       )}

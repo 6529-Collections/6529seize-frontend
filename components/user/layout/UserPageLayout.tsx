@@ -18,12 +18,12 @@ export default function UserPageLayout({
     initialProfile?.primary_wallet ?? normalizedHandleOrWallet;
 
   return (
-    <main className="tw-min-h-[100dvh] tailwind-scope">
+    <main className="tw-flex tw-flex-col tw-min-h-[100dvh] tailwind-scope">
       <UserPageClientHydrator
         profile={initialProfile}
         handleOrWallet={normalizedHandleOrWallet}
       />
-      <div className="tw-bg-black tw-min-h-screen tw-pb-16 lg:tw-pb-20 tw-border-r tw-border-iron-800 tw-border-solid tw-border-y-0 tw-border-l-0">
+      <div className="tw-flex-1 tw-bg-black tw-pb-16 lg:tw-pb-20 tw-border-r tw-border-iron-800 tw-border-solid tw-border-y-0 tw-border-l-0">
         <UserPageHeader
           profile={initialProfile}
           handleOrWallet={normalizedHandleOrWallet}

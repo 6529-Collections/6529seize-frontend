@@ -1,6 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import SingleWaveDropVoteSlider from '@/components/waves/drop/SingleWaveDropVoteSlider';
-import { ApiWaveCreditType } from '@/generated/models/ApiWaveCreditType';
 
 // Mock framer-motion
 jest.mock('framer-motion', () => ({
@@ -35,7 +34,7 @@ describe('SingleWaveDropVoteSlider', () => {
     minValue: -100,
     maxValue: 100,
     setVoteValue: jest.fn(),
-    creditType: ApiWaveCreditType.Rep,
+    label: "Rep",
   };
 
   beforeEach(() => {
@@ -44,29 +43,29 @@ describe('SingleWaveDropVoteSlider', () => {
 
   it('renders slider with basic elements', () => {
     render(<SingleWaveDropVoteSlider {...defaultProps} />);
-    
+
     const sliders = screen.getAllByRole('slider');
     expect(sliders.length).toBeGreaterThan(0);
     const tooltips = screen.getAllByText((content, element) => {
-      return element?.textContent === '50 REP';
+      return element?.textContent === '50 Rep';
     });
     expect(tooltips.length).toBeGreaterThan(0); // Vote value in tooltip
   });
 
   it('displays vote value in tooltip', () => {
     render(<SingleWaveDropVoteSlider {...defaultProps} voteValue={75} />);
-    
+
     const tooltips = screen.getAllByText((content, element) => {
-      return element?.textContent === '75 REP';
+      return element?.textContent === '75 Rep';
     });
     expect(tooltips.length).toBeGreaterThan(0);
   });
 
   it('handles string vote value by defaulting to 0', () => {
     render(<SingleWaveDropVoteSlider {...defaultProps} voteValue="invalid" />);
-    
+
     const tooltips = screen.getAllByText((content, element) => {
-      return element?.textContent === '0 REP';
+      return element?.textContent === '0 Rep';
     });
     expect(tooltips.length).toBeGreaterThan(0);
   });
@@ -111,18 +110,18 @@ describe('SingleWaveDropVoteSlider', () => {
 
   it('handles zero range case', () => {
     render(<SingleWaveDropVoteSlider {...defaultProps} minValue={0} maxValue={0} voteValue={0} />);
-    
+
     const tooltips = screen.getAllByText((content, element) => {
-      return element?.textContent === '0 REP';
+      return element?.textContent === '0 Rep';
     });
     expect(tooltips.length).toBeGreaterThan(0);
   });
 
   it('handles negative vote values', () => {
     render(<SingleWaveDropVoteSlider {...defaultProps} voteValue={-25} />);
-    
+
     const tooltips = screen.getAllByText((content, element) => {
-      return element?.textContent === '-25 REP';
+      return element?.textContent === '-25 Rep';
     });
     expect(tooltips.length).toBeGreaterThan(0);
   });
@@ -161,20 +160,20 @@ describe('SingleWaveDropVoteSlider', () => {
   });
 
   it('displays correct credit type in tooltip', () => {
-    render(<SingleWaveDropVoteSlider {...defaultProps} creditType={ApiWaveCreditType.Rep} />);
-    
+    render(<SingleWaveDropVoteSlider {...defaultProps} label="Rep" />);
+
     const tooltips = screen.getAllByText((content, element) => {
-      return element?.textContent === '50 REP';
+      return element?.textContent === '50 Rep';
     });
     expect(tooltips.length).toBeGreaterThan(0);
   });
 
   it('handles edge case where all values are zero', () => {
     render(<SingleWaveDropVoteSlider {...defaultProps} minValue={0} maxValue={0} voteValue={0} />);
-    
+
     // Should render without crashing and show 0 value
     const tooltips = screen.getAllByText((content, element) => {
-      return element?.textContent === '0 REP';
+      return element?.textContent === '0 Rep';
     });
     expect(tooltips.length).toBeGreaterThan(0);
   });

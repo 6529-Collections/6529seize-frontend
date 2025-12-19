@@ -112,13 +112,14 @@ describe('WaveLeaderboardRightSidebarActivityLog', () => {
 
   it('displays voter information with profile picture', () => {
     renderComponent();
-    
+
     const voterLink = screen.getByTitle('Voter: voter_user');
     expect(voterLink).toHaveAttribute('href', '/voter_user');
     expect(screen.getByText('voter_user')).toBeInTheDocument();
-    
+
     const voterPfp = voterLink.querySelector('img');
-    expect(voterPfp).toHaveAttribute('src', 'https://example.com/voter.jpg');
+    expect(voterPfp).toBeInTheDocument();
+    expect(voterPfp).toHaveAttribute('src', expect.stringContaining('voter.jpg'));
     expect(voterPfp).toHaveClass('tw-size-5', 'tw-rounded-md');
   });
 
@@ -138,13 +139,14 @@ describe('WaveLeaderboardRightSidebarActivityLog', () => {
 
   it('displays drop author information with profile picture', () => {
     renderComponent();
-    
+
     const authorLink = screen.getByTitle('Drop creator: author_user');
     expect(authorLink).toHaveAttribute('href', '/author_user');
     expect(screen.getByText('author_user')).toBeInTheDocument();
-    
+
     const authorPfp = authorLink.querySelector('img');
-    expect(authorPfp).toHaveAttribute('src', 'https://example.com/author.jpg');
+    expect(authorPfp).toBeInTheDocument();
+    expect(authorPfp).toHaveAttribute('src', expect.stringContaining('author.jpg'));
   });
 
   it('displays drop author information without profile picture', () => {

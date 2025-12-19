@@ -1,22 +1,20 @@
-import styles from "./UserPageSubscriptions.module.scss";
-import { Container, Row, Col, Accordion } from "react-bootstrap";
-import {
-  RedeemedSubscription,
-  SubscriptionLog,
-  SubscriptionTopUp,
-} from "@/entities/ISubscription";
-import EthereumIcon from "../utils/icons/EthereumIcon";
-import EtherscanIcon from "../utils/icons/EtherscanIcon";
+import Pagination from "@/components/pagination/Pagination";
+import { MEMES_CONTRACT } from "@/constants";
+import { RedeemedSubscription } from "@/generated/models/RedeemedSubscription";
+import { SubscriptionLog } from "@/generated/models/SubscriptionLog";
+import { SubscriptionTopUp } from "@/generated/models/SubscriptionTopUp";
 import {
   areEqualAddresses,
   formatAddress,
   getDateDisplay,
   getTransactionLink,
 } from "@/helpers/Helpers";
-import { mainnet } from "wagmi/chains";
-import { MEMES_CONTRACT } from "@/constants";
 import { Page } from "@/helpers/Types";
-import Pagination from "@/components/pagination/Pagination";
+import { Accordion, Col, Container, Row } from "react-bootstrap";
+import { mainnet } from "wagmi/chains";
+import EthereumIcon from "../utils/icons/EthereumIcon";
+import EtherscanIcon from "../utils/icons/EtherscanIcon";
+import styles from "./UserPageSubscriptions.module.scss";
 
 export default function UserPageSubscriptionsHistory(
   props: Readonly<{
@@ -32,10 +30,11 @@ export default function UserPageSubscriptionsHistory(
     <Container className="no-padding">
       <Row>
         <Col>
-          <h5>Subscription History</h5>
+          <h5 className="mb-0 tw-font-semibold">Subscription History</h5>
         </Col>
       </Row>
-      <Row className="pt-2 pb-2">
+      <hr className="tw-border-white tw-opacity-100 tw-border-2 tw-mt-1" />
+      <Row className="pb-2">
         <Col>
           <RedeemedSubscriptionsAccordion
             history={props.redeemed}
@@ -200,8 +199,7 @@ function TopUpEntry(
               target="_blank"
               rel="noopener noreferrer"
               href={getTransactionLink(mainnet.id, props.topUp.hash)}
-              aria-label="View transaction on Etherscan"
-            >
+              aria-label="View transaction on Etherscan">
               <EtherscanIcon />
             </a>
           </div>
@@ -229,7 +227,8 @@ function LogEntry(
         </div>
         <div className="d-flex align-items-center gap-3">
           <div className="font-color-silver no-wrap">
-            {getDateDisplay(new Date(props.log.created_at))}
+            {props.log.created_at &&
+              getDateDisplay(new Date(props.log.created_at))}
           </div>
         </div>
       </div>
@@ -251,18 +250,23 @@ function RedeemedEntry(
       <div className="d-flex align-items-center justify-content-between gap-2">
         <div className="d-flex flex-column gap-1">
           <div>
-            Redeemed Subscription for {contractName} #{props.redeem.token_id}
+            Redeemed Subscription for {contractName} #{props.redeem.token_id} x
+            {props.redeem.count}
           </div>
           <div className="font-smaller font-color-silver">
-            Airdrop Address: {props.redeem.address} - Balance after redemption:{" "}
-            {props.redeem.balance_after} ETH
+            Airdrop Address: {formatAddress(props.redeem.address)} - Balance
+            after redemption: {props.redeem.balance_after} ETH
           </div>
         </div>
         <div className="d-flex align-items-center gap-3">
           <div className="font-color-silver no-wrap">
-            {getDateDisplay(
-              new Date(props.redeem.transaction_date ?? props.redeem.created_at)
-            )}
+            {(props.redeem.transaction_date ?? props.redeem.created_at) &&
+              getDateDisplay(
+                new Date(
+                  (props.redeem.transaction_date ??
+                    props.redeem.created_at) as Date
+                )
+              )}
           </div>
           <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5">
             <a
@@ -270,8 +274,7 @@ function RedeemedEntry(
               target="_blank"
               rel="noopener noreferrer"
               href={getTransactionLink(mainnet.id, props.redeem.transaction)}
-              aria-label="View transaction on Etherscan"
-            >
+              aria-label="View transaction on Etherscan">
               <EtherscanIcon />
             </a>
           </div>

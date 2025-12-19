@@ -1,12 +1,18 @@
 import { createMockAuthContext } from "@/__tests__/utils/testContexts";
 import { AuthContext } from "@/components/auth/Auth";
 import UserPageSubscriptionsUpcoming from "@/components/user/subscriptions/UserPageSubscriptionsUpcoming";
-import { NFTSubscription, SubscriptionDetails } from "@/entities/ISubscription";
+import { NFTSubscription } from "@/generated/models/NFTSubscription";
+import { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { useQuery } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 
+const mockInvalidateQueries = jest.fn();
+
 jest.mock("@tanstack/react-query", () => ({
   useQuery: jest.fn(),
+  useQueryClient: () => ({
+    invalidateQueries: mockInvalidateQueries,
+  }),
 }));
 
 const mockUpcomingRows = [
@@ -79,9 +85,16 @@ const mockSubscriptions: NFTSubscription[] = [
   } as NFTSubscription,
 ];
 
+const FIXED_TIMESTAMP = 1609459200000;
+
 const mockDetails: SubscriptionDetails = {
-  profile: "testuser",
-} as SubscriptionDetails;
+  consolidation_key: "testuser",
+  last_update: FIXED_TIMESTAMP,
+  balance: 1,
+  automatic: true,
+  subscribe_all_editions: false,
+  subscription_eligibility_count: 1,
+};
 
 describe("UserPageSubscriptionsUpcoming", () => {
   const useQueryMock = useQuery as jest.Mock;
@@ -206,7 +219,7 @@ describe("UserPageSubscriptionsUpcoming", () => {
 
     renderComponent();
 
-    expect(screen.getByText("Minting Today")).toBeInTheDocument();
+    expect(screen.getByText(/Minting Today/)).toBeInTheDocument();
   });
 
   it("disables toggles in readonly mode", () => {

@@ -142,9 +142,9 @@ describe('SingleWaveDropVoteSubmit', () => {
 
   it('renders vote button with correct initial text', () => {
     renderComponent();
-    
+
     expect(screen.getByRole('button')).toBeInTheDocument();
-    expect(screen.getByText('Vote!')).toBeInTheDocument();
+    expect(screen.getByText('Vote')).toBeInTheDocument();
   });
 
   it('applies correct styling based on drop rank', () => {
@@ -159,13 +159,13 @@ describe('SingleWaveDropVoteSubmit', () => {
     mockCommonApiPost.mockResolvedValue(mockDrop);
 
     renderComponent();
-    
+
     const button = screen.getByRole('button');
     fireEvent.click(button);
 
     // Should show loading spinner
     await waitFor(() => {
-      expect(screen.getByText('Vote!')).toBeInTheDocument();
+      expect(screen.getByText('Vote')).toBeInTheDocument();
     });
   });
 
@@ -234,12 +234,12 @@ describe('SingleWaveDropVoteSubmit', () => {
     mockCommonApiPost.mockRejectedValue(mockError);
 
     renderComponent();
-    
+
     const button = screen.getByRole('button');
     fireEvent.click(button);
 
     // Button should show initial text
-    expect(screen.getByText('Vote!')).toBeInTheDocument();
+    expect(screen.getByText('Vote')).toBeInTheDocument();
   });
 
   it('accepts onVoteSuccess callback prop', () => {
@@ -273,10 +273,10 @@ describe('SingleWaveDropVoteSubmit', () => {
 
   it('renders button with initial vote text', () => {
     renderComponent();
-    
+
     const button = screen.getByRole('button');
     expect(button).toBeInTheDocument();
-    expect(screen.getByText('Vote!')).toBeInTheDocument();
+    expect(screen.getByText('Vote')).toBeInTheDocument();
   });
 
   it('exposes handleClick method through ref', () => {

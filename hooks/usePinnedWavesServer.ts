@@ -13,6 +13,7 @@ export const MAX_PINNED_WAVES = 10;
 // Cache time constants for React Query
 const PINNED_WAVES_STALE_TIME = 5 * 60 * 1000; // 5 minutes
 const PINNED_WAVES_GC_TIME = 10 * 60 * 1000; // 10 minutes
+const PINNED_WAVES_REFETCH_INTERVAL = 2 * 60 * 1000; // 2 minutes
 
 // Type definitions for React Query data structures
 interface InfiniteQueryData<T> {
@@ -58,6 +59,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
     enabled: isAuthenticated,
     staleTime: PINNED_WAVES_STALE_TIME,
     gcTime: PINNED_WAVES_GC_TIME,
+    refetchInterval: PINNED_WAVES_REFETCH_INTERVAL,
   });
 
   // Clear pinned waves data when user logs out

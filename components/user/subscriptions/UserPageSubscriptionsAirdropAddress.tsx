@@ -1,8 +1,9 @@
 import { AIRDROPS_USE_CASE } from "@/components/delegation/delegation-constants";
+import { MEMES_CONTRACT } from "@/constants";
+import { faEdit } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Col, Container, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
-import { MEMES_CONTRACT } from "@/constants";
-import { formatAddress } from "@/helpers/Helpers";
 
 interface AirdropAddress {
   address: string;
@@ -28,14 +29,14 @@ export default function UserPageSubscriptionsAirdropAddress(
         </Col>
       </Row>
       <Row className="pt-1">
-        <Col className="d-flex gap-3">
+        <Col className="d-flex gap-2">
           <span>
             {props.airdrop?.airdrop_address && (
               <>
                 <>
                   <span
                     data-tooltip-id={`airdrop-address-${props.airdrop.airdrop_address.address}`}>
-                    {formatAddress(props.airdrop.airdrop_address.address)}
+                    {props.airdrop.airdrop_address.address}
                   </span>
                   <Tooltip
                     id={`airdrop-address-${props.airdrop.airdrop_address.address}`}
@@ -57,7 +58,7 @@ export default function UserPageSubscriptionsAirdropAddress(
             <a
               href={`/delegation/register-delegation?collection=${MEMES_CONTRACT}&use_case=${AIRDROPS_USE_CASE.use_case}`}
               aria-label="Change airdrop address">
-              Change
+              <FontAwesomeIcon icon={faEdit} />
             </a>
           )}
         </Col>

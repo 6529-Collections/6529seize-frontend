@@ -52,6 +52,8 @@ type DistributionPlanToolContextType = {
     messages: string[];
     type: TypeOptions;
   }) => void;
+  confirmedTokenId: string | null;
+  setConfirmedTokenId: (tokenId: string | null) => void;
 };
 
 const setToast = ({
@@ -102,6 +104,8 @@ export const DistributionPlanToolContext =
     phases: [],
     setPhases: () => {},
     setToasts: () => {},
+    confirmedTokenId: null,
+    setConfirmedTokenId: () => {},
   });
 
 export default function DistributionPlanToolContextWrapper({
@@ -126,6 +130,7 @@ export default function DistributionPlanToolContextWrapper({
   const [phases, setPhases] = useState<AllowlistPhaseWithComponentAndItems[]>(
     []
   );
+  const [confirmedTokenId, setConfirmedTokenId] = useState<string | null>(null);
 
   const runOperations = async () => {
     if (!distributionPlan) return;
@@ -243,6 +248,8 @@ export default function DistributionPlanToolContextWrapper({
           phases,
           setPhases,
           setToasts,
+          confirmedTokenId,
+          setConfirmedTokenId,
         }}>
         <div>{children}</div>
         <RunOperations />
