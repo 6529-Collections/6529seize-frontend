@@ -9,25 +9,23 @@ interface MyStreamWaveOutcomeProps {
   readonly wave: ApiWave;
 }
 
-// Removed in favor of useWaveViewHeight hook
-
 const MyStreamWaveOutcome: React.FC<MyStreamWaveOutcomeProps> = ({ wave }) => {
   // Get the pre-calculated style from LayoutContext
   const { outcomeViewStyle } = useLayout();
-  
+
   const containerClassName = useMemo(() => {
     return `tw-pt-4 tw-pb-4 tw-w-full tw-flex tw-flex-col tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-flex-grow lg:tw-pr-2`;
   }, []);
   return (
     <div className={containerClassName} style={outcomeViewStyle}>
-      <div className="tw-px-2 sm:tw-px-4 tw-space-y-4">
+      {/* <div className="tw-px-2 sm:tw-px-4 tw-space-y-4">
         {wave.outcomes.map((outcome, index) => (
           <WaveOutcome
             key={`${outcome.credit}-${outcome.type}-${index}`}
             outcome={outcome}
           />
         ))}
-      </div>
+      </div> */}
     </div>
   );
 };

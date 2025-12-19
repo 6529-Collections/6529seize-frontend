@@ -93,6 +93,7 @@ export enum QueryKey {
   WAVE_FOLLOWERS = "WAVE_FOLLOWERS",
   FEED_ITEMS = "FEED_ITEMS",
   WAVE_DECISIONS = "WAVE_DECISIONS",
+  WAVE_OUTCOMES = "WAVE_OUTCOMES",
 }
 
 interface InitProfileRatersParamsAndData {
