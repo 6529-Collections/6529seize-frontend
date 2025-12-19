@@ -1,40 +1,60 @@
 "use client";
 
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ApiWaveOutcomeOld } from "@/generated/models/ApiWaveOutcomeOld";
+import type { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
+import type { WaveOutcomeDistributionState } from "@/types/waves.types";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-regular-svg-icons";
 
 interface WaveRepOutcomeProps {
-  readonly outcome: ApiWaveOutcomeOld;
+  readonly outcome: ApiWaveOutcome;
+  readonly distribution: WaveOutcomeDistributionState;
 }
 
 const DEFAULT_AMOUNTS_TO_SHOW = 3;
 
-export const WaveRepOutcome: FC<WaveRepOutcomeProps> = ({ outcome }) => {
+export const WaveRepOutcome: FC<WaveRepOutcomeProps> = ({
+  outcome,
+  distribution,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
-  const winnersCount =
-    outcome.distribution?.filter((d) => !!d.amount).length ?? 0;
-  const totalCount = outcome.distribution?.length ?? 0;
   const [showAll, setShowAll] = useState(false);
+  const {
+    items,
+    totalCount,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    isLoading,
+    isError,
+    errorMessage,
+  } = distribution;
+  const winnersCount = totalCount;
+  const visibleItems = showAll
+    ? items
+    : items.slice(0, DEFAULT_AMOUNTS_TO_SHOW);
 
-  const getAmounts = (): number[] => {
-    if (showAll) {
-      return outcome.distribution?.map((d) => d.amount ?? 0) ?? [];
+  const hiddenLocalCount = Math.max(
+    items.length - DEFAULT_AMOUNTS_TO_SHOW,
+    0
+  );
+  const remainingFromServer = Math.max(totalCount - items.length, 0);
+  const remainingCount = showAll
+    ? remainingFromServer
+    : hiddenLocalCount + remainingFromServer;
+  const shouldShowMore =
+    hasNextPage || (!showAll && items.length > DEFAULT_AMOUNTS_TO_SHOW);
+
+  const onViewMore = () => {
+    if (!showAll) {
+      setShowAll(true);
     }
-    return (
-      outcome.distribution
-        ?.slice(0, DEFAULT_AMOUNTS_TO_SHOW)
-        .map((d) => d.amount ?? 0) ?? []
-    );
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
   };
-  const [amounts, setAmounts] = useState<number[]>(getAmounts());
-
-  useEffect(() => {
-    setAmounts(getAmounts());
-  }, [showAll]);
 
   return (
     <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-300 desktop-hover:hover:tw-border-iron-700">
@@ -55,8 +75,14 @@ export const WaveRepOutcome: FC<WaveRepOutcomeProps> = ({ outcome }) => {
                 Rep
               </div>
               <div className="tw-text-sm tw-text-[#C3B5D9]/80">
-                {formatNumberWithCommas(winnersCount)}{" "}
-                {winnersCount === 1 ? "Winner" : "Winners"}
+                {isLoading ? (
+                  <span className="tw-animate-pulse tw-bg-white/20 tw-h-4 tw-w-12 tw-rounded tw-inline-block" />
+                ) : (
+                  <>
+                    {formatNumberWithCommas(winnersCount)}{" "}
+                    {winnersCount === 1 ? "Winner" : "Winners"}
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -106,29 +132,48 @@ export const WaveRepOutcome: FC<WaveRepOutcomeProps> = ({ outcome }) => {
             transition={{ duration: 0.2 }}
             className="tw-overflow-hidden tw-bg-gradient-to-b tw-from-iron-900/50 tw-to-iron-950/50">
             <div className="tw-divide-y tw-divide-iron-800/30 tw-divide-solid tw-divide-x-0">
-              {amounts.map((amount, i) => (
+              {visibleItems.map((item, i) => (
                 <div
-                  key={`wave-rep-outcome-${amount}-${i}`}
+                  key={`wave-rep-outcome-${item.index}`}
                   className="tw-px-4 tw-py-3 tw-bg-gradient-to-r hover:tw-from-[#C3B5D9]/5 hover:tw-to-transparent tw-transition-colors tw-duration-300">
                   <div className="tw-flex tw-items-center tw-gap-4">
                     <span className="tw-flex tw-items-center tw-justify-center tw-size-8 tw-rounded-lg tw-bg-gradient-to-br tw-from-[#C3B5D9]/10 tw-to-[#C3B5D9]/5 tw-text-[#C3B5D9] tw-text-sm tw-font-semibold">
                       {i + 1}
                     </span>
                     <span className="tw-whitespace-nowrap tw-text-[#C3B5D9] tw-text-base tw-font-medium">
-                      {formatNumberWithCommas(amount)} Rep
+                      {formatNumberWithCommas(item.amount ?? 0)} Rep
                     </span>
                   </div>
                 </div>
               ))}
 
-              {totalCount > DEFAULT_AMOUNTS_TO_SHOW && !showAll && (
+              {isLoading && (
+                <div className="tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-text-iron-500">
+                  Loading winners...
+                </div>
+              )}
+
+              {isError && (
+                <div className="tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-text-red-400">
+                  {errorMessage || "Failed to load winners"}
+                </div>
+              )}
+
+              {!isLoading && !isError && items.length === 0 && (
+                <div className="tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-text-iron-500">
+                  No winners yet
+                </div>
+              )}
+
+              {shouldShowMore && (
                 <button
                   className="tw-border-0 tw-w-full tw-px-4 tw-py-3 tw-text-left tw-bg-iron-900 tw-text-[#C3B5D9]/80 tw-text-sm hover:tw-text-[#C3B5D9] tw-transition-all tw-duration-300"
-                  onClick={() => setShowAll(true)}>
-                  <span>View more</span>
+                  onClick={onViewMore}
+                  disabled={isFetchingNextPage}>
+                  <span>{isFetchingNextPage ? "Loading..." : "View more"}</span>
                   <span className="tw-ml-1 tw-text-iron-400">•</span>
                   <span className="tw-ml-1 tw-text-iron-400">
-                    {totalCount - DEFAULT_AMOUNTS_TO_SHOW} more
+                    {remainingCount} more
                   </span>
                 </button>
               )}

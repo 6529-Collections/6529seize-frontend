@@ -14,22 +14,50 @@ jest.mock("@/components/waves/outcome/WaveManualOutcome", () => ({
   WaveManualOutcome: (props: any) => <div data-testid="manual" />,
 }));
 
+jest.mock("@/hooks/waves/useWaveOutcomeDistributionQuery", () => ({
+  useWaveOutcomeDistributionQuery: jest.fn().mockReturnValue({
+    items: [],
+    totalCount: 0,
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    fetchNextPage: jest.fn(),
+    isLoading: false,
+    isError: false,
+    errorMessage: undefined,
+  }),
+}));
+
 import { WaveOutcome } from "@/components/waves/outcome/WaveOutcome";
 import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
 
 describe("WaveOutcome", () => {
   it("renders rep outcome", () => {
-    render(<WaveOutcome outcome={{ credit: ApiWaveOutcomeCredit.Rep } as any} />);
+    render(
+      <WaveOutcome
+        waveId="wave-1"
+        outcome={{ credit: ApiWaveOutcomeCredit.Rep, index: 0 } as any}
+      />
+    );
     expect(screen.getByTestId("rep")).toBeInTheDocument();
   });
 
   it("renders nic outcome", () => {
-    render(<WaveOutcome outcome={{ credit: ApiWaveOutcomeCredit.Cic } as any} />);
+    render(
+      <WaveOutcome
+        waveId="wave-2"
+        outcome={{ credit: ApiWaveOutcomeCredit.Cic, index: 1 } as any}
+      />
+    );
     expect(screen.getByTestId("nic")).toBeInTheDocument();
   });
 
   it("renders manual outcome", () => {
-    render(<WaveOutcome outcome={{ credit: "OTHER" } as any} />);
+    render(
+      <WaveOutcome
+        waveId="wave-3"
+        outcome={{ credit: "OTHER", index: 2 } as any}
+      />
+    );
     expect(screen.getByTestId("manual")).toBeInTheDocument();
   });
 });

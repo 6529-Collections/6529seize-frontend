@@ -1,40 +1,52 @@
 "use client";
 
-import { FC, useEffect, useState } from "react";
-import { ApiWaveOutcomeOld } from "@/generated/models/ApiWaveOutcomeOld";
+import { FC, useState } from "react";
+import type { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
+import type { WaveOutcomeDistributionState } from "@/types/waves.types";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { motion, AnimatePresence } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAddressCard } from "@fortawesome/free-regular-svg-icons";
 
 interface WaveNICOutcomeProps {
-  readonly outcome: ApiWaveOutcomeOld;
+  readonly outcome: ApiWaveOutcome;
+  readonly distribution: WaveOutcomeDistributionState;
 }
 
 const DEFAULT_AMOUNTS_TO_SHOW = 3;
 
-export const WaveNICOutcome: FC<WaveNICOutcomeProps> = ({ outcome }) => {
+export const WaveNICOutcome: FC<WaveNICOutcomeProps> = ({
+  outcome,
+  distribution,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showAll, setShowAll] = useState(false);
-  const winnersCount =
-    outcome.distribution?.filter((d) => !!d.amount).length ?? 0;
-  const totalCount = outcome.distribution?.length ?? 0;
+  const {
+    items,
+    totalCount,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    isLoading,
+    isError,
+    errorMessage,
+  } = distribution;
+  const winnersCount = totalCount;
+  const visibleItems = showAll
+    ? items
+    : items.slice(0, DEFAULT_AMOUNTS_TO_SHOW);
+  const remainingCount = Math.max(totalCount - visibleItems.length, 0);
+  const shouldShowMore =
+    hasNextPage || (!showAll && items.length > DEFAULT_AMOUNTS_TO_SHOW);
 
-  const getAmounts = (): number[] => {
-    if (showAll) {
-      return outcome.distribution?.map((d) => d?.amount ?? 0) ?? [];
+  const onViewMore = () => {
+    if (!showAll) {
+      setShowAll(true);
     }
-    return (
-      outcome.distribution
-        ?.slice(0, DEFAULT_AMOUNTS_TO_SHOW)
-        .map((d) => d?.amount ?? 0) ?? []
-    );
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
   };
-  const [amounts, setAmounts] = useState<number[]>(getAmounts());
-
-  useEffect(() => {
-    setAmounts(getAmounts());
-  }, [showAll]);
 
   return (
     <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-300 desktop-hover:hover:tw-border-iron-700">
@@ -55,8 +67,14 @@ export const WaveNICOutcome: FC<WaveNICOutcomeProps> = ({ outcome }) => {
                 NIC
               </div>
               <div className="tw-text-sm tw-text-[#A4C2DB]/80">
-                {formatNumberWithCommas(winnersCount)}{" "}
-                {winnersCount === 1 ? "Winner" : "Winners"}
+                {isLoading ? (
+                  <span className="tw-animate-pulse tw-bg-white/20 tw-h-4 tw-w-12 tw-rounded tw-inline-block" />
+                ) : (
+                  <>
+                    {formatNumberWithCommas(winnersCount)}{" "}
+                    {winnersCount === 1 ? "Winner" : "Winners"}
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -96,29 +114,47 @@ export const WaveNICOutcome: FC<WaveNICOutcomeProps> = ({ outcome }) => {
             transition={{ duration: 0.2 }}
             className="tw-overflow-hidden tw-bg-gradient-to-b tw-from-iron-900/50 tw-to-iron-950/50">
             <div className="tw-divide-y tw-divide-iron-800/30 tw-divide-solid tw-divide-x-0">
-              {amounts.map((amount, i) => (
+              {visibleItems.map((item, i) => (
                 <div
-                  key={`wave-nic-outcome-${amount}-${i}`}
+                  key={`wave-nic-outcome-${item.index}`}
                   className="tw-px-4 tw-py-3 tw-bg-gradient-to-r hover:tw-from-[#A4C2DB]/5 hover:tw-to-transparent tw-transition-colors tw-duration-300">
                   <div className="tw-flex tw-items-center tw-gap-4">
                     <span className="tw-flex tw-items-center tw-justify-center tw-size-8 tw-rounded-lg tw-bg-gradient-to-br tw-from-[#A4C2DB]/10 tw-to-[#A4C2DB]/5 tw-text-[#A4C2DB] tw-text-sm tw-font-semibold">
                       {i + 1}
                     </span>
                     <span className="tw-whitespace-nowrap tw-text-[#A4C2DB] tw-text-base tw-font-medium">
-                      {formatNumberWithCommas(amount)} NIC
+                      {formatNumberWithCommas(item.amount ?? 0)} NIC
                     </span>
                   </div>
                 </div>
               ))}
 
-              {!showAll && totalCount > DEFAULT_AMOUNTS_TO_SHOW && (
+              {isLoading && (
+                <div className="tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-text-iron-500">
+                  Loading winners...
+                </div>
+              )}
+
+              {isError && (
+                <div className="tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-text-red-400">
+                  {errorMessage || "Failed to load winners"}
+                </div>
+              )}
+
+              {!isLoading && !isError && items.length === 0 && (
+                <div className="tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-text-iron-500">
+                  No winners yet
+                </div>
+              )}
+
+              {shouldShowMore && (
                 <button
-                  onClick={() => setShowAll(true)}
+                  onClick={onViewMore}
                   className="tw-border-0 tw-w-full tw-px-4 tw-py-3 tw-text-left tw-bg-iron-900 tw-text-[#A4C2DB]/80 tw-text-sm hover:tw-text-[#A4C2DB] tw-transition-all tw-duration-300">
                   <span>View more</span>
                   <span className="tw-ml-1 tw-text-iron-400">•</span>
                   <span className="tw-ml-1 tw-text-iron-400">
-                    {totalCount - DEFAULT_AMOUNTS_TO_SHOW} more
+                    {remainingCount} more
                   </span>
                 </button>
               )}
