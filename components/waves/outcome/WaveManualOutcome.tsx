@@ -6,17 +6,11 @@ import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAward } from "@fortawesome/free-solid-svg-icons";
 import type { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
-import type { ApiWaveOutcomeDistributionItem } from "@/generated/models/ApiWaveOutcomeDistributionItem";
+import type { WaveOutcomeDistributionState } from "@/types/waves.types";
 
 interface WaveManualOutcomeProps {
   readonly outcome: ApiWaveOutcome;
-  readonly distribution: {
-    readonly items: ApiWaveOutcomeDistributionItem[];
-    readonly totalCount: number;
-    readonly hasNextPage: boolean;
-    readonly isFetchingNextPage: boolean;
-    readonly fetchNextPage: () => void;
-  };
+  readonly distribution: WaveOutcomeDistributionState;
 }
 
 const DEFAULT_AMOUNTS_TO_SHOW = 3;
@@ -49,6 +43,7 @@ export const WaveManualOutcome: FC<WaveManualOutcomeProps> = ({
   return (
     <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-300 desktop-hover:hover:tw-border-iron-700">
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="tw-w-full tw-border-0 tw-px-4 tw-py-3 tw-bg-iron-950">
         <div className="tw-flex tw-items-center tw-justify-between">
@@ -116,7 +111,7 @@ export const WaveManualOutcome: FC<WaveManualOutcomeProps> = ({
                       {i + 1}
                     </span>
                     <span className="tw-whitespace-nowrap tw-text-amber-100 tw-text-base tw-font-medium">
-                      {item.amount ? item.description : ""}
+                      {item.description ?? ""}
                     </span>
                   </div>
                 </div>

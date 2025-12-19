@@ -4,6 +4,13 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 
+jest.mock("@/components/not-found/NotFound", () => ({
+  __esModule: true,
+  default: ({ label }: { label?: string }) => (
+    <div data-testid="not-found" data-label={label} />
+  ),
+}));
+
 // Mock useParams to return different values for different tests
 const mockUseParams = jest.fn(() => ({ id: "123" }));
 jest.mock("next/navigation", () => ({
@@ -128,6 +135,13 @@ jest.mock("@/components/scrollTo/ScrollToButton", () => {
   return MockScrollToButton;
 });
 
+jest.mock("@/components/the-memes/UpcomingMemePage", () => ({
+  __esModule: true,
+  default: ({ id }: { id: string }) => (
+    <div data-testid="upcoming-meme-page" data-id={id} />
+  ),
+}));
+
 // Sample test data
 const mockDistributionData = [
   {
@@ -225,6 +239,19 @@ describe("DistributionPage", () => {
       });
     });
 
+    it("renders UpcomingMemePage component in empty state when nftId exists", async () => {
+      mockFetchAllPages.mockResolvedValue([]);
+      mockFetchUrl.mockResolvedValue({ count: 0, data: [] });
+
+      render(<DistributionPage header="Test" contract="0x123" link="" />);
+
+      await waitFor(() => {
+        const upcomingMemePage = screen.getByTestId("upcoming-meme-page");
+        expect(upcomingMemePage).toBeInTheDocument();
+        expect(upcomingMemePage).toHaveAttribute("data-id", "123");
+      });
+    });
+
     it("shows no results message when search yields no results", async () => {
       const user = userEvent.setup();
       mockFetchAllPages.mockResolvedValue([]);
@@ -247,6 +274,34 @@ describe("DistributionPage", () => {
         expect(
           screen.getByText(/No results found for the search criteria/)
         ).toBeInTheDocument();
+      });
+    });
+
+    it("does not render UpcomingMemePage when search yields no results", async () => {
+      const user = userEvent.setup();
+      mockFetchAllPages.mockResolvedValue([]);
+      mockFetchUrl
+        .mockResolvedValueOnce({ count: 1, data: [mockDistributionData[0]] }) // Initial load with data
+        .mockResolvedValueOnce({ count: 0, data: [] }); // After search
+
+      render(<DistributionPage header="Test" contract="0x123" link="" />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId("open-search-modal")).toBeInTheDocument();
+      });
+
+      // Open search modal and add wallets
+      await user.click(screen.getByTestId("open-search-modal"));
+      await user.click(screen.getByTestId("add-wallets"));
+      await user.click(screen.getByTestId("close-modal"));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/No results found for the search criteria/)
+        ).toBeInTheDocument();
+        expect(
+          screen.queryByTestId("upcoming-meme-page")
+        ).not.toBeInTheDocument();
       });
     });
   });
@@ -604,6 +659,18 @@ describe("DistributionPage", () => {
       // Should not make API calls without nft id
       expect(mockFetchAllPages).not.toHaveBeenCalled();
       expect(mockFetchUrl).not.toHaveBeenCalled();
+    });
+
+    it("renders NotFound component when nft id is invalid", () => {
+      mockUseParams.mockReturnValue({ id: "invalid" });
+      mockFetchAllPages.mockResolvedValue([]);
+      mockFetchUrl.mockResolvedValue({ count: 0, data: [] });
+
+      render(<DistributionPage header="Test" contract="0x123" link="" />);
+
+      const notFound = screen.getByTestId("not-found");
+      expect(notFound).toBeInTheDocument();
+      expect(notFound).toHaveAttribute("data-label", "DISTRIBUTION");
     });
 
     it("handles invalid nft id for mint countdown", async () => {

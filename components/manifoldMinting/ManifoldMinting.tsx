@@ -537,6 +537,13 @@ function ManifoldMemesMintingPhases(
 
   return (
     <Container className="no-padding">
+      {distribution?.airdrops && (
+        <Row className="tw-pb-2">
+          <Col className="tw-text-lg tw-font-bold">
+            Airdrops: x{distribution?.airdrops}
+          </Col>
+        </Row>
+      )}
       <Row>
         {phases.map((phase) => (
           <ManifoldMemesMintingPhase

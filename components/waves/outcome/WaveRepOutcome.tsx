@@ -3,20 +3,14 @@
 import { FC, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
-import type { ApiWaveOutcomeDistributionItem } from "@/generated/models/ApiWaveOutcomeDistributionItem";
+import type { WaveOutcomeDistributionState } from "@/types/waves.types";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-regular-svg-icons";
 
 interface WaveRepOutcomeProps {
   readonly outcome: ApiWaveOutcome;
-  readonly distribution: {
-    readonly items: ApiWaveOutcomeDistributionItem[];
-    readonly totalCount: number;
-    readonly hasNextPage: boolean;
-    readonly isFetchingNextPage: boolean;
-    readonly fetchNextPage: () => void;
-  };
+  readonly distribution: WaveOutcomeDistributionState;
 }
 
 const DEFAULT_AMOUNTS_TO_SHOW = 3;
@@ -34,7 +28,14 @@ export const WaveRepOutcome: FC<WaveRepOutcomeProps> = ({
     ? items
     : items.slice(0, DEFAULT_AMOUNTS_TO_SHOW);
   const amounts = visibleItems.map((item) => item.amount ?? 0);
-  const remainingCount = Math.max(totalCount - visibleItems.length, 0);
+  const hiddenLocalCount = Math.max(
+    items.length - DEFAULT_AMOUNTS_TO_SHOW,
+    0
+  );
+  const remainingFromServer = Math.max(totalCount - items.length, 0);
+  const remainingCount = showAll
+    ? remainingFromServer
+    : hiddenLocalCount + remainingFromServer;
   const shouldShowMore =
     hasNextPage || (!showAll && items.length > DEFAULT_AMOUNTS_TO_SHOW);
 

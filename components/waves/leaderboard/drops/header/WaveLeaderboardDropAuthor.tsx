@@ -3,6 +3,7 @@ import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { cicToType } from "@/helpers/Helpers";
 
 import Link from "next/link";
+import Image from "next/image";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
@@ -29,11 +30,13 @@ export const WaveLeaderboardDropAuthor: React.FC<
           {drop.author.pfp ? (
             <div className="tw-rounded-lg tw-h-full tw-w-full">
               <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-lg tw-overflow-hidden tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
-                <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-overflow-hidden">
-                  <img
+                <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-overflow-hidden tw-relative">
+                  <Image
                     src={resolveIpfsUrlSync(drop.author.pfp)}
                     alt="Profile picture"
-                    className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
+                    fill
+                    sizes="44px"
+                    className="tw-bg-transparent tw-object-contain"
                   />
                 </div>
               </div>

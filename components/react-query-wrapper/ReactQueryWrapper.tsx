@@ -1141,6 +1141,12 @@ export default function ReactQueryWrapper({
     queryClient.invalidateQueries({
       queryKey: [QueryKey.WAVE],
     });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.WAVE_OUTCOMES],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.WAVE_OUTCOME_DISTRIBUTION],
+    });
   };
 
   const invalidateDrops = () => {

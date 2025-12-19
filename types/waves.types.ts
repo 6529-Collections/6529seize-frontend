@@ -1,6 +1,7 @@
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
+import type { ApiWaveOutcomeDistributionItem } from "@/generated/models/ApiWaveOutcomeDistributionItem";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
@@ -114,6 +115,14 @@ export interface CreateWaveOutcomeConfig {
   readonly category: string | null;
   readonly maxWinners: number | null;
   readonly winnersConfig: CreateWaveOutcomeConfigWinnersConfig | null;
+}
+
+export interface WaveOutcomeDistributionState {
+  readonly items: ApiWaveOutcomeDistributionItem[];
+  readonly totalCount: number;
+  readonly hasNextPage: boolean;
+  readonly isFetchingNextPage: boolean;
+  readonly fetchNextPage: () => void;
 }
 
 export interface CreateWaveConfig {

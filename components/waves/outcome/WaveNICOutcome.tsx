@@ -2,7 +2,7 @@
 
 import { FC, useState } from "react";
 import type { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
-import type { ApiWaveOutcomeDistributionItem } from "@/generated/models/ApiWaveOutcomeDistributionItem";
+import type { WaveOutcomeDistributionState } from "@/types/waves.types";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { motion, AnimatePresence } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -10,13 +10,7 @@ import { faAddressCard } from "@fortawesome/free-regular-svg-icons";
 
 interface WaveNICOutcomeProps {
   readonly outcome: ApiWaveOutcome;
-  readonly distribution: {
-    readonly items: ApiWaveOutcomeDistributionItem[];
-    readonly totalCount: number;
-    readonly hasNextPage: boolean;
-    readonly isFetchingNextPage: boolean;
-    readonly fetchNextPage: () => void;
-  };
+  readonly distribution: WaveOutcomeDistributionState;
 }
 
 const DEFAULT_AMOUNTS_TO_SHOW = 3;
@@ -33,7 +27,6 @@ export const WaveNICOutcome: FC<WaveNICOutcomeProps> = ({
   const visibleItems = showAll
     ? items
     : items.slice(0, DEFAULT_AMOUNTS_TO_SHOW);
-  const amounts = visibleItems.map((item) => item.amount ?? 0);
   const remainingCount = Math.max(totalCount - visibleItems.length, 0);
   const shouldShowMore =
     hasNextPage || (!showAll && items.length > DEFAULT_AMOUNTS_TO_SHOW);
@@ -107,16 +100,16 @@ export const WaveNICOutcome: FC<WaveNICOutcomeProps> = ({
             transition={{ duration: 0.2 }}
             className="tw-overflow-hidden tw-bg-gradient-to-b tw-from-iron-900/50 tw-to-iron-950/50">
             <div className="tw-divide-y tw-divide-iron-800/30 tw-divide-solid tw-divide-x-0">
-              {amounts.map((amount, i) => (
+              {visibleItems.map((item, i) => (
                 <div
-                  key={`wave-nic-outcome-${amount}-${i}`}
+                  key={`wave-nic-outcome-${item.index}`}
                   className="tw-px-4 tw-py-3 tw-bg-gradient-to-r hover:tw-from-[#A4C2DB]/5 hover:tw-to-transparent tw-transition-colors tw-duration-300">
                   <div className="tw-flex tw-items-center tw-gap-4">
                     <span className="tw-flex tw-items-center tw-justify-center tw-size-8 tw-rounded-lg tw-bg-gradient-to-br tw-from-[#A4C2DB]/10 tw-to-[#A4C2DB]/5 tw-text-[#A4C2DB] tw-text-sm tw-font-semibold">
                       {i + 1}
                     </span>
                     <span className="tw-whitespace-nowrap tw-text-[#A4C2DB] tw-text-base tw-font-medium">
-                      {formatNumberWithCommas(amount)} NIC
+                      {formatNumberWithCommas(item.amount ?? 0)} NIC
                     </span>
                   </div>
                 </div>

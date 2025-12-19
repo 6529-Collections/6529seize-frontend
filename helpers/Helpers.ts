@@ -81,6 +81,34 @@ export function numberWithCommasFromString(x: any) {
   return numberWithCommas(num);
 }
 
+export function extractAllNumbers(str: string): number[] {
+  const regex = /\d+/g;
+  const numbers: number[] = [];
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(str)) !== null) {
+    numbers.push(Number.parseInt(match[0], 10));
+  }
+
+  return numbers;
+}
+
+export function isValidPositiveInteger(value: string | number): boolean {
+  if (typeof value === "number") {
+    return Number.isInteger(value) && value > 0;
+  }
+  if (typeof value !== "string" || value.trim() === "") {
+    return false;
+  }
+  const num = Number.parseInt(value, 10);
+  return (
+    !Number.isNaN(num) &&
+    Number.isInteger(num) &&
+    num > 0 &&
+    num.toString() === value.trim()
+  );
+}
+
 export function numberWithCommas(x: number | undefined) {
   if (!x || x === null || isNaN(x)) return "-";
   if (x === 0) return "-";

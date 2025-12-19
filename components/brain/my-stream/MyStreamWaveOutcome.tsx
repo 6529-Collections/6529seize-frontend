@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useRef } from "react";
+import React, { FC, useMemo, useRef } from "react";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { WaveOutcome } from "@/components/waves/outcome/WaveOutcome";
 import { useLayout } from "./layout/LayoutContext";
@@ -12,7 +12,7 @@ interface MyStreamWaveOutcomeProps {
   readonly wave: ApiWave;
 }
 
-const MyStreamWaveOutcome: React.FC<MyStreamWaveOutcomeProps> = ({ wave }) => {
+const MyStreamWaveOutcome: FC<MyStreamWaveOutcomeProps> = ({ wave }) => {
   // Get the pre-calculated style from LayoutContext
   const { outcomeViewStyle } = useLayout();
   const scrollContainerRef = useRef<HTMLDivElement>(null);

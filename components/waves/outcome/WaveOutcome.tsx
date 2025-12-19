@@ -2,7 +2,7 @@
 
 import { FC, type JSX } from "react";
 import { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
-import type { ApiWaveOutcomeDistributionItem } from "@/generated/models/ApiWaveOutcomeDistributionItem";
+import type { WaveOutcomeDistributionState } from "@/types/waves.types";
 import { useWaveOutcomeDistributionQuery } from "@/hooks/waves/useWaveOutcomeDistributionQuery";
 import { WaveRepOutcome } from "./WaveRepOutcome";
 import { WaveNICOutcome } from "./WaveNICOutcome";
@@ -18,14 +18,6 @@ enum OutcomeType {
 interface WaveOutcomeProps {
   readonly waveId: string;
   readonly outcome: ApiWaveOutcome;
-}
-
-interface WaveOutcomeDistributionState {
-  readonly items: ApiWaveOutcomeDistributionItem[];
-  readonly totalCount: number;
-  readonly hasNextPage: boolean;
-  readonly isFetchingNextPage: boolean;
-  readonly fetchNextPage: () => void;
 }
 
 export const WaveOutcome: FC<WaveOutcomeProps> = ({ waveId, outcome }) => {
