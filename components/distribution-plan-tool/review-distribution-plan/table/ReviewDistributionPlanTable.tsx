@@ -1,11 +1,14 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { AllowlistResult } from "@/components/allowlist-tool/allowlist-tool.types";
+import { AuthContext } from "@/components/auth/Auth";
 import DistributionPlanTableWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableWrapper";
+import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+import { useContext, useEffect, useState } from "react";
+import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "./constants";
 import ReviewDistributionPlanTableBody from "./ReviewDistributionPlanTableBody";
 import ReviewDistributionPlanTableHeader from "./ReviewDistributionPlanTableHeader";
-import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
-import { AllowlistResult } from "@/components/allowlist-tool/allowlist-tool.types";
+import { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription";
 import { ReviewDistributionPlanTableSubscriptionFooter } from "./ReviewDistributionPlanTableSubscriptionFooter";
 export enum ReviewDistributionPlanTableItemType {
   PHASE = "PHASE",
@@ -40,49 +43,69 @@ export interface FullResultWallet extends AllowlistResult {
 }
 export default function ReviewDistributionPlanTable() {
   const { phases } = useContext(DistributionPlanToolContext);
+  const { connectedProfile } = useContext(AuthContext);
 
   const [rows, setRows] = useState<ReviewDistributionPlanTablePhase[]>([]);
 
   useEffect(() => {
-    setRows(
-      phases.map((phase) => {
-        const { components, spotsCount } = phase.components.reduce<{
-          components: ReviewDistributionPlanTableItem[];
-          spotsCount: number;
-        }>(
-          (acc, component) => {
-            acc.components.push({
-              id: component.id,
-              phaseId: phase.id,
-              componentId: component.id,
-              type: ReviewDistributionPlanTableItemType.COMPONENT,
-              name: component.name,
-              description: component.description,
-              walletsCount: component.winnersWalletsCount,
-              spotsCount: component.winnersSpotsCount,
-            });
-            acc.spotsCount += component.winnersSpotsCount;
-            return acc;
-          },
-          { components: [], spotsCount: 0 }
-        );
-
-        return {
-          phase: {
-            id: phase.id,
+    const phaseRows = phases.map((phase) => {
+      const { components, spotsCount } = phase.components.reduce<{
+        components: ReviewDistributionPlanTableItem[];
+        spotsCount: number;
+      }>(
+        (acc, component) => {
+          acc.components.push({
+            id: component.id,
             phaseId: phase.id,
-            componentId: null,
-            type: ReviewDistributionPlanTableItemType.PHASE,
-            name: phase.name,
-            description: "",
-            walletsCount: phase.walletsCount,
-            spotsCount,
-          },
-          components,
-        };
-      })
-    );
-  }, [phases]);
+            componentId: component.id,
+            type: ReviewDistributionPlanTableItemType.COMPONENT,
+            name: component.name,
+            description: component.description,
+            walletsCount: component.winnersWalletsCount,
+            spotsCount: component.winnersSpotsCount,
+          });
+          acc.spotsCount += component.winnersSpotsCount;
+          return acc;
+        },
+        { components: [], spotsCount: 0 }
+      );
+
+      return {
+        phase: {
+          id: phase.id,
+          phaseId: phase.id,
+          componentId: null,
+          type: ReviewDistributionPlanTableItemType.PHASE,
+          name: phase.name,
+          description: "",
+          walletsCount: phase.walletsCount,
+          spotsCount,
+        },
+        components,
+      };
+    });
+
+    const allRows: ReviewDistributionPlanTablePhase[] = [...phaseRows];
+
+    if (isSubscriptionsAdmin(connectedProfile)) {
+      const publicRow: ReviewDistributionPlanTablePhase = {
+        phase: {
+          id: PUBLIC_SUBSCRIPTIONS_PHASE_ID,
+          phaseId: PUBLIC_SUBSCRIPTIONS_PHASE_ID,
+          componentId: null,
+          type: ReviewDistributionPlanTableItemType.PHASE,
+          name: "Public",
+          description: "Auto-generated",
+          walletsCount: 0,
+          spotsCount: 0,
+        },
+        components: [],
+      };
+      allRows.push(publicRow);
+    }
+
+    setRows(allRows);
+  }, [phases, connectedProfile]);
   return (
     <>
       <DistributionPlanTableWrapper>

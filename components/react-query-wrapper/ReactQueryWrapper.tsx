@@ -93,6 +93,8 @@ export enum QueryKey {
   WAVE_FOLLOWERS = "WAVE_FOLLOWERS",
   FEED_ITEMS = "FEED_ITEMS",
   WAVE_DECISIONS = "WAVE_DECISIONS",
+  WAVE_OUTCOMES = "WAVE_OUTCOMES",
+  WAVE_OUTCOME_DISTRIBUTION = "WAVE_OUTCOME_DISTRIBUTION",
 }
 
 interface InitProfileRatersParamsAndData {
@@ -1138,6 +1140,12 @@ export default function ReactQueryWrapper({
     });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.WAVE],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.WAVE_OUTCOMES],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.WAVE_OUTCOME_DISTRIBUTION],
     });
   };
 

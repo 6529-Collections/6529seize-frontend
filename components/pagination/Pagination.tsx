@@ -1,9 +1,14 @@
 "use client";
 
 import { faCaretLeft, faCaretRight } from "@fortawesome/free-solid-svg-icons";
-import styles from "./Pagination.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { type ChangeEvent, type KeyboardEvent, useEffect, useState } from "react";
+import {
+  type ChangeEvent,
+  type KeyboardEvent,
+  useEffect,
+  useState,
+} from "react";
+import styles from "./Pagination.module.scss";
 
 interface Props {
   page: number;
@@ -68,12 +73,11 @@ export default function Pagination(props: Readonly<Props>) {
     const newValue = event.target.value;
     setInputPage(newValue);
   }
-  
 
   return (
     <>
       {props.totalResults > props.pageSize && (
-        <span>
+        <span className="tw-inline-flex tw-items-center tw-gap-1">
           <button
             type="button"
             onClick={pagePrevious}
@@ -83,7 +87,7 @@ export default function Pagination(props: Readonly<Props>) {
             aria-label="Previous page"
             disabled={props.page <= 1}>
             <FontAwesomeIcon icon={faCaretLeft} />
-          </button>{" "}
+          </button>
           <input
             id="page-number"
             type="text"
@@ -101,7 +105,7 @@ export default function Pagination(props: Readonly<Props>) {
             aria-label="Go to last page"
             disabled={isLastPage()}>
             {Math.ceil(props.totalResults / props.pageSize).toLocaleString()}
-          </button>{" "}
+          </button>
           <button
             type="button"
             onClick={pageNext}

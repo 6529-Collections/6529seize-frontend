@@ -3,7 +3,6 @@ import { ApiCreateWaveDropRequest } from "@/generated/models/ApiCreateWaveDropRe
 import { ApiIntRange } from "@/generated/models/ApiIntRange";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
-import { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
 import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeSubType } from "@/generated/models/ApiWaveOutcomeSubType";
 import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
@@ -16,6 +15,7 @@ import {
   TimeWeightedVotingSettings,
 } from "@/types/waves.types";
 import { assertUnreachable } from "../AllowlistToolHelpers";
+import { ApiCreateWaveOutcome } from "@/generated/models/ApiCreateWaveOutcome";
 
 /**
  * Converts time-weighted voting settings to milliseconds, ensuring it's within acceptable range
@@ -148,8 +148,8 @@ const getRankOutcomes = ({
   config,
 }: {
   readonly config: CreateWaveConfig;
-}): ApiWaveOutcome[] => {
-  const outcomes: ApiWaveOutcome[] = [];
+}): ApiCreateWaveOutcome[] => {
+  const outcomes: ApiCreateWaveOutcome[] = [];
   for (const outcome of config.outcomes) {
     if (
       outcome.type === CreateWaveOutcomeType.MANUAL &&
@@ -205,8 +205,8 @@ const getApproveOutcomes = ({
   config,
 }: {
   readonly config: CreateWaveConfig;
-}): ApiWaveOutcome[] => {
-  const outcomes: ApiWaveOutcome[] = [];
+}): ApiCreateWaveOutcome[] => {
+  const outcomes: ApiCreateWaveOutcome[] = [];
   for (const outcome of config.outcomes) {
     if (
       outcome.type === CreateWaveOutcomeType.MANUAL &&
@@ -247,16 +247,14 @@ const getOutcomes = ({
   config,
 }: {
   readonly config: CreateWaveConfig;
-}): ApiWaveOutcome[] => {
+}): ApiCreateWaveOutcome[] => {
   const waveType = config.overview.type;
   switch (waveType) {
     case ApiWaveType.Chat:
       return [];
     case ApiWaveType.Approve:
-      // TODO add max winners
       return getApproveOutcomes({ config });
     case ApiWaveType.Rank:
-      // TODO add max winners
       return getRankOutcomes({ config });
     default:
       assertUnreachable(waveType);

@@ -74,7 +74,6 @@ export const convertWaveToUpdateWave = (
     },
     decisions_strategy: wave.wave.decisions_strategy,
   },
-  outcomes: wave.outcomes,
 });
 
 export const canEditWave = ({

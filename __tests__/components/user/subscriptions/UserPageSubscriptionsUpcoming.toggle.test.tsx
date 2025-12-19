@@ -9,7 +9,12 @@ jest.mock("react-toggle", () => (props: any) => (
   <input data-testid="toggle" type="checkbox" onChange={props.onChange} />
 ));
 
-jest.mock("@tanstack/react-query", () => ({ useQuery: jest.fn() }));
+const mockInvalidateQueries = jest.fn();
+
+jest.mock("@tanstack/react-query", () => ({
+  useQuery: jest.fn(),
+  useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
+}));
 
 const mockUpcomingRows = [
   {
@@ -40,6 +45,10 @@ const details = { profile: "test" } as any;
 
 const useQueryMock = useQuery as jest.Mock;
 
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
 function renderComp() {
   useQueryMock.mockReturnValue({ data: null });
   const auth = createMockAuthContext({
@@ -65,7 +74,12 @@ test("toggles subscription and posts update", async () => {
     token_id: 1,
     subscribed: false,
   });
-  const { container } = renderComp();
+  renderComp();
   await user.click(screen.getByTestId("toggle"));
   expect(commonApiPost).toHaveBeenCalled();
+  expect(mockInvalidateQueries).toHaveBeenCalledWith(
+    expect.objectContaining({
+      queryKey: expect.arrayContaining([expect.stringContaining("subscription")]),
+    })
+  );
 });

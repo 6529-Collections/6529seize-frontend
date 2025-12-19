@@ -1,6 +1,8 @@
 interface DistributionPhaseEntry {
   phase: string;
   spots: number;
+  spots_airdrop: number;
+  spots_allowlist: number;
 }
 
 export interface Distribution {

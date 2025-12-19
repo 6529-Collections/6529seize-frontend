@@ -1,5 +1,8 @@
 export * from '../models/AcceptActionRequest';
 export * from '../models/AddActionToProxyRequest';
+export * from '../models/AirdropAddressResponse';
+export * from '../models/AirdropAddressResponseTdhWallet';
+export * from '../models/AllowlistNormalizedEntry';
 export * from '../models/ApiAddReactionToDropRequest';
 export * from '../models/ApiAggregatedActivity';
 export * from '../models/ApiAggregatedActivityMemes';
@@ -46,6 +49,8 @@ export * from '../models/ApiCreateNewWaveVotingConfig';
 export * from '../models/ApiCreateOrUpdateProfileRequest';
 export * from '../models/ApiCreateWaveConfig';
 export * from '../models/ApiCreateWaveDropRequest';
+export * from '../models/ApiCreateWaveOutcome';
+export * from '../models/ApiCreateWaveOutcomeDistributionItem';
 export * from '../models/ApiDrop';
 export * from '../models/ApiDropAndDropVote';
 export * from '../models/ApiDropContextProfileContext';
@@ -159,8 +164,11 @@ export * from '../models/ApiWaveMin';
 export * from '../models/ApiWaveOutcome';
 export * from '../models/ApiWaveOutcomeCredit';
 export * from '../models/ApiWaveOutcomeDistributionItem';
+export * from '../models/ApiWaveOutcomeDistributionItemsPage';
+export * from '../models/ApiWaveOutcomeOld';
 export * from '../models/ApiWaveOutcomeSubType';
 export * from '../models/ApiWaveOutcomeType';
+export * from '../models/ApiWaveOutcomesPage';
 export * from '../models/ApiWaveParticipationConfig';
 export * from '../models/ApiWaveParticipationRequirement';
 export * from '../models/ApiWaveRequiredMetadata';
@@ -193,10 +201,40 @@ export * from '../models/ApiXTdhStats';
 export * from '../models/ApiXTdhToken';
 export * from '../models/ApiXTdhTokensPage';
 export * from '../models/CreateDirectMessageWaveRequest';
+export * from '../models/DistributionNormalized';
+export * from '../models/DistributionNormalizedPage';
+export * from '../models/DistributionPhasesPage';
+export * from '../models/DistributionPhoto';
+export * from '../models/DistributionPhotosPage';
 export * from '../models/GetWaveSubscription200Response';
+export * from '../models/NFTFinalSubscription';
+export * from '../models/NFTFinalSubscriptionUpload';
+export * from '../models/NFTFinalSubscriptionUploadPage';
+export * from '../models/NFTSubscription';
+export * from '../models/RedeemedSubscription';
+export * from '../models/RedeemedSubscriptionCounts';
+export * from '../models/RedeemedSubscriptionCountsPage';
+export * from '../models/RedeemedSubscriptionPage';
+export * from '../models/SubscribeAllEditionsResponse';
+export * from '../models/SubscriptionCountResponse';
+export * from '../models/SubscriptionCounts';
+export * from '../models/SubscriptionDetails';
+export * from '../models/SubscriptionLog';
+export * from '../models/SubscriptionLogPage';
+export * from '../models/SubscriptionModeResponse';
+export * from '../models/SubscriptionResponse';
+export * from '../models/SubscriptionTopUp';
+export * from '../models/SubscriptionTopUpPage';
+export * from '../models/UpdateSubscribeAllEditionsRequest';
+export * from '../models/UpdateSubscriptionCountRequest';
+export * from '../models/UpdateSubscriptionModeRequest';
+export * from '../models/UpdateSubscriptionRequest';
 
 import { AcceptActionRequest, AcceptActionRequestActionEnum   } from '../models/AcceptActionRequest';
 import { AddActionToProxyRequest    } from '../models/AddActionToProxyRequest';
+import { AirdropAddressResponse } from '../models/AirdropAddressResponse';
+import { AirdropAddressResponseTdhWallet } from '../models/AirdropAddressResponseTdhWallet';
+import { AllowlistNormalizedEntry } from '../models/AllowlistNormalizedEntry';
 import { ApiAddReactionToDropRequest } from '../models/ApiAddReactionToDropRequest';
 import { ApiAggregatedActivity } from '../models/ApiAggregatedActivity';
 import { ApiAggregatedActivityMemes } from '../models/ApiAggregatedActivityMemes';
@@ -243,6 +281,8 @@ import { ApiCreateNewWaveVotingConfig         } from '../models/ApiCreateNewWave
 import { ApiCreateOrUpdateProfileRequest        } from '../models/ApiCreateOrUpdateProfileRequest';
 import { ApiCreateWaveConfig        } from '../models/ApiCreateWaveConfig';
 import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
+import { ApiCreateWaveOutcome        } from '../models/ApiCreateWaveOutcome';
+import { ApiCreateWaveOutcomeDistributionItem } from '../models/ApiCreateWaveOutcomeDistributionItem';
 import { ApiDrop                          } from '../models/ApiDrop';
 import { ApiDropAndDropVote } from '../models/ApiDropAndDropVote';
 import { ApiDropContextProfileContext } from '../models/ApiDropContextProfileContext';
@@ -356,8 +396,11 @@ import { ApiWaveMin                    } from '../models/ApiWaveMin';
 import { ApiWaveOutcome        } from '../models/ApiWaveOutcome';
 import { ApiWaveOutcomeCredit } from '../models/ApiWaveOutcomeCredit';
 import { ApiWaveOutcomeDistributionItem } from '../models/ApiWaveOutcomeDistributionItem';
+import { ApiWaveOutcomeDistributionItemsPage } from '../models/ApiWaveOutcomeDistributionItemsPage';
+import { ApiWaveOutcomeOld         } from '../models/ApiWaveOutcomeOld';
 import { ApiWaveOutcomeSubType } from '../models/ApiWaveOutcomeSubType';
 import { ApiWaveOutcomeType } from '../models/ApiWaveOutcomeType';
+import { ApiWaveOutcomesPage } from '../models/ApiWaveOutcomesPage';
 import { ApiWaveParticipationConfig } from '../models/ApiWaveParticipationConfig';
 import { ApiWaveParticipationRequirement } from '../models/ApiWaveParticipationRequirement';
 import { ApiWaveRequiredMetadata   } from '../models/ApiWaveRequiredMetadata';
@@ -390,7 +433,34 @@ import { ApiXTdhStats } from '../models/ApiXTdhStats';
 import { ApiXTdhToken } from '../models/ApiXTdhToken';
 import { ApiXTdhTokensPage } from '../models/ApiXTdhTokensPage';
 import { CreateDirectMessageWaveRequest } from '../models/CreateDirectMessageWaveRequest';
+import { DistributionNormalized } from '../models/DistributionNormalized';
+import { DistributionNormalizedPage } from '../models/DistributionNormalizedPage';
+import { DistributionPhasesPage } from '../models/DistributionPhasesPage';
+import { DistributionPhoto } from '../models/DistributionPhoto';
+import { DistributionPhotosPage } from '../models/DistributionPhotosPage';
 import { GetWaveSubscription200Response } from '../models/GetWaveSubscription200Response';
+import { NFTFinalSubscription } from '../models/NFTFinalSubscription';
+import { NFTFinalSubscriptionUpload } from '../models/NFTFinalSubscriptionUpload';
+import { NFTFinalSubscriptionUploadPage } from '../models/NFTFinalSubscriptionUploadPage';
+import { NFTSubscription } from '../models/NFTSubscription';
+import { RedeemedSubscription } from '../models/RedeemedSubscription';
+import { RedeemedSubscriptionCounts } from '../models/RedeemedSubscriptionCounts';
+import { RedeemedSubscriptionCountsPage } from '../models/RedeemedSubscriptionCountsPage';
+import { RedeemedSubscriptionPage } from '../models/RedeemedSubscriptionPage';
+import { SubscribeAllEditionsResponse } from '../models/SubscribeAllEditionsResponse';
+import { SubscriptionCountResponse } from '../models/SubscriptionCountResponse';
+import { SubscriptionCounts } from '../models/SubscriptionCounts';
+import { SubscriptionDetails } from '../models/SubscriptionDetails';
+import { SubscriptionLog } from '../models/SubscriptionLog';
+import { SubscriptionLogPage } from '../models/SubscriptionLogPage';
+import { SubscriptionModeResponse } from '../models/SubscriptionModeResponse';
+import { SubscriptionResponse } from '../models/SubscriptionResponse';
+import { SubscriptionTopUp } from '../models/SubscriptionTopUp';
+import { SubscriptionTopUpPage } from '../models/SubscriptionTopUpPage';
+import { UpdateSubscribeAllEditionsRequest } from '../models/UpdateSubscribeAllEditionsRequest';
+import { UpdateSubscriptionCountRequest } from '../models/UpdateSubscriptionCountRequest';
+import { UpdateSubscriptionModeRequest } from '../models/UpdateSubscriptionModeRequest';
+import { UpdateSubscriptionRequest } from '../models/UpdateSubscriptionRequest';
 
 /* tslint:disable:no-unused-variable */
 let primitives = [
@@ -439,6 +509,9 @@ let enumsMap: Set<string> = new Set<string>([
 let typeMap: {[index: string]: any} = {
     "AcceptActionRequest": AcceptActionRequest,
     "AddActionToProxyRequest": AddActionToProxyRequest,
+    "AirdropAddressResponse": AirdropAddressResponse,
+    "AirdropAddressResponseTdhWallet": AirdropAddressResponseTdhWallet,
+    "AllowlistNormalizedEntry": AllowlistNormalizedEntry,
     "ApiAddReactionToDropRequest": ApiAddReactionToDropRequest,
     "ApiAggregatedActivity": ApiAggregatedActivity,
     "ApiAggregatedActivityMemes": ApiAggregatedActivityMemes,
@@ -485,6 +558,8 @@ let typeMap: {[index: string]: any} = {
     "ApiCreateOrUpdateProfileRequest": ApiCreateOrUpdateProfileRequest,
     "ApiCreateWaveConfig": ApiCreateWaveConfig,
     "ApiCreateWaveDropRequest": ApiCreateWaveDropRequest,
+    "ApiCreateWaveOutcome": ApiCreateWaveOutcome,
+    "ApiCreateWaveOutcomeDistributionItem": ApiCreateWaveOutcomeDistributionItem,
     "ApiDrop": ApiDrop,
     "ApiDropAndDropVote": ApiDropAndDropVote,
     "ApiDropContextProfileContext": ApiDropContextProfileContext,
@@ -581,6 +656,9 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveMin": ApiWaveMin,
     "ApiWaveOutcome": ApiWaveOutcome,
     "ApiWaveOutcomeDistributionItem": ApiWaveOutcomeDistributionItem,
+    "ApiWaveOutcomeDistributionItemsPage": ApiWaveOutcomeDistributionItemsPage,
+    "ApiWaveOutcomeOld": ApiWaveOutcomeOld,
+    "ApiWaveOutcomesPage": ApiWaveOutcomesPage,
     "ApiWaveParticipationConfig": ApiWaveParticipationConfig,
     "ApiWaveRequiredMetadata": ApiWaveRequiredMetadata,
     "ApiWaveScope": ApiWaveScope,
@@ -606,7 +684,34 @@ let typeMap: {[index: string]: any} = {
     "ApiXTdhToken": ApiXTdhToken,
     "ApiXTdhTokensPage": ApiXTdhTokensPage,
     "CreateDirectMessageWaveRequest": CreateDirectMessageWaveRequest,
+    "DistributionNormalized": DistributionNormalized,
+    "DistributionNormalizedPage": DistributionNormalizedPage,
+    "DistributionPhasesPage": DistributionPhasesPage,
+    "DistributionPhoto": DistributionPhoto,
+    "DistributionPhotosPage": DistributionPhotosPage,
     "GetWaveSubscription200Response": GetWaveSubscription200Response,
+    "NFTFinalSubscription": NFTFinalSubscription,
+    "NFTFinalSubscriptionUpload": NFTFinalSubscriptionUpload,
+    "NFTFinalSubscriptionUploadPage": NFTFinalSubscriptionUploadPage,
+    "NFTSubscription": NFTSubscription,
+    "RedeemedSubscription": RedeemedSubscription,
+    "RedeemedSubscriptionCounts": RedeemedSubscriptionCounts,
+    "RedeemedSubscriptionCountsPage": RedeemedSubscriptionCountsPage,
+    "RedeemedSubscriptionPage": RedeemedSubscriptionPage,
+    "SubscribeAllEditionsResponse": SubscribeAllEditionsResponse,
+    "SubscriptionCountResponse": SubscriptionCountResponse,
+    "SubscriptionCounts": SubscriptionCounts,
+    "SubscriptionDetails": SubscriptionDetails,
+    "SubscriptionLog": SubscriptionLog,
+    "SubscriptionLogPage": SubscriptionLogPage,
+    "SubscriptionModeResponse": SubscriptionModeResponse,
+    "SubscriptionResponse": SubscriptionResponse,
+    "SubscriptionTopUp": SubscriptionTopUp,
+    "SubscriptionTopUpPage": SubscriptionTopUpPage,
+    "UpdateSubscribeAllEditionsRequest": UpdateSubscribeAllEditionsRequest,
+    "UpdateSubscriptionCountRequest": UpdateSubscriptionCountRequest,
+    "UpdateSubscriptionModeRequest": UpdateSubscriptionModeRequest,
+    "UpdateSubscriptionRequest": UpdateSubscriptionRequest,
 }
 
 type MimeTypeDescriptor = {

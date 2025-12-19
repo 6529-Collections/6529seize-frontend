@@ -255,6 +255,135 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiCommunityMemberMinimal"
+  /distribution_phases/{contract}/{nft_id}:
+    get:
+      tags:
+        - Distributions
+      summary: Get distribution phases for a specific contract and NFT
+      operationId: getDistributionPhases
+      parameters:
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: nft_id
+          in: path
+          description: NFT ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DistributionPhasesPage"
+  /distribution_photos/{contract}/{nft_id}:
+    get:
+      tags:
+        - Distributions
+      summary: Get distribution photos for a specific contract and NFT
+      operationId: getDistributionPhotos
+      parameters:
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: nft_id
+          in: path
+          description: NFT ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: page_size
+          in: query
+          description: Default is 50
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 100
+        - name: page
+          in: query
+          description: Default is 1
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DistributionPhotosPage"
+  /distributions:
+    get:
+      tags:
+        - Distributions
+      summary: Get distributions
+      description: >-
+        At least one filter parameter (search, card_id, contract, or wallet) is
+        required
+      operationId: getDistributions
+      parameters:
+        - name: page_size
+          in: query
+          description: Default is 2000
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 2000
+        - name: page
+          in: query
+          description: Default is 1
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: search
+          in: query
+          description: Search by wallet address or display name
+          required: false
+          schema:
+            type: string
+        - name: card_id
+          in: query
+          description: Filter by card ID(s), comma-separated for multiple
+          required: false
+          schema:
+            type: string
+        - name: contract
+          in: query
+          description: Filter by contract address(es), comma-separated for multiple
+          required: false
+          schema:
+            type: string
+        - name: wallet
+          in: query
+          description: Filter by wallet address(es), comma-separated for multiple
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DistributionNormalizedPage"
   /light-drops:
     get:
       tags:
@@ -2130,6 +2259,451 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiAvailableRatingCredit"
+  /subscriptions/consolidation/details/{consolidation_key}:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get subscription details for a consolidation
+      operationId: getSubscriptionDetails
+      parameters:
+        - name: consolidation_key
+          in: path
+          description: Consolidation key
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionDetails"
+        "404":
+          description: Not found
+  /subscriptions/consolidation/top-up/{consolidation_key}:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get top-ups for a consolidation
+      operationId: getSubscriptionTopUps
+      parameters:
+        - name: consolidation_key
+          in: path
+          description: Consolidation key
+          required: true
+          schema:
+            type: string
+        - name: page_size
+          in: query
+          description: Default is 20
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: page
+          in: query
+          description: Default is 1
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionTopUpPage"
+        "404":
+          description: Not found
+  /subscriptions/consolidation/upcoming-memes/{consolidation_key}:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get upcoming meme subscriptions for a consolidation
+      operationId: getUpcomingMemeSubscriptions
+      parameters:
+        - name: consolidation_key
+          in: path
+          description: Consolidation key
+          required: true
+          schema:
+            type: string
+        - name: card_count
+          in: query
+          description: Number of upcoming cards to fetch. Default is 3
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NFTSubscription"
+  /subscriptions/upcoming-memes-counts:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get upcoming meme subscription counts
+      operationId: getUpcomingMemeSubscriptionCounts
+      parameters:
+        - name: card_count
+          in: query
+          description: Number of upcoming cards to fetch. Default is 3
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SubscriptionCounts"
+  /subscriptions/redeemed-memes-counts:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get redeemed meme subscription counts
+      operationId: getRedeemedMemeSubscriptionCounts
+      parameters:
+        - name: page_size
+          in: query
+          description: Default is 20
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: page
+          in: query
+          description: Default is 1
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RedeemedSubscriptionCountsPage"
+  /subscriptions/consolidation/logs/{consolidation_key}:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get subscription logs for a consolidation
+      operationId: getSubscriptionLogs
+      parameters:
+        - name: consolidation_key
+          in: path
+          description: Consolidation key
+          required: true
+          schema:
+            type: string
+        - name: page_size
+          in: query
+          description: Default is 20
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: page
+          in: query
+          description: Default is 1
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionLogPage"
+        "404":
+          description: Not found
+  /subscriptions/consolidation/redeemed/{consolidation_key}:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get redeemed subscriptions for a consolidation
+      operationId: getRedeemedSubscriptions
+      parameters:
+        - name: consolidation_key
+          in: path
+          description: Consolidation key
+          required: true
+          schema:
+            type: string
+        - name: page_size
+          in: query
+          description: Default is 20
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: page
+          in: query
+          description: Default is 1
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RedeemedSubscriptionPage"
+        "404":
+          description: Not found
+  /subscriptions/consolidation/{consolidation_key}/airdrop-address:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get airdrop address for a consolidation
+      operationId: getAirdropAddress
+      parameters:
+        - name: consolidation_key
+          in: path
+          description: Consolidation key
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AirdropAddressResponse"
+  /subscriptions/consolidation/final/{consolidation_key}/{contract}/{token_id}:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get final subscription for a consolidation
+      operationId: getFinalSubscription
+      parameters:
+        - name: consolidation_key
+          in: path
+          description: Consolidation key
+          required: true
+          schema:
+            type: string
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: token_id
+          in: path
+          description: Token ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NFTFinalSubscription"
+        "400":
+          description: Invalid token ID
+        "404":
+          description: Not found
+  /subscriptions/uploads:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get subscription uploads
+      operationId: getSubscriptionUploads
+      parameters:
+        - name: contract
+          in: query
+          description: Contract address (required)
+          required: true
+          schema:
+            type: string
+        - name: page_size
+          in: query
+          description: Default is 20
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: page
+          in: query
+          description: Default is 1
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NFTFinalSubscriptionUploadPage"
+        "400":
+          description: Contract is required
+  /subscriptions/{consolidation_key}/subscription-mode:
+    post:
+      tags:
+        - Subscriptions
+      summary: Update subscription mode
+      description: >-
+        Requires authentication. User can only change subscription mode for
+        their own consolidation.
+      operationId: updateSubscriptionMode
+      parameters:
+        - name: consolidation_key
+          in: path
+          description: Consolidation key
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSubscriptionModeRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionModeResponse"
+        "400":
+          description: Not enough balance
+        "403":
+          description: User can only change subscription mode for their own consolidation
+  /subscriptions/{consolidation_key}/subscribe-all-editions:
+    post:
+      tags:
+        - Subscriptions
+      summary: Toggle subscribe all editions preference
+      description: >-
+        Requires authentication. User can only change this setting for their own
+        consolidation.
+      operationId: updateSubscribeAllEditions
+      parameters:
+        - name: consolidation_key
+          in: path
+          description: Consolidation key
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSubscribeAllEditionsRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscribeAllEditionsResponse"
+        "403":
+          description: User can only change subscription mode for their own consolidation
+  /subscriptions/{consolidation_key}/subscription:
+    post:
+      tags:
+        - Subscriptions
+      summary: Update subscription for a specific NFT
+      description: >-
+        Requires authentication. User can only change subscriptions for their
+        own consolidation.
+      operationId: updateSubscription
+      parameters:
+        - name: consolidation_key
+          in: path
+          description: Consolidation key
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSubscriptionRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionResponse"
+        "400":
+          description: Not enough balance or NFT already released
+        "403":
+          description: User can only change subscription mode for their own consolidation
+  /subscriptions/{consolidation_key}/subscription-count:
+    post:
+      tags:
+        - Subscriptions
+      summary: Update subscription count for a specific NFT
+      description: >-
+        Requires authentication. User can only change subscriptions for their
+        own consolidation.
+      operationId: updateSubscriptionCount
+      parameters:
+        - name: consolidation_key
+          in: path
+          description: Consolidation key
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSubscriptionCountRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionCountResponse"
+        "400":
+          description: Not enough balance, NFT already released, or exceeds eligibility
+        "403":
+          description: User can only change subscription mode for their own consolidation
   /identity-subscriptions/outgoing/{target_type}:
     get:
       tags:
@@ -2502,6 +3076,105 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiTransactionPage"
+  /waves/{waveId}/outcomes:
+    get:
+      tags:
+        - Waves
+      summary: Get wave outcomes
+      operationId: getWaveOutcomes
+      parameters:
+        - name: waveId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+            default: DESC
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 2000
+            default: 100
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveOutcomesPage"
+        "404":
+          description: Wave not found
+  /waves/{waveId}/outcomes/{outcomeIndex}/distribution:
+    get:
+      tags:
+        - Waves
+      summary: Get wave outcome distribution
+      operationId: getWaveOutcomeDistribution
+      parameters:
+        - name: waveId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: outcomeIndex
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+            default: DESC
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 2000
+            default: 100
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveOutcomeDistributionItemsPage"
+        "404":
+          description: Wave not found
   /waves/{id}/decisions:
     get:
       tags:
@@ -3753,6 +4426,51 @@ components:
       type: http
       scheme: bearer
   schemas:
+    AirdropAddressResponse:
+      type: object
+      required:
+        - tdh_wallet
+        - airdrop_address
+      properties:
+        tdh_wallet:
+          type: object
+          required:
+            - address
+            - ens
+          properties:
+            address:
+              type: string
+            ens:
+              type: string
+        airdrop_address:
+          type: object
+          required:
+            - address
+            - ens
+          properties:
+            address:
+              type: string
+            ens:
+              type: string
+    AllowlistNormalizedEntry:
+      type: object
+      required:
+        - phase
+        - spots
+        - spots_airdrop
+        - spots_allowlist
+      properties:
+        phase:
+          type: string
+        spots:
+          type: integer
+          format: int64
+        spots_airdrop:
+          type: integer
+          format: int64
+        spots_allowlist:
+          type: integer
+          format: int64
     ApiAddReactionToDropRequest:
       type: object
       required:
@@ -4599,7 +5317,7 @@ components:
         outcomes:
           type: array
           items:
-            $ref: "#/components/schemas/ApiWaveOutcome"
+            $ref: "#/components/schemas/ApiCreateWaveOutcome"
     ApiCreateNewWaveChatConfig:
       type: object
       required:
@@ -4818,6 +5536,39 @@ components:
           type: boolean
         signer_address:
           type: string
+    ApiCreateWaveOutcome:
+      type: object
+      required:
+        - type
+        - description
+      properties:
+        type:
+          $ref: "#/components/schemas/ApiWaveOutcomeType"
+        subtype:
+          $ref: "#/components/schemas/ApiWaveOutcomeSubType"
+        description:
+          type: string
+        credit:
+          $ref: "#/components/schemas/ApiWaveOutcomeCredit"
+        rep_category:
+          type: string
+        amount:
+          type: number
+          format: int64
+        distribution:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCreateWaveOutcomeDistributionItem"
+    ApiCreateWaveOutcomeDistributionItem:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: int64
+          nullable: true
+        description:
+          type: string
+          nullable: true
     ApiDrop:
       type: object
       required:
@@ -6805,7 +7556,6 @@ components:
         - participation
         - chat
         - wave
-        - outcomes
       properties:
         name:
           description: The name of the wave
@@ -6826,10 +7576,6 @@ components:
           $ref: "#/components/schemas/ApiCreateNewWaveChatConfig"
         wave:
           $ref: "#/components/schemas/ApiCreateWaveConfig"
-        outcomes:
-          type: array
-          items:
-            $ref: "#/components/schemas/ApiWaveOutcome"
     ApiUploadItem:
       type: object
       required:
@@ -6946,7 +7692,7 @@ components:
         outcomes:
           type: array
           items:
-            $ref: "#/components/schemas/ApiWaveOutcome"
+            $ref: "#/components/schemas/ApiWaveOutcomeOld"
         contributors_overview:
           type: array
           items:
@@ -7317,6 +8063,61 @@ components:
       required:
         - type
         - description
+        - index
+      properties:
+        type:
+          $ref: "#/components/schemas/ApiWaveOutcomeType"
+        subtype:
+          $ref: "#/components/schemas/ApiWaveOutcomeSubType"
+        description:
+          type: string
+        credit:
+          $ref: "#/components/schemas/ApiWaveOutcomeCredit"
+        rep_category:
+          type: string
+        amount:
+          type: number
+          format: int64
+        index:
+          type: number
+          format: int64
+    ApiWaveOutcomeCredit:
+      type: string
+      enum:
+        - REP
+        - CIC
+    ApiWaveOutcomeDistributionItem:
+      type: object
+      required:
+        - index
+      properties:
+        index:
+          type: number
+          format: int64
+        amount:
+          type: number
+          format: int64
+          nullable: true
+        description:
+          type: string
+          nullable: true
+    ApiWaveOutcomeDistributionItemsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveOutcomeDistributionItem"
+    ApiWaveOutcomeOld:
+      type: object
+      required:
+        - type
+        - description
+        - index
       properties:
         type:
           $ref: "#/components/schemas/ApiWaveOutcomeType"
@@ -7335,21 +8136,20 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiWaveOutcomeDistributionItem"
-    ApiWaveOutcomeCredit:
-      type: string
-      enum:
-        - REP
-        - CIC
-    ApiWaveOutcomeDistributionItem:
-      type: object
-      properties:
-        amount:
+        index:
           type: number
           format: int64
-          nullable: true
-        description:
-          type: string
-          nullable: true
+    ApiWaveOutcomesPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveOutcome"
     ApiWaveOutcomeSubType:
       type: string
       enum:
@@ -7945,5 +8745,510 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiXTdhToken"
+    DistributionNormalized:
+      type: object
+      required:
+        - card_id
+        - contract
+        - wallet
+        - wallet_display
+        - airdrops
+        - total_spots
+        - total_count
+        - minted
+      properties:
+        card_id:
+          type: integer
+          format: int64
+        contract:
+          type: string
+        wallet:
+          type: string
+        wallet_display:
+          type: string
+        card_name:
+          type: string
+          nullable: true
+        mint_date:
+          type: string
+          format: date-time
+          nullable: true
+        airdrops:
+          type: integer
+          format: int64
+        total_spots:
+          type: integer
+          format: int64
+        total_count:
+          type: integer
+          format: int64
+        minted:
+          type: integer
+          format: int64
+        allowlist:
+          type: array
+          nullable: true
+          items:
+            $ref: "#/components/schemas/AllowlistNormalizedEntry"
+        phases:
+          type: array
+          nullable: true
+          items:
+            type: string
+    DistributionNormalizedPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithNextUriBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/DistributionNormalized"
+    DistributionPhasesPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithNextUriBase"
+      properties:
+        data:
+          type: array
+          items:
+            type: string
+    DistributionPhoto:
+      type: object
+      required:
+        - id
+        - card_id
+        - contract
+        - link
+      properties:
+        id:
+          type: integer
+          format: int64
+        card_id:
+          type: integer
+          format: int64
+        contract:
+          type: string
+        link:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    DistributionPhotosPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithNextUriBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/DistributionPhoto"
+    NFTFinalSubscription:
+      type: object
+      required:
+        - consolidation_key
+        - contract
+        - token_id
+        - subscribed_count
+        - airdrop_address
+        - balance
+      properties:
+        id:
+          type: integer
+          format: int64
+        consolidation_key:
+          type: string
+        contract:
+          type: string
+        token_id:
+          type: integer
+          format: int64
+        subscribed_count:
+          type: integer
+          format: int64
+        airdrop_address:
+          type: string
+        balance:
+          type: number
+          format: double
+        subscribed_at:
+          type: string
+          nullable: true
+        phase:
+          type: string
+          nullable: true
+        phase_subscriptions:
+          type: integer
+          format: int64
+        phase_position:
+          type: integer
+          format: int64
+        redeemed_count:
+          type: integer
+          format: int64
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    NFTFinalSubscriptionUpload:
+      type: object
+      required:
+        - contract
+        - token_id
+        - upload_url
+      properties:
+        contract:
+          type: string
+        token_id:
+          type: integer
+          format: int64
+        date:
+          type: string
+          nullable: true
+        upload_url:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    NFTFinalSubscriptionUploadPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithNextUriBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/NFTFinalSubscriptionUpload"
+    NFTSubscription:
+      type: object
+      required:
+        - consolidation_key
+        - contract
+        - token_id
+        - subscribed
+        - subscribed_count
+      properties:
+        consolidation_key:
+          type: string
+        contract:
+          type: string
+        token_id:
+          type: integer
+          format: int64
+        subscribed:
+          type: boolean
+        subscribed_count:
+          type: integer
+          format: int64
+    RedeemedSubscription:
+      type: object
+      required:
+        - contract
+        - token_id
+        - address
+        - transaction
+        - consolidation_key
+        - value
+        - balance_after
+        - count
+      properties:
+        contract:
+          type: string
+        token_id:
+          type: integer
+          format: int64
+        address:
+          type: string
+        transaction:
+          type: string
+        transaction_date:
+          type: string
+          format: date-time
+          nullable: true
+        consolidation_key:
+          type: string
+        value:
+          type: number
+          format: double
+        balance_after:
+          type: number
+          format: double
+        count:
+          type: integer
+          format: int64
+        created_at:
+          type: string
+          format: date-time
+    RedeemedSubscriptionCounts:
+      type: object
+      required:
+        - contract
+        - token_id
+        - count
+        - name
+        - image_url
+        - mint_date
+        - szn
+      properties:
+        contract:
+          type: string
+        token_id:
+          type: integer
+          format: int64
+        count:
+          type: integer
+          format: int64
+        name:
+          type: string
+        image_url:
+          type: string
+        mint_date:
+          type: string
+        szn:
+          type: integer
+          format: int64
+    RedeemedSubscriptionCountsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithNextUriBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/RedeemedSubscriptionCounts"
+    RedeemedSubscriptionPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithNextUriBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/RedeemedSubscription"
+    SubscribeAllEditionsResponse:
+      type: object
+      required:
+        - consolidation_key
+        - subscribe_all_editions
+      properties:
+        consolidation_key:
+          type: string
+        subscribe_all_editions:
+          type: boolean
+    SubscriptionCountResponse:
+      type: object
+      required:
+        - consolidation_key
+        - contract
+        - token_id
+        - count
+      properties:
+        consolidation_key:
+          type: string
+        contract:
+          type: string
+        token_id:
+          type: integer
+          format: int64
+        count:
+          type: integer
+          format: int64
+    SubscriptionCounts:
+      type: object
+      required:
+        - contract
+        - token_id
+        - count
+      properties:
+        contract:
+          type: string
+        token_id:
+          type: integer
+          format: int64
+        count:
+          type: integer
+          format: int64
+    SubscriptionDetails:
+      type: object
+      required:
+        - consolidation_key
+        - last_update
+        - balance
+        - automatic
+        - subscribe_all_editions
+        - subscription_eligibility_count
+      properties:
+        consolidation_key:
+          type: string
+        last_update:
+          type: integer
+          format: int64
+        balance:
+          type: number
+          format: double
+        automatic:
+          type: boolean
+        subscribe_all_editions:
+          type: boolean
+        subscription_eligibility_count:
+          type: integer
+          format: int64
+    SubscriptionLog:
+      type: object
+      required:
+        - consolidation_key
+        - log
+      properties:
+        id:
+          type: integer
+          format: int64
+        consolidation_key:
+          type: string
+        log:
+          type: string
+        additional_info:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+    SubscriptionLogPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithNextUriBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/SubscriptionLog"
+    SubscriptionModeResponse:
+      type: object
+      required:
+        - consolidation_key
+        - automatic
+      properties:
+        consolidation_key:
+          type: string
+        automatic:
+          type: boolean
+    SubscriptionResponse:
+      type: object
+      required:
+        - consolidation_key
+        - contract
+        - token_id
+        - subscribed
+        - subscribed_count
+      properties:
+        consolidation_key:
+          type: string
+        contract:
+          type: string
+        token_id:
+          type: integer
+          format: int64
+        subscribed:
+          type: boolean
+        subscribed_count:
+          type: integer
+          format: int64
+    SubscriptionTopUp:
+      type: object
+      required:
+        - hash
+        - block
+        - transaction_date
+        - from_wallet
+        - amount
+      properties:
+        hash:
+          type: string
+        block:
+          type: integer
+          format: int64
+        transaction_date:
+          type: string
+          format: date-time
+        from_wallet:
+          type: string
+        amount:
+          type: number
+          format: double
+        created_at:
+          type: string
+          format: date-time
+    SubscriptionTopUpPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithNextUriBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/SubscriptionTopUp"
+    UpdateSubscribeAllEditionsRequest:
+      type: object
+      required:
+        - subscribe_all_editions
+      properties:
+        subscribe_all_editions:
+          type: boolean
+    UpdateSubscriptionCountRequest:
+      type: object
+      required:
+        - contract
+        - token_id
+        - count
+      properties:
+        contract:
+          type: string
+        token_id:
+          type: integer
+          format: int64
+        count:
+          type: integer
+          format: int64
+    UpdateSubscriptionModeRequest:
+      type: object
+      required:
+        - automatic
+      properties:
+        automatic:
+          type: boolean
+    UpdateSubscriptionRequest:
+      type: object
+      required:
+        - contract
+        - token_id
+        - subscribed
+      properties:
+        contract:
+          type: string
+        token_id:
+          type: integer
+          format: int64
+        subscribed:
+          type: boolean
 security:
   - bearerAuth: []
