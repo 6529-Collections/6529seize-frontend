@@ -85,9 +85,11 @@ const mockSubscriptions: NFTSubscription[] = [
   } as NFTSubscription,
 ];
 
+const FIXED_TIMESTAMP = 1609459200000;
+
 const mockDetails: SubscriptionDetails = {
   consolidation_key: "testuser",
-  last_update: Date.now(),
+  last_update: FIXED_TIMESTAMP,
   balance: 1,
   automatic: true,
   subscribe_all_editions: false,
