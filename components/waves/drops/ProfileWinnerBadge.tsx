@@ -49,7 +49,7 @@ export const ProfileWinnerBadge: React.FC<ProfileWinnerBadgeProps> = ({
         onMouseEnter={() => setIsTooltipOpen(true)}
         onMouseLeave={() => setIsTooltipOpen(false)}
         className="tw-w-6 tw-h-6 md:tw-w-5 md:tw-h-5 tw-outline-none tw-ring-0 tw-inline-flex tw-items-center tw-justify-center
-       tw-rounded-full tw-border tw-border-solid tw-border-amber-400/20
+       tw-rounded-md tw-border tw-border-solid tw-border-amber-400/20
         tw-bg-amber-400/10 tw-text-amber-300 tw-text-xs
         tw-shadow-[inset_0_0_2px_rgba(255,255,255,0.08),0_1px_4px_rgba(0,0,0,0.25)]
         tw-transition-all tw-duration-200

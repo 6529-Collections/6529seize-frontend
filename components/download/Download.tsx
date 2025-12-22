@@ -18,6 +18,7 @@ interface Props {
   showProgress?: boolean;
   className?: string;
   variant?: "default" | "text";
+  alwaysShowText?: boolean;
 }
 
 export default function Download(props: Readonly<Props>) {
@@ -86,7 +87,7 @@ export default function Download(props: Readonly<Props>) {
             aria-label="Download file"
             type="button">
             <ArrowDownTrayIcon className="tw-w-4 tw-h-4 tw-flex-shrink-0" />
-            <span className="tw-hidden sm:tw-inline">Download</span>
+            <span className={props.alwaysShowText ? "" : "tw-hidden sm:tw-inline"}>Download</span>
           </button>
         );
       }

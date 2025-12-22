@@ -61,7 +61,7 @@ export const SingleWaveDropVoteContent: React.FC<
             onClick={() => setIsSliderMode(!isSliderMode)}
             className="tw-h-8 tw-w-8 tw-rounded-md tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700
                     tw-flex tw-items-center tw-justify-center tw-transition-all tw-flex-shrink-0
-                    desktop-hover:hover:tw-bg-iron-600"
+                    desktop-hover:hover:tw-bg-iron-600 tw-font-medium"
             title={isSliderMode ? "Switch to numeric" : "Switch to slider"}
           >
             <FontAwesomeIcon
@@ -123,11 +123,11 @@ export const SingleWaveDropVoteContent: React.FC<
   // Clean, sleek design with flexbox ordering for responsive layout
   return (
     <div
-      className="tw-bg-iron-950 tw-backdrop-blur-sm tw-border tw-border-iron-800 tw-border-solid tw-rounded-lg tw-px-2 tw-py-3 sm:tw-p-4"
+      className="tw-space-y-6"
       onClick={(e) => e.stopPropagation()}
     >
       {/* Top row: Input + Submit */}
-      <div className="tw-flex tw-gap-2.5">
+      <div className="tw-flex tw-gap-3">
         <div className="tw-flex-1 tw-min-w-0 tw-h-14">
           {isSliderMode ? (
             <SingleWaveDropVoteSlider
@@ -159,8 +159,8 @@ export const SingleWaveDropVoteContent: React.FC<
         </div>
       </div>
 
-      {/* Bottom row: Stats + Toggle button */}
-      <div className="tw-flex tw-items-center tw-justify-between tw-mt-3">
+      {/* Stats and mode toggle */}
+      <div className="tw-flex tw-items-center tw-justify-between">
         <SingleWaveDropVoteStats
           currentRating={drop.context_profile_context?.rating ?? 0}
           maxRating={maxRating}
@@ -168,19 +168,11 @@ export const SingleWaveDropVoteContent: React.FC<
         />
         <button
           onClick={() => setIsSliderMode(!isSliderMode)}
-          className="tw-h-8 tw-px-2.5 tw-rounded-lg tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700
-                  tw-flex tw-items-center tw-justify-center tw-gap-1.5 tw-transition-all
-                  desktop-hover:hover:tw-bg-iron-700"
+          className="tw-bg-transparent tw-border-0 tw-p-0 tw-text-sm tw-font-medium tw-text-primary-400
+                  desktop-hover:hover:tw-text-primary-300 tw-transition-colors"
           title="Switch mode"
         >
-          <FontAwesomeIcon
-            icon={faExchange}
-            className="tw-text-iron-400 tw-size-3 tw-flex-shrink-0"
-            flip={isSliderMode ? "horizontal" : "vertical"}
-          />
-          <span className="tw-text-xs tw-font-medium tw-text-iron-400">
-            {isSliderMode ? "Numeric" : "Slider"}
-          </span>
+          {isSliderMode ? "Switch to numeric" : "Switch to slider"}
         </button>
       </div>
     </div>

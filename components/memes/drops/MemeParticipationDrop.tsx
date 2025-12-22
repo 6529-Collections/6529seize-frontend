@@ -123,7 +123,9 @@ export default function MemeParticipationDrop({
                 </div>
               )}
 
-              <MemeDropTraits drop={drop} />
+              <div className="tw-px-4 tw-py-4">
+                <MemeDropTraits drop={drop} />
+              </div>
             </>
           </DropMobileMenuHandler>
           <div className="tw-flex tw-flex-col @[700px]:tw-flex-row tw-gap-3 @[700px]:tw-gap-y-0 tw-justify-between @[700px]:tw-items-center @[700px]:tw-px-4 tw-pb-4">

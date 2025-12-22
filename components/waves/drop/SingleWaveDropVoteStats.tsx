@@ -11,7 +11,7 @@ export const SingleWaveDropVoteStats: React.FC<
   SingleWaveDropVoteStatsProps
 > = ({ currentRating, maxRating, label }) => {
   return (
-    <div className="tw-mt-0.5 tw-flex tw-items-center tw-flex-wrap tw-gap-x-3 tw-gap-y-0.5 tw-text-xs tw-text-iron-500">
+    <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-3 tw-gap-y-0.5 tw-text-xs tw-text-iron-500">
       <div className="tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
         {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:{" "}
         <span className="tw-text-iron-300 tw-font-mono tw-tabular-nums">

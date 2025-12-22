@@ -48,7 +48,7 @@ export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
         onMouseEnter={() => setIsTooltipOpen(true)}
         onMouseLeave={() => setIsTooltipOpen(false)}
         className="tw-flex tw-items-center tw-justify-center tw-w-6 tw-h-6 md:tw-w-5 md:tw-h-5
-        tw-rounded-full tw-border tw-border-solid tw-border-blue-400/40
+        tw-rounded-md tw-border tw-border-solid tw-border-blue-400/40
         tw-bg-gradient-to-br tw-from-blue-800 tw-to-blue-900
         tw-text-blue-100/90
         tw-shadow-[0_1px_3px_rgba(0,0,0,0.45)]

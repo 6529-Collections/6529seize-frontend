@@ -39,7 +39,7 @@ export const SingleWaveDropInfoPanel: React.FC<
       </div>
       <SingleWaveDropInfoActions drop={drop} />
 
-      <div className="tw-mt-2">
+      <div className="tw-mt-2 tw-px-6">
         <SingleWaveDropInfoDetails drop={drop} />
       </div>
       {canDelete && drop.drop_type !== ApiDropType.Winner && (

@@ -10,6 +10,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useCallback, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { MemesSingleWaveDropInfoPanel } from "./MemesSingleWaveDropInfoPanel";
 import { SingleWaveDropChat } from "./SingleWaveDropChat";
 
@@ -104,54 +105,64 @@ export const MemesSingleWaveDrop: React.FC<MemesSingleWaveDropProps> = ({
         </div>
       </div>
 
-      <div
-        className={`lg:tw-hidden tw-fixed tw-inset-0 tw-z-[999] tw-bg-black/60 tw-transition-opacity tw-duration-300 ${
-          isChatOpen
-            ? "tw-visible tw-opacity-100"
-            : "tw-invisible tw-opacity-0 tw-pointer-events-none"
-        }`}
-        onClick={toggleChat}
-      />
-
       <CompactModeProvider compact={true}>
         <div
           className={`
-            tw-flex tw-flex-col tw-h-full tw-bg-iron-950 tw-transition-all tw-duration-300 tw-ease-in-out
-            lg:tw-relative lg:tw-bg-black
+            tw-hidden lg:tw-flex tw-flex-col tw-h-full tw-bg-black tw-transition-all tw-duration-300 tw-ease-in-out
             ${
               isChatOpen
-                ? "lg:tw-w-[400px] lg:tw-border-l lg:tw-border-solid lg:tw-border-white/10 lg:tw-border-y-0 lg:tw-border-r-0"
-                : "lg:tw-w-0 lg:tw-overflow-hidden lg:tw-border-none"
-            }
-            tw-fixed tw-inset-0 tw-z-[1000] lg:tw-static lg:tw-inset-auto lg:tw-z-auto
-            ${
-              isChatOpen
-                ? "tw-translate-x-0"
-                : "tw-translate-x-full lg:tw-translate-x-0"
+                ? "tw-w-[400px] tw-border-l tw-border-solid tw-border-white/10 tw-border-y-0 tw-border-r-0"
+                : "tw-w-0 tw-overflow-hidden tw-border-none"
             }
           `}
         >
-          <div className="lg:tw-hidden tw-flex tw-items-center tw-justify-between tw-px-4 tw-py-3 tw-border-b tw-border-solid tw-border-white/10 tw-border-x-0 tw-border-t-0">
-            <button
-              onClick={toggleChat}
-              className="tw-flex tw-items-center tw-gap-2 tw-text-white/70 hover:tw-text-white tw-transition-colors tw-bg-transparent tw-border-0"
-            >
-              <ArrowLeftIcon className="tw-w-4 tw-h-4 tw-flex-shrink-0" />
-              <span className="tw-text-sm tw-font-semibold">Back</span>
-            </button>
-            <span className="tw-text-sm tw-font-semibold tw-text-white">
-              Chat
-            </span>
-          </div>
-
           <div className="tw-flex-1 tw-overflow-hidden tw-relative">
-            <div className="tw-absolute tw-top-0 tw-left-0 tw-right-0 tw-h-12 tw-bg-gradient-to-b tw-from-black tw-to-transparent tw-z-50 tw-pointer-events-none lg:tw-block tw-hidden" />
+            <div className="tw-absolute tw-top-0 tw-left-0 tw-right-0 tw-h-12 tw-bg-gradient-to-b tw-from-black tw-to-transparent tw-z-50 tw-pointer-events-none" />
             {wave && drop && (
               <SingleWaveDropChat key={drop.id} wave={wave} drop={drop} />
             )}
           </div>
         </div>
       </CompactModeProvider>
+
+      {typeof document !== "undefined" &&
+        document.body &&
+        createPortal(
+          <CompactModeProvider compact={true}>
+            <div
+              className={`lg:tw-hidden tw-fixed tw-inset-0 tw-z-[90] tw-bg-black/60 tw-transition-opacity tw-duration-300 ${
+                isChatOpen
+                  ? "tw-visible tw-opacity-100"
+                  : "tw-invisible tw-opacity-0 tw-pointer-events-none"
+              }`}
+              onClick={toggleChat}
+            />
+            <div
+              className={`
+                lg:tw-hidden tw-flex tw-flex-col tw-h-full tw-bg-iron-950 tw-transition-all tw-duration-300 tw-ease-in-out
+                tw-fixed tw-inset-0 tw-z-[100]
+                ${isChatOpen ? "tw-translate-x-0" : "tw-translate-x-full"}
+              `}
+            >
+              <div className="tw-flex tw-items-center tw-px-4 tw-py-3 tw-border-b tw-border-solid tw-border-white/10 tw-border-x-0 tw-border-t-0">
+                <button
+                  onClick={toggleChat}
+                  className="tw-flex tw-items-center tw-gap-2 tw-text-white/70 hover:tw-text-white tw-transition-colors tw-bg-transparent tw-border-0"
+                >
+                  <ArrowLeftIcon className="tw-w-4 tw-h-4 tw-flex-shrink-0" />
+                  <span className="tw-text-sm tw-font-semibold">Back</span>
+                </button>
+              </div>
+
+              <div className="tw-flex-1 tw-overflow-hidden">
+                {wave && drop && (
+                  <SingleWaveDropChat key={drop.id} wave={wave} drop={drop} />
+                )}
+              </div>
+            </div>
+          </CompactModeProvider>,
+          document.body
+        )}
     </div>
   );
 };
