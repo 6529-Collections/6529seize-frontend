@@ -5,97 +5,17 @@ import { Tooltip } from "react-tooltip";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAddressCard, faStar } from "@fortawesome/free-regular-svg-icons";
 import { faAward } from "@fortawesome/free-solid-svg-icons";
-
-import { ApiWave } from "@/generated/models/ApiWave";
-import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
-import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
 import { ApiDrop } from "@/generated/models/ApiDrop";
+import { useWaveRankReward } from "@/hooks/waves/useWaveRankReward";
 
 interface WaveSmallLeaderboardItemOutcomesProps {
   readonly drop: ApiDrop;
-  readonly wave: ApiWave;
   readonly isMobile?: boolean;
 }
 
-interface OutcomeSummary {
-  nicTotal: number;
-  repTotal: number;
-  manualOutcomes: string[];
-}
-
-const calculateNIC = ({
-  drop,
-  wave,
-}: {
-  drop: ApiDrop;
-  wave: ApiWave;
-}): number => {
-  const rank = drop.rank;
-  if (!rank) return 0;
-  const outcomes = wave.outcomes;
-  const nicOutcomes = outcomes.filter(
-    (outcome) => outcome.credit === ApiWaveOutcomeCredit.Cic
-  );
-  const nic = nicOutcomes.reduce((acc, outcome) => {
-    return acc + (outcome.distribution?.[rank - 1]?.amount ?? 0);
-  }, 0);
-  return nic;
-};
-
-const calculateRep = ({
-  drop,
-  wave,
-}: {
-  drop: ApiDrop;
-  wave: ApiWave;
-}): number => {
-  const rank = drop.rank;
-  if (!rank) return 0;
-  const outcomes = wave.outcomes;
-  const repOutcomes = outcomes.filter(
-    (outcome) => outcome.credit === ApiWaveOutcomeCredit.Rep
-  );
-  const rep = repOutcomes.reduce((acc, outcome) => {
-    return acc + (outcome.distribution?.[rank - 1]?.amount ?? 0);
-  }, 0);
-  return rep;
-};
-
-const calculateManualOutcomes = ({
-  drop,
-  wave,
-}: {
-  drop: ApiDrop;
-  wave: ApiWave;
-}): string[] => {
-  const rank = drop.rank;
-  if (!rank) return [];
-  const outcomes = wave.outcomes;
-  const manualOutcomes = outcomes.filter(
-    (outcome) => outcome.type === ApiWaveOutcomeType.Manual
-  );
-  return manualOutcomes
-    .filter((outcome) => !!outcome.distribution?.[rank - 1]?.amount)
-    .map((outcome) => outcome.distribution?.[rank - 1]?.description ?? "");
-};
-
-const calculateOutcomeSummary = ({
-  drop,
-  wave,
-}: {
-  drop: ApiDrop;
-  wave: ApiWave;
-}): OutcomeSummary => {
-  return {
-    nicTotal: calculateNIC({ drop, wave }),
-    repTotal: calculateRep({ drop, wave }),
-    manualOutcomes: calculateManualOutcomes({ drop, wave }),
-  };
-};
-
 export const WaveSmallLeaderboardItemOutcomes: React.FC<
   WaveSmallLeaderboardItemOutcomesProps
-> = ({ drop, wave, isMobile = false }) => {
+> = ({ drop, isMobile = false }) => {
   const [isTouch, setIsTouch] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -110,15 +30,22 @@ export const WaveSmallLeaderboardItemOutcomes: React.FC<
     }
   };
 
-  const { nicTotal, repTotal, manualOutcomes } = calculateOutcomeSummary({
-    drop,
-    wave,
+  const { nicTotal, repTotal, manualOutcomes, isLoading } = useWaveRankReward({
+    waveId: drop.wave.id,
+    rank: drop.rank,
   });
+
   const totalOutcomes =
     (nicTotal ? 1 : 0) + (repTotal ? 1 : 0) + manualOutcomes.length;
 
-  if (totalOutcomes === 0) {
+  if (totalOutcomes === 0 && !isLoading) {
     return null;
+  }
+
+  if (isLoading) {
+    return (
+      <div className={`tw-animate-pulse tw-h-6 tw-w-16 tw-bg-iron-800 tw-rounded-lg`} />
+    )
   }
 
   const tooltipContent = (
@@ -184,11 +111,9 @@ export const WaveSmallLeaderboardItemOutcomes: React.FC<
     <>
       <button
         onClick={handleClick}
-        className={`tw-border-0 tw-rounded-lg tw-flex tw-items-center ${
-          isMobile ? "tw-gap-4" : "tw-gap-2"
-        } tw-min-w-6 tw-py-1.5 tw-px-2 tw-bg-iron-800 tw-ring-1 tw-ring-iron-700 ${
-          isTouch ? "tw-cursor-pointer" : ""
-        }`}
+        className={`tw-border-0 tw-rounded-lg tw-flex tw-items-center ${isMobile ? "tw-gap-4" : "tw-gap-2"
+          } tw-min-w-6 tw-py-1.5 tw-px-2 tw-bg-iron-800 tw-ring-1 tw-ring-iron-700 ${isTouch ? "tw-cursor-pointer" : ""
+          }`}
         data-tooltip-id={`wave-outcomes-${drop.id}`}>
         <span className="tw-text-xs tw-font-medium tw-text-iron-200">
           Outcome:
