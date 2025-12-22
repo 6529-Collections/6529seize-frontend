@@ -10,6 +10,6 @@ interface WaveLeaderboardDropFooterProps {
 
 export const WaveLeaderboardDropFooter: React.FC<
   WaveLeaderboardDropFooterProps
-> = ({ drop, wave }) => {
-  return <WaveSmallLeaderboardItemOutcomes drop={drop} wave={wave} />;
+> = ({ drop }) => {
+  return <WaveSmallLeaderboardItemOutcomes drop={drop} />;
 };

@@ -23,7 +23,7 @@ export const SingleWaveDropInfoAuthorSection: React.FC<
         </div>
       </div>
       {wave && drop && (
-        <WaveSmallLeaderboardItemOutcomes drop={drop} wave={wave} />
+        <WaveSmallLeaderboardItemOutcomes drop={drop} />
       )}
     </div>
   );

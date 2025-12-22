@@ -20,7 +20,7 @@ interface WaveSmallLeaderboardDefaultDropProps {
 
 export const WaveSmallLeaderboardDefaultDrop: React.FC<
   WaveSmallLeaderboardDefaultDropProps
-> = ({ drop, wave, onDropClick }) => {
+> = ({ drop, onDropClick }) => {
   const getCICColor = (cic: number): string => {
     const cicType = cicToType(cic);
     switch (cicType) {
@@ -129,7 +129,7 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<
                 />
               </div>
               <div className="tw-mt-3">
-                <WaveSmallLeaderboardItemOutcomes drop={drop} wave={wave} />
+                <WaveSmallLeaderboardItemOutcomes drop={drop} />
               </div>
             </div>
           </div>

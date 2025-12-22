@@ -19,7 +19,7 @@ interface WaveSmallLeaderboardTopThreeDropProps {
 
 export const WaveSmallLeaderboardTopThreeDrop: React.FC<
   WaveSmallLeaderboardTopThreeDropProps
-> = ({ drop, wave, onDropClick }) => {
+> = ({ drop, onDropClick }) => {
   const getPFPColor = (rank: number | null): string | null => {
     return null;
   };
@@ -67,32 +67,28 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
             className="tw-@container tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-relative desktop-hover:hover:tw-bg-iron-800/80 tw-transition-all tw-duration-300 tw-ease-out"
             style={{
               border: "1px solid transparent",
-              boxShadow: `inset 2px 0 0 ${
-                drop.rank && drop.rank <= 3
-                  ? getRankTextColor(drop.rank)?.replace("tw-text-", "").trim()
+              boxShadow: `inset 2px 0 0 ${drop.rank && drop.rank <= 3
+                ? getRankTextColor(drop.rank)?.replace("tw-text-", "").trim()
+                : "#60606C"
+                }, 
+                         inset 0 1px 0 ${drop.rank && drop.rank <= 3
+                  ? getRankTextColor(drop.rank)
+                    ?.replace("tw-text-", "")
+                    .trim()
                   : "#60606C"
-              }, 
-                         inset 0 1px 0 ${
-                           drop.rank && drop.rank <= 3
-                             ? getRankTextColor(drop.rank)
-                                 ?.replace("tw-text-", "")
-                                 .trim()
-                             : "#60606C"
-                         }20, 
-                         inset -1px 0 0 ${
-                           drop.rank && drop.rank <= 3
-                             ? getRankTextColor(drop.rank)
-                                 ?.replace("tw-text-", "")
-                                 .trim()
-                             : "#60606C"
-                         }20, 
-                         inset 0 -1px 0 ${
-                           drop.rank && drop.rank <= 3
-                             ? getRankTextColor(drop.rank)
-                                 ?.replace("tw-text-", "")
-                                 .trim()
-                             : "#60606C"
-                         }20`,
+                }20, 
+                         inset -1px 0 0 ${drop.rank && drop.rank <= 3
+                  ? getRankTextColor(drop.rank)
+                    ?.replace("tw-text-", "")
+                    .trim()
+                  : "#60606C"
+                }20, 
+                         inset 0 -1px 0 ${drop.rank && drop.rank <= 3
+                  ? getRankTextColor(drop.rank)
+                    ?.replace("tw-text-", "")
+                    .trim()
+                  : "#60606C"
+                }20`,
               transition: "box-shadow 0.2s ease, background-color 0.2s ease",
             }}
           >
@@ -168,7 +164,7 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
                   />
                 </div>
                 <div className="tw-mt-3">
-                  <WaveSmallLeaderboardItemOutcomes drop={drop} wave={wave} />
+                  <WaveSmallLeaderboardItemOutcomes drop={drop} />
                 </div>
               </div>
             </div>

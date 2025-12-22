@@ -7649,7 +7649,6 @@ components:
         - participation
         - chat
         - wave
-        - outcomes
         - created_at
         - contributors_overview
         - subscribed_actions
