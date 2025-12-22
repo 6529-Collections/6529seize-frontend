@@ -137,7 +137,6 @@ export default function MemeLabLeaderboard(props: Readonly<Props>) {
                           consolidationKey={lead.consolidation_key}
                           consolidationDisplay={lead.consolidation_display}
                           pfp={lead.pfp_url}
-                          cicType={lead.cic_type}
                           level={lead.level}
                         />
                       </div>

@@ -1,5 +1,9 @@
-import { FC, type JSX } from "react";
-import { ApiWaveOutcomeOld } from "@/generated/models/ApiWaveOutcomeOld";
+"use client";
+
+import { FC, type JSX, useMemo } from "react";
+import { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
+import type { WaveOutcomeDistributionState } from "@/types/waves.types";
+import { useWaveOutcomeDistributionQuery } from "@/hooks/waves/useWaveOutcomeDistributionQuery";
 import { WaveRepOutcome } from "./WaveRepOutcome";
 import { WaveNICOutcome } from "./WaveNICOutcome";
 import { WaveManualOutcome } from "./WaveManualOutcome";
@@ -12,12 +16,47 @@ enum OutcomeType {
 }
 
 interface WaveOutcomeProps {
-  readonly outcome: ApiWaveOutcomeOld;
+  readonly waveId: string;
+  readonly outcome: ApiWaveOutcome;
 }
 
-export const WaveOutcome: FC<WaveOutcomeProps> = ({
-  outcome,
-}) => {
+export const WaveOutcome: FC<WaveOutcomeProps> = ({ waveId, outcome }) => {
+  const {
+    items,
+    totalCount,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    isLoading,
+    isError,
+    errorMessage,
+  } = useWaveOutcomeDistributionQuery({
+    waveId,
+    outcomeIndex: outcome.index,
+  });
+  const distributionState: WaveOutcomeDistributionState = useMemo(
+    () => ({
+      items,
+      totalCount,
+      hasNextPage: Boolean(hasNextPage),
+      isFetchingNextPage,
+      fetchNextPage,
+      isLoading,
+      isError,
+      errorMessage,
+    }),
+    [
+      items,
+      totalCount,
+      hasNextPage,
+      isFetchingNextPage,
+      fetchNextPage,
+      isLoading,
+      isError,
+      errorMessage,
+    ]
+  );
+
   const getOutcomeType = (): OutcomeType => {
     if (outcome.credit === ApiWaveOutcomeCredit.Rep) {
       return OutcomeType.REP;
@@ -31,9 +70,15 @@ export const WaveOutcome: FC<WaveOutcomeProps> = ({
   const outcomeType = getOutcomeType();
 
   const component: Record<OutcomeType, JSX.Element> = {
-    [OutcomeType.REP]: <WaveRepOutcome outcome={outcome} />,
-    [OutcomeType.NIC]: <WaveNICOutcome outcome={outcome} />,
-    [OutcomeType.MANUAL]: <WaveManualOutcome outcome={outcome} />,
+    [OutcomeType.REP]: (
+      <WaveRepOutcome outcome={outcome} distribution={distributionState} />
+    ),
+    [OutcomeType.NIC]: (
+      <WaveNICOutcome outcome={outcome} distribution={distributionState} />
+    ),
+    [OutcomeType.MANUAL]: (
+      <WaveManualOutcome outcome={outcome} distribution={distributionState} />
+    ),
   };
 
   return <div>{component[outcomeType]}</div>;

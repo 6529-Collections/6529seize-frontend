@@ -4,6 +4,7 @@ import Image from "next/image";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { WavePodiumItemContentOutcomes } from "./WavePodiumItemContentOutcomes";
 import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { motion } from "framer-motion";
@@ -172,7 +173,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
             >
               {drop.author.pfp ? (
                 <Image
-                  src={getScaledImageUri(drop.author.pfp, ImageScale.W_AUTO_H_50)}
+                  src={getScaledImageUri(resolveIpfsUrlSync(drop.author.pfp), ImageScale.W_AUTO_H_50)}
                   alt=""
                   width={56}
                   height={56}

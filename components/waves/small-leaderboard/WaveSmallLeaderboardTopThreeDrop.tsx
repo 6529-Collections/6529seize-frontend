@@ -6,23 +6,18 @@ import { CICType } from "@/entities/IProfile";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { WaveSmallLeaderboardItemContent } from "./WaveSmallLeaderboardItemContent";
 import { WaveSmallLeaderboardItemOutcomes } from "./WaveSmallLeaderboardItemOutcomes";
-import { ApiWave } from "@/generated/models/ApiWave";
 import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 
 interface WaveSmallLeaderboardTopThreeDropProps {
   readonly drop: ExtendedDrop;
-  readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 export const WaveSmallLeaderboardTopThreeDrop: React.FC<
   WaveSmallLeaderboardTopThreeDropProps
-> = ({ drop, wave, onDropClick }) => {
-  const getPFPColor = (rank: number | null): string | null => {
-    return null;
-  };
+> = ({ drop, onDropClick }) => {
 
   const getRankTextColor = (rank: number | null): string | null => {
     if (rank === 1) return "tw-text-[#E8D48A]";
@@ -67,32 +62,28 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
             className="tw-@container tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-relative desktop-hover:hover:tw-bg-iron-800/80 tw-transition-all tw-duration-300 tw-ease-out"
             style={{
               border: "1px solid transparent",
-              boxShadow: `inset 2px 0 0 ${
-                drop.rank && drop.rank <= 3
-                  ? getRankTextColor(drop.rank)?.replace("tw-text-", "").trim()
+              boxShadow: `inset 2px 0 0 ${drop.rank && drop.rank <= 3
+                ? getRankTextColor(drop.rank)?.replace("tw-text-", "").trim()
+                : "#60606C"
+                }, 
+                         inset 0 1px 0 ${drop.rank && drop.rank <= 3
+                  ? getRankTextColor(drop.rank)
+                    ?.replace("tw-text-", "")
+                    .trim()
                   : "#60606C"
-              }, 
-                         inset 0 1px 0 ${
-                           drop.rank && drop.rank <= 3
-                             ? getRankTextColor(drop.rank)
-                                 ?.replace("tw-text-", "")
-                                 .trim()
-                             : "#60606C"
-                         }20, 
-                         inset -1px 0 0 ${
-                           drop.rank && drop.rank <= 3
-                             ? getRankTextColor(drop.rank)
-                                 ?.replace("tw-text-", "")
-                                 .trim()
-                             : "#60606C"
-                         }20, 
-                         inset 0 -1px 0 ${
-                           drop.rank && drop.rank <= 3
-                             ? getRankTextColor(drop.rank)
-                                 ?.replace("tw-text-", "")
-                                 .trim()
-                             : "#60606C"
-                         }20`,
+                }20, 
+                         inset -1px 0 0 ${drop.rank && drop.rank <= 3
+                  ? getRankTextColor(drop.rank)
+                    ?.replace("tw-text-", "")
+                    .trim()
+                  : "#60606C"
+                }20, 
+                         inset 0 -1px 0 ${drop.rank && drop.rank <= 3
+                  ? getRankTextColor(drop.rank)
+                    ?.replace("tw-text-", "")
+                    .trim()
+                  : "#60606C"
+                }20`,
               transition: "box-shadow 0.2s ease, background-color 0.2s ease",
             }}
           >
@@ -168,7 +159,7 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
                   />
                 </div>
                 <div className="tw-mt-3">
-                  <WaveSmallLeaderboardItemOutcomes drop={drop} wave={wave} />
+                  <WaveSmallLeaderboardItemOutcomes drop={drop} />
                 </div>
               </div>
             </div>

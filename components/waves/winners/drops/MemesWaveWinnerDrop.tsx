@@ -13,7 +13,7 @@ import Link from "next/link";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
-import { cicToType, formatNumberWithCommas } from "@/helpers/Helpers";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { Tooltip } from "react-tooltip";
 import MemeDropTraits from "@/components/memes/drops/MemeDropTraits";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
@@ -96,7 +96,6 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                     {winner.drop.author?.level && (
                       <UserCICAndLevel
                         level={winner.drop.author.level}
-                        cicType={cicToType(winner.drop.author.cic || 0)}
                         size={UserCICAndLevelSize.SMALL}
                       />
                     )}
@@ -131,7 +130,6 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                     <WaveDropTime timestamp={winner.drop.created_at} />
                   </div>
 
-                  {/* Bottom row: Winner badge */}
                   <div className="tw-flex tw-items-center tw-gap-x-2">
                     <WinnerDropBadge
                       rank={winner.place}
@@ -141,7 +139,6 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                 </div>
               </div>
 
-              {/* Show open icon when not a touch device */}
               {!hasTouchScreen && (
                 <div className="tw-flex tw-items-start tw-flex-shrink-0">
                   <div className="tw-h-8">
@@ -223,7 +220,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                     </React.Fragment>
                   ))}
                 </div>
-                <span className="tw-text-white tw-font-bold tw-text-sm">
+                <span className="tw-text-iron-200 tw-font-semibold tw-text-sm">
                   {formatNumberWithCommas(ratersCount)}{" "}
                   <span className="tw-text-iron-500 tw-font-normal">
                     {ratersCount === 1 ? "voter" : "voters"}

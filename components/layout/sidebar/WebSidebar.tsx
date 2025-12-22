@@ -146,7 +146,7 @@ function WebSidebar({
         style={isMobile ? undefined : { left: "var(--layout-margin, 0px)" }}
       >
         <div
-          className="tw-group tw-relative tw-z-50 tw-h-full tw-bg-black tw-border-r tw-border-solid tw-border-y-0 tw-border-l-0 tw-border-iron-700/90 tw-border-0 tw-transition-[width] tw-duration-300 tw-ease-in-out focus:tw-outline-none"
+          className="tw-group tw-relative tw-z-50 tw-h-full tw-bg-black tw-border-r tw-border-solid tw-border-y-0 tw-border-l-0 tw-border-iron-800 tw-border-0 tw-transition-[width] tw-duration-300 tw-ease-in-out focus:tw-outline-none"
           style={{ width: sidebarWidth }}
           aria-label="Primary sidebar"
           ref={scrollContainerRef}

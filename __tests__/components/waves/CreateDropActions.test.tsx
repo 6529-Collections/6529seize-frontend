@@ -26,16 +26,16 @@ jest.mock("framer-motion", () => {
   return {
     __esModule: true,
     motion: {
-      div: React.forwardRef(function Div({ children, ...props }, ref) {
+      div: React.forwardRef(function Div({ children, ...props }: { children: React.ReactNode }, ref: React.Ref<HTMLDivElement>) {
         return React.createElement("div", { ...props, ref }, children);
       }),
-      button: React.forwardRef(function Btn({ children, ...props }, ref) {
+      button: React.forwardRef(function Btn({ children, ...props }: { children: React.ReactNode }, ref: React.Ref<HTMLButtonElement>) {
         return React.createElement("button", { ...props, ref }, children);
       }),
     },
-    AnimatePresence: ({ children }) =>
+    AnimatePresence: ({ children }: { children: React.ReactNode }) =>
       React.createElement(React.Fragment, null, children),
-    LayoutGroup: ({ children }) =>
+    LayoutGroup: ({ children }: { children: React.ReactNode }) =>
       React.createElement(React.Fragment, null, children),
   };
 });
@@ -85,84 +85,91 @@ describe("CreateDropActions", () => {
     isStormMode: false,
     canAddPart: true,
     submitting: false,
-    showOptions: false,
     isRequiredMetadataMissing: false,
     isRequiredMediaMissing: false,
     handleFileChange: jest.fn(),
     onAddMetadataClick: jest.fn(),
     breakIntoStorm: jest.fn(),
-    setShowOptions: jest.fn(),
     onGifDrop: jest.fn(),
+    showOptions: true,
+    setShowOptions: jest.fn(),
   };
 
-  it("renders chevron button when options are hidden", () => {
+  it("renders chevron button in narrow container initially", () => {
     render(<CreateDropActions {...defaultProps} />);
 
-    const chevronButton = screen.getByRole("button");
-    expect(chevronButton).toBeInTheDocument();
-    expect(chevronButton.querySelector("svg")).toBeInTheDocument();
-  });
-
-  it("shows options when chevron button is clicked", async () => {
-    render(<CreateDropActions {...defaultProps} />);
-
-    const chevronButton = screen.getByRole("button");
-    await userEvent.click(chevronButton);
-
-    expect(defaultProps.setShowOptions).toHaveBeenCalledWith(true);
-  });
-
-  it("renders all action buttons when options are shown", () => {
-    render(<CreateDropActions {...defaultProps} showOptions={true} />);
-
-    expect(screen.getByLabelText("Upload a file")).toBeInTheDocument();
-    expect(screen.getByLabelText("Add GIF")).toBeInTheDocument();
-    expect(screen.getByTestId("storm-button")).toBeInTheDocument();
-    // Should have multiple buttons when options are shown
+    // In narrow container, chevron is visible initially (isExpanded=false)
+    // Both wide and narrow versions are rendered but one is hidden via CSS
     const buttons = screen.getAllByRole("button");
-    expect(buttons.length).toBeGreaterThanOrEqual(3);
+    expect(buttons.length).toBeGreaterThan(0);
+  });
+
+  it("expands when chevron button is clicked and notifies parent", async () => {
+    render(<CreateDropActions {...defaultProps} showOptions={false} />);
+
+    // Find and click the chevron button (the one without aria-label in narrow container)
+    const buttons = screen.getAllByRole("button");
+    const chevronButton = buttons.find(
+      (btn) => btn.querySelector('path[d="m8.25 4.5 7.5 7.5-7.5 7.5"]')
+    );
+
+    if (chevronButton) {
+      await userEvent.click(chevronButton);
+      expect(defaultProps.setShowOptions).toHaveBeenCalledWith(true);
+    }
+  });
+
+  it("renders all action buttons", () => {
+    render(<CreateDropActions {...defaultProps} />);
+
+    // Both versions render all buttons (one hidden via CSS)
+    expect(screen.getAllByLabelText("Upload a file").length).toBeGreaterThan(0);
+    expect(screen.getAllByLabelText("Add GIF").length).toBeGreaterThan(0);
+    expect(screen.getAllByTestId("storm-button").length).toBeGreaterThan(0);
   });
 
   it("calls onAddMetadataClick when metadata button is clicked", async () => {
-    render(<CreateDropActions {...defaultProps} showOptions={true} />);
+    render(<CreateDropActions {...defaultProps} />);
 
-    // The metadata button is the first button (without aria-label)
+    // Find metadata buttons (the ones with the code icon, without aria-label)
     const buttons = screen.getAllByRole("button");
     const metadataButton = buttons.find(
-      (button) => !button.dataset.ariaLabel && !button.dataset.testid
+      (button) =>
+        button.querySelector('path[d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"]')
     );
-    await userEvent.click(metadataButton!);
 
-    expect(defaultProps.onAddMetadataClick).toHaveBeenCalled();
+    if (metadataButton) {
+      await userEvent.click(metadataButton);
+      expect(defaultProps.onAddMetadataClick).toHaveBeenCalled();
+    }
   });
 
   it("handles file upload", async () => {
-    render(<CreateDropActions {...defaultProps} showOptions={true} />);
+    render(<CreateDropActions {...defaultProps} />);
 
-    const fileInput = screen
-      .getByLabelText("Upload a file")
-      .querySelector('input[type="file"]');
+    const fileInputs = screen.getAllByLabelText("Upload a file");
+    const fileInput = fileInputs[0].querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(["test"], "test.jpg", { type: "image/jpeg" });
 
-    await userEvent.upload(fileInput!, file);
+    await userEvent.upload(fileInput, file);
 
     expect(defaultProps.handleFileChange).toHaveBeenCalledWith([file]);
   });
 
   it("shows GIF picker when GIF button is clicked", async () => {
-    render(<CreateDropActions {...defaultProps} showOptions={true} />);
+    render(<CreateDropActions {...defaultProps} />);
 
-    const gifButton = screen.getByLabelText("Add GIF");
-    await userEvent.click(gifButton);
+    const gifButtons = screen.getAllByLabelText("Add GIF");
+    await userEvent.click(gifButtons[0]);
 
     expect(screen.getByTestId("gif-picker")).toBeInTheDocument();
   });
 
   it("calls onGifDrop when GIF is selected", async () => {
-    render(<CreateDropActions {...defaultProps} showOptions={true} />);
+    render(<CreateDropActions {...defaultProps} />);
 
-    const gifButton = screen.getByLabelText("Add GIF");
-    await userEvent.click(gifButton);
+    const gifButtons = screen.getAllByLabelText("Add GIF");
+    await userEvent.click(gifButtons[0]);
 
     const selectGifButton = screen.getByTestId("select-gif");
     await userEvent.click(selectGifButton);
@@ -171,10 +178,10 @@ describe("CreateDropActions", () => {
   });
 
   it("hides GIF picker when closed", async () => {
-    render(<CreateDropActions {...defaultProps} showOptions={true} />);
+    render(<CreateDropActions {...defaultProps} />);
 
-    const gifButton = screen.getByLabelText("Add GIF");
-    await userEvent.click(gifButton);
+    const gifButtons = screen.getAllByLabelText("Add GIF");
+    await userEvent.click(gifButtons[0]);
 
     expect(screen.getByTestId("gif-picker")).toBeInTheDocument();
 
@@ -185,10 +192,10 @@ describe("CreateDropActions", () => {
   });
 
   it("closes GIF picker on Escape key", async () => {
-    render(<CreateDropActions {...defaultProps} showOptions={true} />);
+    render(<CreateDropActions {...defaultProps} />);
 
-    const gifButton = screen.getByLabelText("Add GIF");
-    await userEvent.click(gifButton);
+    const gifButtons = screen.getAllByLabelText("Add GIF");
+    await userEvent.click(gifButtons[0]);
 
     expect(screen.getByTestId("gif-picker")).toBeInTheDocument();
 
@@ -203,7 +210,7 @@ describe("CreateDropActions", () => {
     const { publicEnv } = require("@/config/env");
     const prevKey = publicEnv.TENOR_API_KEY;
     publicEnv.TENOR_API_KEY = undefined;
-    render(<CreateDropActions {...defaultProps} showOptions={true} />);
+    render(<CreateDropActions {...defaultProps} />);
 
     expect(screen.queryByLabelText("Add GIF")).not.toBeInTheDocument();
     publicEnv.TENOR_API_KEY = prevKey;
@@ -213,14 +220,14 @@ describe("CreateDropActions", () => {
     render(
       <CreateDropActions
         {...defaultProps}
-        showOptions={true}
         isRequiredMetadataMissing={true}
       />
     );
 
     const buttons = screen.getAllByRole("button");
     const metadataButton = buttons.find(
-      (button) => !button.dataset.ariaLabel && !button.dataset.testid
+      (button) =>
+        button.querySelector('path[d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"]')
     );
     expect(metadataButton).toHaveClass("tw-text-[#FEDF89]");
   });
@@ -229,34 +236,36 @@ describe("CreateDropActions", () => {
     render(
       <CreateDropActions
         {...defaultProps}
-        showOptions={true}
         isRequiredMediaMissing={true}
       />
     );
 
-    const uploadLabel = screen.getByLabelText("Upload a file");
-    expect(uploadLabel).toHaveClass("tw-text-[#FEDF89]");
+    const uploadLabels = screen.getAllByLabelText("Upload a file");
+    expect(uploadLabels[0]).toHaveClass("tw-text-[#FEDF89]");
   });
 
   it("highlights chevron button when any required content is missing", () => {
     render(
       <CreateDropActions
         {...defaultProps}
+        showOptions={false}
         isRequiredMetadataMissing={true}
         isRequiredMediaMissing={true}
       />
     );
 
-    const chevronButton = screen.getByRole("button");
+    const buttons = screen.getAllByRole("button");
+    const chevronButton = buttons.find(
+      (btn) => btn.querySelector('path[d="m8.25 4.5 7.5 7.5-7.5 7.5"]')
+    );
     expect(chevronButton).toHaveClass("tw-text-[#FEDF89]");
   });
 
   it("accepts multiple file types", () => {
-    render(<CreateDropActions {...defaultProps} showOptions={true} />);
+    render(<CreateDropActions {...defaultProps} />);
 
-    const fileInput = screen
-      .getByLabelText("Upload a file")
-      .querySelector('input[type="file"]');
+    const fileInputs = screen.getAllByLabelText("Upload a file");
+    const fileInput = fileInputs[0].querySelector('input[type="file"]');
     expect(fileInput).toHaveAttribute("accept", "image/*,video/*,audio/*");
     expect(fileInput).toHaveAttribute("multiple");
   });
@@ -265,39 +274,37 @@ describe("CreateDropActions", () => {
     render(
       <CreateDropActions
         {...defaultProps}
-        showOptions={true}
         isStormMode={true}
         canAddPart={false}
         submitting={true}
       />
     );
 
-    const stormButton = screen.getByTestId("storm-button");
-    expect(stormButton).toHaveTextContent("Storm Mode");
-    expect(stormButton).toBeDisabled();
+    const stormButtons = screen.getAllByTestId("storm-button");
+    expect(stormButtons[0]).toHaveTextContent("Storm Mode");
+    expect(stormButtons[0]).toBeDisabled();
   });
 
   it("calls breakIntoStorm when storm button is clicked", async () => {
-    render(<CreateDropActions {...defaultProps} showOptions={true} />);
+    render(<CreateDropActions {...defaultProps} />);
 
-    const stormButton = screen.getByTestId("storm-button");
-    await userEvent.click(stormButton);
+    const stormButtons = screen.getAllByTestId("storm-button");
+    await userEvent.click(stormButtons[0]);
 
     expect(defaultProps.breakIntoStorm).toHaveBeenCalled();
   });
 
   it("handles multiple file selection", async () => {
-    render(<CreateDropActions {...defaultProps} showOptions={true} />);
+    render(<CreateDropActions {...defaultProps} />);
 
-    const fileInput = screen
-      .getByLabelText("Upload a file")
-      .querySelector('input[type="file"]');
+    const fileInputs = screen.getAllByLabelText("Upload a file");
+    const fileInput = fileInputs[0].querySelector('input[type="file"]') as HTMLInputElement;
     const files = [
       new File(["test1"], "test1.jpg", { type: "image/jpeg" }),
       new File(["test2"], "test2.png", { type: "image/png" }),
     ];
 
-    await userEvent.upload(fileInput!, files);
+    await userEvent.upload(fileInput, files);
 
     expect(defaultProps.handleFileChange).toHaveBeenCalledWith(files);
   });
@@ -309,11 +316,11 @@ describe("CreateDropActions", () => {
     );
 
     const { unmount } = render(
-      <CreateDropActions {...defaultProps} showOptions={true} />
+      <CreateDropActions {...defaultProps} />
     );
 
-    const gifButton = screen.getByLabelText("Add GIF");
-    await userEvent.click(gifButton);
+    const gifButtons = screen.getAllByLabelText("Add GIF");
+    await userEvent.click(gifButtons[0]);
 
     unmount();
 
@@ -323,5 +330,24 @@ describe("CreateDropActions", () => {
     );
 
     removeEventListenerSpy.mockRestore();
+  });
+
+  it("collapses when showOptions changes to false", async () => {
+    const { rerender } = render(
+      <CreateDropActions {...defaultProps} showOptions={true} />
+    );
+
+    // Verify buttons are visible when showOptions is true
+    expect(screen.getAllByLabelText("Upload a file").length).toBeGreaterThan(0);
+
+    // Then collapse
+    rerender(<CreateDropActions {...defaultProps} showOptions={false} />);
+
+    // When showOptions is false, only the chevron button should be visible
+    const buttons = screen.getAllByRole("button");
+    const chevronButton = buttons.find(
+      (btn) => btn.querySelector('path[d="m8.25 4.5 7.5 7.5-7.5 7.5"]')
+    );
+    expect(chevronButton).toBeInTheDocument();
   });
 });

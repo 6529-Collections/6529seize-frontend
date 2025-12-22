@@ -1,4 +1,3 @@
-import { CICType } from "@/entities/IProfile";
 import { formatAddress } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import UserCICAndLevel from "../user/utils/UserCICAndLevel";
@@ -9,7 +8,6 @@ export function LeaderboardCollector(
     consolidationKey: string;
     consolidationDisplay: string;
     pfp: string;
-    cicType?: CICType;
     level: number;
   }>
 ) {
@@ -38,9 +36,9 @@ export function LeaderboardCollector(
         href={`/${link}`}
         className="no-wrap d-flex gap-3 decoration-none align-items-center">
         {pfpImg}
-        {props.cicType && props.level ? (
+        {props.level ? (
           <span className="d-flex gap-2 align-items-center">
-            <UserCICAndLevel level={props.level} cicType={props.cicType} />
+            <UserCICAndLevel level={props.level} />
             <span>{display}</span>
           </span>
         ) : (

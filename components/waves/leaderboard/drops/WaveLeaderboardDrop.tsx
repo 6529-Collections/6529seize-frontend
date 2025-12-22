@@ -23,7 +23,6 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
   return (
     <DefaultWaveLeaderboardDrop
       drop={drop}
-      wave={wave}
       onDropClick={onDropClick}
     />
   );

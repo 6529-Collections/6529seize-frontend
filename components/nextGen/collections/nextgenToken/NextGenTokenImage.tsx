@@ -2,7 +2,7 @@ import { NextGenTokenRarityType } from "@/components/nextGen/nextgen_helpers";
 import UserCICAndLevel from "@/components/user/utils/UserCICAndLevel";
 import { ETHEREUM_ICON_TEXT, NEXTGEN_MEDIA_BASE_URL } from "@/constants";
 import { NextGenToken } from "@/entities/INextgen";
-import { cicToType, formatAddress, getRoyaltyImage } from "@/helpers/Helpers";
+import { formatAddress, getRoyaltyImage } from "@/helpers/Helpers";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -41,15 +41,9 @@ export function NextGenTokenImage(
   function getOwnerInfo() {
     let ownerInfoDisplay;
     if (props.show_owner_info) {
-      const cicType = cicToType(props.token.tdh + props.token.rep_score);
-
       const ownerInfo = (
         <span className="d-flex align-items-center gap-2">
-          <UserCICAndLevel
-            level={props.token.level}
-            cicType={cicType}
-            color="black"
-          />
+          <UserCICAndLevel level={props.token.level} color="black" />
           {props.token.normalised_handle ?? formatAddress(props.token.owner)}
         </span>
       );

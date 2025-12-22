@@ -1,5 +1,4 @@
 import DropPfp from "@/components/drops/create/utils/DropPfp";
-import { cicToType } from "@/helpers/Helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import UserFollowBtn, {
   UserFollowBtnSize,
@@ -113,7 +112,6 @@ export default function UserProfileTooltip({
               {profile && (
                 <UserCICAndLevel
                   level={profile.level}
-                  cicType={cicToType(profile.cic)}
                   size={UserCICAndLevelSize.SMALL}
                 />
               )}

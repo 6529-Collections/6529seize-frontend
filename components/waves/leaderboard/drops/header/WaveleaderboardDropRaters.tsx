@@ -11,6 +11,7 @@ import {
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
 import { WAVE_VOTING_LABELS, WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 
 interface WaveLeaderboardDropRatersProps {
   readonly drop: ExtendedDrop;
@@ -76,10 +77,10 @@ export const WaveLeaderboardDropRaters: React.FC<
                 <Link href={`/${voter.profile.handle}`}>
                   {voter.profile.pfp ? (
                     <Image
-                      src={getScaledImageUri(
+                      src={resolveIpfsUrlSync(getScaledImageUri(
                         voter.profile.pfp,
                         ImageScale.W_AUTO_H_50
-                      )}
+                      ))}
                       alt={`${voter.profile.handle}'s Profile`}
                       width={20}
                       height={20}

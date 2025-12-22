@@ -19,7 +19,6 @@ export const WaveSmallLeaderboardDrop: React.FC<
     return (
       <MemesWaveSmallLeaderboardDrop
         drop={drop}
-        wave={wave}
         onDropClick={onDropClick}
       />
     );
@@ -27,7 +26,6 @@ export const WaveSmallLeaderboardDrop: React.FC<
     return (
       <DefaultWaveSmallLeaderboardDrop
         drop={drop}
-        wave={wave}
         onDropClick={onDropClick}
       />
     );

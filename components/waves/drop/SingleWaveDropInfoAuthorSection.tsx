@@ -1,13 +1,13 @@
 import React from "react";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { ApiWave } from "@/generated/models/ApiWave";
-import { WaveSmallLeaderboardItemOutcomes } from "../small-leaderboard/WaveSmallLeaderboardItemOutcomes";
 import { SingleWaveDropAuthor } from "./SingleWaveDropAuthor";
 import WaveDropTime from "../drops/time/WaveDropTime";
+import { WaveSmallLeaderboardItemOutcomes } from "../small-leaderboard/WaveSmallLeaderboardItemOutcomes";
+import { ApiWave } from "@/generated/models/ApiWave";
 
 interface SingleWaveDropInfoAuthorSectionProps {
   readonly drop: ExtendedDrop | undefined;
-  readonly wave: ApiWave | null;
+  readonly wave?: ApiWave | null;
 }
 
 export const SingleWaveDropInfoAuthorSection: React.FC<
@@ -23,7 +23,7 @@ export const SingleWaveDropInfoAuthorSection: React.FC<
         </div>
       </div>
       {wave && drop && (
-        <WaveSmallLeaderboardItemOutcomes drop={drop} wave={wave} />
+        <WaveSmallLeaderboardItemOutcomes drop={drop} />
       )}
     </div>
   );

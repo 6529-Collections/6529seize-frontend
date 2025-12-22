@@ -14,13 +14,25 @@ jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: () => <spa
 
 describe('WaveRepOutcome', () => {
   const outcome = {
-    distribution: [{ amount: 10 }, { amount: 20 }, { amount: 30 }, { amount: 40 }],
     amount: 100,
     rep_category: 'rep',
   } as any;
 
+  const distribution = {
+    items: [
+      { index: 1, amount: 10 },
+      { index: 2, amount: 20 },
+      { index: 3, amount: 30 },
+      { index: 4, amount: 40 },
+    ],
+    totalCount: 4,
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    fetchNextPage: jest.fn(),
+  } as any;
+
   it('expands list and shows more items', () => {
-    render(<WaveRepOutcome outcome={outcome} />);
+    render(<WaveRepOutcome outcome={outcome} distribution={distribution} />);
     expect(screen.queryByText('10 Rep')).toBeNull();
 
     fireEvent.click(screen.getByRole('button'));
@@ -29,5 +41,21 @@ describe('WaveRepOutcome', () => {
 
     fireEvent.click(screen.getByText(/View more/i));
     expect(screen.getByText('40 Rep')).toBeInTheDocument();
+  });
+
+  it('shows loading state when fetching next page', () => {
+    const loadingDistribution = {
+      ...distribution,
+      hasNextPage: true,
+      isFetchingNextPage: true,
+    };
+    render(<WaveRepOutcome outcome={outcome} distribution={loadingDistribution} />);
+
+    fireEvent.click(screen.getByRole('button')); // Expand accordion
+
+    const viewMoreBtn = screen.getByRole('button', { name: /loading\.\.\./i });
+    expect(viewMoreBtn).toBeInTheDocument();
+    expect(viewMoreBtn).toBeDisabled();
+    expect(screen.getByText(/1 more/i)).toBeInTheDocument();
   });
 });

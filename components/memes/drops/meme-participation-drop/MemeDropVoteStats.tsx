@@ -85,7 +85,7 @@ export default function MemeDropVoteStats({
             </div>
           ))}
         </div>
-        <span className="tw-text-white tw-font-bold tw-text-xs">
+        <span className="tw-text-white tw-font-semibold tw-text-sm">
           {formatNumberWithCommas(ratersCount ?? 0)}{" "}
           <span className="tw-text-iron-500 tw-font-normal">
             {ratersCount === 1 ? "voter" : "voters"}

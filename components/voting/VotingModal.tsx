@@ -3,7 +3,6 @@
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import React, { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
-import SecondaryButton from "../utils/button/SecondaryButton";
 import { SingleWaveDropVote } from "../waves/drop/SingleWaveDropVote";
 import ModalLayout from "../waves/memes/submission/layout/ModalLayout";
 
@@ -56,7 +55,7 @@ const VotingModal: React.FC<VotingModalProps> = ({
       aria-modal="true"
       aria-labelledby={titleId}
       tabIndex={-1}
-      className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px] tw-z-50 tw-flex tw-items-center tw-justify-center tw-outline-none"
+      className="tailwind-scope tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px] tw-z-50 tw-flex tw-items-center tw-justify-center tw-outline-none"
       onClick={(e) => e.stopPropagation()}
     >
       <div
@@ -66,17 +65,11 @@ const VotingModal: React.FC<VotingModalProps> = ({
       ></div>
 
       <div
-        className="tw-w-full tw-max-w-2xl tw-z-10 tw-px-4"
+        className="tw-w-full tw-max-w-xl tw-z-10 tw-px-4"
         onClick={(e) => e.stopPropagation()}
       >
         <ModalLayout title="Vote for this artwork" onCancel={onClose} titleId={titleId}>
-          <div className="tw-pb-6 tw-pt-1">
-            <SingleWaveDropVote drop={drop} onVoteSuccess={onClose} />
-
-            <div className="tw-mt-4 tw-flex tw-justify-end">
-              <SecondaryButton onClicked={onClose}>Cancel</SecondaryButton>
-            </div>
-          </div>
+          <SingleWaveDropVote drop={drop} onVoteSuccess={onClose} />
         </ModalLayout>
       </div>
     </div>

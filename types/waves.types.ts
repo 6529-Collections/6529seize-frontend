@@ -1,6 +1,7 @@
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
+import type { ApiWaveOutcomeDistributionItem } from "@/generated/models/ApiWaveOutcomeDistributionItem";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
@@ -116,6 +117,17 @@ export interface CreateWaveOutcomeConfig {
   readonly winnersConfig: CreateWaveOutcomeConfigWinnersConfig | null;
 }
 
+export interface WaveOutcomeDistributionState {
+  readonly items: ApiWaveOutcomeDistributionItem[];
+  readonly totalCount: number;
+  readonly hasNextPage: boolean;
+  readonly isFetchingNextPage: boolean;
+  readonly fetchNextPage: () => void;
+  readonly isLoading: boolean;
+  readonly isError: boolean;
+  readonly errorMessage?: string;
+}
+
 export interface CreateWaveConfig {
   readonly overview: WaveOverviewConfig;
   readonly groups: WaveGroupsConfig;
@@ -135,11 +147,6 @@ export enum CreateWaveStepStatus {
   PENDING = "PENDING",
 }
 
-interface SearchWavesParams {
-  readonly limit: number;
-  readonly serial_no_less_than?: number;
-  readonly group_id?: string;
-}
 export interface WavesOverviewParams {
   limit: number;
   offset: number;

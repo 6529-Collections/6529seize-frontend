@@ -4,11 +4,7 @@ import { useContext, useEffect, useState } from "react";
 import { Col, Container, Form, Row } from "react-bootstrap";
 import { useEnsAddress, useEnsName } from "wagmi";
 import HeaderUserConnect from "../header/user/HeaderUserConnect";
-import {
-  areEqualAddresses,
-  cicToType,
-  isValidEthAddress,
-} from "@/helpers/Helpers";
+import { areEqualAddresses, isValidEthAddress } from "@/helpers/Helpers";
 import { AuthContext } from "../auth/Auth";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
@@ -133,7 +129,6 @@ export default function ManifoldMintingConnect(
   }
 
   function printConnected() {
-    const type = cicToType(connectedProfile?.cic ?? 0);
     const profileHandle =
       connectedProfile?.handle ?? connectedProfile?.display ?? account.address;
     const showAddress = !areEqualAddresses(profileHandle, account.address);
@@ -144,7 +139,6 @@ export default function ManifoldMintingConnect(
           <UserCICAndLevel
             size={UserCICAndLevelSize.XLARGE}
             level={connectedProfile?.level ?? 0}
-            cicType={type}
           />
           <span className="d-flex flex-column">
             <b>{profileHandle}</b>

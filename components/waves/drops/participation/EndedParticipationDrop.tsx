@@ -16,7 +16,7 @@ import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
-import { cicToType, getTimeAgoShort } from "@/helpers/Helpers";
+import { getTimeAgoShort } from "@/helpers/Helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import WaveDropReactions from "../WaveDropReactions";
 
@@ -47,7 +47,6 @@ export default function EndedParticipationDrop({
 }: EndedParticipationDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const router = useRouter();
-  const cicType = cicToType(drop.author.cic);
 
   const [activePartIndex, setActivePartIndex] = useState(0);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
@@ -112,7 +111,6 @@ export default function EndedParticipationDrop({
               <div className="tw-flex tw-items-center tw-gap-x-2">
                 <UserCICAndLevel
                   level={drop.author.level}
-                  cicType={cicType}
                   size={UserCICAndLevelSize.SMALL}
                 />
 

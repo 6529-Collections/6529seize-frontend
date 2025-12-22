@@ -19,7 +19,6 @@ import { DBResponse } from "@/entities/IDBResponse";
 import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import {
   areEqualAddresses,
-  cicToType,
   formatAddress,
   getRoyaltyImage,
   isNullAddress,
@@ -133,14 +132,11 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                 </Tooltip>
               </>
             )}
-            {profile?.level && profile?.cic ? (
+            {profile?.level ? (
               <Link
                 href={`/${profile?.handle ?? props.token.owner}`}
                 className="d-flex gap-2 decoration-hover-underline align-items-center">
-                <UserCICAndLevel
-                  level={profile.level}
-                  cicType={cicToType(profile.cic)}
-                />
+                <UserCICAndLevel level={profile.level} />
                 <span className="decoration-underline">
                   {profile?.handle ??
                     profile?.display ??

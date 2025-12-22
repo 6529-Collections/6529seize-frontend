@@ -1,5 +1,6 @@
 "use client";
 
+import { useCompactMode } from "@/contexts/CompactModeContext";
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import { ApiDropType } from "@/generated/models/ApiDropType";
@@ -167,6 +168,7 @@ const WaveDrop = ({
     !isDrop && shouldGroupWithDrop(drop, nextDrop);
 
   const isMobile = useIsMobileDevice();
+  const compact = useCompactMode();
 
   const isProfileView = location === DropLocation.PROFILE;
   const showAuthorInfo = !shouldGroupWithPreviousDrop || isProfileView;
@@ -361,7 +363,7 @@ const WaveDrop = ({
             <div
               className={
                 shouldGroupWithPreviousDrop && !isProfileView
-                  ? "tw-ml-[3.5rem]"
+                  ? "tw-ml-[3.25rem]"
                   : ""
               }>
               <WaveDropContent
@@ -391,7 +393,9 @@ const WaveDrop = ({
           />
         )}
         <div
-          className={`tw-mx-2 tw-flex tw-w-[calc(100%-3.25rem)] tw-ml-[3.5rem] tw-items-center tw-gap-x-2 tw-gap-y-1 tw-flex-wrap`}>
+          className={`tw-mx-2 tw-flex tw-items-center tw-gap-x-2 tw-gap-y-1 tw-flex-wrap ${
+            compact ? "tw-ml-[2.75rem] tw-w-[calc(100%-2.5rem)]" : "tw-ml-[3.25rem] tw-w-[calc(100%-3.25rem)]"
+          }`}>
           {drop.metadata.length > 0 && (
             <WaveDropMetadata metadata={drop.metadata} />
           )}

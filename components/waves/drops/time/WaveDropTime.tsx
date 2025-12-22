@@ -2,18 +2,28 @@
 
 import React, { useEffect, useState } from "react";
 import { Time } from "@/helpers/time";
+import { useCompactMode } from "@/contexts/CompactModeContext";
+
+type WaveDropTimeSize = "xs" | "sm";
 
 interface WaveDropTimeProps {
   readonly timestamp: number;
+  readonly size?: WaveDropTimeSize;
 }
 
 /**
  * A reusable component for displaying timestamps in wave drops
  * Uses the exact same logic as the original WaveDropHeader implementation
  */
-const WaveDropTime: React.FC<WaveDropTimeProps> = ({ timestamp }) => {
+const SIZE_CLASSES: Record<WaveDropTimeSize, string> = {
+  xs: "tw-text-xs",
+  sm: "tw-text-sm",
+};
+
+const WaveDropTime: React.FC<WaveDropTimeProps> = ({ timestamp, size = "xs" }) => {
   // Hooks must be called at the top level
   const [isMobile, setIsMobile] = useState(false);
+  const compact = useCompactMode();
 
   // Check mobile on mount and window resize
   useEffect(() => {
@@ -81,8 +91,10 @@ const WaveDropTime: React.FC<WaveDropTimeProps> = ({ timestamp }) => {
     }
   };
 
+  const textSizeClass = compact ? "tw-text-[11px] tw-leading-4" : SIZE_CLASSES[size];
+
   return (
-    <p className="tw-text-xs tw-mb-0 tw-whitespace-nowrap tw-leading-none tw-text-iron-500">
+    <p className={`${textSizeClass} tw-mb-0 tw-whitespace-nowrap tw-leading-none tw-text-white/40`}>
       {formatTime()}
     </p>
   );

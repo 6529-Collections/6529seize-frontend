@@ -57,7 +57,7 @@ const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({ drop }) => {
             </div>
           ))}
         </div>
-        <span className="tw-text-white tw-font-bold tw-text-sm">
+        <span className="tw-text-iron-200 tw-font-semibold tw-text-sm">
           {formatNumberWithCommas(drop.raters_count)}{" "}
           <span className="tw-text-iron-500 tw-font-normal">
             {drop.raters_count === 1 ? "voter" : "voters"}

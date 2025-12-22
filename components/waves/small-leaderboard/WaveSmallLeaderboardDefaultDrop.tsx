@@ -1,6 +1,5 @@
 import React from "react";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { ApiWave } from "@/generated/models/ApiWave";
 import Link from "next/link";
 import { CICType } from "@/entities/IProfile";
 import { cicToType, formatNumberWithCommas } from "@/helpers/Helpers";
@@ -14,13 +13,12 @@ import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileToo
 
 interface WaveSmallLeaderboardDefaultDropProps {
   readonly drop: ExtendedDrop;
-  readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 export const WaveSmallLeaderboardDefaultDrop: React.FC<
   WaveSmallLeaderboardDefaultDropProps
-> = ({ drop, wave, onDropClick }) => {
+> = ({ drop, onDropClick }) => {
   const getCICColor = (cic: number): string => {
     const cicType = cicToType(cic);
     switch (cicType) {
@@ -129,7 +127,7 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<
                 />
               </div>
               <div className="tw-mt-3">
-                <WaveSmallLeaderboardItemOutcomes drop={drop} wave={wave} />
+                <WaveSmallLeaderboardItemOutcomes drop={drop} />
               </div>
             </div>
           </div>
