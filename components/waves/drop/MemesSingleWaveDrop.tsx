@@ -8,7 +8,6 @@ import {
   ArrowLeftIcon,
   ChatBubbleLeftRightIcon,
 } from "@heroicons/react/24/outline";
-import { usePathname, useRouter } from "next/navigation";
 import React, { useCallback, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { MemesSingleWaveDropInfoPanel } from "./MemesSingleWaveDropInfoPanel";
@@ -23,13 +22,11 @@ export const MemesSingleWaveDrop: React.FC<MemesSingleWaveDropProps> = ({
   drop: initialDrop,
   onClose,
 }) => {
-  const router = useRouter();
-  const pathname = usePathname() ?? "";
   const { drop } = useDrop({ dropId: initialDrop.id });
 
   const onWaveNotFound = useCallback(() => {
-    router.push(pathname);
-  }, [router, pathname]);
+    onClose();
+  }, [onClose]);
 
   const { data: wave } = useWaveData({
     waveId: drop?.wave.id ?? null,

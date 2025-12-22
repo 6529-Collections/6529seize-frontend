@@ -7,7 +7,7 @@ import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
 import { SingleWaveDropPosition } from "@/components/waves/drop/SingleWaveDropPosition";
-import { cicToType, formatNumberWithCommas } from "@/helpers/Helpers";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import Link from "next/link";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { ImageScale } from "@/helpers/image.helpers";
@@ -29,7 +29,6 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   isResetting = false,
 }) => {
   const artWork = drop.parts.at(0)?.media.at(0);
-  const cicType = cicToType(drop.author.cic || 0);
 
   const handleClick = () => {
     if (window.getSelection()?.toString()) {
@@ -121,7 +120,6 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
             </div>
             <UserCICAndLevel
               level={drop.author.level || 0}
-              cicType={cicType}
               size={UserCICAndLevelSize.SMALL}
             />
             <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>

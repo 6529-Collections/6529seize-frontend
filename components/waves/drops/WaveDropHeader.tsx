@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { cicToType } from "@/helpers/Helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
@@ -38,9 +37,6 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
   const compact = useCompactMode();
   const { isModalOpen, modalInitialTab, handleBadgeClick, handleModalClose } =
     useArtistPreviewModal();
-
-  // Memoize expensive computations
-  const cicType = useMemo(() => cicToType(drop.author.cic), [drop.author.cic]);
 
   const submissionCount = useMemo(() =>
     drop.author.active_main_stage_submission_ids?.length || 0,
@@ -84,7 +80,6 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
             </p>
             <UserCICAndLevel
               level={drop.author.level}
-              cicType={cicType}
               size={UserCICAndLevelSize.SMALL}
             />
             {hasSubmissions && (

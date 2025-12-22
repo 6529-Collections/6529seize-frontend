@@ -1,3 +1,4 @@
+import { FC } from "react";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
 
@@ -7,9 +8,11 @@ interface SingleWaveDropVoteStatsProps {
   readonly label: string;
 }
 
-export const SingleWaveDropVoteStats: React.FC<
-  SingleWaveDropVoteStatsProps
-> = ({ currentRating, maxRating, label }) => {
+export const SingleWaveDropVoteStats: FC<SingleWaveDropVoteStatsProps> = ({
+  currentRating,
+  maxRating,
+  label,
+}) => {
   return (
     <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-3 tw-gap-y-0.5 tw-text-xs tw-text-iron-500">
       <div className="tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">

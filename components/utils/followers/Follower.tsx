@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ApiIdentityAndSubscriptionActions } from "@/generated/models/ApiIdentityAndSubscriptionActions";
-import { cicToType } from "@/helpers/Helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
@@ -10,7 +9,6 @@ export default function Follower({
 }: {
   readonly follower: ApiIdentityAndSubscriptionActions;
 }) {
-  const cicType = cicToType(follower.identity.cic);
   return (
     <div className="tw-flex tw-items-center tw-gap-x-3">
       <div className="tw-h-10 tw-w-10 tw-bg-iron-800 tw-relative tw-flex-shrink-0 tw-rounded-lg">
@@ -35,7 +33,6 @@ export default function Follower({
           <div className="tw-items-center tw-flex tw-gap-x-2">
             <UserCICAndLevel
               level={follower.identity.level}
-              cicType={cicType}
               size={UserCICAndLevelSize.SMALL}
             />
             <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold tw-text-iron-50">

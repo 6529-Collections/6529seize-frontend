@@ -1,7 +1,7 @@
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { faTrophy } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React from "react";
+import { FC } from "react";
 import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
 
 interface SingleWaveDropPositionProps {
@@ -11,27 +11,25 @@ interface SingleWaveDropPositionProps {
   readonly variant?: "default" | "simple";
 }
 
-// Trophy-only badge component for completed Memes waves
-const TrophyOnlyBadge: React.FC<{ rank: number }> = ({ rank }) => {
-  // Colors for each rank (same as in WinnerDropBadge)
+const TrophyOnlyBadge: FC<{ rank: number }> = ({ rank }) => {
   let accentColor = "";
   let bgColor = "";
 
   switch (rank) {
-    case 1:
-      accentColor = "#fbbf24"; // Gold
+    case 1: // Gold
+      accentColor = "#fbbf24";
       bgColor = "rgba(251,191,36,0.1)";
       break;
-    case 2:
-      accentColor = "#CAD5E3"; // Silver
+    case 2: // Silver
+      accentColor = "#CAD5E3";
       bgColor = "rgba(202, 213, 227,0.1)";
       break;
-    case 3:
-      accentColor = "#CD7F32"; // Bronze
+    case 3: // Bronze
+      accentColor = "#CD7F32";
       bgColor = "rgba(205,127,50,0.1)";
       break;
     default:
-      accentColor = "#848490"; // iron-600
+      accentColor = "#848490";
       bgColor = "rgba(96,96,108,0.1)";
   }
 
@@ -54,8 +52,7 @@ const TrophyOnlyBadge: React.FC<{ rank: number }> = ({ rank }) => {
   );
 };
 
-// Simple variant - just trophy icon + number, no box
-const SimpleRankDisplay: React.FC<{ rank: number }> = ({ rank }) => {
+const SimpleRankDisplay: FC<{ rank: number }> = ({ rank }) => {
   let color = "";
   switch (rank) {
     case 1:
@@ -71,7 +68,6 @@ const SimpleRankDisplay: React.FC<{ rank: number }> = ({ rank }) => {
       color = "tw-text-iron-500";
   }
 
-  // Format rank as ordinal for top 3, otherwise use #N
   const formatRank = (r: number) => {
     switch (r) {
       case 1:
@@ -93,7 +89,7 @@ const SimpleRankDisplay: React.FC<{ rank: number }> = ({ rank }) => {
   );
 };
 
-export const SingleWaveDropPosition: React.FC<SingleWaveDropPositionProps> = ({
+export const SingleWaveDropPosition: FC<SingleWaveDropPositionProps> = ({
   rank,
   drop,
   isFinalWinner = false,
@@ -101,12 +97,10 @@ export const SingleWaveDropPosition: React.FC<SingleWaveDropPositionProps> = ({
 }) => {
   if (!rank) return null;
 
-  // Simple variant - just trophy + number
   if (variant === "simple") {
     return <SimpleRankDisplay rank={rank} />;
   }
 
-  // Check if the drop has winning_context or manual override with isFinalWinner prop
   const isWinner = isFinalWinner || drop?.winning_context;
 
   if (isWinner) {

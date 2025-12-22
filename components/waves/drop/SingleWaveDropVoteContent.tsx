@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import { SingleWaveDropVoteSize } from "./SingleWaveDropVote";
 import SingleWaveDropVoteSubmit, {
@@ -20,9 +20,11 @@ interface SingleWaveDropVoteContentProps {
   readonly onVoteSuccess?: () => void;
 }
 
-export const SingleWaveDropVoteContent: React.FC<
-  SingleWaveDropVoteContentProps
-> = ({ drop, size, onVoteSuccess }) => {
+export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
+  drop,
+  size,
+  onVoteSuccess,
+}) => {
 
   const currentVoteValue = drop.context_profile_context?.rating ?? 0;
   const minRating = drop.context_profile_context?.min_rating ?? 0;
@@ -162,6 +164,7 @@ export const SingleWaveDropVoteContent: React.FC<
           className="tw-bg-transparent tw-border-0 tw-p-0 tw-text-sm tw-font-medium tw-text-primary-400
                   desktop-hover:hover:tw-text-primary-300 tw-transition-colors"
           title="Switch mode"
+          aria-label={isSliderMode ? "Switch to numeric input" : "Switch to slider input"}
         >
           {isSliderMode ? "Switch to numeric" : "Switch to slider"}
         </button>

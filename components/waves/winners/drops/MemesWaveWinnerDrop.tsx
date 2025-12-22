@@ -13,7 +13,7 @@ import Link from "next/link";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
-import { cicToType, formatNumberWithCommas } from "@/helpers/Helpers";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { Tooltip } from "react-tooltip";
 import MemeDropTraits from "@/components/memes/drops/MemeDropTraits";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
@@ -96,7 +96,6 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                     {winner.drop.author?.level && (
                       <UserCICAndLevel
                         level={winner.drop.author.level}
-                        cicType={cicToType(winner.drop.author.cic || 0)}
                         size={UserCICAndLevelSize.SMALL}
                       />
                     )}

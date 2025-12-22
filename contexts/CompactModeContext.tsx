@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, ReactNode } from "react";
+import { createContext, useContext, ReactNode, FC } from "react";
 
 const CompactModeContext = createContext<boolean>(false);
 
@@ -9,7 +9,7 @@ interface CompactModeProviderProps {
   readonly compact: boolean;
 }
 
-export const CompactModeProvider: React.FC<CompactModeProviderProps> = ({
+export const CompactModeProvider: FC<CompactModeProviderProps> = ({
   children,
   compact,
 }) => {

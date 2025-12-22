@@ -1,19 +1,11 @@
 "use client";
 
-import { CICType, RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
+import { RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
 import { ProfileRatersTableType } from "@/enums";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { formatNumberWithCommas, getTimeAgo } from "@/helpers/Helpers";
 import Link from "next/link";
 import UserCICAndLevel from "../UserCICAndLevel";
-
-export const CIC_COLOR: Record<CICType, string> = {
-  [CICType.INACCURATE]: "tw-bg-[#F97066]",
-  [CICType.UNKNOWN]: "tw-bg-[#FEDF89]",
-  [CICType.PROBABLY_ACCURATE]: "tw-bg-[#AAF0C4]",
-  [CICType.ACCURATE]: "tw-bg-[#73E2A3]",
-  [CICType.HIGHLY_ACCURATE]: "tw-bg-[#3CCB7F]",
-};
 
 export default function ProfileRatersTableItem({
   rating,
