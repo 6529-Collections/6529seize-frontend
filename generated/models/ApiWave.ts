@@ -49,7 +49,7 @@ export class ApiWave {
     'participation': ApiWaveParticipationConfig;
     'chat': ApiWaveChatConfig;
     'wave': ApiWaveConfig;
-    'outcomes'?: Array<ApiWaveOutcomeOld>;
+    'outcomes': Array<ApiWaveOutcomeOld>;
     'contributors_overview': Array<ApiWaveContributorOverview>;
     'subscribed_actions': Array<ApiWaveSubscriptionTargetAction>;
     'metrics': ApiWaveMetrics;

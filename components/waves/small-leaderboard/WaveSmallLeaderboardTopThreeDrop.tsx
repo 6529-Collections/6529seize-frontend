@@ -20,9 +20,6 @@ interface WaveSmallLeaderboardTopThreeDropProps {
 export const WaveSmallLeaderboardTopThreeDrop: React.FC<
   WaveSmallLeaderboardTopThreeDropProps
 > = ({ drop, onDropClick }) => {
-  const getPFPColor = (rank: number | null): string | null => {
-    return null;
-  };
 
   const getRankTextColor = (rank: number | null): string | null => {
     if (rank === 1) return "tw-text-[#E8D48A]";
