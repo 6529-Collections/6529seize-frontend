@@ -73,7 +73,7 @@ export function useWaveRankReward({
     const query = distributionQueries[i];
     if (query.data?.data) {
       const item = query.data.data.find((d) => d.index === targetIndex);
-      if (item && item.amount) {
+      if (item?.amount) {
         if (outcome.credit === ApiWaveOutcomeCredit.Cic) {
           nicTotal += item.amount;
         } else if (outcome.credit === ApiWaveOutcomeCredit.Rep) {

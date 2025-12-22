@@ -7,7 +7,6 @@ import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import WaveDropActionsOptions from "@/components/waves/drops/WaveDropActionsOptions";
 import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMenuDelete";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
-import { ApiWave } from "@/generated/models/ObjectSerializer";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
@@ -22,13 +21,12 @@ import { WaveLeaderboardDropRaters } from "./header/WaveleaderboardDropRaters";
 
 interface DefaultWaveLeaderboardDropProps {
   readonly drop: ExtendedDrop;
-  readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 export const DefaultWaveLeaderboardDrop: React.FC<
   DefaultWaveLeaderboardDropProps
-> = ({ drop, wave, onDropClick }) => {
+> = ({ drop, onDropClick }) => {
   const { canShowVote, canDelete } = useDropInteractionRules(drop);
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
   const { hasTouchScreen } = useDeviceInfo();
@@ -87,7 +85,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
           <div className="tw-mt-3 tw-inline-flex tw-flex-col @[700px]:tw-flex-row tw-justify-between @[700px]:tw-items-center sm:tw-ml-[3.5rem] tw-space-y-3 @[700px]:tw-space-y-0 tw-gap-x-2">
             <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-y-2 tw-gap-x-4">
               <WaveLeaderboardDropRaters drop={drop} />
-              <WaveLeaderboardDropFooter drop={drop} wave={wave} />
+              <WaveLeaderboardDropFooter drop={drop} />
             </div>
             {canShowVote && (
               <div
