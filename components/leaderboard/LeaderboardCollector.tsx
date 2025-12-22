@@ -40,7 +40,7 @@ export function LeaderboardCollector(
         {pfpImg}
         {props.cicType && props.level ? (
           <span className="d-flex gap-2 align-items-center">
-            <UserCICAndLevel level={props.level} cicType={props.cicType} />
+            <UserCICAndLevel level={props.level} />
             <span>{display}</span>
           </span>
         ) : (

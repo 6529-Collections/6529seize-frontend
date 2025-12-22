@@ -1,5 +1,3 @@
-import { CICType } from "@/entities/IProfile";
-
 export enum UserCICAndLevelSize {
   SMALL = "SMALL",
   MEDIUM = "MEDIUM",
@@ -13,7 +11,6 @@ export default function UserCICAndLevel({
   size = UserCICAndLevelSize.MEDIUM,
 }: {
   readonly level: number;
-  readonly cicType?: CICType;
   readonly color?: string;
   readonly size?: UserCICAndLevelSize;
 }) {

@@ -6,8 +6,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 interface WinnerDropBadgeProps {
   rank: number | null;
   round?: number;
-  position?: number; // Position within the same rank (e.g., 2nd #1 place winner)
-  decisionTime: number | null; // Add decision time parameter
+  position?: number;
+  decisionTime: number | null;
   variant?: "default" | "simple";
 }
 
@@ -18,17 +18,14 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
   decisionTime,
   variant = "default",
 }) => {
-  // If rank is null or undefined, use position as fallback
   const effectiveRank = rank !== null && rank !== undefined ? rank : position;
   if (!effectiveRank) return null;
 
-  // Convert rank to a number to ensure proper comparison
   const rankNumber =
     typeof effectiveRank === "string"
       ? parseInt(effectiveRank, 10)
       : effectiveRank;
 
-  // Helper to compute English ordinal suffix
   function getOrdinalSuffix(n: number): string {
     const mod10 = n % 10;
     const mod100 = n % 100;
@@ -39,10 +36,8 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
     return "th";
   }
 
-  // Format separate date and time for responsive display
   const dateTime = decisionTime ? new Date(decisionTime) : null;
 
-  // Date string (e.g. "Mar 21")
   const dateString = dateTime
     ? dateTime.toLocaleString(undefined, {
         month: "short",
@@ -50,7 +45,6 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
       })
     : null;
 
-  // Time string (e.g. "12:30 PM") - will only show on sm screens and up
   const timeString = dateTime
     ? dateTime.toLocaleString(undefined, {
         hour: "2-digit",
@@ -58,7 +52,6 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
       })
     : null;
 
-  // Colors for each rank
   let colorClasses = "";
   let textColorClass = "";
   let rankText = "";
@@ -85,7 +78,6 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
       rankText = `${rankNumber}${getOrdinalSuffix(rankNumber)}`;
   }
 
-  // Simple variant - just trophy + rank + date, no pill styling
   if (variant === "simple") {
     return (
       <div className={`tw-flex tw-items-center tw-gap-1.5 tw-text-sm tw-font-semibold ${textColorClass}`}>

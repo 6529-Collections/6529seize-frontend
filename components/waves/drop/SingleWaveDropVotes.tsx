@@ -20,14 +20,12 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
   const { isVotingEnded, isWinner } = useDropInteractionRules(drop);
   const isPositive = drop.rating >= 0;
 
-  // Check if user has voted
   const hasUserVoted =
     drop.context_profile_context?.rating !== undefined &&
     drop.context_profile_context?.rating !== 0;
   const userVote = drop.context_profile_context?.rating ?? 0;
   const isUserVoteNegative = userVote < 0;
 
-  // Only show user vote when voting has ended or it's a winner drop
   const shouldShowUserVote = (isVotingEnded || isWinner) && hasUserVoted;
 
   return (
@@ -50,7 +48,6 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
         </span>
       </div>
 
-      {/* User's vote - only show when voting is ended or it's a winner drop */}
       {shouldShowUserVote && (
         <div className="tw-flex tw-items-center tw-gap-x-1.5">
           <div className="tw-flex tw-items-baseline tw-gap-x-1">

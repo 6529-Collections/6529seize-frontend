@@ -1,4 +1,4 @@
-import React from "react";
+import { ReactElement } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
@@ -14,7 +14,7 @@ export default function DropVoteProgressing({
   current,
   projected,
   subtle = false,
-}: DropVoteProgressingProps): React.ReactElement<any> | null {
+}: DropVoteProgressingProps): ReactElement | null {
   if (typeof current !== "number" || typeof projected !== "number") {
     return null;
   }

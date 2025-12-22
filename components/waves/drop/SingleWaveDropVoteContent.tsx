@@ -46,23 +46,20 @@ export const SingleWaveDropVoteContent: React.FC<
     }
   };
 
-  // MINI layout uses single horizontal row, others use existing responsive layout
   if (size === SingleWaveDropVoteSize.MINI) {
     return (
-
       <div
         className="tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid tw-rounded-lg tw-px-2 tw-py-1.5"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* MINI: Horizontal single-row layout */}
         <div className="tw-flex tw-items-center tw-gap-x-2">
-          {/* Toggle button - icon only */}
           <button
             onClick={() => setIsSliderMode(!isSliderMode)}
             className="tw-h-8 tw-w-8 tw-rounded-md tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700
                     tw-flex tw-items-center tw-justify-center tw-transition-all tw-flex-shrink-0
                     desktop-hover:hover:tw-bg-iron-600 tw-font-medium"
             title={isSliderMode ? "Switch to numeric" : "Switch to slider"}
+            aria-label={isSliderMode ? "Switch to numeric input" : "Switch to slider input"}
           >
             <FontAwesomeIcon
               icon={faExchange}
@@ -71,7 +68,6 @@ export const SingleWaveDropVoteContent: React.FC<
             />
           </button>
 
-          {/* Input controls - flex-1 to fill space */}
           <div className="tw-flex-1 tw-min-w-0 tw-h-8">
             {isSliderMode ? (
               <SingleWaveDropVoteSlider
@@ -96,7 +92,6 @@ export const SingleWaveDropVoteContent: React.FC<
             )}
           </div>
 
-          {/* Submit button - compact */}
           <div className="tw-flex-shrink-0 tw-h-8">
             <SingleWaveDropVoteSubmit
               drop={drop}
@@ -108,7 +103,6 @@ export const SingleWaveDropVoteContent: React.FC<
           </div>
         </div>
 
-        {/* Stats below the controls */}
         <div className="tw-mt-3">
           <SingleWaveDropVoteStats
             currentRating={drop.context_profile_context?.rating ?? 0}
@@ -120,13 +114,11 @@ export const SingleWaveDropVoteContent: React.FC<
     );
   }
 
-  // Clean, sleek design with flexbox ordering for responsive layout
   return (
     <div
       className="tw-space-y-6"
       onClick={(e) => e.stopPropagation()}
     >
-      {/* Top row: Input + Submit */}
       <div className="tw-flex tw-gap-3">
         <div className="tw-flex-1 tw-min-w-0 tw-h-14">
           {isSliderMode ? (
@@ -159,7 +151,6 @@ export const SingleWaveDropVoteContent: React.FC<
         </div>
       </div>
 
-      {/* Stats and mode toggle */}
       <div className="tw-flex tw-items-center tw-justify-between">
         <SingleWaveDropVoteStats
           currentRating={drop.context_profile_context?.rating ?? 0}
