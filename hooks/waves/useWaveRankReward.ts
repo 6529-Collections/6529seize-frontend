@@ -26,13 +26,9 @@ export function useWaveRankReward({
 }): WaveRankRewards {
   const { outcomes, isEnabled: isOutcomesEnabled } = useWaveOutcomesQuery({
     waveId,
-    // We only need the types of outcomes to know what to fetch
     enabled: enabled && !!rank,
   });
 
-  // Calculate which page the rank falls into.
-  // Rank 1 -> index 0. Page 1 (indices 0-99).
-  // Rank 101 -> index 100. Page 2 (indices 100-199).
   const targetIndex = rank ? rank - 1 : 0;
   const page = Math.floor(targetIndex / DISTRIBUTION_PAGE_SIZE) + 1;
 
@@ -73,7 +69,6 @@ export function useWaveRankReward({
   let repTotal = 0;
   const manualOutcomes: string[] = [];
 
-  // Iterate over outcomes and their corresponding query results
   outcomes.forEach((outcome, i) => {
     const query = distributionQueries[i];
     if (query.data?.data) {

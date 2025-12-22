@@ -1,6 +1,5 @@
 import React from "react";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { ApiWave } from "@/generated/models/ApiWave";
 import Link from "next/link";
 import { CICType } from "@/entities/IProfile";
 import { cicToType, formatNumberWithCommas } from "@/helpers/Helpers";
@@ -14,7 +13,6 @@ import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileToo
 
 interface WaveSmallLeaderboardDefaultDropProps {
   readonly drop: ExtendedDrop;
-  readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
