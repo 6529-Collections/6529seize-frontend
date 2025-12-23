@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import useDownloader from "react-use-downloader";
-import { Tooltip } from "react-tooltip";
 import { ArrowDownTrayIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
+import { useEffect, useRef, useState } from "react";
+import { Tooltip } from "react-tooltip";
+import useDownloader from "react-use-downloader";
 
 interface Props {
   href: string;
@@ -58,7 +58,7 @@ export default function WaveDropActionsDownload(props: Readonly<Props>) {
   const renderIcon = () => {
     if (isCompleted) {
       return (
-        <CheckCircleIcon className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-emerald-600" />
+        <CheckCircleIcon className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-emerald-500" />
       );
     }
     if (isInProgress && showProgress) {
@@ -111,10 +111,18 @@ export default function WaveDropActionsDownload(props: Readonly<Props>) {
         <Tooltip
           id={props.tooltipId}
           place="top"
+          offset={8}
+          opacity={1}
           style={{
-            backgroundColor: "#1F2937",
-            color: "white",
             padding: "4px 8px",
+            background: "#37373E",
+            color: "white",
+            fontSize: "13px",
+            fontWeight: 500,
+            borderRadius: "6px",
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+            zIndex: 99999,
+            pointerEvents: "none",
           }}>
           <span className="tw-text-xs">{getTooltipText()}</span>
         </Tooltip>

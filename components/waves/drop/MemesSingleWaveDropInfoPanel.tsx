@@ -27,6 +27,7 @@ import VotingModal from "@/components/voting/VotingModal";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { WAVE_VOTING_LABELS, WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
 import { Tooltip } from "react-tooltip";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 
 interface MemesSingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
@@ -123,7 +124,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
 
   return (
     <>
-      <div className="tw-w-full tw-h-full tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-scroll-smooth">
+      <div className="tw-w-full">
         <div className="tw-w-full tw-min-h-screen tw-flex tw-flex-col tw-pt-16">
           <div className="tw-flex-1 tw-flex tw-items-center tw-justify-center tw-px-4 sm:tw-px-6 xl:tw-px-20 tw-py-8">
             {artworkMedia && (
@@ -169,17 +170,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
                           place="top"
                           offset={8}
                           opacity={1}
-                          style={{
-                            padding: "4px 8px",
-                            background: "#37373E",
-                            color: "white",
-                            fontSize: "13px",
-                            fontWeight: 500,
-                            borderRadius: "6px",
-                            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-                            zIndex: 99999,
-                            pointerEvents: "none",
-                          }}
+                          style={TOOLTIP_STYLES}
                         >
                           Projected vote count at decision time
                         </Tooltip>
@@ -290,9 +281,9 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
           </div>
         </div>
 
-        <div className="tw-w-full tw-h-px tw-bg-white/10 tw-my-10"></div>
+        <div className="tw-w-full tw-h-px tw-bg-white/10 tw-my-8 md:tw-my-10"></div>
 
-        <div className="tw-px-4 sm:tw-px-6 xl:tw-px-20 tw-pb-10">
+        <div className="tw-px-4 sm:tw-px-6 xl:tw-px-20 tw-pb-8 md:tw-pb-10">
           <div className="tw-max-w-3xl tw-mx-auto tw-space-y-8">
             <SingleWaveDropTraits drop={drop} />
 

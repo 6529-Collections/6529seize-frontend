@@ -444,7 +444,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const { send } = useWebSocket();
   const { isApp } = useDeviceInfo();
   const actionsContainerRef = useRef<HTMLDivElement>(null);
-  const [isWideContainer, setIsWideContainer] = useState(true);
+  const [isWideContainer, setIsWideContainer] = useState(false);
   const editingDropId = useSelector(selectEditingDropId);
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
@@ -456,7 +456,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const [editorState, setEditorState] = useState<EditorState | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
-  const [showOptions, setShowOptions] = useState(true);
+  const [showOptions, setShowOptions] = useState(false);
 
   useEffect(() => {
     const container = actionsContainerRef.current;
@@ -468,7 +468,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         const width = entry.contentRect.width;
         const isWide = width >= CONTAINER_WIDTH_THRESHOLD;
         setIsWideContainer((prev) => (prev === isWide ? prev : isWide));
-        if (!isWide) {
+        if (isWide) {
+          setShowOptions(true);
+        } else {
           setShowOptions(false);
         }
       }

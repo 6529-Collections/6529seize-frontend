@@ -27,7 +27,7 @@ export const WaveDropsScrollBottomButton: FC<WaveDropsScrollBottomButtonProps> =
   return (
     <button
       onClick={handleClick}
-      className="tw-flex-shrink-0 tw-absolute tw-z-[49] tw-bottom-3 tw-right-2 lg:tw-right-6 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-700 tw-text-iron-300 tw-h-10 lg:tw-h-8 tw-px-4 tw-flex tw-items-center tw-justify-center tw-gap-2 hover:tw-bg-iron-650 hover:tw-border-iron-650 tw-transition-all tw-duration-300"
+      className="tw-flex-shrink-0 tw-absolute tw-z-[49] tw-bottom-3 tw-right-2 lg:tw-right-6 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-700 tw-text-iron-300 tw-size-8 tw-flex tw-items-center tw-justify-center tw-gap-2 hover:tw-bg-iron-650 hover:tw-border-iron-650 tw-transition-all tw-duration-300"
       aria-label={hasPending ? "Reveal new messages" : "Scroll to bottom"}
     >
       {hasPending ? (

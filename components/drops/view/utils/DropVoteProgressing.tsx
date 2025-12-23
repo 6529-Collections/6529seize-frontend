@@ -1,7 +1,7 @@
-import { ReactElement } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ReactElement } from "react";
 import { Tooltip } from "react-tooltip";
 
 interface DropVoteProgressingProps {
@@ -34,7 +34,7 @@ export default function DropVoteProgressing({
     arrowColor = "tw-text-iron-600";
   } else {
     color = isPositiveProgressing
-      ? "tw-text-emerald-600 tw-bg-emerald-600/10 tw-px-2 tw-py-0.5 tw-rounded tw-border tw-border-solid tw-border-emerald-600/20 tw-font-mono"
+      ? "tw-text-emerald-500 tw-bg-emerald-500/10 tw-px-2 tw-py-0.5 tw-rounded tw-border tw-border-solid tw-border-emerald-500/20 tw-font-mono"
       : "tw-text-rose-500 tw-bg-rose-500/10 tw-px-2 tw-py-0.5 tw-rounded tw-border tw-border-solid tw-border-rose-500/20 tw-font-mono";
     arrowColor = "tw-text-iron-600";
   }

@@ -254,7 +254,7 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   return (
     <div
       ref={containerRef}
-      className="tw-flex tw-flex-col tw-h-full tw-justify-end tw-relative tw-overflow-y-auto tw-bg-iron-950">
+      className="tw-flex tw-flex-col tw-h-full tw-justify-end tw-relative tw-overflow-hidden tw-bg-iron-950">
       <WaveDropsContent
         waveMessages={renderedWaveMessages}
         dropId={dropId}

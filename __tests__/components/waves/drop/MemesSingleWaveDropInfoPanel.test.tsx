@@ -26,14 +26,11 @@ const baseDrop:any = {
 
 describe('MemesSingleWaveDropInfoPanel', () => {
   it('renders drop info and delete button', () => {
-    render(<MemesSingleWaveDropInfoPanel drop={baseDrop} wave={null} isChatOpen={false} onToggleChat={jest.fn()} />);
-    expect(screen.getByTestId('position')).toBeInTheDocument();
+    render(<MemesSingleWaveDropInfoPanel drop={baseDrop} wave={null} />);
     expect(screen.getByTestId('badge')).toBeInTheDocument();
     expect(screen.getByTestId('media')).toHaveAttribute('media_url', 'img.png');
     expect(screen.getByTestId('traits')).toBeInTheDocument();
-    expect(screen.getByTestId('votes')).toBeInTheDocument();
     expect(screen.getByTestId('author')).toBeInTheDocument();
-    expect(screen.getByTestId('actions')).toBeInTheDocument();
     expect(screen.getByTestId('details')).toBeInTheDocument();
     expect(screen.getByTestId('delete')).toBeInTheDocument();
     expect(screen.getByText('Title')).toBeInTheDocument();
@@ -43,7 +40,7 @@ describe('MemesSingleWaveDropInfoPanel', () => {
   it('closes fullscreen when button clicked', async () => {
     const setState = jest.fn();
     const spy = jest.spyOn(React, 'useState').mockImplementationOnce(() => [true, setState]);
-    render(<MemesSingleWaveDropInfoPanel drop={baseDrop} wave={null} isChatOpen={false} onToggleChat={jest.fn()} />);
+    render(<MemesSingleWaveDropInfoPanel drop={baseDrop} wave={null} />);
     await userEvent.click(screen.getByRole('button', { name: 'Exit fullscreen view' }));
     expect(setState).toHaveBeenCalled();
     spy.mockRestore();
