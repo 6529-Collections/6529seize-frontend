@@ -51,6 +51,7 @@ export const WaveNICOutcome: FC<WaveNICOutcomeProps> = ({
     <div className="tw-rounded-xl tw-bg-iron-950 tw-ring-1 tw-ring-white/5 tw-transition-all tw-duration-300 desktop-hover:hover:tw-ring-white/10">
       <button
         type="button"
+        aria-expanded={isOpen}
         onClick={() => setIsOpen(!isOpen)}
         className="tw-w-full tw-border-0 tw-px-4 tw-py-4 tw-bg-transparent tw-cursor-pointer"
       >

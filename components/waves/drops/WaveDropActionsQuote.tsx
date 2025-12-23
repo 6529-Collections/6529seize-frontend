@@ -49,7 +49,7 @@ const WaveDropActionsQuote: React.FC<WaveDropActionsQuoteProps> = ({
         aria-label="Quote drop"
         data-tooltip-id={!isTemporaryDrop ? `quote-${drop.id}` : undefined}>
         <svg
-          className={`tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300 ${!canQuote ? "tw-opacity-50" : ""}`}
+          className={`tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300 ${canQuote ? "" : "tw-opacity-50"}`}
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg">

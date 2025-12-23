@@ -26,7 +26,6 @@ import { WinnerBadge } from "./WinnerBadge";
 interface SingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
   readonly wave: ApiWave | null;
-  readonly onClose: () => void;
 }
 
 export const SingleWaveDropInfoPanel: React.FC<SingleWaveDropInfoPanelProps> = ({
