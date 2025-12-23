@@ -47,16 +47,16 @@ export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
         }}
         onMouseEnter={() => setIsTooltipOpen(true)}
         onMouseLeave={() => setIsTooltipOpen(false)}
-        className="tw-flex tw-items-center tw-justify-center tw-w-6 tw-h-6 md:tw-w-5 md:tw-h-5
-        tw-rounded-md tw-border tw-border-solid tw-border-indigo-400/40
-        tw-bg-gradient-to-br tw-from-indigo-800 tw-to-indigo-900
-        tw-text-indigo-100/90
+        className="tw-flex tw-items-center tw-justify-center tw-w-5 tw-h-5
+        tw-rounded-md tw-border tw-border-solid tw-border-blue-400/40
+        tw-bg-gradient-to-br tw-from-blue-800 tw-to-blue-900
+        tw-text-blue-100/90
         tw-shadow-[0_1px_3px_rgba(0,0,0,0.45)]
         tw-transition-all tw-duration-200 tw-ease-out
-        desktop-hover:hover:tw-from-indigo-700
-        desktop-hover:hover:tw-to-indigo-800
+        desktop-hover:hover:tw-from-blue-700
+        desktop-hover:hover:tw-to-blue-800
         desktop-hover:hover:tw-scale-[1.05]
-        focus:tw-ring-1 focus:tw-ring-indigo-300/40"
+        focus:tw-ring-1 focus:tw-ring-blue-300/40"
         aria-label={`View ${submissionCount} art submission${
           submissionCount === 1 ? "" : "s"
         }`}
@@ -66,7 +66,7 @@ export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
       >
         <FontAwesomeIcon
           icon={faPalette}
-          className="tw-w-3.5 tw-h-3.5 md:tw-w-3 md:tw-h-3 tw-text-white tw-flex-shrink-0"
+          className="tw-w-2.5 tw-h-2.5 tw-text-white tw-flex-shrink-0"
         />
       </button>
 

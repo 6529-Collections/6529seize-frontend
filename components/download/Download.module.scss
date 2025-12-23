@@ -1,23 +1,5 @@
-@use "sass:color";
-@use "../../styles/variables.scss";
-
 .download {
-  margin-left: 5px;
-  color: variables.$lightest-grey;
   display: inline-block;
-
-  svg {
-    width: 20px;
-    color: white;
-    cursor: pointer;
-
-    &:hover {
-      color: color.scale(
-        variables.$font-color,
-        $lightness: -(variables.$darken-percentage)
-      );
-    }
-  }
 }
 
 .cancelDownload {

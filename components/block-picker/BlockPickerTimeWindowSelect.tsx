@@ -77,7 +77,7 @@ export default function BlockPickerTimeWindowSelect({
           <span className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3.5">
             <svg
               ref={iconScope}
-              className="tw-h-5 tw-w-5 tw-text-zinc-400"
+              className="tw-h-5 tw-w-5 tw-text-iron-400"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg">

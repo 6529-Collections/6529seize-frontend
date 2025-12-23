@@ -1,7 +1,6 @@
-import React from "react";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 interface WaveLeaderboardGalleryItemVotesProps {
   readonly drop: ExtendedDrop;
@@ -17,7 +16,7 @@ export default function WaveLeaderboardGalleryItemVotes({
   
   const getColorClass = () => {
     if (variant === "subtle") {
-      return "tw-text-iron-100";
+      return "tw-text-iron-200";
     }
     return isPositive ? "tw-text-emerald-500" : "tw-text-rose-500";
   };

@@ -149,7 +149,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
               loading={false}
               disabled={false}
               onClicked={onCreateDrop}
-              padding="tw-px-3 tw-py-1.5"
+              padding="tw-px-3 tw-py-2"
             >
               <svg
                 className="tw-w-4 tw-h-4 tw-flex-shrink-0 -tw-ml-1"

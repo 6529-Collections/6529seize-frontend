@@ -17,11 +17,7 @@ import {
   TraitValues,
 } from "@/entities/INextgen";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
-import {
-  capitalizeEveryWord,
-  cicToType,
-  formatAddress,
-} from "@/helpers/Helpers";
+import { capitalizeEveryWord, formatAddress } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import Pagination from "@/components/pagination/Pagination";
@@ -427,10 +423,7 @@ function Owner(props: Readonly<{ set: NextgenTraitSet }>) {
       onClick={(e) => e.stopPropagation()}
       href={`/${props.set.handle ?? props.set.owner}`}
     >
-      <UserCICAndLevel
-        level={props.set.level}
-        cicType={cicToType(props.set.tdh + props.set.rep_score)}
-      />{" "}
+      <UserCICAndLevel level={props.set.level} />{" "}
       {getOwnerDisplay()}
     </Link>
   );

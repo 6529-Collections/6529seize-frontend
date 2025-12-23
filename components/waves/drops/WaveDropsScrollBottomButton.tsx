@@ -1,4 +1,4 @@
-import React from "react";
+import { FC } from "react";
 
 interface WaveDropsScrollBottomButtonProps {
   readonly isAtBottom: boolean;
@@ -7,9 +7,7 @@ interface WaveDropsScrollBottomButtonProps {
   readonly onRevealNewMessages?: () => void;
 }
 
-export const WaveDropsScrollBottomButton: React.FC<
-  WaveDropsScrollBottomButtonProps
-> = ({
+export const WaveDropsScrollBottomButton: FC<WaveDropsScrollBottomButtonProps> = ({
   isAtBottom,
   scrollToBottom,
   newMessagesCount = 0,

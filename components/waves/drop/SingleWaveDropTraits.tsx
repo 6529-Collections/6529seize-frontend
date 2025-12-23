@@ -1,16 +1,17 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { Tooltip } from "react-tooltip";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
 import { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
+import { isNumber } from "lodash";
+import React, { useMemo, useState } from "react";
+import { Tooltip } from "react-tooltip";
 import { TraitsData } from "../memes/submission/types/TraitsData";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import {
   FIELD_TO_LABEL_MAP,
   MEME_TRAITS_SORT_ORDER,
 } from "../memes/traits/schema";
-import { isNumber } from "lodash";
 
 interface SingleWaveDropTraitsProps {
   readonly drop: ExtendedDrop;
@@ -28,13 +29,13 @@ const MetadataItem: React.FC<{
     typeof value === "boolean" ? (value ? "Yes" : "No") : String(value);
 
   return (
-    <div className="tw-bg-iron-900 tw-border tw-border-solid tw-border-white/10 tw-rounded-md tw-px-3 tw-py-1.5 tw-flex tw-flex-col">
-      <span className="tw-block tw-text-[9px] tw-uppercase tw-tracking-wider tw-text-iron-600 tw-font-bold tw-mb-0.5">
+    <div className="tw-flex-1 tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg tw-px-3 tw-py-2 tw-flex tw-flex-col tw-min-w-[100px]">
+      <span className="tw-block tw-text-[9px] tw-uppercase tw-tracking-wide tw-text-iron-500 tw-mb-1 tw-font-normal">
         {label}
       </span>
       <>
         <span
-          className="tw-text-xs tw-text-iron-400 tw-truncate"
+          className="tw-text-xs tw-font-medium tw-text-iron-200 tw-truncate"
           data-tooltip-id={`trait-${label}-${displayValue}`}
         >
           {displayValue}
@@ -43,13 +44,11 @@ const MetadataItem: React.FC<{
           <Tooltip
             id={`trait-${label}-${displayValue}`}
             place="top"
-            style={{
-              backgroundColor: "#1F2937",
-              color: "white",
-              padding: "4px 8px",
-            }}
+            offset={8}
+            opacity={1}
+            style={{ ...TOOLTIP_STYLES, maxWidth: "300px", wordWrap: "break-word" }}
           >
-            {displayValue}
+            <span className="tw-text-xs">{displayValue}</span>
           </Tooltip>
         )}
       </>
@@ -487,9 +486,9 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
 
   return (
     <div className="tw-w-full">
-      <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 md:tw-grid-cols-3 tw-gap-2">
-        {/* Always show first 2 items (changed from 4) */}
-        {traitItems.slice(0, 2).map((item) => (
+      <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 lg:tw-grid-cols-4 tw-gap-3">
+        {/* Always show first 3 items */}
+        {traitItems.slice(0, 3).map((item) => (
           <MetadataItem
             key={item.label}
             label={
@@ -502,10 +501,10 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
         ))}
 
         {/* Show more button or additional items */}
-        {traitItems.length > 2 &&
+        {traitItems.length > 3 &&
           (showAllTraits ? (
             <>
-              {traitItems.slice(2).map((item) => (
+              {traitItems.slice(3).map((item) => (
                 <MetadataItem
                   key={item.label}
                   label={
@@ -518,14 +517,14 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
               ))}
               <button
                 onClick={handleShowLess}
-                className="tw-text-xs tw-text-primary-400 desktop-hover:hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left">
+                className="tw-flex-1 tw-min-w-[100px] tw-px-3 tw-py-2 tw-bg-iron-900/30 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg tw-text-xs tw-text-iron-300 hover:tw-text-iron-40 tw-transition-colors tw-flex tw-items-center tw-justify-center tw-cursor-pointer">
                 Show less
               </button>
             </>
           ) : (
             <button
               onClick={handleShowMore}
-              className="tw-text-xs tw-text-primary-400 desktop-hover:hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left">
+              className="tw-flex-1 tw-min-w-[100px] tw-px-3 tw-py-2 tw-bg-iron-900/30 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg tw-text-xs tw-text-iron-300 hover:tw-text-iron-50 tw-transition-colors tw-flex tw-items-center tw-justify-center tw-cursor-pointer">
               Show all
             </button>
           ))}

@@ -47,7 +47,7 @@ export const SubmissionPosition: React.FC<SubmissionPositionProps> = ({ drop }) 
 
   return (
     <div
-      className={`tw-flex tw-items-center tw-gap-1 tw-px-2 tw-py-0.5 tw-rounded tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-border tw-border-solid tw-whitespace-nowrap tw-w-fit ${colorClasses}`}>
+      className={`tw-flex tw-items-center tw-gap-1 tw-px-2 tw-py-0.5 tw-rounded tw-text-xs tw-font-semibold tw-border tw-border-solid tw-whitespace-nowrap tw-w-fit ${colorClasses}`}>
       <FontAwesomeIcon icon={faTrophy} className="tw-size-2.5" />
       {rankText}
     </div>

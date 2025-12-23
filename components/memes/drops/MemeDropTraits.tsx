@@ -69,14 +69,14 @@ const MemeDropTraits: React.FC<MemeDropTraitsProps> = ({ drop }) => {
             ))}
             <button
               onClick={handleShowLess}
-              className="tw-text-primary-400 tw-text-xs tw-text-left tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors tw-whitespace-nowrap tw-self-end tw-pb-1.5 tw-bg-transparent tw-border-0">
+              className="tw-text-iron-400 tw-text-xs tw-text-left tw-font-medium desktop-hover:hover:tw-text-iron-300 tw-transition-colors tw-whitespace-nowrap tw-self-end tw-pb-1.5 tw-bg-transparent tw-border-0 tw-cursor-pointer">
               Show less
             </button>
           </>
         ) : (
           <button
             onClick={handleShowAll}
-            className="tw-text-primary-400 tw-text-xs tw-text-left tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors tw-whitespace-nowrap tw-self-end tw-pb-1.5 tw-bg-transparent tw-border-0">
+            className="tw-text-iron-400 tw-text-xs tw-text-left tw-font-medium desktop-hover:hover:tw-text-iron-300 tw-transition-colors tw-whitespace-nowrap tw-self-end tw-pb-1.5 tw-bg-transparent tw-border-0 tw-cursor-pointer">
             Show all
           </button>
         )}

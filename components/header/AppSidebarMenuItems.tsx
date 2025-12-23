@@ -1,14 +1,14 @@
-import Link from "next/link";
-import {
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
-} from "@headlessui/react";
-import clsx from "clsx";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import { Fragment } from "react";
 import { useIdentity } from "@/hooks/useIdentity";
+import {
+    Disclosure,
+    DisclosureButton,
+    DisclosurePanel,
+} from "@headlessui/react";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import clsx from "clsx";
+import Link from "next/link";
+import { Fragment } from "react";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 
 type MenuItem = {
   readonly label: string;
@@ -100,7 +100,7 @@ export default function AppSidebarMenuItems({
                           <Fragment key={child.label ?? `idx-${idx}`}>
                             {(child.section && idx !== 0) ||
                             child.dividerBefore ? (
-                              <div className="tw-mx-4 tw-my-3 tw-h-px tw-bg-zinc-800" />
+                              <div className="tw-mx-4 tw-my-3 tw-h-px tw-bg-iron-800" />
                             ) : null}
                             {childElement}
                           </Fragment>

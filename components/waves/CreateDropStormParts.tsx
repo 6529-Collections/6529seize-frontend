@@ -2,7 +2,6 @@
 
 import { CreateDropPart, ReferencedNft } from "@/entities/IDrop";
 import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
-import { cicToType } from "@/helpers/Helpers";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import {
@@ -34,7 +33,6 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
   onRemovePart,
 }) => {
   const { connectedProfile } = useContext(AuthContext);
-  const cicType = cicToType(connectedProfile?.cic ?? 0);
 
   const partIdCounterRef = useRef(0);
   const [partIdsMap, setPartIdsMap] = useState<Map<number, string>>(new Map());
@@ -94,7 +92,6 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
               <div className="tw-flex tw-items-center tw-gap-x-2">
                 <UserCICAndLevel
                   level={connectedProfile?.level ?? 0}
-                  cicType={cicType}
                   size={UserCICAndLevelSize.SMALL}
                 />
                 <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">

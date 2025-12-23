@@ -17,12 +17,10 @@ const PodiumPlaceholderCard = ({ height }: { height: string }) => (
 
 export const WaveWinnersLoading: React.FC = () => {
   return (
-    <div className="tw-relative tw-mx-auto tw-rounded-xl tw-overflow-hidden tw-pt-16 tw-px-4 tw-bg-iron-950/60">
-      <div className="tw-grid tw-grid-cols-3 tw-gap-x-4 tw-max-w-3xl tw-mx-auto tw-items-end">
-        <PodiumPlaceholderCard height="tw-h-[190px]" />
-        <PodiumPlaceholderCard height="tw-h-[220px]" />
-        <PodiumPlaceholderCard height="tw-h-[170px]" />
-      </div>
+    <div className="tw-grid tw-grid-cols-3 tw-gap-3 tw-items-end tw-px-4 tw-pb-4 tw-pt-8">
+      <PodiumPlaceholderCard height="tw-h-32" />
+      <PodiumPlaceholderCard height="tw-h-40" />
+      <PodiumPlaceholderCard height="tw-h-28" />
     </div>
   );
 };

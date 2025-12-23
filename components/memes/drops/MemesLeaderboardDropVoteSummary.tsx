@@ -1,10 +1,10 @@
-import React from "react";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
-import Link from "next/link";
-import { Tooltip } from "react-tooltip";
-import { ApiDropRater } from "@/generated/models/ApiDropRater";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
 import { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
+import { ApiDropRater } from "@/generated/models/ApiDropRater";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import Link from "next/link";
+import React from "react";
+import { Tooltip } from "react-tooltip";
 
 interface MemesLeaderboardDropVoteSummaryProps {
   readonly current: number;
@@ -102,7 +102,7 @@ const MemesLeaderboardDropVoteSummary: React.FC<
               </React.Fragment>
             ))}
           </div>
-          <span className="tw-text-white tw-font-bold tw-text-sm">
+          <span className="tw-text-iron-200 tw-font-semibold tw-text-sm">
             {formatNumberWithCommas(ratersCount)}{" "}
             <span className="tw-text-iron-500 tw-font-normal">
               {ratersCount === 1 ? "voter" : "voters"}
