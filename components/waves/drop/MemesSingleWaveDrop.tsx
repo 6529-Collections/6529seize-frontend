@@ -1,11 +1,10 @@
 "use client";
 
-import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useDrop } from "@/hooks/useDrop";
-import { useWaveData } from "@/hooks/useWaveData";
-import React, { useCallback, useMemo } from "react";
+import React from "react";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { MemesSingleWaveDropInfoPanel } from "./MemesSingleWaveDropInfoPanel";
 import { SingleWaveDropWrapper } from "./SingleWaveDropWrapper";
+import { useSingleWaveDropData } from "./useSingleWaveDropData";
 
 interface MemesSingleWaveDropProps {
   readonly drop: ExtendedDrop;
@@ -16,28 +15,9 @@ export const MemesSingleWaveDrop: React.FC<MemesSingleWaveDropProps> = ({
   drop: initialDrop,
   onClose,
 }) => {
-  const { drop } = useDrop({ dropId: initialDrop.id });
-
-  const onWaveNotFound = useCallback(() => {
-    onClose();
-  }, [onClose]);
-
-  const { data: wave } = useWaveData({
-    waveId: drop?.wave.id ?? null,
-    onWaveNotFound,
-  });
-
-  const extendedDrop = useMemo(
-    () =>
-      drop
-        ? {
-            type: DropSize.FULL as const,
-            ...drop,
-            stableHash: initialDrop.stableHash,
-            stableKey: initialDrop.stableKey,
-          }
-        : null,
-    [drop, initialDrop.stableHash, initialDrop.stableKey]
+  const { drop, wave, extendedDrop } = useSingleWaveDropData(
+    initialDrop,
+    onClose
   );
 
   if (!extendedDrop || !wave || !drop) {
