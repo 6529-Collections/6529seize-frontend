@@ -27,6 +27,7 @@ import VotingModal from "@/components/voting/VotingModal";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { WAVE_VOTING_LABELS, WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
 import { Tooltip } from "react-tooltip";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 
 interface MemesSingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
@@ -169,17 +170,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
                           place="top"
                           offset={8}
                           opacity={1}
-                          style={{
-                            padding: "4px 8px",
-                            background: "#37373E",
-                            color: "white",
-                            fontSize: "13px",
-                            fontWeight: 500,
-                            borderRadius: "6px",
-                            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-                            zIndex: 99999,
-                            pointerEvents: "none",
-                          }}
+                          style={TOOLTIP_STYLES}
                         >
                           Projected vote count at decision time
                         </Tooltip>

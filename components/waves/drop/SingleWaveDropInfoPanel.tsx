@@ -22,6 +22,7 @@ import VotingModal from "@/components/voting/VotingModal";
 import WaveDropTime from "../drops/time/WaveDropTime";
 import { SingleWaveDropPosition } from "./SingleWaveDropPosition";
 import { WinnerBadge } from "./WinnerBadge";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 
 interface SingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
@@ -80,17 +81,7 @@ export const SingleWaveDropInfoPanel: React.FC<SingleWaveDropInfoPanelProps> = (
                         place="top"
                         offset={8}
                         opacity={1}
-                        style={{
-                          padding: "4px 8px",
-                          background: "#37373E",
-                          color: "white",
-                          fontSize: "13px",
-                          fontWeight: 500,
-                          borderRadius: "6px",
-                          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-                          zIndex: 99999,
-                          pointerEvents: "none",
-                        }}
+                        style={TOOLTIP_STYLES}
                       >
                         Projected vote count at decision time
                       </Tooltip>

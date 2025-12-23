@@ -7,6 +7,7 @@ import { isNumber } from "lodash";
 import React, { useMemo, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { TraitsData } from "../memes/submission/types/TraitsData";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import {
   FIELD_TO_LABEL_MAP,
   MEME_TRAITS_SORT_ORDER,
@@ -45,19 +46,7 @@ const MetadataItem: React.FC<{
             place="top"
             offset={8}
             opacity={1}
-            style={{
-              padding: "4px 8px",
-              background: "#37373E",
-              color: "white",
-              fontSize: "13px",
-              fontWeight: 500,
-              borderRadius: "6px",
-              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-              zIndex: 99999,
-              pointerEvents: "none",
-              maxWidth: "300px",
-              wordWrap: "break-word",
-            }}
+            style={{ ...TOOLTIP_STYLES, maxWidth: "300px", wordWrap: "break-word" }}
           >
             <span className="tw-text-xs">{displayValue}</span>
           </Tooltip>

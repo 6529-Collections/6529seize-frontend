@@ -5,6 +5,7 @@ import Image from "next/image";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { Tooltip } from "react-tooltip";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { WAVE_VOTING_LABELS, WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
 import {
   isEthereumAddress,
@@ -76,17 +77,7 @@ export const SingleWaveDropVoter: React.FC<SingleWaveDropVoterProps> = ({
             place="top"
             offset={8}
             opacity={1}
-            style={{
-              padding: "4px 8px",
-              background: "#37373E",
-              color: "white",
-              fontSize: "13px",
-              fontWeight: 500,
-              borderRadius: "6px",
-              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-              zIndex: 99999,
-              pointerEvents: "none",
-            }}
+            style={TOOLTIP_STYLES}
           >
             <div className="tw-text-sm tw-space-x-1">
               <div className="tw-text-green">
