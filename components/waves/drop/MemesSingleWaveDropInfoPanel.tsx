@@ -123,7 +123,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
 
   return (
     <>
-      <div className="tw-w-full tw-h-full tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-scroll-smooth">
+      <div className="tw-w-full">
         <div className="tw-w-full tw-min-h-screen tw-flex tw-flex-col tw-pt-16">
           <div className="tw-flex-1 tw-flex tw-items-center tw-justify-center tw-px-4 sm:tw-px-6 xl:tw-px-20 tw-py-8">
             {artworkMedia && (
@@ -290,9 +290,9 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
           </div>
         </div>
 
-        <div className="tw-w-full tw-h-px tw-bg-white/10 tw-my-10"></div>
+        <div className="tw-w-full tw-h-px tw-bg-white/10 tw-my-8 md:tw-my-10"></div>
 
-        <div className="tw-px-4 sm:tw-px-6 xl:tw-px-20 tw-pb-10">
+        <div className="tw-px-4 sm:tw-px-6 xl:tw-px-20 tw-pb-8 md:tw-pb-10">
           <div className="tw-max-w-3xl tw-mx-auto tw-space-y-8">
             <SingleWaveDropTraits drop={drop} />
 

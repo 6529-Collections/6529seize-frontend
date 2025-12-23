@@ -47,7 +47,7 @@ export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({
           className="tw-flex tw-items-center tw-gap-x-2.5 tw-no-underline"
         >
           {drop.author.pfp ? (
-            <div className="tw-w-10 tw-h-10 tw-rounded tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-overflow-hidden">
+            <div className="tw-w-10 tw-h-10 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-overflow-hidden">
               <img
                 className="tw-size-full tw-object-contain tw-opacity-90"
                 src={drop.author.pfp}
@@ -55,7 +55,7 @@ export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({
               />
             </div>
           ) : (
-            <div className="tw-w-10 tw-h-10 tw-rounded tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900" />
+            <div className="tw-w-10 tw-h-10 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900" />
           )}
           <div className="tw-inline-flex tw-items-center tw-gap-x-2">
             <div className="tw-inline-flex tw-items-center tw-gap-x-1">

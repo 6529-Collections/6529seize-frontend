@@ -1,14 +1,14 @@
 "use client";
 
-import React from "react";
+import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
 import { ApiDrop } from "@/generated/models/ObjectSerializer";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
-import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import {
-  WAVE_VOTING_LABELS,
-  WAVE_VOTE_STATS_LABELS,
+    WAVE_VOTE_STATS_LABELS,
+    WAVE_VOTING_LABELS,
 } from "@/helpers/waves/waves.constants";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
+import React from "react";
 
 interface SingleWaveDropVotesProps {
   readonly drop: ApiDrop;
@@ -30,10 +30,10 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-3 tw-mt-1">
-      <div className="tw-flex tw-items-baseline tw-gap-x-2">
+      <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2">
         <span
-          className={`tw-text-sm tw-font-bold tw-font-mono tw-tracking-tight ${
-            isPositive ? "tw-text-emerald-600" : "tw-text-rose-600"
+          className={`tw-text-sm tw-font-bold tw-tabular-nums tw-tracking-tight ${
+            isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
           }`}
         >
           {formatNumberWithCommas(drop.rating)}
@@ -56,7 +56,7 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
             </span>
             <span
               className={`tw-text-sm tw-font-semibold ${
-                isUserVoteNegative ? "tw-text-rose-600" : "tw-text-emerald-600"
+                isUserVoteNegative ? "tw-text-rose-500" : "tw-text-emerald-500"
               }`}
             >
               {isUserVoteNegative && "-"}

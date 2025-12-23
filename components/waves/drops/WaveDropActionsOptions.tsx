@@ -27,7 +27,7 @@ const WaveDropActionsOptions: React.FC<WaveDropActionsOptionsProps> = ({
         className="tw-text-iron-400 desktop-hover:hover:tw-text-rose-400 tw-cursor-pointer tw-transition-colors tw-bg-transparent tw-border-0 tw-px-2"
         aria-label="Delete drop"
         data-tooltip-id={`delete-${drop.id}`}>
-        <TrashIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0" />
+        <TrashIcon className="tw-flex-shrink-0 tw-w-5 tw-h-5" />
       </button>
       <Tooltip
         id={`delete-${drop.id}`}

@@ -34,8 +34,6 @@ const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({ drop }) => {
         aria-label="Open drop"
         data-tooltip-id={`open-${drop.id}`}>
         <svg
-          width="16"
-          height="16"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
