@@ -128,7 +128,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
         <div className="tw-w-full tw-min-h-screen tw-flex tw-flex-col tw-pt-16">
           <div className="tw-flex-1 tw-flex tw-items-center tw-justify-center tw-px-4 sm:tw-px-6 xl:tw-px-20 tw-py-8">
             {artworkMedia && (
-              <div className="tw-w-full tw-max-w-4xl tw-mx-auto tw-h-full tw-flex tw-items-center tw-justify-center">
+              <div className="tw-w-full md:tw-max-w-4xl tw-mx-auto tw-h-full tw-flex tw-items-center tw-justify-center">
                 <div className="tw-relative tw-w-full tw-aspect-[4/5] tw-max-h-[90vh]">
                   <DropListItemContentMedia
                     media_mime_type={artworkMedia.mime_type}
@@ -146,7 +146,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
               <div className="tw-flex tw-justify-center tw-mb-8">
                 <div className="tw-flex tw-items-center tw-gap-3 tw-p-1.5 tw-bg-iron-950 tw-border tw-border-solid tw-border-white/10 tw-rounded-lg tw-shadow-2xl tw-transition-transform hover:tw-scale-[1.01]">
                   <div className="tw-px-4 tw-flex tw-items-baseline tw-gap-1.5 tw-cursor-default">
-                    <span className="tw-text-base tw-font-bold tw-text-white tw-tabular-nums">
+                    <span className="tw-text-sm sm:tw-text-base tw-font-semibold tw-text-white tw-tabular-nums">
                       {formatNumberWithCommas(drop.rating)}
                     </span>
                     {drop.rating !== drop.rating_prediction && (
@@ -156,7 +156,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
                           className="tw-flex-shrink-0 tw-size-2.5 tw-text-iron-600"
                         />
                         <span
-                          className={`tw-text-base tw-font-bold tw-tabular-nums tw-cursor-help ${
+                          className={`tw-text-sm sm:tw-text-base tw-font-semibold tw-tabular-nums tw-cursor-help ${
                             drop.rating < drop.rating_prediction
                               ? "tw-text-emerald-400"
                               : "tw-text-rose-400"
@@ -176,7 +176,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
                         </Tooltip>
                       </>
                     )}
-                    <span className="tw-text-sm tw-text-iron-500 tw-font-normal">
+                    <span className="tw-text-sm tw-text-iron-500 tw-font-normal tw-whitespace-nowrap">
                       {WAVE_VOTING_LABELS[drop.wave.voting_credit_type]} Total
                     </span>
                   </div>

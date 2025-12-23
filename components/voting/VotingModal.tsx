@@ -5,6 +5,7 @@ import React, { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 import { SingleWaveDropVote } from "../waves/drop/SingleWaveDropVote";
 import ModalLayout from "../waves/memes/submission/layout/ModalLayout";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 interface VotingModalProps {
   readonly drop: ExtendedDrop;
@@ -20,6 +21,7 @@ const VotingModal: React.FC<VotingModalProps> = ({
   const titleId = useId();
   const modalRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
+  const { isApp } = useDeviceInfo();
 
   useEffect(() => {
     if (!isOpen) return;
@@ -28,7 +30,9 @@ const VotingModal: React.FC<VotingModalProps> = ({
     modalRef.current?.focus();
 
     const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    if (!isApp) {
+      document.body.style.overflow = "hidden";
+    }
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -38,11 +42,13 @@ const VotingModal: React.FC<VotingModalProps> = ({
     document.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.body.style.overflow = originalOverflow;
+      if (!isApp) {
+        document.body.style.overflow = originalOverflow;
+      }
       document.removeEventListener("keydown", handleKeyDown);
       previousActiveElement.current?.focus();
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, isApp]);
 
   if (!isOpen) {
     return null;
@@ -74,6 +80,11 @@ const VotingModal: React.FC<VotingModalProps> = ({
       </div>
     </div>
   );
+
+  // In app, render inline without portal
+  if (isApp) {
+    return modalContent;
+  }
 
   return createPortal(modalContent, document.body);
 };
