@@ -104,7 +104,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
 
       <CompactModeProvider compact={true}>
         <Transition.Root show={isChatOpen} as={Fragment}>
-          <div className="lg:tw-hidden tw-fixed tw-inset-0 tw-z-[90] tw-overflow-hidden">
+          <div className="lg:tw-hidden tw-fixed tw-inset-y-0 tw-right-0 tw-left-[var(--left-rail,0px)] tw-z-[90] tw-overflow-hidden">
             <Transition.Child
               as={Fragment}
               enter="tw-ease-out tw-duration-150"

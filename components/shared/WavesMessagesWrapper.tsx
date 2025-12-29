@@ -129,7 +129,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
             className="tw-relative tw-flex tw-flex-grow tw-w-full tw-max-w-full tw-mx-auto"
           >
             <div
-              className="tw-flex tw-w-full tw-overflow-hidden"
+              className="tw-relative tw-flex tw-w-full tw-overflow-hidden"
               style={contentContainerStyle}
             >
               {shouldShowLeftSidebar && (
@@ -139,7 +139,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
                 <div className="tw-flex-grow tw-flex tw-flex-col tw-h-full tw-min-w-0 tw-border-solid tw-border-r tw-border-iron-800 tw-border-y-0 tw-border-l-0">
                   {children}
                   {shouldShowDropOverlay && (
-                    <div className="tw-absolute tw-inset-0 tw-z-[49]">
+                    <div className="tw-fixed tw-inset-y-0 tw-right-0 tw-left-[var(--left-rail,0px)] tw-z-[60] lg:tw-absolute lg:tw-inset-0 lg:tw-z-[49]">
                       <BrainDesktopDrop
                         drop={{
                           type: DropSize.FULL,

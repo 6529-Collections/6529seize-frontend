@@ -78,7 +78,13 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   return (
     <>
       <Head>
-        <style>{`body { overflow: hidden !important; }`}</style>
+        <style>{`
+          html, body {
+            height: var(--app-height, 100vh);
+            overflow: hidden !important;
+            overscroll-behavior: none;
+          }
+        `}</style>
       </Head>
       <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black tw-overflow-hidden">
         {content}

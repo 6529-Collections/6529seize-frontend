@@ -131,7 +131,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
           <div className="tw-flex-1 tw-flex tw-items-center tw-justify-center tw-px-4 sm:tw-px-6 xl:tw-px-20 tw-py-6 lg:tw-py-8">
             {artworkMedia && (
               <div className="tw-w-full md:tw-max-w-4xl tw-mx-auto tw-flex tw-items-center tw-justify-center">
-                <div className="tw-relative tw-w-full tw-h-[70dvh] md:tw-h-[80dvh] lg:tw-h-[95dvh]">
+                <div className="tw-relative tw-w-full tw-h-[60vh] md:tw-h-[80vh] lg:tw-h-[95vh]">
                   <DropListItemContentMedia
                     media_mime_type={artworkMedia.mime_type}
                     media_url={artworkMedia.url}
