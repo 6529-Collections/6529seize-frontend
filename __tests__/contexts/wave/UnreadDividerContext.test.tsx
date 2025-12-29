@@ -10,10 +10,9 @@ describe('UnreadDividerContext', () => {
   describe('useUnreadDivider', () => {
     it('throws when used outside provider', () => {
       const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const renderWithoutProvider = () => renderHook(() => useUnreadDivider());
       
-      expect(() => {
-        renderHook(() => useUnreadDivider());
-      }).toThrow('useUnreadDivider must be used within an UnreadDividerProvider');
+      expect(renderWithoutProvider).toThrow('useUnreadDivider must be used within an UnreadDividerProvider');
       
       consoleError.mockRestore();
     });

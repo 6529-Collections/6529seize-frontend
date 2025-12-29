@@ -40,10 +40,12 @@ interface UseEnhancedWavesListCoreOptions {
   supportsPinning: boolean;
 }
 
+const DEFAULT_OPTIONS: UseEnhancedWavesListCoreOptions = { supportsPinning: true };
+
 function useEnhancedWavesListCore(
   activeWaveId: string | null,
   wavesData: WavesDataSource,
-  options: UseEnhancedWavesListCoreOptions = { supportsPinning: true }
+  options: UseEnhancedWavesListCoreOptions = DEFAULT_OPTIONS
 ) {
   const { newDropsCounts, resetAllWavesNewDropsCount } = useNewDropCounter(
     activeWaveId,

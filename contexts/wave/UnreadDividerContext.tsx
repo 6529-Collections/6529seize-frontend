@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, useMemo, ReactNode } from "react";
+import { createContext, useContext, useState, useMemo, ReactNode } from "react";
 
 type SetUnreadDividerSerialNo = (
   serialNo: number | null | ((current: number | null) => number | null)
@@ -22,20 +22,8 @@ export function UnreadDividerProvider({
   initialSerialNo,
   children,
 }: UnreadDividerProviderProps) {
-  const [unreadDividerSerialNo, setUnreadDividerSerialNoState] = useState<number | null>(
-    initialSerialNo
-  );
-
-  const setUnreadDividerSerialNo: SetUnreadDividerSerialNo = useCallback(
-    (serialNo) => {
-      if (typeof serialNo === "function") {
-        setUnreadDividerSerialNoState(serialNo);
-      } else {
-        setUnreadDividerSerialNoState(serialNo);
-      }
-    },
-    []
-  );
+  const [unreadDividerSerialNo, setUnreadDividerSerialNo] =
+    useState<number | null>(initialSerialNo);
 
   const value = useMemo(
     () => ({

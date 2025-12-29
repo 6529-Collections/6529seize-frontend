@@ -14,7 +14,7 @@ describe('UnreadDivider', () => {
 
   it('renders horizontal lines', () => {
     const { container } = render(<UnreadDivider />);
-    const lines = container.querySelectorAll('.tw-h-0\\.5.tw-bg-rose-500');
+    const lines = container.querySelectorAll(String.raw`.tw-h-0\.5.tw-bg-rose-500`);
     expect(lines.length).toBe(2);
   });
 });

@@ -58,13 +58,10 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
         queryKey: [QueryKey.WAVES_OVERVIEW],
       });
     } catch (error) {
+      const defaultMessage = isMuted ? "Unable to unmute wave" : "Unable to mute wave";
+      const errorMessage = typeof error === "string" ? error : defaultMessage;
       setToast({
-        message:
-          typeof error === "string"
-            ? error
-            : isMuted
-            ? "Unable to unmute wave"
-            : "Unable to mute wave",
+        message: errorMessage,
         type: "error",
       });
     } finally {

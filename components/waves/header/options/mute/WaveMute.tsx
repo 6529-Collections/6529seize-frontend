@@ -36,13 +36,10 @@ export default function WaveMute({
       });
       onSuccess?.();
     } catch (error) {
+      const defaultMessage = isMuted ? "Unable to unmute wave" : "Unable to mute wave";
+      const errorMessage = typeof error === "string" ? error : defaultMessage;
       setToast({
-        message:
-          typeof error === "string"
-            ? error
-            : isMuted
-              ? "Unable to unmute wave"
-              : "Unable to mute wave",
+        message: errorMessage,
         type: "error",
       });
     } finally {
@@ -61,8 +58,9 @@ export default function WaveMute({
       className="tw-flex tw-items-center tw-gap-2 tw-bg-transparent tw-w-full tw-border-none tw-px-3 tw-py-1 tw-text-sm tw-leading-6 tw-text-iron-300 hover:tw-bg-iron-800 tw-text-left tw-transition tw-duration-300 tw-ease-out"
       role="menuitem"
       tabIndex={-1}>
-      {loading ? (isMuted ? "Unmuting" : "Muting") : isMuted ? "Unmute" : "Mute"}
       {loading && <Spinner dimension={14} />}
+      {loading ? (isMuted ? "Unmuting" : "Muting") : null}
+      {!loading && (isMuted ? "Unmute" : "Mute")}
     </button>
   );
 }
