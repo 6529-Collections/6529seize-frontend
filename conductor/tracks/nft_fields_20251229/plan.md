@@ -21,9 +21,9 @@ Create the UI components for the new form fields, adhering to existing submissio
 - [x] Task: Implement `AirdropAddressFields` component 5b19f0b
     - [x] Sub-task: Write tests for rendering and basic validation (Red Phase)
     - [x] Sub-task: Implement component with inputs for artist/choice addresses and counts (Green Phase)
-- [ ] Task: Implement `AllowlistBatchManager` component
-    - [ ] Sub-task: Write tests for adding/removing multiple allowlist batches (Red Phase)
-    - [ ] Sub-task: Implement component that allows dynamic addition of Contract Address + Token ID range inputs (Green Phase)
+- [x] Task: Implement AllowlistBatchManager component 44555be
+    - [x] Sub-task: Write tests for adding/removing multiple allowlist batches (Red Phase)
+    - [x] Sub-task: Implement component that allows dynamic addition of Contract Address + Token ID range inputs (Green Phase)
 - [ ] Task: Implement `AdditionalMediaUpload` component
     - [ ] Sub-task: Write tests for file type and count restrictions (Red Phase)
     - [ ] Sub-task: Implement media uploader for Artist Profile and Commentary Media (Green Phase)
