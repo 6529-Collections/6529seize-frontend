@@ -2,7 +2,7 @@
 
 This plan implements additional operational fields in the NFT submission flow, storing them within the submission metadata.
 
-## Phase 1: Foundation & Utility Logic
+## Phase 1: Foundation & Utility Logic [checkpoint: cc7d52e]
 Implement the core data structures and the parsing logic for token ID ranges and address validation.
 
 - [x] Task: Define TypeScript interfaces and constants for new metadata fields 4770a8f
@@ -13,7 +13,7 @@ Implement the core data structures and the parsing logic for token ID ranges and
 - [x] Task: Implement and test strict Ethereum address validation bde452c
     - [x] Sub-task: Write unit tests for validating 0x-prefixed addresses and rejecting ENS (Red Phase)
     - [x] Sub-task: Implement `validateStrictAddress` utility (Green Phase)
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Foundation & Utility Logic' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Foundation & Utility Logic' (Protocol in workflow.md) cc7d52e
 
 ## Phase 2: Submission Wizard UI Components
 Create the UI components for the new form fields, adhering to existing submission styles.
