@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useAuth } from "@/components/auth/Auth";
+import { Spinner } from "@/components/dotLoader/DotLoader";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
 import { useQueryClient } from "@tanstack/react-query";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { useAuth } from "@/components/auth/Auth";
-import { Spinner } from "@/components/dotLoader/DotLoader";
+import { useCallback, useState } from "react";
 
 export default function WaveMute({
   wave,
@@ -36,7 +36,9 @@ export default function WaveMute({
       });
       onSuccess?.();
     } catch (error) {
-      const defaultMessage = isMuted ? "Unable to unmute wave" : "Unable to mute wave";
+      const defaultMessage = isMuted
+        ? "Unable to unmute wave"
+        : "Unable to mute wave";
       const errorMessage = typeof error === "string" ? error : defaultMessage;
       setToast({
         message: errorMessage,

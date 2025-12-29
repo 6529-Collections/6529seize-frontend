@@ -40,7 +40,9 @@ interface UseEnhancedWavesListCoreOptions {
   supportsPinning: boolean;
 }
 
-const DEFAULT_OPTIONS: UseEnhancedWavesListCoreOptions = { supportsPinning: true };
+const DEFAULT_OPTIONS: UseEnhancedWavesListCoreOptions = {
+  supportsPinning: true,
+};
 
 function useEnhancedWavesListCore(
   activeWaveId: string | null,
@@ -136,7 +138,8 @@ function useEnhancedWavesListCore(
       } else if (forcedCount !== undefined) {
         unreadDropsCount = forcedCount + (wsData?.count ?? 0);
       } else if (hasNewWsDrops) {
-        unreadDropsCount = wave.metrics.your_unread_drops_count + (wsData?.count ?? 0);
+        unreadDropsCount =
+          wave.metrics.your_unread_drops_count + (wsData?.count ?? 0);
       } else {
         unreadDropsCount = wave.metrics.your_unread_drops_count;
       }

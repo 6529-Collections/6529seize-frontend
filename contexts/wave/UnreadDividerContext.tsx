@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useMemo, ReactNode } from "react";
+import { createContext, ReactNode, useContext, useMemo, useState } from "react";
 
 type SetUnreadDividerSerialNo = (
   serialNo: number | null | ((current: number | null) => number | null)
@@ -11,7 +11,9 @@ interface UnreadDividerContextValue {
   setUnreadDividerSerialNo: SetUnreadDividerSerialNo;
 }
 
-const UnreadDividerContext = createContext<UnreadDividerContextValue | null>(null);
+const UnreadDividerContext = createContext<UnreadDividerContextValue | null>(
+  null
+);
 
 interface UnreadDividerProviderProps {
   readonly initialSerialNo: number | null;
@@ -22,8 +24,9 @@ export function UnreadDividerProvider({
   initialSerialNo,
   children,
 }: UnreadDividerProviderProps) {
-  const [unreadDividerSerialNo, setUnreadDividerSerialNo] =
-    useState<number | null>(initialSerialNo);
+  const [unreadDividerSerialNo, setUnreadDividerSerialNo] = useState<
+    number | null
+  >(initialSerialNo);
 
   const value = useMemo(
     () => ({
@@ -43,7 +46,9 @@ export function UnreadDividerProvider({
 export function useUnreadDivider() {
   const context = useContext(UnreadDividerContext);
   if (!context) {
-    throw new Error("useUnreadDivider must be used within an UnreadDividerProvider");
+    throw new Error(
+      "useUnreadDivider must be used within an UnreadDividerProvider"
+    );
   }
   return context;
 }
@@ -51,4 +56,3 @@ export function useUnreadDivider() {
 export function useUnreadDividerOptional() {
   return useContext(UnreadDividerContext);
 }
-
