@@ -127,11 +127,11 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
   return (
     <>
       <div className="tw-w-full">
-        <div className="tw-w-full tw-min-h-screen tw-flex tw-flex-col tw-pt-24 md:tw-pt-16">
-          <div className="tw-flex-1 tw-flex tw-items-center tw-justify-center tw-px-4 sm:tw-px-6 xl:tw-px-20 tw-py-8">
+        <div className="tw-w-full tw-min-h-screen tw-flex tw-flex-col">
+          <div className="tw-flex-1 tw-flex tw-items-center tw-justify-center tw-px-4 sm:tw-px-6 xl:tw-px-20 tw-py-6 lg:tw-py-8">
             {artworkMedia && (
-              <div className="tw-w-full md:tw-max-w-4xl tw-mx-auto tw-h-full tw-flex tw-items-center tw-justify-center">
-                <div className="tw-relative tw-w-full tw-aspect-[4/3] tw-max-h-[90vh]">
+              <div className="tw-w-full md:tw-max-w-4xl tw-mx-auto tw-flex tw-items-center tw-justify-center">
+                <div className="tw-relative tw-w-full tw-h-[70dvh] md:tw-h-[80dvh] lg:tw-h-[95dvh]">
                   <DropListItemContentMedia
                     media_mime_type={artworkMedia.mime_type}
                     media_url={artworkMedia.url}
@@ -143,11 +143,11 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
             )}
           </div>
 
-          <div className="tw-px-4 sm:tw-px-6 xl:tw-px-20 tw-mt-6">
+          <div className="tw-px-4 sm:tw-px-6 xl:tw-px-20 tw-mt-4 md:tw-mt-6">
             <div className="tw-max-w-3xl tw-mx-auto tw-w-full">
               <div className="tw-flex tw-justify-center tw-mb-8">
-                <div className="tw-flex tw-items-center tw-gap-3 tw-p-1.5 tw-bg-iron-950 tw-border tw-border-solid tw-border-white/10 tw-rounded-lg tw-shadow-2xl tw-transition-transform hover:tw-scale-[1.01]">
-                  <div className="tw-px-4 tw-flex tw-items-baseline tw-gap-1.5 tw-cursor-default">
+                <div className="tw-flex tw-items-center tw-gap-2 sm:tw-gap-3 tw-p-1.5 tw-bg-iron-950 tw-border tw-border-solid tw-border-white/10 tw-rounded-lg tw-shadow-2xl tw-transition-transform hover:tw-scale-[1.01]">
+                  <div className="tw-px-2 sm:tw-px-4 tw-flex tw-flex-wrap tw-items-baseline tw-gap-1.5 tw-cursor-default">
                     <span className="tw-text-sm sm:tw-text-base tw-font-semibold tw-text-white tw-tabular-nums">
                       {formatNumberWithCommas(drop.rating)}
                     </span>
@@ -206,7 +206,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
                     <button
                       type="button"
                       onClick={() => setIsVotingOpen(true)}
-                      className="tw-px-6 tw-py-2.5 tw-text-sm tw-bg-primary-500 tw-ring-primary-500 hover:tw-bg-primary-600 hover:tw-ring-primary-600 tw-text-white tw-flex tw-items-center tw-cursor-pointer tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out"
+                      className="tw-px-4 tw-py-2.5 tw-text-sm tw-bg-primary-500 tw-ring-primary-500 hover:tw-bg-primary-600 hover:tw-ring-primary-600 tw-text-white tw-flex tw-items-center tw-cursor-pointer tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out"
                     >
                       Vote
                     </button>
@@ -215,7 +215,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
               </div>
 
               <div className="tw-mb-6">
-                <h1 className="tw-text-2xl tw-font-bold tw-text-white tw-mb-4 tw-tracking-tight">
+                <h1 className="tw-text-lg sm:tw-text-2xl tw-font-bold tw-text-white tw-mb-4 tw-tracking-tight">
                   {title}
                 </h1>
                 {description && (

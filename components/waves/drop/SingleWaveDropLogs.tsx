@@ -38,16 +38,18 @@ export const SingleWaveDropLogs: React.FC<SingleWaveDropLogsProps> = ({
     <div>
       <button
         onClick={() => setIsActivityOpen(!isActivityOpen)}
-        className="tw-w-full tw-px-4 tw-py-4 tw-flex tw-items-center tw-justify-between tw-text-left tw-bg-iron-950 desktop-hover:hover:tw-bg-iron-900 tw-transition-colors tw-duration-300 tw-ease-out tw-border-0"
+        className={`tw-w-full tw-px-4 tw-py-4 tw-flex tw-items-center tw-justify-between tw-text-left desktop-hover:hover:tw-bg-iron-900 tw-transition-colors tw-duration-300 tw-ease-out tw-border-0 ${
+          isActivityOpen ? "tw-bg-iron-800" : "tw-bg-iron-950"
+        }`}
       >
-        <span className="tw-text-sm tw-text-iron-400 tw-font-medium">
+        <span className={`tw-text-sm tw-font-medium ${isActivityOpen ? "tw-text-iron-300" : "tw-text-iron-400"}`}>
           Activity log
         </span>
         <motion.div
           animate={{ rotate: isActivityOpen ? 180 : 0 }}
           transition={{ duration: 0.3 }}
         >
-          <ChevronDownIcon className="tw-w-4 tw-h-4 tw-flex-shrink-0 tw-text-iron-600" />
+          <ChevronDownIcon className={`tw-w-4 tw-h-4 tw-flex-shrink-0 ${isActivityOpen ? "tw-text-iron-400" : "tw-text-iron-600"}`} />
         </motion.div>
       </button>
 
