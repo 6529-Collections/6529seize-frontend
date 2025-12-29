@@ -24,9 +24,9 @@ Create the UI components for the new form fields, adhering to existing submissio
 - [x] Task: Implement AllowlistBatchManager component 44555be
     - [x] Sub-task: Write tests for adding/removing multiple allowlist batches (Red Phase)
     - [x] Sub-task: Implement component that allows dynamic addition of Contract Address + Token ID range inputs (Green Phase)
-- [ ] Task: Implement `AdditionalMediaUpload` component
-    - [ ] Sub-task: Write tests for file type and count restrictions (Red Phase)
-    - [ ] Sub-task: Implement media uploader for Artist Profile and Commentary Media (Green Phase)
+- [x] Task: Implement `AdditionalMediaUpload` component a873a8e
+    - [x] Sub-task: Write tests for file type and count restrictions (Red Phase)
+    - [x] Sub-task: Implement media uploader for Artist Profile and Commentary Media (Green Phase)
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Submission Wizard UI Components' (Protocol in workflow.md)
 
 ## Phase 3: Wizard Integration & Submission Logic
