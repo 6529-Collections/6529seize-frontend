@@ -16,15 +16,18 @@ function createWrapper(initialSerialNo: number | null) {
   };
 }
 
+function renderUnreadDividerHook() {
+  return renderHook(useUnreadDivider);
+}
+
 describe("UnreadDividerContext", () => {
   describe("useUnreadDivider", () => {
     it("throws when used outside provider", () => {
       const consoleError = jest
         .spyOn(console, "error")
         .mockImplementation(() => {});
-      const renderWithoutProvider = () => renderHook(() => useUnreadDivider());
 
-      expect(renderWithoutProvider).toThrow(
+      expect(renderUnreadDividerHook).toThrow(
         "useUnreadDivider must be used within an UnreadDividerProvider"
       );
 
