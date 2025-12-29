@@ -69,8 +69,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
         <div className="tw-flex-1 tw-flex tw-flex-col tw-min-h-0 tw-relative">
           <div className="tw-w-full tw-flex tw-flex-col tw-flex-1 tw-min-h-0">
             <div className="tw-w-full tw-flex tw-flex-col tw-flex-1 tw-min-h-0">
-              <div
-                className={`tw-flex-1 tw-min-h-0 ${isApp ? "tw-mb-8" : ""}`}>
+              <div className="tw-flex-1 tw-min-h-0">
                 <WaveDropsAll
                   waveId={wave.id}
                   onReply={({
@@ -102,6 +101,11 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
                   activeDrop={activeDrop}
                   initialDrop={null}
                   dropId={drop.id}
+                  bottomPaddingClassName={
+                    isApp
+                      ? "tw-pb-[calc(env(safe-area-inset-bottom,0px)+4.5rem)]"
+                      : undefined
+                  }
                 />
               </div>
               <div

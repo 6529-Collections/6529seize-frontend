@@ -42,6 +42,7 @@ interface WaveDropsAllProps {
   readonly activeDrop: ActiveDropState | null;
   readonly initialDrop: number | null;
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
+  readonly bottomPaddingClassName?: string;
 }
 
 const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
@@ -52,6 +53,7 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   activeDrop,
   initialDrop,
   onDropContentClick,
+  bottomPaddingClassName,
 }) => {
 
   const router = useRouter();
@@ -274,6 +276,7 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
         onDropContentClick={onDropContentClick}
         pendingCount={pendingDropsCount}
         onRevealPending={revealPendingDrops}
+        bottomPaddingClassName={bottomPaddingClassName}
       />
       <WaveDropsScrollingOverlay isVisible={isScrolling} />
     </div>

@@ -32,7 +32,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
   return (
     <div className="tw-w-full tw-h-full tw-bg-iron-950 tw-flex tw-flex-col lg:tw-flex-row tw-overflow-hidden">
       <div className="@container tw-flex-1 tw-relative tw-h-full lg:tw-h-screen tw-overflow-hidden">
-        <header className="tw-absolute tw-top-0 tw-left-0 tw-right-0 tw-z-20 tw-pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] tw-pb-4 tw-px-4 md:tw-px-8 @[640px]:tw-px-8 tw-bg-gradient-to-b tw-from-iron-950 tw-via-iron-950/90 tw-to-transparent">
+        <header className="tw-absolute tw-top-0 tw-left-0 tw-right-3 tw-z-20 tw-pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] tw-pb-2 tw-px-4 md:tw-px-8 @[640px]:tw-px-8 tw-bg-iron-950/55 tw-bg-gradient-to-b tw-from-iron-950/75 tw-via-iron-950/55 tw-to-iron-950/10 tw-backdrop-blur-sm">
           <div className="tw-w-full tw-flex tw-items-center tw-justify-between">
             <div className="tw-flex tw-items-center tw-gap-6">
               <button
@@ -48,31 +48,22 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
 
             <button
               onClick={toggleChat}
-              className={`tw-hidden lg:tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-backdrop-blur-md tw-rounded-lg tw-transition-all tw-text-sm tw-font-medium tw-border tw-border-solid ${
+              aria-label={isChatOpen ? "Hide chat" : "Show chat"}
+              className={`tw-gap-2 tw-px-3 tw-h-11 sm:tw-h-auto sm:tw-py-2 tw-w-11 sm:tw-w-auto tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-backdrop-blur-md tw-rounded-full sm:tw-rounded-lg tw-transition-all tw-text-sm tw-font-medium tw-border tw-border-solid ${
                 isChatOpen
-                  ? "tw-bg-white/10 tw-border-white/5 tw-text-white desktop-hover:hover:tw-bg-white/15"
-                  : "tw-bg-black/10 tw-border-white/15 tw-text-white/50 desktop-hover:hover:tw-bg-black/40 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-text-white"
+                  ? "max-lg:tw-bg-white/10 max-lg:tw-border-white/20 max-lg:tw-text-white lg:tw-bg-white/10 lg:tw-border-white/5 lg:tw-text-white lg:desktop-hover:hover:tw-bg-white/15"
+                  : "max-lg:tw-bg-black/10 max-lg:tw-border-white/10 max-lg:tw-text-white/50 max-lg:hover:tw-bg-black/40 max-lg:hover:tw-border-white/20 max-lg:hover:tw-text-white lg:tw-bg-black/10 lg:tw-border-white/15 lg:tw-text-white/50 lg:desktop-hover:hover:tw-bg-black/40 lg:desktop-hover:hover:tw-border-white/20 lg:desktop-hover:hover:tw-text-white"
               }`}
             >
-              <ChatBubbleLeftRightIcon className="tw-w-4 tw-h-4 tw-flex-shrink-0" />
-              <span>{isChatOpen ? "Hide" : "Show"} Chat</span>
-            </button>
-
-            <button
-              onClick={toggleChat}
-              className={`lg:tw-hidden tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-backdrop-blur-md tw-rounded-lg tw-transition-all tw-text-sm tw-border tw-border-solid ${
-                isChatOpen
-                  ? "tw-bg-white/10 tw-border-white/20 tw-text-white"
-                  : "tw-bg-black/10 tw-border-white/10 tw-text-white/50 hover:tw-bg-black/40 hover:tw-border-white/20 hover:tw-text-white"
-              }`}
-            >
-              <ChatBubbleLeftRightIcon className="tw-w-4 tw-h-4" />
-              <span>Chat</span>
+              <ChatBubbleLeftRightIcon className="tw-w-5 tw-h-5 sm:tw-w-4 sm:tw-h-4 tw-flex-shrink-0" />
+              <span className="tw-hidden sm:tw-inline">
+                {isChatOpen ? "Hide" : "Show"} Chat
+              </span>
             </button>
           </div>
         </header>
 
-        <div className="tw-h-full tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
+        <div className="tw-h-full tw-overflow-y-auto tw-[scrollbar-gutter:stable] tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
           {children}
         </div>
       </div>
@@ -102,7 +93,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
             onClick={toggleChat}
           />
           <div className="@container lg:tw-hidden tw-flex tw-flex-col tw-h-full tw-bg-iron-950 tw-fixed tw-inset-0 tw-z-[100] tw-animate-in tw-slide-in-from-right tw-duration-300">
-            <div className="tw-flex tw-items-center tw-px-4 md:tw-px-8 tw-pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] tw-pb-4 tw-border-b tw-border-solid tw-border-white/10 tw-border-x-0 tw-border-t-0">
+            <div className="tw-flex tw-items-center tw-px-4 md:tw-px-8 tw-pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] tw-pb-2">
               <button
                 onClick={toggleChat}
                 className="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-text-white/70 hover:tw-text-white tw-transition-colors tw-bg-transparent tw-border-0"

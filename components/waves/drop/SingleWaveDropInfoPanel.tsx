@@ -48,12 +48,10 @@ export const SingleWaveDropInfoPanel: React.FC<SingleWaveDropInfoPanelProps> = (
       <SingleWaveDropInfoContainer>
         <div className="tw-px-4 @[640px]:tw-px-8 tw-pb-8 @[640px]:tw-pb-10">
           <div className="tw-max-w-3xl tw-mx-auto">
-            {/* Content */}
             <div className="tw-mb-6">
               <SingleWaveDropContent drop={drop} />
             </div>
 
-            {/* Vote Bar */}
             <div className="tw-mb-6">
               <div className="tw-inline-flex tw-items-center tw-gap-3 tw-p-1.5 tw-bg-iron-950 tw-border tw-border-solid tw-border-white/10 tw-rounded-lg tw-shadow-2xl">
                 <div className="tw-px-4 tw-flex tw-items-baseline tw-gap-1.5 tw-cursor-default">
@@ -125,7 +123,6 @@ export const SingleWaveDropInfoPanel: React.FC<SingleWaveDropInfoPanelProps> = (
               </div>
             </div>
 
-            {/* Author row with rank and timestamp */}
             <div className="tw-flex tw-items-center tw-gap-3 tw-flex-wrap">
               <SingleWaveDropInfoAuthorSection drop={drop} />
               <span className="tw-text-white/40">·</span>
