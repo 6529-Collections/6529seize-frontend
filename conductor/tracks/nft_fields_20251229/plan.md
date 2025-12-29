@@ -18,9 +18,9 @@ Implement the core data structures and the parsing logic for token ID ranges and
 ## Phase 2: Submission Wizard UI Components
 Create the UI components for the new form fields, adhering to existing submission styles.
 
-- [ ] Task: Implement `AirdropAddressFields` component
-    - [ ] Sub-task: Write tests for rendering and basic validation (Red Phase)
-    - [ ] Sub-task: Implement component with inputs for artist/choice addresses and counts (Green Phase)
+- [x] Task: Implement `AirdropAddressFields` component 5b19f0b
+    - [x] Sub-task: Write tests for rendering and basic validation (Red Phase)
+    - [x] Sub-task: Implement component with inputs for artist/choice addresses and counts (Green Phase)
 - [ ] Task: Implement `AllowlistBatchManager` component
     - [ ] Sub-task: Write tests for adding/removing multiple allowlist batches (Red Phase)
     - [ ] Sub-task: Implement component that allows dynamic addition of Contract Address + Token ID range inputs (Green Phase)
