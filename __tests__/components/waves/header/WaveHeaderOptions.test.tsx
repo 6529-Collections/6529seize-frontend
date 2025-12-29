@@ -37,11 +37,9 @@ test('opens and closes options', async () => {
   await user.click(btn);
   expect(screen.getByTestId('delete')).toHaveAttribute('data-wave','w1');
   expect(screen.getByTestId('mute')).toHaveAttribute('data-wave','w1');
-  // click away
   clickAway();
   rerender(<WaveHeaderOptions wave={wave} />);
   expect(screen.queryByTestId('delete')).toBeNull();
-  // open again and press escape
   await user.click(btn);
   escCb();
   rerender(<WaveHeaderOptions wave={wave} />);

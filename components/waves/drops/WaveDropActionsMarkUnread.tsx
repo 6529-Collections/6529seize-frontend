@@ -50,7 +50,7 @@ export default function WaveDropActionsMarkUnread({
         queryKey: [QueryKey.WAVE, { wave_id: drop.wave.id }],
       });
 
-      if (response.first_unread_drop_serial_no !== undefined) {
+      if (response.first_unread_drop_serial_no != null) {
         unreadDividerContext?.setUnreadDividerSerialNo(
           response.first_unread_drop_serial_no
         );

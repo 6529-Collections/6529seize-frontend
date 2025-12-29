@@ -11,7 +11,7 @@ import {
 
 interface WaveNavigationOptions {
   isDirectMessage?: boolean;
-  serialNo?: number | null;
+  serialNo?: number | string | null;
 }
 
 const getWaveFromWindow = (): string | null => {

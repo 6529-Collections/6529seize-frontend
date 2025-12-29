@@ -6,6 +6,16 @@ import {
 import { act, renderHook } from "@testing-library/react";
 import { ReactNode } from "react";
 
+function createWrapper(initialSerialNo: number | null) {
+  return function Wrapper({ children }: { children: ReactNode }) {
+    return (
+      <UnreadDividerProvider initialSerialNo={initialSerialNo}>
+        {children}
+      </UnreadDividerProvider>
+    );
+  };
+}
+
 describe("UnreadDividerContext", () => {
   describe("useUnreadDivider", () => {
     it("throws when used outside provider", () => {
@@ -22,37 +32,25 @@ describe("UnreadDividerContext", () => {
     });
 
     it("returns initial serial number", () => {
-      const wrapper = ({ children }: { children: ReactNode }) => (
-        <UnreadDividerProvider initialSerialNo={42}>
-          {children}
-        </UnreadDividerProvider>
-      );
-
-      const { result } = renderHook(() => useUnreadDivider(), { wrapper });
+      const { result } = renderHook(() => useUnreadDivider(), {
+        wrapper: createWrapper(42),
+      });
 
       expect(result.current.unreadDividerSerialNo).toBe(42);
     });
 
     it("returns null when initialSerialNo is null", () => {
-      const wrapper = ({ children }: { children: ReactNode }) => (
-        <UnreadDividerProvider initialSerialNo={null}>
-          {children}
-        </UnreadDividerProvider>
-      );
-
-      const { result } = renderHook(() => useUnreadDivider(), { wrapper });
+      const { result } = renderHook(() => useUnreadDivider(), {
+        wrapper: createWrapper(null),
+      });
 
       expect(result.current.unreadDividerSerialNo).toBeNull();
     });
 
     it("updates serial number when setUnreadDividerSerialNo is called", () => {
-      const wrapper = ({ children }: { children: ReactNode }) => (
-        <UnreadDividerProvider initialSerialNo={null}>
-          {children}
-        </UnreadDividerProvider>
-      );
-
-      const { result } = renderHook(() => useUnreadDivider(), { wrapper });
+      const { result } = renderHook(() => useUnreadDivider(), {
+        wrapper: createWrapper(null),
+      });
 
       act(() => {
         result.current.setUnreadDividerSerialNo(99);
@@ -62,13 +60,9 @@ describe("UnreadDividerContext", () => {
     });
 
     it("clears serial number when set to null", () => {
-      const wrapper = ({ children }: { children: ReactNode }) => (
-        <UnreadDividerProvider initialSerialNo={42}>
-          {children}
-        </UnreadDividerProvider>
-      );
-
-      const { result } = renderHook(() => useUnreadDivider(), { wrapper });
+      const { result } = renderHook(() => useUnreadDivider(), {
+        wrapper: createWrapper(42),
+      });
 
       act(() => {
         result.current.setUnreadDividerSerialNo(null);
@@ -85,14 +79,8 @@ describe("UnreadDividerContext", () => {
     });
 
     it("returns context when used inside provider", () => {
-      const wrapper = ({ children }: { children: ReactNode }) => (
-        <UnreadDividerProvider initialSerialNo={42}>
-          {children}
-        </UnreadDividerProvider>
-      );
-
       const { result } = renderHook(() => useUnreadDividerOptional(), {
-        wrapper,
+        wrapper: createWrapper(42),
       });
 
       expect(result.current?.unreadDividerSerialNo).toBe(42);

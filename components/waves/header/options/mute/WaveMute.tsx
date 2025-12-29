@@ -61,7 +61,7 @@ export default function WaveMute({
       role="menuitem"
       tabIndex={-1}>
       {loading && <Spinner dimension={14} />}
-      {loading ? (isMuted ? "Unmuting" : "Muting") : null}
+      {loading && (isMuted ? "Unmuting" : "Muting")}
       {!loading && (isMuted ? "Unmute" : "Mute")}
     </button>
   );

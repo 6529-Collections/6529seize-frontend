@@ -21,6 +21,11 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLayout } from "./layout/LayoutContext";
 
+interface InitialDropState {
+  readonly waveId: string;
+  readonly serialNo: number;
+}
+
 interface MyStreamWaveChatProps {
   readonly wave: ApiWave;
 }
@@ -30,14 +35,16 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [initialDrop, setInitialDrop] = useState<number | null>(null);
-  const prevWaveIdRef = useRef<string>(wave.id);
+  const [initialDropState, setInitialDropState] =
+    useState<InitialDropState | null>(null);
   const { isMemesWave } = useWave(wave);
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
 
-  // Handle URL parameters
+  const initialDrop =
+    initialDropState?.waveId === wave.id ? initialDropState.serialNo : null;
+
   useEffect(() => {
     const dropParam = searchParams?.get("serialNo");
     if (!dropParam) {
@@ -49,7 +56,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
       return;
     }
 
-    setInitialDrop(parsed);
+    setInitialDropState({ waveId: wave.id, serialNo: parsed });
 
     const params = new URLSearchParams(searchParams?.toString() || "");
     params.delete("serialNo");
@@ -57,14 +64,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
       ? `${pathname}?${params.toString()}`
       : pathname || getHomeFeedRoute();
     router.replace(href, { scroll: false });
-  }, [searchParams, router, pathname]);
-
-  useEffect(() => {
-    if (prevWaveIdRef.current !== wave.id) {
-      setInitialDrop(null);
-      prevWaveIdRef.current = wave.id;
-    }
-  }, [wave.id]);
+  }, [searchParams, router, pathname, wave.id]);
 
   const { waveViewStyle } = useLayout();
 

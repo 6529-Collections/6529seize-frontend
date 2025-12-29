@@ -108,7 +108,7 @@ function useEnhancedWavesListCore(
   }, [activeWaveId, resetWaveUnreadCount]);
 
   const mapWave = useCallback(
-    (wave: ApiWave & { isPinned?: boolean }): MinimalWave => {
+    (wave: ApiWave & { pinned?: boolean }): MinimalWave => {
       const wsData = newDropsCounts[wave.id];
       const hasNewWsDrops = (wsData?.count ?? 0) > 0;
       const newDrops = {
@@ -153,7 +153,7 @@ function useEnhancedWavesListCore(
           pfp: c.contributor_pfp,
         })),
         newDropsCount: newDrops,
-        isPinned: options.supportsPinning ? wave.isPinned ?? false : false,
+        isPinned: options.supportsPinning ? wave.pinned ?? false : false,
         isMuted: wave.metrics.muted,
         unreadDropsCount,
         latestReadTimestamp: wave.metrics.your_latest_read_timestamp,
