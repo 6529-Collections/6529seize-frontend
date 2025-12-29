@@ -6,6 +6,13 @@ import { SubmissionStep } from "../types/Steps";
 import { useAuth } from "@/components/auth/Auth";
 import { getInitialTraitsValues } from "@/components/waves/memes/traits/schema";
 import {
+  OperationalData,
+  AirdropInfo,
+  PaymentInfo,
+  AllowlistBatch,
+  AdditionalMedia,
+} from "../types/OperationalData";
+import {
   DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE,
   InteractiveMediaMimeType,
   InteractiveMediaProvider,
@@ -52,7 +59,12 @@ type FormAction =
       type: "SET_UPLOAD_MEDIA";
       payload: { file: File; artworkUrl: string };
     }
-  | { type: "RESET_UPLOAD_MEDIA" };
+  | { type: "RESET_UPLOAD_MEDIA" }
+  | { type: "SET_AIRDROP_INFO"; payload: Partial<AirdropInfo> }
+  | { type: "SET_PAYMENT_INFO"; payload: Partial<PaymentInfo> }
+  | { type: "SET_ALLOWLIST_BATCHES"; payload: AllowlistBatch[] }
+  | { type: "SET_ADDITIONAL_MEDIA"; payload: Partial<AdditionalMedia> }
+  | { type: "SET_COMMENTARY"; payload: string };
 
 interface FormState {
   currentStep: SubmissionStep;
@@ -64,6 +76,7 @@ interface FormState {
   mediaSource: MediaSource;
   selectedFile: File | null;
   externalMedia: ExternalMediaState;
+  operationalData: OperationalData;
 }
 
 const sanitizeInteractiveHash = (
@@ -312,6 +325,60 @@ function formReducer(state: FormState, action: FormAction): FormState {
       };
     }
 
+    case "SET_AIRDROP_INFO":
+      return {
+        ...state,
+        operationalData: {
+          ...state.operationalData,
+          airdrop_info: {
+            ...state.operationalData.airdrop_info,
+            ...action.payload,
+          },
+        },
+      };
+
+    case "SET_PAYMENT_INFO":
+      return {
+        ...state,
+        operationalData: {
+          ...state.operationalData,
+          payment_info: {
+            ...state.operationalData.payment_info,
+            ...action.payload,
+          },
+        },
+      };
+
+    case "SET_ALLOWLIST_BATCHES":
+      return {
+        ...state,
+        operationalData: {
+          ...state.operationalData,
+          allowlist_batches: action.payload,
+        },
+      };
+
+    case "SET_ADDITIONAL_MEDIA":
+      return {
+        ...state,
+        operationalData: {
+          ...state.operationalData,
+          additional_media: {
+            ...state.operationalData.additional_media,
+            ...action.payload,
+          },
+        },
+      };
+
+    case "SET_COMMENTARY":
+      return {
+        ...state,
+        operationalData: {
+          ...state.operationalData,
+          commentary: action.payload,
+        },
+      };
+
     default:
       return state;
   }
@@ -340,6 +407,23 @@ export function useArtworkSubmissionForm() {
       error: null,
       status: "idle",
       isValid: false,
+    },
+    operationalData: {
+      airdrop_info: {
+        airdrop_artist_address: "",
+        airdrop_artist_count: 0,
+        airdrop_choice_address: "",
+        airdrop_choice_count: 0,
+      },
+      payment_info: {
+        payment_address: "",
+      },
+      allowlist_batches: [],
+      additional_media: {
+        artist_profile_media: [],
+        artwork_commentary_media: [],
+      },
+      commentary: "",
     },
   };
 
@@ -410,6 +494,14 @@ export function useArtworkSubmissionForm() {
   );
 
   const handleContinueFromTerms = useCallback(() => {
+    dispatch({ type: "SET_STEP", payload: SubmissionStep.ARTWORK });
+  }, []);
+
+  const handleContinueFromArtwork = useCallback(() => {
+    dispatch({ type: "SET_STEP", payload: SubmissionStep.ADDITIONAL_INFO });
+  }, []);
+
+  const handleBackToArtwork = useCallback(() => {
     dispatch({ type: "SET_STEP", payload: SubmissionStep.ARTWORK });
   }, []);
 
@@ -514,7 +606,7 @@ export function useArtworkSubmissionForm() {
   }, [connectedProfile]);
 
   const getSubmissionData = useCallback(() => {
-    const { traits, artworkUrl } = state;
+    const { traits, artworkUrl, operationalData } = state;
     return {
       imageUrl: artworkUrl,
       traits: {
@@ -523,6 +615,7 @@ export function useArtworkSubmissionForm() {
         description:
           traits.description ?? "Artwork for The Memes collection.",
       },
+      operationalData,
     };
   }, [state]);
 
@@ -572,18 +665,55 @@ export function useArtworkSubmissionForm() {
     dispatch({ type: "SET_MULTIPLE_TRAITS", payload: traitsUpdate });
   }, []);
 
+  const setAirdropInfo = useCallback(
+    (airdropInfo: Partial<AirdropInfo>) => {
+      dispatch({ type: "SET_AIRDROP_INFO", payload: airdropInfo });
+    },
+    [dispatch]
+  );
+
+  const setPaymentInfo = useCallback(
+    (paymentInfo: Partial<PaymentInfo>) => {
+      dispatch({ type: "SET_PAYMENT_INFO", payload: paymentInfo });
+    },
+    [dispatch]
+  );
+
+  const setAllowlistBatches = useCallback(
+    (batches: AllowlistBatch[]) => {
+      dispatch({ type: "SET_ALLOWLIST_BATCHES", payload: batches });
+    },
+    [dispatch]
+  );
+
+  const setAdditionalMedia = useCallback(
+    (additionalMedia: Partial<AdditionalMedia>) => {
+      dispatch({ type: "SET_ADDITIONAL_MEDIA", payload: additionalMedia });
+    },
+    [dispatch]
+  );
+
+  const setCommentary = useCallback(
+    (commentary: string) => {
+      dispatch({ type: "SET_COMMENTARY", payload: commentary });
+    },
+    [dispatch]
+  );
+
   return {
     currentStep: state.currentStep,
     agreements: state.agreements,
     setAgreements: (value: boolean) =>
       dispatch({ type: "SET_AGREEMENTS", payload: value }),
     handleContinueFromTerms,
+    handleContinueFromArtwork,
+    handleBackToArtwork,
 
     artworkUploaded: state.artworkUploaded,
-   artworkUrl: state.artworkUrl,
-   selectedFile: state.selectedFile,
-   mediaSource: state.mediaSource,
-   externalMediaUrl: state.externalMedia.url,
+    artworkUrl: state.artworkUrl,
+    selectedFile: state.selectedFile,
+    mediaSource: state.mediaSource,
+    externalMediaUrl: state.externalMedia.url,
     externalMediaPreviewUrl: state.externalMedia.previewUrl,
     externalMediaHashInput: state.externalMedia.input,
     externalMediaProvider: state.externalMedia.provider,
@@ -602,6 +732,13 @@ export function useArtworkSubmissionForm() {
     traits: state.traits,
     setTraits,
     updateTraitField,
+
+    operationalData: state.operationalData,
+    setAirdropInfo,
+    setPaymentInfo,
+    setAllowlistBatches,
+    setAdditionalMedia,
+    setCommentary,
 
     getSubmissionData,
     getMediaSelection,

@@ -4,7 +4,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [ ] Track: Implement additional custom fields for the NFT submission flow
+## [~] Track: Implement additional custom fields for the NFT submission flow
 *Link: [./conductor/tracks/nft_fields_20251229/](./conductor/tracks/nft_fields_20251229/)*
 
 ---
