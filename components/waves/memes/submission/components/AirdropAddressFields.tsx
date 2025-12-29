@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useRef, useCallback, useMemo } from "react";
+import React, { useRef, useCallback } from "react";
 import FormSection from "../ui/FormSection";
 import ValidationError from "../ui/ValidationError";
-import { CheckCircleIcon } from "@heroicons/react/24/outline";
 
 interface AirdropAddressFieldsProps {
   readonly airdropArtistAddress: string;
