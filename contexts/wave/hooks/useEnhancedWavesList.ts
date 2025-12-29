@@ -1,13 +1,15 @@
-"use client"
+"use client";
 
-import { useCallback, useMemo } from "react";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import useWavesList from "@/hooks/useWavesList";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import useNewDropCounter, {
   MinimalWaveNewDropsCount,
   getNewestTimestamp,
 } from "./useNewDropCounter";
-import { ApiWave } from "@/generated/models/ApiWave";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
+
+const UNREAD_CLEAR_DELAY_MS = 1000;
 
 export interface MinimalWave {
   id: string;
@@ -17,6 +19,8 @@ export interface MinimalWave {
   picture: string | null;
   contributors: { pfp: string }[];
   isPinned: boolean;
+  unreadDropsCount: number;
+  latestReadTimestamp: number;
 }
 
 function useEnhancedWavesList(activeWaveId: string | null) {
@@ -28,6 +32,26 @@ function useEnhancedWavesList(activeWaveId: string | null) {
     wavesData.mainWavesRefetch
   );
 
+  const [clearedUnreadWaveIds, setClearedUnreadWaveIds] = useState<Set<string>>(
+    new Set()
+  );
+
+  const resetWaveUnreadCount = useCallback((waveId: string) => {
+    setClearedUnreadWaveIds((prev) => {
+      const next = new Set(prev);
+      next.add(waveId);
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!activeWaveId) return;
+    const timeout = setTimeout(() => {
+      resetWaveUnreadCount(activeWaveId);
+    }, UNREAD_CLEAR_DELAY_MS);
+    return () => clearTimeout(timeout);
+  }, [activeWaveId, resetWaveUnreadCount]);
+
   const mapWave = useCallback(
     (wave: ApiWave & { isPinned?: boolean }): MinimalWave => {
       const newDrops = {
@@ -37,21 +61,28 @@ function useEnhancedWavesList(activeWaveId: string | null) {
           wave.metrics.latest_drop_timestamp ?? null
         ),
       };
+      const isCleared = clearedUnreadWaveIds.has(wave.id);
       return {
         id: wave.id,
         name: wave.name,
         type: wave.wave.type,
         picture: wave.picture,
-        contributors: wave.contributors_overview.map((c) => ({ pfp: c.contributor_pfp })),
+        contributors: wave.contributors_overview.map((c) => ({
+          pfp: c.contributor_pfp,
+        })),
         newDropsCount: newDrops,
-        // Use server-provided isPinned status instead of local comparison
         isPinned: wave.isPinned ?? false,
+        unreadDropsCount: isCleared ? 0 : wave.metrics.your_unread_drops_count,
+        latestReadTimestamp: wave.metrics.your_latest_read_timestamp,
       };
     },
-    [newDropsCounts]
+    [newDropsCounts, clearedUnreadWaveIds]
   );
 
-  const minimal = useMemo(() => wavesData.waves.map(mapWave), [wavesData.waves, mapWave]);
+  const minimal = useMemo(
+    () => wavesData.waves.map(mapWave),
+    [wavesData.waves, mapWave]
+  );
 
   const sorted = useMemo(
     () =>
@@ -76,4 +107,4 @@ function useEnhancedWavesList(activeWaveId: string | null) {
   };
 }
 
-export default useEnhancedWavesList; 
+export default useEnhancedWavesList;

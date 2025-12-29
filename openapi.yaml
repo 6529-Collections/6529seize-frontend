@@ -7969,6 +7969,9 @@ components:
         - drops_count
         - latest_drop_timestamp
         - your_participation_drops_count
+        - your_latest_drop_timestamp
+        - your_unread_drops_count
+        - your_latest_read_timestamp
       properties:
         subscribers_count:
           type: number
@@ -7986,6 +7989,12 @@ components:
           type: number
           format: int64
         your_latest_drop_timestamp:
+          type: number
+          format: int64
+        your_unread_drops_count:
+          type: number
+          format: int64
+        your_latest_read_timestamp:
           type: number
           format: int64
     ApiWaveMin:

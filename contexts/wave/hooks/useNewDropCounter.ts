@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useCallback, useContext, useEffect } from "react";
-import { WsMessageType, WsDropUpdateMessage } from "@/helpers/Types";
-import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { AuthContext } from "@/components/auth/Auth";
 import { ApiWave } from "@/generated/models/ApiWave";
+import { WsDropUpdateMessage, WsMessageType } from "@/helpers/Types";
+import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
+import { useCallback, useContext, useEffect, useState } from "react";
 
 /**
  * Interface for tracking new drops count for a wave
@@ -164,17 +164,14 @@ function useNewDropCounter(
           });
         }
 
-        // Update the count for this wave
         setNewDropsCounts((prev) => {
           const currentCount = prev[waveId]?.count ?? 0;
           const currentLatestDropTimestamp =
             prev[waveId]?.latestDropTimestamp ?? null;
-          // Optional: Cap the maximum count at 99
-          const MAX_COUNT = 99;
           return {
             ...prev,
             [waveId]: {
-              count: Math.min(currentCount + 1, MAX_COUNT),
+              count: currentCount + 1,
               latestDropTimestamp: Math.max(
                 message.created_at,
                 currentLatestDropTimestamp ?? 0
