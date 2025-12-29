@@ -23,7 +23,8 @@ import Download from "@/components/download/Download";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
-import VotingModal from "@/components/voting/VotingModal";
+import { VotingModal, MobileVotingModal } from "@/components/voting";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { WAVE_VOTING_LABELS, WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
 import { Tooltip } from "react-tooltip";
@@ -65,6 +66,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
 > = ({ drop, wave }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isVotingOpen, setIsVotingOpen] = useState(false);
+  const isMobileScreen = useIsMobileScreen();
   const { isWinner, canDelete, canShowVote, isVotingEnded } = useDropInteractionRules(drop);
 
   // User vote logic
@@ -125,7 +127,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
   return (
     <>
       <div className="tw-w-full">
-        <div className="tw-w-full tw-min-h-screen tw-flex tw-flex-col tw-pt-16">
+        <div className="tw-w-full tw-min-h-screen tw-flex tw-flex-col tw-pt-24 md:tw-pt-16">
           <div className="tw-flex-1 tw-flex tw-items-center tw-justify-center tw-px-4 sm:tw-px-6 xl:tw-px-20 tw-py-8">
             {artworkMedia && (
               <div className="tw-w-full md:tw-max-w-4xl tw-mx-auto tw-h-full tw-flex tw-items-center tw-justify-center">
@@ -364,11 +366,19 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
         )}
       </AnimatePresence>
 
-      <VotingModal
-        drop={drop}
-        isOpen={isVotingOpen}
-        onClose={() => setIsVotingOpen(false)}
-      />
+      {isMobileScreen ? (
+        <MobileVotingModal
+          drop={drop}
+          isOpen={isVotingOpen}
+          onClose={() => setIsVotingOpen(false)}
+        />
+      ) : (
+        <VotingModal
+          drop={drop}
+          isOpen={isVotingOpen}
+          onClose={() => setIsVotingOpen(false)}
+        />
+      )}
     </>
   );
 };

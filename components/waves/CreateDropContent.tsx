@@ -575,6 +575,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   };
 
   const createDropInputRef = useRef<CreateDropInputHandles | null>(null);
+  const isInitialMountRef = useRef(true);
 
   const getReplyTo = () => {
     if (activeDrop?.action === ActiveDropAction.REPLY) {
@@ -943,6 +944,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     if (!activeDrop) {
       return;
     }
+
+    // Skip auto-focus on initial mount in app to prevent keyboard from opening
+    if (isApp && isInitialMountRef.current) {
+      isInitialMountRef.current = false;
+      return;
+    }
+    isInitialMountRef.current = false;
 
     if (isApp) {
       const timer = setTimeout(focusMobileInput, 200);

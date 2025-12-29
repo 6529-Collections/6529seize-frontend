@@ -105,7 +105,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
             <div className="tw-flex tw-items-center tw-px-4 md:tw-px-8 tw-pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] tw-pb-4 tw-border-b tw-border-solid tw-border-white/10 tw-border-x-0 tw-border-t-0">
               <button
                 onClick={toggleChat}
-                className="tw-flex tw-items-center tw-gap-2 tw-text-white/70 hover:tw-text-white tw-transition-colors tw-bg-transparent tw-border-0"
+                className="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-text-white/70 hover:tw-text-white tw-transition-colors tw-bg-transparent tw-border-0"
               >
                 <ArrowLeftIcon className="tw-w-4 tw-h-4 tw-flex-shrink-0" />
                 <span className="tw-text-sm tw-font-semibold">Back</span>
