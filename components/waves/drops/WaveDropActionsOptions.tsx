@@ -23,7 +23,7 @@ const WaveDropActionsOptions: React.FC<WaveDropActionsOptionsProps> = ({
           e.stopPropagation();
           setIsDeleteModalOpen(true);
         }}
-        className="tw-text-iron-400 desktop-hover:hover:tw-text-rose-400 tw-cursor-pointer tw-transition-colors tw-bg-transparent tw-border-0 tw-p-0"
+        className="tw-text-iron-500 desktop-hover:hover:tw-text-rose-400 tw-px-2 tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-flex tw-items-center tw-gap-x-1.5 tw-text-xs tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300 tw-cursor-pointer"
         aria-label="Delete drop"
         data-tooltip-id={`delete-${drop.id}`}>
         <svg
@@ -33,7 +33,7 @@ const WaveDropActionsOptions: React.FC<WaveDropActionsOptionsProps> = ({
           strokeWidth="1.5"
           aria-hidden="true"
           stroke="currentColor"
-          className="tw-w-4 tw-h-4">
+          className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -44,18 +44,10 @@ const WaveDropActionsOptions: React.FC<WaveDropActionsOptionsProps> = ({
       <Tooltip
         id={`delete-${drop.id}`}
         place="top"
-        offset={8}
-        opacity={1}
         style={{
-          padding: "4px 8px",
-          background: "#37373E",
+          backgroundColor: "#1F2937",
           color: "white",
-          fontSize: "13px",
-          fontWeight: 500,
-          borderRadius: "6px",
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-          zIndex: 99999,
-          pointerEvents: "none",
+          padding: "4px 8px",
         }}>
         <span className="tw-text-xs">Delete</span>
       </Tooltip>

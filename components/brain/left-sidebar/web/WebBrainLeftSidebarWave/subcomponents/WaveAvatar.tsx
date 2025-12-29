@@ -1,5 +1,7 @@
 import WavePicture from "@/components/waves/WavePicture";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesList";
+import { faBellSlash } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface WaveAvatarProps {
   readonly isActive: boolean;
@@ -29,11 +31,9 @@ export const WaveAvatar = ({
   showNewDropsBadge,
   wave,
 }: WaveAvatarProps) => {
-  const showBadge = wave.unreadDropsCount > 0 || showNewDropsBadge;
-  const rawCount =
-    wave.unreadDropsCount > 0
-      ? wave.unreadDropsCount
-      : wave.newDropsCount.count;
+  const showBadge =
+    !wave.isMuted && (wave.unreadDropsCount > 0 || showNewDropsBadge);
+  const rawCount = Math.max(wave.unreadDropsCount, wave.newDropsCount.count);
   const displayCount =
     rawCount > MAX_DISPLAY_COUNT ? `${MAX_DISPLAY_COUNT}+` : rawCount;
 
@@ -57,6 +57,14 @@ export const WaveAvatar = ({
       {showBadge && (
         <div className="tw-absolute tw-top-[-4px] tw-right-[-4px] tw-bg-indigo-500 tw-text-white tw-rounded-full tw-h-4 tw-min-w-4 tw-flex tw-items-center tw-justify-center tw-text-[10px] tw-font-medium tw-px-1 tw-shadow-sm">
           {displayCount}
+        </div>
+      )}
+      {wave.isMuted && (
+        <div className="tw-absolute tw-top-[-4px] tw-right-[-4px] tw-bg-red tw-text-white tw-rounded-full tw-size-4 tw-flex tw-items-center tw-justify-center tw-shadow-sm">
+          <FontAwesomeIcon
+            icon={faBellSlash}
+            className="tw-size-2.5 tw-flex-shrink-0"
+          />
         </div>
       )}
     </div>

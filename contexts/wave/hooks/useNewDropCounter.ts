@@ -12,6 +12,7 @@ import { useCallback, useContext, useEffect, useState } from "react";
 export interface MinimalWaveNewDropsCount {
   readonly count: number;
   readonly latestDropTimestamp: number | null;
+  readonly firstUnreadSerialNo: number | null;
 }
 
 export function getNewestTimestamp(
@@ -65,6 +66,7 @@ function useNewDropCounter(
             waves.find((wave) => wave.id === waveId)?.metrics
               .latest_drop_timestamp ?? null
           ),
+          firstUnreadSerialNo: null,
         },
       }));
     },
@@ -81,6 +83,7 @@ function useNewDropCounter(
             prev[wave.id]?.latestDropTimestamp,
             wave.metrics.latest_drop_timestamp ?? null
           ),
+          firstUnreadSerialNo: null,
         };
       });
       return newCounts;
@@ -141,6 +144,7 @@ function useNewDropCounter(
                   message.created_at,
                   currentLatestDropTimestamp ?? 0
                 ),
+                firstUnreadSerialNo: prev[waveId]?.firstUnreadSerialNo ?? null,
               },
             };
           });
@@ -159,6 +163,7 @@ function useNewDropCounter(
                   message.created_at,
                   currentLatestDropTimestamp ?? 0
                 ),
+                firstUnreadSerialNo: prev[waveId]?.firstUnreadSerialNo ?? null,
               },
             };
           });
@@ -168,6 +173,7 @@ function useNewDropCounter(
           const currentCount = prev[waveId]?.count ?? 0;
           const currentLatestDropTimestamp =
             prev[waveId]?.latestDropTimestamp ?? null;
+          const currentFirstUnread = prev[waveId]?.firstUnreadSerialNo ?? null;
           return {
             ...prev,
             [waveId]: {
@@ -176,6 +182,10 @@ function useNewDropCounter(
                 message.created_at,
                 currentLatestDropTimestamp ?? 0
               ),
+              firstUnreadSerialNo:
+                currentFirstUnread === null
+                  ? message.serial_no
+                  : Math.min(currentFirstUnread, message.serial_no),
             },
           };
         });

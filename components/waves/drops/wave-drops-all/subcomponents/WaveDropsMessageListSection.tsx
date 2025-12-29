@@ -39,6 +39,7 @@ interface WaveDropsMessageListSectionProps {
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
   readonly pendingCount: number;
   readonly onRevealPending: () => void;
+  readonly unreadDividerSerialNo?: number | null;
 }
 
 const MIN_DROPS_FOR_PAGINATION = 25;
@@ -63,6 +64,7 @@ export const WaveDropsMessageListSection: React.FC<
   onDropContentClick,
   pendingCount,
   onRevealPending,
+  unreadDividerSerialNo,
 }) => {
   const hasNextPage =
     !!waveMessages?.hasNextPage &&
@@ -91,6 +93,7 @@ export const WaveDropsMessageListSection: React.FC<
           parentContainerRef={scrollContainerRef}
           dropViewDropId={dropId}
           onDropContentClick={onDropContentClick}
+          unreadDividerSerialNo={unreadDividerSerialNo}
           key="drops-list"
         />
         <div ref={bottomAnchorRef} style={{ height: "1px" }} />

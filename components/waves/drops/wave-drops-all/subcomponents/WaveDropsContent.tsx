@@ -9,6 +9,7 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
 import { WaveDropsMessageListSection } from "./WaveDropsMessageListSection";
 import { WaveDropsTypingIndicator } from "./WaveDropsTypingIndicator";
+import { useUnreadDivider } from "@/contexts/wave/UnreadDividerContext";
 
 type WaveMessagesResult = ReturnType<typeof useVirtualizedWaveDrops>["waveMessages"];
 
@@ -65,6 +66,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   pendingCount,
   onRevealPending,
 }) => {
+  const { unreadDividerSerialNo } = useUnreadDivider();
   const dropsCount = waveMessages?.drops?.length ?? 0;
   const isInitialLoading =
     !!waveMessages?.isLoading &&
@@ -105,6 +107,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
         onDropContentClick={onDropContentClick}
         pendingCount={pendingCount}
         onRevealPending={onRevealPending}
+        unreadDividerSerialNo={unreadDividerSerialNo}
       />
       <WaveDropsTypingIndicator typingMessage={typingMessage} />
     </>

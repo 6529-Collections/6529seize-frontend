@@ -19,6 +19,10 @@ import { useWaveDropsSerialScroll } from "./hooks/useWaveDropsSerialScroll";
 import { useWaveDropsClipboard } from "./hooks/useWaveDropsClipboard";
 import { WaveDropsContent } from "./subcomponents/WaveDropsContent";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
+import {
+  UnreadDividerProvider,
+  useUnreadDivider,
+} from "@/contexts/wave/UnreadDividerContext";
 
 const EMPTY_DROPS: Drop[] = [];
 
@@ -44,7 +48,13 @@ interface WaveDropsAllProps {
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }
 
-const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
+interface WaveDropsAllInnerProps extends WaveDropsAllProps {
+  readonly waveMessages: ReturnType<typeof useVirtualizedWaveDrops>["waveMessages"];
+  readonly fetchNextPage: ReturnType<typeof useVirtualizedWaveDrops>["fetchNextPage"];
+  readonly waitAndRevealDrop: ReturnType<typeof useVirtualizedWaveDrops>["waitAndRevealDrop"];
+}
+
+const WaveDropsAllInner: React.FC<WaveDropsAllInnerProps> = ({
   waveId,
   dropId,
   onReply,
@@ -52,16 +62,17 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   activeDrop,
   initialDrop,
   onDropContentClick,
+  waveMessages,
+  fetchNextPage,
+  waitAndRevealDrop,
 }) => {
-
   const router = useRouter();
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
   const { connectedProfile } = useAuth();
   const { isAppleMobile } = useDeviceInfo();
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const { waveMessages, fetchNextPage, waitAndRevealDrop } =
-    useVirtualizedWaveDrops(waveId, dropId);
+  const { unreadDividerSerialNo, setUnreadDividerSerialNo } = useUnreadDivider();
 
   const typingMessage = useWaveIsTyping(
     waveId,
@@ -96,11 +107,48 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
     null
   );
 
+  const prevLatestSerialNoRef = useRef<number | null>(null);
+
   useEffect(() => {
     setVisibleLatestSerial(null);
-  }, [waveId]);
+    prevLatestSerialNoRef.current = null;
+    if (initialDrop === null) {
+      setUnreadDividerSerialNo(null);
+    } else {
+      setUnreadDividerSerialNo(initialDrop);
+    }
+  }, [waveId, initialDrop, setUnreadDividerSerialNo]);
 
   const latestSerialNo = waveMessages?.drops?.[0]?.serial_no ?? null;
+
+  useEffect(() => {
+    if (latestSerialNo === null) {
+      return;
+    }
+
+    const prevSerial = prevLatestSerialNoRef.current;
+    prevLatestSerialNoRef.current = latestSerialNo;
+
+    if (prevSerial !== null && latestSerialNo > prevSerial && !isAtBottom) {
+      setUnreadDividerSerialNo((current) => {
+        if (current === null) {
+          return prevSerial + 1;
+        }
+        return current;
+      });
+    }
+  }, [latestSerialNo, isAtBottom, setUnreadDividerSerialNo]);
+
+  const wasNotAtBottomRef = useRef(false);
+
+  useEffect(() => {
+    if (!isAtBottom) {
+      wasNotAtBottomRef.current = true;
+    } else if (wasNotAtBottomRef.current && unreadDividerSerialNo !== null) {
+      setUnreadDividerSerialNo(null);
+      wasNotAtBottomRef.current = false;
+    }
+  }, [isAtBottom, unreadDividerSerialNo, setUnreadDividerSerialNo]);
 
   useEffect(() => {
     if (latestSerialNo === null) {
@@ -277,6 +325,38 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
       />
       <WaveDropsScrollingOverlay isVisible={isScrolling} />
     </div>
+  );
+};
+
+const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
+  waveId,
+  dropId,
+  onReply,
+  onQuote,
+  activeDrop,
+  initialDrop,
+  onDropContentClick,
+}) => {
+  const { waveMessages, fetchNextPage, waitAndRevealDrop } =
+    useVirtualizedWaveDrops(waveId, dropId);
+
+  return (
+    <UnreadDividerProvider
+      initialSerialNo={initialDrop}
+      key={`unread-divider-${waveId}`}>
+      <WaveDropsAllInner
+        waveId={waveId}
+        dropId={dropId}
+        onReply={onReply}
+        onQuote={onQuote}
+        activeDrop={activeDrop}
+        initialDrop={initialDrop}
+        onDropContentClick={onDropContentClick}
+        waveMessages={waveMessages}
+        fetchNextPage={fetchNextPage}
+        waitAndRevealDrop={waitAndRevealDrop}
+      />
+    </UnreadDividerProvider>
   );
 };
 

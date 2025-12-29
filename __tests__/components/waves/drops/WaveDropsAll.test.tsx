@@ -434,7 +434,7 @@ describe('WaveDropsAll', () => {
   describe('Navigation and Quote Handling', () => {
     it('navigates to different wave when quote is from another wave', () => {
       const mockDrop = createMockDrop({ 
-        wave: { id: 'other-wave', name: 'Other Wave', picture: null, description_drop_id: null },
+        wave: { id: 'other-wave', name: 'Other Wave', picture: null, description_drop_id: '' },
         serial_no: 42
       }) as any;
       
@@ -453,7 +453,7 @@ describe('WaveDropsAll', () => {
 
     it('sets serial number for same wave quote navigation', () => {
       const mockDrop = createMockDrop({ 
-        wave: { id: 'current-wave', name: 'Current Wave', picture: null, description_drop_id: null },
+        wave: { id: 'current-wave', name: 'Current Wave', picture: null, description_drop_id: '' },
         serial_no: 42
       }) as any;
       

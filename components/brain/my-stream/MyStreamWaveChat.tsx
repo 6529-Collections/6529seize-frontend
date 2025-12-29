@@ -31,6 +31,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   const pathname = usePathname();
   const containerRef = useRef<HTMLDivElement>(null);
   const [initialDrop, setInitialDrop] = useState<number | null>(null);
+  const prevWaveIdRef = useRef<string>(wave.id);
   const { isMemesWave } = useWave(wave);
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
@@ -40,7 +41,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   useEffect(() => {
     const dropParam = searchParams?.get("serialNo");
     if (!dropParam) {
-      setInitialDrop(null);
       return;
     }
 
@@ -58,6 +58,13 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
       : pathname || getHomeFeedRoute();
     router.replace(href, { scroll: false });
   }, [searchParams, router, pathname]);
+
+  useEffect(() => {
+    if (prevWaveIdRef.current !== wave.id) {
+      setInitialDrop(null);
+      prevWaveIdRef.current = wave.id;
+    }
+  }, [wave.id]);
 
   const { waveViewStyle } = useLayout();
 

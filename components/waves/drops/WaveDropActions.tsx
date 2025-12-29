@@ -17,6 +17,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import WaveDropActionsEdit from "./WaveDropActionsEdit";
 import WaveDropActionsDownload from "./WaveDropActionsDownload";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
+import WaveDropActionsMarkUnread from "./WaveDropActionsMarkUnread";
 
 interface WaveDropActionsProps {
   readonly drop: ExtendedDrop;
@@ -52,6 +53,9 @@ export default function WaveDropActions({
         <div className="tw-h-8 tw-flex tw-items-center tw-shadow tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-ring-inset tw-rounded-lg">
           {connectedProfile?.handle !== drop.author.handle &&
             !activePartIndex && <WaveDropFollowAuthor drop={drop} />}
+          {connectedProfile && connectedProfile.handle !== drop.author.handle && (
+            <WaveDropActionsMarkUnread drop={drop} />
+          )}
           <WaveDropActionsReply
             onReply={onReply}
             drop={drop}

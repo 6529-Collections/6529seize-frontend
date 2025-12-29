@@ -14,10 +14,15 @@ export function createMockMinimalWave(overrides: Partial<MinimalWave> = {}): Min
     newDropsCount: {
       count: 0,
       latestDropTimestamp: null,
+      firstUnreadSerialNo: null,
     },
     picture: null,
     contributors: [],
     isPinned: false,
+    unreadDropsCount: 0,
+    latestReadTimestamp: 0,
+    firstUnreadDropSerialNo: null,
+    isMuted: false,
     ...overrides,
   };
 }
