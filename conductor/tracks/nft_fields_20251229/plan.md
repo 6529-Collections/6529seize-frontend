@@ -1,0 +1,52 @@
+# Plan: NFT Submission Additional Fields Implementation
+
+This plan implements additional operational fields in the NFT submission flow, storing them within the submission metadata.
+
+## Phase 1: Foundation & Utility Logic
+Implement the core data structures and the parsing logic for token ID ranges and address validation.
+
+- [ ] Task: Define TypeScript interfaces and constants for new metadata fields
+    - [ ] Sub-task: Create types for `airdrop_info`, `payment_info`, `allowlist_batches`, and `additional_media` in a shared types file
+- [ ] Task: Implement and test Token ID range parsing utility
+    - [ ] Sub-task: Write unit tests for parsing strings like "1,2,4-6,10" into [1,2,4,5,6,10] (Red Phase)
+    - [ ] Sub-task: Implement `parseTokenIds` utility reusing logic from `NftPicker` (Green Phase)
+- [ ] Task: Implement and test strict Ethereum address validation
+    - [ ] Sub-task: Write unit tests for validating 0x-prefixed addresses and rejecting ENS (Red Phase)
+    - [ ] Sub-task: Implement `validateStrictAddress` utility (Green Phase)
+- [ ] Task: Conductor - User Manual Verification 'Phase 1: Foundation & Utility Logic' (Protocol in workflow.md)
+
+## Phase 2: Submission Wizard UI Components
+Create the UI components for the new form fields, adhering to existing submission styles.
+
+- [ ] Task: Implement `AirdropAddressFields` component
+    - [ ] Sub-task: Write tests for rendering and basic validation (Red Phase)
+    - [ ] Sub-task: Implement component with inputs for artist/choice addresses and counts (Green Phase)
+- [ ] Task: Implement `AllowlistBatchManager` component
+    - [ ] Sub-task: Write tests for adding/removing multiple allowlist batches (Red Phase)
+    - [ ] Sub-task: Implement component that allows dynamic addition of Contract Address + Token ID range inputs (Green Phase)
+- [ ] Task: Implement `AdditionalMediaUpload` component
+    - [ ] Sub-task: Write tests for file type and count restrictions (Red Phase)
+    - [ ] Sub-task: Implement media uploader for Artist Profile and Commentary Media (Green Phase)
+- [ ] Task: Conductor - User Manual Verification 'Phase 2: Submission Wizard UI Components' (Protocol in workflow.md)
+
+## Phase 3: Wizard Integration & Submission Logic
+Integrate the new step into the submission flow and ensure data is correctly bundled into the metadata.
+
+- [ ] Task: Create "Additional Information" step component
+    - [ ] Sub-task: Implement `AdditionalInfoStep.tsx` combining the components from Phase 2
+- [ ] Task: Integrate new step into the submission container
+    - [ ] Sub-task: Update `MemesArtSubmissionContainer` to include the "Additional Information" step
+    - [ ] Sub-task: Update form state management to track the new field values
+- [ ] Task: Update submission mutation logic
+    - [ ] Sub-task: Write tests to ensure metadata is correctly formatted before API call (Red Phase)
+    - [ ] Sub-task: Modify `useArtworkSubmissionMutation` to bundle new fields into the `metadata` object (Green Phase)
+- [ ] Task: Conductor - User Manual Verification 'Phase 3: Wizard Integration & Submission Logic' (Protocol in workflow.md)
+
+## Phase 4: Displaying Additional Details
+Update the submission view to allow authorized users to view the supplemental operational data.
+
+- [ ] Task: Implement `AdditionalSubmissionDetails` display component
+    - [ ] Sub-task: Create a component to render the structured metadata (airdrops, allowlists, etc.)
+- [ ] Task: Add "View Additional Details" action to submission page
+    - [ ] Sub-task: Add a button/toggle to the submission detail view that opens a modal or expands a section containing the new data
+- [ ] Task: Conductor - User Manual Verification 'Phase 4: Displaying Additional Details' (Protocol in workflow.md)
