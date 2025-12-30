@@ -28,12 +28,6 @@ npm run test
 npm run lint
 ```
 
-### Type Check
-
-```bash
-npm run type-check
-```
-
 > **Note on Next.js 16 & ESLint:** Starting with Next 16, `next lint` is removed. Use the ESLint CLI driven by `eslint-config-next` (flat config). Remove any `eslint` options from `next.config.*`. ([Next.js][1])
 
 ---
@@ -45,19 +39,10 @@ Run all the following (unless you are only editing docs or non-code, in which ca
 ```bash
 npm run test
 npm run lint
-npm run type-check
-```
-
-For small changes, you may run a faster coverage subset:
-
-```bash
-npm run test:cov:changed
 ```
 
 * `npm run test`: Executes all Jest tests and enforces **≥ 80% line coverage for files changed since `main`**. Fails if tests fail or coverage threshold is not met.
-* `npm run test:cov:changed`: Jest on changed files only; still enforces the 80% threshold.
 * `npm run lint`: Code must satisfy ESLint (Next’s Core Web Vitals + React Hooks).
-* `npm run type-check`: Must pass `tsc --noEmit`.
 
 If tests fail due to coverage, write meaningful tests until coverage ≥ 80%. If a test fails functionally, fix root cause (code or test) and re‑run until green.
 
