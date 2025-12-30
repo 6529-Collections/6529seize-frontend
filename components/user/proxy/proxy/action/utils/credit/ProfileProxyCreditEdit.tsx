@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import CommonInput from "@/components/utils/input/CommonInput";
 import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
@@ -29,21 +29,8 @@ export default function ProfileProxyCreditEdit({
     profileProxyAction.credit_amount ?? 0
   );
 
-  const getIsChangedAndValid = () => {
-    if (profileProxyAction.credit_amount === creditAmount) {
-      return false;
-    }
-    if (creditAmount <= 0) {
-      return false;
-    }
-    return true;
-  };
-
-  const [isChangedAndValid, setIsChangedAndValid] = useState(
-    getIsChangedAndValid()
-  );
-
-  useEffect(() => setIsChangedAndValid(getIsChangedAndValid()), [creditAmount]);
+  const isChangedAndValid =
+    profileProxyAction.credit_amount !== creditAmount && creditAmount > 0;
 
   const [submitting, setSubmitting] = useState(false);
   const profileProxyActionCreditMutation = useMutation({

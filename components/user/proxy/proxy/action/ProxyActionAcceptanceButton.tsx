@@ -21,20 +21,6 @@ import HeaderProxyNewModal from "@/components/header/proxy/HeaderProxyNewModal";
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 
-const ACTION_LABEL: Record<AcceptActionRequestActionEnum, string> = {
-  [AcceptActionRequestActionEnum.Accept]: "Accept",
-  [AcceptActionRequestActionEnum.Reject]: "Reject",
-  [AcceptActionRequestActionEnum.Revoke]: "Revoke",
-  [AcceptActionRequestActionEnum.Restore]: "Restore",
-};
-
-const ACTION_CLASSES: Record<AcceptActionRequestActionEnum, string> = {
-  [AcceptActionRequestActionEnum.Accept]: "tw-text-green",
-  [AcceptActionRequestActionEnum.Reject]: "tw-text-red",
-  [AcceptActionRequestActionEnum.Revoke]: "tw-text-red",
-  [AcceptActionRequestActionEnum.Restore]: "tw-text-green",
-};
-
 export default function ProxyActionAcceptanceButton({
   action,
   profile,
