@@ -32,8 +32,6 @@ export interface ArtworkSubmissionData {
   termsOfService: string | null;
 }
 
-import { parseTokenIds } from "../utils/tokenParsing";
-
 /**
  * Function to transform form data into API request format
  */
@@ -84,7 +82,7 @@ export const transformToApiRequest = (data: {
     if (operationalData.allowlist_batches && operationalData.allowlist_batches.length > 0) {
       const processedBatches = operationalData.allowlist_batches.map((batch) => ({
         contract: batch.contract,
-        token_ids: parseTokenIds(batch.token_ids_raw),
+        token_ids: batch.token_ids_raw || "",
       }));
       metadata.push({
         data_key: "allowlist_batches",

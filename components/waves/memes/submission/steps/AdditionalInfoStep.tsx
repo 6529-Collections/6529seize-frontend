@@ -6,6 +6,7 @@ import AirdropConfig from "../components/AirdropConfig";
 import AllowlistBatchManager, { AllowlistBatchRaw } from "../components/AllowlistBatchManager";
 import AdditionalMediaUpload from "../components/AdditionalMediaUpload";
 import { validateStrictAddress } from "../utils/addressValidation";
+import { validateTokenIdFormat } from "../utils/tokenParsing";
 import { AirdropEntry, AIRDROP_TOTAL } from "../types/OperationalData";
 
 interface AdditionalInfoStepProps {
@@ -45,6 +46,10 @@ const AdditionalInfoStep: React.FC<AdditionalInfoStepProps> = ({
     return undefined;
   };
 
+  const getTokenIdsError = (tokenIds: string) => {
+    return validateTokenIdFormat(tokenIds) || undefined;
+  };
+
   const isFormValid = () => {
     // Validate airdrop entries
     const totalAllocated = airdropEntries.reduce((sum, e) => sum + (e.count || 0), 0);
@@ -67,6 +72,12 @@ const AdditionalInfoStep: React.FC<AdditionalInfoStepProps> = ({
       (batch) => !batch.contract || !validateStrictAddress(batch.contract)
     );
     if (hasInvalidBatch) return false;
+
+    // Check token ID format
+    const hasInvalidTokenIds = allowlistBatches.some(
+      (batch) => validateTokenIdFormat(batch.token_ids_raw) !== null
+    );
+    if (hasInvalidTokenIds) return false;
 
     return true;
   };
@@ -93,6 +104,7 @@ const AdditionalInfoStep: React.FC<AdditionalInfoStepProps> = ({
           onBatchesChange={onBatchesChange}
           errors={allowlistBatches.map((b) => ({
             contract: getContractError(b.contract),
+            token_ids: getTokenIdsError(b.token_ids_raw),
           }))}
         />
 

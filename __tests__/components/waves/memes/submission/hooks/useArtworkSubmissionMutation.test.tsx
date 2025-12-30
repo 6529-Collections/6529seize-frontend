@@ -49,7 +49,7 @@ describe("useArtworkSubmissionMutation - transformToApiRequest", () => {
     expect(metadataMap.get("airdrop_config")).toBe(JSON.stringify(mockOperationalData.airdrop_config));
     expect(metadataMap.get("payment_info")).toBe(JSON.stringify(mockOperationalData.payment_info));
     expect(metadataMap.get("allowlist_batches")).toBe(JSON.stringify([
-      { contract: "0xabc", token_ids: [1, 2, 3, 4, 5] } // Expect parsed token IDs
+      { contract: "0xabc", token_ids: "1-5" } // Stored as raw string
     ]));
     expect(metadataMap.get("additional_media")).toBe(JSON.stringify(mockOperationalData.additional_media));
     expect(metadataMap.get("commentary")).toBe("Test Commentary");

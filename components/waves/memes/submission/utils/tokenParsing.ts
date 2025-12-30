@@ -1,13 +1,13 @@
 /**
- * Parses a string of token IDs into an array of numbers.
- * Supports single IDs, comma-separated lists, and ranges (e.g. "1,2,4-6,10").
+ * Validates token ID format.
+ * Valid formats: "1", "1,2,3", "1-5", "1,2,5-10"
+ * Returns null if valid, error message if invalid.
  */
-export function parseTokenIds(input: string): number[] {
+export function validateTokenIdFormat(input: string): string | null {
   if (!input || !input.trim()) {
-    return [];
+    return null; // Empty is valid
   }
 
-  const result: number[] = [];
   const segments = input.split(",");
 
   for (const segment of segments) {
@@ -16,24 +16,21 @@ export function parseTokenIds(input: string): number[] {
 
     if (trimmed.includes("-")) {
       const parts = trimmed.split("-");
-      if (parts.length === 2) {
-        const start = parseInt(parts[0].trim(), 10);
-        const end = parseInt(parts[1].trim(), 10);
-
-        if (!isNaN(start) && !isNaN(end)) {
-          const [min, max] = start <= end ? [start, end] : [end, start];
-          for (let i = min; i <= max; i++) {
-            result.push(i);
-          }
-        }
+      if (parts.length !== 2) {
+        return "Invalid range format. Use: 1-5";
+      }
+      const start = parseInt(parts[0].trim(), 10);
+      const end = parseInt(parts[1].trim(), 10);
+      if (isNaN(start) || isNaN(end)) {
+        return "Invalid range. Use numbers only: 1-5";
       }
     } else {
       const id = parseInt(trimmed, 10);
-      if (!isNaN(id)) {
-        result.push(id);
+      if (isNaN(id)) {
+        return "Invalid token ID. Use: 1,2,5-10";
       }
     }
   }
-  // Return unique sorted IDs
-  return Array.from(new Set(result)).sort((a, b) => a - b);
+
+  return null;
 }
