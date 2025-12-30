@@ -50,19 +50,7 @@ interface WaveDropsAllProps {
   readonly isMuted?: boolean;
 }
 
-interface WaveDropsAllInnerProps extends WaveDropsAllProps {
-  readonly waveMessages: ReturnType<
-    typeof useVirtualizedWaveDrops
-  >["waveMessages"];
-  readonly fetchNextPage: ReturnType<
-    typeof useVirtualizedWaveDrops
-  >["fetchNextPage"];
-  readonly waitAndRevealDrop: ReturnType<
-    typeof useVirtualizedWaveDrops
-  >["waitAndRevealDrop"];
-}
-
-const WaveDropsAllInner: React.FC<WaveDropsAllInnerProps> = ({
+const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   waveId,
   dropId,
   onReply,
@@ -71,9 +59,6 @@ const WaveDropsAllInner: React.FC<WaveDropsAllInnerProps> = ({
   initialDrop,
   onDropContentClick,
   bottomPaddingClassName,
-  waveMessages,
-  fetchNextPage,
-  waitAndRevealDrop,
   isMuted = false,
 }) => {
   const router = useRouter();
@@ -81,6 +66,9 @@ const WaveDropsAllInner: React.FC<WaveDropsAllInnerProps> = ({
   const { connectedProfile } = useAuth();
   const { isAppleMobile } = useDeviceInfo();
   const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const { waveMessages, fetchNextPage, waitAndRevealDrop } =
+    useVirtualizedWaveDrops(waveId, dropId);
 
   const { unreadDividerSerialNo, setUnreadDividerSerialNo } =
     useUnreadDivider();
@@ -345,9 +333,6 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   bottomPaddingClassName,
   isMuted = false,
 }) => {
-  const { waveMessages, fetchNextPage, waitAndRevealDrop } =
-    useVirtualizedWaveDrops(waveId, dropId);
-
   return (
     <UnreadDividerProvider
       initialSerialNo={initialDrop}
@@ -361,9 +346,6 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
         initialDrop={initialDrop}
         onDropContentClick={onDropContentClick}
         bottomPaddingClassName={bottomPaddingClassName}
-        waveMessages={waveMessages}
-        fetchNextPage={fetchNextPage}
-        waitAndRevealDrop={waitAndRevealDrop}
         isMuted={isMuted}
       />
     </UnreadDividerProvider>
