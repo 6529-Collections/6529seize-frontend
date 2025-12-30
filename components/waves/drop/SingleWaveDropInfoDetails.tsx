@@ -2,8 +2,6 @@ import React from "react";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { SingleWaveDropLogs } from "./SingleWaveDropLogs";
 import { SingleWaveDropVoters } from "./SingleWaveDropVoters";
-import Download from "@/components/download/Download";
-import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 
 interface SingleWaveDropInfoDetailsProps {
   readonly drop: ExtendedDrop | undefined;
@@ -12,35 +10,8 @@ interface SingleWaveDropInfoDetailsProps {
 export const SingleWaveDropInfoDetails: React.FC<
   SingleWaveDropInfoDetailsProps
 > = ({ drop }) => {
-  const media = drop?.parts?.at(0)?.media?.at(0);
-  const fileInfo = getFileInfoFromUrl(media?.url);
-  const title =
-    drop?.metadata?.find((m) => m.data_key === "title")?.data_value ??
-    drop?.title;
-  const author = drop?.author?.handle;
-  const wave = drop?.wave.name;
-  let fileName = title;
-  if (wave) {
-    fileName += ` for ${wave}`;
-  }
-  if (author) {
-    fileName += ` by @${author}`;
-  }
-
   return (
-    <div className="tw-px-6 tw-space-y-4 tw-pb-6 tw-pt-4">
-      {media && fileInfo && (
-        <div className="tw-flex tw-justify-between tw-items-center">
-          <span className="tw-text-sm tw-font-medium">
-            Media Type: {fileInfo.extension.toUpperCase()}
-          </span>
-          <Download
-            href={media.url}
-            name={fileName ?? fileInfo.name}
-            extension={fileInfo.extension}
-          />
-        </div>
-      )}
+    <div className="tw-rounded-lg tw-ring-1 tw-ring-white/10 tw-overflow-hidden tw-divide-y tw-divide-white/10 tw-divide-solid tw-divide-x-0">
       {drop && <SingleWaveDropVoters drop={drop} />}
       {drop && <SingleWaveDropLogs drop={drop} />}
     </div>

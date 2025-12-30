@@ -1,7 +1,7 @@
-import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ReactElement } from "react";
 import { Tooltip } from "react-tooltip";
 
 interface DropVoteProgressingProps {
@@ -14,7 +14,7 @@ export default function DropVoteProgressing({
   current,
   projected,
   subtle = false,
-}: DropVoteProgressingProps): React.ReactElement<any> | null {
+}: DropVoteProgressingProps): ReactElement | null {
   if (typeof current !== "number" || typeof projected !== "number") {
     return null;
   }
@@ -34,8 +34,8 @@ export default function DropVoteProgressing({
     arrowColor = "tw-text-iron-600";
   } else {
     color = isPositiveProgressing
-      ? "tw-text-emerald-400 tw-bg-emerald-500/10 tw-px-2 tw-py-0.5 tw-rounded tw-border tw-border-solid tw-border-emerald-500/20 tw-font-mono"
-      : "tw-text-rose-400 tw-bg-rose-500/10 tw-px-2 tw-py-0.5 tw-rounded tw-border tw-border-solid tw-border-rose-500/20 tw-font-mono";
+      ? "tw-text-emerald-500 tw-bg-emerald-500/10 tw-px-2 tw-py-0.5 tw-rounded tw-border tw-border-solid tw-border-emerald-500/20 tw-font-mono"
+      : "tw-text-rose-500 tw-bg-rose-500/10 tw-px-2 tw-py-0.5 tw-rounded tw-border tw-border-solid tw-border-rose-500/20 tw-font-mono";
     arrowColor = "tw-text-iron-600";
   }
 
@@ -52,7 +52,7 @@ export default function DropVoteProgressing({
           icon={faArrowRight}
           className={`tw-flex-shrink-0 tw-size-2.5 ${arrowColor}`}
         />
-        <span className={`${subtle ? 'tw-text-xs' : 'tw-text-sm'} tw-font-medium tw-tracking-tight ${color}`}>{formatNumberWithCommas(projected)}</span>
+        <span className={`tw-text-sm tw-font-medium tw-tracking-tight ${color}`}>{formatNumberWithCommas(projected)}</span>
       </span>
       <Tooltip
         id={`drop-vote-progress-${current}-${projected}`}

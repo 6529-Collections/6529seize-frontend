@@ -1,17 +1,17 @@
 "use client";
 
+import { useAuth } from "@/components/auth/Auth";
 import { publicEnv } from "@/config/env";
+import { areEqualURLS } from "@/helpers/Helpers";
+import useCapacitor from "@/hooks/useCapacitor";
+import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
 import {
-  CapacitorBarcodeScanner,
-  CapacitorBarcodeScannerTypeHint,
+    CapacitorBarcodeScanner,
+    CapacitorBarcodeScannerTypeHint,
 } from "@capacitor/barcode-scanner";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { areEqualURLS } from "@/helpers/Helpers";
-import useCapacitor from "@/hooks/useCapacitor";
-import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
-import { useAuth } from "@/components/auth/Auth";
 
 export default function HeaderQRScanner({
   onScanSuccess,
@@ -155,7 +155,7 @@ export default function HeaderQRScanner({
     return (
       <button
         onClick={startScan}
-        className="tw-bg-transparent tw-border-none tw-w-full tw-flex tw-items-center tw-space-x-4 tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-zinc-300 active:tw-bg-zinc-700 active:tw-text-zinc-200 tw-rounded-lg tw-transition-colors tw-duration-200"
+        className="tw-bg-transparent tw-border-none tw-w-full tw-flex tw-items-center tw-space-x-4 tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 active:tw-bg-iron-700 active:tw-text-iron-200 tw-rounded-lg tw-transition-colors tw-duration-200"
         aria-label="Scan QR Code">
         <HeaderQRScannerIcon className="tw-w-6 tw-h-6 tw-flex-shrink-0" />
         <span>Scan QR Code</span>

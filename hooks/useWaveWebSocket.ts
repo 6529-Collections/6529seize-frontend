@@ -20,20 +20,28 @@ const MAX_RECONNECT_ATTEMPTS = 20;
  * Custom hook to connect to a WebSocket for a given waveId.
  * Automatically reconnects on disconnect, up to MAX_RECONNECT_ATTEMPTS,
  * with a delay of RECONNECT_DELAY ms between attempts.
- * Sends a "hello world" message upon successful connection.
+ * Sends a subscription message upon successful connection.
+ *
+ * @param waveId - The wave ID to subscribe to. Pass empty string to disable.
  */
 export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
   const socketRef = useRef<WebSocket | null>(null);
   const [readyState, setReadyState] = useState<number>(WebSocket.CLOSED);
   const reconnectAttemptsRef = useRef<number>(0);
   const reconnectTimeoutRef = useRef<number | null>(null);
-  // flag controlling whether reconnection should be attempted
   const shouldReconnectRef = useRef<boolean>(true);
 
   useEffect(() => {
-    // allow reconnection again on (re-)mount or waveId change
+    if (!waveId) {
+      if (socketRef.current) {
+        socketRef.current.close();
+        socketRef.current = null;
+      }
+      setReadyState(WebSocket.CLOSED);
+      return;
+    }
+
     shouldReconnectRef.current = true;
-    // determine base URL from environment
     const url =
       publicEnv.WS_ENDPOINT ??
       publicEnv.API_ENDPOINT?.replace("https://api", "wss://ws") ??

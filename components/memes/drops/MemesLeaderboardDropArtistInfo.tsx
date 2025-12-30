@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link";
-import { cicToType } from "@/helpers/Helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
@@ -40,7 +39,6 @@ const MemesLeaderboardDropArtistInfo = ({
           {!!drop.author?.level && (
             <UserCICAndLevel
               level={drop.author.level}
-              cicType={cicToType(drop.author.cic)}
               size={UserCICAndLevelSize.SMALL}
             />
           )}

@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
 import { ApiWave } from "@/generated/models/ApiWave";
-import { useClickAway, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
+import { useRef, useState } from "react";
+import { useClickAway, useKeyPressEvent } from "react-use";
 import WaveDelete from "./delete/WaveDelete";
+import WaveMute from "./mute/WaveMute";
 
 export default function WaveHeaderOptions({
   wave,
@@ -50,6 +51,7 @@ export default function WaveHeaderOptions({
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}>
             <div>
+              <WaveMute wave={wave} onSuccess={() => setIsOptionsOpen(false)} />
               <WaveDelete wave={wave} />
             </div>
           </motion.div>

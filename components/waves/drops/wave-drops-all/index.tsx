@@ -1,9 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
+import WaveDropsScrollingOverlay from "@/components/waves/drops/WaveDropsScrollingOverlay";
+import {
+  UnreadDividerProvider,
+  useUnreadDivider,
+} from "@/contexts/wave/UnreadDividerContext";
+import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { Drop, DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
@@ -11,14 +16,13 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useScrollBehavior } from "@/hooks/useScrollBehavior";
 import { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
 import { useWaveIsTyping } from "@/hooks/useWaveIsTyping";
-import { ApiDrop } from "@/generated/models/ApiDrop";
 import { ActiveDropState } from "@/types/dropInteractionTypes";
-import WaveDropsScrollingOverlay from "@/components/waves/drops/WaveDropsScrollingOverlay";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useWaveDropsClipboard } from "./hooks/useWaveDropsClipboard";
 import { useWaveDropsNotificationRead } from "./hooks/useWaveDropsNotificationRead";
 import { useWaveDropsSerialScroll } from "./hooks/useWaveDropsSerialScroll";
-import { useWaveDropsClipboard } from "./hooks/useWaveDropsClipboard";
 import { WaveDropsContent } from "./subcomponents/WaveDropsContent";
-import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 
 const EMPTY_DROPS: Drop[] = [];
 
@@ -42,9 +46,11 @@ interface WaveDropsAllProps {
   readonly activeDrop: ActiveDropState | null;
   readonly initialDrop: number | null;
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
+  readonly bottomPaddingClassName?: string;
+  readonly isMuted?: boolean;
 }
 
-const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
+const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   waveId,
   dropId,
   onReply,
@@ -52,8 +58,9 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   activeDrop,
   initialDrop,
   onDropContentClick,
+  bottomPaddingClassName,
+  isMuted = false,
 }) => {
-
   const router = useRouter();
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
   const { connectedProfile } = useAuth();
@@ -63,9 +70,13 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   const { waveMessages, fetchNextPage, waitAndRevealDrop } =
     useVirtualizedWaveDrops(waveId, dropId);
 
+  const { unreadDividerSerialNo, setUnreadDividerSerialNo } =
+    useUnreadDivider();
+
   const typingMessage = useWaveIsTyping(
     waveId,
-    connectedProfile?.handle ?? null
+    connectedProfile?.handle ?? null,
+    isMuted
   );
 
   const scrollBehavior = useScrollBehavior();
@@ -96,11 +107,48 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
     null
   );
 
+  const prevLatestSerialNoRef = useRef<number | null>(null);
+
   useEffect(() => {
     setVisibleLatestSerial(null);
-  }, [waveId]);
+    prevLatestSerialNoRef.current = null;
+    if (initialDrop === null) {
+      setUnreadDividerSerialNo(null);
+    } else {
+      setUnreadDividerSerialNo(initialDrop);
+    }
+  }, [waveId, initialDrop, setUnreadDividerSerialNo]);
 
   const latestSerialNo = waveMessages?.drops?.[0]?.serial_no ?? null;
+
+  useEffect(() => {
+    if (latestSerialNo === null) {
+      return;
+    }
+
+    const prevSerial = prevLatestSerialNoRef.current;
+    prevLatestSerialNoRef.current = latestSerialNo;
+
+    if (prevSerial !== null && latestSerialNo > prevSerial && !isAtBottom) {
+      setUnreadDividerSerialNo((current) => {
+        if (current === null) {
+          return prevSerial + 1;
+        }
+        return current;
+      });
+    }
+  }, [latestSerialNo, isAtBottom, setUnreadDividerSerialNo]);
+
+  const wasNotAtBottomRef = useRef(false);
+
+  useEffect(() => {
+    if (!isAtBottom) {
+      wasNotAtBottomRef.current = true;
+    } else if (wasNotAtBottomRef.current && unreadDividerSerialNo !== null) {
+      setUnreadDividerSerialNo(null);
+      wasNotAtBottomRef.current = false;
+    }
+  }, [isAtBottom, unreadDividerSerialNo, setUnreadDividerSerialNo]);
 
   useEffect(() => {
     if (latestSerialNo === null) {
@@ -167,22 +215,18 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
     }, 0);
   }, [isAppleMobile, waveMessages?.drops, visibleLatestSerial]);
 
-  const {
-    serialTarget,
-    queueSerialTarget,
-    targetDropRef,
-    isScrolling,
-  } = useWaveDropsSerialScroll({
-    waveId,
-    dropId,
-    initialDrop,
-    waveMessages,
-    fetchNextPage,
-    waitAndRevealDrop,
-    scrollContainerRef,
-    shouldPinToBottom,
-    scrollToVisualBottom,
-  });
+  const { serialTarget, queueSerialTarget, targetDropRef, isScrolling } =
+    useWaveDropsSerialScroll({
+      waveId,
+      dropId,
+      initialDrop,
+      waveMessages,
+      fetchNextPage,
+      waitAndRevealDrop,
+      scrollContainerRef,
+      shouldPinToBottom,
+      scrollToVisualBottom,
+    });
 
   const waveChatScroll = useWaveChatScrollOptional();
   useEffect(() => {
@@ -233,10 +277,7 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
           (drop.wave as unknown as {
             chat?: { scope?: { group?: { is_direct_message?: boolean } } };
           }) ?? undefined;
-        const isDirectMessage = isWaveDirectMessage(
-          drop.wave.id,
-          waveDetails
-        );
+        const isDirectMessage = isWaveDirectMessage(drop.wave.id, waveDetails);
         const href = getWaveRoute({
           waveId: drop.wave.id,
           serialNo: drop.serial_no,
@@ -254,7 +295,7 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   return (
     <div
       ref={containerRef}
-      className="tw-flex tw-flex-col tw-h-full tw-justify-end tw-relative tw-overflow-y-auto tw-bg-iron-950">
+      className="tw-flex tw-flex-col tw-h-full tw-justify-end tw-relative tw-overflow-hidden tw-bg-iron-950">
       <WaveDropsContent
         waveMessages={renderedWaveMessages}
         dropId={dropId}
@@ -274,9 +315,40 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
         onDropContentClick={onDropContentClick}
         pendingCount={pendingDropsCount}
         onRevealPending={revealPendingDrops}
+        bottomPaddingClassName={bottomPaddingClassName}
       />
       <WaveDropsScrollingOverlay isVisible={isScrolling} />
     </div>
+  );
+};
+
+const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
+  waveId,
+  dropId,
+  onReply,
+  onQuote,
+  activeDrop,
+  initialDrop,
+  onDropContentClick,
+  bottomPaddingClassName,
+  isMuted = false,
+}) => {
+  return (
+    <UnreadDividerProvider
+      initialSerialNo={initialDrop}
+      key={`unread-divider-${waveId}`}>
+      <WaveDropsAllInner
+        waveId={waveId}
+        dropId={dropId}
+        onReply={onReply}
+        onQuote={onQuote}
+        activeDrop={activeDrop}
+        initialDrop={initialDrop}
+        onDropContentClick={onDropContentClick}
+        bottomPaddingClassName={bottomPaddingClassName}
+        isMuted={isMuted}
+      />
+    </UnreadDividerProvider>
   );
 };
 

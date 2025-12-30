@@ -15,6 +15,8 @@ import {
   getWaveHomeRoute,
   getWaveRoute,
 } from "../../../../helpers/navigation.helpers";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBellSlash } from "@fortawesome/free-solid-svg-icons";
 
 interface BrainLeftSidebarWaveProps {
   readonly wave: MinimalWave;
@@ -60,10 +62,16 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     if (activeWaveId === wave.id) {
       return getWaveHomeRoute({ isDirectMessage, isApp });
     }
-    return getWaveRoute({ waveId: wave.id, isDirectMessage, isApp });
-  }, [activeWaveId, isApp, isDirectMessage, wave.id]);
+    return getWaveRoute({
+      waveId: wave.id,
+      serialNo: wave.firstUnreadDropSerialNo ?? undefined,
+      isDirectMessage,
+      isApp,
+    });
+  }, [activeWaveId, isApp, isDirectMessage, wave.id, wave.firstUnreadDropSerialNo]);
 
-  const haveNewDrops = wave.newDropsCount.count > 0;
+  const unreadCount = Math.max(wave.unreadDropsCount, wave.newDropsCount.count);
+  const haveNewDrops = unreadCount > 0;
 
   const onWaveHover = useCallback(() => {
     if (wave.id !== activeWaveId) {
@@ -83,9 +91,12 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       event.preventDefault();
       onWaveHover();
       const nextWaveId = wave.id === activeWaveId ? null : wave.id;
-      activeWave.set(nextWaveId, { isDirectMessage });
+      activeWave.set(nextWaveId, {
+        isDirectMessage,
+        serialNo: nextWaveId ? wave.firstUnreadDropSerialNo : undefined,
+      });
     },
-    [activeWave.set, activeWaveId, isDirectMessage, onWaveHover, wave.id]
+    [activeWave.set, activeWaveId, isDirectMessage, onWaveHover, wave.id, wave.firstUnreadDropSerialNo]
   );
 
   const getAvatarRingClasses = () => {
@@ -133,9 +144,17 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
                 </svg>
               </div>
             )}
-            {!isActive && haveNewDrops && (
+            {!isActive && haveNewDrops && !wave.isMuted && (
               <div className="tw-absolute tw-top-[-4px] tw-right-[-4px] tw-bg-indigo-500 tw-text-white tw-rounded-full tw-h-4 tw-min-w-4 tw-flex tw-items-center tw-justify-center tw-text-[10px] tw-font-medium tw-px-1 tw-shadow-sm">
-                {wave.newDropsCount.count}
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </div>
+            )}
+            {wave.isMuted && (
+              <div className="tw-absolute tw-top-[-4px] tw-right-[-4px] tw-bg-red tw-text-white tw-rounded-full tw-size-4 tw-flex tw-items-center tw-justify-center tw-shadow-sm">
+                <FontAwesomeIcon
+                  icon={faBellSlash}
+                  className="tw-size-2.5 tw-flex-shrink-0"
+                />
               </div>
             )}
           </div>

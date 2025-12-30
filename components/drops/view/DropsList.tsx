@@ -12,6 +12,7 @@ import {
 import { ActiveDropState } from "@/types/dropInteractionTypes";
 import { memo, RefObject, useCallback, useMemo } from "react";
 import HighlightDropWrapper from "./HighlightDropWrapper";
+import UnreadDivider from "./UnreadDivider";
 
 type DropActionHandler = ({
   drop,
@@ -37,6 +38,7 @@ interface DropsListProps {
   readonly dropViewDropId: string | null;
   readonly parentContainerRef?: React.RefObject<HTMLElement | null>;
   readonly location?: DropLocation;
+  readonly unreadDividerSerialNo?: number | null;
 }
 
 
@@ -59,6 +61,7 @@ const DropsList = memo(function DropsList({
   onDropContentClick,
   dropViewDropId,
   location = DropLocation.WAVE,
+  unreadDividerSerialNo,
 }: DropsListProps) {
 
   const handleReply = useCallback<DropActionHandler>(
@@ -117,62 +120,75 @@ const DropsList = memo(function DropsList({
     scrollContainerRef,
   ]);
 
-  const memoizedDrops = useMemo(
-    () =>
-      orderedDrops.map((drop, i) => {
-        const previousDrop = orderedDrops[i - 1] ?? null;
-        const nextDrop = orderedDrops[i + 1] ?? null;
+  const memoizedDrops = useMemo(() => {
+    const elements: React.ReactNode[] = [];
 
-        return (
-          <HighlightDropWrapper
-            key={drop.stableKey}
-            id={`drop-${drop.serial_no}`}
-            waveDropId={
-              drop.type === DropSize.FULL
-                ? drop.stableHash ?? drop.id ?? drop.stableKey
-                : undefined
-            }
-            ref={
-              getItemData.serialNo === drop.serial_no
-                ? getItemData.targetDropRef
-                : null
-            }
-            active={getItemData.serialNo === drop.serial_no}
-            scrollContainer={getItemData.scrollContainerRef?.current ?? null}
-            className={
-              getItemData.serialNo === drop.serial_no ? "tw-scroll-mt-20" : ""
-            }>
-            <VirtualScrollWrapper
-              scrollContainerRef={getItemData.scrollContainerRef}
-              dropSerialNo={drop.serial_no}
-              waveId={drop.type === DropSize.FULL ? drop.wave.id : drop.waveId}
-              type={drop.type}>
-              {drop.type === DropSize.FULL ? (
-                <MemoizedDrop
-                  dropViewDropId={getItemData.dropViewDropId}
-                  onReplyClick={getItemData.handleReplyClick}
-                  drop={drop}
-                  previousDrop={previousDrop}
-                  nextDrop={nextDrop}
-                  showWaveInfo={getItemData.showWaveInfo}
-                  activeDrop={getItemData.activeDrop}
-                  onReply={getItemData.handleReply}
-                  onQuote={getItemData.handleQuote}
-                  location={location}
-                  showReplyAndQuote={getItemData.showReplyAndQuote}
-                  onQuoteClick={getItemData.onQuoteClick}
-                  parentContainerRef={getItemData.parentContainerRef}
-                  onDropContentClick={getItemData.onDropContentClick}
-                />
-              ) : (
-                <MemoizedLightDrop drop={drop} />
-              )}
-            </VirtualScrollWrapper>
-          </HighlightDropWrapper>
+    for (let i = 0; i < orderedDrops.length; i++) {
+      const drop = orderedDrops[i];
+      const previousDrop = orderedDrops[i - 1] ?? null;
+      const nextDrop = orderedDrops[i + 1] ?? null;
+
+      if (
+        unreadDividerSerialNo !== null &&
+        unreadDividerSerialNo !== undefined &&
+        drop.serial_no === unreadDividerSerialNo
+      ) {
+        elements.push(
+          <UnreadDivider key={`unread-divider-${unreadDividerSerialNo}`} />
         );
-      }),
-    [orderedDrops, getItemData, location]
-  );
+      }
+
+      elements.push(
+        <HighlightDropWrapper
+          key={drop.stableKey}
+          id={`drop-${drop.serial_no}`}
+          waveDropId={
+            drop.type === DropSize.FULL
+              ? drop.stableHash ?? drop.id ?? drop.stableKey
+              : undefined
+          }
+          ref={
+            getItemData.serialNo === drop.serial_no
+              ? getItemData.targetDropRef
+              : null
+          }
+          active={getItemData.serialNo === drop.serial_no}
+          scrollContainer={getItemData.scrollContainerRef?.current ?? null}
+          className={
+            getItemData.serialNo === drop.serial_no ? "tw-scroll-mt-20" : ""
+          }>
+          <VirtualScrollWrapper
+            scrollContainerRef={getItemData.scrollContainerRef}
+            dropSerialNo={drop.serial_no}
+            waveId={drop.type === DropSize.FULL ? drop.wave.id : drop.waveId}
+            type={drop.type}>
+            {drop.type === DropSize.FULL ? (
+              <MemoizedDrop
+                dropViewDropId={getItemData.dropViewDropId}
+                onReplyClick={getItemData.handleReplyClick}
+                drop={drop}
+                previousDrop={previousDrop}
+                nextDrop={nextDrop}
+                showWaveInfo={getItemData.showWaveInfo}
+                activeDrop={getItemData.activeDrop}
+                onReply={getItemData.handleReply}
+                onQuote={getItemData.handleQuote}
+                location={location}
+                showReplyAndQuote={getItemData.showReplyAndQuote}
+                onQuoteClick={getItemData.onQuoteClick}
+                parentContainerRef={getItemData.parentContainerRef}
+                onDropContentClick={getItemData.onDropContentClick}
+              />
+            ) : (
+              <MemoizedLightDrop drop={drop} />
+            )}
+          </VirtualScrollWrapper>
+        </HighlightDropWrapper>
+      );
+    }
+
+    return elements;
+  }, [orderedDrops, getItemData, location, unreadDividerSerialNo]);
 
   return memoizedDrops;
 });
