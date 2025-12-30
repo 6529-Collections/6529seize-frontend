@@ -65,8 +65,6 @@ export default function ProfileProxyCreditEdit({
       }
       onProfileProxyModify({
         profileProxyId: profileProxy.id,
-        grantedToHandle: profileProxy.granted_to.handle,
-        createdByHandle: profileProxy.created_by.handle,
       });
       setToast({
         message: "Action credit updated successfully!",

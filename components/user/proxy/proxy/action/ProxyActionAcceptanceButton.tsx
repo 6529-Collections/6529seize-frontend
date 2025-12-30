@@ -120,8 +120,6 @@ export default function ProxyActionAcceptanceButton({
       }
       onProfileProxyModify({
         profileProxyId: profileProxy.id,
-        grantedToHandle: profileProxy.granted_to.handle,
-        createdByHandle: profileProxy.created_by.handle,
       });
       setToast({
         message: "Action status changed",
@@ -190,14 +188,14 @@ export default function ProxyActionAcceptanceButton({
             {possibleActions.includes(
               AcceptActionRequestActionEnum.Restore
             ) && (
-              <button
-                onClick={() => onSubmit(AcceptActionRequestActionEnum.Restore)}
-                disabled={submitting}
-                type="button"
-                className="tw-text-iron-300 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out">
-                {submitting ? <CircleLoader /> : "Restore"}
-              </button>
-            )}
+                <button
+                  onClick={() => onSubmit(AcceptActionRequestActionEnum.Restore)}
+                  disabled={submitting}
+                  type="button"
+                  className="tw-text-iron-300 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out">
+                  {submitting ? <CircleLoader /> : "Restore"}
+                </button>
+              )}
           </div>
         </div>
       </div>

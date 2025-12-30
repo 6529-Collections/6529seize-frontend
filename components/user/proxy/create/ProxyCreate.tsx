@@ -84,9 +84,7 @@ export default function ProxyCreate({
     }
     setProfileProxy(newProfileProxy);
     onProfileProxyModify({
-      profileProxyId: newProfileProxy.id,
-      grantedToHandle: newProfileProxy.granted_to.handle,
-      createdByHandle: newProfileProxy.created_by.handle,
+      profileProxyId: newProfileProxy.id
     });
     onModeChange(ProxyMode.LIST);
   };
