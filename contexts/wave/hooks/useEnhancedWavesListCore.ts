@@ -175,11 +175,15 @@ function useEnhancedWavesListCore(
 
   const sorted = useMemo(
     () =>
-      [...minimal].sort(
-        (a, b) =>
+      [...minimal].sort((a, b) => {
+        if (a.isMuted !== b.isMuted) {
+          return a.isMuted ? 1 : -1;
+        }
+        return (
           (b.newDropsCount.latestDropTimestamp ?? 0) -
           (a.newDropsCount.latestDropTimestamp ?? 0)
-      ),
+        );
+      }),
     [minimal]
   );
 

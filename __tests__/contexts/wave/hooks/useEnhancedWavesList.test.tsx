@@ -46,7 +46,7 @@ describe('useEnhancedWavesList', () => {
         muted: false,
       },
       wave: { type: ApiWaveType.Rank },
-      isPinned: true,
+      pinned: true,
     };
     const fetchNextPage = jest.fn();
     const addPinnedWave = jest.fn();

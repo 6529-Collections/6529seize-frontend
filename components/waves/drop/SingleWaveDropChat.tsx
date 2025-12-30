@@ -117,6 +117,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
                   activeDrop={activeDrop}
                   initialDrop={null}
                   dropId={drop.id}
+                  isMuted={wave.metrics.muted}
                 />
               </div>
               <div

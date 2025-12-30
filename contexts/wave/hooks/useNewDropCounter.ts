@@ -118,7 +118,6 @@ function useNewDropCounter(
     WsMessageType.DROP_UPDATE,
     useCallback(
       (message) => {
-        // Skip if no waveId
         if (!message?.wave.id) return;
 
         const waveId = message.wave.id;
@@ -126,7 +125,10 @@ function useNewDropCounter(
 
         if (!wave) {
           refetchWaves();
+          return;
         }
+
+        if (wave.metrics.muted) return;
 
         if (
           connectedProfile?.handle?.toLowerCase() ===

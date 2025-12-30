@@ -46,6 +46,7 @@ interface WaveDropsAllProps {
   readonly activeDrop: ActiveDropState | null;
   readonly initialDrop: number | null;
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
+  readonly isMuted?: boolean;
 }
 
 interface WaveDropsAllInnerProps extends WaveDropsAllProps {
@@ -65,6 +66,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllInnerProps> = ({
   waveMessages,
   fetchNextPage,
   waitAndRevealDrop,
+  isMuted = false,
 }) => {
   const router = useRouter();
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
@@ -76,7 +78,8 @@ const WaveDropsAllInner: React.FC<WaveDropsAllInnerProps> = ({
 
   const typingMessage = useWaveIsTyping(
     waveId,
-    connectedProfile?.handle ?? null
+    connectedProfile?.handle ?? null,
+    isMuted
   );
 
   const scrollBehavior = useScrollBehavior();
@@ -336,6 +339,7 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   activeDrop,
   initialDrop,
   onDropContentClick,
+  isMuted = false,
 }) => {
   const { waveMessages, fetchNextPage, waitAndRevealDrop } =
     useVirtualizedWaveDrops(waveId, dropId);
@@ -355,6 +359,7 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
         waveMessages={waveMessages}
         fetchNextPage={fetchNextPage}
         waitAndRevealDrop={waitAndRevealDrop}
+        isMuted={isMuted}
       />
     </UnreadDividerProvider>
   );
