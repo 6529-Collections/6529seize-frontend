@@ -342,6 +342,7 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   activeDrop,
   initialDrop,
   onDropContentClick,
+  bottomPaddingClassName,
   isMuted = false,
 }) => {
   const { waveMessages, fetchNextPage, waitAndRevealDrop } =
@@ -359,6 +360,7 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
         activeDrop={activeDrop}
         initialDrop={initialDrop}
         onDropContentClick={onDropContentClick}
+        bottomPaddingClassName={bottomPaddingClassName}
         waveMessages={waveMessages}
         fetchNextPage={fetchNextPage}
         waitAndRevealDrop={waitAndRevealDrop}
