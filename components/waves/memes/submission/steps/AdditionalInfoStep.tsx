@@ -83,8 +83,7 @@ const AdditionalInfoStep: React.FC<AdditionalInfoStepProps> = ({
     >
       <div className="tw-flex-1 tw-overflow-y-auto tw-px-4 tw-py-2 tw-space-y-8 tw-scrollbar-thin tw-scrollbar-thumb-iron-700 tw-scrollbar-track-iron-900">
         <p className="tw-text-sm tw-text-iron-400">
-          The following information is optional but helps with distribution and storytelling.
-          This data will not be publicly displayed on the main artwork card but will be accessible via detailed view.
+          Complete the following details for distribution and storytelling purposes.
         </p>
 
         <AirdropAddressFields
