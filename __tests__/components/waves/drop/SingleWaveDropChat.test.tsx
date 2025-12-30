@@ -55,8 +55,8 @@ jest.mock("@/components/waves/PrivilegedDropCreator", () => ({
   DropMode: { BOTH: "BOTH" },
 }));
 
-// Mock window.matchMedia for useDeviceInfo hook
-Object.defineProperty(window, "matchMedia", {
+// Mock globalThis.matchMedia for useDeviceInfo hook
+Object.defineProperty(globalThis, "matchMedia", {
   writable: true,
   value: jest.fn().mockImplementation(() => ({
     matches: false,
