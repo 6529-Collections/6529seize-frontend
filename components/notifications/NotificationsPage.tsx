@@ -32,7 +32,7 @@ export default function NotificationsPage() {
       {isDropOpen && drop && (
         isApp ? (
           <div
-            className="tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-[1000]"
+            className="tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-40"
             style={{ top: spaces.headerSpace }}
           >
             <BrainDesktopDrop

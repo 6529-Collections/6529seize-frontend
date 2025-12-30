@@ -34,7 +34,9 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
     return <WaveWinnersTimelineLoading />;
   }
 
-  if (decisionPoints.length === 0) {
+  const hasAnyWinners = decisionPoints.some((point) => point.winners.length > 0);
+
+  if (decisionPoints.length === 0 || !hasAnyWinners) {
     return <WaveWinnersEmpty />;
   }
 

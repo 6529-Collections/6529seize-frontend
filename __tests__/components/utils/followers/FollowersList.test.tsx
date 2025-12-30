@@ -9,18 +9,13 @@ jest.mock('@/components/utils/followers/Follower', () => ({ __esModule: true, de
 // Mock UserCICAndLevel and its dependencies that might be causing the issue
 jest.mock('@/components/user/utils/UserCICAndLevel', () => ({
   __esModule: true,
-  default: ({ level, cicType }: any) => <div data-testid="user-cic-level">{level}</div>,
+  default: ({ level }: any) => <div data-testid="user-cic-level">{level}</div>,
   UserCICAndLevelSize: {
     SMALL: 'SMALL',
     MEDIUM: 'MEDIUM',
     LARGE: 'LARGE',
     XLARGE: 'XLARGE',
   },
-}));
-
-// Mock cicToType helper
-jest.mock('@/helpers/Helpers', () => ({
-  cicToType: jest.fn(() => 'UNKNOWN'),
 }));
 
 // Mock Next.js Link component

@@ -1,4 +1,4 @@
-import { cicToType, getTimeAgoShort } from "@/helpers/Helpers";
+import { getTimeAgoShort } from "@/helpers/Helpers";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import DropAuthorHandle from "./DropAuthorHandle";
 import UserCICAndLevel, {
@@ -20,8 +20,6 @@ export default function DropAuthor({
   size = DropPartSize.MEDIUM,
   children,
 }: DropAuthorProps) {
-  const cicType = cicToType(profile.cic);
-
   const getTextClasses = (): string => {
     switch (size) {
       case DropPartSize.SMALL:
@@ -42,7 +40,6 @@ export default function DropAuthor({
         <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-center">
           <UserCICAndLevel
             level={profile.level}
-            cicType={cicType}
             size={UserCICAndLevelSize.SMALL}
           />
           <DropAuthorHandle profile={profile} size={size} />

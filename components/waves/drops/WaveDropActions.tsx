@@ -2,6 +2,7 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import { useCompactMode } from "@/contexts/CompactModeContext";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -39,6 +40,7 @@ export default function WaveDropActions({
   const { connectedProfile } = useContext(AuthContext);
   const { canDelete } = useDropInteractionRules(drop);
   const { isMemesWave } = useSeizeSettings();
+  const compact = useCompactMode();
 
   // Hide voting for participation drops in memes waves
   const shouldShowVoting =
@@ -48,7 +50,7 @@ export default function WaveDropActions({
     );
 
   return (
-    <div className="tw-absolute tw-z-20 tw-right-2 tw-top-0 group-hover:tw-opacity-100 tw-opacity-0 tw-transition-opacity tw-duration-200 tw-ease-in-out">
+    <div className={`tw-absolute tw-z-20 tw-right-2 ${compact ? "-tw-top-4" : "tw-top-0"} group-hover:tw-opacity-100 tw-opacity-0 tw-transition-opacity tw-duration-200 tw-ease-in-out`}>
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <div className="tw-h-8 tw-flex tw-items-center tw-shadow tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-ring-inset tw-rounded-lg">
           {connectedProfile?.handle !== drop.author.handle &&

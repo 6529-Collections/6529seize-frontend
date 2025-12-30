@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { cicToType } from "@/helpers/Helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
@@ -15,6 +14,7 @@ import { ArtistPreviewModal } from "./ArtistPreviewModal";
 import { ProfileWinnerBadge } from "./ProfileWinnerBadge";
 import { useMemo, useCallback } from "react";
 import { useArtistPreviewModal } from "@/hooks/useArtistPreviewModal";
+import { useCompactMode } from "@/contexts/CompactModeContext";
 
 interface WaveDropHeaderProps {
   readonly drop: ApiDrop;
@@ -34,11 +34,9 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
   badge,
 }) => {
   const router = useRouter();
+  const compact = useCompactMode();
   const { isModalOpen, modalInitialTab, handleBadgeClick, handleModalClose } =
     useArtistPreviewModal();
-
-  // Memoize expensive computations
-  const cicType = useMemo(() => cicToType(drop.author.cic), [drop.author.cic]);
 
   const submissionCount = useMemo(() =>
     drop.author.active_main_stage_submission_ids?.length || 0,
@@ -67,13 +65,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-2">
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <div className="tw-flex tw-items-center tw-gap-x-2">
-            <UserCICAndLevel
-              level={drop.author.level}
-              cicType={cicType}
-              size={UserCICAndLevelSize.SMALL}
-            />
-
-            <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
+            <p className={`tw-mb-0 tw-leading-none tw-font-semibold ${compact ? "tw-text-sm" : "tw-text-md"}`}>
               <UserProfileTooltipWrapper
                 user={drop.author.handle ?? drop.author.id}
               >
@@ -86,6 +78,10 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
                 </Link>
               </UserProfileTooltipWrapper>
             </p>
+            <UserCICAndLevel
+              level={drop.author.level}
+              size={UserCICAndLevelSize.SMALL}
+            />
             {hasSubmissions && (
               <ArtistSubmissionBadge
                 submissionCount={submissionCount}

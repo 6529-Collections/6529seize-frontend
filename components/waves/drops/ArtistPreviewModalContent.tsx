@@ -9,6 +9,8 @@ import { ArtistPreviewModalTabs } from "./ArtistPreviewModalTabs";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ModalTab } from "./ArtistPreviewModal";
+import { useCompactMode } from "@/contexts/CompactModeContext";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 interface ArtistPreviewModalContentProps {
   readonly user: ApiProfileMin;
@@ -34,6 +36,8 @@ export const ArtistPreviewModalContent: React.FC<
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const compact = useCompactMode();
+  const isSmallScreen = useMediaQuery("(max-width: 1023px)");
 
   const submissionCount = user.active_main_stage_submission_ids?.length || 0;
   const winnerCount = user.winner_main_stage_drop_ids?.length || 0;
@@ -56,6 +60,11 @@ export const ArtistPreviewModalContent: React.FC<
       const params = new URLSearchParams(searchParams.toString());
       params.set("drop", drop.id);
       router.push(`${pathname}?${params.toString()}`);
+    }
+    if (compact && isSmallScreen && globalThis.window !== undefined) {
+      globalThis.window.dispatchEvent(
+        new CustomEvent("single-drop:close-chat")
+      );
     }
     onClose();
   };

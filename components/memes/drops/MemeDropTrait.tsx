@@ -1,8 +1,8 @@
-import React from "react";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { FIELD_TO_LABEL_MAP } from "@/components/waves/memes/traits/schema";
-import { Tooltip } from "react-tooltip";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
+import React from "react";
+import { Tooltip } from "react-tooltip";
 
 interface MemeDropTraitProps {
   readonly label: string;
@@ -35,13 +35,13 @@ const MemeDropTrait: React.FC<MemeDropTraitProps> = ({ label, value, dropId }) =
   }
 
   return (
-    <div className="tw-bg-iron-900 tw-border tw-border-solid tw-border-white/10 tw-rounded-md tw-px-3 tw-py-1.5 tw-flex tw-flex-col">
-      <span className="tw-block tw-text-[9px] tw-uppercase tw-tracking-wider tw-text-iron-600 tw-font-bold tw-mb-0.5">
+    <div className="tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg tw-px-3 tw-py-1.5 tw-flex tw-flex-col">
+      <span className="tw-block tw-text-[9px] tw-uppercase tw-tracking-wide tw-text-iron-500 tw-font-normal tw-mb-1">
         {label}
       </span>
       <>
         <span
-          className="tw-text-xs tw-text-iron-400 tw-truncate"
+          className="tw-text-xs tw-text-iron-200 tw-font-medium tw-truncate"
           data-tooltip-id={tooltipId}>
           {convertedValue}
         </span>
