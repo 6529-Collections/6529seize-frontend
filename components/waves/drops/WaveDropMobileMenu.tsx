@@ -1,15 +1,16 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
-import { FC, useContext, useEffect, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import { ApiDropType } from "@/generated/models/ApiDropType";
-import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { AuthContext } from "@/components/auth/Auth";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
+import { publicEnv } from "@/config/env";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { FC, useContext, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
+import WaveDropActionsMarkUnread from "./WaveDropActionsMarkUnread";
 import WaveDropActionsRate from "./WaveDropActionsRate";
 import WaveDropMobileMenuDelete from "./WaveDropMobileMenuDelete";
 import WaveDropMobileMenuEdit from "./WaveDropMobileMenuEdit";
@@ -245,6 +246,11 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
           </button>
         )}
 
+        <WaveDropActionsMarkUnread
+          drop={drop}
+          isMobile={true}
+          onMarkUnread={closeMenu}
+        />
         {showFollowOption && !isAuthor && (
           <WaveDropMobileMenuFollow drop={drop} onFollowChange={closeMenu} />
         )}

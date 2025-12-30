@@ -21,6 +21,7 @@ interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
     signal: AbortSignal
   ) => Promise<{ drops: ApiDrop[] | null; highestSerialNo: number | null }>;
   readonly removeWaveDeliveredNotifications: (waveId: string) => Promise<void>;
+  readonly isWaveMuted: (waveId: string) => boolean;
 }
 
 export enum ProcessIncomingDropType {
@@ -42,6 +43,7 @@ export function useWaveRealtimeUpdater({
   syncNewestMessages,
   removeDrop,
   removeWaveDeliveredNotifications,
+  isWaveMuted,
 }: UseWaveRealtimeUpdaterProps): {
   processIncomingDrop: ProcessIncomingDropFn;
   processDropRemoved: (waveId: string, dropId: string) => void;
@@ -137,6 +139,10 @@ export function useWaveRealtimeUpdater({
       }
 
       const waveId = drop.wave.id;
+
+      if (isWaveMuted(waveId)) {
+        return;
+      }
 
       // Check if tab just became visible and refresh eligibility
       if (tabJustBecameVisibleRef.current) {
@@ -247,7 +253,8 @@ export function useWaveRealtimeUpdater({
       registerWave,
       initiateFetchNewestCycle,
       removeWaveDeliveredNotifications,
-      refreshEligibility
+      refreshEligibility,
+      isWaveMuted,
     ]
   );
 

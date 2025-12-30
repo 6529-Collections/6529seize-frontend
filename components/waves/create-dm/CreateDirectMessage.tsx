@@ -1,22 +1,22 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 
-import { CommunityMemberMinimal } from "@/entities/IProfile";
-import GroupCreateIdentitiesSelect from "@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSelect";
-import { areEqualAddresses } from "@/helpers/Helpers";
 import { useAuth } from "@/components/auth/Auth";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
-import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
-import { useRouter } from "next/navigation";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import CreateWaveFlow from "../create-wave/CreateWaveFlow";
+import GroupCreateIdentitiesSelect from "@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSelect";
+import { CommunityMemberMinimal } from "@/entities/IProfile";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { areEqualAddresses } from "@/helpers/Helpers";
+import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
+import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useRouter } from "next/navigation";
+import CreateWaveFlow from "../create-wave/CreateWaveFlow";
 export default function CreateDirectMessage({
   profile,
   onBack,
@@ -77,16 +77,7 @@ export default function CreateDirectMessage({
           .filter((i) => i !== null),
       });
       onSuccess?.();
-      const href = getWaveRoute({
-        waveId: wave.id,
-        isDirectMessage: true,
-        isApp,
-      });
-      if (isApp) {
-        router.replace(href);
-      } else {
-        router.push(href);
-      }
+      navigateToDirectMessage({ waveId: wave.id, router, isApp });
     } catch (error) {
       console.error(error);
       setToast({

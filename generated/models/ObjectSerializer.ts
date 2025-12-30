@@ -95,6 +95,7 @@ export * from '../models/ApiIntRange';
 export * from '../models/ApiLightDrop';
 export * from '../models/ApiLoginRequest';
 export * from '../models/ApiLoginResponse';
+export * from '../models/ApiMarkDropUnreadResponse';
 export * from '../models/ApiNft';
 export * from '../models/ApiNftMedia';
 export * from '../models/ApiNftOwner';
@@ -327,6 +328,7 @@ import { ApiIntRange } from '../models/ApiIntRange';
 import { ApiLightDrop         } from '../models/ApiLightDrop';
 import { ApiLoginRequest } from '../models/ApiLoginRequest';
 import { ApiLoginResponse } from '../models/ApiLoginResponse';
+import { ApiMarkDropUnreadResponse } from '../models/ApiMarkDropUnreadResponse';
 import { ApiNft      , ApiNftTokenTypeEnum                               } from '../models/ApiNft';
 import { ApiNftMedia } from '../models/ApiNftMedia';
 import { ApiNftOwner } from '../models/ApiNftOwner';
@@ -596,6 +598,7 @@ let typeMap: {[index: string]: any} = {
     "ApiLightDrop": ApiLightDrop,
     "ApiLoginRequest": ApiLoginRequest,
     "ApiLoginResponse": ApiLoginResponse,
+    "ApiMarkDropUnreadResponse": ApiMarkDropUnreadResponse,
     "ApiNft": ApiNft,
     "ApiNftMedia": ApiNftMedia,
     "ApiNftOwner": ApiNftOwner,
