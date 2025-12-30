@@ -125,7 +125,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
         activeDrop={activeDrop}
         initialDrop={initialDrop}
         dropId={null}
-        isMuted={wave.metrics.muted}
+        isMuted={wave.metrics?.muted ?? false}
       />
       {!(isApp && editingDropId) && (
         <div className="tw-mt-auto">
