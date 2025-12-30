@@ -16,17 +16,79 @@ import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
 
 interface SingleWaveDropLogProps {
   readonly log: ApiWaveLog;
   readonly creditType: ApiWaveCreditType;
 }
 
-export const SingleWaveDropLog: React.FC<SingleWaveDropLogProps> = ({
+interface VoteSummaryProps {
+  readonly log: ApiWaveLog;
+  readonly creditType: ApiWaveCreditType;
+}
+
+interface TimeStampProps {
+  readonly createdAt: string;
+  readonly iconClassName: string;
+  readonly textClassName: string;
+}
+
+const ClockIcon = ({ className }: { readonly className: string }) => (
+  <svg className={className} viewBox="0 0 24 24" aria-hidden="true" fill="none">
+    <path
+      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const VoteSummary = ({ log, creditType }: VoteSummaryProps) => (
+  <>
+    <span className="tw-text-sm tw-text-iron-500">
+      {log.contents.oldVote === 0 ? "voted" : "changed from"}
+    </span>
+    {log.contents.oldVote !== 0 && (
+      <span className="tw-text-sm tw-font-medium tw-text-iron-400 tw-whitespace-nowrap">
+        <span className="tw-tabular-nums">
+          {formatNumberWithCommas(log.contents.oldVote)}
+        </span>{" "}
+        →
+      </span>
+    )}
+    <span
+      className={`tw-text-sm tw-font-medium tw-whitespace-nowrap ${
+        log.contents.newVote > 0 ? "tw-text-emerald-500" : "tw-text-rose-500"
+      }`}
+    >
+      <span className="tw-tabular-nums">
+        {formatNumberWithCommas(log.contents.newVote)}
+      </span>{" "}
+      {WAVE_VOTING_LABELS[creditType]}
+    </span>
+    {log.contents?.reason === "CREDIT_OVERSPENT" && <SystemAdjustmentPill />}
+  </>
+);
+
+const TimeStamp = ({
+  createdAt,
+  iconClassName,
+  textClassName,
+}: TimeStampProps) => (
+  <div className="tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
+    <ClockIcon className={iconClassName} />
+    <span className={textClassName}>
+      {getTimeAgoShort(new Date(createdAt).getTime())}
+    </span>
+  </div>
+);
+
+export const SingleWaveDropLog = ({
   log,
   creditType,
-}) => {
+}: SingleWaveDropLogProps) => {
   const isMobile = useIsMobileScreen();
   const handleValue = log.invoker.handle ?? "";
   const shouldLimit =
@@ -71,45 +133,15 @@ export const SingleWaveDropLog: React.FC<SingleWaveDropLogProps> = ({
           <div className="tw-flex tw-flex-col tw-flex-1 tw-min-w-0">
             <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
               {handleLink}
-              <div className="tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
-                <svg
-                  className="tw-w-3 tw-h-3 tw-text-iron-400"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                  fill="none"
-                >
-                  <path
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <span className="tw-text-xs tw-font-medium tw-text-iron-400">
-                  {getTimeAgoShort(new Date(log.created_at).getTime())}
-                </span>
-              </div>
+              <TimeStamp
+                createdAt={log.created_at}
+                iconClassName="tw-w-3 tw-h-3 tw-text-iron-400"
+                textClassName="tw-text-xs tw-font-medium tw-text-iron-400"
+              />
             </div>
 
             <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1.5 tw-mt-1">
-              <span className="tw-text-sm tw-text-iron-500">
-                {log.contents.oldVote === 0 ? "voted" : "changed from"}
-              </span>
-              {log.contents.oldVote !== 0 && (
-                <span className="tw-text-sm tw-font-medium tw-text-iron-400 tw-whitespace-nowrap">
-                  <span className="tw-tabular-nums">{formatNumberWithCommas(log.contents.oldVote)}</span> →
-                </span>
-              )}
-              <span
-                className={`tw-text-sm tw-font-medium tw-whitespace-nowrap ${log.contents.newVote > 0 ? "tw-text-emerald-500" : "tw-text-rose-500"
-                  }`}
-              >
-                <span className="tw-tabular-nums">{formatNumberWithCommas(log.contents.newVote)}</span> {WAVE_VOTING_LABELS[creditType]}
-              </span>
-              {log.contents?.reason === "CREDIT_OVERSPENT" && (
-                <SystemAdjustmentPill />
-              )}
+              <VoteSummary log={log} creditType={creditType} />
             </div>
           </div>
         </div>
@@ -119,45 +151,14 @@ export const SingleWaveDropLog: React.FC<SingleWaveDropLogProps> = ({
             {avatar}
             <div className="tw-inline-flex tw-items-center tw-gap-x-1 tw-gap-y-1 tw-flex-wrap">
               {handleLink}
-
-              <span className="tw-text-sm tw-text-iron-500">
-                {log.contents.oldVote === 0 ? "voted" : "changed from"}
-              </span>
-              {log.contents.oldVote !== 0 && (
-                <span className="tw-text-sm tw-font-medium tw-text-iron-400 tw-whitespace-nowrap">
-                  <span className="tw-tabular-nums">{formatNumberWithCommas(log.contents.oldVote)}</span> →
-                </span>
-              )}
-              <span
-                className={`tw-text-sm tw-font-medium tw-whitespace-nowrap ${log.contents.newVote > 0 ? "tw-text-emerald-500" : "tw-text-rose-500"
-                  }`}
-              >
-                <span className="tw-tabular-nums">{formatNumberWithCommas(log.contents.newVote)}</span> {WAVE_VOTING_LABELS[creditType]}
-              </span>
-              {log.contents?.reason === "CREDIT_OVERSPENT" && (
-                <SystemAdjustmentPill />
-              )}
+              <VoteSummary log={log} creditType={creditType} />
             </div>
           </div>
-          <div className="tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
-            <svg
-              className="tw-w-3.5 tw-h-3.5 tw-text-iron-600 tw-flex-shrink-0"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              fill="none"
-            >
-              <path
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span className="tw-text-xs tw-font-medium tw-text-iron-600">
-              {getTimeAgoShort(new Date(log.created_at).getTime())}
-            </span>
-          </div>
+          <TimeStamp
+            createdAt={log.created_at}
+            iconClassName="tw-w-3.5 tw-h-3.5 tw-text-iron-600 tw-flex-shrink-0"
+            textClassName="tw-text-xs tw-font-medium tw-text-iron-600"
+          />
         </div>
       )}
     </div>

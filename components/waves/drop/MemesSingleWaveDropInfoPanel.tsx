@@ -1,20 +1,16 @@
 "use client";
 
-import React, { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, type MouseEvent } from "react";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { SingleWaveDropInfoDetails } from "./SingleWaveDropInfoDetails";
-import { SingleWaveDropInfoAuthorSection } from "./SingleWaveDropInfoAuthorSection";
-import WaveDropTime from "../drops/time/WaveDropTime";
-import { SingleWaveDropPosition } from "./SingleWaveDropPosition";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AnimatePresence, motion } from "framer-motion";
 import { SingleWaveDropVotes } from "./SingleWaveDropVotes";
-import { faArrowRight, faCompress } from "@fortawesome/free-solid-svg-icons";
+import { faCompress } from "@fortawesome/free-solid-svg-icons";
 import { faAddressCard, faStar } from "@fortawesome/free-regular-svg-icons";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
-import { WinnerBadge } from "./WinnerBadge";
 import { SingleWaveDropTraits } from "./SingleWaveDropTraits";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import WaveDropDeleteButton from "@/components/utils/button/WaveDropDeleteButton";
@@ -25,10 +21,8 @@ import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
 import { VotingModal, MobileVotingModal } from "@/components/voting";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
-import { WAVE_VOTING_LABELS, WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
-import { Tooltip } from "react-tooltip";
-import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import { WaveDropVoteSummary } from "./WaveDropVoteSummary";
+import { WaveDropMetaRow } from "./WaveDropMetaRow";
 
 interface MemesSingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
@@ -61,21 +55,14 @@ const calculateOutcomes = (drop: ExtendedDrop, wave: ApiWave | null) => {
   return { nicTotal, repTotal, manualOutcomes };
 };
 
-export const MemesSingleWaveDropInfoPanel: React.FC<
-  MemesSingleWaveDropInfoPanelProps
-> = ({ drop, wave }) => {
+export const MemesSingleWaveDropInfoPanel = ({
+  drop,
+  wave,
+}: MemesSingleWaveDropInfoPanelProps) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isVotingOpen, setIsVotingOpen] = useState(false);
   const isMobileScreen = useIsMobileScreen();
   const { isWinner, canDelete, canShowVote, isVotingEnded } = useDropInteractionRules(drop);
-
-  // User vote logic
-  const hasUserVoted =
-    drop.context_profile_context?.rating !== undefined &&
-    drop.context_profile_context?.rating !== 0;
-  const userVote = drop.context_profile_context?.rating ?? 0;
-  const isUserVoteNegative = userVote < 0;
-  const shouldShowUserVote = (isVotingEnded || isWinner) && hasUserVoted;
 
   const { nicTotal, repTotal, manualOutcomes } = useMemo(
     () => calculateOutcomes(drop, wave),
@@ -118,7 +105,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
     return name;
   }, [title, wave?.name, drop.author?.handle]);
 
-  const toggleFullscreen = useCallback((e: React.MouseEvent) => {
+  const toggleFullscreen = useCallback((e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsFullscreen((prev) => !prev);
@@ -146,72 +133,14 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
           <div className="tw-px-4 sm:tw-px-6 xl:tw-px-20 tw-mt-4 md:tw-mt-6">
             <div className="tw-max-w-3xl tw-mx-auto tw-w-full">
               <div className="tw-flex tw-justify-center tw-mb-8">
-                <div className="tw-flex tw-items-center tw-gap-2 sm:tw-gap-3 tw-p-1.5 tw-bg-iron-950 tw-border tw-border-solid tw-border-white/10 tw-rounded-lg tw-shadow-2xl tw-transition-transform hover:tw-scale-[1.01]">
-                  <div className="tw-px-2 sm:tw-px-4 tw-flex tw-flex-wrap tw-items-baseline tw-gap-1.5 tw-cursor-default">
-                    <span className="tw-text-sm sm:tw-text-base tw-font-semibold tw-text-white tw-tabular-nums">
-                      {formatNumberWithCommas(drop.rating)}
-                    </span>
-                    {drop.rating !== drop.rating_prediction && (
-                      <>
-                        <FontAwesomeIcon
-                          icon={faArrowRight}
-                          className="tw-flex-shrink-0 tw-size-2.5 tw-text-iron-600"
-                        />
-                        <span
-                          className={`tw-text-sm sm:tw-text-base tw-font-semibold tw-tabular-nums tw-cursor-help ${
-                            drop.rating < drop.rating_prediction
-                              ? "tw-text-emerald-400"
-                              : "tw-text-rose-400"
-                          }`}
-                          data-tooltip-id={`drop-vote-progress-${drop.id}`}
-                        >
-                          {formatNumberWithCommas(drop.rating_prediction)}
-                        </span>
-                        <Tooltip
-                          id={`drop-vote-progress-${drop.id}`}
-                          place="top"
-                          offset={8}
-                          opacity={1}
-                          style={TOOLTIP_STYLES}
-                        >
-                          Projected vote count at decision time
-                        </Tooltip>
-                      </>
-                    )}
-                    <span className="tw-text-sm tw-text-iron-500 tw-font-normal tw-whitespace-nowrap">
-                      {WAVE_VOTING_LABELS[drop.wave.voting_credit_type]} Total
-                    </span>
-                  </div>
-
-                  {shouldShowUserVote && (
-                    <div className="tw-px-4 tw-flex tw-items-baseline tw-gap-1 tw-border-l tw-border-solid tw-border-white/5 tw-border-y-0 tw-border-r-0">
-                      <span className="tw-text-sm tw-font-normal tw-text-iron-500">
-                        {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:
-                      </span>
-                      <span
-                        className={`tw-text-sm tw-font-semibold ${
-                          isUserVoteNegative ? "tw-text-rose-500" : "tw-text-emerald-500"
-                        }`}
-                      >
-                        {isUserVoteNegative && "-"}
-                        {formatNumberWithCommas(Math.abs(userVote))}
-                      </span>
-                      <span className="tw-text-iron-500 tw-text-sm tw-font-normal">
-                        {WAVE_VOTING_LABELS[drop.wave.voting_credit_type]}
-                      </span>
-                    </div>
-                  )}
-
-                  {canShowVote && (
-                    <button
-                      type="button"
-                      onClick={() => setIsVotingOpen(true)}
-                      className="tw-px-4 tw-py-2.5 tw-text-sm tw-bg-primary-500 tw-ring-primary-500 hover:tw-bg-primary-600 hover:tw-ring-primary-600 tw-text-white tw-flex tw-items-center tw-cursor-pointer tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out"
-                    >
-                      Vote
-                    </button>
-                  )}
-                </div>
+                <WaveDropVoteSummary
+                  drop={drop}
+                  isWinner={isWinner}
+                  isVotingEnded={isVotingEnded}
+                  canShowVote={canShowVote}
+                  onVoteClick={() => setIsVotingOpen(true)}
+                  variant="memes"
+                />
               </div>
 
               <div className="tw-mb-6">
@@ -225,22 +154,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
                 )}
               </div>
 
-              <div className="tw-flex tw-items-center tw-gap-3 tw-flex-wrap">
-                <SingleWaveDropInfoAuthorSection drop={drop} />
-                <span className="tw-text-white/40">·</span>
-                <WaveDropTime timestamp={drop.created_at} size="sm" />
-                {isWinner && (
-                  <>
-                    <span className="tw-text-white/40">·</span>
-                    <WinnerBadge drop={drop} variant="simple" />
-                  </>
-                )}
-                {!isWinner && drop?.drop_type === ApiDropType.Participatory && (
-                  <>
-                    <span className="tw-text-white/40">·</span>
-                    <SingleWaveDropPosition rank={drop.rank} variant="simple" />
-                  </>
-                )}
+              <WaveDropMetaRow drop={drop} isWinner={isWinner}>
                 {manualOutcomes.length > 0 && (
                   <>
                     <span className="tw-text-white/40">·</span>
@@ -278,7 +192,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
                     </span>
                   </>
                 )}
-              </div>
+              </WaveDropMetaRow>
             </div>
           </div>
         </div>
