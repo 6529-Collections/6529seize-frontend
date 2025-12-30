@@ -17,7 +17,7 @@ import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 import { Time } from "@/helpers/time";
 import { CountlessPage, Page } from "@/helpers/Types";
 import { useQueryKeyListener } from "@/hooks/useQueryKeyListener";
-import { InfiniteData, useQueryClient } from "@tanstack/react-query";
+import { InfiniteData, type QueryClient, useQueryClient } from "@tanstack/react-query";
 import Cookies from "js-cookie";
 import { createContext, useMemo } from "react";
 import { ActivityLogParams } from "../profile-activity/ProfileActivityLogs";
@@ -216,29 +216,25 @@ export const ReactQueryWrapperContext =
     invalidateIdentityTdhStats: () => { },
   });
 
-export default function ReactQueryWrapper({
-  children,
-}: {
-  readonly children: React.ReactNode;
-}) {
-  const queryClient = useQueryClient();
+const getHandlesFromProfile = (profile: ApiIdentity): string[] => {
+  const handles: string[] = [];
+  if (profile.handle) {
+    handles.push(profile.handle.toLowerCase());
+  }
 
-  const getHandlesFromProfile = (profile: ApiIdentity): string[] => {
-    const handles: string[] = [];
-    if (profile.handle) {
-      handles.push(profile.handle.toLowerCase());
+  profile.wallets?.forEach((wallet) => {
+    if (wallet.display) {
+      handles.push(wallet.display.toLowerCase());
     }
+    handles.push(wallet.wallet.toLowerCase());
+  });
 
-    profile.wallets?.forEach((wallet) => {
-      if (wallet.display) {
-        handles.push(wallet.display.toLowerCase());
-      }
-      handles.push(wallet.wallet.toLowerCase());
-    });
+  return handles;
+};
 
-    return handles;
-  };
-
+const createReactQueryContextValue = (
+  queryClient: QueryClient
+): ReactQueryWrapperContextType => {
   const invalidateQueries = ({
     key,
     values,
@@ -348,9 +344,6 @@ export default function ReactQueryWrapper({
   }): void => {
     queryClient.invalidateQueries({
       queryKey: [QueryKey.PROFILE_PROXY, { id: profileProxyId }],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.PROFILE_PROFILE_PROXIES],
     });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.PROFILE_PROFILE_PROXIES],
@@ -978,6 +971,44 @@ export default function ReactQueryWrapper({
     });
   };
 
+  return {
+    setProfile,
+    setWave,
+    setWavesOverviewPage,
+    setWaveDrops,
+    setProfileProxy,
+    onProfileProxyModify,
+    onProfileCICModify,
+    onProfileRepModify,
+    onProfileEdit,
+    onProfileStatementAdd,
+    onProfileStatementRemove,
+    initProfileRepPage,
+    initProfileIdentityPage,
+    initCommunityActivityPage,
+    onGroupRemoved,
+    onGroupChanged,
+    waitAndInvalidateDrops,
+    addOptimisticDrop,
+    onIdentityBulkRate,
+    onGroupCreate,
+    onWaveCreated,
+    onWaveFollowChange,
+    invalidateAll,
+    onIdentityFollowChange,
+    invalidateDrops,
+    invalidateNotifications,
+    invalidateIdentityTdhStats,
+  };
+};
+
+export default function ReactQueryWrapper({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}) {
+  const queryClient = useQueryClient();
+
   useQueryKeyListener([QueryKey.FEED_ITEMS], () => {
     Cookies.set([QueryKey.FEED_ITEMS].toString(), `${Time.now().toMillis()}`);
   });
@@ -990,64 +1021,8 @@ export default function ReactQueryWrapper({
   });
 
   const value = useMemo(
-    () => ({
-      setProfile,
-      setWave,
-      setWavesOverviewPage,
-      setWaveDrops,
-      setProfileProxy,
-      onProfileProxyModify,
-      onProfileCICModify,
-      onProfileRepModify,
-      onProfileEdit,
-      onProfileStatementAdd,
-      onProfileStatementRemove,
-      initProfileRepPage,
-      initProfileIdentityPage,
-      initCommunityActivityPage,
-      onGroupRemoved,
-      onGroupChanged,
-      waitAndInvalidateDrops,
-      addOptimisticDrop,
-      onIdentityBulkRate,
-      onGroupCreate,
-      onWaveCreated,
-      onWaveFollowChange,
-      invalidateAll,
-      onIdentityFollowChange,
-      invalidateDrops,
-      invalidateNotifications,
-      invalidateIdentityTdhStats,
-    }),
-    [
-      setProfile,
-      setWave,
-      setWavesOverviewPage,
-      setWaveDrops,
-      setProfileProxy,
-      onProfileProxyModify,
-      onProfileCICModify,
-      onProfileRepModify,
-      onProfileEdit,
-      onProfileStatementAdd,
-      onProfileStatementRemove,
-      initProfileRepPage,
-      initProfileIdentityPage,
-      initCommunityActivityPage,
-      onGroupRemoved,
-      onGroupChanged,
-      waitAndInvalidateDrops,
-      addOptimisticDrop,
-      onIdentityBulkRate,
-      onGroupCreate,
-      onWaveCreated,
-      onWaveFollowChange,
-      invalidateAll,
-      onIdentityFollowChange,
-      invalidateDrops,
-      invalidateNotifications,
-      invalidateIdentityTdhStats,
-    ]
+    () => createReactQueryContextValue(queryClient),
+    [queryClient]
   );
 
   return (
