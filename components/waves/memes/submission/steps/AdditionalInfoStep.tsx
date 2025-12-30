@@ -40,7 +40,9 @@ const AdditionalInfoStep: React.FC<AdditionalInfoStepProps> = ({
   isSubmitting,
 }) => {
   const getContractError = (address: string) => {
-    return address && !validateStrictAddress(address) ? "Invalid contract" : undefined;
+    if (!address) return "Contract address required";
+    if (!validateStrictAddress(address)) return "Invalid contract address";
+    return undefined;
   };
 
   const isFormValid = () => {
@@ -60,9 +62,9 @@ const AdditionalInfoStep: React.FC<AdditionalInfoStepProps> = ({
     );
     if (hasInvalidAddress) return false;
 
-    // Check allowlist batches
+    // Check allowlist batches - contract is required if batch exists
     const hasInvalidBatch = allowlistBatches.some(
-      (batch) => batch.contract && !validateStrictAddress(batch.contract)
+      (batch) => !batch.contract || !validateStrictAddress(batch.contract)
     );
     if (hasInvalidBatch) return false;
 
