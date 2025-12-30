@@ -68,19 +68,7 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
   const isExactlyAllocated = totalAllocated === AIRDROP_TOTAL;
 
   return (
-    <FormSection
-      title="Airdrop Distribution"
-      headerRight={
-        <button
-          type="button"
-          onClick={handleAddEntry}
-          className="tw-flex tw-items-center tw-gap-x-1.5 tw-text-sm tw-font-semibold tw-text-primary-400 hover:tw-text-primary-300 tw-transition-colors"
-        >
-          <PlusIcon className="tw-w-4 tw-h-4" />
-          Add Address
-        </button>
-      }
-    >
+    <FormSection title="Airdrop Distribution">
       {/* Summary bar */}
       <div className={`tw-flex tw-items-center tw-justify-between tw-px-4 tw-py-3 tw-rounded-lg tw-mb-4 ${
         isExactlyAllocated
@@ -113,7 +101,7 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
         {entries.map((entry, index) => (
           <div
             key={index}
-            className="tw-flex tw-items-start tw-gap-x-3"
+            className="tw-flex tw-items-center tw-gap-x-3"
           >
             {/* Address input */}
             <div className="tw-flex-1 tw-group tw-relative">
@@ -161,19 +149,30 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
               </div>
             </div>
 
-            {/* Remove button */}
-            <button
-              type="button"
-              onClick={() => handleRemoveEntry(index)}
-              disabled={entries.length <= 1}
-              className="tw-mt-3 tw-p-2 tw-text-iron-500 hover:tw-text-red tw-transition-colors disabled:tw-opacity-30 disabled:tw-cursor-not-allowed"
-              aria-label={`Remove address ${index + 1}`}
-            >
-              <TrashIcon className="tw-w-5 tw-h-5" />
-            </button>
+            {/* Remove button - only show when more than 1 entry */}
+            {entries.length > 1 && (
+              <button
+                type="button"
+                onClick={() => handleRemoveEntry(index)}
+                className="tw-p-2 tw-text-iron-500 hover:tw-text-red tw-transition-colors"
+                aria-label={`Remove address ${index + 1}`}
+              >
+                <TrashIcon className="tw-w-5 tw-h-5" />
+              </button>
+            )}
           </div>
         ))}
       </div>
+
+      {/* Add Address button */}
+      <button
+        type="button"
+        onClick={handleAddEntry}
+        className="tw-flex tw-items-center tw-gap-x-1.5 tw-mt-4 tw-text-sm tw-font-semibold tw-text-primary-400 hover:tw-text-primary-300 tw-transition-colors"
+      >
+        <PlusIcon className="tw-w-4 tw-h-4" />
+        Add Address
+      </button>
 
       {/* Validation hint */}
       {entries.length === 1 && !entries[0].address && (
