@@ -41,7 +41,9 @@ const AdditionalInfoStep: React.FC<AdditionalInfoStepProps> = ({
   isSubmitting,
 }) => {
   const getContractError = (address: string) => {
-    if (!address) return "Contract address required";
+    // Only show error if user has typed something invalid
+    // Empty fields are handled by submit button being disabled
+    if (!address) return undefined;
     if (!validateStrictAddress(address)) return "Invalid contract address";
     return undefined;
   };
