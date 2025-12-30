@@ -12,6 +12,7 @@ import { faAddressCard, faStar } from "@fortawesome/free-regular-svg-icons";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { SingleWaveDropTraits } from "./SingleWaveDropTraits";
+import { SingleWaveDropPosition } from "./SingleWaveDropPosition";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import WaveDropDeleteButton from "@/components/utils/button/WaveDropDeleteButton";
 import { ImageScale } from "@/helpers/image.helpers";

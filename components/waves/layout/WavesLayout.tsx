@@ -75,11 +75,9 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   }, [contentState, connectPrompt, containerClassName, children, isApp]);
 
   return (
-    <>
-      <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black tw-overflow-hidden tw-overscroll-none tw-h-[var(--app-height,100vh)]">
-        {content}
-      </div>
-    </>
+    <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black tw-overflow-hidden tw-overscroll-none tw-h-[var(--app-height,100vh)]">
+      {content}
+    </div>
   );
 }
 

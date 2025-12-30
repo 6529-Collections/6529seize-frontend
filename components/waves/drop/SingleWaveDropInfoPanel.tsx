@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { ApiWave } from "@/generated/models/ApiWave";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { SingleWaveDropInfoContainer } from "./SingleWaveDropInfoContainer";
 import { SingleWaveDropInfoDetails } from "./SingleWaveDropInfoDetails";
@@ -15,7 +14,6 @@ import { WaveDropMetaRow } from "./WaveDropMetaRow";
 
 interface SingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
-  readonly wave: ApiWave | null;
 }
 
 export const SingleWaveDropInfoPanel = ({

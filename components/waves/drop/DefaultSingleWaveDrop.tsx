@@ -26,7 +26,7 @@ export const DefaultSingleWaveDrop: React.FC<DefaultSingleWaveDropProps> = ({
 
   return (
     <SingleWaveDropWrapper drop={drop} wave={wave} onClose={onClose}>
-      <SingleWaveDropInfoPanel drop={extendedDrop} wave={wave} />
+      <SingleWaveDropInfoPanel drop={extendedDrop} />
     </SingleWaveDropWrapper>
   );
 };

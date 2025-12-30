@@ -28,7 +28,7 @@ interface VoteSummaryProps {
 }
 
 interface TimeStampProps {
-  readonly createdAt: string;
+  readonly createdAt: Date | string;
   readonly iconClassName: string;
   readonly textClassName: string;
 }
@@ -80,7 +80,11 @@ const TimeStamp = ({
   <div className="tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
     <ClockIcon className={iconClassName} />
     <span className={textClassName}>
-      {getTimeAgoShort(new Date(createdAt).getTime())}
+      {getTimeAgoShort(
+        typeof createdAt === "string"
+          ? new Date(createdAt).getTime()
+          : createdAt.getTime()
+      )}
     </span>
   </div>
 );

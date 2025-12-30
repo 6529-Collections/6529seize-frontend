@@ -30,7 +30,7 @@ export const WaveDropMetaRow = ({
     {!isWinner && drop?.drop_type === ApiDropType.Participatory && (
       <>
         <span className="tw-text-white/40">{"\u00b7"}</span>
-        <SingleWaveDropPosition rank={drop.rank} variant="simple" />
+        <SingleWaveDropPosition rank={drop.rank} drop={drop} variant="simple" />
       </>
     )}
     {children}
