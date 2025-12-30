@@ -121,7 +121,8 @@ export const DefaultWaveLeaderboardDrop: React.FC<
         createPortal(
           <CommonDropdownItemsMobileWrapper
             isOpen={isActive}
-            setOpen={setIsActive}>
+            setOpen={setIsActive}
+          >
             <div className="tw-grid tw-grid-cols-1 tw-gap-y-2">
               {/* Open drop option */}
               <WaveDropMobileMenuOpen

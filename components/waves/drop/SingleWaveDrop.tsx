@@ -7,19 +7,33 @@ import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 interface SingleWaveDropProps {
   readonly drop: ExtendedDrop;
   readonly onClose: () => void;
+  readonly onContentReady?: () => void;
 }
 
 export const SingleWaveDrop: React.FC<SingleWaveDropProps> = ({
   drop: initialDrop,
   onClose,
+  onContentReady,
 }) => {
   // Check if this is the memes wave
   const { isMemesWave } = useSeizeSettings();
   const isMemes = isMemesWave(initialDrop.wave.id);
 
   if (isMemes) {
-    return <MemesSingleWaveDrop drop={initialDrop} onClose={onClose} />;
+    return (
+      <MemesSingleWaveDrop
+        drop={initialDrop}
+        onClose={onClose}
+        onContentReady={onContentReady}
+      />
+    );
   }
 
-  return <DefaultSingleWaveDrop drop={initialDrop} onClose={onClose} />;
+  return (
+    <DefaultSingleWaveDrop
+      drop={initialDrop}
+      onClose={onClose}
+      onContentReady={onContentReady}
+    />
+  );
 };

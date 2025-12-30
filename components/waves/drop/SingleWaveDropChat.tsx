@@ -26,14 +26,14 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
 }) => {
   const contentWrapperRef = useRef<HTMLDivElement | null>(null);
   const { isApp } = useDeviceInfo();
-  const { getContainerStyle, isVisible: isKeyboardVisible } = useAndroidKeyboard();
+  const { isVisible: isKeyboardVisible } = useAndroidKeyboard();
 
   // Apply Android keyboard adjustments to the fixed input area
   const inputContainerStyle = useMemo(() => {
-    return getContainerStyle({
+    return {
       paddingBottom: isKeyboardVisible ? "0px" : "calc(env(safe-area-inset-bottom))",
-    }, 0);
-  }, [getContainerStyle, isKeyboardVisible]);
+    };
+  }, [isKeyboardVisible]);
   
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>({
     action: ActiveDropAction.REPLY,
@@ -101,22 +101,13 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
                   activeDrop={activeDrop}
                   initialDrop={null}
                   dropId={drop.id}
-                  bottomPaddingClassName={
-                    isApp
-                      ? "tw-pb-[calc(env(safe-area-inset-bottom,0px)+4.5rem)]"
-                      : undefined
-                  }
                 />
               </div>
               <div
                 style={isApp ? inputContainerStyle : {
                   paddingBottom: "calc(env(safe-area-inset-bottom))",
                 }}
-                className={`${
-                  isApp
-                    ? "tw-fixed tw-bottom-0 tw-left-0 tw-right-0 tw-bg-iron-950 tw-z-10"
-                    : "tw-mt-auto"
-                }`}>
+                className="tw-mt-auto">
                 <CreateDropWaveWrapper
                   context={CreateDropWaveWrapperContext.SINGLE_DROP}>
                   <PrivilegedDropCreator

@@ -1,13 +1,13 @@
 "use client"
 
 import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import ArtistPreviewAppWrapper from "./ArtistPreviewAppWrapper";
 import { ArtistPreviewModalContent } from "./ArtistPreviewModalContent";
-import { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
 
 export type { ArtistPreviewTab as ModalTab };
 
@@ -83,7 +83,7 @@ export const ArtistPreviewModal = ({
           leaveFrom="tw-opacity-100"
           leaveTo="tw-opacity-0"
         >
-          <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px]" onClick={(e) => { e.stopPropagation(); onClose(); }} />
+          <div className="tw-fixed tw-inset-0 tw-bg-iron-600/60" onClick={(e) => { e.stopPropagation(); onClose(); }} />
         </Transition.Child>
 
         {/* Desktop modal */}
@@ -126,7 +126,7 @@ export const ArtistPreviewModal = ({
                 leaveFrom="tw-translate-y-0"
                 leaveTo="tw-translate-y-full"
               >
-                <Dialog.Panel className="tw-pointer-events-auto tw-relative tw-w-screen tw-max-h-[90vh] tw-rounded-t-xl tw-bg-iron-950 tw-border-t tw-border-iron-800 tw-overflow-hidden tw-shadow-2xl tw-shadow-black/25">
+                <Dialog.Panel className="tw-pointer-events-auto tw-relative tw-w-screen tw-max-h-[90vh] tw-rounded-t-xl tw-bg-iron-950 tw-border-t tw-border-iron-800 tw-overflow-hidden tw-shadow-2xl tw-shadow-black/25 tw-transform-gpu tw-will-change-transform">
                   <ArtistPreviewModalContent
                     user={user}
                     isOpen={isOpen}

@@ -12,6 +12,8 @@ import {
 import React, { Fragment, useCallback, useEffect, useState } from "react";
 import { SingleWaveDropChat } from "./SingleWaveDropChat";
 
+const CHAT_CLOSE_EVENT = "single-drop:close-chat";
+
 interface SingleWaveDropWrapperProps {
   readonly drop: ApiDrop;
   readonly wave: ApiWave;
@@ -33,6 +35,13 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
   }, []);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handleClose = () => setIsChatOpen(false);
+    window.addEventListener(CHAT_CLOSE_EVENT, handleClose);
+    return () => window.removeEventListener(CHAT_CLOSE_EVENT, handleClose);
+  }, []);
+
+  useEffect(() => {
     if (!isChatOpen || !isSmallScreen) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -40,6 +49,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
       document.body.style.overflow = previousOverflow;
     };
   }, [isChatOpen, isSmallScreen]);
+
 
   return (
     <div className="tw-w-full tw-h-full tw-bg-iron-950 tw-flex tw-flex-col lg:tw-flex-row tw-overflow-hidden">
@@ -81,6 +91,10 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
             aria-hidden="true"
           />
           {children}
+          <div
+            className="tw-shrink-0 tw-h-[env(safe-area-inset-bottom,0px)]"
+            aria-hidden="true"
+          />
         </div>
       </div>
 

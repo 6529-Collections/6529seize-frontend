@@ -28,7 +28,7 @@ export default function CommonDropdownItemsMobileWrapper({
           leaveFrom="tw-opacity-100"
           leaveTo="tw-opacity-0"
         >
-          <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px] tw-transition-opacity" />
+          <div className="tw-fixed tw-inset-0 tw-bg-iron-600/60 tw-transition-opacity" />
         </Transition.Child>
 
         <div className="tw-fixed tw-inset-0 tw-overflow-hidden">
@@ -43,7 +43,7 @@ export default function CommonDropdownItemsMobileWrapper({
                 leaveFrom="tw-translate-y-0"
                 leaveTo="tw-translate-y-full"
               >
-                <Dialog.Panel className="tw-pointer-events-auto tw-relative tw-w-screen">
+                <Dialog.Panel className="tw-pointer-events-auto tw-relative tw-w-screen tw-transform-gpu tw-will-change-transform">
                   <Transition.Child
                     as={Fragment}
                     enter="tw-ease-in-out tw-duration-300"
@@ -82,7 +82,10 @@ export default function CommonDropdownItemsMobileWrapper({
                   <div
                     className="tw-flex tw-flex-col tw-bg-iron-950 tw-rounded-t-xl tw-overflow-y-auto tw-scroll-py-3 tw-pt-6 
                     "
-                    style={{ maxHeight: "calc(100vh - 8rem)" }}
+                    style={{
+                      maxHeight: "calc(100vh - 8rem)",
+                      paddingBottom: "env(safe-area-inset-bottom,0px)",
+                    }}
                   >
                     {label && (
                       <div className="tw-px-6">
@@ -91,7 +94,7 @@ export default function CommonDropdownItemsMobileWrapper({
                         </Dialog.Title>
                       </div>
                     )}
-                    <div className="tw-relative tw-mt-3 tw-flex-1 tw-px-4 sm:tw-px-6 tw-gap-y-6 tw-flex tw-flex-col tw-pb-[env(safe-area-inset-bottom,0px)]">
+                    <div className="tw-relative tw-mt-3 tw-flex-1 tw-px-4 sm:tw-px-6 tw-gap-y-6 tw-flex tw-flex-col">
                       <ul className="tw-flex tw-flex-col tw-mx-0 tw-pl-0 tw-space-y-3 tw-mb-0 tw-list-none">
                         {children}
                       </ul>

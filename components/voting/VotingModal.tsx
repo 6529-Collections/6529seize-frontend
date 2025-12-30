@@ -1,11 +1,11 @@
 "use client";
 
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import React, { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 import { SingleWaveDropVote } from "../waves/drop/SingleWaveDropVote";
 import ModalLayout from "../waves/memes/submission/layout/ModalLayout";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 interface VotingModalProps {
   readonly drop: ExtendedDrop;
@@ -61,7 +61,7 @@ const VotingModal: React.FC<VotingModalProps> = ({
       aria-modal="true"
       aria-labelledby={titleId}
       tabIndex={-1}
-      className="tailwind-scope tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px] tw-z-50 tw-flex tw-items-center tw-justify-center tw-outline-none"
+      className="tailwind-scope tw-fixed tw-inset-0 tw-bg-iron-600/60 tw-z-50 tw-flex tw-items-center tw-justify-center tw-outline-none"
       onClick={(e) => e.stopPropagation()}
     >
       <div

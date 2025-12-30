@@ -1,5 +1,6 @@
 "use client";
 
+import useCreateModalState from "@/hooks/useCreateModalState";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, {
@@ -7,6 +8,7 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { createBreakpoint } from "react-use";
@@ -14,6 +16,7 @@ import { ApiDrop } from "../../generated/models/ApiDrop";
 import { DropSize, ExtendedDrop } from "../../helpers/waves/drop.helpers";
 import { useSidebarState } from "../../hooks/useSidebarState";
 import { commonApiFetch } from "../../services/api/common-api";
+import { useAuth } from "../auth/Auth";
 import BrainDesktopDrop from "../brain/BrainDesktopDrop";
 import WebBrainLeftSidebar from "../brain/left-sidebar/web/WebLeftSidebar";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
@@ -21,11 +24,9 @@ import BrainRightSidebar, {
   SidebarTab,
 } from "../brain/right-sidebar/BrainRightSidebar";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
-import { useAuth } from "../auth/Auth";
-import useCreateModalState from "@/hooks/useCreateModalState";
 import CreateWaveModal from "../waves/create-wave/CreateWaveModal";
+import SpinnerLoader from "../common/SpinnerLoader";
 
-// Breakpoint for mobile responsiveness (lg = 1024px)
 const useBreakpoint = createBreakpoint({ XL: 1400, LG: 1024, S: 0 });
 
 interface WavesMessagesWrapperProps {
@@ -53,6 +54,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   const { isWaveModalOpen, close } = useCreateModalState();
 
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>(SidebarTab.ABOUT);
+  const [isDropSwitching, setIsDropSwitching] = useState(false);
 
   const rawDropId = searchParams?.get("drop") ?? undefined;
   const waveId = searchParams?.get("wave") ?? undefined;
@@ -104,10 +106,35 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
     [dropId, drop?.id]
   );
 
+  const previousDropIdRef = useRef<string | undefined>(undefined);
+  const wasDropOpenRef = useRef(false);
+  const isSwitchingDropNow = Boolean(
+    previousDropIdRef.current &&
+      dropId &&
+      previousDropIdRef.current !== dropId &&
+      wasDropOpenRef.current
+  );
+
+  useEffect(() => {
+    if (!dropId) {
+      setIsDropSwitching(false);
+    } else if (isSwitchingDropNow) {
+      setIsDropSwitching(true);
+    }
+    previousDropIdRef.current = dropId;
+    wasDropOpenRef.current = isDropOpen;
+  }, [dropId, isDropOpen, isSwitchingDropNow]);
+
+  const handleDropContentReady = useCallback(() => {
+    setIsDropSwitching(false);
+  }, []);
+
   // Clear logic for when to show each part
   const shouldShowLeftSidebar = showLeftSidebar && (!isMobile || !waveId);
   const shouldShowMainContent = !isMobile || waveId;
   const shouldShowDropOverlay = isDropOpen && drop && shouldShowMainContent;
+  const shouldShowDropLoading =
+    Boolean(dropId && shouldShowMainContent && (isDropSwitching || isSwitchingDropNow));
   const shouldShowRightSidebar = Boolean(isRightSidebarOpen && waveId && !isDropOpen);
   const canInlineRight = !isMobile && (isLargeDesktop || breakpoint === "LG");
   let rightVariant: "inline" | "overlay" | null = null;
@@ -138,6 +165,13 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
               {shouldShowMainContent && (
                 <div className="tw-flex-grow tw-flex tw-flex-col tw-h-full tw-min-w-0 tw-border-solid tw-border-r tw-border-iron-800 tw-border-y-0 tw-border-l-0">
                   {children}
+                  {shouldShowDropLoading && (
+                    <div className="tw-fixed tw-inset-y-0 tw-right-0 tw-left-[var(--left-rail,0px)] tw-z-[60] lg:tw-absolute lg:tw-inset-0 lg:tw-z-[49]">
+                      <div className="tw-flex tw-items-center tw-justify-center tw-h-full tw-w-full tw-bg-iron-950">
+                        <SpinnerLoader text="Loading artwork..." />
+                      </div>
+                    </div>
+                  )}
                   {shouldShowDropOverlay && (
                     <div className="tw-fixed tw-inset-y-0 tw-right-0 tw-left-[var(--left-rail,0px)] tw-z-[60] lg:tw-absolute lg:tw-inset-0 lg:tw-z-[49]">
                       <BrainDesktopDrop
@@ -148,6 +182,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
                           stableHash: drop.id,
                         }}
                         onClose={onDropClose}
+                        onContentReady={handleDropContentReady}
                       />
                     </div>
                   )}
