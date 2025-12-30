@@ -16,6 +16,7 @@
     "test": "jest --silent --verbose=false --coverageReporters=none",
     "test-json": "jest --silent --json --outputFile=test-results/jest-results.json ; npm run test-extract-failed-names",
     "test-json-changed": "jest --silent --json --outputFile=test-results/jest-results.json --changedSince=main ; npm run test-extract-failed-names",
+    "test-extract-failed-names": "node test-results/list-failed-tests.cjs",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "knip": "knip --fix --allow-remove-files",
