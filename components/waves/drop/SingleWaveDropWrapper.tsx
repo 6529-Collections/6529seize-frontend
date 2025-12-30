@@ -11,8 +11,7 @@ import {
 } from "@heroicons/react/24/outline";
 import React, { Fragment, useCallback, useEffect, useState } from "react";
 import { SingleWaveDropChat } from "./SingleWaveDropChat";
-
-const CHAT_CLOSE_EVENT = "single-drop:close-chat";
+import { CHAT_CLOSE_EVENT } from "./singleDropEvents";
 
 interface SingleWaveDropWrapperProps {
   readonly drop: ApiDrop;
@@ -35,10 +34,12 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
   }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    const browserWindow = globalThis.window;
+    if (browserWindow === undefined) return;
     const handleClose = () => setIsChatOpen(false);
-    window.addEventListener(CHAT_CLOSE_EVENT, handleClose);
-    return () => window.removeEventListener(CHAT_CLOSE_EVENT, handleClose);
+    browserWindow.addEventListener(CHAT_CLOSE_EVENT, handleClose);
+    return () =>
+      browserWindow.removeEventListener(CHAT_CLOSE_EVENT, handleClose);
   }, []);
 
   useEffect(() => {

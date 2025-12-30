@@ -22,7 +22,10 @@ export default function ArtistPreviewAppWrapper({
   const constraintsRef = useRef(null);
   const dragControls = useDragControls();
 
-  const handleDragEnd = (_: any, info: PanInfo) => {
+  const handleDragEnd = (
+    _event: MouseEvent | TouchEvent | PointerEvent,
+    info: PanInfo
+  ) => {
     // More lenient threshold for closing
     if (info.offset.y > 80 || info.velocity.y > 300) {
       onClose();
@@ -47,7 +50,6 @@ export default function ArtistPreviewAppWrapper({
           <div className="tw-fixed tw-inset-0 tw-bg-iron-600/60 tw-transition-opacity" />
         </TransitionChild>
 
-        { }
         <div
           className="tw-fixed tw-inset-0 tw-flex tw-items-end"
           onClick={(e) => e.stopPropagation()}

@@ -3,14 +3,7 @@
 import useCreateModalState from "@/hooks/useCreateModalState";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import React, {
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { createBreakpoint } from "react-use";
 import { ApiDrop } from "../../generated/models/ApiDrop";
 import { DropSize, ExtendedDrop } from "../../helpers/waves/drop.helpers";
@@ -25,7 +18,6 @@ import BrainRightSidebar, {
 } from "../brain/right-sidebar/BrainRightSidebar";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import CreateWaveModal from "../waves/create-wave/CreateWaveModal";
-import SpinnerLoader from "../common/SpinnerLoader";
 
 const useBreakpoint = createBreakpoint({ XL: 1400, LG: 1024, S: 0 });
 
@@ -54,7 +46,6 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   const { isWaveModalOpen, close } = useCreateModalState();
 
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>(SidebarTab.ABOUT);
-  const [isDropSwitching, setIsDropSwitching] = useState(false);
 
   const rawDropId = searchParams?.get("drop") ?? undefined;
   const waveId = searchParams?.get("wave") ?? undefined;
@@ -106,35 +97,10 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
     [dropId, drop?.id]
   );
 
-  const previousDropIdRef = useRef<string | undefined>(undefined);
-  const wasDropOpenRef = useRef(false);
-  const isSwitchingDropNow = Boolean(
-    previousDropIdRef.current &&
-      dropId &&
-      previousDropIdRef.current !== dropId &&
-      wasDropOpenRef.current
-  );
-
-  useEffect(() => {
-    if (!dropId) {
-      setIsDropSwitching(false);
-    } else if (isSwitchingDropNow) {
-      setIsDropSwitching(true);
-    }
-    previousDropIdRef.current = dropId;
-    wasDropOpenRef.current = isDropOpen;
-  }, [dropId, isDropOpen, isSwitchingDropNow]);
-
-  const handleDropContentReady = useCallback(() => {
-    setIsDropSwitching(false);
-  }, []);
-
   // Clear logic for when to show each part
   const shouldShowLeftSidebar = showLeftSidebar && (!isMobile || !waveId);
   const shouldShowMainContent = !isMobile || waveId;
   const shouldShowDropOverlay = isDropOpen && drop && shouldShowMainContent;
-  const shouldShowDropLoading =
-    Boolean(dropId && shouldShowMainContent && (isDropSwitching || isSwitchingDropNow));
   const shouldShowRightSidebar = Boolean(isRightSidebarOpen && waveId && !isDropOpen);
   const canInlineRight = !isMobile && (isLargeDesktop || breakpoint === "LG");
   let rightVariant: "inline" | "overlay" | null = null;
@@ -145,7 +111,6 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   // Handle error state for drop loading
   if (dropError && dropId) {
     console.error("Failed to load drop:", dropError);
-    // Could show an error toast here
   }
 
   return (
@@ -165,13 +130,6 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
               {shouldShowMainContent && (
                 <div className="tw-flex-grow tw-flex tw-flex-col tw-h-full tw-min-w-0 tw-border-solid tw-border-r tw-border-iron-800 tw-border-y-0 tw-border-l-0">
                   {children}
-                  {shouldShowDropLoading && (
-                    <div className="tw-fixed tw-inset-y-0 tw-right-0 tw-left-[var(--left-rail,0px)] tw-z-[60] lg:tw-absolute lg:tw-inset-0 lg:tw-z-[49]">
-                      <div className="tw-flex tw-items-center tw-justify-center tw-h-full tw-w-full tw-bg-iron-950">
-                        <SpinnerLoader text="Loading artwork..." />
-                      </div>
-                    </div>
-                  )}
                   {shouldShowDropOverlay && (
                     <div className="tw-fixed tw-inset-y-0 tw-right-0 tw-left-[var(--left-rail,0px)] tw-z-[60] lg:tw-absolute lg:tw-inset-0 lg:tw-z-[49]">
                       <BrainDesktopDrop
@@ -182,7 +140,6 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
                           stableHash: drop.id,
                         }}
                         onClose={onDropClose}
-                        onContentReady={handleDropContentReady}
                       />
                     </div>
                   )}

@@ -45,11 +45,12 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
 
   // Get device info from useDeviceInfo hook
   const { hasTouchScreen } = useDeviceInfo();
-  const mediaImageScale = isMobileScreen
-    ? ImageScale.AUTOx450
-    : isTabletOrSmaller
-    ? ImageScale.AUTOx600
-    : ImageScale.AUTOx800;
+  let mediaImageScale = ImageScale.AUTOx800;
+  if (isMobileScreen) {
+    mediaImageScale = ImageScale.AUTOx450;
+  } else if (isTabletOrSmaller) {
+    mediaImageScale = ImageScale.AUTOx600;
+  }
 
   // Use long press interaction hook with touch screen info from device hook
   const { isActive, setIsActive, touchHandlers } = useLongPressInteraction({

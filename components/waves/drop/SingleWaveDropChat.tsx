@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { ApiDrop, ApiWave } from "@/generated/models/ObjectSerializer";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import WaveDropsAll from "../drops/wave-drops-all";
@@ -24,7 +24,6 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   wave,
   drop,
 }) => {
-  const contentWrapperRef = useRef<HTMLDivElement | null>(null);
   const { isApp } = useDeviceInfo();
   const { isVisible: isKeyboardVisible } = useAndroidKeyboard();
 
@@ -63,9 +62,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
 
   return (
     <div className="tw-flex-1 tw-flex tw-flex-col tw-h-full tw-min-h-0">
-      <div
-        ref={contentWrapperRef}
-        className="tw-flex-1 tw-flex tw-flex-col tw-min-h-0 tw-overflow-hidden tw-bg-iron-950 tw-relative lg:tw-border tw-border-l-0 lg:tw-border-r lg:tw-border-solid tw-border-iron-800 tw-border-y-0">
+      <div className="tw-flex-1 tw-flex tw-flex-col tw-min-h-0 tw-overflow-hidden tw-bg-iron-950 tw-relative lg:tw-border tw-border-l-0 lg:tw-border-r lg:tw-border-solid tw-border-iron-800 tw-border-y-0">
         <div className="tw-flex-1 tw-flex tw-flex-col tw-min-h-0 tw-relative">
           <div className="tw-w-full tw-flex tw-flex-col tw-flex-1 tw-min-h-0">
             <div className="tw-w-full tw-flex tw-flex-col tw-flex-1 tw-min-h-0">

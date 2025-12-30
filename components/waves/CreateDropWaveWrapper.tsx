@@ -74,8 +74,7 @@ export function CreateDropWaveWrapper({
   const containerRef = useRef<HTMLDivElement>(null);
   const fixedBottomRef = useRef<HTMLDivElement>(null);
 
-  const shouldObserve =
-    !(capacitor.isAndroid && context === CreateDropWaveWrapperContext.SINGLE_DROP);
+  const shouldObserve = context !== CreateDropWaveWrapperContext.SINGLE_DROP;
   useResizeObserver(containerRef, fixedBottomRef, shouldObserve);
 
   const containerClassName = useMemo(() => {

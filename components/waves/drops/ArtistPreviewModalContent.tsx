@@ -11,6 +11,7 @@ import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ModalTab } from "./ArtistPreviewModal";
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { CHAT_CLOSE_EVENT } from "@/components/waves/drop/singleDropEvents";
 
 interface ArtistPreviewModalContentProps {
   readonly user: ApiProfileMin;
@@ -61,8 +62,8 @@ export const ArtistPreviewModalContent: React.FC<
       params.set("drop", drop.id);
       router.push(`${pathname}?${params.toString()}`);
     }
-    if (compact && isSmallScreen && typeof window !== "undefined") {
-      window.dispatchEvent(new CustomEvent("single-drop:close-chat"));
+    if (compact && isSmallScreen && globalThis.window !== undefined) {
+      globalThis.window.dispatchEvent(new CustomEvent(CHAT_CLOSE_EVENT));
     }
     onClose();
   };

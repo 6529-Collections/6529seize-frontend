@@ -43,7 +43,7 @@ export default function CommonDropdownItemsMobileWrapper({
                 leaveFrom="tw-translate-y-0"
                 leaveTo="tw-translate-y-full"
               >
-                <Dialog.Panel className="tw-pointer-events-auto tw-relative tw-w-screen tw-transform-gpu tw-will-change-transform">
+                <Dialog.Panel className="tw-pointer-events-auto tw-relative tw-w-screen tw-transform-gpu">
                   <Transition.Child
                     as={Fragment}
                     enter="tw-ease-in-out tw-duration-300"
