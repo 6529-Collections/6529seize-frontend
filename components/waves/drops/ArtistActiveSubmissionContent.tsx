@@ -13,7 +13,6 @@ import {
 } from "@/hooks/useUserArtSubmissions";
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { CHAT_CLOSE_EVENT } from "@/components/waves/drop/singleDropEvents";
 import {
   SingleWaveDropVote,
   SingleWaveDropVoteSize,
@@ -67,7 +66,9 @@ export const ArtistActiveSubmissionContent: React.FC<
       params.set("drop", dropId);
       router.push(`${pathname}?${params.toString()}`);
       if (compact && isSmallScreen && globalThis.window !== undefined) {
-        globalThis.window.dispatchEvent(new CustomEvent(CHAT_CLOSE_EVENT));
+        globalThis.window.dispatchEvent(
+          new CustomEvent("single-drop:close-chat")
+        );
       }
       onClose();
     },
