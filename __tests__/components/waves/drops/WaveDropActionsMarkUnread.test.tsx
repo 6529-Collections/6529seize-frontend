@@ -37,6 +37,10 @@ jest.mock('react-tooltip', () => ({
 
 const mockAuthContext = {
   setToast: jest.fn(),
+  connectedProfile: {
+    handle: 'test-user',
+  },
+  activeProfileProxy: null,
 };
 
 const mockDrop: ApiDrop = {
@@ -45,6 +49,9 @@ const mockDrop: ApiDrop = {
   wave: {
     id: 'wave-456',
     name: 'Test Wave',
+  },
+  author: {
+    handle: 'other-author',
   },
 } as any;
 
