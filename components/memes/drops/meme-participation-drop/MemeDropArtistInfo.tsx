@@ -2,7 +2,6 @@
 
 import React from "react";
 import Link from "next/link";
-import { cicToType } from "@/helpers/Helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
@@ -38,7 +37,6 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
           {!!drop.author?.level && (
             <UserCICAndLevel
               level={drop.author.level}
-              cicType={cicToType(drop.author.cic)}
               size={UserCICAndLevelSize.SMALL}
             />
           )}

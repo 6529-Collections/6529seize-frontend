@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { cicToType } from "@/helpers/Helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
@@ -17,15 +16,12 @@ export default function ParticipationDropHeader({
   drop,
   showWaveInfo,
 }: ParticipationDropHeaderProps) {
-  const cicType = cicToType(drop.author.cic);
-
   return (
     <>
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <UserCICAndLevel
             level={drop.author.level}
-            cicType={cicType}
             size={UserCICAndLevelSize.SMALL}
           />
 

@@ -67,8 +67,8 @@ const calculateHeightStyle = (
   spaces: LayoutSpaces,
   capacitorSpace: number // Accept specific space value
 ): React.CSSProperties => {
-  // Use dynamic viewport height to avoid extra space on mobile browsers
-  const heightCalc = `calc(100dvh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${spaces.mobileNavSpace}px - ${capacitorSpace}px)`;
+  // Use visual viewport height when available, with a 100vh fallback.
+  const heightCalc = `calc(var(--app-height, 100vh) - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${spaces.mobileNavSpace}px - ${capacitorSpace}px)`;
   return {
     height: heightCalc,
     maxHeight: heightCalc,
@@ -169,6 +169,26 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const { isCapacitor, isAndroid, isIos } = useCapacitor();
   const { isVisible: isKeyboardVisible } = useAndroidKeyboard();
+
+  useEffect(() => {
+    const doc = document.documentElement;
+    const viewport = window.visualViewport;
+    const updateAppHeight = () => {
+      const height = viewport?.height ?? window.innerHeight;
+      doc.style.setProperty("--app-height", `${height}px`);
+    };
+
+    updateAppHeight();
+    viewport?.addEventListener("resize", updateAppHeight);
+    viewport?.addEventListener("scroll", updateAppHeight);
+    window.addEventListener("resize", updateAppHeight);
+
+    return () => {
+      viewport?.removeEventListener("resize", updateAppHeight);
+      viewport?.removeEventListener("scroll", updateAppHeight);
+      window.removeEventListener("resize", updateAppHeight);
+    };
+  }, []);
 
   // Internal ref storage (source of truth)
   const refMap = useRef<Record<LayoutRefType, HTMLDivElement | null>>({
@@ -306,10 +326,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       mobileNavHeight;
 
     // Ensure content space is at least 0 to prevent negative values
-    const calculatedContentSpace = Math.max(
-      0,
-      window.innerHeight - totalOccupiedSpace
-    );
+    const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+    const calculatedContentSpace = Math.max(0, viewportHeight - totalOccupiedSpace);
 
     const nextSpaces: LayoutSpaces = {
       headerSpace: headerHeight,
@@ -371,7 +389,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     }
 
     return {
-      height: `calc(100dvh - ${spaces.headerSpace}px - ${spaces.spacerSpace}px)`,
+      height: `calc(var(--app-height, 100vh) - ${spaces.headerSpace}px - ${spaces.spacerSpace}px)`,
       display: "flex",
     };
   }, [spaces.measurementsComplete, spaces.headerSpace, spaces.spacerSpace]);
@@ -456,7 +474,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       spaces.spacerSpace +
       spaces.mobileTabsSpace +
       spaces.mobileNavSpace;
-    const heightCalc = `calc(100dvh - ${totalOffset}px)`;
+    const heightCalc = `calc(var(--app-height, 100vh) - ${totalOffset}px)`;
     return {
       height: heightCalc,
       maxHeight: heightCalc,

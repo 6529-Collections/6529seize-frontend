@@ -9,6 +9,7 @@ import {
   faCheckCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useRef, useState } from "react";
+import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 
 interface Props {
   href: string;
@@ -16,11 +17,14 @@ interface Props {
   extension: string;
   showProgress?: boolean;
   className?: string;
+  variant?: "default" | "text";
+  alwaysShowText?: boolean;
 }
 
 export default function Download(props: Readonly<Props>) {
   const { percentage, download, cancel, isInProgress } = useDownloader();
   const showProgress = props.showProgress ?? true;
+  const variant = props.variant ?? "default";
 
   const [isCompleted, setIsCompleted] = useState(false);
   const completionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -72,6 +76,21 @@ export default function Download(props: Readonly<Props>) {
     }
 
     if (!isInProgress || !showProgress) {
+      if (variant === "text") {
+        return (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              startDownload();
+            }}
+            className="tw-bg-transparent tw-border-0 tw-text-white/40 desktop-hover:hover:tw-text-white tw-transition-colors tw-duration-300 tw-flex tw-items-center tw-gap-1.5 tw-cursor-pointer tw-text-xs tw-font-medium"
+            aria-label="Download file"
+            type="button">
+            <ArrowDownTrayIcon className="tw-w-4 tw-h-4 tw-flex-shrink-0" />
+            <span className={props.alwaysShowText ? "" : "tw-hidden sm:tw-inline"}>Download</span>
+          </button>
+        );
+      }
       return (
         <button
           onClick={(e) => {

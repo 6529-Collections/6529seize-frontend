@@ -66,7 +66,7 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
         aria-label="Copy link"
         data-tooltip-id={!isDisabled ? `copy-link-${drop.id}` : undefined}>
         <svg
-          className={`tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300`}
+          className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -83,10 +83,18 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
         <Tooltip
           id={`copy-link-${drop.id}`}
           place="top"
+          offset={8}
+          opacity={1}
           style={{
-            backgroundColor: "#1F2937",
-            color: "white",
             padding: "4px 8px",
+            background: "#37373E",
+            color: "white",
+            fontSize: "13px",
+            fontWeight: 500,
+            borderRadius: "6px",
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+            zIndex: 99999,
+            pointerEvents: "none",
           }}>
           <span className="tw-text-xs">{getLinkText()}</span>
         </Tooltip>

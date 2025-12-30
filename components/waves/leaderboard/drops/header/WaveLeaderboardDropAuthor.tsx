@@ -1,6 +1,5 @@
 import React from "react";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { cicToType } from "@/helpers/Helpers";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -50,7 +49,6 @@ export const WaveLeaderboardDropAuthor: React.FC<
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <UserCICAndLevel
             level={drop.author.level}
-            cicType={cicToType(drop.author.cic)}
             size={UserCICAndLevelSize.SMALL}
           />
           <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>

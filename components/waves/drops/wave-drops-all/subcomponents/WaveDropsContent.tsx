@@ -43,6 +43,7 @@ interface WaveDropsContentProps {
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
   readonly pendingCount: number;
   readonly onRevealPending: () => void;
+  readonly bottomPaddingClassName?: string;
 }
 
 export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
@@ -64,6 +65,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   onDropContentClick,
   pendingCount,
   onRevealPending,
+  bottomPaddingClassName,
 }) => {
   const dropsCount = waveMessages?.drops?.length ?? 0;
   const isInitialLoading =
@@ -105,6 +107,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
         onDropContentClick={onDropContentClick}
         pendingCount={pendingCount}
         onRevealPending={onRevealPending}
+        bottomPaddingClassName={bottomPaddingClassName}
       />
       <WaveDropsTypingIndicator typingMessage={typingMessage} />
     </>

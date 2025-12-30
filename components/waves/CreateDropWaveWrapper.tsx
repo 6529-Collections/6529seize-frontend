@@ -17,7 +17,8 @@ interface CreateDropWaveWrapperProps {
 
 function useResizeObserver(
   containerRef: React.RefObject<HTMLDivElement | null>,
-  fixedBottomRef: React.RefObject<HTMLDivElement | null>
+  fixedBottomRef: React.RefObject<HTMLDivElement | null>,
+  enabled: boolean
 ) {
   const handleResize = useCallback(() => {
     const container = containerRef.current;
@@ -54,13 +55,14 @@ function useResizeObserver(
   const debouncedHandleResize = useDebouncedCallback(handleResize, 100);
 
   useEffect(() => {
+    if (!enabled) return;
     if (!containerRef.current || !fixedBottomRef.current) return;
     const observer = new ResizeObserver(debouncedHandleResize);
     observer.observe(containerRef.current);
     observer.observe(fixedBottomRef.current);
 
     return () => observer.disconnect();
-  }, [debouncedHandleResize, containerRef, fixedBottomRef]);
+  }, [debouncedHandleResize, containerRef, fixedBottomRef, enabled]);
 }
 
 export function CreateDropWaveWrapper({
@@ -72,7 +74,8 @@ export function CreateDropWaveWrapper({
   const containerRef = useRef<HTMLDivElement>(null);
   const fixedBottomRef = useRef<HTMLDivElement>(null);
 
-  useResizeObserver(containerRef, fixedBottomRef);
+  const shouldObserve = context !== CreateDropWaveWrapperContext.SINGLE_DROP;
+  useResizeObserver(containerRef, fixedBottomRef, shouldObserve);
 
   const containerClassName = useMemo(() => {
     const isMyStreamOrWaveChat =

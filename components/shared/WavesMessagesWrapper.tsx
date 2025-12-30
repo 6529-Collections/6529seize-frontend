@@ -1,19 +1,15 @@
 "use client";
 
+import useCreateModalState from "@/hooks/useCreateModalState";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import React, {
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { createBreakpoint } from "react-use";
 import { ApiDrop } from "../../generated/models/ApiDrop";
 import { DropSize, ExtendedDrop } from "../../helpers/waves/drop.helpers";
 import { useSidebarState } from "../../hooks/useSidebarState";
 import { commonApiFetch } from "../../services/api/common-api";
+import { useAuth } from "../auth/Auth";
 import BrainDesktopDrop from "../brain/BrainDesktopDrop";
 import WebBrainLeftSidebar from "../brain/left-sidebar/web/WebLeftSidebar";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
@@ -21,11 +17,8 @@ import BrainRightSidebar, {
   SidebarTab,
 } from "../brain/right-sidebar/BrainRightSidebar";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
-import { useAuth } from "../auth/Auth";
-import useCreateModalState from "@/hooks/useCreateModalState";
 import CreateWaveModal from "../waves/create-wave/CreateWaveModal";
 
-// Breakpoint for mobile responsiveness (lg = 1024px)
 const useBreakpoint = createBreakpoint({ XL: 1400, LG: 1024, S: 0 });
 
 interface WavesMessagesWrapperProps {
@@ -118,7 +111,6 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   // Handle error state for drop loading
   if (dropError && dropId) {
     console.error("Failed to load drop:", dropError);
-    // Could show an error toast here
   }
 
   return (
@@ -129,7 +121,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
             className="tw-relative tw-flex tw-flex-grow tw-w-full tw-max-w-full tw-mx-auto"
           >
             <div
-              className="tw-flex tw-w-full tw-overflow-hidden"
+              className="tw-relative tw-flex tw-w-full tw-overflow-hidden"
               style={contentContainerStyle}
             >
               {shouldShowLeftSidebar && (
@@ -139,7 +131,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
                 <div className="tw-flex-grow tw-flex tw-flex-col tw-h-full tw-min-w-0 tw-border-solid tw-border-r tw-border-iron-800 tw-border-y-0 tw-border-l-0">
                   {children}
                   {shouldShowDropOverlay && (
-                    <div className="tw-absolute tw-inset-0 tw-z-[49]">
+                    <div className="tw-fixed tw-inset-y-0 tw-right-0 tw-left-[var(--left-rail,0px)] tw-z-[60] lg:tw-absolute lg:tw-inset-0 lg:tw-z-[49]">
                       <BrainDesktopDrop
                         drop={{
                           type: DropSize.FULL,

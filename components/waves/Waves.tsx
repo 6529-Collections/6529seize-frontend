@@ -100,7 +100,7 @@ export default function Waves({
     return (
       <div
         id="waves-placeholder"
-        className="tw-flex-1 tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-min-h-[80dvh] tw-p-6"
+        className="tw-flex-1 tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-min-h-[80vh] tw-p-6"
       >
         <Image
           unoptimized

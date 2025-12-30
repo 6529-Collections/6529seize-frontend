@@ -24,6 +24,10 @@ export default function MobileWrapperDialog({
   readonly children: React.ReactNode;
   readonly noPadding?: boolean;
 }) {
+  const bottomPadding = noPadding
+    ? "env(safe-area-inset-bottom,0px)"
+    : "calc(env(safe-area-inset-bottom,0px) + 1.5rem)";
+
   return (
     <Transition appear={true} show={isOpen} as={Fragment}>
       <Dialog
@@ -40,7 +44,7 @@ export default function MobileWrapperDialog({
           leaveTo="tw-opacity-0"
           beforeLeave={onBeforeLeave}
           afterLeave={onAfterLeave}>
-          <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px]" />
+          <div className="tw-fixed tw-inset-0 tw-bg-iron-600/60" />
         </TransitionChild>
 
         <div 
@@ -62,7 +66,7 @@ export default function MobileWrapperDialog({
                 leaveFrom="tw-translate-y-0"
                 leaveTo="tw-translate-y-full">
                 <DialogPanel 
-                  className="tw-pointer-events-auto tw-relative tw-w-screen md:tw-max-w-screen-md"
+                  className="tw-pointer-events-auto tw-relative tw-w-screen md:tw-max-w-screen-md tw-transform-gpu tw-will-change-transform"
                   onClick={(e) => e.stopPropagation()}>
                   <TransitionChild
                     as={Fragment}
@@ -100,7 +104,10 @@ export default function MobileWrapperDialog({
                     className={`tw-flex tw-flex-col tw-bg-iron-950 tw-rounded-t-xl tw-overflow-y-auto tw-scroll-py-3 ${
                       noPadding ? "tw-py-0" : "tw-py-6 "
                     }`}
-                    style={{ maxHeight: "calc(100dvh - 10rem)" }}>
+                    style={{
+                      maxHeight: "calc(100dvh - 10rem)",
+                      paddingBottom: bottomPadding,
+                    }}>
                     <div className="tw-px-4 sm:tw-px-6">
                       {title && (
                         <DialogTitle className="tw-text-base tw-font-semibold tw-text-iron-50">

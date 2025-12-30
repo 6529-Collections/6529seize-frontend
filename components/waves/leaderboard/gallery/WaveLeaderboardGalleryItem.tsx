@@ -16,6 +16,8 @@ import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileToo
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { WAVE_VOTING_LABELS, WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { ImageScale } from "@/helpers/image.helpers";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 interface WaveLeaderboardGalleryItemProps {
   readonly drop: ExtendedDrop;
@@ -30,8 +32,12 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
     const [isHighlighting, setIsHighlighting] = useState(false);
     const isMobileScreen = useIsMobileScreen();
+    const isTabletOrSmaller = useMediaQuery("(max-width: 1023px)");
     const { hasTouchScreen } = useDeviceInfo();
     const { canShowVote } = useDropInteractionRules(drop);
+    const mediaImageScale = isTabletOrSmaller
+      ? ImageScale.AUTOx450
+      : ImageScale.AUTOx600;
 
     const isFirstRenderRef = useRef(true);
     const previousSortRef = useRef(activeSort);
@@ -129,6 +135,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
               media_mime_type={drop.parts[0].media[0].mime_type || "image/jpeg"}
               media_url={drop.parts[0].media[0].url}
               disableMediaInteraction={true}
+              imageScale={mediaImageScale}
             />
           </div>
         </button>
@@ -136,7 +143,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
           <div className="tw-flex tw-justify-between tw-items-start tw-mb-3">
             <div className="tw-min-w-0 tw-flex-1 tw-mr-2">
               {drop.title && (
-                <h3 className="tw-mb-0 tw-text-sm tw-font-bold tw-text-iron-100 tw-truncate tw-leading-tight">
+                <h3 className="tw-mb-0 tw-text-sm tw-font-bold tw-text-iron-200 tw-truncate tw-leading-tight">
                   {drop.title}
                 </h3>
               )}

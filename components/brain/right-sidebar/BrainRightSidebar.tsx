@@ -110,7 +110,7 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
       className={`tw-flex tw-flex-col tw-w-[20.5rem] tw-bg-iron-950 ${
         isOverlay
           ? `tw-fixed tw-inset-y-0 tw-right-0 tw-z-[100] tw-shadow-2xl lg:tw-bg-opacity-95 min-[1300px]:tw-bg-opacity-100 lg:tw-backdrop-blur min-[1300px]:tw-backdrop-blur-none tw-border-l tw-border-solid tw-border-iron-800 tw-border-y-0 tw-border-r-0`
-          : "tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg overflow-hidden tw-max-h-[calc(100dvh-16px)]"
+          : "tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg overflow-hidden tw-max-h-[calc(100vh-16px)]"
       }`}
     >
       {isOverlay && (

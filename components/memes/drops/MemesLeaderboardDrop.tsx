@@ -24,6 +24,8 @@ import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMen
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 import Link from "next/link";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { ImageScale } from "@/helpers/image.helpers";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 interface MemesLeaderboardDropProps {
   readonly drop: ExtendedDrop;
@@ -37,11 +39,18 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   location = DropLocation.WAVE,
 }) => {
   const isMobileScreen = useIsMobileScreen();
+  const isTabletOrSmaller = useMediaQuery("(max-width: 1023px)");
   const { canDelete } = useDropInteractionRules(drop);
   const [isVotingModalOpen, setIsVotingModalOpen] = useState<boolean>(false);
 
   // Get device info from useDeviceInfo hook
   const { hasTouchScreen } = useDeviceInfo();
+  let mediaImageScale = ImageScale.AUTOx800;
+  if (isMobileScreen) {
+    mediaImageScale = ImageScale.AUTOx450;
+  } else if (isTabletOrSmaller) {
+    mediaImageScale = ImageScale.AUTOx600;
+  }
 
   // Use long press interaction hook with touch screen info from device hook
   const { isActive, setIsActive, touchHandlers } = useLongPressInteraction({
@@ -108,6 +117,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                     media_mime_type={artworkMedia.mime_type}
                     media_url={artworkMedia.url}
                     isCompetitionDrop={true}
+                    imageScale={mediaImageScale}
                   />
                 </div>
               )}
@@ -187,7 +197,8 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
           createPortal(
             <CommonDropdownItemsMobileWrapper
               isOpen={isActive}
-              setOpen={setIsActive}>
+              setOpen={setIsActive}
+            >
               <div className="tw-grid tw-grid-cols-1 tw-gap-y-2">
                 {/* Open drop option */}
                 <WaveDropMobileMenuOpen
