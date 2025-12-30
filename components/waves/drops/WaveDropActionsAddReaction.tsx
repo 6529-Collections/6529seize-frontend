@@ -241,10 +241,18 @@ const WaveDropActionsAddReaction: React.FC<{
           id={`add-reaction-${drop.id}`}
           place="top"
           positionStrategy="fixed"
+          offset={8}
+          opacity={1}
           style={{
-            backgroundColor: "#1F2937",
-            color: "white",
             padding: "4px 8px",
+            background: "#37373E",
+            color: "white",
+            fontSize: "13px",
+            fontWeight: 500,
+            borderRadius: "6px",
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+            zIndex: 99999,
+            pointerEvents: "none",
           }}
         >
           <span className="tw-text-xs">

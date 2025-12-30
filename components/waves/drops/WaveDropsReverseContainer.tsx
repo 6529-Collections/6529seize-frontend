@@ -14,6 +14,7 @@ interface WaveDropsReverseContainerProps {
     direction: "up" | "down",
     isAtBottom: boolean
   ) => void;
+  readonly bottomPaddingClassName?: string;
 }
 
 export const WaveDropsReverseContainer = forwardRef<
@@ -27,6 +28,7 @@ export const WaveDropsReverseContainer = forwardRef<
       isFetchingNextPage,
       hasNextPage,
       onUserScroll,
+      bottomPaddingClassName,
     },
     ref
   ) => {
@@ -87,7 +89,7 @@ export const WaveDropsReverseContainer = forwardRef<
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="tw-pb-6 tw-bg-iron-950 tw-flex tw-flex-col-reverse tw-overflow-y-auto tw-overflow-x-hidden no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300"
+        className={`tw-flex-1 tw-min-h-0 ${bottomPaddingClassName ?? "tw-pb-6"} tw-bg-iron-950 tw-flex tw-flex-col-reverse tw-overflow-y-auto tw-overflow-x-hidden no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300`}
       >
         <div className="tw-flex tw-flex-col">
           {hasNextPage && isFetchingNextPage && (

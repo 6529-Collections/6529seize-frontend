@@ -82,7 +82,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
               <WaveLeaderboardDropContent drop={drop} isCompetitionDrop={true} />
             </div>
           </div>
-          <div className="tw-mt-3 tw-inline-flex tw-flex-col @[700px]:tw-flex-row tw-justify-between @[700px]:tw-items-center sm:tw-ml-[3.5rem] tw-space-y-3 @[700px]:tw-space-y-0 tw-gap-x-2">
+          <div className="tw-mt-3 tw-inline-flex tw-flex-col @[700px]:tw-flex-row tw-justify-between @[700px]:tw-items-center sm:tw-ml-[3.25rem] tw-space-y-3 @[700px]:tw-space-y-0 tw-gap-x-2">
             <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-y-2 tw-gap-x-4">
               <WaveLeaderboardDropRaters drop={drop} />
               <WaveLeaderboardDropFooter drop={drop} />
@@ -121,7 +121,8 @@ export const DefaultWaveLeaderboardDrop: React.FC<
         createPortal(
           <CommonDropdownItemsMobileWrapper
             isOpen={isActive}
-            setOpen={setIsActive}>
+            setOpen={setIsActive}
+          >
             <div className="tw-grid tw-grid-cols-1 tw-gap-y-2">
               {/* Open drop option */}
               <WaveDropMobileMenuOpen

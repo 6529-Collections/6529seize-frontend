@@ -7,6 +7,7 @@ import { Tooltip } from "react-tooltip";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { WAVE_VOTE_STATS_LABELS, WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 
 interface WaveLeaderboardRightSidebarVoterProps {
   readonly voter: ApiWaveVoter;
@@ -30,7 +31,7 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
         >
           {voter.voter.pfp ? (
             <Image
-              src={voter.voter.pfp}
+              src={resolveIpfsUrlSync(voter.voter.pfp)}
               alt={voter.voter.handle ?? "Voter"}
               width={20}
               height={20}

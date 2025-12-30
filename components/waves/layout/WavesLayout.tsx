@@ -1,6 +1,5 @@
 "use client";
 
-import Head from "next/head";
 import { ReactNode, useMemo } from "react";
 import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
@@ -76,14 +75,9 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   }, [contentState, connectPrompt, containerClassName, children, isApp]);
 
   return (
-    <>
-      <Head>
-        <style>{`body { overflow: hidden !important; }`}</style>
-      </Head>
-      <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black tw-overflow-hidden">
-        {content}
-      </div>
-    </>
+    <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black tw-overflow-hidden tw-overscroll-none tw-h-[var(--app-height,100vh)]">
+      {content}
+    </div>
   );
 }
 

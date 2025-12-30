@@ -5,7 +5,7 @@ import UserCICAndLevel, {
 } from "@/components/user/utils/UserCICAndLevel";
 import WaveDropAuthorPfp from "@/components/waves/drops/WaveDropAuthorPfp";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { cicToType, getTimeAgoShort } from "@/helpers/Helpers";
+import { getTimeAgoShort } from "@/helpers/Helpers";
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 
@@ -20,7 +20,6 @@ export default function MemeWinnerArtistInfo({
 }: MemeWinnerArtistInfoProps) {
   // Get the decision time from the winning context
   const decisionTime = drop.winning_context?.decision_time;
-  const cicType = cicToType(drop.author?.cic);
 
   return (
     <div className="tw-flex tw-items-start tw-gap-x-3">
@@ -30,7 +29,6 @@ export default function MemeWinnerArtistInfo({
           {!!drop.author?.level && (
             <UserCICAndLevel
               level={drop.author.level}
-              cicType={cicType}
               size={UserCICAndLevelSize.SMALL}
             />
           )}

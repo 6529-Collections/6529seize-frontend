@@ -65,7 +65,7 @@ export const ProfileWinnerBadge: React.FC<ProfileWinnerBadgeProps> = ({
       >
         <FontAwesomeIcon
           icon={faTrophy}
-          className="tw-w-3.5 tw-h-3.5 md:tw-w-3 md:tw-h-3 tw-text-amber-400 tw-flex-shrink-0
+          className="tw-w-3 tw-h-3 md:tw-w-2.5 md:tw-h-2.5 tw-text-amber-400 tw-flex-shrink-0
         desktop-hover:hover:tw-text-amber-300/90"
         />
       </button>

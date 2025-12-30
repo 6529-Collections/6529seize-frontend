@@ -1,10 +1,10 @@
 "use client";
-import { FC } from "react";
-import Link from "next/link";
-import Image from "next/image";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import AppSidebarUserInfo from "./AppSidebarUserInfo";
+import Image from "next/image";
+import Link from "next/link";
+import { FC } from "react";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import AppSidebarUserInfo from "./AppSidebarUserInfo";
 
 interface AppSidebarHeaderProps {
   readonly onClose: () => void;
@@ -37,7 +37,7 @@ const AppSidebarHeader: FC<AppSidebarHeaderProps> = ({ onClose }) => {
       <button
         onClick={onClose}
         aria-label="Close menu"
-        className="tw-absolute tw-right-2 tw-top-2 tw-bg-transparent tw-border-none tw-text-zinc-400 active:tw-text-white focus:tw-outline-none tw-transition-colors tw-duration-200"
+        className="tw-absolute tw-right-2 tw-top-2 tw-bg-transparent tw-border-none tw-text-iron-400 active:tw-text-white focus:tw-outline-none tw-transition-colors tw-duration-200"
       >
         <XMarkIcon className="tw-size-6 tw-flex-shrink-0" />
       </button>

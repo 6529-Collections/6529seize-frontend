@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import { AnimatePresence, motion } from "framer-motion";
-import { useWaveTopVoters } from "@/hooks/useWaveTopVoters";
 import { useAuth } from "@/components/auth/Auth";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
+import { useWaveTopVoters } from "@/hooks/useWaveTopVoters";
+import { ChevronDownIcon } from "@heroicons/react/24/solid";
+import { AnimatePresence, motion } from "framer-motion";
+import React, { useState } from "react";
 import { SingleWaveDropVoter } from "./SingleWaveDropVoter";
 
 interface SingleWaveDropVotersProps {
@@ -37,36 +38,19 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({
     <div>
       <button
         onClick={() => setIsVotersOpen(!isVotersOpen)}
-        className={`tw-text-sm tw-w-full tw-group tw-ring-1 tw-ring-iron-700 desktop-hover:hover:tw-ring-primary-400/30 tw-flex tw-justify-between tw-items-center tw-font-medium tw-py-2.5 md:tw-py-3 tw-px-5 tw-bg-iron-900 tw-transition-all tw-duration-300 tw-border-0 ${
-          isVotersOpen ? "tw-rounded-t-lg" : "tw-rounded-lg"
-        }`}>
-        <span
-          className={
-            isVotersOpen
-              ? "tw-text-primary-300"
-              : "tw-text-iron-300 desktop-hover:group-hover:tw-text-primary-300 tw-transition-all tw-duration-300"
-          }>
-          Top Voters
+        className={`tw-w-full tw-px-4 tw-py-4 tw-flex tw-items-center tw-justify-between tw-text-left desktop-hover:hover:tw-bg-iron-900 tw-transition-colors tw-duration-300 tw-ease-out tw-border-0 ${
+          isVotersOpen ? "tw-bg-iron-800" : "tw-bg-iron-950"
+        }`}
+      >
+        <span className={`tw-text-sm tw-font-medium ${isVotersOpen ? "tw-text-iron-300" : "tw-text-iron-400"}`}>
+          Top voters
         </span>
-        <motion.svg
-          animate={{ rotate: isVotersOpen ? 0 : -90 }}
+        <motion.div
+          animate={{ rotate: isVotersOpen ? 180 : 0 }}
           transition={{ duration: 0.3 }}
-          className={`tw-w-4 tw-h-4 tw-flex-shrink-0 ${
-            isVotersOpen
-              ? "tw-text-primary-300"
-              : "tw-text-iron-400 desktop-hover:group-hover:tw-text-primary-300 tw-transition-all tw-duration-300"
-          }`}
-          viewBox="0 0 24 24"
-          fill="none"
-          aria-hidden="true"
-          stroke="currentColor">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M19 9l-7 7-7-7"
-          />
-        </motion.svg>
+        >
+          <ChevronDownIcon className={`tw-w-4 tw-h-4 tw-flex-shrink-0 ${isVotersOpen ? "tw-text-iron-400" : "tw-text-iron-600"}`} />
+        </motion.div>
       </button>
 
       <AnimatePresence>
@@ -76,11 +60,11 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="tw-overflow-hidden tw-ring-1 tw-ring-iron-700 tw-rounded-b-xl tw-bg-iron-900">
+            className="tw-overflow-hidden">
             <div className="tw-max-h-[19.75rem] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
               {voters.length > 0 || isLoading ? (
                 <>
-                  <div className="tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0">
+                  <div className="tw-divide-y tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
                     {voters.map((voter, index) => (
                       <SingleWaveDropVoter
                         voter={voter}
