@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useRef, useEffect } from "react";
 import FormSection from "../ui/FormSection";
 import ValidationError from "../ui/ValidationError";
 import { PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { useMediaUpload, MediaUploadItem } from "../hooks/useMediaUpload";
 
 interface AdditionalMediaUploadProps {
   readonly artistProfileMedia: string[];
@@ -22,8 +23,6 @@ interface AdditionalMediaUploadProps {
 const MAX_FILES = 4;
 
 const AdditionalMediaUpload: React.FC<AdditionalMediaUploadProps> = ({
-  artistProfileMedia,
-  artworkCommentaryMedia,
   artworkCommentary,
   onArtistProfileMediaChange,
   onArtworkCommentaryMediaChange,
@@ -33,47 +32,91 @@ const AdditionalMediaUpload: React.FC<AdditionalMediaUploadProps> = ({
   const artistInputRef = useRef<HTMLInputElement>(null);
   const commentaryInputRef = useRef<HTMLInputElement>(null);
 
+  const artistUpload = useMediaUpload(MAX_FILES);
+  const commentaryUpload = useMediaUpload(MAX_FILES);
+
+  // Sync server URLs to parent when uploads complete
+  useEffect(() => {
+    const urls = artistUpload.getServerUrls();
+    onArtistProfileMediaChange(urls);
+  }, [artistUpload.items, artistUpload.getServerUrls, onArtistProfileMediaChange]);
+
+  useEffect(() => {
+    const urls = commentaryUpload.getServerUrls();
+    onArtworkCommentaryMediaChange(urls);
+  }, [commentaryUpload.items, commentaryUpload.getServerUrls, onArtworkCommentaryMediaChange]);
+
   const handleFileChange = useCallback(
-    (
-      type: "artist" | "commentary",
-      currentMedia: string[],
-      onChange: (media: string[]) => void
-    ) =>
+    (upload: ReturnType<typeof useMediaUpload>) =>
       (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (!files) return;
-
-        const newFiles = Array.from(files);
-        if (currentMedia.length + newFiles.length > MAX_FILES) {
-          // This should ideally be handled by validation or a toast
-          return;
-        }
-
-        // Mocking upload by creating object URLs
-        // In a real scenario, this would involve useFileUploader or similar
-        const newUrls = newFiles.map((file) => URL.createObjectURL(file));
-        onChange([...currentMedia, ...newUrls]);
-        
-        // Reset input
+        upload.addFiles(Array.from(files));
         e.target.value = "";
       },
     []
   );
 
-  const handleRemoveMedia = useCallback(
-    (index: number, currentMedia: string[], onChange: (media: string[]) => void) => {
-      const newMedia = [...currentMedia];
-      newMedia.splice(index, 1);
-      onChange(newMedia);
-    },
-    []
+  const renderMediaItem = (
+    item: MediaUploadItem,
+    onRemove: (id: string) => void
+  ) => (
+    <div
+      key={item.id}
+      className="tw-relative tw-aspect-square tw-rounded-lg tw-overflow-hidden tw-bg-iron-900 tw-border tw-border-iron-800"
+    >
+      <img
+        src={item.previewUrl}
+        alt="Media preview"
+        className={`tw-w-full tw-h-full tw-object-cover ${
+          item.status === "uploading" ? "tw-opacity-50" : ""
+        }`}
+      />
+
+      {/* Upload progress overlay */}
+      {item.status === "uploading" && (
+        <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-bg-iron-900/60">
+          <div className="tw-flex tw-flex-col tw-items-center tw-gap-1">
+            <div className="tw-w-12 tw-h-12 tw-rounded-full tw-border-2 tw-border-primary-400 tw-border-t-transparent tw-animate-spin" />
+            <span className="tw-text-xs tw-text-iron-300">{item.progress}%</span>
+          </div>
+        </div>
+      )}
+
+      {/* Error overlay */}
+      {item.status === "error" && (
+        <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-bg-red/20">
+          <span className="tw-text-xs tw-text-red tw-text-center tw-px-2">
+            {item.error || "Upload failed"}
+          </span>
+        </div>
+      )}
+
+      {/* Remove button */}
+      <button
+        type="button"
+        onClick={() => onRemove(item.id)}
+        className="tw-absolute tw-top-1 tw-right-1 tw-p-1 tw-rounded-full tw-bg-iron-900/80 tw-text-iron-100 hover:tw-text-red tw-transition-colors"
+        aria-label="Remove media"
+      >
+        <XMarkIcon className="tw-w-3 tw-h-3" />
+      </button>
+
+      {/* Success indicator */}
+      {item.status === "done" && (
+        <div className="tw-absolute tw-bottom-1 tw-left-1 tw-p-1 tw-rounded-full tw-bg-green/80">
+          <svg className="tw-w-3 tw-h-3 tw-text-white" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+          </svg>
+        </div>
+      )}
+    </div>
   );
 
   const renderMediaSection = (
     title: string,
-    media: string[],
-    inputRef: React.RefObject<HTMLInputElement>,
-    onChange: (media: string[]) => void,
+    upload: ReturnType<typeof useMediaUpload>,
+    inputRef: React.RefObject<HTMLInputElement | null>,
     error?: string
   ) => (
     <div className="tw-flex tw-flex-col tw-gap-y-2">
@@ -81,13 +124,13 @@ const AdditionalMediaUpload: React.FC<AdditionalMediaUploadProps> = ({
         <span className="tw-text-sm tw-font-medium tw-text-iron-300">{title}</span>
         <button
           type="button"
-          disabled={media.length >= MAX_FILES}
+          disabled={upload.items.length >= MAX_FILES || upload.isUploading}
           onClick={() => inputRef.current?.click()}
           className="tw-flex tw-items-center tw-gap-x-1.5 tw-text-sm tw-font-semibold tw-text-primary-400 hover:tw-text-primary-300 disabled:tw-opacity-50 disabled:tw-cursor-not-allowed tw-transition-colors"
           aria-label={`Add ${title}`}
         >
           <PlusIcon className="tw-w-4 tw-h-4" />
-          Add (Max 4)
+          Add (Max {MAX_FILES})
         </button>
         <input
           type="file"
@@ -95,33 +138,16 @@ const AdditionalMediaUpload: React.FC<AdditionalMediaUploadProps> = ({
           className="tw-hidden"
           accept="image/*,video/*"
           multiple
-          onChange={handleFileChange(
-            title.toLowerCase().includes("artist") ? "artist" : "commentary",
-            media,
-            onChange
-          )}
+          onChange={handleFileChange(upload)}
         />
       </div>
 
-      <div className="tw-grid tw-grid-cols-4 tw-gap-4">
-        {media.map((url, index) => (
-          <div key={index} className="tw-relative tw-aspect-square tw-rounded-lg tw-overflow-hidden tw-bg-iron-900 tw-border tw-border-iron-800">
-            <img
-              src={url}
-              alt={`Media ${index + 1}`}
-              className="tw-w-full tw-h-full tw-object-cover"
-            />
-            <button
-              type="button"
-              onClick={() => handleRemoveMedia(index, media, onChange)}
-              className="tw-absolute tw-top-1 tw-right-1 tw-p-1 tw-rounded-full tw-bg-iron-900/80 tw-text-iron-100 hover:tw-text-red tw-transition-colors"
-              aria-label="Remove media"
-            >
-              <XMarkIcon className="tw-w-3 tw-h-3" />
-            </button>
-          </div>
-        ))}
-      </div>
+      {upload.items.length > 0 && (
+        <div className="tw-grid tw-grid-cols-4 tw-gap-4">
+          {upload.items.map((item) => renderMediaItem(item, upload.removeItem))}
+        </div>
+      )}
+
       <ValidationError error={error} />
     </div>
   );
@@ -131,17 +157,15 @@ const AdditionalMediaUpload: React.FC<AdditionalMediaUploadProps> = ({
       <div className="tw-flex tw-flex-col tw-gap-y-8">
         {renderMediaSection(
           "Artist Profile Media",
-          artistProfileMedia,
+          artistUpload,
           artistInputRef,
-          onArtistProfileMediaChange,
           errors?.artistProfileMedia
         )}
 
         {renderMediaSection(
           "Artwork Commentary Media",
-          artworkCommentaryMedia,
+          commentaryUpload,
           commentaryInputRef,
-          onArtworkCommentaryMediaChange,
           errors?.artworkCommentaryMedia
         )}
 
@@ -160,7 +184,7 @@ const AdditionalMediaUpload: React.FC<AdditionalMediaUploadProps> = ({
               placeholder="Tell us more about the artwork..."
               defaultValue={artworkCommentary}
               onBlur={(e) => onArtworkCommentaryChange(e.target.value)}
-              className={`tw-form-textarea tw-w-full tw-rounded-lg tw-px-4 tw-py-3 tw-text-sm tw-text-iron-100 tw-bg-iron-900 tw-border-0 tw-outline-none tw-ring-1 tw-min-h-[120px] ${
+              className={`tw-form-textarea tw-w-full tw-rounded-lg tw-px-4 tw-py-3 tw-text-sm tw-text-iron-100 tw-bg-iron-900 tw-border-0 tw-outline-none tw-ring-1 tw-min-h-[120px] focus:tw-ring-primary-400 ${
                 errors?.artworkCommentary ? "tw-ring-red" : "tw-ring-iron-700"
               }`}
             />
