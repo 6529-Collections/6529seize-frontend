@@ -15,7 +15,7 @@ Implement the core data structures and the parsing logic for token ID ranges and
     - [x] Sub-task: Implement `validateStrictAddress` utility (Green Phase)
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Foundation & Utility Logic' (Protocol in workflow.md) cc7d52e
 
-## Phase 2: Submission Wizard UI Components
+## Phase 2: Submission Wizard UI Components [checkpoint: 2b6d1ffd9ebf8ec89846ec7364f6cb152f4f5539]
 Create the UI components for the new form fields, adhering to existing submission styles.
 
 - [x] Task: Implement `AirdropAddressFields` component 5b19f0b
@@ -27,19 +27,19 @@ Create the UI components for the new form fields, adhering to existing submissio
 - [x] Task: Implement `AdditionalMediaUpload` component a873a8e
     - [x] Sub-task: Write tests for file type and count restrictions (Red Phase)
     - [x] Sub-task: Implement media uploader for Artist Profile and Commentary Media (Green Phase)
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Submission Wizard UI Components' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Submission Wizard UI Components' (Protocol in workflow.md) 2b6d1ffd9ebf8ec89846ec7364f6cb152f4f5539
 
 ## Phase 3: Wizard Integration & Submission Logic
 Integrate the new step into the submission flow and ensure data is correctly bundled into the metadata.
 
-- [ ] Task: Create "Additional Information" step component
-    - [ ] Sub-task: Implement `AdditionalInfoStep.tsx` combining the components from Phase 2
-- [ ] Task: Integrate new step into the submission container
-    - [ ] Sub-task: Update `MemesArtSubmissionContainer` to include the "Additional Information" step
-    - [ ] Sub-task: Update form state management to track the new field values
-- [ ] Task: Update submission mutation logic
-    - [ ] Sub-task: Write tests to ensure metadata is correctly formatted before API call (Red Phase)
-    - [ ] Sub-task: Modify `useArtworkSubmissionMutation` to bundle new fields into the `metadata` object (Green Phase)
+- [x] Task: Create "Additional Information" step component
+    - [x] Sub-task: Implement `AdditionalInfoStep.tsx` combining the components from Phase 2
+- [x] Task: Integrate new step into the submission container
+    - [x] Sub-task: Update `MemesArtSubmissionContainer` to include the "Additional Information" step
+    - [x] Sub-task: Update form state management to track the new field values
+- [x] Task: Update submission mutation logic
+    - [x] Sub-task: Write tests to ensure metadata is correctly formatted before API call (Red Phase)
+    - [x] Sub-task: Modify `useArtworkSubmissionMutation` to bundle new fields into the `metadata` object (Green Phase)
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Wizard Integration & Submission Logic' (Protocol in workflow.md)
 
 ## Phase 4: Displaying Additional Details

@@ -7,6 +7,7 @@ import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { SubmissionStep } from "./types/Steps";
 import AgreementStep from "./steps/AgreementStep";
 import ArtworkStep from "./steps/ArtworkStep";
+import AdditionalInfoStep from "./steps/AdditionalInfoStep";
 import { useArtworkSubmissionForm } from "./hooks/useArtworkSubmissionForm";
 import { useArtworkSubmissionMutation } from "./hooks/useArtworkSubmissionMutation";
 import { SubmissionPhase } from "./ui/SubmissionProgress";
@@ -70,7 +71,7 @@ const MemesArtSubmissionContainer: React.FC<
   // Handle final submission
   const handleSubmit = async () => {
     // Get submission data including all traits
-    const { traits } = form.getSubmissionData();
+    const { traits, operationalData } = form.getSubmissionData();
     const media = form.getMediaSelection();
 
     if (media.mediaSource === "upload") {
@@ -82,6 +83,7 @@ const MemesArtSubmissionContainer: React.FC<
         {
           imageFile: media.selectedFile,
           traits,
+          operationalData,
           waveId: wave.id,
           termsOfService: wave.participation.terms,
         },
@@ -104,6 +106,7 @@ const MemesArtSubmissionContainer: React.FC<
           mimeType: media.externalMimeType,
         },
         traits,
+        operationalData,
         waveId: wave.id,
         termsOfService: wave.participation.terms,
       },
@@ -153,7 +156,7 @@ const MemesArtSubmissionContainer: React.FC<
         onExternalProviderChange={form.setExternalMediaProvider}
         onExternalMimeTypeChange={form.setExternalMediaMimeType}
         onClearExternalMedia={form.clearExternalMedia}
-        onSubmit={handleSubmit}
+        onSubmit={form.handleContinueFromArtwork}
         onCancel={onClose}
         updateTraitField={form.updateTraitField}
         setTraits={form.setTraits}
@@ -162,6 +165,33 @@ const MemesArtSubmissionContainer: React.FC<
         uploadProgress={uploadProgress}
         fileInfo={fileInfo}
         submissionError={submissionError}
+      />
+    ),
+    [SubmissionStep.ADDITIONAL_INFO]: (
+      <AdditionalInfoStep
+        airdropArtistAddress={form.operationalData.airdrop_info.airdrop_artist_address}
+        airdropArtistCount={form.operationalData.airdrop_info.airdrop_artist_count}
+        airdropChoiceAddress={form.operationalData.airdrop_info.airdrop_choice_address}
+        airdropChoiceCount={form.operationalData.airdrop_info.airdrop_choice_count}
+        allowlistBatches={form.operationalData.allowlist_batches}
+        artistProfileMedia={form.operationalData.additional_media.artist_profile_media}
+        artworkCommentaryMedia={form.operationalData.additional_media.artwork_commentary_media}
+        artworkCommentary={form.operationalData.commentary}
+        onArtistAddressChange={(val) => form.setAirdropInfo({ airdrop_artist_address: val })}
+        onArtistCountChange={(val) => form.setAirdropInfo({ airdrop_artist_count: val })}
+        onChoiceAddressChange={(val) => form.setAirdropInfo({ airdrop_choice_address: val })}
+        onChoiceCountChange={(val) => form.setAirdropInfo({ airdrop_choice_count: val })}
+        onBatchesChange={form.setAllowlistBatches}
+        onArtistProfileMediaChange={(val) =>
+          form.setAdditionalMedia({ artist_profile_media: val })
+        }
+        onArtworkCommentaryMediaChange={(val) =>
+          form.setAdditionalMedia({ artwork_commentary_media: val })
+        }
+        onArtworkCommentaryChange={form.setCommentary}
+        onBack={form.handleBackToArtwork}
+        onSubmit={handleSubmit}
+        isSubmitting={isSubmitting}
       />
     ),
   };

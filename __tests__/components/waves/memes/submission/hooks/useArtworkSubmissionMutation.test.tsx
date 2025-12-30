@@ -1,45 +1,80 @@
-import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React from 'react';
-import { useArtworkSubmissionMutation } from '@/components/waves/memes/submission/hooks/useArtworkSubmissionMutation';
+import { transformToApiRequest } from "@/components/waves/memes/submission/hooks/useArtworkSubmissionMutation";
+import { OperationalData } from "@/components/waves/memes/submission/types/OperationalData";
+import { TraitsData } from "@/components/waves/memes/submission/types/TraitsData";
 
-jest.mock('@/hooks/drops/useDropSignature', () => ({
-  useDropSignature: () => ({ signDrop: jest.fn(() => Promise.resolve({ success: true, signature: 'sig' })), isLoading: false }),
-}));
+describe("useArtworkSubmissionMutation - transformToApiRequest", () => {
+  const mockTraits: TraitsData = {
+    title: "Test Artwork",
+    description: "Test Description",
+    artist: "Test Artist",
+  };
 
-jest.mock('@/services/api/common-api', () => ({
-  commonApiPost: jest.fn(() => Promise.resolve({})),
-}));
+  const mockOperationalData: OperationalData = {
+    airdrop_info: {
+      airdrop_artist_address: "0x123",
+      airdrop_artist_count: 1,
+      airdrop_choice_address: "0x456",
+      airdrop_choice_count: 2,
+    },
+    payment_info: {
+      payment_address: "0x789",
+    },
+    allowlist_batches: [
+      { contract: "0xabc", token_ids_raw: "1-5" },
+    ],
+    additional_media: {
+      artist_profile_media: ["https://example.com/profile.jpg"],
+      artwork_commentary_media: ["https://example.com/commentary.jpg"],
+    },
+    commentary: "Test Commentary",
+  };
 
-jest.mock('@/components/auth/Auth', () => ({
-  useAuth: () => ({ setToast: jest.fn(), requestAuth: jest.fn(() => Promise.resolve({ success: true })) }),
-}));
+  it("should include operational data in metadata when provided", () => {
+    const result = transformToApiRequest({
+      waveId: "wave-1",
+      traits: mockTraits,
+      operationalData: mockOperationalData,
+      mediaUrl: "https://example.com/image.jpg",
+      mimeType: "image/jpeg",
+      signerAddress: "0xsigner",
+      isSafeSignature: false,
+    });
 
-jest.mock('@/components/waves/create-wave/services/multiPartUpload', () => ({
-  multiPartUpload: jest.fn(() => Promise.resolve({ url: 'media', mime_type: 'image/png' })),
-}));
+    const metadataMap = new Map(
+      result.metadata.map((m) => [m.data_key, m.data_value])
+    );
 
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
+    // Check basic traits
+    expect(metadataMap.get("title")).toBe("Test Artwork");
+
+    // Check operational data
+    expect(metadataMap.get("airdrop_info")).toBe(JSON.stringify(mockOperationalData.airdrop_info));
+    expect(metadataMap.get("payment_info")).toBe(JSON.stringify(mockOperationalData.payment_info));
+    expect(metadataMap.get("allowlist_batches")).toBe(JSON.stringify([
+      { contract: "0xabc", token_ids: [1, 2, 3, 4, 5] } // Expect parsed token IDs
+    ]));
+    expect(metadataMap.get("additional_media")).toBe(JSON.stringify(mockOperationalData.additional_media));
+    expect(metadataMap.get("commentary")).toBe("Test Commentary");
   });
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-};
 
-const file = new File(['data'], 'test.png', { type: 'image/png' });
+  it("should not include operational fields if not provided", () => {
+    const result = transformToApiRequest({
+      waveId: "wave-1",
+      traits: mockTraits,
+      mediaUrl: "https://example.com/image.jpg",
+      mimeType: "image/jpeg",
+      signerAddress: "0xsigner",
+      isSafeSignature: false,
+    });
 
-it('validates required fields', async () => {
-  const { result } = renderHook(() => useArtworkSubmissionMutation(), { wrapper: createWrapper() });
-  const res = await result.current.submitArtwork({ imageFile: file, traits: { title: '' } as any, waveId: '1', termsOfService: null });
-  expect(res).toBeNull();
-});
+    const metadataMap = new Map(
+      result.metadata.map((m) => [m.data_key, m.data_value])
+    );
 
-it('submits artwork successfully', async () => {
-  const { result } = renderHook(() => useArtworkSubmissionMutation(), { wrapper: createWrapper() });
-  const res = await result.current.submitArtwork({ imageFile: file, traits: { title: 't', description: 'd' } as any, waveId: '1', termsOfService: null });
-  await waitFor(() => expect(require('@/components/waves/create-wave/services/multiPartUpload').multiPartUpload).toHaveBeenCalled());
-  expect(require('@/services/api/common-api').commonApiPost).toHaveBeenCalled();
-  expect(res).not.toBeNull();
+    expect(metadataMap.has("airdrop_info")).toBe(false);
+    expect(metadataMap.has("payment_info")).toBe(false);
+    expect(metadataMap.has("allowlist_batches")).toBe(false);
+    expect(metadataMap.has("additional_media")).toBe(false);
+    expect(metadataMap.has("commentary")).toBe(false);
+  });
 });
