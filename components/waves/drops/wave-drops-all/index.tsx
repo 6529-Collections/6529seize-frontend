@@ -71,6 +71,9 @@ const WaveDropsAllInner: React.FC<WaveDropsAllInnerProps> = ({
   initialDrop,
   onDropContentClick,
   bottomPaddingClassName,
+  waveMessages,
+  fetchNextPage,
+  waitAndRevealDrop,
   isMuted = false,
 }) => {
   const router = useRouter();
@@ -78,9 +81,6 @@ const WaveDropsAllInner: React.FC<WaveDropsAllInnerProps> = ({
   const { connectedProfile } = useAuth();
   const { isAppleMobile } = useDeviceInfo();
   const containerRef = useRef<HTMLDivElement | null>(null);
-
-  const { waveMessages, fetchNextPage, waitAndRevealDrop } =
-    useVirtualizedWaveDrops(waveId, dropId);
 
   const { unreadDividerSerialNo, setUnreadDividerSerialNo } =
     useUnreadDivider();
