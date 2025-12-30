@@ -50,12 +50,7 @@ describe('MemesArtSubmissionContainer', () => {
       externalMediaValidationStatus: 'idle',
       isExternalMediaValid: false,
       operationalData: {
-        airdrop_info: {
-          airdrop_artist_address: "",
-          airdrop_artist_count: 0,
-          airdrop_choice_address: "",
-          airdrop_choice_count: 0,
-        },
+        airdrop_config: [{ address: "", count: 20 }],
         payment_info: {
           payment_address: "",
         },
@@ -66,7 +61,7 @@ describe('MemesArtSubmissionContainer', () => {
         },
         commentary: "",
       },
-      setAirdropInfo: jest.fn(),
+      setAirdropConfig: jest.fn(),
       setPaymentInfo: jest.fn(),
       setAllowlistBatches: jest.fn(),
       setAdditionalMedia: jest.fn(),

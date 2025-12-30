@@ -61,11 +61,17 @@ export const transformToApiRequest = (data: {
 
   // Append operational data if provided
   if (operationalData) {
-    if (operationalData.airdrop_info) {
-      metadata.push({
-        data_key: "airdrop_info",
-        data_value: JSON.stringify(operationalData.airdrop_info),
-      });
+    if (operationalData.airdrop_config && operationalData.airdrop_config.length > 0) {
+      // Filter out entries with empty addresses before saving
+      const validEntries = operationalData.airdrop_config.filter(
+        (e) => e.address && e.count > 0
+      );
+      if (validEntries.length > 0) {
+        metadata.push({
+          data_key: "airdrop_config",
+          data_value: JSON.stringify(validEntries),
+        });
+      }
     }
 
     if (operationalData.payment_info) {

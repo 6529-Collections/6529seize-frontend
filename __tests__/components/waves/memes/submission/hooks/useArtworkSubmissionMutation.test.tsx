@@ -10,12 +10,10 @@ describe("useArtworkSubmissionMutation - transformToApiRequest", () => {
   };
 
   const mockOperationalData: OperationalData = {
-    airdrop_info: {
-      airdrop_artist_address: "0x123",
-      airdrop_artist_count: 1,
-      airdrop_choice_address: "0x456",
-      airdrop_choice_count: 2,
-    },
+    airdrop_config: [
+      { address: "0x1234567890123456789012345678901234567890", count: 15 },
+      { address: "0x0987654321098765432109876543210987654321", count: 5 },
+    ],
     payment_info: {
       payment_address: "0x789",
     },
@@ -48,7 +46,7 @@ describe("useArtworkSubmissionMutation - transformToApiRequest", () => {
     expect(metadataMap.get("title")).toBe("Test Artwork");
 
     // Check operational data
-    expect(metadataMap.get("airdrop_info")).toBe(JSON.stringify(mockOperationalData.airdrop_info));
+    expect(metadataMap.get("airdrop_config")).toBe(JSON.stringify(mockOperationalData.airdrop_config));
     expect(metadataMap.get("payment_info")).toBe(JSON.stringify(mockOperationalData.payment_info));
     expect(metadataMap.get("allowlist_batches")).toBe(JSON.stringify([
       { contract: "0xabc", token_ids: [1, 2, 3, 4, 5] } // Expect parsed token IDs
@@ -71,7 +69,7 @@ describe("useArtworkSubmissionMutation - transformToApiRequest", () => {
       result.metadata.map((m) => [m.data_key, m.data_value])
     );
 
-    expect(metadataMap.has("airdrop_info")).toBe(false);
+    expect(metadataMap.has("airdrop_config")).toBe(false);
     expect(metadataMap.has("payment_info")).toBe(false);
     expect(metadataMap.has("allowlist_batches")).toBe(false);
     expect(metadataMap.has("additional_media")).toBe(false);

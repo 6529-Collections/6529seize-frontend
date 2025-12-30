@@ -2,24 +2,19 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import AirdropAddressFields from "../components/AirdropAddressFields";
+import AirdropConfig from "../components/AirdropConfig";
 import AllowlistBatchManager, { AllowlistBatchRaw } from "../components/AllowlistBatchManager";
 import AdditionalMediaUpload from "../components/AdditionalMediaUpload";
 import { validateStrictAddress } from "../utils/addressValidation";
+import { AirdropEntry, AIRDROP_TOTAL } from "../types/OperationalData";
 
 interface AdditionalInfoStepProps {
-  readonly airdropArtistAddress: string;
-  readonly airdropArtistCount: number;
-  readonly airdropChoiceAddress: string;
-  readonly airdropChoiceCount: number;
+  readonly airdropEntries: AirdropEntry[];
+  readonly onAirdropEntriesChange: (entries: AirdropEntry[]) => void;
   readonly allowlistBatches: AllowlistBatchRaw[];
   readonly artistProfileMedia: string[];
   readonly artworkCommentaryMedia: string[];
   readonly artworkCommentary: string;
-  readonly onArtistAddressChange: (address: string) => void;
-  readonly onArtistCountChange: (count: number) => void;
-  readonly onChoiceAddressChange: (address: string) => void;
-  readonly onChoiceCountChange: (count: number) => void;
   readonly onBatchesChange: (batches: AllowlistBatchRaw[]) => void;
   readonly onArtistProfileMediaChange: (media: string[]) => void;
   readonly onArtworkCommentaryMediaChange: (media: string[]) => void;
@@ -30,18 +25,12 @@ interface AdditionalInfoStepProps {
 }
 
 const AdditionalInfoStep: React.FC<AdditionalInfoStepProps> = ({
-  airdropArtistAddress,
-  airdropArtistCount,
-  airdropChoiceAddress,
-  airdropChoiceCount,
+  airdropEntries,
+  onAirdropEntriesChange,
   allowlistBatches,
   artistProfileMedia,
   artworkCommentaryMedia,
   artworkCommentary,
-  onArtistAddressChange,
-  onArtistCountChange,
-  onChoiceAddressChange,
-  onChoiceCountChange,
   onBatchesChange,
   onArtistProfileMediaChange,
   onArtworkCommentaryMediaChange,
@@ -50,20 +39,26 @@ const AdditionalInfoStep: React.FC<AdditionalInfoStepProps> = ({
   onSubmit,
   isSubmitting,
 }) => {
-  const getAddressError = (address: string) => {
-    return address && !validateStrictAddress(address)
-      ? "Invalid Ethereum address (0x... 42 chars)"
-      : null;
-  };
-
   const getContractError = (address: string) => {
     return address && !validateStrictAddress(address) ? "Invalid contract" : undefined;
   };
 
   const isFormValid = () => {
-    // Check main addresses
-    if (airdropArtistAddress && !validateStrictAddress(airdropArtistAddress)) return false;
-    if (airdropChoiceAddress && !validateStrictAddress(airdropChoiceAddress)) return false;
+    // Validate airdrop entries
+    const totalAllocated = airdropEntries.reduce((sum, e) => sum + (e.count || 0), 0);
+    if (totalAllocated !== AIRDROP_TOTAL) return false;
+
+    // At least one valid address required
+    const hasValidAddress = airdropEntries.some(
+      (e) => e.address && validateStrictAddress(e.address) && e.count > 0
+    );
+    if (!hasValidAddress) return false;
+
+    // All provided addresses must be valid
+    const hasInvalidAddress = airdropEntries.some(
+      (e) => e.address && !validateStrictAddress(e.address)
+    );
+    if (hasInvalidAddress) return false;
 
     // Check allowlist batches
     const hasInvalidBatch = allowlistBatches.some(
@@ -86,17 +81,9 @@ const AdditionalInfoStep: React.FC<AdditionalInfoStepProps> = ({
           Complete the following details for distribution and storytelling purposes.
         </p>
 
-        <AirdropAddressFields
-          airdropArtistAddress={airdropArtistAddress}
-          airdropArtistCount={airdropArtistCount}
-          airdropChoiceAddress={airdropChoiceAddress}
-          airdropChoiceCount={airdropChoiceCount}
-          onArtistAddressChange={onArtistAddressChange}
-          onArtistCountChange={onArtistCountChange}
-          onChoiceAddressChange={onChoiceAddressChange}
-          onChoiceCountChange={onChoiceCountChange}
-          artistAddressError={getAddressError(airdropArtistAddress)}
-          choiceAddressError={getAddressError(airdropChoiceAddress)}
+        <AirdropConfig
+          entries={airdropEntries}
+          onEntriesChange={onAirdropEntriesChange}
         />
 
         <AllowlistBatchManager

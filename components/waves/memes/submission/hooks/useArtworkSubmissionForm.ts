@@ -7,10 +7,11 @@ import { useAuth } from "@/components/auth/Auth";
 import { getInitialTraitsValues } from "@/components/waves/memes/traits/schema";
 import {
   OperationalData,
-  AirdropInfo,
+  AirdropEntry,
   PaymentInfo,
-  AllowlistBatch,
+  AllowlistBatchRaw,
   AdditionalMedia,
+  AIRDROP_TOTAL,
 } from "../types/OperationalData";
 import {
   DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE,
@@ -60,9 +61,9 @@ type FormAction =
       payload: { file: File; artworkUrl: string };
     }
   | { type: "RESET_UPLOAD_MEDIA" }
-  | { type: "SET_AIRDROP_INFO"; payload: Partial<AirdropInfo> }
+  | { type: "SET_AIRDROP_CONFIG"; payload: AirdropEntry[] }
   | { type: "SET_PAYMENT_INFO"; payload: Partial<PaymentInfo> }
-  | { type: "SET_ALLOWLIST_BATCHES"; payload: AllowlistBatch[] }
+  | { type: "SET_ALLOWLIST_BATCHES"; payload: AllowlistBatchRaw[] }
   | { type: "SET_ADDITIONAL_MEDIA"; payload: Partial<AdditionalMedia> }
   | { type: "SET_COMMENTARY"; payload: string };
 
@@ -325,15 +326,12 @@ function formReducer(state: FormState, action: FormAction): FormState {
       };
     }
 
-    case "SET_AIRDROP_INFO":
+    case "SET_AIRDROP_CONFIG":
       return {
         ...state,
         operationalData: {
           ...state.operationalData,
-          airdrop_info: {
-            ...state.operationalData.airdrop_info,
-            ...action.payload,
-          },
+          airdrop_config: action.payload,
         },
       };
 
@@ -409,12 +407,7 @@ export function useArtworkSubmissionForm() {
       isValid: false,
     },
     operationalData: {
-      airdrop_info: {
-        airdrop_artist_address: "",
-        airdrop_artist_count: 0,
-        airdrop_choice_address: "",
-        airdrop_choice_count: 0,
-      },
+      airdrop_config: [{ address: "", count: AIRDROP_TOTAL }],
       payment_info: {
         payment_address: "",
       },
@@ -665,9 +658,9 @@ export function useArtworkSubmissionForm() {
     dispatch({ type: "SET_MULTIPLE_TRAITS", payload: traitsUpdate });
   }, []);
 
-  const setAirdropInfo = useCallback(
-    (airdropInfo: Partial<AirdropInfo>) => {
-      dispatch({ type: "SET_AIRDROP_INFO", payload: airdropInfo });
+  const setAirdropConfig = useCallback(
+    (entries: AirdropEntry[]) => {
+      dispatch({ type: "SET_AIRDROP_CONFIG", payload: entries });
     },
     [dispatch]
   );
@@ -680,7 +673,7 @@ export function useArtworkSubmissionForm() {
   );
 
   const setAllowlistBatches = useCallback(
-    (batches: AllowlistBatch[]) => {
+    (batches: AllowlistBatchRaw[]) => {
       dispatch({ type: "SET_ALLOWLIST_BATCHES", payload: batches });
     },
     [dispatch]
@@ -734,7 +727,7 @@ export function useArtworkSubmissionForm() {
     updateTraitField,
 
     operationalData: state.operationalData,
-    setAirdropInfo,
+    setAirdropConfig,
     setPaymentInfo,
     setAllowlistBatches,
     setAdditionalMedia,

@@ -169,18 +169,12 @@ const MemesArtSubmissionContainer: React.FC<
     ),
     [SubmissionStep.ADDITIONAL_INFO]: (
       <AdditionalInfoStep
-        airdropArtistAddress={form.operationalData.airdrop_info.airdrop_artist_address}
-        airdropArtistCount={form.operationalData.airdrop_info.airdrop_artist_count}
-        airdropChoiceAddress={form.operationalData.airdrop_info.airdrop_choice_address}
-        airdropChoiceCount={form.operationalData.airdrop_info.airdrop_choice_count}
+        airdropEntries={form.operationalData.airdrop_config}
+        onAirdropEntriesChange={form.setAirdropConfig}
         allowlistBatches={form.operationalData.allowlist_batches}
         artistProfileMedia={form.operationalData.additional_media.artist_profile_media}
         artworkCommentaryMedia={form.operationalData.additional_media.artwork_commentary_media}
         artworkCommentary={form.operationalData.commentary}
-        onArtistAddressChange={(val) => form.setAirdropInfo({ airdrop_artist_address: val })}
-        onArtistCountChange={(val) => form.setAirdropInfo({ airdrop_artist_count: val })}
-        onChoiceAddressChange={(val) => form.setAirdropInfo({ airdrop_choice_address: val })}
-        onChoiceCountChange={(val) => form.setAirdropInfo({ airdrop_choice_count: val })}
         onBatchesChange={form.setAllowlistBatches}
         onArtistProfileMediaChange={(val) =>
           form.setAdditionalMedia({ artist_profile_media: val })

@@ -4,11 +4,9 @@ import React, { useCallback } from "react";
 import FormSection from "../ui/FormSection";
 import ValidationError from "../ui/ValidationError";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { AllowlistBatchRaw } from "../types/OperationalData";
 
-export interface AllowlistBatchRaw {
-  contract: string;
-  token_ids_raw: string;
-}
+export type { AllowlistBatchRaw };
 
 interface AllowlistBatchManagerProps {
   readonly batches: AllowlistBatchRaw[];
