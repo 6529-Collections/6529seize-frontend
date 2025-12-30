@@ -1,28 +1,30 @@
 "use client";
 
-import { useContext, useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { useParams, useRouter } from "next/navigation";
+import { useContext, useMemo, useState } from "react";
 
+import { AuthContext } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { AuthContext } from "@/components/auth/Auth";
-import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { amIUser } from "@/helpers/Helpers";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
+import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useIdentity } from "@/hooks/useIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
-import UserPageHeaderBanner from "./banner/UserPageHeaderBanner";
-import UserPageHeaderPfpWrapper from "./pfp/UserPageHeaderPfpWrapper";
-import UserPageHeaderPfp from "./pfp/UserPageHeaderPfp";
-import UserPageHeaderName from "./name/UserPageHeaderName";
-import UserPageHeaderAbout from "./about/UserPageHeaderAbout";
-import UserPageHeaderStats from "./stats/UserPageHeaderStats";
-import UserPageHeaderProfileEnabledAt from "./UserPageHeaderProfileEnabledAt";
 import UserLevel from "../utils/level/UserLevel";
 import UserFollowBtn from "../utils/UserFollowBtn";
-import { useIdentity } from "@/hooks/useIdentity";
+import UserPageHeaderAbout from "./about/UserPageHeaderAbout";
+import UserPageHeaderBanner from "./banner/UserPageHeaderBanner";
+import UserPageHeaderName from "./name/UserPageHeaderName";
+import UserPageHeaderPfp from "./pfp/UserPageHeaderPfp";
+import UserPageHeaderPfpWrapper from "./pfp/UserPageHeaderPfpWrapper";
+import UserPageHeaderStats from "./stats/UserPageHeaderStats";
+import UserPageHeaderProfileEnabledAt from "./UserPageHeaderProfileEnabledAt";
 
 type Props = {
   readonly profile: ApiIdentity;
@@ -47,6 +49,7 @@ export default function UserPageHeaderClient({
 }: Readonly<Props>) {
   const params = useParams();
   const router = useRouter();
+  const { isApp } = useDeviceInfo();
   const routeHandleOrWallet = params?.user?.toString().toLowerCase() ?? null;
   const normalizedHandleOrWallet =
     routeHandleOrWallet ?? handleOrWallet.toLowerCase();
@@ -134,7 +137,7 @@ export default function UserPageHeaderClient({
       const wave = await createDirectMessageWave({
         addresses: [primaryWallet],
       });
-      router.push(`/waves/${wave.id}`);
+      navigateToDirectMessage({ waveId: wave.id, router, isApp });
     } catch (error) {
       console.error(error);
       const errorMessage =
@@ -178,7 +181,7 @@ export default function UserPageHeaderClient({
                     onDirectMessage={
                       profile.primary_wallet
                         ? () =>
-                          handleCreateDirectMessage(profile.primary_wallet)
+                            handleCreateDirectMessage(profile.primary_wallet)
                         : undefined
                     }
                     directMessageLoading={directMessageLoading}

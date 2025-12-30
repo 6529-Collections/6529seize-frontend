@@ -1,13 +1,15 @@
-import type { MutableRefObject } from "react";
 import DropsList from "@/components/drops/view/DropsList";
 import { WaveDropsReverseContainer } from "@/components/waves/drops/WaveDropsReverseContainer";
 import { WaveDropsScrollBottomButton } from "@/components/waves/drops/WaveDropsScrollBottomButton";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import type { MutableRefObject } from "react";
 
-type WaveMessagesResult = ReturnType<typeof useVirtualizedWaveDrops>["waveMessages"];
+type WaveMessagesResult = ReturnType<
+  typeof useVirtualizedWaveDrops
+>["waveMessages"];
 
 interface WaveDropsMessageListSectionProps {
   readonly waveMessages: WaveMessagesResult;
@@ -40,6 +42,7 @@ interface WaveDropsMessageListSectionProps {
   readonly pendingCount: number;
   readonly onRevealPending: () => void;
   readonly bottomPaddingClassName?: string;
+  readonly unreadDividerSerialNo?: number | null;
 }
 
 const MIN_DROPS_FOR_PAGINATION = 25;
@@ -65,6 +68,7 @@ export const WaveDropsMessageListSection: React.FC<
   pendingCount,
   onRevealPending,
   bottomPaddingClassName,
+  unreadDividerSerialNo,
 }) => {
   const hasNextPage =
     !!waveMessages?.hasNextPage &&
@@ -77,8 +81,7 @@ export const WaveDropsMessageListSection: React.FC<
         isFetchingNextPage={!!waveMessages?.isLoadingNextPage}
         hasNextPage={hasNextPage}
         onTopIntersection={onTopIntersection}
-        bottomPaddingClassName={bottomPaddingClassName}
-      >
+        bottomPaddingClassName={bottomPaddingClassName}>
         <DropsList
           scrollContainerRef={scrollContainerRef}
           onReplyClick={queueSerialTarget}
@@ -94,6 +97,7 @@ export const WaveDropsMessageListSection: React.FC<
           parentContainerRef={scrollContainerRef}
           dropViewDropId={dropId}
           onDropContentClick={onDropContentClick}
+          unreadDividerSerialNo={unreadDividerSerialNo}
           key="drops-list"
         />
         <div ref={bottomAnchorRef} style={{ height: "1px" }} />

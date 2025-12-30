@@ -39,10 +39,8 @@ export function useUnreadIndicator({
     if (type === "notifications") {
       setHasUnread(haveUnreadNotifications);
     } else if (type === "messages") {
-      // For messages, check if any DM has unread drops
       const hasUnreadMessages = directMessages.list.some((dm) => {
-        // Use the count property which tracks actual unread drops
-        return (dm?.newDropsCount?.count ?? 0) > 0;
+        return (dm?.unreadDropsCount ?? 0) > 0 || (dm?.newDropsCount?.count ?? 0) > 0;
       });
 
       setHasUnread(hasUnreadMessages);

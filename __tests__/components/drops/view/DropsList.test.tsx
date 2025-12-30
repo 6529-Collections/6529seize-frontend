@@ -46,6 +46,11 @@ jest.mock("@/components/drops/view/HighlightDropWrapper", () => ({
   },
 }));
 
+jest.mock("@/components/drops/view/UnreadDivider", () => ({
+  __esModule: true,
+  default: () => <div data-testid="unread-divider" />,
+}));
+
 describe("DropsList", () => {
   beforeEach(() => {
     dropProps = [];
@@ -83,5 +88,93 @@ describe("DropsList", () => {
     expect(screen.getAllByTestId("highlight")).toHaveLength(2);
     expect(dropProps).toHaveLength(1);
     expect(lightProps).toHaveLength(1);
+  });
+
+  it("renders unread divider when unreadDividerSerialNo matches a drop", () => {
+    const drops: any = [
+      { stableKey: "a", serial_no: 1, type: DropSize.FULL, wave: { id: "w" } },
+      { stableKey: "b", serial_no: 2, type: DropSize.FULL, wave: { id: "w" } },
+      { stableKey: "c", serial_no: 3, type: DropSize.FULL, wave: { id: "w" } },
+    ];
+
+    render(
+      <DropsList
+        scrollContainerRef={{ current: null }}
+        drops={drops}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={false}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onReplyClick={jest.fn()}
+        serialNo={null}
+        targetDropRef={null}
+        parentContainerRef={undefined}
+        onQuoteClick={jest.fn()}
+        onDropContentClick={jest.fn()}
+        dropViewDropId={null}
+        unreadDividerSerialNo={2}
+      />
+    );
+
+    expect(screen.getByTestId("unread-divider")).toBeInTheDocument();
+  });
+
+  it("does not render unread divider when unreadDividerSerialNo is null", () => {
+    const drops: any = [
+      { stableKey: "a", serial_no: 1, type: DropSize.FULL, wave: { id: "w" } },
+      { stableKey: "b", serial_no: 2, type: DropSize.FULL, wave: { id: "w" } },
+    ];
+
+    render(
+      <DropsList
+        scrollContainerRef={{ current: null }}
+        drops={drops}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={false}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onReplyClick={jest.fn()}
+        serialNo={null}
+        targetDropRef={null}
+        parentContainerRef={undefined}
+        onQuoteClick={jest.fn()}
+        onDropContentClick={jest.fn()}
+        dropViewDropId={null}
+        unreadDividerSerialNo={null}
+      />
+    );
+
+    expect(screen.queryByTestId("unread-divider")).not.toBeInTheDocument();
+  });
+
+  it("does not render unread divider when unreadDividerSerialNo does not match any drop", () => {
+    const drops: any = [
+      { stableKey: "a", serial_no: 1, type: DropSize.FULL, wave: { id: "w" } },
+      { stableKey: "b", serial_no: 2, type: DropSize.FULL, wave: { id: "w" } },
+    ];
+
+    render(
+      <DropsList
+        scrollContainerRef={{ current: null }}
+        drops={drops}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={false}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onReplyClick={jest.fn()}
+        serialNo={null}
+        targetDropRef={null}
+        parentContainerRef={undefined}
+        onQuoteClick={jest.fn()}
+        onDropContentClick={jest.fn()}
+        dropViewDropId={null}
+        unreadDividerSerialNo={999}
+      />
+    );
+
+    expect(screen.queryByTestId("unread-divider")).not.toBeInTheDocument();
   });
 });

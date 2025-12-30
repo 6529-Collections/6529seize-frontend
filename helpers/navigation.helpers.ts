@@ -69,3 +69,24 @@ export const getWaveHomeRoute = ({
     ? getMessagesBaseRoute(isApp)
     : getWavesBaseRoute(isApp);
 };
+
+export const navigateToDirectMessage = ({
+  waveId,
+  router,
+  isApp,
+}: {
+  waveId: string;
+  router: { push: (url: string) => void; replace: (url: string) => void };
+  isApp: boolean;
+}): void => {
+  const href = getWaveRoute({
+    waveId,
+    isDirectMessage: true,
+    isApp,
+  });
+  if (isApp) {
+    router.replace(href);
+  } else {
+    router.push(href);
+  }
+};

@@ -696,6 +696,28 @@ paths:
                 $ref: "#/components/schemas/ApiDropSubscriptionActions"
         "404":
           description: Wave not found
+  /drops/{dropId}/mark-unread:
+    post:
+      tags:
+        - Drops
+      summary: Mark a drop and all subsequent drops in the wave as unread
+      description: Sets the user's latest_read_timestamp to just before this drop's created_at, making this drop and all newer drops unread.
+      operationId: markDropUnread
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMarkDropUnreadResponse"
+        "404":
+          description: Drop not found
   /drop-media/prep:
     post:
       tags:
@@ -3687,6 +3709,45 @@ paths:
               schema:
                 type: object
                 additionalProperties: false
+  /waves/{id}/mute:
+    post:
+      tags:
+        - Waves
+      summary: Mute a wave
+      operationId: muteWave
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+    delete:
+      tags:
+        - Waves
+      summary: Unmute a wave
+      operationId: unmuteWave
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
   /waves/{id}/leaderboard:
     get:
       tags:
@@ -5873,6 +5934,16 @@ components:
       enum:
         - DROP_REPLIED
         - DROP_VOTED
+    ApiMarkDropUnreadResponse:
+      type: object
+      required:
+        - your_unread_drops_count
+      properties:
+        your_unread_drops_count:
+          type: integer
+        first_unread_drop_serial_no:
+          type: integer
+          nullable: true
     ApiDropTraceItem:
       type: object
       required:
@@ -7969,6 +8040,10 @@ components:
         - drops_count
         - latest_drop_timestamp
         - your_participation_drops_count
+        - your_latest_drop_timestamp
+        - your_unread_drops_count
+        - your_latest_read_timestamp
+        - muted
       properties:
         subscribers_count:
           type: number
@@ -7988,6 +8063,17 @@ components:
         your_latest_drop_timestamp:
           type: number
           format: int64
+        your_unread_drops_count:
+          type: number
+          format: int64
+        first_unread_drop_serial_no:
+          type: number
+          format: int64
+        your_latest_read_timestamp:
+          type: number
+          format: int64
+        muted:
+          type: boolean
     ApiWaveMin:
       required:
         - id

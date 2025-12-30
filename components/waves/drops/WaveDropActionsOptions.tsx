@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
-import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import DropsListItemDeleteDropModal from "@/components/drops/view/item/options/delete/DropsListItemDeleteDropModal";
-import { Tooltip } from "react-tooltip";
+import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
+import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import { TrashIcon } from "@heroicons/react/24/outline";
+import React, { useState } from "react";
+import { Tooltip } from "react-tooltip";
 
 interface WaveDropActionsOptionsProps {
   readonly drop: ApiDrop;
@@ -32,18 +32,10 @@ const WaveDropActionsOptions: React.FC<WaveDropActionsOptionsProps> = ({
       <Tooltip
         id={`delete-${drop.id}`}
         place="top"
-        offset={8}
-        opacity={1}
         style={{
-          padding: "4px 8px",
-          background: "#37373E",
+          backgroundColor: "#1F2937",
           color: "white",
-          fontSize: "13px",
-          fontWeight: 500,
-          borderRadius: "6px",
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-          zIndex: 99999,
-          pointerEvents: "none",
+          padding: "4px 8px",
         }}>
         <span className="tw-text-xs">Delete</span>
       </Tooltip>

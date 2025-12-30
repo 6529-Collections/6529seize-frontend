@@ -9,6 +9,7 @@ import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
 import React, {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -40,11 +41,19 @@ interface WavesContextData {
   readonly fetchNextPage: () => void;
   readonly addPinnedWave: (id: string) => void;
   readonly removePinnedWave: (id: string) => void;
+  readonly restoreWaveUnreadCount: (waveId: string, count?: number) => void;
 }
 
 interface ActiveWaveContextData {
   readonly id: string | null;
-  readonly set: (waveId: string | null, options?: { isDirectMessage?: boolean; replace?: boolean }) => void;
+  readonly set: (
+    waveId: string | null,
+    options?: {
+      isDirectMessage?: boolean;
+      replace?: boolean;
+      serialNo?: number | string | null;
+    }
+  ) => void;
 }
 
 // Define the interface for the wave messages store functions
@@ -108,6 +117,19 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     removeDrop: waveMessagesStore.removeDrop,
   });
 
+  const wavesRef = useRef(wavesHookData.waves);
+  const dmWavesRef = useRef(dmWavesHookData.waves);
+  wavesRef.current = wavesHookData.waves;
+  dmWavesRef.current = dmWavesHookData.waves;
+
+  const isWaveMuted = useCallback((waveId: string): boolean => {
+    const wave = wavesRef.current.find((w) => w.id === waveId);
+    if (wave) return wave.isMuted;
+    const dmWave = dmWavesRef.current.find((w) => w.id === waveId);
+    if (dmWave) return dmWave.isMuted;
+    return false;
+  }, []);
+
   // Instantiate the real-time updater hook
   const { processIncomingDrop, processDropRemoved } = useWaveRealtimeUpdater({
     activeWaveId,
@@ -117,6 +139,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     syncNewestMessages: waveDataManager.syncNewestMessages,
     removeDrop: waveMessagesStore.removeDrop,
     removeWaveDeliveredNotifications,
+    isWaveMuted,
   });
 
   useEffect(() => {
@@ -168,6 +191,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       fetchNextPage: wavesHookData.fetchNextPage,
       addPinnedWave: wavesHookData.addPinnedWave,
       removePinnedWave: wavesHookData.removePinnedWave,
+      restoreWaveUnreadCount: wavesHookData.restoreWaveUnreadCount,
     };
 
     const directMessages: WavesContextData = {
@@ -178,6 +202,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       fetchNextPage: dmWavesHookData.fetchNextPage,
       addPinnedWave: dmWavesHookData.addPinnedWave,
       removePinnedWave: dmWavesHookData.removePinnedWave,
+      restoreWaveUnreadCount: dmWavesHookData.restoreWaveUnreadCount,
     };
 
     const activeWave: ActiveWaveContextData = {
@@ -212,6 +237,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     wavesHookData.fetchNextPage,
     wavesHookData.addPinnedWave,
     wavesHookData.removePinnedWave,
+    wavesHookData.restoreWaveUnreadCount,
     dmWavesHookData.waves,
     dmWavesHookData.isFetching,
     dmWavesHookData.isFetchingNextPage,
@@ -219,6 +245,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     dmWavesHookData.fetchNextPage,
     dmWavesHookData.addPinnedWave,
     dmWavesHookData.removePinnedWave,
+    dmWavesHookData.restoreWaveUnreadCount,
     activeWaveId,
     setActiveWave,
     waveMessagesStore.getData,

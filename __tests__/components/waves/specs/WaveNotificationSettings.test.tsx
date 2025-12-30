@@ -14,6 +14,12 @@ jest.mock('@/services/api/common-api', () => ({
   commonApiDelete: jest.fn(),
 }));
 
+jest.mock('@tanstack/react-query', () => ({
+  useQueryClient: () => ({
+    invalidateQueries: jest.fn(),
+  }),
+}));
+
 jest.mock('@/contexts/SeizeSettingsContext', () => ({
   useSeizeSettings: () => ({
     seizeSettings: {
@@ -32,6 +38,7 @@ const mockWave: ApiWave = {
   name: 'Test Wave',
   metrics: {
     subscribers_count: 50,
+    muted: false,
   },
   subscribed_actions: ['follow'],
 } as any;
@@ -41,6 +48,17 @@ const mockWaveHighSubscribers: ApiWave = {
   name: 'Popular Wave',
   metrics: {
     subscribers_count: 1500,
+    muted: false,
+  },
+  subscribed_actions: ['follow'],
+} as any;
+
+const mockWaveMuted: ApiWave = {
+  id: 'wave-muted',
+  name: 'Muted Wave',
+  metrics: {
+    subscribers_count: 50,
+    muted: true,
   },
   subscribed_actions: ['follow'],
 } as any;
@@ -257,5 +275,67 @@ describe('WaveNotificationSettings', () => {
     
     const allButton = screen.getByLabelText('Receive all notifications');
     expect(allButton).toBeDisabled();
+  });
+
+  it('renders muted button when wave is muted', () => {
+    renderComponent(mockWaveMuted);
+    
+    const mutedButton = screen.getByLabelText('Unmute wave');
+    expect(mutedButton).toBeInTheDocument();
+    expect(screen.getByText('Muted')).toBeInTheDocument();
+  });
+
+  it('does not render notification settings when wave is muted', () => {
+    renderComponent(mockWaveMuted);
+    
+    expect(screen.queryByLabelText('Receive mentions-only notifications')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Receive all notifications')).not.toBeInTheDocument();
+  });
+
+  it('calls unmute API when clicking muted button', async () => {
+    const { commonApiDelete } = require('@/services/api/common-api');
+    commonApiDelete.mockResolvedValue({});
+    
+    renderComponent(mockWaveMuted);
+    
+    const mutedButton = screen.getByLabelText('Unmute wave');
+    await userEvent.click(mutedButton);
+    
+    await waitFor(() => {
+      expect(commonApiDelete).toHaveBeenCalledWith({
+        endpoint: 'waves/wave-muted/mute',
+      });
+    });
+  });
+
+  it('shows loading spinner when unmuting', async () => {
+    const { commonApiDelete } = require('@/services/api/common-api');
+    commonApiDelete.mockImplementation(() => new Promise(() => {}));
+    
+    renderComponent(mockWaveMuted);
+    
+    const mutedButton = screen.getByLabelText('Unmute wave');
+    await userEvent.click(mutedButton);
+    
+    await waitFor(() => {
+      expect(mutedButton.querySelector('.spinner')).toBeInTheDocument();
+    });
+  });
+
+  it('handles error when unmuting fails', async () => {
+    const { commonApiDelete } = require('@/services/api/common-api');
+    commonApiDelete.mockRejectedValue('Unable to unmute wave');
+    
+    renderComponent(mockWaveMuted);
+    
+    const mutedButton = screen.getByLabelText('Unmute wave');
+    await userEvent.click(mutedButton);
+    
+    await waitFor(() => {
+      expect(mockAuthContext.setToast).toHaveBeenCalledWith({
+        message: 'Unable to unmute wave',
+        type: 'error',
+      });
+    });
   });
 });

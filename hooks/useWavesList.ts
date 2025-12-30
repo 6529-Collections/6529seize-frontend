@@ -27,11 +27,12 @@ function areWavesEqual(arrA: EnhancedWave[], arrB: EnhancedWave[]): boolean {
   if (arrA === arrB) return true;
   if (arrA.length !== arrB.length) return false;
 
-  // Compare each wave by ID, updatedAt, and isPinned status
+  // Compare each wave by ID, updatedAt, isPinned, and muted status
   for (let i = 0; i < arrA.length; i++) {
     if (arrA[i].id !== arrB[i].id) return false;
     if (arrA[i].created_at !== arrB[i].created_at) return false;
     if (arrA[i].isPinned !== arrB[i].isPinned) return false;
+    if (arrA[i].metrics.muted !== arrB[i].metrics.muted) return false;
   }
 
   return true;

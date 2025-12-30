@@ -18,7 +18,11 @@ export class ApiWaveMetrics {
     'latest_drop_timestamp': number;
     'your_drops_count'?: number;
     'your_participation_drops_count': number;
-    'your_latest_drop_timestamp'?: number;
+    'your_latest_drop_timestamp': number;
+    'your_unread_drops_count': number;
+    'first_unread_drop_serial_no'?: number;
+    'your_latest_read_timestamp': number;
+    'muted': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -60,6 +64,30 @@ export class ApiWaveMetrics {
             "baseName": "your_latest_drop_timestamp",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "your_unread_drops_count",
+            "baseName": "your_unread_drops_count",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "first_unread_drop_serial_no",
+            "baseName": "first_unread_drop_serial_no",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "your_latest_read_timestamp",
+            "baseName": "your_latest_read_timestamp",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "muted",
+            "baseName": "muted",
+            "type": "boolean",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {

@@ -40,6 +40,10 @@ describe('BrainLeftSidebarWave', () => {
     contributors: [],
     newDropsCount: { count: 2, latestDropTimestamp: 123 },
     isPinned: false,
+    unreadDropsCount: 0,
+    latestReadTimestamp: 0,
+    firstUnreadDropSerialNo: null,
+    isMuted: false,
   } as any;
 
   beforeEach(() => {
@@ -85,12 +89,38 @@ describe('BrainLeftSidebarWave', () => {
     render(<BrainLeftSidebarWave wave={baseWave} onHover={onHover} />);
     const link = screen.getByRole('link');
     await userEvent.click(link);
-    expect(setActiveWave).toHaveBeenCalledWith('1', { isDirectMessage: false });
+    expect(setActiveWave).toHaveBeenCalledWith('1', { isDirectMessage: false, serialNo: null });
   });
 
   it('shows drop indicators for non-chat waves', () => {
     const dropWave = { ...baseWave, id: '2', type: ApiWaveType.Approve };
     render(<BrainLeftSidebarWave wave={dropWave} onHover={onHover} />);
     expect(screen.getByTestId('drop-time')).toHaveTextContent('123');
+  });
+
+  it('includes firstUnreadDropSerialNo in href when present', () => {
+    const waveWithUnread = { ...baseWave, id: '3', firstUnreadDropSerialNo: 42 };
+    render(<BrainLeftSidebarWave wave={waveWithUnread} onHover={onHover} />);
+    expect(screen.getByRole('link')).toHaveAttribute('href', '/waves?wave=3&serialNo=42');
+  });
+
+  it('does not include serialNo in href when firstUnreadDropSerialNo is null', () => {
+    const waveWithoutUnread = { ...baseWave, id: '4', firstUnreadDropSerialNo: null };
+    render(<BrainLeftSidebarWave wave={waveWithoutUnread} onHover={onHover} />);
+    expect(screen.getByRole('link')).toHaveAttribute('href', '/waves?wave=4');
+  });
+
+  it('shows muted indicator when wave is muted', () => {
+    const mutedWave = { ...baseWave, id: '5', isMuted: true };
+    render(<BrainLeftSidebarWave wave={mutedWave} onHover={onHover} />);
+    const bellSlashIcons = document.querySelectorAll('[data-icon="bell-slash"]');
+    expect(bellSlashIcons.length).toBeGreaterThan(0);
+  });
+
+  it('does not show muted indicator when wave is not muted', () => {
+    const unmutedWave = { ...baseWave, id: '6', isMuted: false };
+    render(<BrainLeftSidebarWave wave={unmutedWave} onHover={onHover} />);
+    const bellSlashIcons = document.querySelectorAll('[data-icon="bell-slash"]');
+    expect(bellSlashIcons.length).toBe(0);
   });
 });

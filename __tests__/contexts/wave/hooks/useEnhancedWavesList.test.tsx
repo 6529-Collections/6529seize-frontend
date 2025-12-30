@@ -24,7 +24,13 @@ describe('useEnhancedWavesList', () => {
       name: 'A',
       picture: 'p',
       contributors_overview: [{ contributor_pfp: '1.png' }],
-      metrics: { latest_drop_timestamp: 100 },
+      metrics: { 
+        latest_drop_timestamp: 100,
+        your_unread_drops_count: 0,
+        your_latest_read_timestamp: 0,
+        first_unread_drop_serial_no: null,
+        muted: false,
+      },
       wave: { type: ApiWaveType.Chat },
     };
     const waveB: any = {
@@ -32,9 +38,15 @@ describe('useEnhancedWavesList', () => {
       name: 'B',
       picture: null,
       contributors_overview: [{ contributor_pfp: '2.png' }],
-      metrics: { latest_drop_timestamp: 200 },
+      metrics: { 
+        latest_drop_timestamp: 200,
+        your_unread_drops_count: 5,
+        your_latest_read_timestamp: 150,
+        first_unread_drop_serial_no: 42,
+        muted: false,
+      },
       wave: { type: ApiWaveType.Rank },
-      isPinned: true,
+      pinned: true,
     };
     const fetchNextPage = jest.fn();
     const addPinnedWave = jest.fn();
@@ -64,5 +76,117 @@ describe('useEnhancedWavesList', () => {
     expect(result.current.waves[0].newDropsCount.count).toBe(2);
     expect(result.current.waves[0].newDropsCount.latestDropTimestamp).toBe(300);
     expect(result.current.waves[0].isPinned).toBe(true);
+  });
+
+  it('maps unreadDropsCount and firstUnreadDropSerialNo from wave metrics', () => {
+    const waveWithUnread: any = {
+      id: 'unread-wave',
+      name: 'Unread Wave',
+      picture: null,
+      contributors_overview: [],
+      metrics: { 
+        latest_drop_timestamp: 100,
+        your_unread_drops_count: 15,
+        your_latest_read_timestamp: 90,
+        first_unread_drop_serial_no: 123,
+        muted: false,
+      },
+      wave: { type: ApiWaveType.Chat },
+    };
+
+    wavesListMock.mockReturnValue({
+      waves: [waveWithUnread],
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      addPinnedWave: jest.fn(),
+      removePinnedWave: jest.fn(),
+      refetchAllWaves: jest.fn(),
+      mainWavesRefetch: jest.fn(),
+      pinnedWaves: [],
+    } as any);
+    newDropCounterMock.mockReturnValue({
+      newDropsCounts: {},
+      resetAllWavesNewDropsCount: jest.fn(),
+    } as any);
+
+    const { result } = renderHook(() => useEnhancedWavesList(null));
+    expect(result.current.waves[0].unreadDropsCount).toBe(15);
+    expect(result.current.waves[0].latestReadTimestamp).toBe(90);
+    expect(result.current.waves[0].firstUnreadDropSerialNo).toBe(123);
+  });
+
+  it('maps isMuted from wave metrics', () => {
+    const mutedWave: any = {
+      id: 'muted-wave',
+      name: 'Muted Wave',
+      picture: null,
+      contributors_overview: [],
+      metrics: { 
+        latest_drop_timestamp: 100,
+        your_unread_drops_count: 0,
+        your_latest_read_timestamp: 0,
+        first_unread_drop_serial_no: null,
+        muted: true,
+      },
+      wave: { type: ApiWaveType.Chat },
+    };
+
+    wavesListMock.mockReturnValue({
+      waves: [mutedWave],
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      addPinnedWave: jest.fn(),
+      removePinnedWave: jest.fn(),
+      refetchAllWaves: jest.fn(),
+      mainWavesRefetch: jest.fn(),
+      pinnedWaves: [],
+    } as any);
+    newDropCounterMock.mockReturnValue({
+      newDropsCounts: {},
+      resetAllWavesNewDropsCount: jest.fn(),
+    } as any);
+
+    const { result } = renderHook(() => useEnhancedWavesList(null));
+    expect(result.current.waves[0].isMuted).toBe(true);
+  });
+
+  it('sets firstUnreadDropSerialNo to null when first_unread_drop_serial_no is undefined', () => {
+    const waveNoUnreadSerial: any = {
+      id: 'no-serial-wave',
+      name: 'No Serial Wave',
+      picture: null,
+      contributors_overview: [],
+      metrics: { 
+        latest_drop_timestamp: 100,
+        your_unread_drops_count: 0,
+        your_latest_read_timestamp: 0,
+        muted: false,
+      },
+      wave: { type: ApiWaveType.Chat },
+    };
+
+    wavesListMock.mockReturnValue({
+      waves: [waveNoUnreadSerial],
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      addPinnedWave: jest.fn(),
+      removePinnedWave: jest.fn(),
+      refetchAllWaves: jest.fn(),
+      mainWavesRefetch: jest.fn(),
+      pinnedWaves: [],
+    } as any);
+    newDropCounterMock.mockReturnValue({
+      newDropsCounts: {},
+      resetAllWavesNewDropsCount: jest.fn(),
+    } as any);
+
+    const { result } = renderHook(() => useEnhancedWavesList(null));
+    expect(result.current.waves[0].firstUnreadDropSerialNo).toBeNull();
   });
 });
