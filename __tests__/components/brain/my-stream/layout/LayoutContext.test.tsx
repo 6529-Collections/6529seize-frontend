@@ -64,7 +64,7 @@ describe('LayoutProvider', () => {
     );
     const content = screen.getByTestId('content');
     expect(content.textContent).toBe('900');
-    expect(content.style.height).toContain('calc(var(--app-height, 100vh) - 100px');
+    expect(content.style.height).toContain('calc(100dvh - 100px');
   });
 
   it('applies 128px capSpace on Android when keyboard is closed', () => {
