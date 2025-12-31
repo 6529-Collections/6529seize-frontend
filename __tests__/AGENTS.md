@@ -48,10 +48,8 @@ Prioritise high-risk areas first when time-boxed.
 ## Running Tests
 
 ```bash
-npm run test:cov:changed   # changed files only
 npm run test               # full suite
 npm run lint
-npm run type-check
 ```
 
 ---

@@ -275,8 +275,8 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   };
 
   const dropOverlayClass = isApp
-    ? "tw-fixed tw-inset-0 tw-z-[2000] tw-bg-black tailwind-scope"
-    : "tw-absolute tw-inset-0 tw-z-[1000]";
+    ? "tw-fixed tw-inset-0 tw-z-50 tw-bg-black tailwind-scope"
+    : "tw-absolute tw-inset-0 tw-z-50";
 
   return (
     <div className="tw-relative tw-flex tw-flex-col tw-h-full">

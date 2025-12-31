@@ -57,4 +57,40 @@ describe("useActiveWaveManager", () => {
     });
     expect(pushStateSpy).toHaveBeenLastCalledWith(null, "", "/waves");
   });
+
+  it("includes serialNo when provided via options", async () => {
+    globalThis.history.replaceState(null, "", "http://localhost/waves");
+    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams({}));
+
+    const pushStateSpy = jest.spyOn(globalThis.history, "pushState");
+
+    const { result } = renderHook(() => useActiveWaveManager());
+
+    act(() => {
+      result.current.setActiveWave("wave-123", { serialNo: 42 });
+    });
+    expect(pushStateSpy).toHaveBeenLastCalledWith(
+      null,
+      "",
+      "/waves?wave=wave-123&serialNo=42"
+    );
+  });
+
+  it("includes serialNo as string in URL", async () => {
+    globalThis.history.replaceState(null, "", "http://localhost/waves");
+    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams({}));
+
+    const pushStateSpy = jest.spyOn(globalThis.history, "pushState");
+
+    const { result } = renderHook(() => useActiveWaveManager());
+
+    act(() => {
+      result.current.setActiveWave("wave-xyz", { serialNo: "99" });
+    });
+    expect(pushStateSpy).toHaveBeenLastCalledWith(
+      null,
+      "",
+      "/waves?wave=wave-xyz&serialNo=99"
+    );
+  });
 });

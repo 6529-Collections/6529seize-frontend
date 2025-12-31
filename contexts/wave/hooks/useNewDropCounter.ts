@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useCallback, useContext, useEffect } from "react";
-import { WsMessageType, WsDropUpdateMessage } from "@/helpers/Types";
-import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { AuthContext } from "@/components/auth/Auth";
 import { ApiWave } from "@/generated/models/ApiWave";
+import { WsDropUpdateMessage, WsMessageType } from "@/helpers/Types";
+import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
+import { useCallback, useContext, useEffect, useState } from "react";
 
 /**
  * Interface for tracking new drops count for a wave
@@ -12,6 +12,7 @@ import { ApiWave } from "@/generated/models/ApiWave";
 export interface MinimalWaveNewDropsCount {
   readonly count: number;
   readonly latestDropTimestamp: number | null;
+  readonly firstUnreadSerialNo: number | null;
 }
 
 export function getNewestTimestamp(
@@ -65,6 +66,7 @@ function useNewDropCounter(
             waves.find((wave) => wave.id === waveId)?.metrics
               .latest_drop_timestamp ?? null
           ),
+          firstUnreadSerialNo: null,
         },
       }));
     },
@@ -81,6 +83,7 @@ function useNewDropCounter(
             prev[wave.id]?.latestDropTimestamp,
             wave.metrics.latest_drop_timestamp ?? null
           ),
+          firstUnreadSerialNo: null,
         };
       });
       return newCounts;
@@ -115,7 +118,6 @@ function useNewDropCounter(
     WsMessageType.DROP_UPDATE,
     useCallback(
       (message) => {
-        // Skip if no waveId
         if (!message?.wave.id) return;
 
         const waveId = message.wave.id;
@@ -123,7 +125,10 @@ function useNewDropCounter(
 
         if (!wave) {
           refetchWaves();
+          return;
         }
+
+        if (wave.metrics.muted) return;
 
         if (
           connectedProfile?.handle?.toLowerCase() ===
@@ -141,6 +146,7 @@ function useNewDropCounter(
                   message.created_at,
                   currentLatestDropTimestamp ?? 0
                 ),
+                firstUnreadSerialNo: prev[waveId]?.firstUnreadSerialNo ?? null,
               },
             };
           });
@@ -159,26 +165,29 @@ function useNewDropCounter(
                   message.created_at,
                   currentLatestDropTimestamp ?? 0
                 ),
+                firstUnreadSerialNo: prev[waveId]?.firstUnreadSerialNo ?? null,
               },
             };
           });
         }
 
-        // Update the count for this wave
         setNewDropsCounts((prev) => {
           const currentCount = prev[waveId]?.count ?? 0;
           const currentLatestDropTimestamp =
             prev[waveId]?.latestDropTimestamp ?? null;
-          // Optional: Cap the maximum count at 99
-          const MAX_COUNT = 99;
+          const currentFirstUnread = prev[waveId]?.firstUnreadSerialNo ?? null;
           return {
             ...prev,
             [waveId]: {
-              count: Math.min(currentCount + 1, MAX_COUNT),
+              count: currentCount + 1,
               latestDropTimestamp: Math.max(
                 message.created_at,
                 currentLatestDropTimestamp ?? 0
               ),
+              firstUnreadSerialNo:
+                currentFirstUnread === null
+                  ? message.serial_no
+                  : Math.min(currentFirstUnread, message.serial_no),
             },
           };
         });

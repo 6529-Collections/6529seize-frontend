@@ -1,17 +1,16 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
-import { ApiWave } from "@/generated/models/ApiWave";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAt } from "@fortawesome/free-solid-svg-icons";
-import { useWaveNotificationSubscription } from "@/hooks/useWaveNotificationSubscription";
-import {
-  commonApiDelete,
-  commonApiPost,
-} from "@/services/api/common-api";
 import { useAuth } from "@/components/auth/Auth";
-import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { Spinner } from "@/components/dotLoader/DotLoader";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { useWaveNotificationSubscription } from "@/hooks/useWaveNotificationSubscription";
+import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
+import { faAt, faBellSlash } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useState } from "react";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 
 interface WaveRatingProps {
@@ -19,6 +18,7 @@ interface WaveRatingProps {
 }
 
 export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
+  const queryClient = useQueryClient();
   const { seizeSettings } = useSeizeSettings();
   const disableSelection =
     wave.metrics.subscribers_count >=
@@ -26,6 +26,8 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
 
   const [following, setFollowing] = useState<boolean>(false);
   const [isAllEnabled, setIsAllEnabled] = useState<boolean>();
+  const [isMuted, setIsMuted] = useState<boolean>(wave.metrics.muted);
+  const [muteLoading, setMuteLoading] = useState<boolean>(false);
 
   const { data, refetch } = useWaveNotificationSubscription(wave);
 
@@ -35,6 +37,39 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
   const [loadingTarget, setLoadingTarget] = useState<"mentions" | "all" | null>(
     null
   );
+
+  useEffect(() => {
+    setIsMuted(wave.metrics.muted);
+  }, [wave.metrics.muted]);
+
+  const toggleMute = useCallback(async () => {
+    setMuteLoading(true);
+    try {
+      if (isMuted) {
+        await commonApiDelete({ endpoint: `waves/${wave.id}/mute` });
+      } else {
+        await commonApiPost({ endpoint: `waves/${wave.id}/mute`, body: {} });
+      }
+      setIsMuted(!isMuted);
+      queryClient.invalidateQueries({
+        queryKey: [QueryKey.WAVE, { wave_id: wave.id }],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QueryKey.WAVES_OVERVIEW],
+      });
+    } catch (error) {
+      const defaultMessage = isMuted
+        ? "Unable to unmute wave"
+        : "Unable to mute wave";
+      const errorMessage = typeof error === "string" ? error : defaultMessage;
+      setToast({
+        message: errorMessage,
+        type: "error",
+      });
+    } finally {
+      setMuteLoading(false);
+    }
+  }, [isMuted, wave.id, queryClient, setToast]);
 
   useEffect(() => {
     setIsAllEnabled(data?.subscribed && !disableSelection);
@@ -121,6 +156,43 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
 
   if (!following) {
     return null;
+  }
+
+  const getMuteTooltip = () => {
+    return isMuted ? "Click to unmute this wave" : "Click to mute this wave";
+  };
+
+  if (isMuted) {
+    return (
+      <div className="tw-space-y-1.5">
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-1.5">
+          <OverlayTrigger
+            overlay={
+              <Tooltip id={`mute-tooltip-${wave.id}`} placement="top">
+                {getMuteTooltip()}
+              </Tooltip>
+            }>
+            <button
+              disabled={muteLoading}
+              onClick={toggleMute}
+              className="tw-flex tw-items-center tw-gap-2 tw-whitespace-nowrap tw-h-10 lg:tw-h-9 tw-px-3 tw-text-xs tw-border tw-border-iron-700 tw-border-solid tw-rounded-lg tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out"
+              aria-label="Unmute wave">
+              {muteLoading ? (
+                <Spinner dimension={14} />
+              ) : (
+                <>
+                  <FontAwesomeIcon
+                    icon={faBellSlash}
+                    className="tw-size-3.5 tw-flex-shrink-0"
+                  />
+                  <span>Muted</span>
+                </>
+              )}
+            </button>
+          </OverlayTrigger>
+        </div>
+      </div>
+    );
   }
 
   return (

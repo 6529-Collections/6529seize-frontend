@@ -40,6 +40,7 @@ describe("useWaveRealtimeUpdater", () => {
       .mockResolvedValue({ drops: null, highestSerialNo: null }),
     removeDrop: jest.fn(),
     removeWaveDeliveredNotifications: jest.fn().mockResolvedValue(undefined),
+    isWaveMuted: jest.fn().mockReturnValue(false),
   });
 
   it("optimistically adds drop and syncs newest messages", async () => {
@@ -229,5 +230,28 @@ describe("useWaveRealtimeUpdater", () => {
 
     expect(props.removeWaveDeliveredNotifications).not.toHaveBeenCalled();
     expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+  });
+
+  it("skips processing when wave is muted", async () => {
+    const store = {
+      wave1: { drops: [], latestFetchedSerialNo: 10 },
+    };
+    const props = baseProps(store);
+    props.isWaveMuted = jest.fn().mockReturnValue(true);
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = { id: "d11", wave: { id: "wave1" }, author: {} };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_INSERT
+      )
+    );
+    await flushPromises();
+
+    expect(props.isWaveMuted).toHaveBeenCalledWith("wave1");
+    expect(props.updateData).not.toHaveBeenCalled();
+    expect(props.registerWave).not.toHaveBeenCalled();
+    expect(props.syncNewestMessages).not.toHaveBeenCalled();
   });
 });

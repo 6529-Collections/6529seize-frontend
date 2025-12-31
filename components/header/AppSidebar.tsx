@@ -1,14 +1,14 @@
 "use client";
 import {
-  Dialog,
-  DialogPanel,
-  Transition,
-  TransitionChild,
+    Dialog,
+    DialogPanel,
+    Transition,
+    TransitionChild,
 } from "@headlessui/react";
 import {
-  DocumentTextIcon,
-  UserIcon,
-  WrenchIcon,
+    DocumentTextIcon,
+    UserIcon,
+    WrenchIcon,
 } from "@heroicons/react/24/outline";
 import { Fragment, useCallback, useEffect, useMemo } from "react";
 import { useAppWallets } from "../app-wallets/AppWalletsContext";
@@ -174,14 +174,14 @@ export default function AppSidebar({
             leave="tw-transform tw-ease-in tw-duration-200"
             leaveFrom="tw-translate-x-0"
             leaveTo="-tw-translate-x-full">
-            <DialogPanel className="tw-pointer-events-auto tw-max-w-[22.75rem] tw-w-full tw-h-full tw-bg-zinc-950 tw-shadow-xl tw-flex tw-flex-col tw-pt-[env(safe-area-inset-top,0px)] tw-pb-[env(safe-area-inset-bottom,0px)]">
+            <DialogPanel className="tw-pointer-events-auto tw-max-w-[22.75rem] tw-w-full tw-h-full tw-bg-iron-950 tw-shadow-xl tw-flex tw-flex-col tw-pt-[env(safe-area-inset-top,0px)] tw-pb-[env(safe-area-inset-bottom,0px)]">
               <AppSidebarHeader onClose={handleClose} />
-              <nav className="tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-zinc-500 tw-transition-colors tw-duration-500 tw-scrollbar-track-zinc-800 hover:tw-scrollbar-thumb-zinc-300 tw-py-6">
+              <nav className="tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-transition-colors tw-duration-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-py-6">
                 <div className="tw-flex tw-flex-col tw-h-full">
                   <div className="tw-flex-1 tw-px-2">
                     <AppSidebarMenuItems menu={menu} onNavigate={handleClose} />
                   </div>
-                  <div className="tw-px-2 tw-mt-auto tw-border-t tw-border-zinc-800 tw-border-solid tw-pt-6 tw-border-b-0 tw-border-x-0">
+                  <div className="tw-px-2 tw-mt-auto tw-border-t tw-border-iron-800 tw-border-solid tw-pt-6 tw-border-b-0 tw-border-x-0">
                     <AppUserConnect onNavigate={handleClose} />
                   </div>
                 </div>

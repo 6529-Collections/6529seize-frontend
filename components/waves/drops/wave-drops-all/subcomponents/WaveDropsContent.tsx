@@ -1,16 +1,19 @@
-import type { MutableRefObject } from "react";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import WaveDropsEmptyPlaceholder from "@/components/waves/drops/WaveDropsEmptyPlaceholder";
+import { useUnreadDivider } from "@/contexts/wave/UnreadDividerContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import type { MutableRefObject } from "react";
 import { WaveDropsMessageListSection } from "./WaveDropsMessageListSection";
 import { WaveDropsTypingIndicator } from "./WaveDropsTypingIndicator";
 
-type WaveMessagesResult = ReturnType<typeof useVirtualizedWaveDrops>["waveMessages"];
+type WaveMessagesResult = ReturnType<
+  typeof useVirtualizedWaveDrops
+>["waveMessages"];
 
 interface WaveDropsContentProps {
   readonly waveMessages: WaveMessagesResult;
@@ -43,6 +46,7 @@ interface WaveDropsContentProps {
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
   readonly pendingCount: number;
   readonly onRevealPending: () => void;
+  readonly bottomPaddingClassName?: string;
 }
 
 export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
@@ -64,7 +68,9 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   onDropContentClick,
   pendingCount,
   onRevealPending,
+  bottomPaddingClassName,
 }) => {
+  const { unreadDividerSerialNo } = useUnreadDivider();
   const dropsCount = waveMessages?.drops?.length ?? 0;
   const isInitialLoading =
     !!waveMessages?.isLoading &&
@@ -105,6 +111,8 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
         onDropContentClick={onDropContentClick}
         pendingCount={pendingCount}
         onRevealPending={onRevealPending}
+        bottomPaddingClassName={bottomPaddingClassName}
+        unreadDividerSerialNo={unreadDividerSerialNo}
       />
       <WaveDropsTypingIndicator typingMessage={typingMessage} />
     </>

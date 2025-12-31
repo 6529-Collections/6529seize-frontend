@@ -29,6 +29,7 @@ import { EditorState } from "lexical";
 import dynamic from "next/dynamic";
 import React, {
   memo,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -36,7 +37,6 @@ import React, {
   useState,
 } from "react";
 import { useSelector } from "react-redux";
-import { createBreakpoint } from "react-use";
 import { AuthContext } from "../auth/Auth";
 import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/HastagTransformer";
 import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
@@ -74,30 +74,33 @@ import {
 } from "./utils/getMissingRequirements";
 
 // Use next/dynamic for lazy loading with SSR support
-const TermsSignatureFlow = dynamic(() => import("../terms/TermsSignatureFlow"));
+const TermsSignatureFlow = dynamic(
+  () => import("../terms/TermsSignatureFlow"),
+  { loading: () => null }
+);
 
 export type CreateDropMetadataType =
   | {
-    readonly id: string;
-    key: string;
-    readonly type: ApiWaveMetadataType.String;
-    value: string | null;
-    readonly required: boolean;
-  }
+      readonly id: string;
+      key: string;
+      readonly type: ApiWaveMetadataType.String;
+      value: string | null;
+      readonly required: boolean;
+    }
   | {
-    readonly id: string;
-    key: string;
-    readonly type: ApiWaveMetadataType.Number;
-    value: number | null;
-    readonly required: boolean;
-  }
+      readonly id: string;
+      key: string;
+      readonly type: ApiWaveMetadataType.Number;
+      value: number | null;
+      readonly required: boolean;
+    }
   | {
-    readonly id: string;
-    key: string;
-    readonly type: null;
-    value: string | null;
-    readonly required: boolean;
-  };
+      readonly id: string;
+      key: string;
+      readonly type: null;
+      value: string | null;
+      readonly required: boolean;
+    };
 
 interface CreateDropContentProps {
   readonly activeDrop: ActiveDropState | null;
@@ -116,7 +119,7 @@ interface CreateDropContentProps {
   readonly privileges: DropPrivileges;
 }
 
-const useBreakpoint = createBreakpoint({ MD: 640, S: 0 });
+const CONTAINER_WIDTH_THRESHOLD = 500;
 
 const isMetadataValuePresent = (value: string | number | null): boolean => {
   if (value === null || value === undefined) {
@@ -373,8 +376,10 @@ const getOptimisticDrop = (
     author: {
       id: connectedProfile.id,
       handle: connectedProfile.handle,
-      active_main_stage_submission_ids: connectedProfile.active_main_stage_submission_ids,
-      winner_main_stage_drop_ids: connectedProfile.winner_main_stage_drop_ids ?? [],
+      active_main_stage_submission_ids:
+        connectedProfile.active_main_stage_submission_ids,
+      winner_main_stage_drop_ids:
+        connectedProfile.winner_main_stage_drop_ids ?? [],
       pfp: connectedProfile.pfp ?? null,
       banner1_color: connectedProfile.banner1 ?? null,
       banner2_color: connectedProfile.banner2 ?? null,
@@ -401,9 +406,9 @@ const getOptimisticDrop = (
       })),
       quoted_drop: part.quoted_drop
         ? {
-          ...part.quoted_drop,
-          is_deleted: false,
-        }
+            ...part.quoted_drop,
+            is_deleted: false,
+          }
         : null,
       replies_count: 0,
       quotes_count: 0,
@@ -442,8 +447,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 }) => {
   const { isSafeWallet, address } = useSeizeConnectContext();
   const { send } = useWebSocket();
-  const breakpoint = useBreakpoint();
   const { isApp } = useDeviceInfo();
+  const actionsContainerRef = useRef<HTMLDivElement>(null);
+  const [isWideContainer, setIsWideContainer] = useState(false);
   const editingDropId = useSelector(selectEditingDropId);
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
@@ -455,8 +461,29 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const [editorState, setEditorState] = useState<EditorState | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
-  const [showOptions, setShowOptions] = useState(breakpoint === "MD");
-  useEffect(() => setShowOptions(breakpoint === "MD"), [breakpoint]);
+  const [showOptions, setShowOptions] = useState(false);
+
+  useEffect(() => {
+    const container = actionsContainerRef.current;
+    if (!container) return;
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) {
+        const width = entry.contentRect.width;
+        const isWide = width >= CONTAINER_WIDTH_THRESHOLD;
+        setIsWideContainer((prev) => (prev === isWide ? prev : isWide));
+        if (isWide) {
+          setShowOptions(true);
+        } else {
+          setShowOptions(false);
+        }
+      }
+    });
+
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   const isParticipatory = wave.wave.type !== ApiWaveType.Chat;
 
@@ -465,21 +492,18 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     requiredMetadata: wave.participation.required_metadata,
   });
 
-  const hasMetadata = useMemo(
-    () => hasMetadataContent(metadata),
-    [metadata]
-  );
+  const hasMetadata = useMemo(() => hasMetadataContent(metadata), [metadata]);
 
   const getMarkdown = useMemo(
     () =>
       editorState
         ? exportDropMarkdown(editorState, [
-          ...SAFE_MARKDOWN_TRANSFORMERS,
-          MENTION_TRANSFORMER,
-          HASHTAG_TRANSFORMER,
-          IMAGE_TRANSFORMER,
-          EMOJI_TRANSFORMER,
-        ])
+            ...SAFE_MARKDOWN_TRANSFORMERS,
+            MENTION_TRANSFORMER,
+            HASHTAG_TRANSFORMER,
+            IMAGE_TRANSFORMER,
+            EMOJI_TRANSFORMER,
+          ])
         : null,
     [editorState]
   );
@@ -553,6 +577,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   };
 
   const createDropInputRef = useRef<CreateDropInputHandles | null>(null);
+  const isInitialMountRef = useRef(true);
 
   const getReplyTo = () => {
     if (activeDrop?.action === ActiveDropAction.REPLY) {
@@ -596,9 +621,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
           quoted_drop:
             activeDrop?.action === ActiveDropAction.QUOTE
               ? {
-                drop_id: activeDrop.drop.id,
-                drop_part_id: activeDrop.partId,
-              }
+                  drop_id: activeDrop.drop.id,
+                  drop_part_id: activeDrop.partId,
+                }
               : null,
           media: files,
         },
@@ -620,22 +645,23 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     const hasPartsInDrop = (drop?.parts.length ?? 0) > 0;
     const hasCurrentContent = !!(markdown?.trim().length || files.length);
 
-    const newParts = hasPartsInDrop && !hasCurrentContent
-      ? drop?.parts ?? []
-      : [
-        ...(drop?.parts ?? []),
-        {
-          content: markdown?.length ? markdown : null,
-          quoted_drop:
-            activeDrop?.action === ActiveDropAction.QUOTE
-              ? {
-                drop_id: activeDrop.drop.id,
-                drop_part_id: activeDrop.partId,
-              }
-              : null,
-          media: files,
-        },
-      ];
+    const newParts =
+      hasPartsInDrop && !hasCurrentContent
+        ? drop?.parts ?? []
+        : [
+            ...(drop?.parts ?? []),
+            {
+              content: markdown?.length ? markdown : null,
+              quoted_drop:
+                activeDrop?.action === ActiveDropAction.QUOTE
+                  ? {
+                      drop_id: activeDrop.drop.id,
+                      drop_part_id: activeDrop.partId,
+                    }
+                  : null,
+              media: files,
+            },
+          ];
 
     const parts = ensurePartsWithFallback(newParts, hasMetadata);
 
@@ -829,7 +855,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         import("@capacitor/core").then(({ Capacitor }) => {
           if (Capacitor.getPlatform() === "android") {
             import("@capacitor/keyboard").then(({ Keyboard }) => {
-              Keyboard.hide().catch(() => { });
+              Keyboard.hide().catch(() => {});
             });
           }
         });
@@ -906,29 +932,35 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }, delay);
   };
 
+  const focusMobileInput = () => {
+    if (!createDropInputRef.current) return;
+    requestAnimationFrame(() => {
+      focusInputWithDelay(300);
+    });
+  };
+
+  const focusDesktopInput = () => {
+    createDropInputRef.current?.focus();
+  };
+
   useEffect(() => {
     if (!activeDrop) {
       return;
     }
 
+    // Skip auto-focus on initial mount in app to prevent keyboard from opening
+    if (isApp && isInitialMountRef.current) {
+      isInitialMountRef.current = false;
+      return;
+    }
+    isInitialMountRef.current = false;
+
     if (isApp) {
-      // Mobile app: Complex focus handling to prevent keyboard issues
-      const focusInput = () => {
-        if (!createDropInputRef.current) return;
-
-        // Use requestAnimationFrame to wait for next paint
-        requestAnimationFrame(() => {
-          // Then focus after a delay for mobile stability
-          focusInputWithDelay(300);
-        });
-      };
-
-      const timer = setTimeout(focusInput, 200);
+      const timer = setTimeout(focusMobileInput, 200);
       return () => clearTimeout(timer);
     } else {
-      // Desktop/web: Keep original simple behavior
       const timer = setTimeout(() => {
-        createDropInputRef.current?.focus();
+        focusDesktopInput();
       }, 100);
       return () => clearTimeout(timer);
     }
@@ -943,8 +975,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       updatedFiles = updatedFiles.slice(-MAX_DROP_UPLOAD_FILES);
 
       setToast({
-        message: `File limit exceeded. The ${removedCount} oldest file${removedCount > 1 ? "s were" : " was"
-          } removed to maintain the ${MAX_DROP_UPLOAD_FILES}-file limit. New files have been added.`,
+        message: `File limit exceeded. The ${removedCount} oldest file${
+          removedCount > 1 ? "s were" : " was"
+        } removed to maintain the ${MAX_DROP_UPLOAD_FILES}-file limit. New files have been added.`,
         type: "warning",
       });
     }
@@ -952,12 +985,15 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     setFiles(updatedFiles);
   };
 
-  const handleEditorStateChange = (newEditorState: EditorState) => {
-    setEditorState(newEditorState);
-    if (breakpoint === "S") {
-      setShowOptions(false);
-    }
-  };
+  const handleEditorStateChange = useCallback(
+    (newEditorState: EditorState) => {
+      setEditorState(newEditorState);
+      if (!isWideContainer) {
+        setShowOptions(false);
+      }
+    },
+    [isWideContainer]
+  );
 
   const removeFile = (file: File, partIndex?: number) => {
     if (partIndex !== undefined) {
@@ -1050,7 +1086,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }
   }, [isApp, editingDropId, activeDrop, onCancelReplyQuote]);
 
-  const isChatClosed = wave.wave.type === ApiWaveType.Chat && !wave.chat.enabled;
+  const isChatClosed =
+    wave.wave.type === ApiWaveType.Chat && !wave.chat.enabled;
 
   if (isChatClosed) {
     return (
@@ -1069,7 +1106,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         dropId={dropId}
       />
       <div className="tw-flex tw-items-end tw-w-full">
-        <div className="tw-w-full tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-3">
+        <div
+          ref={actionsContainerRef}
+          className="tw-w-full tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-3">
           <CreateDropActions
             isStormMode={isStormMode}
             canAddPart={canAddPart}
@@ -1136,8 +1175,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-          >
+            transition={{ duration: 0.3 }}>
             <CreateDropMetadata
               disabled={submitting}
               onRemoveMetadata={onRemoveMetadata}
@@ -1158,11 +1196,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         removeFile={removeFile}
         disabled={submitting}
       />
-
-      {/* Terms of Service Flow - Modal will render when needed */}
-      <React.Suspense fallback={<div>Loading Terms...</div>}>
-        <TermsSignatureFlow />
-      </React.Suspense>
+      <TermsSignatureFlow />
     </div>
   );
 };

@@ -14,6 +14,7 @@ import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { SystemAdjustmentPill } from "@/components/common/SystemAdjustmentPill";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 
 interface WaveLeaderboardRightSidebarActivityLogProps {
   readonly log: ApiWaveLog;
@@ -52,7 +53,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
           >
             {log.invoker.pfp ? (
               <Image
-                src={log.invoker.pfp}
+                src={resolveIpfsUrlSync(log.invoker.pfp)}
                 alt=""
                 width={20}
                 height={20}
@@ -92,7 +93,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
           >
             {log.drop_author?.pfp ? (
               <Image
-                src={log.drop_author.pfp}
+                src={resolveIpfsUrlSync(log.drop_author.pfp)}
                 alt=""
                 width={20}
                 height={20}

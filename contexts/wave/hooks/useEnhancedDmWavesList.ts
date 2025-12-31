@@ -1,70 +1,16 @@
-"use client"
+"use client";
 
-import { useCallback, useMemo } from "react";
 import useDmWavesList from "@/hooks/useDmWavesList";
-import useNewDropCounter, { getNewestTimestamp } from "./useNewDropCounter";
-import { ApiWave } from "@/generated/models/ApiWave";
-import type { MinimalWave } from "./useEnhancedWavesList";
+import useEnhancedWavesListCore from "./useEnhancedWavesListCore";
+
+export type { MinimalWave } from "./useEnhancedWavesListCore";
 
 function useEnhancedDmWavesList(activeWaveId: string | null) {
   const wavesData = useDmWavesList();
 
-  const { newDropsCounts, resetAllWavesNewDropsCount } = useNewDropCounter(
-    activeWaveId,
-    wavesData.waves,
-    wavesData.mainWavesRefetch
-  );
-
-  const mapWaveToMinimalWave = useCallback(
-    (wave: ApiWave): MinimalWave => {
-      const newDropsData = {
-        count: newDropsCounts[wave.id]?.count ?? 0,
-        latestDropTimestamp: getNewestTimestamp(
-          newDropsCounts[wave.id]?.latestDropTimestamp,
-          wave.metrics.latest_drop_timestamp ?? null
-        ),
-      };
-      return {
-        id: wave.id,
-        name: wave.name,
-        type: wave.wave.type,
-        picture: wave.picture,
-        contributors: wave.contributors_overview.map((c) => ({
-          pfp: c.contributor_pfp,
-        })),
-        newDropsCount: newDropsData,
-        isPinned: false,
-      };
-    },
-    [newDropsCounts]
-  );
-
-  const mappedWaves = useMemo(
-    () => wavesData.waves.map(mapWaveToMinimalWave),
-    [wavesData.waves, mapWaveToMinimalWave]
-  );
-
-  const sortedWaves = useMemo(
-    () =>
-      [...mappedWaves].sort(
-        (a, b) =>
-          (b.newDropsCount.latestDropTimestamp ?? 0) -
-          (a.newDropsCount.latestDropTimestamp ?? 0)
-      ),
-    [mappedWaves]
-  );
-
-  return {
-    waves: sortedWaves,
-    isFetching: wavesData.isFetching,
-    isFetchingNextPage: wavesData.isFetchingNextPage,
-    hasNextPage: wavesData.hasNextPage,
-    fetchNextPage: wavesData.fetchNextPage,
-    addPinnedWave: () => {},
-    removePinnedWave: () => {},
-    refetchAllWaves: wavesData.refetchAllWaves,
-    resetAllWavesNewDropsCount,
-  };
+  return useEnhancedWavesListCore(activeWaveId, wavesData, {
+    supportsPinning: false,
+  });
 }
 
-export default useEnhancedDmWavesList; 
+export default useEnhancedDmWavesList;

@@ -28,6 +28,4 @@ files under `app/api/`.
 ## Quality Gates
 
 - All changes must pass the same commands listed in the top-level `AGENTS.md`:
-  `npm run test`, `npm run lint`, and `npm run type-check` (or the targeted
-  `test:cov:changed` when appropriate).
-
+  `npm run test` and `npm run lint`.

@@ -54,28 +54,27 @@ function buildTypingString(entries: TypingEntry[]): string {
 /* ------------------------------------------------------------------ */
 
 /**
- * React hook that returns a live “is‑typing” label for a wave.
+ * React hook that returns a live "is‑typing" label for a wave.
  *
  * @param waveId    Wave/channel ID being viewed.
  * @param myHandle  Handle of current user (events from this handle are ignored).
+ * @param disabled  If true, skip websocket subscription (e.g., for muted waves).
  */
 export function useWaveIsTyping(
   waveId: string,
-  myHandle: string | null
+  myHandle: string | null,
+  disabled: boolean = false
 ): string {
-  const { socket } = useWaveWebSocket(waveId);
+  const { socket } = useWaveWebSocket(disabled ? "" : waveId);
 
-  /** Only the final string lives in state; everything else is in a ref. */
   const [typingMessage, setTypingMessage] = useState("");
 
-  /** Mutable store of active typers — doesn’t cause re‑renders. */
   const typersRef = useRef<Map<string, TypingEntry>>(new Map());
 
-  /* ----- 1. Reset when wave changes -------------------------------- */
   useEffect(() => {
     typersRef.current.clear();
     setTypingMessage("");
-  }, [waveId]);
+  }, [waveId, disabled]);
 
   /* ----- 2. Handle incoming USER_IS_TYPING packets ----------------- */
   useEffect(() => {

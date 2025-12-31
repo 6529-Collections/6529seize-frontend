@@ -3,14 +3,14 @@
 import { ApiWave } from "@/generated/models/ApiWave";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import {
-  faArrowRight,
-  faBook,
-  faChartLine,
-  faCrown,
-  faCubes,
-  faTools,
-  faUser,
-  faVoteYea,
+    faArrowRight,
+    faBook,
+    faChartLine,
+    faCrown,
+    faCubes,
+    faTools,
+    faUser,
+    faVoteYea,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
@@ -267,7 +267,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
                   it contributes 50 to the final vote.
                 </p>
               </div>
-              <div className="tw-bg-iron-900 tw-p-4 tw-rounded-md tw-border-l-4 tw-border-emerald-600 tw-border-solid tw-border-r-0 tw-border-y-0">
+              <div className="tw-bg-iron-900 tw-p-4 tw-rounded-md tw-border-l-4 tw-border-emerald-500 tw-border-solid tw-border-r-0 tw-border-y-0">
                 <p className="tw-font-semibold tw-text-iron-50 tw-text-base">
                   Selection
                 </p>

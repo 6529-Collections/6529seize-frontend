@@ -25,7 +25,7 @@ export default function ParticipationDropFooter({
     <>
       {canShowVote && (
         <div
-          className="tw-@container sm:tw-ml-[3.5rem] tw-mt-4"
+          className="tw-@container sm:tw-ml-[3.25rem] tw-mt-4"
           onClick={(e) => e.stopPropagation()}>
           <div className="tw-flex @[700px]:tw-justify-between tw-flex-col @[700px]:tw-flex-row @[700px]:tw-items-center tw-gap-x-4 tw-gap-y-3">
             <div className="tw-px-4">
@@ -60,16 +60,16 @@ export default function ParticipationDropFooter({
 
       {/* Show ratings if no vote button */}
       {!canShowVote && !!drop.raters_count && (
-        <div className="tw-mt-4 tw-px-4 tw-ml-[3.5rem]">
+        <div className="tw-mt-4 tw-px-4 tw-ml-[3.25rem]">
           <ParticipationDropRatings drop={drop} rank={drop.rank} />
         </div>
       )}
 
-      <div className="tw-mt-4 tw-px-4 tw-flex tw-w-[calc(100%-3.25rem)] tw-ml-[3.5rem] tw-items-center tw-gap-x-2 tw-gap-y-1 tw-flex-wrap">
+      <div className="tw-mt-4 tw-px-4 tw-flex tw-w-[calc(100%-3.25rem)] tw-ml-[3.25rem] tw-items-center tw-gap-x-2 tw-gap-y-1 tw-flex-wrap">
         <WaveDropReactions drop={drop} />
       </div>
 
-      <div className="tw-mt-4 tw-px-4 sm:tw-ml-[3.5rem] tw-pb-3 tw-text-[11px] tw-text-iron-500 tw-border-t tw-border-iron-800/30">
+      <div className="tw-mt-4 tw-px-4 sm:tw-ml-[3.25rem] tw-pb-3 tw-text-[11px] tw-text-iron-500 tw-border-t tw-border-iron-800/30">
         {format(new Date(drop.created_at), "h:mm a · MMM d, yyyy")}
       </div>
     </>

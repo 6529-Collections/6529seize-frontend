@@ -21,26 +21,43 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLayout } from "./layout/LayoutContext";
 
-interface MyStreamWaveChatProps {
-  readonly wave: ApiWave;
+interface InitialDropState {
+  readonly waveId: string;
+  readonly serialNo: number;
+  readonly dividerSerialNo: number | null;
 }
 
-const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
+interface MyStreamWaveChatProps {
+  readonly wave: ApiWave;
+  readonly firstUnreadSerialNo: number | null;
+}
+
+const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
+  wave,
+  firstUnreadSerialNo,
+}) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [initialDrop, setInitialDrop] = useState<number | null>(null);
+  const [initialDropState, setInitialDropState] =
+    useState<InitialDropState | null>(null);
   const { isMemesWave } = useWave(wave);
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
 
-  // Handle URL parameters
+  const scrollTarget =
+    initialDropState?.waveId === wave.id ? initialDropState.serialNo : null;
+
+  const dividerTarget =
+    initialDropState?.waveId === wave.id
+      ? initialDropState.dividerSerialNo
+      : firstUnreadSerialNo;
+
   useEffect(() => {
     const dropParam = searchParams?.get("serialNo");
     if (!dropParam) {
-      setInitialDrop(null);
       return;
     }
 
@@ -49,15 +66,29 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
       return;
     }
 
-    setInitialDrop(parsed);
+    const dividerParam = searchParams?.get("divider");
+    const dividerParsed = dividerParam
+      ? Number.parseInt(dividerParam, 10)
+      : null;
+    const dividerSerialNo =
+      dividerParsed !== null && Number.isFinite(dividerParsed)
+        ? dividerParsed
+        : firstUnreadSerialNo;
+
+    setInitialDropState({
+      waveId: wave.id,
+      serialNo: parsed,
+      dividerSerialNo,
+    });
 
     const params = new URLSearchParams(searchParams?.toString() || "");
     params.delete("serialNo");
+    params.delete("divider");
     const href = params.toString()
       ? `${pathname}?${params.toString()}`
       : pathname || getHomeFeedRoute();
     router.replace(href, { scroll: false });
-  }, [searchParams, router, pathname]);
+  }, [searchParams, router, pathname, wave.id, firstUnreadSerialNo]);
 
   const { waveViewStyle } = useLayout();
 
@@ -116,8 +147,10 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
         onReply={handleReply}
         onQuote={handleQuote}
         activeDrop={activeDrop}
-        initialDrop={initialDrop}
+        initialDrop={scrollTarget}
+        dividerSerialNo={dividerTarget}
         dropId={null}
+        isMuted={wave.metrics?.muted ?? false}
       />
       {!(isApp && editingDropId) && (
         <div className="tw-mt-auto">
