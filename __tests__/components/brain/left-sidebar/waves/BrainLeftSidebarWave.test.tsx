@@ -89,7 +89,7 @@ describe('BrainLeftSidebarWave', () => {
     render(<BrainLeftSidebarWave wave={baseWave} onHover={onHover} />);
     const link = screen.getByRole('link');
     await userEvent.click(link);
-    expect(setActiveWave).toHaveBeenCalledWith('1', { isDirectMessage: false, serialNo: null });
+    expect(setActiveWave).toHaveBeenCalledWith('1', { isDirectMessage: false, serialNo: null, divider: null });
   });
 
   it('shows drop indicators for non-chat waves', () => {
@@ -101,7 +101,7 @@ describe('BrainLeftSidebarWave', () => {
   it('includes firstUnreadDropSerialNo in href when present', () => {
     const waveWithUnread = { ...baseWave, id: '3', firstUnreadDropSerialNo: 42 };
     render(<BrainLeftSidebarWave wave={waveWithUnread} onHover={onHover} />);
-    expect(screen.getByRole('link')).toHaveAttribute('href', '/waves?wave=3&serialNo=42');
+    expect(screen.getByRole('link')).toHaveAttribute('href', '/waves?divider=42&wave=3&serialNo=42');
   });
 
   it('does not include serialNo in href when firstUnreadDropSerialNo is null', () => {

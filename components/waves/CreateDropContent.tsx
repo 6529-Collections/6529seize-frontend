@@ -74,30 +74,33 @@ import {
 } from "./utils/getMissingRequirements";
 
 // Use next/dynamic for lazy loading with SSR support
-const TermsSignatureFlow = dynamic(() => import("../terms/TermsSignatureFlow"));
+const TermsSignatureFlow = dynamic(
+  () => import("../terms/TermsSignatureFlow"),
+  { loading: () => null }
+);
 
 export type CreateDropMetadataType =
   | {
-    readonly id: string;
-    key: string;
-    readonly type: ApiWaveMetadataType.String;
-    value: string | null;
-    readonly required: boolean;
-  }
+      readonly id: string;
+      key: string;
+      readonly type: ApiWaveMetadataType.String;
+      value: string | null;
+      readonly required: boolean;
+    }
   | {
-    readonly id: string;
-    key: string;
-    readonly type: ApiWaveMetadataType.Number;
-    value: number | null;
-    readonly required: boolean;
-  }
+      readonly id: string;
+      key: string;
+      readonly type: ApiWaveMetadataType.Number;
+      value: number | null;
+      readonly required: boolean;
+    }
   | {
-    readonly id: string;
-    key: string;
-    readonly type: null;
-    value: string | null;
-    readonly required: boolean;
-  };
+      readonly id: string;
+      key: string;
+      readonly type: null;
+      value: string | null;
+      readonly required: boolean;
+    };
 
 interface CreateDropContentProps {
   readonly activeDrop: ActiveDropState | null;
@@ -373,8 +376,10 @@ const getOptimisticDrop = (
     author: {
       id: connectedProfile.id,
       handle: connectedProfile.handle,
-      active_main_stage_submission_ids: connectedProfile.active_main_stage_submission_ids,
-      winner_main_stage_drop_ids: connectedProfile.winner_main_stage_drop_ids ?? [],
+      active_main_stage_submission_ids:
+        connectedProfile.active_main_stage_submission_ids,
+      winner_main_stage_drop_ids:
+        connectedProfile.winner_main_stage_drop_ids ?? [],
       pfp: connectedProfile.pfp ?? null,
       banner1_color: connectedProfile.banner1 ?? null,
       banner2_color: connectedProfile.banner2 ?? null,
@@ -401,9 +406,9 @@ const getOptimisticDrop = (
       })),
       quoted_drop: part.quoted_drop
         ? {
-          ...part.quoted_drop,
-          is_deleted: false,
-        }
+            ...part.quoted_drop,
+            is_deleted: false,
+          }
         : null,
       replies_count: 0,
       quotes_count: 0,
@@ -487,21 +492,18 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     requiredMetadata: wave.participation.required_metadata,
   });
 
-  const hasMetadata = useMemo(
-    () => hasMetadataContent(metadata),
-    [metadata]
-  );
+  const hasMetadata = useMemo(() => hasMetadataContent(metadata), [metadata]);
 
   const getMarkdown = useMemo(
     () =>
       editorState
         ? exportDropMarkdown(editorState, [
-          ...SAFE_MARKDOWN_TRANSFORMERS,
-          MENTION_TRANSFORMER,
-          HASHTAG_TRANSFORMER,
-          IMAGE_TRANSFORMER,
-          EMOJI_TRANSFORMER,
-        ])
+            ...SAFE_MARKDOWN_TRANSFORMERS,
+            MENTION_TRANSFORMER,
+            HASHTAG_TRANSFORMER,
+            IMAGE_TRANSFORMER,
+            EMOJI_TRANSFORMER,
+          ])
         : null,
     [editorState]
   );
@@ -619,9 +621,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
           quoted_drop:
             activeDrop?.action === ActiveDropAction.QUOTE
               ? {
-                drop_id: activeDrop.drop.id,
-                drop_part_id: activeDrop.partId,
-              }
+                  drop_id: activeDrop.drop.id,
+                  drop_part_id: activeDrop.partId,
+                }
               : null,
           media: files,
         },
@@ -643,22 +645,23 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     const hasPartsInDrop = (drop?.parts.length ?? 0) > 0;
     const hasCurrentContent = !!(markdown?.trim().length || files.length);
 
-    const newParts = hasPartsInDrop && !hasCurrentContent
-      ? drop?.parts ?? []
-      : [
-        ...(drop?.parts ?? []),
-        {
-          content: markdown?.length ? markdown : null,
-          quoted_drop:
-            activeDrop?.action === ActiveDropAction.QUOTE
-              ? {
-                drop_id: activeDrop.drop.id,
-                drop_part_id: activeDrop.partId,
-              }
-              : null,
-          media: files,
-        },
-      ];
+    const newParts =
+      hasPartsInDrop && !hasCurrentContent
+        ? drop?.parts ?? []
+        : [
+            ...(drop?.parts ?? []),
+            {
+              content: markdown?.length ? markdown : null,
+              quoted_drop:
+                activeDrop?.action === ActiveDropAction.QUOTE
+                  ? {
+                      drop_id: activeDrop.drop.id,
+                      drop_part_id: activeDrop.partId,
+                    }
+                  : null,
+              media: files,
+            },
+          ];
 
     const parts = ensurePartsWithFallback(newParts, hasMetadata);
 
@@ -852,7 +855,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         import("@capacitor/core").then(({ Capacitor }) => {
           if (Capacitor.getPlatform() === "android") {
             import("@capacitor/keyboard").then(({ Keyboard }) => {
-              Keyboard.hide().catch(() => { });
+              Keyboard.hide().catch(() => {});
             });
           }
         });
@@ -972,8 +975,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       updatedFiles = updatedFiles.slice(-MAX_DROP_UPLOAD_FILES);
 
       setToast({
-        message: `File limit exceeded. The ${removedCount} oldest file${removedCount > 1 ? "s were" : " was"
-          } removed to maintain the ${MAX_DROP_UPLOAD_FILES}-file limit. New files have been added.`,
+        message: `File limit exceeded. The ${removedCount} oldest file${
+          removedCount > 1 ? "s were" : " was"
+        } removed to maintain the ${MAX_DROP_UPLOAD_FILES}-file limit. New files have been added.`,
         type: "warning",
       });
     }
@@ -981,12 +985,15 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     setFiles(updatedFiles);
   };
 
-  const handleEditorStateChange = useCallback((newEditorState: EditorState) => {
-    setEditorState(newEditorState);
-    if (!isWideContainer) {
-      setShowOptions(false);
-    }
-  }, [isWideContainer]);
+  const handleEditorStateChange = useCallback(
+    (newEditorState: EditorState) => {
+      setEditorState(newEditorState);
+      if (!isWideContainer) {
+        setShowOptions(false);
+      }
+    },
+    [isWideContainer]
+  );
 
   const removeFile = (file: File, partIndex?: number) => {
     if (partIndex !== undefined) {
@@ -1079,7 +1086,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }
   }, [isApp, editingDropId, activeDrop, onCancelReplyQuote]);
 
-  const isChatClosed = wave.wave.type === ApiWaveType.Chat && !wave.chat.enabled;
+  const isChatClosed =
+    wave.wave.type === ApiWaveType.Chat && !wave.chat.enabled;
 
   if (isChatClosed) {
     return (
@@ -1167,8 +1175,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-          >
+            transition={{ duration: 0.3 }}>
             <CreateDropMetadata
               disabled={submitting}
               onRemoveMetadata={onRemoveMetadata}
@@ -1189,10 +1196,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         removeFile={removeFile}
         disabled={submitting}
       />
-
-      <React.Suspense fallback={<div>Loading Terms...</div>}>
-        <TermsSignatureFlow />
-      </React.Suspense>
+      <TermsSignatureFlow />
     </div>
   );
 };

@@ -123,9 +123,12 @@ function useEnhancedWavesListCore(
       const forcedCount = forcedUnreadCounts[wave.id];
       const apiFirstUnread = wave.metrics.first_unread_drop_serial_no ?? null;
       const wsFirstUnread = wsData?.firstUnreadSerialNo ?? null;
+      const wasCleared = clearedUnreadWaveIds.has(wave.id);
       let firstUnreadDropSerialNo: number | null = null;
       if (!isCleared) {
-        if (apiFirstUnread !== null && wsFirstUnread !== null) {
+        if (wasCleared && hasNewWsDrops) {
+          firstUnreadDropSerialNo = wsFirstUnread;
+        } else if (apiFirstUnread !== null && wsFirstUnread !== null) {
           firstUnreadDropSerialNo = Math.min(apiFirstUnread, wsFirstUnread);
         } else {
           firstUnreadDropSerialNo = apiFirstUnread ?? wsFirstUnread;
@@ -137,6 +140,8 @@ function useEnhancedWavesListCore(
         unreadDropsCount = 0;
       } else if (forcedCount !== undefined) {
         unreadDropsCount = forcedCount + (wsData?.count ?? 0);
+      } else if (wasCleared && hasNewWsDrops) {
+        unreadDropsCount = wsData?.count ?? 0;
       } else if (hasNewWsDrops) {
         unreadDropsCount =
           wave.metrics.your_unread_drops_count + (wsData?.count ?? 0);

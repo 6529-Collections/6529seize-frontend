@@ -45,6 +45,7 @@ interface WaveDropsAllProps {
   }) => void;
   readonly activeDrop: ActiveDropState | null;
   readonly initialDrop: number | null;
+  readonly dividerSerialNo?: number | null;
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
   readonly bottomPaddingClassName?: string;
   readonly isMuted?: boolean;
@@ -57,6 +58,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   onQuote,
   activeDrop,
   initialDrop,
+  dividerSerialNo,
   onDropContentClick,
   bottomPaddingClassName,
   isMuted = false,
@@ -70,8 +72,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   const { waveMessages, fetchNextPage, waitAndRevealDrop } =
     useVirtualizedWaveDrops(waveId, dropId);
 
-  const { unreadDividerSerialNo, setUnreadDividerSerialNo } =
-    useUnreadDivider();
+  const { setUnreadDividerSerialNo } = useUnreadDivider();
 
   const typingMessage = useWaveIsTyping(
     waveId,
@@ -112,12 +113,8 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   useEffect(() => {
     setVisibleLatestSerial(null);
     prevLatestSerialNoRef.current = null;
-    if (initialDrop === null) {
-      setUnreadDividerSerialNo(null);
-    } else {
-      setUnreadDividerSerialNo(initialDrop);
-    }
-  }, [waveId, initialDrop, setUnreadDividerSerialNo]);
+    setUnreadDividerSerialNo(dividerSerialNo ?? null);
+  }, [waveId, dividerSerialNo, setUnreadDividerSerialNo]);
 
   const latestSerialNo = waveMessages?.drops?.[0]?.serial_no ?? null;
 
@@ -138,17 +135,6 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
       });
     }
   }, [latestSerialNo, isAtBottom, setUnreadDividerSerialNo]);
-
-  const wasNotAtBottomRef = useRef(false);
-
-  useEffect(() => {
-    if (!isAtBottom) {
-      wasNotAtBottomRef.current = true;
-    } else if (wasNotAtBottomRef.current && unreadDividerSerialNo !== null) {
-      setUnreadDividerSerialNo(null);
-      wasNotAtBottomRef.current = false;
-    }
-  }, [isAtBottom, unreadDividerSerialNo, setUnreadDividerSerialNo]);
 
   useEffect(() => {
     if (latestSerialNo === null) {
@@ -329,13 +315,14 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   onQuote,
   activeDrop,
   initialDrop,
+  dividerSerialNo,
   onDropContentClick,
   bottomPaddingClassName,
   isMuted = false,
 }) => {
   return (
     <UnreadDividerProvider
-      initialSerialNo={initialDrop}
+      initialSerialNo={dividerSerialNo ?? null}
       key={`unread-divider-${waveId}`}>
       <WaveDropsAllInner
         waveId={waveId}
@@ -344,6 +331,7 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
         onQuote={onQuote}
         activeDrop={activeDrop}
         initialDrop={initialDrop}
+        dividerSerialNo={dividerSerialNo}
         onDropContentClick={onDropContentClick}
         bottomPaddingClassName={bottomPaddingClassName}
         isMuted={isMuted}

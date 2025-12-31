@@ -45,14 +45,18 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     },
   });
 
-  // Get new drops count from the waves list
-  const newDropsCount = useMemo(() => {
-    // Check both regular waves and direct messages
+  // Get enhanced data from the waves list (has correct WS-updated values)
+  const enhancedData = useMemo(() => {
     const waveFromList =
       waves.list.find((w) => w.id === waveId) ??
       directMessages.list.find((w) => w.id === waveId);
-    return waveFromList?.newDropsCount.count ?? 0;
+    return {
+      newDropsCount: waveFromList?.newDropsCount.count ?? 0,
+      firstUnreadSerialNo: waveFromList?.firstUnreadDropSerialNo ?? null,
+    };
   }, [waves.list, directMessages.list, waveId]);
+
+  const newDropsCount = enhancedData.newDropsCount;
 
   // Update wave data in title context
   useSetWaveData(
@@ -81,7 +85,12 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
 
   // Create component instances with wave-specific props and stable measurements
   const components: Record<MyStreamWaveTab, JSX.Element> = {
-    [MyStreamWaveTab.CHAT]: <MyStreamWaveChat wave={wave} />,
+    [MyStreamWaveTab.CHAT]: (
+      <MyStreamWaveChat
+        wave={wave}
+        firstUnreadSerialNo={enhancedData.firstUnreadSerialNo}
+      />
+    ),
     [MyStreamWaveTab.LEADERBOARD]: (
       <MyStreamWaveLeaderboard wave={wave} onDropClick={onDropClick} />
     ),
