@@ -6,7 +6,11 @@ interface UseWaveNavigationOptions {
   readonly activeWaveId: string | null;
   readonly setActiveWave: (
     waveId: string | null,
-    options?: { isDirectMessage?: boolean; serialNo?: number | null }
+    options?: {
+      isDirectMessage?: boolean;
+      serialNo?: number | null;
+      divider?: number | null;
+    }
   ) => void;
   readonly onHover: (waveId: string) => void;
   readonly prefetchWaveData: (waveId: string) => void;
