@@ -9,6 +9,7 @@ import sonarjs from "eslint-plugin-sonarjs";
 import security from "eslint-plugin-security";
 import promise from "eslint-plugin-promise";
 import perfectionist from "eslint-plugin-perfectionist";
+import tailwindcss from "eslint-plugin-tailwindcss";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -42,6 +43,7 @@ const plugins = {
     "security": security,
     "promise": promise,
     "perfectionist": perfectionist,
+    "tailwindcss": tailwindcss,
 };
 
 if (reactCompilerPlugin) {
@@ -299,6 +301,17 @@ const rules = {
         type: "alphabetical",
         order: "asc",
     }],
+
+    // -------------------------------------------------------------------------
+    // Tailwind CSS - Production Grade
+    // -------------------------------------------------------------------------
+    "tailwindcss/classnames-order": "off",              // Handled by prettier-plugin-tailwindcss
+    "tailwindcss/enforces-negative-arbitrary-values": "error",  // Use -top-[5px] not top-[-5px]
+    "tailwindcss/enforces-shorthand": "warn",           // Use mx-4 not ml-4 mr-4
+    "tailwindcss/no-arbitrary-value": "off",            // Allow arbitrary values like w-[123px]
+    "tailwindcss/no-custom-classname": "warn",          // Catch typos in class names
+    "tailwindcss/no-contradicting-classname": "error",  // Catch p-4 p-5 conflicts
+    "tailwindcss/no-unnecessary-arbitrary-value": "warn", // Use p-4 not p-[16px]
 
     // -------------------------------------------------------------------------
     // General Code Quality - Production Grade
