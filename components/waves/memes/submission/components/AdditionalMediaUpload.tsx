@@ -147,10 +147,10 @@ const AdditionalMediaUpload: React.FC<AdditionalMediaUploadProps> = ({
           type="button"
           disabled={upload.items.length >= MAX_FILES || upload.isUploading}
           onClick={() => inputRef.current?.click()}
-          className="tw-flex tw-items-center tw-gap-x-1.5 tw-text-sm tw-font-semibold tw-text-primary-400 hover:tw-text-primary-300 disabled:tw-opacity-50 disabled:tw-cursor-not-allowed tw-transition-colors"
+          className="tw-bg-transparent tw-border-0 tw-flex tw-items-center tw-gap-x-1.5 tw-text-sm tw-font-semibold tw-text-primary-400 desktop-hover:hover:tw-text-primary-300 tw-cursor-pointer disabled:tw-opacity-50 disabled:tw-cursor-not-allowed tw-transition tw-duration-300 tw-ease-out"
           aria-label={`Add ${title}`}
         >
-          <PlusIcon className="tw-w-4 tw-h-4" />
+          <PlusIcon className="tw-w-4 tw-h-4 tw-flex-shrink-0" />
           Add (Max {MAX_FILES})
         </button>
         <input

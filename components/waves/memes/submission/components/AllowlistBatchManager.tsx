@@ -110,9 +110,9 @@ const AllowlistBatchManager: React.FC<AllowlistBatchManagerProps> = ({
       <button
         type="button"
         onClick={handleAddBatch}
-        className="tw-flex tw-items-center tw-gap-x-1.5 tw-mt-4 tw-text-sm tw-font-semibold tw-text-primary-400 hover:tw-text-primary-300 tw-transition-colors"
+        className="tw-bg-transparent tw-border-0 tw-flex tw-items-center tw-gap-x-1.5 tw-mt-4 tw-text-sm tw-font-semibold tw-text-primary-400 desktop-hover:hover:tw-text-primary-300 tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out"
       >
-        <PlusIcon className="tw-w-4 tw-h-4" />
+        <PlusIcon className="tw-w-4 tw-h-4 tw-flex-shrink-0" />
         Add Batch
       </button>
     </FormSection>
