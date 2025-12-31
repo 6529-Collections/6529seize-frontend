@@ -378,7 +378,7 @@ const rules = {
     "tailwindcss/enforces-negative-arbitrary-values": "error",  // Use -top-[5px] not top-[-5px]
     "tailwindcss/enforces-shorthand": "warn",           // Use mx-4 not ml-4 mr-4
     "tailwindcss/no-arbitrary-value": "off",            // Allow arbitrary values like w-[123px]
-    "tailwindcss/no-custom-classname": "warn",          // Catch typos (config from settings)
+    "tailwindcss/no-custom-classname": "error",         // Only Tailwind classes allowed, no legacy CSS
     "tailwindcss/no-contradicting-classname": "error",  // Catch p-4 p-5 conflicts
     "tailwindcss/no-unnecessary-arbitrary-value": "warn", // Use p-4 not p-[16px]
 
