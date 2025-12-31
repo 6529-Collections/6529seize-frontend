@@ -44,12 +44,6 @@ export default function ProfileProxyCreditEdit({
       });
     },
     onSuccess: () => {
-      if (
-        !profileProxy.granted_to?.handle ||
-        !profileProxy.created_by?.handle
-      ) {
-        return;
-      }
       onProfileProxyModify({
         profileProxyId: profileProxy.id,
       });
@@ -108,11 +102,10 @@ export default function ProfileProxyCreditEdit({
               onClick={onSubmit}
               disabled={submitting}
               type="button"
-              className={`${
-                !isChangedAndValid
+              className={`${!isChangedAndValid
                   ? "tw-opacity-50"
                   : "hover:tw-bg-primary-600 hover:tw-border-primary-600"
-              } tw-w-full tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}>
+                } tw-w-full tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}>
               <div className="tw-flex tw-items-center tw-space-x-2">
                 {submitting && <CircleLoader size={CircleLoaderSize.SMALL} />}
                 <span>Update</span>

@@ -34,15 +34,9 @@ export default function ProfileProxyEndTimeEdit({
     profileProxyAction.end_time
   );
 
-  const isChangedAndValid = (() => {
-    if (profileProxyAction.end_time === endTime) {
-      return false;
-    }
-    if (endTime && endTime < Time.currentMillis()) {
-      return false;
-    }
-    return true;
-  })();
+  const isChangedAndValid =
+    profileProxyAction.end_time !== endTime &&
+    (!endTime || endTime >= Time.currentMillis());
 
   const [submitting, setSubmitting] = useState(false);
   const profileProxyActionCreditMutation = useMutation({
@@ -56,12 +50,6 @@ export default function ProfileProxyEndTimeEdit({
       });
     },
     onSuccess: () => {
-      if (
-        !profileProxy.granted_to?.handle ||
-        !profileProxy.created_by?.handle
-      ) {
-        return;
-      }
       onProfileProxyModify({
         profileProxyId: profileProxy.id
       });

@@ -98,12 +98,6 @@ export default function ProxyActionAcceptanceButton({
       });
     },
     onSuccess: (_, variables) => {
-      if (
-        !profileProxy.granted_to?.handle ||
-        !profileProxy.created_by?.handle
-      ) {
-        return;
-      }
       onProfileProxyModify({
         profileProxyId: profileProxy.id,
       });
