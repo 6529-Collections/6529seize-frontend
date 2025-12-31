@@ -8,6 +8,8 @@ import AdditionalMediaUpload from "../components/AdditionalMediaUpload";
 import { validateStrictAddress } from "../utils/addressValidation";
 import { validateTokenIdFormat } from "../utils/tokenParsing";
 import { AirdropEntry, AIRDROP_TOTAL } from "../types/OperationalData";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import SecondaryButton from "@/components/utils/button/SecondaryButton";
 
 interface AdditionalInfoStepProps {
   readonly airdropEntries: AirdropEntry[];
@@ -121,22 +123,20 @@ const AdditionalInfoStep: React.FC<AdditionalInfoStepProps> = ({
       </div>
 
       <div className="tw-flex tw-items-center tw-justify-between tw-pt-6 tw-px-4 tw-border-t tw-border-iron-800 tw-mt-auto">
-        <button
-          type="button"
-          onClick={onBack}
+        <SecondaryButton
+          onClicked={onBack}
           disabled={isSubmitting}
-          className="tw-px-6 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-300 hover:tw-text-iron-100 tw-transition-colors disabled:tw-opacity-50"
         >
           Back
-        </button>
-        <button
-          type="button"
-          onClick={onSubmit}
-          disabled={isSubmitting || !isFormValid()}
-          className="tw-inline-flex tw-items-center tw-justify-center tw-px-8 tw-py-3 tw-text-sm tw-font-bold tw-text-white tw-bg-primary-500 hover:tw-bg-primary-600 disabled:tw-bg-iron-800 disabled:tw-text-iron-500 tw-rounded-xl tw-transition-all tw-duration-300"
+        </SecondaryButton>
+        <PrimaryButton
+          onClicked={onSubmit}
+          disabled={!isFormValid()}
+          loading={isSubmitting}
+          padding="tw-px-6 tw-py-3"
         >
-          {isSubmitting ? "Submitting..." : "Submit Artwork"}
-        </button>
+          Submit Artwork
+        </PrimaryButton>
       </div>
     </motion.div>
   );
