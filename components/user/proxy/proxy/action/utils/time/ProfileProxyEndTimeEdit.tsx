@@ -35,8 +35,9 @@ export default function ProfileProxyEndTimeEdit({
   );
 
   const isChangedAndValid =
-    profileProxyAction.end_time !== endTime &&
-    (!endTime || endTime >= Time.currentMillis());
+    profileProxyAction.end_time !== (isEndTimeDisabled ? null : endTime) &&
+    (isEndTimeDisabled ||
+      (endTime !== null && endTime >= Time.currentMillis()));
 
   const [submitting, setSubmitting] = useState(false);
   const profileProxyActionCreditMutation = useMutation({

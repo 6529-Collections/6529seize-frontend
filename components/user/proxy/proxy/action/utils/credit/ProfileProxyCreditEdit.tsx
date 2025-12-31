@@ -100,7 +100,7 @@ export default function ProfileProxyCreditEdit({
             </button>
             <button
               onClick={onSubmit}
-              disabled={submitting}
+              disabled={submitting || !isChangedAndValid}
               type="button"
               className={`${!isChangedAndValid
                   ? "tw-opacity-50"
