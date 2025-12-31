@@ -65,6 +65,12 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     return getWaveRoute({
       waveId: wave.id,
       serialNo: wave.firstUnreadDropSerialNo ?? undefined,
+      extraParams: {
+        divider:
+          wave.firstUnreadDropSerialNo !== null
+            ? String(wave.firstUnreadDropSerialNo)
+            : undefined,
+      },
       isDirectMessage,
       isApp,
     });
@@ -94,6 +100,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       activeWave.set(nextWaveId, {
         isDirectMessage,
         serialNo: nextWaveId ? wave.firstUnreadDropSerialNo : undefined,
+        divider: nextWaveId ? wave.firstUnreadDropSerialNo : undefined,
       });
     },
     [activeWave.set, activeWaveId, isDirectMessage, onWaveHover, wave.id, wave.firstUnreadDropSerialNo]

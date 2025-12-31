@@ -12,6 +12,7 @@ import {
 interface WaveNavigationOptions {
   isDirectMessage?: boolean;
   serialNo?: number | string | null;
+  divider?: number | string | null;
 }
 
 const getWaveFromWindow = (): string | null => {
@@ -47,8 +48,20 @@ export function useActiveWaveManager() {
     (waveId: string | null, options?: WaveNavigationOptions) => {
       const isDirectMessage = options?.isDirectMessage ?? false;
       const serialNo = options?.serialNo ?? undefined;
+      const divider = options?.divider;
       return waveId
-        ? getWaveRoute({ waveId, serialNo, isDirectMessage, isApp })
+        ? getWaveRoute({
+            waveId,
+            serialNo,
+            extraParams: {
+              divider:
+                divider !== null && divider !== undefined
+                  ? String(divider)
+                  : undefined,
+            },
+            isDirectMessage,
+            isApp,
+          })
         : getWaveHomeRoute({ isDirectMessage, isApp });
     },
     [isApp]
