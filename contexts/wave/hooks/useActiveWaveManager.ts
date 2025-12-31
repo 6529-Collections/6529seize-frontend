@@ -1,17 +1,15 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getWaveHomeRoute, getWaveRoute } from "@/helpers/navigation.helpers";
 import { useClientNavigation } from "@/hooks/useClientNavigation";
-import {
-  getWaveHomeRoute,
-  getWaveRoute,
-} from "@/helpers/navigation.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useSearchParams } from "next/navigation";
+import { useCallback, useMemo } from "react";
 
 interface WaveNavigationOptions {
   isDirectMessage?: boolean;
   serialNo?: number | string | null;
+  divider?: number | null;
 }
 
 const getWaveFromWindow = (): string | null => {
@@ -47,8 +45,20 @@ export function useActiveWaveManager() {
     (waveId: string | null, options?: WaveNavigationOptions) => {
       const isDirectMessage = options?.isDirectMessage ?? false;
       const serialNo = options?.serialNo ?? undefined;
+      const divider = options?.divider;
       return waveId
-        ? getWaveRoute({ waveId, serialNo, isDirectMessage, isApp })
+        ? getWaveRoute({
+            waveId,
+            serialNo,
+            extraParams: {
+              divider:
+                divider !== null && divider !== undefined
+                  ? String(divider)
+                  : undefined,
+            },
+            isDirectMessage,
+            isApp,
+          })
         : getWaveHomeRoute({ isDirectMessage, isApp });
     },
     [isApp]

@@ -52,6 +52,7 @@ interface ActiveWaveContextData {
       isDirectMessage?: boolean;
       replace?: boolean;
       serialNo?: number | string | null;
+      divider?: number | null;
     }
   ) => void;
 }

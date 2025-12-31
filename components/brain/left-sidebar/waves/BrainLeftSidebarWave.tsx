@@ -1,22 +1,22 @@
 "use client";
 
-import React, { useMemo, useCallback } from "react";
-import Link from "next/link";
-import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import WavePicture from "@/components/waves/WavePicture";
-import BrainLeftSidebarWaveDropTime from "./BrainLeftSidebarWaveDropTime";
 import { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesList";
-import BrainLeftSidebarWavePin from "./BrainLeftSidebarWavePin";
-import { formatAddress, isValidEthAddress } from "../../../../helpers/Helpers";
-import useDeviceInfo from "../../../../hooks/useDeviceInfo";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
+import { faBellSlash } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
+import React, { useCallback, useMemo } from "react";
+import { formatAddress, isValidEthAddress } from "../../../../helpers/Helpers";
 import {
   getWaveHomeRoute,
   getWaveRoute,
 } from "../../../../helpers/navigation.helpers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBellSlash } from "@fortawesome/free-solid-svg-icons";
+import useDeviceInfo from "../../../../hooks/useDeviceInfo";
+import BrainLeftSidebarWaveDropTime from "./BrainLeftSidebarWaveDropTime";
+import BrainLeftSidebarWavePin from "./BrainLeftSidebarWavePin";
 
 interface BrainLeftSidebarWaveProps {
   readonly wave: MinimalWave;
@@ -32,6 +32,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   isDirectMessage = false,
 }) => {
   const { activeWave } = useMyStream();
+  const { id: activeWaveId, set: setActiveWave } = activeWave;
   const prefetchWaveData = usePrefetchWaveData();
   const { isApp, hasTouchScreen } = useDeviceInfo();
   const isDropWave = wave.type !== ApiWaveType.Chat;
@@ -45,18 +46,21 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       if (markerIndex !== -1) {
         const prefix = wave.name.slice(0, markerIndex + marker.length);
         const addressStart = markerIndex + marker.length;
-        const candidateAddress = wave.name.slice(addressStart, addressStart + 42);
+        const candidateAddress = wave.name.slice(
+          addressStart,
+          addressStart + 42
+        );
 
         if (isValidEthAddress(candidateAddress)) {
-          const suffix = wave.name.slice(addressStart + candidateAddress.length);
+          const suffix = wave.name.slice(
+            addressStart + candidateAddress.length
+          );
           return `${prefix}${formatAddress(candidateAddress)}${suffix}`;
         }
       }
     }
     return wave.name;
   }, [wave.name, wave.type]);
-
-  const activeWaveId = activeWave.id;
 
   const href = useMemo(() => {
     if (activeWaveId === wave.id) {
@@ -65,10 +69,19 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     return getWaveRoute({
       waveId: wave.id,
       serialNo: wave.firstUnreadDropSerialNo ?? undefined,
+      extraParams: wave.firstUnreadDropSerialNo
+        ? { divider: String(wave.firstUnreadDropSerialNo) }
+        : undefined,
       isDirectMessage,
       isApp,
     });
-  }, [activeWaveId, isApp, isDirectMessage, wave.id, wave.firstUnreadDropSerialNo]);
+  }, [
+    activeWaveId,
+    isApp,
+    isDirectMessage,
+    wave.id,
+    wave.firstUnreadDropSerialNo,
+  ]);
 
   const unreadCount = Math.max(wave.unreadDropsCount, wave.newDropsCount.count);
   const haveNewDrops = unreadCount > 0;
@@ -85,22 +98,37 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   const handleWaveClick = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement>) => {
       if (event.defaultPrevented) return;
-      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button === 1) {
+      if (
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey ||
+        event.button === 1
+      ) {
         return;
       }
       event.preventDefault();
       onWaveHover();
       const nextWaveId = wave.id === activeWaveId ? null : wave.id;
-      activeWave.set(nextWaveId, {
+      setActiveWave(nextWaveId, {
         isDirectMessage,
-        serialNo: nextWaveId ? wave.firstUnreadDropSerialNo : undefined,
+        serialNo: nextWaveId ? wave.firstUnreadDropSerialNo : null,
+        divider: nextWaveId ? wave.firstUnreadDropSerialNo : null,
       });
     },
-    [activeWave.set, activeWaveId, isDirectMessage, onWaveHover, wave.id, wave.firstUnreadDropSerialNo]
+    [
+      setActiveWave,
+      activeWaveId,
+      isDirectMessage,
+      onWaveHover,
+      wave.id,
+      wave.firstUnreadDropSerialNo,
+    ]
   );
 
   const getAvatarRingClasses = () => {
-    if (isActive) return "tw-ring-1 tw-ring-offset-2 tw-ring-offset-iron-900 tw-ring-primary-400";
+    if (isActive)
+      return "tw-ring-1 tw-ring-offset-2 tw-ring-offset-iron-900 tw-ring-primary-400";
     return "tw-ring-1 tw-ring-iron-700";
   };
 
@@ -123,7 +151,9 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
         <div className="tw-relative">
           <div
             className={`tw-relative tw-size-8 tw-rounded-full tw-transition tw-duration-300 desktop-hover:group-hover:tw-brightness-110 ${getAvatarRingClasses()} ${
-              isActive ? "tw-opacity-100" : "tw-opacity-80 desktop-hover:group-hover:tw-opacity-100"
+              isActive
+                ? "tw-opacity-100"
+                : "tw-opacity-80 desktop-hover:group-hover:tw-opacity-100"
             }`}>
             <WavePicture
               name={wave.name}
