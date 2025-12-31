@@ -4,7 +4,7 @@ import React, { useCallback, useRef, useEffect, useMemo } from "react";
 import FormSection from "../ui/FormSection";
 import ValidationError from "../ui/ValidationError";
 import { TraitWrapper } from "../../traits/TraitWrapper";
-import { PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import { useMediaUpload, MediaUploadItem } from "../hooks/useMediaUpload";
 
 interface AdditionalMediaUploadProps {
@@ -117,17 +117,39 @@ const AdditionalMediaUpload: React.FC<AdditionalMediaUploadProps> = ({
       <button
         type="button"
         onClick={() => onRemove(item.id)}
-        className="tw-absolute tw-top-1 tw-right-1 tw-p-1 tw-rounded-full tw-bg-iron-900/80 tw-text-iron-100 hover:tw-text-red tw-transition-colors"
+        className="tw-border-0 tw-flex tw-items-center tw-justify-center tw-absolute tw-top-1.5 tw-right-1.5 tw-text-iron-300 tw-rounded-full tw-size-6 tw-transition-all tw-duration-300 tw-z-10 tw-cursor-pointer tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-red"
         aria-label="Remove media"
       >
-        <XMarkIcon className="tw-w-3 tw-h-3" />
+        <svg
+          className="tw-size-3.5 tw-flex-shrink-0"
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M18 6L6 18M6 6l12 12" />
+        </svg>
       </button>
 
       {/* Success indicator */}
       {item.status === "done" && (
-        <div className="tw-absolute tw-bottom-1 tw-left-1 tw-p-1 tw-rounded-full tw-bg-green/80">
-          <svg className="tw-w-3 tw-h-3 tw-text-white" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+        <div className="tw-absolute tw-bottom-1.5 tw-left-1.5 tw-flex tw-items-center tw-justify-center tw-size-5 tw-rounded-full tw-bg-green/90">
+          <svg
+            className="tw-size-3 tw-text-white tw-flex-shrink-0"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M5 13l4 4L19 7" />
           </svg>
         </div>
       )}
