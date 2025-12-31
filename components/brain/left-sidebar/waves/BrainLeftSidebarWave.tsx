@@ -112,8 +112,8 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       const nextWaveId = wave.id === activeWaveId ? null : wave.id;
       setActiveWave(nextWaveId, {
         isDirectMessage,
-        serialNo: nextWaveId ? wave.firstUnreadDropSerialNo : undefined,
-        divider: nextWaveId ? wave.firstUnreadDropSerialNo : undefined,
+        serialNo: nextWaveId ? wave.firstUnreadDropSerialNo : null,
+        divider: nextWaveId ? wave.firstUnreadDropSerialNo : null,
       });
     },
     [

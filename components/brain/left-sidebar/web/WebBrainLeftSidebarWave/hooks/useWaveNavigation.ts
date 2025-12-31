@@ -84,8 +84,8 @@ export const useWaveNavigation = ({
       const nextWaveId = waveId === currentWaveId ? null : waveId;
       setActiveWave(nextWaveId, {
         isDirectMessage,
-        serialNo: nextWaveId ? firstUnreadDropSerialNo : undefined,
-        divider: nextWaveId ? firstUnreadDropSerialNo : undefined,
+        serialNo: nextWaveId ? firstUnreadDropSerialNo : null,
+        divider: nextWaveId ? firstUnreadDropSerialNo : null,
       });
     },
     [

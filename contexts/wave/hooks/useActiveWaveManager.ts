@@ -1,18 +1,15 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getWaveHomeRoute, getWaveRoute } from "@/helpers/navigation.helpers";
 import { useClientNavigation } from "@/hooks/useClientNavigation";
-import {
-  getWaveHomeRoute,
-  getWaveRoute,
-} from "@/helpers/navigation.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useSearchParams } from "next/navigation";
+import { useCallback, useMemo } from "react";
 
 interface WaveNavigationOptions {
   isDirectMessage?: boolean;
   serialNo?: number | string | null;
-  divider?: number | string | null;
+  divider?: number | null;
 }
 
 const getWaveFromWindow = (): string | null => {
