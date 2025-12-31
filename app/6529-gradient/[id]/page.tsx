@@ -13,7 +13,7 @@ export default async function GradientPage({
 }) {
   const { id } = await params;
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <GradientPageComponent id={id} />
     </main>
   );

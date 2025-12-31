@@ -307,7 +307,7 @@ export default function Leaderboard(
           </Row>
         </>
       )}
-      <Row className={`${styles.scrollContainer} pt-2`}>
+      <Row className={`${styles["scrollContainer"]} pt-2`}>
         <Col>
           {props.focus === LeaderboardFocus.TDH && (
             <LeaderboardCardsCollectedComponent
