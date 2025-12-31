@@ -2,7 +2,7 @@
 
 import React, { useCallback } from "react";
 import FormSection from "../ui/FormSection";
-import ValidationError from "../ui/ValidationError";
+import { TraitWrapper } from "../../traits/TraitWrapper";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { AllowlistBatchRaw } from "../types/OperationalData";
 
@@ -55,63 +55,51 @@ const AllowlistBatchManager: React.FC<AllowlistBatchManagerProps> = ({
               className="tw-flex tw-items-center tw-gap-x-3"
             >
               {/* Contract Address */}
-              <div className="tw-flex-1 tw-group tw-relative">
-                <div className="tw-relative">
-                  <label
-                    htmlFor={`batch-${index}-contract`}
-                    className={`tw-absolute tw-left-3 -tw-top-2 tw-px-1 tw-text-xs tw-font-medium tw-bg-iron-900 tw-z-10 tw-transition-all ${
-                      errors?.[index]?.contract ? "tw-text-red" : "tw-text-iron-300"
-                    }`}
-                  >
-                    Contract Address
-                  </label>
-                  <input
-                    id={`batch-${index}-contract`}
-                    type="text"
-                    placeholder="0x..."
-                    defaultValue={batch.contract}
-                    onBlur={(e) => handleBatchChange(index, "contract", e.target.value)}
-                    className={`tw-form-input tw-w-full tw-rounded-lg tw-px-4 tw-py-3 tw-text-sm tw-text-iron-100 tw-bg-iron-900 tw-border-0 tw-outline-none tw-ring-1 ${
-                      errors?.[index]?.contract ? "tw-ring-red" : "tw-ring-iron-700"
-                    } focus:tw-ring-primary-400`}
-                  />
-                </div>
-                <ValidationError error={errors?.[index]?.contract} />
-              </div>
+              <TraitWrapper
+                label="Contract Address"
+                id={`batch-${index}-contract`}
+                error={errors?.[index]?.contract}
+                isFieldFilled={!!batch.contract && !errors?.[index]?.contract}
+                className="tw-flex-1"
+              >
+                <input
+                  type="text"
+                  placeholder="0x..."
+                  defaultValue={batch.contract}
+                  onBlur={(e) => handleBatchChange(index, "contract", e.target.value)}
+                  className={`tw-form-input tw-w-full tw-rounded-lg tw-px-4 tw-py-3 tw-text-sm tw-text-iron-100 tw-bg-iron-900 tw-border-0 tw-outline-none tw-ring-1 ${
+                    errors?.[index]?.contract ? "tw-ring-red" : "tw-ring-iron-700"
+                  } focus:tw-ring-primary-400`}
+                />
+              </TraitWrapper>
 
               {/* Token IDs */}
-              <div className="tw-flex-1 tw-group tw-relative">
-                <div className="tw-relative">
-                  <label
-                    htmlFor={`batch-${index}-token-ids`}
-                    className={`tw-absolute tw-left-3 -tw-top-2 tw-px-1 tw-text-xs tw-font-medium tw-bg-iron-900 tw-z-10 tw-transition-all ${
-                      errors?.[index]?.token_ids ? "tw-text-red" : "tw-text-iron-300"
-                    }`}
-                  >
-                    Token IDs (e.g. 1,2,5-10)
-                  </label>
-                  <input
-                    id={`batch-${index}-token-ids`}
-                    type="text"
-                    placeholder="Optional"
-                    defaultValue={batch.token_ids_raw}
-                    onBlur={(e) => handleBatchChange(index, "token_ids_raw", e.target.value)}
-                    className={`tw-form-input tw-w-full tw-rounded-lg tw-px-4 tw-py-3 tw-text-sm tw-text-iron-100 tw-bg-iron-900 tw-border-0 tw-outline-none tw-ring-1 ${
-                      errors?.[index]?.token_ids ? "tw-ring-red" : "tw-ring-iron-700"
-                    } focus:tw-ring-primary-400`}
-                  />
-                </div>
-                <ValidationError error={errors?.[index]?.token_ids} />
-              </div>
+              <TraitWrapper
+                label="Token IDs (e.g. 1,2,5-10)"
+                id={`batch-${index}-token-ids`}
+                error={errors?.[index]?.token_ids}
+                isFieldFilled={!!batch.token_ids_raw && !errors?.[index]?.token_ids}
+                className="tw-flex-1"
+              >
+                <input
+                  type="text"
+                  placeholder="Optional"
+                  defaultValue={batch.token_ids_raw}
+                  onBlur={(e) => handleBatchChange(index, "token_ids_raw", e.target.value)}
+                  className={`tw-form-input tw-w-full tw-rounded-lg tw-px-4 tw-py-3 tw-text-sm tw-text-iron-100 tw-bg-iron-900 tw-border-0 tw-outline-none tw-ring-1 ${
+                    errors?.[index]?.token_ids ? "tw-ring-red" : "tw-ring-iron-700"
+                  } focus:tw-ring-primary-400`}
+                />
+              </TraitWrapper>
 
               {/* Remove button */}
               <button
                 type="button"
                 onClick={() => handleRemoveBatch(index)}
-                className="tw-p-2 tw-text-iron-500 hover:tw-text-red tw-transition-colors"
+                className="tw-bg-transparent tw-border-0 tw-p-2 tw-text-iron-400 desktop-hover:hover:tw-text-rose-400 tw-cursor-pointer tw-transition-colors tw-duration-300 tw-ease-out tw-self-center"
                 aria-label={`Remove Batch ${index + 1}`}
               >
-                <TrashIcon className="tw-w-5 tw-h-5" />
+                <TrashIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0" />
               </button>
             </div>
           ))

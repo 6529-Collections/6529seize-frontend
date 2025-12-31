@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useCallback, useRef, useEffect } from "react";
+import React, { useCallback, useRef, useEffect, useMemo } from "react";
 import FormSection from "../ui/FormSection";
 import ValidationError from "../ui/ValidationError";
+import { TraitWrapper } from "../../traits/TraitWrapper";
 import { PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useMediaUpload, MediaUploadItem } from "../hooks/useMediaUpload";
 
@@ -35,16 +36,36 @@ const AdditionalMediaUpload: React.FC<AdditionalMediaUploadProps> = ({
   const artistUpload = useMediaUpload(MAX_FILES);
   const commentaryUpload = useMediaUpload(MAX_FILES);
 
-  // Sync server URLs to parent when uploads complete
+  // Track previous URL values to avoid unnecessary parent updates
+  const prevArtistUrlsRef = useRef<string>("");
+  const prevCommentaryUrlsRef = useRef<string>("");
+
+  // Memoize the server URLs to get stable references
+  const artistServerUrls = useMemo(
+    () => artistUpload.getServerUrls(),
+    [artistUpload.items]
+  );
+  const commentaryServerUrls = useMemo(
+    () => commentaryUpload.getServerUrls(),
+    [commentaryUpload.items]
+  );
+
+  // Sync server URLs to parent only when they actually change
   useEffect(() => {
-    const urls = artistUpload.getServerUrls();
-    onArtistProfileMediaChange(urls);
-  }, [artistUpload.items, artistUpload.getServerUrls, onArtistProfileMediaChange]);
+    const urlsKey = artistServerUrls.join(",");
+    if (urlsKey !== prevArtistUrlsRef.current) {
+      prevArtistUrlsRef.current = urlsKey;
+      onArtistProfileMediaChange(artistServerUrls);
+    }
+  }, [artistServerUrls, onArtistProfileMediaChange]);
 
   useEffect(() => {
-    const urls = commentaryUpload.getServerUrls();
-    onArtworkCommentaryMediaChange(urls);
-  }, [commentaryUpload.items, commentaryUpload.getServerUrls, onArtworkCommentaryMediaChange]);
+    const urlsKey = commentaryServerUrls.join(",");
+    if (urlsKey !== prevCommentaryUrlsRef.current) {
+      prevCommentaryUrlsRef.current = urlsKey;
+      onArtworkCommentaryMediaChange(commentaryServerUrls);
+    }
+  }, [commentaryServerUrls, onArtworkCommentaryMediaChange]);
 
   const handleFileChange = useCallback(
     (upload: ReturnType<typeof useMediaUpload>) =>
@@ -169,28 +190,21 @@ const AdditionalMediaUpload: React.FC<AdditionalMediaUploadProps> = ({
           errors?.artworkCommentaryMedia
         )}
 
-        <div className="tw-group tw-relative">
-          <div className="tw-relative">
-            <label
-              htmlFor="artwork-commentary"
-              className={`tw-absolute tw-left-3 -tw-top-2 tw-px-1 tw-text-xs tw-font-medium tw-bg-iron-900 tw-z-10 tw-transition-all ${
-                errors?.artworkCommentary ? "tw-text-red" : "tw-text-iron-300"
-              }`}
-            >
-              Artwork Commentary
-            </label>
-            <textarea
-              id="artwork-commentary"
-              placeholder="Tell us more about the artwork..."
-              defaultValue={artworkCommentary}
-              onBlur={(e) => onArtworkCommentaryChange(e.target.value)}
-              className={`tw-form-textarea tw-w-full tw-rounded-lg tw-px-4 tw-py-3 tw-text-sm tw-text-iron-100 tw-bg-iron-900 tw-border-0 tw-outline-none tw-ring-1 tw-min-h-[120px] focus:tw-ring-primary-400 ${
-                errors?.artworkCommentary ? "tw-ring-red" : "tw-ring-iron-700"
-              }`}
-            />
-          </div>
-          <ValidationError error={errors?.artworkCommentary} />
-        </div>
+        <TraitWrapper
+          label="Artwork Commentary"
+          id="artwork-commentary"
+          error={errors?.artworkCommentary}
+          isFieldFilled={!!artworkCommentary}
+        >
+          <textarea
+            placeholder="Tell us more about the artwork..."
+            defaultValue={artworkCommentary}
+            onBlur={(e) => onArtworkCommentaryChange(e.target.value)}
+            className={`tw-form-textarea tw-w-full tw-rounded-lg tw-px-4 tw-py-3 tw-text-sm tw-text-iron-100 tw-bg-iron-900 tw-border-0 tw-outline-none tw-ring-1 tw-min-h-[120px] focus:tw-ring-primary-400 ${
+              errors?.artworkCommentary ? "tw-ring-red" : "tw-ring-iron-700"
+            }`}
+          />
+        </TraitWrapper>
       </div>
     </FormSection>
   );

@@ -62,6 +62,21 @@ const MemesArtSubmissionContainer: React.FC<
     form.handleFileSelect(file);
   };
 
+  // Memoized callbacks for additional media to prevent infinite loops
+  const handleArtistProfileMediaChange = useCallback(
+    (media: string[]) => {
+      form.setAdditionalMedia({ artist_profile_media: media });
+    },
+    [form.setAdditionalMedia]
+  );
+
+  const handleArtworkCommentaryMediaChange = useCallback(
+    (media: string[]) => {
+      form.setAdditionalMedia({ artwork_commentary_media: media });
+    },
+    [form.setAdditionalMedia]
+  );
+
   // Phase change handler
   const handlePhaseChange = useCallback((phase: SubmissionPhase) => {
     // Any additional phase-specific handling can be done here
@@ -176,12 +191,8 @@ const MemesArtSubmissionContainer: React.FC<
         artworkCommentaryMedia={form.operationalData.additional_media.artwork_commentary_media}
         artworkCommentary={form.operationalData.commentary}
         onBatchesChange={form.setAllowlistBatches}
-        onArtistProfileMediaChange={(val) =>
-          form.setAdditionalMedia({ artist_profile_media: val })
-        }
-        onArtworkCommentaryMediaChange={(val) =>
-          form.setAdditionalMedia({ artwork_commentary_media: val })
-        }
+        onArtistProfileMediaChange={handleArtistProfileMediaChange}
+        onArtworkCommentaryMediaChange={handleArtworkCommentaryMediaChange}
         onArtworkCommentaryChange={form.setCommentary}
         onBack={form.handleBackToArtwork}
         onSubmit={handleSubmit}

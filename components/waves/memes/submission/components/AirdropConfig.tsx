@@ -2,7 +2,7 @@
 
 import React, { useCallback, useMemo } from "react";
 import FormSection from "../ui/FormSection";
-import ValidationError from "../ui/ValidationError";
+import { TraitWrapper } from "../../traits/TraitWrapper";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { AirdropEntry, AIRDROP_TOTAL } from "../types/OperationalData";
 import { validateStrictAddress } from "../utils/addressValidation";
@@ -104,60 +104,50 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
             className="tw-flex tw-items-center tw-gap-x-3"
           >
             {/* Address input */}
-            <div className="tw-flex-1 tw-group tw-relative">
-              <div className="tw-relative">
-                <label
-                  htmlFor={`airdrop-${index}-address`}
-                  className={`tw-absolute tw-left-3 -tw-top-2 tw-px-1 tw-text-xs tw-font-medium tw-bg-iron-900 tw-z-10 ${
-                    getAddressError(entry.address) ? "tw-text-red" : "tw-text-iron-300"
-                  }`}
-                >
-                  Wallet Address
-                </label>
-                <input
-                  id={`airdrop-${index}-address`}
-                  type="text"
-                  placeholder="0x..."
-                  value={entry.address}
-                  onChange={(e) => handleAddressChange(index, e.target.value)}
-                  className={`tw-form-input tw-w-full tw-rounded-lg tw-px-4 tw-py-3 tw-text-sm tw-text-iron-100 tw-bg-iron-900 tw-border-0 tw-outline-none tw-ring-1 ${
-                    getAddressError(entry.address) ? "tw-ring-red" : "tw-ring-iron-700"
-                  } focus:tw-ring-primary-400`}
-                />
-              </div>
-              <ValidationError error={getAddressError(entry.address)} />
-            </div>
+            <TraitWrapper
+              label="Wallet Address"
+              id={`airdrop-${index}-address`}
+              error={getAddressError(entry.address)}
+              isFieldFilled={!!entry.address && !getAddressError(entry.address)}
+              className="tw-flex-1"
+            >
+              <input
+                type="text"
+                placeholder="0x..."
+                value={entry.address}
+                onChange={(e) => handleAddressChange(index, e.target.value)}
+                className={`tw-form-input tw-w-full tw-rounded-lg tw-px-4 tw-py-3 tw-text-sm tw-text-iron-100 tw-bg-iron-900 tw-border-0 tw-outline-none tw-ring-1 ${
+                  getAddressError(entry.address) ? "tw-ring-red" : "tw-ring-iron-700"
+                } focus:tw-ring-primary-400`}
+              />
+            </TraitWrapper>
 
             {/* Count input */}
-            <div className="tw-w-24 tw-group tw-relative">
-              <div className="tw-relative">
-                <label
-                  htmlFor={`airdrop-${index}-count`}
-                  className="tw-absolute tw-left-3 -tw-top-2 tw-px-1 tw-text-xs tw-font-medium tw-bg-iron-900 tw-z-10 tw-text-iron-300"
-                >
-                  Count
-                </label>
-                <input
-                  id={`airdrop-${index}-count`}
-                  type="number"
-                  min="1"
-                  max={AIRDROP_TOTAL}
-                  value={entry.count || ""}
-                  onChange={(e) => handleCountChange(index, e.target.value)}
-                  className="tw-form-input tw-w-full tw-rounded-lg tw-px-4 tw-py-3 tw-text-sm tw-text-iron-100 tw-bg-iron-900 tw-border-0 tw-outline-none tw-ring-1 tw-ring-iron-700 focus:tw-ring-primary-400"
-                />
-              </div>
-            </div>
+            <TraitWrapper
+              label="Count"
+              id={`airdrop-${index}-count`}
+              isFieldFilled={!!entry.count}
+              className="tw-w-24"
+            >
+              <input
+                type="number"
+                min="1"
+                max={AIRDROP_TOTAL}
+                value={entry.count || ""}
+                onChange={(e) => handleCountChange(index, e.target.value)}
+                className="tw-form-input tw-w-full tw-rounded-lg tw-px-4 tw-py-3 tw-text-sm tw-text-iron-100 tw-bg-iron-900 tw-border-0 tw-outline-none tw-ring-1 tw-ring-iron-700 focus:tw-ring-primary-400"
+              />
+            </TraitWrapper>
 
             {/* Remove button - only show when more than 1 entry */}
             {entries.length > 1 && (
               <button
                 type="button"
                 onClick={() => handleRemoveEntry(index)}
-                className="tw-p-2 tw-text-iron-500 hover:tw-text-red tw-transition-colors"
+                className="tw-bg-transparent tw-border-0 tw-p-2 tw-text-iron-400 desktop-hover:hover:tw-text-rose-400 tw-cursor-pointer tw-transition-colors tw-duration-300 tw-ease-out tw-self-center"
                 aria-label={`Remove address ${index + 1}`}
               >
-                <TrashIcon className="tw-w-5 tw-h-5" />
+                <TrashIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0" />
               </button>
             )}
           </div>
