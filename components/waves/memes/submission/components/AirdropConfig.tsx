@@ -101,7 +101,7 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
         {entries.map((entry, index) => (
           <div
             key={index}
-            className="tw-flex tw-items-center tw-gap-x-3"
+            className="tw-flex tw-items-start tw-gap-x-3"
           >
             {/* Address input */}
             <TraitWrapper
@@ -144,7 +144,7 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
               <button
                 type="button"
                 onClick={() => handleRemoveEntry(index)}
-                className="tw-bg-transparent tw-border-0 tw-p-2 tw-text-iron-400 desktop-hover:hover:tw-text-rose-400 tw-cursor-pointer tw-transition-colors tw-duration-300 tw-ease-out tw-self-center"
+                className="tw-bg-transparent tw-border-0 tw-p-2 tw-mt-2 tw-text-iron-400 desktop-hover:hover:tw-text-rose-400 tw-cursor-pointer tw-transition-colors tw-duration-300 tw-ease-out"
                 aria-label={`Remove address ${index + 1}`}
               >
                 <TrashIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0" />

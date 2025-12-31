@@ -55,7 +55,7 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
   }
 
   return (
-    <div className={`tw-group tw-relative ${className ?? ""}`}>
+    <div className={`tw-group tw-relative tw-pb-5 ${className ?? ""}`}>
       {/* Modern floating label design */}
       <div className="tw-relative">
         <label
@@ -88,8 +88,10 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
         </div>
       </div>
 
-      {/* Error message */}
-      <ValidationError error={error} id={errorId} />
+      {/* Error message - absolutely positioned to not affect layout */}
+      <div className="tw-absolute tw-left-0 tw-right-0 tw-bottom-0">
+        <ValidationError error={error} id={errorId} className="tw-mt-0" />
+      </div>
     </div>
   );
 };
