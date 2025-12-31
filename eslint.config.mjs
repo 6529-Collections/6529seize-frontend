@@ -95,6 +95,75 @@ const rules = {
     // -------------------------------------------------------------------------
 
     // -------------------------------------------------------------------------
+    // TypeScript - Production Grade
+    // -------------------------------------------------------------------------
+    // Safety - Prevent unsafe operations
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-unsafe-assignment": "warn",
+    "@typescript-eslint/no-unsafe-call": "warn",
+    "@typescript-eslint/no-unsafe-member-access": "warn",
+    "@typescript-eslint/no-unsafe-return": "warn",
+    "@typescript-eslint/no-unsafe-argument": "warn",
+
+    // Async - Catch promise mistakes
+    "@typescript-eslint/no-floating-promises": "error",
+    "@typescript-eslint/no-misused-promises": ["error", {
+        checksVoidReturn: { attributes: false },  // Allow async onClick handlers
+    }],
+    "@typescript-eslint/await-thenable": "error",
+    "@typescript-eslint/require-await": "error",
+    "@typescript-eslint/no-redundant-type-constituents": "warn",
+
+    // Type safety
+    "@typescript-eslint/strict-boolean-expressions": ["warn", {
+        allowString: true,
+        allowNumber: true,
+        allowNullableObject: true,
+        allowNullableBoolean: true,
+        allowNullableString: true,
+        allowNullableNumber: false,
+        allowAny: false,
+    }],
+    "@typescript-eslint/no-unnecessary-condition": "warn",
+    "@typescript-eslint/no-unnecessary-type-assertion": "error",
+    "@typescript-eslint/no-non-null-assertion": "warn",
+
+    // Best practices
+    "@typescript-eslint/prefer-nullish-coalescing": "warn",
+    "@typescript-eslint/prefer-optional-chain": "error",
+    "@typescript-eslint/no-unused-vars": "off",  // Handled by unused-imports
+    "@typescript-eslint/no-inferrable-types": "error",
+    "@typescript-eslint/prefer-as-const": "error",
+    "@typescript-eslint/no-unnecessary-type-parameters": "warn",
+
+    // Consistency
+    "@typescript-eslint/consistent-type-imports": ["error", {
+        prefer: "type-imports",
+        fixStyle: "separate-type-imports",
+    }],
+    "@typescript-eslint/consistent-type-exports": ["error", {
+        fixMixedExportsWithInlineTypeSpecifier: true,
+    }],
+    "@typescript-eslint/no-import-type-side-effects": "error",
+
+    // Prevent common mistakes
+    "@typescript-eslint/no-array-delete": "error",
+    "@typescript-eslint/no-duplicate-enum-values": "error",
+    "@typescript-eslint/no-duplicate-type-constituents": "error",
+    "@typescript-eslint/no-for-in-array": "error",
+    "@typescript-eslint/no-mixed-enums": "error",
+    "@typescript-eslint/restrict-plus-operands": "error",
+    "@typescript-eslint/restrict-template-expressions": ["warn", {
+        allowNumber: true,
+        allowBoolean: true,
+        allowNullish: false,
+    }],
+    "@typescript-eslint/use-unknown-in-catch-callback-variable": "warn",
+
+    // Disable base rules that TypeScript handles
+    "require-await": "off",  // Using @typescript-eslint/require-await instead
+
+    // -------------------------------------------------------------------------
     // React Hooks Rules - Production Grade
     // -------------------------------------------------------------------------
     "react-hooks/rules-of-hooks": "error",
@@ -333,7 +402,7 @@ const rules = {
     "no-sequences": "error",
     "no-throw-literal": "error",
     "no-useless-return": "error",
-    "require-await": "error",
+    // "require-await" is off - using @typescript-eslint/require-await instead
     "yoda": "error",
 
     // Variables
@@ -409,7 +478,7 @@ export default defineConfig([
         },
     },
 
-    // TypeScript-specific rules
+    // TypeScript-specific rules with type-checking
     {
         files: ["**/*.{ts,tsx}"],
         ignores: [
@@ -422,6 +491,13 @@ export default defineConfig([
             "**/playwright.config.ts",
             "tests/**",
         ],
+        languageOptions: {
+            parser: tseslint.parser,
+            parserOptions: {
+                project: `${__dirname}/tsconfig.json`,
+                tsconfigRootDir: __dirname,
+            },
+        },
         rules: {
             "no-restricted-syntax": ["error", {
                 selector: "MemberExpression[object.name='process'][property.name='env']",
