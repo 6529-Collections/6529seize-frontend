@@ -11,7 +11,7 @@
 
 @layer components {
   .layout-root {
-    min-height: var(--app-height, 100vh);
+    min-height: 100dvh;
 
     --layout-max: 82.75rem;
     --sidebar-width: 0px;
