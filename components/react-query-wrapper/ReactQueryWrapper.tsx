@@ -168,8 +168,8 @@ type ReactQueryWrapperContextType = {
   }: {
     activityLogs: InitProfileActivityLogsParams;
   }) => void;
-  waitAndInvalidateDrops: () => void;
-  addOptimisticDrop: (params: { readonly drop: ApiDrop }) => void;
+  waitAndInvalidateDrops: () => Promise<void>;
+  addOptimisticDrop: (params: { readonly drop: ApiDrop }) => Promise<void>;
   readonly invalidateDrops: () => void;
   onGroupRemoved: ({ groupId }: { readonly groupId: string }) => void;
   onGroupChanged: ({ groupId }: { readonly groupId: string }) => void;
@@ -202,8 +202,8 @@ export const ReactQueryWrapperContext =
     initProfileRepPage: () => { },
     initProfileIdentityPage: () => { },
     initCommunityActivityPage: () => { },
-    waitAndInvalidateDrops: () => { },
-    addOptimisticDrop: () => { },
+    waitAndInvalidateDrops: async () => {},
+    addOptimisticDrop: async () => {},
     invalidateDrops: () => { },
     onGroupRemoved: () => { },
     onGroupChanged: () => { },
