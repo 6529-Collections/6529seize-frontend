@@ -1,5 +1,6 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
+import eslintConfigPrettier from "eslint-config-prettier";
 import unusedImports from "eslint-plugin-unused-imports";
 import reactHooks from "eslint-plugin-react-hooks";
 import tseslint from "typescript-eslint";
@@ -411,4 +412,7 @@ export default defineConfig([
             }],
         },
     },
+
+    // Prettier - MUST be last to override formatting rules
+    eslintConfigPrettier,
 ]);
