@@ -35,7 +35,7 @@ export const userPageNeedsRedirect = ({
   };
   props: {};
 } | null => {
-  const userParam = req.query.user;
+  const userParam = req.query["user"];
   const userValue = Array.isArray(userParam) ? userParam[0] : userParam;
 
   if (
@@ -44,7 +44,7 @@ export const userPageNeedsRedirect = ({
     profile.handle.toLowerCase() !== userValue.toLowerCase()
   ) {
     const currentQuery = { ...req.query };
-    delete currentQuery.user;
+    delete currentQuery["user"];
     const toQueryStringValue = (input: unknown): string | null => {
       if (input === undefined || input === null) {
         return null;

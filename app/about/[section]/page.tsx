@@ -23,7 +23,7 @@ export default async function AboutPage(props: Readonly<Props>) {
   }
 
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <Container fluid className="pt-4">
         <Row>
           <Col>

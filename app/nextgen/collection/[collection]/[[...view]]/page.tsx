@@ -48,7 +48,7 @@ export default async function NextGenCollectionPage({
   }
   const resolvedView = getCollectionView(view?.[0] ?? "");
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <NextGenCollectionComponent
         collection={resolvedCollection}
         initialView={resolvedView}

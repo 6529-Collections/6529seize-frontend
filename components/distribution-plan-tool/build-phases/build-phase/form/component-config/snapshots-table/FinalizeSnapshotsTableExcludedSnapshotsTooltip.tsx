@@ -39,10 +39,10 @@ export default function FinalizeSnapshotsTableExcludedSnapshotsTooltip({
     operation: AllowlistOperation
   ): ExcludedSnapshot => {
     const tokenPool = tokenPools.find(
-      (tokenPool) => tokenPool.id === operation.params.id
+      (tokenPool) => tokenPool.id === operation.params["id"]
     );
     return {
-      id: operation.params.id,
+      id: operation.params["id"],
       name: tokenPool?.name || "",
       type: "Snapshot",
       walletsCount: tokenPool?.walletsCount ?? null,
@@ -53,18 +53,18 @@ export default function FinalizeSnapshotsTableExcludedSnapshotsTooltip({
   const convertCustomTokenPoolOperationToExcludedSnapshot = (
     operation: AllowlistOperation
   ): ExcludedSnapshot => ({
-    id: operation.params.id,
-    name: operation.params.name,
+    id: operation.params["id"],
+    name: operation.params["name"],
     type: "Custom Snapshot",
-    walletsCount: new Set(operation.params.tokens.map((t: any) => t.owner))
+    walletsCount: new Set(operation.params["tokens"].map((t: any) => t.owner))
       .size,
-    tokensCount: operation.params.tokens.length,
+    tokensCount: operation.params["tokens"].length,
   });
 
   const excludedSnapshotsData: ExcludedSnapshot[] = excludedSnapshots.map(
     (excludedSnapshot) => {
       const operation = tokenPoolOperations.find(
-        (operation) => operation.params.id === excludedSnapshot.snapshotId
+        (operation) => operation.params["id"] === excludedSnapshot.snapshotId
       );
       if (!operation) {
         throw new Error("Operation not found");

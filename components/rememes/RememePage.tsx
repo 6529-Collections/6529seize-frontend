@@ -254,7 +254,7 @@ export default function RememePage(props: Readonly<Props>) {
                 <Row className="pt-4">
                   <Col>
                     <a
-                      className={styles.userLink}
+                      className={styles["userLink"]}
                       href={`https://etherscan.io/token/${rememe.contract}/?a=${rememe.id}`}
                       target="_blank"
                       rel="noopener noreferrer">
@@ -276,11 +276,11 @@ export default function RememePage(props: Readonly<Props>) {
                   <Row className="pt-4">
                     <Col>
                       <a
-                        className={styles.userLink}
+                        className={styles["userLink"]}
                         href={rememe.contract_opensea_data.externalUrl}>
                         <FontAwesomeIcon
                           icon={faGlobe}
-                          className={styles.globeIcon}
+                          className={styles["globeIcon"]}
                         />
                         {rememe.contract_opensea_data.externalUrl}
                       </a>
@@ -291,7 +291,7 @@ export default function RememePage(props: Readonly<Props>) {
                   <Row className="pt-4">
                     <Col>
                       <a
-                        className={styles.userLink}
+                        className={styles["userLink"]}
                         href={`https://x.com/${rememe.contract_opensea_data.twitterUsername}`}
                         target="_blank"
                         rel="noopener noreferrer">
@@ -342,7 +342,7 @@ export default function RememePage(props: Readonly<Props>) {
                   {rememe.replicas
                     .filter((rep) => rep != parseInt(rememe.id))
                     .map((rep) => (
-                      <span className={styles.replica} key={`replica-rep`}>
+                      <span className={styles["replica"]} key={`replica-rep`}>
                         <Link href={`/rememes/${rememe.contract}/${rep}`}>
                           #{rep}
                         </Link>
@@ -381,9 +381,9 @@ export default function RememePage(props: Readonly<Props>) {
           href={parseIpfsUrl(s)}
           target="_blank"
           rel="noopener noreferrer"
-          className={`d-inline-flex align-items-center justify-content-start ${styles.userLink}`}>
+          className={`d-inline-flex align-items-center justify-content-start ${styles["userLink"]}`}>
           {s}
-          <FontAwesomeIcon icon={faExternalLink} className={styles.linkIcon} />
+          <FontAwesomeIcon icon={faExternalLink} className={styles["linkIcon"]} />
         </a>
       );
     }
@@ -396,27 +396,27 @@ export default function RememePage(props: Readonly<Props>) {
         <>
           <Row className="pt-4">
             <Col>
-              <Table className={styles.metadataTable}>
+              <Table className={styles["metadataTable"]}>
                 <tbody>
                   <tr>
-                    <td className={styles.metadataTableNoBreak}>Token URI</td>
-                    <td className={styles.metadataTableBreak}>
+                    <td className={styles["metadataTableNoBreak"]}>Token URI</td>
+                    <td className={styles["metadataTableBreak"]}>
                       <a
                         href={rememe.token_uri}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`d-inline-flex align-items-center justify-content-start ${styles.userLink}`}>
+                        className={`d-inline-flex align-items-center justify-content-start ${styles["userLink"]}`}>
                         {rememe.token_uri}
                         <FontAwesomeIcon
                           icon={faExternalLink}
-                          className={styles.linkIcon}
+                          className={styles["linkIcon"]}
                         />
                       </a>
                     </td>
                   </tr>
                   <tr>
-                    <td className={styles.metadataTableNoBreak}>Token Type</td>
-                    <td className={styles.metadataTableBreak}>
+                    <td className={styles["metadataTableNoBreak"]}>Token Type</td>
+                    <td className={styles["metadataTableBreak"]}>
                       {rememe.token_type}
                     </td>
                   </tr>
@@ -439,7 +439,7 @@ export default function RememePage(props: Readonly<Props>) {
               <h1>Metadata</h1>
             </Col>
             <Col xs={12}>
-              <Table className={styles.metadataTable}>
+              <Table className={styles["metadataTable"]}>
                 <tbody>
                   {Object.keys(rememe.metadata).map((k) => {
                     const value: any = rememe.metadata[k];
@@ -487,7 +487,7 @@ export default function RememePage(props: Readonly<Props>) {
   }
 
   return (
-    <Container fluid className={styles.mainContainer}>
+    <Container fluid className={styles["mainContainer"]}>
       <Row>
         <Col>
           <Container className="pt-4 pb-4">
@@ -519,8 +519,8 @@ export default function RememePage(props: Readonly<Props>) {
                   <Col>
                     {Object.values(Tabs).map((k) => (
                       <span
-                        className={`${styles.tabFocus} ${
-                          activeTab === k ? styles.tabActive : ""
+                        className={`${styles["tabFocus"]} ${
+                          activeTab === k ? styles["tabActive"] : ""
                         }`}
                         key={`${k}-tab`}
                         onClick={() => setActiveTab(k)}>

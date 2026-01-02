@@ -69,7 +69,7 @@ export function NextGenBackToCollectionPageLink(
     <Link
       href={link}
       className="pt-2 decoration-none d-flex align-items-center gap-2 pb-2">
-      <FontAwesomeIcon icon={faArrowCircleLeft} className={styles.backIcon} />
+      <FontAwesomeIcon icon={faArrowCircleLeft} className={styles["backIcon"]} />
       {content}
     </Link>
   );
@@ -114,7 +114,7 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
     const hideMintBtn = pathParts[pathParts.length - 1] === "mint";
 
     return (
-      <span className={styles.countdownContainer}>
+      <span className={styles["countdownContainer"]}>
         <DateCountdown title={`${title} in`} date={new Date(date * 1000)} />
         {!hideMintBtn && (
           <Link
@@ -122,7 +122,7 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
               props.collection.name
             )}/mint`}>
             <button
-              className={`pt-2 pb-2 btn-block no-wrap ${styles.exploreBtn}`}>
+              className={`pt-2 pb-2 btn-block no-wrap ${styles["exploreBtn"]}`}>
               {getButtonLabel()}
             </button>
           </Link>
@@ -160,21 +160,21 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
 
   function getAllowlistClassName() {
     if (alStatus === Status.LIVE && props.available > 0) {
-      return styles.phaseTimeTagActive;
+      return styles["phaseTimeTagActive"];
     } else if (alStatus === Status.UPCOMING && props.available > 0) {
-      return styles.phaseTimeTagUpcoming;
+      return styles["phaseTimeTagUpcoming"];
     } else {
-      return styles.phaseTimeTagComplete;
+      return styles["phaseTimeTagComplete"];
     }
   }
 
   function getPublicStatusClassName() {
     if (publicStatus === Status.LIVE && props.available > 0) {
-      return styles.phaseTimeTagActive;
+      return styles["phaseTimeTagActive"];
     } else if (publicStatus === Status.UPCOMING && props.available > 0) {
-      return styles.phaseTimeTagUpcoming;
+      return styles["phaseTimeTagUpcoming"];
     } else {
-      return styles.phaseTimeTagComplete;
+      return styles["phaseTimeTagComplete"];
     }
   }
 
@@ -183,7 +183,7 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
       {alStatus !== Status.UNAVAILABLE && (
         <span
           className={`d-flex align-items-center font-bolder font-smaller ${
-            styles.nextgenTag
+            styles["nextgenTag"]
           } ${getAllowlistClassName()}`}>
           ALLOWLIST {alStatus}
         </span>
@@ -191,7 +191,7 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
       {publicStatus !== Status.UNAVAILABLE && (
         <span
           className={`d-flex align-items-center font-bolder font-smaller ${
-            styles.nextgenTag
+            styles["nextgenTag"]
           } ${getPublicStatusClassName()}`}>
           PUBLIC PHASE {publicStatus}
         </span>
@@ -248,7 +248,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
                 rel="noopener noreferrer">
                 <Image
                   unoptimized
-                  className={styles.marketplace}
+                  className={styles["marketplace"]}
                   src="/opensea.png"
                   alt="opensea"
                   width={32}
@@ -261,7 +261,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
                 rel="noopener noreferrer">
                 <Image
                   unoptimized
-                  className={styles.marketplace}
+                  className={styles["marketplace"]}
                   src="/blur.png"
                   alt="blur"
                   width={32}
@@ -274,7 +274,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
                 rel="noopener noreferrer">
                 <Image
                   unoptimized
-                  className={styles.marketplace}
+                  className={styles["marketplace"]}
                   src="/magiceden.png"
                   alt="magiceden"
                   width={32}

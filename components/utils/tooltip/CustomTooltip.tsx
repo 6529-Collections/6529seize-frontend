@@ -397,7 +397,7 @@ export default function CustomTooltip({
         <div
           ref={tooltipRef}
           role="tooltip"
-          className={`${styles.tooltip} ${styles["tooltip--" + actualPlacement]}`}
+          className={`${styles["tooltip"]} ${styles["tooltip--" + actualPlacement]}`}
           style={{
             position: 'fixed',
             left: `${position.x}px`,
@@ -408,11 +408,11 @@ export default function CustomTooltip({
           onMouseEnter={handleTooltipMouseEnter}
           onMouseLeave={handleTooltipMouseLeave}
         >
-          <div className={styles.tooltipContent}>
+          <div className={styles["tooltipContent"]}>
             {content}
           </div>
           <div 
-            className={`${styles.tooltipArrow} ${styles["tooltipArrow--" + actualPlacement]}`}
+            className={`${styles["tooltipArrow"]} ${styles["tooltipArrow--" + actualPlacement]}`}
             style={{
               ...(actualPlacement === "top" || actualPlacement === "bottom") && {
                 left: `${arrowPosition.x}px`,

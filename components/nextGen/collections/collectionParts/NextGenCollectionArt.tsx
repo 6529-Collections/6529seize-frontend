@@ -249,12 +249,12 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
               href={`/nextgen/collection/${formatNameForUrl(
                 props.collection.name
               )}/art`}
-              className={`d-flex align-items-center gap-2 decoration-none ${styles.viewAllTokens}`}>
+              className={`d-flex align-items-center gap-2 decoration-none ${styles["viewAllTokens"]}`}>
               <h5 className="mb-0 font-color d-flex align-items-center gap-2">
                 View All
                 <FontAwesomeIcon
                   icon={faArrowCircleRight}
-                  className={styles.viewAllIcon}
+                  className={styles["viewAllIcon"]}
                 />
               </h5>
             </Link>
@@ -285,7 +285,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                     : ""
                 }`}
               </Tooltip>
-              <Dropdown className={styles.rarityDropdown} drop="down-centered">
+              <Dropdown className={styles["rarityDropdown"]} drop="down-centered">
                 <Dropdown.Toggle>Listing Status: {listedType}</Dropdown.Toggle>
                 <Dropdown.Menu>
                   {Object.values(NextGenTokenListedType).map((lt) => (
@@ -297,7 +297,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                   ))}
                 </Dropdown.Menu>
               </Dropdown>
-              <Dropdown className={styles.rarityDropdown} drop="down-centered">
+              <Dropdown className={styles["rarityDropdown"]} drop="down-centered">
                 <Dropdown.Toggle>Sort: {sort}</Dropdown.Toggle>
                 <Dropdown.Menu>
                   {Object.values(NextGenListFilters).map((lf) => (
@@ -405,11 +405,11 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                     traits.map((tr, index) => (
                       <Accordion
                         key={getRandomObjectId()}
-                        className={styles.traitsAccordion}
+                        className={styles["traitsAccordion"]}
                         defaultActiveKey={getDefaultActiveKeys()}>
                         <Accordion.Item
                           defaultChecked={true}
-                          className={styles.traitsAccordionItem}
+                          className={styles["traitsAccordionItem"]}
                           eventKey={index.toString()}>
                           <Accordion.Button className="d-flex">
                             <span>{tr.trait}</span>&nbsp;&nbsp;
@@ -420,7 +420,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                           {tr.value_counts.map((v) => (
                             <Accordion.Body
                               key={getRandomObjectId()}
-                              className={styles.traitsAccordionBody}>
+                              className={styles["traitsAccordionBody"]}>
                               <Form.Check
                                 type="checkbox"
                                 label={

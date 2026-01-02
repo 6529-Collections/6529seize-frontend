@@ -35,9 +35,9 @@ export default function RestrictedPage() {
   }, [image]);
 
   return (
-    <main className={styles.login}>
+    <main className={styles["login"]}>
       {image && <LoginImage image={image} alt="access" />}
-      <div className={styles.loginPrompt}>
+      <div className={styles["loginPrompt"]}>
         <input disabled type="text" className="text-center" value={message} />
       </div>
     </main>

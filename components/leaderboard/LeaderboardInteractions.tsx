@@ -79,46 +79,46 @@ export default function LeaderboardInteractionsComponent(
       <Container>
         <Row>
           <Col>
-            <Table bordered={false} className={styles.leaderboardTable}>
+            <Table bordered={false} className={styles["leaderboardTable"]}>
               <thead>
                 <tr>
                   <th colSpan={2}></th>
                   <th
                     colSpan={2}
-                    className={`text-center ${styles.borderBottom}`}>
+                    className={`text-center ${styles["borderBottom"]}`}>
                     Primary Purchases
                   </th>
-                  <th className={styles.gap}></th>
+                  <th className={styles["gap"]}></th>
                   <th
                     colSpan={2}
-                    className={`text-center ${styles.borderBottom}`}>
+                    className={`text-center ${styles["borderBottom"]}`}>
                     Secondary Purchases
                   </th>
-                  <th className={styles.gap}></th>
+                  <th className={styles["gap"]}></th>
                   <th
                     colSpan={2}
-                    className={`text-center ${styles.borderBottom}`}>
+                    className={`text-center ${styles["borderBottom"]}`}>
                     Sales
                   </th>
-                  <th className={styles.gap}></th>
+                  <th className={styles["gap"]}></th>
                   <th
                     colSpan={4}
-                    className={`text-center ${styles.borderBottom}`}>
+                    className={`text-center ${styles["borderBottom"]}`}>
                     Transfers
                   </th>
                 </tr>
                 <tr>
-                  <th className={styles.rank}>Rank</th>
-                  <th className={`${styles.hodlerContainer}`}>
+                  <th className={styles["rank"]}>Rank</th>
+                  <th className={`${styles["hodlerContainer"]}`}>
                     <span>Collector</span>
-                    <span className={styles.totalResults}>
+                    <span className={styles["totalResults"]}>
                       {props.isLoading
                         ? "..."
                         : `x${totalResults.toLocaleString()}`}
                     </span>
                   </th>
                   {/* primary purchases */}
-                  <th className={styles.tdhSub}>
+                  <th className={styles["tdhSub"]}>
                     <span className="d-flex align-items-center justify-content-center">
                       Count&nbsp;
                       {printHeader(
@@ -126,7 +126,7 @@ export default function LeaderboardInteractionsComponent(
                       )}
                     </span>
                   </th>
-                  <th className={styles.tdhSub}>
+                  <th className={styles["tdhSub"]}>
                     <span className="d-flex align-items-center justify-content-center">
                       Value&nbsp;
                       {printHeader(
@@ -134,9 +134,9 @@ export default function LeaderboardInteractionsComponent(
                       )}
                     </span>
                   </th>
-                  <th className={styles.gap}></th>
+                  <th className={styles["gap"]}></th>
                   {/* secondary purchases */}
-                  <th className={styles.tdhSub}>
+                  <th className={styles["tdhSub"]}>
                     <span className="d-flex align-items-center justify-content-center">
                       Count&nbsp;
                       {printHeader(
@@ -144,7 +144,7 @@ export default function LeaderboardInteractionsComponent(
                       )}
                     </span>
                   </th>
-                  <th className={styles.tdhSub}>
+                  <th className={styles["tdhSub"]}>
                     <span className="d-flex align-items-center justify-content-center">
                       Value&nbsp;
                       {printHeader(
@@ -152,41 +152,41 @@ export default function LeaderboardInteractionsComponent(
                       )}
                     </span>
                   </th>
-                  <th className={styles.gap}></th>
+                  <th className={styles["gap"]}></th>
                   {/* sales */}
-                  <th className={styles.tdhSub}>
+                  <th className={styles["tdhSub"]}>
                     <span className="d-flex align-items-center justify-content-center">
                       Count&nbsp;
                       {printHeader(LeaderboardInteractionsSort.sales_count)}
                     </span>
                   </th>
-                  <th className={styles.tdhSub}>
+                  <th className={styles["tdhSub"]}>
                     <span className="d-flex align-items-center justify-content-center">
                       Value&nbsp;
                       {printHeader(LeaderboardInteractionsSort.sales_value)}
                     </span>
                   </th>
-                  <th className={styles.gap}></th>
+                  <th className={styles["gap"]}></th>
                   {/* transfers */}
-                  <th className={styles.tdhSub}>
+                  <th className={styles["tdhSub"]}>
                     <span className="d-flex align-items-center justify-content-center">
                       Airdrops&nbsp;
                       {printHeader(LeaderboardInteractionsSort.airdrops)}
                     </span>
                   </th>
-                  <th className={styles.tdhSub}>
+                  <th className={styles["tdhSub"]}>
                     <span className="d-flex align-items-center justify-content-center">
                       In&nbsp;
                       {printHeader(LeaderboardInteractionsSort.transfers_in)}
                     </span>
                   </th>
-                  <th className={styles.tdhSub}>
+                  <th className={styles["tdhSub"]}>
                     <span className="d-flex align-items-center justify-content-center">
                       Out&nbsp;
                       {printHeader(LeaderboardInteractionsSort.transfers_out)}
                     </span>
                   </th>
-                  <th className={styles.tdhSub}>
+                  <th className={styles["tdhSub"]}>
                     <span className="d-flex align-items-center justify-content-center">
                       Burns&nbsp;
                       {printHeader(LeaderboardInteractionsSort.burns)}
@@ -198,7 +198,7 @@ export default function LeaderboardInteractionsComponent(
                 {leaderboard.map((lead: LeaderboardInteractions, index) => {
                   return (
                     <tr key={lead.consolidation_key}>
-                      <td className={styles.rank}>
+                      <td className={styles["rank"]}>
                         {numberWithCommas(
                           index + 1 + (page - 1) * LEADERBOARD_PAGE_SIZE
                         )}
@@ -212,43 +212,43 @@ export default function LeaderboardInteractionsComponent(
                           level={lead.level}
                         />
                       </td>
-                      <td className={styles.tdhSub}>
+                      <td className={styles["tdhSub"]}>
                         {numberWithCommas(lead.primary_purchases_count)}
                       </td>
-                      <td className={styles.tdhSub}>
+                      <td className={styles["tdhSub"]}>
                         {numberWithCommas(
                           Math.round(lead.primary_purchases_value * 100) / 100
                         )}
                       </td>
-                      <th className={styles.gap}></th>
-                      <td className={styles.tdhSub}>
+                      <th className={styles["gap"]}></th>
+                      <td className={styles["tdhSub"]}>
                         {numberWithCommas(lead.secondary_purchases_count)}
                       </td>
-                      <td className={styles.tdhSub}>
+                      <td className={styles["tdhSub"]}>
                         {numberWithCommas(
                           Math.round(lead.secondary_purchases_value * 100) / 100
                         )}
                       </td>
-                      <th className={styles.gap}></th>
-                      <td className={styles.tdhSub}>
+                      <th className={styles["gap"]}></th>
+                      <td className={styles["tdhSub"]}>
                         {numberWithCommas(lead.sales_count)}
                       </td>
-                      <td className={styles.tdhSub}>
+                      <td className={styles["tdhSub"]}>
                         {numberWithCommas(
                           Math.round(lead.sales_value * 100) / 100
                         )}
                       </td>
-                      <th className={styles.gap}></th>
-                      <td className={styles.tdhSub}>
+                      <th className={styles["gap"]}></th>
+                      <td className={styles["tdhSub"]}>
                         {numberWithCommas(lead.airdrops)}
                       </td>
-                      <td className={styles.tdhSub}>
+                      <td className={styles["tdhSub"]}>
                         {numberWithCommas(lead.transfers_in)}
                       </td>
-                      <td className={styles.tdhSub}>
+                      <td className={styles["tdhSub"]}>
                         {numberWithCommas(lead.transfers_out)}
                       </td>
-                      <td className={styles.tdhSub}>
+                      <td className={styles["tdhSub"]}>
                         {numberWithCommas(lead.burns)}
                       </td>
                     </tr>

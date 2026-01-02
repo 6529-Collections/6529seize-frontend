@@ -92,19 +92,19 @@ export default function LeaderboardCardsCollectedComponent(
       <Container>
         <Row>
           <Col>
-            <Table bordered={false} className={styles.leaderboardTable}>
+            <Table bordered={false} className={styles["leaderboardTable"]}>
               <thead>
                 <tr>
-                  <th className={styles.rank}>Rank</th>
-                  <th className={`${styles.hodlerContainer}`}>
+                  <th className={styles["rank"]}>Rank</th>
+                  <th className={`${styles["hodlerContainer"]}`}>
                     <span>Collector</span>
-                    <span className={styles.totalResults}>
+                    <span className={styles["totalResults"]}>
                       {props.isLoading
                         ? "..."
                         : `x${totalResults.toLocaleString()}`}
                     </span>
                   </th>
-                  <th className={styles.tdhSub}>
+                  <th className={styles["tdhSub"]}>
                     <span className="d-flex align-items-center justify-content-center">
                       Level&nbsp;
                       <LeaderboardSort
@@ -114,7 +114,7 @@ export default function LeaderboardCardsCollectedComponent(
                       />
                     </span>
                   </th>
-                  <th className={styles.tdhSub}>
+                  <th className={styles["tdhSub"]}>
                     <span className="d-flex align-items-center justify-content-center">
                       Cards Collected&nbsp;
                       <LeaderboardSort
@@ -124,7 +124,7 @@ export default function LeaderboardCardsCollectedComponent(
                       />
                     </span>
                   </th>
-                  <th className={styles.tdhSub}>
+                  <th className={styles["tdhSub"]}>
                     <span className="d-flex align-items-center justify-content-center">
                       Unique Memes&nbsp;
                       <LeaderboardSort
@@ -134,7 +134,7 @@ export default function LeaderboardCardsCollectedComponent(
                       />
                     </span>
                   </th>
-                  <th className={styles.tdhSub}>
+                  <th className={styles["tdhSub"]}>
                     <span className="d-flex align-items-center justify-content-center">
                       Sets&nbsp;
                       <LeaderboardSort
@@ -146,7 +146,7 @@ export default function LeaderboardCardsCollectedComponent(
                       />
                     </span>
                   </th>
-                  <th className={styles.tdhSub}>
+                  <th className={styles["tdhSub"]}>
                     <span className="d-flex align-items-center justify-content-center">
                       TDH&nbsp;
                       <LeaderboardSort
@@ -156,7 +156,7 @@ export default function LeaderboardCardsCollectedComponent(
                       />
                     </span>
                   </th>
-                  <th className={styles.tdhSub}>
+                  <th className={styles["tdhSub"]}>
                     <span className="d-flex align-items-center justify-content-center">
                       Daily Change&nbsp;
                       <LeaderboardSort
@@ -166,7 +166,7 @@ export default function LeaderboardCardsCollectedComponent(
                       />
                     </span>
                   </th>
-                  <th className={styles.tdhSub}>
+                  <th className={styles["tdhSub"]}>
                     <span className="d-flex align-items-center justify-content-center">
                       vs Network&nbsp;
                     </span>
@@ -177,7 +177,7 @@ export default function LeaderboardCardsCollectedComponent(
                 {leaderboard.map((lead: LeaderboardMetrics, index) => {
                   return (
                     <tr key={lead.consolidation_key}>
-                      <td className={styles.rank}>
+                      <td className={styles["rank"]}>
                         {numberWithCommas(index + 1 + (page - 1) * PAGE_SIZE)}
                       </td>
                       <td className="tw-max-w-[20px] tw-truncate">
@@ -190,11 +190,11 @@ export default function LeaderboardCardsCollectedComponent(
                         />
                       </td>
 
-                      <td className={styles.tdhSub}>{lead.level}</td>
-                      <td className={styles.tdhSub}>
+                      <td className={styles["tdhSub"]}>{lead.level}</td>
+                      <td className={styles["tdhSub"]}>
                         {numberWithCommas(lead.balance)}
                       </td>
-                      <td className={styles.tdhSub}>
+                      <td className={styles["tdhSub"]}>
                         {lead.unique_memes
                           ? numberWithCommas(lead.unique_memes)
                           : 0}{" "}
@@ -204,13 +204,13 @@ export default function LeaderboardCardsCollectedComponent(
                         )}
                         %)
                       </td>
-                      <td className={styles.tdhSub}>
+                      <td className={styles["tdhSub"]}>
                         {numberWithCommas(lead.memes_cards_sets)}
                       </td>
-                      <td className={styles.tdhSub}>
+                      <td className={styles["tdhSub"]}>
                         {numberWithCommas(Math.round(lead.boosted_tdh))}
                       </td>
-                      <td className={styles.tdhSub}>
+                      <td className={styles["tdhSub"]}>
                         {!lead.day_change ? (
                           "-"
                         ) : (
@@ -218,14 +218,14 @@ export default function LeaderboardCardsCollectedComponent(
                             {lead.day_change > 0 ? `+` : ``}
                             {numberWithCommas(lead.day_change)}
                             {lead.day_change != 0 && (
-                              <span className={styles.tdhBoost}>
+                              <span className={styles["tdhBoost"]}>
                                 {getTDHChange(lead)}
                               </span>
                             )}
                           </>
                         )}
                       </td>
-                      <td className={styles.tdhSub}>
+                      <td className={styles["tdhSub"]}>
                         {!lead.day_change
                           ? "-"
                           : `${calculateTdhVsCommunity(lead)}`}

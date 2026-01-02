@@ -1,8 +1,12 @@
-import { useMemo, type ComponentType } from "react";
-import { UsersIcon, WrenchIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
 import Squares2X2Icon from "@/components/common/icons/Squares2X2Icon";
 import { SidebarSection } from "@/components/navigation/navTypes";
 import { AboutSection } from "@/enums";
+import {
+  DocumentTextIcon,
+  UsersIcon,
+  WrenchIcon,
+} from "@heroicons/react/24/outline";
+import { useMemo, type ComponentType } from "react";
 
 export function useSidebarSections(
   appWalletsSupported: boolean,
@@ -98,7 +102,24 @@ export function useSidebarSections(
               { name: "API", href: "/tools/api" },
               { name: "EMMA", href: "/emma" },
               { name: "Block Finder", href: "/tools/block-finder" },
+            ],
+          },
+          {
+            name: "Open Data",
+            items: [
               { name: "Open Data", href: "/open-data" },
+              { name: "Network Metrics", href: "/open-data/network-metrics" },
+              ...(!isIos || country?.toUpperCase() === "US"
+                ? [
+                    {
+                      name: "Meme Subscriptions",
+                      href: "/open-data/meme-subscriptions",
+                    },
+                  ]
+                : []),
+              { name: "Rememes", href: "/open-data/rememes" },
+              { name: "Team", href: "/open-data/team" },
+              { name: "Royalties", href: "/open-data/royalties" },
             ],
           },
         ],
@@ -183,7 +204,7 @@ export function useSidebarSections(
 
 export function useSectionMap(sections: SidebarSection[]) {
   return useMemo(
-    () => new Map(sections.map(section => [section.key, section])),
+    () => new Map(sections.map((section) => [section.key, section])),
     [sections]
   );
 }

@@ -22,7 +22,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
   return (
     <html lang="en">
       <body>
-        <main className={styles.main}>
+        <main className={styles["main"]}>
           <ErrorComponent
             stackTrace={errorDetails}
             digest={error.digest}

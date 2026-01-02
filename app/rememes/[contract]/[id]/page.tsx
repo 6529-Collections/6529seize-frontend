@@ -16,7 +16,7 @@ export default async function ReMeme({
   const { contract, id } = await params;
 
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <RememePage contract={contract} id={id} />
     </main>
   );

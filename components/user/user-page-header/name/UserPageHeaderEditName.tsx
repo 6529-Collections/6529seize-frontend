@@ -53,7 +53,7 @@ export default function UserPageHeaderEditName({
         type: "success",
       });
       const newPath = pathname.replace(
-        params?.user?.toString() ?? "",
+        params?.["user"]?.toString() ?? "",
         updatedProfile.handle!?.toLowerCase()
       );
       await router.replace(newPath);

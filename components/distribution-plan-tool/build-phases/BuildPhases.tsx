@@ -42,23 +42,23 @@ export default function BuildPhases() {
     );
     setPhasesByOp(
       createPhasesOperations.map((phaseOp) => ({
-        id: phaseOp.params.id,
+        id: phaseOp.params["id"],
         allowlistId: phaseOp.allowlistId,
-        name: phaseOp.params.name,
-        description: phaseOp.params.description,
+        name: phaseOp.params["name"],
+        description: phaseOp.params["description"],
         hasRan: phaseOp.hasRan,
         order: phaseOp.order,
         components: operations
           .filter(
             (operation) =>
               operation.code === AllowlistOperationCode.ADD_COMPONENT &&
-              operation.params.phaseId === phaseOp.params.id
+              operation.params["phaseId"] === phaseOp.params["id"]
           )
           .map((operation) => ({
-            id: operation.params.id,
+            id: operation.params["id"],
             allowlistId: operation.allowlistId,
-            name: operation.params.name,
-            description: operation.params.description,
+            name: operation.params["name"],
+            description: operation.params["description"],
             order: operation.order,
             spotsNotRan: operations.some(
               (operation2) =>
@@ -66,13 +66,13 @@ export default function BuildPhases() {
                   AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_ALL_ITEM_WALLETS,
                   AllowlistOperationCode.COMPONENT_ADD_SPOTS_TO_WALLETS_EXCLUDING_CERTAIN_COMPONENTS,
                 ].includes(operation2.code) &&
-                operation2.params.componentId === operation.params.id &&
+                operation2.params["componentId"] === operation.params["id"] &&
                 !operation2.hasRan
             ),
             spots:
               phases
-                .find((p) => p.id === phaseOp.params.id)
-                ?.components.find((c) => c.id === operation.params.id)
+                .find((p) => p.id === phaseOp.params["id"])
+                ?.components.find((c) => c.id === operation.params["id"])
                 ?.winnersSpotsCount || null,
           })),
       }))

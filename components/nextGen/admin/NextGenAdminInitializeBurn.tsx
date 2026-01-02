@@ -193,7 +193,7 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
             <Form.Group className="mb-3">
               <Form.Label>Burn Collection ID</Form.Label>
               <Form.Select
-                className={`${styles.formInput}`}
+                className={`${styles["formInput"]}`}
                 value={burnCollectionID}
                 onChange={(e) => {
                   setStatus(false);
@@ -212,7 +212,7 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
             <Form.Group className="mb-3">
               <Form.Label>Mint Collection ID</Form.Label>
               <Form.Select
-                className={`${styles.formInput}`}
+                className={`${styles["formInput"]}`}
                 value={mintCollectionID}
                 onChange={(e) => {
                   setStatus(false);

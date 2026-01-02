@@ -46,7 +46,7 @@ const nodeIsEditable = (node: Node | null): boolean => {
     ) {
       return true;
     }
-    if (node.dataset?.waveClipboardAllowDefault === "true") {
+    if (node.dataset?.["waveClipboardAllowDefault"] === "true") {
       return true;
     }
   }
@@ -102,7 +102,7 @@ const findDropElement = (node: Node | null): HTMLElement | null => {
   }
 
   while (current) {
-    if (current.dataset?.waveDropId) {
+    if (current.dataset?.["waveDropId"]) {
       return current;
     }
     current = current.parentElement;
@@ -764,7 +764,7 @@ const gatherSelectedMessageIds = (
   const seen = new Set<string>();
 
   for (const element of dropElements) {
-    const dropId = element.dataset.waveDropId;
+    const dropId = element.dataset["waveDropId"];
     if (!dropId || seen.has(dropId)) {
       continue;
     }
@@ -934,8 +934,8 @@ const resolveRangeBoundaries = (
 ): RangeBoundaryContext => {
   const startElement = findDropElement(selectionRange.startContainer);
   const endElement = findDropElement(selectionRange.endContainer);
-  const startDropId = startElement?.dataset?.waveDropId ?? null;
-  const endDropId = endElement?.dataset?.waveDropId ?? null;
+  const startDropId = startElement?.dataset?.["waveDropId"] ?? null;
+  const endDropId = endElement?.dataset?.["waveDropId"] ?? null;
 
   const startElementForRange =
     startDropId == null

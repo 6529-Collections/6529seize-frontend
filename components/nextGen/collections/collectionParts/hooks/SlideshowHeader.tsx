@@ -19,13 +19,13 @@ export default function SlideshowHeader({
       <Col className="d-flex align-items-center justify-content-end">
         <Link
           href={`/nextgen/collection/${formatNameForUrl(collectionName)}/art`}
-          className={`d-flex align-items-center gap-2 decoration-none ${styles.viewAllTokens}`}
+          className={`d-flex align-items-center gap-2 decoration-none ${styles["viewAllTokens"]}`}
         >
           <h5 className="mb-0 font-color d-flex align-items-center gap-2">
             View All
             <FontAwesomeIcon
               icon={faArrowCircleRight}
-              className={styles.viewAllIcon}
+              className={styles["viewAllIcon"]}
             />
           </h5>
         </Link>

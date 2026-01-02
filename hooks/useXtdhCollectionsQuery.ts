@@ -84,10 +84,10 @@ export function useXtdhCollectionsQuery({
         order: normalizedOrder,
       };
       if (hasIdentity) {
-        params.identity = normalizedIdentity;
+        params["identity"] = normalizedIdentity;
       }
       if (collectionName) {
-        params.collection_name = collectionName;
+        params["collection_name"] = collectionName;
       }
 
       return commonApiFetch<ApiXTdhCollectionsPage>({

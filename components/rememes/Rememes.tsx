@@ -210,7 +210,7 @@ export default function Rememes() {
   }
 
   return (
-    <Container fluid className={styles.mainContainer}>
+    <Container fluid className={styles["mainContainer"]}>
       <Row>
         <Col>
           <Container className="pt-4">
@@ -260,7 +260,7 @@ export default function Rememes() {
                   Add ReMeme{" "}
                   <FontAwesomeIcon
                     icon={faPlusCircle}
-                    className={styles.buttonIcon}
+                    className={styles["buttonIcon"]}
                   />
                 </Button>
               </Col>
@@ -277,7 +277,7 @@ export default function Rememes() {
                   className={`pt-2 pb-2 d-flex align-items-center flex-wrap gap-2 justify-content-between`}>
                   <span className="d-flex align-items-center gap-1">
                     <Dropdown
-                      className={styles.memeRefDropdown}
+                      className={styles["memeRefDropdown"]}
                       drop={"down-centered"}>
                       <Dropdown.Toggle>Sort: {selectedSorting}</Dropdown.Toggle>
                       <Dropdown.Menu>
@@ -296,7 +296,7 @@ export default function Rememes() {
                       <>
                         <FontAwesomeIcon
                           icon={faRefresh}
-                          className={styles.buttonIcon}
+                          className={styles["buttonIcon"]}
                           onClick={() => {
                             fetchResults(page);
                           }}
@@ -318,7 +318,7 @@ export default function Rememes() {
                   </span>
                   <span className="d-flex flex-wrap align-items-center justify-content-between gap-2">
                     <Dropdown
-                      className={styles.memeRefDropdown}
+                      className={styles["memeRefDropdown"]}
                       drop={"down-centered"}>
                       <Dropdown.Toggle>
                         Token Type: {selectedTokenType}
@@ -336,7 +336,7 @@ export default function Rememes() {
                       </Dropdown.Menu>
                     </Dropdown>
                     <Dropdown
-                      className={styles.memeRefDropdown}
+                      className={styles["memeRefDropdown"]}
                       drop={"down-centered"}>
                       <Dropdown.Toggle>
                         Meme Reference:{" "}

@@ -10,8 +10,8 @@ const getServerEnv = (): ServerEnv | null => {
   }
 
   const raw = {
-    SSR_CLIENT_ID: process.env.SSR_CLIENT_ID,
-    SSR_CLIENT_SECRET: process.env.SSR_CLIENT_SECRET,
+    SSR_CLIENT_ID: process.env["SSR_CLIENT_ID"],
+    SSR_CLIENT_SECRET: process.env["SSR_CLIENT_SECRET"],
   };
 
   const parsed = serverEnvSchema.safeParse(raw);

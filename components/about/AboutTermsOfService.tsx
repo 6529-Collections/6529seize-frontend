@@ -14,7 +14,7 @@ export default function AboutTermsOfService() {
         </Col>
       </Row>
       <Row>
-        <Col className={`${styles.lastUpdateText} text-right pt-3 pb-3`}>
+        <Col className={`${styles["lastUpdateText"]} text-right pt-3 pb-3`}>
           Last Updated: February 23, 2023
         </Col>
       </Row>

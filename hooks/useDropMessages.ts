@@ -55,8 +55,8 @@ export function useDropMessages(waveId: string, dropId: string | null) {
       };
 
       if (pageParam?.serialNo) {
-        params.serial_no_limit = `${pageParam.serialNo}`;
-        params.search_strategy = `${pageParam.strategy}`;
+        params["serial_no_limit"] = `${pageParam.serialNo}`;
+        params["search_strategy"] = `${pageParam.strategy}`;
       }
 
       const results = await commonApiFetch<ApiWaveDropsFeed>({

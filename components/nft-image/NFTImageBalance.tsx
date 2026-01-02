@@ -34,8 +34,8 @@ export default function NFTImageBalance({ contract, tokenId, height }: Props) {
   const printBalanceSpan = (b: string) => {
     return (
       <span
-        className={`${styles.balance}  ${
-          height === 650 ? styles.balanceBigger : ""
+        className={`${styles["balance"]}  ${
+          height === 650 ? styles["balanceBigger"] : ""
         } `}>
         {b}
       </span>

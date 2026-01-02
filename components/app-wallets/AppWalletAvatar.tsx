@@ -8,7 +8,7 @@ export default function AppWalletAvatar(
   return (
     <Image
       unoptimized
-      className={styles.appWalletAvatar}
+      className={styles["appWalletAvatar"]}
       fetchPriority="high"
       loading="eager"
       height={size}

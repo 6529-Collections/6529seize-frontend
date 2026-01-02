@@ -239,7 +239,7 @@ run().catch((err) => {
     process.exit(1);
 });`;
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <Container className="pt-4 pb-4">
         <Row>
           <Col>

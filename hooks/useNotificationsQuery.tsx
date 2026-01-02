@@ -60,11 +60,11 @@ const fetchNotifications = async ({
   const params: Record<string, string> = { limit };
 
   if (pageParam != null) {
-    params.id_less_than = String(pageParam);
+    params["id_less_than"] = String(pageParam);
   }
 
   if (cause?.length) {
-    params.cause = cause.join(",");
+    params["cause"] = cause.join(",");
   }
 
   return await commonApiFetch<TypedNotificationsResponse>({

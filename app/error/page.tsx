@@ -10,7 +10,7 @@ export default async function ErrorPage({ searchParams }: ErrorPageProps) {
   const stackTraceParam = (await searchParams)?.stack ?? null;
 
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <Suspense fallback={null}>
         <ErrorComponent stackTrace={stackTraceParam} />
       </Suspense>

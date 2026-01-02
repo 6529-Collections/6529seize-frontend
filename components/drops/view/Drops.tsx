@@ -20,7 +20,7 @@ export default function Drops() {
   const router = useRouter();
   const { isApp } = useDeviceInfo();
   const params = useParams();
-  const handleOrWallet = (params?.user as string)?.toLowerCase();
+  const handleOrWallet = (params?.["user"] as string)?.toLowerCase();
   const { connectedProfile } = useContext(AuthContext);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -47,10 +47,10 @@ export default function Drops() {
         include_replies: "true",
       };
       if (pageParam) {
-        params.serial_no_less_than = `${pageParam}`;
+        params["serial_no_less_than"] = `${pageParam}`;
       }
       if (connectedProfile?.handle) {
-        params.context_profile = connectedProfile.handle;
+        params["context_profile"] = connectedProfile.handle;
       }
       return await commonApiFetch<ApiDrop[]>({
         endpoint: `/drops`,

@@ -45,7 +45,7 @@ export default function UserPageFollowers({
         ...query,
       };
       if (pageParam) {
-        params.page = `${pageParam}`;
+        params["page"] = `${pageParam}`;
       }
       return await commonApiFetch<ApiIncomingIdentitySubscriptionsPage>({
         endpoint: `/identity-subscriptions/incoming/IDENTITY/${profile.id}`,

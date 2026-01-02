@@ -112,7 +112,7 @@ export default function Leaderboard(
 
   function printCollectorsDropdown() {
     return (
-      <Dropdown className={styles.contentDropdown} drop={"down-centered"}>
+      <Dropdown className={styles["contentDropdown"]} drop={"down-centered"}>
         <Dropdown.Toggle>Collectors: {collector}</Dropdown.Toggle>
         <Dropdown.Menu>
           {Object.values(Collector).map((collector) => (
@@ -134,7 +134,7 @@ export default function Leaderboard(
 
   function printCollectionsDropdown() {
     return (
-      <Dropdown className={styles.contentDropdown} drop={"down-centered"}>
+      <Dropdown className={styles["contentDropdown"]} drop={"down-centered"}>
         <Dropdown.Toggle>Collection: {content}</Dropdown.Toggle>
         <Dropdown.Menu>
           {Object.values(Content).map((content) => (
@@ -149,7 +149,7 @@ export default function Leaderboard(
 
   function printSeasonsDropdown() {
     return (
-      <Dropdown className={styles.contentDropdown} drop={"down-centered"}>
+      <Dropdown className={styles["contentDropdown"]} drop={"down-centered"}>
         <Dropdown.Toggle
           disabled={
             content != Content.MEMES &&
@@ -188,7 +188,7 @@ export default function Leaderboard(
             Network{" "}
             {showViewAll && (
               <Link href="/network/nerd">
-                <span className={styles.viewAllLink}>View All</span>
+                <span className={styles["viewAllLink"]}>View All</span>
               </Link>
             )}
           </h1>
@@ -200,7 +200,7 @@ export default function Leaderboard(
             }
             xs={{ span: 6 }}
           >
-            <div className={styles.statsContainer}>
+            <div className={styles["statsContainer"]}>
               <span>
                 TDH Block&nbsp;
                 <a
@@ -255,20 +255,20 @@ export default function Leaderboard(
               {printSeasonsDropdown()}
             </Col>
             <Col
-              className={`${styles.pageHeader}`}
+              className={`${styles["pageHeader"]}`}
               sm={{ span: 12 }}
               md={{ span: 3 }}
             >
               <div
-                className={`${styles.headerMenuFocus} d-flex justify-content-center align-items-center`}
+                className={`${styles["headerMenuFocus"]} d-flex justify-content-center align-items-center`}
               >
                 <span>
                   <span
                     onClick={() => props.setFocus(LeaderboardFocus.TDH)}
-                    className={`${styles.focus} ${
+                    className={`${styles["focus"]} ${
                       props.focus === LeaderboardFocus.TDH
                         ? ""
-                        : styles.disabled
+                        : styles["disabled"]
                     }`}
                   >
                     {LeaderboardFocus.TDH}
@@ -280,10 +280,10 @@ export default function Leaderboard(
                     onClick={() =>
                       props.setFocus(LeaderboardFocus.INTERACTIONS)
                     }
-                    className={`${styles.focus} ${
+                    className={`${styles["focus"]} ${
                       props.focus === LeaderboardFocus.INTERACTIONS
                         ? ""
-                        : styles.disabled
+                        : styles["disabled"]
                     }`}
                   >
                     {LeaderboardFocus.INTERACTIONS}
