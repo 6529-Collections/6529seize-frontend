@@ -7,6 +7,7 @@ import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { SubmissionStep } from "./types/Steps";
 import AgreementStep from "./steps/AgreementStep";
 import ArtworkStep from "./steps/ArtworkStep";
+import AdditionalInfoStep from "./steps/AdditionalInfoStep";
 import { useArtworkSubmissionForm } from "./hooks/useArtworkSubmissionForm";
 import { useArtworkSubmissionMutation } from "./hooks/useArtworkSubmissionMutation";
 import { SubmissionPhase } from "./ui/SubmissionProgress";
@@ -61,6 +62,21 @@ const MemesArtSubmissionContainer: React.FC<
     form.handleFileSelect(file);
   };
 
+  // Memoized callbacks for additional media to prevent infinite loops
+  const handleArtistProfileMediaChange = useCallback(
+    (media: string[]) => {
+      form.setAdditionalMedia({ artist_profile_media: media });
+    },
+    [form.setAdditionalMedia]
+  );
+
+  const handleArtworkCommentaryMediaChange = useCallback(
+    (media: string[]) => {
+      form.setAdditionalMedia({ artwork_commentary_media: media });
+    },
+    [form.setAdditionalMedia]
+  );
+
   // Phase change handler
   const handlePhaseChange = useCallback((phase: SubmissionPhase) => {
     // Any additional phase-specific handling can be done here
@@ -70,7 +86,7 @@ const MemesArtSubmissionContainer: React.FC<
   // Handle final submission
   const handleSubmit = async () => {
     // Get submission data including all traits
-    const { traits } = form.getSubmissionData();
+    const { traits, operationalData } = form.getSubmissionData();
     const media = form.getMediaSelection();
 
     if (media.mediaSource === "upload") {
@@ -82,6 +98,7 @@ const MemesArtSubmissionContainer: React.FC<
         {
           imageFile: media.selectedFile,
           traits,
+          operationalData,
           waveId: wave.id,
           termsOfService: wave.participation.terms,
         },
@@ -104,6 +121,7 @@ const MemesArtSubmissionContainer: React.FC<
           mimeType: media.externalMimeType,
         },
         traits,
+        operationalData,
         waveId: wave.id,
         termsOfService: wave.participation.terms,
       },
@@ -153,7 +171,7 @@ const MemesArtSubmissionContainer: React.FC<
         onExternalProviderChange={form.setExternalMediaProvider}
         onExternalMimeTypeChange={form.setExternalMediaMimeType}
         onClearExternalMedia={form.clearExternalMedia}
-        onSubmit={handleSubmit}
+        onSubmit={form.handleContinueFromArtwork}
         onCancel={onClose}
         updateTraitField={form.updateTraitField}
         setTraits={form.setTraits}
@@ -162,6 +180,23 @@ const MemesArtSubmissionContainer: React.FC<
         uploadProgress={uploadProgress}
         fileInfo={fileInfo}
         submissionError={submissionError}
+      />
+    ),
+    [SubmissionStep.ADDITIONAL_INFO]: (
+      <AdditionalInfoStep
+        airdropEntries={form.operationalData.airdrop_config}
+        onAirdropEntriesChange={form.setAirdropConfig}
+        allowlistBatches={form.operationalData.allowlist_batches}
+        artistProfileMedia={form.operationalData.additional_media.artist_profile_media}
+        artworkCommentaryMedia={form.operationalData.additional_media.artwork_commentary_media}
+        artworkCommentary={form.operationalData.commentary}
+        onBatchesChange={form.setAllowlistBatches}
+        onArtistProfileMediaChange={handleArtistProfileMediaChange}
+        onArtworkCommentaryMediaChange={handleArtworkCommentaryMediaChange}
+        onArtworkCommentaryChange={form.setCommentary}
+        onBack={form.handleBackToArtwork}
+        onSubmit={handleSubmit}
+        isSubmitting={isSubmitting}
       />
     ),
   };

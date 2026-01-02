@@ -136,6 +136,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
           placeholder={placeholder ?? ""}
           readOnly={readOnly}
           className={inputClassName}
+          autoComplete="off"
         />
       </TraitWrapper>
     );

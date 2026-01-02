@@ -5,6 +5,7 @@ interface FormSectionProps {
   readonly children: React.ReactNode;
   readonly titleClassName?: string;
   readonly contentClassName?: string;
+  readonly headerRight?: React.ReactNode;
 }
 
 /**
@@ -16,12 +17,16 @@ interface FormSectionProps {
 const FormSection: React.FC<FormSectionProps> = ({
   title,
   children,
-  titleClassName = "tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-4",
+  titleClassName = "tw-text-lg tw-font-semibold tw-text-iron-100",
   contentClassName = "",
+  headerRight,
 }) => {
   return (
     <div>
-      <div className={titleClassName}>{title}</div>
+      <div className="tw-flex tw-justify-between tw-items-center tw-mb-4">
+        <div className={titleClassName}>{title}</div>
+        {headerRight && <div>{headerRight}</div>}
+      </div>
       <div className={contentClassName}>{children}</div>
     </div>
   );
