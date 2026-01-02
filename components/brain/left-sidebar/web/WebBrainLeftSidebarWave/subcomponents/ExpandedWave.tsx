@@ -13,9 +13,9 @@ interface ExpandedWaveProps {
   readonly isActive: boolean;
   readonly isDropWave: boolean;
   readonly isPinned: boolean;
-  readonly latestDropTimestamp?: number | null;
+  readonly latestDropTimestamp?: number | null | undefined;
   readonly nameRef: MutableRefObject<HTMLDivElement | null>;
-  readonly onMouseEnter?: () => void;
+  readonly onMouseEnter?: () => void | undefined | undefined;
   readonly onClick: (e: React.MouseEvent<HTMLAnchorElement>) => void;
   readonly showExpandedTooltip: boolean;
   readonly showPin: boolean;

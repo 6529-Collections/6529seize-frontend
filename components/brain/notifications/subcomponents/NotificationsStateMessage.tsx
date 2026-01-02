@@ -9,7 +9,7 @@ interface NotificationsStateAction {
 
 interface NotificationsStateMessageProps {
   readonly message: string;
-  readonly action?: NotificationsStateAction;
+  readonly action?: NotificationsStateAction | undefined;
 }
 
 export default function NotificationsStateMessage({

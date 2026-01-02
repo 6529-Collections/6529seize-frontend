@@ -17,7 +17,7 @@ interface FeedWrapperProps {
   readonly onBottomIntersection: (state: boolean) => void;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void | undefined | undefined;
 }
 
 export default function FeedWrapper({

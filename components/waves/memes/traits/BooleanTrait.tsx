@@ -7,9 +7,9 @@ import { TraitWrapper } from "./TraitWrapper";
 type BooleanTraitProps = {
   readonly label: string;
   readonly field: keyof TraitsData;
-  readonly className?: string;
-  readonly error?: string | null;
-  readonly onBlur?: (field: keyof TraitsData) => void;
+  readonly className?: string | undefined;
+  readonly error?: string | null | undefined;
+  readonly onBlur?: (field: keyof TraitsData) => void | undefined | undefined;
   readonly traits: TraitsData;
   readonly updateBoolean: (field: keyof TraitsData, value: boolean) => void;
 };

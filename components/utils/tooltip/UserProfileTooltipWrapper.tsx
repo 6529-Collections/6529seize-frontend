@@ -6,7 +6,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 interface UserProfileTooltipWrapperProps {
   readonly user: string;
   readonly children: React.ReactElement;
-  readonly placement?: "top" | "bottom" | "left" | "right" | "auto";
+  readonly placement?: "top" | "bottom" | "left" | "right" | "auto" | undefined;
 }
 
 export default function UserProfileTooltipWrapper({ 

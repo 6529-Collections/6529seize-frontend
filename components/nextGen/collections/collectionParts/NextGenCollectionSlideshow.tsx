@@ -7,7 +7,7 @@ import TokenSlideshow from "./hooks/TokenSlideshow";
 
 interface Props {
   readonly collection: NextGenCollection;
-  readonly initialTokens?: NextGenToken[];
+  readonly initialTokens?: NextGenToken[] | undefined;
 }
 
 export default function NextGenCollectionSlideshow(props: Readonly<Props>) {

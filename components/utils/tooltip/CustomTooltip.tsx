@@ -14,22 +14,22 @@ import styles from "./CustomTooltip.module.scss";
 interface CustomTooltipProps {
   readonly children: React.ReactElement;
   readonly content: React.ReactNode;
-  readonly placement?: "top" | "bottom" | "left" | "right" | "auto";
-  readonly delayShow?: number;
-  readonly delayHide?: number;
-  readonly disabled?: boolean;
-  readonly offset?: number;
-  readonly hoverTransitionDelay?: number;
+  readonly placement?: "top" | "bottom" | "left" | "right" | "auto" | undefined;
+  readonly delayShow?: number | undefined;
+  readonly delayHide?: number | undefined;
+  readonly disabled?: boolean | undefined;
+  readonly offset?: number | undefined;
+  readonly hoverTransitionDelay?: number | undefined;
 }
 
 type TooltipChildHandlers = {
-  onMouseEnter?: React.MouseEventHandler<HTMLElement>;
-  onMouseLeave?: React.MouseEventHandler<HTMLElement>;
-  onFocus?: React.FocusEventHandler<HTMLElement>;
-  onBlur?: React.FocusEventHandler<HTMLElement>;
+  onMouseEnter?: React.MouseEventHandler<HTMLElement> | undefined;
+  onMouseLeave?: React.MouseEventHandler<HTMLElement> | undefined;
+  onFocus?: React.FocusEventHandler<HTMLElement> | undefined;
+  onBlur?: React.FocusEventHandler<HTMLElement> | undefined;
 };
 
-const globalScope = globalThis as typeof globalThis & { window?: Window };
+const globalScope = globalThis as typeof globalThis & { window?: Window | undefined };
 const win = globalScope.window ?? null;
 const isBrowser = win !== null;
 
@@ -59,7 +59,7 @@ export default function CustomTooltip({
   const isPointerOverTooltipRef = useRef(false);
   const childElement = React.Children.only(children) as React.ReactElement<TooltipChildHandlers>;
   const originalRef = (childElement as React.ReactElement & {
-    ref?: React.Ref<HTMLElement>;
+    ref?: React.Ref<HTMLElement> | undefined;
   }).ref;
 
   const setRefValue = useCallback((ref: React.Ref<HTMLElement> | undefined, node: HTMLElement | null) => {

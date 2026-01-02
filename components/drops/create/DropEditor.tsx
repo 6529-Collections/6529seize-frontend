@@ -37,17 +37,17 @@ interface DropEditorProps {
     readonly dropId: string;
     readonly partId: number;
   } | null;
-  readonly isClient?: boolean;
+  readonly isClient?: boolean | undefined;
   readonly type: CreateDropType;
   readonly loading: boolean;
   readonly dropEditorRefreshKey: number;
-  readonly showSubmit?: boolean;
-  readonly showDropError?: boolean;
-  readonly showProfile?: boolean;
+  readonly showSubmit?: boolean | undefined;
+  readonly showDropError?: boolean | undefined;
+  readonly showProfile?: boolean | undefined;
   readonly wave: DropEditorWaveProps | null;
   readonly waveId: string | null;
   readonly onSubmitDrop: (dropRequest: CreateDropConfig) => void;
-  readonly onCanSubmitChange?: (canSubmit: boolean) => void;
+  readonly onCanSubmitChange?: (canSubmit: boolean) => void | undefined | undefined;
 }
 
 const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(

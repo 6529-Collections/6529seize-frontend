@@ -50,7 +50,7 @@ export type MediaItem = {
 export type ContentSegment = {
   type: 'text' | 'media';
   content: string;
-  mediaInfo?: MediaItem;
+  mediaInfo?: MediaItem | undefined;
 };
 
 /**

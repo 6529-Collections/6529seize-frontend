@@ -86,7 +86,7 @@ export default function CreateSnapshotForm() {
       description: string;
       contract: string;
       blockNo: number;
-      tokenIds?: string;
+      tokenIds?: string | undefined;
       consolidateBlockNo: number | null;
     } = {
       id: tokenPoolId,

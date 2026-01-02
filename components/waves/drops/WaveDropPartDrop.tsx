@@ -14,12 +14,12 @@ interface WaveDropPartDropProps {
   activePartIndex: number;
   setActivePartIndex: (index: number) => void;
   onQuoteClick: (drop: ApiDrop) => void;
-  isEditing?: boolean;
-  isSaving?: boolean;
-  onSave?: (newContent: string) => void;
-  onCancel?: () => void;
-  isCompetitionDrop?: boolean;
-  mediaImageScale?: ImageScale;
+  isEditing?: boolean | undefined;
+  isSaving?: boolean | undefined;
+  onSave?: (newContent: string) => void | undefined | undefined;
+  onCancel?: () => void | undefined | undefined;
+  isCompetitionDrop?: boolean | undefined;
+  mediaImageScale?: ImageScale | undefined;
 }
 
 const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({

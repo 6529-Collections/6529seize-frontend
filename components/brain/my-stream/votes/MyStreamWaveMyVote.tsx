@@ -16,9 +16,9 @@ import { Tooltip } from "react-tooltip";
 interface MyStreamWaveMyVoteProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
-  readonly isChecked?: boolean;
-  readonly onToggleCheck?: (dropId: string) => void;
-  readonly isResetting?: boolean;
+  readonly isChecked?: boolean | undefined;
+  readonly onToggleCheck?: (dropId: string) => void | undefined | undefined;
+  readonly isResetting?: boolean | undefined;
 }
 
 const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({

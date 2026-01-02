@@ -13,36 +13,36 @@ interface UseNotificationsQueryProps {
   /**
    * If true, reverse the notifications order (e.g. for a "descending" / "newest first" display).
    */
-  readonly reverse?: boolean;
+  readonly reverse?: boolean | undefined;
 
   /**
    * Only fetch notifications if we have a valid identity.
    * Used in "enabled" to avoid sending queries prematurely.
    */
-  readonly identity?: string | null;
+  readonly identity?: string | null | undefined;
 
   /**
    * Example usage where you only fetch if no active profile proxy is set.
    * Adjust or remove according to your own logic.
    */
-  readonly activeProfileProxy?: boolean;
+  readonly activeProfileProxy?: boolean | undefined;
 
   /**
    * How many notifications to fetch per page.
    */
-  readonly limit?: string;
+  readonly limit?: string | undefined;
 
   /**
    * The cause of the notifications to fetch.
    */
-  readonly cause?: ApiNotificationCause[] | null;
+  readonly cause?: ApiNotificationCause[] | null | undefined;
 }
 
 type NotificationsQueryParams = {
   limit: string;
   cause: ApiNotificationCause[] | null;
-  pageParam?: number | null;
-  signal?: AbortSignal;
+  pageParam?: number | null | undefined;
+  signal?: AbortSignal | undefined;
 };
 
 const getIdentityNotificationsQueryKey = (
@@ -158,9 +158,9 @@ export function usePrefetchNotifications() {
       pages = 3,
     }: {
       identity: string | null;
-      cause?: ApiNotificationCause[] | null;
-      limit?: string;
-      pages?: number;
+      cause?: ApiNotificationCause[] | null | undefined;
+      limit?: string | undefined;
+      pages?: number | undefined;
     }) => {
       if (!identity) {
         return;
@@ -171,8 +171,8 @@ export function usePrefetchNotifications() {
           pageParam,
           signal,
         }: {
-          pageParam?: number | null;
-          signal?: AbortSignal;
+          pageParam?: number | null | undefined;
+          signal?: AbortSignal | undefined;
         }) => fetchNotifications({ limit, cause, pageParam, signal }),
         initialPageParam: null,
         getNextPageParam: (lastPage) =>

@@ -71,7 +71,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
   // Check for browser support
   const [browserSupport, setBrowserSupport] = useState<{
     supported: boolean;
-    reason?: string;
+    reason?: string | undefined;
   }>({ supported: true });
 
   // Reduced-motion preference

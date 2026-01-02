@@ -7,9 +7,9 @@ interface DateAccordionProps {
   readonly title: React.ReactNode;
   readonly isExpanded: boolean;
   readonly onToggle: () => void;
-  readonly collapsedContent?: React.ReactNode;
+  readonly collapsedContent?: React.ReactNode | undefined;
   readonly children: React.ReactNode;
-  readonly showChevron?: boolean;
+  readonly showChevron?: boolean | undefined;
 }
 
 export default function DateAccordion({

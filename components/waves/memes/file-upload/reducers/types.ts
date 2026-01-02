@@ -14,7 +14,7 @@ import type {
  */
 export interface FileValidationResult {
   valid: boolean;
-  error?: string;
+  error?: string | undefined;
 }
 
 /**
@@ -120,13 +120,13 @@ export interface VideoCompatibilityResult {
   /** Whether testing was completed */
   tested: boolean;
   /** User-friendly error message if not compatible */
-  errorMessage?: string;
+  errorMessage?: string | undefined;
   /** Technical reason for debugging */
-  technicalReason?: string;
+  technicalReason?: string | undefined;
   /** Detected codec information if available */
-  codecInfo?: string;
+  codecInfo?: string | undefined;
   /** Whether the video can be streamed */
-  isStreamable?: boolean;
+  isStreamable?: boolean | undefined;
 }
 
 /**
@@ -144,7 +144,7 @@ export interface VideoFallbackPreviewProps {
   /** File that couldn't be previewed */
   readonly file: File;
   /** Optional error message */
-  readonly errorMessage?: string;
+  readonly errorMessage?: string | undefined;
 }
 
 /**

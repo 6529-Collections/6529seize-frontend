@@ -28,7 +28,7 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
 
     const waveDetails =
       (drop.wave as unknown as {
-        chat?: { scope?: { group?: { is_direct_message?: boolean } } };
+        chat?: { scope?: { group?: { is_direct_message?: boolean | undefined } | undefined } | undefined } | undefined;
       }) ?? undefined;
     const isDirectMessage = isWaveDirectMessage(
       drop.wave.id,

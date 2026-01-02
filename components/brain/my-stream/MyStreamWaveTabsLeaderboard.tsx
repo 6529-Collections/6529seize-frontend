@@ -9,7 +9,7 @@ interface MyStreamWaveTabsLeaderboardProps {
   readonly wave: ApiWave;
   readonly activeView: BrainView;
   readonly onViewChange: (view: BrainView) => void;
-  readonly registerTabRef?: RegisterTabRef;
+  readonly registerTabRef?: RegisterTabRef | undefined;
 }
 
 const MyStreamWaveTabsLeaderboard: React.FC<

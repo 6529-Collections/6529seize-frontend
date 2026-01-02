@@ -63,7 +63,7 @@ export default function GroupCardActionStats({
       }
       const params: {
         rater: string;
-        rater_representative?: string;
+        rater_representative?: string | undefined;
       } = {
         rater,
       };
@@ -74,7 +74,7 @@ export default function GroupCardActionStats({
 
       return await commonApiFetch<
         ApiAvailableRatingCredit,
-        { rater: string; rater_representative?: string }
+        { rater: string; rater_representative?: string | undefined }
       >({
         endpoint: `ratings/credit`,
         params,

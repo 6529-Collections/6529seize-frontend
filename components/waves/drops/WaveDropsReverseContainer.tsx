@@ -13,8 +13,8 @@ interface WaveDropsReverseContainerProps {
   readonly onUserScroll?: (
     direction: "up" | "down",
     isAtBottom: boolean
-  ) => void;
-  readonly bottomPaddingClassName?: string;
+  ) => void | undefined | undefined;
+  readonly bottomPaddingClassName?: string | undefined;
 }
 
 export const WaveDropsReverseContainer = forwardRef<

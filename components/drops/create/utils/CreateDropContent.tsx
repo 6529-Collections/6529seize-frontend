@@ -89,7 +89,7 @@ const CreateDropContent = forwardRef<
     readonly canSubmit: boolean;
     readonly missingMedia: ApiWaveParticipationRequirement[];
     readonly missingMetadata: ApiWaveRequiredMetadata[];
-    readonly onDrop?: () => void;
+    readonly onDrop?: () => void | undefined | undefined;
     readonly onEditorState: (editorState: EditorState) => void;
     readonly onReferencedNft: (referencedNft: ReferencedNft) => void;
     readonly onMentionedUser: (
@@ -98,7 +98,7 @@ const CreateDropContent = forwardRef<
     readonly setFiles: (files: File[]) => void;
     readonly onViewClick: () => void;
     readonly onDropPart: () => void;
-    readonly children?: React.ReactNode;
+    readonly children?: React.ReactNode | undefined;
   }
 >(
   (

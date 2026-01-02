@@ -1,10 +1,10 @@
 interface CollectionBreadcrumbsProps {
   readonly collectionLabel: string;
-  readonly tokenLabel?: string;
-  readonly grantLabel?: string;
+  readonly tokenLabel?: string | undefined;
+  readonly grantLabel?: string | undefined;
   readonly onNavigateToCollections: () => void;
-  readonly onNavigateToTokens?: () => void;
-  readonly onNavigateToContributors?: () => void;
+  readonly onNavigateToTokens?: () => void | undefined | undefined;
+  readonly onNavigateToContributors?: () => void | undefined | undefined;
 }
 
 export function CollectionBreadcrumbs({

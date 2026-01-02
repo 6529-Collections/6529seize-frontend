@@ -27,11 +27,11 @@ export default function GroupCard({
   userPlaceholder,
   titlePlaceholder,
 }: {
-  readonly group?: ApiGroupFull;
-  readonly activeGroupIdVoteAll?: string | null;
-  readonly setActiveGroupIdVoteAll?: (value: string | null) => void;
-  readonly userPlaceholder?: string;
-  readonly titlePlaceholder?: string;
+  readonly group?: ApiGroupFull | undefined;
+  readonly activeGroupIdVoteAll?: string | null | undefined;
+  readonly setActiveGroupIdVoteAll?: (value: string | null) => void | undefined | undefined;
+  readonly userPlaceholder?: string | undefined;
+  readonly titlePlaceholder?: string | undefined;
 }) {
   const router = useRouter();
   const { connectedProfile } = useContext(AuthContext);

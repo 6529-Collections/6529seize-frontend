@@ -24,7 +24,7 @@ export default function CreateDirectMessage({
 }: {
   readonly profile: ApiIdentity;
   readonly onBack: () => void;
-  readonly onSuccess?: () => void;
+  readonly onSuccess?: () => void | undefined | undefined;
 }) {
   const [isCreating, setIsCreating] = useState(false);
   const router = useRouter();

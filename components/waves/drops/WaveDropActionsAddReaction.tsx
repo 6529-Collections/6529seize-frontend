@@ -22,8 +22,8 @@ import {
 
 const WaveDropActionsAddReaction: React.FC<{
   readonly drop: ExtendedDrop;
-  readonly isMobile?: boolean;
-  readonly onAddReaction?: () => void;
+  readonly isMobile?: boolean | undefined;
+  readonly onAddReaction?: () => void | undefined | undefined;
 }> = ({ drop, isMobile = false, onAddReaction }) => {
   const isTemporaryDrop = drop.id.startsWith("temp-");
   const canReact = drop.type === DropSize.FULL && !isTemporaryDrop;
@@ -114,7 +114,7 @@ const WaveDropActionsAddReaction: React.FC<{
     ]
   );
 
-  const handleEmojiSelect = async (emoji: { native?: string; id?: string }) => {
+  const handleEmojiSelect = async (emoji: { native?: string | undefined; id?: string | undefined }) => {
     const emojiText = `:${emoji.id}:`;
     setShowPicker(false);
 

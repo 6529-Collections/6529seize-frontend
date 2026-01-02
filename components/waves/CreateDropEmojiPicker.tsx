@@ -11,7 +11,7 @@ import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useEmoji } from "@/contexts/EmojiContext";
 
 interface CreateDropEmojiPickerProps {
-  top?: string;
+  top?: string | undefined;
 }
 
 const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({ top = "tw-top-2" }) => {
@@ -28,7 +28,7 @@ const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({ top = "tw-top-2
     left: number;
   }>({ top: 0, left: 0 });
 
-  const addEmoji = (emoji: { native?: string; id?: string }) => {
+  const addEmoji = (emoji: { native?: string | undefined; id?: string | undefined }) => {
     let emojiText = emoji.native;
     if (!emojiText && emoji.id) {
       emojiText = `:${emoji.id}:`;

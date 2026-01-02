@@ -9,12 +9,12 @@ import {
 
 interface UseOptimizedVideoOptions {
   /** ms between checks */
-  readonly pollInterval?: number;
-  readonly maxRetries?: number;
+  readonly pollInterval?: number | undefined;
+  readonly maxRetries?: number | undefined;
   /** if true, tries HLS first */
-  readonly preferHls?: boolean;
+  readonly preferHls?: boolean | undefined;
   /** if true, each pollInterval can grow exponentially (reducing requests on slow encodes) */
-  readonly exponentialBackoff?: boolean;
+  readonly exponentialBackoff?: boolean | undefined;
 }
 
 interface UseOptimizedVideoResult {

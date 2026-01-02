@@ -9,8 +9,8 @@ export enum SingleWaveDropVoteSize {
 
 interface SingleWaveDropVoteProps {
   readonly drop: ApiDrop;
-  readonly size?: SingleWaveDropVoteSize;
-  readonly onVoteSuccess?: () => void;
+  readonly size?: SingleWaveDropVoteSize | undefined;
+  readonly onVoteSuccess?: () => void | undefined | undefined;
 }
 
 const SingleWaveDropVoteContent = dynamic(

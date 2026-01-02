@@ -20,8 +20,8 @@ export default function DropListItemRateGive({
   isMobile = false,
 }: {
   readonly drop: ApiDrop;
-  readonly onRated?: () => void;
-  readonly isMobile?: boolean;
+  readonly onRated?: () => void | undefined | undefined;
+  readonly isMobile?: boolean | undefined;
 }) {
   const memeticWaitTime = 1000;
   const memeticValues: number[] = [

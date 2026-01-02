@@ -90,8 +90,8 @@ jest.mock("@/components/waves/drops/WaveDropActions", () => {
 
 // Create a context to pass handlers
 const TestEditContext = React.createContext<{
-  onSave?: (content: string, mentions: any[]) => void;
-  onCancel?: () => void;
+  onSave?: (content: string, mentions: any[]) => void | undefined | undefined;
+  onCancel?: () => void | undefined | undefined;
 }>({});
 
 // Mock WaveDropPartContentMarkdown to check for edit state

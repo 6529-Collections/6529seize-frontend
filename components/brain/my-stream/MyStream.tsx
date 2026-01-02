@@ -17,10 +17,10 @@ interface MyStreamProps {
   readonly items: TypedFeedItem[];
   readonly isFetching: boolean;
   readonly onBottomIntersection: (state: boolean) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
-  readonly haveNewItems?: boolean;
-  readonly status?: string;
-  readonly isInitialQueryDone?: boolean;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void | undefined | undefined;
+  readonly haveNewItems?: boolean | undefined;
+  readonly status?: string | undefined;
+  readonly isInitialQueryDone?: boolean | undefined;
 }
 
 export default function MyStream({

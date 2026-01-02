@@ -23,10 +23,10 @@ import WaveDropFollowAuthor from "./WaveDropFollowAuthor";
 interface WaveDropActionsProps {
   readonly drop: ExtendedDrop;
   readonly activePartIndex: number;
-  readonly showVoting?: boolean;
+  readonly showVoting?: boolean | undefined;
   readonly onReply: () => void;
   readonly onQuote: () => void;
-  readonly onEdit?: () => void;
+  readonly onEdit?: () => void | undefined | undefined;
 }
 
 export default function WaveDropActions({

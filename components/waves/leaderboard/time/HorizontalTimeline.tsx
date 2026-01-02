@@ -7,9 +7,9 @@ import { HorizontalTimelineItem } from "./HorizontalTimelineItem";
 interface HorizontalTimelineProps {
   readonly decisions: DecisionPoint[];
   readonly nextDecisionTime: number | null;
-  readonly animationComplete?: boolean;
-  readonly focus?: "start" | "end" | null;
-  readonly onFocusHandled?: () => void;
+  readonly animationComplete?: boolean | undefined;
+  readonly focus?: "start" | "end" | null | undefined;
+  readonly onFocusHandled?: () => void | undefined | undefined;
 }
 
 /**

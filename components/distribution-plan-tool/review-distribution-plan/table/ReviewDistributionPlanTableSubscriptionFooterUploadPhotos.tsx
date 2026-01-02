@@ -15,8 +15,8 @@ export function UploadDistributionPhotosModal(
     plan: AllowlistDescription;
     show: boolean;
     handleClose(): void;
-    existingPhotosCount?: number;
-    confirmedTokenId?: string | null;
+    existingPhotosCount?: number | undefined;
+    confirmedTokenId?: string | null | undefined;
     onUpload(contract: string, tokenId: string, files: File[]): void;
   }>
 ) {

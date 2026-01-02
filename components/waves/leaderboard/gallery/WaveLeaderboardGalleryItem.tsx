@@ -22,9 +22,9 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 interface WaveLeaderboardGalleryItemProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
-  readonly artFocused?: boolean;
-  readonly activeSort?: WaveDropsLeaderboardSort;
-  readonly animationKey?: number;
+  readonly artFocused?: boolean | undefined;
+  readonly activeSort?: WaveDropsLeaderboardSort | undefined;
+  readonly animationKey?: number | undefined;
 }
 
 export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(

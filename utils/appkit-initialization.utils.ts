@@ -23,7 +23,7 @@ interface AppKitInitializationResult {
    * Optional to preserve backwards compatibility with mocks.
    * When provided, callers can await it to ensure AppKit is ready before using the adapter.
    */
-  ready?: Promise<void>;
+  ready?: Promise<void> | undefined;
 }
 
 /**

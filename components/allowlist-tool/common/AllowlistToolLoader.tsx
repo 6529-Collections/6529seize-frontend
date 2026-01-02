@@ -7,7 +7,7 @@ export enum AllowlistToolLoaderSize {
 export default function AllowlistToolLoader({
   size = AllowlistToolLoaderSize.SMALL,
 }: {
-  size?: AllowlistToolLoaderSize;
+  size?: AllowlistToolLoaderSize | undefined;
 }) {
   const sizes: Record<AllowlistToolLoaderSize, string> = {
     [AllowlistToolLoaderSize.SMALL]: "tw-w-5 tw-h-5",

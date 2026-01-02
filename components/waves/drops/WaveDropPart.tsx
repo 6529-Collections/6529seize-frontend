@@ -10,16 +10,16 @@ interface WaveDropPartProps {
   readonly drop: ExtendedDrop;
   readonly activePartIndex: number;
   readonly setActivePartIndex: (index: number) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void | undefined | undefined;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onLongPress: () => void;
   readonly setLongPressTriggered: (triggered: boolean) => void;
-  readonly isEditing?: boolean;
-  readonly isSaving?: boolean;
-  readonly onSave?: (newContent: string) => void;
-  readonly onCancel?: () => void;
-  readonly isCompetitionDrop?: boolean;
-  readonly mediaImageScale?: ImageScale;
+  readonly isEditing?: boolean | undefined;
+  readonly isSaving?: boolean | undefined;
+  readonly onSave?: (newContent: string) => void | undefined | undefined;
+  readonly onCancel?: () => void | undefined | undefined;
+  readonly isCompetitionDrop?: boolean | undefined;
+  readonly mediaImageScale?: ImageScale | undefined;
 }
 
 const LONG_PRESS_DURATION = 500; // milliseconds

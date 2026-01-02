@@ -7,8 +7,8 @@ type GridRowProps = Readonly<{
   tokens: TokenWindowEntry[];
   metadataMap: Map<string, TokenMetadata>;
   metadataQuery: any;
-  renderTokenExtra?: (tokenId: bigint, metadata?: TokenMetadata) => ReactNode;
-  action?: TokenListAction;
+  renderTokenExtra?: (tokenId: bigint, metadata?: TokenMetadata) => ReactNode | undefined | undefined;
+  action?: TokenListAction | undefined;
   positionStyle: CSSProperties;
   columns: number;
 

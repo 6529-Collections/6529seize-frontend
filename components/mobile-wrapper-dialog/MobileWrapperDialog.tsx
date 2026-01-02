@@ -16,13 +16,13 @@ export default function MobileWrapperDialog({
   children,
   noPadding,
 }: {
-  readonly title?: string;
+  readonly title?: string | undefined;
   readonly isOpen: boolean;
   readonly onClose: () => void;
-  readonly onBeforeLeave?: () => void;
-  readonly onAfterLeave?: () => void;
+  readonly onBeforeLeave?: () => void | undefined | undefined;
+  readonly onAfterLeave?: () => void | undefined | undefined;
   readonly children: React.ReactNode;
-  readonly noPadding?: boolean;
+  readonly noPadding?: boolean | undefined;
 }) {
   const bottomPadding = noPadding
     ? "env(safe-area-inset-bottom,0px)"

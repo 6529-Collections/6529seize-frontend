@@ -71,11 +71,11 @@ interface CreateDropWrapperProps {
   readonly drop: CreateDropConfig | null;
   readonly viewType: CreateDropViewType;
   readonly showSubmit: boolean;
-  readonly showDropError?: boolean;
+  readonly showDropError?: boolean | undefined;
   readonly wave: CreateDropWrapperWaveProps | null;
   readonly waveId: string | null;
   readonly children: React.ReactNode;
-  readonly showProfile?: boolean;
+  readonly showProfile?: boolean | undefined;
   readonly setIsStormMode: (isStormMode: boolean) => void;
   readonly setViewType: (newV: CreateDropViewType) => void;
   readonly setDrop: (newV: CreateDropConfig) => void;
@@ -89,7 +89,7 @@ interface CreateDropWrapperProps {
   readonly setTitle: (newV: string | null) => void;
   readonly setMetadata: (newV: DropMetadata[]) => void;
   readonly onSubmitDrop: (dropRequest: CreateDropConfig) => void;
-  readonly onCanSubmitChange?: (canSubmit: boolean) => void;
+  readonly onCanSubmitChange?: (canSubmit: boolean) => void | undefined | undefined;
 }
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });

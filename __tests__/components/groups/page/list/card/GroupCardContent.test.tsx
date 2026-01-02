@@ -17,7 +17,7 @@ const group: any = {
   }
 };
 
-function renderComp(options: {handle?: string|null, setState?: (s: GroupCardState) => void, haveActive?: boolean} = {}) {
+function renderComp(options: {handle?: string|null | undefined, setState?: (s: GroupCardState) => void | undefined | undefined, haveActive?: boolean | undefined} = {}) {
   const {handle = null, setState = undefined, haveActive = false} = options;
   return render(
     <AuthContext.Provider value={{ connectedProfile: handle ? { handle } : null } as any}>

@@ -49,8 +49,8 @@ const DEFAULT_DROP_RATE_CATEGORY = "Rep";
 interface Props {
   readonly drop: ApiDrop;
   readonly newRating: number;
-  readonly onVoteSuccess?: () => void;
-  readonly size?: SingleWaveDropVoteSize;
+  readonly onVoteSuccess?: () => void | undefined | undefined;
+  readonly size?: SingleWaveDropVoteSize | undefined;
 }
 
 const SingleWaveDropVoteSubmit = forwardRef<

@@ -6,7 +6,7 @@ import { WaveGroupType } from "../specs/groups/group/WaveGroup.types";
 
 interface WaveGroupsProps {
   readonly wave: ApiWave;
-  readonly useRing?: boolean;
+  readonly useRing?: boolean | undefined;
 }
 
 export default function WaveGroups({ wave, useRing = true }: WaveGroupsProps) {

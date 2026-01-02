@@ -11,11 +11,11 @@ import { formatCanonical } from "../utils";
 import { VirtualizedTokenList } from "@/components/token-list/VirtualizedTokenList";
 
 interface NftTokenListProps {
-    readonly contractAddress?: `0x${string}`;
+    readonly contractAddress?: `0x${string}` | undefined;
     readonly chain: SupportedChain;
     readonly ranges: TokenRange[];
-    readonly overscan?: number;
-    readonly renderTokenExtra?: (tokenId: bigint, metadata?: TokenMetadata) => ReactNode;
+    readonly overscan?: number | undefined;
+    readonly renderTokenExtra?: (tokenId: bigint, metadata?: TokenMetadata) => ReactNode | undefined | undefined;
     readonly onRemove: (tokenId: bigint) => void;
 }
 

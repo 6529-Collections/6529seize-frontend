@@ -39,7 +39,7 @@ export interface PageSearchResult {
   title: string;
   href: string;
   breadcrumbs: string[];
-  icon?: ComponentType<{ className?: string }>;
+  icon?: ComponentType<{ className?: string | undefined }> | undefined;
 }
 
 export type HeaderSearchModalItemType =
@@ -102,7 +102,7 @@ export default function HeaderSearchModalItem({
   const getNft = () => content as NFTSearchResult;
   const getPage = () => content as PageSearchResult;
 
-  const getMediaIcon = (Icon: ComponentType<{ className?: string }>) => {
+  const getMediaIcon = (Icon: ComponentType<{ className?: string | undefined }>) => {
     return (
       <div className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900">
         <Icon className="tw-h-5 tw-w-5" />

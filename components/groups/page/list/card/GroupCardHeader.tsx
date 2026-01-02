@@ -17,9 +17,9 @@ export default function GroupCardHeader({
   onEditClick,
   userPlaceholder,
 }: {
-  readonly group?: ApiGroupFull;
-  readonly onEditClick?: (group: ApiGroupFull) => void;
-  readonly userPlaceholder?: string;
+  readonly group?: ApiGroupFull | undefined;
+  readonly onEditClick?: (group: ApiGroupFull) => void | undefined | undefined;
+  readonly userPlaceholder?: string | undefined;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const timeAgo = group

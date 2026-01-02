@@ -32,13 +32,13 @@ interface DropsListProps {
   readonly onQuote: DropActionHandler;
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void | undefined | undefined;
   readonly serialNo: number | null;
   readonly targetDropRef: RefObject<HTMLDivElement | null> | null;
   readonly dropViewDropId: string | null;
-  readonly parentContainerRef?: React.RefObject<HTMLElement | null>;
-  readonly location?: DropLocation;
-  readonly unreadDividerSerialNo?: number | null;
+  readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
+  readonly location?: DropLocation | undefined;
+  readonly unreadDividerSerialNo?: number | null | undefined;
 }
 
 

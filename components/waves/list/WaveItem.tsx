@@ -74,11 +74,11 @@ const shouldSkipNavigation = (
 
 type CardContainerProps = {
   readonly isInteractive: boolean;
-  readonly href?: string;
-  readonly ariaLabel?: string;
+  readonly href?: string | undefined;
+  readonly ariaLabel?: string | undefined;
   readonly children: ReactNode;
-  readonly onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
-  readonly onKeyDown?: (event: KeyboardEvent<HTMLAnchorElement>) => void;
+  readonly onClick?: (event: MouseEvent<HTMLAnchorElement>) => void | undefined | undefined;
+  readonly onKeyDown?: (event: KeyboardEvent<HTMLAnchorElement>) => void | undefined | undefined;
 };
 
 function CardContainer({
@@ -134,9 +134,9 @@ export default function WaveItem({
   userPlaceholder,
   titlePlaceholder,
 }: {
-  readonly wave?: ApiWave;
-  readonly userPlaceholder?: string;
-  readonly titlePlaceholder?: string;
+  readonly wave?: ApiWave | undefined;
+  readonly userPlaceholder?: string | undefined;
+  readonly titlePlaceholder?: string | undefined;
 }) {
   const router = useRouter();
   const author = wave?.author;

@@ -14,9 +14,9 @@ import { useEffect, useId, useMemo, useState } from "react";
 import { useCopyToClipboard } from "react-use";
 
 type ErrorComponentProps = {
-  readonly stackTrace?: string | null;
-  readonly digest?: string | null;
-  readonly onReset?: () => void;
+  readonly stackTrace?: string | null | undefined;
+  readonly digest?: string | null | undefined;
+  readonly onReset?: () => void | undefined | undefined;
 };
 
 export default function ErrorComponent({

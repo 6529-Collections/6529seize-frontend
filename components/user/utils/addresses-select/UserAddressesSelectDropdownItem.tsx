@@ -6,7 +6,7 @@ export default function UserAddressesSelectDropdownItem({
   onCopy,
 }: {
   readonly wallet: ApiWallet;
-  readonly onCopy?: () => void;
+  readonly onCopy?: () => void | undefined | undefined;
 }) {
   const [_, copyToClipboard] = useCopyToClipboard();
   const getEnsOrWallet = () => wallet.display ?? wallet.wallet;

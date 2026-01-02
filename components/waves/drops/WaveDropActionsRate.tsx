@@ -7,8 +7,8 @@ import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 
 interface WaveDropActionsRateProps {
   readonly drop: ApiDrop;
-  readonly onRated?: () => void;
-  readonly isMobile?: boolean;
+  readonly onRated?: () => void | undefined | undefined;
+  readonly isMobile?: boolean | undefined;
 }
 
 const WaveDropActionsRate: React.FC<WaveDropActionsRateProps> = ({

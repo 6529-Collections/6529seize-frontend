@@ -10,7 +10,7 @@ import { getWaveRoute } from "@/helpers/navigation.helpers";
 
 interface WaveLeaderboardDropContentProps {
   readonly drop: ExtendedDrop;
-  readonly isCompetitionDrop?: boolean;
+  readonly isCompetitionDrop?: boolean | undefined;
 }
 
 export const WaveLeaderboardDropContent: React.FC<

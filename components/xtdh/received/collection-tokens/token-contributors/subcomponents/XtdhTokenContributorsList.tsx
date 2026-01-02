@@ -15,7 +15,7 @@ interface XtdhTokenContributorsListProps {
   readonly isEnabled: boolean;
   readonly isLoading: boolean;
   readonly isError: boolean;
-  readonly errorMessage?: string;
+  readonly errorMessage?: string | undefined;
   readonly onRetry: () => void;
   readonly onSelectGrant: (grantId: string, label: string) => void;
 }

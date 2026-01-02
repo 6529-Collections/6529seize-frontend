@@ -26,7 +26,7 @@ export default function DropListItemRateGiveClap({
   readonly voteState: DropVoteState;
   readonly canVote: boolean;
   readonly onSubmit: () => void;
-  readonly isMobile?: boolean;
+  readonly isMobile?: boolean | undefined;
 }) {
   const positiveRgba = "rgba(39, 174, 96, 1)";
   const negativeRgba = "rgba(192, 57, 43, 1)";

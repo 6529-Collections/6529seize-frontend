@@ -27,7 +27,7 @@ type ViewContextValue = ReturnType<typeof useViewContext>;
 
 const TestNavComponent: React.FC<{
   readonly item: NavItem;
-  readonly afterNav?: (context: ViewContextValue) => void;
+  readonly afterNav?: (context: ViewContextValue) => void | undefined | undefined;
 }> = ({ item, afterNav }) => {
   const context = useViewContext();
 

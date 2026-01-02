@@ -6,7 +6,7 @@ import React from "react";
 
 jest.mock("@/components/not-found/NotFound", () => ({
   __esModule: true,
-  default: ({ label }: { label?: string }) => (
+  default: ({ label }: { label?: string | undefined }) => (
     <div data-testid="not-found" data-label={label} />
   ),
 }));

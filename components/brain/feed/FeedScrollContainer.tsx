@@ -12,9 +12,9 @@ import { NEAR_TOP_SCROLL_THRESHOLD_PX } from "../constants";
 interface FeedScrollContainerProps {
   readonly children: React.ReactNode;
   readonly onScrollUpNearTop: () => void;
-  readonly onScrollDownNearBottom?: () => void;
-  readonly isFetchingNextPage?: boolean;
-  readonly className?: string;
+  readonly onScrollDownNearBottom?: () => void | undefined | undefined;
+  readonly isFetchingNextPage?: boolean | undefined;
+  readonly className?: string | undefined;
 }
 
 const MIN_OUT_OF_VIEW_COUNT = 30;

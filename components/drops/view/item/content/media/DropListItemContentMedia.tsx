@@ -32,9 +32,9 @@ export default function DropListItemContentMedia({
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;
-  readonly onContainerClick?: () => void;
-  readonly isCompetitionDrop?: boolean;
-  readonly imageScale?: ImageScale;
+  readonly onContainerClick?: () => void | undefined | undefined;
+  readonly isCompetitionDrop?: boolean | undefined;
+  readonly imageScale?: ImageScale | undefined;
 }) {
   const getMediaType = (): MediaType => {
     if (media_mime_type.includes("image")) {

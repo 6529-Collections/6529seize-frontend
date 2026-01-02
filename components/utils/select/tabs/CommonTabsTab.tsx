@@ -12,10 +12,10 @@ export default function CommonTabsTab<T, U = unknown>(
     CommonSelectItemProps<T, U> & {
       readonly onKeyDown?: (
         event: ReactKeyboardEvent<HTMLButtonElement>
-      ) => void;
-      readonly buttonRef?: (element: HTMLButtonElement | null) => void;
-      readonly disabled?: boolean;
-      readonly fill?: boolean;
+      ) => void | undefined | undefined;
+      readonly buttonRef?: (element: HTMLButtonElement | null) => void | undefined | undefined;
+      readonly disabled?: boolean | undefined;
+      readonly fill?: boolean | undefined;
     }
   >
 ) {

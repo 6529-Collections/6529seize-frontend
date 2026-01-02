@@ -34,8 +34,8 @@ export default function MediaDisplay({
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;
-  readonly disableMediaInteraction?: boolean; // Set to true in gallery context to disable all media interaction (controls and click handlers)
-  readonly imageScale?: ImageScale;
+  readonly disableMediaInteraction?: boolean | undefined; // Set to true in gallery context to disable all media interaction (controls and click handlers)
+  readonly imageScale?: ImageScale | undefined;
 }) {
   const getMediaType = (): MediaType => {
     if (media_mime_type.includes("image")) {

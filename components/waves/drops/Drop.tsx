@@ -34,8 +34,8 @@ interface DropProps {
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
-  readonly parentContainerRef?: React.RefObject<HTMLElement | null>;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void | undefined | undefined;
+  readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
 }
 
 export default function Drop({

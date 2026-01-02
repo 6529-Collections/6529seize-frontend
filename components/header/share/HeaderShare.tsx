@@ -49,7 +49,7 @@ const squareStyle = {
 export default function HeaderShare({
   isCollapsed = false,
 }: {
-  readonly isCollapsed?: boolean;
+  readonly isCollapsed?: boolean | undefined;
 }) {
   const capacitor = useCapacitor();
   const isMobileDevice = useIsMobileDevice();
@@ -391,7 +391,7 @@ function ModalMenu({
   activeSubTab,
   onTabChange,
 }: {
-  readonly isShareConnection?: boolean;
+  readonly isShareConnection?: boolean | undefined;
   readonly activeTab: Mode;
   readonly activeSubTab: SubMode;
   readonly onTabChange: (tab: Mode, subTab: SubMode) => void;
@@ -464,7 +464,7 @@ function CoreAppsDownload() {
     downloadPath: string;
     image: string;
     enabled: boolean;
-    version?: string;
+    version?: string | undefined;
   }
 
   interface FileData {

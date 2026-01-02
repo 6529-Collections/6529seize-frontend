@@ -7,9 +7,9 @@ type UserPageTabDefinition = {
   readonly id: string;
   readonly title: string;
   readonly route: string;
-  readonly metaLabel?: string;
-  readonly badge?: string;
-  readonly isVisible?: (context: UserPageVisibilityContext) => boolean;
+  readonly metaLabel?: string | undefined;
+  readonly badge?: string | undefined;
+  readonly isVisible?: (context: UserPageVisibilityContext) => boolean | undefined | undefined;
 };
 
 const TAB_DEFINITIONS = [

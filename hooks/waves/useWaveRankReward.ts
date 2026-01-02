@@ -22,7 +22,7 @@ export function useWaveRankReward({
 }: {
   waveId: string;
   rank: number | null;
-  enabled?: boolean;
+  enabled?: boolean | undefined;
 }): WaveRankRewards {
   const { outcomes, isEnabled: isOutcomesEnabled } = useWaveOutcomesQuery({
     waveId,

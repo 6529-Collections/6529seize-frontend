@@ -11,7 +11,7 @@ export default function CommonTablePagination({
   readonly setCurrentPage: (page: number) => void;
   readonly totalPages: number | null;
   readonly haveNextPage: boolean;
-  readonly loading?: boolean;
+  readonly loading?: boolean | undefined;
 }) {
   return (
     <div

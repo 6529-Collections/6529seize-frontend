@@ -9,24 +9,24 @@ const AUTH_BROADCAST_CHANNEL = "auth-token-updates";
 const AUTH_BROADCAST_MESSAGE = "auth-token-changed";
 
 type CookieChangeInfo = {
-  readonly name?: string | null;
+  readonly name?: string | null | undefined;
 };
 
 interface CookieChangeEventLike {
-  readonly changed?: CookieChangeInfo[];
-  readonly deleted?: CookieChangeInfo[];
+  readonly changed?: CookieChangeInfo[] | undefined;
+  readonly deleted?: CookieChangeInfo[] | undefined;
 }
 
 interface CookieStoreWithEvents {
   addEventListener?: (
     type: "change",
     listener: (event: CookieChangeEventLike) => void
-  ) => void;
+  ) => void | undefined | undefined;
   removeEventListener?: (
     type: "change",
     listener: (event: CookieChangeEventLike) => void
-  ) => void;
-  onchange?: ((event: CookieChangeEventLike) => void) | null;
+  ) => void | undefined | undefined;
+  onchange?: ((event: CookieChangeEventLike) => void) | null | undefined;
 }
 
 const isAuthCookieChange = (event: CookieChangeEventLike): boolean => {
@@ -100,7 +100,7 @@ export function useWebSocketHealth() {
     }
 
     const cookieStore = (window as unknown as {
-      cookieStore?: CookieStoreWithEvents;
+      cookieStore?: CookieStoreWithEvents | undefined;
     }).cookieStore;
 
     const hasCookieStoreListener = Boolean(
@@ -146,7 +146,7 @@ export function useWebSocketHealth() {
 
       if (!hasCookieStoreListener) {
         const handleMessage = (event: MessageEvent) => {
-          if ((event.data as { type?: string })?.type === AUTH_BROADCAST_MESSAGE) {
+          if ((event.data as { type?: string | undefined })?.type === AUTH_BROADCAST_MESSAGE) {
             performHealthCheck();
           }
         };

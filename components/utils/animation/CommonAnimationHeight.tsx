@@ -10,9 +10,9 @@ export default function CommonAnimationHeight({
   onAnimationStart,
 }: {
   readonly children: React.ReactNode;
-  readonly className?: string;
-  readonly onAnimationCompleted?: () => void;
-  readonly onAnimationStart?: () => void;
+  readonly className?: string | undefined;
+  readonly onAnimationCompleted?: () => void | undefined | undefined;
+  readonly onAnimationStart?: () => void | undefined | undefined;
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [height, setHeight] = useState<number | "auto">("auto");

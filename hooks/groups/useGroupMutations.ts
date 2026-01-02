@@ -15,9 +15,9 @@ import type {
 
 export interface SubmitArgs {
   readonly payload: ApiCreateGroup;
-  readonly previousGroup?: ApiGroupFull | null;
-  readonly currentHandle?: string | null;
-  readonly publish?: boolean;
+  readonly previousGroup?: ApiGroupFull | null | undefined;
+  readonly currentHandle?: string | null | undefined;
+  readonly publish?: boolean | undefined;
 }
 
 type SubmitResult =
@@ -30,7 +30,7 @@ type SubmitResult =
       readonly ok: false;
       readonly reason: "validation" | "auth" | "api" | "busy";
       readonly error: string;
-      readonly validation?: GroupValidationResult;
+      readonly validation?: GroupValidationResult | undefined;
     };
 
 interface TestArgs {
@@ -47,19 +47,19 @@ type TestResult =
       readonly ok: false;
       readonly reason: "validation" | "auth" | "api" | "busy";
       readonly error: string;
-      readonly validation?: GroupValidationResult;
+      readonly validation?: GroupValidationResult | undefined;
     };
 
 interface UseGroupMutationsArgs {
   readonly requestAuth: () => Promise<{ success: boolean }>;
-  readonly onGroupCreate?: () => void;
+  readonly onGroupCreate?: () => void | undefined | undefined;
 }
 
 interface UpdateVisibilityArgs {
   readonly groupId: string;
   readonly visible: boolean;
-  readonly oldVersionId?: string | null;
-  readonly skipAuth?: boolean;
+  readonly oldVersionId?: string | null | undefined;
+  readonly skipAuth?: boolean | undefined;
 }
 
 type UpdateVisibilityResult =
@@ -67,7 +67,7 @@ type UpdateVisibilityResult =
       readonly ok: true;
       readonly groupId: string;
       readonly visible: boolean;
-      readonly group?: ApiGroupFull;
+      readonly group?: ApiGroupFull | undefined;
     }
   | {
       readonly ok: false;
@@ -79,8 +79,8 @@ const resolveOldVersionId = ({
   previousGroup,
   currentHandle,
 }: {
-  readonly previousGroup?: ApiGroupFull | null;
-  readonly currentHandle?: string | null;
+  readonly previousGroup?: ApiGroupFull | null | undefined;
+  readonly currentHandle?: string | null | undefined;
 }): string | null => {
   if (!previousGroup?.id) {
     return null;
@@ -106,7 +106,7 @@ export const useGroupMutations = ({
       nameOverride,
     }: {
       readonly payload: ApiCreateGroup;
-      readonly nameOverride?: string;
+      readonly nameOverride?: string | undefined;
     }) => await createGroup({ payload, nameOverride }),
   });
 
@@ -130,7 +130,7 @@ export const useGroupMutations = ({
       nameOverride,
     }: {
       readonly payload: ApiCreateGroup;
-      readonly nameOverride?: string;
+      readonly nameOverride?: string | undefined;
     }) => await createGroup({ payload, nameOverride }),
   });
 

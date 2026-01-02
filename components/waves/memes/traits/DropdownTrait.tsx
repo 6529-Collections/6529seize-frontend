@@ -7,9 +7,9 @@ import { TraitWrapper } from "./TraitWrapper";
 interface DropdownTraitProps {
   readonly label: string;
   readonly field: keyof TraitsData;
-  readonly className?: string;
-  readonly error?: string | null;
-  readonly onBlur?: (field: keyof TraitsData) => void;
+  readonly className?: string | undefined;
+  readonly error?: string | null | undefined;
+  readonly onBlur?: (field: keyof TraitsData) => void | undefined | undefined;
   readonly options: readonly string[];
   readonly traits: TraitsData;
   readonly updateText: (field: keyof TraitsData, value: string) => void;

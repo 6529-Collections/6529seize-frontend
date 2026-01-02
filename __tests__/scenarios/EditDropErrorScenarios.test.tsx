@@ -109,8 +109,8 @@ describe('Edit Drop Error Scenarios', () => {
   const runErrorTests = (testCases: Array<{ 
     error: any; 
     desc: string; 
-    expectToast?: () => Promise<void>;
-    customRequest?: Partial<ApiUpdateDropRequest>;
+    expectToast?: () => Promise<void> | undefined | undefined;
+    customRequest?: Partial<ApiUpdateDropRequest> | undefined;
   }>) => {
     testCases.forEach(({ error, desc, expectToast = expectGenericErrorToast, customRequest }) => {
       it(`should handle ${desc}`, async () => {

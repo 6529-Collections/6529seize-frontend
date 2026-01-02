@@ -107,7 +107,7 @@ function SubscriptionRow(
     subscription: NFTSubscription;
     eligibilityCount: number;
     readonly: boolean;
-    minting_today?: boolean;
+    minting_today?: boolean | undefined;
     first: boolean;
     date: SeasonMintRow | null;
     refresh: () => void;

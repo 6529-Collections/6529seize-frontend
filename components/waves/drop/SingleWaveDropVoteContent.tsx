@@ -17,7 +17,7 @@ import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 interface SingleWaveDropVoteContentProps {
   readonly drop: ApiDrop;
   readonly size: SingleWaveDropVoteSize;
-  readonly onVoteSuccess?: () => void;
+  readonly onVoteSuccess?: () => void | undefined | undefined;
 }
 
 export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({

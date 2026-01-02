@@ -31,7 +31,7 @@ interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
   readonly onDropAddedToQueue: () => void;
-  readonly onAllDropsAdded?: () => void;
+  readonly onAllDropsAdded?: () => void | undefined | undefined;
   readonly wave: ApiWave;
   readonly dropId: string | null;
   readonly fixedDropMode: DropMode;

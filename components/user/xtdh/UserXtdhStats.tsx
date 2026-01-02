@@ -6,7 +6,7 @@ interface UserXtdhStatsProps {
   readonly generationRate: number;
   readonly incomingRate: number;
   readonly unusedRate: number;
-  readonly onOutboundClick?: () => void;
+  readonly onOutboundClick?: () => void | undefined | undefined;
 }
 
 export function UserXtdhStats({

@@ -17,7 +17,7 @@ type FactoryArgs = {
   subroute: string;
   metaLabel: string;
   Tab: (props: Readonly<TabProps>) => React.JSX.Element;
-  enableTransfer?: boolean;
+  enableTransfer?: boolean | undefined;
 };
 
 type UserRouteParams = { user: string };
@@ -59,9 +59,9 @@ const isNotFoundError = (error: unknown): boolean => {
 
   const status =
     typeof error === "object" && error !== null
-      ? (error as { status?: number }).status ??
-        (error as { statusCode?: number }).statusCode ??
-        (error as { response?: { status?: number } }).response?.status
+      ? (error as { status?: number | undefined }).status ??
+        (error as { statusCode?: number | undefined }).statusCode ??
+        (error as { response?: { status?: number | undefined } | undefined }).response?.status
       : undefined;
 
   if (status === 404) {
@@ -89,8 +89,8 @@ export function createUserTabPage({
     params,
     searchParams,
   }: {
-    readonly params?: Promise<UserRouteParams>;
-    readonly searchParams?: Promise<UserSearchParams>;
+    readonly params?: Promise<UserRouteParams> | undefined;
+    readonly searchParams?: Promise<UserSearchParams> | undefined;
   }) {
     const resolvedParams = params ? await params : undefined;
     if (!resolvedParams?.user) {
@@ -138,7 +138,7 @@ export function createUserTabPage({
   async function generateMetadata({
     params,
   }: {
-    readonly params?: Promise<UserRouteParams>;
+    readonly params?: Promise<UserRouteParams> | undefined;
   }): Promise<Metadata> {
     const resolvedParams = params ? await params : undefined;
     if (!resolvedParams?.user) {

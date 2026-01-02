@@ -19,12 +19,12 @@ interface TikTokCardProps {
 type TikTokCardState =
   | { status: "loading" }
   | { status: "success"; data: TikTokPreviewSuccess }
-  | { status: "unavailable"; canonicalUrl?: string };
+  | { status: "unavailable"; canonicalUrl?: string | undefined };
 
 const CAPTION_PREVIEW_LIMIT = 180;
 
 function isUnavailable(preview: TikTokPreviewResult): preview is TikTokPreviewUnavailable {
-  return (preview as { error?: string }).error === "unavailable";
+  return (preview as { error?: string | undefined }).error === "unavailable";
 }
 
 function extractUsername(url: string | null | undefined): string | null {

@@ -11,9 +11,9 @@ const DEFAULT_SANDBOX = "allow-scripts";
 export interface SandboxedExternalIframeProps {
   readonly src: string;
   readonly title: string;
-  readonly className?: string;
-  readonly fallback?: React.ReactNode;
-  readonly containerClassName?: string;
+  readonly className?: string | undefined;
+  readonly fallback?: React.ReactNode | undefined;
+  readonly containerClassName?: string | undefined;
 }
 
 /**
@@ -110,8 +110,8 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
       referrerPolicy: "no-referrer",
       loading: "lazy",
     } as React.IframeHTMLAttributes<HTMLIFrameElement> & {
-      fetchPriority?: "high" | "low" | "auto";
-      credentialless?: string;
+      fetchPriority?: "high" | "low" | "auto" | undefined;
+      credentialless?: string | undefined;
     };
 
     baseProps.fetchPriority = "low";

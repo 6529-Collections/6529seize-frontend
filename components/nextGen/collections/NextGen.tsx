@@ -161,7 +161,7 @@ export default function NextGen(props: Readonly<Props>) {
 export function DistributionLink(
   props: Readonly<{
     collection: NextGenCollection;
-    class?: string;
+    class?: string | undefined;
   }>
 ) {
   const alStatus = getStatusFromDates(

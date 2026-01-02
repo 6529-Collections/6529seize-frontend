@@ -7,7 +7,7 @@ export default function PrimaryButtonLink({
 }: {
   readonly href: string;
   readonly children: React.ReactNode;
-  readonly padding?: string;
+  readonly padding?: string | undefined;
 }) {
   return (
     <div className="tw-p-[1px] tw-w-full sm:tw-w-auto tw-flex tw-rounded-lg tw-bg-gradient-to-b tw-from-primary-400 tw-to-primary-500">

@@ -37,7 +37,7 @@ export default function CreateWave({
 }: {
   readonly profile: ApiIdentity;
   readonly onBack: () => void;
-  readonly onSuccess?: () => void;
+  readonly onSuccess?: () => void | undefined | undefined;
 }) {
   const router = useRouter();
   const { isIos, keyboardVisible } = useCapacitor();

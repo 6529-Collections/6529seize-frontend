@@ -29,7 +29,7 @@ export default function GroupCardVoteAll({
   onCancel,
 }: {
   readonly matter: ApiRateMatter;
-  readonly group?: ApiGroupFull;
+  readonly group?: ApiGroupFull | undefined;
   readonly onCancel: () => void;
 }) {
   const SUCCESS_LABEL: Record<ApiRateMatter, string> = {

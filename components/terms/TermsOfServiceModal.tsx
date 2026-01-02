@@ -11,7 +11,7 @@ interface TermsOfServiceModalProps {
   readonly onClose: () => void;
   readonly onAccept: () => void;
   readonly termsContent: string | null;
-  readonly isLoading?: boolean;
+  readonly isLoading?: boolean | undefined;
 }
 
 const TermsOfServiceModal: FC<TermsOfServiceModalProps> = ({

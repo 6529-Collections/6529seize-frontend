@@ -18,7 +18,7 @@ export default function HeaderQRScanner({
   appSidebar = false,
 }: {
   readonly onScanSuccess: () => void;
-  readonly appSidebar?: boolean;
+  readonly appSidebar?: boolean | undefined;
 }) {
   const appScheme = publicEnv.MOBILE_APP_SCHEME ?? "mobile6529";
   const baseEndpoint = publicEnv.BASE_ENDPOINT ?? "https://6529.io";
@@ -178,7 +178,7 @@ export default function HeaderQRScanner({
   );
 }
 
-function HeaderQRScannerIcon({ className }: { readonly className?: string }) {
+function HeaderQRScannerIcon({ className }: { readonly className?: string | undefined }) {
   return (
     <Image
       unoptimized

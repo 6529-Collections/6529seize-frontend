@@ -4,12 +4,12 @@ type StoreFn = <T>(
 ) => Promise<T>;
 
 type RequestLike<T = unknown> = {
-  result?: T;
-  error?: unknown;
+  result?: T | undefined;
+  error?: unknown | undefined;
   onsuccess: ((this: any, ev: Event) => any) | null;
   onerror: ((this: any, ev: Event) => any) | null;
-  oncomplete?: ((this: any, ev: Event) => any) | null;
-  onabort?: ((this: any, ev: Event) => any) | null;
+  oncomplete?: ((this: any, ev: Event) => any) | null | undefined;
+  onabort?: ((this: any, ev: Event) => any) | null | undefined;
 };
 
 function extractErrorMessage(error: unknown): string {

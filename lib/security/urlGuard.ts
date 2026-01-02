@@ -19,7 +19,7 @@ export class UrlGuardError extends Error {
   readonly kind: UrlGuardErrorKind;
   readonly statusCode: number;
 
-  constructor(message: string, kind: UrlGuardErrorKind, statusCode = 400, options?: { cause?: unknown }) {
+  constructor(message: string, kind: UrlGuardErrorKind, statusCode = 400, options?: { cause?: unknown | undefined }) {
     super(message, options);
     this.name = "UrlGuardError";
     this.kind = kind;
@@ -28,36 +28,36 @@ export class UrlGuardError extends Error {
 }
 
 export interface UrlGuardHostPolicy {
-  readonly allowedHosts?: readonly string[];
-  readonly allowedHostSuffixes?: readonly string[];
-  readonly blockedHosts?: readonly string[];
-  readonly blockedHostSuffixes?: readonly string[];
+  readonly allowedHosts?: readonly string[] | undefined;
+  readonly allowedHostSuffixes?: readonly string[] | undefined;
+  readonly blockedHosts?: readonly string[] | undefined;
+  readonly blockedHostSuffixes?: readonly string[] | undefined;
 }
 
 interface UrlGuardHooks {
-  readonly onBlockedUrl?: (details: { readonly url: URL; readonly reason: UrlGuardErrorKind; readonly message: string }) => void;
+  readonly onBlockedUrl?: (details: { readonly url: URL; readonly reason: UrlGuardErrorKind; readonly message: string }) => void | undefined | undefined;
 }
 
 export interface UrlGuardOptions {
-  readonly policy?: UrlGuardHostPolicy;
-  readonly allowIpAddresses?: boolean;
-  readonly hooks?: UrlGuardHooks;
+  readonly policy?: UrlGuardHostPolicy | undefined;
+  readonly allowIpAddresses?: boolean | undefined;
+  readonly hooks?: UrlGuardHooks | undefined;
 }
 
 interface ParsePublicUrlOptions {
-  readonly allowedProtocols?: readonly string[];
-  readonly missingUrlMessage?: string;
-  readonly invalidUrlMessage?: string;
-  readonly unsupportedProtocolMessage?: string;
+  readonly allowedProtocols?: readonly string[] | undefined;
+  readonly missingUrlMessage?: string | undefined;
+  readonly invalidUrlMessage?: string | undefined;
+  readonly unsupportedProtocolMessage?: string | undefined;
 }
 
 export interface FetchPublicUrlOptions extends UrlGuardOptions {
-  readonly maxRedirects?: number;
-  readonly timeoutMs?: number;
-  readonly redirectStatusCodes?: ReadonlySet<number>;
-  readonly userAgent?: string;
-  readonly fetchImpl?: typeof fetch;
-  readonly revalidateFinalUrl?: boolean;
+  readonly maxRedirects?: number | undefined;
+  readonly timeoutMs?: number | undefined;
+  readonly redirectStatusCodes?: ReadonlySet<number> | undefined;
+  readonly userAgent?: string | undefined;
+  readonly fetchImpl?: typeof fetch | undefined;
+  readonly revalidateFinalUrl?: boolean | undefined;
 }
 
 const DEFAULT_PROTOCOLS = ["http:", "https:"];

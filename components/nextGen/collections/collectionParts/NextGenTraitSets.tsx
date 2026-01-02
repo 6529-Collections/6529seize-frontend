@@ -47,7 +47,7 @@ const ULTIMATE = "Ultimate";
 export default function NextGenTraitSets(
   props: Readonly<{
     collection: NextGenCollection;
-    preview?: boolean;
+    preview?: boolean | undefined;
   }>
 ) {
   const [page, setPage] = useState(1);

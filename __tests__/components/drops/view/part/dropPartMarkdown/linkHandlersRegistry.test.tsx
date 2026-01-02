@@ -7,7 +7,7 @@ import { ensureStableSeizeLink } from "@/helpers/SeizeLinkParser";
 import { publicEnv } from "@/config/env";
 
 type EnsureStableSeizeLinkWithSetter = typeof ensureStableSeizeLink & {
-  __setCurrentHref?: (href?: string) => void;
+  __setCurrentHref?: (href?: string) => void | undefined | undefined;
 };
 
 jest.mock("@/components/drops/view/part/dropPartMarkdown/youtubePreview", () => ({
@@ -136,7 +136,7 @@ const onQuoteClick = jest.fn();
 const baseRenderer = () => createLinkRenderer({ onQuoteClick });
 
 type EnsureStableSeizeLinkWithSetter = typeof ensureStableSeizeLink & {
-  __setCurrentHref?: (href?: string) => void;
+  __setCurrentHref?: (href?: string) => void | undefined | undefined;
 };
 
 const setEnsureCurrentHref = (href?: string) => {

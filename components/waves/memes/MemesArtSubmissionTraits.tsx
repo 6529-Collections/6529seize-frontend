@@ -9,8 +9,8 @@ import { useAuth } from "@/components/auth/Auth";
 interface MemesArtSubmissionTraitsProps {
   readonly traits: TraitsData;
   readonly setTraits: (traits: Partial<TraitsData>) => void;
-  readonly validationErrors?: Record<keyof TraitsData, string | null>;
-  readonly onFieldBlur?: (field: keyof TraitsData) => void;
+  readonly validationErrors?: Record<keyof TraitsData, string | null> | undefined;
+  readonly onFieldBlur?: (field: keyof TraitsData) => void | undefined | undefined;
 }
 
 /**

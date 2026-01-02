@@ -19,8 +19,8 @@ const TOOLTIP_STYLES = {
 
 interface ArtistSubmissionBadgeProps {
   readonly submissionCount: number;
-  readonly onBadgeClick?: () => void;
-  readonly tooltipId?: string;
+  readonly onBadgeClick?: () => void | undefined | undefined;
+  readonly tooltipId?: string | undefined;
 }
 
 export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({

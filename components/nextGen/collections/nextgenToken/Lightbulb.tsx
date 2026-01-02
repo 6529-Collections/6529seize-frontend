@@ -4,7 +4,7 @@ export default function Lightbulb(
   props: Readonly<{
     mode: "black" | "light";
     className: string;
-    onClick?: () => void;
+    onClick?: () => void | undefined | undefined;
   }>
 ) {
   if (props.mode === "black") {

@@ -9,12 +9,12 @@ import styles from "./DatePickerModal.module.scss";
 interface Props {
   mode: "date" | "block";
   show: boolean;
-  initial_from_date?: Date;
-  initial_to_date?: Date;
-  initial_from_block?: number;
-  initial_to_block?: number;
-  onApplyDate?: (fromDate: Date, toDate: Date) => void;
-  onApplyBlock?: (fromBlock: number, toBlock: number) => void;
+  initial_from_date?: Date | undefined;
+  initial_to_date?: Date | undefined;
+  initial_from_block?: number | undefined;
+  initial_to_block?: number | undefined;
+  onApplyDate?: (fromDate: Date, toDate: Date) => void | undefined | undefined;
+  onApplyBlock?: (fromBlock: number, toBlock: number) => void | undefined | undefined;
   onHide: () => void;
 }
 

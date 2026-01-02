@@ -16,7 +16,7 @@ export default function NextGenZoomableImage(
     token: NextGenToken;
     zoom_scale: number;
     setZoomScale: (scale: number) => void;
-    is_fullscreen?: boolean;
+    is_fullscreen?: boolean | undefined;
     maintain_aspect_ratio: boolean;
     onImageLoaded: () => void;
   }>

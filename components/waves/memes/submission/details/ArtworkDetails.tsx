@@ -10,10 +10,10 @@ interface ArtworkDetailsProps {
   readonly description: string;
   readonly onTitleChange: (title: string) => void;
   readonly onDescriptionChange: (description: string) => void;
-  readonly titleError?: string | null;
-  readonly descriptionError?: string | null;
-  readonly onTitleBlur?: () => void;
-  readonly onDescriptionBlur?: () => void;
+  readonly titleError?: string | null | undefined;
+  readonly descriptionError?: string | null | undefined;
+  readonly onTitleBlur?: () => void | undefined | undefined;
+  readonly onDescriptionBlur?: () => void | undefined | undefined;
 }
 
 /**

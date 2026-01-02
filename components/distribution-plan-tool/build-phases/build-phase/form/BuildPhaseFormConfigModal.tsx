@@ -625,7 +625,7 @@ export default function BuildPhaseFormConfigModal({
         const coreParams: {
           componentId: string;
           seed: string;
-          weightType?: ComponentRandomHoldersWeightType;
+          weightType?: ComponentRandomHoldersWeightType | undefined;
         } = {
           componentId,
           seed,

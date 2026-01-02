@@ -38,7 +38,7 @@ interface MultiPartUploadParams {
   /**
    * Optional callback that receives an integer (0..100) representing % of file uploaded.
    */
-  onProgress?: (progressPercent: number) => void;
+  onProgress?: (progressPercent: number) => void | undefined | undefined;
 }
 
 /**

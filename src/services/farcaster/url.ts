@@ -17,8 +17,8 @@ interface FarcasterCastIdentifier {
   readonly type: "cast";
   readonly canonicalUrl: string;
   readonly castHash: string;
-  readonly username?: string;
-  readonly channel?: string | null;
+  readonly username?: string | undefined;
+  readonly channel?: string | null | undefined;
 }
 
 interface FarcasterProfileIdentifier {

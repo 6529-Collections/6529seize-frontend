@@ -8,7 +8,7 @@ export function usePendingGrantsCount({
   enabled = true,
 }: {
   readonly grantor: string;
-  readonly enabled?: boolean;
+  readonly enabled?: boolean | undefined;
 }) {
   const queryKey = [QueryKey.TDH_GRANTS, "pending-count", grantor];
 

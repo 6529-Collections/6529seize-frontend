@@ -184,9 +184,9 @@ export function formatWaveMessages(
   waveId: string,
   drops: ApiDrop[],
   options: {
-    isLoading?: boolean;
-    isLoadingNextPage?: boolean;
-    hasNextPage?: boolean;
+    isLoading?: boolean | undefined;
+    isLoadingNextPage?: boolean | undefined;
+    hasNextPage?: boolean | undefined;
   } = {}
 ): WaveMessagesUpdate {
   const {
@@ -228,9 +228,9 @@ export function formatWaveMessages(
 export function createEmptyWaveMessages(
   waveId: string,
   options: {
-    isLoading?: boolean;
-    isLoadingNextPage?: boolean;
-    hasNextPage?: boolean;
+    isLoading?: boolean | undefined;
+    isLoadingNextPage?: boolean | undefined;
+    hasNextPage?: boolean | undefined;
   } = {}
 ): WaveMessagesUpdate {
   const {
@@ -416,7 +416,7 @@ interface LightDropsApiParams {
   /** The ID of the wave to fetch messages for. Required by the API. */
   wave_id: string;
   /** The maximum number of items to return. API requires 1-2000. Defaults to 2000 if not specified by caller. */
-  limit?: number;
+  limit?: number | undefined;
   /** Fetch items with serial_no less than or equal to this value. For pagination. Required. */
   max_serial_no: number;
   // Add any other specific, known query parameters for /light-drops from openapi.yaml if they exist

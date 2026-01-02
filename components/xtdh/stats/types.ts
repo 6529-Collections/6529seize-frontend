@@ -12,6 +12,6 @@ export interface XtdhReceivingProps {
 
 export interface XtdhStatsProps {
   readonly metrics: XtdhMetricsProps;
-  readonly receiving?: XtdhReceivingProps;
-  readonly className?: string;
+  readonly receiving?: XtdhReceivingProps | undefined;
+  readonly className?: string | undefined;
 }

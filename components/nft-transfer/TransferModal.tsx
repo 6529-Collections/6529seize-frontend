@@ -101,8 +101,8 @@ type TxEntry = {
   originKey: string;
   label: string;
   state: TxState;
-  hash?: `0x${string}`;
-  error?: string;
+  hash?: `0x${string}` | undefined;
+  error?: string | undefined;
 };
 
 type TxItem = {
@@ -210,8 +210,8 @@ function SelectedSummaryList({
   readonly items: {
     key: string;
     qty: number;
-    title?: string;
-    thumbUrl?: string;
+    title?: string | undefined;
+    thumbUrl?: string | undefined;
   }[];
   readonly leftListRef: React.RefObject<HTMLUListElement | null>;
   readonly leftHasOverflow: boolean;
@@ -683,8 +683,8 @@ function BodyByFlow({
   readonly items: {
     key: string;
     qty: number;
-    title?: string;
-    thumbUrl?: string;
+    title?: string | undefined;
+    thumbUrl?: string | undefined;
   }[];
   readonly leftListRef: React.RefObject<HTMLUListElement | null>;
   readonly leftHasOverflow: boolean;
@@ -794,7 +794,7 @@ export default function TransferModal({
   onClose,
 }: {
   readonly open: boolean;
-  readonly onClose: (opts?: { completed?: boolean }) => void;
+  readonly onClose: (opts?: { completed?: boolean | undefined }) => void;
 }) {
   const t = useTransfer();
   const [query, setQuery] = useState("");

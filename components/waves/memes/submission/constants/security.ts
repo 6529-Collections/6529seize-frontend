@@ -231,7 +231,7 @@ export const INTERACTIVE_MEDIA_ALLOWED_CONTENT_TYPES = [
 
 export interface InteractiveMediaValidationResult {
   readonly ok: boolean;
-  readonly reason?: string;
-  readonly contentType?: string | null;
-  readonly finalUrl?: string;
+  readonly reason?: string | undefined;
+  readonly contentType?: string | null | undefined;
+  readonly finalUrl?: string | undefined;
 }

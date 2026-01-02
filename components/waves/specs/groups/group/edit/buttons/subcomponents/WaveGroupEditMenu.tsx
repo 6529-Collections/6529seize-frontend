@@ -21,7 +21,7 @@ interface WaveGroupEditMenuProps {
   readonly type: WaveGroupType;
   readonly onWaveUpdate: (
     body: ApiUpdateWaveRequest,
-    opts?: { readonly skipAuth?: boolean },
+    opts?: { readonly skipAuth?: boolean | undefined },
   ) => Promise<void>;
   readonly hasGroup: boolean;
   readonly canIncludeIdentity: boolean;
@@ -29,8 +29,8 @@ interface WaveGroupEditMenuProps {
   readonly canRemoveGroup: boolean;
   readonly onIncludeIdentity: () => void;
   readonly onExcludeIdentity: () => void;
-  readonly onChangeGroup?: () => void;
-  readonly onRemoveGroup?: () => void;
+  readonly onChangeGroup?: () => void | undefined | undefined;
+  readonly onRemoveGroup?: () => void | undefined | undefined;
 }
 
 interface WaveGroupEditMenuTriggerProps {

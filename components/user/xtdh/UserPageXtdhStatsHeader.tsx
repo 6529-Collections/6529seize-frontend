@@ -9,7 +9,7 @@ import { UserPageXtdhStatsHeaderSkeleton } from "./user-page-xtdh-stats-header/U
 
 interface UserPageXtdhStatsHeaderProps {
   readonly profileId: string | null;
-  readonly onOutboundClick?: () => void;
+  readonly onOutboundClick?: () => void | undefined | undefined;
 }
 
 export default function UserPageXtdhStatsHeader({

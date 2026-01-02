@@ -35,10 +35,10 @@ function DropListItemContentMediaImage({
   imageScale = ImageScale.AUTOx450,
 }: {
   readonly src: string;
-  readonly maxRetries?: number;
-  readonly onContainerClick?: () => void;
-  readonly isCompetitionDrop?: boolean;
-  readonly imageScale?: ImageScale;
+  readonly maxRetries?: number | undefined;
+  readonly onContainerClick?: () => void | undefined | undefined;
+  readonly isCompetitionDrop?: boolean | undefined;
+  readonly imageScale?: ImageScale | undefined;
 }) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const [loaded, setLoaded] = useState(false);

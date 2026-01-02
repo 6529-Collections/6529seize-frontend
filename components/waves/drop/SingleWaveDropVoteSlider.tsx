@@ -11,9 +11,9 @@ interface WaveDropVoteSliderProps {
   readonly minValue: number;
   readonly maxValue: number;
   readonly setVoteValue: React.Dispatch<React.SetStateAction<string | number>>;
-  readonly rank?: number | null;
+  readonly rank?: number | null | undefined;
   readonly label: string;
-  readonly size?: SingleWaveDropVoteSize;
+  readonly size?: SingleWaveDropVoteSize | undefined;
 }
 
 type ProgressBarStyle = {

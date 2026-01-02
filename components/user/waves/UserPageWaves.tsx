@@ -15,11 +15,11 @@ import CommonIntersectionElement from "@/components/utils/CommonIntersectionElem
 import WaveItem from "@/components/waves/list/WaveItem";
 import UserPageWavesSearch from "./UserPageWavesSearch";
 interface SearchWavesParams {
-  readonly author?: string;
-  readonly name?: string;
+  readonly author?: string | undefined;
+  readonly name?: string | undefined;
   readonly limit: number;
-  readonly serial_no_less_than?: number;
-  readonly group_id?: string;
+  readonly serial_no_less_than?: number | undefined;
+  readonly group_id?: string | undefined;
 }
 
 export default function UserPageWaves({

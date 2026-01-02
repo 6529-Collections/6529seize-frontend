@@ -16,14 +16,14 @@ interface TabToggleWithOverflowProps {
   readonly options: readonly TabOption[];
   readonly activeKey: string;
   readonly onSelect: (key: string) => void;
-  readonly maxVisibleTabs?: number;
-  readonly fullWidth?: boolean;
+  readonly maxVisibleTabs?: number | undefined;
+  readonly fullWidth?: boolean | undefined;
 }
 
 interface OverflowTriggerProps {
-  readonly isOpen?: boolean;
+  readonly isOpen?: boolean | undefined;
   readonly isActiveInOverflow: boolean;
-  readonly activeLabel?: string;
+  readonly activeLabel?: string | undefined;
   readonly fallbackLabel: string;
 }
 

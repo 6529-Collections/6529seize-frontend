@@ -102,14 +102,14 @@ function getZoomTitle(zoom: ZoomLevel, seasonIndex: number): string {
 // Props types
 interface MonthProps {
   readonly date: Date;
-  readonly onSelectDay?: (date: Date) => void;
-  readonly autoOpenYmd?: string;
+  readonly onSelectDay?: (date: Date) => void | undefined | undefined;
+  readonly autoOpenYmd?: string | undefined;
   readonly displayTz: DisplayTz;
 }
 interface SeasonViewProps {
   readonly seasonIndex: number;
-  readonly onSelectDay?: (date: Date) => void;
-  readonly autoOpenYmd?: string;
+  readonly onSelectDay?: (date: Date) => void | undefined | undefined;
+  readonly autoOpenYmd?: string | undefined;
   readonly displayTz: DisplayTz;
 }
 interface YearViewProps {

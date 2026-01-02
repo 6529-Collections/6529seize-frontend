@@ -14,11 +14,11 @@ interface WaveDropPartContentMarkdownProps {
   readonly part: ApiDropPart;
   readonly wave: ApiWaveMin;
   readonly onQuoteClick: (drop: ApiDrop) => void;
-  readonly isEditing?: boolean;
-  readonly isSaving?: boolean;
-  readonly onSave?: (newContent: string, mentions?: ApiDropMentionedUser[]) => void;
-  readonly onCancel?: () => void;
-  readonly drop?: ApiDrop; // Add drop to check for edited status
+  readonly isEditing?: boolean | undefined;
+  readonly isSaving?: boolean | undefined;
+  readonly onSave?: (newContent: string, mentions?: ApiDropMentionedUser[]) => void | undefined | undefined;
+  readonly onCancel?: () => void | undefined | undefined;
+  readonly drop?: ApiDrop | undefined; // Add drop to check for edited status
 }
 
 const WaveDropPartContentMarkdown: React.FC<

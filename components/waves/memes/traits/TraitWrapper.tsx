@@ -4,13 +4,13 @@ import { CheckCircleIcon } from "@heroicons/react/24/outline";
 
 interface TraitWrapperProps {
   readonly label: string;
-  readonly readOnly?: boolean;
+  readonly readOnly?: boolean | undefined;
   readonly children: React.ReactNode;
-  readonly isBoolean?: boolean;
-  readonly className?: string;
-  readonly error?: string | null;
-  readonly id?: string;
-  readonly isFieldFilled?: boolean;
+  readonly isBoolean?: boolean | undefined;
+  readonly className?: string | undefined;
+  readonly error?: string | null | undefined;
+  readonly id?: string | undefined;
+  readonly isFieldFilled?: boolean | undefined;
 }
 
 export const TraitWrapper: React.FC<TraitWrapperProps> = ({

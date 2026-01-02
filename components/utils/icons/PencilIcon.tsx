@@ -6,7 +6,7 @@ export enum PencilIconSize {
 export default function PencilIcon({
   size = PencilIconSize.MEDIUM,
 }: {
-  readonly size?: PencilIconSize;
+  readonly size?: PencilIconSize | undefined;
 }) {
   const classes: Record<PencilIconSize, string> = {
     [PencilIconSize.SMALL]: "tw-w-4 tw-h-4",

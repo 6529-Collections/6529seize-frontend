@@ -27,7 +27,7 @@ export interface CreateDropCompactHandles {
 interface CreateDropCompactProps {
   readonly waveId: string | null;
   readonly profile: ProfileMinWithoutSubs;
-  readonly showProfile?: boolean;
+  readonly showProfile?: boolean | undefined;
   readonly screenType: CreateDropScreenType;
   readonly editorState: EditorState | null;
   readonly title: string | null;
@@ -39,7 +39,7 @@ interface CreateDropCompactProps {
   readonly type: CreateDropType;
   readonly drop: CreateDropConfig | null;
   readonly showSubmit: boolean;
-  readonly showDropError?: boolean;
+  readonly showDropError?: boolean | undefined;
   readonly missingMedia: ApiWaveParticipationRequirement[];
   readonly missingMetadata: ApiWaveRequiredMetadata[];
   readonly children: React.ReactNode;
@@ -52,7 +52,7 @@ interface CreateDropCompactProps {
   readonly onReferencedNft: (newNft: ReferencedNft) => void;
   readonly onFileRemove: (file: File) => void;
   readonly setFiles: (files: File[]) => void;
-  readonly onDrop?: () => void;
+  readonly onDrop?: () => void | undefined | undefined;
   readonly onDropPart: () => void;
 }
 

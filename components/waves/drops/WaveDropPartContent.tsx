@@ -21,13 +21,13 @@ interface WaveDropPartContentProps {
   readonly activePartIndex: number;
   readonly setActivePartIndex: (index: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
-  readonly isEditing?: boolean;
-  readonly isSaving?: boolean;
-  readonly onSave?: (newContent: string) => void;
-  readonly onCancel?: () => void;
-  readonly drop?: ApiDrop;
-  readonly isCompetitionDrop?: boolean;
-  readonly mediaImageScale?: ImageScale;
+  readonly isEditing?: boolean | undefined;
+  readonly isSaving?: boolean | undefined;
+  readonly onSave?: (newContent: string) => void | undefined | undefined;
+  readonly onCancel?: () => void | undefined | undefined;
+  readonly drop?: ApiDrop | undefined;
+  readonly isCompetitionDrop?: boolean | undefined;
+  readonly mediaImageScale?: ImageScale | undefined;
 }
 
 const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({

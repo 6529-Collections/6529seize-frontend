@@ -130,10 +130,10 @@ export function printGas(
 }
 
 interface Props {
-  nft?: NFTLite;
-  nextgen_collection?: NextGenCollection;
+  nft?: NFTLite | undefined;
+  nextgen_collection?: NextGenCollection | undefined;
   tr: Transaction;
-  hideNextgenTokenId?: boolean;
+  hideNextgenTokenId?: boolean | undefined;
 }
 
 export default function LatestActivityRow(props: Readonly<Props>) {

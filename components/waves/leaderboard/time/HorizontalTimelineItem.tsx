@@ -6,7 +6,7 @@ import { Time } from "@/helpers/time";
 interface HorizontalTimelineItemProps {
   readonly decision: DecisionPoint;
   readonly isNext: boolean;
-  readonly flexGrow?: boolean;
+  readonly flexGrow?: boolean | undefined;
 }
 
 /**

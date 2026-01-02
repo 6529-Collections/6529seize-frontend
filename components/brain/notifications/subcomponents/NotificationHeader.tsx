@@ -8,7 +8,7 @@ import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 interface NotificationHeaderProps {
   readonly author: ApiProfileMin;
   readonly children: React.ReactNode; // Content AFTER the user link (e.g. "replied • 2h")
-  readonly actions?: React.ReactNode; // Follow button(s)
+  readonly actions?: React.ReactNode | undefined; // Follow button(s)
 }
 
 export default function NotificationHeader({

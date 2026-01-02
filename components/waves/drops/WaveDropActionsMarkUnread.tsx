@@ -15,8 +15,8 @@ import { Tooltip } from "react-tooltip";
 
 interface WaveDropActionsMarkUnreadProps {
   readonly drop: ApiDrop;
-  readonly isMobile?: boolean;
-  readonly onMarkUnread?: () => void;
+  readonly isMobile?: boolean | undefined;
+  readonly onMarkUnread?: () => void | undefined | undefined;
 }
 
 export default function WaveDropActionsMarkUnread({

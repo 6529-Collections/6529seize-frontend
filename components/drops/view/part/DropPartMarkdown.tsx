@@ -38,10 +38,10 @@ const headingClassName = "tw-text-iron-200 tw-break-words word-break";
 
 type MarkdownRendererProps<T extends ElementType> =
   ComponentPropsWithoutRef<T> &
-    ExtraProps & { children?: ReactNode; className?: string };
+    ExtraProps & { children?: ReactNode | undefined; className?: string | undefined };
 
 type MarkdownCodeProps = MarkdownRendererProps<"code"> & {
-  inline?: boolean;
+  inline?: boolean | undefined;
 };
 
 type MarkdownComponentsOptions = {
@@ -216,8 +216,8 @@ export interface DropPartMarkdownProps {
   readonly referencedNfts: Array<ApiDropReferencedNFT>;
   readonly partContent: string | null;
   readonly onQuoteClick: (drop: ApiDrop) => void;
-  readonly textSize?: "sm" | "md";
-  readonly currentDropId?: string;
+  readonly textSize?: "sm" | "md" | undefined;
+  readonly currentDropId?: string | undefined;
 }
 
 function DropPartMarkdown({

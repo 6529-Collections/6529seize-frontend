@@ -17,7 +17,7 @@ export default function GroupItem({
 }: {
   readonly group: ApiGroupFull;
   readonly activeGroupId: string | null;
-  readonly onActiveGroupId?: (groupId: string | null) => void;
+  readonly onActiveGroupId?: (groupId: string | null) => void | undefined | undefined;
 }) {
   const getIsActive = (): boolean =>
     !!activeGroupId && activeGroupId === group.id;

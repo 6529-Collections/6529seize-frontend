@@ -549,7 +549,7 @@ export const amIUser = ({
 }: {
   profile: ApiIdentity;
   address: string | undefined;
-  connectedHandle?: string;
+  connectedHandle?: string | undefined;
 }): boolean => {
   if (connectedHandle && profile?.handle) {
     if (connectedHandle.toLowerCase() === profile.handle.toLowerCase()) {

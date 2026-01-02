@@ -16,8 +16,8 @@ export interface GrantDetails {
   readonly floorPriceLabel: ReactNode;
   readonly tokensCountLabel: ReactNode;
   readonly tdhRateLabel: ReactNode;
-  readonly tdhRatePerTokenLabel?: ReactNode;
-  readonly tdhRatePerTokenHint?: string | null;
+  readonly tdhRatePerTokenLabel?: ReactNode | undefined;
+  readonly tdhRatePerTokenHint?: string | null | undefined;
   readonly totalGrantedLabel: ReactNode;
   readonly validFromLabel: ReactNode;
 
@@ -40,26 +40,26 @@ export interface GrantTokensDisclosureState {
   readonly contractAddress: `0x${string}` | null;
   readonly chain: SupportedChain | null;
   readonly grantId: string;
-  readonly onEndReached?: () => void;
+  readonly onEndReached?: () => void | undefined | undefined;
   readonly isFetchingNextPage: boolean;
 }
 
 export interface GrantItemContentProps {
   readonly contract: import("@/types/nft").ContractOverview;
   readonly details: GrantDetails;
-  readonly errorDetails?: string | null;
+  readonly errorDetails?: string | null | undefined;
   readonly status: import("@/generated/models/ApiXTdhGrantStatus").ApiXTdhGrantStatus;
-  readonly validFrom?: number | string | null;
-  readonly validTo?: number | string | null;
+  readonly validFrom?: number | string | null | undefined;
+  readonly validTo?: number | string | null | undefined;
 
-  readonly actions?: ReactNode;
+  readonly actions?: ReactNode | undefined;
 }
 
 export interface GrantItemErrorProps {
   readonly contractLabel: string;
   readonly details: GrantDetails;
-  readonly errorDetails?: string | null;
+  readonly errorDetails?: string | null | undefined;
   readonly status: import("@/generated/models/ApiXTdhGrantStatus").ApiXTdhGrantStatus;
-  readonly validFrom?: number | string | null;
-  readonly validTo?: number | string | null;
+  readonly validFrom?: number | string | null | undefined;
+  readonly validTo?: number | string | null | undefined;
 }

@@ -9,10 +9,10 @@ import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants";
 
 export interface ContractWalletDelegation {
   wallet: string;
-  fetched?: boolean;
-  expiry?: string;
-  all?: boolean;
-  tokens?: number;
+  fetched?: boolean | undefined;
+  expiry?: string | undefined;
+  all?: boolean | undefined;
+  tokens?: number | undefined;
 }
 
 export interface ContractDelegation {

@@ -26,9 +26,9 @@ type InteractionMode = "button" | "static";
 
 interface XtdhReceivedCollectionCardProps {
   readonly collection: ApiXtdhCollection;
-  readonly isSelected?: boolean;
-  readonly onSelect?: (contract: string | null) => void;
-  readonly interactionMode?: InteractionMode;
+  readonly isSelected?: boolean | undefined;
+  readonly onSelect?: (contract: string | null) => void | undefined | undefined;
+  readonly interactionMode?: InteractionMode | undefined;
 }
 
 export function XtdhReceivedCollectionCard({
@@ -186,7 +186,7 @@ export function CollectionMetric({
   label,
   value,
   className,
-}: Readonly<{ label: string; value: string; className?: string }>) {
+}: Readonly<{ label: string; value: string; className?: string | undefined }>) {
   return (
     <div
       className={clsx("tw-flex tw-flex-col tw-text-left", className)}

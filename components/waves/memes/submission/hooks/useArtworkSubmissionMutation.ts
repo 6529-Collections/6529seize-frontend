@@ -19,11 +19,11 @@ import type { InteractiveMediaMimeType } from "../constants/media";
  * Interface for the artwork submission data
  */
 interface ArtworkSubmissionData {
-  imageFile?: File;
+  imageFile?: File | undefined;
   externalMedia?: {
     url: string;
     mimeType: InteractiveMediaMimeType;
-  };
+  } | undefined;
   traits: TraitsData;
   waveId: string;
   termsOfService: string | null;
@@ -84,7 +84,7 @@ const transformToApiRequest = (data: {
  * Phase transition callback type
  */
 interface PhaseChangeCallbacks {
-  onPhaseChange?: (phase: SubmissionPhase, error?: string) => void;
+  onPhaseChange?: (phase: SubmissionPhase, error?: string) => void | undefined | undefined;
 }
 
 /**
@@ -123,7 +123,7 @@ export function useArtworkSubmissionMutation() {
     Error, // Error type
     {
       file: File;
-      callbacks?: PhaseChangeCallbacks;
+      callbacks?: PhaseChangeCallbacks | undefined;
     }
   >({
     mutationFn: async ({ file, callbacks }) => {
@@ -153,7 +153,7 @@ export function useArtworkSubmissionMutation() {
     Error, // Error type
     {
       data: ApiCreateDropRequest;
-      callbacks?: PhaseChangeCallbacks;
+      callbacks?: PhaseChangeCallbacks | undefined;
     }
   >({
     mutationFn: async ({ data, callbacks }) => {
@@ -201,9 +201,9 @@ export function useArtworkSubmissionMutation() {
     signerAddress: string,
     isSafeSignature: boolean,
     options?: {
-      onSuccess?: (data: ApiDrop) => void;
-      onError?: (error: Error) => void;
-      onPhaseChange?: (phase: SubmissionPhase, error?: string) => void;
+      onSuccess?: (data: ApiDrop) => void | undefined | undefined;
+      onError?: (error: Error) => void | undefined | undefined;
+      onPhaseChange?: (phase: SubmissionPhase, error?: string) => void | undefined | undefined;
     },
  
   ) => {

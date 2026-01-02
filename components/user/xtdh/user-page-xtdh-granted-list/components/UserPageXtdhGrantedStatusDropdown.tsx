@@ -21,7 +21,7 @@ interface UserPageXtdhGrantedStatusDropdownProps {
   readonly selectedStatuses: GrantedFilterStatuses;
   readonly onChange: (statuses: GrantedFilterStatuses) => void;
   readonly filterLabel: string;
-  readonly disabled?: boolean;
+  readonly disabled?: boolean | undefined;
 }
 
 export function UserPageXtdhGrantedStatusDropdown({

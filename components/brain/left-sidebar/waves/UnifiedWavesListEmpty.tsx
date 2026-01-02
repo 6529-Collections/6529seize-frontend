@@ -5,7 +5,7 @@ interface UnifiedWavesListEmptyProps {
   readonly sortedWaves: MinimalWave[];
   readonly isFetching: boolean;
   readonly isFetchingNextPage: boolean;
-  readonly emptyMessage?: string;
+  readonly emptyMessage?: string | undefined;
 }
 
 const UnifiedWavesListEmpty: React.FC<UnifiedWavesListEmptyProps> = ({

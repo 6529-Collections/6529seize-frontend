@@ -4,7 +4,7 @@ import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
 
 interface WebBrainLeftSidebarWavesProps {
   readonly scrollContainerRef: React.RefObject<HTMLElement | null>;
-  readonly isCollapsed?: boolean;
+  readonly isCollapsed?: boolean | undefined;
 }
 
 const WebBrainLeftSidebarWaves: React.FC<WebBrainLeftSidebarWavesProps> = ({

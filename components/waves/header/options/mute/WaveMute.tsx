@@ -13,7 +13,7 @@ export default function WaveMute({
   onSuccess,
 }: {
   readonly wave: ApiWave;
-  readonly onSuccess?: () => void;
+  readonly onSuccess?: () => void | undefined | undefined;
 }) {
   const queryClient = useQueryClient();
   const { setToast } = useAuth();

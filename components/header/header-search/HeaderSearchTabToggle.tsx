@@ -3,7 +3,7 @@ import React from "react";
 interface HeaderSearchTabOption {
   readonly key: string;
   readonly label: string;
-  readonly hasIndicator?: boolean;
+  readonly hasIndicator?: boolean | undefined;
   readonly panelId: string;
 }
 
@@ -11,8 +11,8 @@ interface HeaderSearchTabToggleProps {
   readonly options: readonly HeaderSearchTabOption[];
   readonly activeKey: string;
   readonly onSelect: (key: string) => void;
-  readonly fullWidth?: boolean;
-  readonly orientation?: "horizontal" | "vertical";
+  readonly fullWidth?: boolean | undefined;
+  readonly orientation?: "horizontal" | "vertical" | undefined;
 }
 
 export const HeaderSearchTabToggle: React.FC<HeaderSearchTabToggleProps> = ({

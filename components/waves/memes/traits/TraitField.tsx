@@ -12,8 +12,8 @@ interface TraitFieldProps {
   readonly updateText: (field: keyof TraitsData, value: string) => void;
   readonly updateNumber: (field: keyof TraitsData, value: number) => void;
   readonly updateBoolean: (field: keyof TraitsData, value: boolean) => void;
-  readonly error?: string | null;
-  readonly onBlur?: () => void;
+  readonly error?: string | null | undefined;
+  readonly onBlur?: () => void | undefined | undefined;
 }
 
 // Create the component

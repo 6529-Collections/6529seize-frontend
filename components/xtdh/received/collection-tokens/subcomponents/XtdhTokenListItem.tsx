@@ -11,12 +11,12 @@ import { XtdhTokenListItemThumbnail } from "./XtdhTokenListItemThumbnail";
 
 interface XtdhTokenListItemProps {
   readonly token: ApiXtdhToken;
-  readonly metadata?: TokenMetadata;
+  readonly metadata?: TokenMetadata | undefined;
   readonly isMetadataLoading: boolean;
   readonly hasMetadataError: boolean;
-  readonly onSelect?: () => void;
-  readonly as?: "li" | "div";
-  readonly className?: string;
+  readonly onSelect?: () => void | undefined | undefined;
+  readonly as?: "li" | "div" | undefined;
+  readonly className?: string | undefined;
 }
 
 export function XtdhTokenListItem({

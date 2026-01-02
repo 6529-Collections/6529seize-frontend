@@ -9,7 +9,7 @@ function MediaDisplayAudio({
   showControls = false,
 }: {
   readonly src: string;
-  readonly showControls?: boolean;
+  readonly showControls?: boolean | undefined;
 }) {
   return (
     <div className="tw-w-full tw-h-full">

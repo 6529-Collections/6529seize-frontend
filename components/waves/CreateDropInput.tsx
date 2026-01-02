@@ -99,7 +99,7 @@ const CreateDropInput = forwardRef<
     readonly isStormMode: boolean;
     readonly submitting: boolean;
     readonly isDropMode: boolean;
-    readonly onDrop?: () => void;
+    readonly onDrop?: () => void | undefined | undefined;
     readonly onEditorState: (editorState: EditorState) => void;
     readonly onReferencedNft: (referencedNft: ReferencedNft) => void;
     readonly onMentionedUser: (

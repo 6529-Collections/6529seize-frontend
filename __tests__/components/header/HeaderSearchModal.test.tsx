@@ -103,24 +103,24 @@ interface SetupOptions {
     queryKey: [QueryKey, string];
     profilesRefetch: jest.Mock<Promise<unknown>, []>;
     nftsRefetch: jest.Mock<Promise<unknown>, []>;
-    enabled?: boolean;
+    enabled?: boolean | undefined;
   }) => {
     isFetching: boolean;
     data: unknown;
-    error?: Error;
+    error?: Error | undefined;
     refetch: jest.Mock<Promise<unknown>, []>;
-  };
-  selectedCategory?: "ALL" | "PROFILES" | "NFTS" | "WAVES" | "PAGES";
+  } | undefined | undefined;
+  selectedCategory?: "ALL" | "PROFILES" | "NFTS" | "WAVES" | "PAGES" | undefined;
   wavesReturn?: {
     waves: unknown[];
     isFetching: boolean;
     error: Error | null;
     refetch: jest.Mock<Promise<unknown>, []>;
-  };
-  profilesRefetch?: jest.Mock<Promise<unknown>, []>;
-  nftsRefetch?: jest.Mock<Promise<unknown>, []>;
-  wavesRefetch?: jest.Mock<Promise<unknown>, []>;
-  sidebarSections?: typeof defaultSidebarSections;
+  } | undefined;
+  profilesRefetch?: jest.Mock<Promise<unknown>, []> | undefined;
+  nftsRefetch?: jest.Mock<Promise<unknown>, []> | undefined;
+  wavesRefetch?: jest.Mock<Promise<unknown>, []> | undefined;
+  sidebarSections?: typeof defaultSidebarSections | undefined;
 }
 
 function setup(options: SetupOptions = {}) {

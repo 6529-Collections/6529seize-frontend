@@ -48,11 +48,11 @@ function TraitAccordion(
       trait: string;
       value: string;
       score: number;
-      score_dps?: number;
+      score_dps?: number | undefined;
       rank: number;
       trait_count: number;
       value_count: number;
-    }[];
+    }[] | undefined;
   }>
 ) {
   return (
@@ -402,8 +402,8 @@ export function NextgenRarityToggle(
   props: Readonly<{
     title: string;
     show: boolean;
-    disabled?: boolean;
-    setShow?: (show: boolean) => void;
+    disabled?: boolean | undefined;
+    setShow?: (show: boolean) => void | undefined | undefined;
   }>
 ) {
   const label = props.title.replaceAll(" ", "-").toLowerCase();

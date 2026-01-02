@@ -18,7 +18,7 @@ export default function DropsListItemDeleteDropModal({
 }: {
   readonly drop: ApiDrop;
   readonly closeModal: () => void;
-  readonly onDropDeleted?: () => void;
+  readonly onDropDeleted?: () => void | undefined | undefined;
 }) {
   const { requestAuth, setToast } = useContext(AuthContext);
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);

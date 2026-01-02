@@ -32,16 +32,16 @@ interface DropPartProps {
   readonly partMedias: DropPartPropsMedia[];
   readonly createdAt: number;
   readonly wave: DropPartPropsWave | null;
-  readonly size?: DropPartSize;
-  readonly totalPartsCount?: number;
-  readonly currentPartCount?: number;
+  readonly size?: DropPartSize | undefined;
+  readonly totalPartsCount?: number | undefined;
+  readonly currentPartCount?: number | undefined;
   readonly smallMenuIsShown: boolean;
   readonly components?: {
-    readonly authorFollow?: ReactNode;
-  };
-  readonly onNextPart?: () => void;
-  readonly onPrevPart?: () => void;
-  readonly onContentClick?: () => void;
+    readonly authorFollow?: ReactNode | undefined;
+  } | undefined;
+  readonly onNextPart?: () => void | undefined | undefined;
+  readonly onPrevPart?: () => void | undefined | undefined;
+  readonly onContentClick?: () => void | undefined | undefined;
 }
 
 const DropPart = memo(

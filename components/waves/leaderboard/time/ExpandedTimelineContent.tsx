@@ -13,14 +13,14 @@ import { HorizontalTimeline } from "./HorizontalTimeline";
 interface ExpandedTimelineContentProps {
   readonly decisions: DecisionPoint[];
   readonly nextDecisionTime: number | null;
-  readonly onLoadMorePast?: () => void;
-  readonly onLoadMoreFuture?: () => void;
-  readonly hasMorePast?: boolean;
-  readonly hasMoreFuture?: boolean;
-  readonly remainingPastCount?: number | null;
-  readonly remainingFutureCount?: number | null;
-  readonly focus?: "start" | "end" | null;
-  readonly onFocusHandled?: () => void;
+  readonly onLoadMorePast?: () => void | undefined | undefined;
+  readonly onLoadMoreFuture?: () => void | undefined | undefined;
+  readonly hasMorePast?: boolean | undefined;
+  readonly hasMoreFuture?: boolean | undefined;
+  readonly remainingPastCount?: number | null | undefined;
+  readonly remainingFutureCount?: number | null | undefined;
+  readonly focus?: "start" | "end" | null | undefined;
+  readonly onFocusHandled?: () => void | undefined | undefined;
 }
 
 export const ExpandedTimelineContent: React.FC<

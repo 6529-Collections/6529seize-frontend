@@ -67,7 +67,7 @@ export async function getTokensMetadata(
         Accept: "application/json",
       },
       body: JSON.stringify(body),
-      signal,
+      ...(signal !== undefined ? { signal: signal } : {}),
     });
 
     if (!response.ok) {

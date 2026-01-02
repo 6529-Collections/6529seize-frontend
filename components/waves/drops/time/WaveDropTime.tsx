@@ -8,7 +8,7 @@ type WaveDropTimeSize = "xs" | "sm";
 
 interface WaveDropTimeProps {
   readonly timestamp: number;
-  readonly size?: WaveDropTimeSize;
+  readonly size?: WaveDropTimeSize | undefined;
 }
 
 /**

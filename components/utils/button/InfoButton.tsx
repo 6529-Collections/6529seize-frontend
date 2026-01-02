@@ -2,13 +2,13 @@ import React from "react";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 
 interface InfoButtonProps {
-  readonly loading?: boolean;
-  readonly disabled?: boolean;
-  readonly onClicked?: () => void;
+  readonly loading?: boolean | undefined;
+  readonly disabled?: boolean | undefined;
+  readonly onClicked?: () => void | undefined | undefined;
   readonly children: React.ReactNode;
-  readonly padding?: string;
-  readonly title?: string;
-  readonly variant?: "primary" | "info" | "muted";
+  readonly padding?: string | undefined;
+  readonly title?: string | undefined;
+  readonly variant?: "primary" | "info" | "muted" | undefined;
 }
 
 /**

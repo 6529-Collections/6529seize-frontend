@@ -28,7 +28,7 @@ import WalletCheckerComponent from "./walletChecker/WalletChecker";
 
 interface Props {
   section: DelegationCenterSection;
-  path?: string[];
+  path?: string[] | undefined;
   setActiveSection(section: DelegationCenterSection): any;
   address_query: string;
   setAddressQuery(address: string): any;
@@ -447,7 +447,7 @@ function GithubLink() {
 export function DelegationToast(
   props: Readonly<{
     toastRef: React.RefObject<HTMLDivElement | null>;
-    toast: { title: string; message?: string };
+    toast: { title: string; message?: string | undefined };
     showToast: boolean;
     setShowToast: (show: boolean) => void;
   }>

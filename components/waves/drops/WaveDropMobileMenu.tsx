@@ -26,10 +26,10 @@ interface WaveDropMobileMenuProps {
   readonly onReply: () => void;
   readonly onQuote: () => void;
   readonly onAddReaction: () => void;
-  readonly onEdit?: () => void;
-  readonly showOpenOption?: boolean;
-  readonly showCopyOption?: boolean;
-  readonly showFollowOption?: boolean;
+  readonly onEdit?: () => void | undefined | undefined;
+  readonly showOpenOption?: boolean | undefined;
+  readonly showCopyOption?: boolean | undefined;
+  readonly showFollowOption?: boolean | undefined;
 }
 
 const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
@@ -67,7 +67,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
 
     const waveDetails =
       (drop.wave as unknown as {
-        chat?: { scope?: { group?: { is_direct_message?: boolean } } };
+        chat?: { scope?: { group?: { is_direct_message?: boolean | undefined } | undefined } | undefined } | undefined;
       }) ?? undefined;
     const isDirectMessage =
       waveDetails?.chat?.scope?.group?.is_direct_message ?? false;

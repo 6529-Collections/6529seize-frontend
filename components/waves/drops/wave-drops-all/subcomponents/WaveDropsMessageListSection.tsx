@@ -38,11 +38,11 @@ interface WaveDropsMessageListSectionProps {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly isAtBottom: boolean;
   readonly scrollToBottom: () => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void | undefined | undefined;
   readonly pendingCount: number;
   readonly onRevealPending: () => void;
-  readonly bottomPaddingClassName?: string;
-  readonly unreadDividerSerialNo?: number | null;
+  readonly bottomPaddingClassName?: string | undefined;
+  readonly unreadDividerSerialNo?: number | null | undefined;
 }
 
 const MIN_DROPS_FOR_PAGINATION = 25;

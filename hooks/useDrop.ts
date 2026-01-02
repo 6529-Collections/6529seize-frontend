@@ -8,8 +8,8 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 interface UseDropProps {
   readonly dropId: string;
-  readonly initialDrop?: ApiDrop;
-  readonly enabled?: boolean;
+  readonly initialDrop?: ApiDrop | undefined;
+  readonly enabled?: boolean | undefined;
 }
 
 const getDropQueryKey = (dropId: string) => [

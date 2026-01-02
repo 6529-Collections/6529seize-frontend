@@ -13,7 +13,7 @@ interface FileWithSource {
   file: File;
   source: FileSource;
   label: string | null;
-  partIndex?: number;
+  partIndex?: number | undefined;
 }
 
 interface CreateDropContentFilesProps {

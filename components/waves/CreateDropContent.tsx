@@ -321,7 +321,7 @@ const getOptimisticDrop = (
     voting: {
       authenticated_user_eligible: boolean;
       credit_type: ApiWaveCreditType;
-      period?: { min: number | null; max: number | null };
+      period?: { min: number | null; max: number | null } | undefined;
       forbid_negative_votes: boolean;
     };
     chat: { authenticated_user_eligible: boolean };
@@ -766,7 +766,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       // Define callback for when signing completes
       const handleSigningComplete = (result: {
         success: boolean;
-        signature?: string;
+        signature?: string | undefined;
       }) => {
         if (!result.success || !result.signature) {
           resolve(null);

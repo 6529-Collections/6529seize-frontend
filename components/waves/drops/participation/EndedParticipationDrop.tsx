@@ -29,8 +29,8 @@ interface EndedParticipationDropProps {
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
-  readonly parentContainerRef?: React.RefObject<HTMLElement | null>;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void | undefined | undefined;
+  readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
 }
 
 export default function EndedParticipationDrop({
@@ -138,7 +138,7 @@ export default function EndedParticipationDrop({
 
             {showWaveInfo && (() => {
               const waveMeta = (drop.wave as unknown as {
-                chat?: { scope?: { group?: { is_direct_message?: boolean } } };
+                chat?: { scope?: { group?: { is_direct_message?: boolean | undefined } | undefined } | undefined } | undefined;
               })?.chat;
               const isDirectMessage = waveMeta?.scope?.group?.is_direct_message ?? false;
               const waveHref = getWaveRoute({

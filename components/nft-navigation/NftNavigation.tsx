@@ -15,8 +15,8 @@ export default function NftNavigation(
     path: string;
     startIndex: number;
     endIndex: number;
-    fullscreenElementId?: string;
-    params?: ReadonlyURLSearchParams;
+    fullscreenElementId?: string | undefined;
+    params?: ReadonlyURLSearchParams | undefined;
   }>
 ) {
   const isFirst = props.nftId === props.startIndex;

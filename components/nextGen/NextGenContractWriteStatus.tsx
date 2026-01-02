@@ -13,10 +13,10 @@ const TRANSFER_EVENT =
   "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 
 interface Props {
-  hash?: `0x${string}`;
+  hash?: `0x${string}` | undefined;
   isLoading: boolean;
   error: any;
-  onSuccess?: () => void;
+  onSuccess?: () => void | undefined | undefined;
 }
 
 export default function NextGenContractWriteStatus(props: Readonly<Props>) {

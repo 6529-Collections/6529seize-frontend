@@ -20,7 +20,7 @@ export function AutomaticAirdropsModal(
     plan: AllowlistDescription;
     show: boolean;
     handleClose(): void;
-    confirmedTokenId?: string | null;
+    confirmedTokenId?: string | null | undefined;
     onUpload(contract: string, tokenId: string, csvContent: string): void;
   }>
 ) {

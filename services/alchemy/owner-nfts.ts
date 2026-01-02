@@ -60,7 +60,7 @@ async function fetchLegacyUrl<T>(
   url: string,
   signal?: AbortSignal
 ): Promise<T> {
-  const response = await fetch(url, { ...legacyOptions, signal });
+  const response = await fetch(url, { ...legacyOptions, ...(signal !== undefined ? { signal: signal } : {}) });
   return (await response.json()) as T;
 }
 

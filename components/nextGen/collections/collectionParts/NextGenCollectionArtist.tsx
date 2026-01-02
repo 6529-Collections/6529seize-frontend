@@ -13,7 +13,7 @@ import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
 
 interface Props {
   collection: NextGenCollection;
-  link_collections?: NextGenCollection[];
+  link_collections?: NextGenCollection[] | undefined;
 }
 
 export default function NextGenCollectionArtist(props: Readonly<Props>) {

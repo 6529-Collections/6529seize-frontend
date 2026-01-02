@@ -21,7 +21,7 @@ describe("ArtBlocksTokenCard", () => {
 
   beforeEach(() => {
     mockFetchMeta.mockReset();
-    (window as unknown as { awsRum?: { recordEvent?: jest.Mock } }).awsRum = {
+    (window as unknown as { awsRum?: { recordEvent?: jest.Mock | undefined } | undefined }).awsRum = {
       recordEvent: jest.fn(),
     };
   });
@@ -132,7 +132,7 @@ describe("ArtBlocksTokenCard", () => {
     );
     expect(openButton).toHaveFocus();
 
-    const recordEvent = (window as { awsRum?: { recordEvent?: jest.Mock } })
+    const recordEvent = (window as { awsRum?: { recordEvent?: jest.Mock | undefined } | undefined })
       .awsRum?.recordEvent as jest.Mock;
     expect(recordEvent).toHaveBeenCalledWith(
       "ab_card_link_out",

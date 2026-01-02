@@ -15,19 +15,19 @@ import { TraitScore } from "./NextGenTokenAbout";
 export function NextGenTokenImage(
   props: Readonly<{
     token: NextGenToken;
-    hide_link?: boolean;
-    hide_info?: boolean;
-    info_class?: string;
-    show_animation?: boolean;
-    show_original?: boolean;
-    token_art?: boolean;
-    is_fullscreen?: boolean;
-    rarity_type?: NextGenTokenRarityType;
-    show_listing?: boolean;
-    show_max_sale?: boolean;
-    show_last_sale?: boolean;
-    show_owner_info?: boolean;
-    is_zoom?: boolean;
+    hide_link?: boolean | undefined;
+    hide_info?: boolean | undefined;
+    info_class?: string | undefined;
+    show_animation?: boolean | undefined;
+    show_original?: boolean | undefined;
+    token_art?: boolean | undefined;
+    is_fullscreen?: boolean | undefined;
+    rarity_type?: NextGenTokenRarityType | undefined;
+    show_listing?: boolean | undefined;
+    show_max_sale?: boolean | undefined;
+    show_last_sale?: boolean | undefined;
+    show_owner_info?: boolean | undefined;
+    is_zoom?: boolean | undefined;
   }>
 ) {
   const isMobileScreen = useIsMobileScreen();

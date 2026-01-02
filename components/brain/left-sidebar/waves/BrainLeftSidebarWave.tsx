@@ -21,8 +21,8 @@ import BrainLeftSidebarWavePin from "./BrainLeftSidebarWavePin";
 interface BrainLeftSidebarWaveProps {
   readonly wave: MinimalWave;
   readonly onHover: (waveId: string) => void;
-  readonly showPin?: boolean;
-  readonly isDirectMessage?: boolean;
+  readonly showPin?: boolean | undefined;
+  readonly isDirectMessage?: boolean | undefined;
 }
 
 const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({

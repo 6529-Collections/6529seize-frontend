@@ -19,9 +19,9 @@ export default function CommonProfileSearchItems({
   readonly selected: string | null;
   readonly searchCriteria: string | null;
   readonly onProfileSelect: (newV: CommunityMemberMinimal | null) => void;
-  readonly highlightedIndex?: number | null;
-  readonly onHighlightedOptionIdChange?: (optionId: string | undefined) => void;
-  readonly listboxId?: string;
+  readonly highlightedIndex?: number | null | undefined;
+  readonly onHighlightedOptionIdChange?: (optionId: string | undefined) => void | undefined | undefined;
+  readonly listboxId?: string | undefined;
 }) {
   const generatedListboxId = useId();
   const resolvedListboxId = listboxId ?? generatedListboxId;

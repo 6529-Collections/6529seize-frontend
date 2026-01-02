@@ -49,7 +49,7 @@ export default function ParticipationDropHeader({
       </div>
       {showWaveInfo && drop.wave && (() => {
         const waveMeta = (drop.wave as unknown as {
-          chat?: { scope?: { group?: { is_direct_message?: boolean } } };
+          chat?: { scope?: { group?: { is_direct_message?: boolean | undefined } | undefined } | undefined } | undefined;
         })?.chat;
         const isDirectMessage = waveMeta?.scope?.group?.is_direct_message ?? false;
         const waveHref = getWaveRoute({

@@ -16,14 +16,14 @@ interface NftPickerSearchProps {
   variant: "card" | "flat";
   inputRef: RefObject<HTMLInputElement | null>;
   collectionInputId: string;
-  activeSuggestionId?: string;
+  activeSuggestionId?: string | undefined;
   onInputChange: (event: ChangeEvent<HTMLInputElement>) => void;
   onInputKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void;
   onInputFocus: () => void;
   onToggleSpam: () => void;
   onHoverSuggestion: (index: number) => void;
   onSelectSuggestion: (suggestion: Suggestion) => void;
-  loading?: boolean;
+  loading?: boolean | undefined;
 }
 
 export function NftPickerSearch({

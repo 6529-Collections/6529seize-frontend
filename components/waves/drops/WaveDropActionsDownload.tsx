@@ -9,9 +9,9 @@ interface Props {
   href: string;
   name: string;
   extension: string;
-  showProgress?: boolean;
-  className?: string;
-  tooltipId?: string;
+  showProgress?: boolean | undefined;
+  className?: string | undefined;
+  tooltipId?: string | undefined;
 }
 
 export default function WaveDropActionsDownload(props: Readonly<Props>) {

@@ -6,7 +6,7 @@ type ButtonRef = React.Ref<HTMLButtonElement>;
 
 interface AllTokensSelectedCardProps {
     readonly onDeselect: () => void;
-    readonly buttonRef?: ButtonRef;
+    readonly buttonRef?: ButtonRef | undefined;
 }
 
 export function AllTokensSelectedCard({

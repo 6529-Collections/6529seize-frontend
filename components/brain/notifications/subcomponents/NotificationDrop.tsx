@@ -15,7 +15,7 @@ interface NotificationDropProps {
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (quote: ApiDrop) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void | undefined | undefined;
 }
 
 export default function NotificationDrop({

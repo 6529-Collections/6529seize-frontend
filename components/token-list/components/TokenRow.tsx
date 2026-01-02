@@ -6,10 +6,10 @@ import { TokenThumbnail } from "./TokenThumbnail";
 
 type TokenRowProps = Readonly<{
   token: TokenWindowEntry;
-  metadata?: TokenMetadata;
-  rowClassName?: string;
-  renderTokenExtra?: (tokenId: bigint, metadata?: TokenMetadata) => ReactNode;
-  action?: TokenListAction;
+  metadata?: TokenMetadata | undefined;
+  rowClassName?: string | undefined;
+  renderTokenExtra?: (tokenId: bigint, metadata?: TokenMetadata) => ReactNode | undefined | undefined;
+  action?: TokenListAction | undefined;
   isMetadataLoading: boolean;
   hasMetadataError: boolean;
   positionStyle: CSSProperties;

@@ -10,11 +10,11 @@ type TextTraitProps = {
   readonly field: keyof TraitsData;
   readonly traits: TraitsData;
   readonly updateText: (field: keyof TraitsData, value: string) => void;
-  readonly readOnly?: boolean;
-  readonly placeholder?: string;
-  readonly className?: string;
-  readonly error?: string | null;
-  readonly onBlur?: (field: keyof TraitsData) => void;
+  readonly readOnly?: boolean | undefined;
+  readonly placeholder?: string | undefined;
+  readonly className?: string | undefined;
+  readonly error?: string | null | undefined;
+  readonly onBlur?: (field: keyof TraitsData) => void | undefined | undefined;
 };
 
 /**

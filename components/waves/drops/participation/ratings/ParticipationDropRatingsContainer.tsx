@@ -7,7 +7,7 @@ import ParticipationDropRatingsUserSection from "./ParticipationDropRatingsUserS
 
 interface ParticipationDropRatingsContainerProps {
   readonly drop: ApiDrop;
-  readonly rank?: number | null;
+  readonly rank?: number | null | undefined;
 }
 
 export default function ParticipationDropRatingsContainer({

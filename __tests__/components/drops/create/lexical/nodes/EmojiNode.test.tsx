@@ -4,7 +4,7 @@ import { EmojiNode } from '@/components/drops/create/lexical/nodes/EmojiNode';
 
 jest.mock('lexical', () => ({
   DecoratorNode: class MockDecoratorNode {
-    __key?: string;
+    __key?: string | undefined;
     constructor(key?: string) {
       this.__key = key;
     }
