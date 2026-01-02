@@ -125,7 +125,7 @@ function AppWalletImportMnemonic() {
             md={3}
             className="pt-2 pb-2"
             key={getRandomObjectId()}>
-            <Container className={`${styles.phrase}`}>
+            <Container className={`${styles["phrase"]}`}>
               <Row>
                 <Col className="d-flex gap-2">
                   <span className="font-color-h font-lighter">{i + 1}</span>
@@ -135,7 +135,7 @@ function AppWalletImportMnemonic() {
                       type="text"
                       placeholder={`word ${i + 1}`}
                       value={w}
-                      className={styles.importWalletWordInput}
+                      className={styles["importWalletWordInput"]}
                       onChange={(e) => {
                         const newPhrase = e.target.value;
                         if (/^[a-z]*$/.test(newPhrase)) {
@@ -221,7 +221,7 @@ function AppWalletImportPrivateKey() {
     <Container className="pt-3 pb-5">
       <Row>
         <Col className="pt-2 pb-2">
-          <Container className={`${styles.phrase}`}>
+          <Container className={`${styles["phrase"]}`}>
             <Row>
               <Col className="d-flex gap-2">
                 <input
@@ -231,7 +231,7 @@ function AppWalletImportPrivateKey() {
                   type="text"
                   placeholder="private key"
                   value={privateKey}
-                  className={styles.importWalletWordInput}
+                  className={styles["importWalletWordInput"]}
                   onChange={(e) => setPrivateKey(e.target.value)}
                 />
               </Col>

@@ -431,7 +431,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
               <Form.Label column sm={12} className="d-flex align-items-center">
                 Mint To
                 <FontAwesomeIcon
-                  className={styles.infoIcon}
+                  className={styles["infoIcon"]}
                   icon={faInfoCircle}
                   data-tooltip-id={`mint-to-info-${props.collection.id}`}></FontAwesomeIcon>
                 <Tooltip
@@ -446,7 +446,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
               </Form.Label>
               <Col sm={12}>
                 <Form.Control
-                  className={`${styles.formInput} ${styles.formInputDisabled}`}
+                  className={`${styles["formInput"]} ${styles["formInputDisabled"]}`}
                   type="text"
                   placeholder="0x..."
                   disabled={!isConnected || disableMint()}
@@ -511,7 +511,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
               <Form.Label className="d-flex align-items-center">
                 Mint Count
                 <FontAwesomeIcon
-                  className={styles.infoIcon}
+                  className={styles["infoIcon"]}
                   icon={faInfoCircle}
                   data-tooltip-id={`mint-count-info-${props.collection.id}`}></FontAwesomeIcon>
                 <Tooltip
@@ -526,7 +526,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
               </Form.Label>
               <Col xs={3}>
                 <Form.Select
-                  className={styles.mintSelect}
+                  className={styles["mintSelect"]}
                   value={mintCount}
                   disabled={
                     !isConnected ||
@@ -547,7 +547,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
               </Col>
               <Col xs={9}>
                 <Button
-                  className={styles.mintBtn}
+                  className={styles["mintBtn"]}
                   disabled={disableMint()}
                   onClick={handleMintClick}>
                   {renderButtonText()}

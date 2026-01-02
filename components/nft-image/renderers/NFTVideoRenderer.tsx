@@ -8,7 +8,7 @@ import { BaseRendererProps } from "../types/renderer-props";
 export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
   return (
     <Col
-      className={`${styles.nftAnimation} ${props.heightStyle} ${props.bgStyle} d-flex justify-content-center align-items-center`}>
+      className={`${styles["nftAnimation"]} ${props.heightStyle} ${props.bgStyle} d-flex justify-content-center align-items-center`}>
       {props.showBalance && (
         <NFTImageBalance
           contract={props.nft.contract}

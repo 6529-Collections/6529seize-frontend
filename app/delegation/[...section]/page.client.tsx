@@ -97,7 +97,7 @@ export default function DelegationPageClient(props: {
   }, [addressQuery, collectionQuery, useCaseQuery]);
 
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <DelegationCenterMenu
         section={section}
         path={props.path}

@@ -207,7 +207,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
               />
               <Col sm={9}>
                 <Form.Select
-                  className={`${styles.formInput}`}
+                  className={`${styles["formInput"]}`}
                   value={newDelegationUseCase}
                   onChange={(e) => {
                     const newCase = parseInt(e.target.value);
@@ -240,7 +240,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
               <Col sm={9}>
                 <Form.Check
                   checked={!showExpiryCalendar}
-                  className={styles.newDelegationFormToggle}
+                  className={styles["newDelegationFormToggle"]}
                   type="radio"
                   label="Never"
                   name="expiryRadio"
@@ -249,7 +249,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
                 &nbsp;&nbsp;
                 <Form.Check
                   checked={showExpiryCalendar}
-                  className={styles.newDelegationFormToggle}
+                  className={styles["newDelegationFormToggle"]}
                   type="radio"
                   label="Select Date"
                   name="expiryRadio"
@@ -270,7 +270,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
               <Col sm={9}>
                 <Form.Check
                   checked={!showTokensInput}
-                  className={styles.newDelegationFormToggle}
+                  className={styles["newDelegationFormToggle"]}
                   type="radio"
                   label="All&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
                   name="tokenIdRadio"
@@ -279,7 +279,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
                 &nbsp;&nbsp;
                 <Form.Check
                   checked={showTokensInput}
-                  className={styles.newDelegationFormToggle}
+                  className={styles["newDelegationFormToggle"]}
                   type="radio"
                   label="Select Token ID"
                   name="tokenIdRadio"
@@ -301,7 +301,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
                   target="_blank"
                   rel="noopener noreferrer">
                   <FontAwesomeIcon
-                    className={styles.infoIconLink}
+                    className={styles["infoIconLink"]}
                     icon={faInfoCircle}></FontAwesomeIcon>
                 </Link>
               </Form.Label>

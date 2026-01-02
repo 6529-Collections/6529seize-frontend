@@ -190,7 +190,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
           <Col>
             <span
               ref={descriptionRef}
-              className={descriptionClamped ? styles.descriptionClamped : ""}
+              className={descriptionClamped ? styles["descriptionClamped"] : ""}
               dangerouslySetInnerHTML={{
                 __html: parseNftDescriptionToHtml(
                   i.publicData.asset.description
@@ -241,7 +241,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
             </Col>
             <Col xs={12}>{printDescription(instance)}</Col>
             <Col xs={12} className="pt-3">
-              <Table className={styles.spotsTable}>
+              <Table className={styles["spotsTable"]}>
                 <tbody>
                   <tr>
                     <td className="pt-2">Edition Size</td>
@@ -385,7 +385,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
       <hr />
       <Row className="pb-2">
         <Col sm={12} md={6} className="pt-1 pb-1">
-          <Table className={styles.spotsTable}>
+          <Table className={styles["spotsTable"]}>
             <tbody>
               {artist && (
                 <tr>
@@ -441,7 +441,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
           </Table>
         </Col>
         <Col sm={12} md={6} className="pt-1 pb-1">
-          <Table className={styles.spotsTable}>
+          <Table className={styles["spotsTable"]}>
             <tbody>
               <tr>
                 <td className="pt-2">Phase</td>
@@ -626,8 +626,8 @@ function ManifoldMemesMintingPhase(
         className={
           props.claim.memePhase?.id === props.phase.id &&
           !props.claim.isFinalized
-            ? styles.phaseBoxActive
-            : styles.phaseBox
+            ? styles["phaseBoxActive"]
+            : styles["phaseBox"]
         }>
         <Row>
           <Col xs={12} className="font-bolder font-larger text-center pb-2">

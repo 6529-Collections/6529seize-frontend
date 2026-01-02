@@ -21,7 +21,7 @@ export default function CollectionPageShell({
   return (
     <>
       <NextGenCollectionHead collection={collection} />
-      <main className={styles.main}>
+      <main className={styles["main"]}>
         {withNav && <NextGenNavigationHeader />}
         {children}
       </main>

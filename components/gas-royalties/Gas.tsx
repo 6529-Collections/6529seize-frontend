@@ -126,10 +126,10 @@ export default function GasComponent() {
         {...getSharedProps()}
       />
       <Container className={`no-padding pt-4`}>
-        <Row className={`pt-3 ${styles.scrollContainer}`}>
+        <Row className={`pt-3 ${styles["scrollContainer"]}`}>
           <Col>
             {gas.length > 0 && (
-              <Table bordered={false} className={styles.gasTable}>
+              <Table bordered={false} className={styles["gasTable"]}>
                 <thead>
                   <tr>
                     <th>Meme Card (x{gas.length})</th>

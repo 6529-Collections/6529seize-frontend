@@ -144,22 +144,22 @@ const LFGSlideshow: React.FC<{
   }
 
   return (
-    <div className={styles.slideshowContainer}>
-      <span className={styles.slideButtons}>
+    <div className={styles["slideshowContainer"]}>
+      <span className={styles["slideButtons"]}>
         {fullScreenSupported() && (
           <FontAwesomeIcon
             icon={faExpand}
-            className={styles.slideButton}
+            className={styles["slideButton"]}
             onClick={() => enterArtFullScreen(SLIDESHOW_ID)}
           />
         )}
         <FontAwesomeIcon
           icon={faXmarkCircle}
-          className={styles.slideButton}
+          className={styles["slideButton"]}
           onClick={toggleSlideshow}
         />
       </span>
-      <div className={styles.slide} id={SLIDESHOW_ID}>
+      <div className={styles["slide"]} id={SLIDESHOW_ID}>
         {isVideo(media[currentIndex].animation) ? (
           <video
             id={VIDEO_ID}
@@ -192,7 +192,7 @@ export const LFGButton: React.FC<{
       <LFGSlideshow contract={contract} isOpen={isOpen} setIsOpen={setIsOpen} />
       <Button
         onClick={() => setIsOpen(true)}
-        className={`${styles.lfgButton} no-wrap`}>
+        className={`${styles["lfgButton"]} no-wrap`}>
         LFG: Start the Show!
       </Button>
     </>

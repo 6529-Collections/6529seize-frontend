@@ -33,7 +33,7 @@ export default function DownloadUrlWidget(props: Readonly<Props>) {
 
   return (
     <button
-      className={styles.downloadUrlWidget}
+      className={styles["downloadUrlWidget"]}
       onClick={() => {
         startDownload();
       }}

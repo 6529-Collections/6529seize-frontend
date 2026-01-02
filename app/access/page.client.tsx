@@ -55,9 +55,9 @@ export default function AccessPage() {
   }
 
   return (
-    <main className={styles.login}>
+    <main className={styles["login"]}>
       {image && <LoginImage image={image} alt="access" />}
-      <div className={styles.loginPrompt}>
+      <div className={styles["loginPrompt"]}>
         <input
           disabled={inputDisabled}
           type="text"
@@ -89,7 +89,7 @@ export function LoginImage(props: Readonly<{ image: string; alt: string }>) {
         maxHeight: "100%",
       }}
       src={props.image}
-      className={styles.loginImage}
+      className={styles["loginImage"]}
       alt={props.alt}
     />
   );

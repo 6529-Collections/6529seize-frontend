@@ -77,13 +77,13 @@ export function MemePageArt(props: {
           <Row className="position-relative">
             {props.nft.animation || props.nft.metadata.animation ? (
               <>
-                <Col xs={12} className={styles.artHeader}>
-                  <div className={styles.artHeaderContent}>
-                    <div className={styles.artFormatLabel}>{currentFormat}</div>
+                <Col xs={12} className={styles["artHeader"]}>
+                  <div className={styles["artHeaderContent"]}>
+                    <div className={styles["artFormatLabel"]}>{currentFormat}</div>
                     {isFullScreenSupported && (
                       <FontAwesomeIcon
                         icon={faExpandAlt}
-                        className={styles.fullScreen}
+                        className={styles["fullScreen"]}
                         onClick={() =>
                           fullscreenElementId &&
                           enterArtFullScreen(fullscreenElementId)
@@ -93,7 +93,7 @@ export function MemePageArt(props: {
                   </div>
                 </Col>
                 <Carousel
-                  className={styles.memesCarousel}
+                  className={styles["memesCarousel"]}
                   interval={null}
                   indicators={false}
                   wrap={false}
@@ -124,13 +124,13 @@ export function MemePageArt(props: {
               </>
             ) : (
               <>
-                <Col xs={12} className={styles.artHeader}>
-                  <div className={styles.artHeaderContent}>
-                    <div className={styles.artFormatLabel}>{currentFormat}</div>
+                <Col xs={12} className={styles["artHeader"]}>
+                  <div className={styles["artHeaderContent"]}>
+                    <div className={styles["artFormatLabel"]}>{currentFormat}</div>
                     {isFullScreenSupported && (
                       <FontAwesomeIcon
                         icon={faExpandAlt}
-                        className={styles.fullScreen}
+                        className={styles["fullScreen"]}
                         onClick={() =>
                           fullscreenElementId &&
                           enterArtFullScreen(fullscreenElementId)
@@ -167,7 +167,7 @@ export function MemePageArt(props: {
                       <Col className="tw-flex tw-items-center tw-gap-1">
                         <span>{props.nft.metadata.image_details.format}</span>
                         <Link
-                          className={styles.arweaveLink}
+                          className={styles["arweaveLink"]}
                           href={props.nft.metadata.image}
                           target="_blank"
                           rel="noopener noreferrer">
@@ -188,7 +188,7 @@ export function MemePageArt(props: {
                             {props.nft.metadata.animation_details.format}
                           </span>
                           <Link
-                            className={styles.arweaveLink}
+                            className={styles["arweaveLink"]}
                             href={
                               props.nft.metadata.animation
                                 ? props.nft.metadata.animation
@@ -305,7 +305,7 @@ export function MemePageArt(props: {
                             ? undefined
                             : "noopener noreferrer"
                         }
-                        className={styles.distributionPlanLink}>
+                        className={styles["distributionPlanLink"]}>
                         Distribution Plan
                       </Link>
                     </Col>

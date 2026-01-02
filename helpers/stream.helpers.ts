@@ -102,7 +102,7 @@ const prefetchAuthenticatedWaves = async ({
       };
 
       if (pageParam) {
-        queryParams.serial_no_less_than = `${pageParam}`;
+        queryParams["serial_no_less_than"] = `${pageParam}`;
       }
       return await commonApiFetch<ApiWave[]>({
         endpoint: `waves`,
@@ -141,7 +141,7 @@ const prefetchAuthenticatedWaveFeedItems = async ({
       };
 
       if (pageParam) {
-        params.serial_no_less_than = `${pageParam}`;
+        params["serial_no_less_than"] = `${pageParam}`;
       }
       return await commonApiFetch<ApiWaveDropsFeed>({
         endpoint: `waves/${waveId}/drops`,
@@ -168,7 +168,7 @@ const prefetchAuthenticatedGlobalFeedItems = async ({
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const params: Record<string, string> = {};
       if (pageParam) {
-        params.serial_no_less_than = `${pageParam}`;
+        params["serial_no_less_than"] = `${pageParam}`;
       }
       return await commonApiFetch<TypedFeedItem[]>({
         endpoint: `feed/`,
@@ -303,7 +303,7 @@ const prefetchAuthenticatedNotificationsItems = async ({
         limit: "10",
       };
       if (pageParam) {
-        params.id_less_than = `${pageParam}`;
+        params["id_less_than"] = `${pageParam}`;
       }
       return await commonApiFetch<TypedNotificationsResponse>({
         endpoint: `notifications`,

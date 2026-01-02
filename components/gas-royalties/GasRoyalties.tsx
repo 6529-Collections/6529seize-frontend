@@ -151,8 +151,8 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
               <span
                 className={`font-larger font-bolder font-color-h ${
                   props.focus === GasRoyaltiesCollectionFocus.MEMES
-                    ? styles.collectionFocusActive
-                    : styles.collectionFocus
+                    ? styles["collectionFocusActive"]
+                    : styles["collectionFocus"]
                 }`}
                 onClick={() => {
                   router.push(
@@ -172,8 +172,8 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
               <span
                 className={`font-larger font-bolder font-color-h ${
                   props.focus === GasRoyaltiesCollectionFocus.MEMELAB
-                    ? styles.collectionFocusActive
-                    : styles.collectionFocus
+                    ? styles["collectionFocusActive"]
+                    : styles["collectionFocus"]
                 }`}
                 onClick={() =>
                   router.push(
@@ -210,7 +210,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
               )}
             </span>
             <span className="d-flex align-items-center gap-5">
-              <Dropdown className={styles.filterDropdown} drop={"down"}>
+              <Dropdown className={styles["filterDropdown"]} drop={"down"}>
                 <Dropdown.Toggle disabled={props.fetching}>
                   Artist: {props.selected_artist || "All"}
                 </Dropdown.Toggle>
@@ -232,7 +232,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                   ))}
                 </Dropdown.Menu>
               </Dropdown>
-              <Dropdown className={styles.filterDropdown} drop={"down"}>
+              <Dropdown className={styles["filterDropdown"]} drop={"down"}>
                 <Dropdown.Toggle disabled={props.fetching}>
                   {getDateSelectionLabel()}
                 </Dropdown.Toggle>
@@ -324,13 +324,13 @@ export function GasRoyaltiesTokenImage(props: Readonly<TokenImageProps>) {
           style={{ width: "auto", height: "40px" }}
           src={props.thumbnail}
           alt={props.name}
-          className={styles.nftImage}
+          className={styles["nftImage"]}
           data-tooltip-id={`token-image-${props.token_id}`}
         />
         {props.note && (
           <span>
             <FontAwesomeIcon
-              className={styles.infoIcon}
+              className={styles["infoIcon"]}
               icon={faInfoCircle}
               data-tooltip-id={`token-info-${props.token_id}`}
             />

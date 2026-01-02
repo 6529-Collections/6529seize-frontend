@@ -116,7 +116,7 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
         <Col className="d-flex flex-wrap gap-2">
           <Dropdown
             drop={"down-centered"}
-            className={`${styles.customRenderDropdown} d-flex align-items-center gap-2`}>
+            className={`${styles["customRenderDropdown"]} d-flex align-items-center gap-2`}>
             <span className="font-color-h">Render Type:</span>
             <Dropdown.Toggle>{renderType}</Dropdown.Toggle>
             <Dropdown.Menu>
@@ -133,7 +133,7 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
           </Dropdown>
           <Dropdown
             drop={"down-centered"}
-            className={`${styles.customRenderDropdown} d-flex align-items-center gap-2`}>
+            className={`${styles["customRenderDropdown"]} d-flex align-items-center gap-2`}>
             <span className="font-color-h">Script Version:</span>
             <Dropdown.Toggle>{scriptVersion}</Dropdown.Toggle>
             <Dropdown.Menu>
@@ -150,7 +150,7 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
           </Dropdown>
           <Dropdown
             drop={"down-centered"}
-            className={`${styles.customRenderDropdown} d-flex align-items-center gap-2`}>
+            className={`${styles["customRenderDropdown"]} d-flex align-items-center gap-2`}>
             <span className="font-color-h">Height:</span>
             <Dropdown.Toggle>
               {height ? `${numberWithCommas(height)} px` : "Screen Size"}
@@ -172,7 +172,7 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
                   <input
                     type="number"
                     placeholder="enter height"
-                    className={styles.customRenderInput}
+                    className={styles["customRenderInput"]}
                     value={height ?? ""}
                     onChange={(e) => {
                       setHeight(parseInt(e.target.value));
@@ -183,7 +183,7 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
             </Dropdown.Menu>
           </Dropdown>
           <button
-            className={`pt-2 pb-2 seize-btn no-wrap ${styles.sceneBtn}`}
+            className={`pt-2 pb-2 seize-btn no-wrap ${styles["sceneBtn"]}`}
             onClick={() => {
               go();
             }}>

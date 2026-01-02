@@ -149,10 +149,10 @@ export function isCompoundResponse(value: unknown): value is CompoundResponse {
     return false;
   }
   const record = value as Record<string, unknown>;
-  if (typeof record.type !== "string") {
+  if (typeof record["type"] !== "string") {
     return false;
   }
-  return record.type.startsWith("compound.");
+  return record["type"].startsWith("compound.");
 }
 
 export function isCompoundMarket(

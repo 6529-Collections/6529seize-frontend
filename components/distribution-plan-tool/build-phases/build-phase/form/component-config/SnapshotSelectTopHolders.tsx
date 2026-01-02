@@ -56,8 +56,8 @@ export default function SnapshotSelectTopHolders({
     const tokenPool = operations.find(
       (operation) =>
         operation.code === AllowlistOperationCode.CREATE_TOKEN_POOL &&
-        operation.params.id === snapshotId &&
-        operation.params.contract.toLowerCase() ===
+        operation.params["id"] === snapshotId &&
+        operation.params["contract"].toLowerCase() ===
           "0x33fd426905f149f8376e227d0c9d3340aad17af1"
     );
     if (!tokenPool) {

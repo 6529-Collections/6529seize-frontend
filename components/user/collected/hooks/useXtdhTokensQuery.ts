@@ -48,7 +48,7 @@ export const useXtdhTokensQuery = ({
       };
 
       if (contract) {
-        params.contract = contract;
+        params["contract"] = contract;
       }
 
       return await commonApiFetch<ApiXTdhTokensPage>({

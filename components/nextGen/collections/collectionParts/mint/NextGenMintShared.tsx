@@ -34,7 +34,7 @@ export function NextGenMintingFor(
       <Form.Label column sm={12} className="d-flex align-items-center">
         {props.title}
         <FontAwesomeIcon
-          className={styles.infoIcon}
+          className={styles["infoIcon"]}
           icon={faInfoCircle}
           data-tooltip-id="mint-for-address-info">
         </FontAwesomeIcon>
@@ -51,7 +51,7 @@ export function NextGenMintingFor(
       </Form.Label>
       <Col sm={12}>
         <Form.Select
-          className={styles.mintSelect}
+          className={styles["mintSelect"]}
           value={props.mintForAddress}
           onChange={(e: any) => {
             props.setMintForAddress(e.currentTarget.value);

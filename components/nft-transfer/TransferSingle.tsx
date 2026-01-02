@@ -120,7 +120,7 @@ function TransferSingleImpl(props: TransferSingleProps) {
   }
 
   return (
-    <div className={styles.shadowBox} data-testid="transfer-single">
+    <div className={styles["shadowBox"]} data-testid="transfer-single">
       <div className="tw-flex tw-items-center tw-gap-5">
         <div className="tw-flex tw-items-center tw-gap-2">
           <span className="tw-text-lg tw-font-medium">Transfer</span>

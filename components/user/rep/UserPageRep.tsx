@@ -32,7 +32,7 @@ export default function UserPageRep({
   const { connectedProfile } = useContext(AuthContext);
 
   const params = useParams();
-  const user = (params?.user as string)?.toLowerCase();
+  const user = (params?.["user"] as string)?.toLowerCase();
 
   const [rater, setRater] = useState<string | undefined>(undefined);
   useEffect(

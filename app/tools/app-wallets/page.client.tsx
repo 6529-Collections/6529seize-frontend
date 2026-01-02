@@ -8,7 +8,7 @@ export default function AppWallets() {
   useSetTitle("App Wallets | Tools");
 
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <AppWalletsComponent />
     </main>
   );

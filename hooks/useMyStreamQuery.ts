@@ -26,7 +26,7 @@ export function useMyStreamQuery({ reverse }: UseMyStreamQueryProps) {
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const params: Record<string, string> = {};
       if (pageParam) {
-        params.serial_no_less_than = `${pageParam}`;
+        params["serial_no_less_than"] = `${pageParam}`;
       }
 
       return await commonApiFetch<TypedFeedItem[]>({
@@ -46,7 +46,7 @@ export function useMyStreamQuery({ reverse }: UseMyStreamQueryProps) {
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const params: Record<string, string> = {};
       if (pageParam) {
-        params.serial_no_less_than = `${pageParam}`;
+        params["serial_no_less_than"] = `${pageParam}`;
       }
       return await commonApiFetch<TypedFeedItem[]>({
         endpoint: `feed/`,

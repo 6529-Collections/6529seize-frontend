@@ -134,8 +134,8 @@ export default function NextGenTraitSets(
       >
         <button
           key={getRandomObjectId()}
-          className={`${styles.collectorSetPill} ${
-            t === selectedTrait ? styles.collectorSetPillSelected : ""
+          className={`${styles["collectorSetPill"]} ${
+            t === selectedTrait ? styles["collectorSetPillSelected"] : ""
           }`}
           onClick={() => {
             if (selectedTrait === ULTIMATE || t === ULTIMATE) {
@@ -227,13 +227,13 @@ export default function NextGenTraitSets(
               href={`/nextgen/collection/${formatNameForUrl(
                 props.collection.name
               )}/trait-sets`}
-              className={`d-flex align-items-center gap-2 decoration-none ${styles.viewAllTokens}`}
+              className={`d-flex align-items-center gap-2 decoration-none ${styles["viewAllTokens"]}`}
             >
               <h5 className="mb-0 font-color d-flex align-items-center gap-2">
                 View All
                 <FontAwesomeIcon
                   icon={faArrowCircleRight}
-                  className={styles.viewAllIcon}
+                  className={styles["viewAllIcon"]}
                 />
               </h5>
             </Link>
@@ -345,13 +345,13 @@ export default function NextGenTraitSets(
                 href={`/nextgen/collection/${formatNameForUrl(
                   props.collection.name
                 )}/trait-sets`}
-                className={`d-flex align-items-center gap-2 decoration-none ${styles.viewAllTokens} justify-content-center`}
+                className={`d-flex align-items-center gap-2 decoration-none ${styles["viewAllTokens"]} justify-content-center`}
               >
                 <h5 className="mb-0 font-color d-flex align-items-center gap-2">
                   View All Trait Sets
                   <FontAwesomeIcon
                     icon={faArrowCircleRight}
-                    className={styles.viewAllIcon}
+                    className={styles["viewAllIcon"]}
                   />
                 </h5>
               </Link>
@@ -378,7 +378,7 @@ function UltimateOwner(props: Readonly<{ set: NextgenTraitSet }>) {
     <Accordion className="pt-1 pb-1">
       <Accordion.Item defaultChecked={true} eventKey={"0"}>
         <Accordion.Button
-          className={styles.collectorSetAccordionButtonUltimate}
+          className={styles["collectorSetAccordionButtonUltimate"]}
         >
           <Container>
             <Row>
@@ -479,7 +479,7 @@ function TraitSetAccordion(
             </Row>
           </Container>
         </Accordion.Button>
-        <Accordion.Body className={styles.collectorSetAccordionBody}>
+        <Accordion.Body className={styles["collectorSetAccordionBody"]}>
           <Container>
             {props.values.length > 0 &&
               props.set.token_values?.map((tv) => (

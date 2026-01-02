@@ -48,7 +48,7 @@ interface Props {
 export function Spinner() {
   return (
     <div className="d-inline">
-      <output className={`spinner-border ${styles.loader}`}></output>
+      <output className={`spinner-border ${styles["loader"]}`}></output>
     </div>
   );
 }
@@ -404,7 +404,7 @@ export default function NextGenMint(props: Readonly<Props>) {
             <Row className="pt-2">
               <Col className="d-flex gap-2">
                 <span
-                  className={`mb-0 d-flex align-items-center gap-2 no-wrap ${styles.nextgenTag}`}>
+                  className={`mb-0 d-flex align-items-center gap-2 no-wrap ${styles["nextgenTag"]}`}>
                   <span>Mint Cost:</span>
                   <span className="font-bolder">
                     {props.mint_price > 0 ? fromGWEI(props.mint_price) : `Free`}{" "}
@@ -412,7 +412,7 @@ export default function NextGenMint(props: Readonly<Props>) {
                   </span>
                 </span>
                 <span
-                  className={`mb-0 d-flex align-items-center gap-2 no-wrap ${styles.nextgenTag}`}>
+                  className={`mb-0 d-flex align-items-center gap-2 no-wrap ${styles["nextgenTag"]}`}>
                   <span>Sales Model:</span>
                   <span className="font-bolder">{getSalesModel()}</span>
                 </span>

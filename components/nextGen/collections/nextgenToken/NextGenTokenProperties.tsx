@@ -75,7 +75,7 @@ function TraitAccordion(
           </Container>
         </Accordion.Button>
         {props.traits && (
-          <Accordion.Body className={styles.tokenPropertiesAccordionBody}>
+          <Accordion.Body className={styles["tokenPropertiesAccordionBody"]}>
             <Container>
               <Row className="pt-2 pb-2">
                 <Col xs={5}>Trait</Col>

@@ -466,7 +466,7 @@ export default function WalletCheckerComponent(
                   disabled={delegationsLoaded || consolidationsLoaded}
                   autoFocus
                   placeholder={"0x... or ENS"}
-                  className={`${styles.formInput}`}
+                  className={`${styles["formInput"]}`}
                   type="text"
                   value={walletInput}
                   onChange={(e) => {
@@ -478,7 +478,7 @@ export default function WalletCheckerComponent(
             </Form.Group>
             {addressError && (
               <Form.Group as={Row}>
-                <Form.Text className={styles.error}>Invalid address</Form.Text>
+                <Form.Text className={styles["error"]}>Invalid address</Form.Text>
               </Form.Group>
             )}
             <Form.Group as={Row} className="pt-3 text-center">
@@ -495,13 +495,13 @@ export default function WalletCheckerComponent(
                     setChecking(false);
                     setAddressQuery("");
                   }}
-                  className={styles.clearBtn}>
+                  className={styles["clearBtn"]}>
                   Clear
                 </Button>
                 <Button
                   disabled={formDisabled}
                   onClick={() => setChecking(true)}
-                  className={styles.checkBtn}>
+                  className={styles["checkBtn"]}>
                   {checking ? `Checking...` : `Check`}
                 </Button>
               </Col>
@@ -540,7 +540,7 @@ export default function WalletCheckerComponent(
                                     display={delegation.from_display}
                                   />
                                 ) : (
-                                  <span className={styles.supportingAddress}>
+                                  <span className={styles["supportingAddress"]}>
                                     <Address
                                       wallets={[
                                         delegation.from_address as `0x${string}`,
@@ -562,7 +562,7 @@ export default function WalletCheckerComponent(
                                     display={delegation.to_display}
                                   />
                                 ) : (
-                                  <span className={styles.supportingAddress}>
+                                  <span className={styles["supportingAddress"]}>
                                     <Address
                                       wallets={[
                                         delegation.to_address as `0x${string}`,
@@ -630,7 +630,7 @@ export default function WalletCheckerComponent(
                       )}
                       <FontAwesomeIcon
                         icon={faCheck}
-                        className={styles.activeDelegationIcon}
+                        className={styles["activeDelegationIcon"]}
                       />
                     </div>
                   </div>
@@ -664,7 +664,7 @@ export default function WalletCheckerComponent(
                                     display={delegation.from_display}
                                   />
                                 ) : (
-                                  <span className={styles.supportingAddress}>
+                                  <span className={styles["supportingAddress"]}>
                                     <Address
                                       wallets={[
                                         delegation.from_address as `0x${string}`,
@@ -686,7 +686,7 @@ export default function WalletCheckerComponent(
                                     display={delegation.to_display}
                                   />
                                 ) : (
-                                  <span className={styles.supportingAddress}>
+                                  <span className={styles["supportingAddress"]}>
                                     <Address
                                       wallets={[
                                         delegation.to_address as `0x${string}`,
@@ -733,7 +733,7 @@ export default function WalletCheckerComponent(
                                   display={consolidation.from_display}
                                 />
                               ) : (
-                                <span className={styles.supportingAddress}>
+                                <span className={styles["supportingAddress"]}>
                                   <Address
                                     wallets={[
                                       consolidation.from as `0x${string}`,
@@ -743,8 +743,8 @@ export default function WalletCheckerComponent(
                                 </span>
                               )}
                               <span className="d-inline-flex align-items-center justify-content-center">
-                                <span className={styles.arrowBody}></span>
-                                <span className={styles.arrowHead}></span>
+                                <span className={styles["arrowBody"]}></span>
+                                <span className={styles["arrowHead"]}></span>
                               </span>
                               {areEqualAddresses(
                                 fetchedAddress,
@@ -755,7 +755,7 @@ export default function WalletCheckerComponent(
                                   display={consolidation.to_display}
                                 />
                               ) : (
-                                <span className={styles.supportingAddress}>
+                                <span className={styles["supportingAddress"]}>
                                   <Address
                                     wallets={[
                                       consolidation.to as `0x${string}`,
@@ -788,7 +788,7 @@ export default function WalletCheckerComponent(
                                   display={wallet.display}
                                 />
                               ) : (
-                                <span className={styles.supportingAddress}>
+                                <span className={styles["supportingAddress"]}>
                                   <Address
                                     wallets={[wallet.address as `0x${string}`]}
                                     display={wallet.display}
@@ -798,14 +798,14 @@ export default function WalletCheckerComponent(
                               {consolidatedWallets.length - 1 > index && (
                                 <FontAwesomeIcon
                                   icon={faPlusCircle}
-                                  className={styles.consolidationPlusIcon}
+                                  className={styles["consolidationPlusIcon"]}
                                 />
                               )}
                             </Fragment>
                           ))}
                           <FontAwesomeIcon
                             icon={faCheck}
-                            className={styles.consolidationActiveIcon}
+                            className={styles["consolidationActiveIcon"]}
                           />
                         </div>
                       </div>
@@ -815,13 +815,13 @@ export default function WalletCheckerComponent(
                       <div className="pt-2 pb-2 d-flex-align-items-center">
                         <FontAwesomeIcon
                           icon={faXmark}
-                          className={styles.consolidationRecommendationIcon}
+                          className={styles["consolidationRecommendationIcon"]}
                         />
                         Incomplete Consolidation
                       </div>
                       <div className="pt-2 pb-2">
                         Recommended Actions:
-                        <ul className={`${styles.recommendationsList} pt-2`}>
+                        <ul className={`${styles["recommendationsList"]} pt-2`}>
                           {consolidationActions.map((c, index) => (
                             <li
                               key={`consolidated-wallets-${index}`}
@@ -833,7 +833,7 @@ export default function WalletCheckerComponent(
                                   display={c.to_display}
                                 />
                               ) : (
-                                <span className={styles.supportingAddress}>
+                                <span className={styles["supportingAddress"]}>
                                   <Address
                                     wallets={[c.to as `0x${string}`]}
                                     display={c.to_display}
@@ -847,7 +847,7 @@ export default function WalletCheckerComponent(
                                   display={c.from_display}
                                 />
                               ) : (
-                                <span className={styles.supportingAddress}>
+                                <span className={styles["supportingAddress"]}>
                                   <Address
                                     wallets={[c.from as `0x${string}`]}
                                     display={c.from_display}

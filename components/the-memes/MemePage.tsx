@@ -260,7 +260,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                     sm={{ span: 12 }}
                     md={{ span: 6 }}
                     lg={{ span: 6 }}
-                    className={`${styles.nftImageWrapper} pt-2 pb-5`}>
+                    className={`${styles["nftImageWrapper"]} pt-2 pb-5`}>
                     <NFTImage
                       nft={nft}
                       animation={true}
@@ -332,7 +332,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   const isLastCard = nftMeta?.collection_size === nft?.id;
 
   return (
-    <Container fluid className={styles.mainContainer}>
+    <Container fluid className={styles["mainContainer"]}>
       <Row>
         <Col>
           <Container className="pt-4 pb-4">

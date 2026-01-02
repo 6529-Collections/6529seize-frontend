@@ -133,12 +133,12 @@ export function CreateAppWalletModal(
       backdrop
       keyboard={false}
       centered>
-      <Modal.Header className={styles.modalHeader}>
+      <Modal.Header className={styles["modalHeader"]}>
         <Modal.Title>
           {importData ? `Import` : `Create New`} Wallet
         </Modal.Title>
       </Modal.Header>
-      <Modal.Body className={styles.modalContent}>
+      <Modal.Body className={styles["modalContent"]}>
         <label className="pb-1" htmlFor="walletName">
           Wallet Name
         </label>
@@ -148,7 +148,7 @@ export function CreateAppWalletModal(
           type="text"
           placeholder="My Wallet..."
           value={walletName}
-          className={styles.newWalletInput}
+          className={styles["newWalletInput"]}
           onChange={(e) => {
             const value = e.target.value;
             if (/^[a-zA-Z0-9 ]*$/.test(value)) {
@@ -177,7 +177,7 @@ export function CreateAppWalletModal(
           type={passHidden ? "password" : "text"}
           placeholder="******"
           value={walletPass}
-          className={styles.newWalletInput}
+          className={styles["newWalletInput"]}
           onChange={(e: any) => {
             const value = e.target.value;
             if (/^\S*$/.test(value)) {
@@ -199,7 +199,7 @@ export function CreateAppWalletModal(
           )}
         </p>
       </Modal.Body>
-      <Modal.Footer className={styles.modalContent}>
+      <Modal.Footer className={styles["modalContent"]}>
         <Button variant="secondary" onClick={() => handleHide()}>
           Cancel
         </Button>
@@ -295,10 +295,10 @@ export function UnlockAppWalletModal(
       backdrop
       keyboard={false}
       centered>
-      <Modal.Header className={styles.modalHeader}>
+      <Modal.Header className={styles["modalHeader"]}>
         <Modal.Title>Unlock Wallet</Modal.Title>
       </Modal.Header>
-      <Modal.Body className={styles.modalContent}>
+      <Modal.Body className={styles["modalContent"]}>
         <label className="pb-1 d-flex align-items-center justify-content-between">
           <span className="unselectable">Wallet Password</span>
           <FontAwesomeIcon
@@ -316,7 +316,7 @@ export function UnlockAppWalletModal(
           type={passHidden ? "password" : "text"}
           placeholder="******"
           value={walletPass}
-          className={styles.newWalletInput}
+          className={styles["newWalletInput"]}
           onChange={(e) => {
             const value = e.target.value;
             if (/^\S*$/.test(value)) {
@@ -339,7 +339,7 @@ export function UnlockAppWalletModal(
           )}
         </p>
       </Modal.Body>
-      <Modal.Footer className={styles.modalContent}>
+      <Modal.Footer className={styles["modalContent"]}>
         <Button variant="secondary" onClick={() => handleHide()}>
           Cancel
         </Button>

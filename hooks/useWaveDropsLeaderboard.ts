@@ -127,11 +127,11 @@ export function useWaveDropsLeaderboard({
         };
 
         if (sortDirection) {
-          params.sort_direction = sortDirection;
+          params["sort_direction"] = sortDirection;
         }
 
         if (pageParam) {
-          params.page = `${pageParam}`;
+          params["page"] = `${pageParam}`;
         }
 
         return await commonApiFetch<ApiDropsLeaderboardPage>({
@@ -163,11 +163,11 @@ export function useWaveDropsLeaderboard({
       };
 
       if (sortDirection) {
-        params.sort_direction = sortDirection;
+        params["sort_direction"] = sortDirection;
       }
 
       if (pageParam) {
-        params.page = `${pageParam}`;
+        params["page"] = `${pageParam}`;
       }
 
       const results = await commonApiFetch<ApiDropsLeaderboardPage>({
@@ -226,7 +226,7 @@ export function useWaveDropsLeaderboard({
       };
 
       if (sortDirection) {
-        params.sort_direction = sortDirection;
+        params["sort_direction"] = sortDirection;
       }
 
       return await commonApiFetch<ApiDropsLeaderboardPage>({
