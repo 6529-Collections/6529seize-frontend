@@ -14,8 +14,9 @@ import { SubmissionPhase } from "../ui/SubmissionProgress";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
 import type { InteractiveMediaMimeType } from "../constants/media";
+import { validateStrictAddress } from "../utils/addressValidation";
 
-import { MemesSubmissionAdditionalInfoKey, OperationalData } from "../types/OperationalData";
+import { OperationalData } from "../types/OperationalData";
 
 /**
  * Interface for the artwork submission data
@@ -62,19 +63,22 @@ export const transformToApiRequest = (data: {
     if (operationalData.airdrop_config && operationalData.airdrop_config.length > 0) {
       // Filter out entries with empty addresses before saving
       const validEntries = operationalData.airdrop_config.filter(
-        (e) => e.address && e.count > 0
+        (e) => {
+          const trimmedAddress = e.address?.trim() ?? "";
+          return validateStrictAddress(trimmedAddress) && e.count > 0;
+        }
       );
       if (validEntries.length > 0) {
         metadata.push({
-          data_key: MemesSubmissionAdditionalInfoKey.AIRDROP_CONFIG,
+          data_key: "airdrop_config",
           data_value: JSON.stringify(validEntries),
         });
       }
     }
 
-    if (operationalData.payment_info) {
+    if (operationalData.payment_info?.payment_address?.trim()) {
       metadata.push({
-        data_key: MemesSubmissionAdditionalInfoKey.PAYMENT_INFO,
+        data_key: "payment_info",
         data_value: JSON.stringify(operationalData.payment_info),
       });
     }
@@ -85,21 +89,21 @@ export const transformToApiRequest = (data: {
         token_ids: batch.token_ids_raw || "",
       }));
       metadata.push({
-        data_key: MemesSubmissionAdditionalInfoKey.ALLOWLIST_BATCHES,
+        data_key: "allowlist_batches",
         data_value: JSON.stringify(processedBatches),
       });
     }
 
     if (operationalData.additional_media) {
       metadata.push({
-        data_key: MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA,
+        data_key: "additional_media",
         data_value: JSON.stringify(operationalData.additional_media),
       });
     }
 
     if (operationalData.commentary) {
       metadata.push({
-        data_key: MemesSubmissionAdditionalInfoKey.COMMENTARY,
+        data_key: "commentary",
         data_value: operationalData.commentary,
       });
     }

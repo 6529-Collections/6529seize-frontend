@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useRef, useEffect, useMemo } from "react";
+import Image from "next/image";
 import FormSection from "../ui/FormSection";
 import ValidationError from "../ui/ValidationError";
 import { TraitWrapper } from "../../traits/TraitWrapper";
@@ -86,9 +87,12 @@ const AdditionalMediaUpload: React.FC<AdditionalMediaUploadProps> = ({
       key={item.id}
       className="tw-relative tw-aspect-square tw-rounded-lg tw-overflow-hidden tw-bg-iron-900 tw-border tw-border-iron-800"
     >
-      <img
+      <Image
         src={item.previewUrl}
         alt="Media preview"
+        fill
+        unoptimized
+        sizes="100vw"
         className={`tw-w-full tw-h-full tw-object-cover ${
           item.status === "uploading" ? "tw-opacity-50" : ""
         }`}

@@ -56,7 +56,12 @@ const AdditionalInfoStep: React.FC<AdditionalInfoStepProps> = ({
 
   const isFormValid = () => {
     // Validate airdrop entries
-    const totalAllocated = airdropEntries.reduce((sum, e) => sum + (e.count || 0), 0);
+    const hasInvalidCount = airdropEntries.some(
+      (e) => !Number.isFinite(e.count) || e.count < 0 || !Number.isInteger(e.count)
+    );
+    if (hasInvalidCount) return false;
+
+    const totalAllocated = airdropEntries.reduce((sum, e) => sum + (e.count ?? 0), 0);
     if (totalAllocated !== AIRDROP_TOTAL) return false;
 
     // Every entry with count > 0 must have a valid address

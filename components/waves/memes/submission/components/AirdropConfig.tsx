@@ -131,7 +131,7 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
             >
               <input
                 type="number"
-                min="1"
+                min="0"
                 max={AIRDROP_TOTAL}
                 value={entry.count || ""}
                 onChange={(e) => handleCountChange(index, e.target.value)}

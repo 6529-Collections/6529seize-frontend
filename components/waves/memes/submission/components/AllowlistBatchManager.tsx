@@ -65,8 +65,8 @@ const AllowlistBatchManager: React.FC<AllowlistBatchManagerProps> = ({
                 <input
                   type="text"
                   placeholder="0x..."
-                  defaultValue={batch.contract}
-                  onBlur={(e) => handleBatchChange(index, "contract", e.target.value)}
+                  value={batch.contract ?? ""}
+                  onChange={(e) => handleBatchChange(index, "contract", e.target.value)}
                   className={`tw-form-input tw-w-full tw-rounded-lg tw-px-4 tw-py-3 tw-text-sm tw-text-iron-100 tw-bg-iron-900 tw-border-0 tw-outline-none tw-ring-1 ${
                     errors?.[index]?.contract ? "tw-ring-red" : "tw-ring-iron-700"
                   } focus:tw-ring-primary-400`}
@@ -84,8 +84,8 @@ const AllowlistBatchManager: React.FC<AllowlistBatchManagerProps> = ({
                 <input
                   type="text"
                   placeholder="Optional"
-                  defaultValue={batch.token_ids_raw}
-                  onBlur={(e) => handleBatchChange(index, "token_ids_raw", e.target.value)}
+                  value={batch.token_ids_raw ?? ""}
+                  onChange={(e) => handleBatchChange(index, "token_ids_raw", e.target.value)}
                   className={`tw-form-input tw-w-full tw-rounded-lg tw-px-4 tw-py-3 tw-text-sm tw-text-iron-100 tw-bg-iron-900 tw-border-0 tw-outline-none tw-ring-1 ${
                     errors?.[index]?.token_ids ? "tw-ring-red" : "tw-ring-iron-700"
                   } focus:tw-ring-primary-400`}

@@ -72,6 +72,9 @@ export function useMediaUpload(maxFiles: number = 4): UseMediaUploadReturn {
           );
         } catch (error) {
           const errorMsg = error instanceof Error ? error.message : "Upload failed";
+          if (item.previewUrl) {
+            URL.revokeObjectURL(item.previewUrl);
+          }
           setItems((prev) =>
             prev.map((i) =>
               i.id === item.id

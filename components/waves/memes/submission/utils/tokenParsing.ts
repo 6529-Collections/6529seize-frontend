@@ -24,10 +24,22 @@ export function validateTokenIdFormat(input: string): string | null {
       if (isNaN(start) || isNaN(end)) {
         return "Invalid range. Use numbers only: 1-5";
       }
+      if (start < 0 || end < 0) {
+        return "Invalid range. Token IDs must be non-negative.";
+      }
+      if (start > end) {
+        return "Invalid range. Start must be less than end.";
+      }
+      if (start === end) {
+        return "Invalid range. Use a single token ID instead of a range.";
+      }
     } else {
       const id = parseInt(trimmed, 10);
       if (isNaN(id)) {
         return "Invalid token ID. Use: 1,2,5-10";
+      }
+      if (id < 0) {
+        return "Invalid token ID. Must be non-negative.";
       }
     }
   }
