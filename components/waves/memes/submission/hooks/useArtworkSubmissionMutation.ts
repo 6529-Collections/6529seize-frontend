@@ -15,7 +15,7 @@ import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
 import type { InteractiveMediaMimeType } from "../constants/media";
 
-import { OperationalData } from "../types/OperationalData";
+import { MemesSubmissionAdditionalInfoKey, OperationalData } from "../types/OperationalData";
 
 /**
  * Interface for the artwork submission data
@@ -66,7 +66,7 @@ export const transformToApiRequest = (data: {
       );
       if (validEntries.length > 0) {
         metadata.push({
-          data_key: "airdrop_config",
+          data_key: MemesSubmissionAdditionalInfoKey.AIRDROP_CONFIG,
           data_value: JSON.stringify(validEntries),
         });
       }
@@ -74,7 +74,7 @@ export const transformToApiRequest = (data: {
 
     if (operationalData.payment_info) {
       metadata.push({
-        data_key: "payment_info",
+        data_key: MemesSubmissionAdditionalInfoKey.PAYMENT_INFO,
         data_value: JSON.stringify(operationalData.payment_info),
       });
     }
@@ -85,21 +85,21 @@ export const transformToApiRequest = (data: {
         token_ids: batch.token_ids_raw || "",
       }));
       metadata.push({
-        data_key: "allowlist_batches",
+        data_key: MemesSubmissionAdditionalInfoKey.ALLOWLIST_BATCHES,
         data_value: JSON.stringify(processedBatches),
       });
     }
 
     if (operationalData.additional_media) {
       metadata.push({
-        data_key: "additional_media",
+        data_key: MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA,
         data_value: JSON.stringify(operationalData.additional_media),
       });
     }
 
     if (operationalData.commentary) {
       metadata.push({
-        data_key: "commentary",
+        data_key: MemesSubmissionAdditionalInfoKey.COMMENTARY,
         data_value: operationalData.commentary,
       });
     }

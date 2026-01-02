@@ -1,5 +1,5 @@
 import { transformToApiRequest } from "@/components/waves/memes/submission/hooks/useArtworkSubmissionMutation";
-import { OperationalData } from "@/components/waves/memes/submission/types/OperationalData";
+import { MemesSubmissionAdditionalInfoKey, OperationalData } from "@/components/waves/memes/submission/types/OperationalData";
 import { TraitsData } from "@/components/waves/memes/submission/types/TraitsData";
 
 describe("useArtworkSubmissionMutation - transformToApiRequest", () => {
@@ -46,13 +46,13 @@ describe("useArtworkSubmissionMutation - transformToApiRequest", () => {
     expect(metadataMap.get("title")).toBe("Test Artwork");
 
     // Check operational data
-    expect(metadataMap.get("airdrop_config")).toBe(JSON.stringify(mockOperationalData.airdrop_config));
-    expect(metadataMap.get("payment_info")).toBe(JSON.stringify(mockOperationalData.payment_info));
-    expect(metadataMap.get("allowlist_batches")).toBe(JSON.stringify([
+    expect(metadataMap.get(MemesSubmissionAdditionalInfoKey.AIRDROP_CONFIG)).toBe(JSON.stringify(mockOperationalData.airdrop_config));
+    expect(metadataMap.get(MemesSubmissionAdditionalInfoKey.PAYMENT_INFO)).toBe(JSON.stringify(mockOperationalData.payment_info));
+    expect(metadataMap.get(MemesSubmissionAdditionalInfoKey.ALLOWLIST_BATCHES)).toBe(JSON.stringify([
       { contract: "0xabc", token_ids: "1-5" } // Stored as raw string
     ]));
-    expect(metadataMap.get("additional_media")).toBe(JSON.stringify(mockOperationalData.additional_media));
-    expect(metadataMap.get("commentary")).toBe("Test Commentary");
+    expect(metadataMap.get(MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA)).toBe(JSON.stringify(mockOperationalData.additional_media));
+    expect(metadataMap.get(MemesSubmissionAdditionalInfoKey.COMMENTARY)).toBe("Test Commentary");
   });
 
   it("should not include operational fields if not provided", () => {
@@ -69,10 +69,10 @@ describe("useArtworkSubmissionMutation - transformToApiRequest", () => {
       result.metadata.map((m) => [m.data_key, m.data_value])
     );
 
-    expect(metadataMap.has("airdrop_config")).toBe(false);
-    expect(metadataMap.has("payment_info")).toBe(false);
-    expect(metadataMap.has("allowlist_batches")).toBe(false);
-    expect(metadataMap.has("additional_media")).toBe(false);
-    expect(metadataMap.has("commentary")).toBe(false);
+    expect(metadataMap.has(MemesSubmissionAdditionalInfoKey.AIRDROP_CONFIG)).toBe(false);
+    expect(metadataMap.has(MemesSubmissionAdditionalInfoKey.PAYMENT_INFO)).toBe(false);
+    expect(metadataMap.has(MemesSubmissionAdditionalInfoKey.ALLOWLIST_BATCHES)).toBe(false);
+    expect(metadataMap.has(MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA)).toBe(false);
+    expect(metadataMap.has(MemesSubmissionAdditionalInfoKey.COMMENTARY)).toBe(false);
   });
 });

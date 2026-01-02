@@ -1,3 +1,14 @@
+export enum MemesSubmissionAdditionalInfoKey {
+  AIRDROP_CONFIG = "airdrop_config",
+  PAYMENT_INFO = "payment_info",
+  ALLOWLIST_BATCHES = "allowlist_batches",
+  ADDITIONAL_MEDIA = "additional_media",
+  COMMENTARY = "commentary",
+}
+
+export const MEMES_SUBMISSION_ADDITIONAL_INFO_KEYS: string[] =
+  Object.values(MemesSubmissionAdditionalInfoKey);
+
 export interface AirdropEntry {
   address: string;
   count: number;

@@ -65,6 +65,12 @@ const AdditionalInfoStep: React.FC<AdditionalInfoStepProps> = ({
     );
     if (hasEntryWithCountButNoValidAddress) return false;
 
+    // Every entry with a valid address must have count > 0
+    const hasEntryWithAddressButNoCount = airdropEntries.some(
+      (e) => e.address && validateStrictAddress(e.address) && (!e.count || e.count <= 0)
+    );
+    if (hasEntryWithAddressButNoCount) return false;
+
     // All provided addresses must be valid (even if count is 0)
     const hasInvalidAddress = airdropEntries.some(
       (e) => e.address && !validateStrictAddress(e.address)
