@@ -13,6 +13,7 @@ jest.mock('@/components/waves/drop/SingleWaveDropPosition', () => ({ SingleWaveD
 jest.mock('@/components/waves/drop/SingleWaveDropVotes', () => ({ SingleWaveDropVotes: () => <div data-testid="votes"/> }));
 jest.mock('@/components/waves/drop/WinnerBadge', () => ({ WinnerBadge: () => <div data-testid="badge"/> }));
 jest.mock('@/components/waves/drop/SingleWaveDropTraits', () => ({ SingleWaveDropTraits: () => <div data-testid="traits"/> }));
+jest.mock('@/components/waves/drop/WaveDropAdditionalInfo', () => ({ WaveDropAdditionalInfo: () => <div data-testid="process"/> }));
 jest.mock('@/components/utils/button/WaveDropDeleteButton', () => ({ __esModule: true, default: () => <div data-testid="delete"/> }));
 jest.mock('@/components/drops/view/item/content/media/DropListItemContentMedia', () => (props:any) => <div data-testid="media" {...props}/>);
 jest.mock('@/hooks/drops/useDropInteractionRules', () => ({ useDropInteractionRules: jest.fn(() => ({ isWinner:true, canDelete:true })) }));
@@ -30,6 +31,7 @@ describe('MemesSingleWaveDropInfoPanel', () => {
     expect(screen.getByTestId('badge')).toBeInTheDocument();
     expect(screen.getByTestId('media')).toHaveAttribute('media_url', 'img.png');
     expect(screen.getByTestId('traits')).toBeInTheDocument();
+    expect(screen.getByTestId('process')).toBeInTheDocument();
     expect(screen.getByTestId('author')).toBeInTheDocument();
     expect(screen.getByTestId('details')).toBeInTheDocument();
     expect(screen.getByTestId('delete')).toBeInTheDocument();

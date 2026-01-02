@@ -12,6 +12,7 @@ import { faAddressCard, faStar } from "@fortawesome/free-regular-svg-icons";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { SingleWaveDropTraits } from "./SingleWaveDropTraits";
+import { WaveDropAdditionalInfo } from "./WaveDropAdditionalInfo";
 import { SingleWaveDropPosition } from "./SingleWaveDropPosition";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import WaveDropDeleteButton from "@/components/utils/button/WaveDropDeleteButton";
@@ -63,7 +64,8 @@ export const MemesSingleWaveDropInfoPanel = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isVotingOpen, setIsVotingOpen] = useState(false);
   const isMobileScreen = useIsMobileScreen();
-  const { isWinner, canDelete, canShowVote, isVotingEnded } = useDropInteractionRules(drop);
+  const { isWinner, canDelete, canShowVote, isVotingEnded } =
+    useDropInteractionRules(drop);
 
   const { nicTotal, repTotal, manualOutcomes } = useMemo(
     () => calculateOutcomes(drop, wave),
@@ -203,8 +205,8 @@ export const MemesSingleWaveDropInfoPanel = ({
         <div className="tw-px-4 sm:tw-px-6 xl:tw-px-20 tw-pb-8 md:tw-pb-10">
           <div className="tw-max-w-3xl tw-mx-auto tw-space-y-8">
             <SingleWaveDropTraits drop={drop} />
-
             <SingleWaveDropInfoDetails drop={drop} />
+            <WaveDropAdditionalInfo drop={drop} />
 
             {artworkMedia && fileInfo && (
               <div className="tw-flex tw-gap-x-3 tw-items-center">
