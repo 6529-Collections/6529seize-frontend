@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-<<<<<<< HEAD
     // ==========================================================================
     // Language & Environment
     // ==========================================================================
@@ -13,19 +12,6 @@
     // ==========================================================================
     "module": "ESNext",
     "moduleResolution": "bundler",
-=======
-    "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "node",
->>>>>>> main
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
