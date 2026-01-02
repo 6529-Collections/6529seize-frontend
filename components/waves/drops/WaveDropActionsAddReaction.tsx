@@ -23,7 +23,7 @@ import {
 const WaveDropActionsAddReaction: React.FC<{
   readonly drop: ExtendedDrop;
   readonly isMobile?: boolean | undefined;
-  readonly onAddReaction?: () => void | undefined | undefined;
+  readonly onAddReaction?: (() => void) | undefined;
 }> = ({ drop, isMobile = false, onAddReaction }) => {
   const isTemporaryDrop = drop.id.startsWith("temp-");
   const canReact = drop.type === DropSize.FULL && !isTemporaryDrop;
@@ -74,7 +74,10 @@ const WaveDropActionsAddReaction: React.FC<{
           if (targetIndex >= 0) {
             reactionsWithoutUser[targetIndex] = {
               ...reactionsWithoutUser[targetIndex],
-              profiles: [...reactionsWithoutUser[targetIndex].profiles, profileMin],
+              profiles: [
+                ...reactionsWithoutUser[targetIndex].profiles,
+                profileMin,
+              ],
             };
           } else {
             reactionsWithoutUser.push({
@@ -85,8 +88,7 @@ const WaveDropActionsAddReaction: React.FC<{
 
           draft.reactions = reactionsWithoutUser;
 
-          const baseContext =
-            draft.context_profile_context ??
+          const baseContext = draft.context_profile_context ??
             drop.context_profile_context ?? {
               rating: 0,
               min_rating: 0,
@@ -114,7 +116,10 @@ const WaveDropActionsAddReaction: React.FC<{
     ]
   );
 
-  const handleEmojiSelect = async (emoji: { native?: string | undefined; id?: string | undefined }) => {
+  const handleEmojiSelect = async (emoji: {
+    native?: string | undefined;
+    id?: string | undefined;
+  }) => {
     const emojiText = `:${emoji.id}:`;
     setShowPicker(false);
 
@@ -122,7 +127,6 @@ const WaveDropActionsAddReaction: React.FC<{
     rollbackRef.current = applyOptimisticReaction(emojiText);
 
     try {
-
       await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
         endpoint: `drops/${drop.id}/reaction`,
         body: {
@@ -183,8 +187,9 @@ const WaveDropActionsAddReaction: React.FC<{
 
   const mobileContent = (
     <button
-      className={`tw-border-0 tw-flex tw-items-center tw-gap-x-4 tw-p-4 tw-bg-iron-950 tw-rounded-xl ${!canReact ? "tw-opacity-50 tw-cursor-default" : "active:tw-bg-iron-800"
-        } tw-transition-colors tw-duration-200`}
+      className={`tw-border-0 tw-flex tw-items-center tw-gap-x-4 tw-p-4 tw-bg-iron-950 tw-rounded-xl ${
+        !canReact ? "tw-opacity-50 tw-cursor-default" : "active:tw-bg-iron-800"
+      } tw-transition-colors tw-duration-200`}
       onClick={onReact}
       disabled={!canReact}
     >
@@ -213,18 +218,18 @@ const WaveDropActionsAddReaction: React.FC<{
     <>
       <button
         ref={buttonRef}
-        className={`picker-button tw-text-iron-500 icon tw-px-2 tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-flex tw-items-center tw-gap-x-1.5 tw-text-xs tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300 ${!canReact ? "tw-opacity-50 tw-cursor-default" : "tw-cursor-pointer"
-          } hover:tw-text-[#FFCC22]`}
+        className={`picker-button tw-text-iron-500 icon tw-px-2 tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-flex tw-items-center tw-gap-x-1.5 tw-text-xs tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300 ${
+          !canReact ? "tw-opacity-50 tw-cursor-default" : "tw-cursor-pointer"
+        } hover:tw-text-[#FFCC22]`}
         onClick={onReact}
         disabled={!canReact}
         aria-label="Add reaction to drop"
-        data-tooltip-id={
-          canReact ? `add-reaction-${drop.id}` : undefined
-        }
+        {...(canReact ? { "data-tooltip-id": `add-reaction-${drop.id}` } : {})}
       >
         <svg
-          className={`tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300 ${!canReact ? "tw-opacity-50" : ""
-            }`}
+          className={`tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300 ${
+            !canReact ? "tw-opacity-50" : ""
+          }`}
           xmlns="http://www.w3.org/2000/svg"
           fill="currentColor"
           viewBox="0 0 24 24"

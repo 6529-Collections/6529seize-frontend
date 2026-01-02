@@ -44,15 +44,17 @@ function TraitAccordion(
     rank: number;
     token_count: number;
     collection: NextGenCollection;
-    traits?: {
-      trait: string;
-      value: string;
-      score: number;
-      score_dps?: number | undefined;
-      rank: number;
-      trait_count: number;
-      value_count: number;
-    }[] | undefined;
+    traits?:
+      | {
+          trait: string;
+          value: string;
+          score: number;
+          score_dps?: number | undefined;
+          rank: number;
+          trait_count: number;
+          value_count: number;
+        }[]
+      | undefined;
   }>
 ) {
   return (
@@ -98,13 +100,15 @@ function TraitAccordion(
                     key={`trait-${t.trait.replaceAll(
                       " ",
                       "-"
-                    )}-${t.value.replaceAll(" ", "-")}`}>
+                    )}-${t.value.replaceAll(" ", "-")}`}
+                  >
                     <Col xs={5}>
                       <span className="font-color-h">{t.trait}:</span>{" "}
                       <Link
                         href={`/nextgen/collection/${formatNameForUrl(
                           props.collection.name
-                        )}/art?traits=${t.trait}:${t.value}`}>
+                        )}/art?traits=${t.trait}:${t.value}`}
+                      >
                         {t.value}
                       </Link>
                     </Col>
@@ -384,7 +388,8 @@ export function NextgenTokenTraits(props: Readonly<Props>) {
               <Link
                 href={`/nextgen/collection/${formatNameForUrl(
                   props.collection.name
-                )}/art?traits=${t.trait}:${t.value}`}>
+                )}/art?traits=${t.trait}:${t.value}`}
+              >
                 {t.value}
               </Link>
             </span>
@@ -403,7 +408,7 @@ export function NextgenRarityToggle(
     title: string;
     show: boolean;
     disabled?: boolean | undefined;
-    setShow?: (show: boolean) => void | undefined | undefined;
+    setShow?: ((show: boolean) => void) | undefined;
   }>
 ) {
   const label = props.title.replaceAll(" ", "-").toLowerCase();
@@ -417,7 +422,8 @@ export function NextgenRarityToggle(
       />
       <label
         htmlFor={label}
-        className={props.disabled ? "font-color-h" : "font-color"}>
+        className={props.disabled ? "font-color-h" : "font-color"}
+      >
         <b>{props.title}</b>
       </label>
     </>

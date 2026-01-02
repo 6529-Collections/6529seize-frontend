@@ -5,7 +5,7 @@ import CommonDropdown from "./dropdown/CommonDropdown";
 import CommonTabs from "./tabs/CommonTabs";
 
 interface ChildComponentProps {
-  onCopy?: () => void | undefined | undefined;
+  onCopy?: (() => void) | undefined;
 }
 
 export interface CommonSelectItem<T, U = unknown> {
@@ -30,7 +30,7 @@ interface CommonSelectDefaultProps<T, U> {
   readonly setSelected: (item: T) => void;
   readonly renderItemChildren?: (
     item: CommonSelectItem<T, U>
-  ) => React.ReactElement<ChildComponentProps> | undefined | undefined;
+  ) => React.ReactElement<ChildComponentProps> | undefined;
   readonly closeOnSelect?: boolean | undefined;
   readonly fill?: boolean | undefined;
   readonly showFilterLabel?: boolean | undefined;

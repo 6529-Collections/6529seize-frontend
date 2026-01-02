@@ -5,11 +5,7 @@ import {
   ApiDropSearchStrategy,
   ApiLightDrop,
 } from "@/generated/models/ObjectSerializer";
-import {
-  Drop,
-  DropSize,
-  getStableDropKey,
-} from "@/helpers/waves/drop.helpers";
+import { Drop, DropSize, getStableDropKey } from "@/helpers/waves/drop.helpers";
 import {
   commonApiFetch,
   commonApiFetchWithRetry,
@@ -47,9 +43,12 @@ export async function fetchWaveMessages(
     // Update centralized eligibility if callback provided
     if (updateEligibility && data.wave) {
       updateEligibility(waveId, {
-        authenticated_user_eligible_to_chat: data.wave.authenticated_user_eligible_to_chat,
-        authenticated_user_eligible_to_vote: data.wave.authenticated_user_eligible_to_vote,
-        authenticated_user_eligible_to_participate: data.wave.authenticated_user_eligible_to_participate,
+        authenticated_user_eligible_to_chat:
+          data.wave.authenticated_user_eligible_to_chat,
+        authenticated_user_eligible_to_vote:
+          data.wave.authenticated_user_eligible_to_vote,
+        authenticated_user_eligible_to_participate:
+          data.wave.authenticated_user_eligible_to_participate,
         authenticated_user_admin: data.wave.authenticated_user_admin,
       });
     }
@@ -197,9 +196,7 @@ export function formatWaveMessages(
 
   // Calculate the highest serial number from the fetched drops
   const latestFetchedSerialNo =
-    drops.length > 0
-      ? Math.max(...drops.map((drop) => drop.serial_no))
-      : undefined;
+    drops.length > 0 ? Math.max(...drops.map((drop) => drop.serial_no)) : null;
 
   const update: WaveMessagesUpdate = {
     key: waveId,
@@ -369,9 +366,12 @@ export async function fetchNewestWaveMessages(
     // Update centralized eligibility if callback provided
     if (updateEligibility && data.wave) {
       updateEligibility(waveId, {
-        authenticated_user_eligible_to_chat: data.wave.authenticated_user_eligible_to_chat,
-        authenticated_user_eligible_to_vote: data.wave.authenticated_user_eligible_to_vote,
-        authenticated_user_eligible_to_participate: data.wave.authenticated_user_eligible_to_participate,
+        authenticated_user_eligible_to_chat:
+          data.wave.authenticated_user_eligible_to_chat,
+        authenticated_user_eligible_to_vote:
+          data.wave.authenticated_user_eligible_to_vote,
+        authenticated_user_eligible_to_participate:
+          data.wave.authenticated_user_eligible_to_participate,
         authenticated_user_admin: data.wave.authenticated_user_admin,
       });
     }

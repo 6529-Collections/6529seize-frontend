@@ -3,7 +3,10 @@
 import { useMemo, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
-import { CompactMenu, type CompactMenuItem } from "@/components/common/CompactMenu";
+import {
+  CompactMenu,
+  type CompactMenuItem,
+} from "@/components/common/CompactMenu";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
 import { WaveGroupType } from "../../../WaveGroup.types";
@@ -21,7 +24,7 @@ interface WaveGroupEditMenuProps {
   readonly type: WaveGroupType;
   readonly onWaveUpdate: (
     body: ApiUpdateWaveRequest,
-    opts?: { readonly skipAuth?: boolean | undefined },
+    opts?: { readonly skipAuth?: boolean | undefined }
   ) => Promise<void>;
   readonly hasGroup: boolean;
   readonly canIncludeIdentity: boolean;
@@ -29,8 +32,8 @@ interface WaveGroupEditMenuProps {
   readonly canRemoveGroup: boolean;
   readonly onIncludeIdentity: () => void;
   readonly onExcludeIdentity: () => void;
-  readonly onChangeGroup?: () => void | undefined | undefined;
-  readonly onRemoveGroup?: () => void | undefined | undefined;
+  readonly onChangeGroup?: (() => void) | undefined;
+  readonly onRemoveGroup?: (() => void) | undefined;
 }
 
 interface WaveGroupEditMenuTriggerProps {
@@ -105,8 +108,7 @@ export default function WaveGroupEditMenu({
           }
           removeButtonRef.current?.open();
         },
-        className:
-          "tw-text-red desktop-hover:hover:tw-text-red",
+        className: "tw-text-red desktop-hover:hover:tw-text-red",
       });
     }
 

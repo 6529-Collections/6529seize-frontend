@@ -12,7 +12,7 @@ import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 export default function NextGenNavigationHeader(
   props: Readonly<{
     view?: NextgenView | undefined;
-    setView?: (view: NextgenView | undefined) => void | undefined | undefined;
+    setView?: ((view: NextgenView | undefined) => void) | undefined;
   }>
 ) {
   const [isMobile, setIsMobile] = useState(false);

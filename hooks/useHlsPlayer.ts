@@ -11,9 +11,9 @@ interface UseHlsPlayerParams {
   /** If true, auto-play when HLS (or fallback) is ready. */
   autoPlay?: boolean | undefined;
   /** Called on non-fatal or fatal HLS errors if you want. */
-  onError?: (data: any) => void | undefined | undefined;
+  onError?: ((data: any) => void) | undefined;
   /** Called once the manifest is parsed (like MANIFEST_PARSED). */
-  onManifestParsed?: () => void | undefined | undefined;
+  onManifestParsed?: (() => void) | undefined;
   /** If HLS completely fails, we can fallback to this original src. */
   fallbackSrc?: string | undefined;
 }

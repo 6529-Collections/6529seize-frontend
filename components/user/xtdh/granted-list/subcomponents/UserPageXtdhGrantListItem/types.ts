@@ -20,7 +20,6 @@ export interface GrantDetails {
   readonly tdhRatePerTokenHint?: string | null | undefined;
   readonly totalGrantedLabel: ReactNode;
   readonly validFromLabel: ReactNode;
-
 }
 
 export type GrantItemVariant = "contract" | "error";
@@ -40,7 +39,7 @@ export interface GrantTokensDisclosureState {
   readonly contractAddress: `0x${string}` | null;
   readonly chain: SupportedChain | null;
   readonly grantId: string;
-  readonly onEndReached?: () => void | undefined | undefined;
+  readonly onEndReached?: (() => void) | undefined;
   readonly isFetchingNextPage: boolean;
 }
 

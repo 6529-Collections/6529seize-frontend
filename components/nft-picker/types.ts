@@ -25,13 +25,13 @@ type BaseSelection = {
 
 export type NftPickerSelection =
   | (BaseSelection & {
-    outputMode: "number";
-    tokenIds: readonly number[];
-  })
+      outputMode: "number";
+      tokenIds: readonly number[];
+    })
   | (BaseSelection & {
-    outputMode: "bigint";
-    tokenIds: readonly string[];
-  });
+      outputMode: "bigint";
+      tokenIds: readonly string[];
+    });
 
 // Emitted when the picker cannot safely emit number output because token IDs exceed Number.MAX_SAFE_INTEGER.
 export type NftPickerSelectionError = {
@@ -42,7 +42,10 @@ export type NftPickerSelectionError = {
   outputMode: "number";
 };
 
-export type NftPickerChange = NftPickerSelection | NftPickerSelectionError | null;
+export type NftPickerChange =
+  | NftPickerSelection
+  | NftPickerSelectionError
+  | null;
 
 export type NftPickerOnChange = {
   // Bivariant to accept handlers that only handle the successful selection shape.
@@ -60,7 +63,10 @@ export type NftPickerProps = {
   readonly value?: NftPickerValue | undefined;
   readonly defaultValue?: Partial<NftPickerValue> | undefined;
   readonly onChange: NftPickerOnChange;
-  readonly onContractChange?: (meta: ContractOverview | null) => void | undefined | undefined;
+  readonly onContractChange?:
+    | ((meta: ContractOverview | null) => void)
+    | undefined
+    | undefined;
   readonly chain?: SupportedChain | undefined;
   readonly outputMode?: OutputMode | undefined;
   readonly hideSpam?: boolean | undefined;
@@ -70,7 +76,10 @@ export type NftPickerProps = {
   readonly overscan?: number | undefined;
   readonly placeholder?: string | undefined;
   readonly className?: string | undefined;
-  readonly renderTokenExtra?: (tokenId: bigint, metadata?: TokenMetadata) => ReactNode | undefined | undefined;
+  readonly renderTokenExtra?:
+    | ((tokenId: bigint, metadata?: TokenMetadata) => ReactNode)
+    | undefined
+    | undefined;
   readonly variant?: "card" | "flat" | undefined;
 };
 

@@ -20,7 +20,10 @@ export default function CommonProfileSearchItems({
   readonly searchCriteria: string | null;
   readonly onProfileSelect: (newV: CommunityMemberMinimal | null) => void;
   readonly highlightedIndex?: number | null | undefined;
-  readonly onHighlightedOptionIdChange?: (optionId: string | undefined) => void | undefined | undefined;
+  readonly onHighlightedOptionIdChange?:
+    | ((optionId: string | undefined) => void)
+    | undefined
+    | undefined;
   readonly listboxId?: string | undefined;
 }) {
   const generatedListboxId = useId();

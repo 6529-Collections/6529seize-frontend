@@ -5,7 +5,7 @@ import { useState, useRef, useCallback } from "react";
 interface UseLongPressInteractionOptions {
   longPressDuration?: number | undefined;
   moveThreshold?: number | undefined;
-  onInteractionStart?: () => void | undefined | undefined;
+  onInteractionStart?: (() => void) | undefined;
   hasTouchScreen?: boolean | undefined;
 }
 

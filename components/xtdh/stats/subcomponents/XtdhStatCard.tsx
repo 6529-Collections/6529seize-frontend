@@ -6,7 +6,7 @@ interface XtdhStatCardProps {
   readonly value: string;
   readonly subtext?: string | undefined;
   readonly tooltip?: string | undefined;
-  readonly onClick?: () => void | undefined | undefined;
+  readonly onClick?: (() => void) | undefined;
 }
 
 export function XtdhStatCard({

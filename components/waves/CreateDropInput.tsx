@@ -99,7 +99,7 @@ const CreateDropInput = forwardRef<
     readonly isStormMode: boolean;
     readonly submitting: boolean;
     readonly isDropMode: boolean;
-    readonly onDrop?: () => void | undefined | undefined;
+    readonly onDrop?: (() => void) | undefined;
     readonly onEditorState: (editorState: EditorState) => void;
     readonly onReferencedNft: (referencedNft: ReferencedNft) => void;
     readonly onMentionedUser: (
@@ -290,7 +290,9 @@ const CreateDropInput = forwardRef<
               <DragDropPastePlugin />
               <ListPlugin />
               <PlainTextPastePlugin />
-              <MarkdownShortcutPlugin transformers={SAFE_MARKDOWN_TRANSFORMERS} />
+              <MarkdownShortcutPlugin
+                transformers={SAFE_MARKDOWN_TRANSFORMERS}
+              />
               <TabIndentationPlugin />
               <LinkPlugin validateUrl={validateUrl} />
               <ClearEditorPlugin ref={clearEditorRef} />

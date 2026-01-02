@@ -38,7 +38,7 @@ export const CollapsedWave = ({
     }`}>
     <Link
       href={href}
-      onMouseEnter={onMouseEnter}
+      {...(onMouseEnter ? { onMouseEnter } : {})}
       onClick={onClick}
       className="tw-flex tw-items-center tw-justify-center tw-no-underline"
       {...(showTooltip ? { "data-tooltip-id": tooltipId } : {})}>

@@ -9,7 +9,7 @@ interface DropdownTraitProps {
   readonly field: keyof TraitsData;
   readonly className?: string | undefined;
   readonly error?: string | null | undefined;
-  readonly onBlur?: (field: keyof TraitsData) => void | undefined | undefined;
+  readonly onBlur?: ((field: keyof TraitsData) => void) | undefined;
   readonly options: readonly string[];
   readonly traits: TraitsData;
   readonly updateText: (field: keyof TraitsData, value: string) => void;
@@ -63,7 +63,8 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = React.memo(
         label={label}
         className={className}
         error={error}
-        isFieldFilled={isFieldFilled}>
+        isFieldFilled={isFieldFilled}
+      >
         <select
           ref={selectRef}
           defaultValue={(traits[field] as string) || ""}
@@ -84,7 +85,8 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = React.memo(
             backgroundPosition: "right 0.5rem center",
             backgroundRepeat: "no-repeat",
             backgroundSize: "1.5em 1.5em",
-          }}>
+          }}
+        >
           <option value="" className="tw-bg-iron-950">
             Select {label}
           </option>

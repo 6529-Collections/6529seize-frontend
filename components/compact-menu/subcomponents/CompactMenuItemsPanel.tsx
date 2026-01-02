@@ -51,7 +51,7 @@ export function CompactMenuItemsPanel({
         const isActive = item.active ?? activeItemId === item.id;
 
         return (
-          <MenuItem key={item.id} as={Fragment} disabled={item.disabled}>
+          <MenuItem key={item.id} as={Fragment} disabled={!!item.disabled}>
             {({ active }) => (
               <CompactMenuItemButton
                 item={item}

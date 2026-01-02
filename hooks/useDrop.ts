@@ -35,7 +35,7 @@ export const useDrop = ({
     data: drop,
     isFetching,
     refetch,
-  } = useQuery<ApiDrop>({
+  } = useQuery<ApiDrop | undefined>({
     queryKey: getDropQueryKey(dropId),
     queryFn: () => fetchDrop(dropId),
     initialData: initialDrop,

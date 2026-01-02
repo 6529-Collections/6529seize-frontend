@@ -160,7 +160,7 @@ async function fetchTokenMetadataFromApi(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body,
-    signal: params.signal,
+    signal: params.signal ?? null,
   };
 
   const payload = await fetchJsonWithFailover<AlchemyTokenMetadataResponse>(

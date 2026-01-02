@@ -13,8 +13,11 @@ export default function GroupCardView({
 }: {
   readonly group?: ApiGroupFull | undefined;
   readonly haveActiveGroupVoteAll: boolean;
-  readonly setState?: (state: GroupCardState) => void | undefined | undefined;
-  readonly onEditClick?: (group: ApiGroupFull) => void | undefined | undefined;
+  readonly setState?: ((state: GroupCardState) => void) | undefined;
+  readonly onEditClick?:
+    | ((group: ApiGroupFull) => void)
+    | undefined
+    | undefined;
   readonly userPlaceholder?: string | undefined;
   readonly titlePlaceholder?: string | undefined;
 }) {

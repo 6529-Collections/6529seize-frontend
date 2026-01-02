@@ -10,7 +10,7 @@ interface NumberTraitProps {
   readonly field: keyof TraitsData;
   readonly className?: string | undefined;
   readonly error?: string | null | undefined;
-  readonly onBlur?: (field: keyof TraitsData) => void | undefined | undefined;
+  readonly onBlur?: ((field: keyof TraitsData) => void) | undefined;
   readonly readOnly?: boolean | undefined;
   readonly min: number;
   readonly max: number;
@@ -197,7 +197,8 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(
         readOnly={readOnly}
         className={className}
         error={error}
-        isFieldFilled={isFieldFilled}>
+        isFieldFilled={isFieldFilled}
+      >
         <input
           ref={inputRef}
           type="number"

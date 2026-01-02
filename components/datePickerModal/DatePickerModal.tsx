@@ -13,8 +13,14 @@ interface Props {
   initial_to_date?: Date | undefined;
   initial_from_block?: number | undefined;
   initial_to_block?: number | undefined;
-  onApplyDate?: (fromDate: Date, toDate: Date) => void | undefined | undefined;
-  onApplyBlock?: (fromBlock: number, toBlock: number) => void | undefined | undefined;
+  onApplyDate?:
+    | ((fromDate: Date, toDate: Date) => void)
+    | undefined
+    | undefined;
+  onApplyBlock?:
+    | ((fromBlock: number, toBlock: number) => void)
+    | undefined
+    | undefined;
   onHide: () => void;
 }
 
@@ -90,7 +96,8 @@ export default function DatePickerModal(props: Readonly<Props>) {
         />
       </div>
       <Modal.Body
-        className={`${styles["body"]} d-flex align-items-center justify-content-between font-larger`}>
+        className={`${styles["body"]} d-flex align-items-center justify-content-between font-larger`}
+      >
         <Container>
           <Row>
             <Col>
@@ -191,7 +198,8 @@ export default function DatePickerModal(props: Readonly<Props>) {
               <span className="d-flex justify-content-end gap-2">
                 <Button
                   className="seize-btn-link"
-                  onClick={() => props.onHide()}>
+                  onClick={() => props.onHide()}
+                >
                   Cancel
                 </Button>
                 <Button
@@ -199,7 +207,8 @@ export default function DatePickerModal(props: Readonly<Props>) {
                   onClick={() => {
                     setError(undefined);
                     apply();
-                  }}>
+                  }}
+                >
                   Apply
                 </Button>
               </span>

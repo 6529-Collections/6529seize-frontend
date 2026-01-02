@@ -2,7 +2,11 @@ import clsx from "clsx";
 
 import type { TokenMetadata } from "@/types/nft";
 
-import { formatCount, formatXtdhRate, formatXtdhValue } from "../../utils/formatters";
+import {
+  formatCount,
+  formatXtdhRate,
+  formatXtdhValue,
+} from "../../utils/formatters";
 import { XtdhContributorSummary } from "../../subcomponents/XtdhContributorSummary";
 import { XtdhRatePill } from "../../collection-card-content/subcomponents/XtdhRatePill";
 import { getTokenLabel } from "../utils/getTokenLabel";
@@ -14,7 +18,7 @@ interface XtdhTokenListItemProps {
   readonly metadata?: TokenMetadata | undefined;
   readonly isMetadataLoading: boolean;
   readonly hasMetadataError: boolean;
-  readonly onSelect?: () => void | undefined | undefined;
+  readonly onSelect?: (() => void) | undefined;
   readonly as?: "li" | "div" | undefined;
   readonly className?: string | undefined;
 }

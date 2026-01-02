@@ -47,7 +47,10 @@ interface DropEditorProps {
   readonly wave: DropEditorWaveProps | null;
   readonly waveId: string | null;
   readonly onSubmitDrop: (dropRequest: CreateDropConfig) => void;
-  readonly onCanSubmitChange?: (canSubmit: boolean) => void | undefined | undefined;
+  readonly onCanSubmitChange?:
+    | ((canSubmit: boolean) => void)
+    | undefined
+    | undefined;
 }
 
 const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
@@ -156,7 +159,8 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
           setMetadata={setMetadata}
           onSubmitDrop={onSubmitDrop}
           onCanSubmitChange={onCanSubmitChange}
-          key={dropEditorRefreshKey}>
+          key={dropEditorRefreshKey}
+        >
           {!!drop?.parts.length && isStormMode && !loading ? (
             <CreateDropStormView
               drop={drop}

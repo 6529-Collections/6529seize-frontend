@@ -28,7 +28,17 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
 
     const waveDetails =
       (drop.wave as unknown as {
-        chat?: { scope?: { group?: { is_direct_message?: boolean | undefined } | undefined } | undefined } | undefined;
+        chat?:
+          | {
+              scope?:
+                | {
+                    group?:
+                      | { is_direct_message?: boolean | undefined }
+                      | undefined;
+                  }
+                | undefined;
+            }
+          | undefined;
       }) ?? undefined;
     const isDirectMessage = isWaveDirectMessage(
       drop.wave.id,
@@ -64,14 +74,16 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
         onClick={copyToClipboard}
         disabled={isDisabled}
         aria-label="Copy link"
-        data-tooltip-id={!isDisabled ? `copy-link-${drop.id}` : undefined}>
+        {...(!isDisabled ? { "data-tooltip-id": `copy-link-${drop.id}` } : {})}
+      >
         <svg
           className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth="1.5"
-          stroke="currentColor">
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -95,7 +107,8 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
             boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
             zIndex: 99999,
             pointerEvents: "none",
-          }}>
+          }}
+        >
           <span className="tw-text-xs">{getLinkText()}</span>
         </Tooltip>
       )}

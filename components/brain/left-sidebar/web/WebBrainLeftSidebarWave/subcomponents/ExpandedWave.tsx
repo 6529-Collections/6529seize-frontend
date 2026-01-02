@@ -62,7 +62,7 @@ export const ExpandedWave = ({
     >
       <Link
         href={href}
-        onMouseEnter={onMouseEnter}
+        {...(onMouseEnter ? { onMouseEnter } : {})}
         onClick={onClick}
         className={`tw-flex tw-flex-1 tw-min-w-0 tw-space-x-3 tw-no-underline tw-py-1 tw-transition-all tw-duration-200 tw-ease-out ${
           isActive

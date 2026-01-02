@@ -6,7 +6,7 @@ type InputProps = {
   readonly theme?: "dark" | "light" | undefined;
   readonly size?: "sm" | "md" | undefined;
   readonly onChange: (newV: string | null) => void;
-  readonly onFocusChange?: (focus: boolean) => void | undefined | undefined;
+  readonly onFocusChange?: ((focus: boolean) => void) | undefined;
 };
 
 type NumberInputProps = InputProps & {

@@ -9,7 +9,7 @@ interface HorizontalTimelineProps {
   readonly nextDecisionTime: number | null;
   readonly animationComplete?: boolean | undefined;
   readonly focus?: "start" | "end" | null | undefined;
-  readonly onFocusHandled?: () => void | undefined | undefined;
+  readonly onFocusHandled?: (() => void) | undefined;
 }
 
 /**
@@ -93,7 +93,10 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
       return true;
     };
 
-    const scrollToDecision = (decision: DecisionPoint | undefined, inline: ScrollLogicalPosition) => {
+    const scrollToDecision = (
+      decision: DecisionPoint | undefined,
+      inline: ScrollLogicalPosition
+    ) => {
       if (!decision) {
         return false;
       }
@@ -170,11 +173,13 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
       <div className="tw-relative">
         <div
           ref={scrollContainerRef}
-          className="tw-overflow-x-auto tw-pb-2 tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
+          className="tw-overflow-x-auto tw-pb-2 tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+        >
           <div
             className={`tw-flex tw-gap-4 ${
               shouldSpread ? "tw-w-full" : "tw-max-w-20"
-            }`}>
+            }`}
+          >
             {decisions.map((decision) => {
               const isNext =
                 !!nextDecisionTime && decision.timestamp === nextDecisionTime;
@@ -184,7 +189,8 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
                   key={decision.id}
                   ref={(el) => {
                     itemRefs.current[decision.id] = el;
-                  }}>
+                  }}
+                >
                   <HorizontalTimelineItem
                     decision={decision}
                     isNext={isNext}

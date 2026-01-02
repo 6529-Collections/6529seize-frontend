@@ -69,9 +69,7 @@ import { EmojiNode } from "../lexical/nodes/EmojiNode";
 import CreateDropEmojiPicker from "@/components/waves/CreateDropEmojiPicker";
 import EmojiPlugin from "../lexical/plugins/emoji/EmojiPlugin";
 import PlainTextPastePlugin from "../lexical/plugins/PlainTextPastePlugin";
-import {
-  exportDropMarkdown,
-} from "@/components/waves/drops/normalizeDropMarkdown";
+import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
 
 export interface CreateDropContentHandles {
   clearEditorState: () => void;
@@ -89,7 +87,7 @@ const CreateDropContent = forwardRef<
     readonly canSubmit: boolean;
     readonly missingMedia: ApiWaveParticipationRequirement[];
     readonly missingMetadata: ApiWaveRequiredMetadata[];
-    readonly onDrop?: () => void | undefined | undefined;
+    readonly onDrop?: (() => void) | undefined;
     readonly onEditorState: (editorState: EditorState) => void;
     readonly onReferencedNft: (referencedNft: ReferencedNft) => void;
     readonly onMentionedUser: (
@@ -289,7 +287,9 @@ const CreateDropContent = forwardRef<
               <DragDropPastePlugin />
               <ListPlugin />
               <PlainTextPastePlugin />
-              <MarkdownShortcutPlugin transformers={SAFE_MARKDOWN_TRANSFORMERS} />
+              <MarkdownShortcutPlugin
+                transformers={SAFE_MARKDOWN_TRANSFORMERS}
+              />
               <TabIndentationPlugin />
               <LinkPlugin validateUrl={validateUrl} />
               <ClearEditorPlugin ref={clearEditorRef} />

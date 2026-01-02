@@ -7,7 +7,7 @@ interface Props {
   readonly elementRole?: string | undefined;
   readonly onClicked?: (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>
-  ) => void | undefined | undefined;
+  ) => void | undefined;
 }
 
 export default function CommonAnimationOpacity(props: Props) {

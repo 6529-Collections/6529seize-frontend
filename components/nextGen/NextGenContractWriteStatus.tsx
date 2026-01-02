@@ -16,7 +16,7 @@ interface Props {
   hash?: `0x${string}` | undefined;
   isLoading: boolean;
   error: any;
-  onSuccess?: () => void | undefined | undefined;
+  onSuccess?: (() => void) | undefined;
 }
 
 export default function NextGenContractWriteStatus(props: Readonly<Props>) {
@@ -97,7 +97,8 @@ export default function NextGenContractWriteStatus(props: Readonly<Props>) {
           <Link
             href={getTransactionLink(NEXTGEN_CHAIN_ID, props.hash)}
             target="_blank"
-            rel="noopener noreferrer">
+            rel="noopener noreferrer"
+          >
             view
           </Link>
           {waitContractWrite.isLoading && (
@@ -117,7 +118,8 @@ export default function NextGenContractWriteStatus(props: Readonly<Props>) {
                 <Link
                   href={`/nextgen/token/${t}`}
                   target="_blank"
-                  rel="noopener noreferrer">
+                  rel="noopener noreferrer"
+                >
                   #{t}
                 </Link>
               </li>

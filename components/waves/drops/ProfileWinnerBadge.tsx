@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useId } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -20,7 +20,7 @@ interface ProfileWinnerBadgeProps {
   readonly winCount: number;
   readonly title?: string | undefined;
   readonly tooltipId?: string | undefined;
-  readonly onBadgeClick?: () => void | undefined | undefined;
+  readonly onBadgeClick?: (() => void) | undefined;
 }
 
 export const ProfileWinnerBadge: React.FC<ProfileWinnerBadgeProps> = ({
@@ -34,6 +34,7 @@ export const ProfileWinnerBadge: React.FC<ProfileWinnerBadgeProps> = ({
   const uniqueTooltipId = `${tooltipId}-${id}`;
   const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
 
+  const dataTooltipId = !isMobile ? uniqueTooltipId : undefined;
 
   if (winCount === 0) return null;
 
@@ -61,7 +62,7 @@ export const ProfileWinnerBadge: React.FC<ProfileWinnerBadgeProps> = ({
         aria-label={`View ${winCount} winning artwork${
           winCount === 1 ? "" : "s"
         }`}
-        data-tooltip-id={!isMobile ? uniqueTooltipId : undefined}
+        {...(dataTooltipId && { "data-tooltip-id": dataTooltipId })}
       >
         <FontAwesomeIcon
           icon={faTrophy}

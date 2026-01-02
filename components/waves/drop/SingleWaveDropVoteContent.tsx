@@ -17,7 +17,7 @@ import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 interface SingleWaveDropVoteContentProps {
   readonly drop: ApiDrop;
   readonly size: SingleWaveDropVoteSize;
-  readonly onVoteSuccess?: () => void | undefined | undefined;
+  readonly onVoteSuccess?: (() => void) | undefined;
 }
 
 export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
@@ -25,12 +25,13 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
   size,
   onVoteSuccess,
 }) => {
-
   const currentVoteValue = drop.context_profile_context?.rating ?? 0;
   const minRating = drop.context_profile_context?.min_rating ?? 0;
   const maxRating = drop.context_profile_context?.max_rating ?? 0;
   const [voteValue, setVoteValue] = useState<number | string>(currentVoteValue);
-  const [isSliderMode, setIsSliderMode] = useState(size !== SingleWaveDropVoteSize.MINI);
+  const [isSliderMode, setIsSliderMode] = useState(
+    size !== SingleWaveDropVoteSize.MINI
+  );
 
   const voteLabel =
     WAVE_VOTING_LABELS[drop.wave.voting_credit_type as ApiWaveCreditType] ||
@@ -61,7 +62,11 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
                     tw-flex tw-items-center tw-justify-center tw-transition-all tw-flex-shrink-0
                     desktop-hover:hover:tw-bg-iron-600 tw-font-medium"
             title={isSliderMode ? "Switch to numeric" : "Switch to slider"}
-            aria-label={isSliderMode ? "Switch to numeric input" : "Switch to slider input"}
+            aria-label={
+              isSliderMode
+                ? "Switch to numeric input"
+                : "Switch to slider input"
+            }
           >
             <FontAwesomeIcon
               icon={faExchange}
@@ -117,10 +122,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
   }
 
   return (
-    <div
-      className="tw-space-y-6"
-      onClick={(e) => e.stopPropagation()}
-    >
+    <div className="tw-space-y-6" onClick={(e) => e.stopPropagation()}>
       <div className="tw-flex tw-gap-3">
         <div className="tw-flex-1 tw-min-w-0 tw-h-14">
           {isSliderMode ? (
@@ -164,7 +166,9 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
           className="tw-bg-transparent tw-border-0 tw-p-0 tw-text-sm tw-font-medium tw-text-primary-400
                   desktop-hover:hover:tw-text-primary-300 tw-transition-colors"
           title="Switch mode"
-          aria-label={isSliderMode ? "Switch to numeric input" : "Switch to slider input"}
+          aria-label={
+            isSliderMode ? "Switch to numeric input" : "Switch to slider input"
+          }
         >
           {isSliderMode ? "Switch to numeric" : "Switch to slider"}
         </button>

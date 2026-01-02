@@ -8,7 +8,7 @@ import type {
 export type TokenListAction = {
   label: string;
   onClick: (tokenId: bigint, metadata?: TokenMetadata) => void;
-  getAriaLabel?: (tokenLabel: string) => string | undefined | undefined;
+  getAriaLabel?: ((tokenLabel: string) => string) | undefined;
 };
 
 export type TokenWindowEntry = {
@@ -23,7 +23,10 @@ export interface VirtualizedTokenListProps {
   readonly ranges: TokenRange[];
   readonly scrollKey: string;
   readonly overscan?: number | undefined;
-  readonly renderTokenExtra?: (tokenId: bigint, metadata?: TokenMetadata) => ReactNode | undefined | undefined;
+  readonly renderTokenExtra?:
+    | ((tokenId: bigint, metadata?: TokenMetadata) => ReactNode)
+    | undefined
+    | undefined;
   readonly action?: TokenListAction | undefined;
   readonly className?: string | undefined;
   readonly scrollContainerClassName?: string | undefined;
@@ -31,7 +34,10 @@ export interface VirtualizedTokenListProps {
   readonly footerContent?: ReactNode | undefined;
   readonly footerClassName?: string | undefined;
   readonly emptyState?: ReactNode | undefined;
-  readonly onEndReached?: (info: { lastVisibleIndex: number; totalCount: number }) => void | undefined | undefined;
+  readonly onEndReached?:
+    | ((info: { lastVisibleIndex: number; totalCount: number }) => void)
+    | undefined
+    | undefined;
   readonly endReachedOffset?: number | undefined;
   readonly layout?: "list" | "grid" | undefined;
   readonly columns?: number | undefined;
@@ -40,5 +46,8 @@ export interface VirtualizedTokenListProps {
 }
 
 export type VirtualizedTokenListContentProps = Readonly<
-  Omit<VirtualizedTokenListProps, "emptyState"> & { totalCount: number; emptyState: ReactNode }
+  Omit<VirtualizedTokenListProps, "emptyState"> & {
+    totalCount: number;
+    emptyState: ReactNode;
+  }
 >;

@@ -23,7 +23,10 @@ interface XtdhCollectionsListProps {
   readonly errorMessage?: string | undefined;
   readonly onRetry: () => void;
   readonly selectedContract?: string | null | undefined;
-  readonly onSelectCollection?: (contract: string | null) => void | undefined | undefined;
+  readonly onSelectCollection?:
+    | ((contract: string | null) => void)
+    | undefined
+    | undefined;
   readonly isIdentityScoped?: boolean | undefined;
 }
 

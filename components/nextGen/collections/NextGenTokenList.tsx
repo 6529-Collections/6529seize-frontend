@@ -28,7 +28,7 @@ interface Props {
   show_normalised?: boolean | undefined;
   show_trait_count?: boolean | undefined;
   listed_type?: NextGenTokenListedType | undefined;
-  setTotalResults?: (totalResults: number) => void | undefined | undefined;
+  setTotalResults?: ((totalResults: number) => void) | undefined;
   show_pagination?: boolean | undefined;
 }
 
@@ -161,7 +161,8 @@ export default function NextGenTokenList(props: Readonly<Props>) {
                   sm={4}
                   md={4}
                   key={getRandomObjectId()}
-                  className="pt-3 pb-3">
+                  className="pt-3 pb-3"
+                >
                   <NextGenTokenImage
                     token={t}
                     rarity_type={rarityType}

@@ -5,7 +5,7 @@ export interface CompactMenuItem {
   readonly id: string;
   readonly label: ReactNode;
   readonly icon?: ReactNode | undefined;
-  readonly onSelect?: () => void | undefined | undefined;
+  readonly onSelect?: (() => void) | undefined;
   readonly disabled?: boolean | undefined;
   readonly className?: string | undefined;
   readonly active?: boolean | undefined;
@@ -20,7 +20,7 @@ export interface CompactMenuProps {
     | ReactNode
     | ((context: { isOpen: boolean; close: () => void }) => ReactNode);
   readonly items: readonly CompactMenuItem[];
-  readonly onItemSelect?: (id: string) => void | undefined | undefined;
+  readonly onItemSelect?: ((id: string) => void) | undefined;
   readonly className?: string | undefined;
   readonly triggerClassName?: string | undefined;
   readonly unstyledTrigger?: boolean | undefined;

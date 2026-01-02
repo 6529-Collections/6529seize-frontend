@@ -52,7 +52,7 @@ export default function UserFollowBtn({
 }: {
   readonly handle: string;
   readonly size?: UserFollowBtnSize | undefined;
-  readonly onDirectMessage?: () => void | undefined | undefined;
+  readonly onDirectMessage?: (() => void) | undefined;
   readonly directMessageLoading?: boolean | undefined;
 }) {
   const { onIdentityFollowChange } = useContext(ReactQueryWrapperContext);

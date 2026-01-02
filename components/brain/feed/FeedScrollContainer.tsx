@@ -12,7 +12,7 @@ import { NEAR_TOP_SCROLL_THRESHOLD_PX } from "../constants";
 interface FeedScrollContainerProps {
   readonly children: React.ReactNode;
   readonly onScrollUpNearTop: () => void;
-  readonly onScrollDownNearBottom?: () => void | undefined | undefined;
+  readonly onScrollDownNearBottom?: (() => void) | undefined;
   readonly isFetchingNextPage?: boolean | undefined;
   readonly className?: string | undefined;
 }
@@ -113,9 +113,12 @@ export const FeedScrollContainer = forwardRef<
       const intersectionObserver = new IntersectionObserver(
         (entries) => {
           for (const entry of entries) {
-            const rootTop = entry.rootBounds?.top ?? scrollContainer.getBoundingClientRect().top;
+            const rootTop =
+              entry.rootBounds?.top ??
+              scrollContainer.getBoundingClientRect().top;
             const isAbove =
-              !entry.isIntersecting && entry.boundingClientRect.bottom <= rootTop;
+              !entry.isIntersecting &&
+              entry.boundingClientRect.bottom <= rootTop;
 
             updateOutOfViewCount(entry.target, isAbove);
           }
@@ -180,9 +183,8 @@ export const FeedScrollContainer = forwardRef<
         observedFeedItems.clear();
         outOfViewAboveCountRef.current = 0;
 
-        const initialElements = contentRef.current?.querySelectorAll(
-          FEED_ITEM_SELECTOR
-        );
+        const initialElements =
+          contentRef.current?.querySelectorAll(FEED_ITEM_SELECTOR);
 
         if (!initialElements) {
           return;
@@ -237,8 +239,7 @@ export const FeedScrollContainer = forwardRef<
           };
 
           const latestScrollTop = currentTarget.scrollTop;
-          const isNearTop =
-            latestScrollTop <= NEAR_TOP_SCROLL_THRESHOLD_PX;
+          const isNearTop = latestScrollTop <= NEAR_TOP_SCROLL_THRESHOLD_PX;
 
           const direction = latestScrollTop > lastScrollTop ? "down" : "up";
           setLastScrollTop(latestScrollTop);
@@ -286,7 +287,8 @@ export const FeedScrollContainer = forwardRef<
         ref={ref}
         style={{ overflowAnchor: "none" }}
         className={`tw-flex tw-flex-col-reverse tw-overflow-x-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-h-full ${className}`}
-        onScroll={handleScroll}>
+        onScroll={handleScroll}
+      >
         <div ref={contentRef}>{children}</div>
       </div>
     );

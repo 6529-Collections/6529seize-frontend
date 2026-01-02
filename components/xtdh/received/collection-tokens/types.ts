@@ -30,7 +30,10 @@ export interface XtdhTokensListProps {
   readonly isError: boolean;
   readonly errorMessage?: string | undefined;
   readonly onRetry: () => void;
-  readonly onTokenSelect?: (descriptor: XtdhSelectedTokenDescriptor) => void | undefined | undefined;
+  readonly onTokenSelect?:
+    | ((descriptor: XtdhSelectedTokenDescriptor) => void)
+    | undefined
+    | undefined;
 }
 
 export interface UseXtdhTokensListStateParams

@@ -29,7 +29,10 @@ export default function GroupCard({
 }: {
   readonly group?: ApiGroupFull | undefined;
   readonly activeGroupIdVoteAll?: string | null | undefined;
-  readonly setActiveGroupIdVoteAll?: (value: string | null) => void | undefined | undefined;
+  readonly setActiveGroupIdVoteAll?:
+    | ((value: string | null) => void)
+    | undefined
+    | undefined;
   readonly userPlaceholder?: string | undefined;
   readonly titlePlaceholder?: string | undefined;
 }) {

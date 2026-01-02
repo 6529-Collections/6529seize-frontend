@@ -13,7 +13,7 @@ export default function WaveMute({
   onSuccess,
 }: {
   readonly wave: ApiWave;
-  readonly onSuccess?: () => void | undefined | undefined;
+  readonly onSuccess?: (() => void) | undefined;
 }) {
   const queryClient = useQueryClient();
   const { setToast } = useAuth();
@@ -59,7 +59,8 @@ export default function WaveMute({
       }}
       className="tw-flex tw-items-center tw-gap-2 tw-bg-transparent tw-w-full tw-border-none tw-px-3 tw-py-1 tw-text-sm tw-leading-6 tw-text-iron-300 hover:tw-bg-iron-800 tw-text-left tw-transition tw-duration-300 tw-ease-out"
       role="menuitem"
-      tabIndex={-1}>
+      tabIndex={-1}
+    >
       {loading && <Spinner dimension={14} />}
       {loading && (isMuted ? "Unmuting" : "Muting")}
       {!loading && (isMuted ? "Unmute" : "Mute")}

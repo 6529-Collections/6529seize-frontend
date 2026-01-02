@@ -9,7 +9,7 @@ type FallbackImageProps = Omit<ImageProps, "src" | "alt"> & {
   readonly alt?: string | undefined;
   readonly onPrimaryError?: (
     event: React.SyntheticEvent<HTMLImageElement, Event>
-  ) => void | undefined | undefined;
+  ) => void | undefined;
   readonly optimize?: boolean | undefined;
 };
 

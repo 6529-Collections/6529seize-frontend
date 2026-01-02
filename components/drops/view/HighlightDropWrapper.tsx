@@ -187,7 +187,7 @@ const HighlightDropWrapper = forwardRef<
     useIntersectionObserver(
       innerRef,
       {
-        root: scrollContainer ?? undefined,
+        root: scrollContainer ?? null,
         threshold: visibilityThreshold,
         freezeOnceVisible: true,
       },

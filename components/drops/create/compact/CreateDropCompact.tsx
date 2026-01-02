@@ -52,7 +52,7 @@ interface CreateDropCompactProps {
   readonly onReferencedNft: (newNft: ReferencedNft) => void;
   readonly onFileRemove: (file: File) => void;
   readonly setFiles: (files: File[]) => void;
-  readonly onDrop?: () => void | undefined | undefined;
+  readonly onDrop?: (() => void) | undefined;
   readonly onDropPart: () => void;
 }
 
@@ -147,7 +147,8 @@ const CreateDropCompact = forwardRef<
                 onDrop={onDrop}
                 onViewClick={() => onViewChange(CreateDropViewType.FULL)}
                 setFiles={setFiles}
-                onDropPart={onDropPart}>
+                onDropPart={onDropPart}
+              >
                 {showSubmit && (
                   <div>
                     {onDrop && (
@@ -159,7 +160,8 @@ const CreateDropCompact = forwardRef<
                           screenType === CreateDropScreenType.MOBILE
                             ? "tw-px-3 tw-py-2"
                             : "tw-px-4 tw-py-2.5"
-                        }>
+                        }
+                      >
                         {getSubmitText()}
                       </PrimaryButton>
                     )}
@@ -184,13 +186,15 @@ const CreateDropCompact = forwardRef<
                   onClick={() => onFileRemove(file)}
                   type="button"
                   aria-label="Remove file"
-                  className="-tw-mb-0.5 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-iron-800">
+                  className="-tw-mb-0.5 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-iron-800"
+                >
                   <svg
                     className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-red"
                     viewBox="0 0 24 24"
                     fill="none"
                     aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg">
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
                     <path
                       d="M18 6L6 18M6 6L18 18"
                       stroke="currentColor"

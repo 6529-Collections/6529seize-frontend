@@ -7,7 +7,7 @@ import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 
 interface WaveDropActionsRateProps {
   readonly drop: ApiDrop;
-  readonly onRated?: () => void | undefined | undefined;
+  readonly onRated?: (() => void) | undefined;
   readonly isMobile?: boolean | undefined;
 }
 

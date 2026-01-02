@@ -18,7 +18,7 @@ export default function GroupCardContent({
 }: {
   readonly group?: ApiGroupFull | undefined;
   readonly haveActiveGroupVoteAll: boolean;
-  readonly setState?: (state: GroupCardState) => void | undefined | undefined;
+  readonly setState?: ((state: GroupCardState) => void) | undefined;
   readonly titlePlaceholder?: string | undefined;
 }) {
   const { connectedProfile } = useContext(AuthContext);

@@ -9,9 +9,7 @@ import {
   validateGroupPayload as validateGroupPayloadLocal,
   toErrorMessage,
 } from "@/services/groups/groupMutations";
-import type {
-  ValidationResult as GroupValidationResult,
-} from "@/services/groups/groupMutations";
+import type { ValidationResult as GroupValidationResult } from "@/services/groups/groupMutations";
 
 export interface SubmitArgs {
   readonly payload: ApiCreateGroup;
@@ -52,7 +50,7 @@ type TestResult =
 
 interface UseGroupMutationsArgs {
   readonly requestAuth: () => Promise<{ success: boolean }>;
-  readonly onGroupCreate?: () => void | undefined | undefined;
+  readonly onGroupCreate?: (() => void) | undefined;
 }
 
 interface UpdateVisibilityArgs {
@@ -112,12 +110,12 @@ export const useGroupMutations = ({
 
   const publishGroupMutation = useMutation({
     mutationFn: async ({
-        id,
-        oldVersionId,
-      }: {
-        readonly id: string;
-        readonly oldVersionId: string | null;
-      }) => await publishGroup({ id, oldVersionId }),
+      id,
+      oldVersionId,
+    }: {
+      readonly id: string;
+      readonly oldVersionId: string | null;
+    }) => await publishGroup({ id, oldVersionId }),
   });
 
   const hideGroupMutation = useMutation({
@@ -259,7 +257,10 @@ export const useGroupMutations = ({
         };
       }
 
-      const oldVersionId = resolveOldVersionId({ previousGroup, currentHandle });
+      const oldVersionId = resolveOldVersionId({
+        previousGroup,
+        currentHandle,
+      });
 
       const visibilityResult = await updateVisibility({
         groupId: created.id,
@@ -342,7 +343,8 @@ export const useGroupMutations = ({
     submit,
     runTest,
     updateVisibility,
-    isSubmitting: createGroupMutation.isPending || publishGroupMutation.isPending,
+    isSubmitting:
+      createGroupMutation.isPending || publishGroupMutation.isPending,
     isTesting: testGroupMutation.isPending,
     isUpdatingVisibility:
       publishGroupMutation.isPending || hideGroupMutation.isPending,

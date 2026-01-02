@@ -4,11 +4,11 @@ import React from "react";
 import Link from "next/link";
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";
 
-type IconComp = React.ComponentType<{ className?: string | undefined }>; 
+type IconComp = React.ComponentType<{ className?: string | undefined }>;
 
 interface SidebarPrimaryItemProps {
   readonly href?: string | undefined;
-  readonly onClick?: (e?: React.MouseEvent) => void | undefined | undefined;
+  readonly onClick?: ((e?: React.MouseEvent) => void) | undefined;
   readonly icon?: IconComp | undefined;
   readonly iconSizeClass?: string | undefined;
   readonly label: string;
@@ -48,7 +48,9 @@ function WebSidebarNavItem({
           <div className="tw-relative">
             <Icon
               aria-hidden="true"
-              className={`tw-h-6 tw-w-6 tw-flex-shrink-0 ${iconSizeClass ?? ""}`}
+              className={`tw-h-6 tw-w-6 tw-flex-shrink-0 ${
+                iconSizeClass ?? ""
+              }`}
             />
             {hasIndicator && (
               <>

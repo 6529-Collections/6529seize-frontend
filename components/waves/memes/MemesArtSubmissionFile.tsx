@@ -161,7 +161,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
         setMediaSource("url");
       }
     },
-    [setMediaSource, onExternalMimeTypeChange],
+    [setMediaSource, onExternalMimeTypeChange]
   );
 
   const providerOptions = useMemo(
@@ -171,7 +171,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
         label: provider.label,
         panelId: `memes-art-submission-provider-${provider.key}`,
       })),
-    [],
+    []
   );
 
   const handleProviderSelect = useCallback(
@@ -184,7 +184,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
         onExternalProviderChange(key);
       }
     },
-    [externalProvider, onExternalProviderChange],
+    [externalProvider, onExternalProviderChange]
   );
 
   // Check browser compatibility on mount
@@ -236,26 +236,26 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
     if (externalValidationStatus === "pending") {
       return renderPreviewMessage(
         "Validating preview...",
-        "We're verifying the gateway serves an HTML document.",
+        "We're verifying the gateway serves an HTML document."
       );
     }
 
     if (externalValidationStatus === "invalid" && externalError) {
       return renderPreviewMessage(
         externalError,
-        "Only ipfs.io or arweave.net HTML documents can be embedded.",
+        "Only ipfs.io or arweave.net HTML documents can be embedded."
       );
     }
 
     return renderPreviewMessage(
       "Provide a valid hash or CID to enable the preview.",
-      "The final artwork is rendered securely inside a sandboxed iframe.",
+      "The final artwork is rendered securely inside a sandboxed iframe."
     );
   }, [externalValidationStatus, externalError]);
 
   const mediaTypeLabel = useMemo(() => {
     const match = ALLOWED_INTERACTIVE_MEDIA_MIME_TYPES.find(
-      (type) => type.value === externalMimeType,
+      (type) => type.value === externalMimeType
     );
     return match?.label ?? externalMimeType;
   }, [externalMimeType]);
@@ -275,11 +275,9 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
         <motion.div
           id="memes-art-submission-upload-panel"
           ref={dropAreaRef}
-          whileHover={
-            !artworkUploaded && !prefersReducedMotion
-              ? { scale: 1.002 }
-              : undefined
-          }
+          {...(!artworkUploaded && !prefersReducedMotion
+            ? { whileHover: { scale: 1.002 } }
+            : {})}
           className={`
             tw-relative tw-w-full tw-h-full
             tw-bg-gradient-to-br tw-from-iron-900 tw-to-iron-950
@@ -308,7 +306,8 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
           aria-label="Upload artwork"
           onKeyDown={handleKeyDown}
           aria-describedby={error ? "file-upload-error" : undefined}
-          data-testid="artwork-upload-area">
+          data-testid="artwork-upload-area"
+        >
           <input
             ref={fileInputRef}
             type="file"
@@ -346,7 +345,8 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
             tw-flex tw-flex-col tw-gap-4 tw-flex-1
             tw-bg-gradient-to-br tw-from-iron-900 tw-to-iron-950
             tw-rounded-xl tw-border tw-border-iron-800 tw-p-4
-          `}>
+          `}
+        >
           <div className="tw-flex tw-flex-col tw-gap-2">
             <span className="tw-text-sm tw-font-medium tw-text-iron-200">
               Hosting Network
@@ -363,7 +363,8 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
           <div className="tw-flex tw-flex-col tw-gap-2">
             <label
               htmlFor="memes-interactive-media-hash"
-              className="tw-text-sm tw-font-medium tw-text-iron-200">
+              className="tw-text-sm tw-font-medium tw-text-iron-200"
+            >
               Content Hash or Path
             </label>
             <input
@@ -382,7 +383,9 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
             {externalConstructedUrl && !externalError && (
               <p className="tw-text-xs tw-text-iron-400">
                 Resulting URL{" "}
-                <span className="tw-text-iron-100">{externalConstructedUrl}</span>
+                <span className="tw-text-iron-100">
+                  {externalConstructedUrl}
+                </span>
               </p>
             )}
           </div>
@@ -404,7 +407,8 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
               type="button"
               onClick={onClearExternalMedia}
               className="tw-text-xs tw-font-medium tw-text-iron-200 tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-1.5 hover:tw-bg-iron-800 tw-transition disabled:tw-opacity-40 disabled:tw-cursor-not-allowed"
-              disabled={!externalHash}>
+              disabled={!externalHash}
+            >
               Clear Hash
             </button>
           </div>
@@ -419,11 +423,13 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
                 containerClassName="tw-flex-1 tw-flex tw-flex-col"
                 fallback={renderPreviewMessage(
                   "Preview unavailable for unapproved domains or file types.",
-                  "Only ipfs.io or arweave.net HTML documents can be embedded.",
+                  "Only ipfs.io or arweave.net HTML documents can be embedded."
                 )}
               />
             ) : (
-              <div className="tw-flex-1 tw-flex tw-flex-col">{previewFallback}</div>
+              <div className="tw-flex-1 tw-flex tw-flex-col">
+                {previewFallback}
+              </div>
             )}
           </div>
         </div>

@@ -104,19 +104,29 @@ interface SetupOptions {
     profilesRefetch: jest.Mock<Promise<unknown>, []>;
     nftsRefetch: jest.Mock<Promise<unknown>, []>;
     enabled?: boolean | undefined;
-  }) => {
-    isFetching: boolean;
-    data: unknown;
-    error?: Error | undefined;
-    refetch: jest.Mock<Promise<unknown>, []>;
-  } | undefined | undefined;
-  selectedCategory?: "ALL" | "PROFILES" | "NFTS" | "WAVES" | "PAGES" | undefined;
-  wavesReturn?: {
-    waves: unknown[];
-    isFetching: boolean;
-    error: Error | null;
-    refetch: jest.Mock<Promise<unknown>, []>;
-  } | undefined;
+  }) =>
+    | {
+        isFetching: boolean;
+        data: unknown;
+        error?: Error | undefined;
+        refetch: jest.Mock<Promise<unknown>, []>;
+      }
+    | undefined;
+  selectedCategory?:
+    | "ALL"
+    | "PROFILES"
+    | "NFTS"
+    | "WAVES"
+    | "PAGES"
+    | undefined;
+  wavesReturn?:
+    | {
+        waves: unknown[];
+        isFetching: boolean;
+        error: Error | null;
+        refetch: jest.Mock<Promise<unknown>, []>;
+      }
+    | undefined;
   profilesRefetch?: jest.Mock<Promise<unknown>, []> | undefined;
   nftsRefetch?: jest.Mock<Promise<unknown>, []> | undefined;
   wavesRefetch?: jest.Mock<Promise<unknown>, []> | undefined;
