@@ -5,7 +5,7 @@ import { Col, Container, Row } from "react-bootstrap";
 
 export default function CommunityStatsPage() {
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <Container fluid>
         <Row>
           <Col>

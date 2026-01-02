@@ -86,7 +86,7 @@ export default function AppHeader() {
     pathname === "/waves/create" || pathname === "/messages/create";
   const isInsideWave = !!waveId;
 
-  const isProfilePage = typeof params?.user === "string";
+  const isProfilePage = typeof params?.["user"] === "string";
 
   const showBackButton =
     isInsideWave || isCreateRoute || (isProfilePage && canGoBack);

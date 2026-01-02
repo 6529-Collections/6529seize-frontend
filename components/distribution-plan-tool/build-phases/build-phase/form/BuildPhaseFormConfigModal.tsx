@@ -144,7 +144,7 @@ export default function BuildPhaseFormConfigModal({
         return null;
       }
 
-      const tokens = operation.params.tokens;
+      const tokens = operation.params["tokens"];
       if (!tokens) {
         return null;
       }
@@ -158,10 +158,10 @@ export default function BuildPhaseFormConfigModal({
           operation.code === AllowlistOperationCode.CREATE_TOKEN_POOL
       )
       .map<DistributionPlanSnapshot>((operation) => ({
-        id: operation.params.id,
-        name: operation.params.name,
+        id: operation.params["id"],
+        name: operation.params["name"],
         poolType: Pool.TOKEN_POOL,
-        walletsCount: findTokenPoolWalletsCount(operation.params.id),
+        walletsCount: findTokenPoolWalletsCount(operation.params["id"]),
       }));
 
     const customPools = operations
@@ -170,8 +170,8 @@ export default function BuildPhaseFormConfigModal({
           operation.code === AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL
       )
       .map<DistributionPlanSnapshot>((operation) => ({
-        id: operation.params.id,
-        name: operation.params.name,
+        id: operation.params["id"],
+        name: operation.params["name"],
         poolType: Pool.CUSTOM_TOKEN_POOL,
         walletsCount: getCustomTokenPoolWalletsCount(operation),
       }));
@@ -224,12 +224,12 @@ export default function BuildPhaseFormConfigModal({
     const tokenPool = operations.find(
       (operation) =>
         operation.code === AllowlistOperationCode.CREATE_TOKEN_POOL &&
-        operation.params.id === snapshotId
+        operation.params["id"] === snapshotId
     );
     if (!tokenPool) {
       return null;
     }
-    const contract = tokenPool.params.contract;
+    const contract = tokenPool.params["contract"];
     const endpoint = `/other/contract-metadata/${contract}`;
     setIsLoadingContractSchema(true);
     const { data } =
@@ -271,7 +271,7 @@ export default function BuildPhaseFormConfigModal({
         [
           AllowlistOperationCode.CREATE_TOKEN_POOL,
           AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL,
-        ].includes(operation.code) && operation.params.id !== snapshotId
+        ].includes(operation.code) && operation.params["id"] !== snapshotId
     ).length;
 
     if (haveMoreSnapshots) {

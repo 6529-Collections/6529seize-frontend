@@ -10,7 +10,7 @@ import { Metadata } from "next";
 
 export default function MemeDistributionPage() {
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <DistributionComponent
         header="The Memes"
         contract={MEMES_CONTRACT}

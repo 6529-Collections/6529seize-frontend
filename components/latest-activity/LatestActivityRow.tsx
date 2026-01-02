@@ -98,7 +98,7 @@ export function printGas(
     <>
       <FontAwesomeIcon
         data-tooltip-id={id}
-        className={styles.gasIcon}
+        className={styles["gasIcon"]}
         icon={faGasPump}
       ></FontAwesomeIcon>
       <Tooltip
@@ -183,7 +183,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
             onError={({ currentTarget }) => {
               currentTarget.src = getNftImageSrc(props.nft, currentTarget.src);
             }}
-            className={styles.nftImage}
+            className={styles["nftImage"]}
           />
         </a>
       );
@@ -295,7 +295,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
           }}
           src={getNextGenIconUrl(props.tr.token_id)}
           alt={`#${props.tr.token_id.toString()}`}
-          className={styles.nftImage}
+          className={styles["nftImage"]}
           onError={({ currentTarget }) => {
             if (currentTarget.src === getNextGenIconUrl(props.tr.token_id)) {
               currentTarget.src = getNextGenImageUrl(props.tr.token_id);
@@ -389,7 +389,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
           className="tw-flex"
         >
           <FontAwesomeIcon
-            className={styles.gasIcon}
+            className={styles["gasIcon"]}
             icon={faExternalLinkSquare}
           ></FontAwesomeIcon>
         </Link>
@@ -414,15 +414,15 @@ export default function LatestActivityRow(props: Readonly<Props>) {
 
   function getIconClass() {
     if (isBurn()) {
-      return styles.iconRed;
+      return styles["iconRed"];
     }
     if (isMint() || isAirdrop()) {
-      return styles.iconWhite;
+      return styles["iconWhite"];
     }
     if (props.tr.value > 0) {
-      return styles.iconBlue;
+      return styles["iconBlue"];
     }
-    return styles.iconGreen;
+    return styles["iconGreen"];
   }
 
   function getIcon() {
@@ -448,7 +448,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
   return (
     <tr
       key={`${props.tr.from_address}-${props.tr.to_address}-${props.tr.transaction}-${props.tr.token_id}-latestactivity-row`}
-      className={styles.latestActivityRow}
+      className={styles["latestActivityRow"]}
     >
       <td className="align-middle text-center">
         {getDateDisplay(new Date(props.tr.transaction_date))}

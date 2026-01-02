@@ -81,16 +81,16 @@ export default function DatePickerModal(props: Readonly<Props>) {
 
   return (
     <Modal show={props.show} onHide={() => props.onHide()}>
-      <div className={styles.header}>
+      <div className={styles["header"]}>
         <Modal.Title>Select {props.mode}s</Modal.Title>
         <FontAwesomeIcon
-          className={styles.modalClose}
+          className={styles["modalClose"]}
           icon={faTimesCircle}
           onClick={() => props.onHide()}
         />
       </div>
       <Modal.Body
-        className={`${styles.body} d-flex align-items-center justify-content-between font-larger`}>
+        className={`${styles["body"]} d-flex align-items-center justify-content-between font-larger`}>
         <Container>
           <Row>
             <Col>
@@ -106,7 +106,7 @@ export default function DatePickerModal(props: Readonly<Props>) {
                       max={new Date().toISOString().slice(0, 10)}
                       type="date"
                       placeholder="Start Date"
-                      className={`${styles.formInput}`}
+                      className={`${styles["formInput"]}`}
                       onChange={(e) => {
                         const value = e.target.value;
                         if (value && value.length === 10) {
@@ -122,7 +122,7 @@ export default function DatePickerModal(props: Readonly<Props>) {
                   ) : (
                     <Form.Control
                       value={fromBlock}
-                      className={`${styles.formInput}`}
+                      className={`${styles["formInput"]}`}
                       type="number"
                       placeholder="Start Block"
                       onChange={(e) => {
@@ -144,7 +144,7 @@ export default function DatePickerModal(props: Readonly<Props>) {
                         toDate && new Date(toDate)?.toISOString().slice(0, 10)
                       }
                       max={new Date().toISOString().slice(0, 10)}
-                      className={`${styles.formInput}`}
+                      className={`${styles["formInput"]}`}
                       type="date"
                       placeholder="End Date"
                       onChange={(e) => {
@@ -162,7 +162,7 @@ export default function DatePickerModal(props: Readonly<Props>) {
                   ) : (
                     <Form.Control
                       value={toBlock}
-                      className={`${styles.formInput}`}
+                      className={`${styles["formInput"]}`}
                       type="number"
                       placeholder="End Block"
                       onChange={(e) => {
@@ -181,7 +181,7 @@ export default function DatePickerModal(props: Readonly<Props>) {
           </Row>
         </Container>
       </Modal.Body>
-      <Modal.Footer className={styles.footer}>
+      <Modal.Footer className={styles["footer"]}>
         <Container>
           <Row>
             <Col className="d-flex justify-content-between gap-2">

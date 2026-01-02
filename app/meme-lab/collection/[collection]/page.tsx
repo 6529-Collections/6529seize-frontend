@@ -12,7 +12,7 @@ export default async function MemeLabCollectionPage({
 }) {
   const { collection } = await params;
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <MemeLabCollection collectionName={collection.replaceAll("-", " ")} />
     </main>
   );

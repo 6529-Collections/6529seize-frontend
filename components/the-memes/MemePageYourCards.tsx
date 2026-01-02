@@ -126,7 +126,7 @@ export function MemePageYourCardsRightMenu(props: {
                         lg={{ span: 8 }}>
                         <Table bordered={false}>
                           <tbody>
-                            <tr className={`${styles.overviewColumn}`}>
+                            <tr className={`${styles["overviewColumn"]}`}>
                               <td>Cards</td>
                               <td className="text-right">{`x${props.nftBalance}`}</td>
                             </tr>
@@ -160,7 +160,7 @@ export function MemePageYourCardsRightMenu(props: {
                           lg={{ span: 8 }}>
                           <Table bordered={false}>
                             <tbody>
-                              <tr className={`pt-1 ${styles.overviewColumn}`}>
+                              <tr className={`pt-1 ${styles["overviewColumn"]}`}>
                                 <td>TDH</td>
                                 <td className="text-right">
                                   {numberWithCommas(
@@ -168,7 +168,7 @@ export function MemePageYourCardsRightMenu(props: {
                                   )}
                                 </td>
                               </tr>
-                              <tr className={`${styles.overviewColumn}`}>
+                              <tr className={`${styles["overviewColumn"]}`}>
                                 <td>Rank</td>
                                 <td className="text-right">
                                   #{props.myRank?.rank}
@@ -180,7 +180,7 @@ export function MemePageYourCardsRightMenu(props: {
                       </Row>
                     ) : (
                       <Row className="pb-3">
-                        <Col className={`pt-1 ${styles.overviewColumn}`}>
+                        <Col className={`pt-1 ${styles["overviewColumn"]}`}>
                           No TDH accrued
                         </Col>
                       </Row>
@@ -192,14 +192,14 @@ export function MemePageYourCardsRightMenu(props: {
                     <h3>Overview</h3>
                   </Col>
                 </Row>
-                <Row className={`pb-2 ${styles.overviewColumn}`}>
+                <Row className={`pb-2 ${styles["overviewColumn"]}`}>
                   <Col>
                     First acquired{" "}
                     {printMintDate(new Date(firstAcquired.transaction_date))}
                   </Col>
                 </Row>
                 {airdropped.length > 0 && (
-                  <Row className={`pt-1 ${styles.overviewColumn}`}>
+                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
                     <Col>
                       {getTokenCount(airdropped)} card
                       {getTokenCount(airdropped) > 1 && "s"} airdropped
@@ -207,7 +207,7 @@ export function MemePageYourCardsRightMenu(props: {
                   </Row>
                 )}
                 {bought.length > 0 && (
-                  <Row className={`pt-1 ${styles.overviewColumn}`}>
+                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
                     <Col>
                       {getTokenCount(bought)} card
                       {getTokenCount(bought) > 1 && "s"} bought for {boughtSum}{" "}
@@ -216,7 +216,7 @@ export function MemePageYourCardsRightMenu(props: {
                   </Row>
                 )}
                 {transferredIn.length > 0 && (
-                  <Row className={`pt-1 ${styles.overviewColumn}`}>
+                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
                     <Col>
                       {getTokenCount(transferredIn)} card
                       {getTokenCount(transferredIn) > 1 && "s"} transferred in
@@ -224,7 +224,7 @@ export function MemePageYourCardsRightMenu(props: {
                   </Row>
                 )}
                 {sold.length > 0 && (
-                  <Row className={`pt-1 ${styles.overviewColumn}`}>
+                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
                     <Col>
                       {getTokenCount(sold)} card
                       {getTokenCount(sold) > 1 && "s"} sold for {soldSum} ETH
@@ -232,7 +232,7 @@ export function MemePageYourCardsRightMenu(props: {
                   </Row>
                 )}
                 {transferredOut.length > 0 && (
-                  <Row className={`pt-1 ${styles.overviewColumn}`}>
+                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
                     <Col>
                       {getTokenCount(transferredOut)} card
                       {getTokenCount(transferredOut) > 1 && "s"} transferred out
@@ -264,9 +264,9 @@ export function MemePageYourCardsSubMenu(props: {
                 <h3>Your Transaction History</h3>
               </Col>
             </Row>
-            <Row className={`pt-4 ${styles.transactionsScrollContainer}`}>
+            <Row className={`pt-4 ${styles["transactionsScrollContainer"]}`}>
               <Col>
-                <Table bordered={false} className={styles.transactionsTable}>
+                <Table bordered={false} className={styles["transactionsTable"]}>
                   <tbody>
                     {props.transactions.map((tr) => (
                       <LatestActivityRow

@@ -20,7 +20,7 @@ export default function NFTAttributes(
             className="pt-2 pb-2">
             <Container>
               <Row>
-                <Col className={styles.nftAttribute}>
+                <Col className={styles["nftAttribute"]}>
                   <span>{a.trait_type}</span>
                   <br />
                   <span title={a.value}>{a.value}</span>

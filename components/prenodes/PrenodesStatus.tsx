@@ -96,21 +96,21 @@ export default function PrenodesStatus() {
     const createdAt: Time = Time.fromString(prenode.created_at.toString());
     const updatedAt: Time = Time.fromString(prenode.updated_at.toString());
 
-    let updatedAtStatus = styles.error;
+    let updatedAtStatus = styles["error"];
     let updatedAtIcon = faXmarkCircle;
-    let tdhStatus = styles.unknown;
+    let tdhStatus = styles["unknown"];
     let tdhIcon = faMinusCircle;
-    let blockStatus = styles.unknown;
+    let blockStatus = styles["unknown"];
     let blockIcon = faMinusCircle;
     if (prenode.ping_status === "green") {
-      updatedAtStatus = styles.success;
+      updatedAtStatus = styles["success"];
       updatedAtIcon = faCheckCircle;
       tdhIcon = prenode.tdh_sync ? faCheckCircle : faXmarkCircle;
-      tdhStatus = prenode.tdh_sync ? styles.success : styles.error;
+      tdhStatus = prenode.tdh_sync ? styles["success"] : styles["error"];
       blockIcon = prenode.block_sync ? faCheckCircle : faXmarkCircle;
-      blockStatus = prenode.block_sync ? styles.success : styles.error;
+      blockStatus = prenode.block_sync ? styles["success"] : styles["error"];
     } else if (prenode.ping_status === "orange") {
-      updatedAtStatus = styles.warning;
+      updatedAtStatus = styles["warning"];
       updatedAtIcon = faWarning;
     }
 
@@ -126,7 +126,7 @@ export default function PrenodesStatus() {
           target="_blank"
           rel="noopener noreferrer"
           className="decoration-none">
-          <Container className={`no-padding ${styles.prenode}`}>
+          <Container className={`no-padding ${styles["prenode"]}`}>
             <Row>
               <Col>
                 <h5>{prenode.domain ?? prenode.ip}</h5>

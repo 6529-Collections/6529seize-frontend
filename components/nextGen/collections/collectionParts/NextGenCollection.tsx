@@ -28,7 +28,7 @@ export function printViewButton(
     <button
       onClick={() => setView(v)}
       className={`btn-link decoration-none ${
-        v === currentView ? styles.nextgenTokenDetailsLinkSelected : ""
+        v === currentView ? styles["nextgenTokenDetailsLinkSelected"] : ""
       }`}>
       <h4
         className={

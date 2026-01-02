@@ -92,7 +92,7 @@ export function MemePageActivity(
   const activityContent = useMemo(() => {
     if (activity.length > 0) {
       return (
-        <Table bordered={false} className={styles.transactionsTable}>
+        <Table bordered={false} className={styles["transactionsTable"]}>
           <tbody>
             {activity.map((tr) => (
               <LatestActivityRow
@@ -207,7 +207,7 @@ export function MemePageActivity(
             </div>
           </Col>
         </Row>
-        <Row className={`pt-2 ${styles.transactionsScrollContainer}`}>
+        <Row className={`pt-2 ${styles["transactionsScrollContainer"]}`}>
           <Col>{activityContent}</Col>
         </Row>
         {activity.length > 0 && !activityLoading && (

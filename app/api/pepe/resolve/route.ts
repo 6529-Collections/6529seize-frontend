@@ -353,14 +353,14 @@ async function tryExtractImageFromDescription(
       if (metadata) {
         const candidate = extractFirstString(
           [
-            metadata.image,
-            metadata.image_url,
-            metadata.imageUrl,
-            metadata.imageLarge,
-            metadata.card_image,
-            metadata.thumb,
-            metadata.thumbnail,
-            metadata.large_image,
+            metadata["image"],
+            metadata["image_url"],
+            metadata["imageUrl"],
+            metadata["imageLarge"],
+            metadata["card_image"],
+            metadata["thumb"],
+            metadata["thumbnail"],
+            metadata["large_image"],
           ].filter((value) => typeof value === "string") as string[]
         );
 

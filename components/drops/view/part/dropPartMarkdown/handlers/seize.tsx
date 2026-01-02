@@ -62,11 +62,11 @@ const createSeizeQueryHandler = <T,>(
 
 const getGroupId = (href: string): string | null => {
   const result = parseSeizeQueryLink(href, "/network", ["group"]);
-  if (!result || typeof result.group !== "string") {
+  if (!result || typeof result["group"] !== "string") {
     return null;
   }
 
-  return result.group;
+  return result["group"];
 };
 
 const createSeizeGroupHandler = (): LinkHandler =>
@@ -78,11 +78,11 @@ const createSeizeGroupHandler = (): LinkHandler =>
 
 const getWaveId = (href: string): string | null => {
   const result = parseSeizeQueryLink(href, "/waves", ["wave"], true);
-  if (!result || typeof result.wave !== "string") {
+  if (!result || typeof result["wave"] !== "string") {
     return null;
   }
 
-  return result.wave;
+  return result["wave"];
 };
 
 const createSeizeWaveHandler = (): LinkHandler =>

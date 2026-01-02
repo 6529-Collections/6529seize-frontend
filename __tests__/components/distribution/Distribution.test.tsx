@@ -207,7 +207,7 @@ describe("DistributionPage", () => {
       await waitFor(() => {
         const mintCountdown = screen.getByTestId("mint-countdown");
         expect(mintCountdown).toBeInTheDocument();
-        expect(mintCountdown.dataset.nftId).toBe("456");
+        expect(mintCountdown.dataset["nftId"]).toBe("456");
       });
     });
 
@@ -619,11 +619,11 @@ describe("DistributionPage", () => {
         () => {
           const addressComponent = screen.getByTestId("address-component");
           expect(addressComponent).toBeInTheDocument();
-          expect(addressComponent.dataset.wallet).toBe(
+          expect(addressComponent.dataset["wallet"]).toBe(
             "0x1234567890123456789012345678901234567890"
           );
-          expect(addressComponent.dataset.display).toBe("TestUser1");
-          expect(addressComponent.dataset.hideCopy).toBe("true");
+          expect(addressComponent.dataset["display"]).toBe("TestUser1");
+          expect(addressComponent.dataset["hideCopy"]).toBe("true");
         },
         { timeout: 5000 }
       );
@@ -641,9 +641,9 @@ describe("DistributionPage", () => {
       await waitFor(() => {
         const scrollButton = screen.getByTestId("scroll-to-button");
         expect(scrollButton).toBeInTheDocument();
-        expect(scrollButton.dataset.threshold).toBe("500");
-        expect(scrollButton.dataset.to).toBe("distribution-table");
-        expect(scrollButton.dataset.offset).toBe("0");
+        expect(scrollButton.dataset["threshold"]).toBe("500");
+        expect(scrollButton.dataset["to"]).toBe("distribution-table");
+        expect(scrollButton.dataset["offset"]).toBe("0");
       });
     });
   });

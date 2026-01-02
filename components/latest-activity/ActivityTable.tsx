@@ -21,9 +21,9 @@ export default function ActivityTable({
   nextgenCollections,
 }: ActivityTableProps) {
   return (
-    <Row className={`pt-3 ${styles.scrollContainer}`}>
+    <Row className={`pt-3 ${styles["scrollContainer"]}`}>
       <Col>
-        <Table bordered={false} className={styles.activityTable}>
+        <Table bordered={false} className={styles["activityTable"]}>
           <tbody>
             {activity &&
               nfts &&

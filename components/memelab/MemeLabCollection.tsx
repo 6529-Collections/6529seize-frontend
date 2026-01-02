@@ -138,7 +138,7 @@ export default function LabCollection({
           href={`/meme-lab/${nft.id}`}
           className="decoration-none scale-hover">
           <Container fluid>
-            <Row className={connectedProfile ? styles.nftImagePadding : ""}>
+            <Row className={connectedProfile ? styles["nftImagePadding"] : ""}>
               <NFTImage
                 nft={nft}
                 animation={false}
@@ -172,7 +172,7 @@ export default function LabCollection({
 
   return (
     <>
-      <Container fluid className={styles.mainContainer}>
+      <Container fluid className={styles["mainContainer"]}>
         <Row>
           <Col>
             <Container className="pt-4 pb-4">
@@ -209,15 +209,15 @@ export default function LabCollection({
                   <FontAwesomeIcon
                     icon={faChevronCircleUp}
                     onClick={() => setSortDir(SortDirection.ASC)}
-                    className={`${styles.sortDirection} ${
-                      sortDir != SortDirection.ASC ? styles.disabled : ""
+                    className={`${styles["sortDirection"]} ${
+                      sortDir != SortDirection.ASC ? styles["disabled"] : ""
                     }`}
                   />{" "}
                   <FontAwesomeIcon
                     icon={faChevronCircleDown}
                     onClick={() => setSortDir(SortDirection.DESC)}
-                    className={`${styles.sortDirection} ${
-                      sortDir != SortDirection.DESC ? styles.disabled : ""
+                    className={`${styles["sortDirection"]} ${
+                      sortDir != SortDirection.DESC ? styles["disabled"] : ""
                     }`}
                   />
                 </Col>

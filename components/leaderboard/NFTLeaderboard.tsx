@@ -159,35 +159,35 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
           />
         </Col>
       </Row>
-      <Row className={styles.scrollContainer}>
+      <Row className={styles["scrollContainer"]}>
         <Col>
-          <Table bordered={false} className={styles.leaderboardTable}>
+          <Table bordered={false} className={styles["leaderboardTable"]}>
             <thead>
               <tr>
-                <th className={styles.rank}></th>
-                <th className={styles.hodlerContainer}></th>
-                <th className={styles.gap}></th>
+                <th className={styles["rank"]}></th>
+                <th className={styles["hodlerContainer"]}></th>
+                <th className={styles["gap"]}></th>
                 <th
                   colSpan={3}
-                  className={`${styles.tdh} ${styles.borderBottom}`}>
+                  className={`${styles["tdh"]} ${styles["borderBottom"]}`}>
                   <b>This Card</b>
                 </th>
-                <th className={styles.gap}></th>
+                <th className={styles["gap"]}></th>
                 <th
                   colSpan={3}
-                  className={`${styles.tdh} ${styles.borderBottom}`}>
+                  className={`${styles["tdh"]} ${styles["borderBottom"]}`}>
                   <b>Total</b>
                 </th>
               </tr>
-              <tr className={styles.gap}></tr>
+              <tr className={styles["gap"]}></tr>
               <tr>
-                <th className={styles.rank}>Rank</th>
-                <th className={styles.hodlerContainer}>
+                <th className={styles["rank"]}>Rank</th>
+                <th className={styles["hodlerContainer"]}>
                   Collector{" "}
                   {totalResults > 0 && `x${totalResults.toLocaleString()}`}
                 </th>
-                <th className={styles.gap}></th>
-                <th className={styles.tdhSub}>
+                <th className={styles["gap"]}></th>
+                <th className={styles["tdhSub"]}>
                   <span className="d-flex align-items-center justify-content-center">
                     Balance&nbsp;
                     <span className="d-flex flex-column">
@@ -199,10 +199,10 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                             sort_direction: SortDirection.ASC,
                           })
                         }
-                        className={`${styles.caret} ${
+                        className={`${styles["caret"]} ${
                           sort.sort_direction != SortDirection.ASC ||
                           sort.sort != Sort.balance
-                            ? styles.disabled
+                            ? styles["disabled"]
                             : ""
                         }`}
                       />
@@ -214,17 +214,17 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                             sort_direction: SortDirection.DESC,
                           })
                         }
-                        className={`${styles.caret} ${
+                        className={`${styles["caret"]} ${
                           sort.sort_direction != SortDirection.DESC ||
                           sort.sort != Sort.balance
-                            ? styles.disabled
+                            ? styles["disabled"]
                             : ""
                         }`}
                       />
                     </span>
                   </span>
                 </th>
-                <th className={styles.tdhSub}>
+                <th className={styles["tdhSub"]}>
                   <span className="d-flex align-items-center justify-content-center">
                     TDH&nbsp;
                     <span className="d-flex flex-column">
@@ -236,10 +236,10 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                             sort_direction: SortDirection.ASC,
                           })
                         }
-                        className={`${styles.caret} ${
+                        className={`${styles["caret"]} ${
                           sort.sort_direction != SortDirection.ASC ||
                           sort.sort != Sort.boosted_tdh
-                            ? styles.disabled
+                            ? styles["disabled"]
                             : ""
                         }`}
                       />
@@ -251,17 +251,17 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                             sort_direction: SortDirection.DESC,
                           })
                         }
-                        className={`${styles.caret} ${
+                        className={`${styles["caret"]} ${
                           sort.sort_direction != SortDirection.DESC ||
                           sort.sort != Sort.boosted_tdh
-                            ? styles.disabled
+                            ? styles["disabled"]
                             : ""
                         }`}
                       />
                     </span>
                   </span>
                 </th>
-                <th className={styles.tdhSub}>
+                <th className={styles["tdhSub"]}>
                   <span className="d-flex align-items-center justify-content-center">
                     Unweighted TDH&nbsp;
                     <span className="d-flex flex-column">
@@ -273,10 +273,10 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                             sort_direction: SortDirection.ASC,
                           })
                         }
-                        className={`${styles.caret} ${
+                        className={`${styles["caret"]} ${
                           sort.sort_direction != SortDirection.ASC ||
                           sort.sort != Sort.tdh__raw
-                            ? styles.disabled
+                            ? styles["disabled"]
                             : ""
                         }`}
                       />
@@ -288,18 +288,18 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                             sort_direction: SortDirection.DESC,
                           })
                         }
-                        className={`${styles.caret} ${
+                        className={`${styles["caret"]} ${
                           sort.sort_direction != SortDirection.DESC ||
                           sort.sort != Sort.tdh__raw
-                            ? styles.disabled
+                            ? styles["disabled"]
                             : ""
                         }`}
                       />
                     </span>
                   </span>
                 </th>
-                <th className={styles.gap}></th>
-                <th className={styles.tdhSub}>
+                <th className={styles["gap"]}></th>
+                <th className={styles["tdhSub"]}>
                   <span className="d-flex align-items-center justify-content-center">
                     Balance&nbsp;
                     <span className="d-flex flex-column">
@@ -311,10 +311,10 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                             sort_direction: SortDirection.ASC,
                           })
                         }
-                        className={`${styles.caret} ${
+                        className={`${styles["caret"]} ${
                           sort.sort_direction != SortDirection.ASC ||
                           sort.sort != Sort.total_balance
-                            ? styles.disabled
+                            ? styles["disabled"]
                             : ""
                         }`}
                       />
@@ -326,17 +326,17 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                             sort_direction: SortDirection.DESC,
                           })
                         }
-                        className={`${styles.caret} ${
+                        className={`${styles["caret"]} ${
                           sort.sort_direction != SortDirection.DESC ||
                           sort.sort != Sort.total_balance
-                            ? styles.disabled
+                            ? styles["disabled"]
                             : ""
                         }`}
                       />
                     </span>
                   </span>
                 </th>
-                <th className={styles.tdhSub}>
+                <th className={styles["tdhSub"]}>
                   <span className="d-flex align-items-center justify-content-center">
                     TDH&nbsp;
                     <span className="d-flex flex-column">
@@ -348,10 +348,10 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                             sort_direction: SortDirection.ASC,
                           })
                         }
-                        className={`${styles.caret} ${
+                        className={`${styles["caret"]} ${
                           sort.sort_direction != SortDirection.ASC ||
                           sort.sort != Sort.total_boosted_tdh
-                            ? styles.disabled
+                            ? styles["disabled"]
                             : ""
                         }`}
                       />
@@ -363,17 +363,17 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                             sort_direction: SortDirection.DESC,
                           })
                         }
-                        className={`${styles.caret} ${
+                        className={`${styles["caret"]} ${
                           sort.sort_direction != SortDirection.DESC ||
                           sort.sort != Sort.total_boosted_tdh
-                            ? styles.disabled
+                            ? styles["disabled"]
                             : ""
                         }`}
                       />
                     </span>
                   </span>
                 </th>
-                <th className={styles.tdhSub}>
+                <th className={styles["tdhSub"]}>
                   <span className="d-flex align-items-center justify-content-center">
                     Unweighted TDH&nbsp;
                     <span className="d-flex flex-column">
@@ -385,10 +385,10 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                             sort_direction: SortDirection.ASC,
                           })
                         }
-                        className={`${styles.caret} ${
+                        className={`${styles["caret"]} ${
                           sort.sort_direction != SortDirection.ASC ||
                           sort.sort != Sort.total_tdh__raw
-                            ? styles.disabled
+                            ? styles["disabled"]
                             : ""
                         }`}
                       />
@@ -400,10 +400,10 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                             sort_direction: SortDirection.DESC,
                           })
                         }
-                        className={`${styles.caret} ${
+                        className={`${styles["caret"]} ${
                           sort.sort_direction != SortDirection.DESC ||
                           sort.sort != Sort.total_tdh__raw
-                            ? styles.disabled
+                            ? styles["disabled"]
                             : ""
                         }`}
                       />
@@ -416,10 +416,10 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
               {leaderboard.map((lead) => {
                 return (
                   <tr key={lead.consolidation_key}>
-                    <td className={styles.rank}>
+                    <td className={styles["rank"]}>
                       {numberWithCommas(lead.rank)}
                     </td>
-                    <td className={styles.hodlerContainer}>
+                    <td className={styles["hodlerContainer"]}>
                       <LeaderboardCollector
                         handle={lead.handle}
                         consolidationKey={lead.consolidation_key}
@@ -428,24 +428,24 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                         level={lead.level}
                       />
                     </td>
-                    <td className={styles.gap}></td>
-                    <td className={styles.tdhSub}>
+                    <td className={styles["gap"]}></td>
+                    <td className={styles["tdhSub"]}>
                       {numberWithCommas(lead.balance)}
                     </td>
-                    <td className={styles.tdhSub}>
+                    <td className={styles["tdhSub"]}>
                       {numberWithCommas(Math.round(lead.boosted_tdh))}
                     </td>
-                    <td className={styles.tdhSub}>
+                    <td className={styles["tdhSub"]}>
                       {numberWithCommas(Math.round(lead.tdh__raw))}
                     </td>
-                    <td className={styles.gap}></td>
-                    <td className={styles.tdhSub}>
+                    <td className={styles["gap"]}></td>
+                    <td className={styles["tdhSub"]}>
                       {numberWithCommas(lead.total_balance)}
                     </td>
-                    <td className={styles.tdhSub}>
+                    <td className={styles["tdhSub"]}>
                       {numberWithCommas(Math.round(lead.total_boosted_tdh))}
                     </td>
-                    <td className={styles.tdhSub}>
+                    <td className={styles["tdhSub"]}>
                       {numberWithCommas(Math.round(lead.total_tdh__raw))}
                     </td>
                   </tr>

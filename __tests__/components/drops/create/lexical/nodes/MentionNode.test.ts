@@ -46,7 +46,7 @@ describe('MentionNode', () => {
     const span = document.createElement('span');
     span.setAttribute('data-lexical-mention', 'true');
     span.textContent = '@alice';
-    const conv = mapping.span!(span)!;
+    const conv = mapping["span"]!(span)!;
     const newNode = conv.conversion(span).node;
     expect(newNode.__mention).toBe('@alice');
     expect(conv.priority).toBe(1);

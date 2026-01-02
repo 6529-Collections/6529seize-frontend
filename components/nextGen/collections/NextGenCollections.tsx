@@ -61,7 +61,7 @@ export default function NextGenCollections() {
       <Row className="pb-3">
         <Col className="d-flex justify-content-between">
           <h1>Collections</h1>
-          <Dropdown className={styles.filterDropdown} drop={"down-centered"}>
+          <Dropdown className={styles["filterDropdown"]} drop={"down-centered"}>
             <Dropdown.Toggle>Status: {selectedStatus}</Dropdown.Toggle>
             <Dropdown.Menu>
               {Object.values(StatusFilter).map((filter) => (

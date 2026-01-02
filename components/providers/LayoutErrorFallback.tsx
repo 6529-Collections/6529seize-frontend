@@ -16,7 +16,7 @@ export default function LayoutErrorFallback({
       : undefined;
 
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <ErrorComponent
         stackTrace={errorDetails}
         digest={digest}

@@ -65,10 +65,10 @@ function RedeemedSubscriptionsAccordion(
   return (
     <Accordion>
       <Accordion.Item defaultChecked={true} eventKey={"0"}>
-        <Accordion.Button className={styles.topUpHistoryAccordionButton}>
+        <Accordion.Button className={styles["topUpHistoryAccordionButton"]}>
           <b>Redeemed Subscriptions</b>
         </Accordion.Button>
-        <Accordion.Body className={styles.topUpHistoryAccordionBody}>
+        <Accordion.Body className={styles["topUpHistoryAccordionBody"]}>
           <div className="d-flex flex-column gap-2">
             {props.history.data.length > 0 ? (
               props.history.data.map((redeem) => (
@@ -105,10 +105,10 @@ function LogAccordion(
   return (
     <Accordion>
       <Accordion.Item defaultChecked={true} eventKey={"0"}>
-        <Accordion.Button className={styles.topUpHistoryAccordionButton}>
+        <Accordion.Button className={styles["topUpHistoryAccordionButton"]}>
           <b>Log History</b>
         </Accordion.Button>
-        <Accordion.Body className={styles.topUpHistoryAccordionBody}>
+        <Accordion.Body className={styles["topUpHistoryAccordionBody"]}>
           <div className="d-flex flex-column gap-2">
             {props.logs.data.length > 0 ? (
               props.logs.data.map((log) => (
@@ -143,10 +143,10 @@ function TopUpAccordion(
   return (
     <Accordion>
       <Accordion.Item defaultChecked={true} eventKey={"0"}>
-        <Accordion.Button className={styles.topUpHistoryAccordionButton}>
+        <Accordion.Button className={styles["topUpHistoryAccordionButton"]}>
           <b>Top Up History</b>
         </Accordion.Button>
-        <Accordion.Body className={styles.topUpHistoryAccordionBody}>
+        <Accordion.Body className={styles["topUpHistoryAccordionBody"]}>
           <div className="d-flex flex-column gap-2">
             {props.history.data.length > 0 ? (
               props.history.data.map((topUp) => (
@@ -178,7 +178,7 @@ function TopUpEntry(
   }>
 ) {
   return (
-    <div className={styles.subscriptionHistoryEntry}>
+    <div className={styles["subscriptionHistoryEntry"]}>
       <div className="d-flex align-items-center justify-content-between gap-2">
         <div className="d-flex align-items-center gap-3">
           <div className="d-flex align-items-center gap-1 no-wrap">
@@ -215,7 +215,7 @@ function LogEntry(
   }>
 ) {
   return (
-    <div className={styles.subscriptionHistoryEntry}>
+    <div className={styles["subscriptionHistoryEntry"]}>
       <div className="d-flex align-items-center justify-content-between gap-2">
         <div className="d-flex flex-column gap-1">
           <div>{props.log.log}</div>
@@ -246,7 +246,7 @@ function RedeemedEntry(
     : `Contract ${formatAddress(props.redeem.contract)}`;
 
   return (
-    <div className={styles.subscriptionHistoryEntry}>
+    <div className={styles["subscriptionHistoryEntry"]}>
       <div className="d-flex align-items-center justify-content-between gap-2">
         <div className="d-flex flex-column gap-1">
           <div>

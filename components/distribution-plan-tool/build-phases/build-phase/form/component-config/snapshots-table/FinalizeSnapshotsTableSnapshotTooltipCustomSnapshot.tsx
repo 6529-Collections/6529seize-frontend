@@ -19,13 +19,13 @@ export default function FinalizeSnapshotsTableSnapshotTooltipCustomSnapshot({
   const customPool = operations.find(
     (o) =>
       o.code === AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL &&
-      o.params?.id === snapshotId
+      o.params?.["id"] === snapshotId
   );
 
   const rows: Row[] = [
     {
       name: "Name",
-      value: customPool?.params?.name ?? "",
+      value: customPool?.params?.["name"] ?? "",
     },
     {
       name: "Type",
@@ -35,11 +35,11 @@ export default function FinalizeSnapshotsTableSnapshotTooltipCustomSnapshot({
     {
       name: "Wallets count",
       value:
-        new Set(customPool?.params.tokens.map((t: any) => t.owner)).size ?? "",
+        new Set(customPool?.params["tokens"].map((t: any) => t.owner)).size ?? "",
     },
     {
       name: "Tokens count",
-      value: customPool?.params.tokens.length ?? "",
+      value: customPool?.params["tokens"].length ?? "",
     },
   ];
 

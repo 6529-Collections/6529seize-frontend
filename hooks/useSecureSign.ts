@@ -166,13 +166,13 @@ const extractErrorCode = (error: unknown): string | number | undefined => {
   if (error && typeof error === 'object') {
     const errorObj = error as Record<string, unknown>;
     if ('code' in errorObj) {
-      const code = errorObj.code;
+      const code = errorObj["code"];
       if (typeof code === 'string' || typeof code === 'number') {
         return code;
       }
     }
-    if ('name' in errorObj && typeof errorObj.name === 'string') {
-      return errorObj.name;
+    if ('name' in errorObj && typeof errorObj["name"] === 'string') {
+      return errorObj["name"];
     }
   }
   return undefined;

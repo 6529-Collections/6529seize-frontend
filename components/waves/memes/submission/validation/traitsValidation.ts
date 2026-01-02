@@ -139,7 +139,7 @@ function validateRequiredFields(
     (options.touchedFields && options.touchedFields.has("title"))
   ) {
     if (!traits.title || traits.title.trim() === "") {
-      errors.title = "Title is required";
+      errors["title"] = "Title is required";
     }
   }
 
@@ -148,7 +148,7 @@ function validateRequiredFields(
     (options.touchedFields && options.touchedFields.has("description"))
   ) {
     if (!traits.description || traits.description.trim() === "") {
-      errors.description = "Description is required";
+      errors["description"] = "Description is required";
     }
   }
 

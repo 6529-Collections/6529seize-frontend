@@ -435,7 +435,7 @@ export default function MemeLabPageComponent({
   const activityContent = useMemo(() => {
     if (activity.length > 0) {
       return (
-        <Table bordered={false} className={styles.transactionsTable}>
+        <Table bordered={false} className={styles["transactionsTable"]}>
           <tbody>
             {activity.map((tr) => (
               <LatestActivityRow
@@ -485,7 +485,7 @@ export default function MemeLabPageComponent({
 
     return (
       <Container className="p-0">
-        <Row className={connectedProfile ? styles.nftImagePadding : ""}>
+        <Row className={connectedProfile ? styles["nftImagePadding"] : ""}>
           {(activeTab === MEME_FOCUS.LIVE ||
             activeTab === MEME_FOCUS.YOUR_CARDS) &&
             nft && (
@@ -495,7 +495,7 @@ export default function MemeLabPageComponent({
                   sm={{ span: 12 }}
                   md={{ span: 6 }}
                   lg={{ span: 6 }}
-                  className={`${styles.nftImageWrapper} pt-2 pb-5`}>
+                  className={`${styles["nftImageWrapper"]} pt-2 pb-5`}>
                   <NFTImage
                     nft={nft}
                     animation={true}
@@ -598,7 +598,7 @@ export default function MemeLabPageComponent({
             </Row>
             <Row>
               <Col>
-                <Table bordered={false} className={styles.hodlersTableLive}>
+                <Table bordered={false} className={styles["hodlersTableLive"]}>
                   <tbody>
                     <tr>
                       <td>Edition Size</td>
@@ -758,9 +758,9 @@ export default function MemeLabPageComponent({
                 <h3>Your Transaction History</h3>
               </Col>
             </Row>
-            <Row className={`pt-4 ${styles.transactionsScrollContainer}`}>
+            <Row className={`pt-4 ${styles["transactionsScrollContainer"]}`}>
               <Col>
-                <Table bordered={false} className={styles.transactionsTable}>
+                <Table bordered={false} className={styles["transactionsTable"]}>
                   <tbody>
                     {transactions.map((tr) => (
                       <LatestActivityRow
@@ -870,7 +870,7 @@ export default function MemeLabPageComponent({
                       lg={{ span: 8 }}>
                       <Table bordered={false}>
                         <tbody>
-                          <tr className={`${styles.overviewColumn}`}>
+                          <tr className={`${styles["overviewColumn"]}`}>
                             <td>Cards</td>
                             <td className="text-right">{`x${nftBalance}`}</td>
                           </tr>
@@ -901,7 +901,7 @@ export default function MemeLabPageComponent({
                   </Col>
                 </Row>
                 {firstAcquired && (
-                  <Row className={`pb-2 ${styles.overviewColumn}`}>
+                  <Row className={`pb-2 ${styles["overviewColumn"]}`}>
                     <Col>
                       First acquired{" "}
                       {printMintDate(new Date(firstAcquired.transaction_date))}
@@ -909,7 +909,7 @@ export default function MemeLabPageComponent({
                   </Row>
                 )}
                 {airdropped.length > 0 && (
-                  <Row className={`pt-1 ${styles.overviewColumn}`}>
+                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
                     <Col>
                       {getTokenCount(airdropped)} card
                       {getTokenCount(airdropped) > 1 && "s"} airdropped
@@ -917,7 +917,7 @@ export default function MemeLabPageComponent({
                   </Row>
                 )}
                 {bought.length > 0 && (
-                  <Row className={`pt-1 ${styles.overviewColumn}`}>
+                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
                     <Col>
                       {getTokenCount(bought)} card
                       {getTokenCount(bought) > 1 && "s"} bought for {boughtSum}{" "}
@@ -926,7 +926,7 @@ export default function MemeLabPageComponent({
                   </Row>
                 )}
                 {transferredIn.length > 0 && (
-                  <Row className={`pt-1 ${styles.overviewColumn}`}>
+                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
                     <Col>
                       {getTokenCount(transferredIn)} card
                       {getTokenCount(transferredIn) > 1 && "s"} transferred in
@@ -934,7 +934,7 @@ export default function MemeLabPageComponent({
                   </Row>
                 )}
                 {sold.length > 0 && (
-                  <Row className={`pt-1 ${styles.overviewColumn}`}>
+                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
                     <Col>
                       {getTokenCount(sold)} card
                       {getTokenCount(sold) > 1 && "s"} sold for {soldSum} ETH
@@ -942,7 +942,7 @@ export default function MemeLabPageComponent({
                   </Row>
                 )}
                 {transferredOut.length > 0 && (
-                  <Row className={`pt-1 ${styles.overviewColumn}`}>
+                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
                     <Col>
                       {getTokenCount(transferredOut)} card
                       {getTokenCount(transferredOut) > 1 && "s"} transferred out
@@ -980,15 +980,15 @@ export default function MemeLabPageComponent({
             <Row className="position-relative">
               {nft.animation ? (
                 <>
-                  <Col xs={12} className={styles.artHeader}>
-                    <div className={styles.artHeaderContent}>
-                      <div className={styles.artFormatLabel}>
+                  <Col xs={12} className={styles["artHeader"]}>
+                    <div className={styles["artHeaderContent"]}>
+                      <div className={styles["artFormatLabel"]}>
                         {currentFormat}
                       </div>
                       {isFullScreenSupported && (
                         <FontAwesomeIcon
                           icon={faExpandAlt}
-                          className={styles.fullScreen}
+                          className={styles["fullScreen"]}
                           onClick={() =>
                             fullscreenElementId &&
                             enterArtFullScreen(fullscreenElementId)
@@ -998,7 +998,7 @@ export default function MemeLabPageComponent({
                     </div>
                   </Col>
                   <Carousel
-                    className={styles.memesCarousel}
+                    className={styles["memesCarousel"]}
                     interval={null}
                     indicators={false}
                     wrap={false}
@@ -1029,15 +1029,15 @@ export default function MemeLabPageComponent({
                 </>
               ) : (
                 <>
-                  <Col xs={12} className={styles.artHeader}>
-                    <div className={styles.artHeaderContent}>
-                      <div className={styles.artFormatLabel}>
+                  <Col xs={12} className={styles["artHeader"]}>
+                    <div className={styles["artHeaderContent"]}>
+                      <div className={styles["artFormatLabel"]}>
                         {currentFormat}
                       </div>
                       {isFullScreenSupported && (
                         <FontAwesomeIcon
                           icon={faExpandAlt}
-                          className={styles.fullScreen}
+                          className={styles["fullScreen"]}
                           onClick={() =>
                             fullscreenElementId &&
                             enterArtFullScreen(fullscreenElementId)
@@ -1074,7 +1074,7 @@ export default function MemeLabPageComponent({
                         <Col className="tw-flex tw-items-center tw-gap-1">
                           <span>{nft.metadata.image_details.format}</span>
                           <Link
-                            className={styles.arweaveLink}
+                            className={styles["arweaveLink"]}
                             href={nft.metadata.image}
                             target="_blank"
                             rel="noopener noreferrer">
@@ -1093,7 +1093,7 @@ export default function MemeLabPageComponent({
                           <Col className="tw-flex tw-items-center tw-gap-1">
                             <span>{nft.metadata.animation_details.format}</span>
                             <Link
-                              className={styles.arweaveLink}
+                              className={styles["arweaveLink"]}
                               href={
                                 nft.metadata.animation
                                   ? nft.metadata.animation
@@ -1371,7 +1371,7 @@ export default function MemeLabPageComponent({
             </div>
           </Col>
         </Row>
-        <Row className={`pt-2 ${styles.transactionsScrollContainer}`}>
+        <Row className={`pt-2 ${styles["transactionsScrollContainer"]}`}>
           <Col>{activityContent}</Col>
         </Row>
         {activity.length > 0 && !activityLoading && (
@@ -1392,7 +1392,7 @@ export default function MemeLabPageComponent({
   }
 
   return (
-    <Container fluid className={styles.mainContainer}>
+    <Container fluid className={styles["mainContainer"]}>
       <Row>
         <Col>
           <Container className="pt-4 pb-4">

@@ -185,7 +185,7 @@ export default function GradientsComponent() {
   }
 
   return (
-    <Container fluid className={styles.mainContainer}>
+    <Container fluid className={styles["mainContainer"]}>
       <Row>
         <Col>
           <Container className="pt-4">
@@ -212,15 +212,15 @@ export default function GradientsComponent() {
                   <FontAwesomeIcon
                     icon={faChevronCircleUp}
                     onClick={() => setSortDir(SortDirection.ASC)}
-                    className={`${styles.sortDirection} ${
-                      sortDir != SortDirection.ASC ? styles.disabled : ""
+                    className={`${styles["sortDirection"]} ${
+                      sortDir != SortDirection.ASC ? styles["disabled"] : ""
                     }`}
                   />{" "}
                   <FontAwesomeIcon
                     icon={faChevronCircleDown}
                     onClick={() => setSortDir(SortDirection.DESC)}
-                    className={`${styles.sortDirection} ${
-                      sortDir != SortDirection.DESC ? styles.disabled : ""
+                    className={`${styles["sortDirection"]} ${
+                      sortDir != SortDirection.DESC ? styles["disabled"] : ""
                     }`}
                   />
                 </Col>
@@ -229,15 +229,15 @@ export default function GradientsComponent() {
                 <Col>
                   <span
                     onClick={() => setSort(Sort.ID)}
-                    className={`${styles.sort} ${
-                      sort != Sort.ID ? styles.disabled : ""
+                    className={`${styles["sort"]} ${
+                      sort != Sort.ID ? styles["disabled"] : ""
                     }`}>
                     ID
                   </span>
                   <span
                     onClick={() => setSort(Sort.TDH)}
-                    className={`${styles.sort} ${
-                      sort != Sort.TDH ? styles.disabled : ""
+                    className={`${styles["sort"]} ${
+                      sort != Sort.TDH ? styles["disabled"] : ""
                     }`}>
                     TDH
                   </span>

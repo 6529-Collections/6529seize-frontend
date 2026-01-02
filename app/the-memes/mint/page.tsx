@@ -16,7 +16,7 @@ export default async function TheMemesMintPage() {
   }).then(async (responseExtended) => responseExtended);
 
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <TheMemesMint nft={nft} />
     </main>
   );

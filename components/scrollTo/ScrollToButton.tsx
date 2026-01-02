@@ -36,14 +36,14 @@ export default function ScrollToButton(props: Readonly<Props>) {
 
   return (
     <Link
-      className={styles.btn}
+      className={styles["btn"]}
       activeClass="active"
       to={props.to}
       smooth={true}
       offset={props.offset}
       style={{ display: showButton ? "flex" : "none" }}
       duration={250}>
-      <FontAwesomeIcon icon={faChevronUp} className={styles.icon} />
+      <FontAwesomeIcon icon={faChevronUp} className={styles["icon"]} />
     </Link>
   );
 }

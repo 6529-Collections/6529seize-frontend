@@ -20,7 +20,7 @@ export default function FinalizeSnapshotsTableSnapshotTooltipDefaultSnapshot({
   const createTokenPoolOperation = operations.find(
     (operation) =>
       operation.code === AllowlistOperationCode.CREATE_TOKEN_POOL &&
-      operation.params.id === snapshotId
+      operation.params["id"] === snapshotId
   );
 
   const rows: Row[] = [
@@ -34,11 +34,11 @@ export default function FinalizeSnapshotsTableSnapshotTooltipDefaultSnapshot({
     },
     {
       name: "Contract number",
-      value: createTokenPoolOperation?.params?.contract ?? "",
+      value: createTokenPoolOperation?.params?.["contract"] ?? "",
     },
     {
       name: "Block number",
-      value: createTokenPoolOperation?.params?.blockNo ?? "",
+      value: createTokenPoolOperation?.params?.["blockNo"] ?? "",
     },
     {
       name: "Token ID(s)",
@@ -46,7 +46,7 @@ export default function FinalizeSnapshotsTableSnapshotTooltipDefaultSnapshot({
     },
     {
       name: "Consolidation block number",
-      value: createTokenPoolOperation?.params?.consolidateBlockNo ?? "",
+      value: createTokenPoolOperation?.params?.["consolidateBlockNo"] ?? "",
     },
     {
       name: "Wallets count",

@@ -549,13 +549,13 @@ function AppWalletPhraseWord(
       sm={props.full_width ? 12 : 4}
       md={props.full_width ? 12 : 3}
       className="pt-2 pb-2">
-      <Container className={styles.phrase}>
+      <Container className={styles["phrase"]}>
         <Row>
           <Col className="d-flex gap-2 unselectable">
             {props.index && (
               <span className="font-color-h font-lighter">{props.index}</span>
             )}
-            <span className={`text-break ${props.hidden ? styles.blurry : ""}`}>
+            <span className={`text-break ${props.hidden ? styles["blurry"] : ""}`}>
               {props.word}
             </span>
           </Col>

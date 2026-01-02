@@ -50,7 +50,7 @@ export default function NextGenTokenPageClient({
   };
 
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <NextGenNavigationHeader />
       {token ? (
         <NextGenTokenComponent

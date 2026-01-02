@@ -178,7 +178,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                   data-tooltip-id={`opensea-${props.token.id}`}>
                   <Image
                     unoptimized
-                    className={styles.marketplace}
+                    className={styles["marketplace"]}
                     src="/opensea.png"
                     alt="opensea"
                     width={24}
@@ -244,7 +244,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                   data-tooltip-id={`blur-${props.token.id}`}>
                   <Image
                     unoptimized
-                    className={styles.marketplace}
+                    className={styles["marketplace"]}
                     src="/blur.png"
                     alt="blur"
                     width={24}
@@ -292,7 +292,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                   data-tooltip-id={`magic-eden-${props.token.id}`}>
                   <Image
                     unoptimized
-                    className={styles.marketplace}
+                    className={styles["marketplace"]}
                     src="/magiceden.png"
                     alt="magiceden"
                     width={24}

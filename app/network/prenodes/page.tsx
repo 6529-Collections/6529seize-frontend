@@ -5,8 +5,8 @@ import { getAppMetadata } from "@/components/providers/metadata";
 
 export default function PrenodesPage() {
   return (
-    <main className={styles.main}>
-      <Container fluid className={styles.leaderboardContainer}>
+    <main className={styles["main"]}>
+      <Container fluid className={styles["leaderboardContainer"]}>
         <Row>
           <Col>
             <PrenodesStatus />

@@ -227,7 +227,7 @@ export default function NextGenAdmin() {
         <Row className="pt-2 pb-2">
           <Col
             className={
-              focus === Focus.GLOBAL ? styles.tabLeftActive : styles.tabLeft
+              focus === Focus.GLOBAL ? styles["tabLeftActive"] : styles["tabLeft"]
             }
             onClick={() => setFocus(Focus.GLOBAL)}>
             <b>Global</b>
@@ -236,7 +236,7 @@ export default function NextGenAdmin() {
         <Row className="pt-2 pb-2">
           <Col
             className={
-              focus === Focus.COLLECTION ? styles.tabLeftActive : styles.tabLeft
+              focus === Focus.COLLECTION ? styles["tabLeftActive"] : styles["tabLeft"]
             }
             onClick={() => setFocus(Focus.COLLECTION)}>
             <b>Collection</b>
@@ -245,7 +245,7 @@ export default function NextGenAdmin() {
         <Row className="pt-2 pb-2">
           <Col
             className={
-              focus === Focus.ARTIST ? styles.tabLeftActive : styles.tabLeft
+              focus === Focus.ARTIST ? styles["tabLeftActive"] : styles["tabLeft"]
             }
             onClick={() => setFocus(Focus.ARTIST)}>
             <b>Artist</b>

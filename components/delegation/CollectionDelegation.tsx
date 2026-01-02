@@ -463,7 +463,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     )}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className=${styles.etherscanLink}>
+                    className=${styles["etherscanLink"]}>
                     view
                   </a><br />Waiting for confirmation...`,
           });
@@ -478,7 +478,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     )}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className=${styles.etherscanLink}>
+                    className=${styles["etherscanLink"]}>
                     view
                   </a>`,
           });
@@ -512,7 +512,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     )}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className=${styles.etherscanLink}>
+                    className=${styles["etherscanLink"]}>
                     view
                   </a><br />Waiting for confirmation...`,
           });
@@ -528,7 +528,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     )}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className=${styles.etherscanLink}>
+                    className=${styles["etherscanLink"]}>
                     view
                   </a>`,
           });
@@ -565,7 +565,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     )}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className=${styles.etherscanLink}>
+                    className=${styles["etherscanLink"]}>
                     view
                   </a><br />Waiting for confirmation...`,
           });
@@ -580,7 +580,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     )}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className=${styles.etherscanLink}>
+                    className=${styles["etherscanLink"]}>
                     view
                   </a>`,
           });
@@ -619,7 +619,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     )}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className=${styles.etherscanLink}>
+                    className=${styles["etherscanLink"]}>
                     view
                   </a><br />Waiting for confirmation...`,
           });
@@ -634,7 +634,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     )}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className=${styles.etherscanLink}>
+                    className=${styles["etherscanLink"]}>
                     view
                   </a>`,
           });
@@ -792,10 +792,10 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         <h5 className="pt-3 pb-1">Delegations</h5>
         <Accordion
           alwaysOpen
-          className={styles.collectionDelegationsAccordion}
+          className={styles["collectionDelegationsAccordion"]}
           activeKey={delegationKeys}>
           <Accordion.Item
-            className={`${styles.collectionDelegationsAccordionItem}`}
+            className={`${styles["collectionDelegationsAccordionItem"]}`}
             eventKey={"0"}>
             <Accordion.Header
               onClick={() => {
@@ -813,7 +813,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
             </Accordion.Body>
           </Accordion.Item>
           <Accordion.Item
-            className={`${styles.collectionDelegationsAccordionItem} mt-3`}
+            className={`${styles["collectionDelegationsAccordionItem"]} mt-3`}
             eventKey={"1"}>
             <Accordion.Header
               onClick={() => {
@@ -843,10 +843,10 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         </h5>
         <Accordion
           alwaysOpen
-          className={`${styles.collectionDelegationsAccordion} `}
+          className={`${styles["collectionDelegationsAccordion"]} `}
           activeKey={subDelegationKeys}>
           <Accordion.Item
-            className={`${styles.collectionDelegationsAccordionItem}`}
+            className={`${styles["collectionDelegationsAccordionItem"]}`}
             eventKey={"0"}>
             <Accordion.Header
               onClick={() => {
@@ -871,7 +871,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
             </Accordion.Body>
           </Accordion.Item>
           <Accordion.Item
-            className={`${styles.collectionDelegationsAccordionItem} mt-3`}
+            className={`${styles["collectionDelegationsAccordionItem"]} mt-3`}
             eventKey={"1"}>
             <Accordion.Header
               onClick={() => {
@@ -907,10 +907,10 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         <h5 className="pt-5 pb-1">Consolidations</h5>
         <Accordion
           alwaysOpen
-          className={`${styles.collectionDelegationsAccordion}`}
+          className={`${styles["collectionDelegationsAccordion"]}`}
           activeKey={consolidationKeys}>
           <Accordion.Item
-            className={`${styles.collectionDelegationsAccordionItem}`}
+            className={`${styles["collectionDelegationsAccordionItem"]}`}
             eventKey={"0"}>
             <Accordion.Header
               onClick={() => {
@@ -935,7 +935,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
             </Accordion.Body>
           </Accordion.Item>
           <Accordion.Item
-            className={`${styles.collectionDelegationsAccordionItem} mt-3`}
+            className={`${styles["collectionDelegationsAccordionItem"]} mt-3`}
             eventKey={"1"}>
             <Accordion.Header
               onClick={() => {
@@ -981,8 +981,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
           <span
             className={
               w.expiry === "expired"
-                ? styles.delegationExpiredLabel
-                : styles.delegationActiveLabel
+                ? styles["delegationExpiredLabel"]
+                : styles["delegationActiveLabel"]
             }>
             {w.expiry}
           </span>
@@ -990,14 +990,14 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
             <span
               className={
                 !pending
-                  ? styles.consolidationActiveLabel
-                  : styles.consolidationNotAcceptedLabel
+                  ? styles["consolidationActiveLabel"]
+                  : styles["consolidationNotAcceptedLabel"]
               }>
               {consolidationStatus}
               {pending && (
                 <>
                   <FontAwesomeIcon
-                    className={styles.infoIcon}
+                    className={styles["infoIcon"]}
                     icon={faInfoCircle}
                     data-tooltip-id={`consolidation-missing-${label}`}></FontAwesomeIcon>
                   <Tooltip
@@ -1051,7 +1051,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
       <tr key={`outgoing-${del.useCase.use_case}-${index}-${w.wallet}`}>
         <td>
           <div
-            className={`d-flex flex-column gap-2 ${styles.delegationAccordionBlock}`}>
+            className={`d-flex flex-column gap-2 ${styles["delegationAccordionBlock"]}`}>
             <span className="d-flex align-items-center justify-content-between">
               <span className="d-flex gap-3 align-items-center">
                 {delegations >= 2 && (
@@ -1176,9 +1176,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
 
     return (
       <Container className="no-padding">
-        <Row className={styles.delegationsTableScrollContainer}>
+        <Row className={styles["delegationsTableScrollContainer"]}>
           <Col className="pb-3">
-            <Table className={styles.delegationsTable}>
+            <Table className={styles["delegationsTable"]}>
               <tbody>
                 {delegations > 0 ? (
                   myDelegations.map((del, index: number) => {
@@ -1192,7 +1192,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                           <tr>
                             <td
                               colSpan={4}
-                              className={styles.delegationsTableUseCaseHeader}>
+                              className={styles["delegationsTableUseCaseHeader"]}>
                               #{del.useCase.use_case} - {del.useCase.display}
                             </td>
                           </tr>
@@ -1237,9 +1237,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       &nbsp;&nbsp;
                       <button
                         disabled={bulkRevocations.length < 2}
-                        className={`${styles.useCaseWalletRevoke} ${
+                        className={`${styles["useCaseWalletRevoke"]} ${
                           bulkRevocations.length < 2
-                            ? `${styles.useCaseWalletRevokeDisabled}`
+                            ? `${styles["useCaseWalletRevokeDisabled"]}`
                             : ``
                         }`}
                         onClick={() => {
@@ -1272,7 +1272,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                           waitContractWriteBatchRevoke.isLoading) && (
                           <div className="d-inline">
                             <div
-                              className={`spinner-border ${styles.loader}`}
+                              className={`spinner-border ${styles["loader"]}`}
                               role="status">
                               <span className="sr-only"></span>
                             </div>
@@ -1302,7 +1302,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
       <tr key={`incoming-${del.useCase.use_case}-${index}-${w.wallet}`}>
         <td>
           <div
-            className={`d-flex flex-column gap-2 ${styles.delegationAccordionBlock}`}>
+            className={`d-flex flex-column gap-2 ${styles["delegationAccordionBlock"]}`}>
             <span className="d-flex align-items-center gap-3">
               {del.useCase.use_case == SUB_DELEGATION_USE_CASE.use_case ? (
                 <FormCheck
@@ -1349,9 +1349,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
 
     return (
       <Container className="no-padding">
-        <Row className={styles.delegationsTableScrollContainer}>
+        <Row className={styles["delegationsTableScrollContainer"]}>
           <Col className="pb-3">
-            <Table className={styles.delegationsTable}>
+            <Table className={styles["delegationsTable"]}>
               <tbody>
                 {delegations > 0 ? (
                   myDelegations.map((del, index: number) => {
@@ -1365,7 +1365,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                           <tr>
                             <td
                               colSpan={4}
-                              className={styles.delegationsTableUseCaseHeader}>
+                              className={styles["delegationsTableUseCaseHeader"]}>
                               #{del.useCase.use_case} - {del.useCase.display}
                             </td>
                           </tr>
@@ -1406,9 +1406,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       <td colSpan={2} className="pt-3">
                         <span className="d-flex flex-wrap align-items-center gap-2">
                           <button
-                            className={`${styles.useCaseWalletUpdate} ${
+                            className={`${styles["useCaseWalletUpdate"]} ${
                               subDelegationOriginalDelegator === undefined
-                                ? styles.useCaseWalletUpdateDisabled
+                                ? styles["useCaseWalletUpdateDisabled"]
                                 : ""
                             }`}
                             onClick={() => {
@@ -1417,14 +1417,14 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                             }}>
                             <FontAwesomeIcon
                               icon={faPlus}
-                              className={styles.buttonIcon}
+                              className={styles["buttonIcon"]}
                             />
                             Register Delegation
                           </button>
                           <button
-                            className={`${styles.useCaseWalletUpdate} ${
+                            className={`${styles["useCaseWalletUpdate"]} ${
                               subDelegationOriginalDelegator === undefined
-                                ? styles.useCaseWalletUpdateDisabled
+                                ? styles["useCaseWalletUpdateDisabled"]
                                 : ""
                             }`}
                             onClick={() => {
@@ -1433,14 +1433,14 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                             }}>
                             <FontAwesomeIcon
                               icon={faPlus}
-                              className={styles.buttonIcon}
+                              className={styles["buttonIcon"]}
                             />
                             Register Delegation Manager
                           </button>
                           <button
-                            className={`${styles.useCaseWalletUpdate} ${
+                            className={`${styles["useCaseWalletUpdate"]} ${
                               subDelegationOriginalDelegator === undefined
-                                ? styles.useCaseWalletUpdateDisabled
+                                ? styles["useCaseWalletUpdateDisabled"]
                                 : ""
                             }`}
                             onClick={() => {
@@ -1449,7 +1449,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                             }}>
                             <FontAwesomeIcon
                               icon={faPlus}
-                              className={styles.buttonIcon}
+                              className={styles["buttonIcon"]}
                             />
                             Register Consolidation
                           </button>
@@ -1458,9 +1458,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                             props.collection.contract ===
                               MEMES_COLLECTION.contract) && (
                             <button
-                              className={`${styles.useCaseWalletUpdate} ${
+                              className={`${styles["useCaseWalletUpdate"]} ${
                                 subDelegationOriginalDelegator === undefined
-                                  ? styles.useCaseWalletUpdateDisabled
+                                  ? styles["useCaseWalletUpdateDisabled"]
                                   : ""
                               }`}
                               onClick={() => {
@@ -1469,15 +1469,15 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                               }}>
                               <FontAwesomeIcon
                                 icon={faPlus}
-                                className={styles.buttonIcon}
+                                className={styles["buttonIcon"]}
                               />
                               Assign Primary Address
                             </button>
                           )}
                           <button
-                            className={`${styles.useCaseWalletRevoke} ${
+                            className={`${styles["useCaseWalletRevoke"]} ${
                               subDelegationOriginalDelegator === undefined
-                                ? styles.useCaseWalletRevokeDisabled
+                                ? styles["useCaseWalletRevokeDisabled"]
                                 : ""
                             }`}
                             onClick={() => {
@@ -1486,7 +1486,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                             }}>
                             <FontAwesomeIcon
                               icon={faMinus}
-                              className={styles.buttonIcon}
+                              className={styles["buttonIcon"]}
                             />
                             Revoke
                           </button>
@@ -1511,7 +1511,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
               Locks{" "}
               <>
                 <FontAwesomeIcon
-                  className={styles.infoIcon}
+                  className={styles["infoIcon"]}
                   icon={faInfoCircle}
                   data-tooltip-id="locks-info"></FontAwesomeIcon>
                 <Tooltip
@@ -1530,9 +1530,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         <Row className="pt-2 pb-2">
           <Col>
             <button
-              className={`${styles.lockDelegationBtn} ${
+              className={`${styles["lockDelegationBtn"]} ${
                 collectionLockReadGlobal?.data
-                  ? styles.lockDelegationBtnDisabled
+                  ? styles["lockDelegationBtnDisabled"]
                   : ""
               }`}
               onClick={() => {
@@ -1555,7 +1555,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
               }}>
               <FontAwesomeIcon
                 icon={collectionLockRead.data ? faLock : faLockOpen}
-                className={styles.buttonIcon}
+                className={styles["buttonIcon"]}
               />
               {collectionLockRead.data ? "Unlock" : "Lock"} Wallet
               {collectionLockReadGlobal?.data &&
@@ -1574,9 +1574,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
           <Col xs={12} sm={12} md={4} lg={4} className="pt-2 pb-2">
             <Form.Select
               disabled={!!collectionLockRead.data}
-              className={`${styles.formInputLockUseCase} ${
+              className={`${styles["formInputLockUseCase"]} ${
                 collectionLockRead.data || collectionLockReadGlobal?.data
-                  ? styles.formInputDisabled
+                  ? styles["formInputDisabled"]
                   : ""
               }`}
               value={lockUseCaseValue}
@@ -1638,7 +1638,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   lockUseCaseIndex
                 ] as any as boolean) === false) ? (
                 <button
-                  className={`${styles.lockUseCaseBtn}`}
+                  className={`${styles["lockUseCaseBtn"]}`}
                   onClick={() => {
                     const useCase = DELEGATION_USE_CASES[lockUseCaseIndex];
                     const title = `${
@@ -1673,7 +1673,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                         ? faLock
                         : faLockOpen
                     }
-                    className={styles.buttonIcon}
+                    className={styles["buttonIcon"]}
                   />
                   {useCaseLockStatuses.data?.[lockUseCaseIndex]
                     ? "Unlock"
@@ -1684,7 +1684,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 </button>
               ) : (
                 <div>
-                  <span className={styles.hint}>* Note:</span> Unlock use case in{" "}
+                  <span className={styles["hint"]}>* Note:</span> Unlock use case in{" "}
                   <Link href={`/delegation/${ANY_COLLECTION_PATH}`}>
                     All Collections
                   </Link>
@@ -1696,7 +1696,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         {collectionLockRead.data ? (
           <Row className="pb-3">
             <Col>
-              <span className={styles.hint}>* Note:</span> Unlock Wallet to
+              <span className={styles["hint"]}>* Note:</span> Unlock Wallet to
               lock/unlock specific use cases
             </Col>
           </Row>
@@ -1704,7 +1704,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         {collectionLockReadGlobal?.data ? (
           <Row className="pb-3">
             <Col>
-              <span className={styles.hint}>* Note:</span> Unlock Wallet on{" "}
+              <span className={styles["hint"]}>* Note:</span> Unlock Wallet on{" "}
               <Link href={`/delegation/${ANY_COLLECTION_PATH}`}>
                 All Collections
               </Link>{" "}
@@ -1730,7 +1730,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
               <Row className="pb-4">
                 <Col className="d-flex align-items-center justify-content-start">
                   <button
-                    className={styles.backBtn}
+                    className={styles["backBtn"]}
                     onClick={() =>
                       props.setSection(DelegationCenterSection.CENTER)
                     }>
@@ -1756,7 +1756,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       <Row className="pt-5 pb-3">
                         <Col className="d-flex align-items-center justify-content-start">
                           <button
-                            className={styles.backBtn}
+                            className={styles["backBtn"]}
                             onClick={() =>
                               props.setSection(DelegationCenterSection.CENTER)
                             }>
