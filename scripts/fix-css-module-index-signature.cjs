@@ -1,5 +1,6 @@
 "use strict";
 
+const fs = require("fs");
 const path = require("path");
 const { Project, Node, SyntaxKind } = require("ts-morph");
 
@@ -12,134 +13,112 @@ const project = new Project({
   skipFileDependencyResolution: true,
 });
 
-const cssModuleExtensions = [
-  ".module.css",
-  ".module.scss",
-  ".module.sass",
-];
+const diagnostics = project
+  .getPreEmitDiagnostics()
+  .filter((diagnostic) => diagnostic.getCode() === 4111);
 
-const isCssModuleSpecifier = (specifier) =>
-  cssModuleExtensions.some((ext) => specifier.endsWith(ext));
-
-const collectCssModuleSymbols = (sourceFile) => {
-  const symbols = new Set();
-
-  for (const importDecl of sourceFile.getImportDeclarations()) {
-    const specifier = importDecl.getModuleSpecifierValue();
-    if (!isCssModuleSpecifier(specifier)) {
-      continue;
+const findPropertyAccessNode = (sourceFile, position) => {
+  let current = sourceFile.getDescendantAtPos(position);
+  while (current) {
+    const kind = current.getKind();
+    if (
+      kind === SyntaxKind.PropertyAccessExpression ||
+      kind === SyntaxKind.PropertyAccessChain ||
+      kind === SyntaxKind.SuperPropertyAccessExpression
+    ) {
+      return current;
     }
-
-    const defaultImport = importDecl.getDefaultImport();
-    if (defaultImport) {
-      const symbol = defaultImport.getSymbol();
-      if (symbol) {
-        symbols.add(symbol);
-        const aliased = symbol.getAliasedSymbol();
-        if (aliased) {
-          symbols.add(aliased);
-        }
-      }
-    }
-
-    const namespaceImport = importDecl.getNamespaceImport();
-    if (namespaceImport) {
-      const symbol = namespaceImport.getSymbol();
-      if (symbol) {
-        symbols.add(symbol);
-        const aliased = symbol.getAliasedSymbol();
-        if (aliased) {
-          symbols.add(aliased);
-        }
-      }
-    }
+    current = current.getParent();
   }
-
-  return symbols;
+  return null;
 };
 
-const isCssModuleIdentifier = (identifier, cssModuleSymbols) => {
-  const symbol = identifier.getSymbol();
-  if (!symbol) {
-    return false;
+const replacementsByFile = new Map();
+
+for (const diagnostic of diagnostics) {
+  const sourceFile = diagnostic.getSourceFile();
+  if (!sourceFile) {
+    continue;
   }
 
-  if (cssModuleSymbols.has(symbol)) {
-    return true;
+  const start = diagnostic.getStart();
+  if (start == null) {
+    continue;
   }
 
-  const aliased = symbol.getAliasedSymbol();
-  return aliased ? cssModuleSymbols.has(aliased) : false;
-};
+  const propertyAccess = findPropertyAccessNode(sourceFile, start);
+  if (!propertyAccess) {
+    continue;
+  }
+
+  const expression = propertyAccess.getExpression();
+  const nameNode = propertyAccess.getNameNode?.();
+  if (!nameNode) {
+    continue;
+  }
+
+  const replaceStart = expression.getEnd();
+  const replaceEnd = nameNode.getEnd();
+  if (replaceStart >= replaceEnd) {
+    continue;
+  }
+
+  const name = propertyAccess.getName();
+  const optionalPrefix = propertyAccess.hasQuestionDotToken() ? "?.[" : "[";
+  const replacement = `${optionalPrefix}${JSON.stringify(name)}]`;
+
+  const filePath = sourceFile.getFilePath();
+  if (!replacementsByFile.has(filePath)) {
+    replacementsByFile.set(filePath, []);
+  }
+
+  replacementsByFile.get(filePath).push({
+    start: replaceStart,
+    end: replaceEnd,
+    replacement,
+  });
+}
 
 let totalChanges = 0;
 let filesTouched = 0;
 
-for (const sourceFile of project.getSourceFiles()) {
-  const filePath = sourceFile.getFilePath();
-  if (!filePath.endsWith(".ts") && !filePath.endsWith(".tsx")) {
+for (const [filePath, replacements] of replacementsByFile.entries()) {
+  const originalText = fs.readFileSync(filePath, "utf8");
+
+  const deduped = [];
+  const seen = new Set();
+  for (const replacement of replacements) {
+    const key = `${replacement.start}:${replacement.end}`;
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    deduped.push(replacement);
+  }
+
+  if (deduped.length === 0) {
     continue;
   }
 
-  const cssModuleSymbols = collectCssModuleSymbols(sourceFile);
-  if (cssModuleSymbols.size === 0) {
-    continue;
+  deduped.sort((a, b) => b.start - a.start);
+
+  let updatedText = originalText;
+  for (const { start, end, replacement } of deduped) {
+    updatedText =
+      updatedText.slice(0, start) + replacement + updatedText.slice(end);
   }
 
-  const replacements = [];
-
-  sourceFile.forEachDescendant((node) => {
-    const kind = node.getKind();
-    const isPropertyAccess =
-      kind === SyntaxKind.PropertyAccessExpression ||
-      kind === SyntaxKind.PropertyAccessChain;
-
-    if (!isPropertyAccess) {
-      return;
+  if (updatedText !== originalText) {
+    totalChanges += deduped.length;
+    filesTouched += 1;
+    if (!dryRun) {
+      fs.writeFileSync(filePath, updatedText, "utf8");
     }
-
-    const propertyAccess = node;
-    const expression = propertyAccess.getExpression();
-    if (!Node.isIdentifier(expression)) {
-      return;
-    }
-
-    if (!isCssModuleIdentifier(expression, cssModuleSymbols)) {
-      return;
-    }
-
-    const name = propertyAccess.getName();
-    if (!name) {
-      return;
-    }
-
-    const expressionText = expression.getText();
-    const isOptional = kind === SyntaxKind.PropertyAccessChain;
-    const replacement = isOptional
-      ? `${expressionText}?.[${JSON.stringify(name)}]`
-      : `${expressionText}[${JSON.stringify(name)}]`;
-
-    replacements.push({ node: propertyAccess, replacement });
-  });
-
-  if (replacements.length === 0) {
-    continue;
-  }
-
-  replacements.sort((a, b) => b.node.getStart() - a.node.getStart());
-  for (const { node, replacement } of replacements) {
-    node.replaceWithText(replacement);
-  }
-
-  totalChanges += replacements.length;
-  filesTouched += 1;
-
-  if (!dryRun) {
-    sourceFile.saveSync();
   }
 }
 
 const modeLabel = dryRun ? "Dry run: " : "";
+console.log(`Found ${diagnostics.length} TS4111 diagnostics.`);
 console.log(
   `${modeLabel}updated ${totalChanges} property access${
     totalChanges === 1 ? "" : "es"
