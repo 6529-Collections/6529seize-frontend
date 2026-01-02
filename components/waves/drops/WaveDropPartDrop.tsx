@@ -16,8 +16,8 @@ interface WaveDropPartDropProps {
   onQuoteClick: (drop: ApiDrop) => void;
   isEditing?: boolean | undefined;
   isSaving?: boolean | undefined;
-  onSave?: (newContent: string) => void | undefined | undefined;
-  onCancel?: () => void | undefined | undefined;
+  readonly onSave?: ((newContent: string) => void) | undefined;
+  readonly onCancel?: (() => void) | undefined;
   isCompetitionDrop?: boolean | undefined;
   mediaImageScale?: ImageScale | undefined;
 }

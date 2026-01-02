@@ -16,8 +16,10 @@ interface WaveDropPartContentMarkdownProps {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly isEditing?: boolean | undefined;
   readonly isSaving?: boolean | undefined;
-  readonly onSave?: (newContent: string, mentions?: ApiDropMentionedUser[]) => void | undefined | undefined;
-  readonly onCancel?: () => void | undefined | undefined;
+  readonly onSave?:
+    | ((newContent: string, mentions?: ApiDropMentionedUser[]) => void)
+    | undefined;
+  readonly onCancel?: (() => void) | undefined;
   readonly drop?: ApiDrop | undefined; // Add drop to check for edited status
 }
 

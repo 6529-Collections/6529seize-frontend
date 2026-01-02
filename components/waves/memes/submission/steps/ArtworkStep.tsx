@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useCallback, useMemo } from "react";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
@@ -145,7 +145,7 @@ interface ArtworkStepProps {
   readonly onExternalMimeTypeChange: (value: InteractiveMediaMimeType) => void;
   readonly onClearExternalMedia: () => void;
   readonly onSubmit: () => void;
-  readonly onCancel?: () => void | undefined | undefined; // Added cancel handler prop
+  readonly onCancel?: (() => void) | undefined; // Added cancel handler prop
   readonly updateTraitField: <K extends keyof TraitsData>(
     field: K,
     value: TraitsData[K]

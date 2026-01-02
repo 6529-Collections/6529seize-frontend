@@ -43,7 +43,7 @@ interface WaveDropsContentProps {
   readonly isAtBottom: boolean;
   readonly scrollToBottom: () => void;
   readonly typingMessage: string | null;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void | undefined | undefined;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly pendingCount: number;
   readonly onRevealPending: () => void;
   readonly bottomPaddingClassName?: string | undefined;

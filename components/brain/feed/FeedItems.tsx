@@ -1,9 +1,6 @@
 import { TypedFeedItem } from "@/types/feed.types";
 import FeedItem from "./FeedItem";
-import {
-  ExtendedDrop,
-  getFeedItemKey,
-} from "@/helpers/waves/drop.helpers";
+import { ExtendedDrop, getFeedItemKey } from "@/helpers/waves/drop.helpers";
 import CommonChangeAnimation from "@/components/utils/animation/CommonChangeAnimation";
 import { DropInteractionParams } from "@/components/waves/drops/Drop";
 import { ActiveDropState } from "@/types/dropInteractionTypes";
@@ -14,7 +11,7 @@ interface FeedItemsProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void | undefined | undefined;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
 }
 
 export default function FeedItems({
@@ -28,7 +25,10 @@ export default function FeedItems({
   return (
     <div className="tw-flex tw-flex-col tw-space-y-3 tw-pb-2 lg:tw-pb-4">
       {items.map((item, i) => (
-        <div key={getFeedItemKey({ item, index: i })} id={`feed-item-${item.serial_no}`}>
+        <div
+          key={getFeedItemKey({ item, index: i })}
+          id={`feed-item-${item.serial_no}`}
+        >
           <CommonChangeAnimation>
             <FeedItem
               item={item}

@@ -32,7 +32,7 @@ interface DropsListProps {
   readonly onQuote: DropActionHandler;
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void | undefined | undefined;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly serialNo: number | null;
   readonly targetDropRef: RefObject<HTMLDivElement | null> | null;
   readonly dropViewDropId: string | null;
@@ -40,8 +40,6 @@ interface DropsListProps {
   readonly location?: DropLocation | undefined;
   readonly unreadDividerSerialNo?: number | null | undefined;
 }
-
-
 
 const MemoizedDrop = memo(Drop);
 const MemoizedLightDrop = memo(LightDrop);
@@ -63,7 +61,6 @@ const DropsList = memo(function DropsList({
   location = DropLocation.WAVE,
   unreadDividerSerialNo,
 }: DropsListProps) {
-
   const handleReply = useCallback<DropActionHandler>(
     ({ drop, partId }) => onReply({ drop, partId }),
     [onReply]
@@ -156,12 +153,14 @@ const DropsList = memo(function DropsList({
           scrollContainer={getItemData.scrollContainerRef?.current ?? null}
           className={
             getItemData.serialNo === drop.serial_no ? "tw-scroll-mt-20" : ""
-          }>
+          }
+        >
           <VirtualScrollWrapper
             scrollContainerRef={getItemData.scrollContainerRef}
             dropSerialNo={drop.serial_no}
             waveId={drop.type === DropSize.FULL ? drop.wave.id : drop.waveId}
-            type={drop.type}>
+            type={drop.type}
+          >
             {drop.type === DropSize.FULL ? (
               <MemoizedDrop
                 dropViewDropId={getItemData.dropViewDropId}

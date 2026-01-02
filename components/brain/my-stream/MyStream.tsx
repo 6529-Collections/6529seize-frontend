@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { DropInteractionParams } from "@/components/waves/drops/Drop";
 import { useSetStreamHasNewItems } from "@/contexts/TitleContext";
@@ -17,7 +17,7 @@ interface MyStreamProps {
   readonly items: TypedFeedItem[];
   readonly isFetching: boolean;
   readonly onBottomIntersection: (state: boolean) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void | undefined | undefined;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly haveNewItems?: boolean | undefined;
   readonly status?: string | undefined;
   readonly isInitialQueryDone?: boolean | undefined;
@@ -37,11 +37,11 @@ export default function MyStream({
 }: MyStreamProps) {
   const { myStreamFeedStyle } = useLayout();
   // Compute whether stream has new items
-  const hasNewItems = useMemo(() => 
-    status !== "pending" && isInitialQueryDone && haveNewItems,
+  const hasNewItems = useMemo(
+    () => status !== "pending" && isInitialQueryDone && haveNewItems,
     [status, isInitialQueryDone, haveNewItems]
   );
-  
+
   // Update stream new items status in title context
   useSetStreamHasNewItems(hasNewItems);
   const showLoader = (!isInitialQueryDone || isFetching) && items.length === 0;

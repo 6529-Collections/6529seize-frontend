@@ -23,8 +23,8 @@ interface WaveDropPartContentProps {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly isEditing?: boolean | undefined;
   readonly isSaving?: boolean | undefined;
-  readonly onSave?: (newContent: string) => void | undefined | undefined;
-  readonly onCancel?: () => void | undefined | undefined;
+  readonly onSave?: ((newContent: string) => void) | undefined;
+  readonly onCancel?: (() => void) | undefined;
   readonly drop?: ApiDrop | undefined;
   readonly isCompetitionDrop?: boolean | undefined;
   readonly mediaImageScale?: ImageScale | undefined;
@@ -78,7 +78,8 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
           e.stopPropagation();
           onClick();
         }}
-        aria-label={`${isPrevious ? "Previous" : "Next"} part`}>
+        aria-label={`${isPrevious ? "Previous" : "Next"} part`}
+      >
         <svg
           className="tw-size-5 sm:tw-size-4 tw-flex-shrink-0"
           xmlns="http://www.w3.org/2000/svg"
@@ -86,7 +87,8 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
           aria-hidden="true"
           viewBox="0 0 24 24"
           strokeWidth="2"
-          stroke="currentColor">
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"

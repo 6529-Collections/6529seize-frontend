@@ -24,7 +24,7 @@ interface OngoingParticipationDropProps {
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void | undefined | undefined;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
 }
 
@@ -71,7 +71,8 @@ export default function OngoingParticipationDrop({
     <ParticipationDropContainer
       drop={drop}
       isActiveDrop={isActiveDrop}
-      location={location}>
+      location={location}
+    >
       {!isMobile && showReplyAndQuote && (
         <WaveDropActions
           drop={drop}

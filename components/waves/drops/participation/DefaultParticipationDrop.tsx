@@ -16,11 +16,13 @@ interface DefaultParticipationDropProps {
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void | undefined | undefined;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
 }
 
-export default function ParticipationDrop(props: DefaultParticipationDropProps) {
+export default function ParticipationDrop(
+  props: DefaultParticipationDropProps
+) {
   const { drop } = props;
   const { isVotingEnded } = useDropInteractionRules(drop);
 

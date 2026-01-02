@@ -4,10 +4,7 @@ import { IFeedItemWaveCreated } from "@/types/feed.types";
 
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import { ActiveDropState } from "@/types/dropInteractionTypes";
-import {
-  DropSize,
-  ExtendedDrop,
-} from "@/helpers/waves/drop.helpers";
+import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import Drop, {
   DropInteractionParams,
   DropLocation,
@@ -29,7 +26,7 @@ export default function FeedItemWaveCreated({
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void | undefined | undefined;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
 }) {
   const router = useRouter();
   const { isApp } = useDeviceInfo();
@@ -78,7 +75,8 @@ export default function FeedItemWaveCreated({
               aria-hidden="true"
               viewBox="0 0 24 24"
               strokeWidth="1.5"
-              stroke="currentColor">
+              stroke="currentColor"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"

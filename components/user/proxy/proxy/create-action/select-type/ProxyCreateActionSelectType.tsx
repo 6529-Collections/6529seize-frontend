@@ -13,7 +13,7 @@ export default function ProxyCreateActionSelectType({
   readonly setSelectedActionType: (
     actionType: ApiProfileProxyActionType
   ) => void;
-  readonly onCancel?: () => void | undefined | undefined;
+  readonly onCancel?: (() => void) | undefined;
 }) {
   const isActionAvailable = (
     actionType: ApiProfileProxyActionType

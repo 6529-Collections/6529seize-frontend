@@ -9,7 +9,7 @@ interface CollapsedWaveProps {
   readonly href: string;
   readonly isActive: boolean;
   readonly isDropWave: boolean;
-  readonly onMouseEnter?: () => void | undefined | undefined;
+  readonly onMouseEnter?: (() => void) | undefined;
   readonly onClick: (e: React.MouseEvent<HTMLAnchorElement>) => void;
   readonly showTooltip: boolean;
   readonly tooltipId: string;

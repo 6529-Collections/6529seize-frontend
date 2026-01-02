@@ -10,14 +10,14 @@ interface WaveDropPartProps {
   readonly drop: ExtendedDrop;
   readonly activePartIndex: number;
   readonly setActivePartIndex: (index: number) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void | undefined | undefined;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onLongPress: () => void;
   readonly setLongPressTriggered: (triggered: boolean) => void;
   readonly isEditing?: boolean | undefined;
   readonly isSaving?: boolean | undefined;
-  readonly onSave?: (newContent: string) => void | undefined | undefined;
-  readonly onCancel?: () => void | undefined | undefined;
+  readonly onSave?: ((newContent: string) => void) | undefined;
+  readonly onCancel?: (() => void) | undefined;
   readonly isCompetitionDrop?: boolean | undefined;
   readonly mediaImageScale?: ImageScale | undefined;
 }
@@ -116,7 +116,8 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
         tabIndex={isTemporaryDrop || !onDropContentClick ? undefined : 0}
         onKeyDown={(e) =>
           !isTemporaryDrop && e.key === "Enter" && handleClick()
-        }>
+        }
+      >
         <div className="tw-relative tw-overflow-hidden  tw-transition-all tw-duration-300 tw-ease-out">
           <WaveDropPartDrop
             drop={drop}

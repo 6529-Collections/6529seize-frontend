@@ -25,7 +25,7 @@ export default function NotificationPriorityAlert({
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void | undefined | undefined;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
 }) {
   const { createReplyClickHandler, createQuoteClickHandler } =
     useWaveNavigation();
@@ -38,7 +38,8 @@ export default function NotificationPriorityAlert({
           profile={notification.related_identity}
           size={UserFollowBtnSize.SMALL}
         />
-      }>
+      }
+    >
       <span className="tw-text-sm tw-font-normal tw-text-iron-50">
         <span className="tw-text-iron-400">sent a priority alert 🚨</span>{" "}
         <NotificationTimestamp createdAt={notification.created_at} />

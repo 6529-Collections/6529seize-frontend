@@ -27,7 +27,7 @@ export default function NotificationAllDrops({
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void | undefined | undefined;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
 }) {
   const { createReplyClickHandler, createQuoteClickHandler } =
     useWaveNavigation();
@@ -53,7 +53,8 @@ export default function NotificationAllDrops({
           <span
             className={`${getNotificationVoteColor(
               notification.additional_context.vote
-            )} tw-pl-1 tw-font-medium`}>
+            )} tw-pl-1 tw-font-medium`}
+          >
             {notification.additional_context.vote > 0 && "+"}
             {numberWithCommas(notification.additional_context.vote)}
           </span>
@@ -73,7 +74,8 @@ export default function NotificationAllDrops({
             profile={notification.related_identity}
             size={UserFollowBtnSize.SMALL}
           />
-        }>
+        }
+      >
         <span className="tw-text-sm tw-font-normal tw-text-iron-50">
           {getContent()}{" "}
           <NotificationTimestamp createdAt={notification.created_at} />
