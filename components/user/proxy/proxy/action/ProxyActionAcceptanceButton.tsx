@@ -21,20 +21,6 @@ import HeaderProxyNewModal from "@/components/header/proxy/HeaderProxyNewModal";
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 
-const ACTION_LABEL: Record<AcceptActionRequestActionEnum, string> = {
-  [AcceptActionRequestActionEnum.Accept]: "Accept",
-  [AcceptActionRequestActionEnum.Reject]: "Reject",
-  [AcceptActionRequestActionEnum.Revoke]: "Revoke",
-  [AcceptActionRequestActionEnum.Restore]: "Restore",
-};
-
-const ACTION_CLASSES: Record<AcceptActionRequestActionEnum, string> = {
-  [AcceptActionRequestActionEnum.Accept]: "tw-text-green",
-  [AcceptActionRequestActionEnum.Reject]: "tw-text-red",
-  [AcceptActionRequestActionEnum.Revoke]: "tw-text-red",
-  [AcceptActionRequestActionEnum.Restore]: "tw-text-green",
-};
-
 export default function ProxyActionAcceptanceButton({
   action,
   profile,
@@ -112,16 +98,8 @@ export default function ProxyActionAcceptanceButton({
       });
     },
     onSuccess: (_, variables) => {
-      if (
-        !profileProxy.granted_to?.handle ||
-        !profileProxy.created_by?.handle
-      ) {
-        return;
-      }
       onProfileProxyModify({
         profileProxyId: profileProxy.id,
-        grantedToHandle: profileProxy.granted_to.handle,
-        createdByHandle: profileProxy.created_by.handle,
       });
       setToast({
         message: "Action status changed",
@@ -190,14 +168,14 @@ export default function ProxyActionAcceptanceButton({
             {possibleActions.includes(
               AcceptActionRequestActionEnum.Restore
             ) && (
-              <button
-                onClick={() => onSubmit(AcceptActionRequestActionEnum.Restore)}
-                disabled={submitting}
-                type="button"
-                className="tw-text-iron-300 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out">
-                {submitting ? <CircleLoader /> : "Restore"}
-              </button>
-            )}
+                <button
+                  onClick={() => onSubmit(AcceptActionRequestActionEnum.Restore)}
+                  disabled={submitting}
+                  type="button"
+                  className="tw-text-iron-300 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out">
+                  {submitting ? <CircleLoader /> : "Restore"}
+                </button>
+              )}
           </div>
         </div>
       </div>

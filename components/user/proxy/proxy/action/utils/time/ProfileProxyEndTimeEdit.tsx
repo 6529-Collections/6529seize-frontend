@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
 import CommonTimeSelect from "@/components/utils/time/CommonTimeSelect";
@@ -34,23 +34,10 @@ export default function ProfileProxyEndTimeEdit({
     profileProxyAction.end_time
   );
 
-  const getIsChangedAndValid = () => {
-    if (profileProxyAction.end_time === endTime) {
-      return false;
-    }
-    if (endTime && endTime < Time.currentMillis()) {
-      return false;
-    }
-    return true;
-  };
-
-  const [isChangedAndValid, setIsChangedAndValid] = useState(
-    getIsChangedAndValid()
-  );
-  useEffect(
-    () => setIsChangedAndValid(getIsChangedAndValid()),
-    [endTime, profileProxyAction.end_time]
-  );
+  const isChangedAndValid =
+    profileProxyAction.end_time !== (isEndTimeDisabled ? null : endTime) &&
+    (isEndTimeDisabled ||
+      (endTime !== null && endTime >= Time.currentMillis()));
 
   const [submitting, setSubmitting] = useState(false);
   const profileProxyActionCreditMutation = useMutation({
@@ -64,16 +51,8 @@ export default function ProfileProxyEndTimeEdit({
       });
     },
     onSuccess: () => {
-      if (
-        !profileProxy.granted_to?.handle ||
-        !profileProxy.created_by?.handle
-      ) {
-        return;
-      }
       onProfileProxyModify({
-        profileProxyId: profileProxy.id,
-        grantedToHandle: profileProxy.granted_to.handle,
-        createdByHandle: profileProxy.created_by.handle,
+        profileProxyId: profileProxy.id
       });
       setToast({
         message: "Action end time updated successfully!",
@@ -141,11 +120,10 @@ export default function ProfileProxyEndTimeEdit({
               onClick={onSubmit}
               disabled={!isChangedAndValid || submitting}
               type="button"
-              className={`${
-                !isChangedAndValid
-                  ? "tw-opacity-50"
-                  : "hover:tw-bg-primary-600 hover:tw-border-primary-600"
-              } tw-w-full tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}>
+              className={`${isChangedAndValid
+                ? "hover:tw-bg-primary-600 hover:tw-border-primary-600"
+                : "tw-opacity-50"
+                } tw-w-full tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}>
               <div className="tw-flex tw-items-center tw-space-x-2">
                 {submitting && <CircleLoader size={CircleLoaderSize.SMALL} />}
                 <span>Update</span>
