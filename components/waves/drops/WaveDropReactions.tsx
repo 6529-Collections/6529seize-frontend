@@ -316,9 +316,9 @@ function WaveDropReaction({
   let animationStyle = "";
   if (animate) {
     if (selected) {
-      animationStyle = styles.reactionSlideUp;
+      animationStyle = styles["reactionSlideUp"];
     } else {
-      animationStyle = styles.reactionSlideDown;
+      animationStyle = styles["reactionSlideDown"];
     }
   }
 

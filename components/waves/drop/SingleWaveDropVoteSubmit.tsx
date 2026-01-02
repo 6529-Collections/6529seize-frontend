@@ -265,23 +265,23 @@ const SingleWaveDropVoteSubmit = forwardRef<
 
   const getButtonContent = () => {
     return (
-      <div className={styles.buttonContent}>
+      <div className={styles["buttonContent"]}>
         {(!loading || isTextExiting) && (
           <span
-            className={`${styles.buttonText} ${
-              isTextExiting ? styles.exit : styles.enter
+            className={`${styles["buttonText"]} ${
+              isTextExiting ? styles["exit"] : styles["enter"]
             }`}>
             {showSuccess ? "Voted" : "Vote"}
           </span>
         )}
         {loading && (
           <div
-            className={`${styles.spinner} ${
-              isSpinnerExiting ? styles.exit : styles.enter
+            className={`${styles["spinner"]} ${
+              isSpinnerExiting ? styles["exit"] : styles["enter"]
             }`}>
-            <div className={styles.bounce1}></div>
-            <div className={styles.bounce2}></div>
-            <div className={styles.bounce3}></div>
+            <div className={styles["bounce1"]}></div>
+            <div className={styles["bounce2"]}></div>
+            <div className={styles["bounce3"]}></div>
           </div>
         )}
       </div>
@@ -292,8 +292,8 @@ const SingleWaveDropVoteSubmit = forwardRef<
     <div className={`vote-button-container-${randomID}`}>
       <button
         id={`vote-button-${randomID}`}
-        className={`${size === SingleWaveDropVoteSize.MINI ? styles.voteButtonMini : styles.voteButton} ${
-          isProcessing ? styles.processing : ""
+        className={`${size === SingleWaveDropVoteSize.MINI ? styles["voteButtonMini"] : styles["voteButton"]} ${
+          isProcessing ? styles["processing"] : ""
         }`}
         onClick={(e) => {
           e.stopPropagation();

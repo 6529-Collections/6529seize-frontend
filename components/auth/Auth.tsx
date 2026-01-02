@@ -594,10 +594,10 @@ export default function Auth({
         keyboard={false}
         centered
       >
-        <div className={styles.signModalHeader}>
+        <div className={styles["signModalHeader"]}>
           <Modal.Title>Sign Authentication Request</Modal.Title>
         </div>
-        <Modal.Body className={styles.signModalContent}>
+        <Modal.Body className={styles["signModalContent"]}>
           <p className="mt-2 mb-2">
             To connect your wallet, you will need to sign a message to confirm
             your identity.
@@ -615,7 +615,7 @@ export default function Auth({
             </li>
           </ul>
         </Modal.Body>
-        <Modal.Footer className={styles.signModalContent}>
+        <Modal.Footer className={styles["signModalContent"]}>
           <Button
             variant="danger"
             onClick={() => {

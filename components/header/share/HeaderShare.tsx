@@ -332,10 +332,10 @@ function HeaderQRModal({
         {content}
         {url && (
           <div className="d-flex align-items-center gap-2 mt-2">
-            <div className={styles.url}>{url}</div>
+            <div className={styles["url"]}>{url}</div>
             <FontAwesomeIcon
               icon={faCopy}
-              className={`${styles.urlCopy} ${urlCopied ? styles.copied : ""}`}
+              className={`${styles["urlCopy"]} ${urlCopied ? styles["copied"] : ""}`}
               data-tooltip-id="copy-url-tooltip"
               onClick={() => {
                 navigator.clipboard.writeText(url);
@@ -369,7 +369,7 @@ function HeaderQRModal({
       centered
       data-testid="header-share-modal"
     >
-      <Modal.Body className={styles.modalBody}>
+      <Modal.Body className={styles["modalBody"]}>
         <ModalMenu
           isShareConnection={!!getRefreshToken()}
           activeTab={activeTab}
@@ -403,7 +403,7 @@ function ModalMenu({
       <div className="d-flex gap-2">
         {isShareConnection && (
           <Button
-            className={activeTab === Mode.SHARE ? styles.disabledMenuBtn : ""}
+            className={activeTab === Mode.SHARE ? styles["disabledMenuBtn"] : ""}
             variant={activeTab === Mode.SHARE ? "light" : "outline-light"}
             onClick={() => onTabChange(Mode.SHARE, SubMode.APP)}
           >
@@ -411,14 +411,14 @@ function ModalMenu({
           </Button>
         )}
         <Button
-          className={activeTab === Mode.NAVIGATE ? styles.disabledMenuBtn : ""}
+          className={activeTab === Mode.NAVIGATE ? styles["disabledMenuBtn"] : ""}
           variant={activeTab === Mode.NAVIGATE ? "light" : "outline-light"}
           onClick={() => onTabChange(Mode.NAVIGATE, SubMode.APP)}
         >
           Current URL
         </Button>
         <Button
-          className={activeTab === Mode.APPS ? styles.disabledMenuBtn : ""}
+          className={activeTab === Mode.APPS ? styles["disabledMenuBtn"] : ""}
           variant={activeTab === Mode.APPS ? "light" : "outline-light"}
           onClick={() => onTabChange(Mode.APPS, SubMode.APP)}
         >

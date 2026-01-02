@@ -65,9 +65,9 @@ export function DownloadsTable<T>({
   }
 
   return (
-    <Row className={`pt-3 ${styles.downloadsScrollContainer}`}>
+    <Row className={`pt-3 ${styles["downloadsScrollContainer"]}`}>
       <Col>
-        <Table bordered={false} className={styles.downloadsTable}>
+        <Table bordered={false} className={styles["downloadsTable"]}>
           <thead>
             <tr>
               {columns.map((col) => (

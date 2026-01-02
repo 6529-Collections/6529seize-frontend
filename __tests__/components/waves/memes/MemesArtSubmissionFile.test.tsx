@@ -59,8 +59,8 @@ beforeAll(() => {
 jest.mock('@/components/waves/memes/file-upload/components/FilePreview', () => {
   const FilePreviewMock = React.forwardRef<HTMLDivElement, any>((props, ref) => (
     <div ref={ref} data-testid="preview">
-      {props.url || 'no-url'}
-      {props.file && <span data-testid="file-info">{props.file.name}</span>}
+      {props["url"] || 'no-url'}
+      {props["file"] && <span data-testid="file-info">{props["file"].name}</span>}
     </div>
   ));
   FilePreviewMock.displayName = 'FilePreviewMock';
@@ -72,9 +72,9 @@ jest.mock('@/components/waves/memes/file-upload/components/FilePreview', () => {
 
 jest.mock('@/components/waves/memes/file-upload/components/UploadArea', () => {
   const UploadAreaMock = React.forwardRef<HTMLDivElement, any>((props, ref) => (
-    <div ref={ref} data-testid="upload" data-visual-state={props.visualState}>
-      {props.error && <div data-testid="upload-error">{props.error}</div>}
-      {props.hasRecoveryOption && <button data-testid="retry-button" onClick={props.onRetry}>Retry</button>}
+    <div ref={ref} data-testid="upload" data-visual-state={props["visualState"]}>
+      {props["error"] && <div data-testid="upload-error">{props["error"]}</div>}
+      {props["hasRecoveryOption"] && <button data-testid="retry-button" onClick={props["onRetry"]}>Retry</button>}
     </div>
   ));
   UploadAreaMock.displayName = 'UploadAreaMock';

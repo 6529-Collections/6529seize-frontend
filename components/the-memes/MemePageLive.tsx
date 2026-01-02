@@ -71,7 +71,7 @@ export function MemePageLiveRightMenu(props: {
           </Row>
           <Row>
             <Col>
-              <Table bordered={false} className={styles.hodlersTableLive}>
+              <Table bordered={false} className={styles["hodlersTableLive"]}>
                 <tbody>
                   <tr>
                     <td>Edition Size</td>
@@ -352,7 +352,7 @@ export function MemePageLiveSubMenu(props: {
             {showRememesSort && (
               <span className="d-flex align-items-center gap-2 pt-2">
                 <Dropdown
-                  className={styles.rememesSortDropdown}
+                  className={styles["rememesSortDropdown"]}
                   drop={"down-centered"}>
                   <Dropdown.Toggle>
                     Sort: {selectedRememeSorting}
@@ -375,7 +375,7 @@ export function MemePageLiveSubMenu(props: {
                   <>
                     <FontAwesomeIcon
                       icon={faRefresh}
-                      className={styles.buttonIcon}
+                      className={styles["buttonIcon"]}
                       onClick={() => {
                         if (props.nft) {
                           fetchRememes(props.nft.id);

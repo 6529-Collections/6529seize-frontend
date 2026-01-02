@@ -54,10 +54,10 @@ export function useWaveTopVoters({
           sort: sort,
         };
         if (dropId) {
-          params.drop_id = dropId;
+          params["drop_id"] = dropId;
         }
         if (pageParam !== null) {
-          params.page = pageParam.toString();
+          params["page"] = pageParam.toString();
         }
         return await commonApiFetch<ApiWaveVotersPage>({
           endpoint: `waves/${waveId}/voters`,
@@ -95,10 +95,10 @@ export function useWaveTopVoters({
         sort: sort,
       };
       if (dropId) {
-        params.drop_id = dropId;
+        params["drop_id"] = dropId;
       }
       if (pageParam !== null) {
-        params.page = pageParam.toString();
+        params["page"] = pageParam.toString();
       }
 
       return await commonApiFetch<ApiWaveVotersPage>({

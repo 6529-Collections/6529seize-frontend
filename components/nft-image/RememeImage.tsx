@@ -67,8 +67,8 @@ export default function RememeImage(props: Readonly<Props>) {
   ) {
     return (
       <Col
-        className={`${styles.nftAnimation} ${
-          props.height === 650 ? styles.height650 : styles.height300
+        className={`${styles["nftAnimation"]} ${
+          props.height === 650 ? styles["height650"] : styles["height300"]
         } d-flex justify-content-center align-items-center`}
       >
         <video
@@ -94,8 +94,8 @@ export default function RememeImage(props: Readonly<Props>) {
     <Col
       xs={12}
       className={`mb-2 text-center d-flex align-items-center justify-content-center ${
-        styles.imageWrapper
-      } ${props.height === 300 ? styles.height300 : ""}`}
+        styles["imageWrapper"]
+      } ${props.height === 300 ? styles["height300"] : ""}`}
     >
       <Image
         unoptimized
@@ -118,7 +118,7 @@ export default function RememeImage(props: Readonly<Props>) {
           }
         }}
         alt={props.nft.metadata.name}
-        className={props.height === 650 ? styles.height650 : ""}
+        className={props.height === 650 ? styles["height650"] : ""}
       />
     </Col>
   );

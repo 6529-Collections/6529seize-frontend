@@ -137,8 +137,8 @@ export default function DropListItemRateGiveClap({
   const [countShort, setCountShort] = useState(getCountShort());
 
   const CLAP_CLASSES: Record<RateStatus, string> = {
-    [RateStatus.POSITIVE]: `${styles.clapPositive}`,
-    [RateStatus.NEGATIVE]: `${styles.clapNegative}`,
+    [RateStatus.POSITIVE]: `${styles["clapPositive"]}`,
+    [RateStatus.NEGATIVE]: `${styles["clapNegative"]}`,
     [RateStatus.NEUTRAL]: ``,
   };
 
@@ -232,7 +232,7 @@ export default function DropListItemRateGiveClap({
           id={`clap-${randomID}`}
           data-tooltip-id={!canVote ? tooltipId : undefined}
           aria-label="Clap for drop"
-          className={`${clapClasses} tw-border-none tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-relative tw-z-10 tw-outline-1 tw-outline-transparent tw-bg-current tw-transition tw-duration-300 tw-ease-out ${styles.clap}`}
+          className={`${clapClasses} tw-border-none tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-relative tw-z-10 tw-outline-1 tw-outline-transparent tw-bg-current tw-transition tw-duration-300 tw-ease-out ${styles["clap"]}`}
           onClick={(e) => {
             e.stopPropagation();
             handleClick();
@@ -253,7 +253,7 @@ export default function DropListItemRateGiveClap({
           </span>
           <span
             id={`clap--count-${randomID}`}
-            className={`${clapCountClasses} tw-rounded-full tw-flex tw-items-center tw-justify-center tw-text-xs tw-absolute ${styles.clapCount}`}>
+            className={`${clapCountClasses} tw-rounded-full tw-flex tw-items-center tw-justify-center tw-text-xs tw-absolute ${styles["clapCount"]}`}>
             {countShort}
           </span>
         </button>

@@ -15,7 +15,7 @@ export default function UserPageBrainWrapper({
 }) {
   const params = useParams();
   const router = useRouter();
-  const user = (params?.user as string)?.toLowerCase();
+  const user = (params?.["user"] as string)?.toLowerCase();
 
   const { address } = useSeizeConnectContext();
   const { connectedProfile, activeProfileProxy, showWaves } =

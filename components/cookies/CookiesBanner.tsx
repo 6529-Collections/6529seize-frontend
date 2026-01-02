@@ -20,8 +20,8 @@ export default function CookiesBanner() {
 
   return (
     <div
-      className={`${styles.banner} ${isApp ? styles.bannerMobile : ""} ${
-        isApp && isAppleMobile ? styles.bannerIOS : ""
+      className={`${styles["banner"]} ${isApp ? styles["bannerMobile"] : ""} ${
+        isApp && isAppleMobile ? styles["bannerIOS"] : ""
       } d-flex align-items-center justify-content-between gap-2 ${
         isApp ? `flex-column` : ""
       }`}
@@ -37,13 +37,13 @@ export default function CookiesBanner() {
         <span className="font-bolder">seize the cookies of consent</span>
       </span>
       <span className="d-flex align-items-center justify-content-between gap-3">
-        <button className={styles.accept} onClick={consent}>
+        <button className={styles["accept"]} onClick={consent}>
           Accept
         </button>
-        <button className={styles.reject} onClick={reject}>
+        <button className={styles["reject"]} onClick={reject}>
           <span className="font-smaller">Reject Non-Essential</span>
         </button>
-        <Link className={styles.learnMore} href="/about/cookie-policy">
+        <Link className={styles["learnMore"]} href="/about/cookie-policy">
           <span className="font-smaller">Learn more</span>
         </Link>
       </span>

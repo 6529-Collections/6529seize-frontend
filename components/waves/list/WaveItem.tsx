@@ -58,7 +58,7 @@ const shouldSkipNavigation = (
       break;
     }
 
-    if (current.dataset?.waveItemInteractive === "true") {
+    if (current.dataset?.["waveItemInteractive"] === "true") {
       return true;
     }
 

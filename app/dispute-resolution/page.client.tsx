@@ -10,7 +10,7 @@ export default function DisputeResolutionPage() {
   useSetTitle("Dispute Resolution | 6529.io");
 
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <Container>
         <Row className="pt-4 pb-4">
           <Col>

@@ -356,7 +356,7 @@ export default function TheMemesComponent() {
           href={`/the-memes/${nft.id}`}
           className="decoration-none scale-hover">
           <Container fluid>
-            <Row className={connectedProfile ? styles.nftImagePadding : ""}>
+            <Row className={connectedProfile ? styles["nftImagePadding"] : ""}>
               <NFTImage
                 nft={nft}
                 animation={false}
@@ -442,7 +442,7 @@ export default function TheMemesComponent() {
   }
 
   return (
-    <Container fluid className={styles.mainContainer}>
+    <Container fluid className={styles["mainContainer"]}>
       <Row>
         <Col>
           <Container className="pt-4">
@@ -492,7 +492,7 @@ export default function TheMemesComponent() {
                     width={16}
                     color={sortDir != SortDirection.ASC ? "#9a9a9a" : "#fff"}
                     cursor={"pointer"}
-                    className={styles.sortDirection}
+                    className={styles["sortDirection"]}
                   />{" "}
                   <FontAwesomeIcon
                     icon={faChevronCircleDown}
@@ -500,7 +500,7 @@ export default function TheMemesComponent() {
                     width={16}
                     color={sortDir != SortDirection.DESC ? "#9a9a9a" : "#fff"}
                     cursor={"pointer"}
-                    className={styles.sortDirection}
+                    className={styles["sortDirection"]}
                   />
                 </Col>
               </Row>

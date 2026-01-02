@@ -50,7 +50,7 @@ export const useWavesOverview = ({
       };
 
       if (params.direct_message !== undefined) {
-        queryParams.direct_message = `${params.direct_message}`;
+        queryParams["direct_message"] = `${params.direct_message}`;
       }
 
       return await commonApiFetch<ApiWave[]>({

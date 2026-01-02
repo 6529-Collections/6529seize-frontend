@@ -13,7 +13,7 @@ interface Props {
 export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
 
   return (
-    <Container fluid className={styles.slideshowContainer}>
+    <Container fluid className={styles["slideshowContainer"]}>
       <Row>
         <Col>
           <Container className="pt-3 pb-3">

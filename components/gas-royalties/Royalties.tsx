@@ -154,10 +154,10 @@ export default function RoyaltiesComponent() {
         {...getSharedProps()}
       />
       <Container className={`no-padding pt-4`}>
-        <Row className={`pt-4 ${styles.scrollContainer}`}>
+        <Row className={`pt-4 ${styles["scrollContainer"]}`}>
           <Col>
             {royalties.length > 0 && (
-              <Table bordered={false} className={styles.royaltiesTable}>
+              <Table bordered={false} className={styles["royaltiesTable"]}>
                 <thead>
                   <tr>
                     <th>
@@ -174,7 +174,7 @@ export default function RoyaltiesComponent() {
                         {isPrimary && (
                           <>
                             <FontAwesomeIcon
-                              className={styles.infoIcon}
+                              className={styles["infoIcon"]}
                               icon={faInfoCircle}
                               data-tooltip-id="primary-proceeds-tooltip"></FontAwesomeIcon>
                             <Tooltip
@@ -198,7 +198,7 @@ export default function RoyaltiesComponent() {
                         Artist Split{" "}
                         <>
                           <FontAwesomeIcon
-                            className={styles.infoIcon}
+                            className={styles["infoIcon"]}
                             icon={faInfoCircle}
                             data-tooltip-id="artist-split-tooltip"></FontAwesomeIcon>
                           <Tooltip

@@ -253,7 +253,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
   function printToken() {
     return (
       <>
-        <Container fluid className={`${styles.tokenContainer} pt-4 pb-4`}>
+        <Container fluid className={`${styles["tokenContainer"]} pt-4 pb-4`}>
           <Row>
             <Col>
               <Container>

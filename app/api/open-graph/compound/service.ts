@@ -1204,7 +1204,7 @@ export function createCompoundPlan(url: URL): PreviewPlan | null {
       cacheKey: `compound:tx:${target.hash.toLowerCase()}`,
       execute: async () => {
         const data = await decodeCompoundTx(target.hash);
-        const ttl = data.status === "pending" ? TX_TTL_PENDING_MS : TX_TTL_SUCCESS_MS;
+        const ttl = data["status"] === "pending" ? TX_TTL_PENDING_MS : TX_TTL_SUCCESS_MS;
         return { data, ttl };
       },
     };

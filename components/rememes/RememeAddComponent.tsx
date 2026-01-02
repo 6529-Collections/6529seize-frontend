@@ -168,7 +168,7 @@ export default function RememeAddComponent(props: Readonly<Props>) {
   }
 
   return (
-    <Form className={styles.addRememeContainer}>
+    <Form className={styles["addRememeContainer"]}>
       <Container>
         <Row>
           <Col sm={12} md={6}>
@@ -179,7 +179,7 @@ export default function RememeAddComponent(props: Readonly<Props>) {
               <Col>
                 <Form.Control
                   autoFocus
-                  className={`${styles.formInput}`}
+                  className={`${styles["formInput"]}`}
                   type="text"
                   placeholder="0x..."
                   value={contract}
@@ -196,7 +196,7 @@ export default function RememeAddComponent(props: Readonly<Props>) {
               </Form.Label>
               <Col>
                 <Form.Control
-                  className={`${styles.formInput}`}
+                  className={`${styles["formInput"]}`}
                   type="text"
                   placeholder="1,2,3 or 1-3 or 1,2-5 or 1-3,5"
                   value={tokenIdDisplay}
@@ -217,12 +217,12 @@ export default function RememeAddComponent(props: Readonly<Props>) {
         <Row className="pt-2">
           <Col className="d-flex align-items-center flex-wrap gap-2">
             {references.map((m) => (
-              <span className={styles.addMemeReferenceWrapper} key={m.id}>
+              <span className={styles["addMemeReferenceWrapper"]} key={m.id}>
                 <>
                   <span
-                    className={`${styles.addMemeReferenceDisplayBtn} ${
+                    className={`${styles["addMemeReferenceDisplayBtn"]} ${
                       verifying || verified
-                        ? styles.addMemeReferenceDisplayBtnDisabled
+                        ? styles["addMemeReferenceDisplayBtnDisabled"]
                         : ""
                     }`}
                     onClick={() =>
@@ -243,12 +243,12 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                     Clear
                   </Tooltip>
                 </>
-                <span className={styles.addMemeReferenceDisplay}>
+                <span className={styles["addMemeReferenceDisplay"]}>
                   #{m.id} - {m.name}
                 </span>
               </span>
             ))}
-            <Dropdown className={styles.addMemeReferencesDropdown}>
+            <Dropdown className={styles["addMemeReferencesDropdown"]}>
               <Dropdown.Toggle disabled={verifying || verified}>
                 <FontAwesomeIcon icon={faPlusCircle} />
               </Dropdown.Toggle>
@@ -315,7 +315,7 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                       </b>
                     </Col>
                   </Row>
-                  <ul className={styles.addRememeTokenList}>
+                  <ul className={styles["addRememeTokenList"]}>
                     {nftResponses.map((nftR) => (
                       <li key={`nftr-${nftR.tokenId}`}>
                         {nftR.raw.error ? (
@@ -356,7 +356,7 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                 <span className="d-flex align-items-center justify-content-start gap-2">
                   <FontAwesomeIcon
                     icon={faTimesCircle}
-                    className={styles.unverifiedIcon}
+                    className={styles["unverifiedIcon"]}
                   />
                   Verification Failed - Fix errors and revalidate
                 </span>
@@ -384,7 +384,7 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                 {verifying && (
                   <div className="d-inline">
                     <div
-                      className={`spinner-border ${styles.loader}`}
+                      className={`spinner-border ${styles["loader"]}`}
                       role="status">
                       <span className="sr-only"></span>
                     </div>
@@ -396,7 +396,7 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                 <span className="d-flex align-items-center justify-content-start gap-2">
                   <FontAwesomeIcon
                     icon={faCheckCircle}
-                    className={styles.verifiedIcon}
+                    className={styles["verifiedIcon"]}
                   />
                   Verified
                   {areEqualAddresses(contract, OPENSEA_STORE_FRONT_CONTRACT) &&

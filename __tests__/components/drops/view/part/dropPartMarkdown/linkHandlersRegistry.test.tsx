@@ -147,21 +147,21 @@ const setEnsureCurrentHref = (href?: string) => {
 describe("createLinkRenderer", () => {
   const FALLBACK_BASE_ENDPOINT = "https://6529.io";
   const originalBaseEndpointEnv = publicEnv.BASE_ENDPOINT;
-  const originalProcessBaseEndpoint = process.env.BASE_ENDPOINT;
+  const originalProcessBaseEndpoint = process.env["BASE_ENDPOINT"];
 
   beforeEach(() => {
     jest.clearAllMocks();
     publicEnv.BASE_ENDPOINT = FALLBACK_BASE_ENDPOINT;
-    process.env.BASE_ENDPOINT = FALLBACK_BASE_ENDPOINT;
+    process.env["BASE_ENDPOINT"] = FALLBACK_BASE_ENDPOINT;
     setEnsureCurrentHref();
   });
 
   afterEach(() => {
     publicEnv.BASE_ENDPOINT = originalBaseEndpointEnv;
     if (originalProcessBaseEndpoint === undefined) {
-      delete process.env.BASE_ENDPOINT;
+      delete process.env["BASE_ENDPOINT"];
     } else {
-      process.env.BASE_ENDPOINT = originalProcessBaseEndpoint;
+      process.env["BASE_ENDPOINT"] = originalProcessBaseEndpoint;
     }
     setEnsureCurrentHref();
   });

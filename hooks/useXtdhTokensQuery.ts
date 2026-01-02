@@ -94,7 +94,7 @@ export function useXtdhTokensQuery({
         contract: normalizedContract,
       };
       if (hasIdentity) {
-        params.identity = normalizedIdentity;
+        params["identity"] = normalizedIdentity;
       }
 
       return commonApiFetch<ApiXTdhTokensPage>({

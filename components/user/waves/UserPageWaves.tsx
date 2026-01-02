@@ -84,15 +84,15 @@ export default function UserPageWaves({
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const queryParams: Record<string, string> = {};
       if (pageParam) {
-        queryParams.serial_no_less_than = `${pageParam}`;
+        queryParams["serial_no_less_than"] = `${pageParam}`;
       }
 
       if (debouncedParams.author) {
-        queryParams.author = debouncedParams.author;
+        queryParams["author"] = debouncedParams.author;
       }
 
       if (debouncedParams.name) {
-        queryParams.name = debouncedParams.name;
+        queryParams["name"] = debouncedParams.name;
       }
       return await commonApiFetch<ApiWave[]>({
         endpoint: `waves`,
@@ -116,15 +116,15 @@ export default function UserPageWaves({
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const queryParams: Record<string, string> = {};
       if (pageParam) {
-        queryParams.serial_no_less_than = `${pageParam}`;
+        queryParams["serial_no_less_than"] = `${pageParam}`;
       }
 
       if (debouncedParams.author) {
-        queryParams.author = debouncedParams.author;
+        queryParams["author"] = debouncedParams.author;
       }
 
       if (debouncedParams.name) {
-        queryParams.name = debouncedParams.name;
+        queryParams["name"] = debouncedParams.name;
       }
       return await commonApiFetch<ApiWave[]>({
         endpoint: `waves-public`,

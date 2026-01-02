@@ -125,7 +125,7 @@ export default function Download(props: Readonly<Props>) {
   };
 
   return (
-    <div className={`${styles.download} ${props.className ?? ""}`}>
+    <div className={`${styles["download"]} ${props.className ?? ""}`}>
       {renderContent()}
     </div>
   );

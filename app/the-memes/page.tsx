@@ -7,7 +7,7 @@ import { Metadata } from "next";
 
 export default function TheMemesPage() {
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <TheMemesComponent />
     </main>
   );

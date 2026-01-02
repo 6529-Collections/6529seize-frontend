@@ -425,7 +425,7 @@ export default function ManifoldMintingWidget(
 
   function printTable(title: string, value: string | number) {
     return (
-      <Table className={styles.spotsTable}>
+      <Table className={styles["spotsTable"]}>
         <tbody>
           <tr>
             <td>{title}</td>

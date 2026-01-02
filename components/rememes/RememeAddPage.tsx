@@ -188,7 +188,7 @@ export default function RememeAddPage() {
   }
 
   return (
-    <Container fluid className={styles.mainContainer}>
+    <Container fluid className={styles["mainContainer"]}>
       <Row className="pb-5">
         <Col>
           <Container className="pt-4">
@@ -235,7 +235,7 @@ export default function RememeAddPage() {
               <Col className="d-flex justify-content-between align-items-center">
                 <span className="d-flex flex-column gap-2">
                   {checkList.length > 0 && (
-                    <ul className={styles.addRememeChecklist}>
+                    <ul className={styles["addRememeChecklist"]}>
                       {checkList.map((note, index) => (
                         <li
                           key={`ve-${index}`}
@@ -243,13 +243,13 @@ export default function RememeAddPage() {
                           {note.status ? (
                             <FontAwesomeIcon
                               icon={faCheckCircle}
-                              className={styles.verifiedIcon}
+                              className={styles["verifiedIcon"]}
                               data-testid="check-circle"
                             />
                           ) : (
                             <FontAwesomeIcon
                               icon={faTimesCircle}
-                              className={styles.unverifiedIcon}
+                              className={styles["unverifiedIcon"]}
                             />
                           )}
                           {note.note}
@@ -258,14 +258,14 @@ export default function RememeAddPage() {
                     </ul>
                   )}
                   {signErrors.length > 0 && (
-                    <ul className={styles.addRememeChecklist}>
+                    <ul className={styles["addRememeChecklist"]}>
                       {signErrors.map((se, index) => (
                         <li
                           key={`se-${index}`}
                           className={`d-flex align-items-center gap-2`}>
                           <FontAwesomeIcon
                             icon={faTimesCircle}
-                            className={styles.unverifiedIcon}
+                            className={styles["unverifiedIcon"]}
                           />
                           {se}
                         </li>
@@ -317,7 +317,7 @@ export default function RememeAddPage() {
                   {submitting && "Adding Rememe"}
                   <div className="d-inline">
                     <div
-                      className={`spinner-border ${styles.loader}`}
+                      className={`spinner-border ${styles["loader"]}`}
                       role="status">
                       <span className="sr-only"></span>
                     </div>
@@ -334,7 +334,7 @@ export default function RememeAddPage() {
                         Status: Success
                         <FontAwesomeIcon
                           icon={faCheckCircle}
-                          className={styles.verifiedIcon}
+                          className={styles["verifiedIcon"]}
                         />
                       </span>
                     ) : (
@@ -342,7 +342,7 @@ export default function RememeAddPage() {
                         Status: Fail
                         <FontAwesomeIcon
                           icon={faTimesCircle}
-                          className={styles.unverifiedIcon}
+                          className={styles["unverifiedIcon"]}
                         />
                       </span>
                     )}

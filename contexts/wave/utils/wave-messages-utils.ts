@@ -34,7 +34,7 @@ export async function fetchWaveMessages(
     limit: WAVE_DROPS_PARAMS.limit.toString(),
   };
   if (serialNo) {
-    params.serial_no_less_than = `${serialNo}`;
+    params["serial_no_less_than"] = `${serialNo}`;
   }
 
   try {
@@ -81,8 +81,8 @@ export async function fetchAroundSerialNoWaveMessages(
     limit: WAVE_DROPS_PARAMS.limit.toString(),
   };
 
-  params.search_strategy = ApiDropSearchStrategy.Both;
-  params.serial_no_limit = `${serialNo}`;
+  params["search_strategy"] = ApiDropSearchStrategy.Both;
+  params["serial_no_limit"] = `${serialNo}`;
 
   try {
     const data = await commonApiFetchWithRetry<ApiWaveDropsFeed>({
@@ -349,8 +349,8 @@ export async function fetchNewestWaveMessages(
   };
   if (sinceSerialNo !== null) {
     // Assuming API uses these parameters for fetching newer messages
-    params.serial_no_limit = `${sinceSerialNo}`;
-    params.search_strategy = ApiDropSearchStrategy.Newer;
+    params["serial_no_limit"] = `${sinceSerialNo}`;
+    params["search_strategy"] = ApiDropSearchStrategy.Newer;
   }
 
   try {

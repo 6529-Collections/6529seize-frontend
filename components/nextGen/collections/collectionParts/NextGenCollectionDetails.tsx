@@ -49,7 +49,7 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
                     <Row className="pb-2">
                       <Col xs={12} className="pt-2">
                         <div
-                          className={styles.artistSignature}
+                          className={styles["artistSignature"]}
                           dangerouslySetInnerHTML={{
                             __html: props.collection.artist_signature,
                           }}></div>

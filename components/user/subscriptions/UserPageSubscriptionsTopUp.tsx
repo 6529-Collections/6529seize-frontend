@@ -370,7 +370,7 @@ export default function UserPageSubscriptionsTopUp() {
           <button
             type="button"
             className={`tw-border tw-rounded-lg tw-p-3 tw-cursor-pointer tw-transition-colors tw-w-full tw-text-left ${
-              styles.cardCountOption
+              styles["cardCountOption"]
             } ${
               selectedOption === "other"
                 ? "tw-bg-iron-800"
@@ -384,7 +384,7 @@ export default function UserPageSubscriptionsTopUp() {
                   checked={selectedOption === "other"}
                   onChange={handleSelectOther}
                   aria-label="Other card count"
-                  className={styles.radioInput}
+                  className={styles["radioInput"]}
                 />
               </Col>
               <Col xs={11} className="d-flex tw-items-center gap-2">
@@ -395,7 +395,7 @@ export default function UserPageSubscriptionsTopUp() {
                   min={1}
                   placeholder="count"
                   value={memeCount}
-                  className={styles.countInput}
+                  className={styles["countInput"]}
                   style={{ width: "100px", padding: "2px 10px" }}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -428,7 +428,7 @@ export default function UserPageSubscriptionsTopUp() {
           sm={6}
           className="d-flex tw-justify-center tw-items-center pt-2 pt-sm-0">
           <Button
-            className={`${styles.sendBtn} tw-w-full sm:tw-w-auto`}
+            className={`${styles["sendBtn"]} tw-w-full sm:tw-w-auto`}
             onClick={handleSend}
             disabled={
               sendTransaction.isPending ||
@@ -546,7 +546,7 @@ function CardCountOption(
     <button
       type="button"
       className={`tw-border tw-rounded-lg tw-p-3 tw-cursor-pointer tw-transition-colors tw-w-full tw-text-left ${
-        styles.cardCountOption
+        styles["cardCountOption"]
       } ${
         props.selected
           ? "tw-bg-iron-700"
@@ -560,7 +560,7 @@ function CardCountOption(
             checked={props.selected}
             onChange={props.onSelect}
             aria-label={labelText}
-            className={styles.radioInput}
+            className={styles["radioInput"]}
           />
         </Col>
         <Col xs={11} className="d-flex tw-items-center">

@@ -94,8 +94,8 @@ export default function DistributionPage(props: Readonly<Props>) {
   }
 
   useEffect(() => {
-    const isValid = isValidPositiveInteger(params?.id as string);
-    const id = isValid ? (params?.id as string) : "";
+    const isValid = isValidPositiveInteger(params?.["id"] as string);
+    const id = isValid ? (params?.["id"] as string) : "";
     setIsValidNftId(isValid);
     setNftId(id);
   }, [params]);
@@ -147,7 +147,7 @@ export default function DistributionPage(props: Readonly<Props>) {
               wrap={false}
               touch={true}
               fade={true}
-              className={styles.distributionCarousel}>
+              className={styles["distributionCarousel"]}>
               {distributionPhotos.map((dp, index) => (
                 <Carousel.Item key={dp.id}>
                   <Image
@@ -222,9 +222,9 @@ export default function DistributionPage(props: Readonly<Props>) {
           </Row>
         </Container>
         <Container>
-          <Row className={styles.distributionsScrollContainer}>
+          <Row className={styles["distributionsScrollContainer"]}>
             <Col className="no-padding">
-              <Table className={styles.distributionsTable}>
+              <Table className={styles["distributionsTable"]}>
                 <thead>
                   <tr>
                     <th colSpan={2}></th>
@@ -351,12 +351,12 @@ export default function DistributionPage(props: Readonly<Props>) {
 
   return (
     <>
-      <Container fluid className={`${styles.mainContainer} tw-pt-6 tw-pb-10`}>
+      <Container fluid className={`${styles["mainContainer"]} tw-pt-6 tw-pb-10`}>
         <Row>
           <Col>
             <Container>
               <Row>
-                <Col className={`${styles.distributionHeader} pb-1`}>
+                <Col className={`${styles["distributionHeader"]} pb-1`}>
                   <h1 className="text-center mb-0">
                     {props.header} Card #{nftId} Distribution
                   </h1>
