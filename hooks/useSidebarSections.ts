@@ -101,6 +101,23 @@ export function useSidebarSections(
               { name: "Open Data", href: "/open-data" },
             ],
           },
+          {
+            name: "Open Data",
+            items: [
+              { name: "Network Metrics", href: "/open-data/network-metrics" },
+              ...(!isIos || country?.toUpperCase() === "US"
+                ? [
+                    {
+                      name: "Meme Subscriptions",
+                      href: "/open-data/meme-subscriptions",
+                    },
+                  ]
+                : []),
+              { name: "Rememes", href: "/open-data/rememes" },
+              { name: "Team", href: "/open-data/team" },
+              { name: "Royalties", href: "/open-data/royalties" },
+            ],
+          },
         ],
       },
       {
