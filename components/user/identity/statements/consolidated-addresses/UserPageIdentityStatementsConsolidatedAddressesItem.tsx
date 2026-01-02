@@ -18,7 +18,6 @@ import { Tooltip } from "react-tooltip";
 import { useCopyToClipboard } from "react-use";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import UserPageIdentityStatementsConsolidatedAddressesItemPrimary from "./UserPageIdentityStatementsConsolidatedAddressesItemPrimary";
-import { is } from "cheerio/dist/commonjs/api/traversing";
 
 export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   address,

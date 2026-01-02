@@ -28,7 +28,6 @@ import {
 } from "./dropPartMarkdown/content";
 import { highlightCodeElement } from "./dropPartMarkdown/highlight";
 import { createLinkRenderer } from "./dropPartMarkdown/linkHandlers";
-import { render } from "@testing-library/react";
 
 const BreakComponent = () => <br />;
 

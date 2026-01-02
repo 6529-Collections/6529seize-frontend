@@ -8,7 +8,6 @@ import { Time } from "@/helpers/time";
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import { Tooltip } from "react-tooltip";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
-import { get } from "lodash";
 
 export enum RateChangeType {
   INCREASE = "INCREASE",

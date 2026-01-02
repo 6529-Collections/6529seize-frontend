@@ -6,7 +6,7 @@ import { AdapterCacheError, AdapterError } from "@/src/errors/adapter";
 import { isIndexedDBError, logErrorSecurely } from "@/utils/error-sanitizer";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import type { AppKitNetwork } from "@reown/appkit-common";
-import { createAppKit } from "@reown/appkit/react";
+import { ChainAdapter, createAppKit } from "@reown/appkit/react";
 import { mainnet } from "viem/chains";
 
 // Configuration interface for AppKit initialization
@@ -108,7 +108,7 @@ export function initializeAppKit(
  */
 function buildAppKitConfig(adapter: WagmiAdapter) {
   return {
-    adapters: [adapter],
+    adapters: [adapter] as ChainAdapter[],
     networks: [mainnet] as [AppKitNetwork, ...AppKitNetwork[]],
     projectId: CW_PROJECT_ID,
     metadata: {
