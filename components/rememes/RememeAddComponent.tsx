@@ -81,8 +81,8 @@ export default function RememeAddComponent(props: Readonly<Props>) {
         if (trimmed.includes("-")) {
           const range = trimmed.split("-");
           if (range.length === 2) {
-            const start = Number.parseInt(range[0]?.trim());
-            const end = Number.parseInt(range[1]?.trim());
+            const start = Number.parseInt(range[0]?.trim()!);
+            const end = Number.parseInt(range[1]?.trim()!);
             const MAX_RANGE_SIZE = 1000;
             if (
               !Number.isNaN(start) &&

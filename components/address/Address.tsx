@@ -98,7 +98,7 @@ export default function Address(props: Readonly<Props>) {
     <>
       {props.wallets.length === 1 ? (
         <WalletAddress
-          wallet={props.wallets[0]}
+          wallet={props.wallets[0]!}
           display={props.display}
           displayEns={props.displayEns}
           hideCopy={props.hideCopy}

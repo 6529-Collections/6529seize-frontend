@@ -105,7 +105,7 @@ export default function UserPageSubscriptionsTopUp() {
         era: remainingMintsForEra,
         eon: remainingMintsForEon,
       };
-      count = optionCountMap[selectedOption];
+      count = optionCountMap[selectedOption]!;
       if (!count || count < 1) {
         setError("Invalid option selected");
         return;

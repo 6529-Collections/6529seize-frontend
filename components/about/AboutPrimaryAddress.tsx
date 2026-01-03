@@ -140,10 +140,10 @@ function parsePrimaryAddressCsv(csvContent: string): Promise<PrimaryAddressData[
     const parser = csvParser({ headers: false })
       .on("data", (row: Record<string, string>) => {
         results.push({
-          profile_id: row["0"],
-          handle: row["1"],
-          current_primary: row["2"],
-          new_primary: row["3"],
+          profile_id: row["0"]!,
+          handle: row["1"]!,
+          current_primary: row["2"]!,
+          new_primary: row["3"]!,
         });
       })
       .on("end", () => {

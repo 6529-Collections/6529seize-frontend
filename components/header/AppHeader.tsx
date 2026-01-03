@@ -101,13 +101,13 @@ export default function AppHeader() {
       return wave?.name ?? "Wave";
     }
 
-    const collectionTitle = getCollectionTitle(basePath, pageTitle);
+    const collectionTitle = getCollectionTitle(basePath!, pageTitle!);
     if (collectionTitle) return collectionTitle;
 
     const rememesTitle = getRememesTitle(pathSegments);
     if (rememesTitle) return rememesTitle;
 
-    return sliceString(capitalizeEveryWord(pageTitle), 20);
+    return sliceString(capitalizeEveryWord(pageTitle!), 20);
   })();
 
   return (

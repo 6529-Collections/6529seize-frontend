@@ -47,15 +47,15 @@ export async function decryptData(
   password: string
 ): Promise<string> {
   const [ivHex, authTagHex, encryptedHex] = encryptedData.split(":");
-  const iv = Buffer.from(ivHex, "hex");
-  const authTag = Buffer.from(authTagHex, "hex");
+  const iv = Buffer.from(ivHex!, "hex");
+  const authTag = Buffer.from(authTagHex!, "hex");
 
   const key = await deriveKey(password, salt);
 
   const decipher = crypto.createDecipheriv(ENCRYPTION_ALGORITHM, key, iv);
   decipher.setAuthTag(authTag); // Set the authentication tag
 
-  let decrypted = decipher.update(encryptedHex, "hex", "utf8");
+  let decrypted = decipher.update(encryptedHex!, "hex", "utf8");
   decrypted += decipher.final("utf8");
 
   return decrypted;

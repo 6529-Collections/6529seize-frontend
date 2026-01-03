@@ -254,10 +254,10 @@ const extractTraitsFromMetadata = (
 
       // Safe assignment with type checking
       if (
-        typeof traits[textKey] === "string" ||
-        traits[textKey] === undefined
+        typeof traits[textKey!] === "string" ||
+        traits[textKey!] === undefined
       ) {
-        (traits as Record<keyof TraitsData, any>)[textKey] = value;
+        (traits as Record<keyof TraitsData, any>)[textKey!] = value;
       }
     }
     // Special case: handle any key that starts with "points"

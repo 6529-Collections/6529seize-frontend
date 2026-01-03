@@ -22,7 +22,7 @@ export default function CommonAnimationHeight({
       const resizeObserver = new ResizeObserver((entries) => {
         // We only have one entry, so we can use entries[0].
         const observedHeight = entries[0]?.contentRect.height;
-        setHeight(observedHeight);
+        setHeight(observedHeight!);
       });
 
       resizeObserver.observe(containerRef.current);

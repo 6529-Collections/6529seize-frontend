@@ -23,7 +23,7 @@ export function createAppWalletConnector(
   requestPasswordModal: () => Promise<string>
 ) {
   let walletClient: WalletClient | undefined;
-  let currentChainId: number = chains[0]?.id;
+  let currentChainId: number = chains[0]?.id!;
 
   let decryptedPrivateKey: string | null = null;
 
@@ -203,7 +203,7 @@ export function createAppWalletConnector(
         );
       }
 
-      const client = await getOrCreateClient(chainId);
+      const client = await getOrCreateClient(chainId!);
       if (!client.account?.address) {
         throw new Error("No valid local account found after decryption.");
       }
@@ -218,12 +218,12 @@ export function createAppWalletConnector(
       }
 
       // Keep internal state up to date
-      currentChainId = chainId;
+      currentChainId = chainId!;
 
       // Emit connect event (addresses only)
       emitter.emit("connect", {
         accounts: [client.account.address],
-        chainId,
+        chainId: chainId!,
       });
 
       if (opts?.withCapabilities) {

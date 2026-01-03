@@ -295,7 +295,7 @@ export function DelegationSubmitGroups(
     if (writeDelegation.error) {
       emitToast({
         title,
-        message: writeDelegation.error.message.split("Request Arguments")[0],
+        message: writeDelegation.error.message.split("Request Arguments")[0]!,
       });
     }
     if (writeDelegation.data) {

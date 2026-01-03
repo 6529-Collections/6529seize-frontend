@@ -95,7 +95,7 @@ const useDragAndDrop = ({
       e.stopPropagation();
 
       if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-        onFileDrop(e.dataTransfer.files[0]);
+        onFileDrop(e.dataTransfer.files[0]!);
       } else {
         // Reset if no files were dropped
         setVisualState("idle");

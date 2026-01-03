@@ -226,11 +226,11 @@ export class Time {
   }
 
   public toIsoDateString(): string {
-    return this.toIsoString().split("T")[0];
+    return this.toIsoString().split("T")[0]!;
   }
 
   public toIsoTimeString(): string {
-    return this.toIsoString().split("T")[1]?.split(".")[0];
+    return this.toIsoString().split("T")[1]?.split(".")[0]!;
   }
 
   public toIsoTimeStringWithoutSeconds(): string {

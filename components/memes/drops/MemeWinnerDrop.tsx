@@ -44,11 +44,11 @@ export default function MemeWinnerDrop({
   const artworkMedia = drop.parts.at(0)?.media?.at(0);
 
   const handleOnReply = useCallback(() => {
-    onReply({ drop, partId: drop.parts[0]?.part_id });
+    onReply({ drop, partId: drop.parts[0]?.part_id! });
   }, [onReply, drop]);
 
   const handleOnQuote = useCallback(() => {
-    onQuote({ drop, partId: drop.parts[0]?.part_id });
+    onQuote({ drop, partId: drop.parts[0]?.part_id! });
   }, [onQuote, drop]);
 
   // First place shadow class from DefaultWaveWinnerDrop

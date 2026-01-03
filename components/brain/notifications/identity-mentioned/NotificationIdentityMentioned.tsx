@@ -21,7 +21,7 @@ export default function NotificationIdentityMentioned({
 }) {
   return (
     <NotificationWithDrop
-      drop={notification.related_drops[0]}
+      drop={notification.related_drops[0]!}
       actionText="mentioned you"
       createdAt={notification.created_at}
       activeDrop={activeDrop}

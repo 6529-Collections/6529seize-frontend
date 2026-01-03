@@ -38,7 +38,7 @@ export default function ProfileActivityLogsFilter({
     if (selected.length === 0) {
       setTitle("Select");
     } else if (selected.length === 1) {
-      setTitle(PROFILE_ACTIVITY_TYPE_TO_TEXT[selected[0]]);
+      setTitle(PROFILE_ACTIVITY_TYPE_TO_TEXT[selected[0]!]);
     } else {
       setTitle(`${selected.length} Selected`);
     }

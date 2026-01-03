@@ -44,7 +44,7 @@ export const WaveSmallLeaderboardItemContent: React.FC<
         <WaveDropPartContentMarkdown
           mentionedUsers={drop.mentioned_users}
           referencedNfts={drop.referenced_nfts}
-          part={drop.parts[0]}
+          part={drop.parts[0]!}
           wave={drop.wave}
           onQuoteClick={() => {}}
         />

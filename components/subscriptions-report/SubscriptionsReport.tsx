@@ -206,7 +206,7 @@ export default function SubscriptionsReportComponent() {
                           : "tw-bg-iron-900 hover:tw-bg-iron-700"
                       }>
                       <SubscriptionDayDetails
-                        date={rows[index]}
+                        date={rows[index]!}
                         count={count}
                       />
                     </tr>

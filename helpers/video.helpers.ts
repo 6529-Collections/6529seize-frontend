@@ -89,7 +89,7 @@ const HEAD_CACHE: Record<string, boolean> = {};
  */
 export async function checkVideoAvailability(url: string): Promise<boolean> {
   if (url in HEAD_CACHE) {
-    return HEAD_CACHE[url];
+    return HEAD_CACHE[url]!;
   }
   try {
     const response = await fetch(url, {

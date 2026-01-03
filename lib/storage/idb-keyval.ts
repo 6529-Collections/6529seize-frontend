@@ -343,7 +343,7 @@ export function entries<T = unknown>(
           store.getAllKeys() as unknown as RequestLike<IDBValidKey[]>
         ),
         promisifyRequest<T[]>(store.getAll() as unknown as RequestLike<T[]>),
-      ]).then(([k, v]) => k.map((key, i) => [key, v[i]]));
+      ]).then(([k, v]) => k.map((key, i) => [key, v[i]] as [IDBValidKey, T]));
     }
 
     const items: Array<[IDBValidKey, T]> = [];

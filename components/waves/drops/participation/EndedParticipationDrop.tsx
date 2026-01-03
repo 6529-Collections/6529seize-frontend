@@ -67,12 +67,12 @@ export default function EndedParticipationDrop({
 
   const handleOnReply = useCallback(() => {
     setIsSlideUp(false);
-    onReply({ drop, partId: drop.parts[activePartIndex]?.part_id });
+    onReply({ drop, partId: drop.parts[activePartIndex]?.part_id! });
   }, [onReply, drop, activePartIndex]);
 
   const handleOnQuote = useCallback(() => {
     setIsSlideUp(false);
-    onQuote({ drop, partId: drop.parts[activePartIndex]?.part_id });
+    onQuote({ drop, partId: drop.parts[activePartIndex]?.part_id! });
   }, [onQuote, drop, activePartIndex]);
 
   const handleOnAddReaction = useCallback(() => {
