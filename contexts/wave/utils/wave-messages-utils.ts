@@ -486,7 +486,7 @@ async function findLightDropBySerialNoWithPagination(
       if (drop.serial_no === targetSerialNo) {
         targetFound = true;
       }
-      if (drop.serial_no < smallestSerialInCurrentBatch) {
+      if (drop.serial_no < smallestSerialInCurrentBatch!) {
         smallestSerialInCurrentBatch = drop.serial_no;
       }
     }
@@ -499,13 +499,13 @@ async function findLightDropBySerialNoWithPagination(
     // Prepare for next iteration or check if we should stop
     if (
       currentBatch.length < itemsPerRequest &&
-      smallestSerialInCurrentBatch > targetSerialNo
+      smallestSerialInCurrentBatch! > targetSerialNo
     ) {
       // Last page fetched, it was smaller than limit, and the smallest item is still greater than target.
       // This means target is not in the dataset in the range we are looking.
       break; // Target not found, and no more data in the desired direction.
     }
-    currentMaxSerialForNextCall = smallestSerialInCurrentBatch;
+    currentMaxSerialForNextCall = smallestSerialInCurrentBatch!;
 
     // Safety break: if max_serial_no for next call is not less than targetSerialNo after fetching a full page
     // and target not found, it implies we might be stuck or target is much lower.

@@ -107,10 +107,10 @@ function ipv4ToInt(ip: string): number {
   }
 
   return (
-    ((segments[0] << 24) +
-      (segments[1] << 16) +
-      (segments[2] << 8) +
-      segments[3]) >>>
+    ((segments[0]! << 24) +
+      (segments[1]! << 16) +
+      (segments[2]! << 8) +
+      segments[3]!) >>>
     0
   );
 }

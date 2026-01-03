@@ -96,7 +96,7 @@ export default function NextGenZoomableImage(
       e.type === "touchstart"
         ? (e as React.TouchEvent).touches[0]?.clientY
         : (e as React.MouseEvent).clientY;
-    setDragStart({ x: clientX, y: clientY });
+    setDragStart({ x: clientX!, y: clientY! });
     e.preventDefault();
   };
 
@@ -114,8 +114,8 @@ export default function NextGenZoomableImage(
         ? (e as React.TouchEvent).touches[0]?.clientY
         : (e as React.MouseEvent).clientY;
 
-    const deltaX = clientX - dragStart.x;
-    const deltaY = clientY - dragStart.y;
+    const deltaX = clientX! - dragStart.x;
+    const deltaY = clientY! - dragStart.y;
 
     updateObjectPosition(-deltaX, -deltaY);
     e.preventDefault();
@@ -145,8 +145,8 @@ export default function NextGenZoomableImage(
         ? prevPosition.split(" ").map((val) => parseFloat(val))
         : [50, 50];
 
-      let newX = prevX + adjustedDeltaX;
-      let newY = prevY + adjustedDeltaY;
+      let newX = prevX! + adjustedDeltaX;
+      let newY = prevY! + adjustedDeltaY;
 
       newX = Math.max(0, Math.min(100, newX));
       newY = Math.max(0, Math.min(100, newY));

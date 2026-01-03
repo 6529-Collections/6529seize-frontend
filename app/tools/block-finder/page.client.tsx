@@ -104,7 +104,7 @@ export default function BlockFinderClient() {
       const dateObj = new Date(date);
       const [hours, minutes] = time.split(":");
       const startDate = new Date(dateObj);
-      startDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      startDate.setHours(parseInt(hours!), parseInt(minutes!), 0, 0);
 
       const minTimestamp = startDate.getTime();
 

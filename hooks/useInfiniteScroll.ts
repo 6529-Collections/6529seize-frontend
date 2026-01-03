@@ -22,7 +22,7 @@ export function useInfiniteScroll(
       (entries) => {
         const [entry] = entries;
         if (
-          entry.isIntersecting &&
+          entry?.isIntersecting &&
           hasNextPage &&
           !isFetchingNextPage &&
           !fetchingRef.current

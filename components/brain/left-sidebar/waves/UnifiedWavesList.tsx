@@ -56,7 +56,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
     const cb = (entries: IntersectionObserverEntry[]) => {
       const [entry] = entries;
       if (
-        entry.isIntersecting &&
+        entry?.isIntersecting &&
         hasNextPage &&
         !isFetchingNextPage &&
         !hasFetchedRef.current

@@ -458,7 +458,7 @@ const getRollingTimestampForIndex = ({
   const completedCycles = Math.floor(offset / subsequentCount);
 
   return (
-    firstDecisionTime + completedCycles * cycleLength + prefixSums[cycleIndex]
+    firstDecisionTime + completedCycles * cycleLength + prefixSums[cycleIndex]!
   );
 };
 
@@ -550,7 +550,7 @@ const sliceTimestamps = ({
   const hasMoreFuture = remainingFutureCount > 0;
 
   const nextDecisionTimestamp =
-    effectiveNextIndex < sorted.length ? sorted[effectiveNextIndex] : null;
+    effectiveNextIndex < sorted.length ? sorted[effectiveNextIndex] ?? null : null;
 
   return {
     decisions,

@@ -132,8 +132,8 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
         >
           <div className={`tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center ${imageScaleClasses}`}>
             <MediaDisplay
-              media_mime_type={drop.parts[0]?.media[0].mime_type || "image/jpeg"}
-              media_url={drop.parts[0]?.media[0].url}
+              media_mime_type={drop.parts[0]?.media[0]!.mime_type || "image/jpeg"}
+              media_url={drop.parts[0]?.media[0]!.url!}
               disableMediaInteraction={true}
               imageScale={mediaImageScale}
             />

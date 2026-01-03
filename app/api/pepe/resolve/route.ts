@@ -184,7 +184,7 @@ function ipfsToHttp(url: string): string {
   }
 
   const [, , path] = match;
-  return `${IPFS_GATEWAY}/${path.replace(/^\/+/, "")}`;
+  return `${IPFS_GATEWAY}/${path?.replace(/^\/+/, "")}`;
 }
 
 function absolutizeRelativeUrl(candidate: string, base: string): string {

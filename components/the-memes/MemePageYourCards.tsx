@@ -195,7 +195,7 @@ export function MemePageYourCardsRightMenu(props: {
                 <Row className={`pb-2 ${styles["overviewColumn"]}`}>
                   <Col>
                     First acquired{" "}
-                    {printMintDate(new Date(firstAcquired.transaction_date))}
+                    {printMintDate(new Date(firstAcquired!.transaction_date))}
                   </Col>
                 </Row>
                 {airdropped.length > 0 && (

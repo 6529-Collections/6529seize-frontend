@@ -231,12 +231,12 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
           if (isHistoricalMintDay) {
             const first = historical[0];
             const last = historical[historical.length - 1];
-            mintNumber = first.id; // anchor for invites (unused for past)
-            mintInstantUtc = first.instantUtc;
+            mintNumber = first?.id; // anchor for invites (unused for past)
+            mintInstantUtc = first?.instantUtc;
             mintLabel =
               historical.length === 1
-                ? `#${first.id}`
-                : `#${first.id}-#${last.id}`;
+                ? `#${first?.id}`
+                : `#${first?.id}-#${last?.id}`;
           } else if (isScheduledMintDay) {
             mintNumber = getMintNumberForMintDate(cellDateUtcDay);
             mintLabel = formatMint(mintNumber);
@@ -284,7 +284,7 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
                 Meme${historical.length > 1 ? "s" : ""} ${items}
               </div>
               <div style="margin-bottom:12px">${formatFullDate(
-                historical[0]?.instantUtc,
+                historical[0]?.instantUtc!,
                 displayTz
               )}</div>
             </div>`;

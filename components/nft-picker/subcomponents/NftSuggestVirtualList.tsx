@@ -58,10 +58,11 @@ export function NftSuggestVirtualList({
           }
           const suggestion = items[virtual.index];
           const isActive = virtual.index === activeIndex;
-          const isDisabled = suggestion.tokenType !== "ERC721";
+          const isDisabled = suggestion?.tokenType !== "ERC721";
+          if (!suggestion) return null;
           return (
             <NftSuggestItem
-              key={suggestion.address}
+              key={suggestion?.address}
               suggestion={suggestion}
               isActive={isActive}
               index={virtual.index}

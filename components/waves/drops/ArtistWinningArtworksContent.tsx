@@ -61,8 +61,8 @@ export const ArtistWinningArtworksContent: React.FC<
                     {drop.parts?.[0]?.media &&
                     drop.parts[0].media.length > 0 ? (
                       <MediaDisplay
-                        media_url={drop.parts[0]?.media[0].url}
-                        media_mime_type={drop.parts[0]?.media[0].mime_type}
+                        media_url={drop.parts[0]!.media[0]!.url}
+                        media_mime_type={drop.parts[0]!.media[0]!.mime_type}
                         disableMediaInteraction={true}
                       />
                     ) : (

@@ -186,7 +186,7 @@ function WaveDropReaction({
               );
 
               if (existingIndex >= 0) {
-                const target = reactionsWithoutUser[existingIndex];
+                const target = reactionsWithoutUser[existingIndex]!;
                 reactionsWithoutUser[existingIndex] = {
                   ...target,
                   profiles: [...target.profiles, userProfileMin],
@@ -316,9 +316,9 @@ function WaveDropReaction({
   let animationStyle = "";
   if (animate) {
     if (selected) {
-      animationStyle = styles["reactionSlideUp"];
+      animationStyle = styles["reactionSlideUp"]!;
     } else {
-      animationStyle = styles["reactionSlideDown"];
+      animationStyle = styles["reactionSlideDown"]!;
     }
   }
 

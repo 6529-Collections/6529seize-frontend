@@ -46,8 +46,8 @@ export default function DropMobileMenuHandler({
       e.preventDefault();
     }
 
-    touchStartX.current = e.touches[0]?.clientX;
-    touchStartY.current = e.touches[0]?.clientY;
+    touchStartX.current = e.touches[0]!.clientX;
+    touchStartY.current = e.touches[0]!.clientY;
 
     longPressTimeout.current = setTimeout(() => {
       setLongPressTriggered(true);
@@ -64,8 +64,8 @@ export default function DropMobileMenuHandler({
     const touchX = e.touches[0]?.clientX;
     const touchY = e.touches[0]?.clientY;
 
-    const deltaX = Math.abs(touchX - touchStartX.current);
-    const deltaY = Math.abs(touchY - touchStartY.current);
+    const deltaX = Math.abs(touchX! - touchStartX.current);
+    const deltaY = Math.abs(touchY! - touchStartY.current);
 
     if (deltaX > MOVE_THRESHOLD || deltaY > MOVE_THRESHOLD) {
       if (longPressTimeout.current) {

@@ -1,6 +1,6 @@
 export const mainSegment = (url: string): string => {
   const pathname = url.split(/[?#]/)[0];
-  const [, first] = pathname.split("/");
+  const [, first] = pathname!.split("/");
   return first ? `/${first.toLowerCase()}` : "/";
 };
 

@@ -56,7 +56,7 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
     let returnSpots = addressEntries[index]?.spots;
     if (index > 0) {
       returnSpots =
-        addressEntries[index]?.spots - addressEntries[index - 1]?.spots;
+        addressEntries[index]?.spots! - addressEntries[index - 1]?.spots!;
     }
     return returnSpots;
   }

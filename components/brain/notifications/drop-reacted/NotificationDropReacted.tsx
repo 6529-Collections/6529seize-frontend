@@ -119,6 +119,9 @@ export default function NotificationDropReacted({
   }
 
   const drop = notification.related_drops[0];
+  if (!drop) {
+    return null;
+  }
   const isDirectMessage = getIsDirectMessage(drop.wave);
 
   return (
