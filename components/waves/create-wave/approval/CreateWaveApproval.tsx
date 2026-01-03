@@ -4,13 +4,11 @@ import CreateWaveApprovalThresholdTime from "./CreateWaveApprovalThresholdTime";
 
 export default function CreateWaveApproval({
   threshold,
-  thresholdTimeMs,
   errors,
   setThreshold,
   setThresholdTimeMs,
 }: {
   readonly threshold: number | null;
-  readonly thresholdTimeMs: number | null;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly setThreshold: (threshold: number | null) => void;
   readonly setThresholdTimeMs: (thresholdTimeMs: number | null) => void;
@@ -37,7 +35,6 @@ export default function CreateWaveApproval({
           setThreshold={setThreshold}
         />
         <CreateWaveApprovalThresholdTime
-          thresholdTimeMs={thresholdTimeMs}
           thresholdTimeError={thresholdTimeError}
           thresholdDurationError={thresholdDurationError}
           setThresholdTimeMs={setThresholdTimeMs}

@@ -1,4 +1,4 @@
-import React, { type JSX } from "react";
+import { type JSX } from "react";
 
 interface LimitIconProps {
   readonly className?: string | undefined;
@@ -7,11 +7,13 @@ interface LimitIconProps {
 /**
  * Icon for indicating a limit or maximum has been reached
  */
-export default function LimitIcon({ className = "" }: LimitIconProps): JSX.Element {
+export default function LimitIcon({
+  className = "",
+}: LimitIconProps): JSX.Element {
   return (
-    <svg 
+    <svg
       className={className}
-      viewBox="0 0 24 24" 
+      viewBox="0 0 24 24"
       fill="none"
       aria-hidden="true"
       xmlns="http://www.w3.org/2000/svg"

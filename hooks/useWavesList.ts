@@ -12,7 +12,6 @@ import { AuthContext } from "@/components/auth/Auth";
 import { useWavesOverview } from "./useWavesOverview";
 import { WAVE_FOLLOWING_WAVES_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 import { usePinnedWavesServer } from "./usePinnedWavesServer";
-import { useWaveData } from "./useWaveData";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { useShowFollowingWaves } from "./useShowFollowingWaves";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -38,32 +37,20 @@ function areWavesEqual(arrA: EnhancedWave[], arrB: EnhancedWave[]): boolean {
   return true;
 }
 
-// Custom hook to handle individual wave data
-const useIndividualWaveData = (
-  waveId: string | null,
-  onWaveNotFound: () => void = () => {}
-) => {
-  const { data, isLoading, isError, refetch } = useWaveData({
-    waveId,
-    onWaveNotFound,
-  });
-  return { data, isLoading, isError, refetch };
-};
-
 /**
  * Hook for managing and fetching waves list including pinned waves
  * @returns Wave list data and loading states
  */
 const useWavesList = () => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const { 
-    pinnedIds, 
-    pinnedWaves: serverPinnedWaves, 
-    pinWave, 
-    unpinWave, 
+  const {
+    pinnedIds,
+    pinnedWaves: serverPinnedWaves,
+    pinWave,
+    unpinWave,
     isLoading: isPinnedWavesLoadingServer,
     isError: hasPinnedWavesErrorServer,
-    refetch: refetchPinnedWaves
+    refetch: refetchPinnedWaves,
   } = usePinnedWavesServer();
   const [following] = useShowFollowingWaves();
   // Use state for allWaves instead of ref to ensure reactivity
@@ -119,7 +106,7 @@ const useWavesList = () => {
   // Use server-provided pinned waves
   const separatelyFetchedPinnedWaves = useMemo(() => {
     // Filter out pinned waves that are already in mainWaves to avoid duplicates
-    return serverPinnedWaves.filter(wave => !mainWaveIds.has(wave.id));
+    return serverPinnedWaves.filter((wave) => !mainWaveIds.has(wave.id));
   }, [serverPinnedWaves, mainWaveIds]);
 
   // Collect ALL pinned waves (both from mainWaves and server-provided)
@@ -266,7 +253,6 @@ const useWavesList = () => {
 
 const waveIsDm = (w: ApiWave) =>
   w.wave.type === ApiWaveType.Chat &&
-   
   (w.chat as any)?.scope?.group?.is_direct_message === true;
 
 export default useWavesList;

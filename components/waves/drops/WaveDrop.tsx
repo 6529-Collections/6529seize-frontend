@@ -129,7 +129,6 @@ interface WaveDropProps {
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
-  readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
 }
 
 const WaveDrop = ({
@@ -146,7 +145,6 @@ const WaveDrop = ({
   onQuoteClick,
   onDropContentClick,
   showReplyAndQuote,
-  parentContainerRef,
 }: WaveDropProps) => {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
@@ -204,7 +202,7 @@ const WaveDrop = ({
     [isMobile, handleLongPress, isEditing]
   );
 
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+  const handleTouchEnd = useCallback(() => {
     if (longPressTimeoutRef.current) {
       clearTimeout(longPressTimeoutRef.current);
     }
@@ -383,7 +381,6 @@ const WaveDrop = ({
                 onDropContentClick={onDropContentClick}
                 onQuoteClick={onQuoteClick}
                 setLongPressTriggered={setLongPressTriggered}
-                parentContainerRef={parentContainerRef}
                 isEditing={isEditing}
                 isSaving={dropUpdateMutation.isPending}
                 onSave={handleEditSave}

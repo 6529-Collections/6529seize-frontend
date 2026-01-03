@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import React, { ReactNode, useCallback } from "react";
+import { ReactNode, useCallback } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import BottomNavigation from "../navigation/BottomNavigation";
 import { useViewContext } from "../navigation/ViewContext";
@@ -66,7 +66,8 @@ export default function AppLayout({ children }: Props) {
     <div
       className={`${safeAreaClass} ${
         isHomeFeedView ? "tw-overflow-hidden" : "tw-overflow-auto"
-      }`}>
+      }`}
+    >
       <div ref={headerWrapperRef}>
         <TouchDeviceHeader />
       </div>

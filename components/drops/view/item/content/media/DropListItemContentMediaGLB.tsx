@@ -1,4 +1,3 @@
-import React from "react";
 import MediaDisplayGLB from "./MediaDisplayGLB";
 
 export default function DropListItemContentMediaGLB({
@@ -10,6 +9,5 @@ export default function DropListItemContentMediaGLB({
     <div className="tw-w-full tw-h-full">
       <MediaDisplayGLB src={src} />
     </div>
-
-);
+  );
 }

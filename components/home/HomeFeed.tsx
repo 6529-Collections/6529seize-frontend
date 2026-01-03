@@ -1,9 +1,15 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useMyStreamQuery, usePollingQuery } from "../../hooks/useMyStreamQuery";
-import { ActiveDropAction, ActiveDropState } from "../../types/dropInteractionTypes";
+import {
+  useMyStreamQuery,
+  usePollingQuery,
+} from "../../hooks/useMyStreamQuery";
+import {
+  ActiveDropAction,
+  ActiveDropState,
+} from "../../types/dropInteractionTypes";
 import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
 import { DropInteractionParams } from "../waves/drops/Drop";
 import BrainContent from "../brain/content/BrainContent";
@@ -89,7 +95,8 @@ export default function HomeFeed() {
   const content = (
     <BrainContent
       activeDrop={activeDrop}
-      onCancelReplyQuote={onCancelReplyQuote}>
+      onCancelReplyQuote={onCancelReplyQuote}
+    >
       <MyStream
         key="home-feed"
         onReply={onReply}

@@ -92,8 +92,6 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
     );
   }
 
-  // Exhaustiveness check - TypeScript will warn if we missed any type
-  const _exhaustiveCheck: never = definition;
   return null;
 };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { getTimeAgo, numberWithCommas } from "@/helpers/Helpers";
 import WaveHeaderFollow from "./WaveHeaderFollow";

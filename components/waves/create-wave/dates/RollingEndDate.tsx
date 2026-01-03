@@ -19,7 +19,6 @@ interface RollingEndDateProps {
   readonly dates: CreateWaveDatesConfig;
   readonly setDates: (dates: CreateWaveDatesConfig) => void;
   readonly isRollingMode: boolean;
-  readonly setIsRollingMode: (isRolling: boolean) => void;
   readonly isExpanded: boolean;
   readonly setIsExpanded: (expanded: boolean) => void;
 }
@@ -28,7 +27,6 @@ export default function RollingEndDate({
   dates,
   setDates,
   isRollingMode,
-  setIsRollingMode,
   isExpanded,
   setIsExpanded,
 }: RollingEndDateProps) {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo, useState, useCallback } from "react";
+import { memo, useState, useCallback } from "react";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import WaveDropContent from "@/components/waves/drops/WaveDropContent";
 

@@ -108,7 +108,6 @@ export default function Drop({
         onQuoteClick={onQuoteClick}
         onDropContentClick={onDropContentClick}
         showReplyAndQuote={showReplyAndQuote}
-        parentContainerRef={parentContainerRef}
       />
     ),
   };

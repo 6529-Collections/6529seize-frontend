@@ -62,7 +62,7 @@ export default function DropListItemRateGiveSubmit({
           category: param.category,
         },
       }),
-    onSuccess: (response: ApiDrop) => {
+    onSuccess: () => {
       onSuccessfulRateChange();
       optimisticRollbackRef.current = null;
     },
@@ -114,8 +114,7 @@ export default function DropListItemRateGiveSubmit({
           if (draft.type !== DropSize.FULL) {
             return draft;
           }
-          const baseContext =
-            draft.context_profile_context ??
+          const baseContext = draft.context_profile_context ??
             drop.context_profile_context ?? {
               rating: 0,
               min_rating: 0,

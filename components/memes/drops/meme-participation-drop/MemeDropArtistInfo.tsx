@@ -1,6 +1,5 @@
-"use client"
+"use client";
 
-import React from "react";
 import Link from "next/link";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
@@ -23,7 +22,8 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
   const { isModalOpen, modalInitialTab, handleBadgeClick, handleModalClose } =
     useArtistPreviewModal();
 
-  const submissionCount = drop.author.active_main_stage_submission_ids?.length || 0;
+  const submissionCount =
+    drop.author.active_main_stage_submission_ids?.length || 0;
   const hasSubmissions = submissionCount > 0;
 
   const winnerCount = drop.author.winner_main_stage_drop_ids?.length || 0;
@@ -46,7 +46,9 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
             className="tw-no-underline"
           >
             {drop.author?.handle ? (
-              <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
+              <UserProfileTooltipWrapper
+                user={drop.author.handle ?? drop.author.id}
+              >
                 <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
                   {drop.author?.handle}
                 </span>
@@ -90,7 +92,7 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
           </Link>
         )}
       </div>
-      
+
       {/* Artist Preview Modal */}
       <ArtistPreviewModal
         isOpen={isModalOpen}

@@ -12,7 +12,6 @@ interface WaveDropContentProps {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onLongPress: () => void;
   readonly setLongPressTriggered: (triggered: boolean) => void;
-  readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
   readonly isEditing?: boolean | undefined;
   readonly isSaving?: boolean | undefined;
   readonly onSave?: ((newContent: string) => void) | undefined;
@@ -29,7 +28,6 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
   onQuoteClick,
   onLongPress,
   setLongPressTriggered,
-  parentContainerRef,
   isEditing = false,
   isSaving = false,
   onSave,

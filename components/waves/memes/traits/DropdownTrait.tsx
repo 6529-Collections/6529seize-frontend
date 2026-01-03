@@ -42,15 +42,12 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = React.memo(
     );
 
     // Handle blur events
-    const handleBlur = useCallback(
-      (e: React.FocusEvent<HTMLSelectElement>) => {
-        // Call parent onBlur if provided
-        if (onBlur) {
-          onBlur(field);
-        }
-      },
-      [onBlur, field]
-    );
+    const handleBlur = useCallback(() => {
+      // Call parent onBlur if provided
+      if (onBlur) {
+        onBlur(field);
+      }
+    }, [onBlur, field]);
 
     // Check if field is filled (option selected, not empty default)
     const isFieldFilled = React.useMemo(() => {

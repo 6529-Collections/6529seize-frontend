@@ -40,5 +40,3 @@ export class DropHasher {
     return `{${keyValuePairs.join(",")}}`;
   }
 }
-
-const dropHasher = new DropHasher();

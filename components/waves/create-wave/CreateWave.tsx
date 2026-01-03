@@ -1,7 +1,7 @@
 "use client";
 
 /* istanbul ignore file */
-import React, { useContext, useRef, useState, type JSX } from "react";
+import { useContext, useRef, useState, type JSX } from "react";
 import CreateWaveDrops from "./drops/CreateWaveDrops";
 import CreateWavesMainSteps from "./main-steps/CreateWavesMainSteps";
 import CreateWaveOverview from "./overview/CreateWaveOverview";
@@ -249,7 +249,6 @@ export default function CreateWave({
     [CreateWaveStep.APPROVAL]: (
       <CreateWaveApproval
         threshold={config.approval.threshold}
-        thresholdTimeMs={config.approval.thresholdTimeMs}
         errors={errors}
         setThreshold={onThresholdChange}
         setThresholdTimeMs={onThresholdTimeChange}

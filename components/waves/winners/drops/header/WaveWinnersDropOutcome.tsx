@@ -1,4 +1,3 @@
-import React from "react";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
