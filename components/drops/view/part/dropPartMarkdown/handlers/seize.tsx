@@ -16,7 +16,7 @@ import { renderSeizeQuote } from "../renderers";
 
 interface CreateSeizeHandlersConfig {
   readonly onQuoteClick: (drop: ApiDrop) => void;
-  readonly currentDropId?: string;
+  readonly currentDropId?: string | undefined;
 }
 
 const ensureSeizeQuote = (href: string): SeizeQuoteLinkInfo => {

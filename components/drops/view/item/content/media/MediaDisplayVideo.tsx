@@ -7,8 +7,8 @@ import { useHlsPlayer } from "@/hooks/useHlsPlayer";
 
 interface Props {
   readonly src: string;
-  readonly showControls?: boolean;
-  readonly disableClickHandler?: boolean;
+  readonly showControls?: boolean | undefined;
+  readonly disableClickHandler?: boolean | undefined;
 }
 
 const MediaDisplayVideo: React.FC<Props> = ({

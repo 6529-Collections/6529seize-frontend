@@ -9,7 +9,10 @@ export default function AllowlistToolAnimationHeightOpacity({
   children: React.ReactNode;
   elementClasses?: string | undefined;
   elementRole?: string | undefined;
-  onClicked?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+  onClicked?:
+    | ((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void)
+    | undefined
+    | undefined;
 }) {
   return (
     <motion.div

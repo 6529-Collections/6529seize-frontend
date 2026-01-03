@@ -11,7 +11,7 @@ import {
 type UseNftTokenInputProps = {
   allowRanges: boolean;
   allSelected: boolean;
-  contractTotalSupply?: bigint | null;
+  contractTotalSupply?: bigint | null | undefined;
 };
 
 export function useNftTokenInput({

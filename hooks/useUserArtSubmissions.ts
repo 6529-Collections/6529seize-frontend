@@ -11,19 +11,19 @@ interface ArtistSubmission {
   id: string;
   imageUrl: string;
   mediaMimeType: string;
-  title?: string;
+  title?: string | undefined;
   createdAt: number;
-  drop?: ApiDrop;
+  drop?: ApiDrop | undefined;
 }
 
 interface User {
   id: string;
-  handle?: string | null;
+  handle?: string | null | undefined;
   level: number;
   cic: number;
   rep: number;
-  pfp?: string | null;
-  active_main_stage_submission_ids?: string[];
+  pfp?: string | null | undefined;
+  active_main_stage_submission_ids?: string[] | undefined;
 }
 
 interface UseUserArtSubmissionsReturn {

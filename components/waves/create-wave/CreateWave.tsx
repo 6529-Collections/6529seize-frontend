@@ -37,7 +37,7 @@ export default function CreateWave({
 }: {
   readonly profile: ApiIdentity;
   readonly onBack: () => void;
-  readonly onSuccess?: () => void;
+  readonly onSuccess?: (() => void) | undefined;
 }) {
   const router = useRouter();
   const { isIos, keyboardVisible } = useCapacitor();
@@ -153,7 +153,7 @@ export default function CreateWave({
     );
 
     const dropRequest: ApiCreateWaveDropRequest = {
-      title: drop.title,
+      title: drop.title ?? null,
       parts: dropParts.map((part) => ({
         content: part.content,
         quoted_drop: part.quoted_drop,

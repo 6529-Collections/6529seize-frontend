@@ -73,15 +73,15 @@ interface UnifiedWavesListWavesProps {
   /** Callback function called when a wave is hovered */
   readonly onHover: (waveId: string) => void;
   /** Whether to hide the joined waves toggle. When true, toggle is not rendered */
-  readonly hideToggle?: boolean;
+  readonly hideToggle?: boolean | undefined;
   /** Whether to hide the pin functionality for waves */
-  readonly hidePin?: boolean;
+  readonly hidePin?: boolean | undefined;
   /** Whether to hide section headers (All Waves, Pinned) */
-  readonly hideHeaders?: boolean;
+  readonly hideHeaders?: boolean | undefined;
   /** Reference to the scroll container for virtualization */
   readonly scrollContainerRef: React.RefObject<HTMLElement | null>;
   /** Whether the waves are direct messages (affects navigation route) */
-  readonly isDirectMessage?: boolean;
+  readonly isDirectMessage?: boolean | undefined;
 }
 
 /**

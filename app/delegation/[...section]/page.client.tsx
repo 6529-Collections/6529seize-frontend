@@ -12,7 +12,7 @@ export default function DelegationPageClient(props: {
   readonly addressQuery: string;
   readonly collectionQuery: string;
   readonly useCaseQuery: number;
-  readonly path?: string[];
+  readonly path?: string[] | undefined;
 }) {
   useSetTitle("Delegation | 6529.io");
   const router = useRouter();

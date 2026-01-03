@@ -35,8 +35,8 @@ import styles from "../NextGen.module.scss";
 
 interface Props {
   collection: NextGenCollection;
-  collection_link?: boolean;
-  show_links?: boolean;
+  collection_link?: boolean | undefined;
+  show_links?: boolean | undefined;
 }
 
 interface CountdownProps {
@@ -325,7 +325,7 @@ export function NextGenMintCounts(
   props: Readonly<{
     collection: NextGenCollection;
     setAvailable?(available: number): void;
-    shouldRefetchMintCounts?: boolean;
+    shouldRefetchMintCounts?: boolean | undefined;
     setShouldRefetchMintCounts?(shouldRefetchMintCounts: boolean): void;
   }>
 ) {

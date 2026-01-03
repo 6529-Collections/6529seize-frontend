@@ -18,8 +18,8 @@ import { isAddress } from "viem";
 type Props = {
   readonly profile: ApiIdentity;
   readonly initialSeasons: MemeSeason[];
-  readonly initialTdh?: ConsolidatedTDH | TDH;
-  readonly initialOwnerBalance?: OwnerBalance;
+  readonly initialTdh?: ConsolidatedTDH | TDH | undefined;
+  readonly initialOwnerBalance?: OwnerBalance | undefined;
   readonly initialBalanceMemes: OwnerBalanceMemes[];
 };
 
@@ -81,7 +81,7 @@ export default function UserPageStatsClient({
     })
       .then(setSeasons)
       .catch((error) => {
-        if ((error as { name?: string })?.name === "AbortError") {
+        if ((error as { name?: string | undefined })?.name === "AbortError") {
           return;
         }
         setSeasons([]);
@@ -109,7 +109,7 @@ export default function UserPageStatsClient({
     })
       .then(setTdh)
       .catch((error) => {
-        if ((error as { name?: string })?.name === "AbortError") {
+        if ((error as { name?: string | undefined })?.name === "AbortError") {
           return;
         }
         setTdh(undefined);
@@ -138,7 +138,7 @@ export default function UserPageStatsClient({
     })
       .then(setOwnerBalance)
       .catch((error) => {
-        if ((error as { name?: string })?.name === "AbortError") {
+        if ((error as { name?: string | undefined })?.name === "AbortError") {
           return;
         }
         setOwnerBalance(undefined);
@@ -170,7 +170,7 @@ export default function UserPageStatsClient({
     })
       .then(setBalanceMemes)
       .catch((error) => {
-        if ((error as { name?: string })?.name === "AbortError") {
+        if ((error as { name?: string | undefined })?.name === "AbortError") {
           return;
         }
         setBalanceMemes([]);

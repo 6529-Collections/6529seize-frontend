@@ -3,10 +3,10 @@
 import { useState, useRef, useCallback } from "react";
 
 interface UseLongPressInteractionOptions {
-  longPressDuration?: number;
-  moveThreshold?: number;
-  onInteractionStart?: () => void;
-  hasTouchScreen?: boolean;
+  longPressDuration?: number | undefined;
+  moveThreshold?: number | undefined;
+  onInteractionStart?: (() => void) | undefined;
+  hasTouchScreen?: boolean | undefined;
 }
 
 /**

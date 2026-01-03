@@ -49,7 +49,7 @@ const MEMES_SORT_TO_API: Record<MemesSort, string> = {
 
 const API_SORT_TO_MEMES: Record<
   string,
-  { sort: MemesSort; volume?: VolumeType }
+  { sort: MemesSort; volume?: VolumeType | undefined }
 > = {
   [MEMES_EXTENDED_SORT[0]]: { sort: MemesSort.AGE },
   [MEMES_EXTENDED_SORT[1]]: { sort: MemesSort.EDITION_SIZE },

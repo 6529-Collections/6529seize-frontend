@@ -42,7 +42,7 @@ interface CreateDropFullDesktopProps {
   readonly loading: boolean;
   readonly drop: CreateDropConfig | null;
   readonly showSubmit: boolean;
-  readonly showDropError?: boolean;
+  readonly showDropError?: boolean | undefined;
   readonly missingMedia: ApiWaveParticipationRequirement[];
   readonly missingMetadata: ApiWaveRequiredMetadata[];
   readonly waveId: string | null;

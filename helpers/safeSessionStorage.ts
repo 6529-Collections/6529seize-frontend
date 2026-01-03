@@ -1,5 +1,5 @@
 const globalScope = globalThis as typeof globalThis & {
-  sessionStorage?: Storage;
+  sessionStorage?: Storage | undefined;
 };
 
 const storage = globalScope.sessionStorage;

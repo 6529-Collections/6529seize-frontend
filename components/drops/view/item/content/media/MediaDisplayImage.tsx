@@ -7,7 +7,7 @@ import { useInView } from "@/hooks/useInView";
 
 interface Props {
   readonly src: string;
-  readonly imageScale?: ImageScale;
+  readonly imageScale?: ImageScale | undefined;
 }
 
 function MediaDisplayImage({ src, imageScale = ImageScale.AUTOx600 }: Props) {

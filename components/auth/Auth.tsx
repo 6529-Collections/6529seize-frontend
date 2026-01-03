@@ -416,9 +416,9 @@ export default function Auth({
         body: {
           server_signature,
           client_signature: clientSignature.signature,
-          role: role ?? undefined,
           is_safe_wallet: isSafeWallet,
           client_address: signerAddress,
+          ...(role != null && { role }),
         },
       });
       setAuthJwt(

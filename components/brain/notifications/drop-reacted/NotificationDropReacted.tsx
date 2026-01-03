@@ -32,7 +32,7 @@ interface Props {
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
 }
 
 export default function NotificationDropReacted({
@@ -67,7 +67,8 @@ export default function NotificationDropReacted({
         <span
           className={`${getNotificationVoteColor(
             voteValue
-          )} tw-font-medium tw-text-sm`}>
+          )} tw-font-medium tw-text-sm`}
+        >
           {voteValue > 0 && "+"}
           {numberWithCommas(voteValue)}
         </span>
@@ -129,7 +130,8 @@ export default function NotificationDropReacted({
             profile={notification.related_identity}
             size={UserFollowBtnSize.SMALL}
           />
-        }>
+        }
+      >
         {actionElement}
       </NotificationHeader>
 

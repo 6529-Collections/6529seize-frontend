@@ -12,7 +12,7 @@ type ApiXtdhCollection = Omit<
   ApiXTdhCollectionsPage["data"][number],
   "contract"
 > & {
-  readonly contract?: string | null;
+  readonly contract?: string | null | undefined;
 };
 
 interface XtdhCollectionsListProps {
@@ -20,11 +20,14 @@ interface XtdhCollectionsListProps {
   readonly isLoading: boolean;
   readonly isError: boolean;
   readonly collections: ApiXTdhCollectionsPage["data"];
-  readonly errorMessage?: string;
+  readonly errorMessage?: string | undefined;
   readonly onRetry: () => void;
-  readonly selectedContract?: string | null;
-  readonly onSelectCollection?: (contract: string | null) => void;
-  readonly isIdentityScoped?: boolean;
+  readonly selectedContract?: string | null | undefined;
+  readonly onSelectCollection?:
+    | ((contract: string | null) => void)
+    | undefined
+    | undefined;
+  readonly isIdentityScoped?: boolean | undefined;
 }
 
 export function XtdhCollectionsList({

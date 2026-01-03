@@ -36,20 +36,20 @@ interface SummaryTarget {
   readonly host: string;
   readonly title: string;
   readonly source: WikimediaSource;
-  readonly fragment?: { readonly raw: string; readonly display: string };
+  readonly fragment?: { readonly raw: string; readonly display: string } | undefined;
   readonly canonicalFallback: string;
 }
 
 interface CommonsFileTarget {
   readonly type: "commons-file";
   readonly fileName: string;
-  readonly fragment?: { readonly raw: string; readonly display: string };
+  readonly fragment?: { readonly raw: string; readonly display: string } | undefined;
 }
 
 interface WikidataTarget {
   readonly type: "wikidata";
   readonly id: string;
-  readonly fragment?: { readonly raw: string; readonly display: string };
+  readonly fragment?: { readonly raw: string; readonly display: string } | undefined;
 }
 
 type NormalizedTarget = SummaryTarget | CommonsFileTarget | WikidataTarget;
@@ -168,8 +168,8 @@ const ensureWikimediaUrl = (url: URL): void => {
 };
 
 type WikimediaRequestInit = RequestInit & {
-  readonly timeoutMs?: number;
-  readonly language?: string;
+  readonly timeoutMs?: number | undefined;
+  readonly language?: string | undefined;
 };
 
 const fetchWithTimeout = async (
@@ -326,7 +326,7 @@ const resolveWikipediaTitle = async (
       prop: "info",
     });
     const response = await fetchJson<{
-      readonly query?: { readonly pages?: Record<string, { readonly title?: string }> };
+      readonly query?: { readonly pages?: Record<string, { readonly title?: string | undefined }> | undefined } | undefined;
     }>(`https://${lang}.wikipedia.org/w/api.php?${query.toString()}`);
     const pages = response.query?.pages;
     if (!pages) {
@@ -349,9 +349,9 @@ const resolveWikipediaTitle = async (
     });
     const response = await fetchJson<{
       readonly query?: {
-        readonly revisions?: Record<string, { readonly pageid?: number; readonly title?: string }>;
-        readonly pages?: Record<string, { readonly title?: string }>;
-      };
+        readonly revisions?: Record<string, { readonly pageid?: number | undefined; readonly title?: string | undefined }> | undefined;
+        readonly pages?: Record<string, { readonly title?: string | undefined }> | undefined;
+      } | undefined;
     }>(`https://${lang}.wikipedia.org/w/api.php?${query.toString()}`);
     const pages = response.query?.pages;
     if (!pages) {
@@ -501,15 +501,15 @@ const buildSummaryCard = async (
 ): Promise<WikimediaCardResponse> => {
   try {
     const summary = await fetchJson<{
-      readonly title?: string;
-      readonly description?: string;
-      readonly extract?: string;
-      readonly lang?: string;
-      readonly thumbnail?: { readonly source?: string; readonly width?: number; readonly height?: number };
-      readonly content_urls?: { readonly desktop?: { readonly page?: string } };
-      readonly timestamp?: string;
-      readonly type?: string;
-      readonly coordinates?: { readonly lat?: number; readonly lon?: number };
+      readonly title?: string | undefined;
+      readonly description?: string | undefined;
+      readonly extract?: string | undefined;
+      readonly lang?: string | undefined;
+      readonly thumbnail?: { readonly source?: string | undefined; readonly width?: number | undefined; readonly height?: number | undefined } | undefined;
+      readonly content_urls?: { readonly desktop?: { readonly page?: string | undefined } | undefined } | undefined;
+      readonly timestamp?: string | undefined;
+      readonly type?: string | undefined;
+      readonly coordinates?: { readonly lat?: number | undefined; readonly lon?: number | undefined } | undefined;
     }>(
       `https://${target.host}/api/rest_v1/page/summary/${encodeURIComponent(target.title)}?redirect=true`,
       { language: languages[0] }
@@ -534,19 +534,19 @@ const buildSummaryCard = async (
     if (summary.type === "disambiguation") {
       let items: Array<{
         readonly title: string;
-        readonly description?: string | null;
+        readonly description?: string | null | undefined;
         readonly url: string;
-        readonly thumbnail?: WikimediaImage | null;
+        readonly thumbnail?: WikimediaImage | null | undefined;
       }> | undefined;
       try {
         const related = await fetchJson<{
           readonly pages?: ReadonlyArray<{
-            readonly title?: string;
-            readonly description?: string;
-            readonly extract?: string;
-            readonly thumbnail?: { readonly source?: string; readonly width?: number; readonly height?: number };
-            readonly content_urls?: { readonly desktop?: { readonly page?: string } };
-          }>;
+            readonly title?: string | undefined;
+            readonly description?: string | undefined;
+            readonly extract?: string | undefined;
+            readonly thumbnail?: { readonly source?: string | undefined; readonly width?: number | undefined; readonly height?: number | undefined } | undefined;
+            readonly content_urls?: { readonly desktop?: { readonly page?: string | undefined } | undefined } | undefined;
+          }> | undefined;
         }>(
           `https://${target.host}/api/rest_v1/page/related/${encodeURIComponent(target.title)}`,
           { language: languages[0] }
@@ -636,23 +636,23 @@ const buildCommonsCard = async (target: CommonsFileTarget): Promise<WikimediaCar
         readonly pages?: Record<
           string,
           {
-            readonly title?: string;
-            readonly missing?: string;
+            readonly title?: string | undefined;
+            readonly missing?: string | undefined;
             readonly imageinfo?: ReadonlyArray<{
-              readonly url?: string;
-              readonly mime?: string;
-              readonly size?: number;
-              readonly width?: number;
-              readonly height?: number;
-              readonly thumburl?: string;
-              readonly thumbwidth?: number;
-              readonly thumbheight?: number;
-              readonly descriptionurl?: string;
-              readonly extmetadata?: Record<string, { readonly value?: string }>;
-            }>;
+              readonly url?: string | undefined;
+              readonly mime?: string | undefined;
+              readonly size?: number | undefined;
+              readonly width?: number | undefined;
+              readonly height?: number | undefined;
+              readonly thumburl?: string | undefined;
+              readonly thumbwidth?: number | undefined;
+              readonly thumbheight?: number | undefined;
+              readonly descriptionurl?: string | undefined;
+              readonly extmetadata?: Record<string, { readonly value?: string | undefined }> | undefined;
+            }> | undefined;
           }
-        >;
-      };
+        > | undefined;
+      } | undefined;
     }>(`https://commons.wikimedia.org/w/api.php?${params.toString()}`);
 
     const pages = response.query?.pages;
@@ -697,7 +697,7 @@ const buildCommonsCard = async (target: CommonsFileTarget): Promise<WikimediaCar
         }
       : null;
 
-    const original: (WikimediaImage & { readonly mime?: string | null }) | null = info.url
+    const original: (WikimediaImage & { readonly mime?: string | null | undefined }) | null = info.url
       ? {
           url: info.url,
           width: info.width,
@@ -734,7 +734,7 @@ const buildCommonsCard = async (target: CommonsFileTarget): Promise<WikimediaCar
 };
 
 const selectLabel = (
-  entries: Record<string, { readonly value?: string }> | undefined,
+  entries: Record<string, { readonly value?: string | undefined }> | undefined,
   languages: readonly string[]
 ): string | undefined => {
   if (!entries) {
@@ -775,8 +775,8 @@ const fetchEntityLabels = async (
       const response = await fetchJson<{
         readonly entities?: Record<
           string,
-          { readonly labels?: Record<string, { readonly value?: string }> }
-        >;
+          { readonly labels?: Record<string, { readonly value?: string | undefined }> | undefined }
+        > | undefined;
       }>(`https://www.wikidata.org/w/api.php?${params.toString()}`);
 
       const entities = response.entities ?? {};
@@ -796,8 +796,8 @@ const fetchEntityLabels = async (
 };
 
 const formatTimeValue = (value: {
-  readonly time?: string;
-  readonly precision?: number;
+  readonly time?: string | undefined;
+  readonly precision?: number | undefined;
 }): string | null => {
   if (!value.time) {
     return null;
@@ -836,19 +836,19 @@ const buildWikidataCard = async (
       readonly entities?: Record<
         string,
         {
-          readonly labels?: Record<string, { readonly value?: string }>;
-          readonly descriptions?: Record<string, { readonly value?: string }>;
+          readonly labels?: Record<string, { readonly value?: string | undefined }> | undefined;
+          readonly descriptions?: Record<string, { readonly value?: string | undefined }> | undefined;
           readonly claims?: Record<
             string,
             ReadonlyArray<{
               readonly mainsnak?: {
-                readonly datavalue?: { readonly type?: string; readonly value?: unknown };
-              };
+                readonly datavalue?: { readonly type?: string | undefined; readonly value?: unknown | undefined } | undefined;
+              } | undefined;
             }>
-          >;
-          readonly sitelinks?: Record<string, { readonly title?: string; readonly url?: string }>;
+          > | undefined;
+          readonly sitelinks?: Record<string, { readonly title?: string | undefined; readonly url?: string | undefined }> | undefined;
         }
-      >;
+      > | undefined;
     }>(`https://www.wikidata.org/wiki/Special:EntityData/${encodeURIComponent(target.id)}.json`);
 
     const entity = response.entities?.[target.id];
@@ -870,23 +870,23 @@ const buildWikidataCard = async (
         continue;
       }
       propertyIds.push(propertyId);
-      const { type, value } = claim.datavalue as { type?: string; value?: unknown };
+      const { type, value } = claim.datavalue as { type?: string | undefined; value?: unknown | undefined };
       let formatted: string | null = null;
 
       if (type === "wikibase-entityid" && value && typeof value === "object" && "id" in value) {
-        const entityId = (value as { readonly id?: string }).id;
+        const entityId = (value as { readonly id?: string | undefined }).id;
         if (entityId) {
           referencedIds.push(entityId);
           formatted = entityId;
         }
       } else if (type === "time" && value && typeof value === "object") {
-        formatted = formatTimeValue(value as { readonly time?: string; readonly precision?: number });
+        formatted = formatTimeValue(value as { readonly time?: string | undefined; readonly precision?: number | undefined });
       } else if (type === "monolingualtext" && value && typeof value === "object" && "text" in value) {
-        formatted = String((value as { readonly text?: string }).text);
+        formatted = String((value as { readonly text?: string | undefined }).text);
       } else if (type === "string" && typeof value === "string") {
         formatted = value;
       } else if (type === "globecoordinate" && value && typeof value === "object") {
-        const coord = value as { readonly latitude?: number; readonly longitude?: number };
+        const coord = value as { readonly latitude?: number | undefined; readonly longitude?: number | undefined };
         if (typeof coord.latitude === "number" && typeof coord.longitude === "number") {
           formatted = `${coord.latitude.toFixed(2)}, ${coord.longitude.toFixed(2)}`;
         }

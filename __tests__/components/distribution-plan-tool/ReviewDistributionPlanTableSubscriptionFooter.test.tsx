@@ -74,7 +74,7 @@ const authCtx = {
 function TestWrapper({
   initialTokenId = null,
 }: {
-  readonly initialTokenId?: string | null;
+  readonly initialTokenId?: string | null | undefined;
 }) {
   const [confirmedTokenId, setConfirmedTokenId] = useState<string | null>(
     initialTokenId

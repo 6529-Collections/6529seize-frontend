@@ -16,7 +16,7 @@ export default function DropListItemRateGiveChangeButton({
   readonly canVote: boolean;
   readonly handleMouseDown: (changeType: RateChangeType) => void;
   readonly handleMouseUp: () => void;
-  readonly isMobile?: boolean;
+  readonly isMobile?: boolean | undefined;
 }) {
   const { connectionStatus } = useContext(AuthContext);
 

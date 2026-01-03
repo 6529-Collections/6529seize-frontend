@@ -16,7 +16,7 @@ export default function MediaDisplayGLB({
   disableMediaInteractions = false 
 }: { 
   readonly src: string;
-  readonly disableMediaInteractions?: boolean;
+  readonly disableMediaInteractions?: boolean | undefined;
 }) {
   const modelRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);

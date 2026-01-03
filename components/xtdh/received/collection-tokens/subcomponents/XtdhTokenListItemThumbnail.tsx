@@ -6,7 +6,7 @@ import type { TokenMetadata } from "@/types/nft";
 
 interface XtdhTokenListItemThumbnailProps {
   readonly tokenLabel: string;
-  readonly metadata?: TokenMetadata;
+  readonly metadata?: TokenMetadata | undefined;
   readonly isLoading: boolean;
   readonly hasError: boolean;
 }

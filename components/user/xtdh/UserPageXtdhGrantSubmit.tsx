@@ -13,10 +13,10 @@ export interface UserPageXtdhGrantSubmitProps {
   readonly amount: number | null;
   readonly validUntil: Date | null;
   readonly onSubmit: () => void | Promise<void>;
-  readonly isSubmitting?: boolean;
-  readonly errorMessage?: string | null;
-  readonly successMessage?: string | null;
-  readonly maxGrantRate?: number | null;
+  readonly isSubmitting?: boolean | undefined;
+  readonly errorMessage?: string | null | undefined;
+  readonly successMessage?: string | null | undefined;
+  readonly maxGrantRate?: number | null | undefined;
 }
 
 const hasFutureExpiry = (value: Date): boolean => {
@@ -40,7 +40,7 @@ const canSubmit = ({
   readonly selection: NftPickerChange;
   readonly amount: number | null;
   readonly validUntil: Date | null;
-  readonly maxGrantRate?: number | null;
+  readonly maxGrantRate?: number | null | undefined;
 }): boolean => {
   if (!contract || !isAddress(contract.address)) {
     return false;

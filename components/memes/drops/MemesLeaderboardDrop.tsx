@@ -30,7 +30,7 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 interface MemesLeaderboardDropProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
-  readonly location?: DropLocation;
+  readonly location?: DropLocation | undefined;
 }
 
 export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({

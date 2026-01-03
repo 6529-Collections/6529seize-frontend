@@ -1,6 +1,6 @@
 interface StripHtmlTagsOptions {
-  readonly maxLength?: number;
-  readonly preserveTagSpacing?: boolean;
+  readonly maxLength?: number | undefined;
+  readonly preserveTagSpacing?: boolean | undefined;
 }
 
 const NAMED_ENTITIES: Record<string, string> = {

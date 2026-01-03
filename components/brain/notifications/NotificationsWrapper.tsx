@@ -17,10 +17,10 @@ type WaveWithChatScope = ExtendedDrop["wave"] & {
   chat?: {
     scope?: {
       group?: {
-        is_direct_message?: boolean;
-      };
-    };
-  };
+        is_direct_message?: boolean | undefined;
+      } | undefined;
+    } | undefined;
+  } | undefined;
 };
 
 const hasChatScope = (

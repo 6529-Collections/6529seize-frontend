@@ -1,7 +1,7 @@
 import React, { type JSX } from "react";
 
 interface ClockIconProps {
-  readonly className?: string;
+  readonly className?: string | undefined;
 }
 
 /**

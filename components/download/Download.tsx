@@ -15,10 +15,10 @@ interface Props {
   href: string;
   name: string;
   extension: string;
-  showProgress?: boolean;
-  className?: string;
-  variant?: "default" | "text";
-  alwaysShowText?: boolean;
+  showProgress?: boolean | undefined;
+  className?: string | undefined;
+  variant?: "default" | "text" | undefined;
+  alwaysShowText?: boolean | undefined;
 }
 
 export default function Download(props: Readonly<Props>) {

@@ -43,10 +43,10 @@ interface WaveDropsContentProps {
   readonly isAtBottom: boolean;
   readonly scrollToBottom: () => void;
   readonly typingMessage: string | null;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly pendingCount: number;
   readonly onRevealPending: () => void;
-  readonly bottomPaddingClassName?: string;
+  readonly bottomPaddingClassName?: string | undefined;
 }
 
 export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({

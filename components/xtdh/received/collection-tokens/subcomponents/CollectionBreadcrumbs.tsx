@@ -1,10 +1,10 @@
 interface CollectionBreadcrumbsProps {
   readonly collectionLabel: string;
-  readonly tokenLabel?: string;
-  readonly grantLabel?: string;
+  readonly tokenLabel?: string | undefined;
+  readonly grantLabel?: string | undefined;
   readonly onNavigateToCollections: () => void;
-  readonly onNavigateToTokens?: () => void;
-  readonly onNavigateToContributors?: () => void;
+  readonly onNavigateToTokens?: (() => void) | undefined;
+  readonly onNavigateToContributors?: (() => void) | undefined;
 }
 
 export function CollectionBreadcrumbs({
@@ -19,14 +19,14 @@ export function CollectionBreadcrumbs({
   const backAction = grantLabel
     ? onNavigateToContributors
     : tokenLabel
-      ? onNavigateToTokens
-      : onNavigateToCollections;
+    ? onNavigateToTokens
+    : onNavigateToCollections;
 
   const backLabel = grantLabel
     ? "Back"
     : tokenLabel
-      ? "Back"
-      : "Back to collections";
+    ? "Back"
+    : "Back to collections";
 
   if (!backAction) {
     return null;

@@ -11,7 +11,7 @@ export default function RepCategorySearchDropdown({
   readonly open: boolean;
   readonly categories: string[];
   readonly selected: string | null;
-  readonly disabledCategories?: string[];
+  readonly disabledCategories?: string[] | undefined;
   readonly onSelect: (newV: string) => void;
 }) {
   const noResultsText =

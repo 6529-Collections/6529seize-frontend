@@ -11,7 +11,7 @@ import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileToo
 
 interface MemeWinnerArtistInfoProps {
   readonly drop: ExtendedDrop;
-  readonly showWaveInfo?: boolean;
+  readonly showWaveInfo?: boolean | undefined;
 }
 
 export default function MemeWinnerArtistInfo({

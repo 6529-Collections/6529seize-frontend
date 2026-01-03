@@ -12,10 +12,13 @@ export default function CommonTabsTab<T, U = unknown>(
     CommonSelectItemProps<T, U> & {
       readonly onKeyDown?: (
         event: ReactKeyboardEvent<HTMLButtonElement>
-      ) => void;
-      readonly buttonRef?: (element: HTMLButtonElement | null) => void;
-      readonly disabled?: boolean;
-      readonly fill?: boolean;
+      ) => void | undefined;
+      readonly buttonRef?:
+        | ((element: HTMLButtonElement | null) => void)
+        | undefined
+        | undefined;
+      readonly disabled?: boolean | undefined;
+      readonly fill?: boolean | undefined;
     }
   >
 ) {
@@ -77,8 +80,9 @@ export default function CommonTabsTab<T, U = unknown>(
         fill ? "tw-flex-1" : undefined,
         isActive
           ? "tw-bg-gradient-to-b tw-from-iron-700 tw-to-iron-800"
-          : undefined,
-      )}>
+          : undefined
+      )}
+    >
       <button
         type="button"
         role="tab"
@@ -91,9 +95,12 @@ export default function CommonTabsTab<T, U = unknown>(
         onKeyDown={onKeyDown}
         onMouseEnter={() => !disabled && setShouldRotate(true)}
         onMouseLeave={() => !disabled && setShouldRotate(false)}
-        className={`${dynamicClasses} ${disabled ? "tw-cursor-not-allowed tw-opacity-60" : ""
-          } ${fill ? "tw-flex-1" : ""
-          } tw-whitespace-nowrap tw-px-3 tw-py-1.5 tw-text-sm tw-leading-5 tw-font-medium tw-border-0 tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center tw-gap-2`}>
+        className={`${dynamicClasses} ${
+          disabled ? "tw-cursor-not-allowed tw-opacity-60" : ""
+        } ${
+          fill ? "tw-flex-1" : ""
+        } tw-whitespace-nowrap tw-px-3 tw-py-1.5 tw-text-sm tw-leading-5 tw-font-medium tw-border-0 tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center tw-gap-2`}
+      >
         {item.label}
         {!!item.badge && item.badge > 0 && (
           <span className="tw-bg-primary-500 tw-text-white tw-text-[10px] tw-font-bold tw-px-1.5 tw-py-0.5 tw-rounded-full tw-min-w-[18px] tw-h-[18px] tw-flex tw-items-center tw-justify-center">

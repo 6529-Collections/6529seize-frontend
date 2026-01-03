@@ -5,7 +5,7 @@ import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import { QueryKey } from "../ReactQueryWrapper";
 
 type WavesOverviewQueryData = {
-  pages?: ApiWave[][];
+  pages?: ApiWave[][] | undefined;
 };
 
 export const increaseWavesOverviewDropsCount = async (

@@ -16,7 +16,7 @@ interface XtdhTokenContributorsControlsProps {
   readonly onSortChange: (sort: XtdhTokensSortField) => void;
   readonly onGroupByChange: (groupBy: XtdhTokenContributorsGroupBy) => void;
 
-  readonly isDisabled?: boolean;
+  readonly isDisabled?: boolean | undefined;
 }
 
 export function XtdhTokenContributorsControls({

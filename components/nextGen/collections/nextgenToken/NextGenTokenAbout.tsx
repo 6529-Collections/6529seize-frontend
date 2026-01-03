@@ -401,7 +401,7 @@ export function TraitScore(
   props: Readonly<{
     score: number;
     rank: number;
-    places?: number;
+    places?: number | undefined;
   }>
 ) {
   return (

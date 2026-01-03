@@ -2,8 +2,8 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { forwardRef, type ComponentProps } from "react";
 
 type MockNextImageProps = ComponentProps<"img"> & {
-  readonly fill?: boolean;
-  readonly unoptimized?: boolean;
+  readonly fill?: boolean | undefined;
+  readonly unoptimized?: boolean | undefined;
 };
 
 jest.mock("next/image", () => ({

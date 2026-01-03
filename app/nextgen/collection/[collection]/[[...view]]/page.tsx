@@ -11,7 +11,7 @@ import { fetchCollection, getCollectionView } from "../page-utils";
 export async function generateMetadata({
   params,
 }: {
-  readonly params: Promise<{ collection: string; view?: string[] }>;
+  readonly params: Promise<{ collection: string; view?: string[] | undefined }>;
 }): Promise<Metadata> {
   const { collection, view } = await params;
   const headers = await getAppCommonHeaders();
@@ -38,7 +38,7 @@ export async function generateMetadata({
 export default async function NextGenCollectionPage({
   params,
 }: {
-  readonly params: Promise<{ collection: string; view?: string[] }>;
+  readonly params: Promise<{ collection: string; view?: string[] | undefined }>;
 }) {
   const { collection, view } = await params;
   const headers = await getAppCommonHeaders();

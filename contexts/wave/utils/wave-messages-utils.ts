@@ -5,11 +5,7 @@ import {
   ApiDropSearchStrategy,
   ApiLightDrop,
 } from "@/generated/models/ObjectSerializer";
-import {
-  Drop,
-  DropSize,
-  getStableDropKey,
-} from "@/helpers/waves/drop.helpers";
+import { Drop, DropSize, getStableDropKey } from "@/helpers/waves/drop.helpers";
 import {
   commonApiFetch,
   commonApiFetchWithRetry,
@@ -47,9 +43,12 @@ export async function fetchWaveMessages(
     // Update centralized eligibility if callback provided
     if (updateEligibility && data.wave) {
       updateEligibility(waveId, {
-        authenticated_user_eligible_to_chat: data.wave.authenticated_user_eligible_to_chat,
-        authenticated_user_eligible_to_vote: data.wave.authenticated_user_eligible_to_vote,
-        authenticated_user_eligible_to_participate: data.wave.authenticated_user_eligible_to_participate,
+        authenticated_user_eligible_to_chat:
+          data.wave.authenticated_user_eligible_to_chat,
+        authenticated_user_eligible_to_vote:
+          data.wave.authenticated_user_eligible_to_vote,
+        authenticated_user_eligible_to_participate:
+          data.wave.authenticated_user_eligible_to_participate,
         authenticated_user_admin: data.wave.authenticated_user_admin,
       });
     }
@@ -184,9 +183,9 @@ export function formatWaveMessages(
   waveId: string,
   drops: ApiDrop[],
   options: {
-    isLoading?: boolean;
-    isLoadingNextPage?: boolean;
-    hasNextPage?: boolean;
+    isLoading?: boolean | undefined;
+    isLoadingNextPage?: boolean | undefined;
+    hasNextPage?: boolean | undefined;
   } = {}
 ): WaveMessagesUpdate {
   const {
@@ -197,9 +196,7 @@ export function formatWaveMessages(
 
   // Calculate the highest serial number from the fetched drops
   const latestFetchedSerialNo =
-    drops.length > 0
-      ? Math.max(...drops.map((drop) => drop.serial_no))
-      : undefined;
+    drops.length > 0 ? Math.max(...drops.map((drop) => drop.serial_no)) : null;
 
   const update: WaveMessagesUpdate = {
     key: waveId,
@@ -228,9 +225,9 @@ export function formatWaveMessages(
 export function createEmptyWaveMessages(
   waveId: string,
   options: {
-    isLoading?: boolean;
-    isLoadingNextPage?: boolean;
-    hasNextPage?: boolean;
+    isLoading?: boolean | undefined;
+    isLoadingNextPage?: boolean | undefined;
+    hasNextPage?: boolean | undefined;
   } = {}
 ): WaveMessagesUpdate {
   const {
@@ -369,9 +366,12 @@ export async function fetchNewestWaveMessages(
     // Update centralized eligibility if callback provided
     if (updateEligibility && data.wave) {
       updateEligibility(waveId, {
-        authenticated_user_eligible_to_chat: data.wave.authenticated_user_eligible_to_chat,
-        authenticated_user_eligible_to_vote: data.wave.authenticated_user_eligible_to_vote,
-        authenticated_user_eligible_to_participate: data.wave.authenticated_user_eligible_to_participate,
+        authenticated_user_eligible_to_chat:
+          data.wave.authenticated_user_eligible_to_chat,
+        authenticated_user_eligible_to_vote:
+          data.wave.authenticated_user_eligible_to_vote,
+        authenticated_user_eligible_to_participate:
+          data.wave.authenticated_user_eligible_to_participate,
         authenticated_user_admin: data.wave.authenticated_user_admin,
       });
     }
@@ -416,7 +416,7 @@ interface LightDropsApiParams {
   /** The ID of the wave to fetch messages for. Required by the API. */
   wave_id: string;
   /** The maximum number of items to return. API requires 1-2000. Defaults to 2000 if not specified by caller. */
-  limit?: number;
+  limit?: number | undefined;
   /** Fetch items with serial_no less than or equal to this value. For pagination. Required. */
   max_serial_no: number;
   // Add any other specific, known query parameters for /light-drops from openapi.yaml if they exist

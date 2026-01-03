@@ -7,29 +7,29 @@ import { removeBaseEndpoint } from "@/helpers/Helpers";
 import ChatItemHrefButtons from "./ChatItemHrefButtons";
 
 export interface OpenGraphPreviewData {
-  title?: unknown;
-  description?: unknown;
-  url?: unknown;
-  siteName?: unknown;
-  site_name?: unknown;
-  domain?: unknown;
-  source?: unknown;
-  canonicalUrl?: unknown;
-  canonical_url?: unknown;
-  image?: unknown;
-  imageUrl?: unknown;
-  image_url?: unknown;
-  images?: unknown;
-  ogImage?: unknown;
-  og_image?: unknown;
-  thumbnailUrl?: unknown;
-  thumbnail_url?: unknown;
+  title?: unknown | undefined;
+  description?: unknown | undefined;
+  url?: unknown | undefined;
+  siteName?: unknown | undefined;
+  site_name?: unknown | undefined;
+  domain?: unknown | undefined;
+  source?: unknown | undefined;
+  canonicalUrl?: unknown | undefined;
+  canonical_url?: unknown | undefined;
+  image?: unknown | undefined;
+  imageUrl?: unknown | undefined;
+  image_url?: unknown | undefined;
+  images?: unknown | undefined;
+  ogImage?: unknown | undefined;
+  og_image?: unknown | undefined;
+  thumbnailUrl?: unknown | undefined;
+  thumbnail_url?: unknown | undefined;
   [key: string]: unknown;
 }
 
 interface OpenGraphPreviewProps {
   readonly href: string;
-  readonly preview?: OpenGraphPreviewData | null;
+  readonly preview?: OpenGraphPreviewData | null | undefined;
 }
 
 type MaybeRecord = Record<string, unknown>;

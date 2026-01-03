@@ -31,7 +31,7 @@ export default function UserPageCollectedCards({
   readonly filters: ProfileCollectedFilters;
   readonly setPage: (page: number) => void;
   readonly dataTransfer: CollectedCard[];
-  readonly isTransferLoading?: boolean;
+  readonly isTransferLoading?: boolean | undefined;
 }) {
   const t = useTransfer();
   const isTransferEnabled = t.enabled;

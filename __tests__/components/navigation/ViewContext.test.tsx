@@ -27,7 +27,10 @@ type ViewContextValue = ReturnType<typeof useViewContext>;
 
 const TestNavComponent: React.FC<{
   readonly item: NavItem;
-  readonly afterNav?: (context: ViewContextValue) => void;
+  readonly afterNav?:
+    | ((context: ViewContextValue) => void)
+    | undefined
+    | undefined;
 }> = ({ item, afterNav }) => {
   const context = useViewContext();
 
@@ -43,7 +46,7 @@ const TestNavComponent: React.FC<{
 
 beforeEach(() => {
   jest.clearAllMocks();
-  usePathname.mockReturnValue('/');
+  usePathname.mockReturnValue("/");
   useRouter.mockReturnValue({
     push,
   });
@@ -63,12 +66,14 @@ describe("ViewContext", () => {
     render(
       <ViewProvider>
         <TestNavComponent
-          item={{
-            kind: "route",
-            name: "Home",
-            href: "/home",
-            icon: "h",
-          } as NavItem}
+          item={
+            {
+              kind: "route",
+              name: "Home",
+              href: "/home",
+              icon: "h",
+            } as NavItem
+          }
         />
       </ViewProvider>
     );
@@ -79,12 +84,14 @@ describe("ViewContext", () => {
     render(
       <ViewProvider>
         <TestNavComponent
-          item={{
-            kind: "route",
-            name: "Stream",
-            href: "/",
-            icon: "s",
-          } as NavItem}
+          item={
+            {
+              kind: "route",
+              name: "Stream",
+              href: "/",
+              icon: "s",
+            } as NavItem
+          }
         />
       </ViewProvider>
     );
@@ -95,12 +102,14 @@ describe("ViewContext", () => {
     render(
       <ViewProvider>
         <TestNavComponent
-          item={{
-            kind: "view",
-            name: "Waves",
-            viewKey: "waves",
-            icon: "w",
-          } as NavItem}
+          item={
+            {
+              kind: "view",
+              name: "Waves",
+              viewKey: "waves",
+              icon: "w",
+            } as NavItem
+          }
           afterNav={({ hardBack }) => hardBack("waves")}
         />
       </ViewProvider>

@@ -9,15 +9,13 @@ import {
   validateGroupPayload as validateGroupPayloadLocal,
   toErrorMessage,
 } from "@/services/groups/groupMutations";
-import type {
-  ValidationResult as GroupValidationResult,
-} from "@/services/groups/groupMutations";
+import type { ValidationResult as GroupValidationResult } from "@/services/groups/groupMutations";
 
 export interface SubmitArgs {
   readonly payload: ApiCreateGroup;
-  readonly previousGroup?: ApiGroupFull | null;
-  readonly currentHandle?: string | null;
-  readonly publish?: boolean;
+  readonly previousGroup?: ApiGroupFull | null | undefined;
+  readonly currentHandle?: string | null | undefined;
+  readonly publish?: boolean | undefined;
 }
 
 type SubmitResult =
@@ -30,7 +28,7 @@ type SubmitResult =
       readonly ok: false;
       readonly reason: "validation" | "auth" | "api" | "busy";
       readonly error: string;
-      readonly validation?: GroupValidationResult;
+      readonly validation?: GroupValidationResult | undefined;
     };
 
 interface TestArgs {
@@ -47,19 +45,19 @@ type TestResult =
       readonly ok: false;
       readonly reason: "validation" | "auth" | "api" | "busy";
       readonly error: string;
-      readonly validation?: GroupValidationResult;
+      readonly validation?: GroupValidationResult | undefined;
     };
 
 interface UseGroupMutationsArgs {
   readonly requestAuth: () => Promise<{ success: boolean }>;
-  readonly onGroupCreate?: () => void;
+  readonly onGroupCreate?: (() => void) | undefined;
 }
 
 interface UpdateVisibilityArgs {
   readonly groupId: string;
   readonly visible: boolean;
-  readonly oldVersionId?: string | null;
-  readonly skipAuth?: boolean;
+  readonly oldVersionId?: string | null | undefined;
+  readonly skipAuth?: boolean | undefined;
 }
 
 type UpdateVisibilityResult =
@@ -67,7 +65,7 @@ type UpdateVisibilityResult =
       readonly ok: true;
       readonly groupId: string;
       readonly visible: boolean;
-      readonly group?: ApiGroupFull;
+      readonly group?: ApiGroupFull | undefined;
     }
   | {
       readonly ok: false;
@@ -79,8 +77,8 @@ const resolveOldVersionId = ({
   previousGroup,
   currentHandle,
 }: {
-  readonly previousGroup?: ApiGroupFull | null;
-  readonly currentHandle?: string | null;
+  readonly previousGroup?: ApiGroupFull | null | undefined;
+  readonly currentHandle?: string | null | undefined;
 }): string | null => {
   if (!previousGroup?.id) {
     return null;
@@ -106,18 +104,18 @@ export const useGroupMutations = ({
       nameOverride,
     }: {
       readonly payload: ApiCreateGroup;
-      readonly nameOverride?: string;
+      readonly nameOverride?: string | undefined;
     }) => await createGroup({ payload, nameOverride }),
   });
 
   const publishGroupMutation = useMutation({
     mutationFn: async ({
-        id,
-        oldVersionId,
-      }: {
-        readonly id: string;
-        readonly oldVersionId: string | null;
-      }) => await publishGroup({ id, oldVersionId }),
+      id,
+      oldVersionId,
+    }: {
+      readonly id: string;
+      readonly oldVersionId: string | null;
+    }) => await publishGroup({ id, oldVersionId }),
   });
 
   const hideGroupMutation = useMutation({
@@ -130,7 +128,7 @@ export const useGroupMutations = ({
       nameOverride,
     }: {
       readonly payload: ApiCreateGroup;
-      readonly nameOverride?: string;
+      readonly nameOverride?: string | undefined;
     }) => await createGroup({ payload, nameOverride }),
   });
 
@@ -259,7 +257,10 @@ export const useGroupMutations = ({
         };
       }
 
-      const oldVersionId = resolveOldVersionId({ previousGroup, currentHandle });
+      const oldVersionId = resolveOldVersionId({
+        previousGroup,
+        currentHandle,
+      });
 
       const visibilityResult = await updateVisibility({
         groupId: created.id,
@@ -342,7 +343,8 @@ export const useGroupMutations = ({
     submit,
     runTest,
     updateVisibility,
-    isSubmitting: createGroupMutation.isPending || publishGroupMutation.isPending,
+    isSubmitting:
+      createGroupMutation.isPending || publishGroupMutation.isPending,
     isTesting: testGroupMutation.isPending,
     isUpdatingVisibility:
       publishGroupMutation.isPending || hideGroupMutation.isPending,

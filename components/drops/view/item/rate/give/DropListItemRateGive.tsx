@@ -20,8 +20,8 @@ export default function DropListItemRateGive({
   isMobile = false,
 }: {
   readonly drop: ApiDrop;
-  readonly onRated?: () => void;
-  readonly isMobile?: boolean;
+  readonly onRated?: (() => void) | undefined;
+  readonly isMobile?: boolean | undefined;
 }) {
   const memeticWaitTime = 1000;
   const memeticValues: number[] = [
@@ -209,13 +209,15 @@ export default function DropListItemRateGive({
 
   return (
     <>
-      <div 
+      <div
         className="tw-relative tw-gap-y-1 tw-flex tw-flex-col tw-items-center"
-        data-tooltip-id={getShowRate() ? tooltipId : undefined}>
+        {...(getShowRate() ? { "data-tooltip-id": tooltipId } : {})}
+      >
         <div
           className={`${
             isMobile ? "tw-gap-x-4" : ""
-          } tw-w-full tw-inline-flex tw-items-center tw-gap-x-1`}>
+          } tw-w-full tw-inline-flex tw-items-center tw-gap-x-1`}
+        >
           <DropListItemRateGiveChangeButton
             canVote={canVote}
             type={RateChangeType.DECREASE}
@@ -247,10 +249,12 @@ export default function DropListItemRateGive({
             backgroundColor: "#1F2937",
             color: "white",
             padding: "4px 8px",
-          }}>
+          }}
+        >
           <div className="tw-text-center">
             <span
-              className={`${getRateClasses()} tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}>
+              className={`${getRateClasses()} tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}
+            >
               {getRateText()}
             </span>
           </div>

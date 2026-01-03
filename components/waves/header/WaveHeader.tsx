@@ -23,9 +23,9 @@ export enum WaveHeaderPinnedSide {
 interface WaveHeaderProps {
   readonly wave: ApiWave;
   readonly onFollowersClick: () => void;
-  readonly useRing?: boolean;
-  readonly useRounded?: boolean;
-  readonly pinnedSide?: WaveHeaderPinnedSide;
+  readonly useRing?: boolean | undefined;
+  readonly useRounded?: boolean | undefined;
+  readonly pinnedSide?: WaveHeaderPinnedSide | undefined;
 }
 
 export default function WaveHeader({

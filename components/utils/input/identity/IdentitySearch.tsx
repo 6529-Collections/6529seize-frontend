@@ -28,10 +28,10 @@ export default function IdentitySearch({
   setIdentity,
 }: {
   readonly identity: string | null;
-  readonly size?: IdentitySearchSize;
-  readonly error?: boolean;
-  readonly label?: string;
-  readonly autoFocus?: boolean;
+  readonly size?: IdentitySearchSize | undefined;
+  readonly error?: boolean | undefined;
+  readonly label?: string | undefined;
+  readonly autoFocus?: boolean | undefined;
 
   readonly setIdentity: (identity: string | null) => void;
 }) {

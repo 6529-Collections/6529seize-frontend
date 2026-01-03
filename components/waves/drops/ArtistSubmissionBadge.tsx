@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useId } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -19,8 +19,8 @@ const TOOLTIP_STYLES = {
 
 interface ArtistSubmissionBadgeProps {
   readonly submissionCount: number;
-  readonly onBadgeClick?: () => void;
-  readonly tooltipId?: string;
+  readonly onBadgeClick?: (() => void) | undefined;
+  readonly tooltipId?: string | undefined;
 }
 
 export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
@@ -35,6 +35,9 @@ export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
   const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
 
   if (submissionCount === 0) return null;
+
+  const dataTooltipId =
+    !isMobile && !hasTouchScreen ? uniqueTooltipId : undefined;
 
   return (
     <>
@@ -62,7 +65,7 @@ export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
         }`}
         aria-expanded="false"
         aria-haspopup="dialog"
-        data-tooltip-id={!isMobile && !hasTouchScreen ? uniqueTooltipId : undefined}
+        {...(dataTooltipId && { "data-tooltip-id": dataTooltipId })}
       >
         <FontAwesomeIcon
           icon={faPalette}

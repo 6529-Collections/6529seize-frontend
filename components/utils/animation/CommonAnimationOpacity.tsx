@@ -3,11 +3,11 @@ import React from "react";
 
 interface Props {
   readonly children: React.ReactNode;
-  readonly elementClasses?: string;
-  readonly elementRole?: string;
+  readonly elementClasses?: string | undefined;
+  readonly elementRole?: string | undefined;
   readonly onClicked?: (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>
-  ) => void;
+  ) => void | undefined;
 }
 
 export default function CommonAnimationOpacity(props: Props) {

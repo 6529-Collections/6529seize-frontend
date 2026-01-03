@@ -99,8 +99,8 @@ export const formatTargetTokens = (tokens: readonly string[]): string => {
 };
 
 interface DateTimeFormatOptions {
-  readonly fallbackLabel?: string;
-  readonly includeTime?: boolean;
+  readonly fallbackLabel?: string | undefined;
+  readonly includeTime?: boolean | undefined;
 }
 
 export const formatDateTime = (

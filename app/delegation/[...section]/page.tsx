@@ -9,9 +9,9 @@ export default async function DelegationPage({
 }: {
   readonly params: Promise<{ section: string[] }>;
   readonly searchParams: Promise<{
-    address?: string;
-    collection?: string;
-    use_case?: string;
+    address?: string | undefined;
+    collection?: string | undefined;
+    use_case?: string | undefined;
   }>;
 }) {
   const { section } = await params;

@@ -31,8 +31,8 @@ export enum WaveDropsLeaderboardSort {
 interface UseWaveDropsLeaderboardProps {
   readonly waveId: string;
   readonly connectedProfileHandle: string | null;
-  readonly sort?: WaveDropsLeaderboardSort;
-  readonly pausePolling?: boolean;
+  readonly sort?: WaveDropsLeaderboardSort | undefined;
+  readonly pausePolling?: boolean | undefined;
 }
 
 const SORT_DIRECTION_MAP: Record<WaveDropsLeaderboardSort, string | undefined> =

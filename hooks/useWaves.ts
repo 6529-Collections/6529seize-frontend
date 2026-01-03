@@ -11,19 +11,19 @@ import { ApiWave } from "@/generated/models/ApiWave";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
 interface SearchWavesParams {
-  readonly author?: string;
-  readonly name?: string;
+  readonly author?: string | undefined;
+  readonly name?: string | undefined;
   readonly limit: number;
-  readonly serial_no_less_than?: number;
-  readonly group_id?: string;
+  readonly serial_no_less_than?: number | undefined;
+  readonly group_id?: string | undefined;
 }
 
 interface UseWavesParams {
   readonly identity: string | null;
   readonly waveName: string | null;
-  readonly limit?: number;
-  readonly refetchInterval?: number;
-  readonly enabled?: boolean;
+  readonly limit?: number | undefined;
+  readonly refetchInterval?: number | undefined;
+  readonly enabled?: boolean | undefined;
 }
 
 export function useWaves({

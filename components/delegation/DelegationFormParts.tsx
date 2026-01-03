@@ -47,7 +47,7 @@ function DelegationAddressInput(
 }
 
 export function DelegationFormLabel(
-  props: Readonly<{ title: string; tooltip: string; span?: number }>
+  props: Readonly<{ title: string; tooltip: string; span?: number | undefined }>
 ) {
   const tooltipId = `delegation-form-label-${props.title
     .toLowerCase()
@@ -173,8 +173,8 @@ export function DelegationFormCollectionFormGroup(
     subdelegation?: {
       originalDelegator: string;
       collection: DelegationCollection;
-    };
-    consolidation?: boolean;
+    } | undefined;
+    consolidation?: boolean | undefined;
   }>
 ) {
   const collections =
@@ -239,11 +239,11 @@ export function DelegationSubmitGroups(
     title: string;
     writeParams: any;
     showCancel: boolean;
-    gasError?: string;
+    gasError?: string | undefined;
     validate: () => string[];
     onHide: () => void;
     onSetToast: (toast: { title: string; message: string }) => void;
-    submitBtnLabel?: string;
+    submitBtnLabel?: string | undefined;
   }>
 ) {
   const {

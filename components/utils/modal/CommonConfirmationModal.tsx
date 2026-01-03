@@ -10,11 +10,11 @@ interface CommonConfirmationModalProps {
   readonly onConfirm: () => void;
   readonly title: string;
   readonly message: string;
-  readonly confirmText?: string;
-  readonly cancelText?: string;
-  readonly isConfirming?: boolean;
-  readonly icon?: React.ReactNode;
-  readonly confirmButtonClass?: string;
+  readonly confirmText?: string | undefined;
+  readonly cancelText?: string | undefined;
+  readonly isConfirming?: boolean | undefined;
+  readonly icon?: React.ReactNode | undefined;
+  readonly confirmButtonClass?: string | undefined;
 }
 
 export default function CommonConfirmationModal({

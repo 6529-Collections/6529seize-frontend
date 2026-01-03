@@ -270,8 +270,8 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
 
                 const response = await commonApiPostForm<{
                   success: boolean;
-                  photos?: string[];
-                  error?: string;
+                  photos?: string[] | undefined;
+                  error?: string | undefined;
                 }>({
                   endpoint: `distribution_photos/${contract}/${tokenId}`,
                   body: formData,
@@ -320,8 +320,8 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
                   { csv: string },
                   {
                     success: boolean;
-                    message?: string;
-                    error?: string;
+                    message?: string | undefined;
+                    error?: string | undefined;
                   }
                 >({
                   endpoint: `distributions/${contract}/${tokenId}/automatic_airdrops`,
@@ -381,8 +381,8 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
                   Record<string, never>,
                   {
                     success: boolean;
-                    message?: string;
-                    error?: string;
+                    message?: string | undefined;
+                    error?: string | undefined;
                   }
                 >({
                   endpoint: `distributions/${contract}/${tokenId}/normalize`,

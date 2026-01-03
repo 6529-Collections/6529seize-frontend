@@ -15,7 +15,7 @@ interface XtdhCollectionsControlsProps {
   readonly searchTerm: string;
   readonly onSearchChange: (term: string) => void;
 
-  readonly isDisabled?: boolean;
+  readonly isDisabled?: boolean | undefined;
 }
 
 export function XtdhCollectionsControls({

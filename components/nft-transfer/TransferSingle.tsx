@@ -26,7 +26,7 @@ interface TransferSingleProps {
   readonly tokenId: number;
   readonly title: string;
   readonly max: number;
-  readonly thumbUrl?: string;
+  readonly thumbUrl?: string | undefined;
 }
 
 export default function TransferSingle(props: TransferSingleProps) {

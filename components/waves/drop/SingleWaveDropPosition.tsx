@@ -6,9 +6,9 @@ import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
 
 interface SingleWaveDropPositionProps {
   readonly rank: number | null;
-  readonly drop?: ExtendedDrop;
-  readonly isFinalWinner?: boolean;
-  readonly variant?: "default" | "simple";
+  readonly drop?: ExtendedDrop | undefined;
+  readonly isFinalWinner?: boolean | undefined;
+  readonly variant?: "default" | "simple" | undefined;
 }
 
 const TrophyOnlyBadge: FC<{ rank: number }> = ({ rank }) => {

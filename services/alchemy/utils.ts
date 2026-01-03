@@ -72,10 +72,10 @@ export function parseFloorPrice(
 }
 
 type OpenSeaMetadataSource = {
-  openSeaMetadata?: AlchemyOpenSeaMetadata | null;
-  openseaMetadata?: AlchemyOpenSeaMetadata | null;
-  openSea?: AlchemyOpenSeaMetadata | null;
-  opensea?: AlchemyOpenSeaMetadata | null;
+  openSeaMetadata?: AlchemyOpenSeaMetadata | null | undefined;
+  openseaMetadata?: AlchemyOpenSeaMetadata | null | undefined;
+  openSea?: AlchemyOpenSeaMetadata | null | undefined;
+  opensea?: AlchemyOpenSeaMetadata | null | undefined;
 } | null | undefined;
 
 export function resolveOpenSeaMetadata(
@@ -98,9 +98,9 @@ export function resolveOpenSeaMetadata(
 }
 
 export function pickImage(source?: {
-  image?: { cachedUrl?: string | null; thumbnailUrl?: string | null } | null;
-  imageUrl?: string | null;
-  media?: { thumbnailUrl?: string | null; gateway?: string | null }[] | null;
+  image?: { cachedUrl?: string | null | undefined; thumbnailUrl?: string | null | undefined } | null | undefined;
+  imageUrl?: string | null | undefined;
+  media?: { thumbnailUrl?: string | null | undefined; gateway?: string | null | undefined }[] | null | undefined;
 }): string | null {
   if (!source) {
     return null;
@@ -128,8 +128,8 @@ export function pickImage(source?: {
 }
 
 export function pickThumbnail(source?: {
-  image?: { thumbnailUrl?: string | null; cachedUrl?: string | null } | null;
-  media?: { thumbnailUrl?: string | null }[] | null;
+  image?: { thumbnailUrl?: string | null | undefined; cachedUrl?: string | null | undefined } | null | undefined;
+  media?: { thumbnailUrl?: string | null | undefined }[] | null | undefined;
 }): string | null {
   if (!source) {
     return null;

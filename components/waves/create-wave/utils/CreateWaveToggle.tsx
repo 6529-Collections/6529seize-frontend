@@ -2,7 +2,7 @@ interface CreateWaveToggleProps {
   readonly enabled: boolean;
   readonly onChange: (enabled: boolean) => void;
   readonly label: string;
-  readonly displayLabel?: boolean;
+  readonly displayLabel?: boolean | undefined;
 }
 
 export default function CreateWaveToggle({

@@ -8,11 +8,11 @@ interface ParticipationDropContentProps {
   readonly activePartIndex: number;
   readonly setActivePartIndex: (index: number) => void;
   readonly onLongPress: () => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly setLongPressTriggered: (triggered: boolean) => void;
-  readonly parentContainerRef?: React.RefObject<HTMLElement | null>;
-  readonly isCompetitionDrop?: boolean;
+  readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
+  readonly isCompetitionDrop?: boolean | undefined;
 }
 
 export default function ParticipationDropContent({

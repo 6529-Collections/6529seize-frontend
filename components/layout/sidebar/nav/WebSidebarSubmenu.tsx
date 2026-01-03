@@ -16,10 +16,10 @@ interface WebSidebarSubmenuProps {
   readonly section: SidebarSection;
   readonly pathname: string | null;
   readonly onClose: () => void;
-  readonly leftOffset?: number;
-  readonly anchorTop?: number;
-  readonly anchorHeight?: number;
-  readonly triggerElement?: HTMLElement | null;
+  readonly leftOffset?: number | undefined;
+  readonly anchorTop?: number | undefined;
+  readonly anchorHeight?: number | undefined;
+  readonly triggerElement?: HTMLElement | null | undefined;
 }
 
 function WebSidebarSubmenu({

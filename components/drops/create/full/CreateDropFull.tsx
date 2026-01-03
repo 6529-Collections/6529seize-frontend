@@ -43,7 +43,7 @@ interface CreateDropFullProps {
   readonly showSubmit: boolean;
   readonly type: CreateDropType;
   readonly drop: CreateDropConfig | null;
-  readonly showDropError?: boolean;
+  readonly showDropError?: boolean | undefined;
   readonly missingMedia: ApiWaveParticipationRequirement[];
   readonly missingMetadata: ApiWaveRequiredMetadata[];
   readonly waveId: string | null;

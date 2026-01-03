@@ -10,8 +10,8 @@ import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 interface DropAuthorProps {
   readonly profile: ProfileMinWithoutSubs;
   readonly timestamp: number;
-  readonly size?: DropPartSize;
-  readonly children?: React.ReactNode;
+  readonly size?: DropPartSize | undefined;
+  readonly children?: React.ReactNode | undefined;
 }
 
 export default function DropAuthor({

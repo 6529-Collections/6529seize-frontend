@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./DateCountdown.module.scss";
 
 interface Props {
-  title?: string;
-  date?: Date;
+  title?: string | undefined;
+  date?: Date | undefined;
 }
 
 interface TimeLeft {

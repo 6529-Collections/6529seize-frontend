@@ -38,11 +38,11 @@ interface WaveDropsMessageListSectionProps {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly isAtBottom: boolean;
   readonly scrollToBottom: () => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly pendingCount: number;
   readonly onRevealPending: () => void;
-  readonly bottomPaddingClassName?: string;
-  readonly unreadDividerSerialNo?: number | null;
+  readonly bottomPaddingClassName?: string | undefined;
+  readonly unreadDividerSerialNo?: number | null | undefined;
 }
 
 const MIN_DROPS_FOR_PAGINATION = 25;
@@ -81,7 +81,8 @@ export const WaveDropsMessageListSection: React.FC<
         isFetchingNextPage={!!waveMessages?.isLoadingNextPage}
         hasNextPage={hasNextPage}
         onTopIntersection={onTopIntersection}
-        bottomPaddingClassName={bottomPaddingClassName}>
+        bottomPaddingClassName={bottomPaddingClassName}
+      >
         <DropsList
           scrollContainerRef={scrollContainerRef}
           onReplyClick={queueSerialTarget}

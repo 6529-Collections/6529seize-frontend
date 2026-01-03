@@ -27,7 +27,7 @@ import {
 
 interface Crumb {
   display: string;
-  href?: string;
+  href?: string | undefined;
 }
 
 export function useGlobalAdmin(address: string) {

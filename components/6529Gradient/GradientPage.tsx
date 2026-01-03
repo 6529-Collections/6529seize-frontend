@@ -65,7 +65,7 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
         return;
       }
       try {
-        const response = await fetchUrl(url, { signal });
+        const response = await fetchUrl(url, { ...(signal !== undefined ? { signal: signal } : {}) });
         const combined = [...mynfts, ...response.data];
         if (response.next) {
           await fetchNftsInner(response.next, combined, signal);

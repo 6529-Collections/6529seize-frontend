@@ -5,8 +5,8 @@ import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
 
 interface WinnerBadgeProps {
   readonly drop: ApiDrop;
-  readonly showBadge?: boolean;
-  readonly variant?: "default" | "simple";
+  readonly showBadge?: boolean | undefined;
+  readonly variant?: "default" | "simple" | undefined;
 }
 
 export const WinnerBadge: React.FC<WinnerBadgeProps> = ({

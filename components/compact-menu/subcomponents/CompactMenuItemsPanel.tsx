@@ -6,16 +6,16 @@ import { CompactMenuItemButton } from "./CompactMenuItemButton";
 
 interface CompactMenuItemsPanelProps {
   readonly items: CompactMenuProps["items"];
-  readonly activeItemId?: CompactMenuProps["activeItemId"];
-  readonly onItemSelect?: CompactMenuProps["onItemSelect"];
+  readonly activeItemId?: CompactMenuProps["activeItemId"] | undefined;
+  readonly onItemSelect?: CompactMenuProps["onItemSelect"] | undefined;
   readonly close: () => void;
   readonly closeOnSelect: boolean;
-  readonly itemClassName?: CompactMenuProps["itemClassName"];
-  readonly activeItemClassName?: CompactMenuProps["activeItemClassName"];
-  readonly inactiveItemClassName?: CompactMenuProps["inactiveItemClassName"];
-  readonly focusItemClassName?: CompactMenuProps["focusItemClassName"];
-  readonly itemsWrapperClassName?: CompactMenuProps["itemsWrapperClassName"];
-  readonly unstyledItems?: boolean;
+  readonly itemClassName?: CompactMenuProps["itemClassName"] | undefined;
+  readonly activeItemClassName?: CompactMenuProps["activeItemClassName"] | undefined;
+  readonly inactiveItemClassName?: CompactMenuProps["inactiveItemClassName"] | undefined;
+  readonly focusItemClassName?: CompactMenuProps["focusItemClassName"] | undefined;
+  readonly itemsWrapperClassName?: CompactMenuProps["itemsWrapperClassName"] | undefined;
+  readonly unstyledItems?: boolean | undefined;
 }
 
 export function CompactMenuItemsPanel({
@@ -51,7 +51,7 @@ export function CompactMenuItemsPanel({
         const isActive = item.active ?? activeItemId === item.id;
 
         return (
-          <MenuItem key={item.id} as={Fragment} disabled={item.disabled}>
+          <MenuItem key={item.id} as={Fragment} disabled={!!item.disabled}>
             {({ active }) => (
               <CompactMenuItemButton
                 item={item}

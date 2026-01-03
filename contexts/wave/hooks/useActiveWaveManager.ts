@@ -7,9 +7,9 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
 interface WaveNavigationOptions {
-  isDirectMessage?: boolean;
-  serialNo?: number | string | null;
-  divider?: number | null;
+  isDirectMessage?: boolean | undefined;
+  serialNo?: number | string | null | undefined;
+  divider?: number | null | undefined;
 }
 
 const getWaveFromWindow = (): string | null => {

@@ -24,11 +24,11 @@ import { Suspense, type JSX } from "react";
 const ImageComponent = React.lazy(() => import("./ImageComponent"));
 
 interface ImagePayload {
-  key?: NodeKey;
+  key?: NodeKey | undefined;
   src: string;
-  altText?: string;
-  width?: number;
-  height?: number;
+  altText?: string | undefined;
+  width?: number | undefined;
+  height?: number | undefined;
 }
 
 function $convertImageElement(domNode: Node): null | DOMConversionOutput {
@@ -41,18 +41,18 @@ function $convertImageElement(domNode: Node): null | DOMConversionOutput {
 type SerializedImageNode = Spread<
   {
     src: string;
-    altText?: string;
-    width?: number;
-    height?: number;
+    altText?: string | undefined;
+    width?: number | undefined;
+    height?: number | undefined;
   },
   SerializedLexicalNode
 >;
 
 export class ImageNode extends DecoratorNode<JSX.Element> {
   __src: string;
-  __altText?: string;
-  __width?: number;
-  __height?: number;
+  __altText?: string | undefined;
+  __width?: number | undefined;
+  __height?: number | undefined;
   static getType(): string {
     return "image";
   }

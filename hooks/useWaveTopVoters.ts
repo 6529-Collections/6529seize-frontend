@@ -17,9 +17,9 @@ interface UseWaveTopVotersProps {
   readonly connectedProfileHandle: string | undefined;
   readonly reverse: boolean;
   readonly dropId: string | null;
-  readonly sortDirection?: "ASC" | "DESC";
-  readonly sort?: "ABSOLUTE" | "POSITIVE" | "NEGATIVE";
-  readonly refetchInterval?: number;
+  readonly sortDirection?: "ASC" | "DESC" | undefined;
+  readonly sort?: "ABSOLUTE" | "POSITIVE" | "NEGATIVE" | undefined;
+  readonly refetchInterval?: number | undefined;
 }
 
 export function useWaveTopVoters({

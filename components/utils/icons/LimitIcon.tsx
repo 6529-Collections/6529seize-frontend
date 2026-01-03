@@ -1,7 +1,7 @@
 import React, { type JSX } from "react";
 
 interface LimitIconProps {
-  readonly className?: string;
+  readonly className?: string | undefined;
 }
 
 /**

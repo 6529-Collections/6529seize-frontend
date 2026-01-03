@@ -20,8 +20,8 @@ const DEFAULT_BODY_CLASSES =
 type SelectGroupSearchPanelProps = {
   readonly onClose: () => void;
   readonly onGroupSelect: (group: ApiGroupFull) => void;
-  readonly containerClassName?: string;
-  readonly bodyClassName?: string;
+  readonly containerClassName?: string | undefined;
+  readonly bodyClassName?: string | undefined;
 };
 
 export default function SelectGroupSearchPanel({

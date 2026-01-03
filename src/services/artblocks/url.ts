@@ -1,6 +1,6 @@
 export interface ArtBlocksTokenIdentifier {
   readonly tokenId: string;
-  readonly contract?: string;
+  readonly contract?: string | undefined;
 }
 
 const HEX_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/;

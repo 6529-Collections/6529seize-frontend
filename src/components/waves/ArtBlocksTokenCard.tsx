@@ -48,7 +48,7 @@ const recordArtBlocksEvent = (
     return;
   }
 
-  const rum = (window as unknown as { awsRum?: { recordEvent?: Function } }).awsRum;
+  const rum = (window as unknown as { awsRum?: { recordEvent?: Function | undefined } | undefined }).awsRum;
   if (rum && typeof rum.recordEvent === "function") {
     try {
       rum.recordEvent(eventName, detail);

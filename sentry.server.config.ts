@@ -12,7 +12,8 @@ import * as Sentry from "@sentry/nextjs";
 const dsn = publicEnv.SENTRY_DSN;
 
 Sentry.init({
-  dsn,
+  ...(dsn && { dsn }),
+
   // Only enable Sentry if a DSN is actually set
   enabled: Boolean(dsn),
 

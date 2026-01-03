@@ -532,7 +532,7 @@ export default function UserPageSubscriptionsTopUp() {
 function CardCountOption(
   props: Readonly<{
     count: number;
-    display?: string;
+    display?: string | undefined;
     selected: boolean;
     onSelect: () => void;
   }>

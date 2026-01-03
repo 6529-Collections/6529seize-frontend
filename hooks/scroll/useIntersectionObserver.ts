@@ -3,7 +3,7 @@
 import { RefObject, useEffect } from "react";
 
 interface UseIntersectionObserverOptions extends IntersectionObserverInit {
-  freezeOnceVisible?: boolean;
+  freezeOnceVisible?: boolean | undefined;
 }
 
 export function useIntersectionObserver(

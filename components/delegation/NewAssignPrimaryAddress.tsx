@@ -33,10 +33,10 @@ interface Props {
   subdelegation?: {
     originalDelegator: string;
     collection: DelegationCollection;
-  };
+  } | undefined;
   ens: string | null | undefined;
   onHide(): any;
-  new_primary_address_query?: string;
+  new_primary_address_query?: string | undefined;
   setNewPrimaryAddressQuery?(query: string): any;
   onSetToast(toast: any): any;
 }

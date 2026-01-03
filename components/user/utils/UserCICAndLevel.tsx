@@ -11,8 +11,8 @@ export default function UserCICAndLevel({
   size = UserCICAndLevelSize.MEDIUM,
 }: {
   readonly level: number;
-  readonly color?: string;
-  readonly size?: UserCICAndLevelSize;
+  readonly color?: string | undefined;
+  readonly size?: UserCICAndLevelSize | undefined;
 }) {
   const mainColor = color ?? "iron-300";
 

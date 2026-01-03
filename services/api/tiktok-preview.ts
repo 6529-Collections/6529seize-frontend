@@ -18,7 +18,7 @@ export interface TikTokPreviewSuccess {
 
 export interface TikTokPreviewUnavailable {
   readonly error: "unavailable";
-  readonly canonicalUrl?: string;
+  readonly canonicalUrl?: string | undefined;
 }
 
 export type TikTokPreviewResult =

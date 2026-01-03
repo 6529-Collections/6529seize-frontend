@@ -13,7 +13,7 @@ interface WebSidebarExpandableProps {
   readonly onToggle: (e?: React.MouseEvent) => void;
   readonly collapsed: boolean;
   readonly pathname: string | null;
-  readonly "data-section"?: string;
+  readonly "data-section"?: string | undefined;
 }
 
 function WebSidebarExpandable({

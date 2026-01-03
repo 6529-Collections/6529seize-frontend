@@ -12,18 +12,18 @@ interface Props {
   mintInfo?: {
     title: string;
     date: number; // Unix seconds
-    showAllowlistInfo?: boolean;
-    isFinalized?: boolean;
-    isEnded?: boolean;
-    isSoldOut?: boolean;
-  };
+    showAllowlistInfo?: boolean | undefined;
+    isFinalized?: boolean | undefined;
+    isEnded?: boolean | undefined;
+    isSoldOut?: boolean | undefined;
+  } | undefined;
   linkInfo?: {
     href: string;
     target: "_blank" | "_self";
-  };
-  hideMintBtn?: boolean;
-  small?: boolean;
-  isError?: boolean;
+  } | undefined;
+  hideMintBtn?: boolean | undefined;
+  small?: boolean | undefined;
+  isError?: boolean | undefined;
 }
 
 export default function MintCountdownBox(props: Readonly<Props>) {

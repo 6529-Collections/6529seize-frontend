@@ -24,7 +24,7 @@ const isGoogleWorkspacePreview = (
   if (!response || typeof response !== "object") {
     return false;
   }
-  const type = (response as { readonly type?: unknown }).type;
+  const type = (response as { readonly type?: unknown | undefined }).type;
   return typeof type === "string" && type.startsWith("google.");
 };
 

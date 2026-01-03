@@ -12,7 +12,7 @@ import { WAVE_DROPS_PARAMS, getDefaultQueryRetry } from "@/components/react-quer
 interface WaveleaderboardSortProps {
   readonly sort: WaveDropsLeaderboardSort;
   readonly onSortChange: (sort: WaveDropsLeaderboardSort) => void;
-  readonly waveId?: string;
+  readonly waveId?: string | undefined;
 }
 
 const SORT_DIRECTION_MAP: Record<WaveDropsLeaderboardSort, string | undefined> = {

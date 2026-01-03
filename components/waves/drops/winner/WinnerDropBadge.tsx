@@ -5,10 +5,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface WinnerDropBadgeProps {
   rank: number | null;
-  round?: number;
-  position?: number;
+  round?: number | undefined;
+  position?: number | undefined;
   decisionTime: number | null;
-  variant?: "default" | "simple";
+  variant?: "default" | "simple" | undefined;
 }
 
 const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({

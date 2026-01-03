@@ -7,9 +7,9 @@ type RouteNavItem = {
   name: string;
   href: string;
   icon: string;
-  iconComponent?: React.ComponentType<{ className?: string }>;
-  iconSizeClass?: string;
-  disabled?: boolean;
+  iconComponent?: React.ComponentType<{ className?: string | undefined }> | undefined;
+  iconSizeClass?: string | undefined;
+  disabled?: boolean | undefined;
 };
 
 type ViewNavItem = {
@@ -17,9 +17,9 @@ type ViewNavItem = {
   name: string;
   viewKey: ViewKey;
   icon: string;
-  iconComponent?: React.ComponentType<{ className?: string }>;
-  iconSizeClass?: string;
-  disabled?: boolean;
+  iconComponent?: React.ComponentType<{ className?: string | undefined }> | undefined;
+  iconSizeClass?: string | undefined;
+  disabled?: boolean | undefined;
 };
 
 export type NavItem = RouteNavItem | ViewNavItem;
@@ -27,12 +27,12 @@ export type NavItem = RouteNavItem | ViewNavItem;
 export interface SidebarSection {
   key: string;
   name: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string | undefined }>;
   items: SidebarNavItem[];
   subsections?: {
     name: string;
     items: SidebarNavItem[];
-  }[];
+  }[] | undefined;
 }
 
 interface SidebarNavItem {

@@ -24,7 +24,7 @@ interface Props {
   collector: Collector;
   selectedSeason: number;
   searchWallets: string[];
-  globalTdhRateChange?: number;
+  globalTdhRateChange?: number | undefined;
   seasons: MemeSeason[];
   isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;

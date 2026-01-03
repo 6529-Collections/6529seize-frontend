@@ -74,11 +74,15 @@ const shouldSkipNavigation = (
 
 type CardContainerProps = {
   readonly isInteractive: boolean;
-  readonly href?: string;
-  readonly ariaLabel?: string;
+  readonly href?: string | undefined;
+  readonly ariaLabel?: string | undefined;
   readonly children: ReactNode;
-  readonly onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
-  readonly onKeyDown?: (event: KeyboardEvent<HTMLAnchorElement>) => void;
+  readonly onClick?:
+    | ((event: MouseEvent<HTMLAnchorElement>) => void)
+    | undefined;
+  readonly onKeyDown?:
+    | ((event: KeyboardEvent<HTMLAnchorElement>) => void)
+    | undefined;
 };
 
 function CardContainer({
@@ -100,7 +104,7 @@ function CardContainer({
         prefetch={false}
         className={className}
         aria-label={ariaLabel}
-        onClick={onClick}
+        {...(onClick ? { onClick } : {})}
         onKeyDown={onKeyDown}
       >
         {children}
@@ -134,9 +138,9 @@ export default function WaveItem({
   userPlaceholder,
   titlePlaceholder,
 }: {
-  readonly wave?: ApiWave;
-  readonly userPlaceholder?: string;
-  readonly titlePlaceholder?: string;
+  readonly wave?: ApiWave | undefined;
+  readonly userPlaceholder?: string | undefined;
+  readonly titlePlaceholder?: string | undefined;
 }) {
   const router = useRouter();
   const author = wave?.author;
@@ -261,21 +265,29 @@ export default function WaveItem({
           author?.handle ? `View @${author.handle}` : "View author profile"
         }
       >
-        <div className="tw-h-8 tw-w-8 tw-relative tw-flex-shrink-0 tw-mr-3">{authorAvatar}</div>
+        <div className="tw-h-8 tw-w-8 tw-relative tw-flex-shrink-0 tw-mr-3">
+          {authorAvatar}
+        </div>
         <span className={linkedAuthorNameClass}>
           {author?.handle ?? userPlaceholder}
         </span>
-        <div className="tw-ml-1.5 tw-flex tw-items-center">{authorLevelBadge}</div>
+        <div className="tw-ml-1.5 tw-flex tw-items-center">
+          {authorLevelBadge}
+        </div>
       </button>
     );
   } else {
     authorSection = (
       <div className={`${authorWrapperClass} tw-min-w-0`}>
-        <div className="tw-h-8 tw-w-8 tw-relative tw-flex-shrink-0 tw-mr-3">{authorAvatar}</div>
+        <div className="tw-h-8 tw-w-8 tw-relative tw-flex-shrink-0 tw-mr-3">
+          {authorAvatar}
+        </div>
         <span className={staticAuthorNameClass}>
           {author?.handle ?? userPlaceholder}
         </span>
-        <div className="tw-ml-1.5 tw-flex tw-items-center">{authorLevelBadge}</div>
+        <div className="tw-ml-1.5 tw-flex tw-items-center">
+          {authorLevelBadge}
+        </div>
       </div>
     );
   }
@@ -339,7 +351,7 @@ export default function WaveItem({
             className="tw-absolute tw-inset-0 tw-h-full tw-w-full tw-object-cover tw-transition-transform tw-duration-500 tw-will-change-transform desktop-hover:group-hover:tw-scale-[1.015]"
           />
         )}
-         <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-black/90 tw-via-black/40 tw-to-transparent" />
+        <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-black/90 tw-via-black/40 tw-to-transparent" />
         <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-flex tw-items-end tw-justify-between tw-gap-3">
           <div className="tw-flex tw-min-w-0 tw-items-end tw-px-4 tw-pb-5">
             <div className="tw-min-w-0">

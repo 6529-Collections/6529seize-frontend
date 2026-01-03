@@ -15,7 +15,7 @@ interface ArtistPreviewModalProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly user: ApiProfileMin;
-  readonly initialTab?: ArtistPreviewTab;
+  readonly initialTab?: ArtistPreviewTab | undefined;
 }
 
 export const ArtistPreviewModal = ({

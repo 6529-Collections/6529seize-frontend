@@ -5,8 +5,8 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 interface UseWaveDataProps {
   waveId: string | null;
-  refetchInterval?: number;
-  onWaveNotFound?: () => void;
+  refetchInterval?: number | undefined;
+  onWaveNotFound?: (() => void) | undefined;
 }
 
 export const useWaveData = ({
@@ -14,7 +14,7 @@ export const useWaveData = ({
   refetchInterval = Infinity,
   onWaveNotFound = () => {},
 }: UseWaveDataProps) => {
-   return useQuery<ApiWave>({
+  return useQuery<ApiWave>({
     queryKey: [QueryKey.WAVE, { wave_id: waveId }],
     queryFn: async () => {
       if (!waveId) {
