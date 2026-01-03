@@ -17,13 +17,6 @@ export interface ChartProps {
   readonly datasets: ChartData[];
 }
 
-enum TDHHistoryChartType {
-  BOOSTED_TDH = "BOOSTED_TDH",
-  NET_TDH = "NET_TDH",
-  CREATED_TDH = "CREATED_TDH",
-  DESTROYED_TDH = "DESTROYED_TDH",
-}
-
 interface ChartConfigDataset {
   readonly label: string;
   readonly field: keyof TDHHistory;

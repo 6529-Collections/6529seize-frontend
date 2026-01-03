@@ -421,20 +421,6 @@ export interface CollectedCard {
   readonly szn: number | null;
 }
 
-interface WalletDelegation {
-  readonly created_at: Date;
-  readonly block: number;
-  readonly from_address: string;
-  readonly to_address: string;
-  readonly collection: string; //"0x8888888888888888888888888888888888888888" = any collection
-  readonly use_case: number;
-  readonly expiry: number;
-  readonly all_tokens: number;
-  readonly token_id: number;
-  readonly from_display: string | null;
-  readonly to_display: string | null;
-}
-
 export interface CommunityMemberOverview {
   readonly display: string;
   readonly detail_view_key: string;
@@ -455,10 +441,6 @@ export interface ProfileMinimal {
   readonly rep: number;
   readonly tdh: number;
   readonly level: number;
-}
-
-interface ProfileAvailableDropRateResponse {
-  readonly available_credit_for_rating: number;
 }
 
 export enum ProfileConnectedStatus {

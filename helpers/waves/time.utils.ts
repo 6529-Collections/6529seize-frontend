@@ -40,21 +40,6 @@ export const calculateTimeLeft = (targetTime: number): TimeLeft => {
 };
 
 /**
- * Determines if all time components are zero
- *
- * @param timeLeft - TimeLeft object
- * @returns boolean - true if all values are zero
- */
-const isTimeZero = (timeLeft: TimeLeft): boolean => {
-  return (
-    timeLeft.days === 0 &&
-    timeLeft.hours === 0 &&
-    timeLeft.minutes === 0 &&
-    timeLeft.seconds === 0
-  );
-};
-
-/**
  * Calculates the timestamp of the last decision point in a wave.
  * This considers the wave type (single decision, multi-decision, or rolling)
  * and determines when voting will actually end.

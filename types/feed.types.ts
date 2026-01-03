@@ -1,5 +1,4 @@
 import { ApiDrop } from "@/generated/models/ApiDrop";
-import { ApiDropVote } from "@/generated/models/ApiDropVote";
 import { ApiFeedItemType } from "@/generated/models/ApiFeedItemType";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { ApiNotificationsResponse } from "@/generated/models/ApiNotificationsResponse";
@@ -27,11 +26,6 @@ export type IFeedItemDropReplied = {
   readonly serial_no: number;
   readonly item: IFeedItemDropRepliedItem;
   readonly type: ApiFeedItemType.DropReplied;
-};
-
-type IFeedItemDropVotedItem = {
-  readonly drop: ApiDrop;
-  readonly vote: ApiDropVote;
 };
 
 export type TypedFeedItem =
