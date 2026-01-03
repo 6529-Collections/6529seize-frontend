@@ -121,9 +121,7 @@ export default function NextGenZoomableImage(
     e.preventDefault();
   };
 
-  const handleDragEnd = (
-    e: React.MouseEvent<HTMLImageElement> | React.TouchEvent<HTMLImageElement>
-  ) => {
+  const handleDragEnd = () => {
     setDragStart(null);
   };
 

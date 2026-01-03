@@ -33,15 +33,12 @@ export default function UserPageStatsClient({
   const [activeAddress, setActiveAddress] = useState<string | null>(null);
 
   const [seasons, setSeasons] = useState<MemeSeason[]>(initialSeasons);
-  const [tdh, setTdh] = useState<ConsolidatedTDH | TDH | undefined>(
-    initialTdh
-  );
+  const [tdh, setTdh] = useState<ConsolidatedTDH | TDH | undefined>(initialTdh);
   const [ownerBalance, setOwnerBalance] = useState<OwnerBalance | undefined>(
     initialOwnerBalance
   );
-  const [balanceMemes, setBalanceMemes] = useState<OwnerBalanceMemes[]>(
-    initialBalanceMemes
-  );
+  const [balanceMemes, setBalanceMemes] =
+    useState<OwnerBalanceMemes[]>(initialBalanceMemes);
   const activeAddressForStats = useMemo(() => {
     if (!activeAddress) {
       return null;
@@ -150,10 +147,7 @@ export default function UserPageStatsClient({
   useEffect(() => {
     const controller = new AbortController();
 
-    if (
-      activeAddressForStats === null &&
-      initialBalanceMemes != null
-    ) {
+    if (activeAddressForStats === null && initialBalanceMemes != null) {
       setBalanceMemes(initialBalanceMemes);
       return () => controller.abort();
     }
@@ -185,7 +179,6 @@ export default function UserPageStatsClient({
         <UserPageStatsTags
           ownerBalance={ownerBalance}
           balanceMemes={balanceMemes}
-          seasons={seasons}
         />
         <div>
           <UserAddressesSelectDropdown

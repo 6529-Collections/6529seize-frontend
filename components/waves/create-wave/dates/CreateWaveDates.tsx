@@ -163,10 +163,6 @@ export default function CreateWaveDates({
             dates={dates}
             setDates={setDates}
             isRollingMode={isRollingMode}
-            setIsRollingMode={(isRolling) => {
-              setIsRollingMode(isRolling);
-              handleRollingInteraction();
-            }}
             isExpanded={expandedSections.rolling}
             setIsExpanded={() => toggleSection("rolling")}
           />

@@ -78,7 +78,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     refreshOverview(contract, confirmedTokenId);
   }, [distributionPlan, connectedProfile, confirmedTokenId, refreshOverview]);
 
-  const handleConfirmTokenId = (contract: string, tokenId: string) => {
+  const handleConfirmTokenId = (tokenId: string) => {
     setConfirmedTokenId(tokenId);
     setShowConfirmTokenId(false);
   };
@@ -146,14 +146,16 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
           <button
             onClick={handleChangeTokenId}
             type="button"
-            className="tw-px-3 tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-sm tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-900 tw-bg-white tw-ring-iron-400/20 hover:tw-bg-iron-400/20 hover:tw-text-iron-100 tw-ease-out tw-transition tw-duration-300">
+            className="tw-px-3 tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-sm tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-900 tw-bg-white tw-ring-iron-400/20 hover:tw-bg-iron-400/20 hover:tw-text-iron-100 tw-ease-out tw-transition tw-duration-300"
+          >
             Change Token ID
           </button>
           <button
             onClick={() => setShowSubscriptionsReset(true)}
             disabled={isResetting}
             type="button"
-            className="tw-px-3 tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-sm tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-900 tw-bg-[#f87171] tw-ring-[#f87171]/20 hover:tw-bg-[#7f1d1d] hover:tw-text-iron-100 tw-ease-out tw-transition tw-duration-300">
+            className="tw-px-3 tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-sm tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-900 tw-bg-[#f87171] tw-ring-[#f87171]/20 hover:tw-bg-[#7f1d1d] hover:tw-text-iron-100 tw-ease-out tw-transition tw-duration-300"
+          >
             {isResetting ? (
               <span className="d-flex gap-2 align-items-center">
                 <CircleLoader />
@@ -170,7 +172,8 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
           onClick={() => setShowAutomaticAirdrops(true)}
           disabled={isUploadingAirdrops}
           type="button"
-          className="tw-px-3 tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-sm tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-900 tw-bg-white tw-ring-iron-400/20 hover:tw-bg-iron-400/20 hover:tw-text-iron-100 tw-ease-out tw-transition tw-duration-300">
+          className="tw-px-3 tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-sm tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-900 tw-bg-white tw-ring-iron-400/20 hover:tw-bg-iron-400/20 hover:tw-text-iron-100 tw-ease-out tw-transition tw-duration-300"
+        >
           {isUploadingAirdrops ? (
             <span className="d-flex gap-2 align-items-center">
               <CircleLoader />
@@ -195,7 +198,8 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
           onClick={() => setShowUploadPhotos(true)}
           disabled={isUploading}
           type="button"
-          className="tw-px-3 tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-sm tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-900 tw-bg-white tw-ring-iron-400/20 hover:tw-bg-iron-400/20 hover:tw-text-iron-100 tw-ease-out tw-transition tw-duration-300">
+          className="tw-px-3 tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-sm tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-900 tw-bg-white tw-ring-iron-400/20 hover:tw-bg-iron-400/20 hover:tw-text-iron-100 tw-ease-out tw-transition tw-duration-300"
+        >
           {isUploading ? (
             <span className="d-flex gap-2 align-items-center">
               <CircleLoader />
@@ -220,7 +224,8 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
           onClick={() => setShowFinalizeDistribution(true)}
           disabled={isFinalizing}
           type="button"
-          className="tw-px-3 tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-sm tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-900 tw-bg-[#86efac] tw-ring-[#86efac]/20 hover:tw-bg-[#14532d] hover:tw-text-iron-100 tw-ease-out tw-transition tw-duration-300">
+          className="tw-px-3 tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-sm tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-900 tw-bg-[#86efac] tw-ring-[#86efac]/20 hover:tw-bg-[#14532d] hover:tw-text-iron-100 tw-ease-out tw-transition tw-duration-300"
+        >
           {isFinalizing ? (
             <span className="d-flex gap-2 align-items-center">
               <CircleLoader />

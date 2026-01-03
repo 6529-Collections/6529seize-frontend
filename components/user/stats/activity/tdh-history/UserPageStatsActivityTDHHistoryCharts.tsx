@@ -140,7 +140,7 @@ export default function UserPageStatsActivityTDHHistoryCharts({
 
   return (
     <div className="tw-mt-2 sm:tw-mt-4 tw-flex tw-flex-col tw-gap-y-6 md:tw-gap-y-8">
-      {dataSets.map((dataSet, i) => (
+      {dataSets.map((dataSet) => (
         <UserPageStatsActivityTDHHistoryChart
           key={getRandomObjectId()}
           data={dataSet}

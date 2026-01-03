@@ -53,10 +53,12 @@ export default function RememeAddPage() {
     success: boolean;
     errors?: string[] | undefined;
     contract?: string | undefined;
-    tokens?: {
-      id: string;
-      name: string;
-    }[] | undefined;
+    tokens?:
+      | {
+          id: string;
+          name: string;
+        }[]
+      | undefined;
   }>();
 
   useEffect(() => {
@@ -239,7 +241,8 @@ export default function RememeAddPage() {
                       {checkList.map((note, index) => (
                         <li
                           key={`ve-${index}`}
-                          className={`d-flex align-items-center gap-2`}>
+                          className={`d-flex align-items-center gap-2`}
+                        >
                           {note.status ? (
                             <FontAwesomeIcon
                               icon={faCheckCircle}
@@ -262,7 +265,8 @@ export default function RememeAddPage() {
                       {signErrors.map((se, index) => (
                         <li
                           key={`se-${index}`}
-                          className={`d-flex align-items-center gap-2`}>
+                          className={`d-flex align-items-center gap-2`}
+                        >
                           <FontAwesomeIcon
                             icon={faTimesCircle}
                             className={styles["unverifiedIcon"]}
@@ -296,7 +300,8 @@ export default function RememeAddPage() {
                             message: JSON.stringify(buildRememeObject()),
                           });
                         }
-                      }}>
+                      }}
+                    >
                       Add Rememe
                     </Button>
                   </span>
@@ -304,7 +309,8 @@ export default function RememeAddPage() {
                   <Button
                     className="seize-btn btn-white"
                     disabled={seizeConnectOpen}
-                    onClick={() => seizeConnect()}>
+                    onClick={() => seizeConnect()}
+                  >
                     {seizeConnectOpen ? `Connecting...` : `Connect Wallet`}
                   </Button>
                 )}
@@ -318,7 +324,8 @@ export default function RememeAddPage() {
                   <div className="d-inline">
                     <div
                       className={`spinner-border ${styles["loader"]}`}
-                      role="status">
+                      role="status"
+                    >
                       <span className="sr-only"></span>
                     </div>
                   </div>
@@ -349,7 +356,7 @@ export default function RememeAddPage() {
                   </>
                 </Col>
                 {submissionResult.errors &&
-                  submissionResult.errors.map((e, index) => (
+                  submissionResult.errors.map((e) => (
                     <Col xs={12} className="pt-2" key={getRandomObjectId()}>
                       {e}
                     </Col>
@@ -364,14 +371,16 @@ export default function RememeAddPage() {
                         <Col
                           xs={12}
                           className="pt-1 pb-1"
-                          key={`submission-result-token-${t.id}`}>
+                          key={`submission-result-token-${t.id}`}
+                        >
                           #{t.id} - {t.name}
                           &nbsp;&nbsp;
                           <a
                             className="font-color"
                             href={`${publicEnv.BASE_ENDPOINT}/rememes/${submissionResult.contract}/${t.id}`}
                             target="_blank"
-                            rel="noopener noreferrer">
+                            rel="noopener noreferrer"
+                          >
                             view
                           </a>
                         </Col>
@@ -383,7 +392,8 @@ export default function RememeAddPage() {
                           className="seize-btn btn-white"
                           onClick={() => {
                             location.reload();
-                          }}>
+                          }}
+                        >
                           Add Another
                         </Button>
                       </Col>

@@ -22,18 +22,16 @@ function calculateDropdownLeft(
   return Math.max(0, referenceRight - dropdownWidth);
 }
 
-export default function CommonDropdownItemsDefaultWrapper<T>({
+export default function CommonDropdownItemsDefaultWrapper({
   isOpen,
   setOpen,
   buttonRef,
-  buttonPosition,
   dynamicPosition = true,
   children,
 }: {
   readonly isOpen: boolean;
   readonly setOpen: (isOpen: boolean) => void;
   readonly buttonRef: RefObject<HTMLButtonElement | HTMLDivElement | null>;
-  readonly buttonPosition?: { readonly right: number } | undefined;
   readonly dynamicPosition?: boolean | undefined;
   readonly children: ReactNode;
 }) {
@@ -108,7 +106,11 @@ export default function CommonDropdownItemsDefaultWrapper<T>({
   if (!mounted) return null;
 
   return createPortal(
-    <div className="tw-absolute tw-z-[100]" ref={dropdownRef} style={{ left: 0, top: 0 }}>
+    <div
+      className="tw-absolute tw-z-[100]"
+      ref={dropdownRef}
+      style={{ left: 0, top: 0 }}
+    >
       <AnimatePresence mode="wait" initial={false}>
         {isOpen && (
           <motion.div
@@ -119,7 +121,8 @@ export default function CommonDropdownItemsDefaultWrapper<T>({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}>
+            transition={{ duration: 0.2 }}
+          >
             <div className="tw-max-h-80 tw-overflow-y-auto tw-overflow-x-hidden">
               <ul className="tw-flex tw-flex-col tw-gap-0.5 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
                 {children}

@@ -31,7 +31,6 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
-import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 import { IMAGE_TRANSFORMER } from "../lexical/transformers/ImageTransformer";
 import { SAFE_MARKDOWN_TRANSFORMERS } from "../lexical/transformers/markdownTransformers";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -55,7 +54,6 @@ interface CreateDropWrapperWaveProps {
 }
 
 interface CreateDropWrapperProps {
-  readonly profile: ProfileMinWithoutSubs;
   readonly quotedDrop: {
     dropId: string;
     partId: number;
@@ -73,13 +71,9 @@ interface CreateDropWrapperProps {
   readonly wave: CreateDropWrapperWaveProps | null;
   readonly waveId: string | null;
   readonly children: React.ReactNode;
-  readonly showProfile?: boolean | undefined;
   readonly setIsStormMode: (isStormMode: boolean) => void;
   readonly setViewType: (newV: CreateDropViewType) => void;
   readonly setDrop: (newV: CreateDropConfig) => void;
-  readonly setMentionedUsers: (
-    newV: Omit<MentionedUser, "current_handle">[]
-  ) => void;
   readonly onMentionedUser: (
     newUser: Omit<MentionedUser, "current_handle">
   ) => void;
@@ -101,7 +95,6 @@ const CreateDropWrapper = forwardRef<
 >(
   (
     {
-      profile,
       quotedDrop,
       type,
       loading,
@@ -113,14 +106,12 @@ const CreateDropWrapper = forwardRef<
       viewType,
       showSubmit,
       showDropError = false,
-      showProfile = true,
       wave: waveProps,
       waveId,
       children,
       setIsStormMode,
       setViewType,
       setDrop,
-      setMentionedUsers,
       setReferencedNfts,
       onMentionedUser,
       setTitle,
@@ -440,13 +431,9 @@ const CreateDropWrapper = forwardRef<
       [CreateDropViewType.COMPACT]: (
         <CreateDropCompact
           ref={createDropContendCompactRef}
-          profile={profile}
-          showProfile={showProfile}
           screenType={screenType}
           editorState={editorState}
           files={files}
-          title={title}
-          metadata={metadata}
           canSubmit={canSubmit}
           waveId={waveId}
           canAddPart={canAddPart}
@@ -458,7 +445,6 @@ const CreateDropWrapper = forwardRef<
           missingMedia={missingMedia}
           missingMetadata={missingMetadata}
           onViewChange={setViewType}
-          onMetadataRemove={onMetadataRemove}
           onEditorState={setEditorState}
           onMentionedUser={onMentionedUser}
           onReferencedNft={onReferencedNft}
@@ -474,7 +460,6 @@ const CreateDropWrapper = forwardRef<
         <CreateDropFull
           ref={createDropContentFullRef}
           screenType={screenType}
-          profile={profile}
           title={title}
           files={files}
           metadata={metadata}

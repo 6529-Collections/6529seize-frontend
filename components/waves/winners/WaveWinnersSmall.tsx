@@ -47,7 +47,7 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
 
     // Process decision points to include UI-friendly fields
     const decisionPoints: EnhancedDecisionPoint[] = rawDecisionPoints.map(
-      (point, index) => {
+      (point) => {
         const decisionTime = point.decision_time;
         // Create a formatted date string
         const dateObj = new Date(decisionTime);

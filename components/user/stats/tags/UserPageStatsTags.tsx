@@ -3,11 +3,7 @@
 import { useEffect, useState } from "react";
 import UserPageStatsTagsSet from "./UserPageStatsTagsSet";
 import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
-import {
-  OwnerBalance,
-  OwnerBalanceMemes,
-} from "@/entities/IBalances";
-import { MemeSeason } from "@/entities/ISeason";
+import { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
 
 export interface UserPageStatsTag {
   readonly id: string;
@@ -18,11 +14,9 @@ export interface UserPageStatsTag {
 export default function UserPageStatsTags({
   ownerBalance,
   balanceMemes,
-  seasons,
 }: {
   readonly ownerBalance: OwnerBalance | undefined;
   readonly balanceMemes: OwnerBalanceMemes[];
-  readonly seasons: MemeSeason[];
 }) {
   const getMainTags = (): UserPageStatsTag[] => {
     const result: UserPageStatsTag[] = [];

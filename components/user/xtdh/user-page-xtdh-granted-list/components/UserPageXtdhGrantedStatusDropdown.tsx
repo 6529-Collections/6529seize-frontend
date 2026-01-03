@@ -177,7 +177,6 @@ export function UserPageXtdhGrantedStatusDropdown({
         isOpen={isOpen}
         setOpen={setIsOpen}
         buttonRef={buttonRef}
-        buttonPosition={buttonPosition}
         filterLabel={filterLabel}
         dynamicPosition={true}
         onIsMobile={() => {}} // Mobile state unused: dropdown layout identical across breakpoints

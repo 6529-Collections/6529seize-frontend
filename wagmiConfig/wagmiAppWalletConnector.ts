@@ -301,7 +301,7 @@ export function createAppWalletConnector(
       const numericId = parseInt(hexChainId, 16);
       emitter.emit("change", { chainId: numericId });
     },
-    onConnect(connectInfo) {
+    onConnect() {
       emitter.emit("connect", {
         accounts: walletClient?.account?.address
           ? [walletClient.account.address]
@@ -309,7 +309,7 @@ export function createAppWalletConnector(
         chainId: currentChainId,
       });
     },
-    onDisconnect(error) {
+    onDisconnect() {
       emitter.emit("disconnect");
     },
     onMessage(message) {

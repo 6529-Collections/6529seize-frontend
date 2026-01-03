@@ -69,7 +69,7 @@ export default function ManifoldMintingWidget(
             setMerkleProofs(data);
           });
         })
-        .catch((error) => {
+        .catch(() => {
           setIsError(true);
         })
         .finally(() => {
@@ -80,7 +80,7 @@ export default function ManifoldMintingWidget(
 
   function getReadContractsParams() {
     const params: any = [];
-    merkleProofs.map((mp, i) => {
+    merkleProofs.map((mp) => {
       params.push({
         address: props.proxy as `0x${string}`,
         abi: props.abi,

@@ -18,14 +18,12 @@ const TOOLTIP_STYLES = {
 
 interface ProfileWinnerBadgeProps {
   readonly winCount: number;
-  readonly title?: string | undefined;
   readonly tooltipId?: string | undefined;
   readonly onBadgeClick?: (() => void) | undefined;
 }
 
 export const ProfileWinnerBadge: React.FC<ProfileWinnerBadgeProps> = ({
   winCount,
-  title = "View winning artworks",
   tooltipId = "winner-badge",
   onBadgeClick,
 }) => {

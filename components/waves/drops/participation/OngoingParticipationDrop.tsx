@@ -25,7 +25,6 @@ interface OngoingParticipationDropProps {
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
-  readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
 }
 
 export default function OngoingParticipationDrop({
@@ -38,7 +37,6 @@ export default function OngoingParticipationDrop({
   onQuote,
   onQuoteClick,
   onDropContentClick,
-  parentContainerRef,
 }: OngoingParticipationDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isMobile = useIsMobileDevice();
@@ -94,7 +92,6 @@ export default function OngoingParticipationDrop({
             onDropContentClick={onDropContentClick}
             onQuoteClick={onQuoteClick}
             setLongPressTriggered={setLongPressTriggered}
-            parentContainerRef={parentContainerRef}
             isCompetitionDrop={true}
           />
         </div>

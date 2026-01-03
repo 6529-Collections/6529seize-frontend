@@ -11,7 +11,6 @@ interface ParticipationDropContentProps {
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly setLongPressTriggered: (triggered: boolean) => void;
-  readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
   readonly isCompetitionDrop?: boolean | undefined;
 }
 
@@ -23,7 +22,6 @@ export default function ParticipationDropContent({
   onDropContentClick,
   onQuoteClick,
   setLongPressTriggered,
-  parentContainerRef,
   isCompetitionDrop = false,
 }: ParticipationDropContentProps) {
   return (
@@ -36,7 +34,6 @@ export default function ParticipationDropContent({
         onDropContentClick={onDropContentClick}
         onQuoteClick={onQuoteClick}
         setLongPressTriggered={setLongPressTriggered}
-        parentContainerRef={parentContainerRef}
         isCompetitionDrop={isCompetitionDrop}
       />
     </div>

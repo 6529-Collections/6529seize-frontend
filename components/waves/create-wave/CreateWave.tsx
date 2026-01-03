@@ -249,7 +249,6 @@ export default function CreateWave({
     [CreateWaveStep.APPROVAL]: (
       <CreateWaveApproval
         threshold={config.approval.threshold}
-        thresholdTimeMs={config.approval.thresholdTimeMs}
         errors={errors}
         setThreshold={onThresholdChange}
         setThresholdTimeMs={onThresholdTimeChange}

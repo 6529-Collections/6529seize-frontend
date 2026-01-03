@@ -95,7 +95,6 @@ export default function ProfileActivityLogsFilter({
                     selected={selected}
                     options={options}
                     setSelected={setSelected}
-                    user={user}
                   />
                 </motion.div>
               )}

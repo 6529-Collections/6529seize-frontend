@@ -190,7 +190,7 @@ export default function TheMemesComponent() {
 
     if (sort === MemesSort.VOLUME) {
       const volKey = Object.entries(VolumeType).find(
-        ([key, value]) => value === volumeType
+        ([_, value]) => value === volumeType
       )?.[0];
 
       if (volKey) {
@@ -200,7 +200,7 @@ export default function TheMemesComponent() {
       }
     } else {
       const found = Object.entries(MemesSort).find(
-        ([key, value]) => value === sort
+        ([_, value]) => value === sort
       );
       sortParam = found ? found[0].toLowerCase() : sort.toLowerCase();
     }
