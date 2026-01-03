@@ -10,7 +10,7 @@ import {
 import { RateMatter } from "@/enums";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
 
 enum ProfileActivityLogRateType {
@@ -45,7 +45,6 @@ export default function ProfileActivityLogRate({
     log.contents.change_reason ===
     ProfileActivityLogRatingEditContentChangeReason.LOST_TDH;
 
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   const getRatingType = (): ProfileActivityLogRateType =>
@@ -101,7 +100,8 @@ export default function ProfileActivityLogRate({
       {!!proxyHandle && isSelfProxy && (
         <Link
           href={`/${proxyHandle}`}
-          className="tw-no-underline tw-whitespace-nowrap tw-text-xs tw-text-iron-400 tw-font-medium">
+          className="tw-no-underline tw-whitespace-nowrap tw-text-xs tw-text-iron-400 tw-font-medium"
+        >
           (Proxy for {proxyHandle})
         </Link>
       )}
@@ -109,11 +109,13 @@ export default function ProfileActivityLogRate({
       <span
         className={`${
           isChangePositive ? "tw-text-green" : "tw-text-red"
-        } tw-text-base tw-font-medium`}>
+        } tw-text-base tw-font-medium`}
+      >
         {changeStr}
       </span>
       <span
-        className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-base tw-font-medium`}>
+        className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-base tw-font-medium`}
+      >
         (total {newRatingStr})
       </span>
       {log.contents.rating_matter === RateMatter.REP && (
@@ -135,7 +137,8 @@ export default function ProfileActivityLogRate({
       {!!proxyHandle && !isSelfProxy && (
         <Link
           href={`/${proxyHandle}`}
-          className="tw-no-underline tw-whitespace-nowrap tw-text-xs tw-text-iron-400 tw-font-medium">
+          className="tw-no-underline tw-whitespace-nowrap tw-text-xs tw-text-iron-400 tw-font-medium"
+        >
           (Proxy: {proxyHandle})
         </Link>
       )}

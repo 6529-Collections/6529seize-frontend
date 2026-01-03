@@ -14,7 +14,7 @@ export function ConfirmTokenIdModal(
   props: Readonly<{
     plan: AllowlistDescription;
     show: boolean;
-    onConfirm(contract: string, tokenId: string): void;
+    onConfirm(tokenId: string): void;
   }>
 ) {
   const contract = MEMES_CONTRACT;
@@ -28,7 +28,7 @@ export function ConfirmTokenIdModal(
 
   const handleConfirm = () => {
     if (isValid) {
-      props.onConfirm(contract, tokenId);
+      props.onConfirm(tokenId);
     }
   };
 
@@ -37,7 +37,8 @@ export function ConfirmTokenIdModal(
       show={props.show}
       onHide={() => {}}
       backdrop="static"
-      keyboard={false}>
+      keyboard={false}
+    >
       <Modal.Header>
         <Modal.Title className="tw-text-lg tw-font-semibold">
           Confirm Token ID
@@ -77,14 +78,10 @@ export function ConfirmTokenIdModal(
         </Container>
       </Modal.Body>
       <Modal.Footer>
-        <Button
-          disabled={!isValid}
-          variant="primary"
-          onClick={handleConfirm}>
+        <Button disabled={!isValid} variant="primary" onClick={handleConfirm}>
           Confirm
         </Button>
       </Modal.Footer>
     </Modal>
   );
 }
-

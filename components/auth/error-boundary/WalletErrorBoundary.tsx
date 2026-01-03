@@ -1,6 +1,6 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { sanitizeErrorMessage, logError } from '@/src/utils/security-logger';
-import { removeAuthJwt } from '@/services/auth/auth.utils';
+import { Component, ErrorInfo, ReactNode } from "react";
+import { sanitizeErrorMessage, logError } from "@/src/utils/security-logger";
+import { removeAuthJwt } from "@/services/auth/auth.utils";
 
 interface Props {
   children: ReactNode;
@@ -27,17 +27,19 @@ export class WalletErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log detailed error information to console for debugging
-    console.error('🚨 Wallet Error Boundary Caught Error:', {
+    console.error("🚨 Wallet Error Boundary Caught Error:", {
       name: error.name,
       message: sanitizeErrorMessage(error.message),
       stack: error.stack ? sanitizeErrorMessage(error.stack) : undefined,
-      componentStack: errorInfo.componentStack ? sanitizeErrorMessage(errorInfo.componentStack) : undefined,
+      componentStack: errorInfo.componentStack
+        ? sanitizeErrorMessage(errorInfo.componentStack)
+        : undefined,
       timestamp: new Date().toISOString(),
-      isMinified: !!(error.message?.includes('Minified React error'))
+      isMinified: !!error.message?.includes("Minified React error"),
     });
 
     // Log using the secure logging system
-    logError('wallet_error_boundary', error);
+    logError("wallet_error_boundary", error);
   }
 
   private readonly handleRetry = () => {
@@ -50,7 +52,7 @@ export class WalletErrorBoundary extends Component<Props, State> {
       localStorage.clear();
       window.location.reload();
     } catch (error) {
-      console.error('Failed to clear storage:', error);
+      console.error("Failed to clear storage:", error);
       window.location.reload();
     }
   };

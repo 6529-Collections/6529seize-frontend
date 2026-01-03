@@ -30,7 +30,6 @@ interface EndedParticipationDropProps {
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
-  readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
 }
 
 export default function EndedParticipationDrop({
@@ -43,7 +42,6 @@ export default function EndedParticipationDrop({
   onQuote,
   onQuoteClick,
   onDropContentClick,
-  parentContainerRef,
 }: EndedParticipationDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const router = useRouter();
@@ -182,7 +180,6 @@ export default function EndedParticipationDrop({
               onDropContentClick={onDropContentClick}
               onQuoteClick={onQuoteClick}
               setLongPressTriggered={setLongPressTriggered}
-              parentContainerRef={parentContainerRef}
               isCompetitionDrop={true}
             />
           </div>

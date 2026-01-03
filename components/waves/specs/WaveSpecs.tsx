@@ -1,4 +1,3 @@
-import React from "react";
 import { ApiWave } from "@/generated/models/ApiWave";
 import WaveAuthor from "./WaveAuthor";
 import WaveTypeIcon from "./WaveTypeIcon";

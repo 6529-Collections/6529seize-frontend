@@ -1,4 +1,3 @@
-import React from "react";
 import Link from "next/link";
 import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
@@ -12,7 +11,9 @@ export default function WaveWinnersDropHeaderAuthorHandle({
 }: WaveWinnersDropHeaderAuthorHandleProps) {
   return (
     <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
-      <UserProfileTooltipWrapper user={winner.drop.author.handle ?? winner.drop.author.id}>
+      <UserProfileTooltipWrapper
+        user={winner.drop.author.handle ?? winner.drop.author.id}
+      >
         <Link
           href={`/${winner.drop.author.handle}`}
           onClick={(e) => e.stopPropagation()}

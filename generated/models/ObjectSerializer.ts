@@ -1,3 +1,4 @@
+// @ts-nocheck
 export * from '../models/AcceptActionRequest';
 export * from '../models/AddActionToProxyRequest';
 export * from '../models/AirdropAddressResponse';

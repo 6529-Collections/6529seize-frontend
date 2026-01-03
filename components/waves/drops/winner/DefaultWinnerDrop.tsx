@@ -2,7 +2,7 @@
 
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
-import { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import { ActiveDropState } from "@/types/dropInteractionTypes";
 import Link from "next/link";
@@ -71,8 +71,6 @@ const getDropStyles = (
 
 interface DefautWinnerDropProps {
   readonly drop: ExtendedDrop;
-  readonly previousDrop: Drop | null;
-  readonly nextDrop: Drop | null;
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly showReplyAndQuote: boolean;
@@ -83,13 +81,10 @@ interface DefautWinnerDropProps {
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
-  readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
 }
 
 const DefaultWinnerDrop = ({
   drop,
-  previousDrop,
-  nextDrop,
   showWaveInfo,
   activeDrop,
   location,
@@ -100,7 +95,6 @@ const DefaultWinnerDrop = ({
   onQuoteClick,
   onDropContentClick,
   showReplyAndQuote,
-  parentContainerRef,
 }: DefautWinnerDropProps) => {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
@@ -229,7 +223,6 @@ const DefaultWinnerDrop = ({
                 setActivePartIndex={setActivePartIndex}
                 onDropContentClick={onDropContentClick}
                 onQuoteClick={onQuoteClick}
-                parentContainerRef={parentContainerRef}
                 onLongPress={handleLongPress}
                 setLongPressTriggered={setLongPressTriggered}
                 isCompetitionDrop={true}

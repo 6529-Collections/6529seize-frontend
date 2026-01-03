@@ -70,7 +70,9 @@ export function useWaveTopVoters({
           return null;
         }
         const currentPage =
-          typeof lastPage.page === "number" ? lastPage.page : allPages.length - 1;
+          typeof lastPage.page === "number"
+            ? lastPage.page
+            : allPages.length - 1;
         return currentPage + 1;
       },
       pages: 3,
@@ -123,7 +125,7 @@ export function useWaveTopVoters({
   });
 
   useEffect(() => {
-    setVoters((prev) => {
+    setVoters(() => {
       const newVoters = (data?.pages ? data.pages : []).flatMap(
         (page) => page.data
       );

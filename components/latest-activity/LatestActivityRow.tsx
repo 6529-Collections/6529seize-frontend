@@ -76,9 +76,8 @@ export function printRoyalties(value: number, royalties: number, from: string) {
           <span>Royalties</span>
           <span>
             {royalties > 0
-              ? `${displayDecimal(royalties, 5)} (${displayDecimal(
-                  royaltiesPercentage * 100,
-                  2
+              ? `${displayDecimal(royalties)} (${displayDecimal(
+                  royaltiesPercentage * 100
                 )}%)`
               : "-"}
           </span>
@@ -111,9 +110,9 @@ export function printGas(
       >
         <div className="tw-flex tw-flex-col tw-gap-1">
           {[
-            ["Gas", `${displayDecimal(gas, 5)}`],
+            ["Gas", `${displayDecimal(gas)}`],
             ["GWEI", numberWithCommas(gas_gwei)],
-            ["Gas Price", `${displayDecimal(gas_price_gwei, 2)}`],
+            ["Gas Price", `${displayDecimal(gas_price_gwei)}`],
           ].map(([label, value]) => (
             <div
               key={label}

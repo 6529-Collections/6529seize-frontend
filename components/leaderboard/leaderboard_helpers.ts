@@ -32,10 +32,6 @@ export enum LeaderboardInteractionsSort {
   "burns" = "burns",
 }
 
-type LeaderboardSortType =
-  | LeaderboardCardsCollectedSort
-  | LeaderboardInteractionsSort;
-
 export interface LeaderboardMetrics {
   handle: string;
   consolidation_key: string;

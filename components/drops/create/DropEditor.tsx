@@ -43,7 +43,6 @@ interface DropEditorProps {
   readonly dropEditorRefreshKey: number;
   readonly showSubmit?: boolean | undefined;
   readonly showDropError?: boolean | undefined;
-  readonly showProfile?: boolean | undefined;
   readonly wave: DropEditorWaveProps | null;
   readonly waveId: string | null;
   readonly onSubmitDrop: (dropRequest: CreateDropConfig) => void;
@@ -64,7 +63,6 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
       dropEditorRefreshKey,
       showSubmit = true,
       showDropError = false,
-      showProfile = true,
       wave,
       waveId,
       onSubmitDrop,
@@ -134,9 +132,7 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
       <div>
         <CreateDropWrapper
           ref={createDropWrapperRef}
-          profile={profile}
           quotedDrop={quotedDrop}
-          showProfile={showProfile}
           type={type}
           waveId={waveId}
           loading={loading}
@@ -152,7 +148,6 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
           setIsStormMode={setIsStormMode}
           setViewType={setViewType}
           setDrop={setDrop}
-          setMentionedUsers={setMentionedUsers}
           onMentionedUser={onMentionedUser}
           setReferencedNfts={setReferencedNfts}
           setTitle={setTitle}

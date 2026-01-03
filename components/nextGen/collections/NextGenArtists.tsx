@@ -51,13 +51,7 @@ export default function NextGenArtists() {
         </Col>
       </Row>
       {artistCollections.map(
-        (
-          ac: {
-            address: string;
-            collections: NextGenCollection[];
-          },
-          index: number
-        ) => {
+        (ac: { address: string; collections: NextGenCollection[] }) => {
           return (
             <Row key={`nextgen-artist-${ac.address}`}>
               <Col>

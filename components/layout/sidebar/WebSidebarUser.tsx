@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo, useRef, useState } from "react";
+import { memo, useRef, useState } from "react";
 import { useClickAway } from "react-use";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useIdentity } from "@/hooks/useIdentity";
@@ -50,7 +50,8 @@ function WebSidebarUser({
 
   const profile = parentProfile || localProfile;
 
-  const containerClasses = "tw-mt-auto tw-relative tw-w-full tw-group tw-pb-2 tw-px-3";
+  const containerClasses =
+    "tw-mt-auto tw-relative tw-w-full tw-group tw-pb-2 tw-px-3";
 
   if (!address) {
     return (
@@ -86,9 +87,7 @@ function WebSidebarUser({
       <div className={containerClasses}>
         <div
           className={`tw-flex tw-items-center tw-w-full tw-rounded-xl tw-py-2 tw-px-2 ${
-            isCollapsed
-              ? "tw-justify-center"
-              : "tw-justify-start tw-gap-x-3"
+            isCollapsed ? "tw-justify-center" : "tw-justify-start tw-gap-x-3"
           }`}
         >
           <div className="tw-h-10 tw-w-10 tw-rounded-lg tw-bg-iron-800 tw-animate-pulse tw-flex-shrink-0" />
@@ -121,25 +120,29 @@ function WebSidebarUser({
         aria-expanded={showUserMenu}
         aria-controls="user-menu"
       >
-        <div className={`tw-flex tw-items-center tw-w-full ${isCollapsed ? "" : "tw-gap-x-2"}`}>
+        <div
+          className={`tw-flex tw-items-center tw-w-full ${
+            isCollapsed ? "" : "tw-gap-x-2"
+          }`}
+        >
           <div className="tw-w-10 tw-flex tw-items-center tw-justify-center tw-flex-shrink-0">
             <DropPfp pfpUrl={profile.pfp} size={DropPartSize.MEDIUM} />
           </div>
           {!isCollapsed && (
-          <>
-            <div className="tw-flex tw-flex-col tw-items-start tw-justify-between tw-min-w-0 tw-flex-1 tw-whitespace-nowrap">
-              <div
-                className={`tw-text-white tw-font-medium tw-text-md tw-leading-tight tw-w-full tw-text-left tw-overflow-hidden -tw-mt-0.5 tw-mb-1 ${
-                  shouldTruncate ? "tw-max-w-[8rem] tw-truncate" : ""
-                }`}
-              >
-                {displayHandle}
+            <>
+              <div className="tw-flex tw-flex-col tw-items-start tw-justify-between tw-min-w-0 tw-flex-1 tw-whitespace-nowrap">
+                <div
+                  className={`tw-text-white tw-font-medium tw-text-md tw-leading-tight tw-w-full tw-text-left tw-overflow-hidden -tw-mt-0.5 tw-mb-1 ${
+                    shouldTruncate ? "tw-max-w-[8rem] tw-truncate" : ""
+                  }`}
+                >
+                  {displayHandle}
+                </div>
+                <UserLevel level={profile.level} size="xxs" asSpan={true} />
               </div>
-              <UserLevel level={profile.level} size="xxs" asSpan={true} />
-            </div>
-            <EllipsisVerticalIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-400 group-hover/user:tw-text-white" />
-          </>
-        )}
+              <EllipsisVerticalIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-400 group-hover/user:tw-text-white" />
+            </>
+          )}
         </div>
       </button>
       {showUserMenu && profile && (

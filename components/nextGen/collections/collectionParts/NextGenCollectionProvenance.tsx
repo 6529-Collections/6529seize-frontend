@@ -96,12 +96,6 @@ export default function NextGenCollectionProvenance(props: Readonly<Props>) {
   );
 }
 
-interface NextGenCollectionProvenanceRowProps {
-  collection: NextGenCollection;
-  log: NextGenLog;
-  disable_link?: boolean | undefined;
-}
-
 export function NextGenCollectionProvenanceRow(
   props: Readonly<{
     collection: NextGenCollection;

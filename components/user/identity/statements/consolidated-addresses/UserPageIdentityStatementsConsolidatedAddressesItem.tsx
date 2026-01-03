@@ -221,7 +221,6 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
             <UserPageIdentityStatementsConsolidatedAddressesItemPrimary
               isPrimary={isPrimary}
               canEdit={canEdit}
-              address={address}
               assignPrimary={assignPrimary}
               isAssigningPrimary={assigningPrimary}
             />

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useMemo } from "react";
 
@@ -8,18 +8,13 @@ enum SubmissionStatus {
   ENDED = "ENDED",
 }
 
-enum ChatStatus {
-  ACTIVE = "ACTIVE",
-  DISABLED = "DISABLED",
-}
-
 export enum SubmissionRestriction {
   NOT_LOGGED_IN = "NOT_LOGGED_IN",
   PROXY_USER = "PROXY_USER",
   NO_PERMISSION = "NO_PERMISSION",
   NOT_STARTED = "NOT_STARTED",
   ENDED = "ENDED",
-  MAX_DROPS_REACHED = "MAX_DROPS_REACHED"
+  MAX_DROPS_REACHED = "MAX_DROPS_REACHED",
 }
 
 export enum ChatRestriction {
@@ -61,23 +56,25 @@ export function useDropPrivileges({
     const now = Date.now();
 
     let submissionStatus: SubmissionStatus;
-    
+
     // Case 1: No time restrictions at all - always active
     if (submissionStarts === null && submissionEnds === null) {
       submissionStatus = SubmissionStatus.ACTIVE;
-    } 
+    }
     // Case 2: Only end time exists - active until end time
     else if (submissionStarts === null && submissionEnds !== null) {
-      submissionStatus = now <= submissionEnds
-        ? SubmissionStatus.ACTIVE 
-        : SubmissionStatus.ENDED;
-    } 
+      submissionStatus =
+        now <= submissionEnds
+          ? SubmissionStatus.ACTIVE
+          : SubmissionStatus.ENDED;
+    }
     // Case 3: Only start time exists - not started before start, active after
     else if (submissionEnds === null && submissionStarts !== null) {
-      submissionStatus = now < submissionStarts 
-        ? SubmissionStatus.NOT_STARTED 
-        : SubmissionStatus.ACTIVE;
-    } 
+      submissionStatus =
+        now < submissionStarts
+          ? SubmissionStatus.NOT_STARTED
+          : SubmissionStatus.ACTIVE;
+    }
     // Case 4: Both start and end times exist - full range checking
     else if (submissionStarts !== null && submissionEnds !== null) {
       if (now < submissionStarts) {
@@ -92,13 +89,15 @@ export function useDropPrivileges({
     }
 
     return {
-      submissionRestriction: !isLoggedIn 
+      submissionRestriction: !isLoggedIn
         ? SubmissionRestriction.NOT_LOGGED_IN
         : isProxy
         ? SubmissionRestriction.PROXY_USER
         : !canDrop
         ? SubmissionRestriction.NO_PERMISSION
-        : maxDropsCount !== null && identityDropsCount !== null && identityDropsCount >= maxDropsCount
+        : maxDropsCount !== null &&
+          identityDropsCount !== null &&
+          identityDropsCount >= maxDropsCount
         ? SubmissionRestriction.MAX_DROPS_REACHED
         : submissionStatus !== SubmissionStatus.ACTIVE
         ? submissionStatus === SubmissionStatus.NOT_STARTED
