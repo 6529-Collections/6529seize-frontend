@@ -96,21 +96,6 @@ export default function CreateWaveDates({
     }
   };
 
-  // Handler for when user interacts with Rolling End Date section
-  const handleRollingInteraction = () => {
-    // Only auto-collapse Decisions section if it hasn't been auto-collapsed before
-    if (!autoCollapsedSections.decisions) {
-      setExpandedSections((prev) => ({
-        ...prev,
-        decisions: false,
-      }));
-      setAutoCollapsedSections((prev) => ({
-        ...prev,
-        decisions: true,
-      }));
-    }
-  };
-
   // Handle date changes with proper adjustments
   const handleDateUpdate = (newDates: CreateWaveDatesConfig) => {
     // Ensure valid date sequence

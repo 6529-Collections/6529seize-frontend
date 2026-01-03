@@ -40,7 +40,6 @@ export default function RememeAddPage() {
 
   const signMessage = useSignMessage();
   const [memes, setMemes] = useState<NFT[]>([]);
-  const [memesLoaded, setMemesLoaded] = useState(false);
   const [userTDH, setUserTDH] = useState<ConsolidatedTDH>();
 
   const [addRememe, setAddRememe] = useState<ProcessedRememe>();
@@ -118,7 +117,6 @@ export default function RememeAddPage() {
     fetchUrl(`${publicEnv.API_ENDPOINT}/api/memes_lite`).then(
       (response: DBResponse) => {
         setMemes(response.data);
-        setMemesLoaded(true);
       }
     );
   }, []);

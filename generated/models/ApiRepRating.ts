@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * 6529.io API
  * This is the API interface description. Brief terminology overview and an authentication example can be found at <a href=\"https://6529.io/about/api\">https://6529.io/about/api</a>.

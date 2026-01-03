@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import React, { memo, useCallback } from "react";
+import { memo, useCallback } from "react";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ApiWave } from "@/generated/models/ApiWave";
 import Link from "next/link";
@@ -106,8 +106,7 @@ export const DefaultWaveWinnerDropSmall = memo<DefaultWaveWinnerDropSmallProps>(
                     <span
                       className={`tw-text-sm tw-font-medium ${userVoteStyle}`}
                     >
-                      {formatNumberWithCommas(userVote)}{" "}
-                      {votingLabel}
+                      {formatNumberWithCommas(userVote)} {votingLabel}
                     </span>
                   </div>
                 )}
@@ -136,7 +135,9 @@ export const DefaultWaveWinnerDropSmall = memo<DefaultWaveWinnerDropSmallProps>(
             </Link>
 
             <div className="tw-flex tw-items-center tw-gap-1.5">
-              <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
+              <UserProfileTooltipWrapper
+                user={drop.author.handle ?? drop.author.id}
+              >
                 <Link
                   href={`/${drop.author.handle}`}
                   onClick={(e) => e.stopPropagation()}

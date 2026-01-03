@@ -6,9 +6,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import NFTImage from "@/components/nft-image/NFTImage";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import { publicEnv } from "@/config/env";
-import { MEMES_CONTRACT } from "@/constants";
 import { LabExtendedData, LabNFT, VolumeType } from "@/entities/INFT";
-import { NftOwner } from "@/entities/IOwner";
 import { SortDirection } from "@/entities/ISort";
 import { MemeLabSort } from "@/enums";
 import { addProtocol } from "@/helpers/Helpers";
@@ -29,10 +27,6 @@ import {
   sortChanged,
 } from "./MemeLab";
 
-interface Props {
-  wallets: string[];
-}
-
 export default function LabCollection({
   collectionName,
 }: {
@@ -47,7 +41,6 @@ export default function LabCollection({
   const [nfts, setNfts] = useState<LabNFT[]>([]);
   const [nftMetas, setNftMetas] = useState<LabExtendedData[]>([]);
   const [nftsLoaded, setNftsLoaded] = useState(false);
-  const [nftBalances, setNftBalances] = useState<NftOwner[]>([]);
 
   const [sortDir, setSortDir] = useState<SortDirection>();
   const [sort, setSort] = useState<MemeLabSort>(MemeLabSort.AGE);
@@ -100,30 +93,10 @@ export default function LabCollection({
   }, [collectionName]);
 
   useEffect(() => {
-    if (connectedProfile?.consolidation_key) {
-      fetchAllPages<NftOwner>(
-        `${publicEnv.API_ENDPOINT}/api/nft-owners/consolidation/${connectedProfile?.consolidation_key}?contract=${MEMES_CONTRACT}`
-      ).then((owners) => {
-        setNftBalances(owners);
-      });
-    } else {
-      setNftBalances([]);
-    }
-  }, [connectedProfile]);
-
-  useEffect(() => {
     if (sort && sortDir && nftsLoaded) {
       sortChanged(router, sort, sortDir, volumeType, nfts, nftMetas, setNfts);
     }
   }, [sort, sortDir, nftsLoaded]);
-
-  function getBalance(id: number) {
-    const balance = nftBalances.find((b) => b.token_id === id);
-    if (balance) {
-      return balance.balance;
-    }
-    return 0;
-  }
 
   function printNft(nft: LabNFT) {
     return (
@@ -133,10 +106,12 @@ export default function LabCollection({
         xs={{ span: 6 }}
         sm={{ span: 4 }}
         md={{ span: 3 }}
-        lg={{ span: 3 }}>
+        lg={{ span: 3 }}
+      >
         <Link
           href={`/meme-lab/${nft.id}`}
-          className="decoration-none scale-hover">
+          className="decoration-none scale-hover"
+        >
           <Container fluid>
             <Row className={connectedProfile ? styles["nftImagePadding"] : ""}>
               <NFTImage
@@ -194,7 +169,8 @@ export default function LabCollection({
                         <a
                           href={addProtocol(w)}
                           target="_blank"
-                          rel="noopener noreferrer">
+                          rel="noopener noreferrer"
+                        >
                           {w}
                         </a>
                         &nbsp;&nbsp;

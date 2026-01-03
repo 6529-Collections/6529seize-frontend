@@ -13,15 +13,6 @@ import {
 } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 
-function calculateDropdownLeft(
-  buttonRight: number,
-  dropdownWidth: number,
-  offsetParentLeft: number
-): number {
-  const referenceRight = buttonRight - offsetParentLeft;
-  return Math.max(0, referenceRight - dropdownWidth);
-}
-
 export default function CommonDropdownItemsDefaultWrapper({
   isOpen,
   setOpen,

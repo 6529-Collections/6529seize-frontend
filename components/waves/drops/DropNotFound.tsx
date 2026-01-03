@@ -1,5 +1,3 @@
-import React from "react";
-
 /**
  * Component to show when a drop is not found
  */

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { TypedNotification } from "@/types/feed.types";
 import {
@@ -14,18 +14,22 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 
 type WaveWithChatScope = ExtendedDrop["wave"] & {
-  chat?: {
-    scope?: {
-      group?: {
-        is_direct_message?: boolean | undefined;
-      } | undefined;
-    } | undefined;
-  } | undefined;
+  chat?:
+    | {
+        scope?:
+          | {
+              group?:
+                | {
+                    is_direct_message?: boolean | undefined;
+                  }
+                | undefined;
+            }
+          | undefined;
+      }
+    | undefined;
 };
 
-const hasChatScope = (
-  wave: ExtendedDrop["wave"]
-): wave is WaveWithChatScope =>
+const hasChatScope = (wave: ExtendedDrop["wave"]): wave is WaveWithChatScope =>
   typeof wave === "object" && wave !== null && "chat" in wave;
 
 interface NotificationsWrapperProps {

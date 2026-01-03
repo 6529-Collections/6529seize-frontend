@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, memo } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import WaveLeaderboardGalleryItemVotes from "./WaveLeaderboardGalleryItemVotes";
@@ -14,7 +14,10 @@ import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
-import { WAVE_VOTING_LABELS, WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
+import {
+  WAVE_VOTING_LABELS,
+  WAVE_VOTE_STATS_LABELS,
+} from "@/helpers/waves/waves.constants";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ImageScale } from "@/helpers/image.helpers";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -98,7 +101,8 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     const voteStyle = getVoteStyle(isNegativeVote, isZeroVote, artFocused);
 
     const votingCreditType = drop.wave.voting_credit_type as ApiWaveCreditType;
-    const votingCreditLabel = WAVE_VOTING_LABELS[votingCreditType] ?? votingCreditType;
+    const votingCreditLabel =
+      WAVE_VOTING_LABELS[votingCreditType] ?? votingCreditType;
 
     const handleImageClick = () => {
       onDropClick(drop);
@@ -108,14 +112,17 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
       setIsVotingModalOpen(true);
     };
 
-    const transitionClasses = !hasTouchScreen ? "tw-transition-all tw-duration-300 tw-ease-out" : "";
+    const transitionClasses = !hasTouchScreen
+      ? "tw-transition-all tw-duration-300 tw-ease-out"
+      : "";
     const groupClasses = artFocused ? `tw-group ${transitionClasses}` : "";
     const containerClass = `${groupClasses} tw-relative tw-bg-iron-950/50 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg desktop-hover:hover:tw-border-iron-700 tw-shadow-lg desktop-hover:hover:tw-shadow-xl`;
 
     const highlightAnimation =
       isHighlighting && !hasTouchScreen ? "tw-animate-gallery-reveal" : "";
 
-    const baseImageClasses = "tw-aspect-square tw-relative tw-cursor-pointer tw-touch-none tw-overflow-hidden tw-bg-iron-900 tw-group/image";
+    const baseImageClasses =
+      "tw-aspect-square tw-relative tw-cursor-pointer tw-touch-none tw-overflow-hidden tw-bg-iron-900 tw-group/image";
 
     const imageScaleClasses = hasTouchScreen
       ? ""
@@ -130,9 +137,13 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
           onClick={handleImageClick}
           type="button"
         >
-          <div className={`tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center ${imageScaleClasses}`}>
+          <div
+            className={`tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center ${imageScaleClasses}`}
+          >
             <MediaDisplay
-              media_mime_type={drop.parts[0]?.media[0]!.mime_type || "image/jpeg"}
+              media_mime_type={
+                drop.parts[0]?.media[0]!.mime_type || "image/jpeg"
+              }
               media_url={drop.parts[0]?.media[0]!.url!}
               disableMediaInteraction={true}
               imageScale={mediaImageScale}
@@ -197,7 +208,12 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
           <div className="tw-flex tw-gap-3 tw-items-center tw-pt-2 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800/50">
             {hasUserVoted && (
               <span className="tw-text-[11px] tw-text-iron-500 tw-font-mono">
-                {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}: <span className={voteStyle}>{isNegativeVote && "-"}{formatNumberWithCommas(Math.abs(userVote))} {votingCreditLabel}</span>
+                {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:{" "}
+                <span className={voteStyle}>
+                  {isNegativeVote && "-"}
+                  {formatNumberWithCommas(Math.abs(userVote))}{" "}
+                  {votingCreditLabel}
+                </span>
               </span>
             )}
             {canShowVote && (

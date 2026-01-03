@@ -39,18 +39,6 @@ interface LayoutSpaces {
   measurementsComplete: boolean;
 }
 
-type View =
-  | "wave"
-  | "leaderboard"
-  | "winners"
-  | "myVotes"
-  | "outcome"
-  | "faq"
-  | "notifications"
-  | "myStreamFeed"
-  | "mobileWaves"
-  | "mobileAbout";
-
 const spacesAreEqual = (a: LayoutSpaces, b: LayoutSpaces) =>
   a.headerSpace === b.headerSpace &&
   a.pinnedSpace === b.pinnedSpace &&

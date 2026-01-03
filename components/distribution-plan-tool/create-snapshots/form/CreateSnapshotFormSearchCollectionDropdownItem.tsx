@@ -2,14 +2,12 @@
 
 import { DistributionPlanSearchContractMetadataResult } from "@/components/allowlist-tool/allowlist-tool.types";
 import DistributionPlanVerifiedIcon from "@/components/distribution-plan-tool/common/DistributionPlanVerifiedIcon";
-import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import {
-    formatNumber,
-    truncateTextMiddle,
+  formatNumber,
+  truncateTextMiddle,
 } from "@/helpers/AllowlistToolHelpers";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 import Image from "next/image";
-import { useContext, useState } from "react";
 
 interface CollectionMeta {
   readonly imgUrl: string;
@@ -31,7 +29,6 @@ export default function CreateSnapshotFormSearchCollectionDropdownItem({
     tokenIds: string | null;
   }) => void;
 }) {
-  const { setToasts } = useContext(DistributionPlanToolContext);
   const collectionMeta: CollectionMeta = {
     imgUrl: collection.imageUrl ?? "",
     openseaVerified: collection.openseaVerified,
@@ -47,17 +44,13 @@ export default function CreateSnapshotFormSearchCollectionDropdownItem({
         : "N/A",
   };
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
   const getTokenIdsString = async (
     collectionId: string
   ): Promise<string | null> => {
-    setIsLoading(true);
     const endpoint = `/other/contract-token-ids-as-string/${collectionId}`;
     const { data } = await distributionPlanApiFetch<{
       tokenIds: string;
     }>(endpoint);
-    setIsLoading(false);
     return data?.tokenIds ?? null;
   };
 

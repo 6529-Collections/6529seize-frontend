@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, memo, useEffect } from "react";
+import { useState, memo, useEffect } from "react";
 import { ApiWave } from "@/generated/models/ApiWave";
 import {
   ExtendedDrop,

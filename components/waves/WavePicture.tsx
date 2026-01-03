@@ -1,4 +1,3 @@
-import React from "react";
 import { FallbackImage } from "@/components/common/FallbackImage";
 
 interface WavePictureProps {

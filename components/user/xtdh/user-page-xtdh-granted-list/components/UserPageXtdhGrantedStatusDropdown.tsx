@@ -73,38 +73,6 @@ export function UserPageXtdhGrantedStatusDropdown({
 
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const getButtonPosition = () => {
-    const currentButton = buttonRef.current;
-    if (!currentButton) {
-      return { right: 0 };
-    }
-
-    try {
-      const { right } = currentButton.getBoundingClientRect();
-      return { right };
-    } catch (error) {
-      console.error("Failed to read dropdown trigger position", error);
-      return { right: 0 };
-    }
-  };
-
-  const [buttonPosition, setButtonPosition] = useState(getButtonPosition());
-
-  const onButtonPositionChange = () => {
-    if (buttonRef.current) {
-      setButtonPosition(getButtonPosition());
-    }
-  };
-
-  useEffect(() => {
-    if (!isOpen) return;
-    window.addEventListener("resize", onButtonPositionChange);
-    onButtonPositionChange();
-    return () => {
-      window.removeEventListener("resize", onButtonPositionChange);
-    };
-  }, [isOpen]);
-
   const handleToggle = (status: GrantedFilterStatus) => {
     if (disabled) return;
 

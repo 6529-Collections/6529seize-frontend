@@ -1,4 +1,3 @@
-import React from "react";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import WaveGroup from "../specs/groups/group/WaveGroup";

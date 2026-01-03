@@ -47,38 +47,6 @@ const MEMES_SORT_TO_API: Record<MemesSort, string> = {
   [MemesSort.HIGHEST_OFFER]: MEMES_EXTENDED_SORT[13],
 };
 
-const API_SORT_TO_MEMES: Record<
-  string,
-  { sort: MemesSort; volume?: VolumeType | undefined }
-> = {
-  [MEMES_EXTENDED_SORT[0]]: { sort: MemesSort.AGE },
-  [MEMES_EXTENDED_SORT[1]]: { sort: MemesSort.EDITION_SIZE },
-  [MEMES_EXTENDED_SORT[2]]: { sort: MemesSort.MEME },
-  [MEMES_EXTENDED_SORT[3]]: { sort: MemesSort.HODLERS },
-  [MEMES_EXTENDED_SORT[4]]: { sort: MemesSort.TDH },
-  [MEMES_EXTENDED_SORT[5]]: { sort: MemesSort.UNIQUE_PERCENT },
-  [MEMES_EXTENDED_SORT[6]]: { sort: MemesSort.UNIQUE_PERCENT_EX_MUSEUM },
-  [MEMES_EXTENDED_SORT[7]]: { sort: MemesSort.FLOOR_PRICE },
-  [MEMES_EXTENDED_SORT[8]]: { sort: MemesSort.MARKET_CAP },
-  [MEMES_EXTENDED_SORT[9]]: {
-    sort: MemesSort.VOLUME,
-    volume: VolumeType.HOURS_24,
-  },
-  [MEMES_EXTENDED_SORT[10]]: {
-    sort: MemesSort.VOLUME,
-    volume: VolumeType.DAYS_7,
-  },
-  [MEMES_EXTENDED_SORT[11]]: {
-    sort: MemesSort.VOLUME,
-    volume: VolumeType.DAYS_30,
-  },
-  [MEMES_EXTENDED_SORT[12]]: {
-    sort: MemesSort.VOLUME,
-    volume: VolumeType.ALL_TIME,
-  },
-  [MEMES_EXTENDED_SORT[13]]: { sort: MemesSort.HIGHEST_OFFER },
-};
-
 function getApiSort(sort: MemesSort, volumeType: VolumeType): string {
   if (sort === MemesSort.VOLUME) {
     switch (volumeType) {
@@ -351,10 +319,12 @@ export default function TheMemesComponent() {
         xs={{ span: 6 }}
         sm={{ span: 4 }}
         md={{ span: 3 }}
-        lg={{ span: 3 }}>
+        lg={{ span: 3 }}
+      >
         <Link
           href={`/the-memes/${nft.id}`}
-          className="decoration-none scale-hover">
+          className="decoration-none scale-hover"
+        >
           <Container fluid>
             <Row className={connectedProfile ? styles["nftImagePadding"] : ""}>
               <NFTImage
@@ -559,7 +529,8 @@ export function SortButton(
         isActive
           ? "tw-text-white tw-font-semibold"
           : "tw-text-gray-400 hover:tw-text-white"
-      }`}>
+      }`}
+    >
       {props.sort}
     </button>
   );
