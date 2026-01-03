@@ -25,7 +25,7 @@ describe('useWaveMessagesStore', () => {
     });
 
     const data = result.current.getData('wave1');
-    expect(data?.drops[0].id).toBe('d1');
+    expect(data?.drops[0]?.id).toBe('d1');
     await waitFor(() =>
       expect(listener).toHaveBeenLastCalledWith(
         expect.objectContaining({ id: 'wave1' })

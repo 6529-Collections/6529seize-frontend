@@ -117,7 +117,7 @@ export const SingleWaveDropVoteInput: React.FC<
         increment
       );
       crossedMemetic = hasCrossed;
-      return nextValue;
+      return nextValue!;
     });
 
     if (crossedMemetic) {

@@ -73,7 +73,7 @@ const parseFromMedia = (
     return null;
   }
 
-  const tokenId = ensureValidTokenId(stripExtension(segments[0]));
+  const tokenId = ensureValidTokenId(stripExtension(segments[0]!));
   return tokenId ? { tokenId } : null;
 };
 
@@ -85,7 +85,7 @@ const parseFromMediaProxy = (
   }
 
   const contract = ensureValidContract(segments[0]);
-  const tokenId = ensureValidTokenId(stripExtension(segments[1]));
+  const tokenId = ensureValidTokenId(stripExtension(segments[1]!));
 
   if (contract && tokenId) {
     return { contract, tokenId };

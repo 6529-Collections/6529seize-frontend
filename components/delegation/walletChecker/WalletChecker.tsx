@@ -195,9 +195,9 @@ export default function WalletCheckerComponent(
         const firstData = firstResponse.data;
 
         if (firstData.length > 0) {
-          const newWallet = areEqualAddresses(walletAddress, firstData[0].wallet1)
-            ? firstData[0].wallet2
-            : firstData[0].wallet1;
+          const newWallet = areEqualAddresses(walletAddress, firstData[0]?.wallet1)
+            ? firstData[0]?.wallet2
+            : firstData[0]?.wallet1;
           const nextUrl = `${publicEnv.API_ENDPOINT}/api/consolidations/${newWallet}?show_incomplete=true`;
           try {
             const secondResponse: DBResponse<WalletConsolidation> = await fetchUrl(nextUrl);

@@ -127,7 +127,7 @@ export function usePollingQuery(
         : items.at(0);
       setHaveNewItems(
         latestExistingItem
-          ? latestPolledItem.serial_no > latestExistingItem.serial_no
+          ? latestPolledItem?.serial_no! > latestExistingItem.serial_no
           : true
       );
     } else {

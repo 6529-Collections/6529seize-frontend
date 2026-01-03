@@ -62,7 +62,7 @@ export default function ReviewDistributionPlanTableHeader({
   const downloadCsv = (results: AllowlistResult[]) => {
     const fullResult = getFullResults(results);
     const csv = [
-      Object.keys(fullResult[0]).join(","),
+      Object.keys(fullResult[0]!).join(","),
       ...fullResult.map((item) => Object.values(item).join(",")),
     ].join("\n");
 
@@ -83,7 +83,7 @@ export default function ReviewDistributionPlanTableHeader({
       value: row.amount,
     }));
     const csv = [
-      Object.keys(fullResult[0]).join(","),
+      Object.keys(fullResult[0]!).join(","),
       ...fullResult.map((item) => Object.values(item).join(",")),
     ].join("\n");
 

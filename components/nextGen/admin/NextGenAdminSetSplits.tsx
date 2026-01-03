@@ -68,8 +68,8 @@ export default function NextGenAdminSetSplits(props: Readonly<Props>) {
     const data = primarySplitsRead.data;
     if (data) {
       const d = data as string[];
-      setArtistPrimary(d[0]);
-      setTeamPrimary(d[1]);
+      setArtistPrimary(d[0]!);
+      setTeamPrimary(d[1]!);
     }
   }, [primarySplitsRead.data]);
 
@@ -88,8 +88,8 @@ export default function NextGenAdminSetSplits(props: Readonly<Props>) {
     const data = secondarySplitsRead.data;
     if (data) {
       const d = data as string[];
-      setArtistSecondary(d[0]);
-      setTeamSecondary(d[1]);
+      setArtistSecondary(d[0]!);
+      setTeamSecondary(d[1]!);
     }
   }, [secondarySplitsRead.data]);
 

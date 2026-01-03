@@ -51,7 +51,7 @@ export default function RollingEndDate({
       dates.firstDecisionTime,
       dates.subsequentDecisions
     );
-    return decisionTimes[decisionTimes.length - 1];
+    return decisionTimes[decisionTimes.length - 1]!;
   };
 
   // Update local state when dates change

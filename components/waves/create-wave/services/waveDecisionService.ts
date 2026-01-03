@@ -38,7 +38,7 @@ export const calculateEndDate = (
       dates.firstDecisionTime, 
       dates.subsequentDecisions
     );
-    return decisions[decisions.length - 1];
+    return decisions[decisions.length - 1]!;
   }
 };
 

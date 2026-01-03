@@ -243,7 +243,7 @@ function handleRedirects(req: NextRequest): NextResponse | undefined {
   for (const mapping of redirectMappings) {
     if (pathname.toLowerCase() === mapping.url.toLowerCase()) {
       const url = req.nextUrl.clone();
-      url.pathname = mapping.target.split("?")[0];
+      url.pathname = mapping.target.split("?")[0]!;
       const queryString = mapping.target.split("?")[1];
       if (queryString) {
         url.search = `?${queryString}`;

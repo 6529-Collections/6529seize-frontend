@@ -77,10 +77,10 @@ const EmojiComponent = ({ emojiId }: { emojiId: string }) => {
   if (!emoji) {
     const nativeEmoji = findNativeEmoji(emojiId);
     if (nativeEmoji) {
-      return <span>{nativeEmoji.skins[0].native}</span>;
+      return <span>{nativeEmoji.skins[0]?.native}</span>;
     }
     return <span>{`:${emojiId}:`}</span>;
   }
 
-  return <img src={emoji.skins[0].src} alt={emojiId} className="emoji-node" />;
+  return <img src={emoji.skins[0]?.src} alt={emojiId} className="emoji-node" />;
 };

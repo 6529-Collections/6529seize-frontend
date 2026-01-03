@@ -55,7 +55,7 @@ function transformEmojiTextToNode(
       }
 
       const hasValidEmoji = matches.some(({ emojiId }) =>
-        isEmojiIdValid(emojiId)
+        isEmojiIdValid(emojiId!)
       );
 
       if (!hasValidEmoji) {
@@ -74,13 +74,13 @@ function transformEmojiTextToNode(
           }
         }
 
-        if (!isEmojiIdValid(emojiId)) {
+        if (!isEmojiIdValid(emojiId!)) {
           newNodes.push(new TextNode(matchText));
           lastIndex = endIndex;
           return;
         }
 
-        const emojiNode = new EmojiNode(emojiId);
+        const emojiNode = new EmojiNode(emojiId!);
         newNodes.push(emojiNode);
 
         const trailingTextNode = new TextNode(" ");

@@ -55,7 +55,7 @@ export default function CreateGroupWalletsUpload({
 
       if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
         const file = e.dataTransfer.files[0];
-        onFileChange(file);
+        onFileChange(file!);
       }
     },
     [onFileChange]

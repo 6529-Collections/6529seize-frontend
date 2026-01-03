@@ -38,7 +38,7 @@ describe("CollectionDelegation utility functions", () => {
   it("getDelegationsFromData parses delegations", () => {
     const data = [{ result: [["0x4"], [NEVER_DATE + 1], [true], [1]] }];
     const res = getDelegationsFromData(data);
-    expect(res[0].wallets[0].expiry).toContain("active - non-expiring");
+    expect(res[0]?.wallets[0].expiry).toContain("active - non-expiring");
   });
 
   it("includes formatted expiry date for active delegations", () => {
@@ -46,7 +46,7 @@ describe("CollectionDelegation utility functions", () => {
     const data = [{ result: [["0x9"], [future], [true], [1]] }];
     const res = getDelegationsFromData(data);
     const expected = new Date(future * 1000).toISOString().slice(0, 10);
-    expect(res[0].wallets[0].expiry).toBe(`active - expires ${expected}`);
+    expect(res[0]?.wallets[0].expiry).toBe(`active - expires ${expected}`);
   });
 
   it("returns empty when no result present", () => {
@@ -58,6 +58,6 @@ describe("CollectionDelegation utility functions", () => {
     const past = Math.floor(Date.now() / 1000) - 100;
     const data = [{ result: [["0x1"], [past], [false], [1]] }];
     const res = getDelegationsFromData(data);
-    expect(res[0].wallets[0].expiry).toContain("expired");
+    expect(res[0]?.wallets[0].expiry).toContain("expired");
   });
 });

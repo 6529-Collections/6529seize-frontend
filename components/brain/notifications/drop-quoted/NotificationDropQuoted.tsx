@@ -21,7 +21,7 @@ export default function NotificationDropQuoted({
 }) {
   return (
     <NotificationWithDrop
-      drop={notification.related_drops[0]}
+      drop={notification.related_drops[0]!}
       actionText="quoted you"
       createdAt={notification.created_at}
       activeDrop={activeDrop}

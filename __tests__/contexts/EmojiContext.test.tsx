@@ -31,7 +31,7 @@ const TestComponent = () => {
       </div>
       <div data-testid="emojiMap">{emojiMap.length}</div>
       <div data-testid="nativeEmoji">
-        {findNativeEmoji("smile")?.skins[0].native}
+        {findNativeEmoji("smile")?.skins[0]?.native}
       </div>
     </div>
   );

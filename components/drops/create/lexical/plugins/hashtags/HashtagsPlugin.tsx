@@ -15,7 +15,6 @@ import {
   useMemo,
   useState,
 } from "react";
-import * as React from "react";
 import * as ReactDOM from "react-dom";
 
 import { $createHashtagNode } from "@/components/drops/create/lexical/nodes/HashtagNode";
@@ -36,7 +35,7 @@ function useHashtagLookupService(hashtagString: string | null) {
 
   const getResults = async (query: string): Promise<void> => {
     const [contract, tokenId] = query.split(":");
-    const isContract = isEthereumAddress(contract);
+    const isContract = isEthereumAddress(contract!);
     const isTokenId = !isNaN(Number(tokenId));
     if (!isContract || !isTokenId) {
       setResults([]);

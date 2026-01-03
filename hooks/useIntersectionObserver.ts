@@ -11,7 +11,7 @@ export function useIntersectionObserver(
     if (intersectionElementRef.current) {
       const observer = new IntersectionObserver(
         ([entry]) => {
-          if (entry.isIntersecting) {
+          if (entry?.isIntersecting) {
             onIntersection(true);
             observer.disconnect();
           }

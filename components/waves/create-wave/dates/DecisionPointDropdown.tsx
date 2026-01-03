@@ -66,7 +66,7 @@ export default function DecisionPointDropdown({
         aria-haspopup="true"
         onClick={() => setIsOpen(!isOpen)}
         className="tw-flex tw-items-center tw-justify-between tw-w-full tw-bg-iron-800 lg:tw-bg-iron-900 tw-border-0 tw-rounded-r-lg tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-iron-300 tw-px-3 tw-py-4 tw-text-sm tw-transition tw-duration-300 tw-ease-out">
-        <span>{selectedOption.label}</span>
+        <span>{selectedOption?.label}</span>
         <div className="tw-pointer-events-none tw-flex tw-items-center">
           <FontAwesomeIcon
             ref={iconScope}

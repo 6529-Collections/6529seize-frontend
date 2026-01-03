@@ -383,7 +383,7 @@ async function loadOwnership(
 
   if (isEthSecondLevel(normalized)) {
     const [label] = normalized.split(".");
-    const labelHash = labelhash(label);
+    const labelHash = labelhash(label!);
     const labelHashBigInt = BigInt(labelHash);
 
     try {

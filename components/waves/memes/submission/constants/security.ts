@@ -34,7 +34,7 @@ const getArweaveTransactionIdFromSubdomain = (
 ): string | null => {
   const normalized = canonicalizeInteractiveMediaHostname(hostname);
   const match = ARWEAVE_SUBDOMAIN_PATTERN.exec(normalized);
-  return match ? match[1] : null;
+  return match ? match[1]! : null;
 };
 
 const isArweaveHost = (hostname: string): boolean => {
@@ -113,7 +113,7 @@ export const isInteractiveMediaContentPathAllowed = (
       return false;
     }
 
-    if (!isInteractiveMediaContentIdentifier(provider, match[1])) {
+    if (!isInteractiveMediaContentIdentifier(provider, match[1]!)) {
       return false;
     }
 
@@ -142,7 +142,7 @@ export const isInteractiveMediaContentPathAllowed = (
         return false;
       }
 
-      return isInteractiveMediaContentIdentifier(provider, subdomainMatch[1]);
+      return isInteractiveMediaContentIdentifier(provider, subdomainMatch[1]!);
     }
 
     const match = ARWEAVE_PATH_PATTERN.exec(pathname);
@@ -150,7 +150,7 @@ export const isInteractiveMediaContentPathAllowed = (
       return false;
     }
 
-    return isInteractiveMediaContentIdentifier(provider, match[1]);
+    return isInteractiveMediaContentIdentifier(provider, match[1]!);
   }
 
   return false;

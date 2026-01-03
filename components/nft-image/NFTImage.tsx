@@ -30,13 +30,17 @@ export default function NFTImage(props: Readonly<Props>) {
   const { heightStyle, imageStyle } = styleConfig.height[props.height];
   const bgStyle = props.transparentBG ? styles["transparentBG"] : "";
 
+  const safeHeightStyle = heightStyle ?? "";
+  const safeImageStyle = imageStyle ?? "";
+  const safeBgStyle = bgStyle ?? "";
+
   const mediaType = getMediaType(props.nft, props.animation);
 
   const rendererProps = {
     ...props,
-    heightStyle,
-    imageStyle,
-    bgStyle,
+    heightStyle: safeHeightStyle,
+    imageStyle: safeImageStyle,
+    bgStyle: safeBgStyle,
   };
 
   switch (mediaType) {

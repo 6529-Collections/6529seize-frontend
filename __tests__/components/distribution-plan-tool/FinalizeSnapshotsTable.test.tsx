@@ -74,6 +74,6 @@ describe('FinalizeSnapshotsTable', () => {
         onRemoveGroupSnapshot={() => {}}
       />
     );
-    expect(rows[0].topHoldersFilter).toBe('');
+    expect(rows[0]?.topHoldersFilter).toBe('');
   });
 });

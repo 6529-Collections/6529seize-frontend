@@ -53,10 +53,10 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
       areEqualAddresses(al.address, address)
     );
     const index = addressEntries.findIndex((al) => al.keccak === keccak);
-    let returnSpots = addressEntries[index].spots;
+    let returnSpots = addressEntries[index]?.spots;
     if (index > 0) {
       returnSpots =
-        addressEntries[index].spots - addressEntries[index - 1].spots;
+        addressEntries[index]?.spots! - addressEntries[index - 1]?.spots!;
     }
     return returnSpots;
   }

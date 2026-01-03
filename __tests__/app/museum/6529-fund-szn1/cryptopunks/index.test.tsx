@@ -110,7 +110,7 @@ describe("CryptoPunksPage", () => {
     const pageHeadings = screen.getAllByText("CRYPTOPUNKS");
     expect(pageHeadings.length).toBeGreaterThan(0);
     expect(pageHeadings[0]).toBeInTheDocument();
-    expect(pageHeadings[0].tagName).toBe("H1");
+    expect(pageHeadings[0]?.tagName).toBe("H1");
   });
 
   it("includes skip to content link for accessibility", () => {

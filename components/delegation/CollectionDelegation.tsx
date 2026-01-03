@@ -224,11 +224,12 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     }
   }, [retrieveOutgoingDelegations.data]);
 
+
   const retrieveOutgoingConsolidations = useReadContracts({
     contracts: getConsolidationReadParams(
       accountResolution.address as `0x${string}`,
       props.collection.contract,
-      outgoingDelegations[CONSOLIDATION_USE_CASE.index]
+      outgoingDelegations[CONSOLIDATION_USE_CASE.index]!
     ),
     query: {
       enabled: accountResolution.isConnected && outgoingDelegations.length > 0,
@@ -287,7 +288,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     contracts: getConsolidationReadParams(
       accountResolution.address as `0x${string}`,
       props.collection.contract,
-      incomingDelegations[CONSOLIDATION_USE_CASE.index]
+      incomingDelegations[CONSOLIDATION_USE_CASE.index]!
     ),
     query: {
       enabled: accountResolution.isConnected && incomingDelegations.length > 0,
@@ -1645,8 +1646,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       useCaseLockStatuses?.data?.[lockUseCaseIndex]
                         ? "Unlocking"
                         : "Locking"
-                    } Wallet on Use Case #${useCase.use_case} - ${
-                      useCase.display
+                    } Wallet on Use Case #${useCase?.use_case} - ${
+                      useCase?.display
                     }`;
                     let message = "Confirm in your wallet...";
 

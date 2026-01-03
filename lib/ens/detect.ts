@@ -16,18 +16,18 @@ const extractEnsNameFromUrl = (url: URL): string | null => {
 
   if (hostname === "app.ens.domains") {
     if (segments.length === 1) {
-      return decodeURIComponent(segments[0]);
+      return decodeURIComponent(segments[0]!);
     }
     if (segments.length >= 2) {
       if (segments[0] === "name" || segments[0] === "address") {
-        return decodeURIComponent(segments[1]);
+        return decodeURIComponent(segments[1]!);
       }
     }
   }
 
   if (hostname === "etherscan.io" && segments.length >= 2) {
     if (segments[0] === "address") {
-      return decodeURIComponent(segments[1]);
+      return decodeURIComponent(segments[1]!);
     }
   }
 

@@ -158,8 +158,8 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
         setSelectedToAddress(newPrimaryAddressQuery);
       } else {
         const newTo = addresses.length === 1 ? addresses[0] : "";
-        setSelectedToAddress(newTo);
-        setNewPrimaryAddressQuery?.(newTo);
+        setSelectedToAddress(newTo!);
+        setNewPrimaryAddressQuery?.(newTo!);
       }
     }
   }, [tdhAddress, newPrimaryAddressQuery, setNewPrimaryAddressQuery]);

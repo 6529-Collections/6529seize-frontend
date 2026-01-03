@@ -24,5 +24,5 @@ test('adds missing required metadata when entering drop mode', () => {
   });
   expect(result.current.metadata.length).toBe(0);
   rerender({ isDropMode: true, requiredMetadata: required });
-  expect(result.current.metadata[0].key).toBe('foo');
+  expect(result.current.metadata[0]?.key).toBe('foo');
 });

@@ -60,8 +60,8 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
     const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
       if (isTemporaryDrop) return;
 
-      touchStartX.current = e.touches[0].clientX;
-      touchStartY.current = e.touches[0].clientY;
+      touchStartX.current = e.touches[0]!.clientX;
+      touchStartY.current = e.touches[0]!.clientY;
 
       longPressTimeout.current = setTimeout(() => {
         setLongPressTriggered(true);
@@ -70,8 +70,8 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
     };
 
     const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-      const touchX = e.touches[0].clientX;
-      const touchY = e.touches[0].clientY;
+      const touchX = e.touches[0]!.clientX;
+      const touchY = e.touches[0]!.clientY;
 
       const deltaX = Math.abs(touchX - touchStartX.current);
       const deltaY = Math.abs(touchY - touchStartY.current);
@@ -99,6 +99,10 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
       if (isTemporaryDrop || !onDropContentClick) return;
       onDropContentClick(drop);
     };
+
+    if (!activePart) {
+      return null;
+    }
 
     return (
       <div

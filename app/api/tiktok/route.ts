@@ -239,7 +239,7 @@ function parseTikTokPath(segments: readonly string[]): NormalizedTikTokUrl {
   }
 
   const first = segments[0];
-  if (first.startsWith("@")) {
+  if (first?.startsWith("@")) {
     if (!/^@[A-Za-z0-9._-]+$/.test(first)) {
       throw new Error("Invalid TikTok username.");
     }
