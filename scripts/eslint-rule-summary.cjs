@@ -1,4 +1,7 @@
 const { spawn } = require("node:child_process");
+const fs = require("node:fs");
+
+const outputPath = parseOutputPath(process.argv.slice(2));
 
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 const npmArgs = ["--silent", "run", "lint", "--", "--format", "json"];
@@ -44,10 +47,41 @@ proc.on("close", (code) => {
   const rows = buildRuleSummary(results);
   const csv = toCsv(rows);
 
+  if (outputPath) {
+    try {
+      fs.writeFileSync(outputPath, csv, "utf8");
+    } catch (error) {
+      console.error(`Failed to write CSV to ${outputPath}:`, error);
+      process.exit(1);
+    }
+    process.exit(code || 0);
+  }
+
   process.stdout.write(csv, () => {
     process.exit(code || 0);
   });
 });
+
+function parseOutputPath(args) {
+  let output = null;
+
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg === "--output" || arg === "-o") {
+      output = args[index + 1];
+      index += 1;
+    } else if (arg.startsWith("--output=")) {
+      output = arg.slice("--output=".length);
+    }
+  }
+
+  if (output === "") {
+    console.error("Missing output path after --output.");
+    process.exit(1);
+  }
+
+  return output;
+}
 
 function extractJsonArray(output) {
   const text = output.trim();
