@@ -161,6 +161,7 @@ export default function NextGenZoomableImage(
 
       return () => clearTimeout(timer);
     }
+    return;
   }, [props.zoom_scale]);
 
   function getImageUrl() {

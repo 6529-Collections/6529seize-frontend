@@ -99,5 +99,6 @@ export default function SocialStatementIcon({
       return <TheLineIcon aria-hidden="true" />;
     default:
       assertUnreachable(statementType);
+      return;
   }
 }

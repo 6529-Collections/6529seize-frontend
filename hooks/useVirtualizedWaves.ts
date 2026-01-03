@@ -30,18 +30,18 @@ export function useVirtualizedWaves<T>(
       return;
     }
     const el = scrollContainerRef.current;
-    if (el) {
-      el.scrollTop = getPosition(key);
-      const onScroll = () => {
-        setScrollOffset(el.scrollTop);
-        setPosition(key, el.scrollTop);
-      };
-      el.addEventListener("scroll", onScroll);
-      return () => {
-        setPosition(key, el.scrollTop);
-        el.removeEventListener("scroll", onScroll);
-      };
-    }
+    if (!el) return;
+
+    el.scrollTop = getPosition(key);
+    const onScroll = () => {
+      setScrollOffset(el.scrollTop);
+      setPosition(key, el.scrollTop);
+    };
+    el.addEventListener("scroll", onScroll);
+    return () => {
+      setPosition(key, el.scrollTop);
+      el.removeEventListener("scroll", onScroll);
+    };
   }, [getPosition, setPosition, key, scrollContainerRef, isActive]);
 
   const viewportHeight = scrollContainerRef.current?.clientHeight ?? 0;

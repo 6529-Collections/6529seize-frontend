@@ -83,12 +83,13 @@ export default function DropListItemContentMedia({
         <SandboxedExternalIframe
           title=""
           src={media_url.replace("ipfs://", "https://ipfs.io/ipfs/")}
-          className="tw-w-full tw-h-full"
+          className="tw-h-full tw-w-full"
         />
       );
     case MediaType.UNKNOWN:
       return <></>;
     default:
       assertUnreachable(mediaType);
+      return;
   }
 }

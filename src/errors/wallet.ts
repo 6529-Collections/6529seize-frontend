@@ -1,7 +1,10 @@
 class WalletConnectionError extends Error {
-  constructor(message: string, public readonly cause?: unknown) {
+  constructor(
+    message: string,
+    public override readonly cause?: unknown
+  ) {
     super(message);
-    this.name = 'WalletConnectionError';
+    this.name = "WalletConnectionError";
     Object.setPrototypeOf(this, WalletConnectionError.prototype);
   }
 }
@@ -9,7 +12,7 @@ class WalletConnectionError extends Error {
 export class WalletValidationError extends WalletConnectionError {
   constructor(message: string, cause?: unknown) {
     super(`Wallet validation failed: ${message}`, cause);
-    this.name = 'WalletValidationError';
+    this.name = "WalletValidationError";
     Object.setPrototypeOf(this, WalletValidationError.prototype);
   }
 }
@@ -17,11 +20,11 @@ export class WalletValidationError extends WalletConnectionError {
 export class WalletInitializationError extends Error {
   constructor(
     message: string,
-    public readonly cause?: unknown,
+    public override readonly cause?: unknown,
     public readonly addressAttempt?: string
   ) {
     super(message);
-    this.name = 'WalletInitializationError';
+    this.name = "WalletInitializationError";
     Object.setPrototypeOf(this, WalletInitializationError.prototype);
   }
 }

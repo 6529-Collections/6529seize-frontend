@@ -451,7 +451,7 @@ export default function MemeLabPageComponent({
 
     if (activityLoading) {
       return (
-        <div className="tw-flex tw-justify-center tw-items-center tw-py-4">
+        <div className="tw-flex tw-items-center tw-justify-center tw-py-4">
           <CircleLoader size={CircleLoaderSize.LARGE} />
         </div>
       );
@@ -459,11 +459,12 @@ export default function MemeLabPageComponent({
 
     if (activity.length === 0) {
       return (
-        <div className="tw-flex tw-justify-center tw-items-center tw-h-full tw-py-2">
+        <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-py-2">
           <NothingHereYetSummer />
         </div>
       );
     }
+    return;
   }, [activity, activityLoading, nft]);
 
   function printContent() {
@@ -495,7 +496,8 @@ export default function MemeLabPageComponent({
                   sm={{ span: 12 }}
                   md={{ span: 6 }}
                   lg={{ span: 6 }}
-                  className={`${styles["nftImageWrapper"]} pt-2 pb-5`}>
+                  className={`${styles["nftImageWrapper"]} pt-2 pb-5`}
+                >
                   <NFTImage
                     nft={nft}
                     animation={true}
@@ -532,7 +534,8 @@ export default function MemeLabPageComponent({
           sm={{ span: 12 }}
           md={{ span: 6 }}
           lg={{ span: 6 }}
-          className="pt-2">
+          className="pt-2"
+        >
           <Container className="p-0">
             <Row className="pt-3">
               <Col>
@@ -559,7 +562,8 @@ export default function MemeLabPageComponent({
                         <Link
                           href={`/meme-lab/collection/${encodeURIComponent(
                             nftMeta.metadata_collection.replaceAll(" ", "-")
-                          )}`}>
+                          )}`}
+                        >
                           {nftMeta.metadata_collection}
                         </Link>
                       </td>
@@ -573,7 +577,8 @@ export default function MemeLabPageComponent({
                               <Link
                                 href={addProtocol(w)}
                                 target="_blank"
-                                rel="noopener noreferrer">
+                                rel="noopener noreferrer"
+                              >
                                 {w}
                               </Link>
                               &nbsp;&nbsp;
@@ -742,6 +747,7 @@ export default function MemeLabPageComponent({
         </Col>
       );
     }
+    return;
   }
 
   function getTokenCount(transactions: Transaction[]) {
@@ -840,7 +846,8 @@ export default function MemeLabPageComponent({
         xs={{ span: 12 }}
         sm={{ span: 12 }}
         md={{ span: 6 }}
-        lg={{ span: 6 }}>
+        lg={{ span: 6 }}
+      >
         <Container className="p-0">
           <Row>
             {wallets.length === 0 && (
@@ -867,7 +874,8 @@ export default function MemeLabPageComponent({
                       xs={{ span: 12 }}
                       sm={{ span: 12 }}
                       md={{ span: 12 }}
-                      lg={{ span: 8 }}>
+                      lg={{ span: 8 }}
+                    >
                       <Table bordered={false}>
                         <tbody>
                           <tr className={`${styles["overviewColumn"]}`}>
@@ -1002,7 +1010,8 @@ export default function MemeLabPageComponent({
                     interval={null}
                     indicators={false}
                     wrap={false}
-                    onSlide={carouselHandlerSlide}>
+                    onSlide={carouselHandlerSlide}
+                  >
                     <Carousel.Item className="text-center">
                       <NFTImage
                         nft={nft}
@@ -1077,7 +1086,8 @@ export default function MemeLabPageComponent({
                             className={styles["arweaveLink"]}
                             href={nft.metadata.image}
                             target="_blank"
-                            rel="noopener noreferrer">
+                            rel="noopener noreferrer"
+                          >
                             {nft.metadata.image}
                           </Link>
                           <Download
@@ -1100,7 +1110,8 @@ export default function MemeLabPageComponent({
                                   : nft.metadata.animation_url
                               }
                               target="_blank"
-                              rel="noopener noreferrer">
+                              rel="noopener noreferrer"
+                            >
                               {nft.metadata.animation
                                 ? nft.metadata.animation
                                 : nft.metadata.animation_url}
@@ -1129,7 +1140,8 @@ export default function MemeLabPageComponent({
                 xs={{ span: 12 }}
                 sm={{ span: 6 }}
                 md={{ span: 6 }}
-                lg={{ span: 6 }}>
+                lg={{ span: 6 }}
+              >
                 <Container>
                   <Row>
                     <Col>
@@ -1186,7 +1198,8 @@ export default function MemeLabPageComponent({
                   xs={{ span: 12 }}
                   sm={{ span: 6 }}
                   md={{ span: 6 }}
-                  lg={{ span: 6 }}>
+                  lg={{ span: 6 }}
+                >
                   <Container>
                     <Row>
                       <Col>
@@ -1234,7 +1247,8 @@ export default function MemeLabPageComponent({
                     <Col
                       dangerouslySetInnerHTML={{
                         __html: parseNftDescriptionToHtml(nft.description),
-                      }}></Col>
+                      }}
+                    ></Col>
                   </Row>
                 </Container>
               </Col>
@@ -1261,6 +1275,7 @@ export default function MemeLabPageComponent({
         </>
       );
     }
+    return;
   }
 
   function printHodlers() {
@@ -1276,6 +1291,7 @@ export default function MemeLabPageComponent({
         </Row>
       );
     }
+    return;
   }
 
   function printTimeline() {
@@ -1353,11 +1369,11 @@ export default function MemeLabPageComponent({
         )}
         <Row className="tw-py-3">
           <Col>
-            <div className="tw-flex tw-flex-col md:tw-flex-row tw-justify-between tw-items-stretch md:tw-items-center tw-gap-3">
-              <h3 className="tw-mb-0 tw-whitespace-nowrap tw-shrink-0">
+            <div className="tw-flex tw-flex-col tw-items-stretch tw-justify-between tw-gap-3 md:tw-flex-row md:tw-items-center">
+              <h3 className="tw-mb-0 tw-shrink-0 tw-whitespace-nowrap">
                 Card Activity
               </h3>
-              <div className="tw-w-full md:tw-w-72 tw-shrink-0">
+              <div className="tw-w-full tw-shrink-0 md:tw-w-72">
                 <CommonDropdown
                   items={ActivityTypeItems}
                   activeItem={activityTypeFilter}
@@ -1421,7 +1437,7 @@ export default function MemeLabPageComponent({
                   </Col>
                 </Row>
                 <Row className="pt-3 pb-3">
-                  <Col className="tw-flex tw-gap-3 tw-items-center tw-flex-wrap">
+                  <Col className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
                     {MEME_TABS.map((tab) => (
                       <TabButton
                         key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}

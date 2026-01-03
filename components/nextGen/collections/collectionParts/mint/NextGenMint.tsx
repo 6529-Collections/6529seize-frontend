@@ -17,7 +17,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { useReadContract, useReadContracts } from "wagmi";
-import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "@/components/nextGen/nextgen_contracts";
+import {
+  NEXTGEN_CHAIN_ID,
+  NEXTGEN_CORE,
+} from "@/components/nextGen/nextgen_contracts";
 import {
   AllowlistType,
   CollectionWithMerkle,
@@ -227,12 +230,14 @@ export default function NextGenMint(props: Readonly<Props>) {
     if (props.collection.merkle_root) {
       const merkleRoot = props.collection.merkle_root;
       const url = `${publicEnv.API_ENDPOINT}/api/nextgen/merkle_roots/${merkleRoot}`;
-      fetchUrl<CollectionWithMerkle>(url).then((response: CollectionWithMerkle) => {
-        if (response) {
-          setCollection(response);
+      fetchUrl<CollectionWithMerkle>(url).then(
+        (response: CollectionWithMerkle) => {
+          if (response) {
+            setCollection(response);
+          }
+          setCollectionLoaded(true);
         }
-        setCollectionLoaded(true);
-      });
+      );
     }
   }, [props.collection.merkle_root]);
 
@@ -314,6 +319,7 @@ export default function NextGenMint(props: Readonly<Props>) {
         />
       );
     }
+    return;
   }
 
   function printMintWidgetContent() {
@@ -351,7 +357,8 @@ export default function NextGenMint(props: Readonly<Props>) {
             href={`/nextgen/collection/${formatNameForUrl(
               props.collection.name
             )}`}
-            className="decoration-hover-underline">
+            className="decoration-hover-underline"
+          >
             <h1 className="mb-0 font-color">{props.collection.name}</h1>
           </Link>
           <span className="font-larger">
@@ -379,7 +386,8 @@ export default function NextGenMint(props: Readonly<Props>) {
         <Col
           sm={12}
           md={6}
-          className="no-padding d-flex align-items-start justify-content-start gap-3">
+          className="no-padding d-flex align-items-start justify-content-start gap-3"
+        >
           <Image
             unoptimized
             loading="eager"
@@ -404,7 +412,8 @@ export default function NextGenMint(props: Readonly<Props>) {
             <Row className="pt-2">
               <Col className="d-flex gap-2">
                 <span
-                  className={`mb-0 d-flex align-items-center gap-2 no-wrap ${styles["nextgenTag"]}`}>
+                  className={`mb-0 d-flex align-items-center gap-2 no-wrap ${styles["nextgenTag"]}`}
+                >
                   <span>Mint Cost:</span>
                   <span className="font-bolder">
                     {props.mint_price > 0 ? fromGWEI(props.mint_price) : `Free`}{" "}
@@ -412,7 +421,8 @@ export default function NextGenMint(props: Readonly<Props>) {
                   </span>
                 </span>
                 <span
-                  className={`mb-0 d-flex align-items-center gap-2 no-wrap ${styles["nextgenTag"]}`}>
+                  className={`mb-0 d-flex align-items-center gap-2 no-wrap ${styles["nextgenTag"]}`}
+                >
                   <span>Sales Model:</span>
                   <span className="font-bolder">{getSalesModel()}</span>
                 </span>

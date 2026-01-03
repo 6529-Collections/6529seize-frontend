@@ -30,10 +30,12 @@ import {
 
 interface Props {
   address: string;
-  subdelegation?: {
-    originalDelegator: string;
-    collection: DelegationCollection;
-  } | undefined;
+  subdelegation?:
+    | {
+        originalDelegator: string;
+        collection: DelegationCollection;
+      }
+    | undefined;
   ens: string | null | undefined;
   onHide(): any;
   new_primary_address_query?: string | undefined;
@@ -115,9 +117,11 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
       newErrors.push("Missing or invalid Address");
     } else if (
       (subdelegation &&
-        areEqualAddresses(selectedToAddress, subdelegation.originalDelegator)) ||
-      (!subdelegation &&
-        areEqualAddresses(selectedToAddress, address))
+        areEqualAddresses(
+          selectedToAddress,
+          subdelegation.originalDelegator
+        )) ||
+      (!subdelegation && areEqualAddresses(selectedToAddress, address))
     ) {
       newErrors.push("Invalid Address - cannot delegate to your own wallet");
     }
@@ -182,10 +186,7 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
                 } the Primary Address assignment`}
               />
               <Col sm={9}>
-                <DelegationAddressDisabledInput
-                  address={address}
-                  ens={ens}
-                />
+                <DelegationAddressDisabledInput address={address} ens={ens} />
               </Col>
             </Form.Group>
             <DelegationFormOptionsFormGroup
@@ -216,20 +217,19 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
   }
 
   function printContent() {
-    if (connectedProfile) {
-      if (isFetchingTdhAddress) {
-        return <DotLoader />;
-      } else if (!isValidConsolidation()) {
-        return (
-          <Row>
-            <Col className="font-larger font-bolder">
-              You must have a consolidation to assign a Primary Address
-            </Col>
-          </Row>
-        );
-      } else {
-        return printForm();
-      }
+    if (!connectedProfile) return null;
+    if (isFetchingTdhAddress) {
+      return <DotLoader />;
+    } else if (!isValidConsolidation()) {
+      return (
+        <Row>
+          <Col className="font-larger font-bolder">
+            You must have a consolidation to assign a Primary Address
+          </Col>
+        </Row>
+      );
+    } else {
+      return printForm();
     }
   }
 
@@ -238,13 +238,13 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
       <Row className="pb-3">
         <Col xs={10} className="pt-3 pb-1">
           <h4>
-            Assign Primary Address{" "}
-            {subdelegation && `as Delegation Manager`}
+            Assign Primary Address {subdelegation && `as Delegation Manager`}
           </h4>
         </Col>
         <Col
           xs={2}
-          className="pt-3 pb-1 d-flex align-items-center justify-content-end">
+          className="pt-3 pb-1 d-flex align-items-center justify-content-end"
+        >
           <DelegationCloseButton onHide={onHide} title="Consolidation" />
         </Col>
       </Row>

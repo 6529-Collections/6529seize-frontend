@@ -53,11 +53,11 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
   __altText?: string | undefined;
   __width?: number | undefined;
   __height?: number | undefined;
-  static getType(): string {
+  static override getType(): string {
     return "image";
   }
 
-  static clone(node: ImageNode): ImageNode {
+  static override clone(node: ImageNode): ImageNode {
     return new ImageNode(
       node.__src,
       node.__altText,
@@ -67,7 +67,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     );
   }
 
-  static importJSON(serializedNode: SerializedImageNode): ImageNode {
+  static override importJSON(serializedNode: SerializedImageNode): ImageNode {
     const { src, altText, width, height } = serializedNode;
     const node = $createImageNode({
       src,
@@ -79,13 +79,13 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     return node;
   }
 
-  exportDOM(): DOMExportOutput {
+  override exportDOM(): DOMExportOutput {
     const element = document.createElement("img");
     element.setAttribute("src", this.__src);
     return { element };
   }
 
-  static importDOM(): DOMConversionMap | null {
+  static override importDOM(): DOMConversionMap | null {
     return {
       img: () => ({
         conversion: $convertImageElement,
@@ -108,7 +108,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     this.__height = height;
   }
 
-  exportJSON(): SerializedImageNode {
+  override exportJSON(): SerializedImageNode {
     return {
       src: this.getSrc(),
       type: "image",
@@ -121,7 +121,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
 
   // View
 
-  createDOM(config: EditorConfig): HTMLElement {
+  override createDOM(config: EditorConfig): HTMLElement {
     const span = document.createElement("span");
     const theme = config.theme;
     const className = theme.image;
@@ -131,7 +131,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     return span;
   }
 
-  updateDOM(): false {
+  override updateDOM(): false {
     return false;
   }
 
@@ -151,7 +151,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     return this.__height;
   }
 
-  decorate(): JSX.Element {
+  override decorate(): JSX.Element {
     return (
       <Suspense fallback={null}>
         <ImageComponent
@@ -165,7 +165,13 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
   }
 }
 
-export function $createImageNode({ src, altText, width, height, key }: ImagePayload): ImageNode {
+export function $createImageNode({
+  src,
+  altText,
+  width,
+  height,
+  key,
+}: ImagePayload): ImageNode {
   return $applyNodeReplacement(new ImageNode(src, altText, width, height, key));
 }
 

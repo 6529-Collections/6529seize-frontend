@@ -33,5 +33,6 @@ export default function DropListItemContentPart({
       return <DropListItemContentNft nft={value} />;
     default:
       assertUnreachable(type);
+      return;
   }
 }

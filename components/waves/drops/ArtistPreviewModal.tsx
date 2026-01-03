@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
@@ -22,14 +22,15 @@ export const ArtistPreviewModal = ({
   isOpen,
   onClose,
   user,
-  initialTab = "active"
+  initialTab = "active",
 }: ArtistPreviewModalProps) => {
   const { isApp } = useDeviceInfo();
   const [activeTab, setActiveTab] = useState<ArtistPreviewTab>(initialTab);
 
   // Check if user has winning artworks
-  const hasWinningArtworks = user.winner_main_stage_drop_ids &&
-                             user.winner_main_stage_drop_ids.length > 0;
+  const hasWinningArtworks =
+    user.winner_main_stage_drop_ids &&
+    user.winner_main_stage_drop_ids.length > 0;
 
   // Reset tab when modal opens with different initial tab
   useEffect(() => {
@@ -42,12 +43,13 @@ export const ArtistPreviewModal = ({
   useEffect(() => {
     if (isOpen && !isApp) {
       const originalOverflow = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
 
       return () => {
         document.body.style.overflow = originalOverflow;
       };
     }
+    return;
   }, [isOpen, isApp]);
 
   if (!isOpen) return null;
@@ -69,10 +71,13 @@ export const ArtistPreviewModal = ({
     );
   }
 
-
   return createPortal(
     <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as="div" className="tw-cursor-default tw-relative tw-z-[9999]" onClose={() => {}}>
+      <Dialog
+        as="div"
+        className="tw-relative tw-z-[9999] tw-cursor-default"
+        onClose={() => {}}
+      >
         {/* Backdrop */}
         <Transition.Child
           as={Fragment}
@@ -83,11 +88,23 @@ export const ArtistPreviewModal = ({
           leaveFrom="tw-opacity-100"
           leaveTo="tw-opacity-0"
         >
-          <div className="tw-fixed tw-inset-0 tw-bg-iron-600/60" onClick={(e) => { e.stopPropagation(); onClose(); }} />
+          <div
+            className="tw-fixed tw-inset-0 tw-bg-iron-600/60"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+          />
         </Transition.Child>
 
         {/* Desktop modal */}
-        <div className="tw-fixed tw-inset-0 tw-z-[100] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-hidden sm:tw-block" onClick={(e) => { e.stopPropagation(); onClose(); }}>
+        <div
+          className="tw-fixed tw-inset-0 tw-z-[100] tw-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-block"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+        >
           <div className="tw-flex tw-min-h-full tw-items-center tw-justify-center tw-p-4">
             <Transition.Child
               as={Fragment}
@@ -98,7 +115,10 @@ export const ArtistPreviewModal = ({
               leaveFrom="tw-opacity-100"
               leaveTo="tw-opacity-100"
             >
-              <Dialog.Panel className="tw-relative tw-w-full tw-max-w-5xl tw-max-h-[90vh] tw-rounded-xl tw-bg-iron-950 tw-border tw-border-iron-800 tw-overflow-hidden tw-shadow-2xl tw-shadow-black/25 tw-m-0 tw-p-0" onClick={(e) => e.stopPropagation()}>
+              <Dialog.Panel
+                className="tw-relative tw-m-0 tw-max-h-[90vh] tw-w-full tw-max-w-5xl tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-0 tw-shadow-2xl tw-shadow-black/25"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <ArtistPreviewModalContent
                   user={user}
                   isOpen={isOpen}
@@ -114,7 +134,7 @@ export const ArtistPreviewModal = ({
         </div>
 
         {/* Mobile slide-up modal */}
-        <div className="tw-fixed tw-inset-0 tw-overflow-hidden tw-block sm:tw-hidden">
+        <div className="tw-fixed tw-inset-0 tw-block tw-overflow-hidden sm:tw-hidden">
           <div className="tw-absolute tw-inset-0 tw-overflow-hidden">
             <div className="tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-flex tw-max-w-full tw-pt-10">
               <Transition.Child
@@ -126,7 +146,7 @@ export const ArtistPreviewModal = ({
                 leaveFrom="tw-translate-y-0"
                 leaveTo="tw-translate-y-full"
               >
-                <Dialog.Panel className="tw-pointer-events-auto tw-relative tw-w-screen tw-max-h-[90vh] tw-rounded-t-xl tw-bg-iron-950 tw-border-t tw-border-iron-800 tw-overflow-hidden tw-shadow-2xl tw-shadow-black/25 tw-transform-gpu tw-will-change-transform">
+                <Dialog.Panel className="tw-pointer-events-auto tw-relative tw-max-h-[90vh] tw-w-screen tw-transform-gpu tw-overflow-hidden tw-rounded-t-xl tw-border-t tw-border-iron-800 tw-bg-iron-950 tw-shadow-2xl tw-shadow-black/25 tw-will-change-transform">
                   <ArtistPreviewModalContent
                     user={user}
                     isOpen={isOpen}

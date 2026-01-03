@@ -5,9 +5,7 @@ import CreateSnapshotFormSearchCollectionDropdown from "./CreateSnapshotFormSear
 import CreateSnapshotFormSearchCollectionInput from "./CreateSnapshotFormSearchCollectionInput";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
-import {
-  DistributionPlanSearchContractMetadataResult,
-} from "@/components/allowlist-tool/allowlist-tool.types";
+import { DistributionPlanSearchContractMetadataResult } from "@/components/allowlist-tool/allowlist-tool.types";
 import { MEMES_CONTRACT } from "@/constants";
 import AllowlistToolCommonModalWrapper, {
   AllowlistToolModalSize,
@@ -78,9 +76,10 @@ export default function CreateSnapshotFormSearchCollection({
     const fetchDefaultCollections = async () => {
       setIsLoadingDefaultCollections(true);
       const endpoint = `/other/memes-collections`;
-      const { data } = await distributionPlanApiFetch<
-        DistributionPlanSearchContractMetadataResult[]
-      >(endpoint);
+      const { data } =
+        await distributionPlanApiFetch<
+          DistributionPlanSearchContractMetadataResult[]
+        >(endpoint);
       setIsLoadingDefaultCollections(false);
       setDefaultCollections(data ?? []);
     };
@@ -105,7 +104,7 @@ export default function CreateSnapshotFormSearchCollection({
       });
       setIsLoadingCollections(false);
       if (!success) {
-        return null;
+        return;
       }
       setCollections(data ?? []);
     };
@@ -141,7 +140,8 @@ export default function CreateSnapshotFormSearchCollection({
         onClose={() => setIsOnMemesCollection(false)}
         title={`Select "The Memes by 6529" Seasons`}
         modalSize={AllowlistToolModalSize.X_LARGE}
-        showTitle={false}>
+        showTitle={false}
+      >
         <CreateSnapshotFormSearchCollectionMemesModal
           onMemesCollection={onMemesCollection}
           collectionName="The Memes by 6529"

@@ -56,5 +56,6 @@ export default function UserPageIdentityAddStatementsViews({
       );
     default:
       assertUnreachable(activeView);
+      return;
   }
 }

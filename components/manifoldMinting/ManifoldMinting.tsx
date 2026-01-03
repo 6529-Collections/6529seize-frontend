@@ -144,6 +144,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
       const frameId = requestAnimationFrame(checkClamping);
       return () => cancelAnimationFrame(frameId);
     }
+    return;
   }, [instance, descriptionClamped]);
 
   function printMint() {
@@ -167,7 +168,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
   function printTitle() {
     return (
       <Row className="pb-2">
-        <Col className="d-flex align-items-center gap-2 ">
+        <Col className="d-flex align-items-center gap-2">
           <h2 className="mb-0">Mint {props.title}</h2>
         </Col>
       </Row>
@@ -204,7 +205,8 @@ export default function ManifoldMinting(props: Readonly<Props>) {
             <Col>
               <button
                 className="btn btn-link decoration-none"
-                onClick={() => setDescriptionClamped(!descriptionClamped)}>
+                onClick={() => setDescriptionClamped(!descriptionClamped)}
+              >
                 <span className="font-smaller font-color-silver font-color-hover">
                   {descriptionClamped ? "+ SHOW MORE" : "- SHOW LESS"}
                 </span>
@@ -226,11 +228,13 @@ export default function ManifoldMinting(props: Readonly<Props>) {
           <Row className="pt-2 pb-2">
             <Col
               xs={12}
-              className="d-flex align-items-center justify-content-between">
+              className="d-flex align-items-center justify-content-between"
+            >
               <Link
                 href={`/${getPathForContract(props.contract)}/${
                   props.token_id
-                }`}>
+                }`}
+              >
                 <h3 className="mb-0">{instance.publicData.asset.name}</h3>
               </Link>
             </Col>
@@ -352,7 +356,8 @@ export default function ManifoldMinting(props: Readonly<Props>) {
             href="https://x.com/6529collections"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-color-h font-color-hover">
+            className="font-color-h font-color-hover"
+          >
             &#64;6529collections
           </a>{" "}
           for updates.
@@ -364,7 +369,8 @@ export default function ManifoldMinting(props: Readonly<Props>) {
               your local timezone.{" "}
               <button
                 className="btn btn-link"
-                onClick={() => setIsLocalTimezone(false)}>
+                onClick={() => setIsLocalTimezone(false)}
+              >
                 <span className="font-color-hover">Change to UTC</span>
               </button>
             </>
@@ -373,7 +379,8 @@ export default function ManifoldMinting(props: Readonly<Props>) {
               UTC.{" "}
               <button
                 className="btn btn-link font-color-hover"
-                onClick={() => setIsLocalTimezone(true)}>
+                onClick={() => setIsLocalTimezone(true)}
+              >
                 <span className="font-color-hover">
                   Change to your local timezone
                 </span>
@@ -628,33 +635,38 @@ function ManifoldMemesMintingPhase(
           !props.claim.isFinalized
             ? styles["phaseBoxActive"]
             : styles["phaseBox"]
-        }>
+        }
+      >
         <Row>
           <Col xs={12} className="font-bolder font-larger text-center pb-2">
             {props.phase.name}
           </Col>
           <Col
             xs={12}
-            className="d-flex align-items-center justify-content-between gap-2">
+            className="d-flex align-items-center justify-content-between gap-2"
+          >
             <span className="font-lighter font-smaller">Status</span>
             <span
               className={`${
                 status === PhaseStatus.ACTIVE || status === PhaseStatus.UPCOMING
                   ? "font-color-blue font-bolder text-right"
                   : "font-color-red font-bolder text-right opacity-75"
-              }`}>
+              }`}
+            >
               {status}
             </span>
           </Col>
           <Col
             xs={12}
-            className="d-flex align-items-center justify-content-between gap-2">
+            className="d-flex align-items-center justify-content-between gap-2"
+          >
             <span className="font-lighter font-smaller">{startText}</span>
             <span className="text-right">{startDisplay}</span>
           </Col>
           <Col
             xs={12}
-            className="d-flex align-items-center justify-content-between gap-2">
+            className="d-flex align-items-center justify-content-between gap-2"
+          >
             <span className="font-lighter font-smaller">{endText}</span>
             <span className="text-right">{endDisplay}</span>
           </Col>
